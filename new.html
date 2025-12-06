@@ -1763,7 +1763,7 @@ function endTurnPhase() {
         player.hp = Math.min(player.maxHp, player.hp + regen);
     }
 
-    buffs.player.eva = player.baseEva + (buffs.player.evaBuff || 0); 
+    buffs.player.eva = (buffs.player.evaBuff || 0);
     if(buffs.player.nextEva) { buffs.player.eva += buffs.player.nextEva; delete buffs.player.nextEva; }
     
     delete buffs.player.guard; 
