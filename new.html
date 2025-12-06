@@ -1179,16 +1179,16 @@ function applyPlayerSupport(skill) {
     
     if(skill.effect === 'eva_buff') {
         let val = skill.name === '베일 오브 다크니스' ? 0.4 : 0.2;
-        buffs.player.evaBuff = val;
+        buffs.player.veilVal = val;
         buffs.player.veilTurns = 3;
         buffs.player.eva = (buffs.player.eva || 0) + val; 
         log("회피율이 증가했습니다.", 'info');
     }
 
-    // [FIX] 문라이트 베일: 로직이 여기 있으나 기존에는 실행되지 않았음. 이제 실행됨.
+    // [FIX] 문라이트 베일
     if(skill.effect === 'sage_moon_veil') {
         if(buffs.player.sageForm === 'moon') {
-             buffs.player.evaBuff = 0.4;
+             buffs.player.veilVal = 0.4;
              buffs.player.veilTurns = 3;
              buffs.player.eva = (buffs.player.eva || 0) + 0.4;
              log("달빛의 가호로 회피율이 대폭 증가합니다!", 'star');
@@ -1197,7 +1197,7 @@ function applyPlayerSupport(skill) {
         }
     }
     
-    // [FIX] 메테오 스매시: playerAttack에서 여기로 이동. 태양 형태 시 치명타 버프 적용
+    // [FIX] 메테오 스매시
     if(skill.effect === 'sage_meteor') {
         if(buffs.player.sageForm === 'sun') {
             buffs.player.critBuff = true;
@@ -1214,7 +1214,7 @@ function applyPlayerSupport(skill) {
     
     if(skill.effect === 'instinct') {
         buffs.player.instinctTurns = 5;
-        buffs.player.evaBuff = 0.25;
+        buffs.player.instinctVal = 0.25;
         buffs.player.eva = (buffs.player.eva || 0) + 0.25; 
         log("본능 발동! 회피와 피해량이 증가합니다.", 'info');
     }
@@ -1763,9 +1763,6 @@ function endTurnPhase() {
         player.hp = Math.min(player.maxHp, player.hp + regen);
     }
 
-    buffs.player.eva = player.baseEva + (buffs.player.evaBuff || 0); 
-    if(buffs.player.nextEva) { buffs.player.eva += buffs.player.nextEva; delete buffs.player.nextEva; }
-    
     delete buffs.player.guard; 
     delete buffs.player.guard_70; 
     delete buffs.player.nullMag;
@@ -1784,9 +1781,9 @@ function endTurnPhase() {
         delete buffs.player.nextTurnStun;
     }
 
-    if(buffs.player.instinctTurns) { buffs.player.instinctTurns--; if(buffs.player.instinctTurns<=0) { delete buffs.player.evaBuff; } }
+    if(buffs.player.instinctTurns) { buffs.player.instinctTurns--; if(buffs.player.instinctTurns<=0) { delete buffs.player.instinctVal; } }
     if(buffs.player.adrenalineTurns) { buffs.player.adrenalineTurns--; if(buffs.player.adrenalineTurns<=0) { delete buffs.player.critUp; } }
-    if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns<=0) { delete buffs.player.evaBuff; } }
+    if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns<=0) { delete buffs.player.veilVal; } }
     if(buffs.player.mediTurns) { buffs.player.mediTurns--; if(buffs.player.mediTurns<=0) { delete buffs.player.medi; } }
     if(buffs.player.divineTurns) buffs.player.divineTurns--;
     if(buffs.player.vulcanTurns) buffs.player.vulcanTurns--;
@@ -1817,6 +1814,13 @@ function endTurnPhase() {
 
     if(buffs.enemy.defDownTurns) buffs.enemy.defDownTurns--;
     if(buffs.enemy.mdefDownTurns) buffs.enemy.mdefDownTurns--;
+
+    let totalEva = 0;
+    if(buffs.player.instinctTurns > 0) totalEva += (buffs.player.instinctVal || 0);
+    if(buffs.player.veilTurns > 0) totalEva += (buffs.player.veilVal || 0);
+    buffs.player.eva = totalEva;
+
+    if(buffs.player.nextEva) { buffs.player.eva += buffs.player.nextEva; delete buffs.player.nextEva; }
 
     let regen = player.mpRegen;
     if(buffs.player.medi) regen += 30;
