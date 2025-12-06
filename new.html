@@ -223,6 +223,7 @@
             <button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;">☁️ 천상의 계단 (Lv.21~25)</button>
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
             <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
+            <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
         </div>
 
         <div id="battle-menu" style="display:none; width:100%;">
@@ -340,7 +341,7 @@ const EQUIP_STATS = {
     }
 };
 
-const ARTIFACTS = [
+const BASE_ARTIFACTS = [
     { id: 'vit_stone', name: "생명의 돌", desc: "최대 HP +20%", effect: 'stat_hp', val: 0.2 },
     { id: 'mana_crys', name: "마나 수정", desc: "최대 MP +20%", effect: 'stat_mp', val: 0.2 },
     { id: 'str_ring', name: "전사의 반지", desc: "물리 공격 +10%", effect: 'stat_atk', val: 0.1 },
@@ -361,11 +362,22 @@ const ARTIFACTS = [
     { id: 'guardian_angel', name: "수호천사의 깃털", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5 },
     { id: 'dragon_heart', name: "용의 심장", desc: "최대 HP +40%, 물리공격 +20%", effect: 'dragon_heart', val: 0.4 },
     { id: 'ancient_book', name: "고대의 마도서", desc: "최대 MP +40%, 마법공격 +20%", effect: 'ancient_book', val: 0.4 },
-    { id: 'golden_sun', name: "황금의 태양[에픽]", desc: "공/마공 +20%, 마법방어 -20%", effect: 'golden_sun', val: 0.2 },
+    { id: 'golden_sun', name: "황금의 태양[에픽]", desc: "공/마공 +25%, 마법방어 -20%", effect: 'golden_sun', val: 0.25 },
     { id: 'beelzebub', name: "마신기 벨제뷔트[에픽]", desc: "공격/치명피해 +50%, 방어 -30%", effect: 'beelzebub', val: 0.5 },
     { id: 'iris', name: "신기 아이리스[에픽]", desc: "마공/마방 +50%", effect: 'iris', val: 0.5 },
     { id: 'royal_crown', name: "로열 크라운[에픽]", desc: "모든 능력치 +20% (여왕: 시작시 장미+5)", effect: 'all_stat', val: 0.2 }
 ];
+
+const NEW_ARTIFACTS = {
+    zeke: { id: 'will_protect', name: "수호의 의지", desc: "방어력/마법방어력 +30%", effect: 'stat_def_mdef', val: 0.3 },
+    luna: { id: 'moon_neck', name: "월광의 목걸이", desc: "치명타율 +10%, 치명타피해 +30%", effect: 'crit_critdmg', val: 0.3 },
+    jasmine: { id: 'old_diary', name: "오래된 일기장", desc: "마법공격력/최대MP +30%", effect: 'matk_mp', val: 0.3 },
+    queen: { id: 'queen_crest', name: "여왕의 문양", desc: "공격력/마법공격력 +30%", effect: 'atk_matk', val: 0.3 },
+    rumi: { id: 'precious_dream', name: "소중한 꿈", desc: "공격력/생명력 +30%", effect: 'atk_hp', val: 0.3 }
+};
+
+let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
+
 const CHAR_DATA = {
     luna: {
         name: "루나", hp: 540, mp: 100, mpRegen: 10, atk: 65, matk: 55, def: 30, mdef: 35, baseCrit: 0.15, baseCritDmg: 1.5, baseEva: 0.1, fixedMp: true,
@@ -439,8 +451,8 @@ const CHAR_DATA = {
             'blooming': { name: "Quick Grow", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미 3스택 충전", effect: 'add_rose_3' },
             'overwhelm': { name: "Rose Prison", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
             'fatalrose': { name: "Heart Pierce", type: 'phy', cost: 40, power: 1.8, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
+            'royalbloom': { name: "Royal Bloom", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (종료시 소멸)", effect: 'royal_bloom' },
             'queensgarden': { name: "Queen's Domain", type: 'ult', cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
-            'royalbloom': { name: "Royal Bloom", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (장미소멸)", effect: 'royal_bloom' },
             'funeral': { name: "Finale", type: 'ult', cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }
         }
     },
@@ -615,6 +627,133 @@ function selectChar(charKey) {
     updateInfo();
 }
 
+function confirmResetGame() {
+    if(confirm("정말 게임을 초기화하시겠습니까?\n\n(캐릭터, 레벨, 골드, 유물 등 모든 데이터가 사라집니다.)\n(단, '창조신 클리어 기록'은 유지됩니다.)")) {
+        resetGameProcess();
+    }
+}
+
+function resetGameProcess() {
+    // 1. 초기화
+    gameState.gold = 10000;
+    roseStack = 0;
+    buffs = { player: {}, enemy: {} };
+    player = {};
+
+    // 2. NG+ 유물 풀 세팅
+    initArtifactsWithNGPlus();
+
+    // 3. UI 리셋 및 캐릭터 선택창 열기
+    document.getElementById('town-menu').style.display = 'none';
+    document.getElementById('battle-menu').style.display = 'none';
+    document.getElementById('shop-modal').classList.remove('active');
+
+    // 화면 요소 리셋
+    document.getElementById('vis-p-hp').style.width = '100%';
+    document.getElementById('hp-bar').style.width = '100%';
+    document.getElementById('mp-bar').style.width = '50%';
+    document.getElementById('log-box').innerHTML = "";
+    document.getElementById('main-stage').classList.remove('battle-mode');
+    document.getElementById('main-stage').classList.add('town-mode');
+
+    // 캐릭터 선택 모달 열기
+    document.getElementById('char-modal').classList.add('active');
+    myAlert("게임이 초기화되었습니다. (새로운 운명이 시작됩니다)");
+}
+
+function initArtifactsWithNGPlus() {
+    // 기본 유물 목록으로 복구
+    ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
+
+    // 클리어 기록 확인
+    const clears = getClearHistory(); // ['zeke', 'luna', ...]
+
+    if(clears.length === 0) return;
+
+    // 1. 공통 유물 추가 (100% 확률)
+    clears.forEach(char => {
+        if(NEW_ARTIFACTS[char]) {
+            // 중복 방지 체크 (혹시 모르니)
+            if(!ARTIFACTS.find(a => a.id === NEW_ARTIFACTS[char].id)) {
+                ARTIFACTS.push(NEW_ARTIFACTS[char]);
+            }
+        }
+    });
+
+    // 2. 전설 유물 강화 (각 캐릭터별 10% 확률)
+    clears.forEach(char => {
+        if(Math.random() < 0.1) {
+            upgradeLegendaryArtifact(char);
+        }
+    });
+}
+
+function upgradeLegendaryArtifact(char) {
+    // 지크 -> 황금의태양
+    if(char === 'zeke') {
+        let art = ARTIFACTS.find(a => a.id === 'golden_sun');
+        if(art) {
+            art.name = "진: 황금의 태양[전설]";
+            art.desc = "공/마공 +40%, 마법방어 -30%";
+            art.val = 0.40; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
+            art.effect = 'golden_sun_legend'; // 효과 ID 변경
+        }
+    }
+    // 루나 -> 벨제뷔트
+    if(char === 'luna') {
+        let art = ARTIFACTS.find(a => a.id === 'beelzebub');
+        if(art) {
+            art.name = "진: 마신기 벨제뷔트[전설]";
+            art.desc = "공격/치명피해 +60%, 방어 -30%";
+            art.val = 0.60;
+            art.effect = 'beelzebub_legend';
+        }
+    }
+    // 자스민 -> 아이리스
+    if(char === 'jasmine') {
+        let art = ARTIFACTS.find(a => a.id === 'iris');
+        if(art) {
+            art.name = "진: 신기 아이리스[전설]";
+            art.desc = "마공/마방 +60%";
+            art.val = 0.60;
+            art.effect = 'iris_legend';
+        }
+    }
+    // 여왕 -> 로열크라운
+    if(char === 'queen') {
+        let art = ARTIFACTS.find(a => a.id === 'royal_crown');
+        if(art) {
+            art.name = "진: 로열 크라운[전설]";
+            art.desc = "올스탯 +30% (여왕: 시작시 장미+10)";
+            art.val = 0.30;
+            art.effect = 'royal_crown_legend';
+        }
+    }
+    // 루미 -> 수호천사의 깃털
+    if(char === 'rumi') {
+        let art = ARTIFACTS.find(a => a.id === 'guardian_angel');
+        if(art) {
+            art.name = "진: 수호천사의 깃털[전설]";
+            art.desc = "사망 시 1회 부활 (HP 100%)";
+            art.val = 1.0;
+            art.effect = 'guardian_angel_legend';
+        }
+    }
+}
+
+function getClearHistory() {
+    let history = localStorage.getItem('turnRpgClears');
+    return history ? JSON.parse(history) : [];
+}
+
+function saveClear(charKey) {
+    let history = getClearHistory();
+    if(!history.includes(charKey)) {
+        history.push(charKey);
+        localStorage.setItem('turnRpgClears', JSON.stringify(history));
+    }
+}
+
 function recalcAllStats() {
     if(!player || !player.baseStats) return;
 
@@ -664,21 +803,60 @@ function recalcAllStats() {
         
         if(art.effect === 'stat_crit') player.baseCrit += art.val;
         if(art.effect === 'stat_eva') player.baseEva += art.val;
+
+        // 신규 유물 효과 처리
+        if(art.effect === 'stat_def_mdef') {
+            newDef = Math.floor(newDef * (1 + art.val));
+            newMdef = Math.floor(newMdef * (1 + art.val));
+        }
+        if(art.effect === 'crit_critdmg') {
+            player.baseCrit += 0.1;
+            player.baseCritDmg += 0.3;
+        }
+        if(art.effect === 'matk_mp') {
+            newMatk = Math.floor(newMatk * (1 + art.val));
+            newMaxMp = Math.floor(newMaxMp * (1 + art.val));
+        }
+        if(art.effect === 'atk_matk') {
+            newAtk = Math.floor(newAtk * (1 + art.val));
+            newMatk = Math.floor(newMatk * (1 + art.val));
+        }
+        if(art.effect === 'atk_hp') {
+            newAtk = Math.floor(newAtk * (1 + art.val));
+            newMaxHp = Math.floor(newMaxHp * (1 + art.val));
+        }
         
         if(art.effect === 'golden_sun') {
-             newAtk = Math.floor(newAtk * 1.2);
-             newMatk = Math.floor(newMatk * 1.2);
+             newAtk = Math.floor(newAtk * (1 + art.val)); // 1.25
+             newMatk = Math.floor(newMatk * (1 + art.val)); // 1.25
              newMdef = Math.floor(newMdef * 0.8); 
         }
+        if(art.effect === 'golden_sun_legend') {
+             newAtk = Math.floor(newAtk * 1.4);
+             newMatk = Math.floor(newMatk * 1.4);
+             newMdef = Math.floor(newMdef * 0.7);
+        }
+
         if(art.effect === 'beelzebub') {
              newAtk = Math.floor(newAtk * 1.5);
              newDef = Math.floor(newDef * 0.7); 
              player.baseCritDmg += 0.5;
         }
+        if(art.effect === 'beelzebub_legend') {
+             newAtk = Math.floor(newAtk * 1.6);
+             newDef = Math.floor(newDef * 0.7);
+             player.baseCritDmg += 0.6;
+        }
+
         if(art.effect === 'iris') {
              newMatk = Math.floor(newMatk * 1.5);
              newMdef = Math.floor(newMdef * 1.5);
         }
+        if(art.effect === 'iris_legend') {
+             newMatk = Math.floor(newMatk * 1.6);
+             newMdef = Math.floor(newMdef * 1.6);
+        }
+
         if(art.effect === 'all_stat') {
              newMaxHp = Math.floor(newMaxHp * 1.2);
              newMaxMp = Math.floor(newMaxMp * 1.2);
@@ -687,6 +865,15 @@ function recalcAllStats() {
              newDef = Math.floor(newDef * 1.2);
              newMdef = Math.floor(newMdef * 1.2);
         }
+        if(art.effect === 'royal_crown_legend') {
+             newMaxHp = Math.floor(newMaxHp * 1.3);
+             newMaxMp = Math.floor(newMaxMp * 1.3);
+             newAtk = Math.floor(newAtk * 1.3);
+             newMatk = Math.floor(newMatk * 1.3);
+             newDef = Math.floor(newDef * 1.3);
+             newMdef = Math.floor(newMdef * 1.3);
+        }
+
         if(art.effect === 'blood_pact') newMaxHp = Math.floor(newMaxHp * 0.8);
         if(art.effect === 'reckless') {
             newDef = Math.floor(newDef * 0.7);
@@ -694,6 +881,12 @@ function recalcAllStats() {
             player.baseCritDmg += art.val; 
         }
     });
+
+    // 로열블룸 공격력 증가 (상태창 표시용)
+    if(buffs && buffs.player && buffs.player.royalBloomTurns > 0) {
+        newAtk = Math.floor(newAtk * 1.5);
+        newMatk = Math.floor(newMatk * 1.5);
+    }
 
     // 대현자 형태 변환 및 버프 스탯 적용
     if(player.charKey === 'rumi' && buffs && buffs.player) {
@@ -998,9 +1191,15 @@ function startBattle(mobData) {
         delete buffs.player.sageForm;
     }
 
-    if(player.charKey === 'queen' && hasArtifact('royal_crown')) {
-        roseStack = 5; // 로열 크라운 효과 상향 (3 -> 5)
-        log("로열 크라운의 효과로 장미 5송이를 가지고 시작합니다!", 'rose');
+    if(player.charKey === 'queen') {
+        if(hasArtifact('royal_crown')) {
+            roseStack = 5;
+            log("로열 크라운의 효과로 장미 5송이를 가지고 시작합니다!", 'rose');
+        }
+        if(hasArtifact('royal_crown_legend')) {
+            roseStack = 10;
+            log("전설의 로열 크라운 효과로 장미 10송이를 가지고 시작합니다!", 'rose');
+        }
     }
 
     // 대현자 스탯 재계산 (형태 초기화 반영)
@@ -1257,8 +1456,8 @@ function applyPlayerSupport(skill) {
 
     if(skill.effect === 'royal_bloom') {
         buffs.player.royalBloomTurns = 3;
-        roseStack = 0;
-        log("Royal Bloom! 장미를 모두 소모하여 힘을 개방합니다! (공/마공 50% 증가)", 'rose');
+        // roseStack = 0; // 즉시 소멸하지 않음
+        log("Royal Bloom! 장미가 만개하여 힘을 개방합니다! (3턴간 공/마공 50% 증가, 종료 시 시듦)", 'rose');
     }
 }
 
@@ -1269,6 +1468,7 @@ function winBattle() {
     log(`경험치 +${currentEnemy.exp}, 골드 +${currentEnemy.gold} G`);
     
     if(currentEnemy.name === "창조신 아스테아") {
+        saveClear(player.charKey);
         alert("축하합니다! 창조신을 물리치고 전설이 되었습니다!\n\n~ THE END ~");
     }
 
@@ -1412,7 +1612,7 @@ function playerAttack(skill) {
     if(buffs.player.goddessTurns) atkVal *= 2.0;
     
     if(buffs.player.goddessBlessing) atkVal *= 1.5;
-    if(buffs.player.royalBloomTurns) atkVal *= 1.5;
+    // if(buffs.player.royalBloomTurns) atkVal *= 1.5; // recalcAllStats로 이동됨
 
     if(buffs.player.undyingPowerTurns) {
         atkVal *= 2.0;
@@ -1724,10 +1924,19 @@ function applyEnemyDamage(rawDmg, type) {
             buffs.player.undyingPowerTurns = 2; 
         }
     } else {
-        if(player.hp - dmg <= 0 && hasArtifact('guardian_angel') && !buffs.player.revived) {
-            buffs.player.revived = true;
-            player.hp = Math.floor(player.maxHp * 0.5);
-            log("<b>수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)</b>", 'heal');
+        if(player.hp - dmg <= 0 && !buffs.player.revived) {
+             if(hasArtifact('guardian_angel')) {
+                buffs.player.revived = true;
+                player.hp = Math.floor(player.maxHp * 0.5);
+                log("<b>수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)</b>", 'heal');
+             } else if(hasArtifact('guardian_angel_legend')) {
+                buffs.player.revived = true;
+                player.hp = player.maxHp;
+                log("<b>[전설] 수호천사의 깃털이 빛나며 완전하게 부활했습니다! (HP 100% 회복)</b>", 'heal');
+             } else {
+                player.hp -= dmg;
+                log(`<span class="dmg">${dmg}</span> 피해를 입었습니다.`, 'dmg');
+             }
         } else {
             player.hp -= dmg;
             log(`<span class="dmg">${dmg}</span> 피해를 입었습니다.`, 'dmg');
@@ -1816,7 +2025,13 @@ function endTurnPhase() {
 
     if(buffs.player.critBuffTurns) { buffs.player.critBuffTurns--; if(buffs.player.critBuffTurns<=0) delete buffs.player.critBuff; }
     if(buffs.player.gardenTurns) buffs.player.gardenTurns--;
-    if(buffs.player.royalBloomTurns) buffs.player.royalBloomTurns--;
+    if(buffs.player.royalBloomTurns) {
+        buffs.player.royalBloomTurns--;
+        if(buffs.player.royalBloomTurns <= 0) {
+            roseStack = 0;
+            log("Royal Bloom 효과가 끝나며 장미가 시들었습니다...", 'rose');
+        }
+    }
 
     if(buffs.player.enchantTurns) buffs.player.enchantTurns--;
     if(buffs.player.undyingPowerTurns) { buffs.player.undyingPowerTurns--; if(buffs.player.undyingPowerTurns<=0) log("언다잉 힘이 사라집니다.", 'info'); }
