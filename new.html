@@ -282,6 +282,29 @@
     </div>
 </div>
 
+<div id="reset-modal" class="modal">
+    <div class="modal-content">
+        <div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#ef5350;">초기화 옵션</div>
+        <div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;">
+            어떤 방식으로 초기화하시겠습니까?
+        </div>
+
+        <button onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;">
+            <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
+            <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
+            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
+        </button>
+
+        <button onclick="triggerReset('hard')" style="width:100%; margin-bottom:10px; background:#b71c1c;">
+            <div style="font-weight:bold; font-size:1.0rem;">☠️ 완전 초기화</div>
+            <div style="font-size:0.75rem; color:#ef9a9a;">모든 기록 삭제 (회차 / 유물 해금 포함)</div>
+            <div style="font-size:0.7rem; color:#e57373; margin-top:2px;">(완전히 처음부터 다시 시작)</div>
+        </button>
+
+        <button onclick="document.getElementById('reset-modal').classList.remove('active')" style="width:100%; background:#444;">취소</button>
+    </div>
+</div>
+
 <!-- data.js: characters, skills, artifacts, enemies -->
 <script src="data.js"></script>
 
@@ -360,9 +383,21 @@ function selectChar(charKey) {
 }
 
 function confirmResetGame() {
-    if(confirm("정말 게임을 초기화하시겠습니까?\n\n(캐릭터, 레벨, 골드, 유물 등 모든 데이터가 사라집니다.)\n(단, '창조신 클리어 기록' 및 '회차(난이도)'는 유지됩니다.)")) {
-        resetGameProcess();
+    document.getElementById('reset-modal').classList.add('active');
+}
+
+function triggerReset(mode) {
+    if(mode === 'hard') {
+        if(!confirm("정말 모든 데이터를 삭제하시겠습니까?\n\n- 회차(난이도) 초기화 (1회차로 복귀)\n- 유물 해금 기록 삭제\n- 창조신 클리어 기록 삭제\n\n완전히 처음 상태로 돌아갑니다.")) return;
+
+        localStorage.removeItem('turnRpgCycle');
+        localStorage.removeItem('turnRpgClears');
+    } else {
+        if(!confirm("현재 회차를 재시작하시겠습니까?\n\n- 캐릭터/골드/보유유물 초기화\n- 회차(적 강화) 및 유물 해금 상태는 유지됩니다.")) return;
     }
+
+    document.getElementById('reset-modal').classList.remove('active');
+    resetGameProcess();
 }
 
 function resetGameProcess() {
@@ -572,10 +607,22 @@ function recalcAllStats() {
 
         if(art.effect === 'blood_pact') { hpPer -= 0.2; atkPer += 0.2; matkPer += 0.2; }
         if(art.effect === 'reckless') { defPer -= 0.3; player.baseCritDmg += art.val; }
+
+        // New Boss Artifacts
+        if(art.effect === 'hestia') {
+            hpPer += 1.0; mpPer += 1.0; atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0;
+        }
+        if(art.effect === 'heart_ice') {
+             // Will be applied in dynamic section if HP < 50%
+        }
     });
 
     // Buffs (Battle) - 이제 합연산으로 계산 및 상태창 반영
     if(buffs && buffs.player) {
+        if(buffs.player.demonEyeTurns > 0) {
+            atkPer += 1.0;
+            matkPer += 1.0;
+        }
         if(buffs.player.royalBloomTurns > 0) { atkPer += 0.5; matkPer += 0.5; }
 
         // Sage Forms
@@ -597,11 +644,21 @@ function recalcAllStats() {
     let finalMaxHp = Math.floor(baseMaxHp * (1 + hpPer));
     let finalMaxMp = Math.floor(baseMaxMp * (1 + mpPer));
 
-    // Zeke Passive (Low HP) - Add to UI stats
-    if(player.charKey === 'zeke' && player.hp) {
+    // Dynamic checks dependent on HP (Boss Artifacts & Passives)
+    if(player.hp) {
          let ratio = player.hp / finalMaxHp;
-         if(ratio < 0.25) { atkPer += 0.3; defPer += 0.3; }
-         else if(ratio < 0.5) { atkPer += 0.15; defPer += 0.15; }
+
+         // Zeke Passive
+         if(player.charKey === 'zeke') {
+             if(ratio < 0.25) { atkPer += 0.3; defPer += 0.3; }
+             else if(ratio < 0.5) { atkPer += 0.15; defPer += 0.15; }
+         }
+
+         // Heart of Ice (Ice Heart)
+         if(ratio < 0.5 && hasArtifact('heart_ice')) {
+             defPer += 1.0;
+             mdefPer += 1.0;
+         }
     }
 
     let finalAtk = Math.floor(baseAtk * (1 + atkPer));
@@ -905,6 +962,11 @@ function startBattle(mobData) {
     // 루미 신규 스킬 관련 버프 초기화 추가 (chargingMilkyway, milkshakeTurns)
     buffs = { player: { castleStack: 0, dodgeCount: 0, absoluteStack: 0, divineStack: 0, moonUltStack: 0, chargingMilkyway: false, milkshakeTurns: 0 }, enemy: {} };
     roseStack = 0; 
+
+    if(hasArtifact('demon_eye')) {
+        buffs.player.demonEyeTurns = 4;
+        log("[마안] 발동! 4턴간 공격력/마법공격력 대폭 증가.", 'rose');
+    }
     
     if(player.charKey === 'rumi') {
         player.dreamCrystals = 5;
@@ -1191,6 +1253,24 @@ function winBattle() {
     gameState.gold += currentEnemy.gold;
     log(`경험치 +${currentEnemy.exp}, 골드 +${currentEnemy.gold} G`);
     
+    // Boss Drop Logic
+    if(BOSS_DROP_ARTIFACTS) {
+        let drop = null;
+        if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
+        else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
+        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
+
+        if(drop) {
+             // Check if already have it
+             if(!player.artifacts.find(a => a.id === drop.id)) {
+                 player.artifacts.push(drop);
+                 log(`<b style="color:#e040fb; font-size:1.1rem;">[보스 유물] ${drop.name} 획득!</b>`, 'rose');
+                 myAlert(`대박!\n보스의 힘이 담긴 유물 [${drop.name}]을(를) 획득했습니다!\n(이번 회차에서만 사용 가능합니다)`);
+                 recalcAllStats();
+             }
+        }
+    }
+
     if(currentEnemy.name === "창조신 아스테아") {
         saveClear(player.charKey);
         incrementCycle();
@@ -1737,6 +1817,10 @@ function endTurnPhase() {
     if(buffs.player.vulcanTurns) buffs.player.vulcanTurns--;
     if(buffs.player.sanctuaryTurns) buffs.player.sanctuaryTurns--;
     if(buffs.player.goddessTurns) buffs.player.goddessTurns--;
+    if(buffs.player.demonEyeTurns) {
+        buffs.player.demonEyeTurns--;
+        if(buffs.player.demonEyeTurns <= 0) log("마안의 효과가 끝났습니다.", 'info');
+    }
     
     // 대현자 형태 및 버프 턴 감소
     if(buffs.player.formTurns) {
