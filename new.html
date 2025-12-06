@@ -440,6 +440,7 @@ const CHAR_DATA = {
             'overwhelm': { name: "Rose Prison", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
             'fatalrose': { name: "Heart Pierce", type: 'phy', cost: 40, power: 1.8, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
             'queensgarden': { name: "Queen's Domain", type: 'ult', cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
+            'royalbloom': { name: "Royal Bloom", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (장미소멸)", effect: 'royal_bloom' },
             'funeral': { name: "Finale", type: 'ult', cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }
         }
     },
@@ -1090,7 +1091,7 @@ function executeTurn(skillKey) {
     if(skill.type === 'sup' || skill.effect === 'perfect_eva' || skill.effect === 'guard_70' || skill.effect === 'null_mag' || skill.effect === 'null_phy' || 
        skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' || skill.effect === 'passive_boost' || 
        skill.effect.startsWith('form_change_') || skill.effect === 'sage_barrier' || skill.effect === 'milkshake_heal' ||
-       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor') { // <-- 예외 추가됨
+       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'royal_bloom') { // <-- 예외 추가됨
         
         applyPlayerSupport(skill);
         
@@ -1253,6 +1254,12 @@ function applyPlayerSupport(skill) {
         roseStack = Math.min(15, roseStack + 3);
         log("장미 3송이가 피어났습니다.", 'rose');
     }
+
+    if(skill.effect === 'royal_bloom') {
+        buffs.player.royalBloomTurns = 3;
+        roseStack = 0;
+        log("Royal Bloom! 장미를 모두 소모하여 힘을 개방합니다! (공/마공 50% 증가)", 'rose');
+    }
 }
 
 function winBattle() {
@@ -1405,6 +1412,7 @@ function playerAttack(skill) {
     if(buffs.player.goddessTurns) atkVal *= 2.0;
     
     if(buffs.player.goddessBlessing) atkVal *= 1.5;
+    if(buffs.player.royalBloomTurns) atkVal *= 1.5;
 
     if(buffs.player.undyingPowerTurns) {
         atkVal *= 2.0;
@@ -1440,8 +1448,8 @@ function playerAttack(skill) {
         defVal *= (1 - reduction);
     }
 
-    if(skill.type === 'phy' && buffs.enemy.defDownTurns > 0) defVal *= 0.8;
-    if(skill.type === 'mag' && buffs.enemy.mdefDownTurns > 0) defVal *= 0.8;
+    if(isPhy && buffs.enemy.defDownTurns > 0) defVal *= 0.8;
+    if(!isPhy && buffs.enemy.mdefDownTurns > 0) defVal *= 0.8;
 
     let dmg = atkVal * multiplier * (100 / (100 + defVal));
     dmg = Math.floor(dmg);
@@ -1808,6 +1816,7 @@ function endTurnPhase() {
 
     if(buffs.player.critBuffTurns) { buffs.player.critBuffTurns--; if(buffs.player.critBuffTurns<=0) delete buffs.player.critBuff; }
     if(buffs.player.gardenTurns) buffs.player.gardenTurns--;
+    if(buffs.player.royalBloomTurns) buffs.player.royalBloomTurns--;
 
     if(buffs.player.enchantTurns) buffs.player.enchantTurns--;
     if(buffs.player.undyingPowerTurns) { buffs.player.undyingPowerTurns--; if(buffs.player.undyingPowerTurns<=0) log("언다잉 힘이 사라집니다.", 'info'); }
