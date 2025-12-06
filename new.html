@@ -627,7 +627,7 @@ function selectChar(charKey) {
 }
 
 function confirmResetGame() {
-    if(confirm("정말 게임을 초기화하시겠습니까?\n\n(캐릭터, 레벨, 골드, 유물 등 모든 데이터가 사라집니다.)\n(단, '창조신 클리어 기록'은 유지됩니다.)")) {
+    if(confirm("정말 게임을 초기화하시겠습니까?\n\n(캐릭터, 레벨, 골드, 유물 등 모든 데이터가 사라집니다.)\n(단, '창조신 클리어 기록' 및 '회차(난이도)'는 유지됩니다.)")) {
         resetGameProcess();
     }
 }
@@ -743,6 +743,20 @@ function upgradeLegendaryArtifact(char) {
 function getClearHistory() {
     let history = localStorage.getItem('turnRpgClears');
     return history ? JSON.parse(history) : [];
+}
+
+function getCycleCount() {
+    let cycle = localStorage.getItem('turnRpgCycle');
+    return cycle ? parseInt(cycle) : 0;
+}
+
+function incrementCycle() {
+    let cycle = getCycleCount();
+    localStorage.setItem('turnRpgCycle', cycle + 1);
+}
+
+function getMaxLevel() {
+    return 25 + getCycleCount();
 }
 
 function saveClear(charKey) {
@@ -880,7 +894,7 @@ function recalcAllStats() {
 function updateInfo() {
     if(!player || !player.name) return;
     document.getElementById('char-name').innerText = player.name;
-    document.getElementById('char-lvl').innerText = `Lv.${player.level}`;
+    document.getElementById('char-lvl').innerText = `Lv.${player.level} / ${getMaxLevel()}`;
     document.getElementById('ui-gold').innerText = gameState.gold;
     document.getElementById('ui-atk').innerText = player.atk;
     document.getElementById('ui-def').innerText = player.def;
@@ -1084,8 +1098,9 @@ function rollArtifact(silent=false) {
 function checkLevelUp() {
     let baseReq = 100 * player.level * (1 + player.level * 0.1);
     let nextExp = player.level >= 20 ? baseReq * 3 : baseReq;
+    const maxLvl = getMaxLevel();
 
-    if(player.exp >= nextExp && player.level < 25) { 
+    if(player.exp >= nextExp && player.level < maxLvl) {
         player.level++;
         player.exp = 0;
         recalcAllStats(); 
@@ -1127,6 +1142,18 @@ function startBattle(mobData) {
     stage.classList.add('battle-mode'); 
 
     currentEnemy = JSON.parse(JSON.stringify(mobData));
+
+    // 다회차 스탯 보정
+    let cycle = getCycleCount();
+    if(cycle > 0) {
+        let mult = 1 + (cycle * 0.1);
+        currentEnemy.hp = Math.floor(currentEnemy.hp * mult);
+        currentEnemy.atk = Math.floor(currentEnemy.atk * mult);
+        currentEnemy.matk = Math.floor(currentEnemy.matk * mult);
+        currentEnemy.def = Math.floor(currentEnemy.def * mult);
+        currentEnemy.mdef = Math.floor(currentEnemy.mdef * mult);
+    }
+
     currentEnemy.maxHp = currentEnemy.hp || 1;
 
     document.getElementById('vis-e-name').innerText = currentEnemy.name;
@@ -1433,7 +1460,8 @@ function winBattle() {
     
     if(currentEnemy.name === "창조신 아스테아") {
         saveClear(player.charKey);
-        alert("축하합니다! 창조신을 물리치고 전설이 되었습니다!\n\n~ THE END ~");
+        incrementCycle();
+        alert("축하합니다! 창조신을 물리치고 전설이 되었습니다!\n\n(다음 회차부터 적이 강해지고 최대 레벨이 확장됩니다!)");
     }
 
     checkLevelUp();
