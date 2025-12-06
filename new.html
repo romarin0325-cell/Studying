@@ -550,7 +550,6 @@ const ENEMIES = [
         name: "창조신 아스테아", img:"",
         hp: 27000, atk: 700, matk: 750, def: 330, mdef: 330, 
         exp: 100000, gold: 100000, tier: 6, 
-        skillName: "천벌", skillType: 'mag', skillPower: 1.0, 
         ai: 'goddess', desc: "★ 진 최종보스 ★" 
     }
 ];
@@ -759,163 +758,120 @@ function recalcAllStats() {
 
     let growth = 1.0 + (player.level - 1) * 0.1;
     
-    let newMaxHp = Math.floor(player.baseStats.hp * growth);
-    let newMaxMp = player.fixedMp ? player.baseStats.mp : Math.floor(player.baseStats.mp * growth);
-    let newAtk = Math.floor(player.baseStats.atk * growth);
-    let newMatk = Math.floor(player.baseStats.matk * growth);
-    let newDef = Math.floor(player.baseStats.def * growth);
-    let newMdef = Math.floor(player.baseStats.mdef * growth);
+    // Base Calculation
+    let baseMaxHp = Math.floor(player.baseStats.hp * growth);
+    let baseMaxMp = player.fixedMp ? player.baseStats.mp : Math.floor(player.baseStats.mp * growth);
+    let baseAtk = Math.floor(player.baseStats.atk * growth);
+    let baseMatk = Math.floor(player.baseStats.matk * growth);
+    let baseDef = Math.floor(player.baseStats.def * growth);
+    let baseMdef = Math.floor(player.baseStats.mdef * growth);
 
+    // Equipments
     for(let i=0; i<gameState.equipWeapon; i++) {
         let s = EQUIP_STATS[player.charKey].weapon[i];
-        newAtk += s.atk; 
-        newMatk += s.matk;
+        baseAtk += s.atk;
+        baseMatk += s.matk;
     }
     for(let i=0; i<gameState.equipArmor; i++) {
         let s = EQUIP_STATS[player.charKey].armor[i];
-        newDef += s.def; 
-        newMdef += s.mdef;
+        baseDef += s.def;
+        baseMdef += s.mdef;
     }
 
     player.baseCrit = CHAR_DATA[player.charKey].baseCrit;
     player.baseEva = CHAR_DATA[player.charKey].baseEva;
     player.baseCritDmg = CHAR_DATA[player.charKey].baseCritDmg;
 
-    // 대현자 히든 기믹: 레벨당 치명타율 1%
+    // 대현자 히든 기믹
     if(player.charKey === 'rumi') {
         player.baseCrit += (player.level - 1) * 0.01;
     }
 
+    // Additive Modifiers
+    let hpPer = 0.0, mpPer = 0.0, atkPer = 0.0, matkPer = 0.0, defPer = 0.0, mdefPer = 0.0;
+
+    // Artifacts
     player.artifacts.forEach(art => {
-        if(art.effect === 'stat_hp' || art.effect === 'dragon_heart') newMaxHp = Math.floor(newMaxHp * (1 + art.val));
-        if(art.effect === 'stat_mp' || art.effect === 'ancient_book') newMaxMp = Math.floor(newMaxMp * (1 + art.val));
-        
-        if(art.effect === 'stat_atk') newAtk = Math.floor(newAtk * (1 + art.val));
-        if(art.effect === 'dragon_heart') newAtk = Math.floor(newAtk * (1 + 0.2)); 
-        if(art.effect === 'blood_pact') newAtk = Math.floor(newAtk * 1.2);
-        
-        if(art.effect === 'stat_matk') newMatk = Math.floor(newMatk * (1 + art.val));
-        if(art.effect === 'ancient_book') newMatk = Math.floor(newMatk * (1 + 0.2)); 
-        if(art.effect === 'blood_pact') newMatk = Math.floor(newMatk * 1.2);
-        
-        if(art.effect === 'stat_def') newDef = Math.floor(newDef * (1 + art.val));
-        if(art.effect === 'stat_mdef') newMdef = Math.floor(newMdef * (1 + art.val));
+        if(art.effect === 'stat_hp') hpPer += art.val;
+        if(art.effect === 'stat_mp') mpPer += art.val;
+        if(art.effect === 'stat_atk') atkPer += art.val;
+        if(art.effect === 'stat_matk') matkPer += art.val;
+        if(art.effect === 'stat_def') defPer += art.val;
+        if(art.effect === 'stat_mdef') mdefPer += art.val;
         
         if(art.effect === 'stat_crit') player.baseCrit += art.val;
         if(art.effect === 'stat_eva') player.baseEva += art.val;
 
-        // 신규 유물 효과 처리
-        if(art.effect === 'stat_def_mdef') {
-            newDef = Math.floor(newDef * (1 + art.val));
-            newMdef = Math.floor(newMdef * (1 + art.val));
-        }
-        if(art.effect === 'crit_critdmg') {
-            player.baseCrit += 0.1;
-            player.baseCritDmg += 0.3;
-        }
-        if(art.effect === 'matk_mp') {
-            newMatk = Math.floor(newMatk * (1 + art.val));
-            newMaxMp = Math.floor(newMaxMp * (1 + art.val));
-        }
-        if(art.effect === 'atk_matk') {
-            newAtk = Math.floor(newAtk * (1 + art.val));
-            newMatk = Math.floor(newMatk * (1 + art.val));
-        }
-        if(art.effect === 'atk_hp') {
-            newAtk = Math.floor(newAtk * (1 + art.val));
-            newMaxHp = Math.floor(newMaxHp * (1 + art.val));
-        }
+        if(art.effect === 'stat_def_mdef') { defPer += art.val; mdefPer += art.val; }
+        if(art.effect === 'crit_critdmg') { player.baseCrit += 0.1; player.baseCritDmg += 0.3; }
+        if(art.effect === 'matk_mp') { matkPer += art.val; mpPer += art.val; }
+        if(art.effect === 'atk_matk') { atkPer += art.val; matkPer += art.val; }
+        if(art.effect === 'atk_hp') { atkPer += art.val; hpPer += art.val; }
         
-        if(art.effect === 'golden_sun') {
-             newAtk = Math.floor(newAtk * (1 + art.val)); // 1.25
-             newMatk = Math.floor(newMatk * (1 + art.val)); // 1.25
-             newMdef = Math.floor(newMdef * 0.8); 
-        }
-        if(art.effect === 'golden_sun_legend') {
-             newAtk = Math.floor(newAtk * 1.4);
-             newMatk = Math.floor(newMatk * 1.4);
-             newMdef = Math.floor(newMdef * 0.7);
-        }
+        if(art.effect === 'dragon_heart') { hpPer += 0.4; atkPer += 0.2; }
+        if(art.effect === 'ancient_book') { mpPer += 0.4; matkPer += 0.2; }
 
-        if(art.effect === 'beelzebub') {
-             newAtk = Math.floor(newAtk * 1.5);
-             newDef = Math.floor(newDef * 0.7); 
-             player.baseCritDmg += 0.5;
-        }
-        if(art.effect === 'beelzebub_legend') {
-             newAtk = Math.floor(newAtk * 1.6);
-             newDef = Math.floor(newDef * 0.7);
-             player.baseCritDmg += 0.6;
-        }
+        if(art.effect === 'golden_sun') { atkPer += 0.25; matkPer += 0.25; mdefPer -= 0.2; }
+        if(art.effect === 'golden_sun_legend') { atkPer += 0.4; matkPer += 0.4; mdefPer -= 0.3; }
 
-        if(art.effect === 'iris') {
-             newMatk = Math.floor(newMatk * 1.5);
-             newMdef = Math.floor(newMdef * 1.5);
-        }
-        if(art.effect === 'iris_legend') {
-             newMatk = Math.floor(newMatk * 1.6);
-             newMdef = Math.floor(newMdef * 1.6);
-        }
+        if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; player.baseCritDmg += 0.5; }
+        if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.6; }
 
-        if(art.effect === 'all_stat') {
-             newMaxHp = Math.floor(newMaxHp * 1.2);
-             newMaxMp = Math.floor(newMaxMp * 1.2);
-             newAtk = Math.floor(newAtk * 1.2);
-             newMatk = Math.floor(newMatk * 1.2);
-             newDef = Math.floor(newDef * 1.2);
-             newMdef = Math.floor(newMdef * 1.2);
-        }
-        if(art.effect === 'royal_crown_legend') {
-             newMaxHp = Math.floor(newMaxHp * 1.3);
-             newMaxMp = Math.floor(newMaxMp * 1.3);
-             newAtk = Math.floor(newAtk * 1.3);
-             newMatk = Math.floor(newMatk * 1.3);
-             newDef = Math.floor(newDef * 1.3);
-             newMdef = Math.floor(newMdef * 1.3);
-        }
+        if(art.effect === 'iris') { matkPer += 0.5; mdefPer += 0.5; }
+        if(art.effect === 'iris_legend') { matkPer += 0.6; mdefPer += 0.6; }
 
-        if(art.effect === 'blood_pact') newMaxHp = Math.floor(newMaxHp * 0.8);
-        if(art.effect === 'reckless') {
-            newDef = Math.floor(newDef * 0.7);
-            newMdef = Math.floor(newMdef * 0.7);
-            player.baseCritDmg += art.val; 
-        }
+        if(art.effect === 'all_stat') { hpPer+=0.2; mpPer+=0.2; atkPer+=0.2; matkPer+=0.2; defPer+=0.2; mdefPer+=0.2; }
+        if(art.effect === 'royal_crown_legend') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
+
+        if(art.effect === 'blood_pact') { hpPer -= 0.2; atkPer += 0.2; matkPer += 0.2; }
+        if(art.effect === 'reckless') { defPer -= 0.3; player.baseCritDmg += art.val; }
     });
 
-    // 로열블룸 공격력 증가 (상태창 표시용)
-    if(buffs && buffs.player && buffs.player.royalBloomTurns > 0) {
-        newAtk = Math.floor(newAtk * 1.5);
-        newMatk = Math.floor(newMatk * 1.5);
+    // Buffs (Battle) - 이제 합연산으로 계산 및 상태창 반영
+    if(buffs && buffs.player) {
+        if(buffs.player.royalBloomTurns > 0) { atkPer += 0.5; matkPer += 0.5; }
+
+        // Sage Forms
+        if(buffs.player.sageForm === 'star') { defPer += 0.5; mdefPer += 0.5; }
+        else if(buffs.player.sageForm === 'moon') { matkPer += 0.5; atkPer -= 0.5; }
+        else if(buffs.player.sageForm === 'sun') { atkPer += 1.0; defPer -= 0.5; mdefPer -= 0.5; }
+
+        if(buffs.player.milkshakeTurns > 0) { defPer += 0.3; mdefPer += 0.3; }
+
+        // Other Buffs
+        if(buffs.player.goddessTurns > 0) { atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0; }
+        if(buffs.player.goddessBlessing) { atkPer += 0.5; matkPer += 0.5; }
+        if(buffs.player.undyingPowerTurns > 0) { atkPer += 1.0; }
+        if(buffs.player.divineTurns > 0) { defPer += 0.3; }
+        if(buffs.player.castleDef100) { defPer += 1.0; }
     }
 
-    // 대현자 형태 변환 및 버프 스탯 적용
-    if(player.charKey === 'rumi' && buffs && buffs.player) {
-        // 형태별 기본 스탯 변경
-        if(buffs.player.sageForm === 'star') {
-            newDef = Math.floor(newDef * 1.5);
-            newMdef = Math.floor(newMdef * 1.5);
-        } else if(buffs.player.sageForm === 'moon') {
-            newMatk = Math.floor(newMatk * 1.5);
-            newAtk = Math.floor(newAtk * 0.5);
-        } else if(buffs.player.sageForm === 'sun') {
-            newAtk = Math.floor(newAtk * 2.0); // 물공 100% 증가
-            newDef = Math.floor(newDef * 0.5);
-            newMdef = Math.floor(newMdef * 0.5);
-        }
+    // Apply Multipliers
+    let finalMaxHp = Math.floor(baseMaxHp * (1 + hpPer));
+    let finalMaxMp = Math.floor(baseMaxMp * (1 + mpPer));
 
-        // 밀크쉐이크 버프 (형태와 곱연산 적용)
-        if(buffs.player.milkshakeTurns > 0) {
-             newDef = Math.floor(newDef * 1.3);
-             newMdef = Math.floor(newMdef * 1.3);
-        }
+    // Zeke Passive (Low HP) - Add to UI stats
+    if(player.charKey === 'zeke' && player.hp) {
+         let ratio = player.hp / finalMaxHp;
+         if(ratio < 0.25) { atkPer += 0.3; defPer += 0.3; }
+         else if(ratio < 0.5) { atkPer += 0.15; defPer += 0.15; }
     }
 
-    player.maxHp = newMaxHp;
-    player.maxMp = newMaxMp;
-    player.atk = newAtk;
-    player.matk = newMatk;
-    player.def = newDef;
-    player.mdef = newMdef;
+    let finalAtk = Math.floor(baseAtk * (1 + atkPer));
+    let finalMatk = Math.floor(baseMatk * (1 + matkPer));
+    let finalDef = Math.floor(baseDef * (1 + defPer));
+    let finalMdef = Math.floor(baseMdef * (1 + mdefPer));
+
+    if(buffs && buffs.player && buffs.player.defZero) {
+        finalDef = 0;
+    }
+
+    player.maxHp = finalMaxHp;
+    player.maxMp = finalMaxMp;
+    player.atk = finalAtk;
+    player.matk = finalMatk;
+    player.def = finalDef;
+    player.mdef = finalMdef;
     
     player.hp = Math.min(player.hp, player.maxHp);
     player.mp = Math.min(player.mp, player.maxMp);
@@ -979,6 +935,11 @@ function updateInfo() {
         extraUI.style.color = '#b39ddb';
         let darkStack = buffs.enemy && buffs.enemy.darkness ? buffs.enemy.darkness : 0;
         extraUI.innerText = `💀 암흑 스택: ${darkStack} (최대 5)`;
+    } else if(player.charKey === 'jasmine') {
+        extraUI.style.display = 'block';
+        extraUI.style.color = '#fff59d';
+        let stack = buffs.player.absoluteStack || 0;
+        extraUI.innerText = `☀️ 앱솔루트 스택: ${stack} (최대 5)`;
     } else {
         extraUI.style.display = 'none';
     }
@@ -1459,6 +1420,9 @@ function applyPlayerSupport(skill) {
         // roseStack = 0; // 즉시 소멸하지 않음
         log("Royal Bloom! 장미가 만개하여 힘을 개방합니다! (3턴간 공/마공 50% 증가, 종료 시 시듦)", 'rose');
     }
+
+    // UI 업데이트를 위해 스탯 재계산 호출 (버프 적용 직후)
+    recalcAllStats();
 }
 
 function winBattle() {
@@ -1609,13 +1573,13 @@ function playerAttack(skill) {
     
     if(buffs.player.medi && !isPhy) atkVal *= 0.5;
 
-    if(buffs.player.goddessTurns) atkVal *= 2.0;
+    // if(buffs.player.goddessTurns) atkVal *= 2.0; // recalcAllStats로 이동
     
-    if(buffs.player.goddessBlessing) atkVal *= 1.5;
+    // if(buffs.player.goddessBlessing) atkVal *= 1.5; // recalcAllStats로 이동
     // if(buffs.player.royalBloomTurns) atkVal *= 1.5; // recalcAllStats로 이동됨
 
     if(buffs.player.undyingPowerTurns) {
-        atkVal *= 2.0;
+        // atkVal *= 2.0; // recalcAllStats로 이동
         log("죽음을 극복한 힘으로 공격력이 2배가 됩니다!", 'fire');
     }
 
@@ -1636,20 +1600,25 @@ function playerAttack(skill) {
         atkVal *= critDmg;
     }
 
-    if(player.name === '지크') {
-        if(player.hp < player.maxHp * 0.25) atkVal *= 1.3;
-        else if(player.hp < player.maxHp * 0.5) atkVal *= 1.15;
-    }
+    // 지크 패시브는 이제 recalcAllStats에서 기본 stat에 반영됨.
+    // if(player.name === '지크') {
+    //     if(player.hp < player.maxHp * 0.25) atkVal *= 1.3;
+    //     else if(player.hp < player.maxHp * 0.5) atkVal *= 1.15;
+    // }
 
     let defVal = isPhy ? currentEnemy.def : currentEnemy.mdef;
     
+    // Enemy Def Reduction (Additive)
+    let defRed = 0.0;
     if(skill.type === 'phy' && buffs.enemy.darkness) {
-        let reduction = 0.10 * buffs.enemy.darkness; 
-        defVal *= (1 - reduction);
+        defRed += 0.10 * buffs.enemy.darkness;
     }
+    if(isPhy && buffs.enemy.defDownTurns > 0) defRed += 0.2;
+    if(!isPhy && buffs.enemy.mdefDownTurns > 0) defRed += 0.2;
 
-    if(isPhy && buffs.enemy.defDownTurns > 0) defVal *= 0.8;
-    if(!isPhy && buffs.enemy.mdefDownTurns > 0) defVal *= 0.8;
+    // Cap reduction? 100% means 0 def.
+    defRed = Math.min(1.0, defRed);
+    defVal *= (1 - defRed);
 
     let dmg = atkVal * multiplier * (100 / (100 + defVal));
     dmg = Math.floor(dmg);
@@ -1878,20 +1847,21 @@ function applyEnemyDamage(rawDmg, type) {
     let def = type === 'mag' ? player.mdef : player.def;
     
     if(buffs.player.defZero) def = 0;
-    else {
-        let defMult = 1.0;
-        if(buffs.player.divineTurns) defMult += 0.3; 
-        if(buffs.player.castleDef100) defMult += 1.0; 
+    // else {
+        // Buffs are now handled in recalcAllStats (defMult)
+        // let defMult = 1.0;
+        // if(buffs.player.divineTurns) defMult += 0.3;
+        // if(buffs.player.castleDef100) defMult += 1.0;
         
-        if(player.name === '지크') {
-            if(player.hp < player.maxHp * 0.25) defMult += 0.3;
-            else if(player.hp < player.maxHp * 0.5) defMult += 0.15;
-        }
+        // if(player.name === '지크') {
+        //     if(player.hp < player.maxHp * 0.25) defMult += 0.3;
+        //     else if(player.hp < player.maxHp * 0.5) defMult += 0.15;
+        // }
         
-        def *= defMult;
-    }
+        // def *= defMult;
+    // }
 
-    if(buffs.player.goddessTurns) def *= 2.0;
+    // if(buffs.player.goddessTurns) def *= 2.0; // Handled in recalcAllStats
 
     let dmg = rawDmg * (100 / (100 + def));
 
