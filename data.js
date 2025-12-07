@@ -156,7 +156,7 @@ const CHAR_DATA = {
             'barrier': { name: "배리어", type: 'sup', cost: 30, power: 0, price: 5000, desc: "이번 턴 물리무효", effect: 'null_phy' },
             'meditation': { name: "메디테이션", type: 'sup', cost: 30, power: 0, price: 10000, desc: "리젠UP/마법공격DOWN (4턴)", effect: 'medi' },
             'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 5.5, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 극딜", effect: 'self_stun' },
-            'goddess': { name: "여신 강림", type: 'mag', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP/상태 리셋, 버프", effect: 'reset_buff' }
+            'goddess': { name: "여신 강림", type: 'sup', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP/상태 리셋, 버프", effect: 'reset_buff' }
         }
     },
     queen: {

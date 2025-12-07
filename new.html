@@ -289,7 +289,7 @@
             어떤 방식으로 초기화하시겠습니까?
         </div>
 
-        <button onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;">
+        <button id="btn-soft-reset" onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;">
             <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
             <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
             <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
@@ -383,7 +383,23 @@ function selectChar(charKey) {
 }
 
 function confirmResetGame() {
-    document.getElementById('reset-modal').classList.add('active');
+    const modal = document.getElementById('reset-modal');
+    modal.classList.add('active');
+
+    const softBtn = document.getElementById('btn-soft-reset');
+    if(gameState.clearedCreator) {
+        softBtn.innerHTML = `
+            <div style="font-weight:bold; font-size:1.0rem;">🔄 게임 재시작 (다음 회차)</div>
+            <div style="font-size:0.75rem; color:#a5d6a7;">적 강화(+10%) / 레벨 확장(+1) / 유물 해금 유지</div>
+            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(창조신 클리어 보상 적용)</div>
+        `;
+    } else {
+        softBtn.innerHTML = `
+            <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
+            <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
+            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
+        `;
+    }
 }
 
 function triggerReset(mode) {
@@ -392,8 +408,18 @@ function triggerReset(mode) {
 
         localStorage.removeItem('turnRpgCycle');
         localStorage.removeItem('turnRpgClears');
+        localStorage.removeItem('turnRpgBossDrops'); // 보스 유물 해금 초기화
     } else {
-        if(!confirm("현재 회차를 재시작하시겠습니까?\n\n- 캐릭터/골드/보유유물 초기화\n- 회차(적 강화) 및 유물 해금 상태는 유지됩니다.")) return;
+        let msg = "현재 회차를 재시작하시겠습니까?\n\n- 캐릭터/골드/보유유물 초기화\n- 회차(적 강화) 및 유물 해금 상태는 유지됩니다.";
+        if(gameState.clearedCreator) {
+            msg = "게임을 재시작하고 다음 회차로 넘어가시겠습니까?\n\n- 적의 능력치가 10% 증가합니다.\n- 최대 레벨이 1 증가합니다.\n- 캐릭터/골드/보유유물은 초기화됩니다.";
+        }
+        if(!confirm(msg)) return;
+
+        // 창조신 클리어 상태라면 여기서 회차 증가
+        if(gameState.clearedCreator) {
+            incrementCycle();
+        }
     }
 
     document.getElementById('reset-modal').classList.remove('active');
@@ -447,12 +473,36 @@ function initArtifactsWithNGPlus() {
         }
     });
 
-    // 2. 전설 유물 강화 (각 캐릭터별 10% 확률)
+    // 2. 전설 유물 강화 (클리어 시 100% 확률로 강화)
     clears.forEach(char => {
-        if(Math.random() < 0.1) {
-            upgradeLegendaryArtifact(char);
+        upgradeLegendaryArtifact(char);
+    });
+
+    // 3. 보스 드랍 유물 해금 목록 추가 (리롤 풀에 추가)
+    let bossUnlocks = getBossArtifactUnlocks();
+    bossUnlocks.forEach(id => {
+        // BOSS_DROP_ARTIFACTS에서 찾아서 추가
+        let drop = null;
+        for(let k in BOSS_DROP_ARTIFACTS) {
+            if(BOSS_DROP_ARTIFACTS[k].id === id) drop = BOSS_DROP_ARTIFACTS[k];
+        }
+        if(drop && !ARTIFACTS.find(a => a.id === drop.id)) {
+            ARTIFACTS.push(drop);
         }
     });
+}
+
+function getBossArtifactUnlocks() {
+    let unlocks = localStorage.getItem('turnRpgBossDrops');
+    return unlocks ? JSON.parse(unlocks) : [];
+}
+
+function unlockBossArtifact(id) {
+    let unlocks = getBossArtifactUnlocks();
+    if(!unlocks.includes(id)) {
+        unlocks.push(id);
+        localStorage.setItem('turnRpgBossDrops', JSON.stringify(unlocks));
+    }
 }
 
 function upgradeLegendaryArtifact(char) {
@@ -663,8 +713,18 @@ function recalcAllStats() {
 
     let finalAtk = Math.floor(baseAtk * (1 + atkPer));
     let finalMatk = Math.floor(baseMatk * (1 + matkPer));
+
+    // 메디테이션 마공 50% 감소 반영 (UI 표기용)
+    if(buffs && buffs.player && buffs.player.medi) {
+        finalMatk = Math.floor(finalMatk * 0.5);
+    }
+
     let finalDef = Math.floor(baseDef * (1 + defPer));
     let finalMdef = Math.floor(baseMdef * (1 + mdefPer));
+
+    // 방어력이 0 미만으로 내려가지 않도록 보정 (벨제뷔트 등)
+    finalDef = Math.max(0, finalDef);
+    finalMdef = Math.max(0, finalMdef);
 
     if(buffs && buffs.player && buffs.player.defZero) {
         finalDef = 0;
@@ -1253,28 +1313,28 @@ function winBattle() {
     gameState.gold += currentEnemy.gold;
     log(`경험치 +${currentEnemy.exp}, 골드 +${currentEnemy.gold} G`);
     
-    // Boss Drop Logic
+    // Boss Drop Logic (Unlock System)
     if(BOSS_DROP_ARTIFACTS) {
         let drop = null;
+        // 보스 드랍 확률 체크
         if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
         else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
         else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
 
         if(drop) {
-             // Check if already have it
-             if(!player.artifacts.find(a => a.id === drop.id)) {
-                 player.artifacts.push(drop);
-                 log(`<b style="color:#e040fb; font-size:1.1rem;">[보스 유물] ${drop.name} 획득!</b>`, 'rose');
-                 myAlert(`대박!\n보스의 힘이 담긴 유물 [${drop.name}]을(를) 획득했습니다!\n(이번 회차에서만 사용 가능합니다)`);
-                 recalcAllStats();
+             let unlocks = getBossArtifactUnlocks();
+             if(!unlocks.includes(drop.id)) {
+                 unlockBossArtifact(drop.id);
+                 log(`<b style="color:#e040fb; font-size:1.1rem;">[보스 유물 해금!] ${drop.name}</b>`, 'rose');
+                 myAlert(`축하합니다!\n[${drop.name}]이(가) 해금되었습니다!\n이제부터 상점 리셋이나 유물 뽑기에서 등장합니다.`);
              }
         }
     }
 
     if(currentEnemy.name === "창조신 아스테아") {
         saveClear(player.charKey);
-        incrementCycle();
-        alert("축하합니다! 창조신을 물리치고 전설이 되었습니다!\n\n(다음 회차부터 적이 강해지고 최대 레벨이 확장됩니다!)");
+        gameState.clearedCreator = true; // 플래그 설정
+        alert("축하합니다! 창조신을 물리치고 전설이 되었습니다!\n\n마을 메뉴의 [게임 재시작]을 통해 다음 회차(적 강화+레벨확장)로 진행할 수 있습니다.");
     }
 
     checkLevelUp();
@@ -1412,7 +1472,7 @@ function playerAttack(skill) {
     if(hasArtifact('high_risk_dmg')) multiplier *= 1.3;
     if(hasArtifact('high_risk_dmg_ex')) multiplier *= 2.0;
     
-    if(buffs.player.medi && !isPhy) atkVal *= 0.5;
+    // if(buffs.player.medi && !isPhy) atkVal *= 0.5; // recalcAllStats로 이동됨
 
     // if(buffs.player.goddessTurns) atkVal *= 2.0; // recalcAllStats로 이동
     
