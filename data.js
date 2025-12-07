@@ -75,7 +75,7 @@ const BASE_ARTIFACTS = [
     { id: 'vampire', name: "흡혈의 이빨", desc: "가한 피해의 5% 회복", effect: 'vampire', val: 0.05 },
     { id: 'mana_engine', name: "마나 엔진", desc: "턴 종료 시 MP +10", effect: 'mana_engine', val: 10 },
     { id: 'thorns', name: "가시 갑옷", desc: "받은 물리 피해 10% 반사", effect: 'reflect_phy', val: 0.1 },
-    { id: 'guardian_angel', name: "수호천사의 깃털", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5 },
+    { id: 'guardian_angel', name: "수호천사의 깃털[에픽]", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5 },
     { id: 'dragon_heart', name: "용의 심장", desc: "최대 HP +40%, 물리공격 +20%", effect: 'dragon_heart', val: 0.4 },
     { id: 'ancient_book', name: "고대의 마도서", desc: "최대 MP +40%, 마법공격 +20%", effect: 'ancient_book', val: 0.4 },
     { id: 'golden_sun', name: "황금의 태양[에픽]", desc: "공/마공 +25%, 마법방어 -20%", effect: 'golden_sun', val: 0.25 },
@@ -90,6 +90,12 @@ const NEW_ARTIFACTS = {
     jasmine: { id: 'old_diary', name: "오래된 일기장", desc: "마법공격력/최대MP +30%", effect: 'matk_mp', val: 0.3 },
     queen: { id: 'queen_crest', name: "여왕의 문양", desc: "공격력/마법공격력 +30%", effect: 'atk_matk', val: 0.3 },
     rumi: { id: 'precious_dream', name: "소중한 꿈", desc: "공격력/생명력 +30%", effect: 'atk_hp', val: 0.3 }
+};
+
+const BOSS_DROP_ARTIFACTS = {
+    mashin: { id: 'demon_eye', name: "마안[에픽]", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0 },
+    witch: { id: 'heart_ice', name: "얼음의 심장[에픽]", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0 },
+    goddess: { id: 'hestia', name: "신기 에스티아[전설]", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0 }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
