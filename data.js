@@ -28,7 +28,7 @@ const EQUIP_STATS = {
     luna: {
         weapon: [
             {atk:15,matk:15}, {atk:30,matk:20}, {atk:35,matk:40},
-            {atk:60,matk:55}, {atk:90,matk:85}, {atk:120,matk:115}, {atk:165,matk:155}
+            {atk:60,matk:55}, {atk:90,matk:85}, {atk:120,matk:115}, {atk:175,matk:160}
         ],
         armor: [
             {def:5,mdef:5}, {def:20,mdef:15}, {def:25,mdef:25},
@@ -38,11 +38,11 @@ const EQUIP_STATS = {
     queen: {
         weapon: [
             {atk:15,matk:15}, {atk:30,matk:30}, {atk:45,matk:45},
-            {atk:70,matk:70}, {atk:95,matk:95}, {atk:140,matk:140}, {atk:180,matk:180}
+            {atk:70,matk:70}, {atk:95,matk:95}, {atk:140,matk:140}, {atk:190,matk:190}
         ],
         armor: [
             {def:10,mdef:10}, {def:25,mdef:25}, {def:35,mdef:35},
-            {def:50,mdef:50}, {def:65,mdef:65}, {def:80,mdef:80}, {def:100,mdef:100}
+            {def:50,mdef:50}, {def:65,mdef:65}, {def:80,mdef:80}, {def:110,mdef:110}
         ]
     },
     rumi: {
@@ -75,13 +75,13 @@ const BASE_ARTIFACTS = [
     { id: 'vampire', name: "흡혈의 이빨", desc: "가한 피해의 5% 회복", effect: 'vampire', val: 0.05 },
     { id: 'mana_engine', name: "마나 엔진", desc: "턴 종료 시 MP +10", effect: 'mana_engine', val: 10 },
     { id: 'thorns', name: "가시 갑옷", desc: "받은 물리 피해 10% 반사", effect: 'reflect_phy', val: 0.1 },
-    { id: 'guardian_angel', name: "수호천사의 깃털[에픽]", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5 },
+    { id: 'guardian_angel', name: "수호천사의 깃털", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5, rarity: 'epic' },
     { id: 'dragon_heart', name: "용의 심장", desc: "최대 HP +40%, 물리공격 +20%", effect: 'dragon_heart', val: 0.4 },
     { id: 'ancient_book', name: "고대의 마도서", desc: "최대 MP +40%, 마법공격 +20%", effect: 'ancient_book', val: 0.4 },
-    { id: 'golden_sun', name: "황금의 태양[에픽]", desc: "공/마공 +25%, 마법방어 -20%", effect: 'golden_sun', val: 0.25 },
-    { id: 'beelzebub', name: "마신기 벨제뷔트[에픽]", desc: "공격/치명피해 +50%, 방어 -30%", effect: 'beelzebub', val: 0.5 },
-    { id: 'iris', name: "신기 아이리스[에픽]", desc: "마공/마방 +50%", effect: 'iris', val: 0.5 },
-    { id: 'royal_crown', name: "로열 크라운[에픽]", desc: "모든 능력치 +20% (여왕: 시작시 장미+5)", effect: 'all_stat', val: 0.2 }
+    { id: 'golden_sun', name: "황금의 태양", desc: "공/마공 +25%, 마법방어 -20%", effect: 'golden_sun', val: 0.25, rarity: 'epic' },
+    { id: 'beelzebub', name: "마신기 벨제뷔트", desc: "공격/치명피해 +50%, 방어 -30%", effect: 'beelzebub', val: 0.5, rarity: 'epic' },
+    { id: 'iris', name: "신기 아이리스", desc: "마공/마방 +50%", effect: 'iris', val: 0.5, rarity: 'epic' },
+    { id: 'royal_crown', name: "로열 크라운", desc: "모든 능력치 +20% (여왕: 시작시 장미+5)", effect: 'all_stat', val: 0.2, rarity: 'epic' }
 ];
 
 const NEW_ARTIFACTS = {
@@ -93,9 +93,9 @@ const NEW_ARTIFACTS = {
 };
 
 const BOSS_DROP_ARTIFACTS = {
-    mashin: { id: 'demon_eye', name: "마안[에픽]", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0 },
-    witch: { id: 'heart_ice', name: "얼음의 심장[에픽]", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0 },
-    goddess: { id: 'hestia', name: "신기 에스티아[전설]", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0 }
+    mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
+    witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
+    goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
@@ -163,19 +163,19 @@ const CHAR_DATA = {
         name: "여왕", hp: 550, mp: 120, mpRegen: 12, atk: 55, matk: 55, def: 35, mdef: 45, baseCrit: 0.10, baseCritDmg: 1.5, baseEva: 0.05, fixedMp: true,
         skills: {
             'basic': { name: "기본 공격", type: 'phy', cost: 0, power: 1.0, price: 0, desc: "기본 물리 공격", effect: '' },
-            'thornwhip': { name: "Vine Whip", type: 'phy', cost: 10, power: 1.2, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
-            'roseseed': { name: "Rose Shot", type: 'mag', cost: 10, power: 1.1, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
-            'petaldance': { name: "Flower Dance", type: 'phy', cost: 20, power: 1.3, price: 3000, desc: "3턴 회피 +20%", effect: 'eva_buff' },
-            'sharpness': { name: "Royal Focus", type: 'mag', cost: 20, power: 1.3, price: 3000, desc: "3턴 치명 +25%", effect: 'crit_buff' },
-            'thornarmor': { name: "Thorn Guard", type: 'sup', cost: 10, power: 0, price: 0, desc: "이번 턴 피해 50% 감소", effect: 'dmg_red_50' },
-            'withering': { name: "Cruel Thorn", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "3턴 적 마방 감소", effect: 'mdef_down' },
-            'wildgrowth': { name: "Wild Root", type: 'mag', cost: 30, power: 2.9, price: 10000, desc: "장미 2스택 / 다음 턴 불가", effect: 'rose_2_self_stun' },
-            'blooming': { name: "Quick Grow", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미 3스택 충전", effect: 'add_rose_3' },
-            'overwhelm': { name: "Rose Prison", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
-            'fatalrose': { name: "Heart Pierce", type: 'phy', cost: 40, power: 1.8, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
-            'royalbloom': { name: "Royal Bloom", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (종료시 소멸)", effect: 'royal_bloom' },
-            'queensgarden': { name: "Queen's Domain", type: 'mag', isUlt: true, cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
-            'funeral': { name: "Finale", type: 'mag', isUlt: true, cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }
+            'thornwhip': { name: "바인 휩", type: 'phy', cost: 10, power: 1.2, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
+            'roseseed': { name: "로즈 샷", type: 'mag', cost: 10, power: 1.1, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
+            'petaldance': { name: "플라워 댄스", type: 'phy', cost: 20, power: 1.3, price: 3000, desc: "3턴 회피 +20%", effect: 'eva_buff' },
+            'sharpness': { name: "로열 포커스", type: 'mag', cost: 20, power: 1.4, price: 3000, desc: "3턴 치명 +25%", effect: 'crit_buff' },
+            'thornarmor': { name: "쏜 가드", type: 'sup', cost: 10, power: 0, price: 0, desc: "이번 턴 피해 50% 감소", effect: 'dmg_red_50' },
+            'withering': { name: "크루얼 쏜", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "3턴 적 마방 감소", effect: 'mdef_down' },
+            'wildgrowth': { name: "와일드 루트", type: 'mag', cost: 30, power: 3.1, price: 10000, desc: "장미 2스택 / 다음 턴 불가", effect: 'rose_2_self_stun' },
+            'blooming': { name: "퀵 그로우", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미 3스택 충전", effect: 'add_rose_3' },
+            'overwhelm': { name: "로즈 프리즌", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
+            'fatalrose': { name: "하트 피어스", type: 'phy', cost: 40, power: 2.0, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
+            'royalbloom': { name: "로열 블룸", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (종료시 소멸)", effect: 'royal_bloom' },
+            'queensgarden': { name: "퀸즈 도메인", type: 'mag', isUlt: true, cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
+            'funeral': { name: "피날레", type: 'mag', isUlt: true, cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }
         }
     },
     rumi: {
