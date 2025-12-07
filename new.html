@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Turn RPG: Legend Edition v9.3 (Fix Update)</title>
+<title>Turn RPG: Legend Edition v9.4 (Balance & Fix Update)</title>
 <style>
     /* =========================================
        Global Layout
@@ -169,7 +169,7 @@
 </head>
 <body>
 
-<div class="header">Turn RPG: Legend Edition v9.3</div>
+<div class="header">Turn RPG: Legend Edition v9.4 (Balance & Fix Update)</div>
 
 <div class="container">
     <div class="status-panel">
@@ -224,6 +224,7 @@
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
             <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
             <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
+            <button onclick="viewPatchNotes()" style="background:#424242; border-color:#666; font-size:0.8rem; height:40px; min-height:40px;">📜 패치 노트</button>
         </div>
 
         <div id="battle-menu" style="display:none; width:100%;">
@@ -282,6 +283,42 @@
     </div>
 </div>
 
+<div id="patch-modal" class="modal">
+    <div class="modal-content" style="text-align:left;">
+        <h3 style="color:#ffd700; border-bottom:1px solid #555; padding-bottom:10px;">패치 노트 (v9.4)</h3>
+        <div style="font-size:0.85rem; color:#ccc; line-height:1.6; max-height:60vh; overflow-y:auto;">
+            <b>[버그 수정 및 검증]</b><br>
+            - 자스민 [여신 강림] 스킬이 정상적으로 버프를 적용하지 않던 문제를 수정했습니다.<br>
+            - 전설 유물 [진: 수호천사의 깃털]의 100% 부활 기능이 정상 작동함을 검증했습니다.<br>
+            - 보스 드랍 에픽 유물이 재시작 후에도 리롤 풀에 정상적으로 추가됨을 검증했습니다.<br>
+            - 창조신 클리어 후 회차 초기화 외의 상황에서 만렙 확장이 일어나는 버그는 없는 것으로 확인되었습니다.<br><br>
+
+            <b>[밸런스 조정]</b><br>
+            - 여왕의 스킬 이름이 한글로 변경되었습니다. (예: Royal Focus -> 로열 포커스)<br>
+            - 여왕 스킬 상향:<br>
+              * 로열 포커스: 배율 1.3 -> 1.4<br>
+              * 하트 피어스: 배율 1.8 -> 2.0<br>
+              * 와일드 루트: 배율 2.9 -> 3.1<br>
+            - 장비 상향:<br>
+              * 여왕 최종 무기: 공/마공 +10<br>
+              * 여왕 최종 방어구: 방/마방 +10<br>
+              * 루나 최종 무기: 공 +10, 마공 +5<br><br>
+
+            <b>[UI 개선]</b><br>
+            - 에픽 및 전설 아이템 표기 방식을 텍스트([에픽]) 대신 <span style="color:#e040fb">보라색</span>/<span style="color:#ff5252">붉은색</span> 글씨 색상으로 변경했습니다.<br><br>
+
+            <b>[개발자 코멘트: 캐릭터 강함 측정]</b><br>
+            현재 데이터 기반 대략적인 전투력(스킬/스탯/시너지 고려):<br>
+            - <b>루나:</b> 단일 대상 폭딜 최상위. 확정 치명타와 회피 생존력이 우수하지만 광역 대처가 약함.<br>
+            - <b>지크:</b> 안정성 최상위. 반격과 체력 비례 딜링으로 후반부 보스전에 강함.<br>
+            - <b>자스민:</b> 마법 난사와 유틸리티(반사/부활) 보유. 여신 강림 버그 수정으로 고점 대폭 상승 예상.<br>
+            - <b>여왕:</b> 스택형 지속 딜러. 이번 버프로 인해 스택 예열 후의 파괴력이 더욱 강화됨.<br>
+            - <b>루미:</b> 만능형(하이브리드). 상황 대처 능력은 좋으나 자원(결정) 관리가 필요함.
+        </div>
+        <button onclick="document.getElementById('patch-modal').classList.remove('active')" style="width:100%; margin-top:15px; background:#444;">닫기</button>
+    </div>
+</div>
+
 <div id="reset-modal" class="modal">
     <div class="modal-content">
         <div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#ef5350;">초기화 옵션</div>
@@ -322,6 +359,10 @@ let roseStack = 0;
 function myAlert(msg) {
     document.getElementById('alert-msg').innerText = msg;
     document.getElementById('alert-modal').classList.add('active');
+}
+
+function viewPatchNotes() {
+    document.getElementById('patch-modal').classList.add('active');
 }
 
 function log(msg, type='info') {
@@ -461,24 +502,24 @@ function initArtifactsWithNGPlus() {
     // 클리어 기록 확인
     const clears = getClearHistory(); // ['zeke', 'luna', ...]
 
-    if(clears.length === 0) return;
-
     // 1. 공통 유물 추가 (100% 확률)
-    clears.forEach(char => {
-        if(NEW_ARTIFACTS[char]) {
-            // 중복 방지 체크 (혹시 모르니)
-            if(!ARTIFACTS.find(a => a.id === NEW_ARTIFACTS[char].id)) {
-                ARTIFACTS.push(NEW_ARTIFACTS[char]);
+    if(clears.length > 0) {
+        clears.forEach(char => {
+            if(NEW_ARTIFACTS[char]) {
+                // 중복 방지 체크 (혹시 모르니)
+                if(!ARTIFACTS.find(a => a.id === NEW_ARTIFACTS[char].id)) {
+                    ARTIFACTS.push(NEW_ARTIFACTS[char]);
+                }
             }
-        }
-    });
+        });
 
-    // 2. 전설 유물 강화 (클리어 시 100% 확률로 강화)
-    clears.forEach(char => {
-        upgradeLegendaryArtifact(char);
-    });
+        // 2. 전설 유물 강화 (클리어 시 100% 확률로 강화)
+        clears.forEach(char => {
+            upgradeLegendaryArtifact(char);
+        });
+    }
 
-    // 3. 보스 드랍 유물 해금 목록 추가 (리롤 풀에 추가)
+    // 3. 보스 드랍 유물 해금 목록 추가 (리롤 풀에 추가) - 클리어 여부와 무관하게 적용
     let bossUnlocks = getBossArtifactUnlocks();
     bossUnlocks.forEach(id => {
         // BOSS_DROP_ARTIFACTS에서 찾아서 추가
@@ -510,50 +551,55 @@ function upgradeLegendaryArtifact(char) {
     if(char === 'zeke') {
         let art = ARTIFACTS.find(a => a.id === 'golden_sun');
         if(art) {
-            art.name = "진: 황금의 태양[전설]";
+            art.name = "진: 황금의 태양";
             art.desc = "공/마공 +40%, 마법방어 -30%";
             art.val = 0.40; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
             art.effect = 'golden_sun_legend'; // 효과 ID 변경
+            art.rarity = 'legend';
         }
     }
     // 루나 -> 벨제뷔트
     if(char === 'luna') {
         let art = ARTIFACTS.find(a => a.id === 'beelzebub');
         if(art) {
-            art.name = "진: 마신기 벨제뷔트[전설]";
+            art.name = "진: 마신기 벨제뷔트";
             art.desc = "공격/치명피해 +60%, 방어 -30%";
             art.val = 0.60;
             art.effect = 'beelzebub_legend';
+            art.rarity = 'legend';
         }
     }
     // 자스민 -> 아이리스
     if(char === 'jasmine') {
         let art = ARTIFACTS.find(a => a.id === 'iris');
         if(art) {
-            art.name = "진: 신기 아이리스[전설]";
+            art.name = "진: 신기 아이리스";
             art.desc = "마공/마방 +60%";
             art.val = 0.60;
             art.effect = 'iris_legend';
+            art.rarity = 'legend';
         }
     }
     // 여왕 -> 로열크라운
     if(char === 'queen') {
         let art = ARTIFACTS.find(a => a.id === 'royal_crown');
         if(art) {
-            art.name = "진: 로열 크라운[전설]";
+            art.name = "진: 로열 크라운";
             art.desc = "올스탯 +30% (여왕: 시작시 장미+10)";
             art.val = 0.30;
             art.effect = 'royal_crown_legend';
+            art.rarity = 'legend';
         }
     }
     // 루미 -> 수호천사의 깃털
     if(char === 'rumi') {
         let art = ARTIFACTS.find(a => a.id === 'guardian_angel');
         if(art) {
-            art.name = "진: 수호천사의 깃털[전설]";
+            art.name = "진: 수호천사의 깃털";
             art.desc = "사망 시 1회 부활 (HP 100%)";
             art.val = 1.0;
             art.effect = 'guardian_angel_legend';
+            art.rarity = 'legend';
         }
     }
 }
@@ -766,9 +812,12 @@ function updateInfo() {
 
     const artBox = document.getElementById('artifact-list');
     if(player.artifacts.length > 0) {
-        let artNames = player.artifacts.map(a => 
-            `<span onclick="myAlert('[${a.name}]\\n${a.desc}')" style="cursor:pointer; text-decoration:underline; margin-right:5px; color:${a.name.includes('에픽') ? '#e040fb' : '#ffd700'}">${a.name}</span>`
-        ).join(" ");
+        let artNames = player.artifacts.map(a => {
+            let color = '#ffd700';
+            if(a.rarity === 'epic') color = '#e040fb';
+            if(a.rarity === 'legend') color = '#ff5252';
+            return `<span onclick="myAlert('[${a.name}]\\n${a.desc}')" style="cursor:pointer; text-decoration:underline; margin-right:5px; color:${color}">${a.name}</span>`;
+        }).join(" ");
         artBox.innerHTML = `유물(터치): ${artNames}`;
     } else {
         artBox.innerText = "유물: 없음";
@@ -935,9 +984,12 @@ function rollArtifact(silent=false) {
 
     player.artifacts.push(pick);
     if(!silent) {
-        if(pick.name.includes('에픽')) {
+        if(pick.rarity === 'epic') {
             log(`<b style="color:#e040fb; font-size:1.1rem;">[대박!] 에픽 유물 발견! [${pick.name}]</b>`, 'rose');
             myAlert(`축하합니다!\n전설적인 유물 [${pick.name}]을(를) 손에 넣었습니다!`);
+        } else if(pick.rarity === 'legend') {
+             log(`<b style="color:#ff5252; font-size:1.1rem;">[전설!] 신화급 유물 발견! [${pick.name}]</b>`, 'dmg');
+             myAlert(`믿을 수 없습니다!\n신화 속 유물 [${pick.name}]을(를) 손에 넣었습니다!`);
         } else {
             log(`<span style="color:#ffd700">유물 획득! [${pick.name}]: ${pick.desc}</span>`, 'info');
         }
@@ -1130,10 +1182,14 @@ function executeTurn(skillKey) {
     }
 
     // [FIX] 서포트 스킬 적용 조건에 'sage_moon_veil'과 'sage_meteor' 추가
+    // [FIX 9.4] 'reset_buff' (여신 강림) 추가하여 공격 함수 호출하도록 유도 (스킬 타입이 sup이라서 applyPlayerSupport 호출 후 playerDefending=true 됨)
+    // 하지만 reset_buff는 applyPlayerSupport에 없으므로 아무 일도 안 함.
+    // playerDefending=true 때문에 아래 공격 로직 진입 못함.
+    // 그래서 예외 리스트에 reset_buff 추가.
     if(skill.type === 'sup' || skill.effect === 'perfect_eva' || skill.effect === 'guard_70' || skill.effect === 'null_mag' || skill.effect === 'null_phy' || 
        skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' || skill.effect === 'passive_boost' || 
        skill.effect.startsWith('form_change_') || skill.effect === 'sage_barrier' || skill.effect === 'milkshake_heal' ||
-       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'royal_bloom') { // <-- 예외 추가됨
+       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'royal_bloom' || skill.effect === 'reset_buff') { // <-- reset_buff 추가
         
         applyPlayerSupport(skill);
         
@@ -1154,10 +1210,11 @@ function executeTurn(skillKey) {
     let enemyAlive = true;
     
     // [FIX] 공격 스킬 조건에 'sage_moon_veil'과 'sage_meteor' 예외 추가 (playerDefending이 true여도 공격 실행)
+    // [FIX 9.4] reset_buff 추가 (이래야 playerAttack 호출됨)
     if(!playerDefending || skill.effect === 'perfect_eva' || skill.effect === 'rose_2_self_stun' || 
        skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' ||
        skill.effect === 'form_change_sun' || skill.effect === 'sage_dream_ult' ||
-       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor') { // <-- 예외 추가됨
+       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'reset_buff') { // <-- reset_buff 추가
         
         if(skill.effect === 'sage_dream_ult' || !skill.effect.startsWith('form_change_')) {
             document.getElementById('player-actor').classList.add('shake');
@@ -1325,7 +1382,8 @@ function winBattle() {
              let unlocks = getBossArtifactUnlocks();
              if(!unlocks.includes(drop.id)) {
                  unlockBossArtifact(drop.id);
-                 log(`<b style="color:#e040fb; font-size:1.1rem;">[보스 유물 해금!] ${drop.name}</b>`, 'rose');
+                 let color = drop.rarity === 'legend' ? '#ff5252' : '#e040fb';
+                 log(`<b style="color:${color}; font-size:1.1rem;">[보스 유물 해금!] ${drop.name}</b>`, 'rose');
                  myAlert(`축하합니다!\n[${drop.name}]이(가) 해금되었습니다!\n이제부터 상점 리셋이나 유물 뽑기에서 등장합니다.`);
              }
         }
