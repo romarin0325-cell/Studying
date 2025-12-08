@@ -219,6 +219,8 @@
             <button onclick="enterDungeon(2)">🟡 검은 안개 숲 (Lv.4~7)</button>
             <button onclick="enterDungeon(3)">🔴 잊혀진 고성 (Lv.8~10)</button>
             <button onclick="enterEvent()">🟣 혼돈의 틈 (Lv.11~16)</button>
+            <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
+            <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
             <button onclick="enterDungeon(5)" style="background: linear-gradient(135deg, #4fc3f7, #0288d1); border-color:#29b6f6; color:#fff;">❄️ 영겁의 빙하 (Lv.17~20)</button>
             <button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;">☁️ 천상의 계단 (Lv.21~25)</button>
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
@@ -246,6 +248,10 @@
         <button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;">방어구 강화 <span id="armor-cost" class="skill-sub"></span></button>
         <h4 style="text-align:left; color:#a5d6a7;">스킬 습득</h4>
         <div id="skill-shop-list" style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px;"></div>
+        <button onclick="rollEpicArtifact()" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
+             🔮 에픽 뽑기 (100,000 G)
+             <span class="skill-sub" style="color:#e1bee7">에픽/전설 확률 3배</span>
+        </button>
         <button onclick="closeShop()" style="background:#555; margin-top:10px;">나가기</button>
     </div>
 </div>
@@ -664,6 +670,10 @@ function recalcAllStats() {
     if(player.charKey === 'rumi') {
         player.baseCrit += (player.level - 1) * 0.01;
     }
+    // 루나 히든 패시브
+    if(player.charKey === 'luna') {
+        player.baseCritDmg += (player.level - 1) * 0.01;
+    }
 
     // Additive Modifiers
     let hpPer = 0.0, mpPer = 0.0, atkPer = 0.0, matkPer = 0.0, defPer = 0.0, mdefPer = 0.0;
@@ -689,8 +699,8 @@ function recalcAllStats() {
         if(art.effect === 'dragon_heart') { hpPer += 0.4; atkPer += 0.2; }
         if(art.effect === 'ancient_book') { mpPer += 0.4; matkPer += 0.2; }
 
-        if(art.effect === 'golden_sun') { atkPer += 0.25; matkPer += 0.25; mdefPer -= 0.2; }
-        if(art.effect === 'golden_sun_legend') { atkPer += 0.4; matkPer += 0.4; mdefPer -= 0.3; }
+        if(art.effect === 'golden_sun') { atkPer += 0.30; matkPer += 0.30; mdefPer -= 0.2; }
+        if(art.effect === 'golden_sun_legend') { atkPer += 0.45; matkPer += 0.45; mdefPer -= 0.3; }
 
         if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; player.baseCritDmg += 0.5; }
         if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.6; }
@@ -707,6 +717,12 @@ function recalcAllStats() {
         // New Boss Artifacts
         if(art.effect === 'hestia') {
             hpPer += 1.0; mpPer += 1.0; atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0;
+        }
+        if(art.effect === 'dream_choco') {
+            atkPer += 0.7; matkPer += 0.7;
+        }
+        if(art.effect === 'blue_moon') {
+            mpPer += 0.2;
         }
         if(art.effect === 'heart_ice') {
              // Will be applied in dynamic section if HP < 50%
@@ -976,6 +992,41 @@ function resetAllArtifacts() {
     }
 }
 
+function rollEpicArtifact() {
+    let cost = 100000;
+    if(gameState.gold < cost) return myAlert("골드가 부족합니다.");
+
+    let available = ARTIFACTS.filter(a => !hasArtifact(a.id));
+    if(available.length === 0) return myAlert("더 이상 뽑을 유물이 없습니다.");
+
+    gameState.gold -= cost;
+    openShop(); // Refresh gold
+
+    // Weighted random
+    let weighted = [];
+    available.forEach(a => {
+        let w = 1;
+        if(a.rarity === 'epic') w = 3;
+        if(a.rarity === 'legend') w = 3;
+        for(let i=0; i<w; i++) weighted.push(a);
+    });
+
+    let pick = weighted[Math.floor(Math.random() * weighted.length)];
+    player.artifacts.push(pick);
+
+    if(pick.rarity === 'epic') {
+        log(`<b style="color:#e040fb; font-size:1.1rem;">[에픽 뽑기!] 에픽 유물 발견! [${pick.name}]</b>`, 'rose');
+        myAlert(`축하합니다!\n[에픽 뽑기]에서 [${pick.name}]을(를) 손에 넣었습니다!`);
+    } else if(pick.rarity === 'legend') {
+            log(`<b style="color:#ff5252; font-size:1.1rem;">[에픽 뽑기!] 신화급 유물 발견! [${pick.name}]</b>`, 'dmg');
+            myAlert(`믿을 수 없습니다!\n[에픽 뽑기]에서 [${pick.name}]을(를) 손에 넣었습니다!`);
+    } else {
+        log(`<span style="color:#ffd700">유물 획득! [${pick.name}]: ${pick.desc}</span>`, 'info');
+    }
+    recalcAllStats();
+    updateInfo();
+}
+
 function rollArtifact(silent=false) {
     let available = ARTIFACTS.filter(a => !hasArtifact(a.id));
     if(available.length === 0) return;
@@ -1025,6 +1076,12 @@ function enterEvent() {
     startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
 }
 
+function enterEventDungeon(type) {
+    const candidates = ENEMIES.filter(e => e.tier === type);
+    if(candidates.length === 0) return myAlert("던전 데이터 오류");
+    startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
+}
+
 function updateBattleUI() {
     updateInfo(); 
     if (currentEnemy) {
@@ -1068,6 +1125,7 @@ function startBattle(mobData) {
 
     let startMp = player.maxMp ? Math.floor(player.maxMp / 2) : 0;
     if(hasArtifact('start_mp')) startMp += 30;
+    if(hasArtifact('blue_moon')) startMp += 100;
     
     player.mp = Math.min(player.maxMp, startMp);
     turnCount = 1;
@@ -1373,10 +1431,12 @@ function winBattle() {
     // Boss Drop Logic (Unlock System)
     if(BOSS_DROP_ARTIFACTS) {
         let drop = null;
-        // 보스 드랍 확률 체크
+        // 보스 드랍 확률 체크 (신규 보스 100% 해금)
         if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
         else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
         else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
+        else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
+        else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
 
         if(drop) {
              let unlocks = getBossArtifactUnlocks();
@@ -1432,6 +1492,11 @@ function playerAttack(skill) {
     if(currentEnemy.name === "마신") {
         if(turnCount % 2 !== 0 && skill.type === 'phy') { log("마신은 홀수 턴에 물리 공격에 면역입니다!", 'info'); return true; }
         if(turnCount % 2 === 0 && skill.type === 'mag') { log("마신은 짝수 턴에 마법 공격에 면역입니다!", 'info'); return true; }
+    }
+
+    if(currentEnemy.ai === 'artificial_god') {
+        if(skill.type === 'phy') buffs.enemy.nextPhysDef = true;
+        if(skill.type === 'mag') buffs.enemy.nextMagDef = true;
     }
 
     if(buffs.enemy.counter && skill.type === 'phy') {
@@ -1575,9 +1640,13 @@ function playerAttack(skill) {
     if(isPhy && buffs.enemy.defDownTurns > 0) defRed += 0.2;
     if(!isPhy && buffs.enemy.mdefDownTurns > 0) defRed += 0.2;
 
+    if(isPhy && buffs.enemy.physDefBuff) defRed -= 0.5;
+    if(!isPhy && buffs.enemy.magDefBuff) defRed -= 0.5;
+
     // Cap reduction? 100% means 0 def.
     defRed = Math.min(1.0, defRed);
     defVal *= (1 - defRed);
+    defVal = Math.max(0, defVal);
 
     let dmg = atkVal * multiplier * (100 / (100 + defVal));
     dmg = Math.floor(dmg);
@@ -1688,6 +1757,114 @@ function enemyTurn() {
             buffs.enemy.charging = true;
             return true;
         }
+    }
+
+    if(currentEnemy.ai === 'cream_maid') {
+        if(Math.random() < 0.3) {
+            log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        } else {
+            log(`${currentEnemy.name}의 공격`, 'phy');
+            return applyEnemyDamage(currentEnemy.atk, 'phy');
+        }
+    }
+
+    if(currentEnemy.ai === 'candy_boy') {
+        let rand = Math.random();
+        if(rand < 0.2) {
+            log(`${currentEnemy.name}의 캔디 캐논!`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
+        } else if(rand < 0.4) {
+            log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        } else {
+            log(`${currentEnemy.name}의 공격`, 'phy');
+            return applyEnemyDamage(currentEnemy.atk, 'phy');
+        }
+    }
+
+    if(currentEnemy.ai === 'pudding_princess') {
+        // Form Change Logic
+        if(turnCount === 1 || turnCount % 3 === 0) {
+            let form = Math.random() < 0.5 ? 'milk' : 'choco';
+
+            // Remove old buffs if any
+            if(buffs.enemy.form === 'milk') { currentEnemy.atk -= 200; currentEnemy.def -= 500; }
+            if(buffs.enemy.form === 'choco') { currentEnemy.matk -= 200; currentEnemy.mdef -= 500; }
+
+            buffs.enemy.form = form;
+            if(form === 'milk') {
+                currentEnemy.atk += 200; currentEnemy.def += 500;
+                log(`<b style="color:#fff59d">[밀크 푸딩 폼] 공격력/방어력 증가!</b>`, 'info');
+            } else {
+                currentEnemy.matk += 200; currentEnemy.mdef += 500;
+                log(`<b style="color:#8d6e63">[초코 푸딩 폼] 마법공격력/마법방어력 증가!</b>`, 'info');
+            }
+        }
+
+        let rand = Math.random();
+        if(rand < 0.3) {
+            log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        } else if(rand < 0.4) {
+            log(`<b style="color:#ffd700">${currentEnemy.name}의 파라다이스!</b>`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 4.0, 'mag');
+        } else {
+            log(`${currentEnemy.name}의 공격`, 'phy');
+            return applyEnemyDamage(currentEnemy.atk, 'phy');
+        }
+    }
+
+    if(currentEnemy.ai === 'flame_sage') {
+        if(Math.random() < 0.3) {
+            log(`${currentEnemy.name}의 익스플로전!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
+        }
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'lightning_sage') {
+        let rand = Math.random();
+        if(rand < 0.2) {
+            log(`${currentEnemy.name}의 전광석화!`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 2.0, 'phy');
+        } else if(rand < 0.4) {
+            log(`${currentEnemy.name}의 썬더 레인!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
+        }
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'artificial_god') {
+        // Defensive Passive handled in playerAttack() via buffs.enemy.nextTurn...
+        if(buffs.enemy.nextPhysDef) {
+            buffs.enemy.physDefBuff = true;
+            delete buffs.enemy.nextPhysDef;
+            log(`[인조 마신] 물리 방어 프로토콜 가동 (물리 방어력 50% 증가)`, 'info');
+        } else { delete buffs.enemy.physDefBuff; }
+
+        if(buffs.enemy.nextMagDef) {
+            buffs.enemy.magDefBuff = true;
+            delete buffs.enemy.nextMagDef;
+            log(`[인조 마신] 마법 방어 프로토콜 가동 (마법 방어력 50% 증가)`, 'info');
+        } else { delete buffs.enemy.magDefBuff; }
+
+        let isLowHp = currentEnemy.hp < currentEnemy.maxHp * 0.5;
+        let rand = Math.random();
+
+        if(rand < 0.2) {
+            log(`${currentEnemy.name}의 전광석화!`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 2.0, 'phy');
+        } else if(rand < 0.4) {
+            if(isLowHp) {
+                log(`<b style="color:#ff5252">${currentEnemy.name}의 파괴의 형태!</b>`, 'mag');
+                return applyEnemyDamage(currentEnemy.matk * 4.5, 'mag');
+            } else {
+                log(`${currentEnemy.name}의 익스플로전!`, 'mag');
+                return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
+            }
+        }
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
     if(currentEnemy.ai === 'witch') {
