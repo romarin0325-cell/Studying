@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Turn RPG: Legend Edition v9.4 (Balance & Fix Update)</title>
+<title>Turn RPG: Legend Edition v9.5</title>
 <style>
     /* =========================================
        Global Layout
@@ -169,7 +169,7 @@
 </head>
 <body>
 
-<div class="header">Turn RPG: Legend Edition v9.4 (Balance & Fix Update)</div>
+<div class="header">Turn RPG: Legend Edition v9.5</div>
 
 <div class="container">
     <div class="status-panel">
@@ -219,14 +219,14 @@
             <button onclick="enterDungeon(2)">🟡 검은 안개 숲 (Lv.4~7)</button>
             <button onclick="enterDungeon(3)">🔴 잊혀진 고성 (Lv.8~10)</button>
             <button onclick="enterEvent()">🟣 혼돈의 틈 (Lv.11~16)</button>
-            <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
-            <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
             <button onclick="enterDungeon(5)" style="background: linear-gradient(135deg, #4fc3f7, #0288d1); border-color:#29b6f6; color:#fff;">❄️ 영겁의 빙하 (Lv.17~20)</button>
             <button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;">☁️ 천상의 계단 (Lv.21~25)</button>
+            <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
+            <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
+            <button onclick="enterEventDungeon('dragon')" style="background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;">🐲 용의 둥지</button>
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
             <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
             <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
-            <button onclick="viewPatchNotes()" style="background:#424242; border-color:#666; font-size:0.8rem; height:40px; min-height:40px;">📜 패치 노트</button>
         </div>
 
         <div id="battle-menu" style="display:none; width:100%;">
@@ -248,9 +248,9 @@
         <button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;">방어구 강화 <span id="armor-cost" class="skill-sub"></span></button>
         <h4 style="text-align:left; color:#a5d6a7;">스킬 습득</h4>
         <div id="skill-shop-list" style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px;"></div>
-        <button onclick="rollEpicArtifact()" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
-             🔮 에픽 뽑기 (100,000 G)
-             <span class="skill-sub" style="color:#e1bee7">에픽/전설 확률 3배</span>
+        <button onclick="resetAllArtifacts(true)" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
+             🔮 고귀한 시간의 역행 (100,000 G)
+             <span class="skill-sub" style="color:#e1bee7">모든 유물 리셋 (에픽/전설 확률 3배)</span>
         </button>
         <button onclick="closeShop()" style="background:#555; margin-top:10px;">나가기</button>
     </div>
@@ -286,42 +286,6 @@
     <div class="modal-content" style="width:70%;">
         <div id="alert-msg" style="color:#fff; margin-bottom:20px;">알림</div>
         <button onclick="document.getElementById('alert-modal').classList.remove('active')" style="width:100%; padding:10px; background:#444;">확인</button>
-    </div>
-</div>
-
-<div id="patch-modal" class="modal">
-    <div class="modal-content" style="text-align:left;">
-        <h3 style="color:#ffd700; border-bottom:1px solid #555; padding-bottom:10px;">패치 노트 (v9.4)</h3>
-        <div style="font-size:0.85rem; color:#ccc; line-height:1.6; max-height:60vh; overflow-y:auto;">
-            <b>[버그 수정 및 검증]</b><br>
-            - 자스민 [여신 강림] 스킬이 정상적으로 버프를 적용하지 않던 문제를 수정했습니다.<br>
-            - 전설 유물 [진: 수호천사의 깃털]의 100% 부활 기능이 정상 작동함을 검증했습니다.<br>
-            - 보스 드랍 에픽 유물이 재시작 후에도 리롤 풀에 정상적으로 추가됨을 검증했습니다.<br>
-            - 창조신 클리어 후 회차 초기화 외의 상황에서 만렙 확장이 일어나는 버그는 없는 것으로 확인되었습니다.<br><br>
-
-            <b>[밸런스 조정]</b><br>
-            - 여왕의 스킬 이름이 한글로 변경되었습니다. (예: Royal Focus -> 로열 포커스)<br>
-            - 여왕 스킬 상향:<br>
-              * 로열 포커스: 배율 1.3 -> 1.4<br>
-              * 하트 피어스: 배율 1.8 -> 2.0<br>
-              * 와일드 루트: 배율 2.9 -> 3.1<br>
-            - 장비 상향:<br>
-              * 여왕 최종 무기: 공/마공 +10<br>
-              * 여왕 최종 방어구: 방/마방 +10<br>
-              * 루나 최종 무기: 공 +10, 마공 +5<br><br>
-
-            <b>[UI 개선]</b><br>
-            - 에픽 및 전설 아이템 표기 방식을 텍스트([에픽]) 대신 <span style="color:#e040fb">보라색</span>/<span style="color:#ff5252">붉은색</span> 글씨 색상으로 변경했습니다.<br><br>
-
-            <b>[개발자 코멘트: 캐릭터 강함 측정]</b><br>
-            현재 데이터 기반 대략적인 전투력(스킬/스탯/시너지 고려):<br>
-            - <b>루나:</b> 단일 대상 폭딜 최상위. 확정 치명타와 회피 생존력이 우수하지만 광역 대처가 약함.<br>
-            - <b>지크:</b> 안정성 최상위. 반격과 체력 비례 딜링으로 후반부 보스전에 강함.<br>
-            - <b>자스민:</b> 마법 난사와 유틸리티(반사/부활) 보유. 여신 강림 버그 수정으로 고점 대폭 상승 예상.<br>
-            - <b>여왕:</b> 스택형 지속 딜러. 이번 버프로 인해 스택 예열 후의 파괴력이 더욱 강화됨.<br>
-            - <b>루미:</b> 만능형(하이브리드). 상황 대처 능력은 좋으나 자원(결정) 관리가 필요함.
-        </div>
-        <button onclick="document.getElementById('patch-modal').classList.remove('active')" style="width:100%; margin-top:15px; background:#444;">닫기</button>
     </div>
 </div>
 
@@ -976,62 +940,59 @@ function healFull() {
     }
 }
 
-function resetAllArtifacts() {
+function resetAllArtifacts(highQuality=false) {
     if(player.artifacts.length === 0) return myAlert("초기화할 유물이 없습니다.");
-    let cost = 20000;
+    let cost = highQuality ? 100000 : 20000;
     if(gameState.gold < cost) return myAlert(`골드가 부족합니다. (필요: ${cost} G)`);
 
-    if(confirm(`[주의] 보유한 모든 유물을 파괴하고 다시 뽑습니다.\n비용: ${cost} G\n\n정말 진행하시겠습니까?`)) {
+    let msg = highQuality
+        ? `[고귀한 시간의 역행] 보유한 모든 유물을 리셋하고 다시 뽑습니다.\n(에픽/전설 확률 3배)\n비용: ${cost} G\n\n정말 진행하시겠습니까?`
+        : `[주의] 보유한 모든 유물을 파괴하고 다시 뽑습니다.\n비용: ${cost} G\n\n정말 진행하시겠습니까?`;
+
+    if(confirm(msg)) {
         gameState.gold -= cost;
         let count = player.artifacts.length;
         player.artifacts = []; 
-        for(let i=0; i<count; i++) rollArtifact(true); 
+        for(let i=0; i<count; i++) rollArtifact(true, highQuality);
         recalcAllStats();
         updateInfo();
+        if(highQuality) openShop(); // Refresh shop gold display
         myAlert(`시간을 되돌렸습니다!\n새로운 유물 ${count}개를 획득했습니다.`);
     }
 }
 
-function rollEpicArtifact() {
-    let cost = 100000;
-    if(gameState.gold < cost) return myAlert("골드가 부족합니다.");
-
-    let available = ARTIFACTS.filter(a => !hasArtifact(a.id));
-    if(available.length === 0) return myAlert("더 이상 뽑을 유물이 없습니다.");
-
-    gameState.gold -= cost;
-    openShop(); // Refresh gold
-
-    // Weighted random
-    let weighted = [];
-    available.forEach(a => {
-        let w = 1;
-        if(a.rarity === 'epic') w = 3;
-        if(a.rarity === 'legend') w = 3;
-        for(let i=0; i<w; i++) weighted.push(a);
+function rollArtifact(silent=false, highQuality=false) {
+    // 1. NG+ 및 보스 해금 유물을 포함한 전체 ARTIFACTS 목록 갱신
+    // (보스 드랍 유물이 해금되었는데 ARTIFACTS에 없는 경우를 방지)
+    let bossUnlocks = getBossArtifactUnlocks();
+    bossUnlocks.forEach(id => {
+         let drop = null;
+         for(let k in BOSS_DROP_ARTIFACTS) {
+             if(BOSS_DROP_ARTIFACTS[k].id === id) drop = BOSS_DROP_ARTIFACTS[k];
+         }
+         if(drop && !ARTIFACTS.find(a => a.id === drop.id)) {
+             ARTIFACTS.push(drop);
+         }
     });
 
-    let pick = weighted[Math.floor(Math.random() * weighted.length)];
-    player.artifacts.push(pick);
-
-    if(pick.rarity === 'epic') {
-        log(`<b style="color:#e040fb; font-size:1.1rem;">[에픽 뽑기!] 에픽 유물 발견! [${pick.name}]</b>`, 'rose');
-        myAlert(`축하합니다!\n[에픽 뽑기]에서 [${pick.name}]을(를) 손에 넣었습니다!`);
-    } else if(pick.rarity === 'legend') {
-            log(`<b style="color:#ff5252; font-size:1.1rem;">[에픽 뽑기!] 신화급 유물 발견! [${pick.name}]</b>`, 'dmg');
-            myAlert(`믿을 수 없습니다!\n[에픽 뽑기]에서 [${pick.name}]을(를) 손에 넣었습니다!`);
-    } else {
-        log(`<span style="color:#ffd700">유물 획득! [${pick.name}]: ${pick.desc}</span>`, 'info');
-    }
-    recalcAllStats();
-    updateInfo();
-}
-
-function rollArtifact(silent=false) {
     let available = ARTIFACTS.filter(a => !hasArtifact(a.id));
     if(available.length === 0) return;
 
-    let pick = available[Math.floor(Math.random() * available.length)];
+    let pick;
+    if(highQuality) {
+        // Weighted random for High Quality
+        let weighted = [];
+        available.forEach(a => {
+            let w = 1;
+            if(a.rarity === 'epic') w = 3;
+            if(a.rarity === 'legend') w = 3;
+            for(let i=0; i<w; i++) weighted.push(a);
+        });
+        pick = weighted[Math.floor(Math.random() * weighted.length)];
+    } else {
+        // Uniform random
+        pick = available[Math.floor(Math.random() * available.length)];
+    }
 
     player.artifacts.push(pick);
     if(!silent) {
@@ -1437,6 +1398,7 @@ function winBattle() {
         else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
+        else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
 
         if(drop) {
              let unlocks = getBossArtifactUnlocks();
@@ -1864,6 +1826,56 @@ function enemyTurn() {
                 return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
             }
         }
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'red_dragon') {
+        let rand = Math.random();
+        if(rand < 0.2) {
+            log(`${currentEnemy.name}의 드래곤 크로! (물리)`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
+        } else if(rand < 0.4) {
+            log(`${currentEnemy.name}의 드래곤 브레스! (마법)`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        } else {
+            log(`${currentEnemy.name}의 공격`, 'phy');
+            return applyEnemyDamage(currentEnemy.atk, 'phy');
+        }
+    }
+
+    if(currentEnemy.ai === 'gold_dragon') {
+        buffs.enemy.goldDragonScale = (buffs.enemy.goldDragonScale || 0) + 1;
+
+        if(turnCount % 6 === 0) {
+            buffs.enemy.goldDragonScale = 0;
+            log(`<b style="color:#ffd700">[골드 드래곤] 비늘이 약해지며 방어력이 초기화되었습니다!</b>`, 'info');
+        } else {
+            let boost = buffs.enemy.goldDragonScale * 10;
+            log(`[골드 드래곤] 비늘이 단단해집니다. (방어/마방 +${boost}%)`, 'info');
+        }
+
+        if(!currentEnemy.baseDef) {
+            currentEnemy.baseDef = currentEnemy.def;
+            currentEnemy.baseMdef = currentEnemy.mdef;
+        }
+
+        let scaleStack = buffs.enemy.goldDragonScale;
+        let multiplier = 1.0 + (scaleStack * 0.1);
+
+        currentEnemy.def = Math.floor(currentEnemy.baseDef * multiplier);
+        currentEnemy.mdef = Math.floor(currentEnemy.baseMdef * multiplier);
+
+        if((turnCount + 1) % 6 === 0) {
+            log(`<b style="color:#ff5252">${currentEnemy.name}의 드래곤 크로! (강력한 일격)</b>`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
+        }
+
+        if(Math.random() < 0.3) {
+            log(`${currentEnemy.name}의 드래곤 브레스!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        }
+
+        log(`${currentEnemy.name}의 공격`, 'phy');
         return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 

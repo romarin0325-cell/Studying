@@ -97,14 +97,15 @@ const BOSS_DROP_ARTIFACTS = {
     witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
     goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' },
     pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +70%", effect: 'dream_choco', val: 0.7, rarity: 'legend' },
-    artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' }
+    artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' },
+    gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
 
 const CHAR_DATA = {
     luna: {
-        name: "루나", hp: 540, mp: 100, mpRegen: 10, atk: 65, matk: 55, def: 30, mdef: 35, baseCrit: 0.15, baseCritDmg: 1.5, baseEva: 0.1, fixedMp: true,
+        name: "루나", hp: 540, mp: 120, mpRegen: 10, atk: 65, matk: 55, def: 30, mdef: 35, baseCrit: 0.15, baseCritDmg: 1.5, baseEva: 0.1, fixedMp: true,
         skills: {
             'basic': { name: "기본 공격", type: 'phy', cost: 0, power: 1.0, price: 0, desc: "기본 물리 공격", effect: '' },
             'genocide': { name: "제노사이드 스탭", type: 'phy', cost: 10, power: 0.5, price: 0, desc: "이번 턴 회피율 +50%", effect: 'evasion_50' },
@@ -321,5 +322,28 @@ const ENEMIES = [
         exp: 40000, gold: 60000, tier: 'magic',
         skillName: "익스플로전", skillType: 'mag', skillPower: 3.0,
         ai: 'artificial_god', desc: "제국의 병기"
+    },
+
+    // Event: 용의 둥지
+    {
+        name: "베이비 드래곤", img:"",
+        hp: 11000, atk: 600, matk: 500, def: 300, mdef: 250,
+        exp: 10000, gold: 30000, tier: 'dragon',
+        skillName: "드래곤 브레스", skillType: 'mag', skillPower: 2.5,
+        ai: 'basic'
+    },
+    {
+        name: "레드 드래곤", img:"",
+        hp: 12000, atk: 700, matk: 600, def: 320, mdef: 300,
+        exp: 12000, gold: 32000, tier: 'dragon',
+        skillName: "드래곤 브레스", skillType: 'mag', skillPower: 2.5,
+        ai: 'red_dragon'
+    },
+    {
+        name: "골드 드래곤", img:"",
+        hp: 21000, atk: 750, matk: 600, def: 350, mdef: 350,
+        exp: 30000, gold: 50000, tier: 'dragon',
+        skillName: "드래곤 브레스", skillType: 'mag', skillPower: 2.5,
+        ai: 'gold_dragon', desc: "용의 둥지의 주인"
     }
 ];
