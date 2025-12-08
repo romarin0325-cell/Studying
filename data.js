@@ -96,9 +96,10 @@ const BOSS_DROP_ARTIFACTS = {
     mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
     witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
     goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' },
-    pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +70%", effect: 'dream_choco', val: 0.7, rarity: 'legend' },
+    pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +60%", effect: 'dream_choco', val: 0.6, rarity: 'legend' },
     artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' },
-    gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' }
+    gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' },
+    pharaoh: { id: 'pharaoh', name: "신기 파라오", desc: "주는 피해 +100%", effect: 'pharaoh', val: 1.0, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
@@ -341,9 +342,32 @@ const ENEMIES = [
     },
     {
         name: "골드 드래곤", img:"",
-        hp: 21000, atk: 750, matk: 600, def: 350, mdef: 350,
+        hp: 19000, atk: 750, matk: 600, def: 350, mdef: 350,
         exp: 30000, gold: 50000, tier: 'dragon',
         skillName: "드래곤 브레스", skillType: 'mag', skillPower: 2.5,
         ai: 'gold_dragon', desc: "용의 둥지의 주인"
+    },
+
+    // Event: 고대 유적
+    {
+        name: "미이라", img:"",
+        hp: 9000, atk: 700, matk: 700, def: 250, mdef: 250,
+        exp: 10000, gold: 30000, tier: 'ruins',
+        skillName: "포이즌", skillType: 'mag', skillPower: 2.3,
+        ai: 'basic'
+    },
+    {
+        name: "스핑크스", img:"",
+        hp: 11000, atk: 700, matk: 500, def: 350, mdef: 280,
+        exp: 11000, gold: 31000, tier: 'ruins',
+        skillName: "강타", skillType: 'phy', skillPower: 1.5,
+        ai: 'sphinx'
+    },
+    {
+        name: "고대신 파라오", img:"",
+        hp: 23000, atk: 550, matk: 500, def: 350, mdef: 350,
+        exp: 30000, gold: 50000, tier: 'ruins',
+        skillName: "샌드스톰", skillType: 'mag', skillPower: 2.0,
+        ai: 'pharaoh', desc: "고대 유적의 지배자"
     }
 ];
