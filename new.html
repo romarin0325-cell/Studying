@@ -224,6 +224,7 @@
             <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
             <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
             <button onclick="enterEventDungeon('dragon')" style="background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;">🐲 용의 둥지</button>
+            <button onclick="enterEventDungeon('ruins')" style="background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;">🏺 고대 유적</button>
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
             <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
             <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
@@ -440,6 +441,7 @@ function triggerReset(mode) {
 function resetGameProcess() {
     // 1. 초기화
     gameState.gold = 10000;
+    gameState.clearedCreator = false; // [FIX] 회차 증가 중복 방지
     roseStack = 0;
     buffs = { player: {}, enemy: {} };
     player = {};
@@ -522,8 +524,8 @@ function upgradeLegendaryArtifact(char) {
         let art = ARTIFACTS.find(a => a.id === 'golden_sun');
         if(art) {
             art.name = "진: 황금의 태양";
-            art.desc = "공/마공 +40%, 마법방어 -30%";
-            art.val = 0.40; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
+            art.desc = "공/마공 +50%, 마법방어 -30%";
+            art.val = 0.50; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
             art.effect = 'golden_sun_legend'; // 효과 ID 변경
             art.rarity = 'legend';
         }
@@ -533,7 +535,7 @@ function upgradeLegendaryArtifact(char) {
         let art = ARTIFACTS.find(a => a.id === 'beelzebub');
         if(art) {
             art.name = "진: 마신기 벨제뷔트";
-            art.desc = "공격/치명피해 +60%, 방어 -30%";
+            art.desc = "공격 +60% / 치명피해 +70%, 방어 -30%";
             art.val = 0.60;
             art.effect = 'beelzebub_legend';
             art.rarity = 'legend';
@@ -544,8 +546,8 @@ function upgradeLegendaryArtifact(char) {
         let art = ARTIFACTS.find(a => a.id === 'iris');
         if(art) {
             art.name = "진: 신기 아이리스";
-            art.desc = "마공/마방 +60%";
-            art.val = 0.60;
+            art.desc = "마공/마방 +70%";
+            art.val = 0.70;
             art.effect = 'iris_legend';
             art.rarity = 'legend';
         }
@@ -664,13 +666,13 @@ function recalcAllStats() {
         if(art.effect === 'ancient_book') { mpPer += 0.4; matkPer += 0.2; }
 
         if(art.effect === 'golden_sun') { atkPer += 0.30; matkPer += 0.30; mdefPer -= 0.2; }
-        if(art.effect === 'golden_sun_legend') { atkPer += 0.45; matkPer += 0.45; mdefPer -= 0.3; }
+        if(art.effect === 'golden_sun_legend') { atkPer += 0.50; matkPer += 0.50; mdefPer -= 0.3; }
 
         if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; player.baseCritDmg += 0.5; }
-        if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.6; }
+        if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.7; }
 
         if(art.effect === 'iris') { matkPer += 0.5; mdefPer += 0.5; }
-        if(art.effect === 'iris_legend') { matkPer += 0.6; mdefPer += 0.6; }
+        if(art.effect === 'iris_legend') { matkPer += 0.7; mdefPer += 0.7; }
 
         if(art.effect === 'all_stat') { hpPer+=0.2; mpPer+=0.2; atkPer+=0.2; matkPer+=0.2; defPer+=0.2; mdefPer+=0.2; }
         if(art.effect === 'royal_crown_legend') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
@@ -683,7 +685,7 @@ function recalcAllStats() {
             hpPer += 1.0; mpPer += 1.0; atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0;
         }
         if(art.effect === 'dream_choco') {
-            atkPer += 0.7; matkPer += 0.7;
+            atkPer += 0.6; matkPer += 0.6;
         }
         if(art.effect === 'blue_moon') {
             mpPer += 0.2;
@@ -1399,6 +1401,7 @@ function winBattle() {
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
         else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
+        else if(currentEnemy.name === "고대신 파라오") drop = BOSS_DROP_ARTIFACTS.pharaoh;
 
         if(drop) {
              let unlocks = getBossArtifactUnlocks();
@@ -1556,6 +1559,7 @@ function playerAttack(skill) {
 
     if(hasArtifact('high_risk_dmg')) multiplier *= 1.3;
     if(hasArtifact('high_risk_dmg_ex')) multiplier *= 2.0;
+    if(hasArtifact('pharaoh')) multiplier *= 2.0;
     
     // if(buffs.player.medi && !isPhy) atkVal *= 0.5; // recalcAllStats로 이동됨
 
@@ -1688,6 +1692,23 @@ function playerAttack(skill) {
         currentEnemy.hasRevived = true;
         log(`<b style="color:#29b6f6">혹한의 마녀가 얼음 속에서 되살아납니다! (HP 3000 회복)</b>`, 'info');
         return true; 
+    }
+
+    if(currentEnemy.hp <= 0 && currentEnemy.ai === 'gold_dragon' && !currentEnemy.hasRevived) {
+        currentEnemy.hp = 3000;
+        currentEnemy.hasRevived = true;
+        log(`<b style="color:#ffd700">골드 드래곤이 황금의 힘으로 부활합니다! (HP 3000 회복)</b>`, 'info');
+        return true;
+    }
+
+    if(currentEnemy.ai === 'pharaoh' && buffs.enemy.pharaohCurseReady > 0) {
+        log(`<b style="color:#8d6e63">파라오가 공격에 반응하여 고대의 저주를 발동합니다! (공/마공 +100%)</b>`, 'dmg');
+        buffs.enemy.pharaohBuffTurns = 10;
+        delete buffs.enemy.pharaohCurseReady; // 1회 발동 후 제거? or 턴 동안 지속? "공격받을시" -> 매번? or 상태?
+        // 요구사항: "사용턴과 다음턴에 파라오가 공격받을시 파라오의 물리공격력과 마법공격력이 10턴간 100%상승"
+        // 중첩 여부 명시 없음. 100% 상승 상태가 됨. (buffs check in enemyTurn)
+        // 여기서는 버프 턴만 설정하고 실제 적용은 applyEnemyDamage나 enemyTurn시점에서? 아니면 스탯 계산?
+        // 적 스탯은 실시간 반영이 아니라 데미지 계산식에서 씀.
     }
 
     return currentEnemy.hp > 0;
@@ -1877,6 +1898,102 @@ function enemyTurn() {
 
         log(`${currentEnemy.name}의 공격`, 'phy');
         return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'sphinx') {
+        let rand = Math.random();
+        if(rand < 0.2) {
+             log(`${currentEnemy.name}의 강타!`, 'dmg');
+             return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
+        } else if(rand < 0.4) {
+             log(`${currentEnemy.name}의 샌드스톰!`, 'mag');
+             return applyEnemyDamage(currentEnemy.matk * 2.0, 'mag');
+        }
+
+        // 20% phy, 20% mag, else basic (60% basic?)
+        // Requirement says: 20% Phy Skill, 20% Mag Skill.
+        // It says "AI (Same as Creator God late phase)".
+        // Creator God phase checks charging etc. But here simple probs.
+        // Remaining 60%: Basic Attack?
+        log(`${currentEnemy.name}의 공격`, 'phy');
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'pharaoh') {
+        // Turn 25: Full Heal
+        if(turnCount === 25) {
+            log(`<b style="color:#ffd700">[투탕카멘의 관] 파라오가 영면에서 깨어나 완전히 회복합니다!</b>`, 'heal');
+            currentEnemy.hp = currentEnemy.maxHp;
+            updateBattleUI();
+            return true;
+        }
+
+        // Ancient Curse (Turn 7, 14, 21...)
+        // Active for current turn and next turn.
+        if(turnCount % 7 === 0) {
+            buffs.enemy.pharaohCurseReady = 2; // Decremented in endTurnPhase? No, enemy turns don't decrement buff counters automatically unless coded.
+            // I'll handle decrement in endTurnPhase or start of enemy turn?
+            // Usually player turn happens -> player attacks (triggers curse) -> enemy turn.
+            // "Active for current turn and next turn" -> If cast on Turn 7. Player attacks on Turn 7 (before enemy acts? No enemy acts after).
+            // Wait, Enemy turn is AFTER player attack.
+            // So if Enemy casts it on Turn 7, it means it's active for Turn 8 (Player's turn) and Turn 9?
+            // "사용턴과 다음턴에 파라오가 공격받을시"
+            // Enemy uses it on Turn 7.
+            // Player attacks on Turn 7? No, Player attacks first.
+            // Turn Flow: Player Act -> Enemy Act -> End Phase (Turn++).
+            // So on Turn 7: Player attacks. Enemy casts Curse.
+            // Then on Turn 8: Player attacks (Trigger!). Enemy acts.
+            // Then on Turn 9: Player attacks (Trigger!). Enemy acts.
+            // Turn 10: Player attacks (No Trigger).
+
+            // So if cast on Turn 7, it should be active for Turn 8 and 9?
+            // Or does "Use Turn" mean the turn he casts it?
+            // "Used Turn and Next Turn".
+            // Since Enemy acts after Player, "Used Turn" implies the turn it was cast. But Player already attacked.
+            // So maybe it acts as a stance for the *next* turn?
+            // Or maybe "Use Turn" means the turn count.
+            // Let's assume:
+            // Turn 7 ends -> Enemy Casts.
+            // Turn 8 starts -> Player attacks (Trigger).
+            // Turn 9 starts -> Player attacks (Trigger).
+            // Turn 10 -> Expire.
+
+            log(`<b style="color:#8d6e63">[고대의 저주] 파라오가 저주를 영창합니다. (공격받으면 능력치 상승)</b>`, 'info');
+            buffs.enemy.pharaohCurseReady = 2;
+            return true;
+        }
+
+        // Handle Curse Duration
+        if(buffs.enemy.pharaohCurseReady !== undefined) {
+             // Logic handled in endTurnPhase to decrement?
+             // Or simply decrement here?
+             // Since this is Enemy Turn, we decrement here?
+             // If I set it to 2 on Turn 7.
+             // Turn 8 Enemy Turn -> Decrement to 1.
+             // Turn 9 Enemy Turn -> Decrement to 0 (Delete).
+             // Seems correct.
+             if(turnCount % 7 !== 0) { // Don't decrement on the turn it's cast
+                 buffs.enemy.pharaohCurseReady--;
+                 if(buffs.enemy.pharaohCurseReady <= 0) delete buffs.enemy.pharaohCurseReady;
+             }
+        }
+
+        if(buffs.enemy.pharaohBuffTurns > 0) {
+             buffs.enemy.pharaohBuffTurns--;
+             // Apply buff value in calculation
+        }
+
+        if(Math.random() < 0.3) {
+            log(`${currentEnemy.name}의 샌드스톰!`, 'mag');
+            let mult = 1.0;
+            if(buffs.enemy.pharaohBuffTurns > 0) mult += 1.0;
+            return applyEnemyDamage(currentEnemy.matk * 2.0 * mult, 'mag');
+        }
+
+        log(`${currentEnemy.name}의 공격`, 'phy');
+        let mult = 1.0;
+        if(buffs.enemy.pharaohBuffTurns > 0) mult += 1.0;
+        return applyEnemyDamage(currentEnemy.atk * mult, 'phy');
     }
 
     if(currentEnemy.ai === 'witch') {
