@@ -78,7 +78,7 @@ const BASE_ARTIFACTS = [
     { id: 'guardian_angel', name: "수호천사의 깃털", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5, rarity: 'epic' },
     { id: 'dragon_heart', name: "용의 심장", desc: "최대 HP +40%, 물리공격 +20%", effect: 'dragon_heart', val: 0.4 },
     { id: 'ancient_book', name: "고대의 마도서", desc: "최대 MP +40%, 마법공격 +20%", effect: 'ancient_book', val: 0.4 },
-    { id: 'golden_sun', name: "황금의 태양", desc: "공/마공 +25%, 마법방어 -20%", effect: 'golden_sun', val: 0.25, rarity: 'epic' },
+    { id: 'golden_sun', name: "황금의 태양", desc: "공/마공 +30%, 마법방어 -20%", effect: 'golden_sun', val: 0.30, rarity: 'epic' },
     { id: 'beelzebub', name: "마신기 벨제뷔트", desc: "공격/치명피해 +50%, 방어 -30%", effect: 'beelzebub', val: 0.5, rarity: 'epic' },
     { id: 'iris', name: "신기 아이리스", desc: "마공/마방 +50%", effect: 'iris', val: 0.5, rarity: 'epic' },
     { id: 'royal_crown', name: "로열 크라운", desc: "모든 능력치 +20% (여왕: 시작시 장미+5)", effect: 'all_stat', val: 0.2, rarity: 'epic' }
@@ -95,7 +95,9 @@ const NEW_ARTIFACTS = {
 const BOSS_DROP_ARTIFACTS = {
     mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
     witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
-    goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' }
+    goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' },
+    pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +70%", effect: 'dream_choco', val: 0.7, rarity: 'legend' },
+    artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
@@ -273,5 +275,51 @@ const ENEMIES = [
         hp: 27000, atk: 700, matk: 750, def: 330, mdef: 330,
         exp: 100000, gold: 100000, tier: 6,
         ai: 'goddess', desc: "★ 진 최종보스 ★"
+    },
+
+    // Event: 디저트 킹덤
+    {
+        name: "생크림 메이드", img:"",
+        hp: 10000, atk: 500, matk: 700, def: 250, mdef: 300,
+        exp: 10000, gold: 30000, tier: 'dessert',
+        skillName: "크림 익스플로전", skillType: 'mag', skillPower: 2.5,
+        ai: 'cream_maid'
+    },
+    {
+        name: "캔디 보이", img:"",
+        hp: 11000, atk: 650, matk: 650, def: 300, mdef: 300,
+        exp: 12000, gold: 32000, tier: 'dessert',
+        skillName: "캔디 캐논", skillType: 'phy', skillPower: 1.5,
+        ai: 'candy_boy'
+    },
+    {
+        name: "푸딩 프린세스", img:"",
+        hp: 16000, atk: 500, matk: 500, def: 200, mdef: 200,
+        exp: 30000, gold: 50000, tier: 'dessert',
+        skillName: "크림 익스플로전", skillType: 'mag', skillPower: 2.5,
+        ai: 'pudding_princess', desc: "디저트 킹덤의 공주"
+    },
+
+    // Event: 마도 제국
+    {
+        name: "화염의 현자", img:"",
+        hp: 9000, atk: 450, matk: 750, def: 200, mdef: 400,
+        exp: 11000, gold: 30000, tier: 'magic',
+        skillName: "익스플로전", skillType: 'mag', skillPower: 3.0,
+        ai: 'flame_sage'
+    },
+    {
+        name: "번개의 현자", img:"",
+        hp: 10000, atk: 500, matk: 700, def: 250, mdef: 350,
+        exp: 11000, gold: 30000, tier: 'magic',
+        skillName: "썬더 레인", skillType: 'mag', skillPower: 3.0,
+        ai: 'lightning_sage'
+    },
+    {
+        name: "인조 마신", img:"",
+        hp: 20000, atk: 600, matk: 600, def: 300, mdef: 300,
+        exp: 40000, gold: 60000, tier: 'magic',
+        skillName: "익스플로전", skillType: 'mag', skillPower: 3.0,
+        ai: 'artificial_god', desc: "제국의 병기"
     }
 ];
