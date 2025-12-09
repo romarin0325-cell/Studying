@@ -93,13 +93,14 @@ const NEW_ARTIFACTS = {
 };
 
 const BOSS_DROP_ARTIFACTS = {
-    mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 4턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
+    mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 5턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
     witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
     goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' },
     pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +60%", effect: 'dream_choco', val: 0.6, rarity: 'legend' },
     artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' },
     gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' },
-    pharaoh: { id: 'pharaoh', name: "신기 파라오", desc: "주는 피해 +100%", effect: 'pharaoh', val: 1.0, rarity: 'legend' }
+    pharaoh: { id: 'pharaoh', name: "신기 파라오", desc: "주는 피해 +100%", effect: 'pharaoh', val: 1.0, rarity: 'legend' },
+    time_ruler: { id: 'dark_pendant', name: "다크 펜던트", desc: "치명타율 +10%, 치명타 피해량 +100%", effect: 'dark_pendant', val: 1.0, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
@@ -369,5 +370,28 @@ const ENEMIES = [
         exp: 30000, gold: 50000, tier: 'ruins',
         skillName: "샌드스톰", skillType: 'mag', skillPower: 2.0,
         ai: 'pharaoh', desc: "고대 유적의 지배자"
+    },
+
+    // Event: 시간의 도서관
+    {
+        name: "침묵의 사서", img:"",
+        hp: 9500, atk: 500, matk: 700, def: 250, mdef: 300,
+        exp: 10000, gold: 30000, tier: 'time',
+        skillName: "사일런트", skillType: 'mag', skillPower: 2.5,
+        ai: 'silent_librarian'
+    },
+    {
+        name: "밤토끼", img:"",
+        hp: 10000, atk: 700, matk: 600, def: 320, mdef: 290,
+        exp: 11000, gold: 31000, tier: 'time',
+        skillName: "깡총깡총", skillType: 'phy', skillPower: 1.5,
+        ai: 'night_rabbit'
+    },
+    {
+        name: "시간의 지배자", img:"",
+        hp: 23000, atk: 500, matk: 600, def: 300, mdef: 360,
+        exp: 35000, gold: 55000, tier: 'time',
+        skillName: "사일런트", skillType: 'mag', skillPower: 2.5,
+        ai: 'time_ruler', desc: "시간의 도서관 주인"
     }
 ];
