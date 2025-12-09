@@ -194,7 +194,7 @@ const CHAR_DATA = {
             'milkyway': { name: "밀키웨이 엑스터시", type: 'mag', cost: 40, power: 2.2, price: 5000, desc: "1턴 차징 / (물공+마공)x2.2", effect: 'charge_milkyway' },
             'moonveil': { name: "문라이트 베일", type: 'mag', cost: 20, power: 1.3, price: 3000, desc: "달: 3턴 회피 40%", effect: 'sage_moon_veil' },
             'form_moon': { name: "달의 형태", type: 'sup', cost: 10, power: 0, price: 3000, desc: "[결정1] 마공50%↑ 물공50%↓", effect: 'form_change_moon' },
-            'godhand': { name: "갓 핸드", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "태양: 추가타 (0.4배)", effect: 'sage_god_hand' },
+    'godhand': { name: "갓 핸드", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "태양: 추가타 (0.6배)", effect: 'sage_god_hand' },
             'silentserena': { name: "사일런트 세레나", type: 'mag', cost: 40, power: 2.0, price: 5000, desc: "달: 추가타 (0.4배)", effect: 'sage_silent' },
             'meteorsmash': { name: "메테오 스매시", type: 'phy', cost: 40, power: 2.2, price: 10000, desc: "태양: 3턴 치명 40%", effect: 'sage_meteor' },
             'milkshake': { name: "스타파우더 밀크쉐이크", type: 'sup', cost: 100, power: 0, price: 15000, desc: "HP30%회복/별:10턴 방어30%", effect: 'milkshake_heal' },
@@ -366,7 +366,7 @@ const ENEMIES = [
     },
     {
         name: "고대신 파라오", img:"",
-        hp: 23000, atk: 550, matk: 500, def: 350, mdef: 350,
+        hp: 23000, atk: 600, matk: 550, def: 350, mdef: 350,
         exp: 30000, gold: 50000, tier: 'ruins',
         skillName: "샌드스톰", skillType: 'mag', skillPower: 2.0,
         ai: 'pharaoh', desc: "고대 유적의 지배자"
