@@ -1399,7 +1399,7 @@ function winBattle() {
         // 보스 드랍 확률 체크 (신규 보스 100% 해금)
         if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
         else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
-        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
+        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1 && getCycleCount() >= 2) drop = BOSS_DROP_ARTIFACTS.goddess;
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
         else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
@@ -1516,7 +1516,7 @@ function playerAttack(skill) {
     }
 
     if(skill.effect === 'sage_silent' && buffs.player.sageForm === 'moon') multiplier += 0.4;
-    if(skill.effect === 'sage_god_hand' && buffs.player.sageForm === 'sun') multiplier += 0.4;
+    if(skill.effect === 'sage_god_hand' && buffs.player.sageForm === 'sun') multiplier += 0.6;
 
     if(skill.effect === 'sage_dream_ult') {
         multiplier = 4.0; 
@@ -1559,9 +1559,13 @@ function playerAttack(skill) {
         }
     }
 
-    if(hasArtifact('high_risk_dmg')) multiplier *= 1.3;
-    if(hasArtifact('high_risk_dmg_ex')) multiplier *= 2.0;
-    if(hasArtifact('pharaoh')) multiplier *= 2.0;
+    // Final Damage Artifacts (Additive)
+    let finalDmgAdd = 0.0;
+    if(hasArtifact('high_risk_dmg')) finalDmgAdd += 0.3;
+    if(hasArtifact('high_risk_dmg_ex')) finalDmgAdd += 1.0;
+    if(hasArtifact('pharaoh')) finalDmgAdd += 1.0;
+
+    if(finalDmgAdd > 0) multiplier *= (1.0 + finalDmgAdd);
     
     // if(buffs.player.medi && !isPhy) atkVal *= 0.5; // recalcAllStats로 이동됨
 
@@ -2254,6 +2258,13 @@ function endTurnPhase() {
     if(buffs.player.adrenalineTurns) { buffs.player.adrenalineTurns--; if(buffs.player.adrenalineTurns<=0) { delete buffs.player.critUp; } }
     if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns<=0) { delete buffs.player.veilVal; } }
     if(buffs.player.mediTurns) { buffs.player.mediTurns--; if(buffs.player.mediTurns<=0) { delete buffs.player.medi; } }
+
+    // Pharaoh's Curse Logic: Expire if not triggered next turn
+    if(buffs.enemy.pharaohStance && turnCount > buffs.enemy.pharaohStanceTurn) {
+        delete buffs.enemy.pharaohStance;
+        log("파라오의 저주가 빗나가며 소멸했습니다.", 'info');
+    }
+
     if(buffs.player.divineTurns) buffs.player.divineTurns--;
     if(buffs.player.vulcanTurns) buffs.player.vulcanTurns--;
     if(buffs.player.sanctuaryTurns) buffs.player.sanctuaryTurns--;
