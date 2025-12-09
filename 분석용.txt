@@ -1,38 +1,38 @@
 
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Turn RPG: Legend Edition v9.5</title>
-<style>
+＜!DOCTYPE html＞
+＜html lang="ko"＞
+＜head＞
+＜meta charset="UTF-8"＞
+＜meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"＞
+＜title＞Turn RPG: Legend Edition v9.5＜/title＞
+＜style＞
     /* =========================================
        Global Layout
        ========================================= */
-    body { 
-        background-color: #121212; 
-        color: #e0e0e0; 
-        font-family: 'Suit', sans-serif; 
-        margin: 0; padding: 0; 
-        display: flex; flex-direction: column; 
-        height: 100vh; height: 100dvh; 
-        overflow: hidden; 
-        user-select: none; 
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: 'Suit', sans-serif;
+        margin: 0; padding: 0;
+        display: flex; flex-direction: column;
+        height: 100vh; height: 100dvh;
+        overflow: hidden;
+        user-select: none;
     }
 
     .header { padding: 10px; text-align: center; background: #1f1f1f; border-bottom: 1px solid #333; font-size: 0.95rem; color: #bbb; font-weight: bold; flex-shrink: 0; }
-    
-    .container { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        padding: 8px; 
-        overflow: hidden; 
+
+    .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 8px;
+        overflow: hidden;
         gap: 8px;
     }
 
     /* 상단 상태창 */
-    .status-panel { 
+    .status-panel {
         background: #222; padding: 8px 12px; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
     .status-top { display: flex; justify-content: space-between; align-items: center; }
@@ -50,14 +50,14 @@
        비주얼 스테이지
        ========================================= */
     .visual-stage {
-        flex: 0 0 auto; 
+        flex: 0 0 auto;
         position: relative;
         background: #1a1a1a;
         border: 1px solid #333;
         border-radius: 8px;
         overflow: hidden;
         margin-bottom: 6px;
-        min-height: 150px; 
+        min-height: 150px;
         background-image: linear-gradient(to bottom, #2a2a2a, #121212);
     }
 
@@ -85,7 +85,7 @@
 
     .mini-stat {
         position: absolute;
-        width: 140px; 
+        width: 140px;
         background: rgba(30, 30, 30, 0.85);
         padding: 6px 10px;
         border-radius: 6px;
@@ -102,21 +102,21 @@
     .actor-name { font-size: 0.8rem; color: #fff; font-weight: bold; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .mini-hp-bg { width: 100%; height: 8px; background: #333; border-radius: 4px; overflow: hidden; border: 1px solid #222; }
     .mini-hp-fill { height: 100%; background: #ef5350; transition: width 0.3s; }
-    
+
     .visual-stage.town-mode .actor-box.player { left: 50%; transform: translate(-50%, -50%) scale(1.1); }
     .visual-stage.town-mode .actor-box.enemy { display: none; }
     .visual-stage.town-mode .player-stat { top: auto; bottom: 20px; left: 50%; }
     .visual-stage.town-mode .enemy-stat { display: none; }
-    
+
     .visual-stage.battle-mode .actor-box.enemy { opacity: 1; }
     .visual-stage.battle-mode .enemy-stat { opacity: 1; }
 
     .shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
-    @keyframes shake { 
-        10%, 90% { transform: translate3d(-1px, -50%, 0); } 
-        20%, 80% { transform: translate3d(1px, -50%, 0); } 
-        30%, 50%, 70% { transform: translate3d(-2px, -50%, 0); } 
-        40%, 60% { transform: translate3d(2px, -50%, 0); } 
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, -50%, 0); }
+        20%, 80% { transform: translate3d(1px, -50%, 0); }
+        30%, 50%, 70% { transform: translate3d(-2px, -50%, 0); }
+        40%, 60% { transform: translate3d(2px, -50%, 0); }
     }
 
     /* 로그창 */
@@ -126,198 +126,198 @@
     .dmg { color: #ff5252; } .heal { color: #69f0ae; } .info { color: #4fc3f7; } .rose { color: #f06292; } .fire { color: #ffab91; } .holy { color: #fff59d; } .star { color: #e1f5fe; text-shadow: 0 0 3px #0288d1; }
 
     /* 하단 컨트롤 */
-    #game-controls { 
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        min-height: 0; 
-        overflow: hidden; 
+    #game-controls {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
     }
-    
+
     #battle-menu {
         display: flex;
         flex-direction: column;
         height: 100%;
     }
 
-    .controls { 
-        flex: 1; 
-        display: grid; 
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 6px; 
+    .controls {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
         padding: 2px 2px 10px 2px;
-        overflow-y: auto; 
+        overflow-y: auto;
         min-height: 0;
     }
     .controls.menu-mode { grid-template-columns: 1fr; }
-    
+
     button { background: #333; border: 1px solid #555; color: #eee; padding: 12px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: all 0.1s; touch-action: manipulation; min-height: 52px; }
     button:active { background: #555; transform: scale(0.98); }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
-    
+
     .btn-atk { background: linear-gradient(135deg, #4a148c, #7b1fa2); border-color: #8e24aa; }
     .btn-skill { background: linear-gradient(135deg, #0d47a1, #1976d2); border-color: #2196f3; }
     .btn-def { background: linear-gradient(135deg, #1b5e20, #388e3c); border-color: #4caf50; }
     .btn-ult { background: linear-gradient(135deg, #b71c1c, #d32f2f); border-color: #f44336; grid-column: span 2; font-weight: bold; border: 1px solid #ffcdd2; }
     .skill-sub { display: block; font-size: 0.7rem; color: #ccc; margin-top: 1px; }
-    
+
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
     .modal-content { background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444; width: 85%; max-width: 400px; text-align: center; max-height: 85vh; overflow-y: auto; }
     .char-select-btn { width: 100%; margin: 6px 0; padding: 16px; text-align: left; background: #333; }
-</style>
-</head>
-<body>
+＜/style＞
+＜/head＞
+＜body＞
 
-<div class="header">Turn RPG: Legend Edition v9.5</div>
+＜div class="header"＞Turn RPG: Legend Edition v9.5＜/div＞
 
-<div class="container">
-    <div class="status-panel">
-        <div class="status-top">
-            <div class="char-info">
-                <div id="char-name">캐릭터</div>
-                <div style="font-size:0.8rem; color:#aaa;" id="char-lvl">Lv.1</div>
-            </div>
-            <div class="stat-bars">
-                <div class="bar-box"><div id="hp-bar" class="bar-fill hp-bar" style="width:100%"></div><span id="hp-text" class="bar-text">0/0</span></div>
-                <div class="bar-box"><div id="mp-bar" class="bar-fill mp-bar" style="width:50%"></div><span id="mp-text" class="bar-text">0/0</span></div>
-            </div>
-        </div>
-        <div class="stat-detail">
-            <span>⚔️ ATK: <span id="ui-atk" style="color:#ef9a9a">0</span></span>
-            <span>🔮 MATK: <span id="ui-matk" style="color:#90caf9">0</span></span>
-            <span>🛡️ DEF: <span id="ui-def" style="color:#a5d6a7">0</span></span>
-            <span>🔰 MDEF: <span id="ui-mdef" style="color:#ce93d8">0</span></span>
-        </div>
-        <div id="artifact-list" class="artifact-box">유물: 없음</div>
-        <div id="extra-ui" style="display:none; font-size:0.8rem; margin-top:4px; text-align:center;"></div>
-    </div>
+＜div class="container"＞
+    ＜div class="status-panel"＞
+        ＜div class="status-top"＞
+            ＜div class="char-info"＞
+                ＜div id="char-name"＞캐릭터＜/div＞
+                ＜div style="font-size:0.8rem; color:#aaa;" id="char-lvl"＞Lv.1＜/div＞
+            ＜/div＞
+            ＜div class="stat-bars"＞
+                ＜div class="bar-box"＞＜div id="hp-bar" class="bar-fill hp-bar" style="width:100%"＞＜/div＞＜span id="hp-text" class="bar-text"＞0/0＜/span＞＜/div＞
+                ＜div class="bar-box"＞＜div id="mp-bar" class="bar-fill mp-bar" style="width:50%"＞＜/div＞＜span id="mp-text" class="bar-text"＞0/0＜/span＞＜/div＞
+            ＜/div＞
+        ＜/div＞
+        ＜div class="stat-detail"＞
+            ＜span＞⚔️ ATK: ＜span id="ui-atk" style="color:#ef9a9a"＞0＜/span＞＜/span＞
+            ＜span＞🔮 MATK: ＜span id="ui-matk" style="color:#90caf9"＞0＜/span＞＜/span＞
+            ＜span＞🛡️ DEF: ＜span id="ui-def" style="color:#a5d6a7"＞0＜/span＞＜/span＞
+            ＜span＞🔰 MDEF: ＜span id="ui-mdef" style="color:#ce93d8"＞0＜/span＞＜/span＞
+        ＜/div＞
+        ＜div id="artifact-list" class="artifact-box"＞유물: 없음＜/div＞
+        ＜div id="extra-ui" style="display:none; font-size:0.8rem; margin-top:4px; text-align:center;"＞＜/div＞
+    ＜/div＞
 
-    <div id="main-stage" class="visual-stage town-mode">
-        <div id="player-actor" class="actor-box player">
-            <div class="portrait" id="player-img">🧙‍♂️</div> 
-        </div>
-        <div id="enemy-actor" class="actor-box enemy">
-            <div class="portrait" id="enemy-img">💀</div>
-        </div>
-        <div class="mini-stat player-stat">
-            <div class="actor-name" id="vis-p-name">Player</div>
-            <div class="mini-hp-bg"><div id="vis-p-hp" class="mini-hp-fill" style="width:100%"></div></div>
-        </div>
-        <div class="mini-stat enemy-stat">
-            <div class="actor-name" id="vis-e-name">Monster</div>
-            <div class="mini-hp-bg"><div id="vis-e-hp" class="mini-hp-fill" style="width:100%"></div></div>
-        </div>
-    </div>
+    ＜div id="main-stage" class="visual-stage town-mode"＞
+        ＜div id="player-actor" class="actor-box player"＞
+            ＜div class="portrait" id="player-img"＞🧙‍♂️＜/div＞
+        ＜/div＞
+        ＜div id="enemy-actor" class="actor-box enemy"＞
+            ＜div class="portrait" id="enemy-img"＞💀＜/div＞
+        ＜/div＞
+        ＜div class="mini-stat player-stat"＞
+            ＜div class="actor-name" id="vis-p-name"＞Player＜/div＞
+            ＜div class="mini-hp-bg"＞＜div id="vis-p-hp" class="mini-hp-fill" style="width:100%"＞＜/div＞＜/div＞
+        ＜/div＞
+        ＜div class="mini-stat enemy-stat"＞
+            ＜div class="actor-name" id="vis-e-name"＞Monster＜/div＞
+            ＜div class="mini-hp-bg"＞＜div id="vis-e-hp" class="mini-hp-fill" style="width:100%"＞＜/div＞＜/div＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="game-controls">
-        <div id="town-menu" class="controls menu-mode" style="display:none;">
-            <div style="text-align:center; margin-bottom:10px; color:#ffd700;">
-                평화로운 마을 (골드: <span id="ui-gold" style="font-weight:bold;">0</span> G)
-            </div>
-            <button onclick="enterDungeon(1)">🟢 속삭이는 동굴 (Lv.1~3)</button>
-            <button onclick="enterDungeon(2)">🟡 검은 안개 숲 (Lv.4~7)</button>
-            <button onclick="enterDungeon(3)">🔴 잊혀진 고성 (Lv.8~10)</button>
-            <button onclick="enterEvent()">🟣 혼돈의 틈 (Lv.11~16)</button>
-            <button onclick="enterDungeon(5)" style="background: linear-gradient(135deg, #4fc3f7, #0288d1); border-color:#29b6f6; color:#fff;">❄️ 영겁의 빙하 (Lv.17~20)</button>
-            <button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;">☁️ 천상의 계단 (Lv.21~25)</button>
-            <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
-            <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
-            <button onclick="enterEventDungeon('dragon')" style="background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;">🐲 용의 둥지</button>
-            <button onclick="enterEventDungeon('ruins')" style="background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;">🏺 고대 유적</button>
-            <button onclick="enterEventDungeon('time')" style="background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
-            <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
-            <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
-            <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
-        </div>
+    ＜div id="game-controls"＞
+        ＜div id="town-menu" class="controls menu-mode" style="display:none;"＞
+            ＜div style="text-align:center; margin-bottom:10px; color:#ffd700;"＞
+                평화로운 마을 (골드: ＜span id="ui-gold" style="font-weight:bold;"＞0＜/span＞ G)
+            ＜/div＞
+            ＜button onclick="enterDungeon(1)"＞🟢 속삭이는 동굴 (Lv.1~3)＜/button＞
+            ＜button onclick="enterDungeon(2)"＞🟡 검은 안개 숲 (Lv.4~7)＜/button＞
+            ＜button onclick="enterDungeon(3)"＞🔴 잊혀진 고성 (Lv.8~10)＜/button＞
+            ＜button onclick="enterEvent()"＞🟣 혼돈의 틈 (Lv.11~16)＜/button＞
+            ＜button onclick="enterDungeon(5)" style="background: linear-gradient(135deg, #4fc3f7, #0288d1); border-color:#29b6f6; color:#fff;"＞❄️ 영겁의 빙하 (Lv.17~20)＜/button＞
+            ＜button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;"＞☁️ 천상의 계단 (Lv.21~25)＜/button＞
+            ＜button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;"＞🍰 디저트 킹덤＜/button＞
+            ＜button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;"＞🏰 마도 제국＜/button＞
+            ＜button onclick="enterEventDungeon('dragon')" style="background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;"＞🐲 용의 둥지＜/button＞
+            ＜button onclick="enterEventDungeon('ruins')" style="background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;"＞🏺 고대 유적＜/button＞
+            ＜button onclick="enterEventDungeon('time')" style="background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;"＞🕰️ 시간의 도서관＜/button＞
+            ＜button onclick="openShop()" style="background:#424242;"＞🛒 상점 / 스킬 관리＜/button＞
+            ＜button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;"＞🕰️ 시간의 역행 (유물 리셋)＜/button＞
+            ＜button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;"＞☠️ 게임 초기화 (Rebirth)＜/button＞
+        ＜/div＞
 
-        <div id="battle-menu" style="display:none; width:100%;">
-            <div id="log-box" class="log-container"></div>
-            <div id="action-btns" class="controls"></div>
-        </div>
-    </div>
-</div>
+        ＜div id="battle-menu" style="display:none; width:100%;"＞
+            ＜div id="log-box" class="log-container"＞＜/div＞
+            ＜div id="action-btns" class="controls"＞＜/div＞
+        ＜/div＞
+    ＜/div＞
+＜/div＞
 
-<div id="shop-modal" class="modal">
-    <div class="modal-content">
-        <h2 style="color:#fff; border-bottom:1px solid #555; padding-bottom:10px;">정비소</h2>
-        <div style="margin-bottom:15px; color:#ffd700; font-size:1.1rem;">골드: <span id="shop-gold">0</span> G</div>
-        <h4 style="text-align:left; color:#81d4fa;">능력치 강화</h4>
-        <button onclick="upgradeMana()" style="width:100%; margin-bottom:5px;">마나 효율 강화 <span id="mana-cost" class="skill-sub"></span></button>
-        <button onclick="healFull()" style="width:100%; margin-bottom:15px;">전체 회복 <span class="skill-sub">비용: 50 G</span></button>
-        <h4 style="text-align:left; color:#ffcc80;">장비 강화</h4>
-        <button onclick="buyEquip('weapon')" style="width:100%; margin-bottom:5px;">무기 강화 <span id="weapon-cost" class="skill-sub"></span></button>
-        <button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;">방어구 강화 <span id="armor-cost" class="skill-sub"></span></button>
-        <h4 style="text-align:left; color:#a5d6a7;">스킬 습득</h4>
-        <div id="skill-shop-list" style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px;"></div>
-        <button onclick="resetAllArtifacts(true)" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
+＜div id="shop-modal" class="modal"＞
+    ＜div class="modal-content"＞
+        ＜h2 style="color:#fff; border-bottom:1px solid #555; padding-bottom:10px;"＞정비소＜/h2＞
+        ＜div style="margin-bottom:15px; color:#ffd700; font-size:1.1rem;"＞골드: ＜span id="shop-gold"＞0＜/span＞ G＜/div＞
+        ＜h4 style="text-align:left; color:#81d4fa;"＞능력치 강화＜/h4＞
+        ＜button onclick="upgradeMana()" style="width:100%; margin-bottom:5px;"＞마나 효율 강화 ＜span id="mana-cost" class="skill-sub"＞＜/span＞＜/button＞
+        ＜button onclick="healFull()" style="width:100%; margin-bottom:15px;"＞전체 회복 ＜span class="skill-sub"＞비용: 50 G＜/span＞＜/button＞
+        ＜h4 style="text-align:left; color:#ffcc80;"＞장비 강화＜/h4＞
+        ＜button onclick="buyEquip('weapon')" style="width:100%; margin-bottom:5px;"＞무기 강화 ＜span id="weapon-cost" class="skill-sub"＞＜/span＞＜/button＞
+        ＜button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;"＞방어구 강화 ＜span id="armor-cost" class="skill-sub"＞＜/span＞＜/button＞
+        ＜h4 style="text-align:left; color:#a5d6a7;"＞스킬 습득＜/h4＞
+        ＜div id="skill-shop-list" style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px;"＞＜/div＞
+        ＜button onclick="resetAllArtifacts(true)" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;"＞
              🔮 고귀한 시간의 역행 (100,000 G)
-             <span class="skill-sub" style="color:#e1bee7">모든 유물 리셋 (에픽/전설 확률 3배)</span>
-        </button>
-        <button onclick="closeShop()" style="background:#555; margin-top:10px;">나가기</button>
-    </div>
-</div>
+             ＜span class="skill-sub" style="color:#e1bee7"＞모든 유물 리셋 (에픽/전설 확률 3배)＜/span＞
+        ＜/button＞
+        ＜button onclick="closeShop()" style="background:#555; margin-top:10px;"＞나가기＜/button＞
+    ＜/div＞
+＜/div＞
 
-<div id="char-modal" class="modal active">
-    <div class="modal-content">
-        <div class="title-text" style="font-size:1.2rem; margin-bottom:15px;">운명 선택</div>
-        <button class="char-select-btn" onclick="selectChar('luna')">
-            <span style="color:#b39ddb; font-size:1.1rem; font-weight:bold;">🌙 루나 (암살자)</span>
-            <span class="skill-sub">회피 / 치명타 / 유리대포</span>
-        </button>
-        <button class="char-select-btn" onclick="selectChar('zeke')">
-            <span style="color:#ef9a9a; font-size:1.1rem; font-weight:bold;">🔥 지크 (기사단장)</span>
-            <span class="skill-sub">근성 / 반격 / 하이브리드 탱커</span>
-        </button>
-        <button class="char-select-btn" onclick="selectChar('jasmine')">
-            <span style="color:#fff59d; font-size:1.1rem; font-weight:bold;">☀️ 자스민 (마법사)</span>
-            <span class="skill-sub">마나 / 운영 / 컨트롤</span>
-        </button>
-        <button class="char-select-btn" onclick="selectChar('queen')">
-            <span style="color:#f48fb1; font-size:1.1rem; font-weight:bold;">🌹 여왕 (마법검사)</span>
-            <span class="skill-sub">스택 / 지속딜 / 운영</span>
-        </button>
-        <button class="char-select-btn" onclick="selectChar('rumi')">
-            <span style="color:#81d4fa; font-size:1.1rem; font-weight:bold;">✨ 루미 (대현자)</span>
-            <span class="skill-sub">형태 변환 / 하이브리드 / 꿈의 결정</span>
-        </button>
-    </div>
-</div>
+＜div id="char-modal" class="modal active"＞
+    ＜div class="modal-content"＞
+        ＜div class="title-text" style="font-size:1.2rem; margin-bottom:15px;"＞운명 선택＜/div＞
+        ＜button class="char-select-btn" onclick="selectChar('luna')"＞
+            ＜span style="color:#b39ddb; font-size:1.1rem; font-weight:bold;"＞🌙 루나 (암살자)＜/span＞
+            ＜span class="skill-sub"＞회피 / 치명타 / 유리대포＜/span＞
+        ＜/button＞
+        ＜button class="char-select-btn" onclick="selectChar('zeke')"＞
+            ＜span style="color:#ef9a9a; font-size:1.1rem; font-weight:bold;"＞🔥 지크 (기사단장)＜/span＞
+            ＜span class="skill-sub"＞근성 / 반격 / 하이브리드 탱커＜/span＞
+        ＜/button＞
+        ＜button class="char-select-btn" onclick="selectChar('jasmine')"＞
+            ＜span style="color:#fff59d; font-size:1.1rem; font-weight:bold;"＞☀️ 자스민 (마법사)＜/span＞
+            ＜span class="skill-sub"＞마나 / 운영 / 컨트롤＜/span＞
+        ＜/button＞
+        ＜button class="char-select-btn" onclick="selectChar('queen')"＞
+            ＜span style="color:#f48fb1; font-size:1.1rem; font-weight:bold;"＞🌹 여왕 (마법검사)＜/span＞
+            ＜span class="skill-sub"＞스택 / 지속딜 / 운영＜/span＞
+        ＜/button＞
+        ＜button class="char-select-btn" onclick="selectChar('rumi')"＞
+            ＜span style="color:#81d4fa; font-size:1.1rem; font-weight:bold;"＞✨ 루미 (대현자)＜/span＞
+            ＜span class="skill-sub"＞형태 변환 / 하이브리드 / 꿈의 결정＜/span＞
+        ＜/button＞
+    ＜/div＞
+＜/div＞
 
-<div id="alert-modal" class="modal">
-    <div class="modal-content" style="width:70%;">
-        <div id="alert-msg" style="color:#fff; margin-bottom:20px;">알림</div>
-        <button onclick="document.getElementById('alert-modal').classList.remove('active')" style="width:100%; padding:10px; background:#444;">확인</button>
-    </div>
-</div>
+＜div id="alert-modal" class="modal"＞
+    ＜div class="modal-content" style="width:70%;"＞
+        ＜div id="alert-msg" style="color:#fff; margin-bottom:20px;"＞알림＜/div＞
+        ＜button onclick="document.getElementById('alert-modal').classList.remove('active')" style="width:100%; padding:10px; background:#444;"＞확인＜/button＞
+    ＜/div＞
+＜/div＞
 
-<div id="reset-modal" class="modal">
-    <div class="modal-content">
-        <div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#ef5350;">초기화 옵션</div>
-        <div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;">
+＜div id="reset-modal" class="modal"＞
+    ＜div class="modal-content"＞
+        ＜div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#ef5350;"＞초기화 옵션＜/div＞
+        ＜div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;"＞
             어떤 방식으로 초기화하시겠습니까?
-        </div>
+        ＜/div＞
 
-        <button id="btn-soft-reset" onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;">
-            <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
-            <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
-            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
-        </button>
+        ＜button id="btn-soft-reset" onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;"＞
+            ＜div style="font-weight:bold; font-size:1.0rem;"＞🔄 현재 회차 재시작＜/div＞
+            ＜div style="font-size:0.75rem; color:#a5d6a7;"＞유물 해금 / 적 강화 상태 / 회차 유지＜/div＞
+            ＜div style="font-size:0.7rem; color:#81c784; margin-top:2px;"＞(진행 불가 시 추천)＜/div＞
+        ＜/button＞
 
-        <button onclick="triggerReset('hard')" style="width:100%; margin-bottom:10px; background:#b71c1c;">
-            <div style="font-weight:bold; font-size:1.0rem;">☠️ 완전 초기화</div>
-            <div style="font-size:0.75rem; color:#ef9a9a;">모든 기록 삭제 (회차 / 유물 해금 포함)</div>
-            <div style="font-size:0.7rem; color:#e57373; margin-top:2px;">(완전히 처음부터 다시 시작)</div>
-        </button>
+        ＜button onclick="triggerReset('hard')" style="width:100%; margin-bottom:10px; background:#b71c1c;"＞
+            ＜div style="font-weight:bold; font-size:1.0rem;"＞☠️ 완전 초기화＜/div＞
+            ＜div style="font-size:0.75rem; color:#ef9a9a;"＞모든 기록 삭제 (회차 / 유물 해금 포함)＜/div＞
+            ＜div style="font-size:0.7rem; color:#e57373; margin-top:2px;"＞(완전히 처음부터 다시 시작)＜/div＞
+        ＜/button＞
 
-        <button onclick="document.getElementById('reset-modal').classList.remove('active')" style="width:100%; background:#444;">취소</button>
-    </div>
-</div>
+        ＜button onclick="document.getElementById('reset-modal').classList.remove('active')" style="width:100%; background:#444;"＞취소＜/button＞
+    ＜/div＞
+＜/div＞
 
-<!-- data.js: characters, skills, artifacts, enemies -->
-<script src="data.js"></script>
+＜!-- data.js: characters, skills, artifacts, enemies --＞
+＜script src="data.js"＞＜/script＞
 
-<script>
+＜script＞
 /* =========================================
    2. 게임 로직 (Game Logic)
    ========================================= */
@@ -326,7 +326,7 @@ let gameState = { gold: 10000, learnedSkills: [], manaLevel: 0, equipWeapon: 0, 
 let currentEnemy = null;
 let turnCount = 0;
 let buffs = { player: {}, enemy: {} };
-let roseStack = 0; 
+let roseStack = 0;
 
 function myAlert(msg) {
     document.getElementById('alert-msg').innerText = msg;
@@ -355,15 +355,15 @@ function selectChar(charKey) {
     player.artifacts = [];
     player.level = 1;
     player.exp = 0;
-    
+
     // 대현자 고유 자원
     if(charKey === 'rumi') {
         player.dreamCrystals = 5;
     }
-    
+
     gameState.gold = 10000;
     gameState.learnedSkills = ['basic']; // 기본 공격 습득
-    
+
     if(charKey === 'queen') {
         gameState.learnedSkills.push('thornwhip');
         gameState.learnedSkills.push('roseseed');
@@ -386,12 +386,12 @@ function selectChar(charKey) {
         }
     }
 
-    recalcAllStats(); 
+    recalcAllStats();
     player.hp = player.maxHp;
     player.mp = player.maxMp;
 
     document.getElementById('char-modal').classList.remove('active');
-    document.getElementById('town-menu').style.display = 'grid'; 
+    document.getElementById('town-menu').style.display = 'grid';
     updateInfo();
 }
 
@@ -402,15 +402,15 @@ function confirmResetGame() {
     const softBtn = document.getElementById('btn-soft-reset');
     if(gameState.clearedCreator) {
         softBtn.innerHTML = `
-            <div style="font-weight:bold; font-size:1.0rem;">🔄 게임 재시작 (다음 회차)</div>
-            <div style="font-size:0.75rem; color:#a5d6a7;">적 강화(+10%) / 레벨 확장(+1) / 유물 해금 유지</div>
-            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(창조신 클리어 보상 적용)</div>
+            ＜div style="font-weight:bold; font-size:1.0rem;"＞🔄 게임 재시작 (다음 회차)＜/div＞
+            ＜div style="font-size:0.75rem; color:#a5d6a7;"＞적 강화(+10%) / 레벨 확장(+1) / 유물 해금 유지＜/div＞
+            ＜div style="font-size:0.7rem; color:#81c784; margin-top:2px;"＞(창조신 클리어 보상 적용)＜/div＞
         `;
     } else {
         softBtn.innerHTML = `
-            <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
-            <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
-            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
+            ＜div style="font-weight:bold; font-size:1.0rem;"＞🔄 현재 회차 재시작＜/div＞
+            ＜div style="font-size:0.75rem; color:#a5d6a7;"＞유물 해금 / 적 강화 상태 / 회차 유지＜/div＞
+            ＜div style="font-size:0.7rem; color:#81c784; margin-top:2px;"＞(진행 불가 시 추천)＜/div＞
         `;
     }
 }
@@ -476,31 +476,31 @@ function initArtifactsWithNGPlus() {
     const clears = getClearHistory(); // ['zeke', 'luna', ...]
 
     // 1. 공통 유물 추가 (100% 확률)
-    if(clears.length > 0) {
-        clears.forEach(char => {
+    if(clears.length ＞ 0) {
+        clears.forEach(char =＞ {
             if(NEW_ARTIFACTS[char]) {
                 // 중복 방지 체크 (혹시 모르니)
-                if(!ARTIFACTS.find(a => a.id === NEW_ARTIFACTS[char].id)) {
+                if(!ARTIFACTS.find(a =＞ a.id === NEW_ARTIFACTS[char].id)) {
                     ARTIFACTS.push(NEW_ARTIFACTS[char]);
                 }
             }
         });
 
         // 2. 전설 유물 강화 (클리어 시 100% 확률로 강화)
-        clears.forEach(char => {
+        clears.forEach(char =＞ {
             upgradeLegendaryArtifact(char);
         });
     }
 
     // 3. 보스 드랍 유물 해금 목록 추가 (리롤 풀에 추가) - 클리어 여부와 무관하게 적용
     let bossUnlocks = getBossArtifactUnlocks();
-    bossUnlocks.forEach(id => {
+    bossUnlocks.forEach(id =＞ {
         // BOSS_DROP_ARTIFACTS에서 찾아서 추가
         let drop = null;
         for(let k in BOSS_DROP_ARTIFACTS) {
             if(BOSS_DROP_ARTIFACTS[k].id === id) drop = BOSS_DROP_ARTIFACTS[k];
         }
-        if(drop && !ARTIFACTS.find(a => a.id === drop.id)) {
+        if(drop && !ARTIFACTS.find(a =＞ a.id === drop.id)) {
             ARTIFACTS.push(drop);
         }
     });
@@ -520,9 +520,9 @@ function unlockBossArtifact(id) {
 }
 
 function upgradeLegendaryArtifact(char) {
-    // 지크 -> 황금의태양
+    // 지크 -＞ 황금의태양
     if(char === 'zeke') {
-        let art = ARTIFACTS.find(a => a.id === 'golden_sun');
+        let art = ARTIFACTS.find(a =＞ a.id === 'golden_sun');
         if(art) {
             art.name = "진: 황금의 태양";
             art.desc = "공/마공 +50%, 마법방어 -30%";
@@ -531,9 +531,9 @@ function upgradeLegendaryArtifact(char) {
             art.rarity = 'legend';
         }
     }
-    // 루나 -> 벨제뷔트
+    // 루나 -＞ 벨제뷔트
     if(char === 'luna') {
-        let art = ARTIFACTS.find(a => a.id === 'beelzebub');
+        let art = ARTIFACTS.find(a =＞ a.id === 'beelzebub');
         if(art) {
             art.name = "진: 마신기 벨제뷔트";
             art.desc = "공격 +60% / 치명피해 +70%, 방어 -30%";
@@ -542,9 +542,9 @@ function upgradeLegendaryArtifact(char) {
             art.rarity = 'legend';
         }
     }
-    // 자스민 -> 아이리스
+    // 자스민 -＞ 아이리스
     if(char === 'jasmine') {
-        let art = ARTIFACTS.find(a => a.id === 'iris');
+        let art = ARTIFACTS.find(a =＞ a.id === 'iris');
         if(art) {
             art.name = "진: 신기 아이리스";
             art.desc = "마공/마방 +70%";
@@ -553,9 +553,9 @@ function upgradeLegendaryArtifact(char) {
             art.rarity = 'legend';
         }
     }
-    // 여왕 -> 로열크라운
+    // 여왕 -＞ 로열크라운
     if(char === 'queen') {
-        let art = ARTIFACTS.find(a => a.id === 'royal_crown');
+        let art = ARTIFACTS.find(a =＞ a.id === 'royal_crown');
         if(art) {
             art.name = "진: 로열 크라운";
             art.desc = "올스탯 +30% (여왕: 시작시 장미+10)";
@@ -564,9 +564,9 @@ function upgradeLegendaryArtifact(char) {
             art.rarity = 'legend';
         }
     }
-    // 루미 -> 수호천사의 깃털
+    // 루미 -＞ 수호천사의 깃털
     if(char === 'rumi') {
-        let art = ARTIFACTS.find(a => a.id === 'guardian_angel');
+        let art = ARTIFACTS.find(a =＞ a.id === 'guardian_angel');
         if(art) {
             art.name = "진: 수호천사의 깃털";
             art.desc = "사망 시 1회 부활 (HP 100%)";
@@ -608,7 +608,7 @@ function recalcAllStats() {
     if(!player || !player.baseStats) return;
 
     let growth = 1.0 + (player.level - 1) * 0.1;
-    
+
     // Base Calculation
     let baseMaxHp = Math.floor(player.baseStats.hp * growth);
     let baseMaxMp = player.fixedMp ? player.baseStats.mp : Math.floor(player.baseStats.mp * growth);
@@ -618,12 +618,12 @@ function recalcAllStats() {
     let baseMdef = Math.floor(player.baseStats.mdef * growth);
 
     // Equipments
-    for(let i=0; i<gameState.equipWeapon; i++) {
+    for(let i=0; i＜gameState.equipWeapon; i++) {
         let s = EQUIP_STATS[player.charKey].weapon[i];
         baseAtk += s.atk;
         baseMatk += s.matk;
     }
-    for(let i=0; i<gameState.equipArmor; i++) {
+    for(let i=0; i＜gameState.equipArmor; i++) {
         let s = EQUIP_STATS[player.charKey].armor[i];
         baseDef += s.def;
         baseMdef += s.mdef;
@@ -646,14 +646,14 @@ function recalcAllStats() {
     let hpPer = 0.0, mpPer = 0.0, atkPer = 0.0, matkPer = 0.0, defPer = 0.0, mdefPer = 0.0;
 
     // Artifacts
-    player.artifacts.forEach(art => {
+    player.artifacts.forEach(art =＞ {
         if(art.effect === 'stat_hp') hpPer += art.val;
         if(art.effect === 'stat_mp') mpPer += art.val;
         if(art.effect === 'stat_atk') atkPer += art.val;
         if(art.effect === 'stat_matk') matkPer += art.val;
         if(art.effect === 'stat_def') defPer += art.val;
         if(art.effect === 'stat_mdef') mdefPer += art.val;
-        
+
         if(art.effect === 'stat_crit') player.baseCrit += art.val;
         if(art.effect === 'stat_eva') player.baseEva += art.val;
 
@@ -663,7 +663,7 @@ function recalcAllStats() {
         if(art.effect === 'matk_mp') { matkPer += art.val; mpPer += art.val; }
         if(art.effect === 'atk_matk') { atkPer += art.val; matkPer += art.val; }
         if(art.effect === 'atk_hp') { atkPer += art.val; hpPer += art.val; }
-        
+
         if(art.effect === 'dragon_heart') { hpPer += 0.4; atkPer += 0.2; }
         if(art.effect === 'ancient_book') { mpPer += 0.4; matkPer += 0.2; }
 
@@ -693,30 +693,30 @@ function recalcAllStats() {
             mpPer += 0.2;
         }
         if(art.effect === 'heart_ice') {
-             // Will be applied in dynamic section if HP < 50%
+             // Will be applied in dynamic section if HP ＜ 50%
         }
     });
 
     // Buffs (Battle) - 이제 합연산으로 계산 및 상태창 반영
     if(buffs && buffs.player) {
-        if(buffs.player.demonEyeTurns > 0) {
+        if(buffs.player.demonEyeTurns ＞ 0) {
             atkPer += 1.0;
             matkPer += 1.0;
         }
-        if(buffs.player.royalBloomTurns > 0) { atkPer += 0.5; matkPer += 0.5; }
+        if(buffs.player.royalBloomTurns ＞ 0) { atkPer += 0.5; matkPer += 0.5; }
 
         // Sage Forms
         if(buffs.player.sageForm === 'star') { defPer += 0.5; mdefPer += 0.5; }
         else if(buffs.player.sageForm === 'moon') { matkPer += 0.5; atkPer -= 0.5; }
         else if(buffs.player.sageForm === 'sun') { atkPer += 1.0; defPer -= 0.5; mdefPer -= 0.5; }
 
-        if(buffs.player.milkshakeTurns > 0) { defPer += 0.3; mdefPer += 0.3; }
+        if(buffs.player.milkshakeTurns ＞ 0) { defPer += 0.3; mdefPer += 0.3; }
 
         // Other Buffs
-        if(buffs.player.goddessTurns > 0) { atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0; }
+        if(buffs.player.goddessTurns ＞ 0) { atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0; }
         if(buffs.player.goddessBlessing) { atkPer += 0.5; matkPer += 0.5; }
-        if(buffs.player.undyingPowerTurns > 0) { atkPer += 1.0; }
-        if(buffs.player.divineTurns > 0) { defPer += 0.3; }
+        if(buffs.player.undyingPowerTurns ＞ 0) { atkPer += 1.0; }
+        if(buffs.player.divineTurns ＞ 0) { defPer += 0.3; }
         if(buffs.player.castleDef100) { defPer += 1.0; }
     }
 
@@ -730,12 +730,12 @@ function recalcAllStats() {
 
          // Zeke Passive
          if(player.charKey === 'zeke') {
-             if(ratio < 0.25) { atkPer += 0.3; defPer += 0.3; }
-             else if(ratio < 0.5) { atkPer += 0.15; defPer += 0.15; }
+             if(ratio ＜ 0.25) { atkPer += 0.3; defPer += 0.3; }
+             else if(ratio ＜ 0.5) { atkPer += 0.15; defPer += 0.15; }
          }
 
          // Heart of Ice (Ice Heart)
-         if(ratio < 0.5 && hasArtifact('heart_ice')) {
+         if(ratio ＜ 0.5 && hasArtifact('heart_ice')) {
              defPer += 1.0;
              mdefPer += 1.0;
          }
@@ -766,7 +766,7 @@ function recalcAllStats() {
     player.matk = finalMatk;
     player.def = finalDef;
     player.mdef = finalMdef;
-    
+
     player.hp = Math.min(player.hp, player.maxHp);
     player.mp = Math.min(player.mp, player.maxMp);
 }
@@ -792,15 +792,15 @@ function updateInfo() {
     document.getElementById('vis-p-hp').style.width = `${Math.max(0, hpPer)}%`;
     const pImgBox = document.getElementById('player-img');
     const emojis = { 'luna':'🌙', 'zeke':'🛡️', 'jasmine':'☀️', 'queen':'🌹', 'rumi':'✨' };
-    pImgBox.innerHTML = `<img src="${player.charKey}.png" onerror="this.style.display='none'; this.parentNode.innerText='${emojis[player.charKey]}'">`;
+    pImgBox.innerHTML = `＜img src="${player.charKey}.png" onerror="this.style.display='none'; this.parentNode.innerText='${emojis[player.charKey]}'"＞`;
 
     const artBox = document.getElementById('artifact-list');
-    if(player.artifacts.length > 0) {
-        let artNames = player.artifacts.map(a => {
+    if(player.artifacts.length ＞ 0) {
+        let artNames = player.artifacts.map(a =＞ {
             let color = '#ffd700';
             if(a.rarity === 'epic') color = '#e040fb';
             if(a.rarity === 'legend') color = '#ff5252';
-            return `<span onclick="myAlert('[${a.name}]\\n${a.desc}')" style="cursor:pointer; text-decoration:underline; margin-right:5px; color:${color}">${a.name}</span>`;
+            return `＜span onclick="myAlert('[${a.name}]\\n${a.desc}')" style="cursor:pointer; text-decoration:underline; margin-right:5px; color:${color}"＞${a.name}＜/span＞`;
         }).join(" ");
         artBox.innerHTML = `유물(터치): ${artNames}`;
     } else {
@@ -816,7 +816,7 @@ function updateInfo() {
         extraUI.style.display = 'block';
         extraUI.style.color = '#fff59d';
         let stack = buffs.player.divineStack || 0;
-        let enchantText = buffs.player.enchantTurns > 0 ? ` | 🔥 인챈트: ${buffs.player.enchantTurns}턴` : "";
+        let enchantText = buffs.player.enchantTurns ＞ 0 ? ` | 🔥 인챈트: ${buffs.player.enchantTurns}턴` : "";
         extraUI.innerText = `🛡️ 디바인 스택: ${stack}${enchantText}`;
     } else if(player.charKey === 'rumi') {
         extraUI.style.display = 'block';
@@ -825,7 +825,7 @@ function updateInfo() {
         if(buffs.player && buffs.player.sageForm === 'star') formName = "⭐ 별";
         if(buffs.player && buffs.player.sageForm === 'moon') formName = "🌙 달";
         if(buffs.player && buffs.player.sageForm === 'sun') formName = "☀️ 태양";
-        let milkshakeText = buffs.player.milkshakeTurns > 0 ? ` | 🥤쉐이크: ${buffs.player.milkshakeTurns}턴` : "";
+        let milkshakeText = buffs.player.milkshakeTurns ＞ 0 ? ` | 🥤쉐이크: ${buffs.player.milkshakeTurns}턴` : "";
         extraUI.innerText = `💎 꿈의 결정: ${player.dreamCrystals} | 형태: ${formName}${milkshakeText}`;
     } else if(player.charKey === 'luna') {
         extraUI.style.display = 'block';
@@ -848,21 +848,21 @@ function openShop() {
     document.getElementById('shop-gold').innerText = gameState.gold;
 
     const manaCosts = [1000, 2000, 3000, 4000];
-    let costText = gameState.manaLevel >= 4 ? "MAX" : `${manaCosts[gameState.manaLevel]} G`;
+    let costText = gameState.manaLevel ＞= 4 ? "MAX" : `${manaCosts[gameState.manaLevel]} G`;
     document.getElementById('mana-cost').innerText = costText;
 
     const nextW = gameState.equipWeapon;
     const nextA = gameState.equipArmor;
 
     let wText = "MAX";
-    if(nextW < 7) {
+    if(nextW ＜ 7) {
         let stats = EQUIP_STATS[player.charKey].weapon[nextW];
         wText = `${EQUIP_COSTS[nextW]} G (ATK+${stats.atk}/MATK+${stats.matk})`;
     }
     document.getElementById('weapon-cost').innerText = wText;
 
     let aText = "MAX";
-    if(nextA < 7) {
+    if(nextA ＜ 7) {
         let stats = EQUIP_STATS[player.charKey].armor[nextA];
         aText = `${EQUIP_COSTS[nextA]} G (DEF+${stats.def}/MDEF+${stats.mdef})`;
     }
@@ -877,12 +877,12 @@ function openShop() {
         const learned = gameState.learnedSkills.includes(key);
         const btn = document.createElement('button');
 
-        btn.innerHTML = `<span style="color:${learned ? '#4caf50':'#fff'}">${sk.name}</span>
-                         <span style="font-size:0.7rem; display:block;">${sk.desc}</span>
-                         <span style="font-size:0.7rem; color:#ffd700;">${learned ? '습득완료' : sk.price + ' G'}</span>`;
+        btn.innerHTML = `＜span style="color:${learned ? '#4caf50':'#fff'}"＞${sk.name}＜/span＞
+                         ＜span style="font-size:0.7rem; display:block;"＞${sk.desc}＜/span＞
+                         ＜span style="font-size:0.7rem; color:#ffd700;"＞${learned ? '습득완료' : sk.price + ' G'}＜/span＞`;
 
         if(!learned) {
-            btn.onclick = () => buySkill(key, sk.price);
+            btn.onclick = () =＞ buySkill(key, sk.price);
         } else {
             btn.disabled = true;
             btn.style.opacity = 0.7;
@@ -897,10 +897,10 @@ function closeShop() {
 }
 
 function upgradeMana() {
-    if(gameState.manaLevel >= 4) return;
+    if(gameState.manaLevel ＞= 4) return;
     const costs = [1000, 2000, 3000, 4000];
     const cost = costs[gameState.manaLevel];
-    if(gameState.gold >= cost) {
+    if(gameState.gold ＞= cost) {
         gameState.gold -= cost;
         gameState.manaLevel++;
         const regenMap = { '루나':[10,13,16,20], '지크':[10,13,16,20], '자스민':[15,20,25,30], '여왕':[12,14,16,20], '루미':[10,15,20,25] };
@@ -913,20 +913,20 @@ function upgradeMana() {
 function buyEquip(type) {
     if(!player) return;
     let currentTier = type === 'weapon' ? gameState.equipWeapon : gameState.equipArmor;
-    if(currentTier >= 7) return;
+    if(currentTier ＞= 7) return;
     let cost = EQUIP_COSTS[currentTier];
-    if(gameState.gold >= cost) {
+    if(gameState.gold ＞= cost) {
         gameState.gold -= cost;
         if(type === 'weapon') gameState.equipWeapon++;
         else gameState.equipArmor++;
-        recalcAllStats(); 
+        recalcAllStats();
         openShop();
     }
 }
 
 function buySkill(key, price) {
     if(gameState.learnedSkills.includes(key)) return;
-    if(gameState.gold >= price) {
+    if(gameState.gold ＞= price) {
         gameState.gold -= price;
         gameState.learnedSkills.push(key);
         openShop();
@@ -936,7 +936,7 @@ function buySkill(key, price) {
 }
 
 function healFull() {
-    if(gameState.gold >= 50) {
+    if(gameState.gold ＞= 50) {
         gameState.gold -= 50;
         player.hp = player.maxHp;
         player.mp = player.maxMp;
@@ -947,7 +947,7 @@ function healFull() {
 function resetAllArtifacts(highQuality=false) {
     if(player.artifacts.length === 0) return myAlert("초기화할 유물이 없습니다.");
     let cost = highQuality ? 100000 : 20000;
-    if(gameState.gold < cost) return myAlert(`골드가 부족합니다. (필요: ${cost} G)`);
+    if(gameState.gold ＜ cost) return myAlert(`골드가 부족합니다. (필요: ${cost} G)`);
 
     let msg = highQuality
         ? `[고귀한 시간의 역행] 보유한 모든 유물을 리셋하고 다시 뽑습니다.\n(에픽/전설 확률 3배)\n비용: ${cost} G\n\n정말 진행하시겠습니까?`
@@ -956,8 +956,8 @@ function resetAllArtifacts(highQuality=false) {
     if(confirm(msg)) {
         gameState.gold -= cost;
         let count = player.artifacts.length;
-        player.artifacts = []; 
-        for(let i=0; i<count; i++) rollArtifact(true, highQuality);
+        player.artifacts = [];
+        for(let i=0; i＜count; i++) rollArtifact(true, highQuality);
         recalcAllStats();
         updateInfo();
         if(highQuality) openShop(); // Refresh shop gold display
@@ -969,28 +969,28 @@ function rollArtifact(silent=false, highQuality=false) {
     // 1. NG+ 및 보스 해금 유물을 포함한 전체 ARTIFACTS 목록 갱신
     // (보스 드랍 유물이 해금되었는데 ARTIFACTS에 없는 경우를 방지)
     let bossUnlocks = getBossArtifactUnlocks();
-    bossUnlocks.forEach(id => {
+    bossUnlocks.forEach(id =＞ {
          let drop = null;
          for(let k in BOSS_DROP_ARTIFACTS) {
              if(BOSS_DROP_ARTIFACTS[k].id === id) drop = BOSS_DROP_ARTIFACTS[k];
          }
-         if(drop && !ARTIFACTS.find(a => a.id === drop.id)) {
+         if(drop && !ARTIFACTS.find(a =＞ a.id === drop.id)) {
              ARTIFACTS.push(drop);
          }
     });
 
-    let available = ARTIFACTS.filter(a => !hasArtifact(a.id));
+    let available = ARTIFACTS.filter(a =＞ !hasArtifact(a.id));
     if(available.length === 0) return;
 
     let pick;
     if(highQuality) {
         // Weighted random for High Quality
         let weighted = [];
-        available.forEach(a => {
+        available.forEach(a =＞ {
             let w = 1;
             if(a.rarity === 'epic') w = 3;
             if(a.rarity === 'legend') w = 3;
-            for(let i=0; i<w; i++) weighted.push(a);
+            for(let i=0; i＜w; i++) weighted.push(a);
         });
         pick = weighted[Math.floor(Math.random() * weighted.length)];
     } else {
@@ -1001,13 +1001,13 @@ function rollArtifact(silent=false, highQuality=false) {
     player.artifacts.push(pick);
     if(!silent) {
         if(pick.rarity === 'epic') {
-            log(`<b style="color:#e040fb; font-size:1.1rem;">[대박!] 에픽 유물 발견! [${pick.name}]</b>`, 'rose');
+            log(`＜b style="color:#e040fb; font-size:1.1rem;"＞[대박!] 에픽 유물 발견! [${pick.name}]＜/b＞`, 'rose');
             myAlert(`축하합니다!\n전설적인 유물 [${pick.name}]을(를) 손에 넣었습니다!`);
         } else if(pick.rarity === 'legend') {
-             log(`<b style="color:#ff5252; font-size:1.1rem;">[전설!] 신화급 유물 발견! [${pick.name}]</b>`, 'dmg');
+             log(`＜b style="color:#ff5252; font-size:1.1rem;"＞[전설!] 신화급 유물 발견! [${pick.name}]＜/b＞`, 'dmg');
              myAlert(`믿을 수 없습니다!\n신화 속 유물 [${pick.name}]을(를) 손에 넣었습니다!`);
         } else {
-            log(`<span style="color:#ffd700">유물 획득! [${pick.name}]: ${pick.desc}</span>`, 'info');
+            log(`＜span style="color:#ffd700"＞유물 획득! [${pick.name}]: ${pick.desc}＜/span＞`, 'info');
         }
     }
     recalcAllStats();
@@ -1015,13 +1015,13 @@ function rollArtifact(silent=false, highQuality=false) {
 
 function checkLevelUp() {
     let baseReq = 100 * player.level * (1 + player.level * 0.1);
-    let nextExp = player.level >= 20 ? baseReq * 3 : baseReq;
+    let nextExp = player.level ＞= 20 ? baseReq * 3 : baseReq;
     const maxLvl = getMaxLevel();
 
-    if(player.exp >= nextExp && player.level < maxLvl) {
+    if(player.exp ＞= nextExp && player.level ＜ maxLvl) {
         player.level++;
         player.exp = 0;
-        recalcAllStats(); 
+        recalcAllStats();
         log(`레벨 업! Lv.${player.level}`, 'heal');
         if([5, 10, 15, 20, 25].includes(player.level)) {
             rollArtifact();
@@ -1030,25 +1030,25 @@ function checkLevelUp() {
 }
 
 function enterDungeon(tier) {
-    const candidates = ENEMIES.filter(e => e.tier === tier);
+    const candidates = ENEMIES.filter(e =＞ e.tier === tier);
     if(candidates.length === 0) return myAlert("몬스터 데이터 오류");
     startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
 }
 
 function enterEvent() {
-    const candidates = ENEMIES.filter(e => e.tier === 4);
+    const candidates = ENEMIES.filter(e =＞ e.tier === 4);
     if(candidates.length === 0) return myAlert("이벤트 보스 오류");
     startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
 }
 
 function enterEventDungeon(type) {
-    const candidates = ENEMIES.filter(e => e.tier === type);
+    const candidates = ENEMIES.filter(e =＞ e.tier === type);
     if(candidates.length === 0) return myAlert("던전 데이터 오류");
     startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
 }
 
 function updateBattleUI() {
-    updateInfo(); 
+    updateInfo();
     if (currentEnemy) {
         let hpPer = (currentEnemy.hp / currentEnemy.maxHp) * 100;
         document.getElementById('vis-e-hp').style.width = `${Math.max(0, hpPer)}%`;
@@ -1057,19 +1057,19 @@ function updateBattleUI() {
 
 function startBattle(mobData) {
     if(!player || !player.name) return myAlert("캐릭터 선택 필요");
-    
+
     document.getElementById('town-menu').style.display = 'none';
     document.getElementById('battle-menu').style.display = 'flex';
-    
+
     const stage = document.getElementById('main-stage');
     stage.classList.remove('town-mode');
-    stage.classList.add('battle-mode'); 
+    stage.classList.add('battle-mode');
 
     currentEnemy = JSON.parse(JSON.stringify(mobData));
 
     // 다회차 스탯 보정
     let cycle = getCycleCount();
-    if(cycle > 0) {
+    if(cycle ＞ 0) {
         let mult = 1 + (cycle * 0.1);
         currentEnemy.hp = Math.floor(currentEnemy.hp * mult);
         currentEnemy.atk = Math.floor(currentEnemy.atk * mult);
@@ -1082,27 +1082,27 @@ function startBattle(mobData) {
 
     document.getElementById('vis-e-name').innerText = currentEnemy.name;
     const eImgBox = document.getElementById('enemy-img');
-    
+
     let imgSrc = currentEnemy.img ? currentEnemy.img : `${currentEnemy.name}.png`;
-    eImgBox.innerHTML = `<img src="${imgSrc}" onerror="this.style.display='none'; this.parentNode.innerText='💀'">`;
+    eImgBox.innerHTML = `＜img src="${imgSrc}" onerror="this.style.display='none'; this.parentNode.innerText='💀'"＞`;
 
     document.getElementById('log-box').innerHTML = "";
 
     let startMp = player.maxMp ? Math.floor(player.maxMp / 2) : 0;
     if(hasArtifact('start_mp')) startMp += 30;
     if(hasArtifact('blue_moon')) startMp += 100;
-    
+
     player.mp = Math.min(player.maxMp, startMp);
     turnCount = 1;
     // 루미 신규 스킬 관련 버프 초기화 추가 (chargingMilkyway, milkshakeTurns)
     buffs = { player: { castleStack: 0, dodgeCount: 0, absoluteStack: 0, divineStack: 0, moonUltStack: 0, chargingMilkyway: false, milkshakeTurns: 0 }, enemy: {} };
-    roseStack = 0; 
+    roseStack = 0;
 
     if(hasArtifact('demon_eye')) {
         buffs.player.demonEyeTurns = 5;
         log("[마안] 발동! 5턴간 공격력/마법공격력 대폭 증가.", 'rose');
     }
-    
+
     if(player.charKey === 'rumi') {
         player.dreamCrystals = 5;
         // 전투 시작시 형태 초기화
@@ -1125,14 +1125,14 @@ function startBattle(mobData) {
 
     updateBattleUI();
     createBattleButtons();
-    log(`<b>${currentEnemy.name}</b>(이)가 나타났다!`, 'info');
+    log(`＜b＞${currentEnemy.name}＜/b＞(이)가 나타났다!`, 'info');
 }
 
 function createBattleButtons() {
     const box = document.getElementById('action-btns');
     box.innerHTML = "";
     gameState.learnedSkills = gameState.learnedSkills || ['basic'];
-    gameState.learnedSkills.forEach(key => {
+    gameState.learnedSkills.forEach(key =＞ {
         const sk = player.skills[key];
         if(!sk) return;
         const btn = document.createElement('button');
@@ -1141,8 +1141,8 @@ function createBattleButtons() {
         if(sk.type === 'sup') cls = 'btn-def';
         if(sk.isUlt) cls = 'btn-ult';
         btn.className = cls;
-        btn.innerHTML = `${sk.name}<span class="skill-sub">MP ${sk.cost}</span>`;
-        btn.onclick = () => executeTurn(key);
+        btn.innerHTML = `${sk.name}＜span class="skill-sub"＞MP ${sk.cost}＜/span＞`;
+        btn.onclick = () =＞ executeTurn(key);
         box.appendChild(btn);
     });
 }
@@ -1157,17 +1157,17 @@ function executeTurn(skillKey) {
     }
 
     const skill = player.skills[skillKey];
-    
+
     // 대현자 형태 변환 비용 및 결정 체크
     if(skill.effect.startsWith('form_change_')) {
-        if(skill.effect !== 'form_change_sun' && player.dreamCrystals < 1) { 
-             if(player.dreamCrystals < 1) { log("꿈의 결정이 부족합니다!", 'info'); return; }
+        if(skill.effect !== 'form_change_sun' && player.dreamCrystals ＜ 1) {
+             if(player.dreamCrystals ＜ 1) { log("꿈의 결정이 부족합니다!", 'info'); return; }
         }
-        if(skill.effect === 'form_change_sun' && player.dreamCrystals < 1) { log("꿈의 결정이 부족합니다!", 'info'); return; }
-        
+        if(skill.effect === 'form_change_sun' && player.dreamCrystals ＜ 1) { log("꿈의 결정이 부족합니다!", 'info'); return; }
+
         // 비용 소모
-        if(skill.effect !== 'form_change_sun') player.dreamCrystals--; 
-        if(skill.effect === 'form_change_sun') player.dreamCrystals--; 
+        if(skill.effect !== 'form_change_sun') player.dreamCrystals--;
+        if(skill.effect === 'form_change_sun') player.dreamCrystals--;
     }
 
     // 차징 스킬 처리
@@ -1177,10 +1177,10 @@ function executeTurn(skillKey) {
         let chargeColor = skill.effect === 'charge_divine' ? 'holy' : 'star';
 
         if(!buffs.player[chargingFlag]) {
-            if(player.mp < skill.cost) { log("마나가 부족합니다!", 'info'); return; }
+            if(player.mp ＜ skill.cost) { log("마나가 부족합니다!", 'info'); return; }
             player.mp -= skill.cost;
             buffs.player[chargingFlag] = true;
-            buffs.player.guard = true; 
+            buffs.player.guard = true;
             log(`${skill.name}! ${chargeMsg}`, chargeColor);
             if(!enemyTurn()) return loseBattle();
             endTurnPhase();
@@ -1190,18 +1190,18 @@ function executeTurn(skillKey) {
             delete buffs.player.guard;
         }
     } else {
-        if(player.mp < skill.cost) { log("마나가 부족합니다!", 'info'); return; }
+        if(player.mp ＜ skill.cost) { log("마나가 부족합니다!", 'info'); return; }
         player.mp -= skill.cost;
     }
 
-    log(`<div class="log-turn">=== Turn ${turnCount} ===</div>`);
+    log(`＜div class="log-turn"＞=== Turn ${turnCount} ===＜/div＞`);
 
     let playerDefending = false;
-    
+
     if(skill.effect === 'milkshake_heal') {
         let healAmount = Math.floor(player.maxHp * 0.3);
         player.hp = Math.min(player.maxHp, player.hp + healAmount);
-        log(`스타파우더 밀크쉐이크! HP <span class="heal">${healAmount}</span> 회복.`, 'heal');
+        log(`스타파우더 밀크쉐이크! HP ＜span class="heal"＞${healAmount}＜/span＞ 회복.`, 'heal');
     }
 
     // [FIX] 서포트 스킬 적용 조건에 'sage_moon_veil'과 'sage_meteor' 추가
@@ -1209,15 +1209,15 @@ function executeTurn(skillKey) {
     // 하지만 reset_buff는 applyPlayerSupport에 없으므로 아무 일도 안 함.
     // playerDefending=true 때문에 아래 공격 로직 진입 못함.
     // 그래서 예외 리스트에 reset_buff 추가.
-    if(skill.type === 'sup' || skill.effect === 'perfect_eva' || skill.effect === 'guard_70' || skill.effect === 'null_mag' || skill.effect === 'null_phy' || 
-       skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' || skill.effect === 'passive_boost' || 
+    if(skill.type === 'sup' || skill.effect === 'perfect_eva' || skill.effect === 'guard_70' || skill.effect === 'null_mag' || skill.effect === 'null_phy' ||
+       skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' || skill.effect === 'passive_boost' ||
        skill.effect.startsWith('form_change_') || skill.effect === 'sage_barrier' || skill.effect === 'milkshake_heal' ||
-       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'royal_bloom' || skill.effect === 'reset_buff') { // <-- reset_buff 추가
-        
+       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'royal_bloom' || skill.effect === 'reset_buff') { // ＜-- reset_buff 추가
+
         applyPlayerSupport(skill);
-        
+
         if(skill.effect === 'stun_rose_3') {
-             if(roseStack >= 3) {
+             if(roseStack ＞= 3) {
                  roseStack -= 3;
                  buffs.enemy.stun = true;
                  log("장미 3개를 소모하여 적을 압도합니다!", 'rose');
@@ -1228,20 +1228,20 @@ function executeTurn(skillKey) {
         playerDefending = true;
     }
 
-    if(buffs.enemy.counter && turnCount > buffs.enemy.counterTurn + 1) delete buffs.enemy.counter;
+    if(buffs.enemy.counter && turnCount ＞ buffs.enemy.counterTurn + 1) delete buffs.enemy.counter;
 
     let enemyAlive = true;
-    
+
     // [FIX] 공격 스킬 조건에 'sage_moon_veil'과 'sage_meteor' 예외 추가 (playerDefending이 true여도 공격 실행)
     // [FIX 9.4] reset_buff 추가 (이래야 playerAttack 호출됨)
-    if(!playerDefending || skill.effect === 'perfect_eva' || skill.effect === 'rose_2_self_stun' || 
+    if(!playerDefending || skill.effect === 'perfect_eva' || skill.effect === 'rose_2_self_stun' ||
        skill.effect === 'evasion_50' || skill.effect === 'eva_buff' || skill.effect === 'crit_buff' ||
        skill.effect === 'form_change_sun' || skill.effect === 'sage_dream_ult' ||
-       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'reset_buff') { // <-- reset_buff 추가
-        
+       skill.effect === 'sage_moon_veil' || skill.effect === 'sage_meteor' || skill.effect === 'reset_buff') { // ＜-- reset_buff 추가
+
         if(skill.effect === 'sage_dream_ult' || !skill.effect.startsWith('form_change_')) {
             document.getElementById('player-actor').classList.add('shake');
-            setTimeout(()=> document.getElementById('player-actor').classList.remove('shake'), 250);
+            setTimeout(()=＞ document.getElementById('player-actor').classList.remove('shake'), 250);
             enemyAlive = playerAttack(skill);
         }
     }
@@ -1253,12 +1253,12 @@ function executeTurn(skillKey) {
             delete buffs.enemy.stun;
         } else {
             document.getElementById('enemy-actor').classList.add('shake');
-            setTimeout(()=> document.getElementById('enemy-actor').classList.remove('shake'), 250);
-            
+            setTimeout(()=＞ document.getElementById('enemy-actor').classList.remove('shake'), 250);
+
             playerAlive = enemyTurn();
         }
     }
-    
+
     if(playerAlive && enemyAlive) endTurnPhase();
     else if(!enemyAlive) winBattle();
     else loseBattle();
@@ -1268,7 +1268,7 @@ function applyPlayerSupport(skill) {
     if(skill.effect === 'guard_70') buffs.player.guard_70 = true;
     if(skill.effect === 'null_mag') buffs.player.nullMag = true;
     if(skill.effect === 'null_phy') buffs.player.nullPhy = true;
-    
+
     if(skill.effect === 'sage_barrier') {
         buffs.player.sageBarrier = true;
         let form = buffs.player.sageForm;
@@ -1276,10 +1276,10 @@ function applyPlayerSupport(skill) {
     }
 
     if(skill.effect.startsWith('form_change_')) {
-        let type = skill.effect.split('_')[2]; 
+        let type = skill.effect.split('_')[2];
         buffs.player.sageForm = type;
         buffs.player.formTurns = 3;
-        recalcAllStats(); 
+        recalcAllStats();
         let names = {'star':'별', 'moon':'달', 'sun':'태양'};
         log(`[${names[type]}의 형태]로 변환했습니다!`, 'star');
     }
@@ -1288,7 +1288,7 @@ function applyPlayerSupport(skill) {
         if(buffs.player.sageForm === 'star') {
             buffs.player.milkshakeTurns = 10;
             log("별의 형태 추가 효과! 10턴간 방어력/마법방어력이 30% 증가합니다.", 'star');
-            recalcAllStats(); 
+            recalcAllStats();
         }
     }
 
@@ -1298,13 +1298,13 @@ function applyPlayerSupport(skill) {
     }
     if(skill.effect === 'next_eva') buffs.player.nextEva = 0.5;
 
-    if(skill.effect === 'perfect_eva') buffs.player.eva = (buffs.player.eva || 0) + 10.0; 
-    
+    if(skill.effect === 'perfect_eva') buffs.player.eva = (buffs.player.eva || 0) + 10.0;
+
     if(skill.effect === 'eva_buff') {
         let val = skill.name === '베일 오브 다크니스' ? 0.4 : 0.2;
         buffs.player.veilVal = val;
         buffs.player.veilTurns = 3;
-        buffs.player.eva = (buffs.player.eva || 0) + val; 
+        buffs.player.eva = (buffs.player.eva || 0) + val;
         log("회피율이 증가했습니다.", 'info');
     }
 
@@ -1319,7 +1319,7 @@ function applyPlayerSupport(skill) {
              log("문라이트 베일 발동 (달의 형태가 아니어서 추가효과 없음).", 'info');
         }
     }
-    
+
     // [FIX] 메테오 스매시
     if(skill.effect === 'sage_meteor') {
         if(buffs.player.sageForm === 'sun') {
@@ -1334,11 +1334,11 @@ function applyPlayerSupport(skill) {
         buffs.player.critBuffTurns = 3;
         log("치명타율이 증가했습니다!", 'rose');
     }
-    
+
     if(skill.effect === 'instinct') {
         buffs.player.instinctTurns = 5;
         buffs.player.instinctVal = 0.25;
-        buffs.player.eva = (buffs.player.eva || 0) + 0.25; 
+        buffs.player.eva = (buffs.player.eva || 0) + 0.25;
         log("본능 발동! 회피와 피해량이 증가합니다.", 'info');
     }
 
@@ -1388,18 +1388,18 @@ function applyPlayerSupport(skill) {
 }
 
 function winBattle() {
-    log(`<b style="color:#ffd700">전투 승리!</b>`, 'info');
+    log(`＜b style="color:#ffd700"＞전투 승리!＜/b＞`, 'info');
     player.exp += currentEnemy.exp;
     gameState.gold += currentEnemy.gold;
     log(`경험치 +${currentEnemy.exp}, 골드 +${currentEnemy.gold} G`);
-    
+
     // Boss Drop Logic (Unlock System)
     if(BOSS_DROP_ARTIFACTS) {
         let drop = null;
         // 보스 드랍 확률 체크 (신규 보스 100% 해금)
-        if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
-        else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
-        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
+        if(currentEnemy.name === "마신" && Math.random() ＜ 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
+        else if(currentEnemy.name === "혹한의 마녀" && Math.random() ＜ 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
+        else if(currentEnemy.name === "창조신 아스테아" && Math.random() ＜ 0.1) drop = BOSS_DROP_ARTIFACTS.goddess;
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
         else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
@@ -1410,7 +1410,7 @@ function winBattle() {
              if(!unlocks.includes(drop.id)) {
                  unlockBossArtifact(drop.id);
                  let color = drop.rarity === 'legend' ? '#ff5252' : '#e040fb';
-                 log(`<b style="color:${color}; font-size:1.1rem;">[보스 유물 해금!] ${drop.name}</b>`, 'rose');
+                 log(`＜b style="color:${color}; font-size:1.1rem;"＞[보스 유물 해금!] ${drop.name}＜/b＞`, 'rose');
                  myAlert(`축하합니다!\n[${drop.name}]이(가) 해금되었습니다!\n이제부터 상점 리셋이나 유물 뽑기에서 등장합니다.`);
              }
         }
@@ -1423,26 +1423,26 @@ function winBattle() {
     }
 
     checkLevelUp();
-    
-    setTimeout(() => {
+
+    setTimeout(() =＞ {
         document.getElementById('battle-menu').style.display = 'none';
-        document.getElementById('town-menu').style.display = 'grid'; 
-        
+        document.getElementById('town-menu').style.display = 'grid';
+
         const stage = document.getElementById('main-stage');
         stage.classList.remove('battle-mode');
-        stage.classList.add('town-mode'); 
+        stage.classList.add('town-mode');
 
         updateInfo();
     }, 1500);
 }
 
 function loseBattle() {
-    log(`<b style="color:#ff5252">전투 패배...</b>`, 'dmg');
+    log(`＜b style="color:#ff5252"＞전투 패배...＜/b＞`, 'dmg');
     player.hp = 1;
-    setTimeout(() => {
+    setTimeout(() =＞ {
         document.getElementById('battle-menu').style.display = 'none';
-        document.getElementById('town-menu').style.display = 'grid'; 
-        
+        document.getElementById('town-menu').style.display = 'grid';
+
         const stage = document.getElementById('main-stage');
         stage.classList.remove('battle-mode');
         stage.classList.add('town-mode');
@@ -1452,7 +1452,7 @@ function loseBattle() {
 }
 
 function hasArtifact(key) {
-    return player.artifacts && player.artifacts.some(a => a.id === key || a.effect === key);
+    return player.artifacts && player.artifacts.some(a =＞ a.id === key || a.effect === key);
 }
 
 function playerAttack(skill) {
@@ -1469,16 +1469,16 @@ function playerAttack(skill) {
     if(buffs.enemy.counter && skill.type === 'phy') {
         let counterDmg = Math.floor(currentEnemy.atk * 2.0);
         player.hp -= counterDmg;
-        log(`${currentEnemy.name}의 카운터! <span class="dmg">${counterDmg}</span>의 피해를 입고 반격당했습니다!`, 'dmg');
-        return true; 
+        log(`${currentEnemy.name}의 카운터! ＜span class="dmg"＞${counterDmg}＜/span＞의 피해를 입고 반격당했습니다!`, 'dmg');
+        return true;
     }
 
-    if(skill.effect === 'miss_chance' && Math.random() < 0.3) { log(`${skill.name}이(가) 빗나갔습니다!`, 'info'); return true; }
+    if(skill.effect === 'miss_chance' && Math.random() ＜ 0.3) { log(`${skill.name}이(가) 빗나갔습니다!`, 'info'); return true; }
 
     let multiplier = skill.power;
-    
+
     if(skill.name === '더 홀리' && buffs.player.goddessTurns) {
-        multiplier += 3.5; 
+        multiplier += 3.5;
         log("여신 강림의 힘으로 위력이 극대화됩니다!", 'holy');
     }
 
@@ -1486,10 +1486,10 @@ function playerAttack(skill) {
         multiplier += (buffs.player.absoluteStack || 0);
         buffs.player.absoluteStack = Math.min(5.0, (buffs.player.absoluteStack || 0) + 1.0);
     }
-    
+
     if(skill.effect === 'rose_finisher') {
         multiplier += (roseStack * 0.4);
-        multiplier = Math.min(11.0, multiplier); 
+        multiplier = Math.min(11.0, multiplier);
         roseStack = 0;
         log("피날레! 모든 장미가 폭발합니다!", 'rose');
     }
@@ -1502,11 +1502,11 @@ function playerAttack(skill) {
         let lostRatio = (player.maxHp - player.hp) / player.maxHp;
         multiplier = 1.2 + (lostRatio * 2.2);
     }
-    
+
     if(skill.effect === 'stack_ult_new') {
         buffs.player.castleStack = Math.min(5, (buffs.player.castleStack || 0) + 1);
         multiplier = buffs.player.castleStack * 1.8;
-        buffs.player.castleDef100 = true; 
+        buffs.player.castleDef100 = true;
     }
     if(skill.effect === 'charge_divine') {
         let stack = buffs.player.divineStack || 0;
@@ -1519,13 +1519,13 @@ function playerAttack(skill) {
     if(skill.effect === 'sage_god_hand' && buffs.player.sageForm === 'sun') multiplier += 0.4;
 
     if(skill.effect === 'sage_dream_ult') {
-        multiplier = 4.0; 
+        multiplier = 4.0;
         let activeForm = buffs.player.sageForm;
-        
+
         if(activeForm) {
             delete buffs.player.sageForm;
             delete buffs.player.formTurns;
-            recalcAllStats(); 
+            recalcAllStats();
         }
 
         if(activeForm === 'star') {
@@ -1549,10 +1549,10 @@ function playerAttack(skill) {
 
     let isPhy = skill.type === 'phy';
     let atkVal = isPhy ? player.atk : player.matk;
-    
+
     if(skill.effect === 'sage_hybrid_mana' || skill.effect === 'charge_milkyway') {
-        atkVal = (player.atk + player.matk); 
-        if(skill.effect === 'sage_hybrid_mana') atkVal /= 2; 
+        atkVal = (player.atk + player.matk);
+        if(skill.effect === 'sage_hybrid_mana') atkVal /= 2;
 
         if(skill.effect === 'charge_milkyway') {
             log("은하수의 힘이 개방됩니다!", 'star');
@@ -1562,11 +1562,11 @@ function playerAttack(skill) {
     if(hasArtifact('high_risk_dmg')) multiplier *= 1.3;
     if(hasArtifact('high_risk_dmg_ex')) multiplier *= 2.0;
     if(hasArtifact('pharaoh')) multiplier *= 2.0;
-    
+
     // if(buffs.player.medi && !isPhy) atkVal *= 0.5; // recalcAllStats로 이동됨
 
     // if(buffs.player.goddessTurns) atkVal *= 2.0; // recalcAllStats로 이동
-    
+
     // if(buffs.player.goddessBlessing) atkVal *= 1.5; // recalcAllStats로 이동
     // if(buffs.player.royalBloomTurns) atkVal *= 1.5; // recalcAllStats로 이동됨
 
@@ -1580,11 +1580,11 @@ function playerAttack(skill) {
     critChance += (player.charKey === 'rumi') ? 0.40 : 0.25;}
     if(skill.effect === 'guarantee_crit') critChance = 1.0;
     if(skill.name === '어쌔신 네일') critChance += (buffs.enemy.darkness || 0) * 0.3;
-    
+
     // [FIX] 메테오 스매시 버프 로직 제거 (applyPlayerSupport로 이동됨)
     // if(skill.effect === 'sage_meteor' && buffs.player.sageForm === 'sun') { ... }
 
-    let isCrit = Math.random() < critChance;
+    let isCrit = Math.random() ＜ critChance;
     if(isCrit) {
         let critDmg = player.baseCritDmg;
         if(buffs.player.adrenalineTurns) critDmg += 1.0;
@@ -1594,19 +1594,19 @@ function playerAttack(skill) {
 
     // 지크 패시브는 이제 recalcAllStats에서 기본 stat에 반영됨.
     // if(player.name === '지크') {
-    //     if(player.hp < player.maxHp * 0.25) atkVal *= 1.3;
-    //     else if(player.hp < player.maxHp * 0.5) atkVal *= 1.15;
+    //     if(player.hp ＜ player.maxHp * 0.25) atkVal *= 1.3;
+    //     else if(player.hp ＜ player.maxHp * 0.5) atkVal *= 1.15;
     // }
 
     let defVal = isPhy ? currentEnemy.def : currentEnemy.mdef;
-    
+
     // Enemy Def Reduction (Additive)
     let defRed = 0.0;
     if(skill.type === 'phy' && buffs.enemy.darkness) {
         defRed += 0.10 * buffs.enemy.darkness;
     }
-    if(isPhy && buffs.enemy.defDownTurns > 0) defRed += 0.2;
-    if(!isPhy && buffs.enemy.mdefDownTurns > 0) defRed += 0.2;
+    if(isPhy && buffs.enemy.defDownTurns ＞ 0) defRed += 0.2;
+    if(!isPhy && buffs.enemy.mdefDownTurns ＞ 0) defRed += 0.2;
 
     if(isPhy && buffs.enemy.physDefBuff) defRed -= 0.5;
     if(!isPhy && buffs.enemy.magDefBuff) defRed -= 0.5;
@@ -1618,27 +1618,27 @@ function playerAttack(skill) {
 
     let dmg = atkVal * multiplier * (100 / (100 + defVal));
     dmg = Math.floor(dmg);
-    dmg = Math.max(1, dmg); 
+    dmg = Math.max(1, dmg);
 
     if(skill.effect === 'hp_cost') player.hp -= player.maxHp * 0.1;
     if(skill.effect === 'hp_cost_20') player.hp -= player.maxHp * 0.2;
-    if(skill.effect === 'reset_buff') { 
-        player.hp = player.maxHp; 
+    if(skill.effect === 'reset_buff') {
+        player.hp = player.maxHp;
         buffs.player.goddessTurns = 3;
-        log("여신 강림! 상태 리셋 및 능력치 2배!", 'heal'); 
+        log("여신 강림! 상태 리셋 및 능력치 2배!", 'heal');
     }
-    
+
     if(skill.effect === 'darkness') {
         let add = 0;
-        if(skill.name === '크로스 컷' && isCrit) add = 3; 
-        else if(skill.name === '섀도우 볼') add = 1; 
-        
-        if(add > 0) {
+        if(skill.name === '크로스 컷' && isCrit) add = 3;
+        else if(skill.name === '섀도우 볼') add = 1;
+
+        if(add ＞ 0) {
             buffs.enemy.darkness = Math.min(5, (buffs.enemy.darkness || 0) + add);
             log(`암흑 스택이 ${add} 쌓였습니다! (현재: ${buffs.enemy.darkness})`, 'info');
         }
     }
-    
+
     if(skill.effect === 'sage_hybrid_mana' && isCrit) {
         player.mp = Math.min(player.maxMp, player.mp + 40);
         log("트윙클 치명타! 마나 40 회복.", 'heal');
@@ -1654,30 +1654,30 @@ function playerAttack(skill) {
     if(skill.effect === 'def_down') buffs.enemy.defDownTurns = 3;
     if(skill.effect === 'mdef_down') buffs.enemy.mdefDownTurns = 3;
     if(skill.effect === 'burn') buffs.enemy.burnTurns = 3;
-    
+
     if(skill.effect === 'add_rose_1') roseStack = Math.min(15, roseStack + 1);
     if(skill.effect === 'rose_2_self_stun') roseStack = Math.min(15, roseStack + 2);
     if(skill.effect === 'crit_rose_6' && isCrit) { roseStack = Math.min(15, roseStack + 6); log("치명타! 장미가 급격히 피어납니다!", 'rose'); }
 
     let enchantDmg = 0;
-    if(buffs.player.enchantTurns > 0 && isPhy) {
+    if(buffs.player.enchantTurns ＞ 0 && isPhy) {
         let eMult = 0.7;
         if(skill.effect === 'fire_combo_new') eMult = 1.4;
         enchantDmg = Math.floor(player.matk * eMult * (100 / (100 + currentEnemy.mdef)));
-        enchantDmg = Math.max(1, enchantDmg); 
+        enchantDmg = Math.max(1, enchantDmg);
     }
 
     currentEnemy.hp -= dmg;
     buffs.enemy.tookDamageThisTurn = true;
 
-    let critMsg = isCrit ? " <b>(치명타!)</b>" : "";
-    log(`${skill.name}! 적에게 <span class="dmg">${dmg}${critMsg}</span> 피해.`);
+    let critMsg = isCrit ? " ＜b＞(치명타!)＜/b＞" : "";
+    log(`${skill.name}! 적에게 ＜span class="dmg"＞${dmg}${critMsg}＜/span＞ 피해.`);
 
-    if(enchantDmg > 0) {
+    if(enchantDmg ＞ 0) {
         currentEnemy.hp -= enchantDmg;
-        log(`파이어 인챈트 추가타! <span class="fire">${enchantDmg}</span> 마법 피해.`, 'fire');
+        log(`파이어 인챈트 추가타! ＜span class="fire"＞${enchantDmg}＜/span＞ 마법 피해.`, 'fire');
     }
-    
+
     if(hasArtifact('vampire')) {
         let heal = Math.floor((dmg + enchantDmg) * 0.05);
         player.hp = Math.min(player.maxHp, player.hp + heal);
@@ -1686,32 +1686,32 @@ function playerAttack(skill) {
     if(skill.effect === 'multi_hit' && buffs.player.dodgeCount) {
         let hits = Math.min(4, buffs.player.dodgeCount);
         let extraDmg = dmg * hits;
-        extraDmg = Math.max(1, extraDmg); 
+        extraDmg = Math.max(1, extraDmg);
         currentEnemy.hp -= extraDmg;
-        log(`댄싱 대거 추가 ${hits}타! <span class="dmg">${extraDmg}</span> 피해.`);
+        log(`댄싱 대거 추가 ${hits}타! ＜span class="dmg"＞${extraDmg}＜/span＞ 피해.`);
     }
 
-    if(currentEnemy.hp <= 0 && currentEnemy.ai === 'witch' && !currentEnemy.hasRevived) {
+    if(currentEnemy.hp ＜= 0 && currentEnemy.ai === 'witch' && !currentEnemy.hasRevived) {
         currentEnemy.hp = 3000;
         currentEnemy.hasRevived = true;
-        log(`<b style="color:#29b6f6">혹한의 마녀가 얼음 속에서 되살아납니다! (HP 3000 회복)</b>`, 'info');
-        return true; 
+        log(`＜b style="color:#29b6f6"＞혹한의 마녀가 얼음 속에서 되살아납니다! (HP 3000 회복)＜/b＞`, 'info');
+        return true;
     }
 
-    if(currentEnemy.hp <= 0 && currentEnemy.ai === 'gold_dragon' && !currentEnemy.hasRevived) {
+    if(currentEnemy.hp ＜= 0 && currentEnemy.ai === 'gold_dragon' && !currentEnemy.hasRevived) {
         currentEnemy.hp = 3000;
         currentEnemy.hasRevived = true;
-        log(`<b style="color:#ffd700">골드 드래곤이 황금의 힘으로 부활합니다! (HP 3000 회복)</b>`, 'info');
+        log(`＜b style="color:#ffd700"＞골드 드래곤이 황금의 힘으로 부활합니다! (HP 3000 회복)＜/b＞`, 'info');
         return true;
     }
 
     if(currentEnemy.ai === 'pharaoh' && buffs.enemy.pharaohStance) {
-        log(`<b style="color:#8d6e63">파라오가 공격에 반응하여 고대의 저주를 발동합니다! (공/마공 +100%)</b>`, 'dmg');
+        log(`＜b style="color:#8d6e63"＞파라오가 공격에 반응하여 고대의 저주를 발동합니다! (공/마공 +100%)＜/b＞`, 'dmg');
         buffs.enemy.pharaohBuffTurns = 10;
         delete buffs.enemy.pharaohStance;
     }
 
-    return currentEnemy.hp > 0;
+    return currentEnemy.hp ＞ 0;
 }
 
 function enemyTurn() {
@@ -1720,13 +1720,13 @@ function enemyTurn() {
         currentEnemy.matk += 5;
     }
 
-    if(buffs.enemy.burnTurns > 0) {
+    if(buffs.enemy.burnTurns ＞ 0) {
         let burnDmg = Math.floor(player.matk * 0.5);
         burnDmg = Math.max(1, burnDmg);
         currentEnemy.hp -= burnDmg;
-        log(`화상 피해! <span class="dmg">${burnDmg}</span>`, 'info');
+        log(`화상 피해! ＜span class="dmg"＞${burnDmg}＜/span＞`, 'info');
         buffs.enemy.burnTurns--;
-        if(currentEnemy.hp <= 0) return false;
+        if(currentEnemy.hp ＜= 0) return false;
     }
 
     if(currentEnemy.ai === 'charge') {
@@ -1735,7 +1735,7 @@ function enemyTurn() {
             log(`${currentEnemy.name}의 차지 어택 발사!`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 2.5, 'phy');
         }
-        if(Math.random() < 0.3) {
+        if(Math.random() ＜ 0.3) {
             log(`${currentEnemy.name}이(가) 기를 모으기 시작합니다...`, 'info');
             buffs.enemy.charging = true;
             return true;
@@ -1743,7 +1743,7 @@ function enemyTurn() {
     }
 
     if(currentEnemy.ai === 'cream_maid') {
-        if(Math.random() < 0.3) {
+        if(Math.random() ＜ 0.3) {
             log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
         } else {
@@ -1754,10 +1754,10 @@ function enemyTurn() {
 
     if(currentEnemy.ai === 'candy_boy') {
         let rand = Math.random();
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
             log(`${currentEnemy.name}의 캔디 캐논!`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
             log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
         } else {
@@ -1769,7 +1769,7 @@ function enemyTurn() {
     if(currentEnemy.ai === 'pudding_princess') {
         // Form Change Logic
         if(turnCount === 1 || turnCount % 3 === 0) {
-            let form = Math.random() < 0.5 ? 'milk' : 'choco';
+            let form = Math.random() ＜ 0.5 ? 'milk' : 'choco';
 
             // Remove old buffs if any
             if(buffs.enemy.form === 'milk') { currentEnemy.atk -= 200; currentEnemy.def -= 500; }
@@ -1778,19 +1778,19 @@ function enemyTurn() {
             buffs.enemy.form = form;
             if(form === 'milk') {
                 currentEnemy.atk += 200; currentEnemy.def += 500;
-                log(`<b style="color:#fff59d">[밀크 푸딩 폼] 공격력/방어력 증가!</b>`, 'info');
+                log(`＜b style="color:#fff59d"＞[밀크 푸딩 폼] 공격력/방어력 증가!＜/b＞`, 'info');
             } else {
                 currentEnemy.matk += 200; currentEnemy.mdef += 500;
-                log(`<b style="color:#8d6e63">[초코 푸딩 폼] 마법공격력/마법방어력 증가!</b>`, 'info');
+                log(`＜b style="color:#8d6e63"＞[초코 푸딩 폼] 마법공격력/마법방어력 증가!＜/b＞`, 'info');
             }
         }
 
         let rand = Math.random();
-        if(rand < 0.3) {
+        if(rand ＜ 0.3) {
             log(`${currentEnemy.name}의 크림 익스플로전!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
-        } else if(rand < 0.4) {
-            log(`<b style="color:#ffd700">${currentEnemy.name}의 파라다이스!</b>`, 'mag');
+        } else if(rand ＜ 0.4) {
+            log(`＜b style="color:#ffd700"＞${currentEnemy.name}의 파라다이스!＜/b＞`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 4.0, 'mag');
         } else {
             log(`${currentEnemy.name}의 공격`, 'phy');
@@ -1799,7 +1799,7 @@ function enemyTurn() {
     }
 
     if(currentEnemy.ai === 'flame_sage') {
-        if(Math.random() < 0.3) {
+        if(Math.random() ＜ 0.3) {
             log(`${currentEnemy.name}의 익스플로전!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
         }
@@ -1808,10 +1808,10 @@ function enemyTurn() {
 
     if(currentEnemy.ai === 'lightning_sage') {
         let rand = Math.random();
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
             log(`${currentEnemy.name}의 전광석화!`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 2.0, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
             log(`${currentEnemy.name}의 썬더 레인!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
         }
@@ -1832,15 +1832,15 @@ function enemyTurn() {
             log(`[인조 마신] 마법 방어 프로토콜 가동 (마법 방어력 50% 증가)`, 'info');
         } else { delete buffs.enemy.magDefBuff; }
 
-        let isLowHp = currentEnemy.hp < currentEnemy.maxHp * 0.5;
+        let isLowHp = currentEnemy.hp ＜ currentEnemy.maxHp * 0.5;
         let rand = Math.random();
 
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
             log(`${currentEnemy.name}의 전광석화!`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 2.0, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
             if(isLowHp) {
-                log(`<b style="color:#ff5252">${currentEnemy.name}의 파괴의 형태!</b>`, 'mag');
+                log(`＜b style="color:#ff5252"＞${currentEnemy.name}의 파괴의 형태!＜/b＞`, 'mag');
                 return applyEnemyDamage(currentEnemy.matk * 4.5, 'mag');
             } else {
                 log(`${currentEnemy.name}의 익스플로전!`, 'mag');
@@ -1852,10 +1852,10 @@ function enemyTurn() {
 
     if(currentEnemy.ai === 'red_dragon') {
         let rand = Math.random();
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
             log(`${currentEnemy.name}의 드래곤 크로! (물리)`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
             log(`${currentEnemy.name}의 드래곤 브레스! (마법)`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
         } else {
@@ -1869,7 +1869,7 @@ function enemyTurn() {
 
         if(turnCount % 6 === 0) {
             buffs.enemy.goldDragonScale = 0;
-            log(`<b style="color:#ffd700">[골드 드래곤] 비늘이 약해지며 방어력이 초기화되었습니다!</b>`, 'info');
+            log(`＜b style="color:#ffd700"＞[골드 드래곤] 비늘이 약해지며 방어력이 초기화되었습니다!＜/b＞`, 'info');
         } else {
             let boost = buffs.enemy.goldDragonScale * 10;
             log(`[골드 드래곤] 비늘이 단단해집니다. (방어/마방 +${boost}%)`, 'info');
@@ -1887,11 +1887,11 @@ function enemyTurn() {
         currentEnemy.mdef = Math.floor(currentEnemy.baseMdef * multiplier);
 
         if((turnCount + 1) % 6 === 0) {
-            log(`<b style="color:#ff5252">${currentEnemy.name}의 드래곤 크로! (강력한 일격)</b>`, 'dmg');
+            log(`＜b style="color:#ff5252"＞${currentEnemy.name}의 드래곤 크로! (강력한 일격)＜/b＞`, 'dmg');
             return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
         }
 
-        if(Math.random() < 0.3) {
+        if(Math.random() ＜ 0.3) {
             log(`${currentEnemy.name}의 드래곤 브레스!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
         }
@@ -1902,10 +1902,10 @@ function enemyTurn() {
 
     if(currentEnemy.ai === 'sphinx') {
         let rand = Math.random();
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
              log(`${currentEnemy.name}의 강타!`, 'dmg');
              return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
              log(`${currentEnemy.name}의 샌드스톰!`, 'mag');
              return applyEnemyDamage(currentEnemy.matk * 2.0, 'mag');
         }
@@ -1917,38 +1917,38 @@ function enemyTurn() {
     if(currentEnemy.ai === 'pharaoh') {
         // Turn 25: Full Heal
         if(turnCount === 25) {
-            log(`<b style="color:#ffd700">[투탕카멘의 관] 파라오가 영면에서 깨어나 완전히 회복합니다!</b>`, 'heal');
+            log(`＜b style="color:#ffd700"＞[투탕카멘의 관] 파라오가 영면에서 깨어나 완전히 회복합니다!＜/b＞`, 'heal');
             currentEnemy.hp = currentEnemy.maxHp;
             updateBattleUI();
             return true;
         }
 
         if(turnCount % 7 === 0) {
-            log(`<b style="color:#8d6e63">[고대의 저주] 파라오가 저주를 영창합니다. (다음 턴 피격 시 능력치 상승)</b>`, 'info');
+            log(`＜b style="color:#8d6e63"＞[고대의 저주] 파라오가 저주를 영창합니다. (다음 턴 피격 시 능력치 상승)＜/b＞`, 'info');
             buffs.enemy.pharaohStance = true;
             buffs.enemy.pharaohStanceTurn = turnCount;
             return true;
         }
 
-        if(buffs.enemy.pharaohBuffTurns > 0) {
+        if(buffs.enemy.pharaohBuffTurns ＞ 0) {
              buffs.enemy.pharaohBuffTurns--;
         }
 
-        if(Math.random() < 0.3) {
+        if(Math.random() ＜ 0.3) {
             log(`${currentEnemy.name}의 샌드스톰!`, 'mag');
             let mult = 1.0;
-            if(buffs.enemy.pharaohBuffTurns > 0) mult += 1.0;
+            if(buffs.enemy.pharaohBuffTurns ＞ 0) mult += 1.0;
             return applyEnemyDamage(currentEnemy.matk * 2.0 * mult, 'mag');
         }
 
         log(`${currentEnemy.name}의 공격`, 'phy');
         let mult = 1.0;
-        if(buffs.enemy.pharaohBuffTurns > 0) mult += 1.0;
+        if(buffs.enemy.pharaohBuffTurns ＞ 0) mult += 1.0;
         return applyEnemyDamage(currentEnemy.atk * mult, 'phy');
     }
 
     if(currentEnemy.ai === 'silent_librarian') {
-         if(Math.random() < 0.3) {
+         if(Math.random() ＜ 0.3) {
              log(`${currentEnemy.name}의 사일런트!`, 'mag');
              return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
          }
@@ -1958,10 +1958,10 @@ function enemyTurn() {
 
     if(currentEnemy.ai === 'night_rabbit') {
         let rand = Math.random();
-        if(rand < 0.2) {
+        if(rand ＜ 0.2) {
              log(`${currentEnemy.name}의 깡총깡총!`, 'phy');
              return applyEnemyDamage(currentEnemy.atk * 1.5, 'phy');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
              log(`${currentEnemy.name}의 사일런트!`, 'mag');
              return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
         } else {
@@ -1977,18 +1977,18 @@ function enemyTurn() {
              delete buffs.enemy.forecastType;
 
              if(type === 'drain') {
-                  log(`<b style="color:#90caf9">소울 드레인! (플레이어 MP 0)</b>`, 'mag');
+                  log(`＜b style="color:#90caf9"＞소울 드레인! (플레이어 MP 0)＜/b＞`, 'mag');
                   player.mp = 0;
                   return true;
              }
              if(type === 'darkness') {
                   let dmgMult = buffs.enemy.tookDamageThisTurn ? 4.5 : 1.5;
                   let msg = buffs.enemy.tookDamageThisTurn ? "섀도우 트위스트! (반격 폭발)" : "섀도우 트위스트!";
-                  log(`<b style="color:#b39ddb">${msg}</b>`, 'mag');
+                  log(`＜b style="color:#b39ddb"＞${msg}＜/b＞`, 'mag');
                   return applyEnemyDamage(currentEnemy.matk * dmgMult, 'mag');
              }
              if(type === 'doom') {
-                  log(`<b style="color:#ff5252">아포칼립스! (종말의 일격)</b>`, 'dmg');
+                  log(`＜b style="color:#ff5252"＞아포칼립스! (종말의 일격)＜/b＞`, 'dmg');
                   return applyEnemyDamage(currentEnemy.atk * 5.0, 'phy');
              }
          }
@@ -2001,11 +2001,11 @@ function enemyTurn() {
 
              buffs.enemy.forecastType = type;
              buffs.enemy.forecastTurn = turnCount;
-             log(`<b style="color:#ffd700">[${names[type]}] ${descs[type]}</b>`, 'info');
+             log(`＜b style="color:#ffd700"＞[${names[type]}] ${descs[type]}＜/b＞`, 'info');
              return true;
          }
 
-         if(Math.random() < 0.3) {
+         if(Math.random() ＜ 0.3) {
              log(`${currentEnemy.name}의 사일런트!`, 'mag');
              return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
          }
@@ -2014,18 +2014,18 @@ function enemyTurn() {
     }
 
     if(currentEnemy.ai === 'witch') {
-        let isEnraged = (currentEnemy.hp < currentEnemy.maxHp * 0.25);
+        let isEnraged = (currentEnemy.hp ＜ currentEnemy.maxHp * 0.25);
         let multiplier = 1.0;
         if(isEnraged) {
             multiplier = 2.0;
-            log(`<b style="color:#29b6f6">마녀가 생명의 위협을 느끼고 폭주합니다! (공격력 2배)</b>`, 'dmg');
+            log(`＜b style="color:#29b6f6"＞마녀가 생명의 위협을 느끼고 폭주합니다! (공격력 2배)＜/b＞`, 'dmg');
         }
 
         let rand = Math.random();
-        if(rand < 0.1) {
-            log(`<b style="color:#4fc3f7">절대영도! (모든 것을 얼려버립니다!)</b>`, 'mag');
+        if(rand ＜ 0.1) {
+            log(`＜b style="color:#4fc3f7"＞절대영도! (모든 것을 얼려버립니다!)＜/b＞`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 5.0 * multiplier, 'mag');
-        } else if(rand < 0.4) {
+        } else if(rand ＜ 0.4) {
             log(`아이스 빔!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 2.0 * multiplier, 'mag');
         } else {
@@ -2035,36 +2035,36 @@ function enemyTurn() {
     }
 
     if(currentEnemy.ai === 'goddess') {
-        if(turnCount <= 2) {
+        if(turnCount ＜= 2) {
             if(turnCount === 1) {
-                log(`<b style="color:#ff5252">[심판의 형태] 여신이 거대한 힘을 모으고 있습니다...</b>`, 'info');
-                return true; 
+                log(`＜b style="color:#ff5252"＞[심판의 형태] 여신이 거대한 힘을 모으고 있습니다...＜/b＞`, 'info');
+                return true;
             }
             if(turnCount === 2) {
-                log(`<b style="color:#ff5252; font-size:1.1rem;">저지먼트!!</b>`, 'dmg');
+                log(`＜b style="color:#ff5252; font-size:1.1rem;"＞저지먼트!!＜/b＞`, 'dmg');
                 return applyEnemyDamage(currentEnemy.matk * 3.5, 'mag');
             }
         }
-        
-        if(currentEnemy.hp <= currentEnemy.maxHp * 0.5) {
+
+        if(currentEnemy.hp ＜= currentEnemy.maxHp * 0.5) {
             if(buffs.player.goddessBlessing) {
                 delete buffs.player.goddessBlessing;
-                log(`<b style="color:#e040fb">[검의 형태] "자애는 끝났다."</b>`, 'dmg');
+                log(`＜b style="color:#e040fb"＞[검의 형태] "자애는 끝났다."＜/b＞`, 'dmg');
                 log(`플레이어의 축복이 해제되었습니다!`, 'info');
             }
 
             if(buffs.enemy.charging) {
                 delete buffs.enemy.charging;
-                log(`<b style="color:#ff5252">디바인 블레이드! (차지 발동)</b>`, 'dmg');
+                log(`＜b style="color:#ff5252"＞디바인 블레이드! (차지 발동)＜/b＞`, 'dmg');
                 return applyEnemyDamage(currentEnemy.atk * 4.5, 'phy');
             }
 
             let rand = Math.random();
-            if(rand < 0.2) {
+            if(rand ＜ 0.2) {
                 log(`여신이 검을 높이 듭니다... (차지)`, 'info');
                 buffs.enemy.charging = true;
                 return true;
-            } else if(rand < 0.4) {
+            } else if(rand ＜ 0.4) {
                 log(`홀리 레이!`, 'mag');
                 return applyEnemyDamage(currentEnemy.matk * 2.0, 'mag');
             } else {
@@ -2072,18 +2072,18 @@ function enemyTurn() {
                 return applyEnemyDamage(currentEnemy.atk * 1.0, 'phy');
             }
         }
-        
+
         if(!buffs.player.goddessBlessing) {
             buffs.player.goddessBlessing = true;
-            log(`<b style="color:#69f0ae">[자애의 형태] "너의 힘을 보여보아라."</b>`, 'heal');
+            log(`＜b style="color:#69f0ae"＞[자애의 형태] "너의 힘을 보여보아라."＜/b＞`, 'heal');
             log(`플레이어 공격력/마법공격력 50% 증가!`, 'heal');
         }
 
-        if(turnCount >= 7) {
-            log(`<b style="color:#ffd700">더 홀리! (광역 심판)</b>`, 'holy');
+        if(turnCount ＞= 7) {
+            log(`＜b style="color:#ffd700"＞더 홀리! (광역 심판)＜/b＞`, 'holy');
             player.hp -= 550;
-            log(`<span class="dmg">550</span>의 절대 피해를 입었습니다!`, 'dmg');
-            return player.hp > 0;
+            log(`＜span class="dmg"＞550＜/span＞의 절대 피해를 입었습니다!`, 'dmg');
+            return player.hp ＞ 0;
         }
 
         log(`여신의 자애로운 평타`, 'info');
@@ -2108,7 +2108,7 @@ function enemyTurn() {
         return applyEnemyDamage(currentEnemy.atk * 3.5, 'phy');
     }
 
-    if(Math.random() < 0.3 && currentEnemy.ai !== 'charge') {
+    if(Math.random() ＜ 0.3 && currentEnemy.ai !== 'charge') {
         let val = currentEnemy.skillType === 'phy' ? currentEnemy.atk : currentEnemy.matk;
         log(`${currentEnemy.name}의 ${currentEnemy.skillName}!`, 'dmg');
         return applyEnemyDamage(val * currentEnemy.skillPower, currentEnemy.skillType);
@@ -2120,26 +2120,26 @@ function enemyTurn() {
 
 function applyEnemyDamage(rawDmg, type) {
     let eva = player.baseEva + (buffs.player.eva || 0);
-    if(Math.random() < eva) {
+    if(Math.random() ＜ eva) {
         log("적의 공격을 회피했습니다!", 'info');
         if(player.skills['dancing']) buffs.player.dodgeCount = (buffs.player.dodgeCount || 0) + 1;
         return true;
     }
 
     let def = type === 'mag' ? player.mdef : player.def;
-    
+
     if(buffs.player.defZero) def = 0;
     // else {
         // Buffs are now handled in recalcAllStats (defMult)
         // let defMult = 1.0;
         // if(buffs.player.divineTurns) defMult += 0.3;
         // if(buffs.player.castleDef100) defMult += 1.0;
-        
+
         // if(player.name === '지크') {
-        //     if(player.hp < player.maxHp * 0.25) defMult += 0.3;
-        //     else if(player.hp < player.maxHp * 0.5) defMult += 0.15;
+        //     if(player.hp ＜ player.maxHp * 0.25) defMult += 0.3;
+        //     else if(player.hp ＜ player.maxHp * 0.5) defMult += 0.15;
         // }
-        
+
         // def *= defMult;
     // }
 
@@ -2156,46 +2156,46 @@ function applyEnemyDamage(rawDmg, type) {
     if(buffs.player.guard) dmg *= 0.3;
     if(buffs.player.dmgRed50) dmg *= 0.5;
     if(buffs.player.instinctTurns) dmg *= 1.2;
-    
+
     if(buffs.player.sageBarrier) {
-        let reduction = buffs.player.sageForm === 'star' ? 0.3 : 0.5; 
+        let reduction = buffs.player.sageForm === 'star' ? 0.3 : 0.5;
         dmg *= reduction;
     }
 
     dmg = Math.floor(dmg);
-    dmg = Math.max(1, dmg); 
-    
-    if(buffs.player.divineTurns > 0 && dmg > 0) {
+    dmg = Math.max(1, dmg);
+
+    if(buffs.player.divineTurns ＞ 0 && dmg ＞ 0) {
         buffs.player.divineStack = (buffs.player.divineStack || 0) + 1;
     }
 
-    if(buffs.player.immortal && player.hp - dmg <= 0) {
+    if(buffs.player.immortal && player.hp - dmg ＜= 0) {
         player.hp = 1;
         log(`언다잉 발동! 죽음을 거부했습니다!`, 'fire');
         if(player.name === '지크') {
-            buffs.player.undyingPowerTurns = 2; 
+            buffs.player.undyingPowerTurns = 2;
         }
     } else {
-        if(player.hp - dmg <= 0 && !buffs.player.revived) {
+        if(player.hp - dmg ＜= 0 && !buffs.player.revived) {
              if(hasArtifact('guardian_angel')) {
                 buffs.player.revived = true;
                 player.hp = Math.floor(player.maxHp * 0.5);
-                log("<b>수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)</b>", 'heal');
+                log("＜b＞수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)＜/b＞", 'heal');
              } else if(hasArtifact('guardian_angel_legend')) {
                 buffs.player.revived = true;
                 player.hp = player.maxHp;
-                log("<b>[전설] 수호천사의 깃털이 빛나며 완전하게 부활했습니다! (HP 100% 회복)</b>", 'heal');
+                log("＜b＞[전설] 수호천사의 깃털이 빛나며 완전하게 부활했습니다! (HP 100% 회복)＜/b＞", 'heal');
              } else {
                 player.hp -= dmg;
-                log(`<span class="dmg">${dmg}</span> 피해를 입었습니다.`, 'dmg');
+                log(`＜span class="dmg"＞${dmg}＜/span＞ 피해를 입었습니다.`, 'dmg');
              }
         } else {
             player.hp -= dmg;
-            log(`<span class="dmg">${dmg}</span> 피해를 입었습니다.`, 'dmg');
+            log(`＜span class="dmg"＞${dmg}＜/span＞ 피해를 입었습니다.`, 'dmg');
         }
     }
 
-    if(buffs.player.sanctuaryTurns > 0) {
+    if(buffs.player.sanctuaryTurns ＞ 0) {
         let refDmg = Math.floor(player.matk * 1.5 * (100 / (100 + currentEnemy.mdef)));
         refDmg = Math.max(1, refDmg);
         currentEnemy.hp -= refDmg;
@@ -2204,44 +2204,44 @@ function applyEnemyDamage(rawDmg, type) {
 
     if(hasArtifact('reflect_phy') && type === 'phy') {
         let thornDmg = Math.floor(dmg * 0.1);
-        if(thornDmg > 0) {
+        if(thornDmg ＞ 0) {
             currentEnemy.hp -= thornDmg;
             log(`유물 반사! ${thornDmg} 피해.`, 'dmg');
         }
     }
 
-    return player.hp > 0;
+    return player.hp ＞ 0;
 }
 
 function endTurnPhase() {
-    if(player.charKey === 'queen' && roseStack > 0 && currentEnemy.hp > 0) {
+    if(player.charKey === 'queen' && roseStack ＞ 0 && currentEnemy.hp ＞ 0) {
         let roseDmg = Math.floor((player.atk + player.matk) * 0.1 * roseStack);
         let defVal = currentEnemy.def;
         let reduction = 100 / (100 + defVal);
         roseDmg = Math.floor(roseDmg * reduction);
         if(buffs.player.gardenTurns) roseDmg *= 2;
         roseDmg = Math.max(1, roseDmg);
-        
+
         currentEnemy.hp -= roseDmg;
-        log(`[패시브] 장미의 가시가 적을 찌릅니다! <span class="rose">${roseDmg}</span> 피해`, 'rose');
-        if(currentEnemy.hp <= 0) { winBattle(); return; }
+        log(`[패시브] 장미의 가시가 적을 찌릅니다! ＜span class="rose"＞${roseDmg}＜/span＞ 피해`, 'rose');
+        if(currentEnemy.hp ＜= 0) { winBattle(); return; }
     }
-    
+
     if(hasArtifact('regen_10')) {
         let regen = Math.floor(player.maxHp * 0.1);
         player.hp = Math.min(player.maxHp, player.hp + regen);
     }
 
-    delete buffs.player.guard; 
-    delete buffs.player.guard_70; 
+    delete buffs.player.guard;
+    delete buffs.player.guard_70;
     delete buffs.player.nullMag;
     delete buffs.player.nullPhy;
-    delete buffs.player.castleDef100; 
-    delete buffs.player.stun; 
+    delete buffs.player.castleDef100;
+    delete buffs.player.stun;
     delete buffs.player.immortal;
     delete buffs.player.dmgRed50;
-    delete buffs.player.sageBarrier; 
-    
+    delete buffs.player.sageBarrier;
+
     if(buffs.player.defZero) delete buffs.player.defZero;
     if(buffs.player.defZeroNext) { buffs.player.defZero = true; delete buffs.player.defZeroNext; }
 
@@ -2250,23 +2250,23 @@ function endTurnPhase() {
         delete buffs.player.nextTurnStun;
     }
 
-    if(buffs.player.instinctTurns) { buffs.player.instinctTurns--; if(buffs.player.instinctTurns<=0) { delete buffs.player.instinctVal; } }
-    if(buffs.player.adrenalineTurns) { buffs.player.adrenalineTurns--; if(buffs.player.adrenalineTurns<=0) { delete buffs.player.critUp; } }
-    if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns<=0) { delete buffs.player.veilVal; } }
-    if(buffs.player.mediTurns) { buffs.player.mediTurns--; if(buffs.player.mediTurns<=0) { delete buffs.player.medi; } }
+    if(buffs.player.instinctTurns) { buffs.player.instinctTurns--; if(buffs.player.instinctTurns＜=0) { delete buffs.player.instinctVal; } }
+    if(buffs.player.adrenalineTurns) { buffs.player.adrenalineTurns--; if(buffs.player.adrenalineTurns＜=0) { delete buffs.player.critUp; } }
+    if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns＜=0) { delete buffs.player.veilVal; } }
+    if(buffs.player.mediTurns) { buffs.player.mediTurns--; if(buffs.player.mediTurns＜=0) { delete buffs.player.medi; } }
     if(buffs.player.divineTurns) buffs.player.divineTurns--;
     if(buffs.player.vulcanTurns) buffs.player.vulcanTurns--;
     if(buffs.player.sanctuaryTurns) buffs.player.sanctuaryTurns--;
     if(buffs.player.goddessTurns) buffs.player.goddessTurns--;
     if(buffs.player.demonEyeTurns) {
         buffs.player.demonEyeTurns--;
-        if(buffs.player.demonEyeTurns <= 0) log("마안의 효과가 끝났습니다.", 'info');
+        if(buffs.player.demonEyeTurns ＜= 0) log("마안의 효과가 끝났습니다.", 'info');
     }
-    
+
     // 대현자 형태 및 버프 턴 감소
     if(buffs.player.formTurns) {
         buffs.player.formTurns--;
-        if(buffs.player.formTurns <= 0) {
+        if(buffs.player.formTurns ＜= 0) {
             delete buffs.player.sageForm;
             delete buffs.player.formTurns;
             log("형태 변환의 힘이 사라졌습니다.", 'info');
@@ -2274,31 +2274,31 @@ function endTurnPhase() {
     }
     if(buffs.player.milkshakeTurns) {
         buffs.player.milkshakeTurns--;
-        if(buffs.player.milkshakeTurns <= 0) log("밀크쉐이크 버프가 사라집니다.", 'info');
+        if(buffs.player.milkshakeTurns ＜= 0) log("밀크쉐이크 버프가 사라집니다.", 'info');
     }
     // 턴 종료시 스탯 재계산 (형태/버프 만료 반영)
     recalcAllStats();
 
-    if(buffs.player.critBuffTurns) { buffs.player.critBuffTurns--; if(buffs.player.critBuffTurns<=0) delete buffs.player.critBuff; }
+    if(buffs.player.critBuffTurns) { buffs.player.critBuffTurns--; if(buffs.player.critBuffTurns＜=0) delete buffs.player.critBuff; }
     if(buffs.player.gardenTurns) buffs.player.gardenTurns--;
     if(buffs.player.royalBloomTurns) {
         buffs.player.royalBloomTurns--;
-        if(buffs.player.royalBloomTurns <= 0) {
+        if(buffs.player.royalBloomTurns ＜= 0) {
             roseStack = 0;
             log("Royal Bloom 효과가 끝나며 장미가 시들었습니다...", 'rose');
         }
     }
 
     if(buffs.player.enchantTurns) buffs.player.enchantTurns--;
-    if(buffs.player.undyingPowerTurns) { buffs.player.undyingPowerTurns--; if(buffs.player.undyingPowerTurns<=0) log("언다잉 힘이 사라집니다.", 'info'); }
+    if(buffs.player.undyingPowerTurns) { buffs.player.undyingPowerTurns--; if(buffs.player.undyingPowerTurns＜=0) log("언다잉 힘이 사라집니다.", 'info'); }
 
     if(buffs.enemy.defDownTurns) buffs.enemy.defDownTurns--;
     if(buffs.enemy.mdefDownTurns) buffs.enemy.mdefDownTurns--;
     if(buffs.enemy.tookDamageThisTurn) delete buffs.enemy.tookDamageThisTurn;
 
     let totalEva = 0;
-    if(buffs.player.instinctTurns > 0) totalEva += (buffs.player.instinctVal || 0);
-    if(buffs.player.veilTurns > 0) totalEva += (buffs.player.veilVal || 0);
+    if(buffs.player.instinctTurns ＞ 0) totalEva += (buffs.player.instinctVal || 0);
+    if(buffs.player.veilTurns ＞ 0) totalEva += (buffs.player.veilVal || 0);
     buffs.player.eva = totalEva;
 
     if(buffs.player.nextEva) { buffs.player.eva += buffs.player.nextEva; delete buffs.player.nextEva; }
@@ -2306,12 +2306,12 @@ function endTurnPhase() {
     let regen = player.mpRegen;
     if(buffs.player.medi) regen += 30;
     if(hasArtifact('mana_engine')) regen += 10;
-    
+
     player.mp = Math.min(player.maxMp, player.mp + regen);
-    
+
     updateBattleUI();
     turnCount++;
 }
-</script>
-</body>
-</html>
+＜/script＞
+＜/body＞
+＜/html＞
