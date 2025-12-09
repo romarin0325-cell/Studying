@@ -221,13 +221,15 @@
             <button onclick="enterEvent()">🟣 혼돈의 틈 (Lv.11~16)</button>
             <button onclick="enterDungeon(5)" style="background: linear-gradient(135deg, #4fc3f7, #0288d1); border-color:#29b6f6; color:#fff;">❄️ 영겁의 빙하 (Lv.17~20)</button>
             <button onclick="enterDungeon(6)" style="background: linear-gradient(135deg, #cfd8dc, #546e7a); border-color:#90a4ae; color:#263238; font-weight:bold;">☁️ 천상의 계단 (Lv.21~25)</button>
-            <button onclick="enterEventDungeon('dessert')" style="background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
-            <button onclick="enterEventDungeon('magic')" style="background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
-            <button onclick="enterEventDungeon('dragon')" style="background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;">🐲 용의 둥지</button>
-            <button onclick="enterEventDungeon('ruins')" style="background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;">🏺 고대 유적</button>
-            <button onclick="enterEventDungeon('time')" style="background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
+
+            <!-- Event Dungeons -->
+            <button id="btn-event-dessert" class="btn-event-dungeon" onclick="enterEventDungeon('dessert')" style="display:none; background: linear-gradient(135deg, #f8bbd0, #ec407a); border-color:#e91e63; color:#fff;">🍰 디저트 킹덤</button>
+            <button id="btn-event-magic" class="btn-event-dungeon" onclick="enterEventDungeon('magic')" style="display:none; background: linear-gradient(135deg, #7e57c2, #512da8); border-color:#673ab7; color:#fff;">🏰 마도 제국</button>
+            <button id="btn-event-dragon" class="btn-event-dungeon" onclick="enterEventDungeon('dragon')" style="display:none; background: linear-gradient(135deg, #ffab91, #d84315); border-color:#bf360c; color:#fff;">🐲 용의 둥지</button>
+            <button id="btn-event-ruins" class="btn-event-dungeon" onclick="enterEventDungeon('ruins')" style="display:none; background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;">🏺 고대 유적</button>
+            <button id="btn-event-time" class="btn-event-dungeon" onclick="enterEventDungeon('time')" style="display:none; background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
+
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
-            <button onclick="resetAllArtifacts()" style="background:#3e2723; border-color:#5d4037;">🕰️ 시간의 역행 (유물 리셋)</button>
             <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
         </div>
 
@@ -250,6 +252,12 @@
         <button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;">방어구 강화 <span id="armor-cost" class="skill-sub"></span></button>
         <h4 style="text-align:left; color:#a5d6a7;">스킬 습득</h4>
         <div id="skill-shop-list" style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:15px;"></div>
+
+        <button onclick="resetAllArtifacts()" style="width:100%; margin-bottom:5px; background:#3e2723; border-color:#5d4037;">
+            🕰️ 시간의 역행 (20,000 G)
+            <span class="skill-sub" style="color:#bcaaa4">모든 유물 리셋 (기본 확률)</span>
+        </button>
+
         <button onclick="resetAllArtifacts(true)" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
              🔮 고귀한 시간의 역행 (100,000 G)
              <span class="skill-sub" style="color:#e1bee7">모든 유물 리셋 (에픽/전설 확률 3배)</span>
@@ -322,7 +330,7 @@
    2. 게임 로직 (Game Logic)
    ========================================= */
 let player = {};
-let gameState = { gold: 10000, learnedSkills: [], manaLevel: 0, equipWeapon: 0, equipArmor: 0 };
+let gameState = { gold: 10000, learnedSkills: [], manaLevel: 0, equipWeapon: 0, equipArmor: 0, currentEventDungeon: null };
 let currentEnemy = null;
 let turnCount = 0;
 let buffs = { player: {}, enemy: {} };
@@ -392,7 +400,20 @@ function selectChar(charKey) {
 
     document.getElementById('char-modal').classList.remove('active');
     document.getElementById('town-menu').style.display = 'grid'; 
+    updateTownUI(); // 이벤트 던전 버튼 갱신
     updateInfo();
+}
+
+function updateTownUI() {
+    // 이벤트 던전 버튼들 숨기기
+    const eventBtns = document.querySelectorAll('.btn-event-dungeon');
+    eventBtns.forEach(btn => btn.style.display = 'none');
+
+    // 현재 할당된 이벤트 던전만 보이기
+    if(gameState.currentEventDungeon) {
+        const targetBtn = document.getElementById(`btn-event-${gameState.currentEventDungeon}`);
+        if(targetBtn) targetBtn.style.display = 'block';
+    }
 }
 
 function confirmResetGame() {
@@ -447,10 +468,13 @@ function resetGameProcess() {
     buffs = { player: {}, enemy: {} };
     player = {};
 
-    // 2. NG+ 유물 풀 세팅
+    // 2. 이벤트 던전 설정 (회차별 1개, 중복 X, 6회차부터 등장 X)
+    setupEventDungeon();
+
+    // 3. NG+ 유물 풀 세팅
     initArtifactsWithNGPlus();
 
-    // 3. UI 리셋 및 캐릭터 선택창 열기
+    // 4. UI 리셋 및 캐릭터 선택창 열기
     document.getElementById('town-menu').style.display = 'none';
     document.getElementById('battle-menu').style.display = 'none';
     document.getElementById('shop-modal').classList.remove('active');
@@ -466,6 +490,43 @@ function resetGameProcess() {
     // 캐릭터 선택 모달 열기
     document.getElementById('char-modal').classList.add('active');
     myAlert("게임이 초기화되었습니다. (새로운 운명이 시작됩니다)");
+}
+
+function setupEventDungeon() {
+    let cycle = getCycleCount();
+    // 6회차(인덱스 5)부터는 등장하지 않음
+    if(cycle >= 5) {
+        gameState.currentEventDungeon = null;
+        return;
+    }
+
+    let usedEvents = JSON.parse(localStorage.getItem('turnRpgUsedEvents') || '[]');
+    const ALL_EVENTS = ['dessert', 'magic', 'dragon', 'ruins', 'time'];
+
+    // 현재 회차에 이미 할당된 이벤트가 있는지 확인 (재시작 시 유지)
+    // 하지만 usedEvents는 문자열 배열이므로, 순서대로 할당되었다고 가정하거나,
+    // cycle 인덱스를 사용하여 매핑해야 함.
+    // 단순하게: usedEvents의 길이는 현재 진행한 회차 수와 같아야 함 (0회차 -> 1개 할당)
+    // 만약 usedEvents.length > cycle 이면 이미 할당된 것.
+    // 만약 usedEvents.length <= cycle 이면 새로 할당해야 함.
+
+    // [보정] 하드 리셋 시 usedEvents도 초기화해야 함 (triggerReset('hard')에서 처리 필요)
+
+    if(usedEvents.length > cycle) {
+        // 이미 할당됨
+        gameState.currentEventDungeon = usedEvents[cycle];
+    } else {
+        // 새로 할당
+        let available = ALL_EVENTS.filter(e => !usedEvents.includes(e));
+        if(available.length > 0) {
+            let pick = available[Math.floor(Math.random() * available.length)];
+            usedEvents.push(pick);
+            localStorage.setItem('turnRpgUsedEvents', JSON.stringify(usedEvents));
+            gameState.currentEventDungeon = pick;
+        } else {
+            gameState.currentEventDungeon = null; // 남은 게 없음
+        }
+    }
 }
 
 function initArtifactsWithNGPlus() {
@@ -1399,11 +1460,12 @@ function winBattle() {
         // 보스 드랍 확률 체크 (신규 보스 100% 해금)
         if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
         else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
-        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1 && getCycleCount() >= 2) drop = BOSS_DROP_ARTIFACTS.goddess;
+        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1 && getCycleCount() >= 4) drop = BOSS_DROP_ARTIFACTS.goddess;
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
         else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
         else if(currentEnemy.name === "고대신 파라오") drop = BOSS_DROP_ARTIFACTS.pharaoh;
+        else if(currentEnemy.name === "시간의 지배자") drop = BOSS_DROP_ARTIFACTS.time_ruler;
 
         if(drop) {
              let unlocks = getBossArtifactUnlocks();
@@ -2323,6 +2385,9 @@ function endTurnPhase() {
     updateBattleUI();
     turnCount++;
 }
+
+// 초기화: 페이지 로드 시 이벤트 던전 설정 (새로고침 대응)
+setupEventDungeon();
 </script>
 </body>
 </html>
