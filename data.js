@@ -100,7 +100,8 @@ const BOSS_DROP_ARTIFACTS = {
     artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' },
     gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' },
     pharaoh: { id: 'pharaoh', name: "신기 파라오", desc: "주는 피해 +100%", effect: 'pharaoh', val: 1.0, rarity: 'legend' },
-    time_ruler: { id: 'dark_pendant', name: "다크 펜던트", desc: "치명타율 +10%, 치명타 피해량 +100%", effect: 'dark_pendant', val: 1.0, rarity: 'legend' }
+    time_ruler: { id: 'dark_pendant', name: "다크 펜던트", desc: "치명타율 +10%, 치명타 피해량 +100%", effect: 'dark_pendant', val: 1.0, rarity: 'legend' },
+    hidden: { id: 'legend_mark', name: "전설의 증표", desc: "모든 능력치 +100%", effect: 'legend_mark', val: 1.0, rarity: 'legend' }
 };
 
 let ARTIFACTS = JSON.parse(JSON.stringify(BASE_ARTIFACTS));
@@ -393,5 +394,21 @@ const ENEMIES = [
         exp: 35000, gold: 55000, tier: 'time',
         skillName: "사일런트", skillType: 'mag', skillPower: 2.5,
         ai: 'time_ruler', desc: "시간의 도서관 주인"
+    },
+
+    // Hidden: 빛과 저주의 회랑
+    {
+        name: "사랑의 여신 아이리스", img:"",
+        hp: 17000, atk: 500, matk: 600, def: 300, mdef: 400,
+        exp: 1000000, gold: 1000000, tier: 'hidden',
+        skillName: "홀리 레이", skillType: 'mag', skillPower: 2.0,
+        ai: 'iris_light', desc: "빛과 저주의 회랑 주인"
+    },
+    {
+        name: "저주의 여신 아이리스", img:"",
+        hp: 17000, atk: 600, matk: 500, def: 400, mdef: 300,
+        exp: 0, gold: 0, tier: 'hidden',
+        skillName: "다크니스", skillType: 'mag', skillPower: 2.0,
+        ai: 'iris_curse', desc: "빛과 저주의 회랑 주인"
     }
 ];
