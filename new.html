@@ -229,6 +229,9 @@
             <button id="btn-event-ruins" class="btn-event-dungeon" onclick="enterEventDungeon('ruins')" style="display:none; background: linear-gradient(135deg, #8d6e63, #5d4037); border-color:#4e342e; color:#fff;">🏺 고대 유적</button>
             <button id="btn-event-time" class="btn-event-dungeon" onclick="enterEventDungeon('time')" style="display:none; background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
 
+            <!-- Hidden Dungeon -->
+            <button id="btn-hidden-dungeon" onclick="enterHiddenDungeon()" style="display:none; background: linear-gradient(135deg, #212121, #000000); border-color:#424242; color:#fff;">👁️ 빛과 저주의 회랑 (Hidden)</button>
+
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
             <button onclick="openSettings()" style="background:#37474f; border-color:#455a64; color:#b0bec5;">⚙️ 게임 설정</button>
         </div>
@@ -447,6 +450,20 @@ function updateTownUI() {
         const targetBtn = document.getElementById(`btn-event-${gameState.currentEventDungeon}`);
         if(targetBtn) targetBtn.style.display = 'block';
     }
+
+    // 히든 던전 해금 확인
+    if(checkHiddenUnlock()) {
+        document.getElementById('btn-hidden-dungeon').style.display = 'block';
+    } else {
+        document.getElementById('btn-hidden-dungeon').style.display = 'none';
+    }
+}
+
+function checkHiddenUnlock() {
+    const required = ['hestia', 'dream_choco', 'blue_moon', 'dragon_scale', 'pharaoh', 'dark_pendant'];
+    const unlocks = getBossArtifactUnlocks();
+    // 모든 필수 전설 유물이 unlock 되어있는지 확인
+    return required.every(id => unlocks.includes(id));
 }
 
 function confirmResetGame() {
@@ -1145,6 +1162,13 @@ function enterEventDungeon(type) {
     startBattle(candidates[Math.floor(Math.random() * candidates.length)]);
 }
 
+function enterHiddenDungeon() {
+    // Hidden dungeon starts with Iris Light
+    const boss = ENEMIES.find(e => e.ai === 'iris_light');
+    if(!boss) return myAlert("히든 보스 데이터 오류");
+    startBattle(boss);
+}
+
 function updateBattleUI() {
     updateInfo(); 
     if (currentEnemy) {
@@ -1817,7 +1841,94 @@ function playerAttack(skill) {
         delete buffs.enemy.pharaohStance;
     }
 
+    // Hidden Boss Death Handling
+    if(currentEnemy.hp <= 0 && currentEnemy.tier === 'hidden') {
+        if(!gameState.hiddenBossDead) {
+            // Check if reserve is alive
+            let otherId = currentEnemy.ai === 'iris_light' ? 'iris_curse' : 'iris_light';
+            if(gameState.hiddenBossReserve[otherId] > 0) {
+                // One dies, but other is alive.
+                gameState.hiddenBossDead = true; // Mark one as dead (Berserk trigger next turn)
+                currentEnemy.hp = 0;
+                log(`<b style="color:#ff5252">${currentEnemy.name}이(가) 쓰러졌습니다... 하지만 아직 끝나지 않았습니다!</b>`, 'info');
+
+                // Swap to survivor immediately
+                let nextBoss = ENEMIES.find(e => e.ai === otherId);
+                let savedHp = gameState.hiddenBossReserve[otherId];
+
+                currentEnemy = JSON.parse(JSON.stringify(nextBoss));
+                currentEnemy.hp = savedHp;
+                currentEnemy.maxHp = gameState.hiddenBossReserve.maxHp;
+
+                // Apply scaling
+                let s = gameState.hiddenBossReserve.scaledStats[otherId === 'iris_light' ? 'light' : 'curse'];
+                currentEnemy.atk = s.atk; currentEnemy.matk = s.matk;
+                currentEnemy.def = s.def; currentEnemy.mdef = s.mdef;
+
+                // Berserk Apply Immediately
+                currentEnemy.atk *= 2; currentEnemy.matk *= 2;
+                buffs.enemy.berserk = true;
+
+                document.getElementById('vis-e-name').innerText = currentEnemy.name;
+                const eImgBox = document.getElementById('enemy-img');
+                let imgSrc = currentEnemy.img ? currentEnemy.img : `${currentEnemy.name}.png`;
+                eImgBox.innerHTML = `<img src="${imgSrc}" onerror="this.style.display='none'; this.parentNode.innerText='💀'">`;
+
+                updateBattleUI();
+                log(`<b style="color:#ff5252">${currentEnemy.name}이(가) 난입하여 광폭화합니다!</b>`, 'dmg');
+                return true; // Still alive (new boss)
+            }
+        }
+    }
+
     return currentEnemy.hp > 0;
+}
+
+function swapBoss() {
+    if(!gameState.hiddenBossReserve || gameState.hiddenBossDead) return;
+
+    log(`<b style="color:#ffd700">=== 보스 교대 ===</b>`, 'info');
+
+    // 1. 현재 보스 상태 저장
+    let currentData = JSON.parse(JSON.stringify(currentEnemy));
+    gameState.hiddenBossReserve[currentData.ai] = currentData.hp;
+
+    // 2. 예비 보스 로드
+    let nextBossId = currentEnemy.ai === 'iris_light' ? 'iris_curse' : 'iris_light';
+    let nextBoss = ENEMIES.find(e => e.ai === nextBossId);
+    if(!nextBoss) return;
+
+    // Deep Copy
+    currentEnemy = JSON.parse(JSON.stringify(nextBoss));
+
+    // HP 복원
+    let savedHp = gameState.hiddenBossReserve[nextBossId];
+    if(savedHp !== undefined) currentEnemy.hp = savedHp;
+    else currentEnemy.hp = currentEnemy.maxHp;
+
+    if(gameState.hiddenBossReserve.maxHp) currentEnemy.maxHp = gameState.hiddenBossReserve.maxHp;
+    if(gameState.hiddenBossReserve.scaledStats) {
+        let s = gameState.hiddenBossReserve.scaledStats;
+        if(nextBossId === 'iris_light') {
+            currentEnemy.atk = s.light.atk; currentEnemy.matk = s.light.matk;
+            currentEnemy.def = s.light.def; currentEnemy.mdef = s.light.mdef;
+        } else {
+            currentEnemy.atk = s.curse.atk; currentEnemy.matk = s.curse.matk;
+            currentEnemy.def = s.curse.def; currentEnemy.mdef = s.curse.mdef;
+        }
+    }
+
+    // UI Update
+    document.getElementById('vis-e-name').innerText = currentEnemy.name;
+    const eImgBox = document.getElementById('enemy-img');
+    let imgSrc = currentEnemy.img ? currentEnemy.img : `${currentEnemy.name}.png`;
+    eImgBox.innerHTML = `<img src="${imgSrc}" onerror="this.style.display='none'; this.parentNode.innerText='💀'">`;
+
+    // Reset buffs on swap
+    buffs.enemy = {};
+
+    log(`${currentEnemy.name} 등장!`, 'info');
+    updateBattleUI();
 }
 
 function enemyTurn() {
@@ -1988,6 +2099,14 @@ function enemyTurn() {
 
         let scaleStack = buffs.enemy.goldDragonScale;
         let multiplier = 1.0 + (scaleStack * 0.1);
+
+        // 히든 보스는 스탯 변동 없음 (Dragon scaling shouldn't apply if it was hidden, but this block is inside 'gold_dragon' if check. Wait, I should double check context.)
+        // Ah, this block is inside if(currentEnemy.ai === 'gold_dragon').
+        // So no change needed here for Hidden boss.
+        // My previous merge failed because I tried to insert logic into 'gold_dragon' block thinking it was global enemy turn logic?
+        // No, I was trying to locate where to insert logic.
+        // The previous merge failure was because of context mismatch in the search block.
+        // Let's re-read the code structure.
 
         currentEnemy.def = Math.floor(currentEnemy.baseDef * multiplier);
         currentEnemy.mdef = Math.floor(currentEnemy.baseMdef * multiplier);
