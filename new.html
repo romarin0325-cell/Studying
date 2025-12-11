@@ -1203,6 +1203,43 @@ function startBattle(mobData) {
 
     currentEnemy.maxHp = currentEnemy.hp || 1;
 
+    // 히든 보스 초기화 (Tag Team 데이터 준비)
+    if(mobData.tier === 'hidden') {
+         const light = ENEMIES.find(e => e.ai === 'iris_light');
+         const curse = ENEMIES.find(e => e.ai === 'iris_curse');
+
+         // 보정 적용된 스탯 계산을 위해 임시 객체 생성
+         let lightStat = { atk: light.atk, matk: light.matk, def: light.def, mdef: light.mdef };
+         let curseStat = { atk: curse.atk, matk: curse.matk, def: curse.def, mdef: curse.mdef };
+
+         let cycle = getCycleCount();
+         if(cycle > 0) {
+             let cappedCycle = Math.min(cycle, 5);
+             let mult = 1 + (cappedCycle * 0.1);
+             lightStat.atk = Math.floor(lightStat.atk * mult);
+             lightStat.matk = Math.floor(lightStat.matk * mult);
+             lightStat.def = Math.floor(lightStat.def * mult);
+             lightStat.mdef = Math.floor(lightStat.mdef * mult);
+
+             curseStat.atk = Math.floor(curseStat.atk * mult);
+             curseStat.matk = Math.floor(curseStat.matk * mult);
+             curseStat.def = Math.floor(curseStat.def * mult);
+             curseStat.mdef = Math.floor(curseStat.mdef * mult);
+         }
+
+         gameState.hiddenBossReserve = {
+             maxHp: currentEnemy.maxHp,
+             iris_light: currentEnemy.maxHp,
+             iris_curse: currentEnemy.maxHp,
+             scaledStats: {
+                 light: lightStat,
+                 curse: curseStat
+             }
+         };
+         gameState.hiddenBossDead = false;
+         log(`<b style="color:#ffd700">빛과 어둠의 회랑에 입장했습니다. (페이즈 변환 보스)</b>`, 'info');
+    }
+
     document.getElementById('vis-e-name').innerText = currentEnemy.name;
     const eImgBox = document.getElementById('enemy-img');
     
@@ -2331,6 +2368,55 @@ function enemyTurn() {
     if((currentEnemy.ai === 'mawang' && turnCount % 5 === 0) || (currentEnemy.ai === 'mashin' && turnCount % 7 === 0)) {
         log(`${currentEnemy.name}의 데스 핸드!`, 'dmg');
         return applyEnemyDamage(currentEnemy.atk * 3.5, 'phy');
+    }
+
+    // Iris AI (Hidden Boss)
+    if(currentEnemy.ai === 'iris_light') {
+        // Phase Transition Check
+        if(Math.random() < 0.2 && !gameState.hiddenBossDead) {
+            log(`<b style="color:#b39ddb">[차원 변환] 아이리스가 모습을 바꿉니다!</b>`, 'info');
+            swapBoss();
+            return true;
+        }
+
+        // Pattern
+        if(turnCount % 4 === 0) {
+            log(`<b style="color:#fff59d">홀리 레이! (강력한 일격)</b>`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        }
+
+        let rand = Math.random();
+        if(rand < 0.3) {
+            log(`${currentEnemy.name}의 섬광!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 1.5, 'mag');
+        }
+        log(`${currentEnemy.name}의 공격`, 'phy');
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
+    }
+
+    if(currentEnemy.ai === 'iris_curse') {
+        // Phase Transition Check
+        if(Math.random() < 0.2 && !gameState.hiddenBossDead) {
+            log(`<b style="color:#fff59d">[차원 변환] 아이리스가 모습을 바꿉니다!</b>`, 'info');
+            swapBoss();
+            return true;
+        }
+
+        // Pattern
+        if(turnCount % 4 === 0) {
+            log(`<b style="color:#b39ddb">다크니스! (강력한 일격)</b>`, 'mag');
+            let dmg = applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+            if(dmg) buffs.enemy.darkness = Math.min(5, (buffs.enemy.darkness || 0) + 1);
+            return dmg;
+        }
+
+        let rand = Math.random();
+        if(rand < 0.3) {
+            log(`${currentEnemy.name}의 암흑탄!`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * 1.5, 'mag');
+        }
+        log(`${currentEnemy.name}의 공격`, 'phy');
+        return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
     if(Math.random() < 0.3 && currentEnemy.ai !== 'charge') {
