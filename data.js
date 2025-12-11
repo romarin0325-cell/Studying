@@ -95,7 +95,7 @@ const NEW_ARTIFACTS = {
 const BOSS_DROP_ARTIFACTS = {
     mashin: { id: 'demon_eye', name: "마안", desc: "전투 개시 후 5턴간 물공/마공 +100%", effect: 'demon_eye', val: 1.0, rarity: 'epic' },
     witch: { id: 'heart_ice', name: "얼음의 심장", desc: "체력 50% 미만에서 물방/마방 +100%", effect: 'heart_ice', val: 1.0, rarity: 'epic' },
-    goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +100%", effect: 'hestia', val: 1.0, rarity: 'legend' },
+    goddess: { id: 'hestia', name: "신기 에스티아", desc: "모든 스탯 +50%", effect: 'hestia', val: 0.5, rarity: 'legend' },
     pudding: { id: 'dream_choco', name: "드림 초콜릿", desc: "공격력/마법공격력 +60%", effect: 'dream_choco', val: 0.6, rarity: 'legend' },
     artificial: { id: 'blue_moon', name: "신기 블루문", desc: "최대 MP +20%, 전투 시작시 MP +100", effect: 'blue_moon', val: 0.2, rarity: 'legend' },
     gold_dragon: { id: 'dragon_scale', name: "용의 비늘", desc: "체력/방어력/마법방어력 +50%", effect: 'dragon_scale', val: 0.5, rarity: 'legend' },
@@ -111,18 +111,18 @@ const CHAR_DATA = {
         skills: {
             'basic': { name: "기본 공격", type: 'phy', cost: 0, power: 1.0, price: 0, desc: "기본 물리 공격", effect: '' },
             'genocide': { name: "제노사이드 스탭", type: 'phy', cost: 10, power: 0.5, price: 0, desc: "이번 턴 회피율 +50%", effect: 'evasion_50' },
-            'crosscut': { name: "크로스 컷", type: 'phy', cost: 20, power: 1.3, price: 1000, desc: "치명타 시 암흑 3스택", effect: 'darkness' },
-            'assassin': { name: "어쌔신 네일", type: 'phy', cost: 30, power: 1.5, price: 5000, desc: "암흑 스택당 치명타율 증가", effect: 'finisher' },
+            'crosscut': { name: "크로스 컷", type: 'phy', cost: 20, power: 1.4, price: 1000, desc: "치명타 시 암흑 3스택", effect: 'darkness' },
+            'assassin': { name: "어쌔신 네일", type: 'phy', cost: 30, power: 1.6, price: 5000, desc: "암흑 스택당 치명타율 증가", effect: 'finisher' },
             'phantom': { name: "팬텀 레이드", type: 'phy', cost: 20, power: 1.4, price: 1000, desc: "다음 턴 적 마방 감소", effect: 'mdef_down' },
             'dancing': { name: "댄싱 대거", type: 'phy', cost: 30, power: 0.6, price: 5000, desc: "회피 횟수만큼 추가타", effect: 'multi_hit' },
             'shadow': { name: "섀도우 볼", type: 'mag', cost: 20, power: 1.1, price: 1000, desc: "암흑 부여", effect: 'darkness' },
             'veil': { name: "베일 오브 다크니스", type: 'mag', cost: 30, power: 1.0, price: 5000, desc: "3턴 회피 +40%", effect: 'eva_buff' },
-            'meteor': { name: "다크 메테오", type: 'mag', cost: 40, power: 3.5, price: 10000, desc: "다음 턴 행동불가", effect: 'self_stun' },
+            'meteor': { name: "다크 메테오", type: 'mag', cost: 40, power: 3.5, price: 10000, desc: "암흑 부여 / 다음 턴 행동불가", effect: 'self_stun' },
             'evasion': { name: "회피 태세", type: 'sup', cost: 10, power: 0, price: 0, desc: "다음 턴 회피 +50%", effect: 'next_eva' },
-            'instinct': { name: "인스팅트", type: 'sup', cost: 10, power: 0, price: 5000, desc: "5턴 회피+25%/피해+20%", effect: 'instinct' },
+            'instinct': { name: "인스팅트", type: 'sup', cost: 10, power: 0, price: 5000, desc: "5턴 회피+25%/피해+20% (중첩가능)", effect: 'instinct' },
             'adrenaline': { name: "아드레날린", type: 'sup', cost: 20, power: 0, price: 5000, desc: "4턴 치명댐/피해 증가", effect: 'adrenaline' },
             'eclipse': { name: "이클립스", type: 'phy', isUlt: true, cost: 50, power: 2.9, price: 20000, desc: "확정 치명타 (물리)", effect: 'guarantee_crit' },
-            'lunablade': { name: "루나 블레이드", type: 'mag', isUlt: true, cost: 50, power: 3.2, price: 20000, desc: "이번 턴 완전회피", effect: 'perfect_eva' }
+            'lunablade': { name: "루나 블레이드", type: 'mag', isUlt: true, cost: 50, power: 3.3, price: 20000, desc: "이번 턴 완전회피", effect: 'perfect_eva' }
         }
     },
     zeke: {
@@ -130,16 +130,16 @@ const CHAR_DATA = {
         skills: {
             'basic': { name: "기본 공격", type: 'phy', cost: 0, power: 1.0, price: 0, desc: "기본 물리 공격", effect: '' },
             'heavy': { name: "헤비 임팩트", type: 'phy', cost: 20, power: 1.2, price: 1000, desc: "잃은 체력 비례 피해", effect: 'hp_reverse_mid' },
-            'carnage': { name: "카니지", type: 'phy', cost: 0, power: 1.4, price: 1000, desc: "HP 10% 소모", effect: 'hp_cost' },
+            'carnage': { name: "카니지", type: 'phy', cost: 0, power: 1.5, price: 1000, desc: "HP 10% 소모", effect: 'hp_cost' },
             'flameshot': { name: "플레임 샷", type: 'mag', cost: 10, power: 1.1, price: 1000, desc: "3턴 물방 20% 감소", effect: 'def_down' },
             'undying': { name: "언다잉", type: 'sup', cost: 10, power: 0, price: 5000, desc: "불사 / 성공시 공2배", effect: 'immortal' },
-            'wild': { name: "와일드 쓰래쉬", type: 'phy', cost: 30, power: 2.8, price: 5000, desc: "다음 턴 내 방어력 0", effect: 'self_def_zero' },
-            'divine': { name: "디바인 아머", type: 'sup', cost: 20, power: 0, price: 5000, desc: "4턴 방어+30% / 피격시 스택", effect: 'divine_buff' },
-            'ignis': { name: "이그니스 스매시", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "화염 인챈트 시 1.4배", effect: 'fire_combo_new' },
-            'enchant': { name: "파이어 인챈트", type: 'sup', cost: 30, power: 0, price: 5000, desc: "5턴 물공 시 마법 추가타", effect: 'enchant_buff' },
+            'wild': { name: "와일드 쓰래쉬", type: 'phy', cost: 30, power: 3.0, price: 5000, desc: "다음 턴 내 방어력 0", effect: 'self_def_zero' },
+            'divine': { name: "디바인 아머", type: 'sup', cost: 20, power: 0, price: 5000, desc: "4턴 방어/마방+30% / 피격시 스택", effect: 'divine_buff' },
+            'ignis': { name: "이그니스 스매시", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "화염 인챈트 시 1.6배", effect: 'fire_combo_new' },
+            'enchant': { name: "파이어 인챈트", type: 'sup', cost: 30, power: 0, price: 5000, desc: "5턴 물공 시 마법 추가타(0.8)", effect: 'enchant_buff' },
             'guard': { name: "가드", type: 'sup', cost: 10, power: 0, price: 0, desc: "이번 턴 피해 70% 감소", effect: 'guard_70' },
             'divineblade': { name: "디바인 블레이드", type: 'phy', cost: 40, power: 4.2, price: 10000, desc: "2턴 차지/스택소모", effect: 'charge_divine' },
-            'prominence': { name: "프로미넌스", type: 'mag', cost: 40, power: 2.1, price: 10000, desc: "3턴 물방 20% 감소", effect: 'def_down' },
+            'prominence': { name: "프로미넌스", type: 'mag', cost: 40, power: 2.3, price: 10000, desc: "3턴 물방 20% 감소", effect: 'def_down' },
             'ragnarok': { name: "라그나로크", type: 'phy', isUlt: true, cost: 50, power: 2.0, price: 20000, desc: "잃은 체력 비례 댐(물리)", effect: 'hp_reverse' },
             'castle': { name: "기간틱 캐슬", type: 'mag', isUlt: true, cost: 50, power: 1.8, price: 20000, desc: "사용 횟수만큼 강화 / 방어+100%", effect: 'stack_ult_new' }
         }
@@ -148,20 +148,20 @@ const CHAR_DATA = {
         name: "자스민", hp: 480, mp: 300, mpRegen: 15, atk: 30, matk: 85, def: 40, mdef: 60, baseCrit: 0.1, baseCritDmg: 1.5, baseEva: 0.1, fixedMp: true,
         skills: {
             'basic': { name: "기본 공격", type: 'phy', cost: 0, power: 1.0, price: 0, desc: "기본 물리 공격", effect: '' },
-            'smite': { name: "홀리 스마이트", type: 'phy', cost: 10, power: 1.3, price: 1000, desc: "저비용 물리", effect: '' },
-            'rod': { name: "저지먼트 로드", type: 'phy', cost: 20, power: 1.4, price: 5000, desc: "3턴 물방 감소", effect: 'def_down' },
-            'lance': { name: "에테르 랜스", type: 'phy', cost: 30, power: 1.7, price: 10000, desc: "3턴 마방 감소", effect: 'mdef_down' },
+            'smite': { name: "홀리 스마이트", type: 'phy', cost: 10, power: 1.4, price: 1000, desc: "저비용 물리", effect: '' },
+            'rod': { name: "저지먼트 로드", type: 'phy', cost: 20, power: 1.6, price: 5000, desc: "3턴 물방 감소", effect: 'def_down' },
+            'lance': { name: "에테르 랜스", type: 'phy', cost: 30, power: 1.8, price: 10000, desc: "3턴 마방 감소", effect: 'mdef_down' },
             'holyball': { name: "홀리 볼", type: 'mag', cost: 30, power: 1.4, price: 0, desc: "기본 마법", effect: '' },
             'holyray': { name: "홀리 레이", type: 'mag', cost: 60, power: 2.4, price: 1000, desc: "순간 누킹", effect: '' },
-            'sunfire': { name: "선파이어", type: 'mag', cost: 50, power: 2.8, price: 5000, desc: "HP 20% 소모", effect: 'hp_cost_20' },
-            'judgment': { name: "저지먼트", type: 'mag', cost: 70, power: 3.5, price: 5000, desc: "명중률 70%", effect: 'miss_chance' },
-            'sanctuary': { name: "생츄어리", type: 'sup', cost: 70, power: 0, price: 5000, desc: "3턴 마법 반사", effect: 'reflect' },
+            'sunfire': { name: "선파이어", type: 'mag', cost: 50, power: 3.0, price: 5000, desc: "HP 20% 소모", effect: 'hp_cost_20' },
+            'judgment': { name: "저지먼트", type: 'mag', cost: 70, power: 3.6, price: 5000, desc: "명중률 70%", effect: 'miss_chance' },
+            'sanctuary': { name: "생츄어리", type: 'sup', cost: 70, power: 0, price: 5000, desc: "4턴 마법 반사", effect: 'reflect' },
             'absolute': { name: "앱솔루트 라이트", type: 'mag', cost: 70, power: 1.5, price: 10000, desc: "연속 사용시 강화", effect: 'stack_dmg' },
             'magicguard': { name: "매직 가드", type: 'sup', cost: 30, power: 0, price: 0, desc: "이번 턴 마법무효", effect: 'null_mag' },
             'barrier': { name: "배리어", type: 'sup', cost: 30, power: 0, price: 5000, desc: "이번 턴 물리무효", effect: 'null_phy' },
-            'meditation': { name: "메디테이션", type: 'sup', cost: 30, power: 0, price: 10000, desc: "리젠UP/마법공격DOWN (4턴)", effect: 'medi' },
-            'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 5.5, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 극딜", effect: 'self_stun' },
-            'goddess': { name: "여신 강림", type: 'sup', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP/상태 리셋, 버프", effect: 'reset_buff' }
+            'meditation': { name: "메디테이션", type: 'sup', cost: 30, power: 0, price: 10000, desc: "리젠UP/마법공격DOWN (3턴)", effect: 'medi' },
+            'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 6.0, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 추가타(2배)", effect: 'self_stun' },
+            'goddess': { name: "여신 강림", type: 'sup', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP 회복(60%)/상태 리셋, 버프", effect: 'reset_buff' }
         }
     },
     queen: {
@@ -171,13 +171,13 @@ const CHAR_DATA = {
             'thornwhip': { name: "바인 휩", type: 'phy', cost: 10, power: 1.2, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
             'roseseed': { name: "로즈 샷", type: 'mag', cost: 10, power: 1.1, price: 1000, desc: "장미 1스택", effect: 'add_rose_1' },
             'petaldance': { name: "플라워 댄스", type: 'phy', cost: 20, power: 1.3, price: 3000, desc: "3턴 회피 +20%", effect: 'eva_buff' },
-            'sharpness': { name: "로열 포커스", type: 'mag', cost: 20, power: 1.4, price: 3000, desc: "3턴 치명 +25%", effect: 'crit_buff' },
+            'sharpness': { name: "로열 포커스", type: 'mag', cost: 20, power: 1.5, price: 3000, desc: "3턴 치명 +25%", effect: 'crit_buff' },
             'thornarmor': { name: "쏜 가드", type: 'sup', cost: 10, power: 0, price: 0, desc: "이번 턴 피해 50% 감소", effect: 'dmg_red_50' },
             'withering': { name: "크루얼 쏜", type: 'phy', cost: 30, power: 1.7, price: 5000, desc: "3턴 적 마방 감소", effect: 'mdef_down' },
-            'wildgrowth': { name: "와일드 루트", type: 'mag', cost: 30, power: 3.1, price: 10000, desc: "장미 2스택 / 다음 턴 불가", effect: 'rose_2_self_stun' },
+            'wildgrowth': { name: "와일드 루트", type: 'mag', cost: 30, power: 3.2, price: 10000, desc: "장미 2스택 / 다음 턴 불가", effect: 'rose_2_self_stun' },
             'blooming': { name: "퀵 그로우", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미 3스택 충전", effect: 'add_rose_3' },
             'overwhelm': { name: "로즈 프리즌", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
-            'fatalrose': { name: "하트 피어스", type: 'phy', cost: 40, power: 2.0, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
+            'fatalrose': { name: "하트 피어스", type: 'phy', cost: 40, power: 2.2, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
             'royalbloom': { name: "로열 블룸", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (종료시 소멸)", effect: 'royal_bloom' },
             'queensgarden': { name: "퀸즈 도메인", type: 'mag', isUlt: true, cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
             'funeral': { name: "피날레", type: 'mag', isUlt: true, cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }

@@ -230,8 +230,7 @@
             <button id="btn-event-time" class="btn-event-dungeon" onclick="enterEventDungeon('time')" style="display:none; background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
 
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
-            <button onclick="saveGame()" style="background:#1b5e20; border-color:#2e7d32; color:#a5d6a7;">💾 현재 상태 보존</button>
-            <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
+            <button onclick="openSettings()" style="background:#37474f; border-color:#455a64; color:#b0bec5;">⚙️ 게임 설정</button>
         </div>
 
         <div id="battle-menu" style="display:none; width:100%;">
@@ -300,23 +299,36 @@
     </div>
 </div>
 
+<div id="settings-modal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:#fff; border-bottom:1px solid #555; padding-bottom:10px;">게임 설정</h2>
+
+        <button onclick="saveGame()" style="width:100%; margin-bottom:15px; background:#1b5e20; border-color:#2e7d32; color:#a5d6a7;">
+            💾 현재 상태 보존
+            <span class="skill-sub" style="color:#81c784">현재 진행상황을 저장합니다</span>
+        </button>
+
+        <button onclick="openResetModal()" style="width:100%; margin-bottom:15px; background:#b71c1c; border-color:#d32f2f; color:#ffcdd2;">
+            ☠️ 게임 초기화 (Rebirth)
+            <span class="skill-sub" style="color:#e57373">재시작 또는 완전 초기화</span>
+        </button>
+
+        <button onclick="document.getElementById('settings-modal').classList.remove('active')" style="width:100%; background:#555;">닫기</button>
+    </div>
+</div>
+
 <div id="reset-modal" class="modal">
     <div class="modal-content">
         <div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#ef5350;">초기화 옵션</div>
-        <div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;">
-            어떤 방식으로 초기화하시겠습니까?
-        </div>
 
         <button id="btn-soft-reset" onclick="triggerReset('soft')" style="width:100%; margin-bottom:10px; background:#1b5e20;">
             <div style="font-weight:bold; font-size:1.0rem;">🔄 현재 회차 재시작</div>
             <div style="font-size:0.75rem; color:#a5d6a7;">유물 해금 / 적 강화 상태 / 회차 유지</div>
-            <div style="font-size:0.7rem; color:#81c784; margin-top:2px;">(진행 불가 시 추천)</div>
         </button>
 
         <button onclick="triggerReset('hard')" style="width:100%; margin-bottom:10px; background:#b71c1c;">
             <div style="font-weight:bold; font-size:1.0rem;">☠️ 완전 초기화</div>
             <div style="font-size:0.75rem; color:#ef9a9a;">모든 기록 삭제 (회차 / 유물 해금 포함)</div>
-            <div style="font-size:0.7rem; color:#e57373; margin-top:2px;">(완전히 처음부터 다시 시작)</div>
         </button>
 
         <button onclick="document.getElementById('reset-modal').classList.remove('active')" style="width:100%; background:#444;">취소</button>
@@ -798,7 +810,7 @@ function recalcAllStats() {
         if(buffs.player.goddessTurns > 0) { atkPer += 1.0; matkPer += 1.0; defPer += 1.0; mdefPer += 1.0; }
         if(buffs.player.goddessBlessing) { atkPer += 0.5; matkPer += 0.5; }
         if(buffs.player.undyingPowerTurns > 0) { atkPer += 1.0; }
-        if(buffs.player.divineTurns > 0) { defPer += 0.3; }
+        if(buffs.player.divineTurns > 0) { defPer += 0.3; mdefPer += 0.3; }
         if(buffs.player.castleDef100) { defPer += 1.0; }
     }
 
@@ -959,7 +971,11 @@ function openShop() {
         const learned = gameState.learnedSkills.includes(key);
         const btn = document.createElement('button');
 
-        btn.innerHTML = `<span style="color:${learned ? '#4caf50':'#fff'}">${sk.name}</span>
+        let typeStr = "";
+        if(sk.type === 'phy') typeStr = "<span style='color:#ef9a9a; font-size:0.7rem;'>[물리]</span> ";
+        if(sk.type === 'mag') typeStr = "<span style='color:#90caf9; font-size:0.7rem;'>[마법]</span> ";
+
+        btn.innerHTML = `<span style="color:${learned ? '#4caf50':'#fff'}">${typeStr}${sk.name}</span>
                          <span style="font-size:0.7rem; display:block;">${sk.desc}</span>
                          <span style="font-size:0.7rem; color:#ffd700;">${learned ? '습득완료' : sk.price + ' G'}</span>`;
 
@@ -1149,10 +1165,11 @@ function startBattle(mobData) {
 
     currentEnemy = JSON.parse(JSON.stringify(mobData));
 
-    // 다회차 스탯 보정
+    // 다회차 스탯 보정 (최대 6회차/5사이클 까지만 증가)
     let cycle = getCycleCount();
     if(cycle > 0) {
-        let mult = 1 + (cycle * 0.1);
+        let cappedCycle = Math.min(cycle, 5);
+        let mult = 1 + (cappedCycle * 0.1);
         currentEnemy.hp = Math.floor(currentEnemy.hp * mult);
         currentEnemy.atk = Math.floor(currentEnemy.atk * mult);
         currentEnemy.matk = Math.floor(currentEnemy.matk * mult);
@@ -1441,12 +1458,12 @@ function applyPlayerSupport(skill) {
         log("무기에 화염을 둘렀습니다!", 'fire');
     }
     if(skill.effect === 'reflect') {
-        buffs.player.sanctuaryTurns = 3;
+        buffs.player.sanctuaryTurns = 4;
         log("마법 반사 보호막 생성!", 'holy');
     }
     if(skill.effect === 'medi') {
         buffs.player.medi = true;
-        buffs.player.mediTurns = 4;
+        buffs.player.mediTurns = 3;
         log("명상 시작. 마나 회복 증가.", 'heal');
     }
     if(skill.effect === 'dmg_red_50') buffs.player.dmgRed50 = true;
@@ -1481,7 +1498,7 @@ function winBattle() {
         // 보스 드랍 확률 체크 (신규 보스 100% 해금)
         if(currentEnemy.name === "마신" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.mashin;
         else if(currentEnemy.name === "혹한의 마녀" && Math.random() < 0.1) drop = BOSS_DROP_ARTIFACTS.witch;
-        else if(currentEnemy.name === "창조신 아스테아" && Math.random() < 0.1 && getCycleCount() >= 4) drop = BOSS_DROP_ARTIFACTS.goddess;
+        else if(currentEnemy.name === "창조신 아스테아" && getCycleCount() >= 4) drop = BOSS_DROP_ARTIFACTS.goddess;
         else if(currentEnemy.name === "푸딩 프린세스") drop = BOSS_DROP_ARTIFACTS.pudding;
         else if(currentEnemy.name === "인조 마신") drop = BOSS_DROP_ARTIFACTS.artificial;
         else if(currentEnemy.name === "골드 드래곤") drop = BOSS_DROP_ARTIFACTS.gold_dragon;
@@ -1561,8 +1578,8 @@ function playerAttack(skill) {
     let multiplier = skill.power;
     
     if(skill.name === '더 홀리' && buffs.player.goddessTurns) {
-        multiplier += 3.5; 
-        log("여신 강림의 힘으로 위력이 극대화됩니다!", 'holy');
+        multiplier += 2.0;
+        log("여신 강림의 힘으로 추가타가 발생합니다!", 'holy');
     }
 
     if(skill.effect === 'stack_dmg') {
@@ -1599,7 +1616,7 @@ function playerAttack(skill) {
     }
 
     if(skill.effect === 'sage_silent' && buffs.player.sageForm === 'moon') multiplier += 0.4;
-    if(skill.effect === 'sage_god_hand' && buffs.player.sageForm === 'sun') multiplier += 0.6;
+    if(skill.effect === 'sage_god_hand' && buffs.player.sageForm === 'sun') multiplier += 0.8;
 
     if(skill.effect === 'sage_dream_ult') {
         multiplier = 4.0; 
@@ -1710,15 +1727,17 @@ function playerAttack(skill) {
     if(skill.effect === 'hp_cost') player.hp -= player.maxHp * 0.1;
     if(skill.effect === 'hp_cost_20') player.hp -= player.maxHp * 0.2;
     if(skill.effect === 'reset_buff') { 
-        player.hp = player.maxHp; 
+        let heal = Math.floor(player.maxHp * 0.6);
+        player.hp = Math.min(player.maxHp, player.hp + heal);
         buffs.player.goddessTurns = 3;
-        log("여신 강림! 상태 리셋 및 능력치 2배!", 'heal'); 
+        log(`여신 강림! HP <span class="heal">${heal}</span> 회복, 상태 리셋 및 능력치 2배!`, 'heal');
     }
     
     if(skill.effect === 'darkness') {
         let add = 0;
         if(skill.name === '크로스 컷' && isCrit) add = 3; 
         else if(skill.name === '섀도우 볼') add = 1; 
+        else if(skill.name === '다크 메테오') add = 1;
         
         if(add > 0) {
             buffs.enemy.darkness = Math.min(5, (buffs.enemy.darkness || 0) + add);
@@ -1748,8 +1767,8 @@ function playerAttack(skill) {
 
     let enchantDmg = 0;
     if(buffs.player.enchantTurns > 0 && isPhy) {
-        let eMult = 0.7;
-        if(skill.effect === 'fire_combo_new') eMult = 1.4;
+        let eMult = 0.8;
+        if(skill.effect === 'fire_combo_new') eMult = 1.6;
         enchantDmg = Math.floor(player.matk * eMult * (100 / (100 + currentEnemy.mdef)));
         enchantDmg = Math.max(1, enchantDmg); 
     }
@@ -2494,29 +2513,28 @@ function loadGame() {
 }
 
 function startNewGameProcess() {
+    // "새로 시작" 버튼 클릭 시 -> 완전한 초기화 (Hard Reset과 동일하게)
+    if(!confirm("새로 시작하시겠습니까?\n모든 데이터(유물 해금 포함)가 초기화되고 처음부터 시작합니다.")) return;
+
+    localStorage.removeItem('turnRpgSaveData');
+    localStorage.removeItem('turnRpgCycle');
+    localStorage.removeItem('turnRpgClears');
+    localStorage.removeItem('turnRpgBossDrops');
+    localStorage.removeItem('turnRpgUsedEvents');
+
     document.getElementById('load-modal').classList.remove('active');
 
-    // [FIX] 새로 시작 시 회차 정보(난이도) 및 만렙 확장 정보 초기화
-    // (저장된 데이터를 무시하고 새로 시작하는 것이므로 난이도도 초기화되어야 함)
-    // 단, 유물 해금 정보(turnRpgClears, turnRpgBossDrops)는 유지 (사용자 요청: 일반적인 하드 리셋 아님)
-    localStorage.removeItem('turnRpgCycle');
+    // 게임 상태 초기화
+    resetGameProcess();
+}
 
-    // 기존 초기화 로직
-    // setupEventDungeon은 resetGameProcess 내에서 호출되거나 여기서 호출해야 함.
-    // 하지만 resetGameProcess는 "게임 중 초기화"용이라 UI 리셋이 포함됨.
-    // 앱 시작 시점에는 setupEventDungeon만 필요할 수 있음.
+function openSettings() {
+    document.getElementById('settings-modal').classList.add('active');
+}
 
-    // 만약 저장 데이터가 "없어서" 들어온 경우: 캐릭터 선택창은 이미 HTML에 active 상태.
-    // 만약 "새로 하기"를 누른 경우: 캐릭터 선택창을 보여줘야 함.
-
-    setupEventDungeon();
-    initArtifactsWithNGPlus();
-
-    // 캐릭터 선택창 확실히 열기
-    document.getElementById('char-modal').classList.add('active');
-
-    // UI 초기화
-    document.getElementById('town-menu').style.display = 'none';
+function openResetModal() {
+    document.getElementById('settings-modal').classList.remove('active');
+    confirmResetGame();
 }
 
 // 초기화: 페이지 로드 시 저장 데이터 확인
