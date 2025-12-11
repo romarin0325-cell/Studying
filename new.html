@@ -230,6 +230,7 @@
             <button id="btn-event-time" class="btn-event-dungeon" onclick="enterEventDungeon('time')" style="display:none; background: linear-gradient(135deg, #b39ddb, #673ab7); border-color:#512da8; color:#fff;">🕰️ 시간의 도서관</button>
 
             <button onclick="openShop()" style="background:#424242;">🛒 상점 / 스킬 관리</button>
+            <button onclick="saveGame()" style="background:#1b5e20; border-color:#2e7d32; color:#a5d6a7;">💾 현재 상태 보존</button>
             <button onclick="confirmResetGame()" style="background:#212121; border-color:#000; color:#ef5350; margin-top:5px;">☠️ 게임 초기화 (Rebirth)</button>
         </div>
 
@@ -319,6 +320,26 @@
         </button>
 
         <button onclick="document.getElementById('reset-modal').classList.remove('active')" style="width:100%; background:#444;">취소</button>
+    </div>
+</div>
+
+<div id="load-modal" class="modal">
+    <div class="modal-content">
+        <div class="title-text" style="font-size:1.2rem; margin-bottom:15px; color:#4fc3f7;">저장된 데이터 발견</div>
+        <div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;">
+            이전에 저장된 게임 데이터가 있습니다.<br>
+            이어하시겠습니까?
+        </div>
+
+        <button onclick="loadGame()" style="width:100%; margin-bottom:10px; background:#0277bd;">
+            <div style="font-weight:bold; font-size:1.0rem;">📂 이어하기</div>
+            <div style="font-size:0.75rem; color:#81d4fa;" id="load-desc">Lv.? / ?</div>
+        </button>
+
+        <button onclick="startNewGameProcess()" style="width:100%; background:#b71c1c;">
+            <div style="font-weight:bold; font-size:1.0rem;">✨ 새로 시작</div>
+            <div style="font-size:0.75rem; color:#ef9a9a;">저장된 데이터를 무시합니다</div>
+        </button>
     </div>
 </div>
 
@@ -2386,8 +2407,115 @@ function endTurnPhase() {
     turnCount++;
 }
 
-// 초기화: 페이지 로드 시 이벤트 던전 설정 (새로고침 대응)
-setupEventDungeon();
+// =========================================
+// 3. 저장 및 불러오기 (Save & Load)
+// =========================================
+
+function saveGame() {
+    if(document.getElementById('main-stage').classList.contains('battle-mode')) {
+        return myAlert("전투 중에는 저장할 수 없습니다.");
+    }
+    if(!player || !player.charKey) return myAlert("저장할 데이터가 없습니다.");
+
+    const saveData = {
+        player: player,
+        gameState: gameState,
+        roseStack: roseStack, // 여왕 스택
+        timestamp: new Date().getTime(),
+        dateStr: new Date().toLocaleString()
+    };
+
+    localStorage.setItem('turnRpgSaveData', JSON.stringify(saveData));
+    myAlert("게임이 안전하게 보존되었습니다.\n(재시작 시 불러올 수 있습니다)");
+}
+
+function checkSaveData() {
+    const saved = localStorage.getItem('turnRpgSaveData');
+    if(saved) {
+        try {
+            const data = JSON.parse(saved);
+            const p = data.player;
+            document.getElementById('load-desc').innerText =
+                `${data.dateStr}\n${p.name} (Lv.${p.level}) / Gold: ${data.gameState.gold}`;
+
+            // 로드 모달 띄우기 (캐릭터 선택창 닫고)
+            document.getElementById('char-modal').classList.remove('active');
+            document.getElementById('load-modal').classList.add('active');
+        } catch(e) {
+            console.error("Save file corrupted", e);
+            startNewGameProcess();
+        }
+    } else {
+        // 저장된 데이터가 없으면 바로 캐릭터 선택 (기본 동작)
+        // startNewGameProcess 호출 불필요 (이미 초기 HTML 상태가 캐릭터 선택창임)
+        // 단, setupEventDungeon 등 초기화는 필요
+        startNewGameProcess();
+    }
+}
+
+function loadGame() {
+    const saved = localStorage.getItem('turnRpgSaveData');
+    if(!saved) return startNewGameProcess();
+
+    try {
+        const data = JSON.parse(saved);
+
+        // 1. 데이터 복원
+        player = data.player;
+        gameState = data.gameState;
+        roseStack = data.roseStack || 0;
+
+        // 2. 유물 풀 재구성 (Unlocked Artifacts 복원)
+        // 저장된 시점의 유물 풀 상태는 저장되지 않으므로, 현재 해금 상태 기준으로 재구성
+        // (만약 "시간의 역행" 후 저장을 안했다면? -> 저장된 시점 기준으로 복원되므로 문제 없음)
+        initArtifactsWithNGPlus();
+
+        // 3. UI 갱신
+        document.getElementById('load-modal').classList.remove('active');
+        document.getElementById('char-modal').classList.remove('active'); // 혹시 켜져있다면
+
+        // 마을 모드로 복귀
+        document.getElementById('battle-menu').style.display = 'none';
+        document.getElementById('town-menu').style.display = 'grid';
+        document.getElementById('main-stage').classList.remove('battle-mode');
+        document.getElementById('main-stage').classList.add('town-mode');
+
+        // 스탯 재계산 및 UI 업데이트
+        recalcAllStats();
+        updateInfo();
+        updateTownUI();
+
+        myAlert("게임을 불러왔습니다.");
+
+    } catch(e) {
+        myAlert("데이터 불러오기 실패: " + e);
+        startNewGameProcess();
+    }
+}
+
+function startNewGameProcess() {
+    document.getElementById('load-modal').classList.remove('active');
+
+    // 기존 초기화 로직
+    // setupEventDungeon은 resetGameProcess 내에서 호출되거나 여기서 호출해야 함.
+    // 하지만 resetGameProcess는 "게임 중 초기화"용이라 UI 리셋이 포함됨.
+    // 앱 시작 시점에는 setupEventDungeon만 필요할 수 있음.
+
+    // 만약 저장 데이터가 "없어서" 들어온 경우: 캐릭터 선택창은 이미 HTML에 active 상태.
+    // 만약 "새로 하기"를 누른 경우: 캐릭터 선택창을 보여줘야 함.
+
+    setupEventDungeon();
+    initArtifactsWithNGPlus();
+
+    // 캐릭터 선택창 확실히 열기
+    document.getElementById('char-modal').classList.add('active');
+
+    // UI 초기화
+    document.getElementById('town-menu').style.display = 'none';
+}
+
+// 초기화: 페이지 로드 시 저장 데이터 확인
+checkSaveData();
 </script>
 </body>
 </html>
