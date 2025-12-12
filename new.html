@@ -615,6 +615,31 @@ function initArtifactsWithNGPlus() {
             ARTIFACTS.push(drop);
         }
     });
+
+    // 4. 5회차(Run 6) 이상일 경우 특정 에픽 유물 진화 (마안, 얼음의심장)
+    let cycle = getCycleCount();
+    if(cycle >= 5) {
+        // 마안 -> 진: 마안
+        let eye = ARTIFACTS.find(a => a.id === 'demon_eye');
+        if(eye) {
+            eye.id = 'demon_eye_legend';
+            eye.name = "진: 마안";
+            eye.desc = "전투 개시 후 5턴간 물공/마공 +150%";
+            eye.val = 1.5;
+            eye.effect = 'demon_eye_legend';
+            eye.rarity = 'legend';
+        }
+        // 얼음의심장 -> 진: 얼음의심장
+        let heart = ARTIFACTS.find(a => a.id === 'heart_ice');
+        if(heart) {
+            heart.id = 'heart_ice_legend';
+            heart.name = "진: 얼음의 심장";
+            heart.desc = "체력 50% 미만에서 물방/마방 +150%";
+            heart.val = 1.5;
+            heart.effect = 'heart_ice_legend';
+            heart.rarity = 'legend';
+        }
+    }
 }
 
 function getBossArtifactUnlocks() {
@@ -814,6 +839,10 @@ function recalcAllStats() {
             atkPer += 1.0;
             matkPer += 1.0;
         }
+        if(buffs.player.demonEyeLegendTurns > 0) {
+            atkPer += 1.5;
+            matkPer += 1.5;
+        }
         if(buffs.player.royalBloomTurns > 0) { atkPer += 0.5; matkPer += 0.5; }
 
         // Sage Forms
@@ -846,9 +875,15 @@ function recalcAllStats() {
          }
 
          // Heart of Ice (Ice Heart)
-         if(ratio < 0.5 && hasArtifact('heart_ice')) {
-             defPer += 1.0;
-             mdefPer += 1.0;
+         if(ratio < 0.5) {
+             if(hasArtifact('heart_ice')) {
+                 defPer += 1.0;
+                 mdefPer += 1.0;
+             }
+             if(hasArtifact('heart_ice_legend')) {
+                 defPer += 1.5;
+                 mdefPer += 1.5;
+             }
          }
     }
 
@@ -1263,6 +1298,10 @@ function startBattle(mobData) {
         buffs.player.demonEyeTurns = 5;
         log("[마안] 발동! 5턴간 공격력/마법공격력 대폭 증가.", 'rose');
     }
+    if(hasArtifact('demon_eye_legend')) {
+        buffs.player.demonEyeLegendTurns = 5;
+        log("[진: 마안] 발동! 5턴간 공격력/마법공격력 초월적 증가.", 'rose');
+    }
     
     if(player.charKey === 'rumi') {
         player.dreamCrystals = 5;
@@ -1669,7 +1708,7 @@ function playerAttack(skill) {
     
     if(skill.effect === 'stack_ult_new') {
         buffs.player.castleStack = Math.min(5, (buffs.player.castleStack || 0) + 1);
-        multiplier = buffs.player.castleStack * 1.8;
+        multiplier = buffs.player.castleStack * 2.0;
         buffs.player.castleDef100 = true; 
     }
     if(skill.effect === 'charge_divine') {
@@ -2524,14 +2563,14 @@ function applyEnemyDamage(rawDmg, type) {
         }
     } else {
         if(player.hp - dmg <= 0 && !buffs.player.revived) {
-             if(hasArtifact('guardian_angel')) {
-                buffs.player.revived = true;
-                player.hp = Math.floor(player.maxHp * 0.5);
-                log("<b>수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)</b>", 'heal');
-             } else if(hasArtifact('guardian_angel_legend')) {
+             if(hasArtifact('guardian_angel_legend')) {
                 buffs.player.revived = true;
                 player.hp = player.maxHp;
                 log("<b>[전설] 수호천사의 깃털이 빛나며 완전하게 부활했습니다! (HP 100% 회복)</b>", 'heal');
+             } else if(hasArtifact('guardian_angel')) {
+                buffs.player.revived = true;
+                player.hp = Math.floor(player.maxHp * 0.5);
+                log("<b>수호천사의 깃털이 부서지며 부활했습니다! (HP 50% 회복)</b>", 'heal');
              } else {
                 player.hp -= dmg;
                 log(`<span class="dmg">${dmg}</span> 피해를 입었습니다.`, 'dmg');
@@ -2615,6 +2654,10 @@ function endTurnPhase() {
     if(buffs.player.demonEyeTurns) {
         buffs.player.demonEyeTurns--;
         if(buffs.player.demonEyeTurns <= 0) log("마안의 효과가 끝났습니다.", 'info');
+    }
+    if(buffs.player.demonEyeLegendTurns) {
+        buffs.player.demonEyeLegendTurns--;
+        if(buffs.player.demonEyeLegendTurns <= 0) log("진: 마안의 효과가 끝났습니다.", 'info');
     }
     
     // 대현자 형태 및 버프 턴 감소
