@@ -2370,53 +2370,82 @@ function enemyTurn() {
         return applyEnemyDamage(currentEnemy.atk * 3.5, 'phy');
     }
 
-    // Iris AI (Hidden Boss)
-    if(currentEnemy.ai === 'iris_light') {
-        // Phase Transition Check
-        if(Math.random() < 0.2 && !gameState.hiddenBossDead) {
-            log(`<b style="color:#b39ddb">[차원 변환] 아이리스가 모습을 바꿉니다!</b>`, 'info');
-            swapBoss();
-            return true;
+    // Iris AI (Hidden Boss) - Refactored
+    if(currentEnemy.ai === 'iris_light' || currentEnemy.ai === 'iris_curse') {
+        // 1. Special Patterns
+        // 22, 44, 66 -> Apocalypse
+        if([22, 44, 66].includes(turnCount)) {
+            log(`<b style="color:#ff5252">아포칼립스! (종말의 일격)</b>`, 'dmg');
+            return applyEnemyDamage(currentEnemy.atk * 5.0, 'phy');
         }
 
-        // Pattern
-        if(turnCount % 4 === 0) {
-            log(`<b style="color:#fff59d">홀리 레이! (강력한 일격)</b>`, 'mag');
-            return applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
+        // 10n + 1 (11, 21, 31...) -> Soul Drain
+        if((turnCount - 1) % 10 === 0 && turnCount > 1) {
+             log(`<b style="color:#b39ddb">소울 드레인! (플레이어의 마나가 사라집니다)</b>`, 'mag');
+             player.mp = 0;
+             updateBattleUI();
+             return true;
         }
 
+        // 10n - 2 (8, 18, 28...) -> Shadow Twist
+        if((turnCount + 2) % 10 === 0) {
+            let mult = 1.5;
+            let msg = "섀도우 트위스트!";
+            if(buffs.enemy.tookDamageThisTurn) {
+                mult = 4.5;
+                msg = "섀도우 트위스트! (카운터 폭발)";
+            }
+            log(`<b style="color:#b39ddb">${msg}</b>`, 'mag');
+            return applyEnemyDamage(currentEnemy.matk * mult, 'mag');
+        }
+
+        // 2. Form Change (5n)
+        if(turnCount % 5 === 0) {
+             let otherId = currentEnemy.ai === 'iris_light' ? 'iris_curse' : 'iris_light';
+             let otherHp = gameState.hiddenBossReserve ? gameState.hiddenBossReserve[otherId] : 0;
+
+             if(otherHp > 0 && !gameState.hiddenBossDead) {
+                 log(`<b style="color:#ffd700">[폼 체인지] 아이리스가 모습을 바꿉니다.</b>`, 'info');
+                 swapBoss();
+                 return true;
+             } else {
+                 log(`[폼 체인지 실패] 다른 인격이 소멸하여 변신할 수 없습니다.`, 'info');
+             }
+        }
+
+        // 3. Basic Logic
         let rand = Math.random();
-        if(rand < 0.3) {
-            log(`${currentEnemy.name}의 섬광!`, 'mag');
-            return applyEnemyDamage(currentEnemy.matk * 1.5, 'mag');
-        }
-        log(`${currentEnemy.name}의 공격`, 'phy');
-        return applyEnemyDamage(currentEnemy.atk, 'phy');
-    }
 
-    if(currentEnemy.ai === 'iris_curse') {
-        // Phase Transition Check
-        if(Math.random() < 0.2 && !gameState.hiddenBossDead) {
-            log(`<b style="color:#fff59d">[차원 변환] 아이리스가 모습을 바꿉니다!</b>`, 'info');
-            swapBoss();
-            return true;
+        if(currentEnemy.ai === 'iris_light') {
+            if(rand < 0.3) {
+                log(`<b style="color:#fff59d">홀리 레이!</b>`, 'mag');
+                return applyEnemyDamage(currentEnemy.matk * 2.0, 'mag');
+            } else if(rand < 0.4) {
+                log(`<b style="color:#ff5252">저지먼트!</b>`, 'mag');
+                return applyEnemyDamage(currentEnemy.matk * 3.5, 'mag');
+            } else {
+                log(`${currentEnemy.name}의 공격`, 'phy');
+                return applyEnemyDamage(currentEnemy.atk, 'phy');
+            }
+        } else { // iris_curse
+            if(rand < 0.3) {
+                let pRatio = player.maxHp ? (player.hp / player.maxHp) : 0;
+                let mult = 1.5;
+                let msg = "균형의 천칭";
+                if(pRatio >= 0.8) {
+                    mult = 5.0;
+                    msg = "균형의 천칭 (심판)";
+                }
+                log(`<b style="color:#b39ddb">${msg}!</b>`, 'mag');
+                return applyEnemyDamage(currentEnemy.matk * mult, 'mag');
+            } else if(rand < 0.4) {
+                 log(`<b style="color:#5d4037">데스 핸드!</b>`, 'dmg');
+                 return applyEnemyDamage(currentEnemy.atk * 3.5, 'phy');
+            } else {
+                log(`${currentEnemy.name}의 공격`, 'phy');
+                return applyEnemyDamage(currentEnemy.atk, 'phy');
+            }
         }
-
-        // Pattern
-        if(turnCount % 4 === 0) {
-            log(`<b style="color:#b39ddb">다크니스! (강력한 일격)</b>`, 'mag');
-            let dmg = applyEnemyDamage(currentEnemy.matk * 2.5, 'mag');
-            if(dmg) buffs.enemy.darkness = Math.min(5, (buffs.enemy.darkness || 0) + 1);
-            return dmg;
-        }
-
-        let rand = Math.random();
-        if(rand < 0.3) {
-            log(`${currentEnemy.name}의 암흑탄!`, 'mag');
-            return applyEnemyDamage(currentEnemy.matk * 1.5, 'mag');
-        }
-        log(`${currentEnemy.name}의 공격`, 'phy');
-        return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
     if(Math.random() < 0.3 && currentEnemy.ai !== 'charge') {
