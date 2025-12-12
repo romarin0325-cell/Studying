@@ -704,7 +704,7 @@ function incrementCycle() {
 }
 
 function getMaxLevel() {
-    return 25 + getCycleCount();
+    return 30;
 }
 
 function saveClear(charKey) {
@@ -991,6 +991,7 @@ function openShop() {
         let typeStr = "";
         if(sk.type === 'phy') typeStr = "<span style='color:#ef9a9a; font-size:0.7rem;'>[물리]</span> ";
         if(sk.type === 'mag') typeStr = "<span style='color:#90caf9; font-size:0.7rem;'>[마법]</span> ";
+        if(sk.type === 'sup') typeStr = "<span style='color:#a5d6a7; font-size:0.7rem;'>[보조]</span> ";
 
         btn.innerHTML = `<span style="color:${learned ? '#4caf50':'#fff'}">${typeStr}${sk.name}</span>
                          <span style="font-size:0.7rem; display:block;">${sk.desc}</span>
@@ -1138,7 +1139,7 @@ function checkLevelUp() {
         player.exp = 0;
         recalcAllStats(); 
         log(`레벨 업! Lv.${player.level}`, 'heal');
-        if([5, 10, 15, 20, 25].includes(player.level)) {
+        if([5, 10, 15, 20, 25, 30].includes(player.level)) {
             rollArtifact();
         }
     }
@@ -1309,6 +1310,8 @@ function createBattleButtons() {
 function executeTurn(skillKey) {
     if(!player || !currentEnemy) return;
 
+    log(`<div class="log-turn">=== Turn ${turnCount} ===</div>`);
+
     if(buffs.player.stun) {
         log("행동 불가 상태입니다!", 'dmg');
         if(!enemyTurn()) return loseBattle();
@@ -1354,7 +1357,7 @@ function executeTurn(skillKey) {
         player.mp -= skill.cost;
     }
 
-    log(`<div class="log-turn">=== Turn ${turnCount} ===</div>`);
+
 
     let playerDefending = false;
     
@@ -2057,6 +2060,7 @@ function enemyTurn() {
             log(`${currentEnemy.name}의 익스플로전!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
         }
+        log(`${currentEnemy.name}의 공격`, 'phy');
         return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
@@ -2069,6 +2073,7 @@ function enemyTurn() {
             log(`${currentEnemy.name}의 썬더 레인!`, 'mag');
             return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
         }
+        log(`${currentEnemy.name}의 공격`, 'phy');
         return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
@@ -2101,6 +2106,7 @@ function enemyTurn() {
                 return applyEnemyDamage(currentEnemy.matk * 3.0, 'mag');
             }
         }
+        log(`${currentEnemy.name}의 공격`, 'phy');
         return applyEnemyDamage(currentEnemy.atk, 'phy');
     }
 
@@ -2435,6 +2441,7 @@ function enemyTurn() {
                 if(pRatio >= 0.8) {
                     mult = 5.0;
                     msg = "균형의 천칭 (심판)";
+                    log("플레이어 체력이 80% 이상이어 강력한 피해를 입습니다!", 'info');
                 }
                 log(`<b style="color:#b39ddb">${msg}!</b>`, 'mag');
                 return applyEnemyDamage(currentEnemy.matk * mult, 'mag');
@@ -2490,8 +2497,8 @@ function applyEnemyDamage(rawDmg, type) {
     if(hasArtifact('high_risk_dmg')) dmg *= 1.2;
     if(hasArtifact('high_risk_dmg_ex')) dmg *= 1.5;
 
-    if(buffs.player.nullMag && type === 'mag') dmg = 0;
-    if(buffs.player.nullPhy && type === 'phy') dmg = 0;
+    if(buffs.player.nullMag && type === 'mag') { log("매직 가드로 마법 공격을 무효화했습니다!", 'info'); dmg = 0; }
+    if(buffs.player.nullPhy && type === 'phy') { log("배리어로 물리 공격을 무효화했습니다!", 'info'); dmg = 0; }
     if(buffs.player.guard_70) dmg *= 0.3;
     if(buffs.player.guard) dmg *= 0.3;
     if(buffs.player.dmgRed50) dmg *= 0.5;

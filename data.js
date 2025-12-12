@@ -120,7 +120,7 @@ const CHAR_DATA = {
             'veil': { name: "베일 오브 다크니스", type: 'mag', cost: 30, power: 1.0, price: 5000, desc: "3턴 회피 +40%", effect: 'eva_buff' },
             'meteor': { name: "다크 메테오", type: 'mag', cost: 40, power: 3.5, price: 10000, desc: "암흑 부여 / 다음 턴 행동불가", effect: 'self_stun' },
             'evasion': { name: "회피 태세", type: 'sup', cost: 10, power: 0, price: 0, desc: "다음 턴 회피 +50%", effect: 'next_eva' },
-            'instinct': { name: "인스팅트", type: 'sup', cost: 10, power: 0, price: 5000, desc: "5턴 회피+25%/피해+20% (중첩가능)", effect: 'instinct' },
+    'instinct': { name: "인스팅트", type: 'sup', cost: 10, power: 0, price: 5000, desc: "5턴 회피+25%, 받는 피해 증가 (중첩가능)", effect: 'instinct' },
             'adrenaline': { name: "아드레날린", type: 'sup', cost: 20, power: 0, price: 5000, desc: "4턴 치명댐/피해 증가", effect: 'adrenaline' },
             'eclipse': { name: "이클립스", type: 'phy', isUlt: true, cost: 50, power: 2.9, price: 20000, desc: "확정 치명타 (물리)", effect: 'guarantee_crit' },
             'lunablade': { name: "루나 블레이드", type: 'mag', isUlt: true, cost: 50, power: 3.3, price: 20000, desc: "이번 턴 완전회피", effect: 'perfect_eva' }
@@ -161,7 +161,7 @@ const CHAR_DATA = {
             'magicguard': { name: "매직 가드", type: 'sup', cost: 30, power: 0, price: 0, desc: "이번 턴 마법무효", effect: 'null_mag' },
             'barrier': { name: "배리어", type: 'sup', cost: 30, power: 0, price: 5000, desc: "이번 턴 물리무효", effect: 'null_phy' },
             'meditation': { name: "메디테이션", type: 'sup', cost: 30, power: 0, price: 10000, desc: "리젠UP/마법공격DOWN (3턴)", effect: 'medi' },
-            'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 6.0, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 추가타(2배)", effect: 'self_stun' },
+    'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 6.0, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 추가 대미지", effect: 'self_stun' },
             'goddess': { name: "여신 강림", type: 'sup', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP 회복(60%)/상태 리셋, 버프", effect: 'reset_buff' }
         }
     },
@@ -180,7 +180,7 @@ const CHAR_DATA = {
             'overwhelm': { name: "로즈 프리즌", type: 'sup', cost: 20, power: 0, price: 5000, desc: "장미3 소모: 적 스턴", effect: 'stun_rose_3' },
             'fatalrose': { name: "하트 피어스", type: 'phy', cost: 40, power: 2.2, price: 10000, desc: "치명타 시 장미 6스택", effect: 'crit_rose_6' },
             'royalbloom': { name: "로열 블룸", type: 'sup', cost: 30, power: 0, price: 5000, desc: "3턴 공격/마공 50% 증가 (종료시 소멸)", effect: 'royal_bloom' },
-            'queensgarden': { name: "퀸즈 도메인", type: 'mag', isUlt: true, cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
+    'queensgarden': { name: "퀸즈 도메인", type: 'sup', isUlt: true, cost: 50, power: 2.5, price: 20000, desc: "3턴 패시브 피해 2배", effect: 'passive_boost' },
             'funeral': { name: "피날레", type: 'mag', isUlt: true, cost: 50, power: 5.0, price: 20000, desc: "스택 폭발", effect: 'rose_finisher' }
         }
     },
@@ -399,15 +399,15 @@ const ENEMIES = [
     // Hidden: 빛과 저주의 회랑
     {
         name: "사랑의 여신 아이리스", img:"",
-        hp: 17000, atk: 500, matk: 600, def: 300, mdef: 400,
+        hp: 19000, atk: 500, matk: 650, def: 300, mdef: 450,
         exp: 1000000, gold: 1000000, tier: 'hidden',
         skillName: "홀리 레이", skillType: 'mag', skillPower: 2.0,
         ai: 'iris_light', desc: "빛과 저주의 회랑 주인"
     },
     {
         name: "저주의 여신 아이리스", img:"",
-        hp: 17000, atk: 600, matk: 500, def: 400, mdef: 300,
-        exp: 0, gold: 0, tier: 'hidden',
+        hp: 19000, atk: 650, matk: 500, def: 450, mdef: 300,
+        exp: 1000000, gold: 1000000, tier: 'hidden',
         skillName: "다크니스", skillType: 'mag', skillPower: 2.0,
         ai: 'iris_curse', desc: "빛과 저주의 회랑 주인"
     }
