@@ -661,8 +661,8 @@ function upgradeLegendaryArtifact(char) {
         let art = ARTIFACTS.find(a => a.id === 'golden_sun');
         if(art) {
             art.name = "진: 황금의 태양";
-            art.desc = "공/마공 +50%, 마법방어 -30%";
-            art.val = 0.50; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
+            art.desc = "공/마공 +70%, 마법방어 -30%";
+            art.val = 0.70; // recalcAllStats에서 별도 처리 필요하지만 val도 업데이트
             art.effect = 'golden_sun_legend'; // 효과 ID 변경
             art.rarity = 'legend';
         }
@@ -729,7 +729,7 @@ function incrementCycle() {
 }
 
 function getMaxLevel() {
-    return 30;
+    return Math.min(30, 25 + getCycleCount());
 }
 
 function saveClear(charKey) {
@@ -803,8 +803,8 @@ function recalcAllStats() {
         if(art.effect === 'dragon_heart') { hpPer += 0.4; atkPer += 0.2; }
         if(art.effect === 'ancient_book') { mpPer += 0.4; matkPer += 0.2; }
 
-        if(art.effect === 'golden_sun') { atkPer += 0.30; matkPer += 0.30; mdefPer -= 0.2; }
-        if(art.effect === 'golden_sun_legend') { atkPer += 0.50; matkPer += 0.50; mdefPer -= 0.3; }
+        if(art.effect === 'golden_sun') { atkPer += 0.40; matkPer += 0.40; mdefPer -= 0.2; }
+        if(art.effect === 'golden_sun_legend') { atkPer += 0.70; matkPer += 0.70; mdefPer -= 0.3; }
 
         if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; player.baseCritDmg += 0.5; }
         if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.7; }
@@ -815,7 +815,7 @@ function recalcAllStats() {
         if(art.effect === 'all_stat') { hpPer+=0.2; mpPer+=0.2; atkPer+=0.2; matkPer+=0.2; defPer+=0.2; mdefPer+=0.2; }
         if(art.effect === 'royal_crown_legend') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
 
-        if(art.effect === 'blood_pact') { hpPer -= 0.2; atkPer += 0.2; matkPer += 0.2; }
+        if(art.effect === 'blood_pact') { hpPer -= 0.2; atkPer += 0.3; matkPer += 0.3; }
         if(art.effect === 'reckless') { defPer -= 0.3; player.baseCritDmg += art.val; }
 
         // New Boss Artifacts
@@ -1764,7 +1764,7 @@ function playerAttack(skill) {
 
     // Final Damage Artifacts (Additive)
     let finalDmgAdd = 0.0;
-    if(hasArtifact('high_risk_dmg')) finalDmgAdd += 0.3;
+    if(hasArtifact('high_risk_dmg')) finalDmgAdd += 0.5;
     if(hasArtifact('high_risk_dmg_ex')) finalDmgAdd += 1.0;
     if(hasArtifact('pharaoh')) finalDmgAdd += 1.0;
 
@@ -2533,7 +2533,7 @@ function applyEnemyDamage(rawDmg, type) {
 
     let dmg = rawDmg * (100 / (100 + def));
 
-    if(hasArtifact('high_risk_dmg')) dmg *= 1.2;
+    if(hasArtifact('high_risk_dmg')) dmg *= 1.3;
     if(hasArtifact('high_risk_dmg_ex')) dmg *= 1.5;
 
     if(buffs.player.nullMag && type === 'mag') { log("매직 가드로 마법 공격을 무효화했습니다!", 'info'); dmg = 0; }
