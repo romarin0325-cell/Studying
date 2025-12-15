@@ -60,16 +60,16 @@ const EQUIP_STATS = {
 const BASE_ARTIFACTS = [
     { id: 'vit_stone', name: "생명의 돌", desc: "최대 HP +20%", effect: 'stat_hp', val: 0.2 },
     { id: 'mana_crys', name: "마나 수정", desc: "최대 MP +20%", effect: 'stat_mp', val: 0.2 },
-    { id: 'str_ring', name: "전사의 반지", desc: "물리 공격 +10%", effect: 'stat_atk', val: 0.1 },
-    { id: 'wis_ring', name: "현자의 반지", desc: "마법 공격 +10%", effect: 'stat_matk', val: 0.1 },
-    { id: 'iron_shield', name: "강철 방패", desc: "물리 방어 +10%", effect: 'stat_def', val: 0.1 },
-    { id: 'magic_cloak', name: "마법 망토", desc: "마법 방어 +10%", effect: 'stat_mdef', val: 0.1 },
+    { id: 'str_ring', name: "전사의 반지", desc: "물리 공격 +15%", effect: 'stat_atk', val: 0.15 },
+    { id: 'wis_ring', name: "현자의 반지", desc: "마법 공격 +15%", effect: 'stat_matk', val: 0.15 },
+    { id: 'iron_shield', name: "강철 방패", desc: "물리 방어 +15%", effect: 'stat_def', val: 0.15 },
+    { id: 'magic_cloak', name: "마법 망토", desc: "마법 방어 +15%", effect: 'stat_mdef', val: 0.15 },
     { id: 'eagle_eye', name: "매의 눈", desc: "치명타 확률 +15%", effect: 'stat_crit', val: 0.15 },
     { id: 'wind_boots', name: "바람의 장화", desc: "회피율 +5%", effect: 'stat_eva', val: 0.05 },
     { id: 'gold_pocket', name: "황금 주머니", desc: "골드 획득 +20%", effect: 'gold_up', val: 0.2 },
     { id: 'mana_gem', name: "시작의 보석", desc: "시작 MP +30", effect: 'start_mp', val: 30 },
-    { id: 'cursed_sword', name: "저주받은 검", desc: "피해량 +30%, 받는 피해 +20%", effect: 'high_risk_dmg', val: 0.3 },
-    { id: 'blood_pact', name: "피의 계약", desc: "최대 HP -20%, ATK/MATK +20%", effect: 'blood_pact', val: 0.2 },
+    { id: 'cursed_sword', name: "저주받은 검", desc: "피해량 +50%, 받는 피해 +30%", effect: 'high_risk_dmg', val: 0.5 },
+    { id: 'blood_pact', name: "피의 계약", desc: "최대 HP -20%, ATK/MATK +30%", effect: 'blood_pact', val: 0.3 },
     { id: 'reckless', name: "무모한 돌진", desc: "방어 -30%, 치명타 피해 +80%", effect: 'reckless', val: 0.8 },
     { id: 'mask_madness', name: "광기의 가면", desc: "주는 피해 +100%, 받는 피해 +50%", effect: 'high_risk_dmg_ex', val: 1.0 },
     { id: 'vampire', name: "흡혈의 이빨", desc: "가한 피해의 5% 회복", effect: 'vampire', val: 0.05 },
@@ -78,7 +78,7 @@ const BASE_ARTIFACTS = [
     { id: 'guardian_angel', name: "수호천사의 깃털", desc: "사망 시 1회 부활 (HP 50%)", effect: 'revive_once', val: 0.5, rarity: 'epic' },
     { id: 'dragon_heart', name: "용의 심장", desc: "최대 HP +40%, 물리공격 +20%", effect: 'dragon_heart', val: 0.4 },
     { id: 'ancient_book', name: "고대의 마도서", desc: "최대 MP +40%, 마법공격 +20%", effect: 'ancient_book', val: 0.4 },
-    { id: 'golden_sun', name: "황금의 태양", desc: "공/마공 +30%, 마법방어 -20%", effect: 'golden_sun', val: 0.30, rarity: 'epic' },
+    { id: 'golden_sun', name: "황금의 태양", desc: "공/마공 +40%, 마법방어 -20%", effect: 'golden_sun', val: 0.40, rarity: 'epic' },
     { id: 'beelzebub', name: "마신기 벨제뷔트", desc: "공격/치명피해 +50%, 방어 -30%", effect: 'beelzebub', val: 0.5, rarity: 'epic' },
     { id: 'iris', name: "신기 아이리스", desc: "마공/마방 +50%", effect: 'iris', val: 0.5, rarity: 'epic' },
     { id: 'royal_crown', name: "로열 크라운", desc: "모든 능력치 +20% (여왕: 시작시 장미+5)", effect: 'all_stat', val: 0.2, rarity: 'epic' }
@@ -399,14 +399,14 @@ const ENEMIES = [
     // Hidden: 빛과 저주의 회랑
     {
         name: "사랑의 여신 아이리스", img:"",
-        hp: 19000, atk: 500, matk: 650, def: 300, mdef: 450,
+        hp: 20000, atk: 550, matk: 650, def: 300, mdef: 450,
         exp: 1000000, gold: 1000000, tier: 'hidden',
         skillName: "홀리 레이", skillType: 'mag', skillPower: 2.0,
         ai: 'iris_light', desc: "빛과 저주의 회랑 주인"
     },
     {
         name: "저주의 여신 아이리스", img:"",
-        hp: 19000, atk: 650, matk: 500, def: 450, mdef: 300,
+        hp: 20000, atk: 650, matk: 550, def: 450, mdef: 300,
         exp: 1000000, gold: 1000000, tier: 'hidden',
         skillName: "다크니스", skillType: 'mag', skillPower: 2.0,
         ai: 'iris_curse', desc: "빛과 저주의 회랑 주인"
