@@ -161,6 +161,7 @@ const CHAR_DATA = {
             'magicguard': { name: "매직 가드", type: 'sup', cost: 30, power: 0, price: 0, desc: "이번 턴 마법무효", effect: 'null_mag' },
             'barrier': { name: "배리어", type: 'sup', cost: 30, power: 0, price: 5000, desc: "이번 턴 물리무효", effect: 'null_phy' },
             'meditation': { name: "메디테이션", type: 'sup', cost: 30, power: 0, price: 10000, desc: "리젠UP/마법공격DOWN (3턴)", effect: 'medi' },
+            'manadress': { name: "마나드레스", type: 'sup', cost: 50, power: 0, price: 10000, desc: "4턴간 마나리젠+10 / 회피+10%", effect: 'mana_dress' },
     'theholy': { name: "더 홀리", type: 'mag', isUlt: true, cost: 100, power: 6.0, price: 20000, desc: "다음 턴 행동불가 / 여신강림 시 추가 대미지", effect: 'self_stun' },
             'goddess': { name: "여신 강림", type: 'sup', isUlt: true, cost: 200, power: 0, price: 25000, desc: "HP 회복(60%)/상태 리셋, 버프", effect: 'reset_buff' }
         }

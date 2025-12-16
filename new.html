@@ -1569,6 +1569,13 @@ function applyPlayerSupport(skill) {
         buffs.player.mediTurns = 3;
         log("명상 시작. 마나 회복 증가.", 'heal');
     }
+    if(skill.effect === 'mana_dress') {
+        buffs.player.manaDress = true;
+        buffs.player.manaDressTurns = 4;
+        buffs.player.manaDressVal = 0.1;
+        buffs.player.eva = (buffs.player.eva || 0) + 0.1;
+        log("마나의 가호! 마나 회복량과 회피율이 증가합니다.", 'heal');
+    }
     if(skill.effect === 'dmg_red_50') buffs.player.dmgRed50 = true;
     if(skill.effect === 'passive_boost') {
         buffs.player.gardenTurns = 3;
@@ -2600,6 +2607,14 @@ function applyEnemyDamage(rawDmg, type) {
 }
 
 function endTurnPhase() {
+    // MP Regen Logic Moved Here (Before Buff Expiry)
+    let regen = player.mpRegen;
+    if(buffs.player.medi) regen += 30;
+    if(buffs.player.manaDress) regen += 10;
+    if(hasArtifact('mana_engine')) regen += 10;
+
+    player.mp = Math.min(player.maxMp, player.mp + regen);
+
     if(player.charKey === 'queen' && roseStack > 0 && currentEnemy.hp > 0) {
         let roseDmg = Math.floor((player.atk + player.matk) * 0.1 * roseStack);
         let defVal = currentEnemy.def;
@@ -2640,6 +2655,7 @@ function endTurnPhase() {
     if(buffs.player.adrenalineTurns) { buffs.player.adrenalineTurns--; if(buffs.player.adrenalineTurns<=0) { delete buffs.player.critUp; } }
     if(buffs.player.veilTurns) { buffs.player.veilTurns--; if(buffs.player.veilTurns<=0) { delete buffs.player.veilVal; } }
     if(buffs.player.mediTurns) { buffs.player.mediTurns--; if(buffs.player.mediTurns<=0) { delete buffs.player.medi; } }
+    if(buffs.player.manaDressTurns) { buffs.player.manaDressTurns--; if(buffs.player.manaDressTurns<=0) { delete buffs.player.manaDress; delete buffs.player.manaDressVal; } }
 
     // Pharaoh's Curse Logic: Expire if not triggered next turn
     if(buffs.enemy.pharaohStance && turnCount > buffs.enemy.pharaohStanceTurn) {
@@ -2696,15 +2712,12 @@ function endTurnPhase() {
     let totalEva = 0;
     if(buffs.player.instinctTurns > 0) totalEva += (buffs.player.instinctVal || 0);
     if(buffs.player.veilTurns > 0) totalEva += (buffs.player.veilVal || 0);
+    if(buffs.player.manaDressTurns > 0) totalEva += (buffs.player.manaDressVal || 0);
     buffs.player.eva = totalEva;
 
     if(buffs.player.nextEva) { buffs.player.eva += buffs.player.nextEva; delete buffs.player.nextEva; }
 
-    let regen = player.mpRegen;
-    if(buffs.player.medi) regen += 30;
-    if(hasArtifact('mana_engine')) regen += 10;
-    
-    player.mp = Math.min(player.maxMp, player.mp + regen);
+    // MP Regen moved to top of function
     
     updateBattleUI();
     turnCount++;
