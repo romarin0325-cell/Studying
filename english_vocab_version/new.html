@@ -373,7 +373,7 @@
         <hr style="border-color:#444; margin: 15px 0;">
 
         <button onclick="tryTimeReversal('normal')" style="width:100%; margin-bottom:5px; background:#3e2723; border-color:#5d4037;">
-            🕰️ 시간의 역행 (30,000 G)
+            🕰️ 시간의 역행 (무료)
             <span class="skill-sub" style="color:#bcaaa4">퀴즈 정답 시 유물 리셋 (기본)</span>
         </button>
 
@@ -444,7 +444,9 @@ const BLESSINGS = {
         { id: 'lucky_hand', name: "행운의 손길", desc: "다음전투 골드보상 +100%", type: 'normal' },
         { id: 'balance', name: "균형의 힘", desc: "올스탯 +10%", type: 'normal' },
         { id: 'mana_wing', name: "마나의 날개", desc: "공격/마공 +30%", type: 'normal' },
-        { id: 'star_bless', name: "별의 축복", desc: "마나리젠 +5", type: 'normal' }
+        { id: 'star_bless', name: "별의 축복", desc: "마나리젠 +5", type: 'normal' },
+        { id: 'weakness_detect', name: "약점간파", desc: "치명타확률 +10%, 치명타피해 +30%", type: 'normal' },
+        { id: 'ancient_god_bless', name: "고대신의 축복", desc: "올스탯 +10%, 주는피해 +30%", type: 'normal' }
     ],
     epic: [
         { id: 'destruction', name: "파괴의 광란", desc: "공격력 +30%, 체력 +15%", type: 'epic' },
@@ -453,16 +455,20 @@ const BLESSINGS = {
         { id: 'gold_contract', name: "황금의 계약", desc: "다음전투 골드보상 +200%", type: 'epic' },
         { id: 'transcendence', name: "초월각성", desc: "올스탯 +20%", type: 'epic' },
         { id: 'pen_sword', name: "문무겸비", desc: "공격/마공 +40%", type: 'epic' },
-        { id: 'moon_bless', name: "달의 축복", desc: "올스탯 +10%, 마나리젠 +10", type: 'epic' }
+        { id: 'moon_bless', name: "달의 축복", desc: "올스탯 +10%, 마나리젠 +10", type: 'epic' },
+        { id: 'severing_fate', name: "운명절단", desc: "치명타확률 +15%, 치명타피해 +50%", type: 'epic' },
+        { id: 'demon_god_auth', name: "마신의 권능", desc: "공/마공 +50%, 방/마방 +30%", type: 'epic' }
     ],
     legend: [
         { id: 'doom_strike', name: "파멸의 일격", desc: "공격력 +40%, 체력 +20%", type: 'legend' },
         { id: 'goddess_bless', name: "여신의 축복", desc: "마공 +40%, 체력 +20%", type: 'legend' },
         { id: 'immortal_guardian', name: "불멸의 수호자", desc: "방어/마방/체력 +35%", type: 'legend' },
         { id: 'midas', name: "미다스의 권능", desc: "다음전투 골드보상 +300%", type: 'legend' },
-        { id: 'creation_bless', name: "창조신의 축복", desc: "올스탯 +30%", type: 'legend' },
+        { id: 'gold_dragon_bless', name: "골드드래곤의 축복", desc: "올스탯 +30%", type: 'legend' },
         { id: 'light_dark', name: "빛과 어둠의 축복", desc: "공격/마공 +50%", type: 'legend' },
-        { id: 'sun_bless', name: "태양의 축복", desc: "올스탯 +20%, 마나리젠 +10", type: 'legend' }
+        { id: 'sun_bless', name: "태양의 축복", desc: "올스탯 +20%, 마나리젠 +10", type: 'legend' },
+        { id: 'reaper_bless', name: "사신의 축복", desc: "치명타확률 +20%, 치명타피해 +70%", type: 'legend' },
+        { id: 'creation_bless', name: "창조신의 축복", desc: "올스탯 +40%", type: 'legend' }
     ]
 };
 
@@ -880,6 +886,7 @@ function recalcAllStats() {
 
     // Additive Modifiers
     let hpPer = 0.0, mpPer = 0.0, atkPer = 0.0, matkPer = 0.0, defPer = 0.0, mdefPer = 0.0;
+    let extraCrit = 0.0, extraCritDmg = 0.0, extraEva = 0.0;
 
     // Artifacts
     player.artifacts.forEach(art => {
@@ -890,12 +897,12 @@ function recalcAllStats() {
         if(art.effect === 'stat_def') defPer += art.val;
         if(art.effect === 'stat_mdef') mdefPer += art.val;
 
-        if(art.effect === 'stat_crit') player.baseCrit += art.val;
-        if(art.effect === 'stat_eva') player.baseEva += art.val;
+        if(art.effect === 'stat_crit') extraCrit += art.val;
+        if(art.effect === 'stat_eva') extraEva += art.val;
 
         if(art.effect === 'stat_def_mdef') { defPer += art.val; mdefPer += art.val; }
-        if(art.effect === 'crit_critdmg') { player.baseCrit += 0.1; player.baseCritDmg += 0.3; }
-        if(art.effect === 'dark_pendant') { player.baseCrit += 0.1; player.baseCritDmg += 1.0; }
+        if(art.effect === 'crit_critdmg') { extraCrit += 0.1; extraCritDmg += 0.3; }
+        if(art.effect === 'dark_pendant') { extraCrit += 0.1; extraCritDmg += 1.0; }
         if(art.effect === 'matk_mp') { matkPer += art.val; mpPer += art.val; }
         if(art.effect === 'atk_matk') { atkPer += art.val; matkPer += art.val; }
         if(art.effect === 'atk_hp') { atkPer += art.val; hpPer += art.val; }
@@ -906,8 +913,8 @@ function recalcAllStats() {
         if(art.effect === 'golden_sun') { atkPer += 0.40; matkPer += 0.40; mdefPer -= 0.2; }
         if(art.effect === 'golden_sun_legend') { atkPer += 0.70; matkPer += 0.70; mdefPer -= 0.3; }
 
-        if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; player.baseCritDmg += 0.5; }
-        if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; player.baseCritDmg += 0.7; }
+        if(art.effect === 'beelzebub') { atkPer += 0.5; defPer -= 0.3; extraCritDmg += 0.5; }
+        if(art.effect === 'beelzebub_legend') { atkPer += 0.6; defPer -= 0.3; extraCritDmg += 0.7; }
 
         if(art.effect === 'iris') { matkPer += 0.5; mdefPer += 0.5; }
         if(art.effect === 'iris_legend') { matkPer += 0.7; mdefPer += 0.7; }
@@ -916,7 +923,7 @@ function recalcAllStats() {
         if(art.effect === 'royal_crown_legend') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
 
         if(art.effect === 'blood_pact') { hpPer -= 0.2; atkPer += 0.3; matkPer += 0.3; }
-        if(art.effect === 'reckless') { defPer -= 0.3; player.baseCritDmg += art.val; }
+        if(art.effect === 'reckless') { defPer -= 0.3; extraCritDmg += art.val; }
 
         // New Boss Artifacts
         if(art.effect === 'hestia') {
@@ -953,10 +960,21 @@ function recalcAllStats() {
         if(b.id === 'doom_strike') { atkPer+=0.4; hpPer+=0.2; }
         if(b.id === 'goddess_bless') { matkPer+=0.4; hpPer+=0.2; }
         if(b.id === 'immortal_guardian') { defPer+=0.35; mdefPer+=0.35; hpPer+=0.35; }
-        if(b.id === 'creation_bless') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
+        if(b.id === 'gold_dragon_bless') { hpPer+=0.3; mpPer+=0.3; atkPer+=0.3; matkPer+=0.3; defPer+=0.3; mdefPer+=0.3; }
         if(b.id === 'light_dark') { atkPer+=0.5; matkPer+=0.5; }
         if(b.id === 'sun_bless') { hpPer+=0.2; mpPer+=0.2; atkPer+=0.2; matkPer+=0.2; defPer+=0.2; mdefPer+=0.2; }
+
+        if(b.id === 'weakness_detect') { extraCrit += 0.1; extraCritDmg += 0.3; }
+        if(b.id === 'ancient_god_bless') { hpPer+=0.1; mpPer+=0.1; atkPer+=0.1; matkPer+=0.1; defPer+=0.1; mdefPer+=0.1; }
+        if(b.id === 'severing_fate') { extraCrit += 0.15; extraCritDmg += 0.5; }
+        if(b.id === 'demon_god_auth') { atkPer+=0.5; matkPer+=0.5; defPer+=0.3; mdefPer+=0.3; }
+        if(b.id === 'reaper_bless') { extraCrit += 0.20; extraCritDmg += 0.7; }
+        if(b.id === 'creation_bless') { hpPer+=0.4; mpPer+=0.4; atkPer+=0.4; matkPer+=0.4; defPer+=0.4; mdefPer+=0.4; }
     }
+
+    player.baseCrit += extraCrit;
+    player.baseEva += extraEva;
+    player.baseCritDmg += extraCritDmg;
 
     // Buffs (Battle) - 이제 합연산으로 계산 및 상태창 반영
     if(buffs && buffs.player) {
@@ -1890,6 +1908,8 @@ function playerAttack(skill) {
     if(hasArtifact('high_risk_dmg')) finalDmgAdd += 0.5;
     if(hasArtifact('high_risk_dmg_ex')) finalDmgAdd += 1.0;
     if(hasArtifact('pharaoh')) finalDmgAdd += 1.0;
+
+    if(gameState.activeBlessing && gameState.activeBlessing.id === 'ancient_god_bless') finalDmgAdd += 0.3;
 
     if(finalDmgAdd > 0) multiplier *= (1.0 + finalDmgAdd);
 
@@ -2984,6 +3004,7 @@ function tryTimeReversal(type) {
     if(player.artifacts.length === 0) return myAlert("초기화할 유물이 없습니다.");
 
     let cost = 30000;
+    if(type === 'normal') cost = 0;
     if(type === 'noble') cost = 50000;
 
     if(gameState.gold < cost) return myAlert(`골드가 부족합니다. (필요: ${cost} G)`);
@@ -2992,16 +3013,25 @@ function tryTimeReversal(type) {
     if(type === 'brilliant') title = "찬란한 시간의 역행";
     if(type === 'noble') title = "고귀한 시간의 역행";
 
-    if(!confirm(`${title}을 진행하시겠습니까?\n비용: ${cost} G\n영어 퀴즈가 출제됩니다.`)) return;
+    let msg = `${title}을 진행하시겠습니까?\n비용: ${cost} G\n영어 퀴즈가 출제됩니다.`;
+    if(cost === 0) msg = `${title}을 진행하시겠습니까?\n비용: 무료\n영어 퀴즈가 출제됩니다.`;
 
-    gameState.gold -= cost;
-    updateInfo();
+    if(!confirm(msg)) return;
+
+    if(cost > 0) {
+        gameState.gold -= cost;
+        updateInfo();
+    }
 
     startQuiz((isCorrect) => {
+        if(type === 'normal' && !isCorrect) {
+            myAlert("오답입니다. 리셋에 실패했습니다.");
+            return;
+        }
+
         let weight = 1;
         if(type === 'normal') {
-            if(isCorrect) weight = 1;
-            else weight = 1;
+            weight = 1;
         } else if(type === 'brilliant') {
             weight = isCorrect ? 2 : 1;
         } else if(type === 'noble') {
