@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프린스 메이커</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header: Age, Season, Resources -->
+        <div id="header">
+            <div class="status-group">
+                <span>나이: <span id="ui-age" class="stat-val">10</span></span>
+                <span>계절: <span id="ui-season" class="stat-val">봄</span></span>
+            </div>
+            <div class="status-group">
+                <span>Gold: <span id="ui-gold" class="stat-val">1000</span></span>
+                <span>HP: <span id="ui-hp" class="stat-val">50</span>/50</span>
+                <span>스트레스: <span id="ui-stress" class="stat-val">0</span></span>
+            </div>
+        </div>
+
+        <!-- Main Content: Illustration & Logs -->
+        <div id="main-content">
+            <div id="illustration-area">
+                <!-- Base Illustrations (Age/Fatigue/Rebel) -->
+                <!-- Use a placeholder background or alt text if image missing -->
+                <div id="main-image-placeholder" style="color:white;text-align:center;">
+                    <h2 id="img-name">프린스10</h2>
+                </div>
+                <!-- Overlay for Events/Locations -->
+                <div id="overlay-image">
+                    <h2 id="overlay-title">대련장</h2>
+                    <div id="overlay-content"></div>
+                </div>
+            </div>
+
+            <div id="right-panel">
+                <div id="message-log">
+                    <div class="log-entry">새로운 게임이 시작되었습니다.</div>
+                </div>
+                <div id="mini-stats">
+                    <!-- Dynamic Stat List -->
+                    <div class="stat-row"><span>체력(Vit)</span><span id="stat-vit">20</span></div>
+                    <div class="stat-row"><span>근력(Str)</span><span id="stat-str">20</span></div>
+                    <div class="stat-row"><span>지능(Int)</span><span id="stat-int">20</span></div>
+                    <div class="stat-row"><span>매력(Cha)</span><span id="stat-charm">20</span></div>
+                    <hr style="border-color:#444; width:100%;">
+                    <div class="stat-row"><span>도덕심</span><span id="stat-morality">20</span></div>
+                    <div class="stat-row"><span>신앙심</span><span id="stat-faith">20</span></div>
+                    <div class="stat-row"><span>기품</span><span id="stat-elegance">20</span></div>
+                    <div class="stat-row"><span>친밀함</span><span id="stat-intimacy">20</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Menu: Commands -->
+        <div id="bottom-menu">
+            <div class="menu-group" id="menu-main">
+                <button onclick="GAME.openMenu('study')">공부</button>
+                <button onclick="GAME.openMenu('job')">알바</button>
+                <button onclick="GAME.openMenu('rest')">휴식</button>
+                <button onclick="GAME.openEquipMenu()">장비</button>
+                <button onclick="GAME.openStatusMenu()">스탯</button>
+                <button onclick="GAME.openSystemMenu()">메뉴</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Action Select Modal -->
+    <div id="modal-action" class="modal">
+        <div class="modal-content">
+            <h2 id="action-title">수업 선택</h2>
+            <div id="action-list" class="choice-container"></div>
+            <button onclick="GAME.closeModal('modal-action')" style="margin-top:20px;">취소</button>
+        </div>
+    </div>
+
+    <!-- Star/Fortune Modal -->
+    <div id="modal-star" class="modal">
+        <div class="modal-content">
+            <h2>이번 분기의 운세</h2>
+            <div id="star-result" class="star-card">
+                <h3 id="star-name">???</h3>
+                <p id="star-desc">...</p>
+            </div>
+            <p>남은 리롤 횟수: <span id="reroll-count">3</span></p>
+            <div class="choice-container">
+                <button onclick="GAME.rerollStar()">운세 다시 뽑기</button>
+                <button onclick="GAME.confirmStar()">확정</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Choice Modal -->
+    <div id="modal-event" class="modal">
+        <div class="modal-content">
+            <h2 id="event-title">이벤트</h2>
+            <p id="event-desc">내용</p>
+            <div id="event-choices" class="choice-container"></div>
+        </div>
+    </div>
+
+    <!-- Combat Modal -->
+    <div id="modal-combat" class="modal">
+        <div class="modal-content" style="width:700px;">
+            <h2>전투 시작!</h2>
+            <div class="combat-hud">
+                <div id="player-hud">
+                    <h3>나</h3>
+                    <p>HP: <span id="combat-hp-p">50</span></p>
+                    <p>ATK: <span id="combat-atk-p">10</span></p>
+                </div>
+                <div id="enemy-hud">
+                    <h3 id="enemy-name">적</h3>
+                    <p>HP: <span id="combat-hp-e">50</span></p>
+                    <p>ATK: <span id="combat-atk-e">10</span></p>
+                </div>
+            </div>
+            <div id="combat-log" class="combat-log"></div>
+            <div class="rps-buttons" id="combat-btns">
+                <button class="rps-btn" onclick="GAME.combatAction('attack')">공격<br>(1x Dmg)</button>
+                <button class="rps-btn" onclick="GAME.combatAction('special')">필살<br>(2x Dmg)</button>
+                <button class="rps-btn" onclick="GAME.combatAction('counter')">반격<br>(카운터)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="modal-shop" class="modal">
+        <div class="modal-content">
+            <h2>상점</h2>
+            <div id="shop-list" class="shop-grid"></div>
+            <button onclick="GAME.closeModal('modal-shop')" style="margin-top:20px;">나가기</button>
+        </div>
+    </div>
+
+    <!-- System/Status Modal -->
+    <div id="modal-system" class="modal">
+        <div class="modal-content">
+            <h2>시스템</h2>
+            <div class="choice-container">
+                <button onclick="GAME.saveGame()">저장</button>
+                <button onclick="GAME.viewEndings()">엔딩 목록</button>
+                <button onclick="GAME.closeModal('modal-system')">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ending List Modal -->
+    <div id="modal-endings" class="modal">
+        <div class="modal-content">
+            <h2>획득한 엔딩</h2>
+            <div id="ending-list" style="text-align:left; max-height:300px; overflow-y:auto;"></div>
+            <button onclick="GAME.closeModal('modal-endings')" style="margin-top:20px;">닫기</button>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1>프린스 메이커</h1>
+        <p>성향을 선택하세요</p>
+        <div class="personality-select">
+            <button onclick="GAME.startGame('heat')">열혈<br>(체/근+10, 근력성장)</button>
+            <button onclick="GAME.startGame('wisdom')">지혜<br>(지능+10, 지능성장)</button>
+            <button onclick="GAME.startGame('kindness')">다정<br>(매력+10, 매력성장)</button>
+            <button onclick="GAME.startGame('freedom')">자유<br>(알바보상 10%)</button>
+        </div>
+        <button onclick="GAME.loadGame()" id="load-btn" style="margin-top:20px;">불러오기</button>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
