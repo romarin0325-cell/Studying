@@ -478,8 +478,6 @@
         function init() {
             // Cache DOM elements
             const ids = ['ui-age', 'ui-season', 'ui-gold', 'ui-stress',
-                'stat-vit', 'stat-str', 'stat-int', 'stat-charm',
-                'stat-morality', 'stat-faith', 'stat-elegance', 'stat-intimacy',
                 'img-name', 'message-log',
                 'modal-action', 'action-list', 'action-title',
                 'modal-star', 'star-result', 'star-name', 'star-desc', 'reroll-count',
@@ -744,30 +742,16 @@
             const realMaxHp = 30 + state.stats.vit;
             if (state.stats.hp > realMaxHp) state.stats.hp = realMaxHp;
 
-            els['stat-vit'].textContent = state.stats.vit;
-            els['stat-str'].textContent = state.stats.str;
-            els['stat-int'].textContent = state.stats.int;
-            els['stat-charm'].textContent = state.stats.charm;
-
-            els['stat-morality'].textContent = state.stats.morality;
-            els['stat-faith'].textContent = state.stats.faith;
-            els['stat-elegance'].textContent = state.stats.elegance;
-            els['stat-intimacy'].textContent = state.stats.intimacy;
-
             updateImage();
         }
 
         function updateImage() {
-            let artAge = 10;
-            if (state.age >= 13) artAge = 13;
-            if (state.age >= 16) artAge = 16;
-
-            let base = `프린스${artAge}`;
+            let base = 'prince';
             if (state.flags.silk_dress_equipped && state.age >= 16) {
-                base = '프린스실크드레스';
+                base = 'prince_dress';
             } else {
-                if (state.stats.stress >= 80) base = `프린스피로${artAge}`;
-                else if (state.stats.morality <= 10) base = `프린스반항${artAge}`;
+                if (state.stats.stress >= 80) base = 'prince_tired';
+                else if (state.stats.morality <= 10) base = 'prince_rebel';
             }
 
             els['img-name'].textContent = base;
