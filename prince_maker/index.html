@@ -79,7 +79,7 @@
 
         #main-image-container {
             height: 100%;
-            aspect-ratio: 9/12;
+            aspect-ratio: 7/12;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -746,7 +746,10 @@
         }
 
         function updateImage() {
-            let base = 'prince';
+            let base = 'prince_child';
+            if (state.age >= 13) base = 'prince_teen';
+            if (state.age >= 16) base = 'prince_adult';
+
             if (state.flags.silk_dress_equipped && state.age >= 16) {
                 base = 'prince_dress';
             } else {
