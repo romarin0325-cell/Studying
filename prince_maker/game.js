@@ -17,10 +17,10 @@ const GAME = (function() {
 
     function init() {
         // Cache DOM elements
-        const ids = ['ui-age', 'ui-season', 'ui-gold', 'ui-hp', 'ui-stress',
+        const ids = ['ui-age', 'ui-season', 'ui-gold', 'ui-stress',
             'stat-vit', 'stat-str', 'stat-int', 'stat-charm',
             'stat-morality', 'stat-faith', 'stat-elegance', 'stat-intimacy',
-            'main-image-placeholder', 'img-name', 'message-log',
+            'main-image', 'img-name', 'message-log',
             'modal-action', 'action-list', 'action-title',
             'modal-star', 'star-result', 'star-name', 'star-desc', 'reroll-count',
             'modal-event', 'event-title', 'event-desc', 'event-choices',
@@ -281,8 +281,6 @@ const GAME = (function() {
 
         const realMaxHp = 30 + state.stats.vit;
         if (state.stats.hp > realMaxHp) state.stats.hp = realMaxHp;
-        // Explicitly format as string to avoid confusion
-        els['ui-hp'].textContent = `${Math.floor(state.stats.hp)} / ${realMaxHp}`;
 
         els['stat-vit'].textContent = state.stats.vit;
         els['stat-str'].textContent = state.stats.str;
@@ -298,18 +296,6 @@ const GAME = (function() {
     }
 
     function updateImage() {
-        let imgName = `프린스${state.age}`;
-
-        if (state.flags.silk_dress_equipped && state.age >= 16) {
-            imgName = '프린스실크드레스';
-        } else {
-            if (state.stats.stress >= 80) {
-                imgName = `프린스피로${state.age}`;
-            } else if (state.stats.morality <= 10) {
-                imgName = `프린스반항${state.age}`;
-            }
-        }
-
         let artAge = 10;
         if (state.age >= 13) artAge = 13;
         if (state.age >= 16) artAge = 16;
@@ -323,6 +309,13 @@ const GAME = (function() {
         }
 
         els['img-name'].textContent = base;
+
+        // Image loading logic
+        if (els['main-image']) {
+            els['main-image'].style.display = 'block';
+            els['img-name'].style.display = 'none';
+            els['main-image'].src = base + '.png';
+        }
     }
 
     function log(msg, type='') {
@@ -450,11 +443,12 @@ const GAME = (function() {
     function startSeason() {
         log(`=== ${state.age}세 ${PM_DATA.gameDuration.seasons[state.seasonIndex]} ===`, 'log-turn');
         state.star = null; // Reset star
+        state.starRerolls = 3; // Reset rerolls
         // No auto-roll. User must click 'Fortune'.
     }
 
     function openFortuneMenu() {
-        state.starRerolls = 3;
+        // state.starRerolls = 3; // REMOVED: Do not reset rerolls here
         rollStar();
         els['modal-star'].style.display = 'flex';
     }
@@ -484,7 +478,10 @@ const GAME = (function() {
     }
 
     function executeTurn(action, type) {
-        if (action.cost) state.stats.money -= action.cost;
+        if (action.cost) {
+            state.stats.money -= action.cost;
+            log(`${action.cost} Gold 소모`, 'log-loss');
+        }
 
         let isGreat = false;
         let isFail = false;
@@ -517,6 +514,8 @@ const GAME = (function() {
             state.flags.pub_success = true;
         }
 
+        let statChanges = {};
+
         if (action.stats) {
             for (let key in action.stats) {
                 let val = action.stats[key];
@@ -543,16 +542,39 @@ const GAME = (function() {
                     if (state.star.id === 'black' && action.id.includes('pub')) val *= 2;
                 }
 
-                if (key !== 'stress') state.stats[key] += val;
-                else state.stats.stress += val;
+                if (key !== 'stress') {
+                    state.stats[key] += val;
+                    statChanges[key] = (statChanges[key] || 0) + val;
+                }
+                else {
+                    state.stats.stress += val;
+                    statChanges['stress'] = (statChanges['stress'] || 0) + val;
+                }
             }
         }
 
         if (type === 'study') {
-            if (state.personality === 'heat' && !action.stats.str) state.stats.str += 1;
-            if (state.personality === 'wisdom' && !action.stats.int) state.stats.int += 1;
-            if (state.personality === 'kindness' && !action.stats.charm) state.stats.charm += 1;
+            if (state.personality === 'heat' && !action.stats.str) { state.stats.str += 1; statChanges['str'] = (statChanges['str'] || 0) + 1; }
+            if (state.personality === 'wisdom' && !action.stats.int) { state.stats.int += 1; statChanges['int'] = (statChanges['int'] || 0) + 1; }
+            if (state.personality === 'kindness' && !action.stats.charm) { state.stats.charm += 1; statChanges['charm'] = (statChanges['charm'] || 0) + 1; }
         }
+
+        // Log stat changes
+        let changeStrs = [];
+        const statNames = {
+            vit:'체력', str:'근력', int:'지능', charm:'매력',
+            morality:'도덕', faith:'신앙', elegance:'기품', intimacy:'친밀', stress:'스트레스'
+        };
+
+        for(let k in statChanges) {
+             let v = statChanges[k];
+             if(v !== 0) {
+                 let name = statNames[k] || k;
+                 let sign = v > 0 ? '+' : '';
+                 changeStrs.push(`${name} ${sign}${v}`);
+             }
+        }
+        if(changeStrs.length > 0) log(changeStrs.join(', '));
 
         if (action.income && !isFail) {
             let income = action.income;
