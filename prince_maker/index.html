@@ -16,7 +16,7 @@
             </div>
             <div class="status-group">
                 <span>Gold: <span id="ui-gold" class="stat-val">1000</span></span>
-                <span>HP: <span id="ui-hp" class="stat-val">50</span>/50</span>
+                <span>HP: <span id="ui-hp" class="stat-val">50/50</span></span>
                 <span>스트레스: <span id="ui-stress" class="stat-val">0</span></span>
             </div>
         </div>
@@ -25,7 +25,6 @@
         <div id="main-content">
             <div id="illustration-area">
                 <!-- Base Illustrations (Age/Fatigue/Rebel) -->
-                <!-- Use a placeholder background or alt text if image missing -->
                 <div id="main-image-placeholder" style="color:white;text-align:center;">
                     <h2 id="img-name">프린스10</h2>
                 </div>
@@ -36,22 +35,11 @@
                 </div>
             </div>
 
-            <div id="right-panel">
+            <div id="log-panel">
                 <div id="message-log">
                     <div class="log-entry">새로운 게임이 시작되었습니다.</div>
                 </div>
-                <div id="mini-stats">
-                    <!-- Dynamic Stat List -->
-                    <div class="stat-row"><span>체력(Vit)</span><span id="stat-vit">20</span></div>
-                    <div class="stat-row"><span>근력(Str)</span><span id="stat-str">20</span></div>
-                    <div class="stat-row"><span>지능(Int)</span><span id="stat-int">20</span></div>
-                    <div class="stat-row"><span>매력(Cha)</span><span id="stat-charm">20</span></div>
-                    <hr style="border-color:#444; width:100%;">
-                    <div class="stat-row"><span>도덕심</span><span id="stat-morality">20</span></div>
-                    <div class="stat-row"><span>신앙심</span><span id="stat-faith">20</span></div>
-                    <div class="stat-row"><span>기품</span><span id="stat-elegance">20</span></div>
-                    <div class="stat-row"><span>친밀함</span><span id="stat-intimacy">20</span></div>
-                </div>
+                <!-- Removed mini-stats as requested -->
             </div>
         </div>
 
@@ -138,15 +126,31 @@
         </div>
     </div>
 
-    <!-- System/Status Modal -->
+    <!-- System Modal -->
     <div id="modal-system" class="modal">
         <div class="modal-content">
             <h2>시스템</h2>
             <div class="choice-container">
-                <button onclick="GAME.saveGame()">저장</button>
-                <button onclick="GAME.viewEndings()">엔딩 목록</button>
-                <button onclick="GAME.closeModal('modal-system')">닫기</button>
+                <!-- Dynamically filled -->
             </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="modal-status" class="modal">
+        <div class="modal-content">
+            <h2>상세 스탯</h2>
+            <div id="status-content"></div>
+            <button onclick="GAME.closeModal('modal-status')" style="margin-top:20px;">닫기</button>
+        </div>
+    </div>
+
+    <!-- Equip Modal -->
+    <div id="modal-equip" class="modal">
+        <div class="modal-content">
+            <h2>장비 현황</h2>
+            <div id="equip-content"></div>
+            <button onclick="GAME.closeModal('modal-equip')" style="margin-top:20px;">닫기</button>
         </div>
     </div>
 

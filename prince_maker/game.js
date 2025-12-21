@@ -25,7 +25,8 @@ const GAME = (function() {
             'modal-star', 'star-result', 'star-name', 'star-desc', 'reroll-count',
             'modal-event', 'event-title', 'event-desc', 'event-choices',
             'modal-combat', 'player-hud', 'enemy-hud', 'combat-log',
-            'modal-shop', 'shop-list', 'modal-endings', 'ending-list', 'start-screen'
+            'modal-shop', 'shop-list', 'modal-endings', 'ending-list', 'start-screen',
+            'modal-system', 'modal-status', 'status-content', 'modal-equip', 'equip-content'
         ];
         ids.forEach(id => els[id] = document.getElementById(id));
 
@@ -49,6 +50,7 @@ const GAME = (function() {
         state.turnCount = 0;
         state.flags = {};
         state.personality = personalityKey;
+        state.star = null;
 
         // Apply personality bonuses
         const p = PM_DATA.personalities[personalityKey];
@@ -56,7 +58,7 @@ const GAME = (function() {
         if (personalityKey === 'wisdom') { state.stats.int += 10; }
         if (personalityKey === 'kindness') { state.stats.charm += 10; }
 
-        state.flags.counts = {}; // Track action counts for unlocking advanced
+        state.flags.counts = {};
 
         els['start-screen'].style.display = 'none';
         log(`게임 시작! 성향: ${p.name}`);
@@ -74,25 +76,9 @@ const GAME = (function() {
         onCombatEnd = endCallback;
 
         const enemyData = PM_DATA.enemies[enemyId];
-        // Calc Player Stats
-        // HP = 50 + Vit (from logic earlier, wait, I used 30+Vit).
-        // Let's reuse UI logic.
         const maxHp = 30 + state.stats.vit;
-
-        // Attack: 10 base + Str/10
         const atk = 10 + Math.floor(state.stats.str / 10) + (state.stats.atk - 10);
-        // Note: state.stats.atk was initialized to 10. Items add to it directly.
-        // So `state.stats.atk` already contains Base(10) + ItemBonus.
-        // But prompt: "근력10당 공격력 1 증가".
-        // So RealAtk = state.stats.atk + Math.floor(state.stats.str / 10).
-
-        // MagAtk: 10 base + Int/10
         const matk = 10 + Math.floor(state.stats.int / 10) + (state.stats.matk - 10);
-
-        // Def: 5 base + Items
-        // Prompt says "장비의 공격이나 마공 방어는 그대로 합산".
-        // Does Str/Int/Vit affect defense? Prompt only mentioned HP from Vit.
-        // So Def is purely Base(5) + Items.
         const def = state.stats.def;
 
         combatState = {
@@ -103,11 +89,10 @@ const GAME = (function() {
                 matk: matk,
                 def: def
             },
-            enemy: JSON.parse(JSON.stringify(enemyData)), // Clone
+            enemy: JSON.parse(JSON.stringify(enemyData)),
             turn: 0
         };
 
-        // Setup UI
         els['modal-combat'].style.display = 'flex';
         els['enemy-name'].textContent = combatState.enemy.name;
         els['combat-log'].innerHTML = '';
@@ -117,7 +102,7 @@ const GAME = (function() {
 
     function updateCombatUI() {
         els['combat-hp-p'].textContent = combatState.player.hp;
-        els['combat-atk-p'].textContent = combatState.player.atk; // Show Phy Atk primarily
+        els['combat-atk-p'].textContent = combatState.player.atk;
 
         els['combat-hp-e'].textContent = combatState.enemy.hp;
         els['combat-atk-e'].textContent = combatState.enemy.atk;
@@ -131,92 +116,41 @@ const GAME = (function() {
     }
 
     function combatAction(playerMove) {
-        // AI Move: Random
         const moves = ['attack', 'special', 'counter'];
         const enemyMove = moves[Math.floor(Math.random() * 3)];
 
         logCombat(`나: ${moveName(playerMove)} vs 적: ${moveName(enemyMove)}`);
 
-        // Calculate Damage
         let pDmg = 0;
         let eDmg = 0;
 
-        // Player stats
-        const pAtk = combatState.player.atk; // Assuming Phy for now. Prompt says "검술대회는 물리스탯, 마법대회는 마법스탯".
-        // We should switch based on context or use higher?
-        // Let's use `type` from enemy to decide context?
-        // Enemy has `type: 'phy'` or `'mag'`.
-        // If enemy is Mag, maybe it's a Magic Tourney?
-        // But "탐험은 물리스탯 사용".
-        // Let's check context.
-        // We don't have context passed easily.
-        // Let's assume Phy unless specifically Magic Tourney logic overrides?
-        // Or check `enemy.type`. If enemy is Mag, maybe we use Mag?
-        // Wait, Magic Tourney uses Magic Stats.
-        // Let's assume if enemy.type == 'mag', we use Matk.
-
         let pPower = (combatState.enemy.type === 'mag') ? combatState.player.matk : combatState.player.atk;
-        let pDef = combatState.player.def; // Prompt didn't mention MDef scaling, just "기본 방어력 5".
-
+        let pDef = combatState.player.def;
         let ePower = combatState.enemy.atk;
         let eDef = combatState.enemy.def;
 
-        // Resolution
-        // RPS:
-        // Attack vs Attack: Both deal dmg
-        // Attack vs Special: Special wins (2x dmg), Attack deals normal? No.
-        // Prompt: "가위바위보 식으로 서로의 패를 비교해서 대미지 계산"
-        // "커맨드는 필살, 공격, 반격 3개 존재"
-        // This usually implies a triangular relationship.
-        // Attack < Special < Counter < Attack?
-        // Prompt says:
-        // "공격은 공격력만큼의 대미지"
-        // "필살기는 공격력의 2배대미지"
-        // "반격은 대미지0이지만 상대 커맨드가 필살기일 경우 무효화하고 공격력만큼의 대미지"
-
-        // It doesn't explicitly say "Special beats Attack".
-        // It just defines damage.
-        // "반격" only works vs "필살기".
-        // If I Counter and Enemy Attacks?
-        // Prompt doesn't say. Usually Counter fails vs Attack (Take dmg, deal 0).
-        // Let's implement:
-        // P: Attack, E: Attack -> Both Dmg
-        // P: Attack, E: Special -> Both Dmg (E deals 2x)
-        // P: Attack, E: Counter -> P Dmg, E 0 Dmg (Counter fails vs Attack)
-
-        // P: Special, E: Attack -> Both Dmg (P 2x)
-        // P: Special, E: Special -> Both 2x
-        // P: Special, E: Counter -> P 0 Dmg, E Dmg (Counter proc)
-
-        // P: Counter, E: Attack -> P Take Dmg, Deal 0.
-        // P: Counter, E: Special -> P Take 0, Deal Dmg.
-        // P: Counter, E: Counter -> Both 0.
-
-        // Calculate Raw Dmg
         const calcDmg = (atk, def, mult) => {
             let d = (atk - def);
             if (d < 1) d = 1;
             return Math.floor(d * mult);
         };
 
-        // Player Action Resolution
         if (playerMove === 'attack') {
             pDmg = calcDmg(pPower, eDef, 1);
         } else if (playerMove === 'special') {
             if (enemyMove === 'counter') {
-                pDmg = 0; // Countered
+                pDmg = 0;
             } else {
                 pDmg = calcDmg(pPower, eDef, 2);
             }
         } else if (playerMove === 'counter') {
             if (enemyMove === 'special') {
-                pDmg = calcDmg(pPower, eDef, 1); // Counter success deals normal dmg
+                pDmg = calcDmg(pPower, eDef, 1);
             } else {
-                pDmg = 0; // Failed counter
+                pDmg = 0;
             }
         }
 
-        // Enemy Action Resolution
         if (enemyMove === 'attack') {
             eDmg = calcDmg(ePower, pDef, 1);
         } else if (enemyMove === 'special') {
@@ -233,7 +167,6 @@ const GAME = (function() {
             }
         }
 
-        // Apply Dmg
         if (pDmg > 0) {
             combatState.enemy.hp -= pDmg;
             logCombat(`적에게 ${pDmg} 피해!`);
@@ -250,7 +183,6 @@ const GAME = (function() {
 
         updateCombatUI();
 
-        // Check Death
         if (combatState.player.hp <= 0 || combatState.enemy.hp <= 0) {
             endCombat();
         }
@@ -282,7 +214,11 @@ const GAME = (function() {
 
     // --- Ending Logic ---
     function checkEnding() {
-        // Sort endings by priority
+        // Prepare flags for special endings
+        if (state.flags.black_star_seen && state.flags.pub_success) {
+            state.flags.night_toy_cond = true;
+        }
+
         const sortedEndings = PM_DATA.endings.sort((a,b) => a.priority - b.priority);
 
         let finalEnding = null;
@@ -290,21 +226,22 @@ const GAME = (function() {
         for (let ending of sortedEndings) {
             let match = true;
 
-            // Check Req
             for (let stat in ending.req) {
-                // If ending.req is {str: 130}, check state.stats.str >= 130
                 if ((state.stats[stat] || 0) < ending.req[stat]) {
                     match = false;
                     break;
                 }
             }
 
-            // Check Max Conditions (e.g. morality < 10)
             if (ending.maxMorality !== undefined) {
                 if (state.stats.morality > ending.maxMorality) match = false;
             }
 
-            // Check Flags
+            // Millionaire Money Check
+            if (ending.minMoney !== undefined) {
+                if (state.stats.money < ending.minMoney) match = false;
+            }
+
             if (ending.flag) {
                 if (!state.flags[ending.flag]) match = false;
             }
@@ -321,23 +258,18 @@ const GAME = (function() {
     }
 
     function showEnding(ending) {
-        // Save to History
         let history = JSON.parse(localStorage.getItem('pm_endings') || '[]');
         if (!history.find(e => e.id === ending.id)) {
             history.push(ending);
             localStorage.setItem('pm_endings', JSON.stringify(history));
         }
 
-        // UI
-        els['main-image-placeholder'].innerHTML = ''; // Clear current
-        // Show Ending Image?
+        els['main-image-placeholder'].innerHTML = '';
         els['img-name'].textContent = `엔딩: ${ending.name}`;
 
         log(`=== 엔딩 달성: ${ending.name} ===`, 'log-event');
+        alert(`축하합니다! 당신은 [${ending.name}] 엔딩을 맞이했습니다.\n(성공적 마무리! 왕자는 훌륭하게 자랐습니다.)`);
 
-        alert(`축하합니다! 당신은 [${ending.name}] 엔딩을 맞이했습니다.`);
-
-        // Reset or Return to Title
         location.reload();
     }
 
@@ -347,23 +279,10 @@ const GAME = (function() {
         els['ui-gold'].textContent = state.stats.money;
         els['ui-stress'].textContent = state.stats.stress;
 
-        // Calc max HP
-        const maxHp = 50 + (state.stats.vit - 20); // Base 50 + (Vit-20) -> 1 Vit = 1 MaxHP inc?
-        // Prompt: "체력 1당 최대hp 1 증가(상한50)" -> This implies MaxHP increases by 1 for every Vit?
-        // "기본 hp50... 체력 1당 최대hp 1 증가(상한50)" -> Wait. "상한50" might mean the increase is capped or the total is capped?
-        // Or maybe it means "Max HP increases by 1 per Vit, but Vit itself is capped at 50?" No, stats go to 100+.
-        // Let's assume MaxHP = 50 + (Vit - InitialVit). If Initial is 20, then at 20 Vit we have 50 HP. at 30 Vit we have 60 HP.
-        // Wait "상한50" usually means Limit 50. But Base is 50. So maybe "Increase is capped at +50"? So max 100 HP?
-        // Or "Max HP is 50"? No, that contradicts "increases".
-        // Let's assume: MaxHP = 50 + (state.stats.vit); and the prompt meant "Vit limit 50"? No.
-        // Let's stick to: HP = 50 + (state.stats.vit - 20).
-        // Actually, prompt says: "체력 1당 최대hp 1 증가(상한50)" -> Maybe it means "Max Bonus is 50"?
-        // Let's implement HP = 50 + state.stats.vit. (Since init Vit is 20, init HP is 70? No init HP is 50).
-        // Let's do: MaxHP = 30 + state.stats.vit. (20 vit -> 50 HP).
-
         const realMaxHp = 30 + state.stats.vit;
         if (state.stats.hp > realMaxHp) state.stats.hp = realMaxHp;
-        els['ui-hp'].textContent = `${state.stats.hp}/${realMaxHp}`;
+        // Explicitly format as string to avoid confusion
+        els['ui-hp'].textContent = `${Math.floor(state.stats.hp)} / ${realMaxHp}`;
 
         els['stat-vit'].textContent = state.stats.vit;
         els['stat-str'].textContent = state.stats.str;
@@ -381,25 +300,20 @@ const GAME = (function() {
     function updateImage() {
         let imgName = `프린스${state.age}`;
 
-        // Check for specific overrides
         if (state.flags.silk_dress_equipped && state.age >= 16) {
             imgName = '프린스실크드레스';
         } else {
-            // Check fatigue/rebel
-            if (state.stats.stress >= 80) { // Exhaustion/Fatigue
+            if (state.stats.stress >= 80) {
                 imgName = `프린스피로${state.age}`;
-            } else if (state.stats.morality <= 10) { // Rebel
+            } else if (state.stats.morality <= 10) {
                 imgName = `프린스반항${state.age}`;
             }
         }
 
-        // The prompt lists specific ages for images: 10, 13, 16.
-        // We need to map 10,11,12 -> 10. 13,14,15 -> 13. 16,17 -> 16.
         let artAge = 10;
         if (state.age >= 13) artAge = 13;
         if (state.age >= 16) artAge = 16;
 
-        // Reconstruct name with mapped age
         let base = `프린스${artAge}`;
         if (state.flags.silk_dress_equipped && state.age >= 16) {
             base = '프린스실크드레스';
@@ -409,8 +323,6 @@ const GAME = (function() {
         }
 
         els['img-name'].textContent = base;
-        // In a real implementation, we would set els['main-image'].src = `assets/${base}.png`;
-        // For now, we rely on the placeholder text.
     }
 
     function log(msg, type='') {
@@ -421,6 +333,31 @@ const GAME = (function() {
         els['message-log'].scrollTop = els['message-log'].scrollHeight;
     }
 
+    function getFlavorText(type, isGreat, isFail) {
+        // Prince personality: Cute, energetic, kind
+        const failTexts = [
+            "으앙, 너무 어려워요...",
+            "실수해버렸어요. 다음엔 잘할게요!",
+            "죄송해요, 조금 졸았나봐요..."
+        ];
+        const greatTexts = [
+            "완벽해요! 저, 꽤 잘하죠?",
+            "신난다! 칭찬해주세요!",
+            "이정도 쯤이야 식은 죽 먹기죠!"
+        ];
+        const normalTexts = [
+            "열심히 했어요!",
+            "오늘도 무사히 마쳤습니다.",
+            "조금 힘들지만 보람차네요."
+        ];
+
+        let list = normalTexts;
+        if (isFail) list = failTexts;
+        if (isGreat) list = greatTexts;
+
+        return list[Math.floor(Math.random() * list.length)];
+    }
+
     // --- Actions ---
 
     function openMenu(type) {
@@ -429,14 +366,11 @@ const GAME = (function() {
             return;
         }
 
-        // Check "Collapse" state (Stress 100) -> Forced Rest only
         if (state.stats.stress >= 100 && type !== 'rest') {
             log("스트레스가 한계입니다! 무조건 휴식해야 합니다.", 'log-loss');
             return;
         }
 
-        // Rebel Check (Morality <= 10)
-        // Blocks: Etiquette (Study), Church (Job)
         const isRebel = state.stats.morality <= 10;
 
         const modal = els['modal-action'];
@@ -447,17 +381,7 @@ const GAME = (function() {
         if (type === 'study') {
             els['action-title'].textContent = '수업 선택';
             items = PM_DATA.actions.study.basic;
-            // Add advanced if unlocked? Prompt: "6회 이상부터"
-            // We need to check counts. For simplicity, we merge basic and advanced if unlocked, or replace?
-            // "수업 고급 (6회 이상부터)" implies it replaces or is added. Usually replaces in PM games.
-            // Let's list both or upgrade. Prompt separates them. Let's show all available.
 
-            // Actually, let's just iterate over keys in PM_DATA.actions.study
-            // And check unlock conditions.
-            // Simplified: Just show basic list, and if count >= 6, show advanced version instead?
-            // Or show advanced as separate buttons.
-
-            // Let's try to map them.
             ['s_sword', 's_magic', 's_etiquette'].forEach(baseId => {
                 const count = state.flags.counts[baseId] || 0;
                 let action = PM_DATA.actions.study.basic.find(a => a.id === baseId);
@@ -470,10 +394,7 @@ const GAME = (function() {
                         isAdv = true;
                     }
                 }
-
-                // Rebel check for Etiquette
                 if (isRebel && baseId === 's_etiquette') return;
-
                 createActionBtn(action, type, isAdv);
             });
 
@@ -491,10 +412,7 @@ const GAME = (function() {
                         isAdv = true;
                     }
                 }
-
-                // Rebel check for Church
                 if (isRebel && baseId === 'j_church') return;
-
                 createActionBtn(action, type, isAdv);
             });
         } else if (type === 'rest') {
@@ -514,7 +432,6 @@ const GAME = (function() {
         if (action.income) txt += `(+${action.income}G) `;
         btn.textContent = txt;
 
-        // Cost check
         if (action.cost && state.stats.money < action.cost) {
             btn.disabled = true;
         }
@@ -527,14 +444,16 @@ const GAME = (function() {
     }
 
     function closeModal(id) {
-        els[id].style.display = 'none';
+        if(els[id]) els[id].style.display = 'none';
     }
 
     function startSeason() {
-        // Log Season Start
         log(`=== ${state.age}세 ${PM_DATA.gameDuration.seasons[state.seasonIndex]} ===`, 'log-turn');
+        state.star = null; // Reset star
+        // No auto-roll. User must click 'Fortune'.
+    }
 
-        // Star Reroll Trigger
+    function openFortuneMenu() {
         state.starRerolls = 3;
         rollStar();
         els['modal-star'].style.display = 'flex';
@@ -542,9 +461,11 @@ const GAME = (function() {
 
     function rollStar() {
         const stars = PM_DATA.stars;
-        state.star = stars[Math.floor(Math.random() * stars.length)];
-        els['star-name'].textContent = state.star.name;
-        els['star-desc'].textContent = state.star.desc;
+        let star = stars[Math.floor(Math.random() * stars.length)];
+        // Temporary holding
+        state.pendingStar = star;
+        els['star-name'].textContent = star.name;
+        els['star-desc'].textContent = star.desc;
         els['reroll-count'].textContent = state.starRerolls;
     }
 
@@ -556,95 +477,70 @@ const GAME = (function() {
     }
 
     function confirmStar() {
+        state.star = state.pendingStar;
+        if (state.star.id === 'black') state.flags.black_star_seen = true;
         closeModal('modal-star');
         log(`이번 분기 운세: [${state.star.name}] 적용`);
-
-        // Event Check Trigger? No, events usually trigger at end of turn or specific times.
-        // Prompt: "각 분기별로 수업, 아르바이트, 휴식 중 하나 선택가능" -> This means 1 turn per season?
-        // Prompt says "총 28턴". 7 years * 4 seasons = 28. So yes, 1 action per season.
-        // So we are currently waiting for user input via openMenu.
     }
 
     function executeTurn(action, type) {
-        // Deduct Cost
         if (action.cost) state.stats.money -= action.cost;
-
-        // Calculate Success/Fail
-        // Base Success 100%.
-        // Great Success (Study: 20%, Job: 10%).
-        // Fail (Job: 10%).
-        // Modifiers: Personality, Stars, Exhaustion.
 
         let isGreat = false;
         let isFail = false;
         const r = Math.random();
 
-        // Modifiers
         let greatChance = (type === 'study') ? 0.2 : (type === 'job' ? 0.1 : 0);
         let failChance = (type === 'job') ? 0.1 : 0;
 
-        if (state.star.id === 'chaos') { greatChance *= 2; failChance *= 2; }
-        if (state.star.id === 'king') { greatChance *= 2; }
+        // Apply Star effects if star exists
+        if (state.star) {
+            if (state.star.id === 'chaos') { greatChance *= 2; failChance *= 2; }
+            if (state.star.id === 'king') { greatChance *= 2; }
+            if (state.star.id === 'gold' && type==='rest') { /* handled in stats */ }
+        }
 
-        if (state.stats.stress >= 80) greatChance = 0; // Exhaustion blocks Great Success
+        if (state.stats.stress >= 80) greatChance = 0;
 
         if (r < greatChance && type !== 'rest') isGreat = true;
         else if (r > (1 - failChance) && type === 'job') isFail = true;
 
-        // Apply Results
         log(`${action.name} 진행...`);
+        // Flavor Text
+        log(`"${getFlavorText(type, isGreat, isFail)}"`);
 
-        let statMult = 1;
-        if (isGreat) {
-            log("대성공!! 효과가 2배가 됩니다!", 'log-gain');
-            statMult = 2;
-            // Personality Bonuses?
-        }
-        if (isFail) {
-            log("실패했습니다... 보상이 없습니다.", 'log-loss');
-            statMult = 0; // Stats might still apply? Prompt: "알바 실패시 보상골드 없음". Stats usually apply or reduced.
-            // Let's assume stats apply normally but gold is 0.
-            // Wait, usually failure means stress up and no money/stats.
-            // Prompt specifically says "알바 실패시 보상골드 없음". Doesn't mention stats.
-            // Let's assume stats gain is 0 too for safety/standard PM logic, or just half?
-            // Let's set statMult 0.5 for failure? Or 1?
-            // "보상골드 없음" implies that's the main penalty.
-            // Let's keep stats at 1 for fail, but gold 0.
+        if (isGreat) log("대성공!! 효과가 2배가 됩니다!", 'log-gain');
+        if (isFail) log("실패했습니다... 보상이 없습니다.", 'log-loss');
+
+        // Track pub success
+        if (type === 'job' && action.id.includes('pub') && !isFail) {
+            state.flags.pub_success = true;
         }
 
-        // Apply Stats
         if (action.stats) {
             for (let key in action.stats) {
                 let val = action.stats[key];
 
-                // Stress is special
                 if (key === 'stress') {
-                    if (val > 0) { // Stress Increase
-                        if (state.star.id === 'rest') { /* No effect on increase */ }
-                        if (state.star.id === 'gold') val = 0; // Gold Star: No stress
+                    if (val > 0) {
+                        if (state.star && state.star.id === 'rest') {}
+                        if (state.star && state.star.id === 'gold') val = 0;
                     }
                 }
 
-                // Apply Multiplier to gains (positive stats)
-                // Negative stats (like str -1 in etiquette) should they be doubled on great success? Usually yes.
-                // But Prompt says "수업 대성공시 스탯변동 2배". So yes.
                 if (key !== 'stress' && isGreat) val *= 2;
 
-                // Personality Bonuses (Only for Study)
                 if (type === 'study') {
-                    if (state.personality === 'heat' && key === 'str') val += 1; // Actually Prompt: "수업시 근력추가스탯 1" (implies flat add)
+                    if (state.personality === 'heat' && key === 'str') val += 1;
                     if (state.personality === 'wisdom' && key === 'int') val += 1;
                     if (state.personality === 'kindness' && key === 'charm') val += 1;
-                    // "추가스탯 1" is flat. So add after mult? Or before? Usually flat is added.
-                    // Let's add distinct check.
                 }
 
-                // Star Bonuses
-                if (val > 0) { // Only grow positive stats
+                if (val > 0 && state.star) {
                     if (state.star.id === 'scholar' && (key === 'int' || key === 'faith')) val += 1;
                     if (state.star.id === 'warrior' && (key === 'vit' || key === 'str')) val += 1;
                     if (state.star.id === 'charm' && (key === 'charm' || key === 'elegance')) val += 1;
-                    if (state.star.id === 'black' && action.id.includes('pub')) val *= 2; // Black Star Pub 2x
+                    if (state.star.id === 'black' && action.id.includes('pub')) val *= 2;
                 }
 
                 if (key !== 'stress') state.stats[key] += val;
@@ -652,37 +548,31 @@ const GAME = (function() {
             }
         }
 
-        // Personality Flat Bonus Injection (if not in action.stats)
-        // eg. "수업시 근력추가스탯 1". If action didn't have Str, do we add it? Usually yes.
         if (type === 'study') {
             if (state.personality === 'heat' && !action.stats.str) state.stats.str += 1;
             if (state.personality === 'wisdom' && !action.stats.int) state.stats.int += 1;
             if (state.personality === 'kindness' && !action.stats.charm) state.stats.charm += 1;
         }
 
-        // Income
         if (action.income && !isFail) {
             let income = action.income;
             if (isGreat) income *= 2;
-            if (state.star.id === 'money') income = Math.floor(income * 1.2);
-            if (state.star.id === 'black' && action.id.includes('pub')) income *= 2;
+            if (state.star && state.star.id === 'money') income = Math.floor(income * 1.2);
+            if (state.star && state.star.id === 'black' && action.id.includes('pub')) income *= 2;
             if (state.personality === 'freedom') income = Math.floor(income * 1.1);
 
             state.stats.money += income;
             log(`${income} Gold 획득`, 'log-gain');
         }
 
-        // Stress Heal (Rest)
         if (action.stressHeal) {
             let heal = action.stressHeal;
-            if (state.star.id === 'rest') heal += 10;
+            if (state.star && state.star.id === 'rest') heal += 10;
             state.stats.stress -= heal;
             if (state.stats.stress < 0) state.stats.stress = 0;
             log(`스트레스가 ${heal} 감소했습니다.`);
         }
 
-        // Track Counts (For unlocking advanced)
-        // We need the base ID. e.g. 's_sword_adv' -> 's_sword'
         let baseId = action.id.replace('_adv', '');
         if (!state.flags.counts[baseId]) state.flags.counts[baseId] = 0;
         state.flags.counts[baseId]++;
@@ -695,46 +585,30 @@ const GAME = (function() {
         state.turnCount++;
         state.seasonIndex++;
 
-        // Age Up check
         if (state.seasonIndex >= 4) {
             state.seasonIndex = 0;
             state.age++;
             log(`${state.age}살이 되었습니다!`, 'log-event');
 
-            // Age Triggers (12, 14, 16 for Shop)
             if ([12, 14, 16].includes(state.age)) {
                 log("상점이 열렸습니다! (메뉴에서 확인 가능)", 'log-event');
-                state.flags.shopOpen = true; // Reset shop status for new age if needed?
-                // Prompt says "한번 이용에 한개 구매 가능".
-                // So we set a flag 'shopUsed' = false.
+                state.flags.shopOpen = true;
                 state.flags.shopUsed = false;
             } else {
                 state.flags.shopOpen = false;
             }
         }
 
-        // Check Ending Conditions (17 years old)
-        if (state.age > PM_DATA.gameDuration.endAge) { // > 17 means turned 18? No, prompt says "17살까지". "17세 종료시 특수이벤트".
-            // If we just finished Winter of 17, next is Age 18 Spring? Or check at end of 17 Winter.
-            // Let's check: Age 17 Winter executed -> seasonIndex becomes 0, Age becomes 18.
-            // So if state.age == 18, trigger Final Event.
-        }
-
-        // Trigger Events based on Age
-        // "12세 종료시 1차이벤트", "15세 종료시 2차이벤트", "17세 종료시 특수이벤트"
-        // "종료시" usually means after Winter. So exactly when Age increments.
-        // If we just incremented age to 13 (so 12 finished), 16 (15 finished), 18 (17 finished).
-
-        if (state.seasonIndex === 0) { // Just turned new age
-             if (state.age === 13) { // 12 finished
+        if (state.seasonIndex === 0) {
+             if (state.age === 13) {
                  triggerLocationEvent(1);
-                 return; // Pause loop
+                 return;
              }
-             if (state.age === 16) { // 15 finished
+             if (state.age === 16) {
                  triggerLocationEvent(2);
                  return;
              }
-             if (state.age === 18) { // 17 finished
+             if (state.age === 18) {
                  triggerFinalEvent();
                  return;
              }
@@ -747,12 +621,10 @@ const GAME = (function() {
     // --- Systems Implementation ---
 
     function openSystemMenu() {
-         // Re-using System Modal for general options
          const modal = els['modal-system'];
          const container = modal.querySelector('.choice-container');
          container.innerHTML = '';
 
-         // Shop Button
          if (state.flags.shopOpen && !state.flags.shopUsed) {
              const btn = document.createElement('button');
              btn.textContent = '상점 이용';
@@ -760,7 +632,11 @@ const GAME = (function() {
              container.appendChild(btn);
          }
 
-         // Standard Buttons
+         const btnFortune = document.createElement('button');
+         btnFortune.textContent = '운세 뽑기';
+         btnFortune.onclick = () => { closeModal('modal-system'); openFortuneMenu(); };
+         container.appendChild(btnFortune);
+
          const btnSave = document.createElement('button');
          btnSave.textContent = '저장';
          btnSave.onclick = GAME.saveGame;
@@ -785,7 +661,6 @@ const GAME = (function() {
         list.innerHTML = '';
 
         PM_DATA.shop.items.forEach(item => {
-            // Check visibility
             if (item.id === 'dress_silk' && state.age < 16) return;
 
             const div = document.createElement('div');
@@ -816,28 +691,11 @@ const GAME = (function() {
         if (confirm(`${item.name}을(를) 구매하시겠습니까?`)) {
             state.stats.money -= item.cost;
             state.flags.shopUsed = true;
-
             log(`${item.name} 구매 완료!`, 'log-gain');
-
-            // Apply Effects
             if (item.type === 'consumable' || item.type === 'equip') {
-                // For simplicity, Equips are permanent stat boosts in this implementation
-                // unless we want to track equipment slots.
-                // Prompt: "장비슬롯은 무기, 방어구 2종류 있음".
-                // "장비의 공격이나 마공 방어는 그대로 합산".
-                // So we should track current equipment.
-
                 if (item.type === 'equip') {
-                    // Unequip previous if exists?
-                    // Let's just add stats for now, or track slot.
-                    // If we track slot, we need to remove old stats.
-                    // Let's simplified: Equips give permanent stats.
-                    // Wait, "실크드레스 : 착용시 드레스 코스튬으로 변환".
-                    // This implies "Equipped" state.
-
                     equipItem(item);
                 } else {
-                    // Consumable (Instant)
                     if (item.effect) {
                         for (let k in item.effect) {
                             if (k === 'stress') state.stats.stress += item.effect[k];
@@ -850,33 +708,16 @@ const GAME = (function() {
                     }
                 }
             }
-
             updateUI();
             closeModal('modal-shop');
         }
     }
 
     function equipItem(item) {
-        // Remove old stats if slot occupied
         const slot = item.slot;
         if (!state.equipment) state.equipment = { weapon: null, armor: null };
 
         const oldItem = state.equipment[slot];
-        if (oldItem) {
-            // Revert stats?
-            // Since we added stats permanently in prompt's logic "합산",
-            // if we just add stats to base, we can't revert easily without tracking.
-            // Let's store equipment stats separately in calculation?
-            // Prompt: "장비의 공격이나 마공 방어는 그대로 합산".
-            // Let's track `extraStats` from equipment.
-        }
-
-        // Actually, let's just use `state.stats` as base stats + permanent growth,
-        // and calculate "Battle Stats" dynamically?
-        // But UI shows Total Stats.
-        // Let's keep it simple: Add new stats, remove old stats.
-        // But I don't have old item data easily unless I store full item object.
-
         if (oldItem) {
              for (let k in oldItem.stats) {
                  state.stats[k] -= oldItem.stats[k];
@@ -891,7 +732,7 @@ const GAME = (function() {
         if (item.id === 'dress_silk') {
             state.flags.silk_dress_equipped = true;
         } else if (slot === 'armor') {
-            state.flags.silk_dress_equipped = false; // Unequip dress if wearing other armor
+            state.flags.silk_dress_equipped = false;
         }
 
         log(`${item.name} 장착!`);
@@ -923,7 +764,6 @@ const GAME = (function() {
         let desc = '';
         let choices = [];
 
-        // Logic based on Loc and Phase
         if (locId === 'arena') {
             title = '대련장 (케인)';
             if (phase === 1) {
@@ -941,7 +781,7 @@ const GAME = (function() {
                     state.flags.kane_affinity = (state.flags.kane_affinity || 0) + 1;
                     closeEvent();
                 }});
-            } else { // Phase 2
+            } else {
                 desc = '케인이 검술대회에 대해 이야기합니다.';
                 choices.push({ txt: '참가한다고 말한다', action: () => {
                     log('응원을 받았습니다. 체력+2, 근력+2');
@@ -955,10 +795,6 @@ const GAME = (function() {
                 if (state.flags.kane_affinity > 0) {
                     choices.push({ txt: '강해지고 싶다고 한다', action: () => {
                         log('케인에게서 검을 받았습니다! (공격력+10)', 'log-gain');
-                        // Add item effect directly or give item?
-                        // "케인의 검을 받음 (공격력10)" -> Treat as passive or item?
-                        // Let's add stats directly for simplicity as "Item" implies equipment slot.
-                        // But I have slots. Let's give item "sword_kane" (need to define or just buff).
                         state.stats.atk += 10;
                         closeEvent();
                     }});
@@ -982,7 +818,7 @@ const GAME = (function() {
                 desc = '다친 새를 발견했습니다.';
                 choices.push({ txt: '새를 도와준다', action: () => {
                     state.stats.morality += 2; state.stats.faith += 2; state.stats.stress += 10;
-                    state.flags.noah_event = true; // Flag for Ending
+                    state.flags.noah_event = true;
                     log('도덕+2, 신앙+2, 스트레스+10. 노아 호감도 증가.');
                     closeEvent();
                 }});
@@ -1108,7 +944,6 @@ const GAME = (function() {
     function handleFinalEvent(id) {
         if (id === 'sword') {
             log('검술대회에 참가했습니다.');
-            // Fight Knight then Kane
             startCombat('knight', () => {
                 log('왕궁기사를 꺾었습니다! (체력+1, 근력+1)');
                 state.stats.vit += 1; state.stats.str += 1;
@@ -1118,7 +953,7 @@ const GAME = (function() {
                         state.stats.vit += 2; state.stats.str += 2;
                         state.flags.sword_win = true;
                         checkEnding();
-                    }, checkEnding); // If lose Kane, just check Ending
+                    }, checkEnding);
                 }, 1000);
             }, checkEnding);
         } else if (id === 'magic') {
@@ -1155,8 +990,7 @@ const GAME = (function() {
             }, checkEnding);
         } else if (id === 'ball') {
             log('무도회에 참석했습니다.');
-            // Checks
-            if (state.stats.charm >= 50) { // Indefinite "certain amount"
+            if (state.stats.charm >= 50) {
                 log('사람들에게 인정을 받았습니다. (매력+2)');
                 state.stats.charm += 2;
             } else {
@@ -1178,7 +1012,51 @@ const GAME = (function() {
         }
     }
 
-    // Expose public methods
+    // New Modals
+    function openStatusModal() {
+        if(els['modal-status']) {
+            const content = els['status-content'];
+            content.innerHTML = `
+                <div class="stat-grid">
+                    <div>체력(Vit): ${state.stats.vit}</div>
+                    <div>근력(Str): ${state.stats.str}</div>
+                    <div>지능(Int): ${state.stats.int}</div>
+                    <div>매력(Cha): ${state.stats.charm}</div>
+                    <div>스트레스: ${state.stats.stress}</div>
+                    <div>도덕심: ${state.stats.morality}</div>
+                    <div>신앙심: ${state.stats.faith}</div>
+                    <div>친밀함: ${state.stats.intimacy}</div>
+                    <div>기품: ${state.stats.elegance}</div>
+                    <div style="grid-column: span 2; margin-top:10px;"><b>전투능력</b></div>
+                    <div>HP: ${state.stats.hp}/${30+state.stats.vit}</div>
+                    <div>공격력: ${state.stats.atk + Math.floor(state.stats.str/10)}</div>
+                    <div>마법공격력: ${state.stats.matk + Math.floor(state.stats.int/10)}</div>
+                    <div>방어력: ${state.stats.def}</div>
+                </div>
+            `;
+            els['modal-status'].style.display = 'flex';
+        } else {
+             alert('Status modal not found');
+        }
+    }
+
+    function openEquipModal() {
+        if(els['modal-equip']) {
+             const content = els['equip-content'];
+             content.innerHTML = `
+                <div class="equip-slot">
+                    <b>무기:</b> ${state.equipment && state.equipment.weapon ? state.equipment.weapon.name : '없음'}
+                </div>
+                <div class="equip-slot">
+                    <b>방어구:</b> ${state.equipment && state.equipment.armor ? state.equipment.armor.name : '없음'}
+                </div>
+             `;
+             els['modal-equip'].style.display = 'flex';
+        } else {
+             alert('Equip modal not found');
+        }
+    }
+
     return {
         init,
         startGame,
@@ -1186,35 +1064,10 @@ const GAME = (function() {
         closeModal,
         rerollStar,
         confirmStar,
-        openSystemMenu: () => els['modal-system'].style.display = 'flex',
-        openEquipMenu: () => {
-            alert(`[장비 현황]\n무기: ${state.equipment && state.equipment.weapon ? state.equipment.weapon.name : '없음'}\n방어구: ${state.equipment && state.equipment.armor ? state.equipment.armor.name : '없음'}`);
-        },
-        openStatusMenu: () => {
-             // Show all stats in alert or reuse modal?
-             // Let's use a formatted alert for simplicity as prompt requested "스탯표시" in menu.
-             // We already have side panel. Maybe this button just highlights it or shows more detail?
-             // Prompt: "스탯 : 체력, 근력, 지능, 매력 ,스트레스 / 히든스탯 : 도덕심, 신앙심, 친밀함 기품"
-             // Side panel shows all these. So maybe just redundant?
-             // Let's pop up a detailed alert.
-             let msg = `[상세 스탯]\n`;
-             msg += `체력(Vit): ${state.stats.vit}\n`;
-             msg += `근력(Str): ${state.stats.str}\n`;
-             msg += `지능(Int): ${state.stats.int}\n`;
-             msg += `매력(Cha): ${state.stats.charm}\n`;
-             msg += `스트레스: ${state.stats.stress}\n\n`;
-             msg += `도덕심: ${state.stats.morality}\n`;
-             msg += `신앙심: ${state.stats.faith}\n`;
-             msg += `친밀함: ${state.stats.intimacy}\n`;
-             msg += `기품: ${state.stats.elegance}\n`;
-             msg += `\n전투능력:\n`;
-             msg += `HP: ${state.stats.hp}/${30+state.stats.vit}\n`;
-             msg += `공격력: ${state.stats.atk + Math.floor(state.stats.str/10)} (기본 ${state.stats.atk} + 보정 ${Math.floor(state.stats.str/10)})\n`;
-             msg += `마법공격력: ${state.stats.matk + Math.floor(state.stats.int/10)} (기본 ${state.stats.matk} + 보정 ${Math.floor(state.stats.int/10)})\n`;
-             msg += `방어력: ${state.stats.def}\n`;
-
-             alert(msg);
-        },
+        openSystemMenu: openSystemMenu,
+        openEquipMenu: openEquipModal,
+        openStatusMenu: openStatusModal,
+        openFortuneMenu: openFortuneMenu,
         saveGame: () => {
             localStorage.setItem('pm_save', JSON.stringify(state));
             alert('저장되었습니다.');
@@ -1228,7 +1081,8 @@ const GAME = (function() {
                 startSeason();
             }
         },
-        viewEndings: () => els['modal-endings'].style.display = 'flex'
+        viewEndings: () => els['modal-endings'].style.display = 'flex',
+        combatAction
     };
 
 })();

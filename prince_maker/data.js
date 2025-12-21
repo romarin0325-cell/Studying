@@ -25,13 +25,6 @@ const PM_DATA = {
         matkPerInt: 0.1 // 1 per 10
     },
 
-    // 10~17 years old = 8 years? Prompt says "10살부터 17살까지 7년 진행".
-    // Usually 10, 11, 12, 13, 14, 15, 16. (7 years).
-    // Ends at 17th birthday (start of 17).
-    // Or 10,11,12,13,14,15,16,17(end).
-    // Prompt says "17세 종료시 특수이벤트". So 10,11,12,13,14,15,16,17. That's 8 years.
-    // But prompt says "총 28턴". 28 / 4 seasons = 7 years.
-    // So likely 10 to 16 inclusive (7 years), then 17 is the ending/final event year.
     gameDuration: {
         startAge: 10,
         endAge: 17, // The moment you turn 17, final events trigger
@@ -99,9 +92,9 @@ const PM_DATA = {
             { id: 'book_magic', name: '마법서', type: 'equip', slot: 'weapon', stats: {matk: 5}, cost: 100 },
             { id: 'book_ancient', name: '고대의마법서', type: 'equip', slot: 'weapon', stats: {matk: 10}, cost: 300 },
             { id: 'armor_leather', name: '가죽갑옷', type: 'equip', slot: 'armor', stats: {def: 5}, cost: 200 },
-            { id: 'robe_magic', name: '마법로브', type: 'equip', slot: 'armor', stats: {mdef: 5}, cost: 200 }, // mdef handled as def in prompt? "장비의 공격이나 마공 방어는 그대로 합산" -> Maybe universal def
+            { id: 'robe_magic', name: '마법로브', type: 'equip', slot: 'armor', stats: {mdef: 5}, cost: 200 },
             { id: 'indulgence', name: '면죄부', type: 'consumable', effect: {morality: 10}, cost: 1000 },
-            { id: 'dress_silk', name: '실크드레스', type: 'equip', slot: 'armor', stats: {charm: 10}, cost: 2000, special: 'costume' }, // 16+ only
+            { id: 'dress_silk', name: '실크드레스', type: 'equip', slot: 'armor', stats: {charm: 10}, cost: 2000, special: 'costume' },
             { id: 'book_str', name: '힘의책', type: 'consumable', effect: {str: 10}, cost: 500 },
             { id: 'book_int', name: '지식의책', type: 'consumable', effect: {int: 10}, cost: 500 },
             { id: 'book_charm', name: '매력의책', type: 'consumable', effect: {charm: 10}, cost: 500 }
@@ -118,34 +111,33 @@ const PM_DATA = {
     },
 
     enemies: {
-        // Tournament
         knight: { name: '왕궁기사', hp: 70, atk: 30, def: 5, type: 'phy' },
         kane: { name: '케인', hp: 90, atk: 35, def: 10, type: 'phy' },
-        apprentice: { name: '견습마법사', hp: 70, atk: 30, def: 0, type: 'mag' }, // "atk" here is matk for dmg calc
+        apprentice: { name: '견습마법사', hp: 70, atk: 30, def: 0, type: 'mag' },
         royalmage: { name: '왕궁마법사', hp: 90, atk: 35, def: 5, type: 'mag' },
-        // Exploration
         slime: { name: '슬라임', hp: 50, atk: 20, def: 0, type: 'phy' },
         goblin: { name: '고블린', hp: 70, atk: 30, def: 5, type: 'phy' },
         demonking: { name: '마왕', hp: 100, atk: 40, def: 10, type: 'phy' }
     },
 
     endings: [
-        { id: 'king', name: '왕', priority: 1, req: {elegance: 110, morality: 50, charm: 60, vit: 50}, flag: 'noble_ledger' },
+        { id: 'king', name: '왕', priority: 1, req: {elegance: 110, morality: 50, charm: 60, vit: 40}, flag: 'noble_ledger' },
         { id: 'hero', name: '용사', priority: 2, req: {str: 130, vit: 60, morality: 30}, flag: 'demon_king_dead' },
-        { id: 'demon_king', name: '마왕', priority: 3, req: {str: 130, vit: 70}, maxMorality: 0, flag: 'demon_king_dead' }, // morality <= 0
+        { id: 'demon_king', name: '마왕', priority: 3, req: {str: 130, vit: 70}, maxMorality: 0, flag: 'demon_king_dead' },
         { id: 'knight_captain', name: '왕궁기사단장', priority: 4, req: {str: 120, vit: 60, morality: 20, elegance: 40}, flag: 'sword_win' },
         { id: 'archmage', name: '대현자', priority: 5, req: {int: 140, vit: 50, elegance: 30, morality: 30}, flag: 'magic_win' },
         { id: 'court_musician', name: '궁정음악가', priority: 6, req: {charm: 110, elegance: 70, morality: 30}, flag: 'noah_event' },
         { id: 'princess', name: '공주', priority: 7, req: {charm: 100, intimacy: 50}, flag: 'silk_dress_equipped' },
         { id: 'pope', name: '교황', priority: 8, req: {faith: 100, morality: 50} },
-        { id: 'royal_guard', name: '왕실근위병', priority: 9, req: {str: 100, morality: 20} },
-        { id: 'bard', name: '음유시인', priority: 10, req: {charm: 100, morality: 20} },
-        { id: 'teacher', name: '교사', priority: 11, req: {int: 120, morality: 20} },
-        { id: 'warlock', name: '흑마법사', priority: 12, req: {int: 120}, maxMorality: 9 }, // morality < 10
-        { id: 'farmer', name: '농부', priority: 13, req: {str: 80, vit: 60, morality: 10} },
-        { id: 'bunnyboy', name: '바니보이', priority: 14, req: {charm: 90}, maxMorality: 9 },
-        { id: 'thug', name: '건달', priority: 15, req: {str: 80}, maxMorality: 9 },
-        { id: 'househusband', name: '가정주부', priority: 16, req: {morality: 40, charm: 40} },
-        { id: 'jobless', name: '백수', priority: 99, req: {} } // Fallback
+        { id: 'millionaire', name: '대부호', priority: 9, req: {morality: 30}, minMoney: 10000 },
+        { id: 'royal_guard', name: '왕실근위병', priority: 10, req: {str: 100, morality: 20} },
+        { id: 'bard', name: '음유시인', priority: 11, req: {charm: 100, morality: 20} },
+        { id: 'teacher', name: '교사', priority: 12, req: {int: 120, morality: 20} },
+        { id: 'warlock', name: '흑마법사', priority: 13, req: {int: 120}, maxMorality: 9 },
+        { id: 'night_toy', name: '밤의 장난감', priority: 14, req: {charm: 90}, maxMorality: 9, flag: 'night_toy_cond' },
+        { id: 'bunnyboy', name: '바니보이', priority: 15, req: {charm: 90}, maxMorality: 9 },
+        { id: 'thug', name: '건달', priority: 16, req: {str: 80}, maxMorality: 9 },
+        { id: 'househusband', name: '가정주부', priority: 17, req: {morality: 40, charm: 40} },
+        { id: 'jobless', name: '백수', priority: 99, req: {} }
     ]
 };
