@@ -314,7 +314,7 @@ const GAME = (function() {
         if (els['main-image']) {
             els['main-image'].style.display = 'block';
             els['img-name'].style.display = 'none';
-            els['main-image'].src = base + '.png';
+            els['main-image'].src = encodeURIComponent(base) + '.png';
         }
     }
 
