@@ -16,7 +16,6 @@
             </div>
             <div class="status-group">
                 <span>Gold: <span id="ui-gold" class="stat-val">1000</span></span>
-                <span>HP: <span id="ui-hp" class="stat-val">50/50</span></span>
                 <span>스트레스: <span id="ui-stress" class="stat-val">0</span></span>
             </div>
         </div>
@@ -25,7 +24,8 @@
         <div id="main-content">
             <div id="illustration-area">
                 <!-- Base Illustrations (Age/Fatigue/Rebel) -->
-                <div id="main-image-placeholder" style="color:white;text-align:center;">
+                <div id="main-image-container">
+                    <img id="main-image" src="" alt="Illustration" onerror="this.style.display='none'; document.getElementById('img-name').style.display='block';">
                     <h2 id="img-name">프린스10</h2>
                 </div>
                 <!-- Overlay for Events/Locations -->

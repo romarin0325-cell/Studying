@@ -54,18 +54,29 @@ body {
 
 /* Illustration Area (Top) */
 #illustration-area {
-    flex: 2; /* Takes more space */
+    flex: 1.5;
     background-color: #111;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    /* Maintain 12:9 Aspect Ratio within flexible container?
-       Container width is fixed (800px).
-       If we want 12:9 approx, let's just use flex ratio.
-       Top area larger.
-    */
     border-bottom: 1px solid #444;
+}
+
+#main-image-container {
+    height: 100%;
+    aspect-ratio: 9/12;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none; /* Shown via JS if loaded */
 }
 
 #img-name {
@@ -85,7 +96,7 @@ body {
 
 /* Log Panel (Bottom) */
 #log-panel {
-    flex: 1; /* Less space than image */
+    flex: 1;
     background-color: #2a2a2a;
     display: flex;
     flex-direction: column;
@@ -231,11 +242,15 @@ button:disabled { color: #888; background-color: #333; cursor: not-allowed; }
 }
 .personality-select {
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
     margin-top: 30px;
 }
 .personality-select button {
-    width: 120px; height: 120px;
+    width: 300px;
+    padding: 15px;
+    height: auto;
+    font-size: 16px;
 }
 
 /* Status Grid */
