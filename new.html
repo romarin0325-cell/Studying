@@ -72,7 +72,9 @@
     .actor-box.enemy { right: 15px; opacity: 0; }
 
     .portrait {
-        width: 54px; height: 72px; /* 3:4 비율 */
+        width: 14vw; height: 18.6vw; /* Mobile flexible 3:4 approx */
+        max-width: 60px; max-height: 80px; /* Desktop limits */
+        min-width: 50px; min-height: 66px; /* Minimum legibility */
         border-radius: 8px;
         background: #000;
         border: 2px solid #555;
@@ -81,7 +83,7 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 1.8rem;
     }
-    .portrait img { width: 100%; height: 100%; object-fit: cover; }
+    .portrait img { width: 100%; height: 100%; object-fit: contain; }
 
     .mini-stat {
         position: absolute;
