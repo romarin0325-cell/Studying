@@ -68,7 +68,8 @@
 
         /* Illustration Area (Top) */
         #illustration-area {
-            flex: 1.5;
+            height: 350px; /* Fixed height to secure log area */
+            flex: none;
             background-color: #111;
             display: flex;
             justify-content: center;
@@ -78,8 +79,8 @@
         }
 
         #main-image-container {
-            height: 100%;
-            aspect-ratio: 7/12;
+            width: 300px;
+            height: 340px;
             background-color: #000;
             display: flex;
             justify-content: center;
@@ -778,21 +779,27 @@
         }
 
         function getFlavorText(type, isGreat, isFail) {
-            // Prince personality: Cute, energetic, kind
+            // Prince personality: Bright, Cute, Energetic
             const failTexts = [
-                "으앙, 너무 어려워요...",
-                "실수해버렸어요. 다음엔 잘할게요!",
-                "죄송해요, 조금 졸았나봐요..."
+                "으앙... 마음대로 잘 안 돼요. 아빠, 저 위로해주세요...",
+                "히잉, 실수해버렸어요. 다음엔 꼭 잘할게요! 지켜봐주세요!",
+                "죄송해요, 깜빡 졸았나봐요... 헤헤, 머리가 띵해요.",
+                "어라? 이게 아닌데... 아빠, 저 좀 도와주세요~",
+                "우우... 너무 어려워요. 그래도 포기 안 할 거예요!"
             ];
             const greatTexts = [
-                "완벽해요! 저, 꽤 잘하죠?",
-                "신난다! 칭찬해주세요!",
-                "이정도 쯤이야 식은 죽 먹기죠!"
+                "짠! 완벽하죠? 아빠한테 칭찬받고 싶어서 열심히 했어요!",
+                "신난다! 제가 해냈어요! 아빠, 보셨죠? 저 대단하죠?",
+                "이정도 쯤이야 식은 죽 먹기죠! 저, 천재일지도 몰라요! 에헤헤.",
+                "오늘따라 집중이 엄청 잘 돼요! 기분이 날아갈 것 같아요!",
+                "아빠를 위해서라면 이정도는 기본이죠! 사랑해요 아빠!"
             ];
             const normalTexts = [
-                "열심히 했어요!",
-                "오늘도 무사히 마쳤습니다.",
-                "조금 힘들지만 보람차네요."
+                "영차영차! 열심히 했어요! 쓰담쓰담 해주세요!",
+                "오늘도 무사히 마쳤습니다. 배고파요, 맛있는 거 먹어요!",
+                "조금 힘들지만 보람차네요. 아빠랑 같이 있어서 힘이 나요!",
+                "열심히 배우고 일해서 훌륭한 사람이 될 거예요!",
+                "오늘 하루도 알차게 보냈어요. 내일도 파이팅!"
             ];
 
             let list = normalTexts;
@@ -954,8 +961,24 @@
             else if (r > (1 - failChance) && type === 'job') isFail = true;
 
             log(`${action.name} 진행...`);
-            // Flavor Text
-            log(`"${getFlavorText(type, isGreat, isFail)}"`);
+
+            // Special dialogues for Rest/Vacation (Dad interactions)
+            if (action.id === 'r_adv') {
+                 log(`"아빠와 함께 푹 쉬니까 정말 좋아요! 피로가 싹 가시는 것 같아요 헤헤. 아빠 품이 제일 편해요!"`);
+                 log(`(아빠와 함께 느긋한 휴식을 즐겼다...)`);
+            } else if (action.id === 'r_vacation') {
+                 const seasons = [
+                     "꽃이 만발한 들판으로 아빠와 소풍을 나왔어요! 김밥도 맛있고 꽃도 예쁘고... 아빠가 제일 좋아요!", // 봄
+                     "아빠와 함께 바다에 왔어요! 물장구치며 노니까 정말 시원해요! 아빠, 저 잡으러 와보세요~!", // 여름
+                     "단풍이 예쁜 산으로 아빠와 등산을 왔어요. 정상에서 아빠랑 같이 먹는 도시락이 세상에서 제일 맛있어요!", // 가을
+                     "아빠랑 눈사람을 만들었어요! 손이 꽁꽁 얼었지만 아빠 손을 잡으니까 하나도 안 차가워요. 헤헤." // 겨울
+                 ];
+                 log(`"${seasons[state.seasonIndex]}"`);
+                 log(`(아빠와 함께 즐거운 추억을 쌓았다...)`);
+            } else {
+                 // Flavor Text
+                 log(`"${getFlavorText(type, isGreat, isFail)}"`);
+            }
 
             if (isGreat) log("대성공!! 효과가 2배가 됩니다!", 'log-gain');
             if (isFail) log("실패했습니다... 보상이 없습니다.", 'log-loss');
@@ -1061,7 +1084,37 @@
             if (state.seasonIndex >= 4) {
                 state.seasonIndex = 0;
                 state.age++;
-                log(`${state.age}살이 되었습니다!`, 'log-event');
+
+                // Age Event Stories
+                let ageMsg = `${state.age}살이 되었습니다!`;
+                let story = "";
+
+                switch(state.age) {
+                    case 11:
+                        story = "왕자님이 무럭무럭 자라고 있습니다. 이제 제법 의사표현도 확실해지고, 아빠를 졸졸 따라다니는 모습이 귀엽습니다.";
+                        break;
+                    case 12:
+                        story = "키가 훌쩍 컸습니다. 사춘기가 올까 걱정했지만, 여전히 아빠바라기인 착한 아이입니다. 호기심이 왕성해졌습니다.";
+                        break;
+                    case 13:
+                        story = "소년의 티가 나기 시작합니다. 자신의 진로에 대해 조금씩 고민하는 것 같습니다. 하지만 여전히 아빠와 노는 걸 제일 좋아합니다.";
+                        break;
+                    case 14:
+                        story = "이제 어엿한 청소년입니다. 가끔은 진지한 표정으로 나라의 미래를 걱정하기도 합니다. 듬직한 아들로 자라고 있습니다.";
+                        break;
+                    case 15:
+                        story = "변성기가 찾아왔습니다. 목소리가 조금 굵어졌지만, 아빠를 부르는 다정한 말투는 변하지 않았습니다. 검술과 마법에도 제법 능숙해졌습니다.";
+                        break;
+                    case 16:
+                        story = "성인식이 머지 않았습니다. 훤칠한 키와 준수한 외모로 마을에서도 인기가 많습니다. 당신은 아들이 자랑스럽습니다.";
+                        break;
+                    case 17:
+                        story = "드디어 운명의 17세입니다. 이제 곧 왕자님의 미래가 결정됩니다. 마지막까지 최선을 다해 아들을 이끌어주세요.";
+                        break;
+                }
+
+                log(`=== ${ageMsg} ===`, 'log-event');
+                if(story) log(story);
 
                 if ([12, 14, 16].includes(state.age)) {
                     log("상점이 열렸습니다! (메뉴에서 확인 가능)", 'log-event');
