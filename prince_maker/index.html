@@ -68,7 +68,7 @@
 
         /* Illustration Area (Top) */
         #illustration-area {
-            height: 350px; /* Fixed height to secure log area */
+            height: 180px; /* Reduced height */
             flex: none;
             background-color: #111;
             display: flex;
@@ -79,8 +79,8 @@
         }
 
         #main-image-container {
-            width: 300px;
-            height: 340px;
+            width: 150px;
+            height: 170px;
             background-color: #000;
             display: flex;
             justify-content: center;
@@ -779,6 +779,62 @@
         }
 
         function getFlavorText(type, isGreat, isFail) {
+            // Rebellious State (Morality <= 10)
+            if (state.stats.morality <= 10) {
+                 const rebelFail = [
+                     "아, 짜증나... 안 해.",
+                     "이딴 거 왜 해야 돼? 쳇.",
+                     "실수했다고 뭐라 하지 마요. 시끄러우니까.",
+                     "하기 싫다고 했잖아요! 아 진짜...",
+                     "대충 해요, 대충. 어차피 아빠 마음대로 할 거면서."
+                 ];
+                 const rebelGreat = [
+                     "흥, 이 정도는 껌이지. 별거 아니네.",
+                     "봤어? 나 한다면 하는 사람이야. ...칭찬은 됐어.",
+                     "뭐, 나쁘지 않네. 운이 좋았을 뿐이야.",
+                     "훗, 아빠 도움 없어도 이 정도는 해.",
+                     "이게 내 실력이야. 깜짝 놀랐어?"
+                 ];
+                 const rebelNormal = [
+                     "하아... 귀찮아 죽겠네.",
+                     "끝났죠? 저 갈래요.",
+                     "이게 무슨 의미가 있는지 모르겠어.",
+                     "시키는 대로 했잖아요. 됐죠?",
+                     "다음엔 다른 거 시켜줘요. 이건 지겨워."
+                 ];
+                 if (isFail) return rebelFail[Math.floor(Math.random() * rebelFail.length)];
+                 if (isGreat) return rebelGreat[Math.floor(Math.random() * rebelGreat.length)];
+                 return rebelNormal[Math.floor(Math.random() * rebelNormal.length)];
+            }
+
+            // Mature State (Age >= 16)
+            if (state.age >= 16) {
+                 const matureFail = [
+                     "죄송해요, 아버지. 집중력이 흐트러졌습니다...",
+                     "이런 실수를 하다니... 면목 없습니다.",
+                     "아직 수행이 부족한가 봅니다. 더 정진하겠습니다.",
+                     "기대에 부응하지 못했군요. 죄송합니다.",
+                     "잠시 딴생각을 했습니다. 다시는 이런 일 없을 겁니다."
+                 ];
+                 const matureGreat = [
+                     "완벽합니다. 아버지의 가르침 덕분입니다.",
+                     "성과가 좋군요. 저도 꽤 성장한 것 같습니다.",
+                     "아버지, 보셨습니까? 제 실력을 증명했습니다.",
+                     "기분이 상쾌하군요. 모든 일이 잘 풀릴 것 같습니다.",
+                     "이 정도면 아버지도 만족하시겠죠? 헤헤... 흠, 크흠."
+                 ];
+                 const matureNormal = [
+                     "오늘 일과를 무사히 마쳤습니다.",
+                     "나쁘지 않은 하루였습니다. 아버지도 고생하셨습니다.",
+                     "꾸준함이 답이겠죠. 내일도 열심히 하겠습니다.",
+                     "조금 피곤하지만, 보람은 있네요.",
+                     "아버지와 함께라 든든합니다. 저, 꽤 컸죠?"
+                 ];
+                 if (isFail) return matureFail[Math.floor(Math.random() * matureFail.length)];
+                 if (isGreat) return matureGreat[Math.floor(Math.random() * matureGreat.length)];
+                 return matureNormal[Math.floor(Math.random() * matureNormal.length)];
+            }
+
             // Prince personality: Bright, Cute, Energetic
             const failTexts = [
                 "으앙... 마음대로 잘 안 돼요. 아빠, 저 위로해주세요...",
@@ -963,10 +1019,10 @@
             log(`${action.name} 진행...`);
 
             // Special dialogues for Rest/Vacation (Dad interactions)
-            if (action.id === 'r_adv') {
+            if (state.stats.morality > 10 && action.id === 'r_adv') {
                  log(`"아빠와 함께 푹 쉬니까 정말 좋아요! 피로가 싹 가시는 것 같아요 헤헤. 아빠 품이 제일 편해요!"`);
                  log(`(아빠와 함께 느긋한 휴식을 즐겼다...)`);
-            } else if (action.id === 'r_vacation') {
+            } else if (state.stats.morality > 10 && action.id === 'r_vacation') {
                  const seasons = [
                      "꽃이 만발한 들판으로 아빠와 소풍을 나왔어요! 김밥도 맛있고 꽃도 예쁘고... 아빠가 제일 좋아요!", // 봄
                      "아빠와 함께 바다에 왔어요! 물장구치며 노니까 정말 시원해요! 아빠, 저 잡으러 와보세요~!", // 여름
