@@ -286,6 +286,34 @@
             margin: 5px 0;
             text-align: left;
         }
+
+        /* Speech Bubble */
+        #speech-bubble {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            margin-left: 90px;
+            background: #fff;
+            color: #222;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #222;
+            width: 160px;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 15px;
+            border-width: 10px 10px 10px 0;
+            border-style: solid;
+            border-color: transparent #fff transparent transparent;
+        }
     </style>
 </head>
 <body>
@@ -306,10 +334,13 @@
         <div id="main-content">
             <div id="illustration-area">
                 <!-- Base Illustrations (Age/Fatigue/Rebel) -->
-                <div id="main-image-container">
+                <div id="main-image-container" onclick="GAME.showInteraction()" style="cursor: pointer;">
                     <div id="pm-image-box" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;"></div>
                     <h2 id="img-name" style="display:none; position:absolute; z-index:5;">프린스10</h2>
                 </div>
+
+                <div id="speech-bubble"></div>
+
                 <!-- Overlay for Events/Locations -->
                 <div id="overlay-image">
                     <h2 id="overlay-title">대련장</h2>
@@ -480,11 +511,12 @@
         function init() {
             // Cache DOM elements
             const ids = ['ui-age', 'ui-season', 'ui-gold', 'ui-stress',
-                'img-name', 'message-log',
+                'img-name', 'message-log', 'speech-bubble', 'overlay-image',
                 'modal-action', 'action-list', 'action-title',
                 'modal-star', 'star-result', 'star-name', 'star-desc', 'reroll-count',
                 'modal-event', 'event-title', 'event-desc', 'event-choices',
                 'modal-combat', 'player-hud', 'enemy-hud', 'combat-log',
+                'enemy-name', 'combat-hp-p', 'combat-atk-p', 'combat-hp-e', 'combat-atk-e',
                 'modal-shop', 'shop-list', 'modal-endings', 'ending-list', 'start-screen',
                 'modal-system', 'modal-status', 'status-content', 'modal-equip', 'equip-content'
             ];
@@ -768,6 +800,28 @@
                 els['img-name'].style.display = 'none'; // Initially hide text
                 imgBox.innerHTML = `<img src="${base}.png" style="width:100%; height:100%; object-fit:contain;" onerror="this.style.display='none'; document.getElementById('img-name').style.display='block';">`;
             }
+        }
+
+        function showInteraction() {
+            if (els['overlay-image'].style.display === 'flex') return;
+
+            let lines = [];
+            if (state.age >= 16) lines = PM_DATA.interactions.adult;
+            else if (state.age >= 13) lines = PM_DATA.interactions.teen;
+            else lines = PM_DATA.interactions.child;
+
+            if (!lines || lines.length === 0) return;
+
+            const text = lines[Math.floor(Math.random() * lines.length)];
+            const bubble = els['speech-bubble'];
+
+            bubble.textContent = text;
+            bubble.style.display = 'block';
+
+            if (state.interactionTimer) clearTimeout(state.interactionTimer);
+            state.interactionTimer = setTimeout(() => {
+                bubble.style.display = 'none';
+            }, 3000);
         }
 
         function log(msg, type='') {
@@ -1664,7 +1718,11 @@
                 }
             },
             viewEndings: () => els['modal-endings'].style.display = 'flex',
-            combatAction
+            combatAction,
+            startCombat,
+            showInteraction,
+            getState: () => state,
+            getCombatState: () => combatState
         };
 
     })();
