@@ -1,0 +1,2 @@
+127.0.0.1 - - [27/Dec/2025 15:09:39] code 404, message File not found
+127.0.0.1 - - [27/Dec/2025 15:09:39] "GET /card/index.html HTTP/1.1" 404 -
