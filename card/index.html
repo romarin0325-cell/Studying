@@ -74,7 +74,7 @@
     .log-line { margin-bottom: 2px; border-bottom: 1px solid #252525; }
     .log-dmg { color: #ff5252; } .log-heal { color: #69f0ae; } .log-info { color: #4fc3f7; }
 
-    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 110px; }
+    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 110px; margin-bottom: 60px; }
     .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
     .skill-btn:disabled { opacity: 0.5; background: #222; }
     .skill-btn span { pointer-events: none; }
@@ -123,7 +123,7 @@
             <div id="slot-2" class="deck-slot" onclick="selectDeckSlot(2)">대장 (클릭하여 선택)</div>
         </div>
         <div style="flex:1; overflow-y:auto; border-top:1px solid #333;"><div id="deck-card-list" class="card-grid"></div></div>
-        <button class="menu-btn" onclick="confirmDeck()">확인</button>
+        <button class="menu-btn" onclick="confirmDeck()" style="margin-bottom: 60px;">확인</button>
     </div>
     <div id="screen-battle" class="screen">
         <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs"></div></div>
@@ -196,7 +196,7 @@
         gameState.tickets--;
         document.getElementById('ui-tickets').innerText = gameState.tickets;
         let rand = Math.random(), grade = 'normal';
-        if(rand < 0.05) grade = 'legend'; else if(rand < 0.20) grade = 'epic'; else if(rand < 0.50) grade = 'rare';
+        if(rand < 0.10) grade = 'legend'; else if(rand < 0.30) grade = 'epic'; else if(rand < 0.60) grade = 'rare';
         const pool = CARDS.filter(c => c.grade === grade);
         const pick = pool[Math.floor(Math.random() * pool.length)];
         gameState.inventory.push(pick.id);
@@ -207,7 +207,7 @@
         else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
         document.getElementById('gacha-title').innerText = title;
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
-            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="../${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
         modal.classList.add('active');
     }
     function closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); }
@@ -223,7 +223,7 @@
             if(!data) continue;
             const el = document.createElement('div');
             el.className = `card-item ${data.grade}`;
-            el.innerHTML = `<div class="portrait"><img src="../${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
+            el.innerHTML = `<div class="portrait"><img src="${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
             el.onclick = () => clickHandler(id);
             box.appendChild(el);
         }
@@ -232,7 +232,7 @@
         const data = CARDS.find(c => c.id === id);
         if(!data) return;
         document.getElementById('md-name').innerText = data.name;
-        document.getElementById('md-img').src = `../${data.name}.png`;
+        document.getElementById('md-img').src = `${data.name}.png`;
         document.getElementById('md-grade').className = data.grade;
         document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
         document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
@@ -325,7 +325,7 @@
         // Render Active Player
         if(p && !p.isDead) {
             document.getElementById('p-name').innerText = p.name;
-            document.getElementById('p-img').src = `../${p.name}.png`;
+            document.getElementById('p-img').src = `${p.name}.png`;
             let hpPct = (p.hp / p.maxHp) * 100;
             document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
             let buffTxt = Object.keys(p.buffs).map(k=>k.substring(0,3)).join(',');
@@ -341,7 +341,7 @@
         let eHpPct = (e.hp / e.maxHp) * 100;
         document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
         document.getElementById('e-name').innerText = e.name;
-        document.getElementById('e-img').src = `../${e.name}.png`;
+        document.getElementById('e-img').src = `${e.name}.png`;
         let eBuffTxt = Object.keys(e.buffs).map(k=>`${k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
 
