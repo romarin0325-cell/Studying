@@ -20,27 +20,76 @@
     .card-item.epic { border-color: #e040fb; color: #e040fb; }
     .card-item.rare { border-color: #448aff; color: #448aff; }
     .card-item.normal { border-color: #bdbdbd; color: #bdbdbd; }
-    .card-img { width: 100%; aspect-ratio: 3/4; background: #000; margin-bottom: 3px; object-fit: contain; }
+
+    /* Updated Frame Style similar to Turn RPG */
+    .portrait {
+        width: 100%; aspect-ratio: 3/4;
+        border-radius: 6px;
+        background: #000;
+        border: 2px solid #555;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 3px;
+    }
+    .portrait img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Battle Visual Stage */
     .battle-header { display: flex; justify-content: space-between; padding: 5px; background: #222; border-radius: 5px; font-size: 0.8rem; }
     .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; }
-    .visual-stage { flex: 1; position: relative; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; overflow: hidden; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; padding: 10px; }
-    .actor-group { display: flex; gap: 5px; align-items: flex-end; }
-    .actor-card { width: 60px; text-align: center; position: relative; transition: all 0.2s; }
-    .actor-card.turn { transform: scale(1.1); z-index: 10; border: 1px solid #ffd700; }
-    .actor-card.dead { opacity: 0.3; filter: grayscale(100%); }
-    .actor-hp-bar { width: 100%; height: 4px; background: #333; margin-top: 2px; }
-    .actor-hp-fill { height: 100%; background: #ef5350; width: 100%; }
-    .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 10px; overflow: hidden; }
-    .enemy-actor { width: 80px; text-align: center; margin: 0 auto; }
+
+    .visual-stage {
+        flex: 1; position: relative;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 6px;
+        display: flex; justify-content: space-around; align-items: center;
+        padding: 10px;
+        background-image: linear-gradient(to bottom, #2a2a2a, #121212);
+    }
+
+    .battle-actor {
+        width: 120px;
+        text-align: center;
+        position: relative;
+        transition: all 0.2s;
+        display: flex; flex-direction: column; align-items: center;
+    }
+    .battle-actor .portrait {
+        width: 100px; height: 133px; /* Fixed size for battle */
+        border-color: #999;
+    }
+    .battle-actor.player .portrait { border-color: #4caf50; }
+    .battle-actor.enemy .portrait { border-color: #ff5252; }
+    .battle-actor.turn { transform: scale(1.05); z-index: 10; }
+    .battle-actor.dead { opacity: 0.3; filter: grayscale(100%); }
+
+    .actor-hp-bar { width: 100%; height: 6px; background: #333; margin-top: 4px; border-radius: 3px; overflow: hidden; }
+    .actor-hp-fill { height: 100%; background: #ef5350; width: 100%; transition: width 0.3s; }
+    .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 12px; overflow: hidden; margin-top: 2px; }
+
     .log-container { height: 80px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
     .log-line { margin-bottom: 2px; border-bottom: 1px solid #252525; }
     .log-dmg { color: #ff5252; } .log-heal { color: #69f0ae; } .log-info { color: #4fc3f7; }
-    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 100px; }
-    .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 110px; }
+    .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
     .skill-btn:disabled { opacity: 0.5; background: #222; }
+    .skill-btn span { pointer-events: none; }
+
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444; width: 85%; max-width: 400px; text-align: center; max-height: 80vh; overflow-y: auto; }
+    /* Fixed size modal as requested */
+    .modal-content {
+        background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;
+        width: 320px; height: 500px;
+        display: flex; flex-direction: column;
+        text-align: center;
+    }
+    .modal-scroll { flex: 1; overflow-y: auto; }
+
     .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
 </style>
@@ -79,11 +128,19 @@
     <div id="screen-battle" class="screen">
         <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs"></div></div>
         <div class="visual-stage">
-            <div class="actor-group" id="player-group"></div>
-            <div class="enemy-actor" id="enemy-actor">
+            <div id="player-actor-box" class="battle-actor player">
+                <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
+                <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
+                <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
+                <div id="p-buffs" class="actor-buffs"></div>
+            </div>
+
+            <div style="color:#555; font-size:1.5rem; font-weight:bold;">VS</div>
+
+            <div id="enemy-actor-box" class="battle-actor enemy">
+                <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name">Enemy</div>
+                <div class="portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
                 <div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div>
-                <img id="e-img" class="card-img" src="" style="background:transparent;" onerror="this.style.display='none'">
-                <div id="e-name" style="font-size:0.7rem;">Enemy</div>
                 <div id="e-buffs" class="actor-buffs"></div>
             </div>
         </div>
@@ -91,17 +148,22 @@
         <div id="battle-controls" class="control-panel"></div>
     </div>
 </div>
+
 <div id="modal-card" class="modal">
     <div class="modal-content">
         <h3 id="md-name">Name</h3>
-        <p id="md-grade" style="font-size:0.8rem;">Grade</p>
-        <div id="md-stats" style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"></div>
-        <div id="md-skills" style="font-size:0.8rem; text-align:left;"></div>
+        <div class="modal-scroll">
+            <div class="portrait" style="width:150px; height:200px; margin:0 auto;"><img id="md-img" src="" style="width:100%; height:100%; object-fit:contain;"></div>
+            <p id="md-grade" style="font-size:0.8rem; margin:5px 0;">Grade</p>
+            <div id="md-stats" style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"></div>
+            <div id="md-skills" style="font-size:0.8rem; text-align:left;"></div>
+        </div>
         <button onclick="closeModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
+
 <div id="modal-gacha" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="height:auto; min-height:300px;">
         <h2 id="gacha-title">획득!</h2>
         <div id="gacha-result"></div>
         <button onclick="closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;">확인</button>
@@ -112,6 +174,9 @@
     let gameState = { tickets: 10, inventory: [], deck: [null, null, null], enemyScale: 0 };
     let battleState = { turn: 1, players: [], enemy: null, fieldBuffs: [], currentPlayerIdx: 0, phase: 'start' };
     let selectedSlot = -1;
+
+    // Standard Normal Attack Definition
+    const NORMAL_ATTACK = { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격' };
 
     function startGame(mode) {
         if(mode === 'load') {
@@ -142,7 +207,7 @@
         else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
         document.getElementById('gacha-title').innerText = title;
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
-            <img src="../${pick.name}.png" onerror="this.style.display='none'" style="width:100px; height:130px; object-fit:contain; background:#000; margin-bottom:10px;"><p>새로운 동료를 얻었습니다!</p>`;
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="../${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
         modal.classList.add('active');
     }
     function closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); }
@@ -158,7 +223,7 @@
             if(!data) continue;
             const el = document.createElement('div');
             el.className = `card-item ${data.grade}`;
-            el.innerHTML = `<img src="../${data.name}.png" class="card-img" onerror="this.style.display='none'"><div>${data.name} (x${counts[id]})</div>`;
+            el.innerHTML = `<div class="portrait"><img src="../${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
             el.onclick = () => clickHandler(id);
             box.appendChild(el);
         }
@@ -167,11 +232,13 @@
         const data = CARDS.find(c => c.id === id);
         if(!data) return;
         document.getElementById('md-name').innerText = data.name;
+        document.getElementById('md-img').src = `../${data.name}.png`;
         document.getElementById('md-grade').className = data.grade;
         document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
         document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
-        let skills = `<p style="color:#ffd700">[특성] ${data.trait.desc}</p>`;
-        data.skills.forEach(s => { skills += `<p>[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}</p>`; });
+        let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
+        skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
+        data.skills.forEach(s => { skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}</p>`; });
         document.getElementById('md-skills').innerHTML = skills;
         document.getElementById('modal-card').classList.add('active');
     }
@@ -206,7 +273,7 @@
     function startBattleInit() {
         if(gameState.deck.includes(null)) return alert("덱을 완성해주세요.");
         showScreen('screen-battle');
-        const baseEnemy = ENEMIES[0];
+        const baseEnemy = ENEMIES[0]; // Assuming first enemy for now or random
         let scale = 1.0 + (gameState.enemyScale * 0.2);
         battleState.enemy = {
             id: baseEnemy.id, name: baseEnemy.name,
@@ -244,22 +311,32 @@
         });
         battleState.fieldBuffs = [];
         battleState.turn = 1;
-        battleState.currentPlayerIdx = 0;
+        battleState.currentPlayerIdx = 0; // Vanguard starts
         document.getElementById('battle-log').innerHTML = "";
         log("전투 개시!");
         renderBattlefield();
         startPlayerTurn();
     }
     function log(msg, type='info') { const box = document.getElementById('battle-log'); const div = document.createElement('div'); div.className = `log-line log-${type}`; div.innerHTML = msg; box.appendChild(div); box.scrollTop = box.scrollHeight; }
+
     function renderBattlefield() {
-        const pGroup = document.getElementById('player-group'); pGroup.innerHTML = "";
-        battleState.players.forEach((p, idx) => {
-            const div = document.createElement('div'); div.className = `actor-card ${p.isDead ? 'dead' : ''} ${battleState.currentPlayerIdx === idx && !p.isDead ? 'turn' : ''}`;
+        const p = battleState.players[battleState.currentPlayerIdx];
+
+        // Render Active Player
+        if(p && !p.isDead) {
+            document.getElementById('p-name').innerText = p.name;
+            document.getElementById('p-img').src = `../${p.name}.png`;
             let hpPct = (p.hp / p.maxHp) * 100;
+            document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
             let buffTxt = Object.keys(p.buffs).map(k=>k.substring(0,3)).join(',');
-            div.innerHTML = `<div style="font-size:0.6rem; color:#ccc;">${p.name}</div><img src="../${p.name}.png" class="card-img" onerror="this.style.display='none'"><div class="actor-hp-bar"><div class="actor-hp-fill" style="width:${hpPct}%"></div></div><div class="actor-buffs">${buffTxt}</div>`;
-            pGroup.appendChild(div);
-        });
+            document.getElementById('p-buffs').innerText = buffTxt;
+            document.getElementById('player-actor-box').style.opacity = 1;
+        } else {
+             // Should handle all dead case or transition?
+             document.getElementById('player-actor-box').style.opacity = 0;
+        }
+
+        // Render Enemy
         const e = battleState.enemy;
         let eHpPct = (e.hp / e.maxHp) * 100;
         document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
@@ -267,29 +344,55 @@
         document.getElementById('e-img').src = `../${e.name}.png`;
         let eBuffTxt = Object.keys(e.buffs).map(k=>`${k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
+
         document.getElementById('bt-turn').innerText = battleState.turn;
         document.getElementById('field-buff-box').innerHTML = battleState.fieldBuffs.map(b => `[${b.name}]`).join(" ");
     }
-    function startPlayerTurn() { battleState.currentPlayerIdx = 0; processNextPlayer(); }
-    function processNextPlayer() {
-        while(battleState.currentPlayerIdx < 3) {
-            const p = battleState.players[battleState.currentPlayerIdx];
-            if(!p.isDead) {
-                if(p.buffs.stun) { log(`${p.name} 기절.`); delete p.buffs.stun; battleState.currentPlayerIdx++; continue; }
-                renderBattlefield(); setupControls(p); return;
-            }
+
+    function startPlayerTurn() {
+        // Ensure current player is alive or switch
+        if(battleState.currentPlayerIdx >= 3) { loseBattle(); return; }
+        let p = battleState.players[battleState.currentPlayerIdx];
+        if(p.isDead) {
             battleState.currentPlayerIdx++;
+            startPlayerTurn();
+            return;
         }
-        setTimeout(startEnemyTurn, 500);
+
+        renderBattlefield();
+
+        if(p.buffs.stun) {
+            log(`${p.name} 기절.`);
+            delete p.buffs.stun;
+            setTimeout(startEnemyTurn, 500);
+            return;
+        }
+
+        setupControls(p);
     }
+
     function setupControls(p) {
-        const panel = document.getElementById('battle-controls'); panel.innerHTML = "";
+        const panel = document.getElementById('battle-controls');
+        panel.innerHTML = "";
+
+        // Add Normal Attack
+        const btn = document.createElement('button');
+        btn.className = 'skill-btn';
+        btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
+        btn.onclick = () => executeSkill(p, NORMAL_ATTACK);
+        panel.appendChild(btn);
+
+        // Add Skills
         p.proto.skills.forEach(s => {
-            const btn = document.createElement('button'); btn.className = 'skill-btn'; btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
-            if(p.mp < s.cost) btn.disabled = true; else btn.onclick = () => executeSkill(p, s);
+            const btn = document.createElement('button');
+            btn.className = 'skill-btn';
+            btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
+            if(p.mp < s.cost) btn.disabled = true;
+            else btn.onclick = () => executeSkill(p, s);
             panel.appendChild(btn);
         });
     }
+
     function getElementalMultiplier(atkEl, defEl) {
         if(atkEl === 'water' && defEl === 'fire') return 1.2;
         if(atkEl === 'fire' && defEl === 'nature') return 1.2;
@@ -303,6 +406,7 @@
         log(`<b>${p.name}</b>의 <b>${skill.name}</b>!`);
 
         let atkMult = 1.0, matkMult = 1.0, crit = p.baseCrit, critDmg = 150, eva = 5;
+        // Apply field buffs
         battleState.fieldBuffs.forEach(fb => {
              if(fb.name === '태양의축복') { atkMult += 0.3; matkMult += 0.3; critDmg += 50; }
              if(fb.name === '달의축복') { matkMult += 0.3; eva += 10; }
@@ -321,32 +425,23 @@
         if(skill.type === 'phy' || skill.type === 'mag') {
             let val = skill.type === 'phy' ? atk : matk;
             let mult = skill.val;
-            let dmgBonus = 0.0; // Additive damage bonus
+            let dmgBonus = 0.0;
 
-            // Elemental Logic (Assuming 'dark' for current single enemy based on context, or default 'dark' if unspecified in ENEMIES)
-            // The prompt "demon god" (Mashin) implies Dark? Or add element property to ENEMIES.
-            // For now, assume 'dark' for the test enemy. Or add it to enemy data.
-            // Let's default enemy element to 'dark' for now as it's a "Demon God".
-            let enemyEl = 'dark'; // Placeholder for enemy element logic
+            let enemyEl = 'dark'; // Placeholder default
             let elMult = getElementalMultiplier(p.proto.element, enemyEl);
             if(elMult > 1.0) log(`상성 우위! 대미지 20% 증가.`);
 
             if(skill.desc.includes('암흑 상태 적 2배') && e.buffs.darkness) mult *= 2;
 
-            // Consume Mechanics
             if(skill.desc.includes('필드버프제거')) {
                 let count = battleState.fieldBuffs.length;
                 if(count > 0) {
                     battleState.fieldBuffs = [];
-                    mult += (count * 2.5); // "Increases power by removed count x 2.5" -> Base is val, add bonus? Prompt says "Power x2.5 per buff removed". Usually added to base multiplier? Or multiplicative? "威力(Power) increases". Let's assume Additive to multiplier.
-                    // Wait, prompt: "2.5배율 (모든 필드버프를 제거하고 제거한 수 x2.5 만큼 위력 증가)".
-                    // This implies Base 2.5 + (Count * 2.5). Or just (Count * 2.5)?
-                    // "Power increases by...". Base is 2.5. So 2.5 + (Count * 2.5).
+                    mult += (count * 2.5);
                     log(`필드 버프 ${count}개 제거! 위력 대폭 상승!`);
                 }
             }
             if(skill.desc.includes('작열스택을 전부 소모') || (skill.name === '이그니스스매시' && skill.desc.includes('작열소모'))) {
-                // Prompt: "Consumes all burn stacks and adds 1.5 multiplier per stack"
                 if(e.buffs.burn) {
                     let count = e.buffs.burn;
                     mult += (count * 1.5);
@@ -363,7 +458,7 @@
                 }
             }
 
-            if(skill.desc.includes('작열스택당') && e.buffs.burn) mult += (e.buffs.burn * 0.5); // Non-consuming
+            if(skill.desc.includes('작열스택당') && e.buffs.burn) mult += (e.buffs.burn * 0.5);
             if(skill.desc.includes('디바인 3스택') && e.buffs.divine >= 3) mult *= 2;
             if(skill.desc.includes('HP 50%이하 2배') && (p.hp/p.maxHp) <= 0.5) mult *= 2;
             if(skill.desc.includes('약화시 2배') && e.buffs.weak) mult *= 2;
@@ -410,9 +505,14 @@
         if(skill.desc.includes('다음 턴 휴식') || skill.desc.includes('행동 불가')) p.buffs.stun = true;
 
         if(e.hp <= 0) { winBattle(); return; }
-        battleState.currentPlayerIdx++;
-        processNextPlayer();
+
+        // After player action, check if player died (self-destruct) or continue to enemy
+        if(p.hp <= 0 && !p.isDead) { p.isDead = true; log(`${p.name} 사망!`); }
+
+        // 1v1 turn structure: Player Action -> Enemy Action (against THIS player)
+        setTimeout(startEnemyTurn, 500);
     }
+
     function applyFieldBuff(name) {
         if(battleState.fieldBuffs.length >= 3) { let removed = battleState.fieldBuffs.shift(); log(`필드버프 [${removed.name}] 소멸.`); }
         battleState.fieldBuffs.push({ name: name }); log(`필드버프 [${name}] 발동!`);
@@ -421,15 +521,41 @@
         if(stackable) { target.buffs[type] = (target.buffs[type] || 0) + 1; target.buffs[type] = Math.min(3, target.buffs[type]); log(`적에게 [${type}] ${target.buffs[type]}스택 부여.`); }
         else { target.buffs[type] = 1; log(`적에게 [${type}] 부여.`); }
     }
+
     function startEnemyTurn() {
+        // If enemy is already dead, don't act
+        if(battleState.enemy.hp <= 0) { winBattle(); return; }
+
         log("--- 적 턴 ---");
         const e = battleState.enemy;
-        let roll = Math.random(), skill = e.skills[0];
-        if(roll < 0.3) skill = e.skills.find(s => s.name === '다크니스'); else if(roll < 0.5) skill = e.skills.find(s => s.name === '기습'); else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
 
-        // Find alive target order: Van -> Mid -> Rear
-        let target = battleState.players.find(p => !p.isDead);
-        if(!target) { loseBattle(); return; }
+        // Target is the current active player
+        let target = battleState.players[battleState.currentPlayerIdx];
+        if(!target || target.isDead) {
+            // If current player is dead, try to find next living player?
+            // In 1v1 relay, if player died during their turn (e.g. Chaos Mage), switch happens.
+            // If switch hasn't happened yet, we need to handle it.
+            // But usually Player Turn -> Enemy Turn.
+            // If Player died self-inflicted, 'processNextPlayer' logic might be needed.
+            if(battleState.players.every(p => p.isDead)) { loseBattle(); return; }
+
+            // If current is dead, switch to next alive
+            while(target.isDead && battleState.currentPlayerIdx < 3) {
+                 battleState.currentPlayerIdx++;
+                 target = battleState.players[battleState.currentPlayerIdx];
+            }
+            if(!target) { loseBattle(); return; }
+        }
+
+        let roll = Math.random(), skill = e.skills[0];
+        if(roll < 0.3 && e.skills.length > 0) skill = e.skills[Math.min(e.skills.length-1, Math.floor(Math.random() * e.skills.length))];
+        else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
+
+        // Specific Logic for Demon God
+        if(e.name === '마신') {
+             if(Math.random() < 0.3) skill = e.skills[0]; // Darkness
+             else skill = e.skills[1]; // Ambush
+        }
 
         let val = skill.type === 'phy' ? e.atk : e.matk;
         let mult = skill.val;
@@ -450,13 +576,27 @@
         log(`${target.name}에게 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
 
         if(target.hp <= 0) {
-            target.isDead = true; log(`${target.name} 쓰러짐!`);
+            target.isDead = true;
+            target.hp = 0;
+            log(`${target.name} 쓰러짐!`);
             if(target.proto.trait.type === 'death_dmg_mag') { e.hp -= Math.floor(target.matk * 2.0); log(`[특성] 사망시 반격! 적에게 ${Math.floor(target.matk*2)} 피해.`); }
             if(target.proto.trait.type === 'death_field_sun') applyFieldBuff('태양의축복');
+
+            // If current player died, switch to next immediately or end game
+            battleState.currentPlayerIdx++;
+            // Check if game over
+            if(battleState.currentPlayerIdx >= 3) { loseBattle(); return; }
         }
-        if(e.hp <= 0) winBattle(); else if(battleState.players.every(p => p.isDead)) loseBattle(); else endEnemyTurn();
+
+        if(e.hp <= 0) winBattle(); else endEnemyTurn();
     }
-    function endEnemyTurn() { battleState.turn++; renderBattlefield(); startPlayerTurn(); }
+
+    function endEnemyTurn() {
+        battleState.turn++;
+        // Start next player turn (which is the current index)
+        startPlayerTurn();
+    }
+
     function handlePermadeath(players) {
         let deadNames = [];
         players.forEach(p => {

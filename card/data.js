@@ -36,7 +36,8 @@ const CARDS = [
         trait: { type: 'syn_fire_water_nature', desc: '불/물/자연 덱일시 트윙클파티 추가발동' },
         skills: [
             { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 발동' },
-            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동' }
+            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동' },
+            { name: '슈팅스타', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '회피율 증가' }
         ]
     },
     {
@@ -157,7 +158,8 @@ const CARDS = [
         trait: { type: 'syn_water_light_mdef', val: 50, desc: '물+빛 보유시 마방 50% 증가' },
         skills: [
             { name: '성역전개', type: 'sup', tier: 1, cost: 10, desc: '필드버프 성역 발동' },
-            { name: '홀리레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여' }
+            { name: '홀리레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여' },
+            { name: '심판의빛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '강력한 마법 공격' }
         ]
     },
     {
@@ -187,7 +189,8 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
             { name: '베이비브레스', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여' },
-            { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리' }
+            { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리' },
+            { name: '응원하기', type: 'sup', tier: 1, cost: 10, desc: '공격력 증가' }
         ]
     },
     {
@@ -338,7 +341,8 @@ const CARDS = [
         trait: { type: 'syn_light_fire_atk', val: 20, desc: '빛+불 보유시 공 20% 증가' },
         skills: [
             { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여' },
-            { name: '캔디파라다이스', type: 'sup', tier: 2, cost: 20, desc: '필드버프 트윙클파티 발동' }
+            { name: '캔디파라다이스', type: 'sup', tier: 2, cost: 20, desc: '필드버프 트윙클파티 발동' },
+            { name: '캔디쉴드', type: 'sup', tier: 1, cost: 10, desc: '배리어 생성' }
         ]
     },
     {
