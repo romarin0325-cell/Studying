@@ -334,7 +334,7 @@
                  const t = p.proto.trait;
                  if(t.type === 'syn_nature_3_def' && elements.filter(e=>e==='nature').length===3) p.def = Math.floor(p.def * 1.5);
                  if(t.type === 'syn_water_3_atk' && elements.filter(e=>e==='water').length===3) p.atk = Math.floor(p.atk * 1.5);
-                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 20;
+                 if(t.type === 'syn_fire_3_crit' && elements.filter(e=>e==='fire').length===3) p.baseCrit += 20;
                  if(t.type === 'syn_dark_3_matk' && elements.filter(e=>e==='dark').length===3) p.matk = Math.floor(p.matk * 1.5);
                  if(t.type === 'syn_light_fire_atk' && elements.includes('light') && elements.includes('fire')) p.atk = Math.floor(p.atk * 1.2);
                  if(t.type === 'syn_water_light_mdef' && elements.includes('water') && elements.includes('light')) p.mdef = Math.floor(p.mdef * 1.5);
@@ -404,6 +404,10 @@
 
     function startPlayerTurn() {
         if(battleState.currentPlayerIdx >= 3) { loseBattle(); return; }
+
+        if(battleState.currentPlayerIdx === 0) {
+             log(`=== ${battleState.turn}턴 ===`, 'info');
+        }
 
         // Reset enemy lastHitType at the start of player turn to ensure logic works per turn
         if(battleState.enemy) battleState.enemy.lastHitType = null;
@@ -584,6 +588,17 @@
             let buffName = skill.desc.match(/필드버프 (.+?) (발동|부여)/)[1];
             applyFieldBuff(buffName);
         }
+
+        // Rumi Trait Logic
+        if(p.proto.trait.type === 'syn_fire_water_nature' && skill.name === '문라이트세레나') {
+             // Check deck elements
+             const activePlayers = battleState.players.filter(pl => pl !== null && !pl.isDead);
+             const elements = activePlayers.map(pl => pl.proto.element);
+             if(elements.includes('fire') && elements.includes('water') && elements.includes('nature')) {
+                  log("루미의 특성 발동! 트윙클파티 추가!");
+                  applyFieldBuff('트윙클파티');
+             }
+        }
         if(skill.desc.includes('회피율') || skill.desc.includes('회피태세')) p.buffs.evasion = true;
         if(skill.desc.includes('물리공격 무효')) p.buffs.barrier = true;
         if(skill.desc.includes('마법공격 무효')) p.buffs.magic_guard = true;
@@ -754,7 +769,7 @@
         battleState.fieldBuffs.forEach(fb => { if(fb.name === '달의축복') eva += 10; });
         if(target.proto.trait.type === 'cond_no_field_buff_eva' && battleState.fieldBuffs.length === 0) eva += 30;
 
-        if((target.buffs.evasion && Math.random() < 0.5) || (Math.random()*100 < eva)) { log(`${target.name} 회피 성공!`); endEnemyTurn(); return; }
+        if((target.buffs.evasion && Math.random() < 0.5) || (Math.random()*100 < eva)) { log(`${target.name} 회피 성공! (${skill.name} 회피)`); endEnemyTurn(); return; }
         if(target.buffs.barrier && skill.type === 'phy') { log(`${target.name} 배리어로 방어!`); endEnemyTurn(); return; }
         if(target.buffs.magic_guard && skill.type === 'mag') { log(`${target.name} 매직가드로 방어!`); endEnemyTurn(); return; }
 
@@ -834,7 +849,13 @@
         else char = battleState.enemy;
         if(!char) return;
 
-        let buffs = Object.keys(char.buffs).map(k=>getBuffNameKR(k) + (char.buffs[k] > 1 ? `(${char.buffs[k]})` : '')).join(', ') || '없음';
+        let buffs = Object.keys(char.buffs).map(k => {
+            let name = getBuffNameKR(k);
+            let val = char.buffs[k];
+            if(val === true) return name;
+            return `${name}(${val})`;
+        }).join(', ') || '없음';
+
         let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
         if(side === 'player') content += `MP: ${char.mp}<br>`;
         content += `ATK: ${char.atk} / MATK: ${char.matk}<br>`;
