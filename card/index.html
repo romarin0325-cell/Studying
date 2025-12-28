@@ -36,7 +36,7 @@
 
     /* Battle Visual Stage */
     .battle-header { display: flex; justify-content: space-between; padding: 5px; background: #222; border-radius: 5px; font-size: 0.8rem; }
-    .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; }
+    .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; }
 
     .visual-stage {
         flex: 1; position: relative;
@@ -46,8 +46,10 @@
         overflow: hidden;
         margin-bottom: 6px;
         display: flex; justify-content: space-around; align-items: center;
-        padding: 10px;
+        padding: 5px;
         background-image: linear-gradient(to bottom, #2a2a2a, #121212);
+        min-height: 200px;
+        max-height: 40vh;
     }
 
     .battle-actor {
@@ -56,9 +58,10 @@
         position: relative;
         transition: all 0.2s;
         display: flex; flex-direction: column; align-items: center;
+        cursor: pointer;
     }
     .battle-actor .portrait {
-        width: 100px; height: 133px; /* Fixed size for battle */
+        width: 90px; height: 120px; /* Reduced fixed size for battle */
         border-color: #999;
     }
     .battle-actor.player .portrait { border-color: #4caf50; }
@@ -72,7 +75,7 @@
     .actor-mp-fill { height: 100%; background: #42a5f5; width: 100%; transition: width 0.3s; }
     .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 12px; overflow: hidden; margin-top: 2px; }
 
-    .log-container { height: 80px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
+    .log-container { height: 150px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
     .log-line { margin-bottom: 2px; border-bottom: 1px solid #252525; }
     .log-dmg { color: #ff5252; } .log-heal { color: #69f0ae; } .log-info { color: #4fc3f7; }
 
@@ -80,6 +83,9 @@
     .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
     .skill-btn:disabled { opacity: 0.5; background: #222; }
     .skill-btn span { pointer-events: none; }
+    .skill-btn.phy { border-color: #9c27b0; color: #e1bee7; }
+    .skill-btn.mag { border-color: #2196f3; color: #bbdefb; }
+    .skill-btn.sup { border-color: #4caf50; color: #c8e6c9; }
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -128,9 +134,9 @@
         <button class="menu-btn" onclick="confirmDeck()" style="margin-bottom: 60px;">확인</button>
     </div>
     <div id="screen-battle" class="screen">
-        <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs"></div></div>
+        <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs" onclick="showFieldBuffInfo()"></div></div>
         <div class="visual-stage">
-            <div id="player-actor-box" class="battle-actor player">
+            <div id="player-actor-box" class="battle-actor player" onclick="showBattleStat('player', battleState.currentPlayerIdx)">
                 <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
                 <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
                 <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
@@ -140,7 +146,7 @@
 
             <div style="color:#555; font-size:1.5rem; font-weight:bold;">VS</div>
 
-            <div id="enemy-actor-box" class="battle-actor enemy">
+            <div id="enemy-actor-box" class="battle-actor enemy" onclick="showBattleStat('enemy', 0)">
                 <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name">Enemy</div>
                 <div class="portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
                 <div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div>
@@ -405,7 +411,7 @@
 
         // Add Normal Attack
         const btn = document.createElement('button');
-        btn.className = 'skill-btn';
+        btn.className = 'skill-btn phy';
         btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
         btn.onclick = () => executeSkill(p, NORMAL_ATTACK);
         panel.appendChild(btn);
@@ -413,7 +419,7 @@
         // Add Skills
         p.proto.skills.forEach(s => {
             const btn = document.createElement('button');
-            btn.className = 'skill-btn';
+            btn.className = `skill-btn ${s.type}`;
             btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
             if(p.mp < s.cost) btn.disabled = true;
             else btn.onclick = () => executeSkill(p, s);
@@ -527,7 +533,7 @@
         if(skill.desc.includes('저주')) applyDebuff(e, 'curse');
         if(skill.desc.includes('약화')) applyDebuff(e, 'weak');
         if(skill.desc.includes('작열')) applyDebuff(e, 'burn', true);
-        if(skill.desc.includes('디바인')) applyDebuff(e, 'divine', true);
+        if(skill.desc.includes('디바인') && skill.desc.includes('부여')) applyDebuff(e, 'divine', true);
 
         if(skill.desc.includes('사망한다')) { p.hp = 0; p.isDead = true; log(`${p.name} 사망!`); }
         if(skill.desc.includes('다음 턴 휴식') || skill.desc.includes('행동 불가')) p.buffs.stun = true;
@@ -640,7 +646,7 @@
         handlePermadeath(battleState.players);
         alert("승리!");
         let reward = 1;
-        if(battleState.players.some(p => !p.isDead && p.proto.trait.type === 'looter')) reward = 2;
+        if(battleState.players.some(p => p.proto.trait.type === 'looter')) reward = 2;
         gameState.tickets += reward;
         gameState.enemyScale++;
         log(`승리 보상: 뽑기권 ${reward}장 획득.`);
@@ -650,6 +656,40 @@
         handlePermadeath(battleState.players);
         alert("패배...");
         toMenu();
+    }
+
+    function showBattleStat(side, idx) {
+        let char;
+        if(side === 'player') char = battleState.players[idx];
+        else char = battleState.enemy;
+
+        if(!char) return;
+
+        let buffs = Object.keys(char.buffs).map(k=>getBuffNameKR(k) + (char.buffs[k] > 1 ? `(${char.buffs[k]})` : '')).join(', ') || '없음';
+        let msg = `[${char.name}]\nHP: ${char.hp}/${char.maxHp}\n`;
+        if(side === 'player') msg += `MP: ${char.mp}\n`;
+        msg += `ATK: ${char.atk} / MATK: ${char.matk}\n`;
+        msg += `DEF: ${char.def} / MDEF: ${char.mdef}\n`;
+        msg += `상태: ${buffs}`;
+        alert(msg);
+    }
+
+    function showFieldBuffInfo() {
+        if(battleState.fieldBuffs.length === 0) return alert("활성화된 필드 버프가 없습니다.");
+        const buffInfo = {
+            '태양의축복': '물공/마공 +30%, 치명타대미지 +50%',
+            '달의축복': '마공 +30%, 회피율 +10%',
+            '성역': '마공 +20%, 마방 +20%',
+            '여신강림': '물공/마공 +25%, 방어/마방 +25%',
+            '대지의축복': '물공/마공 +20%',
+            '트윙클파티': '물공 +20%, 치명타율 +10%',
+            '스타파우더': '방어/마방 +20%'
+        };
+        let msg = "--- 필드 버프 ---\n";
+        battleState.fieldBuffs.forEach(b => {
+             msg += `[${b.name}] ${buffInfo[b.name] || ''}\n`;
+        });
+        alert(msg);
     }
 </script>
 </body>
