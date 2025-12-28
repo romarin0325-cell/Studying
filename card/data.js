@@ -2,12 +2,12 @@ const CARDS = [
     // --- 전설 (Legend) ---
     {
         id: 'queen', name: '여왕', grade: 'legend', element: 'nature', role: 'looter',
-        stats: { hp: 520, atk: 100, matk: 120, def: 65, mdef: 60 },
+        stats: { hp: 440, atk: 85, matk: 100, def: 55, mdef: 55 },
         trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효' },
             { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프제거x2.5배' },
-            { name: '로열블룸', type: 'sup', tier: 2, cost: 20, desc: '대지의축복(물공/마공 20%↑)' }
+            { name: '로열블룸', type: 'sup', tier: 2, cost: 20, desc: '필드버프 대지의축복 발동' }
         ]
     },
     {
@@ -57,7 +57,7 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감' },
             { name: '대지의분노', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '필드버프 대지의축복 발동' },
-            { name: '가이아포스', type: 'phy', tier: 2, cost: 20, val: 1.0, desc: '아군 디버프 해제' }
+            { name: '가이아포스', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 달의축복 발동' }
         ]
     },
     {
@@ -94,7 +94,7 @@ const CARDS = [
     // --- 에픽 (Epic) ---
     {
         id: 'shadow_stalker', name: '그림자추적자', grade: 'epic', element: 'dark', role: 'looter',
-        stats: { hp: 380, atk: 110, matk: 80, def: 65, mdef: 65 },
+        stats: { hp: 340, atk: 100, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
@@ -185,7 +185,7 @@ const CARDS = [
     // --- 레어 (Rare) ---
     {
         id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
-        stats: { hp: 340, atk: 90, matk: 80, def: 60, mdef: 50 },
+        stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 45 },
         trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '베이비브레스', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여' },
@@ -287,7 +287,7 @@ const CARDS = [
     // --- 일반 (Normal) ---
     {
         id: 'kobold', name: '코볼트', grade: 'normal', element: 'nature', role: 'looter',
-        stats: { hp: 300, atk: 85, matk: 60, def: 45, mdef: 45 },
+        stats: { hp: 270, atk: 75, matk: 55, def: 40, mdef: 40 },
         trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
@@ -389,11 +389,53 @@ const CARDS = [
 
 const ENEMIES = [
     {
-        id: 'demon_god', name: '마신', element: 'dark',
-        stats: { hp: 1000, atk: 100, matk: 100, def: 70, mdef: 70 },
+        id: 'artificial_demon_god', name: '인조 마신', element: 'water',
+        stats: { hp: 600, atk: 60, matk: 60, def: 60, mdef: 60 },
         skills: [
-            { name: '다크니스', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해' },
-            { name: '기습', type: 'phy', rate: 0.2, val: 1.5, desc: '1.5배 물리 피해' }
+            { name: '아이스빔', type: 'mag', rate: 0.3, val: 1.5, desc: '1.5배 마법 피해' },
+            { name: '파괴의형태', type: 'mag', rate: 0.0, val: 4.0, desc: '10턴째 4배 마법' } // Triggered by logic
+        ]
+    },
+    {
+        id: 'iris_love', name: '사랑의 여신 아이리스', element: 'light',
+        stats: { hp: 800, atk: 50, matk: 80, def: 50, mdef: 80 },
+        skills: [
+            { name: '홀리레이', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해' },
+            { name: '더홀리', type: 'mag', rate: 0.1, val: 3.5, desc: '3.5배 마법 피해' },
+            { name: '소울드레인', type: 'mag', rate: 0.0, val: 0, desc: '7턴째 마나 제거' }
+        ]
+    },
+    {
+        id: 'iris_curse', name: '저주의 여신 아이리스', element: 'fire',
+        stats: { hp: 1000, atk: 100, matk: 70, def: 90, mdef: 60 },
+        skills: [
+            { name: '프레임샷', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해' },
+            { name: '아포칼립스', type: 'phy', rate: 0.0, val: 5.0, desc: '10턴째 5배 물리' }
+        ]
+    },
+    {
+        id: 'pharaoh', name: '고대신 파라오', element: 'nature',
+        stats: { hp: 1200, atk: 100, matk: 100, def: 90, mdef: 90 },
+        skills: [
+            { name: '고대의힘', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해' },
+            { name: '고대의저주', type: 'mag', rate: 0.0, val: 1.0, desc: '5턴 주기 공격' }
+        ]
+    },
+    {
+        id: 'demon_god', name: '마신', element: 'dark',
+        stats: { hp: 1400, atk: 120, matk: 120, def: 100, mdef: 100 },
+        skills: [
+            { name: '다크니스', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법 피해' },
+            { name: '제노사이드', type: 'phy', rate: 0.0, val: 3.5, desc: '7/14턴 3.5배 물리' }
+        ]
+    },
+    {
+        id: 'creator_god', name: '창조신 아스테아', element: 'light',
+        stats: { hp: 1600, atk: 130, matk: 150, def: 110, mdef: 110 },
+        skills: [
+            { name: '저지먼트', type: 'mag', rate: 0.0, val: 3.5, desc: '강력한 마법' },
+            { name: '디바인블레이드', type: 'phy', rate: 0.2, val: 4.0, desc: '1턴 차지 후 4배 물리' },
+            { name: '홀리레이', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법' }
         ]
     }
 ];
