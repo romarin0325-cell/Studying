@@ -37,7 +37,7 @@ const CARDS = [
         skills: [
             { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 발동' },
             { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동' },
-            { name: '슈팅스타', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '회피율 증가' }
+            { name: '매직가드', type: 'sup', tier: 2, cost: 20, desc: '마법공격 무효' }
         ]
     },
     {
@@ -86,7 +86,7 @@ const CARDS = [
         trait: { type: 'death_dmg_debuff', val: 1.0, desc: '사망시 적에게 걸려있는 디버프 수 곱하기 1배율 대미지' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 2, cost: 20, desc: '마법공격 무효' },
-            { name: '블리자드', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '부식, 침묵, 약화, 저주 부여, 다음턴 자신 행동불가' },
+            { name: '블리자드', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '부식, 침묵, 약화, 저주 부여, 다음 턴 행동 불가' },
             { name: '프로스트', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '상대에게 적용된 디버프가 5개 이상일 시, 상대 스턴' }
         ]
     },
@@ -197,7 +197,7 @@ const CARDS = [
     {
         id: 'chaos_mage', name: '혼돈의마법사', grade: 'rare', element: 'dark', role: 'dealer',
         stats: { hp: 320, atk: 75, matk: 105, def: 50, mdef: 70 },
-        trait: { type: 'pos_van_matk', val: 50, desc: '선봉배치세 마법공격력 50%증가' },
+        trait: { type: 'pos_van_matk', val: 50, desc: '선봉배치시 마법공격력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 2, cost: 20, desc: '마법공격 무효' },
             { name: '카오스카니발', type: 'mag', tier: 3, cost: 30, val: 6.0, desc: '이 카드는 사망한다' },
@@ -363,7 +363,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리' },
-            { name: '바인드', type: 'sup', tier: 1, cost: 10, desc: '저주부여' }
+            { name: '바인드', type: 'sup', tier: 1, cost: 10, desc: '저주 부여' }
         ]
     },
     {
