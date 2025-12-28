@@ -195,7 +195,11 @@
     function startGame(mode) {
         if(mode === 'load') {
             const save = localStorage.getItem('cardRpgSave');
-            if(save) { gameState = JSON.parse(save); alert("불러오기 완료"); } else { alert("저장된 데이터가 없습니다. 새로 시작합니다."); initNewGame(); }
+            if(save) {
+                 let loaded = JSON.parse(save);
+                 gameState = { ...gameState, ...loaded };
+                 alert("불러오기 완료");
+            } else { alert("저장된 데이터가 없습니다. 새로 시작합니다."); initNewGame(); }
         } else { initNewGame(); }
         toMenu();
     }
@@ -290,14 +294,17 @@
     function startBattleInit() {
         if(gameState.deck.every(x => x === null)) return alert("덱을 완성해주세요.");
         showScreen('screen-battle');
-        const baseEnemy = ENEMIES[Math.min(ENEMIES.length-1, gameState.enemyScale % ENEMIES.length)];
-        let scale = 1.0 + (gameState.enemyScale * 0.2);
+        const enemyIdx = gameState.enemyScale % ENEMIES.length;
+        const baseEnemy = ENEMIES[enemyIdx];
+        let cycle = Math.floor(gameState.enemyScale / ENEMIES.length);
+        let scale = 1.0 + (cycle * 0.2);
+
         battleState.enemy = {
             id: baseEnemy.id, name: baseEnemy.name,
             maxHp: Math.floor(baseEnemy.stats.hp * scale), hp: Math.floor(baseEnemy.stats.hp * scale),
             atk: Math.floor(baseEnemy.stats.atk * scale), matk: Math.floor(baseEnemy.stats.matk * scale),
             def: Math.floor(baseEnemy.stats.def * scale), mdef: Math.floor(baseEnemy.stats.mdef * scale),
-            baseDef: Math.floor(baseEnemy.stats.def * scale), baseMdef: Math.floor(baseEnemy.stats.mdef * scale), // Added for reset
+            baseDef: Math.floor(baseEnemy.stats.def * scale), baseMdef: Math.floor(baseEnemy.stats.mdef * scale),
             skills: baseEnemy.skills, buffs: {}, element: baseEnemy.element,
             tookDamageThisTurn: false, lastHitType: null
         };
@@ -353,7 +360,8 @@
         const map = {
             'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
             'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-            'magic_guard': '매직가드', 'guard': '가드'
+            'magic_guard': '매직가드', 'guard': '가드',
+            'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)'
         };
         return map[key] || key;
     }
@@ -470,7 +478,7 @@
         p.mp -= skill.cost;
         log(`<b>${p.name}</b>의 <b>${skill.name}</b>!`);
 
-        if(skill.desc.includes('3턴 뒤 공격')) {
+        if(skill.desc.includes('3턴 뒤')) {
             log(`종언의 예고가 시작됩니다... (3턴 뒤 발동)`);
             battleState.delayedEffects.push({ turn: battleState.turn + 3, source: p, skill: skill });
             setTimeout(startEnemyTurn, 500);
@@ -481,10 +489,10 @@
     }
 
     function executeSkillDamage(p, skill, isDelayed=false) {
-        let atkMult = 1.0, matkMult = 1.0, crit = p.baseCrit, critDmg = 150, eva = 5;
+        let atkMult = 1.0, matkMult = 1.0, crit = p.baseCrit, critDmg = 150;
         battleState.fieldBuffs.forEach(fb => {
              if(fb.name === '태양의축복') { atkMult += 0.3; matkMult += 0.3; critDmg += 50; }
-             if(fb.name === '달의축복') { matkMult += 0.3; eva += 10; }
+             if(fb.name === '달의축복') { matkMult += 0.3; }
              if(fb.name === '성역') { matkMult += 0.2; }
              if(fb.name === '여신강림') { atkMult += 0.25; matkMult += 0.25; }
              if(fb.name === '대지의축복') { atkMult += 0.2; matkMult += 0.2; }
@@ -493,7 +501,6 @@
 
         let atk = Math.floor(p.atk * atkMult);
         let matk = Math.floor(p.matk * matkMult);
-        if(p.proto.trait.type === 'cond_no_field_buff_eva' && battleState.fieldBuffs.length === 0) eva += 30;
         if(p.proto.trait.type === 'cond_twinkle_atk' && battleState.fieldBuffs.some(b=>b.name==='트윙클파티')) atk = Math.floor(atk * 1.4);
 
         const e = battleState.enemy;
@@ -541,7 +548,7 @@
             }
 
             if(skill.desc.includes('작열스택당') && e.buffs.burn) mult += (e.buffs.burn * 0.5);
-            if(skill.desc.includes('적 디버프 1종당') || skill.desc.includes('디버프당')) {
+            if(skill.desc.includes('디버프 1종당') || skill.desc.includes('디버프당')) {
                 mult += (Object.keys(e.buffs).length * 0.5);
             }
             if(skill.desc.includes('디바인 3스택') && e.buffs.divine >= 3) mult *= 2;
@@ -551,9 +558,10 @@
             if(skill.desc.includes('달의축복 상태에서') && battleState.fieldBuffs.some(b=>b.name==='달의축복')) mult *= 2;
             if(skill.desc.includes('어둠 상태시 추가 0.5배') && e.buffs.darkness) mult += 0.5;
 
-            if(p.proto.trait.type === 'cond_silence_dmg' && e.buffs.silence) dmgBonus += (p.proto.trait.val - 1.0);
-            if(p.proto.trait.type === 'cond_corrosion_dmg' && e.buffs.corrosion) dmgBonus += (p.proto.trait.val - 1.0);
-            if(p.proto.trait.type === 'cond_debuff_3_dmg' && Object.keys(e.buffs).length >= 3) dmgBonus += (p.proto.trait.val - 1.0);
+            if(p.proto.trait.type === 'cond_silence_dmg' && e.buffs.silence) { dmgBonus += (p.proto.trait.val - 1.0); log(`[특성] 침묵 추댐!`); }
+            if(p.proto.trait.type === 'cond_corrosion_dmg' && e.buffs.corrosion) { dmgBonus += (p.proto.trait.val - 1.0); log(`[특성] 부식 추댐!`); }
+            if(p.proto.trait.type === 'cond_debuff_3_dmg' && Object.keys(e.buffs).length >= 3) { dmgBonus += (p.proto.trait.val - 1.0); log(`[특성] 디버프 3개 이상 추댐!`); }
+            if(p.proto.trait.type === 'cond_divine_3_dmg' && e.buffs.divine >= 3) { dmgBonus += (p.proto.trait.val - 1.0); log(`[특성] 디바인 3스택 이상 추댐!`); }
 
             let isCrit = Math.random() * 100 < crit;
             if(isCrit) val *= (critDmg / 100);
@@ -600,6 +608,9 @@
         if(skill.desc.includes('부식, 침묵, 약화, 저주 부여')) {
             applyDebuff(e, 'corrosion'); applyDebuff(e, 'silence'); applyDebuff(e, 'weak'); applyDebuff(e, 'curse');
         }
+        if(skill.desc.includes('저주, 침묵, 암흑 부여')) {
+            applyDebuff(e, 'curse'); applyDebuff(e, 'silence'); applyDebuff(e, 'darkness');
+        }
 
         if(skill.desc.includes('이 카드는 사망한다')) { p.hp = 0; p.isDead = true; log(`${p.name} 사망!`); }
         if(skill.desc.includes('다음 턴 휴식') || skill.desc.includes('행동 불가') || skill.desc.includes('다음턴불가')) p.buffs.stun = true;
@@ -639,26 +650,16 @@
 
         // Boss Passives / Logic
         if(e.id === 'artificial_demon_god') {
-            if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = true; log("방어 프로토콜: 물리 피격 감지."); }
-            if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = true; log("방어 프로토콜: 마법 피격 감지."); }
+            // Clear previous protocols first
+            if(e.buffs.defProtocolPhy) delete e.buffs.defProtocolPhy;
+            if(e.buffs.defProtocolMag) delete e.buffs.defProtocolMag;
 
-            // Apply protocol buffs from PREVIOUS turn if they exist (Actually logic is: hit this turn -> buff for next turn)
-            // Wait, lastHitType tracks what hit it *during player turn*.
-            // So now (Enemy Turn), we apply buffs that will last through the NEXT player turn?
-            // "Next turn only" usually means the turn immediately following.
-            // If I hit it now (Player Turn 1), it activates Protocol.
-            // Protocol should be active during Player Turn 2.
-            // So I should apply it now, and clear it after Player Turn 2 starts?
-            // Simplified: Apply stats now. They persist until next Enemy Turn reset.
+            // Detect hits from player turn and activate protocol for THIS enemy turn + NEXT player turn
+            if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = 1; log("방어 프로토콜: 물리 피격 감지."); }
+            if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = 1; log("방어 프로토콜: 마법 피격 감지."); }
+
             if(e.buffs.defProtocolPhy) { e.def = Math.floor(e.def * 1.5); log("방어력 증가 상태."); }
             if(e.buffs.defProtocolMag) { e.mdef = Math.floor(e.mdef * 1.5); log("마법방어력 증가 상태."); }
-
-            // Clear protocols for next cycle (so they only last one round)
-            // But wait, if I clear them now, and Player Turn 2 starts, stats are reset?
-            // No, I set e.def NOW. Player Turn 2 uses e.def. Enemy Turn 2 resets e.def. Correct.
-            // So I just need to clear the flags so they don't re-trigger unless hit again.
-            e.buffs.defProtocolPhy = false;
-            e.buffs.defProtocolMag = false;
         }
         else if(e.id === 'demon_god') {
              if(battleState.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); log("마신의 권능: 짝수 턴 방어력 증가."); }
@@ -691,15 +692,18 @@
         if(e.id === 'artificial_demon_god') {
             if(battleState.turn === 10) skill = e.skills.find(s => s.name === '파괴의형태');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '아이스빔');
+            else skill = { type: 'phy', val: 1.0, name: '일반 공격' }; // Fallback
         }
         else if(e.id === 'iris_love') {
             if(battleState.turn === 7) { skill = e.skills.find(s => s.name === '소울드레인'); target.mp = 0; log("소울드레인! 플레이어 마나 소멸."); }
             else if(Math.random() < 0.1) skill = e.skills.find(s => s.name === '더홀리');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '홀리레이');
+            else skill = { type: 'phy', val: 1.0, name: '일반 공격' }; // Fallback
         }
         else if(e.id === 'iris_curse') {
             if(battleState.turn === 10) skill = e.skills.find(s => s.name === '아포칼립스');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '프레임샷');
+            else skill = { type: 'phy', val: 1.0, name: '일반 공격' }; // Fallback
         }
         else if(e.id === 'pharaoh') {
             if(battleState.turn % 5 === 0) {
@@ -746,7 +750,11 @@
         battleState.fieldBuffs.forEach(b => { if(b.name === '스타파우더') { fieldDef += 0.2; fieldMdef += 0.2; } if(b.name === '성역') { fieldMdef += 0.2; } if(b.name === '여신강림') { fieldDef += 0.25; fieldMdef += 0.25; } });
         def = Math.floor(def * fieldDef);
 
-        if(target.buffs.evasion && Math.random() < 0.5) { log(`${target.name} 회피 성공!`); endEnemyTurn(); return; }
+        let eva = 5;
+        battleState.fieldBuffs.forEach(fb => { if(fb.name === '달의축복') eva += 10; });
+        if(target.proto.trait.type === 'cond_no_field_buff_eva' && battleState.fieldBuffs.length === 0) eva += 30;
+
+        if((target.buffs.evasion && Math.random() < 0.5) || (Math.random()*100 < eva)) { log(`${target.name} 회피 성공!`); endEnemyTurn(); return; }
         if(target.buffs.barrier && skill.type === 'phy') { log(`${target.name} 배리어로 방어!`); endEnemyTurn(); return; }
         if(target.buffs.magic_guard && skill.type === 'mag') { log(`${target.name} 매직가드로 방어!`); endEnemyTurn(); return; }
 
@@ -807,10 +815,7 @@
         handlePermadeath(battleState.players);
         alert("승리!");
         let reward = 1;
-        if(battleState.players.some(p => p && !p.isDead && p.proto.trait.type === 'looter')) reward = 2; // Fixed: Looter must survive? Usually traits apply if in deck. Memory says "irrespective of whether they survived".
-        // Checking memory: "Looter trait grants bonus rewards upon victory provided the character is in the deck, irrespective of whether they survived"
-        // So I should check all players in deck even if dead.
-        if(battleState.players.some(p => p && p.proto.trait.type === 'looter')) reward = 2;
+        if(battleState.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
 
         gameState.tickets += reward;
         gameState.enemyScale++;

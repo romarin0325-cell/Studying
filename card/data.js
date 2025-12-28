@@ -169,7 +169,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효' },
             { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 부여' },
-            { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '스타파우더 부여' }
+            { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 스타파우더 부여' }
         ]
     },
     {
@@ -241,7 +241,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효' },
             { name: '크림샷', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여' },
-            { name: '크림익스플로전', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '스타파우더 부여' }
+            { name: '크림익스플로전', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '필드버프 스타파우더 부여' }
         ]
     },
     {
@@ -383,7 +383,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
             { name: '저주의불꽃', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '저주 부여' },
-            { name: '침묵의불꽃', type: 'sup', tier: 1, cost: 10, desc: '침묵, 작열부여' }
+            { name: '침묵의불꽃', type: 'sup', tier: 1, cost: 10, desc: '침묵, 작열 부여' }
         ]
     }
 ];
