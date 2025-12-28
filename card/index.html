@@ -21,7 +21,6 @@
     .card-item.rare { border-color: #448aff; color: #448aff; }
     .card-item.normal { border-color: #bdbdbd; color: #bdbdbd; }
 
-    /* Updated Frame Style similar to Turn RPG */
     .portrait {
         width: 100%; aspect-ratio: 3/4;
         border-radius: 6px;
@@ -34,7 +33,6 @@
     }
     .portrait img { width: 100%; height: 100%; object-fit: contain; }
 
-    /* Battle Visual Stage */
     .battle-header { display: flex; justify-content: space-between; padding: 5px; background: #222; border-radius: 5px; font-size: 0.8rem; }
     .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; }
 
@@ -61,7 +59,7 @@
         cursor: pointer;
     }
     .battle-actor .portrait {
-        width: 90px; height: 120px; /* Reduced fixed size for battle */
+        width: 90px; height: 120px;
         border-color: #999;
     }
     .battle-actor.player .portrait { border-color: #4caf50; }
@@ -89,14 +87,14 @@
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    /* Fixed size modal as requested */
     .modal-content {
         background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;
-        width: 320px; height: 500px;
+        width: 320px; max-height: 80vh;
         display: flex; flex-direction: column;
         text-align: center;
+        color: #e0e0e0;
     }
-    .modal-scroll { flex: 1; overflow-y: auto; }
+    .modal-scroll { flex: 1; overflow-y: auto; margin-bottom: 10px; }
 
     .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
@@ -171,6 +169,14 @@
     </div>
 </div>
 
+<div id="modal-info" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3 id="info-title">정보</h3>
+        <div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"></div>
+        <button onclick="closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
 <div id="modal-gacha" class="modal">
     <div class="modal-content" style="height:auto; min-height:300px;">
         <h2 id="gacha-title">획득!</h2>
@@ -180,11 +186,10 @@
 </div>
 <script src="data.js"></script>
 <script>
-    let gameState = { tickets: 10, inventory: [], deck: [null, null, null], enemyScale: 0 };
+    let gameState = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0 };
     let battleState = { turn: 1, players: [], enemy: null, fieldBuffs: [], currentPlayerIdx: 0, phase: 'start', delayedEffects: [] };
     let selectedSlot = -1;
 
-    // Standard Normal Attack Definition
     const NORMAL_ATTACK = { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격' };
 
     function startGame(mode) {
@@ -194,7 +199,7 @@
         } else { initNewGame(); }
         toMenu();
     }
-    function initNewGame() { gameState = { tickets: 10, inventory: [], deck: [null, null, null], enemyScale: 0 }; }
+    function initNewGame() { gameState = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0 }; }
     function toMenu() { showScreen('screen-menu'); document.getElementById('ui-tickets').innerText = gameState.tickets; }
     function toTitle() { showScreen('screen-title'); }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -247,7 +252,10 @@
         document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
         let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
         skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
-        data.skills.forEach(s => { skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}</p>`; });
+        data.skills.forEach(s => {
+            let multText = s.val ? ` (x${s.val})` : '';
+            skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
+        });
         document.getElementById('md-skills').innerHTML = skills;
         document.getElementById('modal-card').classList.add('active');
     }
@@ -289,14 +297,14 @@
             maxHp: Math.floor(baseEnemy.stats.hp * scale), hp: Math.floor(baseEnemy.stats.hp * scale),
             atk: Math.floor(baseEnemy.stats.atk * scale), matk: Math.floor(baseEnemy.stats.matk * scale),
             def: Math.floor(baseEnemy.stats.def * scale), mdef: Math.floor(baseEnemy.stats.mdef * scale),
+            baseDef: Math.floor(baseEnemy.stats.def * scale), baseMdef: Math.floor(baseEnemy.stats.mdef * scale), // Added for reset
             skills: baseEnemy.skills, buffs: {}, element: baseEnemy.element,
-            tookDamageThisTurn: false, lastHitType: null // Added for AI tracking
+            tookDamageThisTurn: false, lastHitType: null
         };
-        // Reset AI tracking properties
         if(baseEnemy.id === 'creator_god') battleState.enemy.chargeTurn = 0;
 
         battleState.players = gameState.deck.map((id, idx) => {
-            if(!id) return null; // Handle empty slots
+            if(!id) return null;
             const proto = CARDS.find(c => c.id === id);
             let p = { id: proto.id, proto: proto, name: proto.name, maxHp: proto.stats.hp, hp: proto.stats.hp, mp: 100, atk: proto.stats.atk, matk: proto.stats.matk, def: proto.stats.def, mdef: proto.stats.mdef, buffs: {}, pos: idx, isDead: false, baseCrit: 10 };
             if(proto.trait.type.startsWith('pos_')) {
@@ -326,11 +334,10 @@
              }
         });
         battleState.fieldBuffs = [];
-        battleState.delayedEffects = []; // Reset delayed effects
+        battleState.delayedEffects = [];
         battleState.turn = 1;
-        battleState.currentPlayerIdx = 0; // Vanguard starts
+        battleState.currentPlayerIdx = 0;
 
-        // Find first valid player
         while(battleState.currentPlayerIdx < 3 && battleState.players[battleState.currentPlayerIdx] === null) {
             battleState.currentPlayerIdx++;
         }
@@ -354,35 +361,31 @@
     function renderBattlefield() {
         const p = battleState.players[battleState.currentPlayerIdx];
 
-        // Render Active Player
         if(p && !p.isDead) {
             document.getElementById('p-name').innerText = p.name;
             const pImg = document.getElementById('p-img');
             pImg.src = `${p.name}.png`;
-            pImg.style.display = 'block'; // Force display if hidden previously
+            pImg.style.display = 'block';
 
             let hpPct = (p.hp / p.maxHp) * 100;
             document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
-
-            let mpPct = (p.mp / 100) * 100; // MP Max 100 fixed
+            let mpPct = (p.mp / 100) * 100;
             document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
             let buffTxt = Object.keys(p.buffs).map(k=>getBuffNameKR(k)).join(',');
             document.getElementById('p-buffs').innerText = buffTxt;
             document.getElementById('player-actor-box').style.opacity = 1;
         } else {
-             // Should handle all dead case or transition?
              document.getElementById('player-actor-box').style.opacity = 0;
         }
 
-        // Render Enemy
         const e = battleState.enemy;
         let eHpPct = (e.hp / e.maxHp) * 100;
         document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
         document.getElementById('e-name').innerText = e.name;
         const eImg = document.getElementById('e-img');
         eImg.src = `${e.name}.png`;
-        eImg.style.display = 'block'; // Force display
+        eImg.style.display = 'block';
 
         let eBuffTxt = Object.keys(e.buffs).map(k=>`${getBuffNameKR(k)}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
@@ -392,18 +395,19 @@
     }
 
     function startPlayerTurn() {
-        // Ensure current player is alive or switch
         if(battleState.currentPlayerIdx >= 3) { loseBattle(); return; }
+
+        // Reset enemy lastHitType at the start of player turn to ensure logic works per turn
+        if(battleState.enemy) battleState.enemy.lastHitType = null;
+
         let p = battleState.players[battleState.currentPlayerIdx];
 
-        // Skip null or dead players
         if(!p || p.isDead) {
             battleState.currentPlayerIdx++;
             startPlayerTurn();
             return;
         }
 
-        // Process Delayed Effects
         for(let i = battleState.delayedEffects.length - 1; i >= 0; i--) {
             let effect = battleState.delayedEffects[i];
             if(effect.turn === battleState.turn) {
@@ -412,12 +416,11 @@
                     log(`${effect.skill.name} 발동 실패... (시전자 사망)`);
                 } else {
                     log(`${effect.skill.name} 발동!`);
-                    executeSkillDamage(effect.source, effect.skill, true); // True to skip cost/delayed logic
+                    executeSkillDamage(effect.source, effect.skill, true);
                 }
             }
         }
 
-        // Cleanup temporary defensive buffs from previous turn (duration 1)
         if(p.buffs.evasion) delete p.buffs.evasion;
         if(p.buffs.barrier) delete p.buffs.barrier;
         if(p.buffs.magic_guard) delete p.buffs.magic_guard;
@@ -426,7 +429,7 @@
         renderBattlefield();
 
         if(p.buffs.stun) {
-            log(`${p.name} 기절.`);
+            log(`${p.name} 기절로 인해 행동 불가.`);
             delete p.buffs.stun;
             setTimeout(startEnemyTurn, 500);
             return;
@@ -439,14 +442,12 @@
         const panel = document.getElementById('battle-controls');
         panel.innerHTML = "";
 
-        // Add Normal Attack
         const btn = document.createElement('button');
         btn.className = 'skill-btn phy';
         btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
         btn.onclick = () => executeSkill(p, NORMAL_ATTACK);
         panel.appendChild(btn);
 
-        // Add Skills
         p.proto.skills.forEach(s => {
             const btn = document.createElement('button');
             btn.className = `skill-btn ${s.type}`;
@@ -469,7 +470,6 @@
         p.mp -= skill.cost;
         log(`<b>${p.name}</b>의 <b>${skill.name}</b>!`);
 
-        // Handle Delayed Skill (Time Ruler)
         if(skill.desc.includes('3턴 뒤 공격')) {
             log(`종언의 예고가 시작됩니다... (3턴 뒤 발동)`);
             battleState.delayedEffects.push({ turn: battleState.turn + 3, source: p, skill: skill });
@@ -482,7 +482,6 @@
 
     function executeSkillDamage(p, skill, isDelayed=false) {
         let atkMult = 1.0, matkMult = 1.0, crit = p.baseCrit, critDmg = 150, eva = 5;
-        // Apply field buffs
         battleState.fieldBuffs.forEach(fb => {
              if(fb.name === '태양의축복') { atkMult += 0.3; matkMult += 0.3; critDmg += 50; }
              if(fb.name === '달의축복') { matkMult += 0.3; eva += 10; }
@@ -499,19 +498,20 @@
 
         const e = battleState.enemy;
         if(skill.type === 'phy' || skill.type === 'mag') {
-            e.lastHitType = skill.type; // Track hit type for AI
+            e.lastHitType = skill.type;
 
             let val = skill.type === 'phy' ? atk : matk;
             let mult = skill.val;
             let dmgBonus = 0.0;
 
-            let enemyEl = e.element || 'dark'; // Use enemy element if set
+            let enemyEl = e.element || 'dark';
             let elMult = getElementalMultiplier(p.proto.element, enemyEl);
             if(elMult > 1.0) log(`상성 우위! 대미지 20% 증가.`);
 
+            if(skill.desc.includes('암흑 상태의 적에게 대미지 2배') && e.buffs.darkness) mult *= 2;
             if(skill.desc.includes('암흑 상태 적 2배') && e.buffs.darkness) mult *= 2;
 
-            if(skill.desc.includes('필드버프제거')) {
+            if(skill.desc.includes('필드버프를 제거하고')) {
                 let count = battleState.fieldBuffs.length;
                 if(count > 0) {
                     battleState.fieldBuffs = [];
@@ -519,7 +519,7 @@
                     log(`필드 버프 ${count}개 제거! 위력 대폭 상승!`);
                 }
             }
-            if(skill.desc.includes('작열스택을 전부 소모') || (skill.name === '이그니스스매시' && skill.desc.includes('작열소모'))) {
+            if(skill.desc.includes('작열스택을 전부 소모')) {
                 if(e.buffs.burn) {
                     let count = e.buffs.burn;
                     mult += (count * 1.5);
@@ -527,7 +527,7 @@
                     log(`작열 ${count}스택 소모! 위력 폭발!`);
                 }
             }
-            if(skill.desc.includes('디바인스택 전부 소모') || (skill.name === '레인오브썬더')) {
+            if(skill.desc.includes('디바인스택 전부 소모')) {
                 if(e.buffs.divine) {
                     let count = e.buffs.divine;
                     mult += (count * 2.0);
@@ -535,12 +535,21 @@
                     log(`디바인 ${count}스택 소모! 천둥이 내리칩니다!`);
                 }
             }
+            if(skill.desc.includes('1~5배율 사이로 랜덤공격')) {
+                mult = 1.0 + (Math.floor(Math.random() * 5));
+                log(`무작위 위력! x${mult.toFixed(1)}`);
+            }
 
             if(skill.desc.includes('작열스택당') && e.buffs.burn) mult += (e.buffs.burn * 0.5);
+            if(skill.desc.includes('적 디버프 1종당') || skill.desc.includes('디버프당')) {
+                mult += (Object.keys(e.buffs).length * 0.5);
+            }
             if(skill.desc.includes('디바인 3스택') && e.buffs.divine >= 3) mult *= 2;
-            if(skill.desc.includes('HP 50%이하 2배') && (p.hp/p.maxHp) <= 0.5) mult *= 2;
-            if(skill.desc.includes('약화시 2배') && e.buffs.weak) mult *= 2;
-            if(skill.desc.includes('저주시 2배') && e.buffs.curse) mult *= 2;
+            if(skill.desc.includes('생명력 50% 아래') && (p.hp/p.maxHp) <= 0.5) mult *= 2;
+            if((skill.desc.includes('약화시 2배') || skill.desc.includes('상대가 약화시')) && e.buffs.weak) mult *= 2;
+            if((skill.desc.includes('저주시 2배') || skill.desc.includes('상대가 저주시')) && e.buffs.curse) mult *= 2;
+            if(skill.desc.includes('달의축복 상태에서') && battleState.fieldBuffs.some(b=>b.name==='달의축복')) mult *= 2;
+            if(skill.desc.includes('어둠 상태시 추가 0.5배') && e.buffs.darkness) mult += 0.5;
 
             if(p.proto.trait.type === 'cond_silence_dmg' && e.buffs.silence) dmgBonus += (p.proto.trait.val - 1.0);
             if(p.proto.trait.type === 'cond_corrosion_dmg' && e.buffs.corrosion) dmgBonus += (p.proto.trait.val - 1.0);
@@ -559,7 +568,7 @@
             let dmg = val * finalMult * (100 / (100 + def));
             dmg = Math.floor(dmg);
             e.hp -= dmg;
-            if(dmg > 0) e.tookDamageThisTurn = true; // Track for AI
+            if(dmg > 0) e.tookDamageThisTurn = true;
             log(`${isCrit?'Critical! ':''}적에게 <span class="log-dmg">${dmg}</span> 피해.`);
         }
 
@@ -567,33 +576,49 @@
             let buffName = skill.desc.match(/필드버프 (.+?) (발동|부여)/)[1];
             applyFieldBuff(buffName);
         }
-        if(skill.desc.includes('회피율')) p.buffs.evasion = true;
+        if(skill.desc.includes('회피율') || skill.desc.includes('회피태세')) p.buffs.evasion = true;
         if(skill.desc.includes('물리공격 무효')) p.buffs.barrier = true;
         if(skill.desc.includes('마법공격 무효')) p.buffs.magic_guard = true;
         if(skill.desc.includes('대미지 반감')) p.buffs.guard = true;
 
-        if(skill.desc.includes('암흑')) applyDebuff(e, 'darkness');
-        if(skill.desc.includes('부식')) applyDebuff(e, 'corrosion');
-        if(skill.desc.includes('침묵')) applyDebuff(e, 'silence');
-        if(skill.desc.includes('저주')) applyDebuff(e, 'curse');
-        if(skill.desc.includes('약화')) applyDebuff(e, 'weak');
-        if(skill.desc.includes('작열')) applyDebuff(e, 'burn', true);
-        if(skill.desc.includes('디바인') && skill.desc.includes('부여')) applyDebuff(e, 'divine', true);
+        if(skill.desc.includes('암흑 부여')) applyDebuff(e, 'darkness');
+        if(skill.desc.includes('부식 부여')) applyDebuff(e, 'corrosion');
+        if(skill.desc.includes('침묵 부여') || skill.desc.includes('침묵, 작열 부여')) applyDebuff(e, 'silence');
+        if(skill.desc.includes('저주 부여')) applyDebuff(e, 'curse');
+        if(skill.desc.includes('약화 부여')) applyDebuff(e, 'weak');
+        if(skill.desc.includes('작열 부여') || skill.desc.includes('작열스택 부여') || skill.desc.includes('침묵, 작열 부여')) applyDebuff(e, 'burn', true);
+        if(skill.desc.includes('작열스택 추가')) applyDebuff(e, 'burn', true);
+        if((skill.desc.includes('디바인') && skill.desc.includes('부여')) || skill.desc.includes('디바인, 암흑 부여')) applyDebuff(e, 'divine', true);
+        if(skill.desc.includes('디바인, 암흑 부여')) applyDebuff(e, 'darkness');
 
-        if(skill.desc.includes('사망한다')) { p.hp = 0; p.isDead = true; log(`${p.name} 사망!`); }
-        if(skill.desc.includes('다음 턴 휴식') || skill.desc.includes('행동 불가')) p.buffs.stun = true;
+        if(skill.desc.includes('랜덤 디버프 2종') || skill.desc.includes('랜덤 2종 부여')) {
+            let pool = ['darkness', 'corrosion', 'silence', 'curse', 'weak'];
+            pool.sort(() => 0.5 - Math.random());
+            applyDebuff(e, pool[0]);
+            applyDebuff(e, pool[1]);
+        }
+        if(skill.desc.includes('부식, 침묵, 약화, 저주 부여')) {
+            applyDebuff(e, 'corrosion'); applyDebuff(e, 'silence'); applyDebuff(e, 'weak'); applyDebuff(e, 'curse');
+        }
+
+        if(skill.desc.includes('이 카드는 사망한다')) { p.hp = 0; p.isDead = true; log(`${p.name} 사망!`); }
+        if(skill.desc.includes('다음 턴 휴식') || skill.desc.includes('행동 불가') || skill.desc.includes('다음턴불가')) p.buffs.stun = true;
+
+        if(skill.desc.includes('디버프 5개 이상시 스턴') && Object.keys(e.buffs).length >= 5) {
+             // Enemy stun logic? Enemy doesn't have 'stun' buff logic yet, but let's just log it or skip next turn.
+             // We'll add a 'stun' flag to enemy and check in startEnemyTurn.
+             e.buffs.stun = true;
+             log(`적에게 기절 부여!`);
+        }
 
         if(e.hp <= 0) { winBattle(); return; }
-
-        // After player action, check if player died (self-destruct) or continue to enemy
         if(p.hp <= 0 && !p.isDead) { p.isDead = true; log(`${p.name} 사망!`); }
 
-        // 1v1 turn structure: Player Action -> Enemy Action (against THIS player)
-        // If it was a delayed effect, do NOT trigger turn pass
         if(!isDelayed) setTimeout(startEnemyTurn, 500);
     }
 
     function applyFieldBuff(name) {
+        if(battleState.fieldBuffs.some(b => b.name === name)) return log(`필드버프 [${name}]는 이미 존재합니다.`);
         if(battleState.fieldBuffs.length >= 3) { let removed = battleState.fieldBuffs.shift(); log(`필드버프 [${removed.name}] 소멸.`); }
         battleState.fieldBuffs.push({ name: name }); log(`필드버프 [${name}] 발동!`);
     }
@@ -604,19 +629,54 @@
     }
 
     function startEnemyTurn() {
-        // If enemy is already dead, don't act
         if(battleState.enemy.hp <= 0) { winBattle(); return; }
 
         log("--- 적 턴 ---");
         const e = battleState.enemy;
 
-        // Target is the current active player
+        // Reset Boss Stats each turn to base, then apply passives/buffs
+        e.def = e.baseDef; e.mdef = e.baseMdef;
+
+        // Boss Passives / Logic
+        if(e.id === 'artificial_demon_god') {
+            if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = true; log("방어 프로토콜: 물리 피격 감지."); }
+            if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = true; log("방어 프로토콜: 마법 피격 감지."); }
+
+            // Apply protocol buffs from PREVIOUS turn if they exist (Actually logic is: hit this turn -> buff for next turn)
+            // Wait, lastHitType tracks what hit it *during player turn*.
+            // So now (Enemy Turn), we apply buffs that will last through the NEXT player turn?
+            // "Next turn only" usually means the turn immediately following.
+            // If I hit it now (Player Turn 1), it activates Protocol.
+            // Protocol should be active during Player Turn 2.
+            // So I should apply it now, and clear it after Player Turn 2 starts?
+            // Simplified: Apply stats now. They persist until next Enemy Turn reset.
+            if(e.buffs.defProtocolPhy) { e.def = Math.floor(e.def * 1.5); log("방어력 증가 상태."); }
+            if(e.buffs.defProtocolMag) { e.mdef = Math.floor(e.mdef * 1.5); log("마법방어력 증가 상태."); }
+
+            // Clear protocols for next cycle (so they only last one round)
+            // But wait, if I clear them now, and Player Turn 2 starts, stats are reset?
+            // No, I set e.def NOW. Player Turn 2 uses e.def. Enemy Turn 2 resets e.def. Correct.
+            // So I just need to clear the flags so they don't re-trigger unless hit again.
+            e.buffs.defProtocolPhy = false;
+            e.buffs.defProtocolMag = false;
+        }
+        else if(e.id === 'demon_god') {
+             if(battleState.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); log("마신의 권능: 짝수 턴 방어력 증가."); }
+             else { e.mdef = Math.floor(e.mdef * 1.5); log("마신의 권능: 홀수 턴 마법방어력 증가."); }
+        }
+
+        if(e.buffs.stun) {
+            log(`${e.name} 기절하여 행동 불가.`);
+            delete e.buffs.stun;
+            endEnemyTurn();
+            return;
+        }
+
+        // Target Selection
         let target = battleState.players[battleState.currentPlayerIdx];
         if(!target || target.isDead) {
             let players = battleState.players.filter(p => p !== null);
             if(players.every(p => p.isDead)) { loseBattle(); return; }
-
-            // If current is dead, switch to next alive
             while(battleState.currentPlayerIdx < 3) {
                  battleState.currentPlayerIdx++;
                  target = battleState.players[battleState.currentPlayerIdx];
@@ -625,91 +685,58 @@
             if(!target) { loseBattle(); return; }
         }
 
-        let skill = e.skills[0]; // Default
+        let skill = null;
 
-        // --- AI Logic ---
-
-        // Artificial Demon God
+        // AI Skill Logic
         if(e.id === 'artificial_demon_god') {
-            // Passive: Defense Protocol
-            if(e.lastHitType === 'phy') { e.def = Math.floor(e.def * 1.5); log("방어 프로토콜: 물리 피격으로 방어력 증가!"); }
-            if(e.lastHitType === 'mag') { e.mdef = Math.floor(e.mdef * 1.5); log("방어 프로토콜: 마법 피격으로 마법방어력 증가!"); }
-
-            // Turn 10: Destruction Form
             if(battleState.turn === 10) skill = e.skills.find(s => s.name === '파괴의형태');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '아이스빔');
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
-        // Iris (Love)
         else if(e.id === 'iris_love') {
-            if(battleState.turn === 7) {
-                skill = e.skills.find(s => s.name === '소울드레인');
-                target.mp = 0; log("소울드레인! 플레이어 마나 소멸.");
-            }
+            if(battleState.turn === 7) { skill = e.skills.find(s => s.name === '소울드레인'); target.mp = 0; log("소울드레인! 플레이어 마나 소멸."); }
             else if(Math.random() < 0.1) skill = e.skills.find(s => s.name === '더홀리');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '홀리레이');
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
-        // Iris (Curse)
         else if(e.id === 'iris_curse') {
             if(battleState.turn === 10) skill = e.skills.find(s => s.name === '아포칼립스');
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '프레임샷');
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
-        // Pharaoh
         else if(e.id === 'pharaoh') {
             if(battleState.turn % 5 === 0) {
                 skill = e.skills.find(s => s.name === '고대의저주');
-                if(e.tookDamageThisTurn) {
-                    skill.val = 3.0; // Boosted
-                    log("파라오가 분노합니다! 고대의 저주 위력 상승!");
-                } else skill.val = 1.0;
+                if(e.tookDamageThisTurn) { skill.val = 3.0; log("파라오가 분노합니다! 고대의 저주 위력 상승!"); } else skill.val = 1.0;
             }
             else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '고대의힘');
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
-        // Demon God
         else if(e.id === 'demon_god') {
-            // Passive: Demon Authority
-            if(battleState.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); log("마신의 권능: 짝수 턴 방어력 증가."); }
-            else { e.mdef = Math.floor(e.mdef * 1.5); log("마신의 권능: 홀수 턴 마법방어력 증가."); }
-
             if(battleState.turn === 7 || battleState.turn === 14) skill = e.skills.find(s => s.name === '제노사이드');
             else if(Math.random() < 0.2) skill = e.skills.find(s => s.name === '다크니스');
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
-        // Creator God
         else if(e.id === 'creator_god') {
             if(e.isCharging) {
                 log("창조신이 힘을 모으고 있습니다...");
                 skill = e.skills.find(s => s.name === '디바인블레이드');
                 e.isCharging = false;
-                // Attack proceeds
             }
             else if(battleState.turn === 2) skill = e.skills.find(s => s.name === '저지먼트');
             else {
                 let r = Math.random();
-                if(battleState.turn > 15 && r < 0.2) skill = e.skills.find(s => s.name === '저지먼트'); // Replaces Holy Ray
+                if(battleState.turn > 15 && r < 0.2) skill = e.skills.find(s => s.name === '저지먼트');
                 else if(r < 0.2) skill = e.skills.find(s => s.name === '홀리레이');
                 else if(r < 0.4) {
                     log("창조신이 자세를 잡습니다 (차지중...)");
                     e.isCharging = true;
-                    endEnemyTurn(); // Skip turn effectively
-                    return;
+                    endEnemyTurn(); return;
                 }
-                else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
             }
         }
-        // Default / Generic AI
-        else {
-            let r = Math.random();
-            if(r < 0.3 && e.skills.length > 0) skill = e.skills[Math.min(e.skills.length-1, Math.floor(Math.random() * e.skills.length))];
-            else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
+
+        if(!skill) {
+             // Generic random skill or attack
+             if(Math.random() < 0.3 && e.skills.length > 0) skill = e.skills[Math.min(e.skills.length-1, Math.floor(Math.random() * e.skills.length))];
+             else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
 
-        if(!skill) skill = { type: 'phy', val: 1.0, name: '일반 공격' }; // Fallback
-
-        // Execution
         let val = skill.type === 'phy' ? e.atk : e.matk;
         let mult = skill.val;
         if(e.buffs.weak && skill.type === 'phy') val *= 0.8; if(e.buffs.silence && skill.type === 'mag') val *= 0.8;
@@ -732,27 +759,26 @@
             target.isDead = true;
             target.hp = 0;
             log(`${target.name} 쓰러짐!`);
-
-            // Death Traits Logic with Defense Application
             if(target.proto.trait.type === 'death_dmg_mag') {
                 let dAtk = target.matk * 2.0;
-                let dDef = e.mdef; // Assuming magic defense against magic death damage
-                let dDmg = Math.floor(dAtk * (100 / (100 + dDef)));
+                let dDmg = Math.floor(dAtk * (100 / (100 + e.mdef)));
                 e.hp -= dDmg;
-                log(`[특성] 사망시 반격! 적에게 ${dDmg} 피해 (방어적용).`);
+                log(`[특성] 사망시 반격! 적에게 ${dDmg} 피해.`);
+            }
+            if(target.proto.trait.type === 'death_dmg_debuff') {
+                 let dCount = Object.keys(e.buffs).length;
+                 let dDmg = Math.floor(target.matk * dCount * 1.0); // 1.0 multiplier per debuff
+                 e.hp -= dDmg;
+                 log(`[특성] 사망시 저주! 적에게 ${dDmg} 피해.`);
             }
             if(target.proto.trait.type === 'death_field_sun') applyFieldBuff('태양의축복');
 
-            // If current player died, switch to next immediately or end game
             battleState.currentPlayerIdx++;
-
-            // Find next valid player
             let valid = false;
             while(battleState.currentPlayerIdx < 3) {
                  if(battleState.players[battleState.currentPlayerIdx] && !battleState.players[battleState.currentPlayerIdx].isDead) { valid=true; break; }
                  battleState.currentPlayerIdx++;
             }
-
             if(!valid) { loseBattle(); return; }
         }
 
@@ -761,9 +787,7 @@
 
     function endEnemyTurn() {
         battleState.turn++;
-        // Reset Enemy per-turn flags
         battleState.enemy.tookDamageThisTurn = false;
-        // Start next player turn (which is the current index)
         startPlayerTurn();
     }
 
@@ -783,7 +807,11 @@
         handlePermadeath(battleState.players);
         alert("승리!");
         let reward = 1;
+        if(battleState.players.some(p => p && !p.isDead && p.proto.trait.type === 'looter')) reward = 2; // Fixed: Looter must survive? Usually traits apply if in deck. Memory says "irrespective of whether they survived".
+        // Checking memory: "Looter trait grants bonus rewards upon victory provided the character is in the deck, irrespective of whether they survived"
+        // So I should check all players in deck even if dead.
         if(battleState.players.some(p => p && p.proto.trait.type === 'looter')) reward = 2;
+
         gameState.tickets += reward;
         gameState.enemyScale++;
         log(`승리 보상: 뽑기권 ${reward}장 획득.`);
@@ -799,16 +827,30 @@
         let char;
         if(side === 'player') char = battleState.players[idx];
         else char = battleState.enemy;
-
         if(!char) return;
 
         let buffs = Object.keys(char.buffs).map(k=>getBuffNameKR(k) + (char.buffs[k] > 1 ? `(${char.buffs[k]})` : '')).join(', ') || '없음';
-        let msg = `[${char.name}]\nHP: ${char.hp}/${char.maxHp}\n`;
-        if(side === 'player') msg += `MP: ${char.mp}\n`;
-        msg += `ATK: ${char.atk} / MATK: ${char.matk}\n`;
-        msg += `DEF: ${char.def} / MDEF: ${char.mdef}\n`;
-        msg += `상태: ${buffs}`;
-        alert(msg);
+        let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
+        if(side === 'player') content += `MP: ${char.mp}<br>`;
+        content += `ATK: ${char.atk} / MATK: ${char.matk}<br>`;
+        content += `DEF: ${char.def} / MDEF: ${char.mdef}<br>`;
+        content += `상태: ${buffs}<br><br>`;
+
+        if(side === 'player') {
+             content += `<b>[스킬]</b><br>`;
+             char.proto.skills.forEach(s => {
+                 let multText = s.val ? ` (x${s.val})` : '';
+                 content += `- ${s.name}: ${s.desc}${multText}<br>`;
+             });
+        } else {
+             content += `<b>[스킬]</b><br>`;
+             char.skills.forEach(s => {
+                 let multText = s.val ? ` (x${s.val})` : '';
+                 content += `- ${s.name}: ${s.desc}${multText}<br>`;
+             });
+        }
+
+        openInfoModal(char.name, content);
     }
 
     function showFieldBuffInfo() {
@@ -822,12 +864,19 @@
             '트윙클파티': '물공 +20%, 치명타율 +10%',
             '스타파우더': '방어/마방 +20%'
         };
-        let msg = "--- 필드 버프 ---\n";
+        let msg = "";
         battleState.fieldBuffs.forEach(b => {
-             msg += `[${b.name}] ${buffInfo[b.name] || ''}\n`;
+             msg += `<b>[${b.name}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
         });
-        alert(msg);
+        openInfoModal("필드 버프", msg);
     }
+
+    function openInfoModal(title, content) {
+        document.getElementById('info-title').innerText = title;
+        document.getElementById('info-content').innerHTML = content;
+        document.getElementById('modal-info').classList.add('active');
+    }
+    function closeInfoModal() { document.getElementById('modal-info').classList.remove('active'); }
 </script>
 </body>
 </html>
