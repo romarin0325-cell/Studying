@@ -3,7 +3,7 @@ const CARDS = [
     {
         id: 'queen', name: '여왕', grade: 'legend', element: 'nature', role: 'looter',
         stats: { hp: 520, atk: 100, matk: 120, def: 65, mdef: 60 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효' },
             { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프제거x2.5배' },
@@ -95,7 +95,7 @@ const CARDS = [
     {
         id: 'shadow_stalker', name: '그림자추적자', grade: 'epic', element: 'dark', role: 'looter',
         stats: { hp: 380, atk: 110, matk: 80, def: 65, mdef: 65 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
             { name: '암살', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '암흑 부여' },
@@ -186,7 +186,7 @@ const CARDS = [
     {
         id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
         stats: { hp: 340, atk: 90, matk: 80, def: 60, mdef: 50 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '베이비브레스', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여' },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리' },
@@ -288,7 +288,7 @@ const CARDS = [
     {
         id: 'kobold', name: '코볼트', grade: 'normal', element: 'nature', role: 'looter',
         stats: { hp: 300, atk: 85, matk: 60, def: 45, mdef: 45 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가' },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리' },
@@ -332,7 +332,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효' },
             { name: '에너지볼', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '디바인 부여' },
-            { name: '스타파우더', type: 'sup', tier: 2, cost: 20, desc: '필드버프 스타파우더' }
+            { name: '스타파우더', type: 'sup', tier: 2, cost: 20, desc: '필드버프 스타파우더 발동' }
         ]
     },
     {
@@ -342,7 +342,7 @@ const CARDS = [
         skills: [
             { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여' },
             { name: '캔디파라다이스', type: 'sup', tier: 2, cost: 20, desc: '필드버프 트윙클파티 발동' },
-            { name: '캔디쉴드', type: 'sup', tier: 1, cost: 10, desc: '배리어 생성' }
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감' }
         ]
     },
     {
@@ -368,7 +368,7 @@ const CARDS = [
     {
         id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'debuffer',
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드가 덱에 있을 경우 승리시 추가 1장 드로우' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감' },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리' },
