@@ -389,7 +389,7 @@ const CARDS = [
 
 const ENEMIES = [
     {
-        id: 'demon_god', name: '마신',
+        id: 'demon_god', name: '마신', element: 'dark',
         stats: { hp: 1000, atk: 100, matk: 100, def: 70, mdef: 70 },
         skills: [
             { name: '다크니스', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해' },

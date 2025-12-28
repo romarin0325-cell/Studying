@@ -68,6 +68,8 @@
 
     .actor-hp-bar { width: 100%; height: 6px; background: #333; margin-top: 4px; border-radius: 3px; overflow: hidden; }
     .actor-hp-fill { height: 100%; background: #ef5350; width: 100%; transition: width 0.3s; }
+    .actor-mp-bar { width: 100%; height: 4px; background: #333; margin-top: 2px; border-radius: 2px; overflow: hidden; }
+    .actor-mp-fill { height: 100%; background: #42a5f5; width: 100%; transition: width 0.3s; }
     .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 12px; overflow: hidden; margin-top: 2px; }
 
     .log-container { height: 80px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
@@ -132,6 +134,7 @@
                 <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
                 <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
                 <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
+                <div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div>
                 <div id="p-buffs" class="actor-buffs"></div>
             </div>
 
@@ -319,16 +322,32 @@
     }
     function log(msg, type='info') { const box = document.getElementById('battle-log'); const div = document.createElement('div'); div.className = `log-line log-${type}`; div.innerHTML = msg; box.appendChild(div); box.scrollTop = box.scrollHeight; }
 
+    function getBuffNameKR(key) {
+        const map = {
+            'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
+            'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
+            'magic_guard': '매직가드', 'guard': '가드'
+        };
+        return map[key] || key;
+    }
+
     function renderBattlefield() {
         const p = battleState.players[battleState.currentPlayerIdx];
 
         // Render Active Player
         if(p && !p.isDead) {
             document.getElementById('p-name').innerText = p.name;
-            document.getElementById('p-img').src = `${p.name}.png`;
+            const pImg = document.getElementById('p-img');
+            pImg.src = `${p.name}.png`;
+            pImg.style.display = 'block'; // Force display if hidden previously
+
             let hpPct = (p.hp / p.maxHp) * 100;
             document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
-            let buffTxt = Object.keys(p.buffs).map(k=>k.substring(0,3)).join(',');
+
+            let mpPct = (p.mp / 100) * 100; // MP Max 100 fixed
+            document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
+
+            let buffTxt = Object.keys(p.buffs).map(k=>getBuffNameKR(k)).join(',');
             document.getElementById('p-buffs').innerText = buffTxt;
             document.getElementById('player-actor-box').style.opacity = 1;
         } else {
@@ -341,8 +360,11 @@
         let eHpPct = (e.hp / e.maxHp) * 100;
         document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
         document.getElementById('e-name').innerText = e.name;
-        document.getElementById('e-img').src = `${e.name}.png`;
-        let eBuffTxt = Object.keys(e.buffs).map(k=>`${k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
+        const eImg = document.getElementById('e-img');
+        eImg.src = `${e.name}.png`;
+        eImg.style.display = 'block'; // Force display
+
+        let eBuffTxt = Object.keys(e.buffs).map(k=>`${getBuffNameKR(k)}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
 
         document.getElementById('bt-turn').innerText = battleState.turn;
@@ -358,6 +380,12 @@
             startPlayerTurn();
             return;
         }
+
+        // Cleanup temporary defensive buffs from previous turn (duration 1)
+        if(p.buffs.evasion) delete p.buffs.evasion;
+        if(p.buffs.barrier) delete p.buffs.barrier;
+        if(p.buffs.magic_guard) delete p.buffs.magic_guard;
+        if(p.buffs.guard) delete p.buffs.guard;
 
         renderBattlefield();
 
@@ -427,7 +455,7 @@
             let mult = skill.val;
             let dmgBonus = 0.0;
 
-            let enemyEl = 'dark'; // Placeholder default
+            let enemyEl = e.element || 'dark'; // Use enemy element if set
             let elMult = getElementalMultiplier(p.proto.element, enemyEl);
             if(elMult > 1.0) log(`상성 우위! 대미지 20% 증가.`);
 
@@ -518,8 +546,9 @@
         battleState.fieldBuffs.push({ name: name }); log(`필드버프 [${name}] 발동!`);
     }
     function applyDebuff(target, type, stackable=false) {
-        if(stackable) { target.buffs[type] = (target.buffs[type] || 0) + 1; target.buffs[type] = Math.min(3, target.buffs[type]); log(`적에게 [${type}] ${target.buffs[type]}스택 부여.`); }
-        else { target.buffs[type] = 1; log(`적에게 [${type}] 부여.`); }
+        let nameKR = getBuffNameKR(type);
+        if(stackable) { target.buffs[type] = (target.buffs[type] || 0) + 1; target.buffs[type] = Math.min(3, target.buffs[type]); log(`적에게 [${nameKR}] ${target.buffs[type]}스택 부여.`); }
+        else { target.buffs[type] = 1; log(`적에게 [${nameKR}] 부여.`); }
     }
 
     function startEnemyTurn() {
@@ -532,11 +561,6 @@
         // Target is the current active player
         let target = battleState.players[battleState.currentPlayerIdx];
         if(!target || target.isDead) {
-            // If current player is dead, try to find next living player?
-            // In 1v1 relay, if player died during their turn (e.g. Chaos Mage), switch happens.
-            // If switch hasn't happened yet, we need to handle it.
-            // But usually Player Turn -> Enemy Turn.
-            // If Player died self-inflicted, 'processNextPlayer' logic might be needed.
             if(battleState.players.every(p => p.isDead)) { loseBattle(); return; }
 
             // If current is dead, switch to next alive
@@ -553,8 +577,11 @@
 
         // Specific Logic for Demon God
         if(e.name === '마신') {
-             if(Math.random() < 0.3) skill = e.skills[0]; // Darkness
-             else skill = e.skills[1]; // Ambush
+             // 30% Skill 1, 30% Skill 2, 40% Normal Attack
+             let r = Math.random();
+             if(r < 0.3) skill = e.skills[0]; // Darkness
+             else if(r < 0.6) skill = e.skills[1]; // Ambush
+             else skill = { type: 'phy', val: 1.0, name: '일반 공격' };
         }
 
         let val = skill.type === 'phy' ? e.atk : e.matk;
@@ -573,7 +600,7 @@
         let dmg = val * mult * (100 / (100 + def));
         if(target.buffs.guard) dmg *= 0.5;
         dmg = Math.floor(dmg); target.hp -= dmg;
-        log(`${target.name}에게 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
+        log(`${e.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
 
         if(target.hp <= 0) {
             target.isDead = true;
