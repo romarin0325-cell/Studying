@@ -806,14 +806,14 @@ const RPG = {
             // Boss Passive Logic
             if(e.id === 'artificial_demon_god') {
                  delete e.buffs.defProtocolPhy; delete e.buffs.defProtocolMag;
-                 if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = 1; RPG.log("방어 프로토콜: 물리 피격 감지."); }
-                 if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = 1; RPG.log("방어 프로토콜: 마법 피격 감지."); }
+                 if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = 1; RPG.log("방어 프로토콜: 물리 피격 감지 (다음 턴 물리방어력 증가)."); }
+                 if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = 1; RPG.log("방어 프로토콜: 마법 피격 감지 (다음 턴 마법방어력 증가)."); }
                  if(e.buffs.defProtocolPhy) e.def = Math.floor(e.def * 1.5);
                  if(e.buffs.defProtocolMag) e.mdef = Math.floor(e.mdef * 1.5);
             }
             if(e.id === 'demon_god') {
-                 if(b.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); RPG.log("마신의 권능: 짝수 턴 방어력 증가."); }
-                 else { e.mdef = Math.floor(e.mdef * 1.5); RPG.log("마신의 권능: 홀수 턴 마법방어력 증가."); }
+                 if(b.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); RPG.log("마신의 권능: 짝수 턴 물리방어력 50% 증가."); }
+                 else { e.mdef = Math.floor(e.mdef * 1.5); RPG.log("마신의 권능: 홀수 턴 마법방어력 50% 증가."); }
             }
 
             if(e.buffs.stun) {
@@ -838,6 +838,13 @@ const RPG = {
             // Execute Enemy Skill (Simplified: Calculate -> Apply)
             let val = skill.type === 'phy' ? e.atk : e.matk;
             let mult = skill.val || 1.0;
+
+            // Pharaoh Special Counter Logic
+            if(e.id === 'pharaoh' && skill.name === '고대의저주' && e.tookDamageThisTurn) {
+                mult = 3.0;
+                RPG.log("고대의 저주: 턴 내 피격 감지! 대미지 3배로 반격!");
+            }
+
             if(e.buffs.weak && skill.type === 'phy') val *= 0.8;
             if(e.buffs.silence && skill.type === 'mag') val *= 0.8;
 
@@ -904,26 +911,28 @@ const RPG = {
     EnemyAI: {
         selectSkill(e, turn) {
             let skill = null;
+            let r = Math.random();
+
             if(e.id === 'artificial_demon_god') {
                 if(turn === 10) skill = e.skills.find(s => s.name === '파괴의형태');
-                else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '아이스빔');
+                else if(r < 0.3) skill = e.skills.find(s => s.name === '아이스빔');
             }
             else if(e.id === 'iris_love') {
                 if(turn === 7) skill = e.skills.find(s => s.name === '소울드레인');
-                else if(Math.random() < 0.1) skill = e.skills.find(s => s.name === '더홀리');
-                else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '홀리레이');
+                else if(r < 0.1) skill = e.skills.find(s => s.name === '더홀리');
+                else if(r < 0.4) skill = e.skills.find(s => s.name === '홀리레이'); // 0.1 ~ 0.4 (30%)
             }
             else if(e.id === 'iris_curse') {
                 if(turn === 10) skill = e.skills.find(s => s.name === '아포칼립스');
-                else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '프레임샷');
+                else if(r < 0.3) skill = e.skills.find(s => s.name === '프레임샷');
             }
             else if(e.id === 'pharaoh') {
                 if(turn % 5 === 0) skill = e.skills.find(s => s.name === '고대의저주');
-                else if(Math.random() < 0.3) skill = e.skills.find(s => s.name === '고대의힘');
+                else if(r < 0.3) skill = e.skills.find(s => s.name === '고대의힘');
             }
             else if(e.id === 'demon_god') {
                 if(turn === 7 || turn === 14) skill = e.skills.find(s => s.name === '제노사이드');
-                else if(Math.random() < 0.2) skill = e.skills.find(s => s.name === '다크니스');
+                else if(r < 0.2) skill = e.skills.find(s => s.name === '다크니스');
             }
             else if(e.id === 'creator_god') {
                 if(e.isCharging) {
@@ -931,20 +940,33 @@ const RPG = {
                     skill = e.skills.find(s => s.name === '디바인블레이드');
                     e.isCharging = false;
                 }
-                else if(turn === 2) skill = e.skills.find(s => s.name === '저지먼트');
+                else if(turn === 2) {
+                    skill = e.skills.find(s => s.name === '저지먼트');
+                }
                 else {
-                    let r = Math.random();
-                    if(turn > 15 && r < 0.2) skill = e.skills.find(s => s.name === '저지먼트');
-                    else if(r < 0.2) skill = e.skills.find(s => s.name === '홀리레이');
-                    else if(r < 0.4) {
-                        RPG.log("창조신이 자세를 잡습니다 (차지중...)");
-                        e.isCharging = true;
-                        return { type: 'phy', val: 0, name: '차지' }; // Dummy turn
+                    // Turn > 15: Judgment(20%), Charge(20%) -- Holy Ray replaced by Judgment
+                    if(turn > 15) {
+                        if(r < 0.2) skill = e.skills.find(s => s.name === '저지먼트');
+                        else if(r < 0.4) {
+                            RPG.log("창조신이 자세를 잡습니다 (차지중...)");
+                            e.isCharging = true;
+                            return { type: 'phy', val: 0, name: '차지' };
+                        }
+                    } else {
+                        // Turn <= 15: Holy Ray(20%), Charge(20%) -- Judgment Excluded
+                        if(r < 0.2) skill = e.skills.find(s => s.name === '홀리레이');
+                        else if(r < 0.4) {
+                            RPG.log("창조신이 자세를 잡습니다 (차지중...)");
+                            e.isCharging = true;
+                            return { type: 'phy', val: 0, name: '차지' };
+                        }
                     }
                 }
             }
 
+            // Fallback: Use other valid skills if not selected
             if(!skill && Math.random() < 0.3 && e.skills.length > 0) {
+                 // Excluding specific skills that have rate 0.0
                  const validSkills = e.skills.filter(s => s.rate > 0);
                  if(validSkills.length > 0) {
                      skill = validSkills[Math.floor(Math.random() * validSkills.length)];
