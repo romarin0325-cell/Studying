@@ -931,7 +931,10 @@ const RPG = {
             }
 
             if(!skill && Math.random() < 0.3 && e.skills.length > 0) {
-                 skill = e.skills[Math.floor(Math.random() * e.skills.length)];
+                 const validSkills = e.skills.filter(s => s.rate > 0);
+                 if(validSkills.length > 0) {
+                     skill = validSkills[Math.floor(Math.random() * validSkills.length)];
+                 }
             }
             return skill || { type: 'phy', val: 1.0, name: '일반 공격' };
         }
