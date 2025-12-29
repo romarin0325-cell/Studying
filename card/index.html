@@ -122,6 +122,9 @@
     </div>
     <div id="screen-menu" class="screen">
         <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장</div>
+        <div id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
+             다음 상대: ?
+        </div>
         <div style="display:flex; gap:5px; margin-bottom:10px;">
             <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
             <button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;">도전 뽑기</button>
@@ -129,9 +132,9 @@
         <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
         <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
         <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
+        <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">혼돈의 축복</button>
         <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
-        <button class="menu-btn" onclick="RPG.saveGame()">저장</button>
-        <button class="menu-btn" onclick="RPG.toTitle()">타이틀로</button>
+        <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
     </div>
     <div id="screen-collection" class="screen">
         <div style="display:flex; justify-content:space-between; align-items:center;"><h3>카드 목록</h3><button onclick="RPG.toMenu()" style="padding:5px;">뒤로</button></div>
@@ -193,6 +196,17 @@
     </div>
 </div>
 
+<div id="modal-confirm" class="modal">
+  <div class="modal-content" style="height:auto;">
+    <h3 id="confirm-title">확인</h3>
+    <div id="confirm-msg" style="margin: 10px 0;">...</div>
+    <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
+       <button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;">예</button>
+       <button id="confirm-no" class="menu-btn" style="flex:1; margin-bottom:0; background:#555; border-color:#777;">아니오</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-gacha" class="modal">
     <div class="modal-content" style="height:auto; min-height:300px;">
         <h2 id="gacha-title">획득!</h2>
@@ -218,6 +232,33 @@
     </div>
 </div>
 
+<div id="modal-chaos" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3>혼돈의 축복</h3>
+        <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 2회)</p>
+        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">남은 기회: <span id="chaos-uses">2</span>회</div>
+        <button class="menu-btn" onclick="RPG.activateChaos('normal')">
+            혼돈의 축복 (일반)<br>
+            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승</span>
+        </button>
+        <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
+            혼돈의 축복 (도전)<br>
+            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 3종 카드 능력치 대폭 상승</span>
+        </button>
+        <button onclick="document.getElementById('modal-chaos').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-menu" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3>메뉴</h3>
+        <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
+        <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
+        <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
+        <button onclick="document.getElementById('modal-menu').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
 <script src="data.js"></script>
 <script src="vocab_data.js"></script>
 <script>
@@ -231,7 +272,9 @@ const RPG = {
         tickets: 20,
         inventory: [],
         deck: [null, null, null],
-        enemyScale: 0
+        enemyScale: 0,
+        chaosBlessingUses: 2,
+        chaosBuffs: [] // Array of { id: cardId, multiplier: float }
     },
 
     // Battle State (Transient)
@@ -249,6 +292,8 @@ const RPG = {
     // UI Helper Variables
     selectedSlot: -1,
     tempOnClose: null,
+    tempConfirmYes: null,
+    tempConfirmNo: null,
 
     // Constants
     NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
@@ -280,6 +325,8 @@ const RPG = {
             if(save) {
                  let loaded = JSON.parse(save);
                  this.state = { ...this.state, ...loaded };
+                 if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 2;
+                 if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
                  this.showAlert("불러오기 완료");
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
         } else { this.initNewGame(); }
@@ -287,7 +334,7 @@ const RPG = {
     },
 
     initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0 };
+        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 2, chaosBuffs: [] };
     },
 
     saveGame() {
@@ -295,10 +342,83 @@ const RPG = {
         this.showAlert("저장되었습니다.");
     },
 
+    saveRecord() {
+        let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
+        history.unshift(`최대 스테이지: ${this.state.enemyScale + 1}`);
+        if(history.length > 5) history = history.slice(0, 5);
+        localStorage.setItem('cardRpgRecords', JSON.stringify(history));
+    },
+
+    showRecords() {
+        let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
+        if(history.length === 0) return this.showAlert("기록이 없습니다.");
+        let msg = history.map((h, i) => `${i+1}. ${h}`).join("<br>");
+        this.openInfoModal("지난 5회 플레이 기록", msg);
+    },
+
     // --- Screen Navigation ---
-    toMenu() { this.showScreen('screen-menu'); document.getElementById('ui-tickets').innerText = this.state.tickets; },
-    toTitle() { this.showScreen('screen-title'); },
+    toMenu() {
+        this.showScreen('screen-menu');
+        document.getElementById('ui-tickets').innerText = this.state.tickets;
+        const enemyIdx = this.state.enemyScale % ENEMIES.length;
+        const nextName = ENEMIES[enemyIdx].name;
+        document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
+    },
+    toTitle() {
+        this.saveRecord();
+        this.showScreen('screen-title');
+    },
     showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+
+    openSystemMenu() {
+        document.getElementById('modal-menu').classList.add('active');
+    },
+
+    // --- Chaos Blessing ---
+    openChaosBlessing() {
+        document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
+        document.getElementById('modal-chaos').classList.add('active');
+    },
+    activateChaos(type) {
+        if(this.state.chaosBlessingUses <= 0) {
+            return this.showAlert("이번 전투 구간의 축복 기회를 모두 소진했습니다.");
+        }
+        document.getElementById('modal-chaos').classList.remove('active');
+
+        if(type === 'normal') {
+            this.applyChaosBlessing(2);
+        } else {
+            this.startQuiz((success) => {
+                if(success) {
+                    this.applyChaosBlessing(3);
+                } else {
+                    this.showAlert("퀴즈 실패... 축복을 받지 못했습니다.");
+                }
+            });
+        }
+    },
+    applyChaosBlessing(count) {
+        this.state.chaosBlessingUses--;
+        // Pick random cards from ALL types (CARDS)
+        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+        let picks = pool.slice(0, count);
+
+        this.state.chaosBuffs = picks.map(c => {
+            let mult = 0;
+            if(c.grade === 'normal') mult = 0.4;
+            else if(c.grade === 'rare') mult = 0.3;
+            else if(c.grade === 'epic') mult = 0.2;
+            else if(c.grade === 'legend') mult = 0.1;
+            return { id: c.id, name: c.name, multiplier: mult };
+        });
+
+        let msg = "<b>혼돈의 축복 적용!</b><br>";
+        this.state.chaosBuffs.forEach(b => {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+        });
+        msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+        this.openInfoModal("축복 성공", msg);
+    },
 
     // --- Gacha & Deck UI ---
     openGacha() {
@@ -538,6 +658,18 @@ const RPG = {
                 def: proto.stats.def, mdef: proto.stats.mdef,
                 buffs: {}, pos: idx, isDead: false, baseCrit: 10
             };
+
+            // Apply Chaos Blessing Buffs
+            const blessing = this.state.chaosBuffs.find(b => b.id === p.id);
+            if(blessing) {
+                p.maxHp = Math.floor(p.maxHp * (1 + blessing.multiplier));
+                p.hp = p.maxHp; // Heal to full as requested
+                p.atk = Math.floor(p.atk * (1 + blessing.multiplier));
+                p.matk = Math.floor(p.matk * (1 + blessing.multiplier));
+                p.def = Math.floor(p.def * (1 + blessing.multiplier));
+                p.mdef = Math.floor(p.mdef * (1 + blessing.multiplier));
+            }
+
             // Apply Positional Traits
             if(proto.trait.type.startsWith('pos_')) {
                 const t = proto.trait;
@@ -904,7 +1036,10 @@ const RPG = {
                      if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) mult *= eff.mult;
                      else if(eff.condition === 'target_stack' && target.buffs[eff.debuff]) mult += (target.buffs[eff.debuff] * eff.multPerStack);
                      else if(eff.condition === 'target_debuff_count_scale') mult += (Object.keys(target.buffs).length * eff.multPerDebuff);
-                     else if(eff.condition === 'hp_below' && (source.hp/source.maxHp) <= eff.val) mult *= eff.mult;
+                     else if(eff.condition === 'hp_below' && (source.hp/source.maxHp) <= eff.val) {
+                         mult *= eff.mult;
+                         if(skill.name === '라그나로크') RPG.log("라그나로크: 생명력 조건 만족! 대미지 증가!");
+                     }
                      else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=>b.name === eff.buff)) mult *= eff.mult;
                 }
                 else if(eff.type === 'random_mult') {
@@ -1089,31 +1224,47 @@ const RPG = {
 
         this.state.tickets += reward;
         this.state.enemyScale++;
+
+        // Reset Chaos Blessing
+        this.state.chaosBlessingUses = 2;
+        this.state.chaosBuffs = [];
+
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
         let msg = "승리!<br>보상을 획득했습니다.";
         if (deadMsg) msg += "<br><br>" + deadMsg;
 
         this.openInfoModal("전투 결과", msg, () => {
-             // Quiz Challenge Prompt
-             if(confirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)")) {
-                 this.startQuiz((success) => {
-                     if(success) {
-                         this.state.tickets += 1;
-                         document.getElementById('ui-tickets').innerText = this.state.tickets;
-                         alert("정답! 드로우권 1장을 추가로 획득했습니다.");
-                     } else {
-                         alert("오답입니다... 보상 없음.");
-                     }
-                     this.toMenu();
-                 });
-             } else {
-                 this.toMenu();
-             }
+             // Quiz Challenge Prompt using Custom Modal
+             this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                // Yes Callback
+                () => {
+                     this.startQuiz((success) => {
+                         if(success) {
+                             this.state.tickets += 1;
+                             document.getElementById('ui-tickets').innerText = this.state.tickets;
+                             this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                         } else {
+                             this.showAlert("오답입니다... 보상 없음.");
+                         }
+                         this.toMenu();
+                     });
+                },
+                // No Callback
+                () => {
+                    this.toMenu();
+                }
+             );
         });
     },
 
     loseBattle() {
+        this.saveRecord(); // Save Max Stage
+
+        // Reset Chaos Blessing
+        this.state.chaosBlessingUses = 2;
+        this.state.chaosBuffs = [];
+
         let deadMsg = this.handlePermadeath(this.battle.players);
         let msg = "패배...";
         if (deadMsg) msg += "<br><br>" + deadMsg;
@@ -1186,6 +1337,25 @@ const RPG = {
             this.tempOnClose = null;
         }
     },
+
+    showConfirm(msg, onYes, onNo) {
+        document.getElementById('confirm-msg').innerText = msg;
+        const modal = document.getElementById('modal-confirm');
+        const btnYes = document.getElementById('confirm-yes');
+        const btnNo = document.getElementById('confirm-no');
+
+        btnYes.onclick = () => {
+            modal.classList.remove('active');
+            if(onYes) onYes();
+        };
+        btnNo.onclick = () => {
+             modal.classList.remove('active');
+             if(onNo) onNo();
+        };
+
+        modal.classList.add('active');
+    },
+
     showAlert(msg) {
         this.openInfoModal("알림", msg);
     }

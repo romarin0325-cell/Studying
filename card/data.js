@@ -76,7 +76,7 @@ const CARDS = [
         trait: { type: 'pos_mid_matk', val: 30, desc: '중견 배치시 마공 30%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 2, cost: 20, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
-            { name: '종언의예고', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '사용 후 3턴 뒤에 공격', effects: [{type: 'delayed_attack', turns: 3}] },
+            { name: '종언의예고', type: 'mag', tier: 3, cost: 30, val: 5.0, desc: '사용 후 3턴 뒤에 공격', effects: [{type: 'delayed_attack', turns: 3}] },
             { name: '섀도우트위스트', type: 'sup', tier: 3, cost: 30, desc: '저주, 침묵, 암흑 부여', effects: [{type: 'debuff', id: 'curse'}, {type: 'debuff', id: 'silence'}, {type: 'debuff', id: 'darkness'}] }
         ]
     },
