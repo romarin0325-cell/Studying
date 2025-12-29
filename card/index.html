@@ -188,7 +188,7 @@
     </div>
 </div>
 
-<div id="modal-info" class="modal">
+<div id="modal-info" class="modal" style="z-index: 200;">
     <div class="modal-content" style="height:auto;">
         <h3 id="info-title">정보</h3>
         <div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"></div>
@@ -196,7 +196,7 @@
     </div>
 </div>
 
-<div id="modal-confirm" class="modal">
+<div id="modal-confirm" class="modal" style="z-index: 210;">
   <div class="modal-content" style="height:auto;">
     <h3 id="confirm-title">확인</h3>
     <div id="confirm-msg" style="margin: 10px 0;">...</div>
@@ -244,6 +244,9 @@
         <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
             혼돈의 축복 (도전)<br>
             <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 3종 카드 능력치 대폭 상승</span>
+        </button>
+        <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;">
+            적용된 축복 확인
         </button>
         <button onclick="document.getElementById('modal-chaos').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
@@ -378,6 +381,17 @@ const RPG = {
     openChaosBlessing() {
         document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
         document.getElementById('modal-chaos').classList.add('active');
+    },
+    checkActiveChaosBlessings() {
+        if(!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
+            return this.showAlert("현재 적용된 축복이 없습니다.");
+        }
+        let msg = "<b>현재 적용된 축복</b><br><br>";
+        this.state.chaosBuffs.forEach(b => {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+        });
+        msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+        this.openInfoModal("축복 상태", msg);
     },
     activateChaos(type) {
         if(this.state.chaosBlessingUses <= 0) {
