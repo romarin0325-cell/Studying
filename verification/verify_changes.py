@@ -1,69 +1,69 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 import os
 
 def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        context = browser.new_context(viewport={'width': 400, 'height': 800})
+        page = context.new_page()
 
-        # Load local file
-        file_path = os.path.abspath("card/index.html")
-        page.goto(f"file://{file_path}")
+        # Load the local HTML file
+        page.goto("file://" + os.path.abspath("card/index.html"))
 
-        # 1. Verify Card Grid CSS (Bottom Padding)
-        page.evaluate("RPG.showScreen('screen-collection')")
-        page.evaluate("RPG.renderCardList('collection-grid', RPG.state.inventory, () => {})")
-        # Add dummy cards to scroll
-        page.evaluate("""
-            for(let i=0; i<30; i++) RPG.state.inventory.push('angel');
-            RPG.renderCardList('collection-grid', RPG.state.inventory, () => {});
-        """)
+        # Wait for game to initialize and show title screen
+        expect(page.locator("#screen-title")).to_be_visible()
 
-        # Check padding
-        padding = page.evaluate("getComputedStyle(document.querySelector('.card-grid')).paddingBottom")
-        print(f"Card Grid Padding Bottom: {padding}")
+        # Click "New Game"
+        page.locator("button", has_text="새로하기").click()
 
-        page.screenshot(path="verification/card_list_padding.png")
+        # 1. Verify Menu Screen Changes
+        expect(page.locator("#screen-menu")).to_be_visible()
 
-        # 2. Verify Challenge Gacha Logic
-        # Set Tickets to 1
-        page.evaluate("RPG.state.tickets = 1")
+        # Check "Next Enemy" preview
+        expect(page.locator("#next-enemy-preview")).to_contain_text("다음 상대:")
 
-        # Mock runGacha to avoid animation/alerts blocking flow if needed, but we want to see failure
-        # We need to click "Challenge Gacha"
-        # Navigate to Menu
-        page.evaluate("RPG.toMenu()")
+        # Check "Menu" button exists
+        expect(page.locator("button", has_text="메뉴")).to_be_visible()
 
-        # Take screenshot of menu
-        page.screenshot(path="verification/menu.png")
+        # Check "Chaos Blessing" button exists (exact match to avoid ambiguity)
+        expect(page.locator("button", has_text="혼돈의 축복").first).to_be_visible()
 
-        # Click Challenge Gacha
-        page.evaluate("RPG.openChallengeGacha()")
+        # Screenshot Menu
+        page.screenshot(path="verification/1_menu.png")
+        print("Menu screenshot taken.")
 
-        # Check Ticket Count immediately (Should be 0)
-        tickets = page.evaluate("RPG.state.tickets")
-        print(f"Tickets after opening (should be 0): {tickets}")
+        # 2. Verify Chaos Blessing Modal
+        # Use exact text selector or ID if possible, or filtered locator
+        page.locator("button", has_text="혼돈의 축복").first.click()
+        expect(page.locator("#modal-chaos")).to_be_visible()
+        page.screenshot(path="verification/2_chaos_modal.png")
+        print("Chaos modal screenshot taken.")
 
-        # Verify Quiz Modal is open and feedback div exists
-        feedback_exists = page.evaluate("!!document.getElementById('quiz-feedback')")
-        print(f"Feedback Div Exists: {feedback_exists}")
+        # Click "Normal" blessing
+        page.locator("button", has_text="혼돈의 축복 (일반)").click()
 
-        page.screenshot(path="verification/quiz_open.png")
+        # Should show Info Modal with result
+        expect(page.locator("#modal-info")).to_be_visible()
+        expect(page.locator("#info-title")).to_have_text("축복 성공")
+        page.screenshot(path="verification/3_chaos_result.png")
+        print("Chaos result screenshot taken.")
 
-        # Click a Wrong Answer
-        # We need to find the wrong answer.
-        # The script creates buttons. The correct one has onclick that calls callback(true).
-        # We can just click the first button and check feedback.
+        # Close Info Modal
+        page.locator("#modal-info button", has_text="닫기").click()
+        expect(page.locator("#modal-info")).not_to_be_visible()
 
-        page.evaluate("document.querySelector('#quiz-options button').click()")
+        # 3. Verify System Menu
+        page.locator("button", has_text="메뉴").click()
+        expect(page.locator("#modal-menu")).to_be_visible()
+        page.screenshot(path="verification/4_system_menu.png")
+        print("System menu screenshot taken.")
 
-        # Wait for potential feedback text
-        page.wait_for_timeout(500)
-
-        feedback_text = page.evaluate("document.getElementById('quiz-feedback').innerText")
-        print(f"Feedback Text: {feedback_text}")
-
-        page.screenshot(path="verification/quiz_feedback.png")
+        # Click Records
+        page.locator("button", has_text="기록 확인").click()
+        expect(page.locator("#modal-info")).to_be_visible()
+        expect(page.locator("#info-title")).to_have_text("지난 5회 플레이 기록")
+        page.screenshot(path="verification/5_records.png")
+        print("Records screenshot taken.")
 
         browser.close()
 
