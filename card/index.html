@@ -120,9 +120,13 @@
     </div>
     <div id="screen-menu" class="screen">
         <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장</div>
-        <button class="menu-btn" onclick="RPG.openGacha()">카드 뽑기 (1장 소모)</button>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
+            <button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;">도전 뽑기</button>
+        </div>
         <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
         <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
+        <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
         <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
         <button class="menu-btn" onclick="RPG.saveGame()">저장</button>
         <button class="menu-btn" onclick="RPG.toTitle()">타이틀로</button>
@@ -195,7 +199,24 @@
     </div>
 </div>
 
+<div id="modal-wordbook" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
+        <h3>단어장</h3>
+        <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
+        <button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-quiz" class="modal">
+    <div class="modal-content" style="width: 320px;">
+        <h3>단어 퀴즈</h3>
+        <div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"></div>
+        <div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
+    </div>
+</div>
+
 <script src="data.js"></script>
+<script src="vocab_data.js"></script>
 <script>
 /**
  * RPG Game Namespace
@@ -280,9 +301,40 @@ const RPG = {
     openGacha() {
         if(this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
         this.state.tickets--;
+        this.runGacha(false);
+    },
+
+    openChallengeGacha() {
+        if(this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
+
+        this.startQuiz((success) => {
+            if(success) {
+                this.state.tickets--;
+                this.runGacha(true);
+            } else {
+                this.showAlert("퀴즈 실패! (티켓은 소모되지 않았습니다)");
+            }
+        });
+    },
+
+    runGacha(isChallenge) {
         document.getElementById('ui-tickets').innerText = this.state.tickets;
-        let rand = Math.random(), grade = 'normal';
-        if(rand < 0.10) grade = 'legend'; else if(rand < 0.30) grade = 'epic'; else if(rand < 0.60) grade = 'rare';
+        let rand = Math.random();
+        let grade = 'normal';
+
+        if (isChallenge) {
+            // Legend 1.5, Epic 2.5, Rare 3, Normal 3 (Total 10) -> 15%, 25%, 30%, 30%
+            if(rand < 0.15) grade = 'legend';
+            else if(rand < 0.40) grade = 'epic';
+            else if(rand < 0.70) grade = 'rare';
+            else grade = 'normal';
+        } else {
+            // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
+            if(rand < 0.10) grade = 'legend';
+            else if(rand < 0.30) grade = 'epic';
+            else if(rand < 0.60) grade = 'rare';
+        }
+
         const pool = CARDS.filter(c => c.grade === grade);
         const pick = pool[Math.floor(Math.random() * pool.length)];
         this.state.inventory.push(pick.id);
@@ -292,9 +344,73 @@ const RPG = {
         let color = '#bdbdbd', title = "획득!";
         if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
         else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
-        document.getElementById('gacha-title').innerText = title;
+
+        let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
+        document.getElementById('gacha-title').innerText = msgTitle;
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
             <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+        modal.classList.add('active');
+    },
+
+    // --- Wordbook & Quiz ---
+    openWordbook() {
+        const list = document.getElementById('wordbook-list');
+        list.innerHTML = "";
+        VOCAB_DATA.forEach(v => {
+            const div = document.createElement('div');
+            div.style.marginBottom = "10px";
+            div.style.borderBottom = "1px solid #444";
+            div.style.paddingBottom = "5px";
+            div.innerHTML = `<b style="color:#81d4fa; font-size:1.1rem;">${v.word}</b><br>
+                             <span style="color:#eee;">${v.meaning}</span>`;
+            list.appendChild(div);
+        });
+        document.getElementById('modal-wordbook').classList.add('active');
+    },
+
+    startQuiz(callback) {
+        // Pick a word
+        const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+
+        // Options: Correct, Trap, 2 Random
+        let options = [];
+        options.push({ text: q.meaning, correct: true });
+        options.push({ text: q.trap_meaning, correct: false }); // Trap Answer
+
+        // Randoms (ensure distinct)
+        let safeCounter = 0;
+        while(options.length < 4 && safeCounter < 100) {
+            safeCounter++;
+            let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+            // Must be different word, different trap word, and meaning not already in options
+            if(r.word !== q.word && r.word !== q.trap_word && !options.some(o => o.text === r.meaning)) {
+                options.push({ text: r.meaning, correct: false });
+            }
+        }
+
+        // Shuffle
+        options.sort(() => Math.random() - 0.5);
+
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const oDiv = document.getElementById('quiz-options');
+
+        qDiv.innerText = q.word;
+        oDiv.innerHTML = "";
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = opt.text;
+            btn.onclick = () => {
+                modal.classList.remove('active');
+                callback(opt.correct);
+            };
+            oDiv.appendChild(btn);
+        });
+
         modal.classList.add('active');
     },
     closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); },
@@ -940,7 +1056,6 @@ const RPG = {
 
     winBattle() {
         let deadMsg = this.handlePermadeath(this.battle.players);
-        // alert("승리!");
         let reward = 1;
         if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
 
@@ -950,7 +1065,24 @@ const RPG = {
 
         let msg = "승리!<br>보상을 획득했습니다.";
         if (deadMsg) msg += "<br><br>" + deadMsg;
-        this.openInfoModal("전투 결과", msg, () => this.toMenu());
+
+        this.openInfoModal("전투 결과", msg, () => {
+             // Quiz Challenge Prompt
+             if(confirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)")) {
+                 this.startQuiz((success) => {
+                     if(success) {
+                         this.state.tickets += 1;
+                         document.getElementById('ui-tickets').innerText = this.state.tickets;
+                         alert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                     } else {
+                         alert("오답입니다... 보상 없음.");
+                     }
+                     this.toMenu();
+                 });
+             } else {
+                 this.toMenu();
+             }
+        });
     },
 
     loseBattle() {
