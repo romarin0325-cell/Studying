@@ -26,7 +26,7 @@ const CARDS = [
         trait: { type: 'pos_rear_def_mdef', val: 20, desc: '대장 배치시 방어력 마법방어력 20%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
-            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
+            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해', effects: [] }
         ]
     },
@@ -211,7 +211,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '프로스트팽', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '부식부여', effects: [{type: 'debuff', id: 'corrosion'}] },
-            { name: '버서크바이트', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '달의축복 상태에서 대미지 2배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0}] }
+            { name: '버서크바이트', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '달의축복 상태에서 대미지 2.5배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5}] }
         ]
     },
     {
@@ -221,7 +221,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 추가 0.5배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 1.5}] }, // Note: desc says +0.5x (so 1.5x total bonus or 2.0 * 1.5?) Original code: mult += 0.5. So 2.0 -> 2.5. My new logic might need care. I'll use multAdd: 0.5
-            { name: '문라이트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '달의축복 상태에서 대미지 2배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0}] }
+            { name: '문라이트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '달의축복 상태에서 대미지 2.5배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5}] }
         ]
     },
     {
@@ -251,7 +251,7 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '다음턴 휴식', effects: [{type: 'self_debuff', id: 'stun', duration: 1}] },
-            { name: '록스매기', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] }
+            { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] }
         ]
     },
     {
@@ -299,7 +299,7 @@ const CARDS = [
     {
         id: 'werebear', name: '웨어베어', grade: 'normal', element: 'nature', role: 'dealer',
         stats: { hp: 330, atk: 75, matk: 50, def: 55, mdef: 35 },
-        trait: { type: 'pos_rear_atk', val: 20, desc: '대장 배치시 공격력 20%증가' },
+        trait: { type: 'pos_rear_atk', val: 30, desc: '대장 배치시 공격력 30%증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '베어러쉬', type: 'phy', tier: 1, cost: 10, val: 1.0, desc: '상대가 약화시 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'weak', mult: 2.0}] },
@@ -312,14 +312,14 @@ const CARDS = [
         trait: { type: 'cond_silence_dmg', val: 1.1, desc: '침묵상태 적에게 대미지 1.1배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
-            { name: '블러드드레인', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '상대가 저주시 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'curse', mult: 2.0}] },
+            { name: '블러드드레인', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '상대가 저주시 2.5배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'curse', mult: 2.5}] },
             { name: '다크니스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '2배 마법', effects: [] }
         ]
     },
     {
         id: 'snow_rabbit', name: '눈토끼', grade: 'normal', element: 'water', role: 'dealer',
         stats: { hp: 290, atk: 60, matk: 85, def: 40, mdef: 60 },
-        trait: { type: 'pos_rear_matk', val: 20, desc: '대장 배치시 마공 20%증가' },
+        trait: { type: 'pos_rear_matk', val: 30, desc: '대장 배치시 마공 30%증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] },
