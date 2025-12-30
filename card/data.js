@@ -23,7 +23,7 @@ const CARDS = [
     {
         id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer',
         stats: { hp: 540, atk: 115, matk: 95, def: 60, mdef: 60 },
-        trait: { type: 'pos_rear_def_mdef', val: 20, desc: '대장 배치시 방어력 마법방어력 20%증가' },
+        trait: { type: 'pos_rear_def_mdef', val: 30, desc: '대장 배치시 방어력 마법방어력 30%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
@@ -53,7 +53,7 @@ const CARDS = [
     {
         id: 'world_tree', name: '세계수', grade: 'legend', element: 'nature', role: 'buffer',
         stats: { hp: 600, atk: 90, matk: 90, def: 45, mdef: 45 },
-        trait: { type: 'syn_nature_3_def', val: 50, desc: '덱이 전부 자연일 시 방어력 50%증가' },
+        trait: { type: 'syn_nature_3_def', val: 50, desc: '덱이 전부 자연일 시 방어력/마법방어력 50%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '대지의분노', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '필드버프 대지의축복 발동', effects: [{type: 'field_buff', id: 'earth_bless'}] },
@@ -247,7 +247,7 @@ const CARDS = [
     {
         id: 'golem', name: '골렘', grade: 'rare', element: 'nature', role: 'balancer',
         stats: { hp: 385, atk: 75, matk: 55, def: 70, mdef: 35 },
-        trait: { type: 'syn_nature_3_def', val: 50, desc: '덱에 자연 3장일시 방어력 50%증가' },
+        trait: { type: 'syn_nature_3_golem', val: 30, desc: '덱에 자연 3장일시 공격력 방어력 30%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '다음턴 휴식', effects: [{type: 'self_debuff', id: 'stun', duration: 1}] },

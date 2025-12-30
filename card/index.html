@@ -777,6 +777,7 @@ const RPG = {
 
              let active = false;
              if(t.type === 'syn_nature_3_def' && elements.filter(e=>e==='nature').length===3) active = true;
+             else if(t.type === 'syn_nature_3_golem' && elements.filter(e=>e==='nature').length===3) active = true;
              else if(t.type === 'syn_water_3_atk' && elements.filter(e=>e==='water').length===3) active = true;
              else if(t.type === 'syn_fire_3_crit' && elements.filter(e=>e==='fire').length===3) active = true;
              else if(t.type === 'syn_dark_3_matk' && elements.filter(e=>e==='dark').length===3) active = true;
@@ -788,7 +789,8 @@ const RPG = {
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
-                if(t.type === 'syn_nature_3_def') p.def = Math.floor(p.def * 1.5);
+                if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
+                if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
                 if(t.type === 'syn_water_3_atk') p.atk = Math.floor(p.atk * 1.5);
                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 20;
                 if(t.type === 'syn_dark_3_matk') p.matk = Math.floor(p.matk * 1.5);
@@ -939,8 +941,8 @@ const RPG = {
             let def = skill.type === 'phy' ? target.def : target.mdef;
             let fieldDef = 1.0;
             b.fieldBuffs.forEach(fb => {
-                if(fb.name === 'star_powder') fieldDef += 0.2;
-                if(fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.2;
+                if(fb.name === 'star_powder') fieldDef += 0.25;
+                if(fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
                 if(fb.name === 'goddess_descent') fieldDef += 0.25;
             });
             def = Math.floor(def * fieldDef);
@@ -1123,9 +1125,9 @@ const RPG = {
         RPG.battle.fieldBuffs.forEach(fb => {
              if(fb.name === 'sun_bless') { atkMult += 0.3; matkMult += 0.3; critDmg += 50; }
              if(fb.name === 'moon_bless') { matkMult += 0.3; }
-             if(fb.name === 'sanctuary') { matkMult += 0.2; }
+             if(fb.name === 'sanctuary') { matkMult += 0.25; }
              if(fb.name === 'goddess_descent') { atkMult += 0.25; matkMult += 0.25; }
-             if(fb.name === 'earth_bless') { atkMult += 0.2; matkMult += 0.2; }
+             if(fb.name === 'earth_bless') { atkMult += 0.25; matkMult += 0.25; }
              if(fb.name === 'twinkle_party') { atkMult += 0.2; crit += 10; }
         });
 
@@ -1193,8 +1195,19 @@ const RPG = {
 
         let def = skill.type === 'phy' ? target.def : target.mdef;
         let defRed = 0.0;
-        if(target.buffs.corrosion || target.buffs.darkness) defRed += 0.2;
-        if(target.buffs.curse) defRed += 0.2;
+
+        if (skill.type === 'phy') {
+            if (target.buffs.darkness && target.buffs.corrosion) {
+                defRed = 0.4;
+            } else if (target.buffs.darkness || target.buffs.corrosion) {
+                defRed = 0.2;
+            }
+        } else {
+            if (target.buffs.curse) {
+                defRed = 0.2;
+            }
+        }
+
         def = Math.floor(def * (1.0 - defRed));
 
         let finalMult = mult * elMult * (1.0 + dmgBonus);
@@ -1449,11 +1462,11 @@ const RPG = {
         const buffInfo = {
             'sun_bless': '물공/마공 +30%, 치명타대미지 +50%',
             'moon_bless': '마공 +30%, 회피율 +10%',
-            'sanctuary': '마공 +20%, 마방 +20%',
+            'sanctuary': '마공 +25%, 마방 +25%',
             'goddess_descent': '물공/마공 +25%, 방어/마방 +25%',
-            'earth_bless': '물공/마공 +20%',
+            'earth_bless': '물공/마공 +25%',
             'twinkle_party': '물공 +20%, 치명타율 +10%',
-            'star_powder': '방어/마방 +20%'
+            'star_powder': '방어/마방 +25%'
         };
         let msg = "";
         this.battle.fieldBuffs.forEach(b => {
