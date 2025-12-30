@@ -235,8 +235,8 @@
 <div id="modal-chaos" class="modal">
     <div class="modal-content" style="height:auto;">
         <h3>혼돈의 축복</h3>
-        <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 2회)</p>
-        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">남은 기회: <span id="chaos-uses">2</span>회</div>
+        <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
+        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">남은 기회: <span id="chaos-uses">3</span>회</div>
         <button class="menu-btn" onclick="RPG.activateChaos('normal')">
             혼돈의 축복 (일반)<br>
             <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승</span>
@@ -276,7 +276,7 @@ const RPG = {
         inventory: [],
         deck: [null, null, null],
         enemyScale: 0,
-        chaosBlessingUses: 2,
+        chaosBlessingUses: 3,
         chaosBuffs: [] // Array of { id: cardId, multiplier: float }
     },
 
@@ -328,7 +328,7 @@ const RPG = {
             if(save) {
                  let loaded = JSON.parse(save);
                  this.state = { ...this.state, ...loaded };
-                 if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 2;
+                 if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 3;
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
                  this.showAlert("불러오기 완료");
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
@@ -337,7 +337,7 @@ const RPG = {
     },
 
     initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 2, chaosBuffs: [] };
+        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, chaosBuffs: [] };
     },
 
     saveGame() {
@@ -402,7 +402,7 @@ const RPG = {
         if(type === 'normal') {
             this.applyChaosBlessing(2);
         } else {
-            this.startQuiz((success) => {
+            this.startChaosQuiz((success) => {
                 if(success) {
                     this.applyChaosBlessing(3);
                 } else {
@@ -562,6 +562,74 @@ const RPG = {
                     // Find correct one to highlight
                     Array.from(oDiv.children).forEach(c => {
                          if(c.innerText === q.meaning) c.classList.add('correct');
+                    });
+                    if(fDiv) { fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350"; }
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        callback(false);
+                    }, 1500);
+                }
+            };
+            oDiv.appendChild(btn);
+        });
+
+        modal.classList.add('active');
+    },
+
+    startChaosQuiz(callback) {
+        // Pick a word
+        const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+
+        // Options: Correct (English), 3 Random (English)
+        let options = [];
+        options.push({ text: q.word, correct: true });
+
+        // Randoms (ensure distinct)
+        let safeCounter = 0;
+        while(options.length < 4 && safeCounter < 100) {
+            safeCounter++;
+            let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+            // Must be different word, and word not already in options
+            if(r.word !== q.word && !options.some(o => o.text === r.word)) {
+                options.push({ text: r.word, correct: false });
+            }
+        }
+
+        // Shuffle
+        options.sort(() => Math.random() - 0.5);
+
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // Question is Meaning (Korean)
+        qDiv.innerText = q.meaning;
+        oDiv.innerHTML = "";
+        if(fDiv) fDiv.innerText = "";
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = opt.text;
+            btn.onclick = () => {
+                // Disable all buttons
+                Array.from(oDiv.children).forEach(c => c.onclick = null);
+
+                if(opt.correct) {
+                    btn.classList.add('correct');
+                    if(fDiv) { fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50"; }
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        callback(true);
+                    }, 1000);
+                } else {
+                    btn.classList.add('wrong');
+                    // Find correct one to highlight
+                    Array.from(oDiv.children).forEach(c => {
+                         if(c.innerText === q.word) c.classList.add('correct');
                     });
                     if(fDiv) { fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350"; }
                     setTimeout(() => {
@@ -1296,7 +1364,7 @@ const RPG = {
         this.state.enemyScale++;
 
         // Reset Chaos Blessing
-        this.state.chaosBlessingUses = 2;
+        this.state.chaosBlessingUses = 3;
         this.state.chaosBuffs = [];
 
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
@@ -1332,7 +1400,7 @@ const RPG = {
         this.saveRecord(); // Save Max Stage
 
         // Reset Chaos Blessing
-        this.state.chaosBlessingUses = 2;
+        this.state.chaosBlessingUses = 3;
         this.state.chaosBuffs = [];
 
         let deadMsg = this.handlePermadeath(this.battle.players);
