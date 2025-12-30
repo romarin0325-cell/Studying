@@ -752,6 +752,18 @@ const RPG = {
 
             if(b.currentPlayerIdx === 0) {
                  RPG.log(`=== ${b.turn}턴 ===`, 'info');
+
+                 // Demon God Passive (Apply at start of turn for visibility)
+                 if(b.enemy && b.enemy.id === 'demon_god') {
+                     b.enemy.def = b.enemy.baseDef; b.enemy.mdef = b.enemy.baseMdef;
+                     if(b.turn % 2 === 0) {
+                         b.enemy.def = Math.floor(b.enemy.def * 1.5);
+                         RPG.log("마신의 권능: 짝수 턴 물리방어력 50% 증가.");
+                     } else {
+                         b.enemy.mdef = Math.floor(b.enemy.mdef * 1.5);
+                         RPG.log("마신의 권능: 홀수 턴 마법방어력 50% 증가.");
+                     }
+                 }
             }
             if(b.enemy) b.enemy.lastHitType = null;
 
@@ -812,8 +824,9 @@ const RPG = {
                  if(e.buffs.defProtocolMag) e.mdef = Math.floor(e.mdef * 1.5);
             }
             if(e.id === 'demon_god') {
-                 if(b.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); RPG.log("마신의 권능: 짝수 턴 물리방어력 50% 증가."); }
-                 else { e.mdef = Math.floor(e.mdef * 1.5); RPG.log("마신의 권능: 홀수 턴 마법방어력 50% 증가."); }
+                 // Re-apply without log (applied at start of player turn)
+                 if(b.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); }
+                 else { e.mdef = Math.floor(e.mdef * 1.5); }
             }
 
             if(e.buffs.stun) {
@@ -834,6 +847,13 @@ const RPG = {
 
             // AI Skill Selection
             let skill = RPG.EnemyAI.selectSkill(e, b.turn);
+
+            // Creator God Charge Handling
+            if(e.id === 'creator_god' && skill.name === '차지') {
+                 RPG.log("창조신이 힘을 모으고 있습니다... (공격 없음)");
+                 this.endEnemyTurn();
+                 return;
+            }
 
             // Execute Enemy Skill (Simplified: Calculate -> Apply)
             let val = skill.type === 'phy' ? e.atk : e.matk;
@@ -1074,7 +1094,11 @@ const RPG = {
                 else if(eff.type === 'dmg_boost') {
                      if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) mult *= eff.mult;
                      else if(eff.condition === 'target_stack' && target.buffs[eff.debuff]) mult += (target.buffs[eff.debuff] * eff.multPerStack);
-                     else if(eff.condition === 'target_debuff_count_scale') mult += (Object.keys(target.buffs).length * eff.multPerDebuff);
+                     else if(eff.condition === 'target_debuff_count_scale') {
+                         let bonus = (Object.keys(target.buffs).length * eff.multPerDebuff);
+                         mult += bonus;
+                         if(bonus > 0) RPG.log(`[특성] 디버프 대상 추가 피해! (배율 +${bonus.toFixed(1)})`);
+                     }
                      else if(eff.condition === 'hp_below' && (source.hp/source.maxHp) <= eff.val) {
                          mult *= eff.mult;
                          if(skill.name === '라그나로크') RPG.log("라그나로크: 생명력 조건 만족! 대미지 증가!");
@@ -1107,6 +1131,13 @@ const RPG = {
 
         let finalMult = mult * elMult * (1.0 + dmgBonus);
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
+
+        if(target.id === 'demon_god') {
+             const b = RPG.battle;
+             if((b.turn % 2 === 0 && skill.type === 'phy') || (b.turn % 2 !== 0 && skill.type === 'mag')) {
+                 RPG.log("(마신의 권능: 방어력 상승 적용중)");
+             }
+        }
 
         target.lastHitType = skill.type;
 
