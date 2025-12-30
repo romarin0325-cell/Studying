@@ -391,7 +391,7 @@ const CARDS = [
 const ENEMIES = [
     {
         id: 'artificial_demon_god', name: '인조 마신', element: 'water',
-        stats: { hp: 600, atk: 60, matk: 60, def: 60, mdef: 60 },
+        stats: { hp: 600, atk: 50, matk: 50, def: 60, mdef: 60 },
         skills: [
             { name: '아이스빔', type: 'mag', rate: 0.3, val: 1.5, desc: '1.5배 마법 피해', effects: [] },
             { name: '파괴의형태', type: 'mag', rate: 0.0, val: 4.0, desc: '10턴째 4배 마법', effects: [] }
@@ -399,7 +399,7 @@ const ENEMIES = [
     },
     {
         id: 'iris_love', name: '사랑의 여신 아이리스', element: 'light',
-        stats: { hp: 800, atk: 50, matk: 80, def: 50, mdef: 80 },
+        stats: { hp: 800, atk: 40, matk: 70, def: 50, mdef: 80 },
         skills: [
             { name: '홀리레이', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해', effects: [] },
             { name: '더홀리', type: 'mag', rate: 0.1, val: 3.5, desc: '3.5배 마법 피해', effects: [] },
@@ -408,7 +408,7 @@ const ENEMIES = [
     },
     {
         id: 'iris_curse', name: '저주의 여신 아이리스', element: 'fire',
-        stats: { hp: 1000, atk: 100, matk: 70, def: 90, mdef: 60 },
+        stats: { hp: 1000, atk: 90, matk: 60, def: 90, mdef: 60 },
         skills: [
             { name: '프레임샷', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해', effects: [] },
             { name: '아포칼립스', type: 'phy', rate: 0.0, val: 5.0, desc: '10턴째 5배 물리', effects: [] }
@@ -416,7 +416,7 @@ const ENEMIES = [
     },
     {
         id: 'pharaoh', name: '고대신 파라오', element: 'nature',
-        stats: { hp: 1200, atk: 100, matk: 100, def: 90, mdef: 90 },
+        stats: { hp: 1200, atk: 90, matk: 90, def: 90, mdef: 90 },
         skills: [
             { name: '고대의힘', type: 'mag', rate: 0.3, val: 2.0, desc: '2배 마법 피해', effects: [] },
             { name: '고대의저주', type: 'mag', rate: 0.0, val: 1.0, desc: '5턴 주기 공격', effects: [] }
@@ -424,7 +424,7 @@ const ENEMIES = [
     },
     {
         id: 'demon_god', name: '마신', element: 'dark',
-        stats: { hp: 1400, atk: 120, matk: 120, def: 100, mdef: 100 },
+        stats: { hp: 1400, atk: 110, matk: 110, def: 100, mdef: 100 },
         skills: [
             { name: '다크니스', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법 피해', effects: [] },
             { name: '제노사이드', type: 'phy', rate: 0.0, val: 3.5, desc: '7/14턴 3.5배 물리', effects: [] }
@@ -432,7 +432,7 @@ const ENEMIES = [
     },
     {
         id: 'creator_god', name: '창조신 아스테아', element: 'light',
-        stats: { hp: 1600, atk: 130, matk: 150, def: 110, mdef: 110 },
+        stats: { hp: 1600, atk: 120, matk: 140, def: 110, mdef: 110 },
         skills: [
             { name: '저지먼트', type: 'mag', rate: 0.0, val: 3.5, desc: '강력한 마법', effects: [] },
             { name: '디바인블레이드', type: 'phy', rate: 0.2, val: 4.0, desc: '1턴 차지 후 4배 물리', effects: [] },
