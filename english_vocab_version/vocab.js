@@ -358,5 +358,185 @@ const VOCAB_DATA = [
     "meaning": "(형) 모호한, 희미한",
     "trap_meaning": "(명) 유행; (형) 유행하는",
     "trap_word": "vogue"
+  },
+  {
+    "word": "retail",
+    "meaning": "(명) 소매; (형) 소매의",
+    "trap_meaning": "(명) 세부사항; (동) 상세히 알리다",
+    "trap_word": "detail"
+  },
+  {
+    "word": "affordable",
+    "meaning": "(형) 가격이 알맞은; (형) 감당할 수 있는",
+    "trap_meaning": "(형) 사랑스러운; (형) 귀여운",
+    "trap_word": "adorable"
+  },
+  {
+    "word": "valid",
+    "meaning": "(형) 유효한; (형) 타당한",
+    "trap_meaning": "(형) 고체의, 단단한; (형) 견고한",
+    "trap_word": "solid"
+  },
+  {
+    "word": "traffic",
+    "meaning": "(명) 교통(량); (명) 왕래",
+    "trap_meaning": "(형) 아주 멋진; (형) 훌륭한",
+    "trap_word": "terrific"
+  },
+  {
+    "word": "imperative",
+    "meaning": "(형) 필수적인; (형) 긴급한",
+    "trap_meaning": "(형) 제국의; (형) 황제의",
+    "trap_word": "imperial"
+  },
+  {
+    "word": "insurance",
+    "meaning": "(명) 보험; (명) 보험금",
+    "trap_meaning": "(명) 확언, 장담; (명) 보증",
+    "trap_word": "assurance"
+  },
+  {
+    "word": "ingredient",
+    "meaning": "(명) 재료, 성분",
+    "trap_meaning": "(명) 경사도; (명) 기울기, 비탈",
+    "trap_word": "gradient"
+  },
+  {
+    "word": "renovate",
+    "meaning": "(동) 개조하다, 보수하다",
+    "trap_meaning": "(동) 혁신하다; (동) 쇄신하다",
+    "trap_word": "innovate"
+  },
+  {
+    "word": "versatile",
+    "meaning": "(형) 다재다능한; (형) 다용도의",
+    "trap_meaning": "(형) 휘발성의; (형) 변덕스러운",
+    "trap_word": "volatile"
+  },
+  {
+    "word": "implement",
+    "meaning": "(동) 실행하다; (명) 도구",
+    "trap_meaning": "(동) 보충하다; (명) 부록",
+    "trap_word": "supplement"
+  },
+  {
+    "word": "commitment",
+    "meaning": "(명) 헌신; (명) 약속, 책무",
+    "trap_meaning": "(명) 위원회; (명) 위원",
+    "trap_word": "committee"
+  },
+  {
+    "word": "facilitate",
+    "meaning": "(동) 용이하게 하다; (동) 촉진하다",
+    "trap_meaning": "(동) 매혹하다; (동) 마음을 사로잡다",
+    "trap_word": "fascinate"
+  },
+  {
+    "word": "encourage",
+    "meaning": "(동) 격려하다; (동) 권장하다",
+    "trap_meaning": "(동) 격분하게 하다; (동) 화나게 하다",
+    "trap_word": "enrage"
+  },
+  {
+    "word": "persuade",
+    "meaning": "(동) 설득하다",
+    "trap_meaning": "(동) 추구하다; (동) 뒤쫓다",
+    "trap_word": "pursue"
+  },
+  {
+    "word": "launch",
+    "meaning": "(동) 출시하다; (동) 시작하다",
+    "trap_meaning": "(명) 점심 식사; (동) 점심을 먹다",
+    "trap_word": "lunch"
+  },
+  {
+    "word": "reliable",
+    "meaning": "(형) 믿을 수 있는; (형) 확실한",
+    "trap_meaning": "(형) 법적 책임이 있는; (형) ~하기 쉬운",
+    "trap_word": "liable"
+  },
+  {
+    "word": "strategy",
+    "meaning": "(명) 전략, 계획",
+    "trap_meaning": "(명) 비극; (명) 참사",
+    "trap_word": "tragedy"
+  },
+  {
+    "word": "remind",
+    "meaning": "(동) 상기시키다; (동) 생각나게 하다",
+    "trap_meaning": "(동) 되감다; (동) 다시 감다",
+    "trap_word": "rewind"
+  },
+  {
+    "word": "suitable",
+    "meaning": "(형) 적합한, 알맞은",
+    "trap_meaning": "(형) 안정적인; (형) 차분한",
+    "trap_word": "stable"
+  },
+  {
+    "word": "beverage",
+    "meaning": "(명) 음료",
+    "trap_meaning": "(형) 평균의; (명) 평균",
+    "trap_word": "average"
+  },
+  {
+    "word": "tentative",
+    "meaning": "(형) 잠정적인, 임시의",
+    "trap_meaning": "(형) 주의 깊은; (형) 세심한",
+    "trap_word": "attentive"
+  },
+  {
+    "word": "publicity",
+    "meaning": "(명) 홍보, 광고; (명) 평판",
+    "trap_meaning": "(명) 출판, 발행; (명) 출판물",
+    "trap_word": "publication"
+  },
+  {
+    "word": "procedure",
+    "meaning": "(명) 절차, 순서",
+    "trap_meaning": "(명) 제작자, PD; (명) 생산자",
+    "trap_word": "producer"
+  },
+  {
+    "word": "merchandise",
+    "meaning": "(명) 상품, 물품",
+    "trap_meaning": "(명) 상인, 무역상",
+    "trap_word": "merchant"
+  },
+  {
+    "word": "guarantee",
+    "meaning": "(명) 보증; (동) 보장하다",
+    "trap_meaning": "(명) 격리; (동) 격리하다",
+    "trap_word": "quarantine"
+  },
+  {
+    "word": "alleviate",
+    "meaning": "(동) 완화하다; (동) 경감하다",
+    "trap_meaning": "(동) (들어) 올리다; (동) 승진시키다",
+    "trap_word": "elevate"
+  },
+  {
+    "word": "solicit",
+    "meaning": "(동) 요청하다; (동) 간청하다",
+    "trap_meaning": "(형) 불법의; (형) 사회 통념에 어긋나는",
+    "trap_word": "illicit"
+  },
+  {
+    "word": "unprecedented",
+    "meaning": "(형) 전례 없는",
+    "trap_meaning": "(형) 예측할 수 없는; (형) 종잡을 수 없는",
+    "trap_word": "unpredictable"
+  },
+  {
+    "word": "deny",
+    "meaning": "(동) 부인하다; (동) 거절하다",
+    "trap_meaning": "(동) 반항하다; (동) 무시하다",
+    "trap_word": "defy"
+  },
+  {
+    "word": "recession",
+    "meaning": "(명) 불경기, 침체",
+    "trap_meaning": "(명) 접수처; (명) 환영회",
+    "trap_word": "reception"
   }
 ];
