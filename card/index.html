@@ -938,7 +938,7 @@ const RPG = {
                 RPG.log("고대의 저주: 턴 내 피격 감지! 대미지 3배로 반격!");
             }
 
-            if(e.buffs.weak) val *= 0.8;
+            if(e.buffs.weak && skill.type === 'phy') val *= 0.8;
             if(e.buffs.silence && skill.type === 'mag') val *= 0.8;
 
             let def = skill.type === 'phy' ? target.def : target.mdef;
@@ -1148,6 +1148,8 @@ const RPG = {
         // Weakness Debuff (Applies to Source)
         if (source.buffs.weak) {
             atkMult -= 0.2;
+        }
+        if (source.buffs.silence) {
             matkMult -= 0.2;
         }
 
@@ -1483,7 +1485,8 @@ const RPG = {
         }
 
         // 3. Buffs/Debuffs
-        if (char.buffs['weak']) { m.atk -= 0.2; m.matk -= 0.2; }
+        if (char.buffs['weak']) { m.atk -= 0.2; }
+        if (char.buffs['silence']) { m.matk -= 0.2; }
         if (char.buffs['evasion']) { addEva += 50; }
 
         let defRed = 0.0;
