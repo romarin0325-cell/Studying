@@ -1433,6 +1433,57 @@ const RPG = {
         this.openInfoModal("전투 결과", msg, () => this.toMenu());
     },
 
+    getEffectiveStats(char, fieldBuffs) {
+        let stats = {
+            atk: char.atk, matk: char.matk,
+            def: char.def, mdef: char.mdef,
+            evasion: 5
+        };
+        let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
+        let addEva = 0;
+
+        // 1. Dynamic Traits (Player Only)
+        const trait = char.proto ? char.proto.trait : null;
+        if (trait) {
+            if (trait.type === 'cond_twinkle_all' && fieldBuffs.some(b => b.name === 'twinkle_party')) {
+                 m.atk += 0.3; m.matk += 0.3;
+            }
+            if (trait.type === 'cond_no_field_buff_eva' && fieldBuffs.length === 0) {
+                addEva += trait.val;
+            }
+        }
+
+        // 2. Field Buffs
+        fieldBuffs.forEach(fb => {
+            if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
+            if(fb.name === 'moon_bless') { m.matk += 0.3; addEva += 15; }
+            if(fb.name === 'sanctuary') { m.matk += 0.25; m.mdef += 0.25; }
+            if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
+            if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
+            if(fb.name === 'twinkle_party') { m.atk += 0.2; }
+            if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
+        });
+
+        // 3. Buffs/Debuffs
+        if (char.buffs['weak']) { m.atk -= 0.3; m.matk -= 0.3; }
+        if (char.buffs['evasion']) { addEva += 50; }
+
+        let defRed = 0.0;
+        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
+        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
+        m.def -= defRed;
+
+        if (char.buffs['curse']) m.mdef -= 0.2;
+
+        stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
+        stats.matk = Math.floor(stats.matk * Math.max(0, m.matk));
+        stats.def = Math.floor(stats.def * Math.max(0, m.def));
+        stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
+        stats.evasion += addEva;
+
+        return stats;
+    },
+
     showBattleStat(side, idx) {
         let char;
         if(side === 'player') char = this.battle.players[idx];
@@ -1446,10 +1497,18 @@ const RPG = {
             return `${name}(${val})`;
         }).join(', ') || '없음';
 
+        const eff = this.getEffectiveStats(char, this.battle.fieldBuffs);
+        const colorize = (val, base) => {
+             if(val > base) return `<span style="color:#69f0ae">${val}</span>`;
+             if(val < base) return `<span style="color:#ff5252">${val}</span>`;
+             return `<span style="color:#eee">${val}</span>`;
+        };
+
         let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
         if(side === 'player') content += `MP: ${char.mp}<br>`;
-        content += `ATK: ${char.atk} / MATK: ${char.matk}<br>`;
-        content += `DEF: ${char.def} / MDEF: ${char.mdef}<br>`;
+        content += `ATK: ${colorize(eff.atk, char.atk)} / MATK: ${colorize(eff.matk, char.matk)}<br>`;
+        content += `DEF: ${colorize(eff.def, char.def)} / MDEF: ${colorize(eff.mdef, char.mdef)}<br>`;
+        content += `회피율: <span style="color:#4fc3f7">${eff.evasion}%</span><br>`;
         content += `상태: ${buffs}<br><br>`;
 
         if(side === 'player') {
