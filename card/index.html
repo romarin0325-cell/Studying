@@ -938,7 +938,7 @@ const RPG = {
                 RPG.log("고대의 저주: 턴 내 피격 감지! 대미지 3배로 반격!");
             }
 
-            if(e.buffs.weak && skill.type === 'phy') val *= 0.8;
+            if(e.buffs.weak) val *= 0.8;
             if(e.buffs.silence && skill.type === 'mag') val *= 0.8;
 
             let def = skill.type === 'phy' ? target.def : target.mdef;
@@ -948,7 +948,17 @@ const RPG = {
                 if(fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
                 if(fb.name === 'goddess_descent') fieldDef += 0.3;
             });
-            def = Math.floor(def * fieldDef);
+
+            // Target Defense Debuffs
+            let defMult = 1.0;
+            if (skill.type === 'phy') {
+                if (target.buffs.darkness && target.buffs.corrosion) defMult = 0.6;
+                else if (target.buffs.darkness || target.buffs.corrosion) defMult = 0.8;
+            } else {
+                if (target.buffs.curse) defMult = 0.8;
+            }
+
+            def = Math.floor(def * fieldDef * defMult);
 
             // Evasion Check
             let eva = 5;
@@ -1135,13 +1145,19 @@ const RPG = {
              if(fb.name === 'twinkle_party') { atkMult += 0.2; crit += 15; }
         });
 
+        // Weakness Debuff (Applies to Source)
+        if (source.buffs.weak) {
+            atkMult -= 0.2;
+            matkMult -= 0.2;
+        }
+
         // Trait: Twinkle Party (Fresh Cream Maid)
         if(source.proto.trait.type === 'cond_twinkle_all' && RPG.battle.fieldBuffs.some(b=>b.name==='twinkle_party')) {
             atkMult *= 1.3;
             matkMult *= 1.3;
         }
 
-        let val = (skill.type === 'phy' ? source.atk * atkMult : source.matk * matkMult);
+        let val = (skill.type === 'phy' ? source.atk * Math.max(0, atkMult) : source.matk * Math.max(0, matkMult));
         let mult = skill.val;
         let dmgBonus = 0.0;
 
@@ -1454,18 +1470,20 @@ const RPG = {
         }
 
         // 2. Field Buffs
-        fieldBuffs.forEach(fb => {
-            if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
-            if(fb.name === 'moon_bless') { m.matk += 0.3; addEva += 15; }
-            if(fb.name === 'sanctuary') { m.matk += 0.25; m.mdef += 0.25; }
-            if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
-            if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
-            if(fb.name === 'twinkle_party') { m.atk += 0.2; }
-            if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
-        });
+        if (char.proto) {
+            fieldBuffs.forEach(fb => {
+                if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
+                if(fb.name === 'moon_bless') { m.matk += 0.3; addEva += 15; }
+                if(fb.name === 'sanctuary') { m.matk += 0.25; m.mdef += 0.25; }
+                if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
+                if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
+                if(fb.name === 'twinkle_party') { m.atk += 0.2; }
+                if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
+            });
+        }
 
         // 3. Buffs/Debuffs
-        if (char.buffs['weak']) { m.atk -= 0.3; m.matk -= 0.3; }
+        if (char.buffs['weak']) { m.atk -= 0.2; m.matk -= 0.2; }
         if (char.buffs['evasion']) { addEva += 50; }
 
         let defRed = 0.0;
