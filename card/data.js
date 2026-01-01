@@ -1,6 +1,16 @@
 const CARDS = [
     // --- 전설 (Legend) ---
     {
+        id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer',
+        stats: { hp: 510, atk: 115, matk: 130, def: 60, mdef: 60 },
+        trait: { type: 'normal_attack_burn_divine', desc: '일반공격시 적에게 작열, 디바인 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
+            { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 1.5배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 1.5}] },
+            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.0 증가, 사용 후 적 디버프 해제', effects: [{type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.0}, {type: 'clear_target_debuffs'}] }
+        ]
+    },
+    {
         id: 'queen', name: '여왕', grade: 'legend', element: 'nature', role: 'looter',
         stats: { hp: 440, atk: 90, matk: 95, def: 55, mdef: 55 },
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
@@ -93,6 +103,16 @@ const CARDS = [
 
     // --- 에픽 (Epic) ---
     {
+        id: 'storm_sage', name: '폭풍의현자', grade: 'epic', element: 'nature', role: 'debuffer',
+        stats: { hp: 380, atk: 75, matk: 110, def: 60, mdef: 75 },
+        trait: { type: 'syn_nature_3_matk', val: 50, desc: '자연속성 3덱일시 마법공격력 50%증가' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 2, cost: 20, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '러스트브리즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 약화 혹은 부식 부여', effects: [{type: 'random_debuff', count: 1, pool: ['weak', 'corrosion']}] },
+            { name: '팬텀게일', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 대지의축복이 있을시 적에게 저주와 침묵 부여', effects: [{type: 'conditional_field_debuff', field: 'earth_bless', debuffs: ['curse', 'silence']}] }
+        ]
+    },
+    {
         id: 'shadow_stalker', name: '그림자추적자', grade: 'epic', element: 'dark', role: 'looter',
         stats: { hp: 340, atk: 100, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
@@ -184,6 +204,16 @@ const CARDS = [
     },
 
     // --- 레어 (Rare) ---
+    {
+        id: 'cloud_sheep', name: '구름양', grade: 'rare', element: 'water', role: 'balancer',
+        stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
+        trait: { type: 'death_stun', desc: '사망시 상대에게 스턴 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '자장가', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '30%확률로 적에게 스턴 부여', effects: [{type: 'chance_debuff', id: 'stun', chance: 0.3, duration: 1}] },
+            { name: '솜사탕', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 트윙클파티 부여', effects: [{type: 'field_buff', id: 'twinkle_party'}] }
+        ]
+    },
     {
         id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 45 },
@@ -286,6 +316,16 @@ const CARDS = [
     },
 
     // --- 일반 (Normal) ---
+    {
+        id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer',
+        stats: { hp: 310, atk: 75, matk: 70, def: 50, mdef: 50 },
+        trait: { type: 'death_sun_bless_chance', val: 0.3, desc: '사망시 30%확률로 태양의축복 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
+            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
+            { name: '멜팅허그', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 작열 부여', effects: [{type: 'debuff', id: 'burn', stack: 1}] }
+        ]
+    },
     {
         id: 'kobold', name: '코볼트', grade: 'normal', element: 'nature', role: 'looter',
         stats: { hp: 270, atk: 75, matk: 55, def: 40, mdef: 40 },
