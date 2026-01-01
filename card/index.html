@@ -787,6 +787,7 @@ const RPG = {
              else if(t.type === 'syn_water_nature' && elements.includes('water') && elements.includes('nature')) {
                  this.battle.activeTraits.push(t.type); // Special handling for Rumi
              }
+             else if(t.type === 'syn_nature_3_matk' && elements.filter(e=>e==='nature').length===3) active = true;
              else if(t.type === 'syn_night_rabbit' && this.state.deck.includes('night_rabbit')) active = true;
              else if(t.type === 'syn_snow_rabbit' && this.state.deck.includes('snow_rabbit')) active = true;
 
@@ -795,6 +796,7 @@ const RPG = {
                 if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
                 if(t.type === 'syn_water_3_matk') p.matk = Math.floor(p.matk * 1.5);
+                if(t.type === 'syn_nature_3_matk') p.matk = Math.floor(p.matk * 1.5);
                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
                 if(t.type === 'syn_dark_3_matk') p.matk = Math.floor(p.matk * 1.5);
                 if(t.type === 'syn_light_fire_atk') p.atk = Math.floor(p.atk * 1.3);
@@ -1100,6 +1102,20 @@ const RPG = {
         else if(t.type === 'death_field_sun') {
             RPG.applyFieldBuff('sun_bless');
         }
+        else if(t.type === 'death_stun') {
+             if (killer && killer.buffs) {
+                 killer.buffs.stun = 1;
+                 RPG.log(`[특성] 사망 시 스턴 발동! 적을 기절시킵니다.`);
+             }
+        }
+        else if(t.type === 'death_sun_bless_chance') {
+             if(Math.random() < t.val) {
+                 RPG.applyFieldBuff('sun_bless');
+                 RPG.log(`[특성] 마시멜로가 녹으며 태양의 축복을 남깁니다!`);
+             } else {
+                 RPG.log(`[특성] 마시멜로가 흔적도 없이 사라졌습니다... (축복 실패)`);
+             }
+        }
     },
 
     // --- Player Skill Execution ---
@@ -1107,6 +1123,15 @@ const RPG = {
     executeSkill(source, target, skill, isDelayed=false) {
         if(!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
         RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
+
+        // Trait: Normal Attack Burn & Divine
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
+             target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
+             target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
+             if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+             if(target.buffs['divine'] > 3) target.buffs['divine'] = 3;
+             RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
+        }
 
         // Check for Delayed Attack Effect
         const delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
@@ -1299,6 +1324,27 @@ const RPG = {
             }
             else if(eff.type === 'suicide') {
                 source.hp = 0;
+            }
+            else if(eff.type === 'chance_debuff') {
+                if(Math.random() < eff.chance) {
+                    target.buffs[eff.id] = eff.duration || 1;
+                    RPG.log(`<b>성공!</b> ${target === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
+                } else {
+                    RPG.log(`[${this.BUFF_NAMES[eff.id]}] 부여 <b>실패</b>.`);
+                }
+            }
+            else if(eff.type === 'conditional_field_debuff') {
+                 if(RPG.battle.fieldBuffs.some(b => b.name === eff.field)) {
+                     eff.debuffs.forEach(d => {
+                         target.buffs[d] = 1;
+                         RPG.log(`조건 만족! [${this.BUFF_NAMES[d]}] 부여.`);
+                     });
+                 }
+            }
+            else if(eff.type === 'clear_target_debuffs') {
+                 const count = Object.keys(target.buffs).length;
+                 target.buffs = {};
+                 if(count > 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
             }
         });
 
