@@ -218,6 +218,10 @@
 <div id="modal-wordbook" class="modal">
     <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
         <h3>단어장</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+             <span style="font-size: 0.8rem; color: #aaa;">빨간색: 틀린 단어</span>
+             <button class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습 초기화</button>
+        </div>
         <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
         <button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
@@ -338,7 +342,7 @@ const RPG = {
     },
 
     initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, chaosBuffs: [] };
+        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, chaosBuffs: [], wrongWords: [] };
     },
 
     saveGame() {
@@ -495,18 +499,30 @@ const RPG = {
 
     // --- Wordbook & Quiz ---
     openWordbook() {
+        if(!this.state.wrongWords) this.state.wrongWords = [];
         const list = document.getElementById('wordbook-list');
         list.innerHTML = "";
         VOCAB_DATA.forEach(v => {
+            const isWrong = this.state.wrongWords.includes(v.word);
             const div = document.createElement('div');
             div.style.marginBottom = "10px";
             div.style.borderBottom = "1px solid #444";
             div.style.paddingBottom = "5px";
-            div.innerHTML = `<b style="color:#81d4fa; font-size:1.1rem;">${v.word}</b><br>
+
+            // Apply red color if wrong
+            const wordColor = isWrong ? '#ef5350' : '#81d4fa';
+
+            div.innerHTML = `<b style="color:${wordColor}; font-size:1.1rem;">${v.word}</b><br>
                              <span style="color:#eee;">${v.meaning}</span>`;
             list.appendChild(div);
         });
         document.getElementById('modal-wordbook').classList.add('active');
+    },
+
+    resetWrongWords() {
+        this.state.wrongWords = [];
+        this.showAlert("복습 상태가 초기화되었습니다.");
+        this.openWordbook(); // Re-render
     },
 
     startQuiz(callback) {
@@ -560,6 +576,13 @@ const RPG = {
                     }, 1000);
                 } else {
                     btn.classList.add('wrong');
+
+                    // Record Wrong Answer
+                    if(!RPG.state.wrongWords) RPG.state.wrongWords = [];
+                    if(!RPG.state.wrongWords.includes(q.word)) {
+                        RPG.state.wrongWords.push(q.word);
+                    }
+
                     // Find correct one to highlight
                     Array.from(oDiv.children).forEach(c => {
                          if(c.innerText === q.meaning) c.classList.add('correct');
@@ -1061,6 +1084,9 @@ const RPG = {
                             RPG.log("창조신이 자세를 잡습니다 (차지중...)");
                             e.isCharging = true;
                             return { type: 'phy', val: 0, name: '차지' };
+                        } else {
+                             // Explicit fallback for r >= 0.4
+                             skill = e.skills.find(s => s.name === '저지먼트'); // High turns use Judgment more
                         }
                     } else {
                         // Turn <= 15: Holy Ray(20%), Charge(20%) -- Judgment Excluded
@@ -1069,6 +1095,9 @@ const RPG = {
                             RPG.log("창조신이 자세를 잡습니다 (차지중...)");
                             e.isCharging = true;
                             return { type: 'phy', val: 0, name: '차지' };
+                        } else {
+                             // Explicit fallback for r >= 0.4
+                             skill = e.skills.find(s => s.name === '홀리레이');
                         }
                     }
                 }
