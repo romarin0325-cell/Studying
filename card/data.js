@@ -476,7 +476,7 @@ const ENEMIES = [
         stats: { hp: 1600, atk: 120, matk: 140, def: 110, mdef: 110 },
         skills: [
             { name: '저지먼트', type: 'mag', rate: 0.0, val: 3.5, desc: '강력한 마법', effects: [] },
-            { name: '디바인블레이드', type: 'phy', rate: 0.2, val: 4.0, desc: '1턴 차지 후 4배 물리', effects: [] },
+            { name: '디바인블레이드', type: 'phy', rate: 0.0, val: 4.0, desc: '1턴 차지 후 4배 물리', effects: [] },
             { name: '홀리레이', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법', effects: [] }
         ]
     }
