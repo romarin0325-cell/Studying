@@ -258,7 +258,7 @@
         <div style="margin-bottom:15px; color:#ffd700; font-size:1.1rem;">골드: <span id="shop-gold">0</span> G</div>
         <h4 style="text-align:left; color:#81d4fa;">능력치 강화</h4>
         <button onclick="upgradeMana()" style="width:100%; margin-bottom:5px;">마나 효율 강화 <span id="mana-cost" class="skill-sub"></span></button>
-        <button onclick="tryHeal()" style="width:100%; margin-bottom:15px; background: #2e7d32; border-color:#4caf50;">🧪 체력 회복 (영어 퀴즈)<span class="skill-sub" style="color:#a5d6a7">정답 시 100% 회복 / 실패 시 유지</span></button>
+        <!-- <button onclick="tryHeal()" style="width:100%; margin-bottom:15px; background: #2e7d32; border-color:#4caf50;">🧪 체력 회복 (영어 퀴즈)<span class="skill-sub" style="color:#a5d6a7">정답 시 100% 회복 / 실패 시 유지</span></button> -->
         <h4 style="text-align:left; color:#ffcc80;">장비 강화</h4>
         <button onclick="buyEquip('weapon')" style="width:100%; margin-bottom:5px;">무기 강화 <span id="weapon-cost" class="skill-sub"></span></button>
         <button onclick="buyEquip('armor')" style="width:100%; margin-bottom:15px;">방어구 강화 <span id="armor-cost" class="skill-sub"></span></button>
@@ -315,6 +315,11 @@
         <button onclick="openResetModal()" style="width:100%; margin-bottom:15px; background:#b71c1c; border-color:#d32f2f; color:#ffcdd2;">
             ☠️ 게임 초기화 (Rebirth)
             <span class="skill-sub" style="color:#e57373">재시작 또는 완전 초기화</span>
+        </button>
+
+        <button onclick="openWordbook()" style="width:100%; margin-bottom:15px; background:#424242; border-color:#616161;">
+            📖 단어장
+            <span class="skill-sub" style="color:#bdbdbd">학습한 단어 목록 및 오답 확인</span>
         </button>
 
         <button onclick="document.getElementById('settings-modal').classList.remove('active')" style="width:100%; background:#555;">닫기</button>
@@ -427,6 +432,38 @@
     </div>
 </div>
 
+<div id="wordbook-modal" class="modal">
+    <div class="modal-content" style="max-height: 80vh;">
+        <h2 style="color:#fff; border-bottom:1px solid #555; padding-bottom:10px;">단어장</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%;">
+             <span style="font-size: 0.8rem; color: #aaa;">빨간색: 틀린 단어</span>
+             <button onclick="resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555; min-height: 30px;">복습 초기화</button>
+        </div>
+        <div id="wordbook-list" style="overflow-y: auto; text-align: left; padding: 10px; flex: 1; width: 100%;"></div>
+        <button onclick="document.getElementById('wordbook-modal').classList.remove('active')" style="width:100%; background:#555; margin-top:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal" style="z-index: 200;">
+    <div class="modal-content" style="width: 80%; max-width: 350px;">
+        <h3 id="confirm-title" style="color: #ffd700; margin-bottom: 10px;">확인</h3>
+        <div id="confirm-msg" style="margin-bottom: 20px; font-size: 1.0rem; line-height: 1.5;"></div>
+        <div style="display: flex; gap: 10px; width: 100%;">
+            <button id="confirm-yes" style="flex: 1; background: #1b5e20;">예</button>
+            <button id="confirm-no" style="flex: 1; background: #b71c1c;">아니오</button>
+        </div>
+    </div>
+</div>
+
+<div id="quiz-bonus-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div style="font-size: 0.9rem; color: #aaa; margin-bottom: 5px;">BONUS QUIZ (KOREAN MEANING)</div>
+        <div id="quiz-bonus-question" class="quiz-question" style="font-size: 1.2rem;">MEANING</div>
+        <div id="quiz-bonus-options"></div>
+        <div id="quiz-bonus-feedback" style="margin-top:10px; font-weight:bold; height:20px;"></div>
+    </div>
+</div>
+
 <script src="vocab.js"></script>
 <script src="data.js"></script>
 
@@ -472,7 +509,7 @@ const BLESSINGS = {
     ]
 };
 
-let gameState = { gold: 10000, learnedSkills: [], manaLevel: 0, equipWeapon: 0, equipArmor: 0, currentEventDungeon: null, activeBlessing: null };
+let gameState = { gold: 10000, learnedSkills: [], manaLevel: 0, equipWeapon: 0, equipArmor: 0, currentEventDungeon: null, activeBlessing: null, wrongWords: [] };
 let currentEnemy = null;
 let turnCount = 0;
 let buffs = { player: {}, enemy: {} };
@@ -1445,9 +1482,14 @@ function startBattle(mobData) {
     // 대현자 스탯 재계산 (형태 초기화 반영)
     recalcAllStats();
 
+    // Auto-Heal (Full Restore)
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
+
     updateBattleUI();
     createBattleButtons();
     log(`<b>${currentEnemy.name}</b>(이)가 나타났다!`, 'info');
+    log(`<b style="color:#69f0ae">전투 시작: 체력과 마나가 모두 회복되었습니다.</b>`, 'heal');
 }
 
 function createBattleButtons() {
@@ -1721,9 +1763,30 @@ function applyPlayerSupport(skill) {
 
 function winBattle() {
     log(`<b style="color:#ffd700">전투 승리!</b>`, 'info');
-    player.exp += currentEnemy.exp;
 
-    let goldReward = currentEnemy.gold;
+    // Confirm Bonus Quiz
+    showConfirmModal("전투 승리! 보너스 퀴즈에 도전하시겠습니까?\n(성공 시 경험치/골드 3배)",
+        () => {
+            // Yes: Start Bonus Quiz
+            startBonusQuiz((success) => {
+                let rewardMult = success ? 3 : 1;
+                if(success) myAlert("정답입니다! 보상이 3배가 됩니다!");
+                else myAlert("오답입니다. 기본 보상을 획득합니다.");
+                finalizeWin(rewardMult);
+            });
+        },
+        () => {
+            // No: Normal Reward
+            finalizeWin(1);
+        }
+    );
+}
+
+function finalizeWin(multiplier) {
+    let expReward = currentEnemy.exp * multiplier;
+    player.exp += expReward;
+
+    let goldReward = currentEnemy.gold * multiplier;
     if(gameState.activeBlessing) {
         if(gameState.activeBlessing.id === 'lucky_hand') goldReward *= 2;
         if(gameState.activeBlessing.id === 'gold_contract') goldReward *= 3;
@@ -1734,7 +1797,7 @@ function winBattle() {
     }
 
     gameState.gold += goldReward;
-    log(`경험치 +${currentEnemy.exp}, 골드 +${goldReward} G`);
+    log(`경험치 +${expReward}, 골드 +${goldReward} G`);
 
     // Boss Drop Logic (Unlock System)
     if(BOSS_DROP_ARTIFACTS) {
@@ -1778,6 +1841,26 @@ function winBattle() {
 
         updateInfo();
     }, 1500);
+}
+
+function showConfirmModal(msg, onYes, onNo) {
+    document.getElementById('confirm-msg').innerText = msg;
+    const modal = document.getElementById('confirm-modal');
+    const btnYes = document.getElementById('confirm-yes');
+    const btnNo = document.getElementById('confirm-no');
+
+    // Remove old listeners (cloneNode trick or just reassign)
+    // Simple reassign
+    btnYes.onclick = () => {
+        modal.classList.remove('active');
+        if(onYes) onYes();
+    };
+    btnNo.onclick = () => {
+         modal.classList.remove('active');
+         if(onNo) onNo();
+    };
+
+    modal.classList.add('active');
 }
 
 function loseBattle() {
@@ -3141,6 +3224,11 @@ function startQuiz(callback) {
                 }, 1000);
             } else {
                 btn.classList.add('wrong');
+
+                // Record wrong word
+                if(!gameState.wrongWords) gameState.wrongWords = [];
+                if(!gameState.wrongWords.includes(qData.word)) gameState.wrongWords.push(qData.word);
+
                 // Highlight correct one
                 Array.from(optionsBox.children).forEach(c => {
                     if(c.innerText === qData.meaning) c.classList.add('correct');
@@ -3157,6 +3245,103 @@ function startQuiz(callback) {
     });
 
     modal.classList.add('active');
+}
+
+function startBonusQuiz(callback) {
+    const modal = document.getElementById('quiz-bonus-modal');
+    const wordBox = document.getElementById('quiz-bonus-question');
+    const optionsBox = document.getElementById('quiz-bonus-options');
+    const feedbackBox = document.getElementById('quiz-bonus-feedback');
+
+    // Pick random word
+    let qData = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+
+    // Create options: Correct (English Word), 3 Random (English Words)
+    let options = [
+        { text: qData.word, correct: true }
+    ];
+
+    while(options.length < 4) {
+        let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+        if(r.word !== qData.word && !options.find(o => o.text === r.word)) {
+            options.push({ text: r.word, correct: false });
+        }
+    }
+
+    // Shuffle options
+    options.sort(() => Math.random() - 0.5);
+
+    wordBox.innerText = qData.meaning; // Question is Meaning (Korean)
+    optionsBox.innerHTML = "";
+    feedbackBox.innerText = "";
+
+    options.forEach(opt => {
+        let btn = document.createElement('div');
+        btn.className = 'quiz-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => {
+            // Disable all buttons
+            Array.from(optionsBox.children).forEach(c => c.onclick = null);
+
+            if(opt.correct) {
+                btn.classList.add('correct');
+                feedbackBox.innerText = "CORRECT!";
+                feedbackBox.style.color = "#4caf50";
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    callback(true);
+                }, 1000);
+            } else {
+                btn.classList.add('wrong');
+
+                // Record wrong word
+                if(!gameState.wrongWords) gameState.wrongWords = [];
+                if(!gameState.wrongWords.includes(qData.word)) gameState.wrongWords.push(qData.word);
+
+                // Highlight correct one
+                Array.from(optionsBox.children).forEach(c => {
+                    if(c.innerText === qData.word) c.classList.add('correct');
+                });
+                feedbackBox.innerText = "WRONG!";
+                feedbackBox.style.color = "#ef5350";
+                setTimeout(() => {
+                    modal.classList.remove('active');
+                    callback(false);
+                }, 1500);
+            }
+        };
+        optionsBox.appendChild(btn);
+    });
+
+    modal.classList.add('active');
+}
+
+function openWordbook() {
+    if(!gameState.wrongWords) gameState.wrongWords = [];
+    const list = document.getElementById('wordbook-list');
+    list.innerHTML = "";
+    VOCAB_DATA.forEach(v => {
+        const isWrong = gameState.wrongWords.includes(v.word);
+        const div = document.createElement('div');
+        div.style.marginBottom = "10px";
+        div.style.borderBottom = "1px solid #444";
+        div.style.paddingBottom = "5px";
+
+        const wordColor = isWrong ? '#ef5350' : '#81d4fa';
+
+        div.innerHTML = `<b style="color:${wordColor}; font-size:1.1rem;">${v.word}</b><br>
+                         <span style="color:#eee;">${v.meaning}</span>`;
+        list.appendChild(div);
+    });
+    document.getElementById('wordbook-modal').classList.add('active');
+    // Close settings modal if open
+    document.getElementById('settings-modal').classList.remove('active');
+}
+
+function resetWrongWords() {
+    gameState.wrongWords = [];
+    myAlert("복습 상태가 초기화되었습니다.");
+    openWordbook(); // Re-render
 }
 
 // 초기화: 페이지 로드 시 저장 데이터 확인
