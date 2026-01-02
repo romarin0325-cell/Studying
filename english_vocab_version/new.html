@@ -1443,11 +1443,6 @@ function startBattle(mobData) {
 
     document.getElementById('log-box').innerHTML = "";
 
-    let startMp = player.maxMp ? Math.floor(player.maxMp / 2) : 0;
-    if(hasArtifact('start_mp')) startMp += 30;
-    if(hasArtifact('blue_moon')) startMp += 100;
-
-    player.mp = Math.min(player.maxMp, startMp);
     turnCount = 1;
     // 루미 신규 스킬 관련 버프 초기화 추가 (chargingMilkyway, milkshakeTurns)
     buffs = { player: { castleStack: 0, dodgeCount: 0, absoluteStack: 0, divineStack: 0, moonUltStack: 0, chargingMilkyway: false, milkshakeTurns: 0 }, enemy: {} };
@@ -1482,14 +1477,18 @@ function startBattle(mobData) {
     // 대현자 스탯 재계산 (형태 초기화 반영)
     recalcAllStats();
 
-    // Auto-Heal (Full Restore)
+    // Auto-Heal (HP Full, MP Half + Artifacts)
     player.hp = player.maxHp;
-    player.mp = player.maxMp;
+
+    let startMp = player.maxMp ? Math.floor(player.maxMp / 2) : 0;
+    if(hasArtifact('start_mp')) startMp += 30;
+    if(hasArtifact('blue_moon')) startMp += 100;
+    player.mp = Math.min(player.maxMp, startMp);
 
     updateBattleUI();
     createBattleButtons();
     log(`<b>${currentEnemy.name}</b>(이)가 나타났다!`, 'info');
-    log(`<b style="color:#69f0ae">전투 시작: 체력과 마나가 모두 회복되었습니다.</b>`, 'heal');
+    log(`<b style="color:#69f0ae">전투 시작: 체력 회복, 마나 50%로 진입.</b>`, 'heal');
 }
 
 function createBattleButtons() {
