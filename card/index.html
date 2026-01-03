@@ -237,7 +237,7 @@
 </div>
 
 <div id="modal-chaos" class="modal">
-    <div class="modal-content" style="height:auto;">
+    <div class="modal-content" style="height:auto; min-height: 550px;">
         <h3>혼돈의 축복</h3>
         <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
         <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">남은 기회: <span id="chaos-uses">3</span>회</div>
@@ -247,7 +247,7 @@
         </button>
         <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
             혼돈의 축복 (도전)<br>
-            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 3종 카드 능력치 대폭 상승</span>
+            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승</span>
         </button>
         <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;">
             적용된 축복 확인
@@ -335,6 +335,11 @@ const RPG = {
                  this.state = { ...this.state, ...loaded };
                  if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 3;
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
+
+                 // Load persistent wordbook
+                 const vocab = localStorage.getItem('cardRpgVocab');
+                 if(vocab) this.state.wrongWords = JSON.parse(vocab);
+
                  this.showAlert("불러오기 완료");
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
         } else { this.initNewGame(); }
@@ -343,10 +348,14 @@ const RPG = {
 
     initNewGame() {
         this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, chaosBuffs: [], wrongWords: [] };
+        // Load persistent wordbook
+        const vocab = localStorage.getItem('cardRpgVocab');
+        if(vocab) this.state.wrongWords = JSON.parse(vocab);
     },
 
     saveGame() {
         localStorage.setItem('cardRpgSave', JSON.stringify(this.state));
+        localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
         this.showAlert("저장되었습니다.");
     },
 
@@ -409,9 +418,11 @@ const RPG = {
         } else {
             this.startChaosQuiz((success) => {
                 if(success) {
-                    this.applyChaosBlessing(3);
+                    this.applyChaosBlessing(4);
                 } else {
-                    this.showAlert("퀴즈 실패... 축복을 받지 못했습니다.");
+                    this.state.chaosBlessingUses--;
+                    document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
+                    this.showAlert("퀴즈 실패... 기회가 1회 차감되었습니다.");
                 }
             });
         }
@@ -521,6 +532,7 @@ const RPG = {
 
     resetWrongWords() {
         this.state.wrongWords = [];
+        localStorage.removeItem('cardRpgVocab');
         this.showAlert("복습 상태가 초기화되었습니다.");
         this.openWordbook(); // Re-render
     },
@@ -581,6 +593,7 @@ const RPG = {
                     if(!RPG.state.wrongWords) RPG.state.wrongWords = [];
                     if(!RPG.state.wrongWords.includes(q.word)) {
                         RPG.state.wrongWords.push(q.word);
+                        localStorage.setItem('cardRpgVocab', JSON.stringify(RPG.state.wrongWords));
                     }
 
                     // Find correct one to highlight
