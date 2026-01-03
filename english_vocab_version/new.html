@@ -368,48 +368,19 @@
 
 <div id="destiny-modal" class="modal">
     <div class="modal-content">
-        <h2 style="color:#b39ddb; border-bottom:1px solid #673ab7; padding-bottom:10px;">🔮 운명 확인</h2>
+        <h2 style="color:#fff; border-bottom:1px solid #555; padding-bottom:10px;">🔮 운명 확인</h2>
 
-        <button onclick="openAltarModal()" style="width:100%; margin-bottom:15px; background: linear-gradient(135deg, #00695c, #004d40); border-color:#00897b;">
-            🙏 축복의 제단
-            <span class="skill-sub" style="color:#80cbc4">다음 전투를 위한 강력한 축복</span>
-        </button>
-
-        <hr style="border-color:#444; margin: 15px 0;">
-
-        <button onclick="tryTimeReversal('normal')" style="width:100%; margin-bottom:5px; background:#3e2723; border-color:#5d4037;">
-            🕰️ 시간의 역행 (무료)
-            <span class="skill-sub" style="color:#bcaaa4">퀴즈 정답 시 유물 리셋 (기본)</span>
-        </button>
-
-        <button onclick="tryTimeReversal('brilliant')" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #1565c0, #0d47a1); border-color:#42a5f5;">
-             ✨ 찬란한 시간의 역행 (30,000 G)
-             <span class="skill-sub" style="color:#90caf9">퀴즈 정답 시 레어 가중치 2배</span>
-        </button>
-
-        <button onclick="tryTimeReversal('noble')" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
-             👑 고귀한 시간의 역행 (50,000 G)
-             <span class="skill-sub" style="color:#e1bee7">퀴즈 정답 시 레어 가중치 3배</span>
-        </button>
-
-        <button onclick="document.getElementById('destiny-modal').classList.remove('active')" style="background:#555; margin-top:10px;">닫기</button>
-    </div>
-</div>
-
-<div id="altar-modal" class="modal">
-    <div class="modal-content">
-        <h2 style="color:#80cbc4; border-bottom:1px solid #00897b; padding-bottom:10px;">🙏 축복의 제단</h2>
-        <div style="margin-bottom:15px; color:#aaa; font-size:0.8rem;">
-            영어 퀴즈를 맞춰 축복을 획득하세요.<br>
-            축복은 <b>다음 전투 1회</b> 동안 지속되며 승리 시 소멸합니다.
+        <h4 style="text-align:left; color:#80cbc4; margin: 10px 0 5px 0;">축복의 제단</h4>
+        <div style="margin-bottom:10px; color:#aaa; font-size:0.75rem;">
+            축복은 <b>다음 전투 1회</b> 지속됩니다.
         </div>
 
-        <button onclick="tryBlessing('normal')" style="width:100%; margin-bottom:10px; background:#424242;">
+        <button onclick="tryBlessing('normal')" style="width:100%; margin-bottom:5px; background:#424242;">
             일반 축복의 제단 (무료)
             <span class="skill-sub" style="color:#bdbdbd">일반 등급 축복 중 하나 랜덤 획득</span>
         </button>
 
-        <button onclick="tryBlessing('epic')" style="width:100%; margin-bottom:10px; background:linear-gradient(135deg, #1565c0, #0d47a1);">
+        <button onclick="tryBlessing('epic')" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #1565c0, #0d47a1);">
             찬란한 축복의 제단 (5,000 G)
             <span class="skill-sub" style="color:#90caf9">성공: 에픽 / 실패: 일반 축복</span>
         </button>
@@ -419,7 +390,21 @@
             <span class="skill-sub" style="color:#ffcc80">성공: 전설 / 실패: 에픽 축복</span>
         </button>
 
-        <button onclick="document.getElementById('altar-modal').classList.remove('active')" style="background:#555; margin-top:10px;">닫기</button>
+        <hr style="border-color:#444; margin: 15px 0;">
+
+        <h4 style="text-align:left; color:#b39ddb; margin: 10px 0 5px 0;">시간의 역행</h4>
+
+        <button onclick="tryTimeReversal('normal')" style="width:100%; margin-bottom:5px; background:#3e2723; border-color:#5d4037;">
+            🕰️ 시간의 역행 (30,000 G)
+            <span class="skill-sub" style="color:#bcaaa4">퀴즈 정답 시 레어 가중치 2배</span>
+        </button>
+
+        <button onclick="tryTimeReversal('noble')" style="width:100%; margin-bottom:5px; background:linear-gradient(135deg, #7b1fa2, #e040fb); border-color:#d500f9;">
+             👑 고귀한 시간의 역행 (50,000 G)
+             <span class="skill-sub" style="color:#e1bee7">퀴즈 정답 시 레어 가중치 3배</span>
+        </button>
+
+        <button onclick="document.getElementById('destiny-modal').classList.remove('active')" style="background:#555; margin-top:10px;">닫기</button>
     </div>
 </div>
 
@@ -1769,8 +1754,19 @@ function winBattle() {
             // Yes: Start Bonus Quiz
             startBonusQuiz((success) => {
                 let rewardMult = success ? 3 : 1;
-                if(success) myAlert("정답입니다! 보상이 3배가 됩니다!");
-                else myAlert("오답입니다. 기본 보상을 획득합니다.");
+
+                // 미리 보상 계산 (표시용)
+                let tempExp = Math.floor(currentEnemy.exp * rewardMult);
+                let tempGold = Math.floor(currentEnemy.gold * rewardMult);
+
+                if(gameState.activeBlessing) {
+                    if(gameState.activeBlessing.id === 'lucky_hand') tempGold *= 2;
+                    if(gameState.activeBlessing.id === 'gold_contract') tempGold *= 3;
+                    if(gameState.activeBlessing.id === 'midas') tempGold *= 4;
+                }
+
+                if(success) myAlert(`정답입니다! 보상이 3배가 됩니다!\n(획득: ${tempExp} EXP, ${tempGold} G)`);
+                else myAlert(`오답입니다. 기본 보상을 획득합니다.\n(획득: ${tempExp} EXP, ${tempGold} G)`);
                 finalizeWin(rewardMult);
             });
         },
@@ -3078,25 +3074,18 @@ function openDestinyCheck() {
     document.getElementById('destiny-modal').classList.add('active');
 }
 
-function openAltarModal() {
-    document.getElementById('altar-modal').classList.add('active');
-}
-
 function tryTimeReversal(type) {
     if(player.artifacts.length === 0) return myAlert("초기화할 유물이 없습니다.");
 
     let cost = 30000;
-    if(type === 'normal') cost = 0;
     if(type === 'noble') cost = 50000;
 
     if(gameState.gold < cost) return myAlert(`골드가 부족합니다. (필요: ${cost} G)`);
 
     let title = "시간의 역행";
-    if(type === 'brilliant') title = "찬란한 시간의 역행";
     if(type === 'noble') title = "고귀한 시간의 역행";
 
     let msg = `${title}을 진행하시겠습니까?\n비용: ${cost} G\n영어 퀴즈가 출제됩니다.`;
-    if(cost === 0) msg = `${title}을 진행하시겠습니까?\n비용: 무료\n영어 퀴즈가 출제됩니다.`;
 
     if(!confirm(msg)) return;
 
@@ -3106,15 +3095,8 @@ function tryTimeReversal(type) {
     }
 
     startQuiz((isCorrect) => {
-        if(type === 'normal' && !isCorrect) {
-            myAlert("오답입니다. 리셋에 실패했습니다.");
-            return;
-        }
-
         let weight = 1;
         if(type === 'normal') {
-            weight = 1;
-        } else if(type === 'brilliant') {
             weight = isCorrect ? 2 : 1;
         } else if(type === 'noble') {
             weight = isCorrect ? 3 : 1;
@@ -3171,7 +3153,6 @@ function tryBlessing(tier) {
         myAlert(`축복을 받았습니다!\n[${pick.name}] ${pick.desc}`);
         recalcAllStats();
         updateInfo();
-        document.getElementById('altar-modal').classList.remove('active');
         document.getElementById('destiny-modal').classList.remove('active');
     });
 }
