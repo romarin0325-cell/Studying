@@ -794,10 +794,10 @@ const RPG = {
                 const t = proto.trait;
                 let active = (t.type.includes('van') && idx===0) || (t.type.includes('mid') && idx===1) || (t.type.includes('rear') && idx===2);
                 if(active) {
-                    if(t.type.includes('atk')) p.atk = Math.floor(p.atk * (1 + t.val/100));
-                    if(t.type.includes('matk')) p.matk = Math.floor(p.matk * (1 + t.val/100));
-                    if(t.type.includes('def')) p.def = Math.floor(p.def * (1 + t.val/100));
-                    if(t.type.includes('mdef')) p.mdef = Math.floor(p.mdef * (1 + t.val/100));
+                    if(t.type.includes('_atk')) p.atk = Math.floor(p.atk * (1 + t.val/100));
+                    if(t.type.includes('_matk')) p.matk = Math.floor(p.matk * (1 + t.val/100));
+                    if(t.type.includes('_def')) p.def = Math.floor(p.def * (1 + t.val/100));
+                    if(t.type.includes('_mdef')) p.mdef = Math.floor(p.mdef * (1 + t.val/100));
                 }
             }
             return p;
@@ -829,6 +829,8 @@ const RPG = {
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
+                this.battle.activeTraits.push(t.type);
+
                 if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
                 if(t.type === 'syn_water_3_matk') p.matk = Math.floor(p.matk * 1.5);
@@ -1263,7 +1265,14 @@ const RPG = {
                     }
                 }
                 else if(eff.type === 'dmg_boost') {
-                     if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) mult *= eff.mult;
+                     if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) {
+                         mult *= eff.mult;
+                         RPG.log(`[특성] ${this.BUFF_NAMES[eff.debuff]} 대상 추가 피해! (배율 x${eff.mult})`);
+                     }
+                     else if(eff.condition === 'synergy_active' && RPG.battle.activeTraits.includes(eff.trait)) {
+                         mult *= eff.mult;
+                         RPG.log(`[시너지] 조건 만족! 위력 ${eff.mult}배 증가!`);
+                     }
                      else if(eff.condition === 'target_stack' && target.buffs[eff.debuff]) mult += (target.buffs[eff.debuff] * eff.multPerStack);
                      else if(eff.condition === 'target_debuff_count_scale') {
                          let bonus = (Object.keys(target.buffs).length * eff.multPerDebuff);
@@ -1289,10 +1298,22 @@ const RPG = {
 
         // 4. Trait Multipliers
         const t = source.proto.trait;
-        if(t.type === 'cond_silence_dmg' && target.buffs.silence) dmgBonus += (t.val - 1.0);
-        if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) dmgBonus += (t.val - 1.0);
-        if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length >= 3) dmgBonus += (t.val - 1.0);
-        if(t.type === 'cond_divine_3_dmg' && target.buffs.divine >= 3) dmgBonus += (t.val - 1.0);
+        if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
+            dmgBonus += (t.val - 1.0);
+            RPG.log("[특성] 침묵 대상 추가 피해!");
+        }
+        if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) {
+            dmgBonus += (t.val - 1.0);
+            RPG.log("[특성] 부식 대상 추가 피해!");
+        }
+        if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length >= 3) {
+            dmgBonus += (t.val - 1.0);
+            RPG.log("[특성] 디버프 3개 이상 대상 추가 피해!");
+        }
+        if(t.type === 'cond_divine_3_dmg' && target.buffs.divine >= 3) {
+            dmgBonus += (t.val - 1.0);
+            RPG.log("[특성] 디바인 3스택 이상 대상 추가 피해!");
+        }
 
         // 5. Defense Calculation
         let isCrit = Math.random() * 100 < crit;
