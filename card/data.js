@@ -36,7 +36,7 @@ const CARDS = [
         trait: { type: 'pos_rear_atk_matk', val: 30, desc: '대장 배치시 공격력 마법공격력 30%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
-            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
+            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!'}] }
         ]
     },
@@ -45,7 +45,7 @@ const CARDS = [
         stats: { hp: 500, atk: 85, matk: 110, def: 80, mdef: 90 },
         trait: { type: 'syn_water_nature', desc: '덱에 물 자연이 있을 경우, 문라이트세레나에 트윙클파티 필드버프 추가발동' },
         skills: [
-            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 발동', effects: [{type: 'field_buff', id: 'star_powder'}] },
+            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 스타파우더 발동', effects: [{type: 'field_buff', id: 'star_powder'}] },
             { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동', effects: [{type: 'field_buff', id: 'moon_bless'}] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] }
         ]
@@ -62,7 +62,7 @@ const CARDS = [
     },
     {
         id: 'world_tree', name: '세계수', grade: 'legend', element: 'nature', role: 'buffer',
-        stats: { hp: 600, atk: 90, matk: 90, def: 55, mdef: 55 },
+        stats: { hp: 600, atk: 90, matk: 90, def: 60, mdef: 60 },
         trait: { type: 'syn_nature_3_def', val: 50, desc: '덱이 전부 자연일 시 방어력/마법방어력 50%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
@@ -250,7 +250,7 @@ const CARDS = [
         trait: { type: 'syn_snow_rabbit', val: 50, desc: '눈토끼가 덱에 있을시 물공 물방 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 추가 0.5배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 1.5}] },
+            { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0}] },
             { name: '문라이트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '달의축복 상태에서 대미지 2.5배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5}] }
         ]
     },
@@ -363,7 +363,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] },
-            { name: '아이스빔', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '2배 마법', effects: [] }
+            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼 시너지 발동 중 대미지 2배', effects: [{type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0}] }
         ]
     },
     {
