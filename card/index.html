@@ -557,9 +557,9 @@ const RPG = {
     applyGreatSageBlessing() {
         this.state.greatSageBlessingUses--;
         this.state.tickets += 1;
+        if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-        // Apply to 8 random cards (or just 8 slots if deck + inventory?)
-        // User said "8개의 캐릭터에 대해". I'll pick 8 distinct random cards from full list (CARDS)
+        // Apply to 8 random cards
         let pool = [...CARDS].sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, 8);
 
@@ -581,10 +581,12 @@ const RPG = {
             }
         });
 
-        let msg = "<b>대현자의 축복 성공!</b><br>8명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br>";
-        this.state.chaosBuffs.forEach(b => {
+        let msg = "<b>대현자의 축복 성공!</b><br>8명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
+        newBuffs.forEach(b => {
              msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
         });
+        msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
+
         this.openInfoModal("축복 성공", msg);
     },
 
@@ -612,11 +614,11 @@ const RPG = {
             }
         });
 
-        let msg = "<b>혼돈의 축복 적용!</b><br>";
-        this.state.chaosBuffs.forEach(b => {
+        let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
+        newBuffs.forEach(b => {
              msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
         });
-        msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+        msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
         this.openInfoModal("축복 성공", msg);
     },
 
