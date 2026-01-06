@@ -131,7 +131,7 @@
         </div>
         <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
         <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
-        <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
+        <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
         <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">혼돈의 축복</button>
         <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
         <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
@@ -215,6 +215,36 @@
     </div>
 </div>
 
+<div id="modal-library" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3>도서관</h3>
+        <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
+        <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
+        <button onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-magic-class" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
+        <h3>루미의 마법교실</h3>
+        <div id="lecture-list" class="modal-scroll"></div>
+        <button onclick="document.getElementById('modal-magic-class').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-lecture-view" class="modal" style="z-index: 150;">
+    <div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;">
+        <h3 id="lecture-title">강의 제목</h3>
+        <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;">
+                 <img src="루미.png" onerror="this.src=''" alt="Rumi">
+             </div>
+        </div>
+        <div id="lecture-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;"></div>
+        <button onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
 <div id="modal-wordbook" class="modal">
     <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
         <h3>단어장</h3>
@@ -229,8 +259,9 @@
 
 <div id="modal-quiz" class="modal">
     <div class="modal-content" style="width: 320px;">
-        <h3>단어 퀴즈</h3>
+        <h3>퀴즈</h3>
         <div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"></div>
+        <div id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"></div>
         <div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
         <div id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"></div>
     </div>
@@ -248,6 +279,11 @@
         <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
             혼돈의 축복 (도전)<br>
             <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승</span>
+        </button>
+        <button class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;">
+            대현자의 축복<br>
+            <span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;">문법 퀴즈 성공 시 8종 전체 축복 + 티켓 1장</span>
+            <div style="font-size:0.7rem; margin-top:2px;">(남은 기회: <span id="sage-uses">3</span>회)</div>
         </button>
         <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;">
             적용된 축복 확인
@@ -268,6 +304,7 @@
 
 <script src="data.js"></script>
 <script src="vocab_data.js"></script>
+<script src="grammar_data.js"></script>
 <script>
 /**
  * RPG Game Namespace
@@ -281,6 +318,7 @@ const RPG = {
         deck: [null, null, null],
         enemyScale: 0,
         chaosBlessingUses: 3,
+        greatSageBlessingUses: 3,
         chaosBuffs: [] // Array of { id: cardId, multiplier: float }
     },
 
@@ -334,6 +372,7 @@ const RPG = {
                  let loaded = JSON.parse(save);
                  this.state = { ...this.state, ...loaded };
                  if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 3;
+                 if(this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = 3;
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
 
                  // Load persistent wordbook
@@ -347,7 +386,7 @@ const RPG = {
     },
 
     initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, chaosBuffs: [], wrongWords: [] };
+        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, greatSageBlessingUses: 3, chaosBuffs: [], wrongWords: [] };
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
@@ -393,7 +432,9 @@ const RPG = {
 
     // --- Chaos Blessing ---
     openChaosBlessing() {
+        if(this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = 3;
         document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
+        document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
         document.getElementById('modal-chaos').classList.add('active');
     },
     checkActiveChaosBlessings() {
@@ -408,6 +449,33 @@ const RPG = {
         this.openInfoModal("축복 상태", msg);
     },
     activateChaos(type) {
+        if(type === 'great_sage') {
+            if(this.state.greatSageBlessingUses <= 0) {
+                return this.showAlert("대현자의 축복 기회를 모두 소진했습니다. (새로하기 시 리셋)");
+            }
+            document.getElementById('modal-chaos').classList.remove('active');
+
+            // Pick random quiz
+            // Get all quizzes from all lectures
+            let allQuizzes = [];
+            GRAMMAR_DATA.forEach(lec => {
+                allQuizzes = allQuizzes.concat(lec.quizzes);
+            });
+            let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+            this.showConfirm(`이 문제는 ${q.lecture_id}강의 내용이야. 강의를 확인하고 풀래?`,
+                () => { // Yes
+                    this.showLecture(q.lecture_id, () => {
+                        this.startGrammarQuiz(q);
+                    });
+                },
+                () => { // No
+                    this.startGrammarQuiz(q);
+                }
+            );
+            return;
+        }
+
         if(this.state.chaosBlessingUses <= 0) {
             return this.showAlert("이번 전투 구간의 축복 기회를 모두 소진했습니다.");
         }
@@ -415,7 +483,7 @@ const RPG = {
 
         if(type === 'normal') {
             this.applyChaosBlessing(2);
-        } else {
+        } else if (type === 'challenge') {
             this.startChaosQuiz((success) => {
                 if(success) {
                     this.applyChaosBlessing(4);
@@ -427,19 +495,121 @@ const RPG = {
             });
         }
     },
-    applyChaosBlessing(count) {
-        this.state.chaosBlessingUses--;
-        // Pick random cards from ALL types (CARDS)
-        let pool = [...CARDS].sort(() => 0.5 - Math.random());
-        let picks = pool.slice(0, count);
 
-        this.state.chaosBuffs = picks.map(c => {
+    startGrammarQuiz(q) {
+        // Shuffle options
+        // q.options is array of strings. q.answer is correct string.
+        let opts = [...q.options];
+        opts.sort(() => Math.random() - 0.5);
+
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // Remove hints in parentheses from description (desc)
+        let cleanDesc = q.desc.replace(/\s*\(.*?\)/g, "").trim();
+        // Keep parentheses in question text (interpretation)
+
+        qDiv.innerText = q.question;
+        descDiv.innerText = cleanDesc;
+        descDiv.style.display = 'block';
+
+        oDiv.innerHTML = "";
+        fDiv.innerText = "";
+
+        opts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = opt;
+            btn.onclick = () => {
+                Array.from(oDiv.children).forEach(c => c.onclick = null);
+                if(opt === q.answer) {
+                    btn.classList.add('correct');
+                    fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50";
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        this.applyGreatSageBlessing();
+                    }, 1000);
+                } else {
+                    btn.classList.add('wrong');
+                     // Highlight correct
+                    Array.from(oDiv.children).forEach(c => {
+                         if(c.innerText === q.answer) c.classList.add('correct');
+                    });
+                    fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350";
+                    this.state.greatSageBlessingUses--;
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        this.showAlert(`틀렸어... 남은 기회: ${this.state.greatSageBlessingUses}회`);
+                    }, 1500);
+                }
+            };
+            oDiv.appendChild(btn);
+        });
+
+        modal.classList.add('active');
+    },
+
+    applyGreatSageBlessing() {
+        this.state.greatSageBlessingUses--;
+        this.state.tickets += 1;
+
+        // Apply to 8 random cards (or just 8 slots if deck + inventory?)
+        // User said "8개의 캐릭터에 대해". I'll pick 8 distinct random cards from full list (CARDS)
+        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+        let picks = pool.slice(0, 8);
+
+        let newBuffs = picks.map(c => {
             let mult = 0;
             if(c.grade === 'normal') mult = 0.4;
             else if(c.grade === 'rare') mult = 0.3;
             else if(c.grade === 'epic') mult = 0.2;
             else if(c.grade === 'legend') mult = 0.1;
             return { id: c.id, name: c.name, multiplier: mult };
+        });
+
+        newBuffs.forEach(nb => {
+            let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
+            if(existing) {
+                existing.multiplier += nb.multiplier;
+            } else {
+                this.state.chaosBuffs.push(nb);
+            }
+        });
+
+        let msg = "<b>대현자의 축복 성공!</b><br>8명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br>";
+        this.state.chaosBuffs.forEach(b => {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+        });
+        this.openInfoModal("축복 성공", msg);
+    },
+
+    applyChaosBlessing(count) {
+        this.state.chaosBlessingUses--;
+        // Pick random cards from ALL types (CARDS)
+        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+        let picks = pool.slice(0, count);
+
+        let newBuffs = picks.map(c => {
+            let mult = 0;
+            if(c.grade === 'normal') mult = 0.4;
+            else if(c.grade === 'rare') mult = 0.3;
+            else if(c.grade === 'epic') mult = 0.2;
+            else if(c.grade === 'legend') mult = 0.1;
+            return { id: c.id, name: c.name, multiplier: mult };
+        });
+
+        newBuffs.forEach(nb => {
+            let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
+            if(existing) {
+                existing.multiplier += nb.multiplier;
+            } else {
+                this.state.chaosBuffs.push(nb);
+            }
         });
 
         let msg = "<b>혼돈의 축복 적용!</b><br>";
@@ -508,6 +678,47 @@ const RPG = {
         modal.classList.add('active');
     },
 
+    // --- Library & Lecture ---
+    openLibrary() {
+        document.getElementById('modal-library').classList.add('active');
+    },
+    openMagicClass() {
+        const list = document.getElementById('lecture-list');
+        list.innerHTML = "";
+        GRAMMAR_DATA.forEach(lec => {
+             const btn = document.createElement('button');
+             btn.className = "menu-btn";
+             btn.innerText = `${lec.id}강. ${lec.title}`;
+             btn.onclick = () => this.showLecture(lec.id);
+             list.appendChild(btn);
+        });
+        document.getElementById('modal-magic-class').classList.add('active');
+    },
+    showLecture(id, onCloseCallback) {
+        const lec = GRAMMAR_DATA.find(l => l.id === id);
+        if(!lec) return;
+        document.getElementById('lecture-title').innerText = `${lec.id}강. ${lec.title}`;
+        document.getElementById('lecture-content').innerText = lec.content;
+
+        // Setup close button to handle callback if provided (for quiz flow)
+        // We override the onclick of the close button inside modal-lecture-view dynamically if needed,
+        // or just use a temporary callback variable.
+        const modal = document.getElementById('modal-lecture-view');
+
+        // This is a bit hacky for the callback, but simplest given the structure.
+        // We will store the callback in RPG.tempLectureClose
+        this.tempLectureClose = onCloseCallback;
+
+        modal.classList.add('active');
+    },
+    closeLectureView() {
+        document.getElementById('modal-lecture-view').classList.remove('active');
+        if(this.tempLectureClose) {
+            this.tempLectureClose();
+            this.tempLectureClose = null;
+        }
+    },
+
     // --- Wordbook & Quiz ---
     openWordbook() {
         if(!this.state.wrongWords) this.state.wrongWords = [];
@@ -538,6 +749,9 @@ const RPG = {
     },
 
     startQuiz(callback) {
+        // Reset specific UI elements for normal quiz
+        document.getElementById('quiz-desc').style.display = 'none';
+
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
 
@@ -614,6 +828,8 @@ const RPG = {
     },
 
     startChaosQuiz(callback) {
+        document.getElementById('quiz-desc').style.display = 'none';
+
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
 

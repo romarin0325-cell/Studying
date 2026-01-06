@@ -42,10 +42,10 @@ const CARDS = [
     },
     {
         id: 'rumi', name: '루미', grade: 'legend', element: 'water', role: 'buffer',
-        stats: { hp: 500, atk: 85, matk: 110, def: 80, mdef: 90 },
+        stats: { hp: 500, atk: 90, matk: 120, def: 80, mdef: 90 },
         trait: { type: 'syn_water_nature', desc: '덱에 물 자연이 있을 경우, 문라이트세레나에 트윙클파티 필드버프 추가발동' },
         skills: [
-            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 스타파우더 발동', effects: [{type: 'field_buff', id: 'star_powder'}] },
+            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '필드버프 스타파우더 발동', effects: [{type: 'field_buff', id: 'star_powder'}] },
             { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동', effects: [{type: 'field_buff', id: 'moon_bless'}] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] }
         ]
