@@ -132,7 +132,7 @@
         <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
         <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
         <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
-        <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">혼돈의 축복</button>
+        <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
         <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
         <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
     </div>
@@ -271,7 +271,9 @@
     <div class="modal-content" style="height:auto; min-height: 550px;">
         <h3>혼돈의 축복</h3>
         <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
-        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">남은 기회: <span id="chaos-uses">3</span>회</div>
+        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
+            혼돈의 축복: <span id="chaos-uses">3</span>회 / 대현자의 축복: <span id="sage-uses">3</span>회
+        </div>
         <button class="menu-btn" onclick="RPG.activateChaos('normal')">
             혼돈의 축복 (일반)<br>
             <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승</span>
@@ -283,7 +285,6 @@
         <button class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;">
             대현자의 축복<br>
             <span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;">문법 퀴즈 성공 시 8종 전체 축복 + 티켓 1장</span>
-            <div style="font-size:0.7rem; margin-top:2px;">(남은 기회: <span id="sage-uses">3</span>회)</div>
         </button>
         <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;">
             적용된 축복 확인
@@ -381,7 +382,32 @@ const RPG = {
 
                  this.showAlert("불러오기 완료");
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
-        } else { this.initNewGame(); }
+        } else {
+            // New Game Logic: Check for previous run data to save record
+            let prevStage = this.state.enemyScale;
+
+            // If in-memory state is empty (e.g. fresh load), check localStorage
+            if (prevStage === 0 && this.state.tickets === 20) {
+                const save = localStorage.getItem('cardRpgSave');
+                if (save) {
+                    try {
+                        let loaded = JSON.parse(save);
+                        if (loaded.enemyScale) prevStage = loaded.enemyScale;
+                    } catch (e) {}
+                }
+            }
+
+            // Save record if significant progress
+            if (prevStage > 0) {
+                 // Temporarily set state to previous stage for saveRecord to use
+                 let originalScale = this.state.enemyScale;
+                 this.state.enemyScale = prevStage;
+                 this.saveRecord();
+                 this.state.enemyScale = originalScale;
+            }
+
+            this.initNewGame();
+        }
         this.toMenu();
     },
 
@@ -398,18 +424,33 @@ const RPG = {
         this.showAlert("저장되었습니다.");
     },
 
-    saveRecord() {
+    saveRecord(score = null) {
         let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
-        history.unshift(`최대 스테이지: ${this.state.enemyScale + 1}`);
-        if(history.length > 5) history = history.slice(0, 5);
+        let currentStage = score !== null ? score : (this.state.enemyScale + 1);
+
+        // Extract existing stages (assuming format "최대 스테이지: N")
+        let stages = history.map(h => {
+             let m = h.match(/최대 스테이지: (\d+)/);
+             return m ? parseInt(m[1]) : 0;
+        });
+
+        // Add current stage
+        stages.push(currentStage);
+
+        // Sort descending and keep top 5
+        stages.sort((a, b) => b - a);
+        stages = stages.slice(0, 5);
+
+        // Reconstruct history strings
+        history = stages.map(s => `최대 스테이지: ${s}`);
         localStorage.setItem('cardRpgRecords', JSON.stringify(history));
     },
 
     showRecords() {
         let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
         if(history.length === 0) return this.showAlert("기록이 없습니다.");
-        let msg = history.map((h, i) => `${i+1}. ${h}`).join("<br>");
-        this.openInfoModal("지난 5회 플레이 기록", msg);
+        let msg = history.map((h, i) => `${i+1}위. ${h}`).join("<br>");
+        this.openInfoModal("최대 스테이지 기록 (Top 5)", msg);
     },
 
     // --- Screen Navigation ---
@@ -421,7 +462,7 @@ const RPG = {
         document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
     },
     toTitle() {
-        this.saveRecord();
+        // No saveRecord here
         this.showScreen('screen-title');
     },
     showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
@@ -556,6 +597,9 @@ const RPG = {
 
     applyGreatSageBlessing() {
         this.state.greatSageBlessingUses--;
+        // Update UI immediately
+        document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
+
         this.state.tickets += 1;
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
@@ -564,11 +608,7 @@ const RPG = {
         let picks = pool.slice(0, 8);
 
         let newBuffs = picks.map(c => {
-            let mult = 0;
-            if(c.grade === 'normal') mult = 0.4;
-            else if(c.grade === 'rare') mult = 0.3;
-            else if(c.grade === 'epic') mult = 0.2;
-            else if(c.grade === 'legend') mult = 0.1;
+            let mult = 0.1; // Changed to flat 10%
             return { id: c.id, name: c.name, multiplier: mult };
         });
 
@@ -1775,7 +1815,7 @@ const RPG = {
     },
 
     loseBattle() {
-        this.saveRecord(); // Save Max Stage
+        // No saveRecord here (User request: only on New Game)
 
         // Reset Chaos Blessing
         this.state.chaosBlessingUses = 3;
