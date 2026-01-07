@@ -1084,6 +1084,7 @@ const RPG = {
              else if(t.type === 'syn_nature_3_matk' && elements.filter(e=>e==='nature').length===3) active = true;
              else if(t.type === 'syn_night_rabbit' && this.state.deck.includes('night_rabbit')) active = true;
              else if(t.type === 'syn_snow_rabbit' && this.state.deck.includes('snow_rabbit')) active = true;
+             else if(t.type === 'syn_water_3_atk_matk' && elements.filter(e=>e==='water').length===3) active = true;
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
@@ -1099,6 +1100,7 @@ const RPG = {
                 if(t.type === 'syn_water_light_matk_mdef') { p.matk = Math.floor(p.matk * 1.3); p.mdef = Math.floor(p.mdef * 1.3); }
                 if(t.type === 'syn_night_rabbit') { p.matk = Math.floor(p.matk * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_snow_rabbit') { p.atk = Math.floor(p.atk * 1.5); p.def = Math.floor(p.def * 1.5); }
+                if(t.type === 'syn_water_3_atk_matk') { p.atk = Math.floor(p.atk * 1.5); p.matk = Math.floor(p.matk * 1.5); }
              }
         });
 
@@ -1418,6 +1420,12 @@ const RPG = {
                  RPG.log(`[특성] 마시멜로가 흔적도 없이 사라졌습니다... (축복 실패)`);
              }
         }
+        else if(t.type === 'death_field_buff_count_dmg') {
+             let count = RPG.battle.fieldBuffs.length;
+             let dmg = Math.floor(victim.matk * count * t.val * (100 / (100 + killer.mdef)));
+             killer.hp -= dmg;
+             RPG.log(`[특성] 사망 반격! (필드버프 ${count}개) <span class="log-dmg">${dmg}</span> 피해.`);
+        }
     },
 
     // --- Player Skill Execution ---
@@ -1547,6 +1555,23 @@ const RPG = {
                      }
                      else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=>b.name === eff.buff)) mult *= eff.mult;
                 }
+                else if(eff.type === 'consume_burn_1_dmg') {
+                     if(target.buffs['burn'] >= 1) {
+                         mult *= eff.mult;
+                         // RPG.log("작열 소비 조건 만족! 위력 증가!"); // Logged in applySkillEffects for clarity on consumption
+                     }
+                }
+                else if(eff.type === 'remove_field_buff_dmg') {
+                     if(RPG.battle.fieldBuffs.length > 0) {
+                         mult *= eff.mult;
+                     }
+                }
+                else if(eff.type === 'cond_target_debuff_3_dmg') {
+                     if(Object.keys(target.buffs).length >= 3) {
+                         mult *= eff.mult;
+                         RPG.log("적 디버프 3개 이상! 위력 2배!");
+                     }
+                }
                 else if(eff.type === 'random_mult') {
                     mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
                     RPG.log(`무작위 위력! x${mult.toFixed(1)}`);
@@ -1671,6 +1696,29 @@ const RPG = {
                  const count = Object.keys(target.buffs).length;
                  target.buffs = {};
                  if(count > 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+            }
+            else if(eff.type === 'consume_all_burn_cond_buff') {
+                 if(target.buffs['burn']) {
+                     delete target.buffs['burn'];
+                     RPG.applyFieldBuff('sun_bless');
+                     RPG.log("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
+                 } else {
+                     RPG.applyFieldBuff('earth_bless');
+                     RPG.log("소모할 작열이 없어 대지의 축복을 불러옵니다.");
+                 }
+            }
+            else if(eff.type === 'consume_burn_1_dmg') {
+                 if(target.buffs['burn'] >= 1) {
+                     target.buffs['burn']--;
+                     if(target.buffs['burn'] <= 0) delete target.buffs['burn'];
+                     RPG.log("작열 1스택 소모! 대미지 2배 적용!");
+                 }
+            }
+            else if(eff.type === 'remove_field_buff_dmg') {
+                 if(RPG.battle.fieldBuffs.length > 0) {
+                     let rm = RPG.battle.fieldBuffs.shift();
+                     RPG.log(`필드버프 [${this.BUFF_NAMES[rm.name]}] 제거! 대미지 2배 적용!`);
+                 }
             }
         });
 

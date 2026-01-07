@@ -1,6 +1,16 @@
 const CARDS = [
     // --- 전설 (Legend) ---
     {
+        id: 'deep_lord', name: '심해의주인', grade: 'legend', element: 'water', role: 'dealer',
+        stats: { hp: 520, atk: 110, matk: 120, def: 70, mdef: 70 },
+        trait: { type: 'syn_water_3_atk_matk', val: 50, desc: '덱에 물 3장일시 물리공격력 마법공격력 50% 증가' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '월광해류', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개 제거하고 위력 2배', effects: [{type: 'remove_field_buff_dmg', mult: 2.0}] },
+            { name: '심연의포옹', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적이 디버프 3개 이상일 때 위력 2배', effects: [{type: 'cond_target_debuff_3_dmg', mult: 2.0}] }
+        ]
+    },
+    {
         id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer',
         stats: { hp: 510, atk: 115, matk: 130, def: 60, mdef: 60 },
         trait: { type: 'normal_attack_burn_divine', desc: '일반공격시 적에게 작열, 디바인 부여' },
@@ -102,6 +112,16 @@ const CARDS = [
     },
 
     // --- 에픽 (Epic) ---
+    {
+        id: 'sun_priestess', name: '태양의무녀', grade: 'epic', element: 'nature', role: 'buffer',
+        stats: { hp: 400, atk: 75, matk: 100, def: 65, mdef: 75 },
+        trait: { type: 'death_field_buff_count_dmg', val: 2.0, desc: '사망시 적용중인 필드버프수 x2배율 대미지' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '풍요의축제', type: 'sup', tier: 3, cost: 30, desc: '작열스택 소모시 태양의축복, 없을시 대지의축복', effects: [{type: 'consume_all_burn_cond_buff'}] },
+            { name: '태양의춤', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 1스택 소모하여 대미지 2배', effects: [{type: 'consume_burn_1_dmg', mult: 2.0}] }
+        ]
+    },
     {
         id: 'storm_sage', name: '폭풍의현자', grade: 'epic', element: 'nature', role: 'debuffer',
         stats: { hp: 380, atk: 75, matk: 110, def: 60, mdef: 75 },
