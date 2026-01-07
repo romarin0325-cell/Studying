@@ -320,7 +320,9 @@ const RPG = {
         enemyScale: 0,
         chaosBlessingUses: 3,
         greatSageBlessingUses: 3,
-        chaosBuffs: [] // Array of { id: cardId, multiplier: float }
+        chaosBuffs: [], // Array of { id: cardId, multiplier: float } (Merged)
+        activeChaosBlessing: [], // Specific buffs from Chaos Blessing
+        activeSageBlessing: []   // Specific buffs from Great Sage Blessing
     },
 
     // Battle State (Transient)
@@ -375,6 +377,8 @@ const RPG = {
                  if(this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 3;
                  if(this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = 3;
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
+                 if(!this.state.activeChaosBlessing) this.state.activeChaosBlessing = [];
+                 if(!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
 
                  // Load persistent wordbook
                  const vocab = localStorage.getItem('cardRpgVocab');
@@ -412,7 +416,7 @@ const RPG = {
     },
 
     initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, greatSageBlessingUses: 3, chaosBuffs: [], wrongWords: [] };
+        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, greatSageBlessingUses: 3, chaosBuffs: [], activeChaosBlessing: [], activeSageBlessing: [], wrongWords: [] };
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
@@ -595,6 +599,24 @@ const RPG = {
         modal.classList.add('active');
     },
 
+    updateMergedBlessings() {
+        this.state.chaosBuffs = [];
+
+        const addBuffs = (list) => {
+            list.forEach(nb => {
+                let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
+                if(existing) {
+                    existing.multiplier += nb.multiplier;
+                } else {
+                    this.state.chaosBuffs.push({ ...nb });
+                }
+            });
+        };
+
+        if(this.state.activeChaosBlessing) addBuffs(this.state.activeChaosBlessing);
+        if(this.state.activeSageBlessing) addBuffs(this.state.activeSageBlessing);
+    },
+
     applyGreatSageBlessing() {
         this.state.greatSageBlessingUses--;
         // Update UI immediately
@@ -612,14 +634,9 @@ const RPG = {
             return { id: c.id, name: c.name, multiplier: mult };
         });
 
-        newBuffs.forEach(nb => {
-            let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
-            if(existing) {
-                existing.multiplier += nb.multiplier;
-            } else {
-                this.state.chaosBuffs.push(nb);
-            }
-        });
+        // Set to activeSageBlessing (Replacing previous)
+        this.state.activeSageBlessing = newBuffs;
+        this.updateMergedBlessings();
 
         let msg = "<b>대현자의 축복 성공!</b><br>8명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
         newBuffs.forEach(b => {
@@ -645,14 +662,9 @@ const RPG = {
             return { id: c.id, name: c.name, multiplier: mult };
         });
 
-        newBuffs.forEach(nb => {
-            let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
-            if(existing) {
-                existing.multiplier += nb.multiplier;
-            } else {
-                this.state.chaosBuffs.push(nb);
-            }
-        });
+        // Set to activeChaosBlessing (Replacing previous)
+        this.state.activeChaosBlessing = newBuffs;
+        this.updateMergedBlessings();
 
         let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
         newBuffs.forEach(b => {
@@ -1832,6 +1844,8 @@ const RPG = {
         // Reset Chaos Blessing
         this.state.chaosBlessingUses = 3;
         this.state.chaosBuffs = [];
+        this.state.activeChaosBlessing = [];
+        this.state.activeSageBlessing = [];
 
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
@@ -1868,6 +1882,8 @@ const RPG = {
         // Reset Chaos Blessing
         this.state.chaosBlessingUses = 3;
         this.state.chaosBuffs = [];
+        this.state.activeChaosBlessing = [];
+        this.state.activeSageBlessing = [];
 
         let deadMsg = this.handlePermadeath(this.battle.players);
         let msg = "패배...";
