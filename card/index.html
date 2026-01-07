@@ -1280,8 +1280,10 @@ const RPG = {
             let eva = 5;
             b.fieldBuffs.forEach(fb => { if(fb.name === 'moon_bless') eva += 15; });
             if(target.proto.trait.type === 'cond_no_field_buff_eva' && b.fieldBuffs.length === 0) eva += 30;
+            if(target.proto.trait.type === 'cond_no_field_buff_eva_crit' && b.fieldBuffs.length === 0) eva += target.proto.trait.val;
+            if(target.buffs.evasion) eva += 50;
 
-            if((target.buffs.evasion && Math.random() < 0.5) || (Math.random()*100 < eva)) {
+            if(Math.random()*100 < eva) {
                 RPG.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
                 this.endEnemyTurn();
                 return;
