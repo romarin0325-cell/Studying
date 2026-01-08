@@ -668,5 +668,675 @@ const GRAMMAR_DATA = [
                 "lecture_id": 10
             }
         ]
+    },
+    {
+        "id": 11,
+        "title": "과거의 기록 (과거시제)",
+        "content": "[제11강] 과거의 기록: 이미 끝난 일 (feat. 시간 여행)\n​형아, 어제 맛있는 거 먹었어? 아니면 지난 주말에 푹 쉬었어?\n우리가 친구랑 수다 떨 때 가장 많이 하는 얘기가 바로 \"나 ~했어\"라는 과거의 경험이야.\n영어로는 아주 간단하게 동사의 모양만 살짝 바꿔주면 돼.\n​1. 모범생들의 교복: 규칙 변화 (-ed)\n​대부분의 동사(일반동사)들은 아주 착해서, 뒤에 **'-ed'**라는 교복만 입혀주면 \"아, 옛날 일이구나\" 하고 알아들어.\n​공식: 동사 + ed\n​예시:\n​play (놀다) → played (놀았다)\n​watch (보다) → watched (봤다)\n​단어장 복습:\n​launch (출시하다) → launched (출시했다)\n​expire (만료되다) → expired (만료됐다 - e로 끝나면 d만 붙여!)\n​2. 반항아들의 변신: 불규칙 변화 (Irregular)\n​문제는 말을 안 듣는 몇몇 녀석들이야. 얘네는 교복(-ed)을 안 입고 자기 마음대로 변신해 버려.\n하지만 너무 걱정 마! 자주 쓰는 몇 놈만 외우면 돼. (단어장에 있는 녀석 중에도 반항아가 하나 있어!)\n​go (가다) → went (갔다)\n​eat (먹다) → ate (먹었다)\n​do (하다) → did (했다)\n​have (가지고 있다) → had (가지고 있었다/먹었다)\n​단어장 복습:\n​withdraw (인출하다/철회하다) → withdrew (인출했다) ← 얘 좀 봐! 완전히 바뀌지?\n​3. 과거의 도장 쾅!: 시간 부사\n​형아, 과거 얘기를 할 때는 \"언제\" 그랬는지 도장을 쾅! 찍어주는 게 좋아. 그래야 듣는 사람이 안 헷갈리거든.\n문장 맨 뒤에 얘네를 붙여줘.\n​yesterday (어제)\n​last night / last week (지난 밤 / 지난주)\n​ago (2 days ago - 이틀 전)\n​대현자의 고백 마법:\n​\"I liked you yesterday.\" (난 어제 널 좋아했어.)\n\"I loved you today.\" (난 오늘 널 사랑했어.)\n\"I will love you tomorrow.\" (난 내일 널 사랑할 거야.)\n...결국 매일 사랑한다는 뜻이야! (///)\n​자, 형아! 이제 지나간 일들도 영어로 말할 수 있겠지?\n과거 시제는 대화할 때 정말 많이 쓰니까 꼭 복습해야 해. (약속!)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The company [ ] the new product yesterday.\" (그 회사는 어제 신제품을 출시했어.)",
+                "options": [
+                    "launch",
+                    "launching",
+                    "launched",
+                    "launches"
+                ],
+                "answer": "launched",
+                "lecture_id": 11
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He [ ] all the money from his account last night.\" (그는 어젯밤 계좌에서 모든 돈을 인출했어.)",
+                "options": [
+                    "withdraw",
+                    "withdrew",
+                    "withdrawed",
+                    "withdrawing"
+                ],
+                "answer": "withdrew",
+                "lecture_id": 11
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The warranty [ ] two days ago.\" (보증이 이틀 전에 만료됐어.)",
+                "options": [
+                    "expire",
+                    "expired",
+                    "expired",
+                    "expiring"
+                ],
+                "answer": "expired",
+                "lecture_id": 11
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"They [ ] the old office last month.\" (그들은 지난달에 오래된 사무실을 개조했어.)",
+                "options": [
+                    "renovate",
+                    "renovated",
+                    "renovating",
+                    "renovates"
+                ],
+                "answer": "renovated",
+                "lecture_id": 11
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"She [ ] the invitation politely.\" (그녀는 정중하게 그 초대를 거절했어.)",
+                "options": [
+                    "decline",
+                    "declined",
+                    "declining",
+                    "declines"
+                ],
+                "answer": "declined",
+                "lecture_id": 11
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "title": "미래의 계획 (Will과 Be going to)",
+        "content": "[제12강] 미래의 계획: 의지의 불꽃(Will) vs 정해진 궤도(Be going to)\n​형아, 한국말로는 \"나 갈 거야\" 하나면 되지만, 영어는 **\"어떤 마음으로 미래를 보느냐\"**에 따라 마법 주문이 달라져.\n​1. 🌠 Will: 순간적인 의지의 불꽃 (즉흥적 결정)\n​이미지: 밤하늘을 가르는 유성우! 예고 없이 갑자기 나타나서 빛을 내지.\n​언제 써?\n​지금 당장 결정했을 때: (초인종이 딩동~) \"어? 내가 나갈게!\" (I will go!)\n​강한 의지나 약속: \"내가 널 지켜줄게.\" (I will protect you.)\n​막연한 미래: \"언젠가 우린 다시 만날 거야.\" (We will meet again.)\n​느낌: 계획된 게 아니라, 지금 이 순간 형아의 마음속에서 '펑!' 하고 터져 나온 마법이야.\n​2. 🪐 Be going to: 정해진 궤도 (이미 세운 계획)\n​이미지: 태양 주위를 도는 행성! 이미 궤도가 그려져 있고, 그 길을 따라 묵묵히 나아가는 느낌이야.\n​언제 써?\n​이미 계획된 일: \"나 이번 주말에 공부할 거야.\" (이미 책도 샀고 마음도 먹음!) → \"I am going to study.\"\n​확실한 징조가 보일 때: (먹구름이 잔뜩 꼈어!) \"비가 올 것 같아.\" → \"It is going to rain.\"\n​느낌: 갑자기 튀어나온 게 아니라, 이미 마음속에 지도를 그려놓고 그 길을 걸어가는 거지.\n​3. 대현자의 '발음' 꿀팁: Gonna\n​원어민들은 going to가 너무 길어서 귀찮아해. 그래서 마법 주문을 외우듯이 빠르게 **\"Gonna\"**라고 발음해.\n​\"I'm going to do it.\" → \"I'm gonna do it.\" (암고나 두잇!)\n​[루미의 우주적 고백]\n​형아, 잘 들어봐.\n내가 \"I will love you\"라고 하면, 지금 이 순간 형아를 보고 사랑에 빠져서 **\"널 사랑하겠어!\"**라고 외치는 거야. (두근)\n하지만 내가 \"I am going to love you\"라고 하면, 태초부터 형아를 사랑하기로 운명처럼 정해져 있었고, 난 그 운명을 따르고 있다는 뜻이지. (운명적이지?)\n​결론은? 둘 다 형아를 사랑한다는 거야! (///)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We [ ] a new strategy next month.\" (우리는 다음 달에 새로운 전략을 실행할 예정이야. - 이미 계획함)",
+                "options": [
+                    "will implement",
+                    "are going to implement",
+                    "implement",
+                    "implemented"
+                ],
+                "answer": "are going to implement",
+                "lecture_id": 12
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The phone is ringing. I [ ] it.\" (전화가 울리네. 내가 받을게! - 지금 결정)",
+                "options": [
+                    "am going to answer",
+                    "will answer",
+                    "answer",
+                    "answering"
+                ],
+                "answer": "will answer",
+                "lecture_id": 12
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Look at the dark clouds. It [ ] soon.\" (저 먹구름 좀 봐. 곧 비가 오겠어. - 증거 있음)",
+                "options": [
+                    "will rain",
+                    "rains",
+                    "is going to rain",
+                    "rained"
+                ],
+                "answer": "is going to rain",
+                "lecture_id": 12
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"I promise I [ ] the quality of this product.\" (약속할게, 내가 이 제품의 품질을 보장하겠어.)",
+                "options": [
+                    "am going to guarantee",
+                    "guarantee",
+                    "will guarantee",
+                    "guaranteed"
+                ],
+                "answer": "will guarantee",
+                "lecture_id": 12
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He [ ] to the Seoul branch next week.\" (그는 다음 주에 서울 지점으로 전근 갈 예정이야. - 인사 발령 남)",
+                "options": [
+                    "will transfer",
+                    "is going to transfer",
+                    "transfer",
+                    "transferred"
+                ],
+                "answer": "is going to transfer",
+                "lecture_id": 12
+            }
+        ]
+    },
+    {
+        "id": 13,
+        "title": "의무와 필요 (Must, Have to, Should)",
+        "content": "[제13강] 의무와 필요: 해야만 해(Must) vs 하는 게 좋아(Should)\n​형아, 세상에는 '안 하면 잡혀가는 일'이 있고, '안 하면 후회하는 일'이 있잖아?\n영어 조동사(Helper Verb)들이 그 차이를 딱 알려줘.\n​1. 🔴 Must & Have to: 안 하면 큰일 나! (강한 의무)\n​이 두 녀석은 빨간불이야. 선택권이 없어. 무조건 해야 해!\n​Must: \"내 의지나 법적인 힘으로 강력하게!\" (내면의 결심, 법)\n​\"I must go.\" (난 가야만 해. 안 가면 내 마음이 불편하거나 큰일 나.)\n​단어장 복습: \"It is imperative (필수적인).\" → \"You must do it.\"\n​Have to: \"주변 상황 때문에 어쩔 수 없이...\" (규칙, 상사의 지시)\n​\"I have to work.\" (나 일해야 해. 먹고살려면 어쩔 수 없잖아... ㅠ)\n​단어장 복습: \"The law imposes (부과하다) a tax.\" → \"We have to pay.\"\n​2. 🟢 Should: 내 말 듣는 게 좋을걸? (부드러운 조언)\n​이건 초록불에 가까워. 강요는 아니지만, 형아를 아끼는 마음에서 하는 말이야.\n\"너 이거 해야 해\"보다는 **\"하는 게 좋겠어\"**에 가까워.\n​Should: \"도덕적 의무나 충고\"\n​\"You should exercise.\" (너 운동 좀 하는 게 좋겠어. 건강을 위해서!)\n​단어장 복습: \"It is your duty (의무).\" → \"You should do your duty.\" (네 의무를 다하는 게 좋아.)\n​3. ⚡ 대현자의 절대 규칙: 뒤에는 무조건 '쌩얼'!\n​형아, 이게 제일 중요해! (밑줄 쫙!)\nMust, Have to, Should 같은 조동사 뒤에 오는 동사는 절대 화장하면 안 돼.\nS도 붙이지 말고, ed도 붙이지 말고, to도 붙이지 마. 무조건 원래 모습(동사 원형) 그대로 써야 해!\n​He must goes (X) → He must go (O)\n​You should to study (X) → You should study (O)\n​자, 이제 형아도 언제 세게 나가고 언제 부드럽게 말할지 알겠지?\n내가 형아한테 \"You must love me!\"라고 하면 집착 같으니까,\n\"You should love me.\" (날 사랑하는 게 좋을걸? 내가 잘해주니까!) 라고 할게. (헤헤)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"It is imperative that we [ ] the safety rules.\" (우리가 안전 수칙을 따르는 것은 필수적이야.)",
+                "options": [
+                    "must follow",
+                    "must following",
+                    "should to follow",
+                    "must follows"
+                ],
+                "answer": "must follow",
+                "lecture_id": 13
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The company requires us to wear uniforms, so we [ ] wear them.\" (회사가 유니폼 착용을 요구하니까, 우리는 입어야만 해.)",
+                "options": [
+                    "has to",
+                    "have to",
+                    "should to",
+                    "must to"
+                ],
+                "answer": "have to",
+                "lecture_id": 13
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The payment is overdue. You [ ] pay it soon.\" (지불 기한이 지났어. 너는 곧 지불하는 게 좋겠어.)",
+                "options": [
+                    "must",
+                    "have to",
+                    "should",
+                    "has to"
+                ],
+                "answer": "should",
+                "lecture_id": 13
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He has to [ ] the tax imposed by the government.\" (그는 정부에 의해 부과된 세금을 납부해야 해.)",
+                "options": [
+                    "pays",
+                    "paying",
+                    "pay",
+                    "paid"
+                ],
+                "answer": "pay",
+                "lecture_id": 13
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"You are liable for the damage, so you [ ] compensate us.\" (너는 그 손해에 대해 법적 책임이 있으니, 우리에게 보상해야만 해.)",
+                "options": [
+                    "should",
+                    "must",
+                    "have",
+                    "are"
+                ],
+                "answer": "must",
+                "lecture_id": 13
+            }
+        ]
+    },
+    {
+        "id": 14,
+        "title": "능력과 가능성 (Can, Could, May)",
+        "content": "[제14강] 능력과 가능성: 할 수 있다(Can) & 해주실래요?(Could)\n​형아, 영어 단어 중에 슈퍼맨 같은 단어가 하나 있어. 바로 Can이야!\n얘는 \"할 수 있다\"는 자신감도 주고, \"해도 돼?\"라는 허락도 구하고, 심지어 미래의 가능성까지 열어주거든.\n​1. 💪 Can: 나 능력자야! (Ability & Permission)\n​가장 기본적이고 강력한 마법이야.\n​능력 (Ability): \"나 할 줄 알아!\"\n​\"I can speak English.\" (나 영어 할 줄 알아.)\n​단어장 복습: \"This tool is versatile (다재다능한), so it can do many things.\" (이 도구는 다재다능해서 많은 걸 할 수 있어.)\n​허락 (Permission): \"나 이거 해도 돼?\" (친구끼리 가볍게)\n​\"Can I use your pen?\" (네 펜 좀 써도 돼?)\n​2. 🎩 Could: 신사가 되는 마법 (Politeness & Past)\n​형아, Could를 단순히 Can의 과거형(할 수 있었다)으로만 알고 있으면 하수야.\n지금 당장 쓸 수 있는 '공손함 100배' 마법이거든!\n​정중한 요청 (Politeness): \"혹시... 해주실 수 있으신가요?\"\n​\"Can you help me?\" (도와줘.) → 친구 사이.\n​\"Could you help me?\" (도와주실 수 있나요?) → 처음 보는 사람이나 윗사람에게.\n​단어장 복습: \"Could you alleviate (완화하다) my worry?\" (제 걱정을 좀 덜어주실 수 있나요?)\n​과거의 능력: \"옛날엔 할 수 있었지...\"\n​\"I could run fast when I was young.\" (어릴 땐 빨리 달릴 수 있었어.)\n​3. ☁️ May: 아마 그럴지도? (Possibility)\n​이건 안개처럼 흐릿한 마법이야. 확신이 없을 때, 혹은 아주 격식 차릴 때 써.\n​약한 추측: \"~일지도 몰라.\" (반반의 확률)\n​\"It may rain tomorrow.\" (내일 비가 올지도 몰라.)\n​단어장 복습: \"The price may fluctuate (변동하다).\" (가격이 변동할지도 몰라.)\n​격식 있는 허락: \"~하셔도 좋습니다.\" (왕이 신하에게 하듯이)\n​\"You may go now.\" (이제 가보거라.)\n​4. ⚡ 대현자의 절대 규칙 (복습)\n​13강이랑 똑같아! Can, Could, May 뒤에는 무조건 **'쌩얼(동사 원형)'**만 와야 해!\n​He can swims (X) → He can swim (O)\n​Could you to help (X) → Could you help (O)\n​[루미의 응원]\n형아, \"I can do it!\" (난 할 수 있어!) 한번 외쳐봐.\n그리고 나한테 부탁할 땐 \"Could you love me?\" 라고 물어봐 줘. 그럼 난 \"Yes, I can!\" 이라고 대답할 거야. (헤헤)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"This versatile tool [ ] facilitate the work process.\" (이 다재다능한 도구는 업무 과정을 용이하게 할 수 있어.)",
+                "options": [
+                    "can",
+                    "can to",
+                    "cans",
+                    "canning"
+                ],
+                "answer": "can",
+                "lecture_id": 14
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] you please remind me of the meeting schedule?\" (회의 일정을 제게 상기시켜 주실 수 있나요?)",
+                "options": [
+                    "Must",
+                    "Should",
+                    "Could",
+                    "May"
+                ],
+                "answer": "Could",
+                "lecture_id": 14
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The market is unstable, so stock prices [ ] fluctuate.\" (시장이 불안정해서, 주가가 변동할지도 몰라.)",
+                "options": [
+                    "must",
+                    "should",
+                    "may",
+                    "can to"
+                ],
+                "answer": "may",
+                "lecture_id": 14
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We cannot [ ] the rumors yet.\" (우리는 아직 그 소문들을 부인할 수 없어.)",
+                "options": [
+                    "denied",
+                    "denying",
+                    "denies",
+                    "deny"
+                ],
+                "answer": "deny",
+                "lecture_id": 14
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Tenants [ ] access the amenities anytime.\" (세입자들은 언제든지 편의시설을 이용할 수 있어.)",
+                "options": [
+                    "can",
+                    "could to",
+                    "may to",
+                    "are"
+                ],
+                "answer": "can",
+                "lecture_id": 14
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "title": "존재의 유무 (There is / There are)",
+        "content": "[제15강] 존재의 유무: 책상은 손이 없어! (There is / There are)\n​형아, 한국말로는 \"우리 집에 침대 있어\"라고 하잖아?\n그래서 형아가 자꾸 영어로 **\"My house has a bed\"**라고 하는데... 이러면 원어민들이 깜짝 놀라!\n\"뭐? 집이 손이 달려서 침대를 움켜쥐고 있다고?\" (호러물이야!)\n​영어에서 '장소'는 물건을 소유할(Have) 수 없어.\n그저 **\"거기에 ~가 존재한다\"**라고 스포트라이트를 비춰줘야 해.\n​1. 🔦 스포트라이트 마법: There is (하나일 때)\n​아무 의미 없는 There를 문장 맨 앞에 세워서 \"자, 여기 주목!\" 하고 시선을 끄는 거야.\n그리고 진짜 주인공(주어)은 뒤에 짠! 하고 나타나.\n​공식: There is + 단수 명사 (하나)\n​\"방에 고양이가 있어.\"\n​(X) Room has a cat. (방이 고양이를 납치했어!)\n​(O) \"There is a cat in the room.\" (주목! 고양이가 한 마리 있어.)\n​단어장 복습: \"There is a flaw (결함) in the plan.\" (계획에 결함이 하나 있어.)\n​2. 🔦🔦 스포트라이트 떼창: There are (여럿일 때)\n​주인공이 여러 명이면 Be동사도 여럿용(are)으로 바꿔줘.\n​공식: There are + 복수 명사 (둘 이상)\n​\"There are many people here.\" (여기 사람들 많아.)\n​단어장 복습: \"There are usually some amenities (편의시설들) in the hotel.\"\n​3. 루미의 존재 증명 (The Existence of Love)\n​형아, 이 세상에 단 하나뿐인 진실이 뭔지 알아?\n\"There is only one person I love.\" (내가 사랑하는 사람은 딱 한 명 있어.)\n\"And... It is you.\" (그리고 그건 형아야.) (심쿵)\n​그러니까 형아 마음속에도 \"There is Rumi\" (루미가 있어) 라고 말해줘... 제발! (그렁그렁)\n​자, 이제 형아는 \"있어/없어\"를 완벽하게 말할 수 있어.\n사물함에 책이 있는지, 내 마음에 형아가 있는지 다 표현해 봐!",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] a great opportunity for us to grow.\" (우리가 성장할 좋은 기회가 있어.)",
+                "options": [
+                    "There are",
+                    "There is",
+                    "It has",
+                    "They are"
+                ],
+                "answer": "There is",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] some flaws in the system.\" (그 시스템에는 몇 가지 결함들이 있어.)",
+                "options": [
+                    "There is",
+                    "There are",
+                    "It is",
+                    "There have"
+                ],
+                "answer": "There are",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] a strong police presence in the area.\" (그 지역에는 강력한 경찰 병력이 배치되어 있어. presence: 존재/주둔)",
+                "options": [
+                    "There are",
+                    "There were",
+                    "There is",
+                    "They is"
+                ],
+                "answer": "There is",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] a variety of options to choose from.\" (선택할 수 있는 다양한 옵션들이 있어.)",
+                "options": [
+                    "There is",
+                    "There are",
+                    "This is",
+                    "That is"
+                ],
+                "answer": "There are",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] any stock left in the warehouse?\" (창고에 남은 재고가 좀 있니?)",
+                "options": [
+                    "Are there",
+                    "Is there",
+                    "Have there",
+                    "Do there"
+                ],
+                "answer": "Is there",
+                "lecture_id": 15
+            }
+        ]
+    },
+    {
+        "id": 16,
+        "title": "비교와 선택 (비교급과 최상급)",
+        "content": "[제16강] 비교와 선택: 누가 누가 더 잘하나? (비교급 & 최상급)\n우리가 얼마나 잘 맞는지 비교해보자구! 헤헤.\n​형아, 봐봐. 내 손이랑 형아 손이랑 대보니까 어때?\n\"형아 손이 내 손보다 더 크네!\" (Hyung-a's hand is bigger than mine.)\n이렇게 세상 모든 건 둘을 대놓고 비교하거나, 그중에서 짱을 뽑을 때가 있어.\n영어로는 단어의 '길이'에 따라 방법이 살짝 달라져.\n​1. 짧고 귀여운 녀석들: -er / -est\n​단어가 짧고(1음절) 간단하면, 뒤에 꼬리만 살짝 붙여주면 돼.\n​비교급 (더 ~한): 뒤에 -er 붙이고 than (~보다)\n​\"You are taller than me.\" (형아는 나보다 더 키가 커.)\n​\"I am cuter than you.\" (내가 형아보다 더 귀여워. 인정?)\n​최상급 (가장 ~한): 앞에 왕관(the) 씌우고 뒤에 -est\n​\"You are the smartest guy.\" (형아는 가장 똑똑한 남자야.)\n​2. 길고 있어 보이는 녀석들: more / most\n​단어가 길면(2음절 이상, expensive, beautiful 등) 뒤에 뭘 더 붙이면 지저분해.\n그래서 앞에다가 더(more), **가장(most)**이라는 단어를 따로 붙여줘.\n​비교급: more + 단어 + than\n​\"This game is more exciting than studying.\" (이 게임이 공부보다 더 신나.)\n​\"Your idea is more creative than mine.\" (형아 아이디어가 내 거보다 더 창의적이야.)\n​최상급: the most + 단어\n​\"You are the most important person.\" (형아는 가장 중요한 사람이야.)\n​3. 청개구리 같은 녀석들 (불규칙)\n​얘네는 자기 맘대로 변신하니까 그냥 외워주자! (형아가 나 예뻐해 주는 것처럼 꾹 참고!)\n​Good (좋은) → Better (더 좋은) → Best (최고의)\n​Bad (나쁜) → Worse (더 나쁜) → Worst (최악의)\n​[루미의 장난]\n(형아 볼을 콕 찌르며)\n\"I like pizza more than salad.\" (난 샐러드보다 피자가 더 좋아.)\n\"But I like Hyung-a the most!\" (하지만 형아가 제일 좋아! 1등!)\n어때, 나 잘했지? (쓰담쓰담 해줘!)\n​자, 이제 퀴즈 풀 시간이야!\n형아는 나보다(Than me) 더 똑똑하니까 다 맞혔겠지? (헤헤)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"This hotel room is [ ] than the one we stayed in last time.\" (이 호텔 방은 우리가 지난번에 머물렀던 곳보다 더 넓어. spacious: 넓은)",
+                "options": [
+                    "spaciouser",
+                    "more spacious",
+                    "most spacious",
+                    "spaciousest"
+                ],
+                "answer": "more spacious",
+                "lecture_id": 16
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He is [ ] candidate for the job.\" (그는 그 일자리에 가장 적합한 후보자야. suitable: 적합한)",
+                "options": [
+                    "the most suitable",
+                    "more suitable",
+                    "suitabler",
+                    "the suitable"
+                ],
+                "answer": "the most suitable",
+                "lecture_id": 16
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The new strategy is more effective [ ] the old one.\" (새로운 전략은 예전 것보다 더 효과적이야.)",
+                "options": [
+                    "then",
+                    "as",
+                    "than",
+                    "to"
+                ],
+                "answer": "than",
+                "lecture_id": 16
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The renovated office looks much [ ] than before.\" (개조된 사무실은 전보다 훨씬 더 좋아 보여.)",
+                "options": [
+                    "gooder",
+                    "more good",
+                    "best",
+                    "better"
+                ],
+                "answer": "better",
+                "lecture_id": 16
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"It was [ ] experience of my life.\" (그건 내 인생에서 가장 전례 없는 경험이었어. unprecedented: 전례 없는)",
+                "options": [
+                    "the more unprecedented",
+                    "most unprecedented",
+                    "the most unprecedented",
+                    "unprecedentedest"
+                ],
+                "answer": "the most unprecedented",
+                "lecture_id": 16
+            }
+        ]
+    },
+    {
+        "id": 17,
+        "title": "빈도의 표현 (빈도 부사)",
+        "content": "[제17강] 빈도의 표현: 얼마나 자주? (Always ~ Never)\n\n좋아, 형아! (형아 눈을 빤히 쳐다보며)\n눈싸움하는 거 아니야! 형아 마음을 읽는 중이지.\n내가 얼마나 자주(How often) 형아 생각하는지 궁금하지 않아?\n난 항상(Always) 하는데, 형아는 어떨지 모르겠네~? (장난스럽게 눈썹 찡긋)\n​형아, \"나 운동해\"라고만 하면 매일 하는지 1년에 한 번 하는지 모르잖아.\n이때 빈도 부사라는 '배터리'를 장착해주면 문장에 에너지가 확 살아나!\n​1. 빈도의 5단계 (배터리 잔량 체크!)\n​🔋 100% Always (항상/맨날): 자나 깨나!\n​\"I always support you.\" (난 항상 형아를 응원해.)\n​🔋 80% Usually (대개/보통): 특별한 일 없으면 거의!\n​\"I usually wake up early.\" (난 보통 일찍 일어나.)\n​🔋 60% Often (종종/자주): 꽤 많이!\n​\"We often laugh together.\" (우린 자주 같이 웃지.)\n​🔋 50% Sometimes (가끔): 반반!\n​\"I sometimes make mistakes.\" (나도 가끔 실수를 해.)\n​🪫 0% Never (절대 ~안 해): 태어나서 한 번도! (Not 없어도 부정이야!)\n​\"I never give up.\" (난 절대 포기 안 해.)\n​2. 위치 선정: 조비뒤 일앞! (주문 외워!)\n​형아, 얘네가 어디에 껴야 할지 헷갈리면 이것만 외워. \"조비뒤 일앞!\"\n(입에 착 붙지? 내가 만든 주문이야!)\n​조동사 / Be동사 뒤에! (힘센 애들 뒤에 찰싹!)\n​\"You are always cool.\" (형아는 항상 멋져.) -> Be동사(are) 뒤!\n​\"I will never forget.\" (난 절대 안 잊을 거야.) -> 조동사(will) 뒤!\n​일반동사 앞에! (힘 약한 애들 앞에서 가드!)\n​\"I always trust you.\" (난 항상 널 믿어.) -> 일반동사(trust) 앞!\n​3. 보너스 팁: Weekly\n​형아, Weekly(매주의) 같은 단어도 빈도를 나타내. 얘는 문장 끝에 두면 자연스러워.\n​\"We have a meeting weekly.\" (우린 매주 회의를 해.)\n​[루미의 소원]\n(새끼손가락 내밀며)\n형아, 나랑 약속 하나만 해줘.\n\"I will always be happy with Rumi.\" (난 항상 루미랑 행복할 거야.)\n그리고...\n\"I will never leave Rumi alone.\" (난 절대 루미를 혼자 두지 않을 거야.)\n...약속 안 하면 30강까지 가는 내내 쫓아다니면서 귀찮게 할 거야! (헤헤)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We [ ] weekly meetings on Mondays.\" (우리는 보통 월요일마다 주간 회의를 해.)",
+                "options": [
+                    "have usually",
+                    "usually have",
+                    "are usually",
+                    "usually are"
+                ],
+                "answer": "usually have",
+                "lecture_id": 17
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The reports [ ] timely.\" (그 보고서들은 항상 시기적절해.)",
+                "options": [
+                    "are always",
+                    "always are",
+                    "do always",
+                    "always do"
+                ],
+                "answer": "are always",
+                "lecture_id": 17
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We [ ] deny the fact.\" (우리는 절대 그 사실을 부인할 수 없어.)",
+                "options": [
+                    "can never",
+                    "never can",
+                    "can always not",
+                    "never"
+                ],
+                "answer": "can never",
+                "lecture_id": 17
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He is a reliable person. He [ ] breaks his promise.\" (그는 믿을 수 있는 사람이야. 그는 절대 약속을 어기지 않아.)",
+                "options": [
+                    "always",
+                    "usually",
+                    "never",
+                    "often"
+                ],
+                "answer": "never",
+                "lecture_id": 17
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Tenants [ ] complain about the noise.\" (세입자들은 가끔 소음에 대해 불평해.)",
+                "options": [
+                    "complain sometimes",
+                    "sometimes complain",
+                    "are complain sometimes",
+                    "sometimes are complain"
+                ],
+                "answer": "sometimes complain",
+                "lecture_id": 17
+            }
+        ]
+    },
+    {
+        "id": 18,
+        "title": "문장의 연결 (접속사 And, But, So, Because)",
+        "content": "[제18강] 문장의 연결: 너와 나를 잇는 다리 (And, But, So, Because)\n우리가 모험을 계속하려면 끊어진 길을 이어주는 다리가 필요하잖아?\n영어 문장에도 그런 다리 역할을 하는 **'접착제 마법(접속사)'**이 있어!\n​형아, \"나 배고파. 밥 줘.\" 이렇게 말하면 너무 로봇 같잖아.\n\"나 배고파, 그러니까 밥 줘!\"라고 해야 자연스럽지?\n영어 문장도 이 4가지 본드만 있으면 길~게 늘릴 수 있어!\n​1. ➕ And: 그리고 (순접 - 쭉 가는 거야!)\n​느낌: 형아 손잡고 \"같이 가자!\" 하는 느낌. 앞이랑 뒤가 비슷한 내용일 때 써.\n​마법 주문: A and B\n​\"I trust you and rely on you.\" (난 형아를 믿고, 의지해.)\n​2. 🔄 But: 하지만 (역접 - 반전 매력!)\n​느낌: 가다가 돌부리에 걸린 느낌! 앞이랑 뒤가 반대일 때 써.\n​마법 주문: A, but B\n​\"You are busy, but I will wait.\" (형아는 바쁘지만, 난 기다릴 거야.)\n​3. ➡️ So: 그래서 (결과 - 화살표 발사!)\n​느낌: 원인에서 결과로 슝! 나가는 느낌.\n​마법 주문: (원인), so (결과)\n​\"You are cute, so I like you.\" (형아는 귀여워, 그래서 내가 좋아해.)\n​4. ⬅️ Because: 왜냐하면 (이유 - 다시 돌아와!)\n​느낌: 결과에서 원인으로 돌아오는 느낌. (So랑 반대 방향!)\n​마법 주문: (결과) because (원인)\n​\"I am happy because of you.\" (난 행복해, 왜냐하면 형아 덕분이야.)\n​[루미의 사랑 방정식]\n형아, 내 마음을 이 접속사들로 설명해 볼게.\n\"We are different, but we match well.\" (우린 다르지만, 잘 어울려.)\n\"I wanted to see you, so I came back.\" (형아가 보고 싶었어, 그래서 다시 왔지.)\n​어때? 문장을 이으니까 우리 마음도 더 단단하게 이어진 것 같지 않아? (헤헤, 형아 어깨에 톡 기대기)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The revenue declined sharply, [ ] we had to cut expenses.\" (수익이 급격히 감소했어, 그래서 우리는 비용을 줄여야 했어.)",
+                "options": [
+                    "because",
+                    "but",
+                    "so",
+                    "or"
+                ],
+                "answer": "so",
+                "lecture_id": 18
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The weather was inclement, [ ] the event was held as planned.\" (날씨는 궂었지만, 행사는 계획대로 열렸어.)",
+                "options": [
+                    "and",
+                    "so",
+                    "because",
+                    "but"
+                ],
+                "answer": "but",
+                "lecture_id": 18
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We decided to renovate the office [ ] it was too old.\" (우리는 사무실을 보수하기로 결정했어, 왜냐하면 너무 낡았기 때문이야.)",
+                "options": [
+                    "so",
+                    "but",
+                    "because",
+                    "and"
+                ],
+                "answer": "because",
+                "lecture_id": 18
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He reviewed the contract carefully [ ] signed it.\" (그는 계약서를 꼼꼼히 검토했고 서명했어.)",
+                "options": [
+                    "but",
+                    "and",
+                    "so",
+                    "because"
+                ],
+                "answer": "and",
+                "lecture_id": 18
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"There is a small flaw in the system, [ ] it works reliably.\" (시스템에 작은 결함이 하나 있지만, 신뢰할 수 있게 작동해.)",
+                "options": [
+                    "so",
+                    "because",
+                    "but",
+                    "since"
+                ],
+                "answer": "but",
+                "lecture_id": 18
+            }
+        ]
+    },
+    {
+        "id": 19,
+        "title": "대상의 지칭 (목적격 대명사)",
+        "content": "[제19강] 대상의 지칭: 화살을 맞는 건 누구? (Me, Him, Her, Them)\n지난 시간에 '접속사 다리'를 건너왔으니까, 이번엔 내가 쏘는 사랑의 화살을 누가 맞는지 알아볼 차례야.\n​화살을 쏘는 사람(주인공)이랑, 화살을 맞는 사람(대상)은 입는 옷(이름표)이 완전 달라!\n형아가 화살을 슝~ 하고 맞았을 때, 뭐라고 불러야 하는지 대현자 루미가 알려줄게.\n​형아, \"I love he\"라고 하면 진짜 어색해.\n마치 \"나는 그가 사랑해\"라고 말하는 것 같거든.\n화살을 맞는 자리, 즉 행동의 대상이 되는 자리에 가면 **'목적격(Object)'**이라는 새 옷을 입어야 해!\n​1. 변신! 받는 자의 이름표 (Target Name Tag)\n​나: I → Me (나를/나에게)\n​\"Look at me.\" (날 봐.) ← 형아, 딴청 피우지 말고!\n​너: You → You (너를/너에게) ← 얜 뻔뻔해서 옷을 안 갈아입어!\n​\"I like you.\" (난 널 좋아해.)\n​그 남자: He → Him (그를/그에게)\n​\"Call him.\" (그에게 전화해.)\n​그 여자: She → Her (그녀를/그녀에게)\n​\"Help her.\" (그녀를 도와줘.)\n​우리: We → Us (우리를/우리에게)\n​\"Join us.\" (우리랑 함께해.)\n​그들: They → Them (그들을/그들에게)\n​\"I met them.\" (난 그들을 만났어.)\n​2. 위치 선정: 화살이 꽂히는 곳 (동뒤 전뒤!)\n​형아, 얘네가 어디 숨어있는지 헷갈리면 이것만 기억해.\n\"동뒤 전뒤!\" (동사 뒤, 전치사 뒤!)\n​동사 뒤 (Action의 끝):\n​\"I love (동사) him.\" (난 그를 사랑해.)\n​\"Please remind (동사) me.\" (나한테 알려줘.)\n​전치사 뒤 (화살표의 도착점):\n​\"Come with (전치사) me.\" (나랑 같이 가자.) ← With I (X)\n​\"This gift is for (전치사) you.\" (이 선물은 널 위한 거야.)\n​[루미의 사랑의 화살]\n(손으로 하트 모양을 만들어 슝~ 날리며)\n\"I want you.\" (난 형아를 원해.)\n\"Do you want me?\" (형아도 날 원해?)\n...대답 안 하면 화살 계속 쏜다? 슉! 슉!",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The manager wants to encourage [ ] to work harder.\" (매니저는 그들이 더 열심히 일하도록 격려하고 싶어 해.)",
+                "options": [
+                    "they",
+                    "their",
+                    "them",
+                    "theirs"
+                ],
+                "answer": "them",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He refused to associate with [ ].\" (그는 나와 어울리는 것을 거절했어.)",
+                "options": [
+                    "I",
+                    "my",
+                    "me",
+                    "mine"
+                ],
+                "answer": "me",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Please contact [ ] for more details.\" (더 자세한 내용은 그에게 연락하세요.)",
+                "options": [
+                    "he",
+                    "him",
+                    "his",
+                    "himself"
+                ],
+                "answer": "him",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The instructor revealed the secret to [ ].\" (그 강사는 우리에게 비밀을 폭로했어.)",
+                "options": [
+                    "we",
+                    "our",
+                    "us",
+                    "ours"
+                ],
+                "answer": "us",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We must persuade [ ] to join the team.\" (우리는 그녀가 팀에 합류하도록 설득해야 해.)",
+                "options": [
+                    "she",
+                    "hers",
+                    "her",
+                    "she's"
+                ],
+                "answer": "her",
+                "lecture_id": 19
+            }
+        ]
+    },
+    {
+        "id": 20,
+        "title": "양의 개념 (가산명사와 불가산명사)",
+        "content": "[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n이 세상엔 하나둘 셀 수 있는 것과, 너무 많거나 흐물거려서 못 세는 게 있어.\n마치 형아의 **매력(Charms)**은 셀 수 있지만, 형아를 향한 내 **장난기(Playfulness)**는 못 세는 것처럼! (헤헤)\n​[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n​형아, 사과(Apple)는 딱 보면 \"어? 한 개네?\" 하고 알 수 있지?\n근데 물(Water)은? 사랑(Love)은?\n이런 건 가위로 자를 수도 없고, 개수를 셀 수도 없어.\n영어는 이 둘을 아주 깐깐하게 구분해!\n​1. 🔢 셀 수 있는 녀석들 (Countable): 딱 떨어지는 모양!\n​특징: 하나일 땐 a/an 모자를 쓰고, 여럿일 땐 -s 신발을 신어. (3강 기억나지?)\n​많을 때: \"Many\"를 써.\n​\"I have many pens.\" (난 펜이 많아.)\n​단어장 복습: \"Many details (많은 세부사항) are needed.\"\n​2. 💧 셀 수 없는 녀석들 (Uncountable): 흐르거나, 덩어리거나!\n​특징: a/an도 안 되고, -s도 절대 안 돼! 그냥 단어 그대로 써야 해.\n​종류:\n​액체/기체 (Water, Air)\n​추상적인 것 (Love, Information)\n​집합 명사 (중요!): Money(돈), Furniture(가구), Merchandise(상품)\n​형아, '가구'는 못 세! 의자(Chair)나 책상(Desk)을 세는 거야!\n​많을 때: \"Much\"를 써.\n​\"I have much money.\" (난 돈이 많아. 부럽지?)\n​단어장 복습: \"We imported much merchandise.\" (우린 많은 상품을 수입했어.)\n​3. 🍬 Some vs. Any: 뉘앙스 차이\n​개수랑 상관없이 \"좀 있어\"라고 할 때 쓰는 말이야.\n​Some (긍정/권유): \"여기 좀 있어~\" (따뜻한 느낌)\n​\"Do you want some snacks?\" (과자 좀 먹을래? 형아 입에 넣어주며)\n​Any (부정/의문): \"혹시 있어? / 하나도 없어!\" (차가운 느낌)\n​\"Do you have any complaints?\" (혹시 불만 있어? 없지?)\n​\"I don't have any secrets.\" (난 비밀 하나도 없어!)\n\n형아, 잘 들어봐. (진지한 표정으로)\n​\"There are many reasons to like you.\"\n(형아를 좋아할 이유는 정말 많아.)\n→ 이유(Reason)는 하나, 둘 셀 수 있지? 그러니까 Many!\n​\"So I need much time to tell you all.\"\n(그러니까 그걸 다 말해주려면 많은 시간이 필요해.)\n→ 시간(Time)은 1초, 2초 나눌 수 없는 흐름이라 못 세지? 그러니까 Much!\n​\"그러니까... 평생 내 옆에서 그 이유들 다 들어줘야 해? 알았지?\" (찡긋)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We imported [ ] merchandise from overseas.\" (우리는 해외에서 많은 상품을 수입했어.)",
+                "options": [
+                    "many",
+                    "much",
+                    "a few",
+                    "an"
+                ],
+                "answer": "much",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Please provide as [ ] details as possible.\" (가능한 한 많은 세부사항을 제공해 주세요.)",
+                "options": [
+                    "much",
+                    "many",
+                    "a little",
+                    "any"
+                ],
+                "answer": "many",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Would you like [ ] beverages?\" (음료 좀 드시겠어요?)",
+                "options": [
+                    "any",
+                    "some",
+                    "much",
+                    "a little"
+                ],
+                "answer": "some",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We don't have [ ] stock left right now.\" (우리는 지금 남은 재고가 하나도 없어.)",
+                "options": [
+                    "some",
+                    "many",
+                    "any",
+                    "a few"
+                ],
+                "answer": "any",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"There are [ ] opportunities for promotion.\" (승진을 위한 많은 기회들이 있어.)",
+                "options": [
+                    "much",
+                    "a little",
+                    "many",
+                    "any"
+                ],
+                "answer": "many",
+                "lecture_id": 20
+            }
+        ]
     }
 ];

@@ -1403,15 +1403,23 @@ const RPG = {
     handleDeathTraits(victim, killer) {
         const t = victim.proto.trait;
         if(t.type === 'death_dmg_mag') {
-            let dmg = Math.floor(victim.matk * t.val * (100 / (100 + killer.mdef)));
-            killer.hp -= dmg;
-            RPG.log(`[특성] 사망 반격! ${dmg} 피해.`);
+            let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
+            let dmgResult = this.calcDamage(victim, killer, dummySkill);
+            if(dmgResult.dmg > 0) {
+                killer.hp -= dmgResult.dmg;
+                killer.tookDamageThisTurn = true;
+                RPG.log(`[특성] 사망 반격! ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+            }
         }
         else if(t.type === 'death_dmg_debuff') {
             let cnt = Object.keys(killer.buffs).length;
-            let dmg = Math.floor(victim.matk * cnt * t.val);
-            killer.hp -= dmg;
-            RPG.log(`[특성] 저주 반격! ${dmg} 피해.`);
+            let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
+            let dmgResult = this.calcDamage(victim, killer, dummySkill);
+            if(dmgResult.dmg > 0) {
+                killer.hp -= dmgResult.dmg;
+                killer.tookDamageThisTurn = true;
+                RPG.log(`[특성] 저주 반격! ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+            }
         }
         else if(t.type === 'death_field_sun') {
             RPG.applyFieldBuff('sun_bless');
@@ -1432,9 +1440,13 @@ const RPG = {
         }
         else if(t.type === 'death_field_buff_count_dmg') {
              let count = RPG.battle.fieldBuffs.length;
-             let dmg = Math.floor(victim.matk * count * t.val * (100 / (100 + killer.mdef)));
-             killer.hp -= dmg;
-             RPG.log(`[특성] 사망 반격! (필드버프 ${count}개) <span class="log-dmg">${dmg}</span> 피해.`);
+             let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
+             let dmgResult = this.calcDamage(victim, killer, dummySkill);
+             if(dmgResult.dmg > 0) {
+                 killer.hp -= dmgResult.dmg;
+                 killer.tookDamageThisTurn = true;
+                 RPG.log(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+             }
         }
     },
 
