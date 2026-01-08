@@ -37,7 +37,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '이클립스', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '암흑 상태의 적에게 대미지 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0}] },
-            { name: '다크메테오', type: 'mag', tier: 3, cost: 30, val: 3.5, desc: '다음 턴 행동 불가', effects: [{type: 'self_debuff', id: 'stun', duration: 1}] }
+            { name: '다크메테오', type: 'mag', tier: 3, cost: 30, val: 4.5, desc: '다음 턴 행동 불가', effects: [{type: 'self_debuff', id: 'stun', duration: 1}] }
         ]
     },
     {
