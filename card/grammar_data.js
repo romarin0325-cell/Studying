@@ -704,7 +704,7 @@ const GRAMMAR_DATA = [
                 "options": [
                     "expire",
                     "expired",
-                    "expired",
+                    "expires",
                     "expiring"
                 ],
                 "answer": "expired",
@@ -810,7 +810,7 @@ const GRAMMAR_DATA = [
         "quizzes": [
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"It is imperative that we [ ] the safety rules.\" (우리가 안전 수칙을 따르는 것은 필수적이야.)",
+                "question": "\"We [ ] the safety rules immediately.\" (우리는 즉시 안전 수칙을 따라야 해.)",
                 "options": [
                     "must follow",
                     "must following",
