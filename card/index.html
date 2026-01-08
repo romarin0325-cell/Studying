@@ -250,6 +250,9 @@
         <h3>단어장</h3>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
              <span style="font-size: 0.8rem; color: #aaa;">빨간색: 틀린 단어</span>
+             <label style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()" style="margin-right: 5px;"> 틀린 단어만 보기
+             </label>
              <button class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습 초기화</button>
         </div>
         <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
@@ -778,8 +781,15 @@ const RPG = {
         if(!this.state.wrongWords) this.state.wrongWords = [];
         const list = document.getElementById('wordbook-list');
         list.innerHTML = "";
+
+        const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
+
         VOCAB_DATA.forEach(v => {
             const isWrong = this.state.wrongWords.includes(v.word);
+
+            // Filter logic
+            if(onlyWrong && !isWrong) return;
+
             const div = document.createElement('div');
             div.style.marginBottom = "10px";
             div.style.borderBottom = "1px solid #444";
