@@ -1362,32 +1362,28 @@ const RPG = {
                     skill = e.skills.find(s => s.name === '디바인블레이드');
                     e.isCharging = false;
                 }
+                else if(turn === 1) {
+                    return { type: 'phy', val: 1.0, name: '일반 공격' };
+                }
                 else if(turn === 2) {
                     skill = e.skills.find(s => s.name === '저지먼트');
                 }
                 else {
-                    // Turn > 15: Judgment(20%), Charge(20%) -- Holy Ray replaced by Judgment
-                    if(turn > 15) {
-                        if(r < 0.2) skill = e.skills.find(s => s.name === '저지먼트');
-                        else if(r < 0.4) {
-                            RPG.log("창조신이 자세를 잡습니다 (차지중...)");
-                            e.isCharging = true;
-                            return { type: 'phy', val: 0, name: '차지' };
-                        } else {
-                             // Explicit fallback for r >= 0.4
-                             skill = e.skills.find(s => s.name === '저지먼트'); // High turns use Judgment more
-                        }
-                    } else {
-                        // Turn <= 15: Holy Ray(20%), Charge(20%) -- Judgment Excluded
-                        if(r < 0.2) skill = e.skills.find(s => s.name === '홀리레이');
-                        else if(r < 0.4) {
-                            RPG.log("창조신이 자세를 잡습니다 (차지중...)");
-                            e.isCharging = true;
-                            return { type: 'phy', val: 0, name: '차지' };
-                        } else {
-                             // Explicit fallback for r >= 0.4
-                             skill = e.skills.find(s => s.name === '홀리레이');
-                        }
+                    // Turn >= 3
+                    // 30% Holy Ray (or Judgment if Turn > 15)
+                    // 20% Divine Blade (Charge)
+                    // 50% Normal Attack
+                    if(r < 0.3) {
+                         if(turn > 15) skill = e.skills.find(s => s.name === '저지먼트');
+                         else skill = e.skills.find(s => s.name === '홀리레이');
+                    }
+                    else if(r < 0.5) { // 30% ~ 50% range (20%)
+                        RPG.log("창조신이 자세를 잡습니다 (차지중...)");
+                        e.isCharging = true;
+                        return { type: 'phy', val: 0, name: '차지' };
+                    }
+                    else {
+                        return { type: 'phy', val: 1.0, name: '일반 공격' };
                     }
                 }
             }
