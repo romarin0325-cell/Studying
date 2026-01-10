@@ -6,7 +6,7 @@ const CARDS = [
         trait: { type: 'syn_water_3_atk_matk', val: 50, desc: '덱에 물 3장일시 물리공격력 마법공격력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '월광해류', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개 제거하고 위력 2배', effects: [{type: 'remove_field_buff_dmg', mult: 2.0}] },
+            { name: '월광해류', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개 제거하고 위력 2배', effects: [{type: 'remove_field_buff_dmg', mult: 2.0}] },
             { name: '심연의포옹', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적이 디버프 3개 이상일 때 위력 2배', effects: [{type: 'cond_target_debuff_3_dmg', mult: 2.0}] }
         ]
     },
