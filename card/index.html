@@ -544,7 +544,7 @@ const RPG = {
         }
     },
 
-    startGrammarQuiz(q) {
+    startGrammarQuiz(q, successCallback = null, failCallback = null) {
         // Shuffle options
         // q.options is array of strings. q.answer is correct string.
         let opts = [...q.options];
@@ -580,7 +580,8 @@ const RPG = {
                     fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50";
                     setTimeout(() => {
                         modal.classList.remove('active');
-                        this.applyGreatSageBlessing();
+                        if (successCallback) successCallback();
+                        else this.applyGreatSageBlessing();
                     }, 1000);
                 } else {
                     btn.classList.add('wrong');
@@ -589,11 +590,19 @@ const RPG = {
                          if(c.innerText === q.answer) c.classList.add('correct');
                     });
                     fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350";
-                    this.state.greatSageBlessingUses--;
-                    setTimeout(() => {
-                        modal.classList.remove('active');
-                        this.showAlert(`틀렸어... 남은 기회: ${this.state.greatSageBlessingUses}회`);
-                    }, 1500);
+
+                    if (failCallback) {
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                            failCallback();
+                        }, 1500);
+                    } else {
+                        this.state.greatSageBlessingUses--;
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                            this.showAlert(`틀렸어... 남은 기회: ${this.state.greatSageBlessingUses}회`);
+                        }, 1500);
+                    }
                 }
             };
             oDiv.appendChild(btn);
@@ -1873,26 +1882,53 @@ const RPG = {
         if (deadMsg) msg += "<br><br>" + deadMsg;
 
         this.openInfoModal("전투 결과", msg, () => {
-             // Quiz Challenge Prompt using Custom Modal
-             this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
-                // Yes Callback
-                () => {
-                     this.startQuiz((success) => {
-                         if(success) {
-                             this.state.tickets += 1;
-                             document.getElementById('ui-tickets').innerText = this.state.tickets;
-                             this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
-                         } else {
-                             this.showAlert("오답입니다... 보상 없음.");
-                         }
-                         this.toMenu();
-                     });
-                },
-                // No Callback
-                () => {
-                    this.toMenu();
-                }
-             );
+             // Creator God Bonus Check
+             if (this.battle.enemy.id === 'creator_god') {
+                 this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
+                    () => { // Yes
+                        let allQuizzes = [];
+                        GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                        let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+                        this.startGrammarQuiz(q,
+                            () => { // Success
+                                this.state.tickets += 3;
+                                document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
+                                this.toMenu();
+                            },
+                            () => { // Fail
+                                this.showAlert("오답입니다... 보상 없음.");
+                                this.toMenu();
+                            }
+                        );
+                    },
+                    () => { // No
+                        this.toMenu();
+                    }
+                 );
+             } else {
+                 // Quiz Challenge Prompt using Custom Modal
+                 this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                    // Yes Callback
+                    () => {
+                         this.startQuiz((success) => {
+                             if(success) {
+                                 this.state.tickets += 1;
+                                 document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                 this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                             } else {
+                                 this.showAlert("오답입니다... 보상 없음.");
+                             }
+                             this.toMenu();
+                         });
+                    },
+                    // No Callback
+                    () => {
+                        this.toMenu();
+                    }
+                 );
+             }
         });
     },
 
