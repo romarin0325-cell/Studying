@@ -491,7 +491,9 @@ const RPG = {
         }
         let msg = "<b>현재 적용된 축복</b><br><br>";
         this.state.chaosBuffs.forEach(b => {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%`;
+             if(b.isSage) msg += ", 치명타/회피율 증가";
+             msg += "<br>";
         });
         msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
         this.openInfoModal("축복 상태", msg);
@@ -637,22 +639,28 @@ const RPG = {
         this.state.tickets += 1;
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-        // Apply to 8 random cards
+        // Apply to 12 random cards
         let pool = [...CARDS].sort(() => 0.5 - Math.random());
-        let picks = pool.slice(0, 8);
+        let picks = pool.slice(0, 12);
+
+        this.state.activeChaosBlessing = []; // Clear Chaos Blessing
 
         let newBuffs = picks.map(c => {
-            let mult = 0.1; // Changed to flat 10%
-            return { id: c.id, name: c.name, multiplier: mult };
+            let mult = 0;
+            if(c.grade === 'normal') mult = 0.4;
+            else if(c.grade === 'rare') mult = 0.3;
+            else if(c.grade === 'epic') mult = 0.2;
+            else if(c.grade === 'legend') mult = 0.1;
+            return { id: c.id, name: c.name, multiplier: mult, isSage: true };
         });
 
         // Set to activeSageBlessing (Replacing previous)
         this.state.activeSageBlessing = newBuffs;
         this.updateMergedBlessings();
 
-        let msg = "<b>대현자의 축복 성공!</b><br>8명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
+        let msg = "<b>대현자의 축복 성공!</b><br>12명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
         newBuffs.forEach(b => {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가<br>`;
         });
         msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
 
@@ -664,6 +672,8 @@ const RPG = {
         // Pick random cards from ALL types (CARDS)
         let pool = [...CARDS].sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, count);
+
+        this.state.activeSageBlessing = []; // Clear Sage Blessing
 
         let newBuffs = picks.map(c => {
             let mult = 0;
@@ -1064,7 +1074,7 @@ const RPG = {
                 maxHp: proto.stats.hp, hp: proto.stats.hp, mp: 100,
                 atk: proto.stats.atk, matk: proto.stats.matk,
                 def: proto.stats.def, mdef: proto.stats.mdef,
-                buffs: {}, pos: idx, isDead: false, baseCrit: 10
+                buffs: {}, pos: idx, isDead: false, baseCrit: 10, baseEva: 0
             };
 
             // Apply Chaos Blessing Buffs
@@ -1076,6 +1086,10 @@ const RPG = {
                 p.matk = Math.floor(p.matk * (1 + blessing.multiplier));
                 p.def = Math.floor(p.def * (1 + blessing.multiplier));
                 p.mdef = Math.floor(p.mdef * (1 + blessing.multiplier));
+                if(blessing.isSage) {
+                    p.baseCrit += 10;
+                    p.baseEva += 5;
+                }
             }
 
             // Apply Positional Traits
@@ -1951,10 +1965,12 @@ const RPG = {
         let stats = {
             atk: char.atk, matk: char.matk,
             def: char.def, mdef: char.mdef,
-            evasion: 5
+            evasion: (char.baseEva || 0) + 5,
+            crit: (char.baseCrit || 10)
         };
         let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
         let addEva = 0;
+        let addCrit = 0;
 
         // 1. Dynamic Traits (Player Only)
         const trait = char.proto ? char.proto.trait : null;
@@ -1964,6 +1980,7 @@ const RPG = {
             }
             if (trait.type === 'cond_no_field_buff_eva_crit' && fieldBuffs.length === 0) {
                 addEva += trait.val;
+                addCrit += trait.val;
             }
         }
 
@@ -1975,7 +1992,7 @@ const RPG = {
                 if(fb.name === 'sanctuary') { m.matk += 0.30; m.mdef += 0.30; }
                 if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
                 if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
-                if(fb.name === 'twinkle_party') { m.atk += 0.2; }
+                if(fb.name === 'twinkle_party') { m.atk += 0.2; addCrit += 15; }
                 if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
             });
         }
@@ -1997,6 +2014,7 @@ const RPG = {
         stats.def = Math.floor(stats.def * Math.max(0, m.def));
         stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
         stats.evasion += addEva;
+        stats.crit += addCrit;
 
         return stats;
     },
@@ -2025,7 +2043,7 @@ const RPG = {
         if(side === 'player') content += `MP: ${char.mp}<br>`;
         content += `ATK: ${colorize(eff.atk, char.atk)} / MATK: ${colorize(eff.matk, char.matk)}<br>`;
         content += `DEF: ${colorize(eff.def, char.def)} / MDEF: ${colorize(eff.mdef, char.mdef)}<br>`;
-        content += `회피율: <span style="color:#4fc3f7">${eff.evasion}%</span><br>`;
+        content += `치명타율: <span style="color:#ff5252">${eff.crit}%</span> / 회피율: <span style="color:#4fc3f7">${eff.evasion}%</span><br>`;
         content += `상태: ${buffs}<br><br>`;
 
         if(side === 'player') {
