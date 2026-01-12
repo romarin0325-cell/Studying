@@ -279,11 +279,11 @@
         </div>
         <button class="menu-btn" onclick="RPG.activateChaos('normal')">
             혼돈의 축복 (일반)<br>
-            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승</span>
+            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
         </button>
         <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
             혼돈의 축복 (도전)<br>
-            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승</span>
+            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
         </button>
         <button class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;">
             대현자의 축복<br>
@@ -491,8 +491,7 @@ const RPG = {
         }
         let msg = "<b>현재 적용된 축복</b><br><br>";
         this.state.chaosBuffs.forEach(b => {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%`;
-             if(b.isSage) msg += ", 치명타/회피율 증가";
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가`;
              msg += "<br>";
         });
         msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
@@ -690,7 +689,7 @@ const RPG = {
 
         let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
         newBuffs.forEach(b => {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%<br>`;
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가<br>`;
         });
         msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
         this.openInfoModal("축복 성공", msg);
@@ -1982,10 +1981,8 @@ const RPG = {
         // 0. Blessings
         if (char.blessing) {
             // Stats (atk/matk/def/mdef) are now applied to base in startBattleInit
-            if(char.blessing.isSage) {
-                addCrit += 10;
-                addEva += 5;
-            }
+            addCrit += 10;
+            addEva += 5;
         }
 
         // 1. Dynamic Traits (Player Only)
