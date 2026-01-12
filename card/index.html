@@ -1082,14 +1082,7 @@ const RPG = {
             if(blessing) {
                 p.maxHp = Math.floor(p.maxHp * (1 + blessing.multiplier));
                 p.hp = p.maxHp; // Heal to full as requested
-                p.atk = Math.floor(p.atk * (1 + blessing.multiplier));
-                p.matk = Math.floor(p.matk * (1 + blessing.multiplier));
-                p.def = Math.floor(p.def * (1 + blessing.multiplier));
-                p.mdef = Math.floor(p.mdef * (1 + blessing.multiplier));
-                if(blessing.isSage) {
-                    p.baseCrit += 10;
-                    p.baseEva += 5;
-                }
+                p.blessing = blessing; // Store for getEffectiveStats
             }
 
             // Apply Positional Traits
@@ -1972,6 +1965,18 @@ const RPG = {
         let addEva = 0;
         let addCrit = 0;
 
+        // 0. Blessings
+        if (char.blessing) {
+            m.atk += char.blessing.multiplier;
+            m.matk += char.blessing.multiplier;
+            m.def += char.blessing.multiplier;
+            m.mdef += char.blessing.multiplier;
+            if(char.blessing.isSage) {
+                addCrit += 10;
+                addEva += 5;
+            }
+        }
+
         // 1. Dynamic Traits (Player Only)
         const trait = char.proto ? char.proto.trait : null;
         if (trait) {
@@ -2043,7 +2048,7 @@ const RPG = {
         if(side === 'player') content += `MP: ${char.mp}<br>`;
         content += `ATK: ${colorize(eff.atk, char.atk)} / MATK: ${colorize(eff.matk, char.matk)}<br>`;
         content += `DEF: ${colorize(eff.def, char.def)} / MDEF: ${colorize(eff.mdef, char.mdef)}<br>`;
-        content += `치명타율: <span style="color:#ff5252">${eff.crit}%</span> / 회피율: <span style="color:#4fc3f7">${eff.evasion}%</span><br>`;
+        content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
         content += `상태: ${buffs}<br><br>`;
 
         if(side === 'player') {
