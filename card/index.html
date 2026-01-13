@@ -309,6 +309,7 @@
 <script src="data.js"></script>
 <script src="vocab_data.js"></script>
 <script src="grammar_data.js"></script>
+<script src="logic.js"></script>
 <script>
 /**
  * RPG Game Namespace
@@ -1316,13 +1317,7 @@ const RPG = {
             def = Math.floor(def * fieldDef * defMult);
 
             // Evasion Check
-            let eva = 5;
-            b.fieldBuffs.forEach(fb => { if(fb.name === 'moon_bless') eva += 15; });
-            if(target.proto.trait.type === 'cond_no_field_buff_eva' && b.fieldBuffs.length === 0) eva += 30;
-            if(target.proto.trait.type === 'cond_no_field_buff_eva_crit' && b.fieldBuffs.length === 0) eva += target.proto.trait.val;
-            if(target.buffs.evasion) eva += 50;
-
-            if(Math.random()*100 < eva) {
+            if (Logic.checkEvasion(target, skill.type, b.fieldBuffs)) {
                 RPG.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
                 this.endEnemyTurn();
                 return;
@@ -1496,7 +1491,7 @@ const RPG = {
         RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
 
         // Trait: Normal Attack Burn & Divine
-        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
              target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
              target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
              if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
@@ -1534,154 +1529,15 @@ const RPG = {
     calcDamage(source, target, skill) {
         if(skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0 };
 
-        // 1. Base Stats
-        let atkMult = 1.0, matkMult = 1.0, crit = source.baseCrit, critDmg = 150;
-        RPG.battle.fieldBuffs.forEach(fb => {
-             if(fb.name === 'sun_bless') { atkMult += 0.3; matkMult += 0.3; critDmg += 60; }
-             if(fb.name === 'moon_bless') { matkMult += 0.3; }
-             if(fb.name === 'sanctuary') { matkMult += 0.30; }
-             if(fb.name === 'goddess_descent') { atkMult += 0.3; matkMult += 0.3; }
-             if(fb.name === 'earth_bless') { atkMult += 0.25; matkMult += 0.25; }
-             if(fb.name === 'twinkle_party') { atkMult += 0.2; crit += 15; }
-        });
-
-        // Weakness Debuff (Applies to Source)
-        if (source.buffs.weak) {
-            atkMult -= 0.2;
-        }
-        if (source.buffs.silence) {
-            matkMult -= 0.2;
-        }
-
-        // Trait: Twinkle Party (Fresh Cream Maid)
-        if(source.proto.trait.type === 'cond_twinkle_all' && RPG.battle.fieldBuffs.some(b=>b.name==='twinkle_party')) {
-            atkMult *= 1.3;
-            matkMult *= 1.3;
-        }
-
-        // Trait: Luna (No Field Buff -> Crit +25)
-        if(source.proto.trait.type === 'cond_no_field_buff_eva_crit' && RPG.battle.fieldBuffs.length === 0) {
-            crit += source.proto.trait.val;
-        }
-
-        let val = (skill.type === 'phy' ? source.atk * Math.max(0, atkMult) : source.matk * Math.max(0, matkMult));
-        let mult = skill.val;
-        let dmgBonus = 0.0;
-
-        // 2. Elemental
-        let elMult = this.getElementalMultiplier(source.proto.element, target.element);
-        if(elMult > 1.0) RPG.log("상성 우위! 대미지 20% 증가.");
-
-        // 3. Skill-Specific Multipliers (from Effects)
-        if(skill.effects) {
-            skill.effects.forEach(eff => {
-                if(eff.type === 'consume_field_all') {
-                    let c = RPG.battle.fieldBuffs.length;
-                    if(c > 0) {
-                        mult += (c * eff.multPerStack);
-                        RPG.battle.fieldBuffs = [];
-                        RPG.log(`필드 버프 ${c}개 제거! 위력 폭발!`);
-                    }
-                }
-                else if(eff.type === 'consume_debuff_all') {
-                    if(target.buffs[eff.debuff]) {
-                        let c = target.buffs[eff.debuff];
-                        mult += (c * eff.multPerStack);
-                        delete target.buffs[eff.debuff];
-                        RPG.log(`${this.BUFF_NAMES[eff.debuff]} ${c}스택 소모!`);
-                    }
-                }
-                else if(eff.type === 'dmg_boost') {
-                     if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) {
-                         mult *= eff.mult;
-                         RPG.log(`[특성] ${this.BUFF_NAMES[eff.debuff]} 대상 추가 피해! (배율 x${eff.mult})`);
-                     }
-                     else if(eff.condition === 'synergy_active' && RPG.battle.activeTraits.includes(eff.trait)) {
-                         mult *= eff.mult;
-                         RPG.log(`[시너지] 조건 만족! 위력 ${eff.mult}배 증가!`);
-                     }
-                     else if(eff.condition === 'target_stack' && target.buffs[eff.debuff]) mult += (target.buffs[eff.debuff] * eff.multPerStack);
-                     else if(eff.condition === 'target_debuff_count_scale') {
-                         let bonus = (Object.keys(target.buffs).length * eff.multPerDebuff);
-                         mult += bonus;
-                         if(bonus > 0) RPG.log(`[특성] 디버프 대상 추가 피해! (배율 +${bonus.toFixed(1)})`);
-                     }
-                     else if(eff.condition === 'hp_below' && (source.hp/source.maxHp) <= eff.val) {
-                         mult *= eff.mult;
-                         if(skill.name === '라그나로크') RPG.log("라그나로크: 생명력 조건 만족! 대미지 증가!");
-                     }
-                     else if(eff.condition === 'hp_full' && source.hp === source.maxHp) {
-                         mult *= eff.mult;
-                         if(eff.log) RPG.log(eff.log);
-                     }
-                     else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=>b.name === eff.buff)) mult *= eff.mult;
-                }
-                else if(eff.type === 'consume_burn_1_dmg') {
-                     if(target.buffs['burn'] >= 1) {
-                         mult *= eff.mult;
-                         // RPG.log("작열 소비 조건 만족! 위력 증가!"); // Logged in applySkillEffects for clarity on consumption
-                     }
-                }
-                else if(eff.type === 'remove_field_buff_dmg') {
-                     if(RPG.battle.fieldBuffs.length > 0) {
-                         mult *= eff.mult;
-                     }
-                }
-                else if(eff.type === 'cond_target_debuff_3_dmg') {
-                     if(Object.keys(target.buffs).length >= 3) {
-                         mult *= eff.mult;
-                         RPG.log("적 디버프 3개 이상! 위력 2배!");
-                     }
-                }
-                else if(eff.type === 'random_mult') {
-                    mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
-                    RPG.log(`무작위 위력! x${mult.toFixed(1)}`);
-                }
-            });
-        }
-
-        // 4. Trait Multipliers
-        const t = source.proto.trait;
-        if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 침묵 대상 추가 피해!");
-        }
-        if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 부식 대상 추가 피해!");
-        }
-        if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length >= 3) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 디버프 3개 이상 대상 추가 피해!");
-        }
-        if(t.type === 'cond_divine_3_dmg' && target.buffs.divine >= 3) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 디바인 3스택 이상 대상 추가 피해!");
-        }
-
-        // 5. Defense Calculation
-        let isCrit = Math.random() * 100 < crit;
-        if(isCrit) val *= (critDmg / 100);
-
-        let def = skill.type === 'phy' ? target.def : target.mdef;
-        let defRed = 0.0;
-
-        if (skill.type === 'phy') {
-            if (target.buffs.darkness && target.buffs.corrosion) {
-                defRed = 0.4;
-            } else if (target.buffs.darkness || target.buffs.corrosion) {
-                defRed = 0.2;
-            }
-        } else {
-            if (target.buffs.curse) {
-                defRed = 0.2;
-            }
-        }
-
-        def = Math.floor(def * (1.0 - defRed));
-
-        let finalMult = mult * elMult * (1.0 + dmgBonus);
-        let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
+        // Logic.js returns { dmg, isCrit } and logs via callback
+        const result = Logic.calculateDamage(
+            source,
+            target,
+            skill,
+            RPG.battle.fieldBuffs,
+            RPG.battle.activeTraits,
+            (msg) => RPG.log(msg)
+        );
 
         if(target.id === 'demon_god') {
              const b = RPG.battle;
@@ -1692,7 +1548,7 @@ const RPG = {
 
         target.lastHitType = skill.type;
 
-        return { dmg: finalDmg, isCrit: isCrit };
+        return result;
     },
 
     applySkillEffects(source, target, skill) {
@@ -1968,68 +1824,7 @@ const RPG = {
     },
 
     getEffectiveStats(char, fieldBuffs) {
-        let stats = {
-            atk: char.atk, matk: char.matk,
-            def: char.def, mdef: char.mdef,
-            evasion: (char.baseEva || 0) + 5,
-            crit: (char.baseCrit || 10)
-        };
-        let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
-        let addEva = 0;
-        let addCrit = 0;
-
-        // 0. Blessings
-        if (char.blessing) {
-            // Stats (atk/matk/def/mdef) are now applied to base in startBattleInit
-            addCrit += 10;
-            addEva += 5;
-        }
-
-        // 1. Dynamic Traits (Player Only)
-        const trait = char.proto ? char.proto.trait : null;
-        if (trait) {
-            if (trait.type === 'cond_twinkle_all' && fieldBuffs.some(b => b.name === 'twinkle_party')) {
-                 m.atk += 0.3; m.matk += 0.3;
-            }
-            if (trait.type === 'cond_no_field_buff_eva_crit' && fieldBuffs.length === 0) {
-                addEva += trait.val;
-                addCrit += trait.val;
-            }
-        }
-
-        // 2. Field Buffs
-        if (char.proto) {
-            fieldBuffs.forEach(fb => {
-                if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
-                if(fb.name === 'moon_bless') { m.matk += 0.3; addEva += 15; }
-                if(fb.name === 'sanctuary') { m.matk += 0.30; m.mdef += 0.30; }
-                if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
-                if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
-                if(fb.name === 'twinkle_party') { m.atk += 0.2; addCrit += 15; }
-                if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
-            });
-        }
-
-        // 3. Buffs/Debuffs
-        if (char.buffs['weak']) { m.atk -= 0.2; }
-        if (char.buffs['silence']) { m.matk -= 0.2; }
-        if (char.buffs['evasion']) { addEva += 50; }
-
-        let defRed = 0.0;
-        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
-        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
-        m.def -= defRed;
-
-        if (char.buffs['curse']) m.mdef -= 0.2;
-
-        stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
-        stats.matk = Math.floor(stats.matk * Math.max(0, m.matk));
-        stats.def = Math.floor(stats.def * Math.max(0, m.def));
-        stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
-        stats.evasion += addEva;
-        stats.crit += addCrit;
-
-        return stats;
+        return Logic.calculateStats(char, fieldBuffs);
     },
 
     showBattleStat(side, idx) {
@@ -2045,7 +1840,7 @@ const RPG = {
             return `${name}(${val})`;
         }).join(', ') || '없음';
 
-        const eff = this.getEffectiveStats(char, this.battle.fieldBuffs);
+        const eff = Logic.calculateStats(char, this.battle.fieldBuffs);
 
         // Use baseStatsWithoutBlessing if available to show Green for blessed stats
         const getBase = (key, fallback) => {
