@@ -107,7 +107,7 @@ const CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
             { name: '블리자드', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식, 침묵, 약화, 저주 부여, 다음 턴 행동 불가', effects: [{type: 'debuff', id: 'corrosion'}, {type: 'debuff', id: 'silence'}, {type: 'debuff', id: 'weak'}, {type: 'debuff', id: 'curse'}, {type: 'self_debuff', id: 'stun', duration: 1}] },
-            { name: '프로스트', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '상대에게 적용된 디버프가 5개 이상일 시, 상대 스턴', effects: [{type: 'conditional_debuff', condition: 'target_debuff_count', count: 5, debuff: 'stun'}] }
+            { name: '프로스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '상대에게 적용된 디버프가 5개 이상일 시, 상대 스턴', effects: [{type: 'conditional_debuff', condition: 'target_debuff_count', count: 5, debuff: 'stun'}] }
         ]
     },
     {
@@ -219,7 +219,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] },
-            { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 스타파우더 부여', effects: [{type: 'field_buff', id: 'star_powder'}] }
+            { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 부여', effects: [{type: 'field_buff', id: 'star_powder'}] }
         ]
     },
     {
@@ -350,7 +350,7 @@ const CARDS = [
         trait: { type: 'death_dmg_mag', val: 2.0, desc: '사망시 적에게 200% 마법대미지' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '사일런트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '침묵 부여', effects: [{type: 'debuff', id: 'silence'}] },
+            { name: '사일런트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 부여', effects: [{type: 'debuff', id: 'silence'}] },
             { name: '위크니스', type: 'sup', tier: 1, cost: 10, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] }
         ]
     },
@@ -439,7 +439,7 @@ const CARDS = [
     {
         id: 'slime', name: '슬라임', grade: 'normal', element: 'water', role: 'balancer',
         stats: { hp: 340, atk: 60, matk: 60, def: 45, mdef: 45 },
-        trait: { type: 'pos_mid_def', val: 20, desc: '중견 배치시 방어 20%증가' },
+        trait: { type: 'pos_mid_def', val: 30, desc: '중견 배치시 방어 30%증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '산성액', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '부식부여', effects: [{type: 'debuff', id: 'corrosion'}] },
@@ -449,7 +449,7 @@ const CARDS = [
     {
         id: 'mummy', name: '미이라', grade: 'normal', element: 'nature', role: 'balancer',
         stats: { hp: 320, atk: 70, matk: 50, def: 65, mdef: 40 },
-        trait: { type: 'pos_mid_mdef', val: 20, desc: '중견 배치시 마방 20%증가' },
+        trait: { type: 'pos_mid_mdef', val: 30, desc: '중견 배치시 마방 30%증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
