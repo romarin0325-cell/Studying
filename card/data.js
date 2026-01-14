@@ -110,6 +110,16 @@ const CARDS = [
             { name: '프로스트', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '상대에게 적용된 디버프가 5개 이상일 시, 상대 스턴', effects: [{type: 'conditional_debuff', condition: 'target_debuff_count', count: 5, debuff: 'stun'}] }
         ]
     },
+    {
+        id: 'behemoth', name: '베히모스', grade: 'legend', element: 'nature', role: 'balancer',
+        stats: { hp: 560, atk: 115, matk: 90, def: 75, mdef: 55 },
+        trait: { type: 'behemoth_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용시 20%확률로 적에게 스턴부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '대지분쇄', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{type: 'self_debuff', id: 'stun', duration: 1}, {type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0}] },
+            { name: '어스퀘이크', type: 'mag', tier: 3, cost: 30, val: 3.5, desc: '다음 턴에 공격 (시전자 사망 시 취소)', effects: [{type: 'delayed_attack', turns: 1}] }
+        ]
+    },
 
     // --- 에픽 (Epic) ---
     {
@@ -220,6 +230,16 @@ const CARDS = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '고스트소울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인, 암흑 부여', effects: [{type: 'debuff', id: 'divine', stack: 1}, {type: 'debuff', id: 'darkness'}] },
             { name: '네더커스', type: 'sup', tier: 2, cost: 20, desc: '저주 침묵 약화 부식 중 랜덤 2종 부여', effects: [{type: 'random_debuff', count: 2, pool: ['curse', 'silence', 'weak', 'corrosion']}] }
+        ]
+    },
+    {
+        id: 'fairy_queen', name: '페어리퀸', grade: 'epic', element: 'light', role: 'debuffer',
+        stats: { hp: 395, atk: 70, matk: 110, def: 60, mdef: 75 },
+        trait: { type: 'death_stun', desc: '사망시 적에게 기절 부여' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적이 디바인 3스택이면 스턴, 아니면 디바인 부여', effects: [{type: 'check_divine_3_stun_else_add'}] },
+            { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1개 (디바인 소모 시 2개)', effects: [{type: 'random_debuff_consume_divine'}] }
         ]
     },
 
@@ -334,6 +354,16 @@ const CARDS = [
             { name: '위크니스', type: 'sup', tier: 1, cost: 10, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] }
         ]
     },
+    {
+        id: 'mirage', name: '신기루', grade: 'rare', element: 'fire', role: 'debuffer',
+        stats: { hp: 345, atk: 80, matk: 80, def: 55, mdef: 65 },
+        trait: { type: 'death_darkness', desc: '사망시 암흑 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
+            { name: '미라지프레임', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '작열, 약화 부여', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'debuff', id: 'weak'}] },
+            { name: '팬텀러쉬', type: 'phy', tier: 3, cost: 30, val: 1.5, desc: '작열, 저주 부여', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'debuff', id: 'curse'}] }
+        ]
+    },
 
     // --- 일반 (Normal) ---
     {
@@ -444,6 +474,16 @@ const CARDS = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '저주의불꽃', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 부여', effects: [{type: 'debuff', id: 'curse'}] },
             { name: '침묵의불꽃', type: 'sup', tier: 1, cost: 10, desc: '침묵, 작열 부여', effects: [{type: 'debuff', id: 'silence'}, {type: 'debuff', id: 'burn', stack: 1}] }
+        ]
+    },
+    {
+        id: 'joker', name: '조커', grade: 'normal', element: 'nature', role: 'balancer',
+        stats: { hp: 280, atk: 70, matk: 70, def: 45, mdef: 45 },
+        trait: { type: 'joker_wild', desc: '이 카드는 모든 속성, 모든 이름으로 취급' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '레인보우룰렛', type: 'sup', tier: 10, cost: 100, desc: '모든 필드버프 교체', effects: [{type: 'roulette_field'}] },
+            { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 랜덤 디버프 2종 부여', effects: [{type: 'wild_card_debuff'}] }
         ]
     }
 ];

@@ -265,6 +265,10 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 디바인 3스택 이상 대상 추가 피해!");
             }
+            if(t.type === 'behemoth_trait' && Object.keys(target.buffs).length >= 3) {
+                dmgBonus += (t.val - 1.0);
+                logFn("[특성] 베히모스: 디버프 3개 이상 대상 파괴적 일격!");
+            }
         }
 
         // Defense

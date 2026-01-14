@@ -1102,31 +1102,39 @@ const RPG = {
         // Identify Synergy Traits (Deck Check)
         this.battle.activeTraits = [];
         const activePlayerCards = this.battle.players.filter(p => p !== null);
-        const elements = activePlayerCards.map(p => p.proto.element);
+        const hasJoker = this.state.deck.includes('joker');
+
+        const countEl = (el) => {
+            return activePlayerCards.filter(p => p.proto.element === el || p.proto.id === 'joker').length;
+        };
+        const hasEl = (el) => {
+            return activePlayerCards.some(p => p.proto.element === el || p.proto.id === 'joker');
+        };
 
         activePlayerCards.forEach(p => {
              const t = p.proto.trait;
              if(!t.type.startsWith('syn_')) return;
 
              let active = false;
-             if(t.type === 'syn_nature_3_def' && elements.filter(e=>e==='nature').length===3) active = true;
-             else if(t.type === 'syn_nature_3_golem' && elements.filter(e=>e==='nature').length===3) active = true;
-             else if(t.type === 'syn_water_3_matk' && elements.filter(e=>e==='water').length===3) active = true;
-             else if(t.type === 'syn_fire_3_crit' && elements.filter(e=>e==='fire').length===3) active = true;
-             else if(t.type === 'syn_dark_3_matk' && elements.filter(e=>e==='dark').length===3) active = true;
-             else if(t.type === 'syn_light_fire_atk' && elements.includes('light') && elements.includes('fire')) active = true;
-             else if(t.type === 'syn_water_light_matk_mdef' && elements.includes('water') && elements.includes('light')) active = true;
-             else if(t.type === 'syn_water_nature' && elements.includes('water') && elements.includes('nature')) {
+             if(t.type === 'syn_nature_3_def' && countEl('nature') >= 3) active = true;
+             else if(t.type === 'syn_nature_3_golem' && countEl('nature') >= 3) active = true;
+             else if(t.type === 'syn_water_3_matk' && countEl('water') >= 3) active = true;
+             else if(t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
+             else if(t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
+             else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
+             else if(t.type === 'syn_water_light_matk_mdef' && hasEl('water') && hasEl('light')) active = true;
+             else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) {
                  this.battle.activeTraits.push(t.type); // Special handling for Rumi
              }
-             else if(t.type === 'syn_nature_3_matk' && elements.filter(e=>e==='nature').length===3) active = true;
-             else if(t.type === 'syn_night_rabbit' && this.state.deck.includes('night_rabbit')) active = true;
-             else if(t.type === 'syn_snow_rabbit' && this.state.deck.includes('snow_rabbit')) active = true;
-             else if(t.type === 'syn_water_3_atk_matk' && elements.filter(e=>e==='water').length===3) active = true;
+             else if(t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
+             else if(t.type === 'syn_night_rabbit' && (this.state.deck.includes('night_rabbit') || hasJoker)) active = true;
+             else if(t.type === 'syn_snow_rabbit' && (this.state.deck.includes('snow_rabbit') || hasJoker)) active = true;
+             else if(t.type === 'syn_water_3_atk_matk' && countEl('water') >= 3) active = true;
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
                 this.battle.activeTraits.push(t.type);
+                RPG.log(`[시너지] ${t.desc} 발동!`);
 
                 if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
@@ -1464,6 +1472,12 @@ const RPG = {
                  RPG.log(`[특성] 사망 시 스턴 발동! 적을 기절시킵니다.`);
              }
         }
+        else if(t.type === 'death_darkness') {
+             if (killer && killer.buffs) {
+                 killer.buffs.darkness = 1;
+                 RPG.log(`[특성] 사망 시 암흑 발동! 적에게 암흑을 부여합니다.`);
+             }
+        }
         else if(t.type === 'death_sun_bless_chance') {
              if(Math.random() < t.val) {
                  RPG.applyFieldBuff('sun_bless');
@@ -1497,6 +1511,14 @@ const RPG = {
              if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
              if(target.buffs['divine'] > 3) target.buffs['divine'] = 3;
              RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
+        }
+
+        // Trait: Behemoth (Skill Use -> Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
+            if (Math.random() < 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
+            }
         }
 
         // Check for Delayed Attack Effect
@@ -1635,6 +1657,89 @@ const RPG = {
                  if(RPG.battle.fieldBuffs.length > 0) {
                      let rm = RPG.battle.fieldBuffs.shift();
                      RPG.log(`필드버프 [${this.BUFF_NAMES[rm.name]}] 제거! 대미지 2배 적용!`);
+                 }
+            }
+            else if(eff.type === 'check_divine_3_stun_else_add') {
+                 if((target.buffs['divine'] || 0) >= 3) {
+                     target.buffs['stun'] = 1;
+                     RPG.log("디바인 3스택 확인! 적을 기절시킵니다!");
+                 } else {
+                     target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
+                     if(target.buffs['divine'] > 3) target.buffs['divine'] = 3;
+                     RPG.log("디바인 스택 추가.");
+                 }
+            }
+            else if(eff.type === 'random_debuff_consume_divine') {
+                let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+                let count = 1;
+                if(target.buffs['divine'] > 0) {
+                    target.buffs['divine']--;
+                    if(target.buffs['divine'] <= 0) delete target.buffs['divine'];
+                    count = 2;
+                    RPG.log("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
+                }
+
+                pool.sort(() => 0.5 - Math.random());
+                for(let i=0; i<count; i++) {
+                    target.buffs[pool[i]] = 1;
+                    RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
+                }
+            }
+            else if(eff.type === 'roulette_field') {
+                 RPG.battle.fieldBuffs = [];
+                 RPG.log("모든 필드 버프가 제거되었습니다!");
+
+                 const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
+                 const pick = buffs[Math.floor(Math.random() * buffs.length)];
+                 this.applyFieldBuff(pick);
+            }
+            else if(eff.type === 'wild_card_debuff') {
+                 // Cleanse player debuffs
+                 // "모든 디버프를 해제한다"
+                 // If this is a support skill targeting ENEMY (as attack/debuff), removing ENEMY debuffs is weird unless intended (reset).
+                 // But wait, Joker is a "Balancer".
+                 // Skill says: "Cost 100. Remove all debuffs. Add 2 random debuffs."
+                 // Usually "Remove all debuffs" (Cleanse) targets Self/Party.
+                 // "Add 2 random debuffs" targets Enemy.
+                 // If the skill is executed by `executeSkill`, it has a `source` and `target`.
+                 // If `wild_card` is `sup` (Support), does it target self or enemy?
+                 // In this game, `executeSkill` calls `applySkillEffects`.
+                 // `applySkillEffects` uses `source` and `target`.
+                 // If the user clicks a skill, `executeSkill(p, enemy, skill)` is called.
+                 // So `target` is Enemy. `source` is Player.
+
+                 // If I want to cleanse PLAYER: use `source.buffs`.
+                 // If I want to cleanse ENEMY: use `target.buffs`.
+
+                 // "Wild Card": A Joker move. Usually chaotic.
+                 // "Clear all debuffs": Likely clears PLAYER'S debuffs (Good thing).
+                 // "Inflict 2 random debuffs": Likely on ENEMY (Bad thing).
+                 // This makes it a very strong skill (Cost 100).
+
+                 // Let's implement: Cleanse Source (Player), Debuff Target (Enemy).
+
+                 const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+                 let cleansed = 0;
+                 badBuffs.forEach(b => {
+                     if(source.buffs[b]) {
+                         delete source.buffs[b];
+                         cleansed++;
+                     }
+                 });
+                 if(cleansed > 0) RPG.log(`나의 디버프를 모두 해제했습니다! (${cleansed}개)`);
+
+                 let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+                 pool.sort(() => 0.5 - Math.random());
+
+                 for(let i=0; i<2; i++) {
+                     if(pool[i] === 'burn' || pool[i] === 'divine') {
+                         target.buffs[pool[i]] = (target.buffs[pool[i]] || 0) + 1;
+                         if(target.buffs[pool[i]] > 3) target.buffs[pool[i]] = 3;
+                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 스택 추가.`);
+                     } else {
+                         target.buffs[pool[i]] = 1;
+                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
+                     }
                  }
             }
         });
