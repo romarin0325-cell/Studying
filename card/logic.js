@@ -18,6 +18,9 @@ const Logic = {
             stats.evasion += 5;
         }
 
+        // Check if character is Player (has proto)
+        const isPlayer = !!char.proto;
+
         // Traits
         const trait = char.proto ? char.proto.trait : null;
         if (trait) {
@@ -33,16 +36,18 @@ const Logic = {
         // Multipliers from Buffs/Traits
         let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
 
-        // Field Buffs
-        fieldBuffs.forEach(fb => {
-            if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
-            if(fb.name === 'moon_bless') { m.matk += 0.3; stats.evasion += 15; }
-            if(fb.name === 'sanctuary') { m.matk += 0.3; m.mdef += 0.3; }
-            if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
-            if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
-            if(fb.name === 'twinkle_party') { m.atk += 0.2; stats.crit += 15; }
-            if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
-        });
+        // Field Buffs (Only apply to Allies)
+        if (isPlayer) {
+            fieldBuffs.forEach(fb => {
+                if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
+                if(fb.name === 'moon_bless') { m.matk += 0.3; stats.evasion += 15; }
+                if(fb.name === 'sanctuary') { m.matk += 0.3; m.mdef += 0.3; }
+                if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
+                if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
+                if(fb.name === 'twinkle_party') { m.atk += 0.2; stats.crit += 15; }
+                if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
+            });
+        }
 
         // Trait Multipliers (that affect base stats permanently for the turn)
         if (trait) {
@@ -89,7 +94,8 @@ const Logic = {
         // 1. Critical
         let isCrit = Math.random() * 100 < srcStats.crit;
         let critDmg = 1.5; // Base 150%
-        if (fieldBuffs.some(b => b.name === 'sun_bless')) critDmg += 0.6;
+        // Sun Bless Crit Dmg boost only for Player
+        if (source.proto && fieldBuffs.some(b => b.name === 'sun_bless')) critDmg += 0.6;
 
         let val = (skill.type === 'phy') ? srcStats.atk : srcStats.matk;
         if (isCrit) val *= critDmg;
