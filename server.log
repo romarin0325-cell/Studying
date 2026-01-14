@@ -1,42 +1,5 @@
-127.0.0.1 - - [12/Jan/2026 05:55:54] "GET /card/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:55:54] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:55:54] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:55:54] "GET /card/data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:55:54] "GET /card/vocab_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:55:54] "GET /card/grammar_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:56:48] "GET /card/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:56:48] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:56:48] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:56:48] "GET /card/data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:56:48] "GET /card/vocab_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:56:48] "GET /card/grammar_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/vocab_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/grammar_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:58:08] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/%EB%A7%88%EC%8B%9C%EB%A9%9C%EB%A1%9C.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:58:08] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/vocab_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/grammar_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/%EB%A7%88%EC%8B%9C%EB%A9%9C%EB%A1%9C.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 05:59:21] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 05:59:21] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/index.html HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/vocab_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/grammar_data.js HTTP/1.1" 200 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
-127.0.0.1 - - [12/Jan/2026 06:00:19] code 404, message File not found
-127.0.0.1 - - [12/Jan/2026 06:00:19] "GET /card/%EB%A7%88%EC%8B%9C%EB%A9%9C%EB%A1%9C.png HTTP/1.1" 404 -
+127.0.0.1 - - [14/Jan/2026 08:38:10] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [14/Jan/2026 08:38:10] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Jan/2026 08:38:10] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Jan/2026 08:38:10] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Jan/2026 08:38:10] "GET /card/vocab_data.js HTTP/1.1" 200 -
