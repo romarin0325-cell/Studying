@@ -1,11 +1,11 @@
-＜!DOCTYPE html＞
-＜html lang="ko"＞
-＜head＞
-＜meta charset="UTF-8"＞
-＜meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"＞
-＜title＞Card RPG＜/title＞
-＜link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"＞
-＜style＞
+\xef!DOCTYPE html\xef
+\xefhtml lang="ko"\xef
+\xefhead\xef
+\xefmeta charset="UTF-8"\xef
+\xefmeta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"\xef
+\xeftitle\xefCard RPG\xef/title\xef
+\xeflink href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"\xef
+\xefstyle\xef
     body { background-color: #121212; color: #e0e0e0; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
     .header { padding: 10px; text-align: center; background: #1f1f1f; border-bottom: 1px solid #333; font-size: 0.95rem; color: #bbb; font-weight: bold; flex-shrink: 0; }
     .container { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
@@ -110,206 +110,207 @@
 
     .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
-＜/style＞
-＜/head＞
-＜body＞
-＜div class="header"＞Card RPG＜/div＞
-＜div class="container"＞
-    ＜div id="screen-title" class="screen active" style="justify-content: center; align-items: center;"＞
-        ＜h1 style="color:#ffd700;"＞Card RPG＜/h1＞
-        ＜button class="menu-btn" onclick="RPG.startGame('new')"＞새로하기＜/button＞
-        ＜button class="menu-btn" onclick="RPG.startGame('load')"＞이어하기＜/button＞
-    ＜/div＞
-    ＜div id="screen-menu" class="screen"＞
-        ＜div style="text-align:center; padding: 10px;"＞보유 티켓: ＜span id="ui-tickets" style="color:#ffd700"＞0＜/span＞장＜/div＞
-        ＜div id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;"＞
+\xef/style\xef
+\xef/head\xef
+\xefbody\xef
+\xefdiv class="header"\xefCard RPG\xef/div\xef
+\xefdiv class="container"\xef
+    \xefdiv id="screen-title" class="screen active" style="justify-content: center; align-items: center;"\xef
+        \xefh1 style="color:#ffd700;"\xefCard RPG\xef/h1\xef
+        \xefbutton class="menu-btn" onclick="RPG.startGame('new')"\xef새로하기\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.startGame('load')"\xef이어하기\xef/button\xef
+    \xef/div\xef
+    \xefdiv id="screen-menu" class="screen"\xef
+        \xefdiv style="text-align:center; padding: 10px;"\xef보유 티켓: \xefspan id="ui-tickets" style="color:#ffd700"\xef0\xef/span\xef장\xef/div\xef
+        \xefdiv id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;"\xef
              다음 상대: ?
-        ＜/div＞
-        ＜div style="display:flex; gap:5px; margin-bottom:10px;"＞
-            ＜button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;"＞일반 뽑기 (1장)＜/button＞
-            ＜button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;"＞도전 뽑기＜/button＞
-        ＜/div＞
-        ＜button class="menu-btn" onclick="RPG.openDeck()"＞덱 구성＜/button＞
-        ＜button class="menu-btn" onclick="RPG.openCollection()"＞카드 확인＜/button＞
-        ＜button class="menu-btn" onclick="RPG.openLibrary()"＞도서관＜/button＞
-        ＜button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;"＞축복의 제단＜/button＞
-        ＜button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;"＞전투 진입＜/button＞
-        ＜button class="menu-btn" onclick="RPG.openSystemMenu()"＞메뉴＜/button＞
-    ＜/div＞
-    ＜div id="screen-collection" class="screen"＞
-        ＜div style="display:flex; justify-content:space-between; align-items:center;"＞＜h3＞카드 목록＜/h3＞＜button onclick="RPG.toMenu()" style="padding:5px;"＞뒤로＜/button＞＜/div＞
-        ＜div id="collection-grid" class="card-grid"＞＜/div＞
-    ＜/div＞
-    ＜div id="screen-deck" class="screen"＞
-        ＜h3＞덱 구성＜/h3＞
-        ＜div style="margin-bottom:10px;"＞
-            ＜div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)"＞선봉 (클릭하여 선택)＜/div＞
-            ＜div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)"＞중견 (클릭하여 선택)＜/div＞
-            ＜div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)"＞대장 (클릭하여 선택)＜/div＞
-        ＜/div＞
-        ＜div style="flex:1; overflow-y:auto; border-top:1px solid #333;"＞＜div id="deck-card-list" class="card-grid"＞＜/div＞＜/div＞
-        ＜button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;"＞확인＜/button＞
-    ＜/div＞
-    ＜div id="screen-battle" class="screen"＞
-        ＜div class="battle-header"＞＜span＞Turn: ＜span id="bt-turn"＞1＜/span＞＜/span＞＜div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"＞＜/div＞＜/div＞
-        ＜div class="visual-stage"＞
-            ＜div id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"＞
-                ＜div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name"＞Player＜/div＞
-                ＜div class="portrait"＞＜img id="p-img" src="" onerror="this.style.display='none'"＞＜/div＞
-                ＜div class="actor-hp-bar"＞＜div id="p-hp-bar" class="actor-hp-fill"＞＜/div＞＜/div＞
-                ＜div class="actor-mp-bar"＞＜div id="p-mp-bar" class="actor-mp-fill"＞＜/div＞＜/div＞
-                ＜div id="p-buffs" class="actor-buffs"＞＜/div＞
-            ＜/div＞
+        \xef/div\xef
+        \xefdiv style="display:flex; gap:5px; margin-bottom:10px;"\xef
+            \xefbutton class="menu-btn" onclick="RPG.openGacha()" style="flex:1;"\xef일반 뽑기 (1장)\xef/button\xef
+            \xefbutton class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;"\xef도전 뽑기\xef/button\xef
+        \xef/div\xef
+        \xefbutton class="menu-btn" onclick="RPG.openDeck()"\xef덱 구성\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.openCollection()"\xef카드 확인\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.openLibrary()"\xef도서관\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;"\xef축복의 제단\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;"\xef전투 진입\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.openSystemMenu()"\xef메뉴\xef/button\xef
+    \xef/div\xef
+    \xefdiv id="screen-collection" class="screen"\xef
+        \xefdiv style="display:flex; justify-content:space-between; align-items:center;"\xef\xefh3\xef카드 목록\xef/h3\xef\xefbutton onclick="RPG.toMenu()" style="padding:5px;"\xef뒤로\xef/button\xef\xef/div\xef
+        \xefdiv id="collection-grid" class="card-grid"\xef\xef/div\xef
+    \xef/div\xef
+    \xefdiv id="screen-deck" class="screen"\xef
+        \xefh3\xef덱 구성\xef/h3\xef
+        \xefdiv style="margin-bottom:10px;"\xef
+            \xefdiv id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)"\xef선봉 (클릭하여 선택)\xef/div\xef
+            \xefdiv id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)"\xef중견 (클릭하여 선택)\xef/div\xef
+            \xefdiv id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)"\xef대장 (클릭하여 선택)\xef/div\xef
+        \xef/div\xef
+        \xefdiv style="flex:1; overflow-y:auto; border-top:1px solid #333;"\xef\xefdiv id="deck-card-list" class="card-grid"\xef\xef/div\xef\xef/div\xef
+        \xefbutton class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;"\xef확인\xef/button\xef
+    \xef/div\xef
+    \xefdiv id="screen-battle" class="screen"\xef
+        \xefdiv class="battle-header"\xef\xefspan\xefTurn: \xefspan id="bt-turn"\xef1\xef/span\xef\xef/span\xef\xefdiv id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"\xef\xef/div\xef\xef/div\xef
+        \xefdiv class="visual-stage"\xef
+            \xefdiv id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"\xef
+                \xefdiv style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name"\xefPlayer\xef/div\xef
+                \xefdiv class="portrait"\xef\xefimg id="p-img" src="" onerror="this.style.display='none'"\xef\xef/div\xef
+                \xefdiv class="actor-hp-bar"\xef\xefdiv id="p-hp-bar" class="actor-hp-fill"\xef\xef/div\xef\xef/div\xef
+                \xefdiv class="actor-mp-bar"\xef\xefdiv id="p-mp-bar" class="actor-mp-fill"\xef\xef/div\xef\xef/div\xef
+                \xefdiv id="p-buffs" class="actor-buffs"\xef\xef/div\xef
+            \xef/div\xef
 
-            ＜div style="color:#555; font-size:1.5rem; font-weight:bold;"＞VS＜/div＞
+            \xefdiv style="color:#555; font-size:1.5rem; font-weight:bold;"\xefVS\xef/div\xef
 
-            ＜div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)"＞
-                ＜div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name"＞Enemy＜/div＞
-                ＜div class="portrait"＞＜img id="e-img" src="" onerror="this.style.display='none'"＞＜/div＞
-                ＜div class="actor-hp-bar"＞＜div id="e-hp-bar" class="actor-hp-fill"＞＜/div＞＜/div＞
-                ＜div id="e-buffs" class="actor-buffs"＞＜/div＞
-            ＜/div＞
-        ＜/div＞
-        ＜div id="battle-log" class="log-container"＞＜/div＞
-        ＜div id="battle-controls" class="control-panel"＞＜/div＞
-    ＜/div＞
-＜/div＞
+            \xefdiv id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)"\xef
+                \xefdiv style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name"\xefEnemy\xef/div\xef
+                \xefdiv class="portrait"\xef\xefimg id="e-img" src="" onerror="this.style.display='none'"\xef\xef/div\xef
+                \xefdiv class="actor-hp-bar"\xef\xefdiv id="e-hp-bar" class="actor-hp-fill"\xef\xef/div\xef\xef/div\xef
+                \xefdiv id="e-buffs" class="actor-buffs"\xef\xef/div\xef
+            \xef/div\xef
+        \xef/div\xef
+        \xefdiv id="battle-log" class="log-container"\xef\xef/div\xef
+        \xefdiv id="battle-controls" class="control-panel"\xef\xef/div\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-card" class="modal"＞
-    ＜div class="modal-content"＞
-        ＜h3 id="md-name"＞Name＜/h3＞
-        ＜div class="modal-scroll"＞
-            ＜div class="portrait" style="width:150px; height:200px; margin:0 auto;"＞＜img id="md-img" src="" style="width:100%; height:100%; object-fit:contain;"＞＜/div＞
-            ＜p id="md-grade" style="font-size:0.8rem; margin:5px 0;"＞Grade＜/p＞
-            ＜div id="md-stats" style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"＞＜/div＞
-            ＜div id="md-skills" style="font-size:0.8rem; text-align:left;"＞＜/div＞
-        ＜/div＞
-        ＜button onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-card" class="modal"\xef
+    \xefdiv class="modal-content"\xef
+        \xefh3 id="md-name"\xefName\xef/h3\xef
+        \xefdiv class="modal-scroll"\xef
+            \xefdiv class="portrait" style="width:150px; height:200px; margin:0 auto;"\xef\xefimg id="md-img" src="" style="width:100%; height:100%; object-fit:contain;"\xef\xef/div\xef
+            \xefp id="md-grade" style="font-size:0.8rem; margin:5px 0;"\xefGrade\xef/p\xef
+            \xefdiv id="md-stats" style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"\xef\xef/div\xef
+            \xefdiv id="md-skills" style="font-size:0.8rem; text-align:left;"\xef\xef/div\xef
+        \xef/div\xef
+        \xefbutton onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-info" class="modal" style="z-index: 200;"＞
-    ＜div class="modal-content" style="height:auto;"＞
-        ＜h3 id="info-title"＞정보＜/h3＞
-        ＜div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"＞＜/div＞
-        ＜button onclick="RPG.closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-info" class="modal" style="z-index: 200;"\xef
+    \xefdiv class="modal-content" style="height:auto;"\xef
+        \xefh3 id="info-title"\xef정보\xef/h3\xef
+        \xefdiv id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"\xef\xef/div\xef
+        \xefbutton onclick="RPG.closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-confirm" class="modal" style="z-index: 210;"＞
-  ＜div class="modal-content" style="height:auto;"＞
-    ＜h3 id="confirm-title"＞확인＜/h3＞
-    ＜div id="confirm-msg" style="margin: 10px 0;"＞...＜/div＞
-    ＜div style="display:flex; gap:10px; margin-top:15px; width:100%;"＞
-       ＜button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;"＞예＜/button＞
-       ＜button id="confirm-no" class="menu-btn" style="flex:1; margin-bottom:0; background:#555; border-color:#777;"＞아니오＜/button＞
-    ＜/div＞
-  ＜/div＞
-＜/div＞
+\xefdiv id="modal-confirm" class="modal" style="z-index: 210;"\xef
+  \xefdiv class="modal-content" style="height:auto;"\xef
+    \xefh3 id="confirm-title"\xef확인\xef/h3\xef
+    \xefdiv id="confirm-msg" style="margin: 10px 0;"\xef...\xef/div\xef
+    \xefdiv style="display:flex; gap:10px; margin-top:15px; width:100%;"\xef
+       \xefbutton id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;"\xef예\xef/button\xef
+       \xefbutton id="confirm-no" class="menu-btn" style="flex:1; margin-bottom:0; background:#555; border-color:#777;"\xef아니오\xef/button\xef
+    \xef/div\xef
+  \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-gacha" class="modal"＞
-    ＜div class="modal-content" style="height:auto; min-height:300px;"＞
-        ＜h2 id="gacha-title"＞획득!＜/h2＞
-        ＜div id="gacha-result"＞＜/div＞
-        ＜button onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;"＞확인＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-gacha" class="modal"\xef
+    \xefdiv class="modal-content" style="height:auto; min-height:300px;"\xef
+        \xefh2 id="gacha-title"\xef획득!\xef/h2\xef
+        \xefdiv id="gacha-result"\xef\xef/div\xef
+        \xefbutton onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;"\xef확인\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-library" class="modal"＞
-    ＜div class="modal-content" style="height:auto;"＞
-        ＜h3＞도서관＜/h3＞
-        ＜button class="menu-btn" onclick="RPG.openMagicClass()"＞루미의 마법교실＜/button＞
-        ＜button class="menu-btn" onclick="RPG.openWordbook()"＞단어장＜/button＞
-        ＜button onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-library" class="modal"\xef
+    \xefdiv class="modal-content" style="height:auto;"\xef
+        \xefh3\xef도서관\xef/h3\xef
+        \xefbutton class="menu-btn" onclick="RPG.openMagicClass()"\xef루미의 마법교실\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.openWordbook()"\xef단어장\xef/button\xef
+        \xefbutton onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-magic-class" class="modal"＞
-    ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"＞
-        ＜h3＞루미의 마법교실＜/h3＞
-        ＜div id="lecture-list" class="modal-scroll"＞＜/div＞
-        ＜button onclick="document.getElementById('modal-magic-class').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-magic-class" class="modal"\xef
+    \xefdiv class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"\xef
+        \xefh3\xef루미의 마법교실\xef/h3\xef
+        \xefdiv id="lecture-list" class="modal-scroll"\xef\xef/div\xef
+        \xefbutton onclick="document.getElementById('modal-magic-class').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-lecture-view" class="modal" style="z-index: 150;"＞
-    ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;"＞
-        ＜h3 id="lecture-title"＞강의 제목＜/h3＞
-        ＜div style="display: flex; justify-content: center; margin-bottom: 10px;"＞
-             ＜div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;"＞
-                 ＜img src="루미.png" onerror="this.src=''" alt="Rumi"＞
-             ＜/div＞
-        ＜/div＞
-        ＜div id="lecture-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;"＞＜/div＞
-        ＜button onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-lecture-view" class="modal" style="z-index: 150;"\xef
+    \xefdiv class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;"\xef
+        \xefh3 id="lecture-title"\xef강의 제목\xef/h3\xef
+        \xefdiv style="display: flex; justify-content: center; margin-bottom: 10px;"\xef
+             \xefdiv class="portrait" style="width: 100px; height: 130px; border-color: #448aff;"\xef
+                 \xefimg src="루미.png" onerror="this.src=''" alt="Rumi"\xef
+             \xef/div\xef
+        \xef/div\xef
+        \xefdiv id="lecture-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;"\xef\xef/div\xef
+        \xefbutton onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-wordbook" class="modal"＞
-    ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"＞
-        ＜h3＞단어장＜/h3＞
-        ＜div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"＞
-             ＜span style="font-size: 0.8rem; color: #aaa;"＞빨간색: 틀린 단어＜/span＞
-             ＜label style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;"＞
-                ＜input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()" style="margin-right: 5px;"＞ 틀린 단어만 보기
-             ＜/label＞
-             ＜button class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;"＞복습 초기화＜/button＞
-        ＜/div＞
-        ＜div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"＞＜/div＞
-        ＜button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-wordbook" class="modal"\xef
+    \xefdiv class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"\xef
+        \xefh3\xef단어장\xef/h3\xef
+        \xefdiv style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"\xef
+             \xefspan style="font-size: 0.8rem; color: #aaa;"\xef빨간색: 틀린 단어\xef/span\xef
+             \xeflabel style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;"\xef
+                \xefinput type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()" style="margin-right: 5px;"\xef 틀린 단어만 보기
+             \xef/label\xef
+             \xefbutton class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;"\xef복습 초기화\xef/button\xef
+        \xef/div\xef
+        \xefdiv id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"\xef\xef/div\xef
+        \xefbutton onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-quiz" class="modal"＞
-    ＜div class="modal-content" style="width: 320px;"＞
-        ＜h3＞퀴즈＜/h3＞
-        ＜div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"＞＜/div＞
-        ＜div id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"＞＜/div＞
-        ＜div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"＞＜/div＞
-        ＜div id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"＞＜/div＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-quiz" class="modal"\xef
+    \xefdiv class="modal-content" style="width: 320px;"\xef
+        \xefh3\xef퀴즈\xef/h3\xef
+        \xefdiv id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"\xef\xef/div\xef
+        \xefdiv id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"\xef\xef/div\xef
+        \xefdiv id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"\xef\xef/div\xef
+        \xefdiv id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"\xef\xef/div\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-chaos" class="modal"＞
-    ＜div class="modal-content" style="height:auto; min-height: 550px;"＞
-        ＜h3＞혼돈의 축복＜/h3＞
-        ＜p style="font-size:0.8rem; color:#aaa;"＞전투 시 무작위 카드에게 강력한 축복을 내립니다.＜br＞(전투 종료 시 사라짐, 최대 3회)＜/p＞
-        ＜div style="margin-bottom:10px; font-weight:bold; color:#ffd700;"＞
-            혼돈의 축복: ＜span id="chaos-uses"＞3＜/span＞회 / 대현자의 축복: ＜span id="sage-uses"＞3＜/span＞회
-        ＜/div＞
-        ＜button class="menu-btn" onclick="RPG.activateChaos('normal')"＞
-            혼돈의 축복 (일반)＜br＞
-            ＜span style="font-size:0.75rem; font-weight:normal; color:#ccc;"＞랜덤 2종 카드 능력치 대폭 상승＜/span＞
-        ＜/button＞
-        ＜button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;"＞
-            혼돈의 축복 (도전)＜br＞
-            ＜span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;"＞퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승＜/span＞
-        ＜/button＞
-        ＜button class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;"＞
-            대현자의 축복＜br＞
-            ＜span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;"＞문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장＜/span＞
-        ＜/button＞
-        ＜button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;"＞
+\xefdiv id="modal-chaos" class="modal"\xef
+    \xefdiv class="modal-content" style="height:auto; min-height: 550px;"\xef
+        \xefh3\xef혼돈의 축복\xef/h3\xef
+        \xefp style="font-size:0.8rem; color:#aaa;"\xef전투 시 무작위 카드에게 강력한 축복을 내립니다.\xefbr\xef(전투 종료 시 사라짐, 최대 3회)\xef/p\xef
+        \xefdiv style="margin-bottom:10px; font-weight:bold; color:#ffd700;"\xef
+            혼돈의 축복: \xefspan id="chaos-uses"\xef3\xef/span\xef회 / 대현자의 축복: \xefspan id="sage-uses"\xef3\xef/span\xef회
+        \xef/div\xef
+        \xefbutton class="menu-btn" onclick="RPG.activateChaos('normal')"\xef
+            혼돈의 축복 (일반)\xefbr\xef
+            \xefspan style="font-size:0.75rem; font-weight:normal; color:#ccc;"\xef랜덤 2종 카드 능력치 대폭 상승, 치명타/회피율 증가\xef/span\xef
+        \xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;"\xef
+            혼돈의 축복 (도전)\xefbr\xef
+            \xefspan style="font-size:0.75rem; font-weight:normal; color:#e1bee7;"\xef퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승, 치명타/회피율 증가\xef/span\xef
+        \xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;"\xef
+            대현자의 축복\xefbr\xef
+            \xefspan style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;"\xef문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장\xef/span\xef
+        \xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;"\xef
             적용된 축복 확인
-        ＜/button＞
-        ＜button onclick="document.getElementById('modal-chaos').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+        \xef/button\xef
+        \xefbutton onclick="document.getElementById('modal-chaos').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜div id="modal-menu" class="modal"＞
-    ＜div class="modal-content" style="height:auto;"＞
-        ＜h3＞메뉴＜/h3＞
-        ＜button class="menu-btn" onclick="RPG.saveGame()"＞저장하기＜/button＞
-        ＜button class="menu-btn" onclick="RPG.showRecords()"＞기록 확인＜/button＞
-        ＜button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;"＞타이틀로＜/button＞
-        ＜button onclick="document.getElementById('modal-menu').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
-    ＜/div＞
-＜/div＞
+\xefdiv id="modal-menu" class="modal"\xef
+    \xefdiv class="modal-content" style="height:auto;"\xef
+        \xefh3\xef메뉴\xef/h3\xef
+        \xefbutton class="menu-btn" onclick="RPG.saveGame()"\xef저장하기\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.showRecords()"\xef기록 확인\xef/button\xef
+        \xefbutton class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;"\xef타이틀로\xef/button\xef
+        \xefbutton onclick="document.getElementById('modal-menu').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;"\xef닫기\xef/button\xef
+    \xef/div\xef
+\xef/div\xef
 
-＜script src="data.js"＞＜/script＞
-＜script src="vocab_data.js"＞＜/script＞
-＜script src="grammar_data.js"＞＜/script＞
-＜script＞
+\xefscript src="data.js"\xef\xef/script\xef
+\xefscript src="vocab_data.js"\xef\xef/script\xef
+\xefscript src="grammar_data.js"\xef\xef/script\xef
+\xefscript src="logic.js"\xef\xef/script\xef
+\xefscript\xef
 /**
  * RPG Game Namespace
  * Encapsulates all game logic, state, and UI handling.
@@ -405,7 +406,7 @@ const RPG = {
             }
 
             // Save record if significant progress
-            if (prevStage ＞ 0) {
+            if (prevStage \xef 0) {
                  // Temporarily set state to previous stage for saveRecord to use
                  let originalScale = this.state.enemyScale;
                  this.state.enemyScale = prevStage;
@@ -436,7 +437,7 @@ const RPG = {
         let currentStage = score !== null ? score : (this.state.enemyScale + 1);
 
         // Extract existing stages (assuming format "최대 스테이지: N")
-        let stages = history.map(h =＞ {
+        let stages = history.map(h =\xef {
              let m = h.match(/최대 스테이지: (\d+)/);
              return m ? parseInt(m[1]) : 0;
         });
@@ -445,18 +446,18 @@ const RPG = {
         stages.push(currentStage);
 
         // Sort descending and keep top 5
-        stages.sort((a, b) =＞ b - a);
+        stages.sort((a, b) =\xef b - a);
         stages = stages.slice(0, 5);
 
         // Reconstruct history strings
-        history = stages.map(s =＞ `최대 스테이지: ${s}`);
+        history = stages.map(s =\xef `최대 스테이지: ${s}`);
         localStorage.setItem('cardRpgRecords', JSON.stringify(history));
     },
 
     showRecords() {
         let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
         if(history.length === 0) return this.showAlert("기록이 없습니다.");
-        let msg = history.map((h, i) =＞ `${i+1}위. ${h}`).join("＜br＞");
+        let msg = history.map((h, i) =\xef `${i+1}위. ${h}`).join("\xefbr\xef");
         this.openInfoModal("최대 스테이지 기록 (Top 5)", msg);
     },
 
@@ -472,7 +473,7 @@ const RPG = {
         // No saveRecord here
         this.showScreen('screen-title');
     },
-    showScreen(id) { document.querySelectorAll('.screen').forEach(el =＞ el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+    showScreen(id) { document.querySelectorAll('.screen').forEach(el =\xef el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
     openSystemMenu() {
         document.getElementById('modal-menu').classList.add('active');
@@ -489,18 +490,17 @@ const RPG = {
         if(!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
             return this.showAlert("현재 적용된 축복이 없습니다.");
         }
-        let msg = "＜b＞현재 적용된 축복＜/b＞＜br＞＜br＞";
-        this.state.chaosBuffs.forEach(b =＞ {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%`;
-             if(b.isSage) msg += ", 치명타/회피율 증가";
-             msg += "＜br＞";
+        let msg = "\xefb\xef현재 적용된 축복\xef/b\xef\xefbr\xef\xefbr\xef";
+        this.state.chaosBuffs.forEach(b =\xef {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가`;
+             msg += "\xefbr\xef";
         });
-        msg += "＜br＞(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+        msg += "\xefbr\xef(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
         this.openInfoModal("축복 상태", msg);
     },
     activateChaos(type) {
         if(type === 'great_sage') {
-            if(this.state.greatSageBlessingUses ＜= 0) {
+            if(this.state.greatSageBlessingUses \xef= 0) {
                 return this.showAlert("대현자의 축복 기회를 모두 소진했습니다. (새로하기 시 리셋)");
             }
             document.getElementById('modal-chaos').classList.remove('active');
@@ -508,25 +508,25 @@ const RPG = {
             // Pick random quiz
             // Get all quizzes from all lectures
             let allQuizzes = [];
-            GRAMMAR_DATA.forEach(lec =＞ {
+            GRAMMAR_DATA.forEach(lec =\xef {
                 allQuizzes = allQuizzes.concat(lec.quizzes);
             });
             let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
             this.showConfirm(`이 문제는 ${q.lecture_id}강의 내용이야. 강의를 확인하고 풀래?`,
-                () =＞ { // Yes
-                    this.showLecture(q.lecture_id, () =＞ {
+                () =\xef { // Yes
+                    this.showLecture(q.lecture_id, () =\xef {
                         this.startGrammarQuiz(q);
                     });
                 },
-                () =＞ { // No
+                () =\xef { // No
                     this.startGrammarQuiz(q);
                 }
             );
             return;
         }
 
-        if(this.state.chaosBlessingUses ＜= 0) {
+        if(this.state.chaosBlessingUses \xef= 0) {
             return this.showAlert("이번 전투 구간의 축복 기회를 모두 소진했습니다.");
         }
         document.getElementById('modal-chaos').classList.remove('active');
@@ -534,7 +534,7 @@ const RPG = {
         if(type === 'normal') {
             this.applyChaosBlessing(2);
         } else if (type === 'challenge') {
-            this.startChaosQuiz((success) =＞ {
+            this.startChaosQuiz((success) =\xef {
                 if(success) {
                     this.applyChaosBlessing(4);
                 } else {
@@ -550,7 +550,7 @@ const RPG = {
         // Shuffle options
         // q.options is array of strings. q.answer is correct string.
         let opts = [...q.options];
-        opts.sort(() =＞ Math.random() - 0.5);
+        opts.sort(() =\xef Math.random() - 0.5);
 
         const modal = document.getElementById('modal-quiz');
         const qDiv = document.getElementById('quiz-question');
@@ -569,18 +569,18 @@ const RPG = {
         oDiv.innerHTML = "";
         fDiv.innerText = "";
 
-        opts.forEach(opt =＞ {
+        opts.forEach(opt =\xef {
             const btn = document.createElement('button');
             btn.className = "menu-btn";
             btn.style.padding = "10px";
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt;
-            btn.onclick = () =＞ {
-                Array.from(oDiv.children).forEach(c =＞ c.onclick = null);
+            btn.onclick = () =\xef {
+                Array.from(oDiv.children).forEach(c =\xef c.onclick = null);
                 if(opt === q.answer) {
                     btn.classList.add('correct');
                     fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50";
-                    setTimeout(() =＞ {
+                    setTimeout(() =\xef {
                         modal.classList.remove('active');
                         if (successCallback) successCallback();
                         else this.applyGreatSageBlessing();
@@ -588,19 +588,19 @@ const RPG = {
                 } else {
                     btn.classList.add('wrong');
                      // Highlight correct
-                    Array.from(oDiv.children).forEach(c =＞ {
+                    Array.from(oDiv.children).forEach(c =\xef {
                          if(c.innerText === q.answer) c.classList.add('correct');
                     });
                     fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350";
 
                     if (failCallback) {
-                        setTimeout(() =＞ {
+                        setTimeout(() =\xef {
                             modal.classList.remove('active');
                             failCallback();
                         }, 1500);
                     } else {
                         this.state.greatSageBlessingUses--;
-                        setTimeout(() =＞ {
+                        setTimeout(() =\xef {
                             modal.classList.remove('active');
                             this.showAlert(`틀렸어... 남은 기회: ${this.state.greatSageBlessingUses}회`);
                         }, 1500);
@@ -616,9 +616,9 @@ const RPG = {
     updateMergedBlessings() {
         this.state.chaosBuffs = [];
 
-        const addBuffs = (list) =＞ {
-            list.forEach(nb =＞ {
-                let existing = this.state.chaosBuffs.find(b =＞ b.id === nb.id);
+        const addBuffs = (list) =\xef {
+            list.forEach(nb =\xef {
+                let existing = this.state.chaosBuffs.find(b =\xef b.id === nb.id);
                 if(existing) {
                     existing.multiplier += nb.multiplier;
                 } else {
@@ -640,12 +640,12 @@ const RPG = {
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
         // Apply to 12 random cards
-        let pool = [...CARDS].sort(() =＞ 0.5 - Math.random());
+        let pool = [...CARDS].sort(() =\xef 0.5 - Math.random());
         let picks = pool.slice(0, 12);
 
         this.state.activeChaosBlessing = []; // Clear Chaos Blessing
 
-        let newBuffs = picks.map(c =＞ {
+        let newBuffs = picks.map(c =\xef {
             let mult = 0;
             if(c.grade === 'normal') mult = 0.4;
             else if(c.grade === 'rare') mult = 0.3;
@@ -658,11 +658,11 @@ const RPG = {
         this.state.activeSageBlessing = newBuffs;
         this.updateMergedBlessings();
 
-        let msg = "＜b＞대현자의 축복 성공!＜/b＞＜br＞12명의 동료에게 축복이 내려졌습니다.＜br＞드로우 티켓 1장 획득!＜br＞＜br＞＜b＞[새로 적용된 축복]＜/b＞＜br＞";
-        newBuffs.forEach(b =＞ {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가＜br＞`;
+        let msg = "\xefb\xef대현자의 축복 성공!\xef/b\xef\xefbr\xef12명의 동료에게 축복이 내려졌습니다.\xefbr\xef드로우 티켓 1장 획득!\xefbr\xef\xefbr\xef\xefb\xef[새로 적용된 축복]\xef/b\xef\xefbr\xef";
+        newBuffs.forEach(b =\xef {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가\xefbr\xef`;
         });
-        msg += `＜br＞＜b＞(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)＜/b＞`;
+        msg += `\xefbr\xef\xefb\xef(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)\xef/b\xef`;
 
         this.openInfoModal("축복 성공", msg);
     },
@@ -670,12 +670,12 @@ const RPG = {
     applyChaosBlessing(count) {
         this.state.chaosBlessingUses--;
         // Pick random cards from ALL types (CARDS)
-        let pool = [...CARDS].sort(() =＞ 0.5 - Math.random());
+        let pool = [...CARDS].sort(() =\xef 0.5 - Math.random());
         let picks = pool.slice(0, count);
 
         this.state.activeSageBlessing = []; // Clear Sage Blessing
 
-        let newBuffs = picks.map(c =＞ {
+        let newBuffs = picks.map(c =\xef {
             let mult = 0;
             if(c.grade === 'normal') mult = 0.4;
             else if(c.grade === 'rare') mult = 0.3;
@@ -688,29 +688,29 @@ const RPG = {
         this.state.activeChaosBlessing = newBuffs;
         this.updateMergedBlessings();
 
-        let msg = "＜b＞혼돈의 축복 적용!＜/b＞＜br＞새로운 축복이 부여되었습니다.＜br＞＜br＞＜b＞[새로 적용된 축복]＜/b＞＜br＞";
-        newBuffs.forEach(b =＞ {
-             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%＜br＞`;
+        let msg = "\xefb\xef혼돈의 축복 적용!\xef/b\xef\xefbr\xef새로운 축복이 부여되었습니다.\xefbr\xef\xefbr\xef\xefb\xef[새로 적용된 축복]\xef/b\xef\xefbr\xef";
+        newBuffs.forEach(b =\xef {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가\xefbr\xef`;
         });
-        msg += `＜br＞＜b＞(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)＜/b＞＜br＞(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
+        msg += `\xefbr\xef\xefb\xef(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)\xef/b\xef\xefbr\xef(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
         this.openInfoModal("축복 성공", msg);
     },
 
     // --- Gacha & Deck UI ---
     openGacha() {
-        if(this.state.tickets ＜ 1) return this.showAlert("티켓이 부족합니다.");
+        if(this.state.tickets \xef 1) return this.showAlert("티켓이 부족합니다.");
         this.state.tickets--;
         this.runGacha(false);
     },
 
     openChallengeGacha() {
-        if(this.state.tickets ＜ 1) return this.showAlert("티켓이 부족합니다.");
+        if(this.state.tickets \xef 1) return this.showAlert("티켓이 부족합니다.");
 
         // 티켓 선차감
         this.state.tickets--;
         document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-        this.startQuiz((success) =＞ {
+        this.startQuiz((success) =\xef {
             if(success) {
                 this.runGacha(true);
             } else {
@@ -726,18 +726,18 @@ const RPG = {
 
         if (isChallenge) {
             // Legend 20%, Epic 25%, Rare 30%, Normal 25%
-            if(rand ＜ 0.20) grade = 'legend';
-            else if(rand ＜ 0.45) grade = 'epic';
-            else if(rand ＜ 0.75) grade = 'rare';
+            if(rand \xef 0.20) grade = 'legend';
+            else if(rand \xef 0.45) grade = 'epic';
+            else if(rand \xef 0.75) grade = 'rare';
             else grade = 'normal';
         } else {
             // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
-            if(rand ＜ 0.10) grade = 'legend';
-            else if(rand ＜ 0.30) grade = 'epic';
-            else if(rand ＜ 0.60) grade = 'rare';
+            if(rand \xef 0.10) grade = 'legend';
+            else if(rand \xef 0.30) grade = 'epic';
+            else if(rand \xef 0.60) grade = 'rare';
         }
 
-        const pool = CARDS.filter(c =＞ c.grade === grade);
+        const pool = CARDS.filter(c =\xef c.grade === grade);
         const pick = pool[Math.floor(Math.random() * pool.length)];
         this.state.inventory.push(pick.id);
 
@@ -749,8 +749,8 @@ const RPG = {
 
         let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
         document.getElementById('gacha-title').innerText = msgTitle;
-        content.innerHTML = `＜div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;"＞[${pick.grade.toUpperCase()}] ${pick.name}＜/div＞
-            ＜div class="portrait" style="width:120px; height:160px; margin:0 auto;"＞＜img src="${pick.name}.png" onerror="this.style.display='none'"＞＜/div＞＜p＞새로운 동료를 얻었습니다!＜/p＞`;
+        content.innerHTML = `\xefdiv style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;"\xef[${pick.grade.toUpperCase()}] ${pick.name}\xef/div\xef
+            \xefdiv class="portrait" style="width:120px; height:160px; margin:0 auto;"\xef\xefimg src="${pick.name}.png" onerror="this.style.display='none'"\xef\xef/div\xef\xefp\xef새로운 동료를 얻었습니다!\xef/p\xef`;
         modal.classList.add('active');
     },
 
@@ -761,17 +761,17 @@ const RPG = {
     openMagicClass() {
         const list = document.getElementById('lecture-list');
         list.innerHTML = "";
-        GRAMMAR_DATA.forEach(lec =＞ {
+        GRAMMAR_DATA.forEach(lec =\xef {
              const btn = document.createElement('button');
              btn.className = "menu-btn";
              btn.innerText = `${lec.id}강. ${lec.title}`;
-             btn.onclick = () =＞ this.showLecture(lec.id);
+             btn.onclick = () =\xef this.showLecture(lec.id);
              list.appendChild(btn);
         });
         document.getElementById('modal-magic-class').classList.add('active');
     },
     showLecture(id, onCloseCallback) {
-        const lec = GRAMMAR_DATA.find(l =＞ l.id === id);
+        const lec = GRAMMAR_DATA.find(l =\xef l.id === id);
         if(!lec) return;
         document.getElementById('lecture-title').innerText = `${lec.id}강. ${lec.title}`;
         document.getElementById('lecture-content').innerText = lec.content;
@@ -803,7 +803,7 @@ const RPG = {
 
         const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
 
-        VOCAB_DATA.forEach(v =＞ {
+        VOCAB_DATA.forEach(v =\xef {
             const isWrong = this.state.wrongWords.includes(v.word);
 
             // Filter logic
@@ -817,8 +817,8 @@ const RPG = {
             // Apply red color if wrong
             const wordColor = isWrong ? '#ef5350' : '#81d4fa';
 
-            div.innerHTML = `＜b style="color:${wordColor}; font-size:1.1rem;"＞${v.word}＜/b＞＜br＞
-                             ＜span style="color:#eee;"＞${v.meaning}＜/span＞`;
+            div.innerHTML = `\xefb style="color:${wordColor}; font-size:1.1rem;"\xef${v.word}\xef/b\xef\xefbr\xef
+                             \xefspan style="color:#eee;"\xef${v.meaning}\xef/span\xef`;
             list.appendChild(div);
         });
         document.getElementById('modal-wordbook').classList.add('active');
@@ -845,17 +845,17 @@ const RPG = {
 
         // Randoms (ensure distinct)
         let safeCounter = 0;
-        while(options.length ＜ 4 && safeCounter ＜ 100) {
+        while(options.length \xef 4 && safeCounter \xef 100) {
             safeCounter++;
             let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
             // Must be different word, different trap word, and meaning not already in options
-            if(r.word !== q.word && r.word !== q.trap_word && !options.some(o =＞ o.text === r.meaning)) {
+            if(r.word !== q.word && r.word !== q.trap_word && !options.some(o =\xef o.text === r.meaning)) {
                 options.push({ text: r.meaning, correct: false });
             }
         }
 
         // Shuffle
-        options.sort(() =＞ Math.random() - 0.5);
+        options.sort(() =\xef Math.random() - 0.5);
 
         const modal = document.getElementById('modal-quiz');
         const qDiv = document.getElementById('quiz-question');
@@ -866,20 +866,20 @@ const RPG = {
         oDiv.innerHTML = "";
         if(fDiv) fDiv.innerText = "";
 
-        options.forEach(opt =＞ {
+        options.forEach(opt =\xef {
             const btn = document.createElement('button');
             btn.className = "menu-btn";
             btn.style.padding = "10px";
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt.text;
-            btn.onclick = () =＞ {
+            btn.onclick = () =\xef {
                 // Disable all buttons
-                Array.from(oDiv.children).forEach(c =＞ c.onclick = null);
+                Array.from(oDiv.children).forEach(c =\xef c.onclick = null);
 
                 if(opt.correct) {
                     btn.classList.add('correct');
                     if(fDiv) { fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50"; }
-                    setTimeout(() =＞ {
+                    setTimeout(() =\xef {
                         modal.classList.remove('active');
                         callback(true);
                     }, 1000);
@@ -894,11 +894,11 @@ const RPG = {
                     }
 
                     // Find correct one to highlight
-                    Array.from(oDiv.children).forEach(c =＞ {
+                    Array.from(oDiv.children).forEach(c =\xef {
                          if(c.innerText === q.meaning) c.classList.add('correct');
                     });
                     if(fDiv) { fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350"; }
-                    setTimeout(() =＞ {
+                    setTimeout(() =\xef {
                         modal.classList.remove('active');
                         callback(false);
                     }, 1500);
@@ -922,17 +922,17 @@ const RPG = {
 
         // Randoms (ensure distinct)
         let safeCounter = 0;
-        while(options.length ＜ 4 && safeCounter ＜ 100) {
+        while(options.length \xef 4 && safeCounter \xef 100) {
             safeCounter++;
             let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
             // Must be different word, and word not already in options
-            if(r.word !== q.word && !options.some(o =＞ o.text === r.word)) {
+            if(r.word !== q.word && !options.some(o =\xef o.text === r.word)) {
                 options.push({ text: r.word, correct: false });
             }
         }
 
         // Shuffle
-        options.sort(() =＞ Math.random() - 0.5);
+        options.sort(() =\xef Math.random() - 0.5);
 
         const modal = document.getElementById('modal-quiz');
         const qDiv = document.getElementById('quiz-question');
@@ -944,31 +944,31 @@ const RPG = {
         oDiv.innerHTML = "";
         if(fDiv) fDiv.innerText = "";
 
-        options.forEach(opt =＞ {
+        options.forEach(opt =\xef {
             const btn = document.createElement('button');
             btn.className = "menu-btn";
             btn.style.padding = "10px";
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt.text;
-            btn.onclick = () =＞ {
+            btn.onclick = () =\xef {
                 // Disable all buttons
-                Array.from(oDiv.children).forEach(c =＞ c.onclick = null);
+                Array.from(oDiv.children).forEach(c =\xef c.onclick = null);
 
                 if(opt.correct) {
                     btn.classList.add('correct');
                     if(fDiv) { fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50"; }
-                    setTimeout(() =＞ {
+                    setTimeout(() =\xef {
                         modal.classList.remove('active');
                         callback(true);
                     }, 1000);
                 } else {
                     btn.classList.add('wrong');
                     // Find correct one to highlight
-                    Array.from(oDiv.children).forEach(c =＞ {
+                    Array.from(oDiv.children).forEach(c =\xef {
                          if(c.innerText === q.word) c.classList.add('correct');
                     });
                     if(fDiv) { fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350"; }
-                    setTimeout(() =＞ {
+                    setTimeout(() =\xef {
                         modal.classList.remove('active');
                         callback(false);
                     }, 1500);
@@ -981,37 +981,37 @@ const RPG = {
     },
     closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); },
 
-    openCollection() { this.showScreen('screen-collection'); this.renderCardList('collection-grid', this.state.inventory, (id) =＞ this.showCardInfo(id)); },
+    openCollection() { this.showScreen('screen-collection'); this.renderCardList('collection-grid', this.state.inventory, (id) =\xef this.showCardInfo(id)); },
 
     renderCardList(containerId, list, clickHandler) {
         const box = document.getElementById(containerId);
         box.innerHTML = "";
         let counts = {};
-        list.forEach(id =＞ { counts[id] = (counts[id] || 0) + 1; });
+        list.forEach(id =\xef { counts[id] = (counts[id] || 0) + 1; });
         for(let id in counts) {
-            const data = CARDS.find(c =＞ c.id === id);
+            const data = CARDS.find(c =\xef c.id === id);
             if(!data) continue;
             const el = document.createElement('div');
             el.className = `card-item ${data.grade}`;
-            el.innerHTML = `＜div class="portrait"＞＜img src="${data.name}.png" onerror="this.style.display='none'"＞＜/div＞＜div＞${data.name} (x${counts[id]})＜/div＞`;
-            el.onclick = () =＞ clickHandler(id);
+            el.innerHTML = `\xefdiv class="portrait"\xef\xefimg src="${data.name}.png" onerror="this.style.display='none'"\xef\xef/div\xef\xefdiv\xef${data.name} (x${counts[id]})\xef/div\xef`;
+            el.onclick = () =\xef clickHandler(id);
             box.appendChild(el);
         }
     },
 
     showCardInfo(id) {
-        const data = CARDS.find(c =＞ c.id === id);
+        const data = CARDS.find(c =\xef c.id === id);
         if(!data) return;
         document.getElementById('md-name').innerText = data.name;
         document.getElementById('md-img').src = `${data.name}.png`;
         document.getElementById('md-grade').className = data.grade;
         document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
-        document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}＜br＞DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
-        let skills = `＜p style="color:#ffd700; margin:5px 0;"＞[특성] ${data.trait.desc}＜/p＞`;
-        skills += `＜p style="margin:2px 0;"＞[일반 공격] (Tier 1) 기본 물리 공격＜/p＞`;
-        data.skills.forEach(s =＞ {
+        document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}\xefbr\xefDEF:${data.stats.def} MDEF:${data.stats.mdef}`;
+        let skills = `\xefp style="color:#ffd700; margin:5px 0;"\xef[특성] ${data.trait.desc}\xef/p\xef`;
+        skills += `\xefp style="margin:2px 0;"\xef[일반 공격] (Tier 1) 기본 물리 공격\xef/p\xef`;
+        data.skills.forEach(s =\xef {
             let multText = s.val ? ` (x${s.val})` : '';
-            skills += `＜p style="margin:2px 0;"＞[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}＜/p＞`;
+            skills += `\xefp style="margin:2px 0;"\xef[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}\xef/p\xef`;
         });
         document.getElementById('md-skills').innerHTML = skills;
         document.getElementById('modal-card').classList.add('active');
@@ -1022,32 +1022,32 @@ const RPG = {
         this.showScreen('screen-deck');
         this.updateDeckSlots();
         this.selectedSlot = -1;
-        this.renderCardList('deck-card-list', this.state.inventory, (id) =＞ {
+        this.renderCardList('deck-card-list', this.state.inventory, (id) =\xef {
             if(this.selectedSlot === -1) this.selectedSlot = this.state.deck.indexOf(null);
             if(this.selectedSlot === -1) return this.showAlert("슬롯을 먼저 선택하거나 빈 슬롯이 없습니다.");
-            let total = this.state.inventory.filter(x =＞ x === id).length;
-            let used = this.state.deck.filter(x =＞ x === id).length;
+            let total = this.state.inventory.filter(x =\xef x === id).length;
+            let used = this.state.deck.filter(x =\xef x === id).length;
             if(this.state.deck[this.selectedSlot] === id) used--;
-            if(total - used ＜= 0) return this.showAlert("보유 수량이 부족합니다.");
+            if(total - used \xef= 0) return this.showAlert("보유 수량이 부족합니다.");
             this.state.deck[this.selectedSlot] = id;
             this.updateDeckSlots();
         });
     },
-    selectDeckSlot(idx) { this.selectedSlot = idx; document.querySelectorAll('.deck-slot').forEach((el, i) =＞ { el.style.borderColor = i === idx ? '#ffd700' : '#555'; }); },
+    selectDeckSlot(idx) { this.selectedSlot = idx; document.querySelectorAll('.deck-slot').forEach((el, i) =\xef { el.style.borderColor = i === idx ? '#ffd700' : '#555'; }); },
     updateDeckSlots() {
-        ['선봉', '중견', '대장'].forEach((role, i) =＞ {
+        ['선봉', '중견', '대장'].forEach((role, i) =\xef {
             const id = this.state.deck[i];
             const el = document.getElementById(`slot-${i}`);
-            if(id) { const c = CARDS.find(x =＞ x.id === id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
+            if(id) { const c = CARDS.find(x =\xef x.id === id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
             else { el.innerText = `${role} (비어있음)`; el.classList.remove('filled'); }
         });
     },
-    confirmDeck() { if(this.state.deck.every(x =＞ x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
+    confirmDeck() { if(this.state.deck.every(x =\xef x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
 
     // --- Battle Logic Start ---
 
     startBattleInit() {
-        if(this.state.deck.every(x =＞ x === null)) return this.showAlert("덱을 완성해주세요.");
+        if(this.state.deck.every(x =\xef x === null)) return this.showAlert("덱을 완성해주세요.");
         this.showScreen('screen-battle');
         const enemyIdx = this.state.enemyScale % ENEMIES.length;
         const baseEnemy = ENEMIES[enemyIdx];
@@ -1066,9 +1066,9 @@ const RPG = {
         if(baseEnemy.id === 'creator_god') this.battle.enemy.chargeTurn = 0;
 
         // Init Players
-        this.battle.players = this.state.deck.map((id, idx) =＞ {
+        this.battle.players = this.state.deck.map((id, idx) =\xef {
             if(!id) return null;
-            const proto = CARDS.find(c =＞ c.id === id);
+            const proto = CARDS.find(c =\xef c.id === id);
             let p = {
                 id: proto.id, proto: proto, name: proto.name,
                 maxHp: proto.stats.hp, hp: proto.stats.hp, mp: 100,
@@ -1078,7 +1078,7 @@ const RPG = {
             };
 
             // Apply Chaos Blessing Buffs
-            const blessing = this.state.chaosBuffs.find(b =＞ b.id === p.id);
+            const blessing = this.state.chaosBuffs.find(b =\xef b.id === p.id);
             if(blessing) {
                 p.maxHp = Math.floor(p.maxHp * (1 + blessing.multiplier));
                 p.hp = p.maxHp; // Heal to full as requested
@@ -1101,32 +1101,40 @@ const RPG = {
 
         // Identify Synergy Traits (Deck Check)
         this.battle.activeTraits = [];
-        const activePlayerCards = this.battle.players.filter(p =＞ p !== null);
-        const elements = activePlayerCards.map(p =＞ p.proto.element);
+        const activePlayerCards = this.battle.players.filter(p =\xef p !== null);
+        const hasJoker = this.state.deck.includes('joker');
 
-        activePlayerCards.forEach(p =＞ {
+        const countEl = (el) =\xef {
+            return activePlayerCards.filter(p =\xef p.proto.element === el || p.proto.id === 'joker').length;
+        };
+        const hasEl = (el) =\xef {
+            return activePlayerCards.some(p =\xef p.proto.element === el || p.proto.id === 'joker');
+        };
+
+        activePlayerCards.forEach(p =\xef {
              const t = p.proto.trait;
              if(!t.type.startsWith('syn_')) return;
 
              let active = false;
-             if(t.type === 'syn_nature_3_def' && elements.filter(e=＞e==='nature').length===3) active = true;
-             else if(t.type === 'syn_nature_3_golem' && elements.filter(e=＞e==='nature').length===3) active = true;
-             else if(t.type === 'syn_water_3_matk' && elements.filter(e=＞e==='water').length===3) active = true;
-             else if(t.type === 'syn_fire_3_crit' && elements.filter(e=＞e==='fire').length===3) active = true;
-             else if(t.type === 'syn_dark_3_matk' && elements.filter(e=＞e==='dark').length===3) active = true;
-             else if(t.type === 'syn_light_fire_atk' && elements.includes('light') && elements.includes('fire')) active = true;
-             else if(t.type === 'syn_water_light_matk_mdef' && elements.includes('water') && elements.includes('light')) active = true;
-             else if(t.type === 'syn_water_nature' && elements.includes('water') && elements.includes('nature')) {
+             if(t.type === 'syn_nature_3_def' && countEl('nature') \xef= 3) active = true;
+             else if(t.type === 'syn_nature_3_golem' && countEl('nature') \xef= 3) active = true;
+             else if(t.type === 'syn_water_3_matk' && countEl('water') \xef= 3) active = true;
+             else if(t.type === 'syn_fire_3_crit' && countEl('fire') \xef= 3) active = true;
+             else if(t.type === 'syn_dark_3_matk' && countEl('dark') \xef= 3) active = true;
+             else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
+             else if(t.type === 'syn_water_light_matk_mdef' && hasEl('water') && hasEl('light')) active = true;
+             else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) {
                  this.battle.activeTraits.push(t.type); // Special handling for Rumi
              }
-             else if(t.type === 'syn_nature_3_matk' && elements.filter(e=＞e==='nature').length===3) active = true;
-             else if(t.type === 'syn_night_rabbit' && this.state.deck.includes('night_rabbit')) active = true;
-             else if(t.type === 'syn_snow_rabbit' && this.state.deck.includes('snow_rabbit')) active = true;
-             else if(t.type === 'syn_water_3_atk_matk' && elements.filter(e=＞e==='water').length===3) active = true;
+             else if(t.type === 'syn_nature_3_matk' && countEl('nature') \xef= 3) active = true;
+             else if(t.type === 'syn_night_rabbit' && (this.state.deck.includes('night_rabbit') || hasJoker)) active = true;
+             else if(t.type === 'syn_snow_rabbit' && (this.state.deck.includes('snow_rabbit') || hasJoker)) active = true;
+             else if(t.type === 'syn_water_3_atk_matk' && countEl('water') \xef= 3) active = true;
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
                 this.battle.activeTraits.push(t.type);
+                RPG.log(`[시너지] ${t.desc} 발동!`);
 
                 if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
@@ -1142,13 +1150,27 @@ const RPG = {
              }
         });
 
+        // Apply Chaos Blessing Stats (Multiplicative to Base)
+        activePlayerCards.forEach(p =\xef {
+             if(p.blessing) {
+                 // Store base stats before blessing for UI comparison
+                 p.baseStatsWithoutBlessing = { atk: p.atk, matk: p.matk, def: p.def, mdef: p.mdef };
+
+                 let mult = 1.0 + p.blessing.multiplier;
+                 p.atk = Math.floor(p.atk * mult);
+                 p.matk = Math.floor(p.matk * mult);
+                 p.def = Math.floor(p.def * mult);
+                 p.mdef = Math.floor(p.mdef * mult);
+             }
+        });
+
         this.battle.fieldBuffs = [];
         this.battle.delayedEffects = [];
         this.battle.turn = 1;
         this.battle.currentPlayerIdx = 0;
         this.battle.isNewTurn = true;
 
-        while(this.battle.currentPlayerIdx ＜ 3 && this.battle.players[this.battle.currentPlayerIdx] === null) {
+        while(this.battle.currentPlayerIdx \xef 3 && this.battle.players[this.battle.currentPlayerIdx] === null) {
             this.battle.currentPlayerIdx++;
         }
 
@@ -1162,7 +1184,7 @@ const RPG = {
     TurnManager: {
         startPlayerTurn() {
             const b = RPG.battle;
-            if(b.currentPlayerIdx ＞= 3) { RPG.loseBattle(); return; }
+            if(b.currentPlayerIdx \xef= 3) { RPG.loseBattle(); return; }
 
             if(b.isNewTurn) {
                  b.isNewTurn = false;
@@ -1190,7 +1212,7 @@ const RPG = {
             }
 
             // Process Delayed Effects
-            for(let i = b.delayedEffects.length - 1; i ＞= 0; i--) {
+            for(let i = b.delayedEffects.length - 1; i \xef= 0; i--) {
                 let effect = b.delayedEffects[i];
                 if(effect.turn === b.turn) {
                     b.delayedEffects.splice(i, 1);
@@ -1204,7 +1226,7 @@ const RPG = {
             }
 
             // Clear temporary self buffs
-            ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(k =＞ delete p.buffs[k]);
+            ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(k =\xef delete p.buffs[k]);
 
             RPG.renderBattlefield();
 
@@ -1219,13 +1241,13 @@ const RPG = {
         },
 
         endPlayerTurn() {
-             setTimeout(() =＞ this.startEnemyTurn(), 500);
+             setTimeout(() =\xef this.startEnemyTurn(), 500);
         },
 
         startEnemyTurn() {
             const b = RPG.battle;
             const e = b.enemy;
-            if(e.hp ＜= 0) { RPG.winBattle(); return; }
+            if(e.hp \xef= 0) { RPG.winBattle(); return; }
 
             RPG.log("--- 적 턴 ---");
             e.def = e.baseDef; e.mdef = e.baseMdef; // Reset base
@@ -1254,7 +1276,7 @@ const RPG = {
             // Target Logic
             let target = b.players[b.currentPlayerIdx];
             if(!target || target.isDead) {
-                let validIdx = b.players.findIndex(p =＞ p && !p.isDead);
+                let validIdx = b.players.findIndex(p =\xef p && !p.isDead);
                 if(validIdx === -1) { RPG.loseBattle(); return; }
                 b.currentPlayerIdx = validIdx;
                 target = b.players[validIdx];
@@ -1270,7 +1292,7 @@ const RPG = {
                  return;
             }
 
-            // Execute Enemy Skill (Simplified: Calculate -＞ Apply)
+            // Execute Enemy Skill (Simplified: Calculate -\xef Apply)
             let val = skill.type === 'phy' ? e.atk : e.matk;
             let mult = skill.val || 1.0;
 
@@ -1285,7 +1307,7 @@ const RPG = {
 
             let def = skill.type === 'phy' ? target.def : target.mdef;
             let fieldDef = 1.0;
-            b.fieldBuffs.forEach(fb =＞ {
+            b.fieldBuffs.forEach(fb =\xef {
                 if(fb.name === 'star_powder') fieldDef += 0.3;
                 if(fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
                 if(fb.name === 'goddess_descent') fieldDef += 0.3;
@@ -1303,13 +1325,7 @@ const RPG = {
             def = Math.floor(def * fieldDef * defMult);
 
             // Evasion Check
-            let eva = 5;
-            b.fieldBuffs.forEach(fb =＞ { if(fb.name === 'moon_bless') eva += 15; });
-            if(target.proto.trait.type === 'cond_no_field_buff_eva' && b.fieldBuffs.length === 0) eva += 30;
-            if(target.proto.trait.type === 'cond_no_field_buff_eva_crit' && b.fieldBuffs.length === 0) eva += target.proto.trait.val;
-            if(target.buffs.evasion) eva += 50;
-
-            if(Math.random()*100 ＜ eva) {
+            if (Logic.checkEvasion(target, skill.type, b.fieldBuffs)) {
                 RPG.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
                 this.endEnemyTurn();
                 return;
@@ -1321,30 +1337,30 @@ const RPG = {
             if(target.buffs.guard) dmg *= 0.5;
             dmg = Math.floor(dmg);
             target.hp -= dmg;
-            RPG.log(`${e.name}의 ${skill.name}! ＜span class="log-dmg"＞${dmg}＜/span＞ 피해.`);
+            RPG.log(`${e.name}의 ${skill.name}! \xefspan class="log-dmg"\xef${dmg}\xef/span\xef 피해.`);
 
             // Process Effects (if any)
             if(skill.effects) {
-                skill.effects.forEach(eff =＞ {
+                skill.effects.forEach(eff =\xef {
                     if(eff.type === 'mana_burn') { target.mp = 0; RPG.log("플레이어 마나 소멸!"); }
                 });
             }
 
-            if(target.hp ＜= 0) {
+            if(target.hp \xef= 0) {
                 target.isDead = true; target.hp = 0;
                 RPG.log(`${target.name} 쓰러짐!`);
                 RPG.handleDeathTraits(target, e);
 
                 // Advance to next valid player
                 b.currentPlayerIdx++;
-                while(b.currentPlayerIdx ＜ 3) {
+                while(b.currentPlayerIdx \xef 3) {
                      if(b.players[b.currentPlayerIdx] && !b.players[b.currentPlayerIdx].isDead) break;
                      b.currentPlayerIdx++;
                 }
-                if(b.currentPlayerIdx ＞= 3 && b.players.every(p =＞ !p || p.isDead)) { RPG.loseBattle(); return; }
+                if(b.currentPlayerIdx \xef= 3 && b.players.every(p =\xef !p || p.isDead)) { RPG.loseBattle(); return; }
             }
 
-            if(e.hp ＜= 0) RPG.winBattle();
+            if(e.hp \xef= 0) RPG.winBattle();
             else this.endEnemyTurn();
         },
 
@@ -1362,48 +1378,48 @@ const RPG = {
             let r = Math.random();
 
             if(e.id === 'artificial_demon_god') {
-                if(turn === 10) skill = e.skills.find(s =＞ s.name === '파괴의형태');
-                else if(r ＜ 0.3) skill = e.skills.find(s =＞ s.name === '아이스빔');
+                if(turn === 10) skill = e.skills.find(s =\xef s.name === '파괴의형태');
+                else if(r \xef 0.3) skill = e.skills.find(s =\xef s.name === '아이스빔');
             }
             else if(e.id === 'iris_love') {
-                if(turn === 7) skill = e.skills.find(s =＞ s.name === '소울드레인');
-                else if(r ＜ 0.1) skill = e.skills.find(s =＞ s.name === '더홀리');
-                else if(r ＜ 0.4) skill = e.skills.find(s =＞ s.name === '홀리레이'); // 0.1 ~ 0.4 (30%)
+                if(turn === 7) skill = e.skills.find(s =\xef s.name === '소울드레인');
+                else if(r \xef 0.1) skill = e.skills.find(s =\xef s.name === '더홀리');
+                else if(r \xef 0.4) skill = e.skills.find(s =\xef s.name === '홀리레이'); // 0.1 ~ 0.4 (30%)
             }
             else if(e.id === 'iris_curse') {
-                if(turn === 10) skill = e.skills.find(s =＞ s.name === '아포칼립스');
-                else if(r ＜ 0.3) skill = e.skills.find(s =＞ s.name === '프레임샷');
+                if(turn === 10) skill = e.skills.find(s =\xef s.name === '아포칼립스');
+                else if(r \xef 0.3) skill = e.skills.find(s =\xef s.name === '프레임샷');
             }
             else if(e.id === 'pharaoh') {
-                if(turn % 5 === 0) skill = e.skills.find(s =＞ s.name === '고대의저주');
-                else if(r ＜ 0.3) skill = e.skills.find(s =＞ s.name === '고대의힘');
+                if(turn % 5 === 0) skill = e.skills.find(s =\xef s.name === '고대의저주');
+                else if(r \xef 0.3) skill = e.skills.find(s =\xef s.name === '고대의힘');
             }
             else if(e.id === 'demon_god') {
-                if(turn === 7 || turn === 14) skill = e.skills.find(s =＞ s.name === '제노사이드');
-                else if(r ＜ 0.2) skill = e.skills.find(s =＞ s.name === '다크니스');
+                if(turn === 7 || turn === 14) skill = e.skills.find(s =\xef s.name === '제노사이드');
+                else if(r \xef 0.2) skill = e.skills.find(s =\xef s.name === '다크니스');
             }
             else if(e.id === 'creator_god') {
                 if(e.isCharging) {
                     RPG.log("창조신이 힘을 모으고 있습니다...");
-                    skill = e.skills.find(s =＞ s.name === '디바인블레이드');
+                    skill = e.skills.find(s =\xef s.name === '디바인블레이드');
                     e.isCharging = false;
                 }
                 else if(turn === 1) {
                     return { type: 'phy', val: 1.0, name: '일반 공격' };
                 }
                 else if(turn === 2) {
-                    skill = e.skills.find(s =＞ s.name === '저지먼트');
+                    skill = e.skills.find(s =\xef s.name === '저지먼트');
                 }
                 else {
-                    // Turn ＞= 3
-                    // 30% Holy Ray (or Judgment if Turn ＞ 15)
+                    // Turn \xef= 3
+                    // 30% Holy Ray (or Judgment if Turn \xef 15)
                     // 20% Divine Blade (Charge)
                     // 50% Normal Attack
-                    if(r ＜ 0.3) {
-                         if(turn ＞ 15) skill = e.skills.find(s =＞ s.name === '저지먼트');
-                         else skill = e.skills.find(s =＞ s.name === '홀리레이');
+                    if(r \xef 0.3) {
+                         if(turn \xef 15) skill = e.skills.find(s =\xef s.name === '저지먼트');
+                         else skill = e.skills.find(s =\xef s.name === '홀리레이');
                     }
-                    else if(r ＜ 0.5) { // 30% ~ 50% range (20%)
+                    else if(r \xef 0.5) { // 30% ~ 50% range (20%)
                         RPG.log("창조신이 자세를 잡습니다 (차지중...)");
                         e.isCharging = true;
                         return { type: 'phy', val: 0, name: '차지' };
@@ -1415,10 +1431,10 @@ const RPG = {
             }
 
             // Fallback: Use other valid skills if not selected
-            if(!skill && Math.random() ＜ 0.3 && e.skills.length ＞ 0) {
+            if(!skill && Math.random() \xef 0.3 && e.skills.length \xef 0) {
                  // Excluding specific skills that have rate 0.0
-                 const validSkills = e.skills.filter(s =＞ s.rate ＞ 0);
-                 if(validSkills.length ＞ 0) {
+                 const validSkills = e.skills.filter(s =\xef s.rate \xef 0);
+                 if(validSkills.length \xef 0) {
                      skill = validSkills[Math.floor(Math.random() * validSkills.length)];
                  }
             }
@@ -1431,20 +1447,20 @@ const RPG = {
         if(t.type === 'death_dmg_mag') {
             let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
             let dmgResult = this.calcDamage(victim, killer, dummySkill);
-            if(dmgResult.dmg ＞ 0) {
+            if(dmgResult.dmg \xef 0) {
                 killer.hp -= dmgResult.dmg;
                 killer.tookDamageThisTurn = true;
-                RPG.log(`[특성] 사망 반격! ${dmgResult.isCrit?'Critical! ':''}＜span class="log-dmg"＞${dmgResult.dmg}＜/span＞ 피해.`);
+                RPG.log(`[특성] 사망 반격! ${dmgResult.isCrit?'Critical! ':''}\xefspan class="log-dmg"\xef${dmgResult.dmg}\xef/span\xef 피해.`);
             }
         }
         else if(t.type === 'death_dmg_debuff') {
             let cnt = Object.keys(killer.buffs).length;
             let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
             let dmgResult = this.calcDamage(victim, killer, dummySkill);
-            if(dmgResult.dmg ＞ 0) {
+            if(dmgResult.dmg \xef 0) {
                 killer.hp -= dmgResult.dmg;
                 killer.tookDamageThisTurn = true;
-                RPG.log(`[특성] 저주 반격! ${dmgResult.isCrit?'Critical! ':''}＜span class="log-dmg"＞${dmgResult.dmg}＜/span＞ 피해.`);
+                RPG.log(`[특성] 저주 반격! ${dmgResult.isCrit?'Critical! ':''}\xefspan class="log-dmg"\xef${dmgResult.dmg}\xef/span\xef 피해.`);
             }
         }
         else if(t.type === 'death_field_sun') {
@@ -1456,8 +1472,14 @@ const RPG = {
                  RPG.log(`[특성] 사망 시 스턴 발동! 적을 기절시킵니다.`);
              }
         }
+        else if(t.type === 'death_darkness') {
+             if (killer && killer.buffs) {
+                 killer.buffs.darkness = 1;
+                 RPG.log(`[특성] 사망 시 암흑 발동! 적에게 암흑을 부여합니다.`);
+             }
+        }
         else if(t.type === 'death_sun_bless_chance') {
-             if(Math.random() ＜ t.val) {
+             if(Math.random() \xef t.val) {
                  RPG.applyFieldBuff('sun_bless');
                  RPG.log(`[특성] 마시멜로가 녹으며 태양의 축복을 남깁니다!`);
              } else {
@@ -1468,10 +1490,10 @@ const RPG = {
              let count = RPG.battle.fieldBuffs.length;
              let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
              let dmgResult = this.calcDamage(victim, killer, dummySkill);
-             if(dmgResult.dmg ＞ 0) {
+             if(dmgResult.dmg \xef 0) {
                  killer.hp -= dmgResult.dmg;
                  killer.tookDamageThisTurn = true;
-                 RPG.log(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit?'Critical! ':''}＜span class="log-dmg"＞${dmgResult.dmg}＜/span＞ 피해.`);
+                 RPG.log(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit?'Critical! ':''}\xefspan class="log-dmg"\xef${dmgResult.dmg}\xef/span\xef 피해.`);
              }
         }
     },
@@ -1480,19 +1502,27 @@ const RPG = {
 
     executeSkill(source, target, skill, isDelayed=false) {
         if(!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
-        RPG.log(`＜b＞${source.name}＜/b＞의 ＜b＞${skill.name}＜/b＞!`);
+        RPG.log(`\xefb\xef${source.name}\xef/b\xef의 \xefb\xef${skill.name}\xef/b\xef!`);
 
         // Trait: Normal Attack Burn & Divine
-        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
              target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
              target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
-             if(target.buffs['burn'] ＞ 3) target.buffs['burn'] = 3;
-             if(target.buffs['divine'] ＞ 3) target.buffs['divine'] = 3;
+             if(target.buffs['burn'] \xef 3) target.buffs['burn'] = 3;
+             if(target.buffs['divine'] \xef 3) target.buffs['divine'] = 3;
              RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
         }
 
+        // Trait: Behemoth (Skill Use -\xef Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
+            if (Math.random() \xef 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
+            }
+        }
+
         // Check for Delayed Attack Effect
-        const delayedEff = skill.effects && skill.effects.find(e =＞ e.type === 'delayed_attack');
+        const delayedEff = skill.effects && skill.effects.find(e =\xef e.type === 'delayed_attack');
         if(delayedEff && !isDelayed) {
             RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
             RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: skill });
@@ -1503,17 +1533,17 @@ const RPG = {
         const dmgResult = this.calcDamage(source, target, skill);
 
         // Apply Damage
-        if(dmgResult.dmg ＞ 0) {
+        if(dmgResult.dmg \xef 0) {
             target.hp -= dmgResult.dmg;
             target.tookDamageThisTurn = true;
-            RPG.log(`${dmgResult.isCrit?'Critical! ':''}적에게 ＜span class="log-dmg"＞${dmgResult.dmg}＜/span＞ 피해.`);
+            RPG.log(`${dmgResult.isCrit?'Critical! ':''}적에게 \xefspan class="log-dmg"\xef${dmgResult.dmg}\xef/span\xef 피해.`);
         }
 
         // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
         this.applySkillEffects(source, target, skill);
 
-        if(target.hp ＜= 0) { RPG.winBattle(); return; }
-        if(source.hp ＜= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
+        if(target.hp \xef= 0) { RPG.winBattle(); return; }
+        if(source.hp \xef= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
 
         if(!isDelayed) RPG.TurnManager.endPlayerTurn();
     },
@@ -1521,154 +1551,15 @@ const RPG = {
     calcDamage(source, target, skill) {
         if(skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0 };
 
-        // 1. Base Stats
-        let atkMult = 1.0, matkMult = 1.0, crit = source.baseCrit, critDmg = 150;
-        RPG.battle.fieldBuffs.forEach(fb =＞ {
-             if(fb.name === 'sun_bless') { atkMult += 0.3; matkMult += 0.3; critDmg += 60; }
-             if(fb.name === 'moon_bless') { matkMult += 0.3; }
-             if(fb.name === 'sanctuary') { matkMult += 0.30; }
-             if(fb.name === 'goddess_descent') { atkMult += 0.3; matkMult += 0.3; }
-             if(fb.name === 'earth_bless') { atkMult += 0.25; matkMult += 0.25; }
-             if(fb.name === 'twinkle_party') { atkMult += 0.2; crit += 15; }
-        });
-
-        // Weakness Debuff (Applies to Source)
-        if (source.buffs.weak) {
-            atkMult -= 0.2;
-        }
-        if (source.buffs.silence) {
-            matkMult -= 0.2;
-        }
-
-        // Trait: Twinkle Party (Fresh Cream Maid)
-        if(source.proto.trait.type === 'cond_twinkle_all' && RPG.battle.fieldBuffs.some(b=＞b.name==='twinkle_party')) {
-            atkMult *= 1.3;
-            matkMult *= 1.3;
-        }
-
-        // Trait: Luna (No Field Buff -＞ Crit +25)
-        if(source.proto.trait.type === 'cond_no_field_buff_eva_crit' && RPG.battle.fieldBuffs.length === 0) {
-            crit += source.proto.trait.val;
-        }
-
-        let val = (skill.type === 'phy' ? source.atk * Math.max(0, atkMult) : source.matk * Math.max(0, matkMult));
-        let mult = skill.val;
-        let dmgBonus = 0.0;
-
-        // 2. Elemental
-        let elMult = this.getElementalMultiplier(source.proto.element, target.element);
-        if(elMult ＞ 1.0) RPG.log("상성 우위! 대미지 20% 증가.");
-
-        // 3. Skill-Specific Multipliers (from Effects)
-        if(skill.effects) {
-            skill.effects.forEach(eff =＞ {
-                if(eff.type === 'consume_field_all') {
-                    let c = RPG.battle.fieldBuffs.length;
-                    if(c ＞ 0) {
-                        mult += (c * eff.multPerStack);
-                        RPG.battle.fieldBuffs = [];
-                        RPG.log(`필드 버프 ${c}개 제거! 위력 폭발!`);
-                    }
-                }
-                else if(eff.type === 'consume_debuff_all') {
-                    if(target.buffs[eff.debuff]) {
-                        let c = target.buffs[eff.debuff];
-                        mult += (c * eff.multPerStack);
-                        delete target.buffs[eff.debuff];
-                        RPG.log(`${this.BUFF_NAMES[eff.debuff]} ${c}스택 소모!`);
-                    }
-                }
-                else if(eff.type === 'dmg_boost') {
-                     if(eff.condition === 'target_debuff' && target.buffs[eff.debuff]) {
-                         mult *= eff.mult;
-                         RPG.log(`[특성] ${this.BUFF_NAMES[eff.debuff]} 대상 추가 피해! (배율 x${eff.mult})`);
-                     }
-                     else if(eff.condition === 'synergy_active' && RPG.battle.activeTraits.includes(eff.trait)) {
-                         mult *= eff.mult;
-                         RPG.log(`[시너지] 조건 만족! 위력 ${eff.mult}배 증가!`);
-                     }
-                     else if(eff.condition === 'target_stack' && target.buffs[eff.debuff]) mult += (target.buffs[eff.debuff] * eff.multPerStack);
-                     else if(eff.condition === 'target_debuff_count_scale') {
-                         let bonus = (Object.keys(target.buffs).length * eff.multPerDebuff);
-                         mult += bonus;
-                         if(bonus ＞ 0) RPG.log(`[특성] 디버프 대상 추가 피해! (배율 +${bonus.toFixed(1)})`);
-                     }
-                     else if(eff.condition === 'hp_below' && (source.hp/source.maxHp) ＜= eff.val) {
-                         mult *= eff.mult;
-                         if(skill.name === '라그나로크') RPG.log("라그나로크: 생명력 조건 만족! 대미지 증가!");
-                     }
-                     else if(eff.condition === 'hp_full' && source.hp === source.maxHp) {
-                         mult *= eff.mult;
-                         if(eff.log) RPG.log(eff.log);
-                     }
-                     else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=＞b.name === eff.buff)) mult *= eff.mult;
-                }
-                else if(eff.type === 'consume_burn_1_dmg') {
-                     if(target.buffs['burn'] ＞= 1) {
-                         mult *= eff.mult;
-                         // RPG.log("작열 소비 조건 만족! 위력 증가!"); // Logged in applySkillEffects for clarity on consumption
-                     }
-                }
-                else if(eff.type === 'remove_field_buff_dmg') {
-                     if(RPG.battle.fieldBuffs.length ＞ 0) {
-                         mult *= eff.mult;
-                     }
-                }
-                else if(eff.type === 'cond_target_debuff_3_dmg') {
-                     if(Object.keys(target.buffs).length ＞= 3) {
-                         mult *= eff.mult;
-                         RPG.log("적 디버프 3개 이상! 위력 2배!");
-                     }
-                }
-                else if(eff.type === 'random_mult') {
-                    mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
-                    RPG.log(`무작위 위력! x${mult.toFixed(1)}`);
-                }
-            });
-        }
-
-        // 4. Trait Multipliers
-        const t = source.proto.trait;
-        if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 침묵 대상 추가 피해!");
-        }
-        if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 부식 대상 추가 피해!");
-        }
-        if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length ＞= 3) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 디버프 3개 이상 대상 추가 피해!");
-        }
-        if(t.type === 'cond_divine_3_dmg' && target.buffs.divine ＞= 3) {
-            dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 디바인 3스택 이상 대상 추가 피해!");
-        }
-
-        // 5. Defense Calculation
-        let isCrit = Math.random() * 100 ＜ crit;
-        if(isCrit) val *= (critDmg / 100);
-
-        let def = skill.type === 'phy' ? target.def : target.mdef;
-        let defRed = 0.0;
-
-        if (skill.type === 'phy') {
-            if (target.buffs.darkness && target.buffs.corrosion) {
-                defRed = 0.4;
-            } else if (target.buffs.darkness || target.buffs.corrosion) {
-                defRed = 0.2;
-            }
-        } else {
-            if (target.buffs.curse) {
-                defRed = 0.2;
-            }
-        }
-
-        def = Math.floor(def * (1.0 - defRed));
-
-        let finalMult = mult * elMult * (1.0 + dmgBonus);
-        let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
+        // Logic.js returns { dmg, isCrit } and logs via callback
+        const result = Logic.calculateDamage(
+            source,
+            target,
+            skill,
+            RPG.battle.fieldBuffs,
+            RPG.battle.activeTraits,
+            (msg) =\xef RPG.log(msg)
+        );
 
         if(target.id === 'demon_god') {
              const b = RPG.battle;
@@ -1679,13 +1570,13 @@ const RPG = {
 
         target.lastHitType = skill.type;
 
-        return { dmg: finalDmg, isCrit: isCrit };
+        return result;
     },
 
     applySkillEffects(source, target, skill) {
         if(!skill.effects) return;
 
-        skill.effects.forEach(eff =＞ {
+        skill.effects.forEach(eff =\xef {
             if(eff.type === 'buff') {
                 source.buffs[eff.id] = (eff.duration || 1);
             }
@@ -1693,7 +1584,7 @@ const RPG = {
                 let t = eff.type === 'debuff' ? target : source;
                 if(eff.stack) {
                     t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
-                    if(t.buffs[eff.id] ＞ 3) t.buffs[eff.id] = 3;
+                    if(t.buffs[eff.id] \xef 3) t.buffs[eff.id] = 3;
                     RPG.log(`${t === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] ${t.buffs[eff.id]}스택.`);
                 } else {
                     t.buffs[eff.id] = 1; // Flag or duration 1
@@ -1707,8 +1598,8 @@ const RPG = {
                 if(eff.condition === 'target_has_debuff' && target.buffs[eff.debuff]) this.applyFieldBuff(eff.id);
             }
             else if(eff.type === 'random_debuff') {
-                let pool = [...eff.pool].sort(() =＞ 0.5 - Math.random());
-                for(let i=0; i＜eff.count; i++) {
+                let pool = [...eff.pool].sort(() =\xef 0.5 - Math.random());
+                for(let i=0; i\xefeff.count; i++) {
                     if(pool[i]) {
                          target.buffs[pool[i]] = 1;
                          RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
@@ -1716,7 +1607,7 @@ const RPG = {
                 }
             }
             else if(eff.type === 'conditional_debuff') {
-                if(eff.condition === 'target_debuff_count' && Object.keys(target.buffs).length ＞= eff.count) {
+                if(eff.condition === 'target_debuff_count' && Object.keys(target.buffs).length \xef= eff.count) {
                     target.buffs[eff.debuff] = 1;
                     RPG.log(`조건 만족! 적에게 [${this.BUFF_NAMES[eff.debuff]}] 부여.`);
                 }
@@ -1725,16 +1616,16 @@ const RPG = {
                 source.hp = 0;
             }
             else if(eff.type === 'chance_debuff') {
-                if(Math.random() ＜ eff.chance) {
+                if(Math.random() \xef eff.chance) {
                     target.buffs[eff.id] = eff.duration || 1;
-                    RPG.log(`＜b＞성공!＜/b＞ ${target === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
+                    RPG.log(`\xefb\xef성공!\xef/b\xef ${target === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
                 } else {
-                    RPG.log(`[${this.BUFF_NAMES[eff.id]}] 부여 ＜b＞실패＜/b＞.`);
+                    RPG.log(`[${this.BUFF_NAMES[eff.id]}] 부여 \xefb\xef실패\xef/b\xef.`);
                 }
             }
             else if(eff.type === 'conditional_field_debuff') {
-                 if(RPG.battle.fieldBuffs.some(b =＞ b.name === eff.field)) {
-                     eff.debuffs.forEach(d =＞ {
+                 if(RPG.battle.fieldBuffs.some(b =\xef b.name === eff.field)) {
+                     eff.debuffs.forEach(d =\xef {
                          target.buffs[d] = 1;
                          RPG.log(`조건 만족! [${this.BUFF_NAMES[d]}] 부여.`);
                      });
@@ -1743,7 +1634,7 @@ const RPG = {
             else if(eff.type === 'clear_target_debuffs') {
                  const count = Object.keys(target.buffs).length;
                  target.buffs = {};
-                 if(count ＞ 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+                 if(count \xef 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
             }
             else if(eff.type === 'consume_all_burn_cond_buff') {
                  if(target.buffs['burn']) {
@@ -1756,16 +1647,99 @@ const RPG = {
                  }
             }
             else if(eff.type === 'consume_burn_1_dmg') {
-                 if(target.buffs['burn'] ＞= 1) {
+                 if(target.buffs['burn'] \xef= 1) {
                      target.buffs['burn']--;
-                     if(target.buffs['burn'] ＜= 0) delete target.buffs['burn'];
+                     if(target.buffs['burn'] \xef= 0) delete target.buffs['burn'];
                      RPG.log("작열 1스택 소모! 대미지 2배 적용!");
                  }
             }
             else if(eff.type === 'remove_field_buff_dmg') {
-                 if(RPG.battle.fieldBuffs.length ＞ 0) {
+                 if(RPG.battle.fieldBuffs.length \xef 0) {
                      let rm = RPG.battle.fieldBuffs.shift();
                      RPG.log(`필드버프 [${this.BUFF_NAMES[rm.name]}] 제거! 대미지 2배 적용!`);
+                 }
+            }
+            else if(eff.type === 'check_divine_3_stun_else_add') {
+                 if((target.buffs['divine'] || 0) \xef= 3) {
+                     target.buffs['stun'] = 1;
+                     RPG.log("디바인 3스택 확인! 적을 기절시킵니다!");
+                 } else {
+                     target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
+                     if(target.buffs['divine'] \xef 3) target.buffs['divine'] = 3;
+                     RPG.log("디바인 스택 추가.");
+                 }
+            }
+            else if(eff.type === 'random_debuff_consume_divine') {
+                let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+                let count = 1;
+                if(target.buffs['divine'] \xef 0) {
+                    target.buffs['divine']--;
+                    if(target.buffs['divine'] \xef= 0) delete target.buffs['divine'];
+                    count = 2;
+                    RPG.log("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
+                }
+
+                pool.sort(() =\xef 0.5 - Math.random());
+                for(let i=0; i\xefcount; i++) {
+                    target.buffs[pool[i]] = 1;
+                    RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
+                }
+            }
+            else if(eff.type === 'roulette_field') {
+                 RPG.battle.fieldBuffs = [];
+                 RPG.log("모든 필드 버프가 제거되었습니다!");
+
+                 const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
+                 const pick = buffs[Math.floor(Math.random() * buffs.length)];
+                 this.applyFieldBuff(pick);
+            }
+            else if(eff.type === 'wild_card_debuff') {
+                 // Cleanse player debuffs
+                 // "모든 디버프를 해제한다"
+                 // If this is a support skill targeting ENEMY (as attack/debuff), removing ENEMY debuffs is weird unless intended (reset).
+                 // But wait, Joker is a "Balancer".
+                 // Skill says: "Cost 100. Remove all debuffs. Add 2 random debuffs."
+                 // Usually "Remove all debuffs" (Cleanse) targets Self/Party.
+                 // "Add 2 random debuffs" targets Enemy.
+                 // If the skill is executed by `executeSkill`, it has a `source` and `target`.
+                 // If `wild_card` is `sup` (Support), does it target self or enemy?
+                 // In this game, `executeSkill` calls `applySkillEffects`.
+                 // `applySkillEffects` uses `source` and `target`.
+                 // If the user clicks a skill, `executeSkill(p, enemy, skill)` is called.
+                 // So `target` is Enemy. `source` is Player.
+
+                 // If I want to cleanse PLAYER: use `source.buffs`.
+                 // If I want to cleanse ENEMY: use `target.buffs`.
+
+                 // "Wild Card": A Joker move. Usually chaotic.
+                 // "Clear all debuffs": Likely clears PLAYER'S debuffs (Good thing).
+                 // "Inflict 2 random debuffs": Likely on ENEMY (Bad thing).
+                 // This makes it a very strong skill (Cost 100).
+
+                 // Let's implement: Cleanse Source (Player), Debuff Target (Enemy).
+
+                 const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+                 let cleansed = 0;
+                 badBuffs.forEach(b =\xef {
+                     if(source.buffs[b]) {
+                         delete source.buffs[b];
+                         cleansed++;
+                     }
+                 });
+                 if(cleansed \xef 0) RPG.log(`나의 디버프를 모두 해제했습니다! (${cleansed}개)`);
+
+                 let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+                 pool.sort(() =\xef 0.5 - Math.random());
+
+                 for(let i=0; i\xef2; i++) {
+                     if(pool[i] === 'burn' || pool[i] === 'divine') {
+                         target.buffs[pool[i]] = (target.buffs[pool[i]] || 0) + 1;
+                         if(target.buffs[pool[i]] \xef 3) target.buffs[pool[i]] = 3;
+                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 스택 추가.`);
+                     } else {
+                         target.buffs[pool[i]] = 1;
+                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
+                     }
                  }
             }
         });
@@ -1778,8 +1752,8 @@ const RPG = {
     },
 
     applyFieldBuff(id) {
-        if(this.battle.fieldBuffs.some(b =＞ b.name === id)) return RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 이미 존재.`);
-        if(this.battle.fieldBuffs.length ＞= 3) {
+        if(this.battle.fieldBuffs.some(b =\xef b.name === id)) return RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 이미 존재.`);
+        if(this.battle.fieldBuffs.length \xef= 3) {
              let removed = this.battle.fieldBuffs.shift();
              RPG.log(`필드버프 [${this.BUFF_NAMES[removed.name]}] 소멸.`);
         }
@@ -1796,17 +1770,17 @@ const RPG = {
         // Normal Attack
         const btn = document.createElement('button');
         btn.className = 'skill-btn phy';
-        btn.innerHTML = `＜span＞일반공격＜/span＞＜span style="color:#aaa"＞MP 0＜/span＞`;
-        btn.onclick = () =＞ RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
+        btn.innerHTML = `\xefspan\xef일반공격\xef/span\xef\xefspan style="color:#aaa"\xefMP 0\xef/span\xef`;
+        btn.onclick = () =\xef RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
         panel.appendChild(btn);
 
         // Skills
-        p.proto.skills.forEach(s =＞ {
+        p.proto.skills.forEach(s =\xef {
             const btn = document.createElement('button');
             btn.className = `skill-btn ${s.type}`;
-            btn.innerHTML = `＜span＞${s.name}＜/span＞＜span style="color:#aaa"＞MP ${s.cost}＜/span＞`;
-            if(p.mp ＜ s.cost) btn.disabled = true;
-            else btn.onclick = () =＞ RPG.executeSkill(p, RPG.battle.enemy, s);
+            btn.innerHTML = `\xefspan\xef${s.name}\xef/span\xef\xefspan style="color:#aaa"\xefMP ${s.cost}\xef/span\xef`;
+            if(p.mp \xef s.cost) btn.disabled = true;
+            else btn.onclick = () =\xef RPG.executeSkill(p, RPG.battle.enemy, s);
             panel.appendChild(btn);
         });
     },
@@ -1825,7 +1799,7 @@ const RPG = {
             let mpPct = (p.mp / 100) * 100;
             document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
-            let buffTxt = Object.keys(p.buffs).map(k=＞this.BUFF_NAMES[k]||k).join(',');
+            let buffTxt = Object.keys(p.buffs).map(k=\xefthis.BUFF_NAMES[k]||k).join(',');
             document.getElementById('p-buffs').innerText = buffTxt;
             document.getElementById('player-actor-box').style.opacity = 1;
         } else {
@@ -1840,11 +1814,11 @@ const RPG = {
         eImg.src = `${e.name}.png`;
         eImg.style.display = 'block';
 
-        let eBuffTxt = Object.keys(e.buffs).map(k=＞`${this.BUFF_NAMES[k]||k}${e.buffs[k]＞1?e.buffs[k]:''}`).join(' ');
+        let eBuffTxt = Object.keys(e.buffs).map(k=\xef`${this.BUFF_NAMES[k]||k}${e.buffs[k]\xef1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
 
         document.getElementById('bt-turn').innerText = this.battle.turn;
-        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b =＞ `[${this.BUFF_NAMES[b.name]||b.name}]`).join(" ");
+        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b =\xef `[${this.BUFF_NAMES[b.name]||b.name}]`).join(" ");
     },
 
     getElementalMultiplier(atkEl, defEl) {
@@ -1857,22 +1831,22 @@ const RPG = {
 
     handlePermadeath(players) {
         let deadNames = [];
-        players.forEach(p =＞ {
+        players.forEach(p =\xef {
             if(p && p.isDead) {
                 let idx = this.state.inventory.indexOf(p.id);
-                if(idx ＞ -1) this.state.inventory.splice(idx, 1);
+                if(idx \xef -1) this.state.inventory.splice(idx, 1);
                 if(p.pos !== undefined) this.state.deck[p.pos] = null;
                 deadNames.push(p.name);
             }
         });
-        if(deadNames.length ＞ 0) return `전사자 발생: ${deadNames.join(', ')}＜br＞(카드가 소멸했습니다)`;
+        if(deadNames.length \xef 0) return `전사자 발생: ${deadNames.join(', ')}\xefbr\xef(카드가 소멸했습니다)`;
         return "";
     },
 
     winBattle() {
         let deadMsg = this.handlePermadeath(this.battle.players);
         let reward = 1;
-        if(this.battle.players.some(p =＞ p && p.proto.trait.type === 'looter')) reward += 1;
+        if(this.battle.players.some(p =\xef p && p.proto.trait.type === 'looter')) reward += 1;
 
         this.state.tickets += reward;
         this.state.enemyScale++;
@@ -1885,32 +1859,32 @@ const RPG = {
 
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
-        let msg = "승리!＜br＞보상을 획득했습니다.";
-        if (deadMsg) msg += "＜br＞＜br＞" + deadMsg;
+        let msg = "승리!\xefbr\xef보상을 획득했습니다.";
+        if (deadMsg) msg += "\xefbr\xef\xefbr\xef" + deadMsg;
 
-        this.openInfoModal("전투 결과", msg, () =＞ {
+        this.openInfoModal("전투 결과", msg, () =\xef {
              // Creator God Bonus Check
              if (this.battle.enemy.id === 'creator_god') {
                  this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
-                    () =＞ { // Yes
+                    () =\xef { // Yes
                         let allQuizzes = [];
-                        GRAMMAR_DATA.forEach(lec =＞ { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                        GRAMMAR_DATA.forEach(lec =\xef { allQuizzes = allQuizzes.concat(lec.quizzes); });
                         let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
                         this.startGrammarQuiz(q,
-                            () =＞ { // Success
+                            () =\xef { // Success
                                 this.state.tickets += 3;
                                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                                 this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
                                 this.toMenu();
                             },
-                            () =＞ { // Fail
+                            () =\xef { // Fail
                                 this.showAlert("오답입니다... 보상 없음.");
                                 this.toMenu();
                             }
                         );
                     },
-                    () =＞ { // No
+                    () =\xef { // No
                         this.toMenu();
                     }
                  );
@@ -1918,8 +1892,8 @@ const RPG = {
                  // Quiz Challenge Prompt using Custom Modal
                  this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
                     // Yes Callback
-                    () =＞ {
-                         this.startQuiz((success) =＞ {
+                    () =\xef {
+                         this.startQuiz((success) =\xef {
                              if(success) {
                                  this.state.tickets += 1;
                                  document.getElementById('ui-tickets').innerText = this.state.tickets;
@@ -1931,7 +1905,7 @@ const RPG = {
                          });
                     },
                     // No Callback
-                    () =＞ {
+                    () =\xef {
                         this.toMenu();
                     }
                  );
@@ -1950,78 +1924,12 @@ const RPG = {
 
         let deadMsg = this.handlePermadeath(this.battle.players);
         let msg = "패배...";
-        if (deadMsg) msg += "＜br＞＜br＞" + deadMsg;
-        this.openInfoModal("전투 결과", msg, () =＞ this.toMenu());
+        if (deadMsg) msg += "\xefbr\xef\xefbr\xef" + deadMsg;
+        this.openInfoModal("전투 결과", msg, () =\xef this.toMenu());
     },
 
     getEffectiveStats(char, fieldBuffs) {
-        let stats = {
-            atk: char.atk, matk: char.matk,
-            def: char.def, mdef: char.mdef,
-            evasion: (char.baseEva || 0) + 5,
-            crit: (char.baseCrit || 10)
-        };
-        let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
-        let addEva = 0;
-        let addCrit = 0;
-
-        // 0. Blessings
-        if (char.blessing) {
-            m.atk += char.blessing.multiplier;
-            m.matk += char.blessing.multiplier;
-            m.def += char.blessing.multiplier;
-            m.mdef += char.blessing.multiplier;
-            if(char.blessing.isSage) {
-                addCrit += 10;
-                addEva += 5;
-            }
-        }
-
-        // 1. Dynamic Traits (Player Only)
-        const trait = char.proto ? char.proto.trait : null;
-        if (trait) {
-            if (trait.type === 'cond_twinkle_all' && fieldBuffs.some(b =＞ b.name === 'twinkle_party')) {
-                 m.atk += 0.3; m.matk += 0.3;
-            }
-            if (trait.type === 'cond_no_field_buff_eva_crit' && fieldBuffs.length === 0) {
-                addEva += trait.val;
-                addCrit += trait.val;
-            }
-        }
-
-        // 2. Field Buffs
-        if (char.proto) {
-            fieldBuffs.forEach(fb =＞ {
-                if(fb.name === 'sun_bless') { m.atk += 0.3; m.matk += 0.3; }
-                if(fb.name === 'moon_bless') { m.matk += 0.3; addEva += 15; }
-                if(fb.name === 'sanctuary') { m.matk += 0.30; m.mdef += 0.30; }
-                if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
-                if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
-                if(fb.name === 'twinkle_party') { m.atk += 0.2; addCrit += 15; }
-                if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
-            });
-        }
-
-        // 3. Buffs/Debuffs
-        if (char.buffs['weak']) { m.atk -= 0.2; }
-        if (char.buffs['silence']) { m.matk -= 0.2; }
-        if (char.buffs['evasion']) { addEva += 50; }
-
-        let defRed = 0.0;
-        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
-        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
-        m.def -= defRed;
-
-        if (char.buffs['curse']) m.mdef -= 0.2;
-
-        stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
-        stats.matk = Math.floor(stats.matk * Math.max(0, m.matk));
-        stats.def = Math.floor(stats.def * Math.max(0, m.def));
-        stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
-        stats.evasion += addEva;
-        stats.crit += addCrit;
-
-        return stats;
+        return Logic.calculateStats(char, fieldBuffs);
     },
 
     showBattleStat(side, idx) {
@@ -2030,38 +1938,45 @@ const RPG = {
         else char = this.battle.enemy;
         if(!char) return;
 
-        let buffs = Object.keys(char.buffs).map(k =＞ {
+        let buffs = Object.keys(char.buffs).map(k =\xef {
             let name = this.BUFF_NAMES[k] || k;
             let val = char.buffs[k];
             if(val === true) return name;
             return `${name}(${val})`;
         }).join(', ') || '없음';
 
-        const eff = this.getEffectiveStats(char, this.battle.fieldBuffs);
-        const colorize = (val, base) =＞ {
-             if(val ＞ base) return `＜span style="color:#69f0ae"＞${val}＜/span＞`;
-             if(val ＜ base) return `＜span style="color:#ff5252"＞${val}＜/span＞`;
-             return `＜span style="color:#eee"＞${val}＜/span＞`;
+        const eff = Logic.calculateStats(char, this.battle.fieldBuffs);
+
+        // Use baseStatsWithoutBlessing if available to show Green for blessed stats
+        const getBase = (key, fallback) =\xef {
+             if(char.baseStatsWithoutBlessing && char.baseStatsWithoutBlessing[key] !== undefined) return char.baseStatsWithoutBlessing[key];
+             return fallback;
         };
 
-        let content = `＜b＞[${char.name}]＜/b＞＜br＞HP: ${char.hp}/${char.maxHp}＜br＞`;
-        if(side === 'player') content += `MP: ${char.mp}＜br＞`;
-        content += `ATK: ${colorize(eff.atk, char.atk)} / MATK: ${colorize(eff.matk, char.matk)}＜br＞`;
-        content += `DEF: ${colorize(eff.def, char.def)} / MDEF: ${colorize(eff.mdef, char.mdef)}＜br＞`;
-        content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%＜br＞`;
-        content += `상태: ${buffs}＜br＞＜br＞`;
+        const colorize = (val, base) =\xef {
+             if(val \xef base) return `\xefspan style="color:#69f0ae"\xef${val}\xef/span\xef`;
+             if(val \xef base) return `\xefspan style="color:#ff5252"\xef${val}\xef/span\xef`;
+             return `\xefspan style="color:#eee"\xef${val}\xef/span\xef`;
+        };
+
+        let content = `\xefb\xef[${char.name}]\xef/b\xef\xefbr\xefHP: ${char.hp}/${char.maxHp}\xefbr\xef`;
+        if(side === 'player') content += `MP: ${char.mp}\xefbr\xef`;
+        content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}\xefbr\xef`;
+        content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}\xefbr\xef`;
+        content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%\xefbr\xef`;
+        content += `상태: ${buffs}\xefbr\xef\xefbr\xef`;
 
         if(side === 'player') {
-             content += `＜b＞[스킬]＜/b＞＜br＞`;
-             char.proto.skills.forEach(s =＞ {
+             content += `\xefb\xef[스킬]\xef/b\xef\xefbr\xef`;
+             char.proto.skills.forEach(s =\xef {
                  let multText = s.val ? ` (x${s.val})` : '';
-                 content += `- ${s.name}: ${s.desc}${multText}＜br＞`;
+                 content += `- ${s.name}: ${s.desc}${multText}\xefbr\xef`;
              });
         } else {
-             content += `＜b＞[스킬]＜/b＞＜br＞`;
-             char.skills.forEach(s =＞ {
+             content += `\xefb\xef[스킬]\xef/b\xef\xefbr\xef`;
+             char.skills.forEach(s =\xef {
                  let multText = s.val ? ` (x${s.val})` : '';
-                 content += `- ${s.name}: ${s.desc}${multText}＜br＞`;
+                 content += `- ${s.name}: ${s.desc}${multText}\xefbr\xef`;
              });
         }
         this.openInfoModal(char.name, content);
@@ -2079,8 +1994,8 @@ const RPG = {
             'star_powder': '방어/마방 +30%'
         };
         let msg = "";
-        this.battle.fieldBuffs.forEach(b =＞ {
-             msg += `＜b＞[${this.BUFF_NAMES[b.name]}]＜/b＞＜br＞${buffInfo[b.name] || ''}＜br＞＜br＞`;
+        this.battle.fieldBuffs.forEach(b =\xef {
+             msg += `\xefb\xef[${this.BUFF_NAMES[b.name]}]\xef/b\xef\xefbr\xef${buffInfo[b.name] || ''}\xefbr\xef\xefbr\xef`;
         });
         this.openInfoModal("필드 버프", msg);
     },
@@ -2105,11 +2020,11 @@ const RPG = {
         const btnYes = document.getElementById('confirm-yes');
         const btnNo = document.getElementById('confirm-no');
 
-        btnYes.onclick = () =＞ {
+        btnYes.onclick = () =\xef {
             modal.classList.remove('active');
             if(onYes) onYes();
         };
-        btnNo.onclick = () =＞ {
+        btnNo.onclick = () =\xef {
              modal.classList.remove('active');
              if(onNo) onNo();
         };
@@ -2121,6 +2036,6 @@ const RPG = {
         this.openInfoModal("알림", msg);
     }
 };
-＜/script＞
-＜/body＞
-＜/html＞
+\xef/script\xef
+\xef/body\xef
+\xef/html\xef
