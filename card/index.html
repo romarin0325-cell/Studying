@@ -279,11 +279,11 @@
         </div>
         <button class="menu-btn" onclick="RPG.activateChaos('normal')">
             혼돈의 축복 (일반)<br>
-            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 2종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
+            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 3종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
         </button>
         <button class="menu-btn" onclick="RPG.activateChaos('challenge')" style="border-color:#e040fb; color:#e040fb;">
             혼돈의 축복 (도전)<br>
-            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 4종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
+            <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 5종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
         </button>
         <button class="menu-btn" onclick="RPG.activateChaos('great_sage')" style="border-color:#00e676; color:#00e676;">
             대현자의 축복<br>
@@ -532,11 +532,11 @@ const RPG = {
         document.getElementById('modal-chaos').classList.remove('active');
 
         if(type === 'normal') {
-            this.applyChaosBlessing(2);
+            this.applyChaosBlessing(3);
         } else if (type === 'challenge') {
             this.startChaosQuiz((success) => {
                 if(success) {
-                    this.applyChaosBlessing(4);
+                    this.applyChaosBlessing(5);
                 } else {
                     this.state.chaosBlessingUses--;
                     document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
