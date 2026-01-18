@@ -17,7 +17,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
             { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 2배', effects: [{type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 2.0}] },
-            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.0 증가, 사용 후 적 디버프 해제', effects: [{type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.0}, {type: 'clear_target_debuffs'}] }
+            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5}, {type: 'clear_target_debuffs'}] }
         ]
     },
     {
@@ -46,7 +46,7 @@ const CARDS = [
         trait: { type: 'pos_rear_atk_matk', val: 30, desc: '대장 배치시 공격력 마법공격력 30%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
-            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열스택 부여, 작열스택 하나당 0.5배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 0.5}] },
+            { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열스택 부여, 작열스택 하나당 1.0배율 추가', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 1.0}] },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!'}] }
         ]
     },
@@ -73,7 +73,7 @@ const CARDS = [
     {
         id: 'world_tree', name: '세계수', grade: 'legend', element: 'nature', role: 'buffer',
         stats: { hp: 600, atk: 90, matk: 90, def: 60, mdef: 60 },
-        trait: { type: 'syn_nature_3_def', val: 50, desc: '덱이 전부 자연일 시 방어력/마법방어력 50%증가' },
+        trait: { type: 'syn_nature_3_all', val: 30, desc: '덱이 전부 자연일 시 공격/마공/방어/마방 30%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '대지의분노', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 대지의축복 발동', effects: [{type: 'field_buff', id: 'earth_bless'}] },
@@ -116,7 +116,7 @@ const CARDS = [
         trait: { type: 'behemoth_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용시 20%확률로 적에게 스턴부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
-            { name: '대지분쇄', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{type: 'self_debuff', id: 'stun', duration: 1}, {type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0}] },
+            { name: '대지분쇄', type: 'phy', tier: 3, cost: 30, val: 3.5, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{type: 'self_debuff', id: 'stun', duration: 1}, {type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0}] },
             { name: '어스퀘이크', type: 'mag', tier: 3, cost: 30, val: 3.5, desc: '다음 턴에 공격 (시전자 사망 시 취소)', effects: [{type: 'delayed_attack', turns: 1}] }
         ]
     },
@@ -195,11 +195,11 @@ const CARDS = [
     {
         id: 'avalanche_maid', name: '아발란체메이드', grade: 'epic', element: 'water', role: 'balancer',
         stats: { hp: 410, atk: 95, matk: 90, def: 60, mdef: 60 },
-        trait: { type: 'syn_water_3_matk', val: 50, desc: '덱에 물 3장일시 마법공격력 50%증가' },
+        trait: { type: 'syn_water_3_ice_age', val: 0, desc: '덱에 물 3장일시 아이스에이지 최대배율 대폭 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '빙하의일격', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] },
-            { name: '아이스에이지', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '1~5배율 사이로 랜덤공격', effects: [{type: 'random_mult', min: 1.0, max: 5.0}] }
+            { name: '아이스에이지', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '1~5배율 사이로 랜덤공격 (특성 발동시 1~10배율)', effects: [{type: 'random_mult', min: 1.0, max: 5.0}] }
         ]
     },
     {
@@ -218,7 +218,7 @@ const CARDS = [
         trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵 걸린 적에게 대미지 1.5배' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] },
+            { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 침묵 부여', effects: [{type: 'random_debuff', count: 1, pool: ['weak', 'silence']}] },
             { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 부여', effects: [{type: 'field_buff', id: 'star_powder'}] }
         ]
     },
@@ -287,7 +287,7 @@ const CARDS = [
     {
         id: 'night_rabbit', name: '밤토끼', grade: 'rare', element: 'dark', role: 'dealer',
         stats: { hp: 330, atk: 90, matk: 80, def: 55, mdef: 60 },
-        trait: { type: 'syn_snow_rabbit', val: 50, desc: '눈토끼가 덱에 있을시 물공 물방 50% 증가' },
+        trait: { type: 'syn_snow_rabbit', val: 50, desc: '눈토끼 혹은 은토끼가 덱에 있을시 물공 물방 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0}] },
@@ -326,7 +326,7 @@ const CARDS = [
     },
     {
         id: 'void_knight', name: '공허의기사', grade: 'rare', element: 'dark', role: 'balancer',
-        stats: { hp: 360, atk: 95, matk: 70, def: 50, mdef: 50 },
+        stats: { hp: 360, atk: 100, matk: 50, def: 60, mdef: 55 },
         trait: { type: 'cond_corrosion_dmg', val: 1.5, desc: '부식상태의 적에게 대미지 1.5배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
@@ -409,11 +409,21 @@ const CARDS = [
     {
         id: 'snow_rabbit', name: '눈토끼', grade: 'normal', element: 'water', role: 'dealer',
         stats: { hp: 290, atk: 60, matk: 85, def: 40, mdef: 60 },
-        trait: { type: 'syn_night_rabbit', val: 50, desc: '밤토끼가 덱에 있을시 마공 마방 50% 증가' },
+        trait: { type: 'syn_night_rabbit', val: 50, desc: '밤토끼 혹은 은토끼가 덱에 있을시 마공 마방 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
             { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] },
-            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼 시너지 발동 중 대미지 2배', effects: [{type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0}] }
+            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼/은토끼 시너지 발동 중 대미지 2배', effects: [{type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0}] }
+        ]
+    },
+    {
+        id: 'silver_rabbit', name: '은토끼', grade: 'normal', element: 'light', role: 'dealer',
+        stats: { hp: 300, atk: 70, matk: 70, def: 60, mdef: 60 },
+        trait: { type: 'syn_silver_rabbit', val: 50, desc: '눈토끼 혹은 밤토끼가 덱에 있을시 물공 마공 50% 증가' },
+        skills: [
+            { name: '헤븐리루어', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_silver_rabbit', mult: 2.0}] },
+            { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0}] },
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] }
         ]
     },
     {

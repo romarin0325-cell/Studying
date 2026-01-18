@@ -1109,9 +1109,12 @@ const RPG = {
              if(!t.type.startsWith('syn_')) return;
 
              let active = false;
-             if(t.type === 'syn_nature_3_def' && elements.filter(e=＞e==='nature').length===3) active = true;
+             // Check Joker
+             const jokerInDeck = this.state.deck.includes('joker');
+
+             if(t.type === 'syn_nature_3_all' && elements.filter(e=>e==='nature').length===3) active = true;
              else if(t.type === 'syn_nature_3_golem' && elements.filter(e=＞e==='nature').length===3) active = true;
-             else if(t.type === 'syn_water_3_matk' && elements.filter(e=＞e==='water').length===3) active = true;
+             else if(t.type === 'syn_water_3_ice_age' && elements.filter(e=>e==='water').length===3) active = true;
              else if(t.type === 'syn_fire_3_crit' && elements.filter(e=＞e==='fire').length===3) active = true;
              else if(t.type === 'syn_dark_3_matk' && elements.filter(e=＞e==='dark').length===3) active = true;
              else if(t.type === 'syn_light_fire_atk' && elements.includes('light') && elements.includes('fire')) active = true;
@@ -1120,17 +1123,17 @@ const RPG = {
                  this.battle.activeTraits.push(t.type); // Special handling for Rumi
              }
              else if(t.type === 'syn_nature_3_matk' && elements.filter(e=＞e==='nature').length===3) active = true;
-             else if(t.type === 'syn_night_rabbit' && this.state.deck.includes('night_rabbit')) active = true;
-             else if(t.type === 'syn_snow_rabbit' && this.state.deck.includes('snow_rabbit')) active = true;
+             else if(t.type === 'syn_night_rabbit' && (this.state.deck.includes('night_rabbit') || this.state.deck.includes('silver_rabbit') || jokerInDeck)) active = true;
+             else if(t.type === 'syn_snow_rabbit' && (this.state.deck.includes('snow_rabbit') || this.state.deck.includes('silver_rabbit') || jokerInDeck)) active = true;
+             else if(t.type === 'syn_silver_rabbit' && (this.state.deck.includes('snow_rabbit') || this.state.deck.includes('night_rabbit') || jokerInDeck)) active = true;
              else if(t.type === 'syn_water_3_atk_matk' && elements.filter(e=＞e==='water').length===3) active = true;
 
              if(active) {
                 // Stat buffs are applied here, specific logic buffs stored in activeTraits
                 this.battle.activeTraits.push(t.type);
 
-                if(t.type === 'syn_nature_3_def') { p.def = Math.floor(p.def * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
+                if(t.type === 'syn_nature_3_all') { p.atk = Math.floor(p.atk * 1.3); p.matk = Math.floor(p.matk * 1.3); p.def = Math.floor(p.def * 1.3); p.mdef = Math.floor(p.mdef * 1.3); }
                 if(t.type === 'syn_nature_3_golem') { p.atk = Math.floor(p.atk * 1.3); p.def = Math.floor(p.def * 1.3); }
-                if(t.type === 'syn_water_3_matk') p.matk = Math.floor(p.matk * 1.5);
                 if(t.type === 'syn_nature_3_matk') p.matk = Math.floor(p.matk * 1.5);
                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
                 if(t.type === 'syn_dark_3_matk') p.matk = Math.floor(p.matk * 1.5);
@@ -1138,6 +1141,7 @@ const RPG = {
                 if(t.type === 'syn_water_light_matk_mdef') { p.matk = Math.floor(p.matk * 1.3); p.mdef = Math.floor(p.mdef * 1.3); }
                 if(t.type === 'syn_night_rabbit') { p.matk = Math.floor(p.matk * 1.5); p.mdef = Math.floor(p.mdef * 1.5); }
                 if(t.type === 'syn_snow_rabbit') { p.atk = Math.floor(p.atk * 1.5); p.def = Math.floor(p.def * 1.5); }
+                if(t.type === 'syn_silver_rabbit') { p.atk = Math.floor(p.atk * 1.5); p.matk = Math.floor(p.matk * 1.5); }
                 if(t.type === 'syn_water_3_atk_matk') { p.atk = Math.floor(p.atk * 1.5); p.matk = Math.floor(p.matk * 1.5); }
              }
         });
@@ -1615,7 +1619,10 @@ const RPG = {
                          mult *= eff.mult;
                          if(eff.log) RPG.log(eff.log);
                      }
-                     else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=＞b.name === eff.buff)) mult *= eff.mult;
+                     else if(eff.condition === 'field_buff' && RPG.battle.fieldBuffs.some(b=>b.name === eff.buff)) {
+                         mult *= eff.mult;
+                         if(source.id === 'behemoth' && skill.name === '대지분쇄') RPG.log("대지의 축복으로 인해 대지분쇄의 위력이 증가합니다!");
+                     }
                 }
                 else if(eff.type === 'consume_burn_1_dmg') {
                      if(target.buffs['burn'] ＞= 1) {
@@ -1635,7 +1642,9 @@ const RPG = {
                      }
                 }
                 else if(eff.type === 'random_mult') {
-                    mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
+                    let max = eff.max;
+                    if(RPG.battle.activeTraits.includes('syn_water_3_ice_age')) max = 10.0;
+                    mult = eff.min + Math.floor(Math.random() * (max - eff.min + 1));
                     RPG.log(`무작위 위력! x${mult.toFixed(1)}`);
                 }
             });
@@ -1645,11 +1654,11 @@ const RPG = {
         const t = source.proto.trait;
         if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
             dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 침묵 대상 추가 피해!");
+            RPG.log(`[특성] ${source.name}: 침묵 대상 추가 피해!`);
         }
         if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) {
             dmgBonus += (t.val - 1.0);
-            RPG.log("[특성] 부식 대상 추가 피해!");
+            RPG.log(`[특성] ${source.name}: 부식 대상 추가 피해!`);
         }
         if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length ＞= 3) {
             dmgBonus += (t.val - 1.0);
