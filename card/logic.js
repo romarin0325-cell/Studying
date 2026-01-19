@@ -155,7 +155,10 @@ const Logic = {
                          mult *= eff.mult;
                          if(eff.log) logFn(eff.log);
                      }
-                     else if(eff.condition === 'field_buff' && fieldBuffs.some(b=>b.name === eff.buff)) mult *= eff.mult;
+                     else if(eff.condition === 'field_buff' && fieldBuffs.some(b=>b.name === eff.buff)) {
+                         mult *= eff.mult;
+                         if(source.id === 'behemoth' && skill.name === '대지분쇄') logFn("대지의 축복으로 인해 대지분쇄의 위력이 증가합니다!");
+                     }
                 }
                 else if(eff.type === 'consume_burn_1_dmg') {
                      if(target.buffs['burn'] >= 1) {
@@ -174,7 +177,9 @@ const Logic = {
                      }
                 }
                 else if(eff.type === 'random_mult') {
-                    mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
+                    let max = eff.max;
+                    if(activeTraits.includes('syn_water_3_ice_age')) max = 10.0;
+                    mult = eff.min + Math.floor(Math.random() * (max - eff.min + 1));
                     logFn(`무작위 위력! x${mult.toFixed(1)}`);
                 }
             });
@@ -185,11 +190,11 @@ const Logic = {
         if (t) {
             if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
                 dmgBonus += (t.val - 1.0);
-                logFn("[특성] 침묵 대상 추가 피해!");
+                logFn(`[특성] ${source.name}: 침묵 대상 추가 피해!`);
             }
             if(t.type === 'cond_corrosion_dmg' && target.buffs.corrosion) {
                 dmgBonus += (t.val - 1.0);
-                logFn("[특성] 부식 대상 추가 피해!");
+                logFn(`[특성] ${source.name}: 부식 대상 추가 피해!`);
             }
             if(t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length >= 3) {
                 dmgBonus += (t.val - 1.0);
@@ -239,23 +244,23 @@ const Logic = {
 
         // Synergy Traits
         if(t.type.startsWith('syn_')) {
-             if(t.type === 'syn_nature_3_def' && countEl('nature') >= 3) active = true;
+             if(t.type === 'syn_nature_3_all' && countEl('nature') >= 3) active = true;
              else if(t.type === 'syn_nature_3_golem' && countEl('nature') >= 3) active = true;
-             else if(t.type === 'syn_water_3_matk' && countEl('water') >= 3) active = true;
+             else if(t.type === 'syn_water_3_ice_age' && countEl('water') >= 3) active = true;
              else if(t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
              else if(t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
              else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
              else if(t.type === 'syn_water_light_matk_mdef' && hasEl('water') && hasEl('light')) active = true;
              else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
              else if(t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
-             else if(t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || jokerInDeck)) active = true;
-             else if(t.type === 'syn_snow_rabbit' && (deck.includes('snow_rabbit') || jokerInDeck)) active = true;
+             else if(t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
+             else if(t.type === 'syn_snow_rabbit' && (deck.includes('snow_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
+             else if(t.type === 'syn_silver_rabbit' && (deck.includes('snow_rabbit') || deck.includes('night_rabbit') || jokerInDeck)) active = true;
              else if(t.type === 'syn_water_3_atk_matk' && countEl('water') >= 3) active = true;
 
              if(active) {
-                if(t.type === 'syn_nature_3_def') { p.def *= 1.5; p.mdef *= 1.5; }
+                if(t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
                 if(t.type === 'syn_nature_3_golem') { p.atk *= 1.3; p.def *= 1.3; }
-                if(t.type === 'syn_water_3_matk') p.matk *= 1.5;
                 if(t.type === 'syn_nature_3_matk') p.matk *= 1.5;
                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
                 if(t.type === 'syn_dark_3_matk') p.matk *= 1.5;
@@ -263,6 +268,7 @@ const Logic = {
                 if(t.type === 'syn_water_light_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
                 if(t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if(t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
+                if(t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
                 if(t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
 
                 // Flooring
