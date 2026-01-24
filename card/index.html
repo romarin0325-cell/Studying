@@ -444,7 +444,7 @@ const RPG = {
         desc.innerText = "모드를 선택하여 설명을 확인하세요.";
 
         const MODES = [
-            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 24 스테이지)' },
+            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
             { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
             { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
             { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
@@ -499,7 +499,7 @@ const RPG = {
         }
 
         let initTickets = 3;
-        if (mode === 'suffering' || mode === 'overdrive') initTickets = 10;
+        if (mode === 'suffering' || mode === 'overdrive' || mode === 'origin') initTickets = 10;
 
         this.state = {
             mode: mode,
@@ -1905,6 +1905,7 @@ const RPG = {
         let clearStage = 24;
         if (mode === 'overdrive') clearStage = 30;
         if (mode === 'curse' || mode === 'flood') clearStage = 36;
+        if (mode === 'origin') clearStage = Infinity;
 
         let gameClear = false;
         if (stage >= clearStage) {
