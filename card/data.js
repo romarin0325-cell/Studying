@@ -26,7 +26,7 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 0.5, desc: '필드버프를 제거하고 제거한 수 x3.0 만큼 위력 증가', effects: [{type: 'consume_field_all', multPerStack: 3.0}] },
+            { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프를 제거하고 제거한 수 x3.0 만큼 위력 증가', effects: [{type: 'consume_field_all', multPerStack: 3.0}] },
             { name: '로열블룸', type: 'sup', tier: 2, cost: 20, desc: '필드버프 대지의축복 발동', effects: [{type: 'field_buff', id: 'earth_bless'}] }
         ]
     },
@@ -525,7 +525,7 @@ const BONUS_CARDS = [
         trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
-            { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 최대 배율 10으로 증가)', effects: [{type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0}] },
+            { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~10배율)', effects: [{type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0}] },
             { name: '차원절단', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '2턴 뒤 발동, 3~6배율 랜덤 공격', effects: [{type: 'delayed_random_attack', turns: 2, min: 3.0, max: 6.0}] }
         ]
     },
