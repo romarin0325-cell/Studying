@@ -175,6 +175,17 @@
     </div>
 </div>
 
+<div id="modal-mode-select" class="modal">
+    <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
+        <h3>게임 모드 선택</h3>
+        <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;"></div>
+        <div id="mode-desc" style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
+            모드를 선택해주세요.
+        </div>
+        <button onclick="document.getElementById('modal-mode-select').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">취소</button>
+    </div>
+</div>
+
 <div id="modal-card" class="modal">
     <div class="modal-content">
         <h3 id="md-name">Name</h3>
@@ -316,8 +327,16 @@
  * Encapsulates all game logic, state, and UI handling.
  */
 const RPG = {
-    // Game State (Persistent)
+    // Global Data (Persistent across resets)
+    global: {
+        unlocked_modes: ['origin'],
+        unlocked_bonus_cards: [],
+        achievements: { origin: false }
+    },
+
+    // Game State (Session Persistent)
     state: {
+        mode: 'origin',
         tickets: 20,
         inventory: [],
         deck: [null, null, null],
@@ -326,7 +345,8 @@ const RPG = {
         greatSageBlessingUses: 3,
         chaosBuffs: [], // Array of { id: cardId, multiplier: float } (Merged)
         activeChaosBlessing: [], // Specific buffs from Chaos Blessing
-        activeSageBlessing: []   // Specific buffs from Great Sage Blessing
+        activeSageBlessing: [],   // Specific buffs from Great Sage Blessing
+        quiz_stats: { correct: 0, total: 0 }
     },
 
     // Battle State (Transient)
@@ -372,7 +392,22 @@ const RPG = {
         box.scrollTop = box.scrollHeight;
     },
 
+    // --- Global Data ---
+    loadGlobalData() {
+        const data = localStorage.getItem('cardRpgGlobal');
+        if (data) {
+            try {
+                this.global = { ...this.global, ...JSON.parse(data) };
+            } catch (e) { console.error("Global data parse error", e); }
+        }
+    },
+    saveGlobalData() {
+        localStorage.setItem('cardRpgGlobal', JSON.stringify(this.global));
+    },
+
     startGame(mode) {
+        this.loadGlobalData();
+
         if(mode === 'load') {
             const save = localStorage.getItem('cardRpgSave');
             if(save) {
@@ -383,44 +418,90 @@ const RPG = {
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
                  if(!this.state.activeChaosBlessing) this.state.activeChaosBlessing = [];
                  if(!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
+                 if(!this.state.mode) this.state.mode = 'origin';
+                 if(!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
 
                  // Load persistent wordbook
                  const vocab = localStorage.getItem('cardRpgVocab');
                  if(vocab) this.state.wrongWords = JSON.parse(vocab);
 
                  this.showAlert("불러오기 완료");
-            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
+                 this.toMenu();
+            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openModeSelect(); }
         } else {
-            // New Game Logic: Check for previous run data to save record
-            let prevStage = this.state.enemyScale;
-
-            // If in-memory state is empty (e.g. fresh load), check localStorage
-            if (prevStage === 0 && this.state.tickets === 20) {
-                const save = localStorage.getItem('cardRpgSave');
-                if (save) {
-                    try {
-                        let loaded = JSON.parse(save);
-                        if (loaded.enemyScale) prevStage = loaded.enemyScale;
-                    } catch (e) {}
-                }
-            }
-
-            // Save record if significant progress
-            if (prevStage > 0) {
-                 // Temporarily set state to previous stage for saveRecord to use
-                 let originalScale = this.state.enemyScale;
-                 this.state.enemyScale = prevStage;
-                 this.saveRecord();
-                 this.state.enemyScale = originalScale;
-            }
-
-            this.initNewGame();
+            // New Game Logic: Show Mode Select
+            this.openModeSelect();
         }
-        this.toMenu();
     },
 
-    initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, greatSageBlessingUses: 3, chaosBuffs: [], activeChaosBlessing: [], activeSageBlessing: [], wrongWords: [] };
+    openModeSelect() {
+        // Save record if significant progress before resetting?
+        // Logic moved to startNewGame execution
+        const modal = document.getElementById('modal-mode-select');
+        const list = document.getElementById('mode-list');
+        const desc = document.getElementById('mode-desc');
+        list.innerHTML = "";
+        desc.innerText = "모드를 선택하여 설명을 확인하세요.";
+
+        const MODES = [
+            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 24 스테이지)' },
+            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
+            { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
+            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
+            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
+            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' }
+        ];
+
+        MODES.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = m.name;
+
+            const isUnlocked = this.global.unlocked_modes.includes(m.id);
+            if(isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
+
+            btn.onclick = () => {
+                desc.innerText = `[${m.name}]\n${m.desc}`;
+                // Double click or separate confirm?
+                // Just use confirm dialog
+                this.showConfirm(`${m.name} 모드로 시작하시겠습니까?`, () => {
+                    this.initNewGame(m.id);
+                    modal.classList.remove('active');
+                    this.toMenu();
+                });
+            };
+            list.appendChild(btn);
+        });
+
+        modal.classList.add('active');
+    },
+
+    initNewGame(mode = 'origin') {
+        // Record saving logic (Only for Origin mode as per request "Record check only for Origin")
+        // Check previous state
+        if (this.state.mode === 'origin' && this.state.enemyScale > 0) {
+             this.saveRecord();
+        }
+
+        this.state = {
+            mode: mode,
+            tickets: 20,
+            inventory: [],
+            deck: [null, null, null],
+            enemyScale: 0,
+            chaosBlessingUses: 3,
+            greatSageBlessingUses: 3,
+            chaosBuffs: [],
+            activeChaosBlessing: [],
+            activeSageBlessing: [],
+            wrongWords: [],
+            quiz_stats: { correct: 0, total: 0 }
+        };
+
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
@@ -429,6 +510,7 @@ const RPG = {
     saveGame() {
         localStorage.setItem('cardRpgSave', JSON.stringify(this.state));
         localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+        this.saveGlobalData(); // Also save global just in case
         this.showAlert("저장되었습니다.");
     },
 
@@ -506,7 +588,6 @@ const RPG = {
             document.getElementById('modal-chaos').classList.remove('active');
 
             // Pick random quiz
-            // Get all quizzes from all lectures
             let allQuizzes = [];
             GRAMMAR_DATA.forEach(lec => {
                 allQuizzes = allQuizzes.concat(lec.quizzes);
@@ -531,12 +612,17 @@ const RPG = {
         }
         document.getElementById('modal-chaos').classList.remove('active');
 
+        // Mode Bonus
+        let bonus = 0;
+        if(this.state.mode === 'suffering') bonus = 2;
+        if(this.state.mode === 'overdrive') bonus = 1;
+
         if(type === 'normal') {
-            this.applyChaosBlessing(3);
+            this.applyChaosBlessing(3 + bonus);
         } else if (type === 'challenge') {
             this.startChaosQuiz((success) => {
                 if(success) {
-                    this.applyChaosBlessing(5);
+                    this.applyChaosBlessing(5 + bonus);
                 } else {
                     this.state.chaosBlessingUses--;
                     document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
@@ -723,21 +809,67 @@ const RPG = {
         document.getElementById('ui-tickets').innerText = this.state.tickets;
         let rand = Math.random();
         let grade = 'normal';
+        const mode = this.state.mode;
 
-        if (isChallenge) {
-            // Legend 20%, Epic 25%, Rare 30%, Normal 25%
-            if(rand < 0.20) grade = 'legend';
-            else if(rand < 0.45) grade = 'epic';
-            else if(rand < 0.75) grade = 'rare';
-            else grade = 'normal';
+        // Determine Grade
+        if (mode === 'restriction') {
+            // Restriction: Rare max
+            if (isChallenge) {
+                // Challenge: Rare 40, Normal 60
+                if(rand < 0.40) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Normal: Rare 20, Normal 80
+                if(rand < 0.20) grade = 'rare';
+                else grade = 'normal';
+            }
+        } else if (mode === 'balance') {
+            // Balance: Epic max
+            if (isChallenge) {
+                // Challenge: Epic 20, Rare 30, Normal 50
+                if(rand < 0.20) grade = 'epic';
+                else if(rand < 0.50) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Normal: Epic 10, Rare 20, Normal 70
+                if(rand < 0.10) grade = 'epic';
+                else if(rand < 0.30) grade = 'rare';
+                else grade = 'normal';
+            }
         } else {
-            // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
-            if(rand < 0.10) grade = 'legend';
-            else if(rand < 0.30) grade = 'epic';
-            else if(rand < 0.60) grade = 'rare';
+            // Origin / Others
+            if (isChallenge) {
+                // Legend 20%, Epic 25%, Rare 30%, Normal 25%
+                if(rand < 0.20) grade = 'legend';
+                else if(rand < 0.45) grade = 'epic';
+                else if(rand < 0.75) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
+                if(rand < 0.10) grade = 'legend';
+                else if(rand < 0.30) grade = 'epic';
+                else if(rand < 0.60) grade = 'rare';
+            }
         }
 
-        const pool = CARDS.filter(c => c.grade === grade);
+        // Build Pool
+        let pool = CARDS.filter(c => c.grade === grade);
+
+        // Add Bonus Cards
+        if (this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => c.grade === grade && this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+
+        if(pool.length === 0) {
+            // Fallback if pool is empty (e.g. no cards of that grade? Should not happen with standard set)
+            // But if Restriction mode and we rolled something else? Logic guarantees valid grade.
+            // If somehow empty, fallback to normal
+            console.error("Empty pool for grade: " + grade);
+            grade = 'normal';
+            pool = CARDS.filter(c => c.grade === 'normal');
+        }
+
         const pick = pool[Math.floor(Math.random() * pool.length)];
         this.state.inventory.push(pick.id);
 
@@ -1387,6 +1519,13 @@ const RPG = {
              RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
         }
 
+        // Trait: Phoenix Normal Attack Burn
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'syn_fire_3_crit_burn' && RPG.battle.activeTraits.includes('syn_fire_3_crit_burn')) {
+             target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
+             if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+             RPG.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
+        }
+
         // Trait: Behemoth (Skill Use -> Stun Chance)
         if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
             if (Math.random() < 0.2) {
@@ -1396,7 +1535,10 @@ const RPG = {
         }
 
         // Check for Delayed Attack Effect
-        const delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
+        let delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack_field');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_random_attack');
+
         if(delayedEff && !isDelayed) {
             RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
             RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: skill });
@@ -1432,7 +1574,8 @@ const RPG = {
             skill,
             RPG.battle.fieldBuffs,
             RPG.battle.activeTraits,
-            (msg) => RPG.log(msg)
+            (msg) => RPG.log(msg),
+            RPG.state.mode // PASS MODE
         );
 
         if(target.id === 'demon_god') {
@@ -1568,9 +1711,6 @@ const RPG = {
                  this.applyFieldBuff(pick);
             }
             else if(eff.type === 'wild_card_debuff') {
-                 // Fix: Cleanse TARGET (Enemy) debuffs, then add new debuffs to TARGET (Enemy).
-                 // As per request: "상대의 디버프를 제거하고 새로 2개를 부여하는것"
-
                  const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
                  let cleansed = 0;
                  badBuffs.forEach(b => {
@@ -1595,11 +1735,22 @@ const RPG = {
                      }
                  }
             }
+            // New Handlers
+            else if(eff.type === 'delayed_attack_field') {
+                if (eff.field) this.applyFieldBuff(eff.field);
+            }
+            // Note: delayed_random_attack doesn't have immediate effects, damage handled in Logic/calcDamage
         });
 
         // Special Rumi Trait Trigger
         if(RPG.battle.activeTraits.includes('syn_water_nature') && skill.name === '문라이트세레나') {
             RPG.log("루미의 특성 발동! 트윙클파티 추가!");
+            this.applyFieldBuff('twinkle_party');
+        }
+
+        // Siren Trait Trigger
+        if(RPG.battle.activeTraits.includes('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
+            RPG.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
             this.applyFieldBuff('twinkle_party');
         }
     },
@@ -1701,6 +1852,10 @@ const RPG = {
         let reward = 1;
         if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
 
+        // Mode Rewards
+        if (this.state.mode === 'suffering') reward = 0;
+        if (this.state.mode === 'overdrive') reward += 1;
+
         this.state.tickets += reward;
         this.state.enemyScale++;
 
@@ -1712,56 +1867,140 @@ const RPG = {
 
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
+        // Victory Condition Check
+        const mode = this.state.mode;
+        const stage = this.state.enemyScale; // current stage (already incremented)
+        let clearStage = 24;
+        if (mode === 'overdrive') clearStage = 30;
+        if (mode === 'curse' || mode === 'flood') clearStage = 36;
+
+        let gameClear = false;
+        if (stage >= clearStage) {
+            gameClear = true;
+        }
+
+        // Archive Mode: Mandatory Quiz
+        if (mode === 'archive') {
+            // Need to pass stats? We don't have per-battle stats easily accessible for "accuracy > 90%" unless we track it.
+            // Requirement: "Archive: Mandatory grammar quiz after stage. Clear if > 90% accuracy at stage 24."
+            // We need to track quiz accuracy.
+            // Let's add stats to this.state.quiz_stats
+
+            // Trigger Quiz immediately
+            let allQuizzes = [];
+            GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+            let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+            this.startGrammarQuiz(q,
+                () => { // Success
+                    this.state.quiz_stats.correct++;
+                    this.state.quiz_stats.total++;
+                    this.finishWinBattle(deadMsg, gameClear);
+                },
+                () => { // Fail
+                    this.state.quiz_stats.total++;
+                    this.finishWinBattle(deadMsg, gameClear);
+                }
+            );
+            return;
+        }
+
+        this.finishWinBattle(deadMsg, gameClear);
+    },
+
+    finishWinBattle(deadMsg, gameClear) {
         let msg = "승리!<br>보상을 획득했습니다.";
         if (deadMsg) msg += "<br><br>" + deadMsg;
 
-        this.openInfoModal("전투 결과", msg, () => {
-             // Creator God Bonus Check
-             if (this.battle.enemy.id === 'creator_god') {
-                 this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
-                    () => { // Yes
-                        let allQuizzes = [];
-                        GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
-                        let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+        if (gameClear) {
+            // Check Archive Condition
+            if (this.state.mode === 'archive') {
+                let rate = (this.state.quiz_stats.total > 0) ? (this.state.quiz_stats.correct / this.state.quiz_stats.total) : 0;
+                if (rate < 0.9) {
+                    this.showAlert(`[실패] 아카이브 모드 클리어 실패!<br>정답률: ${(rate*100).toFixed(1)}% (목표: 90% 이상)`);
+                    this.toTitle();
+                    return;
+                }
+            }
 
-                        this.startGrammarQuiz(q,
-                            () => { // Success
-                                this.state.tickets += 3;
-                                document.getElementById('ui-tickets').innerText = this.state.tickets;
-                                this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
-                                this.toMenu();
-                            },
-                            () => { // Fail
-                                this.showAlert("오답입니다... 보상 없음.");
-                                this.toMenu();
-                            }
-                        );
-                    },
-                    () => { // No
-                        this.toMenu();
-                    }
-                 );
+            // Unlock Mode
+            if (!this.global.unlocked_modes.includes(this.state.mode)) {
+                this.global.unlocked_modes.push(this.state.mode);
+            }
+            this.global.achievements[this.state.mode] = true;
+
+            // Unlock Bonus Card
+            let newCard = null;
+            let lockedBonus = BONUS_CARDS.filter(c => !this.global.unlocked_bonus_cards.includes(c.id));
+            if (lockedBonus.length > 0) {
+                let pick = lockedBonus[Math.floor(Math.random() * lockedBonus.length)];
+                this.global.unlocked_bonus_cards.push(pick.id);
+                newCard = pick;
+            }
+
+            this.saveGlobalData();
+
+            msg = `🎉 <b>${this.state.mode.toUpperCase()} 모드 클리어!</b> 🎉<br><br>`;
+            if (newCard) msg += `[보상] 새로운 동료 해금: ${newCard.name}!<br>`;
+            else msg += `(이미 모든 보너스 카드를 획득했습니다)<br>`;
+
+            this.openInfoModal("게임 클리어", msg, () => {
+                this.toTitle();
+            });
+            return;
+        }
+
+        this.openInfoModal("전투 결과", msg, () => {
+             // Creator God Bonus Check (Keep for non-archive modes or just generic?)
+             // User request mentions Archive replaces reward logic or just forced quiz.
+             // I'll keep the optional quiz for non-Archive modes.
+
+             if (this.state.mode !== 'archive') {
+                 if (this.battle.enemy.id === 'creator_god') {
+                     this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
+                        () => { // Yes
+                            let allQuizzes = [];
+                            GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                            let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+                            this.startGrammarQuiz(q,
+                                () => { // Success
+                                    this.state.tickets += 3;
+                                    document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                    this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
+                                    this.toMenu();
+                                },
+                                () => { // Fail
+                                    this.showAlert("오답입니다... 보상 없음.");
+                                    this.toMenu();
+                                }
+                            );
+                        },
+                        () => { // No
+                            this.toMenu();
+                        }
+                     );
+                 } else {
+                     this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                        () => {
+                             this.startQuiz((success) => {
+                                 if(success) {
+                                     this.state.tickets += 1;
+                                     document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                     this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                                 } else {
+                                     this.showAlert("오답입니다... 보상 없음.");
+                                 }
+                                 this.toMenu();
+                             });
+                        },
+                        () => {
+                            this.toMenu();
+                        }
+                     );
+                 }
              } else {
-                 // Quiz Challenge Prompt using Custom Modal
-                 this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
-                    // Yes Callback
-                    () => {
-                         this.startQuiz((success) => {
-                             if(success) {
-                                 this.state.tickets += 1;
-                                 document.getElementById('ui-tickets').innerText = this.state.tickets;
-                                 this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
-                             } else {
-                                 this.showAlert("오답입니다... 보상 없음.");
-                             }
-                             this.toMenu();
-                         });
-                    },
-                    // No Callback
-                    () => {
-                        this.toMenu();
-                    }
-                 );
+                 this.toMenu();
              }
         });
     },
@@ -1782,7 +2021,7 @@ const RPG = {
     },
 
     getEffectiveStats(char, fieldBuffs) {
-        return Logic.calculateStats(char, fieldBuffs);
+        return Logic.calculateStats(char, fieldBuffs, this.state.mode);
     },
 
     showBattleStat(side, idx) {
@@ -1798,7 +2037,7 @@ const RPG = {
             return `${name}(${val})`;
         }).join(', ') || '없음';
 
-        const eff = Logic.calculateStats(char, this.battle.fieldBuffs);
+        const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode);
 
         // Use baseStatsWithoutBlessing if available to show Green for blessed stats
         const getBase = (key, fallback) => {

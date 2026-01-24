@@ -26,7 +26,7 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
-            { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프를 제거하고 제거한 수 x2.5 만큼 위력 증가', effects: [{type: 'consume_field_all', multPerStack: 2.5}] },
+            { name: '피날레', type: 'mag', tier: 3, cost: 30, val: 0.5, desc: '필드버프를 제거하고 제거한 수 x3.0 만큼 위력 증가', effects: [{type: 'consume_field_all', multPerStack: 3.0}] },
             { name: '로열블룸', type: 'sup', tier: 2, cost: 20, desc: '필드버프 대지의축복 발동', effects: [{type: 'field_buff', id: 'earth_bless'}] }
         ]
     },
@@ -208,7 +208,7 @@ const CARDS = [
         trait: { type: 'syn_water_light_matk_mdef', val: 30, desc: '덱에 물, 빛이 있을 경우 마법공격력, 마법방어력 30%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
-            { name: '성역전개', type: 'sup', tier: 1, cost: 10, desc: '필드버프 성역 발동', effects: [{type: 'field_buff', id: 'sanctuary'}] },
+            { name: '성역전개', type: 'sup', tier: 2, cost: 20, desc: '필드버프 성역 발동 및 적에게 디바인 2스택 부여', effects: [{type: 'field_buff', id: 'sanctuary'}, {type: 'debuff', id: 'divine', stack: 2}] },
             { name: '홀리레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{type: 'debuff', id: 'divine', stack: 1}] }
         ]
     },
@@ -469,7 +469,7 @@ const CARDS = [
     {
         id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'debuffer',
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
-        trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
@@ -494,6 +494,79 @@ const CARDS = [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '레인보우룰렛', type: 'sup', tier: 10, cost: 100, desc: '모든 필드버프 교체', effects: [{type: 'roulette_field'}] },
             { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 랜덤 디버프 2종 부여', effects: [{type: 'wild_card_debuff'}] }
+        ]
+    }
+];
+
+const BONUS_CARDS = [
+    {
+        id: 'phoenix', name: '피닉스', grade: 'legend', element: 'fire', role: 'buffer',
+        stats: { hp: 510, atk: 130, matk: 90, def: 75, mdef: 70 },
+        trait: { type: 'syn_fire_3_crit_burn', val: 50, desc: '덱에 불 3장 이상 시 치명타율 50% 증가 / 일반 공격 시 작열 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
+            { name: '메테오임팩트', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '필드버프 트윙클파티 발동', effects: [{type: 'field_buff', id: 'twinkle_party'}] },
+            { name: '샤이닝플레임', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '필드버프 태양의축복 발동', effects: [{type: 'field_buff', id: 'sun_bless'}] }
+        ]
+    },
+    {
+        id: 'priest_of_end', name: '종말의사제', grade: 'epic', element: 'dark', role: 'buffer',
+        stats: { hp: 400, atk: 55, matk: 105, def: 80, mdef: 80 },
+        trait: { type: 'syn_dark_3_matk_boost', val: 100, desc: '덱에 어둠 3장 이상 시 마법공격력 100% 증가' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
+            { name: '사신강림', type: 'mag', tier: 3, cost: 30, val: 5.0, desc: '5턴 뒤 발동, 발동 시 필드버프 사신의영역 부여', effects: [{type: 'delayed_attack_field', turns: 5, field: 'reaper_realm'}] }
+        ]
+    },
+    {
+        id: 'gray', name: '그레이', grade: 'legend', element: 'dark', role: 'dealer',
+        stats: { hp: 480, atk: 145, matk: 125, def: 65, mdef: 65 },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
+            { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 최대 배율 10으로 증가)', effects: [{type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0}] },
+            { name: '차원절단', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '2턴 뒤 발동, 3~6배율 랜덤 공격', effects: [{type: 'delayed_random_attack', turns: 2, min: 3.0, max: 6.0}] }
+        ]
+    },
+    {
+        id: 'unicorn', name: '유니콘', grade: 'epic', element: 'light', role: 'looter',
+        stats: { hp: 360, atk: 90, matk: 65, def: 65, mdef: 70 },
+        trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
+            { name: '홀리차지', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{type: 'debuff', id: 'divine', stack: 1}] },
+            { name: '실버문베일', type: 'sup', tier: 3, cost: 30, desc: '필드버프 달의축복 발동', effects: [{type: 'field_buff', id: 'moon_bless'}] }
+        ]
+    },
+    {
+        id: 'hellhound', name: '헬하운드', grade: 'rare', element: 'fire', role: 'balancer',
+        stats: { hp: 370, atk: 100, matk: 75, def: 45, mdef: 55 },
+        trait: { type: 'death_twinkle', desc: '사망 시 필드버프 트윙클파티 발동' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '섀도우러쉬', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '약화 부여', effects: [{type: 'debuff', id: 'weak'}] },
+            { name: '헬바이트', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '작열 모두 소모, 소모한 개수당 2.0배율 추가', effects: [{type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.0}] }
+        ]
+    },
+    {
+        id: 'siren', name: '세이렌', grade: 'rare', element: 'water', role: 'buffer',
+        stats: { hp: 345, atk: 60, matk: 95, def: 60, mdef: 75 },
+        trait: { type: 'syn_water_2_moon_twinkle', desc: '덱에 물 2장 이상 시, 실버문베일 발동 시 트윙클파티 추가 발동' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
+            { name: '실버문베일', type: 'sup', tier: 3, cost: 30, desc: '필드버프 달의축복 발동', effects: [{type: 'field_buff', id: 'moon_bless'}] },
+            { name: '타이달스크림', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 부여', effects: [{type: 'debuff', id: 'silence'}] }
+        ]
+    },
+    {
+        id: 'shadow_cat', name: '섀도우캣', grade: 'normal', element: 'dark', role: 'debuffer',
+        stats: { hp: 300, atk: 85, matk: 50, def: 55, mdef: 55 },
+        trait: { type: 'death_darkness', desc: '사망 시 암흑 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
+            { name: '사일런트스텝', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '반드시 치명타로 적중', effects: [{type: 'force_crit'}] },
+            { name: '베놈슬래시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] }
         ]
     }
 ];
