@@ -393,6 +393,10 @@ const RPG = {
         box.scrollTop = box.scrollHeight;
     },
 
+    getCardData(id) {
+        return CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id);
+    },
+
     // --- Global Data ---
     loadGlobalData() {
         const data = localStorage.getItem('cardRpgGlobal');
@@ -740,7 +744,12 @@ const RPG = {
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
         // Apply to 12 random cards
-        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+        let pool = [...CARDS];
+        if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+        pool.sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, 12);
 
         this.state.activeChaosBlessing = []; // Clear Chaos Blessing
@@ -1153,7 +1162,7 @@ const RPG = {
         let counts = {};
         list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
         for(let id in counts) {
-            const data = CARDS.find(c => c.id === id);
+            const data = this.getCardData(id);
             if(!data) continue;
             const el = document.createElement('div');
             el.className = `card-item ${data.grade}`;
@@ -1164,7 +1173,7 @@ const RPG = {
     },
 
     showCardInfo(id) {
-        const data = CARDS.find(c => c.id === id);
+        const data = this.getCardData(id);
         if(!data) return;
         document.getElementById('md-name').innerText = data.name;
         document.getElementById('md-img').src = `${data.name}.png`;
@@ -1202,7 +1211,7 @@ const RPG = {
         ['선봉', '중견', '대장'].forEach((role, i) => {
             const id = this.state.deck[i];
             const el = document.getElementById(`slot-${i}`);
-            if(id) { const c = CARDS.find(x => x.id === id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
+            if(id) { const c = this.getCardData(id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
             else { el.innerText = `${role} (비어있음)`; el.classList.remove('filled'); }
         });
     },
@@ -1234,10 +1243,11 @@ const RPG = {
 
         this.battle.players = this.state.deck.map((id, idx) => {
             if(!id) return null;
-            const proto = CARDS.find(c => c.id === id);
+            const proto = this.getCardData(id);
 
             // Call Logic to calculate initial stats (Base + Synergies)
-            const init = Logic.calculateInitialStats(proto, this.state.deck, CARDS);
+            const allCards = [...CARDS, ...BONUS_CARDS];
+            const init = Logic.calculateInitialStats(proto, this.state.deck, allCards);
 
             // Log active synergy if any
             if(init.activeTrait) {
