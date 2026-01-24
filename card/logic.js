@@ -211,6 +211,10 @@ const Logic = {
                      mult = min + Math.random() * (max - min);
                      logFn(`무작위 위력! x${mult.toFixed(1)}`);
                 }
+                else if(eff.type === 'delayed_random_attack') {
+                     mult = eff.min + Math.random() * (eff.max - eff.min);
+                     logFn(`무작위 위력! x${mult.toFixed(1)}`);
+                }
             });
         }
 
