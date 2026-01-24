@@ -254,8 +254,9 @@ const Logic = {
         // Gray Trait: Ignore Def
         if (t && t.type === 'crit_ignore_def_add' && isCrit) {
             let ignore = t.val; // 0.5
-            def = Math.floor(def * (1 - ignore));
-            logFn("[특성] 치명타! 적 방어력 50% 무시!");
+            let baseDef = (skill.type === 'phy') ? target.def : target.mdef;
+            def = Math.max(0, def - Math.floor(baseDef * ignore));
+            logFn("[특성] 치명타! 적 방어력 50% 추가 무시!");
         }
 
         // Final Calculation
