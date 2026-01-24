@@ -182,7 +182,8 @@
         <div id="mode-desc" style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
             모드를 선택해주세요.
         </div>
-        <button onclick="document.getElementById('modal-mode-select').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">취소</button>
+        <button id="btn-enter-mode" class="menu-btn" style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;">입장</button>
+        <button onclick="document.getElementById('modal-mode-select').classList.remove('active')" style="margin-top:5px; width:100%; padding:10px;">취소</button>
     </div>
 </div>
 
@@ -435,8 +436,7 @@ const RPG = {
     },
 
     openModeSelect() {
-        // Save record if significant progress before resetting?
-        // Logic moved to startNewGame execution
+        this.selectedModeId = null;
         const modal = document.getElementById('modal-mode-select');
         const list = document.getElementById('mode-list');
         const desc = document.getElementById('mode-desc');
@@ -460,22 +460,33 @@ const RPG = {
             btn.style.padding = "10px";
             btn.style.fontSize = "0.9rem";
             btn.innerText = m.name;
+            btn.id = `mode-btn-${m.id}`;
 
             const isUnlocked = this.global.unlocked_modes.includes(m.id);
             if(isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
 
             btn.onclick = () => {
+                this.selectedModeId = m.id;
                 desc.innerText = `[${m.name}]\n${m.desc}`;
-                // Double click or separate confirm?
-                // Just use confirm dialog
-                this.showConfirm(`${m.name} 모드로 시작하시겠습니까?`, () => {
-                    this.initNewGame(m.id);
-                    modal.classList.remove('active');
-                    this.toMenu();
-                });
+
+                // Visual Update
+                list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
+                btn.style.borderColor = '#ffd700';
             };
             list.appendChild(btn);
         });
+
+        // Enter Button Logic
+        const enterBtn = document.getElementById('btn-enter-mode');
+        enterBtn.onclick = () => {
+            if(!this.selectedModeId) return this.showAlert("모드를 선택해주세요.");
+            const mName = MODES.find(m => m.id === this.selectedModeId).name;
+            this.showConfirm(`${mName} 모드로 시작하시겠습니까?`, () => {
+                this.initNewGame(this.selectedModeId);
+                modal.classList.remove('active');
+                this.toMenu();
+            });
+        };
 
         modal.classList.add('active');
     },
@@ -755,8 +766,26 @@ const RPG = {
 
     applyChaosBlessing(count) {
         this.state.chaosBlessingUses--;
-        // Pick random cards from ALL types (CARDS)
-        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+
+        // 1. Base Pool
+        let pool = [...CARDS];
+
+        // 2. Add Bonus Cards (if unlocked)
+        if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+
+        // 3. Filter by Mode Rarity
+        const mode = this.state.mode;
+        if (mode === 'restriction') {
+            pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
+        } else if (mode === 'balance') {
+            pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+        }
+
+        // 4. Shuffle and Pick
+        pool.sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, count);
 
         this.state.activeSageBlessing = []; // Clear Sage Blessing
