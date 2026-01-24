@@ -498,9 +498,12 @@ const RPG = {
              this.saveRecord();
         }
 
+        let initTickets = 3;
+        if (mode === 'suffering' || mode === 'overdrive') initTickets = 10;
+
         this.state = {
             mode: mode,
-            tickets: 20,
+            tickets: initTickets,
             inventory: [],
             deck: [null, null, null],
             enemyScale: 0,
