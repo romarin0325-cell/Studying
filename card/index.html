@@ -502,8 +502,8 @@ const RPG = {
              this.saveRecord();
         }
 
-        let initTickets = 3;
-        if (mode === 'suffering' || mode === 'overdrive' || mode === 'origin') initTickets = 10;
+        let initTickets = 20;
+        if (mode === 'suffering' || mode === 'overdrive') initTickets = 10;
 
         this.state = {
             mode: mode,
