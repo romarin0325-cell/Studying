@@ -208,7 +208,7 @@ const CARDS = [
         trait: { type: 'syn_water_light_matk_mdef', val: 30, desc: '덱에 물, 빛이 있을 경우 마법공격력, 마법방어력 30%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
-            { name: '성역전개', type: 'sup', tier: 1, cost: 10, desc: '필드버프 성역 발동', effects: [{type: 'field_buff', id: 'sanctuary'}] },
+            { name: '성역전개', type: 'sup', tier: 2, cost: 20, desc: '필드버프 성역 발동 및 적에게 디바인 1스택 부여', effects: [{type: 'field_buff', id: 'sanctuary'}, {type: 'debuff', id: 'divine', stack: 1}] },
             { name: '홀리레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{type: 'debuff', id: 'divine', stack: 1}] }
         ]
     },

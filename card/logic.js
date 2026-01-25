@@ -48,7 +48,7 @@ const Logic = {
                 if(fb.name === 'goddess_descent') { m.atk += (0.3 * buffMult); m.matk += (0.3 * buffMult); m.def += (0.3 * buffMult); m.mdef += (0.3 * buffMult); }
                 if(fb.name === 'earth_bless') { m.atk += (0.25 * buffMult); m.matk += (0.25 * buffMult); }
                 if(fb.name === 'twinkle_party') { m.atk += (0.2 * buffMult); stats.crit += (15 * buffMult); }
-                if(fb.name === 'star_powder') { m.def += (0.3 * buffMult); m.mdef += (0.3 * buffMult); }
+                if(fb.name === 'star_powder') { m.def += (0.4 * buffMult); m.mdef += (0.4 * buffMult); }
                 if(fb.name === 'reaper_realm') { stats.crit += (40 * buffMult); }
             });
         }
@@ -475,7 +475,7 @@ const Logic = {
             'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
             'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
             'star_powder': '스타파우더',
-            'reaper_realm': '사신의영역'
+            'reaper_realm': '사신강림'
         };
         return names[key] || key;
     }
