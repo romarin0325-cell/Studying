@@ -45,7 +45,7 @@ const Logic = {
                 if(fb.name === 'goddess_descent') { m.atk += 0.3; m.matk += 0.3; m.def += 0.3; m.mdef += 0.3; }
                 if(fb.name === 'earth_bless') { m.atk += 0.25; m.matk += 0.25; }
                 if(fb.name === 'twinkle_party') { m.atk += 0.2; stats.crit += 15; }
-                if(fb.name === 'star_powder') { m.def += 0.3; m.mdef += 0.3; }
+                if(fb.name === 'star_powder') { m.def += 0.4; m.mdef += 0.4; }
             });
         }
 
