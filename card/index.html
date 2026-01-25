@@ -749,6 +749,14 @@ const RPG = {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
         }
+
+        const mode = this.state.mode;
+        if (mode === 'restriction') {
+            pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
+        } else if (mode === 'balance') {
+            pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+        }
+
         pool.sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, 12);
 
@@ -1892,10 +1900,11 @@ const RPG = {
     winBattle() {
         let deadMsg = this.handlePermadeath(this.battle.players);
         let reward = 1;
-        if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
 
         // Mode Rewards
         if (this.state.mode === 'suffering') reward = 0;
+
+        if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
         if (this.state.mode === 'overdrive') reward += 1;
 
         this.state.tickets += reward;
