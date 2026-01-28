@@ -208,11 +208,11 @@ const Logic = {
                      // Actually, let's use 1 decimal place precision logic or just float.
                      // For consistency with existing random_mult which does integer steps if min/max are integers?
                      // Let's just do random float.
-                     mult = min + Math.random() * (max - min);
+                     mult = min + Math.floor(Math.random() * (max - min + 1));
                      logFn(`무작위 위력! x${mult.toFixed(1)}`);
                 }
                 else if(eff.type === 'delayed_random_attack') {
-                     mult = eff.min + Math.random() * (eff.max - eff.min);
+                     mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
                      logFn(`무작위 위력! x${mult.toFixed(1)}`);
                 }
             });
