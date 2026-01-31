@@ -31,6 +31,11 @@ const Logic = {
             if (trait.type === 'cond_twinkle_all' && fieldBuffs.some(b => b.name === 'twinkle_party')) {
                 // Multiplier handled below
             }
+            // [추가] 머쉬룸킹: 대지의축복 시 방/마방 50% 증가
+            if (trait.type === 'cond_earth_def_mdef' && fieldBuffs.some(b => b.name === 'earth_bless')) {
+                m.def += 0.5;
+                m.mdef += 0.5;
+            }
         }
 
         // Multipliers from Buffs/Traits
@@ -162,6 +167,11 @@ const Logic = {
                          mult *= eff.mult;
                          if(skill.name === '라그나로크') logFn("라그나로크: 생명력 조건 만족! 대미지 증가!");
                      }
+                     // [추가] 머쉬룸킹: 적 HP 50% 이하 체크
+                     else if(eff.condition === 'target_hp_below' && (target.hp / target.maxHp) <= eff.val) {
+                         mult *= eff.mult;
+                         logFn(`[약점 포착] 적 체력 ${eff.val*100}% 이하! 위력 증가!`);
+                     }
                      else if(eff.condition === 'hp_full' && source.hp === source.maxHp) {
                          mult *= eff.mult;
                          if(eff.log) logFn(eff.log);
@@ -174,6 +184,24 @@ const Logic = {
                 else if(eff.type === 'consume_burn_1_dmg') {
                      if(target.buffs['burn'] >= 1) {
                          mult *= eff.mult;
+                     }
+                }
+                else if(eff.type === 'consume_divine_1_dmg') { // 타천사: 다크레이
+                     if((target.buffs['divine'] || 0) >= 1) {
+                         target.buffs['divine']--;
+                         if(target.buffs['divine'] <= 0) delete target.buffs['divine'];
+                         mult *= eff.mult;
+                         logFn("디바인을 삼켜 힘으로 전환! 위력 2배!");
+                     }
+                }
+                else if(eff.type === 'consume_divine_add_darkness') { // 타천사: 타락의낙인
+                     if((target.buffs['divine'] || 0) >= 1) {
+                         target.buffs['divine']--;
+                         if(target.buffs['divine'] <= 0) delete target.buffs['divine'];
+                         target.buffs['darkness'] = 1;
+                         logFn("신성력을 오염시켜 암흑을 부여합니다!");
+                     } else {
+                         logFn("소모할 디바인이 없어 효과가 발동하지 않았습니다.");
                      }
                 }
                 else if(eff.type === 'remove_field_buff_dmg') {
@@ -221,6 +249,11 @@ const Logic = {
         // Trait Multipliers
         const t = source.proto ? source.proto.trait : null;
         if (t) {
+            // [추가] 타천사: 암흑 추뎀
+            if(t.type === 'cond_darkness_dmg' && target.buffs.darkness) {
+                dmgBonus += (t.val - 1.0);
+                logFn(`[특성] 타천사: 암흑 속에서 힘이 솟구칩니다!`);
+            }
             if(t.type === 'cond_silence_dmg' && target.buffs.silence) {
                 dmgBonus += (t.val - 1.0);
                 logFn(`[특성] ${source.name}: 침묵 대상 추가 피해!`);
@@ -250,6 +283,24 @@ const Logic = {
 
         // Defense
         let def = (skill.type === 'phy') ? tgtStats.def : tgtStats.mdef;
+
+        // [추가] 신데렐라: 스택 비례 방어 무시
+        if (t && t.type === 'ignore_def_mdef_by_stack') {
+            let ignoreRate = 0;
+            if (skill.type === 'phy' && target.buffs['burn']) {
+                ignoreRate = target.buffs['burn'] * t.val; // 스택 * 0.1
+                logFn(`[특성] 유리구두: 작열 ${target.buffs['burn']}스택! 방어력 ${Math.round(ignoreRate*100)}% 무시!`);
+            }
+            else if (skill.type === 'mag' && target.buffs['divine']) {
+                ignoreRate = target.buffs['divine'] * t.val; // 스택 * 0.1
+                logFn(`[특성] 유리구두: 디바인 ${target.buffs['divine']}스택! 마법방어력 ${Math.round(ignoreRate*100)}% 무시!`);
+            }
+
+            if (ignoreRate > 0) {
+                let baseDef = (skill.type === 'phy') ? target.def : target.mdef; // 원본 방어력 (버프 적용된)
+                def = Math.max(0, def - Math.floor(baseDef * ignoreRate));
+            }
+        }
 
         // Gray Trait: Ignore Def
         if (t && t.type === 'crit_ignore_def_add' && isCrit) {
@@ -424,6 +475,12 @@ const Logic = {
              if (killer) {
                  result.killerDebuffs.stun = 1;
                  logFn(`[특성] 사망 시 스턴 발동! 적을 기절시킵니다.`);
+             }
+        }
+        else if(t.type === 'death_weak') { // 눈꽃펭귄
+             if (killer) {
+                 result.killerDebuffs.weak = 1;
+                 logFn(`[특성] 눈꽃펭귄이 쓰러지며 적을 약화시킵니다.`);
              }
         }
         else if(t.type === 'death_darkness') {

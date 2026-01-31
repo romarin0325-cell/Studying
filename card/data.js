@@ -568,6 +568,46 @@ const BONUS_CARDS = [
             { name: '사일런트스텝', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '반드시 치명타로 적중', effects: [{type: 'force_crit'}] },
             { name: '베놈슬래시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{type: 'debuff', id: 'corrosion'}] }
         ]
+    },
+    {
+        id: 'mushroom_king', name: '머쉬룸킹', grade: 'epic', element: 'nature', role: 'dealer',
+        stats: { hp: 400, atk: 100, matk: 80, def: 80, mdef: 60 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '그랜드슬램', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적 생명력이 50% 이하일 때 위력 2배', effects: [{type: 'dmg_boost', condition: 'target_hp_below', val: 0.5, mult: 2.0}] },
+            { name: '스포어미스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '자신의 생명력이 25% 이하일 때 위력 3배', effects: [{type: 'dmg_boost', condition: 'hp_below', val: 0.25, mult: 3.0}] }
+        ]
+    },
+    {
+        id: 'fallen_angel', name: '타천사', grade: 'rare', element: 'dark', role: 'dealer',
+        stats: { hp: 340, atk: 65, matk: 100, def: 55, mdef: 60 },
+        trait: { type: 'cond_darkness_dmg', val: 1.5, desc: '암흑 상태의 적에게 대미지 1.5배' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{type: 'buff', id: 'barrier', duration: 1}] },
+            { name: '다크레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{type: 'consume_divine_1_dmg', mult: 2.0}] },
+            { name: '타락의낙인', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '디바인 1스택 소모하고 암흑 부여', effects: [{type: 'consume_divine_add_darkness'}] }
+        ]
+    },
+    {
+        id: 'cinderella', name: '신데렐라', grade: 'legend', element: 'light', role: 'debuffer',
+        stats: { hp: 490, atk: 110, matk: 120, def: 75, mdef: 75 },
+        trait: { type: 'ignore_def_mdef_by_stack', val: 0.1, desc: '작열 1스택당 방어력 10% 무시 / 디바인 1스택당 마법방어력 10% 무시' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
+            { name: '크리스탈킥', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '작열 부여 및 약화/부식 중 하나 추가 부여', effects: [{type: 'debuff', id: 'burn', stack: 1}, {type: 'random_debuff', count: 1, pool: ['weak', 'corrosion']}] },
+            { name: '미드나잇스펠', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 부여 및 침묵/저주 중 하나 추가 부여', effects: [{type: 'debuff', id: 'divine', stack: 1}, {type: 'random_debuff', count: 1, pool: ['silence', 'curse']}] }
+        ]
+    },
+    {
+        id: 'snow_penguin', name: '눈꽃펭귄', grade: 'normal', element: 'water', role: 'debuffer',
+        stats: { hp: 300, atk: 80, matk: 70, def: 50, mdef: 50 },
+        trait: { type: 'death_weak', desc: '사망 시 적에게 약화 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
+            { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 4배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 4.0}] },
+            { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 혹은 침묵 부여', effects: [{type: 'random_debuff', count: 1, pool: ['curse', 'silence']}] }
+        ]
     }
 ];
 
