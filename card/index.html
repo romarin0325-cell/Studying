@@ -2158,6 +2158,7 @@ const RPG = {
                 () => { // Success
                     this.state.quiz_stats.correct++;
                     this.state.quiz_stats.total++;
+                    this.state.tickets++; // Reward Ticket
                     setTimeout(() => this.finishWinBattle(deadMsg, gameClear, true), 200);
                 },
                 () => { // Fail
@@ -2226,7 +2227,7 @@ const RPG = {
         }
 
         this.openInfoModal("전투 결과", msg, () => {
-             if (this.state.mode !== 'archive' && this.state.mode !== 'chaos' && this.state.mode !== 'draft') {
+             if (this.state.mode !== 'archive') {
                  if (this.battle.enemy.id === 'creator_god') {
                      this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
                         () => { // Yes
