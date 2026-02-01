@@ -78,7 +78,6 @@ const VOCAB_SOURCE = [
     { w: 'direct', m: '(형) 직접적인; (동) 지시하다', tm: '(동) 발견하다; (동) 감지하다', tw: 'detect' },
     { w: 'cover', m: '(동) 덮다; (동) 포함하다', tm: '(동) 맴돌다; (동) 공중 정지하다', tw: 'hover' },
     { w: 'accompany', m: '(동) 동행하다; (동) 동반하다', tm: '(동) 성취하다; (동) 완수하다', tw: 'accomplish' },
-    { w: 'contribute', m: '(동) 기여하다; (동) 기부하다', tm: '(동) 분배하다; (동) 유통시키다', tw: 'distribute' },
     { w: 'motivate', m: '(동) 동기부여하다; (동) 자극하다', tm: '(동) 경작하다; (동) 재배하다', tw: 'cultivate' },
     { w: 'consider', m: '(동) 고려하다; (동) 숙고하다', tm: '(동) 인정하다; (동) 양보하다', tw: 'concede' },
     { w: 'arrange', m: '(동) 정리하다; (동) 마련하다', tm: '(동) 어지럽히다; (동) 미치게 하다', tw: 'derange' },
@@ -96,7 +95,7 @@ const VOCAB_SOURCE = [
     { w: 'fluctuate', m: '(동) 변동하다; (동) 오르내리다', tm: '(동) 구두점을 찍다; (동) 강조하다', tw: 'punctuate' },
     { w: 'deliver', m: '(동) 배달하다; (동) 연설하다', tm: '(형) 고의적인; (형) 신중한', tw: 'deliberate' },
     { w: 'devoted', m: '(형) 헌신적인; (형) 전념하는', tm: '(동) 강등시키다; (동) 좌천시키다', tw: 'demote' },
-    { w: 'stock', m: '(명) 재고; (명) 주식', tm: '(동) 몰래 접근하다; (명) 줄기', tw: 'stalk' },
+    { w: 'stock', m: '(명) 재고; (명) 주식', tm: '(명) (식물의) 줄기, 대; (동) 몰래 접근하다', tw: 'stalk' },
     { w: 'authority', m: '(명) 권한; (명) 당국', tm: '(명) 작가; (명) 저자', tw: 'author' },
     { w: 'variety', m: '(명) 다양성; (명) 품종', tm: '(명) 진실성; (명) 진리', tw: 'verity' },
     { w: 'access', m: '(명) 접근, 이용 권한; (동) 접근하다', tm: '(동) 평가하다; (동) 가늠하다, 재다', tw: 'assess' },
@@ -228,7 +227,57 @@ const VOCAB_SOURCE = [
     { w: 'regulation', m: '(명) 규제, 규정', tm: '(명) 규칙성; (명) 정기적임', tw: 'regularity' },
     { w: 'material', m: '(명) 재료, 자료', tm: '(형) 어머니의; (형) 모성의', tw: 'maternal' },
     { w: 'critical', m: '(형) 비판적인; (형) 대단히 중요한', tm: '(형) 임상의; (형) 병원의', tw: 'clinical' },
-    { w: 'draft', m: '(명) 초안; (명) 징병', tm: '(동) 표류하다; (동) 떠가다', tw: 'drift' }
+    { w: 'draft', m: '(명) 초안; (명) 징병', tm: '(동) 표류하다; (동) 떠가다', tw: 'drift' },
+
+    // [추가] 신규 대체 항목 (토익 빈출 부사 쌍)
+    { w: 'formally', m: '(부) 정식으로, 공식적으로', tm: '(부) 이전에, 예전에', tw: 'formerly' },
+    { w: 'fare', m: '(명) (교통) 요금; (동) 해내다', tm: '(형) 공정한; (명) 박람회', tw: 'fair' },
+
+    // [명사 혼동 어휘]
+    { w: 'recipe', m: '(명) 요리법, 조리법; (명) 비결', tm: '(명) 영수증; (명) 수령, 받음', tw: 'receipt' },
+    { w: 'application', m: '(명) 지원서, 신청; (명) 적용', tm: '(명) 가전제품, 기구', tw: 'appliance' },
+    { w: 'investment', m: '(명) 투자; (명) 투자금', tm: '(명) 조사, 수사; (명) 연구', tw: 'investigation' },
+    { w: 'transportation', m: '(명) 수송, 운송; (명) 교통수단', tm: '(명) 변화, 변신; (명) 개혁', tw: 'transformation' },
+    { w: 'reputation', m: '(명) 평판, 명성', tm: '(명) 반복; (명) 암송', tw: 'repetition' },
+    { w: 'plumber', m: '(명) 배관공', tm: '(명) 목재', tw: 'lumber' },
+    { w: 'satisfaction', m: '(명) 만족; (명) 배상', tm: '(명) (시장) 포화; (명) 포화 상태', tw: 'saturation' },
+    { w: 'corrosion', m: '(명) 부식, 녹', tm: '(명) 침식; (명) (가치) 하락', tw: 'erosion' },
+    { w: 'ascent', m: '(명) 상승; (명) 오르막길', tm: '(명) 동의, 찬성; (동) 동의하다', tw: 'assent' },
+    { w: 'council', m: '(명) 의회, 위원회', tm: '(명) 조언; (명) 변호인단', tw: 'counsel' },
+    { w: 'reality', m: '(명) 현실, 실재', tm: '(명) 부동산, 부동산 물건', tw: 'realty' },
+    { w: 'award', m: '(명) 상, 상품; (동) 수여하다', tm: '(명) 보상, 사례금; (동) 보답하다', tw: 'reward' },
+    { w: 'addition', m: '(명) 추가, 덧셈; (명) 증축 건물', tm: '(명) (출간물의) 판, 호; (명) (방송의) 회', tw: 'edition' },
+
+    // [동사 혼동 어휘]
+    { w: 'compete', m: '(동) 경쟁하다, 겨루다', tm: '(동) 완료하다; (형) 완전한', tw: 'complete' },
+    { w: 'negotiate', m: '(동) 협상하다; (동) (도로를) 뚫고 나아가다', tm: '(동) 길을 찾다; (동) 항해하다', tw: 'navigate' },
+    { w: 'accrue', m: '(동) 축적되다; (동) (이자가) 붙다', tm: '(동) 고발하다, 기소하다; (동) 비난하다', tw: 'accuse' },
+    { w: 'retain', m: '(동) 유지하다, 보유하다', tm: '(동) 구금하다; (동) 지체시키다', tw: 'detain' },
+    { w: 'remit', m: '(동) 송금하다; (동) 면제하다', tm: '(동) 제출하다; (동) 항복하다', tw: 'submit' },
+    { w: 'cite', m: '(동) 인용하다; (동) 소환하다', tm: '(명) 현장, 부지; (명) 웹사이트', tw: 'site' },
+    { w: 'inhabit', m: '(동) 살다, 거주하다', tm: '(동) 억제하다; (동) 금지하다', tw: 'inhibit' },
+    { w: 'defer', m: '(동) 미루다, 연기하다; (동) 따르다', tm: '(동) 다르다; (동) 의견을 달리하다', tw: 'differ' },
+    { w: 'persecute', m: '(동) 박해하다, 괴롭히다', tm: '(동) 기소하다; (동) 추진하다', tw: 'prosecute' },
+    { w: 'abolish', m: '(동) (제도를) 폐지하다', tm: '(동) 설립하다; (동) 확고히 하다', tw: 'establish' },
+    { w: 'commence', m: '(동) 시작되다, 개시하다', tm: '(동) 칭찬하다; (동) 추천하다', tw: 'commend' },
+    { w: 'comprise', m: '(동) 구성하다; (동) 포함하다', tm: '(동) 타협하다; (명) 타협', tw: 'compromise' },
+    { w: 'lay', m: '(동) (물건을) 놓다, 두다; (동) 낳다', tm: '(동) 눕다; (동) 거짓말하다', tw: 'lie' },
+    { w: 'rise', m: '(동) 오르다, 상승하다; (동) 뜨다', tm: '(동) (들어) 올리다; (동) 모으다', tw: 'raise' },
+
+    // [형용사 및 부사 혼동 어휘]
+    { w: 'beneficial', m: '(형) 유익한, 이로운', tm: '(명) 수혜자, 수령인', tw: 'beneficiary' },
+    { w: 'permanent', m: '(형) 영구적인, 정규직의', tm: '(형) 저명한; (형) 눈에 띄는', tw: 'prominent' },
+    { w: 'considerable', m: '(형) 상당한, 많은', tm: '(형) 사려 깊은, 배려하는', tw: 'considerate' },
+    { w: 'later', m: '(부) 나중에; (형) 더 뒤의', tm: '(형) 후자의; (명) 후자', tw: 'latter' },
+    { w: 'comprehensible', m: '(형) 이해할 수 있는', tm: '(형) 포괄적인, 종합적인', tw: 'comprehensive' },
+    { w: 'human', m: '(형) 인간의; (명) 인간', tm: '(형) 인도적인; (형) 자비로운', tw: 'humane' },
+    { w: 'imaginary', m: '(형) 가상의, 상상의', tm: '(형) 창의적인, 상상력이 풍부한', tw: 'imaginative' },
+    { w: 'industrial', m: '(형) 산업의, 공업의', tm: '(형) 근면한, 부지런한', tw: 'industrious' },
+    { w: 'loyal', m: '(형) 충성스러운, 충실한', tm: '(형) 왕실의; (명) 왕족', tw: 'royal' },
+    { w: 'momentary', m: '(형) 순간적인, 찰나의', tm: '(형) 중대한, 중요한', tw: 'momentous' },
+    { w: 'negligent', m: '(형) 태만한, 부주의한', tm: '(형) 무시해도 될 정도의', tw: 'negligible' },
+    { w: 'successful', m: '(형) 성공적인, 성공한', tm: '(형) 연속적인, 연이은', tw: 'successive' },
+    { w: 'continual', m: '(형) 빈번한, 되풀이되는', tm: '(형) (끊김 없이) 계속되는', tw: 'continuous' }
 ];
 
 const VOCAB_DATA = [];
