@@ -576,7 +576,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
             { name: '그랜드슬램', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적 생명력이 50% 이하일 때 위력 2배', effects: [{type: 'dmg_boost', condition: 'target_hp_below', val: 0.5, mult: 2.0}] },
-            { name: '스포어미스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '자신의 생명력이 25% 이하일 때 위력 3배', effects: [{type: 'dmg_boost', condition: 'hp_below', val: 0.25, mult: 3.0}] }
+            { name: '스포어미스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '자신의 생명력이 25% 이하일 때 위력 4배', effects: [{type: 'dmg_boost', condition: 'hp_below', val: 0.25, mult: 4.0}] }
         ]
     },
     {
