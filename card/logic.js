@@ -180,6 +180,7 @@ const Logic = {
                          mult *= eff.mult;
                          if(source.id === 'behemoth' && skill.name === '대지분쇄') logFn("대지의 축복으로 인해 대지분쇄의 위력이 증가합니다!");
                          if(skill.name === '윈터하울링') logFn("윈터하울링: 달의 축복 조건 만족! 대미지 증가!");
+                         if(skill.name === '성염') logFn("성염: 성역 조건 만족! 대미지 2배!");
                      }
                 }
                 else if(eff.type === 'consume_burn_1_dmg') {
