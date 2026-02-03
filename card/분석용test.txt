@@ -340,6 +340,7 @@
 
 ＜script src="data.js"＞＜/script＞
 ＜script src="vocab_data.js"＞＜/script＞
+＜script src="collocation_data.js"＞＜/script＞
 ＜script src="grammar_data.js"＞＜/script＞
 ＜script src="logic.js"＞＜/script＞
 ＜script＞
@@ -450,6 +451,9 @@ const RPG = {
                  const vocab = localStorage.getItem('cardRpgVocab');
                  if(vocab) this.state.wrongWords = JSON.parse(vocab);
 
+                 const col = localStorage.getItem('cardRpgCollocation');
+                 if(col) this.state.wrongCollocations = JSON.parse(col);
+
                  this.showAlert("불러오기 완료");
                  this.toMenu();
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openModeSelect(); }
@@ -476,8 +480,8 @@ const RPG = {
             { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
             { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
             { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' },
-            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-            { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 18 스테이지 / 패배 시 데이터 삭제)' }
+            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
+            { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
         ];
 
         MODES.forEach(m =＞ {
@@ -562,6 +566,9 @@ const RPG = {
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
+
+        const col = localStorage.getItem('cardRpgCollocation');
+        if(col) this.state.wrongCollocations = JSON.parse(col);
     },
 
     saveGame() {
@@ -1058,6 +1065,12 @@ const RPG = {
 
     // --- Wordbook & Quiz ---
     openWordbook() {
+        if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+            this.openCollocationBook();
+            return;
+        }
+
+        document.querySelector('#modal-wordbook h3').innerText = "단어장"; // Reset title
         if(!this.state.wrongWords) this.state.wrongWords = [];
         const list = document.getElementById('wordbook-list');
         list.innerHTML = "";
@@ -1086,10 +1099,107 @@ const RPG = {
     },
 
     resetWrongWords() {
+        if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+            this.state.wrongCollocations = [];
+            localStorage.removeItem('cardRpgCollocation');
+            this.showAlert("숙어/구동사 복습 상태가 초기화되었습니다.");
+            this.openCollocationBook();
+            return;
+        }
+
         this.state.wrongWords = [];
         localStorage.removeItem('cardRpgVocab');
         this.showAlert("복습 상태가 초기화되었습니다.");
         this.openWordbook(); // Re-render
+    },
+
+    openCollocationBook() {
+        if(!this.state.wrongCollocations) this.state.wrongCollocations = [];
+        const list = document.getElementById('wordbook-list');
+        list.innerHTML = "";
+
+        const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
+
+        COLLOCATION_DATA.forEach(v =＞ {
+            const isWrong = this.state.wrongCollocations.includes(v.id);
+
+            if(onlyWrong && !isWrong) return;
+
+            const div = document.createElement('div');
+            div.style.marginBottom = "10px";
+            div.style.borderBottom = "1px solid #444";
+            div.style.paddingBottom = "5px";
+
+            const color = isWrong ? '#ef5350' : '#81d4fa';
+
+            div.innerHTML = `＜b style="color:${color}; font-size:1.1rem;"＞${v.expression}＜/b＞＜br＞
+                             ＜span style="color:#eee;"＞${v.meaning}＜/span＞`;
+            list.appendChild(div);
+        });
+
+        document.querySelector('#modal-wordbook h3').innerText = "숙어/구동사 단어장";
+        document.getElementById('modal-wordbook').classList.add('active');
+    },
+
+    startCollocationQuiz(callback) {
+        document.getElementById('quiz-desc').style.display = 'block';
+
+        const q = COLLOCATION_DATA[Math.floor(Math.random() * COLLOCATION_DATA.length)];
+
+        let opts = [...q.options];
+        opts.sort(() =＞ Math.random() - 0.5);
+
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        qDiv.innerText = q.question;
+        descDiv.innerText = q.translation;
+
+        oDiv.innerHTML = "";
+        fDiv.innerText = "";
+
+        opts.forEach(opt =＞ {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = opt;
+            btn.onclick = () =＞ {
+                Array.from(oDiv.children).forEach(c =＞ c.onclick = null);
+                if(opt === q.answer) {
+                    btn.classList.add('correct');
+                    fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50";
+                    setTimeout(() =＞ {
+                        modal.classList.remove('active');
+                        callback(true);
+                    }, 1000);
+                } else {
+                    btn.classList.add('wrong');
+
+                    if(!this.state.wrongCollocations) this.state.wrongCollocations = [];
+                    if(!this.state.wrongCollocations.includes(q.id)) {
+                        this.state.wrongCollocations.push(q.id);
+                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+                    }
+
+                    Array.from(oDiv.children).forEach(c =＞ {
+                         if(c.innerText === q.answer) c.classList.add('correct');
+                    });
+                    fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350";
+
+                    setTimeout(() =＞ {
+                        modal.classList.remove('active');
+                        callback(false);
+                    }, 1500);
+                }
+            };
+            oDiv.appendChild(btn);
+        });
+
+        modal.classList.add('active');
     },
 
     startQuiz(callback) {
@@ -2097,6 +2207,7 @@ const RPG = {
 
         // Mode Rewards
         if (this.state.mode === 'suffering') reward = 0;
+        if (this.state.mode === 'chaos') reward = 0;
 
         if(this.battle.players.some(p =＞ p && p.proto.trait.type === 'looter')) reward += 1;
         if (this.state.mode === 'overdrive') reward += 1;
@@ -2228,7 +2339,26 @@ const RPG = {
 
         this.openInfoModal("전투 결과", msg, () =＞ {
              if (this.state.mode !== 'archive') {
-                 if (this.battle.enemy.id === 'creator_god') {
+                 if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                     this.showConfirm("추가 보상을 위한 콜로케이션 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                        () =＞ {
+                             this.startCollocationQuiz((success) =＞ {
+                                 if(success) {
+                                     this.state.tickets += 1;
+                                     document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                     this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                                 } else {
+                                     this.showAlert("오답입니다... 보상 없음.");
+                                 }
+                                 this.toMenu();
+                             });
+                        },
+                        () =＞ {
+                            this.toMenu();
+                        }
+                     );
+                 }
+                 else if (this.battle.enemy.id === 'creator_god') {
                      this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
                         () =＞ { // Yes
                             let allQuizzes = [];
