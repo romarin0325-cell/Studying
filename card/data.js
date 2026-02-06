@@ -605,7 +605,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'weak', desc: '사망 시 적에게 약화 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{type: 'buff', id: 'guard', duration: 1}] },
-            { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 8배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 8.0}] },
+            { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 5배', effects: [{type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 5.0}] },
             { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 혹은 침묵 부여', effects: [{type: 'random_debuff', count: 1, pool: ['curse', 'silence']}] }
         ]
     }

@@ -133,6 +133,14 @@
             ＜button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;"＞덱 빌딩 (드래프트)＜/button＞
             ＜div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;"＞* 이번 전투에 사용할 3명을 선발하세요.＜/div＞
         ＜/div＞
+        ＜div id="menu-chaos-area" style="display:none; margin-bottom:10px;"＞
+            ＜button class="menu-btn" onclick="RPG.reshuffleChaosPool()" style="border-color:#ff5252; color:#ff5252;"＞
+                카오스 셔플 (티켓 1장)
+            ＜/button＞
+            ＜div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;"＞
+                * 현재 보유한 20장을 모두 버리고＜br＞새로운 20장을 무작위로 지급합니다.
+            ＜/div＞
+        ＜/div＞
         ＜button class="menu-btn" onclick="RPG.openDeck()"＞덱 구성＜/button＞
         ＜button class="menu-btn" onclick="RPG.openCollection()"＞카드 확인＜/button＞
         ＜button class="menu-btn" onclick="RPG.openLibrary()"＞도서관＜/button＞
@@ -344,6 +352,151 @@
 ＜script src="grammar_data.js"＞＜/script＞
 ＜script src="logic.js"＞＜/script＞
 ＜script＞
+const SIDE_EFFECT_HANDLERS = {
+    'buff': (ctx, eff) =＞ {
+        ctx.source.buffs[eff.id] = (eff.duration || 1);
+    },
+    'debuff': (ctx, eff) =＞ {
+        let t = ctx.target;
+        if(eff.stack) {
+            t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
+            if(t.buffs[eff.id] ＞ 3) t.buffs[eff.id] = 3;
+            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
+        } else {
+            t.buffs[eff.id] = 1;
+            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        }
+    },
+    'self_debuff': (ctx, eff) =＞ {
+        let s = ctx.source;
+        if(eff.stack) {
+            s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
+            if(s.buffs[eff.id] ＞ 3) s.buffs[eff.id] = 3;
+            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
+        } else {
+            s.buffs[eff.id] = 1;
+            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        }
+    },
+    'field_buff': (ctx, eff) =＞ {
+        RPG.applyFieldBuff(eff.id);
+    },
+    'conditional_field_buff': (ctx, eff) =＞ {
+        if(eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) RPG.applyFieldBuff(eff.id);
+    },
+    'random_debuff': (ctx, eff) =＞ {
+        let pool = [...eff.pool].sort(() =＞ 0.5 - Math.random());
+        for(let i=0; i＜eff.count; i++) {
+            if(pool[i]) {
+                 ctx.target.buffs[pool[i]] = 1;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+            }
+        }
+    },
+    'conditional_debuff': (ctx, eff) =＞ {
+        if(eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length ＞= eff.count) {
+            ctx.target.buffs[eff.debuff] = 1;
+            ctx.logFn(`조건 만족! 적에게 [${ctx.getBuffName(eff.debuff)}] 부여.`);
+        }
+    },
+    'suicide': (ctx, eff) =＞ {
+        ctx.source.hp = 0;
+    },
+    'chance_debuff': (ctx, eff) =＞ {
+        if(Math.random() ＜ eff.chance) {
+            ctx.target.buffs[eff.id] = eff.duration || 1;
+            ctx.logFn(`＜b＞성공!＜/b＞ ${ctx.target === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        } else {
+            ctx.logFn(`[${ctx.getBuffName(eff.id)}] 부여 ＜b＞실패＜/b＞.`);
+        }
+    },
+    'conditional_field_debuff': (ctx, eff) =＞ {
+         if(RPG.battle.fieldBuffs.some(b =＞ b.name === eff.field)) {
+             eff.debuffs.forEach(d =＞ {
+                 ctx.target.buffs[d] = 1;
+                 ctx.logFn(`조건 만족! [${ctx.getBuffName(d)}] 부여.`);
+             });
+         }
+    },
+    'clear_target_debuffs': (ctx, eff) =＞ {
+         const count = Object.keys(ctx.target.buffs).length;
+         ctx.target.buffs = {};
+         if(count ＞ 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+    },
+    'consume_all_burn_cond_buff': (ctx, eff) =＞ {
+         if(ctx.target.buffs['burn']) {
+             delete ctx.target.buffs['burn'];
+             RPG.applyFieldBuff('sun_bless');
+             ctx.logFn("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
+         } else {
+             RPG.applyFieldBuff('earth_bless');
+             ctx.logFn("소모할 작열이 없어 대지의 축복을 불러옵니다.");
+         }
+    },
+    'check_divine_3_stun_else_add': (ctx, eff) =＞ {
+         if((ctx.target.buffs['divine'] || 0) ＞= 3) {
+             ctx.target.buffs['stun'] = 1;
+             ctx.logFn("디바인 3스택 확인! 적을 기절시킵니다!");
+         } else {
+             ctx.target.buffs['divine'] = (ctx.target.buffs['divine'] || 0) + 1;
+             if(ctx.target.buffs['divine'] ＞ 3) ctx.target.buffs['divine'] = 3;
+             ctx.logFn("디바인 스택 추가.");
+         }
+    },
+    'random_debuff_consume_divine': (ctx, eff) =＞ {
+        let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+        let count = 1;
+        if(ctx.target.buffs['divine'] ＞ 0) {
+            ctx.target.buffs['divine']--;
+            if(ctx.target.buffs['divine'] ＜= 0) delete ctx.target.buffs['divine'];
+            count = 2;
+            ctx.logFn("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
+        }
+
+        pool.sort(() =＞ 0.5 - Math.random());
+        for(let i=0; i＜count; i++) {
+            ctx.target.buffs[pool[i]] = 1;
+            ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+        }
+    },
+    'roulette_field': (ctx, eff) =＞ {
+         RPG.battle.fieldBuffs = [];
+         ctx.logFn("모든 필드 버프가 제거되었습니다!");
+
+         const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
+         const pick = buffs[Math.floor(Math.random() * buffs.length)];
+         RPG.applyFieldBuff(pick);
+    },
+    'wild_card_debuff': (ctx, eff) =＞ {
+         const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+         let cleansed = 0;
+         badBuffs.forEach(b =＞ {
+             if(ctx.target.buffs[b]) {
+                 delete ctx.target.buffs[b];
+                 cleansed++;
+             }
+         });
+         if(cleansed ＞ 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
+
+         let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+         pool.sort(() =＞ 0.5 - Math.random());
+
+         for(let i=0; i＜2; i++) {
+             if(pool[i] === 'burn' || pool[i] === 'divine') {
+                 ctx.target.buffs[pool[i]] = (ctx.target.buffs[pool[i]] || 0) + 1;
+                 if(ctx.target.buffs[pool[i]] ＞ 3) ctx.target.buffs[pool[i]] = 3;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 스택 추가.`);
+             } else {
+                 ctx.target.buffs[pool[i]] = 1;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+             }
+         }
+    },
+    'delayed_attack_field': (ctx, eff) =＞ {
+        if (eff.field) RPG.applyFieldBuff(eff.field);
+    }
+};
+
 /**
  * RPG Game Namespace
  * Encapsulates all game logic, state, and UI handling.
@@ -615,13 +768,24 @@ const RPG = {
         const nextName = ENEMIES[enemyIdx].name;
         document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
 
-        // Draft Mode Toggle
+        // Mode Specific Menu Areas
+        const gachaArea = document.getElementById('menu-gacha-area');
+        const draftArea = document.getElementById('menu-draft-area');
+        const chaosArea = document.getElementById('menu-chaos-area');
+
+        // Hide all first
+        gachaArea.style.display = 'none';
+        draftArea.style.display = 'none';
+        if (chaosArea) chaosArea.style.display = 'none';
+
         if (this.state.mode === 'draft') {
-            document.getElementById('menu-gacha-area').style.display = 'none';
-            document.getElementById('menu-draft-area').style.display = 'block';
-        } else {
-            document.getElementById('menu-gacha-area').style.display = 'flex';
-            document.getElementById('menu-draft-area').style.display = 'none';
+            draftArea.style.display = 'block';
+        }
+        else if (this.state.mode === 'chaos') {
+            if (chaosArea) chaosArea.style.display = 'block';
+        }
+        else {
+            gachaArea.style.display = 'flex';
         }
     },
     toTitle() {
@@ -887,6 +1051,51 @@ const RPG = {
     },
 
     // --- Gacha & Deck UI ---
+    reshuffleChaosPool() {
+        if (this.state.tickets ＜ 1) {
+            return this.showAlert("셔플할 티켓이 부족합니다.");
+        }
+
+        this.showConfirm(
+            `현재 보유한 모든 카드와 덱 구성이 사라집니다.＜br＞
+            티켓 1장을 사용하여 새로운 20장을 받으시겠습니까?`,
+            () =＞ {
+                this.state.tickets--;
+                document.getElementById('ui-tickets').innerText = this.state.tickets;
+
+                let allCards = [...CARDS];
+
+                if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length ＞ 0) {
+                    const bonus = BONUS_CARDS.filter(c =＞ this.global.unlocked_bonus_cards.includes(c.id));
+                    allCards = allCards.concat(bonus);
+                }
+
+                allCards.sort(() =＞ Math.random() - 0.5);
+                const newPicks = allCards.slice(0, 20).map(c =＞ c.id);
+
+                this.state.chaosPool = newPicks;
+                this.state.inventory = [...newPicks];
+                this.state.deck = [null, null, null];
+
+                this.saveGame();
+
+                let legendCnt = 0, epicCnt = 0;
+                newPicks.forEach(id =＞ {
+                    const c = this.getCardData(id);
+                    if(c.grade === 'legend') legendCnt++;
+                    if(c.grade === 'epic') epicCnt++;
+                });
+
+                this.showAlert(
+                    `＜b＞카오스 셔플 완료!＜/b＞＜br＞＜br＞
+                    새로운 20장이 지급되었습니다.＜br＞
+                    (전설: ${legendCnt}, 에픽: ${epicCnt})＜br＞＜br＞
+                    * 덱이 초기화되었으니 다시 구성해주세요.`
+                );
+            }
+        );
+    },
+
     openGacha() {
         if(this.state.tickets ＜ 1) return this.showAlert("티켓이 부족합니다.");
         this.state.tickets--;
@@ -1445,7 +1654,7 @@ const RPG = {
 
             // Call Logic to calculate initial stats (Base + Synergies)
             const allCards = [...CARDS, ...BONUS_CARDS];
-            const init = Logic.calculateInitialStats(proto, this.state.deck, allCards);
+            const init = Logic.calculateInitialStats(proto, this.state.deck, allCards, idx);
 
             // Log active synergy if any
             if(init.activeTrait) {
@@ -1833,153 +2042,19 @@ const RPG = {
     applySkillEffects(source, target, skill) {
         if(!skill.effects) return;
 
+        const ctx = {
+            source: source,
+            target: target,
+            skill: skill,
+            logFn: (msg) =＞ RPG.log(msg),
+            getBuffName: (id) =＞ (this.BUFF_NAMES[id] || id)
+        };
+
         skill.effects.forEach(eff =＞ {
-            if(eff.type === 'buff') {
-                source.buffs[eff.id] = (eff.duration || 1);
+            const handler = SIDE_EFFECT_HANDLERS[eff.type];
+            if (handler) {
+                handler(ctx, eff);
             }
-            else if(eff.type === 'debuff' || eff.type === 'self_debuff') {
-                let t = eff.type === 'debuff' ? target : source;
-                if(eff.stack) {
-                    t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
-                    if(t.buffs[eff.id] ＞ 3) t.buffs[eff.id] = 3;
-                    RPG.log(`${t === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] ${t.buffs[eff.id]}스택.`);
-                } else {
-                    t.buffs[eff.id] = 1; // Flag or duration 1
-                    RPG.log(`${t === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'field_buff') {
-                this.applyFieldBuff(eff.id);
-            }
-            else if(eff.type === 'conditional_field_buff') {
-                if(eff.condition === 'target_has_debuff' && target.buffs[eff.debuff]) this.applyFieldBuff(eff.id);
-            }
-            else if(eff.type === 'random_debuff') {
-                let pool = [...eff.pool].sort(() =＞ 0.5 - Math.random());
-                for(let i=0; i＜eff.count; i++) {
-                    if(pool[i]) {
-                         target.buffs[pool[i]] = 1;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                    }
-                }
-            }
-            else if(eff.type === 'conditional_debuff') {
-                if(eff.condition === 'target_debuff_count' && Object.keys(target.buffs).length ＞= eff.count) {
-                    target.buffs[eff.debuff] = 1;
-                    RPG.log(`조건 만족! 적에게 [${this.BUFF_NAMES[eff.debuff]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'suicide') {
-                source.hp = 0;
-            }
-            else if(eff.type === 'chance_debuff') {
-                if(Math.random() ＜ eff.chance) {
-                    target.buffs[eff.id] = eff.duration || 1;
-                    RPG.log(`＜b＞성공!＜/b＞ ${target === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
-                } else {
-                    RPG.log(`[${this.BUFF_NAMES[eff.id]}] 부여 ＜b＞실패＜/b＞.`);
-                }
-            }
-            else if(eff.type === 'conditional_field_debuff') {
-                 if(RPG.battle.fieldBuffs.some(b =＞ b.name === eff.field)) {
-                     eff.debuffs.forEach(d =＞ {
-                         target.buffs[d] = 1;
-                         RPG.log(`조건 만족! [${this.BUFF_NAMES[d]}] 부여.`);
-                     });
-                 }
-            }
-            else if(eff.type === 'clear_target_debuffs') {
-                 const count = Object.keys(target.buffs).length;
-                 target.buffs = {};
-                 if(count ＞ 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
-            }
-            else if(eff.type === 'consume_all_burn_cond_buff') {
-                 if(target.buffs['burn']) {
-                     delete target.buffs['burn'];
-                     RPG.applyFieldBuff('sun_bless');
-                     RPG.log("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
-                 } else {
-                     RPG.applyFieldBuff('earth_bless');
-                     RPG.log("소모할 작열이 없어 대지의 축복을 불러옵니다.");
-                 }
-            }
-            else if(eff.type === 'consume_burn_1_dmg') {
-                 if(target.buffs['burn'] ＞= 1) {
-                     target.buffs['burn']--;
-                     if(target.buffs['burn'] ＜= 0) delete target.buffs['burn'];
-                     RPG.log("작열 1스택 소모! 대미지 2배 적용!");
-                 }
-            }
-            else if(eff.type === 'remove_field_buff_dmg') {
-                 if(RPG.battle.fieldBuffs.length ＞ 0) {
-                     let rm = RPG.battle.fieldBuffs.shift();
-                     RPG.log(`필드버프 [${this.BUFF_NAMES[rm.name]}] 제거! 대미지 2배 적용!`);
-                 }
-            }
-            else if(eff.type === 'check_divine_3_stun_else_add') {
-                 if((target.buffs['divine'] || 0) ＞= 3) {
-                     target.buffs['stun'] = 1;
-                     RPG.log("디바인 3스택 확인! 적을 기절시킵니다!");
-                 } else {
-                     target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
-                     if(target.buffs['divine'] ＞ 3) target.buffs['divine'] = 3;
-                     RPG.log("디바인 스택 추가.");
-                 }
-            }
-            else if(eff.type === 'random_debuff_consume_divine') {
-                let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
-                let count = 1;
-                if(target.buffs['divine'] ＞ 0) {
-                    target.buffs['divine']--;
-                    if(target.buffs['divine'] ＜= 0) delete target.buffs['divine'];
-                    count = 2;
-                    RPG.log("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
-                }
-
-                pool.sort(() =＞ 0.5 - Math.random());
-                for(let i=0; i＜count; i++) {
-                    target.buffs[pool[i]] = 1;
-                    RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'roulette_field') {
-                 RPG.battle.fieldBuffs = [];
-                 RPG.log("모든 필드 버프가 제거되었습니다!");
-
-                 const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
-                 const pick = buffs[Math.floor(Math.random() * buffs.length)];
-                 this.applyFieldBuff(pick);
-            }
-            else if(eff.type === 'wild_card_debuff') {
-                 const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
-                 let cleansed = 0;
-                 badBuffs.forEach(b =＞ {
-                     if(target.buffs[b]) {
-                         delete target.buffs[b];
-                         cleansed++;
-                     }
-                 });
-                 if(cleansed ＞ 0) RPG.log(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
-
-                 let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
-                 pool.sort(() =＞ 0.5 - Math.random());
-
-                 for(let i=0; i＜2; i++) {
-                     if(pool[i] === 'burn' || pool[i] === 'divine') {
-                         target.buffs[pool[i]] = (target.buffs[pool[i]] || 0) + 1;
-                         if(target.buffs[pool[i]] ＞ 3) target.buffs[pool[i]] = 3;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 스택 추가.`);
-                     } else {
-                         target.buffs[pool[i]] = 1;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                     }
-                 }
-            }
-            // New Handlers
-            else if(eff.type === 'delayed_attack_field') {
-                if (eff.field) this.applyFieldBuff(eff.field);
-            }
-            // Note: delayed_random_attack doesn't have immediate effects, damage handled in Logic/calcDamage
         });
 
         // Special Rumi Trait Trigger
