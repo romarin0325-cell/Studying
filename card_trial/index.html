@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Card RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body { background-color: #121212; color: #e0e0e0; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
+    .header { padding: 10px; text-align: center; background: #1f1f1f; border-bottom: 1px solid #333; font-size: 0.95rem; color: #bbb; font-weight: bold; flex-shrink: 0; }
+    .container { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
+    .screen { display: none; flex-direction: column; height: 100%; }
+    .screen.active { display: flex; }
+    .menu-btn { background: #333; border: 1px solid #555; color: #eee; padding: 15px; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-bottom: 10px; width: 100%; text-align: center; }
+    .menu-btn:active { background: #555; transform: scale(0.98); }
+    .menu-btn.correct { background: #1b5e20 !important; border-color: #4caf50 !important; }
+    .menu-btn.wrong { background: #b71c1c !important; border-color: #ef5350 !important; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 5px; overflow-y: auto; padding: 5px; padding-bottom: 80px; flex: 1; align-content: start; }
+    .card-item { background: #222; border: 2px solid #444; border-radius: 5px; padding: 5px; text-align: center; font-size: 0.8rem; cursor: pointer; position: relative; }
+    .card-item.selected { border-color: #ffd700; box-shadow: 0 0 5px #ffd700; }
+    @keyframes glow-legend {
+      0% { box-shadow: 0 0 5px #ff5252; }
+      50% { box-shadow: 0 0 20px #ff5252; }
+      100% { box-shadow: 0 0 5px #ff5252; }
+    }
+    @keyframes glow-epic {
+      0% { box-shadow: 0 0 5px #e040fb; }
+      50% { box-shadow: 0 0 15px #e040fb; }
+      100% { box-shadow: 0 0 5px #e040fb; }
+    }
+    .card-item.legend { border-color: #ff5252; color: #ff5252; animation: glow-legend 2s infinite; }
+    .card-item.epic { border-color: #e040fb; color: #e040fb; animation: glow-epic 2s infinite; }
+    .card-item.rare { border-color: #448aff; color: #448aff; }
+    .card-item.normal { border-color: #bdbdbd; color: #bdbdbd; }
+
+    .portrait {
+        width: 100%; aspect-ratio: 3/4;
+        border-radius: 6px;
+        background: #000;
+        border: 2px solid #555;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 3px;
+    }
+    .portrait img { width: 100%; height: 100%; object-fit: contain; }
+
+    .battle-header { display: flex; justify-content: space-between; padding: 5px; background: #222; border-radius: 5px; font-size: 0.8rem; }
+    .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; }
+
+    .visual-stage {
+        flex: 1; position: relative;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 6px;
+        display: flex; justify-content: space-around; align-items: center;
+        padding: 5px;
+        background-image: linear-gradient(to bottom, #2a2a2a, #121212);
+        min-height: 200px;
+        max-height: 40vh;
+    }
+
+    .battle-actor {
+        width: 120px;
+        text-align: center;
+        position: relative;
+        transition: all 0.2s;
+        display: flex; flex-direction: column; align-items: center;
+        cursor: pointer;
+    }
+    .battle-actor .portrait {
+        width: 90px; height: 120px;
+        border-color: #999;
+    }
+    .battle-actor.player .portrait { border-color: #4caf50; }
+    .battle-actor.enemy .portrait { border-color: #ff5252; }
+    .battle-actor.turn { transform: scale(1.05); z-index: 10; }
+    .battle-actor.dead { opacity: 0.3; filter: grayscale(100%); }
+
+    .actor-hp-bar { width: 100%; height: 6px; background: #333; margin-top: 4px; border-radius: 3px; overflow: hidden; }
+    .actor-hp-fill { height: 100%; background: #ef5350; width: 100%; transition: width 0.5s; }
+    .actor-mp-bar { width: 100%; height: 4px; background: #333; margin-top: 2px; border-radius: 2px; overflow: hidden; }
+    .actor-mp-fill { height: 100%; background: #42a5f5; width: 100%; transition: width 0.3s; }
+    .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 12px; overflow: hidden; margin-top: 2px; }
+
+    .log-container { height: 150px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
+    .log-line { margin-bottom: 2px; border-bottom: 1px solid #252525; }
+    .log-dmg { color: #ff5252; } .log-heal { color: #69f0ae; } .log-info { color: #4fc3f7; }
+
+    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 110px; margin-bottom: 60px; }
+    .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
+    .skill-btn:disabled { opacity: 0.5; background: #222; }
+    .skill-btn span { pointer-events: none; }
+    .skill-btn.phy { border-color: #9c27b0; color: #e1bee7; }
+    .skill-btn.mag { border-color: #2196f3; color: #bbdefb; }
+    .skill-btn.sup { border-color: #4caf50; color: #c8e6c9; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content {
+        background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;
+        width: 320px; max-height: 80vh;
+        display: flex; flex-direction: column;
+        text-align: center;
+        color: #e0e0e0;
+    }
+    .modal-scroll { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+
+    .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
+    .big-gacha-btn {
+        height: 100px;
+        font-size: 1.5rem;
+        background: #ffd700;
+        color: #000;
+        border-color: #ffca28;
+        font-weight: bold;
+    }
+    .big-gacha-btn:active { background: #ffca28; transform: scale(0.98); }
+</style>
+</head>
+<body>
+<div class="header">Card RPG 체험판</div>
+<div class="container">
+    <div id="screen-title" class="screen active" style="justify-content: center; align-items: center;">
+        <h1 style="color:#ffd700;">Card RPG 체험판</h1>
+        <button class="menu-btn" onclick="RPG.startGame('new')" style="padding: 20px; font-size: 1.2rem;">게임 시작</button>
+    </div>
+    <div id="screen-menu" class="screen">
+        <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장</div>
+        <div id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
+             다음 상대: ?
+        </div>
+        <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
+            <button class="menu-btn big-gacha-btn" onclick="RPG.openGacha()" style="flex:1;">동료 소환 (1장)</button>
+        </div>
+
+        <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
+        <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
+        <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
+        <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336; padding: 20px; font-size: 1.2rem; margin-top: 10px;">전투 진입</button>
+    </div>
+    <div id="screen-draft" class="screen">
+        <h3 style="margin:5px 0;">덱 빌딩 (<span id="draft-round-text">선봉</span> 선발)</h3>
+        <div style="text-align:center; margin-bottom:2px;">
+            남은 리롤: <span id="draft-reroll-cnt" style="color:#ffd700">3</span>회
+        </div>
+
+        <div id="draft-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; padding:5px; overflow-y:auto; flex:1;"></div>
+
+        <div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px;">
+            <button class="menu-btn" onclick="RPG.rerollDraft()" style="background:#333; border-color:#ff9800; color:#ff9800;">리롤 (새로고침)</button>
+            <button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;">나가기</button>
+        </div>
+    </div>
+    <div id="screen-collection" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>카드 목록</h3><button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button></div>
+        <div id="collection-grid" class="card-grid"></div>
+    </div>
+    <div id="screen-deck" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>덱 구성</h3>
+            <button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
+        </div>
+        <div style="margin-bottom:10px;">
+            <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉 (클릭하여 선택)</div>
+            <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견 (클릭하여 선택)</div>
+            <div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">대장 (클릭하여 선택)</div>
+        </div>
+        <div style="flex:1; overflow-y:auto; border-top:1px solid #333;"><div id="deck-card-list" class="card-grid"></div></div>
+        <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
+    </div>
+    <div id="screen-battle" class="screen">
+        <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div></div>
+        <div class="visual-stage">
+            <div id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
+                <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
+                <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
+                <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
+                <div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div>
+                <div id="p-buffs" class="actor-buffs"></div>
+            </div>
+
+            <div style="color:#555; font-size:1.5rem; font-weight:bold;">VS</div>
+
+            <div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)">
+                <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name">Enemy</div>
+                <div class="portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
+                <div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div>
+                <div id="e-buffs" class="actor-buffs"></div>
+            </div>
+        </div>
+        <div id="battle-log" class="log-container"></div>
+        <div id="battle-controls" class="control-panel"></div>
+    </div>
+</div>
+
+<div id="modal-card" class="modal">
+    <div class="modal-content">
+        <h3 id="md-name">Name</h3>
+        <div class="modal-scroll">
+            <div class="portrait" style="width:150px; height:200px; margin:0 auto;"><img id="md-img" src="" style="width:100%; height:100%; object-fit:contain;"></div>
+            <p id="md-grade" style="font-size:0.8rem; margin:5px 0;">Grade</p>
+            <div id="md-stats" style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"></div>
+            <div id="md-skills" style="font-size:0.8rem; text-align:left;"></div>
+        </div>
+        <button onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-info" class="modal" style="z-index: 200;">
+    <div class="modal-content" style="height:auto;">
+        <h3 id="info-title">정보</h3>
+        <div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"></div>
+        <button onclick="RPG.closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-confirm" class="modal" style="z-index: 210;">
+  <div class="modal-content" style="height:auto;">
+    <h3 id="confirm-title">확인</h3>
+    <div id="confirm-msg" style="margin: 10px 0;">...</div>
+    <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
+       <button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;">예</button>
+       <button id="confirm-no" class="menu-btn" style="flex:1; margin-bottom:0; background:#555; border-color:#777;">아니오</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-gacha" class="modal">
+    <div class="modal-content" style="height:auto; min-height:300px;">
+        <h2 id="gacha-title">획득!</h2>
+        <div id="gacha-result"></div>
+        <button onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;">확인</button>
+    </div>
+</div>
+
+
+<div id="modal-chaos" class="modal">
+    <div class="modal-content" style="height:auto; min-height: 550px;">
+        <h3>혼돈의 축복</h3>
+        <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
+        <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
+            혼돈의 축복: <span id="chaos-uses">3</span>회
+        </div>
+        <button class="menu-btn" onclick="RPG.activateChaos('normal')">
+            혼돈의 축복 (일반)<br>
+            <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 3종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
+        </button>
+        <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()" style="border-color:#29b6f6; color:#29b6f6;">
+            적용된 축복 확인
+        </button>
+        <button onclick="document.getElementById('modal-chaos').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+
+<script src="data.js"></script>
+<script src="logic.js"></script>
+<script>
+const SIDE_EFFECT_HANDLERS = {
+    'buff': (ctx, eff) => {
+        ctx.source.buffs[eff.id] = (eff.duration || 1);
+    },
+    'debuff': (ctx, eff) => {
+        let t = ctx.target;
+        if(eff.stack) {
+            t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
+            if(t.buffs[eff.id] > 3) t.buffs[eff.id] = 3;
+            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
+        } else {
+            t.buffs[eff.id] = 1;
+            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        }
+    },
+    'self_debuff': (ctx, eff) => {
+        let s = ctx.source;
+        if(eff.stack) {
+            s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
+            if(s.buffs[eff.id] > 3) s.buffs[eff.id] = 3;
+            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
+        } else {
+            s.buffs[eff.id] = 1;
+            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        }
+    },
+    'field_buff': (ctx, eff) => {
+        RPG.applyFieldBuff(eff.id);
+    },
+    'conditional_field_buff': (ctx, eff) => {
+        if(eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) RPG.applyFieldBuff(eff.id);
+    },
+    'random_debuff': (ctx, eff) => {
+        let pool = [...eff.pool].sort(() => 0.5 - Math.random());
+        for(let i=0; i<eff.count; i++) {
+            if(pool[i]) {
+                 ctx.target.buffs[pool[i]] = 1;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+            }
+        }
+    },
+    'conditional_debuff': (ctx, eff) => {
+        if(eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length >= eff.count) {
+            ctx.target.buffs[eff.debuff] = 1;
+            ctx.logFn(`조건 만족! 적에게 [${ctx.getBuffName(eff.debuff)}] 부여.`);
+        }
+    },
+    'suicide': (ctx, eff) => {
+        ctx.source.hp = 0;
+    },
+    'chance_debuff': (ctx, eff) => {
+        if(Math.random() < eff.chance) {
+            ctx.target.buffs[eff.id] = eff.duration || 1;
+            ctx.logFn(`<b>성공!</b> ${ctx.target === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
+        } else {
+            ctx.logFn(`[${ctx.getBuffName(eff.id)}] 부여 <b>실패</b>.`);
+        }
+    },
+    'conditional_field_debuff': (ctx, eff) => {
+         if(RPG.battle.fieldBuffs.some(b => b.name === eff.field)) {
+             eff.debuffs.forEach(d => {
+                 ctx.target.buffs[d] = 1;
+                 ctx.logFn(`조건 만족! [${ctx.getBuffName(d)}] 부여.`);
+             });
+         }
+    },
+    'clear_target_debuffs': (ctx, eff) => {
+         const count = Object.keys(ctx.target.buffs).length;
+         ctx.target.buffs = {};
+         if(count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+    },
+    'consume_all_burn_cond_buff': (ctx, eff) => {
+         if(ctx.target.buffs['burn']) {
+             delete ctx.target.buffs['burn'];
+             RPG.applyFieldBuff('sun_bless');
+             ctx.logFn("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
+         } else {
+             RPG.applyFieldBuff('earth_bless');
+             ctx.logFn("소모할 작열이 없어 대지의 축복을 불러옵니다.");
+         }
+    },
+    'check_divine_3_stun_else_add': (ctx, eff) => {
+         if((ctx.target.buffs['divine'] || 0) >= 3) {
+             ctx.target.buffs['stun'] = 1;
+             ctx.logFn("디바인 3스택 확인! 적을 기절시킵니다!");
+         } else {
+             ctx.target.buffs['divine'] = (ctx.target.buffs['divine'] || 0) + 1;
+             if(ctx.target.buffs['divine'] > 3) ctx.target.buffs['divine'] = 3;
+             ctx.logFn("디바인 스택 추가.");
+         }
+    },
+    'random_debuff_consume_divine': (ctx, eff) => {
+        let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+        let count = 1;
+        if(ctx.target.buffs['divine'] > 0) {
+            ctx.target.buffs['divine']--;
+            if(ctx.target.buffs['divine'] <= 0) delete ctx.target.buffs['divine'];
+            count = 2;
+            ctx.logFn("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
+        }
+
+        pool.sort(() => 0.5 - Math.random());
+        for(let i=0; i<count; i++) {
+            ctx.target.buffs[pool[i]] = 1;
+            ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+        }
+    },
+    'roulette_field': (ctx, eff) => {
+         RPG.battle.fieldBuffs = [];
+         ctx.logFn("모든 필드 버프가 제거되었습니다!");
+
+         const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
+         const pick = buffs[Math.floor(Math.random() * buffs.length)];
+         RPG.applyFieldBuff(pick);
+    },
+    'wild_card_debuff': (ctx, eff) => {
+         const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+         let cleansed = 0;
+         badBuffs.forEach(b => {
+             if(ctx.target.buffs[b]) {
+                 delete ctx.target.buffs[b];
+                 cleansed++;
+             }
+         });
+         if(cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
+
+         let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+         pool.sort(() => 0.5 - Math.random());
+
+         for(let i=0; i<2; i++) {
+             if(pool[i] === 'burn' || pool[i] === 'divine') {
+                 ctx.target.buffs[pool[i]] = (ctx.target.buffs[pool[i]] || 0) + 1;
+                 if(ctx.target.buffs[pool[i]] > 3) ctx.target.buffs[pool[i]] = 3;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 스택 추가.`);
+             } else {
+                 ctx.target.buffs[pool[i]] = 1;
+                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
+             }
+         }
+    },
+    'delayed_attack_field': (ctx, eff) => {
+        if (eff.field) RPG.applyFieldBuff(eff.field);
+    }
+};
+
+/**
+ * RPG Game Namespace
+ * Encapsulates all game logic, state, and UI handling.
+ */
+const RPG = {
+    // Global Data (Empty in Trial)
+    global: {},
+
+    // Game State (Session Persistent)
+    state: {
+        mode: 'origin',
+        tickets: 20,
+        inventory: [],
+        deck: [null, null, null],
+        enemyScale: 0,
+        chaosBlessingUses: 3,
+        chaosBuffs: [], // Array of { id: cardId, multiplier: float } (Merged)
+        activeChaosBlessing: [], // Specific buffs from Chaos Blessing
+    },
+
+    // Battle State (Transient)
+    battle: {
+        turn: 1,
+        players: [],
+        enemy: null,
+        fieldBuffs: [],
+        currentPlayerIdx: 0,
+        phase: 'start', // start, player, enemy, end
+        delayedEffects: [],
+        activeTraits: [], // List of active deck synergy traits
+        isNewTurn: true
+    },
+
+    // UI Helper Variables
+    selectedSlot: -1,
+    tempOnClose: null,
+    tempConfirmYes: null,
+    tempConfirmNo: null,
+
+    // Constants
+    NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
+
+    BUFF_NAMES: {
+        'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
+        'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
+        'magic_guard': '매직가드', 'guard': '가드',
+        'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
+        'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
+        'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
+        'star_powder': '스타파우더'
+    },
+
+    // --- Core Functions ---
+
+    log(msg, type='info') {
+        const box = document.getElementById('battle-log');
+        const div = document.createElement('div');
+        div.className = `log-line log-${type}`;
+        div.innerHTML = msg;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    },
+
+    getCardData(id) {
+        return CARDS.find(c => c.id === id);
+    },
+
+    // --- Global Data ---
+    loadGlobalData() {},
+    saveGlobalData() {},
+
+    startGame(mode) {
+        this.initNewGame('origin');
+        this.toMenu();
+    },
+
+    openModeSelect() {},
+
+    initNewGame(mode = 'origin') {
+        this.state = {
+            mode: 'origin',
+            tickets: 20,
+            inventory: [],
+            deck: [null, null, null],
+            enemyScale: 0,
+            chaosBlessingUses: 3,
+            chaosBuffs: [],
+            activeChaosBlessing: [],
+        };
+    },
+
+    saveGame() {},
+    saveRecord(score = null) {},
+    showRecords() {},
+
+    // --- Screen Navigation ---
+    toMenu() {
+        this.showScreen('screen-menu');
+        document.getElementById('ui-tickets').innerText = this.state.tickets;
+        const enemyIdx = this.state.enemyScale % ENEMIES.length;
+        const nextName = ENEMIES[enemyIdx].name;
+        document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
+
+        // Mode Specific Menu Areas (Always Gacha in Trial)
+        const gachaArea = document.getElementById('menu-gacha-area');
+        if(gachaArea) gachaArea.style.display = 'flex';
+    },
+    toTitle() {
+        // No saveRecord here
+        this.showScreen('screen-title');
+    },
+    showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+
+    openSystemMenu() {
+        document.getElementById('modal-menu').classList.add('active');
+    },
+
+    // --- Chaos Blessing ---
+    openChaosBlessing() {
+        document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
+        document.getElementById('modal-chaos').classList.add('active');
+    },
+    checkActiveChaosBlessings() {
+        if(!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
+            return this.showAlert("현재 적용된 축복이 없습니다.");
+        }
+        let msg = "<b>현재 적용된 축복</b><br><br>";
+        this.state.chaosBuffs.forEach(b => {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가`;
+             msg += "<br>";
+        });
+        msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+        this.openInfoModal("축복 상태", msg);
+    },
+    activateChaos(type) {
+        if(this.state.chaosBlessingUses <= 0) {
+            return this.showAlert("이번 전투 구간의 축복 기회를 모두 소진했습니다.");
+        }
+        document.getElementById('modal-chaos').classList.remove('active');
+
+        if(type === 'normal') {
+            this.applyChaosBlessing(3);
+        }
+    },
+
+    updateMergedBlessings() {
+        this.state.chaosBuffs = [];
+
+        const addBuffs = (list) => {
+            list.forEach(nb => {
+                let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
+                if(existing) {
+                    existing.multiplier += nb.multiplier;
+                } else {
+                    this.state.chaosBuffs.push({ ...nb });
+                }
+            });
+        };
+
+        if(this.state.activeChaosBlessing) addBuffs(this.state.activeChaosBlessing);
+    },
+
+    applyChaosBlessing(count) {
+        this.state.chaosBlessingUses--;
+
+        // 1. Base Pool (Use full CARDS, no unlock checks needed)
+        let pool = [...CARDS];
+
+        // 4. Shuffle and Pick
+        pool.sort(() => 0.5 - Math.random());
+        let picks = pool.slice(0, count);
+
+        let newBuffs = picks.map(c => {
+            let mult = 0;
+            if(c.grade === 'normal') mult = 0.4;
+            else if(c.grade === 'rare') mult = 0.3;
+            else if(c.grade === 'epic') mult = 0.2;
+            else if(c.grade === 'legend') mult = 0.1;
+            return { id: c.id, name: c.name, multiplier: mult };
+        });
+
+        // Set to activeChaosBlessing (Replacing previous)
+        this.state.activeChaosBlessing = newBuffs;
+        this.updateMergedBlessings();
+
+        let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
+        newBuffs.forEach(b => {
+             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier*100)}%, 치명타/회피율 증가<br>`;
+        });
+        msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
+        this.openInfoModal("축복 성공", msg);
+    },
+
+    // --- Gacha & Deck UI ---
+    openGacha() {
+        if(this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
+        this.state.tickets--;
+        this.runGacha();
+    },
+
+    runGacha() {
+        document.getElementById('ui-tickets').innerText = this.state.tickets;
+        let rand = Math.random();
+        let grade = 'normal';
+
+        // Origin Rates: 10% Legend, 20% Epic, 30% Rare, 40% Normal
+        if(rand < 0.10) grade = 'legend';
+        else if(rand < 0.30) grade = 'epic';
+        else if(rand < 0.60) grade = 'rare';
+
+        // Build Pool (Full pool available from start)
+        let pool = CARDS.filter(c => c.grade === grade);
+
+        if(pool.length === 0) {
+            grade = 'normal';
+            pool = CARDS.filter(c => c.grade === 'normal');
+        }
+
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        this.state.inventory.push(pick.id);
+
+        const modal = document.getElementById('modal-gacha');
+        const content = document.getElementById('gacha-result');
+        let color = '#bdbdbd', title = "획득!";
+        if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
+        else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
+
+        document.getElementById('gacha-title').innerText = title;
+        content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+        modal.classList.add('active');
+    },
+
+
+    closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); },
+
+    openCollection() { this.showScreen('screen-collection'); this.renderCardList('collection-grid', this.state.inventory, (id) => this.showCardInfo(id)); },
+
+    renderCardList(containerId, list, clickHandler) {
+        const box = document.getElementById(containerId);
+        box.innerHTML = "";
+        let counts = {};
+        list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+        for(let id in counts) {
+            const data = this.getCardData(id);
+            if(!data) continue;
+            const el = document.createElement('div');
+            el.className = `card-item ${data.grade}`;
+            el.innerHTML = `<div class="portrait"><img src="${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
+            el.onclick = () => clickHandler(id);
+            box.appendChild(el);
+        }
+    },
+
+    showCardInfo(id) {
+        const data = this.getCardData(id);
+        if(!data) return;
+        document.getElementById('md-name').innerText = data.name;
+        document.getElementById('md-img').src = `${data.name}.png`;
+        document.getElementById('md-grade').className = data.grade;
+        document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
+        document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
+        let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
+        skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
+        data.skills.forEach(s => {
+            let multText = s.val ? ` (x${s.val})` : '';
+            skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
+        });
+        document.getElementById('md-skills').innerHTML = skills;
+        document.getElementById('modal-card').classList.add('active');
+    },
+    closeModal() { document.getElementById('modal-card').classList.remove('active'); },
+
+    openDeck() {
+        this.showScreen('screen-deck');
+        this.updateDeckSlots();
+        this.selectedSlot = -1;
+        this.renderCardList('deck-card-list', this.state.inventory, (id) => {
+            if(this.selectedSlot === -1) this.selectedSlot = this.state.deck.indexOf(null);
+            if(this.selectedSlot === -1) return this.showAlert("슬롯을 먼저 선택하거나 빈 슬롯이 없습니다.");
+            let total = this.state.inventory.filter(x => x === id).length;
+            let used = this.state.deck.filter(x => x === id).length;
+            if(this.state.deck[this.selectedSlot] === id) used--;
+            if(total - used <= 0) return this.showAlert("보유 수량이 부족합니다.");
+            this.state.deck[this.selectedSlot] = id;
+            this.updateDeckSlots();
+        });
+    },
+    selectDeckSlot(idx) { this.selectedSlot = idx; document.querySelectorAll('.deck-slot').forEach((el, i) => { el.style.borderColor = i === idx ? '#ffd700' : '#555'; }); },
+    updateDeckSlots() {
+        ['선봉', '중견', '대장'].forEach((role, i) => {
+            const id = this.state.deck[i];
+            const el = document.getElementById(`slot-${i}`);
+            if(id) { const c = this.getCardData(id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
+            else { el.innerText = `${role} (비어있음)`; el.classList.remove('filled'); }
+        });
+    },
+    confirmDeck() { if(this.state.deck.every(x => x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
+
+    // --- Battle Logic Start ---
+
+    startBattleInit() {
+        if(this.state.deck.every(x => x === null)) return this.showAlert("덱을 완성해주세요.");
+        this.showScreen('screen-battle');
+        const enemyIdx = this.state.enemyScale % ENEMIES.length;
+        const baseEnemy = ENEMIES[enemyIdx];
+        let cycle = Math.floor(this.state.enemyScale / ENEMIES.length);
+        let scale = 1.0 + (cycle * 0.2);
+
+        this.battle.enemy = {
+            id: baseEnemy.id, name: baseEnemy.name,
+            maxHp: Math.floor(baseEnemy.stats.hp * scale), hp: Math.floor(baseEnemy.stats.hp * scale),
+            atk: Math.floor(baseEnemy.stats.atk * scale), matk: Math.floor(baseEnemy.stats.matk * scale),
+            def: Math.floor(baseEnemy.stats.def * scale), mdef: Math.floor(baseEnemy.stats.mdef * scale),
+            baseDef: Math.floor(baseEnemy.stats.def * scale), baseMdef: Math.floor(baseEnemy.stats.mdef * scale),
+            skills: baseEnemy.skills, buffs: {}, element: baseEnemy.element,
+            tookDamageThisTurn: false, lastHitType: null
+        };
+        if(baseEnemy.id === 'creator_god') this.battle.enemy.chargeTurn = 0;
+
+        // Init Players (Using Logic for Initial Stats)
+        this.battle.activeTraits = []; // Reset active traits before calc
+
+        this.battle.players = this.state.deck.map((id, idx) => {
+            if(!id) return null;
+            const proto = this.getCardData(id);
+
+            // Call Logic to calculate initial stats (Base + Synergies)
+            const allCards = [...CARDS, ...BONUS_CARDS];
+            const init = Logic.calculateInitialStats(proto, this.state.deck, allCards, idx);
+
+            // Log active synergy if any
+            if(init.activeTrait) {
+                 // Avoid duplicate logs if multiple players trigger same synergy?
+                 // But synergy is usually per player check in Logic.
+                 // Actually, Logic returns activeTrait for THIS player.
+                 this.battle.activeTraits.push(init.activeTrait);
+                 RPG.log(`[시너지] ${proto.trait.desc} 발동!`);
+            }
+
+            // Construct Player Object
+            let p = {
+                id: proto.id, proto: proto, name: proto.name,
+                ...init.stats, // hp, maxHp, mp, atk, matk, def, mdef, baseCrit, baseEva
+                buffs: {}, pos: idx, isDead: false
+            };
+
+            // Apply Chaos Blessing Buffs (Multiplicative to the Synergized Base)
+            const blessing = this.state.chaosBuffs.find(b => b.id === p.id);
+            if(blessing) {
+                // Store base stats before blessing for UI comparison
+                p.baseStatsWithoutBlessing = { atk: p.atk, matk: p.matk, def: p.def, mdef: p.mdef };
+
+                p.maxHp = Math.floor(p.maxHp * (1 + blessing.multiplier));
+                p.hp = p.maxHp;
+                p.blessing = blessing;
+
+                let mult = 1.0 + blessing.multiplier;
+                p.atk = Math.floor(p.atk * mult);
+                p.matk = Math.floor(p.matk * mult);
+                p.def = Math.floor(p.def * mult);
+                p.mdef = Math.floor(p.mdef * mult);
+            }
+
+            // Apply Positional Traits (Multiplicative)
+            if(proto.trait.type.startsWith('pos_')) {
+                const t = proto.trait;
+                let active = (t.type.includes('van') && idx===0) || (t.type.includes('mid') && idx===1) || (t.type.includes('rear') && idx===2);
+                if(active) {
+                    if(t.type.includes('_atk')) p.atk = Math.floor(p.atk * (1 + t.val/100));
+                    if(t.type.includes('_matk')) p.matk = Math.floor(p.matk * (1 + t.val/100));
+                    if(t.type.includes('_def')) p.def = Math.floor(p.def * (1 + t.val/100));
+                    if(t.type.includes('_mdef')) p.mdef = Math.floor(p.mdef * (1 + t.val/100));
+                }
+            }
+            return p;
+        });
+
+        // Dedup activeTraits if needed?
+        // Logic.calculateInitialStats checks active conditions.
+        // If 3 nature cards, each one triggers syn_nature_3_def in Logic?
+        // Yes, because Logic checks `countEl` based on the deck.
+        // So we might get duplicates in `this.battle.activeTraits`.
+        // This is fine for `includes` checks, but if we log multiple times it's noisy.
+        // We can unique them if we want, but logic relies on `includes` which works.
+
+        this.battle.fieldBuffs = [];
+        this.battle.delayedEffects = [];
+        this.battle.turn = 1;
+        this.battle.currentPlayerIdx = 0;
+        this.battle.isNewTurn = true;
+
+        while(this.battle.currentPlayerIdx < 3 && this.battle.players[this.battle.currentPlayerIdx] === null) {
+            this.battle.currentPlayerIdx++;
+        }
+
+        document.getElementById('battle-log').innerHTML = "";
+        this.log(`전투 개시! 적: ${this.battle.enemy.name}`);
+        this.renderBattlefield();
+        this.TurnManager.startPlayerTurn();
+    },
+
+    // --- Turn Manager ---
+    TurnManager: {
+        startPlayerTurn() {
+            const b = RPG.battle;
+            if(b.currentPlayerIdx >= 3) { RPG.loseBattle(); return; }
+
+            if(b.isNewTurn) {
+                 b.isNewTurn = false;
+                 RPG.log(`=== ${b.turn}턴 ===`, 'info');
+
+                 // Demon God Passive (Apply at start of turn for visibility)
+                 if(b.enemy && b.enemy.id === 'demon_god') {
+                     b.enemy.def = b.enemy.baseDef; b.enemy.mdef = b.enemy.baseMdef;
+                     if(b.turn % 2 === 0) {
+                         b.enemy.def = Math.floor(b.enemy.def * 1.5);
+                         RPG.log("마신의 권능: 짝수 턴 물리방어력 50% 증가.");
+                     } else {
+                         b.enemy.mdef = Math.floor(b.enemy.mdef * 1.5);
+                         RPG.log("마신의 권능: 홀수 턴 마법방어력 50% 증가.");
+                     }
+                 }
+            }
+            if(b.enemy) b.enemy.lastHitType = null;
+
+            let p = b.players[b.currentPlayerIdx];
+            if(!p || p.isDead) {
+                b.currentPlayerIdx++;
+                this.startPlayerTurn();
+                return;
+            }
+
+            // Process Delayed Effects
+            for(let i = b.delayedEffects.length - 1; i >= 0; i--) {
+                let effect = b.delayedEffects[i];
+                if(effect.turn === b.turn) {
+                    b.delayedEffects.splice(i, 1);
+                    if(effect.source.isDead) {
+                        RPG.log(`${effect.skill.name} 발동 실패... (시전자 사망)`);
+                    } else {
+                        RPG.log(`${effect.skill.name} 발동!`);
+                        RPG.executeSkill(effect.source, b.enemy, effect.skill, true);
+                    }
+                }
+            }
+
+            // Clear temporary self buffs
+            ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(k => delete p.buffs[k]);
+
+            RPG.renderBattlefield();
+
+            if(p.buffs.stun) {
+                RPG.log(`${p.name} 기절로 인해 행동 불가.`);
+                delete p.buffs.stun;
+                this.endPlayerTurn();
+                return;
+            }
+
+            RPG.setupControls(p);
+        },
+
+        endPlayerTurn() {
+             setTimeout(() => this.startEnemyTurn(), 500);
+        },
+
+        startEnemyTurn() {
+            const b = RPG.battle;
+            const e = b.enemy;
+            if(e.hp <= 0) { RPG.winBattle(); return; }
+
+            RPG.log("--- 적 턴 ---");
+            e.def = e.baseDef; e.mdef = e.baseMdef; // Reset base
+
+            // Boss Passive Logic
+            if(e.id === 'artificial_demon_god') {
+                 delete e.buffs.defProtocolPhy; delete e.buffs.defProtocolMag;
+                 if(e.lastHitType === 'phy') { e.buffs.defProtocolPhy = 1; RPG.log("방어 프로토콜: 물리 피격 감지 (다음 턴 물리방어력 증가)."); }
+                 if(e.lastHitType === 'mag') { e.buffs.defProtocolMag = 1; RPG.log("방어 프로토콜: 마법 피격 감지 (다음 턴 마법방어력 증가)."); }
+                 if(e.buffs.defProtocolPhy) e.def = Math.floor(e.def * 1.5);
+                 if(e.buffs.defProtocolMag) e.mdef = Math.floor(e.mdef * 1.5);
+            }
+            if(e.id === 'demon_god') {
+                 // Re-apply without log (applied at start of player turn)
+                 if(b.turn % 2 === 0) { e.def = Math.floor(e.def * 1.5); }
+                 else { e.mdef = Math.floor(e.mdef * 1.5); }
+            }
+
+            if(e.buffs.stun) {
+                RPG.log(`${e.name} 기절하여 행동 불가.`);
+                delete e.buffs.stun;
+                this.endEnemyTurn();
+                return;
+            }
+
+            // Target Logic
+            let target = b.players[b.currentPlayerIdx];
+            if(!target || target.isDead) {
+                let validIdx = b.players.findIndex(p => p && !p.isDead);
+                if(validIdx === -1) { RPG.loseBattle(); return; }
+                b.currentPlayerIdx = validIdx;
+                target = b.players[validIdx];
+            }
+
+            // AI Skill Selection (Using Logic)
+            let skillInfo = Logic.decideEnemyAction(e, b.turn);
+
+            // Handle special AI states (Charge)
+            if(skillInfo.chargeReset) e.isCharging = false;
+            if(skillInfo.isChargeStart) {
+                e.isCharging = true;
+                RPG.log("창조신이 힘을 모으고 있습니다... (공격 없음)");
+                this.endEnemyTurn();
+                return;
+            }
+
+            // Map Logic result to actual skill execution
+            // Logic returns { type, val, name ... } or a skill object
+            // We treat it as the skill to execute.
+            let skill = skillInfo;
+
+            // Execute Enemy Skill (Simplified: Calculate -> Apply)
+            let val = skill.type === 'phy' ? e.atk : e.matk;
+            let mult = skill.val || 1.0;
+
+            // Pharaoh Special Counter Logic
+            if(e.id === 'pharaoh' && skill.name === '고대의저주' && e.tookDamageThisTurn) {
+                mult = 3.0;
+                RPG.log("고대의 저주: 턴 내 피격 감지! 대미지 3배로 반격!");
+            }
+
+            if(e.buffs.weak && skill.type === 'phy') val *= 0.8;
+            if(e.buffs.silence && skill.type === 'mag') val *= 0.8;
+
+            let def = skill.type === 'phy' ? target.def : target.mdef;
+            let fieldDef = 1.0;
+            b.fieldBuffs.forEach(fb => {
+                if(fb.name === 'star_powder') fieldDef += 0.3;
+                if(fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
+                if(fb.name === 'goddess_descent') fieldDef += 0.3;
+            });
+
+            // Target Defense Debuffs
+            let defMult = 1.0;
+            if (skill.type === 'phy') {
+                if (target.buffs.darkness && target.buffs.corrosion) defMult = 0.6;
+                else if (target.buffs.darkness || target.buffs.corrosion) defMult = 0.8;
+            } else {
+                if (target.buffs.curse) defMult = 0.8;
+            }
+
+            def = Math.floor(def * fieldDef * defMult);
+
+            // Evasion Check
+            if (Logic.checkEvasion(target, skill.type, b.fieldBuffs)) {
+                RPG.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
+                this.endEnemyTurn();
+                return;
+            }
+            if(target.buffs.barrier && skill.type === 'phy') { RPG.log(`${target.name} 배리어로 방어!`); this.endEnemyTurn(); return; }
+            if(target.buffs.magic_guard && skill.type === 'mag') { RPG.log(`${target.name} 매직가드로 방어!`); this.endEnemyTurn(); return; }
+
+            let dmg = val * mult * (100 / (100 + def));
+            if(target.buffs.guard) dmg *= 0.5;
+            dmg = Math.floor(dmg);
+            target.hp -= dmg;
+            RPG.log(`${e.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
+
+            // Process Effects (if any)
+            if(skill.effects) {
+                skill.effects.forEach(eff => {
+                    if(eff.type === 'mana_burn') { target.mp = 0; RPG.log("플레이어 마나 소멸!"); }
+                });
+            }
+
+            if(target.hp <= 0) {
+                target.isDead = true; target.hp = 0;
+                RPG.log(`${target.name} 쓰러짐!`);
+                RPG.handleDeathTraits(target, e);
+
+                // Advance to next valid player
+                b.currentPlayerIdx++;
+                while(b.currentPlayerIdx < 3) {
+                     if(b.players[b.currentPlayerIdx] && !b.players[b.currentPlayerIdx].isDead) break;
+                     b.currentPlayerIdx++;
+                }
+                if(b.currentPlayerIdx >= 3 && b.players.every(p => !p || p.isDead)) { RPG.loseBattle(); return; }
+            }
+
+            if(e.hp <= 0) RPG.winBattle();
+            else this.endEnemyTurn();
+        },
+
+        endEnemyTurn() {
+            RPG.battle.turn++;
+            RPG.battle.enemy.tookDamageThisTurn = false;
+            RPG.battle.isNewTurn = true;
+            this.startPlayerTurn();
+        }
+    },
+
+    handleDeathTraits(victim, killer) {
+        // Delegate to Logic
+        const result = Logic.handleDeathTraits(
+            victim,
+            killer,
+            RPG.battle.fieldBuffs,
+            (msg) => RPG.log(msg)
+        );
+
+        // Apply results
+        if(result.damageToKiller > 0) {
+            killer.hp -= result.damageToKiller;
+            killer.tookDamageThisTurn = true;
+        }
+
+        if(result.fieldBuffsToAdd && result.fieldBuffsToAdd.length > 0) {
+            result.fieldBuffsToAdd.forEach(b => RPG.applyFieldBuff(b));
+        }
+
+        if(result.killerDebuffs && killer && killer.buffs) {
+             Object.keys(result.killerDebuffs).forEach(k => {
+                 killer.buffs[k] = (killer.buffs[k] || 0) + result.killerDebuffs[k];
+                 // If specific duration handling is needed, add here. Currently assumed 1 stack.
+             });
+        }
+    },
+
+    // --- Player Skill Execution ---
+
+    executeSkill(source, target, skill, isDelayed=false) {
+        if(!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
+        RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
+
+        // Trait: Normal Attack Burn & Divine
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
+             target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
+             target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
+             if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+             if(target.buffs['divine'] > 3) target.buffs['divine'] = 3;
+             RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
+        }
+
+        // Trait: Phoenix Normal Attack Burn
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'syn_fire_3_crit_burn' && RPG.battle.activeTraits.includes('syn_fire_3_crit_burn')) {
+             target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
+             if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+             RPG.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
+        }
+
+        // Trait: Behemoth (Skill Use -> Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
+            if (Math.random() < 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
+            }
+        }
+
+        // Check for Delayed Attack Effect
+        let delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack_field');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_random_attack');
+
+        if(delayedEff && !isDelayed) {
+            RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
+            RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: skill });
+            RPG.TurnManager.endPlayerTurn();
+            return;
+        }
+
+        const dmgResult = this.calcDamage(source, target, skill);
+
+        // Apply Damage
+        if(dmgResult.dmg > 0) {
+            target.hp -= dmgResult.dmg;
+            target.tookDamageThisTurn = true;
+            RPG.log(`${dmgResult.isCrit?'Critical! ':''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+        }
+
+        // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
+        this.applySkillEffects(source, target, skill);
+
+        if(target.hp <= 0) { RPG.winBattle(); return; }
+        if(source.hp <= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
+
+        if(!isDelayed) RPG.TurnManager.endPlayerTurn();
+    },
+
+    calcDamage(source, target, skill) {
+        if(skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0 };
+
+        // Logic.js returns { dmg, isCrit } and logs via callback
+        const result = Logic.calculateDamage(
+            source,
+            target,
+            skill,
+            RPG.battle.fieldBuffs,
+            RPG.battle.activeTraits,
+            (msg) => RPG.log(msg),
+            RPG.state.mode // PASS MODE
+        );
+
+        if(target.id === 'demon_god') {
+             const b = RPG.battle;
+             if((b.turn % 2 === 0 && skill.type === 'phy') || (b.turn % 2 !== 0 && skill.type === 'mag')) {
+                 RPG.log("(마신의 권능: 방어력 상승 적용중)");
+             }
+        }
+
+        target.lastHitType = skill.type;
+
+        return result;
+    },
+
+    applySkillEffects(source, target, skill) {
+        if(!skill.effects) return;
+
+        const ctx = {
+            source: source,
+            target: target,
+            skill: skill,
+            logFn: (msg) => RPG.log(msg),
+            getBuffName: (id) => (this.BUFF_NAMES[id] || id)
+        };
+
+        skill.effects.forEach(eff => {
+            const handler = SIDE_EFFECT_HANDLERS[eff.type];
+            if (handler) {
+                handler(ctx, eff);
+            }
+        });
+
+        // Special Rumi Trait Trigger
+        if(RPG.battle.activeTraits.includes('syn_water_nature') && skill.name === '문라이트세레나') {
+            RPG.log("루미의 특성 발동! 트윙클파티 추가!");
+            this.applyFieldBuff('twinkle_party');
+        }
+
+        // Siren Trait Trigger
+        if(RPG.battle.activeTraits.includes('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
+            RPG.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
+            this.applyFieldBuff('twinkle_party');
+        }
+    },
+
+    applyFieldBuff(id) {
+        if(this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 이미 존재.`);
+        if(this.battle.fieldBuffs.length >= 3) {
+             let removed = this.battle.fieldBuffs.shift();
+             RPG.log(`필드버프 [${this.BUFF_NAMES[removed.name]}] 소멸.`);
+        }
+        this.battle.fieldBuffs.push({ name: id });
+        RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 발동!`);
+    },
+
+    // --- Setup & UI ---
+
+    setupControls(p) {
+        const panel = document.getElementById('battle-controls');
+        panel.innerHTML = "";
+
+        // Normal Attack
+        const btn = document.createElement('button');
+        btn.className = 'skill-btn phy';
+        btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
+        btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
+        panel.appendChild(btn);
+
+        // Skills
+        p.proto.skills.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = `skill-btn ${s.type}`;
+            btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
+            if(p.mp < s.cost) btn.disabled = true;
+            else btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, s);
+            panel.appendChild(btn);
+        });
+    },
+
+    renderBattlefield() {
+        const p = this.battle.players[this.battle.currentPlayerIdx];
+
+        if(p && !p.isDead) {
+            document.getElementById('p-name').innerText = p.name;
+            const pImg = document.getElementById('p-img');
+            pImg.src = `${p.name}.png`;
+            pImg.style.display = 'block';
+
+            let hpPct = (p.hp / p.maxHp) * 100;
+            document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
+            let mpPct = (p.mp / 100) * 100;
+            document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
+
+            let buffTxt = Object.keys(p.buffs).map(k=>this.BUFF_NAMES[k]||k).join(',');
+            document.getElementById('p-buffs').innerText = buffTxt;
+            document.getElementById('player-actor-box').style.opacity = 1;
+        } else {
+             document.getElementById('player-actor-box').style.opacity = 0;
+        }
+
+        const e = this.battle.enemy;
+        let eHpPct = (e.hp / e.maxHp) * 100;
+        document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
+        document.getElementById('e-name').innerText = e.name;
+        const eImg = document.getElementById('e-img');
+        eImg.src = `${e.name}.png`;
+        eImg.style.display = 'block';
+
+        let eBuffTxt = Object.keys(e.buffs).map(k=>`${this.BUFF_NAMES[k]||k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
+        document.getElementById('e-buffs').innerText = eBuffTxt;
+
+        document.getElementById('bt-turn').innerText = this.battle.turn;
+        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${this.BUFF_NAMES[b.name]||b.name}]`).join(" ");
+    },
+
+    getElementalMultiplier(atkEl, defEl) {
+        if(atkEl === 'water' && defEl === 'fire') return 1.2;
+        if(atkEl === 'fire' && defEl === 'nature') return 1.2;
+        if(atkEl === 'nature' && defEl === 'water') return 1.2;
+        if((atkEl === 'light' && defEl === 'dark') || (atkEl === 'dark' && defEl === 'light')) return 1.2;
+        return 1.0;
+    },
+
+    // --- Draft Logic ---
+    startDraft() {
+        if(this.state.deck.every(x => x !== null)) {
+            return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
+        }
+
+        if(!this.state.draft) this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
+
+        // Find first empty slot
+        this.state.draft.round = this.state.deck.indexOf(null);
+        if(this.state.draft.round === -1) {
+            this.state.draft.round = 0;
+        }
+
+        this.showScreen('screen-draft');
+        this.renderDraftScreen();
+    },
+
+    renderDraftScreen() {
+        const d = this.state.draft;
+        const roles = ['선봉', '중견', '대장'];
+        let roundText = roles[d.round] + ` (${d.round + 1}/3)`;
+        document.getElementById('draft-round-text').innerText = roundText;
+        document.getElementById('draft-reroll-cnt').innerText = d.rerolls;
+
+        if(!d.currentOptions || d.currentOptions.length === 0) {
+            this.generateDraftOptions();
+        }
+
+        const grid = document.getElementById('draft-grid');
+        grid.innerHTML = "";
+
+        d.currentOptions.forEach(id => {
+            const card = this.getCardData(id);
+            const el = document.createElement('div');
+            let color = '#bdbdbd';
+            if(card.grade === 'legend') color = '#ff5252';
+            else if(card.grade === 'epic') color = '#e040fb';
+            else if(card.grade === 'rare') color = '#448aff';
+
+            el.className = `card-item ${card.grade}`;
+            el.style.height = "160px";
+            el.style.display = "flex";
+            el.style.flexDirection = "column";
+            el.style.borderColor = color;
+
+            el.innerHTML = `
+                <div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:${color}">${card.name}</div>
+                <div class="portrait" style="flex:1; margin-bottom:5px; width:100%;"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
+                <div style="display:flex; gap:2px; width:100%;">
+                    <button onclick="event.stopPropagation(); RPG.showCardInfo('${card.id}')" style="flex:1; font-size:0.7rem; padding:3px; background:#444; color:#fff; border:1px solid #666;">상세</button>
+                    <button onclick="event.stopPropagation(); RPG.selectDraftCard('${card.id}')" style="flex:2; font-size:0.7rem; padding:3px; background:#1b5e20; color:#fff; border:1px solid #4caf50;">선택</button>
+                </div>
+            `;
+            grid.appendChild(el);
+        });
+    },
+
+    generateDraftOptions() {
+        let pool = [...CARDS];
+        if (this.global.unlocked_bonus_cards) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+
+        let options = [];
+        for(let i=0; i<4; i++) {
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            options.push(pick.id);
+        }
+        this.state.draft.currentOptions = options;
+    },
+
+    selectDraftCard(id) {
+        this.state.inventory.push(id);
+        this.state.deck[this.state.draft.round] = id;
+
+        // Clear options for next round
+        this.state.draft.currentOptions = [];
+
+        if (this.state.deck.indexOf(null) === -1) {
+            this.showAlert("덱 구성 완료!");
+            this.toMenu();
+        } else {
+            this.startDraft();
+        }
+    },
+
+    rerollDraft() {
+        if (this.state.draft.rerolls > 0) {
+            this.state.draft.rerolls--;
+            this.state.draft.currentOptions = [];
+            this.renderDraftScreen();
+        } else {
+            if (this.state.tickets > 0) {
+                this.showConfirm(`무료 리롤 횟수가 없습니다.<br>티켓 1장을 사용하여 리롤하시겠습니까?<br>(보유 티켓: ${this.state.tickets})`, () => {
+                    this.state.tickets--;
+                    document.getElementById('ui-tickets').innerText = this.state.tickets;
+                    this.state.draft.currentOptions = [];
+                    this.renderDraftScreen();
+                });
+            } else {
+                this.showAlert("리롤 횟수와 티켓이 모두 부족합니다.");
+            }
+        }
+    },
+
+    winBattle() {
+        let reward = 1;
+        if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
+
+        this.state.tickets += reward;
+        this.state.enemyScale++;
+
+        // Reset Chaos Blessing
+        this.state.chaosBlessingUses = 3;
+        this.state.chaosBuffs = [];
+        this.state.activeChaosBlessing = [];
+
+        this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
+
+        this.openInfoModal("전투 결과", "승리!<br>보상을 획득했습니다.", () => this.toMenu());
+    },
+
+    loseBattle() {
+        // Reset Chaos Blessing
+        this.state.chaosBlessingUses = 3;
+        this.state.chaosBuffs = [];
+        this.state.activeChaosBlessing = [];
+
+        let msg = "패배...";
+        this.openInfoModal("전투 결과", msg, () => this.toMenu());
+    },
+
+    getEffectiveStats(char, fieldBuffs) {
+        return Logic.calculateStats(char, fieldBuffs, this.state.mode);
+    },
+
+    showBattleStat(side, idx) {
+        let char;
+        if(side === 'player') char = this.battle.players[idx];
+        else char = this.battle.enemy;
+        if(!char) return;
+
+        let buffs = Object.keys(char.buffs).map(k => {
+            let name = this.BUFF_NAMES[k] || k;
+            let val = char.buffs[k];
+            if(val === true) return name;
+            return `${name}(${val})`;
+        }).join(', ') || '없음';
+
+        const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode);
+
+        // Use baseStatsWithoutBlessing if available to show Green for blessed stats
+        const getBase = (key, fallback) => {
+             if(char.baseStatsWithoutBlessing && char.baseStatsWithoutBlessing[key] !== undefined) return char.baseStatsWithoutBlessing[key];
+             return fallback;
+        };
+
+        const colorize = (val, base) => {
+             if(val > base) return `<span style="color:#69f0ae">${val}</span>`;
+             if(val < base) return `<span style="color:#ff5252">${val}</span>`;
+             return `<span style="color:#eee">${val}</span>`;
+        };
+
+        let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
+        if(side === 'player') content += `MP: ${char.mp}<br>`;
+        content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
+        content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
+        content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
+        content += `상태: ${buffs}<br><br>`;
+
+        if(side === 'player') {
+             content += `<b>[스킬]</b><br>`;
+             char.proto.skills.forEach(s => {
+                 let multText = s.val ? ` (x${s.val})` : '';
+                 content += `- ${s.name}: ${s.desc}${multText}<br>`;
+             });
+        } else {
+             content += `<b>[스킬]</b><br>`;
+             char.skills.forEach(s => {
+                 let multText = s.val ? ` (x${s.val})` : '';
+                 content += `- ${s.name}: ${s.desc}${multText}<br>`;
+             });
+        }
+        this.openInfoModal(char.name, content);
+    },
+
+    showFieldBuffInfo() {
+        if(this.battle.fieldBuffs.length === 0) return this.showAlert("활성화된 필드 버프가 없습니다.");
+        const buffInfo = {
+            'sun_bless': '물공/마공 +30%, 치명타대미지 +60%',
+            'moon_bless': '마공 +30%, 회피율 +15%',
+            'sanctuary': '마공 +30%, 마방 +30%',
+            'goddess_descent': '물공/마공 +30%, 방어/마방 +30%',
+            'earth_bless': '물공/마공 +25%',
+            'twinkle_party': '물공 +20%, 치명타율 +15%',
+            'star_powder': '방어/마방 +40%'
+        };
+        let msg = "";
+        this.battle.fieldBuffs.forEach(b => {
+             msg += `<b>[${this.BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
+        });
+        this.openInfoModal("필드 버프", msg);
+    },
+
+    openInfoModal(title, content, onClose = null) {
+        document.getElementById('info-title').innerText = title;
+        document.getElementById('info-content').innerHTML = content;
+        document.getElementById('modal-info').classList.add('active');
+        this.tempOnClose = onClose;
+    },
+    closeInfoModal() {
+        document.getElementById('modal-info').classList.remove('active');
+        if (this.tempOnClose) {
+            this.tempOnClose();
+            this.tempOnClose = null;
+        }
+    },
+
+    showConfirm(msg, onYes, onNo) {
+        document.getElementById('confirm-msg').innerHTML = msg;
+        const modal = document.getElementById('modal-confirm');
+        const btnYes = document.getElementById('confirm-yes');
+        const btnNo = document.getElementById('confirm-no');
+
+        btnYes.onclick = () => {
+            modal.classList.remove('active');
+            if(onYes) onYes();
+        };
+        btnNo.onclick = () => {
+             modal.classList.remove('active');
+             if(onNo) onNo();
+        };
+
+        modal.classList.add('active');
+    },
+
+    showAlert(msg) {
+        this.openInfoModal("알림", msg);
+    }
+};
+</script>
+</body>
+</html>
