@@ -126,8 +126,8 @@
              다음 상대: ?
         ＜/div＞
         ＜div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;"＞
-            ＜button class="menu-btn" onclick="RPG.openGacha()" style="flex:1; padding: 10px; font-size: 0.9rem;"＞일반 뽑기 (1장)＜/button＞
-            ＜button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; padding: 10px; font-size: 0.9rem; border-color: #e040fb; color: #e0e0e0;"＞도전 뽑기＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;"＞일반 뽑기 (1장)＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;"＞도전 뽑기＜/button＞
         ＜/div＞
         ＜div id="menu-draft-area" style="display:none; margin-bottom:10px;"＞
             ＜button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;"＞덱 빌딩 (드래프트)＜/button＞
