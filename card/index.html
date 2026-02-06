@@ -1353,7 +1353,18 @@ const RPG = {
     startCollocationQuiz(callback) {
         document.getElementById('quiz-desc').style.display = 'block';
 
-        const q = COLLOCATION_DATA[Math.floor(Math.random() * COLLOCATION_DATA.length)];
+        let allQuizzes = [];
+        COLLOCATION_DATA.forEach(item => {
+            if (item.quizzes) {
+                item.quizzes.forEach(q => {
+                    allQuizzes.push({ ...q, parentId: item.id });
+                });
+            } else {
+                 allQuizzes.push({ ...item, parentId: item.id });
+            }
+        });
+
+        const q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
         let opts = [...q.options];
         opts.sort(() => Math.random() - 0.5);
@@ -1389,8 +1400,8 @@ const RPG = {
                     btn.classList.add('wrong');
 
                     if(!this.state.wrongCollocations) this.state.wrongCollocations = [];
-                    if(!this.state.wrongCollocations.includes(q.id)) {
-                        this.state.wrongCollocations.push(q.id);
+                    if(!this.state.wrongCollocations.includes(q.parentId)) {
+                        this.state.wrongCollocations.push(q.parentId);
                         localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
                     }
 

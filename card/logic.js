@@ -391,7 +391,7 @@ const Logic = {
              else if(t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
              else if(t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
              else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
-             else if(t.type === 'syn_water_light_matk_mdef' && hasEl('water') && hasEl('light')) active = true;
+             else if(t.type === 'syn_light_dark_matk_mdef' && hasEl('light') && hasEl('dark')) active = true;
              else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
              else if(t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
              else if(t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
@@ -409,7 +409,7 @@ const Logic = {
                 if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
                 if(t.type === 'syn_dark_3_matk') p.matk *= 1.5;
                 if(t.type === 'syn_light_fire_atk') p.atk *= 1.3;
-                if(t.type === 'syn_water_light_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
+                if(t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
                 if(t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if(t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
                 if(t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
@@ -596,7 +596,7 @@ Logic.calculateInitialStats = function(playerProto, deck, allCards, idx) {
          else if(t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
          else if(t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
          else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
-         else if(t.type === 'syn_water_light_matk_mdef' && hasEl('water') && hasEl('light')) active = true;
+         else if(t.type === 'syn_light_dark_matk_mdef' && hasEl('light') && hasEl('dark')) active = true;
          else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
          else if(t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
          else if(t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
@@ -614,7 +614,7 @@ Logic.calculateInitialStats = function(playerProto, deck, allCards, idx) {
             if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
             if(t.type === 'syn_dark_3_matk') p.matk *= 1.5;
             if(t.type === 'syn_light_fire_atk') p.atk *= 1.3;
-            if(t.type === 'syn_water_light_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
+            if(t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
             if(t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
             if(t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
             if(t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
