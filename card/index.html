@@ -571,10 +571,16 @@ const SIDE_EFFECT_HANDLERS = {
     },
     'apply_lumi_guard': (ctx, eff) => {
         let buffs = RPG.battle.fieldBuffs.map(b => b.name);
-        if(buffs.includes('moon_bless') && buffs.includes('star_powder')) {
+        if(buffs.includes('star_powder')) {
             ctx.source.buffs['guard'] = 1;
-            ctx.logFn("스타파우더&달의축복: 가드 효과(버프) 적용!");
+            ctx.logFn("스타파우더: 가드 효과(버프) 적용!");
         }
+    },
+    'random_field_buff_lumi': (ctx, eff) => {
+        const buffs = ['sun_bless', 'moon_bless', 'star_powder'];
+        const pick = buffs[Math.floor(Math.random() * buffs.length)];
+        RPG.applyFieldBuff(pick);
+        ctx.logFn(`코스믹 하모니: [${ctx.getBuffName(pick)}] 생성!`);
     }
 };
 
@@ -2152,6 +2158,14 @@ const RPG = {
             if (Math.random() < 0.2) {
                 target.buffs.stun = 1;
                 RPG.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
+            }
+        }
+
+        // Trait: Behemoth Liberated (Skill Use -> Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait') {
+            if (Math.random() < 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
             }
         }
 

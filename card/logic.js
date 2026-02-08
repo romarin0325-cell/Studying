@@ -145,24 +145,15 @@ const DAMAGE_EFFECT_HANDLERS = {
         let buffs = ctx.fieldBuffs.map(b => b.name);
         let hasSun = buffs.includes('sun_bless');
         let hasMoon = buffs.includes('moon_bless');
-        let hasEarth = buffs.includes('earth_bless');
-        let hasStar = buffs.includes('star_powder');
 
-        if(hasSun) ctx.mult += 1.0;
+        if(hasSun) {
+            let count = ctx.fieldBuffs.length;
+            ctx.mult += count * 1.0;
+            ctx.logFn(`태양의 축복: 필드버프 ${count}개! 배율 +${count.toFixed(1)}`);
+        }
         if(hasMoon) {
-             // Moon: Ignore 20% MDEF (Handled in Core Logic via activeTraits/Flags? Or modify ctx here?)
-             // We can't modify defense easily here unless we pass it.
-             // But we can attach a flag to ctx for the main calculator to see?
-             ctx.ignoreMdefRate = (ctx.ignoreMdefRate || 0) + 0.2;
-        }
-        if(hasSun && hasEarth) ctx.mult += 2.0;
-        if(hasSun && hasMoon) {
-            ctx.mult += 2.0;
             ctx.ignoreMdefRate = (ctx.ignoreMdefRate || 0) + 0.2;
-        }
-        if(hasMoon && hasStar) {
-            ctx.ignoreMdefRate = (ctx.ignoreMdefRate || 0) + 0.2;
-            ctx.logFn("스타파우더&달의축복: 가드 효과 발동!");
+            ctx.logFn("달의 축복: 마법방어력 20% 관통!");
         }
     },
     'count_deck_attr_dmg': (ctx, eff) => {
