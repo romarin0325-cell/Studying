@@ -140,6 +140,66 @@ const DAMAGE_EFFECT_HANDLERS = {
     'delayed_random_attack': (ctx, eff) => {
          ctx.mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
          ctx.logFn(`무작위 위력! x${ctx.mult.toFixed(1)}`);
+    },
+    'field_buff_combo_dmg': (ctx, eff) => {
+        let buffs = ctx.fieldBuffs.map(b => b.name);
+        let hasSun = buffs.includes('sun_bless');
+        let hasMoon = buffs.includes('moon_bless');
+
+        if(hasSun) {
+            let count = ctx.fieldBuffs.length;
+            ctx.mult += count * 1.0;
+            ctx.logFn(`태양의 축복: 필드버프 ${count}개! 배율 +${count.toFixed(1)}`);
+        }
+        if(hasMoon) {
+            ctx.ignoreMdefRate = (ctx.ignoreMdefRate || 0) + 0.2;
+            ctx.logFn("달의 축복: 마법방어력 20% 관통!");
+        }
+    },
+    'count_deck_attr_dmg': (ctx, eff) => {
+         // Need access to deck or active traits to count attributes?
+         // Logic.calculateDamage receives activeTraits.
+         // But deck content isn't directly passed.
+         // However, `ctx.activeTraits` contains synergy strings, not deck info.
+         // Logic.calculateDamage is called with `activeTraits`.
+         // We might need to pass `deck` to calculateDamage or check `source.proto.element` etc.
+         // Workaround: We can't easily count deck attributes inside Logic without deck data.
+         // BUT, we can pass the count as a param when calling calculateDamage?
+         // OR, we assume `activeTraits` or `fieldBuffs` implies something? No.
+         // We should update `Logic.calculateDamage` to accept `deck` or `attrCount`.
+         // OR, for now, use a hack: Look at `activeTraits` if it has specific markers? No.
+         // Best approach: Add `deck` to the `calculateDamage` signature in the next step,
+         // or handle this in index.html and pass the multiplier?
+         // Index.html `calcDamage` calls `Logic.calculateDamage`.
+         // I will update `Logic` to accept `deck` in the next step.
+         // For now, I'll write the handler assuming `ctx.deck` exists.
+         if(ctx.deck) {
+             const cards = ctx.deck.map(id => id ? (CARDS.find(c=>c.id===id)||BONUS_CARDS.find(c=>c.id===id)||TRANSCENDENCE_CARDS.find(c=>c.id===id)) : null).filter(c=>c);
+             let attrs = new Set();
+             let hasJoker = false;
+             cards.forEach(c => {
+                 if(c.id === 'joker') hasJoker = true;
+                 else attrs.add(c.element);
+             });
+             let count = hasJoker ? 5 : attrs.size;
+             ctx.mult += count * 1.0;
+             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
+         }
+    },
+    'turn_modulo_dmg': (ctx, eff) => {
+         // Need current turn. ctx does not have turn.
+         // Add turn to ctx in calculateDamage.
+         if(ctx.turn && ctx.turn % eff.mod === 0) {
+             ctx.mult *= eff.mult;
+             ctx.logFn(`4의 배수 턴(${ctx.turn})! 위력 ${eff.mult}배!`);
+         }
+    },
+    'dmg_boost_turn_scale': (ctx, eff) => {
+        if(ctx.turn) {
+            let bonus = ctx.turn * eff.scale;
+            ctx.mult += bonus;
+            ctx.logFn(`인과역전: ${ctx.turn}턴 경과! 배율 +${bonus.toFixed(1)}`);
+        }
     }
 };
 
@@ -171,6 +231,10 @@ const Logic = {
             if (trait.type === 'cond_no_field_buff_eva_crit' && fieldBuffs.length === 0) {
                 stats.evasion += trait.val;
                 stats.crit += trait.val;
+            }
+            if (trait.type === 'luna_jasmine_trait' && fieldBuffs.some(b => b.name === 'goddess_descent')) {
+                 stats.evasion += 25;
+                 stats.crit += 25;
             }
         }
 
@@ -235,7 +299,7 @@ const Logic = {
     },
 
     // 3. Damage Calculation
-    calculateDamage: function(source, target, skill, fieldBuffs, activeTraits, logFn, mode) {
+    calculateDamage: function(source, target, skill, fieldBuffs, activeTraits, logFn, mode, deck, turn) {
         if (!logFn) logFn = function() {};
 
         if(skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0, isCrit: false };
@@ -246,6 +310,9 @@ const Logic = {
         // 1. Critical
         let isCrit = Math.random() * 100 < srcStats.crit;
         if (skill.effects && skill.effects.some(e => e.type === 'force_crit')) isCrit = true;
+        // Check force_crit_chance
+        const forceCritChance = skill.effects ? skill.effects.find(e => e.type === 'force_crit_chance') : null;
+        if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
 
         let critDmg = 1.5;
         if (source.proto && fieldBuffs.some(b => b.name === 'sun_bless')) critDmg += 0.6;
@@ -265,12 +332,17 @@ const Logic = {
             activeTraits: activeTraits,
             logFn: logFn,
             mode: mode,
-            mult: skill.val || 1.0
+            deck: deck,
+            turn: turn,
+            mult: skill.val || 1.0,
+            ignoreMdefRate: 0
         };
 
         // Elemental
         if (source.proto && source.proto.element && target.element) {
-             const elMult = this.getElementalMultiplier(source.proto.element, target.element);
+             let elMult = this.getElementalMultiplier(source.proto.element, target.element);
+             if (source.proto.trait && source.proto.trait.type === 'all_advantage') elMult = 1.2;
+
              if (elMult > 1.0) {
                  val *= elMult;
                  logFn("상성 우위! 대미지 20% 증가.");
@@ -324,10 +396,24 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 심해의 주인: 적 디버프 3개 이상! 위력 폭발!");
             }
+            if(t.type === 'luna_jasmine_trait' && (target.buffs['divine'] || 0) >= 3) {
+                dmgBonus += (t.val - 1.0);
+                logFn("[특성] 루나&자스민: 디바인 3스택 이상! 위력 2배!");
+            }
+            if(t.type === 'behemoth_liberated_trait' && Object.keys(target.buffs).length >= 3) {
+                dmgBonus += (t.val - 1.0);
+                logFn("[특성] 해방된 베히모스: 디버프 3개 이상! 파괴적 일격!");
+            }
         }
 
         // Defense
         let def = (skill.type === 'phy') ? tgtStats.def : tgtStats.mdef;
+
+        if (ctx.ignoreMdefRate > 0 && skill.type === 'mag') {
+             let ignore = Math.floor(tgtStats.mdef * ctx.ignoreMdefRate);
+             def = Math.max(0, def - ignore);
+             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate*100)}% 관통!`);
+        }
 
         // [추가] 신데렐라: 스택 비례 방어 무시
         if (t && t.type === 'ignore_def_mdef_by_stack') {
@@ -499,7 +585,7 @@ const Logic = {
     },
 
     // 6. Handle Death Traits
-    handleDeathTraits: function(victim, killer, fieldBuffs, logFn) {
+    handleDeathTraits: function(victim, killer, fieldBuffs, logFn, deck, turn) {
         if (!logFn) logFn = function() {};
 
         let result = { damageToKiller: 0, fieldBuffsToAdd: [], killerDebuffs: {} };
@@ -507,7 +593,7 @@ const Logic = {
 
         if(t.type === 'death_dmg_mag') {
             let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn);
+            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
             if(dmgResult.dmg > 0) {
                 result.damageToKiller += dmgResult.dmg;
                 logFn(`[특성] 사망 반격! ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -516,7 +602,7 @@ const Logic = {
         else if(t.type === 'death_dmg_debuff') {
             let cnt = Object.keys(killer.buffs).length;
             let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn);
+            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
             if(dmgResult.dmg > 0) {
                 result.damageToKiller += dmgResult.dmg;
                 logFn(`[특성] 저주 반격! ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -542,7 +628,7 @@ const Logic = {
         else if(t.type === 'death_field_buff_count_dmg') {
              let count = fieldBuffs.length;
              let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
-             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn);
+             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
              if(dmgResult.dmg > 0) {
                  result.damageToKiller += dmgResult.dmg;
                  logFn(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit?'Critical! ':''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -641,6 +727,17 @@ Logic.calculateInitialStats = function(playerProto, deck, allCards, idx) {
             p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
         }
     }
+
+        if(t.type === 'rabbit_synergy_boost') {
+             const rabbits = ['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit', 'joker'];
+             let count = 0;
+             deck.forEach(id => { if (id && rabbits.includes(id)) count++; });
+             if (count > 0) {
+                 let boost = count * (t.val / 100);
+                 p.atk = Math.floor(p.atk * (1 + boost));
+                 p.matk = Math.floor(p.matk * (1 + boost));
+             }
+        }
 
     return { stats: p, activeTrait: active ? t.type : null };
 };

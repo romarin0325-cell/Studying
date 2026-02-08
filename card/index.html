@@ -32,6 +32,12 @@
     .card-item.epic { border-color: #e040fb; color: #e040fb; animation: glow-epic 2s infinite; }
     .card-item.rare { border-color: #448aff; color: #448aff; }
     .card-item.normal { border-color: #bdbdbd; color: #bdbdbd; }
+    @keyframes glow-gold {
+      0% { box-shadow: 0 0 5px #ffd700; border-color: #ffd700; }
+      50% { box-shadow: 0 0 20px #ffd700; border-color: #ffeb3b; }
+      100% { box-shadow: 0 0 5px #ffd700; border-color: #ffd700; }
+    }
+    .card-item.transcendence { border: 2px solid #ffd700; color: #ffd700; animation: glow-gold 2s infinite; background: #2a2a1a; }
 
     .portrait {
         width: 100%; aspect-ratio: 3/4;
@@ -178,6 +184,32 @@
         <div style="flex:1; overflow-y:auto; border-top:1px solid #333;"><div id="deck-card-list" class="card-grid"></div></div>
         <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
     </div>
+    <div id="screen-chaos-roulette" class="screen">
+        <div class="header">Chaos Roulette</div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+            <div style="text-align:center;">
+                <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
+                <p style="color:#aaa; font-size:0.9rem;">티켓을 소모하여 초월 카드를 획득하세요.</p>
+                <p>보유 카오스 티켓: <span id="ui-chaos-tickets" style="color:#ffd700; font-weight:bold; font-size:1.2rem;">0</span>장</p>
+            </div>
+            <button class="menu-btn" onclick="RPG.spinChaosRoulette()" style="border-color:#ffd700; color:#ffd700; width:80%; max-width:300px; padding:20px;">
+                카오스 룰렛 돌리기 (티켓 1장)
+            </button>
+            <button class="menu-btn" onclick="RPG.openTranscendenceCheck()" style="width:80%; max-width:300px;">
+                초월 확인
+            </button>
+            <button class="menu-btn" onclick="RPG.toMenu()" style="width:80%; max-width:300px; background:#444;">
+                돌아가기
+            </button>
+        </div>
+    </div>
+    <div id="screen-transcendence-check" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1f1f1f;">
+            <h3 style="margin:0; color:#ffd700;">보유 초월 카드 (다음 오리진 게임 적용)</h3>
+            <button onclick="RPG.openChaosRoulette()" style="background:#fff; color:#000; padding:5px 10px; border:1px solid #ccc; cursor:pointer; border-radius:4px;">뒤로</button>
+        </div>
+        <div id="transcendence-grid" class="card-grid"></div>
+    </div>
     <div id="screen-battle" class="screen">
         <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div></div>
         <div class="visual-stage">
@@ -205,7 +237,10 @@
 
 <div id="modal-mode-select" class="modal">
     <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
-        <h3>게임 모드 선택</h3>
+        <div style="position:relative;">
+            <h3>게임 모드 선택</h3>
+            <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()" style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스 룰렛</button>
+        </div>
         <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;"></div>
         <div id="mode-desc" style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
             모드를 선택해주세요.
@@ -494,6 +529,58 @@ const SIDE_EFFECT_HANDLERS = {
     },
     'delayed_attack_field': (ctx, eff) => {
         if (eff.field) RPG.applyFieldBuff(eff.field);
+    },
+    'delayed_turn_scale_attack': (ctx, eff) => {
+        RPG.battle.delayedEffects.push({
+            turn: RPG.battle.turn + eff.turns,
+            source: ctx.source,
+            skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost_turn_scale', scale: eff.scale, startTurn: RPG.battle.turn}] }
+        });
+        ctx.logFn(`인과역전! ${eff.turns}턴 후 발동합니다!`);
+    },
+    'delayed_attack_debuff_scale': (ctx, eff) => {
+        RPG.battle.delayedEffects.push({
+            turn: RPG.battle.turn + eff.turns,
+            source: ctx.source,
+            skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: eff.multPerDebuff}] }
+        });
+        ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
+    },
+    'random_skill_trigger_from_list': (ctx, eff) => {
+        const skillMap = [
+            { id: 'gold_dragon', skill: '얼티밋브레스' },
+            { id: 'zeke', skill: '라그나로크' },
+            { id: 'jasmine', skill: '여신강림' },
+            { id: 'frozen_witch', skill: '블리자드' },
+            { id: 'behemoth', skill: '어스퀘이크' },
+            { id: 'gray', skill: '차원절단' },
+            { id: 'rumi', skill: '밀키웨이엑스터시' },
+            { id: 'phoenix', skill: '메테오임팩트' },
+            { id: 'time_ruler', skill: '섀도우트위스트' }
+        ];
+
+        const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
+        const card = RPG.getCardData(pick.id);
+        if(!card) return;
+        const skill = card.skills.find(s => s.name === pick.skill);
+
+        if (skill) {
+            ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+            RPG.executeSkill(ctx.source, ctx.target, skill, true);
+        }
+    },
+    'apply_lumi_guard': (ctx, eff) => {
+        let buffs = RPG.battle.fieldBuffs.map(b => b.name);
+        if(buffs.includes('star_powder')) {
+            ctx.source.buffs['guard'] = 1;
+            ctx.logFn("스타파우더: 가드 효과(버프) 적용!");
+        }
+    },
+    'random_field_buff_lumi': (ctx, eff) => {
+        const buffs = ['sun_bless', 'moon_bless', 'star_powder'];
+        const pick = buffs[Math.floor(Math.random() * buffs.length)];
+        RPG.applyFieldBuff(pick);
+        ctx.logFn(`코스믹 하모니: [${ctx.getBuffName(pick)}] 생성!`);
     }
 };
 
@@ -506,7 +593,10 @@ const RPG = {
     global: {
         unlocked_modes: ['origin'],
         unlocked_bonus_cards: [],
-        achievements: { origin: false }
+        achievements: { origin: false },
+        chaosTickets: 0,
+        lastRewardDate: null,
+        pendingTranscendenceCards: []
     },
 
     // Game State (Session Persistent)
@@ -584,8 +674,24 @@ const RPG = {
         localStorage.setItem('cardRpgGlobal', JSON.stringify(this.global));
     },
 
+    checkDailyChaosTicket() {
+        const today = new Date().toDateString();
+        if (this.global.lastRewardDate !== today) {
+            this.global.lastRewardDate = today;
+            this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
+            this.saveGlobalData();
+            this.showAlert("출석 보상: 카오스 티켓 1장을 획득했습니다!");
+        }
+    },
+
+    checkAllBonusUnlocked() {
+        if (!this.global.unlocked_bonus_cards) return false;
+        return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
+    },
+
     startGame(mode) {
         this.loadGlobalData();
+        this.checkDailyChaosTicket();
 
         if(mode === 'load') {
             const save = localStorage.getItem('cardRpgSave');
@@ -623,6 +729,15 @@ const RPG = {
         const desc = document.getElementById('mode-desc');
         list.innerHTML = "";
         desc.innerText = "모드를 선택하여 설명을 확인하세요.";
+
+        const chaosBtn = document.getElementById('btn-chaos-roulette');
+        if (chaosBtn) {
+            if (this.checkAllBonusUnlocked()) {
+                chaosBtn.style.display = 'block';
+            } else {
+                chaosBtn.style.display = 'none';
+            }
+        }
 
         const MODES = [
             { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
@@ -716,6 +831,12 @@ const RPG = {
             this.state.inventory = [...picks];
         }
 
+        if (mode === 'origin' && this.global.pendingTranscendenceCards) {
+            this.state.transcendencePool = [...this.global.pendingTranscendenceCards];
+        } else {
+            this.state.transcendencePool = [];
+        }
+
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
@@ -796,6 +917,40 @@ const RPG = {
 
     openSystemMenu() {
         document.getElementById('modal-menu').classList.add('active');
+    },
+
+    // --- Chaos Roulette ---
+    openChaosRoulette() {
+        if (!this.checkAllBonusUnlocked()) return this.showAlert("아직 해금되지 않았습니다.");
+        this.showScreen('screen-chaos-roulette');
+        document.getElementById('ui-chaos-tickets').innerText = this.global.chaosTickets || 0;
+    },
+
+    spinChaosRoulette() {
+        if ((this.global.chaosTickets || 0) < 1) return this.showAlert("티켓이 부족합니다.");
+
+        let pool = TRANSCENDENCE_CARDS.filter(c => !this.global.pendingTranscendenceCards.includes(c.id));
+
+        if (pool.length === 0) return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
+
+        this.global.chaosTickets--;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        this.global.pendingTranscendenceCards.push(pick.id);
+        this.saveGlobalData();
+
+        document.getElementById('ui-chaos-tickets').innerText = this.global.chaosTickets;
+
+        const modal = document.getElementById('modal-gacha');
+        const content = document.getElementById('gacha-result');
+        document.getElementById('gacha-title').innerText = "초월 소환 성공!";
+        content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>다음 오리진 게임 전설 풀에 추가되었습니다!</p>`;
+        modal.classList.add('active');
+    },
+
+    openTranscendenceCheck() {
+        this.showScreen('screen-transcendence-check');
+        this.renderCardList('transcendence-grid', this.global.pendingTranscendenceCards, (id) => this.showCardInfo(id));
     },
 
     // --- Chaos Blessing ---
@@ -968,6 +1123,7 @@ const RPG = {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
         }
+        pool = pool.filter(c => c.grade !== 'transcendence');
 
         const mode = this.state.mode;
         if (mode === 'restriction') {
@@ -1014,6 +1170,7 @@ const RPG = {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
         }
+        pool = pool.filter(c => c.grade !== 'transcendence');
 
         // 3. Filter by Mode Rarity
         const mode = this.state.mode;
@@ -1206,6 +1363,12 @@ const RPG = {
             pool = pool.concat(bonus);
         }
 
+        // Add Transcendence Cards (Origin Only, Legend Only)
+        if (mode === 'origin' && grade === 'legend' && this.state.transcendencePool && this.state.transcendencePool.length > 0) {
+             const transCards = TRANSCENDENCE_CARDS.filter(c => this.state.transcendencePool.includes(c.id));
+             pool = pool.concat(transCards);
+        }
+
         if(pool.length === 0) {
             // Fallback if pool is empty (e.g. no cards of that grade? Should not happen with standard set)
             // But if Restriction mode and we rolled something else? Logic guarantees valid grade.
@@ -1221,10 +1384,12 @@ const RPG = {
         const modal = document.getElementById('modal-gacha');
         const content = document.getElementById('gacha-result');
         let color = '#bdbdbd', title = "획득!";
-        if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
+        if(pick.grade === 'transcendence') { color = '#ffd700'; title = "🌟 초월 카드 강림! 🌟"; }
+        else if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
         else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
 
         let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
+        if(pick.grade === 'transcendence') msgTitle = title;
         document.getElementById('gacha-title').innerText = msgTitle;
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
             <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
@@ -1943,7 +2108,9 @@ const RPG = {
             victim,
             killer,
             RPG.battle.fieldBuffs,
-            (msg) => RPG.log(msg)
+            (msg) => RPG.log(msg),
+            RPG.state.deck,
+            RPG.battle.turn
         );
 
         // Apply results
@@ -1994,6 +2161,14 @@ const RPG = {
             }
         }
 
+        // Trait: Behemoth Liberated (Skill Use -> Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait') {
+            if (Math.random() < 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
+            }
+        }
+
         // Check for Delayed Attack Effect
         let delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
         if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack_field');
@@ -2035,7 +2210,9 @@ const RPG = {
             RPG.battle.fieldBuffs,
             RPG.battle.activeTraits,
             (msg) => RPG.log(msg),
-            RPG.state.mode // PASS MODE
+            RPG.state.mode, // PASS MODE
+            RPG.state.deck, // PASS DECK
+            RPG.battle.turn // PASS TURN
         );
 
         if(target.id === 'demon_god') {
@@ -2396,6 +2573,13 @@ const RPG = {
                 }
             }
 
+            // Transcendence Ticket Logic (On Clear)
+            if (this.state.mode !== 'origin' && this.checkAllBonusUnlocked()) {
+                 this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
+                 this.saveGlobalData();
+                 this.log("<b>[보너스]</b> 카오스 티켓 1장 획득!");
+            }
+
             // Unlock Mode
             if (!this.global.unlocked_modes.includes(this.state.mode)) {
                 this.global.unlocked_modes.push(this.state.mode);
@@ -2498,6 +2682,11 @@ const RPG = {
 
         if (['chaos', 'draft'].includes(this.state.mode)) {
              this.saveRecord();
+        }
+
+        if (this.state.mode === 'origin') {
+             this.global.pendingTranscendenceCards = [];
+             this.saveGlobalData();
         }
 
         if (['chaos', 'draft'].includes(this.state.mode)) {
