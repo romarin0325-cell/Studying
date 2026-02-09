@@ -693,7 +693,7 @@ const TRANSCENDENCE_CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{type: 'buff', id: 'magic_guard', duration: 1}] },
             { name: '코스믹하모니', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '랜덤 필드버프 생성 (태양/달/스타파우더)', effects: [{type: 'random_field_buff_lumi'}] },
-            { name: '꿈의형태', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '적용중인 필드버프에 따라 추가 효과', effects: [{type: 'field_buff_combo_dmg'}, {type: 'apply_lumi_guard'}] }
+            { name: '꿈의형태', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '모든 필드버프를 소모하여 각 버프에 따른 초월적 효과 발동 (배율/회복/관통/기절)', effects: [{type: 'dream_form_execute'}] }
         ]
     },
     {

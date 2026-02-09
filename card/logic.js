@@ -441,6 +441,63 @@ const Logic = {
             logFn("[특성] 치명타! 적 방어력 50% 추가 무시!");
         }
 
+        // [초월 루미: 꿈의형태 리워크 로직]
+        if (skill.name === '꿈의형태' && fieldBuffs.length > 0) {
+            let logMsg = [];
+
+            // 1. 효과 적립
+            fieldBuffs.forEach(b => {
+                switch (b.name) {
+                    case 'sun_bless': // 태양: 2배율 + 확정 치명타
+                        mult += 2.0;
+                        isCrit = true;
+                        logMsg.push("태양(2.0배/치명)");
+                        break;
+                    case 'moon_bless': // 달: 마방 30% 관통
+                        {
+                            let ignore = Math.floor(tgtStats.mdef * 0.3);
+                            def = Math.max(0, def - ignore);
+                            logMsg.push(`달(관통 ${ignore})`);
+                        }
+                        break;
+                    case 'star_powder': // 스타파우더: 마나 30 회복
+                        source.mp = Math.min(100, source.mp + 30);
+                        logMsg.push("스타(MP+30)");
+                        break;
+                    case 'earth_bless': // 대지: 2배율 + 체력 풀회복
+                        mult += 2.0;
+                        source.hp = source.maxHp;
+                        logMsg.push("대지(2.0배/완전회복)");
+                        break;
+                    case 'sanctuary': // 성역: 2배율 + 마나 20 회복
+                        mult += 2.0;
+                        source.mp = Math.min(100, source.mp + 20);
+                        logMsg.push("성역(2.0배/MP+20)");
+                        break;
+                    case 'goddess_descent': // 여신강림: 4배율 + 스턴
+                        mult += 4.0;
+                        target.buffs['stun'] = 1;
+                        logMsg.push("여신(4.0배/기절)");
+                        break;
+                    case 'reaper_realm': // 사신강림: 마방 50% 관통
+                        {
+                            let ignore = Math.floor(tgtStats.mdef * 0.5);
+                            def = Math.max(0, def - ignore);
+                            logMsg.push(`사신(관통 ${ignore})`);
+                        }
+                        break;
+                    case 'twinkle_party': // 트윙클: 3배율
+                        mult += 3.0;
+                        logMsg.push("트윙클(3.0배)");
+                        break;
+                }
+            });
+
+            // 2. 로그 출력 및 버프 소모
+            logFn(`[꿈의형태] 필드 버프 ${fieldBuffs.length}개 융합! (${logMsg.join(', ')})`);
+            fieldBuffs.length = 0; // 모든 필드 버프 제거 (Array Clear)
+        }
+
         // Final Calculation
         let finalMult = mult * (1.0 + dmgBonus);
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
