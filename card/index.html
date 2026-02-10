@@ -152,6 +152,7 @@
         <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
         <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
         <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
+        <button class="menu-btn" onclick="RPG.openApiSettings()">API 설정</button>
         <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
     </div>
     <div id="screen-draft" class="screen">
@@ -294,7 +295,7 @@
     <div class="modal-content" style="height:auto;">
         <h3>도서관</h3>
         <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
-        <button class="menu-btn" onclick="RPG.openPrivateTutoring()" style="border-color: #ffd700; color: #ffd700;">루미의 개인과외</button>
+        <button class="menu-btn" onclick="RPG.openPrivateTutoring()">루미의 개인과외</button>
         <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
         <button onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
@@ -304,7 +305,7 @@
     <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
         <h3>루미의 마법교실</h3>
         <div id="lecture-list" class="modal-scroll"></div>
-        <button onclick="document.getElementById('modal-magic-class').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        <button onclick="RPG.closeMagicClass()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -332,16 +333,15 @@
              <button class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습 초기화</button>
         </div>
         <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
-        <button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        <button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
 <div id="modal-tutoring" class="modal">
     <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
         <h3>루미의 개인과외</h3>
-        <div style="margin-bottom: 10px; display: flex; gap: 5px;">
-            <input type="password" id="api-key-input" placeholder="Gemini API Key 입력" style="flex: 1; padding: 5px; background: #333; color: #fff; border: 1px solid #555;">
-            <button onclick="RPG.saveApiKey()" style="padding: 5px 10px; background: #555; color: #fff; border: 1px solid #777; cursor: pointer;">저장</button>
+        <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
+             <img src="루미.png" onerror="this.src=''" alt="Rumi">
         </div>
         <div id="tutoring-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
             수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
@@ -350,7 +350,7 @@
             <button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;">수업 시작</button>
             <button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()" style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;">퀴즈 풀기</button>
         </div>
-        <button onclick="document.getElementById('modal-tutoring').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        <button onclick="RPG.closePrivateTutoring()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -397,6 +397,16 @@
         <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
         <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
         <button onclick="document.getElementById('modal-menu').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-api-settings" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3>API 설정</h3>
+        <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Gemini API Key를 입력해주세요.</p>
+        <input type="password" id="api-key-input" placeholder="Gemini API Key 입력" style="width:100%; padding:10px; background:#333; color:#fff; border:1px solid #555; margin-bottom:10px;">
+        <button class="menu-btn" onclick="RPG.saveApiKey()">저장</button>
+        <button onclick="document.getElementById('modal-api-settings').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -1420,6 +1430,7 @@ const RPG = {
         document.getElementById('modal-library').classList.add('active');
     },
     openMagicClass() {
+        document.getElementById('modal-library').classList.remove('active');
         const list = document.getElementById('lecture-list');
         list.innerHTML = "";
         GRAMMAR_DATA.forEach(lec => {
@@ -1458,6 +1469,7 @@ const RPG = {
 
     // --- Wordbook & Quiz ---
     openWordbook() {
+        document.getElementById('modal-library').classList.remove('active');
         if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
             this.openCollocationBook();
             return;
@@ -2835,6 +2847,27 @@ const RPG = {
     },
 
     // --- Private Tutoring ---
+    openApiSettings() {
+        document.getElementById('modal-api-settings').classList.add('active');
+        const key = localStorage.getItem('cardRpgApiKey');
+        if(key) document.getElementById('api-key-input').value = key;
+    },
+
+    closePrivateTutoring() {
+        document.getElementById('modal-tutoring').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
+    closeMagicClass() {
+        document.getElementById('modal-magic-class').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
+    closeWordbook() {
+        document.getElementById('modal-wordbook').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
     openPrivateTutoring() {
         const mode = this.state.mode;
         let list = (mode === 'chaos' || mode === 'draft') ? this.state.wrongCollocations : this.state.wrongWords;
@@ -2844,11 +2877,8 @@ const RPG = {
             return this.showAlert(msg);
         }
 
+        document.getElementById('modal-library').classList.remove('active');
         document.getElementById('modal-tutoring').classList.add('active');
-
-        // Load API Key
-        const key = localStorage.getItem('cardRpgApiKey');
-        if(key) document.getElementById('api-key-input').value = key;
 
         // Reset UI
         document.getElementById('tutoring-content').innerText = "수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.";
@@ -2902,32 +2932,57 @@ const RPG = {
         contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
 
         // Construct Prompt
-        let prompt = "";
+        const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 마법사 '루미'입니다.
+- 당신은 딱딱한 전문 용어 대신, 직관적인 비유를 사용하여 영어를 가르칩니다.
+- 당신은 사용자에게 단어를 가르쳐주는 것을 핑계로 대화를 나누는 것을 좋아하며, 때때로 애정 표현을 하거나 칭찬을 갈구합니다.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+- **말버릇:**
+    - 질문할 때: "형아, ~인지 알아?", "혹시 ~해본 적 있어?"
+    - 강조할 때: "바로 ~야!", "절대 안 돼!", "내가 보증할게!"
+    - 마무리: "자, 강의는 여기까지!", "약속해!"
+
+## 3. 교육 방식 (Teaching Style)
+- **절대 금지:** 건조하게 설명하지 마십시오.
+- **예문 활용:** 전문적인 예문 이외에도 **'루미와 형아의 관계'**나 **'일상적인 상황'**을 빗대어 로맨틱하거나 유머러스하게 만든 예문을 한두개씩 넣으십시오.
+    - 나쁜 예: "This is a pen."
+    - 좋은 예: "I am in your heart." (난 형아 마음속에 쏙 들어가 있어!)`;
+
+        const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
+1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
+2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
+암기 비법 (Fun Mnemonic): 연상 기억법 등을 이용해 쉽게 외우는 방법. (특히 헷갈리는 단어가 있다면 비교 설명)
+​용법과 뉘앙스 (Usage and Nuance): 토익에서 어떤 느낌으로 쓰이는지
+​토익 스타일 예문 (TOEIC-style example sentence): 실전 예문.
+3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
+4.강의 마무리 멘트`;
+
+        let targetInfo = "";
         if (isCollocation) {
-            prompt = `Explain the English expression '${targetData.expression}' (Meaning: ${targetData.meaning}).
-Include:
-1. Fun Mnemonic (Association method) to remember it easily.
-2. Usage and Nuance.
-3. Pronunciation tip.
-4. A TOEIC-style example sentence.
-Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
+            targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
         } else {
-            prompt = `Explain the English word '${targetData.word}' (Meaning: ${targetData.meaning}).
-If applicable, distinguish it from the confusing word '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning}).
-Include:
-1. Fun Mnemonic (Association method) to remember it (especially vs the trap word if exists).
-2. Usage and Nuance.
-3. Pronunciation tip.
-4. A TOEIC-style example sentence.
-Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
+            targetInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
+            if (targetData.trap_word) {
+                targetInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+            }
         }
 
+        let fullPrompt = `${LUMI_PERSONA}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
+
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
+                    contents: [{ parts: [{ text: fullPrompt }] }],
+                    generationConfig: { temperature: 0.5 }
                 })
             });
 
@@ -2999,6 +3054,7 @@ Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
                             modal.classList.remove('active');
                             document.getElementById('modal-tutoring').classList.remove('active');
                             this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                            this.toMenu();
                         }, 1500);
                     } else {
                         btn.classList.add('wrong');
@@ -3065,6 +3121,7 @@ Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
                             modal.classList.remove('active');
                             document.getElementById('modal-tutoring').classList.remove('active');
                             this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                            this.toMenu();
                         }, 1500);
                     } else {
                         btn.classList.add('wrong');
