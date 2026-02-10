@@ -1083,6 +1083,7 @@ const RPG = {
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt;
             btn.onclick = () => {
+                btn.disabled = true;
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
                 if(opt === q.answer) {
                     btn.classList.add('correct');
@@ -1584,6 +1585,7 @@ const RPG = {
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt;
             btn.onclick = () => {
+                btn.disabled = true;
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
                 if(opt === q.answer) {
                     btn.classList.add('correct');
@@ -1661,6 +1663,7 @@ const RPG = {
             btn.innerText = opt.text;
             btn.onclick = () => {
                 // Disable all buttons
+                btn.disabled = true;
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
 
                 if(opt.correct) {
@@ -1698,7 +1701,19 @@ const RPG = {
     },
 
     startChaosQuiz(callback) {
-        document.getElementById('quiz-desc').style.display = 'none';
+        // ✅ 모달 초기화 추가
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active'); // 기존 모달 닫기
+
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // 완전 초기화
+        oDiv.innerHTML = "";
+        if(fDiv) fDiv.innerText = "";
+        descDiv.style.display = 'none';
 
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
@@ -1721,15 +1736,8 @@ const RPG = {
         // Shuffle
         options.sort(() => Math.random() - 0.5);
 
-        const modal = document.getElementById('modal-quiz');
-        const qDiv = document.getElementById('quiz-question');
-        const oDiv = document.getElementById('quiz-options');
-        const fDiv = document.getElementById('quiz-feedback');
-
         // Question is Meaning (Korean)
         qDiv.innerText = q.meaning;
-        oDiv.innerHTML = "";
-        if(fDiv) fDiv.innerText = "";
 
         options.forEach(opt => {
             const btn = document.createElement('button');
@@ -1739,6 +1747,7 @@ const RPG = {
             btn.innerText = opt.text;
             btn.onclick = () => {
                 // Disable all buttons
+                btn.disabled = true; // ✅ 즉시 비활성화
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
 
                 if(opt.correct) {
@@ -3020,136 +3029,139 @@ const RPG = {
     startTutoringQuiz() {
         if(!this.currentTutoringItem) return;
 
-        const item = this.currentTutoringItem;
-        const data = item.data;
+        // ✅ 모달 초기화 추가
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active'); // 기존 모달 닫기
+        setTimeout(() => { // 애니메이션 대기
 
-        if (item.type === 'collocation') {
-            // Reuse Collocation Quiz Logic but custom callback
-            let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
-            let q = quizList[Math.floor(Math.random() * quizList.length)];
+            const item = this.currentTutoringItem;
+            const data = item.data;
 
-            const modal = document.getElementById('modal-quiz');
+            // DOM Elements (Re-fetch inside timeout)
             const qDiv = document.getElementById('quiz-question');
             const descDiv = document.getElementById('quiz-desc');
             const oDiv = document.getElementById('quiz-options');
             const fDiv = document.getElementById('quiz-feedback');
 
-            qDiv.innerText = q.question;
-            descDiv.innerText = q.translation || "";
-            descDiv.style.display = 'block';
-
-            let opts = [...q.options];
-            opts.sort(() => Math.random() - 0.5);
-
+            // 초기화
             oDiv.innerHTML = "";
             fDiv.innerText = "";
 
-            opts.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "menu-btn";
-                btn.style.padding = "10px";
-                btn.style.fontSize = "0.9rem";
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    Array.from(oDiv.children).forEach(c => c.onclick = null);
-                    if(opt === q.answer) {
-                        btn.classList.add('correct');
-                        fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
-                        fDiv.style.color = "#4caf50";
+            if (item.type === 'collocation') {
+                // Reuse Collocation Quiz Logic but custom callback
+                let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+                let q = quizList[Math.floor(Math.random() * quizList.length)];
 
-                        // Remove from list
-                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
-                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+                qDiv.innerText = q.question;
+                descDiv.innerText = q.translation || "";
+                descDiv.style.display = 'block';
 
-                        setTimeout(() => {
-                            modal.classList.remove('active');
-                            document.getElementById('modal-tutoring').classList.remove('active');
-                            this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
-                            this.toMenu();
-                        }, 1500);
-                    } else {
-                        btn.classList.add('wrong');
-                        fDiv.innerText = "오답... (다시 학습해보세요)";
-                        fDiv.style.color = "#ef5350";
-                        Array.from(oDiv.children).forEach(c => {
-                             if(c.innerText === q.answer) c.classList.add('correct');
-                        });
-                        setTimeout(() => {
-                            modal.classList.remove('active');
-                        }, 2000);
+                let opts = [...q.options];
+                opts.sort(() => Math.random() - 0.5);
+
+                opts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "menu-btn";
+                    btn.style.padding = "10px";
+                    btn.style.fontSize = "0.9rem";
+                    btn.innerText = opt;
+                    btn.onclick = () => {
+                        btn.disabled = true; // ✅ 즉시 비활성화
+                        Array.from(oDiv.children).forEach(c => c.onclick = null);
+
+                        if(opt === q.answer) {
+                            btn.classList.add('correct');
+                            fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                            fDiv.style.color = "#4caf50";
+
+                            // Remove from list
+                            this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
+                            localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                                document.getElementById('modal-tutoring').classList.remove('active');
+                                this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                                this.toMenu();
+                            }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            fDiv.innerText = "오답... (다시 학습해보세요)";
+                            fDiv.style.color = "#ef5350";
+                            Array.from(oDiv.children).forEach(c => {
+                                 if(c.innerText === q.answer) c.classList.add('correct');
+                            });
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                            }, 2000);
+                        }
+                    };
+                    oDiv.appendChild(btn);
+                });
+                modal.classList.add('active');
+
+            } else {
+                // Vocab Quiz
+                // Create options: Correct + Trap + 2 Randoms
+                let options = [];
+                options.push({ text: data.meaning, correct: true });
+                options.push({ text: data.trap_meaning, correct: false });
+
+                let safeCounter = 0;
+                while(options.length < 4 && safeCounter < 100) {
+                    safeCounter++;
+                    let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                    if(r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
+                        options.push({ text: r.meaning, correct: false });
                     }
-                };
-                oDiv.appendChild(btn);
-            });
-            modal.classList.add('active');
-
-        } else {
-            // Vocab Quiz
-            // Create options: Correct + Trap + 2 Randoms
-            let options = [];
-            options.push({ text: data.meaning, correct: true });
-            options.push({ text: data.trap_meaning, correct: false });
-
-            let safeCounter = 0;
-            while(options.length < 4 && safeCounter < 100) {
-                safeCounter++;
-                let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-                if(r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
-                    options.push({ text: r.meaning, correct: false });
                 }
+                options.sort(() => Math.random() - 0.5);
+
+                qDiv.innerText = data.word;
+                descDiv.style.display = 'none';
+
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "menu-btn";
+                    btn.style.padding = "10px";
+                    btn.style.fontSize = "0.9rem";
+                    btn.innerText = opt.text;
+                    btn.onclick = () => {
+                        btn.disabled = true; // ✅ 즉시 비활성화
+                        Array.from(oDiv.children).forEach(c => c.onclick = null);
+
+                        if(opt.correct) {
+                            btn.classList.add('correct');
+                            fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                            fDiv.style.color = "#4caf50";
+
+                            // Remove
+                            this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
+                            localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                                document.getElementById('modal-tutoring').classList.remove('active');
+                                this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                                this.toMenu();
+                            }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            fDiv.innerText = "오답... (다시 학습해보세요)";
+                            fDiv.style.color = "#ef5350";
+                             Array.from(oDiv.children).forEach(c => {
+                                 if(c.innerText === data.meaning) c.classList.add('correct');
+                            });
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                            }, 2000);
+                        }
+                    };
+                    oDiv.appendChild(btn);
+                });
+                 modal.classList.add('active');
             }
-            options.sort(() => Math.random() - 0.5);
-
-            const modal = document.getElementById('modal-quiz');
-            const qDiv = document.getElementById('quiz-question');
-            const descDiv = document.getElementById('quiz-desc');
-            const oDiv = document.getElementById('quiz-options');
-            const fDiv = document.getElementById('quiz-feedback');
-
-            qDiv.innerText = data.word;
-            descDiv.style.display = 'none';
-            oDiv.innerHTML = "";
-            fDiv.innerText = "";
-
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "menu-btn";
-                btn.style.padding = "10px";
-                btn.style.fontSize = "0.9rem";
-                btn.innerText = opt.text;
-                btn.onclick = () => {
-                    Array.from(oDiv.children).forEach(c => c.onclick = null);
-                    if(opt.correct) {
-                        btn.classList.add('correct');
-                        fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
-                        fDiv.style.color = "#4caf50";
-
-                        // Remove
-                        this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
-                        localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
-
-                        setTimeout(() => {
-                            modal.classList.remove('active');
-                            document.getElementById('modal-tutoring').classList.remove('active');
-                            this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
-                            this.toMenu();
-                        }, 1500);
-                    } else {
-                        btn.classList.add('wrong');
-                        fDiv.innerText = "오답... (다시 학습해보세요)";
-                        fDiv.style.color = "#ef5350";
-                         Array.from(oDiv.children).forEach(c => {
-                             if(c.innerText === data.meaning) c.classList.add('correct');
-                        });
-                        setTimeout(() => {
-                            modal.classList.remove('active');
-                        }, 2000);
-                    }
-                };
-                oDiv.appendChild(btn);
-            });
-             modal.classList.add('active');
-        }
+        }, 100);
     },
 
     showAlert(msg) {
