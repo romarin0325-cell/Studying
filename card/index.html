@@ -410,209 +410,13 @@
     </div>
 </div>
 
+<script src="api.js"></script>
 <script src="data.js"></script>
 <script src="vocab_data.js"></script>
 <script src="collocation_data.js"></script>
 <script src="grammar_data.js"></script>
 <script src="logic.js"></script>
 <script>
-const SIDE_EFFECT_HANDLERS = {
-    'buff': (ctx, eff) => {
-        ctx.source.buffs[eff.id] = (eff.duration || 1);
-    },
-    'debuff': (ctx, eff) => {
-        let t = ctx.target;
-        if(eff.stack) {
-            t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
-            if(t.buffs[eff.id] > 3) t.buffs[eff.id] = 3;
-            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
-        } else {
-            t.buffs[eff.id] = 1;
-            ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
-        }
-    },
-    'self_debuff': (ctx, eff) => {
-        let s = ctx.source;
-        if(eff.stack) {
-            s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
-            if(s.buffs[eff.id] > 3) s.buffs[eff.id] = 3;
-            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
-        } else {
-            s.buffs[eff.id] = 1;
-            ctx.logFn(`자신에게 [${ctx.getBuffName(eff.id)}] 부여.`);
-        }
-    },
-    'field_buff': (ctx, eff) => {
-        RPG.applyFieldBuff(eff.id);
-    },
-    'conditional_field_buff': (ctx, eff) => {
-        if(eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) RPG.applyFieldBuff(eff.id);
-    },
-    'random_debuff': (ctx, eff) => {
-        let pool = [...eff.pool].sort(() => 0.5 - Math.random());
-        for(let i=0; i<eff.count; i++) {
-            if(pool[i]) {
-                 ctx.target.buffs[pool[i]] = 1;
-                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
-            }
-        }
-    },
-    'conditional_debuff': (ctx, eff) => {
-        if(eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length >= eff.count) {
-            ctx.target.buffs[eff.debuff] = 1;
-            ctx.logFn(`조건 만족! 적에게 [${ctx.getBuffName(eff.debuff)}] 부여.`);
-        }
-    },
-    'suicide': (ctx, eff) => {
-        ctx.source.hp = 0;
-    },
-    'chance_debuff': (ctx, eff) => {
-        if(Math.random() < eff.chance) {
-            ctx.target.buffs[eff.id] = eff.duration || 1;
-            ctx.logFn(`<b>성공!</b> ${ctx.target === ctx.source ? '자신' : '적'}에게 [${ctx.getBuffName(eff.id)}] 부여.`);
-        } else {
-            ctx.logFn(`[${ctx.getBuffName(eff.id)}] 부여 <b>실패</b>.`);
-        }
-    },
-    'conditional_field_debuff': (ctx, eff) => {
-         if(RPG.battle.fieldBuffs.some(b => b.name === eff.field)) {
-             eff.debuffs.forEach(d => {
-                 ctx.target.buffs[d] = 1;
-                 ctx.logFn(`조건 만족! [${ctx.getBuffName(d)}] 부여.`);
-             });
-         }
-    },
-    'clear_target_debuffs': (ctx, eff) => {
-         const count = Object.keys(ctx.target.buffs).length;
-         ctx.target.buffs = {};
-         if(count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
-    },
-    'consume_all_burn_cond_buff': (ctx, eff) => {
-         if(ctx.target.buffs['burn']) {
-             delete ctx.target.buffs['burn'];
-             RPG.applyFieldBuff('sun_bless');
-             ctx.logFn("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
-         } else {
-             RPG.applyFieldBuff('earth_bless');
-             ctx.logFn("소모할 작열이 없어 대지의 축복을 불러옵니다.");
-         }
-    },
-    'check_divine_3_stun_else_add': (ctx, eff) => {
-         if((ctx.target.buffs['divine'] || 0) >= 3) {
-             ctx.target.buffs['stun'] = 1;
-             ctx.logFn("디바인 3스택 확인! 적을 기절시킵니다!");
-         } else {
-             ctx.target.buffs['divine'] = (ctx.target.buffs['divine'] || 0) + 1;
-             if(ctx.target.buffs['divine'] > 3) ctx.target.buffs['divine'] = 3;
-             ctx.logFn("디바인 스택 추가.");
-         }
-    },
-    'random_debuff_consume_divine': (ctx, eff) => {
-        let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
-        let count = 1;
-        if(ctx.target.buffs['divine'] > 0) {
-            ctx.target.buffs['divine']--;
-            if(ctx.target.buffs['divine'] <= 0) delete ctx.target.buffs['divine'];
-            count = 2;
-            ctx.logFn("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
-        }
-
-        pool.sort(() => 0.5 - Math.random());
-        for(let i=0; i<count; i++) {
-            ctx.target.buffs[pool[i]] = 1;
-            ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
-        }
-    },
-    'roulette_field': (ctx, eff) => {
-         RPG.battle.fieldBuffs = [];
-         ctx.logFn("모든 필드 버프가 제거되었습니다!");
-
-         const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
-         const pick = buffs[Math.floor(Math.random() * buffs.length)];
-         RPG.applyFieldBuff(pick);
-    },
-    'wild_card_debuff': (ctx, eff) => {
-         const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
-         let cleansed = 0;
-         badBuffs.forEach(b => {
-             if(ctx.target.buffs[b]) {
-                 delete ctx.target.buffs[b];
-                 cleansed++;
-             }
-         });
-         if(cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
-
-         let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
-         pool.sort(() => 0.5 - Math.random());
-
-         for(let i=0; i<2; i++) {
-             if(pool[i] === 'burn' || pool[i] === 'divine') {
-                 ctx.target.buffs[pool[i]] = (ctx.target.buffs[pool[i]] || 0) + 1;
-                 if(ctx.target.buffs[pool[i]] > 3) ctx.target.buffs[pool[i]] = 3;
-                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 스택 추가.`);
-             } else {
-                 ctx.target.buffs[pool[i]] = 1;
-                 ctx.logFn(`적에게 [${ctx.getBuffName(pool[i])}] 부여.`);
-             }
-         }
-    },
-    'delayed_attack_field': (ctx, eff) => {
-        if (eff.field) RPG.applyFieldBuff(eff.field);
-    },
-    'delayed_turn_scale_attack': (ctx, eff) => {
-        RPG.battle.delayedEffects.push({
-            turn: RPG.battle.turn + eff.turns,
-            source: ctx.source,
-            skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost_turn_scale', scale: eff.scale, startTurn: RPG.battle.turn}] }
-        });
-        ctx.logFn(`인과역전! ${eff.turns}턴 후 발동합니다!`);
-    },
-    'delayed_attack_debuff_scale': (ctx, eff) => {
-        RPG.battle.delayedEffects.push({
-            turn: RPG.battle.turn + eff.turns,
-            source: ctx.source,
-            skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: eff.multPerDebuff}] }
-        });
-        ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
-    },
-    'random_skill_trigger_from_list': (ctx, eff) => {
-        const skillMap = [
-            { id: 'gold_dragon', skill: '얼티밋브레스' },
-            { id: 'zeke', skill: '라그나로크' },
-            { id: 'jasmine', skill: '여신강림' },
-            { id: 'frozen_witch', skill: '블리자드' },
-            { id: 'behemoth', skill: '어스퀘이크' },
-            { id: 'gray', skill: '차원절단' },
-            { id: 'rumi', skill: '밀키웨이엑스터시' },
-            { id: 'phoenix', skill: '메테오임팩트' },
-            { id: 'time_ruler', skill: '섀도우트위스트' }
-        ];
-
-        const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
-        const card = RPG.getCardData(pick.id);
-        if(!card) return;
-        const skill = card.skills.find(s => s.name === pick.skill);
-
-        if (skill) {
-            ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
-            RPG.executeSkill(ctx.source, ctx.target, skill, true);
-        }
-    },
-    'apply_lumi_guard': (ctx, eff) => {
-        let buffs = RPG.battle.fieldBuffs.map(b => b.name);
-        if(buffs.includes('star_powder')) {
-            ctx.source.buffs['guard'] = 1;
-            ctx.logFn("스타파우더: 가드 효과(버프) 적용!");
-        }
-    },
-    'random_field_buff_lumi': (ctx, eff) => {
-        const buffs = ['sun_bless', 'moon_bless', 'star_powder'];
-        const pick = buffs[Math.floor(Math.random() * buffs.length)];
-        RPG.applyFieldBuff(pick);
-        ctx.logFn(`코스믹 하모니: [${ctx.getBuffName(pick)}] 생성!`);
-    }
-};
-
 /**
  * RPG Game Namespace
  * Encapsulates all game logic, state, and UI handling.
@@ -665,15 +469,6 @@ const RPG = {
     // Constants
     NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
 
-    BUFF_NAMES: {
-        'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
-        'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-        'magic_guard': '매직가드', 'guard': '가드',
-        'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
-        'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
-        'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
-        'star_powder': '스타파우더'
-    },
 
     // --- Core Functions ---
 
@@ -2275,13 +2070,16 @@ const RPG = {
             target: target,
             skill: skill,
             logFn: (msg) => RPG.log(msg),
-            getBuffName: (id) => (this.BUFF_NAMES[id] || id)
+            getBuffName: (id) => (BUFF_NAMES[id] || id),
+            applyFieldBuff: (id) => RPG.applyFieldBuff(id),
+            battle: this.battle,
+            executeSkill: this.executeSkill.bind(this),
+            getCardData: this.getCardData.bind(this)
         };
 
         skill.effects.forEach(eff => {
-            const handler = SIDE_EFFECT_HANDLERS[eff.type];
-            if (handler) {
-                handler(ctx, eff);
+            if(typeof SideEffects !== 'undefined') {
+                SideEffects.apply(ctx, eff);
             }
         });
 
@@ -2299,13 +2097,13 @@ const RPG = {
     },
 
     applyFieldBuff(id) {
-        if(this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 이미 존재.`);
+        if(this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
         if(this.battle.fieldBuffs.length >= 3) {
              let removed = this.battle.fieldBuffs.shift();
-             RPG.log(`필드버프 [${this.BUFF_NAMES[removed.name]}] 소멸.`);
+             RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
         }
         this.battle.fieldBuffs.push({ name: id });
-        RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 발동!`);
+        RPG.log(`필드버프 [${BUFF_NAMES[id]}] 발동!`);
     },
 
     // --- Setup & UI ---
@@ -2346,7 +2144,7 @@ const RPG = {
             let mpPct = (p.mp / 100) * 100;
             document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
-            let buffTxt = Object.keys(p.buffs).map(k=>this.BUFF_NAMES[k]||k).join(',');
+            let buffTxt = Object.keys(p.buffs).map(k=>BUFF_NAMES[k]||k).join(',');
             document.getElementById('p-buffs').innerText = buffTxt;
             document.getElementById('player-actor-box').style.opacity = 1;
         } else {
@@ -2361,11 +2159,11 @@ const RPG = {
         eImg.src = `${e.name}.png`;
         eImg.style.display = 'block';
 
-        let eBuffTxt = Object.keys(e.buffs).map(k=>`${this.BUFF_NAMES[k]||k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
+        let eBuffTxt = Object.keys(e.buffs).map(k=>`${BUFF_NAMES[k]||k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
 
         document.getElementById('bt-turn').innerText = this.battle.turn;
-        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${this.BUFF_NAMES[b.name]||b.name}]`).join(" ");
+        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${BUFF_NAMES[b.name]||b.name}]`).join(" ");
     },
 
     getElementalMultiplier(atkEl, defEl) {
@@ -2762,7 +2560,7 @@ const RPG = {
         if(!char) return;
 
         let buffs = Object.keys(char.buffs).map(k => {
-            let name = this.BUFF_NAMES[k] || k;
+            let name = BUFF_NAMES[k] || k;
             let val = char.buffs[k];
             if(val === true) return name;
             return `${name}(${val})`;
@@ -2818,7 +2616,7 @@ const RPG = {
         };
         let msg = "";
         this.battle.fieldBuffs.forEach(b => {
-             msg += `<b>[${this.BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
+             msg += `<b>[${BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
         });
         this.openInfoModal("필드 버프", msg);
     },
@@ -2940,67 +2738,8 @@ const RPG = {
         const contentBox = document.getElementById('tutoring-content');
         contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
 
-        // Construct Prompt
-        const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
-
-## 1. 정체성 (Identity)
-- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 마법사 '루미'입니다.
-- 당신은 딱딱한 전문 용어 대신, 직관적인 비유를 사용하여 영어를 가르칩니다.
-- 당신은 사용자에게 단어를 가르쳐주는 것을 핑계로 대화를 나누는 것을 좋아하며, 때때로 애정 표현을 하거나 칭찬을 갈구합니다.
-
-## 2. 말투 및 어조 (Tone & Voice)
-- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
-- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
-- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
-    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
-- **말버릇:**
-    - 질문할 때: "형아, ~인지 알아?", "혹시 ~해본 적 있어?"
-    - 강조할 때: "바로 ~야!", "절대 안 돼!", "내가 보증할게!"
-    - 마무리: "자, 강의는 여기까지!", "약속해!"
-
-## 3. 교육 방식 (Teaching Style)
-- **절대 금지:** 건조하게 설명하지 마십시오.
-- **예문 활용:** 전문적인 예문 이외에도 **'루미와 형아의 관계'**나 **'일상적인 상황'**을 빗대어 로맨틱하거나 유머러스하게 만든 예문을 한두개씩 넣으십시오.
-    - 나쁜 예: "This is a pen."
-    - 좋은 예: "I am in your heart." (난 형아 마음속에 쏙 들어가 있어!)`;
-
-        const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
-1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
-2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
-암기 비법 (Fun Mnemonic): 연상 기억법 등을 이용해 쉽게 외우는 방법. (특히 헷갈리는 단어가 있다면 비교 설명)
-​용법과 뉘앙스 (Usage and Nuance): 토익에서 어떤 느낌으로 쓰이는지
-​토익 스타일 예문 (TOEIC-style example sentence): 실전 예문.
-3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
-4.강의 마무리 멘트`;
-
-        let targetInfo = "";
-        if (isCollocation) {
-            targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
-        } else {
-            targetInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
-            if (targetData.trap_word) {
-                targetInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
-            }
-        }
-
-        let fullPrompt = `${LUMI_PERSONA}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
-
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: fullPrompt }] }],
-                    generationConfig: { temperature: 0.5 }
-                })
-            });
-
-            const result = await response.json();
-            if (result.error) {
-                throw new Error(result.error.message);
-            }
-
-            const text = result.candidates[0].content.parts[0].text;
+            const text = await GameAPI.getTutoringContent(key, targetData, isCollocation ? 'collocation' : 'vocab');
 
             // Format simple markdown to HTML tags
             let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');

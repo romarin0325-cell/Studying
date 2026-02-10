@@ -12,17 +12,10 @@ const FIELD_BUFF_STATS = {
 
 // Helper for Buff Names (Moved out to be accessible)
 function getBuffName(key) {
-    const names = {
-        'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
-        'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-        'magic_guard': '매직가드', 'guard': '가드',
-        'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
-        'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
-        'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
-        'star_powder': '스타파우더',
-        'reaper_realm': '사신강림'
-    };
-    return names[key] || key;
+    if (typeof BUFF_NAMES !== 'undefined') {
+        return BUFF_NAMES[key] || key;
+    }
+    return key;
 }
 
 const DAMAGE_EFFECT_HANDLERS = {
@@ -200,6 +193,209 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult += bonus;
             ctx.logFn(`인과역전: ${ctx.turn}턴 경과! 배율 +${bonus.toFixed(1)}`);
         }
+    }
+};
+
+const SideEffects = {
+    handlers: {
+        'buff': (ctx, eff) => {
+            ctx.source.buffs[eff.id] = (eff.duration || 1);
+        },
+        'debuff': (ctx, eff) => {
+            let t = ctx.target;
+            if(eff.stack) {
+                t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
+                if(t.buffs[eff.id] > 3) t.buffs[eff.id] = 3;
+                ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
+            } else {
+                t.buffs[eff.id] = 1;
+                ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] 부여.`);
+            }
+        },
+        'self_debuff': (ctx, eff) => {
+            let s = ctx.source;
+            if(eff.stack) {
+                s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
+                if(s.buffs[eff.id] > 3) s.buffs[eff.id] = 3;
+                ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
+            } else {
+                s.buffs[eff.id] = 1;
+                ctx.logFn(`자신에게 [${getBuffName(eff.id)}] 부여.`);
+            }
+        },
+        'field_buff': (ctx, eff) => {
+            ctx.applyFieldBuff(eff.id);
+        },
+        'conditional_field_buff': (ctx, eff) => {
+            if(eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) ctx.applyFieldBuff(eff.id);
+        },
+        'random_debuff': (ctx, eff) => {
+            let pool = [...eff.pool].sort(() => 0.5 - Math.random());
+            for(let i=0; i<eff.count; i++) {
+                if(pool[i]) {
+                     ctx.target.buffs[pool[i]] = 1;
+                     ctx.logFn(`적에게 [${getBuffName(pool[i])}] 부여.`);
+                }
+            }
+        },
+        'conditional_debuff': (ctx, eff) => {
+            if(eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length >= eff.count) {
+                ctx.target.buffs[eff.debuff] = 1;
+                ctx.logFn(`조건 만족! 적에게 [${getBuffName(eff.debuff)}] 부여.`);
+            }
+        },
+        'suicide': (ctx, eff) => {
+            ctx.source.hp = 0;
+        },
+        'chance_debuff': (ctx, eff) => {
+            if(Math.random() < eff.chance) {
+                ctx.target.buffs[eff.id] = eff.duration || 1;
+                ctx.logFn(`<b>성공!</b> ${ctx.target === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] 부여.`);
+            } else {
+                ctx.logFn(`[${getBuffName(eff.id)}] 부여 <b>실패</b>.`);
+            }
+        },
+        'conditional_field_debuff': (ctx, eff) => {
+             if(ctx.battle.fieldBuffs.some(b => b.name === eff.field)) {
+                 eff.debuffs.forEach(d => {
+                     ctx.target.buffs[d] = 1;
+                     ctx.logFn(`조건 만족! [${getBuffName(d)}] 부여.`);
+                 });
+             }
+        },
+        'clear_target_debuffs': (ctx, eff) => {
+             const count = Object.keys(ctx.target.buffs).length;
+             ctx.target.buffs = {};
+             if(count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+        },
+        'consume_all_burn_cond_buff': (ctx, eff) => {
+             if(ctx.target.buffs['burn']) {
+                 delete ctx.target.buffs['burn'];
+                 ctx.applyFieldBuff('sun_bless');
+                 ctx.logFn("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
+             } else {
+                 ctx.applyFieldBuff('earth_bless');
+                 ctx.logFn("소모할 작열이 없어 대지의 축복을 불러옵니다.");
+             }
+        },
+        'check_divine_3_stun_else_add': (ctx, eff) => {
+             if((ctx.target.buffs['divine'] || 0) >= 3) {
+                 ctx.target.buffs['stun'] = 1;
+                 ctx.logFn("디바인 3스택 확인! 적을 기절시킵니다!");
+             } else {
+                 ctx.target.buffs['divine'] = (ctx.target.buffs['divine'] || 0) + 1;
+                 if(ctx.target.buffs['divine'] > 3) ctx.target.buffs['divine'] = 3;
+                 ctx.logFn("디바인 스택 추가.");
+             }
+        },
+        'random_debuff_consume_divine': (ctx, eff) => {
+            let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+            let count = 1;
+            if(ctx.target.buffs['divine'] > 0) {
+                ctx.target.buffs['divine']--;
+                if(ctx.target.buffs['divine'] <= 0) delete ctx.target.buffs['divine'];
+                count = 2;
+                ctx.logFn("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
+            }
+
+            pool.sort(() => 0.5 - Math.random());
+            for(let i=0; i<count; i++) {
+                ctx.target.buffs[pool[i]] = 1;
+                ctx.logFn(`적에게 [${getBuffName(pool[i])}] 부여.`);
+            }
+        },
+        'roulette_field': (ctx, eff) => {
+             ctx.battle.fieldBuffs = [];
+             ctx.logFn("모든 필드 버프가 제거되었습니다!");
+
+             const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
+             const pick = buffs[Math.floor(Math.random() * buffs.length)];
+             ctx.applyFieldBuff(pick);
+        },
+        'wild_card_debuff': (ctx, eff) => {
+             const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+             let cleansed = 0;
+             badBuffs.forEach(b => {
+                 if(ctx.target.buffs[b]) {
+                     delete ctx.target.buffs[b];
+                     cleansed++;
+                 }
+             });
+             if(cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
+
+             let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+             pool.sort(() => 0.5 - Math.random());
+
+             for(let i=0; i<2; i++) {
+                 if(pool[i] === 'burn' || pool[i] === 'divine') {
+                     ctx.target.buffs[pool[i]] = (ctx.target.buffs[pool[i]] || 0) + 1;
+                     if(ctx.target.buffs[pool[i]] > 3) ctx.target.buffs[pool[i]] = 3;
+                     ctx.logFn(`적에게 [${getBuffName(pool[i])}] 스택 추가.`);
+                 } else {
+                     ctx.target.buffs[pool[i]] = 1;
+                     ctx.logFn(`적에게 [${getBuffName(pool[i])}] 부여.`);
+                 }
+             }
+        },
+        'delayed_attack_field': (ctx, eff) => {
+            if (eff.field) ctx.applyFieldBuff(eff.field);
+        },
+        'delayed_turn_scale_attack': (ctx, eff) => {
+            ctx.battle.delayedEffects.push({
+                turn: ctx.battle.turn + eff.turns,
+                source: ctx.source,
+                skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost_turn_scale', scale: eff.scale, startTurn: ctx.battle.turn}] }
+            });
+            ctx.logFn(`인과역전! ${eff.turns}턴 후 발동합니다!`);
+        },
+        'delayed_attack_debuff_scale': (ctx, eff) => {
+            ctx.battle.delayedEffects.push({
+                turn: ctx.battle.turn + eff.turns,
+                source: ctx.source,
+                skill: { ...ctx.skill, effects: [...(ctx.skill.effects||[]), {type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: eff.multPerDebuff}] }
+            });
+            ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
+        },
+        'random_skill_trigger_from_list': (ctx, eff) => {
+            const skillMap = [
+                { id: 'gold_dragon', skill: '얼티밋브레스' },
+                { id: 'zeke', skill: '라그나로크' },
+                { id: 'jasmine', skill: '여신강림' },
+                { id: 'frozen_witch', skill: '블리자드' },
+                { id: 'behemoth', skill: '어스퀘이크' },
+                { id: 'gray', skill: '차원절단' },
+                { id: 'rumi', skill: '밀키웨이엑스터시' },
+                { id: 'phoenix', skill: '메테오임팩트' },
+                { id: 'time_ruler', skill: '섀도우트위스트' }
+            ];
+
+            const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
+            const card = ctx.getCardData(pick.id);
+            if(!card) return;
+            const skill = card.skills.find(s => s.name === pick.skill);
+
+            if (skill) {
+                ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+                ctx.executeSkill(ctx.source, ctx.target, skill, true);
+            }
+        },
+        'apply_lumi_guard': (ctx, eff) => {
+            let buffs = ctx.battle.fieldBuffs.map(b => b.name);
+            if(buffs.includes('star_powder')) {
+                ctx.source.buffs['guard'] = 1;
+                ctx.logFn("스타파우더: 가드 효과(버프) 적용!");
+            }
+        },
+        'random_field_buff_lumi': (ctx, eff) => {
+            const buffs = ['sun_bless', 'moon_bless', 'star_powder'];
+            const pick = buffs[Math.floor(Math.random() * buffs.length)];
+            ctx.applyFieldBuff(pick);
+            ctx.logFn(`코스믹 하모니: [${getBuffName(pick)}] 생성!`);
+        }
+    },
+    apply: function(ctx, eff) {
+        const handler = this.handlers[eff.type];
+        if (handler) handler(ctx, eff);
     }
 };
 
@@ -506,7 +702,7 @@ const Logic = {
     },
 
     // 4. Initial Stats Calculation
-    calculateInitialStats: function(playerProto, deck, allCards) {
+    calculateInitialStats: function(playerProto, deck, allCards, idx) {
         // Base stats copy
         let p = {
             maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: 100,
@@ -566,19 +762,32 @@ const Logic = {
         }
 
         // Positional Traits (Generalized)
-        // Handled by Logic now (Note: Requires Logic call to know idx, or Logic must be called with idx.
-        // Current usage: RPG calls calculateInitialStats(proto, deck, allCards). It does not pass idx.
-        // I will assume the caller will be updated to pass idx, or I should update it here if I can.
-        // I cannot change caller here.
-        // However, I can update the logic to accept optional idx.
-        // The caller in index.html is:
-        // const init = Logic.calculateInitialStats(proto, this.state.deck, allCards);
-        // I will update index.html in Step 3 to pass idx.
-        // So here I add 'idx' param.
+        if(t.type === 'pos_stat_boost' && idx !== undefined) {
+            if(t.pos === idx) {
+                let stats = Array.isArray(t.stat) ? t.stat : [t.stat];
+                stats.forEach(s => {
+                    if(s === 'atk') p.atk *= (1 + t.val/100);
+                    if(s === 'matk') p.matk *= (1 + t.val/100);
+                    if(s === 'def') p.def *= (1 + t.val/100);
+                    if(s === 'mdef') p.mdef *= (1 + t.val/100);
+                });
+                p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
+                p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
+            }
+        }
 
-        // Wait, function(playerProto, deck, allCards) -> function(playerProto, deck, allCards, idx)
-        // But arguments inside are `arguments`.
-        // I will change signature.
+        if(t.type === 'rabbit_synergy_boost') {
+             const rabbits = ['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit', 'joker'];
+             let count = 0;
+             deck.forEach(id => { if (id && rabbits.includes(id)) count++; });
+             if (count > 0) {
+                 let boost = count * (t.val / 100);
+                 p.atk = Math.floor(p.atk * (1 + boost));
+                 p.matk = Math.floor(p.matk * (1 + boost));
+             }
+        }
+
+        return { stats: p, activeTrait: active ? t.type : null };
     },
 
     // 5. Enemy AI
@@ -708,93 +917,4 @@ const Logic = {
     },
 
     getBuffName: getBuffName
-};
-
-// Update calculateInitialStats to accept idx and handle pos_stat_boost
-Logic.calculateInitialStats = function(playerProto, deck, allCards, idx) {
-    // Base stats copy
-    let p = {
-        maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: 100,
-        atk: playerProto.stats.atk, matk: playerProto.stats.matk,
-        def: playerProto.stats.def, mdef: playerProto.stats.mdef,
-        baseCrit: 10, baseEva: 0
-    };
-
-    // Filter active cards
-    const activeCards = deck.map(id => id ? allCards.find(c => c.id === id) : null).filter(c => c);
-    const jokerInDeck = deck.includes('joker');
-
-    const countEl = (el) => activeCards.filter(c => c.element === el || c.id === 'joker').length;
-    const hasEl = (el) => activeCards.some(c => c.element === el || c.id === 'joker');
-
-    // Traits
-    const t = playerProto.trait;
-    let active = false;
-
-    // Synergy Traits
-    if(t.type.startsWith('syn_')) {
-         if(t.type === 'syn_nature_3_all' && countEl('nature') >= 3) active = true;
-         else if(t.type === 'syn_nature_3_golem' && countEl('nature') >= 3) active = true;
-         else if(t.type === 'syn_water_3_ice_age' && countEl('water') >= 3) active = true;
-         else if(t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
-         else if(t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
-         else if(t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
-         else if(t.type === 'syn_light_dark_matk_mdef' && hasEl('light') && hasEl('dark')) active = true;
-         else if(t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
-         else if(t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
-         else if(t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
-         else if(t.type === 'syn_snow_rabbit' && (deck.includes('snow_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
-         else if(t.type === 'syn_silver_rabbit' && (deck.includes('snow_rabbit') || deck.includes('night_rabbit') || jokerInDeck)) active = true;
-         else if(t.type === 'syn_water_3_atk_matk' && countEl('water') >= 3) active = true;
-         else if(t.type === 'syn_fire_3_crit_burn' && countEl('fire') >= 3) active = true;
-         else if(t.type === 'syn_dark_3_matk_boost' && countEl('dark') >= 3) active = true;
-         else if(t.type === 'syn_water_2_moon_twinkle' && countEl('water') >= 2) active = true;
-
-         if(active) {
-            if(t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
-            if(t.type === 'syn_nature_3_golem') { p.atk *= 1.3; p.def *= 1.3; }
-            if(t.type === 'syn_nature_3_matk') p.matk *= 1.5;
-            if(t.type === 'syn_fire_3_crit') p.baseCrit += 30;
-            if(t.type === 'syn_dark_3_matk') p.matk *= 1.5;
-            if(t.type === 'syn_light_fire_atk') p.atk *= 1.3;
-            if(t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
-            if(t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
-            if(t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
-            if(t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
-            if(t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
-            if(t.type === 'syn_fire_3_crit_burn') p.baseCrit += t.val;
-            if(t.type === 'syn_dark_3_matk_boost') p.matk *= (1 + t.val/100);
-
-            p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
-            p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
-         }
-    }
-
-    // Positional Traits (Generalized)
-    if(t.type === 'pos_stat_boost' && idx !== undefined) {
-        if(t.pos === idx) {
-            let stats = Array.isArray(t.stat) ? t.stat : [t.stat];
-            stats.forEach(s => {
-                if(s === 'atk') p.atk *= (1 + t.val/100);
-                if(s === 'matk') p.matk *= (1 + t.val/100);
-                if(s === 'def') p.def *= (1 + t.val/100);
-                if(s === 'mdef') p.mdef *= (1 + t.val/100);
-            });
-            p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
-            p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
-        }
-    }
-
-        if(t.type === 'rabbit_synergy_boost') {
-             const rabbits = ['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit', 'joker'];
-             let count = 0;
-             deck.forEach(id => { if (id && rabbits.includes(id)) count++; });
-             if (count > 0) {
-                 let boost = count * (t.val / 100);
-                 p.atk = Math.floor(p.atk * (1 + boost));
-                 p.matk = Math.floor(p.matk * (1 + boost));
-             }
-        }
-
-    return { stats: p, activeTrait: active ? t.type : null };
 };

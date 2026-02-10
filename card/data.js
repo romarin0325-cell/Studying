@@ -747,3 +747,14 @@ const TRANSCENDENCE_CARDS = [
         ]
     }
 ];
+
+const BUFF_NAMES = {
+    'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
+    'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
+    'magic_guard': '매직가드', 'guard': '가드',
+    'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
+    'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
+    'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
+    'star_powder': '스타파우더',
+    'reaper_realm': '사신강림'
+};
