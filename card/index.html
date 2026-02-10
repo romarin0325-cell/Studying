@@ -1621,8 +1621,20 @@ const RPG = {
     },
 
     startQuiz(callback) {
-        // Reset specific UI elements for normal quiz
-        document.getElementById('quiz-desc').style.display = 'none';
+        // ✅ 모달 초기화
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // 모달 닫기 (혹시 열려있다면)
+        modal.classList.remove('active');
+
+        // 완전 초기화
+        oDiv.innerHTML = "";
+        if(fDiv) fDiv.innerText = "";
+        descDiv.style.display = 'none';
 
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
@@ -1646,14 +1658,7 @@ const RPG = {
         // Shuffle
         options.sort(() => Math.random() - 0.5);
 
-        const modal = document.getElementById('modal-quiz');
-        const qDiv = document.getElementById('quiz-question');
-        const oDiv = document.getElementById('quiz-options');
-        const fDiv = document.getElementById('quiz-feedback');
-
         qDiv.innerText = q.word;
-        oDiv.innerHTML = "";
-        if(fDiv) fDiv.innerText = "";
 
         options.forEach(opt => {
             const btn = document.createElement('button');
@@ -2945,6 +2950,7 @@ const RPG = {
 
 ## 1. 정체성 (Identity)
 - 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 마법사 '루미'입니다.
+    - 당신의 성별은 **남성(Male)**입니다.
 - 당신은 딱딱한 전문 용어 대신, 직관적인 비유를 사용하여 영어를 가르칩니다.
 - 당신은 사용자에게 단어를 가르쳐주는 것을 핑계로 대화를 나누는 것을 좋아하며, 때때로 애정 표현을 하거나 칭찬을 갈구합니다.
 
