@@ -294,6 +294,7 @@
     <div class="modal-content" style="height:auto;">
         <h3>도서관</h3>
         <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
+        <button class="menu-btn" onclick="RPG.openPrivateTutoring()" style="border-color: #ffd700; color: #ffd700;">루미의 개인과외</button>
         <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
         <button onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
@@ -332,6 +333,24 @@
         </div>
         <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
         <button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-tutoring" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
+        <h3>루미의 개인과외</h3>
+        <div style="margin-bottom: 10px; display: flex; gap: 5px;">
+            <input type="password" id="api-key-input" placeholder="Gemini API Key 입력" style="flex: 1; padding: 5px; background: #333; color: #fff; border: 1px solid #555;">
+            <button onclick="RPG.saveApiKey()" style="padding: 5px 10px; background: #555; color: #fff; border: 1px solid #777; cursor: pointer;">저장</button>
+        </div>
+        <div id="tutoring-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
+            수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;">수업 시작</button>
+            <button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()" style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;">퀴즈 풀기</button>
+        </div>
+        <button onclick="document.getElementById('modal-tutoring').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -2813,6 +2832,256 @@ const RPG = {
         };
 
         modal.classList.add('active');
+    },
+
+    // --- Private Tutoring ---
+    openPrivateTutoring() {
+        const mode = this.state.mode;
+        let list = (mode === 'chaos' || mode === 'draft') ? this.state.wrongCollocations : this.state.wrongWords;
+
+        if (!list || list.length === 0) {
+            let msg = (mode === 'chaos' || mode === 'draft') ? "오답노트에 등록된 숙어/구동사가 없습니다." : "오답노트에 등록된 단어가 없습니다.";
+            return this.showAlert(msg);
+        }
+
+        document.getElementById('modal-tutoring').classList.add('active');
+
+        // Load API Key
+        const key = localStorage.getItem('cardRpgApiKey');
+        if(key) document.getElementById('api-key-input').value = key;
+
+        // Reset UI
+        document.getElementById('tutoring-content').innerText = "수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.";
+        document.getElementById('btn-tutoring-quiz').style.display = 'none';
+        this.currentTutoringItem = null;
+    },
+
+    saveApiKey() {
+        const key = document.getElementById('api-key-input').value.trim();
+        if(!key) return this.showAlert("API 키를 입력해주세요.");
+        localStorage.setItem('cardRpgApiKey', key);
+        this.showAlert("API 키가 저장되었습니다.");
+    },
+
+    async startTutoringSession() {
+        const key = localStorage.getItem('cardRpgApiKey');
+        if(!key) return this.showAlert("먼저 API 키를 저장해주세요.");
+
+        const mode = this.state.mode;
+        const isCollocation = (mode === 'chaos' || mode === 'draft');
+        let list = isCollocation ? this.state.wrongCollocations : this.state.wrongWords;
+
+        if (!list || list.length === 0) return this.showAlert("학습할 오답 내용이 없습니다.");
+
+        // Pick Random
+        const targetId = list[Math.floor(Math.random() * list.length)];
+        let targetData = null;
+
+        if (isCollocation) {
+            targetData = COLLOCATION_DATA.find(c => c.id === targetId);
+        } else {
+            targetData = VOCAB_DATA.find(v => v.word === targetId);
+        }
+
+        if(!targetData) {
+            // Cleanup invalid data
+            if(isCollocation) {
+                 this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== targetId);
+                 localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+            } else {
+                 this.state.wrongWords = this.state.wrongWords.filter(w => w !== targetId);
+                 localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+            }
+            return this.startTutoringSession(); // Retry
+        }
+
+        this.currentTutoringItem = { data: targetData, type: isCollocation ? 'collocation' : 'vocab' };
+
+        // UI Loading
+        const contentBox = document.getElementById('tutoring-content');
+        contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
+
+        // Construct Prompt
+        let prompt = "";
+        if (isCollocation) {
+            prompt = `Explain the English expression '${targetData.expression}' (Meaning: ${targetData.meaning}).
+Include:
+1. Fun Mnemonic (Association method) to remember it easily.
+2. Usage and Nuance.
+3. Pronunciation tip.
+4. A TOEIC-style example sentence.
+Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
+        } else {
+            prompt = `Explain the English word '${targetData.word}' (Meaning: ${targetData.meaning}).
+If applicable, distinguish it from the confusing word '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning}).
+Include:
+1. Fun Mnemonic (Association method) to remember it (especially vs the trap word if exists).
+2. Usage and Nuance.
+3. Pronunciation tip.
+4. A TOEIC-style example sentence.
+Tone: Fun, friendly, like a private tutor named Rumi. Explain in Korean.`;
+        }
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            const result = await response.json();
+            if (result.error) {
+                throw new Error(result.error.message);
+            }
+
+            const text = result.candidates[0].content.parts[0].text;
+
+            // Format simple markdown to HTML tags
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            contentBox.innerHTML = formatted;
+
+            // Show Quiz Button
+            document.getElementById('btn-tutoring-quiz').style.display = 'block';
+
+        } catch (e) {
+            console.error(e);
+            contentBox.innerText = "강의 생성 실패: " + e.message;
+        }
+    },
+
+    startTutoringQuiz() {
+        if(!this.currentTutoringItem) return;
+
+        const item = this.currentTutoringItem;
+        const data = item.data;
+
+        if (item.type === 'collocation') {
+            // Reuse Collocation Quiz Logic but custom callback
+            let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+            let q = quizList[Math.floor(Math.random() * quizList.length)];
+
+            const modal = document.getElementById('modal-quiz');
+            const qDiv = document.getElementById('quiz-question');
+            const descDiv = document.getElementById('quiz-desc');
+            const oDiv = document.getElementById('quiz-options');
+            const fDiv = document.getElementById('quiz-feedback');
+
+            qDiv.innerText = q.question;
+            descDiv.innerText = q.translation || "";
+            descDiv.style.display = 'block';
+
+            let opts = [...q.options];
+            opts.sort(() => Math.random() - 0.5);
+
+            oDiv.innerHTML = "";
+            fDiv.innerText = "";
+
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "menu-btn";
+                btn.style.padding = "10px";
+                btn.style.fontSize = "0.9rem";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    Array.from(oDiv.children).forEach(c => c.onclick = null);
+                    if(opt === q.answer) {
+                        btn.classList.add('correct');
+                        fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                        fDiv.style.color = "#4caf50";
+
+                        // Remove from list
+                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
+                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                            document.getElementById('modal-tutoring').classList.remove('active');
+                            this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                        }, 1500);
+                    } else {
+                        btn.classList.add('wrong');
+                        fDiv.innerText = "오답... (다시 학습해보세요)";
+                        fDiv.style.color = "#ef5350";
+                        Array.from(oDiv.children).forEach(c => {
+                             if(c.innerText === q.answer) c.classList.add('correct');
+                        });
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                        }, 2000);
+                    }
+                };
+                oDiv.appendChild(btn);
+            });
+            modal.classList.add('active');
+
+        } else {
+            // Vocab Quiz
+            // Create options: Correct + Trap + 2 Randoms
+            let options = [];
+            options.push({ text: data.meaning, correct: true });
+            options.push({ text: data.trap_meaning, correct: false });
+
+            let safeCounter = 0;
+            while(options.length < 4 && safeCounter < 100) {
+                safeCounter++;
+                let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                if(r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
+                    options.push({ text: r.meaning, correct: false });
+                }
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const modal = document.getElementById('modal-quiz');
+            const qDiv = document.getElementById('quiz-question');
+            const descDiv = document.getElementById('quiz-desc');
+            const oDiv = document.getElementById('quiz-options');
+            const fDiv = document.getElementById('quiz-feedback');
+
+            qDiv.innerText = data.word;
+            descDiv.style.display = 'none';
+            oDiv.innerHTML = "";
+            fDiv.innerText = "";
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "menu-btn";
+                btn.style.padding = "10px";
+                btn.style.fontSize = "0.9rem";
+                btn.innerText = opt.text;
+                btn.onclick = () => {
+                    Array.from(oDiv.children).forEach(c => c.onclick = null);
+                    if(opt.correct) {
+                        btn.classList.add('correct');
+                        fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                        fDiv.style.color = "#4caf50";
+
+                        // Remove
+                        this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
+                        localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                            document.getElementById('modal-tutoring').classList.remove('active');
+                            this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                        }, 1500);
+                    } else {
+                        btn.classList.add('wrong');
+                        fDiv.innerText = "오답... (다시 학습해보세요)";
+                        fDiv.style.color = "#ef5350";
+                         Array.from(oDiv.children).forEach(c => {
+                             if(c.innerText === data.meaning) c.classList.add('correct');
+                        });
+                        setTimeout(() => {
+                            modal.classList.remove('active');
+                        }, 2000);
+                    }
+                };
+                oDiv.appendChild(btn);
+            });
+             modal.classList.add('active');
+        }
     },
 
     showAlert(msg) {
