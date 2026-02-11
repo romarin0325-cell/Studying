@@ -465,6 +465,7 @@ const RPG = {
     tempOnClose: null,
     tempConfirmYes: null,
     tempConfirmNo: null,
+    isApiLoading: false,
 
     // Constants
     NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
@@ -514,6 +515,24 @@ const RPG = {
     },
 
     startGame(mode) {
+        // 필수 데이터 로드 검증
+        const requiredData = [
+            { name: 'CARDS', ref: typeof CARDS !== 'undefined' ? CARDS : null },
+            { name: 'ENEMIES', ref: typeof ENEMIES !== 'undefined' ? ENEMIES : null },
+            { name: 'BONUS_CARDS', ref: typeof BONUS_CARDS !== 'undefined' ? BONUS_CARDS : null },
+            { name: 'VOCAB_DATA', ref: typeof VOCAB_DATA !== 'undefined' ? VOCAB_DATA : null },
+            { name: 'GRAMMAR_DATA', ref: typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA : null },
+            { name: 'Logic', ref: typeof Logic !== 'undefined' ? Logic : null }
+        ];
+
+        const missing = requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+
+        if(missing.length > 0) {
+            const names = missing.map(d => d.name).join(', ');
+            this.showAlert(`게임 데이터 로드 실패: ${names}<br><br>파일이 같은 폴더에 있는지 확인하고 게임을 새로고침 해주세요.`);
+            return; // 게임 진입 차단
+        }
+
         this.loadGlobalData();
         this.checkDailyChaosTicket();
 
@@ -2728,6 +2747,8 @@ const RPG = {
     },
 
     async startTutoringSession() {
+        if(this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
+
         const key = localStorage.getItem('cardRpgApiKey');
         if(!key) return this.showAlert("먼저 API 키를 저장해주세요.");
 
@@ -2762,11 +2783,19 @@ const RPG = {
         this.currentTutoringItem = { data: targetData, type: isCollocation ? 'collocation' : 'vocab' };
 
         // UI Loading
+        this.isApiLoading = true;
         const contentBox = document.getElementById('tutoring-content');
         contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
 
         try {
             const text = await GameAPI.getTutoringContent(key, targetData, isCollocation ? 'collocation' : 'vocab');
+
+            // ✅ 응답 도착 후: 모달이 아직 열려있는지 확인
+            const tutoringModal = document.getElementById('modal-tutoring');
+            if(!tutoringModal.classList.contains('active')) {
+                console.warn("과외 모달이 닫혀있어 결과를 무시합니다.");
+                return; // 이미 닫혔으면 아무것도 하지 않음
+            }
 
             // Format simple markdown to HTML tags
             let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
@@ -2789,6 +2818,8 @@ const RPG = {
                 displayMsg = "오류가 발생했습니다: " + msg;
             }
             contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div><div style="font-size:0.7rem; color:#777; margin-top:5px;">(${msg})</div>`;
+        } finally {
+            this.isApiLoading = false;
         }
     },
 
