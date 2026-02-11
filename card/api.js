@@ -53,9 +53,23 @@ const GameAPI = {
             })
         });
 
+        // ✅ HTTP 상태 코드 먼저 확인
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+        }
+
         const result = await response.json();
         if (result.error) {
             throw new Error(result.error.message);
+        }
+
+        // ✅ candidates 배열 안전 체크
+        if (!result.candidates || result.candidates.length === 0
+            || !result.candidates[0].content
+            || !result.candidates[0].content.parts
+            || result.candidates[0].content.parts.length === 0) {
+            throw new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
         }
 
         return result.candidates[0].content.parts[0].text;
