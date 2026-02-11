@@ -482,7 +482,7 @@ const RPG = {
     },
 
     getCardData(id) {
-        return CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id);
+        return CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id) || (typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS.find(c => c.id === id) : null);
     },
 
     // --- Global Data ---
