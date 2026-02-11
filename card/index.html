@@ -1260,9 +1260,10 @@ const RPG = {
     },
     closeLectureView() {
         document.getElementById('modal-lecture-view').classList.remove('active');
-        if(this.tempLectureClose) {
-            this.tempLectureClose();
-            this.tempLectureClose = null;
+        const cb = this.tempLectureClose;
+        this.tempLectureClose = null;
+        if(cb) {
+            cb();
         }
     },
 
@@ -2654,9 +2655,10 @@ const RPG = {
     },
     closeInfoModal() {
         document.getElementById('modal-info').classList.remove('active');
-        if (this.tempOnClose) {
-            this.tempOnClose();
-            this.tempOnClose = null;
+        const cb = this.tempOnClose;
+        this.tempOnClose = null;
+        if (cb) {
+            cb();
         }
     },
 
