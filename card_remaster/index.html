@@ -61,6 +61,8 @@
         text-align: center;
         box-shadow: 0 8px 16px rgba(0,0,0,0.28);
     }
+    .menu-btn.fx-tilt { transform-style: preserve-3d; transition: transform .18s ease, filter .2s ease, box-shadow .2s ease; will-change: transform; }
+    .menu-btn.fx-tilt:active { transform: perspective(700px) rotateX(7deg) scale(0.98); }
     .menu-btn:active { transform: translateY(1px) scale(0.99); filter: brightness(1.08); }
     .menu-btn.correct { background: linear-gradient(180deg, #1f5d3c, #184a31) !important; border-color: #3f9e71 !important; }
     .menu-btn.wrong { background: linear-gradient(180deg, #7e243f, #601a30) !important; border-color: #cb5576 !important; }
@@ -116,6 +118,14 @@
     .bottom-actions button { flex: 1; }
     .modal { background: rgba(2,4,9,0.82); }
     .modal-content { background: linear-gradient(165deg, #1a2237 0%, #101628 100%); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
+    .mode-modal { background: radial-gradient(circle at 0% 0%, rgba(101, 140, 255, 0.16) 0%, transparent 42%), radial-gradient(circle at 100% 0%, rgba(193, 124, 255, 0.18) 0%, transparent 48%), linear-gradient(180deg, #151d31 0%, #101726 100%); border: 1px solid #425684; }
+    .mode-btn { margin-bottom: 0; min-height: 52px; font-size: 0.85rem; }
+    .mode-btn.locked { opacity: 0.85; border-color: #394766; color: #9fb0da; }
+    .mode-btn.unlocked { border-color: #8962ff; box-shadow: 0 8px 16px rgba(95, 72, 189, 0.3); }
+    .mode-btn.selected { border-color: #ffd76e; box-shadow: 0 0 0 2px rgba(255, 216, 110, 0.25), 0 10px 22px rgba(255, 216, 110, 0.25); filter: brightness(1.08); }
+    .gacha-vfx { position: relative; overflow: hidden; }
+    .spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; opacity: 0; pointer-events: none; animation: spark-fall 900ms ease-out forwards; }
+    @keyframes spark-fall { 0% { transform: translate3d(0, -24px, 0) scale(0.5); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate3d(var(--sx, 0px), var(--sy, 140px), 0) scale(1.25); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -236,16 +246,16 @@
 </div>
 
 <div id="modal-mode-select" class="modal">
-    <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
+    <div class="modal-content mode-modal" style="height:auto; min-height:400px; width: 360px;">
         <div style="position:relative;">
             <h3>게임 모드 선택</h3>
-            <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()" style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스 룰렛</button>
+            <button id="btn-chaos-roulette" class="menu-btn fx-tilt" onclick="RPG.openChaosRoulette()" style="display:none; position:absolute; top:-6px; right:0; padding:6px 10px; margin:0; width:auto; font-size:0.75rem; border-color:#ffd700; color:#ffd700;">카오스 룰렛</button>
         </div>
-        <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;"></div>
-        <div id="mode-desc" style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
+        <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px;"></div>
+        <div id="mode-desc" style="font-size:0.8rem; color:#d8e2ff; background:#121c30; border:1px solid #304269; padding:10px; border-radius:8px; height:100px; overflow-y:auto; text-align:left;">
             모드를 선택해주세요.
         </div>
-        <button id="btn-enter-mode" class="menu-btn" style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;">입장</button>
+        <button id="btn-enter-mode" class="menu-btn fx-tilt" style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;">입장</button>
         <button onclick="document.getElementById('modal-mode-select').classList.remove('active')" style="margin-top:5px; width:100%; padding:10px;">취소</button>
     </div>
 </div>
@@ -283,7 +293,7 @@
 </div>
 
 <div id="modal-gacha" class="modal">
-    <div class="modal-content" style="height:auto; min-height:300px;">
+    <div class="modal-content gacha-vfx" style="height:auto; min-height:300px;">
         <h2 id="gacha-title">획득!</h2>
         <div id="gacha-result"></div>
         <button onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;">확인</button>
@@ -514,6 +524,47 @@ const RPG = {
         return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
     },
 
+
+    getModeCatalog() {
+        return [
+            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
+            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
+            { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
+            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
+            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
+            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' },
+            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
+            { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
+        ];
+    },
+
+    playGachaFx(grade = 'normal') {
+        const panel = document.querySelector('#modal-gacha .gacha-vfx');
+        if(!panel) return;
+        const palette = {
+            transcendence: ['#ffe066', '#fff2ab', '#ffd166'],
+            legend: ['#ff6b81', '#ff8fa3', '#ffd5dd'],
+            epic: ['#d08bff', '#b483ff', '#f1d6ff'],
+            rare: ['#75b9ff', '#9dd1ff', '#cbe7ff'],
+            normal: ['#95a3c8', '#c1cbe7', '#d6def4']
+        };
+        const colors = palette[grade] || palette.normal;
+        for(let i=0; i<14; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'spark';
+            dot.style.left = `${8 + Math.random() * 84}%`;
+            dot.style.top = `${8 + Math.random() * 28}%`;
+            dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+            dot.style.setProperty('--sx', `${-90 + Math.random() * 180}px`);
+            dot.style.setProperty('--sy', `${95 + Math.random() * 90}px`);
+            dot.style.animationDelay = `${Math.random() * 160}ms`;
+            panel.appendChild(dot);
+            setTimeout(() => dot.remove(), 1000);
+        }
+    },
+
     startGame(mode) {
         // 필수 데이터 로드 검증
         const requiredData = [
@@ -570,59 +621,55 @@ const RPG = {
         const modal = document.getElementById('modal-mode-select');
         const list = document.getElementById('mode-list');
         const desc = document.getElementById('mode-desc');
-        list.innerHTML = "";
-        desc.innerText = "모드를 선택하여 설명을 확인하세요.";
+        if (!modal || !list || !desc) {
+            this.showAlert('모드 선택 UI를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.');
+            return;
+        }
+
+        list.innerHTML = '';
+        desc.innerText = '모드를 선택하여 설명을 확인하세요.';
 
         const chaosBtn = document.getElementById('btn-chaos-roulette');
         if (chaosBtn) {
-            if (this.checkAllBonusUnlocked()) {
-                chaosBtn.style.display = 'block';
-            } else {
-                chaosBtn.style.display = 'none';
-            }
+            chaosBtn.style.display = this.checkAllBonusUnlocked() ? 'block' : 'none';
         }
 
-        const MODES = [
-            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
-            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
-            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
-            { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
-            { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
-            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
-            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
-            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' },
-            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
-            { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
-        ];
+        const MODES = this.getModeCatalog();
+        const unlocked = Array.isArray(this.global.unlocked_modes) ? this.global.unlocked_modes : ['origin'];
+        if (!unlocked.includes('origin')) unlocked.push('origin');
+        this.global.unlocked_modes = unlocked;
 
         MODES.forEach(m => {
             const btn = document.createElement('button');
-            btn.className = "menu-btn";
-            btn.style.padding = "10px";
-            btn.style.fontSize = "0.9rem";
+            const isUnlocked = unlocked.includes(m.id);
+            btn.className = `menu-btn fx-tilt mode-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
             btn.innerText = m.name;
             btn.id = `mode-btn-${m.id}`;
-
-            const isUnlocked = this.global.unlocked_modes.includes(m.id);
-            if(isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
-
             btn.onclick = () => {
                 this.selectedModeId = m.id;
                 desc.innerText = `[${m.name}]\n${m.desc}`;
-
-                // Visual Update
-                list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
-                btn.style.borderColor = '#ffd700';
+                list.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
             };
             list.appendChild(btn);
         });
 
-        // Enter Button Logic
+        if (list.children.length === 0) {
+            const fallback = document.createElement('button');
+            fallback.className = 'menu-btn fx-tilt mode-btn selected';
+            fallback.innerText = '오리진';
+            fallback.onclick = () => {
+                this.selectedModeId = 'origin';
+                desc.innerText = '[오리진]\n기본 모드입니다.\n(성공조건: 없음 / 무한)';
+            };
+            list.appendChild(fallback);
+        }
+
         const enterBtn = document.getElementById('btn-enter-mode');
         enterBtn.onclick = () => {
-            if(!this.selectedModeId) return this.showAlert("모드를 선택해주세요.");
-            const mName = MODES.find(m => m.id === this.selectedModeId).name;
-            this.showConfirm(`${mName} 모드로 시작하시겠습니까?`, () => {
+            if(!this.selectedModeId) return this.showAlert('모드를 선택해주세요.');
+            const selected = MODES.find(m => m.id === this.selectedModeId) || { name: '오리진' };
+            this.showConfirm(`${selected.name} 모드로 시작하시겠습니까?`, () => {
                 this.initNewGame(this.selectedModeId);
                 modal.classList.remove('active');
                 this.toMenu();
@@ -631,6 +678,7 @@ const RPG = {
 
         modal.classList.add('active');
     },
+
 
     initNewGame(mode = 'origin') {
         // Record saving logic (Only for Origin mode as per request "Record check only for Origin")
@@ -789,6 +837,7 @@ const RPG = {
         content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>
             <div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>다음 오리진 게임 전설 풀에 추가되었습니다!</p>`;
         modal.classList.add('active');
+        this.playGachaFx('transcendence');
     },
 
     openTranscendenceCheck() {
@@ -1241,6 +1290,7 @@ const RPG = {
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
             <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
         modal.classList.add('active');
+        this.playGachaFx(pick.grade || grade);
     },
 
     // --- Library & Lecture ---
