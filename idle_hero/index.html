@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>방치형 원소 영웅들</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div class="top-left">
+        <div class="game-title">방치형 원소 영웅들 <span class="badge">Single-file</span></div>
+        <div class="sub">CX 탐색기 환경 대응: CSS/JS 인라인 + 이미지 파일선택 등록</div>
+      </div>
+      <div id="resourceBar" class="resource-bar"></div>
+    </header>
+
+    <nav id="tabs" class="tabs">
+      <button class="tab-btn" data-tab="home">홈</button>
+      <button class="tab-btn" data-tab="characters">캐릭터</button>
+      <button class="tab-btn" data-tab="upgrades">업그레이드</button>
+      <button class="tab-btn" data-tab="equipment">장비</button>
+      <button class="tab-btn" data-tab="daily">일일도전</button>
+      <button class="tab-btn" data-tab="cards">카드</button>
+      <button class="tab-btn" data-tab="ascension">승급</button>
+      <button class="tab-btn" data-tab="settings">설정</button>
+    </nav>
+
+    <main id="main" class="main"></main>
+
+    <footer class="footer">
+      <div>저장: LocalStorage(가능할 때) / 오프라인 누적 최대 30시간 / 전투: 기본공격 + 덱 5장 자동사용</div>
+    </footer>
+  </div>
+
+  <div id="modalHost" class="modal-host" aria-hidden="true"></div>
+  <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ====== 안전장치: 에러를 화면으로 보여주기 ======
+  var lastErrorText = '';
+  window.addEventListener('error', function(ev){
+    try{
+      var msg = (ev && ev.message) ? ev.message : 'Unknown error';
+      var src = (ev && ev.filename) ? ev.filename : '';
+      var line = (ev && ev.lineno) ? ev.lineno : '';
+      lastErrorText = msg + (src ? ('\n' + src + ':' + line) : '');
+
+      // If showModal is defined (from game.js), use it.
+      // Since game.js is loaded later, we might need to wait or fallback.
+      if(window.showModal) {
+          window.showModal('스크립트 오류', lastErrorText, [{text:'닫기', kind:'warn', value:'close'}], null);
+      } else {
+          // Fallback if game.js not loaded yet or failed
+          console.error('ERROR:', lastErrorText);
+          // Simple alert fallback
+          if(confirm('오류 발생:\n' + lastErrorText + '\n\n페이지를 새로고침 할까요?')) {
+            window.location.reload();
+          }
+      }
+    }catch(e){
+        console.error(e);
+    }
+  });
+
+  // ====== 이미지 로딩 대응 ======
+  function resolveUrl(path){
+    try{
+      return (new URL(path, window.location.href)).href;
+    }catch(e){
+      return path;
+    }
+  }
+  function getCharImgCandidates(charId){
+    return [
+      resolveUrl(charId+'.png'),
+      resolveUrl(charId+'.PNG'),
+      resolveUrl('images/'+charId+'.png'),
+      resolveUrl('images/'+charId+'.PNG'),
+      resolveUrl('img/'+charId+'.png'),
+      resolveUrl('img/'+charId+'.PNG')
+    ];
+  }
+
+  // Make these available globally if needed, though game.js might redefine them.
+  // window.resolveUrl = resolveUrl;
+  // window.getCharImgCandidates = getCharImgCandidates;
+
+  window.__imgFallback = function(imgEl){
+    try{
+      var charId = imgEl.getAttribute('data-charimg');
+      // 저장 이미지가 있으면 그걸로 고정
+      // Access state via global
+      var state = window.__STATE;
+      var stored = state && state.assets && state.assets.charImages ? state.assets.charImages[charId] : null;
+      if(stored){
+        imgEl.src = stored;
+        return;
+      }
+      var tries = parseInt(imgEl.getAttribute('data-try')||'0',10);
+      var list = getCharImgCandidates(charId);
+      tries += 1;
+      if(tries < list.length){
+        imgEl.setAttribute('data-try', String(tries));
+        imgEl.src = list[tries];
+      }else{
+        imgEl.style.display = 'none';
+      }
+    }catch(e){
+      imgEl.style.display = 'none';
+    }
+  };
+})();
+</script>
+<script src="game.js" defer></script>
+</body>
+</html>
