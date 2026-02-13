@@ -6,178 +6,116 @@
 <title>Card RPG</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>
-    /* 기본 배경 및 폰트 개선 */
-    body {
-        background: radial-gradient(circle at center, #1e1e24 0%, #000000 100%); /* 더 깊이감 있는 배경 */
-        perspective: 1000px; /* 3D 효과를 위한 원근감 설정 */
-        color: #e0e0e0; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none;
+    :root {
+        --bg: #080b14;
+        --panel: #121827;
+        --panel-2: #1b2337;
+        --text: #e6ebff;
+        --muted: #9aa6ce;
+        --line: #2f3a57;
+        --accent: #5ea2ff;
+        --accent-2: #8b5cf6;
+        --danger: #ff5a74;
+        --ok: #5fce8f;
+        --radius: 12px;
     }
-    .header { padding: 10px; text-align: center; background: #1f1f1f; border-bottom: 1px solid #333; font-size: 0.95rem; color: #bbb; font-weight: bold; flex-shrink: 0; }
-    .container { flex: 1; display: flex; flex-direction: column; padding: 8px; overflow: hidden; gap: 8px; }
-    .screen { display: none; flex-direction: column; height: 100%; }
-    .screen.active { display: flex; }
-
-    /* 3D 메뉴 컨테이너 */
-    .menu-3d-container {
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+        background: radial-gradient(circle at 20% -10%, #1d2c54 0%, var(--bg) 52%), var(--bg);
+        color: var(--text);
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        transform-style: preserve-3d;
-        transform: rotateX(10deg) rotateY(0deg); /* 살짝 기울임 */
-        padding: 20px;
-    }
-
-    /* 세련된 3D 버튼 스타일 */
-    .menu-btn {
-        background: rgba(255, 255, 255, 0.05); /* 유리 느낌 */
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3),
-                    inset 0 1px 0 rgba(255,255,255,0.1);
-        color: #fff;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 쫀득한 느낌 */
-        position: relative;
+        height: 100vh;
         overflow: hidden;
-        padding: 15px; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-bottom: 5px; width: 100%; text-align: center;
+        user-select: none;
     }
-    .menu-btn:active {
-        transform: scale(0.95) translateZ(-10px);
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        background: rgba(255, 255, 255, 0.1);
-    }
-    .menu-btn::before { /* 버튼 지나가는 광택 효과 */
-        content: '';
-        position: absolute;
-        top: 0; left: -100%; width: 50%; height: 100%;
-        background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
-        transform: skewX(-25deg);
-        transition: 0.5s;
-    }
-    .menu-btn:hover::before { left: 150%; }
-
-    .menu-btn.correct { background: #1b5e20 !important; border-color: #4caf50 !important; }
-    .menu-btn.wrong { background: #b71c1c !important; border-color: #ef5350 !important; }
-
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 5px; overflow-y: auto; padding: 5px; padding-bottom: 80px; flex: 1; }
-
-    /* 등급별 카드 테두리 및 글로우 효과 강화 */
-    .card-item {
-        transition: transform 0.3s;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        background: #222; border: 2px solid #444; border-radius: 5px; padding: 5px; text-align: center; font-size: 0.8rem; cursor: pointer; position: relative;
-    }
-    .card-item.selected { border-color: #ffd700; box-shadow: 0 0 5px #ffd700; }
-
-    @keyframes pulse-legend {
-        from { box-shadow: 0 0 10px rgba(255, 82, 82, 0.4); transform: scale(1); }
-        to { box-shadow: 0 0 25px rgba(255, 82, 82, 0.9); transform: scale(1.02); }
-    }
-    @keyframes glow-epic {
-      0% { box-shadow: 0 0 5px #e040fb; }
-      50% { box-shadow: 0 0 15px #e040fb; }
-      100% { box-shadow: 0 0 5px #e040fb; }
-    }
-    .card-item.legend {
-        border: 2px solid #ff5252;
-        box-shadow: 0 0 15px rgba(255, 82, 82, 0.6); /* 더 강한 네온 */
-        animation: pulse-legend 2s infinite alternate;
-        color: #ff5252;
-    }
-    .card-item.epic { border-color: #e040fb; color: #e040fb; animation: glow-epic 2s infinite; }
-    .legend-glow {
-        box-shadow: 0 0 20px #ff5252 !important;
-        border: 3px solid #ff5252 !important;
-        animation: pulse-legend 2s infinite alternate;
-    }
-    @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-    .card-item.rare { border-color: #448aff; color: #448aff; }
-    .card-item.normal { border-color: #bdbdbd; color: #bdbdbd; }
-
-    .portrait {
-        width: 100%; aspect-ratio: 3/4;
-        border-radius: 6px;
-        background: #000;
-        border: 2px solid #555;
-        overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.7);
-        display: flex; align-items: center; justify-content: center;
-        margin-bottom: 3px;
-    }
-    .portrait img { width: 100%; height: 100%; object-fit: contain; }
-
-    .battle-header { display: flex; justify-content: space-between; padding: 5px; background: #222; border-radius: 5px; font-size: 0.8rem; }
-    .field-buffs { height: 20px; font-size: 0.7rem; color: #81d4fa; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; }
-
-    .visual-stage {
-        flex: 1; position: relative;
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 6px;
-        display: flex; justify-content: space-around; align-items: center;
-        padding: 5px;
-        background-image: linear-gradient(to bottom, #2a2a2a, #121212);
-        min-height: 200px;
-        max-height: 40vh;
-    }
-
-    .battle-actor {
-        width: 120px;
+    .header {
+        padding: 12px 14px;
         text-align: center;
-        position: relative;
-        transition: all 0.2s;
-        display: flex; flex-direction: column; align-items: center;
+        background: rgba(12, 17, 30, 0.86);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--line);
+        font-size: 0.9rem;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        flex-shrink: 0;
+    }
+    .container { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow: hidden; gap: 10px; }
+    .screen { display: none; flex-direction: column; height: 100%; }
+    .screen.active { display: flex; }
+    .menu-btn {
+        background: linear-gradient(180deg, #253250 0%, #1b2640 100%);
+        border: 1px solid #3f527f;
+        color: var(--text);
+        padding: 14px;
+        border-radius: var(--radius);
+        font-size: 0.95rem;
+        font-weight: 700;
         cursor: pointer;
+        margin-bottom: 10px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.28);
     }
-    .battle-actor .portrait {
-        width: 90px; height: 120px;
-        border-color: #999;
+    .menu-btn:active { transform: translateY(1px) scale(0.99); filter: brightness(1.08); }
+    .menu-btn.correct { background: linear-gradient(180deg, #1f5d3c, #184a31) !important; border-color: #3f9e71 !important; }
+    .menu-btn.wrong { background: linear-gradient(180deg, #7e243f, #601a30) !important; border-color: #cb5576 !important; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; overflow-y: auto; padding: 6px; padding-bottom: 86px; flex: 1; align-content: start; }
+    .card-item {
+        background: linear-gradient(165deg, #1a2337 0%, #121a2d 100%);
+        border: 1px solid #344261;
+        border-radius: 10px;
+        padding: 6px;
+        text-align: center;
+        font-size: 0.77rem;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
-    .battle-actor.player .portrait { border-color: #4caf50; }
-    .battle-actor.enemy .portrait { border-color: #ff5252; }
+    .card-item.selected { border-color: #ffd970; box-shadow: 0 0 0 2px rgba(255,217,112,0.25), 0 0 14px rgba(255,217,112,0.45); }
+    @keyframes glow-legend { 0%,100% { box-shadow: 0 0 6px #ff5f6d; } 50% { box-shadow: 0 0 16px #ff5f6d; } }
+    @keyframes glow-epic { 0%,100% { box-shadow: 0 0 6px #d064ff; } 50% { box-shadow: 0 0 14px #d064ff; } }
+    .card-item.legend { border-color: #ff707c; color: #ff9ba3; animation: glow-legend 2s infinite; }
+    .card-item.epic { border-color: #c874ff; color: #dfb7ff; animation: glow-epic 2s infinite; }
+    .card-item.rare { border-color: #6e9dff; color: #9dc7ff; }
+    .card-item.normal { border-color: #8e9aba; color: #ccd5ee; }
+    @keyframes glow-gold { 0%,100% { box-shadow: 0 0 6px #ffd700; } 50% { box-shadow: 0 0 16px #ffd700; } }
+    .card-item.transcendence { border: 1px solid #ffd866; color: #ffe289; animation: glow-gold 2s infinite; background: linear-gradient(160deg,#3a3016 0%,#242012 100%); }
+    .portrait { width: 100%; aspect-ratio: 3/4; border-radius: 8px; background: #05070e; border: 1px solid #4a587c; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+    .portrait img { width: 100%; height: 100%; object-fit: contain; }
+    .battle-header { display: flex; justify-content: space-between; padding: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; font-size: 0.8rem; }
+    .field-buffs { height: 20px; font-size: 0.7rem; color: #93d8ff; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; }
+    .visual-stage { flex: 1; position: relative; background: linear-gradient(180deg,#1e2a45 0%,#0d1324 100%); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; display: flex; justify-content: space-around; align-items: center; padding: 8px; min-height: 220px; max-height: 40vh; }
+    .battle-actor { width: 120px; text-align: center; position: relative; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    .battle-actor .portrait { width: 90px; height: 120px; border-color: #6a7ba8; }
+    .battle-actor.player .portrait { border-color: #58da9a; }
+    .battle-actor.enemy .portrait { border-color: #ff7188; }
     .battle-actor.turn { transform: scale(1.05); z-index: 10; }
     .battle-actor.dead { opacity: 0.3; filter: grayscale(100%); }
-
-    .actor-hp-bar { width: 100%; height: 6px; background: #333; margin-top: 4px; border-radius: 3px; overflow: hidden; }
-    .actor-hp-fill { height: 100%; background: #ef5350; width: 100%; transition: width 0.5s; }
-    .actor-mp-bar { width: 100%; height: 4px; background: #333; margin-top: 2px; border-radius: 2px; overflow: hidden; }
-    .actor-mp-fill { height: 100%; background: #42a5f5; width: 100%; transition: width 0.3s; }
-    .actor-buffs { font-size: 0.6rem; color: #ffd700; height: 12px; overflow: hidden; margin-top: 2px; }
-
-    .log-container { height: 150px; background: #1a1a1a; border: 1px solid #333; border-radius: 5px; padding: 5px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 5px; }
-    .log-line { margin-bottom: 2px; border-bottom: 1px solid #252525; }
-    .log-dmg { color: #ff5252; } .log-heal { color: #69f0ae; } .log-info { color: #4fc3f7; }
-
-    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; height: 110px; margin-bottom: 60px; }
-    .skill-btn { background: #333; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
-    .skill-btn:disabled { opacity: 0.5; background: #222; }
+    .actor-hp-bar, .actor-mp-bar { width: 100%; background: #253049; border-radius: 999px; overflow: hidden; }
+    .actor-hp-bar { height: 7px; margin-top: 5px; }
+    .actor-hp-fill { height: 100%; background: linear-gradient(90deg,#ff6b7b,#ff3f58); width: 100%; transition: width 0.5s; }
+    .actor-mp-bar { height: 5px; margin-top: 3px; }
+    .actor-mp-fill { height: 100%; background: linear-gradient(90deg,#66b6ff,#3989ff); width: 100%; transition: width 0.3s; }
+    .actor-buffs { font-size: 0.6rem; color: #ffd977; height: 12px; overflow: hidden; margin-top: 2px; }
+    .log-container { height: 150px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 7px; overflow-y: auto; font-size: 0.75rem; margin-bottom: 6px; }
+    .log-line { margin-bottom: 2px; border-bottom: 1px solid #212a42; }
+    .log-dmg { color: #ff8c97; } .log-heal { color: #78e7a8; } .log-info { color: #84cfff; }
+    .control-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; height: 110px; margin-bottom: 62px; }
+    .skill-btn { background: linear-gradient(180deg,#293653 0%, #1f2940 100%); border: 1px solid #3f4d72; color: #fff; border-radius: 10px; font-size: 0.8rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5px; }
+    .skill-btn:disabled { opacity: 0.45; background: #151b2a; }
     .skill-btn span { pointer-events: none; }
-    .skill-btn.phy { border-color: #9c27b0; color: #e1bee7; }
-    .skill-btn.mag { border-color: #2196f3; color: #bbdefb; }
-    .skill-btn.sup { border-color: #4caf50; color: #c8e6c9; }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .modal-content {
-        background: #222; padding: 20px; border-radius: 12px; border: 1px solid #444;
-        width: 320px; max-height: 80vh;
-        display: flex; flex-direction: column;
-        text-align: center;
-        color: #e0e0e0;
-    }
-    .modal-scroll { flex: 1; overflow-y: auto; margin-bottom: 10px; }
-
-    .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
+    .skill-btn.phy { border-color: #a25cff; color: #dcb9ff; }
+    .skill-btn.mag { border-color: #4ca8ff; color: #a9d7ff; }
+    .skill-btn.sup { border-color: #61da9a; color: #b5f3d3; }
+    .bottom-actions { position: fixed; bottom: 0; left: 0; right: 0; display: flex; gap: 6px; padding: 8px; background: rgba(10,14,25,0.95); border-top: 1px solid var(--line); }
+    .bottom-actions button { flex: 1; }
+    .modal { background: rgba(2,4,9,0.82); }
+    .modal-content { background: linear-gradient(165deg, #1a2237 0%, #101628 100%); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
 </style>
 </head>
 <body>
@@ -193,25 +131,51 @@
         <div id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
              다음 상대: ?
         </div>
-        <div class="menu-3d-container">
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
-                <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
-                <button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;">도전 뽑기</button>
+        <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
+            <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
+            <button class="menu-btn" onclick="RPG.openChallengeGacha()" style="flex:1; border-color:#e040fb; color:#e040fb;">도전 뽑기</button>
+        </div>
+        <div id="menu-draft-area" style="display:none; margin-bottom:10px;">
+            <button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;">덱 빌딩 (드래프트)</button>
+            <div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;">* 이번 전투에 사용할 3명을 선발하세요.</div>
+        </div>
+        <div id="menu-chaos-area" style="display:none; margin-bottom:10px;">
+            <button class="menu-btn" onclick="RPG.reshuffleChaosPool()" style="border-color:#ff5252; color:#ff5252;">
+                카오스 셔플 (티켓 1장)
+            </button>
+            <div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;">
+                * 현재 보유한 20장을 모두 버리고<br>새로운 20장을 무작위로 지급합니다.
             </div>
-            <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
-            <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
-            <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
-            <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
-            <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
-            <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
+        </div>
+        <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
+        <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
+        <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
+        <button class="menu-btn" onclick="RPG.openChaosBlessing()" style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
+        <button class="menu-btn" onclick="RPG.startBattleInit()" style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
+        <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
+    </div>
+    <div id="screen-draft" class="screen">
+        <h3 style="margin:5px 0;">덱 빌딩 (<span id="draft-round-text">선봉</span> 선발)</h3>
+        <div style="text-align:center; margin-bottom:2px;">
+            남은 리롤: <span id="draft-reroll-cnt" style="color:#ffd700">3</span>회
+        </div>
+
+        <div id="draft-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; padding:5px; overflow-y:auto; flex:1;"></div>
+
+        <div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px;">
+            <button class="menu-btn" onclick="RPG.rerollDraft()" style="background:#333; border-color:#ff9800; color:#ff9800;">리롤 (새로고침)</button>
+            <button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;">나가기</button>
         </div>
     </div>
     <div id="screen-collection" class="screen">
-        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>카드 목록</h3><button onclick="RPG.toMenu()" style="padding:5px;">뒤로</button></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>카드 목록</h3><button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button></div>
         <div id="collection-grid" class="card-grid"></div>
     </div>
     <div id="screen-deck" class="screen">
-        <h3>덱 구성</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>덱 구성</h3>
+            <button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
+        </div>
         <div style="margin-bottom:10px;">
             <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉 (클릭하여 선택)</div>
             <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견 (클릭하여 선택)</div>
@@ -219,6 +183,32 @@
         </div>
         <div style="flex:1; overflow-y:auto; border-top:1px solid #333;"><div id="deck-card-list" class="card-grid"></div></div>
         <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
+    </div>
+    <div id="screen-chaos-roulette" class="screen">
+        <div class="header">Chaos Roulette</div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+            <div style="text-align:center;">
+                <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
+                <p style="color:#aaa; font-size:0.9rem;">티켓을 소모하여 초월 카드를 획득하세요.</p>
+                <p>보유 카오스 티켓: <span id="ui-chaos-tickets" style="color:#ffd700; font-weight:bold; font-size:1.2rem;">0</span>장</p>
+            </div>
+            <button class="menu-btn" onclick="RPG.spinChaosRoulette()" style="border-color:#ffd700; color:#ffd700; width:80%; max-width:300px; padding:20px;">
+                카오스 룰렛 돌리기 (티켓 1장)
+            </button>
+            <button class="menu-btn" onclick="RPG.openTranscendenceCheck()" style="width:80%; max-width:300px;">
+                초월 확인
+            </button>
+            <button class="menu-btn" onclick="RPG.toMenu()" style="width:80%; max-width:300px; background:#444;">
+                돌아가기
+            </button>
+        </div>
+    </div>
+    <div id="screen-transcendence-check" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1f1f1f;">
+            <h3 style="margin:0; color:#ffd700;">보유 초월 카드 (다음 오리진 게임 적용)</h3>
+            <button onclick="RPG.openChaosRoulette()" style="background:#fff; color:#000; padding:5px 10px; border:1px solid #ccc; cursor:pointer; border-radius:4px;">뒤로</button>
+        </div>
+        <div id="transcendence-grid" class="card-grid"></div>
     </div>
     <div id="screen-battle" class="screen">
         <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div></div>
@@ -242,6 +232,21 @@
         </div>
         <div id="battle-log" class="log-container"></div>
         <div id="battle-controls" class="control-panel"></div>
+    </div>
+</div>
+
+<div id="modal-mode-select" class="modal">
+    <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
+        <div style="position:relative;">
+            <h3>게임 모드 선택</h3>
+            <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()" style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스 룰렛</button>
+        </div>
+        <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;"></div>
+        <div id="mode-desc" style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
+            모드를 선택해주세요.
+        </div>
+        <button id="btn-enter-mode" class="menu-btn" style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;">입장</button>
+        <button onclick="document.getElementById('modal-mode-select').classList.remove('active')" style="margin-top:5px; width:100%; padding:10px;">취소</button>
     </div>
 </div>
 
@@ -289,6 +294,7 @@
     <div class="modal-content" style="height:auto;">
         <h3>도서관</h3>
         <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
+        <button class="menu-btn" onclick="RPG.openPrivateTutoring()">루미의 개인과외</button>
         <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
         <button onclick="document.getElementById('modal-library').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
@@ -298,7 +304,7 @@
     <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
         <h3>루미의 마법교실</h3>
         <div id="lecture-list" class="modal-scroll"></div>
-        <button onclick="document.getElementById('modal-magic-class').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        <button onclick="RPG.closeMagicClass()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -326,7 +332,24 @@
              <button class="menu-btn" onclick="RPG.resetWrongWords()" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습 초기화</button>
         </div>
         <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
-        <button onclick="document.getElementById('modal-wordbook').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        <button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<div id="modal-tutoring" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
+        <h3>루미의 개인과외</h3>
+        <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
+             <img src="루미.png" onerror="this.src=''" alt="Rumi">
+        </div>
+        <div id="tutoring-content" class="modal-scroll" style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
+            수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;">수업 시작</button>
+            <button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()" style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;">퀴즈 풀기</button>
+        </div>
+        <button onclick="RPG.closePrivateTutoring()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
     </div>
 </div>
 
@@ -369,6 +392,7 @@
 <div id="modal-menu" class="modal">
     <div class="modal-content" style="height:auto;">
         <h3>메뉴</h3>
+        <button class="menu-btn" onclick="RPG.openApiSettings()">API 설정</button>
         <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
         <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
         <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
@@ -376,98 +400,41 @@
     </div>
 </div>
 
-<script src="data.js"></script>
-<script src="vocab_data.js"></script>
-<script src="grammar_data.js"></script>
-<script src="logic.js"></script>
-<script>
+<div id="modal-api-settings" class="modal">
+    <div class="modal-content" style="height:auto;">
+        <h3>API 설정</h3>
+        <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Gemini API Key를 입력해주세요.</p>
+        <input type="password" id="api-key-input" placeholder="Gemini API Key 입력" style="width:100%; box-sizing:border-box; padding:10px; background:#333; color:#fff; border:1px solid #555; margin-bottom:10px;">
+        <button class="menu-btn" onclick="RPG.saveApiKey()">저장</button>
+        <button onclick="document.getElementById('modal-api-settings').classList.remove('active')" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+    </div>
+</div>
+
+<script src="api.js" defer></script>
+<script src="data.js" defer></script>
+<script src="vocab_data.js" defer></script>
+<script src="collocation_data.js" defer></script>
+<script src="grammar_data.js" defer></script>
+<script src="logic.js" defer></script>
+<script defer>
 /**
  * RPG Game Namespace
  * Encapsulates all game logic, state, and UI handling.
  */
-const FX = {
-    // 화면 전체에 파티클 뿌리기
-    burstParticles: function(x, y, color) {
-        const count = 30;
-        for (let i = 0; i < count; i++) {
-            const p = document.createElement('div');
-            p.style.position = 'fixed';
-            p.style.left = x + 'px';
-            p.style.top = y + 'px';
-            p.style.width = (Math.random() * 8 + 4) + 'px';
-            p.style.height = p.style.width;
-            p.style.backgroundColor = color;
-            p.style.borderRadius = '50%';
-            p.style.pointerEvents = 'none';
-            p.style.zIndex = '9999';
-            p.style.transition = 'all 0.8s ease-out';
-            p.style.boxShadow = `0 0 10px ${color}`;
-
-            document.body.appendChild(p);
-
-            // 랜덤 방향으로 확산
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = Math.random() * 100 + 50;
-
-            setTimeout(() => {
-                p.style.transform = `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px) scale(0)`;
-                p.style.opacity = '0';
-            }, 10);
-
-            setTimeout(() => p.remove(), 800);
-        }
-    },
-
-    screenShake: function() {
-        document.body.style.animation = 'none';
-        // Trigger reflow
-        void document.body.offsetWidth;
-        document.body.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
-    },
-
-    showAttackEffect: function(targetId, type) {
-        const el = document.getElementById(targetId);
-        if(!el) return;
-
-        // Shake target
-        el.animate([
-            { transform: 'translate(0, 0)' },
-            { transform: 'translate(-5px, 0)' },
-            { transform: 'translate(5px, 0)' },
-            { transform: 'translate(0, 0)' }
-        ], { duration: 200 });
-
-        if(type === 'crit') {
-             const effect = document.createElement('div');
-             effect.style.position = 'absolute';
-             effect.style.left = '50%';
-             effect.style.top = '0'; // Top of the actor box
-             effect.style.transform = 'translate(-50%, -50%)';
-             effect.style.pointerEvents = 'none';
-             effect.style.fontSize = '1.5rem';
-             effect.style.fontWeight = 'bold';
-             effect.style.color = '#ff0000';
-             effect.style.textShadow = '0 0 5px #fff';
-             effect.style.zIndex = '100';
-             effect.innerText = 'CRITICAL!';
-
-             el.appendChild(effect);
-
-             effect.animate([
-                { opacity: 1, transform: 'translate(-50%, 0) scale(0.5)' },
-                { opacity: 1, transform: 'translate(-50%, -20px) scale(1.5)' },
-                { opacity: 0, transform: 'translate(-50%, -40px) scale(1.2)' }
-             ], {
-                duration: 800,
-                easing: 'ease-out'
-             }).onfinish = () => effect.remove();
-        }
-    }
-};
-
 const RPG = {
-    // Game State (Persistent)
+    // Global Data (Persistent across resets)
+    global: {
+        unlocked_modes: ['origin'],
+        unlocked_bonus_cards: [],
+        achievements: { origin: false },
+        chaosTickets: 0,
+        lastRewardDate: null,
+        pendingTranscendenceCards: []
+    },
+
+    // Game State (Session Persistent)
     state: {
+        mode: 'origin',
         tickets: 20,
         inventory: [],
         deck: [null, null, null],
@@ -476,7 +443,8 @@ const RPG = {
         greatSageBlessingUses: 3,
         chaosBuffs: [], // Array of { id: cardId, multiplier: float } (Merged)
         activeChaosBlessing: [], // Specific buffs from Chaos Blessing
-        activeSageBlessing: []   // Specific buffs from Great Sage Blessing
+        activeSageBlessing: [],   // Specific buffs from Great Sage Blessing
+        quiz_stats: { correct: 0, total: 0 }
     },
 
     // Battle State (Transient)
@@ -497,19 +465,11 @@ const RPG = {
     tempOnClose: null,
     tempConfirmYes: null,
     tempConfirmNo: null,
+    isApiLoading: false,
 
     // Constants
     NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
 
-    BUFF_NAMES: {
-        'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
-        'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-        'magic_guard': '매직가드', 'guard': '가드',
-        'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
-        'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
-        'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
-        'star_powder': '스타파우더'
-    },
 
     // --- Core Functions ---
 
@@ -522,7 +482,60 @@ const RPG = {
         box.scrollTop = box.scrollHeight;
     },
 
+    getCardData(id) {
+        return CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id) || (typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS.find(c => c.id === id) : null);
+    },
+
+    // --- Global Data ---
+    loadGlobalData() {
+        const data = localStorage.getItem('cardRpgGlobal');
+        if (data) {
+            try {
+                this.global = { ...this.global, ...JSON.parse(data) };
+            } catch (e) { console.error("Global data parse error", e); }
+        }
+    },
+    saveGlobalData() {
+        localStorage.setItem('cardRpgGlobal', JSON.stringify(this.global));
+    },
+
+    checkDailyChaosTicket() {
+        const today = new Date().toDateString();
+        if (this.global.lastRewardDate !== today) {
+            this.global.lastRewardDate = today;
+            this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
+            this.saveGlobalData();
+            this.showAlert("출석 보상: 카오스 티켓 1장을 획득했습니다!");
+        }
+    },
+
+    checkAllBonusUnlocked() {
+        if (!this.global.unlocked_bonus_cards) return false;
+        return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
+    },
+
     startGame(mode) {
+        // 필수 데이터 로드 검증
+        const requiredData = [
+            { name: 'CARDS', ref: typeof CARDS !== 'undefined' ? CARDS : null },
+            { name: 'ENEMIES', ref: typeof ENEMIES !== 'undefined' ? ENEMIES : null },
+            { name: 'BONUS_CARDS', ref: typeof BONUS_CARDS !== 'undefined' ? BONUS_CARDS : null },
+            { name: 'VOCAB_DATA', ref: typeof VOCAB_DATA !== 'undefined' ? VOCAB_DATA : null },
+            { name: 'GRAMMAR_DATA', ref: typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA : null },
+            { name: 'Logic', ref: typeof Logic !== 'undefined' ? Logic : null }
+        ];
+
+        const missing = requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+
+        if(missing.length > 0) {
+            const names = missing.map(d => d.name).join(', ');
+            this.showAlert(`게임 데이터 로드 실패: ${names}<br><br>파일이 같은 폴더에 있는지 확인하고 게임을 새로고침 해주세요.`);
+            return; // 게임 진입 차단
+        }
+
+        this.loadGlobalData();
+        this.checkDailyChaosTicket();
+
         if(mode === 'load') {
             const save = localStorage.getItem('cardRpgSave');
             if(save) {
@@ -533,52 +546,152 @@ const RPG = {
                  if(!this.state.chaosBuffs) this.state.chaosBuffs = [];
                  if(!this.state.activeChaosBlessing) this.state.activeChaosBlessing = [];
                  if(!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
+                 if(!this.state.mode) this.state.mode = 'origin';
+                 if(!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
 
                  // Load persistent wordbook
                  const vocab = localStorage.getItem('cardRpgVocab');
                  if(vocab) this.state.wrongWords = JSON.parse(vocab);
 
+                 const col = localStorage.getItem('cardRpgCollocation');
+                 if(col) this.state.wrongCollocations = JSON.parse(col);
+
                  this.showAlert("불러오기 완료");
-            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.initNewGame(); }
+                 this.toMenu();
+            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openModeSelect(); }
         } else {
-            // New Game Logic: Check for previous run data to save record
-            let prevStage = this.state.enemyScale;
-
-            // If in-memory state is empty (e.g. fresh load), check localStorage
-            if (prevStage === 0 && this.state.tickets === 20) {
-                const save = localStorage.getItem('cardRpgSave');
-                if (save) {
-                    try {
-                        let loaded = JSON.parse(save);
-                        if (loaded.enemyScale) prevStage = loaded.enemyScale;
-                    } catch (e) {}
-                }
-            }
-
-            // Save record if significant progress
-            if (prevStage > 0) {
-                 // Temporarily set state to previous stage for saveRecord to use
-                 let originalScale = this.state.enemyScale;
-                 this.state.enemyScale = prevStage;
-                 this.saveRecord();
-                 this.state.enemyScale = originalScale;
-            }
-
-            this.initNewGame();
+            // New Game Logic: Show Mode Select
+            this.openModeSelect();
         }
-        this.toMenu();
     },
 
-    initNewGame() {
-        this.state = { tickets: 20, inventory: [], deck: [null, null, null], enemyScale: 0, chaosBlessingUses: 3, greatSageBlessingUses: 3, chaosBuffs: [], activeChaosBlessing: [], activeSageBlessing: [], wrongWords: [] };
+    openModeSelect() {
+        this.selectedModeId = null;
+        const modal = document.getElementById('modal-mode-select');
+        const list = document.getElementById('mode-list');
+        const desc = document.getElementById('mode-desc');
+        list.innerHTML = "";
+        desc.innerText = "모드를 선택하여 설명을 확인하세요.";
+
+        const chaosBtn = document.getElementById('btn-chaos-roulette');
+        if (chaosBtn) {
+            if (this.checkAllBonusUnlocked()) {
+                chaosBtn.style.display = 'block';
+            } else {
+                chaosBtn.style.display = 'none';
+            }
+        }
+
+        const MODES = [
+            { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
+            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
+            { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
+            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
+            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
+            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' },
+            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
+            { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
+        ];
+
+        MODES.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = m.name;
+            btn.id = `mode-btn-${m.id}`;
+
+            const isUnlocked = this.global.unlocked_modes.includes(m.id);
+            if(isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
+
+            btn.onclick = () => {
+                this.selectedModeId = m.id;
+                desc.innerText = `[${m.name}]\n${m.desc}`;
+
+                // Visual Update
+                list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
+                btn.style.borderColor = '#ffd700';
+            };
+            list.appendChild(btn);
+        });
+
+        // Enter Button Logic
+        const enterBtn = document.getElementById('btn-enter-mode');
+        enterBtn.onclick = () => {
+            if(!this.selectedModeId) return this.showAlert("모드를 선택해주세요.");
+            const mName = MODES.find(m => m.id === this.selectedModeId).name;
+            this.showConfirm(`${mName} 모드로 시작하시겠습니까?`, () => {
+                this.initNewGame(this.selectedModeId);
+                modal.classList.remove('active');
+                this.toMenu();
+            });
+        };
+
+        modal.classList.add('active');
+    },
+
+    initNewGame(mode = 'origin') {
+        // Record saving logic (Only for Origin mode as per request "Record check only for Origin")
+        // Check previous state
+        if (this.state.mode === 'origin' && this.state.enemyScale > 0) {
+             this.saveRecord();
+        }
+
+        let initTickets = 20;
+        if (mode === 'suffering' || mode === 'overdrive') initTickets = 10;
+        if (mode === 'chaos') initTickets = 0;
+        if (mode === 'draft') initTickets = 5;
+
+        this.state = {
+            mode: mode,
+            tickets: initTickets,
+            inventory: [],
+            deck: [null, null, null],
+            enemyScale: 0,
+            chaosBlessingUses: 3,
+            greatSageBlessingUses: 3,
+            chaosBuffs: [],
+            activeChaosBlessing: [],
+            activeSageBlessing: [],
+            wrongWords: [],
+            quiz_stats: { correct: 0, total: 0 },
+            chaosPool: [],
+            draft: { active: false, round: 0, rerolls: 3, currentOptions: [] }
+        };
+
+        if (mode === 'chaos') {
+            let allCards = [...CARDS];
+            if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+                const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+                allCards = allCards.concat(bonus);
+            }
+            allCards.sort(() => Math.random() - 0.5);
+            const picks = allCards.slice(0, 20).map(c => c.id);
+
+            this.state.chaosPool = picks;
+            this.state.inventory = [...picks];
+        }
+
+        if (mode === 'origin' && this.global.pendingTranscendenceCards) {
+            this.state.transcendencePool = [...this.global.pendingTranscendenceCards];
+        } else {
+            this.state.transcendencePool = [];
+        }
+
         // Load persistent wordbook
         const vocab = localStorage.getItem('cardRpgVocab');
         if(vocab) this.state.wrongWords = JSON.parse(vocab);
+
+        const col = localStorage.getItem('cardRpgCollocation');
+        if(col) this.state.wrongCollocations = JSON.parse(col);
     },
 
     saveGame() {
         localStorage.setItem('cardRpgSave', JSON.stringify(this.state));
         localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+        this.saveGlobalData(); // Also save global just in case
         this.showAlert("저장되었습니다.");
     },
 
@@ -618,6 +731,26 @@ const RPG = {
         const enemyIdx = this.state.enemyScale % ENEMIES.length;
         const nextName = ENEMIES[enemyIdx].name;
         document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
+
+        // Mode Specific Menu Areas
+        const gachaArea = document.getElementById('menu-gacha-area');
+        const draftArea = document.getElementById('menu-draft-area');
+        const chaosArea = document.getElementById('menu-chaos-area');
+
+        // Hide all first
+        gachaArea.style.display = 'none';
+        draftArea.style.display = 'none';
+        if (chaosArea) chaosArea.style.display = 'none';
+
+        if (this.state.mode === 'draft') {
+            draftArea.style.display = 'block';
+        }
+        else if (this.state.mode === 'chaos') {
+            if (chaosArea) chaosArea.style.display = 'block';
+        }
+        else {
+            gachaArea.style.display = 'flex';
+        }
     },
     toTitle() {
         // No saveRecord here
@@ -627,6 +760,40 @@ const RPG = {
 
     openSystemMenu() {
         document.getElementById('modal-menu').classList.add('active');
+    },
+
+    // --- Chaos Roulette ---
+    openChaosRoulette() {
+        if (!this.checkAllBonusUnlocked()) return this.showAlert("아직 해금되지 않았습니다.");
+        this.showScreen('screen-chaos-roulette');
+        document.getElementById('ui-chaos-tickets').innerText = this.global.chaosTickets || 0;
+    },
+
+    spinChaosRoulette() {
+        if ((this.global.chaosTickets || 0) < 1) return this.showAlert("티켓이 부족합니다.");
+
+        let pool = TRANSCENDENCE_CARDS.filter(c => !this.global.pendingTranscendenceCards.includes(c.id));
+
+        if (pool.length === 0) return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
+
+        this.global.chaosTickets--;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        this.global.pendingTranscendenceCards.push(pick.id);
+        this.saveGlobalData();
+
+        document.getElementById('ui-chaos-tickets').innerText = this.global.chaosTickets;
+
+        const modal = document.getElementById('modal-gacha');
+        const content = document.getElementById('gacha-result');
+        document.getElementById('gacha-title').innerText = "초월 소환 성공!";
+        content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>다음 오리진 게임 전설 풀에 추가되었습니다!</p>`;
+        modal.classList.add('active');
+    },
+
+    openTranscendenceCheck() {
+        this.showScreen('screen-transcendence-check');
+        this.renderCardList('transcendence-grid', this.global.pendingTranscendenceCards, (id) => this.showCardInfo(id));
     },
 
     // --- Chaos Blessing ---
@@ -656,7 +823,6 @@ const RPG = {
             document.getElementById('modal-chaos').classList.remove('active');
 
             // Pick random quiz
-            // Get all quizzes from all lectures
             let allQuizzes = [];
             GRAMMAR_DATA.forEach(lec => {
                 allQuizzes = allQuizzes.concat(lec.quizzes);
@@ -681,12 +847,17 @@ const RPG = {
         }
         document.getElementById('modal-chaos').classList.remove('active');
 
+        // Mode Bonus
+        let bonus = 0;
+        if(this.state.mode === 'suffering') bonus = 2;
+        if(this.state.mode === 'overdrive') bonus = 1;
+
         if(type === 'normal') {
-            this.applyChaosBlessing(3);
+            this.applyChaosBlessing(3 + bonus);
         } else if (type === 'challenge') {
             this.startChaosQuiz((success) => {
                 if(success) {
-                    this.applyChaosBlessing(5);
+                    this.applyChaosBlessing(5 + bonus);
                 } else {
                     this.state.chaosBlessingUses--;
                     document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
@@ -697,12 +868,15 @@ const RPG = {
     },
 
     startGrammarQuiz(q, successCallback = null, failCallback = null) {
+        // ✅ 모달 초기화
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active');
+
         // Shuffle options
         // q.options is array of strings. q.answer is correct string.
         let opts = [...q.options];
         opts.sort(() => Math.random() - 0.5);
 
-        const modal = document.getElementById('modal-quiz');
         const qDiv = document.getElementById('quiz-question');
         const descDiv = document.getElementById('quiz-desc');
         const oDiv = document.getElementById('quiz-options');
@@ -726,6 +900,7 @@ const RPG = {
             btn.style.fontSize = "0.9rem";
             btn.innerText = opt;
             btn.onclick = () => {
+                btn.disabled = true;
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
                 if(opt === q.answer) {
                     btn.classList.add('correct');
@@ -790,7 +965,21 @@ const RPG = {
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
         // Apply to 12 random cards
-        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+        let pool = [...CARDS];
+        if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+        pool = pool.filter(c => c.grade !== 'transcendence');
+
+        const mode = this.state.mode;
+        if (mode === 'restriction') {
+            pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
+        } else if (mode === 'balance') {
+            pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+        }
+
+        pool.sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, 12);
 
         this.state.activeChaosBlessing = []; // Clear Chaos Blessing
@@ -819,8 +1008,27 @@ const RPG = {
 
     applyChaosBlessing(count) {
         this.state.chaosBlessingUses--;
-        // Pick random cards from ALL types (CARDS)
-        let pool = [...CARDS].sort(() => 0.5 - Math.random());
+
+        // 1. Base Pool
+        let pool = [...CARDS];
+
+        // 2. Add Bonus Cards (if unlocked)
+        if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+        pool = pool.filter(c => c.grade !== 'transcendence');
+
+        // 3. Filter by Mode Rarity
+        const mode = this.state.mode;
+        if (mode === 'restriction') {
+            pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
+        } else if (mode === 'balance') {
+            pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+        }
+
+        // 4. Shuffle and Pick
+        pool.sort(() => 0.5 - Math.random());
         let picks = pool.slice(0, count);
 
         this.state.activeSageBlessing = []; // Clear Sage Blessing
@@ -847,6 +1055,51 @@ const RPG = {
     },
 
     // --- Gacha & Deck UI ---
+    reshuffleChaosPool() {
+        if (this.state.tickets < 1) {
+            return this.showAlert("셔플할 티켓이 부족합니다.");
+        }
+
+        this.showConfirm(
+            `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
+            티켓 1장을 사용하여 새로운 20장을 받으시겠습니까?`,
+            () => {
+                this.state.tickets--;
+                document.getElementById('ui-tickets').innerText = this.state.tickets;
+
+                let allCards = [...CARDS];
+
+                if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
+                    const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+                    allCards = allCards.concat(bonus);
+                }
+
+                allCards.sort(() => Math.random() - 0.5);
+                const newPicks = allCards.slice(0, 20).map(c => c.id);
+
+                this.state.chaosPool = newPicks;
+                this.state.inventory = [...newPicks];
+                this.state.deck = [null, null, null];
+
+                this.saveGame();
+
+                let legendCnt = 0, epicCnt = 0;
+                newPicks.forEach(id => {
+                    const c = this.getCardData(id);
+                    if(c.grade === 'legend') legendCnt++;
+                    if(c.grade === 'epic') epicCnt++;
+                });
+
+                this.showAlert(
+                    `<b>카오스 셔플 완료!</b><br><br>
+                    새로운 20장이 지급되었습니다.<br>
+                    (전설: ${legendCnt}, 에픽: ${epicCnt})<br><br>
+                    * 덱이 초기화되었으니 다시 구성해주세요.`
+                );
+            }
+        );
+    },
+
     openGacha() {
         if(this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
         this.state.tickets--;
@@ -873,48 +1126,117 @@ const RPG = {
         document.getElementById('ui-tickets').innerText = this.state.tickets;
         let rand = Math.random();
         let grade = 'normal';
+        const mode = this.state.mode;
 
-        if (isChallenge) {
-            // Legend 20%, Epic 25%, Rare 30%, Normal 25%
-            if(rand < 0.20) grade = 'legend';
-            else if(rand < 0.45) grade = 'epic';
-            else if(rand < 0.75) grade = 'rare';
-            else grade = 'normal';
+        // Chaos Mode Override
+        /*
+        if (mode === 'chaos') {
+            if (!this.state.chaosPool || this.state.chaosPool.length === 0) {
+                 // Should have been generated in winBattle or initNewGame, but fallback
+                 let allCards = [...CARDS];
+                 if (this.global.unlocked_bonus_cards) {
+                     const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+                     allCards = allCards.concat(unlocked);
+                 }
+                 allCards.sort(() => Math.random() - 0.5);
+                 this.state.chaosPool = allCards.slice(0, 20).map(c => c.id);
+            }
+            const pickId = this.state.chaosPool[Math.floor(Math.random() * this.state.chaosPool.length)];
+            const pick = this.getCardData(pickId);
+            this.state.inventory.push(pick.id);
+
+            const modal = document.getElementById('modal-gacha');
+            const content = document.getElementById('gacha-result');
+            let color = '#bdbdbd';
+            if(pick.grade === 'legend') color = '#ff5252';
+            else if(pick.grade === 'epic') color = '#e040fb';
+            else if(pick.grade === 'rare') color = '#448aff';
+
+            document.getElementById('gacha-title').innerText = "카오스 뽑기 성공!";
+            content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
+            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+            modal.classList.add('active');
+            return;
+        }
+        */
+
+        // Determine Grade
+        if (mode === 'restriction') {
+            // Restriction: Rare max
+            if (isChallenge) {
+                // Challenge: Rare 40, Normal 60
+                if(rand < 0.40) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Normal: Rare 20, Normal 80
+                if(rand < 0.20) grade = 'rare';
+                else grade = 'normal';
+            }
+        } else if (mode === 'balance') {
+            // Balance: Epic max
+            if (isChallenge) {
+                // Challenge: Epic 20, Rare 30, Normal 50
+                if(rand < 0.20) grade = 'epic';
+                else if(rand < 0.50) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Normal: Epic 10, Rare 20, Normal 70
+                if(rand < 0.10) grade = 'epic';
+                else if(rand < 0.30) grade = 'rare';
+                else grade = 'normal';
+            }
         } else {
-            // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
-            if(rand < 0.10) grade = 'legend';
-            else if(rand < 0.30) grade = 'epic';
-            else if(rand < 0.60) grade = 'rare';
+            // Origin / Others
+            if (isChallenge) {
+                // Legend 20%, Epic 25%, Rare 30%, Normal 25%
+                if(rand < 0.20) grade = 'legend';
+                else if(rand < 0.45) grade = 'epic';
+                else if(rand < 0.75) grade = 'rare';
+                else grade = 'normal';
+            } else {
+                // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
+                if(rand < 0.10) grade = 'legend';
+                else if(rand < 0.30) grade = 'epic';
+                else if(rand < 0.60) grade = 'rare';
+            }
         }
 
-        const pool = CARDS.filter(c => c.grade === grade);
+        // Build Pool
+        let pool = CARDS.filter(c => c.grade === grade);
+
+        // Add Bonus Cards
+        if (this.global.unlocked_bonus_cards.length > 0) {
+            const bonus = BONUS_CARDS.filter(c => c.grade === grade && this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+
+        // Add Transcendence Cards (Origin Only, Legend Only)
+        if (mode === 'origin' && grade === 'legend' && this.state.transcendencePool && this.state.transcendencePool.length > 0) {
+             const transCards = TRANSCENDENCE_CARDS.filter(c => this.state.transcendencePool.includes(c.id));
+             pool = pool.concat(transCards);
+        }
+
+        if(pool.length === 0) {
+            // Fallback if pool is empty (e.g. no cards of that grade? Should not happen with standard set)
+            // But if Restriction mode and we rolled something else? Logic guarantees valid grade.
+            // If somehow empty, fallback to normal
+            console.error("Empty pool for grade: " + grade);
+            grade = 'normal';
+            pool = CARDS.filter(c => c.grade === 'normal');
+        }
+
         const pick = pool[Math.floor(Math.random() * pool.length)];
         this.state.inventory.push(pick.id);
 
         const modal = document.getElementById('modal-gacha');
         const content = document.getElementById('gacha-result');
         let color = '#bdbdbd', title = "획득!";
-        if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
+        if(pick.grade === 'transcendence') { color = '#ffd700'; title = "🌟 초월 카드 강림! 🌟"; }
+        else if(grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
         else if(grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
 
-        // FX Integration
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-
-        if (grade === 'legend') {
-            setTimeout(() => FX.burstParticles(centerX, centerY, '#ff5252'), 0);
-            setTimeout(() => FX.burstParticles(centerX, centerY, '#ff5252'), 200);
-            setTimeout(() => FX.burstParticles(centerX, centerY, '#ffd700'), 400);
-            FX.screenShake();
-        } else if (grade === 'epic') {
-            FX.burstParticles(centerX, centerY, '#e040fb');
-        } else if (grade === 'rare') {
-            FX.burstParticles(centerX, centerY, '#448aff');
-        } else {
-            FX.burstParticles(centerX, centerY, '#ffffff');
-        }
-
         let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
+        if(pick.grade === 'transcendence') msgTitle = title;
         document.getElementById('gacha-title').innerText = msgTitle;
         content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
             <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
@@ -926,6 +1248,7 @@ const RPG = {
         document.getElementById('modal-library').classList.add('active');
     },
     openMagicClass() {
+        document.getElementById('modal-library').classList.remove('active');
         const list = document.getElementById('lecture-list');
         list.innerHTML = "";
         GRAMMAR_DATA.forEach(lec => {
@@ -956,14 +1279,22 @@ const RPG = {
     },
     closeLectureView() {
         document.getElementById('modal-lecture-view').classList.remove('active');
-        if(this.tempLectureClose) {
-            this.tempLectureClose();
-            this.tempLectureClose = null;
+        const cb = this.tempLectureClose;
+        this.tempLectureClose = null;
+        if(cb) {
+            cb();
         }
     },
 
     // --- Wordbook & Quiz ---
     openWordbook() {
+        document.getElementById('modal-library').classList.remove('active');
+        if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+            this.openCollocationBook();
+            return;
+        }
+
+        document.querySelector('#modal-wordbook h3').innerText = "단어장"; // Reset title
         if(!this.state.wrongWords) this.state.wrongWords = [];
         const list = document.getElementById('wordbook-list');
         list.innerHTML = "";
@@ -992,15 +1323,149 @@ const RPG = {
     },
 
     resetWrongWords() {
+        if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+            this.state.wrongCollocations = [];
+            localStorage.removeItem('cardRpgCollocation');
+            this.showAlert("숙어/구동사 복습 상태가 초기화되었습니다.");
+            this.openCollocationBook();
+            return;
+        }
+
         this.state.wrongWords = [];
         localStorage.removeItem('cardRpgVocab');
         this.showAlert("복습 상태가 초기화되었습니다.");
         this.openWordbook(); // Re-render
     },
 
+    openCollocationBook() {
+        if(!this.state.wrongCollocations) this.state.wrongCollocations = [];
+        const list = document.getElementById('wordbook-list');
+        list.innerHTML = "";
+
+        const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
+
+        COLLOCATION_DATA.forEach(v => {
+            const isWrong = this.state.wrongCollocations.includes(v.id);
+
+            if(onlyWrong && !isWrong) return;
+
+            const div = document.createElement('div');
+            div.style.marginBottom = "10px";
+            div.style.borderBottom = "1px solid #444";
+            div.style.paddingBottom = "5px";
+
+            const color = isWrong ? '#ef5350' : '#81d4fa';
+
+            div.innerHTML = `<b style="color:${color}; font-size:1.1rem;">${v.expression}</b><br>
+                             <span style="color:#eee;">${v.meaning}</span>`;
+            list.appendChild(div);
+        });
+
+        document.querySelector('#modal-wordbook h3').innerText = "숙어/구동사 단어장";
+        document.getElementById('modal-wordbook').classList.add('active');
+    },
+
+    startCollocationQuiz(callback) {
+        // ✅ 모달 초기화
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active');
+
+        document.getElementById('quiz-desc').style.display = 'block';
+
+        if (!COLLOCATION_DATA || COLLOCATION_DATA.length === 0) {
+            return this.showAlert("데이터 로드 오류: Collocation 데이터가 없습니다.");
+        }
+
+        let allQuizzes = [];
+        COLLOCATION_DATA.forEach(item => {
+            if (item.quizzes) {
+                item.quizzes.forEach(q => {
+                    allQuizzes.push({ ...q, parentId: item.id });
+                });
+            } else {
+                 allQuizzes.push({ ...item, parentId: item.id });
+            }
+        });
+
+        if (allQuizzes.length === 0) return this.showAlert("퀴즈 데이터가 없습니다.");
+
+        const q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+        let opts = [...q.options];
+        opts.sort(() => Math.random() - 0.5);
+
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        qDiv.innerText = q.question;
+        descDiv.innerText = q.translation;
+
+        oDiv.innerHTML = "";
+        fDiv.innerText = "";
+
+        opts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "menu-btn";
+            btn.style.padding = "10px";
+            btn.style.fontSize = "0.9rem";
+            btn.innerText = opt;
+            btn.onclick = () => {
+                btn.disabled = true;
+                Array.from(oDiv.children).forEach(c => c.onclick = null);
+                if(opt === q.answer) {
+                    btn.classList.add('correct');
+                    fDiv.innerText = "정답!"; fDiv.style.color = "#4caf50";
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        callback(true);
+                    }, 1000);
+                } else {
+                    btn.classList.add('wrong');
+
+                    if(!this.state.wrongCollocations) this.state.wrongCollocations = [];
+                    if(!this.state.wrongCollocations.includes(q.parentId)) {
+                        this.state.wrongCollocations.push(q.parentId);
+                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+                    }
+
+                    Array.from(oDiv.children).forEach(c => {
+                         if(c.innerText === q.answer) c.classList.add('correct');
+                    });
+                    fDiv.innerText = "오답..."; fDiv.style.color = "#ef5350";
+
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        callback(false);
+                    }, 1500);
+                }
+            };
+            oDiv.appendChild(btn);
+        });
+
+        modal.classList.add('active');
+    },
+
     startQuiz(callback) {
-        // Reset specific UI elements for normal quiz
-        document.getElementById('quiz-desc').style.display = 'none';
+        // ✅ 모달 초기화
+        const modal = document.getElementById('modal-quiz');
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // 모달 닫기 (혹시 열려있다면)
+        modal.classList.remove('active');
+
+        // 완전 초기화
+        oDiv.innerHTML = "";
+        if(fDiv) fDiv.innerText = "";
+        descDiv.style.display = 'none';
+
+        if (!VOCAB_DATA || VOCAB_DATA.length === 0) {
+            return this.showAlert("데이터 로드 오류: 단어 데이터가 없습니다.");
+        }
 
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
@@ -1024,14 +1489,7 @@ const RPG = {
         // Shuffle
         options.sort(() => Math.random() - 0.5);
 
-        const modal = document.getElementById('modal-quiz');
-        const qDiv = document.getElementById('quiz-question');
-        const oDiv = document.getElementById('quiz-options');
-        const fDiv = document.getElementById('quiz-feedback');
-
         qDiv.innerText = q.word;
-        oDiv.innerHTML = "";
-        if(fDiv) fDiv.innerText = "";
 
         options.forEach(opt => {
             const btn = document.createElement('button');
@@ -1041,6 +1499,7 @@ const RPG = {
             btn.innerText = opt.text;
             btn.onclick = () => {
                 // Disable all buttons
+                btn.disabled = true;
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
 
                 if(opt.correct) {
@@ -1078,7 +1537,23 @@ const RPG = {
     },
 
     startChaosQuiz(callback) {
-        document.getElementById('quiz-desc').style.display = 'none';
+        // ✅ 모달 초기화 추가
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active'); // 기존 모달 닫기
+
+        const qDiv = document.getElementById('quiz-question');
+        const descDiv = document.getElementById('quiz-desc');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
+
+        // 완전 초기화
+        oDiv.innerHTML = "";
+        if(fDiv) fDiv.innerText = "";
+        descDiv.style.display = 'none';
+
+        if (!VOCAB_DATA || VOCAB_DATA.length === 0) {
+            return this.showAlert("데이터 로드 오류: 단어 데이터가 없습니다.");
+        }
 
         // Pick a word
         const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
@@ -1101,15 +1576,8 @@ const RPG = {
         // Shuffle
         options.sort(() => Math.random() - 0.5);
 
-        const modal = document.getElementById('modal-quiz');
-        const qDiv = document.getElementById('quiz-question');
-        const oDiv = document.getElementById('quiz-options');
-        const fDiv = document.getElementById('quiz-feedback');
-
         // Question is Meaning (Korean)
         qDiv.innerText = q.meaning;
-        oDiv.innerHTML = "";
-        if(fDiv) fDiv.innerText = "";
 
         options.forEach(opt => {
             const btn = document.createElement('button');
@@ -1119,6 +1587,7 @@ const RPG = {
             btn.innerText = opt.text;
             btn.onclick = () => {
                 // Disable all buttons
+                btn.disabled = true; // ✅ 즉시 비활성화
                 Array.from(oDiv.children).forEach(c => c.onclick = null);
 
                 if(opt.correct) {
@@ -1156,7 +1625,7 @@ const RPG = {
         let counts = {};
         list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
         for(let id in counts) {
-            const data = CARDS.find(c => c.id === id);
+            const data = this.getCardData(id);
             if(!data) continue;
             const el = document.createElement('div');
             el.className = `card-item ${data.grade}`;
@@ -1167,34 +1636,13 @@ const RPG = {
     },
 
     showCardInfo(id) {
-        const data = CARDS.find(c => c.id === id);
+        const data = this.getCardData(id);
         if(!data) return;
         document.getElementById('md-name').innerText = data.name;
         document.getElementById('md-img').src = `${data.name}.png`;
         document.getElementById('md-grade').className = data.grade;
         document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
         document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
-
-        // Hologram Logic
-        const portraitDiv = document.querySelector('#modal-card .portrait');
-        portraitDiv.className = 'portrait'; // Reset
-        portraitDiv.style.border = '';
-        portraitDiv.style.boxShadow = '';
-
-        if (data.grade === 'legend') {
-            portraitDiv.classList.add('legend-glow');
-            portraitDiv.style.border = '3px solid #ff5252';
-        } else if (data.grade === 'epic') {
-            portraitDiv.style.border = '2px solid #e040fb';
-            portraitDiv.style.boxShadow = '0 0 15px #e040fb';
-        } else if (data.grade === 'rare') {
-             portraitDiv.style.border = '2px solid #448aff';
-             portraitDiv.style.boxShadow = '0 0 10px #448aff';
-        } else {
-            portraitDiv.style.border = '2px solid #555';
-            portraitDiv.style.boxShadow = 'none';
-        }
-
         let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
         skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
         data.skills.forEach(s => {
@@ -1226,7 +1674,7 @@ const RPG = {
         ['선봉', '중견', '대장'].forEach((role, i) => {
             const id = this.state.deck[i];
             const el = document.getElementById(`slot-${i}`);
-            if(id) { const c = CARDS.find(x => x.id === id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
+            if(id) { const c = this.getCardData(id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
             else { el.innerText = `${role} (비어있음)`; el.classList.remove('filled'); }
         });
     },
@@ -1258,10 +1706,11 @@ const RPG = {
 
         this.battle.players = this.state.deck.map((id, idx) => {
             if(!id) return null;
-            const proto = CARDS.find(c => c.id === id);
+            const proto = this.getCardData(id);
 
             // Call Logic to calculate initial stats (Base + Synergies)
-            const init = Logic.calculateInitialStats(proto, this.state.deck, CARDS);
+            const allCards = [...CARDS, ...BONUS_CARDS];
+            const init = Logic.calculateInitialStats(proto, this.state.deck, allCards, idx);
 
             // Log active synergy if any
             if(init.activeTrait) {
@@ -1539,7 +1988,9 @@ const RPG = {
             victim,
             killer,
             RPG.battle.fieldBuffs,
-            (msg) => RPG.log(msg)
+            (msg) => RPG.log(msg),
+            RPG.state.deck,
+            RPG.battle.turn
         );
 
         // Apply results
@@ -1575,6 +2026,13 @@ const RPG = {
              RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
         }
 
+        // Trait: Phoenix Normal Attack Burn
+        if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'syn_fire_3_crit_burn' && RPG.battle.activeTraits.includes('syn_fire_3_crit_burn')) {
+             target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
+             if(target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+             RPG.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
+        }
+
         // Trait: Behemoth (Skill Use -> Stun Chance)
         if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
             if (Math.random() < 0.2) {
@@ -1583,8 +2041,19 @@ const RPG = {
             }
         }
 
+        // Trait: Behemoth Liberated (Skill Use -> Stun Chance)
+        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait') {
+            if (Math.random() < 0.2) {
+                target.buffs.stun = 1;
+                RPG.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
+            }
+        }
+
         // Check for Delayed Attack Effect
-        const delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
+        let delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack_field');
+        if(!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_random_attack');
+
         if(delayedEff && !isDelayed) {
             RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
             RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: skill });
@@ -1620,18 +2089,11 @@ const RPG = {
             skill,
             RPG.battle.fieldBuffs,
             RPG.battle.activeTraits,
-            (msg) => RPG.log(msg)
+            (msg) => RPG.log(msg),
+            RPG.state.mode, // PASS MODE
+            RPG.state.deck, // PASS DECK
+            RPG.battle.turn // PASS TURN
         );
-
-        // FX Logic
-        if (result.isCrit) {
-             let targetId = 'enemy-actor-box';
-             // If target is in players list, then it's player taking damage
-             if (RPG.battle.players.includes(target)) {
-                 targetId = 'player-actor-box';
-             }
-             FX.showAttackEffect(targetId, 'crit');
-        }
 
         if(target.id === 'demon_god') {
              const b = RPG.battle;
@@ -1648,150 +2110,21 @@ const RPG = {
     applySkillEffects(source, target, skill) {
         if(!skill.effects) return;
 
+        const ctx = {
+            source: source,
+            target: target,
+            skill: skill,
+            logFn: (msg) => RPG.log(msg),
+            getBuffName: (id) => (BUFF_NAMES[id] || id),
+            applyFieldBuff: (id) => RPG.applyFieldBuff(id),
+            battle: this.battle,
+            executeSkill: this.executeSkill.bind(this),
+            getCardData: this.getCardData.bind(this)
+        };
+
         skill.effects.forEach(eff => {
-            if(eff.type === 'buff') {
-                source.buffs[eff.id] = (eff.duration || 1);
-            }
-            else if(eff.type === 'debuff' || eff.type === 'self_debuff') {
-                let t = eff.type === 'debuff' ? target : source;
-                if(eff.stack) {
-                    t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
-                    if(t.buffs[eff.id] > 3) t.buffs[eff.id] = 3;
-                    RPG.log(`${t === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] ${t.buffs[eff.id]}스택.`);
-                } else {
-                    t.buffs[eff.id] = 1; // Flag or duration 1
-                    RPG.log(`${t === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'field_buff') {
-                this.applyFieldBuff(eff.id);
-            }
-            else if(eff.type === 'conditional_field_buff') {
-                if(eff.condition === 'target_has_debuff' && target.buffs[eff.debuff]) this.applyFieldBuff(eff.id);
-            }
-            else if(eff.type === 'random_debuff') {
-                let pool = [...eff.pool].sort(() => 0.5 - Math.random());
-                for(let i=0; i<eff.count; i++) {
-                    if(pool[i]) {
-                         target.buffs[pool[i]] = 1;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                    }
-                }
-            }
-            else if(eff.type === 'conditional_debuff') {
-                if(eff.condition === 'target_debuff_count' && Object.keys(target.buffs).length >= eff.count) {
-                    target.buffs[eff.debuff] = 1;
-                    RPG.log(`조건 만족! 적에게 [${this.BUFF_NAMES[eff.debuff]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'suicide') {
-                source.hp = 0;
-            }
-            else if(eff.type === 'chance_debuff') {
-                if(Math.random() < eff.chance) {
-                    target.buffs[eff.id] = eff.duration || 1;
-                    RPG.log(`<b>성공!</b> ${target === source ? '자신' : '적'}에게 [${this.BUFF_NAMES[eff.id]}] 부여.`);
-                } else {
-                    RPG.log(`[${this.BUFF_NAMES[eff.id]}] 부여 <b>실패</b>.`);
-                }
-            }
-            else if(eff.type === 'conditional_field_debuff') {
-                 if(RPG.battle.fieldBuffs.some(b => b.name === eff.field)) {
-                     eff.debuffs.forEach(d => {
-                         target.buffs[d] = 1;
-                         RPG.log(`조건 만족! [${this.BUFF_NAMES[d]}] 부여.`);
-                     });
-                 }
-            }
-            else if(eff.type === 'clear_target_debuffs') {
-                 const count = Object.keys(target.buffs).length;
-                 target.buffs = {};
-                 if(count > 0) RPG.log(`적의 모든 디버프를 제거했습니다! (${count}개)`);
-            }
-            else if(eff.type === 'consume_all_burn_cond_buff') {
-                 if(target.buffs['burn']) {
-                     delete target.buffs['burn'];
-                     RPG.applyFieldBuff('sun_bless');
-                     RPG.log("작열 스택을 모두 소모하여 태양의 축복을 불러옵니다!");
-                 } else {
-                     RPG.applyFieldBuff('earth_bless');
-                     RPG.log("소모할 작열이 없어 대지의 축복을 불러옵니다.");
-                 }
-            }
-            else if(eff.type === 'consume_burn_1_dmg') {
-                 if(target.buffs['burn'] >= 1) {
-                     target.buffs['burn']--;
-                     if(target.buffs['burn'] <= 0) delete target.buffs['burn'];
-                     RPG.log("작열 1스택 소모! 대미지 2배 적용!");
-                 }
-            }
-            else if(eff.type === 'remove_field_buff_dmg') {
-                 if(RPG.battle.fieldBuffs.length > 0) {
-                     let rm = RPG.battle.fieldBuffs.shift();
-                     RPG.log(`필드버프 [${this.BUFF_NAMES[rm.name]}] 제거! 대미지 2배 적용!`);
-                 }
-            }
-            else if(eff.type === 'check_divine_3_stun_else_add') {
-                 if((target.buffs['divine'] || 0) >= 3) {
-                     target.buffs['stun'] = 1;
-                     RPG.log("디바인 3스택 확인! 적을 기절시킵니다!");
-                 } else {
-                     target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
-                     if(target.buffs['divine'] > 3) target.buffs['divine'] = 3;
-                     RPG.log("디바인 스택 추가.");
-                 }
-            }
-            else if(eff.type === 'random_debuff_consume_divine') {
-                let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
-                let count = 1;
-                if(target.buffs['divine'] > 0) {
-                    target.buffs['divine']--;
-                    if(target.buffs['divine'] <= 0) delete target.buffs['divine'];
-                    count = 2;
-                    RPG.log("디바인을 소모하여 효과 강화! (디버프 2개 부여)");
-                }
-
-                pool.sort(() => 0.5 - Math.random());
-                for(let i=0; i<count; i++) {
-                    target.buffs[pool[i]] = 1;
-                    RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                }
-            }
-            else if(eff.type === 'roulette_field') {
-                 RPG.battle.fieldBuffs = [];
-                 RPG.log("모든 필드 버프가 제거되었습니다!");
-
-                 const buffs = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder'];
-                 const pick = buffs[Math.floor(Math.random() * buffs.length)];
-                 this.applyFieldBuff(pick);
-            }
-            else if(eff.type === 'wild_card_debuff') {
-                 // Fix: Cleanse TARGET (Enemy) debuffs, then add new debuffs to TARGET (Enemy).
-                 // As per request: "상대의 디버프를 제거하고 새로 2개를 부여하는것"
-
-                 const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
-                 let cleansed = 0;
-                 badBuffs.forEach(b => {
-                     if(target.buffs[b]) {
-                         delete target.buffs[b];
-                         cleansed++;
-                     }
-                 });
-                 if(cleansed > 0) RPG.log(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
-
-                 let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
-                 pool.sort(() => 0.5 - Math.random());
-
-                 for(let i=0; i<2; i++) {
-                     if(pool[i] === 'burn' || pool[i] === 'divine') {
-                         target.buffs[pool[i]] = (target.buffs[pool[i]] || 0) + 1;
-                         if(target.buffs[pool[i]] > 3) target.buffs[pool[i]] = 3;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 스택 추가.`);
-                     } else {
-                         target.buffs[pool[i]] = 1;
-                         RPG.log(`적에게 [${this.BUFF_NAMES[pool[i]]}] 부여.`);
-                     }
-                 }
+            if(typeof SideEffects !== 'undefined') {
+                SideEffects.apply(ctx, eff);
             }
         });
 
@@ -1800,16 +2133,22 @@ const RPG = {
             RPG.log("루미의 특성 발동! 트윙클파티 추가!");
             this.applyFieldBuff('twinkle_party');
         }
+
+        // Siren Trait Trigger
+        if(RPG.battle.activeTraits.includes('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
+            RPG.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
+            this.applyFieldBuff('twinkle_party');
+        }
     },
 
     applyFieldBuff(id) {
-        if(this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 이미 존재.`);
+        if(this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
         if(this.battle.fieldBuffs.length >= 3) {
              let removed = this.battle.fieldBuffs.shift();
-             RPG.log(`필드버프 [${this.BUFF_NAMES[removed.name]}] 소멸.`);
+             RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
         }
         this.battle.fieldBuffs.push({ name: id });
-        RPG.log(`필드버프 [${this.BUFF_NAMES[id]}] 발동!`);
+        RPG.log(`필드버프 [${BUFF_NAMES[id]}] 발동!`);
     },
 
     // --- Setup & UI ---
@@ -1850,7 +2189,7 @@ const RPG = {
             let mpPct = (p.mp / 100) * 100;
             document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
-            let buffTxt = Object.keys(p.buffs).map(k=>this.BUFF_NAMES[k]||k).join(',');
+            let buffTxt = Object.keys(p.buffs).map(k=>BUFF_NAMES[k]||k).join(',');
             document.getElementById('p-buffs').innerText = buffTxt;
             document.getElementById('player-actor-box').style.opacity = 1;
         } else {
@@ -1865,11 +2204,11 @@ const RPG = {
         eImg.src = `${e.name}.png`;
         eImg.style.display = 'block';
 
-        let eBuffTxt = Object.keys(e.buffs).map(k=>`${this.BUFF_NAMES[k]||k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
+        let eBuffTxt = Object.keys(e.buffs).map(k=>`${BUFF_NAMES[k]||k}${e.buffs[k]>1?e.buffs[k]:''}`).join(' ');
         document.getElementById('e-buffs').innerText = eBuffTxt;
 
         document.getElementById('bt-turn').innerText = this.battle.turn;
-        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${this.BUFF_NAMES[b.name]||b.name}]`).join(" ");
+        document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${BUFF_NAMES[b.name]||b.name}]`).join(" ");
     },
 
     getElementalMultiplier(atkEl, defEl) {
@@ -1878,6 +2217,120 @@ const RPG = {
         if(atkEl === 'nature' && defEl === 'water') return 1.2;
         if((atkEl === 'light' && defEl === 'dark') || (atkEl === 'dark' && defEl === 'light')) return 1.2;
         return 1.0;
+    },
+
+    // --- Draft Logic ---
+    startDraft() {
+        if(this.state.deck.every(x => x !== null)) {
+            return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
+        }
+
+        if(!this.state.draft) this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
+
+        // Find first empty slot
+        this.state.draft.round = this.state.deck.indexOf(null);
+        if(this.state.draft.round === -1) {
+            this.state.draft.round = 0;
+        }
+
+        this.showScreen('screen-draft');
+        this.renderDraftScreen();
+    },
+
+    renderDraftScreen() {
+        const d = this.state.draft;
+        const roles = ['선봉', '중견', '대장'];
+        let roundText = roles[d.round] + ` (${d.round + 1}/3)`;
+        document.getElementById('draft-round-text').innerText = roundText;
+        document.getElementById('draft-reroll-cnt').innerText = d.rerolls;
+
+        if(!d.currentOptions || d.currentOptions.length === 0) {
+            this.generateDraftOptions();
+        }
+
+        const grid = document.getElementById('draft-grid');
+        grid.innerHTML = "";
+
+        d.currentOptions.forEach(id => {
+            const card = this.getCardData(id);
+            const el = document.createElement('div');
+            let color = '#bdbdbd';
+            if(card.grade === 'legend') color = '#ff5252';
+            else if(card.grade === 'epic') color = '#e040fb';
+            else if(card.grade === 'rare') color = '#448aff';
+
+            el.className = `card-item ${card.grade}`;
+            el.style.height = "160px";
+            el.style.display = "flex";
+            el.style.flexDirection = "column";
+            el.style.borderColor = color;
+
+            el.innerHTML = `
+                <div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:${color}">${card.name}</div>
+                <div class="portrait" style="flex:1; margin-bottom:5px; width:100%;"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
+                <div style="display:flex; gap:2px; width:100%;">
+                    <button onclick="event.stopPropagation(); RPG.showCardInfo('${card.id}')" style="flex:1; font-size:0.7rem; padding:3px; background:#444; color:#fff; border:1px solid #666;">상세</button>
+                    <button onclick="event.stopPropagation(); RPG.selectDraftCard('${card.id}')" style="flex:2; font-size:0.7rem; padding:3px; background:#1b5e20; color:#fff; border:1px solid #4caf50;">선택</button>
+                </div>
+            `;
+            grid.appendChild(el);
+        });
+    },
+
+    generateDraftOptions() {
+        let pool = [...CARDS];
+        if (this.global.unlocked_bonus_cards) {
+            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+            pool = pool.concat(bonus);
+        }
+
+        let options = [];
+        for(let i=0; i<4; i++) {
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            options.push(pick.id);
+        }
+        this.state.draft.currentOptions = options;
+    },
+
+    selectDraftCard(id) {
+        this.state.inventory.push(id);
+        this.state.deck[this.state.draft.round] = id;
+
+        // Clear options for next round
+        this.state.draft.currentOptions = [];
+
+        if (this.state.deck.indexOf(null) === -1) {
+            this.showAlert("덱 구성 완료!");
+            this.toMenu();
+        } else {
+            this.startDraft();
+        }
+    },
+
+    rerollDraft() {
+        if (this.state.draft.rerolls > 0) {
+            this.state.draft.rerolls--;
+            this.state.draft.currentOptions = [];
+            this.renderDraftScreen();
+        } else {
+            if (this.state.tickets > 0) {
+                this.showConfirm(`무료 리롤 횟수가 없습니다.<br>티켓 1장을 사용하여 리롤하시겠습니까?<br>(보유 티켓: ${this.state.tickets})`, () => {
+                    this.state.tickets--;
+                    document.getElementById('ui-tickets').innerText = this.state.tickets;
+                    this.state.draft.currentOptions = [];
+                    this.renderDraftScreen();
+                });
+            } else {
+                this.showAlert("리롤 횟수와 티켓이 모두 부족합니다.");
+            }
+        }
+    },
+
+    resetDraftState() {
+        // Called when initializing new draft cycle
+        this.state.inventory = [];
+        this.state.deck = [null, null, null];
+        this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
     },
 
     handlePermadeath(players) {
@@ -1897,7 +2350,13 @@ const RPG = {
     winBattle() {
         let deadMsg = this.handlePermadeath(this.battle.players);
         let reward = 1;
+
+        // Mode Rewards
+        if (this.state.mode === 'suffering') reward = 0;
+        if (this.state.mode === 'chaos') reward = 0;
+
         if(this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
+        if (this.state.mode === 'overdrive') reward += 1;
 
         this.state.tickets += reward;
         this.state.enemyScale++;
@@ -1910,62 +2369,218 @@ const RPG = {
 
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
+        // Victory Condition Check
+        const mode = this.state.mode;
+        const stage = this.state.enemyScale; // current stage (already incremented)
+        let clearStage = 24;
+        if (mode === 'overdrive') clearStage = 30;
+        if (mode === 'curse' || mode === 'flood') clearStage = 36;
+        if (mode === 'chaos') clearStage = 30;
+        if (mode === 'draft') clearStage = 24;
+        if (mode === 'origin') clearStage = Infinity;
+
+        let gameClear = false;
+        if (stage >= clearStage) {
+            gameClear = true;
+        }
+
+        // Chaos/Draft: Reset Deck/Inventory
+        if (mode === 'chaos') {
+            this.state.inventory = [];
+            this.state.deck = [null, null, null];
+
+            let allCards = [...CARDS];
+            if (this.global.unlocked_bonus_cards) {
+                const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
+                allCards = allCards.concat(unlocked);
+            }
+            allCards.sort(() => Math.random() - 0.5);
+
+            const nextPicks = allCards.slice(0, 20).map(c => c.id);
+            this.state.chaosPool = nextPicks;
+            this.state.inventory = [...nextPicks];
+        }
+
+        if (mode === 'draft') {
+            this.resetDraftState();
+        }
+
+        // Archive Mode: Mandatory Quiz (Direct to finishWinBattle via callback)
+        if (mode === 'archive') {
+            let allQuizzes = [];
+            GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+            let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+            this.startGrammarQuiz(q,
+                () => { // Success
+                    this.state.quiz_stats.correct++;
+                    this.state.quiz_stats.total++;
+                    this.state.tickets++; // Reward Ticket
+                    setTimeout(() => this.finishWinBattle(deadMsg, gameClear, true), 200);
+                },
+                () => { // Fail
+                    this.state.quiz_stats.total++;
+                    setTimeout(() => this.finishWinBattle(deadMsg, gameClear, false), 200);
+                }
+            );
+            return;
+        }
+
+        this.finishWinBattle(deadMsg, gameClear, null);
+    },
+
+    finishWinBattle(deadMsg, gameClear, quizResult) {
         let msg = "승리!<br>보상을 획득했습니다.";
+
+        if (quizResult !== null) {
+            let correct = this.state.quiz_stats.correct;
+            let total = this.state.quiz_stats.total;
+            let rate = (total > 0) ? ((correct / total) * 100).toFixed(1) : "0.0";
+            let resultMsg = quizResult ? "<span style='color:#4caf50'>정답!</span>" : "<span style='color:#ef5350'>오답...</span>";
+            msg = `[퀴즈 결과] ${resultMsg}<br>현황: ${correct}/${total} (${rate}%)<hr>` + msg;
+        }
+
+        if (this.state.mode === 'chaos') msg += "<br><br>카오스 모드: 덱과 인벤토리가 초기화되었습니다.";
+        if (this.state.mode === 'draft') msg += "<br><br>드래프트 모드: 덱과 인벤토리가 초기화되었습니다.";
+
         if (deadMsg) msg += "<br><br>" + deadMsg;
 
-        this.openInfoModal("전투 결과", msg, () => {
-             // Creator God Bonus Check
-             if (this.battle.enemy.id === 'creator_god') {
-                 this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
-                    () => { // Yes
-                        let allQuizzes = [];
-                        GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
-                        let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+        if (gameClear) {
+            // Check Archive Condition
+            if (this.state.mode === 'archive') {
+                let rate = (this.state.quiz_stats.total > 0) ? (this.state.quiz_stats.correct / this.state.quiz_stats.total) : 0;
+                if (rate < 0.9) {
+                    this.showAlert(`[실패] 아카이브 모드 클리어 실패!<br>정답률: ${(rate*100).toFixed(1)}% (목표: 90% 이상)`);
+                    this.toTitle();
+                    return;
+                }
+            }
 
-                        this.startGrammarQuiz(q,
-                            () => { // Success
-                                this.state.tickets += 3;
-                                document.getElementById('ui-tickets').innerText = this.state.tickets;
-                                this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
-                                this.toMenu();
-                            },
-                            () => { // Fail
-                                this.showAlert("오답입니다... 보상 없음.");
-                                this.toMenu();
-                            }
-                        );
-                    },
-                    () => { // No
-                        this.toMenu();
-                    }
-                 );
+            // Transcendence Ticket Logic (On Clear)
+            if (this.state.mode !== 'origin' && this.checkAllBonusUnlocked()) {
+                 this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
+                 this.saveGlobalData();
+                 this.log("<b>[보너스]</b> 카오스 티켓 1장 획득!");
+            }
+
+            // Unlock Mode
+            if (!this.global.unlocked_modes.includes(this.state.mode)) {
+                this.global.unlocked_modes.push(this.state.mode);
+            }
+            this.global.achievements[this.state.mode] = true;
+
+            // Unlock Bonus Card
+            let newCard = null;
+            let lockedBonus = BONUS_CARDS.filter(c => !this.global.unlocked_bonus_cards.includes(c.id));
+            if (lockedBonus.length > 0) {
+                let pick = lockedBonus[Math.floor(Math.random() * lockedBonus.length)];
+                this.global.unlocked_bonus_cards.push(pick.id);
+                newCard = pick;
+            }
+
+            this.saveGlobalData();
+
+            msg = `🎉 <b>${this.state.mode.toUpperCase()} 모드 클리어!</b> 🎉<br><br>`;
+            if (newCard) msg += `[보상] 새로운 동료 해금: ${newCard.name}!<br>`;
+            else msg += `(이미 모든 보너스 카드를 획득했습니다)<br>`;
+
+            this.openInfoModal("게임 클리어", msg, () => {
+                this.toTitle();
+            });
+            return;
+        }
+
+        this.openInfoModal("전투 결과", msg, () => {
+             if (this.state.mode !== 'archive') {
+                 if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                     this.showConfirm("추가 보상을 위한 콜로케이션 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                        () => {
+                             this.startCollocationQuiz((success) => {
+                                 if(success) {
+                                     this.state.tickets += 1;
+                                     document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                     this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                                 } else {
+                                     this.showAlert("오답입니다... 보상 없음.");
+                                 }
+                                 this.toMenu();
+                             });
+                        },
+                        () => {
+                            this.toMenu();
+                        }
+                     );
+                 }
+                 else if (this.battle.enemy.id === 'creator_god') {
+                     this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
+                        () => { // Yes
+                            let allQuizzes = [];
+                            GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                            let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+                            this.startGrammarQuiz(q,
+                                () => { // Success
+                                    this.state.tickets += 3;
+                                    document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                    this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
+                                    this.toMenu();
+                                },
+                                () => { // Fail
+                                    this.showAlert("오답입니다... 보상 없음.");
+                                    this.toMenu();
+                                }
+                            );
+                        },
+                        () => { // No
+                            this.toMenu();
+                        }
+                     );
+                 } else {
+                     this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
+                        () => {
+                             this.startQuiz((success) => {
+                                 if(success) {
+                                     this.state.tickets += 1;
+                                     document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                     this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
+                                 } else {
+                                     this.showAlert("오답입니다... 보상 없음.");
+                                 }
+                                 this.toMenu();
+                             });
+                        },
+                        () => {
+                            this.toMenu();
+                        }
+                     );
+                 }
              } else {
-                 // Quiz Challenge Prompt using Custom Modal
-                 this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
-                    // Yes Callback
-                    () => {
-                         this.startQuiz((success) => {
-                             if(success) {
-                                 this.state.tickets += 1;
-                                 document.getElementById('ui-tickets').innerText = this.state.tickets;
-                                 this.showAlert("정답! 드로우권 1장을 추가로 획득했습니다.");
-                             } else {
-                                 this.showAlert("오답입니다... 보상 없음.");
-                             }
-                             this.toMenu();
-                         });
-                    },
-                    // No Callback
-                    () => {
-                        this.toMenu();
-                    }
-                 );
+                 this.toMenu();
              }
         });
     },
 
     loseBattle() {
         // No saveRecord here (User request: only on New Game)
+
+        if (['chaos', 'draft'].includes(this.state.mode)) {
+             this.saveRecord();
+        }
+
+        if (this.state.mode === 'origin') {
+             this.global.pendingTranscendenceCards = [];
+             this.saveGlobalData();
+        }
+
+        if (['chaos', 'draft'].includes(this.state.mode)) {
+             localStorage.removeItem('cardRpgSave');
+
+             let msg = "패배했습니다...<br>이 모드는 패배 시 데이터가 초기화됩니다.";
+             this.openInfoModal("Game Over", msg, () => {
+                 this.toTitle();
+             });
+             return;
+        }
 
         // Reset Chaos Blessing
         this.state.chaosBlessingUses = 3;
@@ -1980,7 +2595,7 @@ const RPG = {
     },
 
     getEffectiveStats(char, fieldBuffs) {
-        return Logic.calculateStats(char, fieldBuffs);
+        return Logic.calculateStats(char, fieldBuffs, this.state.mode);
     },
 
     showBattleStat(side, idx) {
@@ -1990,13 +2605,13 @@ const RPG = {
         if(!char) return;
 
         let buffs = Object.keys(char.buffs).map(k => {
-            let name = this.BUFF_NAMES[k] || k;
+            let name = BUFF_NAMES[k] || k;
             let val = char.buffs[k];
             if(val === true) return name;
             return `${name}(${val})`;
         }).join(', ') || '없음';
 
-        const eff = Logic.calculateStats(char, this.battle.fieldBuffs);
+        const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode);
 
         // Use baseStatsWithoutBlessing if available to show Green for blessed stats
         const getBase = (key, fallback) => {
@@ -2046,7 +2661,7 @@ const RPG = {
         };
         let msg = "";
         this.battle.fieldBuffs.forEach(b => {
-             msg += `<b>[${this.BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
+             msg += `<b>[${BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
         });
         this.openInfoModal("필드 버프", msg);
     },
@@ -2059,14 +2674,15 @@ const RPG = {
     },
     closeInfoModal() {
         document.getElementById('modal-info').classList.remove('active');
-        if (this.tempOnClose) {
-            this.tempOnClose();
-            this.tempOnClose = null;
+        const cb = this.tempOnClose;
+        this.tempOnClose = null;
+        if (cb) {
+            cb();
         }
     },
 
     showConfirm(msg, onYes, onNo) {
-        document.getElementById('confirm-msg').innerText = msg;
+        document.getElementById('confirm-msg').innerHTML = msg;
         const modal = document.getElementById('modal-confirm');
         const btnYes = document.getElementById('confirm-yes');
         const btnNo = document.getElementById('confirm-no');
@@ -2081,6 +2697,268 @@ const RPG = {
         };
 
         modal.classList.add('active');
+    },
+
+    // --- Private Tutoring ---
+    openApiSettings() {
+        document.getElementById('modal-api-settings').classList.add('active');
+        const key = localStorage.getItem('cardRpgApiKey');
+        if(key) document.getElementById('api-key-input').value = key;
+    },
+
+    closePrivateTutoring() {
+        document.getElementById('modal-tutoring').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
+    closeMagicClass() {
+        document.getElementById('modal-magic-class').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
+    closeWordbook() {
+        document.getElementById('modal-wordbook').classList.remove('active');
+        document.getElementById('modal-library').classList.add('active');
+    },
+
+    openPrivateTutoring() {
+        const mode = this.state.mode;
+        let list = (mode === 'chaos' || mode === 'draft') ? this.state.wrongCollocations : this.state.wrongWords;
+
+        if (!list || list.length === 0) {
+            let msg = (mode === 'chaos' || mode === 'draft') ? "오답노트에 등록된 숙어/구동사가 없습니다." : "오답노트에 등록된 단어가 없습니다.";
+            return this.showAlert(msg);
+        }
+
+        document.getElementById('modal-library').classList.remove('active');
+        document.getElementById('modal-tutoring').classList.add('active');
+
+        // Reset UI
+        document.getElementById('tutoring-content').innerText = "수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.";
+        document.getElementById('btn-tutoring-quiz').style.display = 'none';
+        this.currentTutoringItem = null;
+    },
+
+    saveApiKey() {
+        const key = document.getElementById('api-key-input').value.trim();
+        if(!key) return this.showAlert("API 키를 입력해주세요.");
+        localStorage.setItem('cardRpgApiKey', key);
+        this.showAlert("API 키가 저장되었습니다.");
+    },
+
+    async startTutoringSession() {
+        if(this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
+
+        const key = localStorage.getItem('cardRpgApiKey');
+        if(!key) return this.showAlert("먼저 API 키를 저장해주세요.");
+
+        const mode = this.state.mode;
+        const isCollocation = (mode === 'chaos' || mode === 'draft');
+        let list = isCollocation ? this.state.wrongCollocations : this.state.wrongWords;
+
+        if (!list || list.length === 0) return this.showAlert("학습할 오답 내용이 없습니다.");
+
+        // Pick Random
+        const targetId = list[Math.floor(Math.random() * list.length)];
+        let targetData = null;
+
+        if (isCollocation) {
+            targetData = COLLOCATION_DATA.find(c => c.id === targetId);
+        } else {
+            targetData = VOCAB_DATA.find(v => v.word === targetId);
+        }
+
+        if(!targetData) {
+            // Cleanup invalid data
+            if(isCollocation) {
+                 this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== targetId);
+                 localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+            } else {
+                 this.state.wrongWords = this.state.wrongWords.filter(w => w !== targetId);
+                 localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+            }
+            return this.startTutoringSession(); // Retry
+        }
+
+        this.currentTutoringItem = { data: targetData, type: isCollocation ? 'collocation' : 'vocab' };
+
+        // UI Loading
+        this.isApiLoading = true;
+        const contentBox = document.getElementById('tutoring-content');
+        contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
+
+        try {
+            const text = await GameAPI.getTutoringContent(key, targetData, isCollocation ? 'collocation' : 'vocab');
+
+            // ✅ 응답 도착 후: 모달이 아직 열려있는지 확인
+            const tutoringModal = document.getElementById('modal-tutoring');
+            if(!tutoringModal.classList.contains('active')) {
+                console.warn("과외 모달이 닫혀있어 결과를 무시합니다.");
+                return; // 이미 닫혔으면 아무것도 하지 않음
+            }
+
+            // Format simple markdown to HTML tags
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            contentBox.innerHTML = formatted;
+
+            // Show Quiz Button
+            document.getElementById('btn-tutoring-quiz').style.display = 'block';
+
+        } catch (e) {
+            console.error(e);
+            let msg = e.message || "";
+            let displayMsg = "알 수 없는 오류가 발생했습니다.";
+            if (msg.includes('key') || msg.includes('valid') || msg.includes('400') || msg.includes('403')) {
+                displayMsg = "API 키가 올바르지 않거나 설정되지 않았습니다. 설정을 확인해주세요.";
+            } else if (msg.includes('quota') || msg.includes('429')) {
+                displayMsg = "API 사용량이 초과되었습니다. 잠시 후 다시 시도하거나 키를 확인해주세요.";
+            } else if (msg.includes('safety') || msg.includes('blocked')) {
+                displayMsg = "안전 필터에 의해 생성이 차단되었습니다. 다른 단어로 시도해주세요.";
+            } else {
+                displayMsg = "오류가 발생했습니다: " + msg;
+            }
+            contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div><div style="font-size:0.7rem; color:#777; margin-top:5px;">(${msg})</div>`;
+        } finally {
+            this.isApiLoading = false;
+        }
+    },
+
+    startTutoringQuiz() {
+        if(!this.currentTutoringItem) return;
+
+        // ✅ 모달 초기화 추가
+        const modal = document.getElementById('modal-quiz');
+        modal.classList.remove('active'); // 기존 모달 닫기
+        setTimeout(() => { // 애니메이션 대기
+
+            const item = this.currentTutoringItem;
+            const data = item.data;
+
+            // DOM Elements (Re-fetch inside timeout)
+            const qDiv = document.getElementById('quiz-question');
+            const descDiv = document.getElementById('quiz-desc');
+            const oDiv = document.getElementById('quiz-options');
+            const fDiv = document.getElementById('quiz-feedback');
+
+            // 초기화
+            oDiv.innerHTML = "";
+            fDiv.innerText = "";
+
+            if (item.type === 'collocation') {
+                // Reuse Collocation Quiz Logic but custom callback
+                let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+                let q = quizList[Math.floor(Math.random() * quizList.length)];
+
+                qDiv.innerText = q.question;
+                descDiv.innerText = q.translation || "";
+                descDiv.style.display = 'block';
+
+                let opts = [...q.options];
+                opts.sort(() => Math.random() - 0.5);
+
+                opts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "menu-btn";
+                    btn.style.padding = "10px";
+                    btn.style.fontSize = "0.9rem";
+                    btn.innerText = opt;
+                    btn.onclick = () => {
+                        btn.disabled = true; // ✅ 즉시 비활성화
+                        Array.from(oDiv.children).forEach(c => c.onclick = null);
+
+                        if(opt === q.answer) {
+                            btn.classList.add('correct');
+                            fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                            fDiv.style.color = "#4caf50";
+
+                            // Remove from list
+                            this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
+                            localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                                document.getElementById('modal-tutoring').classList.remove('active');
+                                this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                                this.toMenu();
+                            }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            fDiv.innerText = "오답... (다시 학습해보세요)";
+                            fDiv.style.color = "#ef5350";
+                            Array.from(oDiv.children).forEach(c => {
+                                 if(c.innerText === q.answer) c.classList.add('correct');
+                            });
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                            }, 2000);
+                        }
+                    };
+                    oDiv.appendChild(btn);
+                });
+                modal.classList.add('active');
+
+            } else {
+                // Vocab Quiz
+                // Create options: Correct + Trap + 2 Randoms
+                let options = [];
+                options.push({ text: data.meaning, correct: true });
+                options.push({ text: data.trap_meaning, correct: false });
+
+                let safeCounter = 0;
+                while(options.length < 4 && safeCounter < 100) {
+                    safeCounter++;
+                    let r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                    if(r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
+                        options.push({ text: r.meaning, correct: false });
+                    }
+                }
+                options.sort(() => Math.random() - 0.5);
+
+                qDiv.innerText = data.word;
+                descDiv.style.display = 'none';
+
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "menu-btn";
+                    btn.style.padding = "10px";
+                    btn.style.fontSize = "0.9rem";
+                    btn.innerText = opt.text;
+                    btn.onclick = () => {
+                        btn.disabled = true; // ✅ 즉시 비활성화
+                        Array.from(oDiv.children).forEach(c => c.onclick = null);
+
+                        if(opt.correct) {
+                            btn.classList.add('correct');
+                            fDiv.innerText = "정답! (오답노트에서 삭제됩니다)";
+                            fDiv.style.color = "#4caf50";
+
+                            // Remove
+                            this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
+                            localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                                document.getElementById('modal-tutoring').classList.remove('active');
+                                this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
+                                this.toMenu();
+                            }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            fDiv.innerText = "오답... (다시 학습해보세요)";
+                            fDiv.style.color = "#ef5350";
+                             Array.from(oDiv.children).forEach(c => {
+                                 if(c.innerText === data.meaning) c.classList.add('correct');
+                            });
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                            }, 2000);
+                        }
+                    };
+                    oDiv.appendChild(btn);
+                });
+                 modal.classList.add('active');
+            }
+        }, 100);
     },
 
     showAlert(msg) {
