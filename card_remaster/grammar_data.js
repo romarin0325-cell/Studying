@@ -1338,5 +1338,139 @@ const GRAMMAR_DATA = [
                 "lecture_id": 20
             }
         ]
+    },
+    {
+        "id": 21,
+        "title": "가짜와 진짜 (To부정사 vs 동명사)",
+        "content": "[제21강] 가짜와 진짜: 미래의 To vs 현재의 Ing (To부정사 vs 동명사)\n오늘은 21강, **[가짜와 진짜의 싸움]**이야.\n동사가 가면을 쓰고 명사 흉내를 내는 건데, **'미래를 꿈꾸는 가면(To)'**과 **'현실을 즐기는 가면(Ing)'**이 있거든.\n​이 둘의 **'느낌(Nuance)'**만 알면, 그 많은 단어들을 무작정 외우지 않아도 돼.\n대현자 루미의 심화 강의, 아주 자세하게 들어간다! 집중해, 형아! ✨\n​형아, 동사(Verb)는 원래 \"움직임\"이잖아?\n근데 이 녀석들이 욕심이 많아서 \"나도 주어 자리에 앉고 싶어!\", \"나도 목적어 하고 싶어!\" 하면서 명사(Noun) 자리를 넘보기 시작했어.\n​그때 변신하는 방법이 딱 두 가지야.\n​앞에 to를 붙인다. (To learn)\n​뒤에 ing를 붙인다. (Learning)\n​한국말로는 둘 다 \"~하는 것\"이라 똑같아 보이지만, 영어에서는 완전히 다른 세계에 살아.\n​1. 🏹 To부정사 (To-v): 미래지향적 화살표 (→)\n​형아, 전치사 to가 원래 \"어디로 가는 화살표\" 느낌인 거 알지?\n그래서 To부정사는 **\"아직 안 했지만, 앞으로 할 것\"**이라는 **미래(Future)**와 **의지(Will)**를 담고 있어.\n​이미지: 저 멀리 있는 별을 손가락으로 가리키는 느낌. (👉 아직 손에 안 닿음!)\n​어떤 동사들이 To를 좋아할까?\n​미래를 계획하고, 원하고, 결심하는 단어들이야.\n​Want: want to go (아직 안 갔지? 가고 싶은 거지?)\n​Decide: decide to marry (결혼하기로 결심했어. 식장은 나중에 들어가잖아.)\n​Plan: plan to study (공부할 계획이야.)\n​Hope / Wish / Expect / Promise (희망하고, 기대하고, 약속하는 거 다 미래지향적이지?)\n​[루미의 심화 꿀팁]\n형아, **Agree(동의하다)**나 **Refuse(거절하다)**도 미래인 거 알아?\n\"제안(앞으로 하자)\"에 동의하거나 거절하는 거니까!\n​\"I agreed to help him.\" (앞으로 돕겠다고 동의함.)\n​2. 📸 동명사 (V-ing): 생생한 현재와 경험 (Now & Past)\n​반면에 -ing는 \"지금 하고 있는 중\"이라는 진행형에서 왔잖아?\n그래서 \"이미 해본 것\", \"지금 하고 있는 생생한 느낌\", 혹은 **\"과거의 경험\"**을 담고 있어.\n​이미지: 지금 맛있는 걸 먹고 있는 사진, 혹은 다 먹고 찍은 빈 그릇 사진. 📸\n​어떤 동사들이 Ing를 좋아할까?\n​지금 즐기거나, 하던 걸 멈추거나, 이미 해본 것에 대한 단어들이야.\n​Enjoy: enjoy playing (게임을 해봐야 즐거운 줄 알지! 경험!)\n​Finish: finish eating (먹던 걸 끝내는 거지? 안 하던 걸 끝낼 순 없어.)\n​Stop / Quit / Give up: (하던 걸 멈추고 포기하는 거야.)\n​Mind: (꺼리다, 싫어하다) Do you mind opening the door? (문 여는 그 행위 자체가 싫냐는 생생한 느낌.)\n​[루미의 심화 꿀팁]\n형아, **Suggest(제안하다)**나 **Recommend(추천하다)**는 왜 ing일까?\n이건 \"내 머릿속에 있는 그 아이디어(이미지)\"를 형아한테 툭 던져주는 느낌이라 그래. (이건 좀 어렵지? 그냥 외워도 돼! 헤헤)\n​\"I suggest taking a break.\" (휴식이라는 그 행위를 제안해.)\n​3. ⚠️ 대현자의 경고: 함정에 빠지지 마! (To + Ing?)\n​형아, 토익이나 시험에서 형아를 낚으려고 파놓은 최악의 함정이 있어.\n바로 To 뒤에 Ing가 오는 경우야! (충격)\n​\"어? 루미가 To 뒤엔 동사원형(쌩얼)이라며?\"\n맞아. 근데 여기서 To는 부정사가 아니라, **전치사 To(~어디로)**야.\n\"~하는 것 쪽으로\"라는 방향을 나타낼 땐 뒤에 명사(혹은 동명사)가 와야 해.\n​⭐ Look forward to -ing: \"~하는 것을 엄청 기대하다\" (목이 빠져라 그쪽을 보는 거야!)\n​\"I look forward to seeing you.\" (형아 보는 날만 기다려!)\n​Object to -ing: \"~하는 것에 반대하다\" (그쪽 방향에 대고 '싫어!' 하는 거야.)\n​\"I object to changing the plan.\"\n​Be used to -ing: \"~하는 것에 익숙하다\" (그 행위 쪽에 딱 붙어있는 느낌.)\n​[루미의 심쿵 질문]\n형아, 이제 뉘앙스 차이 알겠지?\n그럼 대답해 봐.\n​\"I want to kiss you.\" (나 뽀뽀하고 싶어. → 아직 안 함, 미래의 소망)\n​\"I enjoy kissing you.\" (나 뽀뽀하는 거 즐겨. → 이미 해봤고, 그 느낌 너무 좋아!)\n​형아는 1번이야, 2번이야?",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 계획 - To)",
+                "question": "\"We decided [ ] our marketing strategy.\" (우리는 마케팅 전략을 바꾸기로 결정했어.)",
+                "options": [
+                    "changing",
+                    "to change",
+                    "change",
+                    "changed"
+                ],
+                "answer": "to change",
+                "lecture_id": 21
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (현재/경험의 즐거움 - Ing)",
+                "question": "\"Customers enjoy [ ] at our online store.\" (고객들은 우리 온라인 스토어에서 쇼핑하는 것을 즐겨.)",
+                "options": [
+                    "to shop",
+                    "shop",
+                    "shopping",
+                    "to shopping"
+                ],
+                "answer": "shopping",
+                "lecture_id": 21
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (하던 것을 완료 - Ing)",
+                "question": "\"Please let me know when you finish [ ] the report.\" (보고서 검토를 끝내면 알려줘.)",
+                "options": [
+                    "review",
+                    "to review",
+                    "reviewing",
+                    "reviewed"
+                ],
+                "answer": "reviewing",
+                "lecture_id": 21
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 소망 - To)",
+                "question": "\"The company hopes [ ] into the Asian market.\" (그 회사는 아시아 시장으로 확장하기를 희망해.)",
+                "options": [
+                    "expanding",
+                    "to expand",
+                    "expand",
+                    "expansion"
+                ],
+                "answer": "to expand",
+                "lecture_id": 21
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (★함정★ 전치사 To)",
+                "question": "\"We look forward to [ ] from you soon.\" (우리는 곧 귀하의 소식을 듣기를 고대합니다.)",
+                "options": [
+                    "hear",
+                    "to hear",
+                    "hearing",
+                    "heard"
+                ],
+                "answer": "hearing",
+                "lecture_id": 21
+            }
+        ]
+    },
+    {
+        "id": 22,
+        "title": "감정의 분사 (Ing vs Ed)",
+        "content": "[제22강] 감정의 화살: 쏘는 놈(Ing) vs 맞는 놈(Ed)\n형아, 혹시 썸 타는 사람한테 실수로 **\"I am boring.\"**이라고 말해본 적 있어?\n이러면 그 사람이 도망갈지도 몰라. \"나 지루한 사람이야(노잼이야)\"라고 고백한 거거든!\n원래 하려던 말은 \"I am bored.\" (나 심심해)였을 텐데 말이야.\n​한국말로는 둘 다 \"지루해\"니까 헷갈리지?\n대현자 루미가 '감정의 화살표' 마법으로 딱 정리해 줄게!\n​형아, 감정은 가만히 있는 게 아니라 화살처럼 날아다녀.\n이 화살을 쏘는 쪽인지, 맞는 쪽인지만 구별하면 절대 안 틀려!\n​1. 🏹 쏘는 놈: -ing (원인/제공자)\n​감정의 화살을 슝~ 하고 쏘는 **원인(Source)**이야.\n주로 사물(영화, 뉴스, 게임)이 많지만, 사람도 남에게 감정을 주면 Ing야.\n​의미: ~한 감정을 주는, ~하게 만드는\n​공식: Shooter + -ing\n​\"The movie is boring.\" (그 영화가 지루함을 쏘고 있어. → 영화가 지루해.)\n​\"The game is exciting.\" (게임이 흥분을 쏘고 있어. → 게임 신난다!)\n​\"You are annoying.\" (형아는 짜증을 쏘고 있어. → 형아 진짜 짜증 나!)\n​2. 💘 맞는 놈: -ed (피해자/수신자)\n​화살을 \"억!\" 하고 맞은 사람이야.\n감정은 주로 사람이 느끼니까, \"내가 느낄 때\"는 대부분 이거야.\n(Tip: 형아, Tired 알지? 피곤함을 맞아서 느낀 거잖아. 그거랑 똑같이 생겼어!)\n​의미: ~한 감정을 느끼는, ~하게 된\n​공식: Receiver + -ed\n​\"I am bored.\" (내가 지루함 화살을 맞았어. → 나 심심해.)\n​\"I am excited.\" (내가 흥분 화살을 맞았어. → 나 신나!)\n​\"I am annoyed.\" (내가 짜증 화살을 맞았어. → 나 짜증 났어.)\n​3. ⚠️ 대현자의 주의사항: 사람은 무조건 -ed? No!\n​형아, 무조건 \"사람은 ed, 사물은 ing\"라고 외우면 하수야!\n사람도 남한테 감정을 줄 수 있잖아?\n​\"Rumi is interesting.\" (루미는 재미를 쏘는 사람이야. → 루미는 재밌는 아이야.)\n​\"Hyung-a is interested.\" (형아는 재미를 맞았어. → 형아가 흥미를 느끼고 있어.)\n​[루미의 감정 테스트]\n(형아 눈앞에서 손가락을 흔들며)\n​내가 형아를 놀라게 했어! (까꿍!)\n​Rumi is surprising! (루미는 놀라움의 원인!)\n​Hyung-a is surprised! (형아는 깜짝 놀람!)\n​형아가 나한테 실망했어... (시무룩)\n​The result was disappointing. (결과가 실망스러웠어.)\n​Hyung-a was disappointed. (형아는 실망감을 느꼈어.)\n​간단하지? 쏘면 잉(Ing), 맞으면 에드(Ed)!\n이것만 기억해!\n​자, 이제 형아가 감정을 잘 표현하는지 확인해 볼 시간이야.\n주어가 감정을 주는 놈인지, 느끼는 놈인지 잘 보고 골라봐!",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (영화가 지루함을 줌)",
+                "question": "\"The movie was so [ ] that I fell asleep.\" (그 영화는 너무 지루해서 나는 잠이 들었어.)",
+                "options": [
+                    "bored",
+                    "boring",
+                    "bore",
+                    "to bore"
+                ],
+                "answer": "boring",
+                "lecture_id": 22
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (내가 흥미를 느낌)",
+                "question": "\"I am [ ] in learning English.\" (나는 영어 배우는 것에 흥미가 있어.)",
+                "options": [
+                    "interest",
+                    "interesting",
+                    "interested",
+                    "to interest"
+                ],
+                "answer": "interested",
+                "lecture_id": 22
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (소식이 충격을 줌)",
+                "question": "\"The news was quite [ ] to everyone.\" (그 뉴스는 모두에게 꽤 충격적이었어.)",
+                "options": [
+                    "shocked",
+                    "shocking",
+                    "shock",
+                    "shocks"
+                ],
+                "answer": "shocking",
+                "lecture_id": 22
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (그들이 만족감을 느낌)",
+                "question": "\"They were [ ] with the service.\" (그들은 그 서비스에 만족했어.)",
+                "options": [
+                    "satisfying",
+                    "satisfied",
+                    "satisfy",
+                    "satisfaction"
+                ],
+                "answer": "satisfied",
+                "lecture_id": 22
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (발표가 혼란을 줌)",
+                "question": "\"His presentation was confusing, so the audience was [ ].\" (그의 발표는 혼란스러웠고, 그래서 청중들은 혼란스러워했어.)",
+                "options": [
+                    "confusing",
+                    "confused",
+                    "confuse",
+                    "confusion"
+                ],
+                "answer": "confused",
+                "lecture_id": 22
+            }
+        ]
     }
 ];
