@@ -129,7 +129,8 @@
     <div id="screen-menu" class="screen">
         <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장</div>
         <div id="next-enemy-preview" style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
-             다음 상대: ?
+             <div style="margin-bottom:5px;">다음 상대: <span id="next-enemy-text">?</span></div>
+             <div class="portrait" style="width:80px; height:106px; margin:0 auto; border-color:#ff5252;"><img id="next-enemy-img" src="" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:contain;"></div>
         </div>
         <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
             <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
@@ -137,15 +138,11 @@
         </div>
         <div id="menu-draft-area" style="display:none; margin-bottom:10px;">
             <button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;">덱 빌딩 (드래프트)</button>
-            <div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;">* 이번 전투에 사용할 3명을 선발하세요.</div>
         </div>
         <div id="menu-chaos-area" style="display:none; margin-bottom:10px;">
             <button class="menu-btn" onclick="RPG.reshuffleChaosPool()" style="border-color:#ff5252; color:#ff5252;">
                 카오스 셔플 (티켓 1장)
             </button>
-            <div style="font-size:0.8rem; color:#aaa; margin-top:5px; text-align:center;">
-                * 현재 보유한 20장을 모두 버리고<br>새로운 20장을 무작위로 지급합니다.
-            </div>
         </div>
         <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
         <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
@@ -189,7 +186,6 @@
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
             <div style="text-align:center;">
                 <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
-                <p style="color:#aaa; font-size:0.9rem;">티켓을 소모하여 초월 카드를 획득하세요.</p>
                 <p>보유 카오스 티켓: <span id="ui-chaos-tickets" style="color:#ffd700; font-weight:bold; font-size:1.2rem;">0</span>장</p>
             </div>
             <button class="menu-btn" onclick="RPG.spinChaosRoulette()" style="border-color:#ffd700; color:#ffd700; width:80%; max-width:300px; padding:20px;">
@@ -275,7 +271,7 @@
   <div class="modal-content" style="height:auto;">
     <h3 id="confirm-title">확인</h3>
     <div id="confirm-msg" style="margin: 10px 0;">...</div>
-    <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
+    <div id="confirm-btn-container" style="display:flex; gap:10px; margin-top:15px; width:100%;">
        <button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;">예</button>
        <button id="confirm-no" class="menu-btn" style="flex:1; margin-bottom:0; background:#555; border-color:#777;">아니오</button>
     </div>
@@ -571,7 +567,7 @@ const RPG = {
         const list = document.getElementById('mode-list');
         const desc = document.getElementById('mode-desc');
         list.innerHTML = "";
-        desc.innerText = "모드를 선택하여 설명을 확인하세요.";
+        desc.innerText = "모드를 선택해주세요.";
 
         const chaosBtn = document.getElementById('btn-chaos-roulette');
         if (chaosBtn) {
@@ -622,11 +618,15 @@ const RPG = {
         enterBtn.onclick = () => {
             if(!this.selectedModeId) return this.showAlert("모드를 선택해주세요.");
             const mName = MODES.find(m => m.id === this.selectedModeId).name;
-            this.showConfirm(`${mName} 모드로 시작하시겠습니까?`, () => {
-                this.initNewGame(this.selectedModeId);
-                modal.classList.remove('active');
-                this.toMenu();
-            });
+            this.showDoubleConfirm(
+                `${mName} 모드로 시작하시겠습니까?`,
+                `정말 시작하시겠습니까?<br>현재 진행 중인 게임 데이터는 초기화됩니다.`,
+                () => {
+                    this.initNewGame(this.selectedModeId);
+                    modal.classList.remove('active');
+                    this.toMenu();
+                }
+            );
         };
 
         modal.classList.add('active');
@@ -729,8 +729,11 @@ const RPG = {
         this.showScreen('screen-menu');
         document.getElementById('ui-tickets').innerText = this.state.tickets;
         const enemyIdx = this.state.enemyScale % ENEMIES.length;
-        const nextName = ENEMIES[enemyIdx].name;
-        document.getElementById('next-enemy-preview').innerText = `다음 상대: ${nextName} (Stage ${this.state.enemyScale + 1})`;
+        const nextEnemy = ENEMIES[enemyIdx];
+        document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} (Stage ${this.state.enemyScale + 1})`;
+        const imgEl = document.getElementById('next-enemy-img');
+        imgEl.src = `${nextEnemy.name}.png`;
+        imgEl.style.display = 'block';
 
         // Mode Specific Menu Areas
         const gachaArea = document.getElementById('menu-gacha-area');
@@ -1060,9 +1063,10 @@ const RPG = {
             return this.showAlert("셔플할 티켓이 부족합니다.");
         }
 
-        this.showConfirm(
+        this.showDoubleConfirm(
             `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
             티켓 1장을 사용하여 새로운 20장을 받으시겠습니까?`,
+            `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
             () => {
                 this.state.tickets--;
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
@@ -2686,6 +2690,10 @@ const RPG = {
         const modal = document.getElementById('modal-confirm');
         const btnYes = document.getElementById('confirm-yes');
         const btnNo = document.getElementById('confirm-no');
+        const btnContainer = document.getElementById('confirm-btn-container');
+
+        // Reset button order
+        btnContainer.style.flexDirection = 'row';
 
         btnYes.onclick = () => {
             modal.classList.remove('active');
@@ -2697,6 +2705,34 @@ const RPG = {
         };
 
         modal.classList.add('active');
+    },
+
+    showDoubleConfirm(msg1, msg2, onYes) {
+        this.showConfirm(msg1, () => {
+            // Step 1 Yes -> Open Step 2
+            setTimeout(() => {
+                document.getElementById('confirm-msg').innerHTML = msg2;
+                const modal = document.getElementById('modal-confirm');
+                const btnYes = document.getElementById('confirm-yes');
+                const btnNo = document.getElementById('confirm-no');
+                const btnContainer = document.getElementById('confirm-btn-container');
+
+                // Swap buttons for safety
+                btnContainer.style.flexDirection = 'row-reverse';
+
+                btnYes.onclick = () => {
+                    modal.classList.remove('active');
+                    btnContainer.style.flexDirection = 'row'; // Reset
+                    if(onYes) onYes();
+                };
+                btnNo.onclick = () => {
+                     modal.classList.remove('active');
+                     btnContainer.style.flexDirection = 'row'; // Reset
+                };
+
+                modal.classList.add('active');
+            }, 100);
+        });
     },
 
     // --- Private Tutoring ---
