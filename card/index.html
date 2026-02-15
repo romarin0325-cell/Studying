@@ -12,6 +12,7 @@
     .screen { display: none; flex-direction: column; height: 100%; }
     .screen.active { display: flex; }
     .menu-btn { background: #333; border: 1px solid #555; color: #eee; padding: 15px; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-bottom: 10px; width: 100%; text-align: center; }
+    .menu-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .menu-btn:active { background: #555; transform: scale(0.98); }
     .menu-btn.correct { background: #1b5e20 !important; border-color: #4caf50 !important; }
     .menu-btn.wrong { background: #b71c1c !important; border-color: #ef5350 !important; }
@@ -116,6 +117,22 @@
 
     .deck-slot { width: 100%; height: 50px; background: #333; margin-bottom: 5px; border: 1px dashed #555; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .deck-slot.filled { border: 1px solid #4caf50; background: #1b5e20; }
+
+    .title-loading {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto 14px auto;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid #4fc3f7;
+        color: #81d4fa;
+        font-size: 0.9rem;
+    }
+
+    .title-loading.hidden {
+        display: none;
+    }
 </style>
 </head>
 <body>
@@ -123,8 +140,9 @@
 <div class="container">
     <div id="screen-title" class="screen active" style="justify-content: center; align-items: center;">
         <h1 style="color:#ffd700;">Card RPG</h1>
-        <button class="menu-btn" onclick="RPG.startGame('new')">새로하기</button>
-        <button class="menu-btn" onclick="RPG.startGame('load')">이어하기</button>
+        <div id="title-loading" class="title-loading">⏳ 데이터 로딩 중... 잠시만 기다려주세요.</div>
+        <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로하기</button>
+        <button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled>이어하기</button>
     </div>
     <div id="screen-menu" class="screen">
         <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장</div>
@@ -510,8 +528,7 @@ const RPG = {
         return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
     },
 
-    startGame(mode) {
-        // 필수 데이터 로드 검증
+    getMissingRequiredData() {
         const requiredData = [
             { name: 'CARDS', ref: typeof CARDS !== 'undefined' ? CARDS : null },
             { name: 'ENEMIES', ref: typeof ENEMIES !== 'undefined' ? ENEMIES : null },
@@ -520,10 +537,58 @@ const RPG = {
             { name: 'GRAMMAR_DATA', ref: typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA : null },
             { name: 'Logic', ref: typeof Logic !== 'undefined' ? Logic : null }
         ];
+        return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+    },
 
-        const missing = requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+    setStartButtonsEnabled(enabled) {
+        const btnNew = document.getElementById('btn-start-new');
+        const btnLoad = document.getElementById('btn-start-load');
+        if (btnNew) btnNew.disabled = !enabled;
+        if (btnLoad) btnLoad.disabled = !enabled;
+
+        const loading = document.getElementById('title-loading');
+        if (loading) {
+            if (enabled) {
+                loading.classList.add('hidden');
+            } else {
+                loading.classList.remove('hidden');
+            }
+        }
+    },
+
+    waitForInitialDataLoad() {
+        let attempts = 0;
+        const maxAttempts = 80;
+
+        const checkReady = () => {
+            const missing = this.getMissingRequiredData();
+            if (missing.length === 0) {
+                this.setStartButtonsEnabled(true);
+                return;
+            }
+
+            attempts++;
+            if (attempts >= maxAttempts) {
+                const loading = document.getElementById('title-loading');
+                if (loading) loading.innerText = `⚠️ 로딩 지연: ${missing.map(d => d.name).join(', ')} 파일 대기 중...`;
+                return;
+            }
+
+            setTimeout(checkReady, 120);
+        };
+
+        this.setStartButtonsEnabled(false);
+        checkReady();
+    },
+
+    startGame(mode, retryCount = 0) {
+        const missing = this.getMissingRequiredData();
 
         if(missing.length > 0) {
+            if (retryCount < 6) {
+                setTimeout(() => this.startGame(mode, retryCount + 1), 180);
+                return;
+            }
             const names = missing.map(d => d.name).join(', ');
             this.showAlert(`게임 데이터 로드 실패: ${names}<br><br>파일이 같은 폴더에 있는지 확인하고 게임을 새로고침 해주세요.`);
             return; // 게임 진입 차단
@@ -3006,6 +3071,10 @@ const RPG = {
         this.openInfoModal("알림", msg);
     }
 };
+
+window.addEventListener('load', () => {
+    RPG.waitForInitialDataLoad();
+});
 </script>
 </body>
 </html>
