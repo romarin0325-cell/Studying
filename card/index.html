@@ -549,6 +549,7 @@ const RPG = {
         const loading = document.getElementById('title-loading');
         if (loading) {
             if (enabled) {
+                loading.innerText = '⏳ 데이터 로딩 중... 잠시만 기다려주세요.';
                 loading.classList.add('hidden');
             } else {
                 loading.classList.remove('hidden');
@@ -559,6 +560,8 @@ const RPG = {
     waitForInitialDataLoad() {
         let attempts = 0;
         const maxAttempts = 80;
+        const fastPollingMs = 120;
+        const slowPollingMs = 500;
 
         const checkReady = () => {
             const missing = this.getMissingRequiredData();
@@ -571,10 +574,11 @@ const RPG = {
             if (attempts >= maxAttempts) {
                 const loading = document.getElementById('title-loading');
                 if (loading) loading.innerText = `⚠️ 로딩 지연: ${missing.map(d => d.name).join(', ')} 파일 대기 중...`;
+                setTimeout(checkReady, slowPollingMs);
                 return;
             }
 
-            setTimeout(checkReady, 120);
+            setTimeout(checkReady, fastPollingMs);
         };
 
         this.setStartButtonsEnabled(false);
