@@ -391,6 +391,34 @@ const SideEffects = {
             const pick = buffs[Math.floor(Math.random() * buffs.length)];
             ctx.applyFieldBuff(pick);
             ctx.logFn(`코스믹 하모니: [${getBuffName(pick)}] 생성!`);
+        },
+        'dream_form_execute': (ctx, eff) => {
+            if (ctx.battle.fieldBuffs.length > 0) {
+                let logMsg = [];
+                ctx.battle.fieldBuffs.forEach(b => {
+                    switch (b.name) {
+                        case 'earth_bless':
+                            ctx.source.hp = ctx.source.maxHp;
+                            logMsg.push("대지(완전회복)");
+                            break;
+                        case 'star_powder':
+                            ctx.source.mp = Math.min(100, ctx.source.mp + 30);
+                            logMsg.push("스타(MP+30)");
+                            break;
+                        case 'sanctuary':
+                            ctx.source.mp = Math.min(100, ctx.source.mp + 20);
+                            logMsg.push("성역(MP+20)");
+                            break;
+                        case 'goddess_descent':
+                            ctx.target.buffs['stun'] = 1;
+                            logMsg.push("여신(기절)");
+                            break;
+                    }
+                });
+                if(logMsg.length > 0) ctx.logFn(`[꿈의형태] 초월 효과 발동! (${logMsg.join(', ')})`);
+                ctx.logFn(`[꿈의형태] 모든 필드 버프가 소모되었습니다.`);
+                ctx.battle.fieldBuffs.length = 0;
+            }
         }
     },
     apply: function(ctx, eff) {
@@ -649,37 +677,36 @@ const Logic = {
                         isCrit = true;
                         logMsg.push("태양(2.0배/치명)");
                         break;
-                    case 'moon_bless': // 달: 마방 30% 관통
+                    case 'moon_bless': // 달: 마방 30% 관통 + 1배율
                         {
                             let ignore = Math.floor(tgtStats.mdef * 0.3);
                             def = Math.max(0, def - ignore);
-                            logMsg.push(`달(관통 ${ignore})`);
+                            mult += 1.0;
+                            logMsg.push(`달(관통 ${ignore}/1.0배)`);
                         }
                         break;
-                    case 'star_powder': // 스타파우더: 마나 30 회복
-                        source.mp = Math.min(100, source.mp + 30);
-                        logMsg.push("스타(MP+30)");
+                    case 'star_powder': // 스타파우더: 1배율
+                        mult += 1.0;
+                        logMsg.push("스타(1.0배)");
                         break;
-                    case 'earth_bless': // 대지: 2배율 + 체력 풀회복
+                    case 'earth_bless': // 대지: 2배율
                         mult += 2.0;
-                        source.hp = source.maxHp;
-                        logMsg.push("대지(2.0배/완전회복)");
+                        logMsg.push("대지(2.0배)");
                         break;
-                    case 'sanctuary': // 성역: 2배율 + 마나 20 회복
+                    case 'sanctuary': // 성역: 2배율
                         mult += 2.0;
-                        source.mp = Math.min(100, source.mp + 20);
-                        logMsg.push("성역(2.0배/MP+20)");
+                        logMsg.push("성역(2.0배)");
                         break;
-                    case 'goddess_descent': // 여신강림: 4배율 + 스턴
+                    case 'goddess_descent': // 여신강림: 4배율
                         mult += 4.0;
-                        target.buffs['stun'] = 1;
-                        logMsg.push("여신(4.0배/기절)");
+                        logMsg.push("여신(4.0배)");
                         break;
-                    case 'reaper_realm': // 사신강림: 마방 50% 관통
+                    case 'reaper_realm': // 사신강림: 마방 50% 관통 + 1배율
                         {
                             let ignore = Math.floor(tgtStats.mdef * 0.5);
                             def = Math.max(0, def - ignore);
-                            logMsg.push(`사신(관통 ${ignore})`);
+                            mult += 1.0;
+                            logMsg.push(`사신(관통 ${ignore}/1.0배)`);
                         }
                         break;
                     case 'twinkle_party': // 트윙클: 3배율
@@ -689,9 +716,8 @@ const Logic = {
                 }
             });
 
-            // 2. 로그 출력 및 버프 소모
-            logFn(`[꿈의형태] 필드 버프 ${fieldBuffs.length}개 융합! (${logMsg.join(', ')})`);
-            fieldBuffs.length = 0; // 모든 필드 버프 제거 (Array Clear)
+            // 2. 로그 출력 (버프 소모 제거 -> SideEffect로 이동)
+            logFn(`[꿈의형태] 필드 버프 ${fieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
         }
 
         // Final Calculation

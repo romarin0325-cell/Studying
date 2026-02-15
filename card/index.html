@@ -573,8 +573,9 @@ const RPG = {
             attempts++;
             if (attempts >= maxAttempts) {
                 const loading = document.getElementById('title-loading');
-                if (loading) loading.innerText = `⚠️ 로딩 지연: ${missing.map(d => d.name).join(', ')} 파일 대기 중...`;
-                setTimeout(checkReady, slowPollingMs);
+                if (loading) {
+                    loading.innerHTML = `⚠️ 로딩 실패: ${missing.map(d => d.name).join(', ')}<br><button onclick="location.reload()" style="margin-top:5px; padding:5px 10px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer;">새로고침</button>`;
+                }
                 return;
             }
 
