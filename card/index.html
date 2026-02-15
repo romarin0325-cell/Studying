@@ -768,6 +768,10 @@ const RPG = {
     // --- Chaos Roulette ---
     openChaosRoulette() {
         if (!this.checkAllBonusUnlocked()) return this.showAlert("아직 해금되지 않았습니다.");
+
+        // Fix: 모달이 화면을 가리는 문제 수정
+        document.getElementById('modal-mode-select').classList.remove('active');
+
         this.showScreen('screen-chaos-roulette');
         document.getElementById('ui-chaos-tickets').innerText = this.global.chaosTickets || 0;
     },
