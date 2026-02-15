@@ -194,7 +194,7 @@
             <button class="menu-btn" onclick="RPG.openTranscendenceCheck()" style="width:80%; max-width:300px;">
                 초월 확인
             </button>
-            <button class="menu-btn" onclick="RPG.toMenu()" style="width:80%; max-width:300px; background:#444;">
+            <button class="menu-btn" onclick="RPG.toTitle(); RPG.openModeSelect();" style="width:80%; max-width:300px; background:#444;">
                 돌아가기
             </button>
         </div>
@@ -730,7 +730,7 @@ const RPG = {
         document.getElementById('ui-tickets').innerText = this.state.tickets;
         const enemyIdx = this.state.enemyScale % ENEMIES.length;
         const nextEnemy = ENEMIES[enemyIdx];
-        document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} (Stage ${this.state.enemyScale + 1})`;
+        document.getElementById('next-enemy-text').innerText = nextEnemy.name;
         const imgEl = document.getElementById('next-enemy-img');
         imgEl.src = `${nextEnemy.name}.png`;
         imgEl.style.display = 'block';
