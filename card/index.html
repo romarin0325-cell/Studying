@@ -733,7 +733,8 @@ const RPG = {
         document.getElementById('next-enemy-text').innerText = nextEnemy.name;
         const imgEl = document.getElementById('next-enemy-img');
         imgEl.src = `${nextEnemy.name}.png`;
-        imgEl.style.display = 'block';
+        imgEl.style.display = 'none';
+        imgEl.parentElement.style.display = 'none';
 
         // Mode Specific Menu Areas
         const gachaArea = document.getElementById('menu-gacha-area');
