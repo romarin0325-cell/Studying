@@ -712,7 +712,7 @@ const TRANSCENDENCE_CARDS = [
         trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{type: 'buff', id: 'evasion', duration: 1}] },
-            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~10배율)', effects: [{type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0}] },
+            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0}] },
             { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{type: 'turn_modulo_dmg', mod: 4, mult: 2.0}, {type: 'force_crit_chance', val: 40}] }
         ]
     },
