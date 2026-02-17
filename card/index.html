@@ -770,10 +770,14 @@ const RPG = {
             draft: { active: false, round: 0, rerolls: 3, currentOptions: [] }
         };
 
-        // Transfer Pending Transcendence to Active State
-        this.state.activeTranscendenceCards = [...(this.global.pendingTranscendenceCards || [])];
-        this.global.pendingTranscendenceCards = [];
-        this.saveGlobalData();
+        // Transfer Pending Transcendence to Active State (Endless Only)
+        if (this.state.gameType === 'endless') {
+             this.state.activeTranscendenceCards = [...(this.global.pendingTranscendenceCards || [])];
+             this.global.pendingTranscendenceCards = [];
+             this.saveGlobalData();
+        } else {
+             this.state.activeTranscendenceCards = [];
+        }
 
         if (mode === 'chaos') {
             let allCards = [...CARDS];
@@ -2625,7 +2629,7 @@ const RPG = {
             }
 
             // Transcendence Ticket Logic (On Clear)
-            if (this.state.mode !== 'origin' && this.checkAllBonusUnlocked()) {
+            if (this.state.gameType === 'challenge' || (this.state.mode !== 'origin' && this.checkAllBonusUnlocked())) {
                  this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
                  this.saveGlobalData();
                  this.log("<b>[보너스]</b> 카오스 티켓 1장 획득!");
