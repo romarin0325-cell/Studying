@@ -375,8 +375,20 @@ const SideEffects = {
             const skill = card.skills.find(s => s.name === pick.skill);
 
             if (skill) {
-                ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
-                ctx.executeSkill(ctx.source, ctx.target, skill, true);
+                const delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack' || e.type === 'delayed_attack_field' || e.type === 'delayed_random_attack');
+
+                if (delayedEff) {
+                     ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+                     ctx.battle.delayedEffects.push({
+                         turn: ctx.battle.turn + delayedEff.turns,
+                         source: ctx.source,
+                         skill: skill
+                     });
+                     ctx.logFn(`(지연 발동) ${delayedEff.turns}턴 뒤에 공격합니다.`);
+                } else {
+                     ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+                     ctx.executeSkill(ctx.source, ctx.target, skill, true);
+                }
             }
         },
         'apply_lumi_guard': (ctx, eff) => {
