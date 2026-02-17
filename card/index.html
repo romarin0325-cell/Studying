@@ -264,6 +264,24 @@
     </div>
 </div>
 
+<div id="modal-type-select" class="modal">
+    <div class="modal-content" style="height:auto; min-height:300px; width: 360px;">
+        <h3>게임 종류 선택</h3>
+        <p style="font-size:0.9rem; color:#aaa; margin-bottom:20px;">
+            플레이하실 게임 종류를 선택해주세요.
+        </p>
+        <button class="menu-btn" onclick="RPG.selectGameType('endless')" style="padding:20px; margin-bottom:10px;">
+            무한 모드 (Endless)<br>
+            <span style="font-size:0.8rem; color:#ccc;">클리어 조건 없음 / 무한 진행</span>
+        </button>
+        <button class="menu-btn" onclick="RPG.selectGameType('challenge')" style="padding:20px; border-color:#e040fb; color:#e040fb;">
+            도전 모드 (Challenge)<br>
+            <span style="font-size:0.8rem; color:#e1bee7;">목표 스테이지 클리어 도전</span>
+        </button>
+        <button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
+    </div>
+</div>
+
 <div id="modal-card" class="modal">
     <div class="modal-content">
         <h3 id="md-name">Name</h3>
@@ -624,11 +642,22 @@ const RPG = {
 
                  this.showAlert("불러오기 완료");
                  this.toMenu();
-            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openModeSelect(); }
+            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openTypeSelect(); }
         } else {
-            // New Game Logic: Show Mode Select
-            this.openModeSelect();
+            // New Game Logic: Show Type Select
+            this.openTypeSelect();
         }
+    },
+
+    openTypeSelect() {
+        this.selectedModeId = null;
+        document.getElementById('modal-type-select').classList.add('active');
+    },
+
+    selectGameType(type) {
+        this.tempGameType = type;
+        document.getElementById('modal-type-select').classList.remove('active');
+        this.openModeSelect();
     },
 
     openModeSelect() {
@@ -641,14 +670,14 @@ const RPG = {
 
         const chaosBtn = document.getElementById('btn-chaos-roulette');
         if (chaosBtn) {
-            if (this.checkAllBonusUnlocked()) {
+            if (this.tempGameType === 'endless' && this.checkAllBonusUnlocked()) {
                 chaosBtn.style.display = 'block';
             } else {
                 chaosBtn.style.display = 'none';
             }
         }
 
-        const MODES = [
+        let MODES = [
             { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
             { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
             { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
@@ -660,6 +689,16 @@ const RPG = {
             { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
             { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
         ];
+
+        if (this.tempGameType === 'endless') {
+            MODES = MODES.filter(m => ['origin', 'draft', 'chaos'].includes(m.id));
+            MODES.forEach(m => {
+                if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
+                if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
+            });
+        } else if (this.tempGameType === 'challenge') {
+             MODES = MODES.filter(m => m.id !== 'origin');
+        }
 
         MODES.forEach(m => {
             const btn = document.createElement('button');
@@ -716,6 +755,7 @@ const RPG = {
 
         this.state = {
             mode: mode,
+            gameType: this.tempGameType || 'challenge',
             tickets: initTickets,
             inventory: [],
             deck: [null, null, null],
@@ -2457,6 +2497,8 @@ const RPG = {
         if (mode === 'chaos') clearStage = 30;
         if (mode === 'draft') clearStage = 24;
         if (mode === 'origin') clearStage = Infinity;
+
+        if (this.state.gameType === 'endless') clearStage = Infinity;
 
         let gameClear = false;
         if (stage >= clearStage) {
