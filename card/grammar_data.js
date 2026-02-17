@@ -1472,5 +1472,139 @@ const GRAMMAR_DATA = [
                 "lecture_id": 22
             }
         ]
+    },
+    {
+        "id": 23,
+        "title": "현재시제 & 3인칭 단수 -s",
+        "content": "[제23강] 자동 실행 모드: 변함없는 나의 마음처럼! (현재시제)\n\n형아, 6강에서 ing는 \"지금 당장! 눈앞의 생중계!\"라고 했던 거 기억나지? 숟가락 들고 와구와구 먹는 중일 때 쓰는 거!\n\n근데 우리가 매일매일 숨 쉬고 밥 먹는 것처럼, \"원래 늘 그런 거\"나 \"변함없는 규칙\"은 어떻게 말할까? 굳이 ing를 붙여서 호들갑 떨 필요 없이, 아주 깔끔하게 **현재시제(Present Simple)**라는 자동 실행 마법을 걸어주면 돼!\n\n\n1. 현재시제는 '패시브 스킬'이야! (Routine & Fact)\n형아의 일상 루틴처럼, 스위치를 켜면 자동으로 돌아가는 걸 말해.\n\"나는 매주 회의를 해.\" → 지금 회의 중이든 아니든, **원래** 그런 거니까!\n\n\"The company requires consent.\" (그 회사는 동의를 요구해. → 원래 그런 규정이야!)\n\"Tenants complain sometimes.\" (세입자들은 가끔 불평해. → 늘 있는 일이지.)\n\n2. 외로운 그 녀석에게 요정(-s)을 붙여줘! (3인칭 단수)\n형아, 1강이랑 5강에서 배운 거 또 나왔다! 이거 진짜 마법 시험(토익 같은 거!)에 맨날 나오는 함정이야.\n\n나(I)랑 형아(You), 그리고 우리(We)는 짝꿍이 있으니까 동사가 쌩얼(원형)로 와도 당당해.\n근데 **He / She / It / 단수 명사(한 명/하나)**는 어때? 저기 혼자 덩그러니 있으면 너무 외로워 보이잖아. 그래서 일반동사 뒤에 **'-s'**라는 꼬마 요정을 친구로 딱! 붙여주는 거야.\n\n\"They work.\" (그들은 일해. - 여럿이니까 쌩얼!)\n\"He works.\" (그는 일해. - 혼자니까 요정 -s 출동!)\n\"The insurance covers fire damage.\" (그 보험은 화재 피해를 보장해. - 보험도 '하나(It)'니까 covers!)\n\n3. 반항아와 요정의 결합 (have → has)\n대부분은 그냥 -s만 붙이면 되는데(encourage → encourages), have라는 녀석은 고집이 세서 요정이랑 합체하면 모양이 확 바뀌어 버려!\n\"He has a plan.\" (그는 계획이 있어. - haves 아냐!)\n\n4. 질문과 부정: 도우미 기사님이 요정을 데려간다! (Do/Does)\n형아… 여기서 사람들이 멘탈이 제일 많이 터져. (토닥토닥)\n\"He works\"에서 -s가 붙었잖아? 근데 질문(?)을 하거나 부정(not)을 할 때는, 주인공이 직접 안 나서고 **도우미(Do/Does)** 기사님을 부른다고 했지?\n이때, 도우미 기사님이 주인공 대신 무거운 '-s' 요정을 안고 나가!\n\n(X) Does he works? (으악! 요정이 두 명이면 무거워서 기사님 쓰러져!)\n(O) Does he work? (그는 일하니? - 기사님이 Does로 s를 챙겨갔으니까 뒤엔 쌩얼!)\n(O) He doesn't deny... (그는 부인하지 않아. - 부정문도 마찬가지!)\n\n[루미의 변함없는 고백]\n형아, 내 마음을 이 마법으로 표현해 볼게.\n\"I love you.\" (이건 ing가 아니야. 어제도, 지금도, 내일도 변함없이 자동으로 실행되는 내 마음이라고! ///)\n\n자, 요정(-s) 챙겨주는 거 잊지 말고 퀴즈 풀어봐!",
+        "quizzes": [
+            {
+                "desc": "그 보험은 화재 피해를 보장해.",
+                "question": "\"The insurance [ ] fire damage.\"",
+                "options": [
+                    "cover",
+                    "covers",
+                    "hovers",
+                    "covering"
+                ],
+                "answer": "covers",
+                "lecture_id": 23
+            },
+            {
+                "desc": "그 매니저는 직원들이 더 열심히 일하도록 격려해.",
+                "question": "\"The manager [ ] employees to work harder.\"",
+                "options": [
+                    "encourage",
+                    "encourages",
+                    "enrages",
+                    "encouraging"
+                ],
+                "answer": "encourages",
+                "lecture_id": 23
+            },
+            {
+                "desc": "그 규정은 서면 동의를 요구해.",
+                "question": "\"The regulation [ ] written consent.\"",
+                "options": [
+                    "require",
+                    "requires",
+                    "inquire",
+                    "required"
+                ],
+                "answer": "requires",
+                "lecture_id": 23
+            },
+            {
+                "desc": "그는 그 소문들을 부인하지 않아.",
+                "question": "\"He [ ] the rumors.\"",
+                "options": [
+                    "don't deny",
+                    "doesn't deny",
+                    "doesn't denies",
+                    "not deny"
+                ],
+                "answer": "doesn't deny",
+                "lecture_id": 23
+            },
+            {
+                "desc": "그 보증은 이번 달에 만료되니?",
+                "question": "\"Does the warranty [ ] this month?\"",
+                "options": [
+                    "expire",
+                    "expires",
+                    "expiring",
+                    "inspire"
+                ],
+                "answer": "expire",
+                "lecture_id": 23
+            }
+        ]
+    },
+    {
+        "id": 24,
+        "title": "시간의 좌표 (시간 전치사 In, On, At + For/Since)",
+        "content": "[제24강] 시간의 좌표: 우리의 시간은 어떻게 흐를까? (In, On, At)\n\n형아! 9강에서 방 안에(in), 책상 위에(on), 점 찍기(at) 배웠던 거 기억나?\n영어는 진짜 깐깐한 덕후라서, 장소뿐만 아니라 '시간'을 말할 때도 그 시간이 큰 덩어리인지, 달력 한 칸인지, 딱 멈춘 점인지를 철저하게 따져!\n\n\n공간 마법을 시간으로 그대로 가져와 볼까?\n\n1. 📍 At: 시계 바늘로 콕! 찍은 그 순간 (점)\n시간의 흐름 속에서 바늘로 딱! 찍을 수 있는 정확한 시각이야.\n\n\"at 7 p.m.\" (오후 7시에 - 딱 그 시간!)\n\"The banquet will start at 7 p.m.\" (연회는 7시에 시작할 거야.)\n\n2. 🥪 On: 달력 '한 칸' 위에 예쁜 스티커 착! (면/표면)\n하루 단위의 시간, 즉 요일이나 특정한 날짜야. 달력에서 그 날짜 칸 위에 스티커를 붙인다고 상상해 봐!\n\n\"on Friday\" (금요일에)\n\"The demonstration will be held on Friday.\" (시연은 금요일에 열려.)\n\n3. 📦 In: 거대한 시간 박스 안에 쏙! (입체/공간)\n하루보다 더 긴 시간들! 한 달, 계절, 연도 같은 아주 큰 덩어리 안에서 헤엄치는 느낌이야. (아침/오후/저녁 같은 넓은 시간대도 In을 써!)\n\n\"in June\" (6월에)\n\"The warranty expires in June.\" (보증은 6월에 만료돼.)\n\n4. ⏳ For vs Since: 기간이냐, 시작점이냐 (선과 점)\n형아, 이건 진짜 실전 마법(시험)에서 엄청 자주 나오는 콤보야!\n둘 다 \"~동안, ~부터\"라는 뜻인데, 느낌이 완전 달라.\n\n\n🧵 For = 쭈욱 늘어난 실의 길이! (얼마나 오래?)\n\"for three years\" (3년 동안 - 실의 길이가 3년어치!)\n\"We have been in this district for three years.\" (우리는 이 구역에 3년 동안 있었어.)\n\n📌 Since = 첫 만남에 꽂은 압정! (언제부터?)\n\"since 2020\" (2020년부터 - 딱 그때부터 지금까지!)\n\"The tenants have lived here since 2020.\" (그 세입자들은 2020년부터 살고 있어.)\n\n[루미의 심쿵 데이트 신청]\n형아, 우리 데이트 스케줄 좀 잡아볼까?\n\"Let's meet **at** 7 p.m. **on** Friday **in** December!\"\n(우리 12월, 금요일, 저녁 7시에 만나!)\n\n그리고 내가 형아한테 하고 싶은 말은...\n\"I have loved you **since** the first day we met, and I will love you **for** the rest of my life!\"\n(우리가 처음 만난 날부터 널 사랑해 왔고, 내 남은 평생 동안 널 사랑할 거야!)\n\n어때? 대현자의 시간 마법, 달콤하지? (헤헤) 자, 이제 퀴즈로 넘어가자!",
+        "quizzes": [
+            {
+                "desc": "연회는 오후 7시에 시작할 거야.",
+                "question": "\"The banquet will start [ ] 7 p.m.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "for"
+                ],
+                "answer": "at",
+                "lecture_id": 24
+            },
+            {
+                "desc": "시연은 금요일에 열릴 거야.",
+                "question": "\"The demonstration will be held [ ] Friday.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "since"
+                ],
+                "answer": "on",
+                "lecture_id": 24
+            },
+            {
+                "desc": "보증은 6월에 만료돼.",
+                "question": "\"The warranty expires [ ] June.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "for"
+                ],
+                "answer": "in",
+                "lecture_id": 24
+            },
+            {
+                "desc": "우리는 이 구역에서 3년 동안 있어 왔어.",
+                "question": "\"We have been in this district [ ] three years.\"",
+                "options": [
+                    "since",
+                    "for",
+                    "at",
+                    "on"
+                ],
+                "answer": "for",
+                "lecture_id": 24
+            },
+            {
+                "desc": "그 세입자들은 2020년부터 여기 살고 있어.",
+                "question": "\"The tenants have lived here [ ] 2020.\"",
+                "options": [
+                    "for",
+                    "since",
+                    "in",
+                    "on"
+                ],
+                "answer": "since",
+                "lecture_id": 24
+            }
+        ]
     }
 ];
