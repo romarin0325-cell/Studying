@@ -1898,5 +1898,385 @@ const COLLOCATION_DATA = [
                 "translation": "마케팅 팀을 제외하고 모든 부서가 목표를 달성했다."
             }
         ]
+    },
+    {
+        "id": 51,
+        "expression": "abide by",
+        "meaning": "준수하다",
+        "options": [
+            "abide",
+            "comply",
+            "adhere",
+            "follow"
+        ],
+        "question": "All employees are required to _______ by the company's safety regulations.",
+        "answer": "abide",
+        "translation": "모든 직원은 회사의 안전 규정을 준수해야 한다.",
+        "quizzes": [
+            {
+                "question": "All employees are required to _______ by the company's safety regulations.",
+                "options": [
+                    "abide",
+                    "comply",
+                    "adhere",
+                    "follow"
+                ],
+                "answer": "abide",
+                "translation": "모든 직원은 회사의 안전 규정을 준수해야 한다."
+            },
+            {
+                "question": "Contractors must _______ by the terms of the agreement to avoid penalties.",
+                "options": [
+                    "abide",
+                    "agree",
+                    "accept",
+                    "admit"
+                ],
+                "answer": "abide",
+                "translation": "계약자들은 벌금을 피하기 위해 계약 조건을 준수해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 52,
+        "expression": "accede to",
+        "meaning": "~에 응하다, 동의하다",
+        "options": [
+            "accede",
+            "accept",
+            "access",
+            "exceed"
+        ],
+        "question": "The board of directors finally decided to _______ to the union's demands.",
+        "answer": "accede",
+        "translation": "이사회는 마침내 노조의 요구에 응하기로 결정했다.",
+        "quizzes": [
+            {
+                "question": "The board of directors finally decided to _______ to the union's demands.",
+                "options": [
+                    "accede",
+                    "accept",
+                    "access",
+                    "exceed"
+                ],
+                "answer": "accede",
+                "translation": "이사회는 마침내 노조의 요구에 응하기로 결정했다."
+            },
+            {
+                "question": "The manager will not _______ to the request for an extended deadline.",
+                "options": [
+                    "allow",
+                    "admit",
+                    "accede",
+                    "approve"
+                ],
+                "answer": "accede",
+                "translation": "관리자는 마감일 연장 요청에 응하지 않을 것이다."
+            }
+        ]
+    },
+    {
+        "id": 53,
+        "expression": "allow for",
+        "meaning": "~을 고려하다, 감안하다",
+        "options": [
+            "allow",
+            "apply",
+            "admit",
+            "approve"
+        ],
+        "question": "When planning the travel schedule, you should _______ for unexpected delays.",
+        "answer": "allow",
+        "translation": "여행 일정을 계획할 때, 예기치 않은 지연을 고려해야 한다.",
+        "quizzes": [
+            {
+                "question": "When planning the travel schedule, you should _______ for unexpected delays.",
+                "options": [
+                    "allow",
+                    "apply",
+                    "admit",
+                    "approve"
+                ],
+                "answer": "allow",
+                "translation": "여행 일정을 계획할 때, 예기치 않은 지연을 고려해야 한다."
+            },
+            {
+                "question": "The proposed budget must _______ for potential increases in raw material costs.",
+                "options": [
+                    "make",
+                    "take",
+                    "allow",
+                    "give"
+                ],
+                "answer": "allow",
+                "translation": "제안된 예산은 원자재 비용의 잠재적 증가를 감안해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 54,
+        "expression": "come up with",
+        "meaning": "생각해 내다, 제안하다",
+        "options": [
+            "come",
+            "catch",
+            "keep",
+            "put"
+        ],
+        "question": "The marketing team needs to _______ up with a new strategy to attract younger customers.",
+        "answer": "come",
+        "translation": "마케팅 팀은 젊은 고객들을 유치하기 위해 새로운 전략을 생각해 내야 한다.",
+        "quizzes": [
+            {
+                "question": "The marketing team needs to _______ up with a new strategy to attract younger customers.",
+                "options": [
+                    "come",
+                    "catch",
+                    "keep",
+                    "put"
+                ],
+                "answer": "come",
+                "translation": "마케팅 팀은 젊은 고객들을 유치하기 위해 새로운 전략을 생각해 내야 한다."
+            },
+            {
+                "question": "We hope the committee will _______ up with an innovative solution to the current problem.",
+                "options": [
+                    "bring",
+                    "set",
+                    "make",
+                    "come"
+                ],
+                "answer": "come",
+                "translation": "우리는 위원회가 현재 문제에 대한 혁신적인 해결책을 생각해 내기를 바란다."
+            }
+        ]
+    },
+    {
+        "id": 55,
+        "expression": "cope with",
+        "meaning": "~에 대처하다, 다루다",
+        "options": [
+            "cope",
+            "cover",
+            "care",
+            "count"
+        ],
+        "question": "The new software will help us _______ with the increasing volume of data more efficiently.",
+        "answer": "cope",
+        "translation": "새로운 소프트웨어는 우리가 증가하는 데이터 양에 더 효율적으로 대처하는 데 도움이 될 것이다.",
+        "quizzes": [
+            {
+                "question": "The new software will help us _______ with the increasing volume of data more efficiently.",
+                "options": [
+                    "cope",
+                    "cover",
+                    "care",
+                    "count"
+                ],
+                "answer": "cope",
+                "translation": "새로운 소프트웨어는 우리가 증가하는 데이터 양에 더 효율적으로 대처하는 데 도움이 될 것이다."
+            },
+            {
+                "question": "Employees are trained to _______ with difficult situations professionally.",
+                "options": [
+                    "cooperate",
+                    "compete",
+                    "coordinate",
+                    "cope"
+                ],
+                "answer": "cope",
+                "translation": "직원들은 어려운 상황에 전문적으로 대처하도록 훈련받는다."
+            }
+        ]
+    },
+    {
+        "id": 56,
+        "expression": "count on",
+        "meaning": "~을 믿다, 의지하다",
+        "options": [
+            "count",
+            "account",
+            "calculate",
+            "stand"
+        ],
+        "question": "You can always _______ on our fast delivery service to arrive on time.",
+        "answer": "count",
+        "translation": "당사는 항상 제시간에 도착하는 빠른 배송 서비스를 믿으셔도 좋습니다.",
+        "quizzes": [
+            {
+                "question": "You can always _______ on our fast delivery service to arrive on time.",
+                "options": [
+                    "count",
+                    "account",
+                    "calculate",
+                    "stand"
+                ],
+                "answer": "count",
+                "translation": "당사는 항상 제시간에 도착하는 빠른 배송 서비스를 믿으셔도 좋습니다."
+            },
+            {
+                "question": "The charity organization will _______ on donations from local businesses this year.",
+                "options": [
+                    "call",
+                    "carry",
+                    "catch",
+                    "count"
+                ],
+                "answer": "count",
+                "translation": "그 자선 단체는 올해 지역 기업들의 기부에 의지할 것이다."
+            }
+        ]
+    },
+    {
+        "id": 57,
+        "expression": "do away with",
+        "meaning": "~을 없애다, 폐지하다",
+        "options": [
+            "do",
+            "take",
+            "put",
+            "make"
+        ],
+        "question": "The company plans to _______ away with the outdated dress code policy starting next month.",
+        "answer": "do",
+        "translation": "회사는 다음 달부터 구식 복장 규정을 폐지할 계획이다.",
+        "quizzes": [
+            {
+                "question": "The company plans to _______ away with the outdated dress code policy starting next month.",
+                "options": [
+                    "do",
+                    "take",
+                    "put",
+                    "make"
+                ],
+                "answer": "do",
+                "translation": "회사는 다음 달부터 구식 복장 규정을 폐지할 계획이다."
+            },
+            {
+                "question": "Management decided to _______ away with the current paper-based filing system.",
+                "options": [
+                    "go",
+                    "get",
+                    "run",
+                    "do"
+                ],
+                "answer": "do",
+                "translation": "경영진은 현재의 종이 기반 문서 보관 시스템을 없애기로 결정했다."
+            }
+        ]
+    },
+    {
+        "id": 58,
+        "expression": "draw up",
+        "meaning": "작성하다",
+        "options": [
+            "draw",
+            "drag",
+            "drop",
+            "drive"
+        ],
+        "question": "The legal department will _______ up a new contract for the upcoming partnership.",
+        "answer": "draw",
+        "translation": "법무 부서는 다가오는 파트너십을 위한 새로운 계약서를 작성할 것이다.",
+        "quizzes": [
+            {
+                "question": "The legal department will _______ up a new contract for the upcoming partnership.",
+                "options": [
+                    "draw",
+                    "drag",
+                    "drop",
+                    "drive"
+                ],
+                "answer": "draw",
+                "translation": "법무 부서는 다가오는 파트너십을 위한 새로운 계약서를 작성할 것이다."
+            },
+            {
+                "question": "The architect was asked to _______ up the blueprints for the new office building.",
+                "options": [
+                    "bring",
+                    "pull",
+                    "set",
+                    "draw"
+                ],
+                "answer": "draw",
+                "translation": "건축가는 새 사무실 건물의 청사진을 작성해 달라는 요청을 받았다."
+            }
+        ]
+    },
+    {
+        "id": 59,
+        "expression": "figure out",
+        "meaning": "알아내다, 이해하다",
+        "options": [
+            "figure",
+            "find",
+            "fill",
+            "point"
+        ],
+        "question": "The technician is trying to _______ out what caused the unexpected system failure.",
+        "answer": "figure",
+        "translation": "기술자는 예상치 못한 시스템 장애의 원인이 무엇인지 알아내려고 노력 중이다.",
+        "quizzes": [
+            {
+                "question": "The technician is trying to _______ out what caused the unexpected system failure.",
+                "options": [
+                    "figure",
+                    "find",
+                    "fill",
+                    "point"
+                ],
+                "answer": "figure",
+                "translation": "기술자는 예상치 못한 시스템 장애의 원인이 무엇인지 알아내려고 노력 중이다."
+            },
+            {
+                "question": "It took the team several hours to _______ out how to operate the new manufacturing machinery.",
+                "options": [
+                    "carry",
+                    "make",
+                    "rule",
+                    "figure"
+                ],
+                "answer": "figure",
+                "translation": "팀이 새로운 제조 기계를 작동하는 방법을 알아내는 데 몇 시간이 걸렸다."
+            }
+        ]
+    },
+    {
+        "id": 60,
+        "expression": "give in (to)",
+        "meaning": "~에 굴복하다, 양보하다",
+        "options": [
+            "give",
+            "turn",
+            "put",
+            "take"
+        ],
+        "question": "The management finally decided to _______ in to the workers' demands for higher wages.",
+        "answer": "give",
+        "translation": "경영진은 결국 임금 인상을 요구하는 노동자들의 요구에 굴복하기로 결정했다.",
+        "quizzes": [
+            {
+                "question": "The management finally decided to _______ in to the workers' demands for higher wages.",
+                "options": [
+                    "give",
+                    "turn",
+                    "put",
+                    "take"
+                ],
+                "answer": "give",
+                "translation": "경영진은 결국 임금 인상을 요구하는 노동자들의 요구에 굴복하기로 결정했다."
+            },
+            {
+                "question": "We must not _______ in to the unreasonable pressure from our competitors.",
+                "options": [
+                    "fall",
+                    "drop",
+                    "step",
+                    "give"
+                ],
+                "answer": "give",
+                "translation": "우리는 경쟁자들의 불합리한 압력에 굴복해서는 안 된다."
+            }
+        ]
     }
 ];
