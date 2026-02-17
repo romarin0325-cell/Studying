@@ -200,7 +200,7 @@
         <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
     </div>
     <div id="screen-chaos-roulette" class="screen">
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:15vh; gap:20px;">
             <div style="text-align:center;">
                 <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
                 <p>보유 카오스 티켓: <span id="ui-chaos-tickets" style="color:#ffd700; font-weight:bold; font-size:1.2rem;">0</span>장</p>
@@ -678,14 +678,14 @@ const RPG = {
 
         let MODES = [
             { id: 'origin', name: '오리진', desc: '기본 모드입니다.\n(성공조건: 없음 / 무한)' },
-            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
-            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 24 스테이지)' },
+            { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
+            { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
             { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
             { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
-            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 90% 이상 필요.\n(성공조건: 24 스테이지)' },
-            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 36 스테이지)' },
-            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 36 스테이지)' },
-            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 30 스테이지 / 패배 시 데이터 삭제)' },
+            { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
+            { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 30 스테이지)' },
+            { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 30 스테이지)' },
+            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 16장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
             { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
         ];
 
@@ -748,7 +748,7 @@ const RPG = {
         }
 
         let initTickets = 20;
-        if (mode === 'suffering' || mode === 'overdrive') initTickets = 10;
+        if (['suffering', 'overdrive', 'restriction', 'balance', 'archive', 'flood', 'curse'].includes(mode)) initTickets = 10;
         if (mode === 'chaos') initTickets = 0;
         if (mode === 'draft') initTickets = 5;
 
@@ -793,7 +793,7 @@ const RPG = {
             }
 
             allCards.sort(() => Math.random() - 0.5);
-            const picks = allCards.slice(0, 20).map(c => c.id);
+            const picks = allCards.slice(0, 16).map(c => c.id);
 
             this.state.chaosPool = picks;
             this.state.inventory = [...picks];
@@ -1197,7 +1197,7 @@ const RPG = {
 
         this.showDoubleConfirm(
             `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
-            티켓 1장을 사용하여 새로운 20장을 받으시겠습니까?`,
+            티켓 1장을 사용하여 새로운 16장을 받으시겠습니까?`,
             `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
             () => {
                 this.state.tickets--;
@@ -1216,7 +1216,7 @@ const RPG = {
                 }
 
                 allCards.sort(() => Math.random() - 0.5);
-                const newPicks = allCards.slice(0, 20).map(c => c.id);
+                const newPicks = allCards.slice(0, 16).map(c => c.id);
 
                 this.state.chaosPool = newPicks;
                 this.state.inventory = [...newPicks];
@@ -1233,7 +1233,7 @@ const RPG = {
 
                 this.showAlert(
                     `<b>카오스 셔플 완료!</b><br><br>
-                    새로운 20장이 지급되었습니다.<br>
+                    새로운 16장이 지급되었습니다.<br>
                     (전설: ${legendCnt}, 에픽: ${epicCnt})<br><br>
                     * 덱이 초기화되었으니 다시 구성해주세요.`
                 );
@@ -2543,9 +2543,10 @@ const RPG = {
         const mode = this.state.mode;
         const stage = this.state.enemyScale; // current stage (already incremented)
         let clearStage = 24;
+        if (['restriction', 'balance', 'archive'].includes(mode)) clearStage = 18;
         if (mode === 'overdrive') clearStage = 30;
-        if (mode === 'curse' || mode === 'flood') clearStage = 36;
-        if (mode === 'chaos') clearStage = 30;
+        if (mode === 'curse' || mode === 'flood') clearStage = 30;
+        if (mode === 'chaos') clearStage = 24;
         if (mode === 'draft') clearStage = 24;
         if (mode === 'origin') clearStage = Infinity;
 
@@ -2568,7 +2569,7 @@ const RPG = {
             }
             allCards.sort(() => Math.random() - 0.5);
 
-            const nextPicks = allCards.slice(0, 20).map(c => c.id);
+            const nextPicks = allCards.slice(0, 16).map(c => c.id);
             this.state.chaosPool = nextPicks;
             this.state.inventory = [...nextPicks];
         }
@@ -2621,8 +2622,8 @@ const RPG = {
             // Check Archive Condition
             if (this.state.mode === 'archive') {
                 let rate = (this.state.quiz_stats.total > 0) ? (this.state.quiz_stats.correct / this.state.quiz_stats.total) : 0;
-                if (rate < 0.9) {
-                    this.showAlert(`[실패] 아카이브 모드 클리어 실패!<br>정답률: ${(rate*100).toFixed(1)}% (목표: 90% 이상)`);
+                if (rate < 0.8) {
+                    this.showAlert(`[실패] 아카이브 모드 클리어 실패!<br>정답률: ${(rate*100).toFixed(1)}% (목표: 80% 이상)`);
                     this.toTitle();
                     return;
                 }
