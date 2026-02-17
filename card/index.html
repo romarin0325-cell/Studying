@@ -685,14 +685,14 @@ const RPG = {
             { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
             { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 30 스테이지)' },
             { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 30 스테이지)' },
-            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 16장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+            { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
             { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
         ];
 
         if (this.tempGameType === 'endless') {
             MODES = MODES.filter(m => ['origin', 'draft', 'chaos'].includes(m.id));
             MODES.forEach(m => {
-                if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 20장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
+                if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                 if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
             });
         } else if (this.tempGameType === 'challenge') {
@@ -793,7 +793,7 @@ const RPG = {
             }
 
             allCards.sort(() => Math.random() - 0.5);
-            const picks = allCards.slice(0, 16).map(c => c.id);
+            const picks = allCards.slice(0, 15).map(c => c.id);
 
             this.state.chaosPool = picks;
             this.state.inventory = [...picks];
@@ -1197,7 +1197,7 @@ const RPG = {
 
         this.showDoubleConfirm(
             `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
-            티켓 1장을 사용하여 새로운 16장을 받으시겠습니까?`,
+            티켓 1장을 사용하여 새로운 15장을 받으시겠습니까?`,
             `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
             () => {
                 this.state.tickets--;
@@ -1216,7 +1216,7 @@ const RPG = {
                 }
 
                 allCards.sort(() => Math.random() - 0.5);
-                const newPicks = allCards.slice(0, 16).map(c => c.id);
+                const newPicks = allCards.slice(0, 15).map(c => c.id);
 
                 this.state.chaosPool = newPicks;
                 this.state.inventory = [...newPicks];
@@ -1233,7 +1233,7 @@ const RPG = {
 
                 this.showAlert(
                     `<b>카오스 셔플 완료!</b><br><br>
-                    새로운 16장이 지급되었습니다.<br>
+                    새로운 15장이 지급되었습니다.<br>
                     (전설: ${legendCnt}, 에픽: ${epicCnt})<br><br>
                     * 덱이 초기화되었으니 다시 구성해주세요.`
                 );
@@ -1280,7 +1280,7 @@ const RPG = {
                      allCards = allCards.concat(unlocked);
                  }
                  allCards.sort(() => Math.random() - 0.5);
-                 this.state.chaosPool = allCards.slice(0, 20).map(c => c.id);
+                 this.state.chaosPool = allCards.slice(0, 15).map(c => c.id);
             }
             const pickId = this.state.chaosPool[Math.floor(Math.random() * this.state.chaosPool.length)];
             const pick = this.getCardData(pickId);
@@ -2569,7 +2569,7 @@ const RPG = {
             }
             allCards.sort(() => Math.random() - 0.5);
 
-            const nextPicks = allCards.slice(0, 16).map(c => c.id);
+            const nextPicks = allCards.slice(0, 15).map(c => c.id);
             this.state.chaosPool = nextPicks;
             this.state.inventory = [...nextPicks];
         }
