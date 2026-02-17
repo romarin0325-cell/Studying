@@ -200,7 +200,6 @@
         <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
     </div>
     <div id="screen-chaos-roulette" class="screen">
-        <div class="header">Chaos Roulette</div>
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;">
             <div style="text-align:center;">
                 <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
@@ -729,7 +728,7 @@ const RPG = {
             const mName = MODES.find(m => m.id === this.selectedModeId).name;
             this.showDoubleConfirm(
                 `${mName} 모드로 시작하시겠습니까?`,
-                `정말 시작하시겠습니까?<br>현재 진행 중인 게임 데이터는 초기화됩니다.`,
+                `정말 시작하시겠습니까?<br>현재 진행 중인 엔드리스 게임 데이터는 초기화됩니다.<br>(게임 시작 시 자동 저장됩니다)`,
                 () => {
                     this.initNewGame(this.selectedModeId);
                     modal.classList.remove('active');
@@ -771,12 +770,24 @@ const RPG = {
             draft: { active: false, round: 0, rerolls: 3, currentOptions: [] }
         };
 
+        // Transfer Pending Transcendence to Active State
+        this.state.activeTranscendenceCards = [...(this.global.pendingTranscendenceCards || [])];
+        this.global.pendingTranscendenceCards = [];
+        this.saveGlobalData();
+
         if (mode === 'chaos') {
             let allCards = [...CARDS];
             if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
                 const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
                 allCards = allCards.concat(bonus);
             }
+
+            // Add Transcendence Cards to Chaos Pool
+            if (this.state.activeTranscendenceCards.length > 0) {
+                 const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
+                 allCards = allCards.concat(transObjs);
+            }
+
             allCards.sort(() => Math.random() - 0.5);
             const picks = allCards.slice(0, 20).map(c => c.id);
 
@@ -784,10 +795,10 @@ const RPG = {
             this.state.inventory = [...picks];
         }
 
-        if (mode === 'origin' && this.global.pendingTranscendenceCards) {
-            this.state.transcendencePool = [...this.global.pendingTranscendenceCards];
-        } else {
-            this.state.transcendencePool = [];
+        // Origin Mode: Add Transcendence Cards directly to Inventory
+        if (mode === 'origin' && this.state.activeTranscendenceCards.length > 0) {
+             this.state.inventory.push(...this.state.activeTranscendenceCards);
+             setTimeout(() => this.showAlert(`초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`), 500);
         }
 
         // Load persistent wordbook
@@ -796,6 +807,8 @@ const RPG = {
 
         const col = localStorage.getItem('cardRpgCollocation');
         if(col) this.state.wrongCollocations = JSON.parse(col);
+
+        this.saveGame();
     },
 
     saveGame() {
@@ -1193,6 +1206,11 @@ const RPG = {
                     allCards = allCards.concat(bonus);
                 }
 
+                if (this.state.activeTranscendenceCards && this.state.activeTranscendenceCards.length > 0) {
+                    const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
+                    allCards = allCards.concat(transObjs);
+                }
+
                 allCards.sort(() => Math.random() - 0.5);
                 const newPicks = allCards.slice(0, 20).map(c => c.id);
 
@@ -1329,11 +1347,6 @@ const RPG = {
             pool = pool.concat(bonus);
         }
 
-        // Add Transcendence Cards (Origin Only, Legend Only)
-        if (mode === 'origin' && grade === 'legend' && this.state.transcendencePool && this.state.transcendencePool.length > 0) {
-             const transCards = TRANSCENDENCE_CARDS.filter(c => this.state.transcendencePool.includes(c.id));
-             pool = pool.concat(transCards);
-        }
 
         if(pool.length === 0) {
             // Fallback if pool is empty (e.g. no cards of that grade? Should not happen with standard set)
@@ -2403,6 +2416,11 @@ const RPG = {
             pool = pool.concat(bonus);
         }
 
+        if (this.state.activeTranscendenceCards && this.state.activeTranscendenceCards.length > 0) {
+            const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
+            pool = pool.concat(transObjs);
+        }
+
         let options = [];
         for(let i=0; i<4; i++) {
             const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -2452,6 +2470,33 @@ const RPG = {
         this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
     },
 
+    cleanupTranscendenceCards() {
+        if (this.state.mode !== 'origin') return "";
+
+        let removedNames = [];
+        this.battle.players.forEach((p, idx) => {
+            if (p && p.proto.grade === 'transcendence') {
+                // Remove from Inventory
+                const invIdx = this.state.inventory.indexOf(p.id);
+                if (invIdx > -1) {
+                    this.state.inventory.splice(invIdx, 1);
+                }
+                // Remove from Deck
+                if (this.state.deck[idx] === p.id) {
+                    this.state.deck[idx] = null;
+                }
+                removedNames.push(p.name);
+            }
+        });
+
+        if (removedNames.length > 0) {
+            const msg = `초월 카드 소멸: ${removedNames.join(', ')}`;
+            this.log(`<span style="color:#ffd700">[시스템] ${msg}</span>`);
+            return `<br><span style="color:#ffd700">${msg}</span>`;
+        }
+        return "";
+    },
+
     handlePermadeath(players) {
         let deadNames = [];
         players.forEach(p => {
@@ -2467,7 +2512,9 @@ const RPG = {
     },
 
     winBattle() {
+        let transMsg = this.cleanupTranscendenceCards();
         let deadMsg = this.handlePermadeath(this.battle.players);
+        if (transMsg) deadMsg += transMsg;
         let reward = 1;
 
         // Mode Rewards
@@ -2682,6 +2729,7 @@ const RPG = {
     },
 
     loseBattle() {
+        let transMsg = this.cleanupTranscendenceCards();
         // No saveRecord here (User request: only on New Game)
 
         if (['chaos', 'draft'].includes(this.state.mode)) {
@@ -2712,6 +2760,7 @@ const RPG = {
         let deadMsg = this.handlePermadeath(this.battle.players);
         let msg = "패배...";
         if (deadMsg) msg += "<br><br>" + deadMsg;
+        if (transMsg) msg += transMsg;
         this.openInfoModal("전투 결과", msg, () => this.toMenu());
     },
 
