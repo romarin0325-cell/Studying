@@ -796,7 +796,7 @@ const RPG = {
         }
 
         // Origin Mode: Add Transcendence Cards directly to Inventory
-        if (mode === 'origin' && this.state.activeTranscendenceCards.length > 0) {
+        if (mode !== 'chaos' && mode !== 'draft' && this.state.activeTranscendenceCards.length > 0) {
              this.state.inventory.push(...this.state.activeTranscendenceCards);
              setTimeout(() => this.showAlert(`초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`), 500);
         }
@@ -1841,7 +1841,7 @@ const RPG = {
             const proto = this.getCardData(id);
 
             // Call Logic to calculate initial stats (Base + Synergies)
-            const allCards = [...CARDS, ...BONUS_CARDS];
+            const allCards = [...CARDS, ...BONUS_CARDS, ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : [])];
             const init = Logic.calculateInitialStats(proto, this.state.deck, allCards, idx);
 
             // Log active synergy if any
@@ -2471,7 +2471,7 @@ const RPG = {
     },
 
     cleanupTranscendenceCards() {
-        if (this.state.mode !== 'origin') return "";
+        if (['draft', 'chaos'].includes(this.state.mode)) return "";
 
         let removedNames = [];
         this.battle.players.forEach((p, idx) => {
