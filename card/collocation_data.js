@@ -34,6 +34,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "conduct",
                 "translation": "연구원들은 회사 내 직원들의 직무 만족도를 평가하기 위해 설문조사를 실시할 예정이다."
+            },
+            {
+                "question": "To identify bottlenecks in the supply chain, the consultant will _______ a survey of key vendors next week.",
+                "options": [
+                    "conduct",
+                    "compile",
+                    "coordinate",
+                    "confirm"
+                ],
+                "answer": "conduct",
+                "translation": "공급망의 병목 현상을 파악하기 위해, 컨설턴트는 다음 주에 주요 공급업체를 대상으로 설문조사를 실시할 것이다."
             }
         ]
     },
@@ -72,6 +83,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "meet",
                 "translation": "디자인 팀은 생산 지연을 피하기 위해 최종 청사진 제출 마감일을 맞춰야 한다."
+            },
+            {
+                "question": "To avoid late fees, please _______ the deadline for submitting your reimbursement form.",
+                "options": [
+                    "meet",
+                    "miss",
+                    "change",
+                    "delay"
+                ],
+                "answer": "meet",
+                "translation": "지연 수수료를 피하려면 경비 환급 신청서 제출 마감일을 맞춰 주세요."
             }
         ]
     },
@@ -110,6 +132,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "reach",
                 "translation": "노동 조합과 경영진은 월말 전에 임금 인상에 대한 합의에 도달하기를 희망한다."
+            },
+            {
+                "question": "After reviewing the service terms, the client and the vendor were able to _______ an agreement on response times.",
+                "options": [
+                    "reach",
+                    "revise",
+                    "record",
+                    "reject"
+                ],
+                "answer": "reach",
+                "translation": "서비스 조건을 검토한 후, 고객사와 공급업체는 응답 시간에 대한 합의에 도달할 수 있었다."
             }
         ]
     },
@@ -148,6 +181,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "address",
                 "translation": "고객 서비스 담당자는 잘못된 청구서 문제를 즉시 해결할 것이다."
+            },
+            {
+                "question": "The spokesperson held a briefing to _______ the issue of data privacy raised by several customers.",
+                "options": [
+                    "address",
+                    "postpone",
+                    "approve",
+                    "estimate"
+                ],
+                "answer": "address",
+                "translation": "대변인은 일부 고객들이 제기한 데이터 개인정보 문제를 다루기 위해 브리핑을 열었다."
             }
         ]
     },
@@ -186,6 +230,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "deliver",
                 "translation": "영업 이사는 잠재 고객들에게 우리 소프트웨어 솔루션의 이점에 대해 발표할 것이다."
+            },
+            {
+                "question": "Each finalist for the position must _______ a short presentation to the interview panel.",
+                "options": [
+                    "deliver",
+                    "develop",
+                    "devote",
+                    "decline"
+                ],
+                "answer": "deliver",
+                "translation": "해당 직무의 최종 후보자들은 면접 패널 앞에서 짧은 발표를 해야 한다."
             }
         ]
     },
@@ -224,6 +279,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "renew",
                 "translation": "구독자들은 중단 없이 월간 뉴스레터를 계속 받기 위해 온라인으로 구독을 갱신하는 것이 좋다."
+            },
+            {
+                "question": "You can _______ your subscription through the mobile app to continue using premium features.",
+                "options": [
+                    "renew",
+                    "remove",
+                    "replace",
+                    "refund"
+                ],
+                "answer": "renew",
+                "translation": "프리미엄 기능을 계속 이용하려면 모바일 앱에서 구독을 갱신할 수 있습니다."
             }
         ]
     },
@@ -262,6 +328,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "play",
                 "translation": "혁신과 기술은 많은 국가들의 경제 성장을 이끄는 데 중요한 역할을 한다."
+            },
+            {
+                "question": "Employee training programs _______ a significant role in reducing workplace accidents.",
+                "options": [
+                    "play",
+                    "hold",
+                    "keep",
+                    "raise"
+                ],
+                "answer": "play",
+                "translation": "직원 교육 프로그램은 산업재해를 줄이는 데 중요한 역할을 한다."
             }
         ]
     },
@@ -300,6 +377,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "accommodate",
                 "translation": "호텔 체인은 국제 관광객들의 증가하는 수요를 맞추기 위해 더 많은 객실을 추가할 계획이다."
+            },
+            {
+                "question": "The call center hired temporary staff to _______ the surge in demand during the holiday rush.",
+                "options": [
+                    "accommodate",
+                    "amplify",
+                    "abandon",
+                    "allocate"
+                ],
+                "answer": "accommodate",
+                "translation": "콜센터는 연휴 성수기 수요 급증을 감당하기 위해 임시 직원을 고용했다."
             }
         ]
     },
@@ -338,6 +426,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "face",
                 "translation": "프로젝트 관리자는 이번 분기에 공급망 중단으로 인해 팀이 도전에 직면할 것으로 예상한다."
+            },
+            {
+                "question": "The new branch may _______ a challenge in attracting customers without a local advertising campaign.",
+                "options": [
+                    "face",
+                    "finance",
+                    "fix",
+                    "forecast"
+                ],
+                "answer": "face",
+                "translation": "현지 광고 캠페인이 없다면 새 지점은 고객 유치에 어려움에 직면할 수 있다."
             }
         ]
     },
@@ -376,6 +475,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "exceeded",
                 "translation": "신제품 출시가 기대를 뛰어넘어 첫 달에 기록적인 매출을 이끌었다."
+            },
+            {
+                "question": "Attendance at the webinar _______ expectations, so the company scheduled an additional session.",
+                "options": [
+                    "exceeded",
+                    "expanded",
+                    "excluded",
+                    "extended"
+                ],
+                "answer": "exceeded",
+                "translation": "웨비나 참석 인원이 기대를 뛰어넘어 회사는 추가 세션을 편성했다."
             }
         ]
     },
@@ -414,6 +524,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "highly",
                 "translation": "이 교육 프로그램은 경력 발전 기회를 추구하는 직원들에게 강력히 추천된다."
+            },
+            {
+                "question": "This shuttle service is _______ recommended for guests arriving late at night.",
+                "options": [
+                    "highly",
+                    "hurriedly",
+                    "barely",
+                    "loosely"
+                ],
+                "answer": "highly",
+                "translation": "이 셔틀 서비스는 심야에 도착하는 투숙객에게 강력히 추천된다."
             }
         ]
     },
@@ -452,6 +573,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "conveniently",
                 "translation": "그 사무실 건물은 주요 고속도로 근처에 편리하게 위치해 있어 출퇴근자들에게 편리하다."
+            },
+            {
+                "question": "The new branch office is _______ located near the subway entrance, saving employees commuting time.",
+                "options": [
+                    "conveniently",
+                    "confidentially",
+                    "constantly",
+                    "correctly"
+                ],
+                "answer": "conveniently",
+                "translation": "새 지점 사무실은 지하철 출입구 근처에 편리하게 위치해 직원들의 통근 시간을 절약해 준다."
             }
         ]
     },
@@ -490,6 +622,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "heavily",
                 "translation": "전자제품들은 쇼핑객들을 유치하기 위해 연례 블랙 프라이데이 프로모션 기간 동안 대폭 할인된다."
+            },
+            {
+                "question": "Last season’s furniture will be _______ discounted to clear space for new inventory.",
+                "options": [
+                    "heavily",
+                    "hardly",
+                    "casually",
+                    "recently"
+                ],
+                "answer": "heavily",
+                "translation": "새 재고를 들이기 위해 지난 시즌 가구가 대폭 할인될 것이다."
             }
         ]
     },
@@ -528,6 +671,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "strictly",
                 "translation": "환자 안전을 보장하기 위해 병원 모든 구역에서 흡연이 엄격히 금지된다."
+            },
+            {
+                "question": "Sharing your password with anyone is _______ prohibited under the company’s security policy.",
+                "options": [
+                    "strictly",
+                    "freely",
+                    "briefly",
+                    "casually"
+                ],
+                "answer": "strictly",
+                "translation": "회사 보안 정책에 따라 비밀번호를 타인과 공유하는 것은 엄격히 금지된다."
             }
         ]
     },
@@ -566,6 +720,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "mutually",
                 "translation": "그 무역 협정은 수출국과 수입국 모두에게 상호 이익이 되도록 설계되었다."
+            },
+            {
+                "question": "Both companies are seeking a _______ beneficial arrangement for joint research and development.",
+                "options": [
+                    "mutually",
+                    "temporarily",
+                    "separately",
+                    "barely"
+                ],
+                "answer": "mutually",
+                "translation": "양사는 공동 연구개발을 위한 상호 이익이 되는 협력 방안을 모색하고 있다."
             }
         ]
     },
@@ -604,6 +769,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "promptly",
                 "translation": "관리자들은 긍정적인 작업 환경을 유지하기 위해 직원들의 우려에 즉시 응답할 것으로 기대된다."
+            },
+            {
+                "question": "Please _______ respond to this email by 3 p.m. so we can confirm the reservation.",
+                "options": [
+                    "promptly",
+                    "randomly",
+                    "mildly",
+                    "jointly"
+                ],
+                "answer": "promptly",
+                "translation": "예약 확정을 위해 오후 3시까지 이 이메일에 즉시 회신해 주세요."
             }
         ]
     },
@@ -642,6 +818,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "increasingly",
                 "translation": "전기 자동차는 증가하는 환경 인식으로 인해 점점 더 인기를 얻고 있다."
+            },
+            {
+                "question": "Contactless payment methods are becoming _______ popular at retail stores nationwide.",
+                "options": [
+                    "increasingly",
+                    "instantly",
+                    "indefinitely",
+                    "individually"
+                ],
+                "answer": "increasingly",
+                "translation": "비접촉 결제 방식은 전국 소매점에서 점점 더 인기를 얻고 있다."
             }
         ]
     },
@@ -680,6 +867,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "currently",
                 "translation": "회의실은 진행 중인 유지보수 작업으로 인해 현재 이용 불가하다."
+            },
+            {
+                "question": "The customer support hotline is _______ unavailable due to system upgrades; please try again later.",
+                "options": [
+                    "currently",
+                    "permanently",
+                    "routinely",
+                    "politely"
+                ],
+                "answer": "currently",
+                "translation": "시스템 업그레이드로 인해 고객 지원 전화는 현재 이용 불가하니, 나중에 다시 시도해 주세요."
             }
         ]
     },
@@ -718,6 +916,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "reasonably",
                 "translation": "이 동네의 아파트들은 합리적인 가격으로 책정되어 많은 첫 구매자들을 끌어들인다."
+            },
+            {
+                "question": "Our basic service package is _______ priced for startups with limited budgets.",
+                "options": [
+                    "reasonably",
+                    "richly",
+                    "rigidly",
+                    "rarely"
+                ],
+                "answer": "reasonably",
+                "translation": "당사의 기본 서비스 패키지는 예산이 제한된 스타트업을 위해 합리적으로 가격이 책정되어 있다."
             }
         ]
     },
@@ -756,6 +965,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "thoroughly",
                 "translation": "품질 관리 직원들은 각 제품이 조립 라인을 떠나기 전에 철저하게 검사해야 한다."
+            },
+            {
+                "question": "Drivers should _______ inspect the vehicle for scratches before leaving the rental lot.",
+                "options": [
+                    "thoroughly",
+                    "roughly",
+                    "indirectly",
+                    "casually"
+                ],
+                "answer": "thoroughly",
+                "translation": "운전자는 렌터카 주차장을 떠나기 전에 흠집 여부를 철저히 점검해야 한다."
             }
         ]
     },
@@ -794,6 +1014,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "forward",
                 "translation": "팀은 귀사와 미래 프로젝트에서 협력하기를 고대하고 있습니다."
+            },
+            {
+                "question": "I look _______ to meeting you at the orientation session next Monday.",
+                "options": [
+                    "forward",
+                    "down",
+                    "over",
+                    "away"
+                ],
+                "answer": "forward",
+                "translation": "다음 주 월요일 오리엔테이션 세션에서 만나 뵙기를 고대합니다."
             }
         ]
     },
@@ -832,6 +1063,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "comply",
                 "translation": "회사들은 벌금을 피하기 위해 국제 무역 규정을 준수해야 한다."
+            },
+            {
+                "question": "All suppliers must _______ with the updated packaging standards starting April 1.",
+                "options": [
+                    "comply",
+                    "complain",
+                    "confide",
+                    "combine"
+                ],
+                "answer": "comply",
+                "translation": "모든 공급업체는 4월 1일부터 업데이트된 포장 기준을 준수해야 한다."
             }
         ]
     },
@@ -870,6 +1112,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "account",
                 "translation": "수출은 그 국가의 경제 생산량에서 큰 비중을 차지한다."
+            },
+            {
+                "question": "Please _______ for any missing receipts before submitting your expense report.",
+                "options": [
+                    "account",
+                    "arrange",
+                    "approve",
+                    "attract"
+                ],
+                "answer": "account",
+                "translation": "경비 보고서를 제출하기 전에 누락된 영수증에 대해 설명해 주세요."
             }
         ]
     },
@@ -908,6 +1161,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "fill",
                 "translation": "신청자들은 세미나에 참석하기 전에 등록 양식을 작성해야 한다."
+            },
+            {
+                "question": "After the workshop, participants were asked to _______ out an evaluation form.",
+                "options": [
+                    "fill",
+                    "file",
+                    "find",
+                    "figure"
+                ],
+                "answer": "fill",
+                "translation": "워크숍 후 참가자들은 평가서를 작성해 달라는 요청을 받았다."
             }
         ]
     },
@@ -946,6 +1210,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "called",
                 "translation": "심각한 날씨 예보로 인해 컨퍼런스가 취소되었다."
+            },
+            {
+                "question": "The annual company picnic was _______ off and will not be rescheduled.",
+                "options": [
+                    "called",
+                    "put",
+                    "held",
+                    "taken"
+                ],
+                "answer": "called",
+                "translation": "연례 회사 소풍은 취소되었으며 재조정(재개최)되지 않을 것이다."
             }
         ]
     },
@@ -984,6 +1259,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "put",
                 "translation": "기술 문제로 인해 제품 출시를 다음 주로 연기해야 한다."
+            },
+            {
+                "question": "Please do not _______ off updating your password, as access will be restricted tomorrow.",
+                "options": [
+                    "put",
+                    "set",
+                    "take",
+                    "keep"
+                ],
+                "answer": "put",
+                "translation": "내일부터 접근이 제한되니 비밀번호 업데이트를 미루지 마세요."
             }
         ]
     },
@@ -1022,6 +1308,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "turn",
                 "translation": "그녀는 가족에 집중하기 위해 승진 제안을 거절하기로 결정했다."
+            },
+            {
+                "question": "Due to budget constraints, the finance department had to _______ down the request for additional funding.",
+                "options": [
+                    "turn",
+                    "bring",
+                    "take",
+                    "set"
+                ],
+                "answer": "turn",
+                "translation": "예산 제약 때문에 재무팀은 추가 자금 요청을 거절해야 했다."
             }
         ]
     },
@@ -1060,6 +1357,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "set",
                 "translation": "계약을 논의하기 위해 고객들과 회의를 잡아야 한다."
+            },
+            {
+                "question": "New employees should _______ up their email accounts on the first day of work.",
+                "options": [
+                    "set",
+                    "take",
+                    "make",
+                    "carry"
+                ],
+                "answer": "set",
+                "translation": "신입사원은 첫 근무일에 이메일 계정을 설정해야 한다."
             }
         ]
     },
@@ -1098,6 +1406,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "go",
                 "translation": "보고서를 검토하고 오류가 있으면 알려주세요."
+            },
+            {
+                "question": "Before the audit, the supervisor will _______ over the expense report with the accounting staff.",
+                "options": [
+                    "go",
+                    "bring",
+                    "make",
+                    "take"
+                ],
+                "answer": "go",
+                "translation": "감사 전에 감독자는 회계 담당자들과 함께 경비 보고서를 검토할 것이다."
             }
         ]
     },
@@ -1136,6 +1455,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "back",
                 "translation": "비용을 절감하기 위해 회사는 불필요한 사무용품을 줄일 계획이다."
+            },
+            {
+                "question": "To reduce operating costs, the plant will cut _______ on energy use during off-peak hours.",
+                "options": [
+                    "back",
+                    "aside",
+                    "over",
+                    "up"
+                ],
+                "answer": "back",
+                "translation": "운영 비용을 줄이기 위해 공장은 비혼잡 시간대에 에너지 사용을 줄일 것이다."
             }
         ]
     },
