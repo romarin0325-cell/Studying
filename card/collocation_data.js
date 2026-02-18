@@ -27,10 +27,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Researchers will _______ a survey among employees to assess job satisfaction levels in the company.",
                 "options": [
-                    "perform",
                     "conduct",
-                    "create",
-                    "collect"
+                    "connect",
+                    "contain",
+                    "commit"
                 ],
                 "answer": "conduct",
                 "translation": "연구원들은 회사 내 직원들의 직무 만족도를 평가하기 위해 설문조사를 실시할 예정이다."
@@ -56,7 +56,7 @@ const COLLOCATION_DATA = [
             "see",
             "face",
             "meet",
-            "hit"
+            "miss"
         ],
         "question": "All employees worked overtime this week to _______ the deadline for the project proposal.",
         "answer": "meet",
@@ -68,7 +68,7 @@ const COLLOCATION_DATA = [
                     "see",
                     "face",
                     "meet",
-                    "hit"
+                    "miss"
                 ],
                 "answer": "meet",
                 "translation": "모든 직원들은 프로젝트 제안서의 마감일을 맞추기 위해 이번 주에 초과 근무를 했다."
@@ -104,8 +104,8 @@ const COLLOCATION_DATA = [
         "options": [
             "arrive",
             "reach",
-            "get",
-            "touch"
+            "reject",
+            "repair"
         ],
         "question": "After hours of negotiation, the two companies finally were able to _______ an agreement on the merger terms.",
         "answer": "reach",
@@ -116,8 +116,8 @@ const COLLOCATION_DATA = [
                 "options": [
                     "arrive",
                     "reach",
-                    "get",
-                    "touch"
+                    "reject",
+                    "repair"
                 ],
                 "answer": "reach",
                 "translation": "몇 시간의 협상 끝에, 두 회사는 마침내 합병 조건에 대한 합의에 도달할 수 있었다."
@@ -174,10 +174,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The customer service representative will _______ the issue with the incorrect billing statement right away.",
                 "options": [
-                    "resolve",
                     "address",
-                    "ignore",
-                    "discuss"
+                    "postpone",
+                    "approve",
+                    "ignore"
                 ],
                 "answer": "address",
                 "translation": "고객 서비스 담당자는 잘못된 청구서 문제를 즉시 해결할 것이다."
@@ -272,10 +272,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Subscribers are advised to _______ their subscription online to continue receiving monthly newsletters without disruption.",
                 "options": [
-                    "update",
                     "renew",
                     "cancel",
-                    "extend"
+                    "remove",
+                    "refund"
                 ],
                 "answer": "renew",
                 "translation": "구독자들은 중단 없이 월간 뉴스레터를 계속 받기 위해 온라인으로 구독을 갱신하는 것이 좋다."
@@ -321,10 +321,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Innovation and technology _______ a significant role in driving economic growth for many countries.",
                 "options": [
-                    "perform",
                     "play",
-                    "assume",
-                    "create"
+                    "pay",
+                    "plan",
+                    "place"
                 ],
                 "answer": "play",
                 "translation": "혁신과 기술은 많은 국가들의 경제 성장을 이끄는 데 중요한 역할을 한다."
@@ -370,10 +370,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The hotel chain plans to add more rooms to _______ the growing demand from international tourists.",
                 "options": [
-                    "meet",
                     "accommodate",
-                    "increase",
-                    "reduce"
+                    "accumulate",
+                    "abandon",
+                    "amplify"
                 ],
                 "answer": "accommodate",
                 "translation": "호텔 체인은 국제 관광객들의 증가하는 수요를 맞추기 위해 더 많은 객실을 추가할 계획이다."
@@ -419,10 +419,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The project manager expects the team to _______ a challenge with supply chain disruptions this quarter.",
                 "options": [
-                    "encounter",
                     "face",
-                    "avoid",
-                    "solve"
+                    "file",
+                    "fill",
+                    "frame"
                 ],
                 "answer": "face",
                 "translation": "프로젝트 관리자는 이번 분기에 공급망 중단으로 인해 팀이 도전에 직면할 것으로 예상한다."
@@ -468,10 +468,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The new product launch _______ expectations, leading to record-breaking sales in the first month.",
                 "options": [
-                    "surpassed",
                     "exceeded",
-                    "met",
-                    "fell"
+                    "excluded",
+                    "expanded",
+                    "extended"
                 ],
                 "answer": "exceeded",
                 "translation": "신제품 출시가 기대를 뛰어넘어 첫 달에 기록적인 매출을 이끌었다."
@@ -517,10 +517,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "This training program is _______ recommended for employees seeking career advancement opportunities.",
                 "options": [
-                    "strongly",
                     "highly",
-                    "barely",
-                    "slightly"
+                    "heavily",
+                    "hugely",
+                    "harshly"
                 ],
                 "answer": "highly",
                 "translation": "이 교육 프로그램은 경력 발전 기회를 추구하는 직원들에게 강력히 추천된다."
@@ -566,9 +566,9 @@ const COLLOCATION_DATA = [
             {
                 "question": "The office building is _______ located near major highways, making it easy for commuters.",
                 "options": [
-                    "ideally",
                     "conveniently",
-                    "remotely",
+                    "confidentially",
+                    "constantly",
                     "awkwardly"
                 ],
                 "answer": "conveniently",
@@ -613,12 +613,12 @@ const COLLOCATION_DATA = [
                 "translation": "겨울 의류는 봄맞이 재고 정리 세일 기간 동안 종종 대폭 할인된다."
             },
             {
-                "question": "Electronics are _______ discounted during the annual Black Friday promotions to attract shoppers.",
+                "question": "Electronics are _______ discounted—often by more than 50%—during the annual Black Friday promotions to attract shoppers.",
                 "options": [
-                    "deeply",
                     "heavily",
-                    "lightly",
-                    "minimally"
+                    "briefly",
+                    "politely",
+                    "randomly"
                 ],
                 "answer": "heavily",
                 "translation": "전자제품들은 쇼핑객들을 유치하기 위해 연례 블랙 프라이데이 프로모션 기간 동안 대폭 할인된다."
@@ -664,10 +664,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Smoking is _______ prohibited in all areas of the hospital to ensure patient safety.",
                 "options": [
-                    "absolutely",
                     "strictly",
-                    "loosely",
-                    "optionally"
+                    "straightly",
+                    "softly",
+                    "shortly"
                 ],
                 "answer": "strictly",
                 "translation": "환자 안전을 보장하기 위해 병원 모든 구역에서 흡연이 엄격히 금지된다."
@@ -713,8 +713,8 @@ const COLLOCATION_DATA = [
             {
                 "question": "The trade agreement is designed to be _______ beneficial for both exporting and importing countries.",
                 "options": [
-                    "equally",
                     "mutually",
+                    "merely",
                     "singly",
                     "partially"
                 ],
@@ -762,10 +762,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Managers are expected to _______ respond to employee concerns to maintain a positive work environment.",
                 "options": [
-                    "quickly",
                     "promptly",
-                    "slowly",
-                    "eventually"
+                    "previously",
+                    "primarily",
+                    "publicly"
                 ],
                 "answer": "promptly",
                 "translation": "관리자들은 긍정적인 작업 환경을 유지하기 위해 직원들의 우려에 즉시 응답할 것으로 기대된다."
@@ -860,10 +860,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The conference room is _______ unavailable because of ongoing maintenance work.",
                 "options": [
-                    "temporarily",
                     "currently",
-                    "permanently",
-                    "always"
+                    "commonly",
+                    "clearly",
+                    "closely"
                 ],
                 "answer": "currently",
                 "translation": "회의실은 진행 중인 유지보수 작업으로 인해 현재 이용 불가하다."
@@ -909,10 +909,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The apartments in this neighborhood are _______ priced, attracting many first-time buyers.",
                 "options": [
-                    "affordably",
                     "reasonably",
-                    "expensively",
-                    "overly"
+                    "rapidly",
+                    "rigidly",
+                    "rarely"
                 ],
                 "answer": "reasonably",
                 "translation": "이 동네의 아파트들은 합리적인 가격으로 책정되어 많은 첫 구매자들을 끌어들인다."
@@ -958,10 +958,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Quality control staff should _______ inspect each product before it leaves the assembly line.",
                 "options": [
-                    "carefully",
                     "thoroughly",
-                    "quickly",
-                    "superficially"
+                    "thoughtfully",
+                    "through",
+                    "loosely"
                 ],
                 "answer": "thoroughly",
                 "translation": "품질 관리 직원들은 각 제품이 조립 라인을 떠나기 전에 철저하게 검사해야 한다."
@@ -1399,10 +1399,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Please _______ over the report and let me know if there are any errors.",
                 "options": [
-                    "review",
                     "go",
-                    "check",
-                    "come"
+                    "come",
+                    "make",
+                    "put"
                 ],
                 "answer": "go",
                 "translation": "보고서를 검토하고 오류가 있으면 알려주세요."
@@ -1448,10 +1448,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "To save costs, the firm plans to cut _______ on unnecessary office supplies.",
                 "options": [
-                    "down",
                     "back",
                     "out",
-                    "off"
+                    "off",
+                    "up"
                 ],
                 "answer": "back",
                 "translation": "비용을 절감하기 위해 회사는 불필요한 사무용품을 줄일 계획이다."
@@ -1546,10 +1546,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Many industries _______ on imported raw materials for production.",
                 "options": [
-                    "depend",
                     "rely",
-                    "trust",
-                    "reply"
+                    "reply",
+                    "relay",
+                    "release"
                 ],
                 "answer": "rely",
                 "translation": "많은 산업들이 생산을 위해 수입 원자재에 의존한다."
@@ -1595,9 +1595,9 @@ const COLLOCATION_DATA = [
             {
                 "question": "Students can _______ in online courses to improve their skills.",
                 "options": [
-                    "register",
                     "enroll",
-                    "join",
+                    "entail",
+                    "ensure",
                     "enter"
                 ],
                 "answer": "enroll",
@@ -1671,7 +1671,7 @@ const COLLOCATION_DATA = [
         "meaning": "화제를 꺼내다",
         "options": [
             "bring",
-            "take",
+            "break",
             "come",
             "make"
         ],
@@ -1683,7 +1683,7 @@ const COLLOCATION_DATA = [
                 "question": "He decided to _______ up the issue of salary negotiation during the meeting.",
                 "options": [
                     "bring",
-                    "take",
+                    "break",
                     "come",
                     "make"
                 ],
@@ -1691,12 +1691,12 @@ const COLLOCATION_DATA = [
                 "translation": "그는 회의 중에 연봉 협상 문제를 꺼내기로 결정했다."
             },
             {
-                "question": "During the interview, he chose to _______ up his previous experience in sales.",
+                "question": "During the interview, he chose to _______ up the topic of his previous experience in sales.",
                 "options": [
-                    "mention",
                     "bring",
-                    "raise",
-                    "take"
+                    "break",
+                    "build",
+                    "bear"
                 ],
                 "answer": "bring",
                 "translation": "면접 중에 그는 이전 영업 경험을 꺼내기로 했다."
@@ -1742,10 +1742,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Who is in _______ of managing the budget for this department?",
                 "options": [
-                    "control",
                     "charge",
-                    "command",
-                    "check"
+                    "change",
+                    "check",
+                    "case"
                 ],
                 "answer": "charge",
                 "translation": "이 부서의 예산 관리를 담당하는 사람은 누구인가?"
@@ -1819,8 +1819,8 @@ const COLLOCATION_DATA = [
         "options": [
             "prior",
             "primary",
-            "previous",
-            "present"
+            "present",
+            "probable"
         ],
         "question": "Passengers should arrive at the airport at least two hours _______ to departure.",
         "answer": "prior",
@@ -1831,8 +1831,8 @@ const COLLOCATION_DATA = [
                 "options": [
                     "prior",
                     "primary",
-                    "previous",
-                    "present"
+                    "present",
+                    "probable"
                 ],
                 "answer": "prior",
                 "translation": "승객들은 출발 최소 2시간 전에 공항에 도착해야 한다."
@@ -1840,10 +1840,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "Please submit your resume _______ to the interview date.",
                 "options": [
-                    "before",
                     "prior",
-                    "previous",
-                    "primary"
+                    "primary",
+                    "present",
+                    "public"
                 ],
                 "answer": "prior",
                 "translation": "면접 날짜 이전에 이력서를 제출해 주세요."
@@ -1852,9 +1852,9 @@ const COLLOCATION_DATA = [
                 "question": "All attendees must register online _______ to entering the exhibition hall.",
                 "options": [
                     "prior",
-                    "present",
                     "primary",
-                    "previous"
+                    "present",
+                    "personal"
                 ],
                 "answer": "prior",
                 "translation": "모든 참석자는 전시장에 들어가기 전에 온라인으로 등록해야 한다."
@@ -1887,14 +1887,14 @@ const COLLOCATION_DATA = [
                 "translation": "일정은 기상 조건에 따라 변경될 수 있습니다."
             },
             {
-                "question": "Prices are _______ to change without prior notice.",
+                "question": "Prices are subject _______ change without prior notice.",
                 "options": [
-                    "liable",
-                    "subject",
-                    "prone",
-                    "object"
+                    "to",
+                    "for",
+                    "with",
+                    "on"
                 ],
-                "answer": "subject",
+                "answer": "to",
                 "translation": "가격은 사전 통보 없이 변경될 수 있습니다."
             },
             {
@@ -1987,10 +1987,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The report must be prepared in _______ with the guidelines provided by the regulatory authority.",
                 "options": [
-                    "agreement",
                     "accordance",
-                    "line",
-                    "compliance"
+                    "account",
+                    "access",
+                    "accord"
                 ],
                 "answer": "accordance",
                 "translation": "보고서는 규제 기관이 제공한 지침에 따라서 준비되어야 한다."
@@ -2034,12 +2034,12 @@ const COLLOCATION_DATA = [
                 "translation": "메인 로비에 있는 엘리베이터는 현재 고장 난 상태이며 정오까지 수리될 예정이다."
             },
             {
-                "question": "The vending machine is out of _______ , so please use the one on the next floor.",
+                "question": "The vending machine is out of _______ due to a mechanical problem, so please use the one on the next floor.",
                 "options": [
-                    "service",
                     "order",
-                    "stock",
-                    "place"
+                    "place",
+                    "line",
+                    "date"
                 ],
                 "answer": "order",
                 "translation": "자판기가 고장 나서, 다음 층에 있는 것을 이용해 주세요."
@@ -2379,10 +2379,10 @@ const COLLOCATION_DATA = [
             {
                 "question": "The new highway is under _______ , causing temporary road closures.",
                 "options": [
-                    "repair",
                     "construction",
-                    "development",
-                    "building"
+                    "connection",
+                    "contraction",
+                    "contribution"
                 ],
                 "answer": "construction",
                 "translation": "새 고속도로가 공사 중이어서 일시적인 도로 폐쇄가 발생하고 있다."
@@ -2704,12 +2704,12 @@ const COLLOCATION_DATA = [
             "calculate",
             "stand"
         ],
-        "question": "You can always _______ on our fast delivery service to arrive on time.",
+        "question": "You can always _______ on our fast delivery service to deliver on time.",
         "answer": "count",
         "translation": "당사는 항상 제시간에 도착하는 빠른 배송 서비스를 믿으셔도 좋습니다.",
         "quizzes": [
             {
-                "question": "You can always _______ on our fast delivery service to arrive on time.",
+                "question": "You can always _______ on our fast delivery service to deliver on time.",
                 "options": [
                     "count",
                     "account",
@@ -2847,9 +2847,9 @@ const COLLOCATION_DATA = [
         "meaning": "알아내다, 이해하다",
         "options": [
             "figure",
-            "find",
-            "fill",
-            "point"
+            "hand",
+            "take",
+            "break"
         ],
         "question": "The technician is trying to _______ out what caused the unexpected system failure.",
         "answer": "figure",
@@ -2859,9 +2859,9 @@ const COLLOCATION_DATA = [
                 "question": "The technician is trying to _______ out what caused the unexpected system failure.",
                 "options": [
                     "figure",
-                    "find",
-                    "fill",
-                    "point"
+                    "hand",
+                    "take",
+                    "break"
                 ],
                 "answer": "figure",
                 "translation": "기술자는 예상치 못한 시스템 장애의 원인이 무엇인지 알아내려고 노력 중이다."
@@ -2881,9 +2881,9 @@ const COLLOCATION_DATA = [
                 "question": "We need to _______ out why the shipment was delayed before contacting the customer.",
                 "options": [
                     "figure",
-                    "find",
-                    "fill",
-                    "point"
+                    "hand",
+                    "take",
+                    "break"
                 ],
                 "answer": "figure",
                 "translation": "고객에게 연락하기 전에 배송이 지연된 이유를 알아내야 한다."
@@ -3270,7 +3270,7 @@ const COLLOCATION_DATA = [
                 "translation": "컨퍼런스 후 영업 담당자가 제안서 건을 후속 조치할 것입니다."
             },
             {
-                "question": "Please follow _______ on the ticket number if you do not receive a response within two business days.",
+                "question": "Please follow _______ on your support ticket if you do not receive a response within two business days.",
                 "options": [
                     "up",
                     "out",
@@ -3760,12 +3760,12 @@ const COLLOCATION_DATA = [
                 "translation": "관리자는 개인적 선호를 제쳐두고 데이터에 집중하라고 했다."
             },
             {
-                "question": "We have set _______ a table near the window for your party of six.",
+                "question": "We have set _______ a table near the window and marked it “Reserved” for your party of six.",
                 "options": [
                     "aside",
                     "off",
-                    "out",
-                    "over"
+                    "over",
+                    "across"
                 ],
                 "answer": "aside",
                 "translation": "6인 손님을 위해 창가 자리를 따로 마련해 두었습니다."
