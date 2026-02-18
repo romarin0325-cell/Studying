@@ -1504,6 +1504,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "dispose",
                 "translation": "직원들은 사용 후 기밀 문서를 적절히 처분해야 한다."
+            },
+            {
+                "question": "Please _______ of the used batteries in the recycling bin near the reception desk.",
+                "options": [
+                    "dispose",
+                    "display",
+                    "dissolve",
+                    "distribute"
+                ],
+                "answer": "dispose",
+                "translation": "사용한 배터리는 안내 데스크 근처 재활용함에 버려 주세요."
             }
         ]
     },
@@ -1542,6 +1553,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "rely",
                 "translation": "많은 산업들이 생산을 위해 수입 원자재에 의존한다."
+            },
+            {
+                "question": "During peak season, the warehouse must _______ on temporary workers to handle additional shipments.",
+                "options": [
+                    "rely",
+                    "relay",
+                    "release",
+                    "revise"
+                ],
+                "answer": "rely",
+                "translation": "성수기 동안 창고는 추가 물량을 처리하기 위해 임시 인력에 의존해야 한다."
             }
         ]
     },
@@ -1580,6 +1602,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "enroll",
                 "translation": "학생들은 기술 향상을 위해 온라인 코스에 등록할 수 있다."
+            },
+            {
+                "question": "New hires are encouraged to _______ in the orientation program to learn company policies.",
+                "options": [
+                    "enroll",
+                    "entail",
+                    "enlist",
+                    "enter"
+                ],
+                "answer": "enroll",
+                "translation": "신입사원은 회사 규정을 배우기 위해 오리엔테이션 프로그램에 등록하는 것이 권장된다."
             }
         ]
     },
@@ -1618,6 +1651,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "deal",
                 "translation": "지원 팀은 기술 문제를 효율적으로 처리할 수 있도록 갖춰져 있다."
+            },
+            {
+                "question": "Please contact the help desk if you cannot _______ with the login problem on your own.",
+                "options": [
+                    "deal",
+                    "draw",
+                    "dwell",
+                    "dial"
+                ],
+                "answer": "deal",
+                "translation": "로그인 문제를 스스로 해결할 수 없다면 헬프데스크에 문의해 주세요."
             }
         ]
     },
@@ -1656,6 +1700,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "bring",
                 "translation": "면접 중에 그는 이전 영업 경험을 꺼내기로 했다."
+            },
+            {
+                "question": "If you have concerns about scheduling, feel free to _______ up the topic at tomorrow’s meeting.",
+                "options": [
+                    "bring",
+                    "break",
+                    "build",
+                    "bear"
+                ],
+                "answer": "bring",
+                "translation": "일정에 대한 우려가 있으면 내일 회의에서 그 주제를 꺼내도 됩니다."
             }
         ]
     },
@@ -1694,6 +1749,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "charge",
                 "translation": "이 부서의 예산 관리를 담당하는 사람은 누구인가?"
+            },
+            {
+                "question": "Mr. Santos is in _______ of coordinating all overseas shipments for the division.",
+                "options": [
+                    "charge",
+                    "case",
+                    "check",
+                    "change"
+                ],
+                "answer": "charge",
+                "translation": "Santos 씨는 해당 부서의 모든 해외 배송 조정을 담당하고 있다."
             }
         ]
     },
@@ -1732,6 +1798,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "regardless",
                 "translation": "그 정책은 직급에 상관없이 모든 직원에게 적용된다."
+            },
+            {
+                "question": "Payment is required in advance, _______ of the delivery method you choose.",
+                "options": [
+                    "regardless",
+                    "regarding",
+                    "regard",
+                    "regards"
+                ],
+                "answer": "regardless",
+                "translation": "선택한 배송 방식과 상관없이 선결제가 필요합니다."
             }
         ]
     },
@@ -1770,6 +1847,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "prior",
                 "translation": "면접 날짜 이전에 이력서를 제출해 주세요."
+            },
+            {
+                "question": "All attendees must register online _______ to entering the exhibition hall.",
+                "options": [
+                    "prior",
+                    "present",
+                    "primary",
+                    "previous"
+                ],
+                "answer": "prior",
+                "translation": "모든 참석자는 전시장에 들어가기 전에 온라인으로 등록해야 한다."
             }
         ]
     },
@@ -1808,6 +1896,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "subject",
                 "translation": "가격은 사전 통보 없이 변경될 수 있습니다."
+            },
+            {
+                "question": "All promotional offers are _______ to approval by the regional manager.",
+                "options": [
+                    "subject",
+                    "object",
+                    "inject",
+                    "project"
+                ],
+                "answer": "subject",
+                "translation": "모든 프로모션 제안은 지역 관리자 승인 대상이다(승인에 따라 달라질 수 있다)."
             }
         ]
     },
@@ -1846,6 +1945,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "behalf",
                 "translation": "변호사는 법정에서 피고를 대표하여 발언했다."
+            },
+            {
+                "question": "I am writing on _______ of our purchasing department to request a revised invoice.",
+                "options": [
+                    "behalf",
+                    "belief",
+                    "behind",
+                    "behave"
+                ],
+                "answer": "behalf",
+                "translation": "수정된 청구서를 요청하기 위해 구매 부서를 대표하여 연락드립니다."
             }
         ]
     },
@@ -1884,6 +1994,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "accordance",
                 "translation": "보고서는 규제 기관이 제공한 지침에 따라서 준비되어야 한다."
+            },
+            {
+                "question": "Refunds will be issued in _______ with the terms stated on the receipt.",
+                "options": [
+                    "accordance",
+                    "access",
+                    "account",
+                    "accord"
+                ],
+                "answer": "accordance",
+                "translation": "환불은 영수증에 명시된 조건에 따라 처리됩니다."
             }
         ]
     },
@@ -1922,6 +2043,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "order",
                 "translation": "자판기가 고장 나서, 다음 층에 있는 것을 이용해 주세요."
+            },
+            {
+                "question": "The printer on the third floor is out of _______ , so please use the one in the lobby.",
+                "options": [
+                    "order",
+                    "stock",
+                    "duty",
+                    "place"
+                ],
+                "answer": "order",
+                "translation": "3층 프린터가 고장 났으니 로비에 있는 것을 사용해 주세요."
             }
         ]
     },
@@ -1960,6 +2092,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "request",
                 "translation": "추가 교육 자료는 인사 부서에 요청 시 제공됩니다."
+            },
+            {
+                "question": "A detailed breakdown of charges can be provided upon _______.",
+                "options": [
+                    "request",
+                    "demand",
+                    "question",
+                    "require"
+                ],
+                "answer": "request",
+                "translation": "비용 상세 내역은 요청 시 제공될 수 있습니다."
             }
         ]
     },
@@ -1998,6 +2141,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "writing",
                 "translation": "계약 변경 사항은 법적 구속력을 가지기 위해 서면으로 확인되어야 한다."
+            },
+            {
+                "question": "Please confirm the change of address in _______ to prevent delivery errors.",
+                "options": [
+                    "writing",
+                    "written",
+                    "writer",
+                    "write"
+                ],
+                "answer": "writing",
+                "translation": "배송 오류를 방지하기 위해 주소 변경을 서면으로 확인해 주세요."
             }
         ]
     },
@@ -2036,6 +2190,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "times",
                 "translation": "건설 현장에서는 항상 안전 헬멧을 착용해야 한다."
+            },
+            {
+                "question": "Visitors must be accompanied by an employee at all _______ while in the restricted area.",
+                "options": [
+                    "times",
+                    "hours",
+                    "days",
+                    "periods"
+                ],
+                "answer": "times",
+                "translation": "제한 구역에서는 방문객이 항상 직원의 동행을 받아야 한다."
             }
         ]
     },
@@ -2074,6 +2239,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "terms",
                 "translation": "새 정책은 비용 절감과 효율성 면에서 유익하다."
+            },
+            {
+                "question": "In _______ of customer satisfaction, the updated support system has shown significant improvement.",
+                "options": [
+                    "terms",
+                    "teams",
+                    "turns",
+                    "times"
+                ],
+                "answer": "terms",
+                "translation": "고객 만족도 면에서 업데이트된 지원 시스템은 큰 개선을 보였다."
             }
         ]
     },
@@ -2112,6 +2288,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "take",
                 "translation": "직원들은 더 나은 건강을 위해 회사의 웰니스 프로그램을 이용해야 한다."
+            },
+            {
+                "question": "Please _______ advantage of the early-bird rate by registering before Friday.",
+                "options": [
+                    "take",
+                    "make",
+                    "get",
+                    "have"
+                ],
+                "answer": "take",
+                "translation": "금요일 전에 등록하여 얼리버드 요금 혜택을 이용해 주세요."
             }
         ]
     },
@@ -2150,6 +2337,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "keep",
                 "translation": "그 소프트웨어는 관리자들이 직원 성과 지표를 파악하는 데 도움이 된다."
+            },
+            {
+                "question": "The accounting team uses a spreadsheet to _______ track of monthly expenses.",
+                "options": [
+                    "keep",
+                    "stay",
+                    "hold",
+                    "put"
+                ],
+                "answer": "keep",
+                "translation": "회계팀은 월별 지출을 파악하기 위해 스프레드시트를 사용한다."
             }
         ]
     },
@@ -2188,6 +2386,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "construction",
                 "translation": "새 고속도로가 공사 중이어서 일시적인 도로 폐쇄가 발생하고 있다."
+            },
+            {
+                "question": "The main entrance is under _______, so please use the side door until further notice.",
+                "options": [
+                    "construction",
+                    "contribution",
+                    "contraction",
+                    "connection"
+                ],
+                "answer": "construction",
+                "translation": "정문이 공사 중이니 추후 공지까지 옆문을 이용해 주세요."
             }
         ]
     },
@@ -2226,6 +2435,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "exception",
                 "translation": "마케팅 팀을 제외하고 모든 부서가 목표를 달성했다."
+            },
+            {
+                "question": "The cafeteria is open daily with the _______ of Sundays.",
+                "options": [
+                    "exception",
+                    "reception",
+                    "inception",
+                    "expectation"
+                ],
+                "answer": "exception",
+                "translation": "구내식당은 일요일을 제외하고 매일 운영된다."
             }
         ]
     },
@@ -2264,6 +2484,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "abide",
                 "translation": "계약자들은 벌금을 피하기 위해 계약 조건을 준수해야 한다."
+            },
+            {
+                "question": "All staff members must _______ by the confidentiality agreement they signed.",
+                "options": [
+                    "abide",
+                    "avoid",
+                    "achieve",
+                    "acquire"
+                ],
+                "answer": "abide",
+                "translation": "모든 직원은 서명한 기밀 유지 계약을 준수해야 한다."
             }
         ]
     },
@@ -2302,6 +2533,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "accede",
                 "translation": "관리자는 마감일 연장 요청에 응하지 않을 것이다."
+            },
+            {
+                "question": "The supplier refused to _______ to the buyer’s request for a 20% discount.",
+                "options": [
+                    "accede",
+                    "access",
+                    "accept",
+                    "exceed"
+                ],
+                "answer": "accede",
+                "translation": "공급업체는 20% 할인 요청에 응하기를 거절했다."
             }
         ]
     },
@@ -2340,6 +2582,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "allow",
                 "translation": "제안된 예산은 원자재 비용의 잠재적 증가를 감안해야 한다."
+            },
+            {
+                "question": "Please _______ for extra shipping time during the national holidays.",
+                "options": [
+                    "allow",
+                    "approve",
+                    "admit",
+                    "apply"
+                ],
+                "answer": "allow",
+                "translation": "국경일 연휴 기간에는 추가 배송 시간을 고려해 주세요."
             }
         ]
     },
@@ -2378,6 +2631,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "come",
                 "translation": "우리는 위원회가 현재 문제에 대한 혁신적인 해결책을 생각해 내기를 바란다."
+            },
+            {
+                "question": "The team was asked to _______ up with ways to improve attendance at the quarterly meeting.",
+                "options": [
+                    "come",
+                    "put",
+                    "keep",
+                    "catch"
+                ],
+                "answer": "come",
+                "translation": "팀은 분기 회의 참석률을 높일 방법을 생각해 내라는 요청을 받았다."
             }
         ]
     },
@@ -2416,6 +2680,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "cope",
                 "translation": "직원들은 어려운 상황에 전문적으로 대처하도록 훈련받는다."
+            },
+            {
+                "question": "The department introduced flexible shifts to _______ with frequent staff shortages.",
+                "options": [
+                    "cope",
+                    "count",
+                    "cover",
+                    "care"
+                ],
+                "answer": "cope",
+                "translation": "해당 부서는 잦은 인력 부족에 대처하기 위해 유연 근무제를 도입했다."
             }
         ]
     },
@@ -2454,6 +2729,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "count",
                 "translation": "그 자선 단체는 올해 지역 기업들의 기부에 의지할 것이다."
+            },
+            {
+                "question": "You can _______ on Ms. Park to finalize the report before the client meeting.",
+                "options": [
+                    "count",
+                    "calculate",
+                    "account",
+                    "stand"
+                ],
+                "answer": "count",
+                "translation": "고객 미팅 전 보고서를 마무리하는 일은 Park 씨를 믿어도 된다."
             }
         ]
     },
@@ -2492,6 +2778,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "do",
                 "translation": "경영진은 현재의 종이 기반 문서 보관 시스템을 없애기로 결정했다."
+            },
+            {
+                "question": "The company will _______ away with manual time sheets once the new system is installed.",
+                "options": [
+                    "do",
+                    "make",
+                    "take",
+                    "put"
+                ],
+                "answer": "do",
+                "translation": "새 시스템이 설치되면 회사는 수기 근태 기록표를 폐지할 것이다."
             }
         ]
     },
@@ -2530,6 +2827,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "draw",
                 "translation": "건축가는 새 사무실 건물의 청사진을 작성해 달라는 요청을 받았다."
+            },
+            {
+                "question": "The consultant was hired to _______ up a detailed action plan for the restructuring.",
+                "options": [
+                    "draw",
+                    "drop",
+                    "drag",
+                    "drive"
+                ],
+                "answer": "draw",
+                "translation": "컨설턴트는 구조조정을 위한 상세 실행 계획을 작성하기 위해 고용되었다."
             }
         ]
     },
@@ -2568,6 +2876,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "figure",
                 "translation": "팀이 새로운 제조 기계를 작동하는 방법을 알아내는 데 몇 시간이 걸렸다."
+            },
+            {
+                "question": "We need to _______ out why the shipment was delayed before contacting the customer.",
+                "options": [
+                    "figure",
+                    "find",
+                    "fill",
+                    "point"
+                ],
+                "answer": "figure",
+                "translation": "고객에게 연락하기 전에 배송이 지연된 이유를 알아내야 한다."
             }
         ]
     },
@@ -2606,6 +2925,17 @@ const COLLOCATION_DATA = [
                 ],
                 "answer": "give",
                 "translation": "우리는 경쟁자들의 불합리한 압력에 굴복해서는 안 된다."
+            },
+            {
+                "question": "The negotiators refused to _______ in to pressure and continued discussions until midnight.",
+                "options": [
+                    "give",
+                    "get",
+                    "put",
+                    "take"
+                ],
+                "answer": "give",
+                "translation": "협상가들은 압력에 굴복하지 않고 자정까지 논의를 계속했다."
             }
         ]
     }
