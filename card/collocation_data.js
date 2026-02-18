@@ -2938,5 +2938,495 @@ const COLLOCATION_DATA = [
                 "translation": "협상가들은 압력에 굴복하지 않고 자정까지 논의를 계속했다."
             }
         ]
+    },
+    {
+        "id": 61,
+        "expression": "make a reservation",
+        "meaning": "예약하다",
+        "options": [
+            "make",
+            "do",
+            "take",
+            "hold"
+        ],
+        "question": "I’d like to _______ a reservation for a double room for April 12 and 13.",
+        "answer": "make",
+        "translation": "4월 12일과 13일에 더블룸을 예약하고 싶습니다.",
+        "quizzes": [
+            {
+                "question": "I’d like to _______ a reservation for a double room for April 12 and 13.",
+                "options": [
+                    "make",
+                    "do",
+                    "take",
+                    "hold"
+                ],
+                "answer": "make",
+                "translation": "4월 12일과 13일에 더블룸을 예약하고 싶습니다."
+            },
+            {
+                "question": "Because the restaurant is often fully booked, customers should _______ a reservation at least one day in advance.",
+                "options": [
+                    "make",
+                    "cancel",
+                    "postpone",
+                    "refuse"
+                ],
+                "answer": "make",
+                "translation": "그 식당은 자주 만석이므로 고객들은 최소 하루 전에 예약을 해야 한다."
+            },
+            {
+                "question": "Our receptionist can _______ a reservation for airport pickup upon request.",
+                "options": [
+                    "make",
+                    "reach",
+                    "exceed",
+                    "account"
+                ],
+                "answer": "make",
+                "translation": "요청 시, 안내 직원이 공항 픽업 예약을 잡아 드릴 수 있습니다."
+            }
+        ]
+    },
+    {
+        "id": 62,
+        "expression": "place an order",
+        "meaning": "주문하다",
+        "options": [
+            "place",
+            "meet",
+            "reach",
+            "file"
+        ],
+        "question": "Customers can _______ an order online and receive an email confirmation within minutes.",
+        "answer": "place",
+        "translation": "고객들은 온라인으로 주문하고 몇 분 내로 이메일 확인을 받을 수 있다.",
+        "quizzes": [
+            {
+                "question": "Customers can _______ an order online and receive an email confirmation within minutes.",
+                "options": [
+                    "place",
+                    "meet",
+                    "reach",
+                    "file"
+                ],
+                "answer": "place",
+                "translation": "고객들은 온라인으로 주문하고 몇 분 내로 이메일 확인을 받을 수 있다."
+            },
+            {
+                "question": "To _______ an order by phone, call our sales office during business hours.",
+                "options": [
+                    "place",
+                    "deliver",
+                    "renew",
+                    "address"
+                ],
+                "answer": "place",
+                "translation": "전화로 주문하려면 영업시간 중에 영업 사무실로 전화해 주세요."
+            },
+            {
+                "question": "Retailers must _______ an order by the 20th to guarantee delivery before the holiday.",
+                "options": [
+                    "place",
+                    "play",
+                    "dispose",
+                    "cope"
+                ],
+                "answer": "place",
+                "translation": "소매업체는 연휴 전 배송을 보장받기 위해 20일까지 주문해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 63,
+        "expression": "file a complaint",
+        "meaning": "불만을 제기하다",
+        "options": [
+            "file",
+            "fill",
+            "fold",
+            "fail"
+        ],
+        "question": "If you are dissatisfied with the service, you may _______ a complaint with the customer relations office.",
+        "answer": "file",
+        "translation": "서비스에 불만이 있다면 고객관리 부서에 불만을 제기할 수 있습니다.",
+        "quizzes": [
+            {
+                "question": "If you are dissatisfied with the service, you may _______ a complaint with the customer relations office.",
+                "options": [
+                    "file",
+                    "fill",
+                    "fold",
+                    "fail"
+                ],
+                "answer": "file",
+                "translation": "서비스에 불만이 있다면 고객관리 부서에 불만을 제기할 수 있습니다."
+            },
+            {
+                "question": "Residents can _______ a complaint online using the property management portal.",
+                "options": [
+                    "file",
+                    "fix",
+                    "finance",
+                    "form"
+                ],
+                "answer": "file",
+                "translation": "거주자는 부동산 관리 포털을 통해 온라인으로 불만을 접수할 수 있다."
+            },
+            {
+                "question": "Please _______ a complaint within seven days of receiving the invoice if you find any errors.",
+                "options": [
+                    "file",
+                    "place",
+                    "set",
+                    "account"
+                ],
+                "answer": "file",
+                "translation": "청구서를 받은 뒤 오류를 발견하면 7일 이내에 불만(이의)을 제기해 주세요."
+            }
+        ]
+    },
+    {
+        "id": 64,
+        "expression": "request a refund",
+        "meaning": "환불을 요청하다",
+        "options": [
+            "request",
+            "revise",
+            "remove",
+            "replace"
+        ],
+        "question": "Customers may _______ a refund if the product is returned with the original receipt.",
+        "answer": "request",
+        "translation": "영수증과 함께 반품하면 고객은 환불을 요청할 수 있다.",
+        "quizzes": [
+            {
+                "question": "Customers may _______ a refund if the product is returned with the original receipt.",
+                "options": [
+                    "request",
+                    "revise",
+                    "remove",
+                    "replace"
+                ],
+                "answer": "request",
+                "translation": "영수증과 함께 반품하면 고객은 환불을 요청할 수 있다."
+            },
+            {
+                "question": "Mr. Green decided to _______ a refund after his credit card was charged twice.",
+                "options": [
+                    "request",
+                    "renew",
+                    "reach",
+                    "review"
+                ],
+                "answer": "request",
+                "translation": "Green 씨는 카드가 이중 결제된 후 환불을 요청하기로 했다."
+            },
+            {
+                "question": "To _______ a refund, complete the form and submit it to the billing department.",
+                "options": [
+                    "request",
+                    "require",
+                    "reserve",
+                    "report"
+                ],
+                "answer": "request",
+                "translation": "환불을 요청하려면 양식을 작성해 결제 부서에 제출하세요."
+            }
+        ]
+    },
+    {
+        "id": 65,
+        "expression": "be eligible for",
+        "meaning": "자격이 있다",
+        "options": [
+            "eligible",
+            "familiar",
+            "helpful",
+            "typical"
+        ],
+        "question": "Employees are _______ for paid training after six months of service.",
+        "answer": "eligible",
+        "translation": "직원들은 6개월 근무 후 유급 교육 대상(자격)이 된다.",
+        "quizzes": [
+            {
+                "question": "Employees are _______ for paid training after six months of service.",
+                "options": [
+                    "eligible",
+                    "familiar",
+                    "helpful",
+                    "typical"
+                ],
+                "answer": "eligible",
+                "translation": "직원들은 6개월 근무 후 유급 교육 대상(자격)이 된다."
+            },
+            {
+                "question": "Part-time staff are not _______ for the annual bonus under the current policy.",
+                "options": [
+                    "eligible",
+                    "evident",
+                    "equal",
+                    "efficient"
+                ],
+                "answer": "eligible",
+                "translation": "현 정책에 따르면 파트타임 직원은 연간 보너스 대상이 아니다."
+            },
+            {
+                "question": "To be _______ for the discount, present your membership card at checkout.",
+                "options": [
+                    "eligible",
+                    "flexible",
+                    "accurate",
+                    "recent"
+                ],
+                "answer": "eligible",
+                "translation": "할인을 받으려면(할인 대상이 되려면) 결제 시 회원 카드를 제시하세요."
+            }
+        ]
+    },
+    {
+        "id": 66,
+        "expression": "be responsible for",
+        "meaning": "담당하다/책임지다",
+        "options": [
+            "responsible",
+            "responsive",
+            "respectful",
+            "reasonable"
+        ],
+        "question": "The logistics coordinator is _______ for arranging international deliveries.",
+        "answer": "responsible",
+        "translation": "물류 코디네이터는 국제 배송 준비를 담당한다.",
+        "quizzes": [
+            {
+                "question": "The logistics coordinator is _______ for arranging international deliveries.",
+                "options": [
+                    "responsible",
+                    "responsive",
+                    "respectful",
+                    "reasonable"
+                ],
+                "answer": "responsible",
+                "translation": "물류 코디네이터는 국제 배송 준비를 담당한다."
+            },
+            {
+                "question": "Who is _______ for preparing the agenda for tomorrow’s meeting?",
+                "options": [
+                    "responsible",
+                    "convenient",
+                    "available",
+                    "eligible"
+                ],
+                "answer": "responsible",
+                "translation": "내일 회의 안건 준비는 누가 담당하나요?"
+            },
+            {
+                "question": "Each department head will be _______ for meeting the quarterly targets.",
+                "options": [
+                    "responsible",
+                    "confident",
+                    "crowded",
+                    "careful"
+                ],
+                "answer": "responsible",
+                "translation": "각 부서장은 분기 목표 달성에 책임을 진다."
+            }
+        ]
+    },
+    {
+        "id": 67,
+        "expression": "follow up on",
+        "meaning": "후속 조치하다",
+        "options": [
+            "up",
+            "out",
+            "off",
+            "over"
+        ],
+        "question": "I am following _______ on your request for a revised quotation.",
+        "answer": "up",
+        "translation": "수정된 견적 요청 건에 대해 후속 연락드립니다.",
+        "quizzes": [
+            {
+                "question": "I am following _______ on your request for a revised quotation.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "수정된 견적 요청 건에 대해 후속 연락드립니다."
+            },
+            {
+                "question": "Our sales representative will follow _______ on the proposal after the conference.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "컨퍼런스 후 영업 담당자가 제안서 건을 후속 조치할 것입니다."
+            },
+            {
+                "question": "Please follow _______ on the ticket number if you do not receive a response within two business days.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "영업일 기준 2일 내 답변이 없으면 티켓 번호로 후속 확인해 주세요."
+            }
+        ]
+    },
+    {
+        "id": 68,
+        "expression": "set a budget",
+        "meaning": "예산을 세우다",
+        "options": [
+            "set",
+            "meet",
+            "reach",
+            "attend"
+        ],
+        "question": "The committee must _______ a budget before approving the event plan.",
+        "answer": "set",
+        "translation": "위원회는 행사 계획을 승인하기 전에 예산을 세워야 한다.",
+        "quizzes": [
+            {
+                "question": "The committee must _______ a budget before approving the event plan.",
+                "options": [
+                    "set",
+                    "meet",
+                    "reach",
+                    "attend"
+                ],
+                "answer": "set",
+                "translation": "위원회는 행사 계획을 승인하기 전에 예산을 세워야 한다."
+            },
+            {
+                "question": "Management has _______ a budget limit of $10,000 for the renovation.",
+                "options": [
+                    "set",
+                    "met",
+                    "reached",
+                    "attended"
+                ],
+                "answer": "set",
+                "translation": "경영진은 리모델링 예산 한도를 1만 달러로 정했다."
+            },
+            {
+                "question": "To control expenses, the department will _______ a budget for business travel this quarter.",
+                "options": [
+                    "set",
+                    "account",
+                    "conduct",
+                    "deliver"
+                ],
+                "answer": "set",
+                "translation": "비용 관리를 위해 부서는 이번 분기 출장 예산을 책정할 것이다."
+            }
+        ]
+    },
+    {
+        "id": 69,
+        "expression": "at your earliest convenience",
+        "meaning": "가능한 한 빠른 시일 내에/편하실 때",
+        "options": [
+            "convenience",
+            "preference",
+            "emergency",
+            "efficiency"
+        ],
+        "question": "Please respond at your earliest _______ so we can finalize the schedule.",
+        "answer": "convenience",
+        "translation": "일정 확정을 위해 가능한 한 빠른 시일 내에 회신 부탁드립니다.",
+        "quizzes": [
+            {
+                "question": "Please respond at your earliest _______ so we can finalize the schedule.",
+                "options": [
+                    "convenience",
+                    "preference",
+                    "emergency",
+                    "efficiency"
+                ],
+                "answer": "convenience",
+                "translation": "일정 확정을 위해 가능한 한 빠른 시일 내에 회신 부탁드립니다."
+            },
+            {
+                "question": "Kindly submit the signed form at your earliest _______.",
+                "options": [
+                    "convenience",
+                    "preference",
+                    "emergency",
+                    "efficiency"
+                ],
+                "answer": "convenience",
+                "translation": "서명된 양식을 가능하신 한 빠르게 제출해 주시기 바랍니다."
+            },
+            {
+                "question": "Contact the front desk at your earliest _______ if you need a late checkout.",
+                "options": [
+                    "convenience",
+                    "preference",
+                    "emergency",
+                    "efficiency"
+                ],
+                "answer": "convenience",
+                "translation": "레이트 체크아웃이 필요하시면 가능한 한 빠른 시일 내에 프런트로 연락해 주세요."
+            }
+        ]
+    },
+    {
+        "id": 70,
+        "expression": "as a result of",
+        "meaning": "~의 결과로",
+        "options": [
+            "result",
+            "request",
+            "response",
+            "resource"
+        ],
+        "question": "The store closed early as a _______ of the power outage.",
+        "answer": "result",
+        "translation": "정전의 결과로 매장이 조기 마감했다.",
+        "quizzes": [
+            {
+                "question": "The store closed early as a _______ of the power outage.",
+                "options": [
+                    "result",
+                    "request",
+                    "response",
+                    "resource"
+                ],
+                "answer": "result",
+                "translation": "정전의 결과로 매장이 조기 마감했다."
+            },
+            {
+                "question": "As a _______ of the policy change, employees must update their ID badges.",
+                "options": [
+                    "result",
+                    "request",
+                    "response",
+                    "resource"
+                ],
+                "answer": "result",
+                "translation": "정책 변경의 결과로 직원들은 출입증을 갱신해야 한다."
+            },
+            {
+                "question": "Several shipments were delayed as a _______ of the port strike.",
+                "options": [
+                    "result",
+                    "request",
+                    "response",
+                    "resource"
+                ],
+                "answer": "result",
+                "translation": "항만 파업의 결과로 여러 배송이 지연되었다."
+            }
+        ]
     }
 ];
