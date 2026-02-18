@@ -3428,5 +3428,495 @@ const COLLOCATION_DATA = [
                 "translation": "항만 파업의 결과로 여러 배송이 지연되었다."
             }
         ]
+    },
+    {
+        "id": 71,
+        "expression": "look into",
+        "meaning": "조사하다, 살펴보다",
+        "options": [
+            "into",
+            "up",
+            "out",
+            "over"
+        ],
+        "question": "The compliance officer will look _______ the cause of the data breach immediately.",
+        "answer": "into",
+        "translation": "준법감시 담당자는 데이터 유출 원인을 즉시 조사할 것이다.",
+        "quizzes": [
+            {
+                "question": "The compliance officer will look _______ the cause of the data breach immediately.",
+                "options": [
+                    "into",
+                    "up",
+                    "out",
+                    "over"
+                ],
+                "answer": "into",
+                "translation": "준법감시 담당자는 데이터 유출 원인을 즉시 조사할 것이다."
+            },
+            {
+                "question": "Could you look _______ the discrepancy in the invoice total before we approve payment?",
+                "options": [
+                    "into",
+                    "up",
+                    "off",
+                    "over"
+                ],
+                "answer": "into",
+                "translation": "결제를 승인하기 전에 청구서 총액의 불일치를 조사해 주시겠어요?"
+            },
+            {
+                "question": "The committee is looking _______ the applicants’ claims before making a final decision.",
+                "options": [
+                    "into",
+                    "after",
+                    "across",
+                    "out"
+                ],
+                "answer": "into",
+                "translation": "위원회는 최종 결정을 내리기 전에 지원자들의 주장(내용)을 조사하고 있다."
+            }
+        ]
+    },
+    {
+        "id": 72,
+        "expression": "carry out",
+        "meaning": "수행하다, 실시하다",
+        "options": [
+            "out",
+            "off",
+            "over",
+            "up"
+        ],
+        "question": "Technicians will carry _______ a safety check before the equipment is used.",
+        "answer": "out",
+        "translation": "기술자들은 장비 사용 전에 안전 점검을 실시할 것이다.",
+        "quizzes": [
+            {
+                "question": "Technicians will carry _______ a safety check before the equipment is used.",
+                "options": [
+                    "out",
+                    "off",
+                    "over",
+                    "up"
+                ],
+                "answer": "out",
+                "translation": "기술자들은 장비 사용 전에 안전 점검을 실시할 것이다."
+            },
+            {
+                "question": "The company plans to carry _______ the renovation in phases to minimize disruption.",
+                "options": [
+                    "out",
+                    "over",
+                    "off",
+                    "up"
+                ],
+                "answer": "out",
+                "translation": "회사는 운영 차질을 최소화하기 위해 리모델링을 단계적으로 수행할 계획이다."
+            },
+            {
+                "question": "All staff members are required to carry _______ the procedures exactly as described in the manual.",
+                "options": [
+                    "out",
+                    "away",
+                    "off",
+                    "over"
+                ],
+                "answer": "out",
+                "translation": "모든 직원은 매뉴얼에 설명된 절차를 정확히 수행해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 73,
+        "expression": "run out of",
+        "meaning": "바닥나다, 다 써버리다",
+        "options": [
+            "out",
+            "off",
+            "over",
+            "up"
+        ],
+        "question": "We ran _______ of printer paper during the audit, so printing was delayed.",
+        "answer": "out",
+        "translation": "감사 중에 프린터 용지가 떨어져서 인쇄가 지연되었다.",
+        "quizzes": [
+            {
+                "question": "We ran _______ of printer paper during the audit, so printing was delayed.",
+                "options": [
+                    "out",
+                    "off",
+                    "over",
+                    "up"
+                ],
+                "answer": "out",
+                "translation": "감사 중에 프린터 용지가 떨어져서 인쇄가 지연되었다."
+            },
+            {
+                "question": "The store may run out _______ the free samples by midday.",
+                "options": [
+                    "of",
+                    "for",
+                    "from",
+                    "with"
+                ],
+                "answer": "of",
+                "translation": "그 매장은 정오쯤 무료 샘플이 동날 수도 있다."
+            },
+            {
+                "question": "The speaker ran _______ of time and skipped the Q&A session.",
+                "options": [
+                    "out",
+                    "off",
+                    "away",
+                    "over"
+                ],
+                "answer": "out",
+                "translation": "발표자는 시간이 부족해 Q&A 세션을 건너뛰었다."
+            }
+        ]
+    },
+    {
+        "id": 74,
+        "expression": "take over",
+        "meaning": "인수하다, (업무를) 대신 맡다",
+        "options": [
+            "over",
+            "out",
+            "off",
+            "up"
+        ],
+        "question": "Ms. Chen will take _______ the project while the manager is on leave.",
+        "answer": "over",
+        "translation": "Chen 씨는 관리자가 휴가인 동안 프로젝트를 대신 맡을 것이다.",
+        "quizzes": [
+            {
+                "question": "Ms. Chen will take _______ the project while the manager is on leave.",
+                "options": [
+                    "over",
+                    "out",
+                    "off",
+                    "up"
+                ],
+                "answer": "over",
+                "translation": "Chen 씨는 관리자가 휴가인 동안 프로젝트를 대신 맡을 것이다."
+            },
+            {
+                "question": "The new supervisor took _______ the shift schedule and updated it for next month.",
+                "options": [
+                    "over",
+                    "off",
+                    "out",
+                    "up"
+                ],
+                "answer": "over",
+                "translation": "새 관리자는 교대 근무표를 인계받아 다음 달 일정으로 수정했다."
+            },
+            {
+                "question": "A larger company is expected to take _______ the startup later this year.",
+                "options": [
+                    "over",
+                    "after",
+                    "out",
+                    "up"
+                ],
+                "answer": "over",
+                "translation": "더 큰 기업이 올해 말 그 스타트업을 인수할 것으로 예상된다."
+            }
+        ]
+    },
+    {
+        "id": 75,
+        "expression": "bring about",
+        "meaning": "초래하다, 야기하다",
+        "options": [
+            "about",
+            "around",
+            "off",
+            "out"
+        ],
+        "question": "The redesigned workflow brought _______ a 15% reduction in processing time.",
+        "answer": "about",
+        "translation": "재설계된 업무 흐름은 처리 시간 15% 감소를 가져왔다(초래했다).",
+        "quizzes": [
+            {
+                "question": "The redesigned workflow brought _______ a 15% reduction in processing time.",
+                "options": [
+                    "about",
+                    "around",
+                    "off",
+                    "out"
+                ],
+                "answer": "about",
+                "translation": "재설계된 업무 흐름은 처리 시간 15% 감소를 가져왔다(초래했다)."
+            },
+            {
+                "question": "Improved training can bring _______ better customer satisfaction scores.",
+                "options": [
+                    "about",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "about",
+                "translation": "개선된 교육은 더 나은 고객 만족도 점수를 가져올 수 있다."
+            },
+            {
+                "question": "The merger is expected to bring _______ major changes in staffing and budgeting.",
+                "options": [
+                    "about",
+                    "in",
+                    "out",
+                    "up"
+                ],
+                "answer": "about",
+                "translation": "그 합병은 인력과 예산에 큰 변화를 초래할 것으로 예상된다."
+            }
+        ]
+    },
+    {
+        "id": 76,
+        "expression": "come across",
+        "meaning": "우연히 발견하다/우연히 마주치다",
+        "options": [
+            "across",
+            "over",
+            "out",
+            "up"
+        ],
+        "question": "I came _______ an outdated contract while organizing the shared folder.",
+        "answer": "across",
+        "translation": "공유 폴더를 정리하다가 오래된 계약서를 우연히 발견했다.",
+        "quizzes": [
+            {
+                "question": "I came _______ an outdated contract while organizing the shared folder.",
+                "options": [
+                    "across",
+                    "over",
+                    "out",
+                    "up"
+                ],
+                "answer": "across",
+                "translation": "공유 폴더를 정리하다가 오래된 계약서를 우연히 발견했다."
+            },
+            {
+                "question": "If you come _______ any incorrect figures in the report, please notify accounting.",
+                "options": [
+                    "across",
+                    "into",
+                    "off",
+                    "over"
+                ],
+                "answer": "across",
+                "translation": "보고서에서 잘못된 수치를 발견하면 회계팀에 알려 주세요."
+            },
+            {
+                "question": "We came _______ a supplier that can deliver within 48 hours.",
+                "options": [
+                    "across",
+                    "up",
+                    "out",
+                    "away"
+                ],
+                "answer": "across",
+                "translation": "우리는 48시간 내 배송 가능한 공급업체를 우연히 찾았다."
+            }
+        ]
+    },
+    {
+        "id": 77,
+        "expression": "set aside",
+        "meaning": "따로 떼어두다/마련하다, (감정·의견을) 제쳐두다",
+        "options": [
+            "aside",
+            "out",
+            "off",
+            "over"
+        ],
+        "question": "Please set _______ a portion of the budget for unexpected repair costs.",
+        "answer": "aside",
+        "translation": "예상치 못한 수리 비용을 위해 예산 일부를 따로 마련해 두세요.",
+        "quizzes": [
+            {
+                "question": "Please set _______ a portion of the budget for unexpected repair costs.",
+                "options": [
+                    "aside",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "aside",
+                "translation": "예상치 못한 수리 비용을 위해 예산 일부를 따로 마련해 두세요."
+            },
+            {
+                "question": "The manager asked the team to set _______ personal preferences and focus on the data.",
+                "options": [
+                    "aside",
+                    "up",
+                    "over",
+                    "out"
+                ],
+                "answer": "aside",
+                "translation": "관리자는 개인적 선호를 제쳐두고 데이터에 집중하라고 했다."
+            },
+            {
+                "question": "We have set _______ a table near the window for your party of six.",
+                "options": [
+                    "aside",
+                    "off",
+                    "out",
+                    "over"
+                ],
+                "answer": "aside",
+                "translation": "6인 손님을 위해 창가 자리를 따로 마련해 두었습니다."
+            }
+        ]
+    },
+    {
+        "id": 78,
+        "expression": "pick up",
+        "meaning": "익히다/습득하다, (물건을) 찾다, (전화를) 받다",
+        "options": [
+            "up",
+            "out",
+            "off",
+            "over"
+        ],
+        "question": "Most employees pick _______ the new software after a short training session.",
+        "answer": "up",
+        "translation": "대부분의 직원은 짧은 교육 후 새 소프트웨어 사용법을 금방 익힌다.",
+        "quizzes": [
+            {
+                "question": "Most employees pick _______ the new software after a short training session.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "대부분의 직원은 짧은 교육 후 새 소프트웨어 사용법을 금방 익힌다."
+            },
+            {
+                "question": "Could you pick _______ the printed materials from the reception desk before the seminar starts?",
+                "options": [
+                    "up",
+                    "over",
+                    "out",
+                    "off"
+                ],
+                "answer": "up",
+                "translation": "세미나 시작 전에 안내 데스크에서 인쇄물을 찾아 주시겠어요?"
+            },
+            {
+                "question": "If no one picks _______ the phone, please leave a voicemail.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "아무도 전화를 받지 않으면 음성 메시지를 남겨 주세요."
+            }
+        ]
+    },
+    {
+        "id": 79,
+        "expression": "make up for",
+        "meaning": "만회하다, 보상하다",
+        "options": [
+            "up",
+            "out",
+            "off",
+            "over"
+        ],
+        "question": "To make _______ for the delayed delivery, we will provide a 10% discount.",
+        "answer": "up",
+        "translation": "배송 지연을 보상하기 위해 10% 할인을 제공하겠습니다.",
+        "quizzes": [
+            {
+                "question": "To make _______ for the delayed delivery, we will provide a 10% discount.",
+                "options": [
+                    "up",
+                    "out",
+                    "off",
+                    "over"
+                ],
+                "answer": "up",
+                "translation": "배송 지연을 보상하기 위해 10% 할인을 제공하겠습니다."
+            },
+            {
+                "question": "The additional staff helped make _______ for the shortage during peak hours.",
+                "options": [
+                    "up",
+                    "off",
+                    "out",
+                    "away"
+                ],
+                "answer": "up",
+                "translation": "추가 인력이 피크 시간대 인력 부족을 만회하는 데 도움이 되었다."
+            },
+            {
+                "question": "A replacement item does not fully make up _______ the inconvenience caused.",
+                "options": [
+                    "for",
+                    "to",
+                    "of",
+                    "with"
+                ],
+                "answer": "for",
+                "translation": "교체품만으로는 발생한 불편을 완전히 보상하지는 못한다."
+            }
+        ]
+    },
+    {
+        "id": 80,
+        "expression": "take place",
+        "meaning": "열리다/발생하다",
+        "options": [
+            "place",
+            "role",
+            "part",
+            "charge"
+        ],
+        "question": "The annual shareholders’ meeting will take _______ on May 15 at headquarters.",
+        "answer": "place",
+        "translation": "연례 주주총회는 5월 15일 본사에서 열릴 것이다.",
+        "quizzes": [
+            {
+                "question": "The annual shareholders’ meeting will take _______ on May 15 at headquarters.",
+                "options": [
+                    "place",
+                    "role",
+                    "part",
+                    "charge"
+                ],
+                "answer": "place",
+                "translation": "연례 주주총회는 5월 15일 본사에서 열릴 것이다."
+            },
+            {
+                "question": "The interview will take _______ in Conference Room B at 2 p.m.",
+                "options": [
+                    "place",
+                    "charge",
+                    "advantage",
+                    "account"
+                ],
+                "answer": "place",
+                "translation": "면접은 오후 2시에 B 회의실에서 진행될 것이다."
+            },
+            {
+                "question": "Due to severe weather, the outdoor ceremony will not take _______ as scheduled.",
+                "options": [
+                    "place",
+                    "forward",
+                    "order",
+                    "terms"
+                ],
+                "answer": "place",
+                "translation": "악천후로 인해 야외 행사는 예정대로 진행되지 않을 것이다."
+            }
+        ]
     }
 ];

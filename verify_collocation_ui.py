@@ -27,16 +27,16 @@ def run(playwright):
     data_length = page.evaluate("COLLOCATION_DATA.length")
     print(f"COLLOCATION_DATA length: {data_length}")
 
-    if data_length == 70:
-        print("Verification Successful: Data length is 70.")
+    if data_length == 80:
+        print("Verification Successful: Data length is 80.")
     else:
-        print(f"Verification Failed: Expected 70, got {data_length}")
+        print(f"Verification Failed: Expected 80, got {data_length}")
 
     # Inspect the last item
     last_item = page.evaluate("COLLOCATION_DATA[COLLOCATION_DATA.length - 1]")
     print(f"Last item: {last_item['expression']}")
 
-    if last_item['expression'] == "as a result of":
+    if last_item['expression'] == "take place":
         print("Verification Successful: Last item matches.")
     else:
         print(f"Verification Failed: Last item is {last_item['expression']}")
