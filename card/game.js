@@ -98,7 +98,38 @@ const GAME_CONSTANTS = {
     },
     DECK_SIZE: 3,
     MAX_RECORDS: 5,
-    SAGE_BLESSING_PICK_COUNT: 12
+    SAGE_BLESSING_PICK_COUNT: 12,
+
+    // Costs
+    COSTS: {
+        GACHA_SINGLE: 1,
+        CHAOS_SHUFFLE: 1,
+        DRAFT_REROLL_WITH_TICKET: 1
+    },
+
+    DRAFT: {
+        INITIAL_REROLLS: 3
+    },
+
+    // Battle Settings
+    BATTLE: {
+        MANA_GAIN_TURN: 20,
+        MANA_GAIN_HIT: 10,
+        MANA_GAIN_ATTACK: 10,
+        TRAIT_TRIGGER_CHANCE: 30 // For some traits
+    },
+
+    // Field Buff Stats (Moved from logic.js)
+    FIELD_BUFF_STATS: {
+        'sun_bless': { atk: 0.3, matk: 0.3 },
+        'moon_bless': { matk: 0.3, evasion: 15 },
+        'sanctuary': { matk: 0.3, mdef: 0.3 },
+        'goddess_descent': { atk: 0.3, matk: 0.3, def: 0.3, mdef: 0.3 },
+        'earth_bless': { atk: 0.25, matk: 0.25 },
+        'twinkle_party': { atk: 0.2, crit: 15 },
+        'star_powder': { def: 0.4, mdef: 0.4 },
+        'reaper_realm': { crit: 40 }
+    }
 };
 
 // ─── Gacha Rate Tables ────────────────────────────────────────────────────────
