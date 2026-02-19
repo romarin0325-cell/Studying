@@ -835,6 +835,7 @@
     <script src="collocation_data.js" defer></script>
     <script src="grammar_data.js" defer></script>
     <script src="logic.js" defer></script>
+    <script src="game.js" defer></script>
     <script src="quiz.js" defer></script>
     <script defer>
         /**
@@ -908,15 +909,13 @@
 
             // --- Global Data ---
             loadGlobalData() {
-                const data = localStorage.getItem('cardRpgGlobal');
+                const data = Storage.load(Storage.keys.GLOBAL);
                 if (data) {
-                    try {
-                        this.global = { ...this.global, ...JSON.parse(data) };
-                    } catch (e) { console.error("Global data parse error", e); }
+                    this.global = { ...this.global, ...data };
                 }
             },
             saveGlobalData() {
-                localStorage.setItem('cardRpgGlobal', JSON.stringify(this.global));
+                Storage.save(Storage.keys.GLOBAL, this.global);
             },
 
             checkDailyChaosTicket() {
@@ -944,7 +943,9 @@
                     { name: 'COLLOCATION_DATA', ref: typeof COLLOCATION_DATA !== 'undefined' ? COLLOCATION_DATA : null },
                     { name: 'GRAMMAR_DATA', ref: typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA : null },
                     { name: 'Logic', ref: typeof Logic !== 'undefined' ? Logic : null },
-                    { name: 'SideEffects', ref: typeof SideEffects !== 'undefined' ? SideEffects : null }
+                    { name: 'SideEffects', ref: typeof SideEffects !== 'undefined' ? SideEffects : null },
+                    { name: 'GameUtils', ref: typeof GameUtils !== 'undefined' ? GameUtils : null },
+                    { name: 'QuizEngine', ref: typeof QuizEngine !== 'undefined' ? QuizEngine : null }
                 ];
                 return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
             },
@@ -1012,10 +1013,9 @@
                 this.checkDailyChaosTicket();
 
                 if (mode === 'load') {
-                    const save = localStorage.getItem('cardRpgSave');
+                    const save = Storage.load(Storage.keys.SAVE);
                     if (save) {
-                        let loaded = JSON.parse(save);
-                        this.state = { ...this.state, ...loaded };
+                        this.state = { ...this.state, ...save };
                         if (this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = 3;
                         if (this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = 3;
                         if (!this.state.chaosBuffs) this.state.chaosBuffs = [];
@@ -1025,11 +1025,11 @@
                         if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
 
                         // Load persistent wordbook
-                        const vocab = localStorage.getItem('cardRpgVocab');
-                        if (vocab) this.state.wrongWords = JSON.parse(vocab);
+                        const vocab = Storage.load(Storage.keys.VOCAB);
+                        if (vocab) this.state.wrongWords = vocab;
 
-                        const col = localStorage.getItem('cardRpgCollocation');
-                        if (col) this.state.wrongCollocations = JSON.parse(col);
+                        const col = Storage.load(Storage.keys.COLLOCATION);
+                        if (col) this.state.wrongCollocations = col;
 
                         this.showAlert("불러오기 완료");
                         this.toMenu();
@@ -1139,10 +1139,7 @@
                     this.saveRecord();
                 }
 
-                let initTickets = 20;
-                if (['suffering', 'overdrive', 'restriction', 'balance', 'archive', 'flood', 'curse'].includes(mode)) initTickets = 10;
-                if (mode === 'chaos') initTickets = 0;
-                if (mode === 'draft') initTickets = 5;
+                let initTickets = GameUtils.getInitialTickets(mode);
 
                 this.state = {
                     mode: mode,
@@ -1172,20 +1169,13 @@
                 }
 
                 if (mode === 'chaos') {
-                    let allCards = [...CARDS];
-                    if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
-                        const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                        allCards = allCards.concat(bonus);
-                    }
-
-                    // Add Transcendence Cards to Chaos Pool
-                    if (this.state.activeTranscendenceCards.length > 0) {
-                        const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
-                        allCards = allCards.concat(transObjs);
-                    }
+                    let allCards = GameUtils.buildCardPool(this.global, {
+                        includeTranscendence: true,
+                        activeTranscendenceCards: this.state.activeTranscendenceCards
+                    });
 
                     allCards.sort(() => Math.random() - 0.5);
-                    const picks = allCards.slice(0, 15).map(c => c.id);
+                    const picks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
 
                     this.state.chaosPool = picks;
                     this.state.inventory = [...picks];
@@ -1198,46 +1188,41 @@
                 }
 
                 // Load persistent wordbook
-                const vocab = localStorage.getItem('cardRpgVocab');
-                if (vocab) this.state.wrongWords = JSON.parse(vocab);
+                const vocab = Storage.load(Storage.keys.VOCAB);
+                if (vocab) this.state.wrongWords = vocab;
 
-                const col = localStorage.getItem('cardRpgCollocation');
-                if (col) this.state.wrongCollocations = JSON.parse(col);
+                const col = Storage.load(Storage.keys.COLLOCATION);
+                if (col) this.state.wrongCollocations = col;
 
                 this.saveGame();
             },
 
             saveGame() {
-                localStorage.setItem('cardRpgSave', JSON.stringify(this.state));
-                localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+                Storage.save(Storage.keys.SAVE, this.state);
+                Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
                 this.saveGlobalData(); // Also save global just in case
                 this.showAlert("저장되었습니다.");
             },
 
             saveRecord(score = null) {
-                let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
+                let history = Storage.load(Storage.keys.RECORDS) || [];
                 let currentStage = score !== null ? score : (this.state.enemyScale + 1);
 
-                // Extract existing stages (assuming format "최대 스테이지: N")
                 let stages = history.map(h => {
                     let m = h.match(/최대 스테이지: (\d+)/);
                     return m ? parseInt(m[1]) : 0;
                 });
 
-                // Add current stage
                 stages.push(currentStage);
-
-                // Sort descending and keep top 5
                 stages.sort((a, b) => b - a);
-                stages = stages.slice(0, 5);
+                stages = stages.slice(0, GAME_CONSTANTS.MAX_RECORDS);
 
-                // Reconstruct history strings
                 history = stages.map(s => `최대 스테이지: ${s}`);
-                localStorage.setItem('cardRpgRecords', JSON.stringify(history));
+                Storage.save(Storage.keys.RECORDS, history);
             },
 
             showRecords() {
-                let history = JSON.parse(localStorage.getItem('cardRpgRecords') || '[]');
+                let history = Storage.load(Storage.keys.RECORDS) || [];
                 if (history.length === 0) return this.showAlert("기록이 없습니다.");
                 let msg = history.map((h, i) => `${i + 1}위. ${h}`).join("<br>");
                 this.openInfoModal("최대 스테이지 기록 (Top 5)", msg);
@@ -1435,22 +1420,13 @@
                 if (document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
                 // Apply to 12 random cards
-                let pool = [...CARDS];
-                if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
-                    const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                    pool = pool.concat(bonus);
-                }
-                pool = pool.filter(c => c.grade !== 'transcendence');
-
-                const mode = this.state.mode;
-                if (mode === 'restriction') {
-                    pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
-                } else if (mode === 'balance') {
-                    pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
-                }
+                let pool = GameUtils.buildCardPool(this.global, {
+                    excludeTranscendence: true,
+                    maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
+                });
 
                 pool.sort(() => 0.5 - Math.random());
-                let picks = pool.slice(0, 12);
+                let picks = pool.slice(0, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
 
                 this.state.activeChaosBlessing = []; // Clear Chaos Blessing
 
@@ -1479,25 +1455,13 @@
             applyChaosBlessing(count) {
                 this.state.chaosBlessingUses--;
 
-                // 1. Base Pool
-                let pool = [...CARDS];
+                // 1. Build Pool
+                let pool = GameUtils.buildCardPool(this.global, {
+                    excludeTranscendence: true,
+                    maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
+                });
 
-                // 2. Add Bonus Cards (if unlocked)
-                if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
-                    const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                    pool = pool.concat(bonus);
-                }
-                pool = pool.filter(c => c.grade !== 'transcendence');
-
-                // 3. Filter by Mode Rarity
-                const mode = this.state.mode;
-                if (mode === 'restriction') {
-                    pool = pool.filter(c => c.grade === 'rare' || c.grade === 'normal');
-                } else if (mode === 'balance') {
-                    pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
-                }
-
-                // 4. Shuffle and Pick
+                // 2. Shuffle and Pick
                 pool.sort(() => 0.5 - Math.random());
                 let picks = pool.slice(0, count);
 
@@ -1538,20 +1502,13 @@
                         this.state.tickets--;
                         document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-                        let allCards = [...CARDS];
-
-                        if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
-                            const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                            allCards = allCards.concat(bonus);
-                        }
-
-                        if (this.state.activeTranscendenceCards && this.state.activeTranscendenceCards.length > 0) {
-                            const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
-                            allCards = allCards.concat(transObjs);
-                        }
+                        let allCards = GameUtils.buildCardPool(this.global, {
+                            includeTranscendence: true,
+                            activeTranscendenceCards: this.state.activeTranscendenceCards
+                        });
 
                         allCards.sort(() => Math.random() - 0.5);
-                        const newPicks = allCards.slice(0, 15).map(c => c.id);
+                        const newPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
 
                         this.state.chaosPool = newPicks;
                         this.state.inventory = [...newPicks];
@@ -1600,82 +1557,10 @@
 
             runGacha(isChallenge) {
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
-                let rand = Math.random();
-                let grade = 'normal';
                 const mode = this.state.mode;
 
-                // Chaos Mode Override
-                /*
-                if (mode === 'chaos') {
-                    if (!this.state.chaosPool || this.state.chaosPool.length === 0) {
-                         // Should have been generated in winBattle or initNewGame, but fallback
-                         let allCards = [...CARDS];
-                         if (this.global.unlocked_bonus_cards) {
-                             const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                             allCards = allCards.concat(unlocked);
-                         }
-                         allCards.sort(() => Math.random() - 0.5);
-                         this.state.chaosPool = allCards.slice(0, 15).map(c => c.id);
-                    }
-                    const pickId = this.state.chaosPool[Math.floor(Math.random() * this.state.chaosPool.length)];
-                    const pick = this.getCardData(pickId);
-                    this.state.inventory.push(pick.id);
-        
-                    const modal = document.getElementById('modal-gacha');
-                    const content = document.getElementById('gacha-result');
-                    let color = '#bdbdbd';
-                    if(pick.grade === 'legend') color = '#ff5252';
-                    else if(pick.grade === 'epic') color = '#e040fb';
-                    else if(pick.grade === 'rare') color = '#448aff';
-        
-                    document.getElementById('gacha-title').innerText = "카오스 뽑기 성공!";
-                    content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
-                    <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
-                    modal.classList.add('active');
-                    return;
-                }
-                */
-
-                // Determine Grade
-                if (mode === 'restriction') {
-                    // Restriction: Rare max
-                    if (isChallenge) {
-                        // Challenge: Rare 40, Normal 60
-                        if (rand < 0.40) grade = 'rare';
-                        else grade = 'normal';
-                    } else {
-                        // Normal: Rare 20, Normal 80
-                        if (rand < 0.20) grade = 'rare';
-                        else grade = 'normal';
-                    }
-                } else if (mode === 'balance') {
-                    // Balance: Epic max
-                    if (isChallenge) {
-                        // Challenge: Epic 20, Rare 30, Normal 50
-                        if (rand < 0.20) grade = 'epic';
-                        else if (rand < 0.50) grade = 'rare';
-                        else grade = 'normal';
-                    } else {
-                        // Normal: Epic 10, Rare 20, Normal 70
-                        if (rand < 0.10) grade = 'epic';
-                        else if (rand < 0.30) grade = 'rare';
-                        else grade = 'normal';
-                    }
-                } else {
-                    // Origin / Others
-                    if (isChallenge) {
-                        // Legend 20%, Epic 25%, Rare 30%, Normal 25%
-                        if (rand < 0.20) grade = 'legend';
-                        else if (rand < 0.45) grade = 'epic';
-                        else if (rand < 0.75) grade = 'rare';
-                        else grade = 'normal';
-                    } else {
-                        // Default: 10% Legend, 20% Epic, 30% Rare, 40% Normal
-                        if (rand < 0.10) grade = 'legend';
-                        else if (rand < 0.30) grade = 'epic';
-                        else if (rand < 0.60) grade = 'rare';
-                    }
-                }
+                // Determine Grade (data-driven via GACHA_RATES)
+                const grade = GameUtils.resolveGachaGrade(mode, isChallenge);
 
                 // Build Pool
                 let pool = CARDS.filter(c => c.grade === grade);
@@ -1796,14 +1681,14 @@
             resetWrongWords() {
                 if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
                     this.state.wrongCollocations = [];
-                    localStorage.removeItem('cardRpgCollocation');
+                    Storage.remove(Storage.keys.COLLOCATION);
                     this.showAlert("숙어/구동사 복습 상태가 초기화되었습니다.");
                     this.openCollocationBook();
                     return;
                 }
 
                 this.state.wrongWords = [];
-                localStorage.removeItem('cardRpgVocab');
+                Storage.remove(Storage.keys.VOCAB);
                 this.showAlert("복습 상태가 초기화되었습니다.");
                 this.openWordbook(); // Re-render
             },
@@ -2449,14 +2334,6 @@
                 document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${BUFF_NAMES[b.name] || b.name}]`).join(" ");
             },
 
-            getElementalMultiplier(atkEl, defEl) {
-                if (atkEl === 'water' && defEl === 'fire') return 1.2;
-                if (atkEl === 'fire' && defEl === 'nature') return 1.2;
-                if (atkEl === 'nature' && defEl === 'water') return 1.2;
-                if ((atkEl === 'light' && defEl === 'dark') || (atkEl === 'dark' && defEl === 'light')) return 1.2;
-                return 1.0;
-            },
-
             // --- Draft Logic ---
             startDraft() {
                 if (this.state.deck.every(x => x !== null)) {
@@ -2516,16 +2393,10 @@
             },
 
             generateDraftOptions() {
-                let pool = [...CARDS];
-                if (this.global.unlocked_bonus_cards) {
-                    const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                    pool = pool.concat(bonus);
-                }
-
-                if (this.state.activeTranscendenceCards && this.state.activeTranscendenceCards.length > 0) {
-                    const transObjs = TRANSCENDENCE_CARDS.filter(c => this.state.activeTranscendenceCards.includes(c.id));
-                    pool = pool.concat(transObjs);
-                }
+                let pool = GameUtils.buildCardPool(this.global, {
+                    includeTranscendence: true,
+                    activeTranscendenceCards: this.state.activeTranscendenceCards
+                });
 
                 let options = [];
                 for (let i = 0; i < 4; i++) {
@@ -2664,14 +2535,10 @@
                     this.state.inventory = [];
                     this.state.deck = [null, null, null];
 
-                    let allCards = [...CARDS];
-                    if (this.global.unlocked_bonus_cards) {
-                        const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
-                        allCards = allCards.concat(unlocked);
-                    }
+                    let allCards = GameUtils.buildCardPool(this.global);
                     allCards.sort(() => Math.random() - 0.5);
 
-                    const nextPicks = allCards.slice(0, 15).map(c => c.id);
+                    const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
                     this.state.chaosPool = nextPicks;
                     this.state.inventory = [...nextPicks];
                 }
@@ -2849,7 +2716,7 @@
                 }
 
                 if (['chaos', 'draft'].includes(this.state.mode)) {
-                    localStorage.removeItem('cardRpgSave');
+                    Storage.remove(Storage.keys.SAVE);
 
                     let msg = "패배했습니다...<br>이 모드는 패배 시 데이터가 초기화됩니다.";
                     this.openInfoModal("Game Over", msg, () => {
@@ -3011,7 +2878,7 @@
             // --- Private Tutoring ---
             openApiSettings() {
                 document.getElementById('modal-api-settings').classList.add('active');
-                const key = localStorage.getItem('cardRpgApiKey');
+                const key = Storage.getRaw(Storage.keys.API_KEY);
                 if (key) document.getElementById('api-key-input').value = key;
             },
 
@@ -3051,14 +2918,14 @@
             saveApiKey() {
                 const key = document.getElementById('api-key-input').value.trim();
                 if (!key) return this.showAlert("API 키를 입력해주세요.");
-                localStorage.setItem('cardRpgApiKey', key);
+                Storage.setRaw(Storage.keys.API_KEY, key);
                 this.showAlert("API 키가 저장되었습니다.");
             },
 
             async startTutoringSession() {
                 if (this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
 
-                const key = localStorage.getItem('cardRpgApiKey');
+                const key = Storage.getRaw(Storage.keys.API_KEY);
                 if (!key) return this.showAlert("먼저 API 키를 저장해주세요.");
 
                 const mode = this.state.mode;
@@ -3081,10 +2948,10 @@
                     // Cleanup invalid data
                     if (isCollocation) {
                         this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== targetId);
-                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+                        Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
                     } else {
                         this.state.wrongWords = this.state.wrongWords.filter(w => w !== targetId);
-                        localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+                        Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
                     }
                     return this.startTutoringSession(); // Retry
                 }
@@ -3141,10 +3008,10 @@
                 const onCorrect = () => {
                     if (item.type === 'collocation') {
                         this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
-                        localStorage.setItem('cardRpgCollocation', JSON.stringify(this.state.wrongCollocations));
+                        Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
                     } else {
                         this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
-                        localStorage.setItem('cardRpgVocab', JSON.stringify(this.state.wrongWords));
+                        Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
                     }
                     document.getElementById('modal-tutoring').classList.remove('active');
                     this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
