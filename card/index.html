@@ -800,7 +800,28 @@
                 style="border-color:#29b6f6; color:#29b6f6;">
                 적용된 축복 확인
             </button>
+            <button id="btn-artifact-check" onclick="RPG.openArtifactCheck()"
+                style="display:none; border-color:#ffd700; color:#ffd700;" class="menu-btn">
+                아티팩트 확인
+            </button>
             <button onclick="document.getElementById('modal-chaos').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-artifact-select" class="modal" style="z-index: 210;">
+        <div class="modal-content" style="height:auto; min-height:350px;">
+            <h3 style="color:#ffd700;">아티팩트 선택</h3>
+            <p style="font-size:0.8rem; color:#aaa;">아래 3개 중 1개를 선택하세요. (최대 4개 보유)</p>
+            <div id="artifact-select-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"></div>
+        </div>
+    </div>
+
+    <div id="modal-artifact-check" class="modal" style="z-index: 200;">
+        <div class="modal-content" style="height:auto;">
+            <h3 style="color:#ffd700;">보유 아티팩트</h3>
+            <div id="artifact-check-list" style="text-align:left; font-size:0.85rem; line-height:1.6;"></div>
+            <button onclick="document.getElementById('modal-artifact-check').classList.remove('active')"
                 style="margin-top:10px; width:100%; padding:10px;">닫기</button>
         </div>
     </div>
@@ -1043,6 +1064,7 @@
                         if (!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
                         if (!this.state.mode) this.state.mode = 'origin';
                         if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
+                        if (!this.state.artifacts) this.state.artifacts = [];
 
                         // Load persistent wordbook
                         const vocab = Storage.load(Storage.keys.VOCAB);
@@ -1098,7 +1120,8 @@
                     { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 30 스테이지)' },
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 30 스테이지)' },
                     { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' }
+                    { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 36 스테이지)' }
                 ];
 
                 if (this.tempGameType === 'endless') {
@@ -1176,7 +1199,8 @@
                     wrongWords: [],
                     quiz_stats: { correct: 0, total: 0 },
                     chaosPool: [],
-                    draft: { active: false, round: 0, rerolls: 3, currentOptions: [] }
+                    draft: { active: false, round: 0, rerolls: 3, currentOptions: [] },
+                    artifacts: []
                 };
 
                 // Transfer Pending Transcendence to Active State (Endless Only)
@@ -1333,6 +1357,13 @@
                 if (this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = 3;
                 document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
                 document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
+
+                // Show artifact check button only in artifact mode
+                const artBtn = document.getElementById('btn-artifact-check');
+                if (artBtn) {
+                    artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
+                }
+
                 document.getElementById('modal-chaos').classList.add('active');
             },
             checkActiveChaosBlessings() {
@@ -1922,6 +1953,25 @@
 
                 document.getElementById('battle-log').innerHTML = "";
                 this.log(`전투 개시! 적: ${this.battle.enemy.name}`);
+
+                // Artifact: gale_storm — apply gale field buff for first 3 turns
+                if (this.hasArtifact('gale_storm')) {
+                    this.applyFieldBuff('gale');
+                    this.log('[아티팩트] 질풍노도: 전투 시작 시 질풍 발동!');
+                }
+
+                // Artifact: support_boost — set all sup skill costs to 0
+                if (this.hasArtifact('support_boost')) {
+                    this.battle.players.forEach(p => {
+                        if (p && p.proto && p.proto.skills) {
+                            p.proto.skills.forEach(s => {
+                                if (s.type === 'sup') s.cost = 0;
+                            });
+                        }
+                    });
+                    this.log('[아티팩트] 서포트부스트: 모든 보조스킬 마나 소비 0!');
+                }
+
                 this.renderBattlefield();
                 this.TurnManager.startPlayerTurn();
             },
@@ -2078,8 +2128,13 @@
                     def = Math.floor(def * fieldDef * defMult);
 
                     // Evasion Check
-                    if (Logic.checkEvasion(target, skill.type, b.fieldBuffs)) {
+                    if (Logic.checkEvasion(target, skill.type, b.fieldBuffs, RPG.state.mode, RPG.state.artifacts || [])) {
                         RPG.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
+                        // Artifact: lucky_vicky — mana recovery on evasion
+                        if (RPG.hasArtifact('lucky_vicky')) {
+                            target.mp = Math.min(GAME_CONSTANTS.MAX_MP, target.mp + 10);
+                            RPG.log('[아티팩트] 럭키비키: 회피 성공! 마나 10 회복!');
+                        }
                         this.endEnemyTurn();
                         return;
                     }
@@ -2133,7 +2188,8 @@
                     RPG.battle.fieldBuffs,
                     (msg) => RPG.log(msg),
                     RPG.state.deck,
-                    RPG.battle.turn
+                    RPG.battle.turn,
+                    RPG.state.artifacts || []
                 );
 
                 // Apply results
@@ -2158,21 +2214,31 @@
 
             executeSkill(source, target, skill, isDelayed = false) {
                 if (!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
+
+                // Artifact: double_attack — normal attack 1.5x power
+                let modifiedSkill = skill;
+                if (this.hasArtifact('double_attack') && skill.name === RPG.NORMAL_ATTACK.name) {
+                    modifiedSkill = { ...skill, val: (skill.val || 1.0) * 1.5 };
+                }
+
                 RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
 
                 // Trait: Normal Attack Burn & Divine
                 if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
-                    target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
-                    target.buffs['divine'] = (target.buffs['divine'] || 0) + 1;
-                    if (target.buffs['burn'] > 3) target.buffs['burn'] = 3;
-                    if (target.buffs['divine'] > 3) target.buffs['divine'] = 3;
+                    let burnMax = this.hasArtifact('over_flame') ? 5 : 3;
+                    let divineMax = this.hasArtifact('over_divine') ? 5 : 3;
+                    let burnAdd = this.hasArtifact('over_flame') ? 2 : 1;
+                    let divineAdd = this.hasArtifact('over_divine') ? 2 : 1;
+                    target.buffs['burn'] = Math.min((target.buffs['burn'] || 0) + burnAdd, burnMax);
+                    target.buffs['divine'] = Math.min((target.buffs['divine'] || 0) + divineAdd, divineMax);
                     RPG.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
                 }
 
                 // Trait: Phoenix Normal Attack Burn
                 if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'syn_fire_3_crit_burn' && RPG.battle.activeTraits.includes('syn_fire_3_crit_burn')) {
-                    target.buffs['burn'] = (target.buffs['burn'] || 0) + 1;
-                    if (target.buffs['burn'] > 3) target.buffs['burn'] = 3;
+                    let burnMax = this.hasArtifact('over_flame') ? 5 : 3;
+                    let burnAdd = this.hasArtifact('over_flame') ? 2 : 1;
+                    target.buffs['burn'] = Math.min((target.buffs['burn'] || 0) + burnAdd, burnMax);
                     RPG.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
                 }
 
@@ -2193,18 +2259,18 @@
                 }
 
                 // Check for Delayed Attack Effect
-                let delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack');
-                if (!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack_field');
-                if (!delayedEff) delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_random_attack');
+                let delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack');
+                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack_field');
+                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_random_attack');
 
                 if (delayedEff && !isDelayed) {
                     RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
-                    RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: skill });
+                    RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: modifiedSkill });
                     RPG.TurnManager.endPlayerTurn();
                     return;
                 }
 
-                const dmgResult = this.calcDamage(source, target, skill);
+                const dmgResult = this.calcDamage(source, target, modifiedSkill);
 
                 // Apply Damage
                 if (dmgResult.dmg > 0) {
@@ -2213,8 +2279,22 @@
                     RPG.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
                 }
 
+                // Artifact: lucky_vicky — mana recovery on crit
+                if (dmgResult.luckyVicky) {
+                    source.mp = Math.min(GAME_CONSTANTS.MAX_MP, source.mp + 10);
+                    RPG.log('[아티팩트] 럭키비키: 치명타 발생! 마나 10 회복!');
+                }
+
+                // Artifact: death_roulette — 30% chance to die on skill use
+                if (this.hasArtifact('death_roulette') && skill.name !== RPG.NORMAL_ATTACK.name && !isDelayed) {
+                    if (Math.random() < 0.3) {
+                        source.hp = 0;
+                        RPG.log('<span style="color:#ff5252">[아티팩트] 데스룰렛: 죽음의 룰렛에 당첨...</span>');
+                    }
+                }
+
                 // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
-                this.applySkillEffects(source, target, skill);
+                this.applySkillEffects(source, target, modifiedSkill);
 
                 if (target.hp <= 0) { RPG.winBattle(); return; }
                 if (source.hp <= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
@@ -2225,7 +2305,7 @@
             calcDamage(source, target, skill) {
                 if (skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0 };
 
-                // Logic.js returns { dmg, isCrit } and logs via callback
+                // Logic.js returns { dmg, isCrit, luckyVicky } and logs via callback
                 const result = Logic.calculateDamage(
                     source,
                     target,
@@ -2235,7 +2315,8 @@
                     (msg) => RPG.log(msg),
                     RPG.state.mode, // PASS MODE
                     RPG.state.deck, // PASS DECK
-                    RPG.battle.turn // PASS TURN
+                    RPG.battle.turn, // PASS TURN
+                    RPG.state.artifacts || [] // PASS ARTIFACTS
                 );
 
                 if (target.id === 'demon_god') {
@@ -2286,7 +2367,9 @@
 
             applyFieldBuff(id) {
                 if (this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
-                if (this.battle.fieldBuffs.length >= GAME_CONSTANTS.MAX_FIELD_BUFFS) {
+                // Artifact: buff_overload — increase max field buffs to 5
+                let maxBuffs = this.hasArtifact('buff_overload') ? 5 : GAME_CONSTANTS.MAX_FIELD_BUFFS;
+                if (this.battle.fieldBuffs.length >= maxBuffs) {
                     let removed = this.battle.fieldBuffs.shift();
                     RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
                 }
@@ -2541,6 +2624,7 @@
                 if (mode === 'curse' || mode === 'flood') clearStage = 30;
                 if (mode === 'chaos') clearStage = 24;
                 if (mode === 'draft') clearStage = 24;
+                if (mode === 'artifact') clearStage = 36;
                 if (mode === 'origin') clearStage = Infinity;
 
                 if (this.state.gameType === 'endless') clearStage = Infinity;
@@ -2673,6 +2757,29 @@
                                 }
                             );
                         }
+                        else if (this.battle.enemy.id === 'creator_god' && this.state.mode === 'artifact' && (this.state.artifacts || []).length < GAME_CONSTANTS.MAX_ARTIFACTS) {
+                            // Artifact Mode: Quiz → Artifact Selection
+                            this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 아티팩트 획득 기회)",
+                                () => { // Yes
+                                    let allQuizzes = [];
+                                    GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                                    let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+                                    this.startGrammarQuiz(q,
+                                        () => { // Success - Show artifact selection
+                                            this.openArtifactSelect();
+                                        },
+                                        () => { // Fail
+                                            this.showAlert("오답입니다... 아티팩트를 획득하지 못했습니다.");
+                                            this.toMenu();
+                                        }
+                                    );
+                                },
+                                () => { // No
+                                    this.toMenu();
+                                }
+                            );
+                        }
                         else if (this.battle.enemy.id === 'creator_god') {
                             this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
                                 () => { // Yes
@@ -2759,7 +2866,7 @@
             },
 
             getEffectiveStats(char, fieldBuffs) {
-                return Logic.calculateStats(char, fieldBuffs, this.state.mode);
+                return Logic.calculateStats(char, fieldBuffs, this.state.mode, this.state.artifacts || []);
             },
 
             showBattleStat(side, idx) {
@@ -2775,7 +2882,7 @@
                     return `${name}(${val})`;
                 }).join(', ') || '없음';
 
-                const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode);
+                const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || []);
 
                 // Use baseStatsWithoutBlessing if available to show Green for blessed stats
                 const getBase = (key, fallback) => {
@@ -3046,6 +3153,67 @@
                 config.correctDelay = 1500;
                 config.wrongDelay = 2000;
                 QuizEngine.show(config);
+            },
+
+            // --- Artifact Helpers ---
+
+            hasArtifact(id) {
+                return (this.state.artifacts || []).includes(id);
+            },
+
+            openArtifactSelect() {
+                const owned = this.state.artifacts || [];
+                const available = ARTIFACT_LIST.filter(a => !owned.includes(a.id));
+                if (available.length === 0) {
+                    this.showAlert("획득 가능한 아티팩트가 없습니다.");
+                    this.toMenu();
+                    return;
+                }
+
+                // Pick 3 random artifacts
+                const shuffled = available.sort(() => Math.random() - 0.5);
+                const choices = shuffled.slice(0, Math.min(3, shuffled.length));
+
+                const list = document.getElementById('artifact-select-list');
+                list.innerHTML = "";
+
+                choices.forEach(art => {
+                    const btn = document.createElement('button');
+                    btn.className = 'menu-btn';
+                    btn.style.borderColor = '#ffd700';
+                    btn.style.color = '#ffd700';
+                    btn.style.textAlign = 'left';
+                    btn.style.padding = '15px';
+                    btn.innerHTML = `<b>${art.name}</b><br><span style="font-size:0.8rem; color:#ccc; font-weight:normal;">${art.desc}</span>`;
+                    btn.onclick = () => {
+                        this.state.artifacts.push(art.id);
+                        document.getElementById('modal-artifact-select').classList.remove('active');
+                        this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
+                        this.saveGame();
+                        this.toMenu();
+                    };
+                    list.appendChild(btn);
+                });
+
+                document.getElementById('modal-artifact-select').classList.add('active');
+            },
+
+            openArtifactCheck() {
+                const owned = this.state.artifacts || [];
+                const list = document.getElementById('artifact-check-list');
+                if (owned.length === 0) {
+                    list.innerHTML = '<div style="color:#aaa; text-align:center;">보유한 아티팩트가 없습니다.</div>';
+                } else {
+                    list.innerHTML = owned.map(id => {
+                        const art = ARTIFACT_LIST.find(a => a.id === id);
+                        if (!art) return '';
+                        return `<div style="margin-bottom:8px; padding:8px; background:#333; border-radius:5px; border-left: 3px solid #ffd700;">
+                            <b style="color:#ffd700;">${art.name}</b><br>
+                            <span style="color:#ccc;">${art.desc}</span>
+                        </div>`;
+                    }).join('');
+                }
+                document.getElementById('modal-artifact-check').classList.add('active');
             },
 
             showAlert(msg) {
