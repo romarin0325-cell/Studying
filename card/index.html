@@ -829,14 +829,15 @@
         </div>
     </div>
 
-    <script src="api.js" defer></script>
-    <script src="data.js" defer></script>
-    <script src="vocab_data.js" defer></script>
-    <script src="collocation_data.js" defer></script>
-    <script src="grammar_data.js" defer></script>
-    <script src="logic.js" defer></script>
-    <script src="game.js" defer></script>
-    <script src="quiz.js" defer></script>
+    <script>window._scriptLoadErrors = [];</script>
+    <script src="game.js" defer onerror="window._scriptLoadErrors.push('game.js')"></script>
+    <script src="api.js" defer onerror="window._scriptLoadErrors.push('api.js')"></script>
+    <script src="data.js" defer onerror="window._scriptLoadErrors.push('data.js')"></script>
+    <script src="vocab_data.js" defer onerror="window._scriptLoadErrors.push('vocab_data.js')"></script>
+    <script src="collocation_data.js" defer onerror="window._scriptLoadErrors.push('collocation_data.js')"></script>
+    <script src="grammar_data.js" defer onerror="window._scriptLoadErrors.push('grammar_data.js')"></script>
+    <script src="logic.js" defer onerror="window._scriptLoadErrors.push('logic.js')"></script>
+    <script src="quiz.js" defer onerror="window._scriptLoadErrors.push('quiz.js')"></script>
     <script defer>
         /**
          * RPG Game Namespace
@@ -969,11 +970,19 @@
 
             waitForInitialDataLoad() {
                 let attempts = 0;
-                const maxAttempts = 100;
-                const fastPollingMs = 150;
-                const slowPollingMs = 500;
+                const maxAttempts = 200;
+                const pollingMs = 150;
 
                 const checkReady = () => {
+                    // Check for script load errors first
+                    if (window._scriptLoadErrors && window._scriptLoadErrors.length > 0) {
+                        const loading = document.getElementById('title-loading');
+                        if (loading) {
+                            loading.innerHTML = `⚠️ 스크립트 로드 실패: ${window._scriptLoadErrors.join(', ')}<br><span style="font-size:0.8rem; color:#aaa;">파일이 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
+                        }
+                        return;
+                    }
+
                     const missing = this.getMissingRequiredData();
                     if (missing.length === 0) {
                         this.setStartButtonsEnabled(true);
@@ -984,12 +993,23 @@
                     if (attempts >= maxAttempts) {
                         const loading = document.getElementById('title-loading');
                         if (loading) {
-                            loading.innerHTML = `⚠️ 로딩 실패: ${missing.map(d => d.name).join(', ')}<br><button onclick="location.reload()" style="margin-top:5px; padding:5px 10px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer;">새로고침</button>`;
+                            const errorInfo = window._scriptLoadErrors && window._scriptLoadErrors.length > 0
+                                ? `<br>로드 실패 파일: ${window._scriptLoadErrors.join(', ')}` : '';
+                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d => d.name).join(', ')}${errorInfo}<br><span style="font-size:0.8rem; color:#aaa;">모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
                         }
                         return;
                     }
 
-                    setTimeout(checkReady, fastPollingMs);
+                    // Update loading text with progress every 50 attempts
+                    if (attempts % 50 === 0) {
+                        const loading = document.getElementById('title-loading');
+                        if (loading) {
+                            const missing = this.getMissingRequiredData();
+                            loading.innerText = `⏳ 데이터 로딩 중... (${missing.map(d => d.name).join(', ')} 대기)`;
+                        }
+                    }
+
+                    setTimeout(checkReady, pollingMs);
                 };
 
                 this.setStartButtonsEnabled(false);
@@ -3033,7 +3053,10 @@
             }
         };
 
-        window.addEventListener('load', () => {
+        // Use DOMContentLoaded instead of 'load' to avoid being blocked by
+        // missing image resources (e.g., 루미.png). DOMContentLoaded fires after
+        // HTML parsing and deferred scripts complete, but before images load.
+        document.addEventListener('DOMContentLoaded', () => {
             RPG.waitForInitialDataLoad();
         });
     </script>
