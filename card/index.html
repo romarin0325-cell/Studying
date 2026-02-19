@@ -2256,7 +2256,8 @@ const QuizEngine = {
                     let p = {
                         id: proto.id, proto: proto, name: proto.name,
                         ...init.stats, // hp, maxHp, mp, atk, matk, def, mdef, baseCrit, baseEva
-                        buffs: {}, pos: idx, isDead: false
+                        buffs: {}, pos: idx, isDead: false,
+                        skills: JSON.parse(JSON.stringify(proto.skills)) // Clone skills
                     };
 
                     // Apply Chaos Blessing Buffs (Multiplicative to the Synergized Base)
@@ -2320,8 +2321,8 @@ const QuizEngine = {
                 // Artifact: support_boost — set all sup skill costs to 0
                 if (this.hasArtifact('support_boost')) {
                     this.battle.players.forEach(p => {
-                        if (p && p.proto && p.proto.skills) {
-                            p.proto.skills.forEach(s => {
+                        if (p && p.skills) {
+                            p.skills.forEach(s => {
                                 if (s.type === 'sup') s.cost = 0;
                             });
                         }
@@ -2342,6 +2343,21 @@ const QuizEngine = {
                     if (b.isNewTurn) {
                         b.isNewTurn = false;
                         RPG.log(`=== ${b.turn}턴 ===`, 'info');
+
+                        // Artifact: gale_storm — maintain gale field buff for first 3 turns
+                        if (RPG.hasArtifact('gale_storm')) {
+                            if (b.turn <= 3) {
+                                if (!b.fieldBuffs.some(buff => buff.name === 'gale')) {
+                                    RPG.applyFieldBuff('gale');
+                                }
+                            } else if (b.turn === 4) {
+                                const hadGale = b.fieldBuffs.some(buff => buff.name === 'gale');
+                                if (hadGale) {
+                                    b.fieldBuffs = b.fieldBuffs.filter(buff => buff.name !== 'gale');
+                                    RPG.log('[아티팩트] 질풍노도 효과 종료. (질풍 제거)');
+                                }
+                            }
+                        }
 
                         // Demon God Passive (Apply at start of turn for visibility)
                         if (b.enemy && b.enemy.id === 'demon_god') {
@@ -2748,7 +2764,7 @@ const QuizEngine = {
                 panel.appendChild(btn);
 
                 // Skills
-                p.proto.skills.forEach(s => {
+                (p.skills || p.proto.skills).forEach(s => {
                     const btn = document.createElement('button');
                     btn.className = `skill-btn ${s.type}`;
                     btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
@@ -3262,7 +3278,7 @@ const QuizEngine = {
 
                 if (side === 'player') {
                     content += `<b>[스킬]</b><br>`;
-                    char.proto.skills.forEach(s => {
+                    (char.skills || char.proto.skills).forEach(s => {
                         let multText = s.val ? ` (x${s.val})` : '';
                         content += `- ${s.name}: ${s.desc}${multText}<br>`;
                     });
