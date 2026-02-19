@@ -35,10 +35,10 @@ const QuizEngine = {
      */
     show(config) {
         const modal = document.getElementById('modal-quiz');
-        const qDiv  = document.getElementById('quiz-question');
+        const qDiv = document.getElementById('quiz-question');
         const descDiv = document.getElementById('quiz-desc');
-        const oDiv  = document.getElementById('quiz-options');
-        const fDiv  = document.getElementById('quiz-feedback');
+        const oDiv = document.getElementById('quiz-options');
+        const fDiv = document.getElementById('quiz-feedback');
 
         // Reset modal state
         modal.classList.remove('active');
@@ -59,7 +59,7 @@ const QuizEngine = {
         // Shuffle options
         const shuffled = [...config.options].sort(() => Math.random() - 0.5);
         const correctDelay = config.correctDelay || 1000;
-        const wrongDelay   = config.wrongDelay   || 1500;
+        const wrongDelay = config.wrongDelay || 1500;
 
         shuffled.forEach(optText => {
             const btn = document.createElement('button');
@@ -134,7 +134,7 @@ const QuizEngine = {
                 if (!RPG.state.wrongWords) RPG.state.wrongWords = [];
                 if (!RPG.state.wrongWords.includes(q.word)) {
                     RPG.state.wrongWords.push(q.word);
-                    localStorage.setItem('cardRpgVocab', JSON.stringify(RPG.state.wrongWords));
+                    Storage.save(Storage.keys.VOCAB, RPG.state.wrongWords);
                 }
                 callback(false);
             }
@@ -201,7 +201,7 @@ const QuizEngine = {
                 if (!RPG.state.wrongCollocations) RPG.state.wrongCollocations = [];
                 if (!RPG.state.wrongCollocations.includes(q.parentId)) {
                     RPG.state.wrongCollocations.push(q.parentId);
-                    localStorage.setItem('cardRpgCollocation', JSON.stringify(RPG.state.wrongCollocations));
+                    Storage.save(Storage.keys.COLLOCATION, RPG.state.wrongCollocations);
                 }
                 callback(false);
             }
