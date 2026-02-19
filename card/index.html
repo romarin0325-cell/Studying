@@ -1490,7 +1490,7 @@
 
             // --- Gacha & Deck UI ---
             reshuffleChaosPool() {
-                if (this.state.tickets < 1) {
+                if (this.state.tickets < GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE) {
                     return this.showAlert("셔플할 티켓이 부족합니다.");
                 }
 
@@ -1499,7 +1499,7 @@
             티켓 1장을 사용하여 새로운 15장을 받으시겠습니까?`,
                     `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
                     () => {
-                        this.state.tickets--;
+                        this.state.tickets -= GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE;
                         document.getElementById('ui-tickets').innerText = this.state.tickets;
 
                         let allCards = GameUtils.buildCardPool(this.global, {
@@ -1534,16 +1534,16 @@
             },
 
             openGacha() {
-                if (this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
-                this.state.tickets--;
+                if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
+                this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 this.runGacha(false);
             },
 
             openChallengeGacha() {
-                if (this.state.tickets < 1) return this.showAlert("티켓이 부족합니다.");
+                if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
 
                 // 티켓 선차감
-                this.state.tickets--;
+                this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
 
                 this.startQuiz((success) => {
@@ -2266,7 +2266,7 @@
 
             applyFieldBuff(id) {
                 if (this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
-                if (this.battle.fieldBuffs.length >= 3) {
+                if (this.battle.fieldBuffs.length >= GAME_CONSTANTS.MAX_FIELD_BUFFS) {
                     let removed = this.battle.fieldBuffs.shift();
                     RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
                 }
@@ -2427,9 +2427,9 @@
                     this.state.draft.currentOptions = [];
                     this.renderDraftScreen();
                 } else {
-                    if (this.state.tickets > 0) {
-                        this.showConfirm(`무료 리롤 횟수가 없습니다.<br>티켓 1장을 사용하여 리롤하시겠습니까?<br>(보유 티켓: ${this.state.tickets})`, () => {
-                            this.state.tickets--;
+                    if (this.state.tickets >= GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET) {
+                        this.showConfirm(`무료 리롤 횟수가 없습니다.<br>티켓 ${GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET}장을 사용하여 리롤하시겠습니까?<br>(보유 티켓: ${this.state.tickets})`, () => {
+                            this.state.tickets -= GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET;
                             document.getElementById('ui-tickets').innerText = this.state.tickets;
                             this.state.draft.currentOptions = [];
                             this.renderDraftScreen();
@@ -2444,7 +2444,7 @@
                 // Called when initializing new draft cycle
                 this.state.inventory = [];
                 this.state.deck = [null, null, null];
-                this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
+                this.state.draft = { active: true, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] };
             },
 
             cleanupTranscendenceCards() {
