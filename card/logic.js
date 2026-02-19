@@ -21,7 +21,14 @@ const DAMAGE_EFFECT_HANDLERS = {
     'consume_debuff_all': (ctx, eff) => {
         if (ctx.target.buffs[eff.debuff]) {
             let c = ctx.target.buffs[eff.debuff];
-            ctx.mult += (c * eff.multPerStack);
+            let mps = eff.multPerStack;
+            // Artifact: holy_flame_burst — double consume multiplier for burn/divine
+            const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+            if (artifacts.includes('holy_flame_burst') && (eff.debuff === 'burn' || eff.debuff === 'divine')) {
+                mps *= 2.0;
+                ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+            }
+            ctx.mult += (c * mps);
             delete ctx.target.buffs[eff.debuff];
             ctx.logFn(`${getBuffName(eff.debuff)} ${c}스택 소모!`);
         }
@@ -76,10 +83,17 @@ const DAMAGE_EFFECT_HANDLERS = {
         if ((ctx.target.buffs[debuff] || 0) >= count) {
             ctx.target.buffs[debuff] -= count;
             if (ctx.target.buffs[debuff] <= 0) delete ctx.target.buffs[debuff];
-            ctx.mult *= eff.mult;
+            let m = eff.mult;
+            // Artifact: holy_flame_burst — double consume multiplier for burn/divine
+            const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+            if (artifacts.includes('holy_flame_burst') && (debuff === 'burn' || debuff === 'divine')) {
+                m *= 2.0;
+                ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+            }
+            ctx.mult *= m;
 
             if (eff.customLog) ctx.logFn(eff.customLog);
-            else ctx.logFn(`${getBuffName(debuff)} ${count}스택 소모! 위력 ${eff.mult}배!`);
+            else ctx.logFn(`${getBuffName(debuff)} ${count}스택 소모! 위력 ${m}배!`);
         }
     },
     'consume_divine_add_darkness': (ctx, eff) => {
@@ -195,8 +209,14 @@ const SideEffects = {
         'debuff': (ctx, eff) => {
             let t = ctx.target;
             if (eff.stack) {
-                t.buffs[eff.id] = (t.buffs[eff.id] || 0) + 1;
-                if (t.buffs[eff.id] > 3) t.buffs[eff.id] = 3;
+                let maxStack = 3;
+                let addStack = 1;
+                // Artifact: over_flame / over_divine
+                const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+                if (eff.id === 'burn' && artifacts.includes('over_flame')) { maxStack = 5; addStack = 2; }
+                if (eff.id === 'divine' && artifacts.includes('over_divine')) { maxStack = 5; addStack = 2; }
+
+                t.buffs[eff.id] = Math.min((t.buffs[eff.id] || 0) + addStack, maxStack);
                 ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
             } else {
                 t.buffs[eff.id] = 1;
@@ -432,7 +452,8 @@ const SideEffects = {
 
 const Logic = {
     // 1. Stats Calculation
-    calculateStats: function (char, fieldBuffs, mode) {
+    calculateStats: function (char, fieldBuffs, mode, artifacts) {
+        if (!artifacts) artifacts = [];
         // Base stats
         let stats = {
             atk: char.atk,
@@ -480,12 +501,18 @@ const Logic = {
             fieldBuffs.forEach(fb => {
                 const bonus = GAME_CONSTANTS.FIELD_BUFF_STATS[fb.name];
                 if (bonus) {
-                    if (bonus.atk) m.atk += (bonus.atk * buffMult);
-                    if (bonus.matk) m.matk += (bonus.matk * buffMult);
-                    if (bonus.def) m.def += (bonus.def * buffMult);
-                    if (bonus.mdef) m.mdef += (bonus.mdef * buffMult);
-                    if (bonus.crit) stats.crit += (bonus.crit * buffMult);
-                    if (bonus.evasion) stats.evasion += (bonus.evasion * buffMult);
+                    // Artifact: nature_blessing — double earth_bless effect
+                    let artifactBuffMult = 1.0;
+                    if (fb.name === 'earth_bless' && artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
+                    // Artifact: milkshake — double star_powder effect
+                    if (fb.name === 'star_powder' && artifacts.includes('milkshake')) artifactBuffMult = 2.0;
+
+                    if (bonus.atk) m.atk += (bonus.atk * buffMult * artifactBuffMult);
+                    if (bonus.matk) m.matk += (bonus.matk * buffMult * artifactBuffMult);
+                    if (bonus.def) m.def += (bonus.def * buffMult * artifactBuffMult);
+                    if (bonus.mdef) m.mdef += (bonus.mdef * buffMult * artifactBuffMult);
+                    if (bonus.crit) stats.crit += (bonus.crit * buffMult * artifactBuffMult);
+                    if (bonus.evasion) stats.evasion += (bonus.evasion * buffMult * artifactBuffMult);
                 }
             });
         }
@@ -508,7 +535,40 @@ const Logic = {
         let defRed = 0.0;
         if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
         else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
+        // Artifact: assassin_nail — double darkness def reduction
+        if (artifacts.includes('assassin_nail') && (char.buffs['darkness'] || char.buffs['corrosion'])) {
+            defRed *= 2.0;
+        }
         m.def -= (defRed * debuffMult);
+
+        // Artifact: shadow_ball — darkness also reduces mdef
+        if (artifacts.includes('shadow_ball') && char.buffs['darkness']) {
+            let mdefRed = 0.2;
+            if (artifacts.includes('assassin_nail')) mdefRed *= 2.0;
+            m.mdef -= (mdefRed * debuffMult);
+        }
+
+        // Artifact: veil_of_darkness — dark element crit/eva +10%
+        if (isPlayer && artifacts.includes('veil_of_darkness') && char.proto && char.proto.element === 'dark') {
+            stats.crit += 10;
+            stats.evasion += 10;
+        }
+
+        // Artifact: rabbit_hole — specific rabbits crit/eva +20%
+        if (isPlayer && artifacts.includes('rabbit_hole') && char.proto) {
+            const rabbitIds = ['snow_rabbit', 'night_rabbit', 'silver_rabbit'];
+            if (rabbitIds.includes(char.proto.id)) {
+                stats.crit += 20;
+                stats.evasion += 20;
+            }
+        }
+
+        // Artifact: shadow_stab — eva +20%, def/mdef -30%
+        if (isPlayer && artifacts.includes('shadow_stab')) {
+            stats.evasion += 20;
+            m.def -= 0.3;
+            m.mdef -= 0.3;
+        }
 
         // Apply Multipliers
         stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
@@ -520,19 +580,20 @@ const Logic = {
     },
 
     // 2. Evasion Check
-    checkEvasion: function (target, skillType, fieldBuffs, mode) {
-        const stats = this.calculateStats(target, fieldBuffs, mode);
+    checkEvasion: function (target, skillType, fieldBuffs, mode, artifacts) {
+        const stats = this.calculateStats(target, fieldBuffs, mode, artifacts);
         return Math.random() * 100 < stats.evasion;
     },
 
     // 3. Damage Calculation
-    calculateDamage: function (source, target, skill, fieldBuffs, activeTraits, logFn, mode, deck, turn) {
+    calculateDamage: function (source, target, skill, fieldBuffs, activeTraits, logFn, mode, deck, turn, artifacts) {
         if (!logFn) logFn = function () { };
+        if (!artifacts) artifacts = [];
 
         if (skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0, isCrit: false };
 
-        const srcStats = this.calculateStats(source, fieldBuffs, mode);
-        const tgtStats = this.calculateStats(target, fieldBuffs, mode);
+        const srcStats = this.calculateStats(source, fieldBuffs, mode, artifacts);
+        const tgtStats = this.calculateStats(target, fieldBuffs, mode, artifacts);
 
         // 1. Critical
         let isCrit = Math.random() * 100 < srcStats.crit;
@@ -642,6 +703,28 @@ const Logic = {
             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate * 100)}% 관통!`);
         }
 
+        // Artifact: flame_piercing — burn stacks x 10% physical defense penetration
+        if (artifacts.includes('flame_piercing') && skill.type === 'phy' && target.buffs['burn']) {
+            let burnPen = target.buffs['burn'] * 0.1;
+            let ignore = Math.floor(tgtStats.def * burnPen);
+            def = Math.max(0, def - ignore);
+            logFn(`[아티팩트] 플레임피어싱: 작열 ${target.buffs['burn']}스택! 방어력 ${Math.round(burnPen * 100)}% 관통!`);
+        }
+
+        // Artifact: divine_piercing — divine stacks x 10% magic defense penetration
+        if (artifacts.includes('divine_piercing') && skill.type === 'mag' && target.buffs['divine']) {
+            let divinePen = target.buffs['divine'] * 0.1;
+            let ignore = Math.floor(tgtStats.mdef * divinePen);
+            def = Math.max(0, def - ignore);
+            logFn(`[아티팩트] 디바인피어싱: 디바인 ${target.buffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
+        }
+
+        // Artifact: ice_break — triple damage to stunned targets
+        if (artifacts.includes('ice_break') && target.buffs['stun']) {
+            mult *= 3.0;
+            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 3배!`);
+        }
+
         // [추가] 신데렐라: 스택 비례 방어 무시
         if (t && t.type === 'ignore_def_mdef_by_stack') {
             let ignoreRate = 0;
@@ -723,11 +806,16 @@ const Logic = {
             logFn(`[꿈의형태] 필드 버프 ${fieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
         }
 
+        // Artifact: death_roulette — double all skill damage
+        if (artifacts.includes('death_roulette')) {
+            mult *= 2.0;
+        }
+
         // Final Calculation
         let finalMult = mult * (1.0 + dmgBonus);
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
 
-        return { dmg: finalDmg, isCrit: isCrit };
+        return { dmg: finalDmg, isCrit: isCrit, luckyVicky: artifacts.includes('lucky_vicky') && isCrit };
     },
 
     // 4. Initial Stats Calculation
@@ -816,6 +904,15 @@ const Logic = {
             }
         }
 
+        // Artifact: dragon_heart — dragon cards matk +50%
+        const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+        if (artifacts.includes('dragon_heart')) {
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon'];
+            if (dragonIds.includes(playerProto.id)) {
+                p.matk = Math.floor(p.matk * 1.5);
+            }
+        }
+
         return { stats: p, activeTrait: active ? t.type : null };
     },
 
@@ -880,8 +977,9 @@ const Logic = {
     },
 
     // 6. Handle Death Traits
-    handleDeathTraits: function (victim, killer, fieldBuffs, logFn, deck, turn) {
+    handleDeathTraits: function (victim, killer, fieldBuffs, logFn, deck, turn, artifacts) {
         if (!logFn) logFn = function () { };
+        if (!artifacts) artifacts = [];
 
         let result = { damageToKiller: 0, fieldBuffsToAdd: [], killerDebuffs: {} };
         const t = victim.proto.trait;
@@ -932,6 +1030,35 @@ const Logic = {
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
             logFn(`[특성] 헬하운드 사망! 트윙클 파티 발동!`);
+        }
+
+        // ─── Artifact Death Effects ─────────────────────────────
+
+        // Artifact: reverse — nature element death -> earth_bless field buff
+        if (artifacts.includes('reverse') && victim.proto && victim.proto.element === 'nature') {
+            result.fieldBuffsToAdd.push('earth_bless');
+            logFn(`[아티팩트] 리버스: 자연속성 카드 사망! 대지의 축복 부여!`);
+        }
+
+        // Artifact: frozen_body — water element death -> stun on killer
+        if (artifacts.includes('frozen_body') && victim.proto && victim.proto.element === 'water') {
+            if (killer) {
+                result.killerDebuffs['stun'] = 1;
+                logFn(`[아티팩트] 프로즌바디: 물속성 카드 사망! 적에게 스턴 부여!`);
+            }
+        }
+
+        // Artifact: big_bang — legend/transcendence death -> 3x physical self-destruct
+        if (artifacts.includes('big_bang') && victim.proto) {
+            const grade = victim.proto.grade;
+            if (grade === 'legend' || grade === 'transcendence') {
+                let dummySkill = { name: '빅뱅', type: 'phy', val: 3.0, effects: [] };
+                let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
+                if (dmgResult.dmg > 0) {
+                    result.damageToKiller += dmgResult.dmg;
+                    logFn(`[아티팩트] 빅뱅! 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
+                }
+            }
         }
 
         return result;

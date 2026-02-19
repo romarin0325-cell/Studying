@@ -94,10 +94,12 @@ const GAME_CONSTANTS = {
         flood: 10,
         curse: 10,
         chaos: 0,
-        draft: 5
+        draft: 5,
+        artifact: 10
     },
     DECK_SIZE: 3,
     MAX_RECORDS: 5,
+    MAX_ARTIFACTS: 4,
     SAGE_BLESSING_PICK_COUNT: 12,
 
     // Costs
@@ -128,7 +130,8 @@ const GAME_CONSTANTS = {
         'earth_bless': { atk: 0.25, matk: 0.25 },
         'twinkle_party': { atk: 0.2, crit: 15 },
         'star_powder': { def: 0.4, mdef: 0.4 },
-        'reaper_realm': { crit: 40 }
+        'reaper_realm': { crit: 40 },
+        'gale': { crit: 20, evasion: 20 }
     }
 };
 
@@ -155,6 +158,34 @@ const GACHA_RATES = {
         challenge: [{ grade: 'legend', threshold: 0.20 }, { grade: 'epic', threshold: 0.45 }, { grade: 'rare', threshold: 0.75 }]
     }
 };
+
+// ─── Artifact Definitions ─────────────────────────────────────────────────────
+
+const ARTIFACT_LIST = [
+    { id: 'nature_blessing', name: '대자연의 축복', desc: '대지의축복 효과 2배' },
+    { id: 'reverse', name: '리버스', desc: '자연속성 카드 사망시 필드버프 대지의축복 부여' },
+    { id: 'milkshake', name: '밀크쉐이크', desc: '스타파우더 효과 2배' },
+    { id: 'buff_overload', name: '버프오버로드', desc: '필드버프 상한 5개로 변경' },
+    { id: 'shadow_ball', name: '섀도우볼', desc: '암흑 효과가 마법방어도 감소하도록 변경' },
+    { id: 'assassin_nail', name: '어쌔신네일', desc: '암흑 효과 2배 적용' },
+    { id: 'veil_of_darkness', name: '베일오브다크니스', desc: '어둠속성 카드 치명타와 회피율 10% 증가' },
+    { id: 'rabbit_hole', name: '래빗홀', desc: '눈토끼, 밤토끼, 은토끼의 치명타와 회피율 20% 증가' },
+    { id: 'lucky_vicky', name: '럭키비키', desc: '치명타 혹은 회피 발생시 마나 10 회복' },
+    { id: 'over_flame', name: '오버플레임', desc: '작열 최대 스택 5, 부여시 2스택씩 부여' },
+    { id: 'over_divine', name: '오버디바인', desc: '디바인 최대 스택 5, 부여시 2스택씩 부여' },
+    { id: 'holy_flame_burst', name: '홀리플레임버스트', desc: '작열/디바인 전소모 스킬의 추가위력 2배' },
+    { id: 'flame_piercing', name: '플레임피어싱', desc: '작열 스택당 적의 방어력 10% 추가 관통' },
+    { id: 'divine_piercing', name: '디바인피어싱', desc: '디바인 스택당 적의 마법방어력 10% 추가 관통' },
+    { id: 'gale_storm', name: '질풍노도', desc: '전투 개시 후 3턴간 필드버프 질풍 부여 (치명타율/회피율 20% 증가)' },
+    { id: 'frozen_body', name: '프로즌바디', desc: '물속성 카드 사망시 적에게 스턴 부여' },
+    { id: 'ice_break', name: '아이스브레이크', desc: '스턴 중인 적에게 대미지 3배' },
+    { id: 'support_boost', name: '서포트부스트', desc: '모든 보조스킬 마나 소비 0' },
+    { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 1.5배' },
+    { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
+    { id: 'shadow_stab', name: '섀도우스탭', desc: '회피율 20%증가, 방어력과 마법방어력 30% 감소' },
+    { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤 마공 50% 증가' },
+    { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' }
+];
 
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
