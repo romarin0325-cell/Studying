@@ -457,6 +457,21 @@
         .title-loading.hidden {
             display: none;
         }
+
+        #modal-artifact-select .modal-content {
+            padding: 10px !important;
+            padding-top: 5px !important;
+            min-height: auto !important;
+        }
+
+        #modal-artifact-select h3 {
+            margin: 5px 0 !important;
+        }
+
+        #modal-artifact-select p {
+            margin: 5px 0 !important;
+            margin-bottom: 8px !important;
+        }
     </style>
 </head>
 
@@ -3144,8 +3159,16 @@ const QuizEngine = {
                                             this.openArtifactSelect();
                                         },
                                         () => { // Fail
-                                            this.showAlert("오답입니다... 아티팩트를 획득하지 못했습니다.");
-                                            this.toMenu();
+                                            this.showConfirm(`오답입니다... 관련 문법 강좌(${q.lecture_id}강)를 확인하시겠습니까?`,
+                                                () => { // Yes
+                                                    this.showLecture(q.lecture_id, () => {
+                                                        this.toMenu();
+                                                    });
+                                                },
+                                                () => { // No
+                                                    this.toMenu();
+                                                }
+                                            );
                                         }
                                     );
                                 },
@@ -3169,8 +3192,16 @@ const QuizEngine = {
                                             this.toMenu();
                                         },
                                         () => { // Fail
-                                            this.showAlert("오답입니다... 보상 없음.");
-                                            this.toMenu();
+                                            this.showConfirm(`오답입니다... 관련 문법 강좌(${q.lecture_id}강)를 확인하시겠습니까?`,
+                                                () => { // Yes
+                                                    this.showLecture(q.lecture_id, () => {
+                                                        this.toMenu();
+                                                    });
+                                                },
+                                                () => { // No
+                                                    this.toMenu();
+                                                }
+                                            );
                                         }
                                     );
                                 },
