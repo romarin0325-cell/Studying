@@ -180,11 +180,14 @@ const ARTIFACT_LIST = [
     { id: 'frozen_body', name: '프로즌바디', desc: '물속성 카드 사망시 적에게 스턴 부여' },
     { id: 'ice_break', name: '아이스브레이크', desc: '스턴 중인 적에게 대미지 3배' },
     { id: 'support_boost', name: '서포트부스트', desc: '모든 보조스킬 마나 소비 0' },
-    { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 1.5배' },
+    { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 2.0배' },
     { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
     { id: 'shadow_stab', name: '섀도우스탭', desc: '회피율 20%증가, 방어력과 마법방어력 30% 감소' },
     { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤 마공 50% 증가' },
-    { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' }
+    { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' },
+    { id: 'companion', name: '길동무', desc: '사망시 적에게 대미지를 주는 특성이나 아티팩트 대미지 2배' },
+    { id: 'kaleidoscope', name: '만화경', desc: '매 턴 개시시 모든 필드버프를 변경한다' },
+    { id: 'blue_moon', name: '블루문', desc: '스킬 사용시 30%확률로 마나를 소비하지 않는다' }
 ];
 
 // ─── Game Utilities ───────────────────────────────────────────────────────────
@@ -1262,6 +1265,11 @@ const Logic = {
         if (t.type === 'death_dmg_mag') {
             let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
+            // Artifact: companion
+            if (artifacts.includes('companion')) {
+                 dmgResult.dmg *= 2;
+                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
+            }
             if (dmgResult.dmg > 0) {
                 result.damageToKiller += dmgResult.dmg;
                 logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -1271,6 +1279,11 @@ const Logic = {
             let cnt = Object.keys(killer.buffs).length;
             let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
+            // Artifact: companion
+            if (artifacts.includes('companion')) {
+                 dmgResult.dmg *= 2;
+                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
+            }
             if (dmgResult.dmg > 0) {
                 result.damageToKiller += dmgResult.dmg;
                 logFn(`[특성] 저주 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -1297,6 +1310,11 @@ const Logic = {
             let count = fieldBuffs.length;
             let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
+            // Artifact: companion
+            if (artifacts.includes('companion')) {
+                 dmgResult.dmg *= 2;
+                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
+            }
             if (dmgResult.dmg > 0) {
                 result.damageToKiller += dmgResult.dmg;
                 logFn(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
@@ -1329,6 +1347,11 @@ const Logic = {
             if (grade === 'legend' || grade === 'transcendence') {
                 let dummySkill = { name: '빅뱅', type: 'phy', val: 3.0, effects: [] };
                 let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
+                // Artifact: companion
+                if (artifacts.includes('companion')) {
+                     dmgResult.dmg *= 2;
+                     logFn('[아티팩트] 길동무: 빅뱅 자폭 대미지 2배!');
+                }
                 if (dmgResult.dmg > 0) {
                     result.damageToKiller += dmgResult.dmg;
                     logFn(`[아티팩트] 빅뱅! 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
