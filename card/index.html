@@ -1482,10 +1482,11 @@ const QuizEngine = {
                 ];
 
                 if (this.tempGameType === 'endless') {
-                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos'].includes(m.id));
+                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact'].includes(m.id));
                     MODES.forEach(m => {
                         if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
+                        if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 없음 / 무한)';
                     });
                 } else if (this.tempGameType === 'challenge') {
                     MODES = MODES.filter(m => m.id !== 'origin');
