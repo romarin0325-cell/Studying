@@ -2360,6 +2360,24 @@ const QuizEngine = {
                         b.isNewTurn = false;
                         RPG.log(`=== ${b.turn}턴 ===`, 'info');
 
+                        // Artifact: kaleidoscope
+                        if (RPG.hasArtifact('kaleidoscope')) {
+                            let count = b.fieldBuffs.length;
+                            if (count > 0) {
+                                b.fieldBuffs = []; // Clear
+                                RPG.log('[아티팩트] 만화경: 필드 버프 재구성!');
+
+                                // Get all available buff keys
+                                const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS);
+
+                                // Select unique random buffs
+                                let pool = [...allBuffs].sort(() => 0.5 - Math.random());
+                                let picks = pool.slice(0, Math.min(count, pool.length));
+
+                                picks.forEach(bid => RPG.applyFieldBuff(bid));
+                            }
+                        }
+
                         // Artifact: gale_storm — maintain gale field buff for first 3 turns
                         if (RPG.hasArtifact('gale_storm')) {
                             if (b.turn <= 3) {
@@ -2602,12 +2620,19 @@ const QuizEngine = {
             // --- Player Skill Execution ---
 
             executeSkill(source, target, skill, isDelayed = false) {
-                if (!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
+                if (!isDelayed && !skill.isDelayed) {
+                    // Artifact: blue_moon
+                    if (this.hasArtifact('blue_moon') && Math.random() < 0.3) {
+                        RPG.log('[아티팩트] 블루문: 마나 소비 없이 스킬 사용!');
+                    } else {
+                        source.mp -= skill.cost;
+                    }
+                }
 
-                // Artifact: double_attack — normal attack 1.5x power
+                // Artifact: double_attack — normal attack 2.0x power
                 let modifiedSkill = skill;
                 if (this.hasArtifact('double_attack') && skill.name === RPG.NORMAL_ATTACK.name) {
-                    modifiedSkill = { ...skill, val: (skill.val || 1.0) * 1.5 };
+                    modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.0 };
                 }
 
                 RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
