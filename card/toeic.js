@@ -17,7 +17,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "1-2",
-        "question": "(진행형 vs 단순현재 / now + 상태 보고)\nWe _______ the supplier’s final quote now, and we expect to receive it by this afternoon.",
+        "question": "(진행형 vs 단순현재 / now + 상태 보고)\nWe _______ the supplier’s final quote now, and we expect to finalize it by this afternoon.",
         "options": [
           "review",
           "reviewed",
@@ -149,7 +149,7 @@ const TOEIC_DATA = [
           "[3]",
           "[4]"
         ],
-        "answer": "[2]"
+        "answer": "[3]"
       }
     ],
     "passage": "3강 \n3강 (Part 6) 배송 지연 안내 + 대체품 제안 고객 이메일 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Update on Your Order and Available Options \n \nDear Ms. Patel, \n \nThank you for your recent purchase from Wexford Office Supply. I am writing regarding your order (No. WS-18427) for 24 units of the MX-900 wireless keyboards, which was scheduled to ship on February 18. \n \nUnfortunately, our carrier has informed us that severe weather conditions in the Kansai region have temporarily disrupted outbound freight operations. As a result, the shipment has been delayed, and the revised estimated delivery date is now February 26. We understand that this may cause inconvenience, (1) _______ if the items are needed for an upcoming installation or an employee onboarding schedule. [1] \n \nTo minimize the impact on your operations, we can offer two alternatives. First, we can send 24 units of the MX-880 model, which is currently in stock and can be dispatched today. The MX-880 has the same layout and compatibility as the MX-900, (2) _______ it does include the dedicated shortcut keys for video conferencing. If this option works for you, we will apply a 10% discount to reflect the difference in features. [2] \n \nSecond, if you prefer to keep the MX-900 model, we can arrange partial delivery: 10 units will be shipped from our Tokyo warehouse immediately, and the remaining 14 units will follow once the freight restrictions are lifted. Please note that this split shipment would require two separate tracking numbers and may arrive (3) _______ different days. In addition, the second shipment may be handed off to a different local carrier depending on route availability. [3] \n \nPlease let us know which option you would like to choose by 2 p.m. tomorrow, so we can update the order and confirm the shipping arrangement. We apologize again for the delay and appreciate your patience. [4] \n \nSincerely, \nHiro Tanaka \nCustomer Support Representative \nWexford Office Supply"
@@ -223,7 +223,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "5-9",
-        "question": "(few/a few 의미 차이 + 수량표현)\nOnly _______ employees volunteered to work overtime, so the manager postponed the deadline.",
+        "question": "(few/a few 의미 차이 + 수량표현)\nOnly _______ employees volunteered to work overtime, so the manager was able to keep the original deadline.",
         "options": [
           "a few",
           "few",
@@ -307,9 +307,9 @@ const TOEIC_DATA = [
         "question": "(be + p.p. 수동태)\nThe final contract _______ by the legal department before it was sent to the client.",
         "options": [
           "was reviewed",
-          "was reviewing",
-          "has review",
-          "is review"
+          "has been reviewed",
+          "reviewed",
+          "was reviewing"
         ],
         "answer": "was reviewed"
       },
@@ -387,7 +387,7 @@ const TOEIC_DATA = [
         "answer": "[4]"
       }
     ],
-    "passage": "8강 \n8강 (Part 6) 신입/부서 대상 오리엔테이션 안내 공지 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: New Employee Orientation: March Schedule and Required Materials \n \nWelcome to Northbridge Solutions. \n \nAll new employees joining the company in March are required to attend the New Employee Orientation Program. This program introduces core workplace policies, explains how to access internal tools, and provides an overview of department-specific procedures. Attendance is mandatory for all full-time hires and is strongly recommended for contract staff who will be on-site more than three days per week. [1] \n \nThe orientation will be held on Monday, March 3, from 9:30 a.m. to 4:30 p.m. in Conference Room B on the 12th floor. Please arrive by 9:15 a.m. to complete check-in and receive your temporary building access badge. Late arrivals may be asked to join the afternoon session instead, (1) _______ the morning portion includes required safety training. [2] \n \nPrior to the orientation, participants must review the attached “Getting Started” guide and complete the short online compliance module. The module takes approximately 20 minutes and must be finished by 6 p.m. on Friday, February 28. You will receive an automated confirmation email after completion; please save (2) _______ for your records. [3] \n \nDuring the program, you will receive a printed packet containing a building map, a list of emergency contacts, and an IT support directory. Please bring a laptop if possible. If you do not yet have a company-issued device, you may bring your personal laptop, (3) _______ it can connect to a standard Wi-Fi network and has a modern web browser installed. Headphones are also recommended, since part of the session includes short training videos. [4] \n \nIf you have any questions about the schedule or materials, please contact Human Resources at hr@northbridge.example \n. \n \nThank you, \nHuman Resources Department \nNorthbridge Solutions"
+    "passage": "8강 \n8강 (Part 6) 신입/부서 대상 오리엔테이션 안내 공지 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: New Employee Orientation: March Schedule and Required Materials \n \nWelcome to Northbridge Solutions. \n \nAll new employees joining the company in March are required to attend the New Employee Orientation Program. This program introduces core workplace policies, explains how to access internal tools, and provides an overview of department-specific procedures. Attendance is mandatory for all full-time hires and is strongly recommended for contract staff who will be on-site more than three days per week. [1] \n \nThe orientation will be held on Tuesday, March 3, from 9:30 a.m. to 4:30 p.m. in Conference Room B on the 12th floor. Please arrive by 9:15 a.m. to complete check-in and receive your temporary building access badge. Late arrivals may be asked to join the afternoon session instead, (1) _______ the morning portion includes required safety training. [2] \n \nPrior to the orientation, participants must review the attached “Getting Started” guide and complete the short online compliance module. The module takes approximately 20 minutes and must be finished by 6 p.m. on Friday, February 27. You will receive an automated confirmation email after completion; please save (2) _______ for your records. [3] \n \nDuring the program, you will receive a printed packet containing a building map, a list of emergency contacts, and an IT support directory. Please bring a laptop if possible. If you do not yet have a company-issued device, you may bring your personal laptop, (3) _______ it can connect to a standard Wi-Fi network and has a modern web browser installed. Headphones are also recommended, since part of the session includes short training videos. [4] \n \nIf you have any questions about the schedule or materials, please contact Human Resources at hr@northbridge.example \n. \n \nThank you, \nHuman Resources Department \nNorthbridge Solutions"
   },
   {
     "id": 9,
@@ -582,7 +582,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "12강 \n12강 (Part 6) — 시설 점검/출입 제한 내부 메모 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nINTERNAL MEMO \n \nTo: All Employees \nFrom: Facilities Management Office \nDate: February 21 \nSubject: Building Maintenance and Temporary Access Restrictions \n \nTo ensure a safe and reliable work environment, Facilities Management will conduct scheduled maintenance on the main electrical panel and the emergency power system next week. The work will be performed by an external contractor and will require limited access to several areas on Floors 3 through 5. [1] \n \nThe maintenance is scheduled (1) _______ 8:00 p.m. on Tuesday, February 25, to 6:00 a.m. on Wednesday, February 26. During this period, the east stairwell and two service elevators will be taken out of operation. Temporary signage will be posted to redirect foot traffic, and security staff will be stationed near the elevator lobby to assist employees leaving after evening meetings. [2] \n \nAccess to the server room (Room 4B) will be restricted throughout the maintenance window. Only employees who have been pre-approved by the IT Security team will be allowed (2) _______. If your work requires entry, submit a request to IT Security no later than 3 p.m. on Monday, February 24. Requests received after this deadline may not be processed in time, and access will not be granted. [3] \n \nPlease note that the cafeteria on the 3rd floor will be closed during the maintenance window (3) _______ noise and safety concerns. Vending machines near the west lobby will remain available. If you need to retrieve personal items from the cafeteria refrigerators, please do so before 7:30 p.m. on Tuesday. The contractor will also test emergency lighting and alarms at multiple points during the night. These tests may trigger short audible alerts lasting less than 30 seconds. Do not evacuate unless an alarm sounds continuously for more than one minute or unless you receive an announcement from Security. [4] \n \nThank you for your cooperation. If you have questions, contact Facilities Management at extension 4021."
+    "passage": "12강 \n12강 (Part 6) — 시설 점검/출입 제한 내부 메모 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nINTERNAL MEMO \n \nTo: All Employees \nFrom: Facilities Management Office \nDate: February 21 \nSubject: Building Maintenance and Temporary Access Restrictions \n \nTo ensure a safe and reliable work environment, Facilities Management will conduct scheduled maintenance on the main electrical panel and the emergency power system next week. The work will be performed by an external contractor and will require limited access to several areas on Floors 3 through 5. [1] \n \nThe maintenance is scheduled (1) _______ 8:00 p.m. on Tuesday, February 24, to 6:00 a.m. on Wednesday, February 25. During this period, the east stairwell and two service elevators will be taken out of operation. Temporary signage will be posted to redirect foot traffic, and security staff will be stationed near the elevator lobby to assist employees leaving after evening meetings. [2] \n \nAccess to the server room (Room 4B) will be restricted throughout the maintenance window. Only employees who have been pre-approved by the IT Security team will be allowed (2) _______. If your work requires entry, submit a request to IT Security no later than 3 p.m. on Monday, February 23. Requests received after this deadline may not be processed in time, and access will not be granted. [3] \n \nPlease note that the cafeteria on the 3rd floor will be closed during the maintenance window (3) _______ noise and safety concerns. Vending machines near the west lobby will remain available. If you need to retrieve personal items from the cafeteria refrigerators, please do so before 7:30 p.m. on Tuesday. The contractor will also test emergency lighting and alarms at multiple points during the night. These tests may trigger short audible alerts lasting less than 30 seconds. Do not evacuate unless an alarm sounds continuously for more than one minute or unless you receive an announcement from Security. [4] \n \nThank you for your cooperation. If you have questions, contact Facilities Management at extension 4021."
   },
   {
     "id": 13,
@@ -596,7 +596,7 @@ const TOEIC_DATA = [
           "frank",
           "frankly",
           "frankness",
-          "frankened"
+          "franker"
         ],
         "answer": "frankly"
       },
@@ -777,7 +777,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "16강 \n16강 (Part 6) — 사내 설문/피드백 요청 이메일 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Request for Feedback on the Updated Expense Reimbursement Process \n \nDear Colleagues, \n \nAs part of our ongoing effort to improve internal services, the Finance Operations team is collecting feedback on the updated expense reimbursement process introduced at the beginning of this quarter. Since the launch, we have received several questions about receipt uploads, approval timing, and the status notifications employees receive after submitting a claim. Your input will help us identify which steps are clear and which steps require additional guidance or system improvements. [1] \n \nThe survey consists of 10 questions and should take no more than five minutes to complete. It covers topics such as how easy it was to locate the correct expense category, whether the mobile upload function worked as expected, and how quickly you received a decision from your approver. Please answer as honestly as possible—even if you have not submitted many claims yet—so that we can understand a wide range of experiences across departments. [2] \n \nTo participate, click the survey link below and submit your responses (1) _______ 5 p.m. on Friday, February 28. The link will remain active until the deadline, but responses received after that time may not be included in the first review report. We plan to share a brief summary of the results with department managers in early March, along with any immediate changes we can implement. [3] \n \nSurvey link: (Internal Portal → Finance → Expense Feedback) \n \nIf you experienced a technical problem—for example, you could not attach a receipt or the page froze while loading—please include a short description in the final comment box. You may also attach a screenshot. Our support team will review these reports separately (2) _______ the survey responses, since technical issues often require direct follow-up. Your input will be used to (3) _______ future updates to the reimbursement guidelines. [4] \n \nThank you in advance for your time and cooperation. If you have questions about the survey, contact Finance Operations at financeops@company.example \n. \n \nSincerely, \nFinance Operations"
+    "passage": "16강 \n16강 (Part 6) — 사내 설문/피드백 요청 이메일 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Request for Feedback on the Updated Expense Reimbursement Process \n \nDear Colleagues, \n \nAs part of our ongoing effort to improve internal services, the Finance Operations team is collecting feedback on the updated expense reimbursement process introduced at the beginning of this quarter. Since the launch, we have received several questions about receipt uploads, approval timing, and the status notifications employees receive after submitting a claim. Your input will help us identify which steps are clear and which steps require additional guidance or system improvements. [1] \n \nThe survey consists of 10 questions and should take no more than five minutes to complete. It covers topics such as how easy it was to locate the correct expense category, whether the mobile upload function worked as expected, and how quickly you received a decision from your approver. Please answer as honestly as possible—even if you have not submitted many claims yet—so that we can understand a wide range of experiences across departments. [2] \n \nTo participate, click the survey link below and submit your responses (1) _______ 5 p.m. on Friday, February 27. The link will remain active until the deadline, but responses received after that time may not be included in the first review report. We plan to share a brief summary of the results with department managers in early March, along with any immediate changes we can implement. [3] \n \nSurvey link: (Internal Portal → Finance → Expense Feedback) \n \nIf you experienced a technical problem—for example, you could not attach a receipt or the page froze while loading—please include a short description in the final comment box. You may also attach a screenshot. Our support team will review these reports separately (2) _______ the survey responses, since technical issues often require direct follow-up. Your input will be used to (3) _______ future updates to the reimbursement guidelines. [4] \n \nThank you in advance for your time and cooperation. If you have questions about the survey, contact Finance Operations at financeops@company.example \n. \n \nSincerely, \nFinance Operations"
   },
   {
     "id": 17,
@@ -931,6 +931,17 @@ const TOEIC_DATA = [
         "id": "20-1",
         "question": "Select the best answer for blank (1).",
         "options": [
+          "securely",
+          "security",
+          "secure",
+          "securing"
+        ],
+        "answer": "securely"
+      },
+      {
+        "id": "20-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
           "If",
           "Because",
           "Due to",
@@ -939,8 +950,8 @@ const TOEIC_DATA = [
         "answer": "If"
       },
       {
-        "id": "20-2",
-        "question": "Select the best answer for blank (2).",
+        "id": "20-3",
+        "question": "Select the best answer for blank (3).",
         "options": [
           "However",
           "Because",
@@ -948,17 +959,6 @@ const TOEIC_DATA = [
           "Although"
         ],
         "answer": "However"
-      },
-      {
-        "id": "20-3",
-        "question": "Select the best answer for blank (3).",
-        "options": [
-          "securely",
-          "security",
-          "secure",
-          "securing"
-        ],
-        "answer": "securely"
       },
       {
         "id": "20-4",
@@ -972,7 +972,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "20강 (Part 6) 수정본 — 환불 안내 이메일 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Update on Your Refund Request (Order #NB-77104) \n \nDear Mr. Lewis, \n \nThank you for contacting Northbay Retail Support regarding your refund request for Order #NB-77104. We appreciate you bringing this matter to our attention, and we apologize for the inconvenience you experienced. \n \nAfter reviewing your account, we confirmed that the item you received (Model TR-55 headset) does not match the product listed on your order confirmation. This type of error is uncommon, but it can occur when packaging labels are printed incorrectly during high-volume processing. [1] \n \nTo resolve the issue, we have created a return authorization for your order. A prepaid shipping label will be sent to you in a separate email within the next hour. Please print the label, attach it to the package, and drop the parcel off at any Yamato Transport location. If you no longer have the original box, you may use another sturdy box, as long as the item is (3) _______ packed to prevent damage in transit. [2] \n \nOnce the package is scanned by the carrier, the return will be tracked automatically in our system. You can check the status in your online account under “My Orders.” We will issue the refund to your original payment method (credit card) within 3–5 business days after we receive and inspect the returned item. (1) _______ you paid using a debit card, the posting time may depend on your bank’s processing schedule. [3] \n \nIf you would prefer an exchange instead of a refund, please reply to this email and let us know. We can ship the correct item as soon as we receive confirmation that the return is in transit. (2) _______ , if the product is currently out of stock, we will notify you immediately and offer alternative options. [4] \n \nThank you again for your patience. If you have any questions, please contact us by replying to this message. \n \nSincerely, \nCustomer Support Team \nNorthbay Retail"
+    "passage": "20강 (Part 6) 수정본 — 환불 안내 이메일 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Update on Your Refund Request (Order #NB-77104) \n \nDear Mr. Lewis, \n \nThank you for contacting Northbay Retail Support regarding your refund request for Order #NB-77104. We appreciate you bringing this matter to our attention, and we apologize for the inconvenience you experienced. \n \nAfter reviewing your account, we confirmed that the item you received (Model TR-55 headset) does not match the product listed on your order confirmation. This type of error is uncommon, but it can occur when packaging labels are printed incorrectly during high-volume processing. [1] \n \nTo resolve the issue, we have created a return authorization for your order. A prepaid shipping label will be sent to you in a separate email within the next hour. Please print the label, attach it to the package, and drop the parcel off at any Yamato Transport location. If you no longer have the original box, you may use another sturdy box, as long as the item is (1) _______ packed to prevent damage in transit. [2] \n \nOnce the package is scanned by the carrier, the return will be tracked automatically in our system. You can check the status in your online account under “My Orders.” We will issue the refund to your original payment method (credit card) within 3–5 business days after we receive and inspect the returned item. (2) _______ you paid using a debit card, the posting time may depend on your bank’s processing schedule. [3] \n \nIf you would prefer an exchange instead of a refund, please reply to this email and let us know. We can ship the correct item as soon as we receive confirmation that the return is in transit. (3) _______ , if the product is currently out of stock, we will notify you immediately and offer alternative options. [4] \n \nThank you again for your patience. If you have any questions, please contact us by replying to this message. \n \nSincerely, \nCustomer Support Team \nNorthbay Retail"
   },
   {
     "id": 21,
@@ -1164,10 +1164,10 @@ const TOEIC_DATA = [
           "[3]",
           "[4] \n: (1) A / (2) B / (3) A / (4) B"
         ],
-        "answer": null
+        "answer": "[2]"
       }
     ],
-    "passage": "24강 \n24강 (Part 6) — 행사 등록 안내(등록 방법/마감/좌석 제한) (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Registration Open: April Client Workshop (Limited Seating) \n \nDear Clients, \n \nThank you for your continued partnership with Greenridge Consulting. We are pleased to invite you to our April Client Workshop, a half-day session focused on practical strategies for improving workflow efficiency and reducing administrative bottlenecks. The workshop will include short presentations, guided discussions, and a live demonstration of our new reporting dashboard. [1] \n \nThe event will be held on Thursday, April 10, from 1:00 p.m. to 5:00 p.m. at the Greenridge Training Center (2F, Room 204). Check-in will begin at 12:30 p.m., and light refreshments will be provided. Because seating is limited, registration will be accepted on a first-come, first-served basis. (1) _______ you would like to attend, please complete the registration form no later than Friday, March 28. [2] \n \nTo register, click the link below and enter your contact information. You will be asked to select one of the available discussion tracks and indicate any dietary restrictions. After you submit the form, you will receive an automated confirmation message within a few minutes. If you do not receive a confirmation, check your spam folder _______ contact us at events@greenridge.example \n. [3] \n \nOn the day of the workshop, please bring a business card for check-in. Also, note that photographs may be taken during the event for internal documentation purposes. (2) _______ you prefer not to appear in any photos, please inform our staff at the registration desk upon arrival. [4] \n \nWe look forward to seeing you in April. \n \nSincerely, \nEvents Team \nGreenridge Consulting"
+    "passage": "24강 \n24강 (Part 6) — 행사 등록 안내(등록 방법/마감/좌석 제한) (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Registration Open: April Client Workshop (Limited Seating) \n \nDear Clients, \n \nThank you for your continued partnership with Greenridge Consulting. We are pleased to invite you to our April Client Workshop, a half-day session focused on practical strategies for improving workflow efficiency and reducing administrative bottlenecks. The workshop will include short presentations, guided discussions, and a live demonstration of our new reporting dashboard. [1] \n \nThe event will be held on Thursday, April 9, from 1:00 p.m. to 5:00 p.m. at the Greenridge Training Center (2F, Room 204). Check-in will begin at 12:30 p.m., and light refreshments will be provided. Because seating is limited, registration will be accepted on a first-come, first-served basis. (1) _______ you would like to attend, please complete the registration form no later than Friday, March 27. [2] \n \nTo register, click the link below and enter your contact information. You will be asked to select one of the available discussion tracks and indicate any dietary restrictions. After you submit the form, you will receive an automated confirmation message within a few minutes. If you do not receive a confirmation, check your spam folder _______ contact us at events@greenridge.example \n. [3] \n \nOn the day of the workshop, please bring a business card for check-in. Also, note that photographs may be taken during the event for internal documentation purposes. (2) _______ you prefer not to appear in any photos, please inform our staff at the registration desk upon arrival. [4] \n \nWe look forward to seeing you in April. \n \nSincerely, \nEvents Team \nGreenridge Consulting"
   },
   {
     "id": 25,
@@ -1292,12 +1292,12 @@ const TOEIC_DATA = [
         "id": "27-8",
         "question": "(부사 위치: 문장/동사 앞 자연스러움)\nThe receptionist _______ forwarded your message to the supervisor.",
         "options": [
-          "politely",
-          "polite",
-          "politeness",
-          "politic"
+          "promptly",
+          "prompt",
+          "promptness",
+          "prompter"
         ],
-        "answer": "politely"
+        "answer": "promptly"
       },
       {
         "id": "27-9",
@@ -1332,23 +1332,23 @@ const TOEIC_DATA = [
         "id": "28-2",
         "question": "Select the best answer for blank (2).",
         "options": [
-          "and",
-          "but",
-          "because",
-          "so"
-        ],
-        "answer": "and"
-      },
-      {
-        "id": "28-3",
-        "question": "Select the best answer for blank (3).",
-        "options": [
           "accurate",
           "accurately",
           "accuracy",
           "accurateness"
         ],
         "answer": "accurate"
+      },
+      {
+        "id": "28-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "so that",
+          "but",
+          "because",
+          "and"
+        ],
+        "answer": "so that"
       },
       {
         "id": "28-4",
@@ -1362,7 +1362,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "28강 \n28강 (Part 6) 수정본 — 주문 확인 + 인보이스/결제 안내 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Order Confirmation and Payment Instructions (Invoice Attached) \n \nDear Ms. Rivera, \n \nThank you for your order with Alderbrook Industrial Supplies. This email confirms that we have received your purchase request and created an invoice for processing. Your order number is AI-50319, and the invoice is attached as a PDF for your records. Please review the item details carefully, including quantities, unit prices, and shipping address information, to ensure everything is correct. [1] \n \nPayment for this order is due within ten business days of the invoice date. You may pay by bank transfer or credit card. If you choose a bank transfer, please use the bank account information listed on the invoice and include your order number in the transfer reference field. This helps our accounting team match your payment to the correct account (1) _______ avoid delays in shipping. [2] \n \nOnce payment is received, your order will be released for fulfillment. Standard shipping usually takes three to five business days, depending on your location and carrier capacity. However, during peak periods, delivery times may be longer than usual. If you have a specific delivery requirement, please notify us in advance so we can provide an (3) _______ estimate. [3] \n \nPlease note that orders will not be shipped until payment has been confirmed. If your company requires an internal purchase order (PO) number, you may reply to this email with the PO number (2) _______ we will add it to your invoice record. In addition, if any information on the invoice needs to be corrected, please inform us as soon as possible. Requests received after processing has begun may require a revised invoice and could postpone shipment. [4] \n \nThank you again for your business. If you have any questions regarding payment, shipping, or the attached invoice, please contact our Billing Department at billing@alderbrook.example \n. \n \nSincerely, \nBilling Department \nAlderbrook Industrial Supplies"
+    "passage": "28강 \n28강 (Part 6) 수정본 — 주문 확인 + 인보이스/결제 안내 (지문 1개 + 4문항) \n \nDirections: Read the text below and choose the best answer for each blank. \n \nSubject: Order Confirmation and Payment Instructions (Invoice Attached) \n \nDear Ms. Rivera, \n \nThank you for your order with Alderbrook Industrial Supplies. This email confirms that we have received your purchase request and created an invoice for processing. Your order number is AI-50319, and the invoice is attached as a PDF for your records. Please review the item details carefully, including quantities, unit prices, and shipping address information, to ensure everything is correct. [1] \n \nPayment for this order is due within ten business days of the invoice date. You may pay by bank transfer or credit card. If you choose a bank transfer, please use the bank account information listed on the invoice and include your order number in the transfer reference field. This helps our accounting team match your payment to the correct account (1) _______ avoid delays in shipping. [2] \n \nOnce payment is received, your order will be released for fulfillment. Standard shipping usually takes three to five business days, depending on your location and carrier capacity. However, during peak periods, delivery times may be longer than usual. If you have a specific delivery requirement, please notify us in advance so we can provide an (2) _______ estimate. [3] \n \nPlease note that orders will not be shipped until payment has been confirmed. If your company requires an internal purchase order (PO) number, you may reply to this email with the PO number (3) _______ we can add it to your invoice record. In addition, if any information on the invoice needs to be corrected, please inform us as soon as possible. Requests received after processing has begun may require a revised invoice and could postpone shipment. [4] \n \nThank you again for your business. If you have any questions regarding payment, shipping, or the attached invoice, please contact our Billing Department at billing@alderbrook.example \n. \n \nSincerely, \nBilling Department \nAlderbrook Industrial Supplies"
   },
   {
     "id": 29,
