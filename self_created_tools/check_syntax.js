@@ -1,7 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 const vm = require('vm');
 
-const code = fs.readFileSync('card/toeic.js', 'utf8');
+const toeicPath = path.join(__dirname, '../card/toeic.js');
+const code = fs.readFileSync(toeicPath, 'utf8');
 const sandbox = {};
 vm.createContext(sandbox);
 
