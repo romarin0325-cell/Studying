@@ -472,6 +472,42 @@
             margin: 5px 0 !important;
             margin-bottom: 8px !important;
         }
+
+        @media (max-width: 768px) {
+            #modal-chaos.artifact-mobile-compact {
+                justify-content: flex-start;
+                padding: 8px 0;
+            }
+
+            #modal-chaos.artifact-mobile-compact .modal-content {
+                min-height: auto !important;
+                max-height: calc(100vh - 16px);
+                overflow-y: auto;
+                padding-top: 8px;
+            }
+
+            #modal-chaos.artifact-mobile-compact .chaos-title {
+                margin: 4px 0 8px 0;
+            }
+
+            #modal-chaos.artifact-mobile-compact .chaos-desc {
+                margin: 4px 0 8px 0;
+                line-height: 1.35;
+            }
+
+            #modal-chaos.artifact-mobile-compact .chaos-uses {
+                margin-bottom: 6px !important;
+            }
+
+            #modal-chaos.artifact-mobile-compact .menu-btn {
+                margin-bottom: 7px;
+                padding: 10px;
+            }
+
+            #modal-chaos.artifact-mobile-compact .chaos-close-btn {
+                margin-top: 6px !important;
+            }
+        }
     </style>
 </head>
 
@@ -791,9 +827,9 @@
 
     <div id="modal-chaos" class="modal">
         <div class="modal-content" style="height:auto; min-height: 550px;">
-            <h3>혼돈의 축복</h3>
-            <p style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
-            <div style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
+            <h3 class="chaos-title">혼돈의 축복</h3>
+            <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
+            <div class="chaos-uses" style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
                 혼돈의 축복: <span id="chaos-uses">3</span>회 / 대현자의 축복: <span id="sage-uses">3</span>회
             </div>
             <button class="menu-btn" onclick="RPG.activateChaos('normal')">
@@ -820,7 +856,7 @@
                 아티팩트 확인
             </button>
             <button onclick="document.getElementById('modal-chaos').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+                style="margin-top:10px; width:100%; padding:10px;" class="chaos-close-btn">닫기</button>
         </div>
     </div>
 
@@ -1731,13 +1767,18 @@ const QuizEngine = {
                 document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
                 document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
 
+                const chaosModal = document.getElementById('modal-chaos');
+                const isArtifactMobileLayout = this.state.mode === 'artifact' &&
+                    (this.state.gameType === 'challenge' || this.state.gameType === 'endless');
+                chaosModal.classList.toggle('artifact-mobile-compact', isArtifactMobileLayout);
+
                 // Show artifact check button only in artifact mode
                 const artBtn = document.getElementById('btn-artifact-check');
                 if (artBtn) {
                     artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
                 }
 
-                document.getElementById('modal-chaos').classList.add('active');
+                chaosModal.classList.add('active');
             },
             checkActiveChaosBlessings() {
                 if (!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
