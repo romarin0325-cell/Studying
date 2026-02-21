@@ -561,10 +561,10 @@
                 flex-direction: column;
             }
             .toeic-passage {
-                flex: 0 0 45%;
-                max-height: none;
+                flex: 1;
                 border-right: none;
                 border-bottom: 1px solid #444;
+                /* Mobile: Display handled by JS toggle */
             }
         }
     </style>
@@ -979,11 +979,15 @@
                 <button onclick="document.getElementById('modal-toeic-practice').classList.remove('active');" style="padding:5px 10px;">나가기</button>
             </div>
             <div id="toeic-container" class="toeic-split-container">
-                <div id="toeic-passage" class="toeic-passage"></div>
+                <div id="toeic-passage" class="toeic-passage">
+                    <div id="toeic-passage-content"></div>
+                    <button id="btn-toeic-solve-mobile" class="menu-btn" style="display:none; margin-top:10px; background:#4caf50; border-color:#81c784;">문제 풀기</button>
+                </div>
                 <div id="toeic-question-pane" class="toeic-question">
                     <div id="toeic-q-text" style="font-size:1rem; font-weight:bold; margin-bottom:15px; color:#ffd700;"></div>
                     <div id="toeic-options" style="display:flex; flex-direction:column; gap:8px;"></div>
                     <div id="toeic-feedback" style="margin-top:10px; font-weight:bold; height:20px;"></div>
+                    <button id="btn-toeic-back-mobile" class="menu-btn" style="display:none; margin-top:10px; background:#555; border-color:#777;">지문 보기 (돌아가기)</button>
                 </div>
             </div>
         </div>
@@ -3893,7 +3897,9 @@
                                                    this.state.currentToeicSession = {
                                                        set: set,
                                                        qIndex: 0,
-                                                       shuffledOptions: [] // Array of arrays
+                                                       shuffledOptions: [], // Array of arrays
+                                                       results: [],
+                                                       mobileViewMode: 'passage'
                                                    };
 
                                                    // Pre-shuffle options for each question
@@ -3920,17 +3926,50 @@
 
                                                    // Passage Pane
                                                    const passageEl = document.getElementById('toeic-passage');
-                                                   const container = document.getElementById('toeic-container');
+                                                   const passageContent = document.getElementById('toeic-passage-content');
+                                                   const questionPane = document.getElementById('toeic-question-pane');
+                                                   const btnSolve = document.getElementById('btn-toeic-solve-mobile');
+                                                   const btnBack = document.getElementById('btn-toeic-back-mobile');
+
+                                                   const isMobile = window.innerWidth <= 768;
+
                                                    if (set.type === 'part5') {
                                                        passageEl.style.display = 'none';
-                                                       // Fix layout for single pane?
-                                                       // CSS handles flex-1. We might want to make question pane take full width.
-                                                       // .toeic-split-container { flex-direction: column? } or just hide one child.
-                                                       // Actually, if we hide passageEl, question pane flex:1 will take remaining space?
-                                                       // We used default flex direction (row). If passage hidden, question takes all space.
+                                                       questionPane.style.display = 'flex';
+                                                       btnSolve.style.display = 'none';
+                                                       btnBack.style.display = 'none';
                                                    } else {
-                                                       passageEl.style.display = 'block';
-                                                       passageEl.innerHTML = set.passage ? set.passage.replace(/\n/g, '<br>') : '';
+                                                       passageContent.innerHTML = set.passage ? set.passage.replace(/\n/g, '<br>') : '';
+
+                                                       if (isMobile) {
+                                                           const mode = this.state.currentToeicSession.mobileViewMode || 'passage';
+                                                           if (mode === 'passage') {
+                                                               passageEl.style.display = 'block';
+                                                               questionPane.style.display = 'none';
+                                                           } else {
+                                                               passageEl.style.display = 'none';
+                                                               questionPane.style.display = 'flex';
+                                                           }
+
+                                                           btnSolve.style.display = 'block';
+                                                           btnBack.style.display = 'block';
+
+                                                           // Bind Events
+                                                           btnSolve.onclick = () => {
+                                                               this.state.currentToeicSession.mobileViewMode = 'question';
+                                                               this.renderToeicQuestion();
+                                                           };
+                                                           btnBack.onclick = () => {
+                                                               this.state.currentToeicSession.mobileViewMode = 'passage';
+                                                               this.renderToeicQuestion();
+                                                           };
+
+                                                       } else {
+                                                           passageEl.style.display = 'block';
+                                                           questionPane.style.display = 'flex';
+                                                           btnSolve.style.display = 'none';
+                                                           btnBack.style.display = 'none';
+                                                       }
                                                    }
 
                                                    // Question Pane
@@ -3959,7 +3998,16 @@
 
                                                    const feedback = document.getElementById('toeic-feedback');
 
-                                                   if (selected === correct) {
+                                                   const isCorrect = (selected === correct);
+                                                   this.state.currentToeicSession.results.push({
+                                                       id: this.state.currentToeicSession.set.questions[this.state.currentToeicSession.qIndex].id,
+                                                       question: this.state.currentToeicSession.set.questions[this.state.currentToeicSession.qIndex].question,
+                                                       isCorrect: isCorrect,
+                                                       userAnswer: selected,
+                                                       correctAnswer: correct
+                                                   });
+
+                                                   if (isCorrect) {
                                                        btn.classList.add('correct');
                                                        feedback.innerHTML = "<span style='color:#4caf50'>정답!</span>";
                                                    } else {
@@ -3997,12 +4045,25 @@
 
                                                    document.getElementById('modal-toeic-practice').classList.remove('active');
 
-                                                   this.openInfoModal(
-                                                       "학습 종료",
-                                                       `수고하셨습니다!<br>
-                                                       '${set.title}' 학습을 완료했습니다.<br><br>
-                                                       <b style="color:#00e676">대현자의 축복 횟수가 3회로 리셋되었습니다!</b>`
-                                                   );
+                                                   const results = this.state.currentToeicSession.results || [];
+                                                   const correctCount = results.filter(r => r.isCorrect).length;
+                                                   const total = results.length;
+                                                   const wrongList = results.filter(r => !r.isCorrect);
+
+                                                   let msg = `수고하셨습니다!<br>'${set.title}' 학습을 완료했습니다.<br><br>`;
+                                                   msg += `정답률: ${correctCount}/${total} (${total > 0 ? ((correctCount/total)*100).toFixed(0) : 0}%)<br><br>`;
+
+                                                   if (wrongList.length > 0) {
+                                                       msg += `<b>[틀린 문제]</b><br>`;
+                                                       wrongList.forEach(w => {
+                                                          msg += `- ${w.question.substring(0, 30)}... (정답: ${w.correctAnswer})<br>`;
+                                                       });
+                                                       msg += `<br>`;
+                                                   }
+
+                                                   msg += `<b style="color:#00e676">대현자의 축복 횟수가 3회로 리셋되었습니다!</b>`;
+
+                                                   this.openInfoModal("학습 종료", msg);
                                                }
                                            };
 
