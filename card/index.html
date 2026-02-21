@@ -457,6 +457,17 @@
         .title-loading.hidden {
             display: none;
         }
+
+        /* Artifact mode mobile UI fix for Chaos modal */
+        #modal-chaos.artifact-mode .menu-btn {
+            padding: 8px !important;
+            margin-bottom: 5px !important;
+        }
+
+        #modal-chaos.artifact-mode .modal-content {
+            min-height: auto !important;
+            padding-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -1360,11 +1371,18 @@
 
                 // Show artifact check button only in artifact mode
                 const artBtn = document.getElementById('btn-artifact-check');
+                const modal = document.getElementById('modal-chaos');
                 if (artBtn) {
                     artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
                 }
 
-                document.getElementById('modal-chaos').classList.add('active');
+                if (this.state.mode === 'artifact') {
+                    modal.classList.add('artifact-mode');
+                } else {
+                    modal.classList.remove('artifact-mode');
+                }
+
+                modal.classList.add('active');
             },
             checkActiveChaosBlessings() {
                 if (!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
