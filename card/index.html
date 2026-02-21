@@ -467,150 +467,175 @@
         #modal-chaos.artifact-mode .modal-content {
             min-height: auto !important;
             padding-bottom: 20px;
+        }
 
-            #modal-artifact-select .modal-content {
-                padding: 10px !important;
-                padding-top: 5px !important;
+        #modal-artifact-select .modal-content {
+            padding: 10px !important;
+            padding-top: 5px !important;
+            min-height: auto !important;
+        }
+
+        #modal-artifact-select h3 {
+            margin: 5px 0 !important;
+        }
+
+        #modal-artifact-select p {
+            margin: 5px 0 !important;
+            margin-bottom: 8px !important;
+        }
+
+        @media (max-width: 768px) {
+            #modal-chaos.artifact-mobile-compact {
+                justify-content: flex-start;
+                padding: 8px 0;
+            }
+
+            #modal-chaos.artifact-mobile-compact .modal-content {
                 min-height: auto !important;
-            }
-
-            #modal-artifact-select h3 {
-                margin: 5px 0 !important;
-            }
-
-            #modal-artifact-select p {
-                margin: 5px 0 !important;
-                margin-bottom: 8px !important;
-            }
-
-            @media (max-width: 768px) {
-                #modal-chaos.artifact-mobile-compact {
-                    justify-content: flex-start;
-                    padding: 8px 0;
-                }
-
-                #modal-chaos.artifact-mobile-compact .modal-content {
-                    min-height: auto !important;
-                    max-height: calc(100vh - 16px);
-                    overflow-y: auto;
-                    padding-top: 8px;
-                }
-
-                #modal-chaos.artifact-mobile-compact .chaos-title {
-                    margin: 4px 0 8px 0;
-                }
-
-                #modal-chaos.artifact-mobile-compact .chaos-desc {
-                    margin: 4px 0 8px 0;
-                    line-height: 1.35;
-                }
-
-                #modal-chaos.artifact-mobile-compact .chaos-uses {
-                    margin-bottom: 6px !important;
-                }
-
-                #modal-chaos.artifact-mobile-compact .menu-btn {
-                    margin-bottom: 7px;
-                    padding: 10px;
-                }
-
-                #modal-chaos.artifact-mobile-compact .chaos-close-btn {
-                    margin-top: 6px !important;
-                }
-            }
-
-            .toeic-split-container {
-                display: flex;
-                width: 100%;
-                flex: 1;
-                min-height: 0;
-                gap: 15px;
-                overflow: hidden;
-            }
-
-            .toeic-passage {
-                flex: 1.2;
-                min-height: 0;
-                background: #1a1a1a;
-                padding: 15px;
+                max-height: calc(100vh - 16px);
                 overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                border: 1px solid #333;
-                border-radius: 8px;
-                font-size: 0.95rem;
-                line-height: 1.7;
-                white-space: pre-wrap;
-                text-align: left;
-                color: #e0e0e0;
+                padding-top: 8px;
             }
 
-            .toeic-question {
-                flex: 1;
-                min-height: 0;
-                display: flex;
-                flex-direction: column;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                padding: 5px 10px;
-                background: #222;
-                border-radius: 8px;
-                border: 1px solid #333;
+            #modal-chaos.artifact-mobile-compact .chaos-title {
+                margin: 4px 0 8px 0;
             }
 
-            .toeic-tabs {
-                display: none;
-                gap: 5px;
-                margin-bottom: 10px;
-                flex-shrink: 0;
+            #modal-chaos.artifact-mobile-compact .chaos-desc {
+                margin: 4px 0 8px 0;
+                line-height: 1.35;
             }
 
-            .toeic-tab {
-                flex: 1;
-                padding: 12px;
-                background: #333;
-                border: 1px solid #444;
-                color: #aaa;
-                cursor: pointer;
-                font-size: 0.9rem;
-                text-align: center;
-                border-radius: 5px;
-                transition: all 0.2s;
+            #modal-chaos.artifact-mobile-compact .chaos-uses {
+                margin-bottom: 6px !important;
             }
 
-            .toeic-tab.active {
-                background: #448aff;
-                color: white;
-                border-color: #82b1ff;
-                font-weight: bold;
-                box-shadow: 0 0 10px rgba(68, 138, 255, 0.3);
+            #modal-chaos.artifact-mobile-compact .menu-btn {
+                margin-bottom: 7px;
+                padding: 10px;
             }
 
-            #modal-toeic-practice .modal-content {
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
-                background: #121212;
-                padding: 15px;
-                overflow: hidden;
+            #modal-chaos.artifact-mobile-compact .chaos-close-btn {
+                margin-top: 6px !important;
             }
+        }
 
-            @media (max-width: 768px) {
-                .toeic-split-container {
-                    flex-direction: column;
-                    gap: 0;
-                    min-height: 0;
-                    overflow: hidden;
-                }
-            }
+        /* === TOEIC Practice UI === */
+        #modal-toeic-practice .modal-content {
+            display: flex;
+            flex-direction: column;
+            background: #121212;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
 
-            /* Prevent passage from taking space completely in part 5 */
-            #modal-toeic-practice.is-part5 .toeic-passage {
-                display: none !important;
-            }
+        /* Part 5: auto height */
+        #modal-toeic-practice.is-part5 .modal-content {
+            height: auto !important;
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+        }
 
-            #modal-toeic-practice.is-part5 .toeic-tabs {
-                display: none !important;
-            }
+        /* Part 6/7: fixed height */
+        #modal-toeic-practice.is-part67 .modal-content {
+            height: 85vh !important;
+            max-height: 85vh !important;
+        }
+
+        /* Part 5: hide hub and passage */
+        #modal-toeic-practice.is-part5 #toeic-hub,
+        #modal-toeic-practice.is-part5 #toeic-passage-view,
+        #modal-toeic-practice.is-part5 #toeic-q-back-btn {
+            display: none !important;
+        }
+
+        /* Hub screen */
+        #toeic-hub {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 20px;
+        }
+
+        .toeic-hub-btn {
+            width: 80%;
+            max-width: 320px;
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: #222;
+            border: 2px solid #448aff;
+            color: #82b1ff;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .toeic-hub-btn:hover,
+        .toeic-hub-btn:active {
+            background: #448aff;
+            color: #fff;
+            transform: scale(1.02);
+        }
+
+        /* Passage view: fills remaining space */
+        #toeic-passage-view {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #toeic-passage-view .toeic-passage-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            background: #1a1a1a;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            text-align: left;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        /* Question view */
+        #toeic-question-view {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 5px 0;
+        }
+
+        .toeic-back-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            background: #333;
+            border: 1px solid #555;
+            color: #ccc;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .toeic-back-btn:hover,
+        .toeic-back-btn:active {
+            background: #444;
+        }
     </style>
 </head>
 
@@ -1021,32 +1046,38 @@
     </div>
 
     <div id="modal-toeic-practice" class="modal">
-        <div class="modal-content" style="width: 95%; max-width: 900px; height: 90vh;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="modal-content" style="width: 95%; max-width: 900px;">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
                 <h3 id="toeic-title" style="margin:0; font-size:1.1rem; color:#ffd700;">Practice</h3>
                 <button onclick="document.getElementById('modal-toeic-practice').classList.remove('active');"
                     style="padding:5px 15px; background:#444; border:1px solid #666; color:#fff; cursor:pointer; border-radius:4px;">나가기</button>
             </div>
 
-            <div id="toeic-tabs" class="toeic-tabs">
-                <div id="tab-toeic-passage" class="toeic-tab active" onclick="RPG.switchToeicTab('passage')">지문
-                    (Passage)</div>
-                <div id="tab-toeic-question" class="toeic-tab" onclick="RPG.switchToeicTab('question')">문제 (Question)
-                </div>
+            <!-- Hub: Part 6/7 only -->
+            <div id="toeic-hub" class="toeic-hub" style="display:none;">
+                <p style="color:#aaa; font-size:0.9rem; text-align:center; margin-bottom:10px;">지문을 읽고 문제를 풀어보세요.</p>
+                <button class="toeic-hub-btn" onclick="RPG.showToeicPassage()">📖 지문보기</button>
+                <button class="toeic-hub-btn" onclick="RPG.showToeicQuestions()"
+                    style="border-color:#ffd700; color:#ffd700;">📝 문제보기</button>
             </div>
 
-            <div id="toeic-container" class="toeic-split-container">
-                <div id="toeic-passage" class="toeic-passage">
-                    <div id="toeic-passage-content"></div>
+            <!-- Passage View: scrollable passage + back button -->
+            <div id="toeic-passage-view" class="toeic-passage-view">
+                <div id="toeic-passage-scroll" class="toeic-passage-scroll"></div>
+                <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
+            </div>
+
+            <!-- Question View: question + options + feedback + back button -->
+            <div id="toeic-question-view" class="toeic-question-view">
+                <div id="toeic-q-text"
+                    style="font-size:1rem; font-weight:bold; margin-bottom:15px; color:#ffd700; line-height:1.4;">
                 </div>
-                <div id="toeic-question-pane" class="toeic-question">
-                    <div id="toeic-q-text"
-                        style="font-size:1rem; font-weight:bold; margin-bottom:15px; color:#ffd700; line-height:1.4;">
-                    </div>
-                    <div id="toeic-options" style="display:flex; flex-direction:column; gap:10px;"></div>
-                    <div id="toeic-feedback" style="margin-top:15px; font-weight:bold; height:24px; text-align:center;">
-                    </div>
+                <div id="toeic-options" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <div id="toeic-feedback" style="margin-top:15px; font-weight:bold; min-height:24px; text-align:center;">
                 </div>
+                <button id="toeic-q-back-btn" class="toeic-back-btn" onclick="RPG.backToToeicHub()"
+                    style="display:none;">↩ 돌아가기</button>
             </div>
         </div>
     </div>
@@ -3951,21 +3982,39 @@
                 // Pick random set
                 const set = available[Math.floor(Math.random() * available.length)];
 
+                // Build expanded question list
+                let expandedQuestions = [];
+                let expandedShuffled = [];
+
+                if (set.type === 'part5') {
+                    // Part 5: repeat 3 times with reshuffled options
+                    for (let repeat = 0; repeat < 3; repeat++) {
+                        set.questions.forEach(q => {
+                            expandedQuestions.push(q);
+                            const opts = [...q.options];
+                            opts.sort(() => Math.random() - 0.5);
+                            expandedShuffled.push(opts);
+                        });
+                    }
+                } else {
+                    // Part 6/7: single pass
+                    set.questions.forEach(q => {
+                        expandedQuestions.push(q);
+                        const opts = [...q.options];
+                        opts.sort(() => Math.random() - 0.5);
+                        expandedShuffled.push(opts);
+                    });
+                }
+
                 // Prepare session
                 this.state.currentToeicSession = {
                     set: set,
                     qIndex: 0,
-                    shuffledOptions: [], // Array of arrays
+                    expandedQuestions: expandedQuestions,
+                    shuffledOptions: expandedShuffled,
                     results: [],
-                    mobileViewMode: 'question'
+                    viewState: 'hub' // 'hub', 'passage', 'question'
                 };
-
-                // Pre-shuffle options for each question
-                set.questions.forEach(q => {
-                    const opts = [...q.options];
-                    opts.sort(() => Math.random() - 0.5);
-                    this.state.currentToeicSession.shuffledOptions.push(opts);
-                });
 
                 document.getElementById('modal-toeic-menu').classList.remove('active');
                 document.getElementById('modal-toeic-practice').classList.add('active');
@@ -3978,34 +4027,44 @@
                 if (session.isAnswering) return;
 
                 const set = session.set;
-                const q = set.questions[session.qIndex];
-                const opts = session.shuffledOptions[session.qIndex];
-
-                document.getElementById('toeic-title').innerText = `${set.title} (${session.qIndex + 1}/${set.questions.length})`;
-
-                const passageContent = document.getElementById('toeic-passage-content');
+                const totalQ = session.expandedQuestions.length;
                 const modalEl = document.getElementById('modal-toeic-practice');
 
+                // Update title
+                document.getElementById('toeic-title').innerText = `${set.title} (${session.qIndex + 1}/${totalQ})`;
+
+                // Hide all views first
+                document.getElementById('toeic-hub').style.display = 'none';
+                document.getElementById('toeic-passage-view').style.display = 'none';
+                document.getElementById('toeic-question-view').style.display = 'none';
+
                 if (set.type === 'part5') {
+                    // Part 5: show questions directly (standard quiz layout)
                     modalEl.classList.remove('is-part67');
                     modalEl.classList.add('is-part5');
-                    document.getElementById('toeic-tabs').style.display = 'none';
-                    document.getElementById('toeic-passage').style.display = 'none';
-                    document.getElementById('toeic-question-pane').style.display = 'flex';
+                    document.getElementById('toeic-q-back-btn').style.display = 'none';
+                    this._renderToeicQuestionContent();
+                    document.getElementById('toeic-question-view').style.display = 'flex';
                 } else {
+                    // Part 6/7: show hub
                     modalEl.classList.remove('is-part5');
                     modalEl.classList.add('is-part67');
-                    passageContent.innerHTML = set.passage ? set.passage.replace(/\n/g, '<br>') : '';
 
-                    // Show tabs for Part 6/7
-                    document.getElementById('toeic-tabs').style.display = 'flex';
+                    // Fill passage content
+                    document.getElementById('toeic-passage-scroll').innerHTML =
+                        set.passage ? set.passage.replace(/\n/g, '<br>') : '';
 
-                    const mode = this.state.currentToeicSession.mobileViewMode || 'question';
-                    this.switchToeicTab(mode);
+                    // Show hub
+                    document.getElementById('toeic-hub').style.display = 'flex';
                 }
+            },
 
-                // Question Pane
-                document.getElementById('toeic-q-text').innerHTML = `${q.question.replace(/\n/g, '<br>')}`;
+            _renderToeicQuestionContent() {
+                const session = this.state.currentToeicSession;
+                const q = session.expandedQuestions[session.qIndex];
+                const opts = session.shuffledOptions[session.qIndex];
+
+                document.getElementById('toeic-q-text').innerHTML = q.question.replace(/\n/g, '<br>');
                 document.getElementById('toeic-feedback').innerText = "";
 
                 const optContainer = document.getElementById('toeic-options');
@@ -4018,50 +4077,77 @@
                     btn.style.fontSize = '0.95rem';
                     btn.style.marginBottom = '0';
                     btn.style.padding = '14px';
+                    btn.style.width = '100%';
                     btn.innerText = optText;
                     btn.onclick = () => this.checkToeicAnswer(btn, optText, q.answer);
                     optContainer.appendChild(btn);
                 });
             },
 
-            switchToeicTab(mode) {
-                this.state.currentToeicSession.mobileViewMode = mode;
-                const tabPassage = document.getElementById('tab-toeic-passage');
-                const tabQuestion = document.getElementById('tab-toeic-question');
-                const passageEl = document.getElementById('toeic-passage');
-                const questionEl = document.getElementById('toeic-question-pane');
+            showToeicPassage() {
+                const session = this.state.currentToeicSession;
+                if (!session) return;
 
-                if (mode === 'passage') {
-                    tabPassage.classList.add('active');
-                    tabQuestion.classList.remove('active');
-                    passageEl.style.display = 'block';
-                    questionEl.style.display = 'none';
-                } else {
-                    tabPassage.classList.remove('active');
-                    tabQuestion.classList.add('active');
-                    passageEl.style.display = 'none';
-                    questionEl.style.display = 'flex';
-                }
+                session.viewState = 'passage';
+
+                document.getElementById('toeic-hub').style.display = 'none';
+                document.getElementById('toeic-question-view').style.display = 'none';
+                document.getElementById('toeic-passage-view').style.display = 'flex';
+
+                // Scroll to top
+                document.getElementById('toeic-passage-scroll').scrollTop = 0;
+            },
+
+            showToeicQuestions() {
+                const session = this.state.currentToeicSession;
+                if (!session) return;
+
+                session.viewState = 'question';
+
+                document.getElementById('toeic-hub').style.display = 'none';
+                document.getElementById('toeic-passage-view').style.display = 'none';
+
+                // Show back button for Part 6/7
+                document.getElementById('toeic-q-back-btn').style.display = 'block';
+
+                // Render current question content (preserves progress)
+                this._renderToeicQuestionContent();
+                document.getElementById('toeic-question-view').style.display = 'flex';
+            },
+
+            backToToeicHub() {
+                const session = this.state.currentToeicSession;
+                if (!session) return;
+
+                session.viewState = 'hub';
+
+                document.getElementById('toeic-passage-view').style.display = 'none';
+                document.getElementById('toeic-question-view').style.display = 'none';
+                document.getElementById('toeic-hub').style.display = 'flex';
+
+                // Update title to reflect current progress
+                const totalQ = session.expandedQuestions.length;
+                document.getElementById('toeic-title').innerText = `${session.set.title} (${session.qIndex + 1}/${totalQ})`;
             },
 
             checkToeicAnswer(btn, selected, correct) {
+                const session = this.state.currentToeicSession;
                 const opts = document.getElementById('toeic-options').children;
                 for (let c of opts) c.disabled = true;
 
-                // Disable mobile tabs/buttons to prevent re-render race condition
-                const tabPassage = document.getElementById('tab-toeic-passage');
-                const tabQuestion = document.getElementById('tab-toeic-question');
-                if (tabPassage) tabPassage.style.pointerEvents = 'none';
-                if (tabQuestion) tabQuestion.style.pointerEvents = 'none';
+                // Disable back button during answer animation
+                const backBtn = document.getElementById('toeic-q-back-btn');
+                if (backBtn) backBtn.style.pointerEvents = 'none';
 
-                this.state.currentToeicSession.isAnswering = true;
+                session.isAnswering = true;
 
                 const feedback = document.getElementById('toeic-feedback');
+                const q = session.expandedQuestions[session.qIndex];
 
                 const isCorrect = (selected === correct);
-                this.state.currentToeicSession.results.push({
-                    id: this.state.currentToeicSession.set.questions[this.state.currentToeicSession.qIndex].id,
-                    question: this.state.currentToeicSession.set.questions[this.state.currentToeicSession.qIndex].question,
+                session.results.push({
+                    id: q.id,
+                    question: q.question,
                     isCorrect: isCorrect,
                     userAnswer: selected,
                     correctAnswer: correct
@@ -4073,26 +4159,30 @@
                 } else {
                     btn.classList.add('wrong');
                     feedback.innerHTML = `<span style='color:#ef5350'>오답... 정답: ${correct}</span>`;
-                    // Highlight correct
                     for (let c of opts) {
                         if (c.innerText === correct) c.classList.add('correct');
                     }
                 }
 
                 setTimeout(() => {
-                    this.state.currentToeicSession.isAnswering = false;
+                    session.isAnswering = false;
 
-                    // Re-enable tabs
-                    const tabPassage = document.getElementById('tab-toeic-passage');
-                    const tabQuestion = document.getElementById('tab-toeic-question');
-                    if (tabPassage) tabPassage.style.pointerEvents = 'auto';
-                    if (tabQuestion) tabQuestion.style.pointerEvents = 'auto';
+                    // Re-enable back button
+                    if (backBtn) backBtn.style.pointerEvents = 'auto';
 
-                    this.state.currentToeicSession.qIndex++;
-                    if (this.state.currentToeicSession.qIndex >= this.state.currentToeicSession.set.questions.length) {
+                    session.qIndex++;
+                    const totalQ = session.expandedQuestions.length;
+
+                    if (session.qIndex >= totalQ) {
                         this.finishToeicSession();
+                    } else if (session.set.type === 'part5') {
+                        // Part 5: go directly to next question
+                        this._renderToeicQuestionContent();
+                        document.getElementById('toeic-title').innerText =
+                            `${session.set.title} (${session.qIndex + 1}/${totalQ})`;
                     } else {
-                        this.renderToeicQuestion();
+                        // Part 6/7: go back to hub for next question
+                        this.backToToeicHub();
                     }
                 }, 2000);
             },
