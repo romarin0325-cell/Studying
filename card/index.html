@@ -530,7 +530,6 @@
 
             .toeic-passage {
                 flex: 1.2;
-                /* Passages usually need more space */
                 min-height: 0;
                 background: #1a1a1a;
                 padding: 15px;
@@ -562,6 +561,7 @@
                 display: none;
                 gap: 5px;
                 margin-bottom: 10px;
+                flex-shrink: 0;
             }
 
             .toeic-tab {
@@ -591,44 +591,24 @@
                 min-height: 0;
                 background: #121212;
                 padding: 15px;
+                overflow: hidden;
             }
 
             @media (max-width: 768px) {
                 .toeic-split-container {
                     flex-direction: column;
                     gap: 0;
-                }
-
-                #modal-toeic-practice:not(.is-part5) .toeic-tabs {
-                    display: flex;
-                }
-
-                .toeic-passage,
-                .toeic-question {
-                    flex: 1;
-                    border-radius: 0 0 8px 8px;
-                    border-top: none;
-                }
-
-                #modal-toeic-practice.view-passage .toeic-question {
-                    display: none !important;
-                }
-
-                #modal-toeic-practice.view-passage .toeic-passage {
-                    display: block !important;
-                }
-
-                #modal-toeic-practice.view-question .toeic-passage {
-                    display: none !important;
-                }
-
-                #modal-toeic-practice.view-question .toeic-question {
-                    display: flex !important;
+                    min-height: 0;
+                    overflow: hidden;
                 }
             }
 
             /* Prevent passage from taking space completely in part 5 */
             #modal-toeic-practice.is-part5 .toeic-passage {
+                display: none !important;
+            }
+
+            #modal-toeic-practice.is-part5 .toeic-tabs {
                 display: none !important;
             }
     </style>
@@ -3977,7 +3957,7 @@
                     qIndex: 0,
                     shuffledOptions: [], // Array of arrays
                     results: [],
-                    mobileViewMode: 'passage'
+                    mobileViewMode: 'question'
                 };
 
                 // Pre-shuffle options for each question
@@ -4009,19 +3989,20 @@
                 if (set.type === 'part5') {
                     modalEl.classList.remove('is-part67');
                     modalEl.classList.add('is-part5');
+                    document.getElementById('toeic-tabs').style.display = 'none';
+                    document.getElementById('toeic-passage').style.display = 'none';
+                    document.getElementById('toeic-question-pane').style.display = 'flex';
                 } else {
                     modalEl.classList.remove('is-part5');
                     modalEl.classList.add('is-part67');
                     passageContent.innerHTML = set.passage ? set.passage.replace(/\n/g, '<br>') : '';
 
-                    const mode = this.state.currentToeicSession.mobileViewMode || 'passage';
+                    // Show tabs for Part 6/7
+                    document.getElementById('toeic-tabs').style.display = 'flex';
+
+                    const mode = this.state.currentToeicSession.mobileViewMode || 'question';
                     this.switchToeicTab(mode);
                 }
-
-                // Clear any lingering inline styles from previous render modes
-                document.getElementById('toeic-passage').style.display = '';
-                document.getElementById('toeic-question-pane').style.display = '';
-                document.getElementById('toeic-tabs').style.display = '';
 
                 // Question Pane
                 document.getElementById('toeic-q-text').innerHTML = `${q.question.replace(/\n/g, '<br>')}`;
@@ -4045,20 +4026,21 @@
 
             switchToeicTab(mode) {
                 this.state.currentToeicSession.mobileViewMode = mode;
-                const modal = document.getElementById('modal-toeic-practice');
                 const tabPassage = document.getElementById('tab-toeic-passage');
                 const tabQuestion = document.getElementById('tab-toeic-question');
+                const passageEl = document.getElementById('toeic-passage');
+                const questionEl = document.getElementById('toeic-question-pane');
 
                 if (mode === 'passage') {
-                    modal.classList.add('view-passage');
-                    modal.classList.remove('view-question');
                     tabPassage.classList.add('active');
                     tabQuestion.classList.remove('active');
+                    passageEl.style.display = 'block';
+                    questionEl.style.display = 'none';
                 } else {
-                    modal.classList.add('view-question');
-                    modal.classList.remove('view-passage');
                     tabPassage.classList.remove('active');
                     tabQuestion.classList.add('active');
+                    passageEl.style.display = 'none';
+                    questionEl.style.display = 'flex';
                 }
             },
 
