@@ -3917,6 +3917,9 @@
 
                                                renderToeicQuestion() {
                                                    const session = this.state.currentToeicSession;
+                                                   // Prevent re-render during answer processing
+                                                   if (session.isAnswering) return;
+
                                                    const set = session.set;
                                                    const q = set.questions[session.qIndex];
                                                    const opts = session.shuffledOptions[session.qIndex];
@@ -3930,6 +3933,10 @@
                                                    const questionPane = document.getElementById('toeic-question-pane');
                                                    const btnSolve = document.getElementById('btn-toeic-solve-mobile');
                                                    const btnBack = document.getElementById('btn-toeic-back-mobile');
+
+                                                   // Ensure buttons are enabled for new question
+                                                   if (btnSolve) btnSolve.disabled = false;
+                                                   if (btnBack) btnBack.disabled = false;
 
                                                    const isMobile = window.innerWidth <= 768;
 
@@ -3996,6 +4003,14 @@
                                                    const opts = document.getElementById('toeic-options').children;
                                                    for (let c of opts) c.disabled = true;
 
+                                                   // Disable mobile navigation to prevent re-render race condition
+                                                   const btnSolve = document.getElementById('btn-toeic-solve-mobile');
+                                                   const btnBack = document.getElementById('btn-toeic-back-mobile');
+                                                   if (btnSolve) btnSolve.disabled = true;
+                                                   if (btnBack) btnBack.disabled = true;
+
+                                                   this.state.currentToeicSession.isAnswering = true;
+
                                                    const feedback = document.getElementById('toeic-feedback');
 
                                                    const isCorrect = (selected === correct);
@@ -4020,6 +4035,7 @@
                                                    }
 
                                                    setTimeout(() => {
+                                                       this.state.currentToeicSession.isAnswering = false;
                                                        this.state.currentToeicSession.qIndex++;
                                                        if (this.state.currentToeicSession.qIndex >= this.state.currentToeicSession.set.questions.length) {
                                                            this.finishToeicSession();
