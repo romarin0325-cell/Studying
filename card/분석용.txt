@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="ko">
+＜!DOCTYPE html＞
+＜html lang="ko"＞
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Card RPG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+＜head＞
+    ＜meta charset="UTF-8"＞
+    ＜meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"＞
+    ＜title＞Card RPG＜/title＞
+    ＜link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"＞
+    ＜style＞
         body {
             background-color: #121212;
             color: #e0e0e0;
@@ -458,15 +458,6 @@
             display: none;
         }
 
-        /* Artifact mode mobile UI fix for Chaos modal */
-        #modal-chaos.artifact-mode .menu-btn {
-            padding: 8px !important;
-            margin-bottom: 5px !important;
-        }
-
-        #modal-chaos.artifact-mode .modal-content {
-            min-height: auto !important;
-            padding-bottom: 20px;
         #modal-artifact-select .modal-content {
             padding: 10px !important;
             padding-top: 5px !important;
@@ -481,442 +472,406 @@
             margin: 5px 0 !important;
             margin-bottom: 8px !important;
         }
+    ＜/style＞
+＜/head＞
 
-        @media (max-width: 768px) {
-            #modal-chaos.artifact-mobile-compact {
-                justify-content: flex-start;
-                padding: 8px 0;
-            }
-
-            #modal-chaos.artifact-mobile-compact .modal-content {
-                min-height: auto !important;
-                max-height: calc(100vh - 16px);
-                overflow-y: auto;
-                padding-top: 8px;
-            }
-
-            #modal-chaos.artifact-mobile-compact .chaos-title {
-                margin: 4px 0 8px 0;
-            }
-
-            #modal-chaos.artifact-mobile-compact .chaos-desc {
-                margin: 4px 0 8px 0;
-                line-height: 1.35;
-            }
-
-            #modal-chaos.artifact-mobile-compact .chaos-uses {
-                margin-bottom: 6px !important;
-            }
-
-            #modal-chaos.artifact-mobile-compact .menu-btn {
-                margin-bottom: 7px;
-                padding: 10px;
-            }
-
-            #modal-chaos.artifact-mobile-compact .chaos-close-btn {
-                margin-top: 6px !important;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="header">Card RPG</div>
-    <div class="container">
-        <div id="screen-title" class="screen active" style="justify-content: center; align-items: center;">
-            <h1 style="color:#ffd700;">Card RPG</h1>
-            <div id="title-loading" class="title-loading">⏳ 데이터 로딩 중... 잠시만 기다려주세요.</div>
-            <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로하기</button>
-            <button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled>이어하기</button>
-        </div>
-        <div id="screen-menu" class="screen">
-            <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장
-            </div>
-            <div id="next-enemy-preview"
-                style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
-                <div style="margin-bottom:5px;">다음 상대: <span id="next-enemy-text">?</span></div>
-                <div class="portrait" style="width:80px; height:106px; margin:0 auto; border-color:#ff5252;"><img
+＜body＞
+    ＜div class="header"＞Card RPG＜/div＞
+    ＜div class="container"＞
+        ＜div id="screen-title" class="screen active" style="justify-content: center; align-items: center;"＞
+            ＜h1 style="color:#ffd700;"＞Card RPG＜/h1＞
+            ＜div id="title-loading" class="title-loading"＞⏳ 데이터 로딩 중... 잠시만 기다려주세요.＜/div＞
+            ＜button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled＞새로하기＜/button＞
+            ＜button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled＞이어하기＜/button＞
+        ＜/div＞
+        ＜div id="screen-menu" class="screen"＞
+            ＜div style="text-align:center; padding: 10px;"＞보유 티켓: ＜span id="ui-tickets" style="color:#ffd700"＞0＜/span＞장
+            ＜/div＞
+            ＜div id="next-enemy-preview"
+                style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;"＞
+                ＜div style="margin-bottom:5px;"＞다음 상대: ＜span id="next-enemy-text"＞?＜/span＞＜/div＞
+                ＜div class="portrait" style="width:80px; height:106px; margin:0 auto; border-color:#ff5252;"＞＜img
                         id="next-enemy-img" src="" onerror="this.style.display='none'"
-                        style="width:100%; height:100%; object-fit:contain;"></div>
-            </div>
-            <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
-                <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기 (1장)</button>
-                <button class="menu-btn" onclick="RPG.openChallengeGacha()"
-                    style="flex:1; border-color:#e040fb; color:#e040fb;">도전 뽑기</button>
-            </div>
-            <div id="menu-draft-area" style="display:none; margin-bottom:10px;">
-                <button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;">덱 빌딩
-                    (드래프트)</button>
-            </div>
-            <div id="menu-chaos-area" style="display:none; margin-bottom:10px;">
-                <button class="menu-btn" onclick="RPG.reshuffleChaosPool()"
-                    style="border-color:#ff5252; color:#ff5252;">
+                        style="width:100%; height:100%; object-fit:contain;"＞＜/div＞
+            ＜/div＞
+            ＜div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;"＞
+                ＜button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;"＞일반 뽑기 (1장)＜/button＞
+                ＜button class="menu-btn" onclick="RPG.openChallengeGacha()"
+                    style="flex:1; border-color:#e040fb; color:#e040fb;"＞도전 뽑기＜/button＞
+            ＜/div＞
+            ＜div id="menu-draft-area" style="display:none; margin-bottom:10px;"＞
+                ＜button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;"＞덱 빌딩
+                    (드래프트)＜/button＞
+            ＜/div＞
+            ＜div id="menu-chaos-area" style="display:none; margin-bottom:10px;"＞
+                ＜button class="menu-btn" onclick="RPG.reshuffleChaosPool()"
+                    style="border-color:#ff5252; color:#ff5252;"＞
                     카오스 셔플 (티켓 1장)
-                </button>
-            </div>
-            <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
-            <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
-            <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
-            <button class="menu-btn" onclick="RPG.openChaosBlessing()"
-                style="border-color: #ffd700; color: #ffd700;">축복의 제단</button>
-            <button class="menu-btn" onclick="RPG.startBattleInit()"
-                style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
-            <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
-        </div>
-        <div id="screen-draft" class="screen">
-            <h3 style="margin:5px 0;">덱 빌딩 (<span id="draft-round-text">선봉</span> 선발)</h3>
-            <div style="text-align:center; margin-bottom:2px;">
-                남은 리롤: <span id="draft-reroll-cnt" style="color:#ffd700">3</span>회
-            </div>
+                ＜/button＞
+            ＜/div＞
+            ＜button class="menu-btn" onclick="RPG.openDeck()"＞덱 구성＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openCollection()"＞카드 확인＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openLibrary()"＞도서관＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openChaosBlessing()"
+                style="border-color: #ffd700; color: #ffd700;"＞축복의 제단＜/button＞
+            ＜button class="menu-btn" onclick="RPG.startBattleInit()"
+                style="background:#b71c1c; border-color:#f44336;"＞전투 진입＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openSystemMenu()"＞메뉴＜/button＞
+        ＜/div＞
+        ＜div id="screen-draft" class="screen"＞
+            ＜h3 style="margin:5px 0;"＞덱 빌딩 (＜span id="draft-round-text"＞선봉＜/span＞ 선발)＜/h3＞
+            ＜div style="text-align:center; margin-bottom:2px;"＞
+                남은 리롤: ＜span id="draft-reroll-cnt" style="color:#ffd700"＞3＜/span＞회
+            ＜/div＞
 
-            <div id="draft-grid"
-                style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; padding:5px; overflow-y:auto; flex:1;">
-            </div>
+            ＜div id="draft-grid"
+                style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; padding:5px; overflow-y:auto; flex:1;"＞
+            ＜/div＞
 
-            <div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px;">
-                <button class="menu-btn" onclick="RPG.rerollDraft()"
-                    style="background:#333; border-color:#ff9800; color:#ff9800;">리롤 (새로고침)</button>
-                <button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;">나가기</button>
-            </div>
-        </div>
-        <div id="screen-collection" class="screen">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>카드 목록</h3><button onclick="RPG.toMenu()"
-                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
-            </div>
-            <div id="collection-grid" class="card-grid"></div>
-        </div>
-        <div id="screen-deck" class="screen">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>덱 구성</h3>
-                <button onclick="RPG.toMenu()"
-                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
-            </div>
-            <div style="margin-bottom:10px;">
-                <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉 (클릭하여 선택)</div>
-                <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견 (클릭하여 선택)</div>
-                <div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">대장 (클릭하여 선택)</div>
-            </div>
-            <div style="flex:1; overflow-y:auto; border-top:1px solid #333;">
-                <div id="deck-card-list" class="card-grid"></div>
-            </div>
-            <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
-        </div>
-        <div id="screen-chaos-roulette" class="screen">
-            <div
-                style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:15vh; gap:20px;">
-                <div style="text-align:center;">
-                    <h2 style="color:#ffd700; margin-bottom:5px;">카오스 룰렛</h2>
-                    <p>보유 카오스 티켓: <span id="ui-chaos-tickets"
-                            style="color:#ffd700; font-weight:bold; font-size:1.2rem;">0</span>장</p>
-                </div>
-                <button class="menu-btn" onclick="RPG.spinChaosRoulette()"
-                    style="border-color:#ffd700; color:#ffd700; width:80%; max-width:300px; padding:20px;">
+            ＜div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px;"＞
+                ＜button class="menu-btn" onclick="RPG.rerollDraft()"
+                    style="background:#333; border-color:#ff9800; color:#ff9800;"＞리롤 (새로고침)＜/button＞
+                ＜button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;"＞나가기＜/button＞
+            ＜/div＞
+        ＜/div＞
+        ＜div id="screen-collection" class="screen"＞
+            ＜div style="display:flex; justify-content:space-between; align-items:center;"＞
+                ＜h3＞카드 목록＜/h3＞＜button onclick="RPG.toMenu()"
+                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;"＞뒤로＜/button＞
+            ＜/div＞
+            ＜div id="collection-grid" class="card-grid"＞＜/div＞
+        ＜/div＞
+        ＜div id="screen-deck" class="screen"＞
+            ＜div style="display:flex; justify-content:space-between; align-items:center;"＞
+                ＜h3＞덱 구성＜/h3＞
+                ＜button onclick="RPG.toMenu()"
+                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;"＞뒤로＜/button＞
+            ＜/div＞
+            ＜div style="margin-bottom:10px;"＞
+                ＜div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)"＞선봉 (클릭하여 선택)＜/div＞
+                ＜div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)"＞중견 (클릭하여 선택)＜/div＞
+                ＜div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)"＞대장 (클릭하여 선택)＜/div＞
+            ＜/div＞
+            ＜div style="flex:1; overflow-y:auto; border-top:1px solid #333;"＞
+                ＜div id="deck-card-list" class="card-grid"＞＜/div＞
+            ＜/div＞
+            ＜button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;"＞확인＜/button＞
+        ＜/div＞
+        ＜div id="screen-chaos-roulette" class="screen"＞
+            ＜div
+                style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:15vh; gap:20px;"＞
+                ＜div style="text-align:center;"＞
+                    ＜h2 style="color:#ffd700; margin-bottom:5px;"＞카오스 룰렛＜/h2＞
+                    ＜p＞보유 카오스 티켓: ＜span id="ui-chaos-tickets"
+                            style="color:#ffd700; font-weight:bold; font-size:1.2rem;"＞0＜/span＞장＜/p＞
+                ＜/div＞
+                ＜button class="menu-btn" onclick="RPG.spinChaosRoulette()"
+                    style="border-color:#ffd700; color:#ffd700; width:80%; max-width:300px; padding:20px;"＞
                     카오스 룰렛 돌리기 (티켓 1장)
-                </button>
-                <button class="menu-btn" onclick="RPG.openTranscendenceCheck()" style="width:80%; max-width:300px;">
+                ＜/button＞
+                ＜button class="menu-btn" onclick="RPG.openTranscendenceCheck()" style="width:80%; max-width:300px;"＞
                     초월 확인
-                </button>
-                <button class="menu-btn" onclick="RPG.toTitle(); RPG.openModeSelect();"
-                    style="width:80%; max-width:300px; background:#444;">
+                ＜/button＞
+                ＜button class="menu-btn" onclick="RPG.toTitle(); RPG.openModeSelect();"
+                    style="width:80%; max-width:300px; background:#444;"＞
                     돌아가기
-                </button>
-            </div>
-        </div>
-        <div id="screen-transcendence-check" class="screen">
-            <div
-                style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1f1f1f;">
-                <h3 style="margin:0; color:#ffd700;">보유 초월 카드 (다음 오리진 게임 적용)</h3>
-                <button onclick="RPG.openChaosRoulette()"
-                    style="background:#fff; color:#000; padding:5px 10px; border:1px solid #ccc; cursor:pointer; border-radius:4px;">뒤로</button>
-            </div>
-            <div id="transcendence-grid" class="card-grid"></div>
-        </div>
-        <div id="screen-battle" class="screen">
-            <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span>
-                <div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div>
-            </div>
-            <div class="visual-stage">
-                <div id="player-actor-box" class="battle-actor player"
-                    onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
-                    <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
-                    <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
-                    <div class="actor-hp-bar">
-                        <div id="p-hp-bar" class="actor-hp-fill"></div>
-                    </div>
-                    <div class="actor-mp-bar">
-                        <div id="p-mp-bar" class="actor-mp-fill"></div>
-                    </div>
-                    <div id="p-buffs" class="actor-buffs"></div>
-                </div>
+                ＜/button＞
+            ＜/div＞
+        ＜/div＞
+        ＜div id="screen-transcendence-check" class="screen"＞
+            ＜div
+                style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1f1f1f;"＞
+                ＜h3 style="margin:0; color:#ffd700;"＞보유 초월 카드 (다음 오리진 게임 적용)＜/h3＞
+                ＜button onclick="RPG.openChaosRoulette()"
+                    style="background:#fff; color:#000; padding:5px 10px; border:1px solid #ccc; cursor:pointer; border-radius:4px;"＞뒤로＜/button＞
+            ＜/div＞
+            ＜div id="transcendence-grid" class="card-grid"＞＜/div＞
+        ＜/div＞
+        ＜div id="screen-battle" class="screen"＞
+            ＜div class="battle-header"＞＜span＞Turn: ＜span id="bt-turn"＞1＜/span＞＜/span＞
+                ＜div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"＞＜/div＞
+            ＜/div＞
+            ＜div class="visual-stage"＞
+                ＜div id="player-actor-box" class="battle-actor player"
+                    onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"＞
+                    ＜div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name"＞Player＜/div＞
+                    ＜div class="portrait"＞＜img id="p-img" src="" onerror="this.style.display='none'"＞＜/div＞
+                    ＜div class="actor-hp-bar"＞
+                        ＜div id="p-hp-bar" class="actor-hp-fill"＞＜/div＞
+                    ＜/div＞
+                    ＜div class="actor-mp-bar"＞
+                        ＜div id="p-mp-bar" class="actor-mp-fill"＞＜/div＞
+                    ＜/div＞
+                    ＜div id="p-buffs" class="actor-buffs"＞＜/div＞
+                ＜/div＞
 
-                <div style="color:#555; font-size:1.5rem; font-weight:bold;">VS</div>
+                ＜div style="color:#555; font-size:1.5rem; font-weight:bold;"＞VS＜/div＞
 
-                <div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)">
-                    <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name">Enemy</div>
-                    <div class="portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
-                    <div class="actor-hp-bar">
-                        <div id="e-hp-bar" class="actor-hp-fill"></div>
-                    </div>
-                    <div id="e-buffs" class="actor-buffs"></div>
-                </div>
-            </div>
-            <div id="battle-log" class="log-container"></div>
-            <div id="battle-controls" class="control-panel"></div>
-        </div>
-    </div>
+                ＜div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)"＞
+                    ＜div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name"＞Enemy＜/div＞
+                    ＜div class="portrait"＞＜img id="e-img" src="" onerror="this.style.display='none'"＞＜/div＞
+                    ＜div class="actor-hp-bar"＞
+                        ＜div id="e-hp-bar" class="actor-hp-fill"＞＜/div＞
+                    ＜/div＞
+                    ＜div id="e-buffs" class="actor-buffs"＞＜/div＞
+                ＜/div＞
+            ＜/div＞
+            ＜div id="battle-log" class="log-container"＞＜/div＞
+            ＜div id="battle-controls" class="control-panel"＞＜/div＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-mode-select" class="modal">
-        <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
-            <div style="position:relative;">
-                <h3>게임 모드 선택</h3>
-                <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()"
-                    style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스
-                    룰렛</button>
-            </div>
-            <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;">
-            </div>
-            <div id="mode-desc"
-                style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
+    ＜div id="modal-mode-select" class="modal"＞
+        ＜div class="modal-content" style="height:auto; min-height:400px; width: 360px;"＞
+            ＜div style="position:relative;"＞
+                ＜h3＞게임 모드 선택＜/h3＞
+                ＜button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()"
+                    style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;"＞카오스
+                    룰렛＜/button＞
+            ＜/div＞
+            ＜div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;"＞
+            ＜/div＞
+            ＜div id="mode-desc"
+                style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;"＞
                 모드를 선택해주세요.
-            </div>
-            <button id="btn-enter-mode" class="menu-btn"
-                style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;">입장</button>
-            <button onclick="document.getElementById('modal-mode-select').classList.remove('active')"
-                style="margin-top:5px; width:100%; padding:10px;">취소</button>
-        </div>
-    </div>
+            ＜/div＞
+            ＜button id="btn-enter-mode" class="menu-btn"
+                style="background:#1b5e20; border-color:#4caf50; margin-top:10px; margin-bottom: 5px;"＞입장＜/button＞
+            ＜button onclick="document.getElementById('modal-mode-select').classList.remove('active')"
+                style="margin-top:5px; width:100%; padding:10px;"＞취소＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-type-select" class="modal">
-        <div class="modal-content" style="height:auto; min-height:300px; width: 360px;">
-            <h3>게임 종류 선택</h3>
-            <p style="font-size:0.9rem; color:#aaa; margin-bottom:20px;">
+    ＜div id="modal-type-select" class="modal"＞
+        ＜div class="modal-content" style="height:auto; min-height:300px; width: 360px;"＞
+            ＜h3＞게임 종류 선택＜/h3＞
+            ＜p style="font-size:0.9rem; color:#aaa; margin-bottom:20px;"＞
                 플레이하실 게임 종류를 선택해주세요.
-            </p>
-            <button class="menu-btn" onclick="RPG.selectGameType('endless')" style="padding:20px; margin-bottom:10px;">
-                무한 모드 (Endless)<br>
-                <span style="font-size:0.8rem; color:#ccc;">클리어 조건 없음 / 무한 진행</span>
-            </button>
-            <button class="menu-btn" onclick="RPG.selectGameType('challenge')"
-                style="padding:20px; border-color:#e040fb; color:#e040fb;">
-                도전 모드 (Challenge)<br>
-                <span style="font-size:0.8rem; color:#e1bee7;">목표 스테이지 클리어 도전</span>
-            </button>
-            <button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
-        </div>
-    </div>
+            ＜/p＞
+            ＜button class="menu-btn" onclick="RPG.selectGameType('endless')" style="padding:20px; margin-bottom:10px;"＞
+                무한 모드 (Endless)＜br＞
+                ＜span style="font-size:0.8rem; color:#ccc;"＞클리어 조건 없음 / 무한 진행＜/span＞
+            ＜/button＞
+            ＜button class="menu-btn" onclick="RPG.selectGameType('challenge')"
+                style="padding:20px; border-color:#e040fb; color:#e040fb;"＞
+                도전 모드 (Challenge)＜br＞
+                ＜span style="font-size:0.8rem; color:#e1bee7;"＞목표 스테이지 클리어 도전＜/span＞
+            ＜/button＞
+            ＜button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;"＞뒤로가기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-card" class="modal">
-        <div class="modal-content">
-            <h3 id="md-name">Name</h3>
-            <div class="modal-scroll">
-                <div class="portrait" style="width:150px; height:200px; margin:0 auto;"><img id="md-img" src=""
-                        style="width:100%; height:100%; object-fit:contain;"></div>
-                <p id="md-grade" style="font-size:0.8rem; margin:5px 0;">Grade</p>
-                <div id="md-stats"
-                    style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"></div>
-                <div id="md-skills" style="font-size:0.8rem; text-align:left;"></div>
-            </div>
-            <button onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-card" class="modal"＞
+        ＜div class="modal-content"＞
+            ＜h3 id="md-name"＞Name＜/h3＞
+            ＜div class="modal-scroll"＞
+                ＜div class="portrait" style="width:150px; height:200px; margin:0 auto;"＞＜img id="md-img" src=""
+                        style="width:100%; height:100%; object-fit:contain;"＞＜/div＞
+                ＜p id="md-grade" style="font-size:0.8rem; margin:5px 0;"＞Grade＜/p＞
+                ＜div id="md-stats"
+                    style="font-size:0.8rem; text-align:left; background:#333; padding:5px; margin:5px 0;"＞＜/div＞
+                ＜div id="md-skills" style="font-size:0.8rem; text-align:left;"＞＜/div＞
+            ＜/div＞
+            ＜button onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-info" class="modal" style="z-index: 200;">
-        <div class="modal-content" style="height:auto;">
-            <h3 id="info-title">정보</h3>
-            <div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;">
-            </div>
-            <button onclick="RPG.closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-info" class="modal" style="z-index: 200;"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3 id="info-title"＞정보＜/h3＞
+            ＜div id="info-content" class="modal-scroll" style="text-align:left; font-size:0.85rem; line-height:1.4;"＞
+            ＜/div＞
+            ＜button onclick="RPG.closeInfoModal()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-confirm" class="modal" style="z-index: 210;">
-        <div class="modal-content" style="height:auto;">
-            <h3 id="confirm-title">확인</h3>
-            <div id="confirm-msg" style="margin: 10px 0;">...</div>
-            <div id="confirm-btn-container" style="display:flex; gap:10px; margin-top:15px; width:100%;">
-                <button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;">예</button>
-                <button id="confirm-no" class="menu-btn"
-                    style="flex:1; margin-bottom:0; background:#555; border-color:#777;">아니오</button>
-            </div>
-        </div>
-    </div>
+    ＜div id="modal-confirm" class="modal" style="z-index: 210;"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3 id="confirm-title"＞확인＜/h3＞
+            ＜div id="confirm-msg" style="margin: 10px 0;"＞...＜/div＞
+            ＜div id="confirm-btn-container" style="display:flex; gap:10px; margin-top:15px; width:100%;"＞
+                ＜button id="confirm-yes" class="menu-btn" style="flex:1; margin-bottom:0;"＞예＜/button＞
+                ＜button id="confirm-no" class="menu-btn"
+                    style="flex:1; margin-bottom:0; background:#555; border-color:#777;"＞아니오＜/button＞
+            ＜/div＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-gacha" class="modal">
-        <div class="modal-content" style="height:auto; min-height:300px;">
-            <h2 id="gacha-title">획득!</h2>
-            <div id="gacha-result"></div>
-            <button onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;">확인</button>
-        </div>
-    </div>
+    ＜div id="modal-gacha" class="modal"＞
+        ＜div class="modal-content" style="height:auto; min-height:300px;"＞
+            ＜h2 id="gacha-title"＞획득!＜/h2＞
+            ＜div id="gacha-result"＞＜/div＞
+            ＜button onclick="RPG.closeGachaModal()" style="margin-top:10px; width:100%; padding:10px;"＞확인＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-library" class="modal">
-        <div class="modal-content" style="height:auto;">
-            <h3>도서관</h3>
-            <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
-            <button class="menu-btn" onclick="RPG.openPrivateTutoring()">루미의 개인과외</button>
-            <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
-            <button onclick="document.getElementById('modal-library').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-library" class="modal"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3＞도서관＜/h3＞
+            ＜button class="menu-btn" onclick="RPG.openMagicClass()"＞루미의 마법교실＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openPrivateTutoring()"＞루미의 개인과외＜/button＞
+            ＜button class="menu-btn" onclick="RPG.openWordbook()"＞단어장＜/button＞
+            ＜button onclick="document.getElementById('modal-library').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-magic-class" class="modal">
-        <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <h3>루미의 마법교실</h3>
-            <div id="lecture-list" class="modal-scroll"></div>
-            <button onclick="RPG.closeMagicClass()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-magic-class" class="modal"＞
+        ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"＞
+            ＜h3＞루미의 마법교실＜/h3＞
+            ＜div id="lecture-list" class="modal-scroll"＞＜/div＞
+            ＜button onclick="RPG.closeMagicClass()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-lecture-view" class="modal" style="z-index: 150;">
-        <div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;">
-            <h3 id="lecture-title">강의 제목</h3>
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-                <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;">
-                    <img src="루미.png" onerror="this.src=''" alt="Rumi">
-                </div>
-            </div>
-            <div id="lecture-content" class="modal-scroll"
-                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">
-            </div>
-            <button onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-lecture-view" class="modal" style="z-index: 150;"＞
+        ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;"＞
+            ＜h3 id="lecture-title"＞강의 제목＜/h3＞
+            ＜div style="display: flex; justify-content: center; margin-bottom: 10px;"＞
+                ＜div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;"＞
+                    ＜img src="루미.png" onerror="this.src=''" alt="Rumi"＞
+                ＜/div＞
+            ＜/div＞
+            ＜div id="lecture-content" class="modal-scroll"
+                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;"＞
+            ＜/div＞
+            ＜button onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-wordbook" class="modal">
-        <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <h3>단어장</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 0.8rem; color: #aaa;">빨간색: 틀린 단어</span>
-                <label
-                    style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;">
-                    <input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()"
-                        style="margin-right: 5px;"> 틀린 단어만 보기
-                </label>
-                <button class="menu-btn" onclick="RPG.resetWrongWords()"
-                    style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습
-                    초기화</button>
-            </div>
-            <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
-            <button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-wordbook" class="modal"＞
+        ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"＞
+            ＜h3＞단어장＜/h3＞
+            ＜div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"＞
+                ＜span style="font-size: 0.8rem; color: #aaa;"＞빨간색: 틀린 단어＜/span＞
+                ＜label
+                    style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;"＞
+                    ＜input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()"
+                        style="margin-right: 5px;"＞ 틀린 단어만 보기
+                ＜/label＞
+                ＜button class="menu-btn" onclick="RPG.resetWrongWords()"
+                    style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;"＞복습
+                    초기화＜/button＞
+            ＜/div＞
+            ＜div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"＞＜/div＞
+            ＜button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-tutoring" class="modal">
-        <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <h3>루미의 개인과외</h3>
-            <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
-                <img src="루미.png" onerror="this.src=''" alt="Rumi">
-            </div>
-            <div id="tutoring-content" class="modal-scroll"
-                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
+    ＜div id="modal-tutoring" class="modal"＞
+        ＜div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;"＞
+            ＜h3＞루미의 개인과외＜/h3＞
+            ＜div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;"＞
+                ＜img src="루미.png" onerror="this.src=''" alt="Rumi"＞
+            ＜/div＞
+            ＜div id="tutoring-content" class="modal-scroll"
+                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;"＞
                 수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;">수업
-                    시작</button>
-                <button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()"
-                    style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;">퀴즈
-                    풀기</button>
-            </div>
-            <button onclick="RPG.closePrivateTutoring()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+            ＜/div＞
+            ＜div style="display: flex; gap: 10px; margin-top: 10px;"＞
+                ＜button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;"＞수업
+                    시작＜/button＞
+                ＜button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()"
+                    style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;"＞퀴즈
+                    풀기＜/button＞
+            ＜/div＞
+            ＜button onclick="RPG.closePrivateTutoring()" style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-quiz" class="modal">
-        <div class="modal-content" style="width: 320px;">
-            <h3>퀴즈</h3>
-            <div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"></div>
-            <div id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"></div>
-            <div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
-            <div id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"></div>
-        </div>
-    </div>
+    ＜div id="modal-quiz" class="modal"＞
+        ＜div class="modal-content" style="width: 320px;"＞
+            ＜h3＞퀴즈＜/h3＞
+            ＜div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"＞＜/div＞
+            ＜div id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"＞＜/div＞
+            ＜div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"＞＜/div＞
+            ＜div id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"＞＜/div＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-chaos" class="modal">
-        <div class="modal-content" style="height:auto; min-height: 550px;">
-            <h3 class="chaos-title">혼돈의 축복</h3>
-            <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
-            <div class="chaos-uses" style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
-                혼돈의 축복: <span id="chaos-uses">3</span>회 / 대현자의 축복: <span id="sage-uses">3</span>회
-            </div>
-            <button class="menu-btn" onclick="RPG.activateChaos('normal')">
-                혼돈의 축복 (일반)<br>
-                <span style="font-size:0.75rem; font-weight:normal; color:#ccc;">랜덤 3종 카드 능력치 대폭 상승, 치명타/회피율 증가</span>
-            </button>
-            <button class="menu-btn" onclick="RPG.activateChaos('challenge')"
-                style="border-color:#e040fb; color:#e040fb;">
-                혼돈의 축복 (도전)<br>
-                <span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;">퀴즈 성공 시 랜덤 5종 카드 능력치 대폭 상승, 치명타/회피율
-                    증가</span>
-            </button>
-            <button class="menu-btn" onclick="RPG.activateChaos('great_sage')"
-                style="border-color:#00e676; color:#00e676;">
-                대현자의 축복<br>
-                <span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;">문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장</span>
-            </button>
-            <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()"
-                style="border-color:#29b6f6; color:#29b6f6;">
+    ＜div id="modal-chaos" class="modal"＞
+        ＜div class="modal-content" style="height:auto; min-height: 550px;"＞
+            ＜h3＞혼돈의 축복＜/h3＞
+            ＜p style="font-size:0.8rem; color:#aaa;"＞전투 시 무작위 카드에게 강력한 축복을 내립니다.＜br＞(전투 종료 시 사라짐, 최대 3회)＜/p＞
+            ＜div style="margin-bottom:10px; font-weight:bold; color:#ffd700;"＞
+                혼돈의 축복: ＜span id="chaos-uses"＞3＜/span＞회 / 대현자의 축복: ＜span id="sage-uses"＞3＜/span＞회
+            ＜/div＞
+            ＜button class="menu-btn" onclick="RPG.activateChaos('normal')"＞
+                혼돈의 축복 (일반)＜br＞
+                ＜span style="font-size:0.75rem; font-weight:normal; color:#ccc;"＞랜덤 3종 카드 능력치 대폭 상승, 치명타/회피율 증가＜/span＞
+            ＜/button＞
+            ＜button class="menu-btn" onclick="RPG.activateChaos('challenge')"
+                style="border-color:#e040fb; color:#e040fb;"＞
+                혼돈의 축복 (도전)＜br＞
+                ＜span style="font-size:0.75rem; font-weight:normal; color:#e1bee7;"＞퀴즈 성공 시 랜덤 5종 카드 능력치 대폭 상승, 치명타/회피율
+                    증가＜/span＞
+            ＜/button＞
+            ＜button class="menu-btn" onclick="RPG.activateChaos('great_sage')"
+                style="border-color:#00e676; color:#00e676;"＞
+                대현자의 축복＜br＞
+                ＜span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;"＞문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장＜/span＞
+            ＜/button＞
+            ＜button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()"
+                style="border-color:#29b6f6; color:#29b6f6;"＞
                 적용된 축복 확인
-            </button>
-            <button id="btn-artifact-check" onclick="RPG.openArtifactCheck()"
-                style="display:none; border-color:#ffd700; color:#ffd700;" class="menu-btn">
+            ＜/button＞
+            ＜button id="btn-artifact-check" onclick="RPG.openArtifactCheck()"
+                style="display:none; border-color:#ffd700; color:#ffd700;" class="menu-btn"＞
                 아티팩트 확인
-            </button>
-            <button onclick="document.getElementById('modal-chaos').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;" class="chaos-close-btn">닫기</button>
-        </div>
-    </div>
+            ＜/button＞
+            ＜button onclick="document.getElementById('modal-chaos').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-artifact-select" class="modal" style="z-index: 210;">
-        <div class="modal-content" style="height:auto; min-height:350px;">
-            <h3 style="color:#ffd700;">아티팩트 선택</h3>
-            <p style="font-size:0.8rem; color:#aaa;">아래 3개 중 1개를 선택하세요. (최대 4개 보유)</p>
-            <div id="artifact-select-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"></div>
-        </div>
-    </div>
+    ＜div id="modal-artifact-select" class="modal" style="z-index: 210;"＞
+        ＜div class="modal-content" style="height:auto; min-height:350px;"＞
+            ＜h3 style="color:#ffd700;"＞아티팩트 선택＜/h3＞
+            ＜p style="font-size:0.8rem; color:#aaa;"＞아래 3개 중 1개를 선택하세요. (최대 4개 보유)＜/p＞
+            ＜div id="artifact-select-list" style="display:flex; flex-direction:column; gap:8px; margin:10px 0;"＞＜/div＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-artifact-check" class="modal" style="z-index: 200;">
-        <div class="modal-content" style="height:auto;">
-            <h3 style="color:#ffd700;">보유 아티팩트</h3>
-            <div id="artifact-check-list" style="text-align:left; font-size:0.85rem; line-height:1.6;"></div>
-            <button onclick="document.getElementById('modal-artifact-check').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-artifact-check" class="modal" style="z-index: 200;"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3 style="color:#ffd700;"＞보유 아티팩트＜/h3＞
+            ＜div id="artifact-check-list" style="text-align:left; font-size:0.85rem; line-height:1.6;"＞＜/div＞
+            ＜button onclick="document.getElementById('modal-artifact-check').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-menu" class="modal">
-        <div class="modal-content" style="height:auto;">
-            <h3>메뉴</h3>
-            <button class="menu-btn" onclick="RPG.openApiSettings()">API 설정</button>
-            <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
-            <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
-            <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
-            <button onclick="document.getElementById('modal-menu').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-menu" class="modal"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3＞메뉴＜/h3＞
+            ＜button class="menu-btn" onclick="RPG.openApiSettings()"＞API 설정＜/button＞
+            ＜button class="menu-btn" onclick="RPG.saveGame()"＞저장하기＜/button＞
+            ＜button class="menu-btn" onclick="RPG.showRecords()"＞기록 확인＜/button＞
+            ＜button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;"＞타이틀로＜/button＞
+            ＜button onclick="document.getElementById('modal-menu').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <div id="modal-api-settings" class="modal">
-        <div class="modal-content" style="height:auto;">
-            <h3>API 설정</h3>
-            <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Gemini API Key를 입력해주세요.</p>
-            <input type="password" id="api-key-input" placeholder="Gemini API Key 입력"
-                style="width:100%; box-sizing:border-box; padding:10px; background:#333; color:#fff; border:1px solid #555; margin-bottom:10px;">
-            <button class="menu-btn" onclick="RPG.saveApiKey()">저장</button>
-            <button onclick="document.getElementById('modal-api-settings').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
+    ＜div id="modal-api-settings" class="modal"＞
+        ＜div class="modal-content" style="height:auto;"＞
+            ＜h3＞API 설정＜/h3＞
+            ＜p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;"＞Gemini API Key를 입력해주세요.＜/p＞
+            ＜input type="password" id="api-key-input" placeholder="Gemini API Key 입력"
+                style="width:100%; box-sizing:border-box; padding:10px; background:#333; color:#fff; border:1px solid #555; margin-bottom:10px;"＞
+            ＜button class="menu-btn" onclick="RPG.saveApiKey()"＞저장＜/button＞
+            ＜button onclick="document.getElementById('modal-api-settings').classList.remove('active')"
+                style="margin-top:10px; width:100%; padding:10px;"＞닫기＜/button＞
+        ＜/div＞
+    ＜/div＞
 
-    <script>window._scriptLoadErrors = [];</script>
-    <script src="data.js" defer onerror="window._scriptLoadErrors.push('data.js')"></script>
-    <script src="vocab_data.js" defer onerror="window._scriptLoadErrors.push('vocab_data.js')"></script>
-    <script src="collocation_data.js" defer onerror="window._scriptLoadErrors.push('collocation_data.js')"></script>
-    <script src="grammar_data.js" defer onerror="window._scriptLoadErrors.push('grammar_data.js')"></script>
-    <script src="logic.js" defer onerror="window._scriptLoadErrors.push('logic.js')"></script>
-    <script defer>
+    ＜script＞window._scriptLoadErrors = [];＜/script＞
+    ＜script src="data.js" defer onerror="window._scriptLoadErrors.push('data.js')"＞＜/script＞
+    ＜script src="vocab_data.js" defer onerror="window._scriptLoadErrors.push('vocab_data.js')"＞＜/script＞
+    ＜script src="collocation_data.js" defer onerror="window._scriptLoadErrors.push('collocation_data.js')"＞＜/script＞
+    ＜script src="grammar_data.js" defer onerror="window._scriptLoadErrors.push('grammar_data.js')"＞＜/script＞
+    ＜script src="logic.js" defer onerror="window._scriptLoadErrors.push('logic.js')"＞＜/script＞
+    ＜script defer＞
 const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
@@ -1015,8 +970,8 @@ const GameAPI = {
  *       desc: 'optional description',        // falsy → hidden
  *       options: ['A', 'B', 'C', 'D'],       // will be shuffled
  *       answer: 'B',                          // correct option text
- *       onCorrect: () => { ... },
- *       onWrong: (chosen) => { ... },
+ *       onCorrect: () =＞ { ... },
+ *       onWrong: (chosen) =＞ { ... },
  *       correctDelay: 1000,                   // ms before closing on correct
  *       wrongDelay: 1500                      // ms before closing on wrong
  *   });
@@ -1058,37 +1013,37 @@ const QuizEngine = {
         }
 
         // Shuffle options
-        const shuffled = [...config.options].sort(() => Math.random() - 0.5);
+        const shuffled = [...config.options].sort(() =＞ Math.random() - 0.5);
         const correctDelay = config.correctDelay || 1000;
         const wrongDelay = config.wrongDelay || 1500;
 
-        shuffled.forEach(optText => {
+        shuffled.forEach(optText =＞ {
             const btn = document.createElement('button');
             btn.className = 'menu-btn';
             btn.style.padding = '10px';
             btn.style.fontSize = '0.9rem';
             btn.innerText = optText;
 
-            btn.onclick = () => {
+            btn.onclick = () =＞ {
                 // Immediately disable all buttons
                 btn.disabled = true;
-                Array.from(oDiv.children).forEach(c => { c.onclick = null; });
+                Array.from(oDiv.children).forEach(c =＞ { c.onclick = null; });
 
                 if (optText === config.answer) {
                     btn.classList.add('correct');
                     if (fDiv) { fDiv.innerText = '정답!'; fDiv.style.color = '#4caf50'; }
-                    setTimeout(() => {
+                    setTimeout(() =＞ {
                         modal.classList.remove('active');
                         if (config.onCorrect) config.onCorrect();
                     }, correctDelay);
                 } else {
                     btn.classList.add('wrong');
                     // Highlight correct answer
-                    Array.from(oDiv.children).forEach(c => {
+                    Array.from(oDiv.children).forEach(c =＞ {
                         if (c.innerText === config.answer) c.classList.add('correct');
                     });
                     if (fDiv) { fDiv.innerText = '오답...'; fDiv.style.color = '#ef5350'; }
-                    setTimeout(() => {
+                    setTimeout(() =＞ {
                         modal.classList.remove('active');
                         if (config.onWrong) config.onWrong(optText);
                     }, wrongDelay);
@@ -1104,7 +1059,7 @@ const QuizEngine = {
 
     /**
      * Build config for a standard vocab quiz (word → meaning).
-     * @param {Function} callback - (success: boolean) => void
+     * @param {Function} callback - (success: boolean) =＞ void
      * @returns {Object|null} config or null if data unavailable
      */
     buildVocabQuiz(callback) {
@@ -1116,10 +1071,10 @@ const QuizEngine = {
         options.push({ text: q.trap_meaning, correct: false });
 
         let safety = 0;
-        while (options.length < 4 && safety < 100) {
+        while (options.length ＜ 4 && safety ＜ 100) {
             safety++;
             const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-            if (r.word !== q.word && r.word !== q.trap_word && !options.some(o => o.text === r.meaning)) {
+            if (r.word !== q.word && r.word !== q.trap_word && !options.some(o =＞ o.text === r.meaning)) {
                 options.push({ text: r.meaning, correct: false });
             }
         }
@@ -1127,10 +1082,10 @@ const QuizEngine = {
         return {
             question: q.word,
             desc: null,
-            options: options.map(o => o.text),
+            options: options.map(o =＞ o.text),
             answer: q.meaning,
-            onCorrect: () => callback(true),
-            onWrong: () => {
+            onCorrect: () =＞ callback(true),
+            onWrong: () =＞ {
                 // Record wrong word
                 if (!RPG.state.wrongWords) RPG.state.wrongWords = [];
                 if (!RPG.state.wrongWords.includes(q.word)) {
@@ -1144,7 +1099,7 @@ const QuizEngine = {
 
     /**
      * Build config for a chaos quiz (meaning → word, reverse direction).
-     * @param {Function} callback - (success: boolean) => void
+     * @param {Function} callback - (success: boolean) =＞ void
      * @returns {Object|null} config or null if data unavailable
      */
     buildChaosQuiz(callback) {
@@ -1154,10 +1109,10 @@ const QuizEngine = {
 
         let options = [{ text: q.word, correct: true }];
         let safety = 0;
-        while (options.length < 4 && safety < 100) {
+        while (options.length ＜ 4 && safety ＜ 100) {
             safety++;
             const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-            if (r.word !== q.word && !options.some(o => o.text === r.word)) {
+            if (r.word !== q.word && !options.some(o =＞ o.text === r.word)) {
                 options.push({ text: r.word, correct: false });
             }
         }
@@ -1165,25 +1120,25 @@ const QuizEngine = {
         return {
             question: q.meaning,
             desc: null,
-            options: options.map(o => o.text),
+            options: options.map(o =＞ o.text),
             answer: q.word,
-            onCorrect: () => callback(true),
-            onWrong: () => callback(false)
+            onCorrect: () =＞ callback(true),
+            onWrong: () =＞ callback(false)
         };
     },
 
     /**
      * Build config for a collocation quiz.
-     * @param {Function} callback - (success: boolean) => void
+     * @param {Function} callback - (success: boolean) =＞ void
      * @returns {Object|null} config or null if data unavailable
      */
     buildCollocationQuiz(callback) {
         if (!COLLOCATION_DATA || COLLOCATION_DATA.length === 0) return null;
 
         let allQuizzes = [];
-        COLLOCATION_DATA.forEach(item => {
+        COLLOCATION_DATA.forEach(item =＞ {
             if (item.quizzes) {
-                item.quizzes.forEach(q => { allQuizzes.push({ ...q, parentId: item.id }); });
+                item.quizzes.forEach(q =＞ { allQuizzes.push({ ...q, parentId: item.id }); });
             } else {
                 allQuizzes.push({ ...item, parentId: item.id });
             }
@@ -1197,8 +1152,8 @@ const QuizEngine = {
             desc: q.translation,
             options: [...q.options],
             answer: q.answer,
-            onCorrect: () => callback(true),
-            onWrong: () => {
+            onCorrect: () =＞ callback(true),
+            onWrong: () =＞ {
                 if (!RPG.state.wrongCollocations) RPG.state.wrongCollocations = [];
                 if (!RPG.state.wrongCollocations.includes(q.parentId)) {
                     RPG.state.wrongCollocations.push(q.parentId);
@@ -1257,10 +1212,10 @@ const QuizEngine = {
             options.push({ text: data.trap_meaning, correct: false });
 
             let safety = 0;
-            while (options.length < 4 && safety < 100) {
+            while (options.length ＜ 4 && safety ＜ 100) {
                 safety++;
                 const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-                if (r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
+                if (r.word !== data.word && r.word !== data.trap_word && !options.some(o =＞ o.text === r.meaning)) {
                     options.push({ text: r.meaning, correct: false });
                 }
             }
@@ -1268,7 +1223,7 @@ const QuizEngine = {
             return {
                 question: data.word,
                 desc: null,
-                options: options.map(o => o.text),
+                options: options.map(o =＞ o.text),
                 answer: data.meaning,
                 onCorrect: onCorrect,
                 onWrong: onWrong
@@ -1343,7 +1298,7 @@ const QuizEngine = {
             },
 
             getCardData(id) {
-                return CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id) || (typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS.find(c => c.id === id) : null);
+                return CARDS.find(c =＞ c.id === id) || BONUS_CARDS.find(c =＞ c.id === id) || (typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS.find(c =＞ c.id === id) : null);
             },
 
             // --- Global Data ---
@@ -1369,7 +1324,7 @@ const QuizEngine = {
 
             checkAllBonusUnlocked() {
                 if (!this.global.unlocked_bonus_cards) return false;
-                return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
+                return BONUS_CARDS.every(c =＞ this.global.unlocked_bonus_cards.includes(c.id));
             },
 
             getMissingRequiredData() {
@@ -1386,7 +1341,7 @@ const QuizEngine = {
                     { name: 'GameUtils', ref: typeof GameUtils !== 'undefined' ? GameUtils : null },
                     { name: 'QuizEngine', ref: typeof QuizEngine !== 'undefined' ? QuizEngine : null }
                 ];
-                return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+                return requiredData.filter(d =＞ !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
             },
 
             setStartButtonsEnabled(enabled) {
@@ -1411,12 +1366,12 @@ const QuizEngine = {
                 const maxAttempts = 200;
                 const pollingMs = 150;
 
-                const checkReady = () => {
+                const checkReady = () =＞ {
                     // Check for script load errors first
-                    if (window._scriptLoadErrors && window._scriptLoadErrors.length > 0) {
+                    if (window._scriptLoadErrors && window._scriptLoadErrors.length ＞ 0) {
                         const loading = document.getElementById('title-loading');
                         if (loading) {
-                            loading.innerHTML = `⚠️ 스크립트 로드 실패: ${window._scriptLoadErrors.join(', ')}<br><span style="font-size:0.8rem; color:#aaa;">파일이 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
+                            loading.innerHTML = `⚠️ 스크립트 로드 실패: ${window._scriptLoadErrors.join(', ')}＜br＞＜span style="font-size:0.8rem; color:#aaa;"＞파일이 같은 폴더에 있는지 확인해주세요.＜/span＞＜br＞＜button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;"＞새로고침＜/button＞`;
                         }
                         return;
                     }
@@ -1428,12 +1383,12 @@ const QuizEngine = {
                     }
 
                     attempts++;
-                    if (attempts >= maxAttempts) {
+                    if (attempts ＞= maxAttempts) {
                         const loading = document.getElementById('title-loading');
                         if (loading) {
-                            const errorInfo = window._scriptLoadErrors && window._scriptLoadErrors.length > 0
-                                ? `<br>로드 실패 파일: ${window._scriptLoadErrors.join(', ')}` : '';
-                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d => d.name).join(', ')}${errorInfo}<br><span style="font-size:0.8rem; color:#aaa;">모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
+                            const errorInfo = window._scriptLoadErrors && window._scriptLoadErrors.length ＞ 0
+                                ? `＜br＞로드 실패 파일: ${window._scriptLoadErrors.join(', ')}` : '';
+                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d =＞ d.name).join(', ')}${errorInfo}＜br＞＜span style="font-size:0.8rem; color:#aaa;"＞모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.＜/span＞＜br＞＜button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;"＞새로고침＜/button＞`;
                         }
                         return;
                     }
@@ -1443,7 +1398,7 @@ const QuizEngine = {
                         const loading = document.getElementById('title-loading');
                         if (loading) {
                             const missing = this.getMissingRequiredData();
-                            loading.innerText = `⏳ 데이터 로딩 중... (${missing.map(d => d.name).join(', ')} 대기)`;
+                            loading.innerText = `⏳ 데이터 로딩 중... (${missing.map(d =＞ d.name).join(', ')} 대기)`;
                         }
                     }
 
@@ -1457,13 +1412,13 @@ const QuizEngine = {
             startGame(mode, retryCount = 0) {
                 const missing = this.getMissingRequiredData();
 
-                if (missing.length > 0) {
-                    if (retryCount < 6) {
-                        setTimeout(() => this.startGame(mode, retryCount + 1), 180);
+                if (missing.length ＞ 0) {
+                    if (retryCount ＜ 6) {
+                        setTimeout(() =＞ this.startGame(mode, retryCount + 1), 180);
                         return;
                     }
-                    const names = missing.map(d => d.name).join(', ');
-                    this.showAlert(`게임 데이터 로드 실패: ${names}<br><br>파일이 같은 폴더에 있는지 확인하고 게임을 새로고침 해주세요.`);
+                    const names = missing.map(d =＞ d.name).join(', ');
+                    this.showAlert(`게임 데이터 로드 실패: ${names}＜br＞＜br＞파일이 같은 폴더에 있는지 확인하고 게임을 새로고침 해주세요.`);
                     return; // 게임 진입 차단
                 }
 
@@ -1542,17 +1497,17 @@ const QuizEngine = {
                 ];
 
                 if (this.tempGameType === 'endless') {
-                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact'].includes(m.id));
-                    MODES.forEach(m => {
+                    MODES = MODES.filter(m =＞ ['origin', 'draft', 'chaos', 'artifact'].includes(m.id));
+                    MODES.forEach(m =＞ {
                         if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 없음 / 무한)';
                     });
                 } else if (this.tempGameType === 'challenge') {
-                    MODES = MODES.filter(m => m.id !== 'origin');
+                    MODES = MODES.filter(m =＞ m.id !== 'origin');
                 }
 
-                MODES.forEach(m => {
+                MODES.forEach(m =＞ {
                     const btn = document.createElement('button');
                     btn.className = "menu-btn";
                     btn.style.padding = "10px";
@@ -1563,12 +1518,12 @@ const QuizEngine = {
                     const isUnlocked = this.global.unlocked_modes.includes(m.id);
                     if (isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
 
-                    btn.onclick = () => {
+                    btn.onclick = () =＞ {
                         this.selectedModeId = m.id;
                         desc.innerText = `[${m.name}]\n${m.desc}`;
 
                         // Visual Update
-                        list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
+                        list.querySelectorAll('.menu-btn').forEach(b =＞ b.style.borderColor = '#555');
                         btn.style.borderColor = '#ffd700';
                     };
                     list.appendChild(btn);
@@ -1576,13 +1531,13 @@ const QuizEngine = {
 
                 // Enter Button Logic
                 const enterBtn = document.getElementById('btn-enter-mode');
-                enterBtn.onclick = () => {
+                enterBtn.onclick = () =＞ {
                     if (!this.selectedModeId) return this.showAlert("모드를 선택해주세요.");
-                    const mName = MODES.find(m => m.id === this.selectedModeId).name;
+                    const mName = MODES.find(m =＞ m.id === this.selectedModeId).name;
                     this.showDoubleConfirm(
                         `${mName} 모드로 시작하시겠습니까?`,
-                        `정말 시작하시겠습니까?<br>현재 진행 중인 엔드리스 게임 데이터는 초기화됩니다.<br>(게임 시작 시 자동 저장됩니다)`,
-                        () => {
+                        `정말 시작하시겠습니까?＜br＞현재 진행 중인 엔드리스 게임 데이터는 초기화됩니다.＜br＞(게임 시작 시 자동 저장됩니다)`,
+                        () =＞ {
                             this.initNewGame(this.selectedModeId);
                             modal.classList.remove('active');
                             this.toMenu();
@@ -1596,7 +1551,7 @@ const QuizEngine = {
             initNewGame(mode = 'origin') {
                 // Record saving logic (Only for Origin mode as per request "Record check only for Origin")
                 // Check previous state
-                if (this.state.mode === 'origin' && this.state.enemyScale > 0) {
+                if (this.state.mode === 'origin' && this.state.enemyScale ＞ 0) {
                     this.saveRecord();
                 }
 
@@ -1636,17 +1591,17 @@ const QuizEngine = {
                         activeTranscendenceCards: this.state.activeTranscendenceCards
                     });
 
-                    allCards.sort(() => Math.random() - 0.5);
-                    const picks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    allCards.sort(() =＞ Math.random() - 0.5);
+                    const picks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c =＞ c.id);
 
                     this.state.chaosPool = picks;
                     this.state.inventory = [...picks];
                 }
 
                 // Origin Mode: Add Transcendence Cards directly to Inventory
-                if (mode !== 'chaos' && mode !== 'draft' && this.state.activeTranscendenceCards.length > 0) {
+                if (mode !== 'chaos' && mode !== 'draft' && this.state.activeTranscendenceCards.length ＞ 0) {
                     this.state.inventory.push(...this.state.activeTranscendenceCards);
-                    setTimeout(() => this.showAlert(`초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`), 500);
+                    setTimeout(() =＞ this.showAlert(`초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`), 500);
                 }
 
                 // Load persistent wordbook
@@ -1670,23 +1625,23 @@ const QuizEngine = {
                 let history = Storage.load(Storage.keys.RECORDS) || [];
                 let currentStage = score !== null ? score : (this.state.enemyScale + 1);
 
-                let stages = history.map(h => {
+                let stages = history.map(h =＞ {
                     let m = h.match(/최대 스테이지: (\d+)/);
                     return m ? parseInt(m[1]) : 0;
                 });
 
                 stages.push(currentStage);
-                stages.sort((a, b) => b - a);
+                stages.sort((a, b) =＞ b - a);
                 stages = stages.slice(0, GAME_CONSTANTS.MAX_RECORDS);
 
-                history = stages.map(s => `최대 스테이지: ${s}`);
+                history = stages.map(s =＞ `최대 스테이지: ${s}`);
                 Storage.save(Storage.keys.RECORDS, history);
             },
 
             showRecords() {
                 let history = Storage.load(Storage.keys.RECORDS) || [];
                 if (history.length === 0) return this.showAlert("기록이 없습니다.");
-                let msg = history.map((h, i) => `${i + 1}위. ${h}`).join("<br>");
+                let msg = history.map((h, i) =＞ `${i + 1}위. ${h}`).join("＜br＞");
                 this.openInfoModal("최대 스테이지 기록 (Top 5)", msg);
             },
 
@@ -1726,7 +1681,7 @@ const QuizEngine = {
                 // No saveRecord here
                 this.showScreen('screen-title');
             },
-            showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+            showScreen(id) { document.querySelectorAll('.screen').forEach(el =＞ el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
             openSystemMenu() {
                 document.getElementById('modal-menu').classList.add('active');
@@ -1744,9 +1699,9 @@ const QuizEngine = {
             },
 
             spinChaosRoulette() {
-                if ((this.global.chaosTickets || 0) < 1) return this.showAlert("티켓이 부족합니다.");
+                if ((this.global.chaosTickets || 0) ＜ 1) return this.showAlert("티켓이 부족합니다.");
 
-                let pool = TRANSCENDENCE_CARDS.filter(c => !this.global.pendingTranscendenceCards.includes(c.id));
+                let pool = TRANSCENDENCE_CARDS.filter(c =＞ !this.global.pendingTranscendenceCards.includes(c.id));
 
                 if (pool.length === 0) return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
 
@@ -1760,14 +1715,14 @@ const QuizEngine = {
                 const modal = document.getElementById('modal-gacha');
                 const content = document.getElementById('gacha-result');
                 document.getElementById('gacha-title').innerText = "초월 소환 성공!";
-                content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>
-            <div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>다음 오리진 게임 전설 풀에 추가되었습니다!</p>`;
+                content.innerHTML = `＜div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;"＞[초월] ${pick.name}＜/div＞
+            ＜div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"＞＜img src="${pick.name}.png" onerror="this.style.display='none'"＞＜/div＞＜p＞다음 오리진 게임 전설 풀에 추가되었습니다!＜/p＞`;
                 modal.classList.add('active');
             },
 
             openTranscendenceCheck() {
                 this.showScreen('screen-transcendence-check');
-                this.renderCardList('transcendence-grid', this.global.pendingTranscendenceCards, (id) => this.showCardInfo(id));
+                this.renderCardList('transcendence-grid', this.global.pendingTranscendenceCards, (id) =＞ this.showCardInfo(id));
             },
 
             // --- Chaos Blessing ---
@@ -1776,67 +1731,54 @@ const QuizEngine = {
                 document.getElementById('chaos-uses').innerText = this.state.chaosBlessingUses;
                 document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
 
-                const chaosModal = document.getElementById('modal-chaos');
-                const isArtifactMobileLayout = this.state.mode === 'artifact' &&
-                    (this.state.gameType === 'challenge' || this.state.gameType === 'endless');
-                chaosModal.classList.toggle('artifact-mobile-compact', isArtifactMobileLayout);
-
                 // Show artifact check button only in artifact mode
                 const artBtn = document.getElementById('btn-artifact-check');
-                const modal = document.getElementById('modal-chaos');
                 if (artBtn) {
                     artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
                 }
 
-                if (this.state.mode === 'artifact') {
-                    modal.classList.add('artifact-mode');
-                } else {
-                    modal.classList.remove('artifact-mode');
-                }
-
-                modal.classList.add('active');
-                chaosModal.classList.add('active');
+                document.getElementById('modal-chaos').classList.add('active');
             },
             checkActiveChaosBlessings() {
                 if (!this.state.chaosBuffs || this.state.chaosBuffs.length === 0) {
                     return this.showAlert("현재 적용된 축복이 없습니다.");
                 }
-                let msg = "<b>현재 적용된 축복</b><br><br>";
-                this.state.chaosBuffs.forEach(b => {
+                let msg = "＜b＞현재 적용된 축복＜/b＞＜br＞＜br＞";
+                this.state.chaosBuffs.forEach(b =＞ {
                     msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가`;
-                    msg += "<br>";
+                    msg += "＜br＞";
                 });
-                msg += "<br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
+                msg += "＜br＞(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)";
                 this.openInfoModal("축복 상태", msg);
             },
             activateChaos(type) {
                 if (type === 'great_sage') {
-                    if (this.state.greatSageBlessingUses <= 0) {
+                    if (this.state.greatSageBlessingUses ＜= 0) {
                         return this.showAlert("대현자의 축복 기회를 모두 소진했습니다. (새로하기 시 리셋)");
                     }
                     document.getElementById('modal-chaos').classList.remove('active');
 
                     // Pick random quiz
                     let allQuizzes = [];
-                    GRAMMAR_DATA.forEach(lec => {
+                    GRAMMAR_DATA.forEach(lec =＞ {
                         allQuizzes = allQuizzes.concat(lec.quizzes);
                     });
                     let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
                     this.showConfirm(`이 문제는 ${q.lecture_id}강의 내용이야. 강의를 확인하고 풀래?`,
-                        () => { // Yes
-                            this.showLecture(q.lecture_id, () => {
+                        () =＞ { // Yes
+                            this.showLecture(q.lecture_id, () =＞ {
                                 this.startGrammarQuiz(q);
                             });
                         },
-                        () => { // No
+                        () =＞ { // No
                             this.startGrammarQuiz(q);
                         }
                     );
                     return;
                 }
 
-                if (this.state.chaosBlessingUses <= 0) {
+                if (this.state.chaosBlessingUses ＜= 0) {
                     return this.showAlert("이번 전투 구간의 축복 기회를 모두 소진했습니다.");
                 }
                 document.getElementById('modal-chaos').classList.remove('active');
@@ -1849,7 +1791,7 @@ const QuizEngine = {
                 if (type === 'normal') {
                     this.applyChaosBlessing(3 + bonus);
                 } else if (type === 'challenge') {
-                    this.startChaosQuiz((success) => {
+                    this.startChaosQuiz((success) =＞ {
                         if (success) {
                             this.applyChaosBlessing(5 + bonus);
                         } else {
@@ -1864,10 +1806,10 @@ const QuizEngine = {
             startGrammarQuiz(q, successCallback = null, failCallback = null) {
                 const onCorrect = successCallback
                     ? successCallback
-                    : () => this.applyGreatSageBlessing();
+                    : () =＞ this.applyGreatSageBlessing();
                 const onWrong = failCallback
                     ? failCallback
-                    : () => {
+                    : () =＞ {
                         this.state.greatSageBlessingUses--;
                         this.showAlert(`틀렸어... 남은 기회: ${this.state.greatSageBlessingUses}회`);
                     };
@@ -1878,9 +1820,9 @@ const QuizEngine = {
             updateMergedBlessings() {
                 this.state.chaosBuffs = [];
 
-                const addBuffs = (list) => {
-                    list.forEach(nb => {
-                        let existing = this.state.chaosBuffs.find(b => b.id === nb.id);
+                const addBuffs = (list) =＞ {
+                    list.forEach(nb =＞ {
+                        let existing = this.state.chaosBuffs.find(b =＞ b.id === nb.id);
                         if (existing) {
                             existing.multiplier += nb.multiplier;
                         } else {
@@ -1907,12 +1849,12 @@ const QuizEngine = {
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
                 });
 
-                pool.sort(() => 0.5 - Math.random());
+                pool.sort(() =＞ 0.5 - Math.random());
                 let picks = pool.slice(0, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
 
                 this.state.activeChaosBlessing = []; // Clear Chaos Blessing
 
-                let newBuffs = picks.map(c => {
+                let newBuffs = picks.map(c =＞ {
                     let mult = 0;
                     if (c.grade === 'normal') mult = 0.4;
                     else if (c.grade === 'rare') mult = 0.3;
@@ -1925,11 +1867,11 @@ const QuizEngine = {
                 this.state.activeSageBlessing = newBuffs;
                 this.updateMergedBlessings();
 
-                let msg = "<b>대현자의 축복 성공!</b><br>12명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
-                newBuffs.forEach(b => {
-                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가<br>`;
+                let msg = "＜b＞대현자의 축복 성공!＜/b＞＜br＞12명의 동료에게 축복이 내려졌습니다.＜br＞드로우 티켓 1장 획득!＜br＞＜br＞＜b＞[새로 적용된 축복]＜/b＞＜br＞";
+                newBuffs.forEach(b =＞ {
+                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가＜br＞`;
                 });
-                msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
+                msg += `＜br＞＜b＞(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)＜/b＞`;
 
                 this.openInfoModal("축복 성공", msg);
             },
@@ -1944,12 +1886,12 @@ const QuizEngine = {
                 });
 
                 // 2. Shuffle and Pick
-                pool.sort(() => 0.5 - Math.random());
+                pool.sort(() =＞ 0.5 - Math.random());
                 let picks = pool.slice(0, count);
 
                 this.state.activeSageBlessing = []; // Clear Sage Blessing
 
-                let newBuffs = picks.map(c => {
+                let newBuffs = picks.map(c =＞ {
                     let mult = 0;
                     if (c.grade === 'normal') mult = 0.4;
                     else if (c.grade === 'rare') mult = 0.3;
@@ -1962,25 +1904,25 @@ const QuizEngine = {
                 this.state.activeChaosBlessing = newBuffs;
                 this.updateMergedBlessings();
 
-                let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
-                newBuffs.forEach(b => {
-                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가<br>`;
+                let msg = "＜b＞혼돈의 축복 적용!＜/b＞＜br＞새로운 축복이 부여되었습니다.＜br＞＜br＞＜b＞[새로 적용된 축복]＜/b＞＜br＞";
+                newBuffs.forEach(b =＞ {
+                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가＜br＞`;
                 });
-                msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
+                msg += `＜br＞＜b＞(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)＜/b＞＜br＞(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
                 this.openInfoModal("축복 성공", msg);
             },
 
             // --- Gacha & Deck UI ---
             reshuffleChaosPool() {
-                if (this.state.tickets < GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE) {
+                if (this.state.tickets ＜ GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE) {
                     return this.showAlert("셔플할 티켓이 부족합니다.");
                 }
 
                 this.showDoubleConfirm(
-                    `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
+                    `현재 보유한 모든 카드와 덱 구성이 사라집니다.＜br＞
             티켓 1장을 사용하여 새로운 15장을 받으시겠습니까?`,
-                    `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
-                    () => {
+                    `정말 셔플하시겠습니까?＜br＞현재 덱과 인벤토리가 모두 초기화됩니다.`,
+                    () =＞ {
                         this.state.tickets -= GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE;
                         document.getElementById('ui-tickets').innerText = this.state.tickets;
 
@@ -1989,8 +1931,8 @@ const QuizEngine = {
                             activeTranscendenceCards: this.state.activeTranscendenceCards
                         });
 
-                        allCards.sort(() => Math.random() - 0.5);
-                        const newPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                        allCards.sort(() =＞ Math.random() - 0.5);
+                        const newPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c =＞ c.id);
 
                         this.state.chaosPool = newPicks;
                         this.state.inventory = [...newPicks];
@@ -1999,16 +1941,16 @@ const QuizEngine = {
                         this.saveGame();
 
                         let legendCnt = 0, epicCnt = 0;
-                        newPicks.forEach(id => {
+                        newPicks.forEach(id =＞ {
                             const c = this.getCardData(id);
                             if (c.grade === 'legend') legendCnt++;
                             if (c.grade === 'epic') epicCnt++;
                         });
 
                         this.showAlert(
-                            `<b>카오스 셔플 완료!</b><br><br>
-                    새로운 15장이 지급되었습니다.<br>
-                    (전설: ${legendCnt}, 에픽: ${epicCnt})<br><br>
+                            `＜b＞카오스 셔플 완료!＜/b＞＜br＞＜br＞
+                    새로운 15장이 지급되었습니다.＜br＞
+                    (전설: ${legendCnt}, 에픽: ${epicCnt})＜br＞＜br＞
                     * 덱이 초기화되었으니 다시 구성해주세요.`
                         );
                     }
@@ -2016,19 +1958,19 @@ const QuizEngine = {
             },
 
             openGacha() {
-                if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
+                if (this.state.tickets ＜ GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
                 this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 this.runGacha(false);
             },
 
             openChallengeGacha() {
-                if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
+                if (this.state.tickets ＜ GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
 
                 // 티켓 선차감
                 this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-                this.startQuiz((success) => {
+                this.startQuiz((success) =＞ {
                     if (success) {
                         this.runGacha(true);
                     } else {
@@ -2045,11 +1987,11 @@ const QuizEngine = {
                 const grade = GameUtils.resolveGachaGrade(mode, isChallenge);
 
                 // Build Pool
-                let pool = CARDS.filter(c => c.grade === grade);
+                let pool = CARDS.filter(c =＞ c.grade === grade);
 
                 // Add Bonus Cards
-                if (this.global.unlocked_bonus_cards.length > 0) {
-                    const bonus = BONUS_CARDS.filter(c => c.grade === grade && this.global.unlocked_bonus_cards.includes(c.id));
+                if (this.global.unlocked_bonus_cards.length ＞ 0) {
+                    const bonus = BONUS_CARDS.filter(c =＞ c.grade === grade && this.global.unlocked_bonus_cards.includes(c.id));
                     pool = pool.concat(bonus);
                 }
 
@@ -2060,7 +2002,7 @@ const QuizEngine = {
                     // If somehow empty, fallback to normal
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
-                    pool = CARDS.filter(c => c.grade === 'normal');
+                    pool = CARDS.filter(c =＞ c.grade === 'normal');
                 }
 
                 const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -2076,8 +2018,8 @@ const QuizEngine = {
                 let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
                 if (pick.grade === 'transcendence') msgTitle = title;
                 document.getElementById('gacha-title').innerText = msgTitle;
-                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
-            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+                content.innerHTML = `＜div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;"＞[${pick.grade.toUpperCase()}] ${pick.name}＜/div＞
+            ＜div class="portrait" style="width:120px; height:160px; margin:0 auto;"＞＜img src="${pick.name}.png" onerror="this.style.display='none'"＞＜/div＞＜p＞새로운 동료를 얻었습니다!＜/p＞`;
                 modal.classList.add('active');
             },
 
@@ -2089,17 +2031,17 @@ const QuizEngine = {
                 document.getElementById('modal-library').classList.remove('active');
                 const list = document.getElementById('lecture-list');
                 list.innerHTML = "";
-                GRAMMAR_DATA.forEach(lec => {
+                GRAMMAR_DATA.forEach(lec =＞ {
                     const btn = document.createElement('button');
                     btn.className = "menu-btn";
                     btn.innerText = `${lec.id}강. ${lec.title}`;
-                    btn.onclick = () => this.showLecture(lec.id);
+                    btn.onclick = () =＞ this.showLecture(lec.id);
                     list.appendChild(btn);
                 });
                 document.getElementById('modal-magic-class').classList.add('active');
             },
             showLecture(id, onCloseCallback) {
-                const lec = GRAMMAR_DATA.find(l => l.id === id);
+                const lec = GRAMMAR_DATA.find(l =＞ l.id === id);
                 if (!lec) return;
                 document.getElementById('lecture-title').innerText = `${lec.id}강. ${lec.title}`;
                 document.getElementById('lecture-content').innerText = lec.content;
@@ -2139,7 +2081,7 @@ const QuizEngine = {
 
                 const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
 
-                VOCAB_DATA.forEach(v => {
+                VOCAB_DATA.forEach(v =＞ {
                     const isWrong = this.state.wrongWords.includes(v.word);
 
                     // Filter logic
@@ -2153,8 +2095,8 @@ const QuizEngine = {
                     // Apply red color if wrong
                     const wordColor = isWrong ? '#ef5350' : '#81d4fa';
 
-                    div.innerHTML = `<b style="color:${wordColor}; font-size:1.1rem;">${v.word}</b><br>
-                             <span style="color:#eee;">${v.meaning}</span>`;
+                    div.innerHTML = `＜b style="color:${wordColor}; font-size:1.1rem;"＞${v.word}＜/b＞＜br＞
+                             ＜span style="color:#eee;"＞${v.meaning}＜/span＞`;
                     list.appendChild(div);
                 });
                 document.getElementById('modal-wordbook').classList.add('active');
@@ -2182,7 +2124,7 @@ const QuizEngine = {
 
                 const onlyWrong = document.getElementById('wordbook-filter-wrong').checked;
 
-                COLLOCATION_DATA.forEach(v => {
+                COLLOCATION_DATA.forEach(v =＞ {
                     const isWrong = this.state.wrongCollocations.includes(v.id);
 
                     if (onlyWrong && !isWrong) return;
@@ -2194,8 +2136,8 @@ const QuizEngine = {
 
                     const color = isWrong ? '#ef5350' : '#81d4fa';
 
-                    div.innerHTML = `<b style="color:${color}; font-size:1.1rem;">${v.expression}</b><br>
-                             <span style="color:#eee;">${v.meaning}</span>`;
+                    div.innerHTML = `＜b style="color:${color}; font-size:1.1rem;"＞${v.expression}＜/b＞＜br＞
+                             ＜span style="color:#eee;"＞${v.meaning}＜/span＞`;
                     list.appendChild(div);
                 });
 
@@ -2222,20 +2164,20 @@ const QuizEngine = {
             },
             closeGachaModal() { document.getElementById('modal-gacha').classList.remove('active'); },
 
-            openCollection() { this.showScreen('screen-collection'); this.renderCardList('collection-grid', this.state.inventory, (id) => this.showCardInfo(id)); },
+            openCollection() { this.showScreen('screen-collection'); this.renderCardList('collection-grid', this.state.inventory, (id) =＞ this.showCardInfo(id)); },
 
             renderCardList(containerId, list, clickHandler) {
                 const box = document.getElementById(containerId);
                 box.innerHTML = "";
                 let counts = {};
-                list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+                list.forEach(id =＞ { counts[id] = (counts[id] || 0) + 1; });
                 for (let id in counts) {
                     const data = this.getCardData(id);
                     if (!data) continue;
                     const el = document.createElement('div');
                     el.className = `card-item ${data.grade}`;
-                    el.innerHTML = `<div class="portrait"><img src="${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
-                    el.onclick = () => clickHandler(id);
+                    el.innerHTML = `＜div class="portrait"＞＜img src="${data.name}.png" onerror="this.style.display='none'"＞＜/div＞＜div＞${data.name} (x${counts[id]})＜/div＞`;
+                    el.onclick = () =＞ clickHandler(id);
                     box.appendChild(el);
                 }
             },
@@ -2247,12 +2189,12 @@ const QuizEngine = {
                 document.getElementById('md-img').src = `${data.name}.png`;
                 document.getElementById('md-grade').className = data.grade;
                 document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
-                document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
-                let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
-                skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
-                data.skills.forEach(s => {
+                document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}＜br＞DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
+                let skills = `＜p style="color:#ffd700; margin:5px 0;"＞[특성] ${data.trait.desc}＜/p＞`;
+                skills += `＜p style="margin:2px 0;"＞[일반 공격] (Tier 1) 기본 물리 공격＜/p＞`;
+                data.skills.forEach(s =＞ {
                     let multText = s.val ? ` (x${s.val})` : '';
-                    skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
+                    skills += `＜p style="margin:2px 0;"＞[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}＜/p＞`;
                 });
                 document.getElementById('md-skills').innerHTML = skills;
                 document.getElementById('modal-card').classList.add('active');
@@ -2263,32 +2205,32 @@ const QuizEngine = {
                 this.showScreen('screen-deck');
                 this.updateDeckSlots();
                 this.selectedSlot = -1;
-                this.renderCardList('deck-card-list', this.state.inventory, (id) => {
+                this.renderCardList('deck-card-list', this.state.inventory, (id) =＞ {
                     if (this.selectedSlot === -1) this.selectedSlot = this.state.deck.indexOf(null);
                     if (this.selectedSlot === -1) return this.showAlert("슬롯을 먼저 선택하거나 빈 슬롯이 없습니다.");
-                    let total = this.state.inventory.filter(x => x === id).length;
-                    let used = this.state.deck.filter(x => x === id).length;
+                    let total = this.state.inventory.filter(x =＞ x === id).length;
+                    let used = this.state.deck.filter(x =＞ x === id).length;
                     if (this.state.deck[this.selectedSlot] === id) used--;
-                    if (total - used <= 0) return this.showAlert("보유 수량이 부족합니다.");
+                    if (total - used ＜= 0) return this.showAlert("보유 수량이 부족합니다.");
                     this.state.deck[this.selectedSlot] = id;
                     this.updateDeckSlots();
                 });
             },
-            selectDeckSlot(idx) { this.selectedSlot = idx; document.querySelectorAll('.deck-slot').forEach((el, i) => { el.style.borderColor = i === idx ? '#ffd700' : '#555'; }); },
+            selectDeckSlot(idx) { this.selectedSlot = idx; document.querySelectorAll('.deck-slot').forEach((el, i) =＞ { el.style.borderColor = i === idx ? '#ffd700' : '#555'; }); },
             updateDeckSlots() {
-                ['선봉', '중견', '대장'].forEach((role, i) => {
+                ['선봉', '중견', '대장'].forEach((role, i) =＞ {
                     const id = this.state.deck[i];
                     const el = document.getElementById(`slot-${i}`);
                     if (id) { const c = this.getCardData(id); el.innerText = `${role}: ${c.name}`; el.classList.add('filled'); }
                     else { el.innerText = `${role} (비어있음)`; el.classList.remove('filled'); }
                 });
             },
-            confirmDeck() { if (this.state.deck.every(x => x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
+            confirmDeck() { if (this.state.deck.every(x =＞ x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
 
             // --- Battle Logic Start ---
 
             startBattleInit() {
-                if (this.state.deck.every(x => x === null)) return this.showAlert("덱을 완성해주세요.");
+                if (this.state.deck.every(x =＞ x === null)) return this.showAlert("덱을 완성해주세요.");
                 this.showScreen('screen-battle');
                 const enemyIdx = this.state.enemyScale % ENEMIES.length;
                 const baseEnemy = ENEMIES[enemyIdx];
@@ -2309,7 +2251,7 @@ const QuizEngine = {
                 // Init Players (Using Logic for Initial Stats)
                 this.battle.activeTraits = []; // Reset active traits before calc
 
-                this.battle.players = this.state.deck.map((id, idx) => {
+                this.battle.players = this.state.deck.map((id, idx) =＞ {
                     if (!id) return null;
                     const proto = this.getCardData(id);
 
@@ -2335,7 +2277,7 @@ const QuizEngine = {
                     };
 
                     // Apply Chaos Blessing Buffs (Multiplicative to the Synergized Base)
-                    const blessing = this.state.chaosBuffs.find(b => b.id === p.id);
+                    const blessing = this.state.chaosBuffs.find(b =＞ b.id === p.id);
                     if (blessing) {
                         // Store base stats before blessing for UI comparison
                         p.baseStatsWithoutBlessing = { atk: p.atk, matk: p.matk, def: p.def, mdef: p.mdef };
@@ -2379,7 +2321,7 @@ const QuizEngine = {
                 this.battle.currentPlayerIdx = 0;
                 this.battle.isNewTurn = true;
 
-                while (this.battle.currentPlayerIdx < 3 && this.battle.players[this.battle.currentPlayerIdx] === null) {
+                while (this.battle.currentPlayerIdx ＜ 3 && this.battle.players[this.battle.currentPlayerIdx] === null) {
                     this.battle.currentPlayerIdx++;
                 }
 
@@ -2394,9 +2336,9 @@ const QuizEngine = {
 
                 // Artifact: support_boost — set all sup skill costs to 0
                 if (this.hasArtifact('support_boost')) {
-                    this.battle.players.forEach(p => {
+                    this.battle.players.forEach(p =＞ {
                         if (p && p.skills) {
-                            p.skills.forEach(s => {
+                            p.skills.forEach(s =＞ {
                                 if (s.type === 'sup') s.cost = 0;
                             });
                         }
@@ -2412,40 +2354,22 @@ const QuizEngine = {
             TurnManager: {
                 startPlayerTurn() {
                     const b = RPG.battle;
-                    if (b.currentPlayerIdx >= 3) { RPG.loseBattle(); return; }
+                    if (b.currentPlayerIdx ＞= 3) { RPG.loseBattle(); return; }
 
                     if (b.isNewTurn) {
                         b.isNewTurn = false;
                         RPG.log(`=== ${b.turn}턴 ===`, 'info');
 
-                        // Artifact: kaleidoscope
-                        if (RPG.hasArtifact('kaleidoscope')) {
-                            let count = b.fieldBuffs.length;
-                            if (count > 0) {
-                                b.fieldBuffs = []; // Clear
-                                RPG.log('[아티팩트] 만화경: 필드 버프 재구성!');
-
-                                // Get all available buff keys
-                                const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS);
-
-                                // Select unique random buffs
-                                let pool = [...allBuffs].sort(() => 0.5 - Math.random());
-                                let picks = pool.slice(0, Math.min(count, pool.length));
-
-                                picks.forEach(bid => RPG.applyFieldBuff(bid));
-                            }
-                        }
-
                         // Artifact: gale_storm — maintain gale field buff for first 3 turns
                         if (RPG.hasArtifact('gale_storm')) {
-                            if (b.turn <= 3) {
-                                if (!b.fieldBuffs.some(buff => buff.name === 'gale')) {
+                            if (b.turn ＜= 3) {
+                                if (!b.fieldBuffs.some(buff =＞ buff.name === 'gale')) {
                                     RPG.applyFieldBuff('gale');
                                 }
                             } else if (b.turn === 4) {
-                                const hadGale = b.fieldBuffs.some(buff => buff.name === 'gale');
+                                const hadGale = b.fieldBuffs.some(buff =＞ buff.name === 'gale');
                                 if (hadGale) {
-                                    b.fieldBuffs = b.fieldBuffs.filter(buff => buff.name !== 'gale');
+                                    b.fieldBuffs = b.fieldBuffs.filter(buff =＞ buff.name !== 'gale');
                                     RPG.log('[아티팩트] 질풍노도 효과 종료. (질풍 제거)');
                                 }
                             }
@@ -2473,7 +2397,7 @@ const QuizEngine = {
                     }
 
                     // Process Delayed Effects
-                    for (let i = b.delayedEffects.length - 1; i >= 0; i--) {
+                    for (let i = b.delayedEffects.length - 1; i ＞= 0; i--) {
                         let effect = b.delayedEffects[i];
                         if (effect.turn === b.turn) {
                             b.delayedEffects.splice(i, 1);
@@ -2487,7 +2411,7 @@ const QuizEngine = {
                     }
 
                     // Clear temporary self buffs
-                    ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(k => delete p.buffs[k]);
+                    ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(k =＞ delete p.buffs[k]);
 
                     RPG.renderBattlefield();
 
@@ -2502,13 +2426,13 @@ const QuizEngine = {
                 },
 
                 endPlayerTurn() {
-                    setTimeout(() => this.startEnemyTurn(), 500);
+                    setTimeout(() =＞ this.startEnemyTurn(), 500);
                 },
 
                 startEnemyTurn() {
                     const b = RPG.battle;
                     const e = b.enemy;
-                    if (e.hp <= 0) { RPG.winBattle(); return; }
+                    if (e.hp ＜= 0) { RPG.winBattle(); return; }
 
                     RPG.log("--- 적 턴 ---");
                     e.def = e.baseDef; e.mdef = e.baseMdef; // Reset base
@@ -2537,7 +2461,7 @@ const QuizEngine = {
                     // Target Logic
                     let target = b.players[b.currentPlayerIdx];
                     if (!target || target.isDead) {
-                        let validIdx = b.players.findIndex(p => p && !p.isDead);
+                        let validIdx = b.players.findIndex(p =＞ p && !p.isDead);
                         if (validIdx === -1) { RPG.loseBattle(); return; }
                         b.currentPlayerIdx = validIdx;
                         target = b.players[validIdx];
@@ -2560,7 +2484,7 @@ const QuizEngine = {
                     // We treat it as the skill to execute.
                     let skill = skillInfo;
 
-                    // Execute Enemy Skill (Simplified: Calculate -> Apply)
+                    // Execute Enemy Skill (Simplified: Calculate -＞ Apply)
                     let val = skill.type === 'phy' ? e.atk : e.matk;
                     let mult = skill.val || 1.0;
 
@@ -2575,7 +2499,7 @@ const QuizEngine = {
 
                     let def = skill.type === 'phy' ? target.def : target.mdef;
                     let fieldDef = 1.0;
-                    b.fieldBuffs.forEach(fb => {
+                    b.fieldBuffs.forEach(fb =＞ {
                         if (fb.name === 'star_powder') fieldDef += 0.3;
                         if (fb.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
                         if (fb.name === 'goddess_descent') fieldDef += 0.3;
@@ -2610,30 +2534,30 @@ const QuizEngine = {
                     if (target.buffs.guard) dmg *= 0.5;
                     dmg = Math.floor(dmg);
                     target.hp -= dmg;
-                    RPG.log(`${e.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
+                    RPG.log(`${e.name}의 ${skill.name}! ＜span class="log-dmg"＞${dmg}＜/span＞ 피해.`);
 
                     // Process Effects (if any)
                     if (skill.effects) {
-                        skill.effects.forEach(eff => {
+                        skill.effects.forEach(eff =＞ {
                             if (eff.type === 'mana_burn') { target.mp = 0; RPG.log("플레이어 마나 소멸!"); }
                         });
                     }
 
-                    if (target.hp <= 0) {
+                    if (target.hp ＜= 0) {
                         target.isDead = true; target.hp = 0;
                         RPG.log(`${target.name} 쓰러짐!`);
                         RPG.handleDeathTraits(target, e);
 
                         // Advance to next valid player
                         b.currentPlayerIdx++;
-                        while (b.currentPlayerIdx < 3) {
+                        while (b.currentPlayerIdx ＜ 3) {
                             if (b.players[b.currentPlayerIdx] && !b.players[b.currentPlayerIdx].isDead) break;
                             b.currentPlayerIdx++;
                         }
-                        if (b.currentPlayerIdx >= 3 && b.players.every(p => !p || p.isDead)) { RPG.loseBattle(); return; }
+                        if (b.currentPlayerIdx ＞= 3 && b.players.every(p =＞ !p || p.isDead)) { RPG.loseBattle(); return; }
                     }
 
-                    if (e.hp <= 0) RPG.winBattle();
+                    if (e.hp ＜= 0) RPG.winBattle();
                     else this.endEnemyTurn();
                 },
 
@@ -2651,24 +2575,24 @@ const QuizEngine = {
                     victim,
                     killer,
                     RPG.battle.fieldBuffs,
-                    (msg) => RPG.log(msg),
+                    (msg) =＞ RPG.log(msg),
                     RPG.state.deck,
                     RPG.battle.turn,
                     RPG.state.artifacts || []
                 );
 
                 // Apply results
-                if (result.damageToKiller > 0) {
+                if (result.damageToKiller ＞ 0) {
                     killer.hp -= result.damageToKiller;
                     killer.tookDamageThisTurn = true;
                 }
 
-                if (result.fieldBuffsToAdd && result.fieldBuffsToAdd.length > 0) {
-                    result.fieldBuffsToAdd.forEach(b => RPG.applyFieldBuff(b));
+                if (result.fieldBuffsToAdd && result.fieldBuffsToAdd.length ＞ 0) {
+                    result.fieldBuffsToAdd.forEach(b =＞ RPG.applyFieldBuff(b));
                 }
 
                 if (result.killerDebuffs && killer && killer.buffs) {
-                    Object.keys(result.killerDebuffs).forEach(k => {
+                    Object.keys(result.killerDebuffs).forEach(k =＞ {
                         killer.buffs[k] = (killer.buffs[k] || 0) + result.killerDebuffs[k];
                         // If specific duration handling is needed, add here. Currently assumed 1 stack.
                     });
@@ -2678,22 +2602,15 @@ const QuizEngine = {
             // --- Player Skill Execution ---
 
             executeSkill(source, target, skill, isDelayed = false) {
-                if (!isDelayed && !skill.isDelayed) {
-                    // Artifact: blue_moon
-                    if (this.hasArtifact('blue_moon') && Math.random() < 0.3) {
-                        RPG.log('[아티팩트] 블루문: 마나 소비 없이 스킬 사용!');
-                    } else {
-                        source.mp -= skill.cost;
-                    }
-                }
+                if (!isDelayed && !skill.isDelayed) source.mp -= skill.cost;
 
-                // Artifact: double_attack — normal attack 2.0x power
+                // Artifact: double_attack — normal attack 1.5x power
                 let modifiedSkill = skill;
                 if (this.hasArtifact('double_attack') && skill.name === RPG.NORMAL_ATTACK.name) {
-                    modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.0 };
+                    modifiedSkill = { ...skill, val: (skill.val || 1.0) * 1.5 };
                 }
 
-                RPG.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
+                RPG.log(`＜b＞${source.name}＜/b＞의 ＜b＞${skill.name}＜/b＞!`);
 
                 // Trait: Normal Attack Burn & Divine
                 if (skill.name === RPG.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
@@ -2714,26 +2631,26 @@ const QuizEngine = {
                     RPG.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
                 }
 
-                // Trait: Behemoth (Skill Use -> Stun Chance)
+                // Trait: Behemoth (Skill Use -＞ Stun Chance)
                 if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait') {
-                    if (Math.random() < 0.2) {
+                    if (Math.random() ＜ 0.2) {
                         target.buffs.stun = 1;
                         RPG.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
                     }
                 }
 
-                // Trait: Behemoth Liberated (Skill Use -> Stun Chance)
+                // Trait: Behemoth Liberated (Skill Use -＞ Stun Chance)
                 if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait') {
-                    if (Math.random() < 0.2) {
+                    if (Math.random() ＜ 0.2) {
                         target.buffs.stun = 1;
                         RPG.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
                     }
                 }
 
                 // Check for Delayed Attack Effect
-                let delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack');
-                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack_field');
-                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_random_attack');
+                let delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e =＞ e.type === 'delayed_attack');
+                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e =＞ e.type === 'delayed_attack_field');
+                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e =＞ e.type === 'delayed_random_attack');
 
                 if (delayedEff && !isDelayed) {
                     RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
@@ -2745,10 +2662,10 @@ const QuizEngine = {
                 const dmgResult = this.calcDamage(source, target, modifiedSkill);
 
                 // Apply Damage
-                if (dmgResult.dmg > 0) {
+                if (dmgResult.dmg ＞ 0) {
                     target.hp -= dmgResult.dmg;
                     target.tookDamageThisTurn = true;
-                    RPG.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+                    RPG.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 ＜span class="log-dmg"＞${dmgResult.dmg}＜/span＞ 피해.`);
                 }
 
                 // Artifact: lucky_vicky — mana recovery on crit
@@ -2759,17 +2676,17 @@ const QuizEngine = {
 
                 // Artifact: death_roulette — 30% chance to die on skill use
                 if (this.hasArtifact('death_roulette') && skill.name !== RPG.NORMAL_ATTACK.name && !isDelayed) {
-                    if (Math.random() < 0.3) {
+                    if (Math.random() ＜ 0.3) {
                         source.hp = 0;
-                        RPG.log('<span style="color:#ff5252">[아티팩트] 데스룰렛: 죽음의 룰렛에 당첨...</span>');
+                        RPG.log('＜span style="color:#ff5252"＞[아티팩트] 데스룰렛: 죽음의 룰렛에 당첨...＜/span＞');
                     }
                 }
 
                 // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
                 this.applySkillEffects(source, target, modifiedSkill);
 
-                if (target.hp <= 0) { RPG.winBattle(); return; }
-                if (source.hp <= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
+                if (target.hp ＜= 0) { RPG.winBattle(); return; }
+                if (source.hp ＜= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
 
                 if (!isDelayed) RPG.TurnManager.endPlayerTurn();
             },
@@ -2784,7 +2701,7 @@ const QuizEngine = {
                     skill,
                     RPG.battle.fieldBuffs,
                     RPG.battle.activeTraits,
-                    (msg) => RPG.log(msg),
+                    (msg) =＞ RPG.log(msg),
                     RPG.state.mode, // PASS MODE
                     RPG.state.deck, // PASS DECK
                     RPG.battle.turn, // PASS TURN
@@ -2810,15 +2727,15 @@ const QuizEngine = {
                     source: source,
                     target: target,
                     skill: skill,
-                    logFn: (msg) => RPG.log(msg),
-                    getBuffName: (id) => (BUFF_NAMES[id] || id),
-                    applyFieldBuff: (id) => RPG.applyFieldBuff(id),
+                    logFn: (msg) =＞ RPG.log(msg),
+                    getBuffName: (id) =＞ (BUFF_NAMES[id] || id),
+                    applyFieldBuff: (id) =＞ RPG.applyFieldBuff(id),
                     battle: this.battle,
                     executeSkill: this.executeSkill.bind(this),
                     getCardData: this.getCardData.bind(this)
                 };
 
-                skill.effects.forEach(eff => {
+                skill.effects.forEach(eff =＞ {
                     if (typeof SideEffects !== 'undefined') {
                         SideEffects.apply(ctx, eff);
                     }
@@ -2838,10 +2755,10 @@ const QuizEngine = {
             },
 
             applyFieldBuff(id) {
-                if (this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
+                if (this.battle.fieldBuffs.some(b =＞ b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
                 // Artifact: buff_overload — increase max field buffs to 5
                 let maxBuffs = this.hasArtifact('buff_overload') ? 5 : GAME_CONSTANTS.MAX_FIELD_BUFFS;
-                if (this.battle.fieldBuffs.length >= maxBuffs) {
+                if (this.battle.fieldBuffs.length ＞= maxBuffs) {
                     let removed = this.battle.fieldBuffs.shift();
                     RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
                 }
@@ -2858,17 +2775,17 @@ const QuizEngine = {
                 // Normal Attack
                 const btn = document.createElement('button');
                 btn.className = 'skill-btn phy';
-                btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
-                btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
+                btn.innerHTML = `＜span＞일반공격＜/span＞＜span style="color:#aaa"＞MP 0＜/span＞`;
+                btn.onclick = () =＞ RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
                 panel.appendChild(btn);
 
                 // Skills
-                (p.skills || p.proto.skills).forEach(s => {
+                (p.skills || p.proto.skills).forEach(s =＞ {
                     const btn = document.createElement('button');
                     btn.className = `skill-btn ${s.type}`;
-                    btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
-                    if (p.mp < s.cost) btn.disabled = true;
-                    else btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, s);
+                    btn.innerHTML = `＜span＞${s.name}＜/span＞＜span style="color:#aaa"＞MP ${s.cost}＜/span＞`;
+                    if (p.mp ＜ s.cost) btn.disabled = true;
+                    else btn.onclick = () =＞ RPG.executeSkill(p, RPG.battle.enemy, s);
                     panel.appendChild(btn);
                 });
             },
@@ -2887,7 +2804,7 @@ const QuizEngine = {
                     let mpPct = (p.mp / 100) * 100;
                     document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
-                    let buffTxt = Object.keys(p.buffs).map(k => BUFF_NAMES[k] || k).join(',');
+                    let buffTxt = Object.keys(p.buffs).map(k =＞ BUFF_NAMES[k] || k).join(',');
                     document.getElementById('p-buffs').innerText = buffTxt;
                     document.getElementById('player-actor-box').style.opacity = 1;
                 } else {
@@ -2902,16 +2819,16 @@ const QuizEngine = {
                 eImg.src = `${e.name}.png`;
                 eImg.style.display = 'block';
 
-                let eBuffTxt = Object.keys(e.buffs).map(k => `${BUFF_NAMES[k] || k}${e.buffs[k] > 1 ? e.buffs[k] : ''}`).join(' ');
+                let eBuffTxt = Object.keys(e.buffs).map(k =＞ `${BUFF_NAMES[k] || k}${e.buffs[k] ＞ 1 ? e.buffs[k] : ''}`).join(' ');
                 document.getElementById('e-buffs').innerText = eBuffTxt;
 
                 document.getElementById('bt-turn').innerText = this.battle.turn;
-                document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b => `[${BUFF_NAMES[b.name] || b.name}]`).join(" ");
+                document.getElementById('field-buff-box').innerHTML = this.battle.fieldBuffs.map(b =＞ `[${BUFF_NAMES[b.name] || b.name}]`).join(" ");
             },
 
             // --- Draft Logic ---
             startDraft() {
-                if (this.state.deck.every(x => x !== null)) {
+                if (this.state.deck.every(x =＞ x !== null)) {
                     return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
                 }
 
@@ -2941,7 +2858,7 @@ const QuizEngine = {
                 const grid = document.getElementById('draft-grid');
                 grid.innerHTML = "";
 
-                d.currentOptions.forEach(id => {
+                d.currentOptions.forEach(id =＞ {
                     const card = this.getCardData(id);
                     const el = document.createElement('div');
                     let color = '#bdbdbd';
@@ -2956,12 +2873,12 @@ const QuizEngine = {
                     el.style.borderColor = color;
 
                     el.innerHTML = `
-                <div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:${color}">${card.name}</div>
-                <div class="portrait" style="flex:1; margin-bottom:5px; width:100%;"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
-                <div style="display:flex; gap:2px; width:100%;">
-                    <button onclick="event.stopPropagation(); RPG.showCardInfo('${card.id}')" style="flex:1; font-size:0.7rem; padding:3px; background:#444; color:#fff; border:1px solid #666;">상세</button>
-                    <button onclick="event.stopPropagation(); RPG.selectDraftCard('${card.id}')" style="flex:2; font-size:0.7rem; padding:3px; background:#1b5e20; color:#fff; border:1px solid #4caf50;">선택</button>
-                </div>
+                ＜div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:${color}"＞${card.name}＜/div＞
+                ＜div class="portrait" style="flex:1; margin-bottom:5px; width:100%;"＞＜img src="${card.name}.png" onerror="this.style.display='none'"＞＜/div＞
+                ＜div style="display:flex; gap:2px; width:100%;"＞
+                    ＜button onclick="event.stopPropagation(); RPG.showCardInfo('${card.id}')" style="flex:1; font-size:0.7rem; padding:3px; background:#444; color:#fff; border:1px solid #666;"＞상세＜/button＞
+                    ＜button onclick="event.stopPropagation(); RPG.selectDraftCard('${card.id}')" style="flex:2; font-size:0.7rem; padding:3px; background:#1b5e20; color:#fff; border:1px solid #4caf50;"＞선택＜/button＞
+                ＜/div＞
             `;
                     grid.appendChild(el);
                 });
@@ -2974,7 +2891,7 @@ const QuizEngine = {
                 });
 
                 let options = [];
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i ＜ 4; i++) {
                     const pick = pool[Math.floor(Math.random() * pool.length)];
                     options.push(pick.id);
                 }
@@ -2997,13 +2914,13 @@ const QuizEngine = {
             },
 
             rerollDraft() {
-                if (this.state.draft.rerolls > 0) {
+                if (this.state.draft.rerolls ＞ 0) {
                     this.state.draft.rerolls--;
                     this.state.draft.currentOptions = [];
                     this.renderDraftScreen();
                 } else {
-                    if (this.state.tickets >= GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET) {
-                        this.showConfirm(`무료 리롤 횟수가 없습니다.<br>티켓 ${GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET}장을 사용하여 리롤하시겠습니까?<br>(보유 티켓: ${this.state.tickets})`, () => {
+                    if (this.state.tickets ＞= GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET) {
+                        this.showConfirm(`무료 리롤 횟수가 없습니다.＜br＞티켓 ${GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET}장을 사용하여 리롤하시겠습니까?＜br＞(보유 티켓: ${this.state.tickets})`, () =＞ {
                             this.state.tickets -= GAME_CONSTANTS.COSTS.DRAFT_REROLL_WITH_TICKET;
                             document.getElementById('ui-tickets').innerText = this.state.tickets;
                             this.state.draft.currentOptions = [];
@@ -3026,11 +2943,11 @@ const QuizEngine = {
                 if (['draft', 'chaos'].includes(this.state.mode)) return "";
 
                 let removedNames = [];
-                this.battle.players.forEach((p, idx) => {
+                this.battle.players.forEach((p, idx) =＞ {
                     if (p && p.proto.grade === 'transcendence') {
                         // Remove from Inventory
                         const invIdx = this.state.inventory.indexOf(p.id);
-                        if (invIdx > -1) {
+                        if (invIdx ＞ -1) {
                             this.state.inventory.splice(invIdx, 1);
                         }
                         // Remove from Deck
@@ -3041,25 +2958,25 @@ const QuizEngine = {
                     }
                 });
 
-                if (removedNames.length > 0) {
+                if (removedNames.length ＞ 0) {
                     const msg = `초월 카드 소멸: ${removedNames.join(', ')}`;
-                    this.log(`<span style="color:#ffd700">[시스템] ${msg}</span>`);
-                    return `<br><span style="color:#ffd700">${msg}</span>`;
+                    this.log(`＜span style="color:#ffd700"＞[시스템] ${msg}＜/span＞`);
+                    return `＜br＞＜span style="color:#ffd700"＞${msg}＜/span＞`;
                 }
                 return "";
             },
 
             handlePermadeath(players) {
                 let deadNames = [];
-                players.forEach(p => {
+                players.forEach(p =＞ {
                     if (p && p.isDead) {
                         let idx = this.state.inventory.indexOf(p.id);
-                        if (idx > -1) this.state.inventory.splice(idx, 1);
+                        if (idx ＞ -1) this.state.inventory.splice(idx, 1);
                         if (p.pos !== undefined) this.state.deck[p.pos] = null;
                         deadNames.push(p.name);
                     }
                 });
-                if (deadNames.length > 0) return `전사자 발생: ${deadNames.join(', ')}<br>(카드가 소멸했습니다)`;
+                if (deadNames.length ＞ 0) return `전사자 발생: ${deadNames.join(', ')}＜br＞(카드가 소멸했습니다)`;
                 return "";
             },
 
@@ -3073,7 +2990,7 @@ const QuizEngine = {
                 if (this.state.mode === 'suffering') reward = 0;
                 if (this.state.mode === 'chaos') reward = 0;
 
-                if (this.battle.players.some(p => p && p.proto.trait.type === 'looter')) reward += 1;
+                if (this.battle.players.some(p =＞ p && p.proto.trait.type === 'looter')) reward += 1;
                 if (this.state.mode === 'overdrive') reward += 1;
 
                 this.state.tickets += reward;
@@ -3102,7 +3019,7 @@ const QuizEngine = {
                 if (this.state.gameType === 'endless') clearStage = Infinity;
 
                 let gameClear = false;
-                if (stage >= clearStage) {
+                if (stage ＞= clearStage) {
                     gameClear = true;
                 }
 
@@ -3112,9 +3029,9 @@ const QuizEngine = {
                     this.state.deck = [null, null, null];
 
                     let allCards = GameUtils.buildCardPool(this.global);
-                    allCards.sort(() => Math.random() - 0.5);
+                    allCards.sort(() =＞ Math.random() - 0.5);
 
-                    const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c =＞ c.id);
                     this.state.chaosPool = nextPicks;
                     this.state.inventory = [...nextPicks];
                 }
@@ -3126,19 +3043,19 @@ const QuizEngine = {
                 // Archive Mode: Mandatory Quiz (Direct to finishWinBattle via callback)
                 if (mode === 'archive') {
                     let allQuizzes = [];
-                    GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                    GRAMMAR_DATA.forEach(lec =＞ { allQuizzes = allQuizzes.concat(lec.quizzes); });
                     let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
                     this.startGrammarQuiz(q,
-                        () => { // Success
+                        () =＞ { // Success
                             this.state.quiz_stats.correct++;
                             this.state.quiz_stats.total++;
                             this.state.tickets++; // Reward Ticket
-                            setTimeout(() => this.finishWinBattle(deadMsg, gameClear, true), 200);
+                            setTimeout(() =＞ this.finishWinBattle(deadMsg, gameClear, true), 200);
                         },
-                        () => { // Fail
+                        () =＞ { // Fail
                             this.state.quiz_stats.total++;
-                            setTimeout(() => this.finishWinBattle(deadMsg, gameClear, false), 200);
+                            setTimeout(() =＞ this.finishWinBattle(deadMsg, gameClear, false), 200);
                         }
                     );
                     return;
@@ -3148,27 +3065,27 @@ const QuizEngine = {
             },
 
             finishWinBattle(deadMsg, gameClear, quizResult) {
-                let msg = "승리!<br>보상을 획득했습니다.";
+                let msg = "승리!＜br＞보상을 획득했습니다.";
 
                 if (quizResult !== null) {
                     let correct = this.state.quiz_stats.correct;
                     let total = this.state.quiz_stats.total;
-                    let rate = (total > 0) ? ((correct / total) * 100).toFixed(1) : "0.0";
-                    let resultMsg = quizResult ? "<span style='color:#4caf50'>정답!</span>" : "<span style='color:#ef5350'>오답...</span>";
-                    msg = `[퀴즈 결과] ${resultMsg}<br>현황: ${correct}/${total} (${rate}%)<hr>` + msg;
+                    let rate = (total ＞ 0) ? ((correct / total) * 100).toFixed(1) : "0.0";
+                    let resultMsg = quizResult ? "＜span style='color:#4caf50'＞정답!＜/span＞" : "＜span style='color:#ef5350'＞오답...＜/span＞";
+                    msg = `[퀴즈 결과] ${resultMsg}＜br＞현황: ${correct}/${total} (${rate}%)＜hr＞` + msg;
                 }
 
-                if (this.state.mode === 'chaos') msg += "<br><br>카오스 모드: 덱과 인벤토리가 초기화되었습니다.";
-                if (this.state.mode === 'draft') msg += "<br><br>드래프트 모드: 덱과 인벤토리가 초기화되었습니다.";
+                if (this.state.mode === 'chaos') msg += "＜br＞＜br＞카오스 모드: 덱과 인벤토리가 초기화되었습니다.";
+                if (this.state.mode === 'draft') msg += "＜br＞＜br＞드래프트 모드: 덱과 인벤토리가 초기화되었습니다.";
 
-                if (deadMsg) msg += "<br><br>" + deadMsg;
+                if (deadMsg) msg += "＜br＞＜br＞" + deadMsg;
 
                 if (gameClear) {
                     // Check Archive Condition
                     if (this.state.mode === 'archive') {
-                        let rate = (this.state.quiz_stats.total > 0) ? (this.state.quiz_stats.correct / this.state.quiz_stats.total) : 0;
-                        if (rate < 0.8) {
-                            this.showAlert(`[실패] 아카이브 모드 클리어 실패!<br>정답률: ${(rate * 100).toFixed(1)}% (목표: 80% 이상)`);
+                        let rate = (this.state.quiz_stats.total ＞ 0) ? (this.state.quiz_stats.correct / this.state.quiz_stats.total) : 0;
+                        if (rate ＜ 0.8) {
+                            this.showAlert(`[실패] 아카이브 모드 클리어 실패!＜br＞정답률: ${(rate * 100).toFixed(1)}% (목표: 80% 이상)`);
                             this.toTitle();
                             return;
                         }
@@ -3178,7 +3095,7 @@ const QuizEngine = {
                     if (this.state.gameType === 'challenge' || (this.state.mode !== 'origin' && this.checkAllBonusUnlocked())) {
                         this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
                         this.saveGlobalData();
-                        this.log("<b>[보너스]</b> 카오스 티켓 1장 획득!");
+                        this.log("＜b＞[보너스]＜/b＞ 카오스 티켓 1장 획득!");
                     }
 
                     // Unlock Mode
@@ -3189,8 +3106,8 @@ const QuizEngine = {
 
                     // Unlock Bonus Card
                     let newCard = null;
-                    let lockedBonus = BONUS_CARDS.filter(c => !this.global.unlocked_bonus_cards.includes(c.id));
-                    if (lockedBonus.length > 0) {
+                    let lockedBonus = BONUS_CARDS.filter(c =＞ !this.global.unlocked_bonus_cards.includes(c.id));
+                    if (lockedBonus.length ＞ 0) {
                         let pick = lockedBonus[Math.floor(Math.random() * lockedBonus.length)];
                         this.global.unlocked_bonus_cards.push(pick.id);
                         newCard = pick;
@@ -3198,22 +3115,22 @@ const QuizEngine = {
 
                     this.saveGlobalData();
 
-                    msg = `🎉 <b>${this.state.mode.toUpperCase()} 모드 클리어!</b> 🎉<br><br>`;
-                    if (newCard) msg += `[보상] 새로운 동료 해금: ${newCard.name}!<br>`;
-                    else msg += `(이미 모든 보너스 카드를 획득했습니다)<br>`;
+                    msg = `🎉 ＜b＞${this.state.mode.toUpperCase()} 모드 클리어!＜/b＞ 🎉＜br＞＜br＞`;
+                    if (newCard) msg += `[보상] 새로운 동료 해금: ${newCard.name}!＜br＞`;
+                    else msg += `(이미 모든 보너스 카드를 획득했습니다)＜br＞`;
 
-                    this.openInfoModal("게임 클리어", msg, () => {
+                    this.openInfoModal("게임 클리어", msg, () =＞ {
                         this.toTitle();
                     });
                     return;
                 }
 
-                this.openInfoModal("전투 결과", msg, () => {
+                this.openInfoModal("전투 결과", msg, () =＞ {
                     if (this.state.mode !== 'archive') {
                         if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
                             this.showConfirm("추가 보상을 위한 콜로케이션 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
-                                () => {
-                                    this.startCollocationQuiz((success) => {
+                                () =＞ {
+                                    this.startCollocationQuiz((success) =＞ {
                                         if (success) {
                                             this.state.tickets += 1;
                                             document.getElementById('ui-tickets').innerText = this.state.tickets;
@@ -3224,78 +3141,78 @@ const QuizEngine = {
                                         this.toMenu();
                                     });
                                 },
-                                () => {
+                                () =＞ {
                                     this.toMenu();
                                 }
                             );
                         }
-                        else if (this.battle.enemy.id === 'creator_god' && this.state.mode === 'artifact' && (this.state.artifacts || []).length < GAME_CONSTANTS.MAX_ARTIFACTS) {
+                        else if (this.battle.enemy.id === 'creator_god' && this.state.mode === 'artifact' && (this.state.artifacts || []).length ＜ GAME_CONSTANTS.MAX_ARTIFACTS) {
                             // Artifact Mode: Quiz → Artifact Selection
                             this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 아티팩트 획득 기회)",
-                                () => { // Yes
+                                () =＞ { // Yes
                                     let allQuizzes = [];
-                                    GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                                    GRAMMAR_DATA.forEach(lec =＞ { allQuizzes = allQuizzes.concat(lec.quizzes); });
                                     let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
                                     this.startGrammarQuiz(q,
-                                        () => { // Success - Show artifact selection
+                                        () =＞ { // Success - Show artifact selection
                                             this.openArtifactSelect();
                                         },
-                                        () => { // Fail
+                                        () =＞ { // Fail
                                             this.showConfirm(`오답입니다... 관련 문법 강좌(${q.lecture_id}강)를 확인하시겠습니까?`,
-                                                () => { // Yes
-                                                    this.showLecture(q.lecture_id, () => {
+                                                () =＞ { // Yes
+                                                    this.showLecture(q.lecture_id, () =＞ {
                                                         this.toMenu();
                                                     });
                                                 },
-                                                () => { // No
+                                                () =＞ { // No
                                                     this.toMenu();
                                                 }
                                             );
                                         }
                                     );
                                 },
-                                () => { // No
+                                () =＞ { // No
                                     this.toMenu();
                                 }
                             );
                         }
                         else if (this.battle.enemy.id === 'creator_god') {
                             this.showConfirm("창조신 격파 보너스! 문법 퀴즈에 도전하시겠습니까?\n(성공 시 뽑기권 3장 획득)",
-                                () => { // Yes
+                                () =＞ { // Yes
                                     let allQuizzes = [];
-                                    GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
+                                    GRAMMAR_DATA.forEach(lec =＞ { allQuizzes = allQuizzes.concat(lec.quizzes); });
                                     let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
 
                                     this.startGrammarQuiz(q,
-                                        () => { // Success
+                                        () =＞ { // Success
                                             this.state.tickets += 3;
                                             document.getElementById('ui-tickets').innerText = this.state.tickets;
                                             this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
                                             this.toMenu();
                                         },
-                                        () => { // Fail
+                                        () =＞ { // Fail
                                             this.showConfirm(`오답입니다... 관련 문법 강좌(${q.lecture_id}강)를 확인하시겠습니까?`,
-                                                () => { // Yes
-                                                    this.showLecture(q.lecture_id, () => {
+                                                () =＞ { // Yes
+                                                    this.showLecture(q.lecture_id, () =＞ {
                                                         this.toMenu();
                                                     });
                                                 },
-                                                () => { // No
+                                                () =＞ { // No
                                                     this.toMenu();
                                                 }
                                             );
                                         }
                                     );
                                 },
-                                () => { // No
+                                () =＞ { // No
                                     this.toMenu();
                                 }
                             );
                         } else {
                             this.showConfirm("추가 보상을 위한 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
-                                () => {
-                                    this.startQuiz((success) => {
+                                () =＞ {
+                                    this.startQuiz((success) =＞ {
                                         if (success) {
                                             this.state.tickets += 1;
                                             document.getElementById('ui-tickets').innerText = this.state.tickets;
@@ -3306,7 +3223,7 @@ const QuizEngine = {
                                         this.toMenu();
                                     });
                                 },
-                                () => {
+                                () =＞ {
                                     this.toMenu();
                                 }
                             );
@@ -3333,8 +3250,8 @@ const QuizEngine = {
                 if (['chaos', 'draft'].includes(this.state.mode)) {
                     Storage.remove(Storage.keys.SAVE);
 
-                    let msg = "패배했습니다...<br>이 모드는 패배 시 데이터가 초기화됩니다.";
-                    this.openInfoModal("Game Over", msg, () => {
+                    let msg = "패배했습니다...＜br＞이 모드는 패배 시 데이터가 초기화됩니다.";
+                    this.openInfoModal("Game Over", msg, () =＞ {
                         this.toTitle();
                     });
                     return;
@@ -3348,9 +3265,9 @@ const QuizEngine = {
 
                 let deadMsg = this.handlePermadeath(this.battle.players);
                 let msg = "패배...";
-                if (deadMsg) msg += "<br><br>" + deadMsg;
+                if (deadMsg) msg += "＜br＞＜br＞" + deadMsg;
                 if (transMsg) msg += transMsg;
-                this.openInfoModal("전투 결과", msg, () => this.toMenu());
+                this.openInfoModal("전투 결과", msg, () =＞ this.toMenu());
             },
 
             getEffectiveStats(char, fieldBuffs) {
@@ -3363,7 +3280,7 @@ const QuizEngine = {
                 else char = this.battle.enemy;
                 if (!char) return;
 
-                let buffs = Object.keys(char.buffs).map(k => {
+                let buffs = Object.keys(char.buffs).map(k =＞ {
                     let name = BUFF_NAMES[k] || k;
                     let val = char.buffs[k];
                     if (val === true) return name;
@@ -3373,35 +3290,35 @@ const QuizEngine = {
                 const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || []);
 
                 // Use baseStatsWithoutBlessing if available to show Green for blessed stats
-                const getBase = (key, fallback) => {
+                const getBase = (key, fallback) =＞ {
                     if (char.baseStatsWithoutBlessing && char.baseStatsWithoutBlessing[key] !== undefined) return char.baseStatsWithoutBlessing[key];
                     return fallback;
                 };
 
-                const colorize = (val, base) => {
-                    if (val > base) return `<span style="color:#69f0ae">${val}</span>`;
-                    if (val < base) return `<span style="color:#ff5252">${val}</span>`;
-                    return `<span style="color:#eee">${val}</span>`;
+                const colorize = (val, base) =＞ {
+                    if (val ＞ base) return `＜span style="color:#69f0ae"＞${val}＜/span＞`;
+                    if (val ＜ base) return `＜span style="color:#ff5252"＞${val}＜/span＞`;
+                    return `＜span style="color:#eee"＞${val}＜/span＞`;
                 };
 
-                let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
-                if (side === 'player') content += `MP: ${char.mp}<br>`;
-                content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
-                content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
-                content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
-                content += `상태: ${buffs}<br><br>`;
+                let content = `＜b＞[${char.name}]＜/b＞＜br＞HP: ${char.hp}/${char.maxHp}＜br＞`;
+                if (side === 'player') content += `MP: ${char.mp}＜br＞`;
+                content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}＜br＞`;
+                content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}＜br＞`;
+                content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%＜br＞`;
+                content += `상태: ${buffs}＜br＞＜br＞`;
 
                 if (side === 'player') {
-                    content += `<b>[스킬]</b><br>`;
-                    (char.skills || char.proto.skills).forEach(s => {
+                    content += `＜b＞[스킬]＜/b＞＜br＞`;
+                    (char.skills || char.proto.skills).forEach(s =＞ {
                         let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name}: ${s.desc}${multText}<br>`;
+                        content += `- ${s.name}: ${s.desc}${multText}＜br＞`;
                     });
                 } else {
-                    content += `<b>[스킬]</b><br>`;
-                    char.skills.forEach(s => {
+                    content += `＜b＞[스킬]＜/b＞＜br＞`;
+                    char.skills.forEach(s =＞ {
                         let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name}: ${s.desc}${multText}<br>`;
+                        content += `- ${s.name}: ${s.desc}${multText}＜br＞`;
                     });
                 }
                 this.openInfoModal(char.name, content);
@@ -3419,8 +3336,8 @@ const QuizEngine = {
                     'star_powder': '방어/마방 +40%'
                 };
                 let msg = "";
-                this.battle.fieldBuffs.forEach(b => {
-                    msg += `<b>[${BUFF_NAMES[b.name]}]</b><br>${buffInfo[b.name] || ''}<br><br>`;
+                this.battle.fieldBuffs.forEach(b =＞ {
+                    msg += `＜b＞[${BUFF_NAMES[b.name]}]＜/b＞＜br＞${buffInfo[b.name] || ''}＜br＞＜br＞`;
                 });
                 this.openInfoModal("필드 버프", msg);
             },
@@ -3450,11 +3367,11 @@ const QuizEngine = {
                 // Reset button order
                 btnContainer.style.flexDirection = 'row';
 
-                btnYes.onclick = () => {
+                btnYes.onclick = () =＞ {
                     modal.classList.remove('active');
                     if (onYes) onYes();
                 };
-                btnNo.onclick = () => {
+                btnNo.onclick = () =＞ {
                     modal.classList.remove('active');
                     if (onNo) onNo();
                 };
@@ -3463,9 +3380,9 @@ const QuizEngine = {
             },
 
             showDoubleConfirm(msg1, msg2, onYes) {
-                this.showConfirm(msg1, () => {
-                    // Step 1 Yes -> Open Step 2
-                    setTimeout(() => {
+                this.showConfirm(msg1, () =＞ {
+                    // Step 1 Yes -＞ Open Step 2
+                    setTimeout(() =＞ {
                         document.getElementById('confirm-msg').innerHTML = msg2;
                         const modal = document.getElementById('modal-confirm');
                         const btnYes = document.getElementById('confirm-yes');
@@ -3475,12 +3392,12 @@ const QuizEngine = {
                         // Swap buttons for safety
                         btnContainer.style.flexDirection = 'row-reverse';
 
-                        btnYes.onclick = () => {
+                        btnYes.onclick = () =＞ {
                             modal.classList.remove('active');
                             btnContainer.style.flexDirection = 'row'; // Reset
                             if (onYes) onYes();
                         };
-                        btnNo.onclick = () => {
+                        btnNo.onclick = () =＞ {
                             modal.classList.remove('active');
                             btnContainer.style.flexDirection = 'row'; // Reset
                         };
@@ -3554,18 +3471,18 @@ const QuizEngine = {
                 let targetData = null;
 
                 if (isCollocation) {
-                    targetData = COLLOCATION_DATA.find(c => c.id === targetId);
+                    targetData = COLLOCATION_DATA.find(c =＞ c.id === targetId);
                 } else {
-                    targetData = VOCAB_DATA.find(v => v.word === targetId);
+                    targetData = VOCAB_DATA.find(v =＞ v.word === targetId);
                 }
 
                 if (!targetData) {
                     // Cleanup invalid data
                     if (isCollocation) {
-                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== targetId);
+                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id =＞ id !== targetId);
                         Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
                     } else {
-                        this.state.wrongWords = this.state.wrongWords.filter(w => w !== targetId);
+                        this.state.wrongWords = this.state.wrongWords.filter(w =＞ w !== targetId);
                         Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
                     }
                     return this.startTutoringSession(); // Retry
@@ -3576,7 +3493,7 @@ const QuizEngine = {
                 // UI Loading
                 this.isApiLoading = true;
                 const contentBox = document.getElementById('tutoring-content');
-                contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
+                contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...＜br＞(잠시만 기다려주세요)";
 
                 try {
                     const text = await GameAPI.getTutoringContent(key, targetData, isCollocation ? 'collocation' : 'vocab');
@@ -3589,7 +3506,7 @@ const QuizEngine = {
                     }
 
                     // Format simple markdown to HTML tags
-                    let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                    let formatted = text.replace(/\*\*(.*?)\*\*/g, '＜b＞$1＜/b＞');
                     contentBox.innerHTML = formatted;
 
                     // Show Quiz Button
@@ -3608,7 +3525,7 @@ const QuizEngine = {
                     } else {
                         displayMsg = "오류가 발생했습니다: " + msg;
                     }
-                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div><div style="font-size:0.7rem; color:#777; margin-top:5px;">(${msg})</div>`;
+                    contentBox.innerHTML = `＜div style="color:#ef5350; font-weight:bold;"＞${displayMsg}＜/div＞＜div style="font-size:0.7rem; color:#777; margin-top:5px;"＞(${msg})＜/div＞`;
                 } finally {
                     this.isApiLoading = false;
                 }
@@ -3620,12 +3537,12 @@ const QuizEngine = {
                 const item = this.currentTutoringItem;
                 const data = item.data;
 
-                const onCorrect = () => {
+                const onCorrect = () =＞ {
                     if (item.type === 'collocation') {
-                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
+                        this.state.wrongCollocations = this.state.wrongCollocations.filter(id =＞ id !== data.id);
                         Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
                     } else {
-                        this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
+                        this.state.wrongWords = this.state.wrongWords.filter(w =＞ w !== data.word);
                         Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
                     }
                     document.getElementById('modal-tutoring').classList.remove('active');
@@ -3633,28 +3550,28 @@ const QuizEngine = {
 
                     // Rumi Surprise Gift Logic
                     this.state.rumiGiftCount = this.state.rumiGiftCount || 0;
-                    if (this.state.rumiGiftCount < 3 && Math.random() < 0.3) {
+                    if (this.state.rumiGiftCount ＜ 3 && Math.random() ＜ 0.3) {
                         this.state.rumiGiftCount++;
                         this.state.tickets = (this.state.tickets || 0) + 1;
                         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
                         this.openInfoModal("루미의 깜짝 선물!",
-                            `<div style="text-align:center;">
-                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448aff;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
-                                </div>
-                                형아! 공부하느라 고생했어! (헤헤)<br>이거 줄게, 받아!<br><br>
-                                <b style="color:#ffd700; font-size:1.2rem;">[티켓 1장 획득]</b><br>
-                                <span style="font-size:0.8rem; color:#aaa;">(오답노트에서도 삭제되었습니다)</span>
-                            </div>`,
-                            () => { this.toMenu(); }
+                            `＜div style="text-align:center;"＞
+                                ＜div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448aff;"＞
+                                    ＜img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;"＞
+                                ＜/div＞
+                                형아! 공부하느라 고생했어! (헤헤)＜br＞이거 줄게, 받아!＜br＞＜br＞
+                                ＜b style="color:#ffd700; font-size:1.2rem;"＞[티켓 1장 획득]＜/b＞＜br＞
+                                ＜span style="font-size:0.8rem; color:#aaa;"＞(오답노트에서도 삭제되었습니다)＜/span＞
+                            ＜/div＞`,
+                            () =＞ { this.toMenu(); }
                         );
                     } else {
                         this.showAlert("학습 완료! 오답노트에서 삭제되었습니다.");
                     }
                 };
 
-                const onWrong = () => {
+                const onWrong = () =＞ {
                     // Stay on tutoring modal, user can retry
                 };
 
@@ -3672,7 +3589,7 @@ const QuizEngine = {
 
             openArtifactSelect() {
                 const owned = this.state.artifacts || [];
-                const available = ARTIFACT_LIST.filter(a => !owned.includes(a.id));
+                const available = ARTIFACT_LIST.filter(a =＞ !owned.includes(a.id));
                 if (available.length === 0) {
                     this.showAlert("획득 가능한 아티팩트가 없습니다.");
                     this.toMenu();
@@ -3680,21 +3597,21 @@ const QuizEngine = {
                 }
 
                 // Pick 3 random artifacts
-                const shuffled = available.sort(() => Math.random() - 0.5);
+                const shuffled = available.sort(() =＞ Math.random() - 0.5);
                 const choices = shuffled.slice(0, Math.min(3, shuffled.length));
 
                 const list = document.getElementById('artifact-select-list');
                 list.innerHTML = "";
 
-                choices.forEach(art => {
+                choices.forEach(art =＞ {
                     const btn = document.createElement('button');
                     btn.className = 'menu-btn';
                     btn.style.borderColor = '#ffd700';
                     btn.style.color = '#ffd700';
                     btn.style.textAlign = 'left';
                     btn.style.padding = '15px';
-                    btn.innerHTML = `<b>${art.name}</b><br><span style="font-size:0.8rem; color:#ccc; font-weight:normal;">${art.desc}</span>`;
-                    btn.onclick = () => {
+                    btn.innerHTML = `＜b＞${art.name}＜/b＞＜br＞＜span style="font-size:0.8rem; color:#ccc; font-weight:normal;"＞${art.desc}＜/span＞`;
+                    btn.onclick = () =＞ {
                         this.state.artifacts.push(art.id);
                         document.getElementById('modal-artifact-select').classList.remove('active');
                         this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
@@ -3711,15 +3628,15 @@ const QuizEngine = {
                 const owned = this.state.artifacts || [];
                 const list = document.getElementById('artifact-check-list');
                 if (owned.length === 0) {
-                    list.innerHTML = '<div style="color:#aaa; text-align:center;">보유한 아티팩트가 없습니다.</div>';
+                    list.innerHTML = '＜div style="color:#aaa; text-align:center;"＞보유한 아티팩트가 없습니다.＜/div＞';
                 } else {
-                    list.innerHTML = owned.map(id => {
-                        const art = ARTIFACT_LIST.find(a => a.id === id);
+                    list.innerHTML = owned.map(id =＞ {
+                        const art = ARTIFACT_LIST.find(a =＞ a.id === id);
                         if (!art) return '';
-                        return `<div style="margin-bottom:8px; padding:8px; background:#333; border-radius:5px; border-left: 3px solid #ffd700;">
-                            <b style="color:#ffd700;">${art.name}</b><br>
-                            <span style="color:#ccc;">${art.desc}</span>
-                        </div>`;
+                        return `＜div style="margin-bottom:8px; padding:8px; background:#333; border-radius:5px; border-left: 3px solid #ffd700;"＞
+                            ＜b style="color:#ffd700;"＞${art.name}＜/b＞＜br＞
+                            ＜span style="color:#ccc;"＞${art.desc}＜/span＞
+                        ＜/div＞`;
                     }).join('');
                 }
                 document.getElementById('modal-artifact-check').classList.add('active');
@@ -3733,10 +3650,10 @@ const QuizEngine = {
         // Use DOMContentLoaded instead of 'load' to avoid being blocked by
         // missing image resources (e.g., 루미.png). DOMContentLoaded fires after
         // HTML parsing and deferred scripts complete, but before images load.
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () =＞ {
             RPG.waitForInitialDataLoad();
         });
-    </script>
-</body>
+    ＜/script＞
+＜/body＞
 
-</html>
+＜/html＞
