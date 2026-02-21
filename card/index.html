@@ -467,56 +467,57 @@
         #modal-chaos.artifact-mode .modal-content {
             min-height: auto !important;
             padding-bottom: 20px;
-        #modal-artifact-select .modal-content {
-            padding: 10px !important;
-            padding-top: 5px !important;
-            min-height: auto !important;
-        }
 
-        #modal-artifact-select h3 {
-            margin: 5px 0 !important;
-        }
-
-        #modal-artifact-select p {
-            margin: 5px 0 !important;
-            margin-bottom: 8px !important;
-        }
-
-        @media (max-width: 768px) {
-            #modal-chaos.artifact-mobile-compact {
-                justify-content: flex-start;
-                padding: 8px 0;
-            }
-
-            #modal-chaos.artifact-mobile-compact .modal-content {
+            #modal-artifact-select .modal-content {
+                padding: 10px !important;
+                padding-top: 5px !important;
                 min-height: auto !important;
-                max-height: calc(100vh - 16px);
-                overflow-y: auto;
-                padding-top: 8px;
             }
 
-            #modal-chaos.artifact-mobile-compact .chaos-title {
-                margin: 4px 0 8px 0;
+            #modal-artifact-select h3 {
+                margin: 5px 0 !important;
             }
 
-            #modal-chaos.artifact-mobile-compact .chaos-desc {
-                margin: 4px 0 8px 0;
-                line-height: 1.35;
+            #modal-artifact-select p {
+                margin: 5px 0 !important;
+                margin-bottom: 8px !important;
             }
 
-            #modal-chaos.artifact-mobile-compact .chaos-uses {
-                margin-bottom: 6px !important;
-            }
+            @media (max-width: 768px) {
+                #modal-chaos.artifact-mobile-compact {
+                    justify-content: flex-start;
+                    padding: 8px 0;
+                }
 
-            #modal-chaos.artifact-mobile-compact .menu-btn {
-                margin-bottom: 7px;
-                padding: 10px;
-            }
+                #modal-chaos.artifact-mobile-compact .modal-content {
+                    min-height: auto !important;
+                    max-height: calc(100vh - 16px);
+                    overflow-y: auto;
+                    padding-top: 8px;
+                }
 
-            #modal-chaos.artifact-mobile-compact .chaos-close-btn {
-                margin-top: 6px !important;
+                #modal-chaos.artifact-mobile-compact .chaos-title {
+                    margin: 4px 0 8px 0;
+                }
+
+                #modal-chaos.artifact-mobile-compact .chaos-desc {
+                    margin: 4px 0 8px 0;
+                    line-height: 1.35;
+                }
+
+                #modal-chaos.artifact-mobile-compact .chaos-uses {
+                    margin-bottom: 6px !important;
+                }
+
+                #modal-chaos.artifact-mobile-compact .menu-btn {
+                    margin-bottom: 7px;
+                    padding: 10px;
+                }
+
+                #modal-chaos.artifact-mobile-compact .chaos-close-btn {
+                    margin-top: 6px !important;
+                }
             }
-        }
     </style>
 </head>
 
@@ -837,7 +838,8 @@
     <div id="modal-chaos" class="modal">
         <div class="modal-content" style="height:auto; min-height: 550px;">
             <h3 class="chaos-title">혼돈의 축복</h3>
-            <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대 3회)</p>
+            <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대
+                3회)</p>
             <div class="chaos-uses" style="margin-bottom:10px; font-weight:bold; color:#ffd700;">
                 혼돈의 축복: <span id="chaos-uses">3</span>회 / 대현자의 축복: <span id="sage-uses">3</span>회
             </div>
@@ -910,14 +912,34 @@
         </div>
     </div>
 
-    <script>window._scriptLoadErrors = [];</script>
-    <script src="data.js" defer onerror="window._scriptLoadErrors.push('data.js')"></script>
-    <script src="vocab_data.js" defer onerror="window._scriptLoadErrors.push('vocab_data.js')"></script>
-    <script src="collocation_data.js" defer onerror="window._scriptLoadErrors.push('collocation_data.js')"></script>
-    <script src="grammar_data.js" defer onerror="window._scriptLoadErrors.push('grammar_data.js')"></script>
-    <script src="logic.js" defer onerror="window._scriptLoadErrors.push('logic.js')"></script>
+    <script>
+        window._scriptLoadErro     // Start parallel download & sequential execution of scripts to prevent timeout on slow networks
+        const scriptsToLoad = [
+            'data.js',
+            'vocab_data.js',
+            'collocation_data.js',
+            'grammar_data.js',
+            'logic.js'
+        ];
+
+        let scriptsLoadedCount = 0;
+
+        scriptsToLoad.forEach(src => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = false; // Important: parallel download, sequential execution order guaranteed
+            script.defer = true;
+            script.onload = () => {
+                scriptsLoadedCount++;
+            };
+            script.onerror = () => {
+                window._scriptLoadErrors.push(src);
+            };
+            document.body.appendChild(script);
+        });
+    </script>
     <script defer>
-const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
+cons        t LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
 - 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(소년)** 마법사 '루미'입니다.
@@ -944,7 +966,7 @@ const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
     - 나쁜 예: "This is a pen."
     - 좋은 예: "I am in your heart." (난 형아 마음속에 쏙 들어가 있어!)`;
 
-const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
+cons        t LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
 2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
 암기 비법 (Fun Mnemonic): 연상 기억법 등을 이용해 쉽게 외우는 방법. (특히 헷갈리는 단어가 있다면 비교 설명)
@@ -953,335 +975,270 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
 4.강의 마무리 멘트`;
 
-const GameAPI = {
-    async getTutoringContent(apiKey, targetData, type) {
-        let targetInfo = "";
-        if (type === 'collocation') {
-            targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
-        } else {
-            targetInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
-            if (targetData.trap_word) {
-                targetInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
-            }
-        }
+cons        t GameAPI = {
+                c getTutoringContent(apiKey, targetData, type) {
+                    targetInfo = "";
+                    type === 'collocation') {
+                        etInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
+                    se {
+                        etInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
+                        targetData.trap_word) {
+                            etInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+                                                             t fullPrompt = `${LUMI_PERSONA}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
-        const fullPrompt = `${LUMI_PERSONA}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
-
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: { temperature: 0.5 }
-            })
-        });
-
-        // ✅ HTTP 상태 코드 먼저 확인
-        if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
-        }
-
-        const result = await response.json();
-        if (result.error) {
-            throw new Error(result.error.message);
-        }
-
-        // ✅ candidates 배열 안전 체크
-        if (!result.candidates || result.candidates.length === 0
-            || !result.candidates[0].content
-            || !result.candidates[0].content.parts
-            || result.candidates[0].content.parts.length === 0) {
-            throw new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
-        }
-
-        return result.candidates[0].content.parts[0].text;
-    }
-};
-
-/**
- * QuizEngine — Unified quiz rendering system for Card RPG.
- *
- * Replaces 5 separate quiz functions with a single configurable engine:
- *   - startQuiz (vocab, Korean meaning → pick correct meaning)
- *   - startChaosQuiz (vocab, Korean meaning → pick correct English word)
- *   - startCollocationQuiz (collocation quiz)
- *   - startGrammarQuiz (grammar quiz)
- *   - startTutoringQuiz (tutoring review quiz)
- *
- * Usage:
- *   QuizEngine.show({
- *       question: 'What is ...?',
- *       desc: 'optional description',        // falsy → hidden
- *       options: ['A', 'B', 'C', 'D'],       // will be shuffled
- *       answer: 'B',                          // correct option text
- *       onCorrect: () => { ... },
- *       onWrong: (chosen) => { ... },
- *       correctDelay: 1000,                   // ms before closing on correct
- *       wrongDelay: 1500                      // ms before closing on wrong
- *   });
- */
-const QuizEngine = {
-    /**
-     * Show a quiz modal with the given configuration.
-     * @param {Object} config
-     * @param {string}   config.question      - The question text
-     * @param {string}   [config.desc]        - Optional description/translation (hidden if falsy)
-     * @param {string[]} config.options       - Array of option strings (will be shuffled)
-     * @param {string}   config.answer        - The correct answer string (must match one of options)
-     * @param {Function} [config.onCorrect]   - Callback when correct answer is chosen
-     * @param {Function} [config.onWrong]     - Callback when wrong answer is chosen, receives (chosenText)
-     * @param {number}   [config.correctDelay=1000] - Delay in ms before closing modal on correct
-     * @param {number}   [config.wrongDelay=1500]   - Delay in ms before closing modal on wrong
-     */
-    show(config) {
-        const modal = document.getElementById('modal-quiz');
-        const qDiv = document.getElementById('quiz-question');
-        const descDiv = document.getElementById('quiz-desc');
-        const oDiv = document.getElementById('quiz-options');
-        const fDiv = document.getElementById('quiz-feedback');
-
-        // Reset modal state
-        modal.classList.remove('active');
-        oDiv.innerHTML = '';
-        if (fDiv) fDiv.innerText = '';
-
-        // Question
-        qDiv.innerText = config.question;
-
-        // Description
-        if (config.desc) {
-            descDiv.innerText = config.desc;
-            descDiv.style.display = 'block';
-        } else {
-            descDiv.style.display = 'none';
-        }
-
-        // Shuffle options
-        const shuffled = [...config.options].sort(() => Math.random() - 0.5);
-        const correctDelay = config.correctDelay || 1000;
-        const wrongDelay = config.wrongDelay || 1500;
-
-        shuffled.forEach(optText => {
-            const btn = document.createElement('button');
-            btn.className = 'menu-btn';
-            btn.style.padding = '10px';
-            btn.style.fontSize = '0.9rem';
-            btn.innerText = optText;
-
-            btn.onclick = () => {
-                // Immediately disable all buttons
-                btn.disabled = true;
-                Array.from(oDiv.children).forEach(c => { c.onclick = null; });
-
-                if (optText === config.answer) {
-                    btn.classList.add('correct');
-                    if (fDiv) { fDiv.innerText = '정답!'; fDiv.style.color = '#4caf50'; }
-                    setTimeout(() => {
-                        modal.classList.remove('active');
-                        if (config.onCorrect) config.onCorrect();
-                    }, correctDelay);
-                } else {
-                    btn.classList.add('wrong');
-                    // Highlight correct answer
-                    Array.from(oDiv.children).forEach(c => {
-                        if (c.innerText === config.answer) c.classList.add('correct');
-                    });
-                    if (fDiv) { fDiv.innerText = '오답...'; fDiv.style.color = '#ef5350'; }
-                    setTimeout(() => {
-                        modal.classList.remove('active');
-                        if (config.onWrong) config.onWrong(optText);
-                    }, wrongDelay);
-                }
-            };
-            oDiv.appendChild(btn);
-        });
-
-        modal.classList.add('active');
-    },
-
-    // ─── Convenience builders ───────────────────────────────────────────
-
-    /**
-     * Build config for a standard vocab quiz (word → meaning).
-     * @param {Function} callback - (success: boolean) => void
-     * @returns {Object|null} config or null if data unavailable
-     */
-    buildVocabQuiz(callback) {
-        if (!VOCAB_DATA || VOCAB_DATA.length === 0) return null;
-
-        const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-
-        let options = [{ text: q.meaning, correct: true }];
-        options.push({ text: q.trap_meaning, correct: false });
-
-        let safety = 0;
-        while (options.length < 4 && safety < 100) {
-            safety++;
-            const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-            if (r.word !== q.word && r.word !== q.trap_word && !options.some(o => o.text === r.meaning)) {
-                options.push({ text: r.meaning, correct: false });
-            }
-        }
-
-        return {
-            question: q.word,
-            desc: null,
-            options: options.map(o => o.text),
-            answer: q.meaning,
-            onCorrect: () => callback(true),
-            onWrong: () => {
-                // Record wrong word
-                if (!RPG.state.wrongWords) RPG.state.wrongWords = [];
-                if (!RPG.state.wrongWords.includes(q.word)) {
-                    RPG.state.wrongWords.push(q.word);
-                    Storage.save(Storage.keys.VOCAB, RPG.state.wrongWords);
-                }
-                callback(false);
-            }
-        };
-    },
-
-    /**
-     * Build config for a chaos quiz (meaning → word, reverse direction).
-     * @param {Function} callback - (success: boolean) => void
-     * @returns {Object|null} config or null if data unavailable
-     */
-    buildChaosQuiz(callback) {
-        if (!VOCAB_DATA || VOCAB_DATA.length === 0) return null;
-
-        const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-
-        let options = [{ text: q.word, correct: true }];
-        let safety = 0;
-        while (options.length < 4 && safety < 100) {
-            safety++;
-            const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-            if (r.word !== q.word && !options.some(o => o.text === r.word)) {
-                options.push({ text: r.word, correct: false });
-            }
-        }
-
-        return {
-            question: q.meaning,
-            desc: null,
-            options: options.map(o => o.text),
-            answer: q.word,
-            onCorrect: () => callback(true),
-            onWrong: () => callback(false)
-        };
-    },
-
-    /**
-     * Build config for a collocation quiz.
-     * @param {Function} callback - (success: boolean) => void
-     * @returns {Object|null} config or null if data unavailable
-     */
-    buildCollocationQuiz(callback) {
-        if (!COLLOCATION_DATA || COLLOCATION_DATA.length === 0) return null;
-
-        let allQuizzes = [];
-        COLLOCATION_DATA.forEach(item => {
-            if (item.quizzes) {
-                item.quizzes.forEach(q => { allQuizzes.push({ ...q, parentId: item.id }); });
-            } else {
-                allQuizzes.push({ ...item, parentId: item.id });
-            }
-        });
-        if (allQuizzes.length === 0) return null;
-
-        const q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
-
-        return {
-            question: q.question,
-            desc: q.translation,
-            options: [...q.options],
-            answer: q.answer,
-            onCorrect: () => callback(true),
-            onWrong: () => {
-                if (!RPG.state.wrongCollocations) RPG.state.wrongCollocations = [];
-                if (!RPG.state.wrongCollocations.includes(q.parentId)) {
-                    RPG.state.wrongCollocations.push(q.parentId);
-                    Storage.save(Storage.keys.COLLOCATION, RPG.state.wrongCollocations);
-                }
-                callback(false);
-            }
-        };
-    },
-
-    /**
-     * Build config for a grammar quiz.
-     * @param {Object}   q               - Quiz object from GRAMMAR_DATA
-     * @param {Function} [onCorrect]     - Callback on correct
-     * @param {Function} [onWrong]       - Callback on wrong
-     * @returns {Object} config
-     */
-    buildGrammarQuiz(q, onCorrect, onWrong) {
-        let cleanDesc = q.desc.replace(/\s*\(.*?\)/g, '').trim();
-
-        return {
-            question: q.question,
-            desc: cleanDesc,
-            options: [...q.options],
-            answer: q.answer,
-            onCorrect: onCorrect || null,
-            onWrong: onWrong || null
-        };
-    },
-
-    /**
-     * Build config for a tutoring review quiz (vocab or collocation).
-     * @param {Object}   item           - { data, type: 'vocab'|'collocation' }
-     * @param {Function} onCorrect      - Callback on correct
-     * @param {Function} onWrong        - Callback on wrong
-     * @returns {Object} config
-     */
-    buildTutoringQuiz(item, onCorrect, onWrong) {
-        const data = item.data;
-
-        if (item.type === 'collocation') {
-            let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
-            let q = quizList[Math.floor(Math.random() * quizList.length)];
-
-            return {
-                question: q.question,
-                desc: q.translation || '',
-                options: [...q.options],
-                answer: q.answer,
-                onCorrect: onCorrect,
-                onWrong: onWrong
-            };
-        } else {
-            // Vocab tutoring quiz
-            let options = [{ text: data.meaning, correct: true }];
-            options.push({ text: data.trap_meaning, correct: false });
-
-            let safety = 0;
-            while (options.length < 4 && safety < 100) {
-                safety++;
-                const r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
-                if (r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
-                    options.push({ text: r.meaning, correct: false });
-                }
-            }
-
-            return {
-                question: data.word,
-                desc: null,
-                options: options.map(o => o.text),
-                answer: data.meaning,
-                onCorrect: onCorrect,
-                onWrong: onWrong
-            };
-        }
-    }
-};
+                    t response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+                        od: 'POST',
+                        ers: { 'Content-Type': 'application/json' },
+                        : JSON.stringify({
+                            ents: [{ parts: [{ text: fullPrompt }] }],
+                            rationConfig: { temperature: 0.5 }
+                                           
+                     HTTP 상태 코드 먼저 확인
+                    !response.ok) {
+                        t errorBody = await response.text();
+                        w new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+                                       t result = await response.json();
+                    result.error) {
+                        w new Error(result.error.message);
+                                        candidates 배열 안전 체크
+                    !result.candidates || result.candidates.length === 0
+                        result.candidates[0].content
+                        result.candidates[0].content.parts
+                        esult.candidates[0].content.parts.length === 0) {
+                        w new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
+                                       rn result.candidates[0].content.parts[0].text;
+                
 
         /**
-         * RPG Game Namespace
-         * Encapsulates all game logic, state, and UI handling.
-         */
-        const RPG = {
+         * Q         izEngine — Unified quiz rendering system for Card RPG.
+ *
+           R         places 5 separate quiz functions with a single configurable engine:
+ *           - startQuiz (vocab, Korean meaning → pick correct meaning)
+ *           - startChaosQuiz (vocab, Korean meaning → pick correct English word)
+ *           - startCollocationQuiz (collocation quiz)
+ *           - startGrammarQuiz (grammar quiz)
+ *           - startTutoringQuiz (tutoring review quiz)
+ *
+           U         age:
+ *           QuizEngine.show({
+ *               question: 'What is ...?',
+ *               desc: 'optional description',        // falsy → hidden
+ *               options: ['A', 'B', 'C', 'D'],       // will be shuffled
+ *               answer: 'B',                          // correct option text
+ *               onCorrect: () => { ... },
+ *               onWrong: (chosen) => { ... },
+ *               correctDelay: 1000,                   // ms before closing on correct
+ *               wrongDelay: 1500                      // ms before closing on wrong
+ *           });
+ */
+         ons        t QuizEngine = {
+                                 ow a quiz modal with the given configuration.
+                 aram {Object} config
+                 aram {string}   config.question      - The question text
+                 aram {string}   [config.desc]        - Optional description/translation (hidden if falsy)
+                 aram {string[]} config.options       - Array of option strings (will be shuffled)
+                 aram {string}   config.answer        - The correct answer string (must match one of options)
+                 aram {Function} [config.onCorrect]   - Callback when correct answer is chosen
+                 aram {Function} [config.onWrong]     - Callback when wrong answer is chosen, receives (chosenText)
+                 aram {number}   [config.correctDelay=1000] - Delay in ms before closing modal on correct
+                 aram {number}   [config.wrongDelay=1500]   - Delay in ms before closing modal on wrong
+                                (config) {
+                    t modal = document.getElementById('modal-quiz');
+                    t qDiv = document.getElementById('quiz-question');
+                    t descDiv = document.getElementById('quiz-desc');
+                    t oDiv = document.getElementById('quiz-options');
+                    t fDiv = document.getElementById('quiz-feedback');
+
+                    eset modal state
+                    l.classList.remove('active');
+                    .innerHTML = '';
+                    fDiv) fDiv.innerText = '';
+
+                    uestion
+                    .innerText = config.question;
+
+                    escription
+                    config.desc) {
+                        Div.innerText = config.desc;
+                        Div.style.display = 'block';
+                    se {
+                        Div.style.display = 'none';
+                                       huffle options
+                    t shuffled = [...config.options].sort(() => Math.random() - 0.5);
+                    t correctDelay = config.correctDelay || 1000;
+                    t wrongDelay = config.wrongDelay || 1500;
+
+                    fled.forEach(optText => {
+                        t btn = document.createElement('button');
+                        className = 'menu-btn';
+                        style.padding = '10px';
+                        style.fontSize = '0.9rem';
+                        innerText = optText;
+
+                        onclick = () => {
+                            mmediately disable all buttons
+                            disabled = true;
+                            y.from(oDiv.children).forEach(c => { c.onclick = null; });
+
+                            optText === config.answer) {
+                                classList.add('correct');
+                                fDiv) { fDiv.innerText = '정답!'; fDiv.style.color = '#4caf50'; }
+                                imeout(() => {
+                                    l.classList.remove('active');
+                                    config.onCorrect) config.onCorrect();
+                                orrectDelay);
+                            se {
+                                classList.add('wrong');
+                                ighlight correct answer
+                                y.from(oDiv.children).forEach(c => {
+                                    c.innerText === config.answer) c.classList.add('correct');
+                                                                fDiv) { fDiv.innerText = '오답...'; fDiv.style.color = '#ef5350'; }
+                                imeout(() => {
+                                    l.classList.remove('active');
+                                    config.onWrong) config.onWrong(optText);
+                                rongDelay);
+                                                                         .appendChild(btn);
+                    
+                    l.classList.add('active');
+                                ── Convenience builders ───────────────────────────────────────────
+
+                                 ild config for a standard vocab quiz (word → meaning).
+                 aram {Function} callback - (success: boolean) => void
+                 eturns {Object|null} config or null if data unavailable
+                                dVocabQuiz(callback) {
+                    !VOCAB_DATA || VOCAB_DATA.length === 0) return null;
+
+                    t q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+
+                    options = [{ text: q.meaning, correct: true }];
+                    ons.push({ text: q.trap_meaning, correct: false });
+
+                    safety = 0;
+                    e (options.length < 4 && safety < 100) {
+                        ty++;
+                        t r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                        r.word !== q.word && r.word !== q.trap_word && !options.some(o => o.text === r.meaning)) {
+                            ons.push({ text: r.meaning, correct: false });
+                                                             rn {
+                        tion: q.word,
+                        : null,
+                        ons: options.map(o => o.text),
+                        er: q.meaning,
+                        rrect: () => callback(true),
+                        ong: () => {
+                            ecord wrong word
+                            !RPG.state.wrongWords) RPG.state.wrongWords = [];
+                            !RPG.state.wrongWords.includes(q.word)) {
+                                state.wrongWords.push(q.word);
+                                age.save(Storage.keys.VOCAB, RPG.state.wrongWords);
+                                                      back(false);
+                                                                                          ild config for a chaos quiz (meaning → word, reverse direction).
+                 aram {Function} callback - (success: boolean) => void
+                 eturns {Object|null} config or null if data unavailable
+                                dChaosQuiz(callback) {
+                    !VOCAB_DATA || VOCAB_DATA.length === 0) return null;
+
+                    t q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+
+                    options = [{ text: q.word, correct: true }];
+                    safety = 0;
+                    e (options.length < 4 && safety < 100) {
+                        ty++;
+                        t r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                        r.word !== q.word && !options.some(o => o.text === r.word)) {
+                            ons.push({ text: r.word, correct: false });
+                                                             rn {
+                        tion: q.meaning,
+                        : null,
+                        ons: options.map(o => o.text),
+                        er: q.word,
+                        rrect: () => callback(true),
+                        ong: () => callback(false)
+                                                                    ild config for a collocation quiz.
+                 aram {Function} callback - (success: boolean) => void
+                 eturns {Object|null} config or null if data unavailable
+                                dCollocationQuiz(callback) {
+                    !COLLOCATION_DATA || COLLOCATION_DATA.length === 0) return null;
+
+                    allQuizzes = [];
+                    OCATION_DATA.forEach(item => {
+                        item.quizzes) {
+                            .quizzes.forEach(q => { allQuizzes.push({ ...q, parentId: item.id }); });
+                        se {
+                            uizzes.push({ ...item, parentId: item.id });
+                                                              allQuizzes.length === 0) return null;
+
+                    t q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+
+                    rn {
+                        tion: q.question,
+                        : q.translation,
+                        ons: [...q.options],
+                        er: q.answer,
+                        rrect: () => callback(true),
+                        ong: () => {
+                            !RPG.state.wrongCollocations) RPG.state.wrongCollocations = [];
+                            !RPG.state.wrongCollocations.includes(q.parentId)) {
+                                state.wrongCollocations.push(q.parentId);
+                                age.save(Storage.keys.COLLOCATION, RPG.state.wrongCollocations);
+                                                      back(false);
+                                                                                          ild config for a grammar quiz.
+                 aram {Object}   q               - Quiz object from GRAMMAR_DATA
+                 aram {Function} [onCorrect]     - Callback on correct
+                 aram {Function} [onWrong]       - Callback on wrong
+                 eturns {Object} config
+                                dGrammarQuiz(q, onCorrect, onWrong) {
+                    cleanDesc = q.desc.replace(/\s*\(.*?\)/g, '').trim();
+
+                    rn {
+                        tion: q.question,
+                        : cleanDesc,
+                        ons: [...q.options],
+                        er: q.answer,
+                        rrect: onCorrect || null,
+                        ong: onWrong || null
+                                                                    ild config for a tutoring review quiz (vocab or collocation).
+                 aram {Object}   item           - { data, type: 'vocab'|'collocation' }
+                 aram {Function} onCorrect      - Callback on correct
+                 aram {Function} onWrong        - Callback on wrong
+                 eturns {Object} config
+                                dTutoringQuiz(item, onCorrect, onWrong) {
+                    t data = item.data;
+
+                    item.type === 'collocation') {
+                        quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+                        q = quizList[Math.floor(Math.random() * quizList.length)];
+
+                        rn {
+                            tion: q.question,
+                            : q.translation || '',
+                            ons: [...q.options],
+                            er: q.answer,
+                            rrect: onCorrect,
+                            ong: onWrong
+                                           se {
+                        ocab tutoring quiz
+                        options = [{ text: data.meaning, correct: true }];
+                        ons.push({ text: data.trap_meaning, correct: false });
+
+                        safety = 0;
+                        e (options.length < 4 && safety < 100) {
+                            ty++;
+                            t r = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                            r.word !== data.word && r.word !== data.trap_word && !options.some(o => o.text === r.meaning)) {
+                                ons.push({ text: r.meaning, correct: false });
+                                                                         rn {
+                            tion: data.word,
+                            : null,
+                            ons: options.map(o => o.text),
+                            er: data.meaning,
+                            rrect: onCorrect,
+                            ong: onWrong
+                                                         
+
+                                 G Game Namespace
+             capsulates all game logic, state, and UI handling.
+                    const RPG = {
             // Global Data (Persistent across resets)
             global: {
                 unlocked_modes: ['origin'],
@@ -3640,7 +3597,7 @@ const QuizEngine = {
 
                         this.openInfoModal("루미의 깜짝 선물!",
                             `<div style="text-align:center;">
-                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448aff;">
+                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448af f;">
                                     <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 형아! 공부하느라 고생했어! (헤헤)<br>이거 줄게, 받아!<br><br>
