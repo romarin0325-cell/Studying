@@ -924,23 +924,39 @@
                 { src: 'logic.js', label: '게임 로직' }
             ];
             var idx = 0;
+
             function loadNext() {
                 if (idx >= scripts.length) return;
                 var info = scripts[idx];
                 var el = document.createElement('script');
                 el.src = info.src;
-                el.onload = function () { idx++; updateProgress(); loadNext(); };
+
+                el.onload = function () {
+                    idx++;
+                    updateProgress();
+                    // 🚀 핵심 수정: 모바일 기기의 파일 I/O 및 메모리 정리를 위해 100ms 대기 후 다음 파일 로드
+                    setTimeout(loadNext, 100);
+                };
+
                 el.onerror = function () {
                     window._scriptLoadErrors.push(info.src);
-                    idx++; updateProgress(); loadNext();
+                    idx++;
+                    updateProgress();
+                    // 에러 발생 시에도 기기가 쉴 수 있게 대기 시간 부여
+                    setTimeout(loadNext, 100);
                 };
-                document.head.appendChild(el);
+
+                // head보다는 body에 추가하는 것이 모바일 웹뷰 메모리 처리에 더 안정적입니다.
+                document.body.appendChild(el);
             }
+
             function updateProgress() {
                 var el = document.getElementById('title-loading');
                 if (el) el.innerText = '⏳ 데이터 로딩 중 (' + idx + '/' + scripts.length + ')... 잠시만 기다려주세요.';
             }
-            loadNext();
+
+            // 첫 스크립트 로드 시작 전에도 DOM이 안정화될 시간을 약간 줍니다.
+            setTimeout(loadNext, 50);
         })();
     </script>
     <script defer>
