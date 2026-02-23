@@ -4131,7 +4131,11 @@
 
                 // Update title to reflect current progress
                 const totalQ = session.expandedQuestions.length;
-                document.getElementById('toeic-title').innerText = `${session.set.title} (${session.qIndex + 1}/${totalQ})`;
+                let typeName = "문제";
+                if (session.set.type === 'part5') typeName = "파트5 문제";
+                else if (session.set.type === 'part6') typeName = "파트6 문제";
+                else if (session.set.type === 'part7') typeName = "파트7 문제";
+                document.getElementById('toeic-title').innerText = `${typeName} (${session.qIndex + 1}/${totalQ})`;
             },
 
             checkToeicAnswer(btn, selected, correct) {
@@ -4183,7 +4187,7 @@
                         // Part 5: go directly to next question
                         this._renderToeicQuestionContent();
                         document.getElementById('toeic-title').innerText =
-                            `${session.set.title} (${session.qIndex + 1}/${totalQ})`;
+                            `파트5 문제 (${session.qIndex + 1}/${totalQ})`;
                     } else {
                         // Part 6/7: go back to hub for next question
                         this.backToToeicHub();
