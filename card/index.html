@@ -3985,25 +3985,13 @@
                 let expandedQuestions = [];
                 let expandedShuffled = [];
 
-                if (set.type === 'part5') {
-                    // Part 5: repeat 3 times with reshuffled options
-                    for (let repeat = 0; repeat < 3; repeat++) {
-                        set.questions.forEach(q => {
-                            expandedQuestions.push(q);
-                            const opts = [...q.options];
-                            opts.sort(() => Math.random() - 0.5);
-                            expandedShuffled.push(opts);
-                        });
-                    }
-                } else {
-                    // Part 6/7: single pass
-                    set.questions.forEach(q => {
-                        expandedQuestions.push(q);
-                        const opts = [...q.options];
-                        opts.sort(() => Math.random() - 0.5);
-                        expandedShuffled.push(opts);
-                    });
-                }
+                // All Parts: single pass (Part 5 also 3 questions only)
+                set.questions.forEach(q => {
+                    expandedQuestions.push(q);
+                    const opts = [...q.options];
+                    opts.sort(() => Math.random() - 0.5);
+                    expandedShuffled.push(opts);
+                });
 
                 // Prepare session
                 this.state.currentToeicSession = {
