@@ -486,8 +486,7 @@
 
         @media (max-width: 768px) {
             #modal-chaos.artifact-mobile-compact {
-                justify-content: flex-start;
-                padding: 8px 0;
+                justify-content: center;
             }
 
             #modal-chaos.artifact-mobile-compact .modal-content {
@@ -875,7 +874,7 @@
             <button class="menu-btn" onclick="RPG.openMagicClass()">루미의 마법교실</button>
             <button class="menu-btn" onclick="RPG.openPrivateTutoring()">루미의 개인과외</button>
             <button class="menu-btn" onclick="RPG.openWordbook()">단어장</button>
-            <button class="menu-btn" onclick="RPG.openToeicMenu()" style="border-color: #00e676; color: #00e676;">실전
+            <button class="menu-btn" onclick="RPG.openToeicMenu()">실전
                 마법연습</button>
             <button onclick="document.getElementById('modal-library').classList.remove('active')"
                 style="margin-top:10px; width:100%; padding:10px;">닫기</button>
@@ -4031,7 +4030,12 @@
                 const modalEl = document.getElementById('modal-toeic-practice');
 
                 // Update title
-                document.getElementById('toeic-title').innerText = `${set.title} (${session.qIndex + 1}/${totalQ})`;
+                let typeName = "문제";
+                if (set.type === 'part5') typeName = "파트5 문제";
+                else if (set.type === 'part6') typeName = "파트6 문제";
+                else if (set.type === 'part7') typeName = "파트7 문제";
+
+                document.getElementById('toeic-title').innerText = `${typeName} (${session.qIndex + 1}/${totalQ})`;
 
                 // Hide all views first
                 document.getElementById('toeic-hub').style.display = 'none';
