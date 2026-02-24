@@ -1261,6 +1261,47 @@
          */
         const QuizEngine = {
             /**
+             * Weighted selection for quiz generation.
+             * Favors items in RPG.state.tutoredItems with 10x weight.
+             */
+            pickWeighted(data, getItemId) {
+                const tutored = (RPG.state && RPG.state.tutoredItems) ? RPG.state.tutoredItems : [];
+
+                // If no data or no tutored items relevant to this dataset, pick random
+                if (!data || data.length === 0) return null;
+
+                // Optimization: if no tutored items at all, skip logic
+                if (tutored.length === 0) return data[Math.floor(Math.random() * data.length)];
+
+                // Check if any tutored item exists in this data
+                const candidates = data.filter(d => tutored.includes(getItemId(d)));
+                if (candidates.length === 0) return data[Math.floor(Math.random() * data.length)];
+
+                // Calculate weights
+                // Candidates: 10, Others: 1
+                const weightC = candidates.length * 10;
+                const weightN = (data.length - candidates.length) * 1;
+                const totalWeight = weightC + weightN;
+
+                let r = Math.random() * totalWeight;
+
+                if (r < weightC) {
+                    // Pick from candidates
+                    return candidates[Math.floor(Math.random() * candidates.length)];
+                } else {
+                    // Pick from others (Rejection sampling for efficiency)
+                    // Since candidates are very few (max 3), rejection probability is very low.
+                    let pick;
+                    let safety = 0;
+                    do {
+                        pick = data[Math.floor(Math.random() * data.length)];
+                        safety++;
+                    } while (tutored.includes(getItemId(pick)) && safety < 50);
+                    return pick;
+                }
+            },
+
+            /**
              * Show a quiz modal with the given configuration.
              * @param {Object} config
              * @param {string}   config.question      - The question text
@@ -1348,7 +1389,7 @@
             buildVocabQuiz(callback) {
                 if (!VOCAB_DATA || VOCAB_DATA.length === 0) return null;
 
-                const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                const q = this.pickWeighted(VOCAB_DATA, v => v.word);
 
                 let options = [{ text: q.meaning, correct: true }];
                 options.push({ text: q.trap_meaning, correct: false });
@@ -1388,7 +1429,7 @@
             buildChaosQuiz(callback) {
                 if (!VOCAB_DATA || VOCAB_DATA.length === 0) return null;
 
-                const q = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                const q = this.pickWeighted(VOCAB_DATA, v => v.word);
 
                 let options = [{ text: q.word, correct: true }];
                 let safety = 0;
@@ -1428,7 +1469,7 @@
                 });
                 if (allQuizzes.length === 0) return null;
 
-                const q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+                const q = this.pickWeighted(allQuizzes, item => item.parentId);
 
                 return {
                     question: q.question,
@@ -1717,6 +1758,7 @@
                         if (!this.state.chaosBuffs) this.state.chaosBuffs = [];
                         if (!this.state.activeChaosBlessing) this.state.activeChaosBlessing = [];
                         if (!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
+                        if (!this.state.tutoredItems) this.state.tutoredItems = [];
                         if (!this.state.mode) this.state.mode = 'origin';
                         if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
                         if (!this.state.artifacts) this.state.artifacts = [];
@@ -1852,6 +1894,7 @@
                     chaosBuffs: [],
                     activeChaosBlessing: [],
                     activeSageBlessing: [],
+                    tutoredItems: [],
                     wrongWords: [],
                     quiz_stats: { correct: 0, total: 0 },
                     chaosPool: [],
@@ -3859,6 +3902,14 @@
                 const data = item.data;
 
                 const onCorrect = () => {
+                    // Add to tutored items list (Max 3, FIFO)
+                    if (!this.state.tutoredItems) this.state.tutoredItems = [];
+                    const itemId = item.type === 'collocation' ? data.id : data.word;
+                    this.state.tutoredItems.push(itemId);
+                    if (this.state.tutoredItems.length > 3) {
+                        this.state.tutoredItems.shift();
+                    }
+
                     if (item.type === 'collocation') {
                         this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
                         Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
