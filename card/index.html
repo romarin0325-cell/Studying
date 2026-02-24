@@ -1010,6 +1010,7 @@
     <div id="modal-menu" class="modal">
         <div class="modal-content" style="height:auto;">
             <h3>메뉴</h3>
+            <button id="btn-toggle-tutoring" class="menu-btn" onclick="RPG.toggleTutoringEvent()">개인과외 이벤트: ON</button>
             <button class="menu-btn" onclick="RPG.openApiSettings()">API 설정</button>
             <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
             <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
@@ -1169,7 +1170,8 @@
         const GameAPI = {
             async getTutoringContent(apiKey, targetData, type) {
                 // 1. 30% 확률 (The 'Accidental' Event)
-                const isMisunderstandingMode = Math.random() < 0.3;
+                const enableEvent = RPG.global.tutoringEventEnabled !== false;
+                const isMisunderstandingMode = enableEvent && Math.random() < 0.3;
 
                 let targetInfo = "";
                 if (type === 'collocation') {
@@ -1185,6 +1187,9 @@
                 let secretInstruction = "";
 
                 if (isMisunderstandingMode) {
+                    const KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '사고'];
+                    const keyword = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
+
                     secretInstruction = `
 ## [Special Direction: Unintentional Innuendo]
 (중요)루미는 지금 형아에게 **'단어의 의미'를 몸소 체험**시켜주고 싶어 합니다.
@@ -1196,6 +1201,9 @@
 1. **소재 선택:** 단어를 설명할 때 하필이면 **'신체 접촉', '땀/체액', '거친 숨소리', '침대/이불 속', '무언가 꽉 끼거나 젖은 상황'**을 예시로 들어서 묘하게 야한 뉘앙스가 풍시도록 문장을 작성하십시오.
 2. **순수한 강조:** 루미는 그저 단어를 확실히 가르치고 싶을 뿐입니다. 단어의 뜻을 강조하기 위해 "더 깊게!", "더 세게!", "안에서!" 같은 표현을 쓰지만, 루미 본인은 그것이 학습 용어라고 굳게 믿고 있습니다. 직접적인 묘사는 절대 사용하지 마십시오.
 3. **반응:** 만약 대사가 묘해지더라도, 루미는 **절대 부끄러워하거나 얼굴을 붉히지 않습니다(/// 금지).** 오히려 "형아, 내 말이 맞지? 직접 해볼래?"라며 해맑게 확인 사살을 하십시오.
+
+[상황 키워드]: ${keyword}
+설명이나 예문 작성 시, 위 키워드와 관련된 상황을 자연스럽게 연출에 포함시키십시오.
 `;
                 }
 
@@ -2010,7 +2018,25 @@
             showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
 
             openSystemMenu() {
+                this.updateSystemMenuUI();
                 document.getElementById('modal-menu').classList.add('active');
+            },
+
+            toggleTutoringEvent() {
+                if (this.global.tutoringEventEnabled === undefined) this.global.tutoringEventEnabled = true;
+                this.global.tutoringEventEnabled = !this.global.tutoringEventEnabled;
+                this.saveGlobalData();
+                this.updateSystemMenuUI();
+            },
+
+            updateSystemMenuUI() {
+                const btn = document.getElementById('btn-toggle-tutoring');
+                if (btn) {
+                    const isOn = this.global.tutoringEventEnabled !== false;
+                    btn.innerText = `개인과외 이벤트: ${isOn ? 'ON' : 'OFF'}`;
+                    btn.style.borderColor = isOn ? '#4caf50' : '#555';
+                    btn.style.color = isOn ? '#fff' : '#aaa';
+                }
             },
 
             // --- Chaos Roulette ---
