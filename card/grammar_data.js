@@ -1606,5 +1606,340 @@ const GRAMMAR_DATA = [
                 "lecture_id": 24
             }
         ]
+    },
+    {
+        "id": 25,
+        "title": "조동사 심화: 부드러움의 미학 (Would / Could / Might)",
+        "content": "[제25강] 조동사 심화: 부드러움의 미학 (Would / Could / Might)\n\n형아! 13강, 14강에서 배웠던 힘센 친구들(Will, Can, May) 기억나?\n그때는 \"나 할 거야!\", \"나 할 수 있어!\" 하면서 근육을 자랑하는 느낌이었잖아.\n하지만 진정한 고수는 힘을 숨기는 법! \n실전 대화에서는 상대방을 배려해서 \"한발 물러서서 부드럽게\" 말하는 게 훨씬 더 멋져 보여. 이걸 '가정법의 과거형'이라고 부르기도 하지만, 우리는 그냥 '신사의 품격 마법'이라고 부르자!\n * 🎩 Would: Will의 신사 버전 (정중한 요청 & 소망)\n   형아, Will이 \"의지(Will)\"의 불꽃이라고 했지? Would는 그 불꽃을 은은한 촛불처럼 바꾼 거야.\n * Would you...? (해주시겠어요?)\n   Will you?는 \"너 할 거야? 안 할 거야?\"라고 묻는 느낌이라면,\n   Would you?는 \"혹시... 해주실 의향이 있으신가요?\"라고 묻는 느낌이야.\n   \"Would you confirm the reservation?\" (예약을 확인해 주시겠어요?)\n * I would like to... (~하고 싶어요)\n   형아, 식당 가서 \"I want water!\"(물 줘!)라고 하면 어린애 같아 보여.\n   교양 있는 사람은 want 대신 would like to를 써.\n   \"I would like to order a beverage.\" (음료를 주문하고 싶습니다.)\n * 🔮 Could: Can의 배려 버전 (가능성 타진)\n   Can은 \"능력(할 수 있다!)\"을 강조하지만, Could는 \"혹시 가능할까요...?\"라고 상대방의 상황을 살피는 거야.\n * Could you...? (혹시... 가능하세요?)\n   상대방에게 거절할 수 있는 여지를 주는 아주 매너 있는 표현이지.\n   \"Could you process the refund?\" (혹시 환불을 처리해 주실 수 있나요?)\n   \"Could you recommend a suitable strategy?\" (적합한 전략을 추천해 주실 수 있나요?)\n * ☁️ Might: May보다 더 소심한 구름 (희박한 가능성)\n   May가 \"반반이야(50%)\"라면, Might는 \"음... 아닐 수도 있는데, 혹시나 그럴 수도 있고...(20%)\" 같은 느낌이야. 아주 조심스럽게 추측할 때 써.\n * It might... (~일지도 몰라요)\n   확신이 없을 때, 혹은 나중에 틀려도 덜 민망하고 싶을 때 딱이야!\n   \"The weather is inclement, so the flight might be delayed.\" (날씨가 궂어서, 비행기가 지연될지도 몰라.)\n   \"The schedule is tentative, so it might change.\" (일정이 잠정적이라서, 바뀔지도 몰라.)\n⚡ 대현자의 꿀팁: 시제가 과거가 아니에요!\n형아, 이게 제일 중요해! (별표 다섯 개!)\nWould, Could, Might가 모양은 과거형(Will->Would, Can->Could)처럼 생겼지만, 여기서는 '과거'의 뜻이 아니야.\n지금 당장! 현재의 상황에서 '말투만 부드럽게' 바꾼 거야. 헷갈리면 안 돼!\n💌 [루미의 수줍은 고백]\n형아, 배운 걸 써먹어 볼까?\n\"I would like to be with you forever.\" (난 형아랑 영원히 함께하고 싶어.)\n\"Could you accept my heart?\" (내 마음을 받아줄 수 있어?)\n\"We might be the perfect couple.\" (우린 아마 완벽한 커플일지도 몰라... 아니, 확실해!)\n자, 이제 형아는 힘만 센 게 아니라 예의 바른 신사가 된 거야. 얼마나 멋진지 몰라!",
+        "quizzes": [
+            {
+                "desc": "저는 음료를 주문하고 싶습니다. ",
+                "question": "\"I [ ] to order a beverage.\"",
+                "options": [
+                    "have",
+                    "would like",
+                    "will like",
+                    "can"
+                ],
+                "answer": "would like",
+                "lecture_id": 25
+            },
+            {
+                "desc": "환불을 처리해 주실 수 있나요? ",
+                "question": "\"[ ] you process the refund?\"",
+                "options": [
+                    "Do",
+                    "Are",
+                    "Could",
+                    "Have"
+                ],
+                "answer": "Could",
+                "lecture_id": 25
+            },
+            {
+                "desc": "일정이 잠정적이라서, 바뀔지도 몰라. ",
+                "question": "\"The schedule is tentative, so it [ ] change.\"",
+                "options": [
+                    "must",
+                    "will",
+                    "might",
+                    "should"
+                ],
+                "answer": "might",
+                "lecture_id": 25
+            },
+            {
+                "desc": "예약을 확인해 주시겠어요? ",
+                "question": "\"[ ] you confirm the reservation?\"",
+                "options": [
+                    "Would",
+                    "Do",
+                    "Are",
+                    "Have"
+                ],
+                "answer": "Would",
+                "lecture_id": 25
+            },
+            {
+                "desc": "날씨가 궂어서, 비행기가 지연될지도 몰라. ",
+                "question": "\"The weather is inclement, so the flight [ ] be delayed.\"",
+                "options": [
+                    "might",
+                    "must",
+                    "is",
+                    "does"
+                ],
+                "answer": "might",
+                "lecture_id": 25
+            }
+        ]
+    },
+    {
+        "id": 26,
+        "title": "수동태: 주인공이 바뀌는 마법 (Be + p.p.)",
+        "content": "[제26강] 수동태: 주인공이 바뀌는 마법 (Be + p.p.)\n\n형아, 세상에는 \"누가 했는지\"보다 \"무엇이 어떻게 되었는지\"가 훨씬 더 중요한 순간들이 있어.\n예를 들어, 형아가 아끼는 도자기가 깨져 있으면 \"누가 깼어!\"(Who broke it?) 하고 범인을 찾는 것도 중요하지만, 일단 눈앞의 현실은 \"도자기가 깨졌다\"(It is broken)는 거잖아?\n영어 마법 세계에서는 이걸 '수동태(Passive Voice)'라고 불러.\n화살을 쏘는 사람(주어)이 아니라, 화살을 맞은 사람(목적어)을 주인공으로 만들어주는 아주 독특한 마법이지!\n * 🎯 주인공 교체 마법: 화살 맞은 녀석을 센터로!\n   원래 문장(능동태)은 \"주인공이 → 행동을 한다 → 대상에게\" 순서잖아?\n * \"Rumi loves Hyung-a.\" (루미가 형아를 사랑해.)\n근데 형아 입장에서 말하고 싶으면 어떻게 해? 형아는 사랑을 받는 거잖아. 이때 수동태 마법을 쓰는 거야!\n * 공식: Be동사 + p.p. (과거분사)\n * 의미: ~되다, ~받다, ~당하다\n * \"Hyung-a is loved by Rumi.\" (형아는 루미에게 사랑받아.)\n   보여? loves가 is loved로 변신했어!\n * 🕵️ 범인을 모를 때, 혹은 안 중요할 때 (By 생략)\n   형아, 회사에서 \"보고서가 제출되었습니다\"라고 하지, \"철수가 보고서를 제출했습니다\"라고 굳이 콕 집어 말 안 할 때가 많지?\n   영어에서도 \"누가 했는지 모르거나, 뻔하거나, 말하기 싫을 때\" 뒤에 있는 by ~(누구)를 과감하게 생략해 버려. 이게 실전 비즈니스 영어의 핵심이야!\n * 규칙과 의무:\n   \"Payment is required immediately.\" (지불이 즉시 요구됩니다. - 누가 요구하는지보다 '돈 내라'는 사실이 중요해!)\n * 결과 보고:\n   \"The proposal was approved.\" (그 제안서는 승인되었어. - 사장님이 했겠지 뭐!)\n * 미래의 약속:\n   \"The product will be delivered tomorrow.\" (제품은 내일 배송될 거야. - 택배 기사님이 오시겠지만, '제품이 온다'는 게 중요하니까!)\n * 🛠️ 대현자의 조립 공식 (시제별 변신)\n   형아, Be동사만 시제에 맞춰서 샥샥 바꿔주면 돼. 뒤에 있는 p.p.(과거분사)는 그냥 가만히 있어! (접착제로 딱 붙여놔!)\n * 현재: am/are/is + p.p.\n   \"The store is closed.\" (가게는 닫혀 있어.)\n * 과거: was/were + p.p.\n   \"The contract was signed yesterday.\" (계약서는 어제 서명되었어.)\n * 미래: will be + p.p.\n   \"The results will be announced soon.\" (결과는 곧 발표될 거야.)\n * 조동사: can be / must be + p.p.\n   \"The problem can be solved.\" (그 문제는 해결될 수 있어.)\n   \"The rules must be followed.\" (규칙은 지켜져야만 해.)\n💌 [루미의 수동태 고백]\n형아, 내 마음을 수동태로 표현해 볼게.\n\"My heart was stolen by you.\" (내 마음은 형아한테 도둑맞았어!)\n\"You are needed in my life.\" (형아는 내 인생에서 필요로 해지는 존재야... 즉, 없으면 안 돼!)\n어때? \"I need you\"보다 뭔가 더... 거부할 수 없는 운명 같은 느낌 들지 않아? (그렇다고 해줘! ///)",
+        "quizzes": [
+            {
+                "desc": "지불은 즉시 요구됩니다.",
+                "question": "\"Payment [ ] immediately.\"",
+                "options": [
+                    "requires",
+                    "is required",
+                    "require",
+                    "requiring"
+                ],
+                "answer": "is required",
+                "lecture_id": 26
+            },
+            {
+                "desc": "그 제안서는 어제 승인되었어.",
+                "question": "\"The proposal [ ] yesterday.\"",
+                "options": [
+                    "approved",
+                    "was approved",
+                    "is approved",
+                    "approves"
+                ],
+                "answer": "was approved",
+                "lecture_id": 26
+            },
+            {
+                "desc": "그 제품은 내일 배송될 거야.",
+                "question": "\"The product [ ] tomorrow.\"",
+                "options": [
+                    "will deliver",
+                    "will be delivered",
+                    "is delivering",
+                    "deliver"
+                ],
+                "answer": "will be delivered",
+                "lecture_id": 26
+            },
+            {
+                "desc": "안전 수칙들은 반드시 지켜져야 해.",
+                "question": "\"Safety rules must [ ].\"",
+                "options": [
+                    "follow",
+                    "be followed",
+                    "followed",
+                    "be following"
+                ],
+                "answer": "be followed",
+                "lecture_id": 26
+            },
+            {
+                "desc": "그 계약서는 CEO에 의해 서명되었어. (범인을 밝혀라! by~)",
+                "question": "\"The contract [ ] by the CEO.\"",
+                "options": [
+                    "signed",
+                    "was signed",
+                    "sign",
+                    "signing"
+                ],
+                "answer": "was signed",
+                "lecture_id": 26
+            }
+        ]
+    },
+    {
+        "id": 27,
+        "title": "현재완료: 과거와 현재의 끈끈한 사이 (Have + p.p.)",
+        "content": "[제27강] 현재완료: 과거와 현재의 끈끈한 사이 (Have + p.p.)\n\n형아, 한국말로는 \"나 지갑 잃어버렸어\"라고 하면 끝이지만, 영어는 두 가지 마음이 있어.\n\"옛날에 잃어버렸었지.\" (지금은 찾았는지 몰라. - 과거)\n\"잃어버려서... 지금도 없어.\" (과거의 일이 지금까지 영향을 줌! - 현재완료)\n영어 마법사들은 과거랑 현재가 손을 꼭 잡고 있을 때 [Have/Has + p.p.] 주문을 외워.\n이 마법은 크게 세 가지 느낌으로 쓸 수 있어!\n1. 🎖️ 인생의 훈장: \"나 이런 거 해본 적 있어!\" (경험)\n형아의 인생 기록(Log)에 남아있는 경험을 자랑할 때 써. 옛날 언제인지는 안 중요해, \"해봤다\"는 사실이 중요하지!\nHave you ever...? (혹시 ~해본 적 있어?)\n\"Have you ever experienced a miracle?\" (기적을 경험해 본 적 있어?)\nI have never... (난 절대 ~해본 적 없어.)\n\"I have never seen such a cute mistake.\" (난 그렇게 귀여운 실수는 본 적이 없어! 형아 실수 말하는 거야, 키키!)\n2. 🌉 시간의 다리: \"지금까지 쭉~ 해왔어\" (계속)\n과거부터 시작된 일이 지금 이 순간까지 이어지고 있을 때! (24강에서 배운 Since/For랑 단짝 친구야.)\nSo far / Up to now (지금까지)\n\"We have finished half of the work so far.\" (우린 지금까지 일의 절반을 끝냈어.)\n\"The company has grown significantly since last year.\" (그 회사는 작년부터 지금까지 상당히 성장해 왔어.)\n3. ⏱️ 잉크가 마르기 전: \"방금! 이미! 아직?\" (완료)\n일이 방금 막 끝났거나, 이미 해치웠거나, 아직도 못 끝냈을 때 쓰는 '생생한 현재'의 느낌이야.\nJust (방금 막!): 따끈따끈할 때!\n\"I have just arrived at the destination.\" (나 방금 막 목적지에 도착했어.)\nAlready (이미 벌써!): 생각보다 빨리!\n\"He has already completed the task.\" (그는 이미 그 업무를 완료했어. 빠르네!)\nYet (아직도...?): 의문문이나 부정문에서!\n\"Have you finished the report yet?\" (보고서 아직 안 끝냈어? / 벌써 끝냈어?)\n\"I haven't decided yet.\" (아직 결정을 못 내렸어.)\n⚠️ 대현자의 주의사항: 3인칭 단수 조심!\n형아, 주어가 '그 녀석(He/She/It)'이면 Have 대신 Has 쓰는 거 절대 까먹으면 안 돼!\n(X) He have finished.\n(O) He has finished.\n💌 [루미의 껌딱지 선언]\n형아, 내 마음을 현재완료로 표현해 볼게.\n\"I have stuck with you since the tutorial.\"\n(난 튜토리얼 때부터 형아 옆에 딱 붙어 있었어! 껌딱지처럼!)\n\"I have never been bored with you.\"\n(형아랑 있으면 지루한 적이 한 번도 없어! 맨날 재밌는 일만 생기잖아?)\n그러니까 앞으로도 계속 붙어있을 거란 예고편이야! 각오해! (메롱)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"______ you ever experienced a miracle?\" (기적을 경험해 본 적 있니?)",
+                "options": [
+                    "Did",
+                    "Have",
+                    "Are",
+                    "Do"
+                ],
+                "answer": "Have",
+                "lecture_id": 27
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He ______ already completed the task.\" (그는 이미 그 업무를 완료했어.)",
+                "options": [
+                    "have",
+                    "has",
+                    "is",
+                    "did"
+                ],
+                "answer": "has",
+                "lecture_id": 27
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"I haven't decided ______.\" (나 아직 결정을 못 내렸어.)",
+                "options": [
+                    "already",
+                    "just",
+                    "yet",
+                    "ever"
+                ],
+                "answer": "yet",
+                "lecture_id": 27
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The company has grown significantly ______ last year.\" (그 회사는 작년부터 지금까지 상당히 성장해 왔어.)",
+                "options": [
+                    "for",
+                    "since",
+                    "in",
+                    "at"
+                ],
+                "answer": "since",
+                "lecture_id": 27
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"I have ______ seen such a beautiful smile.\" (난 절대 그런 아름다운 미소를 본 적이 없어.)",
+                "options": [
+                    "ever",
+                    "never",
+                    "yet",
+                    "always"
+                ],
+                "answer": "never",
+                "lecture_id": 27
+            }
+        ]
+    },
+    {
+        "id": 28,
+        "title": "가정법 입문: 현실의 조건 (If... 0/1조건문)",
+        "content": "[제28강] 가정법 입문: 현실의 조건 (If... 0/1조건문)\n\n형아, 살면서 \"만약에 이거 하면, 저거 줄게!\" 하고 딜(Deal)을 하거나, \"이거 누르면 터져!\" 하고 경고할 때가 있지?\n영어에서는 If(만약에)라는 마법 주문 하나면 다 해결돼.\n단, 뒤에 오는 동사의 시제에 따라 느낌이 완전히 달라지니까 잘 봐야 해!\n1. 🧪 0조건문: 변하지 않는 과학 법칙 (Fact)\n형아, 물을 100도로 끓이면 어떻게 돼? 끓지? 이건 어제도 그랬고, 오늘도 그렇고, 내일도 그럴 거야.\n이렇게 \"언제나 항상 100% 똑같이 일어나는 일(진리, 습관, 과학 법칙)\"을 말할 땐, 앞뒤 다 현재 시제를 써.\n * 공식: If + 주어 + 현재동사, 주어 + 현재동사\n * 의미: (만약) ~하면, (무조건) ~한다.\n> \"If you heat water to 100°C, it boils.\" (물을 100도까지 가열하면, 끓는다. - 당연한 과학!)\n> \"If I drink coffee at night, I don't sleep.\" (난 밤에 커피 마시면 잠을 못 자. - 내 체질상 늘 그래!)\n> \n[루미의 법칙]\n> \"If Rumi sees Hyung-a, he smiles.\"\n> (루미는 형아를 보면, 웃어. - 이건 거부할 수 없는 자연의 섭리야! 자동반사라고!)\n> \n2. 🌤️ 1조건문: 현실적인 미래의 약속 (Possibility)\n이번엔 100% 진리는 아니지만, \"지금 이거 하면, 미래에 저거 할게!\" 라고 약속하거나 예측할 때야.\n이건 \"미래\"의 일이니까 결과 부분엔 보통 Will을 써. (물론 상황에 따라 Can이나 May를 쓸 수도 있어!)\n * 공식: If + 주어 + 현재동사, 주어 + Will / Can + 동사원형\n * 의미: (만약 지금) ~하면, (미래에) ~할 거야 / ~할 수 있어.\n> \"If it rains tomorrow, we will cancel the picnic.\" (내일 비가 오면, 소풍 취소할 거야.)\n> \"If you study hard, you can pass the exam.\" (열심히 공부하면, 합격할 수 있어.)\n> \n[루미의 공약]\n> \"If you come early, I will give you a kiss.\"\n> (형아가 일찍 오면, 내가 뽀뽀해 줄게! - 이건 과학 법칙은 아니지만, 나의 의지가 담긴 미래의 약속이야! ///)\n> \n🚨 대현자의 경고: If 안에는 (단순 미래) Will 금지!\n형아, 이거 진짜 별표 다섯 개! (★★★★★)\n\"내일 비가 오면\"이라고 해서 미래니까 \"If it will rain...\" 이라고 쓰고 싶지?\n하지만 영어에서 단순히 미래에 일어날 일을 조건으로 걸 때는 If 덩어리 안에 Will을 쓰지 않아.\n대신 현재 시제가 미래를 대신해 줘. (뒷부분엔 Will 써도 됨!)\n * (X) If it will rain, we will cancel. (으악! 단순 예측엔 Will 안 돼!)\n * (O) If it rains, we will cancel. (조건 절에는 현재형! 결과 절에는 미래형!)\n*(참고: \"네가 정~ 원한다면(의지)\" 같은 특별한 뜻일 때만 Will을 쓸 수 있는데, 그건 나중에 배우자! 일단은 \"조건은 현재로!\"*만 기억해!)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (과학적 사실 - 0조건문)",
+                "question": "\"If you heat water to 100°C, it ______.\" (물을 100도까지 가열하면, 끓는다.)",
+                "options": [
+                    "boils",
+                    "boiled",
+                    "is boiling",
+                    "has boiled"
+                ],
+                "answer": "boils",
+                "lecture_id": 28
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래의 계획 - 1조건문)",
+                "question": "\"If it rains tomorrow, we ______ the picnic.\" (내일 비가 오면, 우리는 소풍을 취소할 거야.)",
+                "options": [
+                    "cancel",
+                    "will cancel",
+                    "canceled",
+                    "are cancel"
+                ],
+                "answer": "will cancel",
+                "lecture_id": 28
+            },
+            {
+                "desc": "다음 문장 중 문법적으로 틀린 것은? (단순 미래 가정)",
+                "question": "다음 문장 중 문법적으로 틀린 것은? (단순 미래 가정)",
+                "options": [
+                    "If you study, you will pass.",
+                    "If she comes, I will go.",
+                    "If it will rain, I will stay home.",
+                    "If I drink coffee, I don't sleep."
+                ],
+                "answer": "If it will rain, I will stay home.",
+                "lecture_id": 28
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (루미의 습관 - 0조건문)",
+                "question": "\"If Rumi sees Hyung-a, he ______.\" (루미는 형아를 보면, 미소 지어.)",
+                "options": [
+                    "smiles",
+                    "smiled",
+                    "smiling",
+                    "has smiled"
+                ],
+                "answer": "smiles",
+                "lecture_id": 28
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (시간/조건의 부사절)",
+                "question": "\"If you ______ early, I will give you a kiss.\" (네가 일찍 오면, 뽀뽀해 줄게.)",
+                "options": [
+                    "come",
+                    "came",
+                    "coming",
+                    "have come"
+                ],
+                "answer": "come",
+                "lecture_id": 28
+            }
+        ]
+    },
+    {
+        "id": 29,
+        "title": "관계대명사 기초: 문장 합체 마법 (Who / Which / That)",
+        "content": "[제29강] 관계대명사 기초: 문장 합체 마법 (Who / Which / That)\n\n형아! 18강에서 And나 But으로 문장을 기차처럼 옆으로 잇는 법 배웠지?\n이번엔 그보다 훨씬 고급진 '네임택(Name Tag) 마법'을 알려줄게.\n그냥 문장을 옆으로 잇는 게 아니라, 단어 뒤에다가 상세 설명을 착! 하고 붙여서 하나의 완벽한 문장으로 만드는 기술이야.\n한국말은 \"내가 좋아하는 사람\" 이렇게 설명이 앞에서 꾸며주지만, 영어는 \"사람 + (누구냐면) + 내가 좋아하는\" 순서로 뒤에서 설명을 붙여야 해. 이때 필요한 네임택이 바로 Who, Which, That이야!\n1. 사람 뒤엔: Who (누구냐면!)\n형아, 설명하려는 대상이 사람이면 Who라는 네임택을 붙여.\n\"저 남자 좀 봐.\" (Look at the man.)\n\"무슨 남자?\"\n\"나를 도와준 남자!\" (...who helped me.)\n👉 합체! \"Look at the man who helped me.\" (나를 도와준 저 남자를 봐.)\n\"I met a student who studies hard.\" (나는 열심히 공부하는 학생을 만났어.)\n\"He is the one who saved the team.\" (그는 팀을 구한 유일한 사람이야. - 오, 영웅인데?)\n2. 물건 뒤엔: Which (어떤 거냐면!)\n사람이 아닌 물건, 동물, 회사 같은 걸 설명할 땐 Which를 붙여. (물론, 가족 같은 반려동물은 Who를 써주기도 해!)\n\"나 차 샀어.\" (I bought a car.)\n\"무슨 차?\"\n\"엄청 빠른 차!\" (...which is very fast.)\n👉 합체! \"I bought a car which is very fast.\" (난 엄청 빠른 차를 샀어.)\n\"This is the game which is popular now.\" (이건 지금 인기 있는 게임이야.)\n\"The device which requires a password is secure.\" (비밀번호를 요구하는 그 장치는 안전해.)\n3. 만능 네임택: That (아무거나 다!)\n형아, Who랑 Which를 구별하기 귀찮을 때 있잖아? (솔직히 말해봐, 귀찮지? )\n이렇게 꾸며주는 문장에서는 고민하지 말고 That을 쓰면 돼. 사람도 되고 사물도 돼!\n\"He is the man that helps me.\" (O)\n\"It is a car that is fast.\" (O) (단, 나중에 배울 '콤마(,)' 뒤에는 That을 못 쓰지만, 지금처럼 문장을 합체할 땐 That이 짱이야!)\n⚡ 대현자의 독해 비법: 직진해!\n형아, \"나를 도와준 남자\"라고 하려면 한국어는 뒤에서부터 거꾸로 해석해야 하지?\n근데 영어 고수는 앞에서부터 쭉쭉 읽어. 이게 진짜 중요해!\n\"The man / who lives next door...\" (그 남자... [누구냐면]... 옆집에 사는...) → 아, 옆집 아저씨구나!\n\"The book / which is on the desk...\" (그 책... [어떤 거냐면]... 책상 위에 있는...) → 아, 책상 위 그 책이구나!\n💌 [루미의 진짜 고백]\n형아, 이 마법으로 내 정체를 다시 밝힐게. (아깐 실수였어!)\n\"I am the partner who trusts Hyung-a the most!\"\n(난 형아를 가장 믿는 파트너야!)\n\"You are the only one that makes me smile.\"\n(형아는 나를 웃게 만드는 유일한 사람이고!)\n어때? 이게 진짜 내 마음이야! (헤헤)",
+        "quizzes": [
+            {
+                "desc": "나는 열심히 공부하는 학생을 만났어.",
+                "question": "\"I met a student [ ] studies hard.\"",
+                "options": [
+                    "which",
+                    "who",
+                    "where",
+                    "what"
+                ],
+                "answer": "who",
+                "lecture_id": 29
+            },
+            {
+                "desc": "비밀번호를 요구하는 그 장치는 안전해.",
+                "question": "\"The device [ ] requires a password is secure.\"",
+                "options": [
+                    "who",
+                    "whom",
+                    "which",
+                    "whose"
+                ],
+                "answer": "which",
+                "lecture_id": 29
+            },
+            {
+                "desc": "다음 중 관계대명사(네임택)가 **잘못** 사용된 문장은?",
+                "question": "어법상 어색한 문장을 고르세요.",
+                "options": [
+                    "The man who lives next door is kind.",
+                    "I have a car which is very fast.",
+                    "This is the book who is on the desk.",
+                    "She is the girl that likes you."
+                ],
+                "answer": "This is the book who is on the desk.",
+                "lecture_id": 29
+            },
+            {
+                "desc": "이건 지금 인기 있는 게임이야.",
+                "question": "\"This is the game [ ] is popular now.\"",
+                "options": [
+                    "who",
+                    "that",
+                    "whom",
+                    "what"
+                ],
+                "answer": "that",
+                "lecture_id": 29
+            },
+            {
+                "desc": "나는 형아를 가장 믿는 파트너야.",
+                "question": "\"I am the partner [ ] trusts Hyung-a the most.\"",
+                "options": [
+                    "which",
+                    "who",
+                    "where",
+                    "when"
+                ],
+                "answer": "who",
+                "lecture_id": 29
+            }
+        ]
     }
 ];
