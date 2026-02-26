@@ -1,0 +1,146 @@
+127.0.0.1 - - [26/Feb/2026 04:21:43] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:43] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:21:43] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:21:43] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:21:43] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:21:44] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:32] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:32] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:22:32] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:22:33] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:27] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:28] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:28] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:23:28] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:24] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:25] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:25] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:28] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:24:28] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:24:56] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:56] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:24:56] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:24:58] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:58] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:58] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:58] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:58] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:59] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:24:59] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:25:02] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:25:02] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:26:01] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:01] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:26:01] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:26:01] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:26:01] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:02] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:26:05] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:26:05] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:27:02] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:02] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:27:02] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:03] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:07] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:27:07] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:46] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:47] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:47] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:47] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:27:50] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:27:50] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:28:35] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:35] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:28:35] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:28:35] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:36] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:28:39] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:28:39] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:34] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:35] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:29:38] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:29:38] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:26] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:30:30] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:30:30] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/index.html HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/%EB%A3%A8%EB%AF%B8.png HTTP/1.1" 404 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/vocab_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/collocation_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/grammar_data.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:37] "GET /card/toeic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:38] "GET /card/toeic_explanations.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:38] "GET /card/logic.js HTTP/1.1" 200 -
+127.0.0.1 - - [26/Feb/2026 04:31:41] code 404, message File not found
+127.0.0.1 - - [26/Feb/2026 04:31:41] "GET /card/%EC%9D%B8%EC%A1%B0%20%EB%A7%88%EC%8B%A0.png HTTP/1.1" 404 -
