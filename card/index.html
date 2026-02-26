@@ -551,8 +551,11 @@
 
         /* Part 5: hide hub and passage */
         #modal-toeic-practice.is-part5 #toeic-hub,
-        #modal-toeic-practice.is-part5 #toeic-passage-view,
-        #modal-toeic-practice.is-part5 #toeic-q-back-btn {
+        #modal-toeic-practice.is-part5 #toeic-passage-view {
+            display: none !important;
+        }
+
+        #modal-toeic-practice.is-part5:not(.is-review) #toeic-q-back-btn {
             display: none !important;
         }
 
@@ -4137,6 +4140,7 @@
 
                 document.getElementById('modal-toeic-menu').classList.remove('active');
                 document.getElementById('modal-toeic-practice').classList.add('active');
+                document.getElementById('modal-toeic-practice').classList.remove('is-review');
 
                 this.renderToeicQuestion();
             },
@@ -4379,6 +4383,7 @@
                 session.viewState = 'review_hub'; // New state
 
                 document.getElementById('modal-toeic-practice').classList.add('active');
+                document.getElementById('modal-toeic-practice').classList.add('is-review');
                 this.renderToeicReviewHub();
             },
 
