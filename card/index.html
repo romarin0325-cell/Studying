@@ -542,6 +542,13 @@
             max-height: 85vh !important;
         }
 
+        /* Explanation View: fixed height */
+        #modal-toeic-practice.is-explanation .modal-content {
+            height: 85vh !important;
+            max-height: 85vh !important;
+            overflow-y: hidden !important;
+        }
+
         /* Part 5: hide hub and passage */
         #modal-toeic-practice.is-part5 #toeic-hub,
         #modal-toeic-practice.is-part5 #toeic-passage-view,
@@ -562,7 +569,7 @@
         .toeic-hub-btn {
             width: 80%;
             max-width: 320px;
-            padding: 20px;
+            padding: 12px;
             font-size: 1.1rem;
             font-weight: bold;
             background: #222;
@@ -1073,8 +1080,10 @@
 
             <!-- Explanation View -->
             <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
-                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
-                <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
+                <div style="display:flex; justify-content:flex-end; padding:0 0 10px 0;">
+                    <button class="menu-btn" onclick="RPG.backToToeicHub()" style="padding:8px 15px; font-size:0.9rem; width:auto; margin:0; border-color:#aaa;">↩ 돌아가기</button>
+                </div>
+                <div id="toeic-explanation-scroll" class="toeic-passage-scroll" style="border:1px solid #333; padding:10px;"></div>
             </div>
 
             <!-- Question View: question + options + feedback + back button -->
@@ -4242,6 +4251,8 @@
                 const session = this.state.currentToeicSession;
                 if (!session) return;
 
+                document.getElementById('modal-toeic-practice').classList.remove('is-explanation');
+
                 // Handle Review Mode Back
                 if (['review_hub', 'review_q', 'review_passage', 'review_explanation'].includes(session.viewState)) {
                     session.viewState = 'review_hub';
@@ -4375,6 +4386,8 @@
                 const session = this.state.currentToeicSession;
                 const set = session.set;
 
+                document.getElementById('modal-toeic-practice').classList.remove('is-explanation');
+
                 // Hide other views
                 document.getElementById('toeic-hub').style.display = 'none';
                 document.getElementById('toeic-passage-view').style.display = 'none';
@@ -4503,6 +4516,7 @@
                  const session = this.state.currentToeicSession;
                  session.viewState = 'review_explanation';
 
+                 document.getElementById('modal-toeic-practice').classList.add('is-explanation');
                  document.getElementById('toeic-review-hub').style.display = 'none';
 
                  const set = session.set;
