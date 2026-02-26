@@ -1062,9 +1062,18 @@
                     style="border-color:#ffd700; color:#ffd700;">📝 문제보기</button>
             </div>
 
+            <!-- Review Hub -->
+            <div id="toeic-review-hub" class="toeic-hub" style="display:none; gap:10px;"></div>
+
             <!-- Passage View: scrollable passage + back button -->
             <div id="toeic-passage-view" class="toeic-passage-view">
                 <div id="toeic-passage-scroll" class="toeic-passage-scroll"></div>
+                <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
+            </div>
+
+            <!-- Explanation View -->
+            <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
+                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
                 <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
             </div>
 
@@ -1082,6 +1091,17 @@
         </div>
     </div>
 
+    <div id="modal-toeic-result" class="modal">
+        <div class="modal-content" style="height:auto;">
+            <h3 id="toeic-result-title">학습 종료</h3>
+            <div id="toeic-result-content" class="modal-scroll" style="text-align:left; font-size:0.9rem; line-height:1.5;"></div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                 <button class="menu-btn" onclick="RPG.openToeicReview()" style="flex:1; margin-bottom:0; border-color:#ffd700; color:#ffd700;">해설 / 리뷰</button>
+                 <button class="menu-btn" onclick="document.getElementById('modal-toeic-result').classList.remove('active'); RPG.toMenu();" style="flex:1; margin-bottom:0;">닫기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window._scriptLoadErrors = [];
         // Sequential script loader — loads one file at a time for mobile file:// reliability
@@ -1092,6 +1112,7 @@
                 { src: 'collocation_data.js', label: '연어 데이터' },
                 { src: 'grammar_data.js', label: '문법 데이터' },
                 { src: 'toeic.js', label: '토익 데이터' },
+                { src: 'toeic_explanations.js', label: '토익 해설' },
                 { src: 'logic.js', label: '게임 로직' }
             ];
             var idx = 0;
@@ -4182,9 +4203,15 @@
                 const session = this.state.currentToeicSession;
                 if (!session) return;
 
-                session.viewState = 'passage';
+                // Check if we are in review mode
+                if (['review_hub', 'review_q', 'review_passage', 'review_explanation'].includes(session.viewState)) {
+                     session.viewState = 'review_passage';
+                } else {
+                     session.viewState = 'passage';
+                }
 
                 document.getElementById('toeic-hub').style.display = 'none';
+                document.getElementById('toeic-review-hub').style.display = 'none'; // Ensure review hub is hidden
                 document.getElementById('toeic-question-view').style.display = 'none';
                 document.getElementById('toeic-passage-view').style.display = 'flex';
 
@@ -4213,10 +4240,19 @@
                 const session = this.state.currentToeicSession;
                 if (!session) return;
 
+                // Handle Review Mode Back
+                if (['review_hub', 'review_q', 'review_passage', 'review_explanation'].includes(session.viewState)) {
+                    session.viewState = 'review_hub';
+                    this.renderToeicReviewHub();
+                    return;
+                }
+
+                // Normal Practice Mode Back
                 session.viewState = 'hub';
 
                 document.getElementById('toeic-passage-view').style.display = 'none';
                 document.getElementById('toeic-question-view').style.display = 'none';
+                document.getElementById('toeic-explanation-view').style.display = 'none';
                 document.getElementById('toeic-hub').style.display = 'flex';
 
                 // Update title to reflect current progress
@@ -4319,8 +4355,162 @@
 
                 msg += `<b style="color:#00e676">대현자의 축복 횟수가 3회로 리셋되었습니다!</b>`;
 
-                this.openInfoModal("학습 종료", msg);
-            }
+                // Open Result Modal instead of Info Modal
+                document.getElementById('toeic-result-content').innerHTML = msg;
+                document.getElementById('modal-toeic-result').classList.add('active');
+            },
+
+            openToeicReview() {
+                document.getElementById('modal-toeic-result').classList.remove('active');
+                const session = this.state.currentToeicSession;
+                session.viewState = 'review_hub'; // New state
+
+                document.getElementById('modal-toeic-practice').classList.add('active');
+                this.renderToeicReviewHub();
+            },
+
+            renderToeicReviewHub() {
+                const session = this.state.currentToeicSession;
+                const set = session.set;
+
+                // Hide other views
+                document.getElementById('toeic-hub').style.display = 'none';
+                document.getElementById('toeic-passage-view').style.display = 'none';
+                document.getElementById('toeic-question-view').style.display = 'none';
+                document.getElementById('toeic-explanation-view').style.display = 'none';
+
+                // Show Review Hub
+                const hub = document.getElementById('toeic-review-hub');
+                hub.innerHTML = '';
+                hub.style.display = 'flex';
+                hub.style.flexDirection = 'column'; // Vertical list as per request (Part 5 is 5 buttons)
+
+                // Update Title
+                let typeName = "문제";
+                if (set.type === 'part5') typeName = "파트5 문제";
+                else if (set.type === 'part6') typeName = "파트6 문제";
+                else if (set.type === 'part7') typeName = "파트7 문제";
+                // Force simplified title for review, especially Part 5 as requested
+                document.getElementById('toeic-title').innerText = `${typeName} (리뷰)`;
+
+                // 1. Passage Button (Part 6/7 only)
+                if (set.type !== 'part5' && set.passage) {
+                    const btn = document.createElement('button');
+                    btn.className = 'toeic-hub-btn';
+                    btn.innerText = '지문 보기';
+                    btn.onclick = () => this.showToeicPassage(); // Reuses existing logic, viewState handles back button
+                    hub.appendChild(btn);
+                }
+
+                // 2. Question Buttons
+                session.expandedQuestions.forEach((q, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'toeic-hub-btn';
+                    btn.innerText = `문제 ${idx + 1}`;
+
+                    // Mark if wrong
+                    const res = session.results.find(r => r.id === q.id);
+                    if (res && !res.isCorrect) {
+                        btn.style.borderColor = '#ef5350';
+                        btn.style.color = '#ef5350';
+                        btn.innerText += ' (오답)';
+                    }
+
+                    btn.onclick = () => this.showToeicReviewQuestion(idx);
+                    hub.appendChild(btn);
+                });
+
+                // 3. Explanation Button
+                const expBtn = document.createElement('button');
+                expBtn.className = 'toeic-hub-btn';
+                expBtn.style.borderColor = '#ffd700';
+                expBtn.style.color = '#ffd700';
+                expBtn.innerText = '해설';
+                expBtn.onclick = () => this.showToeicExplanation();
+                hub.appendChild(expBtn);
+
+                // 4. Close Button
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'toeic-hub-btn';
+                closeBtn.style.background = '#444';
+                closeBtn.style.borderColor = '#666';
+                closeBtn.style.color = '#fff';
+                closeBtn.innerText = '닫기';
+                closeBtn.onclick = () => {
+                    document.getElementById('modal-toeic-practice').classList.remove('active');
+                    this.toMenu();
+                };
+                hub.appendChild(closeBtn);
+            },
+
+            showToeicReviewQuestion(idx) {
+                const session = this.state.currentToeicSession;
+                session.viewState = 'review_q';
+
+                document.getElementById('toeic-review-hub').style.display = 'none';
+
+                const q = session.expandedQuestions[idx];
+                const res = session.results.find(r => r.id === q.id);
+
+                // Render Question (Read Only)
+                document.getElementById('toeic-q-text').innerHTML = q.question.replace(/\n/g, '<br>');
+                const feedback = document.getElementById('toeic-feedback');
+
+                if (res && res.isCorrect) {
+                     feedback.innerHTML = "<span style='color:#4caf50'>정답!</span>";
+                } else {
+                     feedback.innerHTML = `<span style='color:#ef5350'>오답... (선택: ${res ? res.userAnswer : '없음'})</span>`;
+                }
+
+                const optContainer = document.getElementById('toeic-options');
+                optContainer.innerHTML = "";
+
+                // In review, we might want to show options in original order or stored shuffled order?
+                // Stored shuffled order is better to match user experience.
+                const opts = session.shuffledOptions[idx];
+
+                opts.forEach(optText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'menu-btn';
+                    btn.style.textAlign = 'left';
+                    btn.style.fontSize = '0.95rem';
+                    btn.style.marginBottom = '0';
+                    btn.style.padding = '14px';
+                    btn.style.width = '100%';
+                    btn.innerText = optText;
+                    btn.disabled = true; // Read only
+
+                    if (optText === q.answer) {
+                        btn.classList.add('correct');
+                    } else if (res && res.userAnswer === optText && !res.isCorrect) {
+                        btn.classList.add('wrong');
+                    }
+
+                    optContainer.appendChild(btn);
+                });
+
+                // Show Back Button
+                const backBtn = document.getElementById('toeic-q-back-btn');
+                backBtn.style.display = 'block';
+                backBtn.style.pointerEvents = 'auto';
+
+                document.getElementById('toeic-question-view').style.display = 'flex';
+            },
+
+            showToeicExplanation() {
+                 const session = this.state.currentToeicSession;
+                 session.viewState = 'review_explanation';
+
+                 document.getElementById('toeic-review-hub').style.display = 'none';
+
+                 const set = session.set;
+                 const expText = (typeof TOEIC_EXPLANATIONS !== 'undefined' && TOEIC_EXPLANATIONS[set.id])
+                                 ? TOEIC_EXPLANATIONS[set.id]
+                                 : "해설 데이터가 없습니다.";
+
+                 document.getElementById('toeic-explanation-scroll').innerHTML = expText.replace(/\n/g, '<br>');
+                 document.getElementById('toeic-explanation-view').style.display = 'flex';
+            },
         };
 
         // Use DOMContentLoaded instead of 'load' to avoid being blocked by
