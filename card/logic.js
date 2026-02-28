@@ -206,7 +206,7 @@ const GameUtils = {
      * @returns {Array} Array of card objects
      */
     buildCardPool(globalData, options = {}) {
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
 
         // Add unlocked bonus cards
         if (globalData.unlocked_bonus_cards && globalData.unlocked_bonus_cards.length > 0) {

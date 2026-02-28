@@ -2273,7 +2273,7 @@
                 const grade = GameUtils.resolveGachaGrade(mode, isChallenge);
 
                 // Build Pool
-                let pool = CARDS.filter(c => c.grade === grade);
+                let pool = CARDS.filter(c => c.grade === grade && !c.hide_from_gacha);
 
                 // Add Bonus Cards
                 if (this.global.unlocked_bonus_cards.length > 0) {
@@ -2288,7 +2288,7 @@
                     // If somehow empty, fallback to normal
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
-                    pool = CARDS.filter(c => c.grade === 'normal');
+                    pool = CARDS.filter(c => c.grade === 'normal' && !c.hide_from_gacha);
                 }
 
                 const pick = pool[Math.floor(Math.random() * pool.length)];
