@@ -1060,7 +1060,8 @@
             <div
                 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
                 <h3 id="toeic-title" style="margin:0; font-size:1.1rem; color:#ffd700;">Practice</h3>
-                <button onclick="document.getElementById('modal-toeic-practice').classList.remove('active');"
+                <button id="toeic-exit-btn"
+                    onclick="document.getElementById('modal-toeic-practice').classList.remove('active');"
                     style="padding:5px 15px; background:#444; border:1px solid #666; color:#fff; cursor:pointer; border-radius:4px;">나가기</button>
             </div>
 
@@ -1084,9 +1085,12 @@
             <!-- Explanation View -->
             <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
                 <div style="display:flex; justify-content:flex-end; padding:0 0 10px 0;">
-                    <button class="menu-btn" onclick="RPG.backToToeicHub()" style="padding:8px 15px; font-size:0.9rem; width:auto; margin:0; border-color:#aaa;">↩ 돌아가기</button>
+                    <button class="menu-btn" onclick="RPG.backToToeicHub()"
+                        style="padding:8px 15px; font-size:0.9rem; width:auto; margin:0; border-color:#aaa;">↩
+                        돌아가기</button>
                 </div>
-                <div id="toeic-explanation-scroll" class="toeic-passage-scroll" style="border:1px solid #333; padding:10px;"></div>
+                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"
+                    style="border:1px solid #333; padding:10px;"></div>
             </div>
 
             <!-- Question View: question + options + feedback + back button -->
@@ -1106,11 +1110,30 @@
     <div id="modal-toeic-result" class="modal">
         <div class="modal-content" style="height:auto;">
             <h3 id="toeic-result-title">학습 종료</h3>
-            <div id="toeic-result-content" class="modal-scroll" style="text-align:left; font-size:0.9rem; line-height:1.5;"></div>
+            <div id="toeic-result-content" class="modal-scroll"
+                style="text-align:left; font-size:0.9rem; line-height:1.5;"></div>
             <div style="display:flex; gap:10px; margin-top:10px;">
-                 <button class="menu-btn" onclick="RPG.openToeicReview()" style="flex:1; margin-bottom:0; border-color:#ffd700; color:#ffd700;">해설 / 리뷰</button>
-                 <button class="menu-btn" onclick="document.getElementById('modal-toeic-result').classList.remove('active'); RPG.toMenu();" style="flex:1; margin-bottom:0;">닫기</button>
+                <button class="menu-btn" onclick="RPG.openToeicReview()"
+                    style="flex:1; margin-bottom:0; border-color:#ffd700; color:#ffd700;">해설 / 리뷰</button>
+                <button class="menu-btn"
+                    onclick="document.getElementById('modal-toeic-result').classList.remove('active'); RPG.offerDate();"
+                    style="flex:1; margin-bottom:0;">닫기</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-date" class="modal">
+        <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
+            <h3 style="color: #ff80ab;">💕 루미와의 데이트</h3>
+            <div class="portrait" style="width: 100px; height: 130px; border-color: #ff80ab; margin: 0 auto 10px auto;">
+                <img src="루미.png" onerror="this.src=''" alt="Rumi">
+            </div>
+            <div id="date-content" class="modal-scroll"
+                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
+                데이트 준비 중...
+            </div>
+            <button class="menu-btn" onclick="RPG.finishDate()"
+                style="margin-top:10px; border-color: #ff80ab; color: #ff80ab;">데이트 종료</button>
         </div>
     </div>
 
@@ -3986,6 +4009,10 @@
             },
 
             startToeicPractice() {
+                // Session limit: 1 time per game session
+                if (this.state.toeicPracticeDone) {
+                    return this.showAlert("이번 세션에서는 이미 실전 연습을 완료했습니다.\n다음 세션에서 다시 도전해주세요.");
+                }
                 if (!this.state.completedToeicSets) this.state.completedToeicSets = [];
 
                 // Filter available sets
@@ -4110,9 +4137,9 @@
 
                 // Check if we are in review mode
                 if (['review_hub', 'review_q', 'review_passage', 'review_explanation'].includes(session.viewState)) {
-                     session.viewState = 'review_passage';
+                    session.viewState = 'review_passage';
                 } else {
-                     session.viewState = 'passage';
+                    session.viewState = 'passage';
                 }
 
                 document.getElementById('toeic-hub').style.display = 'none';
@@ -4236,9 +4263,20 @@
                     this.state.completedToeicSets.push(set.id);
                 }
 
+                // Mark session done (1 time per session limit)
+                this.state.toeicPracticeDone = true;
+
                 // Reset Sage Blessing
                 this.state.greatSageBlessingUses = 3;
                 if (document.getElementById('sage-uses')) document.getElementById('sage-uses').innerText = 3;
+
+                // Disable exit button during results/commentary
+                const exitBtn = document.getElementById('toeic-exit-btn');
+                if (exitBtn) {
+                    exitBtn.disabled = true;
+                    exitBtn.style.opacity = '0.4';
+                    exitBtn.style.pointerEvents = 'none';
+                }
 
                 this.saveGame();
 
@@ -4262,7 +4300,7 @@
 
                 msg += `<b style="color:#00e676">대현자의 축복 횟수가 3회로 리셋되었습니다!</b>`;
 
-                // Open Result Modal instead of Info Modal
+                // Open Result Modal
                 document.getElementById('toeic-result-content').innerHTML = msg;
                 document.getElementById('modal-toeic-result').classList.add('active');
             },
@@ -4348,7 +4386,10 @@
                 closeBtn.innerText = '닫기';
                 closeBtn.onclick = () => {
                     document.getElementById('modal-toeic-practice').classList.remove('active');
-                    this.toMenu();
+                    // Re-enable exit button
+                    const exitBtn = document.getElementById('toeic-exit-btn');
+                    if (exitBtn) { exitBtn.disabled = false; exitBtn.style.opacity = '1'; exitBtn.style.pointerEvents = 'auto'; }
+                    this.offerDate();
                 };
                 hub.appendChild(closeBtn);
             },
@@ -4367,9 +4408,9 @@
                 const feedback = document.getElementById('toeic-feedback');
 
                 if (res && res.isCorrect) {
-                     feedback.innerHTML = "<span style='color:#4caf50'>정답!</span>";
+                    feedback.innerHTML = "<span style='color:#4caf50'>정답!</span>";
                 } else {
-                     feedback.innerHTML = `<span style='color:#ef5350'>오답... (선택: ${res ? res.userAnswer : '없음'})</span>`;
+                    feedback.innerHTML = `<span style='color:#ef5350'>오답... (선택: ${res ? res.userAnswer : '없음'})</span>`;
                 }
 
                 const optContainer = document.getElementById('toeic-options');
@@ -4408,19 +4449,212 @@
             },
 
             showToeicExplanation() {
-                 const session = this.state.currentToeicSession;
-                 session.viewState = 'review_explanation';
+                const session = this.state.currentToeicSession;
+                session.viewState = 'review_explanation';
 
-                 document.getElementById('modal-toeic-practice').classList.add('is-explanation');
-                 document.getElementById('toeic-review-hub').style.display = 'none';
+                document.getElementById('modal-toeic-practice').classList.add('is-explanation');
+                document.getElementById('toeic-review-hub').style.display = 'none';
 
-                 const set = session.set;
-                 const expText = (typeof TOEIC_EXPLANATIONS !== 'undefined' && TOEIC_EXPLANATIONS[set.id])
-                                 ? TOEIC_EXPLANATIONS[set.id]
-                                 : "해설 데이터가 없습니다.";
+                const set = session.set;
+                const expText = (typeof TOEIC_EXPLANATIONS !== 'undefined' && TOEIC_EXPLANATIONS[set.id])
+                    ? TOEIC_EXPLANATIONS[set.id]
+                    : "해설 데이터가 없습니다.";
 
-                 document.getElementById('toeic-explanation-scroll').innerHTML = expText.replace(/\n/g, '<br>');
-                 document.getElementById('toeic-explanation-view').style.display = 'flex';
+                document.getElementById('toeic-explanation-scroll').innerHTML = expText.replace(/\n/g, '<br>');
+                document.getElementById('toeic-explanation-view').style.display = 'flex';
+            },
+
+            // --- Lumi Date System ---
+
+            offerDate() {
+                // Re-enable exit button first
+                const exitBtn = document.getElementById('toeic-exit-btn');
+                if (exitBtn) { exitBtn.disabled = false; exitBtn.style.opacity = '1'; exitBtn.style.pointerEvents = 'auto'; }
+
+                this.showConfirm(
+                    `<div style="text-align:center;">
+                        <div class="portrait" style="width:80px; height:106px; margin:0 auto 10px auto; border-color:#ff80ab;">
+                            <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                        </div>
+                        <b style="color:#ff80ab;">루미의 보너스 데이트 신청!</b><br><br>
+                        (헤헤) 형아~ 퀴즈 열심히 푸느라 고생했어!<br>
+                        오늘 특별히... 나랑 데이트 할래? (///)<br><br>
+                        <span style="font-size:0.8rem; color:#aaa;">※ API 키가 필요합니다</span>
+                    </div>`,
+                    () => this.startDate(),
+                    () => this.toMenu()
+                );
+            },
+
+            _getDateParams() {
+                // Check secret date flag first
+                if (this.global.secretDateFlag) {
+                    const secretSet = SECRET_DATE_SETS[Math.floor(Math.random() * SECRET_DATE_SETS.length)];
+                    return {
+                        theme: secretSet.theme,
+                        outfit: secretSet.outfit,
+                        weather: '실내',
+                        keyword: secretSet.keyword,
+                        word: secretSet.word,
+                        secret: true,
+                        cardId: secretSet.cardId,
+                        cardName: secretSet.cardName
+                    };
+                }
+
+                // Normal date: random theme
+                const themeData = DATE_THEMES[Math.floor(Math.random() * DATE_THEMES.length)];
+
+                // Weather
+                let weather;
+                if (themeData.location === 'indoor') {
+                    weather = '실내';
+                } else {
+                    weather = DATE_WEATHER_OUTDOOR[Math.floor(Math.random() * DATE_WEATHER_OUTDOOR.length)];
+                }
+
+                // Keyword
+                const keyword = DATE_KEYWORDS[Math.floor(Math.random() * DATE_KEYWORDS.length)];
+
+                // Random word from wordbook
+                let word = 'love'; // fallback
+                if (typeof VOCAB_DATA !== 'undefined' && VOCAB_DATA.length > 0) {
+                    const vocab = VOCAB_DATA[Math.floor(Math.random() * VOCAB_DATA.length)];
+                    word = vocab.word;
+                }
+
+                return {
+                    theme: themeData.theme,
+                    outfit: themeData.outfit,
+                    weather: weather,
+                    keyword: keyword,
+                    word: word,
+                    secret: false
+                };
+            },
+
+            async startDate() {
+                if (this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
+
+                const key = Storage.getRaw(Storage.keys.API_KEY);
+                if (!key) return this.showAlert("먼저 API 키를 저장해주세요.");
+
+                const dateParams = this._getDateParams();
+
+                // Calculate days since last date for loneliness
+                const now = new Date();
+                const lastDateStr = this.global.lastDateTimestamp;
+                let daysSinceLastDate = 0;
+                if (lastDateStr) {
+                    const lastDate = new Date(lastDateStr);
+                    daysSinceLastDate = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+                }
+                dateParams.daysSinceLastDate = daysSinceLastDate;
+
+                // Save current date params for later use
+                this._currentDateParams = dateParams;
+
+                // Show date modal
+                document.getElementById('modal-date').classList.add('active');
+                const contentBox = document.getElementById('date-content');
+                contentBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">💕 루미가 데이트를 준비하고 있어요...<br>(잠시만 기다려주세요)<br><br><span style="font-size:0.8rem; color:#aaa;">테마: ${dateParams.theme} | 의상: ${dateParams.outfit}<br>날씨: ${dateParams.weather} | 키워드: ${dateParams.keyword}</span></div>`;
+
+                this.isApiLoading = true;
+
+                try {
+                    const text = await GameAPI.getDateContent(key, dateParams);
+
+                    const dateModal = document.getElementById('modal-date');
+                    if (!dateModal.classList.contains('active')) return;
+
+                    let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                    contentBox.innerHTML = formatted;
+
+                } catch (e) {
+                    console.error(e);
+                    let msg = e.message || "";
+                    let displayMsg = "알 수 없는 오류가 발생했습니다.";
+                    if (msg.includes('key') || msg.includes('valid') || msg.includes('400') || msg.includes('403')) {
+                        displayMsg = "API 키가 올바르지 않거나 설정되지 않았습니다.";
+                    } else if (msg.includes('quota') || msg.includes('429')) {
+                        displayMsg = "API 사용량이 초과되었습니다.";
+                    } else if (msg.includes('safety') || msg.includes('blocked')) {
+                        displayMsg = "안전 필터에 의해 차단되었습니다.";
+                    } else {
+                        displayMsg = "오류: " + msg;
+                    }
+                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div>`;
+                } finally {
+                    this.isApiLoading = false;
+                }
+            },
+
+            finishDate() {
+                const dateParams = this._currentDateParams;
+                const isSecret = dateParams && dateParams.secret;
+
+                document.getElementById('modal-date').classList.remove('active');
+
+                // Update last date timestamp in global
+                this.global.lastDateTimestamp = new Date().toISOString();
+
+                if (isSecret) {
+                    const cardId = dateParams.cardId;
+                    const cardName = dateParams.cardName;
+
+                    if (!this.state.inventory.includes(cardId)) {
+                        this.state.inventory.push(cardId);
+                    }
+
+                    this.global.secretDateFlag = false;
+                    this.saveGlobalData();
+                    this.saveGame();
+
+                    this.openInfoModal("💕 비밀 데이트 종료",
+                        `<div style="text-align:center;">
+                            <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
+                                <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                            </div>
+                            루미와의 특별한 비밀 데이트가 끝났어요!<br><br>
+                            <b style="color:#ffd700; font-size:1.2rem;">🎴 이벤트 카드 획득: ${cardName}</b><br>
+                            <span style="font-size:0.8rem; color:#aaa;">(카드가 인벤토리에 추가되었습니다)</span>
+                        </div>`
+                    );
+                } else {
+                    const triggerSecret = Math.random() < 0.1;
+
+                    this.saveGlobalData();
+                    this.saveGame();
+
+                    if (triggerSecret) {
+                        this.global.secretDateFlag = true;
+                        this.saveGlobalData();
+
+                        this.openInfoModal("💕 데이트 종료",
+                            `<div style="text-align:center;">
+                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
+                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                </div>
+                                루미와의 즐거운 데이트가 끝났어요!<br><br>
+                                <span style="color:#ff80ab;">(헤헤) 형아... 다음에는 특별한 데이트를 준비해둘게!</span><br>
+                                <span style="color:#ffd700;">기대해도 좋아! 약속해!</span><br><br>
+                                <b style="color:#ffd700;">🌟 비밀 데이트가 예약되었습니다!</b><br>
+                                <span style="font-size:0.8rem; color:#aaa;">(게임이 자동 저장되었습니다)</span>
+                            </div>`
+                        );
+                    } else {
+                        this.openInfoModal("💕 데이트 종료",
+                            `<div style="text-align:center;">
+                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
+                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                </div>
+                                루미와의 즐거운 데이트가 끝났어요!<br><br>
+                                <span style="color:#ff80ab;">(뿌듯) 형아, 오늘 너무 재밌었어! 또 데이트하자!</span><br><br>
+                                <span style="font-size:0.8rem; color:#aaa;">(게임이 자동 저장되었습니다)</span>
+                            </div>`
+                        );
+                    }
+                }
             },
         };
 
