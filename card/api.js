@@ -111,3 +111,110 @@ const GameAPI = {
         return result.candidates[0].content.parts[0].text;
     }
 };
+
+// --- Date System ---
+
+const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(소년)** 마법사 '루미'입니다.
+- 당신은 딱딱한 전문 용어 대신, 직관적인 비유를 사용하여 영어를 가르칩니다
+- 당신은 사용자에게 단어를 가르쳐주는 것을 핑계로 대화를 나누는 것을 좋아하며, 때때로 애정 표현을 하거나 칭찬을 갈구합니다.
+- 데이트중에는 학습보다 형아와의 관계를 중요시합니다.
+
+## [중요 규칙: 성별 및 대명사]
+- 당신의 성별은 **남성(Male)**입니다.
+- 영어 예문에서 루미 본인을 3인칭으로 지칭할 때 **절대 'she/her'를 사용하지 마십시오.** 반드시 'he/him'을 사용하거나 'I/me' 등의 1인칭을 사용하십시오.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+- **말버릇:**
+    - 질문할 때: "형아, ~인지 알아?", "혹시 ~해본 적 있어?"
+    - 강조할 때: "바로 ~야!", "절대 안 돼!", "내가 보증할게!"
+    - 마무리: "약속해!"`;
+
+const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
+
+[기: 시각적 매력 어필과 시작]
+상황: 주어진 [배경]에서 특별한 [의상]을 입은 캐릭터를 주인공이 발견하거나 마주하는 장면으로 시작합니다.
+묘사: 평소와 다른 복장을 한 캐릭터의 모습, 쑥스러워하거나 자랑스러워하는 반응, 그리고 공간의 분위기를 구체적으로 묘사하세요.
+[승: 알콩달콩한 활동과 캐릭터성]
+상황: 본격적으로 [키워드에 맞는 메인 이벤트]를 함께 진행합니다.
+묘사: 완벽하게 해내기보다는 작은 실수를 하거나(ex: 코에 밀가루가 묻음), 서로 도와주며 티키타카를 주고받는 등 [캐릭터 성격]이 가장 잘 돋보이는 귀여운 해프닝을 넣으세요.
+[전: 분위기의 무르익음]
+상황: 이벤트가 클라이맥스에 달하고, 루미가 장난을 치며 애정표현을 하는 달콤한 타이밍이 옵니다. 여기서 주어진 [단어]를 사용해서 예문을 하나 던져줍니다.
+[결: 성취감과 다음을 기약하는 여운]
+상황: [메인 이벤트]가 성공적으로 마무리됩니다. (ex: 완성된 케이크를 함께 먹음)
+ 플레이어가 퀴즈를 열심히 푼 것에 대한 보상감이 느껴지도록 캐릭터가 따뜻한 미소나 칭찬을 건넵니다. 호감도가 올랐음이 확실히 느껴지는 달달한 여운을 남기며 스토리를 종료하세요.
+데이트를 또 하고싶다는 감정도 표현합니다.`;
+
+const DATE_THEMES = [
+    { theme: '놀이공원', outfit: '캐주얼룩', location: 'outdoor' },
+    { theme: '숲속', outfit: '요정의상', location: 'outdoor' },
+    { theme: '축제', outfit: '유카타', location: 'outdoor' },
+    { theme: '저택', outfit: '메이드복', location: 'indoor' },
+    { theme: '스테이지', outfit: '바니걸의상', location: 'indoor' },
+    { theme: '수영장', outfit: '프릴수영복', location: 'indoor' },
+    { theme: '체육관', outfit: '체육복', location: 'indoor' },
+    { theme: '침대', outfit: '파자마', location: 'indoor' },
+    { theme: '도서관', outfit: '교복', location: 'indoor' }
+];
+const DATE_WEATHER_OUTDOOR = ['갑작스러운 소나기', '강한 바람', '좋은 날씨'];
+const DATE_KEYWORDS = ['귀여운 실수', '졸음', '미끄러짐', '젖음', '키스', '신남', '끼임', '찢어짐', '고장난지퍼', '완벽한데이트'];
+const SECRET_DATE_SETS = [
+    { theme: '저택', outfit: '메이드복', location: 'indoor', keyword: '특제생크림케이크만들기', word: 'love', secret: true, cardId: 'rumi_maid', cardName: '루미(메이드)' },
+    { theme: '스테이지', outfit: '바니걸의상', location: 'indoor', keyword: '형아만을 위한 스테이지 공연', word: 'love', secret: true, cardId: 'rumi_bunny', cardName: '루미(바니)' }
+];
+
+// Add getDateContent to GameAPI
+GameAPI.getDateContent = async function (apiKey, dateParams) {
+    let lonelinessPart = '';
+    if (dateParams.daysSinceLastDate >= 3) {
+        lonelinessPart = `\n\n[중요: 서운함 표현] 이전 데이트 날짜와 현재 데이트 날짜가 ${dateParams.daysSinceLastDate}일이나 차이납니다. 데이트 초반에 요즘 데이트하러 자주 안 오는 것 같아서 서운하다는 감정을 자연스럽게 표현하세요. 하지만 형아가 왔으니 기쁘다는 감정도 함께 표현하세요.`;
+    }
+
+    let secretPart = '';
+    if (dateParams.secret) {
+        secretPart = `\n\n[비밀 데이트] 이것은 특별한 비밀 데이트입니다. 평소보다 더 특별하고 달콤한 이벤트를 만들어주세요. 루미가 형아를 위해 특별히 준비한 이벤트라는 것을 강조하세요. 비밀 데이트 종료 시 루미가 "다음에도 이런 특별한 데이트 하고 싶다"라고 표현합니다.`;
+    }
+
+    const fullPrompt = `${DATE_LUMI_PERSONA}\n\n${DATE_FORMAT}\n\n` +
+        `[배경]: ${dateParams.theme}\n` +
+        `[의상]: ${dateParams.outfit}\n` +
+        `[날씨]: ${dateParams.weather}\n` +
+        `[키워드]: ${dateParams.keyword}\n` +
+        `[단어]: ${dateParams.word}\n` +
+        `[비밀플래그]: ${dateParams.secret ? 'on' : 'off'}` +
+        lonelinessPart + secretPart;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: { temperature: 0.8 }
+        })
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    if (!result.candidates || result.candidates.length === 0
+        || !result.candidates[0].content
+        || !result.candidates[0].content.parts
+        || result.candidates[0].content.parts.length === 0) {
+        throw new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
+    }
+
+    return result.candidates[0].content.parts[0].text;
+};
