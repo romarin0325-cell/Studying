@@ -711,7 +711,7 @@ const RPG = {
         };
 
         if (mode === 'chaos') {
-            let allCards = [...CARDS];
+            let allCards = CARDS.filter(c => !c.hide_from_gacha);
             if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
                 const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
                 allCards = allCards.concat(bonus);
@@ -1015,7 +1015,7 @@ const RPG = {
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
         // Apply to 12 random cards
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
         if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
@@ -1060,7 +1060,7 @@ const RPG = {
         this.state.chaosBlessingUses--;
 
         // 1. Base Pool
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
 
         // 2. Add Bonus Cards (if unlocked)
         if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
@@ -1117,7 +1117,7 @@ const RPG = {
                 this.state.tickets--;
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-                let allCards = [...CARDS];
+                let allCards = CARDS.filter(c => !c.hide_from_gacha);
 
                 if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
                     const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
@@ -1183,7 +1183,7 @@ const RPG = {
         if (mode === 'chaos') {
             if (!this.state.chaosPool || this.state.chaosPool.length === 0) {
                  // Should have been generated in winBattle or initNewGame, but fallback
-                 let allCards = [...CARDS];
+                 let allCards = CARDS.filter(c => !c.hide_from_gacha);
                  if (this.global.unlocked_bonus_cards) {
                      const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
                      allCards = allCards.concat(unlocked);
@@ -2329,7 +2329,7 @@ const RPG = {
     },
 
     generateDraftOptions() {
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
         if (this.global.unlocked_bonus_cards) {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
@@ -2440,7 +2440,7 @@ const RPG = {
             this.state.inventory = [];
             this.state.deck = [null, null, null];
 
-            let allCards = [...CARDS];
+            let allCards = CARDS.filter(c => !c.hide_from_gacha);
             if (this.global.unlocked_bonus_cards) {
                 const unlocked = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
                 allCards = allCards.concat(unlocked);

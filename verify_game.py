@@ -13,6 +13,10 @@ def verify_game_flow():
 
         # Wait for loading
         try:
+            page.evaluate("RPG.closeInfoModal()")
+        except:
+            pass
+        try:
             page.wait_for_selector("#btn-start-new:not([disabled])", timeout=20000)
         except:
             print("Loading timed out or failed.")
@@ -26,6 +30,15 @@ def verify_game_flow():
 
         print("Clicking New Game...")
         page.click("#btn-start-new")
+        page.wait_for_timeout(500)
+        try:
+            page.evaluate("RPG.closeInfoModal()")
+        except:
+            pass
+        try:
+            page.click("#modal-info button.btn", timeout=1000)
+        except:
+            pass
 
         # Verify Type Select
         print("Verifying Type Select Modal...")
@@ -56,9 +69,18 @@ def verify_game_flow():
 
         # Reload for Challenge Mode Test
         print("Reloading for Challenge Mode test...")
-        page.reload()
+        page.reload(wait_until="networkidle")
         page.wait_for_selector("#btn-start-new:not([disabled])")
         page.click("#btn-start-new")
+        page.wait_for_timeout(500)
+        try:
+            page.evaluate("RPG.closeInfoModal()")
+        except:
+            pass
+        try:
+            page.click("#modal-info button.btn", timeout=1000)
+        except:
+            pass
 
         print("Selecting Challenge Mode...")
         page.wait_for_selector("#modal-type-select.active")
