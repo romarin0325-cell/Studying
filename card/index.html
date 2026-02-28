@@ -592,14 +592,14 @@
         }
 
         /* Passage view: fills remaining space */
-        #toeic-passage-view {
+        .toeic-passage-view {
             display: none;
             flex-direction: column;
             flex: 1;
             min-height: 0;
         }
 
-        #toeic-passage-view .toeic-passage-scroll {
+        .toeic-passage-view .toeic-passage-scroll {
             flex: 1;
             min-height: 0;
             overflow-y: auto !important;
@@ -1084,13 +1084,8 @@
 
             <!-- Explanation View -->
             <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
-                <div style="display:flex; justify-content:flex-end; padding:0 0 10px 0;">
-                    <button class="menu-btn" onclick="RPG.backToToeicHub()"
-                        style="padding:8px 15px; font-size:0.9rem; width:auto; margin:0; border-color:#aaa;">↩
-                        돌아가기</button>
-                </div>
-                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"
-                    style="border:1px solid #333; padding:10px;"></div>
+                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
+                <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
             </div>
 
             <!-- Question View: question + options + feedback + back button -->
