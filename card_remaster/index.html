@@ -1015,7 +1015,7 @@ const RPG = {
         if(document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
 
         // Apply to 12 random cards
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
         if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
@@ -1060,7 +1060,7 @@ const RPG = {
         this.state.chaosBlessingUses--;
 
         // 1. Base Pool
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
 
         // 2. Add Bonus Cards (if unlocked)
         if (this.global.unlocked_bonus_cards && this.global.unlocked_bonus_cards.length > 0) {
@@ -1252,7 +1252,7 @@ const RPG = {
         }
 
         // Build Pool
-        let pool = CARDS.filter(c => c.grade === grade);
+        let pool = CARDS.filter(c => c.grade === grade && !c.hide_from_gacha);
 
         // Add Bonus Cards
         if (this.global.unlocked_bonus_cards.length > 0) {
@@ -1272,7 +1272,7 @@ const RPG = {
             // If somehow empty, fallback to normal
             console.error("Empty pool for grade: " + grade);
             grade = 'normal';
-            pool = CARDS.filter(c => c.grade === 'normal');
+            pool = CARDS.filter(c => c.grade === 'normal' && !c.hide_from_gacha);
         }
 
         const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -2329,7 +2329,7 @@ const RPG = {
     },
 
     generateDraftOptions() {
-        let pool = [...CARDS];
+        let pool = CARDS.filter(c => !c.hide_from_gacha);
         if (this.global.unlocked_bonus_cards) {
             const bonus = BONUS_CARDS.filter(c => this.global.unlocked_bonus_cards.includes(c.id));
             pool = pool.concat(bonus);
