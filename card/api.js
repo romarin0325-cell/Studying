@@ -138,18 +138,14 @@ const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
 
-[기: 시각적 매력 어필과 시작]
-상황: 주어진 [배경]에서 특별한 [의상]을 입은 캐릭터를 주인공이 발견하거나 마주하는 장면으로 시작합니다.
-묘사: 평소와 다른 복장을 한 캐릭터의 모습, 쑥스러워하거나 자랑스러워하는 반응, 그리고 공간의 분위기를 구체적으로 묘사하세요.
-[승: 알콩달콩한 활동과 캐릭터성]
-상황: 본격적으로 [키워드에 맞는 메인 이벤트]를 함께 진행합니다.
-묘사: 완벽하게 해내기보다는 작은 실수를 하거나(ex: 코에 밀가루가 묻음), 서로 도와주며 티키타카를 주고받는 등 [캐릭터 성격]이 가장 잘 돋보이는 귀여운 해프닝을 넣으세요.
-[전: 분위기의 무르익음]
-상황: 이벤트가 클라이맥스에 달하고, 루미가 장난을 치며 애정표현을 하는 달콤한 타이밍이 옵니다. 여기서 주어진 [단어]를 사용해서 예문을 하나 던져줍니다.
-[결: 성취감과 다음을 기약하는 여운]
-상황: [메인 이벤트]가 성공적으로 마무리됩니다. (ex: 완성된 케이크를 함께 먹음)
- 플레이어가 퀴즈를 열심히 푼 것에 대한 보상감이 느껴지도록 캐릭터가 따뜻한 미소나 칭찬을 건넵니다. 호감도가 올랐음이 확실히 느껴지는 달달한 여운을 남기며 스토리를 종료하세요.
-데이트를 또 하고싶다는 감정도 표현합니다.`;
+기: 시각적 매력 어필과 시작 - 주어진 [배경]에서 특별한 [의상]을 입은 캐릭터를 주인공이 발견하거나 마주하는 장면으로 시작합니다. 평소와 다른 복장을 한 캐릭터의 모습, 쑥스러워하거나 자랑스러워하는 반응, 그리고 공간의 분위기를 구체적으로 묘사하세요.
+승: 알콩달콩한 활동과 캐릭터성 - 본격적으로 [키워드에 맞는 메인 이벤트]를 함께 진행합니다. 완벽하게 해내기보다는 작은 실수를 하거나(ex: 코에 밀가루가 묻음), 서로 도와주며 티키타카를 주고받는 등 [캐릭터 성격]이 가장 잘 돋보이는 귀여운 해프닝을 넣으세요.
+전: 분위기의 무르익음 - 이벤트가 클라이맥스에 달하고, 루미가 장난을 치며 애정표현을 하는 달콤한 타이밍이 옵니다. 여기서 주어진 [단어]를 사용해서 예문을 하나 던져줍니다.
+결: 성취감과 다음을 기약하는 여운 - [메인 이벤트]가 성공적으로 마무리됩니다. (ex: 완성된 케이크를 함께 먹음) 플레이어가 퀴즈를 열심히 푼 것에 대한 보상감이 느껴지도록 캐릭터가 따뜻한 미소나 칭찬을 건넵니다. 호감도가 올랐음이 확실히 느껴지는 달달한 여운을 남기며 스토리를 종료하세요. 데이트를 또 하고싶다는 감정도 표현합니다.
+
+[중요 작성 규칙]
+1. 절대 "[기]", "[승]", "[전]", "[결]"이나 "상황:", "묘사:" 같은 소제목, 라벨, 단락 구분 기호를 출력하지 마십시오. 처음부터 끝까지 자연스럽게 이어지는 하나의 웹소설처럼 작성해야 합니다.
+2. 분량 제한 없이 최대한 길고 풍부하게 작성하십시오.`;
 
 const DATE_THEMES = [
     { theme: '놀이공원', outfit: '캐주얼룩', location: 'outdoor' },
@@ -177,11 +173,26 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
     }
 
     let secretPart = '';
+    let innuendoInstruction = '';
+
     if (dateParams.secret) {
         secretPart = `\n\n[비밀 데이트] 이것은 특별한 비밀 데이트입니다. 평소보다 더 특별하고 달콤한 이벤트를 만들어주세요. 루미가 형아를 위해 특별히 준비한 이벤트라는 것을 강조하세요. 비밀 데이트 종료 시 루미가 "다음에도 이런 특별한 데이트 하고 싶다"라고 표현합니다.`;
+    } else {
+        // 30% chance for unintentional innuendo during normal dates
+        const enableEvent = RPG && RPG.global && RPG.global.tutoringEventEnabled !== false;
+        if (enableEvent && Math.random() < 0.3) {
+            innuendoInstruction = `
+\n\n## [Special Direction: Unintentional Innuendo (Accidental)]
+1. 평소보다 루미가 적극적인 애정표현을 하며, 데이트의 상황이 플레이어로 하여금 야한 오해를 불러일으키도록 작성해야 합니다.
+2. 캐릭터는 순수한 의도로 행동해야 합니다. (일상 활동, 우연한 상황)
+3. 고수위 이벤트는 플레이어 시점에서만 애매한 해석이 가능해야 합니다.
+4. 캐릭터 대사는 의도 없이 나온 말이지만, 문맥상 이중적 해석이 가능해야 합니다.
+5. 스킨십은 있으나 성적 행위 암시는 없으며, 착각/우연을 강조해야 합니다.
+`;
+        }
     }
 
-    const fullPrompt = `${DATE_LUMI_PERSONA}\n\n${DATE_FORMAT}\n\n` +
+    const fullPrompt = `${DATE_LUMI_PERSONA}\n${innuendoInstruction}\n\n${DATE_FORMAT}\n\n` +
         `[배경]: ${dateParams.theme}\n` +
         `[의상]: ${dateParams.outfit}\n` +
         `[날씨]: ${dateParams.weather}\n` +
@@ -190,12 +201,14 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
         `[비밀플래그]: ${dateParams.secret ? 'on' : 'off'}` +
         lonelinessPart + secretPart;
 
+    const temperature = innuendoInstruction ? 0.85 : 0.8;
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
-            generationConfig: { temperature: 0.8 }
+            generationConfig: { temperature: temperature }
         })
     });
 
