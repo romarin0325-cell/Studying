@@ -1137,23 +1137,23 @@ const TOEIC_DATA = [
         "id": "24-2",
         "question": "Select the best answer for blank (2).",
         "options": [
-          "Unless",
-          "If",
-          "So",
-          "Because of"
-        ],
-        "answer": "If"
-      },
-      {
-        "id": "24-3",
-        "question": "Select the best answer for blank (3).",
-        "options": [
           "or",
           "so",
           "because",
           "therefore"
         ],
         "answer": "or"
+      },
+      {
+        "id": "24-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "Unless",
+          "If",
+          "So",
+          "Because of"
+        ],
+        "answer": "If"
       },
       {
         "id": "24-4",
@@ -1167,7 +1167,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Registration Open: April Client Workshop (Limited Seating) \n \nDear Clients, \n \nThank you for your continued partnership with Greenridge Consulting. We are pleased to invite you to our April Client Workshop, a half-day session focused on practical strategies for improving workflow efficiency and reducing administrative bottlenecks. The workshop will include short presentations, guided discussions, and a live demonstration of our new reporting dashboard. [1] \n \nThe event will be held on Thursday, April 9, from 1:00 p.m. to 5:00 p.m. at the Greenridge Training Center (2F, Room 204). Check-in will begin at 12:30 p.m., and light refreshments will be provided. Because seating is limited, registration will be accepted on a first-come, first-served basis. (1) _______ you would like to attend, please complete the registration form no later than Friday, March 27. [2] \n \nTo register, click the link below and enter your contact information. You will be asked to select one of the available discussion tracks and indicate any dietary restrictions. After you submit the form, you will receive an automated confirmation message within a few minutes. If you do not receive a confirmation, check your spam folder _______ contact us at events@greenridge.example. [3] \n \nOn the day of the workshop, please bring a business card for check-in. Also, note that photographs may be taken during the event for internal documentation purposes. (2) _______ you prefer not to appear in any photos, please inform our staff at the registration desk upon arrival. [4] \n \nWe look forward to seeing you in April. \n \nSincerely, \nEvents Team \nGreenridge Consulting"
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Registration Open: April Client Workshop (Limited Seating) \n \nDear Clients, \n \nThank you for your continued partnership with Greenridge Consulting. We are pleased to invite you to our April Client Workshop, a half-day session focused on practical strategies for improving workflow efficiency and reducing administrative bottlenecks. The workshop will include short presentations, guided discussions, and a live demonstration of our new reporting dashboard. [1] \n \nThe event will be held on Thursday, April 9, from 1:00 p.m. to 5:00 p.m. at the Greenridge Training Center (2F, Room 204). Check-in will begin at 12:30 p.m., and light refreshments will be provided. Because seating is limited, registration will be accepted on a first-come, first-served basis. (1) _______ you would like to attend, please complete the registration form no later than Friday, March 27. [2] \n \nTo register, click the link below and enter your contact information. You will be asked to select one of the available discussion tracks and indicate any dietary restrictions. After you submit the form, you will receive an automated confirmation message within a few minutes. If you do not receive a confirmation, check your spam folder (2) _______ contact us at events@greenridge.example. [3] \n \nOn the day of the workshop, please bring a business card for check-in. Also, note that photographs may be taken during the event for internal documentation purposes. (3) _______ you prefer not to appear in any photos, please inform our staff at the registration desk upon arrival. [4] \n \nWe look forward to seeing you in April. \n \nSincerely, \nEvents Team \nGreenridge Consulting"
   },
   {
     "id": 25,
