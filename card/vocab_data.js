@@ -300,6 +300,41 @@ const VOCAB_SOURCE = [
     { w: 'credit', m: '(명) 신용, 신뢰; (명) 대변, 입금(액)', tm: '(명) 차변; (명) 직불(결제), 인출(액)', tw: 'debit' }
 ];
 
+const VOCAB_ADDITIONS = [
+    { w: 'deadline', m: '(명) 마감일, 기한', tm: '(명) 지침, 가이드라인', tw: 'guideline' },
+    { w: 'supplier', m: '(명) 공급업체, 납품업체', tm: '(명) 감독자, 관리자, 상사', tw: 'supervisor' },
+    { w: 'quote', m: '(명) 견적; (동) 견적을 내다, 인용하다', tm: '(명) 할당량, 정원', tw: 'quota' },
+    { w: 'freight', m: '(명) 화물; (명) 운임', tm: '(명) 항공편; (명) 비행', tw: 'flight' },
+    { w: 'invoice', m: '(명) 송장, 청구서', tm: '(명) 조언, 충고', tw: 'advice' },
+    { w: 'shortage', m: '(명) 부족, 품귀', tm: '(명) 보관, 저장; (명) 저장 공간', tw: 'storage' },
+    { w: 'workshop', m: '(명) 워크숍, 연수회', tm: '(명) 연습장, 문제집; (명) 작업 장부', tw: 'workbook' },
+    { w: 'asset', m: '(명) 자산, 재산; (명) 강점', tm: '(명) 측면, 양상', tw: 'aspect' },
+    { w: 'efficient', m: '(형) 효율적인', tm: '(형) 충분한', tw: 'sufficient' },
+    { w: 'flexible', m: '(형) 유연한; (형) 융통성 있는', tm: '(형) 실행 가능한; (형) 실현 가능한', tw: 'feasible' },
+    { w: 'mandatory', m: '(형) 의무적인, 필수의', tm: '(형) 금전의, 화폐의', tw: 'monetary' },
+    { w: 'current', m: '(형) 현재의, 현행의', tm: '(명) 통화; (명) 유통', tw: 'currency' },
+    { w: 'recent', m: '(형) 최근의', tm: '(명) 거주자; (형) 거주하는', tw: 'resident' },
+    { w: 'abroad', m: '(부) 해외에, 외국에', tm: '(부) 탑승한; (전) ~에 타고', tw: 'aboard' },
+    { w: 'schedule', m: '(명) 일정, 스케줄; (동) 일정을 잡다', tm: '(명) 계획, 안; (명) 제도', tw: 'scheme' },
+    { w: 'accept', m: '(동) 받아들이다; (동) 수락하다', tm: '(전) ~을 제외하고', tw: 'except' },
+    { w: 'assign', m: '(동) 배정하다, 할당하다', tm: '(동) 사임하다, 사직하다', tw: 'resign' },
+    { w: 'revise', m: '(동) 수정하다, 개정하다', tm: '(동) 조언하다, 권고하다', tw: 'advise' },
+    { w: 'respond', m: '(동) 응답하다; (동) 대응하다', tm: '(동) 일치하다; (동) 서신을 주고받다', tw: 'correspond' },
+    { w: 'disclose', m: '(동) 공개하다, 밝히다', tm: '(동) 동봉하다; (동) 둘러싸다', tw: 'enclose' },
+    { w: 'forecast', m: '(명) 예측, 전망; (동) 예측하다', tm: '(명) 형식, 체제; (동) 서식을 갖추다', tw: 'format' },
+    { w: 'escort', m: '(동) 동행하다, 안내하다; (명) 안내자', tm: '(동) 수출하다; (명) 수출', tw: 'export' },
+    { w: 'luggage', m: '(명) 수하물, 짐', tm: '(명) 언어, 말', tw: 'language' },
+    { w: 'accurate', m: '(형) 정확한', tm: '(형) 충분한; (형) 적절한', tw: 'adequate' },
+    { w: 'optional', m: '(형) 선택의, 임의의', tm: '(형) 최적의', tw: 'optimal' },
+    { w: 'immediate', m: '(형) 즉각적인; (형) 당면한', tm: '(형) 중간의; (형) 중급의', tw: 'intermediate' },
+    { w: 'inspection', m: '(명) 점검, 검사', tm: '(명) 설치; (명) 장치', tw: 'installation' },
+    { w: 'designate', m: '(동) 지정하다', tm: '(동) 위임하다; (명) 대표자', tw: 'delegate' },
+    { w: 'certify', m: '(동) 증명하다, 인증하다', tm: '(동) 명확히 하다', tw: 'clarify' },
+    { w: 'orientation', m: '(명) 오리엔테이션; (명) 적응 교육', tm: '(명) 운영; (명) 작동; (명) 수술', tw: 'operation' }
+];
+
+VOCAB_SOURCE.push(...VOCAB_ADDITIONS);
+
 const VOCAB_DATA = [];
 
 VOCAB_SOURCE.forEach(item => {
