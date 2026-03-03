@@ -1849,13 +1849,13 @@
                     artifacts: []
                 };
 
-                // Transfer Pending Transcendence to Active State (Endless Only)
+                // Transfer Transcendence Cards: Endless gets all, Challenge gets earned
                 if (this.state.gameType === 'endless') {
+                    this.state.activeTranscendenceCards = TRANSCENDENCE_CARDS.map(c => c.id);
+                } else {
                     this.state.activeTranscendenceCards = [...(this.global.pendingTranscendenceCards || [])];
                     this.global.pendingTranscendenceCards = [];
                     this.saveGlobalData();
-                } else {
-                    this.state.activeTranscendenceCards = [];
                 }
 
                 if (mode === 'chaos') {
@@ -3357,7 +3357,10 @@
                     this.state.inventory = [];
                     this.state.deck = [null, null, null];
 
-                    let allCards = GameUtils.buildCardPool(this.global);
+                    let allCards = GameUtils.buildCardPool(this.global, {
+                        includeTranscendence: true,
+                        activeTranscendenceCards: this.state.activeTranscendenceCards
+                    });
                     allCards.sort(() => Math.random() - 0.5);
 
                     const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
