@@ -3920,3 +3920,498 @@ const COLLOCATION_DATA = [
         ]
     }
 ];
+
+const COLLOCATION_ADDITIONS = [
+    {
+        "id": 81,
+        "expression": "issue a refund",
+        "meaning": "환불하다; 환불을 처리하다",
+        "options": [
+            "issue",
+            "inspect",
+            "install",
+            "inquire"
+        ],
+        "question": "If the returned item is found to be defective, we will _______ a full refund within five business days.",
+        "answer": "issue",
+        "translation": "반품된 상품에 결함이 있는 것으로 확인되면, 당사는 영업일 기준 5일 이내에 전액 환불을 처리할 것입니다.",
+        "quizzes": [
+            {
+                "question": "If the returned item is found to be defective, we will _______ a full refund within five business days.",
+                "options": [
+                    "issue",
+                    "inspect",
+                    "install",
+                    "inquire"
+                ],
+                "answer": "issue",
+                "translation": "반품된 상품에 결함이 있는 것으로 확인되면, 당사는 영업일 기준 5일 이내에 전액 환불을 처리할 것입니다."
+            },
+            {
+                "question": "The billing department can _______ a partial refund if your order arrived with missing parts.",
+                "options": [
+                    "issue",
+                    "invent",
+                    "ignore",
+                    "invite"
+                ],
+                "answer": "issue",
+                "translation": "주문 상품에 부품이 누락되어 도착한 경우, 결제 부서가 부분 환불을 처리할 수 있습니다."
+            },
+            {
+                "question": "After reviewing the duplicate charge, the credit card company agreed to _______ a refund.",
+                "options": [
+                    "issue",
+                    "enter",
+                    "estimate",
+                    "expand"
+                ],
+                "answer": "issue",
+                "translation": "중복 청구를 검토한 후, 신용카드 회사는 환불을 처리하기로 동의했다."
+            }
+        ]
+    },
+    {
+        "id": 82,
+        "expression": "waive a fee",
+        "meaning": "수수료를 면제하다",
+        "options": [
+            "waive",
+            "waste",
+            "weigh",
+            "widen"
+        ],
+        "question": "The hotel agreed to _______ the cancellation fee because the flight delay was beyond the guest’s control.",
+        "answer": "waive",
+        "translation": "항공편 지연이 투숙객의 통제 범위를 벗어난 일이었기 때문에 호텔은 취소 수수료를 면제해 주기로 했다.",
+        "quizzes": [
+            {
+                "question": "The hotel agreed to _______ the cancellation fee because the flight delay was beyond the guest’s control.",
+                "options": [
+                    "waive",
+                    "waste",
+                    "weigh",
+                    "widen"
+                ],
+                "answer": "waive",
+                "translation": "항공편 지연이 투숙객의 통제 범위를 벗어난 일이었기 때문에 호텔은 취소 수수료를 면제해 주기로 했다."
+            },
+            {
+                "question": "The bank may _______ the transfer fee for customers who maintain a minimum balance.",
+                "options": [
+                    "waive",
+                    "worsen",
+                    "weaken",
+                    "withdraw"
+                ],
+                "answer": "waive",
+                "translation": "은행은 최소 잔액을 유지하는 고객에게 송금 수수료를 면제해 줄 수 있다."
+            },
+            {
+                "question": "Management decided to _______ the late payment fee for clients affected by the system outage.",
+                "options": [
+                    "waive",
+                    "waste",
+                    "widen",
+                    "wait"
+                ],
+                "answer": "waive",
+                "translation": "경영진은 시스템 장애의 영향을 받은 고객들의 연체 수수료를 면제하기로 결정했다."
+            }
+        ]
+    },
+    {
+        "id": 83,
+        "expression": "submit a request",
+        "meaning": "요청서를 제출하다; 요청하다",
+        "options": [
+            "submit",
+            "sustain",
+            "supply",
+            "suspend"
+        ],
+        "question": "Employees must _______ a request through the portal to reserve the conference room after business hours.",
+        "answer": "submit",
+        "translation": "직원들은 업무 시간 이후 회의실을 예약하려면 포털을 통해 요청서를 제출해야 한다.",
+        "quizzes": [
+            {
+                "question": "Employees must _______ a request through the portal to reserve the conference room after business hours.",
+                "options": [
+                    "submit",
+                    "sustain",
+                    "supply",
+                    "suspend"
+                ],
+                "answer": "submit",
+                "translation": "직원들은 업무 시간 이후 회의실을 예약하려면 포털을 통해 요청서를 제출해야 한다."
+            },
+            {
+                "question": "Please _______ a request to Facilities if you need temporary access to the storage area.",
+                "options": [
+                    "submit",
+                    "solve",
+                    "survive",
+                    "separate"
+                ],
+                "answer": "submit",
+                "translation": "보관 구역에 임시 출입이 필요하면 시설팀에 요청서를 제출해 주세요."
+            },
+            {
+                "question": "Team leaders should _______ a request for additional equipment before the monthly budget review.",
+                "options": [
+                    "submit",
+                    "switch",
+                    "shelter",
+                    "settle"
+                ],
+                "answer": "submit",
+                "translation": "팀장들은 월간 예산 검토 전에 추가 장비 요청서를 제출해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 84,
+        "expression": "check in",
+        "meaning": "체크인하다; 도착 등록 절차를 밟다",
+        "options": [
+            "in",
+            "on",
+            "over",
+            "out"
+        ],
+        "question": "All visitors must check _______ at the lobby desk and present a photo ID before entering the building.",
+        "answer": "in",
+        "translation": "모든 방문객은 건물에 들어가기 전에 로비 데스크에서 체크인하고 사진이 부착된 신분증을 제시해야 한다.",
+        "quizzes": [
+            {
+                "question": "All visitors must check _______ at the lobby desk and present a photo ID before entering the building.",
+                "options": [
+                    "in",
+                    "on",
+                    "over",
+                    "out"
+                ],
+                "answer": "in",
+                "translation": "모든 방문객은 건물에 들어가기 전에 로비 데스크에서 체크인하고 사진이 부착된 신분증을 제시해야 한다."
+            },
+            {
+                "question": "Guests can check _______ from 3 p.m., but luggage may be stored earlier at no extra cost.",
+                "options": [
+                    "in",
+                    "off",
+                    "up",
+                    "away"
+                ],
+                "answer": "in",
+                "translation": "투숙객은 오후 3시부터 체크인할 수 있지만, 짐은 그보다 일찍 추가 비용 없이 보관할 수 있다."
+            },
+            {
+                "question": "Participants should check _______ at least 15 minutes before the seminar begins.",
+                "options": [
+                    "in",
+                    "out",
+                    "over",
+                    "through"
+                ],
+                "answer": "in",
+                "translation": "참가자들은 세미나 시작 최소 15분 전에 체크인해야 한다."
+            }
+        ]
+    },
+    {
+        "id": 85,
+        "expression": "rule out",
+        "meaning": "배제하다; 가능성을 없애다",
+        "options": [
+            "out",
+            "off",
+            "over",
+            "away"
+        ],
+        "question": "The finance team cannot rule _______ an accounting error until all records are reviewed.",
+        "answer": "out",
+        "translation": "재무팀은 모든 기록을 검토하기 전까지 회계 오류 가능성을 배제할 수 없다.",
+        "quizzes": [
+            {
+                "question": "The finance team cannot rule _______ an accounting error until all records are reviewed.",
+                "options": [
+                    "out",
+                    "off",
+                    "over",
+                    "away"
+                ],
+                "answer": "out",
+                "translation": "재무팀은 모든 기록을 검토하기 전까지 회계 오류 가능성을 배제할 수 없다."
+            },
+            {
+                "question": "After the inspection, the mechanic ruled _______ engine failure as the cause of the noise.",
+                "options": [
+                    "out",
+                    "up",
+                    "across",
+                    "into"
+                ],
+                "answer": "out",
+                "translation": "점검 후 정비사는 엔진 고장을 소음의 원인으로 배제했다."
+            },
+            {
+                "question": "We should not rule _______ delivery delays during the holiday season.",
+                "options": [
+                    "out",
+                    "down",
+                    "under",
+                    "through"
+                ],
+                "answer": "out",
+                "translation": "연휴 시즌에는 배송 지연 가능성을 배제해서는 안 된다."
+            }
+        ]
+    },
+    {
+        "id": 86,
+        "expression": "in advance",
+        "meaning": "미리; 사전에",
+        "options": [
+            "advance",
+            "priority",
+            "detail",
+            "sequence"
+        ],
+        "question": "Please submit the attendee names in _______ so visitor badges can be prepared before the workshop.",
+        "answer": "advance",
+        "translation": "워크숍 전에 방문 배지를 준비할 수 있도록 참석자 명단을 미리 제출해 주세요.",
+        "quizzes": [
+            {
+                "question": "Please submit the attendee names in _______ so visitor badges can be prepared before the workshop.",
+                "options": [
+                    "advance",
+                    "priority",
+                    "detail",
+                    "sequence"
+                ],
+                "answer": "advance",
+                "translation": "워크숍 전에 방문 배지를 준비할 수 있도록 참석자 명단을 미리 제출해 주세요."
+            },
+            {
+                "question": "Parking passes must be requested two business days in _______.",
+                "options": [
+                    "advance",
+                    "arrival",
+                    "line",
+                    "notice"
+                ],
+                "answer": "advance",
+                "translation": "주차 패스는 영업일 기준 이틀 전에 미리 요청해야 한다."
+            },
+            {
+                "question": "We recommend booking the training session in _______ because seating is limited.",
+                "options": [
+                    "advance",
+                    "response",
+                    "general",
+                    "charge"
+                ],
+                "answer": "advance",
+                "translation": "좌석이 제한되어 있으므로 교육 세션은 미리 예약하는 것이 좋다."
+            }
+        ]
+    },
+    {
+        "id": 87,
+        "expression": "in stock",
+        "meaning": "재고가 있는",
+        "options": [
+            "stock",
+            "storage",
+            "supply",
+            "shipment"
+        ],
+        "question": "The laptop model you asked about is currently in _______ and can be shipped today.",
+        "answer": "stock",
+        "translation": "문의하신 노트북 모델은 현재 재고가 있어 오늘 발송할 수 있습니다.",
+        "quizzes": [
+            {
+                "question": "The laptop model you asked about is currently in _______ and can be shipped today.",
+                "options": [
+                    "stock",
+                    "storage",
+                    "supply",
+                    "shipment"
+                ],
+                "answer": "stock",
+                "translation": "문의하신 노트북 모델은 현재 재고가 있어 오늘 발송할 수 있습니다."
+            },
+            {
+                "question": "Only the gray version is in _______ at the moment; the black one is expected next week.",
+                "options": [
+                    "stock",
+                    "storage",
+                    "loading",
+                    "demand"
+                ],
+                "answer": "stock",
+                "translation": "현재는 회색 버전만 재고가 있고, 검은색은 다음 주에 입고될 예정이다."
+            },
+            {
+                "question": "If an item is not in _______, delivery may take an additional five business days.",
+                "options": [
+                    "stock",
+                    "transit",
+                    "order",
+                    "bulk"
+                ],
+                "answer": "stock",
+                "translation": "상품에 재고가 없으면 배송에 영업일 기준 5일이 추가로 걸릴 수 있다."
+            }
+        ]
+    },
+    {
+        "id": 88,
+        "expression": "free of charge",
+        "meaning": "무료로",
+        "options": [
+            "charge",
+            "cost",
+            "fare",
+            "expense"
+        ],
+        "question": "Customers who receive the wrong item will be sent a replacement free of _______.",
+        "answer": "charge",
+        "translation": "잘못된 상품을 받은 고객에게는 무료로 교환품이 발송됩니다.",
+        "quizzes": [
+            {
+                "question": "Customers who receive the wrong item will be sent a replacement free of _______.",
+                "options": [
+                    "charge",
+                    "cost",
+                    "fare",
+                    "expense"
+                ],
+                "answer": "charge",
+                "translation": "잘못된 상품을 받은 고객에게는 무료로 교환품이 발송됩니다."
+            },
+            {
+                "question": "Printed brochures are available free of _______ at the information desk.",
+                "options": [
+                    "charge",
+                    "value",
+                    "tax",
+                    "debit"
+                ],
+                "answer": "charge",
+                "translation": "인쇄 브로셔는 안내 데스크에서 무료로 받을 수 있다."
+            },
+            {
+                "question": "The airport shuttle is provided free of _______ for hotel guests staying two nights or more.",
+                "options": [
+                    "charge",
+                    "price",
+                    "rental",
+                    "traffic"
+                ],
+                "answer": "charge",
+                "translation": "공항 셔틀은 2박 이상 숙박하는 호텔 투숙객에게 무료로 제공된다."
+            }
+        ]
+    },
+    {
+        "id": 89,
+        "expression": "fully booked",
+        "meaning": "예약이 꽉 찬; 만실의",
+        "options": [
+            "fully",
+            "widely",
+            "strictly",
+            "closely"
+        ],
+        "question": "The hotel is _______ booked during the trade convention, so nearby accommodations are also limited.",
+        "answer": "fully",
+        "translation": "그 호텔은 박람회 기간 동안 예약이 꽉 차 있어서 주변 숙소도 거의 남아 있지 않다.",
+        "quizzes": [
+            {
+                "question": "The hotel is _______ booked during the trade convention, so nearby accommodations are also limited.",
+                "options": [
+                    "fully",
+                    "widely",
+                    "strictly",
+                    "closely"
+                ],
+                "answer": "fully",
+                "translation": "그 호텔은 박람회 기간 동안 예약이 꽉 차 있어서 주변 숙소도 거의 남아 있지 않다."
+            },
+            {
+                "question": "Our 2 p.m. consultation slots are already _______ booked for next Thursday.",
+                "options": [
+                    "fully",
+                    "lightly",
+                    "barely",
+                    "openly"
+                ],
+                "answer": "fully",
+                "translation": "다음 주 목요일 오후 2시 상담 시간대는 이미 예약이 모두 찼다."
+            },
+            {
+                "question": "The conference center was _______ booked within three days of registration opening.",
+                "options": [
+                    "fully",
+                    "properly",
+                    "hardly",
+                    "recently"
+                ],
+                "answer": "fully",
+                "translation": "그 컨퍼런스 센터는 등록 시작 후 사흘 만에 예약이 전부 마감되었다."
+            }
+        ]
+    },
+    {
+        "id": 90,
+        "expression": "entitled to",
+        "meaning": "~을 받을 권리가 있는; 자격이 있는",
+        "options": [
+            "entitled",
+            "related",
+            "devoted",
+            "subject"
+        ],
+        "question": "Employees are _______ to reimbursement for approved travel expenses under the current policy.",
+        "answer": "entitled",
+        "translation": "현행 규정에 따라 직원들은 승인된 출장 경비를 환급받을 권리가 있다.",
+        "quizzes": [
+            {
+                "question": "Employees are _______ to reimbursement for approved travel expenses under the current policy.",
+                "options": [
+                    "entitled",
+                    "related",
+                    "devoted",
+                    "subject"
+                ],
+                "answer": "entitled",
+                "translation": "현행 규정에 따라 직원들은 승인된 출장 경비를 환급받을 권리가 있다."
+            },
+            {
+                "question": "Members are _______ to a discounted room rate during the annual conference.",
+                "options": [
+                    "entitled",
+                    "crowded",
+                    "likely",
+                    "recent"
+                ],
+                "answer": "entitled",
+                "translation": "회원들은 연례 컨퍼런스 기간 동안 할인된 객실 요금을 받을 자격이 있다."
+            },
+            {
+                "question": "Under the new guideline, part-time staff are not _______ to paid parking permits.",
+                "options": [
+                    "entitled",
+                    "available",
+                    "similar",
+                    "adequate"
+                ],
+                "answer": "entitled",
+                "translation": "새 지침에 따르면 파트타임 직원은 유료 주차 허가를 받을 자격이 없다."
+            }
+        ]
+    }
+];
+
+COLLOCATION_DATA.push(...COLLOCATION_ADDITIONS);
