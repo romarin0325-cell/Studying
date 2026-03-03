@@ -3357,7 +3357,10 @@
                     this.state.inventory = [];
                     this.state.deck = [null, null, null];
 
-                    let allCards = GameUtils.buildCardPool(this.global);
+                    let allCards = GameUtils.buildCardPool(this.global, {
+                        includeTranscendence: true,
+                        activeTranscendenceCards: this.state.activeTranscendenceCards
+                    });
                     allCards.sort(() => Math.random() - 0.5);
 
                     const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
