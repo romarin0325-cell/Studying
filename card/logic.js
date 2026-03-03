@@ -714,6 +714,9 @@ const SideEffects = {
                             ctx.target.buffs['stun'] = 1;
                             logMsg.push("여신(기절)");
                             break;
+                        case 'gale':
+                            logMsg.push("질풍(3.0배)");
+                            break;
                     }
                 });
                 if (logMsg.length > 0) ctx.logFn(`[꿈의형태] 초월 효과 발동! (${logMsg.join(', ')})`);
@@ -1076,6 +1079,10 @@ const Logic = {
                     case 'twinkle_party': // 트윙클: 3배율
                         mult += 3.0;
                         logMsg.push("트윙클(3.0배)");
+                        break;
+                    case 'gale': // 질풍: 3배율
+                        mult += 3.0;
+                        logMsg.push("질풍(3.0배)");
                         break;
                 }
             });

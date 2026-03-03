@@ -2672,7 +2672,8 @@
                                 RPG.log('[아티팩트] 만화경: 필드 버프 재구성!');
 
                                 // Get all available buff keys
-                                const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS);
+                                const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS)
+                                    .filter(buffId => buffId !== 'gale');
 
                                 // Select unique random buffs
                                 let pool = [...allBuffs].sort(() => 0.5 - Math.random());
