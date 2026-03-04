@@ -203,6 +203,7 @@ const GameUtils = {
      * @param {boolean} [options.includeTranscendence=false] - Include active transcendence cards
      * @param {string[]} [options.activeTranscendenceCards=[]] - IDs of active transcendence cards
      * @param {boolean} [options.excludeTranscendence=false] - Filter out transcendence grade cards
+     * @param {boolean} [options.excludeEvent=false] - Filter out event grade cards
      * @param {string}  [options.maxGrade] - Max grade filter: 'rare' or 'epic'
      * @returns {Array} Array of card objects
      */
@@ -224,6 +225,11 @@ const GameUtils = {
         // Exclude transcendence grade
         if (options.excludeTranscendence) {
             pool = pool.filter(c => c.grade !== 'transcendence');
+        }
+
+        // Exclude event grade
+        if (options.excludeEvent) {
+            pool = pool.filter(c => c.grade !== 'event');
         }
 
         // Apply max grade filter
