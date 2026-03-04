@@ -61,23 +61,53 @@ const CARDS = [
         ]
     },
     {
-        id: 'rumi_bunny', name: '루미(바니)', grade: 'legend', element: 'water', role: 'buffer', hide_from_gacha: true,
-        stats: { hp: 500, atk: 90, matk: 120, def: 80, mdef: 90 },
-        trait: { type: 'syn_water_nature', desc: '덱에 물 자연이 있을 경우, 문라이트세레나에 트윙클파티 필드버프 추가발동' },
+        id: 'rumi_bunny', name: '루미(바니)', grade: 'event', element: 'dark', role: 'balancer', hide_from_gacha: true,
+        stats: { hp: 360, atk: 110, matk: 90, def: 65, mdef: 45 },
+        trait: { type: 'party_stat_boost', stat: 'atk', val: 30, desc: '파티 전체 공격력 30%상승' },
         skills: [
-            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '필드버프 스타파우더 발동', effects: [{ type: 'field_buff', id: 'star_powder' }] },
-            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동', effects: [{ type: 'field_buff', id: 'moon_bless' }] },
-            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '미드나잇쇼', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '암흑, 부식 부여', effects: [{ type: 'debuff', id: 'darkness' }, { type: 'debuff', id: 'corrosion' }] },
+            { name: '커튼콜', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '저주 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'curse', mult: 3.0 }] }
         ]
     },
     {
-        id: 'rumi_maid', name: '루미(메이드)', grade: 'legend', element: 'water', role: 'buffer', hide_from_gacha: true,
-        stats: { hp: 500, atk: 90, matk: 120, def: 80, mdef: 90 },
-        trait: { type: 'syn_water_nature', desc: '덱에 물 자연이 있을 경우, 문라이트세레나에 트윙클파티 필드버프 추가발동' },
+        id: 'rumi_maid', name: '루미(메이드)', grade: 'event', element: 'nature', role: 'balancer', hide_from_gacha: true,
+        stats: { hp: 370, atk: 85, matk: 80, def: 80, mdef: 55 },
+        trait: { type: 'party_stat_boost', stat: 'def', val: 30, desc: '파티 전체 방어력 30%상승' },
         skills: [
-            { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '필드버프 스타파우더 발동', effects: [{ type: 'field_buff', id: 'star_powder' }] },
-            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동', effects: [{ type: 'field_buff', id: 'moon_bless' }] },
-            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '특제생크림', type: 'sup', tier: 3, cost: 30, desc: '필드버프 대지의축복, 스타파우더 부여', effects: [{ type: 'field_buff', id: 'earth_bless' }, { type: 'field_buff', id: 'star_powder' }] },
+            { name: '달콤한유혹', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '약화, 저주 부여', effects: [{ type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }] }
+        ]
+    },
+    {
+        id: 'rumi_miko', name: '루미(무녀)', grade: 'event', element: 'fire', role: 'balancer', hide_from_gacha: true,
+        stats: { hp: 355, atk: 85, matk: 110, def: 55, mdef: 65 },
+        trait: { type: 'party_stat_boost', stat: 'matk', val: 30, desc: '파티 전체 마법공격력 30%상승' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '파마부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열, 침묵 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'silence' }] },
+            { name: '화염부', type: 'sup', tier: 3, cost: 30, desc: '필드버프 태양의축복 발동', effects: [{ type: 'field_buff', id: 'sun_bless' }] }
+        ]
+    },
+    {
+        id: 'rumi_fairy', name: '루미(페어리)', grade: 'event', element: 'light', role: 'balancer', hide_from_gacha: true,
+        stats: { hp: 360, atk: 80, matk: 90, def: 55, mdef: 80 },
+        trait: { type: 'party_stat_boost', stat: 'mdef', val: 30, desc: '파티 전체 마법방어력 30%상승' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '요정의장난', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인, 약화 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'weak' }] },
+            { name: '요정의축복', type: 'sup', tier: 3, cost: 30, desc: '필드버프 성역, 스타파우더 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }, { type: 'field_buff', id: 'star_powder' }] }
+        ]
+    },
+    {
+        id: 'rumi_wedding', name: '루미(웨딩)', grade: 'event', element: 'water', role: 'balancer', hide_from_gacha: true,
+        stats: { hp: 360, atk: 95, matk: 95, def: 65, mdef: 65 },
+        trait: { type: 'party_stat_boost', stat: ['atk', 'matk', 'def', 'mdef'], val: 15, desc: '파티 전체 공격/마공 방어/마방 15%상승' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '하트샤워', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '디바인, 침묵 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'silence' }] },
+            { name: '순백의축복', type: 'sup', tier: 3, cost: 30, desc: '필드버프 운명의서약 부여', effects: [{ type: 'field_buff', id: 'destiny_oath' }] }
         ]
     },
     {
@@ -774,7 +804,7 @@ const BUFF_NAMES = {
     'magic_guard': '매직가드', 'guard': '가드',
     'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
     'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
-    'goddess_descent': '여신강림', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
+    'goddess_descent': '여신강림', 'destiny_oath': '운명의서약', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
     'star_powder': '스타파우더',
     'reaper_realm': '사신강림',
     'gale': '질풍'
