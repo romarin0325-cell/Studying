@@ -742,7 +742,7 @@ function spawnEnemy(run, sp){
     hp: hpScale,
     maxHp: hpScale,
     contact: Math.round(def.damage * stage.enemyContact),
-    reward: Math.round(def.reward * run.diff.gold * (sp.elite ? 1.5 : 1) * (isBoss ? run.mods.eliteGold : 1)),
+    reward: Math.round(def.reward * run.diff.gold * (sp.elite ? 1.5 : 1) * ((sp.elite || isBoss) ? run.mods.eliteGold : 1)),
     def,
     shield: def.shield ? hpScale * def.shield : 0,
     poison:0,
