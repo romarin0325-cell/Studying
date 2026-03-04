@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<title>균열 보루: 모바일 리팩토링</title>
+<link rel="stylesheet" href="./css/game.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <div id="hudLayer" class="hud hidden">
+    <div id="topHud">
+      <div id="brand" class="panel">
+        <div id="brandMark"></div>
+        <div id="brandText">
+          <b>균열 보루</b>
+          <span id="brandSub">모바일 로그라이크 디펜스</span>
+        </div>
+      </div>
+      <div id="statBar"></div>
+    </div>
+
+    <div id="contextPanel" class="panel">
+      <div class="label">작전 정보</div>
+      <div id="contextTitle">스테이지 준비</div>
+      <div id="contextText">타워를 고르고 빈 타일을 눌러 배치하세요. 왼쪽 조이스틱으로 영웅을 움직이고, 오른쪽 능력 버튼으로 스킬을 사용합니다.</div>
+      <div id="stageBadge">준비 단계</div>
+    </div>
+
+    <button id="startWaveBtn" class="ready">파동 시작<small id="startWaveSub">배치를 끝냈다면 바로 출격</small></button>
+
+    <div id="towerTray"></div>
+
+    <div id="joystick">
+      <div id="stickBase"><div id="stickThumb"></div></div>
+    </div>
+
+    <div id="actionStack">
+      <button id="abilityBtn" class="actionBtn"><div>능력</div><small id="abilitySmall">준비</small></button>
+      <button id="upgradeBtn" class="actionBtn" disabled><div>강화</div><small id="upgradeSmall">선택 필요</small></button>
+      <button id="sellBtn" class="actionBtn warn" disabled><div>판매</div><small id="sellSmall">선택 필요</small></button>
+    </div>
+
+    <div id="hintLine"></div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="titleScreen">
+    <div class="card panel">
+      <h1 class="cardTitle">균열 보루<br/>Rift Bastion</h1>
+      <p class="lead">
+        처음 버전의 고정 16:9 프레임과 초기화 충돌을 버리고, <b>모바일 크롬 기준</b>으로 다시 짠 싱글파일 로그라이크 디펜스입니다.
+        터치 조작, 리롤/유물/테크 드래프트, 스테이지 선택, 보스전, 자동 재배치를 전부 넣었습니다.
+      </p>
+      <div class="chipRow">
+        <div class="chip">터치 우선 입력</div>
+        <div class="chip">5 타워 + 3 영웅</div>
+        <div class="chip">30+ 테크</div>
+        <div class="chip">10 유물</div>
+        <div class="chip">생체군계 5종</div>
+        <div class="chip">레이아웃 5종</div>
+      </div>
+
+      <div class="titleGrid">
+        <div class="section">
+          <div class="sectionLabel">지휘관 선택</div>
+          <div id="heroGrid" class="optionGrid"></div>
+        </div>
+        <div class="section">
+          <div class="sectionLabel">난이도 / 기록</div>
+          <div id="diffGrid" class="optionGrid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px"></div>
+          <div id="metaBox" class="section" style="padding:14px;margin-top:12px">
+            <div class="metaRow"><span>최고 점수</span><strong id="bestScore">0</strong></div>
+            <div class="metaRow"><span>최장 스테이지</span><strong id="bestStage">0</strong></div>
+            <div class="metaRow"><span>클리어 횟수</span><strong id="clearCount">0</strong></div>
+          </div>
+          <button id="startRunBtn">런 시작</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalLayer" class="hidden">
+    <div class="modalCard panel">
+      <div id="modalTitle">선택</div>
+      <div id="modalText">하나를 고르세요.</div>
+      <div id="modalChoices"></div>
+      <div class="modalActions">
+        <button id="modalReroll" class="ghost hidden">리롤</button>
+        <button id="modalSecondary" class="ghost hidden">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
