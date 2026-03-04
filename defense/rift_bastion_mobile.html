@@ -72,7 +72,7 @@
   .actionBtn:disabled{opacity:.44}
 
   #joystick{position:absolute;left:calc(var(--safe-left) + 4px);bottom:calc(var(--safe-bottom) + 108px);width:128px;height:128px;border-radius:999px;z-index:6;pointer-events:auto;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 32px rgba(0,0,0,.2);touch-action:none}
-  #joystick::before{content:"・ｴ・・;position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.04em}
+  #joystick::before{content:"MOVE";position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.04em}
   #stickBase{position:relative;width:92px;height:92px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
   #stickThumb{position:absolute;left:50%;top:50%;width:42px;height:42px;margin-left:-21px;margin-top:-21px;border-radius:999px;background:linear-gradient(180deg,rgba(121,229,255,.34),rgba(70,112,190,.32));border:1px solid rgba(121,229,255,.26);box-shadow:0 8px 20px rgba(18,72,122,.24)}
 
@@ -167,21 +167,21 @@
       <div id="brand" class="panel">
         <div id="brandMark"></div>
         <div id="brandText">
-          <b>・・ｴ ・ｴ・ｨ</b>
-          <span id="brandSub">・ｨ・肥攵 ・懋ｷｸ・ｼ・ｴ增ｬ ・被慈・､</span>
+          <b>Rift Bastion</b>
+          <span id="brandSub">Tower Defense Runner</span>
         </div>
       </div>
       <div id="statBar"></div>
     </div>
 
     <div id="contextPanel" class="panel">
-      <div class="label">・卓・・簿ｳｴ</div>
-      <div id="contextTitle">・､奛護擽・ ・・・/div>
-      <div id="contextText">夋・誤･ｼ ・・ｴ・ ・・夋・ｼ・・・誤洳 ・ｰ・倆葺・ｸ・・ ・ｼ・ｽ ・ｰ・ｴ・､寀ｱ・ｼ・・・・寉・・・・・擽・, ・､・ｸ・ｽ ・･・･ ・・款・ｼ・・・､墲ｬ・・・ｬ・ｩ﨑ｩ・壱共.</div>
-      <div id="stageBadge">・・・・ｨ・・/div>
+      <div class="label">전투 상황</div>
+      <div id="contextTitle">준비</div>
+      <div id="contextText">타워 배치 후 시작 버튼을 눌러 웨이브를 처리하세요.</div>
+      <div id="stageBadge">대기 중</div>
     </div>
 
-    <button id="startWaveBtn" class="ready">甯誤徐 ・懍梠<small id="startWaveSub">・ｰ・俯･ｼ ・晤ヨ・､・ｴ ・罷｡・・懋ｲｩ</small></button>
+    <button id="startWaveBtn" class="ready">전투 시작<small id="startWaveSub">적 0기 예정 · 리롤 1</small></button>
 
     <div id="towerTray"></div>
 
@@ -190,9 +190,9 @@
     </div>
 
     <div id="actionStack">
-      <button id="abilityBtn" class="actionBtn"><div>・･・･</div><small id="abilitySmall">・・・/small></button>
-      <button id="upgradeBtn" class="actionBtn" disabled><div>・倣剩</div><small id="upgradeSmall">・夋・﨑・囈</small></button>
-      <button id="sellBtn" class="actionBtn warn" disabled><div>甯尖ｧ､</div><small id="sellSmall">・夋・﨑・囈</small></button>
+      <button id="abilityBtn" class="actionBtn"><div>스킬</div><small id="abilitySmall">준비</small></button>
+      <button id="upgradeBtn" class="actionBtn" disabled><div>강화</div><small id="upgradeSmall">선택 필요</small></button>
+      <button id="sellBtn" class="actionBtn warn" disabled><div>판매</div><small id="sellSmall">선택 필요</small></button>
     </div>
 
     <div id="hintLine"></div>
@@ -201,34 +201,34 @@
 
   <div id="titleScreen">
     <div class="card panel">
-      <h1 class="cardTitle">Rift Bastion<br/>Rift Bastion</h1>
+      <h1 class="cardTitle">Rift Bastion<br/>Mobile</h1>
       <p class="lead">
-        ・們搆 ・・・攪 ・・・16:9 嵓・溢桷・ｼ ・一ｸｰ嶹・・ｩ・護揆 ・・ｦｬ・, <b>・ｨ・肥攵 增ｬ・ｬ ・ｰ・</b>・ｼ・・・､・・・ ・ｱ・甯護攵 ・懋ｷｸ・ｼ・ｴ增ｬ ・被慈・､・・笈・､.
-        奓ｰ・・・ｰ・・ ・ｬ・､/・・ｼ/奛醐〓 ・罹椈嵓・敢, ・､奛護擽・ ・夋・ ・ｴ・､・・ ・尖徐 ・ｬ・ｰ・俯･ｼ ・・ｶ ・｣・溢慣・壱共.
+        Rift Bastion은 모바일 최적화된 탑뷰 방어 게임입니다. <b>다양한 영웅과</b> 타워 조합으로 웨이브를 클리어하세요.
+        웨이브마다 정예 적과 보스가 등장하고, 업그레이드 카드로 전략을 바꾸세요.
       </p>
       <div class="chipRow">
-        <div class="chip">奓ｰ・・・ｰ・ ・・･</div>
-        <div class="chip">5 夋・・+ 3 ・・寉</div>
-        <div class="chip">30+ 奛醐〓</div>
-        <div class="chip">10 ・・ｼ</div>
-        <div class="chip">・晧ｲｴ・ｰ・・5・・/div>
-        <div class="chip">・溢擽・・寃 5・・/div>
+        <div class="chip">타워 5종</div>
+        <div class="chip">초기 골드 +5</div>
+        <div class="chip">클리어 보너스 +30</div>
+        <div class="chip">스킬 쿨다운 단축</div>
+        <div class="chip">보상 증가 +5%</div>
+        <div class="chip">정예 보상 +5%</div>
       </div>
 
       <div class="titleGrid">
         <div class="section">
-          <div class="sectionLabel">・弴俾ｴ ・夋・/div>
+          <div class="sectionLabel">영웅 선택</div>
           <div id="heroGrid" class="optionGrid"></div>
         </div>
         <div class="section">
-          <div class="sectionLabel">・懍擽・・/ ・ｰ・・/div>
+          <div class="sectionLabel">난이도 선택</div>
           <div id="diffGrid" class="optionGrid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px"></div>
           <div id="metaBox" class="section" style="padding:14px;margin-top:12px">
-            <div class="metaRow"><span>・懋ｳ ・川・</span><strong id="bestScore">0</strong></div>
-            <div class="metaRow"><span>・懍棗 ・､奛護擽・</span><strong id="bestStage">0</strong></div>
-            <div class="metaRow"><span>增ｴ・ｬ・ｴ 巐滕・</span><strong id="clearCount">0</strong></div>
+            <div class="metaRow"><span>최고 점수</span><strong id="bestScore">0</strong></div>
+            <div class="metaRow"><span>최고 스테이지</span><strong id="bestStage">0</strong></div>
+            <div class="metaRow"><span>클리어 횟수</span><strong id="clearCount">0</strong></div>
           </div>
-          <button id="startRunBtn">・ｰ ・懍梠</button>
+          <button id="startRunBtn">게임 시작</button>
         </div>
       </div>
     </div>
@@ -236,12 +236,12 @@
 
   <div id="modalLayer" class="hidden">
     <div class="modalCard panel">
-      <div id="modalTitle">・夋・/div>
-      <div id="modalText">﨑俯ｘ・ｼ ・・ｴ・ｸ・・</div>
+      <div id="modalTitle">선택</div>
+      <div id="modalText">옵션을 선택해 진행하세요.</div>
       <div id="modalChoices"></div>
       <div class="modalActions">
-        <button id="modalReroll" class="ghost hidden">・ｬ・､</button>
-        <button id="modalSecondary" class="ghost hidden">・ｫ・ｰ</button>
+        <button id="modalReroll" class="ghost hidden">리롤</button>
+        <button id="modalSecondary" class="ghost hidden">확인</button>
       </div>
     </div>
   </div>
@@ -249,4 +249,5 @@
 <script type="module" src="./js/main.js"></script>
 </body>
 </html>
+
 
