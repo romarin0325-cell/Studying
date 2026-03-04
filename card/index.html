@@ -3378,6 +3378,7 @@
                     let allQuizzes = [];
                     GRAMMAR_DATA.forEach(lec => { allQuizzes = allQuizzes.concat(lec.quizzes); });
                     let q = allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
+                    this.state.lastArchiveQuizLectureId = q.lecture_id;
 
                     this.startGrammarQuiz(q,
                         () => { // Success
@@ -3562,7 +3563,21 @@
                             );
                         }
                     } else {
-                        this.toMenu();
+                        if (quizResult === false && this.state.lastArchiveQuizLectureId) {
+                            const lectureId = this.state.lastArchiveQuizLectureId;
+                            this.showConfirm(`오답입니다... 관련 문법 강좌(${lectureId}강)를 확인하시겠습니까?`,
+                                () => {
+                                    this.showLecture(lectureId, () => {
+                                        this.toMenu();
+                                    });
+                                },
+                                () => {
+                                    this.toMenu();
+                                }
+                            );
+                        } else {
+                            this.toMenu();
+                        }
                     }
                 });
             },
