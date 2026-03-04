@@ -127,6 +127,7 @@ const GAME_CONSTANTS = {
         'moon_bless': { matk: 0.3, evasion: 15 },
         'sanctuary': { matk: 0.3, mdef: 0.3 },
         'goddess_descent': { atk: 0.3, matk: 0.3, def: 0.3, mdef: 0.3 },
+        'destiny_oath': { atk: 0.3, matk: 0.3, def: 0.3, mdef: 0.3 },
         'earth_bless': { atk: 0.25, matk: 0.25 },
         'twinkle_party': { atk: 0.2, crit: 15 },
         'star_powder': { def: 0.4, mdef: 0.4 },
@@ -1068,6 +1069,10 @@ const Logic = {
                         mult += 4.0;
                         logMsg.push("여신(4.0배)");
                         break;
+                    case 'destiny_oath': // 운명의서약: 10배율
+                        mult += 10.0;
+                        logMsg.push("서약(10.0배)");
+                        break;
                     case 'reaper_realm': // 사신강림: 마방 50% 관통 + 1배율
                         {
                             let ignore = Math.floor(tgtStats.mdef * 0.5);
@@ -1188,6 +1193,23 @@ const Logic = {
                 p.matk = Math.floor(p.matk * (1 + boost));
             }
         }
+
+        // Party-wide Stat Boost Traits (Event)
+        const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0 };
+        activeCards.forEach(c => {
+            const tr = c.trait;
+            if (tr && tr.type === 'party_stat_boost') {
+                const stats = Array.isArray(tr.stat) ? tr.stat : [tr.stat];
+                stats.forEach(s => {
+                    if (partyBoost[s] !== undefined) partyBoost[s] += (tr.val || 0);
+                });
+            }
+        });
+
+        if (partyBoost.atk) p.atk = Math.floor(p.atk * (1 + partyBoost.atk / 100));
+        if (partyBoost.matk) p.matk = Math.floor(p.matk * (1 + partyBoost.matk / 100));
+        if (partyBoost.def) p.def = Math.floor(p.def * (1 + partyBoost.def / 100));
+        if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
 
         // Artifact: dragon_heart — dragon cards matk +50%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];

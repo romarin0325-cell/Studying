@@ -162,7 +162,10 @@ const DATE_WEATHER_OUTDOOR = ['갑작스러운 소나기', '강한 바람', '좋
 const DATE_KEYWORDS = ['귀여운 실수', '졸음', '미끄러짐', '젖음', '키스', '신남', '끼임', '찢어짐', '고장난지퍼', '완벽한데이트'];
 const SECRET_DATE_SETS = [
     { theme: '저택', outfit: '메이드복', location: 'indoor', keyword: '특제생크림케이크만들기', word: 'love', secret: true, cardId: 'rumi_maid', cardName: '루미(메이드)' },
-    { theme: '스테이지', outfit: '바니걸의상', location: 'indoor', keyword: '형아만을 위한 스테이지 공연', word: 'love', secret: true, cardId: 'rumi_bunny', cardName: '루미(바니)' }
+    { theme: '스테이지', outfit: '바니걸의상', location: 'indoor', keyword: '형아만을 위한 스테이지 공연', word: 'love', secret: true, cardId: 'rumi_bunny', cardName: '루미(바니)' },
+    { theme: '신사', outfit: '무녀복', location: 'outdoor', keyword: '부적달다 넘어져서 안기기', word: 'love', secret: true, cardId: 'rumi_miko', cardName: '루미(무녀)' },
+    { theme: '숲', outfit: '요정옷', location: 'outdoor', keyword: '덩굴얽혀서 부끄러운 포즈', word: 'love', secret: true, cardId: 'rumi_fairy', cardName: '루미(페어리)' },
+    { theme: '결혼식장', outfit: '웨딩드레스', location: 'indoor', keyword: '결혼식', word: 'love', secret: true, cardId: 'rumi_wedding', cardName: '루미(웨딩)' }
 ];
 
 // Add getDateContent to GameAPI

@@ -160,6 +160,27 @@
             color: #bdbdbd;
         }
 
+        @keyframes glow-event {
+            0% {
+                box-shadow: 0 0 5px #ff80ab;
+            }
+
+            50% {
+                box-shadow: 0 0 15px #ff80ab;
+            }
+
+            100% {
+                box-shadow: 0 0 5px #ff80ab;
+            }
+        }
+
+        .card-item.event {
+            border-color: #ff80ab;
+            color: #ff80ab;
+            animation: glow-event 2s infinite;
+            background: #2a1a22;
+        }
+
         @keyframes glow-gold {
             0% {
                 box-shadow: 0 0 5px #ffd700;
@@ -2673,7 +2694,7 @@
 
                                 // Get all available buff keys
                                 const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS)
-                                    .filter(buffId => buffId !== 'gale');
+                                    .filter(buffId => buffId !== 'gale' && buffId !== 'destiny_oath');
 
                                 // Select unique random buffs
                                 let pool = [...allBuffs].sort(() => 0.5 - Math.random());
@@ -3679,6 +3700,7 @@
                     'moon_bless': '마공 +30%, 회피율 +15%',
                     'sanctuary': '마공 +30%, 마방 +30%',
                     'goddess_descent': '물공/마공 +30%, 방어/마방 +30%',
+                    'destiny_oath': '물공/마공 +30%, 방어/마방 +30%',
                     'earth_bless': '물공/마공 +25%',
                     'twinkle_party': '물공 +20%, 치명타율 +15%',
                     'star_powder': '방어/마방 +40%',
@@ -4503,10 +4525,13 @@
                 // Check secret date flag first
                 if (this.global.secretDateFlag) {
                     const secretSet = SECRET_DATE_SETS[Math.floor(Math.random() * SECRET_DATE_SETS.length)];
+                    const weather = (secretSet.location === 'outdoor')
+                        ? DATE_WEATHER_OUTDOOR[Math.floor(Math.random() * DATE_WEATHER_OUTDOOR.length)]
+                        : '실내';
                     return {
                         theme: secretSet.theme,
                         outfit: secretSet.outfit,
-                        weather: '실내',
+                        weather: weather,
                         keyword: secretSet.keyword,
                         word: secretSet.word,
                         secret: true,
@@ -4615,7 +4640,8 @@
                     const cardId = dateParams.cardId;
                     const cardName = dateParams.cardName;
 
-                    if (!this.state.inventory.includes(cardId)) {
+                    const alreadyOwned = this.state.inventory.includes(cardId);
+                    if (!alreadyOwned) {
                         this.state.inventory.push(cardId);
                     }
 
@@ -4630,7 +4656,7 @@
                             </div>
                             루미와의 특별한 비밀 데이트가 끝났어요!<br><br>
                             <b style="color:#ffd700; font-size:1.2rem;">🎴 이벤트 카드 획득: ${cardName}</b><br>
-                            <span style="font-size:0.8rem; color:#aaa;">(카드가 인벤토리에 추가되었습니다)</span>
+                            <span style="font-size:0.8rem; color:#aaa;">${alreadyOwned ? '(이미 보유 중이라 추가 지급은 없습니다)' : '(카드가 인벤토리에 추가되었습니다)'}</span>
                         </div>`
                     );
                 } else {
