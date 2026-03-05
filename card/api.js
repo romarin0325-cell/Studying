@@ -36,9 +36,10 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 
 const GameAPI = {
     async getTutoringContent(apiKey, targetData, type) {
-        // 1. 30% 확률 (The 'Accidental' Event)
+        // 1. 30% 확률 (30스테이지 이상 시 50%) (The 'Accidental' Event)
         const enableEvent = RPG.global.tutoringEventEnabled !== false;
-        const isMisunderstandingMode = enableEvent && Math.random() < 0.3;
+        const prob = (RPG.state.enemyScale >= 30) ? 0.5 : 0.3;
+        const isMisunderstandingMode = enableEvent && Math.random() < prob;
 
         let targetInfo = "";
         if (type === 'collocation') {

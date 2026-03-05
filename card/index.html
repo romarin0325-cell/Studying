@@ -4662,7 +4662,8 @@
                         </div>`
                     );
                 } else {
-                    const triggerSecret = Math.random() < 0.1;
+                    const prob = (this.state.enemyScale >= 30) ? 0.3 : 0.1;
+                    const triggerSecret = Math.random() < prob;
 
                     this.saveGlobalData();
                     this.saveGame();
