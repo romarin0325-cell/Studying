@@ -202,6 +202,7 @@ const GameUtils = {
      * @param {Object} [options]
      * @param {boolean} [options.includeTranscendence=false] - Include active transcendence cards
      * @param {string[]} [options.activeTranscendenceCards=[]] - IDs of active transcendence cards
+     * @param {string[]} [options.activeEventCards=[]] - IDs of active event cards for the current run
      * @param {boolean} [options.excludeTranscendence=false] - Filter out transcendence grade cards
      * @param {boolean} [options.excludeEvent=false] - Filter out event grade cards
      * @param {string}  [options.maxGrade] - Max grade filter: 'rare' or 'epic'
@@ -220,6 +221,12 @@ const GameUtils = {
         if (options.includeTranscendence && options.activeTranscendenceCards && options.activeTranscendenceCards.length > 0) {
             const transObjs = TRANSCENDENCE_CARDS.filter(c => options.activeTranscendenceCards.includes(c.id));
             pool = pool.concat(transObjs);
+        }
+
+        // [목적] 카오스/드래프트 모드 등에서 런 도중 획득한 이벤트 카드를 랜덤 풀에 포함시키기 위함
+        if (options.activeEventCards && options.activeEventCards.length > 0) {
+            const eventObjs = CARDS.filter(c => c.grade === 'event' && options.activeEventCards.includes(c.id));
+            pool = pool.concat(eventObjs);
         }
 
         // Exclude transcendence grade
