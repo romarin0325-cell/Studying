@@ -1867,7 +1867,9 @@
                     quiz_stats: { correct: 0, total: 0 },
                     chaosPool: [],
                     draft: { active: false, round: 0, rerolls: 3, currentOptions: [] },
-                    artifacts: []
+                    artifacts: [],
+                    // [목적] 카오스/드래프트 모드에서 해당 런에서만 유효한 이벤트 카드 목록을 초기화
+                    activeEventCards: []
                 };
 
                 // Transfer Pending Transcendence to Active State (Endless Only)
@@ -1882,7 +1884,9 @@
                 if (mode === 'chaos') {
                     let allCards = GameUtils.buildCardPool(this.global, {
                         includeTranscendence: true,
-                        activeTranscendenceCards: this.state.activeTranscendenceCards
+                        activeTranscendenceCards: this.state.activeTranscendenceCards,
+                        // [목적] 해당 런에서 획득한 이벤트 카드를 카오스 모드 시작 풀에 포함
+                        activeEventCards: this.state.activeEventCards
                     });
 
                     allCards.sort(() => Math.random() - 0.5);
@@ -2255,7 +2259,9 @@
 
                         let allCards = GameUtils.buildCardPool(this.global, {
                             includeTranscendence: true,
-                            activeTranscendenceCards: this.state.activeTranscendenceCards
+                            activeTranscendenceCards: this.state.activeTranscendenceCards,
+                            // [목적] 카오스 셔플 시 획득한 이벤트 카드를 풀에 포함
+                            activeEventCards: this.state.activeEventCards
                         });
 
                         allCards.sort(() => Math.random() - 0.5);
@@ -3240,7 +3246,9 @@
             generateDraftOptions() {
                 let pool = GameUtils.buildCardPool(this.global, {
                     includeTranscendence: true,
-                    activeTranscendenceCards: this.state.activeTranscendenceCards
+                    activeTranscendenceCards: this.state.activeTranscendenceCards,
+                    // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함
+                    activeEventCards: this.state.activeEventCards
                 });
 
                 let options = [];
@@ -3383,7 +3391,9 @@
 
                     let allCards = GameUtils.buildCardPool(this.global, {
                         includeTranscendence: true,
-                        activeTranscendenceCards: this.state.activeTranscendenceCards
+                        activeTranscendenceCards: this.state.activeTranscendenceCards,
+                        // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
+                        activeEventCards: this.state.activeEventCards
                     });
                     allCards.sort(() => Math.random() - 0.5);
 
@@ -4642,9 +4652,27 @@
                     const cardId = dateParams.cardId;
                     const cardName = dateParams.cardName;
 
-                    const alreadyOwned = this.state.inventory.includes(cardId);
-                    if (!alreadyOwned) {
-                        this.state.inventory.push(cardId);
+                    const isPoolMode = ['chaos', 'draft'].includes(this.state.mode);
+                    let rewardDetail = "";
+
+                    if (isPoolMode) {
+                        // [목적] 카오스/드래프트 모드에서는 인벤토리에 즉시 추가하지 않고, 해당 런의 랜덤 풀에 추가하여 랜덤하게 등장하게 함 (해당 런 전용)
+                        if (!this.state.activeEventCards) this.state.activeEventCards = [];
+                        if (!this.state.activeEventCards.includes(cardId)) {
+                            this.state.activeEventCards.push(cardId);
+                            rewardDetail = "(해당 런의 카드 풀에 추가되었습니다. 앞으로 랜덤하게 등장합니다!)";
+                        } else {
+                            rewardDetail = "(이미 카드 풀에 포함되어 있습니다)";
+                        }
+                    } else {
+                        // [목적] 일반 모드에서는 기존 방식대로 인벤토리에 즉시 추가
+                        const alreadyOwned = this.state.inventory.includes(cardId);
+                        if (!alreadyOwned) {
+                            this.state.inventory.push(cardId);
+                            rewardDetail = "(카드가 인벤토리에 추가되었습니다)";
+                        } else {
+                            rewardDetail = "(이미 보유 중이라 추가 지급은 없습니다)";
+                        }
                     }
 
                     this.global.secretDateFlag = false;
@@ -4658,7 +4686,7 @@
                             </div>
                             루미와의 특별한 비밀 데이트가 끝났어요!<br><br>
                             <b style="color:#ffd700; font-size:1.2rem;">🎴 이벤트 카드 획득: ${cardName}</b><br>
-                            <span style="font-size:0.8rem; color:#aaa;">${alreadyOwned ? '(이미 보유 중이라 추가 지급은 없습니다)' : '(카드가 인벤토리에 추가되었습니다)'}</span>
+                            <span style="font-size:0.8rem; color:#aaa;">${rewardDetail}</span>
                         </div>`
                     );
                 } else {
