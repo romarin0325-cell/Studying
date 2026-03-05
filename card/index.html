@@ -2171,6 +2171,7 @@
                 // Apply to 12 random cards
                 let pool = GameUtils.buildCardPool(this.global, {
                     excludeTranscendence: true,
+                    excludeEvent: true,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
                 });
 
@@ -2207,6 +2208,7 @@
                 // 1. Build Pool
                 let pool = GameUtils.buildCardPool(this.global, {
                     excludeTranscendence: true,
+                    excludeEvent: true,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
                 });
 
