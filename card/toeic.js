@@ -6,7 +6,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "1-1",
-        "question": "(현재완료 vs 과거 / already 함정)\nThe project team _______ the revised timeline so far, so we can proceed with the next phase.",
+        "question": "The project team _______ the revised timeline so far, so we can proceed with the next phase.",
         "options": [
           "submitted",
           "has submitted",
@@ -17,7 +17,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "1-2",
-        "question": "(진행형 vs 단순현재 / now + 상태 보고)\nWe _______ the supplier’s final quote now, and we expect to finalize it by this afternoon.",
+        "question": "We _______ the supplier’s final quote now, and we expect to finalize it by this afternoon.",
         "options": [
           "review",
           "reviewed",
@@ -28,7 +28,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "1-3",
-        "question": "(업무 어휘 + 시제 / yesterday 함정)\nMs. Han _______ the client’s request yesterday, but she has not received a reply yet.",
+        "question": "Ms. Han _______ the client’s request yesterday, but she has not received a reply yet.",
         "options": [
           "confirms",
           "confirmed",
@@ -161,7 +161,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "4-1",
-        "question": "(collocation: comply with)\nAll employees must comply _______ the updated security guidelines.",
+        "question": "All employees must comply _______ the updated security guidelines.",
         "options": [
           "to",
           "with",
@@ -172,7 +172,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "4-2",
-        "question": "(고정표현: in accordance with)\nThe report was prepared in accordance _______ the procedures outlined in the manual.",
+        "question": "The report was prepared in accordance _______ the procedures outlined in the manual.",
         "options": [
           "to",
           "with",
@@ -183,7 +183,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "4-3",
-        "question": "(confusable: ensure vs assure)\nPlease _______ that the meeting room is reserved for Friday afternoon.",
+        "question": "Please _______ that the meeting room is reserved for Friday afternoon.",
         "options": [
           "assure",
           "ensure",
@@ -201,7 +201,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "5-1",
-        "question": "(each + 단수동사 / 수일치 함정)\nEach of the new interns _______ required to complete the orientation by Monday.",
+        "question": "Each of the new interns _______ required to complete the orientation by Monday.",
         "options": [
           "are",
           "is",
@@ -212,7 +212,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "5-2",
-        "question": "(this/these 지시 대상 + 문맥 정확성)\nThe finance department reviewed the invoices and flagged several errors. _______ issues must be corrected before payment is processed.",
+        "question": "The finance department reviewed the invoices and flagged several errors. _______ issues must be corrected before payment is processed.",
         "options": [
           "This",
           "That",
@@ -223,7 +223,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "5-3",
-        "question": "(few/a few 의미 차이 + 수량표현)\nOnly _______ employees volunteered to work overtime, so the manager was able to keep the original deadline.",
+        "question": "Only _______ employees volunteered to work overtime, so the manager was able to keep the original deadline.",
         "options": [
           "a few",
           "few",
@@ -304,7 +304,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "7-1",
-        "question": "(be + p.p. 수동태)\nThe final contract _______ by the legal department before it was sent to the client.",
+        "question": "The final contract _______ by the legal department before it was sent to the client.",
         "options": [
           "was reviewed",
           "has been reviewed",
@@ -315,7 +315,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "7-2",
-        "question": "(have/get something done)\nWe had the damaged equipment _______ by a certified technician last week.",
+        "question": "We had the damaged equipment _______ by a certified technician last week.",
         "options": [
           "repair",
           "repairing",
@@ -326,7 +326,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "7-3",
-        "question": "(품사 혼동: approve/approval)\nThe manager’s _______ is required before any refunds can be issued.",
+        "question": "The manager’s _______ is required before any refunds can be issued.",
         "options": [
           "approve",
           "approval",
@@ -396,7 +396,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "9-1",
-        "question": "(because/so/therefore 구분)\nThe shipment was delayed _______ a severe storm disrupted port operations.",
+        "question": "The shipment was delayed _______ a severe storm disrupted port operations.",
         "options": [
           "because",
           "so",
@@ -407,7 +407,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "9-2",
-        "question": "(although/however 대조 구조)\n_______ the new software is expensive, it reduces processing time significantly.",
+        "question": "_______ the new software is expensive, it reduces processing time significantly.",
         "options": [
           "However",
           "Although",
@@ -418,7 +418,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "9-3",
-        "question": "(부사 위치: only / 문법 함정)\nThe marketing team will _______ release the report to department heads, not to external partners.",
+        "question": "The marketing team will _______ release the report to department heads, not to external partners.",
         "options": [
           "only",
           "currently",
@@ -499,7 +499,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "11-1",
-        "question": "(문맥상 자연스러운 동사 선택: postpone)\nDue to the speaker’s illness, the company decided to _______ the seminar until next week.",
+        "question": "Due to the speaker’s illness, the company decided to _______ the seminar until next week.",
         "options": [
           "postpone",
           "allocate",
@@ -510,7 +510,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "11-2",
-        "question": "(동사-명사 결합: submit an application)\nApplicants must _______ an online application by March 15.",
+        "question": "Applicants must _______ an online application by March 15.",
         "options": [
           "submit",
           "enroll",
@@ -521,7 +521,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "11-3",
-        "question": "(confusable words: raise vs rise)\nThe company plans to _______ prices slightly to cover increased material costs.",
+        "question": "The company plans to _______ prices slightly to cover increased material costs.",
         "options": [
           "raise",
           "rise",
@@ -591,7 +591,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "13-1",
-        "question": "(형용사 vs 부사 선택)\nThe consultant spoke _______ about the risks involved in the merger.",
+        "question": "The consultant spoke _______ about the risks involved in the merger.",
         "options": [
           "frank",
           "frankly",
@@ -602,7 +602,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "13-2",
-        "question": "(분사형 형용사: interested/interesting)\nEmployees are _______ in attending the training session on data privacy.",
+        "question": "Employees are _______ in attending the training session on data privacy.",
         "options": [
           "interesting",
           "interested",
@@ -613,7 +613,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "13-3",
-        "question": "(수식어 위치로 의미 달라짐 / only 함정)\nThe manager discussed the proposal with the team _______.",
+        "question": "The manager discussed the proposal with the team _______.",
         "options": [
           "only yesterday",
           "yesterday only",
@@ -694,7 +694,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "15-1",
-        "question": "(who/which/that 선택)\nThe consultant _______ prepared the market analysis will present the findings at Friday’s meeting.",
+        "question": "The consultant _______ prepared the market analysis will present the findings at Friday’s meeting.",
         "options": [
           "which",
           "who",
@@ -705,7 +705,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "15-2",
-        "question": "(관계부사 where/when)\nPlease note the date _______ the updated policy will take effect across all branches.",
+        "question": "Please note the date _______ the updated policy will take effect across all branches.",
         "options": [
           "where",
           "when",
@@ -716,7 +716,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "15-3",
-        "question": "(품사 함정: “절”이 필요한 자리인데 “구” 유도 / 접속사 vs 관계대명사)\nThe conference room _______ we reserved for the client briefing is no longer available due to maintenance.",
+        "question": "The conference room _______ we reserved for the client briefing is no longer available due to maintenance.",
         "options": [
           "where",
           "which",
@@ -786,7 +786,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "17-1",
-        "question": "(policy/procedure/guideline 구분)\nAll staff must follow the new security _______ when entering the server room, including the badge-check process.",
+        "question": "All staff must follow the new security _______ when entering the server room, including the badge-check process.",
         "options": [
           "policy",
           "procedure",
@@ -797,7 +797,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "17-2",
-        "question": "(report/summary/memo 구분)\nPlease send a brief _______ of today’s meeting to the department head by 5 p.m.",
+        "question": "Please send a brief _______ of today’s meeting to the department head by 5 p.m.",
         "options": [
           "report",
           "summary",
@@ -808,7 +808,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "17-3",
-        "question": "(confusable: verify vs confirm)\nBefore releasing the monthly statement, the accounting team must _______ the figures against the supporting documents.",
+        "question": "Before releasing the monthly statement, the accounting team must _______ the figures against the supporting documents.",
         "options": [
           "verify",
           "confirm",
@@ -889,7 +889,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "19-1",
-        "question": "(in/at/on 시간)\nThe audit will begin _______ 9:00 a.m. on Monday.",
+        "question": "The audit will begin _______ 9:00 a.m. on Monday.",
         "options": [
           "in",
           "on",
@@ -900,7 +900,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "19-2",
-        "question": "(because vs because of / 접속사 자리 함정)\nThe meeting was canceled _______ the project manager was out of town.",
+        "question": "The meeting was canceled _______ the project manager was out of town.",
         "options": [
           "because",
           "because of",
@@ -911,7 +911,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "19-3",
-        "question": "(전치사 결합: be interested in)\nMany candidates are interested _______ applying for the internship program.",
+        "question": "Many candidates are interested _______ applying for the internship program.",
         "options": [
           "to",
           "in",
@@ -981,7 +981,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "21-1",
-        "question": "(동명사만: avoid + V-ing)\nTo reduce delays, please avoid _______ requests at the last minute.",
+        "question": "To reduce delays, please avoid _______ requests at the last minute.",
         "options": [
           "submit",
           "to submit",
@@ -992,7 +992,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "21-2",
-        "question": "(둘 다 가능하나 의미/형태 함정 최소화: plan to + V)\nThe regional office plans _______ additional staff during the peak season.",
+        "question": "The regional office plans _______ additional staff during the peak season.",
         "options": [
           "hiring",
           "to hire",
@@ -1003,7 +1003,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "21-3",
-        "question": "(품사/형태 함정: be responsible for + V-ing / 명사)\nMs. Ortiz is responsible for _______ the weekly performance report.",
+        "question": "Ms. Ortiz is responsible for _______ the weekly performance report.",
         "options": [
           "prepare",
           "to prepare",
@@ -1084,7 +1084,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "23-1",
-        "question": "(available 의미/용법)\nA conference room will be _______ after 3 p.m. if you need a place to meet.",
+        "question": "A conference room will be _______ after 3 p.m. if you need a place to meet.",
         "options": [
           "available",
           "aware",
@@ -1095,7 +1095,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "23-2",
-        "question": "(-ed / -ing 형용사)\nThe staff members were _______ by the unexpected changes to the travel policy.",
+        "question": "The staff members were _______ by the unexpected changes to the travel policy.",
         "options": [
           "confusing",
           "confused",
@@ -1106,7 +1106,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "23-3",
-        "question": "(근접어 함정: effective vs efficient)\nThe new filing system is more _______ because it reduces the time needed to locate documents.",
+        "question": "The new filing system is more _______ because it reduces the time needed to locate documents.",
         "options": [
           "effective",
           "efficient",
@@ -1176,7 +1176,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "25-1",
-        "question": "(긴 주어 + 단수 동사)\nThe list of approved vendors _______ on the company intranet.",
+        "question": "The list of approved vendors _______ on the company intranet.",
         "options": [
           "are posted",
           "is posted",
@@ -1187,7 +1187,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "25-2",
-        "question": "(each/every 수일치 함정)\nEach of the applicants _______ required to submit two references.",
+        "question": "Each of the applicants _______ required to submit two references.",
         "options": [
           "are",
           "is",
@@ -1198,7 +1198,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "25-3",
-        "question": "(불가산/집합 명사: equipment)\nAll of the laboratory equipment _______ inspected once a month.",
+        "question": "All of the laboratory equipment _______ inspected once a month.",
         "options": [
           "are",
           "is",
@@ -1279,7 +1279,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "27-1",
-        "question": "(promptly 의미)\nPlease respond _______ to the client’s inquiry to avoid delays.",
+        "question": "Please respond _______ to the client’s inquiry to avoid delays.",
         "options": [
           "promptly",
           "recently",
@@ -1290,7 +1290,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "27-2",
-        "question": "(부사 위치: 문장/동사 앞 자연스러움)\nThe receptionist _______ forwarded your message to the supervisor.",
+        "question": "The receptionist _______ forwarded your message to the supervisor.",
         "options": [
           "promptly",
           "prompt",
@@ -1301,7 +1301,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "27-3",
-        "question": "(부사 vs 형용사 혼동: quick/quickly)\nThe technician completed the installation _______.",
+        "question": "The technician completed the installation _______.",
         "options": [
           "quick",
           "quickly",
@@ -1371,7 +1371,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "29-1",
-        "question": "(-tion 명사)\nCustomer _______ is measured through an online survey sent after each purchase.",
+        "question": "Customer _______ is measured through an online survey sent after each purchase.",
         "options": [
           "satisfy",
           "satisfaction",
@@ -1382,7 +1382,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "29-2",
-        "question": "(-ment 명사 / 구조로 판단)\nThe proposed budget includes an _______ for staff training and software licenses.",
+        "question": "The proposed budget includes an _______ for staff training and software licenses.",
         "options": [
           "allocate",
           "allocation",
@@ -1393,7 +1393,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "29-3",
-        "question": "(-ly 부사 / 의미는 비슷해도 품사로 걸러내기)\nThe new procedure must be followed _______ to prevent processing errors.",
+        "question": "The new procedure must be followed _______ to prevent processing errors.",
         "options": [
           "strict",
           "strictly",
