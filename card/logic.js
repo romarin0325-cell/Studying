@@ -369,6 +369,13 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult *= eff.mult;
             matched = true;
         }
+        else if (eff.condition === 'target_element') {
+            const elements = eff.elements || (eff.element ? [eff.element] : []);
+            if (elements.includes(ctx.target.element)) {
+                ctx.mult *= eff.mult;
+                matched = true;
+            }
+        }
 
         if (matched && eff.customLog) {
             ctx.logFn(eff.customLog);
@@ -393,6 +400,19 @@ const DAMAGE_EFFECT_HANDLERS = {
             else ctx.logFn(`${getBuffName(debuff)} ${count}스택 소모! 위력 ${m}배!`);
         }
     },
+    'consume_random_debuff_fixed_mult': (ctx, eff) => {
+        const count = eff.count || 1;
+        const pool = (eff.pool || []).filter(id => (ctx.target.buffs[id] || 0) >= count);
+        if (pool.length === 0) return;
+
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        ctx.target.buffs[pick] -= count;
+        if (ctx.target.buffs[pick] <= 0) delete ctx.target.buffs[pick];
+        ctx.mult *= eff.mult;
+
+        if (eff.customLog) ctx.logFn(eff.customLog);
+        else ctx.logFn(`${getBuffName(pick)} ${count}스택 랜덤 소모! 대미지 ${eff.mult}배!`);
+    },
     'consume_divine_add_darkness': (ctx, eff) => {
         if ((ctx.target.buffs['divine'] || 0) >= 1) {
             ctx.target.buffs['divine']--;
@@ -402,6 +422,16 @@ const DAMAGE_EFFECT_HANDLERS = {
         } else {
             ctx.logFn("소모할 디바인이 없어 효과가 발동하지 않았습니다.");
         }
+    },
+    'consume_field_buff_dmg': (ctx, eff) => {
+        const idx = ctx.fieldBuffs.findIndex(buff => buff.name === eff.buff);
+        if (idx === -1) return;
+
+        ctx.fieldBuffs.splice(idx, 1);
+        ctx.mult *= eff.mult;
+
+        if (eff.customLog) ctx.logFn(eff.customLog);
+        else ctx.logFn(`필드버프 [${getBuffName(eff.buff)}] 소모! 대미지 ${eff.mult}배!`);
     },
     'remove_field_buff_dmg': (ctx, eff) => {
         if (ctx.fieldBuffs.length > 0) {
@@ -968,6 +998,10 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn(`[특성] ${source.name}: 부식 대상 추가 피해!`);
             }
+            if (t.type === 'cond_target_elements_dmg' && Array.isArray(t.elements) && t.elements.includes(target.element)) {
+                dmgBonus += (t.val - 1.0);
+                logFn(`[특성] ${source.name}: 특정 속성 적에게 추가 피해!`);
+            }
             if (t.type === 'cond_debuff_3_dmg' && Object.keys(target.buffs).length >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 디버프 3개 이상 대상 추가 피해!");
@@ -1156,6 +1190,7 @@ const Logic = {
             else if (t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
             else if (t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
             else if (t.type === 'syn_light_dark_matk_mdef' && hasEl('light') && hasEl('dark')) active = true;
+            else if (t.type === 'syn_light_3_matk_mdef' && countEl('light') >= 3) active = true;
             else if (t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
             else if (t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
             else if (t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
@@ -1164,6 +1199,7 @@ const Logic = {
             else if (t.type === 'syn_water_3_atk_matk' && countEl('water') >= 3) active = true;
             else if (t.type === 'syn_fire_3_crit_burn' && countEl('fire') >= 3) active = true;
             else if (t.type === 'syn_dark_3_matk_boost' && countEl('dark') >= 3) active = true;
+            else if (t.type === 'syn_dark_3_party_atk' && countEl('dark') >= 3) active = true;
             else if (t.type === 'syn_water_2_moon_twinkle' && countEl('water') >= 2) active = true;
 
             if (active) {
@@ -1174,6 +1210,7 @@ const Logic = {
                 if (t.type === 'syn_dark_3_matk') p.matk *= 1.5;
                 if (t.type === 'syn_light_fire_atk') p.atk *= 1.3;
                 if (t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
+                if (t.type === 'syn_light_3_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if (t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if (t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
                 if (t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
@@ -1221,6 +1258,9 @@ const Logic = {
                 stats.forEach(s => {
                     if (partyBoost[s] !== undefined) partyBoost[s] += (tr.val || 0);
                 });
+            }
+            else if (tr && tr.type === 'syn_dark_3_party_atk' && countEl('dark') >= 3) {
+                partyBoost.atk += (tr.val || 0);
             }
         });
 
@@ -1341,9 +1381,14 @@ const Logic = {
         }
         else if (t.type === 'death_debuff') {
             if (killer) {
-                result.killerDebuffs[t.debuff] = 1;
-                logFn(`[특성] 사망 효과 발동! 적에게 [${getBuffName(t.debuff)}] 부여.`);
+                const stack = t.stack || 1;
+                result.killerDebuffs[t.debuff] = (result.killerDebuffs[t.debuff] || 0) + stack;
+                logFn(`[특성] 사망 효과 발동! 적에게 [${getBuffName(t.debuff)}] ${stack > 1 ? `${stack}스택 ` : ''}부여.`);
             }
+        }
+        else if (t.type === 'death_field_buff') {
+            result.fieldBuffsToAdd.push(t.buff);
+            logFn(`[특성] 사망 효과 발동! 필드버프 [${getBuffName(t.buff)}] 부여.`);
         }
         else if (t.type === 'death_sun_bless_chance') {
             if (Math.random() < t.val) {
@@ -1404,6 +1449,23 @@ const Logic = {
                     logFn(`[아티팩트] 빅뱅! 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
                 }
             }
+        }
+
+        return result;
+    },
+
+    handleOnHitTraits: function (victim, attacker, logFn) {
+        if (!logFn) logFn = function () { };
+
+        const result = { attackerDebuffs: {} };
+        const t = victim && victim.proto ? victim.proto.trait : null;
+        if (!t || !attacker) return result;
+
+        if (t.type === 'on_hit_random_debuff' && Array.isArray(t.pool) && t.pool.length > 0) {
+            const pick = t.pool[Math.floor(Math.random() * t.pool.length)];
+            const stack = t.stack || 1;
+            result.attackerDebuffs[pick] = (result.attackerDebuffs[pick] || 0) + stack;
+            logFn(`[특성] ${victim.name}: 피격 반응! 적에게 [${getBuffName(pick)}] ${stack > 1 ? `${stack}스택 ` : ''}부여.`);
         }
 
         return result;

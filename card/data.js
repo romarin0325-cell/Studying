@@ -658,6 +658,76 @@ const BONUS_CARDS = [
             { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 5배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 5.0 }] },
             { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['curse', 'silence'] }] }
         ]
+    },
+    {
+        id: 'sakura', name: '사쿠라', grade: 'legend', element: 'fire', role: 'debuffer',
+        stats: { hp: 500, atk: 95, matk: 125, def: 75, mdef: 75 },
+        trait: { type: 'cond_target_elements_dmg', val: 1.5, elements: ['nature', 'dark'], desc: '자연/어둠속성 적에게 대미지 1.5배' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '봉인부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식/약화/침묵/저주/암흑 중 랜덤 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['corrosion', 'weak', 'silence', 'curse', 'darkness'] }] },
+            { name: '폭염부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1종 소모, 대미지 2배', effects: [{ type: 'consume_random_debuff_fixed_mult', count: 1, mult: 2.0, pool: ['burn', 'divine', 'corrosion', 'weak', 'silence', 'curse', 'darkness', 'stun'] }] }
+        ]
+    },
+    {
+        id: 'galaxy_whale', name: '은하고래', grade: 'legend', element: 'light', role: 'dealer',
+        stats: { hp: 490, atk: 105, matk: 145, def: 65, mdef: 65 },
+        trait: { type: 'syn_light_3_matk_mdef', desc: '덱에 빛 3장 이상 시 마법공격력/마법방어력 50% 증가' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '슈퍼노바펄스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 모두 소모, 소모한 개수당 2.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2.0 }] },
+            { name: '앱솔루트라이트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '어둠속성 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'dark', mult: 3.0, customLog: '[특성] 어둠속성 적에게 추가 피해! (배율 x3.0)' }] }
+        ]
+    },
+    {
+        id: 'jellyfish_princess', name: '젤리피쉬프린세스', grade: 'epic', element: 'water', role: 'debuffer',
+        stats: { hp: 410, atk: 80, matk: 85, def: 75, mdef: 70 },
+        trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: '피격 시 부식/약화/침묵/저주/기절 중 랜덤 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '오로라텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
+            { name: '크리스탈레퀴엠', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '기절 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'eclipse_queen', name: '이클립스퀸', grade: 'epic', element: 'dark', role: 'balancer',
+        stats: { hp: 395, atk: 110, matk: 85, def: 65, mdef: 65 },
+        trait: { type: 'syn_dark_3_party_atk', val: 30, desc: '덱에 어둠 3장 이상 시 파티 전체 공격력 30% 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '섀도우코로나', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
+            { name: '녹턴윙스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '약화 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'weak', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'forget_me_not', name: '물망초', grade: 'rare', element: 'nature', role: 'buffer',
+        stats: { hp: 345, atk: 65, matk: 95, def: 55, mdef: 75 },
+        trait: { type: 'death_field_buff', buff: 'earth_bless', desc: '사망 시 필드버프 대지의축복 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '블루메모리', type: 'sup', tier: 2, cost: 20, desc: '디바인 부여 및 약화/침묵 중 하나 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
+            { name: '미드나잇가든', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '대지의축복 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'earth_bless', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'aurora', name: '아우로라', grade: 'rare', element: 'water', role: 'looter',
+        stats: { hp: 315, atk: 70, matk: 75, def: 50, mdef: 50 },
+        trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
+        skills: [
+            { name: '리버설', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 마법공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '라비린스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'corrosion', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'desert_fox', name: '사막여우', grade: 'normal', element: 'fire', role: 'debuffer',
+        stats: { hp: 300, atk: 80, matk: 75, def: 45, mdef: 50 },
+        trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 1.0, customLog: '작열 1스택 소모!' }, { type: 'random_debuff', count: 2, pool: ['weak', 'corrosion', 'curse', 'silence'] }] },
+            { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
     }
 ];
 

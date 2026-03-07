@@ -3064,6 +3064,10 @@
                     if (target.buffs.guard) dmg *= 0.5;
                     dmg = Math.floor(dmg);
                     target.hp -= dmg;
+                    if (dmg > 0) {
+                        target.tookDamageThisTurn = true;
+                        RPG.handleOnHitTraits(target, e);
+                    }
                     RPG.log(`${e.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
 
                     // Process Effects (if any)
@@ -3125,6 +3129,20 @@
                     Object.keys(result.killerDebuffs).forEach(k => {
                         killer.buffs[k] = (killer.buffs[k] || 0) + result.killerDebuffs[k];
                         // If specific duration handling is needed, add here. Currently assumed 1 stack.
+                    });
+                }
+            },
+
+            handleOnHitTraits(victim, attacker) {
+                const result = Logic.handleOnHitTraits(
+                    victim,
+                    attacker,
+                    (msg) => RPG.log(msg)
+                );
+
+                if (result.attackerDebuffs && attacker && attacker.buffs) {
+                    Object.keys(result.attackerDebuffs).forEach(k => {
+                        attacker.buffs[k] = (attacker.buffs[k] || 0) + result.attackerDebuffs[k];
                     });
                 }
             },
@@ -3203,6 +3221,7 @@
                     target.hp -= dmgResult.dmg;
                     target.tookDamageThisTurn = true;
                     RPG.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+                    RPG.handleOnHitTraits(target, source);
                 }
 
                 // Artifact: lucky_vicky — mana recovery on crit
