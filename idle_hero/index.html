@@ -2,120 +2,1290 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>방치형 원소 영웅들</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#081422" />
+  <title>루미의 별바다 방치록</title>
+  <style>
+    :root {
+      --bg0:#08111d; --bg1:#102033; --bg2:#152845; --panel:rgba(12,22,39,.9); --line:rgba(255,255,255,.08);
+      --text:#f2fbff; --muted:rgba(242,251,255,.62); --accent:#78ecf7; --accent2:#86baff; --gold:#ffd67d;
+      --pink:#ff93c3; --good:#9cffb5; --danger:#ff8fa0; --shadow:0 18px 40px rgba(0,0,0,.35);
+      --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+      color-scheme:dark; font-family:"Trebuchet MS","Segoe UI","Noto Sans KR",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:
+      radial-gradient(circle at 18% 10%,rgba(120,236,247,.18),transparent 24%),
+      radial-gradient(circle at 84% 16%,rgba(255,214,125,.14),transparent 20%),
+      linear-gradient(180deg,var(--bg0),var(--bg1) 45%,var(--bg2));color:var(--text);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background-image:
+      radial-gradient(circle at 14% 20%,rgba(255,255,255,.9) 0 1px,transparent 1.6px),
+      radial-gradient(circle at 74% 16%,rgba(255,255,255,.8) 0 1px,transparent 1.6px),
+      radial-gradient(circle at 50% 72%,rgba(255,255,255,.6) 0 1px,transparent 1.6px)}
+    button,input,textarea{font:inherit;color:inherit}
+    button{border:0;background:none;padding:0}
+    .app{position:relative;z-index:1;width:min(100%,480px);min-height:100vh;min-height:100svh;margin:0 auto;padding:calc(12px + var(--safe-top)) 12px calc(12px + var(--safe-bottom));display:flex;flex-direction:column;gap:12px}
+    .resbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;position:sticky;top:calc(8px + var(--safe-top));z-index:20}
+    .pill,.panel,.card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));box-shadow:var(--shadow);backdrop-filter:blur(16px)}
+    .pill{position:relative;overflow:hidden;border-radius:16px;padding:10px;min-height:62px}
+    .pill.flash::after{transform:translateX(120%)}
+    .pill::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.08),transparent);transform:translateX(-120%);transition:transform .8s ease}
+    .label{font-size:11px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+    .label .ico{width:18px;height:18px;display:grid;place-items:center;border-radius:6px;background:rgba(255,255,255,.08);font-size:11px}
+    .value{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .scene{padding:14px;border-radius:28px;display:grid;gap:12px;background:
+      radial-gradient(circle at 18% 12%,rgba(120,236,247,.14),transparent 28%),
+      radial-gradient(circle at 82% 10%,rgba(255,214,125,.1),transparent 22%),
+      linear-gradient(180deg,rgba(17,29,52,.9),rgba(8,15,28,.96))}
+    .row,.badges,.battle-sub,.bars-top,.actions,.title-row,.foot,.nav,.seg{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .badge,.chip,.mini,.price,.tag{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(242,251,255,.84)}
+    .stage{background:linear-gradient(135deg,rgba(120,236,247,.22),rgba(255,255,255,.03));color:var(--text)}
+    .saved{color:var(--good)}
+    .boss{color:var(--gold)}
+    .enemy-name{font-size:28px;font-weight:900;letter-spacing:-.04em;line-height:1.04}
+    .summary{font-size:13px;color:rgba(242,251,255,.78)}
+    .field{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:end;min-height:210px;padding:20px 12px 14px;border-radius:24px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));overflow:hidden}
+    .slot{position:relative;display:grid;place-items:end center;min-height:156px}
+    .slot::after{content:"";width:90px;height:20px;border-radius:50%;background:radial-gradient(circle,rgba(120,236,247,.34),rgba(120,236,247,0));transform:translateY(10px)}
+    .sprite{position:relative;width:118px;height:118px;display:grid;place-items:center;transition:transform .16s steps(3)}
+    .sprite.hit{transform:translate(-8px,0)} .sprite.attack{transform:translate(12px,-4px)}
+    .aura{position:absolute;inset:18px;border-radius:50%;filter:blur(12px);background:radial-gradient(circle,rgba(120,236,247,.28),transparent 66%)}
+    .enemy-aura{background:radial-gradient(circle,rgba(255,147,195,.24),transparent 66%)}
+    canvas{width:92px;height:92px;image-rendering:pixelated;filter:drop-shadow(0 8px 18px rgba(0,0,0,.4))}
+    .fxlayer{position:absolute;inset:0;pointer-events:none}
+    .fx,.dmg{position:absolute;pointer-events:none}
+    .fx{width:68px;height:22px;right:20%;bottom:42%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.9) 0 4px,rgba(120,236,247,.58) 4px 8px);clip-path:polygon(0 48%,28% 20%,100% 0,72% 84%,18% 100%);animation:fx .5s steps(4) forwards;filter:drop-shadow(0 0 10px rgba(120,236,247,.55))}
+    .fx.tap{width:52px;height:18px;background:repeating-linear-gradient(90deg,rgba(255,247,210,.9) 0 4px,rgba(255,214,125,.55) 4px 8px)}
+    .fx.skill{width:110px;height:40px;right:12%;bottom:38%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.92) 0 5px,rgba(134,186,255,.64) 5px 10px)}
+    @keyframes fx{0%{opacity:0;transform:translateX(-8px) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translateX(18px) scale(1.24)}}
+    .dmg{font-size:13px;font-weight:900;text-shadow:0 0 12px rgba(0,0,0,.45);animation:dmg .84s ease forwards}
+    .crit{color:var(--gold)} .skilld{color:var(--accent2)}
+    @keyframes dmg{0%{opacity:0;transform:translateY(14px) scale(.86)}12%{opacity:1}100%{opacity:0;transform:translateY(-26px) scale(1.08)}}
+    .meter{position:relative;height:14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+    .fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--accent),rgba(255,255,255,.75));transition:width .16s linear}
+    .timer .fill{background:linear-gradient(90deg,var(--gold),var(--pink))}
+    .bars-top{font-size:12px;color:rgba(242,251,255,.78)}
+    .actions{display:grid;grid-template-columns:1fr auto;align-items:stretch}
+    .tap{min-height:72px;border-radius:18px;border:1px dashed rgba(255,255,255,.14);background:rgba(255,255,255,.04);padding:12px 14px;font-size:13px;line-height:1.45;color:rgba(242,251,255,.8)}
+    .btn,.ghost,.segbtn,.danger{min-height:46px;padding:0 15px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:var(--text);font-weight:900;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,rgba(120,236,247,.25),rgba(134,186,255,.14));min-width:136px}
+    .btn.ready{box-shadow:0 0 0 1px rgba(120,236,247,.18),0 0 24px rgba(120,236,247,.16)} .disabled{opacity:.48;cursor:default}
+    .small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-top:3px}
+    .ghost{min-height:36px;border-radius:12px;padding:0 12px;font-size:12px} .danger{background:linear-gradient(135deg,rgba(255,143,160,.18),rgba(255,214,125,.12))}
+    .tab{display:none}.tab.active{display:block}
+    .stack,.grid,.list,.feed{display:grid;gap:10px}
+    .card{padding:14px;border-radius:24px}
+    .title{font-size:18px;font-weight:900;letter-spacing:-.03em}
+    .desc{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.4}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .mini{padding:11px 12px;border-radius:18px;background:rgba(0,0,0,.14)}
+    .mini b{display:block;font-size:15px;color:var(--text);margin-top:4px}
+    .seg{display:inline-grid;grid-auto-flow:column;gap:6px;padding:4px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .segbtn{min-height:36px;border-radius:12px;padding:0 12px;background:transparent}.segbtn.active{background:linear-gradient(135deg,rgba(120,236,247,.18),rgba(134,186,255,.14))}
+    .slotgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .slotcard,.log{padding:12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);display:grid;gap:8px}
+    .slotcard.empty{opacity:.76;border-style:dashed}
+    .name{font-size:15px;font-weight:900;line-height:1.24}
+    .mut{font-size:12px;color:var(--muted);line-height:1.4}
+    .affix{padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);font-size:12px;color:rgba(242,251,255,.84)}
+    .feed{max-height:220px;overflow:auto;scrollbar-width:thin}
+    .nav{position:sticky;bottom:calc(0px + var(--safe-bottom));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:8px;border-radius:24px;background:rgba(7,15,28,.92);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(16px)}
+    .navbtn{min-height:58px;border-radius:16px;display:grid;place-items:center;color:var(--muted);font-weight:900;gap:4px;cursor:pointer}
+    .navbtn.active{color:var(--text);background:linear-gradient(135deg,rgba(120,236,247,.16),rgba(134,186,255,.16));border:1px solid rgba(255,255,255,.08)}
+    .rarity-common{color:#dbe8ff}.rarity-uncommon{color:#97ffd8}.rarity-rare{color:#90d0ff}.rarity-epic{color:#d19eff}.rarity-legendary{color:#ffd48a}.rarity-mythic{color:#ff9cd3}
+    .toastbox{position:fixed;left:50%;bottom:calc(92px + var(--safe-bottom));transform:translateX(-50%);width:min(calc(100vw - 28px),440px);display:grid;gap:8px;pointer-events:none;z-index:40}
+    .toast{padding:12px 14px;border-radius:16px;background:rgba(8,15,30,.92);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);font-size:13px;animation:toastin .22s ease,toastout .22s ease 3.1s forwards}
+    @keyframes toastin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} @keyframes toastout{from{opacity:1}to{opacity:0;transform:translateY(8px)}}
+    @media(max-width:390px){.stats,.slotgrid,.actions{grid-template-columns:1fr}.enemy-name{font-size:24px}.value{font-size:14px}}
+  </style>
 </head>
 <body>
-  <div id="app">
-    <header id="topbar">
-      <div class="top-left">
-        <div class="game-title">방치형 원소 영웅들 <span class="badge">Single-file</span></div>
-        <div class="sub">CX 탐색기 환경 대응: CSS/JS 인라인 + 이미지 파일선택 등록</div>
-      </div>
-      <div id="resourceBar" class="resource-bar"></div>
+  <div id="app" class="app">
+    <header class="resbar">
+      <div class="pill" data-res="stardust"><div class="label"><span class="ico">✦</span>별모래</div><div class="value" id="stardustValue">0</div></div>
+      <div class="pill" data-res="memory"><div class="label"><span class="ico">◈</span>마력 편린</div><div class="value" id="memoryValue">0</div></div>
+      <div class="pill" data-res="cores"><div class="label"><span class="ico">✧</span>성좌핵</div><div class="value" id="coresValue">0</div></div>
+      <div class="pill" data-res="keys"><div class="label"><span class="ico">⌘</span>봉인 열쇠</div><div class="value" id="keysValue">0</div></div>
     </header>
 
-    <nav id="tabs" class="tabs">
-      <button class="tab-btn" data-tab="home">홈</button>
-      <button class="tab-btn" data-tab="characters">캐릭터</button>
-      <button class="tab-btn" data-tab="upgrades">업그레이드</button>
-      <button class="tab-btn" data-tab="equipment">장비</button>
-      <button class="tab-btn" data-tab="daily">일일도전</button>
-      <button class="tab-btn" data-tab="cards">카드</button>
-      <button class="tab-btn" data-tab="ascension">승급</button>
-      <button class="tab-btn" data-tab="settings">설정</button>
+    <section class="scene panel">
+      <div class="row">
+        <div class="badges"><div class="badge stage" id="stageBadge">스테이지 1</div><div class="badge" id="realmBadge">새벽 정원</div></div>
+        <div class="badge" id="saveBadge">자동 저장</div>
+      </div>
+      <div>
+        <div class="enemy-name" id="enemyName">슬라임</div>
+        <div class="battle-sub"><span class="summary" id="battleSummary">루미의 트윙클이 적을 자동 추적합니다.</span><span class="chip" id="etaChip">예상 0.0초</span><span class="chip" id="bossChip">일반 전투</span></div>
+      </div>
+      <div class="field" id="tapZone" role="button" tabindex="0" aria-label="적을 터치해 추가 피해를 줍니다.">
+        <div class="slot"><div class="sprite" id="heroWrap"><div class="aura"></div><canvas id="heroCanvas" width="16" height="16"></canvas></div></div>
+        <div class="slot"><div class="sprite" id="enemyWrap"><div class="aura enemy-aura"></div><canvas id="enemyCanvas" width="16" height="16"></canvas></div></div>
+        <div class="fxlayer" id="fxLayer"></div>
+      </div>
+      <div class="grid">
+        <div class="bars-top"><span id="hpLabel">HP 0 / 0</span><span id="rewardLabel">보상 0</span></div>
+        <div class="meter"><div class="fill" id="hpFill"></div></div>
+        <div class="bars-top"><span id="timerLabel">보스 타이머 대기중</span><span id="afkLabel">AFK +0/s</span></div>
+        <div class="meter timer"><div class="fill" id="timerFill"></div></div>
+      </div>
+      <div class="actions">
+        <div class="tap" id="tapHint">적을 탭하면 <strong id="tapDamageValue">0</strong> 추가 피해<br />자동 전투는 <strong>트윙클</strong>, 액티브는 <strong>밀키웨이 엑스터시</strong></div>
+        <button class="btn primary disabled" id="skillBtn" type="button"><span>밀키웨이 엑스터시</span><span class="small" id="skillText">충전 중</span></button>
+      </div>
+    </section>
+
+    <main class="grid">
+      <section class="tab active" data-tab="battle">
+        <div class="card">
+          <div class="title-row"><div><div class="title">전투 개요</div><div class="desc">루미의 현재 전투 흐름과 서사를 요약합니다.</div></div><button class="ghost" id="autoBtn" type="button">자동 진행 ON</button></div>
+          <div class="stats" id="battleStats"></div>
+        </div>
+        <div class="card"><div class="title">전투 기록</div><div class="desc">처치, 보스 돌파, 오프라인 보상이 여기에 쌓입니다.</div><div class="feed" id="battleFeed"></div></div>
+      </section>
+
+      <section class="tab" data-tab="workshop">
+        <div class="card">
+          <div class="title-row"><div><div class="title">공방</div><div class="desc">별빛 공방에서 루미의 계수를 끌어올립니다.</div></div><div class="seg" id="buyMode"></div></div>
+          <div class="list" id="upgradeList"></div>
+        </div>
+      </section>
+
+      <section class="tab" data-tab="gear">
+        <div class="card">
+          <div class="title-row"><div><div class="title">장비 개봉</div><div class="desc">원드, 베일, 성좌핵, 리본 문장을 획득합니다.</div></div><button class="ghost" id="autoOpenBtn" type="button">자동 개봉 OFF</button></div>
+          <div class="slotgrid">
+            <button class="btn primary" id="open1" type="button"><span>1회 개봉</span><span class="small">열쇠 1개</span></button>
+            <button class="btn primary" id="open10" type="button"><span>10회 개봉</span><span class="small">열쇠 10개</span></button>
+          </div>
+        </div>
+        <div class="card"><div class="title">현재 장비</div><div class="desc">현재 장착 중인 루미 전용 장비 4종입니다.</div><div class="slotgrid" id="gearSlots"></div></div>
+        <div class="card"><div class="title">획득 로그</div><div class="desc">최근 장비 획득과 분해 결과입니다.</div><div class="feed" id="lootFeed"></div></div>
+      </section>
+
+      <section class="tab" data-tab="constellation">
+        <div class="card">
+          <div class="title">각성</div><div class="desc">현재 런을 종료하고 성좌핵을 얻어 영구 배율을 올립니다.</div>
+          <div class="stats" id="awakenStats"></div>
+          <div class="foot"><div class="price" id="awakenGain">성좌핵 +0</div><button class="btn primary" id="awakenBtn" type="button"><span>별자리 각성</span><span class="small">런 초기화</span></button></div>
+        </div>
+        <div class="card"><div class="title">성좌</div><div class="desc">핵심 인물의 기억을 패시브로 변환합니다.</div><div class="list" id="talentList"></div></div>
+      </section>
+
+      <section class="tab" data-tab="chronicle">
+        <div class="card"><div class="title">서사 핵심 인물</div><div class="desc">루미와 함께 서사의 축을 이루는 인물들입니다.</div><div class="list" id="castList"></div></div>
+        <div class="card"><div class="title">보스 로드맵</div><div class="desc">신급 위계를 포함한 고정 보스 progression입니다.</div><div class="list" id="bossList"></div></div>
+        <div class="card"><div class="title">설정과 세이브</div><div class="desc">단일 HTML 저장 데이터를 관리합니다.</div><div class="list" id="systemList"></div></div>
+      </section>
+    </main>
+
+    <nav class="nav">
+      <button class="navbtn active" data-tab-btn="battle" type="button"><span>⚔</span><span>전투</span></button>
+      <button class="navbtn" data-tab-btn="workshop" type="button"><span>⚒</span><span>공방</span></button>
+      <button class="navbtn" data-tab-btn="gear" type="button"><span>✦</span><span>장비</span></button>
+      <button class="navbtn" data-tab-btn="constellation" type="button"><span>☽</span><span>성좌</span></button>
+      <button class="navbtn" data-tab-btn="chronicle" type="button"><span>☍</span><span>기록</span></button>
     </nav>
-
-    <main id="main" class="main"></main>
-
-    <footer class="footer">
-      <div>저장: LocalStorage(가능할 때) / 오프라인 누적 최대 30시간 / 전투: 기본공격 + 덱 5장 자동사용</div>
-    </footer>
   </div>
+  <div class="toastbox" id="toastBox"></div>
+  <script>
+    (() => {
+      'use strict';
 
-  <div id="modalHost" class="modal-host" aria-hidden="true"></div>
-  <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="true"></div>
+      const VERSION = 1;
+      const STORAGE_KEY = 'lumi_idle_single_html_v1';
+      const BUY_MODES = [1, 10, 'MAX'];
+      const SLOT_META = {
+        wand: { label: '원드', icon: '✦' },
+        veil: { label: '베일', icon: '☾' },
+        core: { label: '성좌핵', icon: '◈' },
+        ribbon: { label: '리본 문장', icon: '🎀' }
+      };
+      const RARITIES = [
+        { key: 'common', name: '일반', cls: 'rarity-common', mult: 1, rate: 0.44 },
+        { key: 'uncommon', name: '고급', cls: 'rarity-uncommon', mult: 1.2, rate: 0.27 },
+        { key: 'rare', name: '희귀', cls: 'rarity-rare', mult: 1.55, rate: 0.16 },
+        { key: 'epic', name: '영웅', cls: 'rarity-epic', mult: 2.05, rate: 0.08 },
+        { key: 'legendary', name: '전설', cls: 'rarity-legendary', mult: 2.75, rate: 0.04 },
+        { key: 'mythic', name: '신화', cls: 'rarity-mythic', mult: 3.7, rate: 0.01 }
+      ];
+      const THEMES = ['별빛', '월광', '태양', '꿈결', '성좌', '유리', '예언'];
+      const REALMS = [
+        '별내림 정원',
+        '달거울 회랑',
+        '태양 잔향 전선',
+        '꿈낙원 균열',
+        '왕관의 사막',
+        '신계 관문'
+      ];
+      const ENEMY_POOLS = [
+        ['슬라임', '코볼트', '페어리'],
+        ['미믹', '잭오랜턴', '웨어베어'],
+        ['골렘', '뱀파이어', '그림자 추적자'],
+        ['펜리르', '눈토끼', '아발란체 메이드'],
+        ['베이비 드래곤', '레드 드래곤', '공허의 기사'],
+        ['미이라', '스핑크스', '침묵의 사서'],
+        ['밤토끼', '대천사', '라이트 엘리멘탈'],
+        ['생크림 메이드', '캔디 보이', '푸딩 프린세스'],
+        ['화염의 현자', '번개의 현자', '혼돈의 마법사'],
+        ['성운의 파수꾼', '유성의 집행자', '심연의 심판자']
+      ];
+      const BOSSES = [
+        { name: '고스트 킹', icon: 'skull', lore: '첫 문을 지키는 망자의 왕' },
+        { name: '마왕', icon: 'demon', lore: '지크가 경고한 암흑의 군주' },
+        { name: '세계수', icon: 'tree', lore: '여왕의 정원을 가리는 거목' },
+        { name: '혹한의 마녀', icon: 'witch', lore: '루나의 그림자를 닮은 설원의 마도사' },
+        { name: '골드 드래곤', icon: 'dragon', lore: '태양 잔향을 삼키는 황금룡' },
+        { name: '파라오', icon: 'pharaoh', lore: '왕관의 사막을 다스리는 신급 군주' },
+        { name: '시간의 지배자', icon: 'clock', lore: '시간층을 잠그는 성좌의 파수' },
+        { name: '여신 아이리스', icon: 'angel', lore: '사랑과 저주가 뒤섞인 신성한 재판관' },
+        { name: '인조마신', icon: 'machine', lore: '인위적으로 깨어난 금속 신격' },
+        { name: '마신', icon: 'demon', lore: '신계 문턱을 찢는 재앙의 화신' },
+        { name: '창조신 아스테아', icon: 'god', lore: '모든 별자리의 끝에 선 창조주' }
+      ];
+      const UPGRADES = [
+        { id: 'starlight', name: '별빛 응축', desc: '트윙클의 기본 위력을 끌어올립니다.', base: 16, growth: 1.18, currency: 'stardust' },
+        { id: 'moonstep', name: '월광 가속', desc: '루미의 연타 속도를 높여 DPS를 강화합니다.', base: 32, growth: 1.2, currency: 'stardust' },
+        { id: 'dreamsight', name: '꿈결 관측', desc: '치명타율과 스킬 충전 속도를 높입니다.', base: 58, growth: 1.22, currency: 'stardust' },
+        { id: 'pang', name: '팡팡 리듬', desc: '탭 추가타와 팡팡 펀치 위력이 상승합니다.', base: 88, growth: 1.24, currency: 'stardust' },
+        { id: 'gather', name: '별가루 채집', desc: '별모래 획득량과 AFK 수급이 늘어납니다.', base: 14, growth: 1.19, currency: 'memory' },
+        { id: 'dismantle', name: '기억 분해', desc: '마력 편린 획득량과 장비 분해 효율이 올라갑니다.', base: 26, growth: 1.21, currency: 'memory' },
+        { id: 'archive', name: '성좌 기록', desc: '보스전 화력과 성좌핵 회수량을 끌어올립니다.', base: 48, growth: 1.24, currency: 'memory' },
+        { id: 'resonance', name: '드림폼 공명', desc: '액티브 스킬 위력과 봉인 열쇠 흐름을 강화합니다.', base: 84, growth: 1.26, currency: 'memory' }
+      ];
+      const TALENTS = [
+        { id: 'lumi', name: '루미의 공명', desc: '기본 공격력과 액티브 스킬 계수를 높입니다.', base: 1, step: 1, max: 15 },
+        { id: 'jasmine', name: '자스민의 가호', desc: '별모래와 봉인 열쇠 수급이 상승합니다.', base: 1, step: 1, max: 15 },
+        { id: 'queen', name: '여왕의 정원', desc: '오프라인 보상 한도와 마력 편린 효율을 늘립니다.', base: 2, step: 1, max: 12 },
+        { id: 'luna', name: '루나의 그림자', desc: '치명타율과 탭 공격 위력을 끌어올립니다.', base: 2, step: 1, max: 12 },
+        { id: 'zeke', name: '지크의 결의', desc: '보스전 피해량과 생존 시간을 보강합니다.', base: 3, step: 1, max: 10 },
+        { id: 'dream', name: '드림폼 각성', desc: '각성 시 획득하는 성좌핵이 증가합니다.', base: 4, step: 1, max: 8 },
+        { id: 'vault', name: '꿈의 금고', desc: '장비 품질과 자동 개봉 효율이 향상됩니다.', base: 4, step: 1, max: 8 },
+        { id: 'record', name: '성좌 기록자', desc: '전체 공격력과 장비 점수가 소폭 상승합니다.', base: 5, step: 1, max: 8 }
+      ];
+      const CAST = [
+        ['루미', '별과 달의 마법을 다루는 주인공. 트윙클과 밀키웨이 엑스터시로 전장을 밀어냅니다.'],
+        ['지크', '루미가 보스전에 들어설 때마다 결의를 남기는 기사. 보스 피해 재능의 상징입니다.'],
+        ['여왕', '정원과 질서를 상징하는 군주. 오프라인 보상과 편린 축적에 서사를 제공합니다.'],
+        ['자스민', '루미를 보조하는 축복의 매개자. 별모래와 열쇠 수급 성좌에 연결됩니다.'],
+        ['루나', '차가운 그림자와 밤의 마법을 다루는 핵심 인물. 치명타와 탭 공격 재능을 담당합니다.']
+      ];
 
-<script>
-(function(){
-  'use strict';
+      const dom = {
+        app: document.getElementById('app'),
+        stardustValue: document.getElementById('stardustValue'),
+        memoryValue: document.getElementById('memoryValue'),
+        coresValue: document.getElementById('coresValue'),
+        keysValue: document.getElementById('keysValue'),
+        stageBadge: document.getElementById('stageBadge'),
+        realmBadge: document.getElementById('realmBadge'),
+        saveBadge: document.getElementById('saveBadge'),
+        enemyName: document.getElementById('enemyName'),
+        battleSummary: document.getElementById('battleSummary'),
+        etaChip: document.getElementById('etaChip'),
+        bossChip: document.getElementById('bossChip'),
+        tapZone: document.getElementById('tapZone'),
+        heroWrap: document.getElementById('heroWrap'),
+        enemyWrap: document.getElementById('enemyWrap'),
+        heroCanvas: document.getElementById('heroCanvas'),
+        enemyCanvas: document.getElementById('enemyCanvas'),
+        fxLayer: document.getElementById('fxLayer'),
+        hpLabel: document.getElementById('hpLabel'),
+        rewardLabel: document.getElementById('rewardLabel'),
+        hpFill: document.getElementById('hpFill'),
+        timerLabel: document.getElementById('timerLabel'),
+        afkLabel: document.getElementById('afkLabel'),
+        timerFill: document.getElementById('timerFill'),
+        tapDamageValue: document.getElementById('tapDamageValue'),
+        skillBtn: document.getElementById('skillBtn'),
+        skillText: document.getElementById('skillText'),
+        autoBtn: document.getElementById('autoBtn'),
+        battleStats: document.getElementById('battleStats'),
+        battleFeed: document.getElementById('battleFeed'),
+        buyMode: document.getElementById('buyMode'),
+        upgradeList: document.getElementById('upgradeList'),
+        autoOpenBtn: document.getElementById('autoOpenBtn'),
+        open1: document.getElementById('open1'),
+        open10: document.getElementById('open10'),
+        gearSlots: document.getElementById('gearSlots'),
+        lootFeed: document.getElementById('lootFeed'),
+        awakenStats: document.getElementById('awakenStats'),
+        awakenGain: document.getElementById('awakenGain'),
+        awakenBtn: document.getElementById('awakenBtn'),
+        talentList: document.getElementById('talentList'),
+        castList: document.getElementById('castList'),
+        bossList: document.getElementById('bossList'),
+        systemList: document.getElementById('systemList'),
+        toastBox: document.getElementById('toastBox'),
+        tabs: Array.from(document.querySelectorAll('.tab')),
+        nav: Array.from(document.querySelectorAll('[data-tab-btn]'))
+      };
 
-  // ====== 안전장치: 에러를 화면으로 보여주기 ======
-  var lastErrorText = '';
-  window.addEventListener('error', function(ev){
-    try{
-      var msg = (ev && ev.message) ? ev.message : 'Unknown error';
-      var src = (ev && ev.filename) ? ev.filename : '';
-      var line = (ev && ev.lineno) ? ev.lineno : '';
-      lastErrorText = msg + (src ? ('\n' + src + ':' + line) : '');
+      const heroCtx = dom.heroCanvas.getContext('2d');
+      const enemyCtx = dom.enemyCanvas.getContext('2d');
+      let state = loadState();
+      let dirty = true;
+      let panelDirty = true;
+      let lastFrame = performance.now();
+      let lastPanelRender = 0;
+      let lastSaveAt = 0;
 
-      // If showModal is defined (from game.js), use it.
-      // Since game.js is loaded later, we might need to wait or fallback.
-      if(window.showModal) {
-          window.showModal('스크립트 오류', lastErrorText, [{text:'닫기', kind:'warn', value:'close'}], null);
-      } else {
-          // Fallback if game.js not loaded yet or failed
-          console.error('ERROR:', lastErrorText);
-          // Simple alert fallback
-          if(confirm('오류 발생:\n' + lastErrorText + '\n\n페이지를 새로고침 할까요?')) {
-            window.location.reload();
+      function defaults() {
+        const upgrades = Object.fromEntries(UPGRADES.map((item) => [item.id, 0]));
+        const talents = Object.fromEntries(TALENTS.map((item) => [item.id, 0]));
+        const gear = Object.fromEntries(Object.keys(SLOT_META).map((slot) => [slot, null]));
+        return {
+          version: VERSION,
+          createdAt: Date.now(),
+          lastTick: Date.now(),
+          lastSave: 0,
+          stage: 1,
+          highestStage: 1,
+          autoProgress: true,
+          autoOpen: false,
+          buyMode: 1,
+          activeTab: 'battle',
+          stardust: 0,
+          memory: 0,
+          cores: 0,
+          keys: 3,
+          awakenings: 0,
+          upgrades,
+          talents,
+          gear,
+          skillCd: 0,
+          enemy: null,
+          battleFeed: ['루미가 별내림 정원에서 첫 적을 찾았다.'],
+          lootFeed: ['봉인 열쇠를 모아 장비를 개봉하세요.'],
+          stats: { kills: 0, bossKills: 0, taps: 0, skills: 0, playSeconds: 0 }
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? migrate(JSON.parse(raw)) : defaults();
+        } catch (error) {
+          return defaults();
+        }
+      }
+
+      function migrate(source) {
+        const next = defaults();
+        Object.assign(next, source || {});
+        next.upgrades = { ...next.upgrades, ...(source && source.upgrades) };
+        next.talents = { ...next.talents, ...(source && source.talents) };
+        next.gear = { ...next.gear, ...(source && source.gear) };
+        next.battleFeed = Array.isArray(source && source.battleFeed) ? source.battleFeed.slice(0, 18) : next.battleFeed;
+        next.lootFeed = Array.isArray(source && source.lootFeed) ? source.lootFeed.slice(0, 18) : next.lootFeed;
+        next.stats = { ...next.stats, ...(source && source.stats) };
+        next.stage = Math.max(1, Math.floor(next.stage || 1));
+        next.highestStage = Math.max(next.stage, Math.floor(next.highestStage || next.stage));
+        return next;
+      }
+
+      function saveState(force) {
+        if (!force && Date.now() - lastSaveAt < 5000) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        state.lastSave = Date.now();
+        lastSaveAt = state.lastSave;
+      }
+
+      function markDirty() {
+        dirty = true;
+        panelDirty = true;
+      }
+
+      function feed(list, text) {
+        list.unshift(text);
+        list.length = Math.min(list.length, 18);
+      }
+
+      function fmt(num, digits = 0) {
+        if (!Number.isFinite(num)) return '0';
+        const value = Math.max(0, num);
+        const units = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'];
+        if (value < 1000) return value.toLocaleString('en-US', { maximumFractionDigits: digits });
+        let scaled = value;
+        let idx = 0;
+        while (scaled >= 1000 && idx < units.length - 1) {
+          scaled /= 1000;
+          idx += 1;
+        }
+        const precision = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
+        return `${scaled.toFixed(Math.max(digits, precision))}${units[idx]}`;
+      }
+
+      function pct(value) {
+        return `${(value * 100).toFixed(value >= 0.2 ? 0 : 1)}%`;
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function costFor(upgrade, level) {
+        return Math.floor(upgrade.base * Math.pow(upgrade.growth, level));
+      }
+
+      function talentCost(talent, level) {
+        return talent.base + level * talent.step;
+      }
+
+      function isBossStage(stage) {
+        return stage % 10 === 0;
+      }
+
+      function realmFor(stage) {
+        return REALMS[Math.min(REALMS.length - 1, Math.floor((stage - 1) / 20))];
+      }
+
+      function bossFor(stage) {
+        return BOSSES[Math.min(BOSSES.length - 1, Math.floor(stage / 10) - 1)];
+      }
+
+      function enemyTier(stage) {
+        return Math.min(ENEMY_POOLS.length - 1, Math.floor((stage - 1) / 10));
+      }
+
+      function pick(list) {
+        return list[Math.floor(Math.random() * list.length)];
+      }
+
+      function gearTotals() {
+        return Object.values(state.gear).reduce((acc, item) => {
+          if (!item) return acc;
+          for (const key of Object.keys(acc)) acc[key] += item.stats[key] || 0;
+          acc.score += item.score || 0;
+          return acc;
+        }, { attack: 0, tap: 0, crit: 0, gold: 0, memory: 0, boss: 0, key: 0, score: 0 });
+      }
+
+      function stats() {
+        const u = state.upgrades;
+        const t = state.talents;
+        const gear = gearTotals();
+        const baseAttack = 10 + state.awakenings * 7 + t.lumi * 5 + t.record * 4 + gear.attack;
+        const dps = baseAttack * (1 + u.starlight * 0.22) * (1 + u.moonstep * 0.17);
+        const tap = dps * (0.55 + u.pang * 0.05 + t.luna * 0.035) + 10 + gear.tap;
+        const critChance = clamp(0.06 + u.dreamsight * 0.01 + t.luna * 0.012 + gear.crit, 0.06, 0.72);
+        const critMult = 1.65 + u.dreamsight * 0.04 + t.record * 0.03;
+        const goldMult = 1 + u.gather * 0.16 + t.jasmine * 0.06 + gear.gold;
+        const memoryMult = 1 + u.dismantle * 0.15 + t.queen * 0.05 + gear.memory;
+        const bossMult = 1 + u.archive * 0.16 + t.zeke * 0.08 + gear.boss;
+        const skillCd = Math.max(4, 18 - u.dreamsight * 0.22 - t.luna * 0.15);
+        const skillDamage = (tap * 4.5 + dps * 7.5) * (1 + u.resonance * 0.24 + t.lumi * 0.05);
+        const afkDust = dps * 0.18 * goldMult;
+        const afkKeys = (0.002 + u.resonance * 0.00045 + t.jasmine * 0.00035 + gear.key) * (1 + t.vault * 0.03);
+        const afkCap = 7200 + t.queen * 900;
+        const power = dps + tap * 0.8 + skillDamage * 0.15 + bossMult * 130 + gear.score * 0.4;
+        return { dps, tap, critChance, critMult, goldMult, memoryMult, bossMult, skillCd, skillDamage, afkDust, afkKeys, afkCap, power };
+      }
+
+      function spawnEnemy() {
+        const stage = state.stage;
+        const boss = isBossStage(stage);
+        const stageScale = Math.pow(1.28, stage - 1);
+        if (boss) {
+          const info = bossFor(stage);
+          state.enemy = {
+            name: info.name,
+            icon: info.icon,
+            boss: true,
+            maxHp: Math.floor(220 * stageScale * (1 + Math.floor(stage / 10) * 0.36)),
+            hp: 0,
+            dust: Math.floor(48 * stageScale),
+            memory: Math.max(1, Math.floor(stage / 8)),
+            keys: 1 + Math.floor(stage / 40),
+            timeMax: 22 + Math.floor(stage / 15) + state.talents.zeke,
+            timeLeft: 0,
+            lore: info.lore
+          };
+          state.enemy.hp = state.enemy.maxHp;
+          state.enemy.timeLeft = state.enemy.timeMax;
+          return;
+        }
+        const pool = ENEMY_POOLS[enemyTier(stage)];
+        const name = pool[(stage + state.stats.kills) % pool.length];
+        state.enemy = {
+          name,
+          icon: ['skull', 'mask', 'beast', 'mask', 'dragon', 'pharaoh', 'skull', 'angel', 'witch', 'clock'][enemyTier(stage)] || 'mask',
+          boss: false,
+          maxHp: Math.floor(44 * stageScale),
+          hp: 0,
+          dust: Math.floor(11 * stageScale),
+          memory: stage >= 15 ? Math.max(0, Math.floor(stage / 30)) : 0,
+          keys: stage >= 6 ? 0.08 + Math.floor(stage / 45) * 0.02 : 0.03,
+          timeMax: 0,
+          timeLeft: 0,
+          lore: '별자리 틈에서 흘러나온 잡몹입니다.'
+        };
+        state.enemy.hp = state.enemy.maxHp;
+      }
+
+      function ensureEnemy() {
+        if (!state.enemy || state.enemy.hp <= 0) spawnEnemy();
+      }
+
+      function rewardEnemy(enemy) {
+        const s = stats();
+        const dust = enemy.dust * s.goldMult;
+        const memory = enemy.memory * s.memoryMult;
+        const keys = enemy.keys * (1 + state.talents.jasmine * 0.03);
+        state.stardust += dust;
+        state.memory += memory;
+        state.keys += keys;
+        state.stats.kills += 1;
+        if (enemy.boss) state.stats.bossKills += 1;
+        feed(
+          state.battleFeed,
+          enemy.boss
+            ? `${enemy.name} 격파. 별모래 ${fmt(dust)}, 편린 ${fmt(memory)}, 열쇠 ${fmt(keys, 1)} 확보.`
+            : `${enemy.name} 처치. 별모래 ${fmt(dust)}${memory ? `, 편린 ${fmt(memory)}` : ''}.`
+        );
+        if (enemy.boss) {
+          state.stage += 1;
+          state.highestStage = Math.max(state.highestStage, state.stage);
+        } else if (state.autoProgress) {
+          state.stage += 1;
+          state.highestStage = Math.max(state.highestStage, state.stage);
+        }
+        state.enemy = null;
+        ensureEnemy();
+        markDirty();
+      }
+
+      function failBoss() {
+        if (!state.enemy || !state.enemy.boss) return;
+        feed(state.battleFeed, `${state.enemy.name}의 신격에 밀렸다. 보스전이 초기화됩니다.`);
+        spawnToast('보스 타임아웃. 루미가 숨을 고르고 다시 도전합니다.');
+        state.enemy = null;
+        ensureEnemy();
+        markDirty();
+      }
+
+      function applyDamage(amount, meta = {}) {
+        if (!state.enemy || amount <= 0) return;
+        const s = stats();
+        const dealt = amount * (state.enemy.boss ? s.bossMult : 1);
+        state.enemy.hp = Math.max(0, state.enemy.hp - dealt);
+        if (meta.text) spawnDamage(fmt(dealt), meta.kind);
+        if (meta.fx) spawnFx(meta.fx);
+        if (meta.attack) dom.heroWrap.classList.add('attack');
+        if (meta.hit) dom.enemyWrap.classList.add('hit');
+        window.setTimeout(() => {
+          dom.heroWrap.classList.remove('attack');
+          dom.enemyWrap.classList.remove('hit');
+        }, 180);
+        if (state.enemy.hp <= 0) rewardEnemy(state.enemy);
+        dirty = true;
+      }
+
+      function tapAttack() {
+        const s = stats();
+        let amount = s.tap;
+        let kind = 'tap';
+        if (Math.random() < s.critChance) {
+          amount *= s.critMult;
+          kind = 'crit';
+        }
+        state.stats.taps += 1;
+        applyDamage(amount, { text: true, kind, fx: 'tap', attack: true, hit: true });
+      }
+
+      function castSkill() {
+        const s = stats();
+        if (state.skillCd > 0) return;
+        state.skillCd = s.skillCd;
+        state.stats.skills += 1;
+        applyDamage(s.skillDamage, { text: true, kind: 'skill', fx: 'skill', attack: true, hit: true });
+        feed(state.battleFeed, '루미가 밀키웨이 엑스터시를 발동했다.');
+        markDirty();
+      }
+
+      function affordable(cfg) {
+        const budget = state[cfg.currency];
+        const mode = state.buyMode;
+        let count = 0;
+        let total = 0;
+        const limit = mode === 'MAX' ? 300 : mode;
+        while (count < limit) {
+          const price = costFor(cfg, state.upgrades[cfg.id] + count);
+          if (total + price > budget) break;
+          total += price;
+          count += 1;
+        }
+        return { count, total };
+      }
+
+      function buyUpgrade(id) {
+        const cfg = UPGRADES.find((item) => item.id === id);
+        if (!cfg) return;
+        const info = affordable(cfg);
+        if (!info.count) {
+          spawnToast(`${cfg.currency === 'stardust' ? '별모래' : '마력 편린'}가 부족합니다.`);
+          return;
+        }
+        state[cfg.currency] -= info.total;
+        state.upgrades[id] += info.count;
+        feed(state.battleFeed, `${cfg.name} ${info.count}단계 강화.`);
+        markDirty();
+      }
+
+      function buyTalent(id) {
+        const cfg = TALENTS.find((item) => item.id === id);
+        if (!cfg) return;
+        const level = state.talents[id];
+        if (level >= cfg.max) {
+          spawnToast('이 성좌는 이미 최대 단계입니다.');
+          return;
+        }
+        const price = talentCost(cfg, level);
+        if (state.cores < price) {
+          spawnToast('성좌핵이 부족합니다.');
+          return;
+        }
+        state.cores -= price;
+        state.talents[id] += 1;
+        feed(state.battleFeed, `${cfg.name} 개방 ${state.talents[id]}단계.`);
+        markDirty();
+      }
+
+      function rollRarity() {
+        const luck = Math.min(0.12, state.talents.vault * 0.012 + state.stage * 0.0007);
+        let roll = Math.max(0.001, Math.random() - luck);
+        for (const rarity of RARITIES) {
+          if (roll < rarity.rate) return rarity;
+          roll -= rarity.rate;
+        }
+        return RARITIES[RARITIES.length - 1];
+      }
+
+      function makeItem() {
+        const slot = pick(Object.keys(SLOT_META));
+        const rarity = rollRarity();
+        const base = (14 + state.stage * 1.8 + Math.random() * 8) * rarity.mult * (1 + state.awakenings * 0.05 + state.talents.record * 0.03);
+        const item = {
+          id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          slot,
+          name: `${pick(THEMES)} ${SLOT_META[slot].label}`,
+          rarity: rarity.key,
+          stats: { attack: 0, tap: 0, crit: 0, gold: 0, memory: 0, boss: 0, key: 0 },
+          score: 0
+        };
+        if (slot === 'wand') {
+          item.stats.attack = base * 0.95;
+          item.stats.boss = base * 0.004;
+        }
+        if (slot === 'veil') {
+          item.stats.tap = base * 0.85;
+          item.stats.crit = base * 0.00055;
+          item.stats.gold = base * 0.00075;
+        }
+        if (slot === 'core') {
+          item.stats.attack = base * 0.55;
+          item.stats.boss = base * 0.0055;
+          item.stats.memory = base * 0.0012;
+        }
+        if (slot === 'ribbon') {
+          item.stats.tap = base * 0.6;
+          item.stats.crit = base * 0.00035;
+          item.stats.key = base * 0.00002;
+          item.stats.gold = base * 0.00055;
+        }
+        item.score =
+          item.stats.attack +
+          item.stats.tap * 0.8 +
+          item.stats.crit * 90 +
+          item.stats.gold * 160 +
+          item.stats.memory * 180 +
+          item.stats.boss * 180 +
+          item.stats.key * 18000;
+        return item;
+      }
+
+      function rarityInfo(key) {
+        return RARITIES.find((item) => item.key === key) || RARITIES[0];
+      }
+
+      function salvageValue(item) {
+        return Math.max(1, Math.floor(item.score * (0.17 + state.upgrades.dismantle * 0.013)));
+      }
+
+      function processItem(item, noisy) {
+        const current = state.gear[item.slot];
+        if (!current || item.score > current.score * 1.03) {
+          if (current) {
+            const refund = salvageValue(current);
+            state.memory += refund;
+            feed(state.lootFeed, `${current.name} 분해 +${fmt(refund)} 편린`);
           }
+          state.gear[item.slot] = item;
+          feed(state.lootFeed, `${rarityInfo(item.rarity).name} ${item.name} 장착`);
+          if (noisy) spawnToast(`${item.name} 장착`);
+          return 'equip';
+        }
+        const refund = salvageValue(item);
+        state.memory += refund;
+        feed(state.lootFeed, `${item.name} 분해 +${fmt(refund)} 편린`);
+        return 'salvage';
       }
-    }catch(e){
-        console.error(e);
-    }
-  });
 
-  // ====== 이미지 로딩 대응 ======
-  function resolveUrl(path){
-    try{
-      return (new URL(path, window.location.href)).href;
-    }catch(e){
-      return path;
-    }
-  }
-  function getCharImgCandidates(charId){
-    return [
-      resolveUrl(charId+'.png'),
-      resolveUrl(charId+'.PNG'),
-      resolveUrl('images/'+charId+'.png'),
-      resolveUrl('images/'+charId+'.PNG'),
-      resolveUrl('img/'+charId+'.png'),
-      resolveUrl('img/'+charId+'.PNG')
-    ];
-  }
-
-  // Make these available globally if needed, though game.js might redefine them.
-  // window.resolveUrl = resolveUrl;
-  // window.getCharImgCandidates = getCharImgCandidates;
-
-  window.__imgFallback = function(imgEl){
-    try{
-      var charId = imgEl.getAttribute('data-charimg');
-      // 저장 이미지가 있으면 그걸로 고정
-      // Access state via global
-      var state = window.__STATE;
-      var stored = state && state.assets && state.assets.charImages ? state.assets.charImages[charId] : null;
-      if(stored){
-        imgEl.src = stored;
-        return;
+      function openChest(amount, silent) {
+        if (state.keys < 1) {
+          if (!silent) spawnToast('봉인 열쇠가 부족합니다.');
+          return;
+        }
+        const loop = Math.min(60, amount);
+        let opened = 0;
+        let equipped = 0;
+        while (opened < loop && state.keys >= 1) {
+          state.keys -= 1;
+          opened += 1;
+          if (processItem(makeItem(), false) === 'equip') equipped += 1;
+        }
+        if (!silent) spawnToast(`${opened}회 개봉, ${equipped}개 장착`);
+        markDirty();
       }
-      var tries = parseInt(imgEl.getAttribute('data-try')||'0',10);
-      var list = getCharImgCandidates(charId);
-      tries += 1;
-      if(tries < list.length){
-        imgEl.setAttribute('data-try', String(tries));
-        imgEl.src = list[tries];
-      }else{
-        imgEl.style.display = 'none';
+
+      function salvageSlot(slot) {
+        const item = state.gear[slot];
+        if (!item) return;
+        const refund = salvageValue(item);
+        state.memory += refund;
+        state.gear[slot] = null;
+        feed(state.lootFeed, `${item.name} 분해 +${fmt(refund)} 편린`);
+        spawnToast(`${SLOT_META[slot].label} 분해 완료`);
+        markDirty();
       }
-    }catch(e){
-      imgEl.style.display = 'none';
-    }
-  };
-})();
-</script>
-<script src="game.js" defer></script>
+
+      function awakenGain() {
+        const base = Math.floor(state.highestStage / 10);
+        return Math.max(0, base + state.talents.dream - Math.floor(state.awakenings * 0.4));
+      }
+
+      function awaken() {
+        const gain = awakenGain();
+        if (gain <= 0) {
+          spawnToast('아직 성좌핵으로 응축할 기억이 부족합니다.');
+          return;
+        }
+        state.cores += gain;
+        state.awakenings += 1;
+        state.stage = 1;
+        state.stardust = 0;
+        state.keys = 3;
+        state.skillCd = 0;
+        state.enemy = null;
+        state.upgrades = Object.fromEntries(UPGRADES.map((item) => [item.id, 0]));
+        state.gear = Object.fromEntries(Object.keys(SLOT_META).map((slot) => [slot, null]));
+        feed(state.battleFeed, `루미가 드림폼 각성에 성공했다. 성좌핵 ${gain}개 획득.`);
+        ensureEnemy();
+        markDirty();
+      }
+
+      function exportSave() {
+        const text = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+        window.prompt('세이브 문자열을 복사하세요.', text);
+      }
+
+      function importSave() {
+        const input = window.prompt('가져올 세이브 문자열을 붙여 넣으세요.');
+        if (!input) return;
+        try {
+          state = migrate(JSON.parse(decodeURIComponent(escape(atob(input)))));
+          ensureEnemy();
+          awardOffline(false);
+          renderTabs();
+          markDirty();
+          saveState(true);
+          spawnToast('세이브를 불러왔습니다.');
+        } catch (error) {
+          spawnToast('세이브 문자열을 읽지 못했습니다.');
+        }
+      }
+
+      function hardReset() {
+        if (!window.confirm('모든 진행도를 초기화할까요?')) return;
+        state = defaults();
+        ensureEnemy();
+        saveState(true);
+        markDirty();
+      }
+
+      function awardOffline(showToast) {
+        const now = Date.now();
+        const elapsed = Math.max(0, Math.floor((now - state.lastTick) / 1000));
+        state.lastTick = now;
+        if (elapsed < 5) return;
+        const s = stats();
+        const capped = Math.min(elapsed, s.afkCap);
+        const dust = s.afkDust * capped;
+        const keys = s.afkKeys * capped;
+        state.stardust += dust;
+        state.keys += keys;
+        if (showToast) spawnToast(`오프라인 ${Math.floor(capped / 60)}분 보상: 별모래 ${fmt(dust)}, 열쇠 ${fmt(keys, 1)}`);
+        markDirty();
+      }
+
+      function spawnToast(text) {
+        const node = document.createElement('div');
+        node.className = 'toast';
+        node.textContent = text;
+        dom.toastBox.appendChild(node);
+        window.setTimeout(() => node.remove(), 3400);
+      }
+
+      function spawnFx(type) {
+        const fx = document.createElement('div');
+        fx.className = `fx ${type}`;
+        dom.fxLayer.appendChild(fx);
+        window.setTimeout(() => fx.remove(), 520);
+      }
+
+      function spawnDamage(text, kind) {
+        const node = document.createElement('div');
+        node.className = `dmg${kind === 'crit' ? ' crit' : ''}${kind === 'skill' ? ' skilld' : ''}`;
+        node.textContent = kind === 'crit' ? `${text}!` : text;
+        node.style.right = `${18 + Math.random() * 14}%`;
+        node.style.bottom = `${38 + Math.random() * 14}%`;
+        dom.fxLayer.appendChild(node);
+        window.setTimeout(() => node.remove(), 860);
+      }
+
+      function drawRect(ctx, x, y, w, h, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, h);
+      }
+
+      function drawHero(frame) {
+        heroCtx.clearRect(0, 0, 16, 16);
+        const cyan = '#79e8f5';
+        const white = '#f8fbff';
+        const skin = '#f3dbc7';
+        const hair = '#efe1bf';
+        const blue = '#6baeff';
+        const sole = '#5cc9dd';
+        drawRect(heroCtx, 5, 0, 6, 1, white);
+        drawRect(heroCtx, 4, 1, 8, 1, white);
+        drawRect(heroCtx, 3, 2, 2, 1, cyan);
+        drawRect(heroCtx, 11, 2, 2, 1, cyan);
+        drawRect(heroCtx, 5, 2, 6, 3, hair);
+        drawRect(heroCtx, 6, 4, 1, 1, blue);
+        drawRect(heroCtx, 9, 4, 1, 1, blue);
+        drawRect(heroCtx, 6, 5, 4, 1, skin);
+        drawRect(heroCtx, 5, 6, 6, 4, white);
+        drawRect(heroCtx, 7, 6, 2, 2, cyan);
+        drawRect(heroCtx, frame ? 3 : 4, 7, 2, 3, white);
+        drawRect(heroCtx, frame ? 11 : 10, 7, 2, 3, white);
+        drawRect(heroCtx, 4, 9, 2, 2, white);
+        drawRect(heroCtx, 10, 9, 2, 2, white);
+        drawRect(heroCtx, 6, 10, 1, 3, skin);
+        drawRect(heroCtx, 9, 10, 1, 3, skin);
+        drawRect(heroCtx, 5, 13, 2, 1, sole);
+        drawRect(heroCtx, 9, 13, 2, 1, sole);
+        drawRect(heroCtx, frame ? 11 : 12, 8, 1, 3, cyan);
+      }
+
+      function drawEnemy(kind) {
+        enemyCtx.clearRect(0, 0, 16, 16);
+        const dark = '#241b2b';
+        const red = '#ff8fb4';
+        const gold = '#ffd57b';
+        const pale = '#f7f2ff';
+        const green = '#93f0b2';
+        const steel = '#a9bdd6';
+        if (kind === 'skull') {
+          drawRect(enemyCtx, 4, 3, 8, 6, pale);
+          drawRect(enemyCtx, 5, 5, 2, 2, dark);
+          drawRect(enemyCtx, 9, 5, 2, 2, dark);
+          drawRect(enemyCtx, 7, 7, 2, 1, dark);
+          drawRect(enemyCtx, 5, 9, 6, 3, pale);
+          drawRect(enemyCtx, 6, 10, 1, 2, dark);
+          drawRect(enemyCtx, 9, 10, 1, 2, dark);
+        } else if (kind === 'tree') {
+          drawRect(enemyCtx, 6, 8, 4, 5, '#7b5433');
+          drawRect(enemyCtx, 3, 2, 10, 7, green);
+          drawRect(enemyCtx, 5, 0, 6, 3, green);
+        } else if (kind === 'witch') {
+          drawRect(enemyCtx, 3, 3, 10, 2, '#8ea4ff');
+          drawRect(enemyCtx, 5, 1, 6, 2, '#8ea4ff');
+          drawRect(enemyCtx, 6, 5, 4, 5, red);
+          drawRect(enemyCtx, 5, 10, 6, 3, dark);
+        } else if (kind === 'dragon') {
+          drawRect(enemyCtx, 4, 4, 8, 5, gold);
+          drawRect(enemyCtx, 3, 7, 10, 4, gold);
+          drawRect(enemyCtx, 11, 3, 2, 2, red);
+          drawRect(enemyCtx, 2, 5, 2, 2, red);
+        } else if (kind === 'pharaoh') {
+          drawRect(enemyCtx, 4, 2, 8, 9, gold);
+          drawRect(enemyCtx, 5, 4, 1, 5, steel);
+          drawRect(enemyCtx, 10, 4, 1, 5, steel);
+          drawRect(enemyCtx, 6, 5, 1, 1, dark);
+          drawRect(enemyCtx, 9, 5, 1, 1, dark);
+        } else if (kind === 'clock') {
+          drawRect(enemyCtx, 3, 3, 10, 10, steel);
+          drawRect(enemyCtx, 5, 5, 6, 6, pale);
+          drawRect(enemyCtx, 7, 6, 1, 3, dark);
+          drawRect(enemyCtx, 7, 8, 3, 1, dark);
+        } else if (kind === 'angel' || kind === 'god') {
+          drawRect(enemyCtx, 5, 1, 6, 2, gold);
+          drawRect(enemyCtx, 6, 4, 4, 5, pale);
+          drawRect(enemyCtx, 2, 6, 3, 4, pale);
+          drawRect(enemyCtx, 11, 6, 3, 4, pale);
+          drawRect(enemyCtx, 5, 10, 6, 3, gold);
+        } else if (kind === 'machine') {
+          drawRect(enemyCtx, 3, 3, 10, 8, steel);
+          drawRect(enemyCtx, 5, 5, 2, 2, red);
+          drawRect(enemyCtx, 9, 5, 2, 2, red);
+          drawRect(enemyCtx, 5, 9, 6, 2, dark);
+        } else if (kind === 'demon') {
+          drawRect(enemyCtx, 4, 2, 2, 3, red);
+          drawRect(enemyCtx, 10, 2, 2, 3, red);
+          drawRect(enemyCtx, 4, 5, 8, 7, dark);
+          drawRect(enemyCtx, 6, 7, 1, 1, red);
+          drawRect(enemyCtx, 9, 7, 1, 1, red);
+          drawRect(enemyCtx, 6, 10, 4, 1, red);
+        } else {
+          drawRect(enemyCtx, 4, 3, 8, 9, dark);
+          drawRect(enemyCtx, 5, 5, 2, 2, red);
+          drawRect(enemyCtx, 9, 5, 2, 2, red);
+          drawRect(enemyCtx, 5, 9, 6, 2, pale);
+        }
+      }
+
+      function renderStaticText() {
+        document.title = '루미의 성좌 공방';
+        const res = {
+          stardust: ['✦', '별모래'],
+          memory: ['✧', '마력 편린'],
+          cores: ['◈', '성좌핵'],
+          keys: ['⌘', '봉인 열쇠']
+        };
+        Object.entries(res).forEach(([key, value]) => {
+          const label = document.querySelector(`[data-res="${key}"] .label`);
+          if (label) label.innerHTML = `<span class="ico">${value[0]}</span>${value[1]}`;
+        });
+        const nav = {
+          battle: ['⚔', '전투'],
+          workshop: ['⚒', '공방'],
+          gear: ['✦', '장비'],
+          constellation: ['✶', '성좌'],
+          chronicle: ['☰', '기록']
+        };
+        dom.nav.forEach((button) => {
+          const value = nav[button.dataset.tabBtn];
+          if (!value) return;
+          button.children[0].textContent = value[0];
+          button.children[1].textContent = value[1];
+        });
+        const skillBits = dom.skillBtn.querySelectorAll('span');
+        skillBits[0].textContent = '밀키웨이 엑스터시';
+        dom.open1.children[0].textContent = '1회 개봉';
+        dom.open1.children[1].textContent = '열쇠 1개';
+        dom.open10.children[0].textContent = '10회 개봉';
+        dom.open10.children[1].textContent = '열쇠 10개';
+        const tapHint = document.getElementById('tapHint');
+        if (tapHint) {
+          tapHint.innerHTML = '전장을 터치하면 <strong id="tapDamageValue">0</strong>의 팡팡 펀치가 추가됩니다.<br />자동 공격은 계속 진행되며, 보스전에서는 시간 안에 승리해야 합니다.';
+          dom.tapDamageValue = document.getElementById('tapDamageValue');
+        }
+      }
+
+      function renderTabs() {
+        dom.tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === state.activeTab));
+        dom.nav.forEach((button) => button.classList.toggle('active', button.dataset.tabBtn === state.activeTab));
+      }
+
+      function renderFast() {
+        ensureEnemy();
+        const s = stats();
+        const enemy = state.enemy;
+        dom.stardustValue.textContent = fmt(state.stardust);
+        dom.memoryValue.textContent = fmt(state.memory);
+        dom.coresValue.textContent = fmt(state.cores);
+        dom.keysValue.textContent = fmt(state.keys, 1);
+        dom.stageBadge.textContent = `스테이지 ${state.stage}`;
+        dom.realmBadge.textContent = realmFor(state.stage);
+        dom.saveBadge.textContent = Date.now() - state.lastSave < 1800 ? '저장됨' : '자동 저장';
+        dom.saveBadge.classList.toggle('saved', Date.now() - state.lastSave < 1800);
+        dom.enemyName.textContent = enemy.name;
+        dom.battleSummary.textContent = enemy.boss ? enemy.lore : `${enemy.lore} 루미의 별빛 마법으로 밀어붙이세요.`;
+        dom.etaChip.textContent = `TTK ${Math.max(0.1, enemy.hp / Math.max(1, s.dps * (enemy.boss ? s.bossMult : 1))).toFixed(1)}s`;
+        dom.bossChip.textContent = enemy.boss ? '보스전' : '일반전';
+        dom.hpLabel.textContent = `HP ${fmt(enemy.hp)} / ${fmt(enemy.maxHp)}`;
+        dom.hpFill.style.width = `${clamp(enemy.hp / enemy.maxHp, 0, 1) * 100}%`;
+        dom.rewardLabel.textContent = `보상 ${fmt(enemy.dust * s.goldMult)} 별모래${enemy.memory ? ` / ${fmt(enemy.memory * s.memoryMult)} 편린` : ''}`;
+        dom.timerLabel.textContent = enemy.boss ? `남은 시간 ${enemy.timeLeft.toFixed(1)}s` : `자동 공격 ${fmt(s.dps)} DPS`;
+        dom.timerFill.style.width = enemy.boss ? `${clamp(enemy.timeLeft / enemy.timeMax, 0, 1) * 100}%` : '100%';
+        dom.afkLabel.textContent = `AFK ${fmt(s.afkDust)}/s · 열쇠 ${fmt(s.afkKeys * 60, 1)}/m`;
+        dom.tapDamageValue.textContent = fmt(s.tap);
+        dom.autoBtn.textContent = `자동 진행 ${state.autoProgress ? 'ON' : 'OFF'}`;
+        dom.autoOpenBtn.textContent = `자동 개봉 ${state.autoOpen ? 'ON' : 'OFF'}`;
+        dom.awakenGain.textContent = `성좌핵 +${fmt(awakenGain())}`;
+        const ready = state.skillCd <= 0;
+        dom.skillBtn.classList.toggle('disabled', !ready);
+        dom.skillBtn.classList.toggle('ready', ready);
+        dom.skillText.textContent = ready ? `${fmt(s.skillDamage)} 피해` : `${state.skillCd.toFixed(1)}초`;
+        drawHero(Math.floor(performance.now() / 280) % 2);
+        drawEnemy(enemy.icon);
+      }
+
+      function renderBattleStats() {
+        const s = stats();
+        const items = [
+          ['트윙클 DPS', fmt(s.dps), `보스 피해 ${pct(s.bossMult - 1)}`],
+          ['팡팡 펀치', fmt(s.tap), `치명타 ${pct(s.critChance)}`],
+          ['스킬 위력', fmt(s.skillDamage), `재사용 ${s.skillCd.toFixed(1)}초`],
+          ['별모래 수급', `${fmt(s.afkDust)}/s`, `채집 ${pct(s.goldMult - 1)}`],
+          ['편린 효율', pct(s.memoryMult - 1), '장비 분해에 적용'],
+          ['전투력', fmt(s.power), `최고 스테이지 ${state.highestStage}`]
+        ];
+        dom.battleStats.innerHTML = items
+          .map((item) => `<div class="mini"><span>${item[0]}</span><b>${item[1]}</b><div class="mut">${item[2]}</div></div>`)
+          .join('');
+      }
+
+      function renderBattleFeed() {
+        dom.battleFeed.innerHTML = state.battleFeed.map((line) => `<div class="log">${line}</div>`).join('');
+      }
+
+      function renderBuyMode() {
+        dom.buyMode.innerHTML = BUY_MODES.map((mode) => {
+          const label = mode === 'MAX' ? 'MAX' : `x${mode}`;
+          return `<button class="segbtn ${state.buyMode === mode ? 'active' : ''}" type="button" data-mode="${mode}">${label}</button>`;
+        }).join('');
+      }
+
+      function renderUpgrades() {
+        dom.upgradeList.innerHTML = UPGRADES.map((item) => {
+          const level = state.upgrades[item.id];
+          const price = costFor(item, level);
+          const resource = item.currency === 'stardust' ? state.stardust : state.memory;
+          const can = resource >= price;
+          return `
+            <div class="slotcard">
+              <div class="title-row">
+                <div>
+                  <div class="name">${item.name} Lv.${level}</div>
+                  <div class="mut">${item.desc}</div>
+                </div>
+                <button class="ghost ${can ? '' : 'disabled'}" type="button" data-upgrade="${item.id}">
+                  ${state.buyMode === 'MAX' ? '최대 강화' : `+${state.buyMode}`}
+                </button>
+              </div>
+              <div class="foot">
+                <div class="price">${item.currency === 'stardust' ? '별모래' : '편린'} ${fmt(price)}</div>
+                <div class="mut">다음 단계 비용</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderGear() {
+        dom.gearSlots.innerHTML = Object.entries(SLOT_META).map(([slot, meta]) => {
+          const item = state.gear[slot];
+          if (!item) {
+            return `<div class="slotcard empty"><div class="name">${meta.icon} ${meta.label}</div><div class="mut">아직 장비가 없습니다.</div></div>`;
+          }
+          const rarity = rarityInfo(item.rarity);
+          const statsText = [
+            item.stats.attack ? `공격 +${fmt(item.stats.attack)}` : '',
+            item.stats.tap ? `탭 +${fmt(item.stats.tap)}` : '',
+            item.stats.crit ? `치명 +${pct(item.stats.crit)}` : '',
+            item.stats.boss ? `보스 +${pct(item.stats.boss)}` : '',
+            item.stats.gold ? `별모래 +${pct(item.stats.gold)}` : '',
+            item.stats.memory ? `편린 +${pct(item.stats.memory)}` : '',
+            item.stats.key ? `열쇠 +${fmt(item.stats.key * 60, 2)}/m` : ''
+          ].filter(Boolean);
+          return `
+            <div class="slotcard">
+              <div class="name">${meta.icon} <span class="${rarity.cls}">${rarity.name}</span> ${item.name}</div>
+              <div class="mut">${meta.label} 슬롯 장착 중</div>
+              <div class="affix">${statsText.join(' · ')}</div>
+              <div class="foot">
+                <div class="price">점수 ${fmt(item.score)}</div>
+                <button class="ghost" type="button" data-salvage="${slot}">분해</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        dom.lootFeed.innerHTML = state.lootFeed.map((line) => `<div class="log">${line}</div>`).join('');
+      }
+
+      function renderAwaken() {
+        const s = stats();
+        const items = [
+          ['각성 횟수', fmt(state.awakenings), '루미의 드림폼 누적'],
+          ['최고 스테이지', fmt(state.highestStage), '지금까지 도달한 최고 구간'],
+          ['성좌핵', fmt(state.cores), '영구 성좌 강화에 사용'],
+          ['현재 전투력', fmt(s.power), '각성 후 다시 누적됩니다.']
+        ];
+        dom.awakenStats.innerHTML = items
+          .map((item) => `<div class="mini"><span>${item[0]}</span><b>${item[1]}</b><div class="mut">${item[2]}</div></div>`)
+          .join('');
+        dom.awakenBtn.classList.toggle('disabled', awakenGain() <= 0);
+      }
+
+      function renderTalents() {
+        dom.talentList.innerHTML = TALENTS.map((item) => {
+          const level = state.talents[item.id];
+          const price = talentCost(item, level);
+          const done = level >= item.max;
+          return `
+            <div class="slotcard">
+              <div class="title-row">
+                <div>
+                  <div class="name">${item.name} ${level}/${item.max}</div>
+                  <div class="mut">${item.desc}</div>
+                </div>
+                <button class="ghost ${done || state.cores < price ? 'disabled' : ''}" type="button" data-talent="${item.id}">
+                  ${done ? '완료' : `개방 ${price}`}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderChronicle() {
+        dom.castList.innerHTML = CAST.map((item) => `<div class="slotcard"><div class="name">${item[0]}</div><div class="mut">${item[1]}</div></div>`).join('');
+        dom.bossList.innerHTML = BOSSES.map((boss, index) => `<div class="slotcard"><div class="name">Stage ${(index + 1) * 10} · ${boss.name}</div><div class="mut">${boss.lore}</div></div>`).join('');
+        dom.systemList.innerHTML = `
+          <div class="slotcard">
+            <div class="name">세이브 관리</div>
+            <div class="mut">로컬 저장 키: ${STORAGE_KEY}</div>
+            <div class="foot">
+              <button class="ghost" type="button" data-system="export">내보내기</button>
+              <button class="ghost" type="button" data-system="import">가져오기</button>
+            </div>
+          </div>
+          <div class="slotcard">
+            <div class="name">게임 정보</div>
+            <div class="mut">단일 HTML 구조, 루미 단독 플레이, 자동 저장 5초 간격.</div>
+            <div class="foot">
+              <div class="price">플레이 ${Math.floor(state.stats.playSeconds / 60)}분</div>
+              <button class="danger" type="button" data-system="reset">초기화</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPanels() {
+        renderBattleStats();
+        renderBattleFeed();
+        renderBuyMode();
+        renderUpgrades();
+        renderGear();
+        renderAwaken();
+        renderTalents();
+        renderChronicle();
+      }
+
+      function step(now) {
+        const dt = Math.min(0.25, (now - lastFrame) / 1000 || 0.016);
+        lastFrame = now;
+        const s = stats();
+        ensureEnemy();
+        state.stats.playSeconds += dt;
+        state.skillCd = Math.max(0, state.skillCd - dt);
+        state.stardust += s.afkDust * dt;
+        state.keys += s.afkKeys * dt;
+        if (state.autoOpen && state.keys >= 1 && Math.random() < dt * (1.2 + state.talents.vault * 0.2)) {
+          openChest(1, true);
+        }
+        if (state.enemy) {
+          applyDamage(s.dps * dt, {});
+          if (state.enemy && state.enemy.boss) {
+            state.enemy.timeLeft = Math.max(0, state.enemy.timeLeft - dt);
+            if (state.enemy.timeLeft <= 0 && state.enemy.hp > 0) failBoss();
+          }
+        }
+        renderFast();
+        if (panelDirty || now - lastPanelRender > 700) {
+          renderPanels();
+          panelDirty = false;
+          lastPanelRender = now;
+        }
+        state.lastTick = Date.now();
+        if (Date.now() - lastSaveAt > 5000) saveState(true);
+        requestAnimationFrame(step);
+      }
+
+      function bindEvents() {
+        dom.tapZone.addEventListener('click', tapAttack);
+        dom.tapZone.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            tapAttack();
+          }
+        });
+        dom.skillBtn.addEventListener('click', castSkill);
+        dom.autoBtn.addEventListener('click', () => {
+          state.autoProgress = !state.autoProgress;
+          markDirty();
+        });
+        dom.autoOpenBtn.addEventListener('click', () => {
+          state.autoOpen = !state.autoOpen;
+          markDirty();
+        });
+        dom.open1.addEventListener('click', () => openChest(1, false));
+        dom.open10.addEventListener('click', () => openChest(10, false));
+        dom.awakenBtn.addEventListener('click', awaken);
+        dom.buyMode.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-mode]');
+          if (!button) return;
+          state.buyMode = button.dataset.mode === 'MAX' ? 'MAX' : Number(button.dataset.mode);
+          panelDirty = true;
+        });
+        dom.upgradeList.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-upgrade]');
+          if (button) buyUpgrade(button.dataset.upgrade);
+        });
+        dom.talentList.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-talent]');
+          if (button) buyTalent(button.dataset.talent);
+        });
+        dom.gearSlots.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-salvage]');
+          if (button) salvageSlot(button.dataset.salvage);
+        });
+        dom.systemList.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-system]');
+          if (!button) return;
+          if (button.dataset.system === 'export') exportSave();
+          if (button.dataset.system === 'import') importSave();
+          if (button.dataset.system === 'reset') hardReset();
+        });
+        dom.nav.forEach((button) => {
+          button.addEventListener('click', () => {
+            state.activeTab = button.dataset.tabBtn;
+            renderTabs();
+            markDirty();
+          });
+        });
+        window.addEventListener('beforeunload', () => {
+          state.lastTick = Date.now();
+          saveState(true);
+        });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            state.lastTick = Date.now();
+            saveState(true);
+          }
+        });
+      }
+
+      renderStaticText();
+      ensureEnemy();
+      awardOffline(true);
+      renderTabs();
+      bindEvents();
+      renderFast();
+      renderPanels();
+      saveState(true);
+      requestAnimationFrame(step);
+    })();
+  </script>
 </body>
 </html>
