@@ -19,10 +19,15 @@ function run() {
     'initNewGame(mode =',
     'startToeicPractice()',
     'finishToeicSession()',
-    'openToeicReview()'
+    'openToeicReview()',
+    'id="btn-bonus-pool-editor"',
+    'id="modal-bonus-pool-editor"',
+    'pendingActiveBonusPoolIds:',
+    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
+    'openBonusPoolEditor()'
   ]);
 
-  mustContain(path.join(cardRoot, 'logic.js'), ['const Storage']);
+  mustContain(path.join(cardRoot, 'logic.js'), ['const Storage', 'activeBonusPoolIds']);
   mustContain(path.join(cardRoot, 'data.js'), ['const CARDS']);
   mustContain(path.join(cardRoot, 'toeic.js'), ['const TOEIC_DATA']);
 

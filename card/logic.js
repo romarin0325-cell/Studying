@@ -202,6 +202,7 @@ const GameUtils = {
      * @param {Object} [options]
      * @param {boolean} [options.includeTranscendence=false] - Include active transcendence cards
      * @param {string[]} [options.activeTranscendenceCards=[]] - IDs of active transcendence cards
+     * @param {string[]} [options.activeBonusPoolIds=[]] - Enabled bonus card IDs for the current run
      * @param {string[]} [options.activeEventCards=[]] - IDs of active event cards for the current run
      * @param {boolean} [options.excludeTranscendence=false] - Filter out transcendence grade cards
      * @param {boolean} [options.excludeEvent=false] - Filter out event grade cards
@@ -213,7 +214,11 @@ const GameUtils = {
 
         // Add unlocked bonus cards
         if (globalData.unlocked_bonus_cards && globalData.unlocked_bonus_cards.length > 0) {
-            const bonus = BONUS_CARDS.filter(c => globalData.unlocked_bonus_cards.includes(c.id));
+            const unlockedBonusIds = new Set(globalData.unlocked_bonus_cards);
+            const activeBonusIds = Array.isArray(options.activeBonusPoolIds)
+                ? new Set(options.activeBonusPoolIds.filter(id => unlockedBonusIds.has(id)))
+                : unlockedBonusIds;
+            const bonus = BONUS_CARDS.filter(c => activeBonusIds.has(c.id));
             pool = pool.concat(bonus);
         }
 
