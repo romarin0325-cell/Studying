@@ -3127,7 +3127,18 @@
 
                 if (result.killerDebuffs && killer && killer.buffs) {
                     Object.keys(result.killerDebuffs).forEach(k => {
-                        killer.buffs[k] = (killer.buffs[k] || 0) + result.killerDebuffs[k];
+                        const nextStack = (killer.buffs[k] || 0) + result.killerDebuffs[k];
+                        if (k === 'burn') {
+                            const burnMax = this.hasArtifact('over_flame') ? 5 : 3;
+                            killer.buffs[k] = Math.min(nextStack, burnMax);
+                            return;
+                        }
+                        if (k === 'divine') {
+                            const divineMax = this.hasArtifact('over_divine') ? 5 : 3;
+                            killer.buffs[k] = Math.min(nextStack, divineMax);
+                            return;
+                        }
+                        killer.buffs[k] = nextStack;
                         // If specific duration handling is needed, add here. Currently assumed 1 stack.
                     });
                 }
