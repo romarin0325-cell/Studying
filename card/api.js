@@ -181,11 +181,12 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
 
     if (dateParams.secret) {
         secretPart = `\n\n[비밀 데이트] 이것은 특별한 비밀 데이트입니다. 평소보다 더 특별하고 달콤한 이벤트를 만들어주세요. 루미가 형아를 위해 특별히 준비한 이벤트라는 것을 강조하세요. 비밀 데이트 종료 시 루미가 "다음에도 이런 특별한 데이트 하고 싶다"라고 표현합니다.`;
-    } else {
-        // 30% chance for unintentional innuendo during normal dates
-        const enableEvent = RPG && RPG.global && RPG.global.tutoringEventEnabled !== false;
-        if (enableEvent && Math.random() < 0.3) {
-            innuendoInstruction = `
+    }
+
+    // 30% chance for unintentional innuendo during all dates (including secret dates)
+    const enableEvent = RPG && RPG.global && RPG.global.tutoringEventEnabled !== false;
+    if (enableEvent && Math.random() < 0.3) {
+        innuendoInstruction = `
 \n\n## [Special Direction: Unintentional Innuendo (Accidental)]
 1. 평소보다 루미가 적극적인 애정표현을 하며, 데이트의 상황이 플레이어로 하여금 야한 오해를 불러일으키도록 작성해야 합니다.
 2. 캐릭터는 순수한 의도로 행동해야 합니다. (일상 활동, 우연한 상황)
@@ -193,7 +194,6 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
 4. 캐릭터 대사는 의도 없이 나온 말이지만, 문맥상 이중적 해석이 가능해야 합니다.
 5. 스킨십은 있으나 성적 행위 암시는 없으며, 착각/우연을 강조해야 합니다.
 `;
-        }
     }
 
     const fullPrompt = `${DATE_LUMI_PERSONA}\n${innuendoInstruction}\n\n${DATE_FORMAT}\n\n` +
