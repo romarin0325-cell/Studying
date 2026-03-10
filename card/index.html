@@ -3252,8 +3252,12 @@
                 // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
                 this.applySkillEffects(source, target, modifiedSkill);
 
+                if (source.hp <= 0 && !source.isDead) {
+                    source.isDead = true;
+                    RPG.log(`${source.name} 사망!`);
+                    RPG.handleDeathTraits(source, target);
+                }
                 if (target.hp <= 0) { RPG.winBattle(); return; }
-                if (source.hp <= 0 && !source.isDead) { source.isDead = true; RPG.log(`${source.name} 사망!`); }
 
                 if (!isDelayed) RPG.TurnManager.endPlayerTurn();
             },
