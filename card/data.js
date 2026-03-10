@@ -692,7 +692,7 @@ const BONUS_CARDS = [
     {
         id: 'eclipse_queen', name: '이클립스퀸', grade: 'epic', element: 'dark', role: 'balancer',
         stats: { hp: 395, atk: 110, matk: 85, def: 65, mdef: 65 },
-        trait: { type: 'syn_dark_3_party_atk', val: 30, desc: '덱에 어둠 3장 이상 시 파티 전체 공격력 30% 증가' },
+        trait: { type: 'syn_dark_3_party_atk', val: 50, desc: '덱에 어둠 3장 이상 시 파티 전체 공격력 50% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '섀도우코로나', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
