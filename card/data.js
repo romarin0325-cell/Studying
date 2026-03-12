@@ -761,7 +761,7 @@ const BONUS_CARDS = [
     },
     {
         id: 'red_moon', name: '레드문', grade: 'legend', element: 'fire', role: 'dealer',
-        stats: { hp: 500, atk: 140, matk: 90, def: 65, mdef: 60 },
+        stats: { hp: 490, atk: 140, matk: 100, def: 65, mdef: 60 },
         trait: { type: 'death_dmg_phy', val: 6.0, desc: '사망 시 적에게 600% 물리대미지' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
