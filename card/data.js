@@ -255,7 +255,7 @@ const CARDS = [
     {
         id: 'archangel', name: '대천사', grade: 'epic', element: 'light', role: 'balancer',
         stats: { hp: 400, atk: 70, matk: 95, def: 65, mdef: 80 },
-        trait: { type: 'syn_light_dark_matk_mdef', val: 30, desc: '덱에 빛, 어둠이 있을 경우 마법공격력, 마법방어력 30%증가' },
+        trait: { type: 'syn_light_dark_matk_mdef', val: 50, desc: '덱에 빛, 어둠이 있을 경우 마법공격력, 마법방어력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '성역전개', type: 'sup', tier: 2, cost: 20, desc: '필드버프 성역 발동 및 적에게 디바인 1스택 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }] },
@@ -725,7 +725,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 1.0, customLog: '작열 1스택 소모!' }, { type: 'random_debuff', count: 2, pool: ['weak', 'corrosion', 'curse', 'silence'] }] },
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
             { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     }
