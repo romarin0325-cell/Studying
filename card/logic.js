@@ -576,6 +576,25 @@ const SideEffects = {
                 }
             }
         },
+        'consume_debuff_then_random_debuff': (ctx, eff) => {
+            const debuff = eff.debuff;
+            const count = eff.count || 1;
+            if ((ctx.target.buffs[debuff] || 0) < count) return;
+
+            ctx.target.buffs[debuff] -= count;
+            if (ctx.target.buffs[debuff] <= 0) delete ctx.target.buffs[debuff];
+            if (eff.customLog) ctx.logFn(eff.customLog);
+            else ctx.logFn(`${getBuffName(debuff)} ${count}스택 소모!`);
+
+            let pool = [...eff.pool].sort(() => 0.5 - Math.random());
+            const randomCount = eff.randomCount || eff.count || 1;
+            for (let i = 0; i < randomCount; i++) {
+                if (pool[i]) {
+                    ctx.target.buffs[pool[i]] = 1;
+                    ctx.logFn(`적에게 [${getBuffName(pool[i])}] 부여.`);
+                }
+            }
+        },
         'conditional_debuff': (ctx, eff) => {
             if (eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length >= eff.count) {
                 ctx.target.buffs[eff.debuff] = 1;
