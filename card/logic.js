@@ -319,7 +319,7 @@ const DAMAGE_EFFECT_HANDLERS = {
         if (ctx.target.buffs[eff.debuff]) {
             let c = ctx.target.buffs[eff.debuff];
             let mps = eff.multPerStack;
-            // Artifact: holy_flame_burst — double consume multiplier for burn/divine
+            // Artifact: holy_flame_burst — full-consume burn/divine skills only
             const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
             if (artifacts.includes('holy_flame_burst') && (eff.debuff === 'burn' || eff.debuff === 'divine')) {
                 mps *= 2.0;
@@ -387,13 +387,7 @@ const DAMAGE_EFFECT_HANDLERS = {
         if ((ctx.target.buffs[debuff] || 0) >= count) {
             ctx.target.buffs[debuff] -= count;
             if (ctx.target.buffs[debuff] <= 0) delete ctx.target.buffs[debuff];
-            let m = eff.mult;
-            // Artifact: holy_flame_burst — double consume multiplier for burn/divine
-            const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-            if (artifacts.includes('holy_flame_burst') && (debuff === 'burn' || debuff === 'divine')) {
-                m *= 2.0;
-                ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
-            }
+            const m = eff.mult;
             ctx.mult *= m;
 
             if (eff.customLog) ctx.logFn(eff.customLog);

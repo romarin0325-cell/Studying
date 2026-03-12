@@ -2841,7 +2841,10 @@
 
                 // Artifact: gale_storm — apply gale field buff for first 3 turns
                 if (this.hasArtifact('gale_storm')) {
-                    this.applyFieldBuff('gale');
+                    this.applyFieldBuff('gale', {
+                        expiresAtTurn: 4,
+                        expireLog: '[아티팩트] 질풍노도 효과 종료. (질풍 제거)'
+                    });
                     this.log('[아티팩트] 질풍노도: 전투 시작 시 질풍 발동!');
                 }
 
@@ -2870,6 +2873,7 @@
                     if (b.isNewTurn) {
                         b.isNewTurn = false;
                         RPG.log(`=== ${b.turn}턴 ===`, 'info');
+                        RPG.expireFieldBuffs(b.turn);
 
                         // Artifact: kaleidoscope
                         if (RPG.hasArtifact('kaleidoscope')) {
@@ -2880,28 +2884,13 @@
 
                                 // Get all available buff keys
                                 const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS)
-                                    .filter(buffId => buffId !== 'gale' && buffId !== 'destiny_oath');
+                                    .filter(buffId => buffId !== 'destiny_oath');
 
                                 // Select unique random buffs
                                 let pool = [...allBuffs].sort(() => 0.5 - Math.random());
                                 let picks = pool.slice(0, Math.min(count, pool.length));
 
                                 picks.forEach(bid => RPG.applyFieldBuff(bid));
-                            }
-                        }
-
-                        // Artifact: gale_storm — maintain gale field buff for first 3 turns
-                        if (RPG.hasArtifact('gale_storm')) {
-                            if (b.turn <= 3) {
-                                if (!b.fieldBuffs.some(buff => buff.name === 'gale')) {
-                                    RPG.applyFieldBuff('gale');
-                                }
-                            } else if (b.turn === 4) {
-                                const hadGale = b.fieldBuffs.some(buff => buff.name === 'gale');
-                                if (hadGale) {
-                                    b.fieldBuffs = b.fieldBuffs.filter(buff => buff.name !== 'gale');
-                                    RPG.log('[아티팩트] 질풍노도 효과 종료. (질풍 제거)');
-                                }
                             }
                         }
 
@@ -3158,6 +3147,25 @@
                 }
             },
 
+            maybeTriggerDeathRoulette(source, skill, isDelayed = false) {
+                if (!this.hasArtifact('death_roulette') || isDelayed || skill.name === RPG.NORMAL_ATTACK.name) {
+                    return false;
+                }
+                if (Math.random() >= 0.3) return false;
+
+                source.hp = 0;
+                RPG.log('<span style="color:#ff5252">[아티팩트] 데스룰렛: 죽음의 룰렛에 당첨...</span>');
+                return true;
+            },
+
+            resolveSourceDeath(source, target) {
+                if (source.hp > 0 || source.isDead) return;
+
+                source.isDead = true;
+                RPG.log(`${source.name} 사망!`);
+                RPG.handleDeathTraits(source, target);
+            },
+
             // --- Player Skill Execution ---
 
             executeSkill(source, target, skill, isDelayed = false) {
@@ -3221,6 +3229,9 @@
                 if (delayedEff && !isDelayed) {
                     RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
                     RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: modifiedSkill });
+                    this.maybeTriggerDeathRoulette(source, modifiedSkill, isDelayed);
+                    this.resolveSourceDeath(source, target);
+                    if (target.hp <= 0) { RPG.winBattle(); return; }
                     RPG.TurnManager.endPlayerTurn();
                     return;
                 }
@@ -3241,22 +3252,12 @@
                     RPG.log('[아티팩트] 럭키비키: 치명타 발생! 마나 10 회복!');
                 }
 
-                // Artifact: death_roulette — 30% chance to die on skill use
-                if (this.hasArtifact('death_roulette') && skill.name !== RPG.NORMAL_ATTACK.name && !isDelayed) {
-                    if (Math.random() < 0.3) {
-                        source.hp = 0;
-                        RPG.log('<span style="color:#ff5252">[아티팩트] 데스룰렛: 죽음의 룰렛에 당첨...</span>');
-                    }
-                }
+                this.maybeTriggerDeathRoulette(source, modifiedSkill, isDelayed);
 
                 // Apply Side Effects (Buffs, Debuffs, Field, Suicide, etc.)
                 this.applySkillEffects(source, target, modifiedSkill);
 
-                if (source.hp <= 0 && !source.isDead) {
-                    source.isDead = true;
-                    RPG.log(`${source.name} 사망!`);
-                    RPG.handleDeathTraits(source, target);
-                }
+                this.resolveSourceDeath(source, target);
                 if (target.hp <= 0) { RPG.winBattle(); return; }
 
                 if (!isDelayed) RPG.TurnManager.endPlayerTurn();
@@ -3325,7 +3326,17 @@
                 }
             },
 
-            applyFieldBuff(id) {
+            expireFieldBuffs(turn) {
+                const expiredBuffs = this.battle.fieldBuffs.filter(buff => buff.expiresAtTurn && buff.expiresAtTurn <= turn);
+                if (expiredBuffs.length === 0) return;
+
+                this.battle.fieldBuffs = this.battle.fieldBuffs.filter(buff => !(buff.expiresAtTurn && buff.expiresAtTurn <= turn));
+                expiredBuffs.forEach(buff => {
+                    RPG.log(buff.expireLog || `필드버프 [${BUFF_NAMES[buff.name]}] 소멸.`);
+                });
+            },
+
+            applyFieldBuff(id, options = {}) {
                 if (this.battle.fieldBuffs.some(b => b.name === id)) return RPG.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
                 // Artifact: buff_overload — increase max field buffs to 5
                 let maxBuffs = this.hasArtifact('buff_overload') ? 5 : GAME_CONSTANTS.MAX_FIELD_BUFFS;
@@ -3333,7 +3344,7 @@
                     let removed = this.battle.fieldBuffs.shift();
                     RPG.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
                 }
-                this.battle.fieldBuffs.push({ name: id });
+                this.battle.fieldBuffs.push({ name: id, ...options });
                 RPG.log(`필드버프 [${BUFF_NAMES[id]}] 발동!`);
             },
 
