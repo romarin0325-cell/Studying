@@ -306,6 +306,45 @@ function getBuffName(key) {
     return key;
 }
 
+const DELAYED_SKILL_EFFECT_TYPES = [
+    'delayed_attack',
+    'delayed_attack_field',
+    'delayed_random_attack',
+    'delayed_turn_scale_attack',
+    'delayed_attack_debuff_scale'
+];
+
+function findDelayedSkillEffect(skill) {
+    if (!skill || !Array.isArray(skill.effects)) return null;
+    return skill.effects.find(eff => DELAYED_SKILL_EFFECT_TYPES.includes(eff.type)) || null;
+}
+
+function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
+    if (!skill || !delayedEff) return skill;
+
+    if (delayedEff.type === 'delayed_turn_scale_attack') {
+        return {
+            ...skill,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                { type: 'dmg_boost_turn_scale', scale: delayedEff.scale, startTurn: currentTurn }
+            ]
+        };
+    }
+
+    if (delayedEff.type === 'delayed_attack_debuff_scale') {
+        return {
+            ...skill,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                { type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: delayedEff.multPerDebuff }
+            ]
+        };
+    }
+
+    return skill;
+}
+
 const DAMAGE_EFFECT_HANDLERS = {
     'consume_field_all': (ctx, eff) => {
         let c = ctx.fieldBuffs.length;
@@ -510,7 +549,7 @@ const DAMAGE_EFFECT_HANDLERS = {
         // Add turn to ctx in calculateDamage.
         if (ctx.turn && ctx.turn % eff.mod === 0) {
             ctx.mult *= eff.mult;
-            ctx.logFn(`4의 배수 턴(${ctx.turn})! 위력 ${eff.mult}배!`);
+            ctx.logFn(`${eff.mod}의 배수 턴(${ctx.turn})! 위력 ${eff.mult}배!`);
         }
     },
     'dmg_boost_turn_scale': (ctx, eff) => {
@@ -597,6 +636,16 @@ const SideEffects = {
         },
         'suicide': (ctx, eff) => {
             ctx.source.hp = 0;
+        },
+        'self_hp_cost_ratio': (ctx, eff) => {
+            if (!ctx.source || ctx.source.hp <= 0) return;
+
+            const ratio = eff.ratio || eff.val || 0;
+            if (ratio <= 0) return;
+
+            const cost = Math.min(ctx.source.hp, Math.max(1, Math.floor(ctx.source.hp * ratio)));
+            ctx.source.hp -= cost;
+            ctx.logFn(`자신의 생명력 ${cost} 소모!`);
         },
         'chance_debuff': (ctx, eff) => {
             if (Math.random() < eff.chance) {
@@ -692,18 +741,32 @@ const SideEffects = {
             if (eff.field) ctx.applyFieldBuff(eff.field);
         },
         'delayed_turn_scale_attack': (ctx, eff) => {
+            const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
+            if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
+                ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
+                ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
+                return;
+            }
+
             ctx.battle.delayedEffects.push({
                 turn: ctx.battle.turn + eff.turns,
                 source: ctx.source,
-                skill: { ...ctx.skill, effects: [...(ctx.skill.effects || []), { type: 'dmg_boost_turn_scale', scale: eff.scale, startTurn: ctx.battle.turn }] }
+                skill: resolvedSkill
             });
             ctx.logFn(`인과역전! ${eff.turns}턴 후 발동합니다!`);
         },
         'delayed_attack_debuff_scale': (ctx, eff) => {
+            const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
+            if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
+                ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
+                ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
+                return;
+            }
+
             ctx.battle.delayedEffects.push({
                 turn: ctx.battle.turn + eff.turns,
                 source: ctx.source,
-                skill: { ...ctx.skill, effects: [...(ctx.skill.effects || []), { type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: eff.multPerDebuff }] }
+                skill: resolvedSkill
             });
             ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
         },
@@ -726,16 +789,22 @@ const SideEffects = {
             const skill = card.skills.find(s => s.name === pick.skill);
 
             if (skill) {
-                const delayedEff = skill.effects && skill.effects.find(e => e.type === 'delayed_attack' || e.type === 'delayed_attack_field' || e.type === 'delayed_random_attack');
+                const delayedEff = findDelayedSkillEffect(skill);
+                const resolvedSkill = buildResolvedDelayedSkill(skill, delayedEff, ctx.battle.turn);
 
                 if (delayedEff) {
                     ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
-                    ctx.battle.delayedEffects.push({
-                        turn: ctx.battle.turn + delayedEff.turns,
-                        source: ctx.source,
-                        skill: skill
-                    });
-                    ctx.logFn(`(지연 발동) ${delayedEff.turns}턴 뒤에 공격합니다.`);
+                    if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
+                        ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
+                        ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
+                    } else {
+                        ctx.battle.delayedEffects.push({
+                            turn: ctx.battle.turn + delayedEff.turns,
+                            source: ctx.source,
+                            skill: resolvedSkill
+                        });
+                        ctx.logFn(`(지연 발동) ${delayedEff.turns}턴 뒤에 공격합니다.`);
+                    }
                 } else {
                     ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
                     ctx.executeSkill(ctx.source, ctx.target, skill, true);
@@ -1366,6 +1435,18 @@ const Logic = {
             let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
             let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
             // Artifact: companion
+            if (artifacts.includes('companion')) {
+                 dmgResult.dmg *= 2;
+                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
+            }
+            if (dmgResult.dmg > 0) {
+                result.damageToKiller += dmgResult.dmg;
+                logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+            }
+        }
+        else if (t.type === 'death_dmg_phy') {
+            let dummySkill = { name: '사망 반격', type: 'phy', val: t.val, effects: [] };
+            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
             if (artifacts.includes('companion')) {
                  dmgResult.dmg *= 2;
                  logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');

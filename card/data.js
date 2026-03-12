@@ -728,6 +728,46 @@ const BONUS_CARDS = [
             { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
             { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
+    },
+    {
+        id: 'blessing_tail', name: '블레싱테일', grade: 'normal', element: 'light', role: 'buffer',
+        stats: { hp: 300, atk: 60, matk: 80, def: 45, mdef: 55 },
+        trait: { type: 'death_debuff', debuff: 'divine', stack: 3, desc: '사망 시 적에게 디바인 3스택 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '홀리블레싱', type: 'sup', tier: 3, cost: 30, desc: '1턴 뒤 필드버프 성역 발동', effects: [{ type: 'delayed_attack_field', turns: 1, field: 'sanctuary' }] },
+            { name: '폭스플레임', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer',
+        stats: { hp: 350, atk: 75, matk: 95, def: 60, mdef: 60 },
+        trait: { type: 'instant_delayed_skills', desc: '덱의 지연 스킬이 즉시 발동' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '엑셀레이터', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '데스클록', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
+        ]
+    },
+    {
+        id: 'crystal_dancer', name: '수정의무희', grade: 'epic', element: 'water', role: 'dealer',
+        stats: { hp: 395, atk: 100, matk: 100, def: 60, mdef: 60 },
+        trait: { type: 'on_evasion_stun', desc: '회피 성공 시 상대에게 기절 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '댄싱대거', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '하트브레이커', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '기절 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'red_moon', name: '레드문', grade: 'legend', element: 'fire', role: 'dealer',
+        stats: { hp: 500, atk: 140, matk: 90, def: 65, mdef: 60 },
+        trait: { type: 'death_dmg_phy', val: 6.0, desc: '사망 시 적에게 600% 물리대미지' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '데이브레이커', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '현재 생명력 30% 소모', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.3 }] },
+            { name: '이터널플레임', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열 1스택 소모 시 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 2.0 }] }
+        ]
     }
 ];
 

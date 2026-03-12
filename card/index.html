@@ -2778,6 +2778,9 @@
                         this.battle.activeTraits.push(init.activeTrait);
                         RPG.log(`[시너지] ${proto.trait.desc} 발동!`);
                     }
+                    if (proto.trait.type === 'instant_delayed_skills') {
+                        this.battle.activeTraits.push(proto.trait.type);
+                    }
 
                     // Construct Player Object
                     let p = {
@@ -2838,6 +2841,9 @@
 
                 document.getElementById('battle-log').innerHTML = "";
                 this.log(`전투 개시! 적: ${this.battle.enemy.name}`);
+                if (this.battle.activeTraits.includes('instant_delayed_skills')) {
+                    this.log('[특성] 시간의마술사: 덱의 지연 스킬이 즉시 발동합니다!');
+                }
 
                 // Artifact: gale_storm — apply gale field buff for first 3 turns
                 if (this.hasArtifact('gale_storm')) {
@@ -3043,6 +3049,10 @@
                             target.mp = Math.min(GAME_CONSTANTS.MAX_MP, target.mp + 10);
                             RPG.log('[아티팩트] 럭키비키: 회피 성공! 마나 10 회복!');
                         }
+                        if (target.proto && target.proto.trait && target.proto.trait.type === 'on_evasion_stun') {
+                            e.buffs.stun = 1;
+                            RPG.log(`[특성] ${target.name}: 회피 반격! 적에게 [기절] 부여.`);
+                        }
                         this.endEnemyTurn();
                         return;
                     }
@@ -3166,6 +3176,10 @@
                 RPG.handleDeathTraits(source, target);
             },
 
+            hasActiveTrait(id) {
+                return (this.battle.activeTraits || []).includes(id);
+            },
+
             // --- Player Skill Execution ---
 
             executeSkill(source, target, skill, isDelayed = false) {
@@ -3222,18 +3236,27 @@
                 }
 
                 // Check for Delayed Attack Effect
-                let delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack');
-                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_attack_field');
-                if (!delayedEff) delayedEff = modifiedSkill.effects && modifiedSkill.effects.find(e => e.type === 'delayed_random_attack');
+                let delayedEff = typeof findDelayedSkillEffect === 'function'
+                    ? findDelayedSkillEffect(modifiedSkill)
+                    : null;
 
                 if (delayedEff && !isDelayed) {
-                    RPG.log(`종언의 예고가 시작됩니다... (${delayedEff.turns}턴 뒤 발동)`);
-                    RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: modifiedSkill });
-                    this.maybeTriggerDeathRoulette(source, modifiedSkill, isDelayed);
-                    this.resolveSourceDeath(source, target);
-                    if (target.hp <= 0) { RPG.winBattle(); return; }
-                    RPG.TurnManager.endPlayerTurn();
-                    return;
+                    const resolvedDelayedSkill = typeof buildResolvedDelayedSkill === 'function'
+                        ? buildResolvedDelayedSkill(modifiedSkill, delayedEff, RPG.battle.turn)
+                        : modifiedSkill;
+
+                    if (this.hasActiveTrait('instant_delayed_skills')) {
+                        RPG.log('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
+                        modifiedSkill = resolvedDelayedSkill;
+                    } else {
+                        RPG.log(`${skill.name} 준비... (${delayedEff.turns}턴 뒤 발동)`);
+                        RPG.battle.delayedEffects.push({ turn: RPG.battle.turn + delayedEff.turns, source: source, skill: resolvedDelayedSkill });
+                        this.maybeTriggerDeathRoulette(source, modifiedSkill, isDelayed);
+                        this.resolveSourceDeath(source, target);
+                        if (target.hp <= 0) { RPG.winBattle(); return; }
+                        RPG.TurnManager.endPlayerTurn();
+                        return;
+                    }
                 }
 
                 const dmgResult = this.calcDamage(source, target, modifiedSkill);
@@ -3299,6 +3322,7 @@
                     source: source,
                     target: target,
                     skill: skill,
+                    activeTraits: RPG.battle.activeTraits,
                     logFn: (msg) => RPG.log(msg),
                     getBuffName: (id) => (BUFF_NAMES[id] || id),
                     applyFieldBuff: (id) => RPG.applyFieldBuff(id),
