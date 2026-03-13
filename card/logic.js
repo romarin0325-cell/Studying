@@ -184,7 +184,7 @@ const ARTIFACT_LIST = [
     { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 2.0배' },
     { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
     { id: 'shadow_stab', name: '섀도우스탭', desc: '회피율 20%증가, 방어력과 마법방어력 30% 감소' },
-    { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤 마공 50% 증가' },
+    { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤 마공 100% 증가' },
     { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' },
     { id: 'companion', name: '길동무', desc: '사망시 적에게 대미지를 주는 특성이나 아티팩트 대미지 2배' },
     { id: 'kaleidoscope', name: '만화경', desc: '매 턴 개시시 모든 필드버프를 변경한다' },
@@ -383,6 +383,11 @@ const DAMAGE_EFFECT_HANDLERS = {
         }
         else if (eff.condition === 'target_stack' && ctx.target.buffs[eff.debuff]) {
             ctx.mult += (ctx.target.buffs[eff.debuff] * eff.multPerStack);
+        }
+        else if (eff.condition === 'target_stack_at_least' && (ctx.target.buffs[eff.debuff] || 0) >= (eff.count || 1)) {
+            ctx.mult *= eff.mult;
+            matched = true;
+            if (!eff.customLog) ctx.logFn(`[특성] ${getBuffName(eff.debuff)} ${eff.count || 1}스택 이상 대상 추가 피해! (배율 x${eff.mult})`);
         }
         else if (eff.condition === 'target_debuff_count_scale') {
             let bonus = (Object.keys(ctx.target.buffs).length * eff.multPerDebuff);
@@ -1351,12 +1356,12 @@ const Logic = {
         if (partyBoost.def) p.def = Math.floor(p.def * (1 + partyBoost.def / 100));
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
 
-        // Artifact: dragon_heart — dragon cards matk +50%
+        // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
             const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon'];
             if (dragonIds.includes(playerProto.id)) {
-                p.matk = Math.floor(p.matk * 1.5);
+                p.matk = Math.floor(p.matk * 2.0);
             }
         }
 

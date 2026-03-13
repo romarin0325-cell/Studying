@@ -17,7 +17,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 2.0 }] },
-            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
+            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
         ]
     },
     {
@@ -43,7 +43,7 @@ const CARDS = [
     {
         id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer',
         stats: { hp: 540, atk: 125, matk: 95, def: 60, mdef: 60 },
-        trait: { type: 'pos_stat_boost', pos: 2, stat: ['atk', 'matk'], val: 30, desc: '대장 배치시 공격력 마법공격력 30%증가' },
+        trait: { type: 'pos_stat_boost', pos: 2, stat: ['atk', 'matk'], val: 35, desc: '대장 배치시 공격력 마법공격력 35%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '얼티밋브레스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열스택 부여, 작열스택 하나당 1.0배율 추가', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'dmg_boost', condition: 'target_stack', debuff: 'burn', multPerStack: 1.0 }] },
@@ -132,7 +132,7 @@ const CARDS = [
     },
     {
         id: 'zeke', name: '지크', grade: 'legend', element: 'fire', role: 'balancer',
-        stats: { hp: 550, atk: 120, matk: 100, def: 65, mdef: 45 },
+        stats: { hp: 550, atk: 120, matk: 100, def: 65, mdef: 50 },
         trait: { type: 'death_field_sun', desc: '사망시 태양의축복 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
@@ -156,7 +156,7 @@ const CARDS = [
         trait: { type: 'death_dmg_debuff', val: 1.0, desc: '사망시 적에게 걸려있는 디버프 수 곱하기 1배율 대미지' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '블리자드', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식, 침묵, 약화, 저주 부여, 다음 턴 행동 불가', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }, { type: 'self_debuff', id: 'stun', duration: 1 }] },
+            { name: '블리자드', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '부식, 침묵, 약화, 저주 부여, 다음 턴 행동 불가', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }, { type: 'self_debuff', id: 'stun', duration: 1 }] },
             { name: '프로스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '상대에게 적용된 디버프가 5개 이상일 시, 상대 스턴', effects: [{ type: 'conditional_debuff', condition: 'target_debuff_count', count: 5, debuff: 'stun' }] }
         ]
     },
@@ -288,7 +288,7 @@ const CARDS = [
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 적에게 기절 부여' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적이 디바인 3스택이면 스턴, 아니면 디바인 부여', effects: [{ type: 'check_divine_3_stun_else_add' }] },
+            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적이 디바인 3스택이면 대미지 2배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 2.0 }, { type: 'check_divine_3_stun_else_add' }] },
             { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1개 (디바인 소모 시 2개)', effects: [{ type: 'random_debuff_consume_divine' }] }
         ]
     },
@@ -357,7 +357,7 @@ const CARDS = [
     {
         id: 'cream_maid', name: '생크림메이드', grade: 'rare', element: 'light', role: 'buffer',
         stats: { hp: 340, atk: 75, matk: 85, def: 60, mdef: 60 },
-        trait: { type: 'cond_twinkle_all', val: 30, desc: '트윙클파티 상태에서 물리/마법공격력 30%증가' },
+        trait: { type: 'cond_twinkle_all', val: 50, desc: '트윙클파티 상태에서 물리/마법공격력 50%증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '크림샷', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
@@ -376,7 +376,7 @@ const CARDS = [
     },
     {
         id: 'void_knight', name: '공허의기사', grade: 'rare', element: 'dark', role: 'balancer',
-        stats: { hp: 360, atk: 100, matk: 50, def: 60, mdef: 55 },
+        stats: { hp: 360, atk: 110, matk: 55, def: 60, mdef: 55 },
         trait: { type: 'cond_corrosion_dmg', val: 1.5, desc: '부식상태의 적에게 대미지 1.5배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
@@ -419,7 +419,7 @@ const CARDS = [
     {
         id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer',
         stats: { hp: 310, atk: 75, matk: 70, def: 50, mdef: 50 },
-        trait: { type: 'death_sun_bless_chance', val: 0.3, desc: '사망시 30%확률로 태양의축복 부여' },
+        trait: { type: 'death_sun_bless_chance', val: 0.5, desc: '사망시 50%확률로 태양의축복 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
@@ -626,7 +626,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '그랜드슬램', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적 생명력이 50% 이하일 때 위력 2배', effects: [{ type: 'dmg_boost', condition: 'target_hp_below', val: 0.5, mult: 2.0 }] },
-            { name: '스포어미스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '자신의 생명력이 25% 이하일 때 위력 4배', effects: [{ type: 'dmg_boost', condition: 'hp_below', val: 0.25, mult: 4.0 }] }
+            { name: '스포어미스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '자신의 생명력이 25% 이하일 때 위력 5배', effects: [{ type: 'dmg_boost', condition: 'hp_below', val: 0.25, mult: 5.0 }] }
         ]
     },
     {
