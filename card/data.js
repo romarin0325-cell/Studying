@@ -760,6 +760,26 @@ const BONUS_CARDS = [
         ]
     },
     {
+        id: 'ancient_dragon', name: '에인션트드래곤', grade: 'legend', element: 'nature', role: 'debuffer',
+        stats: { hp: 530, atk: 115, matk: 95, def: 70, mdef: 70 },
+        trait: { type: 'death_multi_debuff', desc: '사망시 적에게 약화, 부식, 저주, 침묵, 기절 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '에인션트브레스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열 부여, 대지의축복 상태에서 대미지 2배', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'sunflower', name: '해바라기', grade: 'normal', element: 'nature', role: 'dealer',
+        stats: { hp: 320, atk: 75, matk: 80, def: 50, mdef: 50 },
+        trait: { type: 'cond_sun_matk_mdef', val: 100, desc: '태양의축복 상태에서 마법공격력/마법방어력 100%증가' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '솔라플레어', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '사용 후 2턴 뒤에 공격', effects: [{ type: 'delayed_attack', turns: 2 }] },
+            { name: '어쓰블라썸', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '대지의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] }
+        ]
+    },
+    {
         id: 'red_moon', name: '레드문', grade: 'legend', element: 'fire', role: 'dealer',
         stats: { hp: 490, atk: 140, matk: 100, def: 65, mdef: 60 },
         trait: { type: 'death_dmg_phy', val: 6.0, desc: '사망 시 적에게 600% 물리대미지' },
