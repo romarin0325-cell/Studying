@@ -937,7 +937,9 @@ const Logic = {
         // Trait Multipliers
         if (trait) {
             if (trait.type === 'cond_twinkle_all' && fieldBuffs.some(b => b.name === 'twinkle_party')) {
-                m.atk += 0.3; m.matk += 0.3;
+                const twinkleAllBonus = (trait.val || 0) / 100;
+                m.atk += twinkleAllBonus;
+                m.matk += twinkleAllBonus;
             }
         }
 
