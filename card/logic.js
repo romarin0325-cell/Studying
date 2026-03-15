@@ -1303,7 +1303,7 @@ const Logic = {
                 if (t.type === 'syn_fire_3_crit') p.baseCrit += 30;
                 if (t.type === 'syn_dark_3_matk') p.matk *= 1.5;
                 if (t.type === 'syn_light_fire_atk') p.atk *= 1.3;
-                if (t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.3; p.mdef *= 1.3; }
+                if (t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if (t.type === 'syn_light_3_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if (t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
                 if (t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
