@@ -751,7 +751,7 @@ const BONUS_CARDS = [
     },
     {
         id: 'crystal_dancer', name: '수정의무희', grade: 'epic', element: 'water', role: 'dealer',
-        stats: { hp: 395, atk: 100, matk: 100, def: 60, mdef: 60 },
+        stats: { hp: 395, atk: 110, matk: 90, def: 60, mdef: 60 },
         trait: { type: 'on_evasion_stun', desc: '회피 성공 시 상대에게 기절 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
