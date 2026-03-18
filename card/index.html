@@ -1289,9 +1289,9 @@
         const QuizEngine = {
             /**
              * Weighted selection for quiz generation.
-             * Favors items in RPG.state.tutoredItems with 10x weight.
+             * Favors items in RPG.state.tutoredItems with caller-specific weight.
              */
-            pickWeighted(data, getItemId) {
+            pickWeighted(data, getItemId, reviewedWeight = 10) {
                 const tutored = (RPG.state && RPG.state.tutoredItems) ? RPG.state.tutoredItems : [];
 
                 // If no data or no tutored items relevant to this dataset, pick random
@@ -1305,8 +1305,8 @@
                 if (candidates.length === 0) return data[Math.floor(Math.random() * data.length)];
 
                 // Calculate weights
-                // Candidates: 10, Others: 1
-                const weightC = candidates.length * 10;
+                // Candidates: reviewedWeight, Others: 1
+                const weightC = candidates.length * reviewedWeight;
                 const weightN = (data.length - candidates.length) * 1;
                 const totalWeight = weightC + weightN;
 
@@ -1416,7 +1416,7 @@
             buildVocabQuiz(callback) {
                 if (!VOCAB_DATA || VOCAB_DATA.length === 0) return null;
 
-                const q = this.pickWeighted(VOCAB_DATA, v => v.word);
+                const q = this.pickWeighted(VOCAB_DATA, v => v.word, 30);
 
                 let options = [{ text: q.meaning, correct: true }];
                 options.push({ text: q.trap_meaning, correct: false });
@@ -1496,7 +1496,7 @@
                 });
                 if (allQuizzes.length === 0) return null;
 
-                const q = this.pickWeighted(allQuizzes, item => item.parentId);
+                const q = this.pickWeighted(allQuizzes, item => item.parentId, 20);
 
                 return {
                     question: q.question,

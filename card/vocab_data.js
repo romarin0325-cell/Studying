@@ -330,7 +330,17 @@ const VOCAB_ADDITIONS = [
     { w: 'inspection', m: '(명) 점검, 검사', tm: '(명) 설치; (명) 장치', tw: 'installation' },
     { w: 'designate', m: '(동) 지정하다', tm: '(동) 위임하다; (명) 대표자', tw: 'delegate' },
     { w: 'certify', m: '(동) 증명하다, 인증하다', tm: '(동) 명확히 하다', tw: 'clarify' },
-    { w: 'orientation', m: '(명) 오리엔테이션; (명) 적응 교육', tm: '(명) 운영; (명) 작동; (명) 수술', tw: 'operation' }
+    { w: 'orientation', m: '(명) 오리엔테이션; (명) 적응 교육', tm: '(명) 운영; (명) 작동; (명) 수술', tw: 'operation' },
+    { w: 'expedite', m: '(동) 신속히 처리하다, 앞당기다', tm: '(형) 편의적인, 임시방편의', tw: 'expedient' },
+    { w: 'attendee', m: '(명) 참석자', tm: '(명) 수행원, 안내원, 점원', tw: 'attendant' },
+    { w: 'provisional', m: '(형) 임시의, 잠정적인', tm: '(형) 운 좋게 시의적절한, 천우신조의', tw: 'providential' },
+    { w: 'prepaid', m: '(형) 선불의, 요금 선납의', tm: '(형) 미리 만들어진', tw: 'premade' },
+    { w: 'outage', m: '(명) 정전, 서비스 중단', tm: '(명) 시작, 착수', tw: 'outset' },
+    { w: 'relocation', m: '(명) 이전, 재배치', tm: '(명) 할당, 배정', tw: 'allocation' },
+    { w: 'courier', m: '(명) 택배 기사, 특송 업체', tm: '(명) 큐레이터, 관리자', tw: 'curator' },
+    { w: 'discrepancy', m: '(명) 불일치, 차이', tm: '(명) 조제실, 약국', tw: 'dispensary' },
+    { w: 'counterpart', m: '(명) 대응물, 상대방, 동급 인물', tm: '(명) 조리대 상판', tw: 'countertop' },
+    { w: 'vegetarian', m: '(명/형) 채식주의자; 채식의', tm: '(명) 식물, 초목', tw: 'vegetation' }
 ];
 
 VOCAB_SOURCE.push(...VOCAB_ADDITIONS);

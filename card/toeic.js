@@ -1467,4 +1467,910 @@ const TOEIC_DATA = [
     ],
     "passage": "Document 1: Training Notice \n \nHARBORTECH ANALYTICS — Client Data Privacy Refresher (On-site) \nLocation: HarborTech HQ, Room 5D \nDate: Tuesday, August 4, 2026 \nSessions: \n \nSession A: 9:00–11:00 a.m. \n \nSession B: 2:00–4:00 p.m. \n \nCheck-in: Opens 40 minutes before each session at the Reception Desk. \nID: Contractors and visitors must present a government-issued photo ID to receive a badge. \n \nCertificate of Completion: \nCertificates are issued only to participants who \n \nattend the entire session, and \n \ncomplete the online Quiz by 6:00 p.m. on the same day. \n \nVisitor Parking (Limited): \nParking passes must be requested by 12:00 p.m. two business days before the training date. \nWithout a pass, attendees should use public transportation or be dropped off. \n \nDocument 2: E-mail \n \nSubject: Privacy Refresher (Aug 4) — arrival time and certificate \nFrom: Kenji Nakamura <kenji.n@partnerco.com> \nTo: Training Desk <training@harbortech.com> \nDate: July 29, 2026 \n \nHello, \n \nI registered for Session B (2:00–4:00 p.m.) on August 4. I may be tied up on a client call and might arrive around 2:30 p.m. \n \nIf I arrive at 2:30, can I still receive the Certificate of Completion? \n \nDo I need a parking pass, or can I park on-site without one? \n \nWhen will I receive the link for the Quiz? \n \nThank you, \nKenji Nakamura \n \nDocument 3: E-mail \n \nSubject: Re: Privacy Refresher (Aug 4) — arrival time and certificate \nFrom: Training Desk <training@harbortech.com> \nTo: Kenji Nakamura <kenji.n@partnerco.com> \nDate: July 29, 2026 \n \nHi Kenji, \n \nThanks for your message. \n \nCertificate: To be eligible, you must attend the session from the beginning to the end. If you arrive at 2:30, you may still attend, but you will not qualify for the certificate. If you need the certificate, please switch to Session A or plan to arrive by 2:00 p.m. for Session B. \n \nParking: Visitor parking is limited. If you need a pass for August 4, please send your license plate number by Friday, July 31 at 12:00 p.m. \n \nQuiz: The quiz link will be sent by e-mail after the session and must be completed by 6:00 p.m. on August 4. \n \nBest regards, \nTraining Desk"
   }
+  ,
+  {
+    "id": 31,
+    "type": "part5",
+    "title": "31강 (Part 5) — 비교급/최상급/강조 표현 (3문항)",
+    "questions": [
+      {
+        "id": "31-1",
+        "question": "The revised budget is slightly _______ than the original estimate because shipping costs fell after the contract was signed.",
+        "options": [
+          "higher",
+          "highest",
+          "more low",
+          "lower"
+        ],
+        "answer": "lower"
+      },
+      {
+        "id": "31-2",
+        "question": "Of the three proposals, the Seoul office submitted the _______ timeline for implementation.",
+        "options": [
+          "realistic",
+          "more realistic",
+          "most realistic",
+          "realistically"
+        ],
+        "answer": "most realistic"
+      },
+      {
+        "id": "31-3",
+        "question": "Customer response was far _______ than expected after the loyalty campaign began last month.",
+        "options": [
+          "strong",
+          "stronger",
+          "strongest",
+          "strongly"
+        ],
+        "answer": "stronger"
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "type": "part6",
+    "title": "32강 (Part 6) — 영업팀 노트북 교체 일정 안내 메일 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "32-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "Although",
+          "Unless",
+          "Instead",
+          "Therefore"
+        ],
+        "answer": "Although"
+      },
+      {
+        "id": "32-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "availability",
+          "available",
+          "availably",
+          "avail"
+        ],
+        "answer": "available"
+      },
+      {
+        "id": "32-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "by",
+          "during",
+          "beyond",
+          "beside"
+        ],
+        "answer": "by"
+      },
+      {
+        "id": "32-4",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: Employees who will be traveling during their assigned week should contact IT Support as soon as possible to request an alternative appointment.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[2]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Laptop Replacement Schedule for the Regional Sales Team \n \nHello team, \n \nIT Support will begin replacing laptops for the Regional Sales Team starting Monday, September 14. (1) _______ the upgrade process will require each employee to be away from his or her desk for approximately 40 minutes, the new devices have already been configured with the latest security settings and required sales applications. [1] \n \nA schedule showing each employee's assigned appointment time is attached. Please review it carefully and confirm that you will be (2) _______ during your assigned time slot. If you need to reschedule, send a message to IT Support no later than 3:00 p.m. on Thursday, September 10. [2] \n \nWhen you arrive for your appointment, bring your current laptop, charger, and security token. After your files are transferred, you will be asked to sign a handoff form. Any loaner equipment currently in use must be returned (3) _______ the end of your appointment. [3] \n \nThank you for helping us complete the upgrade before the next sales cycle begins. [4]"
+  },
+  {
+    "id": 33,
+    "type": "part5",
+    "title": "33강 (Part 5) — 제안/요구 동사와 that절 (3문항)",
+    "questions": [
+      {
+        "id": "33-1",
+        "question": "The consultant recommended that the training manual _______ before the new hires arrive.",
+        "options": [
+          "updated",
+          "be updated",
+          "is updated",
+          "was updating"
+        ],
+        "answer": "be updated"
+      },
+      {
+        "id": "33-2",
+        "question": "It is essential that every applicant _______ a copy of the certification form.",
+        "options": [
+          "submits",
+          "submit",
+          "submitted",
+          "submitting"
+        ],
+        "answer": "submit"
+      },
+      {
+        "id": "33-3",
+        "question": "Ms. Ortiz asked whether the figures in the summary report _______ final or still subject to revision.",
+        "options": [
+          "was",
+          "are",
+          "is",
+          "has been"
+        ],
+        "answer": "are"
+      }
+    ]
+  },
+  {
+    "id": 34,
+    "type": "part7",
+    "title": "34강 (Part 7) — Part 7 Multiple Passages (Set 9)",
+    "questions": [
+      {
+        "id": "34-1",
+        "question": "According to the notice, when may employees begin using their new lockers?",
+        "options": [
+          "Thursday, October 15",
+          "Friday, October 16 at noon",
+          "Sunday, October 18",
+          "Monday, October 19"
+        ],
+        "answer": "Monday, October 19"
+      },
+      {
+        "id": "34-2",
+        "question": "What is the main purpose of the notice?",
+        "options": [
+          "To announce new parking rates for the company garage",
+          "To outline the schedule and packing instructions for an upcoming office move",
+          "To invite employees to a client event in Suite 1200",
+          "To explain how to request new computer equipment"
+        ],
+        "answer": "To outline the schedule and packing instructions for an upcoming office move"
+      },
+      {
+        "id": "34-3",
+        "question": "In her e-mail, what does Dana Cho ask Leo Ramirez about?",
+        "options": [
+          "Whether her assistant may prepare cartons and whether sample kits can be staged in the new office",
+          "Whether her parking card can be activated early for a client visit",
+          "Whether the relocation date can be delayed until the following week",
+          "Whether the new locker assignments have already been distributed"
+        ],
+        "answer": "Whether her assistant may prepare cartons and whether sample kits can be staged in the new office"
+      },
+      {
+        "id": "34-4",
+        "question": "What can be inferred about files placed in blue cartons?",
+        "options": [
+          "They will be scanned and discarded on October 16",
+          "They are intended for off-site storage rather than immediate desk use",
+          "They must be carried personally by each employee to Suite 1200",
+          "They will remain in the old mailroom until the end of the month"
+        ],
+        "answer": "They are intended for off-site storage rather than immediate desk use"
+      },
+      {
+        "id": "34-5",
+        "question": "In Leo Ramirez's reply, the word \"staged\" is closest in meaning to",
+        "options": [
+          "arranged",
+          "damaged",
+          "reduced",
+          "returned"
+        ],
+        "answer": "arranged"
+      }
+    ],
+    "passage": "Document 1: Notice \n \nNORTHPOINT CONSULTING \nOffice Relocation Schedule \nDate: September 28, 2026 \n \nNorthPoint Consulting will move from Floor 8 to Suite 1200 on Monday, October 19. To ensure a smooth transition, please follow the schedule below. \n \nFriday, October 16 \n- Pack personal desk items and active files by 12:00 p.m. \n- Place archived files that are not needed for daily work in blue cartons for off-site storage pickup. \n- Label all computer accessories and desk organizers with your name. \n- Desktop phones will be disconnected after 6:00 p.m. \n \nThursday, October 15 \n- New locker assignments will be e-mailed to employees. \n- Parking garage access cards for Suite 1200 will be activated on Sunday, October 18. \n \nMonday, October 19 \n- Employees may begin using the new office and lockers at 7:30 a.m. \n- The mailroom on Floor 12 will begin accepting incoming packages at 9:00 a.m. \n \nDocument 2: E-mail \n \nSubject: Move-day questions \nFrom: Dana Cho <dcho@northpoint.com> \nTo: Leo Ramirez <lramirez@northpoint.com> \nDate: October 12, 2026 \n \nHi Leo, \n \nI will be at a client site for most of Friday, October 16, so I may not return before noon. Can my team assistant seal and label my blue cartons for off-site storage if I leave the files organized on Thursday? \n \nAlso, our product sample kits are scheduled to be picked up by courier on Monday morning. Would it be possible to have them staged near the new reception desk in Suite 1200 instead of the old mailroom? \n \nThanks, \nDana \n \nDocument 3: E-mail \n \nSubject: Re: Move-day questions \nFrom: Leo Ramirez <lramirez@northpoint.com> \nTo: Dana Cho <dcho@northpoint.com> \nDate: October 12, 2026 \n \nHi Dana, \n \nYes. If you sort the files beforehand, your assistant may seal the blue cartons and add your name labels on Friday morning. \n \nAs for the sample kits, we can have them staged near the reception desk. However, the courier should arrive after 10:00 a.m. because the Floor 12 mailroom will not be ready to handle packages before then. Please ask someone from your team to meet the courier when they arrive. \n \nBest, \nLeo"
+  },
+  {
+    "id": 35,
+    "type": "part5",
+    "title": "35강 (Part 5) — 분사 형용사/수식 구조 (3문항)",
+    "questions": [
+      {
+        "id": "35-1",
+        "question": "The packages _______ on the loading dock should be moved before noon.",
+        "options": [
+          "leave",
+          "leaving",
+          "left",
+          "to leave"
+        ],
+        "answer": "left"
+      },
+      {
+        "id": "35-2",
+        "question": "Employees _______ in the pilot program will receive a follow-up survey next week.",
+        "options": [
+          "enroll",
+          "enrolled",
+          "enrolling",
+          "enrollment"
+        ],
+        "answer": "enrolled"
+      },
+      {
+        "id": "35-3",
+        "question": "The speaker gave a highly _______ presentation on workplace safety.",
+        "options": [
+          "inform",
+          "informative",
+          "information",
+          "informing"
+        ],
+        "answer": "informative"
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "type": "part6",
+    "title": "36강 (Part 6) — 박람회 배지 사전 수령 안내 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "36-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "encouraging",
+          "encourage",
+          "encouraged",
+          "encouragement"
+        ],
+        "answer": "encouraged"
+      },
+      {
+        "id": "36-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "unless",
+          "whereas",
+          "after",
+          "because"
+        ],
+        "answer": "unless"
+      },
+      {
+        "id": "36-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "until",
+          "by",
+          "during",
+          "through"
+        ],
+        "answer": "by"
+      },
+      {
+        "id": "36-4",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: If you are sending someone to collect materials for your team, be sure to include that person's full name in your reply.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[2]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Annual Retail Expo Badge Pickup Information \n \nDear Exhibitors, \n \nTo reduce wait times on opening day, all exhibitors are strongly (1) _______ to pick up badges and registration packets on the afternoon before the Annual Retail Expo begins. Early pickup will take place on Wednesday, October 7, from 2:00 p.m. to 6:00 p.m. in Hall B of the Meridian Convention Center. [1] \n \nWhen you arrive, please use the west entrance and bring a photo ID. Your company badge packets will be released only to the person listed as the primary booth contact, (2) _______ a substitute name has been submitted in advance. [2] \n \nEach packet will include exhibitor badges, a floor map, and unloading instructions for the loading dock. Booth setup may begin at 7:00 a.m. on Thursday, October 8, but the exhibition floor will not open to visitors until 10:00 a.m. [3] \n \nIf you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mail (3) _______ Tuesday, October 6, so we can hold your materials at the information counter on Thursday morning. [4]"
+  },
+  {
+    "id": 37,
+    "type": "part5",
+    "title": "37강 (Part 5) — 수량표현/가산·불가산 명사 (3문항)",
+    "questions": [
+      {
+        "id": "37-1",
+        "question": "There is still _______ room in the afternoon session for three additional participants.",
+        "options": [
+          "many",
+          "much",
+          "a few",
+          "several"
+        ],
+        "answer": "much"
+      },
+      {
+        "id": "37-2",
+        "question": "Only _______ of the shipment was damaged, so we can still fulfill most orders today.",
+        "options": [
+          "few",
+          "a few",
+          "little",
+          "a little"
+        ],
+        "answer": "a little"
+      },
+      {
+        "id": "37-3",
+        "question": "We need to order _______ additional scanner because the front-desk unit is no longer working.",
+        "options": [
+          "a",
+          "an",
+          "the",
+          "any"
+        ],
+        "answer": "an"
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "type": "part7",
+    "title": "38강 (Part 7) — Part 7 Multiple Passages (Set 10)",
+    "questions": [
+      {
+        "id": "38-1",
+        "question": "According to the notice, what should customers do first if they own an affected dispenser?",
+        "options": [
+          "Stop using it immediately",
+          "Mail it to AquaFlow Equipment",
+          "Wait for a replacement notice",
+          "Call a local repair technician"
+        ],
+        "answer": "Stop using it immediately"
+      },
+      {
+        "id": "38-2",
+        "question": "What is the purpose of the notice?",
+        "options": [
+          "To promote a new dispenser model for offices",
+          "To explain a revised warranty policy for all AquaFlow products",
+          "To announce a voluntary recall and explain how to obtain a replacement",
+          "To request customer feedback about installation services"
+        ],
+        "answer": "To announce a voluntary recall and explain how to obtain a replacement"
+      },
+      {
+        "id": "38-3",
+        "question": "Why does Raj Patel ask whether the replacement can be expedited?",
+        "options": [
+          "He needs the affected dispenser for a client visit on November 9",
+          "He plans to move the dispensers to another office next month",
+          "He wants both dispensers replaced before the end of the year",
+          "He has already mailed back the unit without a return label"
+        ],
+        "answer": "He needs the affected dispenser for a client visit on November 9"
+      },
+      {
+        "id": "38-4",
+        "question": "What can be inferred about returning the affected dispenser?",
+        "options": [
+          "Raj Patel must pay the return shipping cost himself",
+          "AquaFlow will include a prepaid return label with the replacement unit",
+          "Both dispensers must be returned in the same shipment",
+          "The unit may be returned only after November 12"
+        ],
+        "answer": "AquaFlow will include a prepaid return label with the replacement unit"
+      },
+      {
+        "id": "38-5",
+        "question": "In the reply, the word \"expedite\" is closest in meaning to",
+        "options": [
+          "inspect",
+          "delay",
+          "speed up",
+          "document"
+        ],
+        "answer": "speed up"
+      }
+    ],
+    "passage": "Document 1: Product Notice \n \nAQUAFLOW EQUIPMENT \nVoluntary Recall Notice \nDate: November 2, 2026 \n \nAquaFlow Equipment is voluntarily recalling certain AF-200 countertop water dispensers because a valve defect may cause leaking during continuous use. \n \nAffected units: \n- Model AF-200 only \n- Serial numbers beginning with 21B through 24F \n \nWhat customers should do: \n1. Stop using the affected unit immediately. \n2. Complete the recall form at www.aquaflowservice.com/recall by Thursday, November 12. \n3. Upload a photo of the serial number label. \n \nOnce eligibility is confirmed, a replacement unit will be shipped within five business days. A prepaid return label for the affected dispenser will be included in the replacement shipment. \n \nDocument 2: E-mail \n \nSubject: AF-200 replacement timing \nFrom: Raj Patel <rpatel@cityviewoffices.com> \nTo: Support Team <support@aquaflowservice.com> \nDate: November 3, 2026 \n \nHello, \n \nOur office purchased two AF-200 dispensers in July. One of them has a serial number beginning with 23D, so it appears to be included in the recall. \n \nWe are hosting clients in our conference center on November 9, and that dispenser is the one located there. If I submit the recall form today, is there any way to expedite the replacement? Also, do we need to return both dispensers or only the affected unit? \n \nThank you, \nRaj Patel \n \nDocument 3: E-mail \n \nSubject: Re: AF-200 replacement timing \nFrom: Support Team <support@aquaflowservice.com> \nTo: Raj Patel <rpatel@cityviewoffices.com> \nDate: November 3, 2026 \n \nHello Mr. Patel, \n \nThank you for contacting us. Only the dispenser with the affected serial number should be removed from service and returned. \n \nIf you submit the recall form and serial-number photo by November 5, we can expedite the replacement shipment. While we cannot guarantee delivery by November 9, that submission date gives us the best chance of meeting your request. \n \nAs noted in the recall notice, the return label will be prepaid and included with the replacement unit. \n \nSincerely, \nSupport Team"
+  },
+  {
+    "id": 39,
+    "type": "part5",
+    "title": "39강 (Part 5) — 조동사/수동태/가정법 과거완료 (3문항)",
+    "questions": [
+      {
+        "id": "39-1",
+        "question": "All reimbursement forms must _______ by a department manager before they are submitted to Accounting.",
+        "options": [
+          "approve",
+          "approved",
+          "be approved",
+          "approving"
+        ],
+        "answer": "be approved"
+      },
+      {
+        "id": "39-2",
+        "question": "Visitors may not _______ the research lab without prior written authorization.",
+        "options": [
+          "enter",
+          "entered",
+          "entering",
+          "to enter"
+        ],
+        "answer": "enter"
+      },
+      {
+        "id": "39-3",
+        "question": "The shipment would have arrived on time if the customs documents _______ complete.",
+        "options": [
+          "were",
+          "are",
+          "had been",
+          "have been"
+        ],
+        "answer": "had been"
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "type": "part6",
+    "title": "40강 (Part 6) — 온라인 청구 포털 장애 공지 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "40-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "unexpectedly",
+          "expecting",
+          "expectation",
+          "unexpected"
+        ],
+        "answer": "unexpected"
+      },
+      {
+        "id": "40-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "but",
+          "so",
+          "unless",
+          "therefore"
+        ],
+        "answer": "but"
+      },
+      {
+        "id": "40-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "restore",
+          "restored",
+          "restoration",
+          "restorative"
+        ],
+        "answer": "restoration"
+      },
+      {
+        "id": "40-4",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: Customers enrolled in automatic outage alerts do not need to submit a separate request for updates.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[2]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Update on Online Billing Portal Access \n \nDear Customers, \n \nEarlier today, our online billing portal became temporarily unavailable because of an (1) _______ database synchronization error during a routine overnight update. Our engineers isolated the cause at 8:40 a.m. and immediately began restoration work. [1] \n \nWhile the portal is offline, customers can still make payments by phone through the Billing Support line or by using the secure link included in their most recent invoice e-mail. We understand that this interruption may be inconvenient, (2) _______ we expect normal access to return by noon today. [2] \n \nOnce service is restored, all account information and previously scheduled payments will remain intact. No action is required on your part unless you attempted a transaction between 7:15 a.m. and 8:40 a.m. and did not receive a confirmation message. In that case, please contact Billing Support so we can verify the status of your payment and prevent duplicate charges. [3] \n \nA final confirmation notice will be posted on the portal home page after full (3) _______ has been completed. [4]"
+  },
+  {
+    "id": 41,
+    "type": "part5",
+    "title": "41강 (Part 5) — 비즈니스 동사 결합 (3문항)",
+    "questions": [
+      {
+        "id": "41-1",
+        "question": "The purchasing team will _______ offers from three vendors before choosing one.",
+        "options": [
+          "compare",
+          "comparison",
+          "comparative",
+          "comparatively"
+        ],
+        "answer": "compare"
+      },
+      {
+        "id": "41-2",
+        "question": "Please _______ your receipt to the expense form so reimbursement can be processed promptly.",
+        "options": [
+          "attach",
+          "attacking",
+          "attachment",
+          "attached"
+        ],
+        "answer": "attach"
+      },
+      {
+        "id": "41-3",
+        "question": "The board agreed to _______ the proposal until additional cost data becomes available.",
+        "options": [
+          "postpone",
+          "postposed",
+          "postponing",
+          "postponement"
+        ],
+        "answer": "postpone"
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "type": "part7",
+    "title": "42강 (Part 7) — Part 7 Multiple Passages (Set 11)",
+    "questions": [
+      {
+        "id": "42-1",
+        "question": "According to the announcement, when is the deadline to register for the facility tour?",
+        "options": [
+          "Thursday, May 6",
+          "Monday, May 10",
+          "Thursday, May 13",
+          "Friday, May 14"
+        ],
+        "answer": "Monday, May 10"
+      },
+      {
+        "id": "42-2",
+        "question": "What is the purpose of the announcement?",
+        "options": [
+          "To summarize quarterly supplier performance results",
+          "To recruit vendors for a new product launch",
+          "To provide the schedule and registration details for a supplier event",
+          "To explain changes to Greenridge's payment terms"
+        ],
+        "answer": "To provide the schedule and registration details for a supplier event"
+      },
+      {
+        "id": "42-3",
+        "question": "In her e-mail, what does Mia Alvarez ask the Events Desk to do?",
+        "options": [
+          "Move her registration from the morning session to the afternoon session",
+          "Reserve parking for a delivery vehicle and provide a site map",
+          "Add another attendee and update a lunch request",
+          "Send the workshop slides before the summit begins"
+        ],
+        "answer": "Add another attendee and update a lunch request"
+      },
+      {
+        "id": "42-4",
+        "question": "What can be inferred if Mia sends the vegetarian lunch request after May 6?",
+        "options": [
+          "The request may not be accommodated",
+          "Her registration will be canceled automatically",
+          "She will lose access to the facility tour",
+          "She will need to pay an additional meal fee"
+        ],
+        "answer": "The request may not be accommodated"
+      },
+      {
+        "id": "42-5",
+        "question": "In the reply, the word \"capacity\" is closest in meaning to",
+        "options": [
+          "equipment",
+          "available space",
+          "difficulty",
+          "priority"
+        ],
+        "answer": "available space"
+      }
+    ],
+    "passage": "Document 1: Announcement \n \nGREENRIDGE MANUFACTURING \nSupplier Summit 2027 Preview Session \nLocation: Greenridge Innovation Center \nDate: Thursday, May 13, 2027 \n \nAgenda \n- 8:30 a.m.: Registration and coffee \n- 9:00 a.m.: Product roadmap presentation \n- 10:30 a.m.: Facility tour \n- 12:00 p.m.: Networking lunch \n- 1:30 p.m.: Sustainability workshop \n- 3:00 p.m.: Closing Q&A \n \nImportant notes \n- Attendance is limited to two representatives per supplier. \n- Facility tour participation requires advance registration by Monday, May 10. \n- Dietary requests for lunch must be submitted by Thursday, May 6. \n- A shuttle from Central Station will depart at 7:45 a.m. and return at 3:30 p.m. \n \nDocument 2: E-mail \n \nSubject: Supplier Summit questions \nFrom: Mia Alvarez <mia.alvarez@altairpack.com> \nTo: Events Desk <events@greenridge.com> \nDate: May 5, 2027 \n \nHello, \n \nI registered for the Supplier Summit as Altair Pack's primary representative. Our operations manager would now like to attend as well. Could you let me know whether one additional seat is still available? \n \nAlso, I selected the facility tour when I registered, but I forgot to note that my colleague prefers a vegetarian lunch. If possible, please update our meal request before the event. \n \nThank you, \nMia Alvarez \n \nDocument 3: E-mail \n \nSubject: Re: Supplier Summit questions \nFrom: Events Desk <events@greenridge.com> \nTo: Mia Alvarez <mia.alvarez@altairpack.com> \nDate: May 5, 2027 \n \nHello Ms. Alvarez, \n \nThank you for your message. We can add one more Altair Pack representative because your company has registered only one attendee so far. \n \nThere is still capacity on the facility tour, so your colleague may join that portion as long as you send us his full name by Monday, May 10. \n \nWe can update the lunch request as long as we receive the dietary information by Thursday, May 6. After that date, special meals may not be available. \n \nBest regards, \nEvents Desk"
+  },
+  {
+    "id": 43,
+    "type": "part5",
+    "title": "43강 (Part 5) — 주어-동사 수일치 심화 (3문항)",
+    "questions": [
+      {
+        "id": "43-1",
+        "question": "A list of approved contractors _______ available on the intranet.",
+        "options": [
+          "are",
+          "is",
+          "were",
+          "have been"
+        ],
+        "answer": "is"
+      },
+      {
+        "id": "43-2",
+        "question": "Neither the regional managers nor the director _______ able to attend Friday's briefing.",
+        "options": [
+          "were",
+          "are",
+          "is",
+          "have been"
+        ],
+        "answer": "is"
+      },
+      {
+        "id": "43-3",
+        "question": "Ten percent of the invoices _______ still missing customer reference numbers.",
+        "options": [
+          "is",
+          "are",
+          "was",
+          "has been"
+        ],
+        "answer": "are"
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "type": "part5",
+    "title": "44강 (Part 5) — 대명사/재귀대명사 (3문항)",
+    "questions": [
+      {
+        "id": "44-1",
+        "question": "Each participant must bring _______ laptop to the training session.",
+        "options": [
+          "its",
+          "your",
+          "his or her",
+          "their"
+        ],
+        "answer": "his or her"
+      },
+      {
+        "id": "44-2",
+        "question": "The branches in Busan and Daegu exceeded sales targets, and both of _______ will receive additional marketing support next quarter.",
+        "options": [
+          "it",
+          "them",
+          "they",
+          "their"
+        ],
+        "answer": "them"
+      },
+      {
+        "id": "44-3",
+        "question": "The CEO thanked the interns for preparing the venue _______.",
+        "options": [
+          "themselves",
+          "itself",
+          "yourselves",
+          "himself"
+        ],
+        "answer": "themselves"
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "type": "part5",
+    "title": "45강 (Part 5) — 전치사/전치사구 빈출 표현 (3문항)",
+    "questions": [
+      {
+        "id": "45-1",
+        "question": "The annual audit will begin _______ April 6 and continue through the end of the month.",
+        "options": [
+          "at",
+          "on",
+          "in",
+          "for"
+        ],
+        "answer": "on"
+      },
+      {
+        "id": "45-2",
+        "question": "All changes to the contract must be made _______ writing to be valid.",
+        "options": [
+          "on",
+          "in",
+          "by",
+          "from"
+        ],
+        "answer": "in"
+      },
+      {
+        "id": "45-3",
+        "question": "The revised forecast is based _______ data collected during the first quarter.",
+        "options": [
+          "at",
+          "in",
+          "on",
+          "with"
+        ],
+        "answer": "on"
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "type": "part5",
+    "title": "46강 (Part 5) — 파생어 품사 선택 (3문항)",
+    "questions": [
+      {
+        "id": "46-1",
+        "question": "The new filing system has improved document _______ across departments.",
+        "options": [
+          "accessible",
+          "access",
+          "accessibility",
+          "accessing"
+        ],
+        "answer": "accessibility"
+      },
+      {
+        "id": "46-2",
+        "question": "Applicants will receive a written _______ within five business days after the interview.",
+        "options": [
+          "notify",
+          "notification",
+          "notifying",
+          "notified"
+        ],
+        "answer": "notification"
+      },
+      {
+        "id": "46-3",
+        "question": "The warehouse supervisor handled the complaint very _______ and resolved the issue before noon.",
+        "options": [
+          "professional",
+          "professionally",
+          "profession",
+          "professionalism"
+        ],
+        "answer": "professionally"
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "type": "part5",
+    "title": "47강 (Part 5) — 부정사/동명사 선택 (3문항)",
+    "questions": [
+      {
+        "id": "47-1",
+        "question": "The legal team agreed _______ the revised clause after reviewing the client's comments.",
+        "options": [
+          "accept",
+          "to accept",
+          "accepting",
+          "accepted"
+        ],
+        "answer": "to accept"
+      },
+      {
+        "id": "47-2",
+        "question": "Please remember _______ the air-conditioner before leaving the conference room.",
+        "options": [
+          "turn off",
+          "turning off",
+          "to turn off",
+          "turned off"
+        ],
+        "answer": "to turn off"
+      },
+      {
+        "id": "47-3",
+        "question": "The manager denied _______ the deadline without executive approval.",
+        "options": [
+          "extend",
+          "to extend",
+          "extending",
+          "extended"
+        ],
+        "answer": "extending"
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "type": "part5",
+    "title": "48강 (Part 5) — 관계대명사/관계부사/소유격 관계사 (3문항)",
+    "questions": [
+      {
+        "id": "48-1",
+        "question": "The branch manager, _______ office is on the third floor, will lead tomorrow's orientation.",
+        "options": [
+          "who",
+          "whom",
+          "whose",
+          "which"
+        ],
+        "answer": "whose"
+      },
+      {
+        "id": "48-2",
+        "question": "The year _______ the company opened its Singapore office was one of rapid expansion.",
+        "options": [
+          "which",
+          "when",
+          "where",
+          "who"
+        ],
+        "answer": "when"
+      },
+      {
+        "id": "48-3",
+        "question": "This is the file _______ contains the revised pricing schedule for overseas clients.",
+        "options": [
+          "what",
+          "who",
+          "which",
+          "where"
+        ],
+        "answer": "which"
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "type": "part5",
+    "title": "49강 (Part 5) — 회계/마케팅 실무 어휘 (3문항)",
+    "questions": [
+      {
+        "id": "49-1",
+        "question": "Because of a billing _______, several customers were charged twice for the same order.",
+        "options": [
+          "discrepancy",
+          "compliment",
+          "recovery",
+          "patience"
+        ],
+        "answer": "discrepancy"
+      },
+      {
+        "id": "49-2",
+        "question": "The marketing budget includes a separate _______ for online advertising and video production.",
+        "options": [
+          "allocation",
+          "reception",
+          "duration",
+          "occupation"
+        ],
+        "answer": "allocation"
+      },
+      {
+        "id": "49-3",
+        "question": "Customers may _______ reward points for gift cards through the company app.",
+        "options": [
+          "redeem",
+          "refine",
+          "reject",
+          "reduce"
+        ],
+        "answer": "redeem"
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "type": "part5",
+    "title": "50강 (Part 5) — 부사/상관접속사/도치 (3문항)",
+    "questions": [
+      {
+        "id": "50-1",
+        "question": "Once the software update is complete, users will be able to access the dashboard more _______.",
+        "options": [
+          "easy",
+          "easier",
+          "easily",
+          "easiest"
+        ],
+        "answer": "easily"
+      },
+      {
+        "id": "50-2",
+        "question": "The revised policy applies to all contractors, _______ they work on-site or remotely.",
+        "options": [
+          "whether",
+          "because",
+          "unless",
+          "during"
+        ],
+        "answer": "whether"
+      },
+      {
+        "id": "50-3",
+        "question": "Hardly had the presentation begun when the projector _______ working.",
+        "options": [
+          "stop",
+          "stops",
+          "stopped",
+          "had stopped"
+        ],
+        "answer": "stopped"
+      }
+    ]
+  }
 ];
