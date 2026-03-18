@@ -1661,7 +1661,61 @@ const TOEIC_DATA = [
         "answer": "arranged"
       }
     ],
-    "passage": "Document 1: Notice \n \nNORTHPOINT CONSULTING \nOffice Relocation Schedule \nDate: September 28, 2026 \n \nNorthPoint Consulting will move from Floor 8 to Suite 1200 on Monday, October 19. To ensure a smooth transition, please follow the schedule below. \n \nFriday, October 16 \n- Pack personal desk items and active files by 12:00 p.m. \n- Place archived files that are not needed for daily work in blue cartons for off-site storage pickup. \n- Label all computer accessories and desk organizers with your name. \n- Desktop phones will be disconnected after 6:00 p.m. \n \nThursday, October 15 \n- New locker assignments will be e-mailed to employees. \n- Parking garage access cards for Suite 1200 will be activated on Sunday, October 18. \n \nMonday, October 19 \n- Employees may begin using the new office and lockers at 7:30 a.m. \n- The mailroom on Floor 12 will begin accepting incoming packages at 9:00 a.m. \n \nDocument 2: E-mail \n \nSubject: Move-day questions \nFrom: Dana Cho <dcho@northpoint.com> \nTo: Leo Ramirez <lramirez@northpoint.com> \nDate: October 12, 2026 \n \nHi Leo, \n \nI will be at a client site for most of Friday, October 16, so I may not return before noon. Can my team assistant seal and label my blue cartons for off-site storage if I leave the files organized on Thursday? \n \nAlso, our product sample kits are scheduled to be picked up by courier on Monday morning. Would it be possible to have them staged near the new reception desk in Suite 1200 instead of the old mailroom? \n \nThanks, \nDana \n \nDocument 3: E-mail \n \nSubject: Re: Move-day questions \nFrom: Leo Ramirez <lramirez@northpoint.com> \nTo: Dana Cho <dcho@northpoint.com> \nDate: October 12, 2026 \n \nHi Dana, \n \nYes. If you sort the files beforehand, your assistant may seal the blue cartons and add your name labels on Friday morning. \n \nAs for the sample kits, we can have them staged near the reception desk. However, the courier should arrive after 10:00 a.m. because the Floor 12 mailroom will not be ready to handle packages before then. Please ask someone from your team to meet the courier when they arrive. \n \nBest, \nLeo"
+    "passage": `Document 1: Notice 
+ 
+NORTHPOINT CONSULTING 
+Office Relocation Schedule 
+Date: September 28, 2026 
+ 
+NorthPoint Consulting will move from Floor 8 to Suite 1200 on Monday, October 19. To ensure a smooth transition, please follow the schedule below. 
+ 
+Thursday, October 15 
+- New locker assignments will be e-mailed to employees. 
+ 
+Friday, October 16 
+- Pack personal desk items and active files by 12:00 p.m. 
+- Place archived files that are not needed for daily work in blue cartons for off-site storage pickup. 
+- Label all computer accessories and desk organizers with your name. 
+- Desktop phones will be disconnected after 6:00 p.m. 
+ 
+Sunday, October 18 
+- Parking garage access cards for Suite 1200 will be activated. 
+ 
+Monday, October 19 
+- Employees may begin using the new office and lockers at 7:30 a.m. 
+- The mailroom on Floor 12 will begin accepting incoming packages at 10:00 a.m. 
+ 
+Document 2: E-mail 
+ 
+Subject: Move-day questions 
+From: Dana Cho <dcho@northpoint.com> 
+To: Leo Ramirez <lramirez@northpoint.com> 
+Date: October 12, 2026 
+ 
+Hi Leo, 
+ 
+I will be at a client site for most of Friday, October 16, so I may not return before noon. Can my team assistant seal and label my blue cartons for off-site storage if I leave the files organized on Thursday? 
+ 
+Also, our product sample kits are scheduled to be picked up by courier on Monday morning. Would it be possible to have them staged near the new reception desk in Suite 1200 instead of the old mailroom? 
+ 
+Thanks, 
+Dana 
+ 
+Document 3: E-mail 
+ 
+Subject: Re: Move-day questions 
+From: Leo Ramirez <lramirez@northpoint.com> 
+To: Dana Cho <dcho@northpoint.com> 
+Date: October 12, 2026 
+ 
+Hi Dana, 
+ 
+Yes. If you sort the files beforehand, your assistant may seal the blue cartons and add your name labels on Friday morning. 
+ 
+As for the sample kits, we can have them staged near the reception desk. However, the courier should arrive after 10:00 a.m. because the Floor 12 mailroom will not be ready to handle packages before then. Please ask someone from your team to meet the courier when they arrive. 
+ 
+Best, 
+Leo`
   },
   {
     "id": 35,
@@ -1743,17 +1797,29 @@ const TOEIC_DATA = [
       },
       {
         "id": "36-4",
-        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: If you are sending someone to collect materials for your team, be sure to include that person's full name in your reply.",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: In that reply, please include the full name of the person who will collect the materials on Thursday morning.",
         "options": [
           "[1]",
           "[2]",
           "[3]",
           "[4]"
         ],
-        "answer": "[2]"
+        "answer": "[4]"
       }
     ],
-    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Annual Retail Expo Badge Pickup Information \n \nDear Exhibitors, \n \nTo reduce wait times on opening day, all exhibitors are strongly (1) _______ to pick up badges and registration packets on the afternoon before the Annual Retail Expo begins. Early pickup will take place on Wednesday, October 7, from 2:00 p.m. to 6:00 p.m. in Hall B of the Meridian Convention Center. [1] \n \nWhen you arrive, please use the west entrance and bring a photo ID. Your company badge packets will be released only to the person listed as the primary booth contact, (2) _______ a substitute name has been submitted in advance. [2] \n \nEach packet will include exhibitor badges, a floor map, and unloading instructions for the loading dock. Booth setup may begin at 7:00 a.m. on Thursday, October 8, but the exhibition floor will not open to visitors until 10:00 a.m. [3] \n \nIf you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mail (3) _______ Tuesday, October 6, so we can hold your materials at the information counter on Thursday morning. [4]"
+    "passage": `Directions: Read the text below and choose the best answer for each blank. 
+ 
+Subject: Annual Retail Expo Badge Pickup Information 
+ 
+Dear Exhibitors, 
+ 
+To reduce wait times on opening day, all exhibitors are strongly (1) _______ to pick up badges and registration packets on the afternoon before the Annual Retail Expo begins. Early pickup will take place on Wednesday, October 7, from 2:00 p.m. to 6:00 p.m. in Hall B of the Meridian Convention Center. [1] 
+ 
+When you arrive, please use the west entrance and bring a photo ID. Your company badge packets will be released only to the person listed as the primary booth contact, (2) _______ a substitute name has been submitted in advance. [2] 
+ 
+Each packet will include exhibitor badges, a floor map, and unloading instructions for the loading dock. Booth setup may begin at 7:00 a.m. on Thursday, October 8, but the exhibition floor will not open to visitors until 10:00 a.m. [3] 
+ 
+If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mail (3) _______ Tuesday, October 6, so we can hold your materials at the information counter on Thursday morning. [4]`
   },
   {
     "id": 37,
@@ -1762,7 +1828,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "37-1",
-        "question": "There is still _______ room in the afternoon session for three additional participants.",
+        "question": "There is still _______ room in the conference room, so we can add three more chairs for late registrants.",
         "options": [
           "many",
           "much",
@@ -2103,9 +2169,9 @@ const TOEIC_DATA = [
         "question": "Each participant must bring _______ laptop to the training session.",
         "options": [
           "its",
-          "your",
+          "our",
           "his or her",
-          "their"
+          "them"
         ],
         "answer": "his or her"
       },
@@ -2180,7 +2246,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "46-1",
-        "question": "The new filing system has improved document _______ across departments.",
+        "question": "The new filing system has improved document _______ for staff members across departments.",
         "options": [
           "accessible",
           "access",
