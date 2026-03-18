@@ -288,7 +288,7 @@ const CARDS = [
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 적에게 기절 부여' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적이 디바인 3스택이면 대미지 2배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 2.0 }, { type: 'check_divine_3_stun_else_add' }] },
+            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적이 디바인 3스택이면 대미지 1.5배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 1.5 }, { type: 'check_divine_3_stun_else_add' }] },
             { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1개 (디바인 소모 시 2개)', effects: [{ type: 'random_debuff_consume_divine' }] }
         ]
     },
