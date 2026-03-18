@@ -179,7 +179,7 @@ const ARTIFACT_LIST = [
     { id: 'divine_piercing', name: '디바인피어싱', desc: '디바인 스택당 적의 마법방어력 10% 추가 관통' },
     { id: 'gale_storm', name: '질풍노도', desc: '전투 개시 후 3턴간 필드버프 질풍 부여 (치명타율/회피율 20% 증가)' },
     { id: 'frozen_body', name: '프로즌바디', desc: '물속성 카드 사망시 적에게 스턴 부여' },
-    { id: 'ice_break', name: '아이스브레이크', desc: '스턴 중인 적에게 대미지 3배' },
+    { id: 'ice_break', name: '아이스브레이크', desc: '스턴 중인 적에게 대미지 2배' },
     { id: 'support_boost', name: '서포트부스트', desc: '모든 보조스킬 마나 소비 0' },
     { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 2.0배' },
     { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
@@ -1147,10 +1147,10 @@ const Logic = {
             logFn(`[아티팩트] 디바인피어싱: 디바인 ${target.buffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
         }
 
-        // Artifact: ice_break — triple damage to stunned targets
+        // Artifact: ice_break — double damage to stunned targets
         if (artifacts.includes('ice_break') && target.buffs['stun']) {
-            mult *= 3.0;
-            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 3배!`);
+            mult *= 2.0;
+            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
         }
 
         // [추가] 신데렐라: 스택 비례 방어 무시

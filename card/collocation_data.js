@@ -4411,6 +4411,497 @@ const COLLOCATION_ADDITIONS = [
                 "translation": "새 지침에 따르면 파트타임 직원은 유료 주차 허가를 받을 자격이 없다."
             }
         ]
+    },
+    {
+        "id": 91,
+        "expression": "submit a requisition",
+        "meaning": "구매 요청서를 제출하다",
+        "options": [
+            "submit",
+            "suspend",
+            "supply",
+            "support"
+        ],
+        "question": "Department heads must _______ a requisition before any new office equipment can be ordered.",
+        "answer": "submit",
+        "translation": "새 사무 장비를 주문하기 전에 부서장은 구매 요청서를 제출해야 합니다.",
+        "quizzes": [
+            {
+                "question": "Department heads must _______ a requisition before any new office equipment can be ordered.",
+                "options": [
+                    "submit",
+                    "suspend",
+                    "supply",
+                    "support"
+                ],
+                "answer": "submit",
+                "translation": "새 사무 장비를 주문하기 전에 부서장은 구매 요청서를 제출해야 합니다."
+            },
+            {
+                "question": "Please _______ a requisition for the additional monitors by Friday afternoon.",
+                "options": [
+                    "submit",
+                    "settle",
+                    "survey",
+                    "store"
+                ],
+                "answer": "submit",
+                "translation": "추가 모니터에 대한 구매 요청서를 금요일 오후까지 제출해 주세요."
+            },
+            {
+                "question": "Managers are required to _______ a requisition through the procurement portal for all special-order items.",
+                "options": [
+                    "submit",
+                    "suggest",
+                    "shift",
+                    "send out"
+                ],
+                "answer": "submit",
+                "translation": "관리자는 특수 주문 품목에 대해 조달 포털을 통해 구매 요청서를 제출해야 합니다."
+            }
+        ]
+    },
+    {
+        "id": 92,
+        "expression": "issue a replacement",
+        "meaning": "교체품을 제공하다",
+        "options": [
+            "issue",
+            "inspect",
+            "install",
+            "import"
+        ],
+        "question": "The service center will _______ a replacement if the damaged router cannot be repaired.",
+        "answer": "issue",
+        "translation": "손상된 공유기를 수리할 수 없으면 서비스 센터가 교체품을 제공할 것입니다.",
+        "quizzes": [
+            {
+                "question": "The service center will _______ a replacement if the damaged router cannot be repaired.",
+                "options": [
+                    "issue",
+                    "inspect",
+                    "install",
+                    "import"
+                ],
+                "answer": "issue",
+                "translation": "손상된 공유기를 수리할 수 없으면 서비스 센터가 교체품을 제공할 것입니다."
+            },
+            {
+                "question": "Our supplier agreed to _______ a replacement for the leaking dispenser at no additional charge.",
+                "options": [
+                    "issue",
+                    "illustrate",
+                    "ignore",
+                    "increase"
+                ],
+                "answer": "issue",
+                "translation": "공급업체는 누수되는 정수기에 대해 추가 비용 없이 교체품을 제공하기로 했습니다."
+            },
+            {
+                "question": "If the serial number matches the recall list, we can _______ a replacement within five business days.",
+                "options": [
+                    "issue",
+                    "itemize",
+                    "insert",
+                    "inquire"
+                ],
+                "answer": "issue",
+                "translation": "일련번호가 리콜 목록과 일치하면 영업일 5일 이내에 교체품을 제공할 수 있습니다."
+            }
+        ]
+    },
+    {
+        "id": 93,
+        "expression": "meet a deadline",
+        "meaning": "마감일을 맞추다",
+        "options": [
+            "meet",
+            "miss",
+            "mark",
+            "maintain"
+        ],
+        "question": "The design team stayed late to _______ a deadline for the product catalog.",
+        "answer": "meet",
+        "translation": "디자인팀은 상품 카탈로그 마감일을 맞추기 위해 늦게까지 남아 있었습니다.",
+        "quizzes": [
+            {
+                "question": "The design team stayed late to _______ a deadline for the product catalog.",
+                "options": [
+                    "meet",
+                    "miss",
+                    "mark",
+                    "maintain"
+                ],
+                "answer": "meet",
+                "translation": "디자인팀은 상품 카탈로그 마감일을 맞추기 위해 늦게까지 남아 있었습니다."
+            },
+            {
+                "question": "We need one more editor on the project to _______ a deadline for the annual report.",
+                "options": [
+                    "meet",
+                    "measure",
+                    "move",
+                    "mention"
+                ],
+                "answer": "meet",
+                "translation": "연차 보고서 마감일을 맞추려면 프로젝트에 편집자 한 명이 더 필요합니다."
+            },
+            {
+                "question": "The vendor promised to add extra staff so it could _______ a deadline for the store opening.",
+                "options": [
+                    "meet",
+                    "memorize",
+                    "merge",
+                    "model"
+                ],
+                "answer": "meet",
+                "translation": "해당 업체는 매장 오픈 마감일을 맞추기 위해 추가 인력을 투입하겠다고 약속했습니다."
+            }
+        ]
+    },
+    {
+        "id": 94,
+        "expression": "file a claim",
+        "meaning": "배상 청구를 하다",
+        "options": [
+            "file",
+            "fill",
+            "fix",
+            "frame"
+        ],
+        "question": "Customers should _______ a claim within 30 days if a shipment arrives damaged.",
+        "answer": "file",
+        "translation": "배송품이 파손되어 도착한 경우 고객은 30일 이내에 배상 청구를 해야 합니다.",
+        "quizzes": [
+            {
+                "question": "Customers should _______ a claim within 30 days if a shipment arrives damaged.",
+                "options": [
+                    "file",
+                    "fill",
+                    "fix",
+                    "frame"
+                ],
+                "answer": "file",
+                "translation": "배송품이 파손되어 도착한 경우 고객은 30일 이내에 배상 청구를 해야 합니다."
+            },
+            {
+                "question": "Please _______ a claim with the carrier if your package is missing after the delivery window.",
+                "options": [
+                    "file",
+                    "finalize",
+                    "focus",
+                    "finance"
+                ],
+                "answer": "file",
+                "translation": "배송 예정 기간이 지난 뒤에도 소포가 없으면 운송사에 배상 청구를 접수해 주세요."
+            },
+            {
+                "question": "The customer service team can help you _______ a claim for the defective printer.",
+                "options": [
+                    "file",
+                    "fold",
+                    "force",
+                    "feature"
+                ],
+                "answer": "file",
+                "translation": "고객 서비스팀은 불량 프린터에 대한 배상 청구 접수를 도와줄 수 있습니다."
+            }
+        ]
+    },
+    {
+        "id": 95,
+        "expression": "restore access",
+        "meaning": "접속 권한을 복구하다",
+        "options": [
+            "restore",
+            "retain",
+            "remove",
+            "replace"
+        ],
+        "question": "IT Support can _______ access once your identity has been verified.",
+        "answer": "restore",
+        "translation": "신원이 확인되면 IT 지원팀이 접속 권한을 복구할 수 있습니다.",
+        "quizzes": [
+            {
+                "question": "IT Support can _______ access once your identity has been verified.",
+                "options": [
+                    "restore",
+                    "retain",
+                    "remove",
+                    "replace"
+                ],
+                "answer": "restore",
+                "translation": "신원이 확인되면 IT 지원팀이 접속 권한을 복구할 수 있습니다."
+            },
+            {
+                "question": "The administrator will _______ access to the billing portal after the account review is complete.",
+                "options": [
+                    "restore",
+                    "revise",
+                    "raise",
+                    "route"
+                ],
+                "answer": "restore",
+                "translation": "계정 검토가 끝나면 관리자가 청구 포털 접속 권한을 복구할 것입니다."
+            },
+            {
+                "question": "Please call the help desk if you need us to _______ access after a password lockout.",
+                "options": [
+                    "restore",
+                    "repeat",
+                    "release",
+                    "record"
+                ],
+                "answer": "restore",
+                "translation": "비밀번호 잠금 후 접속 권한을 복구해야 하면 헬프데스크로 연락해 주세요."
+            }
+        ]
+    }
+    ,
+    {
+        "id": 96,
+        "expression": "request an extension",
+        "meaning": "연장을 요청하다",
+        "options": [
+            "request",
+            "reserve",
+            "reject",
+            "reduce"
+        ],
+        "question": "Please _______ an extension if you need more time to complete the compliance form.",
+        "answer": "request",
+        "translation": "규정 준수 양식을 작성할 시간이 더 필요하면 연장을 요청해 주세요.",
+        "quizzes": [
+            {
+                "question": "Please _______ an extension if you need more time to complete the compliance form.",
+                "options": [
+                    "request",
+                    "reserve",
+                    "reject",
+                    "reduce"
+                ],
+                "answer": "request",
+                "translation": "규정 준수 양식을 작성할 시간이 더 필요하면 연장을 요청해 주세요."
+            },
+            {
+                "question": "The supplier decided to _______ an extension on the delivery deadline because of the port delay.",
+                "options": [
+                    "request",
+                    "review",
+                    "report",
+                    "raise"
+                ],
+                "answer": "request",
+                "translation": "공급업체는 항만 지연 때문에 납기 연장을 요청하기로 했습니다."
+            },
+            {
+                "question": "Any participant who misses the original cutoff should _______ an extension before Friday noon.",
+                "options": [
+                    "request",
+                    "repeat",
+                    "receive",
+                    "rank"
+                ],
+                "answer": "request",
+                "translation": "원래 마감 시한을 놓친 참가자는 금요일 정오 전에 연장을 요청해야 합니다."
+            }
+        ]
+    },
+    {
+        "id": 97,
+        "expression": "acknowledge receipt",
+        "meaning": "수령을 확인하다",
+        "options": [
+            "acknowledge",
+            "announce",
+            "assemble",
+            "approve"
+        ],
+        "question": "Please _______ receipt of this contract by replying to the e-mail today.",
+        "answer": "acknowledge",
+        "translation": "오늘 이메일에 회신하여 이 계약서의 수령을 확인해 주세요.",
+        "quizzes": [
+            {
+                "question": "Please _______ receipt of this contract by replying to the e-mail today.",
+                "options": [
+                    "acknowledge",
+                    "announce",
+                    "assemble",
+                    "approve"
+                ],
+                "answer": "acknowledge",
+                "translation": "오늘 이메일에 회신하여 이 계약서의 수령을 확인해 주세요."
+            },
+            {
+                "question": "Vendors are asked to _______ receipt of all revised purchase orders within one business day.",
+                "options": [
+                    "acknowledge",
+                    "assign",
+                    "adjust",
+                    "attach"
+                ],
+                "answer": "acknowledge",
+                "translation": "공급업체는 수정된 모든 구매 주문서의 수령을 영업일 기준 하루 안에 확인해야 합니다."
+            },
+            {
+                "question": "Could you please _______ receipt of the shipment notice so we can release the next batch?",
+                "options": [
+                    "acknowledge",
+                    "analyze",
+                    "appoint",
+                    "arrest"
+                ],
+                "answer": "acknowledge",
+                "translation": "다음 물량을 출고할 수 있도록 배송 안내문의 수령을 확인해 주시겠습니까?"
+            }
+        ]
+    },
+    {
+        "id": 98,
+        "expression": "provide documentation",
+        "meaning": "증빙 서류를 제공하다",
+        "options": [
+            "provide",
+            "prohibit",
+            "promote",
+            "prevent"
+        ],
+        "question": "Applicants must _______ documentation of prior work experience.",
+        "answer": "provide",
+        "translation": "지원자는 이전 근무 경력을 증명하는 서류를 제공해야 합니다.",
+        "quizzes": [
+            {
+                "question": "Applicants must _______ documentation of prior work experience.",
+                "options": [
+                    "provide",
+                    "prohibit",
+                    "promote",
+                    "prevent"
+                ],
+                "answer": "provide",
+                "translation": "지원자는 이전 근무 경력을 증명하는 서류를 제공해야 합니다."
+            },
+            {
+                "question": "Please _______ documentation for any expenses over $200 when filing your report.",
+                "options": [
+                    "provide",
+                    "predict",
+                    "purchase",
+                    "prepare"
+                ],
+                "answer": "provide",
+                "translation": "보고서를 제출할 때 200달러를 초과하는 비용에 대한 증빙 서류를 제공해 주세요."
+            },
+            {
+                "question": "To complete the audit, the finance team must _______ documentation for all overseas transactions.",
+                "options": [
+                    "provide",
+                    "post",
+                    "protect",
+                    "produce up"
+                ],
+                "answer": "provide",
+                "translation": "감사를 마치려면 재무팀이 모든 해외 거래에 대한 증빙 서류를 제공해야 합니다."
+            }
+        ]
+    },
+    {
+        "id": 99,
+        "expression": "confirm attendance",
+        "meaning": "참석 여부를 확인하다",
+        "options": [
+            "confirm",
+            "conserve",
+            "consult",
+            "convert"
+        ],
+        "question": "All guests should _______ attendance by Wednesday so the catering order can be finalized.",
+        "answer": "confirm",
+        "translation": "케이터링 주문을 확정할 수 있도록 모든 참석자는 수요일까지 참석 여부를 확인해야 합니다.",
+        "quizzes": [
+            {
+                "question": "All guests should _______ attendance by Wednesday so the catering order can be finalized.",
+                "options": [
+                    "confirm",
+                    "conserve",
+                    "consult",
+                    "convert"
+                ],
+                "answer": "confirm",
+                "translation": "케이터링 주문을 확정할 수 있도록 모든 참석자는 수요일까지 참석 여부를 확인해야 합니다."
+            },
+            {
+                "question": "Please _______ attendance for the orientation session through the employee portal.",
+                "options": [
+                    "confirm",
+                    "compile",
+                    "compare",
+                    "compose"
+                ],
+                "answer": "confirm",
+                "translation": "오리엔테이션 세션 참석 여부를 직원 포털을 통해 확인해 주세요."
+            },
+            {
+                "question": "Managers were asked to _______ attendance for the supplier meeting no later than noon today.",
+                "options": [
+                    "confirm",
+                    "collect",
+                    "construct",
+                    "classify"
+                ],
+                "answer": "confirm",
+                "translation": "관리자들은 오늘 정오까지 공급업체 회의 참석 여부를 확인해 달라는 요청을 받았습니다."
+            }
+        ]
+    },
+    {
+        "id": 100,
+        "expression": "submit a recall form",
+        "meaning": "리콜 신청서를 제출하다",
+        "options": [
+            "submit",
+            "settle",
+            "signal",
+            "select"
+        ],
+        "question": "Customers must _______ a recall form before a replacement unit can be shipped.",
+        "answer": "submit",
+        "translation": "교체 제품이 발송되기 전에 고객은 리콜 신청서를 제출해야 합니다.",
+        "quizzes": [
+            {
+                "question": "Customers must _______ a recall form before a replacement unit can be shipped.",
+                "options": [
+                    "submit",
+                    "settle",
+                    "signal",
+                    "select"
+                ],
+                "answer": "submit",
+                "translation": "교체 제품이 발송되기 전에 고객은 리콜 신청서를 제출해야 합니다."
+            },
+            {
+                "question": "Please _______ a recall form online and upload the serial-number photo by Thursday.",
+                "options": [
+                    "submit",
+                    "scan",
+                    "store",
+                    "support"
+                ],
+                "answer": "submit",
+                "translation": "목요일까지 온라인으로 리콜 신청서를 제출하고 일련번호 사진을 업로드해 주세요."
+            },
+            {
+                "question": "Retailers should remind customers to _______ a recall form as soon as they identify an affected unit.",
+                "options": [
+                    "submit",
+                    "share",
+                    "schedule",
+                    "serve"
+                ],
+                "answer": "submit",
+                "translation": "소매업체는 영향을 받은 제품을 확인하는 즉시 고객이 리콜 신청서를 제출하도록 안내해야 합니다."
+            }
+        ]
     }
 ];
 
