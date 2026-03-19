@@ -2249,7 +2249,7 @@ If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mai
         "question": "The new filing system has improved document _______ for staff members across departments.",
         "options": [
           "accessible",
-          "access",
+          "accessibly",
           "accessibility",
           "accessing"
         ],
