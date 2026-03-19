@@ -2064,8 +2064,8 @@ const COLLOCATION_DATA = [
         "options": [
             "request",
             "question",
-            "arrival",
-            "revision"
+            "budget",
+            "schedule"
         ],
         "question": "Further details regarding the project are available from headquarters upon _______.",
         "answer": "request",
@@ -2076,8 +2076,8 @@ const COLLOCATION_DATA = [
                 "options": [
                     "request",
                     "question",
-                    "arrival",
-                    "revision"
+                    "budget",
+                    "schedule"
                 ],
                 "answer": "request",
                 "translation": "프로젝트에 관한 추가 세부 사항은 본사에 요청 시 제공됩니다."
@@ -2085,9 +2085,9 @@ const COLLOCATION_DATA = [
             {
                 "question": "Additional training materials are available upon _______ from the human resources department.",
                 "options": [
-                    "arrival",
+                    "budget",
                     "request",
-                    "revision",
+                    "schedule",
                     "question"
                 ],
                 "answer": "request",
@@ -2097,9 +2097,9 @@ const COLLOCATION_DATA = [
                 "question": "A detailed breakdown of charges can be provided upon _______.",
                 "options": [
                     "request",
-                    "arrival",
                     "question",
-                    "revision"
+                    "budget",
+                    "schedule"
                 ],
                 "answer": "request",
                 "translation": "비용 상세 내역은 요청 시 제공될 수 있습니다."
@@ -3455,26 +3455,26 @@ const COLLOCATION_DATA = [
                 "translation": "준법감시 담당자는 데이터 유출 원인을 즉시 조사할 것이다."
             },
             {
-                "question": "Could you look _______ the discrepancy in the invoice total before we approve payment?",
+                "question": "Could you look _______ why the invoice total does not match before we approve payment?",
                 "options": [
                     "into",
                     "up",
                     "off",
-                    "over"
+                    "after"
                 ],
                 "answer": "into",
-                "translation": "결제를 승인하기 전에 청구서 총액의 불일치를 조사해 주시겠어요?"
+                "translation": "결제를 승인하기 전에 청구서 총액이 왜 맞지 않는지 조사해 주시겠어요?"
             },
             {
-                "question": "The committee is looking _______ the applicants’ claims before making a final decision.",
+                "question": "The committee is looking _______ whether the applicants meet the published criteria before making a final decision.",
                 "options": [
                     "into",
-                    "after",
-                    "across",
-                    "out"
+                    "up",
+                    "off",
+                    "after"
                 ],
                 "answer": "into",
-                "translation": "위원회는 최종 결정을 내리기 전에 지원자들의 주장(내용)을 조사하고 있다."
+                "translation": "위원회는 최종 결정을 내리기 전에 지원자들이 공지된 기준을 충족하는지 조사하고 있다."
             }
         ]
     },
@@ -3553,14 +3553,14 @@ const COLLOCATION_DATA = [
                 "translation": "감사 중에 프린터 용지가 떨어져서 인쇄가 지연되었다."
             },
             {
-                "question": "The store may run out _______ the free samples by midday.",
+                "question": "The store may run _______ of the free samples by midday.",
                 "options": [
-                    "of",
-                    "for",
-                    "from",
-                    "with"
+                    "out",
+                    "off",
+                    "over",
+                    "up"
                 ],
-                "answer": "of",
+                "answer": "out",
                 "translation": "그 매장은 정오쯤 무료 샘플이 동날 수도 있다."
             },
             {
@@ -3858,14 +3858,14 @@ const COLLOCATION_DATA = [
                 "translation": "추가 인력이 피크 시간대 인력 부족을 만회하는 데 도움이 되었다."
             },
             {
-                "question": "A replacement item does not fully make up _______ the inconvenience caused.",
+                "question": "A replacement item alone cannot make _______ for the inconvenience caused.",
                 "options": [
-                    "for",
-                    "to",
-                    "of",
-                    "with"
+                    "up",
+                    "out",
+                    "off",
+                    "over"
                 ],
-                "answer": "for",
+                "answer": "up",
                 "translation": "교체품만으로는 발생한 불편을 완전히 보상하지는 못한다."
             }
         ]
