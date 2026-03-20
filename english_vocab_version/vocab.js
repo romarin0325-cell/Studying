@@ -38,7 +38,7 @@ const VOCAB_DATA = [
   {
     "word": "issue",
     "meaning": "(명) 문제, 이슈; (동) 발행하다",
-    "trap_meaning": "(명) 조직, 화장지; (동) (휴지로) 닦다",
+    "trap_meaning": "(명) 조직; (명) 화장지",
     "trap_word": "tissue"
   },
   {
@@ -98,7 +98,7 @@ const VOCAB_DATA = [
   {
     "word": "personal",
     "meaning": "(형) 개인적인; (형) 사적인",
-    "trap_meaning": "(명) 직원, 인원; (명) 인사부서, 인사과",
+    "trap_meaning": "(명) 직원; (명) 인원",
     "trap_word": "personnel"
   },
   {
@@ -170,13 +170,13 @@ const VOCAB_DATA = [
   {
     "word": "auditor",
     "meaning": "(명) 회계 감사관; (명) 청강생",
-    "trap_meaning": "(명) 오디션; (명) 청력, 청각",
+    "trap_meaning": "(명) 오디션; (명) 시연 심사",
     "trap_word": "audition"
   },
   {
     "word": "physics",
     "meaning": "(명) 물리학",
-    "trap_meaning": "(명) 의사, 내과 의사; (동) 치료하다",
+    "trap_meaning": "(명) 의사; (명) 내과 의사",
     "trap_word": "physician"
   },
   {
@@ -194,7 +194,7 @@ const VOCAB_DATA = [
   {
     "word": "commute",
     "meaning": "(동) 통근하다; (동) (처벌을) 감형하다",
-    "trap_meaning": "(동) 계산하다, 산출하다; (동) 추정하다",
+    "trap_meaning": "(동) 계산하다; (동) 산출하다",
     "trap_word": "compute"
   },
   {
@@ -356,7 +356,7 @@ const VOCAB_DATA = [
   {
     "word": "vague",
     "meaning": "(형) 모호한, 희미한",
-    "trap_meaning": "(명) 유행; (형) 유행하는",
+    "trap_meaning": "(명) 유행; (명) 인기",
     "trap_word": "vogue"
   },
   {
@@ -422,7 +422,7 @@ const VOCAB_DATA = [
   {
     "word": "commitment",
     "meaning": "(명) 헌신; (명) 약속, 책무",
-    "trap_meaning": "(명) 위원회; (명) 위원",
+    "trap_meaning": "(명) 위원회",
     "trap_word": "committee"
   },
   {
@@ -487,7 +487,7 @@ const VOCAB_DATA = [
   },
   {
     "word": "publicity",
-    "meaning": "(명) 홍보, 광고; (명) 평판",
+    "meaning": "(명) 홍보; (명) 세간의 주목; (명) 언론 노출",
     "trap_meaning": "(명) 출판, 발행; (명) 출판물",
     "trap_word": "publication"
   },
