@@ -7,6 +7,7 @@
  *   - GACHA_RATES: Gacha probability tables per mode
  *   - GameUtils.buildCardPool(): Unified card pool builder (replaces 6 duplicated patterns)
  *   - GameUtils.resolveGachaGrade(): Grade determination from GACHA_RATES table
+ *   - GameUtils.getCardById()/getAllCards()/buildDeckContext(): Shared card lookup and Joker-aware deck helpers
  */
 
 // ─── Storage Layer ────────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ const GAME_CONSTANTS = {
     MAX_RECORDS: 5,
     MAX_ARTIFACTS: 4,
     SAGE_BLESSING_PICK_COUNT: 12,
+    DEFAULT_BLESSING_USES: 3,
 
     // Costs
     COSTS: {
@@ -111,6 +113,41 @@ const GAME_CONSTANTS = {
 
     DRAFT: {
         INITIAL_REROLLS: 3
+    },
+
+    LOADING: {
+        MAX_ATTEMPTS: 200,
+        POLLING_MS: 150,
+        START_RETRY_LIMIT: 6,
+        START_RETRY_DELAY_MS: 180
+    },
+
+    MODE_CLEAR_STAGES: {
+        default: 24,
+        origin: Infinity,
+        restriction: 18,
+        balance: 18,
+        archive: 18,
+        overdrive: 30,
+        curse: 30,
+        flood: 30,
+        chaos: 24,
+        draft: 24,
+        artifact: 36
+    },
+
+    MODE_REWARDS: {
+        default: 1,
+        suffering: 0,
+        chaos: 0
+    },
+
+    BONUS_REWARDS: {
+        SAGE_BLESSING: 1,
+        QUIZ: 1,
+        CREATOR_GOD_QUIZ: 3,
+        LOOTER: 1,
+        OVERDRIVE: 1
     },
 
     // Battle Settings
@@ -194,6 +231,79 @@ const ARTIFACT_LIST = [
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
 const GameUtils = {
+    /**
+     * Get all collectible cards in lookup order.
+     * @returns {Array}
+     */
+    getAllCards() {
+        return [
+            ...CARDS,
+            ...BONUS_CARDS,
+            ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : [])
+        ];
+    },
+
+    /**
+     * Resolve a card by id from a given pool or the full card set.
+     * @param {string} id
+     * @param {Array} [pool]
+     * @returns {Object|null}
+     */
+    getCardById(id, pool) {
+        if (!id) return null;
+        const cards = Array.isArray(pool) ? pool : this.getAllCards();
+        return cards.find(card => card.id === id) || null;
+    },
+
+    /**
+     * Build a Joker-aware deck context for trait/effect evaluation.
+     * Joker counts as every element and every card name for deck checks.
+     *
+     * @param {string[]} deck
+     * @param {Array} [allCards]
+     * @returns {Object}
+     */
+    buildDeckContext(deck, allCards) {
+        const cards = (deck || [])
+            .map(id => this.getCardById(id, allCards))
+            .filter(Boolean);
+        const jokerCount = cards.filter(card => card.id === 'joker').length;
+        const elementCounts = {};
+        const cardCounts = {};
+
+        cards.forEach(card => {
+            cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
+            if (card.id !== 'joker') {
+                elementCounts[card.element] = (elementCounts[card.element] || 0) + 1;
+            }
+        });
+
+        const countMatchingIds = (ids) => {
+            const allowedIds = new Set(ids || []);
+            let count = jokerCount;
+
+            allowedIds.forEach(id => {
+                count += cardCounts[id] || 0;
+            });
+
+            return count;
+        };
+
+        return {
+            cards,
+            hasJoker: jokerCount > 0,
+            jokerCount,
+            elementCounts,
+            cardCounts,
+            hasCard: (id) => Boolean(cardCounts[id]) || (jokerCount > 0 && id !== 'joker'),
+            hasAnyCard: (ids) => countMatchingIds(ids) > 0,
+            countMatchingIds,
+            hasElement: (element) => jokerCount > 0 || Boolean(elementCounts[element]),
+            countElement: (element) => (elementCounts[element] || 0) + jokerCount,
+            countDeckAttributes: () => (jokerCount > 0 ? 5 : Object.keys(elementCounts).length)
+        };
+    },
+
     /**
      * Build a card pool with bonus and transcendence cards.
      * Replaces 6 duplicated card pool construction patterns throughout the codebase.
@@ -291,6 +401,19 @@ const GameUtils = {
         return GAME_CONSTANTS.INITIAL_TICKETS[mode] !== undefined
             ? GAME_CONSTANTS.INITIAL_TICKETS[mode]
             : GAME_CONSTANTS.INITIAL_TICKETS.default;
+    },
+
+    /**
+     * Get the clear stage requirement for a mode/game type.
+     * @param {string} mode
+     * @param {string} gameType
+     * @returns {number}
+     */
+    getClearStage(mode, gameType) {
+        if (gameType === 'endless') return Infinity;
+        return GAME_CONSTANTS.MODE_CLEAR_STAGES[mode] !== undefined
+            ? GAME_CONSTANTS.MODE_CLEAR_STAGES[mode]
+            : GAME_CONSTANTS.MODE_CLEAR_STAGES.default;
     }
 };
 
@@ -520,31 +643,9 @@ const DAMAGE_EFFECT_HANDLERS = {
         }
     },
     'count_deck_attr_dmg': (ctx, eff) => {
-        // Need access to deck or active traits to count attributes?
-        // Logic.calculateDamage receives activeTraits.
-        // But deck content isn't directly passed.
-        // However, `ctx.activeTraits` contains synergy strings, not deck info.
-        // Logic.calculateDamage is called with `activeTraits`.
-        // We might need to pass `deck` to calculateDamage or check `source.proto.element` etc.
-        // Workaround: We can't easily count deck attributes inside Logic without deck data.
-        // BUT, we can pass the count as a param when calling calculateDamage?
-        // OR, we assume `activeTraits` or `fieldBuffs` implies something? No.
-        // We should update `Logic.calculateDamage` to accept `deck` or `attrCount`.
-        // OR, for now, use a hack: Look at `activeTraits` if it has specific markers? No.
-        // Best approach: Add `deck` to the `calculateDamage` signature in the next step,
-        // or handle this in index.html and pass the multiplier?
-        // Index.html `calcDamage` calls `Logic.calculateDamage`.
-        // I will update `Logic` to accept `deck` in the next step.
-        // For now, I'll write the handler assuming `ctx.deck` exists.
         if (ctx.deck) {
-            const cards = ctx.deck.map(id => id ? (CARDS.find(c => c.id === id) || BONUS_CARDS.find(c => c.id === id) || TRANSCENDENCE_CARDS.find(c => c.id === id)) : null).filter(c => c);
-            let attrs = new Set();
-            let hasJoker = false;
-            cards.forEach(c => {
-                if (c.id === 'joker') hasJoker = true;
-                else attrs.add(c.element);
-            });
-            let count = hasJoker ? 5 : attrs.size;
+            const deckCtx = GameUtils.buildDeckContext(ctx.deck);
+            let count = deckCtx.countDeckAttributes();
             ctx.mult += count * 1.0;
             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
         }
@@ -1264,12 +1365,8 @@ const Logic = {
             baseCrit: 10, baseEva: 0
         };
 
-        // Filter active cards
-        const activeCards = deck.map(id => id ? allCards.find(c => c.id === id) : null).filter(c => c);
-        const jokerInDeck = deck.includes('joker');
-
-        const countEl = (el) => activeCards.filter(c => c.element === el || c.id === 'joker').length;
-        const hasEl = (el) => activeCards.some(c => c.element === el || c.id === 'joker');
+        const deckCtx = GameUtils.buildDeckContext(deck, allCards);
+        const activeCards = deckCtx.cards;
 
         // Traits
         const t = playerProto.trait;
@@ -1277,24 +1374,24 @@ const Logic = {
 
         // Synergy Traits
         if (t.type.startsWith('syn_')) {
-            if (t.type === 'syn_nature_3_all' && countEl('nature') >= 3) active = true;
-            else if (t.type === 'syn_nature_3_golem' && countEl('nature') >= 3) active = true;
-            else if (t.type === 'syn_water_3_ice_age' && countEl('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit' && countEl('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk' && countEl('dark') >= 3) active = true;
-            else if (t.type === 'syn_light_fire_atk' && hasEl('light') && hasEl('fire')) active = true;
-            else if (t.type === 'syn_light_dark_matk_mdef' && hasEl('light') && hasEl('dark')) active = true;
-            else if (t.type === 'syn_light_3_matk_mdef' && countEl('light') >= 3) active = true;
-            else if (t.type === 'syn_water_nature' && hasEl('water') && hasEl('nature')) active = true;
-            else if (t.type === 'syn_nature_3_matk' && countEl('nature') >= 3) active = true;
-            else if (t.type === 'syn_night_rabbit' && (deck.includes('night_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
-            else if (t.type === 'syn_snow_rabbit' && (deck.includes('snow_rabbit') || deck.includes('silver_rabbit') || jokerInDeck)) active = true;
-            else if (t.type === 'syn_silver_rabbit' && (deck.includes('snow_rabbit') || deck.includes('night_rabbit') || jokerInDeck)) active = true;
-            else if (t.type === 'syn_water_3_atk_matk' && countEl('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit_burn' && countEl('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk_boost' && countEl('dark') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_party_atk' && countEl('dark') >= 3) active = true;
-            else if (t.type === 'syn_water_2_moon_twinkle' && countEl('water') >= 2) active = true;
+            if (t.type === 'syn_nature_3_all' && deckCtx.countElement('nature') >= 3) active = true;
+            else if (t.type === 'syn_nature_3_golem' && deckCtx.countElement('nature') >= 3) active = true;
+            else if (t.type === 'syn_water_3_ice_age' && deckCtx.countElement('water') >= 3) active = true;
+            else if (t.type === 'syn_fire_3_crit' && deckCtx.countElement('fire') >= 3) active = true;
+            else if (t.type === 'syn_dark_3_matk' && deckCtx.countElement('dark') >= 3) active = true;
+            else if (t.type === 'syn_light_fire_atk' && deckCtx.hasElement('light') && deckCtx.hasElement('fire')) active = true;
+            else if (t.type === 'syn_light_dark_matk_mdef' && deckCtx.hasElement('light') && deckCtx.hasElement('dark')) active = true;
+            else if (t.type === 'syn_light_3_matk_mdef' && deckCtx.countElement('light') >= 3) active = true;
+            else if (t.type === 'syn_water_nature' && deckCtx.hasElement('water') && deckCtx.hasElement('nature')) active = true;
+            else if (t.type === 'syn_nature_3_matk' && deckCtx.countElement('nature') >= 3) active = true;
+            else if (t.type === 'syn_night_rabbit' && deckCtx.hasAnyCard(['night_rabbit', 'silver_rabbit'])) active = true;
+            else if (t.type === 'syn_snow_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'silver_rabbit'])) active = true;
+            else if (t.type === 'syn_silver_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'night_rabbit'])) active = true;
+            else if (t.type === 'syn_water_3_atk_matk' && deckCtx.countElement('water') >= 3) active = true;
+            else if (t.type === 'syn_fire_3_crit_burn' && deckCtx.countElement('fire') >= 3) active = true;
+            else if (t.type === 'syn_dark_3_matk_boost' && deckCtx.countElement('dark') >= 3) active = true;
+            else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
+            else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
 
             if (active) {
                 if (t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
@@ -1333,9 +1430,7 @@ const Logic = {
         }
 
         if (t.type === 'rabbit_synergy_boost') {
-            const rabbits = ['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit', 'joker'];
-            let count = 0;
-            deck.forEach(id => { if (id && rabbits.includes(id)) count++; });
+            const count = deckCtx.countMatchingIds(['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit']);
             if (count > 0) {
                 let boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
@@ -1353,7 +1448,7 @@ const Logic = {
                     if (partyBoost[s] !== undefined) partyBoost[s] += (tr.val || 0);
                 });
             }
-            else if (tr && tr.type === 'syn_dark_3_party_atk' && countEl('dark') >= 3) {
+            else if (tr && tr.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.atk += (tr.val || 0);
             }
         });
