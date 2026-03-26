@@ -823,12 +823,12 @@ const BONUS_CARD_EXPANSION = [
     },
     {
         id: 'alchemist', name: '연금술사', grade: 'epic', element: 'water', role: 'buffer', unlockSource: 'hidden',
-        stats: { hp: 430, atk: 75, matk: 75, def: 95, mdef: 95 },
+        stats: { hp: 400, atk: 70, matk: 70, def: 80, mdef: 80 },
         trait: { type: 'reverse_atk_matk_party', desc: '덱의 모든 카드의 물리공격과 마법공격이 뒤바뀐다' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격을 1회 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '금단의실험', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
-            { name: '은빛마법진', type: 'sup', tier: 3, cost: 30, desc: '필드버프 달의축복 부여', effects: [{ type: 'field_buff', id: 'moon_bless' }] }
+            { name: '은빛마법진', type: 'sup', tier: 3, cost: 30, desc: '1턴 뒤 필드버프 달의축복 발동', effects: [{ type: 'delayed_attack_field', turns: 1, field: 'moon_bless' }] }
         ]
     },
     {
@@ -853,17 +853,17 @@ const BONUS_CARD_EXPANSION = [
     },
     {
         id: 'ember_tiger', name: '엠버타이거', grade: 'rare', element: 'fire', role: 'balancer', unlockSource: 'hidden',
-        stats: { hp: 365, atk: 105, matk: 70, def: 60, mdef: 55 },
+        stats: { hp: 355, atk: 105, matk: 70, def: 60, mdef: 55 },
         trait: { type: 'party_normal_attack_dmg', val: 2.0, desc: '덱 전체의 일반공격 대미지 2배' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '와일드러쉬', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 적에게 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
-            { name: '블레이즈크로', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 적에게 약화 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] }
+            { name: '와일드러쉬', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 적에게 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '블레이즈크로', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 적에게 약화 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] }
         ]
     },
     {
         id: 'executor', name: '처형인', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus',
-        stats: { hp: 320, atk: 80, matk: 70, def: 60, mdef: 55 },
+        stats: { hp: 320, atk: 80, matk: 60, def: 60, mdef: 45 },
         trait: { type: 'opening_atk_def', val: 50, desc: '전투 시작 후 3턴간 공격력/방어력 50% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
