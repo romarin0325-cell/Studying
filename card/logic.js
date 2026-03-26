@@ -168,6 +168,7 @@ const GAME_CONSTANTS = {
         'earth_bless': { atk: 0.25, matk: 0.25 },
         'twinkle_party': { atk: 0.2, crit: 15 },
         'star_powder': { def: 0.4, mdef: 0.4 },
+        'arena': {},
         'reaper_realm': { crit: 40 },
         'gale': { crit: 20, evasion: 20 }
     }
@@ -650,6 +651,12 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
         }
     },
+    'dream_form_execute': (ctx, eff) => {
+        if (ctx.fieldBuffs.some(buff => buff.name === 'arena')) {
+            ctx.mult += 4.0;
+            ctx.logFn('[융합] 아레나가 꿈의형태에 섞여 위력이 크게 증가합니다! (+4.0배)');
+        }
+    },
     'turn_modulo_dmg': (ctx, eff) => {
         // Need current turn. ctx does not have turn.
         // Add turn to ctx in calculateDamage.
@@ -702,6 +709,19 @@ const SideEffects = {
         },
         'field_buff': (ctx, eff) => {
             ctx.applyFieldBuff(eff.id);
+        },
+        'heal_ratio': (ctx, eff) => {
+            const ratio = eff.ratio || eff.val || 0;
+            if (ratio <= 0) return;
+            const heal = Math.max(1, Math.floor(ctx.source.maxHp * ratio));
+            ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + heal);
+            ctx.logFn(`HP ${heal} 회복!`);
+        },
+        'random_field_buff': (ctx, eff) => {
+            const pool = eff.pool || ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'arena'];
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            ctx.applyFieldBuff(pick);
+            ctx.logFn(`[랜덤] ${getBuffName(pick)} 부여!`);
         },
         'conditional_field_buff': (ctx, eff) => {
             if (eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) ctx.applyFieldBuff(eff.id);
@@ -773,6 +793,40 @@ const SideEffects = {
             const count = Object.keys(ctx.target.buffs).length;
             ctx.target.buffs = {};
             if (count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
+        },
+        'clear_self_debuffs': (ctx, eff) => {
+            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun'];
+            let removed = 0;
+            removable.forEach(id => {
+                if (ctx.source.buffs[id]) {
+                    delete ctx.source.buffs[id];
+                    removed++;
+                }
+            });
+            ctx.logFn(removed > 0 ? `자신의 디버프 ${removed}개를 해제했다!` : '해제할 디버프가 없었다.');
+        },
+        'remove_random_field_buff': (ctx, eff) => {
+            if (!ctx.battle.fieldBuffs.length) {
+                ctx.logFn('삭제할 필드버프가 없었다.');
+                return;
+            }
+            const idx = Math.floor(Math.random() * ctx.battle.fieldBuffs.length);
+            const removed = ctx.battle.fieldBuffs.splice(idx, 1)[0];
+            ctx.logFn(`필드버프 [${getBuffName(removed.name)}] 이(가) 사라졌다!`);
+        },
+        'set_self_stats': (ctx, eff) => {
+            const stats = eff.stats || {};
+            if (typeof stats.atk === 'number') ctx.source.atk = stats.atk;
+            if (typeof stats.matk === 'number') ctx.source.matk = stats.matk;
+            if (typeof stats.def === 'number') {
+                ctx.source.def = stats.def;
+                if (typeof ctx.source.baseDef === 'number') ctx.source.baseDef = stats.def;
+            }
+            if (typeof stats.mdef === 'number') {
+                ctx.source.mdef = stats.mdef;
+                if (typeof ctx.source.baseMdef === 'number') ctx.source.baseMdef = stats.mdef;
+            }
+            ctx.logFn('전투 성향이 변화했다!');
         },
         'consume_all_burn_cond_buff': (ctx, eff) => {
             if (ctx.target.buffs['burn']) {
@@ -970,7 +1024,7 @@ const SideEffects = {
 
 const Logic = {
     // 1. Stats Calculation
-    calculateStats: function (char, fieldBuffs, mode, artifacts) {
+    calculateStats: function (char, fieldBuffs, mode, artifacts, battleTurn = 1) {
         if (!artifacts) artifacts = [];
         // Base stats
         let stats = {
@@ -1016,6 +1070,16 @@ const Logic = {
             const boost = (trait.val || 0) / 100;
             m.matk += boost;
             m.mdef += boost;
+        }
+        if (trait && trait.type === 'luther_guard_mastery' && (char.buffs.barrier || char.buffs.magic_guard)) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.matk += boost;
+        }
+        if (trait && trait.type === 'opening_atk_def' && battleTurn <= 3) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.def += boost;
         }
 
         // Field Buffs (Only apply to Allies)
@@ -1101,12 +1165,18 @@ const Logic = {
         stats.def = Math.floor(stats.def * Math.max(0, m.def));
         stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
 
+        if (char.swapAtkMatk) {
+            const nextAtk = stats.matk;
+            stats.matk = stats.atk;
+            stats.atk = nextAtk;
+        }
+
         return stats;
     },
 
     // 2. Evasion Check
-    checkEvasion: function (target, skillType, fieldBuffs, mode, artifacts) {
-        const stats = this.calculateStats(target, fieldBuffs, mode, artifacts);
+    checkEvasion: function (target, skillType, fieldBuffs, mode, artifacts, battleTurn = 1) {
+        const stats = this.calculateStats(target, fieldBuffs, mode, artifacts, battleTurn);
         return Math.random() * 100 < stats.evasion;
     },
 
@@ -1117,8 +1187,8 @@ const Logic = {
 
         if (skill.type !== 'phy' && skill.type !== 'mag') return { dmg: 0, isCrit: false };
 
-        const srcStats = this.calculateStats(source, fieldBuffs, mode, artifacts);
-        const tgtStats = this.calculateStats(target, fieldBuffs, mode, artifacts);
+        const srcStats = this.calculateStats(source, fieldBuffs, mode, artifacts, turn);
+        const tgtStats = this.calculateStats(target, fieldBuffs, mode, artifacts, turn);
 
         // 1. Critical
         let isCrit = Math.random() * 100 < srcStats.crit;
@@ -1178,6 +1248,17 @@ const Logic = {
         let mult = ctx.mult;
         let dmgBonus = 0.0;
 
+        if (skill.name === '・ｼ・・・ｵ・ｩ') {
+            if (fieldBuffs.some(buff => buff.name === 'arena')) {
+                mult *= 2.0;
+                logFn('[필드버프] 아레나: 일반공격 대미지 2배!');
+            }
+            if (source.normalAttackPartyMult && source.normalAttackPartyMult > 1) {
+                mult *= source.normalAttackPartyMult;
+                logFn(`[특성] 일반공격 강화! x${source.normalAttackPartyMult.toFixed(1)}`);
+            }
+        }
+
         // Trait Multipliers
         const t = source.proto ? source.proto.trait : null;
         if (t) {
@@ -1223,8 +1304,20 @@ const Logic = {
             }
         }
 
+        if (t && t.type === 'burn_stack_phy_pen' && skill.type === 'phy' && target.buffs['burn']) {
+            const ignoreRate = target.buffs['burn'] * (t.val || 0);
+            if (ignoreRate > 0) {
+                ctx.pendingBurnPenRate = ignoreRate;
+            }
+        }
+
         // Defense
         let def = (skill.type === 'phy') ? tgtStats.def : tgtStats.mdef;
+
+        if (ctx.pendingBurnPenRate && skill.type === 'phy') {
+            def = Math.max(0, def - Math.floor(tgtStats.def * ctx.pendingBurnPenRate));
+            logFn(`[특성] 작열 ${target.buffs['burn']}스택으로 물리방어 ${Math.round(ctx.pendingBurnPenRate * 100)}% 관통!`);
+        }
 
         if (ctx.ignoreMdefRate > 0 && skill.type === 'mag') {
             let ignore = Math.floor(tgtStats.mdef * ctx.ignoreMdefRate);
@@ -1392,6 +1485,8 @@ const Logic = {
             else if (t.type === 'syn_dark_3_matk_boost' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
+            else if (t.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) active = true;
+            else if (t.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) active = true;
 
             if (active) {
                 if (t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
@@ -1408,10 +1503,15 @@ const Logic = {
                 if (t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
                 if (t.type === 'syn_fire_3_crit_burn') p.baseCrit += t.val;
                 if (t.type === 'syn_dark_3_matk_boost') p.matk *= (1 + t.val / 100);
+                if (t.type === 'syn_dark_full_party_crit') p.baseCrit += t.val;
 
                 p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
                 p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
             }
+        }
+
+        if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {
+            active = true;
         }
 
         // Positional Traits (Generalized)
@@ -1439,7 +1539,7 @@ const Logic = {
         }
 
         // Party-wide Stat Boost Traits (Event)
-        const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0 };
+        const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0, crit: 0 };
         activeCards.forEach(c => {
             const tr = c.trait;
             if (tr && tr.type === 'party_stat_boost') {
@@ -1451,12 +1551,20 @@ const Logic = {
             else if (tr && tr.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.atk += (tr.val || 0);
             }
+            else if (tr && tr.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) {
+                partyBoost.def += (tr.val || 0);
+                partyBoost.mdef += (tr.val || 0);
+            }
+            else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
+                partyBoost.crit += (tr.val || 0);
+            }
         });
 
         if (partyBoost.atk) p.atk = Math.floor(p.atk * (1 + partyBoost.atk / 100));
         if (partyBoost.matk) p.matk = Math.floor(p.matk * (1 + partyBoost.matk / 100));
         if (partyBoost.def) p.def = Math.floor(p.def * (1 + partyBoost.def / 100));
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
+        if (partyBoost.crit) p.baseCrit += partyBoost.crit;
 
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
@@ -1495,6 +1603,36 @@ const Logic = {
         else if (enemy.id === 'demon_god') {
             if (turn === 7 || turn === 14) skill = enemy.skills.find(s => s.name === '제노사이드');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '다크니스');
+        }
+        else if (enemy.id === 'thor') {
+            if (turn === 10) skill = enemy.skills.find(s => s.name === '썬더러쉬');
+            else if (r < 0.2) skill = enemy.skills.find(s => s.name === '묠니르');
+        }
+        else if (enemy.id === 'poseidon') {
+            if (turn === 5) skill = enemy.skills.find(s => s.name === '어비스블레싱');
+            else if (turn === 10) skill = enemy.skills.find(s => s.name === '어비스프레셔');
+            else if (turn === 15) skill = enemy.skills.find(s => s.name === '디바우러');
+            else if (r < 0.2) skill = enemy.skills.find(s => s.name === '트라이던트');
+        }
+        else if (enemy.id === 'ares') {
+            if (enemy.isCharging && enemy.chargeSkillId) {
+                const chargedSkill = enemy.skills.find(s => s.name === enemy.chargeSkillId);
+                return chargedSkill ? { ...chargedSkill, chargeReset: true } : { type: 'phy', val: 1.0, name: '・ｼ・・・ｵ・ｩ' };
+            }
+            if (turn === 3 || turn === 8) {
+                const chargeSkillId = Math.random() < 0.5 ? '테라소드' : '마그마이럽션';
+                enemy.chargeSkillId = chargeSkillId;
+                return {
+                    type: 'sup',
+                    val: 0,
+                    name: `${chargeSkillId} 차징`,
+                    isChargeStart: true,
+                    chargeMessage: chargeSkillId === '테라소드'
+                        ? '아레스가 테라소드의 힘을 끌어모읍니다...'
+                        : '아레스가 마그마이럽션의 화염을 응축합니다...'
+                };
+            }
+            if (r < 0.2) skill = enemy.skills.find(s => s.name === '스피어레인');
         }
         else if (enemy.id === 'creator_god') {
             if (enemy.isCharging) {
