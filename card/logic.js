@@ -1248,7 +1248,7 @@ const Logic = {
         let mult = ctx.mult;
         let dmgBonus = 0.0;
 
-        if (skill.name === '・ｼ・・・ｵ・ｩ') {
+        if (skill.name === '일반 공격') {
             if (fieldBuffs.some(buff => buff.name === 'arena')) {
                 mult *= 2.0;
                 logFn('[필드버프] 아레나: 일반공격 대미지 2배!');
@@ -1617,7 +1617,7 @@ const Logic = {
         else if (enemy.id === 'ares') {
             if (enemy.isCharging && enemy.chargeSkillId) {
                 const chargedSkill = enemy.skills.find(s => s.name === enemy.chargeSkillId);
-                return chargedSkill ? { ...chargedSkill, chargeReset: true } : { type: 'phy', val: 1.0, name: '・ｼ・・・ｵ・ｩ' };
+                return chargedSkill ? { ...chargedSkill, chargeReset: true } : { type: 'phy', val: 1.0, name: '일반 공격' };
             }
             if (turn === 3 || turn === 8) {
                 const chargeSkillId = Math.random() < 0.5 ? '테라소드' : '마그마이럽션';
