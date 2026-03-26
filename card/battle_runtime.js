@@ -22,9 +22,13 @@ function applyStackMap(rpg, target, buffMap) {
 }
 
 function buildBattleEnemy(rpg) {
-    const enemyIdx = rpg.state.enemyScale % ENEMIES.length;
-    const baseEnemy = ENEMIES[enemyIdx];
-    const cycle = Math.floor(rpg.state.enemyScale / ENEMIES.length);
+    const baseEnemy = rpg.getCurrentStageEnemyData
+        ? rpg.getCurrentStageEnemyData()
+        : ENEMIES[rpg.state.enemyScale % ENEMIES.length];
+    const cycleLength = (typeof ENDLESS_ENEMY_ROTATION !== 'undefined' && ENDLESS_ENEMY_ROTATION.length)
+        ? ENDLESS_ENEMY_ROTATION.length
+        : ENEMIES.length;
+    const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
     const scale = 1.0 + (cycle * 0.2);
     const enemy = {
         id: baseEnemy.id,
@@ -33,6 +37,8 @@ function buildBattleEnemy(rpg) {
         hp: Math.floor(baseEnemy.stats.hp * scale),
         atk: Math.floor(baseEnemy.stats.atk * scale),
         matk: Math.floor(baseEnemy.stats.matk * scale),
+        baseAtk: Math.floor(baseEnemy.stats.atk * scale),
+        baseMatk: Math.floor(baseEnemy.stats.matk * scale),
         def: Math.floor(baseEnemy.stats.def * scale),
         mdef: Math.floor(baseEnemy.stats.mdef * scale),
         baseDef: Math.floor(baseEnemy.stats.def * scale),
@@ -41,7 +47,9 @@ function buildBattleEnemy(rpg) {
         buffs: {},
         element: baseEnemy.element,
         tookDamageThisTurn: false,
-        lastHitType: null
+        lastHitType: null,
+        isHiddenBoss: !!baseEnemy.hiddenBossFor,
+        bonusRewardTickets: baseEnemy.hiddenBossFor ? 3 : 0
     };
 
     if (baseEnemy.id === 'creator_god') {
@@ -125,6 +133,15 @@ const BattleRuntime = {
 
         const allCards = GameUtils.getAllCards();
         rpg.battle.players = rpg.state.deck.map((cardId, idx) => buildBattlePlayer(rpg, cardId, idx, allCards));
+        const hasAttackSwap = rpg.battle.players.some(player => player && player.proto && player.proto.trait.type === 'reverse_atk_matk_party');
+        const normalAttackTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_normal_attack_dmg');
+        if (hasAttackSwap || normalAttackTrait) {
+            rpg.battle.players.forEach(player => {
+                if (!player) return;
+                if (hasAttackSwap) player.swapAtkMatk = true;
+                if (normalAttackTrait) player.normalAttackPartyMult = normalAttackTrait.proto.trait.val || 1.0;
+            });
+        }
         rpg.battle.fieldBuffs = [];
         rpg.battle.delayedEffects = [];
         rpg.battle.turn = 1;
@@ -297,15 +314,24 @@ const BattleRuntime = {
 
             const skillInfo = Logic.decideEnemyAction(enemy, battle.turn);
 
-            if (skillInfo.chargeReset) enemy.isCharging = false;
+            if (skillInfo.chargeReset) {
+                enemy.isCharging = false;
+                enemy.chargeSkillId = null;
+            }
             if (skillInfo.isChargeStart) {
                 enemy.isCharging = true;
-                rpg.log("창조신이 힘을 모으고 있습니다... (공격 없음)");
+                rpg.log(skillInfo.chargeMessage || "창조신이 힘을 모으고 있습니다... (공격 없음)");
                 BattleRuntime.TurnManager.endEnemyTurn(rpg);
                 return;
             }
 
             const skill = skillInfo;
+            if (skill.type !== 'phy' && skill.type !== 'mag') {
+                rpg.log(`${enemy.name}・・${skill.name}!`);
+                BattleRuntime.applySkillEffects(rpg, enemy, target, skill);
+                BattleRuntime.TurnManager.endEnemyTurn(rpg);
+                return;
+            }
             let val = skill.type === 'phy' ? enemy.atk : enemy.matk;
             let mult = skill.val || 1.0;
 
@@ -335,7 +361,7 @@ const BattleRuntime = {
 
             def = Math.floor(def * fieldDef * defMult);
 
-            if (Logic.checkEvasion(target, skill.type, battle.fieldBuffs, rpg.state.mode, rpg.state.artifacts || [])) {
+            if (Logic.checkEvasion(target, skill.type, battle.fieldBuffs, rpg.state.mode, rpg.state.artifacts || [], battle.turn)) {
                 rpg.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
                 if (rpg.hasArtifact('lucky_vicky')) {
                     target.mp = Math.min(GAME_CONSTANTS.MAX_MP, target.mp + 10);
@@ -368,6 +394,7 @@ const BattleRuntime = {
                 BattleRuntime.handleOnHitTraits(rpg, target, enemy);
             }
             rpg.log(`${enemy.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
+            BattleRuntime.applySkillEffects(rpg, enemy, target, skill);
 
             if (skill.effects) {
                 skill.effects.forEach(effect => {

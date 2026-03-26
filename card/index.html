@@ -897,6 +897,11 @@
                 덱 편집<br>
                 <span style="font-size:0.8rem; color:#b3e5fc;">기본 카드는 항상 포함 / 보너스 카드만 ON/OFF</span>
             </button>
+            <button class="menu-btn" onclick="RPG.openMonthlyMission()"
+                style="padding:18px; border-color:#ffb74d; color:#ffb74d; margin-bottom:10px;">
+                월간 미션<br>
+                <span style="font-size:0.8rem; color:#ffe0b2;">매달 3개의 미션을 완료하고 히든 보상을 해금</span>
+            </button>
             <button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
         </div>
     </div>
@@ -912,6 +917,23 @@
             <button class="menu-btn" onclick="RPG.enableAllBonusPoolCards()"
                 style="margin-bottom:8px; border-color:#66bb6a; color:#66bb6a;">모두 활성화</button>
             <button onclick="RPG.closeBonusPoolEditor()" style="width:100%; padding:10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-monthly-mission" class="modal">
+        <div class="modal-content" style="height:auto; min-height:360px; width: 380px;">
+            <h3 style="color:#ffb74d;">월간 미션</h3>
+            <div id="monthly-mission-status" style="font-size:0.9rem; color:#ffe0b2; margin-bottom:10px;">-</div>
+            <div style="padding:12px; border:1px solid #6d4c41; border-radius:8px; background:#2a211a; margin-bottom:10px;">
+                <div style="font-size:0.8rem; color:#bcaaa4; margin-bottom:6px;">이달의 보상</div>
+                <div id="monthly-mission-reward-name" style="font-weight:bold; color:#fff; margin-bottom:8px;">-</div>
+                <button id="btn-monthly-mission-reward" class="menu-btn"
+                    style="margin-bottom:0; border-color:#ffcc80; color:#ffcc80;">카드 정보 보기</button>
+            </div>
+            <div id="monthly-mission-list" class="modal-scroll" style="max-height:220px; margin-bottom:10px;"></div>
+            <button id="btn-claim-monthly-mission" class="menu-btn" onclick="RPG.claimMonthlyMissionReward()"
+                style="border-color:#66bb6a; color:#66bb6a;">보상받기</button>
+            <button onclick="RPG.closeMonthlyMission()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
 
@@ -1142,7 +1164,7 @@
                 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
                 <h3 id="toeic-title" style="margin:0; font-size:1.1rem; color:#ffd700;">Practice</h3>
                 <button id="toeic-exit-btn"
-                    onclick="document.getElementById('modal-toeic-practice').classList.remove('active');"
+                    onclick="RPG.closeToeicPractice()"
                     style="padding:5px 15px; background:#444; border:1px solid #666; color:#fff; cursor:pointer; border-radius:4px;">나가기</button>
             </div>
 
@@ -1600,7 +1622,11 @@
                 achievements: { origin: false },
                 chaosTickets: 0,
                 lastRewardDate: null,
-                pendingTranscendenceCards: []
+                pendingTranscendenceCards: [],
+                tutoringEventEnabled: true,
+                hiddenStudyReady: false,
+                hiddenStudyPracticeCount: 0,
+                monthlyMission: null
             },
 
             // Game State (Session Persistent)
@@ -1616,7 +1642,9 @@
                 activeChaosBlessing: [], // Specific buffs from Chaos Blessing
                 activeSageBlessing: [],   // Specific buffs from Great Sage Blessing
                 activeBonusPoolIds: [],
-                quiz_stats: { correct: 0, total: 0 }
+                quiz_stats: { correct: 0, total: 0 },
+                pendingEnemyId: null,
+                pendingEnemyStage: null
             },
 
             // Battle State (Transient)
@@ -1694,6 +1722,221 @@
                 Storage.save(Storage.keys.GLOBAL, this.global);
             },
 
+            getStandardBonusCards() {
+                return BONUS_CARDS.filter(card => card.unlockSource !== 'hidden');
+            },
+
+            getHiddenBonusCards() {
+                return BONUS_CARDS.filter(card => card.unlockSource === 'hidden');
+            },
+
+            getGradeSortValue(grade) {
+                const gradeOrder = {
+                    transcendence: 0,
+                    legend: 1,
+                    epic: 2,
+                    rare: 3,
+                    normal: 4,
+                    event: 5
+                };
+                return gradeOrder[grade] ?? 99;
+            },
+
+            sortCardDataByGrade(cards) {
+                return [...cards].sort((a, b) => {
+                    const gradeDiff = this.getGradeSortValue(a.grade) - this.getGradeSortValue(b.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    return a.name.localeCompare(b.name, 'ko');
+                });
+            },
+
+            sortCardIdsByGrade(ids) {
+                return [...ids].sort((a, b) => {
+                    const cardA = this.getCardData(a);
+                    const cardB = this.getCardData(b);
+                    if (!cardA && !cardB) return 0;
+                    if (!cardA) return 1;
+                    if (!cardB) return -1;
+                    const gradeDiff = this.getGradeSortValue(cardA.grade) - this.getGradeSortValue(cardB.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    return cardA.name.localeCompare(cardB.name, 'ko');
+                });
+            },
+
+            sortBlessingsByGrade(blessings) {
+                return [...blessings].sort((a, b) => {
+                    const gradeDiff = this.getGradeSortValue(a.grade) - this.getGradeSortValue(b.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    return a.name.localeCompare(b.name, 'ko');
+                });
+            },
+
+            getCurrentMonthKey() {
+                const now = new Date();
+                return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            },
+
+            createMonthlyMissionState() {
+                const hiddenCards = this.getHiddenBonusCards();
+                const lockedHidden = hiddenCards.filter(card => !(this.global.unlocked_bonus_cards || []).includes(card.id));
+                const rewardPool = lockedHidden.length > 0 ? lockedHidden : hiddenCards;
+                const rewardCard = rewardPool[Math.floor(Math.random() * rewardPool.length)] || null;
+                return {
+                    monthKey: this.getCurrentMonthKey(),
+                    rewardCardId: rewardCard ? rewardCard.id : null,
+                    claimed: false,
+                    missions: {
+                        endless40: { label: '무한 모드 40 스테이지 돌파', progress: 0, target: 1 },
+                        challenge3: { label: '챌린지 모드 클리어 3회', progress: 0, target: 3 },
+                        toeic3: { label: '실전마법연습 3회 플레이', progress: 0, target: 3 }
+                    }
+                };
+            },
+
+            ensureMonthlyMissionState() {
+                const currentKey = this.getCurrentMonthKey();
+                if (!this.global.monthlyMission || this.global.monthlyMission.monthKey !== currentKey) {
+                    this.global.monthlyMission = this.createMonthlyMissionState();
+                    this.saveGlobalData();
+                }
+                return this.global.monthlyMission;
+            },
+
+            incrementMonthlyMissionProgress(id, amount = 1) {
+                const monthly = this.ensureMonthlyMissionState();
+                const mission = monthly.missions ? monthly.missions[id] : null;
+                if (!mission) return;
+                mission.progress = Math.min(mission.target, (mission.progress || 0) + amount);
+                this.saveGlobalData();
+            },
+
+            areAllMonthlyMissionsCleared() {
+                const monthly = this.ensureMonthlyMissionState();
+                return Object.values(monthly.missions || {}).every(mission => (mission.progress || 0) >= mission.target);
+            },
+
+            openMonthlyMission() {
+                this.renderMonthlyMission();
+                document.getElementById('modal-monthly-mission').classList.add('active');
+            },
+
+            closeMonthlyMission() {
+                document.getElementById('modal-monthly-mission').classList.remove('active');
+            },
+
+            renderMonthlyMission() {
+                const monthly = this.ensureMonthlyMissionState();
+                const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
+                const rewardNameEl = document.getElementById('monthly-mission-reward-name');
+                const rewardBtn = document.getElementById('btn-monthly-mission-reward');
+                const list = document.getElementById('monthly-mission-list');
+                const status = document.getElementById('monthly-mission-status');
+                const claimBtn = document.getElementById('btn-claim-monthly-mission');
+
+                rewardNameEl.innerText = reward ? reward.name : '보상이 없습니다';
+                rewardBtn.disabled = !reward;
+                rewardBtn.style.opacity = reward ? '1' : '0.5';
+                rewardBtn.onclick = reward ? (() => this.showCardInfo(reward.id)) : null;
+
+                const allClear = this.areAllMonthlyMissionsCleared();
+                status.innerText = `${monthly.monthKey} 월 미션`;
+                list.innerHTML = '';
+
+                Object.values(monthly.missions || {}).forEach(mission => {
+                    const cleared = (mission.progress || 0) >= mission.target;
+                    const item = document.createElement('div');
+                    item.style.padding = '10px';
+                    item.style.marginBottom = '8px';
+                    item.style.border = `1px solid ${cleared ? '#66bb6a' : '#555'}`;
+                    item.style.borderRadius = '8px';
+                    item.style.background = cleared ? 'rgba(102, 187, 106, 0.12)' : '#2a2a2a';
+                    item.innerHTML = `
+                        <div style="font-weight:bold; color:${cleared ? '#a5d6a7' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
+                        <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
+                    `;
+                    list.appendChild(item);
+                });
+
+                claimBtn.disabled = !allClear || monthly.claimed || !reward;
+                claimBtn.style.opacity = claimBtn.disabled ? '0.5' : '1';
+                claimBtn.innerText = monthly.claimed ? '보상 수령 완료' : '보상받기';
+            },
+
+            claimMonthlyMissionReward() {
+                const monthly = this.ensureMonthlyMissionState();
+                if (monthly.claimed) return this.showAlert('이번 달 보상은 이미 수령했습니다.');
+                if (!this.areAllMonthlyMissionsCleared()) return this.showAlert('모든 월간 미션을 완료해야 보상을 받을 수 있습니다.');
+                const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
+                if (!reward) return this.showAlert('이번 달 보상 카드가 없습니다.');
+
+                if (!this.global.unlocked_bonus_cards.includes(reward.id)) {
+                    this.global.unlocked_bonus_cards.push(reward.id);
+                }
+                monthly.claimed = true;
+                this.saveGlobalData();
+                this.updateBonusPoolEditorButton();
+                this.renderMonthlyMission();
+                this.openInfoModal('월간 미션 보상', `<b>${reward.name}</b> 이(가) 보너스 카드로 해금되었습니다!`);
+            },
+
+            registerToeicPracticeAttempt(options = {}) {
+                if (options.countMonthly !== false) {
+                    this.incrementMonthlyMissionProgress('toeic3', 1);
+                }
+
+                if (options.countHiddenUnlock === false || this.state.mode === 'dream_corridor') {
+                    return false;
+                }
+
+                let unlocked = false;
+                if (this.global.tutoringEventEnabled === false) {
+                    this.global.hiddenStudyPracticeCount = (this.global.hiddenStudyPracticeCount || 0) + 1;
+                    if (!this.global.hiddenStudyReady && this.global.hiddenStudyPracticeCount >= 5) {
+                        this.global.hiddenStudyReady = true;
+                        unlocked = true;
+                    }
+                } else {
+                    this.global.hiddenStudyPracticeCount = 0;
+                }
+                this.saveGlobalData();
+                return unlocked;
+            },
+
+            clearPendingEnemySelection() {
+                this.state.pendingEnemyId = null;
+                this.state.pendingEnemyStage = null;
+            },
+
+            getEnemyDataById(id) {
+                return ENEMIES.find(enemy => enemy.id === id) || ENEMIES[0];
+            },
+
+            getCurrentStageEnemyData() {
+                if (this.state.pendingEnemyStage === this.state.enemyScale && this.state.pendingEnemyId) {
+                    return this.getEnemyDataById(this.state.pendingEnemyId);
+                }
+
+                const rotation = (typeof ENDLESS_ENEMY_ROTATION !== 'undefined' && ENDLESS_ENEMY_ROTATION.length > 0)
+                    ? ENDLESS_ENEMY_ROTATION
+                    : ENEMIES.slice(0, 6).map(enemy => enemy.id);
+                const baseId = rotation[this.state.enemyScale % rotation.length];
+                const stageNumber = this.state.enemyScale + 1;
+                const hiddenBossMap = {
+                    iris_curse: 'thor',
+                    pharaoh: 'poseidon',
+                    demon_god: 'ares'
+                };
+
+                let enemyId = baseId;
+                if (this.state.gameType === 'endless' && stageNumber > 36 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+                    enemyId = hiddenBossMap[baseId];
+                }
+
+                this.state.pendingEnemyStage = this.state.enemyScale;
+                this.state.pendingEnemyId = enemyId;
+                return this.getEnemyDataById(enemyId);
+            },
+
             checkDailyChaosTicket() {
                 const today = new Date().toDateString();
                 if (this.global.lastRewardDate !== today) {
@@ -1706,7 +1949,7 @@
 
             checkAllBonusUnlocked() {
                 if (!this.global.unlocked_bonus_cards) return false;
-                return BONUS_CARDS.every(c => this.global.unlocked_bonus_cards.includes(c.id));
+                return this.getStandardBonusCards().every(c => this.global.unlocked_bonus_cards.includes(c.id));
             },
 
             getUnlockedBonusCards() {
@@ -1759,7 +2002,7 @@
             renderBonusPoolEditor() {
                 const list = document.getElementById('bonus-pool-editor-list');
                 const summary = document.getElementById('bonus-pool-editor-summary');
-                const cards = this.getUnlockedBonusCards();
+                const cards = this.sortCardDataByGrade(this.getUnlockedBonusCards());
                 const activeIds = new Set(this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds));
 
                 this.pendingActiveBonusPoolIds = [...activeIds];
@@ -1921,6 +2164,7 @@
                 }
 
                 this.loadGlobalData();
+                this.ensureMonthlyMissionState();
                 this.checkDailyChaosTicket();
 
                 if (mode === 'load') {
@@ -1936,6 +2180,8 @@
                         if (!this.state.mode) this.state.mode = 'origin';
                         if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
                         if (!this.state.artifacts) this.state.artifacts = [];
+                        if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
+                        if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
                         this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
                         this.loadStudyProgress();
 
@@ -1999,6 +2245,13 @@
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 없음 / 무한)';
                     });
+                    if (this.global.hiddenStudyReady) {
+                        MODES.push({
+                            id: 'dream_corridor',
+                            name: '꿈의회랑',
+                            desc: '학습용 히든 엔드리스 모드. 전투 종료 후 퀴즈가 자동 진행되며, 오답이 나오면 해당 런이 종료됩니다.\n(개인과외 이벤트 OFF 상태의 실전마법연습 5회로 출현)'
+                        });
+                    }
                 } else if (this.tempGameType === 'challenge') {
                     MODES = MODES.filter(m => m.id !== 'origin');
                 }
@@ -2011,7 +2264,7 @@
                     btn.innerText = m.name;
                     btn.id = `mode-btn-${m.id}`;
 
-                    const isUnlocked = this.global.unlocked_modes.includes(m.id);
+                    const isUnlocked = m.id === 'dream_corridor' || this.global.unlocked_modes.includes(m.id);
                     if (isUnlocked) btn.style.color = "#e040fb"; // Purple for unlocked
 
                     btn.onclick = () => {
@@ -2072,9 +2325,17 @@
                     chaosPool: [],
                     draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
                     artifacts: [],
+                    pendingEnemyId: null,
+                    pendingEnemyStage: null,
                     // [목적] 카오스/드래프트 모드에서 해당 런에서만 유효한 이벤트 카드 목록을 초기화
                     activeEventCards: []
                 };
+
+                if (mode === 'dream_corridor') {
+                    this.global.hiddenStudyReady = false;
+                    this.global.hiddenStudyPracticeCount = 0;
+                    this.saveGlobalData();
+                }
 
                 // Transfer Pending Transcendence to Active State (Endless Only)
                 if (this.state.gameType === 'endless') {
@@ -2111,11 +2372,11 @@
                 this.saveGame();
             },
 
-            saveGame() {
+            saveGame(showMessage = true) {
                 Storage.save(Storage.keys.SAVE, this.state);
                 this.saveStudyProgress();
                 this.saveGlobalData(); // Also save global just in case
-                this.showAlert("저장되었습니다.");
+                if (showMessage) this.showAlert("저장되었습니다.");
             },
 
             saveRecord(score = null) {
@@ -2146,8 +2407,8 @@
             toMenu() {
                 this.showScreen('screen-menu');
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
-                const enemyIdx = this.state.enemyScale % ENEMIES.length;
-                const nextEnemy = ENEMIES[enemyIdx];
+                this.ensureMonthlyMissionState();
+                const nextEnemy = this.getCurrentStageEnemyData();
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
                 imgEl.src = `${nextEnemy.name}.png`;
@@ -2192,6 +2453,9 @@
             toggleTutoringEvent() {
                 if (this.global.tutoringEventEnabled === undefined) this.global.tutoringEventEnabled = true;
                 this.global.tutoringEventEnabled = !this.global.tutoringEventEnabled;
+                if (this.global.tutoringEventEnabled) {
+                    this.global.hiddenStudyPracticeCount = 0;
+                }
                 this.saveGlobalData();
                 this.updateSystemMenuUI();
             },
@@ -2276,7 +2540,7 @@
                     return this.showAlert("현재 적용된 축복이 없습니다.");
                 }
                 let msg = "<b>현재 적용된 축복</b><br><br>";
-                this.state.chaosBuffs.forEach(b => {
+                this.sortBlessingsByGrade(this.state.chaosBuffs).forEach(b => {
                     msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가`;
                     msg += "<br>";
                 });
@@ -2365,6 +2629,7 @@
 
                 if (this.state.activeChaosBlessing) addBuffs(this.state.activeChaosBlessing);
                 if (this.state.activeSageBlessing) addBuffs(this.state.activeSageBlessing);
+                this.state.chaosBuffs = this.sortBlessingsByGrade(this.state.chaosBuffs);
             },
 
             applyGreatSageBlessing() {
@@ -2394,8 +2659,9 @@
                     else if (c.grade === 'rare') mult = 0.3;
                     else if (c.grade === 'epic') mult = 0.2;
                     else if (c.grade === 'legend') mult = 0.1;
-                    return { id: c.id, name: c.name, multiplier: mult, isSage: true };
+                    return { id: c.id, name: c.name, grade: c.grade, multiplier: mult, isSage: true };
                 });
+                newBuffs = this.sortBlessingsByGrade(newBuffs);
 
                 // Set to activeSageBlessing (Replacing previous)
                 this.state.activeSageBlessing = newBuffs;
@@ -2433,8 +2699,9 @@
                     else if (c.grade === 'rare') mult = 0.3;
                     else if (c.grade === 'epic') mult = 0.2;
                     else if (c.grade === 'legend') mult = 0.1;
-                    return { id: c.id, name: c.name, multiplier: mult };
+                    return { id: c.id, name: c.name, grade: c.grade, multiplier: mult };
                 });
+                newBuffs = this.sortBlessingsByGrade(newBuffs);
 
                 // Set to activeChaosBlessing (Replacing previous)
                 this.state.activeChaosBlessing = newBuffs;
@@ -2708,7 +2975,8 @@
                 box.innerHTML = "";
                 let counts = {};
                 list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-                for (let id in counts) {
+                const sortedIds = this.sortCardIdsByGrade(Object.keys(counts));
+                for (let id of sortedIds) {
                     const data = this.getCardData(id);
                     if (!data) continue;
                     const el = document.createElement('div');
@@ -3062,9 +3330,13 @@
                 if (this.state.mode === 'overdrive') {
                     reward += GAME_CONSTANTS.BONUS_REWARDS.OVERDRIVE;
                 }
+                if (this.battle.enemy && this.battle.enemy.bonusRewardTickets) {
+                    reward += this.battle.enemy.bonusRewardTickets;
+                }
 
                 this.state.tickets += reward;
                 this.state.enemyScale++;
+                this.clearPendingEnemySelection();
 
                 // Reset Chaos Blessing
                 this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
@@ -3079,6 +3351,10 @@
                 const stage = this.state.enemyScale; // current stage (already incremented)
                 const clearStage = GameUtils.getClearStage(mode, this.state.gameType);
                 const gameClear = stage >= clearStage;
+
+                if (this.state.gameType === 'endless' && stage >= 40) {
+                    this.incrementMonthlyMissionProgress('endless40', 1);
+                }
 
                 // Chaos/Draft: Reset Deck/Inventory
                 if (mode === 'chaos') {
@@ -3127,7 +3403,75 @@
                     return;
                 }
 
+                if (mode === 'dream_corridor') {
+                    this.finishDreamCorridorBattle(deadMsg);
+                    return;
+                }
+
                 this.finishWinBattle(deadMsg, gameClear, null);
+            },
+
+            finishDreamCorridorBattle(deadMsg) {
+                const stage = this.state.enemyScale;
+                const stepIndex = (stage - 1) % 6;
+                const steps = ['word', 'collocation', 'word', 'grammar', 'word', 'toeic'];
+                const step = steps[stepIndex];
+
+                const finishSuccess = (label) => {
+                    let msg = `승리!<br>${label} 성공.`;
+                    if (deadMsg) msg += `<br><br>${deadMsg}`;
+                    this.openInfoModal('꿈의회랑', msg, () => this.toMenu());
+                };
+
+                const fail = (label) => this.failDreamCorridorRun(`${label}에서 오답이 발생해 꿈의회랑이 종료되었습니다.`);
+
+                if (step === 'word') {
+                    this.startQuiz(success => {
+                        if (success) finishSuccess('단어 퀴즈');
+                        else fail('단어 퀴즈');
+                    });
+                    return;
+                }
+
+                if (step === 'collocation') {
+                    this.startCollocationQuiz(success => {
+                        if (success) finishSuccess('숙어 퀴즈');
+                        else fail('숙어 퀴즈');
+                    });
+                    return;
+                }
+
+                if (step === 'grammar') {
+                    const q = this.getRandomGrammarQuiz();
+                    if (!q) {
+                        finishSuccess('문법 퀴즈');
+                        return;
+                    }
+                    this.startGrammarQuiz(q,
+                        () => finishSuccess('문법 퀴즈'),
+                        () => fail('문법 퀴즈')
+                    );
+                    return;
+                }
+
+                this.startToeicPractice({
+                    ignoreSessionLimit: true,
+                    suppressDate: true,
+                    lockExit: true,
+                    countHiddenUnlock: false,
+                    countMonthly: false,
+                    onComplete: () => finishSuccess('실전마법연습'),
+                    onFailure: () => fail('실전마법연습')
+                });
+            },
+
+            failDreamCorridorRun(message) {
+                this.global.hiddenStudyReady = false;
+                this.global.hiddenStudyPracticeCount = 0;
+                this.saveStudyProgress();
+                this.saveGlobalData();
+                Storage.remove(Storage.keys.SAVE);
+                this.openInfoModal('꿈의회랑 종료', message, () => this.toTitle());
             },
 
             finishWinBattle(deadMsg, gameClear, quizResult) {
@@ -3157,6 +3501,10 @@
                         }
                     }
 
+                    if (this.state.gameType === 'challenge') {
+                        this.incrementMonthlyMissionProgress('challenge3', 1);
+                    }
+
                     // Transcendence Ticket Logic (On Clear)
                     if (this.state.gameType === 'challenge' || (this.state.mode !== 'origin' && this.checkAllBonusUnlocked())) {
                         this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
@@ -3172,7 +3520,7 @@
 
                     // Unlock Bonus Card
                     let newCard = null;
-                    let lockedBonus = BONUS_CARDS.filter(c => !this.global.unlocked_bonus_cards.includes(c.id));
+                    let lockedBonus = this.getStandardBonusCards().filter(c => !this.global.unlocked_bonus_cards.includes(c.id));
                     if (lockedBonus.length > 0) {
                         let pick = lockedBonus[Math.floor(Math.random() * lockedBonus.length)];
                         this.global.unlocked_bonus_cards.push(pick.id);
@@ -3348,6 +3696,14 @@
                 this.state.activeSageBlessing = [];
 
                 let deadMsg = this.handlePermadeath(this.battle.players);
+                if (this.state.mode === 'dream_corridor') {
+                    let msg = "전투에서 패배해 꿈의회랑 런이 종료되었습니다.";
+                    if (deadMsg) msg += `<br><br>${deadMsg}`;
+                    if (transMsg) msg += transMsg;
+                    this.failDreamCorridorRun(msg);
+                    return;
+                }
+
                 let msg = "패배...";
                 if (deadMsg) msg += "<br><br>" + deadMsg;
                 if (transMsg) msg += transMsg;
@@ -3355,7 +3711,7 @@
             },
 
             getEffectiveStats(char, fieldBuffs) {
-                return Logic.calculateStats(char, fieldBuffs, this.state.mode, this.state.artifacts || []);
+                return Logic.calculateStats(char, fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
             },
 
             showBattleStat(side, idx) {
@@ -3371,7 +3727,7 @@
                     return `${name}(${val})`;
                 }).join(', ') || '없음';
 
-                const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || []);
+                const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
 
                 // Use baseStatsWithoutBlessing if available to show Green for blessed stats
                 const getBase = (key, fallback) => {
@@ -3747,48 +4103,80 @@
                 document.getElementById('modal-toeic-menu').classList.add('active');
             },
 
-            resetToeicProgress() {
+            resetToeicProgress(options = {}) {
+                const reset = () => {
+                    this.state.completedToeicSets = [];
+                    this.saveGame(false);
+                    if (!options.silent) {
+                        this.showAlert("초기화되었습니다.");
+                    }
+                };
+
+                if (options.silent) {
+                    reset();
+                    return;
+                }
+
                 this.showDoubleConfirm(
                     "모든 실전 연습 기록을 초기화하시겠습니까?",
                     "정말 초기화하시겠습니까?<br>완료한 문제 세트가 다시 등장하게 됩니다.",
-                    () => {
-                        this.state.completedToeicSets = [];
-                        this.saveGame();
-                        this.showAlert("초기화되었습니다.");
-                    }
+                    reset
                 );
             },
 
-            startToeicPractice() {
-                // Session limit: 1 time per game session
-                if (this.state.toeicPracticeDone) {
+            closeToeicPractice() {
+                const session = this.state.currentToeicSession;
+                if (session && session.options && session.options.lockExit) {
+                    return;
+                }
+                document.getElementById('modal-toeic-practice').classList.remove('active');
+            },
+
+            startToeicPractice(options = {}) {
+                const practiceOptions = {
+                    ignoreSessionLimit: false,
+                    suppressDate: false,
+                    lockExit: false,
+                    countHiddenUnlock: true,
+                    countMonthly: true,
+                    onComplete: null,
+                    onFailure: null,
+                    ...options
+                };
+
+                if (!practiceOptions.ignoreSessionLimit && this.state.toeicPracticeDone) {
                     return this.showAlert("이번 세션에서는 이미 실전 연습을 완료했습니다.\n다음 세션에서 다시 도전해주세요.");
                 }
                 if (!this.state.completedToeicSets) this.state.completedToeicSets = [];
 
-                // Filter available sets
-                const available = TOEIC_DATA.filter(set =>
+                let available = TOEIC_DATA.filter(set =>
                     !this.state.completedToeicSets.includes(set.id) &&
                     set.questions && set.questions.length > 0
                 );
 
                 if (available.length === 0) {
-                    this.showConfirm(
-                        "모든 문제를 학습했습니다!<br>기록을 초기화하고 다시 학습하시겠습니까?",
-                        () => this.resetToeicProgress(),
-                        () => { }
-                    );
-                    return;
+                    if (practiceOptions.lockExit || practiceOptions.ignoreSessionLimit) {
+                        this.resetToeicProgress({ silent: true });
+                        available = TOEIC_DATA.filter(set => set.questions && set.questions.length > 0);
+                    } else {
+                        this.showConfirm(
+                            "모든 문제를 학습했습니다!<br>기록을 초기화하고 다시 학습하시겠습니까?",
+                            () => this.resetToeicProgress(),
+                            () => { }
+                        );
+                        return;
+                    }
                 }
 
-                // Pick random set
+                if (available.length === 0) {
+                    return this.showAlert("실전 연습 데이터를 불러오지 못했습니다.");
+                }
+
+                const hiddenUnlocked = this.registerToeicPracticeAttempt(practiceOptions);
                 const set = available[Math.floor(Math.random() * available.length)];
 
-                // Build expanded question list
                 let expandedQuestions = [];
                 let expandedShuffled = [];
-
-                // All Parts: single pass (Part 5 also 3 questions only)
                 set.questions.forEach(q => {
                     expandedQuestions.push(q);
                     const opts = [...q.options];
@@ -3796,21 +4184,35 @@
                     expandedShuffled.push(opts);
                 });
 
-                // Prepare session
                 this.state.currentToeicSession = {
                     set: set,
                     qIndex: 0,
                     expandedQuestions: expandedQuestions,
                     shuffledOptions: expandedShuffled,
                     results: [],
-                    viewState: 'hub' // 'hub', 'passage', 'question'
+                    viewState: 'hub',
+                    options: practiceOptions
                 };
+
+                const exitBtn = document.getElementById('toeic-exit-btn');
+                if (exitBtn) {
+                    exitBtn.disabled = !!practiceOptions.lockExit;
+                    exitBtn.style.opacity = practiceOptions.lockExit ? '0.4' : '1';
+                    exitBtn.style.pointerEvents = practiceOptions.lockExit ? 'none' : 'auto';
+                }
 
                 document.getElementById('modal-toeic-menu').classList.remove('active');
                 document.getElementById('modal-toeic-practice').classList.add('active');
                 document.getElementById('modal-toeic-practice').classList.remove('is-review');
+                document.getElementById('modal-toeic-practice').classList.remove('is-explanation');
 
                 this.renderToeicQuestion();
+
+                if (hiddenUnlocked) {
+                    setTimeout(() => {
+                        this.showAlert("엔드리스 히든 모드 '꿈의회랑'이 출현했습니다.");
+                    }, 150);
+                }
             },
 
             renderToeicQuestion() {
@@ -3951,6 +4353,7 @@
 
             checkToeicAnswer(btn, selected, correct) {
                 const session = this.state.currentToeicSession;
+                const sessionOptions = session.options || {};
                 const opts = document.getElementById('toeic-options').children;
                 for (let c of opts) c.disabled = true;
 
@@ -3983,6 +4386,19 @@
                     }
                 }
 
+                if (!isCorrect && typeof sessionOptions.onFailure === 'function') {
+                    setTimeout(() => {
+                        session.isAnswering = false;
+                        if (backBtn) backBtn.style.pointerEvents = 'auto';
+                        document.getElementById('modal-toeic-practice').classList.remove('active');
+                        document.getElementById('modal-toeic-result').classList.remove('active');
+                        const onFailure = sessionOptions.onFailure;
+                        this.state.currentToeicSession = null;
+                        onFailure();
+                    }, 800);
+                    return;
+                }
+
                 setTimeout(() => {
                     session.isAnswering = false;
 
@@ -4007,7 +4423,9 @@
             },
 
             finishToeicSession() {
-                const set = this.state.currentToeicSession.set;
+                const session = this.state.currentToeicSession;
+                const set = session.set;
+                const sessionOptions = session.options || {};
 
                 // Mark complete
                 if (!this.state.completedToeicSets.includes(set.id)) {
@@ -4015,7 +4433,9 @@
                 }
 
                 // Mark session done (1 time per session limit)
-                this.state.toeicPracticeDone = true;
+                if (!sessionOptions.ignoreSessionLimit) {
+                    this.state.toeicPracticeDone = true;
+                }
 
                 // Reset Sage Blessing
                 this.state.greatSageBlessingUses = 3;
@@ -4029,14 +4449,32 @@
                     exitBtn.style.pointerEvents = 'none';
                 }
 
-                this.saveGame();
+                this.saveGame(false);
 
                 document.getElementById('modal-toeic-practice').classList.remove('active');
 
-                const results = this.state.currentToeicSession.results || [];
+                const results = session.results || [];
                 const correctCount = results.filter(r => r.isCorrect).length;
                 const total = results.length;
                 const wrongList = results.filter(r => !r.isCorrect);
+
+                if (sessionOptions.suppressDate) {
+                    if (exitBtn) {
+                        exitBtn.disabled = false;
+                        exitBtn.style.opacity = '1';
+                        exitBtn.style.pointerEvents = 'auto';
+                    }
+                    const onComplete = sessionOptions.onComplete;
+                    this.state.currentToeicSession = null;
+                    if (typeof onComplete === 'function') {
+                        onComplete({
+                            correctCount,
+                            total,
+                            wrongList
+                        });
+                    }
+                    return;
+                }
 
                 let msg = `수고하셨습니다!<br>'${set.title}' 학습을 완료했습니다.<br><br>`;
                 msg += `정답률: ${correctCount}/${total} (${total > 0 ? ((correctCount / total) * 100).toFixed(0) : 0}%)<br><br>`;
