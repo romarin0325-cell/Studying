@@ -378,6 +378,10 @@ const BattleRuntime = {
 
             let dmg = val * mult * (100 / (100 + def));
             if (target.buffs.guard) dmg *= 0.5;
+            if (target.buffs.absolute_armor) {
+                dmg *= 0.5;
+                rpg.log(`${target.name} 앱솔루트아머로 피해 감소!`);
+            }
             dmg = Math.floor(dmg);
             target.hp -= dmg;
             if (dmg > 0) {
@@ -419,6 +423,14 @@ const BattleRuntime = {
         },
 
         endEnemyTurn(rpg) {
+            rpg.battle.players.forEach(player => {
+                if (!player || player.isDead || !player.buffs.absolute_armor) return;
+                player.buffs.absolute_armor--;
+                if (player.buffs.absolute_armor <= 0) {
+                    delete player.buffs.absolute_armor;
+                    rpg.log(`${player.name}의 앱솔루트아머 효과가 종료되었습니다.`);
+                }
+            });
             rpg.battle.turn++;
             rpg.battle.enemy.tookDamageThisTurn = false;
             rpg.battle.isNewTurn = true;
@@ -516,6 +528,16 @@ const BattleRuntime = {
             const burnAdd = rpg.hasArtifact('over_flame') ? 2 : 1;
             target.buffs.burn = Math.min((target.buffs.burn || 0) + burnAdd, getStackCap(rpg, 'burn'));
             rpg.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
+        }
+
+        if (
+            source.proto &&
+            source.proto.trait &&
+            source.proto.trait.type === 'guard_stun_double_dmg' &&
+            skill.name === '가드'
+        ) {
+            target.buffs.stun = 1;
+            rpg.log("[특성] 해신포세이돈: 가드와 동시에 적에게 [기절] 부여!");
         }
 
         if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait' && Math.random() < 0.2) {

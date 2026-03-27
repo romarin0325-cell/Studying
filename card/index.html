@@ -1623,6 +1623,7 @@
                 chaosTickets: 0,
                 lastRewardDate: null,
                 pendingTranscendenceCards: [],
+                bonusTranscendenceUnlocked: false,
                 tutoringEventEnabled: true,
                 hiddenStudyReady: false,
                 hiddenStudyPracticeCount: 0,
@@ -1728,6 +1729,42 @@
 
             getHiddenBonusCards() {
                 return BONUS_CARDS.filter(card => card.unlockSource === 'hidden');
+            },
+
+            getCardAppearanceWeight(card) {
+                if (!card) return 1;
+                if (this.state.gameType === 'endless' && (this.state.mode === 'chaos' || this.state.mode === 'draft') && card.grade === 'transcendence') {
+                    return 0.5;
+                }
+                return 1;
+            },
+
+            pickWeightedCard(pool) {
+                if (!Array.isArray(pool) || pool.length === 0) return null;
+                const weighted = pool.map(card => ({ card, weight: this.getCardAppearanceWeight(card) })).filter(item => item.weight > 0);
+                if (weighted.length === 0) return pool[Math.floor(Math.random() * pool.length)];
+                const totalWeight = weighted.reduce((sum, item) => sum + item.weight, 0);
+                let r = Math.random() * totalWeight;
+                for (const item of weighted) {
+                    r -= item.weight;
+                    if (r <= 0) return item.card;
+                }
+                return weighted[weighted.length - 1].card;
+            },
+
+            pickWeightedUniqueCards(pool, count) {
+                if (!Array.isArray(pool) || pool.length === 0 || count <= 0) return [];
+                const source = [...pool];
+                const picks = [];
+                const pickCount = Math.min(count, source.length);
+                for (let i = 0; i < pickCount; i++) {
+                    const picked = this.pickWeightedCard(source);
+                    if (!picked) break;
+                    picks.push(picked);
+                    const idx = source.findIndex(card => card.id === picked.id);
+                    if (idx !== -1) source.splice(idx, 1);
+                }
+                return picks;
             },
 
             getGradeSortValue(grade) {
@@ -2355,8 +2392,7 @@
                         activeEventCards: this.state.activeEventCards
                     });
 
-                    allCards.sort(() => Math.random() - 0.5);
-                    const picks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    const picks = this.pickWeightedUniqueCards(allCards, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
 
                     this.state.chaosPool = picks;
                     this.state.inventory = [...picks];
@@ -2484,9 +2520,17 @@
             spinChaosRoulette() {
                 if ((this.global.chaosTickets || 0) < 1) return this.showAlert("티켓이 부족합니다.");
 
-                let pool = TRANSCENDENCE_CARDS.filter(c => !this.global.pendingTranscendenceCards.includes(c.id));
+                let pool = TRANSCENDENCE_CARDS.filter(c =>
+                    !this.global.pendingTranscendenceCards.includes(c.id) &&
+                    (c.unlockSource !== 'bonus_transcendence' || this.global.bonusTranscendenceUnlocked)
+                );
 
-                if (pool.length === 0) return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
+                if (pool.length === 0) {
+                    if (!this.global.bonusTranscendenceUnlocked) {
+                        return this.showAlert("기본 초월 카드를 모두 보유 중입니다. 보너스초월은 난입 보스 승리 시 10% 확률로 해금됩니다.");
+                    }
+                    return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
+                }
 
                 this.global.chaosTickets--;
                 const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -2737,8 +2781,7 @@
                             activeEventCards: this.state.activeEventCards
                         });
 
-                        allCards.sort(() => Math.random() - 0.5);
-                        const newPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                        const newPicks = this.pickWeightedUniqueCards(allCards, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
 
                         this.state.chaosPool = newPicks;
                         this.state.inventory = [...newPicks];
@@ -3228,7 +3271,7 @@
 
                 let options = [];
                 for (let i = 0; i < 4; i++) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    const pick = this.pickWeightedCard(pool);
                     options.push(pick.id);
                 }
                 this.state.draft.currentOptions = options;
@@ -3338,6 +3381,18 @@
                 this.state.enemyScale++;
                 this.clearPendingEnemySelection();
 
+                const raidBossIds = ['thor', 'ares', 'poseidon'];
+                const bossUnlockSucceeded =
+                    !this.global.bonusTranscendenceUnlocked &&
+                    this.battle.enemy &&
+                    raidBossIds.includes(this.battle.enemy.id) &&
+                    Math.random() < 0.1;
+                if (bossUnlockSucceeded) {
+                    this.global.bonusTranscendenceUnlocked = true;
+                    this.saveGlobalData();
+                    this.log("<b>[해금]</b> 보너스초월 풀이 해금되었습니다! 이제 카오스 룰렛에서 등장합니다.");
+                }
+
                 // Reset Chaos Blessing
                 this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
                 this.state.chaosBuffs = [];
@@ -3368,9 +3423,7 @@
                         // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
                         activeEventCards: this.state.activeEventCards
                     });
-                    allCards.sort(() => Math.random() - 0.5);
-
-                    const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    const nextPicks = this.pickWeightedUniqueCards(allCards, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
                     this.state.chaosPool = nextPicks;
                     this.state.inventory = [...nextPicks];
                 }

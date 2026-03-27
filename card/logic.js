@@ -537,6 +537,11 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult *= eff.mult;
             matched = true;
         }
+        else if (eff.condition === 'turn_lte' && ctx.turn && ctx.turn <= (eff.turn || 1)) {
+            ctx.mult *= eff.mult;
+            matched = true;
+            if (!eff.customLog) ctx.logFn(`[효과] ${eff.turn}턴 이내 조건 충족! 위력 ${eff.mult}배!`);
+        }
         else if (eff.condition === 'target_element') {
             const elements = eff.elements || (eff.element ? [eff.element] : []);
             if (elements.includes(ctx.target.element)) {
@@ -1081,6 +1086,11 @@ const Logic = {
             m.atk += boost;
             m.def += boost;
         }
+        if (trait && trait.type === 'cond_sanctuary_atk_def' && fieldBuffs.some(b => b.name === 'sanctuary')) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.def += boost;
+        }
 
         // Field Buffs (Only apply to Allies)
         if (isPlayer) {
@@ -1301,6 +1311,10 @@ const Logic = {
             if (t.type === 'behemoth_liberated_trait' && Object.keys(target.buffs).length >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 해방된 베히모스: 디버프 3개 이상! 파괴적 일격!");
+            }
+            if (t.type === 'guard_stun_double_dmg' && target.buffs.stun) {
+                dmgBonus += (t.val - 1.0);
+                logFn("[특성] 해신포세이돈: 기절 대상 추가 피해!");
             }
         }
 

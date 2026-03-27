@@ -1028,6 +1028,36 @@ const TRANSCENDENCE_CARDS = [
             { name: '코스믹하모니', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '랜덤 필드버프 생성 (태양/달/스타파우더)', effects: [{ type: 'random_field_buff_lumi' }] },
             { name: '꿈의형태', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '모든 버프를 제거하고 꿈의마법발동.', effects: [{ type: 'dream_form_execute' }] }
         ]
+    },
+    {
+        id: 'trans_thor', name: '뇌신토르', grade: 'transcendence', element: 'light', role: 'dealer', unlockSource: 'bonus_transcendence',
+        stats: { hp: 530, atk: 110, matk: 150, def: 65, mdef: 85 },
+        trait: { type: 'cond_sanctuary_atk_def', val: 100, desc: '성역 상태에서 물리공격력, 방어력 100% 증가' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '묠니르', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
+            { name: '썬더러쉬', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '사용 후 3턴 뒤에 4~8배율 마법공격, 적에게 디바인 1스택 부여', effects: [{ type: 'delayed_random_attack', turns: 3, min: 4.0, max: 8.0 }, { type: 'debuff', id: 'divine', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'trans_ares', name: '투신아레스', grade: 'transcendence', element: 'fire', role: 'dealer', unlockSource: 'bonus_transcendence',
+        stats: { hp: 560, atk: 130, matk: 100, def: 85, mdef: 75 },
+        trait: { type: 'syn_fire_3_atk_boost', val: 100, desc: '덱에 불 3장 이상 시 공격력 100% 증가' },
+        skills: [
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'absolute_armor', duration: 3 }] },
+            { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나, 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
+        ]
+    },
+    {
+        id: 'trans_poseidon', name: '해신포세이돈', grade: 'transcendence', element: 'water', role: 'balancer', unlockSource: 'bonus_transcendence',
+        stats: { hp: 550, atk: 115, matk: 140, def: 80, mdef: 95 },
+        trait: { type: 'guard_stun_double_dmg', val: 2.0, desc: '가드 사용 시 적에게 기절 부여 / 기절 상태의 적에게 대미지 2배' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '트라이던트', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '전투 시작 후 5턴 이내일 때 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'turn_lte', turn: 5, mult: 2.0 }] },
+            { name: '어비스프레셔', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개를 제거하고 대미지 2배', effects: [{ type: 'remove_field_buff_dmg', mult: 2.0 }] }
+        ]
     }
 ];
 
@@ -1067,7 +1097,7 @@ ENEMIES.push(
 const BUFF_NAMES = {
     'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
     'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-    'magic_guard': '매직가드', 'guard': '가드',
+    'magic_guard': '매직가드', 'guard': '가드', 'absolute_armor': '앱솔루트아머',
     'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
     'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
     'goddess_descent': '여신강림', 'destiny_oath': '운명의서약', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
