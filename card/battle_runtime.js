@@ -343,23 +343,14 @@ const BattleRuntime = {
             if (enemy.buffs.weak && skill.type === 'phy') val *= 0.8;
             if (enemy.buffs.silence && skill.type === 'mag') val *= 0.8;
 
-            let def = skill.type === 'phy' ? target.def : target.mdef;
-            let fieldDef = 1.0;
-            battle.fieldBuffs.forEach(fieldBuff => {
-                if (fieldBuff.name === 'star_powder') fieldDef += 0.3;
-                if (fieldBuff.name === 'sanctuary' && skill.type === 'mag') fieldDef += 0.25;
-                if (fieldBuff.name === 'goddess_descent') fieldDef += 0.3;
-            });
-
-            let defMult = 1.0;
-            if (skill.type === 'phy') {
-                if (target.buffs.darkness && target.buffs.corrosion) defMult = 0.6;
-                else if (target.buffs.darkness || target.buffs.corrosion) defMult = 0.8;
-            } else if (target.buffs.curse) {
-                defMult = 0.8;
-            }
-
-            def = Math.floor(def * fieldDef * defMult);
+            const tgtStats = Logic.calculateStats(
+                target,
+                battle.fieldBuffs,
+                rpg.state.mode,
+                rpg.state.artifacts || [],
+                battle.turn
+            );
+            const def = skill.type === 'phy' ? tgtStats.def : tgtStats.mdef;
 
             if (Logic.checkEvasion(target, skill.type, battle.fieldBuffs, rpg.state.mode, rpg.state.artifacts || [], battle.turn)) {
                 rpg.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
