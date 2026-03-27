@@ -21,6 +21,20 @@ function applyStackMap(rpg, target, buffMap) {
     });
 }
 
+const TURN_BUFF_IDS = ['evasion', 'barrier', 'magic_guard', 'guard'];
+
+function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
+    if (!target || !target.buffs) return;
+
+    buffIds.forEach(buffId => {
+        const duration = target.buffs[buffId];
+        if (!duration) return;
+
+        if (duration > 1) target.buffs[buffId] = duration - 1;
+        else delete target.buffs[buffId];
+    });
+}
+
 function buildBattleEnemy(rpg) {
     const baseEnemy = rpg.getCurrentStageEnemyData
         ? rpg.getCurrentStageEnemyData()
@@ -49,7 +63,8 @@ function buildBattleEnemy(rpg) {
         tookDamageThisTurn: false,
         lastHitType: null,
         isHiddenBoss: !!baseEnemy.hiddenBossFor,
-        bonusRewardTickets: baseEnemy.hiddenBossFor ? 3 : 0
+        bonusRewardTickets: baseEnemy.hiddenBossFor ? 3 : 0,
+        bonusTranscendenceReward: baseEnemy.bonusTranscendenceReward || null
     };
 
     if (baseEnemy.id === 'creator_god') {
@@ -245,7 +260,7 @@ const BattleRuntime = {
                 }
             }
 
-            ['evasion', 'barrier', 'magic_guard', 'guard'].forEach(buffId => delete player.buffs[buffId]);
+            tickTurnBuffs(player);
 
             rpg.renderBattleView();
 
@@ -274,6 +289,7 @@ const BattleRuntime = {
             rpg.log("--- 적 턴 ---");
             enemy.def = enemy.baseDef;
             enemy.mdef = enemy.baseMdef;
+            tickTurnBuffs(enemy);
 
             if (enemy.id === 'artificial_demon_god') {
                 delete enemy.buffs.defProtocolPhy;
@@ -643,6 +659,16 @@ const BattleRuntime = {
                 SideEffects.apply(ctx, effect);
             }
         });
+
+        if (
+            source.proto &&
+            source.proto.trait &&
+            source.proto.trait.type === 'guard_stun_double_dmg' &&
+            skill.effects.some(effect => effect.type === 'buff' && effect.id === 'guard')
+        ) {
+            target.buffs.stun = 1;
+            rpg.log(`[특성] ${source.name}: 가드 사용으로 적을 기절시켰다!`);
+        }
 
         if (rpg.battle.activeTraits.includes('syn_water_nature') && skill.name === '문라이트세레나') {
             rpg.log("루미의 특성 발동! 트윙클파티 추가!");

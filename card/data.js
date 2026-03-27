@@ -1031,9 +1031,58 @@ const TRANSCENDENCE_CARDS = [
     }
 ];
 
+const BONUS_TRANSCENDENCE_CARDS = [
+    {
+        id: 'trans_thor', name: '뇌신토르', grade: 'transcendence', element: 'light', role: 'dealer',
+        stats: { hp: 530, atk: 110, matk: 150, def: 65, mdef: 85 },
+        trait: {
+            type: 'cond_sanctuary_atk_def',
+            val: 100,
+            desc: '성역 상태에서 물리공격력, 방어력 100% 증가'
+        },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '묠니르', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
+            {
+                name: '썬더러쉬', type: 'mag', tier: 3, cost: 30, val: 4.0,
+                desc: '사용 후 3턴 뒤에 4~8배율 마법공격, 적에게 디바인 1스택 부여',
+                effects: [{ type: 'delayed_random_attack', turns: 3, min: 4.0, max: 8.0 }, { type: 'debuff', id: 'divine', stack: 1 }]
+            }
+        ]
+    },
+    {
+        id: 'trans_ares', name: '투신아레스', grade: 'transcendence', element: 'fire', role: 'dealer',
+        stats: { hp: 560, atk: 130, matk: 100, def: 85, mdef: 75 },
+        trait: {
+            type: 'syn_fire_3_atk_boost',
+            val: 100,
+            desc: '덱에 불 3장 이상 시 공격력 100% 증가'
+        },
+        skills: [
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나, 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
+        ]
+    },
+    {
+        id: 'trans_poseidon', name: '해신포세이돈', grade: 'transcendence', element: 'water', role: 'balancer',
+        stats: { hp: 550, atk: 115, matk: 140, def: 80, mdef: 95 },
+        trait: {
+            type: 'guard_stun_double_dmg',
+            val: 2.0,
+            desc: '가드 사용 시 적에게 기절 부여 / 기절 상태의 적에게 대미지 2배'
+        },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '트라이던트', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '전투 시작 후 5턴 이내일 때 대미지 2배', effects: [{ type: 'dmg_boost_turn_limit', maxTurn: 5, mult: 2.0 }] },
+            { name: '어비스프레셔', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개를 제거하고 대미지 2배', effects: [{ type: 'remove_field_buff_dmg', mult: 2.0 }] }
+        ]
+    }
+];
+
 ENEMIES.push(
     {
-        id: 'thor', name: '뇌신 토르', element: 'light', hiddenBossFor: 'iris_curse',
+        id: 'thor', name: '뇌신 토르', element: 'light', hiddenBossFor: 'iris_curse', bonusTranscendenceReward: 'trans_thor',
         stats: { hp: 900, atk: 100, matk: 50, def: 100, mdef: 50 },
         skills: [
             { name: '묠니르', type: 'mag', rate: 0.2, val: 2.0, desc: '마법공격 2배율', effects: [] },
@@ -1044,7 +1093,7 @@ ENEMIES.push(
         ]
     },
     {
-        id: 'poseidon', name: '해신 포세이돈', element: 'water', hiddenBossFor: 'pharaoh',
+        id: 'poseidon', name: '해신 포세이돈', element: 'water', hiddenBossFor: 'pharaoh', bonusTranscendenceReward: 'trans_poseidon',
         stats: { hp: 1100, atk: 100, matk: 80, def: 80, mdef: 100 },
         skills: [
             { name: '트라이던트', type: 'phy', rate: 0.2, val: 2.0, desc: '물리공격 2배율', effects: [] },
@@ -1054,7 +1103,7 @@ ENEMIES.push(
         ]
     },
     {
-        id: 'ares', name: '투신 아레스', element: 'fire', hiddenBossFor: 'demon_god',
+        id: 'ares', name: '투신 아레스', element: 'fire', hiddenBossFor: 'demon_god', bonusTranscendenceReward: 'trans_ares',
         stats: { hp: 1500, atk: 120, matk: 120, def: 100, mdef: 100 },
         skills: [
             { name: '스피어레인', type: 'mag', rate: 0.2, val: 2.0, desc: '마법공격 2배율', effects: [] },
