@@ -504,6 +504,43 @@
             color: #ddd;
         }
 
+        .bonus-preset-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin: 0 0 10px 0;
+        }
+
+        .bonus-preset-btn {
+            padding: 8px 6px;
+            border: 1px solid #4fc3f7;
+            border-radius: 8px;
+            background: #17202a;
+            color: #b3e5fc;
+            cursor: pointer;
+            font-size: 0.82rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bonus-preset-btn span {
+            font-size: 0.72rem;
+            color: #81d4fa;
+        }
+
+        .bonus-preset-btn.is-active {
+            border-color: #ffd54f;
+            background: #3a2f12;
+            color: #fff8e1;
+        }
+
+        .bonus-preset-btn.is-active span {
+            color: #ffe082;
+        }
+
         .title-loading {
             width: 100%;
             max-width: 320px;
@@ -912,7 +949,9 @@
             <p style="font-size:0.85rem; color:#aaa; margin:0 0 6px 0;">
                 기본 카드는 항상 포함됩니다. 체크된 보너스 카드는 이번 런의 랜덤 풀에서 비활성화됩니다.
             </p>
-            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">활성 0 / 0</p>
+            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0</p>
+            <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
+            <p id="bonus-pool-preset-status" style="font-size:0.78rem; color:#b3e5fc; margin:0 0 8px 0;">다음 런 적용 세팅: 1</p>
             <div id="bonus-pool-editor-list" class="modal-scroll"></div>
             <button class="menu-btn" onclick="RPG.enableAllBonusPoolCards()"
                 style="margin-bottom:8px; border-color:#66bb6a; color:#66bb6a;">모두 활성화</button>
@@ -1619,10 +1658,13 @@
             global: {
                 unlocked_modes: ['origin'],
                 unlocked_bonus_cards: [],
+                unlocked_bonus_transcendence_cards: [],
                 achievements: { origin: false },
                 chaosTickets: 0,
                 lastRewardDate: null,
                 pendingTranscendenceCards: [],
+                bonusPoolPresets: [null, null, null],
+                activeBonusPoolPresetIndex: 0,
                 tutoringEventEnabled: true,
                 hiddenStudyReady: false,
                 hiddenStudyPracticeCount: 0,
@@ -1717,6 +1759,7 @@
                 if (data) {
                     this.global = { ...this.global, ...data };
                 }
+                this.ensureBonusPoolPresetState();
             },
             saveGlobalData() {
                 Storage.save(Storage.keys.GLOBAL, this.global);
@@ -1957,6 +2000,14 @@
                 return BONUS_CARDS.filter(card => unlocked.has(card.id));
             },
 
+            getUnlockedBonusTranscendenceCards() {
+                const unlocked = new Set(this.global.unlocked_bonus_transcendence_cards || []);
+                const bonusTranscendenceCards = typeof BONUS_TRANSCENDENCE_CARDS !== 'undefined'
+                    ? BONUS_TRANSCENDENCE_CARDS
+                    : [];
+                return bonusTranscendenceCards.filter(card => unlocked.has(card.id));
+            },
+
             normalizeActiveBonusPoolIds(ids) {
                 const unlockedIds = this.getUnlockedBonusCards().map(card => card.id);
                 if (unlockedIds.length === 0) return [];
@@ -1970,8 +2021,147 @@
                 return normalized;
             },
 
+            ensureBonusPoolPresetState() {
+                const maxPresets = GAME_CONSTANTS.MAX_BONUS_POOL_PRESETS || 3;
+                const presets = Array.isArray(this.global.bonusPoolPresets)
+                    ? this.global.bonusPoolPresets.slice(0, maxPresets)
+                    : [];
+
+                while (presets.length < maxPresets) {
+                    presets.push(null);
+                }
+
+                this.global.bonusPoolPresets = presets.map(preset => {
+                    if (!Array.isArray(preset)) return null;
+                    const deduped = [];
+                    preset.forEach(id => {
+                        if (!deduped.includes(id)) deduped.push(id);
+                    });
+                    return deduped;
+                });
+
+                const activeIndex = Number.isInteger(this.global.activeBonusPoolPresetIndex)
+                    ? this.global.activeBonusPoolPresetIndex
+                    : 0;
+                this.global.activeBonusPoolPresetIndex = Math.min(maxPresets - 1, Math.max(0, activeIndex));
+
+                if (!Array.isArray(this.global.unlocked_bonus_transcendence_cards)) {
+                    this.global.unlocked_bonus_transcendence_cards = [];
+                }
+            },
+
+            getActiveBonusPoolPresetIndex() {
+                this.ensureBonusPoolPresetState();
+                return this.global.activeBonusPoolPresetIndex;
+            },
+
+            getBonusPoolPresetIds(index = this.getActiveBonusPoolPresetIndex()) {
+                this.ensureBonusPoolPresetState();
+                return this.normalizeActiveBonusPoolIds(this.global.bonusPoolPresets[index]);
+            },
+
+            syncPendingActiveBonusPoolIds() {
+                this.pendingActiveBonusPoolIds = [...this.getBonusPoolPresetIds()];
+            },
+
+            persistPendingActiveBonusPoolIds() {
+                this.ensureBonusPoolPresetState();
+                const activeIndex = this.getActiveBonusPoolPresetIndex();
+                const normalizedIds = this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds);
+                this.global.bonusPoolPresets[activeIndex] = [...normalizedIds];
+                this.pendingActiveBonusPoolIds = [...normalizedIds];
+                this.saveGlobalData();
+            },
+
+            selectBonusPoolPreset(index) {
+                this.ensureBonusPoolPresetState();
+                if (index < 0 || index >= this.global.bonusPoolPresets.length) return;
+
+                this.global.activeBonusPoolPresetIndex = index;
+                this.syncPendingActiveBonusPoolIds();
+                this.saveGlobalData();
+                this.renderBonusPoolEditor();
+                this.updateBonusPoolEditorButton();
+            },
+
+            renderBonusPoolPresetButtons() {
+                const container = document.getElementById('bonus-pool-preset-list');
+                if (!container) return;
+
+                this.ensureBonusPoolPresetState();
+                const activeIndex = this.getActiveBonusPoolPresetIndex();
+                const total = this.getUnlockedBonusCards().length;
+                container.innerHTML = '';
+
+                this.global.bonusPoolPresets.forEach((preset, index) => {
+                    const btn = document.createElement('button');
+                    const activeCount = this.getBonusPoolPresetIds(index).length;
+                    btn.type = 'button';
+                    btn.className = `bonus-preset-btn${index === activeIndex ? ' is-active' : ''}`;
+                    btn.innerHTML = `세팅 ${index + 1}<span>${activeCount}/${total}</span>`;
+                    btn.onclick = () => this.selectBonusPoolPreset(index);
+                    container.appendChild(btn);
+                });
+            },
+
+            buildChaosRoulettePool() {
+                return GameUtils.buildTranscendencePool(this.global, {
+                    excludeIds: this.global.pendingTranscendenceCards || []
+                });
+            },
+
+            tryUnlockBonusTranscendence() {
+                const enemy = this.battle ? this.battle.enemy : null;
+                const rewardId = enemy ? enemy.bonusTranscendenceReward : null;
+                if (!rewardId) return '';
+
+                this.ensureBonusPoolPresetState();
+                if (this.global.unlocked_bonus_transcendence_cards.includes(rewardId)) return '';
+                if (Math.random() >= 0.1) return '';
+
+                this.global.unlocked_bonus_transcendence_cards.push(rewardId);
+                this.saveGlobalData();
+
+                const unlockedCard = this.getCardData(rewardId);
+                if (!unlockedCard) return '<b>[보너스초월]</b> 새로운 초월 카드가 카오스 룰렛에 추가되었습니다!';
+                return `<b>[보너스초월]</b> ${unlockedCard.name}이(가) 카오스 룰렛에 해금되었습니다!`;
+            },
+
+            isWeightedTranscendenceRunMode() {
+                return this.state.gameType === 'endless' && ['chaos', 'draft'].includes(this.state.mode);
+            },
+
+            drawRunPoolCards(pool, count, options = {}) {
+                if (!Array.isArray(pool) || pool.length === 0 || count <= 0) return [];
+
+                if (this.isWeightedTranscendenceRunMode()) {
+                    return GameUtils.drawWeightedCards(
+                        pool,
+                        count,
+                        card => (card.grade === 'transcendence' ? 0.5 : 1.0),
+                        options
+                    );
+                }
+
+                if (options.allowDuplicates) {
+                    const picks = [];
+                    for (let i = 0; i < count; i++) {
+                        picks.push(pool[Math.floor(Math.random() * pool.length)]);
+                    }
+                    return picks;
+                }
+
+                return [...pool]
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, count);
+            },
+
+            buildChaosPoolCardIds(pool) {
+                return this.drawRunPoolCards(pool, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(card => card.id);
+            },
+
             resetPendingActiveBonusPoolIds() {
-                this.pendingActiveBonusPoolIds = this.normalizeActiveBonusPoolIds();
+                this.syncPendingActiveBonusPoolIds();
                 this.updateBonusPoolEditorButton();
             },
 
@@ -1979,8 +2169,10 @@
                 const btn = document.getElementById('btn-bonus-pool-editor');
                 if (!btn) return;
 
+                this.ensureBonusPoolPresetState();
                 const total = this.getUnlockedBonusCards().length;
-                const active = this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds).length;
+                const active = this.getBonusPoolPresetIds().length;
+                const presetNo = this.getActiveBonusPoolPresetIndex() + 1;
                 const subText = total > 0
                     ? `이번 런 활성 ${active}/${total}장`
                     : '해금된 보너스 카드가 아직 없습니다';
@@ -2062,12 +2254,106 @@
                 this.updateBonusPoolEditorButton();
             },
 
+            updateBonusPoolEditorButton() {
+                const btn = document.getElementById('btn-bonus-pool-editor');
+                if (!btn) return;
+
+                this.ensureBonusPoolPresetState();
+                const total = this.getUnlockedBonusCards().length;
+                const active = this.getBonusPoolPresetIds().length;
+                const presetNo = this.getActiveBonusPoolPresetIndex() + 1;
+                const subText = total > 0
+                    ? `세팅 ${presetNo} 적용중 · 활성 ${active}/${total}`
+                    : '해금된 보너스 카드가 없습니다';
+
+                btn.innerHTML = `덱 편집<br><span style="font-size:0.8rem; color:#b3e5fc;">${subText}</span>`;
+            },
+
+            openBonusPoolEditor() {
+                this.syncPendingActiveBonusPoolIds();
+                this.renderBonusPoolEditor();
+                document.getElementById('modal-bonus-pool-editor').classList.add('active');
+            },
+
+            renderBonusPoolEditor() {
+                const list = document.getElementById('bonus-pool-editor-list');
+                const summary = document.getElementById('bonus-pool-editor-summary');
+                const presetStatus = document.getElementById('bonus-pool-preset-status');
+                const cards = this.sortCardDataByGrade(this.getUnlockedBonusCards());
+                const activeIds = new Set(this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds));
+                const activePresetIndex = this.getActiveBonusPoolPresetIndex();
+
+                this.pendingActiveBonusPoolIds = [...activeIds];
+                this.renderBonusPoolPresetButtons();
+                list.innerHTML = "";
+
+                if (presetStatus) {
+                    presetStatus.innerText = `다음 런 적용 세팅: ${activePresetIndex + 1}`;
+                }
+
+                if (cards.length === 0) {
+                    summary.innerText = '해금된 보너스 카드가 없습니다.';
+                    list.innerHTML = '<div style="padding:12px; border:1px solid #444; border-radius:8px; background:#2a2a2a; color:#aaa; font-size:0.85rem;">아직 해금된 보너스 카드가 없습니다.</div>';
+                    return;
+                }
+
+                summary.innerText = `세팅 ${activePresetIndex + 1} · 활성 ${activeIds.size} / ${cards.length}`;
+
+                const grid = document.createElement('div');
+                grid.className = 'bonus-pool-grid';
+
+                cards.forEach(card => {
+                    const isActive = activeIds.has(card.id);
+                    const item = document.createElement('label');
+                    item.className = `bonus-pool-item${isActive ? '' : ' is-disabled'}`;
+                    item.innerHTML = `
+                        <div class="portrait"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
+                        <div class="bonus-pool-name">${card.name}</div>
+                        <div class="bonus-pool-grade">${card.grade.toUpperCase()} / ${card.role}</div>
+                        <div class="bonus-pool-toggle">
+                            <input type="checkbox" ${isActive ? 'checked' : ''}>
+                            <span>사용</span>
+                        </div>
+                    `;
+
+                    const checkbox = item.querySelector('input');
+                    checkbox.addEventListener('change', () => {
+                        this.setPendingBonusCardActive(card.id, checkbox.checked);
+                    });
+
+                    grid.appendChild(item);
+                });
+
+                list.appendChild(grid);
+            },
+
+            setPendingBonusCardActive(cardId, isActive) {
+                let ids = this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds);
+                if (isActive) {
+                    if (!ids.includes(cardId)) ids.push(cardId);
+                } else {
+                    ids = ids.filter(id => id !== cardId);
+                }
+                this.pendingActiveBonusPoolIds = ids;
+                this.persistPendingActiveBonusPoolIds();
+                this.renderBonusPoolEditor();
+                this.updateBonusPoolEditorButton();
+            },
+
+            enableAllBonusPoolCards() {
+                this.pendingActiveBonusPoolIds = this.normalizeActiveBonusPoolIds();
+                this.persistPendingActiveBonusPoolIds();
+                this.renderBonusPoolEditor();
+                this.updateBonusPoolEditorButton();
+            },
+
             getMissingRequiredData() {
                 const requiredData = [
                     { name: 'CARDS', ref: typeof CARDS !== 'undefined' ? CARDS : null },
                     { name: 'ENEMIES', ref: typeof ENEMIES !== 'undefined' ? ENEMIES : null },
                     { name: 'BONUS_CARDS', ref: typeof BONUS_CARDS !== 'undefined' ? BONUS_CARDS : null },
                     { name: 'TRANSCENDENCE_CARDS', ref: typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : null },
+                    { name: 'BONUS_TRANSCENDENCE_CARDS', ref: typeof BONUS_TRANSCENDENCE_CARDS !== 'undefined' ? BONUS_TRANSCENDENCE_CARDS : null },
                     { name: 'VOCAB_DATA', ref: typeof VOCAB_DATA !== 'undefined' ? VOCAB_DATA : null },
                     { name: 'COLLOCATION_DATA', ref: typeof COLLOCATION_DATA !== 'undefined' ? COLLOCATION_DATA : null },
                     { name: 'GRAMMAR_DATA', ref: typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA : null },
@@ -2355,8 +2641,7 @@
                         activeEventCards: this.state.activeEventCards
                     });
 
-                    allCards.sort(() => Math.random() - 0.5);
-                    const picks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    const picks = this.buildChaosPoolCardIds(allCards);
 
                     this.state.chaosPool = picks;
                     this.state.inventory = [...picks];
@@ -2484,7 +2769,7 @@
             spinChaosRoulette() {
                 if ((this.global.chaosTickets || 0) < 1) return this.showAlert("티켓이 부족합니다.");
 
-                let pool = TRANSCENDENCE_CARDS.filter(c => !this.global.pendingTranscendenceCards.includes(c.id));
+                let pool = this.buildChaosRoulettePool();
 
                 if (pool.length === 0) return this.showAlert("이미 모든 초월 카드를 보유하고 있습니다. (다음 오리진 게임에서 사용하세요)");
 
@@ -2737,8 +3022,7 @@
                             activeEventCards: this.state.activeEventCards
                         });
 
-                        allCards.sort(() => Math.random() - 0.5);
-                        const newPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                        const newPicks = this.buildChaosPoolCardIds(allCards);
 
                         this.state.chaosPool = newPicks;
                         this.state.inventory = [...newPicks];
@@ -3226,11 +3510,7 @@
                     activeEventCards: this.state.activeEventCards
                 });
 
-                let options = [];
-                for (let i = 0; i < 4; i++) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    options.push(pick.id);
-                }
+                const options = this.drawRunPoolCards(pool, 4, { allowDuplicates: true }).map(card => card.id);
                 this.state.draft.currentOptions = options;
             },
 
@@ -3337,6 +3617,10 @@
                 this.state.tickets += reward;
                 this.state.enemyScale++;
                 this.clearPendingEnemySelection();
+                const bonusTransUnlockMsg = this.tryUnlockBonusTranscendence();
+                if (bonusTransUnlockMsg) {
+                    deadMsg = deadMsg ? `${deadMsg}<br>${bonusTransUnlockMsg}` : bonusTransUnlockMsg;
+                }
 
                 // Reset Chaos Blessing
                 this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
@@ -3368,9 +3652,7 @@
                         // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
                         activeEventCards: this.state.activeEventCards
                     });
-                    allCards.sort(() => Math.random() - 0.5);
-
-                    const nextPicks = allCards.slice(0, GAME_CONSTANTS.CHAOS_POOL_SIZE).map(c => c.id);
+                    const nextPicks = this.buildChaosPoolCardIds(allCards);
                     this.state.chaosPool = nextPicks;
                     this.state.inventory = [...nextPicks];
                 }
