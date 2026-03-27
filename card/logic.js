@@ -1813,7 +1813,7 @@ const Logic = {
             const pick = t.pool[Math.floor(Math.random() * t.pool.length)];
             const stack = t.stack || 1;
             result.attackerDebuffs[pick] = (result.attackerDebuffs[pick] || 0) + stack;
-            logFn(`[특성] ${victim.name}: 피격 반응! 적에게 [${getBuffName(pick)}] ${stack > 1 ? `${stack}스택 ` : ''}부여.`);
+            logFn(`[특성] ${victim.name} 해파리독! 적에게 [${getBuffName(pick)}] ${stack > 1 ? `${stack}스택 ` : ''}부여.`);
         }
 
         return result;

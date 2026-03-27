@@ -17,7 +17,15 @@ function applyStackMap(rpg, target, buffMap) {
     Object.keys(buffMap).forEach(buffId => {
         const cap = getStackCap(rpg, buffId);
         const nextValue = (target.buffs[buffId] || 0) + buffMap[buffId];
-        target.buffs[buffId] = cap === null ? nextValue : Math.min(nextValue, cap);
+
+        if (cap === null) {
+            // Non-stack debuffs/buffs are represented as presence flags.
+            target.buffs[buffId] = buffMap[buffId] > 0 ? 1 : 0;
+            if (target.buffs[buffId] <= 0) delete target.buffs[buffId];
+            return;
+        }
+
+        target.buffs[buffId] = Math.min(nextValue, cap);
     });
 }
 

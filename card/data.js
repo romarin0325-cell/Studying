@@ -657,7 +657,7 @@ const BONUS_CARDS = [
     {
         id: 'jellyfish_princess', name: '젤리피쉬프린세스', grade: 'epic', element: 'water', role: 'debuffer',
         stats: { hp: 410, atk: 80, matk: 85, def: 75, mdef: 70 },
-        trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: '피격 시 부식/약화/침묵/저주/기절 중 랜덤 부여' },
+        trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: '해파리독: 피격 시 부식/약화/침묵/저주/기절 중 랜덤 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '오로라텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
