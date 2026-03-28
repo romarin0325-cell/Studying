@@ -103,6 +103,7 @@ const GAME_CONSTANTS = {
     MAX_ARTIFACTS: 4,
     SAGE_BLESSING_PICK_COUNT: 12,
     DEFAULT_BLESSING_USES: 3,
+    MAX_BONUS_POOL_PRESETS: 3,
 
     // Costs
     COSTS: {
@@ -232,6 +233,77 @@ const ARTIFACT_LIST = [
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
 const GameUtils = {
+    getAllTranscendenceCards() {
+        return [
+            ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : []),
+            ...(typeof BONUS_TRANSCENDENCE_CARDS !== 'undefined' ? BONUS_TRANSCENDENCE_CARDS : [])
+        ];
+    },
+
+    getUnlockedBonusTranscendenceCards(globalData) {
+        const unlocked = new Set(
+            globalData && Array.isArray(globalData.unlocked_bonus_transcendence_cards)
+                ? globalData.unlocked_bonus_transcendence_cards
+                : []
+        );
+        return (typeof BONUS_TRANSCENDENCE_CARDS !== 'undefined' ? BONUS_TRANSCENDENCE_CARDS : [])
+            .filter(card => unlocked.has(card.id));
+    },
+
+    buildTranscendencePool(globalData, options = {}) {
+        let pool = [...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : [])];
+
+        if (options.includeUnlockedBonus !== false) {
+            pool = pool.concat(this.getUnlockedBonusTranscendenceCards(globalData));
+        }
+
+        if (Array.isArray(options.excludeIds) && options.excludeIds.length > 0) {
+            const excluded = new Set(options.excludeIds);
+            pool = pool.filter(card => !excluded.has(card.id));
+        }
+
+        return pool;
+    },
+
+    drawWeightedCards(pool, count, weightFn = () => 1, options = {}) {
+        if (!Array.isArray(pool) || pool.length === 0 || count <= 0) return [];
+
+        const allowDuplicates = !!options.allowDuplicates;
+        const source = allowDuplicates ? pool : [...pool];
+        const picks = [];
+
+        while (picks.length < count && source.length > 0) {
+            const totalWeight = source.reduce((sum, card) => {
+                const weight = Number(weightFn(card));
+                return sum + (Number.isFinite(weight) && weight > 0 ? weight : 0);
+            }, 0);
+
+            if (totalWeight <= 0) break;
+
+            let roll = Math.random() * totalWeight;
+            let pickedIndex = source.length - 1;
+
+            for (let i = 0; i < source.length; i++) {
+                const weight = Number(weightFn(source[i]));
+                const safeWeight = Number.isFinite(weight) && weight > 0 ? weight : 0;
+                roll -= safeWeight;
+                if (roll < 0) {
+                    pickedIndex = i;
+                    break;
+                }
+            }
+
+            const pickedCard = source[pickedIndex];
+            picks.push(pickedCard);
+
+            if (!allowDuplicates) {
+                source.splice(pickedIndex, 1);
+            }
+        }
+
+        return picks;
+    },
+
     /**
      * Get all collectible cards in lookup order.
      * @returns {Array}
@@ -240,7 +312,7 @@ const GameUtils = {
         return [
             ...CARDS,
             ...BONUS_CARDS,
-            ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : [])
+            ...this.getAllTranscendenceCards()
         ];
     },
 
@@ -335,7 +407,7 @@ const GameUtils = {
 
         // Add transcendence cards if requested
         if (options.includeTranscendence && options.activeTranscendenceCards && options.activeTranscendenceCards.length > 0) {
-            const transObjs = TRANSCENDENCE_CARDS.filter(c => options.activeTranscendenceCards.includes(c.id));
+            const transObjs = this.getAllTranscendenceCards().filter(c => options.activeTranscendenceCards.includes(c.id));
             pool = pool.concat(transObjs);
         }
 
@@ -673,6 +745,18 @@ const DAMAGE_EFFECT_HANDLERS = {
         }
     }
 };
+
+const DAMAGE_EFFECT_HANDLERS_EXTRA = {
+    'dmg_boost_turn_limit': (ctx, eff) => {
+        const maxTurn = eff.maxTurn || eff.turn || 0;
+        if (ctx.turn && maxTurn > 0 && ctx.turn <= maxTurn) {
+            ctx.mult *= eff.mult;
+            ctx.logFn(`[孖ｹ・ｱ] ${maxTurn}奓ｴ ・､﨑・ ・・･ ${eff.mult}・ｰ!`);
+        }
+    }
+};
+
+Object.assign(DAMAGE_EFFECT_HANDLERS, DAMAGE_EFFECT_HANDLERS_EXTRA);
 
 const SideEffects = {
     handlers: {
@@ -1081,6 +1165,11 @@ const Logic = {
             m.atk += boost;
             m.def += boost;
         }
+        if (trait && trait.type === 'cond_sanctuary_atk_def' && fieldBuffs.some(b => b.name === 'sanctuary')) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.def += boost;
+        }
 
         // Field Buffs (Only apply to Allies)
         if (isPlayer) {
@@ -1304,6 +1393,11 @@ const Logic = {
             }
         }
 
+        if (t && t.type === 'guard_stun_double_dmg' && target.buffs['stun']) {
+            dmgBonus += (t.val - 1.0);
+            logFn("[孖ｹ・ｱ] ・ｰ・・ ・・乱・・・・ｸ・ 2・ｰ!");
+        }
+
         if (t && t.type === 'burn_stack_phy_pen' && skill.type === 'phy' && target.buffs['burn']) {
             const ignoreRate = target.buffs['burn'] * (t.val || 0);
             if (ignoreRate > 0) {
@@ -1482,6 +1576,7 @@ const Logic = {
             else if (t.type === 'syn_silver_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'night_rabbit'])) active = true;
             else if (t.type === 'syn_water_3_atk_matk' && deckCtx.countElement('water') >= 3) active = true;
             else if (t.type === 'syn_fire_3_crit_burn' && deckCtx.countElement('fire') >= 3) active = true;
+            else if (t.type === 'syn_fire_3_atk_boost' && deckCtx.countElement('fire') >= 3) active = true;
             else if (t.type === 'syn_dark_3_matk_boost' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
@@ -1502,6 +1597,7 @@ const Logic = {
                 if (t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
                 if (t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
                 if (t.type === 'syn_fire_3_crit_burn') p.baseCrit += t.val;
+                if (t.type === 'syn_fire_3_atk_boost') p.atk *= (1 + t.val / 100);
                 if (t.type === 'syn_dark_3_matk_boost') p.matk *= (1 + t.val / 100);
                 if (t.type === 'syn_dark_full_party_crit') p.baseCrit += t.val;
 

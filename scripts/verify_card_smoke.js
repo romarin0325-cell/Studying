@@ -22,13 +22,35 @@ function run() {
     'openToeicReview()',
     'id="btn-bonus-pool-editor"',
     'id="modal-bonus-pool-editor"',
+    'id="bonus-pool-preset-list"',
     'pendingActiveBonusPoolIds:',
     'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
-    'openBonusPoolEditor()'
+    'openBonusPoolEditor()',
+    'bonusPoolPresets:',
+    'activeBonusPoolPresetIndex:',
+    'buildChaosRoulettePool()',
+    'buildChaosPoolCardIds(pool)',
+    'drawRunPoolCards(pool, count, options = {})'
   ]);
 
-  mustContain(path.join(cardRoot, 'logic.js'), ['const Storage', 'activeBonusPoolIds']);
-  mustContain(path.join(cardRoot, 'data.js'), ['const CARDS']);
+  mustContain(path.join(cardRoot, 'logic.js'), [
+    'const Storage',
+    'activeBonusPoolIds',
+    'MAX_BONUS_POOL_PRESETS',
+    'buildTranscendencePool(globalData, options = {})',
+    'drawWeightedCards(pool, count, weightFn = () => 1, options = {})',
+    'dmg_boost_turn_limit'
+  ]);
+  mustContain(path.join(cardRoot, 'data.js'), [
+    'const CARDS',
+    'const BONUS_TRANSCENDENCE_CARDS = [',
+    "id: 'trans_thor'",
+    "id: 'trans_ares'",
+    "id: 'trans_poseidon'",
+    "bonusTranscendenceReward: 'trans_thor'",
+    "bonusTranscendenceReward: 'trans_ares'",
+    "bonusTranscendenceReward: 'trans_poseidon'"
+  ]);
   mustContain(path.join(cardRoot, 'toeic.js'), ['const TOEIC_DATA']);
 
   console.log('Card smoke verification passed.');
