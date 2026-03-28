@@ -1,7 +1,7 @@
 {
   "scripts": {
     "lint": "node --check card/logic.js && node --check card/data.js && node --check card/toeic.js && node --check card/api.js && node --check card/battle_runtime.js",
-    "test:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_idle_hero_smoke.js",
+    "test:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_remaster_smoke.js && node scripts/verify_idle_hero_smoke.js",
     "verify": "npm run lint && npm run test:smoke"
   },
   "dependencies": {
