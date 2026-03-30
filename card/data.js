@@ -11,8 +11,8 @@ const CARDS = [
         ]
     },
     {
-        id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer',
-        stats: { hp: 510, atk: 115, matk: 130, def: 60, mdef: 60 },
+        id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 510, atk: 115, matk: 135, def: 60, mdef: 60 },
         trait: { type: 'normal_attack_burn_divine', desc: '일반공격시 적에게 작열, 디바인 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
@@ -123,8 +123,8 @@ const CARDS = [
 
     // --- Epic ---
     {
-        id: 'sun_priestess', name: '태양의무녀', grade: 'epic', element: 'nature', role: 'buffer',
-        stats: { hp: 400, atk: 75, matk: 100, def: 65, mdef: 75 },
+        id: 'sun_priestess', name: '태양의무녀', grade: 'epic', element: 'nature', role: 'buffer', unlockSource: 'bonus',
+        stats: { hp: 400, atk: 75, matk: 105, def: 65, mdef: 75 },
         trait: { type: 'death_field_buff_count_dmg', val: 2.0, desc: '사망시 적용중인 필드버프수 x2배율 대미지' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
@@ -245,7 +245,7 @@ const CARDS = [
 
     // --- Rare ---
     {
-        id: 'cloud_sheep', name: '구름양', grade: 'rare', element: 'water', role: 'balancer',
+        id: 'cloud_sheep', name: '구름양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
         stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
         skills: [
@@ -449,7 +449,7 @@ const CARDS = [
     {
         id: 'slime', name: '슬라임', grade: 'normal', element: 'water', role: 'balancer',
         stats: { hp: 340, atk: 60, matk: 60, def: 45, mdef: 45 },
-        trait: { type: 'pos_stat_boost', pos: 1, stat: 'def', val: 30, desc: '중견 배치시 방어 30%증가' },
+        trait: { type: 'slime_synergy_boost', val: 30, desc: '덱에 있는 다른 슬라임 하나당 공격력/방어력 30% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '산성액', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '부식부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
@@ -459,7 +459,7 @@ const CARDS = [
     {
         id: 'mummy', name: '미이라', grade: 'normal', element: 'nature', role: 'balancer',
         stats: { hp: 320, atk: 70, matk: 50, def: 65, mdef: 40 },
-        trait: { type: 'pos_stat_boost', pos: 1, stat: 'mdef', val: 30, desc: '중견 배치시 마방 30%증가' },
+        trait: { type: 'mid_party_mdef_boost', val: 15, desc: '중견 배치시 덱 전체 마법방어력 15% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
@@ -487,7 +487,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'joker', name: '조커', grade: 'normal', element: 'nature', role: 'balancer',
+        id: 'joker', name: '조커', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus',
         stats: { hp: 280, atk: 70, matk: 70, def: 45, mdef: 45 },
         trait: { type: 'joker_wild', desc: '이 카드는 모든 속성, 모든 이름으로 취급' },
         skills: [
@@ -743,7 +743,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '엑셀레이터', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
-            { name: '데스클록', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
+            { name: '데스클록', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
         ]
     },
 
@@ -809,6 +809,16 @@ const BONUS_CARD_EXPANSION = [
             { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '갓킬러', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 빛속성 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'light', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'cure_master', name: '큐어마스터', grade: 'legend', element: 'water', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 510, atk: 120, matk: 100, def: 90, mdef: 80 },
+        trait: { type: 'cure_master_trait', val: 30, desc: '덱에 물 3장 이상 시 마법방어력 50% 증가 / 일반 공격 혹은 피격 시 확률로 스턴 부여' },
+        skills: [
+            { name: '레모네이드', type: 'sup', tier: 3, cost: 30, desc: '필드버프 스타파우더 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '멜트다운', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 기절 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 2.0 }] },
+            { name: '굿나잇키스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
         ]
     },
     {
@@ -1059,7 +1069,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
             desc: '덱에 불 3장 이상 시 공격력 100% 증가'
         },
         skills: [
-            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '앱솔루트아머', type: 'sup', tier: 2, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나, 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'field_buff', id: 'twinkle_party' }] },
             { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
         ]
