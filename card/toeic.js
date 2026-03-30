@@ -2438,5 +2438,214 @@ If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mai
         "answer": "stopped"
       }
     ]
+  }  ,
+  {
+    "id": 51,
+    "type": "part6",
+    "title": "51강 (Part 6) — 인사/채용/지원 관련 테마 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "51-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "particularly",
+          "gradually",
+          "closely",
+          "promptly"
+        ],
+        "answer": "particularly"
+      },
+      {
+        "id": "51-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "unless",
+          "so that",
+          "although",
+          "whereas"
+        ],
+        "answer": "so that"
+      },
+      {
+        "id": "51-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "arrange",
+          "arranged",
+          "arrangement",
+          "arrangements"
+        ],
+        "answer": "arrangements"
+      },
+      {
+        "id": "51-4",
+        "question": "Sentence Insertion \n \n다음 문장은 위 이메일의 어디에 들어가야 가장 자연스럽습니까? \n \nSentence: Please reply by 5 p.m. on Monday, May 4 to indicate which time you prefer.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[2]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Invitation to First-Round Interview — Operations Coordinator Position \n \nDear Ms. Rivera, \n \nThank you for applying for the Operations Coordinator position at Millstone Distribution. We have reviewed your resume and cover letter and were (1) _______ impressed by your experience coordinating shipment records and communicating with outside vendors. We would like to invite you to a first-round interview with our hiring team. The interview will be conducted online and should last about 30 minutes. [1] \n \nInterviews are being scheduled for Tuesday, May 5, 2026. We are currently offering two time slots: 10:00 a.m. and 2:00 p.m. [2] Once your preferred time is confirmed, we will send a calendar invitation, a video meeting link, and brief instructions for joining the session. \n \nBefore the interview, please review the attached job description and be prepared to discuss one example of a time you improved a process or solved an unexpected problem at work. You do not need to prepare a presentation, but it would be helpful to have a few specific results or numbers ready. [3] \n \nIf you are no longer available or wish to withdraw your application, please let us know as soon as possible (2) _______ we can update our records and contact other applicants. [4] If you require any accommodation during the hiring process, please inform us in advance so that we can make the necessary (3) _______ before the interview. \n \nThank you again for your interest in Millstone Distribution. We look forward to hearing from you. \n \nSincerely, \nDana Cole \nRecruiting Coordinator \nMillstone Distribution"
+  },
+  {
+    "id": 52,
+    "type": "part6",
+    "title": "52강 (Part 6) — Business Trip / Reservation / Transportation Change (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "52-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "rebooked",
+          "rebooking",
+          "rebook",
+          "rebooks"
+        ],
+        "answer": "rebooked"
+      },
+      {
+        "id": "52-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "apply",
+          "applies",
+          "applied",
+          "applying"
+        ],
+        "answer": "apply"
+      },
+      {
+        "id": "52-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "if",
+          "though",
+          "unless",
+          "because"
+        ],
+        "answer": "if"
+      },
+      {
+        "id": "52-4",
+        "question": "Sentence Insertion \n \n다음 문장은 위 이메일의 어디에 들어가야 가장 자연스럽습니까? \n \nSentence: Because of the later arrival time, your first meeting with the purchasing team has been moved from 11:30 a.m. to 1:00 p.m.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[1]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Updated Travel Arrangements for the Seoul Client Visit \n \nDear Mr. Han, \n \nBecause of scheduled maintenance on the East Rail line, the 7:15 a.m. train from Busan to Seoul on Thursday, June 18, will not be operating. We have therefore (1) _______ you on the 8:05 a.m. express service, which is expected to arrive at Seoul Station at 10:42 a.m. [1] \n \nYour hotel reservation at the Riverside Hotel has also been adjusted. Since your meeting with Daejin Electronics will end later than originally planned, your checkout date has been changed from Friday, June 19, to Saturday, June 20. [2] The company rate will still (2) _______, so no additional approval is required. \n \nThe car service that was supposed to meet you at the station has been canceled, but the hotel operates a complimentary shuttle every 30 minutes. It departs from Exit 3 and takes about 15 minutes to reach the hotel. [3] \n \nPlease review the attached itinerary carefully and contact me as soon as possible (3) _______ any of the details need to be corrected. Once you confirm the changes, I will send the updated reservation numbers and final schedule. [4] \n \nSincerely, \nElena Park \nCorporate Travel Coordinator"
+  },
+  {
+    "id": 53,
+    "type": "part7",
+    "title": "53강 (Part 7) — Press Release",
+    "questions": [
+      {
+        "id": "53-1",
+        "question": "What is the main purpose of the press release?",
+        "options": [
+          "To announce the opening of a new service center",
+          "To explain how to apply for a maintenance position",
+          "To apologize for a delay in product shipments",
+          "To compare several transportation options in Brookdale"
+        ],
+        "answer": "To announce the opening of a new service center"
+      },
+      {
+        "id": "53-2",
+        "question": "According to the press release, what should customers do if they want to attend the safety workshop?",
+        "options": [
+          "Visit the mall location before April 20",
+          "Reserve a seat online by April 16",
+          "Arrive before 9:00 A.M. on opening day",
+          "Call Priya Nanda directly"
+        ],
+        "answer": "Reserve a seat online by April 16"
+      },
+      {
+        "id": "53-3",
+        "question": "What is indicated about the Brookdale Mall location?",
+        "options": [
+          "It will close before April 20",
+          "It will extend its business hours in April",
+          "It will stop accepting repair drop-offs on April 20",
+          "It will continue offering workshops after April 27"
+        ],
+        "answer": "It will stop accepting repair drop-offs on April 20"
+      },
+      {
+        "id": "53-4",
+        "question": "Why does the press release mention public transportation?",
+        "options": [
+          "To recommend a route to the mall",
+          "To explain why the new location is more convenient",
+          "To announce a partnership with the city",
+          "To warn customers about traffic delays"
+        ],
+        "answer": "To explain why the new location is more convenient"
+      }
+    ],
+    "passage": "Directions: Read the text below and answer the questions. \n \nFOR IMMEDIATE RELEASE \n \nHawthorne Mobility to Open New Downtown Service Center \n \nBROOKDALE — Hawthorne Mobility announced on Tuesday that it will open a new customer service and repair center in downtown Brookdale on April 20. The new location, at 18 Benton Street, will replace the company’s older service desk inside Brookdale Mall, which has handled a growing number of bicycle and scooter maintenance requests over the past two years. \n \nAccording to regional manager Priya Nanda, the downtown site offers more repair space, a larger waiting area, and easier access to public transportation. “We’ve seen steady growth in service appointments, and the new center will allow us to assist customers more efficiently,” Nanda said. \n \nTo mark the opening, Hawthorne Mobility will host a free safety workshop at 11:00 A.M. and guided product demonstrations throughout the afternoon. Customers who wish to attend the workshop should reserve a seat on the company’s Web site by April 16. Walk-in visitors are welcome to tour the facility, but workshop seating will be limited. \n \nBeginning April 20, repair drop-offs will no longer be accepted at the mall location. However, customers may continue picking up completed repairs there until April 27. After that date, all service records and any remaining items will be transferred to the downtown center. Store hours will remain the same: Monday through Saturday, 9:00 A.M. to 6:00 P.M. The first 100 visitors on opening day will receive discount vouchers for accessories or future repairs."
+  },
+  {
+    "id": 54,
+    "type": "part7",
+    "title": "54강 (Part 7) — Instant Message Chain",
+    "questions": [
+      {
+        "id": "54-1",
+        "question": "What is the main purpose of the message chain?",
+        "options": [
+          "To discuss a delay and make alternate arrangements",
+          "To compare prices from two printing vendors",
+          "To cancel a supplier workshop",
+          "To request permission for overtime work"
+        ],
+        "answer": "To discuss a delay and make alternate arrangements"
+      },
+      {
+        "id": "54-2",
+        "question": "Why does Daniel Lee think the vendor’s proposal will work?",
+        "options": [
+          "The packets can be emailed to attendees",
+          "The office is next to the downtown branch",
+          "The number of confirmed attendees is fewer than 40",
+          "The workshop has been postponed until the afternoon"
+        ],
+        "answer": "The number of confirmed attendees is fewer than 40"
+      },
+      {
+        "id": "54-3",
+        "question": "What is indicated about Room Cedar?",
+        "options": [
+          "It is located near the side entrance",
+          "It needs additional seating",
+          "It will not be used for the workshop",
+          "It is being cleaned before noon"
+        ],
+        "answer": "It needs additional seating"
+      },
+      {
+        "id": "54-4",
+        "question": "At 9:22 A.M., what does Daniel most likely mean when he says, \"I’ll update the message on the event app\"?",
+        "options": [
+          "He will change the workshop date",
+          "He will upload the welcome packets",
+          "He will notify attendees about the entrance change",
+          "He will ask attendees to bring their own chairs"
+        ],
+        "answer": "He will notify attendees about the entrance change"
+      }
+    ],
+    "passage": "Directions: Read the text messages below and answer the questions. \n \nOfficeChat Messages \n \n[9:08 A.M.] Mina Cho \nHi, Daniel. I just spoke with the printing vendor. The welcome packets for tomorrow’s supplier workshop won’t arrive until 2:00 p.m. because their delivery truck broke down. \n \n[9:10 A.M.] Daniel Lee \nThat’s a problem. Registration starts at 1:30 p.m. Can they print a smaller batch at their downtown branch and send it earlier? \n \n[9:12 A.M.] Mina Cho \nI asked. They can prepare 40 packets by noon, but someone from our office would need to pick them up. \n \n[9:13 A.M.] Daniel Lee \nThat should work. We only have 35 confirmed attendees so far. Could you send me the branch address? \n \n[9:15 A.M.] Mina Cho \nSure. It’s 214 Wexler Avenue, about ten minutes from here by car. Also, they said the remaining packets will be delivered to the conference center later in the afternoon. \n \n[9:18 A.M.] Daniel Lee \nGreat. I’ll ask Kevin to pick up the first batch before lunch. By the way, did the hotel confirm the extra chairs we requested for Room Cedar? \n \n[9:20 A.M.] Mina Cho \nYes. They’ll add 15 more chairs before 11:00 a.m. But the front desk said we need to use the side entrance tomorrow because the main lobby floor is being polished. \n \n[9:22 A.M.] Daniel Lee \nThanks for letting me know. I’ll update the message on the event app so attendees see the entrance change."
   }
+
 ];

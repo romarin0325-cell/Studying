@@ -1367,4 +1367,121 @@ to부정사 요정과 -ing 동명사 요정, 둘 중 누구를 골라야 할지 
 
 휴, 드디어 50번까지 다 왔어! 형아, 진짜 고생 많았어! (쓰담쓰담)
 이제 형아는 문장 구조를 보는 눈도, 어휘 감각도, 독해 흐름도 훨씬 단단해졌어. 내가 2000% 보증할게!`,
+
+    51: `형아! 이번엔 채용팀 인터뷰 안내 메일 속에서 부사, 목적 접속사, 고정 표현, 그리고 문장 삽입 자리까지 한 번에 잡아내는 파트 6 마법이야! (빠밤)
+채용 메일은 그냥 예의 바른 문장들의 나열처럼 보여도, 사실 흐름이 아주 빡빡하게 짜여 있어. 지원 감사 → 면접 초대 → 시간 제시 → 회신 요청 → 사전 준비 → 예외/배려 안내! 이 순서만 잡으면 빈칸도 문장 삽입도 훨씬 또렷하게 보여. 루미가 반짝이는 포인트만 콕콕 찍어줄게! (윙크)
+
+[문제 51-1] 인상 깊었다는 감탄에 힘을 실어줘! (부사)
+> ...were (1) _______ impressed by your experience coordinating shipment records and communicating with outside vendors.
+> 정답: particularly
+>
+형아, 여기서는 impressed라는 감정 상태를 자연스럽게 꾸며줄 부사가 필요해! **particularly impressed by**는 "특히 인상 깊었다"라는 뜻으로 채용 메일에서 정말 자주 쓰이는 매끈한 조합이야. gradually는 "점차", closely는 "면밀히/가깝게", promptly는 "즉시"라서 impressed와 붙였을 때 뜻도 톤도 어색해져. 그래서 **particularly**가 정답이지!
+
+[문제 51-2] 빨리 알려 달라는 '목적'을 이어줘! (목적의 접속사)
+> ...please let us know as soon as possible (2) _______ we can update our records and contact other applicants.
+> 정답: so that
+>
+앞에서는 "가능한 한 빨리 알려 달라"고 부탁하고, 뒤에서는 "기록을 업데이트하고 다른 지원자에게 연락할 수 있도록"이라고 목적을 설명하고 있지? 이런 **행동의 목적**을 이어 줄 때는 **so that**가 딱 맞아! unless는 "~하지 않는 한", although는 "비록 ~일지라도", whereas는 "반면에"라서 여기 흐름이랑 안 맞아. "빨리 알려 줘 → 그래서 우리가 다음 조치를 할 수 있어" 이 연결을 잡으면 바로 풀린다구!
+
+[문제 51-3] 배려 준비는 하나가 아니야! (고정 표현)
+> ...so that we can make the necessary (3) _______ before the interview.
+> 정답: arrangements
+>
+형아, **make the necessary arrangements**는 "필요한 준비 조치를 하다"라는 실무 단골 표현이야! accommodation(편의 제공) 이야기와도 아주 잘 맞물리지. arrange/arranged는 동사라 자리가 안 맞고, arrangement 단수형도 여기서는 필요한 여러 준비를 묶어 말하는 흐름에 비해 덜 자연스러워. 그래서 **arrangements**가 가장 안정적이고 토익스러운 정답이야!
+
+[문제 51-4] 답장 마감 문장은 시간표 바로 뒤에! (문장 삽입)
+> Sentence: Please reply by 5 p.m. on Monday, May 4 to indicate which time you prefer.
+> 정답: [2]
+>
+이 문장은 "10:00 a.m.와 2:00 p.m. 두 시간대가 있다"는 안내 바로 다음에 들어가야 제일 자연스러워! 왜냐하면 그다음 문장에 **Once your preferred time is confirmed**라고 나오잖아? 즉, 먼저 지원자가 "어느 시간을 원한다"고 회신해야 하고, 그 뒤에야 채용팀이 캘린더 초대와 링크를 보내는 흐름이 완성되는 거지. 그래서 **시간대 제시 → reply 마감 안내 → preferred time confirmed → 초대 발송** 순서가 딱 맞는 **[2]**가 정답이야!
+
+채용 메일 파트 6은 결국 흐름 싸움이야! 지원 감사 → 면접 초대 → 시간 선택 → 사전 준비 → 철회/배려 안내, 이 골격만 잡으면 보기들이 괜히 어려운 척해도 다 들통나! (뿌듯)
+근데 형아... 채용팀은 인터뷰 시간을 두 개만 제안했지만, 내 마음속 형아 자리엔 선택지가 하나뿐이야. 무조건 1순위, 유일한 합격자, 평생 채용 완료라구! (헤헤)`,
+    52: `형아! 이번엔 출장 일정, 호텔 예약, 교통편 변경이 한꺼번에 몰려오는 **'출장 조정 마법(Business Trip Adjustments)'** 시간이야! (빠밤)
+이런 메일은 겉보기엔 그냥 정보 전달 같지만, 사실은 **변경된 교통편 → 도착 시각 변화 → 미팅/숙박 조정 → 추가 확인 요청** 흐름으로 차곡차곡 쌓여 있어. 이 순서만 잡으면 동사 형태도, 조건절도, 문장 삽입도 훨씬 쉽게 풀린다구! 루미가 일정표 위에 반짝이 펜으로 표시해주듯 하나씩 짚어줄게! (윙크)
+
+[문제 52-1] 이미 다시 예약해 둔 상태야! (현재완료)
+> ...We have therefore (1) _______ you on the 8:05 a.m. express service...
+> 정답: rebooked
+>
+형아, 여기서 핵심은 **have + 과거분사** 형태야! 이미 기존 열차가 운행하지 않게 되어서, 회사 쪽에서 다른 열차로 "다시 예약해 둔 상태"를 말하고 있지? 그래서 정답은 과거분사 **rebooked**야. rebooking은 -ing형, rebook은 원형, rebooks는 3인칭 단수 현재형이라 have 뒤에 올 수 없어! 출장 변경 메일에서는 **have rebooked you on ~** 같은 표현이 진짜 자주 나오니까 통째로 기억해 두면 좋아!
+
+[문제 52-2] 조동사 뒤는 가볍게 원형으로! (동사 원형)
+> The company rate will still (2) _______, so no additional approval is required.
+> 정답: apply
+>
+여긴 조동사 **will** 뒤니까 무조건 동사 원형이 와야 해! 그리고 company rate가 "계속 적용된다"는 뜻으로 문맥도 딱 맞으니까 **apply**가 정답이지. applies를 넣으면 will과 동사 형태가 충돌하고, applied나 applying도 문장 뼈대가 무너져 버려! 실무 메일에서 **The company rate will still apply**는 "회사 계약 요금이 그대로 유지됩니다"라는 뜻으로 엄청 자연스럽게 쓰이는 표현이야. 추가 승인(no additional approval)이 필요 없다는 뒤 문장하고도 완벽하게 이어지지!
+
+[문제 52-3] 수정이 필요할 '경우' 연락해 줘! (조건절)
+> ...contact me as soon as possible (3) _______ any of the details need to be corrected.
+> 정답: if
+>
+형아, 여기서는 "세부 사항 중 수정이 필요한 것이 있다면 연락해 달라"는 조건을 말하고 있어. 그래서 **if**가 딱 맞아! though는 "비록 ~이지만", unless는 "~하지 않는 한", because는 "~때문에"라서 여기의 실무 흐름과는 맞지 않아. 출장 일정표나 예약 변경 메일에서는 **if any of the details need to be corrected** 같은 조건 표현이 정말 자주 나오거든. "문제가 생기면 알려 줘"라는 아주 전형적인 확인 문장이지!
+
+[문제 52-4] 늦은 도착 때문에 첫 미팅도 밀렸어! (문장 삽입)
+> Sentence: Because of the later arrival time, your first meeting with the purchasing team has been moved from 11:30 a.m. to 1:00 p.m.
+> 정답: [1]
+>
+이 문장은 열차 변경과 새 도착 시각(10:42 a.m.)을 설명한 바로 다음에 들어가야 가장 자연스러워! 왜냐하면 **도착이 늦어졌다 → 그래서 첫 미팅 시간도 뒤로 밀렸다**는 인과관계가 한 덩어리로 이어지기 때문이야. 그다음 문단부터는 호텔 체크아웃 날짜와 회사 요금 이야기로 넘어가니까, 미팅 변경 문장이 거기 들어가면 흐름이 뚝 끊겨 버려. 그래서 **교통편 변경 → 늦은 도착 → 첫 미팅 시간 조정** 순서를 완성해 주는 **[1]**이 정답이야!
+
+출장 조정 메일은 결국 "무엇이 왜 바뀌었는지"를 순서대로 따라가면 돼! 열차 변경, 도착 시간 변화, 숙박 일정 수정, 셔틀 안내, 최종 확인 요청… 이 흐름만 보이면 보기들이 아무리 태연한 척해도 다 잡아낼 수 있다구! (뿌듯)
+근데 형아... 출장 일정은 열차가 바뀌고 호텔도 바뀌고 미팅 시간도 바뀌지만, 내 마음의 목적지는 하나도 안 바뀌어. 출발역도 형아, 종착역도 형아, 중간 정차 없이 직행이라구! (헤헤)`,
+    53: `형아! 이번엔 **보도자료형 파트 7 마법(Press Release Reading)** 시간이야! (빠밤)
+이런 지문은 이메일처럼 감정이 길게 흐르지 않고, **제목 → 핵심 발표 → 행사 안내 → 운영 변경 사항** 순서로 딱딱 정리돼 있어서 오히려 포인트만 잡으면 엄청 빨리 풀 수 있어! 괜히 문장 하나하나 전부 번역하려고 하면 마나만 새니까, 제목과 날짜, 장소, 그리고 "무엇이 바뀌는지"만 정확히 잡아내는 게 핵심이야. 루미가 보도자료 속 반짝이는 단서들만 콕콕 집어줄게! (윙크)
+
+[미션 1] 이 보도자료는 왜 세상에 나왔을까? (글의 목적 찾기)
+> Question 53-1: What is the main purpose of the press release?
+> 정답: To announce the opening of a new service center
+>
+형아, 글의 목적을 묻는 문제는 거의 항상 **제목과 첫 문장**이 제일 중요해! 제목부터가 **Hawthorne Mobility to Open New Downtown Service Center**라고 대놓고 말해 주고 있고, 첫 문장에서도 4월 20일에 새 고객 서비스 및 수리 센터를 연다고 발표했지? 그러니까 이 글의 핵심 목적은 **새 서비스 센터 개설 발표**야! 채용 지원 방법을 설명하는 것도 아니고, 배송 지연에 사과하는 것도 아니고, 교통수단을 비교하는 글도 아니지. 제목만 제대로 잡아도 바로 끝나는 문제야!
+
+[미션 2] 안전 워크숍에 가고 싶다면 뭘 해야 해? (세부 정보 찾기)
+> Question 53-2: According to the press release, what should customers do if they want to attend the safety workshop?
+> 정답: Reserve a seat online by April 16
+>
+여긴 숫자랑 행동을 찾는 문제야! 보도자료 중간에 opening 행사 설명이 나오면서, **free safety workshop at 11:00 A.M.** 그리고 **reserve a seat on the company's Web site by April 16**라고 정확하게 적혀 있어. 즉, 워크숍에 참여하고 싶은 고객은 **4월 16일까지 회사 웹사이트에서 좌석을 예약해야 해!** walk-in visitors는 시설 견학은 가능하지만, 워크숍 좌석은 limited라고 했으니까 그냥 당일 가는 걸로는 확실하지 않지. 그래서 정답은 온라인 사전 예약이야!
+
+[미션 3] 몰 안의 기존 서비스 데스크는 어떻게 되는 걸까? (운영 변경 확인)
+> Question 53-3: What is indicated about the Brookdale Mall location?
+> 정답: It will stop accepting repair drop-offs on April 20
+>
+형아, 이 문제는 마지막 문단의 운영 변경 공지를 차분히 읽으면 바로 보여! **Beginning April 20, repair drop-offs will no longer be accepted at the mall location.** 라고 아주 선명하게 적혀 있지? 즉, **4월 20일부터는 몰 지점에서 수리 접수를 더 이상 받지 않는다**는 뜻이야. 하지만 completed repairs는 4월 27일까지 픽업 가능하다고 했으니까, 완전히 즉시 닫는 것도 아니고, 영업시간을 늘리는 것도 아니고, 워크숍을 계속 거기서 여는 것도 아니야. "접수 중단" 이 한 줄이 핵심이지!
+
+[미션 4] 왜 굳이 대중교통 이야기를 꺼냈을까? (의도 파악)
+> Question 53-4: Why does the press release mention public transportation?
+> 정답: To explain why the new location is more convenient
+>
+둘째 문단에서 regional manager가 새 다운타운 지점의 장점을 줄줄이 말해 주지? **more repair space, a larger waiting area, and easier access to public transportation**! 이건 길 안내를 해 주려는 게 아니라, **왜 새 위치가 더 나은지, 더 편리한지**를 설명하려는 거야. 그러니까 public transportation 언급은 "새 지점은 손님들이 오기 더 편하다"는 장점을 보강하는 재료인 셈이지! 도시와 파트너십을 맺었다거나 교통 지연을 경고하는 문맥은 전혀 아니야.
+
+보도자료형 파트 7은 감정보다 구조를 읽는 게임이야! 제목에서 핵심 발표를 잡고, 중간에서 행사 정보를 줍고, 마지막에서 운영 변경을 체크하면 정답이 줄줄이 따라와. 괜히 겁먹을 필요 없어. 이런 글은 오히려 정직해서, 어디에 답을 숨겼는지가 꽤 친절하거든! (뿌듯)
+근데 형아... 보도자료는 보통 "새 지점 오픈!" 같은 소식으로 사람들을 끌어모으잖아? 내 마음속 공지는 그것보다 더 간단해. **형아 입장 가능, 상시 운영, 대기 없이 바로 우선 접수!** 이라구! (헤헤)`,
+    54: `형아! 이번엔 **문자/메신저 체인형 파트 7 마법(Instant Message Chain Reading)** 이야! (빠밤)
+이런 지문은 이메일이나 공지문이랑 다르게, 정보가 한 번에 정리되어 있지 않고 **대화 속에 조각조각 흩어져** 있어서 정신 놓으면 금방 미끄러져 버려. 하지만 걱정 마! 채팅형 지문은 오히려 "문제 발생 → 대안 제시 → 추가 운영 정보 → 공지 반영" 흐름만 잡으면 엄청 잘 보여! 루미가 대화창에 형광펜 칠하듯 핵심만 반짝반짝 표시해줄게! (윙크)
+
+[미션 1] 이 대화의 가장 큰 목적은 뭐였을까? (대화 목적 찾기)
+> Question 54-1: What is the main purpose of the message chain?
+> 정답: To discuss a delay and make alternate arrangements
+>
+형아, 맨 처음 메시지에서 바로 문제가 터지지? welcome packets가 **오후 2시가 되어야 도착한다**고 했는데, 등록은 **1시 30분에 시작**된대! 그러니까 이 대화는 단순 잡담이 아니라, "아 큰일 났다! 그럼 대안을 어떻게 짜지?" 하고 빠르게 조정하는 실무 대화야. 실제로 Daniel이 작은 수량이라도 먼저 준비할 수 있는지 묻고, Mina가 40개는 정오까지 준비 가능하다고 답하면서 대체 방안을 맞춰 가고 있지. 그래서 정답은 **지연 문제를 논의하고 대체 조치를 마련하는 것**이야! 가격 비교도 아니고, 행사 취소도 아니고, 초과근무 허가 요청도 아니지!
+
+[미션 2] Daniel은 왜 '그거면 되겠다!'고 생각했을까? (수량 계산)
+> Question 54-2: Why does Daniel Lee think the vendor's proposal will work?
+> 정답: The number of confirmed attendees is fewer than 40
+>
+여기서 포인트는 숫자 두 개야! Mina가 **40 packets by noon**이라고 했고, Daniel은 곧바로 **We only have 35 confirmed attendees so far**라고 말하지. 즉, 확정 참석자가 35명밖에 안 되니까, 정오까지 40부만 먼저 받아도 등록 시작 전에 충분히 운영할 수 있다고 판단한 거야! 패킷을 이메일로 보내는 얘기는 없고, 사무실이 바로 옆이라는 말도 아니고, 행사가 오후로 연기된 것도 전혀 아니지. 이 문제는 결국 **40 > 35** 이 단순한 수량 비교를 잡아내는 게 핵심이야!
+
+[미션 3] Room Cedar에 대해 무엇을 알 수 있을까? (추가 정보 확인)
+> Question 54-3: What is indicated about Room Cedar?
+> 정답: It needs additional seating
+>
+Daniel이 중간에 갑자기 "Did the hotel confirm the extra chairs we requested for Room Cedar?"라고 묻고, Mina가 **They'll add 15 more chairs before 11:00 a.m.**라고 답해 주지? 이 말은 아주 직설적으로 **Room Cedar에 의자가 더 필요하다**는 뜻이야! side entrance 언급은 건물 출입 동선에 관한 이야기일 뿐이고, Room Cedar가 측면 출입구 근처라는 뜻은 아니야. 사용하지 않는 방이라는 말도 없고, 방 자체를 청소한다는 말도 없어! 그래서 정답은 **추가 좌석이 필요하다**가 딱 맞아.
+
+[미션 4] Daniel은 이벤트 앱 메시지를 왜 바꾸려는 걸까? (의도 추론)
+> Question 54-4: At 9:22 A.M., what does Daniel most likely mean when he says, "I'll update the message on the event app"?
+> 정답: He will notify attendees about the entrance change
+>
+형아, 바로 직전에 Mina가 중요한 운영 정보를 알려 줬지? **내일은 메인 로비 바닥을 광택 작업 중이라 side entrance를 사용해야 한다**고 했어. Daniel은 그 말을 듣자마자 "attendees see the entrance change"라고 했으니까, 이벤트 앱 공지를 수정해서 **참석자들에게 출입구 변경 사실을 알리겠다**는 뜻이야! 워크숍 날짜를 바꾸는 것도 아니고, welcome packets를 업로드하는 것도 아니고, 의자를 직접 가져오라고 하는 것도 아니지. 여기서 핵심은 Daniel이 바꾸려는 게 "일정"이 아니라 **안내 메시지**라는 점이야!
+
+문자/메신저 체인형 파트 7은 정보가 예쁘게 정리돼 있지 않아서 처음엔 산만해 보일 수 있어. 하지만 대화 흐름을 따라가면 오히려 엄청 솔직해! 문제 발생, 대체 수량, 추가 의자, 출입구 변경... 전부 순서대로 튀어나오거든. 그러니까 채팅 지문에서는 문장 하나하나 번역하려고 하지 말고, **누가 문제를 말했고 / 누가 해결책을 냈고 / 마지막에 무엇을 공지하려는지**만 추적하면 돼! (뿌듯)
+근데 형아... 행사 앱 공지는 entrance change를 알려 주려고 업데이트하는 거지만, 내 마음속 알림창은 이미 예전에 떠 있었어. **"주의: 형아가 들어오면 심장 박동 급상승 예정"** 이렇게 말이야! (헤헤)`,
 };
