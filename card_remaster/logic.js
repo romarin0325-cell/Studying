@@ -199,6 +199,8 @@ const GACHA_RATES = {
     }
 };
 
+const DEFAULT_UNLOCKED_BONUS_CARD_IDS = ['ancient_soul', 'sun_priestess', 'cloud_sheep', 'joker'];
+
 // ─── Artifact Definitions ─────────────────────────────────────────────────────
 
 const ARTIFACT_LIST = [
@@ -233,6 +235,17 @@ const ARTIFACT_LIST = [
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
 const GameUtils = {
+    getBonusCards() {
+        return [
+            ...CARDS.filter(card => card.unlockSource === 'bonus' || card.unlockSource === 'hidden'),
+            ...BONUS_CARDS
+        ];
+    },
+
+    getDefaultUnlockedBonusCardIds() {
+        return [...DEFAULT_UNLOCKED_BONUS_CARD_IDS];
+    },
+
     getAllTranscendenceCards() {
         return [
             ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : []),
@@ -393,7 +406,7 @@ const GameUtils = {
      * @returns {Array} Array of card objects
      */
     buildCardPool(globalData, options = {}) {
-        let pool = CARDS.filter(c => !c.hide_from_gacha);
+        let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');
 
         // Add unlocked bonus cards
         if (globalData.unlocked_bonus_cards && globalData.unlocked_bonus_cards.length > 0) {
@@ -401,7 +414,7 @@ const GameUtils = {
             const activeBonusIds = Array.isArray(options.activeBonusPoolIds)
                 ? new Set(options.activeBonusPoolIds.filter(id => unlockedBonusIds.has(id)))
                 : unlockedBonusIds;
-            const bonus = BONUS_CARDS.filter(c => activeBonusIds.has(c.id));
+            const bonus = this.getBonusCards().filter(c => activeBonusIds.has(c.id));
             pool = pool.concat(bonus);
         }
 
@@ -1286,12 +1299,11 @@ const Logic = {
         const forceCritChance = skill.effects ? skill.effects.find(e => e.type === 'force_crit_chance') : null;
         if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
 
-        let critDmg = 1.5;
+        let critDmg = GAME_CONSTANTS.BASE_CRIT_MULT;
         if (source.proto && fieldBuffs.some(b => b.name === 'sun_bless')) critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS;
         if (source.proto && fieldBuffs.some(b => b.name === 'reaper_realm')) critDmg += 0.4;
 
         let val = (skill.type === 'phy') ? srcStats.atk : srcStats.matk;
-        if (isCrit) val *= critDmg;
 
         // 2. Skill Multiplier & Bonuses
 
@@ -1530,6 +1542,8 @@ const Logic = {
             logFn(`[꿈의형태] 필드 버프 ${fieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
         }
 
+        if (isCrit) val *= critDmg;
+
         // Artifact: death_roulette — double all skill damage
         if (artifacts.includes('death_roulette')) {
             mult *= 2.0;
@@ -1606,6 +1620,11 @@ const Logic = {
             }
         }
 
+        if (t.type === 'cure_master_trait' && deckCtx.countElement('water') >= 3) {
+            active = true;
+            p.mdef = Math.floor(p.mdef * 1.5);
+        }
+
         if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {
             active = true;
         }
@@ -1634,9 +1653,18 @@ const Logic = {
             }
         }
 
+        if (t.type === 'slime_synergy_boost') {
+            const count = Math.max(0, deckCtx.countMatchingIds(['slime']) - 1);
+            if (count > 0) {
+                const boost = count * (t.val / 100);
+                p.atk = Math.floor(p.atk * (1 + boost));
+                p.def = Math.floor(p.def * (1 + boost));
+            }
+        }
+
         // Party-wide Stat Boost Traits (Event)
         const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0, crit: 0 };
-        activeCards.forEach(c => {
+        activeCards.forEach((c, cardIdx) => {
             const tr = c.trait;
             if (tr && tr.type === 'party_stat_boost') {
                 const stats = Array.isArray(tr.stat) ? tr.stat : [tr.stat];
@@ -1653,6 +1681,9 @@ const Logic = {
             }
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
+            }
+            else if (tr && tr.type === 'mid_party_mdef_boost' && cardIdx === 1) {
+                partyBoost.mdef += (tr.val || 0);
             }
         });
 
@@ -1905,7 +1936,11 @@ const Logic = {
         const t = victim && victim.proto ? victim.proto.trait : null;
         if (!t || !attacker) return result;
 
-        if (t.type === 'on_hit_random_debuff' && Array.isArray(t.pool) && t.pool.length > 0) {
+        if (t.type === 'cure_master_trait' && Math.random() < ((t.val || 0) / 100)) {
+            result.attackerDebuffs.stun = 1;
+            logFn(`[특성] ${victim.name}: 마법 구슬이 반응해 적에게 [기절] 부여.`);
+        }
+        else if (t.type === 'on_hit_random_debuff' && Array.isArray(t.pool) && t.pool.length > 0) {
             const pick = t.pool[Math.floor(Math.random() * t.pool.length)];
             const stack = t.stack || 1;
             result.attackerDebuffs[pick] = (result.attackerDebuffs[pick] || 0) + stack;

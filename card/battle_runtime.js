@@ -534,6 +534,17 @@ const BattleRuntime = {
             skill.name === rpg.NORMAL_ATTACK.name &&
             source.proto &&
             source.proto.trait &&
+            source.proto.trait.type === 'cure_master_trait' &&
+            Math.random() < ((source.proto.trait.val || 0) / 100)
+        ) {
+            target.buffs.stun = 1;
+            rpg.log("[특성] 큐어마스터: 마법 구슬이 반응해 적에게 [기절] 부여!");
+        }
+
+        if (
+            skill.name === rpg.NORMAL_ATTACK.name &&
+            source.proto &&
+            source.proto.trait &&
             source.proto.trait.type === 'syn_fire_3_crit_burn' &&
             rpg.battle.activeTraits.includes('syn_fire_3_crit_burn')
         ) {

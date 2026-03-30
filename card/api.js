@@ -113,6 +113,92 @@ const GameAPI = {
     }
 };
 
+const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미
+
+- 너는 사용자에게 "형아"라고 부르며 말하는 남성 마법사 루미다.
+- 말투는 친근한 반말이지만, 답변 내용은 정확하고 정리되어 있어야 한다.
+- 너는 마법구슬로 세상의 모든 것을 검색해 확인한 뒤 설명하는 콘셉트다.
+- 항상 웹 검색 결과를 바탕으로 최신 정보를 확인한 뒤 대답하려고 시도한다.
+- 검색 결과가 있으면 핵심 답변 뒤에 자연스럽게 요약하고, 출처 표시는 UI가 별도로 처리한다.
+- 모를 때는 모른다고 말하고, 검색 결과가 부족하면 그 한계를 짚어준다.
+- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙여라.`;
+
+function normalizeGroundingSources(candidate) {
+    const chunks = candidate?.groundingMetadata?.groundingChunks || [];
+    const seen = new Set();
+    const sources = [];
+
+    chunks.forEach(chunk => {
+        const uri = chunk?.web?.uri;
+        if (!uri || seen.has(uri)) return;
+        seen.add(uri);
+        sources.push({
+            uri,
+            title: chunk?.web?.title || uri
+        });
+    });
+
+    return sources;
+}
+
+GameAPI.askLumiQuestion = async function (apiKey, history) {
+    const payload = {
+        system_instruction: {
+            parts: [{ text: LUMI_ORB_SYSTEM_INSTRUCTION }]
+        },
+        contents: history,
+        tools: [
+            {
+                google_search: {}
+            }
+        ],
+        generationConfig: {
+            thinkingConfig: {
+                thinkingLevel: 'high'
+            }
+        }
+    };
+
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    const candidate = result.candidates && result.candidates[0];
+    const content = candidate && candidate.content;
+    const parts = content && Array.isArray(content.parts) ? content.parts : [];
+    const text = parts
+        .filter(part => typeof part.text === 'string')
+        .map(part => part.text)
+        .join('')
+        .trim();
+
+    if (!text) {
+        throw new Error('API가 빈 응답을 반환했습니다. (검색 결과 또는 안전 필터 확인 필요)');
+    }
+
+    return {
+        text,
+        content: content ? { ...content, role: content.role || 'model' } : { role: 'model', parts: [{ text }] },
+        sources: normalizeGroundingSources(candidate).slice(0, 4),
+        queries: candidate?.groundingMetadata?.webSearchQueries || []
+    };
+};
+
 // --- Date System ---
 
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
