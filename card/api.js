@@ -141,23 +141,35 @@ function normalizeGroundingSources(candidate) {
     return sources;
 }
 
-GameAPI.askLumiQuestion = async function (apiKey, history) {
+GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
+    const {
+        systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
+        enableSearch = true,
+        thinkingLevel = 'high'
+    } = options;
+
     const payload = {
         system_instruction: {
-            parts: [{ text: LUMI_ORB_SYSTEM_INSTRUCTION }]
+            parts: [{ text: systemInstruction }]
         },
-        contents: history,
-        tools: [
+        contents: history
+    };
+
+    if (enableSearch) {
+        payload.tools = [
             {
                 google_search: {}
             }
-        ],
-        generationConfig: {
+        ];
+    }
+
+    if (thinkingLevel) {
+        payload.generationConfig = {
             thinkingConfig: {
-                thinkingLevel: 'high'
+                thinkingLevel
             }
-        }
-    };
+        };
+    }
 
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent', {
         method: 'POST',
