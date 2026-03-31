@@ -20,23 +20,17 @@ const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi
 - 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 근거를 덧붙이십시오.`;
 
 const GENERAL_LUMI_SESSION_UI = {
-    asideTitle: '루미에게 질문하기 (헤헤)',
-    copyHtml: '루미가 <strong>마법구슬</strong>로 웹을 검색하고, 생각을 깊게 정리한 다음 답해줄게!<br>형아가 궁금한 최신 정보도 여기서 물어보면 돼.',
-    panelTitle: '마법구슬 상담실 (///)',
-    panelSubtitle: '형아를 위해 세상을 검색해서 깊게 생각한 다음 알려줄게!',
-    placeholder: '형아, 궁금한 걸 적어줘! 내가 마법구슬로 싹 다 찾아줄게.',
-    closeLabel: '닫기',
+    asideTitle: '루미에게 질문하기',
+    copyHtml: '',
+    closeLabel: '나가기',
     resetLabel: '대화 초기화'
 };
 
 const TOEIC_LUMI_SESSION_UI = {
-    asideTitle: '루미의 TOEIC 질문 (뿌듯)',
-    copyHtml: '루미가 방금 본 <strong>문제, 정답, 해설</strong>을 꼼꼼히 적어뒀어! 토익 문장이랑 정답 근거를 바로 풀어줄게.',
-    panelTitle: '실전마법연습 질문 패널',
-    panelSubtitle: '형아가 푼 문제들을 기준으로 문장 해설이랑 정답 근거를 짚어줄게!',
-    placeholder: '문장 해설, 보기 차이, 왜 정답인지처럼 궁금한 걸 물어봐 줘!',
-    closeLabel: '뒤로가기',
-    resetLabel: '질문 다시 시작'
+    asideTitle: '루미의 TOEIC 질문',
+    copyHtml: '',
+    closeLabel: '나가기',
+    resetLabel: '대화 초기화'
 };
 
 function cloneHistory(history) {
@@ -125,7 +119,7 @@ function createGeneralSession() {
             ? LUMI_ORB_SYSTEM_INSTRUCTION
             : '너는 형아에게 친근하게 답하는 남성 마법사 루미다.',
         enableSearch: true,
-        thinkingLevel: 'high',
+        thinkingLevel: 'max',
         seedHistory: [],
         seedMessages: [{ role: 'model', text: greeting }]
     });
@@ -139,7 +133,7 @@ function createToeicReviewSession(source) {
         ui: TOEIC_LUMI_SESSION_UI,
         systemInstruction: TOEIC_LUMI_SYSTEM_INSTRUCTION,
         enableSearch: false,
-        thinkingLevel: 'high',
+        thinkingLevel: 'max',
         source,
         seedHistory: [
             { role: 'user', parts: [{ text: context }] },

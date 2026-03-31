@@ -928,20 +928,9 @@
 
         .lumi-chat-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             gap: 12px;
-        }
-
-        .lumi-chat-header h3 {
-            margin: 0;
-            color: #ffd700;
-        }
-
-        .lumi-chat-header p {
-            margin: 4px 0 0;
-            font-size: 0.8rem;
-            color: #9eb7d2;
         }
 
         .lumi-chat-log {
@@ -1011,25 +1000,6 @@
             min-height: 18px;
             font-size: 0.76rem;
             color: #8fb0cc;
-        }
-
-        .lumi-chat-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .lumi-chat-input {
-            width: 100%;
-            min-height: 96px;
-            box-sizing: border-box;
-            padding: 12px 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(179, 229, 252, 0.16);
-            background: rgba(6, 12, 22, 0.92);
-            color: #fff;
-            resize: vertical;
-            font: inherit;
         }
 
         .lumi-chat-actions {
@@ -1523,27 +1493,18 @@
                         최신 정보가 필요한 질문도 여기서 바로 물어보면 돼.
                     </div>
                 </div>
-                <button class="menu-btn" onclick="RPG.openApiSettings()" style="margin-top:auto; margin-bottom:0;">API 설정</button>
             </div>
             <div class="lumi-chat-main">
                 <div class="lumi-chat-header">
-                    <div>
-                        <h3 id="lumi-chat-panel-title">마법구슬 상담실</h3>
-                        <p id="lumi-chat-panel-subtitle">Gemini 검색 도구와 하이 싱킹 레벨로 답변해.</p>
-                    </div>
-                    <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()" style="padding:10px 14px;">닫기</button>
+                    <button id="lumi-chat-close-btn" class="menu-btn" onclick="RPG.closeLumiQuestion()"
+                        style="padding:10px 14px; width:auto; margin-bottom:0;">나가기</button>
                 </div>
                 <div id="lumi-chat-log" class="lumi-chat-log"></div>
                 <div id="lumi-chat-status" class="lumi-chat-status"></div>
-                <div class="lumi-chat-form">
-                    <textarea id="lumi-chat-input" class="lumi-chat-input"
-                        placeholder="루미에게 궁금한 것을 적어줘. 최신 정보가 필요하면 알아서 검색해서 정리해줄게."
-                        onkeydown="RPG.handleLumiQuestionKey(event)"></textarea>
-                    <div class="lumi-chat-actions">
-                        <button class="menu-btn" onclick="RPG.sendLumiQuestion()" style="flex:1; margin-bottom:0;">보내기</button>
-                        <button id="lumi-chat-reset-btn" class="menu-btn" onclick="RPG.clearLumiQuestionHistory()"
-                            style="flex:1; margin-bottom:0; border-color:#90a4ae; color:#cfd8dc;">대화 초기화</button>
-                    </div>
+                <div class="lumi-chat-actions">
+                    <button class="menu-btn" onclick="RPG.sendLumiQuestion()" style="flex:1; margin-bottom:0;">질문하기</button>
+                    <button id="lumi-chat-reset-btn" class="menu-btn" onclick="RPG.clearLumiQuestionHistory()"
+                        style="flex:1; margin-bottom:0; border-color:#90a4ae; color:#cfd8dc;">대화 초기화</button>
                 </div>
             </div>
         </div>
@@ -1593,7 +1554,7 @@
             <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
                 <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
                 <div id="toeic-explanation-actions" style="display:none; flex-direction:column; gap:10px;">
-                    <button id="toeic-lumi-question-btn" class="toeic-hub-btn" onclick="RPG.openToeicLumiQuestion()"
+                    <button id="toeic-lumi-question-btn" class="menu-btn" onclick="RPG.openToeicLumiQuestion()"
                         style="width:100%; max-width:none;">루미에게 질문하기</button>
                 </div>
                 <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
@@ -4561,19 +4522,13 @@
                 const ui = session.ui || {};
                 const asideTitle = document.getElementById('lumi-chat-aside-title');
                 const copy = document.getElementById('lumi-chat-copy');
-                const panelTitle = document.getElementById('lumi-chat-panel-title');
-                const panelSubtitle = document.getElementById('lumi-chat-panel-subtitle');
                 const closeBtn = document.getElementById('lumi-chat-close-btn');
                 const resetBtn = document.getElementById('lumi-chat-reset-btn');
-                const input = document.getElementById('lumi-chat-input');
 
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
                 if (copy) copy.innerHTML = ui.copyHtml || '';
-                if (panelTitle) panelTitle.innerText = ui.panelTitle || '마법구슬 상담실';
-                if (panelSubtitle) panelSubtitle.innerText = ui.panelSubtitle || '';
-                if (closeBtn) closeBtn.innerText = ui.closeLabel || '닫기';
+                if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
-                if (input) input.placeholder = ui.placeholder || '';
             },
 
             openLumiChatSession(session, sessionKey) {
@@ -4584,10 +4539,6 @@
                 const hasKey = !!Storage.getRaw(Storage.keys.API_KEY);
                 this.setLumiChatStatus(LumiQuestionRuntime.getInitialStatus(session, hasKey));
                 document.getElementById('modal-lumi-question').classList.add('active');
-                setTimeout(() => {
-                    const input = document.getElementById('lumi-chat-input');
-                    if (input) input.focus();
-                }, 0);
             },
 
             openLumiQuestion() {
@@ -4714,13 +4665,6 @@
                 log.scrollTop = log.scrollHeight;
             },
 
-            handleLumiQuestionKey(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    this.sendLumiQuestion();
-                }
-            },
-
             clearLumiQuestionHistory() {
                 const currentSession = this.getActiveLumiChatSession();
                 if (!currentSession) return;
@@ -4743,18 +4687,15 @@
                 const session = this.getActiveLumiChatSession();
                 if (!session) return;
 
-                const input = document.getElementById('lumi-chat-input');
-                const message = input ? input.value.trim() : '';
+                const message = window.prompt('루미에게 질문할 내용을 입력해줘!');
                 if (!message) return;
 
                 const key = Storage.getRaw(Storage.keys.API_KEY);
                 if (!key) {
-                    this.setLumiChatStatus('API 키를 먼저 저장해줘.');
-                    this.openApiSettings();
+                    this.setLumiChatStatus('API 키를 먼저 시스템 메뉴에서 저장해줘.');
                     return;
                 }
 
-                if (input) input.value = '';
                 this.isLumiChatLoading = true;
                 this.setLumiChatStatus(LumiQuestionRuntime.getLoadingStatus(session));
 
