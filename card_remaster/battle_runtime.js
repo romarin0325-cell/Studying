@@ -545,8 +545,7 @@ const BattleRuntime = {
             skill.name === rpg.NORMAL_ATTACK.name &&
             source.proto &&
             source.proto.trait &&
-            source.proto.trait.type === 'syn_fire_3_crit_burn' &&
-            rpg.battle.activeTraits.includes('syn_fire_3_crit_burn')
+            source.proto.trait.type === 'syn_fire_3_crit_burn'
         ) {
             const burnAdd = rpg.hasArtifact('over_flame') ? 2 : 1;
             target.buffs.burn = Math.min((target.buffs.burn || 0) + burnAdd, getStackCap(rpg, 'burn'));

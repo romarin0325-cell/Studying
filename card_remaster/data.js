@@ -817,7 +817,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'cure_master_trait', val: 30, desc: '덱에 물 3장 이상 시 마법방어력 50% 증가 / 일반 공격 혹은 피격 시 확률로 스턴 부여' },
         skills: [
             { name: '레모네이드', type: 'sup', tier: 3, cost: 30, desc: '필드버프 스타파우더 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'buff', id: 'guard', duration: 3 }] },
-            { name: '멜트다운', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 기절 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 2.0 }] },
+            { name: '멜트다운', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 약화 부여, 기절 상태의 적에게 대미지 2배', effects: [{ type: 'debuff', id: 'weak' }, { type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 2.0 }] },
             { name: '굿나잇키스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
         ]
     },
