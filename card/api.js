@@ -149,7 +149,7 @@ function normalizeGroundingSources(candidate) {
     return sources;
 }
 
-const GEMINI_REASONING_LEVELS = new Set(['minimal', 'low', 'medium', 'high']);
+const GEMINI_REASONING_LEVELS = new Set(['low', 'medium', 'high']);
 
 function normalizeThinkingLevel(thinkingLevel) {
     return GEMINI_REASONING_LEVELS.has(thinkingLevel) ? thinkingLevel : 'high';
@@ -163,7 +163,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     } = options;
 
     const payload = {
-        system_instruction: {
+        systemInstruction: {
             parts: [{ text: systemInstruction }]
         },
         contents: history
@@ -172,7 +172,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     if (enableSearch) {
         payload.tools = [
             {
-                google_search: {}
+                googleSearch: {}
             }
         ];
     }
@@ -186,14 +186,14 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
         { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
         { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
     ];
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
@@ -367,7 +367,6 @@ function buildToeicReviewSource(toeicSession, explanationText) {
 }
 
 function createGeneralSession() {
-    const greeting = '(마법책을 펼치며) 형아, 궁금한 걸 적어줘. 내가 바로 정리해서 답할게.';
     return createSession({
         mode: 'general',
         ui: GENERAL_LUMI_SESSION_UI,
@@ -377,12 +376,11 @@ function createGeneralSession() {
         enableSearch: true,
         thinkingLevel: 'high',
         seedHistory: [],
-        seedMessages: [{ role: 'model', text: greeting }]
+        seedMessages: []
     });
 }
 
 function createToeicReviewSession(source) {
-    const greeting = '(지팡이를 톡 돌리며) 형아, 방금 본 문제랑 해설은 내가 기억하고 있어. 어떤 부분이 제일 헷갈렸는지만 말해줘.';
     const context = buildToeicContext(source);
     return createSession({
         mode: 'toeic-review',
@@ -392,10 +390,9 @@ function createToeicReviewSession(source) {
         thinkingLevel: 'high',
         source,
         seedHistory: [
-            { role: 'user', parts: [{ text: context }] },
-            { role: 'model', parts: [{ text: greeting }] }
+            { role: 'user', parts: [{ text: context }] }
         ],
-        seedMessages: [{ role: 'model', text: greeting }]
+        seedMessages: []
     });
 }
 
