@@ -153,7 +153,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     const {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
-        thinkingLevel = 'high'
+        thinkingLevel = 'max'
     } = options;
 
     const payload = {
@@ -171,15 +171,20 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         ];
     }
 
-    if (thinkingLevel) {
-        payload.generationConfig = {
-            thinkingConfig: {
-                thinkingLevel
-            }
-        };
-    }
+    payload.generationConfig = {
+        thinkingConfig: {
+            thinkingLevel,
+            thinkingBudget: 24576
+        }
+    };
+    payload.safetySettings = [
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+    ];
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
