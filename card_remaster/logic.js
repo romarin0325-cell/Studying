@@ -1418,15 +1418,17 @@ const Logic = {
         }
 
         // Defense
+        const rawDef = Math.max(0, target.def || 0);
+        const rawMdef = Math.max(0, target.mdef || 0);
         let def = (skill.type === 'phy') ? tgtStats.def : tgtStats.mdef;
 
         if (ctx.pendingBurnPenRate && skill.type === 'phy') {
-            def = Math.max(0, def - Math.floor(tgtStats.def * ctx.pendingBurnPenRate));
+            def = Math.max(0, def - Math.floor(rawDef * ctx.pendingBurnPenRate));
             logFn(`[특성] 작열 ${target.buffs['burn']}스택으로 물리방어 ${Math.round(ctx.pendingBurnPenRate * 100)}% 관통!`);
         }
 
         if (ctx.ignoreMdefRate > 0 && skill.type === 'mag') {
-            let ignore = Math.floor(tgtStats.mdef * ctx.ignoreMdefRate);
+            let ignore = Math.floor(rawMdef * ctx.ignoreMdefRate);
             def = Math.max(0, def - ignore);
             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate * 100)}% 관통!`);
         }
@@ -1434,7 +1436,7 @@ const Logic = {
         // Artifact: flame_piercing — burn stacks x 10% physical defense penetration
         if (artifacts.includes('flame_piercing') && skill.type === 'phy' && target.buffs['burn']) {
             let burnPen = target.buffs['burn'] * 0.1;
-            let ignore = Math.floor(tgtStats.def * burnPen);
+            let ignore = Math.floor(rawDef * burnPen);
             def = Math.max(0, def - ignore);
             logFn(`[아티팩트] 플레임피어싱: 작열 ${target.buffs['burn']}스택! 방어력 ${Math.round(burnPen * 100)}% 관통!`);
         }
@@ -1442,7 +1444,7 @@ const Logic = {
         // Artifact: divine_piercing — divine stacks x 10% magic defense penetration
         if (artifacts.includes('divine_piercing') && skill.type === 'mag' && target.buffs['divine']) {
             let divinePen = target.buffs['divine'] * 0.1;
-            let ignore = Math.floor(tgtStats.mdef * divinePen);
+            let ignore = Math.floor(rawMdef * divinePen);
             def = Math.max(0, def - ignore);
             logFn(`[아티팩트] 디바인피어싱: 디바인 ${target.buffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
         }
