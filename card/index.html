@@ -753,184 +753,42 @@
             gap: 10px;
         }
 
-        .title-question-btn {
-            border-color: #64b5f6;
-            color: #b3e5fc;
-            background: linear-gradient(180deg, #15324e, #0c1824);
-        }
-
         .lumi-chat-modal {
-            width: min(960px, 96vw);
-            height: min(760px, 92vh);
-            max-height: 92vh;
-            display: grid;
-            grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-            gap: 0;
-            padding: 0;
-            overflow: hidden;
-            background:
-                radial-gradient(circle at top left, rgba(129, 212, 250, 0.18), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(255, 214, 102, 0.16), transparent 28%),
-                linear-gradient(180deg, #132033 0%, #0a1220 100%);
-            border: 1px solid rgba(179, 229, 252, 0.18);
-        }
-
-        .lumi-chat-aside {
-            padding: 24px 20px;
-            background: linear-gradient(180deg, rgba(18, 34, 56, 0.92), rgba(10, 18, 32, 0.96));
-            border-right: 1px solid rgba(179, 229, 252, 0.14);
+            width: min(600px, 92vw);
+            height: min(80vh, 780px);
             display: flex;
             flex-direction: column;
-            gap: 14px;
-        }
-
-        .lumi-chat-copy {
-            font-size: 0.84rem;
-            line-height: 1.6;
-            color: #b7cbe2;
-        }
-
-        .lumi-chat-copy strong {
-            color: #fff6d6;
-        }
-
-        .lumi-portrait {
-            position: relative;
-            width: 170px;
-            height: 220px;
-            margin: 0 auto 6px;
-        }
-
-        .lumi-portrait__orb {
-            position: absolute;
-            inset: 8px auto auto 50%;
-            width: 62px;
-            height: 62px;
-            margin-left: -31px;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle at 35% 35%, #ffffff 0%, #d7f6ff 28%, #79d6ff 62%, #215ea8 100%);
-            box-shadow:
-                0 0 0 10px rgba(121, 214, 255, 0.12),
-                0 0 28px rgba(121, 214, 255, 0.42);
-        }
-
-        .lumi-portrait__orb::after {
-            content: '';
-            position: absolute;
-            inset: 12px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.45);
-        }
-
-        .lumi-portrait__body {
-            position: absolute;
-            inset: auto 0 0;
-            height: 170px;
-            border-radius: 28px 28px 24px 24px;
-            background:
-                linear-gradient(180deg, rgba(128, 203, 196, 0.26), rgba(74, 127, 197, 0.08)),
-                linear-gradient(180deg, #e6f4ff 0%, #bfd6ff 20%, #5b7dc8 21%, #27406c 100%);
-            overflow: hidden;
-        }
-
-        .lumi-portrait__body::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 22px;
-            width: 108px;
-            height: 108px;
-            margin-left: -54px;
-            border-radius: 54px 54px 46px 46px;
-            background: #ffe3cf;
-            box-shadow: inset 0 -12px 0 rgba(255, 193, 145, 0.32);
-        }
-
-        .lumi-portrait__body::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 8px;
-            width: 140px;
-            height: 104px;
-            margin-left: -70px;
-            border-radius: 70px 70px 40px 40px;
-            background:
-                radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.42), transparent 18%),
-                linear-gradient(180deg, #87d7ff 0%, #6caeff 48%, #2a4d8a 100%);
-            box-shadow: inset 0 -18px 0 rgba(26, 45, 86, 0.24);
-        }
-
-        .lumi-portrait__face {
-            position: absolute;
-            left: 50%;
-            top: 60px;
-            width: 88px;
-            height: 54px;
-            margin-left: -44px;
-        }
-
-        .lumi-portrait__eye,
-        .lumi-portrait__blush {
-            position: absolute;
-            border-radius: 999px;
-        }
-
-        .lumi-portrait__eye {
-            top: 12px;
-            width: 18px;
-            height: 10px;
-            background: #17325d;
-        }
-
-        .lumi-portrait__eye--left {
-            left: 12px;
-        }
-
-        .lumi-portrait__eye--right {
-            right: 12px;
-        }
-
-        .lumi-portrait__blush {
-            top: 28px;
-            width: 20px;
-            height: 9px;
-            background: rgba(255, 148, 164, 0.42);
-        }
-
-        .lumi-portrait__blush--left {
-            left: 6px;
-        }
-
-        .lumi-portrait__blush--right {
-            right: 6px;
-        }
-
-        .lumi-portrait__mouth {
-            position: absolute;
-            left: 50%;
-            top: 34px;
-            width: 20px;
-            height: 10px;
-            margin-left: -10px;
-            border-bottom: 3px solid #d56b84;
-            border-radius: 0 0 14px 14px;
-        }
-
-        .lumi-chat-main {
+            gap: 12px;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            min-width: 0;
+            background:
+                radial-gradient(circle at top left, rgba(129, 212, 250, 0.16), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(255, 214, 102, 0.14), transparent 26%),
+                linear-gradient(180deg, #142033 0%, #0a1220 100%);
+            border: 1px solid rgba(179, 229, 252, 0.18);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
         }
 
-        .lumi-chat-header {
+        .lumi-chat-top {
             display: flex;
-            justify-content: flex-end;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .lumi-chat-top .portrait {
+            width: 138px;
+            height: 182px;
+            margin-bottom: 0;
+            border-color: #448aff;
+            background:
+                radial-gradient(circle at top, rgba(68, 138, 255, 0.22), transparent 45%),
+                linear-gradient(180deg, #101727 0%, #060b14 100%);
+        }
+
+        .lumi-chat-title {
+            margin: 0;
+            color: #ffd700;
         }
 
         .lumi-chat-log {
@@ -944,6 +802,30 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+        }
+
+        .lumi-chat-input {
+            width: 100%;
+            min-height: 88px;
+            max-height: 148px;
+            resize: vertical;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(141, 191, 255, 0.18);
+            background: rgba(8, 15, 27, 0.88);
+            color: #eef6ff;
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .lumi-chat-input::placeholder {
+            color: #7f97b5;
+        }
+
+        .lumi-chat-input:focus {
+            outline: 1px solid rgba(111, 181, 255, 0.75);
+            border-color: rgba(111, 181, 255, 0.75);
         }
 
         .lumi-chat-bubble {
@@ -1007,25 +889,25 @@
             gap: 10px;
         }
 
+        .lumi-chat-actions .menu-btn {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
         @media (max-width: 760px) {
             .lumi-chat-modal {
-                grid-template-columns: 1fr;
-                height: min(92vh, 880px);
+                width: min(92vw, 600px);
+                height: min(84vh, 760px);
+                padding: 16px;
             }
 
-            .lumi-chat-aside {
-                border-right: 0;
-                border-bottom: 1px solid rgba(179, 229, 252, 0.14);
-                padding-bottom: 18px;
+            .lumi-chat-top .portrait {
+                width: 118px;
+                height: 156px;
             }
 
-            .lumi-portrait {
-                width: 132px;
-                height: 170px;
-            }
-
-            .lumi-portrait__body {
-                height: 134px;
+            .lumi-chat-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -1040,7 +922,7 @@
             <div class="title-screen-actions">
                 <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로하기</button>
                 <button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled>이어하기</button>
-                <button id="btn-title-question" class="menu-btn title-question-btn" onclick="RPG.openLumiQuestion()"
+                <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()"
                     disabled>질문하기</button>
             </div>
         </div>
@@ -1451,7 +1333,6 @@
         <div class="modal-content" style="height:auto;">
             <h3>메뉴</h3>
             <button id="btn-toggle-tutoring" class="menu-btn" onclick="RPG.toggleTutoringEvent()">개인과외 이벤트: ON</button>
-            <button class="menu-btn" onclick="RPG.openApiSettings()">API 설정</button>
             <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
             <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
             <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
@@ -1460,52 +1341,22 @@
         </div>
     </div>
 
-    <div id="modal-api-settings" class="modal">
-        <div class="modal-content" style="height:auto;">
-            <h3>API 설정</h3>
-            <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Gemini API Key를 입력해주세요.</p>
-            <input type="password" id="api-key-input" placeholder="Gemini API Key 입력"
-                style="width:100%; box-sizing:border-box; padding:10px; background:#333; color:#fff; border:1px solid #555; margin-bottom:10px;">
-            <button class="menu-btn" onclick="RPG.saveApiKey()">저장</button>
-            <button onclick="document.getElementById('modal-api-settings').classList.remove('active')"
-                style="margin-top:10px; width:100%; padding:10px;">닫기</button>
-        </div>
-    </div>
-
     <div id="modal-lumi-question" class="modal">
         <div class="modal-content lumi-chat-modal">
-            <div class="lumi-chat-aside">
-                <div class="lumi-portrait" aria-hidden="true">
-                    <div class="lumi-portrait__orb"></div>
-                    <div class="lumi-portrait__body"></div>
-                    <div class="lumi-portrait__face">
-                        <span class="lumi-portrait__eye lumi-portrait__eye--left"></span>
-                        <span class="lumi-portrait__eye lumi-portrait__eye--right"></span>
-                        <span class="lumi-portrait__blush lumi-portrait__blush--left"></span>
-                        <span class="lumi-portrait__blush lumi-portrait__blush--right"></span>
-                        <span class="lumi-portrait__mouth"></span>
-                    </div>
+            <div class="lumi-chat-top">
+                <div class="portrait" aria-hidden="true">
+                    <img src="lumi-portrait.svg" alt="루미 초상화">
                 </div>
-                <div>
-                    <h3 id="lumi-chat-aside-title" style="margin:0; color:#ffd700;">루미의 질문하기</h3>
-                    <div id="lumi-chat-copy" class="lumi-chat-copy">
-                        루미가 <strong>마법구슬</strong>로 웹을 검색하고, 생각을 깊게 정리한 다음 답해줘.
-                        최신 정보가 필요한 질문도 여기서 바로 물어보면 돼.
-                    </div>
-                </div>
+                <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
             </div>
-            <div class="lumi-chat-main">
-                <div class="lumi-chat-header">
-                    <button id="lumi-chat-close-btn" class="menu-btn" onclick="RPG.closeLumiQuestion()"
-                        style="padding:10px 14px; width:auto; margin-bottom:0;">나가기</button>
-                </div>
-                <div id="lumi-chat-log" class="lumi-chat-log"></div>
-                <div id="lumi-chat-status" class="lumi-chat-status"></div>
-                <div class="lumi-chat-actions">
-                    <button class="menu-btn" onclick="RPG.sendLumiQuestion()" style="flex:1; margin-bottom:0;">질문하기</button>
-                    <button id="lumi-chat-reset-btn" class="menu-btn" onclick="RPG.clearLumiQuestionHistory()"
-                        style="flex:1; margin-bottom:0; border-color:#90a4ae; color:#cfd8dc;">대화 초기화</button>
-                </div>
+            <div id="lumi-chat-log" class="lumi-chat-log"></div>
+            <div id="lumi-chat-status" class="lumi-chat-status"></div>
+            <textarea id="lumi-chat-input" class="lumi-chat-input" placeholder="루미에게 질문을 적어줘."
+                onkeydown="RPG.handleLumiQuestionKey(event)"></textarea>
+            <div class="lumi-chat-actions">
+                <button id="lumi-chat-reset-btn" class="menu-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
+                <button class="menu-btn" onclick="RPG.sendLumiQuestion()">질문하기</button>
+                <button id="lumi-chat-close-btn" class="menu-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
             </div>
         </div>
     </div>
@@ -1555,7 +1406,7 @@
                 <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
                 <div id="toeic-explanation-actions" style="display:none; flex-direction:column; gap:10px;">
                     <button id="toeic-lumi-question-btn" class="menu-btn" onclick="RPG.openToeicLumiQuestion()"
-                        style="width:100%; max-width:none;">루미에게 질문하기</button>
+                        style="width:100%; max-width:none;">질문하기</button>
                 </div>
                 <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
             </div>
@@ -1616,7 +1467,6 @@
                 { src: 'toeic.js', label: '토익 데이터' },
                 { src: 'toeic_explanations.js', label: '토익 해설' },
                 { src: 'api.js', label: 'API 모듈' },
-                { src: 'lumi_question.js', label: '루미 질문 로직' },
                 { src: 'logic.js', label: '게임 로직' },
                 { src: 'battle_runtime.js', label: '전투 런타임' }
             ];
@@ -4506,29 +4356,48 @@
                     : "해설 데이터가 없습니다.";
             },
 
+            getStoredApiKey() {
+                return (Storage.getRaw(Storage.keys.API_KEY) || '').trim();
+            },
+
+            ensureApiKey(reason = '이 기능을 사용하려면') {
+                let key = this.getStoredApiKey();
+                if (key) return key;
+
+                const entered = window.prompt(`${reason} Gemini API Key가 필요해.\n입력한 키는 이 브라우저에 저장돼.`, '');
+                if (!entered) return '';
+
+                key = entered.trim();
+                if (!key) return '';
+
+                Storage.setRaw(Storage.keys.API_KEY, key);
+                return key;
+            },
+
             getActiveLumiChatSession() {
-                if (this.activeLumiChatSessionKey === 'toeic') {
-                    const toeicSession = this.state.currentToeicSession;
-                    return toeicSession ? toeicSession.lumiQuestionSession || null : null;
-                }
-                if (!this.lumiChatSessions.general) {
-                    this.lumiChatSessions.general = LumiQuestionRuntime.createGeneralSession();
-                }
-                return this.lumiChatSessions.general;
+                return LumiQuestionRuntime.getActiveSession(
+                    this.activeLumiChatSessionKey,
+                    this.lumiChatSessions,
+                    this.state.currentToeicSession
+                );
             },
 
             configureLumiChatSessionUi(session) {
                 if (!session) return;
                 const ui = session.ui || {};
                 const asideTitle = document.getElementById('lumi-chat-aside-title');
-                const copy = document.getElementById('lumi-chat-copy');
                 const closeBtn = document.getElementById('lumi-chat-close-btn');
                 const resetBtn = document.getElementById('lumi-chat-reset-btn');
+                const input = document.getElementById('lumi-chat-input');
 
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
-                if (copy) copy.innerHTML = ui.copyHtml || '';
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
+                if (input) {
+                    input.placeholder = session.mode === 'toeic-review'
+                        ? '해설에서 궁금한 점을 적어줘.'
+                        : '루미에게 질문을 적어줘.';
+                }
             },
 
             openLumiChatSession(session, sessionKey) {
@@ -4536,38 +4405,15 @@
                 this.activeLumiChatSessionKey = sessionKey;
                 this.configureLumiChatSessionUi(session);
                 this.renderLumiChatMessages();
-                const hasKey = !!Storage.getRaw(Storage.keys.API_KEY);
-                this.setLumiChatStatus(LumiQuestionRuntime.getInitialStatus(session, hasKey));
+                this.setLumiChatStatus(LumiQuestionRuntime.getInitialStatus(session, !!this.getStoredApiKey()));
                 document.getElementById('modal-lumi-question').classList.add('active');
+                const input = document.getElementById('lumi-chat-input');
+                if (input) input.focus();
             },
 
             openLumiQuestion() {
-                if (!this.lumiChatSessions.general) {
-                    this.lumiChatSessions.general = LumiQuestionRuntime.createGeneralSession();
-                }
-                this.openLumiChatSession(this.lumiChatSessions.general, 'general');
-            },
-
-            buildToeicLumiQuestionSource() {
-                const toeicSession = this.state.currentToeicSession;
-                if (!toeicSession || !toeicSession.set) return null;
-                const set = toeicSession.set;
-                const partLabel = set.type === 'part6'
-                    ? '파트 6'
-                    : set.type === 'part7'
-                        ? '파트 7'
-                        : '문제';
-
-                return {
-                    setId: set.id,
-                    title: set.title,
-                    partLabel,
-                    passage: set.passage || '',
-                    explanationText: this.getToeicExplanationText(set),
-                    questions: toeicSession.expandedQuestions || [],
-                    shuffledOptions: toeicSession.shuffledOptions || [],
-                    results: toeicSession.results || []
-                };
+                const session = LumiQuestionRuntime.ensureGeneralSession(this.lumiChatSessions);
+                this.openLumiChatSession(session, LumiQuestionRuntime.SESSION_KEYS.GENERAL);
             },
 
             openToeicLumiQuestion() {
@@ -4576,30 +4422,33 @@
                     return;
                 }
 
-                if (!toeicSession.lumiQuestionSession) {
-                    const source = this.buildToeicLumiQuestionSource();
-                    if (!source) return;
-                    toeicSession.lumiQuestionSession = LumiQuestionRuntime.createToeicReviewSession(source);
-                }
+                const session = LumiQuestionRuntime.ensureToeicReviewSession(
+                    toeicSession,
+                    this.getToeicExplanationText(toeicSession.set)
+                );
+                if (!session) return;
 
                 document.getElementById('modal-toeic-practice').classList.remove('active');
-                this.openLumiChatSession(toeicSession.lumiQuestionSession, 'toeic');
+                this.openLumiChatSession(session, LumiQuestionRuntime.SESSION_KEYS.TOEIC);
             },
 
             closeLumiQuestion() {
                 const activeSession = this.getActiveLumiChatSession();
                 document.getElementById('modal-lumi-question').classList.remove('active');
+                this.setLumiChatStatus('');
+                const input = document.getElementById('lumi-chat-input');
+                if (input) input.value = '';
 
                 if (activeSession && activeSession.mode === 'toeic-review') {
                     this.restoreToeicReviewAfterLumiQuestion();
                     return;
                 }
 
-                this.activeLumiChatSessionKey = 'general';
+                this.activeLumiChatSessionKey = LumiQuestionRuntime.SESSION_KEYS.GENERAL;
             },
 
             restoreToeicReviewAfterLumiQuestion() {
-                this.activeLumiChatSessionKey = 'general';
+                this.activeLumiChatSessionKey = LumiQuestionRuntime.SESSION_KEYS.GENERAL;
                 if (!this.state.currentToeicSession) return;
                 document.getElementById('modal-toeic-practice').classList.add('active');
                 this.showToeicExplanation();
@@ -4610,10 +4459,13 @@
                 if (toeicSession && toeicSession.lumiQuestionSession) {
                     delete toeicSession.lumiQuestionSession;
                 }
-                if (this.activeLumiChatSessionKey === 'toeic') {
-                    this.activeLumiChatSessionKey = 'general';
+                if (this.activeLumiChatSessionKey === LumiQuestionRuntime.SESSION_KEYS.TOEIC) {
+                    this.activeLumiChatSessionKey = LumiQuestionRuntime.SESSION_KEYS.GENERAL;
                 }
                 document.getElementById('modal-lumi-question').classList.remove('active');
+                this.setLumiChatStatus('');
+                const input = document.getElementById('lumi-chat-input');
+                if (input) input.value = '';
             },
 
             setLumiChatStatus(message = '') {
@@ -4670,15 +4522,24 @@
                 if (!currentSession) return;
 
                 const resetSession = LumiQuestionRuntime.resetSession(currentSession);
-                if (resetSession.mode === 'toeic-review' && this.state.currentToeicSession) {
-                    this.state.currentToeicSession.lumiQuestionSession = resetSession;
-                } else {
-                    this.lumiChatSessions.general = resetSession;
-                }
+                LumiQuestionRuntime.storeSession(this.lumiChatSessions, this.state.currentToeicSession, resetSession);
 
                 this.configureLumiChatSessionUi(resetSession);
                 this.renderLumiChatMessages();
                 this.setLumiChatStatus(LumiQuestionRuntime.getResetStatus(resetSession));
+                const input = document.getElementById('lumi-chat-input');
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+            },
+
+            handleLumiQuestionKey(event) {
+                if (event.isComposing) return;
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    this.sendLumiQuestion();
+                }
             },
 
             async sendLumiQuestion() {
@@ -4687,15 +4548,21 @@
                 const session = this.getActiveLumiChatSession();
                 if (!session) return;
 
-                const message = window.prompt('루미에게 질문할 내용을 입력해줘!');
-                if (!message) return;
-
-                const key = Storage.getRaw(Storage.keys.API_KEY);
-                if (!key) {
-                    this.setLumiChatStatus('API 키를 먼저 시스템 메뉴에서 저장해줘.');
+                const input = document.getElementById('lumi-chat-input');
+                const message = input ? input.value.trim() : '';
+                if (!message) {
+                    this.setLumiChatStatus('질문을 먼저 적어줘.');
+                    if (input) input.focus();
                     return;
                 }
 
+                const key = this.ensureApiKey('루미에게 질문하려면');
+                if (!key) {
+                    this.setLumiChatStatus('API 키가 없어 답변을 시작하지 못했어.');
+                    return;
+                }
+
+                if (input) input.value = '';
                 this.isLumiChatLoading = true;
                 this.setLumiChatStatus(LumiQuestionRuntime.getLoadingStatus(session));
 
@@ -4709,22 +4576,15 @@
                         role: 'model',
                         text: LumiQuestionRuntime.buildErrorMessage(session, error)
                     });
-                    this.setLumiChatStatus(session.mode === 'toeic-review'
-                        ? '문제 설명 요청에 실패했어.'
-                        : '검색 요청에 실패했어.');
+                    this.setLumiChatStatus('답변 요청에 실패했어.');
                 } finally {
                     this.isLumiChatLoading = false;
                     this.renderLumiChatMessages();
+                    if (input) input.focus();
                 }
             },
 
             // --- Private Tutoring ---
-            openApiSettings() {
-                document.getElementById('modal-api-settings').classList.add('active');
-                const key = Storage.getRaw(Storage.keys.API_KEY);
-                if (key) document.getElementById('api-key-input').value = key;
-            },
-
             closePrivateTutoring() {
                 document.getElementById('modal-tutoring').classList.remove('active');
                 document.getElementById('modal-library').classList.add('active');
@@ -4758,18 +4618,11 @@
                 this.currentTutoringItem = null;
             },
 
-            saveApiKey() {
-                const key = document.getElementById('api-key-input').value.trim();
-                if (!key) return this.showAlert("API 키를 입력해주세요.");
-                Storage.setRaw(Storage.keys.API_KEY, key);
-                this.showAlert("API 키가 저장되었습니다.");
-            },
-
             async startTutoringSession() {
                 if (this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
 
-                const key = Storage.getRaw(Storage.keys.API_KEY);
-                if (!key) return this.showAlert("먼저 API 키를 저장해주세요.");
+                const key = this.ensureApiKey('개인과외를 시작하려면');
+                if (!key) return this.showAlert("API 키가 없어 개인과외를 시작할 수 없습니다.");
 
                 const mode = this.state.mode;
                 const isCollocation = (mode === 'chaos' || mode === 'draft');
@@ -5598,8 +5451,8 @@
             async startDate() {
                 if (this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
 
-                const key = Storage.getRaw(Storage.keys.API_KEY);
-                if (!key) return this.showAlert("먼저 API 키를 저장해주세요.");
+                const key = this.ensureApiKey('데이트를 시작하려면');
+                if (!key) return this.showAlert("API 키가 없어 데이트를 시작할 수 없습니다.");
                 this.clearToeicLumiQuestionSession();
 
                 const dateParams = this._getDateParams();
