@@ -1704,12 +1704,6 @@
                 width: min(42vw, 148px);
             }
         }
-        .title-question-btn {
-            border-color: rgba(133, 212, 255, 0.5) !important;
-            background: linear-gradient(180deg, rgba(28, 89, 128, 0.96), rgba(12, 38, 67, 0.96)) !important;
-            color: #e3f6ff !important;
-        }
-
         .lumi-chat-modal {
             width: min(960px, 96vw);
             height: min(760px, 92vh);
@@ -1870,7 +1864,7 @@
         }
 
         .lumi-chat-main {
-            padding: 20px;
+            padding: 22px 20px 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -1887,12 +1881,6 @@
         .lumi-chat-header h3 {
             margin: 0;
             color: #ffd700;
-        }
-
-        .lumi-chat-header p {
-            margin: 4px 0 0;
-            font-size: 0.8rem;
-            color: #9eb7d2;
         }
 
         .lumi-chat-log {
@@ -1962,6 +1950,7 @@
             min-height: 18px;
             font-size: 0.76rem;
             color: #8fb0cc;
+            display: none;
         }
 
         .lumi-chat-form {
@@ -2043,7 +2032,7 @@
                 <div class="title-actions">
                     <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>New Run</button>
                     <button id="btn-start-load" class="menu-btn secondary-btn" onclick="RPG.startGame('load')" disabled>Continue</button>
-                    <button id="btn-title-question" class="menu-btn title-question-btn" onclick="RPG.openLumiQuestion()" disabled>질문하기</button>
+                    <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()" disabled>질문하기</button>
                 </div>
             </div>
         </div>
@@ -2516,29 +2505,23 @@
                 </div>
                 <div>
                     <h3 style="margin:0; color:#ffd700;">루미의 질문하기</h3>
-                    <div class="lumi-chat-copy">
-                        루미가 <strong>마법구슬</strong>로 웹을 검색하고, 생각을 깊게 정리한 다음 답해줘.
-                        최신 정보가 필요한 질문도 여기서 바로 물어보면 돼.
-                    </div>
                 </div>
-                <button class="menu-btn" onclick="RPG.openApiSettings()" style="margin-top:auto; margin-bottom:0;">API 설정</button>
             </div>
             <div class="lumi-chat-main">
                 <div class="lumi-chat-header">
                     <div>
                         <h3>마법구슬 상담실</h3>
-                        <p>Gemini 검색 도구와 하이 싱킹 레벨로 답변해.</p>
                     </div>
-                    <button onclick="RPG.closeLumiQuestion()" style="padding:10px 14px;">닫기</button>
+                    <button class="menu-btn" onclick="RPG.closeLumiQuestion()" style="padding:10px 14px; margin-bottom:0;">나가기</button>
                 </div>
                 <div id="lumi-chat-log" class="lumi-chat-log"></div>
                 <div id="lumi-chat-status" class="lumi-chat-status"></div>
                 <div class="lumi-chat-form">
                     <textarea id="lumi-chat-input" class="lumi-chat-input"
-                        placeholder="루미에게 궁금한 것을 적어줘. 최신 정보가 필요하면 알아서 검색해서 정리해줄게."
+                        placeholder="루미에게 궁금한 것을 적어줘."
                         onkeydown="RPG.handleLumiQuestionKey(event)"></textarea>
                     <div class="lumi-chat-actions">
-                        <button class="menu-btn" onclick="RPG.sendLumiQuestion()" style="flex:1; margin-bottom:0;">보내기</button>
+                        <button class="menu-btn" onclick="RPG.sendLumiQuestion()" style="flex:1; margin-bottom:0;">질문하기</button>
                         <button class="menu-btn" onclick="RPG.clearLumiQuestionHistory()"
                             style="flex:1; margin-bottom:0; border-color:#90a4ae; color:#cfd8dc;">대화 초기화</button>
                     </div>
@@ -5820,10 +5803,6 @@
             openLumiQuestion() {
                 this.seedLumiChat();
                 this.renderLumiChatMessages();
-                const hasKey = !!Storage.getRaw(Storage.keys.API_KEY);
-                this.setLumiChatStatus(hasKey
-                    ? '질문을 입력하면 루미가 웹을 검색해서 정리해줄게.'
-                    : '먼저 API 설정에 Gemini API Key를 저장해줘.');
                 document.getElementById('modal-lumi-question').classList.add('active');
                 setTimeout(() => {
                     const input = document.getElementById('lumi-chat-input');
@@ -5901,7 +5880,6 @@
                 this.lumiChatMessages = [];
                 this.seedLumiChat();
                 this.renderLumiChatMessages();
-                this.setLumiChatStatus('대화를 초기화했어.');
             },
 
             async sendLumiQuestion() {
@@ -5913,8 +5891,7 @@
 
                 const key = Storage.getRaw(Storage.keys.API_KEY);
                 if (!key) {
-                    this.setLumiChatStatus('API 키를 먼저 저장해줘.');
-                    this.openApiSettings();
+                    this.showAlert("API 키를 먼저 저장해주세요.");
                     return;
                 }
 
@@ -5925,7 +5902,6 @@
                 this.renderLumiChatMessages();
 
                 this.isLumiChatLoading = true;
-                this.setLumiChatStatus('루미가 마법구슬로 검색 중이야...');
 
                 try {
                     const result = await GameAPI.askLumiQuestion(key, this.lumiChatHistory);
@@ -5938,15 +5914,11 @@
                         sources: result.sources,
                         queries: result.queries
                     });
-                    this.setLumiChatStatus(result.sources && result.sources.length > 0
-                        ? `검색 출처 ${result.sources.length}개를 함께 정리했어.`
-                        : '답변을 정리했어.');
                 } catch (error) {
                     this.lumiChatMessages.push({
                         role: 'model',
                         text: `(마법구슬이 흔들려…) 검색 중 문제가 생겼어.\n${error.message || error}`
                     });
-                    this.setLumiChatStatus('검색 요청에 실패했어.');
                 } finally {
                     this.isLumiChatLoading = false;
                     this.renderLumiChatMessages();
