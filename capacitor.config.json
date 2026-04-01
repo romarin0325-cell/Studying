@@ -1,9 +1,0 @@
-{
-    "appId": "com.cardrpg.app",
-    "appName": "Card RPG",
-    "webDir": "card",
-    "bundledWebRuntime": false,
-    "server": {
-        "androidScheme": "https"
-    }
-}
