@@ -758,112 +758,140 @@
             height: min(80vh, 780px);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding: 20px;
-            background:
-                radial-gradient(circle at top left, rgba(129, 212, 250, 0.16), transparent 34%),
-                radial-gradient(circle at bottom right, rgba(255, 214, 102, 0.14), transparent 26%),
-                linear-gradient(180deg, #142033 0%, #0a1220 100%);
-            border: 1px solid rgba(179, 229, 252, 0.18);
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+            gap: 8px;
+            padding: 15px;
         }
 
         .lumi-chat-top {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            text-align: center;
-        }
-
-        .lumi-chat-top .portrait {
-            width: 138px;
-            height: 182px;
-            margin-bottom: 0;
-            border-color: #448aff;
-            background:
-                radial-gradient(circle at top, rgba(68, 138, 255, 0.22), transparent 45%),
-                linear-gradient(180deg, #101727 0%, #060b14 100%);
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
         }
 
         .lumi-chat-title {
             margin: 0;
             color: #ffd700;
+            font-size: 1.1rem;
+        }
+
+        .lumi-chat-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .lumi-chat-controls button {
+            background: #333;
+            border: 1px solid #555;
+            color: #ccc;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .lumi-chat-controls button:hover {
+            background: #444;
         }
 
         .lumi-chat-log {
             flex: 1;
             min-height: 0;
             overflow-y: auto;
-            padding: 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(179, 229, 252, 0.14);
-            background: rgba(8, 15, 27, 0.76);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+        }
+
+        .lumi-chat-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .lumi-chat-input {
-            width: 100%;
-            min-height: 88px;
-            max-height: 148px;
+            flex: 1;
+            min-height: 44px;
+            max-height: 100px;
             resize: vertical;
             box-sizing: border-box;
-            padding: 12px 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(141, 191, 255, 0.18);
-            background: rgba(8, 15, 27, 0.88);
-            color: #eef6ff;
-            font-size: 0.95rem;
-            line-height: 1.55;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #111;
+            color: #eee;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .lumi-chat-input::placeholder {
-            color: #7f97b5;
+            color: #777;
         }
 
         .lumi-chat-input:focus {
-            outline: 1px solid rgba(111, 181, 255, 0.75);
-            border-color: rgba(111, 181, 255, 0.75);
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .lumi-chat-send-btn {
+            background: #222;
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            border-radius: 8px;
+            padding: 0 15px;
+            height: 44px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .lumi-chat-send-btn:active {
+            transform: scale(0.98);
         }
 
         .lumi-chat-bubble {
-            max-width: min(100%, 640px);
-            padding: 12px 14px;
-            border-radius: 16px;
-            line-height: 1.6;
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            line-height: 1.5;
             white-space: pre-wrap;
             word-break: break-word;
+            font-size: 0.85rem;
         }
 
         .lumi-chat-bubble.user {
             align-self: flex-end;
-            background: linear-gradient(180deg, #2c6bb1, #214a80);
-            color: #f3f8ff;
-            border-bottom-right-radius: 6px;
+            background: #2e7d32;
+            color: #fff;
+            border-bottom-right-radius: 4px;
         }
 
         .lumi-chat-bubble.model {
             align-self: flex-start;
-            background: linear-gradient(180deg, rgba(37, 53, 82, 0.96), rgba(20, 31, 54, 0.96));
-            color: #eef6ff;
-            border: 1px solid rgba(141, 191, 255, 0.14);
-            border-bottom-left-radius: 6px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-bottom-left-radius: 4px;
         }
 
         .lumi-chat-meta {
             display: block;
-            margin-top: 10px;
-            font-size: 0.74rem;
-            color: #8cb8ff;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #aaa;
         }
 
         .lumi-chat-sources {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .lumi-chat-source {
@@ -872,45 +900,26 @@
             gap: 4px;
             padding: 4px 8px;
             border-radius: 999px;
-            background: rgba(111, 181, 255, 0.14);
-            color: #d8ecff;
-            font-size: 0.72rem;
+            background: #333;
+            color: #ccc;
+            font-size: 0.7rem;
             text-decoration: none;
+            border: 1px solid #444;
         }
 
         .lumi-chat-status {
-            min-height: 18px;
-            font-size: 0.76rem;
-            color: #8fb0cc;
-        }
-
-        .lumi-chat-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .lumi-chat-actions .menu-btn {
-            flex: 1;
-            margin-bottom: 0;
-            padding: 8px 10px;
-            font-size: 0.88rem;
-            min-height: 38px;
+            min-height: 16px;
+            font-size: 0.75rem;
+            color: #aaa;
+            text-align: left;
+            margin-top: 2px;
         }
 
         @media (max-width: 760px) {
             .lumi-chat-modal {
-                width: min(92vw, 600px);
-                height: min(84vh, 760px);
-                padding: 16px;
-            }
-
-            .lumi-chat-top .portrait {
-                width: 118px;
-                height: 156px;
-            }
-
-            .lumi-chat-actions {
-                flex-direction: column;
+                width: min(95vw, 600px);
+                height: min(85vh, 760px);
+                padding: 12px;
             }
         }
     </style>
@@ -1347,19 +1356,18 @@
     <div id="modal-lumi-question" class="modal">
         <div class="modal-content lumi-chat-modal">
             <div class="lumi-chat-top">
-                <div class="portrait" aria-hidden="true">
-                    <img src="lumi-portrait.svg" alt="루미 초상화">
-                </div>
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
+                <div class="lumi-chat-controls">
+                    <button id="lumi-chat-reset-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
+                    <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
+                </div>
             </div>
             <div id="lumi-chat-log" class="lumi-chat-log"></div>
             <div id="lumi-chat-status" class="lumi-chat-status"></div>
-            <textarea id="lumi-chat-input" class="lumi-chat-input" placeholder="루미에게 질문을 적어줘."
-                onkeydown="RPG.handleLumiQuestionKey(event)"></textarea>
-            <div class="lumi-chat-actions">
-                <button id="lumi-chat-reset-btn" class="menu-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
-                <button class="menu-btn" onclick="RPG.sendLumiQuestion()">질문하기</button>
-                <button id="lumi-chat-close-btn" class="menu-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
+            <div class="lumi-chat-input-container">
+                <textarea id="lumi-chat-input" class="lumi-chat-input" placeholder="질문 입력..."
+                    onkeydown="RPG.handleLumiQuestionKey(event)"></textarea>
+                <button class="lumi-chat-send-btn" onclick="RPG.sendLumiQuestion()">전송</button>
             </div>
         </div>
     </div>
@@ -4398,8 +4406,8 @@
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
-                        ? '해설에서 궁금한 점을 적어줘.'
-                        : '루미에게 질문을 적어줘.';
+                        ? '해설에서 궁금한 점을 입력하세요.'
+                        : '질문을 입력하세요.';
                 }
             },
 
