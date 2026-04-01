@@ -78,15 +78,25 @@ const GameAPI = {
         // 3. 프롬프트 조합
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
-        // 4. API 호출 (온도는 0.6~0.7 추천: 창의적인 상황 부여 필요)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+        // 4. API 호출 (질문하기와 동일하게 3.1-pro / high reasoning / BLOCK_NONE 사용)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: fullPrompt }] }],
                 generationConfig: {
-                    temperature: isMisunderstandingMode ? 0.65 : 0.4
-                }
+                    temperature: isMisunderstandingMode ? 0.65 : 0.4,
+                    thinkingConfig: {
+                        thinkingLevel: 'high'
+                    }
+                },
+                safetySettings: [
+                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+                ]
             })
         });
 
