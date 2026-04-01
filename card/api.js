@@ -78,8 +78,8 @@ const GameAPI = {
         // 3. 프롬프트 조합
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
-        // 4. API 호출 (질문하기와 동일하게 3.1-pro / high reasoning / BLOCK_NONE 사용)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        // 4. API 호출 (3.0 Flash + high reasoning + BLOCK_NONE)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -160,6 +160,14 @@ function normalizeGroundingSources(candidate) {
 }
 
 const GEMINI_REASONING_LEVELS = new Set(['low', 'medium', 'high']);
+const GEMINI_MODEL_OPTIONS = Object.freeze({
+    FLASH: 'gemini-3-flash-preview',
+    PRO: 'gemini-3.1-pro-preview'
+});
+
+function normalizeGeminiModel(model) {
+    return Object.values(GEMINI_MODEL_OPTIONS).includes(model) ? model : GEMINI_MODEL_OPTIONS.PRO;
+}
 
 function normalizeThinkingLevel(thinkingLevel) {
     return GEMINI_REASONING_LEVELS.has(thinkingLevel) ? thinkingLevel : 'high';
@@ -169,7 +177,8 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     const {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
-        thinkingLevel = 'high'
+        thinkingLevel = 'high',
+        model = GEMINI_MODEL_OPTIONS.PRO
     } = options;
 
     const payload = {
@@ -200,7 +209,8 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
     ];
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
+    const selectedModel = normalizeGeminiModel(model);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -385,6 +395,7 @@ function createGeneralSession() {
             : '너는 형아에게 친근하게 답하는 남성 마법사 루미다.',
         enableSearch: true,
         thinkingLevel: 'high',
+        model: GEMINI_MODEL_OPTIONS.PRO,
         seedHistory: [],
         seedMessages: []
     });
@@ -398,6 +409,7 @@ function createToeicReviewSession(source) {
         systemInstruction: TOEIC_LUMI_SYSTEM_INSTRUCTION,
         enableSearch: true,
         thinkingLevel: 'high',
+        model: GEMINI_MODEL_OPTIONS.PRO,
         source,
         seedHistory: [
             { role: 'user', parts: [{ text: context }] }
@@ -506,7 +518,8 @@ const LumiQuestionRuntime = {
         const result = await GameAPI.askLumiQuestion(apiKey, session.history, {
             systemInstruction: session.systemInstruction,
             enableSearch: session.enableSearch,
-            thinkingLevel: session.thinkingLevel
+            thinkingLevel: session.thinkingLevel,
+            model: session.model
         });
 
         if (result && result.content) {
@@ -522,6 +535,17 @@ const LumiQuestionRuntime = {
 
         return result;
     }
+};
+
+LumiQuestionRuntime.MODELS = GEMINI_MODEL_OPTIONS;
+
+LumiQuestionRuntime.getSessionModel = function (session) {
+    return normalizeGeminiModel(session && session.model);
+};
+
+LumiQuestionRuntime.setSessionModel = function (session, model) {
+    if (!session) return;
+    session.model = normalizeGeminiModel(model);
 };
 
 window.LumiQuestionRuntime = LumiQuestionRuntime;
