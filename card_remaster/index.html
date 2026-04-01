@@ -745,22 +745,22 @@
             background: #444;
         }
         :root {
-            --rm-bg: #07111f;
-            --rm-bg-2: #0c1830;
-            --rm-panel: rgba(11, 22, 41, 0.8);
-            --rm-panel-strong: rgba(15, 28, 51, 0.94);
-            --rm-panel-soft: rgba(17, 33, 59, 0.72);
-            --rm-line: rgba(128, 168, 255, 0.22);
-            --rm-line-strong: rgba(177, 208, 255, 0.34);
-            --rm-text: #edf4ff;
-            --rm-muted: #8ea9d1;
-            --rm-gold: #ffd36f;
-            --rm-cyan: #6ed5ff;
-            --rm-green: #82f0b0;
-            --rm-red: #ff7588;
-            --rm-violet: #c18cff;
-            --rm-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
-            --rm-radius: 18px;
+            --rm-bg: #050a12;
+            --rm-bg-2: #0b1426;
+            --rm-panel: rgba(14, 24, 44, 0.65);
+            --rm-panel-strong: rgba(18, 28, 52, 0.88);
+            --rm-panel-soft: rgba(20, 32, 60, 0.5);
+            --rm-line: rgba(120, 160, 255, 0.16);
+            --rm-line-strong: rgba(140, 180, 255, 0.35);
+            --rm-text: #f2f7ff;
+            --rm-muted: #9bb5da;
+            --rm-gold: #ffdf7a;
+            --rm-cyan: #4bd8ff;
+            --rm-green: #68f0aa;
+            --rm-red: #ff6383;
+            --rm-violet: #cf8eff;
+            --rm-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+            --rm-radius: 20px;
         }
 
         html,
@@ -770,9 +770,9 @@
 
         body.remaster-body {
             background:
-                radial-gradient(circle at 15% 15%, rgba(80, 143, 255, 0.24), transparent 28%),
-                radial-gradient(circle at 85% 10%, rgba(193, 117, 255, 0.18), transparent 26%),
-                radial-gradient(circle at 50% 120%, rgba(45, 132, 255, 0.2), transparent 38%),
+                radial-gradient(circle at 10% 0%, rgba(66, 120, 255, 0.28), transparent 35%),
+                radial-gradient(circle at 90% 15%, rgba(180, 90, 255, 0.22), transparent 30%),
+                radial-gradient(circle at 50% 110%, rgba(0, 180, 255, 0.18), transparent 45%),
                 linear-gradient(180deg, var(--rm-bg-2) 0%, var(--rm-bg) 100%);
             color: var(--rm-text);
             font-family: 'Noto Sans KR', sans-serif;
@@ -796,11 +796,11 @@
 
         .app-backdrop__grid {
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-            background-size: 48px 48px;
-            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent);
-            opacity: 0.25;
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent 80%);
+            opacity: 0.35;
         }
 
         .app-backdrop__noise {
@@ -808,39 +808,39 @@
                 radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px),
                 radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px),
                 radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px);
-            background-size: 180px 180px;
-            opacity: 0.28;
+            background-size: 150px 150px;
+            opacity: 0.25;
             mix-blend-mode: screen;
         }
 
         .app-backdrop__orb {
             border-radius: 999px;
-            filter: blur(26px);
-            opacity: 0.75;
-            animation: remaster-float 14s ease-in-out infinite;
+            filter: blur(32px);
+            opacity: 0.8;
+            animation: remaster-float 16s ease-in-out infinite;
         }
 
         .app-backdrop__orb--a {
-            inset: 6% auto auto -10%;
-            width: 220px;
-            height: 220px;
-            background: rgba(80, 143, 255, 0.32);
+            inset: 4% auto auto -8%;
+            width: 260px;
+            height: 260px;
+            background: rgba(60, 120, 255, 0.35);
         }
 
         .app-backdrop__orb--b {
-            inset: auto -8% 18% auto;
-            width: 180px;
-            height: 180px;
-            background: rgba(194, 124, 255, 0.26);
-            animation-duration: 18s;
+            inset: auto -6% 15% auto;
+            width: 220px;
+            height: 220px;
+            background: rgba(184, 94, 255, 0.28);
+            animation-duration: 20s;
         }
 
         .app-backdrop__orb--c {
-            inset: 42% auto auto 58%;
-            width: 150px;
-            height: 150px;
-            background: rgba(110, 213, 255, 0.2);
-            animation-duration: 16s;
+            inset: 38% auto auto 55%;
+            width: 180px;
+            height: 180px;
+            background: rgba(60, 200, 255, 0.22);
+            animation-duration: 18s;
         }
 
         .header {
@@ -850,12 +850,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 12px;
-            background: linear-gradient(180deg, rgba(5, 10, 18, 0.92), rgba(9, 16, 30, 0.72));
+            gap: 8px;
+            padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px;
+            background: linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(12, 18, 30, 0.85));
             border-bottom: 1px solid var(--rm-line);
-            backdrop-filter: blur(18px);
-            box-shadow: 0 16px 32px rgba(2, 6, 14, 0.24);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
         .header__brand {
@@ -904,8 +904,8 @@
             padding: 0 12px;
             border-radius: 999px;
             border: 1px solid var(--rm-line-strong);
-            background: rgba(16, 29, 52, 0.74);
-            color: #d8e7ff;
+            background: rgba(20, 36, 64, 0.7);
+            color: #e4f0ff;
             font-size: 0.74rem;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -914,8 +914,8 @@
 
         .remaster-shell {
             position: relative;
-            gap: 14px;
-            padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+            gap: 16px;
+            padding: 16px 14px calc(24px + env(safe-area-inset-bottom, 0px));
         }
 
         .screen {
@@ -932,10 +932,11 @@
         .log-container,
         .modal-content {
             background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 28%),
+                linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
                 linear-gradient(180deg, var(--rm-panel-strong), var(--rm-panel));
             border: 1px solid var(--rm-line);
-            box-shadow: var(--rm-shadow);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), var(--rm-shadow);
+            backdrop-filter: blur(24px);
         }
 
         .title-screen {
@@ -1044,13 +1045,14 @@
         }
 
         .remaster-body .menu-btn {
-            background: linear-gradient(180deg, rgba(40, 69, 118, 0.96), rgba(22, 40, 73, 0.96)) !important;
-            border: 1px solid rgba(134, 176, 255, 0.34) !important;
-            color: #eef5ff !important;
+            background: linear-gradient(180deg, rgba(44, 78, 136, 0.96), rgba(24, 44, 84, 0.96)) !important;
+            border: 1px solid rgba(144, 190, 255, 0.45) !important;
+            color: #ffffff !important;
             font-weight: 700;
             text-align: left;
             padding: 16px 16px !important;
             margin-bottom: 0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.15);
         }
 
         .remaster-body .menu-btn::before,
@@ -1067,8 +1069,8 @@
         .remaster-body .menu-btn:active,
         .remaster-body .skill-btn:active,
         .remaster-body button:not(.menu-btn):active {
-            transform: translateY(1px) scale(0.985);
-            filter: brightness(1.04);
+            transform: translateY(2px) scale(0.97);
+            filter: brightness(1.1);
         }
 
         .remaster-body .menu-btn:active::before,
@@ -1078,28 +1080,37 @@
         }
 
         .secondary-btn {
-            background: linear-gradient(180deg, rgba(26, 41, 68, 0.96), rgba(14, 25, 45, 0.96)) !important;
-            color: #d7e4ff !important;
+            background: linear-gradient(180deg, rgba(32, 48, 76, 0.96), rgba(16, 28, 50, 0.96)) !important;
+            border-color: rgba(100, 140, 200, 0.3) !important;
+            color: #cce0ff !important;
         }
 
         .accent-violet {
-            border-color: rgba(208, 153, 255, 0.52) !important;
-            box-shadow: 0 16px 26px rgba(116, 64, 191, 0.28);
+            border-color: rgba(220, 160, 255, 0.8) !important;
+            box-shadow: 0 12px 24px rgba(150, 70, 220, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(180deg, rgba(120, 60, 190, 0.95), rgba(60, 25, 100, 0.95)) !important;
+            color: #f7e6ff !important;
         }
 
         .accent-green {
-            border-color: rgba(130, 240, 176, 0.44) !important;
-            box-shadow: 0 16px 26px rgba(59, 147, 95, 0.24);
+            border-color: rgba(140, 255, 180, 0.8) !important;
+            box-shadow: 0 12px 24px rgba(40, 180, 100, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(180deg, rgba(46, 146, 86, 0.95), rgba(22, 78, 44, 0.95)) !important;
+            color: #e6ffed !important;
         }
 
         .accent-red {
-            border-color: rgba(255, 117, 136, 0.46) !important;
-            box-shadow: 0 16px 26px rgba(149, 47, 71, 0.28);
+            border-color: rgba(255, 140, 150, 0.8) !important;
+            box-shadow: 0 12px 24px rgba(200, 50, 70, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(180deg, rgba(170, 44, 66, 0.95), rgba(86, 20, 32, 0.95)) !important;
+            color: #ffe6eb !important;
         }
 
         .accent-gold {
-            border-color: rgba(255, 211, 111, 0.46) !important;
-            box-shadow: 0 16px 26px rgba(153, 111, 35, 0.24);
+            border-color: rgba(255, 220, 120, 0.9) !important;
+            box-shadow: 0 12px 30px rgba(220, 150, 40, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+            background: linear-gradient(180deg, rgba(190, 136, 34, 0.95), rgba(100, 68, 16, 0.95)) !important;
+            color: #fffaf0 !important;
         }
 
         .menu-scroll,
@@ -1998,6 +2009,61 @@
                 height: 134px;
             }
         }
+
+        /* Bottom Nav Layout */
+        .bottom-nav {
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: linear-gradient(180deg, rgba(16, 25, 43, 0.95), rgba(8, 14, 26, 0.98));
+            border-top: 1px solid rgba(136, 173, 237, 0.2);
+            backdrop-filter: blur(12px);
+            z-index: 50;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        body[data-screen="screen-menu"] .bottom-nav,
+        body[data-screen="screen-collection"] .bottom-nav,
+        body[data-screen="screen-deck"] .bottom-nav {
+            display: flex;
+        }
+        .bottom-nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            color: #8ea9d1;
+            background: transparent;
+            border: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+            padding: 0;
+        }
+        .bottom-nav-btn:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .bottom-nav-btn.active {
+            color: #ffd700;
+        }
+        .bottom-nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+        .remaster-shell {
+            padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+        }
+
     </style>
 </head>
 
@@ -2011,28 +2077,28 @@
     </div>
     <div class="header">
         <div class="header__brand">
-            <span class="header__eyebrow">Commercial Remaster Beta</span>
-            <strong class="header__title">Card RPG</strong>
+            <span class="header__eyebrow">RPG REMASTER</span>
+            <strong class="header__title">학습형 카드 게임</strong>
         </div>
         <div class="header__meta">
-            <span id="header-mode-pill" class="header-pill">MODE --</span>
-            <span id="header-stage-pill" class="header-pill">STAGE --</span>
+            <span id="header-mode-pill" class="header-pill">모드 --</span>
+            <span id="header-stage-pill" class="header-pill">스테이지 --</span>
         </div>
     </div>
     <div class="container remaster-shell">
         <div id="screen-title" class="screen active title-screen" style="justify-content: center; align-items: center;">
             <div class="title-panel">
-                <div class="title-panel__crest">CR</div>
+                <div class="title-panel__crest">RG</div>
                 <div class="title-panel__copy">
                     <p class="title-kicker">Touch-First Fantasy Interface</p>
                     <h1 class="title-logo">Card RPG</h1>
-                    <p class="title-subcopy">Beta remaster for mobile HTML. Cleaner battle readability, unified navigation, and stronger visual feedback.</p>
+                    <p class="title-subcopy">모바일에 최적화된 학습형 카드 배틀 RPG입니다. 세련된 UI와 강력한 피드백을 경험해보세요.</p>
                 </div>
-                <div id="title-loading" class="title-loading">Loading data... please wait.</div>
+                <div id="title-loading" class="title-loading">데이터를 불러오는 중입니다...</div>
                 <div class="title-actions">
-                    <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>New Run</button>
-                    <button id="btn-start-load" class="menu-btn secondary-btn" onclick="RPG.startGame('load')" disabled>Continue</button>
-                    <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()" disabled>질문하기</button>
+                    <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로 시작</button>
+                    <button id="btn-start-load" class="menu-btn secondary-btn" onclick="RPG.startGame('load')" disabled>이어 하기</button>
+                    <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()" disabled>마법구슬 상담실</button>
                 </div>
             </div>
         </div>
@@ -2040,84 +2106,81 @@
             <div class="menu-scroll">
                 <section class="menu-hero glass-panel">
                     <div class="menu-hero__copy">
-                        <p class="section-kicker">Run Command</p>
-                        <h2 class="section-title">Ready Room</h2>
-                        <p class="section-copy">Mobile-first hub with clearer info hierarchy, faster touch targets, and a cleaner flow.</p>
+                        <p class="section-kicker">Command Center</p>
+                        <h2 class="section-title">작전 대기실</h2>
+                        <p class="section-copy">진형을 가다듬고 다음 스테이지를 대비하세요.</p>
                         <div class="hero-stats">
                             <div class="hero-stat">
-                                <span>Tickets</span>
+                                <span>보유 티켓</span>
                                 <strong id="ui-tickets">0</strong>
                             </div>
                             <div class="hero-stat">
-                                <span>Mode</span>
+                                <span>현재 모드</span>
                                 <strong id="menu-mode-chip">--</strong>
                             </div>
                             <div class="hero-stat">
-                                <span>Type</span>
+                                <span>게임 유형</span>
                                 <strong id="menu-type-chip">--</strong>
                             </div>
                         </div>
                     </div>
                     <div id="next-enemy-preview" class="enemy-preview">
-                        <div class="enemy-preview__label">NEXT THREAT</div>
+                        <div class="enemy-preview__label">다음 목표</div>
                         <div class="enemy-preview__name"><span id="next-enemy-text">?</span></div>
                         <div class="portrait enemy-preview__portrait"><img id="next-enemy-img" src="" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:contain;"></div>
                     </div>
                 </section>
                 <section class="menu-section glass-panel">
-                    <div class="menu-section__title">Draw / Draft Flow</div>
+                    <div class="menu-section__title">모병소 (가챠 / 드래프트)</div>
                     <div id="menu-gacha-area" class="button-pair">
-                        <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">Normal Draw</button>
-                        <button class="menu-btn accent-violet" onclick="RPG.openChallengeGacha()" style="flex:1;">Challenge Draw</button>
+                        <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">일반 뽑기</button>
+                        <button class="menu-btn accent-violet" onclick="RPG.openChallengeGacha()" style="flex:1;">도전 뽑기</button>
                     </div>
                     <div id="menu-draft-area" class="solo-action" style="display:none;">
-                        <button class="menu-btn accent-green" onclick="RPG.startDraft()">Start Draft</button>
+                        <button class="menu-btn accent-green" onclick="RPG.startDraft()">드래프트 시작</button>
                     </div>
                     <div id="menu-chaos-area" class="solo-action" style="display:none;">
-                        <button class="menu-btn accent-red" onclick="RPG.reshuffleChaosPool()">Refresh Chaos Pool</button>
+                        <button class="menu-btn accent-red" onclick="RPG.reshuffleChaosPool()">카오스 풀 갱신</button>
                     </div>
                 </section>
                 <section class="menu-grid">
-                    <button class="menu-btn menu-tile" onclick="RPG.openDeck()"><span class="menu-tile__eyebrow">FORMATION</span>Deck Edit</button>
-                    <button class="menu-btn menu-tile" onclick="RPG.openCollection()"><span class="menu-tile__eyebrow">ROSTER</span>Collection</button>
-                    <button class="menu-btn menu-tile" onclick="RPG.openLibrary()"><span class="menu-tile__eyebrow">STUDY</span>Library</button>
-                    <button class="menu-btn menu-tile accent-gold" onclick="RPG.openChaosBlessing()"><span class="menu-tile__eyebrow">BOOST</span>Blessings</button>
-                    <button class="menu-btn menu-tile accent-red" onclick="RPG.startBattleInit()"><span class="menu-tile__eyebrow">COMBAT</span>Start Battle</button>
-                    <button class="menu-btn menu-tile" onclick="RPG.openSystemMenu()"><span class="menu-tile__eyebrow">SYSTEM</span>System</button>
+                    <button class="menu-btn menu-tile accent-red" onclick="RPG.startBattleInit()" style="grid-column: 1 / -1; padding: 24px 16px !important; text-align: center;"><span class="menu-tile__eyebrow">COMBAT</span><span style="font-size: 1.3rem;">전투 진입</span></button>
+                    <button class="menu-btn menu-tile accent-gold" onclick="RPG.openChaosBlessing()"><span class="menu-tile__eyebrow">BOOST</span>축복 선택</button>
+                    <button class="menu-btn menu-tile" onclick="RPG.openSystemMenu()"><span class="menu-tile__eyebrow">SYSTEM</span>시스템 설정</button>
                 </section>
             </div>
         </div>
         <div id="screen-draft" class="screen">
-            <h3 style="margin:5px 0;">Draft Select (<span id="draft-round-text">1 / 3</span>)</h3>
-            <div style="text-align:center; margin-bottom:2px;">Rerolls: <span id="draft-reroll-cnt" style="color:#ffd700">3</span></div>
+            <h3 style="margin:5px 0;">드래프트 선택 (<span id="draft-round-text">1 / 3</span>)</h3>
+            <div style="text-align:center; margin-bottom:2px;">남은 리롤: <span id="draft-reroll-cnt" style="color:#ffd700">3</span></div>
             <div id="draft-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; padding:5px; overflow-y:auto; flex:1;"></div>
             <div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px;">
-                <button class="menu-btn" onclick="RPG.rerollDraft()" style="background:#333; border-color:#ff9800; color:#ff9800;">Reroll</button>
-                <button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;">Back to Menu</button>
+                <button class="menu-btn" onclick="RPG.rerollDraft()" style="background:#333; border-color:#ff9800; color:#ff9800;">목록 갱신</button>
+                <button class="menu-btn" onclick="RPG.toMenu()" style="margin-top:5px;">로비로 돌아가기</button>
             </div>
         </div>
         <div id="screen-collection" class="screen">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Collection</h3><button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">Back</button>
+                <h3>카드 도감</h3><button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
             </div>
             <div id="collection-grid" class="card-grid"></div>
         </div>
         <div id="screen-deck" class="screen">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Deck Edit</h3>
-                <button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">Back</button>
+                <h3>덱 편성</h3>
+                <button onclick="RPG.toMenu()" style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
             </div>
             <div style="margin-bottom:10px; display:grid; gap:8px;">
-                <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">Vanguard (tap to assign)</div>
-                <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">Midline (tap to assign)</div>
-                <div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">Anchor (tap to assign)</div>
+                <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉 (클릭하여 배치)</div>
+                <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중위 (클릭하여 배치)</div>
+                <div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">후위 (클릭하여 배치)</div>
             </div>
             <div style="flex:1; overflow-y:auto; border-top:1px solid #333;">
                 <div id="deck-card-list" class="card-grid"></div>
             </div>
-            <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">Save Formation</button>
+            <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">편성 저장</button>
         </div>
-        <div id="screen-chaos-roulette" class="screen">        <div id="screen-chaos-roulette" class="screen">        <div id="screen-chaos-roulette" class="screen">
+        <div id="screen-chaos-roulette" class="screen">
             <div
                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:15vh; gap:20px;">
                 <div style="text-align:center;">
@@ -2150,11 +2213,11 @@
         <div id="screen-battle" class="screen battle-screen">
             <div class="battle-header glass-panel">
                 <div class="battle-header__main">
-                    <span class="battle-header__eyebrow">TURN</span>
+                    <span class="battle-header__eyebrow">현재 턴</span>
                     <strong class="battle-header__value" id="bt-turn">1</strong>
                 </div>
                 <div class="battle-header__meta">
-                    <span id="battle-mode-chip" class="header-pill battle-pill">MODE --</span>
+                    <span id="battle-mode-chip" class="header-pill battle-pill">모드 --</span>
                     <div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div>
                 </div>
             </div>
@@ -2162,16 +2225,16 @@
                 <div class="visual-stage">
                     <div id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
                         <div class="actor-nameplate">
-                            <span class="actor-lane">ALLY</span>
+                            <span class="actor-lane">아군</span>
                             <strong id="p-name">Player</strong>
                         </div>
                         <div class="portrait actor-portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
                         <div class="actor-bar-wrap">
-                            <div class="actor-bar-meta"><span>HP</span><span id="p-hp-text">0 / 0</span></div>
+                            <div class="actor-bar-meta"><span>체력</span><span id="p-hp-text">0 / 0</span></div>
                             <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
                         </div>
                         <div class="actor-bar-wrap">
-                            <div class="actor-bar-meta"><span>MP</span><span id="p-mp-text">0 / 100</span></div>
+                            <div class="actor-bar-meta"><span>마나</span><span id="p-mp-text">0 / 100</span></div>
                             <div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div>
                         </div>
                         <div id="p-buffs" class="actor-buffs"></div>
@@ -2181,12 +2244,12 @@
 
                     <div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)">
                         <div class="actor-nameplate">
-                            <span class="actor-lane">BOSS</span>
+                            <span class="actor-lane">적 개체</span>
                             <strong id="e-name">Enemy</strong>
                         </div>
                         <div class="portrait actor-portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
                         <div class="actor-bar-wrap">
-                            <div class="actor-bar-meta"><span>HP</span><span id="e-hp-text">0 / 0</span></div>
+                            <div class="actor-bar-meta"><span>체력</span><span id="e-hp-text">0 / 0</span></div>
                             <div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div>
                         </div>
                         <div id="e-buffs" class="actor-buffs"></div>
@@ -2197,6 +2260,26 @@
             <div id="battle-controls" class="control-panel"></div>
         </div>
     </div>
+    
+    <!-- Bottom Nav Bar -->
+    <nav class="bottom-nav" id="main-bottom-nav">
+        <button class="bottom-nav-btn active" onclick="RPG.toMenu()">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>로비</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="RPG.openDeck()">
+            <span class="bottom-nav-icon">🛡️</span>
+            <span>편성</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="RPG.openCollection()">
+            <span class="bottom-nav-icon">📚</span>
+            <span>도감</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="RPG.openLibrary()">
+            <span class="bottom-nav-icon">🎓</span>
+            <span>학습소</span>
+        </button>
+    </nav>
 
     <div id="modal-mode-select" class="modal">
         <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
