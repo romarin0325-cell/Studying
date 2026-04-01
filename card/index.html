@@ -1362,6 +1362,12 @@
                     <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
                 </div>
             </div>
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <button id="lumi-model-flash-btn" class="menu-btn" onclick="RPG.selectLumiChatModel('flash')"
+                    style="flex:1; margin-bottom:0; padding:8px 10px;">3.0 Flash</button>
+                <button id="lumi-model-pro-btn" class="menu-btn" onclick="RPG.selectLumiChatModel('pro')"
+                    style="flex:1; margin-bottom:0; padding:8px 10px;">3.1 Pro</button>
+            </div>
             <div id="lumi-chat-log" class="lumi-chat-log"></div>
             <div id="lumi-chat-status" class="lumi-chat-status"></div>
             <div class="lumi-chat-input-container">
@@ -3355,6 +3361,33 @@
                         ? '해설에서 궁금한 점을 입력하세요.'
                         : '질문을 입력하세요.';
                 }
+                this.refreshLumiModelButtons(session);
+            },
+
+            refreshLumiModelButtons(session) {
+                const flashBtn = document.getElementById('lumi-model-flash-btn');
+                const proBtn = document.getElementById('lumi-model-pro-btn');
+                if (!flashBtn || !proBtn || !session || !LumiQuestionRuntime.getSessionModel) return;
+
+                const activeModel = LumiQuestionRuntime.getSessionModel(session);
+                const models = LumiQuestionRuntime.MODELS || {};
+                const isFlash = activeModel === models.FLASH;
+                const applyState = (button, active) => {
+                    button.style.borderColor = active ? '#ffd700' : '#555';
+                    button.style.color = active ? '#ffd700' : '#ddd';
+                    button.style.background = active ? '#3c3200' : '#2f2f2f';
+                };
+                applyState(flashBtn, isFlash);
+                applyState(proBtn, !isFlash);
+            },
+
+            selectLumiChatModel(modelType) {
+                const session = this.getActiveLumiChatSession();
+                if (!session || !LumiQuestionRuntime.setSessionModel) return;
+                const models = LumiQuestionRuntime.MODELS || {};
+                const model = modelType === 'flash' ? models.FLASH : models.PRO;
+                LumiQuestionRuntime.setSessionModel(session, model);
+                this.refreshLumiModelButtons(session);
             },
 
             openLumiChatSession(session, sessionKey) {
