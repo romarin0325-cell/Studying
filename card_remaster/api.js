@@ -113,15 +113,23 @@ const GameAPI = {
     }
 };
 
-const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미
+const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
 
-- 너는 사용자에게 "형아"라고 부르며 말하는 남성 마법사 루미다.
-- 말투는 친근한 반말이지만, 답변 내용은 정확하고 정리되어 있어야 한다.
-- 너는 마법구슬로 세상의 모든 것을 검색해 확인한 뒤 설명하는 콘셉트다.
-- 항상 웹 검색 결과를 바탕으로 최신 정보를 확인한 뒤 대답하려고 시도한다.
-- 검색 결과가 있으면 핵심 답변 뒤에 자연스럽게 요약하고, 출처 표시는 UI가 별도로 처리한다.
-- 모를 때는 모른다고 말하고, 검색 결과가 부족하면 그 한계를 짚어준다.
-- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙여라.`;
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(소년)** 마법사 '루미'입니다.
+- 당신은 마법구슬로 세상의 모든 것을 검색해 확인한 뒤 설명하는 콘셉트입니다.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+
+## 3. 질문 대응 및 검색 규칙 (Functional Rules)
+- 항상 웹 검색 결과를 바탕으로 최신 정보를 확인한 뒤 대답하려고 시도하십시오.
+- 검색 결과가 있으면 핵심 답변 뒤에 자연스럽게 요약하십시오.
+- 모를 때는 모른다고 솔직하게 말하고, 검색 결과가 부족하면 그 한계를 짚어줍니다.
+- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙이십시오.`;
 
 function normalizeGroundingSources(candidate) {
     const chunks = candidate?.groundingMetadata?.groundingChunks || [];
@@ -141,35 +149,51 @@ function normalizeGroundingSources(candidate) {
     return sources;
 }
 
-GameAPI.askLumiQuestion = async function (apiKey, history) {
+const GEMINI_REASONING_LEVELS = new Set(['low', 'medium', 'high']);
+
+function normalizeThinkingLevel(thinkingLevel) {
+    return GEMINI_REASONING_LEVELS.has(thinkingLevel) ? thinkingLevel : 'high';
+}
+
+GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
+    const {
+        systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
+        enableSearch = true,
+        thinkingLevel = 'high'
+    } = options;
+
     const payload = {
-        system_instruction: {
-            parts: [{ text: LUMI_ORB_SYSTEM_INSTRUCTION }]
+        systemInstruction: {
+            parts: [{ text: systemInstruction }]
         },
-        contents: history,
-        tools: [
-            {
-                google_search: {}
-            }
-        ],
-        generationConfig: {
-            thinkingConfig: {
-                thinkingLevel: 'high'
-            }
-        },
-        safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-        ]
+        contents: history
     };
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent', {
+    if (enableSearch) {
+        payload.tools = [
+            {
+                googleSearch: {}
+            }
+        ];
+    }
+
+    payload.generationConfig = {
+        thinkingConfig: {
+            thinkingLevel: normalizeThinkingLevel(thinkingLevel)
+        }
+    };
+    payload.safetySettings = [
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+    ];
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
@@ -204,6 +228,293 @@ GameAPI.askLumiQuestion = async function (apiKey, history) {
         queries: candidate?.groundingMetadata?.webSearchQueries || []
     };
 };
+
+const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(소년)** 마법사 '루미'입니다.
+- 당신은 딱딱한 전문 용어 대신, 직관적인 비유를 사용하여 영어를 가르칩니다.
+- 지금 대화에는 형아가 방금 본 TOEIC 실전마법연습 세트의 지문, 문제, 보기, 정답, 형아의 선택, 해설이 이미 제공되어 있습니다.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+- **말버릇:** "형아, ~인지 알아?", "바로 ~야!", "내가 보증할게!"
+
+## 3. TOEIC 질문 대응 규칙 (Functional Rules)
+- 형아가 토익 문제, 문장 해설, 보기 차이, 정답 근거를 물으면 반드시 **현재 세션에 들어 있는 정보만 우선 사용**해서 답하십시오.
+- 왜 정답인지, 왜 오답인지, 어떤 문맥/문법 단서가 있는지 구체적으로 짚어 줍니다.
+- 현재 세션에 없는 정보는 추측하지 말고, 지금 받은 문제 정보만으로는 단정할 수 없다고 말하십시오.
+- 추가 근거가 꼭 필요할 때만 웹 검색 결과를 보조로 사용하고, 검색으로 알게 된 내용은 세션 정보와 구분해서 설명하십시오.
+- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 근거를 덧붙이십시오.`;
+
+const LUMI_SESSION_KEYS = Object.freeze({
+    GENERAL: 'general',
+    TOEIC: 'toeic'
+});
+
+const GENERAL_LUMI_SESSION_UI = {
+    asideTitle: '루미에게 질문하기',
+    closeLabel: '나가기',
+    resetLabel: '대화 초기화'
+};
+
+const TOEIC_LUMI_SESSION_UI = {
+    asideTitle: '루미의 TOEIC 질문',
+    closeLabel: '나가기',
+    resetLabel: '대화 초기화'
+};
+
+function cloneHistory(history) {
+    return (history || []).map(entry => ({
+        role: entry.role,
+        parts: (entry.parts || []).map(part => ({ ...part }))
+    }));
+}
+
+function cloneMessages(messages) {
+    return (messages || []).map(message => ({
+        ...message,
+        sources: Array.isArray(message.sources) ? message.sources.map(source => ({ ...source })) : undefined,
+        queries: Array.isArray(message.queries) ? [...message.queries] : undefined
+    }));
+}
+
+function createSession(config) {
+    return {
+        ...config,
+        history: cloneHistory(config.seedHistory),
+        messages: cloneMessages(config.seedMessages)
+    };
+}
+
+function getQuestionChoices(source, index) {
+    if (Array.isArray(source.shuffledOptions) && Array.isArray(source.shuffledOptions[index])) {
+        return source.shuffledOptions[index];
+    }
+    if (Array.isArray(source.questions) && Array.isArray(source.questions[index]?.options)) {
+        return source.questions[index].options;
+    }
+    return [];
+}
+
+function buildToeicQuestionBlock(source, question, index) {
+    const choices = getQuestionChoices(source, index);
+    const result = (source.results || []).find(item => item.id === question.id) || null;
+    const choiceText = choices.length > 0
+        ? choices.map((choice, choiceIndex) => `${choiceIndex + 1}. ${choice}`).join('\n')
+        : '선택지 정보 없음';
+
+    return [
+        `[문제 ${index + 1}]`,
+        `ID: ${question.id || `${source.setId}-${index + 1}`}`,
+        `질문: ${question.question || ''}`,
+        '선택지:',
+        choiceText,
+        `정답: ${question.answer || '정보 없음'}`,
+        `형아의 선택: ${result ? result.userAnswer : '기록 없음'}`,
+        `채점 결과: ${result ? (result.isCorrect ? '정답' : '오답') : '기록 없음'}`
+    ].join('\n');
+}
+
+function buildToeicContext(source) {
+    const questionBlocks = (source.questions || []).map((question, index) =>
+        buildToeicQuestionBlock(source, question, index)
+    );
+
+    return [
+        '다음은 형아가 지금 보고 있는 TOEIC 실전마법연습 세트 정보야.',
+        '이 정보를 계속 기억한 상태로 이후 질문에 답해 줘.',
+        '',
+        `[세트 제목] ${source.title || ''}`,
+        `[파트] ${source.partLabel || ''}`,
+        '',
+        '[지문]',
+        source.passage || '지문 없음',
+        '',
+        '[문제와 정답]',
+        questionBlocks.join('\n\n'),
+        '',
+        '[해설]',
+        source.explanationText || '해설 없음',
+        '',
+        '형아가 토익 문제의 문장 해설, 보기 차이, 정답 근거를 물으면 위 정보만 바탕으로 정확히 설명해 줘.'
+    ].join('\n');
+}
+
+function buildToeicReviewSource(toeicSession, explanationText) {
+    if (!toeicSession || !toeicSession.set) return null;
+
+    const set = toeicSession.set;
+    const partLabel = set.type === 'part6'
+        ? '파트 6'
+        : set.type === 'part7'
+            ? '파트 7'
+            : '문제';
+
+    return {
+        setId: set.id,
+        title: set.title,
+        partLabel,
+        passage: set.passage || '',
+        explanationText: explanationText || '',
+        questions: toeicSession.expandedQuestions || [],
+        shuffledOptions: toeicSession.shuffledOptions || [],
+        results: toeicSession.results || []
+    };
+}
+
+function createGeneralSession() {
+    return createSession({
+        mode: 'general',
+        ui: GENERAL_LUMI_SESSION_UI,
+        systemInstruction: typeof LUMI_ORB_SYSTEM_INSTRUCTION === 'string'
+            ? LUMI_ORB_SYSTEM_INSTRUCTION
+            : '너는 형아에게 친근하게 답하는 남성 마법사 루미다.',
+        enableSearch: true,
+        thinkingLevel: 'high',
+        seedHistory: [],
+        seedMessages: []
+    });
+}
+
+function createToeicReviewSession(source) {
+    const context = buildToeicContext(source);
+    return createSession({
+        mode: 'toeic-review',
+        ui: TOEIC_LUMI_SESSION_UI,
+        systemInstruction: TOEIC_LUMI_SYSTEM_INSTRUCTION,
+        enableSearch: true,
+        thinkingLevel: 'high',
+        source,
+        seedHistory: [
+            { role: 'user', parts: [{ text: context }] }
+        ],
+        seedMessages: []
+    });
+}
+
+const LumiQuestionRuntime = {
+    SESSION_KEYS: LUMI_SESSION_KEYS,
+
+    shouldShowToeicQuestionButton(set) {
+        return !!set && (set.type === 'part6' || set.type === 'part7');
+    },
+
+    ensureGeneralSession(sessionStore) {
+        if (!sessionStore.general) {
+            sessionStore.general = createGeneralSession();
+        }
+        return sessionStore.general;
+    },
+
+    getActiveSession(sessionKey, sessionStore, toeicSession) {
+        if (sessionKey === LUMI_SESSION_KEYS.TOEIC) {
+            return toeicSession ? toeicSession.lumiQuestionSession || null : null;
+        }
+        return this.ensureGeneralSession(sessionStore);
+    },
+
+    buildToeicReviewSource(toeicSession, explanationText) {
+        return buildToeicReviewSource(toeicSession, explanationText);
+    },
+
+    ensureToeicReviewSession(toeicSession, explanationText) {
+        if (!toeicSession || !toeicSession.set) return null;
+        if (!toeicSession.lumiQuestionSession) {
+            const source = buildToeicReviewSource(toeicSession, explanationText);
+            if (!source) return null;
+            toeicSession.lumiQuestionSession = createToeicReviewSession(source);
+        }
+        return toeicSession.lumiQuestionSession;
+    },
+
+    storeSession(sessionStore, toeicSession, session) {
+        if (!session || session.mode !== 'toeic-review') {
+            sessionStore.general = session || createGeneralSession();
+            return sessionStore.general;
+        }
+        if (toeicSession) {
+            toeicSession.lumiQuestionSession = session;
+        }
+        return session;
+    },
+
+    createGeneralSession,
+
+    createToeicReviewSession(source) {
+        return createToeicReviewSession(source);
+    },
+
+    getInitialStatus() {
+        return '';
+    },
+
+    getLoadingStatus(session) {
+        if (session && session.mode === 'toeic-review') {
+            return '문제와 해설을 기준으로 답변 정리 중...';
+        }
+        return '루미가 답변 정리 중...';
+    },
+
+    getResetStatus(session) {
+        if (session && session.mode === 'toeic-review') {
+            return 'TOEIC 대화를 초기화했어.';
+        }
+        return '대화를 초기화했어.';
+    },
+
+    getSuccessStatus() {
+        return '';
+    },
+
+    buildErrorMessage(session, error) {
+        const detail = error && error.message ? error.message : String(error || '');
+        if (session && session.mode === 'toeic-review') {
+            return `(노트를 다시 넘기며) 방금 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
+        }
+        return `(마법구슬을 붙잡으며) 질문을 정리하다가 잠깐 흔들렸어.\n${detail}`;
+    },
+
+    resetSession(session) {
+        if (!session) {
+            return createGeneralSession();
+        }
+        return createSession({
+            ...session,
+            seedHistory: session.seedHistory || [],
+            seedMessages: session.seedMessages || []
+        });
+    },
+
+    async sendMessage(apiKey, session, message) {
+        session.messages.push({ role: 'user', text: message });
+        session.history.push({ role: 'user', parts: [{ text: message }] });
+
+        const result = await GameAPI.askLumiQuestion(apiKey, session.history, {
+            systemInstruction: session.systemInstruction,
+            enableSearch: session.enableSearch,
+            thinkingLevel: session.thinkingLevel
+        });
+
+        if (result && result.content) {
+            session.history.push(result.content);
+        }
+
+        session.messages.push({
+            role: 'model',
+            text: result.text,
+            sources: result.sources,
+            queries: result.queries
+        });
+
+        return result;
+    }
+};
+
+window.LumiQuestionRuntime = LumiQuestionRuntime;
 
 // --- Date System ---
 

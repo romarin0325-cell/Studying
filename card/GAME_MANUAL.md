@@ -216,6 +216,43 @@
 
 > 따라서 “퀴즈 연동 강화/보상 시스템”은 **명세에 반드시 포함**해야 합니다.
 
+## 6-6. 월간 미션 / 보너스 카드 풀 / 실전마법연습 최신 동작
+
+### 월간 미션
+- `global.monthlyMission`은 `monthKey`, `rewardCardId`, `claimed`, `missions`를 가진다.
+- 미션은 매달 초기화되며 현재 목표는 아래 3개 고정:
+  - `endless40`: 무한 모드 40 스테이지 돌파 1회
+  - `challenge3`: 챌린지 모드 클리어 3회
+  - `toeic3`: 실전마법연습 3회 플레이
+- 보상 카드는 **숨겨진 보너스 카드 중 아직 해금되지 않은 카드 우선**으로 랜덤 배정된다.
+- 3개 미션을 모두 달성하면 보너스 카드 1장이 해금되고, 같은 달에는 1회만 수령 가능하다.
+
+### 보너스 카드 풀 프리셋
+- `global.bonusPoolPresets`는 최대 3개의 프리셋을 저장하고, `global.activeBonusPoolPresetIndex`가 현재 적용 프리셋을 가리킨다.
+- 각 프리셋은 “이번 런에서 활성화할 보너스 카드 ID 목록”이다. 비어 있거나 유효하지 않은 경우 현재 해금된 전체 보너스 카드로 정규화된다.
+- 새 런 시작 시 `state.activeBonusPoolIds = normalizeActiveBonusPoolIds(pendingActiveBonusPoolIds)`로 복사되며, 이후 보너스 카드 뽑기/보상 풀은 이 목록 기준으로 제한된다.
+- 보너스 카드 편집기에서 프리셋 전환, 전체 활성화, 카드별 토글을 즉시 저장한다.
+
+### 보너스 초월 카드 해금
+- 특정 적(`thor`, `ares`, `poseidon`) 보상 라우트는 `bonusTranscendenceReward`를 가진다.
+- 아직 해금되지 않은 대상이면 **10% 확률**로 `global.unlocked_bonus_transcendence_cards`에 추가된다.
+- 해금된 보너스 초월 카드는 카오스 룰렛 풀(`GameUtils.buildTranscendencePool`)에 합류한다.
+
+### 실전마법연습 리뷰와 루미 질문
+- 리뷰 해설은 항상 `TOEIC_EXPLANATIONS[set.id]`를 사용한다.
+- Part 6 / Part 7 세트는 해설 화면에서 **루미 질문하기** 버튼이 노출된다.
+- 이 버튼은 현재 세션의 지문, 문제, 셔플된 보기, 정답, 플레이어 선택, 해설 텍스트를 묶어 TOEIC 전용 루미 세션을 생성한다.
+- 일반 질문 세션과 TOEIC 질문 세션은 분리된 대화 기록을 사용한다. 초기화도 현재 열린 세션에만 적용된다.
+- 타이틀/메뉴 복귀, 실전마법연습 종료, 데이트 시작 시 TOEIC 전용 질문 세션은 정리된다.
+
+### API 키 사용 규칙
+- 루미 일반 질문, TOEIC 질문, 개인과외, 데이트는 모두 동일한 Gemini API 키를 공유한다.
+- 키가 없으면 기능 실행 시 즉시 입력을 요청하고 브라우저 로컬 저장소에 저장한다.
+
+### 숨겨진 학습 해금 조건
+- `tutoringEventEnabled === false` 상태에서 실전마법연습을 누적 5회 플레이하면 `hiddenStudyReady`가 활성화된다.
+- 꿈의회랑 런에서는 해당 숨김 해금 카운트를 올리지 않는다.
+
 ---
 
 ## 5. 아티팩트 사전 (Artifact Objects)
