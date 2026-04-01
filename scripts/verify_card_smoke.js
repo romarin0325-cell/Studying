@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 function mustContain(filePath, snippets) {
   const content = fs.readFileSync(filePath, 'utf8');
@@ -16,7 +17,10 @@ function run() {
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',
     'id="toeic-review-hub"',
-    'initNewGame(mode =',
+    "{ src: 'rpg_features.js'",
+    '_featuresInstalled: false',
+    'hydrateModules() {',
+    'RPGFeatureModules.install(this);',
     'startToeicPractice()',
     'finishToeicSession()',
     'openToeicReview()',
@@ -24,13 +28,21 @@ function run() {
     'id="modal-bonus-pool-editor"',
     'id="bonus-pool-preset-list"',
     'pendingActiveBonusPoolIds:',
-    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
     'openBonusPoolEditor()',
     'bonusPoolPresets:',
     'activeBonusPoolPresetIndex:',
+    "name: 'RPGFeatureModules'"
+  ]);
+
+  mustContain(path.join(cardRoot, 'rpg_features.js'), [
+    'window.RPGFeatureModules = {',
+    'initNewGame(mode =',
     'buildChaosRoulettePool()',
     'buildChaosPoolCardIds(pool)',
-    'drawRunPoolCards(pool, count, options = {})'
+    'drawRunPoolCards(pool, count, options = {})',
+    'startGame(mode, retryCount = 0)',
+    'claimMonthlyMissionReward()',
+    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)'
   ]);
 
   mustContain(path.join(cardRoot, 'logic.js'), [
@@ -52,6 +64,16 @@ function run() {
     "bonusTranscendenceReward: 'trans_poseidon'"
   ]);
   mustContain(path.join(cardRoot, 'toeic.js'), ['const TOEIC_DATA']);
+
+  const htmlPath = path.join(cardRoot, 'index.html');
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const inlineScripts = [...html.matchAll(/<script(?:\s+defer)?>([\s\S]*?)<\/script>/g)].map((match) => match[1]);
+  if (inlineScripts.length < 2) {
+    throw new Error(`${htmlPath} does not contain the expected inline script blocks.`);
+  }
+  inlineScripts.forEach((script, index) => {
+    new vm.Script(script, { filename: `${htmlPath}#script${index + 1}` });
+  });
 
   console.log('Card smoke verification passed.');
 }
