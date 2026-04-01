@@ -651,6 +651,15 @@
         this.state.chaosBuffs = this.sortBlessingsByGrade(this.state.chaosBuffs);
     },
 
+    pickUniqueRandomCards(pool, count) {
+        const shuffled = [...pool];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, count);
+    },
+
 
     applyChaosBlessing(count) {
         this.state.chaosBlessingUses--;
@@ -663,9 +672,8 @@
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
         });
 
-        // 2. Shuffle and Pick
-        pool.sort(() => 0.5 - Math.random());
-        let picks = pool.slice(0, count);
+        // 2. Shuffle and Pick (Fisher-Yates: uniform)
+        let picks = this.pickUniqueRandomCards(pool, count);
 
         this.state.activeSageBlessing = []; // Clear Sage Blessing
 

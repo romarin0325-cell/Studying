@@ -2484,8 +2484,7 @@
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
                 });
 
-                pool.sort(() => 0.5 - Math.random());
-                let picks = pool.slice(0, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
+                let picks = this.pickUniqueRandomCards(pool, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
 
                 this.state.activeChaosBlessing = []; // Clear Chaos Blessing
 
