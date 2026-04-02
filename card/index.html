@@ -1358,6 +1358,7 @@
             <div class="lumi-chat-top">
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
                 <div class="lumi-chat-controls">
+                    <button id="lumi-chat-model-btn" onclick="RPG.toggleLumiChatModel()">3.1 Pro</button>
                     <button id="lumi-chat-reset-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
                     <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
                 </div>
@@ -3346,10 +3347,12 @@
                 const closeBtn = document.getElementById('lumi-chat-close-btn');
                 const resetBtn = document.getElementById('lumi-chat-reset-btn');
                 const input = document.getElementById('lumi-chat-input');
+                const modelBtn = document.getElementById('lumi-chat-model-btn');
 
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
+                if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview' ? '3.1 Pro' : '3.0 Flash';
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
                         ? '해설에서 궁금한 점을 입력하세요.'
@@ -3488,6 +3491,18 @@
                 if (input) {
                     input.value = '';
                     input.focus();
+                }
+            },
+
+            toggleLumiChatModel() {
+                if (LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview') {
+                    LumiQuestionRuntime.selectedModel = 'gemini-3.0-flash-preview';
+                } else {
+                    LumiQuestionRuntime.selectedModel = 'gemini-3.1-pro-preview';
+                }
+                const btn = document.getElementById('lumi-chat-model-btn');
+                if (btn) {
+                    btn.innerText = LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview' ? '3.1 Pro' : '3.0 Flash';
                 }
             },
 
