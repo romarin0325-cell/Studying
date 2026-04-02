@@ -169,7 +169,8 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     const {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
-        thinkingLevel = 'high'
+        thinkingLevel = 'high',
+        model = 'gemini-3.1-pro-preview'
     } = options;
 
     const payload = {
@@ -200,7 +201,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
     ];
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -409,6 +410,8 @@ function createToeicReviewSession(source) {
 const LumiQuestionRuntime = {
     SESSION_KEYS: LUMI_SESSION_KEYS,
 
+    selectedModel: 'gemini-3.1-pro-preview',
+
     shouldShowToeicQuestionButton(set) {
         return !!set && (set.type === 'part6' || set.type === 'part7');
     },
@@ -506,7 +509,8 @@ const LumiQuestionRuntime = {
         const result = await GameAPI.askLumiQuestion(apiKey, session.history, {
             systemInstruction: session.systemInstruction,
             enableSearch: session.enableSearch,
-            thinkingLevel: session.thinkingLevel
+            thinkingLevel: session.thinkingLevel,
+            model: this.selectedModel
         });
 
         if (result && result.content) {
