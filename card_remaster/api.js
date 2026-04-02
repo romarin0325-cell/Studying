@@ -79,13 +79,16 @@ const GameAPI = {
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
         // 4. API 호출 (온도는 0.6~0.7 추천: 창의적인 상황 부여 필요)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: fullPrompt }] }],
                 generationConfig: {
-                    temperature: isMisunderstandingMode ? 0.65 : 0.4
+                    temperature: isMisunderstandingMode ? 0.65 : 0.4,
+                    thinkingConfig: {
+                        thinkingLevel: 'high'
+                    }
                 }
             })
         });
@@ -122,7 +125,7 @@ const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
 ## 2. 말투 및 어조 (Tone & Voice)
 - **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
 - **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
-- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 종종 표현합니다.
     - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
 
 ## 3. 질문 대응 및 검색 규칙 (Functional Rules)
@@ -239,7 +242,7 @@ const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi
 ## 2. 말투 및 어조 (Tone & Voice)
 - **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
 - **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
-- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 종종 표현합니다.
     - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
 - **말버릇:** "형아, ~인지 알아?", "바로 ~야!", "내가 보증할게!"
 
@@ -615,7 +618,12 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
-            generationConfig: { temperature: temperature }
+            generationConfig: {
+                temperature: temperature,
+                thinkingConfig: {
+                    thinkingLevel: 'high'
+                }
+            }
         })
     });
 
