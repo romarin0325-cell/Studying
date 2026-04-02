@@ -737,7 +737,7 @@ const BONUS_CARDS = [
         ]
     },
     {
-        id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer',
+        id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer', unlockSource: 'hidden',
         stats: { hp: 350, atk: 75, matk: 95, def: 60, mdef: 60 },
         trait: { type: 'instant_delayed_skills', desc: '덱의 지연 스킬이 즉시 발동' },
         skills: [
@@ -882,7 +882,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'black_swan', name: '블랙스완', grade: 'normal', element: 'dark', role: 'dealer', unlockSource: 'hidden',
+        id: 'black_swan', name: '블랙스완', grade: 'normal', element: 'dark', role: 'dealer', unlockSource: 'bonus',
         stats: { hp: 310, atk: 60, matk: 90, def: 50, mdef: 55 },
         trait: { type: 'syn_dark_full_party_crit', val: 20, desc: '덱 전체가 어둠속성인 경우 덱 전체 치명타율 20% 증가' },
         skills: [
