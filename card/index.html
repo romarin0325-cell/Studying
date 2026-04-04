@@ -776,6 +776,16 @@
             text-align: center;
         }
 
+        .lumi-chat-top .portrait {
+            width: 138px;
+            height: 182px;
+            margin-bottom: 0;
+            border-color: #448aff;
+            background:
+                radial-gradient(circle at top, rgba(68, 138, 255, 0.22), transparent 45%),
+                linear-gradient(180deg, #101727 0%, #060b14 100%);
+        }
+
         .lumi-chat-title {
             margin: 0;
             color: #ffd700;
@@ -892,6 +902,11 @@
                 width: min(92vw, 600px);
                 height: min(84vh, 760px);
                 padding: 16px;
+            }
+
+            .lumi-chat-top .portrait {
+                width: 118px;
+                height: 156px;
             }
 
             .lumi-chat-actions {
@@ -1340,6 +1355,9 @@
     <div id="modal-lumi-question" class="modal">
         <div class="modal-content lumi-chat-modal">
             <div class="lumi-chat-top">
+                <div class="portrait" aria-hidden="true">
+                    <img src="lumi-portrait.svg" alt="루미 초상화">
+                </div>
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
             </div>
             <div id="lumi-chat-log" class="lumi-chat-log"></div>
