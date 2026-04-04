@@ -786,6 +786,105 @@
                 linear-gradient(180deg, #101727 0%, #060b14 100%);
         }
 
+        .lumi-chat-portrait {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lumi-chat-portrait__orb {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            width: 46px;
+            height: 46px;
+            margin-left: -23px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 35%, #ffffff 0%, #d7f6ff 30%, #79d6ff 66%, #215ea8 100%);
+            box-shadow:
+                0 0 0 8px rgba(121, 214, 255, 0.12),
+                0 0 24px rgba(121, 214, 255, 0.38);
+        }
+
+        .lumi-chat-portrait__body {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            width: 96px;
+            height: 122px;
+            margin-left: -48px;
+            border-radius: 26px 26px 18px 18px;
+            background:
+                linear-gradient(180deg, rgba(128, 203, 196, 0.26), rgba(74, 127, 197, 0.08)),
+                linear-gradient(180deg, #e6f4ff 0%, #bfd6ff 20%, #5b7dc8 21%, #27406c 100%);
+            overflow: hidden;
+        }
+
+        .lumi-chat-portrait__body::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 18px;
+            width: 62px;
+            height: 62px;
+            margin-left: -31px;
+            border-radius: 31px 31px 26px 26px;
+            background: #ffe3cf;
+            box-shadow: inset 0 -10px 0 rgba(255, 193, 145, 0.32);
+        }
+
+        .lumi-chat-portrait__body::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 4px;
+            width: 80px;
+            height: 62px;
+            margin-left: -40px;
+            border-radius: 40px 40px 24px 24px;
+            background:
+                radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.42), transparent 18%),
+                linear-gradient(180deg, #87d7ff 0%, #6caeff 48%, #2a4d8a 100%);
+            box-shadow: inset 0 -12px 0 rgba(26, 45, 86, 0.24);
+        }
+
+        .lumi-chat-portrait__face {
+            position: absolute;
+            left: 50%;
+            top: 44px;
+            width: 50px;
+            height: 30px;
+            margin-left: -25px;
+        }
+
+        .lumi-chat-portrait__eye {
+            position: absolute;
+            top: 8px;
+            width: 10px;
+            height: 6px;
+            border-radius: 999px;
+            background: #17325d;
+        }
+
+        .lumi-chat-portrait__eye--left {
+            left: 8px;
+        }
+
+        .lumi-chat-portrait__eye--right {
+            right: 8px;
+        }
+
+        .lumi-chat-portrait__mouth {
+            position: absolute;
+            left: 50%;
+            bottom: 2px;
+            width: 12px;
+            height: 6px;
+            margin-left: -6px;
+            border-bottom: 2px solid #d56b84;
+            border-radius: 0 0 10px 10px;
+        }
+
         .lumi-chat-title {
             margin: 0;
             color: #ffd700;
@@ -1355,8 +1454,15 @@
     <div id="modal-lumi-question" class="modal">
         <div class="modal-content lumi-chat-modal">
             <div class="lumi-chat-top">
-                <div class="portrait" aria-hidden="true">
-                    <img src="lumi-portrait.svg" alt="루미 초상화">
+                <div class="portrait lumi-chat-portrait" aria-hidden="true">
+                    <span class="lumi-chat-portrait__orb"></span>
+                    <span class="lumi-chat-portrait__body">
+                        <span class="lumi-chat-portrait__face">
+                            <span class="lumi-chat-portrait__eye lumi-chat-portrait__eye--left"></span>
+                            <span class="lumi-chat-portrait__eye lumi-chat-portrait__eye--right"></span>
+                            <span class="lumi-chat-portrait__mouth"></span>
+                        </span>
+                    </span>
                 </div>
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
             </div>
