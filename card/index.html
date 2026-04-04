@@ -1118,10 +1118,15 @@
             </button>
             <button class="menu-btn" onclick="RPG.openMonthlyMission()"
                 style="padding:18px; border-color:#ffb74d; color:#ffb74d; margin-bottom:10px;">
-                월간/주간 미션<br>
-                <span style="font-size:0.8rem; color:#ffe0b2;">월간 보너스 카드와 주간 카오스 티켓 보상을 확인</span>
+                월간 미션<br>
+                <span style="font-size:0.8rem; color:#ffe0b2;">월간 보너스 카드 보상을 확인</span>
             </button>
-            <button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
+            <button class="menu-btn" onclick="RPG.openWeeklyMission()"
+                style="padding:18px; border-color:#9575cd; color:#d1c4e9; margin-bottom:10px;">
+                주간 미션<br>
+                <span style="font-size:0.8rem; color:#d1c4e9;">주간 카오스 티켓 보상을 확인</span>
+            </button>
+            <button onclick="RPG.backFromTypeSelect()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
         </div>
     </div>
 
@@ -1143,7 +1148,8 @@
 
     <div id="modal-monthly-mission" class="modal">
         <div class="modal-content" style="height:auto; min-height:520px; width: 380px;">
-            <h3 style="color:#ffb74d;">월간/주간 미션</h3>
+            <h3 id="mission-modal-title" style="color:#ffb74d;">미션</h3>
+            <div id="weekly-mission-section">
             <div id="weekly-mission-status" style="font-size:0.9rem; color:#b39ddb; margin-bottom:10px;">-</div>
             <div style="padding:12px; border:1px solid #4527a0; border-radius:8px; background:#221a33; margin-bottom:10px;">
                 <div style="font-size:0.8rem; color:#d1c4e9; margin-bottom:6px;">이번 주 보상</div>
@@ -1152,6 +1158,8 @@
                 <button id="btn-claim-weekly-mission" class="menu-btn" onclick="RPG.claimWeeklyMissionReward()"
                     style="margin-bottom:0; border-color:#9575cd; color:#d1c4e9;">보상받기</button>
             </div>
+            </div>
+            <div id="monthly-mission-section">
             <div id="monthly-mission-status" style="font-size:0.9rem; color:#ffe0b2; margin-bottom:10px;">-</div>
             <div style="padding:12px; border:1px solid #6d4c41; border-radius:8px; background:#2a211a; margin-bottom:10px;">
                 <div style="font-size:0.8rem; color:#bcaaa4; margin-bottom:6px;">이달의 보상</div>
@@ -1162,6 +1170,7 @@
             <div id="monthly-mission-list" class="modal-scroll" style="max-height:180px; margin-bottom:10px;"></div>
             <button id="btn-claim-monthly-mission" class="menu-btn" onclick="RPG.claimMonthlyMissionReward()"
                 style="border-color:#66bb6a; color:#66bb6a;">보상받기</button>
+            </div>
             <button onclick="RPG.closeMonthlyMission()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
@@ -1946,6 +1955,13 @@
             },
 
             openMonthlyMission() {
+                this.missionViewType = 'monthly';
+                this.renderMonthlyMission();
+                document.getElementById('modal-monthly-mission').classList.add('active');
+            },
+
+            openWeeklyMission() {
+                this.missionViewType = 'weekly';
                 this.renderMonthlyMission();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
@@ -1958,6 +1974,9 @@
                 const monthly = this.ensureMonthlyMissionState();
                 const weekly = this.ensureWeeklyMissionState();
                 const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
+                const missionModalTitle = document.getElementById('mission-modal-title');
+                const weeklySection = document.getElementById('weekly-mission-section');
+                const monthlySection = document.getElementById('monthly-mission-section');
                 const rewardNameEl = document.getElementById('monthly-mission-reward-name');
                 const rewardBtn = document.getElementById('btn-monthly-mission-reward');
                 const list = document.getElementById('monthly-mission-list');
@@ -1975,6 +1994,12 @@
 
                 const allClear = this.areAllMonthlyMissionsCleared();
                 const weeklyAllClear = this.areAllWeeklyMissionsCleared();
+                const viewType = this.missionViewType || 'monthly';
+                const showWeekly = viewType !== 'monthly';
+                const showMonthly = viewType !== 'weekly';
+                missionModalTitle.innerText = viewType === 'weekly' ? '주간 미션' : '월간 미션';
+                weeklySection.style.display = showWeekly ? 'block' : 'none';
+                monthlySection.style.display = showMonthly ? 'block' : 'none';
                 status.innerText = `${monthly.monthKey} 월 미션`;
                 weeklyStatus.innerText = `${weekly.weekLabel} 주간 미션`;
                 weeklyRewardName.innerText = `카오스 티켓 ${GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD}장`;
@@ -2234,6 +2259,14 @@
                 this.selectedModeId = null;
                 this.resetPendingActiveBonusPoolIds();
                 document.getElementById('modal-type-select').classList.add('active');
+            },
+
+            backFromTypeSelect() {
+                document.getElementById('modal-type-select').classList.remove('active');
+                document.getElementById('modal-mode-select').classList.remove('active');
+                document.getElementById('modal-bonus-pool-editor').classList.remove('active');
+                document.getElementById('modal-monthly-mission').classList.remove('active');
+                this.toTitle();
             },
 
             selectGameType(type) {
