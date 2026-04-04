@@ -1097,36 +1097,36 @@
     </div>
 
     <div id="modal-type-select" class="modal">
-        <div class="modal-content" style="height:auto; min-height:300px; width: 360px;">
+        <div class="modal-content" style="height:auto; min-height:300px; max-height:85vh; overflow-y:auto; width: 360px;">
             <h3>게임 종류 선택</h3>
-            <p style="font-size:0.9rem; color:#aaa; margin-bottom:20px;">
+            <p style="font-size:0.9rem; color:#aaa; margin-bottom:15px;">
                 플레이하실 게임 종류를 선택해주세요.
             </p>
-            <button class="menu-btn" onclick="RPG.selectGameType('endless')" style="padding:20px; margin-bottom:10px;">
+            <button class="menu-btn" onclick="RPG.selectGameType('endless')" style="padding:12px; margin-bottom:8px;">
                 무한 모드 (Endless)<br>
                 <span style="font-size:0.8rem; color:#ccc;">클리어 조건 없음 / 무한 진행</span>
             </button>
             <button class="menu-btn" onclick="RPG.selectGameType('challenge')"
-                style="padding:20px; border-color:#e040fb; color:#e040fb;">
+                style="padding:12px; border-color:#e040fb; color:#e040fb; margin-bottom:8px;">
                 도전 모드 (Challenge)<br>
                 <span style="font-size:0.8rem; color:#e1bee7;">목표 스테이지 클리어 도전</span>
             </button>
             <button id="btn-bonus-pool-editor" class="menu-btn" onclick="RPG.openBonusPoolEditor()"
-                style="padding:18px; border-color:#4fc3f7; color:#4fc3f7; margin-bottom:10px;">
+                style="padding:12px; border-color:#4fc3f7; color:#4fc3f7; margin-bottom:8px;">
                 덱 편집<br>
                 <span style="font-size:0.8rem; color:#b3e5fc;">기본 카드는 항상 포함 / 보너스 카드만 ON/OFF</span>
             </button>
             <button class="menu-btn" onclick="RPG.openMonthlyMission()"
-                style="padding:18px; border-color:#ffb74d; color:#ffb74d; margin-bottom:10px;">
+                style="padding:12px; border-color:#ffb74d; color:#ffb74d; margin-bottom:8px;">
                 월간 미션<br>
                 <span style="font-size:0.8rem; color:#ffe0b2;">월간 보너스 카드 보상을 확인</span>
             </button>
             <button class="menu-btn" onclick="RPG.openWeeklyMission()"
-                style="padding:18px; border-color:#9575cd; color:#d1c4e9; margin-bottom:10px;">
+                style="padding:12px; border-color:#9575cd; color:#d1c4e9; margin-bottom:8px;">
                 주간 미션<br>
                 <span style="font-size:0.8rem; color:#d1c4e9;">주간 카오스 티켓 보상을 확인</span>
             </button>
-            <button onclick="RPG.backFromTypeSelect()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
+            <button onclick="RPG.backFromTypeSelect()" style="margin-top:10px; width:100%; padding:10px;">뒤로가기</button>
         </div>
     </div>
 
@@ -1147,14 +1147,14 @@
     </div>
 
     <div id="modal-monthly-mission" class="modal">
-        <div class="modal-content" style="height:auto; min-height:520px; width: 380px;">
+        <div class="modal-content" style="height:auto; min-height:520px; width: 380px; max-height:85vh; overflow-y:auto;">
             <h3 id="mission-modal-title" style="color:#ffb74d;">미션</h3>
             <div id="weekly-mission-section">
             <div id="weekly-mission-status" style="font-size:0.9rem; color:#b39ddb; margin-bottom:10px;">-</div>
             <div style="padding:12px; border:1px solid #4527a0; border-radius:8px; background:#221a33; margin-bottom:10px;">
                 <div style="font-size:0.8rem; color:#d1c4e9; margin-bottom:6px;">이번 주 보상</div>
                 <div id="weekly-mission-reward-name" style="font-weight:bold; color:#fff; margin-bottom:8px;">카오스 티켓 3장</div>
-                <div id="weekly-mission-list" class="modal-scroll" style="max-height:150px; margin-bottom:8px;"></div>
+                <div id="weekly-mission-list" style="margin-bottom:8px;"></div>
                 <button id="btn-claim-weekly-mission" class="menu-btn" onclick="RPG.claimWeeklyMissionReward()"
                     style="margin-bottom:0; border-color:#9575cd; color:#d1c4e9;">보상받기</button>
             </div>

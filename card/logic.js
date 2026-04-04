@@ -79,7 +79,7 @@ const Storage = {
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
 
-const GAME_CONSTANTS = {
+window.GAME_CONSTANTS = {
     MAX_MP: 100,
     MAX_FIELD_BUFFS: 3,
     BASE_CRIT_MULT: 1.5,
