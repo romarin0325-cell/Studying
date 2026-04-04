@@ -33,7 +33,9 @@
         if (data) {
             this.global = { ...this.global, ...data };
         }
-        const changed = this.ensureDefaultUnlockedBonusCards();
+        const changedBonusCards = this.ensureDefaultUnlockedBonusCards();
+        const changedTicketState = this.ensureChaosTicketState();
+        const changed = changedBonusCards || changedTicketState;
         this.ensureBonusPoolPresetState();
         if (changed) this.saveGlobalData();
     },
@@ -59,6 +61,21 @@
                 changed = true;
             }
         });
+        return changed;
+    },
+
+
+    ensureChaosTicketState() {
+        let changed = false;
+        if (!Number.isFinite(this.global.chaosTickets)) {
+            this.global.chaosTickets = 0;
+            changed = true;
+        }
+        if (this.global.chaosTicketVersion !== GAME_CONSTANTS.CHAOS_TICKET_VERSION) {
+            this.global.chaosTickets = 0;
+            this.global.chaosTicketVersion = GAME_CONSTANTS.CHAOS_TICKET_VERSION;
+            changed = true;
+        }
         return changed;
     },
 
@@ -130,6 +147,28 @@
     },
 
 
+    getCurrentDateKey(date = new Date()) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    },
+
+
+    getCurrentWeekInfo(date = new Date()) {
+        const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diffToMonday = (localDate.getDay() + 6) % 7;
+        const start = new Date(localDate);
+        start.setDate(localDate.getDate() - diffToMonday);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        const format = value => `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+
+        return {
+            key: format(start),
+            label: `${format(start)} ~ ${format(end)}`,
+            todayKey: format(localDate)
+        };
+    },
+
+
     createMonthlyMissionState() {
         const hiddenCards = this.getHiddenBonusCards();
         const lockedHidden = hiddenCards.filter(card => !(this.global.unlocked_bonus_cards || []).includes(card.id));
@@ -148,6 +187,22 @@
     },
 
 
+    createWeeklyMissionState() {
+        const weekInfo = this.getCurrentWeekInfo();
+        return {
+            weekKey: weekInfo.key,
+            weekLabel: weekInfo.label,
+            claimed: false,
+            attendanceDays: [],
+            missions: {
+                challenge1: { label: '챌린지 모드 클리어 1회', progress: 0, target: 1 },
+                toeic1: { label: '실전마법연습 1회 플레이', progress: 0, target: 1 },
+                attendance3: { label: '3일 출석', progress: 0, target: 3 }
+            }
+        };
+    },
+
+
     ensureMonthlyMissionState() {
         const currentKey = this.getCurrentMonthKey();
         if (!this.global.monthlyMission || this.global.monthlyMission.monthKey !== currentKey) {
@@ -155,6 +210,19 @@
             this.saveGlobalData();
         }
         return this.global.monthlyMission;
+    },
+
+
+    ensureWeeklyMissionState() {
+        const weekInfo = this.getCurrentWeekInfo();
+        if (!this.global.weeklyMission || this.global.weeklyMission.weekKey !== weekInfo.key) {
+            this.global.weeklyMission = this.createWeeklyMissionState();
+            this.saveGlobalData();
+        } else if (this.global.weeklyMission.weekLabel !== weekInfo.label) {
+            this.global.weeklyMission.weekLabel = weekInfo.label;
+            this.saveGlobalData();
+        }
+        return this.global.weeklyMission;
     },
 
 
@@ -167,9 +235,24 @@
     },
 
 
+    incrementWeeklyMissionProgress(id, amount = 1) {
+        const weekly = this.ensureWeeklyMissionState();
+        const mission = weekly.missions ? weekly.missions[id] : null;
+        if (!mission) return;
+        mission.progress = Math.min(mission.target, (mission.progress || 0) + amount);
+        this.saveGlobalData();
+    },
+
+
     areAllMonthlyMissionsCleared() {
         const monthly = this.ensureMonthlyMissionState();
         return Object.values(monthly.missions || {}).every(mission => (mission.progress || 0) >= mission.target);
+    },
+
+
+    areAllWeeklyMissionsCleared() {
+        const weekly = this.ensureWeeklyMissionState();
+        return Object.values(weekly.missions || {}).every(mission => (mission.progress || 0) >= mission.target);
     },
 
 
@@ -191,9 +274,25 @@
     },
 
 
+    claimWeeklyMissionReward() {
+        const weekly = this.ensureWeeklyMissionState();
+        if (weekly.claimed) return this.showAlert('이번 주 보상은 이미 수령했습니다.');
+        if (!this.areAllWeeklyMissionsCleared()) return this.showAlert('모든 주간 미션을 완료해야 보상을 받을 수 있습니다.');
+
+        weekly.claimed = true;
+        this.global.chaosTickets = (this.global.chaosTickets || 0) + GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD;
+        this.saveGlobalData();
+        this.renderMonthlyMission();
+        this.openInfoModal('주간 미션 보상', `카오스 티켓 ${GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD}장을 획득했습니다!`);
+    },
+
+
     registerToeicPracticeAttempt(options = {}) {
         if (options.countMonthly !== false) {
             this.incrementMonthlyMissionProgress('toeic3', 1);
+        }
+        if (options.countWeekly !== false) {
+            this.incrementWeeklyMissionProgress('toeic1', 1);
         }
 
         if (options.countHiddenUnlock === false || this.state.mode === 'dream_corridor') {
@@ -253,14 +352,23 @@
     },
 
 
-    checkDailyChaosTicket() {
-        const today = new Date().toDateString();
-        if (this.global.lastRewardDate !== today) {
-            this.global.lastRewardDate = today;
-            this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
-            this.saveGlobalData();
-            this.showAlert("출석 보상: 카오스 티켓 1장을 획득했습니다!");
+    trackDailyAttendance() {
+        const weekly = this.ensureWeeklyMissionState();
+        const weekInfo = this.getCurrentWeekInfo();
+        if (this.global.lastAttendanceDate === weekInfo.todayKey) return;
+
+        this.global.lastAttendanceDate = weekInfo.todayKey;
+        if (!Array.isArray(weekly.attendanceDays)) {
+            weekly.attendanceDays = [];
         }
+        if (!weekly.attendanceDays.includes(weekInfo.todayKey)) {
+            weekly.attendanceDays.push(weekInfo.todayKey);
+            const mission = weekly.missions ? weekly.missions.attendance3 : null;
+            if (mission) {
+                mission.progress = Math.min(mission.target, weekly.attendanceDays.length);
+            }
+        }
+        this.saveGlobalData();
     },
 
 
@@ -284,6 +392,32 @@
             ? BONUS_TRANSCENDENCE_CARDS
             : [];
         return bonusTranscendenceCards.filter(card => unlocked.has(card.id));
+    },
+
+
+    getUnlockedBonusCardCount() {
+        return Array.isArray(this.global.unlocked_bonus_cards)
+            ? this.global.unlocked_bonus_cards.length
+            : 0;
+    },
+
+
+    needsChallengeSafety() {
+        return this.state.gameType === 'challenge' && this.getUnlockedBonusCardCount() < 5;
+    },
+
+
+    applyBeginnerChallengeSafety(mode) {
+        if (!this.needsChallengeSafety()) return;
+
+        if (mode === 'chaos' || mode === 'draft') {
+            this.state.tickets = Math.max(this.state.tickets, 5);
+            return;
+        }
+
+        if (!this.state.inventory.includes('rumi')) {
+            this.state.inventory.push('rumi');
+        }
     },
 
 
@@ -453,7 +587,8 @@
 
         this.loadGlobalData();
         this.ensureMonthlyMissionState();
-        this.checkDailyChaosTicket();
+        this.ensureWeeklyMissionState();
+        this.trackDailyAttendance();
 
         if (mode === 'load') {
             const save = Storage.load(Storage.keys.SAVE);
@@ -531,6 +666,8 @@
         } else {
             this.state.activeTranscendenceCards = [];
         }
+
+        this.applyBeginnerChallengeSafety(mode);
 
         if (mode === 'chaos') {
             let allCards = GameUtils.buildCardPool(this.global, {

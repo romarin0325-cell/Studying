@@ -337,7 +337,7 @@ const CARDS = [
     {
         id: 'sphinx', name: '스핑크스', grade: 'rare', element: 'nature', role: 'debuffer',
         stats: { hp: 350, atk: 80, matk: 80, def: 50, mdef: 60 },
-        trait: { type: 'pos_van_atk', val: 30, desc: '선봉 배치시 공격력 30%증가' },
+        trait: { type: 'pos_stat_boost', pos: 0, stat: 'def', val: 50, desc: '선봉 배치시 방어력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 저주 중 하나 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
@@ -439,7 +439,7 @@ const CARDS = [
     {
         id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer',
         stats: { hp: 310, atk: 65, matk: 70, def: 50, mdef: 50 },
-        trait: { type: 'syn_light_fire_atk', val: 30, desc: '덱에 빛 불이 있을시 공격 30%증가' },
+        trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛 불이 있을시 마법공격력 50%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
@@ -573,6 +573,31 @@ const BONUS_CARDS = [
         ]
     },
     {
+        id: 'phantom', name: '팬텀', grade: 'legend', element: 'dark', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 490, atk: 95, matk: 150, def: 70, mdef: 75 },
+        trait: { type: 'field_buff_immune', desc: '이 카드는 필드버프를 받지 않는다' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            {
+                name: '나이트메어', type: 'mag', tier: 2, cost: 20, val: 1.0,
+                desc: '1~5턴 뒤 악몽을 남긴다. 암흑 상태의 적에게 대미지 2배',
+                effects: [{
+                    type: 'phantom_nightmare',
+                    turns: [1, 2, 3, 4, 5],
+                    messages: [
+                        '첫번째 악몽이 시작된다.',
+                        '두번째 악몽이 시작된다.',
+                        '세번째 악몽이 시작된다.',
+                        '네번째 악몽이 시작된다.',
+                        '마지막 악몽이 시작된다.'
+                    ],
+                    darknessMult: 2.0
+                }]
+            },
+            { name: '소울디스트로이어', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '암흑 1스택 소모, 암흑 상태의 적에게 대미지 3배', effects: [{ type: 'consume_debuff_fixed', debuff: 'darkness', count: 1, mult: 3.0 }] }
+        ]
+    },
+    {
         id: 'cinderella', name: '신데렐라', grade: 'legend', element: 'light', role: 'debuffer',
         stats: { hp: 490, atk: 110, matk: 120, def: 75, mdef: 75 },
         trait: { type: 'ignore_def_mdef_by_stack', val: 0.1, desc: '작열 1스택당 방어력 10% 무시 / 디바인 1스택당 마법방어력 10% 무시' },
@@ -627,11 +652,11 @@ const BONUS_CARDS = [
     {
         id: 'priest_of_end', name: '종말의사제', grade: 'epic', element: 'dark', role: 'buffer',
         stats: { hp: 400, atk: 55, matk: 105, def: 80, mdef: 80 },
-        trait: { type: 'syn_dark_3_matk_boost', val: 100, desc: '덱에 어둠 3장 이상 시 마법공격력 100% 증가' },
+        trait: { type: 'syn_dark_3_all_stats', val: 40, desc: '덱에 어둠 3장 이상 시 공격/방어/마법공격력/마법방어력 40% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '사신강림', type: 'mag', tier: 3, cost: 30, val: 5.0, desc: '5턴 뒤 발동, 발동 시 필드버프 사신강림 부여', effects: [{ type: 'delayed_attack_field', turns: 5, field: 'reaper_realm' }] }
+            { name: '사신강림', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '4턴 뒤 발동, 발동 시 필드버프 사신강림 부여', effects: [{ type: 'delayed_attack_field', turns: 4, field: 'reaper_realm' }] }
         ]
     },
     {

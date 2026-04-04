@@ -1109,8 +1109,8 @@
             </button>
             <button class="menu-btn" onclick="RPG.openMonthlyMission()"
                 style="padding:18px; border-color:#ffb74d; color:#ffb74d; margin-bottom:10px;">
-                월간 미션<br>
-                <span style="font-size:0.8rem; color:#ffe0b2;">매달 3개의 미션을 완료하고 히든 보상을 해금</span>
+                월간/주간 미션<br>
+                <span style="font-size:0.8rem; color:#ffe0b2;">월간 보너스 카드와 주간 카오스 티켓 보상을 확인</span>
             </button>
             <button onclick="RPG.toTitle()" style="margin-top:20px; width:100%; padding:10px;">뒤로가기</button>
         </div>
@@ -1133,8 +1133,16 @@
     </div>
 
     <div id="modal-monthly-mission" class="modal">
-        <div class="modal-content" style="height:auto; min-height:360px; width: 380px;">
-            <h3 style="color:#ffb74d;">월간 미션</h3>
+        <div class="modal-content" style="height:auto; min-height:520px; width: 380px;">
+            <h3 style="color:#ffb74d;">월간/주간 미션</h3>
+            <div id="weekly-mission-status" style="font-size:0.9rem; color:#b39ddb; margin-bottom:10px;">-</div>
+            <div style="padding:12px; border:1px solid #4527a0; border-radius:8px; background:#221a33; margin-bottom:10px;">
+                <div style="font-size:0.8rem; color:#d1c4e9; margin-bottom:6px;">이번 주 보상</div>
+                <div id="weekly-mission-reward-name" style="font-weight:bold; color:#fff; margin-bottom:8px;">카오스 티켓 3장</div>
+                <div id="weekly-mission-list" class="modal-scroll" style="max-height:150px; margin-bottom:8px;"></div>
+                <button id="btn-claim-weekly-mission" class="menu-btn" onclick="RPG.claimWeeklyMissionReward()"
+                    style="margin-bottom:0; border-color:#9575cd; color:#d1c4e9;">보상받기</button>
+            </div>
             <div id="monthly-mission-status" style="font-size:0.9rem; color:#ffe0b2; margin-bottom:10px;">-</div>
             <div style="padding:12px; border:1px solid #6d4c41; border-radius:8px; background:#2a211a; margin-bottom:10px;">
                 <div style="font-size:0.8rem; color:#bcaaa4; margin-bottom:6px;">이달의 보상</div>
@@ -1142,7 +1150,7 @@
                 <button id="btn-monthly-mission-reward" class="menu-btn"
                     style="margin-bottom:0; border-color:#ffcc80; color:#ffcc80;">카드 정보 보기</button>
             </div>
-            <div id="monthly-mission-list" class="modal-scroll" style="max-height:220px; margin-bottom:10px;"></div>
+            <div id="monthly-mission-list" class="modal-scroll" style="max-height:180px; margin-bottom:10px;"></div>
             <button id="btn-claim-monthly-mission" class="menu-btn" onclick="RPG.claimMonthlyMissionReward()"
                 style="border-color:#66bb6a; color:#66bb6a;">보상받기</button>
             <button onclick="RPG.closeMonthlyMission()" style="width:100%; padding:10px;">닫기</button>
@@ -1846,14 +1854,17 @@
                 unlocked_bonus_transcendence_cards: [],
                 achievements: { origin: false },
                 chaosTickets: 0,
+                chaosTicketVersion: 0,
                 lastRewardDate: null,
+                lastAttendanceDate: null,
                 pendingTranscendenceCards: [],
                 bonusPoolPresets: [null, null, null],
                 activeBonusPoolPresetIndex: 0,
                 tutoringEventEnabled: true,
                 hiddenStudyReady: false,
                 hiddenStudyPracticeCount: 0,
-                monthlyMission: null
+                monthlyMission: null,
+                weeklyMission: null
             },
 
             // Game State (Session Persistent)
@@ -1936,12 +1947,17 @@
 
             renderMonthlyMission() {
                 const monthly = this.ensureMonthlyMissionState();
+                const weekly = this.ensureWeeklyMissionState();
                 const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
                 const rewardNameEl = document.getElementById('monthly-mission-reward-name');
                 const rewardBtn = document.getElementById('btn-monthly-mission-reward');
                 const list = document.getElementById('monthly-mission-list');
                 const status = document.getElementById('monthly-mission-status');
                 const claimBtn = document.getElementById('btn-claim-monthly-mission');
+                const weeklyList = document.getElementById('weekly-mission-list');
+                const weeklyStatus = document.getElementById('weekly-mission-status');
+                const weeklyRewardName = document.getElementById('weekly-mission-reward-name');
+                const weeklyClaimBtn = document.getElementById('btn-claim-weekly-mission');
 
                 rewardNameEl.innerText = reward ? reward.name : '보상이 없습니다';
                 rewardBtn.disabled = !reward;
@@ -1949,8 +1965,12 @@
                 rewardBtn.onclick = reward ? (() => this.showCardInfo(reward.id)) : null;
 
                 const allClear = this.areAllMonthlyMissionsCleared();
+                const weeklyAllClear = this.areAllWeeklyMissionsCleared();
                 status.innerText = `${monthly.monthKey} 월 미션`;
+                weeklyStatus.innerText = `${weekly.weekLabel} 주간 미션`;
+                weeklyRewardName.innerText = `카오스 티켓 ${GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD}장`;
                 list.innerHTML = '';
+                weeklyList.innerHTML = '';
 
                 Object.values(monthly.missions || {}).forEach(mission => {
                     const cleared = (mission.progress || 0) >= mission.target;
@@ -1967,9 +1987,27 @@
                     list.appendChild(item);
                 });
 
+                Object.values(weekly.missions || {}).forEach(mission => {
+                    const cleared = (mission.progress || 0) >= mission.target;
+                    const item = document.createElement('div');
+                    item.style.padding = '10px';
+                    item.style.marginBottom = '8px';
+                    item.style.border = `1px solid ${cleared ? '#7e57c2' : '#555'}`;
+                    item.style.borderRadius = '8px';
+                    item.style.background = cleared ? 'rgba(126, 87, 194, 0.16)' : '#2a2a2a';
+                    item.innerHTML = `
+                        <div style="font-weight:bold; color:${cleared ? '#d1c4e9' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
+                        <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
+                    `;
+                    weeklyList.appendChild(item);
+                });
+
                 claimBtn.disabled = !allClear || monthly.claimed || !reward;
                 claimBtn.style.opacity = claimBtn.disabled ? '0.5' : '1';
                 claimBtn.innerText = monthly.claimed ? '보상 수령 완료' : '보상받기';
+                weeklyClaimBtn.disabled = !weeklyAllClear || weekly.claimed;
+                weeklyClaimBtn.style.opacity = weeklyClaimBtn.disabled ? '0.5' : '1';
+                weeklyClaimBtn.innerText = weekly.claimed ? '보상 수령 완료' : '보상받기';
             },
 
             renderBonusPoolPresetButtons() {
@@ -2206,7 +2244,7 @@
 
                 const chaosBtn = document.getElementById('btn-chaos-roulette');
                 if (chaosBtn) {
-                    if (this.tempGameType === 'endless' && this.checkAllBonusUnlocked()) {
+                    if (this.tempGameType === 'endless') {
                         chaosBtn.style.display = 'block';
                     } else {
                         chaosBtn.style.display = 'none';
@@ -2345,8 +2383,6 @@
 
             // --- Chaos Roulette ---
             openChaosRoulette() {
-                if (!this.checkAllBonusUnlocked()) return this.showAlert("아직 해금되지 않았습니다.");
-
                 // Fix: 모달이 화면을 가리는 문제 수정
                 document.getElementById('modal-mode-select').classList.remove('active');
 
@@ -3018,10 +3054,11 @@
 
                     if (this.state.gameType === 'challenge') {
                         this.incrementMonthlyMissionProgress('challenge3', 1);
+                        this.incrementWeeklyMissionProgress('challenge1', 1);
                     }
 
                     // Transcendence Ticket Logic (On Clear)
-                    if (this.state.gameType === 'challenge' || (this.state.mode !== 'origin' && this.checkAllBonusUnlocked())) {
+                    if (this.state.gameType === 'challenge' && this.checkAllBonusUnlocked()) {
                         this.global.chaosTickets = (this.global.chaosTickets || 0) + 1;
                         this.saveGlobalData();
                         this.log("<b>[보너스]</b> 카오스 티켓 1장 획득!");
