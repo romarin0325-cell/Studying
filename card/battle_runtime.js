@@ -29,6 +29,45 @@ function applyStackMap(rpg, target, buffMap) {
     });
 }
 
+function applyQueuedAction(rpg, target, action) {
+    if (!action || !target) return;
+
+    switch (action.kind) {
+        case 'clear_field_buffs':
+            rpg.battle.fieldBuffs = [];
+            break;
+        case 'remove_target_stack': {
+            const nextValue = (target.buffs[action.id] || 0) - (action.count || 0);
+            if (nextValue > 0) target.buffs[action.id] = nextValue;
+            else delete target.buffs[action.id];
+            break;
+        }
+        case 'add_target_buff': {
+            const value = action.value || 1;
+            const stackCap = getStackCap(rpg, action.id);
+            if (stackCap === null) {
+                target.buffs[action.id] = value > 0 ? 1 : 0;
+                if (target.buffs[action.id] <= 0) delete target.buffs[action.id];
+            } else {
+                target.buffs[action.id] = Math.min((target.buffs[action.id] || 0) + value, stackCap);
+            }
+            break;
+        }
+        case 'remove_field_buff_by_name': {
+            const idx = rpg.battle.fieldBuffs.findIndex(buff => buff.name === action.id);
+            if (idx !== -1) rpg.battle.fieldBuffs.splice(idx, 1);
+            break;
+        }
+        case 'remove_first_field_buff':
+            if (rpg.battle.fieldBuffs.length > 0) rpg.battle.fieldBuffs.shift();
+            break;
+        default:
+            break;
+    }
+
+    if (action.log) rpg.log(action.log);
+}
+
 const TURN_BUFF_IDS = ['evasion', 'barrier', 'magic_guard', 'guard'];
 
 function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
@@ -255,16 +294,18 @@ const BattleRuntime = {
                 return;
             }
 
-            for (let idx = battle.delayedEffects.length - 1; idx >= 0; idx--) {
-                const effect = battle.delayedEffects[idx];
-                if (effect.turn === battle.turn) {
-                    battle.delayedEffects.splice(idx, 1);
+            const dueEffects = battle.delayedEffects.filter(effect => effect.turn === battle.turn);
+            if (dueEffects.length > 0) {
+                battle.delayedEffects = battle.delayedEffects.filter(effect => effect.turn !== battle.turn);
+                for (const effect of dueEffects) {
                     if (effect.source.isDead) {
                         rpg.log(`${effect.skill.name} 발동 실패... (시전자 사망)`);
-                    } else {
-                        rpg.log(`${effect.skill.name} 발동!`);
-                        BattleRuntime.executeSkill(rpg, effect.source, battle.enemy, effect.skill, true);
+                        continue;
                     }
+
+                    rpg.log(effect.announce || `${effect.skill.name} 발동!`);
+                    BattleRuntime.executeSkill(rpg, effect.source, battle.enemy, effect.skill, true);
+                    if (battle.enemy && battle.enemy.hp <= 0) return;
                 }
             }
 
@@ -571,6 +612,56 @@ const BattleRuntime = {
                 ? buildResolvedDelayedSkill(modifiedSkill, delayedEff, rpg.battle.turn)
                 : modifiedSkill;
 
+            if (delayedEff.type === 'phantom_nightmare') {
+                const nightmareTurns = Array.isArray(delayedEff.turns)
+                    ? delayedEff.turns
+                    : [1, 2, 3, 4, 5];
+                const nightmareMessages = Array.isArray(delayedEff.messages) && delayedEff.messages.length === nightmareTurns.length
+                    ? delayedEff.messages
+                    : [
+                        '첫번째 악몽이 시작된다.',
+                        '두번째 악몽이 시작된다.',
+                        '세번째 악몽이 시작된다.',
+                        '네번째 악몽이 시작된다.',
+                        '마지막 악몽이 시작된다.'
+                    ];
+
+                if (BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills')) {
+                    rpg.log('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
+                    nightmareMessages.forEach(message => {
+                        if (target.hp <= 0 || source.isDead) return;
+                        rpg.log(message);
+                        BattleRuntime.executeSkill(rpg, source, target, resolvedDelayedSkill, true);
+                    });
+                    BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+                    BattleRuntime.resolveSourceDeath(rpg, source, target);
+                    if (target.hp <= 0) {
+                        rpg.winBattle();
+                        return;
+                    }
+                    BattleRuntime.TurnManager.endPlayerTurn(rpg);
+                    return;
+                }
+
+                nightmareTurns.forEach((turns, index) => {
+                    rpg.battle.delayedEffects.push({
+                        turn: rpg.battle.turn + turns,
+                        source: source,
+                        skill: resolvedDelayedSkill,
+                        announce: nightmareMessages[index] || `${resolvedDelayedSkill.name} 발동!`
+                    });
+                });
+                rpg.log(`${skill.name} 준비... (1~5턴 뒤 연속 발동)`);
+                BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+                BattleRuntime.resolveSourceDeath(rpg, source, target);
+                if (target.hp <= 0) {
+                    rpg.winBattle();
+                    return;
+                }
+                BattleRuntime.TurnManager.endPlayerTurn(rpg);
+                return;
+            }
+
             if (BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills')) {
                 rpg.log('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
                 modifiedSkill = resolvedDelayedSkill;
@@ -598,7 +689,6 @@ const BattleRuntime = {
             target.hp -= dmgResult.dmg;
             target.tookDamageThisTurn = true;
             rpg.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            BattleRuntime.handleOnHitTraits(rpg, target, source);
         }
 
         if (dmgResult.luckyVicky) {
@@ -606,8 +696,12 @@ const BattleRuntime = {
             rpg.log('[아티팩트] 럭키비키: 치명타 발생! 마나 10 회복!');
         }
 
-        BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+        BattleRuntime.applyQueuedStateChanges(rpg, target, dmgResult.postActions);
         BattleRuntime.applySkillEffects(rpg, source, target, modifiedSkill);
+        if (dmgResult.dmg > 0) {
+            BattleRuntime.handleOnHitTraits(rpg, target, source);
+        }
+        BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
         BattleRuntime.resolveSourceDeath(rpg, source, target);
 
         if (target.hp <= 0) {
@@ -644,6 +738,11 @@ const BattleRuntime = {
         target.lastHitType = skill.type;
 
         return result;
+    },
+
+    applyQueuedStateChanges(rpg, target, actions) {
+        if (!Array.isArray(actions) || actions.length === 0) return;
+        actions.forEach(action => applyQueuedAction(rpg, target, action));
     },
 
     applySkillEffects(rpg, source, target, skill) {
