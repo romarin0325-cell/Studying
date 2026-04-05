@@ -256,6 +256,14 @@
     },
 
 
+    getWeeklyChaosTicketRewardAmount() {
+        const reward = GAME_CONSTANTS && Number.isFinite(GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD)
+            ? GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD
+            : 3;
+        return reward;
+    },
+
+
     claimMonthlyMissionReward() {
         const monthly = this.ensureMonthlyMissionState();
         if (monthly.claimed) return this.showAlert('이번 달 보상은 이미 수령했습니다.');
@@ -279,11 +287,12 @@
         if (weekly.claimed) return this.showAlert('이번 주 보상은 이미 수령했습니다.');
         if (!this.areAllWeeklyMissionsCleared()) return this.showAlert('모든 주간 미션을 완료해야 보상을 받을 수 있습니다.');
 
+        const rewardAmount = this.getWeeklyChaosTicketRewardAmount();
         weekly.claimed = true;
-        this.global.chaosTickets = (this.global.chaosTickets || 0) + GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD;
+        this.global.chaosTickets = (this.global.chaosTickets || 0) + rewardAmount;
         this.saveGlobalData();
         this.renderMonthlyMission();
-        this.openInfoModal('주간 미션 보상', `카오스 티켓 ${GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD}장을 획득했습니다!`);
+        this.openInfoModal('주간 미션 보상', `카오스 티켓 ${rewardAmount}장을 획득했습니다!`);
     },
 
 
