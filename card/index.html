@@ -2002,7 +2002,8 @@
                 monthlySection.style.display = showMonthly ? 'block' : 'none';
                 status.innerText = `${monthly.monthKey} 월 미션`;
                 weeklyStatus.innerText = `${weekly.weekLabel} 주간 미션`;
-                weeklyRewardName.innerText = `카오스 티켓 ${GAME_CONSTANTS.WEEKLY_CHAOS_TICKET_REWARD}장`;
+                const weeklyRewardAmount = this.getWeeklyChaosTicketRewardAmount();
+                weeklyRewardName.innerText = `카오스 티켓 ${weeklyRewardAmount}장`;
                 list.innerHTML = '';
                 weeklyList.innerHTML = '';
 
