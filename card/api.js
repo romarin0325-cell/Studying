@@ -831,9 +831,9 @@ const LumiQuestionRuntime = {
             return `응답이 흔들렸어. 다시 시도하거나 ${this.getModelLabel('gemini-3.1-pro-preview')}로 바꿔볼 수 있어.\n${detail}`;
         }
         if (session && session.mode === 'toeic-review') {
-            return `(・ｸ孖ｸ・ｼ ・､・・・俾ｸｰ・ｰ) ・ｩ・・・ｵ・・・・簿ｦｬ﨑俯共・ ・・・・駕・・ｴ.\n${detail}`;
+            return `(노트를 다시 넘기며) 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
         }
-        return `(・壱ｲ母ｵｬ・ｬ・・・呷棕・ｼ・ｰ) ・壱ｬｸ・・・簿ｦｬ﨑俯共・ ・・・彧罷豆・ｸ・ｴ.\n${detail}`;
+        return `(마법구슬을 붙잡으며) 질문을 정리하다가 잠깐 흔들렸어.\n${detail}`;
     },
 
     getPendingMessageText(modelId) {
