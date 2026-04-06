@@ -857,6 +857,16 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
+        id: 'sylphid', name: '실피드', grade: 'legend', element: 'nature', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 480, atk: 150, matk: 100, def: 65, mdef: 60 },
+        trait: { type: 'opening_atk_matk', val: 50, desc: '3턴 이내 공격력/마법공격력 50% 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '실프스탭', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '필드버프 질풍 발동', effects: [{ type: 'field_buff', id: 'gale' }] },
+            { name: '템페스트크로', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '질풍 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'gale', mult: 2.0 }] }
+        ]
+    },
+    {
         id: 'alchemist', name: '연금술사', grade: 'epic', element: 'water', role: 'buffer', unlockSource: 'hidden',
         stats: { hp: 400, atk: 70, matk: 70, def: 80, mdef: 80 },
         trait: { type: 'reverse_atk_matk_party', desc: '덱의 모든 카드의 물리공격과 마법공격이 뒤바뀐다' },
@@ -964,7 +974,7 @@ const ENEMIES = [
         ]
     },
     {
-        id: 'demon_god', name: '마신', element: 'dark',
+        id: 'demon_god', name: '마신 벨제뷔트', element: 'dark',
         stats: { hp: 1400, atk: 110, matk: 110, def: 100, mdef: 100 },
         skills: [
             { name: '다크니스', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법 피해', effects: [] },
@@ -984,16 +994,6 @@ const ENEMIES = [
 ];
 
 const TRANSCENDENCE_CARDS = [
-    {
-        id: 'trans_gray', name: '사신그레이', grade: 'transcendence', element: 'dark', role: 'dealer',
-        stats: { hp: 530, atk: 150, matk: 135, def: 75, mdef: 75 },
-        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
-        skills: [
-            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
-            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
-        ]
-    },
     {
         id: 'trans_executor', name: '종언의집행자', grade: 'transcendence', element: 'dark', role: 'debuffer',
         stats: { hp: 560, atk: 125, matk: 125, def: 70, mdef: 70 },
@@ -1068,6 +1068,16 @@ const TRANSCENDENCE_CARDS = [
 
 const BONUS_TRANSCENDENCE_CARDS = [
     {
+        id: 'trans_gray', name: '사신그레이', grade: 'transcendence', element: 'dark', role: 'dealer',
+        stats: { hp: 530, atk: 150, matk: 135, def: 75, mdef: 75 },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
+            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
+        ]
+    },
+    {
         id: 'trans_thor', name: '뇌신토르', grade: 'transcendence', element: 'light', role: 'dealer',
         stats: { hp: 530, atk: 110, matk: 150, def: 65, mdef: 85 },
         trait: {
@@ -1112,10 +1122,37 @@ const BONUS_TRANSCENDENCE_CARDS = [
             { name: '트라이던트', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '전투 시작 후 5턴 이내일 때 대미지 2배', effects: [{ type: 'dmg_boost_turn_limit', maxTurn: 5, mult: 2.0 }] },
             { name: '어비스프레셔', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개를 제거하고 대미지 2배', effects: [{ type: 'remove_field_buff_dmg', mult: 2.0 }] }
         ]
+    },
+    {
+        id: 'trans_flora', name: '플로라', grade: 'transcendence', element: 'nature', role: 'buffer',
+        stats: { hp: 550, atk: 110, matk: 120, def: 85, mdef: 85 },
+        trait: { type: 'syn_nature_3_party_def_mdef', val: 50, desc: '덱에 자연속성 3장 이상일 때 파티 전체 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '제네시스블룸', type: 'sup', tier: 3, cost: 30, desc: '필드버프 태양의축복, 대지의축복 발동', effects: [{ type: 'field_buff', id: 'sun_bless' }, { type: 'field_buff', id: 'earth_bless' }] },
+            { name: '블러썸템페스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '반드시 치명타로 적중', effects: [{ type: 'force_crit' }] }
+        ]
     }
 ];
 
 ENEMIES.push(
+    {
+        id: 'flora', name: '꽃의 여신 플로라', element: 'nature', hiddenBossFor: 'artificial_demon_god', bonusTranscendenceReward: 'trans_flora',
+        stats: { hp: 700, atk: 70, matk: 70, def: 70, mdef: 70 },
+        skills: [
+            { name: '제네시스블룸', type: 'sup', rate: 0.0, val: 0, desc: '대미지 반감, 자신에게 걸린 모든 디버프를 해제', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'clear_self_debuffs' }] },
+            { name: '블러썸템페스트', type: 'mag', rate: 0.3, val: 2.0, desc: '마법공격 2배율', effects: [] }
+        ]
+    },
+    {
+        id: 'gray', name: '사신 그레이', element: 'dark', hiddenBossFor: 'iris_love', bonusTranscendenceReward: 'trans_gray',
+        stats: { hp: 800, atk: 90, matk: 90, def: 60, mdef: 60 },
+        skills: [
+            { name: '영혼절단', type: 'mag', rate: 0.0, val: 2.0, desc: '2~4배율 랜덤 마법공격', effects: [{ type: 'random_mult', min: 2.0, max: 4.0 }] },
+            { name: '차원절단', type: 'phy', rate: 0.0, val: 2.0, desc: '2~4배율 랜덤 물리공격', effects: [{ type: 'random_mult', min: 2.0, max: 4.0 }] },
+            { name: '디멘션제로', type: 'phy', rate: 0.0, val: 4.0, desc: '물리공격 4배율', effects: [] }
+        ]
+    },
     {
         id: 'thor', name: '뇌신 토르', element: 'light', hiddenBossFor: 'iris_curse', bonusTranscendenceReward: 'trans_thor',
         stats: { hp: 900, atk: 100, matk: 50, def: 100, mdef: 50 },

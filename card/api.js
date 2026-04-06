@@ -36,8 +36,25 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
 4.강의 마무리 멘트`;
 
+const LUMI_MODEL_OPTIONS = Object.freeze([
+    { id: 'gemini-3.1-pro-preview', label: '3.1 Pro', flashLike: false, allowSearch: true },
+    { id: 'gemini-3.0-flash-preview', label: '3.0 Flash', flashLike: true, allowSearch: true },
+    { id: 'gemini-3.1-flash-lite-preview', label: '3.1 Flash Lite', flashLike: true, allowSearch: false }
+]);
+
+function getLumiModelConfig(modelId) {
+    return LUMI_MODEL_OPTIONS.find(option => option.id === modelId) || LUMI_MODEL_OPTIONS[0];
+}
+
+function truncateContextText(text, maxLength) {
+    const normalized = typeof text === 'string' ? text.trim() : '';
+    if (!maxLength || normalized.length <= maxLength) return normalized;
+    return `${normalized.slice(0, maxLength)}\n...(중략)`;
+}
+
 const GameAPI = {
-    async getTutoringContent(apiKey, targetData, type) {
+    async getTutoringContent(apiKey, targetData, type, options = {}) {
+        const modelConfig = getLumiModelConfig(options.model);
         // 1. 30% 확률 (30스테이지 이상 시 50%) (The 'Accidental' Event)
         const enableEvent = RPG.global.tutoringEventEnabled !== false;
         const prob = (RPG.state.enemyScale >= 30) ? 0.5 : 0.3;
@@ -81,7 +98,7 @@ const GameAPI = {
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
         // 4. API 호출 (flash 기반 high reasoning / BLOCK_NONE 사용)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.id}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -89,7 +106,7 @@ const GameAPI = {
                 generationConfig: {
                     temperature: isMisunderstandingMode ? 0.65 : 0.4,
                     thinkingConfig: {
-                        thinkingLevel: 'high'
+                        thinkingLevel: modelConfig.flashLike ? 'medium' : 'high'
                     }
                 },
                 safetySettings: [
@@ -174,6 +191,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         thinkingLevel = 'high',
         model = 'gemini-3.1-pro-preview'
     } = options;
+    const modelConfig = getLumiModelConfig(model);
 
     const payload = {
         systemInstruction: {
@@ -182,7 +200,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         contents: history
     };
 
-    if (enableSearch) {
+    if (enableSearch && modelConfig.allowSearch) {
         payload.tools = [
             {
                 googleSearch: {}
@@ -192,7 +210,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
 
     payload.generationConfig = {
         thinkingConfig: {
-            thinkingLevel: normalizeThinkingLevel(thinkingLevel)
+            thinkingLevel: normalizeThinkingLevel(modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
         }
     };
     payload.safetySettings = [
@@ -203,7 +221,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
     ];
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.id}:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -332,10 +350,13 @@ function buildToeicQuestionBlock(source, question, index) {
     ].join('\n');
 }
 
-function buildToeicContext(source) {
+function buildToeicContext(source, options = {}) {
+    const compact = !!options.compact;
     const questionBlocks = (source.questions || []).map((question, index) =>
         buildToeicQuestionBlock(source, question, index)
     );
+    const passageText = compact ? truncateContextText(source.passage || '', 2400) : (source.passage || '');
+    const explanationText = compact ? truncateContextText(source.explanationText || '', 1600) : (source.explanationText || '');
 
     return [
         '다음은 형아가 지금 보고 있는 TOEIC 실전마법연습 세트 정보야.',
@@ -345,13 +366,13 @@ function buildToeicContext(source) {
         `[파트] ${source.partLabel || ''}`,
         '',
         '[지문]',
-        source.passage || '지문 없음',
+        passageText || '지문 없음',
         '',
         '[문제와 정답]',
         questionBlocks.join('\n\n'),
         '',
         '[해설]',
-        source.explanationText || '해설 없음',
+        explanationText || '해설 없음',
         '',
         '형아가 토익 문제의 문장 해설, 보기 차이, 정답 근거를 물으면 위 정보만 바탕으로 정확히 설명해 줘.'
     ].join('\n');
@@ -394,7 +415,6 @@ function createGeneralSession() {
 }
 
 function createToeicReviewSession(source) {
-    const context = buildToeicContext(source);
     return createSession({
         mode: 'toeic-review',
         ui: TOEIC_LUMI_SESSION_UI,
@@ -402,17 +422,31 @@ function createToeicReviewSession(source) {
         enableSearch: true,
         thinkingLevel: 'high',
         source,
-        seedHistory: [
-            { role: 'user', parts: [{ text: context }] }
-        ],
+        seedHistory: [],
         seedMessages: []
     });
 }
 
 const LumiQuestionRuntime = {
     SESSION_KEYS: LUMI_SESSION_KEYS,
+    MODEL_OPTIONS: LUMI_MODEL_OPTIONS,
 
     selectedModel: 'gemini-3.1-pro-preview',
+
+    getModelConfig(modelId) {
+        return getLumiModelConfig(modelId || this.selectedModel);
+    },
+
+    getSelectedModelLabel() {
+        return this.getModelConfig().label;
+    },
+
+    cycleSelectedModel() {
+        const currentIndex = this.MODEL_OPTIONS.findIndex(option => option.id === this.selectedModel);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % this.MODEL_OPTIONS.length : 0;
+        this.selectedModel = this.MODEL_OPTIONS[nextIndex].id;
+        return this.selectedModel;
+    },
 
     shouldShowToeicQuestionButton(set) {
         return !!set && (set.type === 'part6' || set.type === 'part7');
@@ -504,15 +538,34 @@ const LumiQuestionRuntime = {
         });
     },
 
+    buildRequestHistory(session, pendingUserContent) {
+        if (!session || session.mode !== 'toeic-review') {
+            return [...session.history, pendingUserContent];
+        }
+
+        const modelConfig = this.getModelConfig();
+        const toeicContext = buildToeicContext(session.source, { compact: modelConfig.flashLike });
+        const priorHistory = modelConfig.flashLike ? session.history.slice(-6) : session.history;
+
+        return [
+            { role: 'user', parts: [{ text: toeicContext }] },
+            ...cloneHistory(priorHistory),
+            pendingUserContent
+        ];
+    },
+
     async sendMessage(apiKey, session, message) {
         session.messages.push({ role: 'user', text: message });
-        session.history.push({ role: 'user', parts: [{ text: message }] });
+        const pendingUserContent = { role: 'user', parts: [{ text: message }] };
+        const modelConfig = this.getModelConfig();
+        const requestHistory = this.buildRequestHistory(session, pendingUserContent);
+        session.history.push(pendingUserContent);
 
-        const result = await GameAPI.askLumiQuestion(apiKey, session.history, {
+        const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
             systemInstruction: session.systemInstruction,
-            enableSearch: session.enableSearch,
-            thinkingLevel: session.thinkingLevel,
-            model: this.selectedModel
+            enableSearch: session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
+            thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
+            model: modelConfig.id
         });
 
         if (result && result.content) {
