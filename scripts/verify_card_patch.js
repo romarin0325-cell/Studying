@@ -447,6 +447,36 @@ async function verifyCombatRules(page) {
     });
     const critSkill = { name: '검증용 강타', type: 'phy', tier: 1, cost: 0, val: 1.0, effects: [{ type: 'force_crit' }] };
     BattleRuntime.executeSkill(critRpg, critSource, critTarget, critSkill);
+
+    const sylphid = cloneCard('sylphid');
+    const galeTarget = makeDummy();
+    const galeRpg = makeRpg({
+      deck: ['sylphid', null, null],
+      enemy: galeTarget,
+      players: [sylphid, null, null],
+      turn: 1
+    });
+    BattleRuntime.applySkillEffects(galeRpg, sylphid, galeTarget, sylphid.skills[1]);
+    const galeBuff = galeRpg.battle.fieldBuffs.find(buff => buff.name === 'gale');
+
+    const refreshedSylphid = cloneCard('sylphid');
+    const refreshedRpg = makeRpg({
+      deck: ['sylphid', null, null],
+      enemy: makeDummy(),
+      players: [refreshedSylphid, null, null],
+      turn: 2,
+      fieldBuffs: [{ name: 'gale', expiresAtTurn: 4, expireLog: '[아티팩트] 질풍 종료' }]
+    });
+    BattleRuntime.applySkillEffects(refreshedRpg, refreshedSylphid, refreshedRpg.battle.enemy, refreshedSylphid.skills[1]);
+    const refreshedGale = refreshedRpg.battle.fieldBuffs.find(buff => buff.name === 'gale');
+    const refreshedGaleCount = refreshedRpg.battle.fieldBuffs.length;
+    const refreshedGaleLogs = [...refreshedRpg.logs];
+    refreshedRpg.logs.length = 0;
+    BattleRuntime.expireFieldBuffs(refreshedRpg, 4);
+    const galeRemainsOnTurnFour = refreshedRpg.battle.fieldBuffs.some(buff => buff.name === 'gale');
+    BattleRuntime.expireFieldBuffs(refreshedRpg, 5);
+    const galeRemainsOnTurnFive = refreshedRpg.battle.fieldBuffs.some(buff => buff.name === 'gale');
+
     BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurn;
     Math.random = originalRandom;
 
@@ -478,7 +508,14 @@ async function verifyCombatRules(page) {
       instantDelayedCount: instantRpg.battle.delayedEffects.length,
       instantMessageCount,
       instantTargetHpLoss: 99999 - instantTarget.hp,
-      luckyVickyMp: critSource.mp
+      luckyVickyMp: critSource.mp,
+      galeExpiresAtTurn: galeBuff ? galeBuff.expiresAtTurn : null,
+      galeBuffCount: galeRpg.battle.fieldBuffs.length,
+      refreshedGaleExpiresAtTurn: refreshedGale ? refreshedGale.expiresAtTurn : null,
+      refreshedGaleCount,
+      refreshedGaleLogs,
+      galeRemainsOnTurnFour,
+      galeRemainsOnTurnFive
     };
   });
 
@@ -510,6 +547,10 @@ async function verifyCombatRules(page) {
   assert(result.instantDelayedCount === 0 && result.instantMessageCount === 5 && result.instantTargetHpLoss > 0, '시간의마술사 조합 즉발 처리가 올바르지 않습니다.');
 
   assert(result.luckyVickyMp === 90, `럭키비키 치명타 MP 회복이 유지되지 않았습니다: ${result.luckyVickyMp}`);
+  assert(result.galeExpiresAtTurn === 4 && result.galeBuffCount === 1, `실프스탭 3턴 질풍 부여가 잘못되었습니다: expiresAt=${result.galeExpiresAtTurn}, count=${result.galeBuffCount}`);
+  assert(result.refreshedGaleExpiresAtTurn === 5 && result.refreshedGaleCount === 1, `기존 질풍 갱신이 잘못되었습니다: expiresAt=${result.refreshedGaleExpiresAtTurn}, count=${result.refreshedGaleCount}`);
+  assert(result.refreshedGaleLogs.some(message => message.includes('지속 턴 갱신')), '기존 질풍 갱신 로그가 남지 않았습니다.');
+  assert(result.galeRemainsOnTurnFour === true && result.galeRemainsOnTurnFive === false, '갱신된 질풍의 만료 턴 계산이 잘못되었습니다.');
 
   return result;
 }

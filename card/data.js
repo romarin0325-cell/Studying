@@ -862,7 +862,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'opening_atk_matk', val: 50, desc: '3턴 이내 공격력/마법공격력 50% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '실프스탭', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '필드버프 질풍 발동', effects: [{ type: 'field_buff', id: 'gale' }] },
+            { name: '실프스탭', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '3턴간 지속되는 필드버프 질풍 발동', effects: [{ type: 'field_buff', id: 'gale', durationTurns: 3 }] },
             { name: '템페스트크로', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '질풍 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'gale', mult: 2.0 }] }
         ]
     },

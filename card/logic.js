@@ -893,7 +893,12 @@ const SideEffects = {
             }
         },
         'field_buff': (ctx, eff) => {
-            ctx.applyFieldBuff(eff.id);
+            const options = {};
+            if (Number.isFinite(eff.durationTurns) && eff.durationTurns > 0) {
+                options.expiresAtTurn = ctx.battle.turn + eff.durationTurns;
+                options.expireLog = eff.expireLog || null;
+            }
+            ctx.applyFieldBuff(eff.id, options);
         },
         'heal_ratio': (ctx, eff) => {
             const ratio = eff.ratio || eff.val || 0;

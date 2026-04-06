@@ -800,7 +800,12 @@ const BattleRuntime = {
     },
 
     applyFieldBuff(rpg, id, options = {}) {
-        if (rpg.battle.fieldBuffs.some(buff => buff.name === id)) {
+        const existingBuff = rpg.battle.fieldBuffs.find(buff => buff.name === id);
+        if (existingBuff) {
+            if (Number.isFinite(options.expiresAtTurn)) {
+                Object.assign(existingBuff, options);
+                return rpg.log(`필드버프 [${BUFF_NAMES[id]}] 지속 턴 갱신!`);
+            }
             return rpg.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
         }
 
