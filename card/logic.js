@@ -392,6 +392,21 @@ const GameUtils = {
         };
     },
 
+    cardMatchesElement(card, element) {
+        return !!card && !!element && (card.id === 'joker' || card.element === element);
+    },
+
+    cardMatchesAnyId(card, ids) {
+        const targetIds = Array.isArray(ids) ? ids : [ids];
+        return !!card && (card.id === 'joker' || targetIds.includes(card.id));
+    },
+
+    getRunPoolGradeBucket(card) {
+        if (!card) return 'normal';
+        if (card.grade === 'legend' || card.grade === 'transcendence' || card.grade === 'event') return 'legend';
+        return card.grade;
+    },
+
     /**
      * Build a card pool with bonus and transcendence cards.
      * Replaces 6 duplicated card pool construction patterns throughout the codebase.
@@ -1252,6 +1267,11 @@ const Logic = {
             m.atk += boost;
             m.def += boost;
         }
+        if (trait && trait.type === 'opening_atk_matk' && battleTurn <= 3) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.matk += boost;
+        }
         if (trait && trait.type === 'cond_sanctuary_atk_def' && effectiveFieldBuffs.some(b => b.name === 'sanctuary')) {
             const boost = (trait.val || 0) / 100;
             m.atk += boost;
@@ -1314,7 +1334,7 @@ const Logic = {
         }
 
         // Artifact: veil_of_darkness — dark element crit/eva +10%
-        if (isPlayer && artifacts.includes('veil_of_darkness') && char.proto && char.proto.element === 'dark') {
+        if (isPlayer && artifacts.includes('veil_of_darkness') && GameUtils.cardMatchesElement(char.proto, 'dark')) {
             stats.crit += 10;
             stats.evasion += 10;
         }
@@ -1322,7 +1342,7 @@ const Logic = {
         // Artifact: rabbit_hole — specific rabbits crit/eva +20%
         if (isPlayer && artifacts.includes('rabbit_hole') && char.proto) {
             const rabbitIds = ['snow_rabbit', 'night_rabbit', 'silver_rabbit'];
-            if (rabbitIds.includes(char.proto.id)) {
+            if (GameUtils.cardMatchesAnyId(char.proto, rabbitIds)) {
                 stats.crit += 20;
                 stats.evasion += 20;
             }
@@ -1686,6 +1706,7 @@ const Logic = {
             else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
             else if (t.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) active = true;
+            else if (t.type === 'syn_nature_3_party_def_mdef' && deckCtx.countElement('nature') >= 3) active = true;
             else if (t.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) active = true;
 
             if (active) {
@@ -1776,6 +1797,10 @@ const Logic = {
                 partyBoost.def += (tr.val || 0);
                 partyBoost.mdef += (tr.val || 0);
             }
+            else if (tr && tr.type === 'syn_nature_3_party_def_mdef' && deckCtx.countElement('nature') >= 3) {
+                partyBoost.def += (tr.val || 0);
+                partyBoost.mdef += (tr.val || 0);
+            }
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
             }
@@ -1794,7 +1819,7 @@ const Logic = {
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
             const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon'];
-            if (dragonIds.includes(playerProto.id)) {
+            if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
         }
@@ -1828,6 +1853,17 @@ const Logic = {
             if (turn === 7 || turn === 14) skill = enemy.skills.find(s => s.name === '제노사이드');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '다크니스');
         }
+        else if (enemy.id === 'flora') {
+            if (turn === 5 || turn === 10) skill = enemy.skills.find(s => s.name === '제네시스블룸');
+            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '블러썸템페스트');
+        }
+        else if (enemy.id === 'gray') {
+            if (turn === 14) skill = enemy.skills.find(s => s.name === '디멘션제로');
+            else if (turn % 4 === 0) {
+                const skillName = Math.random() < 0.5 ? '영혼절단' : '차원절단';
+                skill = enemy.skills.find(s => s.name === skillName);
+            }
+        }
         else if (enemy.id === 'thor') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '썬더러쉬');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '묠니르');
@@ -1852,8 +1888,8 @@ const Logic = {
                     name: `${chargeSkillId} 차징`,
                     isChargeStart: true,
                     chargeMessage: chargeSkillId === '테라소드'
-                        ? '아레스가 테라소드의 힘을 끌어모읍니다...'
-                        : '아레스가 마그마이럽션의 화염을 응축합니다...'
+                        ? `${enemy.name}가 테라소드의 힘을 끌어모읍니다...`
+                        : `${enemy.name}가 마그마이럽션의 화염을 응축합니다...`
                 };
             }
             if (r < 0.2) skill = enemy.skills.find(s => s.name === '스피어레인');
@@ -1992,13 +2028,13 @@ const Logic = {
         // ─── Artifact Death Effects ─────────────────────────────
 
         // Artifact: reverse — nature element death -> earth_bless field buff
-        if (artifacts.includes('reverse') && victim.proto && victim.proto.element === 'nature') {
+        if (artifacts.includes('reverse') && GameUtils.cardMatchesElement(victim.proto, 'nature')) {
             result.fieldBuffsToAdd.push('earth_bless');
             logFn(`[아티팩트] 리버스: 자연속성 카드 사망! 대지의 축복 부여!`);
         }
 
         // Artifact: frozen_body — water element death -> stun on killer
-        if (artifacts.includes('frozen_body') && victim.proto && victim.proto.element === 'water') {
+        if (artifacts.includes('frozen_body') && GameUtils.cardMatchesElement(victim.proto, 'water')) {
             if (killer) {
                 result.killerDebuffs['stun'] = 1;
                 logFn(`[아티팩트] 프로즌바디: 물속성 카드 사망! 적에게 스턴 부여!`);

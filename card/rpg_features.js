@@ -345,6 +345,8 @@
         const baseId = rotation[this.state.enemyScale % rotation.length];
         const stageNumber = this.state.enemyScale + 1;
         const hiddenBossMap = {
+            artificial_demon_god: 'flora',
+            iris_love: 'gray',
             iris_curse: 'thor',
             pharaoh: 'poseidon',
             demon_god: 'ares'
@@ -538,21 +540,49 @@
     },
 
 
-    isWeightedTranscendenceRunMode() {
-        return this.state.gameType === 'endless' && ['chaos', 'draft'].includes(this.state.mode);
+    isGradeBalancedRunMode() {
+        return ['chaos', 'draft'].includes(this.state.mode);
     },
 
 
     drawRunPoolCards(pool, count, options = {}) {
         if (!Array.isArray(pool) || pool.length === 0 || count <= 0) return [];
 
-        if (this.isWeightedTranscendenceRunMode()) {
-            return GameUtils.drawWeightedCards(
-                pool,
-                count,
-                card => (card.grade === 'transcendence' ? 0.5 : 1.0),
-                options
-            );
+        if (this.isGradeBalancedRunMode()) {
+            const allowDuplicates = !!options.allowDuplicates;
+            const source = allowDuplicates ? [...pool] : [...pool];
+            const picks = [];
+            const grades = ['normal', 'rare', 'epic', 'legend'];
+
+            while (picks.length < count && source.length > 0) {
+                const bucketMap = grades.reduce((acc, grade) => {
+                    acc[grade] = source.filter(card => GameUtils.getRunPoolGradeBucket(card) === grade);
+                    return acc;
+                }, {});
+                const availableGrades = grades.filter(grade => bucketMap[grade].length > 0);
+                if (availableGrades.length === 0) break;
+
+                let selectedGrade = grades[Math.min(grades.length - 1, Math.floor(Math.random() * grades.length))];
+                if (bucketMap[selectedGrade].length === 0) {
+                    selectedGrade = availableGrades[Math.floor(Math.random() * availableGrades.length)];
+                }
+
+                const pick = GameUtils.drawWeightedCards(
+                    bucketMap[selectedGrade],
+                    1,
+                    card => (card.grade === 'transcendence' ? 0.5 : 1.0),
+                    { allowDuplicates: false }
+                )[0];
+                if (!pick) break;
+
+                picks.push(pick);
+                if (!allowDuplicates) {
+                    const pickedIndex = source.findIndex(card => card.id === pick.id);
+                    if (pickedIndex > -1) source.splice(pickedIndex, 1);
+                }
+            }
+
+            return picks;
         }
 
         if (options.allowDuplicates) {

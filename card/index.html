@@ -1276,7 +1276,10 @@
 
     <div id="modal-tutoring" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <h3>루미의 개인과외</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <h3 style="margin:0;">루미의 개인과외</h3>
+                <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
+            </div>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
                 <img src="루미.png" onerror="this.src=''" alt="Rumi">
             </div>
@@ -3423,7 +3426,7 @@
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
-                if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview' ? '3.1 Pro' : '3.0 Flash';
+                if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.getSelectedModelLabel();
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
                         ? '해설에서 궁금한 점을 입력하세요.'
@@ -3431,10 +3434,19 @@
                 }
             },
 
+            updateLumiModelButtons() {
+                const label = LumiQuestionRuntime.getSelectedModelLabel();
+                const chatBtn = document.getElementById('lumi-chat-model-btn');
+                const tutoringBtn = document.getElementById('tutoring-model-btn');
+                if (chatBtn) chatBtn.innerText = label;
+                if (tutoringBtn) tutoringBtn.innerText = label;
+            },
+
             openLumiChatSession(session, sessionKey) {
                 if (!session) return;
                 this.activeLumiChatSessionKey = sessionKey;
                 this.configureLumiChatSessionUi(session);
+                this.updateLumiModelButtons();
                 this.renderLumiChatMessages();
                 this.setLumiChatStatus(LumiQuestionRuntime.getInitialStatus(session, !!this.getStoredApiKey()));
                 document.getElementById('modal-lumi-question').classList.add('active');
@@ -3566,15 +3578,8 @@
             },
 
             toggleLumiChatModel() {
-                if (LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview') {
-                    LumiQuestionRuntime.selectedModel = 'gemini-3.0-flash-preview';
-                } else {
-                    LumiQuestionRuntime.selectedModel = 'gemini-3.1-pro-preview';
-                }
-                const btn = document.getElementById('lumi-chat-model-btn');
-                if (btn) {
-                    btn.innerText = LumiQuestionRuntime.selectedModel === 'gemini-3.1-pro-preview' ? '3.1 Pro' : '3.0 Flash';
-                }
+                LumiQuestionRuntime.cycleSelectedModel();
+                this.updateLumiModelButtons();
             },
 
             handleLumiQuestionKey(event) {
@@ -3659,6 +3664,7 @@
                 document.getElementById('tutoring-content').innerText = "수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.";
                 document.getElementById('btn-tutoring-quiz').style.display = 'none';
                 this.currentTutoringItem = null;
+                this.updateLumiModelButtons();
             },
 
             async startTutoringSession() {
@@ -3703,7 +3709,12 @@
                 contentBox.innerHTML = "루미 선생님이 강의를 준비하고 있어요...<br>(잠시만 기다려주세요)";
 
                 try {
-                    const text = await GameAPI.getTutoringContent(key, targetData, isCollocation ? 'collocation' : 'vocab');
+                    const text = await GameAPI.getTutoringContent(
+                        key,
+                        targetData,
+                        isCollocation ? 'collocation' : 'vocab',
+                        { model: LumiQuestionRuntime.selectedModel }
+                    );
 
                     // ✅ 응답 도착 후: 모달이 아직 열려있는지 확인
                     const tutoringModal = document.getElementById('modal-tutoring');
@@ -4177,9 +4188,9 @@
                     this.state.toeicPracticeDone = true;
                 }
 
-                // Reset Sage Blessing
-                this.state.greatSageBlessingUses = 3;
-                if (document.getElementById('sage-uses')) document.getElementById('sage-uses').innerText = 3;
+                // Add Sage Blessing uses instead of fully resetting them.
+                this.state.greatSageBlessingUses = (this.state.greatSageBlessingUses || 0) + getDefaultBlessingUses();
+                if (document.getElementById('sage-uses')) document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
 
                 // Disable exit button during results/commentary
                 const exitBtn = document.getElementById('toeic-exit-btn');
@@ -4227,7 +4238,7 @@
                     msg += `<br>`;
                 }
 
-                msg += `<b style="color:#00e676">대현자의 축복 횟수가 3회로 리셋되었습니다!</b>`;
+                msg += `<b style="color:#00e676">대현자의 축복 횟수가 3회 추가되었습니다! (현재 ${this.state.greatSageBlessingUses}회)</b>`;
 
                 // Open Result Modal
                 document.getElementById('toeic-result-content').innerHTML = msg;

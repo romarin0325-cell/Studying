@@ -277,10 +277,10 @@ const BattleRuntime = {
                     battle.enemy.mdef = battle.enemy.baseMdef;
                     if (battle.turn % 2 === 0) {
                         battle.enemy.def = Math.floor(battle.enemy.def * 1.5);
-                        rpg.log("마신의 권능: 짝수 턴 물리방어력 50% 증가.");
+                        rpg.log(`${battle.enemy.name}의 권능: 짝수 턴 물리방어력 50% 증가.`);
                     } else {
                         battle.enemy.mdef = Math.floor(battle.enemy.mdef * 1.5);
-                        rpg.log("마신의 권능: 홀수 턴 마법방어력 50% 증가.");
+                        rpg.log(`${battle.enemy.name}의 권능: 홀수 턴 마법방어력 50% 증가.`);
                     }
                 }
             }
@@ -731,7 +731,7 @@ const BattleRuntime = {
         if (target.id === 'demon_god') {
             const battle = rpg.battle;
             if ((battle.turn % 2 === 0 && skill.type === 'phy') || (battle.turn % 2 !== 0 && skill.type === 'mag')) {
-                rpg.log("(마신의 권능: 방어력 상승 적용중)");
+                rpg.log(`(${target.name}의 권능: 방어력 상승 적용중)`);
             }
         }
 
