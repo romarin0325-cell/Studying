@@ -735,7 +735,9 @@
 
 
     saveGame(showMessage = true) {
-        Storage.save(Storage.keys.SAVE, this.state);
+        const saveState = { ...this.state };
+        delete saveState.currentToeicSession;
+        Storage.save(Storage.keys.SAVE, saveState);
         this.saveStudyProgress();
         this.saveGlobalData(); // Also save global just in case
         if (showMessage) this.showAlert("저장되었습니다.");
@@ -1238,6 +1240,9 @@
 
     resetToeicProgress(options = {}) {
         const reset = () => {
+            if (typeof this.clearToeicLumiQuestionSession === 'function') {
+                this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
+            }
             this.state.completedToeicSets = [];
             this.saveGame(false);
             if (!options.silent) {

@@ -38,7 +38,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
     { id: 'gemini-3.1-pro-preview', label: '3.1 Pro', flashLike: false, allowSearch: true },
-    { id: 'gemini-3.0-flash-preview', label: '3.0 Flash', flashLike: true, allowSearch: true },
+    { id: 'gemini-3-flash-preview', label: 'Flash 3', flashLike: true, allowSearch: true },
     { id: 'gemini-3.1-flash-lite-preview', label: '3.1 Flash Lite', flashLike: true, allowSearch: false }
 ]);
 
@@ -184,6 +184,201 @@ function normalizeThinkingLevel(thinkingLevel) {
     return GEMINI_REASONING_LEVELS.has(thinkingLevel) ? thinkingLevel : 'high';
 }
 
+function isAbortError(error) {
+    return !!error && (
+        error.name === 'AbortError' ||
+        String(error.message || '').includes('aborted')
+    );
+}
+
+function isRetryableLumiError(error) {
+    if (!error) return false;
+    const status = Number(error.status || 0);
+    if (status === 500 || status === 503 || status === 504) {
+        return true;
+    }
+    const detail = String(error.message || '');
+    return /\b(500|503|504)\b/.test(detail) || detail.includes('빈 응답');
+}
+
+function sleepWithSignal(delayMs, signal) {
+    return new Promise((resolve, reject) => {
+        if (signal && signal.aborted) {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+            return;
+        }
+
+        let timerId = null;
+        const handleAbort = () => {
+            if (timerId !== null) clearTimeout(timerId);
+            if (signal) signal.removeEventListener('abort', handleAbort);
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+        };
+
+        timerId = setTimeout(() => {
+            if (signal) signal.removeEventListener('abort', handleAbort);
+            resolve();
+        }, delayMs);
+
+        if (signal) {
+            signal.addEventListener('abort', handleAbort, { once: true });
+        }
+    });
+}
+
+function createRequestSignal(signal, timeoutMs) {
+    if (!timeoutMs) {
+        return {
+            signal,
+            didTimeout() {
+                return false;
+            },
+            cleanup() { }
+        };
+    }
+
+    const controller = new AbortController();
+    let timeoutId = null;
+    let timedOut = false;
+
+    const handleAbort = () => {
+        try {
+            controller.abort();
+        } catch (_) { }
+    };
+
+    if (signal) {
+        if (signal.aborted) {
+            handleAbort();
+        } else {
+            signal.addEventListener('abort', handleAbort, { once: true });
+        }
+    }
+
+    timeoutId = setTimeout(() => {
+        timedOut = true;
+        try {
+            controller.abort();
+        } catch (_) { }
+    }, timeoutMs);
+
+    return {
+        signal: controller.signal,
+        didTimeout() {
+            return timedOut;
+        },
+        cleanup() {
+            if (timeoutId !== null) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            if (signal) {
+                signal.removeEventListener('abort', handleAbort);
+            }
+        }
+    };
+}
+
+async function requestLumiQuestion(apiKey, history, options = {}) {
+    const {
+        systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
+        enableSearch = true,
+        thinkingLevel = 'high',
+        model = 'gemini-3.1-pro-preview',
+        signal,
+        timeoutMs = 60000
+    } = options;
+    const modelConfig = getLumiModelConfig(model);
+
+    const payload = {
+        systemInstruction: {
+            parts: [{ text: systemInstruction }]
+        },
+        contents: history
+    };
+
+    if (enableSearch && modelConfig.allowSearch) {
+        payload.tools = [
+            {
+                googleSearch: {}
+            }
+        ];
+    }
+
+    payload.generationConfig = {
+        thinkingConfig: {
+            thinkingLevel: normalizeThinkingLevel(modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
+        }
+    };
+    payload.safetySettings = [
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+    ];
+
+    const requestSignal = createRequestSignal(signal, timeoutMs);
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.id}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+            signal: requestSignal.signal
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            const requestError = new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+            requestError.status = response.status;
+            throw requestError;
+        }
+
+        const result = await response.json();
+        if (result.error) {
+            const apiError = new Error(result.error.message);
+            apiError.status = result.error.code;
+            throw apiError;
+        }
+
+        const candidate = result.candidates && result.candidates[0];
+        const content = candidate && candidate.content;
+        const parts = content && Array.isArray(content.parts) ? content.parts : [];
+        const text = parts
+            .filter(part => typeof part.text === 'string')
+            .map(part => part.text)
+            .join('')
+            .trim();
+
+        if (!text) {
+            const emptyError = new Error('API가 빈 응답을 반환했습니다.');
+            emptyError.code = 'LUMI_EMPTY_RESPONSE';
+            emptyError.status = 200;
+            throw emptyError;
+        }
+
+        return {
+            text,
+            content: content ? { ...content, role: content.role || 'model' } : { role: 'model', parts: [{ text }] },
+            sources: normalizeGroundingSources(candidate).slice(0, 4),
+            queries: candidate?.groundingMetadata?.webSearchQueries || []
+        };
+    } catch (error) {
+        if (requestSignal.didTimeout() && isAbortError(error)) {
+            const timeoutError = new Error(`Lumi request timed out after ${timeoutMs}ms.`);
+            timeoutError.code = 'LUMI_TIMEOUT';
+            timeoutError.status = 504;
+            throw timeoutError;
+        }
+        throw error;
+    } finally {
+        requestSignal.cleanup();
+    }
+}
+
 GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     const {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
@@ -281,6 +476,26 @@ const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi
 - 추가 근거가 꼭 필요할 때만 웹 검색 결과를 보조로 사용하고, 검색으로 알게 된 내용은 세션 정보와 구분해서 설명하십시오.
 - 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 근거를 덧붙이십시오.`;
 
+GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
+    const modelConfig = getLumiModelConfig(options.model);
+    const maxAttempts = modelConfig.flashLike ? 2 : 1;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            return await requestLumiQuestion(apiKey, history, options);
+        } catch (error) {
+            lastError = error;
+            if (isAbortError(error) || !isRetryableLumiError(error) || attempt >= maxAttempts) {
+                throw error;
+            }
+            await sleepWithSignal(700 * attempt, options.signal);
+        }
+    }
+
+    throw lastError || new Error('Lumi request failed.');
+};
+
 const LUMI_SESSION_KEYS = Object.freeze({
     GENERAL: 'general',
     TOEIC: 'toeic'
@@ -317,7 +532,9 @@ function createSession(config) {
     return {
         ...config,
         history: cloneHistory(config.seedHistory),
-        messages: cloneMessages(config.seedMessages)
+        messages: cloneMessages(config.seedMessages),
+        requestSeq: 0,
+        inFlight: null
     };
 }
 
@@ -580,6 +797,168 @@ const LumiQuestionRuntime = {
         });
 
         return result;
+    },
+
+    getModelLabel(modelId) {
+        return this.getModelConfig(modelId).label;
+    },
+
+    setSelectedModel(modelId) {
+        this.selectedModel = this.getModelConfig(modelId).id;
+        return this.selectedModel;
+    },
+
+    getAlternateModel(modelId) {
+        const currentModel = this.getModelConfig(modelId).id;
+        const alternate = this.MODEL_OPTIONS.find(option => option.id !== currentModel);
+        return alternate ? alternate.id : currentModel;
+    },
+
+    getLoadingStatus(session, modelId) {
+        return `답변 생성 중... (${this.getModelLabel(modelId || session?.inFlight?.model || this.selectedModel)})`;
+    },
+
+    getCanceledStatus() {
+        return '응답을 취소했어.';
+    },
+
+    buildErrorMessage(session, error) {
+        if (isAbortError(error)) {
+            return this.getCanceledStatus();
+        }
+        const detail = error && error.message ? error.message : String(error || '');
+        if (isRetryableLumiError(error)) {
+            return `응답이 흔들렸어. 다시 시도하거나 ${this.getModelLabel('gemini-3.1-pro-preview')}로 바꿔볼 수 있어.\n${detail}`;
+        }
+        if (session && session.mode === 'toeic-review') {
+            return `(・ｸ孖ｸ・ｼ ・､・・・俾ｸｰ・ｰ) ・ｩ・・・ｵ・・・・簿ｦｬ﨑俯共・ ・・・・駕・・ｴ.\n${detail}`;
+        }
+        return `(・壱ｲ母ｵｬ・ｬ・・・呷棕・ｼ・ｰ) ・壱ｬｸ・・・簿ｦｬ﨑俯共・ ・・・彧罷豆・ｸ・ｴ.\n${detail}`;
+    },
+
+    getPendingMessageText(modelId) {
+        return `답변 생성 중... (${this.getModelLabel(modelId)})`;
+    },
+
+    buildRequestHistory(session, pendingUserContent, modelId) {
+        if (!session || session.mode !== 'toeic-review') {
+            return [...session.history, pendingUserContent];
+        }
+
+        const modelConfig = this.getModelConfig(modelId);
+        const toeicContext = buildToeicContext(session.source, { compact: modelConfig.flashLike });
+        const priorHistory = modelConfig.flashLike ? session.history.slice(-6) : session.history;
+
+        return [
+            { role: 'user', parts: [{ text: toeicContext }] },
+            ...cloneHistory(priorHistory),
+            pendingUserContent
+        ];
+    },
+
+    cancelPending(session, reason = 'cancel') {
+        if (!session || !session.inFlight) return false;
+
+        const pendingMessage = session.inFlight.pendingMessage;
+        if (pendingMessage && pendingMessage.state === 'pending') {
+            pendingMessage.state = 'canceled';
+            pendingMessage.text = this.getCanceledStatus();
+            pendingMessage.sources = [];
+            pendingMessage.queries = [];
+            pendingMessage.retryable = false;
+        }
+
+        const controller = session.inFlight.controller;
+        session.inFlight = null;
+
+        try {
+            controller.abort(reason);
+        } catch (_) { }
+
+        return true;
+    },
+
+    async sendMessage(apiKey, session, message) {
+        const requestId = (session.requestSeq || 0) + 1;
+        session.requestSeq = requestId;
+
+        const modelConfig = this.getModelConfig(this.selectedModel);
+        const pendingUserContent = { role: 'user', parts: [{ text: message }] };
+        const requestHistory = this.buildRequestHistory(session, pendingUserContent, modelConfig.id);
+        const controller = new AbortController();
+        const pendingReply = {
+            id: `model-${requestId}`,
+            role: 'model',
+            model: modelConfig.id,
+            state: 'pending',
+            text: this.getPendingMessageText(modelConfig.id),
+            sources: [],
+            queries: [],
+            retryable: false,
+            userText: message
+        };
+
+        session.messages.push(
+            { id: `user-${requestId}`, role: 'user', text: message, state: 'done' },
+            pendingReply
+        );
+
+        session.inFlight = {
+            requestId,
+            controller,
+            model: modelConfig.id,
+            startedAt: Date.now(),
+            userText: message,
+            pendingMessage: pendingReply
+        };
+
+        try {
+            const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
+                systemInstruction: session.systemInstruction,
+                enableSearch: session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
+                thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
+                model: modelConfig.id,
+                signal: controller.signal,
+                timeoutMs: modelConfig.flashLike ? 45000 : 60000
+            });
+
+            if (!session.inFlight || session.inFlight.requestId !== requestId) {
+                return { ignored: true, stale: true, requestId };
+            }
+
+            session.history.push(pendingUserContent);
+            if (result && result.content) {
+                session.history.push(result.content);
+            }
+
+            pendingReply.state = 'done';
+            pendingReply.text = result.text;
+            pendingReply.sources = result.sources || [];
+            pendingReply.queries = result.queries || [];
+            pendingReply.retryable = false;
+            session.inFlight = null;
+
+            return { ...result, requestId };
+        } catch (error) {
+            const stale = !session.inFlight || session.inFlight.requestId !== requestId;
+            if (stale) {
+                error.stale = true;
+                throw error;
+            }
+
+            pendingReply.state = isAbortError(error) ? 'canceled' : 'error';
+            pendingReply.text = this.buildErrorMessage(session, error);
+            pendingReply.sources = [];
+            pendingReply.queries = [];
+            pendingReply.retryable = !isAbortError(error) && isRetryableLumiError(error);
+            session.inFlight = null;
+
+            error.canceled = isAbortError(error);
+            error.retryable = pendingReply.retryable;
+            error.lumiHandled = true;
+            error.requestId = requestId;
+            throw error;
+        }
     }
 };
 

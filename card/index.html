@@ -1378,7 +1378,12 @@
             <div class="lumi-chat-top">
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
                 <div class="lumi-chat-controls">
-                    <button id="lumi-chat-model-btn" onclick="RPG.toggleLumiChatModel()">3.1 Pro</button>
+                    <select id="lumi-chat-model-select" onchange="RPG.changeLumiModel(this.value)">
+                        <option value="gemini-3.1-pro-preview">3.1 Pro</option>
+                        <option value="gemini-3-flash-preview">Flash 3</option>
+                        <option value="gemini-3.1-flash-lite-preview">3.1 Flash Lite</option>
+                    </select>
+                    <button id="lumi-chat-cancel-btn" onclick="RPG.cancelLumiQuestion()">응답 취소</button>
                     <button id="lumi-chat-reset-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
                     <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
                 </div>
@@ -2371,7 +2376,7 @@
             },
 
             toMenu() {
-                this.clearToeicLumiQuestionSession();
+                this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
                 this.showScreen('screen-menu');
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 this.ensureMonthlyMissionState();
@@ -3421,12 +3426,14 @@
                 const closeBtn = document.getElementById('lumi-chat-close-btn');
                 const resetBtn = document.getElementById('lumi-chat-reset-btn');
                 const input = document.getElementById('lumi-chat-input');
-                const modelBtn = document.getElementById('lumi-chat-model-btn');
+                const modelSelect = document.getElementById('lumi-chat-model-select');
+                const cancelBtn = document.getElementById('lumi-chat-cancel-btn');
 
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
-                if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.getSelectedModelLabel();
+                if (modelSelect) modelSelect.value = LumiQuestionRuntime.selectedModel;
+                if (cancelBtn) cancelBtn.disabled = !(session && session.inFlight);
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
                         ? '해설에서 궁금한 점을 입력하세요.'
@@ -3436,9 +3443,9 @@
 
             updateLumiModelButtons() {
                 const label = LumiQuestionRuntime.getSelectedModelLabel();
-                const chatBtn = document.getElementById('lumi-chat-model-btn');
+                const chatSelect = document.getElementById('lumi-chat-model-select');
                 const tutoringBtn = document.getElementById('tutoring-model-btn');
-                if (chatBtn) chatBtn.innerText = label;
+                if (chatSelect) chatSelect.value = LumiQuestionRuntime.selectedModel;
                 if (tutoringBtn) tutoringBtn.innerText = label;
             },
 
@@ -3477,6 +3484,9 @@
 
             closeLumiQuestion() {
                 const activeSession = this.getActiveLumiChatSession();
+                if (activeSession && activeSession.inFlight) {
+                    LumiQuestionRuntime.cancelPending(activeSession, 'close_modal');
+                }
                 document.getElementById('modal-lumi-question').classList.remove('active');
                 this.setLumiChatStatus('');
                 const input = document.getElementById('lumi-chat-input');
@@ -3497,9 +3507,12 @@
                 this.showToeicExplanation();
             },
 
-            clearToeicLumiQuestionSession() {
+            clearToeicLumiQuestionSession(options = {}) {
                 const toeicSession = this.state.currentToeicSession;
                 if (toeicSession && toeicSession.lumiQuestionSession) {
+                    if (options.abort !== false) {
+                        LumiQuestionRuntime.cancelPending(toeicSession.lumiQuestionSession, 'dispose_toeic_session');
+                    }
                     delete toeicSession.lumiQuestionSession;
                 }
                 if (this.activeLumiChatSessionKey === LumiQuestionRuntime.SESSION_KEYS.TOEIC) {
@@ -3509,6 +3522,9 @@
                 this.setLumiChatStatus('');
                 const input = document.getElementById('lumi-chat-input');
                 if (input) input.value = '';
+                if (options.clearCurrentToeic) {
+                    this.state.currentToeicSession = null;
+                }
             },
 
             setLumiChatStatus(message = '') {
@@ -3527,10 +3543,18 @@
                 messages.forEach(message => {
                     const bubble = document.createElement('div');
                     bubble.className = `lumi-chat-bubble ${message.role === 'user' ? 'user' : 'model'}`;
+                    if (message.state) bubble.classList.add(`is-${message.state}`);
 
                     const body = document.createElement('div');
                     body.textContent = message.text;
                     bubble.appendChild(body);
+
+                    if (message.model) {
+                        const modelMeta = document.createElement('span');
+                        modelMeta.className = 'lumi-chat-meta';
+                        modelMeta.textContent = LumiQuestionRuntime.getModelLabel(message.model);
+                        bubble.appendChild(modelMeta);
+                    }
 
                     if (message.queries && message.queries.length > 0) {
                         const meta = document.createElement('span');
@@ -3554,16 +3578,39 @@
                         bubble.appendChild(sourceWrap);
                     }
 
+                    if (message.retryable && message.role === 'model') {
+                        const actionWrap = document.createElement('div');
+                        actionWrap.style.display = 'flex';
+                        actionWrap.style.gap = '8px';
+                        actionWrap.style.marginTop = '8px';
+
+                        const retryBtn = document.createElement('button');
+                        retryBtn.textContent = '다시 시도';
+                        retryBtn.onclick = () => this.retryLastLumiQuestion(message.userText, message.model);
+                        actionWrap.appendChild(retryBtn);
+
+                        const alternateModel = LumiQuestionRuntime.getAlternateModel(message.model);
+                        const switchBtn = document.createElement('button');
+                        switchBtn.textContent = `${LumiQuestionRuntime.getModelLabel(alternateModel)}로 재시도`;
+                        switchBtn.onclick = () => this.retryLastLumiQuestion(message.userText, alternateModel);
+                        actionWrap.appendChild(switchBtn);
+
+                        bubble.appendChild(actionWrap);
+                    }
+
                     log.appendChild(bubble);
                 });
 
                 log.scrollTop = log.scrollHeight;
+                const cancelBtn = document.getElementById('lumi-chat-cancel-btn');
+                if (cancelBtn) cancelBtn.disabled = !(session && session.inFlight);
             },
 
             clearLumiQuestionHistory() {
                 const currentSession = this.getActiveLumiChatSession();
                 if (!currentSession) return;
 
+                LumiQuestionRuntime.cancelPending(currentSession, 'reset_session');
                 const resetSession = LumiQuestionRuntime.resetSession(currentSession);
                 LumiQuestionRuntime.storeSession(this.lumiChatSessions, this.state.currentToeicSession, resetSession);
 
@@ -3577,9 +3624,42 @@
                 }
             },
 
+            changeLumiModel(model) {
+                LumiQuestionRuntime.setSelectedModel(model);
+                this.updateLumiModelButtons();
+                const session = this.getActiveLumiChatSession();
+                if (session && session.inFlight) {
+                    this.setLumiChatStatus('모델 변경은 다음 질문부터 적용돼. 지금 응답에 적용하려면 취소 후 다시 시도해줘.');
+                } else {
+                    this.setLumiChatStatus('');
+                }
+            },
+
             toggleLumiChatModel() {
                 LumiQuestionRuntime.cycleSelectedModel();
                 this.updateLumiModelButtons();
+            },
+
+            cancelLumiQuestion() {
+                const session = this.getActiveLumiChatSession();
+                if (!session) return;
+                if (!LumiQuestionRuntime.cancelPending(session, 'user_cancel')) return;
+                this.setLumiChatStatus(LumiQuestionRuntime.getCanceledStatus());
+                this.renderLumiChatMessages();
+            },
+
+            async retryLastLumiQuestion(messageText, modelOverride = null) {
+                if (this.isLumiChatLoading) return;
+                if (typeof messageText !== 'string' || !messageText.trim()) return;
+
+                if (modelOverride) {
+                    LumiQuestionRuntime.setSelectedModel(modelOverride);
+                    this.updateLumiModelButtons();
+                }
+
+                const input = document.getElementById('lumi-chat-input');
+                if (input) input.value = messageText;
+                await this.sendLumiQuestion();
             },
 
             handleLumiQuestionKey(event) {
@@ -3612,19 +3692,23 @@
 
                 if (input) input.value = '';
                 this.isLumiChatLoading = true;
-                this.setLumiChatStatus(LumiQuestionRuntime.getLoadingStatus(session));
+                this.setLumiChatStatus(LumiQuestionRuntime.getLoadingStatus(session, LumiQuestionRuntime.selectedModel));
 
                 try {
                     const pendingReply = LumiQuestionRuntime.sendMessage(key, session, message);
                     this.renderLumiChatMessages();
                     const result = await pendingReply;
+                    if (!result || result.stale) return;
                     this.setLumiChatStatus(LumiQuestionRuntime.getSuccessStatus(session, result));
                 } catch (error) {
-                    session.messages.push({
-                        role: 'model',
-                        text: LumiQuestionRuntime.buildErrorMessage(session, error)
-                    });
+                    if (!error || error.stale) return;
+                    if (error.canceled) {
+                        this.setLumiChatStatus(LumiQuestionRuntime.getCanceledStatus());
+                    } else if (error.retryable) {
+                        this.setLumiChatStatus('응답이 흔들렸어. 다시 시도하거나 Pro로 바꿔볼 수 있어.');
+                    } else {
                     this.setLumiChatStatus('답변 요청에 실패했어.');
+                    }
                 } finally {
                     this.isLumiChatLoading = false;
                     this.renderLumiChatMessages();
@@ -3879,7 +3963,7 @@
                 if (session && session.options && session.options.lockExit) {
                     return;
                 }
-                this.clearToeicLumiQuestionSession();
+                this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
                 document.getElementById('modal-toeic-practice').classList.remove('active');
             },
 
@@ -3894,6 +3978,8 @@
                     onFailure: null,
                     ...options
                 };
+
+                this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
 
                 if (!practiceOptions.ignoreSessionLimit && this.state.toeicPracticeDone) {
                     return this.showAlert("이번 세션에서는 이미 실전 연습을 완료했습니다.\n다음 세션에서 다시 도전해주세요.");
@@ -4432,7 +4518,7 @@
 
                 const key = this.ensureApiKey('데이트를 시작하려면');
                 if (!key) return this.showAlert("API 키가 없어 데이트를 시작할 수 없습니다.");
-                this.clearToeicLumiQuestionSession();
+                this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
 
                 const dateParams = this._getDateParams();
 
