@@ -38,7 +38,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 4.강의 마무리 멘트`;
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
-    { id: 'gemini-3.1-pro-preview', label: '3.1 Pro', flashLike: false, allowSearch: true },
+    { id: 'gemini-2.5-pro', label: '2.5 Pro', flashLike: false, allowSearch: true, useThinkingBudget: true, thinkingBudget: 25000 },
     { id: 'gemini-3-flash-preview', label: 'Flash 3', flashLike: true, allowSearch: true },
     { id: 'gemini-3.1-flash-lite-preview', label: '3.1 Flash Lite', flashLike: true, allowSearch: false }
 ]);
@@ -106,9 +106,7 @@ const GameAPI = {
                 contents: [{ parts: [{ text: fullPrompt }] }],
                 generationConfig: {
                     temperature: isMisunderstandingMode ? 0.65 : 0.4,
-                    thinkingConfig: {
-                        thinkingLevel: modelConfig.flashLike ? 'medium' : 'high'
-                    }
+                    thinkingConfig: getThinkingConfig(modelConfig, modelConfig.flashLike ? 'medium' : 'high')
                 },
                 safetySettings: [
                     { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
@@ -180,6 +178,16 @@ const LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH = `# Role: 대현자 루미 (Grand S
 
 function getLumiOrbSystemInstruction(enableSearch) {
     return enableSearch ? LUMI_ORB_SYSTEM_INSTRUCTION : LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH;
+}
+
+
+function getThinkingConfig(modelConfig, thinkingLevel = 'high') {
+    if (modelConfig && modelConfig.useThinkingBudget) {
+        return { thinkingBudget: modelConfig.thinkingBudget || 25000 };
+    }
+    return {
+        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
+    };
 }
 
 function normalizeGroundingSources(candidate) {
@@ -306,7 +314,7 @@ async function requestLumiQuestion(apiKey, history, options = {}) {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
         thinkingLevel = 'high',
-        model = 'gemini-3.1-pro-preview',
+        model = 'gemini-2.5-pro',
         signal,
         timeoutMs = 120000
     } = options;
@@ -328,9 +336,7 @@ async function requestLumiQuestion(apiKey, history, options = {}) {
     }
 
     payload.generationConfig = {
-        thinkingConfig: {
-            thinkingLevel: normalizeThinkingLevel(modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
-        }
+        thinkingConfig: getThinkingConfig(modelConfig, thinkingLevel)
     };
     payload.safetySettings = [
         { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
@@ -406,7 +412,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
         thinkingLevel = 'high',
-        model = 'gemini-3.1-pro-preview'
+        model = 'gemini-2.5-pro'
     } = options;
     const modelConfig = getLumiModelConfig(model);
 
@@ -426,9 +432,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     }
 
     payload.generationConfig = {
-        thinkingConfig: {
-            thinkingLevel: normalizeThinkingLevel(modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
-        }
+        thinkingConfig: getThinkingConfig(modelConfig, thinkingLevel)
     };
     payload.safetySettings = [
         { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
@@ -670,7 +674,7 @@ const LumiQuestionRuntime = {
     SESSION_KEYS: LUMI_SESSION_KEYS,
     MODEL_OPTIONS: LUMI_MODEL_OPTIONS,
 
-    selectedModel: 'gemini-3.1-pro-preview',
+    selectedModel: 'gemini-2.5-pro',
     searchEnabled: true,
 
     getModelConfig(modelId) {
@@ -1098,7 +1102,7 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
 
     const temperature = innuendoInstruction ? 0.85 : 0.8;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
