@@ -286,7 +286,7 @@ async function requestLumiQuestion(apiKey, history, options = {}) {
         thinkingLevel = 'high',
         model = 'gemini-3.1-pro-preview',
         signal,
-        timeoutMs = 60000
+        timeoutMs = 120000
     } = options;
     const modelConfig = getLumiModelConfig(model);
 
@@ -828,7 +828,9 @@ const LumiQuestionRuntime = {
         }
         const detail = error && error.message ? error.message : String(error || '');
         if (isRetryableLumiError(error)) {
-            return `응답이 흔들렸어. 다시 시도하거나 ${this.getModelLabel('gemini-3.1-pro-preview')}로 바꿔볼 수 있어.\n${detail}`;
+            const currentModel = this.getModelConfig(session?.inFlight?.model || this.selectedModel).id;
+            const alternateModel = this.getAlternateModel(currentModel);
+            return `응답이 흔들렸어. 다시 시도하거나 ${this.getModelLabel(alternateModel)}로 바꿔볼 수 있어.\n${detail}`;
         }
         if (session && session.mode === 'toeic-review') {
             return `(노트를 다시 넘기며) 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
@@ -919,7 +921,7 @@ const LumiQuestionRuntime = {
                 thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
                 model: modelConfig.id,
                 signal: controller.signal,
-                timeoutMs: modelConfig.flashLike ? 45000 : 60000
+                timeoutMs: 120000
             });
 
             if (!session.inFlight || session.inFlight.requestId !== requestId) {
