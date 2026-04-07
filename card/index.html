@@ -764,8 +764,9 @@
 
         .lumi-chat-top {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
             border-bottom: 1px solid #444;
             padding-bottom: 8px;
         }
@@ -778,6 +779,9 @@
 
         .lumi-chat-controls {
             display: flex;
+            width: 100%;
+            justify-content: flex-end;
+            flex-wrap: wrap;
             gap: 5px;
         }
 
@@ -1276,9 +1280,11 @@
 
     <div id="modal-tutoring" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:10px;">
                 <h3 style="margin:0;">루미의 개인과외</h3>
-                <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
+                <div style="width:100%; display:flex; justify-content:flex-end;">
+                    <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
+                </div>
             </div>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
                 <img src="루미.png" onerror="this.src=''" alt="Rumi">
@@ -1378,11 +1384,7 @@
             <div class="lumi-chat-top">
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
                 <div class="lumi-chat-controls">
-                    <select id="lumi-chat-model-select" onchange="RPG.changeLumiModel(this.value)">
-                        <option value="gemini-3.1-pro-preview">3.1 Pro</option>
-                        <option value="gemini-3-flash-preview">Flash 3</option>
-                        <option value="gemini-3.1-flash-lite-preview">3.1 Flash Lite</option>
-                    </select>
+                    <button id="lumi-chat-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
                     <button id="lumi-chat-cancel-btn" onclick="RPG.cancelLumiQuestion()">응답 취소</button>
                     <button id="lumi-chat-reset-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
                     <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
@@ -1414,11 +1416,13 @@
     <div id="modal-toeic-practice" class="modal">
         <div class="modal-content" style="width: 95%; max-width: 900px;">
             <div
-                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-shrink:0;">
+                style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:10px; flex-shrink:0; gap:8px;">
                 <h3 id="toeic-title" style="margin:0; font-size:1.1rem; color:#ffd700;">Practice</h3>
-                <button id="toeic-exit-btn"
-                    onclick="RPG.closeToeicPractice()"
-                    style="padding:5px 15px; background:#444; border:1px solid #666; color:#fff; cursor:pointer; border-radius:4px;">나가기</button>
+                <div style="width:100%; display:flex; justify-content:flex-end;">
+                    <button id="toeic-exit-btn"
+                        onclick="RPG.closeToeicPractice()"
+                        style="padding:6px 15px; background:#1f1f1f; border:1px solid #ef5350; color:#ef9a9a; cursor:pointer; border-radius:6px;">나가기</button>
+                </div>
             </div>
 
             <!-- Hub: Part 6/7 only -->
@@ -3426,13 +3430,13 @@
                 const closeBtn = document.getElementById('lumi-chat-close-btn');
                 const resetBtn = document.getElementById('lumi-chat-reset-btn');
                 const input = document.getElementById('lumi-chat-input');
-                const modelSelect = document.getElementById('lumi-chat-model-select');
+                const modelBtn = document.getElementById('lumi-chat-model-btn');
                 const cancelBtn = document.getElementById('lumi-chat-cancel-btn');
 
                 if (asideTitle) asideTitle.innerText = ui.asideTitle || '루미의 질문하기';
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
-                if (modelSelect) modelSelect.value = LumiQuestionRuntime.selectedModel;
+                if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.getSelectedModelLabel();
                 if (cancelBtn) cancelBtn.disabled = !(session && session.inFlight);
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
@@ -3443,9 +3447,9 @@
 
             updateLumiModelButtons() {
                 const label = LumiQuestionRuntime.getSelectedModelLabel();
-                const chatSelect = document.getElementById('lumi-chat-model-select');
+                const chatBtn = document.getElementById('lumi-chat-model-btn');
                 const tutoringBtn = document.getElementById('tutoring-model-btn');
-                if (chatSelect) chatSelect.value = LumiQuestionRuntime.selectedModel;
+                if (chatBtn) chatBtn.innerText = label;
                 if (tutoringBtn) tutoringBtn.innerText = label;
             },
 
