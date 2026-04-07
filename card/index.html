@@ -1284,6 +1284,7 @@
                 <h3 style="margin:0;">루미의 개인과외</h3>
                 <div style="width:100%; display:flex; justify-content:flex-end;">
                     <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
+                    <button id="tutoring-search-btn" onclick="RPG.toggleLumiSearch()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa; margin-left:6px;">검색 ON</button>
                 </div>
             </div>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
@@ -1385,6 +1386,7 @@
                 <h3 id="lumi-chat-aside-title" class="lumi-chat-title">루미의 질문하기</h3>
                 <div class="lumi-chat-controls">
                     <button id="lumi-chat-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">3.1 Pro</button>
+                    <button id="lumi-chat-search-btn" onclick="RPG.toggleLumiSearch()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">검색 ON</button>
                     <button id="lumi-chat-cancel-btn" onclick="RPG.cancelLumiQuestion()">응답 취소</button>
                     <button id="lumi-chat-reset-btn" onclick="RPG.clearLumiQuestionHistory()">대화 초기화</button>
                     <button id="lumi-chat-close-btn" onclick="RPG.closeLumiQuestion()">나가기</button>
@@ -1894,7 +1896,8 @@
                 hiddenStudyReady: false,
                 hiddenStudyPracticeCount: 0,
                 monthlyMission: null,
-                weeklyMission: null
+                weeklyMission: null,
+                lumiSearchEnabled: true
             },
 
             // Game State (Session Persistent)
@@ -3437,6 +3440,8 @@
                 if (closeBtn) closeBtn.innerText = ui.closeLabel || '나가기';
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
                 if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.getSelectedModelLabel();
+                this.syncLumiSearchRuntime();
+                this.updateLumiSearchButtons();
                 if (cancelBtn) cancelBtn.disabled = !(session && session.inFlight);
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
@@ -3449,6 +3454,20 @@
                 const label = LumiQuestionRuntime.getSelectedModelLabel();
                 const chatBtn = document.getElementById('lumi-chat-model-btn');
                 const tutoringBtn = document.getElementById('tutoring-model-btn');
+                if (chatBtn) chatBtn.innerText = label;
+                if (tutoringBtn) tutoringBtn.innerText = label;
+            },
+
+            syncLumiSearchRuntime() {
+                const enabled = this.global.lumiSearchEnabled !== false;
+                LumiQuestionRuntime.setSearchEnabled(enabled);
+                return enabled;
+            },
+
+            updateLumiSearchButtons() {
+                const label = LumiQuestionRuntime.getSearchButtonLabel();
+                const chatBtn = document.getElementById('lumi-chat-search-btn');
+                const tutoringBtn = document.getElementById('tutoring-search-btn');
                 if (chatBtn) chatBtn.innerText = label;
                 if (tutoringBtn) tutoringBtn.innerText = label;
             },
@@ -3642,6 +3661,21 @@
             toggleLumiChatModel() {
                 LumiQuestionRuntime.cycleSelectedModel();
                 this.updateLumiModelButtons();
+            },
+
+            toggleLumiSearch() {
+                const nextEnabled = !(this.global.lumiSearchEnabled !== false);
+                this.global.lumiSearchEnabled = nextEnabled;
+                LumiQuestionRuntime.setSearchEnabled(nextEnabled);
+                this.updateLumiSearchButtons();
+                this.saveGlobalData();
+
+                const session = this.getActiveLumiChatSession();
+                if (session && session.inFlight) {
+                    this.setLumiChatStatus('검색 설정 변경은 다음 질문부터 적용돼.');
+                } else {
+                    this.setLumiChatStatus(nextEnabled ? '검색 도구 호출을 켰어.' : '검색 도구 호출을 껐어.');
+                }
             },
 
             cancelLumiQuestion() {

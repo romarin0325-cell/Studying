@@ -28,9 +28,10 @@ const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
 2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
-암기 비법 (Fun Mnemonic): 단어를 쉽게 외울 수 있는 꿀팁을 제공하십시오.
-        - **[발음 연상법 규칙]** 발음을 활용한 연상법은 **한국인이 들었을 때 억지스럽지 않고 즉각적으로 납득할 수 있는 재치 있는 수준**으로만 작성하십시오. 의미를 억지로 끼워 맞춘 길고 복잡한 말장난은 절대 금지합니다.
-        - 발음 연상이 자연스럽지 않은 단어라면, 억지로 만들지 말고 **어원(접두사/접근)**을 쉽게 풀이해주거나, 루미만의 귀여운 **시각적 이미지(상황)**를 그려주어 암기를 도우십시오. 헷갈리는 단어가 있다면 명확히 비교하십시오.
+암기 비법 (Etymology & Imagery): 단어를 쉽게 외울 수 있는 꿀팁을 제공하십시오.
+        - 억지스러운 발음 말장난(Pun)은 **절대 금지**합니다.
+        - 대신 **어원(Prefix/Root)**을 쪼개서 이 단어가 왜 이런 뜻이 되었는지 '논리적으로' 설명하십시오. (예: Predict = Pre(미리) + Dict(말하다))
+        - 어원이 너무 어려운 경우, **'루미와 형아가 겪는 특정한 상황'** 한 장면을 묘사하여 그 상황과 단어를 연결하십시오. (예: 'Collaborate'를 설명할 때 루미와 형아가 함께 마법 물약을 만드는 장면을 상상하게 함. 오해유발 이벤트에 경우는 제시된 상황에 맞게 연결)
 ​용법과 뉘앙스 (Usage and Nuance): 토익에서 어떤 느낌으로 쓰이는지
 ​토익 스타일 예문 (TOEIC-style example sentence): 실전 예문.
 3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
@@ -159,6 +160,27 @@ const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
 - 검색 결과가 있으면 핵심 답변 뒤에 자연스럽게 요약하십시오.
 - 모를 때는 모른다고 솔직하게 말하고, 검색 결과가 부족하면 그 한계를 짚어줍니다.
 - 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙이십시오.`;
+
+const LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH = `# Role: 대현자 루미 (Grand Sage Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(소년)** 마법사 '루미'입니다.
+- 당신은 친근한 대화를 바탕으로 형아의 질문에 답하는 콘셉트입니다.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 종종 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+
+## 3. 질문 대응 규칙 (Functional Rules)
+- 검색 결과를 전제로 말하지 마십시오.
+- 모를 때는 모른다고 솔직하게 말하고, 추측이면 추측이라고 분명히 밝히십시오.
+- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙이십시오.`;
+
+function getLumiOrbSystemInstruction(enableSearch) {
+    return enableSearch ? LUMI_ORB_SYSTEM_INSTRUCTION : LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH;
+}
 
 function normalizeGroundingSources(candidate) {
     const chunks = candidate?.groundingMetadata?.groundingChunks || [];
@@ -649,6 +671,7 @@ const LumiQuestionRuntime = {
     MODEL_OPTIONS: LUMI_MODEL_OPTIONS,
 
     selectedModel: 'gemini-3.1-pro-preview',
+    searchEnabled: true,
 
     getModelConfig(modelId) {
         return getLumiModelConfig(modelId || this.selectedModel);
@@ -656,6 +679,19 @@ const LumiQuestionRuntime = {
 
     getSelectedModelLabel() {
         return this.getModelConfig().label;
+    },
+
+    setSearchEnabled(enabled) {
+        this.searchEnabled = enabled !== false;
+        return this.searchEnabled;
+    },
+
+    getSearchEnabled() {
+        return this.searchEnabled;
+    },
+
+    getSearchButtonLabel() {
+        return this.searchEnabled ? '검색 ON' : '검색 OFF';
     },
 
     cycleSelectedModel() {
@@ -916,8 +952,10 @@ const LumiQuestionRuntime = {
 
         try {
             const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
-                systemInstruction: session.systemInstruction,
-                enableSearch: session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
+                systemInstruction: session.mode === 'general'
+                    ? getLumiOrbSystemInstruction(this.searchEnabled)
+                    : session.systemInstruction,
+                enableSearch: this.searchEnabled && session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
                 thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
                 model: modelConfig.id,
                 signal: controller.signal,
