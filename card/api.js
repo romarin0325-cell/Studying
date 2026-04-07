@@ -38,9 +38,9 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 4.강의 마무리 멘트`;
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
-    { id: 'gemini-3.1-pro-preview', label: '3.1 Pro', flashLike: false, allowSearch: true },
-    { id: 'gemini-3-flash-preview', label: 'Flash 3', flashLike: true, allowSearch: true },
-    { id: 'gemini-3.1-flash-lite-preview', label: '3.1 Flash Lite', flashLike: true, allowSearch: false }
+    { id: 'gemini-3.1-pro-preview', label: 'Pro', flashLike: false, allowSearch: true },
+    { id: 'gemini-3-flash-preview', label: 'Flash', flashLike: true, allowSearch: true },
+    { id: 'gemini-3.1-flash-lite-preview', label: 'Flash Lite', flashLike: true, allowSearch: false }
 ]);
 
 function getLumiModelConfig(modelId) {
