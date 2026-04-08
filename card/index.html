@@ -1284,7 +1284,6 @@
                 <h3 style="margin:0;">루미의 개인과외</h3>
                 <div style="width:100%; display:flex; justify-content:flex-end;">
                     <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">Pro</button>
-                    <button id="tutoring-search-btn" disabled style="padding:6px 10px; border:1px solid #555; border-radius:6px; background:#1f1f1f; color:#777; margin-left:6px; cursor:not-allowed;">검색 OFF</button>
                 </div>
             </div>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
@@ -3467,9 +3466,7 @@
             updateLumiSearchButtons() {
                 const label = LumiQuestionRuntime.getSearchButtonLabel();
                 const chatBtn = document.getElementById('lumi-chat-search-btn');
-                const tutoringBtn = document.getElementById('tutoring-search-btn');
                 if (chatBtn) chatBtn.innerText = label;
-                if (tutoringBtn) { tutoringBtn.innerText = '검색 OFF'; tutoringBtn.disabled = true; }
             },
 
             openLumiChatSession(session, sessionKey) {
