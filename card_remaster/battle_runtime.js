@@ -441,8 +441,12 @@ const BattleRuntime = {
                 return;
             }
 
+            const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
-            if (target.buffs.guard) dmg *= 0.5;
+            if (guardSucceeded) {
+                dmg *= 0.5;
+                rpg.log(`${target.name} 가드 성공! 피해 반감.`);
+            }
             dmg = Math.floor(dmg);
             target.hp -= dmg;
             if (dmg > 0) {
@@ -477,6 +481,15 @@ const BattleRuntime = {
                     rpg.loseBattle();
                     return;
                 }
+            } else if (
+                guardSucceeded &&
+                target.proto &&
+                target.proto.trait &&
+                target.proto.trait.type === 'guard_stun_double_dmg' &&
+                !enemy.buffs.stun
+            ) {
+                enemy.buffs.stun = 1;
+                rpg.log(`[특성] ${target.name}: 가드 성공! 적에게 [기절] 부여.`);
             }
 
             if (enemy.hp <= 0) rpg.winBattle();
@@ -767,16 +780,6 @@ const BattleRuntime = {
                 SideEffects.apply(ctx, effect);
             }
         });
-
-        if (
-            source.proto &&
-            source.proto.trait &&
-            source.proto.trait.type === 'guard_stun_double_dmg' &&
-            skill.effects.some(effect => effect.type === 'buff' && effect.id === 'guard')
-        ) {
-            target.buffs.stun = 1;
-            rpg.log(`[특성] ${source.name}: 가드 사용으로 적을 기절시켰다!`);
-        }
 
         if (rpg.battle.activeTraits.includes('syn_water_nature') && skill.name === '문라이트세레나') {
             rpg.log("루미의 특성 발동! 트윙클파티 추가!");

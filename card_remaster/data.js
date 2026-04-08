@@ -1105,7 +1105,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
         trait: {
             type: 'guard_stun_double_dmg',
             val: 2.0,
-            desc: '가드 사용 시 적에게 기절 부여 / 기절 상태의 적에게 대미지 2배'
+            desc: '가드 성공 시 적에게 기절 부여 / 기절 상태의 적에게 대미지 2배'
         },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
