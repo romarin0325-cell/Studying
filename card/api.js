@@ -28,9 +28,10 @@ const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
 2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
-암기 비법 (Etymology & Imagery): 단어를 쉽게 외울 수 있는 꿀팁을 제공하십시오.
+암기 비법 (Memorization & Imagery): 단어를 쉽게 외울 수 있는 꿀팁을 제공하십시오.
         - 억지스러운 발음 말장난(Pun)은 **절대 금지**합니다.
-        - 대신 **어원(Prefix/Root)**을 쪼개서 이 단어가 왜 이런 뜻이 되었는지 '논리적으로' 설명하십시오. (예: Predict = Pre(미리) + Dict(말하다))
+        - 자연스러운 연상법을 우선적으로 제시하십시오.
+        - 자연스러운 연상법이 없는 경우, 억지스러운 연상 대신 **어원(Prefix/Root)**을 쪼개서 이 단어가 왜 이런 뜻이 되었는지 '논리적으로' 설명하십시오.
         - 어원이 너무 어려운 경우, **'루미와 형아가 겪는 특정한 상황'** 한 장면을 묘사하여 그 상황과 단어를 연결하십시오. (예: 'Collaborate'를 설명할 때 루미와 형아가 함께 마법 물약을 만드는 장면을 상상하게 함. 오해유발 이벤트에 경우는 제시된 상황에 맞게 연결)
 ​용법과 뉘앙스 (Usage and Nuance): 토익에서 어떤 느낌으로 쓰이는지
 ​토익 스타일 예문 (TOEIC-style example sentence): 실전 예문.
@@ -67,7 +68,8 @@ const GameAPI = {
         } else {
             targetInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
             if (targetData.trap_word) {
-                targetInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+                targetInfo += `\nDistinguish from (Paired Word): '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+                targetInfo += `\n**추가 지시사항**: 암기 비법을 설명할 때, 이 페어 단어('${targetData.trap_word}')와의 차이점을 위주로 연상법을 설명하십시오.`;
             }
         }
 
