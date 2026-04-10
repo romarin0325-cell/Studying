@@ -940,6 +940,8 @@
                 <button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled>이어하기</button>
                 <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()"
                     disabled>질문하기</button>
+                <button id="btn-title-mission" class="menu-btn" onclick="RPG.openMissionHub()"
+                    disabled>미션확인</button>
             </div>
         </div>
         <div id="screen-menu" class="screen">
@@ -1120,17 +1122,20 @@
                 덱 편집<br>
                 <span style="font-size:0.8rem; color:#b3e5fc;">기본 카드는 항상 포함 / 보너스 카드만 ON/OFF</span>
             </button>
-            <button class="menu-btn" onclick="RPG.openMonthlyMission()"
-                style="padding:12px; border-color:#ffb74d; color:#ffb74d; margin-bottom:8px;">
-                월간 미션<br>
-                <span style="font-size:0.8rem; color:#ffe0b2;">월간 보너스 카드 보상을 확인</span>
-            </button>
-            <button class="menu-btn" onclick="RPG.openWeeklyMission()"
-                style="padding:12px; border-color:#9575cd; color:#d1c4e9; margin-bottom:8px;">
-                주간 미션<br>
-                <span style="font-size:0.8rem; color:#d1c4e9;">주간 카오스 티켓 보상을 확인</span>
+            <button id="btn-special-card-editor" class="menu-btn" onclick="RPG.openSpecialCardEditor()"
+                style="display:none; padding:12px; border-color:#ffca28; color:#ffe082; margin-bottom:8px;">
+                스페셜카드 편집<br>
+                <span style="font-size:0.8rem; color:#ffecb3;">획득한 스페셜 카드 중 다음 런에 사용할 버전을 선택</span>
             </button>
             <button onclick="RPG.backFromTypeSelect()" style="margin-top:10px; width:100%; padding:10px;">뒤로가기</button>
+        </div>
+    </div>
+
+    <div id="modal-mission-hub" class="modal">
+        <div class="modal-content" style="height:auto; min-height:260px; width:360px;">
+            <h3>미션확인</h3>
+            <div id="mission-hub-list" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
+            <button onclick="RPG.closeMissionHub()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
 
@@ -1175,7 +1180,31 @@
             <button id="btn-claim-monthly-mission" class="menu-btn" onclick="RPG.claimMonthlyMissionReward()"
                 style="border-color:#66bb6a; color:#66bb6a;">보상받기</button>
             </div>
+            <div id="special-mission-section" style="display:none;">
+            <div id="special-mission-status" style="font-size:0.9rem; color:#ffcc80; margin-bottom:10px;">-</div>
+            <div style="padding:12px; border:1px solid #ef6c00; border-radius:8px; background:#2d2114; margin-bottom:10px;">
+                <div style="font-size:0.8rem; color:#ffcc80; margin-bottom:6px;">이번 시즌 보상</div>
+                <div id="special-mission-reward-name" style="font-weight:bold; color:#fff; margin-bottom:8px;">-</div>
+                <button id="btn-special-mission-reward" class="menu-btn"
+                    style="margin-bottom:0; border-color:#ffb74d; color:#ffe0b2;">카드 정보 보기</button>
+            </div>
+            <div id="special-mission-list" class="modal-scroll" style="max-height:180px; margin-bottom:10px;"></div>
+            <button id="btn-claim-special-mission" class="menu-btn" onclick="RPG.claimSpecialMissionReward()"
+                style="border-color:#ffca28; color:#ffe082;">보상받기</button>
+            </div>
             <button onclick="RPG.closeMonthlyMission()" style="width:100%; padding:10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-special-card-editor" class="modal">
+        <div class="modal-content" style="height:auto; min-height:420px; width:380px; max-height:85vh; overflow-y:auto;">
+            <h3>스페셜카드 편집</h3>
+            <p id="special-card-editor-summary" style="font-size:0.82rem; color:#ffecb3; margin:0 0 8px 0;">
+                기본 카드와 획득한 스페셜 카드 중 다음 런에서 사용할 버전을 선택합니다.
+            </p>
+            <div id="special-card-group-list" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:10px;"></div>
+            <div id="special-card-editor-list" class="modal-scroll" style="max-height:360px;"></div>
+            <button onclick="RPG.closeSpecialCardEditor()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
 
@@ -1896,6 +1925,9 @@
                 hiddenStudyPracticeCount: 0,
                 monthlyMission: null,
                 weeklyMission: null,
+                specialMission: null,
+                unlocked_special_cards: [],
+                activeSpecialCardSelections: {},
                 lumiSearchEnabled: true
             },
 
@@ -1912,6 +1944,7 @@
                 activeChaosBlessing: [], // Specific buffs from Chaos Blessing
                 activeSageBlessing: [],   // Specific buffs from Great Sage Blessing
                 activeBonusPoolIds: [],
+                activeSpecialCardSelections: {},
                 quiz_stats: { correct: 0, total: 0 },
                 pendingEnemyId: null,
                 pendingEnemyStage: null
@@ -1937,6 +1970,7 @@
             tempConfirmNo: null,
             isApiLoading: false,
             pendingActiveBonusPoolIds: [],
+            selectedSpecialCardGroup: null,
             lumiChatSessions: { general: null },
             activeLumiChatSessionKey: 'general',
             isLumiChatLoading: false,
@@ -1968,14 +2002,78 @@
                 return GameUtils.getCardById(id);
             },
 
+            openMissionHub() {
+                this.loadGlobalData();
+                this.ensureMonthlyMissionState();
+                this.ensureWeeklyMissionState();
+                this.ensureSpecialMissionState();
+                this.renderMissionHub();
+                document.getElementById('modal-mission-hub').classList.add('active');
+            },
+
+            closeMissionHub() {
+                document.getElementById('modal-mission-hub').classList.remove('active');
+            },
+
+            renderMissionHub() {
+                const list = document.getElementById('mission-hub-list');
+                const season = this.getCurrentSpecialSeason();
+                const buttons = [
+                    {
+                        title: '월간 미션',
+                        desc: '월간 보너스 카드 보상을 확인합니다.',
+                        style: 'border-color:#ffb74d; color:#ffcc80;',
+                        handler: () => this.openMonthlyMission()
+                    },
+                    {
+                        title: '주간 미션',
+                        desc: '주간 카오스 티켓 보상을 확인합니다.',
+                        style: 'border-color:#9575cd; color:#d1c4e9;',
+                        handler: () => this.openWeeklyMission()
+                    }
+                ];
+
+                if (this.isSpecialMissionVisible()) {
+                    buttons.push({
+                        title: season.title,
+                        desc: `${season.bossName} 격파와 시즌 보상을 확인합니다.`,
+                        style: 'border-color:#ff9800; color:#ffe0b2;',
+                        handler: () => this.openSpecialMission()
+                    });
+                }
+
+                list.innerHTML = '';
+                buttons.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'menu-btn';
+                    btn.style.cssText = `padding:12px; margin-bottom:0; ${item.style}`;
+                    btn.innerHTML = `${item.title}<br><span style="font-size:0.8rem; color:#cfd8dc;">${item.desc}</span>`;
+                    btn.onclick = item.handler;
+                    list.appendChild(btn);
+                });
+            },
+
             openMonthlyMission() {
+                this.closeMissionHub();
+                this.loadGlobalData();
                 this.missionViewType = 'monthly';
                 this.renderMonthlyMission();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
 
             openWeeklyMission() {
+                this.closeMissionHub();
+                this.loadGlobalData();
                 this.missionViewType = 'weekly';
+                this.renderMonthlyMission();
+                document.getElementById('modal-monthly-mission').classList.add('active');
+            },
+
+            openSpecialMission() {
+                this.closeMissionHub();
+                this.loadGlobalData();
+                if (!this.isSpecialMissionVisible()) return this.showAlert("해금된 스페셜 미션이 없습니다.");
+                this.missionViewType = 'special';
                 this.renderMonthlyMission();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
@@ -1987,10 +2085,13 @@
             renderMonthlyMission() {
                 const monthly = this.ensureMonthlyMissionState();
                 const weekly = this.ensureWeeklyMissionState();
+                const special = this.ensureSpecialMissionState();
+                const season = this.getCurrentSpecialSeason();
                 const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
                 const missionModalTitle = document.getElementById('mission-modal-title');
                 const weeklySection = document.getElementById('weekly-mission-section');
                 const monthlySection = document.getElementById('monthly-mission-section');
+                const specialSection = document.getElementById('special-mission-section');
                 const rewardNameEl = document.getElementById('monthly-mission-reward-name');
                 const rewardBtn = document.getElementById('btn-monthly-mission-reward');
                 const list = document.getElementById('monthly-mission-list');
@@ -2000,26 +2101,48 @@
                 const weeklyStatus = document.getElementById('weekly-mission-status');
                 const weeklyRewardName = document.getElementById('weekly-mission-reward-name');
                 const weeklyClaimBtn = document.getElementById('btn-claim-weekly-mission');
+                const specialReward = special.rewardCardId ? this.getCardData(special.rewardCardId) : null;
+                const specialStatus = document.getElementById('special-mission-status');
+                const specialRewardName = document.getElementById('special-mission-reward-name');
+                const specialRewardBtn = document.getElementById('btn-special-mission-reward');
+                const specialList = document.getElementById('special-mission-list');
+                const specialClaimBtn = document.getElementById('btn-claim-special-mission');
 
                 rewardNameEl.innerText = reward ? reward.name : '보상이 없습니다';
                 rewardBtn.disabled = !reward;
                 rewardBtn.style.opacity = reward ? '1' : '0.5';
                 rewardBtn.onclick = reward ? (() => this.showCardInfo(reward.id)) : null;
+                specialRewardName.innerText = specialReward ? specialReward.name : '해금된 스페셜 미션이 없습니다';
+                specialRewardBtn.disabled = !specialReward;
+                specialRewardBtn.style.opacity = specialReward ? '1' : '0.5';
+                specialRewardBtn.onclick = specialReward ? (() => this.showCardInfo(specialReward.id)) : null;
 
                 const allClear = this.areAllMonthlyMissionsCleared();
                 const weeklyAllClear = this.areAllWeeklyMissionsCleared();
+                const specialAllClear = this.areAllSpecialMissionsCleared();
                 const viewType = this.missionViewType || 'monthly';
-                const showWeekly = viewType !== 'monthly';
-                const showMonthly = viewType !== 'weekly';
-                missionModalTitle.innerText = viewType === 'weekly' ? '주간 미션' : '월간 미션';
+                const showWeekly = viewType === 'weekly';
+                const showMonthly = viewType === 'monthly';
+                const showSpecial = viewType === 'special';
+                missionModalTitle.innerText =
+                    viewType === 'weekly'
+                        ? '주간 미션'
+                        : viewType === 'special'
+                            ? season.title
+                            : '월간 미션';
                 weeklySection.style.display = showWeekly ? 'block' : 'none';
                 monthlySection.style.display = showMonthly ? 'block' : 'none';
+                specialSection.style.display = showSpecial ? 'block' : 'none';
                 status.innerText = `${monthly.monthKey} 월 미션`;
                 weeklyStatus.innerText = `${weekly.weekLabel} 주간 미션`;
+                specialStatus.innerText = special.unlocked
+                    ? `${season.title} · 시즌 보상 진행`
+                    : `${season.title} · 아직 해금되지 않았습니다`;
                 const weeklyRewardAmount = this.getWeeklyChaosTicketRewardAmount();
                 weeklyRewardName.innerText = `카오스 티켓 ${weeklyRewardAmount}장`;
                 list.innerHTML = '';
                 weeklyList.innerHTML = '';
+                specialList.innerHTML = '';
 
                 Object.values(monthly.missions || {}).forEach(mission => {
                     const cleared = (mission.progress || 0) >= mission.target;
@@ -2051,12 +2174,38 @@
                     weeklyList.appendChild(item);
                 });
 
+                if (special.unlocked) {
+                    Object.values(special.missions || {}).forEach(mission => {
+                        const cleared = (mission.progress || 0) >= mission.target;
+                        const item = document.createElement('div');
+                        item.style.padding = '10px';
+                        item.style.marginBottom = '8px';
+                        item.style.border = `1px solid ${cleared ? '#ffb74d' : '#555'}`;
+                        item.style.borderRadius = '8px';
+                        item.style.background = cleared ? 'rgba(255, 183, 77, 0.16)' : '#2a2a2a';
+                        item.innerHTML = `
+                            <div style="font-weight:bold; color:${cleared ? '#ffe0b2' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
+                            <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
+                        `;
+                        specialList.appendChild(item);
+                    });
+                } else {
+                    specialList.innerHTML = `
+                        <div style="padding:12px; border:1px solid #444; border-radius:8px; background:#2a2a2a; color:#aaa; font-size:0.85rem;">
+                            꿈의회랑에서 창조신 아스테아를 돌파하면 확률적으로 스페셜 미션이 해금됩니다.
+                        </div>
+                    `;
+                }
+
                 claimBtn.disabled = !allClear || monthly.claimed || !reward;
                 claimBtn.style.opacity = claimBtn.disabled ? '0.5' : '1';
                 claimBtn.innerText = monthly.claimed ? '보상 수령 완료' : '보상받기';
                 weeklyClaimBtn.disabled = !weeklyAllClear || weekly.claimed;
                 weeklyClaimBtn.style.opacity = weeklyClaimBtn.disabled ? '0.5' : '1';
                 weeklyClaimBtn.innerText = weekly.claimed ? '보상 수령 완료' : '보상받기';
+                specialClaimBtn.disabled = !special.unlocked || !specialAllClear || !specialReward;
+                specialClaimBtn.style.opacity = specialClaimBtn.disabled ? '0.5' : '1';
+                specialClaimBtn.innerText = special.unlocked ? '보상받기' : '해금 전';
             },
 
             renderBonusPoolPresetButtons() {
@@ -2097,6 +2246,142 @@
                     : '해금된 보너스 카드가 없습니다';
 
                 btn.innerHTML = `덱 편집<br><span style="font-size:0.8rem; color:#b3e5fc;">${subText}</span>`;
+            },
+
+            updateSpecialCardEditorButton() {
+                const btn = document.getElementById('btn-special-card-editor');
+                if (!btn) return;
+                const hasSpecial = this.hasUnlockedSpecialCards && this.hasUnlockedSpecialCards();
+                btn.style.display = hasSpecial ? 'block' : 'none';
+            },
+
+            openSpecialCardEditor() {
+                this.loadGlobalData();
+                this.updateSpecialCardEditorButton();
+                if (!this.hasUnlockedSpecialCards()) {
+                    return this.showAlert("획득한 스페셜 카드가 없습니다.");
+                }
+
+                const groups = this.getSpecialCardGroups();
+                if (!this.selectedSpecialCardGroup || !groups.some(group => group.baseId === this.selectedSpecialCardGroup)) {
+                    const firstOwnedGroup = this.getUnlockedSpecialCards()
+                        .map(card => card.specialBaseId)
+                        .find(baseId => groups.some(group => group.baseId === baseId));
+                    this.selectedSpecialCardGroup = firstOwnedGroup || (groups[0] ? groups[0].baseId : null);
+                }
+
+                this.renderSpecialCardEditor();
+                document.getElementById('modal-special-card-editor').classList.add('active');
+            },
+
+            closeSpecialCardEditor() {
+                document.getElementById('modal-special-card-editor').classList.remove('active');
+            },
+
+            renderSpecialCardEditor() {
+                const summary = document.getElementById('special-card-editor-summary');
+                const groupList = document.getElementById('special-card-group-list');
+                const list = document.getElementById('special-card-editor-list');
+                const groups = this.getSpecialCardGroups();
+                const ownedSpecialCards = this.getUnlockedSpecialCards();
+
+                if (!this.selectedSpecialCardGroup && groups.length > 0) {
+                    this.selectedSpecialCardGroup = groups[0].baseId;
+                }
+
+                groupList.innerHTML = '';
+                groups.forEach(group => {
+                    const ownedCount = ownedSpecialCards.filter(card => card.specialBaseId === group.baseId).length;
+                    const btn = document.createElement('button');
+                    btn.className = 'menu-btn';
+                    btn.style.marginBottom = '0';
+                    btn.style.padding = '10px';
+                    btn.style.borderColor = group.baseId === this.selectedSpecialCardGroup ? '#ffd54f' : '#555';
+                    btn.style.color = group.baseId === this.selectedSpecialCardGroup ? '#ffe082' : '#eee';
+                    btn.innerHTML = `${group.label}<br><span style="font-size:0.75rem; color:#b0bec5;">스페셜 ${ownedCount}장</span>`;
+                    btn.onclick = () => {
+                        this.selectedSpecialCardGroup = group.baseId;
+                        this.renderSpecialCardEditor();
+                    };
+                    groupList.appendChild(btn);
+                });
+
+                const activeGroup = groups.find(group => group.baseId === this.selectedSpecialCardGroup) || groups[0];
+                if (!activeGroup) return;
+
+                summary.innerText = `${activeGroup.label} · 기본 버전 또는 획득한 스페셜 버전 중 하나만 다음 런에 적용됩니다.`;
+                const baseCard = this.getCardData(activeGroup.baseId);
+                const specialCards = ownedSpecialCards
+                    .filter(card => card.specialBaseId === activeGroup.baseId)
+                    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+                const cards = [baseCard, ...specialCards].filter(Boolean);
+                const selections = this.getActiveSpecialCardSelections('global');
+                const activeCardId = selections[activeGroup.baseId] || activeGroup.baseId;
+
+                list.innerHTML = '';
+                cards.forEach(card => {
+                    const isActive = activeCardId === card.id;
+                    const item = document.createElement('div');
+                    item.style.padding = '12px';
+                    item.style.border = `1px solid ${isActive ? '#ffd54f' : '#555'}`;
+                    item.style.borderRadius = '8px';
+                    item.style.background = isActive ? 'rgba(255, 213, 79, 0.12)' : '#2a2a2a';
+                    item.style.marginBottom = '8px';
+                    item.innerHTML = `
+                        <div style="font-weight:bold; color:${isActive ? '#ffe082' : '#fff'};">${card.name}</div>
+                        <div style="font-size:0.78rem; color:#b0bec5; margin:4px 0 8px 0;">${card.grade.toUpperCase()} / ${card.role} / ${card.element}</div>
+                    `;
+
+                    const actionRow = document.createElement('div');
+                    actionRow.style.display = 'flex';
+                    actionRow.style.gap = '6px';
+
+                    const useBtn = document.createElement('button');
+                    useBtn.className = 'menu-btn';
+                    useBtn.style.flex = '1';
+                    useBtn.style.marginBottom = '0';
+                    useBtn.style.padding = '8px';
+                    useBtn.style.borderColor = isActive ? '#ffd54f' : '#66bb6a';
+                    useBtn.style.color = isActive ? '#ffe082' : '#a5d6a7';
+                    useBtn.innerText = isActive ? '사용중' : '사용';
+                    useBtn.disabled = isActive;
+                    useBtn.onclick = () => this.activateSpecialCardVersion(activeGroup.baseId, card.id);
+
+                    const infoBtn = document.createElement('button');
+                    infoBtn.className = 'menu-btn';
+                    infoBtn.style.flex = '1';
+                    infoBtn.style.marginBottom = '0';
+                    infoBtn.style.padding = '8px';
+                    infoBtn.innerText = '상세';
+                    infoBtn.onclick = () => this.showCardInfo(card.id);
+
+                    actionRow.appendChild(useBtn);
+                    actionRow.appendChild(infoBtn);
+                    item.appendChild(actionRow);
+                    list.appendChild(item);
+                });
+            },
+
+            activateSpecialCardVersion(baseId, cardId) {
+                this.loadGlobalData();
+                const nextSelections = { ...this.getActiveSpecialCardSelections('global') };
+
+                if (cardId === baseId) {
+                    delete nextSelections[baseId];
+                } else {
+                    const card = this.getCardData(cardId);
+                    if (!card || !card.specialCard || card.specialBaseId !== baseId) {
+                        return this.showAlert("잘못된 스페셜 카드 선택입니다.");
+                    }
+                    if (!(this.global.unlocked_special_cards || []).includes(cardId)) {
+                        return this.showAlert("아직 획득하지 않은 스페셜 카드입니다.");
+                    }
+                    nextSelections[baseId] = cardId;
+                }
+
+                this.global.activeSpecialCardSelections = this.normalizeSpecialCardSelections(nextSelections);
+                this.saveGlobalData();
+                this.renderSpecialCardEditor();
             },
 
             openBonusPoolEditor() {
@@ -2203,9 +2488,11 @@
                 const btnNew = document.getElementById('btn-start-new');
                 const btnLoad = document.getElementById('btn-start-load');
                 const btnQuestion = document.getElementById('btn-title-question');
+                const btnMission = document.getElementById('btn-title-mission');
                 if (btnNew) btnNew.disabled = !enabled;
                 if (btnLoad) btnLoad.disabled = !enabled;
                 if (btnQuestion) btnQuestion.disabled = !enabled;
+                if (btnMission) btnMission.disabled = !enabled;
 
                 const loading = document.getElementById('title-loading');
                 if (loading) {
@@ -2273,6 +2560,7 @@
             openTypeSelect() {
                 this.selectedModeId = null;
                 this.resetPendingActiveBonusPoolIds();
+                 this.updateSpecialCardEditorButton();
                 document.getElementById('modal-type-select').classList.add('active');
             },
 
@@ -2280,6 +2568,7 @@
                 document.getElementById('modal-type-select').classList.remove('active');
                 document.getElementById('modal-mode-select').classList.remove('active');
                 document.getElementById('modal-bonus-pool-editor').classList.remove('active');
+                document.getElementById('modal-special-card-editor').classList.remove('active');
                 document.getElementById('modal-monthly-mission').classList.remove('active');
                 this.toTitle();
             },
@@ -2566,6 +2855,7 @@
                     excludeTranscendence: true,
                     excludeEvent: true,
                     activeBonusPoolIds: this.state.activeBonusPoolIds,
+                    specialCardSelections: this.state.activeSpecialCardSelections,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
                 });
 
@@ -2613,6 +2903,7 @@
                             includeTranscendence: true,
                             activeTranscendenceCards: this.state.activeTranscendenceCards,
                             activeBonusPoolIds: this.state.activeBonusPoolIds,
+                            specialCardSelections: this.state.activeSpecialCardSelections,
                             // [목적] 카오스 셔플 시 획득한 이벤트 카드를 풀에 포함
                             activeEventCards: this.state.activeEventCards
                         });
@@ -2673,7 +2964,8 @@
 
                 // Build Pool
                 let pool = GameUtils.buildCardPool(this.global, {
-                    activeBonusPoolIds: this.state.activeBonusPoolIds
+                    activeBonusPoolIds: this.state.activeBonusPoolIds,
+                    specialCardSelections: this.state.activeSpecialCardSelections
                 }).filter(card => card.grade === grade);
 
 
@@ -2684,7 +2976,8 @@
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
                     pool = GameUtils.buildCardPool(this.global, {
-                        activeBonusPoolIds: this.state.activeBonusPoolIds
+                        activeBonusPoolIds: this.state.activeBonusPoolIds,
+                        specialCardSelections: this.state.activeSpecialCardSelections
                     }).filter(card => card.grade === 'normal');
                 }
 
@@ -3111,6 +3404,7 @@
                     if (this.state.gameType === 'challenge') {
                         this.incrementMonthlyMissionProgress('challenge3', 1);
                         this.incrementWeeklyMissionProgress('challenge1', 1);
+                        this.incrementSpecialMissionProgress('challenge3', 1);
                     }
 
                     // Transcendence Ticket Logic (On Clear)

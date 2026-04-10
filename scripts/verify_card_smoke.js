@@ -25,9 +25,18 @@ function run() {
     'finishToeicSession()',
     'openToeicReview()',
     'id="btn-bonus-pool-editor"',
+    'id="btn-special-card-editor"',
     'id="modal-bonus-pool-editor"',
+    'id="modal-mission-hub"',
+    'id="special-mission-section"',
+    'id="modal-special-card-editor"',
+    'id="btn-title-mission"',
     'id="bonus-pool-preset-list"',
     'pendingActiveBonusPoolIds:',
+    'activeSpecialCardSelections:',
+    'openMissionHub()',
+    'openSpecialMission()',
+    'openSpecialCardEditor()',
     'openBonusPoolEditor()',
     'bonusPoolPresets:',
     'activeBonusPoolPresetIndex:',
@@ -42,6 +51,9 @@ function run() {
     'drawRunPoolCards(pool, count, options = {})',
     'startGame(mode, retryCount = 0)',
     'claimMonthlyMissionReward()',
+    'claimSpecialMissionReward()',
+    'tryUnlockSpecialMissionFromDreamCorridor(stageNumber)',
+    'getCurrentSpecialSeason(date = new Date())',
     'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)'
   ]);
 
@@ -49,12 +61,18 @@ function run() {
     'const Storage',
     'activeBonusPoolIds',
     'MAX_BONUS_POOL_PRESETS',
+    'getSpecialCards()',
     'buildTranscendencePool(globalData, options = {})',
     'drawWeightedCards(pool, count, weightFn = () => 1, options = {})',
     'dmg_boost_turn_limit'
   ]);
   mustContain(path.join(cardRoot, 'data.js'), [
     'const CARDS',
+    'const SPECIAL_CARDS = SPECIAL_CARD_VARIANTS.map',
+    "id: 'flora_valentine'",
+    "id: 'thor_swimsuit'",
+    "id: 'ares_halloween'",
+    "id: 'astea_christmas'",
     'const BONUS_TRANSCENDENCE_CARDS = [',
     "id: 'trans_thor'",
     "id: 'trans_ares'",

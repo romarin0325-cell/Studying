@@ -255,6 +255,10 @@ const GameUtils = {
         ];
     },
 
+    getSpecialCards() {
+        return typeof SPECIAL_CARDS !== 'undefined' ? SPECIAL_CARDS : [];
+    },
+
     getUnlockedBonusTranscendenceCards(globalData) {
         const unlocked = new Set(
             globalData && Array.isArray(globalData.unlocked_bonus_transcendence_cards)
@@ -327,6 +331,7 @@ const GameUtils = {
         return [
             ...CARDS,
             ...BONUS_CARDS,
+            ...this.getSpecialCards(),
             ...this.getAllTranscendenceCards()
         ];
     },
@@ -356,8 +361,15 @@ const GameUtils = {
             .map(id => this.getCardById(id, allCards))
             .filter(Boolean);
         const jokerCount = cards.filter(card => card.id === 'joker').length;
+        const nonJokerCards = cards.filter(card => card.id !== 'joker');
         const elementCounts = {};
         const cardCounts = {};
+
+        const getCardAliases = (card) => {
+            const aliases = new Set([card.id]);
+            if (card.specialBaseId) aliases.add(card.specialBaseId);
+            return aliases;
+        };
 
         cards.forEach(card => {
             cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
@@ -370,8 +382,11 @@ const GameUtils = {
             const allowedIds = new Set(ids || []);
             let count = jokerCount;
 
-            allowedIds.forEach(id => {
-                count += cardCounts[id] || 0;
+            nonJokerCards.forEach(card => {
+                const aliases = getCardAliases(card);
+                if ([...aliases].some(id => allowedIds.has(id))) {
+                    count++;
+                }
             });
 
             return count;
@@ -383,7 +398,10 @@ const GameUtils = {
             jokerCount,
             elementCounts,
             cardCounts,
-            hasCard: (id) => Boolean(cardCounts[id]) || (jokerCount > 0 && id !== 'joker'),
+            hasCard: (id) => {
+                if (id === 'joker') return jokerCount > 0;
+                return nonJokerCards.some(card => getCardAliases(card).has(id)) || jokerCount > 0;
+            },
             hasAnyCard: (ids) => countMatchingIds(ids) > 0,
             countMatchingIds,
             hasElement: (element) => jokerCount > 0 || Boolean(elementCounts[element]),
@@ -398,7 +416,11 @@ const GameUtils = {
 
     cardMatchesAnyId(card, ids) {
         const targetIds = Array.isArray(ids) ? ids : [ids];
-        return !!card && (card.id === 'joker' || targetIds.includes(card.id));
+        return !!card && (
+            card.id === 'joker' ||
+            targetIds.includes(card.id) ||
+            (card.specialBaseId && targetIds.includes(card.specialBaseId))
+        );
     },
 
     getRunPoolGradeBucket(card) {
@@ -417,6 +439,7 @@ const GameUtils = {
      * @param {string[]} [options.activeTranscendenceCards=[]] - IDs of active transcendence cards
      * @param {string[]} [options.activeBonusPoolIds=[]] - Enabled bonus card IDs for the current run
      * @param {string[]} [options.activeEventCards=[]] - IDs of active event cards for the current run
+     * @param {Object} [options.specialCardSelections={}] - Base card id => selected special card id
      * @param {boolean} [options.excludeTranscendence=false] - Filter out transcendence grade cards
      * @param {boolean} [options.excludeEvent=false] - Filter out event grade cards
      * @param {string}  [options.maxGrade] - Max grade filter: 'rare' or 'epic'
@@ -445,6 +468,18 @@ const GameUtils = {
         if (options.activeEventCards && options.activeEventCards.length > 0) {
             const eventObjs = CARDS.filter(c => c.grade === 'event' && options.activeEventCards.includes(c.id));
             pool = pool.concat(eventObjs);
+        }
+
+        if (options.specialCardSelections && Object.keys(options.specialCardSelections).length > 0) {
+            const specialById = new Map(this.getSpecialCards().map(card => [card.id, card]));
+            pool = pool.map(card => {
+                const selectedId = options.specialCardSelections[card.id];
+                const specialCard = specialById.get(selectedId);
+                if (specialCard && specialCard.specialBaseId === card.id) {
+                    return specialCard;
+                }
+                return card;
+            });
         }
 
         // Exclude transcendence grade

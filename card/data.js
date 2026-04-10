@@ -930,6 +930,42 @@ const BONUS_CARD_EXPANSION = [
 
 BONUS_CARDS.push(...BONUS_CARD_EXPANSION);
 
+const SPECIAL_CARD_VARIANTS = [
+    { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
+    { id: 'jasmine_valentine', name: '자스민(발렌타인)', baseCardId: 'jasmine', specialSeason: 'valentine' },
+    { id: 'rumi_valentine', name: '루미(발렌타인)', baseCardId: 'rumi', specialSeason: 'valentine' },
+    { id: 'jasmine_swimsuit', name: '자스민(수영복)', baseCardId: 'jasmine', specialSeason: 'beach' },
+    { id: 'rumi_swimsuit', name: '루미(수영복)', baseCardId: 'rumi', specialSeason: 'beach' },
+    { id: 'zeke_swimsuit', name: '지크(수영복)', baseCardId: 'zeke', specialSeason: 'beach' },
+    { id: 'luna_halloween', name: '루나(할로윈)', baseCardId: 'luna', specialSeason: 'halloween' },
+    { id: 'zeke_halloween', name: '지크(할로윈)', baseCardId: 'zeke', specialSeason: 'halloween' },
+    { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
+    { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
+    { id: 'zeke_christmas', name: '지크(크리스마스)', baseCardId: 'zeke', specialSeason: 'christmas' }
+];
+
+function cloneData(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+const SPECIAL_CARDS = SPECIAL_CARD_VARIANTS.map(variant => {
+    const baseCard = [...CARDS, ...BONUS_CARDS].find(card => card.id === variant.baseCardId);
+    if (!baseCard) return null;
+
+    return {
+        ...cloneData(baseCard),
+        id: variant.id,
+        name: variant.name,
+        specialCard: true,
+        specialSeason: variant.specialSeason,
+        specialBaseId: variant.baseCardId,
+        unlockSource: 'special'
+        // NOTE: for now special cards intentionally mirror the base card's stats/skills.
+        // Future balance updates may split stats, traits, or skill loadouts per variant.
+    };
+}).filter(Boolean);
+
 const ENDLESS_ENEMY_ROTATION = [
     'artificial_demon_god',
     'iris_love',
@@ -1184,6 +1220,55 @@ ENEMIES.push(
         ]
     }
 );
+
+[
+    {
+        id: 'flora_valentine',
+        name: '플로라(발렌타인)',
+        copyFromId: 'flora',
+        element: 'nature',
+        specialSeason: 'valentine',
+        stats: { hp: 1400, atk: 130, matk: 130, def: 120, mdef: 120 }
+    },
+    {
+        id: 'thor_swimsuit',
+        name: '토르(수영복)',
+        copyFromId: 'thor',
+        element: 'light',
+        specialSeason: 'beach',
+        stats: { hp: 1500, atk: 140, matk: 80, def: 140, mdef: 80 }
+    },
+    {
+        id: 'ares_halloween',
+        name: '아레스(할로윈)',
+        copyFromId: 'ares',
+        element: 'fire',
+        specialSeason: 'halloween',
+        stats: { hp: 1500, atk: 125, matk: 125, def: 105, mdef: 105 }
+    },
+    {
+        id: 'astea_christmas',
+        name: '아스테아(크리스마스)',
+        copyFromId: 'creator_god',
+        element: 'light',
+        specialSeason: 'christmas',
+        stats: { hp: 1600, atk: 120, matk: 140, def: 110, mdef: 110 }
+    }
+].forEach(variant => {
+    const baseEnemy = ENEMIES.find(enemy => enemy.id === variant.copyFromId);
+    if (!baseEnemy) return;
+
+    ENEMIES.push({
+        id: variant.id,
+        name: variant.name,
+        element: variant.element,
+        stats: cloneData(variant.stats),
+        skills: cloneData(baseEnemy.skills),
+        isSpecialBoss: true,
+        specialSeason: variant.specialSeason,
+        noBonusRewards: true
+    });
+});
 
 const BUFF_NAMES = {
     'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',

@@ -1,4 +1,43 @@
 (function () {
+    const SPECIAL_CARD_GROUPS = [
+        { baseId: 'jasmine', label: '자스민' },
+        { baseId: 'rumi', label: '루미' },
+        { baseId: 'luna', label: '루나' },
+        { baseId: 'zeke', label: '지크' },
+        { baseId: 'cherry_prince', label: '체리프린스' }
+    ];
+
+    const SPECIAL_MISSION_SEASONS = {
+        valentine: {
+            id: 'valentine',
+            title: '스페셜미션(발렌타인)',
+            bossId: 'flora_valentine',
+            bossName: '플로라(발렌타인)',
+            rewardCardIds: ['luna_valentine', 'jasmine_valentine', 'rumi_valentine']
+        },
+        beach: {
+            id: 'beach',
+            title: '스페셜미션(해변)',
+            bossId: 'thor_swimsuit',
+            bossName: '토르(수영복)',
+            rewardCardIds: ['jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit']
+        },
+        halloween: {
+            id: 'halloween',
+            title: '스페셜미션(할로윈)',
+            bossId: 'ares_halloween',
+            bossName: '아레스(할로윈)',
+            rewardCardIds: ['luna_halloween', 'zeke_halloween', 'rumi_halloween']
+        },
+        christmas: {
+            id: 'christmas',
+            title: '스페셜미션(크리스마스)',
+            bossId: 'astea_christmas',
+            bossName: '아스테아(크리스마스)',
+            rewardCardIds: ['jasmine_christmas', 'rumi_christmas', 'zeke_christmas']
+        }
+    };
+
     const RPGFeatureMethods = {
     loadStudyProgress() {
         const vocab = Storage.load(Storage.keys.VOCAB);
@@ -35,7 +74,8 @@
         }
         const changedBonusCards = this.ensureDefaultUnlockedBonusCards();
         const changedTicketState = this.ensureChaosTicketState();
-        const changed = changedBonusCards || changedTicketState;
+        const changedSpecialData = this.ensureSpecialDataState();
+        const changed = changedBonusCards || changedTicketState || changedSpecialData;
         this.ensureBonusPoolPresetState();
         if (changed) this.saveGlobalData();
     },
@@ -77,6 +117,226 @@
             changed = true;
         }
         return changed;
+    },
+
+
+    ensureSpecialDataState() {
+        let changed = false;
+
+        if (!Array.isArray(this.global.unlocked_special_cards)) {
+            this.global.unlocked_special_cards = [];
+            changed = true;
+        }
+
+        const normalizedSelections = this.normalizeSpecialCardSelections(this.global.activeSpecialCardSelections);
+        const currentSelections = this.global.activeSpecialCardSelections || {};
+        const sameSelection =
+            JSON.stringify(normalizedSelections) === JSON.stringify(currentSelections);
+        if (!sameSelection) {
+            this.global.activeSpecialCardSelections = normalizedSelections;
+            changed = true;
+        } else if (!this.global.activeSpecialCardSelections) {
+            this.global.activeSpecialCardSelections = normalizedSelections;
+            changed = true;
+        }
+
+        const season = this.getCurrentSpecialSeason();
+        const mission = this.global.specialMission;
+        if (!mission || mission.seasonId !== season.id) {
+            const keepUnlocked = !!(mission && mission.unlocked && this.getRemainingSpecialRewardCards(season.id).length > 0);
+            this.global.specialMission = this.createSpecialMissionState({ season, unlocked: keepUnlocked });
+            changed = true;
+        } else if (
+            (mission.unlocked && this.getRemainingSpecialRewardCards(season.id).length === 0) ||
+            (mission.unlocked && !mission.rewardCardId)
+        ) {
+            this.global.specialMission = this.createSpecialMissionState({ season, unlocked: false });
+            changed = true;
+        }
+
+        return changed;
+    },
+
+
+    getSpecialCardGroups() {
+        return SPECIAL_CARD_GROUPS.map(group => ({ ...group }));
+    },
+
+
+    getCurrentSpecialSeason(date = new Date()) {
+        const month = date.getMonth() + 1;
+        if (month >= 3 && month <= 5) return SPECIAL_MISSION_SEASONS.valentine;
+        if (month >= 6 && month <= 8) return SPECIAL_MISSION_SEASONS.beach;
+        if (month >= 9 && month <= 11) return SPECIAL_MISSION_SEASONS.halloween;
+        return SPECIAL_MISSION_SEASONS.christmas;
+    },
+
+
+    getSpecialMissionUnlockChance(stageNumber) {
+        if (stageNumber >= 36) return 0.30;
+        if (stageNumber >= 30) return 0.25;
+        if (stageNumber >= 24) return 0.20;
+        if (stageNumber >= 18) return 0.15;
+        if (stageNumber >= 12) return 0.10;
+        if (stageNumber >= 6) return 0.05;
+        return 0;
+    },
+
+
+    getRemainingSpecialRewardCards(seasonId = this.getCurrentSpecialSeason().id) {
+        const season = SPECIAL_MISSION_SEASONS[seasonId];
+        if (!season) return [];
+
+        const unlocked = new Set(this.global.unlocked_special_cards || []);
+        return season.rewardCardIds
+            .filter(id => !unlocked.has(id))
+            .map(id => this.getCardData(id))
+            .filter(Boolean);
+    },
+
+
+    normalizeSpecialCardSelections(selections) {
+        const owned = new Set(this.global.unlocked_special_cards || []);
+        const normalized = {};
+        if (!selections || typeof selections !== 'object') return normalized;
+
+        Object.entries(selections).forEach(([baseId, specialId]) => {
+            const card = this.getCardData(specialId);
+            if (!card || !card.specialCard || card.specialBaseId !== baseId || !owned.has(specialId)) return;
+            normalized[baseId] = specialId;
+        });
+
+        return normalized;
+    },
+
+
+    getActiveSpecialCardSelections(source = 'global') {
+        if (source === 'state' && this.state && this.state.activeSpecialCardSelections) {
+            return this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections);
+        }
+        return this.normalizeSpecialCardSelections(this.global.activeSpecialCardSelections);
+    },
+
+
+    hasUnlockedSpecialCards() {
+        return Array.isArray(this.global.unlocked_special_cards) && this.global.unlocked_special_cards.length > 0;
+    },
+
+
+    getUnlockedSpecialCards() {
+        const unlocked = new Set(this.global.unlocked_special_cards || []);
+        return (typeof SPECIAL_CARDS !== 'undefined' ? SPECIAL_CARDS : []).filter(card => unlocked.has(card.id));
+    },
+
+
+    createSpecialMissionState(options = {}) {
+        const season = options.season || this.getCurrentSpecialSeason();
+        const rewardPool = this.getRemainingSpecialRewardCards(season.id);
+        const unlocked = !!options.unlocked && rewardPool.length > 0;
+        const rewardCard = unlocked
+            ? rewardPool[Math.floor(Math.random() * rewardPool.length)] || null
+            : null;
+
+        return {
+            seasonId: season.id,
+            seasonTitle: season.title,
+            unlocked,
+            rewardCardId: rewardCard ? rewardCard.id : null,
+            missions: {
+                boss: { label: `엔드리스 모드에서 ${season.bossName} 격파`, progress: 0, target: 1 },
+                toeic3: { label: '실전마법연습 3회 플레이', progress: 0, target: 3 },
+                challenge3: { label: '챌린지모드 클리어 3회', progress: 0, target: 3 }
+            }
+        };
+    },
+
+
+    ensureSpecialMissionState() {
+        const season = this.getCurrentSpecialSeason();
+        const remainingRewards = this.getRemainingSpecialRewardCards(season.id);
+        if (!this.global.specialMission || this.global.specialMission.seasonId !== season.id) {
+            const keepUnlocked = !!(this.global.specialMission && this.global.specialMission.unlocked && remainingRewards.length > 0);
+            this.global.specialMission = this.createSpecialMissionState({ season, unlocked: keepUnlocked });
+            this.saveGlobalData();
+        } else if (
+            (this.global.specialMission.unlocked && remainingRewards.length === 0) ||
+            (this.global.specialMission.unlocked && !this.global.specialMission.rewardCardId)
+        ) {
+            this.global.specialMission = this.createSpecialMissionState({ season, unlocked: false });
+            this.saveGlobalData();
+        }
+        return this.global.specialMission;
+    },
+
+
+    isSpecialMissionVisible() {
+        const special = this.ensureSpecialMissionState();
+        return !!(special && special.unlocked && special.rewardCardId);
+    },
+
+
+    incrementSpecialMissionProgress(id, amount = 1) {
+        const special = this.ensureSpecialMissionState();
+        if (!special.unlocked) return;
+        const mission = special.missions ? special.missions[id] : null;
+        if (!mission) return;
+        mission.progress = Math.min(mission.target, (mission.progress || 0) + amount);
+        this.saveGlobalData();
+    },
+
+
+    areAllSpecialMissionsCleared() {
+        const special = this.ensureSpecialMissionState();
+        if (!special.unlocked) return false;
+        return Object.values(special.missions || {}).every(mission => (mission.progress || 0) >= mission.target);
+    },
+
+
+    claimSpecialMissionReward() {
+        const special = this.ensureSpecialMissionState();
+        if (!special.unlocked || !special.rewardCardId) {
+            return this.showAlert('해금된 스페셜 미션이 없습니다.');
+        }
+        if (!this.areAllSpecialMissionsCleared()) {
+            return this.showAlert('모든 스페셜 미션을 완료해야 보상을 받을 수 있습니다.');
+        }
+
+        const reward = this.getCardData(special.rewardCardId);
+        if (!reward) return this.showAlert('이번 시즌 보상 카드가 없습니다.');
+
+        if (!this.global.unlocked_special_cards.includes(reward.id)) {
+            this.global.unlocked_special_cards.push(reward.id);
+        }
+
+        const season = this.getCurrentSpecialSeason();
+        this.global.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.global.activeSpecialCardSelections);
+        this.global.specialMission = this.createSpecialMissionState({ season, unlocked: false });
+        this.saveGlobalData();
+
+        if (typeof this.updateSpecialCardEditorButton === 'function') this.updateSpecialCardEditorButton();
+        if (typeof this.renderMonthlyMission === 'function') this.renderMonthlyMission();
+        if (typeof this.renderMissionHub === 'function') this.renderMissionHub();
+        if (typeof this.closeMonthlyMission === 'function') this.closeMonthlyMission();
+
+        this.openInfoModal('스페셜 미션 보상', `<b>${reward.name}</b> 스페셜 카드를 획득했습니다!`);
+    },
+
+
+    tryUnlockSpecialMissionFromDreamCorridor(stageNumber) {
+        const special = this.ensureSpecialMissionState();
+        if (special.unlocked) return '';
+
+        const season = this.getCurrentSpecialSeason();
+        if (this.getRemainingSpecialRewardCards(season.id).length === 0) return '';
+
+        const chance = this.getSpecialMissionUnlockChance(stageNumber);
+        if (chance <= 0 || Math.random() >= chance) return '';
+
+        this.global.specialMission = this.createSpecialMissionState({ season, unlocked: true });
+        this.saveGlobalData();
+
+        const percent = Math.round(chance * 100);
+        return `<b>스페셜 미션 해금!</b><br>${season.title}이 열렸습니다. (해금 확률 ${percent}%)`;
     },
 
 
@@ -303,6 +563,9 @@
         if (options.countWeekly !== false) {
             this.incrementWeeklyMissionProgress('toeic1', 1);
         }
+        if (options.countSpecial !== false) {
+            this.incrementSpecialMissionProgress('toeic3', 1);
+        }
 
         if (options.countHiddenUnlock === false || this.state.mode === 'dream_corridor') {
             return false;
@@ -353,6 +616,15 @@
         };
 
         let enemyId = baseId;
+        if (
+            this.state.gameType === 'endless' &&
+            this.state.mode !== 'dream_corridor' &&
+            baseId === 'creator_god' &&
+            this.isSpecialMissionVisible() &&
+            Math.random() < this.getSpecialMissionUnlockChance(stageNumber)
+        ) {
+            enemyId = this.getCurrentSpecialSeason().bossId;
+        }
         if (this.state.gameType === 'endless' && stageNumber > 36 && hiddenBossMap[baseId] && Math.random() < 0.3) {
             enemyId = hiddenBossMap[baseId];
         }
@@ -627,6 +899,7 @@
         this.loadGlobalData();
         this.ensureMonthlyMissionState();
         this.ensureWeeklyMissionState();
+        this.ensureSpecialMissionState();
         this.trackDailyAttendance();
 
         if (mode === 'load') {
@@ -645,6 +918,7 @@
                 if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
                 if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
                 this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
+                this.state.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections || this.global.activeSpecialCardSelections);
                 this.loadStudyProgress();
 
                 this.showAlert("불러오기 완료");
@@ -679,6 +953,7 @@
             activeChaosBlessing: [],
             activeSageBlessing: [],
             activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds),
+            activeSpecialCardSelections: this.getActiveSpecialCardSelections('global'),
             tutoredItems: [],
             wrongWords: [],
             quiz_stats: { correct: 0, total: 0 },
@@ -713,6 +988,7 @@
                 includeTranscendence: true,
                 activeTranscendenceCards: this.state.activeTranscendenceCards,
                 activeBonusPoolIds: this.state.activeBonusPoolIds,
+                specialCardSelections: this.state.activeSpecialCardSelections,
                 // [목적] 해당 런에서 획득한 이벤트 카드를 카오스 모드 시작 풀에 포함
                 activeEventCards: this.state.activeEventCards
             });
@@ -847,6 +1123,7 @@
             excludeTranscendence: true,
             excludeEvent: true,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
+            specialCardSelections: this.state.activeSpecialCardSelections,
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
         });
 
@@ -922,6 +1199,7 @@
             includeTranscendence: true,
             activeTranscendenceCards: this.state.activeTranscendenceCards,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
+            specialCardSelections: this.state.activeSpecialCardSelections,
             // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함
             activeEventCards: this.state.activeEventCards
         });
@@ -1002,6 +1280,9 @@
         let transMsg = this.cleanupTranscendenceCards();
         let deadMsg = this.handlePermadeath(this.battle.players);
         if (transMsg) deadMsg += transMsg;
+        const defeatedEnemyId = this.battle.enemy ? this.battle.enemy.id : null;
+        const defeatedStageNumber = this.state.enemyScale + 1;
+        const mode = this.state.mode;
         let reward = GAME_CONSTANTS.MODE_REWARDS[this.state.mode] !== undefined
             ? GAME_CONSTANTS.MODE_REWARDS[this.state.mode]
             : GAME_CONSTANTS.MODE_REWARDS.default;
@@ -1023,6 +1304,16 @@
         if (bonusTransUnlockMsg) {
             deadMsg = deadMsg ? `${deadMsg}<br>${bonusTransUnlockMsg}` : bonusTransUnlockMsg;
         }
+        const currentSeason = this.getCurrentSpecialSeason();
+        if (defeatedEnemyId === currentSeason.bossId) {
+            this.incrementSpecialMissionProgress('boss', 1);
+        }
+        if (mode === 'dream_corridor' && defeatedEnemyId === 'creator_god') {
+            const specialUnlockMsg = this.tryUnlockSpecialMissionFromDreamCorridor(defeatedStageNumber);
+            if (specialUnlockMsg) {
+                deadMsg = deadMsg ? `${deadMsg}<br>${specialUnlockMsg}` : specialUnlockMsg;
+            }
+        }
 
         // Reset Chaos Blessing
         this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
@@ -1033,7 +1324,6 @@
         this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
         // Victory Condition Check
-        const mode = this.state.mode;
         const stage = this.state.enemyScale; // current stage (already incremented)
         const clearStage = GameUtils.getClearStage(mode, this.state.gameType);
         const gameClear = stage >= clearStage;
@@ -1051,6 +1341,7 @@
                 includeTranscendence: true,
                 activeTranscendenceCards: this.state.activeTranscendenceCards,
                 activeBonusPoolIds: this.state.activeBonusPoolIds,
+                specialCardSelections: this.state.activeSpecialCardSelections,
                 // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
                 activeEventCards: this.state.activeEventCards
             });
@@ -1145,6 +1436,7 @@
             lockExit: true,
             countHiddenUnlock: false,
             countMonthly: false,
+            countSpecial: false,
             onComplete: () => finishSuccess('실전마법연습'),
             onFailure: () => fail('실전마법연습')
         });
