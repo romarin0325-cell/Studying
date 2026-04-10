@@ -1893,7 +1893,7 @@ const Logic = {
             if (turn === 7 || turn === 14) skill = enemy.skills.find(s => s.name === '제노사이드');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '다크니스');
         }
-        else if (enemy.id === 'flora') {
+        else if (enemy.id === 'flora' || enemy.id === 'flora_valentine') {
             if (turn === 5 || turn === 10) skill = enemy.skills.find(s => s.name === '제네시스블룸');
             else if (r < 0.3) skill = enemy.skills.find(s => s.name === '블러썸템페스트');
         }
@@ -1904,7 +1904,7 @@ const Logic = {
                 skill = enemy.skills.find(s => s.name === skillName);
             }
         }
-        else if (enemy.id === 'thor') {
+        else if (enemy.id === 'thor' || enemy.id === 'thor_swimsuit') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '썬더러쉬');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '묠니르');
         }
@@ -1914,7 +1914,7 @@ const Logic = {
             else if (turn === 15) skill = enemy.skills.find(s => s.name === '디바우러');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '트라이던트');
         }
-        else if (enemy.id === 'ares') {
+        else if (enemy.id === 'ares' || enemy.id === 'ares_halloween') {
             if (enemy.isCharging && enemy.chargeSkillId) {
                 const chargedSkill = enemy.skills.find(s => s.name === enemy.chargeSkillId);
                 return chargedSkill ? { ...chargedSkill, chargeReset: true } : { type: 'phy', val: 1.0, name: '일반 공격' };
@@ -1934,7 +1934,7 @@ const Logic = {
             }
             if (r < 0.2) skill = enemy.skills.find(s => s.name === '스피어레인');
         }
-        else if (enemy.id === 'creator_god') {
+        else if (enemy.id === 'creator_god' || enemy.id === 'astea_christmas') {
             if (enemy.isCharging) {
                 const chargedSkill = enemy.skills.find(s => s.name === '디바인블레이드');
                 return { ...chargedSkill, chargeReset: true };
