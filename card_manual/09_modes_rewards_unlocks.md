@@ -2,48 +2,45 @@
 
 ## 1. 시작 티켓
 
-| 모드 | 시작 티켓 |
-|---|---:|
-| 기본(`default`) | 20 |
-| `origin` | 20 |
-| `restriction` | 10 |
-| `balance` | 10 |
-| `suffering` | 10 |
-| `overdrive` | 10 |
-| `archive` | 10 |
-| `curse` | 10 |
-| `flood` | 10 |
-| `artifact` | 10 |
-| `draft` | 5 |
-| `chaos` | 0 |
+- **기본(default)**: 20장
+- **origin**: 20장
+- **restriction**: 10장
+- **balance**: 10장
+- **suffering**: 10장
+- **overdrive**: 10장
+- **archive**: 10장
+- **curse**: 10장
+- **flood**: 10장
+- **artifact**: 10장
+- **draft**: 5장
+- **chaos**: 0장
+
 
 ## 2. 클리어 스테이지
 
 `gameType === 'endless'`이면 클리어 스테이지는 무한대로 취급한다. `challenge`일 때만 아래 값이 적용된다.
 
-| 모드 | 클리어 스테이지 |
-|---|---:|
-| 기본(`default`) | 24 |
-| `restriction` | 18 |
-| `balance` | 18 |
-| `archive` | 18 |
-| `chaos` | 24 |
-| `draft` | 24 |
-| `overdrive` | 30 |
-| `curse` | 30 |
-| `flood` | 30 |
-| `artifact` | 36 |
-| `origin` | 무한 |
+- **기본(default)**: 24 스테이지
+- **restriction**: 18 스테이지
+- **balance**: 18 스테이지
+- **archive**: 18 스테이지
+- **chaos**: 24 스테이지
+- **draft**: 24 스테이지
+- **overdrive**: 30 스테이지
+- **curse**: 30 스테이지
+- **flood**: 30 스테이지
+- **artifact**: 36 스테이지
+- **origin**: 무한 스테이지
+
 
 ## 3. 가챠 확률
 
 ### 기본/공통 확률표
 
-| 모드 | 일반 가챠 | 챌린지 가챠 |
-|---|---|---|
-| `default` 계열 | legend 10%, epic 30%, rare 60%, else normal | legend 20%, epic 45%, rare 75%, else normal |
-| `restriction` | rare 20%, else normal | rare 40%, else normal |
-| `balance` | epic 10%, rare 30%, else normal | epic 20%, rare 50%, else normal |
+- **default 계열**: (일반) legend 10%, epic 30%, rare 60%, else normal / (도전) legend 20%, epic 45%, rare 75%, else normal
+- **restriction**: (일반) rare 20%, else normal / (도전) rare 40%, else normal
+- **balance**: (일반) epic 10%, rare 30%, else normal / (도전) epic 20%, rare 50%, else normal
+
 
 ### 등급 상한
 
