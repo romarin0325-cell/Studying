@@ -110,8 +110,9 @@ function buildBattleEnemy(rpg) {
         tookDamageThisTurn: false,
         lastHitType: null,
         isHiddenBoss: !!baseEnemy.hiddenBossFor,
-        bonusRewardTickets: baseEnemy.hiddenBossFor ? 3 : 0,
-        bonusTranscendenceReward: baseEnemy.bonusTranscendenceReward || null
+        isSpecialBoss: !!baseEnemy.isSpecialBoss,
+        bonusRewardTickets: baseEnemy.hiddenBossFor && !baseEnemy.noBonusRewards ? 3 : 0,
+        bonusTranscendenceReward: baseEnemy.noBonusRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
     };
 
     if (baseEnemy.id === 'creator_god') {
