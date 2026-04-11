@@ -205,7 +205,7 @@ const DEFAULT_UNLOCKED_BONUS_CARD_IDS = ['ancient_soul', 'sun_priestess', 'cloud
 
 // ─── Artifact Definitions ─────────────────────────────────────────────────────
 
-const ARTIFACT_LIST = [
+const BASE_ARTIFACT_LIST = [
     { id: 'nature_blessing', name: '대자연의 축복', desc: '대지의축복 효과 2배' },
     { id: 'reverse', name: '리버스', desc: '자연속성 카드 사망시 필드버프 대지의축복 부여' },
     { id: 'milkshake', name: '밀크쉐이크', desc: '스타파우더 효과 2배' },
@@ -234,6 +234,94 @@ const ARTIFACT_LIST = [
     { id: 'blue_moon', name: '블루문', desc: '스킬 사용시 30%확률로 마나를 소비하지 않는다' }
 ];
 
+const DIVINE_ARTIFACT_UNLOCKS = [
+    {
+        id: 'divine_iris',
+        bossId: 'iris_love',
+        name: '신기 아이리스',
+        desc: '디바인 스택당 적의 방어력과 마법방어력 10% 추가 관통',
+        replaces: 'divine_piercing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'demon_iris',
+        bossId: 'iris_curse',
+        name: '마신기 아이리스',
+        desc: '작열 스택당 적의 방어력과 마법방어력 10% 추가 관통',
+        replaces: 'flame_piercing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_pharaoh',
+        bossId: 'pharaoh',
+        name: '신기 파라오',
+        desc: '방어력과 마법방어력 50% 증가, 회피율 50% 감소',
+        replaces: null,
+        unlockChance: 0.01
+    },
+    {
+        id: 'demon_beelzebub',
+        bossId: 'demon_god',
+        name: '마신기 벨제뷔트',
+        desc: '전설/초월 카드 사망시 물리 4배율 자폭대미지',
+        replaces: 'big_bang',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_thor',
+        bossId: 'thor',
+        name: '신기 토르',
+        desc: '스타파우더 효과 2.5배',
+        replaces: 'milkshake',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_flora',
+        bossId: 'flora',
+        name: '신기 플로라',
+        desc: '대지의축복 효과 2.5배',
+        replaces: 'nature_blessing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_gray',
+        bossId: 'gray',
+        name: '신기 그레이',
+        desc: '어둠속성 카드 치명타 20%, 회피율 10% 증가',
+        replaces: 'veil_of_darkness',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_poseidon',
+        bossId: 'poseidon',
+        name: '신기 포세이돈',
+        desc: '스턴 중인 적에게 대미지 2.5배',
+        replaces: 'ice_break',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_ares',
+        bossId: 'ares',
+        name: '신기 아레스',
+        desc: '일반공격 위력 2.5배',
+        replaces: 'double_attack',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_astea',
+        bossId: 'creator_god',
+        name: '신기 아스테아',
+        desc: '작열/디바인 전소모 스킬의 추가위력 3배',
+        replaces: 'holy_flame_burst',
+        unlockChance: 0.001
+    }
+];
+
+const ARTIFACT_LIST = [
+    ...BASE_ARTIFACT_LIST,
+    ...DIVINE_ARTIFACT_UNLOCKS.map(({ id, name, desc, replaces }) => ({ id, name, desc, replaces }))
+];
+
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
 const GameUtils = {
@@ -246,6 +334,56 @@ const GameUtils = {
 
     getDefaultUnlockedBonusCardIds() {
         return [...DEFAULT_UNLOCKED_BONUS_CARD_IDS];
+    },
+
+    getArtifactById(id) {
+        if (!id) return null;
+        return ARTIFACT_LIST.find(artifact => artifact.id === id) || null;
+    },
+
+    getDivineArtifactUnlocks() {
+        return DIVINE_ARTIFACT_UNLOCKS.map(artifact => ({ ...artifact }));
+    },
+
+    getDivineArtifactUnlockByBossId(bossId) {
+        if (!bossId) return null;
+        return DIVINE_ARTIFACT_UNLOCKS.find(artifact => artifact.bossId === bossId) || null;
+    },
+
+    getUnlockedDivineArtifactIds(globalData) {
+        const unlocked = Array.isArray(globalData && globalData.unlocked_divine_artifacts)
+            ? globalData.unlocked_divine_artifacts
+            : [];
+        const validIds = new Set(DIVINE_ARTIFACT_UNLOCKS.map(artifact => artifact.id));
+        const normalized = [];
+        unlocked.forEach(id => {
+            if (validIds.has(id) && !normalized.includes(id)) normalized.push(id);
+        });
+        return normalized;
+    },
+
+    getArtifactSelectionPool(globalData) {
+        const unlockedDivineIds = new Set(this.getUnlockedDivineArtifactIds(globalData));
+        const replacements = new Map();
+        const additions = [];
+
+        DIVINE_ARTIFACT_UNLOCKS.forEach(artifact => {
+            if (!unlockedDivineIds.has(artifact.id)) return;
+            if (artifact.replaces) replacements.set(artifact.replaces, artifact.id);
+            else additions.push(artifact.id);
+        });
+
+        const pool = BASE_ARTIFACT_LIST.map(artifact => {
+            const replacementId = replacements.get(artifact.id);
+            return replacementId ? this.getArtifactById(replacementId) : artifact;
+        }).filter(Boolean);
+
+        additions.forEach(id => {
+            const artifact = this.getArtifactById(id);
+            if (artifact) pool.push(artifact);
+        });
+
+        return pool;
     },
 
     getAllTranscendenceCards() {
@@ -668,9 +806,14 @@ const DAMAGE_EFFECT_HANDLERS = {
             let mps = eff.multPerStack;
             // Artifact: holy_flame_burst — full-consume burn/divine skills only
             const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-            if (artifacts.includes('holy_flame_burst') && (eff.debuff === 'burn' || eff.debuff === 'divine')) {
-                mps *= 2.0;
-                ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+            if (eff.debuff === 'burn' || eff.debuff === 'divine') {
+                if (artifacts.includes('divine_astea')) {
+                    mps *= 3.0;
+                    ctx.logFn('[신기] 신기 아스테아: 전소모 추가위력 3배!');
+                } else if (artifacts.includes('holy_flame_burst')) {
+                    mps *= 2.0;
+                    ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+                }
             }
             ctx.mult += (c * mps);
             removeVirtualStack(ctx.virtualTargetBuffs, eff.debuff, c);
@@ -1287,6 +1430,8 @@ const Logic = {
         // Multipliers
         let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
 
+        let evasionPenalty = 0;
+
         // Handle Mushroom King here properly
         if (trait && trait.type === 'cond_earth_def_mdef' && effectiveFieldBuffs.some(b => b.name === 'earth_bless')) {
             m.def += 0.5;
@@ -1324,11 +1469,15 @@ const Logic = {
             effectiveFieldBuffs.forEach(fb => {
                 const bonus = GAME_CONSTANTS.FIELD_BUFF_STATS[fb.name];
                 if (bonus) {
-                    // Artifact: nature_blessing — double earth_bless effect
                     let artifactBuffMult = 1.0;
-                    if (fb.name === 'earth_bless' && artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
-                    // Artifact: milkshake — double star_powder effect
-                    if (fb.name === 'star_powder' && artifacts.includes('milkshake')) artifactBuffMult = 2.0;
+                    if (fb.name === 'earth_bless') {
+                        if (artifacts.includes('divine_flora')) artifactBuffMult = 2.5;
+                        else if (artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
+                    }
+                    if (fb.name === 'star_powder') {
+                        if (artifacts.includes('divine_thor')) artifactBuffMult = 2.5;
+                        else if (artifacts.includes('milkshake')) artifactBuffMult = 2.0;
+                    }
 
                     if (bonus.atk) m.atk += (bonus.atk * buffMult * artifactBuffMult);
                     if (bonus.matk) m.matk += (bonus.matk * buffMult * artifactBuffMult);
@@ -1373,10 +1522,15 @@ const Logic = {
             m.mdef -= (mdefRed * debuffMult);
         }
 
-        // Artifact: veil_of_darkness — dark element crit/eva +10%
-        if (isPlayer && artifacts.includes('veil_of_darkness') && GameUtils.cardMatchesElement(char.proto, 'dark')) {
-            stats.crit += 10;
-            stats.evasion += 10;
+        // Artifact: veil_of_darkness / divine_gray — dark element crit/eva boost
+        if (isPlayer && GameUtils.cardMatchesElement(char.proto, 'dark')) {
+            if (artifacts.includes('divine_gray')) {
+                stats.crit += 20;
+                stats.evasion += 10;
+            } else if (artifacts.includes('veil_of_darkness')) {
+                stats.crit += 10;
+                stats.evasion += 10;
+            }
         }
 
         // Artifact: rabbit_hole — specific rabbits crit/eva +20%
@@ -1395,11 +1549,20 @@ const Logic = {
             m.mdef -= 0.3;
         }
 
+        if (isPlayer && artifacts.includes('divine_pharaoh')) {
+            m.def += 0.5;
+            m.mdef += 0.5;
+            evasionPenalty += 50;
+        }
+
         // Apply Multipliers
         stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
         stats.matk = Math.floor(stats.matk * Math.max(0, m.matk));
         stats.def = Math.floor(stats.def * Math.max(0, m.def));
         stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
+        if (evasionPenalty > 0) {
+            stats.evasion = Math.max(0, stats.evasion - evasionPenalty);
+        }
 
         if (char.swapAtkMatk) {
             const nextAtk = stats.matk;
@@ -1576,24 +1739,45 @@ const Logic = {
             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate * 100)}% 관통!`);
         }
 
+        if (artifacts.includes('demon_iris') && ctx.baseTargetBuffs['burn']) {
+            const burnPen = ctx.baseTargetBuffs['burn'] * 0.1;
+            const defenseLabel = skill.type === 'phy' ? '방어력' : '마법방어력';
+            const ignore = Math.floor((skill.type === 'phy' ? rawDef : rawMdef) * burnPen);
+            def = Math.max(0, def - ignore);
+            logFn(`[신기] 마신기 아이리스: 작열 ${ctx.baseTargetBuffs['burn']}스택! ${defenseLabel} ${Math.round(burnPen * 100)}% 관통!`);
+        }
+
         // Artifact: flame_piercing — burn stacks x 10% physical defense penetration
-        if (artifacts.includes('flame_piercing') && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
+        if (!artifacts.includes('demon_iris') && artifacts.includes('flame_piercing') && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
             let burnPen = ctx.baseTargetBuffs['burn'] * 0.1;
             let ignore = Math.floor(rawDef * burnPen);
             def = Math.max(0, def - ignore);
             logFn(`[아티팩트] 플레임피어싱: 작열 ${ctx.baseTargetBuffs['burn']}스택! 방어력 ${Math.round(burnPen * 100)}% 관통!`);
         }
 
+        if (artifacts.includes('divine_iris') && ctx.baseTargetBuffs['divine']) {
+            const divinePen = ctx.baseTargetBuffs['divine'] * 0.1;
+            const defenseLabel = skill.type === 'phy' ? '방어력' : '마법방어력';
+            const ignore = Math.floor((skill.type === 'phy' ? rawDef : rawMdef) * divinePen);
+            def = Math.max(0, def - ignore);
+            logFn(`[신기] 신기 아이리스: 디바인 ${ctx.baseTargetBuffs['divine']}스택! ${defenseLabel} ${Math.round(divinePen * 100)}% 관통!`);
+        }
+
         // Artifact: divine_piercing — divine stacks x 10% magic defense penetration
-        if (artifacts.includes('divine_piercing') && skill.type === 'mag' && ctx.baseTargetBuffs['divine']) {
+        if (!artifacts.includes('divine_iris') && artifacts.includes('divine_piercing') && skill.type === 'mag' && ctx.baseTargetBuffs['divine']) {
             let divinePen = ctx.baseTargetBuffs['divine'] * 0.1;
             let ignore = Math.floor(rawMdef * divinePen);
             def = Math.max(0, def - ignore);
             logFn(`[아티팩트] 디바인피어싱: 디바인 ${ctx.baseTargetBuffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
         }
 
+        if (artifacts.includes('divine_poseidon') && ctx.baseTargetBuffs['stun']) {
+            mult *= 2.5;
+            logFn('[신기] 신기 포세이돈: 스턴 중인 적에게 대미지 2.5배!');
+        }
+
         // Artifact: ice_break — double damage to stunned targets
-        if (artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
+        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
             mult *= 2.0;
             logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
         }
@@ -2081,20 +2265,23 @@ const Logic = {
             }
         }
 
-        // Artifact: big_bang — legend/transcendence death -> 3x physical self-destruct
-        if (artifacts.includes('big_bang') && victim.proto) {
+        // Artifact: big_bang / demon_beelzebub — legend/transcendence death -> physical self-destruct
+        if ((artifacts.includes('big_bang') || artifacts.includes('demon_beelzebub')) && victim.proto) {
             const grade = victim.proto.grade;
             if (grade === 'legend' || grade === 'transcendence') {
-                let dummySkill = { name: '빅뱅', type: 'phy', val: 3.0, effects: [] };
+                const isDivineBigBang = artifacts.includes('demon_beelzebub');
+                const skillName = isDivineBigBang ? '마신기 벨제뷔트' : '빅뱅';
+                let dummySkill = { name: skillName, type: 'phy', val: isDivineBigBang ? 4.0 : 3.0, effects: [] };
                 let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
                 // Artifact: companion
                 if (artifacts.includes('companion')) {
                      dmgResult.dmg *= 2;
-                     logFn('[아티팩트] 길동무: 빅뱅 자폭 대미지 2배!');
+                     logFn(`[아티팩트] 길동무: ${skillName} 자폭 대미지 2배!`);
                 }
                 if (dmgResult.dmg > 0) {
                     result.damageToKiller += dmgResult.dmg;
-                    logFn(`[아티팩트] 빅뱅! 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
+                    const prefix = isDivineBigBang ? '[신기]' : '[아티팩트]';
+                    logFn(`${prefix} ${skillName}: 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
                 }
             }
         }
