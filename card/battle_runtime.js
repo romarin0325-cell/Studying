@@ -571,8 +571,12 @@ const BattleRuntime = {
         }
 
         let modifiedSkill = skill;
-        if (rpg.hasArtifact('double_attack') && skill.name === rpg.NORMAL_ATTACK.name) {
-            modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.0 };
+        if (skill.name === rpg.NORMAL_ATTACK.name) {
+            if (rpg.hasArtifact('divine_ares')) {
+                modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.5 };
+            } else if (rpg.hasArtifact('double_attack')) {
+                modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.0 };
+            }
         }
 
         rpg.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);

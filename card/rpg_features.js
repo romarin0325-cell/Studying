@@ -73,9 +73,10 @@
             this.global = { ...this.global, ...data };
         }
         const changedBonusCards = this.ensureDefaultUnlockedBonusCards();
+        const changedDivineArtifacts = this.ensureDivineArtifactState();
         const changedTicketState = this.ensureChaosTicketState();
         const changedSpecialData = this.ensureSpecialDataState();
-        const changed = changedBonusCards || changedTicketState || changedSpecialData;
+        const changed = changedBonusCards || changedDivineArtifacts || changedTicketState || changedSpecialData;
         this.ensureBonusPoolPresetState();
         if (changed) this.saveGlobalData();
     },
@@ -102,6 +103,24 @@
             }
         });
         return changed;
+    },
+
+
+    ensureDivineArtifactState() {
+        if (!Array.isArray(this.global.unlocked_divine_artifacts)) {
+            this.global.unlocked_divine_artifacts = [];
+            return true;
+        }
+
+        const normalized = typeof GameUtils !== 'undefined' && typeof GameUtils.getUnlockedDivineArtifactIds === 'function'
+            ? GameUtils.getUnlockedDivineArtifactIds(this.global)
+            : this.global.unlocked_divine_artifacts;
+        if (JSON.stringify(normalized) === JSON.stringify(this.global.unlocked_divine_artifacts)) {
+            return false;
+        }
+
+        this.global.unlocked_divine_artifacts = normalized;
+        return true;
     },
 
 
@@ -812,6 +831,26 @@
     },
 
 
+    tryUnlockDivineArtifact(enemyId, stageNumber) {
+        if (this.state.gameType !== 'endless' || stageNumber <= 36) return '';
+
+        const unlock = typeof GameUtils !== 'undefined' && typeof GameUtils.getDivineArtifactUnlockByBossId === 'function'
+            ? GameUtils.getDivineArtifactUnlockByBossId(enemyId)
+            : null;
+        if (!unlock) return '';
+
+        this.ensureDivineArtifactState();
+        if (this.global.unlocked_divine_artifacts.includes(unlock.id)) return '';
+        if (Math.random() >= unlock.unlockChance) return '';
+
+        this.global.unlocked_divine_artifacts.push(unlock.id);
+        this.saveGlobalData();
+
+        const chancePercent = unlock.unlockChance >= 0.01 ? '1%' : '0.1%';
+        return `<b>[신기 해금]</b> ${unlock.name}이(가) 아티팩트 모드에 해금되었습니다! (해금 확률 ${chancePercent})`;
+    },
+
+
     isGradeBalancedRunMode() {
         return ['chaos', 'draft'].includes(this.state.mode);
     },
@@ -1300,6 +1339,10 @@
         this.state.tickets += reward;
         this.state.enemyScale++;
         this.clearPendingEnemySelection();
+        const divineArtifactUnlockMsg = this.tryUnlockDivineArtifact(defeatedEnemyId, defeatedStageNumber);
+        if (divineArtifactUnlockMsg) {
+            deadMsg = deadMsg ? `${deadMsg}<br>${divineArtifactUnlockMsg}` : divineArtifactUnlockMsg;
+        }
         const bonusTransUnlockMsg = this.tryUnlockBonusTranscendence();
         if (bonusTransUnlockMsg) {
             deadMsg = deadMsg ? `${deadMsg}<br>${bonusTransUnlockMsg}` : bonusTransUnlockMsg;

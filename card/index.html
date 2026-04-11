@@ -1912,6 +1912,7 @@
                 unlocked_modes: ['origin'],
                 unlocked_bonus_cards: [],
                 unlocked_bonus_transcendence_cards: [],
+                unlocked_divine_artifacts: [],
                 achievements: { origin: false },
                 chaosTickets: 0,
                 chaosTicketVersion: 0,
@@ -4224,7 +4225,14 @@
 
             openArtifactSelect() {
                 const owned = this.state.artifacts || [];
-                const available = ARTIFACT_LIST.filter(a => !owned.includes(a.id));
+                const artifactPool = (typeof GameUtils !== 'undefined' && typeof GameUtils.getArtifactSelectionPool === 'function')
+                    ? GameUtils.getArtifactSelectionPool(this.global)
+                    : ARTIFACT_LIST;
+                const available = artifactPool.filter(artifact => {
+                    if (owned.includes(artifact.id)) return false;
+                    if (artifact.replaces && owned.includes(artifact.replaces)) return false;
+                    return true;
+                });
                 if (available.length === 0) {
                     this.showAlert("획득 가능한 아티팩트가 없습니다.");
                     this.toMenu();
