@@ -64,7 +64,9 @@ function run() {
     'getSpecialCards()',
     'buildTranscendencePool(globalData, options = {})',
     'drawWeightedCards(pool, count, weightFn = () => 1, options = {})',
-    'dmg_boost_turn_limit'
+    'dmg_boost_turn_limit',
+    "'valentine': { def: 0.5, mdef: 0.5 }",
+    'death_multi_debuff_custom'
   ]);
   mustContain(path.join(cardRoot, 'data.js'), [
     'const CARDS',
@@ -79,7 +81,17 @@ function run() {
     "id: 'trans_poseidon'",
     "bonusTranscendenceReward: 'trans_thor'",
     "bonusTranscendenceReward: 'trans_ares'",
-    "bonusTranscendenceReward: 'trans_poseidon'"
+    "bonusTranscendenceReward: 'trans_poseidon'",
+    "type: 'syn_water_light_heart_star'",
+    "type: 'syn_water_light_midnight_twinkle'",
+    "'temptation': '유혹'",
+    "'valentine': '발렌타인'"
+  ]);
+  mustContain(path.join(cardRoot, 'battle_runtime.js'), [
+    "syn_water_light_heart_star",
+    "skill.name === '하트오버드라이브'",
+    "syn_water_light_midnight_twinkle",
+    "skill.name === '미드나잇판타지'"
   ]);
   mustContain(path.join(cardRoot, 'toeic.js'), ['const TOEIC_DATA']);
 
