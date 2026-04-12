@@ -171,6 +171,7 @@ window.GAME_CONSTANTS = {
         'earth_bless': { atk: 0.25, matk: 0.25 },
         'twinkle_party': { atk: 0.2, crit: 15 },
         'star_powder': { def: 0.4, mdef: 0.4 },
+        'valentine': { def: 0.5, mdef: 0.5 },
         'arena': {},
         'reaper_realm': { crit: 40 },
         'gale': { crit: 20, evasion: 20 }
@@ -1002,12 +1003,7 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
         }
     },
-    'dream_form_execute': (ctx, eff) => {
-        if (ctx.fieldBuffs.some(buff => buff.name === 'arena')) {
-            ctx.mult += 4.0;
-            ctx.logFn('[융합] 아레나가 꿈의형태에 섞여 위력이 크게 증가합니다! (+4.0배)');
-        }
-    },
+    'dream_form_execute': () => { },
     'turn_modulo_dmg': (ctx, eff) => {
         // Need current turn. ctx does not have turn.
         // Add turn to ctx in calculateDamage.
@@ -1163,7 +1159,7 @@ const SideEffects = {
             if (count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
         },
         'clear_self_debuffs': (ctx, eff) => {
-            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun'];
+            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun', 'temptation'];
             let removed = 0;
             removable.forEach(id => {
                 if (ctx.source.buffs[id]) {
@@ -1241,7 +1237,7 @@ const SideEffects = {
             ctx.applyFieldBuff(pick);
         },
         'wild_card_debuff': (ctx, eff) => {
-            const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+            const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun', 'temptation'];
             let cleansed = 0;
             badBuffs.forEach(b => {
                 if (ctx.target.buffs[b]) {
@@ -1251,7 +1247,7 @@ const SideEffects = {
             });
             if (cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
 
-            let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+            let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'];
             pool.sort(() => 0.5 - Math.random());
 
             for (let i = 0; i < 2; i++) {
@@ -1372,9 +1368,6 @@ const SideEffects = {
                         case 'goddess_descent':
                             ctx.target.buffs['stun'] = 1;
                             logMsg.push("여신(기절)");
-                            break;
-                        case 'gale':
-                            logMsg.push("질풍(3.0배)");
                             break;
                     }
                 });
@@ -1505,6 +1498,7 @@ const Logic = {
         if (char.buffs['silence']) m.matk -= (0.2 * debuffMult);
         if (char.buffs['evasion']) stats.evasion += 50;
         if (char.buffs['curse']) m.mdef -= (0.2 * debuffMult);
+        if (char.buffs['temptation']) m.mdef -= (0.2 * debuffMult);
 
         let defRed = 0.0;
         if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
@@ -1844,9 +1838,17 @@ const Logic = {
                         mult += 4.0;
                         logMsg.push("여신(4.0배)");
                         break;
+                    case 'valentine': // 발렌타인: 5배율
+                        mult += 5.0;
+                        logMsg.push("발렌타인(5.0배)");
+                        break;
                     case 'destiny_oath': // 운명의서약: 10배율
                         mult += 10.0;
                         logMsg.push("서약(10.0배)");
+                        break;
+                    case 'arena': // 아레나: 4배율
+                        mult += 4.0;
+                        logMsg.push("아레나(4.0배)");
                         break;
                     case 'reaper_realm': // 사신강림: 마방 50% 관통 + 1배율
                         {
@@ -1929,6 +1931,8 @@ const Logic = {
             else if (t.type === 'syn_dark_3_all_stats' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
             else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
+            else if (t.type === 'syn_water_light_heart_star' && deckCtx.hasElement('water') && deckCtx.hasElement('light')) active = true;
+            else if (t.type === 'syn_water_light_midnight_twinkle' && deckCtx.hasElement('water') && deckCtx.hasElement('light')) active = true;
             else if (t.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) active = true;
             else if (t.type === 'syn_nature_3_party_def_mdef' && deckCtx.countElement('nature') >= 3) active = true;
             else if (t.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) active = true;
@@ -2228,6 +2232,14 @@ const Logic = {
                 });
                 result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
                 logFn('[특성] 사망 효과 발동! 적에게 약화, 부식, 저주, 침묵, 기절 부여.');
+            }
+        }
+        else if (t.type === 'death_multi_debuff_custom' && killer) {
+            (t.debuffs || []).forEach(debuff => {
+                result.killerDebuffs[debuff] = (result.killerDebuffs[debuff] || 0) + 1;
+            });
+            if ((t.debuffs || []).length > 0) {
+                logFn(`[특성] 사망 효과 발동! 적에게 ${(t.debuffs || []).map(getBuffName).join(', ')} 부여.`);
             }
         }
         else if (t.type === 'death_field_buff_count_dmg') {

@@ -791,6 +791,16 @@ const BattleRuntime = {
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
         }
 
+        if (rpg.battle.activeTraits.includes('syn_water_light_heart_star') && skill.name === '하트오버드라이브') {
+            rpg.log("[특성] 루미(발렌타인): 스타파우더 추가!");
+            BattleRuntime.applyFieldBuff(rpg, 'star_powder');
+        }
+
+        if (rpg.battle.activeTraits.includes('syn_water_light_midnight_twinkle') && skill.name === '미드나잇판타지') {
+            rpg.log("[특성] 루미(수영복): 트윙클파티 추가!");
+            BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
+        }
+
         if (rpg.battle.activeTraits.includes('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
             rpg.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');

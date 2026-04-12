@@ -208,7 +208,7 @@ async function verifyMainUiAndMissionFlow(page) {
   assert(preClaim.weeklyRewardName.includes('카오스 티켓 3장'), '주간 미션 보상 표기가 카오스 티켓 3장으로 표시되지 않았습니다.');
   assert(preClaim.weeklyMissionText.includes('챌린지') && preClaim.weeklyMissionText.includes('실전') && preClaim.weeklyMissionText.includes('출석'), '주간 미션 목록에 신규 미션 3종이 모두 표시되지 않았습니다.');
 
-  await page.click('#btn-claim-weekly-mission');
+  await page.evaluate(() => RPG.claimWeeklyMissionReward());
   await page.waitForFunction(() => document.getElementById('modal-info').classList.contains('active'));
 
   const postClaim = await page.evaluate(() => ({
@@ -477,6 +477,43 @@ async function verifyCombatRules(page) {
     BattleRuntime.expireFieldBuffs(refreshedRpg, 5);
     const galeRemainsOnTurnFive = refreshedRpg.battle.fieldBuffs.some(buff => buff.name === 'gale');
 
+    const valentineStats = Logic.calculateStats(cloneCard('rumi_valentine'), [{ name: 'valentine' }], 'origin', [], 1);
+    const temptationStats = Logic.calculateStats(makeDummy({ curse: 1, temptation: 1 }, { mdef: 100 }), [], 'origin', [], 1);
+
+    const valentineRumi = cloneCard('rumi_valentine');
+    const valentineRpg = makeRpg({
+      deck: ['rumi_valentine', 'jasmine', null],
+      enemy: makeDummy(),
+      activeTraits: ['syn_water_light_heart_star'],
+      players: [valentineRumi, null, null],
+      turn: 1
+    });
+    BattleRuntime.applySkillEffects(valentineRpg, valentineRumi, valentineRpg.battle.enemy, valentineRumi.skills[1]);
+    const valentineBuffNames = valentineRpg.battle.fieldBuffs.map(buff => buff.name).sort();
+
+    const swimsuitRumi = cloneCard('rumi_swimsuit');
+    const swimsuitRpg = makeRpg({
+      deck: ['rumi_swimsuit', 'jasmine', null],
+      enemy: makeDummy(),
+      activeTraits: ['syn_water_light_midnight_twinkle'],
+      players: [swimsuitRumi, null, null],
+      turn: 1
+    });
+    BattleRuntime.applySkillEffects(swimsuitRpg, swimsuitRumi, swimsuitRpg.battle.enemy, swimsuitRumi.skills[1]);
+    const swimsuitBuffNames = swimsuitRpg.battle.fieldBuffs.map(buff => buff.name).sort();
+
+    const dreamSource = cloneCard('trans_lumi');
+    const dreamTarget = makeDummy({}, { hp: 99999, mdef: 100 });
+    const dreamRpg = makeRpg({
+      deck: ['trans_lumi', null, null],
+      enemy: dreamTarget,
+      players: [dreamSource, null, null],
+      turn: 1,
+      fieldBuffs: [{ name: 'gale' }, { name: 'arena' }]
+    });
+    BattleRuntime.executeSkill(dreamRpg, dreamSource, dreamTarget, dreamSource.skills[2]);
+    const dreamLogs = [...dreamRpg.logs];
+
     BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurn;
     Math.random = originalRandom;
 
@@ -515,7 +552,13 @@ async function verifyCombatRules(page) {
       refreshedGaleCount,
       refreshedGaleLogs,
       galeRemainsOnTurnFour,
-      galeRemainsOnTurnFive
+      galeRemainsOnTurnFive,
+      valentineDef: valentineStats.def,
+      valentineMdef: valentineStats.mdef,
+      temptationMdef: temptationStats.mdef,
+      valentineBuffNames,
+      swimsuitBuffNames,
+      dreamLogs
     };
   });
 
@@ -551,6 +594,13 @@ async function verifyCombatRules(page) {
   assert(result.refreshedGaleExpiresAtTurn === 5 && result.refreshedGaleCount === 1, `기존 질풍 갱신이 잘못되었습니다: expiresAt=${result.refreshedGaleExpiresAtTurn}, count=${result.refreshedGaleCount}`);
   assert(result.refreshedGaleLogs.some(message => message.includes('지속 턴 갱신')), '기존 질풍 갱신 로그가 남지 않았습니다.');
   assert(result.galeRemainsOnTurnFour === true && result.galeRemainsOnTurnFive === false, '갱신된 질풍의 만료 턴 계산이 잘못되었습니다.');
+  assert(result.valentineDef === 120 && result.valentineMdef === 135, `발렌타인 필드버프 수치가 잘못되었습니다: DEF=${result.valentineDef}, MDEF=${result.valentineMdef}`);
+  assert(result.temptationMdef === 60, `유혹과 저주 중첩 마법방어 감소가 잘못되었습니다: MDEF=${result.temptationMdef}`);
+  assert(JSON.stringify(result.valentineBuffNames) === JSON.stringify(['star_powder', 'valentine']), `루미(발렌타인) 추가 발동이 잘못되었습니다: ${JSON.stringify(result.valentineBuffNames)}`);
+  assert(JSON.stringify(result.swimsuitBuffNames) === JSON.stringify(['sun_bless', 'twinkle_party']), `루미(수영복) 추가 발동이 잘못되었습니다: ${JSON.stringify(result.swimsuitBuffNames)}`);
+  assert(result.dreamLogs.some(message => message.includes('필드 버프 2개 융합 계산!') && message.includes('질풍(3.0배)') && message.includes('아레나(4.0배)')), '꿈의형태 융합 로그가 필드버프별로 통일되지 않았습니다.');
+  assert(!result.dreamLogs.some(message => message.includes('[융합]')), `꿈의형태에 별도 특수 융합 로그가 남아 있습니다: ${result.dreamLogs.join(' | ')}`);
+  assert(!result.dreamLogs.some(message => message.includes('초월 효과 발동!')), `순수 배율 버프가 꿈의형태 버프 소모 로그에 포함되었습니다: ${result.dreamLogs.join(' | ')}`);
 
   return result;
 }
