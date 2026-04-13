@@ -1565,26 +1565,66 @@
                 ? window.RPGConfig.BOOT_MODULES
                 : [];
             var idx = 0;
+            var isLoading = false;
+            var queuedScriptKeys = Object.create(null);
+
+            function getScriptKey(src) {
+                if (!src) return '';
+                return String(src).split('?')[0].replace(/\\/g, '/');
+            }
+
+            function markQueuedScripts() {
+                var existingScripts = document.querySelectorAll('script[src]');
+                for (var i = 0; i < existingScripts.length; i++) {
+                    var key = getScriptKey(existingScripts[i].getAttribute('src'));
+                    if (key) queuedScriptKeys[key] = true;
+                }
+            }
 
             function loadNext() {
+                if (isLoading) return;
                 if (idx >= scripts.length) return;
                 var info = scripts[idx];
+                var scriptKey = getScriptKey(info && info.src);
+                if (!scriptKey) {
+                    idx++;
+                    updateProgress();
+                    setTimeout(loadNext, 100);
+                    return;
+                }
+                if (queuedScriptKeys[scriptKey]) {
+                    idx++;
+                    updateProgress();
+                    setTimeout(loadNext, 0);
+                    return;
+                }
+
+                queuedScriptKeys[scriptKey] = true;
+                isLoading = true;
                 var el = document.createElement('script');
                 el.src = info.src;
                 el.charset = 'utf-8';
                 el.async = false;
+                var settled = false;
 
-                el.onload = function () {
+                function finalizeLoad(hadError) {
+                    if (settled) return;
+                    settled = true;
+                    isLoading = false;
+                    if (hadError) {
+                        window._scriptLoadErrors.push(info.src);
+                    }
                     idx++;
                     updateProgress();
                     setTimeout(loadNext, 100);
+                }
+
+                el.onload = function () {
+                    finalizeLoad(false);
                 };
 
                 el.onerror = function () {
-                    window._scriptLoadErrors.push(info.src);
-                    idx++;
-                    updateProgress();
-                    setTimeout(loadNext, 100);
+                    finalizeLoad(true);
                 };
 
                 document.body.appendChild(el);
@@ -1599,6 +1639,7 @@
                 if (el) el.innerText = '\u23f3 \ub370\uc774\ud130 \ub85c\ub529 \uc911 (' + idx + '/' + scripts.length + ')... \uc7a0\uc2dc\ub9cc \uae30\ub2e4\ub824\uc8fc\uc138\uc694.';
             }
 
+            markQueuedScripts();
             setTimeout(loadNext, 50);
         })();
     </script>
