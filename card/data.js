@@ -948,8 +948,7 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
     { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
     { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
-    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
-    { id: 'zeke_christmas', name: '지크(크리스마스)', baseCardId: 'zeke', specialSeason: 'christmas' }
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' }
 ];
 
 function cloneData(value) {

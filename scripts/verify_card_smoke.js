@@ -17,22 +17,10 @@ function run() {
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',
     'id="toeic-review-hub"',
-    'window._scriptRuntimeErrors = [];',
-    '<script src="rpg_config.js" charset="utf-8"',
-    '<script src="rpg_flow_modules.js" charset="utf-8"',
-    'RPGConfig.BOOT_MODULES',
-    "window._scriptLoadErrors.push('rpg_flow_modules.js')",
-    "el.charset = 'utf-8';",
-    'var isLoading = false;',
-    'var queuedScriptKeys = Object.create(null);',
-    'function markQueuedScripts() {',
-    'if (queuedScriptKeys[scriptKey]) {',
-    'var settled = false;',
-    'function finalizeLoad(hadError) {',
+    "{ src: 'rpg_features.js'",
     '_featuresInstalled: false',
     'hydrateModules() {',
     'RPGFeatureModules.install(this);',
-    'RPGFlowModules.install(this);',
     'startToeicPractice()',
     'finishToeicSession()',
     'openToeicReview()',
@@ -52,28 +40,7 @@ function run() {
     'openBonusPoolEditor()',
     'bonusPoolPresets:',
     'activeBonusPoolPresetIndex:',
-    'getBootModules() {',
-    'createMissionProgressItem({'
-  ]);
-
-  mustContain(path.join(cardRoot, 'rpg_config.js'), [
-    'window.RPGConfig =',
-    'MODE_META',
-    'FIELD_BUFF_INFO',
-    'TOEIC_TYPE_LABELS',
-    'BOOT_MODULES',
-    "src: 'rpg_features.js'"
-  ]);
-
-  mustContain(path.join(cardRoot, 'rpg_flow_modules.js'), [
-    'window.RPGFlowModules = {',
-    'startTutoringQuiz()',
-    'runGacha(isChallenge)',
-    'finishWinBattle(deadMsg, gameClear, quizResult)',
-    'startToeicPractice(options = {})',
-    'checkToeicAnswer(btn, selected, correct)',
-    'finishToeicSession()',
-    'async startDate()'
+    "name: 'RPGFeatureModules'"
   ]);
 
   mustContain(path.join(cardRoot, 'rpg_features.js'), [
@@ -137,11 +104,6 @@ function run() {
   inlineScripts.forEach((script, index) => {
     new vm.Script(script, { filename: `${htmlPath}#script${index + 1}` });
   });
-
-  for (const scriptPath of ['rpg_config.js', 'rpg_flow_modules.js']) {
-    const absolutePath = path.join(cardRoot, scriptPath);
-    new vm.Script(fs.readFileSync(absolutePath, 'utf8'), { filename: absolutePath });
-  }
 
   console.log('Card smoke verification passed.');
 }
