@@ -34,7 +34,7 @@
             title: '스페셜미션(크리스마스)',
             bossId: 'astea_christmas',
             bossName: '아스테아(크리스마스)',
-            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas', 'zeke_christmas']
+            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas']
         }
     };
 
