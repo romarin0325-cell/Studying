@@ -3,8 +3,7 @@
         { baseId: 'jasmine', label: '자스민' },
         { baseId: 'rumi', label: '루미' },
         { baseId: 'luna', label: '루나' },
-        { baseId: 'zeke', label: '지크' },
-        { baseId: 'cherry_prince', label: '체리프린스' }
+        { baseId: 'zeke', label: '지크' }
     ];
 
     const SPECIAL_MISSION_SEASONS = {
@@ -34,7 +33,7 @@
             title: '스페셜미션(크리스마스)',
             bossId: 'astea_christmas',
             bossName: '아스테아(크리스마스)',
-            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas', 'zeke_christmas']
+            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas']
         }
     };
 

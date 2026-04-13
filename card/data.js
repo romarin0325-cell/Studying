@@ -853,16 +853,6 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'cherry_prince', name: '체리프린스', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
-        stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
-        trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
-        skills: [
-            { name: '체리로열가드', type: 'sup', tier: 3, cost: 30, desc: '생명력 50% 회복하고 받는 대미지 50% 감소', effects: [{ type: 'heal_ratio', ratio: 0.5 }, { type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
-            { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
-        ]
-    },
-    {
         id: 'sylphid', name: '실피드', grade: 'legend', element: 'nature', role: 'dealer', unlockSource: 'bonus',
         stats: { hp: 480, atk: 150, matk: 100, def: 65, mdef: 60 },
         trait: { type: 'opening_atk_matk', val: 50, desc: '3턴 이내 공격력/마법공격력 50% 증가' },
@@ -948,8 +938,7 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
     { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
     { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
-    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
-    { id: 'zeke_christmas', name: '지크(크리스마스)', baseCardId: 'zeke', specialSeason: 'christmas' }
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' }
 ];
 
 function cloneData(value) {
