@@ -471,6 +471,7 @@ const BattleRuntime = {
                 target.hp = 0;
                 rpg.log(`${target.name} 쓰러짐!`);
                 BattleRuntime.handleDeathTraits(rpg, target, enemy);
+                BattleRuntime.handleLinkedDeathTraits(rpg, target, enemy);
 
                 battle.currentPlayerIdx++;
                 while (battle.currentPlayerIdx < GAME_CONSTANTS.DECK_SIZE) {
@@ -528,6 +529,66 @@ const BattleRuntime = {
         applyStackMap(rpg, killer, result.killerDebuffs);
     },
 
+    handleLinkedDeathTraits(rpg, victim, killer) {
+        if (!victim || !killer || killer.hp <= 0 || !victim.proto) return;
+        if (!GameUtils.cardMatchesElement(victim.proto, 'light')) return;
+
+        const players = Array.isArray(rpg.battle.players) ? rpg.battle.players : [];
+        players.forEach(player => {
+            if (!player || !player.proto || !player.proto.trait) return;
+            if (player.proto.trait.type !== 'ally_light_death_base_matk_mag') return;
+            if (player.isDead && player !== victim) return;
+            if (killer.hp <= 0) return;
+
+            const proxySource = {
+                name: player.name,
+                hp: player.proto.stats.hp,
+                maxHp: player.proto.stats.hp,
+                mp: GAME_CONSTANTS.MAX_MP,
+                atk: player.proto.stats.atk,
+                matk: player.proto.stats.matk,
+                def: player.proto.stats.def,
+                mdef: player.proto.stats.mdef,
+                baseCrit: player.baseCrit || 10,
+                baseEva: 0,
+                buffs: {},
+                proto: {
+                    ...player.proto,
+                    trait: { type: 'field_buff_immune' }
+                }
+            };
+            const retaliationSkill = {
+                name: '성야의 기적',
+                type: 'mag',
+                val: player.proto.trait.val || 2.0,
+                effects: []
+            };
+            const dmgResult = Logic.calculateDamage(
+                proxySource,
+                killer,
+                retaliationSkill,
+                rpg.battle.fieldBuffs,
+                [],
+                msg => rpg.log(msg),
+                rpg.state.mode,
+                rpg.state.deck,
+                rpg.battle.turn,
+                rpg.state.artifacts || []
+            );
+
+            if (rpg.hasArtifact('companion')) {
+                dmgResult.dmg *= 2;
+                rpg.log('[아티팩트] 길동무: 성야의 기적 대미지 2배!');
+            }
+
+            if (dmgResult.dmg > 0) {
+                killer.hp -= dmgResult.dmg;
+                killer.tookDamageThisTurn = true;
+                rpg.log(`[특성] ${player.name}: 빛속성 아군의 희생에 반응! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+            }
+        });
+    },
+
     handleOnHitTraits(rpg, victim, attacker) {
         const result = Logic.handleOnHitTraits(
             victim,
@@ -555,6 +616,7 @@ const BattleRuntime = {
         source.isDead = true;
         rpg.log(`${source.name} 사망!`);
         BattleRuntime.handleDeathTraits(rpg, source, target);
+        BattleRuntime.handleLinkedDeathTraits(rpg, source, target);
     },
 
     hasActiveTrait(rpg, id) {

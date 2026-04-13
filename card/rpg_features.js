@@ -34,7 +34,7 @@
             title: '스페셜미션(크리스마스)',
             bossId: 'astea_christmas',
             bossName: '아스테아(크리스마스)',
-            rewardCardIds: ['jasmine_christmas', 'rumi_christmas', 'zeke_christmas']
+            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas', 'zeke_christmas']
         }
     };
 
@@ -57,10 +57,7 @@
 
 
     getRandomGrammarQuiz() {
-        let allQuizzes = [];
-        GRAMMAR_DATA.forEach(lecture => {
-            allQuizzes = allQuizzes.concat(lecture.quizzes);
-        });
+        const allQuizzes = GameUtils.getAllGrammarQuizzes();
         if (allQuizzes.length === 0) return null;
         return allQuizzes[Math.floor(Math.random() * allQuizzes.length)];
     },
@@ -904,9 +901,7 @@
             return picks;
         }
 
-        return [...pool]
-            .sort(() => Math.random() - 0.5)
-            .slice(0, count);
+        return GameUtils.shuffle(pool).slice(0, count);
     },
 
 
@@ -1145,12 +1140,7 @@
     },
 
     pickUniqueRandomCards(pool, count) {
-        const shuffled = [...pool];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled.slice(0, count);
+        return GameUtils.shuffle(pool).slice(0, count);
     },
 
 
