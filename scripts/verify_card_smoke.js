@@ -17,8 +17,12 @@ function run() {
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',
     'id="toeic-review-hub"',
-    "{ src: 'rpg_config.js'",
+    'window._scriptRuntimeErrors = [];',
+    '<script src="rpg_config.js" charset="utf-8"',
+    '<script src="rpg_flow_modules.js" charset="utf-8"',
     'RPGConfig.BOOT_MODULES',
+    "window._scriptLoadErrors.push('rpg_flow_modules.js')",
+    "el.charset = 'utf-8';",
     '_featuresInstalled: false',
     'hydrateModules() {',
     'RPGFeatureModules.install(this);',
@@ -51,7 +55,8 @@ function run() {
     'MODE_META',
     'FIELD_BUFF_INFO',
     'TOEIC_TYPE_LABELS',
-    'BOOT_MODULES'
+    'BOOT_MODULES',
+    "src: 'rpg_features.js'"
   ]);
 
   mustContain(path.join(cardRoot, 'rpg_flow_modules.js'), [
