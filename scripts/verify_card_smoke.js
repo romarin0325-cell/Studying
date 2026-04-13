@@ -17,10 +17,12 @@ function run() {
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',
     'id="toeic-review-hub"',
-    "{ src: 'rpg_features.js'",
+    "{ src: 'rpg_config.js'",
+    'RPGConfig.BOOT_MODULES',
     '_featuresInstalled: false',
     'hydrateModules() {',
     'RPGFeatureModules.install(this);',
+    'RPGFlowModules.install(this);',
     'startToeicPractice()',
     'finishToeicSession()',
     'openToeicReview()',
@@ -40,7 +42,27 @@ function run() {
     'openBonusPoolEditor()',
     'bonusPoolPresets:',
     'activeBonusPoolPresetIndex:',
-    "name: 'RPGFeatureModules'"
+    'getBootModules() {',
+    'createMissionProgressItem({'
+  ]);
+
+  mustContain(path.join(cardRoot, 'rpg_config.js'), [
+    'window.RPGConfig =',
+    'MODE_META',
+    'FIELD_BUFF_INFO',
+    'TOEIC_TYPE_LABELS',
+    'BOOT_MODULES'
+  ]);
+
+  mustContain(path.join(cardRoot, 'rpg_flow_modules.js'), [
+    'window.RPGFlowModules = {',
+    'startTutoringQuiz()',
+    'runGacha(isChallenge)',
+    'finishWinBattle(deadMsg, gameClear, quizResult)',
+    'startToeicPractice(options = {})',
+    'checkToeicAnswer(btn, selected, correct)',
+    'finishToeicSession()',
+    'async startDate()'
   ]);
 
   mustContain(path.join(cardRoot, 'rpg_features.js'), [
@@ -104,6 +126,11 @@ function run() {
   inlineScripts.forEach((script, index) => {
     new vm.Script(script, { filename: `${htmlPath}#script${index + 1}` });
   });
+
+  for (const scriptPath of ['rpg_config.js', 'rpg_flow_modules.js']) {
+    const absolutePath = path.join(cardRoot, scriptPath);
+    new vm.Script(fs.readFileSync(absolutePath, 'utf8'), { filename: absolutePath });
+  }
 
   console.log('Card smoke verification passed.');
 }

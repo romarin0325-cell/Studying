@@ -1,3 +1,9 @@
+// Role guide:
+// dealer: pure damage finisher focused on closing fights.
+// balancer: mixed offense/utility that covers multiple situations.
+// buffer: field buff or protection specialist that raises party stability.
+// debuffer: pressure card that stacks status effects or disruption.
+// looter / luther: reward-oriented finisher that helps card acquisition flow.
 const CARDS = [
     // --- Legend ---
     {
@@ -565,7 +571,7 @@ const BONUS_CARDS = [
     {
         id: 'gray', name: '그레이', grade: 'legend', element: 'dark', role: 'dealer',
         stats: { hp: 480, atk: 145, matk: 125, def: 65, mdef: 65 },
-        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~10배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0 }] },
@@ -831,8 +837,8 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 430, atk: 115, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '루터: 이 카드로 승리 시 추가 드로우' },
         skills: [
-            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '갓킬러', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 빛속성 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'light', mult: 2.0 }] }
         ]
     },
@@ -940,6 +946,7 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_halloween', name: '루나(할로윈)', baseCardId: 'luna', specialSeason: 'halloween' },
     { id: 'zeke_halloween', name: '지크(할로윈)', baseCardId: 'zeke', specialSeason: 'halloween' },
     { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
+    { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
     { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
     { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
     { id: 'zeke_christmas', name: '지크(크리스마스)', baseCardId: 'zeke', specialSeason: 'christmas' }
@@ -952,6 +959,26 @@ function cloneData(value) {
 function cloneSkillByName(card, skillName) {
     return cloneData(card.skills.find(skill => skill.name === skillName));
 }
+
+const SHARED_MAGIC_GUARD_SKILL = {
+    name: '매직가드',
+    type: 'sup',
+    tier: 1,
+    cost: 10,
+    desc: '마법공격 무효',
+    effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }]
+};
+
+const SANTA_FIELD_BUFF_POOL = [
+    'sun_bless',
+    'moon_bless',
+    'sanctuary',
+    'goddess_descent',
+    'earth_bless',
+    'twinkle_party',
+    'star_powder',
+    'arena'
+];
 
 const SPECIAL_CARD_OVERRIDES = {
     'luna_valentine': card => ({
@@ -1039,6 +1066,62 @@ const SPECIAL_CARD_OVERRIDES = {
             { name: '호핑스매시', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
             { name: '탈리스만씰', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
             cloneSkillByName(card, '매직가드')
+        ]
+    }),
+    'luna_christmas': card => ({
+        ...card,
+        role: 'dealer',
+        stats: { hp: 480, atk: 130, matk: 130, def: 60, mdef: 65 },
+        trait: { type: 'weekday_crit_bonus', weekday: 6, val: 35, desc: '토요일 치명타율 35% 증가' },
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            { name: '홀리메테오', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
+            { name: '캔디크러쉬', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '다음 턴 행동 불가', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }] }
+        ]
+    }),
+    'jasmine_christmas': card => ({
+        ...card,
+        role: 'balancer',
+        stats: { hp: 500, atk: 85, matk: 110, def: 85, mdef: 85 },
+        trait: { type: 'ally_light_death_base_matk_mag', val: 2.0, desc: '덱의 빛속성 카드가 사망할 때 자신의 기본 마공 기준 2배율 반격' },
+        skills: [
+            cloneData(SHARED_MAGIC_GUARD_SKILL),
+            {
+                name: '얼티밋기프트',
+                type: 'sup',
+                tier: 3,
+                cost: 30,
+                desc: '5턴 뒤 랜덤한 필드버프 3종 부여',
+                effects: [{
+                    type: 'delayed_random_unique_field_buffs',
+                    turns: 5,
+                    count: 3,
+                    pool: SANTA_FIELD_BUFF_POOL
+                }]
+            },
+            { name: '미라클페스티벌', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 적에게 디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
+        ]
+    }),
+    'rumi_christmas': card => ({
+        ...card,
+        role: 'dealer',
+        stats: { hp: 490, atk: 100, matk: 130, def: 80, mdef: 80 },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
+        skills: [
+            cloneSkillByName(card, '매직가드'),
+            { name: '스타라이트캐롤', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
+            {
+                name: '오로라이그니션',
+                type: 'mag',
+                tier: 3,
+                cost: 30,
+                val: 2.5,
+                desc: '작열과 디바인을 전부 소모하고 소모한 스택당 1.5배율 추가',
+                effects: [
+                    { type: 'consume_debuff_all', debuff: 'burn', multPerStack: 1.5 },
+                    { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.5 }
+                ]
+            }
         ]
     })
 };
@@ -1201,7 +1284,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
     {
         id: 'trans_gray', name: '사신그레이', grade: 'transcendence', element: 'dark', role: 'dealer',
         stats: { hp: 530, atk: 150, matk: 135, def: 75, mdef: 75 },
-        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },

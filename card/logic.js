@@ -228,7 +228,7 @@ const BASE_ARTIFACT_LIST = [
     { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 2.0배' },
     { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
     { id: 'shadow_stab', name: '섀도우스탭', desc: '회피율 20%증가, 방어력과 마법방어력 30% 감소' },
-    { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤/에인션트드래곤 마공 100% 증가' },
+    { id: 'dragon_heart', name: '드래곤하트', desc: '드래곤의 마법 공격력 100% 증가' },
     { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' },
     { id: 'companion', name: '길동무', desc: '사망시 적에게 대미지를 주는 특성이나 아티팩트 대미지 2배' },
     { id: 'kaleidoscope', name: '만화경', desc: '매 턴 개시시 모든 필드버프를 변경한다' },
@@ -323,6 +323,11 @@ const ARTIFACT_LIST = [
     ...DIVINE_ARTIFACT_UNLOCKS.map(({ id, name, desc, replaces }) => ({ id, name, desc, replaces }))
 ];
 
+let cachedAllCards = null;
+let cachedCardById = null;
+let cachedArtifactById = null;
+let cachedAllGrammarQuizzes = null;
+
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
 const GameUtils = {
@@ -339,7 +344,10 @@ const GameUtils = {
 
     getArtifactById(id) {
         if (!id) return null;
-        return ARTIFACT_LIST.find(artifact => artifact.id === id) || null;
+        if (!cachedArtifactById) {
+            cachedArtifactById = new Map(ARTIFACT_LIST.map(artifact => [artifact.id, artifact]));
+        }
+        return cachedArtifactById.get(id) || null;
     },
 
     getDivineArtifactUnlocks() {
@@ -467,12 +475,15 @@ const GameUtils = {
      * @returns {Array}
      */
     getAllCards() {
-        return [
-            ...CARDS,
-            ...BONUS_CARDS,
-            ...this.getSpecialCards(),
-            ...this.getAllTranscendenceCards()
-        ];
+        if (!cachedAllCards) {
+            cachedAllCards = [
+                ...CARDS,
+                ...BONUS_CARDS,
+                ...this.getSpecialCards(),
+                ...this.getAllTranscendenceCards()
+            ];
+        }
+        return [...cachedAllCards];
     },
 
     /**
@@ -483,8 +494,32 @@ const GameUtils = {
      */
     getCardById(id, pool) {
         if (!id) return null;
-        const cards = Array.isArray(pool) ? pool : this.getAllCards();
-        return cards.find(card => card.id === id) || null;
+        if (Array.isArray(pool)) {
+            return pool.find(card => card.id === id) || null;
+        }
+        if (!cachedCardById) {
+            cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
+        }
+        return cachedCardById.get(id) || null;
+    },
+
+    shuffle(list) {
+        const shuffled = Array.isArray(list) ? [...list] : [];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    },
+
+    getAllGrammarQuizzes() {
+        if (!cachedAllGrammarQuizzes) {
+            cachedAllGrammarQuizzes = [];
+            GRAMMAR_DATA.forEach(lecture => {
+                cachedAllGrammarQuizzes.push(...(lecture.quizzes || []));
+            });
+        }
+        return [...cachedAllGrammarQuizzes];
     },
 
     /**
@@ -737,6 +772,7 @@ const DELAYED_SKILL_EFFECT_TYPES = [
     'delayed_random_attack',
     'delayed_turn_scale_attack',
     'delayed_attack_debuff_scale',
+    'delayed_random_unique_field_buffs',
     'phantom_nightmare'
 ];
 
@@ -1087,6 +1123,20 @@ const SideEffects = {
             ctx.applyFieldBuff(pick);
             ctx.logFn(`[랜덤] ${getBuffName(pick)} 부여!`);
         },
+        'delayed_random_unique_field_buffs': (ctx, eff) => {
+            const pool = Array.isArray(eff.pool) ? [...eff.pool] : [];
+            const active = new Set((ctx.battle.fieldBuffs || []).map(buff => buff.name));
+            const available = pool.filter(id => !active.has(id));
+            const shuffled = (typeof GameUtils !== 'undefined' && typeof GameUtils.shuffle === 'function')
+                ? GameUtils.shuffle(available)
+                : available.sort(() => Math.random() - 0.5);
+            const picks = shuffled.slice(0, Math.max(0, eff.count || 0));
+
+            picks.forEach(id => {
+                ctx.applyFieldBuff(id);
+                ctx.logFn(`[선물] ${getBuffName(id)} 부여!`);
+            });
+        },
         'conditional_field_buff': (ctx, eff) => {
             if (eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) ctx.applyFieldBuff(eff.id);
         },
@@ -1413,6 +1463,9 @@ const Logic = {
             if (trait.type === 'cond_no_field_buff_eva_crit' && effectiveFieldBuffs.length === 0) {
                 stats.evasion += trait.val;
                 stats.crit += trait.val;
+            }
+            if (trait.type === 'weekday_crit_bonus' && new Date().getDay() === trait.weekday) {
+                stats.crit += trait.val || 0;
             }
             if (trait.type === 'luna_jasmine_trait' && effectiveFieldBuffs.some(b => b.name === 'goddess_descent')) {
                 stats.evasion += 25;
@@ -1799,7 +1852,7 @@ const Logic = {
             let ignore = t.val;
             let baseDef = (skill.type === 'phy') ? target.def : target.mdef;
             def = Math.max(0, def - Math.floor(baseDef * ignore));
-            logFn("[특성] 치명타! 적 방어력 50% 추가 무시!");
+            logFn("[특성] 치명타! 방어/마방 50% 관통!");
         }
 
         // [초월 루미: 꿈의형태 리워크 로직]
