@@ -17,7 +17,9 @@ function run() {
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',
     'id="toeic-review-hub"',
-    "{ src: 'rpg_config.js'",
+    '<script src="rpg_config.js"',
+    "{ src: 'data.js'",
+    "{ src: 'rpg_flow_modules.js'",
     'RPGConfig.BOOT_MODULES',
     '_featuresInstalled: false',
     'hydrateModules() {',

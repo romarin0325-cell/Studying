@@ -1528,32 +1528,33 @@
 
     <script>
         window._scriptLoadErrors = [];
+    </script>
+    <script src="rpg_config.js" onerror="window._scriptLoadErrors.push('rpg_config.js')"></script>
+    <script>
         // Sequential script loader — loads one file at a time for mobile file:// reliability
         (function () {
-            var bootstrapScripts = [
-                { src: 'rpg_config.js', label: 'RPG Config' }
+            var scripts = [
+                { src: 'data.js', label: '카드/적 데이터' },
+                { src: 'vocab_data.js', label: '단어 데이터' },
+                { src: 'collocation_data.js', label: '연어 데이터' },
+                { src: 'grammar_data.js', label: '문법 데이터' },
+                { src: 'toeic.js', label: '토익 데이터' },
+                { src: 'toeic_explanations.js', label: '토익 해설' },
+                { src: 'api.js', label: 'API 모듈' },
+                { src: 'logic.js', label: '게임 로직' },
+                { src: 'battle_runtime.js', label: '전투 런타임' },
+                { src: 'rpg_features.js', label: 'RPG Feature Modules' },
+                { src: 'rpg_flow_modules.js', label: 'RPG Flow Modules' }
             ];
-            var bootModulesLoaded = false;
             var idx = 0;
 
-            function getScripts() {
-                if (bootModulesLoaded && typeof RPGConfig !== 'undefined' && Array.isArray(RPGConfig.BOOT_MODULES)) {
-                    return bootstrapScripts.concat(RPGConfig.BOOT_MODULES);
-                }
-                return bootstrapScripts;
-            }
-
             function loadNext() {
-                var scripts = getScripts();
                 if (idx >= scripts.length) return;
                 var info = scripts[idx];
                 var el = document.createElement('script');
                 el.src = info.src;
 
                 el.onload = function () {
-                    if (info.src === 'rpg_config.js') {
-                        bootModulesLoaded = true;
-                    }
                     idx++;
                     updateProgress();
                     // 🚀 핵심 수정: 모바일 기기의 파일 I/O 및 메모리 정리를 위해 100ms 대기 후 다음 파일 로드
@@ -1562,9 +1563,6 @@
 
                 el.onerror = function () {
                     window._scriptLoadErrors.push(info.src);
-                    if (info.src === 'rpg_config.js') {
-                        bootModulesLoaded = true;
-                    }
                     idx++;
                     updateProgress();
                     // 에러 발생 시에도 기기가 쉴 수 있게 대기 시간 부여
@@ -1577,7 +1575,6 @@
 
             function updateProgress() {
                 var el = document.getElementById('title-loading');
-                var scripts = getScripts();
                 if (el) el.innerText = '⏳ 데이터 로딩 중 (' + idx + '/' + scripts.length + ')... 잠시만 기다려주세요.';
             }
 
