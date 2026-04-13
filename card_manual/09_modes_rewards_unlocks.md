@@ -2,38 +2,78 @@
 
 ## 1. 시작 티켓
 
-| 모드 | 시작 티켓 |
-|---|---:|
-| 기본 / origin | 20 |
-| restriction | 10 |
-| balance | 10 |
-| suffering | 10 |
-| overdrive | 10 |
-| archive | 10 |
-| curse | 10 |
-| flood | 10 |
-| artifact | 10 |
-| draft | 5 |
-| chaos | 0 |
+
+### 기본 / origin
+- **시작 티켓**: 20
+
+### restriction
+- **시작 티켓**: 10
+
+### balance
+- **시작 티켓**: 10
+
+### suffering
+- **시작 티켓**: 10
+
+### overdrive
+- **시작 티켓**: 10
+
+### archive
+- **시작 티켓**: 10
+
+### curse
+- **시작 티켓**: 10
+
+### flood
+- **시작 티켓**: 10
+
+### artifact
+- **시작 티켓**: 10
+
+### draft
+- **시작 티켓**: 5
+
+### chaos
+- **시작 티켓**: 0
 
 ## 2. 챌린지 클리어 스테이지
 
 - 엔드리스는 클리어 한계가 없다.
 - 아래 수치는 챌린지형 진행에서만 쓰인다.
 
-| 모드 | 클리어 기준 |
-|---|---:|
-| 기본 | 24 |
-| restriction | 18 |
-| balance | 18 |
-| archive | 18 |
-| chaos | 24 |
-| draft | 24 |
-| overdrive | 30 |
-| curse | 30 |
-| flood | 30 |
-| artifact | 36 |
-| origin | 없음 |
+
+### 기본
+- **클리어 기준**: 24
+
+### restriction
+- **클리어 기준**: 18
+
+### balance
+- **클리어 기준**: 18
+
+### archive
+- **클리어 기준**: 18
+
+### chaos
+- **클리어 기준**: 24
+
+### draft
+- **클리어 기준**: 24
+
+### overdrive
+- **클리어 기준**: 30
+
+### curse
+- **클리어 기준**: 30
+
+### flood
+- **클리어 기준**: 30
+
+### artifact
+- **클리어 기준**: 36
+
+### origin
+- **클리어 기준**: 없음
 
 ## 3. 전투 보상
 
