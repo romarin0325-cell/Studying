@@ -222,11 +222,6 @@
             src: 'rpg_features.js',
             label: 'RPG Feature Modules',
             requiredGlobal: ['RPGFeatureModules']
-        },
-        {
-            src: 'rpg_flow_modules.js',
-            label: 'RPG Flow Modules',
-            requiredGlobal: ['RPGFlowModules']
         }
     ];
 

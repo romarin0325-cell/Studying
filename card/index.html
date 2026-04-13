@@ -1528,24 +1528,42 @@
 
     <script>
         window._scriptLoadErrors = [];
+        window._scriptRuntimeErrors = [];
+        window._bootRuntimeTrackingEnabled = true;
+
+        function getBootScriptName(filename) {
+            if (!filename) return '';
+            var normalized = String(filename).split('?')[0].replace(/\\/g, '/');
+            return normalized.slice(normalized.lastIndexOf('/') + 1);
+        }
+
+        window.addEventListener('error', function (event) {
+            if (!window._bootRuntimeTrackingEnabled) return;
+            var scriptName = getBootScriptName(event && event.filename);
+            if (!scriptName) return;
+
+            var knownScripts = ['rpg_config.js', 'rpg_flow_modules.js'];
+            if (window.RPGConfig && Array.isArray(window.RPGConfig.BOOT_MODULES)) {
+                window.RPGConfig.BOOT_MODULES.forEach(function (moduleInfo) {
+                    if (moduleInfo && moduleInfo.src) knownScripts.push(moduleInfo.src);
+                });
+            }
+            if (knownScripts.indexOf(scriptName) === -1) return;
+
+            var message = scriptName + ': ' + (event.message || 'Unknown error');
+            if (window._scriptRuntimeErrors.indexOf(message) === -1) {
+                window._scriptRuntimeErrors.push(message);
+            }
+        }, true);
     </script>
-    <script src="rpg_config.js" onerror="window._scriptLoadErrors.push('rpg_config.js')"></script>
+    <script src="rpg_config.js" charset="utf-8" onerror="window._scriptLoadErrors.push('rpg_config.js')"></script>
+    <script src="rpg_flow_modules.js" charset="utf-8" onerror="window._scriptLoadErrors.push('rpg_flow_modules.js')"></script>
     <script>
-        // Sequential script loader — loads one file at a time for mobile file:// reliability
+        // Sequential script loader for mobile file:// reliability
         (function () {
-            var scripts = [
-                { src: 'data.js', label: '카드/적 데이터' },
-                { src: 'vocab_data.js', label: '단어 데이터' },
-                { src: 'collocation_data.js', label: '연어 데이터' },
-                { src: 'grammar_data.js', label: '문법 데이터' },
-                { src: 'toeic.js', label: '토익 데이터' },
-                { src: 'toeic_explanations.js', label: '토익 해설' },
-                { src: 'api.js', label: 'API 모듈' },
-                { src: 'logic.js', label: '게임 로직' },
-                { src: 'battle_runtime.js', label: '전투 런타임' },
-                { src: 'rpg_features.js', label: 'RPG Feature Modules' },
-                { src: 'rpg_flow_modules.js', label: 'RPG Flow Modules' }
-            ];
+            var scripts = (window.RPGConfig && Array.isArray(window.RPGConfig.BOOT_MODULES))
+                ? window.RPGConfig.BOOT_MODULES
+                : [];
             var idx = 0;
 
             function loadNext() {
@@ -1553,11 +1571,12 @@
                 var info = scripts[idx];
                 var el = document.createElement('script');
                 el.src = info.src;
+                el.charset = 'utf-8';
+                el.async = false;
 
                 el.onload = function () {
                     idx++;
                     updateProgress();
-                    // 🚀 핵심 수정: 모바일 기기의 파일 I/O 및 메모리 정리를 위해 100ms 대기 후 다음 파일 로드
                     setTimeout(loadNext, 100);
                 };
 
@@ -1565,20 +1584,21 @@
                     window._scriptLoadErrors.push(info.src);
                     idx++;
                     updateProgress();
-                    // 에러 발생 시에도 기기가 쉴 수 있게 대기 시간 부여
                     setTimeout(loadNext, 100);
                 };
 
-                // head보다는 body에 추가하는 것이 모바일 웹뷰 메모리 처리에 더 안정적입니다.
                 document.body.appendChild(el);
             }
 
             function updateProgress() {
+                if ((window._scriptLoadErrors && window._scriptLoadErrors.length > 0)
+                    || (window._scriptRuntimeErrors && window._scriptRuntimeErrors.length > 0)) {
+                    return;
+                }
                 var el = document.getElementById('title-loading');
-                if (el) el.innerText = '⏳ 데이터 로딩 중 (' + idx + '/' + scripts.length + ')... 잠시만 기다려주세요.';
+                if (el) el.innerText = '\u23f3 \ub370\uc774\ud130 \ub85c\ub529 \uc911 (' + idx + '/' + scripts.length + ')... \uc7a0\uc2dc\ub9cc \uae30\ub2e4\ub824\uc8fc\uc138\uc694.';
             }
 
-            // 첫 스크립트 로드 시작 전에도 DOM이 안정화될 시간을 약간 줍니다.
             setTimeout(loadNext, 50);
         })();
     </script>
@@ -2545,6 +2565,7 @@
             getMissingRequiredData() {
                 const requiredData = [
                     { name: 'RPGConfig', ref: typeof RPGConfig !== 'undefined' ? RPGConfig : null },
+                    { name: 'RPGFlowModules', ref: typeof RPGFlowModules !== 'undefined' ? RPGFlowModules : null },
                     { name: 'QuizEngine', ref: typeof QuizEngine !== 'undefined' ? QuizEngine : null }
                 ];
                 this.getBootModules().forEach(moduleInfo => {
@@ -2571,6 +2592,7 @@
                 const loading = document.getElementById('title-loading');
                 if (loading) {
                     if (enabled) {
+                        window._bootRuntimeTrackingEnabled = false;
                         loading.innerText = '⏳ 데이터 로딩 중... 잠시만 기다려주세요.';
                         loading.classList.add('hidden');
                     } else {
@@ -2597,6 +2619,14 @@
                         return;
                     }
 
+                    if (window._scriptRuntimeErrors && window._scriptRuntimeErrors.length > 0) {
+                        const loading = document.getElementById('title-loading');
+                        if (loading) {
+                            loading.innerHTML = `⚠️ 스크립트 실행 오류: ${window._scriptRuntimeErrors.join('<br>')}<br><span style="font-size:0.8rem; color:#aaa;">스크립트 파일은 읽혔지만 실행 중 오류가 발생했습니다.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
+                        }
+                        return;
+                    }
+
                     const missing = this.getMissingRequiredData();
                     if (missing.length === 0) {
                         this.hydrateModules();
@@ -2610,7 +2640,9 @@
                         if (loading) {
                             const errorInfo = window._scriptLoadErrors && window._scriptLoadErrors.length > 0
                                 ? `<br>로드 실패 파일: ${window._scriptLoadErrors.join(', ')}` : '';
-                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d => d.name).join(', ')}${errorInfo}<br><span style="font-size:0.8rem; color:#aaa;">모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
+                            const runtimeInfo = window._scriptRuntimeErrors && window._scriptRuntimeErrors.length > 0
+                                ? `<br>실행 오류: ${window._scriptRuntimeErrors.join('<br>')}` : '';
+                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d => d.name).join(', ')}${errorInfo}${runtimeInfo}<br><span style="font-size:0.8rem; color:#aaa;">모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
                         }
                         return;
                     }
