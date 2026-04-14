@@ -2884,7 +2884,9 @@
                 });
                 msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
 
-                this.openInfoModal("축복 성공", msg);
+                setTimeout(() => {
+                    this.openInfoModal("축복 성공", msg);
+                }, 1200);
             },
 
             reshuffleChaosPool() {
