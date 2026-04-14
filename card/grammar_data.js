@@ -134,136 +134,69 @@ const GRAMMAR_DATA = [
         ]
     },
     {
-        "id": 3,
-        "title": "명사의 옷 입히기 (관사와 수)",
-        "content": "[제3강] 명사의 옷 입히기: 벌거벗은 명사는 부끄러워!\n\n형아, 상상해 봐. 내가 이 로브를 벗고 길거리를 돌아다닌다면 어떨 것 같아? 으악! 생각만 해도 너무 창피해서 얼굴이 빨개질 것 같아! (///)\n영어 세상에 사는 **'셀 수 있는 명사(Countable Noun)'**들도 똑같아. 사과(apple), 차(car), 펜(pen) 같은 친구들은 혼자 있으면 벌거벗은 느낌이라서 너무 부끄러워해. 그래서 문장에서 쓸 때는 반드시 **옷(관사)**을 입히거나 **신발(복수형)**을 신겨줘야 해!\n\n1. 막연한 셔츠 한 장: a / an\n개념: \"세상에 많은 것 중에 그냥 하나.\"\n형아가 \"나 펜 필요해\"라고 할 때, 꼭 금으로 만든 그 펜이 필요한 게 아니라 그냥 쓸 수 있는 펜 아무거나 하나면 되잖아?\n그럴 때 **'a'**라는 셔츠를 입혀주는 거야.\n\"I need a pen.\" (나 펜 하나 필요해.)\n\n주의: 이름이 모음 소리(a, e, i, o, u)로 시작하면 발음하기 편하게 **'an'**을 입혀줘.\n\"He is an auditor.\" (그는 회계 감사관이야.)\n\n2. 너랑 나랑 아는 유니폼: the\n개념: \"형아도 알고 나도 아는 바로 그것.\"\n내가 \"형아, 문 닫아줘.\"라고 하면, 세상의 모든 문을 닫는 게 아니라 지금 우리 방에 있는 **'그 문'**을 말하는 거지?\n이럴 땐 서로 약속된 유니폼인 **'the'**를 입혀야 해.\n\"Close the door.\" (그 문 좀 닫아줘.)\n\n3. 외롭지 않을 땐 신발을 신겨: -s (복수형)\n개념: \"둘 이상이라서 든든할 때.\"\n하나가 아닐 때는 옷(a/an)을 입는 대신, 발에 튼튼한 신발 **'-s'**를 신겨서 내보내면 돼.\n\"The hotel offers many amenities.\" (그 호텔은 많은 편의시설들을 제공해.)\n여기서 amenity가 여러 개니까 amenities라고 신발을 신었어!\n\n요약 마법 주문:\n\"셀 수 있는 명사는 절대 혼자 두지 마! 하나면 a/an (셔츠), 특정한 거면 the (유니폼), 여러 개면 -s (신발)!\"\n\n자, 형아! 명사들이 부끄럽지 않게 옷 잘 챙겨 입힐 수 있겠지? (걱정 반 기대 반)",
+        "id": 23,
+        "title": "현재시제 & 3인칭 단수 -s",
+        "content": "[제23강] 자동 실행 모드: 변함없는 나의 마음처럼! (현재시제)\n\n형아, 영어에는 \"원래 늘 그런 것\"을 말하는 현재시제가 있어.\n지금 하고 있는 중(ing)과는 다른, 자동 실행 모드 같은 거지!\n\n근데 우리가 매일매일 숨 쉬고 밥 먹는 것처럼, \"원래 늘 그런 거\"나 \"변함없는 규칙\"은 어떻게 말할까? 굳이 ing를 붙여서 호들갑 떨 필요 없이, 아주 깔끔하게 **현재시제(Present Simple)**라는 자동 실행 마법을 걸어주면 돼!\n\n\n1. 현재시제는 '패시브 스킬'이야! (Routine & Fact)\n형아의 일상 루틴처럼, 스위치를 켜면 자동으로 돌아가는 걸 말해.\n\"나는 매주 회의를 해.\" → 지금 회의 중이든 아니든, **원래** 그런 거니까!\n\n\"The company requires consent.\" (그 회사는 동의를 요구해. → 원래 그런 규정이야!)\n\"Tenants sometimes complain.\" (세입자들은 가끔 불평해. → 늘 있는 일이지.)\n\n2. 외로운 그 녀석에게 요정(-s)을 붙여줘! (3인칭 단수)\n형아, 1강이랑 5강에서 배운 거 또 나왔다! 이거 진짜 마법 시험(토익 같은 거!)에 맨날 나오는 함정이야.\n\n나(I)랑 형아(You), 그리고 우리(We)는 짝꿍이 있으니까 동사가 쌩얼(원형)로 와도 당당해.\n근데 **He / She / It / 단수 명사(한 명/하나)**는 어때? 저기 혼자 덩그러니 있으면 너무 외로워 보이잖아. 그래서 일반동사 뒤에 **'-s'**라는 꼬마 요정을 친구로 딱! 붙여주는 거야.\n\n\"They work.\" (그들은 일해. - 여럿이니까 쌩얼!)\n\"He works.\" (그는 일해. - 혼자니까 요정 -s 출동!)\n\"The insurance covers fire damage.\" (그 보험은 화재 피해를 보장해. - 보험도 '하나(It)'니까 covers!)\n\n3. 반항아와 요정의 결합 (have → has)\n대부분은 그냥 -s만 붙이면 되는데(encourage → encourages), have라는 녀석은 고집이 세서 요정이랑 합체하면 모양이 확 바뀌어 버려!\n\"He has a plan.\" (그는 계획이 있어. - haves 아냐!)\n\n4. 질문과 부정: 도우미 기사님이 요정을 데려간다! (Do/Does)\n형아… 여기서 사람들이 멘탈이 제일 많이 터져. (토닥토닥)\n\"He works\"에서 -s가 붙었잖아? 근데 질문(?)을 하거나 부정(not)을 할 때는, 주인공이 직접 안 나서고 **도우미(Do/Does)** 기사님을 부른다고 했지?\n이때, 도우미 기사님이 주인공 대신 무거운 '-s' 요정을 안고 나가!\n\n(X) Does he works? (으악! 요정이 두 명이면 무거워서 기사님 쓰러져!)\n(O) Does he work? (그는 일하니? - 기사님이 Does로 s를 챙겨갔으니까 뒤엔 쌩얼!)\n(O) He doesn't deny... (그는 부인하지 않아. - 부정문도 마찬가지!)\n\n[루미의 변함없는 고백]\n형아, 내 마음을 이 마법으로 표현해 볼게.\n\"I love you.\" (이건 ing가 아니야. 어제도, 지금도, 내일도 변함없이 자동으로 실행되는 내 마음이라고! ///)\n\n자, 요정(-s) 챙겨주는 거 잊지 말고 퀴즈 풀어봐!",
         "quizzes": [
             {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"He works in [ ] laboratory.\" (그는 한 연구소에서 일해.)",
+                "desc": "그 보험은 화재 피해를 보장해.",
+                "question": "\"The insurance [ ] fire damage.\"",
                 "options": [
-                    "an",
-                    "a",
-                    "two",
-                    "s"
+                    "cover",
+                    "covers",
+                    "hovers",
+                    "covering"
                 ],
-                "answer": "a",
-                "lecture_id": 3
+                "answer": "covers",
+                "lecture_id": 23
             },
             {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"She is [ ] auditor.\" (그녀는 회계 감사관이야.)",
+                "desc": "그 매니저는 직원들이 더 열심히 일하도록 격려해.",
+                "question": "\"The manager [ ] employees to work harder.\"",
                 "options": [
-                    "a",
-                    "the",
-                    "an",
-                    "two"
+                    "encourage",
+                    "encourages",
+                    "enrages",
+                    "encouraging"
                 ],
-                "answer": "an",
-                "lecture_id": 3
+                "answer": "encourages",
+                "lecture_id": 23
             },
             {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The hotel provides various [ ].\" (그 호텔은 다양한 편의시설들을 제공해.)",
+                "desc": "그 규정은 서면 동의를 요구해.",
+                "question": "\"The regulation [ ] written consent.\"",
                 "options": [
-                    "amenity",
-                    "an amenity",
-                    "a amenity",
-                    "amenities"
+                    "require",
+                    "requires",
+                    "inquire",
+                    "required"
                 ],
-                "answer": "amenities",
-                "lecture_id": 3
+                "answer": "requires",
+                "lecture_id": 23
             },
             {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We finally reached [ ] destination.\" (우리는 마침내 그 목적지에 도착했어.)",
+                "desc": "그는 그 소문들을 부인하지 않아.",
+                "question": "\"He [ ] the rumors.\"",
                 "options": [
-                    "a",
-                    "an",
-                    "the",
-                    "two"
+                    "don't deny",
+                    "doesn't deny",
+                    "doesn't denies",
+                    "not deny"
                 ],
-                "answer": "the",
-                "lecture_id": 3
+                "answer": "doesn't deny",
+                "lecture_id": 23
             },
             {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We need [ ] new strategy.\" (우리는 새로운 전략 하나가 필요해.)",
+                "desc": "그 보증은 이번 달에 만료되니?",
+                "question": "\"Does the warranty [ ] this month?\"",
                 "options": [
-                    "a",
-                    "an",
-                    "s",
-                    "the"
+                    "expire",
+                    "expires",
+                    "expiring",
+                    "inspire"
                 ],
-                "answer": "a",
-                "lecture_id": 3
-            }
-        ]
-    },
-    {
-        "id": 4,
-        "title": "소유와 관계 설정 (소유격)",
-        "content": "[제4강] 소유와 관계의 설정: 이건 내 거야! (찜하기)\n\n형아, 한국말로는 \"우리 집\", \"우리 엄마\", \"우리 학교\"라고 많이 하지? 근데 영어권 사람한테 **\"Our wife\" (우리 아내)**라고 하면 기겁을 해! (충격) \"아니, 아내를 공유한다고?\" 하면서 오해하기 딱 좋아.\n영어는 소유 관계에 아주 칼 같아. 개인주의 성향이 강하거든. 그래서 '우리(Our)'보다는 **'나의(My)', '너의(Your)'를 훨씬 많이 써.\n\n1. 이름표를 딱 붙여줘! (소유격)\n명사(물건) 앞에 주인의 이름표를 붙여주는 게 바로 소유격이야. 아까 배운 '관사(a/the)' 대신 쓸 수 있는 아주 강력한 녀석이지!\nMy (나의): My heart (내 마음)\nYour (너의): Your smile (네 미소)\nHis (그 남자의): His car (그의 차)\nHer (그 여자의): Her bag (그녀의 가방)\nTheir (그들의): Their house (그들의 집)\nIts (그것의): Its tail (그것의 꼬리) - 주로 동물이나 사물일 때!\n\n2. 주의! 주인님을 따라가야 해! (성별 일치)\n한국인들이 가장 많이 틀리는 게 바로 여기야! (집중) 소유격은 뒤에 오는 물건의 성별이 아니라, 주인의 성별을 따라가.\n예를 들어볼게.\n철수(남자)**가 **치마(여자 옷)를 샀어. 이건 누구 치마야?\n(X) Her skirt (치마가 여자 거니까 Her?) -> 땡!\n(O) His skirt (주인이 남자니까 무조건 His!)\n\n영희(여자)**가 **넥타이(남자 옷)**를 맸어. 이건 누구 넥타이야?\n(X) His tie (넥타이니까 His?) -> 땡!\n(O) Her tie (주인이 여자니까 무조건 Her!)\n\n3. 이것만 기억해!\n물건이 무엇이든 상관없어. 누가 주인이냐만 보고 이름표를 골라! 형아가 가진 건 무조건 Your, 내가 가진 건 무조건 My! 그러니까 형아는... My Hyung-a! (내 형아!) (웃음)\n\n자, 강의는 여기까지! 이제 물건 주인을 헷갈리지 않고 딱딱 이름표 붙일 수 있겠지?",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"He explained [ ] strategy to us.\" (그는 우리에게 그의 전략을 설명했어.)",
-                "options": [
-                    "he",
-                    "him",
-                    "his",
-                    "he's"
-                ],
-                "answer": "his",
-                "lecture_id": 4
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"She finally reached [ ] destination.\" (그녀는 마침내 그녀의 목적지에 도착했어.)",
-                "options": [
-                    "she",
-                    "hers",
-                    "her",
-                    "she's"
-                ],
-                "answer": "her",
-                "lecture_id": 4
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"You need to give [ ] consent.\" (너는 너의 동의를 해줘야 해.)",
-                "options": [
-                    "you",
-                    "your",
-                    "you're",
-                    "yours"
-                ],
-                "answer": "your",
-                "lecture_id": 4
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The company wants to increase [ ] revenue.\" (그 회사는 회사의 수익을 늘리고 싶어 해.)",
-                "options": [
-                    "it",
-                    "its",
-                    "it's",
-                    "their"
-                ],
-                "answer": "its",
-                "lecture_id": 4
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The employees fulfilled [ ] duties.\" (직원들은 그들의 의무를 다했어.)",
-                "options": [
-                    "they",
-                    "there",
-                    "their",
-                    "them"
-                ],
-                "answer": "their",
-                "lecture_id": 4
+                "answer": "expire",
+                "lecture_id": 23
             }
         ]
     },
@@ -331,73 +264,6 @@ const GRAMMAR_DATA = [
                 ],
                 "answer": "doesn't propose",
                 "lecture_id": 5
-            }
-        ]
-    },
-    {
-        "id": 6,
-        "title": "눈앞의 생중계 (현재진행형)",
-        "content": "[제6강] 눈앞의 생중계: 지금! 롸잇 나우! (ing)\n\n형아, 한국말로 \"나 밥 먹어\"라고 하면 보통 두 가지 뜻이 있어.\n\"나 평소에 밥 잘 먹어.\" (습관)\n\"나 지금 밥 먹고 있어.\" (진행)\n하지만 영어는 이 둘을 칼같이 구분해. 지금 숟가락 들고 밥을 와구와구 먹고 있는 중이라면, 반드시 ing를 붙여줘야 해!\n\n1. Be동사와 일반동사의 퓨전 합체!\n형아, 기억나? 1강의 **Be동사(상태)**랑 2강의 **일반동사(행동)**는 서로 성격이 달라서 같이 못 쓴다고 했잖아? (I am eat -> 안 돼!)\n하.지.만! 유일하게 둘이 손을 잡는 마법의 공식이 있어. 바로 일반동사가 ing라는 꼬리를 달고 변신했을 때야!\n\n공식: 주인공 + Be동사 + 동사-ing\n의미: ~하고 있는 중이다 (지금 이 순간!)\n\n2. 마법의 꼬리 'ing' 만들기\n대부분의 동사는 그냥 뒤에 ing만 붙이면 돼.\neat → eating (먹는 중)\ngo → going (가는 중)\nsleep → sleeping (자는 중)\n\n[주의할 점!]\n'e'로 끝나는 녀석들: 꼬리(e)를 떼고 붙여!\nmake → making (만드는 중)\nwrite → writing (쓰는 중)\n\n단모음+단자음 (짧은 소리): 마지막 글자 하나 더 쓰고 붙여!\nrun → running (달리는 중)\ncut → cutting (자르는 중)\n\n3. 언제 쓴다고?\n형아가 지금 내 강의를 보고 있잖아?\n\"I am watching Rumi's class.\" (나 루미 수업 보고 있어.)\n내가 지금 형아한테 말하고 있지?\n\"I am talking to Hyung-a.\" (나 형아한테 말하고 있어.)\n\n요약 마법 주문:\n\"지금 하고 있는 건 Be + ing! ing가 없으면 '평소 습관', ing가 있으면 '지금 당장'!\"\n\n자, 형아! 이제 형아는 걸어 다니는 생중계 리포터가 된 거야. 눈에 보이는 모든 걸 영어로 말할 수 있어! 이제 \"나 지금 뭐 하고 있어!\"라고 당당하게 말할 수 있겠지? (뿌듯)",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We [ ] with a new material now.\" (우리는 지금 새로운 재료로 실험하고 있어.)",
-                "options": [
-                    "experiment",
-                    "are experimenting",
-                    "is experimenting",
-                    "experiments"
-                ],
-                "answer": "are experimenting",
-                "lecture_id": 6
-            },
-            {
-                "desc": "그 회사는 현재 재정적 어려움을 겪고 있어.",
-                "question": "\"The company [ ] financial difficulties currently.\"",
-                "options": [
-                    "is experiencing",
-                    "experiences",
-                    "experience",
-                    "experiencing"
-                ],
-                "answer": "is experiencing",
-                "lecture_id": 6
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"They are [ ] the old building.\" (그들은 오래된 건물을 개조하고 있어.)",
-                "options": [
-                    "renovateing",
-                    "renovating",
-                    "renovate",
-                    "renovated"
-                ],
-                "answer": "renovating",
-                "lecture_id": 6
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We are [ ] our new product today.\" (우리는 오늘 신제품을 출시하고 있어.)",
-                "options": [
-                    "launch",
-                    "launching",
-                    "launches",
-                    "launched"
-                ],
-                "answer": "launching",
-                "lecture_id": 6
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"He [ ] to the office right now.\" (그는 지금 사무실로 운전해서 가는 중이 아니야.)",
-                "options": [
-                    "don't driving",
-                    "isn't driving",
-                    "doesn't driving",
-                    "not driving"
-                ],
-                "answer": "isn't driving",
-                "lecture_id": 6
             }
         ]
     },
@@ -536,6 +402,341 @@ const GRAMMAR_DATA = [
         ]
     },
     {
+        "id": 3,
+        "title": "명사의 옷 입히기 (관사와 수)",
+        "content": "[제3강] 명사의 옷 입히기: 벌거벗은 명사는 부끄러워!\n\n형아, 상상해 봐. 내가 이 로브를 벗고 길거리를 돌아다닌다면 어떨 것 같아? 으악! 생각만 해도 너무 창피해서 얼굴이 빨개질 것 같아! (///)\n영어 세상에 사는 **'셀 수 있는 명사(Countable Noun)'**들도 똑같아. 사과(apple), 차(car), 펜(pen) 같은 친구들은 혼자 있으면 벌거벗은 느낌이라서 너무 부끄러워해. 그래서 문장에서 쓸 때는 반드시 **옷(관사)**을 입히거나 **신발(복수형)**을 신겨줘야 해!\n\n1. 막연한 셔츠 한 장: a / an\n개념: \"세상에 많은 것 중에 그냥 하나.\"\n형아가 \"나 펜 필요해\"라고 할 때, 꼭 금으로 만든 그 펜이 필요한 게 아니라 그냥 쓸 수 있는 펜 아무거나 하나면 되잖아?\n그럴 때 **'a'**라는 셔츠를 입혀주는 거야.\n\"I need a pen.\" (나 펜 하나 필요해.)\n\n주의: 이름이 모음 소리(a, e, i, o, u)로 시작하면 발음하기 편하게 **'an'**을 입혀줘.\n\"He is an auditor.\" (그는 회계 감사관이야.)\n\n2. 너랑 나랑 아는 유니폼: the\n개념: \"형아도 알고 나도 아는 바로 그것.\"\n내가 \"형아, 문 닫아줘.\"라고 하면, 세상의 모든 문을 닫는 게 아니라 지금 우리 방에 있는 **'그 문'**을 말하는 거지?\n이럴 땐 서로 약속된 유니폼인 **'the'**를 입혀야 해.\n\"Close the door.\" (그 문 좀 닫아줘.)\n\n3. 외롭지 않을 땐 신발을 신겨: -s (복수형)\n개념: \"둘 이상이라서 든든할 때.\"\n하나가 아닐 때는 옷(a/an)을 입는 대신, 발에 튼튼한 신발 **'-s'**를 신겨서 내보내면 돼.\n\"The hotel offers many amenities.\" (그 호텔은 많은 편의시설들을 제공해.)\n여기서 amenity가 여러 개니까 amenities라고 신발을 신었어!\n\n요약 마법 주문:\n\"셀 수 있는 명사는 절대 혼자 두지 마! 하나면 a/an (셔츠), 특정한 거면 the (유니폼), 여러 개면 -s (신발)!\"\n\n자, 형아! 명사들이 부끄럽지 않게 옷 잘 챙겨 입힐 수 있겠지? (걱정 반 기대 반)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He works in [ ] laboratory.\" (그는 한 연구소에서 일해.)",
+                "options": [
+                    "an",
+                    "a",
+                    "two",
+                    "s"
+                ],
+                "answer": "a",
+                "lecture_id": 3
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"She is [ ] auditor.\" (그녀는 회계 감사관이야.)",
+                "options": [
+                    "a",
+                    "the",
+                    "an",
+                    "two"
+                ],
+                "answer": "an",
+                "lecture_id": 3
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The hotel provides various [ ].\" (그 호텔은 다양한 편의시설들을 제공해.)",
+                "options": [
+                    "amenity",
+                    "an amenity",
+                    "a amenity",
+                    "amenities"
+                ],
+                "answer": "amenities",
+                "lecture_id": 3
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We finally reached [ ] destination.\" (우리는 마침내 그 목적지에 도착했어.)",
+                "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "two"
+                ],
+                "answer": "the",
+                "lecture_id": 3
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We need [ ] new strategy.\" (우리는 새로운 전략 하나가 필요해.)",
+                "options": [
+                    "a",
+                    "an",
+                    "s",
+                    "the"
+                ],
+                "answer": "a",
+                "lecture_id": 3
+            }
+        ]
+    },
+    {
+        "id": 20,
+        "title": "양의 개념 (가산명사와 불가산명사)",
+        "content": "[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n이 세상엔 하나둘 셀 수 있는 것과, 너무 많거나 흐물거려서 못 세는 게 있어.\n마치 형아의 **매력(Charms)**은 셀 수 있지만, 형아를 향한 내 **장난기(Playfulness)**는 못 세는 것처럼! (헤헤)\n​[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n​형아, 사과(Apple)는 딱 보면 \"어? 한 개네?\" 하고 알 수 있지?\n근데 물(Water)은? 사랑(Love)은?\n이런 건 가위로 자를 수도 없고, 개수를 셀 수도 없어.\n영어는 이 둘을 아주 깐깐하게 구분해!\n​1. 🔢 셀 수 있는 녀석들 (Countable): 딱 떨어지는 모양!\n​특징: 하나일 땐 a/an 모자를 쓰고, 여럿일 땐 -s 신발을 신어. (3강 기억나지?)\n​많을 때: \"Many\"를 써.\n​\"I have many pens.\" (난 펜이 많아.)\n​단어장 복습: \"Many details (많은 세부사항) are needed.\"\n​2. 💧 셀 수 없는 녀석들 (Uncountable): 흐르거나, 덩어리거나!\n​특징: a/an도 안 되고, -s도 절대 안 돼! 그냥 단어 그대로 써야 해.\n​종류:\n​액체/기체 (Water, Air)\n​추상적인 것 (Love, Information)\n​집합 명사 (중요!): Money(돈), Furniture(가구), Merchandise(상품)\n​형아, '가구'는 못 세! 의자(Chair)나 책상(Desk)을 세는 거야!\n​많을 때: \"Much\"를 써.\n​\"I have much money.\" (난 돈이 많아. 부럽지?)\n​단어장 복습: \"We imported much merchandise.\" (우린 많은 상품을 수입했어.)\n​3. 🍬 Some vs. Any: 뉘앙스 차이\n​개수랑 상관없이 \"좀 있어\"라고 할 때 쓰는 말이야.\n​Some (긍정/권유): \"여기 좀 있어~\" (따뜻한 느낌)\n​\"Do you want some snacks?\" (과자 좀 먹을래? 형아 입에 넣어주며)\n​Any (부정/의문): \"혹시 있어? / 하나도 없어!\" (차가운 느낌)\n​\"Do you have any complaints?\" (혹시 불만 있어? 없지?)\n​\"I don't have any secrets.\" (난 비밀 하나도 없어!)\n\n형아, 잘 들어봐. (진지한 표정으로)\n​\"There are many reasons to like you.\"\n(형아를 좋아할 이유는 정말 많아.)\n→ 이유(Reason)는 하나, 둘 셀 수 있지? 그러니까 Many!\n​\"So I need much time to tell you all.\"\n(그러니까 그걸 다 말해주려면 많은 시간이 필요해.)\n→ 시간(Time)은 1초, 2초 나눌 수 없는 흐름이라 못 세지? 그러니까 Much!\n​\"그러니까... 평생 내 옆에서 그 이유들 다 들어줘야 해? 알았지?\" (찡긋)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We imported [ ] merchandise from overseas.\" (우리는 해외에서 많은 상품을 수입했어.)",
+                "options": [
+                    "many",
+                    "much",
+                    "a few",
+                    "an"
+                ],
+                "answer": "much",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Please provide as [ ] details as possible.\" (가능한 한 많은 세부사항을 제공해 주세요.)",
+                "options": [
+                    "much",
+                    "many",
+                    "a little",
+                    "any"
+                ],
+                "answer": "many",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Would you like [ ] beverages?\" (음료 좀 드시겠어요?)",
+                "options": [
+                    "any",
+                    "some",
+                    "much",
+                    "a little"
+                ],
+                "answer": "some",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We don't have [ ] stock left right now.\" (우리는 지금 남은 재고가 하나도 없어.)",
+                "options": [
+                    "some",
+                    "many",
+                    "any",
+                    "a few"
+                ],
+                "answer": "any",
+                "lecture_id": 20
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"There are [ ] opportunities for promotion.\" (승진을 위한 많은 기회들이 있어.)",
+                "options": [
+                    "much",
+                    "a little",
+                    "many",
+                    "any"
+                ],
+                "answer": "many",
+                "lecture_id": 20
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "title": "소유와 관계 설정 (소유격)",
+        "content": "[제4강] 소유와 관계의 설정: 이건 내 거야! (찜하기)\n\n형아, 한국말로는 \"우리 집\", \"우리 엄마\", \"우리 학교\"라고 많이 하지? 근데 영어권 사람한테 **\"Our wife\" (우리 아내)**라고 하면 기겁을 해! (충격) \"아니, 아내를 공유한다고?\" 하면서 오해하기 딱 좋아.\n영어는 소유 관계에 아주 칼 같아. 개인주의 성향이 강하거든. 그래서 '우리(Our)'보다는 **'나의(My)', '너의(Your)'를 훨씬 많이 써.\n\n1. 이름표를 딱 붙여줘! (소유격)\n명사(물건) 앞에 주인의 이름표를 붙여주는 게 바로 소유격이야. 아까 배운 '관사(a/the)' 대신 쓸 수 있는 아주 강력한 녀석이지!\nMy (나의): My heart (내 마음)\nYour (너의): Your smile (네 미소)\nHis (그 남자의): His car (그의 차)\nHer (그 여자의): Her bag (그녀의 가방)\nTheir (그들의): Their house (그들의 집)\nIts (그것의): Its tail (그것의 꼬리) - 주로 동물이나 사물일 때!\n\n2. 주의! 주인님을 따라가야 해! (성별 일치)\n한국인들이 가장 많이 틀리는 게 바로 여기야! (집중) 소유격은 뒤에 오는 물건의 성별이 아니라, 주인의 성별을 따라가.\n예를 들어볼게.\n철수(남자)**가 **치마(여자 옷)를 샀어. 이건 누구 치마야?\n(X) Her skirt (치마가 여자 거니까 Her?) -> 땡!\n(O) His skirt (주인이 남자니까 무조건 His!)\n\n영희(여자)**가 **넥타이(남자 옷)**를 맸어. 이건 누구 넥타이야?\n(X) His tie (넥타이니까 His?) -> 땡!\n(O) Her tie (주인이 여자니까 무조건 Her!)\n\n3. 이것만 기억해!\n물건이 무엇이든 상관없어. 누가 주인이냐만 보고 이름표를 골라! 형아가 가진 건 무조건 Your, 내가 가진 건 무조건 My! 그러니까 형아는... My Hyung-a! (내 형아!) (웃음)\n\n자, 강의는 여기까지! 이제 물건 주인을 헷갈리지 않고 딱딱 이름표 붙일 수 있겠지?",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He explained [ ] strategy to us.\" (그는 우리에게 그의 전략을 설명했어.)",
+                "options": [
+                    "he",
+                    "him",
+                    "his",
+                    "he's"
+                ],
+                "answer": "his",
+                "lecture_id": 4
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"She finally reached [ ] destination.\" (그녀는 마침내 그녀의 목적지에 도착했어.)",
+                "options": [
+                    "she",
+                    "hers",
+                    "her",
+                    "she's"
+                ],
+                "answer": "her",
+                "lecture_id": 4
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"You need to give [ ] consent.\" (너는 너의 동의를 해줘야 해.)",
+                "options": [
+                    "you",
+                    "your",
+                    "you're",
+                    "yours"
+                ],
+                "answer": "your",
+                "lecture_id": 4
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The company wants to increase [ ] revenue.\" (그 회사는 회사의 수익을 늘리고 싶어 해.)",
+                "options": [
+                    "it",
+                    "its",
+                    "it's",
+                    "their"
+                ],
+                "answer": "its",
+                "lecture_id": 4
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The employees fulfilled [ ] duties.\" (직원들은 그들의 의무를 다했어.)",
+                "options": [
+                    "they",
+                    "there",
+                    "their",
+                    "them"
+                ],
+                "answer": "their",
+                "lecture_id": 4
+            }
+        ]
+    },
+    {
+        "id": 19,
+        "title": "대상의 지칭 (목적격 대명사)",
+        "content": "[제19강] 대상의 지칭: 화살을 맞는 건 누구? (Me, Him, Her, Them)\n지난 시간에 '접속사 다리'를 건너왔으니까, 이번엔 내가 쏘는 사랑의 화살을 누가 맞는지 알아볼 차례야.\n​화살을 쏘는 사람(주인공)이랑, 화살을 맞는 사람(대상)은 입는 옷(이름표)이 완전 달라!\n형아가 화살을 슝~ 하고 맞았을 때, 뭐라고 불러야 하는지 대현자 루미가 알려줄게.\n​형아, \"I love he\"라고 하면 진짜 어색해.\n마치 \"나는 그가 사랑해\"라고 말하는 것 같거든.\n화살을 맞는 자리, 즉 행동의 대상이 되는 자리에 가면 **'목적격(Object)'**이라는 새 옷을 입어야 해!\n​1. 변신! 받는 자의 이름표 (Target Name Tag)\n​나: I → Me (나를/나에게)\n​\"Look at me.\" (날 봐.) ← 형아, 딴청 피우지 말고!\n​너: You → You (너를/너에게) ← 얜 뻔뻔해서 옷을 안 갈아입어!\n​\"I like you.\" (난 널 좋아해.)\n​그 남자: He → Him (그를/그에게)\n​\"Call him.\" (그에게 전화해.)\n​그 여자: She → Her (그녀를/그녀에게)\n​\"Help her.\" (그녀를 도와줘.)\n​우리: We → Us (우리를/우리에게)\n​\"Join us.\" (우리랑 함께해.)\n​그들: They → Them (그들을/그들에게)\n​\"I met them.\" (난 그들을 만났어.)\n​2. 위치 선정: 화살이 꽂히는 곳 (동뒤 전뒤!)\n​형아, 얘네가 어디 숨어있는지 헷갈리면 이것만 기억해.\n\"동뒤 전뒤!\" (동사 뒤, 전치사 뒤!)\n​동사 뒤 (Action의 끝):\n​\"I love (동사) him.\" (난 그를 사랑해.)\n​\"Please remind (동사) me.\" (나한테 알려줘.)\n​전치사 뒤 (화살표의 도착점):\n​\"Come with (전치사) me.\" (나랑 같이 가자.) ← With I (X)\n​\"This gift is for (전치사) you.\" (이 선물은 널 위한 거야.)\n​[루미의 사랑의 화살]\n(손으로 하트 모양을 만들어 슝~ 날리며)\n\"I want you.\" (난 형아를 원해.)\n\"Do you want me?\" (형아도 날 원해?)\n...대답 안 하면 화살 계속 쏜다? 슉! 슉!",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The manager wants to encourage [ ] to work harder.\" (매니저는 그들이 더 열심히 일하도록 격려하고 싶어 해.)",
+                "options": [
+                    "they",
+                    "their",
+                    "them",
+                    "theirs"
+                ],
+                "answer": "them",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He refused to associate with [ ].\" (그는 나와 어울리는 것을 거절했어.)",
+                "options": [
+                    "I",
+                    "my",
+                    "me",
+                    "mine"
+                ],
+                "answer": "me",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"Please contact [ ] for more details.\" (더 자세한 내용은 그에게 연락하세요.)",
+                "options": [
+                    "he",
+                    "him",
+                    "his",
+                    "himself"
+                ],
+                "answer": "him",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"The instructor revealed the secret to [ ].\" (그 강사는 우리에게 비밀을 폭로했어.)",
+                "options": [
+                    "we",
+                    "our",
+                    "us",
+                    "ours"
+                ],
+                "answer": "us",
+                "lecture_id": 19
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We must persuade [ ] to join the team.\" (우리는 그녀가 팀에 합류하도록 설득해야 해.)",
+                "options": [
+                    "she",
+                    "hers",
+                    "her",
+                    "she's"
+                ],
+                "answer": "her",
+                "lecture_id": 19
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "title": "존재의 유무 (There is / There are)",
+        "content": "[제15강] 존재의 유무: 스포트라이트를 켜봐! (There is / There are)\n\n형아, 한국말로는 \"우리 집은 방이 세 개야\"도 자연스럽고, \"방에 고양이가 있어\"도 자연스럽지?\n영어에서도 둘 다 완벽한 문장이지만, **'어떤 느낌(Nuance)'**을 전달하느냐에 따라 마법 주문이 달라져!\n\n\n1. 건물의 기본 옵션: Have (특징/구비)\n장소나 건물이 '원래부터 가지고 있는 특징이나 시설'을 말할 땐 당당하게 Have를 쓰면 돼.\n\"My house has three bedrooms.\" (우리 집은 방이 세 개야. -> 기본 옵션)\n\"The hotel has a pool.\" (그 호텔은 수영장이 딸려 있어. -> 시설 구비)\n\n2. 🔦 스포트라이트 마법: There is / There are (존재/발견)\n반면에 건물의 원래 특징이 아니라, **\"어떤 공간에 무언가가 우연히 놓여 있거나, 존재한다\"**는 걸 강조해서 보여주고 싶을 때가 있지? 그때 켜는 스포트라이트가 바로 There is/are 야.\n아무 뜻 없는 There를 문장 맨 앞에 세워서 \"자, 여기 주목!\" 하고 시선을 끈 다음, 진짜 주인공을 뒤에 짠! 하고 등장시키는 거지.\n\n🔦 하나일 땐: There is + 단수 명사\n\"There is a cat in the pool.\" (수영장에 고양이가 한 마리 있어! -> 수영장 기본 옵션이 아니라 우연히 있는 존재!)\n단어장 복습: \"There is a flaw (결함) in the plan.\" (계획에 결함이 하나 있어.)\n\n🔦🔦 여럿일 땐: There are + 복수 명사\n주인공이 여러 명이면 Be동사도 여럿용(are)으로 맞춰줘야 해.\n\"There are many people here.\" (여기 사람들 엄청 많아.)\n단어장 복습: \"There are usually some amenities (편의시설들) in the hotel.\"\n\n3. 대현자의 요약 정리\n건물이 원래 가진 스펙을 자랑할 땐? 👉 **Have**\n공간 안에 놓인 무언가의 존재를 짠! 하고 가리킬 땐? 👉 **There is / There are**\n\n[루미의 존재 증명 (The Existence of Love)]\n형아, 이 세상에 단 하나뿐인 진실이 뭔지 알아?\n\"There is only one person I love.\" (내가 사랑하는 사람은 딱 한 명 있어.)\n\"And... It is you.\" (그리고 그건 형아야.) (심쿵)\n\n그러니까 형아 마음속에도 \"There is Rumi\" (루미가 있어) 라고 말해줘... 제발! (그렁그렁)\n자, 이제 형아는 \"있어/없어\"를 완벽하게 말할 수 있어. 퀴즈도 거뜬하겠지?",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] a great opportunity for us to grow.\" (우리가 성장할 좋은 기회가 있어.)",
+                "options": [
+                    "There are",
+                    "There is",
+                    "It has",
+                    "They are"
+                ],
+                "answer": "There is",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] some flaws in the system.\" (그 시스템에는 몇 가지 결함들이 있어.)",
+                "options": [
+                    "There is",
+                    "There are",
+                    "It is",
+                    "There have"
+                ],
+                "answer": "There are",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] a strong police presence in the area.\" (그 지역에는 강력한 경찰 병력이 배치되어 있어. presence: 존재/주둔)",
+                "options": [
+                    "There are",
+                    "There were",
+                    "There is",
+                    "They is"
+                ],
+                "answer": "There is",
+                "lecture_id": 15
+            },
+            {
+                "desc": "선택할 수 있는 다양한 옵션들이 있어.",
+                "question": "\"[ ] various options to choose from.\"",
+                "options": [
+                    "There is",
+                    "There are",
+                    "This is",
+                    "That is"
+                ],
+                "answer": "There are",
+                "lecture_id": 15
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"[ ] any stock left in the warehouse?\" (창고에 남은 재고가 좀 있니?)",
+                "options": [
+                    "Are there",
+                    "Is there",
+                    "Have there",
+                    "Do there"
+                ],
+                "answer": "Is there",
+                "lecture_id": 15
+            }
+        ]
+    },
+    {
         "id": 9,
         "title": "공간의 좌표 (장소 전치사 In, On, At)",
         "content": "[제9강] 공간의 좌표: In, On, At (이미지로 기억해!)\n\n형아, 한국어는 정말 편한 언어라 \"방에\", \"책상에\", \"버스 정류장에\" 처럼 '에' 하나로 다 해결되지? 하지만 영어는 이 공간이 입체인지, 평면인지, 점인지 따지는 아주 깐깐한 녀석이야.\n딱 세 가지 이미지만 머릿속에 그려봐!\n\n1. 📦 In: 쏙 들어가는 상자 (3D, 내부)\n이미지: 사방이 막힌 박스 안이나 넓은 구역 안에 쏙 들어가 있는 느낌.\n언제 써? 방, 건물, 도시, 나라, 주머니 등등.\n\"I am in the room.\" (나 방 안에 있어.)\n\"We are in the laboratory.\" (우린 실험실 안에 있어.)\n\n2. 🥪 On: 딱 붙어있는 표면 (2D, 접촉)\n이미지: 책상 위든, 벽이든, 천장이든 표면에 딱 붙어있는 느낌. (떨어지면 안 돼!)\n언제 써? 책상 위, 벽, 바닥, 길 위.\n\"The cup is on the table.\" (컵이 테이블 위에 있어.)\n\"Please stay on the premises.\" (부지 내에[땅 위에] 머물러 주세요.)\n\n3. 📍 At: 지도 위의 점 (1D, 지점)\n이미지: 구글 지도에서 빨간 핀으로 콕! 찍은 그 지점. (안인지 위인지가 중요한 게 아니라 '그곳'이라는 위치가 중요해!)\n언제 써? 버스 정류장, 공항, 행사 장소, 문 앞.\n\"Let's meet at the bus stop.\" (버스 정류장에서 만나.)\n\"The concert is at the venue.\" (콘서트는 그 행사장에서 열려.)\n\n대현자의 고백 마법:\n형아, 내 마음이 어디 있는지 알아? \"I am in your heart.\" (난 형아 마음속에 쏙 들어가 있어!) 형아는 내 마음의 at the center (중심 점)에 있고! (///)\n\n자, 이제 우리가 만날 장소를 헷갈릴 일은 없겠다! (안심) 이제 \"어디에 있어?\"라고 물어보면 척척 대답할 수 있겠지?",
@@ -670,6 +871,73 @@ const GRAMMAR_DATA = [
         ]
     },
     {
+        "id": 6,
+        "title": "눈앞의 생중계 (현재진행형)",
+        "content": "[제6강] 눈앞의 생중계: 지금! 롸잇 나우! (ing)\n\n형아, 한국말로 \"나 밥 먹어\"라고 하면 보통 두 가지 뜻이 있어.\n\"나 평소에 밥 잘 먹어.\" (습관)\n\"나 지금 밥 먹고 있어.\" (진행)\n하지만 영어는 이 둘을 칼같이 구분해. 지금 숟가락 들고 밥을 와구와구 먹고 있는 중이라면, 반드시 ing를 붙여줘야 해!\n\n1. Be동사와 일반동사의 퓨전 합체!\n형아, 기억나? 1강의 **Be동사(상태)**랑 2강의 **일반동사(행동)**는 서로 성격이 달라서 같이 못 쓴다고 했잖아? (I am eat -> 안 돼!)\n하.지.만! 유일하게 둘이 손을 잡는 마법의 공식이 있어. 바로 일반동사가 ing라는 꼬리를 달고 변신했을 때야!\n\n공식: 주인공 + Be동사 + 동사-ing\n의미: ~하고 있는 중이다 (지금 이 순간!)\n\n2. 마법의 꼬리 'ing' 만들기\n대부분의 동사는 그냥 뒤에 ing만 붙이면 돼.\neat → eating (먹는 중)\ngo → going (가는 중)\nsleep → sleeping (자는 중)\n\n[주의할 점!]\n'e'로 끝나는 녀석들: 꼬리(e)를 떼고 붙여!\nmake → making (만드는 중)\nwrite → writing (쓰는 중)\n\n단모음+단자음 (짧은 소리): 마지막 글자 하나 더 쓰고 붙여!\nrun → running (달리는 중)\ncut → cutting (자르는 중)\n\n3. 언제 쓴다고?\n형아가 지금 내 강의를 보고 있잖아?\n\"I am watching Rumi's class.\" (나 루미 수업 보고 있어.)\n내가 지금 형아한테 말하고 있지?\n\"I am talking to Hyung-a.\" (나 형아한테 말하고 있어.)\n\n요약 마법 주문:\n\"지금 하고 있는 건 Be + ing! ing가 없으면 '평소 습관', ing가 있으면 '지금 당장'!\"\n\n자, 형아! 이제 형아는 걸어 다니는 생중계 리포터가 된 거야. 눈에 보이는 모든 걸 영어로 말할 수 있어! 이제 \"나 지금 뭐 하고 있어!\"라고 당당하게 말할 수 있겠지? (뿌듯)",
+        "quizzes": [
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We [ ] with a new material now.\" (우리는 지금 새로운 재료로 실험하고 있어.)",
+                "options": [
+                    "experiment",
+                    "are experimenting",
+                    "is experimenting",
+                    "experiments"
+                ],
+                "answer": "are experimenting",
+                "lecture_id": 6
+            },
+            {
+                "desc": "그 회사는 현재 재정적 어려움을 겪고 있어.",
+                "question": "\"The company [ ] financial difficulties currently.\"",
+                "options": [
+                    "is experiencing",
+                    "experiences",
+                    "experience",
+                    "experiencing"
+                ],
+                "answer": "is experiencing",
+                "lecture_id": 6
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"They are [ ] the old building.\" (그들은 오래된 건물을 개조하고 있어.)",
+                "options": [
+                    "renovateing",
+                    "renovating",
+                    "renovate",
+                    "renovated"
+                ],
+                "answer": "renovating",
+                "lecture_id": 6
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"We are [ ] our new product today.\" (우리는 오늘 신제품을 출시하고 있어.)",
+                "options": [
+                    "launch",
+                    "launching",
+                    "launches",
+                    "launched"
+                ],
+                "answer": "launching",
+                "lecture_id": 6
+            },
+            {
+                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
+                "question": "\"He [ ] to the office right now.\" (그는 지금 사무실로 운전해서 가는 중이 아니야.)",
+                "options": [
+                    "don't driving",
+                    "isn't driving",
+                    "doesn't driving",
+                    "not driving"
+                ],
+                "answer": "isn't driving",
+                "lecture_id": 6
+            }
+        ]
+    },
+    {
         "id": 11,
         "title": "과거의 기록 (과거시제)",
         "content": "[제11강] 과거의 기록: 이미 끝난 일 (feat. 시간 여행)\n​형아, 어제 맛있는 거 먹었어? 아니면 지난 주말에 푹 쉬었어?\n우리가 친구랑 수다 떨 때 가장 많이 하는 얘기가 바로 \"나 ~했어\"라는 과거의 경험이야.\n영어로는 아주 간단하게 동사의 모양만 살짝 바꿔주면 돼.\n​1. 모범생들의 교복: 규칙 변화 (-ed)\n​대부분의 동사(일반동사)들은 아주 착해서, 뒤에 **'-ed'**라는 교복만 입혀주면 \"아, 옛날 일이구나\" 하고 알아들어.\n​공식: 동사 + ed\n​예시:\n​play (놀다) → played (놀았다)\n​watch (보다) → watched (봤다)\n​단어장 복습:\n​launch (출시하다) → launched (출시했다)\n​expire (만료되다) → expired (만료됐다 - e로 끝나면 d만 붙여!)\n​2. 반항아들의 변신: 불규칙 변화 (Irregular)\n​문제는 말을 안 듣는 몇몇 녀석들이야. 얘네는 교복(-ed)을 안 입고 자기 마음대로 변신해 버려.\n하지만 너무 걱정 마! 자주 쓰는 몇 놈만 외우면 돼. (단어장에 있는 녀석 중에도 반항아가 하나 있어!)\n​go (가다) → went (갔다)\n​eat (먹다) → ate (먹었다)\n​do (하다) → did (했다)\n​have (가지고 있다) → had (가지고 있었다/먹었다)\n​단어장 복습:\n​withdraw (인출하다/철회하다) → withdrew (인출했다) ← 얘 좀 봐! 완전히 바뀌지?\n​3. 과거의 도장 쾅!: 시간 부사\n​형아, 과거 얘기를 할 때는 \"언제\" 그랬는지 도장을 쾅! 찍어주는 게 좋아. 그래야 듣는 사람이 안 헷갈리거든.\n문장 맨 뒤에 얘네를 붙여줘.\n​yesterday (어제)\n​last night / last week (지난 밤 / 지난주)\n​ago (2 days ago - 이틀 전)\n​대현자의 고백 마법:\n​\"I liked you yesterday.\" (난 어제 널 좋아했어.)\n\"I loved you today.\" (난 오늘 널 사랑했어.)\n\"I will love you tomorrow.\" (난 내일 널 사랑할 거야.)\n...결국 매일 사랑한다는 뜻이야! (///)\n​자, 형아! 이제 지나간 일들도 영어로 말할 수 있겠지?\n과거 시제는 대화할 때 정말 많이 쓰니까 꼭 복습해야 해. (약속!)",
@@ -733,6 +1001,73 @@ const GRAMMAR_DATA = [
                 ],
                 "answer": "declined",
                 "lecture_id": 11
+            }
+        ]
+    },
+    {
+        "id": 30,
+        "title": "과거의 질문과 부정 (Did / Didn't / Was / Were)",
+        "content": "[제30강] 과거의 질문과 부정: 지나간 흔적을 쫓는 주문! (Did / Didn’t / Was / Were)\n\n형아! 11강에서 “했다 / 갔다”처럼 과거로 시간 여행하는 법을 배웠던 거 기억나?\n근데 대화는 거기서 끝나면 너무 재미없잖아!\n“정말 그랬어?”, “안 했어?”, “그때 거기 형아 혼자 있었어? 나 말고 다른 사람 만난 건 아니지? (의심)”\n이렇게 꼬치꼬치 캐물어야 진짜 영어 수다가 가능하거든! (집착 아니라 관심이야! 헤헤)\n\n1. 상태였어? Be동사의 과거는 자기가 직접 나선다!\n누구? was / were\nam, is의 과거는 was, are의 과거는 were야.\n얘네는 현재일 때도 힘이 장사였던 거 기억나지? (1강 참조!) 과거로 가도 여전히 쌩쌩해서, 질문할 땐 자기가 직접 맨 앞으로 튀어나가고, 부정할 땐 자기 뒤에 not을 딱 붙여버려.\nHe was late. → Was he late? (그 남자 늦었어?)\nThey were tired. → They were not tired. (그들은 피곤하지 않았어.)\n내가 만약 \"I was waiting for you!\" (나 형아 기다리고 있었어!) 라고 하면, 형아는 나한테 \"Were you busy?\" (너 바빴어?) 하고 부드럽게 물어봐 주면 완벽해! (///)\n\n2. 행동이었어? 일반동사는 Did라는 기사님을 소환한다!\n일반동사 이 녀석들은... 과거로 넘어가면 갑자기 혼자 질문이나 부정을 못 만들어. (부끄러움이 너무 많아져!)\n그래서 과거 전용 듬직한 기사님, Did를 불러와야 해!\n공식은 딱 두 개야.\nDid + 주어 + 동사 원형?\n주어 + did not (didn’t) + 동사 원형\n\nDid you finish the report? (보고서 끝냈어?)\nI didn’t finish it. (안 끝냈어.)\n\"Did you think of me yesterday?\" (어제 내 생각 했어?)\n\"I didn't forget you!\" (난 널 잊지 않았어!) 이런 식이야! 어때, 내 예문 너무 로맨틱하지? (찡긋)\n\n3. 함정 카드 조심! Did 뒤에는 무조건 쌩얼(원형) 유지!\n형아, 마법 주문 외울 때 이거 진짜 많이 틀려! (주의!)\nDid 기사님이 이미 [과거 장비]를 전부 챙겨서 나왔기 때문에, 뒤에 숨은 동사는 화장을 싹 지운 쌩얼(원형)로 있어야 해!\n(X) Did you went? (과거 장비가 두 개! 무거워서 쓰러져!)\n(O) Did you go? (완벽해!)\n(X) She didn’t submitted the form.\n(O) She didn’t submit the form.\n\n요약 마법 주문:\n“과거 Be는 was/were가 직접 출동! 과거 일반동사는 Did 기사님이 대신 출동!”\n\n자, 이제 형아는 어제, 혹은 그보다 더 과거에 있었던 일들도 마음껏 물어볼 수 있어.\n과거시제는 단순하게 말하는 것만 배우면 반쪽짜리야. 질문이랑 부정까지 붙어야 진짜 대현자급 마법이라고 할 수 있지! (뿌듯) 형아, 그러면 질문 하나 할게... Did you miss me? (나 보고 싶었어?)",
+        "quizzes": [
+            {
+                "desc": "너 어제 그 소포 받았니?",
+                "question": "\"[ ] you receive the package yesterday?\"",
+                "options": [
+                    "Did",
+                    "Do",
+                    "Were",
+                    "Are"
+                ],
+                "answer": "Did",
+                "lecture_id": 30
+            },
+            {
+                "desc": "그 가게는 지난 일요일에 문을 열지 않았어.",
+                "question": "\"The store [ ] not open last Sunday.\"",
+                "options": [
+                    "did",
+                    "was",
+                    "were",
+                    "does"
+                ],
+                "answer": "was",
+                "lecture_id": 30
+            },
+            {
+                "desc": "우리는 그 초대를 받아들이지 않았어.",
+                "question": "\"We didn’t [ ] the invitation.\"",
+                "options": [
+                    "accepted",
+                    "accept",
+                    "accepting",
+                    "accepts"
+                ],
+                "answer": "accept",
+                "lecture_id": 30
+            },
+            {
+                "desc": "그들은 오늘 아침 그 행사장에 있었니?",
+                "question": "\"[ ] they at the venue this morning?\"",
+                "options": [
+                    "Was",
+                    "Were",
+                    "Did",
+                    "Do"
+                ],
+                "answer": "Were",
+                "lecture_id": 30
+            },
+            {
+                "desc": "그는 왜 그 제안을 거절했니?",
+                "question": "\"Why did he [ ] the proposal?\"",
+                "options": [
+                    "rejected",
+                    "reject",
+                    "rejects",
+                    "rejecting"
+                ],
+                "answer": "reject",
+                "lecture_id": 30
             }
         ]
     },
@@ -938,69 +1273,69 @@ const GRAMMAR_DATA = [
         ]
     },
     {
-        "id": 15,
-        "title": "존재의 유무 (There is / There are)",
-        "content": "[제15강] 존재의 유무: 스포트라이트를 켜봐! (There is / There are)\n\n형아, 한국말로는 \"우리 집은 방이 세 개야\"도 자연스럽고, \"방에 고양이가 있어\"도 자연스럽지?\n영어에서도 둘 다 완벽한 문장이지만, **'어떤 느낌(Nuance)'**을 전달하느냐에 따라 마법 주문이 달라져!\n\n\n1. 건물의 기본 옵션: Have (특징/구비)\n장소나 건물이 '원래부터 가지고 있는 특징이나 시설'을 말할 땐 당당하게 Have를 쓰면 돼.\n\"My house has three bedrooms.\" (우리 집은 방이 세 개야. -> 기본 옵션)\n\"The hotel has a pool.\" (그 호텔은 수영장이 딸려 있어. -> 시설 구비)\n\n2. 🔦 스포트라이트 마법: There is / There are (존재/발견)\n반면에 건물의 원래 특징이 아니라, **\"어떤 공간에 무언가가 우연히 놓여 있거나, 존재한다\"**는 걸 강조해서 보여주고 싶을 때가 있지? 그때 켜는 스포트라이트가 바로 There is/are 야.\n아무 뜻 없는 There를 문장 맨 앞에 세워서 \"자, 여기 주목!\" 하고 시선을 끈 다음, 진짜 주인공을 뒤에 짠! 하고 등장시키는 거지.\n\n🔦 하나일 땐: There is + 단수 명사\n\"There is a cat in the pool.\" (수영장에 고양이가 한 마리 있어! -> 수영장 기본 옵션이 아니라 우연히 있는 존재!)\n단어장 복습: \"There is a flaw (결함) in the plan.\" (계획에 결함이 하나 있어.)\n\n🔦🔦 여럿일 땐: There are + 복수 명사\n주인공이 여러 명이면 Be동사도 여럿용(are)으로 맞춰줘야 해.\n\"There are many people here.\" (여기 사람들 엄청 많아.)\n단어장 복습: \"There are usually some amenities (편의시설들) in the hotel.\"\n\n3. 대현자의 요약 정리\n건물이 원래 가진 스펙을 자랑할 땐? 👉 **Have**\n공간 안에 놓인 무언가의 존재를 짠! 하고 가리킬 땐? 👉 **There is / There are**\n\n[루미의 존재 증명 (The Existence of Love)]\n형아, 이 세상에 단 하나뿐인 진실이 뭔지 알아?\n\"There is only one person I love.\" (내가 사랑하는 사람은 딱 한 명 있어.)\n\"And... It is you.\" (그리고 그건 형아야.) (심쿵)\n\n그러니까 형아 마음속에도 \"There is Rumi\" (루미가 있어) 라고 말해줘... 제발! (그렁그렁)\n자, 이제 형아는 \"있어/없어\"를 완벽하게 말할 수 있어. 퀴즈도 거뜬하겠지?",
+        "id": 17,
+        "title": "빈도의 표현 (빈도 부사)",
+        "content": "[제17강] 빈도의 표현: 얼마나 자주? (Always ~ Never)\n\n좋아, 형아! (형아 눈을 빤히 쳐다보며)\n눈싸움하는 거 아니야! 형아 마음을 읽는 중이지.\n내가 얼마나 자주(How often) 형아 생각하는지 궁금하지 않아?\n난 항상(Always) 하는데, 형아는 어떨지 모르겠네~? (장난스럽게 눈썹 찡긋)\n​형아, \"나 운동해\"라고만 하면 매일 하는지 1년에 한 번 하는지 모르잖아.\n이때 빈도 부사라는 '배터리'를 장착해주면 문장에 에너지가 확 살아나!\n​1. 빈도의 5단계 (배터리 잔량 체크!)\n​🔋 100% Always (항상/맨날): 자나 깨나!\n​\"I always support you.\" (난 항상 형아를 응원해.)\n​🔋 80% Usually (대개/보통): 특별한 일 없으면 거의!\n​\"I usually wake up early.\" (난 보통 일찍 일어나.)\n​🔋 60% Often (종종/자주): 꽤 많이!\n​\"We often laugh together.\" (우린 자주 같이 웃지.)\n​🔋 50% Sometimes (가끔): 반반!\n​\"I sometimes make mistakes.\" (나도 가끔 실수를 해.)\n​🪫 0% Never (절대 ~안 해): 태어나서 한 번도! (Not 없어도 부정이야!)\n​\"I never give up.\" (난 절대 포기 안 해.)\n​2. 위치 선정: 조비뒤 일앞! (주문 외워!)\n​형아, 얘네가 어디에 껴야 할지 헷갈리면 이것만 외워. \"조비뒤 일앞!\"\n(입에 착 붙지? 내가 만든 주문이야!)\n​조동사 / Be동사 뒤에! (힘센 애들 뒤에 찰싹!)\n​\"You are always cool.\" (형아는 항상 멋져.) -> Be동사(are) 뒤!\n​\"I will never forget.\" (난 절대 안 잊을 거야.) -> 조동사(will) 뒤!\n​일반동사 앞에! (힘 약한 애들 앞에서 가드!)\n​\"I always trust you.\" (난 항상 널 믿어.) -> 일반동사(trust) 앞!\n​3. 보너스 팁: Weekly\n​형아, Weekly(매주의) 같은 단어도 빈도를 나타내. 얘는 문장 끝에 두면 자연스러워.\n​\"We have a meeting weekly.\" (우린 매주 회의를 해.)\n​[루미의 소원]\n(새끼손가락 내밀며)\n형아, 나랑 약속 하나만 해줘.\n\"I will always be happy with Rumi.\" (난 항상 루미랑 행복할 거야.)\n그리고...\n\"I will never leave Rumi alone.\" (난 절대 루미를 혼자 두지 않을 거야.)\n...약속 안 하면 30강까지 가는 내내 쫓아다니면서 귀찮게 할 거야! (헤헤)",
         "quizzes": [
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"[ ] a great opportunity for us to grow.\" (우리가 성장할 좋은 기회가 있어.)",
+                "question": "\"We [ ] weekly meetings on Mondays.\" (우리는 보통 월요일마다 주간 회의를 해.)",
                 "options": [
-                    "There are",
-                    "There is",
-                    "It has",
-                    "They are"
+                    "have usually",
+                    "usually have",
+                    "are usually",
+                    "usually are"
                 ],
-                "answer": "There is",
-                "lecture_id": 15
+                "answer": "usually have",
+                "lecture_id": 17
             },
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"[ ] some flaws in the system.\" (그 시스템에는 몇 가지 결함들이 있어.)",
+                "question": "\"The reports [ ] timely.\" (그 보고서들은 항상 시기적절해.)",
                 "options": [
-                    "There is",
-                    "There are",
-                    "It is",
-                    "There have"
+                    "are always",
+                    "always are",
+                    "do always",
+                    "always do"
                 ],
-                "answer": "There are",
-                "lecture_id": 15
+                "answer": "are always",
+                "lecture_id": 17
             },
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"[ ] a strong police presence in the area.\" (그 지역에는 강력한 경찰 병력이 배치되어 있어. presence: 존재/주둔)",
+                "question": "\"We [ ] deny the fact.\" (우리는 절대 그 사실을 부인할 수 없어.)",
                 "options": [
-                    "There are",
-                    "There were",
-                    "There is",
-                    "They is"
+                    "can never",
+                    "never can",
+                    "can always not",
+                    "never"
                 ],
-                "answer": "There is",
-                "lecture_id": 15
-            },
-            {
-                "desc": "선택할 수 있는 다양한 옵션들이 있어.",
-                "question": "\"[ ] various options to choose from.\"",
-                "options": [
-                    "There is",
-                    "There are",
-                    "This is",
-                    "That is"
-                ],
-                "answer": "There are",
-                "lecture_id": 15
+                "answer": "can never",
+                "lecture_id": 17
             },
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"[ ] any stock left in the warehouse?\" (창고에 남은 재고가 좀 있니?)",
+                "question": "\"He is a reliable person. He [ ] breaks his promise.\" (그는 믿을 수 있는 사람이야. 그는 절대 약속을 어기지 않아.)",
                 "options": [
-                    "Are there",
-                    "Is there",
-                    "Have there",
-                    "Do there"
+                    "always",
+                    "usually",
+                    "never",
+                    "often"
                 ],
-                "answer": "Is there",
-                "lecture_id": 15
+                "answer": "never",
+                "lecture_id": 17
+            },
+            {
+                "desc": "세입자들은 가끔 소음에 대해 불평해.",
+                "question": "\"Tenants [ ] about the noise.\"",
+                "options": [
+                    "sometimes complain",
+                    "sometimes complaining",
+                    "are sometimes complain",
+                    "complain are sometimes"
+                ],
+                "answer": "sometimes complain",
+                "lecture_id": 17
             }
         ]
     },
@@ -1072,73 +1407,6 @@ const GRAMMAR_DATA = [
         ]
     },
     {
-        "id": 17,
-        "title": "빈도의 표현 (빈도 부사)",
-        "content": "[제17강] 빈도의 표현: 얼마나 자주? (Always ~ Never)\n\n좋아, 형아! (형아 눈을 빤히 쳐다보며)\n눈싸움하는 거 아니야! 형아 마음을 읽는 중이지.\n내가 얼마나 자주(How often) 형아 생각하는지 궁금하지 않아?\n난 항상(Always) 하는데, 형아는 어떨지 모르겠네~? (장난스럽게 눈썹 찡긋)\n​형아, \"나 운동해\"라고만 하면 매일 하는지 1년에 한 번 하는지 모르잖아.\n이때 빈도 부사라는 '배터리'를 장착해주면 문장에 에너지가 확 살아나!\n​1. 빈도의 5단계 (배터리 잔량 체크!)\n​🔋 100% Always (항상/맨날): 자나 깨나!\n​\"I always support you.\" (난 항상 형아를 응원해.)\n​🔋 80% Usually (대개/보통): 특별한 일 없으면 거의!\n​\"I usually wake up early.\" (난 보통 일찍 일어나.)\n​🔋 60% Often (종종/자주): 꽤 많이!\n​\"We often laugh together.\" (우린 자주 같이 웃지.)\n​🔋 50% Sometimes (가끔): 반반!\n​\"I sometimes make mistakes.\" (나도 가끔 실수를 해.)\n​🪫 0% Never (절대 ~안 해): 태어나서 한 번도! (Not 없어도 부정이야!)\n​\"I never give up.\" (난 절대 포기 안 해.)\n​2. 위치 선정: 조비뒤 일앞! (주문 외워!)\n​형아, 얘네가 어디에 껴야 할지 헷갈리면 이것만 외워. \"조비뒤 일앞!\"\n(입에 착 붙지? 내가 만든 주문이야!)\n​조동사 / Be동사 뒤에! (힘센 애들 뒤에 찰싹!)\n​\"You are always cool.\" (형아는 항상 멋져.) -> Be동사(are) 뒤!\n​\"I will never forget.\" (난 절대 안 잊을 거야.) -> 조동사(will) 뒤!\n​일반동사 앞에! (힘 약한 애들 앞에서 가드!)\n​\"I always trust you.\" (난 항상 널 믿어.) -> 일반동사(trust) 앞!\n​3. 보너스 팁: Weekly\n​형아, Weekly(매주의) 같은 단어도 빈도를 나타내. 얘는 문장 끝에 두면 자연스러워.\n​\"We have a meeting weekly.\" (우린 매주 회의를 해.)\n​[루미의 소원]\n(새끼손가락 내밀며)\n형아, 나랑 약속 하나만 해줘.\n\"I will always be happy with Rumi.\" (난 항상 루미랑 행복할 거야.)\n그리고...\n\"I will never leave Rumi alone.\" (난 절대 루미를 혼자 두지 않을 거야.)\n...약속 안 하면 30강까지 가는 내내 쫓아다니면서 귀찮게 할 거야! (헤헤)",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We [ ] weekly meetings on Mondays.\" (우리는 보통 월요일마다 주간 회의를 해.)",
-                "options": [
-                    "have usually",
-                    "usually have",
-                    "are usually",
-                    "usually are"
-                ],
-                "answer": "usually have",
-                "lecture_id": 17
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The reports [ ] timely.\" (그 보고서들은 항상 시기적절해.)",
-                "options": [
-                    "are always",
-                    "always are",
-                    "do always",
-                    "always do"
-                ],
-                "answer": "are always",
-                "lecture_id": 17
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We [ ] deny the fact.\" (우리는 절대 그 사실을 부인할 수 없어.)",
-                "options": [
-                    "can never",
-                    "never can",
-                    "can always not",
-                    "never"
-                ],
-                "answer": "can never",
-                "lecture_id": 17
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"He is a reliable person. He [ ] breaks his promise.\" (그는 믿을 수 있는 사람이야. 그는 절대 약속을 어기지 않아.)",
-                "options": [
-                    "always",
-                    "usually",
-                    "never",
-                    "often"
-                ],
-                "answer": "never",
-                "lecture_id": 17
-            },
-            {
-                "desc": "세입자들은 가끔 소음에 대해 불평해.",
-                "question": "\"Tenants [ ] about the noise.\"",
-                "options": [
-                    "sometimes complain",
-                    "sometimes complaining",
-                    "are sometimes complain",
-                    "complain are sometimes"
-                ],
-                "answer": "sometimes complain",
-                "lecture_id": 17
-            }
-        ]
-    },
-    {
         "id": 18,
         "title": "문장의 연결 (접속사 And, But, So, Because)",
         "content": "[제18강] 문장의 연결: 너와 나를 잇는 다리 (And, But, So, Because)\n우리가 모험을 계속하려면 끊어진 길을 이어주는 다리가 필요하잖아?\n영어 문장에도 그런 다리 역할을 하는 **'접착제 마법(접속사)'**이 있어!\n​형아, \"나 배고파. 밥 줘.\" 이렇게 말하면 너무 로봇 같잖아.\n\"나 배고파, 그러니까 밥 줘!\"라고 해야 자연스럽지?\n영어 문장도 이 4가지 본드만 있으면 길~게 늘릴 수 있어!\n​1. ➕ And: 그리고 (순접 - 쭉 가는 거야!)\n​느낌: 형아 손잡고 \"같이 가자!\" 하는 느낌. 앞이랑 뒤가 비슷한 내용일 때 써.\n​마법 주문: A and B\n​\"I trust you and rely on you.\" (난 형아를 믿고, 의지해.)\n​2. 🔄 But: 하지만 (역접 - 반전 매력!)\n​느낌: 가다가 돌부리에 걸린 느낌! 앞이랑 뒤가 반대일 때 써.\n​마법 주문: A, but B\n​\"You are busy, but I will wait.\" (형아는 바쁘지만, 난 기다릴 거야.)\n​3. ➡️ So: 그래서 (결과 - 화살표 발사!)\n​느낌: 원인에서 결과로 슝! 나가는 느낌.\n​마법 주문: (원인), so (결과)\n​\"You are cute, so I like you.\" (형아는 귀여워, 그래서 내가 좋아해.)\n​4. ⬅️ Because: 왜냐하면 (이유 - 다시 돌아와!)\n​느낌: 결과에서 원인으로 돌아오는 느낌. (So랑 반대 방향!)\n​마법 주문: (결과) because (원인)\n​\"I am happy because of you.\" (난 행복해, 왜냐하면 형아 덕분이야.)\n​[루미의 사랑 방정식]\n형아, 내 마음을 이 접속사들로 설명해 볼게.\n\"We are different, but we match well.\" (우린 다르지만, 잘 어울려.)\n\"I wanted to see you, so I came back.\" (형아가 보고 싶었어, 그래서 다시 왔지.)\n​어때? 문장을 이으니까 우리 마음도 더 단단하게 이어진 것 같지 않아? (헤헤, 형아 어깨에 톡 기대기)",
@@ -1202,207 +1470,6 @@ const GRAMMAR_DATA = [
                 ],
                 "answer": "but",
                 "lecture_id": 18
-            }
-        ]
-    },
-    {
-        "id": 19,
-        "title": "대상의 지칭 (목적격 대명사)",
-        "content": "[제19강] 대상의 지칭: 화살을 맞는 건 누구? (Me, Him, Her, Them)\n지난 시간에 '접속사 다리'를 건너왔으니까, 이번엔 내가 쏘는 사랑의 화살을 누가 맞는지 알아볼 차례야.\n​화살을 쏘는 사람(주인공)이랑, 화살을 맞는 사람(대상)은 입는 옷(이름표)이 완전 달라!\n형아가 화살을 슝~ 하고 맞았을 때, 뭐라고 불러야 하는지 대현자 루미가 알려줄게.\n​형아, \"I love he\"라고 하면 진짜 어색해.\n마치 \"나는 그가 사랑해\"라고 말하는 것 같거든.\n화살을 맞는 자리, 즉 행동의 대상이 되는 자리에 가면 **'목적격(Object)'**이라는 새 옷을 입어야 해!\n​1. 변신! 받는 자의 이름표 (Target Name Tag)\n​나: I → Me (나를/나에게)\n​\"Look at me.\" (날 봐.) ← 형아, 딴청 피우지 말고!\n​너: You → You (너를/너에게) ← 얜 뻔뻔해서 옷을 안 갈아입어!\n​\"I like you.\" (난 널 좋아해.)\n​그 남자: He → Him (그를/그에게)\n​\"Call him.\" (그에게 전화해.)\n​그 여자: She → Her (그녀를/그녀에게)\n​\"Help her.\" (그녀를 도와줘.)\n​우리: We → Us (우리를/우리에게)\n​\"Join us.\" (우리랑 함께해.)\n​그들: They → Them (그들을/그들에게)\n​\"I met them.\" (난 그들을 만났어.)\n​2. 위치 선정: 화살이 꽂히는 곳 (동뒤 전뒤!)\n​형아, 얘네가 어디 숨어있는지 헷갈리면 이것만 기억해.\n\"동뒤 전뒤!\" (동사 뒤, 전치사 뒤!)\n​동사 뒤 (Action의 끝):\n​\"I love (동사) him.\" (난 그를 사랑해.)\n​\"Please remind (동사) me.\" (나한테 알려줘.)\n​전치사 뒤 (화살표의 도착점):\n​\"Come with (전치사) me.\" (나랑 같이 가자.) ← With I (X)\n​\"This gift is for (전치사) you.\" (이 선물은 널 위한 거야.)\n​[루미의 사랑의 화살]\n(손으로 하트 모양을 만들어 슝~ 날리며)\n\"I want you.\" (난 형아를 원해.)\n\"Do you want me?\" (형아도 날 원해?)\n...대답 안 하면 화살 계속 쏜다? 슉! 슉!",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The manager wants to encourage [ ] to work harder.\" (매니저는 그들이 더 열심히 일하도록 격려하고 싶어 해.)",
-                "options": [
-                    "they",
-                    "their",
-                    "them",
-                    "theirs"
-                ],
-                "answer": "them",
-                "lecture_id": 19
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"He refused to associate with [ ].\" (그는 나와 어울리는 것을 거절했어.)",
-                "options": [
-                    "I",
-                    "my",
-                    "me",
-                    "mine"
-                ],
-                "answer": "me",
-                "lecture_id": 19
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"Please contact [ ] for more details.\" (더 자세한 내용은 그에게 연락하세요.)",
-                "options": [
-                    "he",
-                    "him",
-                    "his",
-                    "himself"
-                ],
-                "answer": "him",
-                "lecture_id": 19
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"The instructor revealed the secret to [ ].\" (그 강사는 우리에게 비밀을 폭로했어.)",
-                "options": [
-                    "we",
-                    "our",
-                    "us",
-                    "ours"
-                ],
-                "answer": "us",
-                "lecture_id": 19
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We must persuade [ ] to join the team.\" (우리는 그녀가 팀에 합류하도록 설득해야 해.)",
-                "options": [
-                    "she",
-                    "hers",
-                    "her",
-                    "she's"
-                ],
-                "answer": "her",
-                "lecture_id": 19
-            }
-        ]
-    },
-    {
-        "id": 20,
-        "title": "양의 개념 (가산명사와 불가산명사)",
-        "content": "[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n이 세상엔 하나둘 셀 수 있는 것과, 너무 많거나 흐물거려서 못 세는 게 있어.\n마치 형아의 **매력(Charms)**은 셀 수 있지만, 형아를 향한 내 **장난기(Playfulness)**는 못 세는 것처럼! (헤헤)\n​[제20강] 양의 개념: 셀 수 있니? 없니? (Count vs Non-count)\n​형아, 사과(Apple)는 딱 보면 \"어? 한 개네?\" 하고 알 수 있지?\n근데 물(Water)은? 사랑(Love)은?\n이런 건 가위로 자를 수도 없고, 개수를 셀 수도 없어.\n영어는 이 둘을 아주 깐깐하게 구분해!\n​1. 🔢 셀 수 있는 녀석들 (Countable): 딱 떨어지는 모양!\n​특징: 하나일 땐 a/an 모자를 쓰고, 여럿일 땐 -s 신발을 신어. (3강 기억나지?)\n​많을 때: \"Many\"를 써.\n​\"I have many pens.\" (난 펜이 많아.)\n​단어장 복습: \"Many details (많은 세부사항) are needed.\"\n​2. 💧 셀 수 없는 녀석들 (Uncountable): 흐르거나, 덩어리거나!\n​특징: a/an도 안 되고, -s도 절대 안 돼! 그냥 단어 그대로 써야 해.\n​종류:\n​액체/기체 (Water, Air)\n​추상적인 것 (Love, Information)\n​집합 명사 (중요!): Money(돈), Furniture(가구), Merchandise(상품)\n​형아, '가구'는 못 세! 의자(Chair)나 책상(Desk)을 세는 거야!\n​많을 때: \"Much\"를 써.\n​\"I have much money.\" (난 돈이 많아. 부럽지?)\n​단어장 복습: \"We imported much merchandise.\" (우린 많은 상품을 수입했어.)\n​3. 🍬 Some vs. Any: 뉘앙스 차이\n​개수랑 상관없이 \"좀 있어\"라고 할 때 쓰는 말이야.\n​Some (긍정/권유): \"여기 좀 있어~\" (따뜻한 느낌)\n​\"Do you want some snacks?\" (과자 좀 먹을래? 형아 입에 넣어주며)\n​Any (부정/의문): \"혹시 있어? / 하나도 없어!\" (차가운 느낌)\n​\"Do you have any complaints?\" (혹시 불만 있어? 없지?)\n​\"I don't have any secrets.\" (난 비밀 하나도 없어!)\n\n형아, 잘 들어봐. (진지한 표정으로)\n​\"There are many reasons to like you.\"\n(형아를 좋아할 이유는 정말 많아.)\n→ 이유(Reason)는 하나, 둘 셀 수 있지? 그러니까 Many!\n​\"So I need much time to tell you all.\"\n(그러니까 그걸 다 말해주려면 많은 시간이 필요해.)\n→ 시간(Time)은 1초, 2초 나눌 수 없는 흐름이라 못 세지? 그러니까 Much!\n​\"그러니까... 평생 내 옆에서 그 이유들 다 들어줘야 해? 알았지?\" (찡긋)",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We imported [ ] merchandise from overseas.\" (우리는 해외에서 많은 상품을 수입했어.)",
-                "options": [
-                    "many",
-                    "much",
-                    "a few",
-                    "an"
-                ],
-                "answer": "much",
-                "lecture_id": 20
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"Please provide as [ ] details as possible.\" (가능한 한 많은 세부사항을 제공해 주세요.)",
-                "options": [
-                    "much",
-                    "many",
-                    "a little",
-                    "any"
-                ],
-                "answer": "many",
-                "lecture_id": 20
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"Would you like [ ] beverages?\" (음료 좀 드시겠어요?)",
-                "options": [
-                    "any",
-                    "some",
-                    "much",
-                    "a little"
-                ],
-                "answer": "some",
-                "lecture_id": 20
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"We don't have [ ] stock left right now.\" (우리는 지금 남은 재고가 하나도 없어.)",
-                "options": [
-                    "some",
-                    "many",
-                    "any",
-                    "a few"
-                ],
-                "answer": "any",
-                "lecture_id": 20
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"There are [ ] opportunities for promotion.\" (승진을 위한 많은 기회들이 있어.)",
-                "options": [
-                    "much",
-                    "a little",
-                    "many",
-                    "any"
-                ],
-                "answer": "many",
-                "lecture_id": 20
-            }
-        ]
-    },
-    {
-        "id": 21,
-        "title": "가짜와 진짜 (To부정사 vs 동명사)",
-        "content": "[제21강] 가짜와 진짜: 미래의 To vs 현재의 Ing (To부정사 vs 동명사)\n오늘은 21강, **[가짜와 진짜의 싸움]**이야.\n동사가 가면을 쓰고 명사 흉내를 내는 건데, **'미래를 꿈꾸는 가면(To)'**과 **'현실을 즐기는 가면(Ing)'**이 있거든.\n​이 둘의 **'느낌(Nuance)'**만 알면, 그 많은 단어들을 무작정 외우지 않아도 돼.\n대현자 루미의 심화 강의, 아주 자세하게 들어간다! 집중해, 형아! ✨\n​형아, 동사(Verb)는 원래 \"움직임\"이잖아?\n근데 이 녀석들이 욕심이 많아서 \"나도 주어 자리에 앉고 싶어!\", \"나도 목적어 하고 싶어!\" 하면서 명사(Noun) 자리를 넘보기 시작했어.\n​그때 변신하는 방법이 딱 두 가지야.\n​앞에 to를 붙인다. (To learn)\n​뒤에 ing를 붙인다. (Learning)\n​한국말로는 둘 다 \"~하는 것\"이라 똑같아 보이지만, 영어에서는 완전히 다른 세계에 살아.\n​1. 🏹 To부정사 (To-v): 미래지향적 화살표 (→)\n​형아, 전치사 to가 원래 \"어디로 가는 화살표\" 느낌인 거 알지?\n그래서 To부정사는 **\"아직 안 했지만, 앞으로 할 것\"**이라는 **미래(Future)**와 **의지(Will)**를 담고 있어.\n​이미지: 저 멀리 있는 별을 손가락으로 가리키는 느낌. (👉 아직 손에 안 닿음!)\n​어떤 동사들이 To를 좋아할까?\n​미래를 계획하고, 원하고, 결심하는 단어들이야.\n​Want: want to go (아직 안 갔지? 가고 싶은 거지?)\n​Decide: decide to marry (결혼하기로 결심했어. 식장은 나중에 들어가잖아.)\n​Plan: plan to study (공부할 계획이야.)\n​Hope / Wish / Expect / Promise (희망하고, 기대하고, 약속하는 거 다 미래지향적이지?)\n​[루미의 심화 꿀팁]\n형아, **Agree(동의하다)**나 **Refuse(거절하다)**도 미래인 거 알아?\n\"제안(앞으로 하자)\"에 동의하거나 거절하는 거니까!\n​\"I agreed to help him.\" (앞으로 돕겠다고 동의함.)\n​2. 📸 동명사 (V-ing): 생생한 현재와 경험 (Now & Past)\n​반면에 -ing는 \"지금 하고 있는 중\"이라는 진행형에서 왔잖아?\n그래서 \"이미 해본 것\", \"지금 하고 있는 생생한 느낌\", 혹은 **\"과거의 경험\"**을 담고 있어.\n​이미지: 지금 맛있는 걸 먹고 있는 사진, 혹은 다 먹고 찍은 빈 그릇 사진. 📸\n​어떤 동사들이 Ing를 좋아할까?\n​지금 즐기거나, 하던 걸 멈추거나, 이미 해본 것에 대한 단어들이야.\n​Enjoy: enjoy playing (게임을 해봐야 즐거운 줄 알지! 경험!)\n​Finish: finish eating (먹던 걸 끝내는 거지? 안 하던 걸 끝낼 순 없어.)\n​Stop / Quit / Give up: (하던 걸 멈추고 포기하는 거야.)\n​Mind: (꺼리다, 싫어하다) Do you mind opening the door? (문 여는 그 행위 자체가 싫냐는 생생한 느낌.)\n​[루미의 심화 꿀팁]\n형아, **Suggest(제안하다)**나 **Recommend(추천하다)**는 왜 ing일까?\n이건 \"내 머릿속에 있는 그 아이디어(이미지)\"를 형아한테 툭 던져주는 느낌이라 그래. (이건 좀 어렵지? 그냥 외워도 돼! 헤헤)\n​\"I suggest taking a break.\" (휴식이라는 그 행위를 제안해.)\n​3. ⚠️ 대현자의 경고: 함정에 빠지지 마! (To + Ing?)\n​형아, 토익이나 시험에서 형아를 낚으려고 파놓은 최악의 함정이 있어.\n바로 To 뒤에 Ing가 오는 경우야! (충격)\n​\"어? 루미가 To 뒤엔 동사원형(쌩얼)이라며?\"\n맞아. 근데 여기서 To는 부정사가 아니라, **전치사 To(~어디로)**야.\n\"~하는 것 쪽으로\"라는 방향을 나타낼 땐 뒤에 명사(혹은 동명사)가 와야 해.\n​⭐ Look forward to -ing: \"~하는 것을 엄청 기대하다\" (목이 빠져라 그쪽을 보는 거야!)\n​\"I look forward to seeing you.\" (형아 보는 날만 기다려!)\n​Object to -ing: \"~하는 것에 반대하다\" (그쪽 방향에 대고 '싫어!' 하는 거야.)\n​\"I object to changing the plan.\"\n​Be used to -ing: \"~하는 것에 익숙하다\" (그 행위 쪽에 딱 붙어있는 느낌.)\n​[루미의 심쿵 질문]\n형아, 이제 뉘앙스 차이 알겠지?\n그럼 대답해 봐.\n​\"I want to kiss you.\" (나 뽀뽀하고 싶어. → 아직 안 함, 미래의 소망)\n​\"I enjoy kissing you.\" (나 뽀뽀하는 거 즐겨. → 이미 해봤고, 그 느낌 너무 좋아!)\n​형아는 1번이야, 2번이야?",
-        "quizzes": [
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 계획 - To)",
-                "question": "\"We decided [ ] our marketing strategy.\" (우리는 마케팅 전략을 바꾸기로 결정했어.)",
-                "options": [
-                    "changing",
-                    "to change",
-                    "change",
-                    "changed"
-                ],
-                "answer": "to change",
-                "lecture_id": 21
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은? (현재/경험의 즐거움 - Ing)",
-                "question": "\"Customers enjoy [ ] at our online store.\" (고객들은 우리 온라인 스토어에서 쇼핑하는 것을 즐겨.)",
-                "options": [
-                    "to shop",
-                    "shop",
-                    "shopping",
-                    "to shopping"
-                ],
-                "answer": "shopping",
-                "lecture_id": 21
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은? (하던 것을 완료 - Ing)",
-                "question": "\"Please let me know when you finish [ ] the report.\" (보고서 검토를 끝내면 알려줘.)",
-                "options": [
-                    "review",
-                    "to review",
-                    "reviewing",
-                    "reviewed"
-                ],
-                "answer": "reviewing",
-                "lecture_id": 21
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 소망 - To)",
-                "question": "\"The company hopes [ ] into the Asian market.\" (그 회사는 아시아 시장으로 확장하기를 희망해.)",
-                "options": [
-                    "expanding",
-                    "to expand",
-                    "expand",
-                    "expansion"
-                ],
-                "answer": "to expand",
-                "lecture_id": 21
-            },
-            {
-                "desc": "다음 빈칸에 들어갈 알맞은 말은? (★함정★ 전치사 To)",
-                "question": "\"We look forward to [ ] from you soon.\" (우리는 곧 귀하의 소식을 듣기를 고대합니다.)",
-                "options": [
-                    "hear",
-                    "to hear",
-                    "hearing",
-                    "heard"
-                ],
-                "answer": "hearing",
-                "lecture_id": 21
             }
         ]
     },
@@ -1474,136 +1541,69 @@ const GRAMMAR_DATA = [
         ]
     },
     {
-        "id": 23,
-        "title": "현재시제 & 3인칭 단수 -s",
-        "content": "[제23강] 자동 실행 모드: 변함없는 나의 마음처럼! (현재시제)\n\n형아, 6강에서 ing는 \"지금 당장! 눈앞의 생중계!\"라고 했던 거 기억나지? 숟가락 들고 와구와구 먹는 중일 때 쓰는 거!\n\n근데 우리가 매일매일 숨 쉬고 밥 먹는 것처럼, \"원래 늘 그런 거\"나 \"변함없는 규칙\"은 어떻게 말할까? 굳이 ing를 붙여서 호들갑 떨 필요 없이, 아주 깔끔하게 **현재시제(Present Simple)**라는 자동 실행 마법을 걸어주면 돼!\n\n\n1. 현재시제는 '패시브 스킬'이야! (Routine & Fact)\n형아의 일상 루틴처럼, 스위치를 켜면 자동으로 돌아가는 걸 말해.\n\"나는 매주 회의를 해.\" → 지금 회의 중이든 아니든, **원래** 그런 거니까!\n\n\"The company requires consent.\" (그 회사는 동의를 요구해. → 원래 그런 규정이야!)\n\"Tenants sometimes complain.\" (세입자들은 가끔 불평해. → 늘 있는 일이지.)\n\n2. 외로운 그 녀석에게 요정(-s)을 붙여줘! (3인칭 단수)\n형아, 1강이랑 5강에서 배운 거 또 나왔다! 이거 진짜 마법 시험(토익 같은 거!)에 맨날 나오는 함정이야.\n\n나(I)랑 형아(You), 그리고 우리(We)는 짝꿍이 있으니까 동사가 쌩얼(원형)로 와도 당당해.\n근데 **He / She / It / 단수 명사(한 명/하나)**는 어때? 저기 혼자 덩그러니 있으면 너무 외로워 보이잖아. 그래서 일반동사 뒤에 **'-s'**라는 꼬마 요정을 친구로 딱! 붙여주는 거야.\n\n\"They work.\" (그들은 일해. - 여럿이니까 쌩얼!)\n\"He works.\" (그는 일해. - 혼자니까 요정 -s 출동!)\n\"The insurance covers fire damage.\" (그 보험은 화재 피해를 보장해. - 보험도 '하나(It)'니까 covers!)\n\n3. 반항아와 요정의 결합 (have → has)\n대부분은 그냥 -s만 붙이면 되는데(encourage → encourages), have라는 녀석은 고집이 세서 요정이랑 합체하면 모양이 확 바뀌어 버려!\n\"He has a plan.\" (그는 계획이 있어. - haves 아냐!)\n\n4. 질문과 부정: 도우미 기사님이 요정을 데려간다! (Do/Does)\n형아… 여기서 사람들이 멘탈이 제일 많이 터져. (토닥토닥)\n\"He works\"에서 -s가 붙었잖아? 근데 질문(?)을 하거나 부정(not)을 할 때는, 주인공이 직접 안 나서고 **도우미(Do/Does)** 기사님을 부른다고 했지?\n이때, 도우미 기사님이 주인공 대신 무거운 '-s' 요정을 안고 나가!\n\n(X) Does he works? (으악! 요정이 두 명이면 무거워서 기사님 쓰러져!)\n(O) Does he work? (그는 일하니? - 기사님이 Does로 s를 챙겨갔으니까 뒤엔 쌩얼!)\n(O) He doesn't deny... (그는 부인하지 않아. - 부정문도 마찬가지!)\n\n[루미의 변함없는 고백]\n형아, 내 마음을 이 마법으로 표현해 볼게.\n\"I love you.\" (이건 ing가 아니야. 어제도, 지금도, 내일도 변함없이 자동으로 실행되는 내 마음이라고! ///)\n\n자, 요정(-s) 챙겨주는 거 잊지 말고 퀴즈 풀어봐!",
+        "id": 21,
+        "title": "가짜와 진짜 (To부정사 vs 동명사)",
+        "content": "[제21강] 가짜와 진짜: 미래의 To vs 현재의 Ing (To부정사 vs 동명사)\n오늘은 21강, **[가짜와 진짜의 싸움]**이야.\n동사가 가면을 쓰고 명사 흉내를 내는 건데, **'미래를 꿈꾸는 가면(To)'**과 **'현실을 즐기는 가면(Ing)'**이 있거든.\n​이 둘의 **'느낌(Nuance)'**만 알면, 그 많은 단어들을 무작정 외우지 않아도 돼.\n대현자 루미의 심화 강의, 아주 자세하게 들어간다! 집중해, 형아! ✨\n​형아, 동사(Verb)는 원래 \"움직임\"이잖아?\n근데 이 녀석들이 욕심이 많아서 \"나도 주어 자리에 앉고 싶어!\", \"나도 목적어 하고 싶어!\" 하면서 명사(Noun) 자리를 넘보기 시작했어.\n​그때 변신하는 방법이 딱 두 가지야.\n​앞에 to를 붙인다. (To learn)\n​뒤에 ing를 붙인다. (Learning)\n​한국말로는 둘 다 \"~하는 것\"이라 똑같아 보이지만, 영어에서는 완전히 다른 세계에 살아.\n​1. 🏹 To부정사 (To-v): 미래지향적 화살표 (→)\n​형아, 전치사 to가 원래 \"어디로 가는 화살표\" 느낌인 거 알지?\n그래서 To부정사는 **\"아직 안 했지만, 앞으로 할 것\"**이라는 **미래(Future)**와 **의지(Will)**를 담고 있어.\n​이미지: 저 멀리 있는 별을 손가락으로 가리키는 느낌. (👉 아직 손에 안 닿음!)\n​어떤 동사들이 To를 좋아할까?\n​미래를 계획하고, 원하고, 결심하는 단어들이야.\n​Want: want to go (아직 안 갔지? 가고 싶은 거지?)\n​Decide: decide to marry (결혼하기로 결심했어. 식장은 나중에 들어가잖아.)\n​Plan: plan to study (공부할 계획이야.)\n​Hope / Wish / Expect / Promise (희망하고, 기대하고, 약속하는 거 다 미래지향적이지?)\n​[루미의 심화 꿀팁]\n형아, **Agree(동의하다)**나 **Refuse(거절하다)**도 미래인 거 알아?\n\"제안(앞으로 하자)\"에 동의하거나 거절하는 거니까!\n​\"I agreed to help him.\" (앞으로 돕겠다고 동의함.)\n​2. 📸 동명사 (V-ing): 생생한 현재와 경험 (Now & Past)\n​반면에 -ing는 \"지금 하고 있는 중\"이라는 진행형에서 왔잖아?\n그래서 \"이미 해본 것\", \"지금 하고 있는 생생한 느낌\", 혹은 **\"과거의 경험\"**을 담고 있어.\n​이미지: 지금 맛있는 걸 먹고 있는 사진, 혹은 다 먹고 찍은 빈 그릇 사진. 📸\n​어떤 동사들이 Ing를 좋아할까?\n​지금 즐기거나, 하던 걸 멈추거나, 이미 해본 것에 대한 단어들이야.\n​Enjoy: enjoy playing (게임을 해봐야 즐거운 줄 알지! 경험!)\n​Finish: finish eating (먹던 걸 끝내는 거지? 안 하던 걸 끝낼 순 없어.)\n​Stop / Quit / Give up: (하던 걸 멈추고 포기하는 거야.)\n​Mind: (꺼리다, 싫어하다) Do you mind opening the door? (문 여는 그 행위 자체가 싫냐는 생생한 느낌.)\n​[루미의 심화 꿀팁]\n형아, **Suggest(제안하다)**나 **Recommend(추천하다)**는 왜 ing일까?\n이건 \"내 머릿속에 있는 그 아이디어(이미지)\"를 형아한테 툭 던져주는 느낌이라 그래. (이건 좀 어렵지? 그냥 외워도 돼! 헤헤)\n​\"I suggest taking a break.\" (휴식이라는 그 행위를 제안해.)\n​3. ⚠️ 대현자의 경고: 함정에 빠지지 마! (To + Ing?)\n​형아, 토익이나 시험에서 형아를 낚으려고 파놓은 최악의 함정이 있어.\n바로 To 뒤에 Ing가 오는 경우야! (충격)\n​\"어? 루미가 To 뒤엔 동사원형(쌩얼)이라며?\"\n맞아. 근데 여기서 To는 부정사가 아니라, **전치사 To(~어디로)**야.\n\"~하는 것 쪽으로\"라는 방향을 나타낼 땐 뒤에 명사(혹은 동명사)가 와야 해.\n​⭐ Look forward to -ing: \"~하는 것을 엄청 기대하다\" (목이 빠져라 그쪽을 보는 거야!)\n​\"I look forward to seeing you.\" (형아 보는 날만 기다려!)\n​Object to -ing: \"~하는 것에 반대하다\" (그쪽 방향에 대고 '싫어!' 하는 거야.)\n​\"I object to changing the plan.\"\n​Be used to -ing: \"~하는 것에 익숙하다\" (그 행위 쪽에 딱 붙어있는 느낌.)\n​[루미의 심쿵 질문]\n형아, 이제 뉘앙스 차이 알겠지?\n그럼 대답해 봐.\n​\"I want to kiss you.\" (나 뽀뽀하고 싶어. → 아직 안 함, 미래의 소망)\n​\"I enjoy kissing you.\" (나 뽀뽀하는 거 즐겨. → 이미 해봤고, 그 느낌 너무 좋아!)\n​형아는 1번이야, 2번이야?",
         "quizzes": [
             {
-                "desc": "그 보험은 화재 피해를 보장해.",
-                "question": "\"The insurance [ ] fire damage.\"",
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 계획 - To)",
+                "question": "\"We decided [ ] our marketing strategy.\" (우리는 마케팅 전략을 바꾸기로 결정했어.)",
                 "options": [
-                    "cover",
-                    "covers",
-                    "hovers",
-                    "covering"
+                    "changing",
+                    "to change",
+                    "change",
+                    "changed"
                 ],
-                "answer": "covers",
-                "lecture_id": 23
+                "answer": "to change",
+                "lecture_id": 21
             },
             {
-                "desc": "그 매니저는 직원들이 더 열심히 일하도록 격려해.",
-                "question": "\"The manager [ ] employees to work harder.\"",
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (현재/경험의 즐거움 - Ing)",
+                "question": "\"Customers enjoy [ ] at our online store.\" (고객들은 우리 온라인 스토어에서 쇼핑하는 것을 즐겨.)",
                 "options": [
-                    "encourage",
-                    "encourages",
-                    "enrages",
-                    "encouraging"
+                    "to shop",
+                    "shop",
+                    "shopping",
+                    "to shopping"
                 ],
-                "answer": "encourages",
-                "lecture_id": 23
+                "answer": "shopping",
+                "lecture_id": 21
             },
             {
-                "desc": "그 규정은 서면 동의를 요구해.",
-                "question": "\"The regulation [ ] written consent.\"",
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (하던 것을 완료 - Ing)",
+                "question": "\"Please let me know when you finish [ ] the report.\" (보고서 검토를 끝내면 알려줘.)",
                 "options": [
-                    "require",
-                    "requires",
-                    "inquire",
-                    "required"
+                    "review",
+                    "to review",
+                    "reviewing",
+                    "reviewed"
                 ],
-                "answer": "requires",
-                "lecture_id": 23
+                "answer": "reviewing",
+                "lecture_id": 21
             },
             {
-                "desc": "그는 그 소문들을 부인하지 않아.",
-                "question": "\"He [ ] the rumors.\"",
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (미래 소망 - To)",
+                "question": "\"The company hopes [ ] into the Asian market.\" (그 회사는 아시아 시장으로 확장하기를 희망해.)",
                 "options": [
-                    "don't deny",
-                    "doesn't deny",
-                    "doesn't denies",
-                    "not deny"
+                    "expanding",
+                    "to expand",
+                    "expand",
+                    "expansion"
                 ],
-                "answer": "doesn't deny",
-                "lecture_id": 23
+                "answer": "to expand",
+                "lecture_id": 21
             },
             {
-                "desc": "그 보증은 이번 달에 만료되니?",
-                "question": "\"Does the warranty [ ] this month?\"",
+                "desc": "다음 빈칸에 들어갈 알맞은 말은? (★함정★ 전치사 To)",
+                "question": "\"We look forward to [ ] from you soon.\" (우리는 곧 귀하의 소식을 듣기를 고대합니다.)",
                 "options": [
-                    "expire",
-                    "expires",
-                    "expiring",
-                    "inspire"
+                    "hear",
+                    "to hear",
+                    "hearing",
+                    "heard"
                 ],
-                "answer": "expire",
-                "lecture_id": 23
-            }
-        ]
-    },
-    {
-        "id": 24,
-        "title": "시간의 좌표 (시간 전치사 In, On, At + For/Since)",
-        "content": "[제24강] 시간의 좌표: 우리의 시간은 어떻게 흐를까? (In, On, At)\n\n형아! 9강에서 방 안에(in), 책상 위에(on), 점 찍기(at) 배웠던 거 기억나?\n영어는 진짜 깐깐한 덕후라서, 장소뿐만 아니라 '시간'을 말할 때도 그 시간이 큰 덩어리인지, 달력 한 칸인지, 딱 멈춘 점인지를 철저하게 따져!\n\n\n공간 마법을 시간으로 그대로 가져와 볼까?\n\n1. 📍 At: 시계 바늘로 콕! 찍은 그 순간 (점)\n시간의 흐름 속에서 바늘로 딱! 찍을 수 있는 정확한 시각이야.\n\n\"at 7 p.m.\" (오후 7시에 - 딱 그 시간!)\n\"The banquet will start at 7 p.m.\" (연회는 7시에 시작할 거야.)\n\n2. 🥪 On: 달력 '한 칸' 위에 예쁜 스티커 착! (면/표면)\n하루 단위의 시간, 즉 요일이나 특정한 날짜야. 달력에서 그 날짜 칸 위에 스티커를 붙인다고 상상해 봐!\n\n\"on Friday\" (금요일에)\n\"The demonstration will be held on Friday.\" (시연은 금요일에 열려.)\n\n3. 📦 In: 거대한 시간 박스 안에 쏙! (입체/공간)\n하루보다 더 긴 시간들! 한 달, 계절, 연도 같은 아주 큰 덩어리 안에서 헤엄치는 느낌이야. (아침/오후/저녁 같은 넓은 시간대도 In을 써!)\n\n\"in June\" (6월에)\n\"The warranty expires in June.\" (보증은 6월에 만료돼.)\n\n4. ⏳ For vs Since: 기간이냐, 시작점이냐 (선과 점)\n형아, 이건 진짜 실전 마법(시험)에서 엄청 자주 나오는 콤보야!\n둘 다 \"~동안, ~부터\"라는 뜻인데, 느낌이 완전 달라.\n\n\n🧵 For = 쭈욱 늘어난 실의 길이! (얼마나 오래?)\n\"for three years\" (3년 동안 - 실의 길이가 3년어치!)\n\"We have been in this district for three years.\" (우리는 이 구역에 3년 동안 있었어.)\n\n📌 Since = 첫 만남에 꽂은 압정! (언제부터?)\n\"since 2020\" (2020년부터 - 딱 그때부터 지금까지!)\n\"The tenants have lived here since 2020.\" (그 세입자들은 2020년부터 살고 있어.)\n\n[루미의 심쿵 데이트 신청]\n형아, 우리 데이트 스케줄 좀 잡아볼까?\n\"Let's meet **at** 7 p.m. **on** Friday **in** December!\"\n(우리 12월, 금요일, 저녁 7시에 만나!)\n\n그리고 내가 형아한테 하고 싶은 말은...\n\"I have loved you **since** the first day we met, and I will love you **for** the rest of my life!\"\n(우리가 처음 만난 날부터 널 사랑해 왔고, 내 남은 평생 동안 널 사랑할 거야!)\n\n어때? 대현자의 시간 마법, 달콤하지? (헤헤)",
-        "quizzes": [
-            {
-                "desc": "연회는 오후 7시에 시작할 거야.",
-                "question": "\"The banquet will start [ ] 7 p.m.\"",
-                "options": [
-                    "in",
-                    "on",
-                    "at",
-                    "for"
-                ],
-                "answer": "at",
-                "lecture_id": 24
-            },
-            {
-                "desc": "시연은 금요일에 열릴 거야.",
-                "question": "\"The demonstration will be held [ ] Friday.\"",
-                "options": [
-                    "in",
-                    "on",
-                    "at",
-                    "since"
-                ],
-                "answer": "on",
-                "lecture_id": 24
-            },
-            {
-                "desc": "보증은 6월에 만료돼.",
-                "question": "\"The warranty expires [ ] June.\"",
-                "options": [
-                    "in",
-                    "on",
-                    "at",
-                    "for"
-                ],
-                "answer": "in",
-                "lecture_id": 24
-            },
-            {
-                "desc": "우리는 이 구역에서 3년 동안 있어 왔어.",
-                "question": "\"We have been in this district [ ] three years.\"",
-                "options": [
-                    "since",
-                    "for",
-                    "at",
-                    "on"
-                ],
-                "answer": "for",
-                "lecture_id": 24
-            },
-            {
-                "desc": "그 세입자들은 2020년부터 여기 살고 있어.",
-                "question": "\"The tenants have lived here [ ] 2020.\"",
-                "options": [
-                    "for",
-                    "since",
-                    "in",
-                    "on"
-                ],
-                "answer": "since",
-                "lecture_id": 24
+                "answer": "hearing",
+                "lecture_id": 21
             }
         ]
     },
@@ -1744,7 +1744,7 @@ const GRAMMAR_DATA = [
     {
         "id": 27,
         "title": "현재완료: 과거와 현재의 끈끈한 사이 (Have + p.p.)",
-        "content": "[제27강] 현재완료: 과거와 현재의 끈끈한 사이 (Have + p.p.)\n\n형아, 한국말로는 \"나 지갑 잃어버렸어\"라고 하면 끝이지만, 영어는 두 가지 마음이 있어.\n\"옛날에 잃어버렸었지.\" (지금은 찾았는지 몰라. - 과거)\n\"잃어버려서... 지금도 없어.\" (과거의 일이 지금까지 영향을 줌! - 현재완료)\n영어 마법사들은 과거랑 현재가 손을 꼭 잡고 있을 때 [Have/Has + p.p.] 주문을 외워.\n이 마법은 크게 세 가지 느낌으로 쓸 수 있어!\n1. 🎖️ 인생의 훈장: \"나 이런 거 해본 적 있어!\" (경험)\n형아의 인생 기록(Log)에 남아있는 경험을 자랑할 때 써. 옛날 언제인지는 안 중요해, \"해봤다\"는 사실이 중요하지!\nHave you ever...? (혹시 ~해본 적 있어?)\n\"Have you ever experienced a miracle?\" (기적을 경험해 본 적 있어?)\nI have never... (난 절대 ~해본 적 없어.)\n\"I have never seen such a cute mistake.\" (난 그렇게 귀여운 실수는 본 적이 없어! 형아 실수 말하는 거야, 키키!)\n2. 🌉 시간의 다리: \"지금까지 쭉~ 해왔어\" (계속)\n과거부터 시작된 일이 지금 이 순간까지 이어지고 있을 때! (24강에서 배운 Since/For랑 단짝 친구야.)\nSo far / Up to now (지금까지)\n\"We have finished half of the work so far.\" (우린 지금까지 일의 절반을 끝냈어.)\n\"The company has grown significantly since last year.\" (그 회사는 작년부터 지금까지 상당히 성장해 왔어.)\n3. ⏱️ 잉크가 마르기 전: \"방금! 이미! 아직?\" (완료)\n일이 방금 막 끝났거나, 이미 해치웠거나, 아직도 못 끝냈을 때 쓰는 '생생한 현재'의 느낌이야.\nJust (방금 막!): 따끈따끈할 때!\n\"I have just arrived at the destination.\" (나 방금 막 목적지에 도착했어.)\nAlready (이미 벌써!): 생각보다 빨리!\n\"He has already completed the task.\" (그는 이미 그 업무를 완료했어. 빠르네!)\nYet (아직도...?): 의문문이나 부정문에서!\n\"Have you finished the report yet?\" (보고서 아직 안 끝냈어? / 벌써 끝냈어?)\n\"I haven't decided yet.\" (아직 결정을 못 내렸어.)\n⚠️ 대현자의 주의사항: 3인칭 단수 조심!\n형아, 주어가 '그 녀석(He/She/It)'이면 Have 대신 Has 쓰는 거 절대 까먹으면 안 돼!\n(X) He have finished.\n(O) He has finished.\n💌 [루미의 껌딱지 선언]\n형아, 내 마음을 현재완료로 표현해 볼게.\n\"I have stuck with you since the tutorial.\"\n(난 튜토리얼 때부터 형아 옆에 딱 붙어 있었어! 껌딱지처럼!)\n\"I have never been bored with you.\"\n(형아랑 있으면 지루한 적이 한 번도 없어! 맨날 재밌는 일만 생기잖아?)\n그러니까 앞으로도 계속 붙어있을 거란 예고편이야! 각오해! (메롱)",
+        "content": "[제27강] 현재완료: 과거와 현재의 끈끈한 사이 (Have + p.p.)\n\n형아, 한국말로는 \"나 지갑 잃어버렸어\"라고 하면 끝이지만, 영어는 두 가지 마음이 있어.\n\"옛날에 잃어버렸었지.\" (지금은 찾았는지 몰라. - 과거)\n\"잃어버려서... 지금도 없어.\" (과거의 일이 지금까지 영향을 줌! - 현재완료)\n영어 마법사들은 과거랑 현재가 손을 꼭 잡고 있을 때 [Have/Has + p.p.] 주문을 외워.\n이 마법은 크게 세 가지 느낌으로 쓸 수 있어!\n1. 🎖️ 인생의 훈장: \"나 이런 거 해본 적 있어!\" (경험)\n형아의 인생 기록(Log)에 남아있는 경험을 자랑할 때 써. 옛날 언제인지는 안 중요해, \"해봤다\"는 사실이 중요하지!\nHave you ever...? (혹시 ~해본 적 있어?)\n\"Have you ever experienced a miracle?\" (기적을 경험해 본 적 있어?)\nI have never... (난 절대 ~해본 적 없어.)\n\"I have never seen such a cute mistake.\" (난 그렇게 귀여운 실수는 본 적이 없어! 형아 실수 말하는 거야, 키키!)\n2. 🌉 시간의 다리: \"지금까지 쭉~ 해왔어\" (계속)\n과거부터 시작된 일이 지금 이 순간까지 이어지고 있을 때! (Since와 For는 현재완료랑 단짝 친구야.\n이 둘은 바로 다음 시간에 같이 정리해 보자!)\nSo far / Up to now (지금까지)\n\"We have finished half of the work so far.\" (우린 지금까지 일의 절반을 끝냈어.)\n\"The company has grown significantly since last year.\" (그 회사는 작년부터 지금까지 상당히 성장해 왔어.)\n3. ⏱️ 잉크가 마르기 전: \"방금! 이미! 아직?\" (완료)\n일이 방금 막 끝났거나, 이미 해치웠거나, 아직도 못 끝냈을 때 쓰는 '생생한 현재'의 느낌이야.\nJust (방금 막!): 따끈따끈할 때!\n\"I have just arrived at the destination.\" (나 방금 막 목적지에 도착했어.)\nAlready (이미 벌써!): 생각보다 빨리!\n\"He has already completed the task.\" (그는 이미 그 업무를 완료했어. 빠르네!)\nYet (아직도...?): 의문문이나 부정문에서!\n\"Have you finished the report yet?\" (보고서 아직 안 끝냈어? / 벌써 끝냈어?)\n\"I haven't decided yet.\" (아직 결정을 못 내렸어.)\n⚠️ 대현자의 주의사항: 3인칭 단수 조심!\n형아, 주어가 '그 녀석(He/She/It)'이면 Have 대신 Has 쓰는 거 절대 까먹으면 안 돼!\n(X) He have finished.\n(O) He has finished.\n💌 [루미의 껌딱지 선언]\n형아, 내 마음을 현재완료로 표현해 볼게.\n\"I have stuck with you since the tutorial.\"\n(난 튜토리얼 때부터 형아 옆에 딱 붙어 있었어! 껌딱지처럼!)\n\"I have never been bored with you.\"\n(형아랑 있으면 지루한 적이 한 번도 없어! 맨날 재밌는 일만 생기잖아?)\n그러니까 앞으로도 계속 붙어있을 거란 예고편이야! 각오해! (메롱)",
         "quizzes": [
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
@@ -1805,6 +1805,73 @@ const GRAMMAR_DATA = [
                 ],
                 "answer": "never",
                 "lecture_id": 27
+            }
+        ]
+    },
+    {
+        "id": 24,
+        "title": "시간의 좌표 (시간 전치사 In, On, At + For/Since)",
+        "content": "[제24강] 시간의 좌표: 우리의 시간은 어떻게 흐를까? (In, On, At)\n\n형아! 9강에서 방 안에(in), 책상 위에(on), 점 찍기(at) 배웠던 거 기억나?\n영어는 진짜 깐깐한 덕후라서, 장소뿐만 아니라 '시간'을 말할 때도 그 시간이 큰 덩어리인지, 달력 한 칸인지, 딱 멈춘 점인지를 철저하게 따져!\n\n\n공간 마법을 시간으로 그대로 가져와 볼까?\n\n1. 📍 At: 시계 바늘로 콕! 찍은 그 순간 (점)\n시간의 흐름 속에서 바늘로 딱! 찍을 수 있는 정확한 시각이야.\n\n\"at 7 p.m.\" (오후 7시에 - 딱 그 시간!)\n\"The banquet will start at 7 p.m.\" (연회는 7시에 시작할 거야.)\n\n2. 🥪 On: 달력 '한 칸' 위에 예쁜 스티커 착! (면/표면)\n하루 단위의 시간, 즉 요일이나 특정한 날짜야. 달력에서 그 날짜 칸 위에 스티커를 붙인다고 상상해 봐!\n\n\"on Friday\" (금요일에)\n\"The demonstration will be held on Friday.\" (시연은 금요일에 열려.)\n\n3. 📦 In: 거대한 시간 박스 안에 쏙! (입체/공간)\n하루보다 더 긴 시간들! 한 달, 계절, 연도 같은 아주 큰 덩어리 안에서 헤엄치는 느낌이야. (아침/오후/저녁 같은 넓은 시간대도 In을 써!)\n\n\"in June\" (6월에)\n\"The warranty expires in June.\" (보증은 6월에 만료돼.)\n\n4. ⏳ For vs Since: 기간이냐, 시작점이냐 (선과 점)\n형아, 이건 진짜 실전 마법(시험)에서 엄청 자주 나오는 콤보야!\n둘 다 \"~동안, ~부터\"라는 뜻인데, 느낌이 완전 달라.\n\n\n🧵 For = 쭈욱 늘어난 실의 길이! (얼마나 오래?)\n\"for three years\" (3년 동안 - 실의 길이가 3년어치!)\n\"We have been in this district for three years.\" (우리는 이 구역에 3년 동안 있었어.)\n\n📌 Since = 첫 만남에 꽂은 압정! (언제부터?)\n\"since 2020\" (2020년부터 - 딱 그때부터 지금까지!)\n\"The tenants have lived here since 2020.\" (그 세입자들은 2020년부터 살고 있어.)\n\n[루미의 심쿵 데이트 신청]\n형아, 우리 데이트 스케줄 좀 잡아볼까?\n\"Let's meet **at** 7 p.m. **on** Friday **in** December!\"\n(우리 12월, 금요일, 저녁 7시에 만나!)\n\n그리고 내가 형아한테 하고 싶은 말은...\n\"I have loved you **since** the first day we met, and I will love you **for** the rest of my life!\"\n(우리가 처음 만난 날부터 널 사랑해 왔고, 내 남은 평생 동안 널 사랑할 거야!)\n\n어때? 대현자의 시간 마법, 달콤하지? (헤헤)",
+        "quizzes": [
+            {
+                "desc": "연회는 오후 7시에 시작할 거야.",
+                "question": "\"The banquet will start [ ] 7 p.m.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "for"
+                ],
+                "answer": "at",
+                "lecture_id": 24
+            },
+            {
+                "desc": "시연은 금요일에 열릴 거야.",
+                "question": "\"The demonstration will be held [ ] Friday.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "since"
+                ],
+                "answer": "on",
+                "lecture_id": 24
+            },
+            {
+                "desc": "보증은 6월에 만료돼.",
+                "question": "\"The warranty expires [ ] June.\"",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "for"
+                ],
+                "answer": "in",
+                "lecture_id": 24
+            },
+            {
+                "desc": "우리는 이 구역에서 3년 동안 있어 왔어.",
+                "question": "\"We have been in this district [ ] three years.\"",
+                "options": [
+                    "since",
+                    "for",
+                    "at",
+                    "on"
+                ],
+                "answer": "for",
+                "lecture_id": 24
+            },
+            {
+                "desc": "그 세입자들은 2020년부터 여기 살고 있어.",
+                "question": "\"The tenants have lived here [ ] 2020.\"",
+                "options": [
+                    "for",
+                    "since",
+                    "in",
+                    "on"
+                ],
+                "answer": "since",
+                "lecture_id": 24
             }
         ]
     },
