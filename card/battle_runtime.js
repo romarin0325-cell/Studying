@@ -165,6 +165,11 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
         player.matk = Math.floor(player.matk * mult);
         player.def = Math.floor(player.def * mult);
         player.mdef = Math.floor(player.mdef * mult);
+
+        if (player.baseCrit === undefined) player.baseCrit = 10;
+        if (player.baseEva === undefined) player.baseEva = 0;
+        player.baseCrit += 10;
+        player.baseEva += 5;
     }
 
     if (proto.trait.type.startsWith('pos_')) {

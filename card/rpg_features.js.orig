@@ -1122,12 +1122,10 @@
 
     updateMergedBlessings() {
         this.state.chaosBuffs = [];
-
-        // Depending on which blessing is populated, set it to chaosBuffs
-        if (this.state.activeSageBlessing && this.state.activeSageBlessing.length > 0) {
-            this.state.chaosBuffs = [...this.state.activeSageBlessing];
-        } else if (this.state.activeChaosBlessing && this.state.activeChaosBlessing.length > 0) {
+        if (this.state.activeChaosBlessing && this.state.activeChaosBlessing.length > 0) {
             this.state.chaosBuffs = [...this.state.activeChaosBlessing];
+        } else if (this.state.activeSageBlessing && this.state.activeSageBlessing.length > 0) {
+            this.state.chaosBuffs = [...this.state.activeSageBlessing];
         }
         this.state.chaosBuffs = this.sortBlessingsByGrade(this.state.chaosBuffs);
     },
