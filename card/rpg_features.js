@@ -1180,7 +1180,9 @@
             msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가<br>`;
         });
         msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
-        this.openInfoModal("축복 성공", msg);
+        setTimeout(() => {
+            this.openInfoModal("축복 성공", msg);
+        }, 1200);
     },
 
     // --- Gacha & Deck UI ---
