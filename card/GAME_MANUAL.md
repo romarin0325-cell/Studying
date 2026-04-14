@@ -252,8 +252,9 @@
 - 키가 없으면 기능 실행 시 즉시 입력을 요청하고 브라우저 로컬 저장소에 저장한다.
 
 ### 숨겨진 학습 해금 조건
-- `tutoringEventEnabled === false` 상태에서 실전마법연습을 누적 5회 플레이하면 `hiddenStudyReady`가 활성화된다.
+- `tutoringEventEnabled === false` 상태에서 실전마법연습을 누적 **3회** 플레이하면 `hiddenStudyReady`가 활성화된다.
 - 꿈의회랑 런에서는 해당 숨김 해금 카운트를 올리지 않는다.
+- 꿈의회랑 퀴즈 오답 시 즉시 패배하지 않고 **3회까지 유예**된다. 오답 발생 시 즉시 저장되며, 3회 소진 시 런이 실패 처리된다. (`state.dreamCorridorLives`, 초기값 3)
 
 ---
 
