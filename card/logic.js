@@ -202,7 +202,7 @@ const GACHA_RATES = {
     }
 };
 
-const DEFAULT_UNLOCKED_BONUS_CARD_IDS = ['ancient_soul', 'sun_priestess', 'cloud_sheep', 'joker'];
+const DEFAULT_UNLOCKED_BONUS_CARD_IDS = ['ancient_soul', 'sun_priestess', 'cotton_candy_sheep', 'joker'];
 
 // ─── Artifact Definitions ─────────────────────────────────────────────────────
 
@@ -2058,6 +2058,15 @@ const Logic = {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
                 p.def = Math.floor(p.def * (1 + boost));
+            }
+        }
+
+        if (t.type === 'dessert_kingdom_synergy_boost') {
+            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius']) - 1);
+            if (count > 0) {
+                const boost = count * (t.val / 100);
+                p.atk = Math.floor(p.atk * (1 + boost));
+                p.matk = Math.floor(p.matk * (1 + boost));
             }
         }
 
