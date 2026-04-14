@@ -590,7 +590,7 @@
         let unlocked = false;
         if (this.global.tutoringEventEnabled === false) {
             this.global.hiddenStudyPracticeCount = (this.global.hiddenStudyPracticeCount || 0) + 1;
-            if (!this.global.hiddenStudyReady && this.global.hiddenStudyPracticeCount >= 5) {
+            if (!this.global.hiddenStudyReady && this.global.hiddenStudyPracticeCount >= 3) {
                 this.global.hiddenStudyReady = true;
                 unlocked = true;
             }
@@ -953,6 +953,7 @@
                 if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
                 this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
                 this.state.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections || this.global.activeSpecialCardSelections);
+                if (this.state.mode === 'dream_corridor' && this.state.dreamCorridorLives === undefined) this.state.dreamCorridorLives = 3;
                 this.loadStudyProgress();
 
                 this.showAlert("불러오기 완료");
@@ -1004,6 +1005,7 @@
             this.global.hiddenStudyReady = false;
             this.global.hiddenStudyPracticeCount = 0;
             this.saveGlobalData();
+            this.state.dreamCorridorLives = 3;
         }
 
         // Transfer Pending Transcendence to Active State (Endless Only)
@@ -1434,7 +1436,30 @@
             this.openInfoModal('꿈의회랑', msg, () => this.toMenu());
         };
 
-        const fail = (label) => this.failDreamCorridorRun(`${label}에서 오답이 발생해 꿈의회랑이 종료되었습니다.`);
+        const fail = (label) => {
+            // 현재 목숨 확인 (기본값 3)
+            const current = (this.state.dreamCorridorLives !== undefined) ? this.state.dreamCorridorLives : 3;
+            const remaining = current - 1;
+            this.state.dreamCorridorLives = remaining;
+
+            // 오답 발생 시 즉시 저장
+            this.saveGame(false);
+
+            if (remaining <= 0) {
+                // 목숨 소진 → 런 실패
+                this.failDreamCorridorRun(`${label}에서 오답이 발생해 꿈의회랑이 종료되었습니다.<br>(오답 3회 소진)`);
+            } else {
+                // 목숨 차감 후 계속 진행 안내
+                const hearts = '❤️'.repeat(remaining) + '🖤'.repeat(3 - remaining);
+                this.openInfoModal(
+                    '꿈의회랑 ─ 오답',
+                    `${label}에서 오답이 발생했습니다.<br><br>` +
+                    `남은 기회: ${hearts}<br><br>` +
+                    `(3회 오답 시 이 런은 실패 처리됩니다.)`,
+                    () => this.toMenu()
+                );
+            }
+        };
 
         if (step === 'word') {
             this.startQuiz(success => {
