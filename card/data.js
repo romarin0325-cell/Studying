@@ -251,7 +251,7 @@ const CARDS = [
 
     // --- Rare ---
     {
-        id: 'cloud_sheep', name: '구름양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
         stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
         skills: [
@@ -930,6 +930,16 @@ const BONUS_CARD_EXPANSION = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '흑조의속삭임', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
             { name: '운명의무도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
+        trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '스위트드롭', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '스타파우더 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'star_powder', mult: 2.0 }] },
+            { name: '시트러스윙크', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '트윙클파티 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'twinkle_party', mult: 2.0 }] }
         ]
     }
 ];
