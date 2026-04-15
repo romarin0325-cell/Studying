@@ -950,6 +950,7 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
     { id: 'jasmine_valentine', name: '자스민(발렌타인)', baseCardId: 'jasmine', specialSeason: 'valentine' },
     { id: 'rumi_valentine', name: '루미(발렌타인)', baseCardId: 'rumi', specialSeason: 'valentine' },
+    { id: 'luna_swimsuit', name: '루나(수영복)', baseCardId: 'luna', specialSeason: 'beach' },
     { id: 'jasmine_swimsuit', name: '자스민(수영복)', baseCardId: 'jasmine', specialSeason: 'beach' },
     { id: 'rumi_swimsuit', name: '루미(수영복)', baseCardId: 'rumi', specialSeason: 'beach' },
     { id: 'zeke_swimsuit', name: '지크(수영복)', baseCardId: 'zeke', specialSeason: 'beach' },
@@ -1017,6 +1018,14 @@ const SPECIAL_CARD_OVERRIDES = {
             { name: '초콜릿샤워', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 유혹과 침묵 부여', effects: [{ type: 'debuff', id: 'temptation' }, { type: 'debuff', id: 'silence' }] },
             { name: '하트오버드라이브', type: 'sup', tier: 2, cost: 20, desc: '필드버프 발렌타인 발동', effects: [{ type: 'field_buff', id: 'valentine' }] },
             cloneSkillByName(card, '매직가드')
+        ]
+    }),
+    'luna_swimsuit': card => ({
+        ...card,
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            { name: '루나틱스플래시', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (암흑 상태의 적에게 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
+            { name: '나이트메어비치', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '사용 후 3턴 뒤에 공격', effects: [{ type: 'delayed_attack', turns: 3 }] }
         ]
     }),
     'jasmine_swimsuit': card => ({
