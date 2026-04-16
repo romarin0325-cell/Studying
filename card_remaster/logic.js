@@ -1111,6 +1111,7 @@ const SideEffects = {
                 { id: 'rumi', skill: '밀키웨이엑스터시' },
                 { id: 'phoenix', skill: '메테오임팩트' },
                 { id: 'time_ruler', skill: '섀도우트위스트' }
+                , { id: 'cinderella', skill: '미드나잇스펠' }
             ];
 
             const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
@@ -1490,7 +1491,7 @@ const Logic = {
 
         if (t && t.type === 'guard_stun_double_dmg' && ctx.baseTargetBuffs['stun']) {
             dmgBonus += (t.val - 1.0);
-            logFn("[孖ｹ・ｱ] ・ｰ・・ ・・乱・・・・ｸ・ 2・ｰ!");
+            logFn("[특성] 해신포세이돈: 기절 상태의 적에게 대미지 2배!");
         }
 
         if (t && t.type === 'burn_stack_phy_pen' && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {

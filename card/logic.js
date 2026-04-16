@@ -256,7 +256,7 @@ const DIVINE_ARTIFACT_UNLOCKS = [
         id: 'divine_pharaoh',
         bossId: 'pharaoh',
         name: '신기 파라오',
-        desc: '방어력과 마법방어력 50% 증가, 회피율 50% 감소',
+        desc: '방어력과 마법방어력 60% 증가, 회피율 30% 감소',
         replaces: null,
         unlockChance: 0.01
     },
@@ -1355,6 +1355,7 @@ const SideEffects = {
                 { id: 'rumi', skill: '밀키웨이엑스터시' },
                 { id: 'phoenix', skill: '메테오임팩트' },
                 { id: 'time_ruler', skill: '섀도우트위스트' }
+                , { id: 'cinderella', skill: '미드나잇스펠' }
             ];
 
             const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
@@ -1597,9 +1598,9 @@ const Logic = {
         }
 
         if (isPlayer && artifacts.includes('divine_pharaoh')) {
-            m.def += 0.5;
-            m.mdef += 0.5;
-            evasionPenalty += 50;
+            m.def += 0.6;
+            m.mdef += 0.6;
+            evasionPenalty += 30;
         }
 
         // Apply Multipliers
@@ -1760,7 +1761,7 @@ const Logic = {
 
         if (t && t.type === 'guard_stun_double_dmg' && ctx.baseTargetBuffs['stun']) {
             dmgBonus += (t.val - 1.0);
-            logFn("[孖ｹ・ｱ] ・ｰ・・ ・・乱・・・・ｸ・ 2・ｰ!");
+            logFn("[특성] 해신포세이돈: 기절 상태의 적에게 대미지 2배!");
         }
 
         if (t && t.type === 'burn_stack_phy_pen' && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
