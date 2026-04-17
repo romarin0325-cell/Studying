@@ -455,7 +455,7 @@
             rewardCardId: rewardCard ? rewardCard.id : null,
             claimed: false,
             missions: {
-                endless40: { label: '무한 모드 40 스테이지 돌파', progress: 0, target: 1 },
+                endless35: { label: '무한 모드 35 스테이지 돌파', progress: 0, target: 1 },
                 challenge3: { label: '챌린지 모드 클리어 3회', progress: 0, target: 3 },
                 toeic3: { label: '실전마법연습 3회 플레이', progress: 0, target: 3 }
             }
@@ -485,6 +485,15 @@
             this.global.monthlyMission = this.createMonthlyMissionState();
             this.saveGlobalData();
         }
+
+        // Migrate old progress key if present
+        if (this.global.monthlyMission.missions && this.global.monthlyMission.missions.endless40) {
+            let progress = this.global.monthlyMission.missions.endless40.progress || 0;
+            delete this.global.monthlyMission.missions.endless40;
+            this.global.monthlyMission.missions.endless35 = { label: '무한 모드 35 스테이지 돌파', progress: progress, target: 1 };
+            this.saveGlobalData();
+        }
+
         return this.global.monthlyMission;
     },
 
@@ -641,7 +650,7 @@
         ) {
             enemyId = this.getCurrentSpecialSeason().bossId;
         }
-        if (this.state.gameType === 'endless' && stageNumber > 36 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+        if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
             enemyId = hiddenBossMap[baseId];
         }
 
@@ -829,7 +838,7 @@
 
 
     tryUnlockDivineArtifact(enemyId, stageNumber) {
-        if (this.state.gameType !== 'endless' || stageNumber <= 36) return '';
+        if (this.state.gameType !== 'endless' || stageNumber <= 30) return '';
 
         const unlock = typeof GameUtils !== 'undefined' && typeof GameUtils.getDivineArtifactUnlockByBossId === 'function'
             ? GameUtils.getDivineArtifactUnlockByBossId(enemyId)
@@ -1365,8 +1374,8 @@
         const clearStage = GameUtils.getClearStage(mode, this.state.gameType);
         const gameClear = stage >= clearStage;
 
-        if (this.state.gameType === 'endless' && stage >= 40) {
-            this.incrementMonthlyMissionProgress('endless40', 1);
+        if (this.state.gameType === 'endless' && stage >= 35) {
+            this.incrementMonthlyMissionProgress('endless35', 1);
         }
 
         // Chaos/Draft: Reset Deck/Inventory

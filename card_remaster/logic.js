@@ -130,11 +130,11 @@ const GAME_CONSTANTS = {
         balance: 18,
         archive: 18,
         overdrive: 30,
-        curse: 30,
-        flood: 30,
+        curse: 24,
+        flood: 24,
         chaos: 24,
         draft: 24,
-        artifact: 36
+        artifact: 30
     },
 
     MODE_REWARDS: {
