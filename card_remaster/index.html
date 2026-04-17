@@ -3496,7 +3496,7 @@
                     rewardCardId: rewardCard ? rewardCard.id : null,
                     claimed: false,
                     missions: {
-                        endless40: { label: '무한 모드 40 스테이지 돌파', progress: 0, target: 1 },
+                        endless35: { label: '무한 모드 35 스테이지 돌파', progress: 0, target: 1 },
                         challenge3: { label: '챌린지 모드 클리어 3회', progress: 0, target: 3 },
                         toeic3: { label: '실전마법연습 3회 플레이', progress: 0, target: 3 }
                     }
@@ -3729,7 +3729,7 @@
                 };
 
                 let enemyId = baseId;
-                if (this.state.gameType === 'endless' && stageNumber > 36 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+                if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
                     enemyId = hiddenBossMap[baseId];
                 }
 
@@ -4312,11 +4312,11 @@
                     { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
                     { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
                     { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
-                    { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배.\n(성공조건: 30 스테이지)' },
-                    { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배.\n(성공조건: 30 스테이지)' },
+                    { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
+                    { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 36 스테이지)' }
+                    { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' }
                 ];
 
                 if (this.tempGameType === 'endless') {
@@ -4324,7 +4324,7 @@
                     MODES.forEach(m => {
                         if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
-                        if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게!\n(성공조건: 없음 / 무한)';
+                        if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 없음 / 무한)';
                     });
                     if (this.global.hiddenStudyReady) {
                         MODES.push({
@@ -5478,8 +5478,8 @@
                 const clearStage = GameUtils.getClearStage(mode, this.state.gameType);
                 const gameClear = stage >= clearStage;
 
-                if (this.state.gameType === 'endless' && stage >= 40) {
-                    this.incrementMonthlyMissionProgress('endless40', 1);
+                if (this.state.gameType === 'endless' && stage >= 35) {
+                    this.incrementMonthlyMissionProgress('endless35', 1);
                 }
 
                 // Chaos/Draft: Reset Deck/Inventory

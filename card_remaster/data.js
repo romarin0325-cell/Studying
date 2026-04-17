@@ -851,7 +851,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
         trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
         skills: [
-            { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '생명력 50% 회복하고 3턴간 받는 대미지 50% 감소', effects: [{ type: 'heal_ratio', ratio: 0.5 }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
             { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
         ]
@@ -1051,7 +1051,7 @@ const TRANSCENDENCE_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '프리즘브레이커', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '덱에 포함된 속성 수 만큼 추가배율 (조커는 5속성 취급)', effects: [{ type: 'count_deck_attr_dmg' }] },
-            { name: '카오스룰렛', type: 'sup', tier: 1, cost: 10, desc: '랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
+            { name: '데스티니룰렛', type: 'sup', tier: 1, cost: 10, desc: '랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
         ]
     },
     {

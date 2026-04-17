@@ -90,7 +90,10 @@ function buildBattleEnemy(rpg) {
         ? ENDLESS_ENEMY_ROTATION.length
         : ENEMIES.length;
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
-    const scale = 1.0 + (cycle * 0.2);
+    let scale = 1.0 + (cycle * 0.2);
+    if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
+        scale = scale * 1.1;
+    }
     const enemy = {
         id: baseEnemy.id,
         name: baseEnemy.name,
