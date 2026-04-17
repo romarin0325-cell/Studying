@@ -3517,13 +3517,20 @@
                     }
                 };
             },
-
             ensureMonthlyMissionState() {
                 const currentKey = this.getCurrentMonthKey();
                 if (!this.global.monthlyMission || this.global.monthlyMission.monthKey !== currentKey) {
                     this.global.monthlyMission = this.createMonthlyMissionState();
                     this.saveGlobalData();
                 }
+
+                if (this.global.monthlyMission.missions && this.global.monthlyMission.missions.endless40) {
+                    let progress = this.global.monthlyMission.missions.endless40.progress || 0;
+                    delete this.global.monthlyMission.missions.endless40;
+                    this.global.monthlyMission.missions.endless35 = { label: '무한 모드 35 스테이지 돌파', progress: progress, target: 1 };
+                    this.saveGlobalData();
+                }
+
                 return this.global.monthlyMission;
             },
 

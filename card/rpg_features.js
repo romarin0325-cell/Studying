@@ -485,6 +485,15 @@
             this.global.monthlyMission = this.createMonthlyMissionState();
             this.saveGlobalData();
         }
+
+        // Migrate old progress key if present
+        if (this.global.monthlyMission.missions && this.global.monthlyMission.missions.endless40) {
+            let progress = this.global.monthlyMission.missions.endless40.progress || 0;
+            delete this.global.monthlyMission.missions.endless40;
+            this.global.monthlyMission.missions.endless35 = { label: '무한 모드 35 스테이지 돌파', progress: progress, target: 1 };
+            this.saveGlobalData();
+        }
+
         return this.global.monthlyMission;
     },
 
