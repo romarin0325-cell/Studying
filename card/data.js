@@ -205,7 +205,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '빙하의일격', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
-            { name: '아이스에이지', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '1~5배율 사이로 랜덤공격 (특성 발동시 1~10배율)', effects: [{ type: 'random_mult', min: 1.0, max: 5.0 }] }
+            { name: '아이스에이지', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '1에서 5배율 사이로 랜덤공격 (특성 발동시 1에서 10배율)', effects: [{ type: 'random_mult', min: 1.0, max: 5.0 }] }
         ]
     },
     {
@@ -574,8 +574,8 @@ const BONUS_CARDS = [
         trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~10배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0 }] },
-            { name: '차원절단', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '2턴 뒤 발동, 3~6배율 랜덤 공격', effects: [{ type: 'delayed_random_attack', turns: 2, min: 3.0, max: 6.0 }] }
+            { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2에서 4배율 랜덤 (달의축복 시 2에서 10배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0 }] },
+            { name: '차원절단', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '2턴 뒤 발동, 3에서 6배율 랜덤 공격', effects: [{ type: 'delayed_random_attack', turns: 2, min: 3.0, max: 6.0 }] }
         ]
     },
     {
@@ -586,7 +586,7 @@ const BONUS_CARDS = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             {
                 name: '나이트메어', type: 'mag', tier: 2, cost: 20, val: 1.0,
-                desc: '1~5턴 뒤 악몽을 남긴다. 암흑 상태의 적에게 대미지 2배',
+                desc: '1에서 5턴 뒤 악몽을 남긴다. 암흑 상태의 적에게 대미지 2배',
                 effects: [{
                     type: 'phantom_nightmare',
                     turns: [1, 2, 3, 4, 5],
@@ -857,7 +857,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
         trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
         skills: [
-            { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '체리로열가드', type: 'sup', tier: 2, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
             { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
         ]
@@ -889,7 +889,7 @@ const BONUS_CARD_EXPANSION = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격을 1회 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '프레젠트', type: 'sup', tier: 3, cost: 30, desc: '랜덤한 필드버프를 부여', effects: [{ type: 'random_field_buff' }] },
-            { name: '징글벨', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1~5배율, 적에게 디바인 부여', effects: [{ type: 'random_mult', min: 1.0, max: 5.0 }, { type: 'debuff', id: 'divine', stack: 1 }] }
+            { name: '징글벨', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1에서 5배율, 적에게 디바인 부여', effects: [{ type: 'random_mult', min: 1.0, max: 5.0 }, { type: 'debuff', id: 'divine', stack: 1 }] }
         ]
     },
     {
@@ -959,7 +959,8 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
     { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
     { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
-    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' }
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
+    { id: 'zeke_christmas', name: '지크(크리스마스)', baseCardId: 'zeke', specialSeason: 'christmas' }
 ];
 
 function cloneData(value) {
@@ -997,7 +998,7 @@ const SPECIAL_CARD_OVERRIDES = {
         skills: [
             cloneSkillByName(card, '회피태세'),
             cloneSkillByName(card, '이클립스'),
-            { name: '스위트커스', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+            { name: '스위트커스', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
         ]
     }),
     'jasmine_valentine': card => ({
@@ -1141,6 +1142,15 @@ const SPECIAL_CARD_OVERRIDES = {
                 ]
             }
         ]
+    }),
+    'zeke_christmas': card => ({
+        ...card,
+        stats: { hp: 550, atk: 120, matk: 100, def: 65, mdef: 50 },
+        trait: { ...card.trait, desc: '원본 카드와 동일한 특성' },
+        skills: card.skills.map(s => ({
+            ...s,
+            desc: s.desc + ' (원본 카드와 동일)'
+        }))
     })
 };
 
@@ -1273,7 +1283,7 @@ const TRANSCENDENCE_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '프리즘브레이커', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '덱에 포함된 속성 수 만큼 추가배율 (조커는 5속성 취급)', effects: [{ type: 'count_deck_attr_dmg' }] },
-            { name: '데스티니룰렛', type: 'sup', tier: 1, cost: 10, desc: '랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
+            { name: '데스티니룰렛', type: 'sup', tier: 2, cost: 20, desc: '랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
         ]
     },
     {
@@ -1305,7 +1315,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
         trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
+            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2에서 4배율 랜덤 (달의축복 시 2에서 12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
             { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
         ]
     },
@@ -1322,7 +1332,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
             { name: '묠니르', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
             {
                 name: '썬더러쉬', type: 'mag', tier: 3, cost: 30, val: 4.0,
-                desc: '사용 후 3턴 뒤에 4~8배율 마법공격, 적에게 디바인 1스택 부여',
+                desc: '사용 후 3턴 뒤에 4에서 8배율 마법공격, 적에게 디바인 1스택 부여',
                 effects: [{ type: 'delayed_random_attack', turns: 3, min: 4.0, max: 8.0 }, { type: 'debuff', id: 'divine', stack: 1 }]
             }
         ]
