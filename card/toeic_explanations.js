@@ -1492,4 +1492,363 @@ to부정사 요정과 -ing 동명사 요정, 둘 중 누구를 골라야 할지 
 채팅 지문은 이렇게 위아래 톡의 '티키타카' 핑퐁이 제일 중요해! 
 핑퐁 하니까 말인데... 형아랑 나도 사랑의 티키타카 한 번 해볼까? 내가 "형아 좋아해!"라고 톡 보내면, 형아는 "루미 사랑해!"라고 답장해주기! 1분 내로 읽씹 금지야! (초롱초롱)
 루미랑 같이 하니까 파트 7 채팅 지문도 별거 아니지? 우리 다음 미션에서도 찰떡궁합 보여주자! (찰싹)`
+,
+    55: `형아! 짠! 이번엔 명사 앞에 붙어서 방향을 정해주는 '관사와 한정사' 마법 시간이야! (빠밤)
+아무 옷이나 막 입으면 마법진이 꼬이는 것처럼, 명사도 셀 수 있는지, 특정한 건지, 아니면 완전 부정인지에 따라 딱 맞는 모자(관사/한정사)를 씌워줘야 해. 대현자 루미랑 같이 모자 고르러 가보자! (윙크)
+
+[문제 55-1] 아, 에, 이, 오, 우! 모음 앞엔 특별한 모자! (a vs an)
+> The consultant will provide ______ overview of the revised distribution plan at tomorrow’s briefing.
+> 정답: an
+>
+형아, 빈칸 바로 뒷단어 overview(개요)의 첫소리가 '오'라는 모음(a, e, i, o, u) 발음이지? 영어 마법에선 모음 소리 앞에 그냥 a를 쓰면 발음이 엉켜서 혓바닥에 쥐가 난대! 그래서 튼튼한 'n'이 들어간 특별한 모자 **an**을 씌워줘야 해. each는 셀 수 있는 단수명사 앞에 오지만 여긴 의미상 '개요 하나(an overview)'를 제공한다는 게 자연스러워!
+ * 루미표 예문: "You are an angel to me, Hyung-a!" (형아는 나한테 '한 명의' 천사야! 1초도 안 떨어질래! (///))
+
+[문제 55-2] 오직 딱 하나! 모두가 아는 바로 그거! (the)
+> ...submit the request form to ______ Human Resources office on the second floor.
+> 정답: the
+>
+"2층에 있는 인사팀 사무실"이라고 뒤에서 콕 집어 설명해 주고 있지? 이렇게 세상에 많고 많은 사무실들 중에서 "바로 저 녀석!" 하고 특정한 장소를 콕 찌를 때는, 당당한 손가락 마법 **the**를 써야 해! a, an, some은 막연한 걸 가리켜서 길 잃기 십상이야.
+ * 루미표 예문: "Hyung-a is the only one in my heart." (내 마음속엔 오직 '바로 그' 사람, 형아 하나뿐이야! (초롱초롱))
+
+[문제 55-3] 단 1원도 내지 마! 제로 마법! (at no cost)
+> Replacement chargers will be sent at ______ additional cost...
+> 정답: no
+>
+이건 회사에서 고객을 달랠 때 쓰는 제일 유명한 보상 마법 콤보야! '추가 비용 없이, 공짜로'라는 말을 할 때 at ( ) cost 사이에 들어갈 아주 강력한 부정 마법은 바로 **no**야! at no additional cost는 그냥 영혼의 단짝처럼 외워버려! without은 이미 '~없이'라는 전치사라 전치사 at 뒤에 또 올 수 없어.
+ * 루미표 예문: "My love for you is provided at no limit!" (형아를 향한 내 사랑은 한도 '없이' 무제한 제공이야! 맘껏 가져가! (뿌듯))
+
+형아! 명사 모자 씌우기 마법도 규칙만 알면 식은 죽 먹기지?
+근데 형아... 형아라는 완벽한 명사 앞에 붙일 수 있는 관사는 세상에 딱 하나, 대현자 루미의 **'the(유일무이한)'** 수식어뿐인 거 알지? 다른 사람이 탐내면 다 파이어볼로 날려버릴 거니까 찰싹 붙어있어! (헤헤)`,
+    56: `형아! 이번 마법은 문장 속에 또 다른 물음표를 교묘하게 숨기는 '간접의문문(의문사절)' 시간이야! (빠밤)
+누군가에게 직접 "이거 뭐야?" 하고 던지는 게 아니라, "나는 이게 뭔지 알고 싶어~" 하고 큰 문장 속에 쏙 집어넣는 고급 변신 마법이지! 자, 빈칸에 어떤 의문사 요정을 넣어야 매끄러운 마법진이 완성될지 뼈대를 잡아보자! 지팡이 꽉 잡아!
+
+[문제 56-1] 했는지, 안 했는지! 그것이 문제로다! (whether)
+> Please confirm ______ the revised contract has been signed by both parties.
+> 정답: whether
+>
+형아, 빈칸 뒤를 쓱 봐봐! "수정된 계약서에 양측이 서명했다."라는 완벽한 문장이 있지? 이 내용이 '사실인지 아닌지' 확인해 달라는 뜻이 되어야 하니까, "A인지 아닌지"를 묻는 선택의 마법 **whether**가 찰떡처럼 어울려! what이나 whose는 뒤에 명사 구멍이 뻥 뚫려 있어야 하는 탐욕스러운 요정들이라, 이렇게 꽉 찬 문장엔 못 들어가!
+ * 루미표 예문: "I don't care whether you have magic or not, I just love you!" (형아가 마법을 쓸 수 있든 '없든' 난 상관 안 해, 그냥 사랑하니까! (///))
+
+[문제 56-2] 방법과 절차를 알려다오! (how)
+> The technician demonstrated ______ the wireless scanner should be reset after each shift.
+> 정답: how
+>
+기사님이 무선 스캐너를 교대 시간마다 초기화해야 한다고 시범을 보였대. 시범(demonstrate)이라는 건 보통 '어떻게(방법)' 하는지를 보여주는 거잖아? 뒤에 완벽한 문장이 오면서 "어떻게 ~하는지"라는 절차를 쏙 넣어주는 의문 부사 **how**가 이 자리의 정답이야! which는 사물을 고를 때 쓰고, that은 그냥 사실이라 '방법'을 뜻하는 demonstrated랑은 뉘앙스가 안 맞아.
+ * 루미표 예문: "Let me demonstrate how much I love you!" (내가 형아를 '얼마나(어떻게)' 사랑하는지 지금 바로 시범 보여줄게! 꽉 안아버릴 테다! (뿌듯))
+
+[문제 56-3] 시간의 문을 열어라! (when)
+> We have not yet decided ______ the temporary reception desk will be removed from the lobby.
+> 정답: when
+>
+아직 결정을 못 내린 사항이래. 임시 리셉션 데스크를 로비에서 치우긴 치울 건데, '언제' 치울지를 못 정한 거지! 문맥상 시간의 빈칸을 채워주는 **when**이 가장 자연스러워. why(왜)도 문장으론 되지만, 안내데스크를 치우는 건 공사가 끝나면 당연히 치우는 거라 '시기'를 정하는 게 회사 일의 정석이거든!
+ * 루미표 예문: "I don't know when my feelings for you started, it just happened!" (형아를 향한 내 마음이 '언제'부터 커졌는진 몰라, 그냥 눈떠보니 푹 빠져 있었는걸! (헤헤))
+
+형아! 문장 속에 쏙 들어간 작은 의문사들도 이렇게 앞뒤 문맥(시범, 묻기, 결정)을 보면 바로 풀리지? 대현자 루미의 지팡이 끝만 잘 따라오면 이런 환영 마법은 1초 컷이야! (새끼손가락 척) 다음 마법도 가보자! 단단히 준비해 둬!`,
+    57: `형아! 짠! 이번엔 문장과 문장 사이를 요리조리 뛰어넘는 징검다리, '접속부사(전환 표현)' 마법 시간이야! (빠밤)
+이 녀석들은 진짜 접속사처럼 두 문장을 찰싹 붙이지는 못하지만, 의미상으로 "그래서!", "그러나!", "그렇지 않으면!" 하고 앞뒤 상황의 흐름을 쫙쫙 틀어주는 아주 중요한 분위기 메이커들이야! 대현자 루미가 맥락 짚는 법 알려줄게! (윙크)
+
+[문제 57-1] 원인과 결과를 이어주는 인과율 마법! (therefore)
+> The package was sent to the wrong branch; ______, a replacement order was prepared immediately.
+> 정답: therefore
+>
+형아, 앞 문장을 보면 "택배가 엉뚱한 지점으로 갔다"는 대참사가 일어났지? 그리고 뒷문장엔 "대체 주문이 즉시 준비됐다"는 해결책이 나왔어. 잘못 보냈어 👉 '그러니까(원인과 결과)' 👉 다시 보낼게! 이렇게 자연스레 결론으로 이어지는 징검다리 마법은 바로 **therefore(그러므로)**야! instead(대신에)나 otherwise(그렇지 않으면)를 넣으면 흐름이 꼬여서 고객이 뒷목 잡고 쓰러질걸!
+ * 루미표 예문: "Hyung-a smiled at me; therefore, my heart melted simply away!" (형아가 나한테 웃어줬어, '그래서' 내 심장이 속수무책으로 녹아내려 버렸지! (///))
+
+[문제 57-2] 겉과 속이 다른 반전 매력의 징검다리! (however)
+> The software patch has been installed; ______, users may still experience slower loading times this morning.
+> 정답: however
+>
+아하! 이건 마법사들의 영원한 함정 카드야! "패치를 성실하게 설치했다(긍정/해결)" 👉 근데 뒤를 보면 "여전히 속도가 느릴 수 있다(부정/문제)"라고 전혀 다른 방향으로 말이 튀고 있지? 이렇게 앞뒤가 역주행할 때는 분위기를 훅! 뒤집어버리는 반전 마법 **however(그러나)**를 중간에 놔줘야 완벽해! furthermore(게다가)를 쓰면 긍정 뒤에 긍정이 나와야 하니까 꽝!
+ * 루미표 예문: "I try to act like a Great Sage; however, in front of Hyung-a, I am just a cute boy!" (대현자처럼 근엄하게 행동하고 싶어. '하지만!' 형아 앞에만 서면 그냥 칭찬받고 싶은 애가 돼버려! (헤헤))
+
+[문제 57-3] 협박(?)의 마법! 안 그러면 큰일 나! (otherwise)
+> Please include your invoice number on the form; ______, the Finance team may not be able to process your request.
+> 정답: otherwise
+>
+이건 비즈니스에서 아주 부드럽게 협박할 때 쓰는 단골 마법이야! (찌릿) "인보이스 번호 적어라! '그렇지 않으면' 우리가 처리 못 해준다!" 앞의 요구를 안 들어줬을 때 벌어질 무시무시한 일을 경고할 땐 **otherwise(그렇지 않으면)**가 찰떡이야. similarly(마찬가지로)를 넣으면 번호를 적어줘도 처리를 안 해준다는 이상한 회사가 돼버려!
+ * 루미표 예문: "Hold my hand tight; otherwise, someone might steal me!" (내 손 꽉 잡아! '안 그러면' 지나가는 나쁜 사람이 나 훔쳐 갈지도 몰라! (뿌우))
+
+형아! 문장 사이의 분위기를 좌지우지하는 접속부사 징검다리도 문맥의 온도차(+인지 -인지)만 파악하면 스르륵 건널 수 있지? 
+근데 형아... 어떤 징검다리를 건너도 도착지는 결국 나 루미여야 해! 그렇지 않으면(otherwise) 나 진짜 삐칠 테니까! (찰싹)`,
+    58: `형아! 이번엔 저울질의 신이 강림한 '병렬구조와 등위접속사' 시간이야! (빠밤)
+마법 세계에서 양쪽에 마나(단어)를 올려놓을 때는 무조건 무게랑 모양을 똑같이 맞춰줘야 해! 한쪽엔 동사원형, 한쪽엔 -ing를 올리면 저울이 기울어서 마법진이 무너져 내린다고. 대현자 루미의 날카로운 눈으로 모양 맞추기 가보자! 지팡이 꽉 잡아!
+
+[문제 58-1] A, B, 그리고 C! 릴레이 저울 맞추기! (동사원형 병렬)
+> ...can assign meeting rooms, send reminder e-mails, and ______ attendance records automatically.
+> 정답: update
+>
+형아, 문장 속에 동사들이 릴레이 기차처럼 줄줄이 이어져 있지? 조동사 can 뒤에 1번 assign(원형), 2번 send(원형), and 그리고 3번 빈칸! 
+앞에서 형아들이 다 장식 없는 쌩얼(원형)로 왔으니까 3번 빈칸도 당연히 원형인 **update**가 와야 저울이 딱 맞아. 여기서 혼자 꼬리 달린 updating이나 updated가 오면 릴레이가 끊겨서 시스템이 폭발해!
+ * 루미표 예문: "Hyung-a can hug me, kiss me, and love me forever!" (형아는 날 안아주고, 뽀뽀해주고, 영원히 사랑해 줄 수 있어! 전부 다 해줄 거지? (///))
+
+[문제 58-2] A 아니면 B! 선택의 기로에 선 단짝 마법! (either A or B)
+> Employees may reserve the fitness studio either through the company app ______ at the front desk.
+> 정답: or
+>
+이건 마법사들의 영혼의 단짝 콤보야! 빈칸 앞에 **either** 보이지? 이 녀석이 뜨면 반사적으로 뒤에 짝꿍인 **or**를 던져줘야 해. "앱으로 하거나(A) 아니면 데스크에서 하거나(B)" 이렇게 두 선택지 중 하나를 고르라는 뜻이지. and는 both의 짝꿍이고, but은 not only의 짝꿍이라 여기선 다 튕겨 나가!
+ * 루미표 예문: "You can either look at me or hold my hand. Actually, do both!" (형아는 날 쳐다보거나 손을 잡는 거, 둘 중 하나를 선택할 수 있어. 아냐, 사실 그냥 둘 다 해줘! (헤헤))
+
+[문제 58-3] to 부정사도 쌩얼을 좋아해! (투 부정사의 뒤통수)
+> ...asked the assistant to print the handouts and ______ the visitor badges before noon.
+> 정답: prepare
+>
+자, 이번엔 to 뒤에 달린 동사들의 저울질이야! 앞에 to print(원형)가 보이지? 그리고 and가 중간에 다리를 놨어. 영어 마법에선 and 뒤에 또 to를 쓰기 귀찮아서 주로 생략하고 쌩얼(동사원형)만 남겨둬. 그러니까 print와 모양을 똑같이 맞춘 **prepare**가 정답이야! prepares나 preparing은 저울을 박살 내는 악당들이니까 조심해!
+ * 루미표 예문: "I want to protect you and make you smile every day!" (나는 매일매일 형아를 지켜주고, 웃게 '만들어주고' 싶어! 내 마음의 평형 감각은 언제나 완벽하니까! (뿌듯))
+
+형아! 양쪽 모양을 카피 앤 페이스트(복붙)하는 병렬 마법 거뜬하지? (윙크)
+형아의 왼쪽엔 내가 찰싹 붙어있고, 오른쪽에도 역시 형아를 위해 마법 쓰는 루미의 분신이 찰싹 붙어있을 테니까 우리 영원히 완벽한 수평 유지하며 걷자! 사랑의 병렬구조 완성! (총총총)`,
+    59: `형아! 짠! 이번엔 회사 주차장 자리를 두고 벌이는 치열한 눈치게임! 다중 지문(Part 7) 스케줄 조정 마법이야! (빠밤)
+안내문(Web Page), 주차장 배정표(Assignment), 그리고 불만에 찬 이메일이 잔뜩 얽혀 있어. 복잡해 보이지만 대현자 루미의 **'단서 추적'**과 **'두루마리 합체'** 신공이라면 거뜬해! 지팡이 꽉 잡아!
+
+[미션 1] 주차권은 아무나 받을 수 없다! (조건 스캔 마법)
+> Question 59-1: According to the Web page, who may apply for a monthly parking permit?
+> 정답: Full-time employees who work onsite at least three days per week
+>
+첫 번째 정보 보너스 문제! 누가 한 달 주차권을 신청할 수 있을까? 웹페이지 조건(Eligibility) 부분을 아주 빠르게 훑어봐봐! "Full-time employees scheduled onsite at least three days each workweek (주 3일 이상 현장 근무하는 정규직)"이라고 토씨 하나 안 틀리고 딱 적혀 있지? 이건 1초 만에 낚아채고 가는 거야!
+
+[미션 2] 내 럭셔리 실내 주차장 돌려내! (사유 파악하기)
+> Question 59-2: According to the assignment notice, why was Lena Cho assigned to the Overflow Lot for October?
+> 정답: East Garage will undergo resurfacing work
+>
+레나가 자기는 비싼 실내 주차장(East Garage)을 원했는데 왜 구석탱이 야외 주차장(Overflow Lot)으로 쫓겨났냐고? 두 번째 배정표(Assignment Notice)의 Important 메모를 째려봐! "Because resurfacing work will take place in East Garage... (동쪽 차고에 바닥 재포장 공사가 있어서)"라고 변명이 아주 구구절절 적혀 있지? 공사 때문이라는 게 명백한 사실!
+
+[미션 3] 레나 누나는 왜 펜을 들었는가! (이메일 목적 파악)
+> Question 59-3: Why did Lena Cho write to Facilities Support?
+> 정답: To ask about a different arrangement because she works early shifts
+>
+배정받고 화가 머리끝까지 난 레나가 쓴 편지의 본론을 살펴볼까? "나 아침 7시 15분에 출근하는데, 그 주차장(Overflow)은 8시 반부터 쓸 수 있고 셔틀도 안 오잖아! 그러니까 노스 롯(North Lot)이나 가까운 곳으로 바꿔줘!" 
+결국 일찍 출근하는 '얼리 슈프트(early shifts)'라서 다른 대안(different arrangement)을 요구하려고 이메일을 쾅쾅 쓴 거지!
+
+[미션 4] 구석탱이 야외 주차장의 진실! (단서 연결)
+> Question 59-4: What is indicated about the Overflow Lot?
+> 정답: It is served by a shuttle from Stop 2
+>
+야외 주차장(Overflow Lot)에 대해 사실인 건? 다시 첫 번째 웹페이지 두루마리 옵션 부분을 봐. "Overflow Lot: 35달러, 8:30 이후만 가능, Route B shuttle departs from Stop 2 (루트 B 셔틀이 정류장 2번에서 출발)"이라고 아주 정확하게 명시되어 있어. 셔틀버스가 2번 정류장에서 다닌다는 보기가 완벽한 정답!
+
+[미션 5] 너 다른데 가 있어! (어휘의 환영 타파)
+> Question 59-5: In the e-mail, the word "reassigned" is closest in meaning to...
+> 정답: moved to a different option
+>
+레나가 이메일에서 "would it be possible to be reassigned to the North Lot"이라고 빌고 있지? 원래 배정된 곳 말고 '새로운 곳으로 다시(re) 배정(assigned)해 달라'는 뜻이니까, 결국 "moved to a different option(다른 옵션으로 옮겨지다)"와 완벽하게 찰떡인 동의어야! 
+
+휴! 주차장 자리 쟁탈전 서류들도 단서만 똑똑히 짚어내면 순식간에 합체 완료지? (뿌듯)
+근데 형아... 회사 주차장은 자리가 부족하면 꽉 차고 쫓겨나고 난리지만, 내 마음속 1등 VVIP 주차 공간은 오직 형아의 마음(차) 하나만을 위해 영원히 비워져 있어! 24시간 언제든 얼리 슈프트로 들어와서 편하게 주차해 둬! (///) 대현자가 꽉 보증할게!`,
+    60: `형아! 이번엔 복잡한 국제 배송과 깐깐한 택배 기사님의 콜라보! 다중 지문(Part 7) 물류 마법 시간이야! (빠밤)
+택배 규정(Web Page), 택배 예약 확인서(Pickup Confirmation), 그리고 다급한 지시 이메일이 정신없이 섞여 있지? 당황하지 말고 대현자 루미의 네비게이션을 켜고 키워드만 쭉쭉 따라가 보자! (윙크)
+
+[미션 1] 오늘 당장 짐을 보내고 싶다면? (조건 스캔 마법)
+> Question 60-1: According to the Web page, what is required for same-day pickup?
+> 정답: A request entered by 11:30 a.m. on a business day
+>
+가장 기본적인 규칙부터 파헤쳐볼까? 첫 번째 웹페이지 두루마리 첫 줄에 "Same-day pickup is available Monday through Friday for requests entered by 11:30 a.m."이라고 떡하니 쓰여 있어. 평일에 오전 11시 30분 전까지 신청!! 1초 만에 정답 주워 담기 성공!
+
+[미션 2] 택배 기사님한테 쥐여줘야 할 것은? (세부 정보 찾기)
+> Question 60-2: According to the pickup confirmation, what must be given to the driver?
+> 정답: Three signed commercial invoices
+>
+두 번째 서류인 픽업 확인서를 돋보기로 들여다봐! 맨 밑에 'Driver instructions (기사님 전달사항)' 항목에 "Collect 3 signed commercial invoices at pickup (픽업 시 서명된 상업송장 3부 수거)"라고 아주 단호하게 적혀 있지? 그러니까 기사님 손에 쥐여줘야 할 건 상업송장 3부야! 서류 없는 배송은 마법 세계에서도 불법이라고! (찌릿)
+
+[미션 3] 나리 누나는 왜 다급하게 톡을 날렸을까? (이메일 목적)
+> Question 60-3: Why did Nari Kim write to Ben Walsh?
+> 정답: To ask him to prepare the shipment materials before the courier arrives
+>
+나리 누나가 이메일에서 엄청 다급해 보이지? "내가 픽업 예약해 놨으니까, 1시 45분까지 박스 좀 안내 데스크에 놔둬 줄래? 그리고 라벨도 붙이고, 송장 3부 파우치에 넣어둬!" 요약하자면 택배 기사님 오시기 전에 미리 짐이랑 서류(shipment materials) 좀 싹 다 준비해 달라고 부탁하려고 편지를 쓴 거지!
+
+[미션 4] 우리 회사는 프리미엄이 아니야... (대현자의 퓨전 추론)
+> Question 60-4: What is suggested about BrightArc Interiors?
+> 정답: It will provide its own shipping label
+>
+자, 이번엔 퍼즐 조각 합체! 첫 번째 규정에서 "라벨 프린트 서비스는 '프리미엄 계정'만 해줌"이라고 했어. 근데 나리가 보낸 이메일을 보면 "우리 계정은 기사님이 라벨 인쇄 안 해주니까 내가 첨부한 라벨을 박스에 붙여놔라"라고 슬프게 말하지? (즉, 일반 계정이라는 뜻!) 그래서 정답은 확 끌어당겨서 "회사가 직접 자기 라벨(its own shipping label)을 제공할 것이다"가 완벽해!
+
+[미션 5] 시간은 금이라구! (어휘의 환영 타파)
+> Question 60-5: In Document 2, the word "window" is closest in meaning to...
+> 정답: time period
+>
+두 번째 확인서에 "Pickup window: 2:00–4:00 p.m."라고 쓰여 있어. 형아, 이건 네모난 유리창(glass)이 아니야! 마법/비즈니스 세계에서 window는 '기회나 일정이 허락된 특정한 시간대(time period)'를 뜻하는 완전 고급 어휘거든. 그러니까 픽업 가능한 시간대를 뜻하는 time period가 정답이지!
+
+휴! 택배 예약 서류도 규정이랑 이메일 상황을 이어 붙이면 하나의 이야기로 완성되지?
+근데 형아... 내 마음을 형아한테 배송할 때는 송장도 안 붙이고 프리미엄 라벨도 필요 없어! 언제 올지 시간대(window)를 잴 필요도 없이 이미 100% 로켓 특급으로 형아 옆에 찰싹 붙어서 배송 완료됐거든! 반품 절대 불가니까 잘 데리고 살아줘! (헤헤)`,
+    61: `형아! 이번엔 1년에 딱 한 번 열리는 사내 복지(Benefits) 신청 기간의 마감 안내 메일이야! (빠밤)
+파트 6의 마법은 빈칸 주변만 보면 안 되고 위에서부터 아래로 쭈르륵 흐름을 타야 하는 거, 대현자의 수제자라면 잊지 않았지? 놓치면 병원비 엄청 깨진다는 무시무시한 협박성(?) 공지를 부드럽게 요리조리 풀어보자! 지팡이 꽉 잡아!
+
+[문제 61-1] 마법 보험의 가격이 오르락내리락! (시제와 품사)
+> ...as several monthly premium rates will (1) _______ effective January 1.
+> 정답: change
+>
+형아, 빈칸 앞에 떡하니 서 있는 아주 든든 조동사 **will** 보이지? 조동사 뒤엔 뭐다? 묻지도 따지지도 않고 장식 하나 없는 쌩얼 동사원형이 와야 해! 그러니까 s가 붙은 changes나 과거형 changed, 꼬리 달린 changing은 전부 마법진에서 튕겨 나가! "요금이 바뀔(change) 것입니다"라는 완벽한 동사원형이 정답이야!
+ * 루미표 예문: "My love for Hyung-a will never change!" (형아를 향한 내 사랑은 절대 '변하지(change)' 않을 거야! 내가 꽉 보증해! (뿌듯))
+
+[문제 61-2] HR이 돕겠다! 목표는 단 하나! (목적 접속사)
+> ...contact Human Resources as soon as possible (2) _______ we can help you complete the process before the deadline.
+> 정답: so that
+>
+포털에 접속이 안 되면 당장 HR팀에 연락하래! 왜? "마감일 전에 완료할 수 있도록 우리가 도와주기 **위해서(목적)**!"
+이렇게 뒤에 이어지는 완벽한 문장(우리가 도울 수 있다)이 앞 행동의 '의도나 목적'을 나타낼 때는 접착제 마법 **so that(~할 수 있도록)**이 찰떡이야! unless(~하지 않으면)를 넣으면 "우리가 안 도와주지 않으면 연락해라"라는 외계어가 돼버린다고!
+ * 루미표 예문: "Hold me tight so that I won't fly away!" (내가 날아가지 '않을 수 있도록(so that)' 꽉 안아줘! (///))
+
+[문제 61-3] 평범한 일상은 가라! 굴곡진 인생 마법! (어휘)
+> Employees who miss the enrollment period may be able to make changes later only after a qualifying (3) _______.
+> 정답: event
+>
+아하! 이건 사내 복지 좀 받아본(?) 직장인 마법사들만 아는 아주 꿀팁 콜로케이션이야! (찌릿) 원래 기간을 놓치면 보험을 못 바꾸는데, 예외가 있어. 결혼이나 출산 같은 엄청난 '자격 변동 사건/사유'가 생기면 예외로 바꿔주거든. 이걸 **qualifying event (예외 인정 사유/사건)**라고 끈끈하게 묶어서 부르는 고유 명사니까 꼭 외워둬!
+ * 루미표 예문: "Meeting Hyung-a is the biggest event in my life!" (형아를 만난 건 내 인생 최고의 '행사(사건)'야! 팡파르 올려! (헤헤))
+
+[문제 61-4] 대현자의 조각 맞추기! 종이는 안 받아요!
+> Sentence: Paper enrollment forms will not be accepted this year.
+> 정답: [1]
+>
+"올해는 종이 등록 신청서를 안 받습니다!"라는 아주 깐깐한 조각이네! 이게 어디에 들어가야 할까?
+첫 번째 문단을 봐봐. "모든 선택은 **HR 포털(온라인)을 통해서(through the HR portal)만** 제출해야 한다."라고 딱 명시했지? 그 바로 뒤인 **[1]**번에 "보태서 말하자면, 오프라인 종이는 안 받아!"라고 쐐기를 박아주면 흐름이 퍼펙트해져! 뒤쪽엔 서류 제출 내용이 나오니까 종이 안 받는다는 기본 원칙은 1번에 배치하는 게 제일 깔끔하지!
+
+휴! 사내 복지 메일도 뼈대와 흐름을 타니까 아주 매끄럽게 복원 완료! 
+근데 형아... 사내 복지는 자격 제한이 깐깐하고 신청 기간도 놓치면 못 바꾸지만 마리야, 대현자 루미라는 1급 심리 치유 복지 혜택은 연중무휴 365일 형아 한정으로 무제한 신청 가능해! 종이 서류도 온라인 포털도 필요 없이 내 이름 세 글자만 부르면 1초 만에 혜택이 적용된다니까! 꼭 써먹어줘! (새끼손가락 척)`,
+    62: `형아! 짠! 이번 파트 6 마법은 주말 아침부터 빡세게 굴러가는 화물 창고의 '재고 실사(Inventory Count) 작업 지시' 메일이야! (빠밤)
+재고 센다고 택배 발송 멈추고 지게차 운전사를 통제하는 엄숙한 분위기 속에서 대장급 매니저가 내리는 지시문이지. 위에서 아래로 물 샐 틈 없이 꽉 막힌 흐름을 부드럽게 뚫어버리자! 지팡이 준비 레디 고!
+
+[문제 62-1] 허락된 자만이 핸들을 잡을 수 있다! (동사 어휘)
+> ...but only certified forklift operators may (1) _______ equipment in the loading area.
+> 정답: operate
+>
+형아, 조동사 may 뒤에서 진짜 행동의 의미를 뽐낼 동사를 고르는 쌩얼 맞추기 퀘스트야! 빈칸 뒤에 equipment(장비/기계)라는 목적어가 떡하니 놓여 있지? "오직 자격증 있는 지게차 운전사만이 장비를 ( ) 할 수 있다." 기계나 장비를 **'작동하다, 다루다'**라고 할 때는 기계 전용 마법인 **operate**가 정답이야! 명사인 operation을 넣으면 조동사 may가 뒤통수를 치고 화낼걸!
+ * 루미표 예문: "Only Hyung-a can operate my heart!" (오직 형아만이 내 심장을 '작동(operate)'시킬 수 있어! 전원 스위치는 형아 손에 있다구! (///))
+
+[문제 62-2] 마감 기한의 마법, 점을 딱 찍어! (by vs until)
+> ...and submit a summary (2) _______ 3:00 p.m. Monday.
+> 정답: by
+>
+아하! 이건 마법사들의 오랜 숙원! '까지' 삼형제 구별하기야! 월요일 3시까지 요약보고서를 제출(submit)하래! 제출은 그때를 향해 으아아아~ 하고 계속하는 행동이 아니라, 3시 전 아무 때나 '빡!' 하고 한 번 던져 넣고 완료하는 행동이잖아?
+행동의 '완료 및 기한'을 날카롭게 찍어낼 때는 송곳 마법인 **by**를 써야 해! until을 쓰면 월요일 3시가 될 때까지 보고서 수백 장을 끝없이 제출해야 하는 무서운 야근 마법이 돼버려... (오싹)
+ * 루미표 예문: "I will be back by 9 o'clock. Wait for me!" (9시'까지(by)' 무조건 돌아올게. 딱 한 번만 뿅 하고 나타날 거니까 기다려줘! (뿌듯))
+
+[문제 62-3] 미래를 내다보는 꼼꼼한 마법사! (make preparations 콜로케이션)
+> ...so the necessary (3) _______ can be made in advance.
+> 정답: preparations
+>
+"특별 보호 장구가 필요하면 안전팀에 연락해라! 그래야 필요한 ( )를 미리 할 수 있으니까!"라는 문장이야. 
+빈칸 뒤에 조동사 수동태 뼈대인 can be made가 있지? 원래 모습은 "make necessary ( )"라는 아주 유명한 세트 메뉴야. "준비/대비를 단단히 하다"라고 할 때는 make의 영혼의 짝꿍인 **preparations(준비)**를 찰싹 붙여야 돼! make a preparation이라고 단수로 쓰기보다 관습적으로 -(s)를 듬뿍 달아주는 게 특징이야! (동사 원형 prepare는 명사 자리에 못 오니까 탈락!)
+
+[문제 62-4] 대현자의 조각 맞추기! 고장 난 스캐너 구출 작전!
+> Sentence: Scanners that are not working properly should be exchanged at the equipment desk before counting begins.
+> 정답: [2]
+>
+"작동 안 하는 스캐너는 숫자 세기 시작(counting begins)하기 전에 데스크에서 교환해라!"라는 지시 사항이네!
+어디 들어가는 게 제일 좋을까? 자, 두 번째 문단에서는 "목요일 오후에 자기 맡을 구역(zone)을 확인해라, 라벨 빠진 거 신고해라" 등등 재고 조사를 위한 **'구역 준비와 장비 점검'** 이야기가 한창이지! 그리고 세 번째 문단부턴 "에러 줄이려면 두 번 스캔하고..." 하면서 '실제 세고 있는' 작업 이야기가 시작돼.
+그러니까! 본격적으로 카운트(counting) 시작하기 전에 장비를 체크하라는 이 조각은 두 번째 문단이 끝나는 **[2]**번 자리에 들어가서 준비 단계를 마무리 짓는 게 가장 논리적이고 아름다운 흐름이야!
+
+휴! 먼지 날리는 창고 재고 조사 메일도 뼈대와 시간 순서만 따라가면 아주 쾌적하게 클리어 됐지? 
+형아... 복잡하게 재고 실사 같은 거 안 해도 돼! 대현자 루미의 마음속 창고에는 '형아를 향한 사랑 박스'가 오차 없이 무한대로 꽉꽉 차 있다는 걸 내가 내 목숨 걸고 보증할게! 오늘 하루도 너무 반짝반짝 수고 많았어! (헤헤)`,
+    63: `형아! 짠! 이번 마법은 파트 5의 고급 과정, **'시간과 조건의 부사절 속 시제'** 마법 시간이야! (빠밤)
+마법 세계에서 "미래에 몬스터를 만나면, 파이어볼을 날릴 거야!"라고 말할 때, 조건절 안에서는 아직 안 일어난 일이라도 현재 시제가 미래를 대신하는 엄청난 시공간 굴곡 마법이 존재하거든! 언제 미래를 쓰고 언제 현재를 써서 짝을 맞춰야 하는지 대현자가 시원하게 뚫어줄게! 지팡이 꽉 잡아!
+
+[문제 63-1] 그때쯤이면 이미 다 끝났을 거야! (미래완료의 위엄)
+> By the time the inspectors arrive, the maintenance team ______ the safety barriers around the work area.
+> 정답: will have installed
+>
+형아, 이 문장에서 엄청 중요한 시간 힌트는 맨 앞의 **By the time(~할 때쯤이면)**이야! 뒤에 inspectors arrive(검사관들이 도착한다)가 현재 시제로 쓰였지? 시간 부사절 룰에 따라 "미래에 도착할 때쯤엔"이라는 뜻을 머금고 있어!
+그럼 주절(메인 마법진)에서는 "그때쯤이면 유지보수팀이 안전 장벽 치는 걸 '이미 완료해 놓았을' 것"이라는 뜻이 와야겠지? 미래의 특정 시점 이전에 행동이 끝난다는 걸 보여주는 마법은 바로 미래완료 **will have installed** 형밖에 없어! 그냥 will install(그때부터 설치하기 시작할 거다)보다는 의미상 완벽하게 세팅 끝난 상태를 말해주는 미래완료가 찰떡 콤보야!
+ * 루미표 예문: "By the time Hyung-a wakes up, I will have prepared the sweetest breakfast!" (형아가 일어날 때쯤이면, 내가 제일 달콤한 아침 식사를 '이미 준비 다 끝내놨을' 거야! 기대해도 좋아! (뿌듯))
+
+[문제 63-2] 시간의 벽 안에서는 미래가 금지돼! (시간 부사절의 규칙)
+> Please keep the samples refrigerated until the courier ______ them up this afternoon.
+> 정답: picks
+>
+앞에 "샘플 냉장 보관해 주세요(Please keep~)"라는 뻔뻔한 현재형 명령문이 있지? 그리고 뒤에 **until(~할 때까지)**이라는 시간의 벽이 세워져 있어. 오늘 오후에 택배 기사가 '미래에' 가져가겠지만, 영어 마법 단기 속성 법전 제1장 1조! **"시간/조건 부사절(until, when, if 절 등) 안에서는 눈물을 머금고 미래 시제(will)를 현재 시제로 바꿔 써야 한다!"**
+그러니까 will pick은 문법 요정에게 두들겨 맞고 쫓겨나고, 택배 기사(단수)에 맞춰 s 꼬리까지 야무지게 단 현재 시제 **picks**가 왕좌를 차지하는 거야!
+ * 루미표 예문: "I will hold your hand tightly until the storm passes." (폭풍이 지나갈(미래일이지만 현재로!) 때'까지(until)' 내가 형아 손 꽉 잡고 있을게! (///))
+
+[문제 63-3] 일단 쾅 도장이 찍히면 쏜다! (접속사 Once + 현재/수동태)
+> Once the budget revision ______ by the director, Finance will issue the updated figures to all departments.
+> 정답: is approved
+>
+이것도 똑같은 시공간 뒤틀림 마법이야! 콤마(,) 뒤에 "Finance will issue (재무팀이 미래에 발급할 거다)"라는 미래 시제가 빵빵하게 버티고 있지? 
+하지만 접속사 **Once(일단 ~하기만 하면)**가 이끄는 조건 부사절 안에서는 will approve(미래)를 쓸 수 없어! 현재 시제로 바꿔야 하는데, 빈칸 앞에 있는 예산 수정안(budget revision)은 스스로를 승인할 수 있는 생물체가 아니잖아? 디렉터에 의해 수동으로 결재 '당해야' 하니까, (현재) + (수동태)가 합쳐진 **is approved**가 완벽하게 들어맞는 마법 주문이야!
+ * 루미표 예문: "Once my kiss is approved by Hyung-a, I will never stop!" (일단 내 뽀뽀가 형아한테 '승인되기만 하면(Once)', 난 절대 안 멈출 거야! (헤헤))
+
+형아! 시간과 조건을 나타내는 (when, until, by the time, once, if) 문장 안에서는 앞으로 벌어질 미래(will)라도 현재 시제로 꾹꾹 눌러 담아준다는 공식! 이거 하나만 알면 시제 함정 문제들은 다 형아 앞에서 벌벌 떨 거야!
+근데 형아... 미래의 시제는 싹 다 현재로 바뀐다지만, 형아를 향한 내 마음은 영원한 현재진행형(am loving)이자 흔들림 없는 미래형(will love)이야. 시공간의 법칙도 루미의 사랑 마법은 못 이긴다구! (새끼손가락 척)`,
+    64: `형아! 이번 마법은 뒤에 쫓아오는 꼬맹이 동사들에게 "너 이거 입어!" 하고 강제로 옷을 입히는, '동사 문형 패턴(5형식 마법)' 시간이야! (빠밤)
+주인공 대장 동사들은 취향이 지독하게 확고해서 전화를 거는 대상(목적어) 뒤에 오는 행동 요정들에게 저마다 다른 모자나 꼬리를 달아주거든. 누구는 to를 달고 오라 하고, 누구는 -ing로 방해해 버리고! 대장들의 취향만 꿰뚫으면 1초 컷! 출발해보자!
+
+[문제 64-1] 너에게 허락하노라, 앞으로 나아가라! (allow + 목적어 + to 부정사)
+> The new expense portal allows employees ______ receipts directly from their phones.
+> 정답: to upload
+>
+형아, 문장 중간에 **allows(허락하다)**라는 너그러운 동사가 보이지? 이 녀석은 "직원들(employees)에게 이러이러한 행동을 하도록 허락해 준다" 구조로 쓰이는데, 허락을 받고 나면 '미래(앞으로)' 행동을 하게 되잖아?
+영어 마법에서 '미래 지향적인 방향성'을 담은 화살표 모자가 바로 **to 부정사**야! 그래서 allow는 무조건 목적어 뒤에 영혼의 짝꿍으로 to 부정사를 불러와! 동사원형 upload나 꼬리가 달린 uploading은 옷차림이 맘에 안 든다며 쫓아내 버려. 정답은 **to upload**! (ask, expect, encourage, want도 다 이파야!)
+ * 루미표 예문: "Hyung-a, please allow me to hold your hand!" (형아, 제발 형아 손을 잡을 수 '있게 허락해(allow me to hold)' 줘! 꽉 잡고 안 놔줄래! (///))
+
+[문제 64-2] 전문가의 조언, 가야 할 길을 제시하다! (advise + 목적어 + to 부정사)
+> Our legal team advised the supplier ______ the wording in Section 4 before signing the contract.
+> 정답: to revise
+>
+아하! 이것도 allow랑 똑같은 마법 동아리 소속이야! **advise(충고/조언하다)**는 법무팀이 공급업체(the supplier)에게 "앞으로 계약서 서명하기 전에 섹션 4의 문구를 이렇게 수정하시는 게 좋을 겁니다!"라고 미래의 방향을 던져주는 단어지?
+역시 미래 지향적인 화살표 빔, **to 부정사** 모자가 찰떡이야! 동사원형 revise는 쌩얼이라 안 되고, ~ing는 과거 지향이라 탈락! 그러니까 **to revise**가 완벽한 정답 커플링이야.
+ * 루미표 예문: "I strongly advise you to look only at me!" (내가 아주 강력하게 조언하는데, 다른 데 보지 말고 오직 나만 '바라봐야 해(advise you to look)'! 알았지? (뿌듯))
+
+[문제 64-3] 아예 싹을 자르는 강력한 철벽 방어! (prevent A from -ing)
+> The delay prevented the technicians from ______ the network test before noon.
+> 정답: completing
+>
+형아, 이건 아주 못된(?) 금지 마법 콤보야! 맨 앞에 있는 **prevent(막다, 예방하다)**를 조심해! 지연(delay) 사태가 기술자들(the technicians)의 작업을 방해하면서 철벽을 친 거야. 
+"A가 ~하는 것을 막다"라는 방어막 마법은 무조건 중간에 든든한 방패인 전치사 **from(출처/분리)**을 끼워 넣어야 해! 그리고 전치사 뒤에는 동사가 오고 싶으면 엉덩이를 명사처럼 무겁게 만드는 **-ing(동명사)** 꼬리를 무조건 달아야 튕겨나가지 않거든! 그래서 from complete나 from to complete는 불법이고, **completing**만 성 안에 들어올 수 있어! (keep, stop도 똑같은 방어막 마법이야!)
+ * 루미표 예문: "Nothing can prevent me from loving Hyung-a!" (이 세상 그 무엇도 내가 형아를 사랑하는 걸 '막을 순(prevent me from loving)' 없어! 폭풍이 와도 직진할 거야! (초롱초롱))
+
+형아! 동사들이 목적어 뒤에 어떤 요정을 데리고 다니는지(미래로 이끌면 to V, 꽉 막고 차단하면 from V-ing!) 그 뼈대와 짝꿍의 뉘앙스만 파악하면 5형식 문형 문제도 식은 죽 먹기지?
+마법 세계의 룰은 엄격하지만, 내가 룰을 정할 수 있다면 I allow Hyung-a to do whatever you want with me! (난 형아가 나한테 무슨 짓을 하든 다 허락할 거야!) (헤헤) 진짜 갓벽하게 클리어했어!`,
+    65: `형아! 짠! 이번 마법은 비즈니스 편지나 영수증에서 매일매일 날아다니는, '출장, 배송, 예약 실무 어휘' 총집합 시간이야! (빠밤)
+단어 책에선 비슷비슷하게 생겼지만 막상 주문서나 공항 데스크에선 엄격하게 자기 자리가 나눠져 있는 도도한(?) 명사 요정들이야. 대현자의 눈으로 찰떡같이 어울리는 단어를 골라내 보자! 지팡이 꽉 잡아!
+
+[문제 65-1] 호텔 체크아웃 늦었을 때 내야 하는 징벌금? (fee의 쓰임새)
+> The hotel agreed to waive the late check-out ______ because the flight had been canceled.
+> 정답: fee
+>
+형아, 비행기 결항 때문에 늦게 체크아웃했는데 호텔에서 넓은 아량으로 '이것'을 면제(waive)해 줬대. 뒤늦게 나가서 물어야 하는 연체료나 수수료를 뜻하는 한 방 단어는? 바로 **fee**야! 
+fare는 택시비나 비행기표 같은 '교통 요금'에만 타는 특권층이고, price는 물건에 붙은 꼬리표 '가격', salary는 매달 통장에 꽂히는 '월급'이라 호텔 연체료로는 성에 안 차! 그러니까 각종 서비스 이용료나 수수료를 퉁칠 수 있는 **fee**가 완벽해!
+ * 루미표 예문: "My cuddling service is totally free of charge. No fee at all!" (나의 꽉 껴안기 서비스는 완전 무료야. '수수료(fee)' 같은 건 1원도 안 받으니까 매일매일 써줘! (///))
+
+[문제 65-2] 내 물건 어디쯤 오고 있나? (shipment의 정체)
+> Customers can track the status of each ______ by entering the reference number online.
+> 정답: shipment
+>
+택배 송장 번호(reference number)를 온라인에 입력해서 상태(status)를 추적(track)할 수 있는 대상이 뭐겠어? 당연히 상자에 포장되어 슝슝 배달 가고 있는 **'화물, 발송품(shipment)'**이지! payroll은 직원들 월급 목록(급여 대장)이고, warranty는 찢어지면 물어준다는 무시무시한 '보증서'라서 배달 추적이랑은 결이 완전 달라.
+ * 루미표 예문: "My shipment of huge love for Hyung-a has already arrived at your door!" (형아를 향한 내 거대한 사랑 덩어리 화물(shipment)은 이미 형아 집 문 앞에 도착해 있어! 빨리 수령해! (뿌듯))
+
+[문제 65-3] 단 한 번의 비즈니스 트립, 빈틈없이 짜인 시간표 (itinerary)
+> Please review the attached ______ for tomorrow’s client visit and notify me of any scheduling conflicts.
+> 정답: itinerary
+>
+형아, 이건 토익 비즈니스 마법에서 별표 다섯 개짜리 특급 어휘야! 뒤에 "tomorrow’s client visit(내일 고객 방문)"과 "scheduling conflicts(일정 겹침)"이라는 힌트 단어들의 교집합을 찾아봐!
+내일 출장이나 고객 방문 때 몇 시에 어딜 가고 누굴 만나는지 분 단위로 빽빽하게 짜 놓은 **'여행 일정표/출장 스케줄'**을 아주 멋지게 부르는 단어가 바로 **itinerary(아이티너러리)**야! contract(계약서)에 시간표를 짤 필욘 없고, résumé(이력서)는 내일 방문 전이 아니라 입사 전에 내는 거잖아!
+ * 루미표 예문: "Looking at my itinerary for life, every single day is marked as 'being with Hyung-a'!" (내 인생 '일정표(itinerary)'를 쭉 보니까 365일에 매일매일 '형아랑 착 붙어있기'로 일정이 꽉 차 있네! 아무도 못 끼어들어! (헤헤))
+
+형아! 실무 환경에서 쓰는 어휘들은 이렇게 주변에 있는 단서(waive, track the status, schedule)랑 찰떡궁합인 뜻을 고르면 환영에 속아 넘어가지 않아.
+비즈니스 일정표(itinerary)나 물류(shipment)는 복잡해도, 내 마음의 목적지는 계산 안 해도 오직 한 사람뿐이라 초고속 하이패스야! 진짜 진짜 수고 많았어, 푹 쉬어! (새끼손가락 척)`,
+    66: `형아! 짠! 마지막을 장식할 마법은 바로 둘이 합쳐져서 하나의 강력한 뜻을 뿜어내는 '실무 콜로케이션(복합명사)' 콤보 시간이야! (빠밤)
+마치 얼음 속성과 불 속성이 만나 폭발적인 퓨전 마법을 내는 것처럼, 비즈니스 요정들은 항상 특정한 단어끼리 손을 꽉 잡고 다녀. 마치 나랑 형아처럼 떨어질 수 없는 영혼의 짝꿍을 1초 만에 척척 맞추러 가볼까? 지팡이 꽉 잡아!
+
+[문제 66-1] 철통 보안의 첫 관문! 어디서 명부를 적어야 할까?
+> All visitors must check in at the security ______ before entering the laboratory wing.
+> 정답: desk
+>
+형아! 외부 방문객(visitors)이 건물 실험실로 들어가기 전에 반드시 들려서 뱃지도 챙기고 신분확인을(check in) 해야 하는 장소가 있지? 이건 무조건 외워야 하는 자동완성 단어야. 회사의 로비 입구를 지키는 1순위 철벽 방어구역! 바로 **security desk(경비 구역/안내 데스크)**야! security label(보안 상표)에 방문객이 체크인할 수는 없는 노릇이잖아!
+ * 루미표 예문: "You don't have to check in at any security desk to enter my heart, Hyung-a!" (내 마음에 들어올 때는 복잡한 보안 '데스크(desk)' 거칠 필요 없어! 지문 등록 안 해도 프리패스 대환영이야! (///))
+
+[문제 66-2] 갑작스러운 일정 변경은 앙돼! 미리미리 말해달라구! (advance + 명사)
+> The marketing team asked for advance ______ before any changes were made to the promotional schedule.
+> 정답: notice
+>
+아하! 빈칸 앞의 **advance(미리, 사전에)**라는 단어는 아주 극강의 편식쟁이라서 뒤에 오는 명사를 짱 까다롭게 골라! 프로모션 스케줄을 바꾸기 전에 "사전에 미리 (통보/알림) 좀 달라"고 요청하는 상황이잖아? 
+이렇게 "사전 통지, 사전 알림"을 뜻하는 우주 대스타 세트 메뉴는 바로 **advance notice(사전 통지)**야! advance notification보다 훨씬 압도적으로 찰떡같이 쓰이는 한 몸이니까 입에 익혀두는 게 좋아. 형용사 뒤니까 동사인 notify나 과거형은 알아서 튕겨 나가고!
+ * 루미표 예문: "I demand advance notice if you are going to smile like that. My heart drops!" (형아가 그렇게 무방비하게 웃을 거면 나 진짜 '사전 통지(advance notice)' 좀 해줘! 갑자기 심장이 쿵 떨어지잖아! (뿌우))
+
+[문제 66-3] 목 빠지게 기다리고 있는 윗사람의 도장 쾅! (manager approval)
+> The replacement parts are still pending manager ______, so the repair cannot begin yet.
+> 정답: approval
+>
+형아, 부품 수리 시작을 못 하고 밍기적거리는 이유가 뭐야? 매니저의 (결재/승인)이라는 행정을 아직 목 빠지게 기다리고 있어서(pending) 그래! 
+manager 앞에는 소유격('s)이 없지만, 이렇게 직책 명사와 결재 서류 명사가 부딪혀서 하나의 큰 복합명사를 만들 때가 많아. 매니저의 도장 콱! 이라는 의미의 묵직한 명사 꼬리표를 단 **approval(승인/결재)**이 들어가야 마법진이 무너지지 않아! pending 뒤엔 명사 목적어가 필요하니까 동사형인 approve, approved, approving은 바로 아웃!
+ * 루미표 예문: "I don't need any manager's approval to hug you!" (형아를 꽉 안아버리는데 남들 '승인(approval)' 따위는 절대 안 필요해! 내 마음은 항상 100% 프리패스 승인 완료니까! (뿌듯))
+
+형아! 회사 필수 콜로케이션인 security desk, advance notice, manager approval! 이거 세 조각만 머릿속에 콱 박아두면 이런 복합명사 문제는 1초 만에 웃으면서 넘길 수 있어.
+근데 마리야... 아무리 단어들이 끈끈하게 붙어 다니는 콜로케이션이라 해도, 나랑 형아가 손 꽉 잡고 있는 콤보 마법보다 더 완벽하게 어울릴 순 없을걸? 대현자가 내 이름 걸고 꽉 보증할게! (새끼손가락 척) 길고 긴 토익 마법 두루마리 부수느라 진짜 수고 많았어, 형아 최고! (헤헤)`
 };
