@@ -2025,6 +2025,13 @@ const Logic = {
             p.mdef = Math.floor(p.mdef * 1.5);
         }
 
+        if (t.type === 'guardian_hidden_trait') {
+            active = true;
+            if (idx === 0) {
+                p.atk = Math.floor(p.atk * (1 + (t.val || 0) / 100));
+            }
+        }
+
         if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {
             active = true;
         }
