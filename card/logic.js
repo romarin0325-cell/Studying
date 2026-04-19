@@ -1073,6 +1073,10 @@ const SideEffects = {
     handlers: {
         'buff': (ctx, eff) => {
             ctx.source.buffs[eff.id] = (eff.duration || 1);
+            if (eff.id === 'guard') {
+                const isBasicGuardSkill = ctx.skill && ctx.skill.name === '가드' && (eff.duration || 1) === 1;
+                ctx.source.guardEnhancedEligible = !!isBasicGuardSkill;
+            }
         },
         'debuff': (ctx, eff) => {
             let t = ctx.target;
@@ -2023,6 +2027,13 @@ const Logic = {
         if (t.type === 'cure_master_trait' && deckCtx.countElement('water') >= 3) {
             active = true;
             p.mdef = Math.floor(p.mdef * 1.5);
+        }
+
+        if (t.type === 'guardian_hidden_trait') {
+            active = true;
+            if (idx === 0) {
+                p.atk = Math.floor(p.atk * (1 + (t.val || 0) / 100));
+            }
         }
 
         if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {

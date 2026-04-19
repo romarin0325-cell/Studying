@@ -189,12 +189,12 @@
 
 
     getSpecialMissionUnlockChance(stageNumber) {
-        if (stageNumber >= 36) return 0.30;
-        if (stageNumber >= 30) return 0.25;
-        if (stageNumber >= 24) return 0.20;
-        if (stageNumber >= 18) return 0.15;
-        if (stageNumber >= 12) return 0.10;
-        if (stageNumber >= 6) return 0.05;
+        if (stageNumber >= 36) return 0.35;
+        if (stageNumber >= 30) return 0.30;
+        if (stageNumber >= 24) return 0.25;
+        if (stageNumber >= 18) return 0.20;
+        if (stageNumber >= 12) return 0.15;
+        if (stageNumber >= 6) return 0.10;
         return 0;
     },
 
@@ -597,14 +597,10 @@
         }
 
         let unlocked = false;
-        if (this.global.tutoringEventEnabled === false) {
-            this.global.hiddenStudyPracticeCount = (this.global.hiddenStudyPracticeCount || 0) + 1;
-            if (!this.global.hiddenStudyReady && this.global.hiddenStudyPracticeCount >= 3) {
-                this.global.hiddenStudyReady = true;
-                unlocked = true;
-            }
-        } else {
-            this.global.hiddenStudyPracticeCount = 0;
+        this.global.hiddenStudyPracticeCount = (this.global.hiddenStudyPracticeCount || 0) + 1;
+        if (!this.global.hiddenStudyReady && this.global.hiddenStudyPracticeCount >= 3) {
+            this.global.hiddenStudyReady = true;
+            unlocked = true;
         }
         this.saveGlobalData();
         return unlocked;

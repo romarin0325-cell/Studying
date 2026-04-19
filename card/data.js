@@ -805,7 +805,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
             { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -933,13 +933,33 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'bonus',
+        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
         stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
         trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '스위트드롭', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '스타파우더 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'star_powder', mult: 2.0 }] },
             { name: '시트러스윙크', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '트윙클파티 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'twinkle_party', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'guardian', name: '가디언', grade: 'epic', element: 'nature', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 410, atk: 110, matk: 65, def: 70, mdef: 75 },
+        trait: { type: 'guardian_hidden_trait', val: 30, guardReduction: 0.75, desc: '선봉 배치 시 공격력 30% 증가 / 덱 전체 가드 피해 감소율 75%로 강화' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '배틀필드', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
+            { name: '판게아리버스', type: 'mag', tier: 3, cost: 30, val: 7.0, desc: '4턴 뒤 발동하는 마법 공격', effects: [{ type: 'delayed_attack', turns: 4 }] }
+        ]
+    },
+    {
+        id: 'ash', name: '애쉬', grade: 'epic', element: 'fire', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 420, atk: 120, matk: 70, def: 50, mdef: 50 },
+        trait: { type: 'ally_death_base_atk_phy', val: 3.0, desc: '아군이 사망할 때 자신의 기본 공격력 기준 물리 반격' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '아마겟돈', type: 'phy', tier: 3, cost: 30, val: 7.0, desc: '현재 생명력 50% 소모, 다음 턴 휴식', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.5 }, { type: 'self_debuff', id: 'stun', duration: 1 }] },
+            { name: '드림파이어', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '마법 공격 후 회피 태세 진입', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] }
         ]
     }
 ];
@@ -1432,7 +1452,7 @@ ENEMIES.push(
         copyFromId: 'thor',
         element: 'light',
         specialSeason: 'beach',
-        stats: { hp: 1500, atk: 140, matk: 80, def: 140, mdef: 80 }
+        stats: { hp: 1500, atk: 80, matk: 140, def: 80, mdef: 140 }
     },
     {
         id: 'ares_halloween',

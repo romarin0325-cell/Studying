@@ -77,8 +77,12 @@ function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
         const duration = target.buffs[buffId];
         if (!duration) return;
 
-        if (duration > 1) target.buffs[buffId] = duration - 1;
-        else delete target.buffs[buffId];
+        if (duration > 1) {
+            target.buffs[buffId] = duration - 1;
+        } else {
+            delete target.buffs[buffId];
+            if (buffId === 'guard') delete target.guardEnhancedEligible;
+        }
     });
 }
 
@@ -201,12 +205,21 @@ const BattleRuntime = {
         rpg.battle.players = rpg.state.deck.map((cardId, idx) => buildBattlePlayer(rpg, cardId, idx, allCards));
         const hasAttackSwap = rpg.battle.players.some(player => player && player.proto && player.proto.trait.type === 'reverse_atk_matk_party');
         const normalAttackTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_normal_attack_dmg');
+        const guardBoostTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'guardian_hidden_trait');
         if (hasAttackSwap || normalAttackTrait) {
             rpg.battle.players.forEach(player => {
                 if (!player) return;
                 if (hasAttackSwap) player.swapAtkMatk = true;
                 if (normalAttackTrait) player.normalAttackPartyMult = normalAttackTrait.proto.trait.val || 1.0;
             });
+        }
+        if (guardBoostTrait) {
+            const guardReduction = Math.max(0, Math.min(0.95, guardBoostTrait.proto.trait.guardReduction || 0.75));
+            rpg.battle.players.forEach(player => {
+                if (!player) return;
+                player.guardDamageReduction = Math.max(player.guardDamageReduction || 0, guardReduction);
+            });
+            rpg.log('[특성] 가디언: 덱 전체 가드 효과가 강화됩니다!');
         }
         rpg.battle.fieldBuffs = [];
         rpg.battle.delayedEffects = [];
@@ -448,8 +461,12 @@ const BattleRuntime = {
             const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
             if (guardSucceeded) {
-                dmg *= 0.5;
-                rpg.log(`${target.name} 가드 성공! 피해 반감.`);
+                const guardReduction = target.guardEnhancedEligible
+                    ? (target.guardDamageReduction || 0.5)
+                    : 0.5;
+                dmg *= (1 - guardReduction);
+                const guardPercent = Math.round(guardReduction * 100);
+                rpg.log(`${target.name} 가드 성공! 피해 ${guardPercent}% 감소.`);
             }
             dmg = Math.floor(dmg);
             target.hp -= dmg;
@@ -534,14 +551,14 @@ const BattleRuntime = {
 
     handleLinkedDeathTraits(rpg, victim, killer) {
         if (!victim || !killer || killer.hp <= 0 || !victim.proto) return;
-        if (!GameUtils.cardMatchesElement(victim.proto, 'light')) return;
 
         const players = Array.isArray(rpg.battle.players) ? rpg.battle.players : [];
         players.forEach(player => {
             if (!player || !player.proto || !player.proto.trait) return;
-            if (player.proto.trait.type !== 'ally_light_death_base_matk_mag') return;
+            if (player.proto.trait.type !== 'ally_light_death_base_matk_mag' && player.proto.trait.type !== 'ally_death_base_atk_phy') return;
             if (player.isDead && player !== victim) return;
             if (killer.hp <= 0) return;
+            if (player.proto.trait.type === 'ally_light_death_base_matk_mag' && !GameUtils.cardMatchesElement(victim.proto, 'light')) return;
 
             const proxySource = {
                 name: player.name,
@@ -560,12 +577,19 @@ const BattleRuntime = {
                     trait: { type: 'field_buff_immune' }
                 }
             };
-            const retaliationSkill = {
-                name: '성야의 기적',
-                type: 'mag',
-                val: player.proto.trait.val || 2.0,
-                effects: []
-            };
+            const retaliationSkill = player.proto.trait.type === 'ally_death_base_atk_phy'
+                ? {
+                    name: '화염 반격',
+                    type: 'phy',
+                    val: player.proto.trait.val || 3.0,
+                    effects: []
+                }
+                : {
+                    name: '성야의 기적',
+                    type: 'mag',
+                    val: player.proto.trait.val || 2.0,
+                    effects: []
+                };
             const dmgResult = Logic.calculateDamage(
                 proxySource,
                 killer,
@@ -581,13 +605,16 @@ const BattleRuntime = {
 
             if (rpg.hasArtifact('companion')) {
                 dmgResult.dmg *= 2;
-                rpg.log('[아티팩트] 길동무: 성야의 기적 대미지 2배!');
+                rpg.log(`[아티팩트] 길동무: ${retaliationSkill.name} 대미지 2배!`);
             }
 
             if (dmgResult.dmg > 0) {
                 killer.hp -= dmgResult.dmg;
                 killer.tookDamageThisTurn = true;
-                rpg.log(`[특성] ${player.name}: 빛속성 아군의 희생에 반응! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+                const traitLog = player.proto.trait.type === 'ally_death_base_atk_phy'
+                    ? `[특성] ${player.name}: 아군 사망 반응!`
+                    : `[특성] ${player.name}: 빛속성 아군의 희생에 반응!`;
+                rpg.log(`${traitLog} ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
             }
         });
     },
