@@ -1521,8 +1521,12 @@
                 style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
                 데이트 준비 중...
             </div>
-            <button class="menu-btn" onclick="RPG.finishDate()"
-                style="margin-top:10px; border-color: #ff80ab; color: #ff80ab;">데이트 종료</button>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button id="date-retry-btn" class="menu-btn" onclick="RPG.retryDateWithFallback()"
+                    style="display:none; flex:1; margin-top:0; border-color:#81d4fa; color:#81d4fa;">Lite로 다시 시도</button>
+                <button class="menu-btn" onclick="RPG.finishDate()"
+                    style="flex:1; margin-top:0; border-color: #ff80ab; color: #ff80ab;">데이트 종료</button>
+            </div>
         </div>
     </div>
 
@@ -3738,7 +3742,7 @@
                 if (resetBtn) resetBtn.innerText = ui.resetLabel || '대화 초기화';
                 if (modelBtn) modelBtn.innerText = LumiQuestionRuntime.getSelectedModelLabel();
                 this.syncLumiSearchRuntime();
-                this.updateLumiSearchButtons();
+                this.updateLumiSearchButtons(session);
                 if (cancelBtn) cancelBtn.disabled = !(session && session.inFlight);
                 if (input) {
                     input.placeholder = session.mode === 'toeic-review'
@@ -3761,10 +3765,17 @@
                 return enabled;
             },
 
-            updateLumiSearchButtons() {
-                const label = LumiQuestionRuntime.getSearchButtonLabel();
+            updateLumiSearchButtons(session = this.getActiveLumiChatSession()) {
+                const forcedOff = !!(session && session.enableSearch === false);
+                const label = LumiQuestionRuntime.getSearchButtonLabel(session);
                 const chatBtn = document.getElementById('lumi-chat-search-btn');
-                if (chatBtn) chatBtn.innerText = label;
+                if (chatBtn) {
+                    chatBtn.innerText = label;
+                    chatBtn.disabled = forcedOff;
+                    chatBtn.style.opacity = forcedOff ? '0.55' : '1';
+                    chatBtn.style.cursor = forcedOff ? 'not-allowed' : 'pointer';
+                    chatBtn.title = forcedOff ? 'TOEIC 질문에서는 검색을 사용할 수 없습니다.' : '';
+                }
             },
 
             openLumiChatSession(session, sessionKey) {
@@ -3959,13 +3970,19 @@
             },
 
             toggleLumiSearch() {
+                const session = this.getActiveLumiChatSession();
+                if (session && session.enableSearch === false) {
+                    this.updateLumiSearchButtons(session);
+                    this.setLumiChatStatus('TOEIC 질문에서는 검색을 사용할 수 없어.');
+                    return;
+                }
+
                 const nextEnabled = !(this.global.lumiSearchEnabled !== false);
                 this.global.lumiSearchEnabled = nextEnabled;
                 LumiQuestionRuntime.setSearchEnabled(nextEnabled);
                 this.updateLumiSearchButtons();
                 this.saveGlobalData();
 
-                const session = this.getActiveLumiChatSession();
                 if (session && session.inFlight) {
                     this.setLumiChatStatus('검색 설정 변경은 다음 질문부터 적용돼.');
                 } else {
@@ -4038,9 +4055,10 @@
                     if (error.canceled) {
                         this.setLumiChatStatus(LumiQuestionRuntime.getCanceledStatus());
                     } else if (error.retryable) {
-                        this.setLumiChatStatus('응답이 흔들렸어. 다시 시도하거나 Pro로 바꿔볼 수 있어.');
+                        const alternateModel = LumiQuestionRuntime.getAlternateModel(LumiQuestionRuntime.selectedModel);
+                        this.setLumiChatStatus(`응답이 흔들렸어. 다시 시도하거나 ${LumiQuestionRuntime.getModelLabel(alternateModel)}로 바꿔볼 수 있어.`);
                     } else {
-                    this.setLumiChatStatus('답변 요청에 실패했어.');
+                        this.setLumiChatStatus('답변 요청에 실패했어.');
                     }
                 } finally {
                     this.isLumiChatLoading = false;
@@ -4853,6 +4871,77 @@
                 );
             },
 
+            updateDateRetryButton(options = {}) {
+                const retryBtn = document.getElementById('date-retry-btn');
+                if (!retryBtn) return;
+
+                const visible = options.visible === true;
+                const disabled = options.disabled === true;
+                const fallbackModel = 'gemini-3.1-flash-lite-preview';
+                retryBtn.textContent = `${LumiQuestionRuntime.getModelLabel(fallbackModel)}로 다시 시도`;
+                retryBtn.style.display = visible ? 'block' : 'none';
+                retryBtn.disabled = disabled;
+                retryBtn.style.opacity = disabled ? '0.55' : '1';
+                retryBtn.style.cursor = disabled ? 'default' : 'pointer';
+            },
+
+            setDateLoadingState(dateParams, modelId) {
+                const contentBox = document.getElementById('date-content');
+                if (!contentBox || !dateParams) return;
+
+                const isFallback = modelId === 'gemini-3.1-flash-lite-preview';
+                const modelNote = isFallback
+                    ? `<br><span style="font-size:0.8rem; color:#81d4fa;">${LumiQuestionRuntime.getModelLabel(modelId)} 모델로 다시 시도 중...</span>`
+                    : '';
+                contentBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">💕 루미가 데이트를 준비하고 있어요...<br>(잠시만 기다려주세요)${modelNote}<br><br><span style="font-size:0.8rem; color:#aaa;">테마: ${dateParams.theme} | 의상: ${dateParams.outfit}<br>날씨: ${dateParams.weather} | 키워드: ${dateParams.keyword}</span></div>`;
+            },
+
+            buildDateErrorMessage(error) {
+                const msg = error && error.message ? error.message : '';
+                let displayMsg = '데이트 생성 중 오류가 발생했어.';
+                if (msg.includes('key') || msg.includes('valid') || msg.includes('400') || msg.includes('403')) {
+                    displayMsg = 'API 키를 다시 확인해줘.';
+                } else if (msg.includes('quota') || msg.includes('429')) {
+                    displayMsg = 'API 사용량 한도에 도달했어.';
+                } else if (msg.includes('safety') || msg.includes('blocked')) {
+                    displayMsg = '안전 필터로 인해 데이트 내용을 만들지 못했어.';
+                } else if (msg) {
+                    displayMsg = `오류: ${msg}`;
+                }
+                return `${displayMsg}<br><br><span style="font-size:0.85rem; color:#81d4fa;">아래 버튼으로 Lite 모델 재시도를 할 수 있어.</span>`;
+            },
+
+            async loadDateContent(apiKey, dateParams, modelId) {
+                const contentBox = document.getElementById('date-content');
+                if (!contentBox || !dateParams) return false;
+
+                const isFallback = modelId === 'gemini-3.1-flash-lite-preview';
+                this.isApiLoading = true;
+                this.updateDateRetryButton({ visible: isFallback, disabled: true });
+                this.setDateLoadingState(dateParams, modelId);
+
+                try {
+                    const text = await GameAPI.getDateContent(apiKey, dateParams, { model: modelId });
+                    const dateModal = document.getElementById('modal-date');
+                    if (!dateModal.classList.contains('active')) return false;
+
+                    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                    contentBox.innerHTML = formatted;
+                    this.updateDateRetryButton({ visible: false, disabled: true });
+                    return true;
+                } catch (error) {
+                    console.error(error);
+                    const dateModal = document.getElementById('modal-date');
+                    if (!dateModal.classList.contains('active')) return false;
+
+                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${this.buildDateErrorMessage(error)}</div>`;
+                    this.updateDateRetryButton({ visible: true, disabled: false });
+                    return false;
+                } finally {
+                    this.isApiLoading = false;
+                }
+            },
+
             async startDate() {
                 if (this.isApiLoading) return this.showAlert("이전 요청 처리 중입니다...");
 
@@ -4877,37 +4966,20 @@
 
                 // Show date modal
                 document.getElementById('modal-date').classList.add('active');
-                const contentBox = document.getElementById('date-content');
-                contentBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">💕 루미가 데이트를 준비하고 있어요...<br>(잠시만 기다려주세요)<br><br><span style="font-size:0.8rem; color:#aaa;">테마: ${dateParams.theme} | 의상: ${dateParams.outfit}<br>날씨: ${dateParams.weather} | 키워드: ${dateParams.keyword}</span></div>`;
+                this.updateDateRetryButton({ visible: false, disabled: true });
+                await this.loadDateContent(key, dateParams, 'gemini-3-flash-preview');
+            },
 
-                this.isApiLoading = true;
+            async retryDateWithFallback() {
+                if (this.isApiLoading) return;
 
-                try {
-                    const text = await GameAPI.getDateContent(key, dateParams);
+                const dateParams = this._currentDateParams;
+                if (!dateParams) return;
 
-                    const dateModal = document.getElementById('modal-date');
-                    if (!dateModal.classList.contains('active')) return;
+                const key = this.ensureApiKey('데이트를 다시 시도하려면');
+                if (!key) return this.showAlert("API 키가 없어 데이트를 다시 시도할 수 없습니다.");
 
-                    let formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-                    contentBox.innerHTML = formatted;
-
-                } catch (e) {
-                    console.error(e);
-                    let msg = e.message || "";
-                    let displayMsg = "알 수 없는 오류가 발생했습니다.";
-                    if (msg.includes('key') || msg.includes('valid') || msg.includes('400') || msg.includes('403')) {
-                        displayMsg = "API 키가 올바르지 않거나 설정되지 않았습니다.";
-                    } else if (msg.includes('quota') || msg.includes('429')) {
-                        displayMsg = "API 사용량이 초과되었습니다.";
-                    } else if (msg.includes('safety') || msg.includes('blocked')) {
-                        displayMsg = "안전 필터에 의해 차단되었습니다.";
-                    } else {
-                        displayMsg = "오류: " + msg;
-                    }
-                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div>`;
-                } finally {
-                    this.isApiLoading = false;
-                }
+                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite-preview');
             },
 
             finishDate() {
@@ -4915,6 +4987,7 @@
                 const isSecret = dateParams && dateParams.secret;
 
                 document.getElementById('modal-date').classList.remove('active');
+                this.updateDateRetryButton({ visible: false, disabled: true });
 
                 // Update last date timestamp in global
                 this.global.lastDateTimestamp = new Date().toISOString();
