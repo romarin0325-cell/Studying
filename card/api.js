@@ -41,7 +41,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 const LUMI_MODEL_OPTIONS = Object.freeze([
     { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
     { id: 'gemini-3-flash-preview', label: 'Flash', flashLike: true, allowSearch: true },
-    { id: 'gemini-3.1-flash-lite-preview', label: 'Flash Lite', flashLike: true, allowSearch: false }
+    { id: 'gemini-3.1-flash-lite-preview', label: 'Lite', flashLike: true, allowSearch: false }
 ]);
 
 function getLumiModelConfig(modelId) {
@@ -665,7 +665,7 @@ function createToeicReviewSession(source) {
         mode: 'toeic-review',
         ui: TOEIC_LUMI_SESSION_UI,
         systemInstruction: TOEIC_LUMI_SYSTEM_INSTRUCTION,
-        enableSearch: true,
+        enableSearch: false,
         thinkingLevel: 'high',
         source,
         seedHistory: [],
@@ -697,7 +697,10 @@ const LumiQuestionRuntime = {
         return this.searchEnabled;
     },
 
-    getSearchButtonLabel() {
+    getSearchButtonLabel(session = null) {
+        if (session && session.enableSearch === false) {
+            return '검색 OFF';
+        }
         return this.searchEnabled ? '검색 ON' : '검색 OFF';
     },
 
@@ -1013,6 +1016,9 @@ window.LumiQuestionRuntime = LumiQuestionRuntime;
 
 // --- Date System ---
 
+const DATE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
+const DATE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite-preview';
+
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
@@ -1068,7 +1074,13 @@ const SECRET_DATE_SETS = [
 ];
 
 // Add getDateContent to GameAPI
-GameAPI.getDateContent = async function (apiKey, dateParams) {
+GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
+    const modelId = options.model === DATE_FALLBACK_MODEL_ID
+        ? DATE_FALLBACK_MODEL_ID
+        : DATE_PRIMARY_MODEL_ID;
+    const thinkingConfig = modelId === DATE_FALLBACK_MODEL_ID
+        ? { thinkingLevel: 'medium' }
+        : { thinkingLevel: 'high' };
     let lonelinessPart = '';
     if (dateParams.daysSinceLastDate >= 3) {
         lonelinessPart = `\n\n[중요: 서운함 표현] 이전 데이트 날짜와 현재 데이트 날짜가 ${dateParams.daysSinceLastDate}일이나 차이납니다. 데이트 초반에 요즘 데이트하러 자주 안 오는 것 같아서 서운하다는 감정을 자연스럽게 표현하세요. 하지만 형아가 왔으니 기쁘다는 감정도 함께 표현하세요.`;
@@ -1105,16 +1117,14 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
 
     const temperature = innuendoInstruction ? 0.85 : 0.8;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
                 temperature: temperature,
-                thinkingConfig: {
-                    thinkingLevel: 'high'
-                }
+                thinkingConfig
             }
         })
     });
