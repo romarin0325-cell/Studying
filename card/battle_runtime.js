@@ -77,8 +77,12 @@ function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
         const duration = target.buffs[buffId];
         if (!duration) return;
 
-        if (duration > 1) target.buffs[buffId] = duration - 1;
-        else delete target.buffs[buffId];
+        if (duration > 1) {
+            target.buffs[buffId] = duration - 1;
+        } else {
+            delete target.buffs[buffId];
+            if (buffId === 'guard') delete target.guardEnhancedEligible;
+        }
     });
 }
 
@@ -457,8 +461,7 @@ const BattleRuntime = {
             const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
             if (guardSucceeded) {
-                const isBasicGuard = (target.buffs.guard || 0) <= 1;
-                const guardReduction = isBasicGuard
+                const guardReduction = target.guardEnhancedEligible
                     ? (target.guardDamageReduction || 0.5)
                     : 0.5;
                 dmg *= (1 - guardReduction);

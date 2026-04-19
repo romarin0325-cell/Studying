@@ -1073,6 +1073,10 @@ const SideEffects = {
     handlers: {
         'buff': (ctx, eff) => {
             ctx.source.buffs[eff.id] = (eff.duration || 1);
+            if (eff.id === 'guard') {
+                const isBasicGuardSkill = ctx.skill && ctx.skill.name === '가드' && (eff.duration || 1) === 1;
+                ctx.source.guardEnhancedEligible = !!isBasicGuardSkill;
+            }
         },
         'debuff': (ctx, eff) => {
             let t = ctx.target;
