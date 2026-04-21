@@ -95,9 +95,12 @@ function buildBattleEnemy(rpg) {
         : ENEMIES.length;
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
     let scale = 1.0 + (cycle * 0.2);
-    if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
+    if (rpg.state.mode === 'puzzle') {
+        scale += (GAME_CONSTANTS.PUZZLE && GAME_CONSTANTS.PUZZLE.ENEMY_SCALE_BONUS) || 0.2;
+    } else if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
         scale = scale * 1.1;
     }
+    const suppressBossRewards = rpg.state.mode === 'puzzle';
     const enemy = {
         id: baseEnemy.id,
         name: baseEnemy.name,
@@ -118,8 +121,8 @@ function buildBattleEnemy(rpg) {
         lastHitType: null,
         isHiddenBoss: !!baseEnemy.hiddenBossFor,
         isSpecialBoss: !!baseEnemy.isSpecialBoss,
-        bonusRewardTickets: baseEnemy.hiddenBossFor && !baseEnemy.noBonusRewards ? 3 : 0,
-        bonusTranscendenceReward: baseEnemy.noBonusRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
+        bonusRewardTickets: !suppressBossRewards && baseEnemy.hiddenBossFor && !baseEnemy.noBonusRewards ? 3 : 0,
+        bonusTranscendenceReward: suppressBossRewards || baseEnemy.noBonusRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
     };
 
     if (baseEnemy.id === 'creator_god') {
@@ -193,6 +196,15 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
 
 const BattleRuntime = {
     startBattleInit(rpg) {
+        if (rpg.state.mode === 'puzzle') {
+            if (!rpg.state.puzzlePiecesClaimed) {
+                return rpg.showAlert("퍼즐 모드는 먼저 퍼즐조각획득을 완료해야 합니다.");
+            }
+            if (rpg.state.deck.some(cardId => cardId === null)) {
+                return rpg.showAlert("퍼즐 모드는 덱 3장을 모두 채워야 전투에 입장할 수 있습니다.");
+            }
+        }
+
         if (rpg.state.deck.every(cardId => cardId === null)) {
             return rpg.showAlert("덱을 완성해주세요.");
         }

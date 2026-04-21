@@ -1127,6 +1127,23 @@ const BONUS_TRANSCENDENCE_CARDS = [
 
 ENEMIES.push(
     {
+        id: 'flora', name: '꽃의 여신 플로라', element: 'nature',
+        stats: { hp: 700, atk: 70, matk: 70, def: 70, mdef: 70 },
+        skills: [
+            { name: '제네시스블룸', type: 'sup', rate: 0.0, val: 0, desc: '대미지 반감, 자신에게 걸린 모든 디버프를 해제', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'clear_self_debuffs' }] },
+            { name: '블러썸템페스트', type: 'mag', rate: 0.3, val: 2.0, desc: '마법공격 2배율', effects: [] }
+        ]
+    },
+    {
+        id: 'gray', name: '사신 그레이', element: 'dark',
+        stats: { hp: 800, atk: 90, matk: 90, def: 60, mdef: 60 },
+        skills: [
+            { name: '영혼절단', type: 'mag', rate: 0.0, val: 2.0, desc: '2~4배율 랜덤 마법공격', effects: [{ type: 'random_mult', min: 2.0, max: 4.0 }] },
+            { name: '차원절단', type: 'phy', rate: 0.0, val: 2.0, desc: '2~4배율 랜덤 물리공격', effects: [{ type: 'random_mult', min: 2.0, max: 4.0 }] },
+            { name: '디멘션제로', type: 'phy', rate: 0.0, val: 4.0, desc: '물리공격 4배율', effects: [] }
+        ]
+    },
+    {
         id: 'thor', name: '뇌신 토르', element: 'light', hiddenBossFor: 'iris_curse', bonusTranscendenceReward: 'trans_thor',
         stats: { hp: 900, atk: 100, matk: 50, def: 100, mdef: 50 },
         skills: [

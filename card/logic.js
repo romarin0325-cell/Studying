@@ -85,10 +85,18 @@ window.GAME_CONSTANTS = {
     BASE_CRIT_MULT: 1.5,
     SUN_BLESS_CRIT_BONUS: 0.6,
     CHAOS_POOL_SIZE: 15,
+    PUZZLE: {
+        PIECE_COUNT: 36,
+        QUIZ_COUNT: 10,
+        CHALLENGE_RATE_THRESHOLD: 0.7,
+        BONUS_BLESSING_USES: 5,
+        ENEMY_SCALE_BONUS: 0.2
+    },
     INITIAL_TICKETS: {
         default: 20,
         suffering: 10,
         overdrive: 10,
+        puzzle: 0,
         restriction: 10,
         balance: 10,
         archive: 10,
@@ -130,6 +138,7 @@ window.GAME_CONSTANTS = {
         balance: 18,
         archive: 18,
         overdrive: 30,
+        puzzle: 12,
         curse: 24,
         flood: 24,
         chaos: 24,
@@ -140,7 +149,8 @@ window.GAME_CONSTANTS = {
     MODE_REWARDS: {
         default: 1,
         suffering: 0,
-        chaos: 0
+        chaos: 0,
+        puzzle: 0
     },
 
     BONUS_REWARDS: {
