@@ -2067,8 +2067,8 @@
                 <section class="menu-section glass-panel">
                     <div class="menu-section__title">Draw / Draft Flow</div>
                     <div id="menu-gacha-area" class="button-pair">
-                        <button class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">Normal Draw</button>
-                        <button class="menu-btn accent-violet" onclick="RPG.openChallengeGacha()" style="flex:1;">Challenge Draw</button>
+                        <button id="btn-normal-gacha" class="menu-btn" onclick="RPG.openGacha()" style="flex:1;">Normal Draw</button>
+                        <button id="btn-challenge-gacha" class="menu-btn accent-violet" onclick="RPG.openChallengeGacha()" style="flex:1;">Challenge Draw</button>
                     </div>
                     <div id="menu-draft-area" class="solo-action" style="display:none;">
                         <button class="menu-btn accent-green" onclick="RPG.startDraft()">Start Draft</button>
@@ -3247,7 +3247,8 @@
                 activeBonusPoolIds: [],
                 quiz_stats: { correct: 0, total: 0 },
                 pendingEnemyId: null,
-                pendingEnemyStage: null
+                pendingEnemyStage: null,
+                puzzlePiecesClaimed: false
             },
 
             // Battle State (Transient)
@@ -3734,9 +3735,16 @@
                     pharaoh: 'poseidon',
                     demon_god: 'ares'
                 };
+                const puzzleHiddenBossMap = {
+                    artificial_demon_god: 'flora',
+                    iris_love: 'gray',
+                    ...hiddenBossMap
+                };
 
                 let enemyId = baseId;
-                if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+                if (this.state.mode === 'puzzle' && stageNumber > rotation.length && puzzleHiddenBossMap[baseId]) {
+                    enemyId = puzzleHiddenBossMap[baseId];
+                } else if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
                     enemyId = hiddenBossMap[baseId];
                 }
 
@@ -3796,6 +3804,10 @@
 
             applyBeginnerChallengeSafety(mode) {
                 if (!this.needsChallengeSafety()) return;
+
+                if (mode === 'puzzle') {
+                    return;
+                }
 
                 if (mode === 'chaos' || mode === 'draft') {
                     this.state.tickets = Math.max(this.state.tickets, 5);
@@ -4270,6 +4282,7 @@
                         if (!this.state.artifacts) this.state.artifacts = [];
                         if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
                         if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
+                        if (this.state.puzzlePiecesClaimed === undefined) this.state.puzzlePiecesClaimed = false;
                         this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
                         this.loadStudyProgress();
 
@@ -4317,7 +4330,7 @@
                     { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
                     { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
                     { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
-                    { id: 'overdrive', name: '오버드라이브', desc: '초기 10장, 클리어 보상 +1장, 축복 카드 +1장.\n(성공조건: 30 스테이지)' },
+                    { id: 'puzzle', name: '퍼즐', desc: '시작 퀴즈로 정해진 카드 36장을 획득하여 진행합니다. 사용한 카드는 소멸하고 대폭 강화된 적이 출현합니다.\n(성공조건: 12 스테이지)' },
                     { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
                     { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
@@ -4415,6 +4428,7 @@
                     artifacts: [],
                     pendingEnemyId: null,
                     pendingEnemyStage: null,
+                    puzzlePiecesClaimed: false,
                     // [목적] 카오스/드래프트 모드에서 해당 런에서만 유효한 이벤트 카드 목록을 초기화
                     activeEventCards: []
                 };
@@ -4512,6 +4526,17 @@
                 const gachaArea = document.getElementById('menu-gacha-area');
                 const draftArea = document.getElementById('menu-draft-area');
                 const chaosArea = document.getElementById('menu-chaos-area');
+                const normalGachaBtn = document.getElementById('btn-normal-gacha');
+                const challengeGachaBtn = document.getElementById('btn-challenge-gacha');
+
+                if (normalGachaBtn) {
+                    normalGachaBtn.innerText = 'Normal Draw';
+                    normalGachaBtn.onclick = () => this.openGacha();
+                }
+                if (challengeGachaBtn) {
+                    challengeGachaBtn.innerText = 'Challenge Draw';
+                    challengeGachaBtn.onclick = () => this.openChallengeGacha();
+                }
 
                 // Hide all first
                 gachaArea.style.display = 'none';
@@ -4523,6 +4548,13 @@
                 }
                 else if (this.state.mode === 'chaos') {
                     if (chaosArea) chaosArea.style.display = 'block';
+                }
+                else if (this.state.mode === 'puzzle') {
+                    if (normalGachaBtn) {
+                        normalGachaBtn.innerText = 'Puzzle Pieces';
+                        normalGachaBtn.onclick = () => this.openPuzzlePieces();
+                    }
+                    gachaArea.style.display = 'flex';
                 }
                 else {
                     gachaArea.style.display = 'flex';
@@ -4865,7 +4897,96 @@
                 );
             },
 
+            openPuzzlePieces() {
+                if (this.state.mode !== 'puzzle') return this.openGacha();
+                if (this.state.puzzlePiecesClaimed) {
+                    return this.showAlert("이미 퍼즐조각을 획득했습니다. 현재 카드풀로 스테이지를 진행해주세요.");
+                }
+                this.startPuzzlePieceQuiz();
+            },
+
+            startPuzzlePieceQuiz() {
+                const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
+                const total = puzzleConfig.QUIZ_COUNT || 10;
+                let answered = 0;
+                let correct = 0;
+
+                const askNext = () => {
+                    if (answered >= total) {
+                        this.grantPuzzlePieceCards(correct, total);
+                        return;
+                    }
+
+                    const config = QuizEngine.buildVocabQuiz((success) => {
+                        answered++;
+                        if (success) correct++;
+                        askNext();
+                    });
+                    if (!config) return this.showAlert("단어 퀴즈 데이터가 없습니다.");
+
+                    config.question = `[퍼즐조각 ${answered + 1}/${total}] ${config.question}`;
+                    config.correctDelay = 500;
+                    config.wrongDelay = 700;
+                    QuizEngine.show(config);
+                };
+
+                askNext();
+            },
+
+            drawPuzzlePieceCards(useChallengeRates) {
+                const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
+                const count = puzzleConfig.PIECE_COUNT || 36;
+                const pool = GameUtils.buildCardPool(this.global, {
+                    activeBonusPoolIds: this.state.activeBonusPoolIds
+                });
+                if (pool.length === 0) return [];
+
+                const picks = [];
+                for (let i = 0; i < count; i++) {
+                    const grade = GameUtils.resolveGachaGrade('puzzle', useChallengeRates);
+                    let gradePool = pool.filter(card => card.grade === grade);
+                    if (gradePool.length === 0) gradePool = pool.filter(card => card.grade === 'normal');
+                    if (gradePool.length === 0) gradePool = pool;
+                    const pick = gradePool[Math.floor(Math.random() * gradePool.length)];
+                    picks.push(pick.id);
+                }
+                return picks;
+            },
+
+            grantPuzzlePieceCards(correct, total) {
+                const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
+                const threshold = puzzleConfig.CHALLENGE_RATE_THRESHOLD || 0.7;
+                const rate = total > 0 ? correct / total : 0;
+                const useChallengeRates = rate >= threshold;
+                const picks = this.drawPuzzlePieceCards(useChallengeRates);
+                if (picks.length === 0) return this.showAlert("획득 가능한 카드풀이 없습니다.");
+
+                this.state.puzzlePiecesClaimed = true;
+                this.state.chaosPool = [...picks];
+                this.state.inventory = [...picks];
+                this.state.deck = [null, null, null];
+                this.saveGame(false);
+
+                const summary = { normal: 0, rare: 0, epic: 0, legend: 0 };
+                picks.forEach(id => {
+                    const card = this.getCardData(id);
+                    if (card && summary[card.grade] !== undefined) summary[card.grade]++;
+                });
+
+                const rateText = (rate * 100).toFixed(0);
+                const rateName = useChallengeRates ? '도전뽑기 확률' : '일반뽑기 확률';
+                this.openInfoModal(
+                    "퍼즐조각획득",
+                    `단어 퀴즈 결과: ${correct}/${total} (${rateText}%)<br>` +
+                    `${rateName}로 카드 36장을 획득했습니다.<br><br>` +
+                    `NORMAL ${summary.normal} / RARE ${summary.rare} / EPIC ${summary.epic} / LEGEND ${summary.legend}<br><br>` +
+                    `덱 3장을 모두 채워 전투에 입장하세요.`,
+                    () => this.toMenu()
+                );
+            },
+
             openGacha() {
+                if (this.state.mode === 'puzzle') return this.openPuzzlePieces();
                 if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
                 this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 this.runGacha(false);
@@ -5152,7 +5273,13 @@
                     }
                 });
             },
-            confirmDeck() { if (this.state.deck.every(x => x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다."); this.toMenu(); },
+            confirmDeck() {
+                if (this.state.mode === 'puzzle' && this.state.deck.some(x => x === null)) {
+                    return this.showAlert("퍼즐 모드는 덱 3장을 모두 채워야 합니다.");
+                }
+                if (this.state.deck.every(x => x === null)) return this.showAlert("최소 1장의 카드는 선택해야 합니다.");
+                this.toMenu();
+            },
 
             // --- Battle Logic Start ---
 
@@ -5434,13 +5561,16 @@
             handlePermadeath(players) {
                 let deadNames = [];
                 players.forEach(p => {
-                    if (p && p.isDead) {
+                    if (p && (p.isDead || this.state.mode === 'puzzle')) {
                         let idx = this.state.inventory.indexOf(p.id);
                         if (idx > -1) this.state.inventory.splice(idx, 1);
                         if (p.pos !== undefined) this.state.deck[p.pos] = null;
                         deadNames.push(p.name);
                     }
                 });
+                if (deadNames.length > 0 && this.state.mode === 'puzzle') {
+                    return `사용 카드 소멸: ${deadNames.join(', ')}<br>(전투에 사용한 카드가 모두 소멸했습니다)`;
+                }
                 if (deadNames.length > 0) return `전사자 발생: ${deadNames.join(', ')}<br>(카드가 소멸했습니다)`;
                 return "";
             },
@@ -5453,13 +5583,18 @@
                     ? GAME_CONSTANTS.MODE_REWARDS[this.state.mode]
                     : GAME_CONSTANTS.MODE_REWARDS.default;
 
-                if (this.battle.players.some(p => p && p.proto.trait.type === 'looter')) {
+                const mode = this.state.mode;
+                const hasLuther = this.battle.players.some(p => p && (p.id === 'doom_luther' || (p.proto && p.proto.role === 'luther')));
+                const hasLooterReward = mode === 'puzzle'
+                    ? hasLuther
+                    : this.battle.players.some(p => p && p.proto.trait.type === 'looter');
+                if (hasLooterReward) {
                     reward += GAME_CONSTANTS.BONUS_REWARDS.LOOTER;
                 }
                 if (this.state.mode === 'overdrive') {
                     reward += GAME_CONSTANTS.BONUS_REWARDS.OVERDRIVE;
                 }
-                if (this.battle.enemy && this.battle.enemy.bonusRewardTickets) {
+                if (mode !== 'puzzle' && this.battle.enemy && this.battle.enemy.bonusRewardTickets) {
                     reward += this.battle.enemy.bonusRewardTickets;
                 }
 
@@ -5480,7 +5615,6 @@
                 this.log(`승리 보상: 뽑기권 ${reward}장 획득.`);
 
                 // Victory Condition Check
-                const mode = this.state.mode;
                 const stage = this.state.enemyScale; // current stage (already incremented)
                 const clearStage = GameUtils.getClearStage(mode, this.state.gameType);
                 const gameClear = stage >= clearStage;
@@ -5673,7 +5807,26 @@
 
                 this.openInfoModal("전투 결과", msg, () => {
                     if (this.state.mode !== 'archive') {
-                        if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                        if (this.state.mode === 'puzzle') {
+                            this.showConfirm("추가 퀴즈에 도전하시겠습니까?\n(성공 시 다음 전투 혼돈의 축복 5회)",
+                                () => {
+                                    this.startQuiz((success) => {
+                                        if (success) {
+                                            const bonusUses = (GAME_CONSTANTS.PUZZLE && GAME_CONSTANTS.PUZZLE.BONUS_BLESSING_USES) || 5;
+                                            this.state.chaosBlessingUses = bonusUses;
+                                            this.showAlert(`정답! 다음 전투의 혼돈의 축복이 ${bonusUses}회로 증가합니다.`);
+                                        } else {
+                                            this.showAlert("오답입니다... 추가 효과는 없습니다.");
+                                        }
+                                        this.toMenu();
+                                    });
+                                },
+                                () => {
+                                    this.toMenu();
+                                }
+                            );
+                        }
+                        else if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
                             this.showConfirm("추가 보상을 위한 콜로케이션 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
                                 () => {
                                     this.startCollocationQuiz((success) => {
@@ -5736,9 +5889,17 @@
 
                                     this.startGrammarQuiz(q,
                                         () => { // Success
-                                            this.state.tickets += GAME_CONSTANTS.BONUS_REWARDS.CREATOR_GOD_QUIZ;
-                                            document.getElementById('ui-tickets').innerText = this.state.tickets;
-                                            this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
+                                            if (this.state.mode === 'puzzle') {
+                                                const currentUses = Number.isFinite(this.state.greatSageBlessingUses)
+                                                    ? this.state.greatSageBlessingUses
+                                                    : GAME_CONSTANTS.DEFAULT_BLESSING_USES;
+                                                this.state.greatSageBlessingUses = currentUses + 1;
+                                                this.showAlert("정답! 대현자의 축복 상한이 1회 증가했습니다.");
+                                            } else {
+                                                this.state.tickets += GAME_CONSTANTS.BONUS_REWARDS.CREATOR_GOD_QUIZ;
+                                                document.getElementById('ui-tickets').innerText = this.state.tickets;
+                                                this.showAlert("정답! 드로우권 3장을 추가로 획득했습니다.");
+                                            }
                                             this.toMenu();
                                         },
                                         () => { // Fail

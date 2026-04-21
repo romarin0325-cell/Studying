@@ -646,7 +646,9 @@
         ) {
             enemyId = this.getCurrentSpecialSeason().bossId;
         }
-        if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+        if (this.state.mode === 'puzzle' && stageNumber > rotation.length && hiddenBossMap[baseId]) {
+            enemyId = hiddenBossMap[baseId];
+        } else if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
             enemyId = hiddenBossMap[baseId];
         }
 
@@ -713,6 +715,10 @@
 
     applyBeginnerChallengeSafety(mode) {
         if (!this.needsChallengeSafety()) return;
+
+        if (mode === 'puzzle') {
+            return;
+        }
 
         if (mode === 'chaos' || mode === 'draft') {
             this.state.tickets = Math.max(this.state.tickets, 5);
@@ -956,6 +962,7 @@
                 if (!this.state.artifacts) this.state.artifacts = [];
                 if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
                 if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
+                if (this.state.puzzlePiecesClaimed === undefined) this.state.puzzlePiecesClaimed = false;
                 this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
                 this.state.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections || this.global.activeSpecialCardSelections);
                 if (this.state.mode === 'dream_corridor' && this.state.dreamCorridorLives === undefined) this.state.dreamCorridorLives = 3;
@@ -1002,6 +1009,7 @@
             artifacts: [],
             pendingEnemyId: null,
             pendingEnemyStage: null,
+            puzzlePiecesClaimed: false,
             // [목적] 카오스/드래프트 모드에서 해당 런에서만 유효한 이벤트 카드 목록을 초기화
             activeEventCards: []
         };
@@ -1302,13 +1310,16 @@
     handlePermadeath(players) {
         let deadNames = [];
         players.forEach(p => {
-            if (p && p.isDead) {
+            if (p && (p.isDead || this.state.mode === 'puzzle')) {
                 let idx = this.state.inventory.indexOf(p.id);
                 if (idx > -1) this.state.inventory.splice(idx, 1);
                 if (p.pos !== undefined) this.state.deck[p.pos] = null;
                 deadNames.push(p.name);
             }
         });
+        if (deadNames.length > 0 && this.state.mode === 'puzzle') {
+            return `사용 카드 소멸: ${deadNames.join(', ')}<br>(전투에 사용한 카드가 모두 소멸했습니다)`;
+        }
         if (deadNames.length > 0) return `전사자 발생: ${deadNames.join(', ')}<br>(카드가 소멸했습니다)`;
         return "";
     },
@@ -1325,13 +1336,17 @@
             ? GAME_CONSTANTS.MODE_REWARDS[this.state.mode]
             : GAME_CONSTANTS.MODE_REWARDS.default;
 
-        if (this.battle.players.some(p => p && p.proto.trait.type === 'looter')) {
+        const hasLuther = this.battle.players.some(p => p && (p.id === 'doom_luther' || (p.proto && p.proto.role === 'luther')));
+        const hasLooterReward = mode === 'puzzle'
+            ? hasLuther
+            : this.battle.players.some(p => p && p.proto.trait.type === 'looter');
+        if (hasLooterReward) {
             reward += GAME_CONSTANTS.BONUS_REWARDS.LOOTER;
         }
         if (this.state.mode === 'overdrive') {
             reward += GAME_CONSTANTS.BONUS_REWARDS.OVERDRIVE;
         }
-        if (this.battle.enemy && this.battle.enemy.bonusRewardTickets) {
+        if (mode !== 'puzzle' && this.battle.enemy && this.battle.enemy.bonusRewardTickets) {
             reward += this.battle.enemy.bonusRewardTickets;
         }
 

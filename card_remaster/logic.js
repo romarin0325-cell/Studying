@@ -85,10 +85,18 @@ const GAME_CONSTANTS = {
     BASE_CRIT_MULT: 1.5,
     SUN_BLESS_CRIT_BONUS: 0.6,
     CHAOS_POOL_SIZE: 15,
+    PUZZLE: {
+        PIECE_COUNT: 36,
+        QUIZ_COUNT: 10,
+        CHALLENGE_RATE_THRESHOLD: 0.7,
+        BONUS_BLESSING_USES: 5,
+        ENEMY_SCALE_BONUS: 0.2
+    },
     INITIAL_TICKETS: {
         default: 20,
         suffering: 10,
         overdrive: 10,
+        puzzle: 0,
         restriction: 10,
         balance: 10,
         archive: 10,
@@ -130,6 +138,7 @@ const GAME_CONSTANTS = {
         balance: 18,
         archive: 18,
         overdrive: 30,
+        puzzle: 12,
         curse: 24,
         flood: 24,
         chaos: 24,
@@ -140,7 +149,8 @@ const GAME_CONSTANTS = {
     MODE_REWARDS: {
         default: 1,
         suffering: 0,
-        chaos: 0
+        chaos: 0,
+        puzzle: 0
     },
 
     BONUS_REWARDS: {
@@ -1837,6 +1847,17 @@ const Logic = {
         else if (enemy.id === 'demon_god') {
             if (turn === 7 || turn === 14) skill = enemy.skills.find(s => s.name === '제노사이드');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '다크니스');
+        }
+        else if (enemy.id === 'flora') {
+            if (turn === 5 || turn === 10) skill = enemy.skills.find(s => s.name === '제네시스블룸');
+            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '블러썸템페스트');
+        }
+        else if (enemy.id === 'gray') {
+            if (turn === 14) skill = enemy.skills.find(s => s.name === '디멘션제로');
+            else if (turn % 4 === 0) {
+                const skillName = Math.random() < 0.5 ? '영혼절단' : '차원절단';
+                skill = enemy.skills.find(s => s.name === skillName);
+            }
         }
         else if (enemy.id === 'thor') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '썬더러쉬');
