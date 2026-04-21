@@ -85,6 +85,9 @@ const GameAPI = {
         let targetInfo = "";
         if (type === 'collocation') {
             targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
+            if (targetData.options && targetData.options.length > 0) {
+                targetInfo += `\nOptions: [${targetData.options.join(', ')}]`;
+            }
             targetInfo += `\n\n**[숙어 연상법 규칙]**`;
             targetInfo += `\n- 왜 이 단어들의 조합이 이 의미가 되는지 의미적 연결을 설명하십시오. (예: 'conduct a survey' → conduct는 '이끌다/수행하다'의 뉘앙스 → 설문조사를 '주도해서 진행'하는 이미지)`;
             targetInfo += `\n- 틀린 보기 단어와 비교하여, 왜 정답 단어만 이 명사와 어울리는지 직관적으로 설명하십시오.`;
