@@ -1336,10 +1336,9 @@
             ? GAME_CONSTANTS.MODE_REWARDS[this.state.mode]
             : GAME_CONSTANTS.MODE_REWARDS.default;
 
-        const hasLuther = this.battle.players.some(p => p && (p.id === 'doom_luther' || (p.proto && p.proto.role === 'luther')));
-        const hasLooterReward = mode === 'puzzle'
-            ? hasLuther
-            : this.battle.players.some(p => p && p.proto.trait.type === 'looter');
+        const hasLooterReward = this.battle.players.some(
+            p => p && p.proto && p.proto.trait && p.proto.trait.type === 'looter'
+        );
         if (hasLooterReward) {
             reward += GAME_CONSTANTS.BONUS_REWARDS.LOOTER;
         }
