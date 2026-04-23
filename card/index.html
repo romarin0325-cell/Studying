@@ -2009,7 +2009,8 @@
             },
 
             openMissionHub() {
-                this.loadGlobalData();
+                // Load from disk only if not yet loaded (title screen entry point)
+                if (!this._globalLoaded) this.loadGlobalData();
                 this.ensureMonthlyMissionState();
                 this.ensureWeeklyMissionState();
                 this.ensureSpecialMissionState();
@@ -2061,7 +2062,6 @@
 
             openMonthlyMission() {
                 this.closeMissionHub();
-                this.loadGlobalData();
                 this.missionViewType = 'monthly';
                 this.renderMonthlyMission();
                 document.getElementById('modal-monthly-mission').classList.add('active');
@@ -2069,7 +2069,6 @@
 
             openWeeklyMission() {
                 this.closeMissionHub();
-                this.loadGlobalData();
                 this.missionViewType = 'weekly';
                 this.renderMonthlyMission();
                 document.getElementById('modal-monthly-mission').classList.add('active');
@@ -2077,7 +2076,6 @@
 
             openSpecialMission() {
                 this.closeMissionHub();
-                this.loadGlobalData();
                 if (!this.isSpecialMissionVisible()) return this.showAlert("해금된 스페셜 미션이 없습니다.");
                 this.missionViewType = 'special';
                 this.renderMonthlyMission();
@@ -2262,7 +2260,6 @@
             },
 
             openSpecialCardEditor() {
-                this.loadGlobalData();
                 this.updateSpecialCardEditorButton();
                 if (!this.hasUnlockedSpecialCards()) {
                     return this.showAlert("획득한 스페셜 카드가 없습니다.");
@@ -2369,7 +2366,6 @@
             },
 
             activateSpecialCardVersion(baseId, cardId) {
-                this.loadGlobalData();
                 const nextSelections = { ...this.getActiveSpecialCardSelections('global') };
 
                 if (cardId === baseId) {
@@ -4118,6 +4114,9 @@
                     this.setLumiChatStatus('TOEIC 질문에서는 검색을 사용할 수 없어.');
                     return;
                 }
+
+                // [버그수정] global이 아직 디스크에서 로드되지 않았으면 먼저 로드
+                if (!this._globalLoaded) this.loadGlobalData();
 
                 const nextEnabled = !(this.global.lumiSearchEnabled !== false);
                 this.global.lumiSearchEnabled = nextEnabled;
