@@ -64,11 +64,72 @@
 
     // --- Global Data ---
 
-    loadGlobalData() {
-        const data = Storage.load(Storage.keys.GLOBAL);
-        if (data) {
-            this.global = { ...this.global, ...data };
+    /**
+     * Validate that global data has the required structure.
+     * @param {*} data
+     * @returns {boolean}
+     */
+    validateGlobalData(data) {
+        if (!data || typeof data !== 'object') return false;
+        if (!Array.isArray(data.unlocked_bonus_cards)) return false;
+        if (!Array.isArray(data.unlocked_modes)) return false;
+        if (!data.achievements || typeof data.achievements !== 'object') return false;
+        return true;
+    },
+
+    /**
+     * Attempt to restore global data from backup.
+     * @returns {boolean} true if restoration succeeded
+     */
+    _tryRestoreFromBackup() {
+        const backupResult = Storage.loadDetailed(Storage.keys.GLOBAL + '_backup');
+        if (backupResult.ok && this.validateGlobalData(backupResult.data)) {
+            console.warn('[RPG] Restored GLOBAL from backup');
+            this.global = { ...this.global, ...backupResult.data };
+            Storage.save(Storage.keys.GLOBAL, this.global);
+            this.showAlert('⚠️ 해금 데이터를 백업에서 복구했습니다.\n일부 최근 진행이 누락될 수 있습니다.');
+            return true;
         }
+        return false;
+    },
+
+    loadGlobalData() {
+        const result = Storage.loadDetailed(Storage.keys.GLOBAL);
+
+        if (result.ok) {
+            if (this.validateGlobalData(result.data)) {
+                this.global = { ...this.global, ...result.data };
+            } else {
+                console.error('[RPG] GLOBAL data failed validation, trying backup');
+                if (!this._tryRestoreFromBackup()) {
+                    this._globalStorageBroken = true;
+                    this.showAlert('⚠️ 해금 데이터가 손상되었습니다.\n자동 초기화가 차단되었습니다.\n복구/백업을 확인해주세요.');
+                    this._globalLoaded = true;
+                    return;
+                }
+            }
+        } else if (result.reason === 'parse_error') {
+            console.error('[RPG] GLOBAL parse error detected!');
+            // Preserve corrupted raw data for forensics
+            try {
+                localStorage.setItem(
+                    Storage.keys.GLOBAL + '_corrupt_' + Date.now(),
+                    result.raw || ''
+                );
+            } catch (e) { /* quota — ignore */ }
+            if (!this._tryRestoreFromBackup()) {
+                this._globalStorageBroken = true;
+                this.showAlert('⚠️ 해금 데이터가 손상되었습니다.\n자동 초기화가 차단되었습니다.\n복구/백업을 확인해주세요.');
+                this._globalLoaded = true;
+                return;
+            }
+        }
+        // reason === 'missing': first run, use defaults (normal)
+
+        this._globalLoaded = true;
+
+        if (this._globalStorageBroken) return;
+
         const changedBonusCards = this.ensureDefaultUnlockedBonusCards();
         const changedDivineArtifacts = this.ensureDivineArtifactState();
         const changedTicketState = this.ensureChaosTicketState();
@@ -79,7 +140,28 @@
     },
 
     saveGlobalData() {
-        Storage.save(Storage.keys.GLOBAL, this.global);
+        // Block save if global was never loaded from disk (primary bug fix)
+        if (!this._globalLoaded) {
+            console.warn('[RPG] saveGlobalData blocked: global not yet loaded from disk');
+            return false;
+        }
+        if (this._globalStorageBroken) {
+            console.error('[RPG] saveGlobalData blocked: corrupted global storage');
+            return false;
+        }
+
+        const ok = Storage.save(Storage.keys.GLOBAL, this.global);
+        if (ok) {
+            Storage.saveBackup(
+                Storage.keys.GLOBAL,
+                this.global,
+                (d) => this.validateGlobalData(d)
+            );
+        } else {
+            console.error('[RPG] GLOBAL save failed!');
+            this.showAlert('⚠️ 저장 실패! 저장공간이 부족할 수 있습니다.');
+        }
+        return ok;
     },
 
 
@@ -1062,10 +1144,17 @@
     saveGame(showMessage = true) {
         const saveState = { ...this.state };
         delete saveState.currentToeicSession;
-        Storage.save(Storage.keys.SAVE, saveState);
+
+        const saveOk = Storage.save(Storage.keys.SAVE, saveState);
         this.saveStudyProgress();
-        this.saveGlobalData(); // Also save global just in case
-        if (showMessage) this.showAlert("저장되었습니다.");
+        const globalOk = this.saveGlobalData();
+
+        if (!saveOk || globalOk === false) {
+            this.showAlert('⚠️ 저장에 실패했습니다!\n브라우저 저장공간이 부족할 수 있습니다.');
+            return false;
+        }
+        if (showMessage) this.showAlert('저장되었습니다.');
+        return true;
     },
 
 

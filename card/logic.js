@@ -38,16 +38,84 @@ const Storage = {
     },
 
     /**
+     * Load with detailed status. Distinguishes between:
+     * - { ok: true, data } — parsed successfully
+     * - { ok: false, reason: 'missing' } — key doesn't exist
+     * - { ok: false, reason: 'parse_error', raw, error } — key exists but JSON is broken
+     * @param {string} key
+     * @returns {Object}
+     */
+    loadDetailed(key) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw === null) return { ok: false, reason: 'missing' };
+            const data = JSON.parse(raw);
+            return { ok: true, data };
+        } catch (e) {
+            let raw = null;
+            try { raw = localStorage.getItem(key); } catch (e2) { /* ignore */ }
+            console.error(`[Storage] Parse error for key "${key}":`, e);
+            return { ok: false, reason: 'parse_error', raw, error: e };
+        }
+    },
+
+    /**
      * Save data as JSON to localStorage.
      * @param {string} key
      * @param {*} data
+     * @returns {boolean} true if saved successfully
      */
     save(key, data) {
         try {
             localStorage.setItem(key, JSON.stringify(data));
+            return true;
         } catch (e) {
             console.error(`[Storage] Save error for key "${key}":`, e);
+            return false;
         }
+    },
+
+    /**
+     * Save backup only if validation passes and data hasn't regressed.
+     * @param {string} key - primary key (backup will use key + '_backup')
+     * @param {*} data - data to back up
+     * @param {Function} [validator] - returns true if data is structurally valid
+     * @returns {boolean}
+     */
+    saveBackup(key, data, validator) {
+        if (validator && !validator(data)) return false;
+        const backupKey = key + '_backup';
+        const existingBackup = this.load(backupKey);
+        if (existingBackup && validator && validator(existingBackup)) {
+            if (this._hasRegressed(existingBackup, data)) {
+                console.warn(`[Storage] Backup skipped for "${key}": regression detected`);
+                return false;
+            }
+        }
+        return this.save(backupKey, data);
+    },
+
+    /**
+     * Check if newData has fewer monotonically-increasing items than oldData.
+     * Used to prevent overwriting a good backup with regressed data.
+     * @param {Object} oldData
+     * @param {Object} newData
+     * @returns {boolean} true if regression detected
+     */
+    _hasRegressed(oldData, newData) {
+        const fields = [
+            'unlocked_bonus_cards',
+            'unlocked_modes',
+            'unlocked_divine_artifacts',
+            'unlocked_special_cards',
+            'unlocked_bonus_transcendence_cards'
+        ];
+        for (const field of fields) {
+            const oldVal = Array.isArray(oldData[field]) ? oldData[field].length : 0;
+            const newVal = Array.isArray(newData[field]) ? newData[field].length : 0;
+            if (newVal < oldVal) return true;
+        }
+        return false;
     },
 
     /**
