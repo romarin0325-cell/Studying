@@ -1,13 +1,13 @@
-﻿/**
- * game.js — Game utilities, storage layer, and constants for Card RPG.
- *
+/**
+ * @file logic.js
+ * @module GameLogic
+ * @description
+ * Game utilities, central damage calculation, storage layer, and constants for Card RPG.
  * Provides:
- *   - Storage: Centralized localStorage abstraction with safe JSON parsing
- *   - GAME_CONSTANTS: Named constants replacing magic numbers
- *   - GACHA_RATES: Gacha probability tables per mode
- *   - GameUtils.buildCardPool(): Unified card pool builder (replaces 6 duplicated patterns)
- *   - GameUtils.resolveGachaGrade(): Grade determination from GACHA_RATES table
- *   - GameUtils.getCardById()/getAllCards()/buildDeckContext(): Shared card lookup and Joker-aware deck helpers
+ * - Storage: Centralized localStorage abstraction with safe JSON parsing
+ * - GAME_CONSTANTS: Named constants replacing magic numbers
+ * - Logic: Core calculation engine (Damage, Stats, Death/OnHit traits, SideEffects)
+ * - GameUtils: Deck helpers, pool selection, gacha tables
  */
 
 // ─── Storage Layer ────────────────────────────────────────────────────────────
@@ -160,6 +160,35 @@ window.GAME_CONSTANTS = {
         BONUS_BLESSING_USES: 5,
         ENEMY_SCALE_BONUS: 0.2
     },
+    
+    // Core combat stat constants
+    BASE_CRIT: 10,
+    BASE_EVA_BONUS: 5,
+    BLESSING_CRIT: 10,
+    BLESSING_EVA: 5,
+    
+    // Debuff stat reductions
+    DEBUFF_REDUCTIONS: {
+        ATK: 0.2,      // weak
+        MATK: 0.2,     // silence
+        MDEF: 0.2,     // curse, temptation
+        DEF_BASE: 0.2, // darkness or corrosion
+        DEF_FULL: 0.4  // darkness AND corrosion
+    },
+    
+    // Artifact specific bonus values
+    ARTIFACT_BONUSES: {
+        DARK_DIVINE_GRAY_CRIT: 20,
+        DARK_DIVINE_GRAY_EVA: 10,
+        DARK_VEIL_CRIT: 10,
+        DARK_VEIL_EVA: 10
+    },
+
+    ENEMY_SCALING: {
+        CYCLE_BONUS: 0.2,    // added to scale per cycle
+        HARD_MODE_MULT: 1.1  // multiplied to scale for hard modes
+    },
+
     INITIAL_TICKETS: {
         default: 20,
         suffering: 10,
@@ -180,6 +209,12 @@ window.GAME_CONSTANTS = {
     SAGE_BLESSING_PICK_COUNT: 12,
     DEFAULT_BLESSING_USES: 3,
     MAX_BONUS_POOL_PRESETS: 3,
+
+    TUTORING_EVENT: {
+        PROB_BASE: 0.3,
+        PROB_HIGH: 0.5,
+        STAGE_THRESHOLD: 30
+    },
 
     /** Stack cap configuration for stackable buffs/debuffs */
     STACK_CAP: {
@@ -203,6 +238,8 @@ window.GAME_CONSTANTS = {
     DRAFT: {
         INITIAL_REROLLS: 3
     },
+
+    DREAM_CORRIDOR_MAX_LIVES: 3,
 
     LOADING: {
         MAX_ATTEMPTS: 200,
@@ -1559,14 +1596,14 @@ const Logic = {
             matk: char.matk,
             def: char.def,
             mdef: char.mdef,
-            crit: (char.baseCrit || 10),
-            evasion: (char.baseEva || 0) + 5
+            crit: (char.baseCrit || GAME_CONSTANTS.BASE_CRIT),
+            evasion: (char.baseEva || 0) + GAME_CONSTANTS.BASE_EVA_BONUS
         };
 
         // Blessings
         if (char.blessing) {
-            stats.crit += 10;
-            stats.evasion += 5;
+            stats.crit += GAME_CONSTANTS.BLESSING_CRIT;
+            stats.evasion += GAME_CONSTANTS.BLESSING_EVA;
         }
 
         // Check if character is Player (has proto)
@@ -1583,8 +1620,8 @@ const Logic = {
                 stats.crit += trait.val || 0;
             }
             if (trait.type === 'luna_jasmine_trait' && effectiveFieldBuffs.some(b => b.name === 'goddess_descent')) {
-                stats.evasion += 25;
-                stats.crit += 25;
+                stats.evasion += (trait.val || 25);
+                stats.crit += (trait.val || 25);
             }
         }
 
@@ -1662,15 +1699,15 @@ const Logic = {
         // Char Buffs/Debuffs
         let debuffMult = (mode === 'curse') ? 2.0 : 1.0;
 
-        if (char.buffs['weak']) m.atk -= (0.2 * debuffMult);
-        if (char.buffs['silence']) m.matk -= (0.2 * debuffMult);
+        if (char.buffs['weak']) m.atk -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.ATK * debuffMult);
+        if (char.buffs['silence']) m.matk -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MATK * debuffMult);
         if (char.buffs['evasion']) stats.evasion += 50;
-        if (char.buffs['curse']) m.mdef -= (0.2 * debuffMult);
-        if (char.buffs['temptation']) m.mdef -= (0.2 * debuffMult);
+        if (char.buffs['curse']) m.mdef -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF * debuffMult);
+        if (char.buffs['temptation']) m.mdef -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF * debuffMult);
 
         let defRed = 0.0;
-        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
-        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
+        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.DEF_FULL;
+        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.DEF_BASE;
         // Artifact: assassin_nail — double darkness def reduction
         if (artifacts.includes('assassin_nail') && (char.buffs['darkness'] || char.buffs['corrosion'])) {
             defRed *= 2.0;
@@ -1679,7 +1716,7 @@ const Logic = {
 
         // Artifact: shadow_ball — darkness also reduces mdef
         if (artifacts.includes('shadow_ball') && char.buffs['darkness']) {
-            let mdefRed = 0.2;
+            let mdefRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF;
             if (artifacts.includes('assassin_nail')) mdefRed *= 2.0;
             m.mdef -= (mdefRed * debuffMult);
         }
@@ -1687,11 +1724,11 @@ const Logic = {
         // Artifact: veil_of_darkness / divine_gray — dark element crit/eva boost
         if (isPlayer && GameUtils.cardMatchesElement(char.proto, 'dark')) {
             if (artifacts.includes('divine_gray')) {
-                stats.crit += 20;
-                stats.evasion += 10;
+                stats.crit += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_DIVINE_GRAY_CRIT;
+                stats.evasion += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_DIVINE_GRAY_EVA;
             } else if (artifacts.includes('veil_of_darkness')) {
-                stats.crit += 10;
-                stats.evasion += 10;
+                stats.crit += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_VEIL_CRIT;
+                stats.evasion += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_VEIL_EVA;
             }
         }
 
@@ -2093,10 +2130,10 @@ const Logic = {
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
         // Base stats copy
         let p = {
-            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: 100,
+            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: GAME_CONSTANTS.MAX_MP || 100,
             atk: playerProto.stats.atk, matk: playerProto.stats.matk,
             def: playerProto.stats.def, mdef: playerProto.stats.mdef,
-            baseCrit: 10, baseEva: 0
+            baseCrit: GAME_CONSTANTS.BASE_CRIT, baseEva: 0
         };
 
         const deckCtx = GameUtils.buildDeckContext(deck, allCards);

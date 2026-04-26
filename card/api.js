@@ -1,3 +1,11 @@
+/**
+ * @file api.js
+ * @module AI_API
+ * @description
+ * Handles all AI interactions (Lumi persona).
+ * Manages prompt construction, API requests (Google Gemini Core/Flash),
+ * content generation, and fallback logic for educational/tutoring scenarios.
+ */
 const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
@@ -79,7 +87,8 @@ const GameAPI = {
         const modelConfig = getLumiModelConfig(options.model);
         // 1. 30% 확률 (30스테이지 이상 시 50%) (The 'Accidental' Event)
         const enableEvent = RPG.global.tutoringEventEnabled !== false;
-        const prob = (RPG.state.enemyScale >= 30) ? 0.5 : 0.3;
+        const config = GAME_CONSTANTS.TUTORING_EVENT;
+        const prob = (RPG.state.enemyScale >= config.STAGE_THRESHOLD) ? config.PROB_HIGH : config.PROB_BASE;
         const isMisunderstandingMode = enableEvent && Math.random() < prob;
 
         let targetInfo = "";

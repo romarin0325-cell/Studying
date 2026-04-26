@@ -1,7 +1,9 @@
 /**
- * battle_runtime.js — Non-visual battle runtime for Card RPG.
- *
- * Keeps battle state transitions and skill/effect resolution outside index.html
+ * @file battle_runtime.js
+ * @module BattleRuntime
+ * @description
+ * Contains the non-visual battle state machine and turn execution logic.
+ * Keeps battle state transitions and skill/effect resolution separate from UI code
  * while preserving the existing RPG method names and DOM entrypoints.
  */
 
@@ -98,11 +100,11 @@ function buildBattleEnemy(rpg) {
         ? ENDLESS_ENEMY_ROTATION.length
         : ENEMIES.length;
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
-    let scale = 1.0 + (cycle * 0.2);
+    let scale = 1.0 + (cycle * GAME_CONSTANTS.ENEMY_SCALING.CYCLE_BONUS);
     if (rpg.state.mode === 'puzzle') {
         scale += (GAME_CONSTANTS.PUZZLE && GAME_CONSTANTS.PUZZLE.ENEMY_SCALE_BONUS) || 0.2;
     } else if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
-        scale = scale * 1.1;
+        scale = scale * GAME_CONSTANTS.ENEMY_SCALING.HARD_MODE_MULT;
     }
     const suppressBossRewards = rpg.state.mode === 'puzzle';
     const enemy = {
