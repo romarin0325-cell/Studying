@@ -1729,8 +1729,13 @@ const Logic = {
         if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
 
         let critDmg = GAME_CONSTANTS.BASE_CRIT_MULT;
-        if (source.proto && sourceFieldBuffs.some(b => b.name === 'sun_bless')) critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS;
-        if (source.proto && sourceFieldBuffs.some(b => b.name === 'reaper_realm')) critDmg += 0.4;
+        const critBuffMult = (mode === 'flood' && source.proto) ? 2.0 : 1.0;
+        if (source.proto && sourceFieldBuffs.some(b => b.name === 'sun_bless')) {
+            critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS * critBuffMult;
+        }
+        if (source.proto && sourceFieldBuffs.some(b => b.name === 'reaper_realm')) {
+            critDmg += 0.4 * critBuffMult;
+        }
 
         let val = (skill.type === 'phy') ? srcStats.atk : srcStats.matk;
 
