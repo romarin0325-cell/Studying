@@ -2185,6 +2185,11 @@ const Logic = {
             }
         }
 
+        // Legacy positional trait — pos_rear_atk (rear = idx 2)
+        if (t.type === 'pos_rear_atk' && idx === 2) {
+            p.atk = Math.floor(p.atk * (1 + (t.val || 0) / 100));
+        }
+
         if (t.type === 'rabbit_synergy_boost') {
             const count = deckCtx.countMatchingIds(['night_rabbit', 'snow_rabbit', 'silver_rabbit', 'trans_yeon_rabbit']);
             if (count > 0) {
@@ -2366,7 +2371,7 @@ const Logic = {
      */
     _applyDeathDamage: function (result, victim, killer, skillPartial, fieldBuffs, logFn, deck, turn, artifacts, logPrefix) {
         const skill = { ...skillPartial, effects: skillPartial.effects || [] };
-        const dmgResult = this.calculateDamage(victim, killer, skill, fieldBuffs, [], logFn, null, deck, turn);
+        const dmgResult = this.calculateDamage(victim, killer, skill, fieldBuffs, [], logFn, null, deck, turn, artifacts);
         if (artifacts.includes('companion')) {
             dmgResult.dmg *= 2;
             logFn(`[아티팩트] 길동무: ${skill.name} 대미지 2배!`);
