@@ -177,19 +177,8 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
         player.mdef = Math.floor(player.mdef * mult);
     }
 
-    if (proto.trait.type.startsWith('pos_')) {
-        const trait = proto.trait;
-        const active =
-            (trait.type.includes('van') && idx === 0) ||
-            (trait.type.includes('mid') && idx === 1) ||
-            (trait.type.includes('rear') && idx === 2);
-        if (active) {
-            if (trait.type.includes('_atk')) player.atk = Math.floor(player.atk * (1 + trait.val / 100));
-            if (trait.type.includes('_matk')) player.matk = Math.floor(player.matk * (1 + trait.val / 100));
-            if (trait.type.includes('_def')) player.def = Math.floor(player.def * (1 + trait.val / 100));
-            if (trait.type.includes('_mdef')) player.mdef = Math.floor(player.mdef * (1 + trait.val / 100));
-        }
-    }
+    // NOTE: Positional traits ('pos_stat_boost') are handled in Logic.calculateInitialStats.
+    // Do NOT add positional stat boosts here to avoid double-application.
 
     return player;
 }

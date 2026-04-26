@@ -1140,7 +1140,7 @@ const DAMAGE_EFFECT_HANDLERS_EXTRA = {
         const maxTurn = eff.maxTurn || eff.turn || 0;
         if (ctx.turn && maxTurn > 0 && ctx.turn <= maxTurn) {
             ctx.mult *= eff.mult;
-            ctx.logFn(`[孖ｹ・ｱ] ${maxTurn}奓ｴ ・､﨑・ ・・･ ${eff.mult}・ｰ!`);
+            ctx.logFn(`[특성] ${maxTurn}턴 이내 위력 증가! 배율 ${eff.mult}배!`);
         }
     }
 };
