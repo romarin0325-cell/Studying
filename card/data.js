@@ -1,9 +1,17 @@
-// Role guide:
-// dealer: pure damage finisher focused on closing fights.
-// balancer: mixed offense/utility that covers multiple situations.
-// buffer: field buff or protection specialist that raises party stability.
-// debuffer: pressure card that stacks status effects or disruption.
-// looter / luther: reward-oriented finisher that helps card acquisition flow.
+/**
+ * @file data.js
+ * @module GameData
+ * @description
+ * Contains static data definitions for cards, enemies, synergy types, and artifacts.
+ * Acts as the read-only dictionary for game content.
+ * 
+ * Role guide:
+ * - dealer: pure damage finisher focused on closing fights.
+ * - balancer: mixed offense/utility that covers multiple situations.
+ * - buffer: field buff or protection specialist that raises party stability.
+ * - debuffer: pressure card that stacks status effects or disruption.
+ * - looter / luther: reward-oriented finisher that helps card acquisition flow.
+ */
 const CARDS = [
     // --- Legend ---
     {

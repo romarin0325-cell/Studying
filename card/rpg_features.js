@@ -1,3 +1,14 @@
+/**
+ * @file rpg_features.js
+ * @module RPGFeatures
+ * @description
+ * Contains the core UI and logic for all RPG out-of-battle features.
+ * Responsibilities include:
+ * - Managing specific game modes (Endless, Chaos, Draft, Dream Corridor)
+ * - Handling events, shops, gacha, and inventory/deck management UI
+ * - Mission progression and rewards processing
+ * - Central state loop (menu navigation)
+ */
 (function () {
     const SPECIAL_CARD_GROUPS = [
         { baseId: 'jasmine', label: '자스민' },
@@ -1317,7 +1328,7 @@
             return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
         }
 
-        if (!this.state.draft) this.state.draft = { active: true, round: 0, rerolls: 3, currentOptions: [] };
+        if (!this.state.draft) this.state.draft = { active: true, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] };
 
         // Find first empty slot
         this.state.draft.round = this.state.deck.indexOf(null);
@@ -1552,7 +1563,8 @@
 
         const fail = (label) => {
             // 현재 목숨 확인 (기본값 3)
-            const current = (this.state.dreamCorridorLives !== undefined) ? this.state.dreamCorridorLives : 3;
+            const maxLives = GAME_CONSTANTS.DREAM_CORRIDOR_MAX_LIVES;
+            const current = (this.state.dreamCorridorLives !== undefined) ? this.state.dreamCorridorLives : maxLives;
             const remaining = current - 1;
             this.state.dreamCorridorLives = remaining;
 
@@ -1561,15 +1573,15 @@
 
             if (remaining <= 0) {
                 // 목숨 소진 → 런 실패
-                this.failDreamCorridorRun(`${label}에서 오답이 발생해 꿈의회랑이 종료되었습니다.<br>(오답 3회 소진)`);
+                this.failDreamCorridorRun(`${label}에서 오답이 발생해 꿈의회랑이 종료되었습니다.<br>(오답 ${maxLives}회 소진)`);
             } else {
                 // 목숨 차감 후 계속 진행 안내
-                const hearts = '❤️'.repeat(remaining) + '🖤'.repeat(3 - remaining);
+                const hearts = '❤️'.repeat(remaining) + '🖤'.repeat(maxLives - remaining);
                 this.openInfoModal(
                     '꿈의회랑 ─ 오답',
                     `${label}에서 오답이 발생했습니다.<br><br>` +
                     `남은 기회: ${hearts}<br><br>` +
-                    `(3회 오답 시 이 런은 실패 처리됩니다.)`,
+                    `(${maxLives}회 오답 시 이 런은 실패 처리됩니다.)`,
                     () => this.toMenu()
                 );
             }
