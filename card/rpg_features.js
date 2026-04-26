@@ -1651,7 +1651,7 @@
         }
 
         // Reset Chaos Blessing
-        this.state.chaosBlessingUses = 3;
+        this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
         this.state.chaosBuffs = [];
         this.state.activeChaosBlessing = [];
         this.state.activeSageBlessing = [];

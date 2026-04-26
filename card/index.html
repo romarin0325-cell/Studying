@@ -3936,11 +3936,13 @@
                 const label = LumiQuestionRuntime.getSearchButtonLabel(session);
                 const chatBtn = document.getElementById('lumi-chat-search-btn');
                 if (chatBtn) {
-                    chatBtn.innerText = label;
-                    chatBtn.disabled = forcedOff;
-                    chatBtn.style.opacity = forcedOff ? '0.55' : '1';
-                    chatBtn.style.cursor = forcedOff ? 'not-allowed' : 'pointer';
-                    chatBtn.title = forcedOff ? 'TOEIC 질문에서는 검색을 사용할 수 없습니다.' : '';
+                    // TOEIC 질문 모드에서는 검색이 항상 OFF이므로 버튼 자체를 숨김
+                    if (forcedOff) {
+                        chatBtn.style.display = 'none';
+                    } else {
+                        chatBtn.style.display = '';
+                        chatBtn.innerText = label;
+                    }
                 }
             },
 
