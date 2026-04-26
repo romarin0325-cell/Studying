@@ -190,7 +190,7 @@ const GameAPI = {
                 contents: [{ parts: [{ text: fullPrompt }] }],
                 generationConfig: {
                     temperature: isMisunderstandingMode ? 0.65 : 0.4,
-                    maxOutputTokens: isMisunderstandingMode ? 8192 : 4096,
+                    maxOutputTokens: isMisunderstandingMode ? 12288 : 6144,
                     thinkingConfig: buildThinkingConfig(modelConfig, 'high')
                 },
                 safetySettings: [
@@ -297,7 +297,7 @@ function buildThinkingConfig(modelConfig, thinkingLevel = 'high') {
     }
 
     return {
-        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.flashLike && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
+        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.id === 'gemini-3.1-flash-lite-preview' && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
     };
 }
 
@@ -838,7 +838,7 @@ const LumiQuestionRuntime = {
         const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
             systemInstruction: session.systemInstruction,
             enableSearch: session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
-            thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
+            thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite-preview' ? 'medium' : session.thinkingLevel,
             model: modelConfig.id
         });
 
@@ -977,7 +977,7 @@ const LumiQuestionRuntime = {
                     ? getLumiOrbSystemInstruction(this.searchEnabled)
                     : session.systemInstruction,
                 enableSearch: this.searchEnabled && session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
-                thinkingLevel: session.mode === 'toeic-review' && modelConfig.flashLike ? 'medium' : session.thinkingLevel,
+                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite-preview' ? 'medium' : session.thinkingLevel,
                 model: modelConfig.id,
                 signal: controller.signal,
                 timeoutMs: 120000

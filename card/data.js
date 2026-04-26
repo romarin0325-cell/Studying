@@ -361,7 +361,7 @@ const CARDS = [
     {
         id: 'silent_librarian', name: '침묵의사서', grade: 'rare', element: 'water', role: 'debuffer',
         stats: { hp: 330, atk: 70, matk: 95, def: 55, mdef: 75 },
-        trait: { type: 'death_dmg_mag', val: 6.0, desc: '사망시 적에게 600% 마법대미지' },
+        trait: { type: 'death_dmg_mag', val: 3.0, desc: '사망시 적에게 300% 마법대미지' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '사일런트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
