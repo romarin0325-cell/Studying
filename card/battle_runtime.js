@@ -5,10 +5,14 @@
  * while preserving the existing RPG method names and DOM entrypoints.
  */
 
+/**
+ * Returns the stack cap for a given buff, delegating to the shared getStackCapInfo().
+ * @returns {number|null} cap value, or null if not a capped stack buff.
+ */
 function getStackCap(rpg, buffId) {
-    if (buffId === 'burn') return rpg.hasArtifact('over_flame') ? 5 : 3;
-    if (buffId === 'divine') return rpg.hasArtifact('over_divine') ? 5 : 3;
-    return null;
+    const artifacts = (rpg && rpg.state && rpg.state.artifacts) ? rpg.state.artifacts : [];
+    const info = getStackCapInfo(buffId, artifacts);
+    return info ? info.cap : null;
 }
 
 function applyStackMap(rpg, target, buffMap) {

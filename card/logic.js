@@ -1,4 +1,4 @@
-/**
+﻿/**
  * game.js — Game utilities, storage layer, and constants for Card RPG.
  *
  * Provides:
@@ -180,6 +180,18 @@ window.GAME_CONSTANTS = {
     SAGE_BLESSING_PICK_COUNT: 12,
     DEFAULT_BLESSING_USES: 3,
     MAX_BONUS_POOL_PRESETS: 3,
+
+    /** Stack cap configuration for stackable buffs/debuffs */
+    STACK_CAP: {
+        DEFAULT: 3,
+        ENHANCED: 5,
+        ENHANCED_ADD: 2,
+        /** Maps buff ID to the artifact that enhances it */
+        ARTIFACT_MAP: {
+            burn: 'over_flame',
+            divine: 'over_divine'
+        }
+    },
 
     // Costs
     COSTS: {
@@ -1140,12 +1152,30 @@ const DAMAGE_EFFECT_HANDLERS_EXTRA = {
         const maxTurn = eff.maxTurn || eff.turn || 0;
         if (ctx.turn && maxTurn > 0 && ctx.turn <= maxTurn) {
             ctx.mult *= eff.mult;
-            ctx.logFn(`[孖ｹ・ｱ] ${maxTurn}奓ｴ ・､﨑・ ・・･ ${eff.mult}・ｰ!`);
+            ctx.logFn(`[특성] ${maxTurn}턴 이내 위력 증가! 배율 ${eff.mult}배!`);
         }
     }
 };
 
 Object.assign(DAMAGE_EFFECT_HANDLERS, DAMAGE_EFFECT_HANDLERS_EXTRA);
+
+/**
+ * Shared stack cap utility — single source of truth for burn/divine stack limits.
+ * Used by both SideEffects (logic.js) and battle_runtime.js.
+ * @param {string} buffId - The buff/debuff identifier (e.g. 'burn', 'divine')
+ * @param {string[]} artifacts - Player's active artifact IDs
+ * @returns {{ cap: number, add: number } | null} null if not a capped stack buff
+ */
+function getStackCapInfo(buffId, artifacts) {
+    const cfg = GAME_CONSTANTS.STACK_CAP;
+    const enhancerArtifact = cfg.ARTIFACT_MAP[buffId];
+    if (!enhancerArtifact) return null;
+    const enhanced = Array.isArray(artifacts) && artifacts.includes(enhancerArtifact);
+    return {
+        cap: enhanced ? cfg.ENHANCED : cfg.DEFAULT,
+        add: enhanced ? cfg.ENHANCED_ADD : 1
+    };
+}
 
 const SideEffects = {
     handlers: {
@@ -1159,12 +1189,10 @@ const SideEffects = {
         'debuff': (ctx, eff) => {
             let t = ctx.target;
             if (eff.stack) {
-                let maxStack = 3;
-                let addStack = 1;
-                // Artifact: over_flame / over_divine
                 const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-                if (eff.id === 'burn' && artifacts.includes('over_flame')) { maxStack = 5; addStack = 2; }
-                if (eff.id === 'divine' && artifacts.includes('over_divine')) { maxStack = 5; addStack = 2; }
+                const capInfo = getStackCapInfo(eff.id, artifacts);
+                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
+                const addStack = capInfo ? capInfo.add : 1;
 
                 t.buffs[eff.id] = Math.min((t.buffs[eff.id] || 0) + addStack, maxStack);
                 ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
@@ -1176,8 +1204,12 @@ const SideEffects = {
         'self_debuff': (ctx, eff) => {
             let s = ctx.source;
             if (eff.stack) {
-                s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
-                if (s.buffs[eff.id] > 3) s.buffs[eff.id] = 3;
+                const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+                const capInfo = getStackCapInfo(eff.id, artifacts);
+                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
+                const addStack = capInfo ? capInfo.add : 1;
+
+                s.buffs[eff.id] = Math.min((s.buffs[eff.id] || 0) + addStack, maxStack);
                 ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
             } else {
                 s.buffs[eff.id] = 1;
@@ -1874,36 +1906,26 @@ const Logic = {
             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate * 100)}% 관통!`);
         }
 
+        // Artifact: demon_iris — burn stacks penetrate BOTH phy/mag defense (overrides flame_piercing)
         if (artifacts.includes('demon_iris') && ctx.baseTargetBuffs['burn']) {
-            const burnPen = ctx.baseTargetBuffs['burn'] * 0.1;
-            const defenseLabel = skill.type === 'phy' ? '방어력' : '마법방어력';
-            const ignore = Math.floor((skill.type === 'phy' ? rawDef : rawMdef) * burnPen);
-            def = Math.max(0, def - ignore);
-            logFn(`[신기] 마신기 아이리스: 작열 ${ctx.baseTargetBuffs['burn']}스택! ${defenseLabel} ${Math.round(burnPen * 100)}% 관통!`);
+            const rawVal = skill.type === 'phy' ? rawDef : rawMdef;
+            def = Math.max(0, def - this._calcStackPenetration('burn', ctx.baseTargetBuffs['burn'], 0.1, rawVal, '[신기] 마신기 아이리스', logFn));
         }
 
-        // Artifact: flame_piercing — burn stacks x 10% physical defense penetration
+        // Artifact: flame_piercing — burn stacks x 10% physical defense penetration (skip if demon_iris active)
         if (!artifacts.includes('demon_iris') && artifacts.includes('flame_piercing') && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
-            let burnPen = ctx.baseTargetBuffs['burn'] * 0.1;
-            let ignore = Math.floor(rawDef * burnPen);
-            def = Math.max(0, def - ignore);
-            logFn(`[아티팩트] 플레임피어싱: 작열 ${ctx.baseTargetBuffs['burn']}스택! 방어력 ${Math.round(burnPen * 100)}% 관통!`);
+            def = Math.max(0, def - this._calcStackPenetration('burn', ctx.baseTargetBuffs['burn'], 0.1, rawDef, '[아티팩트] 플레임피어싱', logFn));
         }
 
+        // Artifact: divine_iris — divine stacks penetrate BOTH phy/mag defense (overrides divine_piercing)
         if (artifacts.includes('divine_iris') && ctx.baseTargetBuffs['divine']) {
-            const divinePen = ctx.baseTargetBuffs['divine'] * 0.1;
-            const defenseLabel = skill.type === 'phy' ? '방어력' : '마법방어력';
-            const ignore = Math.floor((skill.type === 'phy' ? rawDef : rawMdef) * divinePen);
-            def = Math.max(0, def - ignore);
-            logFn(`[신기] 신기 아이리스: 디바인 ${ctx.baseTargetBuffs['divine']}스택! ${defenseLabel} ${Math.round(divinePen * 100)}% 관통!`);
+            const rawVal = skill.type === 'phy' ? rawDef : rawMdef;
+            def = Math.max(0, def - this._calcStackPenetration('divine', ctx.baseTargetBuffs['divine'], 0.1, rawVal, '[신기] 신기 아이리스', logFn));
         }
 
-        // Artifact: divine_piercing — divine stacks x 10% magic defense penetration
+        // Artifact: divine_piercing — divine stacks x 10% magic defense penetration (skip if divine_iris active)
         if (!artifacts.includes('divine_iris') && artifacts.includes('divine_piercing') && skill.type === 'mag' && ctx.baseTargetBuffs['divine']) {
-            let divinePen = ctx.baseTargetBuffs['divine'] * 0.1;
-            let ignore = Math.floor(rawMdef * divinePen);
-            def = Math.max(0, def - ignore);
-            logFn(`[아티팩트] 디바인피어싱: 디바인 ${ctx.baseTargetBuffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
+            def = Math.max(0, def - this._calcStackPenetration('divine', ctx.baseTargetBuffs['divine'], 0.1, rawMdef, '[아티팩트] 디바인피어싱', logFn));
         }
 
         if (artifacts.includes('divine_poseidon') && ctx.baseTargetBuffs['stun']) {
@@ -2034,6 +2056,40 @@ const Logic = {
     },
 
     // 4. Initial Stats Calculation
+
+    /**
+     * Synergy activation/effect data table.
+     * cond: function(deckCtx) => boolean — whether this synergy is active
+     * apply: function(p, t) — apply stat boosts to player stats object p
+     */
+    _SYNERGY_TABLE: {
+        'syn_nature_3_all':        { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; } },
+        'syn_nature_3_golem':      { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.def *= 1.3; } },
+        'syn_water_3_ice_age':     { cond: d => d.countElement('water') >= 3,                     apply: () => {} },
+        'syn_fire_3_crit':         { cond: d => d.countElement('fire') >= 3,                      apply: p => { p.baseCrit += 30; } },
+        'syn_dark_3_matk':         { cond: d => d.countElement('dark') >= 3,                      apply: p => { p.matk *= 1.5; } },
+        'syn_light_fire_atk':      { cond: d => d.hasElement('light') && d.hasElement('fire'),    apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
+        'syn_light_dark_matk_mdef':{ cond: d => d.hasElement('light') && d.hasElement('dark'),    apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_light_3_matk_mdef':   { cond: d => d.countElement('light') >= 3,                     apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_water_nature':        { cond: d => d.hasElement('water') && d.hasElement('nature'),   apply: () => {} },
+        'syn_nature_3_matk':       { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.matk *= 1.5; } },
+        'syn_night_rabbit':        { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']),   apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_snow_rabbit':         { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),    apply: p => { p.atk *= 1.5; p.def *= 1.5; } },
+        'syn_silver_rabbit':       { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
+        'syn_water_3_atk_matk':    { cond: d => d.countElement('water') >= 3,                     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
+        'syn_fire_3_crit_burn':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_fire_3_atk_boost':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.atk *= (1 + t.val / 100); } },
+        'syn_dark_3_matk_boost':   { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
+        'syn_dark_3_all_stats':    { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; p.def *= m; p.mdef *= m; } },
+        'syn_dark_3_party_atk':    { cond: d => d.countElement('dark') >= 3,                      apply: () => {} },
+        'syn_water_2_moon_twinkle':{ cond: d => d.countElement('water') >= 2,                     apply: () => {} },
+        'syn_water_light_heart_star':      { cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
+        'syn_water_light_midnight_twinkle':{ cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
+        'syn_light_3_party_def_mdef':      { cond: d => d.countElement('light') >= 3,             apply: () => {} },
+        'syn_nature_3_party_def_mdef':     { cond: d => d.countElement('nature') >= 3,            apply: () => {} },
+        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } }
+    },
+
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
         // Base stats copy
         let p = {
@@ -2050,58 +2106,12 @@ const Logic = {
         const t = playerProto.trait;
         let active = false;
 
-        // Synergy Traits
+        // Synergy Traits — data-driven lookup
         if (t.type.startsWith('syn_')) {
-            if (t.type === 'syn_nature_3_all' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_nature_3_golem' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_water_3_ice_age' && deckCtx.countElement('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_light_fire_atk' && deckCtx.hasElement('light') && deckCtx.hasElement('fire')) active = true;
-            else if (t.type === 'syn_light_dark_matk_mdef' && deckCtx.hasElement('light') && deckCtx.hasElement('dark')) active = true;
-            else if (t.type === 'syn_light_3_matk_mdef' && deckCtx.countElement('light') >= 3) active = true;
-            else if (t.type === 'syn_water_nature' && deckCtx.hasElement('water') && deckCtx.hasElement('nature')) active = true;
-            else if (t.type === 'syn_nature_3_matk' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_night_rabbit' && deckCtx.hasAnyCard(['night_rabbit', 'silver_rabbit'])) active = true;
-            else if (t.type === 'syn_snow_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'silver_rabbit'])) active = true;
-            else if (t.type === 'syn_silver_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'night_rabbit'])) active = true;
-            else if (t.type === 'syn_water_3_atk_matk' && deckCtx.countElement('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit_burn' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_atk_boost' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk_boost' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_all_stats' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
-            else if (t.type === 'syn_water_light_heart_star' && deckCtx.hasElement('water') && deckCtx.hasElement('light')) active = true;
-            else if (t.type === 'syn_water_light_midnight_twinkle' && deckCtx.hasElement('water') && deckCtx.hasElement('light')) active = true;
-            else if (t.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) active = true;
-            else if (t.type === 'syn_nature_3_party_def_mdef' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) active = true;
-
-            if (active) {
-                if (t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
-                if (t.type === 'syn_nature_3_golem') { p.atk *= 1.3; p.def *= 1.3; }
-                if (t.type === 'syn_nature_3_matk') p.matk *= 1.5;
-                if (t.type === 'syn_fire_3_crit') p.baseCrit += 30;
-                if (t.type === 'syn_dark_3_matk') p.matk *= 1.5;
-                if (t.type === 'syn_light_fire_atk') p.matk *= (1 + t.val / 100);
-                if (t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_light_3_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
-                if (t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
-                if (t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
-                if (t.type === 'syn_fire_3_crit_burn') p.baseCrit += t.val;
-                if (t.type === 'syn_fire_3_atk_boost') p.atk *= (1 + t.val / 100);
-                if (t.type === 'syn_dark_3_matk_boost') p.matk *= (1 + t.val / 100);
-                if (t.type === 'syn_dark_3_all_stats') {
-                    p.atk *= (1 + t.val / 100);
-                    p.matk *= (1 + t.val / 100);
-                    p.def *= (1 + t.val / 100);
-                    p.mdef *= (1 + t.val / 100);
-                }
-                if (t.type === 'syn_dark_full_party_crit') p.baseCrit += t.val;
-
+            const entry = Logic._SYNERGY_TABLE[t.type];
+            if (entry && entry.cond(deckCtx)) {
+                active = true;
+                entry.apply(p, t);
                 p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
                 p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
             }
@@ -2313,6 +2323,42 @@ const Logic = {
         return skill || { type: 'phy', val: 1.0, name: '일반 공격' };
     },
 
+    /**
+     * Shared helper for death-triggered damage effects.
+     * Consolidates: calculateDamage → companion artifact check → result accumulation → logging.
+     */
+    _applyDeathDamage: function (result, victim, killer, skillPartial, fieldBuffs, logFn, deck, turn, artifacts, logPrefix) {
+        const skill = { ...skillPartial, effects: skillPartial.effects || [] };
+        const dmgResult = this.calculateDamage(victim, killer, skill, fieldBuffs, [], logFn, null, deck, turn);
+        if (artifacts.includes('companion')) {
+            dmgResult.dmg *= 2;
+            logFn(`[아티팩트] 길동무: ${skill.name} 대미지 2배!`);
+        }
+        if (dmgResult.dmg > 0) {
+            result.damageToKiller += dmgResult.dmg;
+            logFn(`${logPrefix} ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+        }
+    },
+
+    /**
+     * Shared helper for stack-based defense penetration (burn/divine artifacts).
+     * All penetration rates are additive (합연산).
+     * @param {string} buffId - Stack buff to check (e.g. 'burn', 'divine')
+     * @param {number} stacks - Current stack count
+     * @param {number} penPerStack - Penetration rate per stack (e.g. 0.1 = 10%)
+     * @param {number} rawDefValue - Raw defense value to penetrate against
+     * @param {string} label - Display label for log
+     * @param {Function} logFn - Logging function
+     * @returns {number} Amount of defense to subtract
+     */
+    _calcStackPenetration: function (buffId, stacks, penPerStack, rawDefValue, label, logFn) {
+        if (!stacks || stacks <= 0) return 0;
+        const penRate = stacks * penPerStack;
+        const ignore = Math.floor(rawDefValue * penRate);
+        logFn(`${label}: ${getBuffName(buffId)} ${stacks}스택! ${Math.round(penRate * 100)}% 관통!`);
+        return ignore;
+    },
+
     // 6. Handle Death Traits
     handleDeathTraits: function (victim, killer, fieldBuffs, logFn, deck, turn, artifacts) {
         if (!logFn) logFn = function () { };
@@ -2322,43 +2368,14 @@ const Logic = {
         const t = victim.proto.trait;
 
         if (t.type === 'death_dmg_mag') {
-            let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 사망 반격!');
         }
         else if (t.type === 'death_dmg_phy') {
-            let dummySkill = { name: '사망 반격', type: 'phy', val: t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 사망 반격!');
         }
         else if (t.type === 'death_dmg_debuff') {
             let cnt = Object.keys(killer.buffs).length;
-            let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 저주 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '저주 반격', type: 'mag', val: cnt * t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 저주 반격!');
         }
         else if (t.type === 'death_field_sun') {
             result.fieldBuffsToAdd.push('sun_bless');
@@ -2401,17 +2418,7 @@ const Logic = {
         }
         else if (t.type === 'death_field_buff_count_dmg') {
             let count = fieldBuffs.length;
-            let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: count * t.val }, fieldBuffs, logFn, deck, turn, artifacts, `[특성] 사망 반격! (필드버프 ${count}개)`);
         }
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
@@ -2440,18 +2447,8 @@ const Logic = {
             if (grade === 'legend' || grade === 'transcendence') {
                 const isDivineBigBang = artifacts.includes('demon_beelzebub');
                 const skillName = isDivineBigBang ? '마신기 벨제뷔트' : '빅뱅';
-                let dummySkill = { name: skillName, type: 'phy', val: isDivineBigBang ? 4.0 : 3.0, effects: [] };
-                let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-                // Artifact: companion
-                if (artifacts.includes('companion')) {
-                     dmgResult.dmg *= 2;
-                     logFn(`[아티팩트] 길동무: ${skillName} 자폭 대미지 2배!`);
-                }
-                if (dmgResult.dmg > 0) {
-                    result.damageToKiller += dmgResult.dmg;
-                    const prefix = isDivineBigBang ? '[신기]' : '[아티팩트]';
-                    logFn(`${prefix} ${skillName}: 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
-                }
+                const prefix = isDivineBigBang ? '[신기]' : '[아티팩트]';
+                this._applyDeathDamage(result, victim, killer, { name: skillName, type: 'phy', val: isDivineBigBang ? 4.0 : 3.0 }, fieldBuffs, logFn, deck, turn, artifacts, `${prefix} ${skillName}: 전설/초월 카드 자폭!`);
             }
         }
 
