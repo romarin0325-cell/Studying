@@ -1860,7 +1860,7 @@
 
                 const quizList = (Array.isArray(data.quizzes) && data.quizzes.length > 0)
                     ? data.quizzes
-                    : [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+                    : [{ question: data.question, options: data.options || [], answer: data.answer, translation: data.translation }];
                 if (quizList.length === 0) return null;
                 return quizList[Math.floor(Math.random() * quizList.length)];
             },

@@ -1620,8 +1620,8 @@ const Logic = {
                 stats.crit += trait.val || 0;
             }
             if (trait.type === 'luna_jasmine_trait' && effectiveFieldBuffs.some(b => b.name === 'goddess_descent')) {
-                stats.evasion += (trait.val || 25);
-                stats.crit += (trait.val || 25);
+                stats.evasion += 25;
+                stats.crit += 25;
             }
         }
 
