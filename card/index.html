@@ -1364,7 +1364,7 @@
             <button class="menu-btn" onclick="RPG.activateChaos('great_sage')"
                 style="border-color:#00e676; color:#00e676;">
                 대현자의 축복<br>
-                <span style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;">문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장</span>
+                <span id="great-sage-desc" style="font-size:0.75rem; font-weight:normal; color:#b9f6ca;">문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장</span>
             </button>
             <button class="menu-btn" onclick="RPG.checkActiveChaosBlessings()"
                 style="border-color:#29b6f6; color:#29b6f6;">
@@ -1854,6 +1854,17 @@
                 };
             },
 
+            resolveCollocationTutoringQuiz(data) {
+                if (data && data.selectedQuiz) return data.selectedQuiz;
+                if (!data) return null;
+
+                const quizList = (Array.isArray(data.quizzes) && data.quizzes.length > 0)
+                    ? data.quizzes
+                    : [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
+                if (quizList.length === 0) return null;
+                return quizList[Math.floor(Math.random() * quizList.length)];
+            },
+
             /**
              * Build config for a tutoring review quiz (vocab or collocation).
              * @param {Object}   item           - { data, type: 'vocab'|'collocation' }
@@ -1865,8 +1876,12 @@
                 const data = item.data;
 
                 if (item.type === 'collocation') {
-                    let quizList = data.quizzes || [{ question: data.question, options: data.options, answer: data.answer, translation: data.translation }];
-                    let q = quizList[Math.floor(Math.random() * quizList.length)];
+                    const q = this.resolveCollocationTutoringQuiz(data) || {
+                        question: data.question,
+                        options: data.options || [],
+                        answer: data.answer,
+                        translation: data.translation
+                    };
 
                     return {
                         question: q.question,
@@ -2604,7 +2619,7 @@
                     { id: 'restriction', name: '제약의 시련', desc: '뽑기/축복에서 레어 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
                     { id: 'balance', name: '균형의 도전', desc: '뽑기/축복에서 에픽 등급 이하만 등장합니다.\n(성공조건: 18 스테이지)' },
                     { id: 'suffering', name: '고난의 여정', desc: '초기 10장, 클리어 보상 없음, 축복 카드 +2장.\n(성공조건: 24 스테이지)' },
-                    { id: 'puzzle', name: '퍼즐', desc: '시작 퀴즈로 정해진 카드 36장을 획득하여 진행합니다. 사용한 카드는 소멸하고 대폭 강화된 적이 출현합니다.\n(성공조건: 12 스테이지)' },
+                    { id: 'puzzle', name: '퍼즐', desc: '시작 퀴즈로 정해진 카드 36장을 확보해 진행. 사용한 카드는 소멸, 강화된 적 출현.\n(성공조건: 12 스테이지)' },
                     { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
                     { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
@@ -2797,8 +2812,14 @@
                 // Show artifact check button only in artifact mode
                 const artBtn = document.getElementById('btn-artifact-check');
                 const modal = document.getElementById('modal-chaos');
+                const sageDesc = document.getElementById('great-sage-desc');
                 if (artBtn) {
                     artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
+                }
+                if (sageDesc) {
+                    sageDesc.innerText = this.state.mode === 'puzzle'
+                        ? '문법 퀴즈 성공 시 12명에게 축복'
+                        : '문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장';
                 }
 
                 if (this.state.mode === 'artifact') {
@@ -2867,8 +2888,11 @@
                 // Update UI immediately
                 document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
 
-                this.state.tickets += GAME_CONSTANTS.BONUS_REWARDS.SAGE_BLESSING;
-                if (document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
+                const grantsTicket = this.state.mode !== 'puzzle';
+                if (grantsTicket) {
+                    this.state.tickets += GAME_CONSTANTS.BONUS_REWARDS.SAGE_BLESSING;
+                    if (document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;
+                }
 
                 // Apply to 12 random cards
                 let pool = GameUtils.buildCardPool(this.global, {
@@ -2897,7 +2921,11 @@
                 this.state.activeSageBlessing = newBuffs;
                 this.updateMergedBlessings();
 
-                let msg = "<b>대현자의 축복 성공!</b><br>12명의 동료에게 축복이 내려졌습니다.<br>드로우 티켓 1장 획득!<br><br><b>[새로 적용된 축복]</b><br>";
+                let msg = "<b>대현자의 축복 성공!</b><br>12명의 동료에게 축복이 내려졌습니다.<br>";
+                if (grantsTicket) {
+                    msg += "드로우 티켓 1장 획득!<br>";
+                }
+                msg += "<br><b>[새로 적용된 축복]</b><br>";
                 newBuffs.forEach(b => {
                     msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가<br>`;
                 });
@@ -4277,7 +4305,21 @@
                     return this.startTutoringSession(); // Retry
                 }
 
-                this.currentTutoringItem = { data: targetData, type: isCollocation ? 'collocation' : 'vocab' };
+                let tutoringData = targetData;
+                if (isCollocation) {
+                    const selectedQuiz = QuizEngine.resolveCollocationTutoringQuiz(targetData);
+                    const selectedOptions = selectedQuiz && Array.isArray(selectedQuiz.options) ? [...selectedQuiz.options] : [];
+                    tutoringData = {
+                        ...targetData,
+                        question: selectedQuiz ? selectedQuiz.question : targetData.question,
+                        options: selectedOptions,
+                        answer: selectedQuiz ? selectedQuiz.answer : targetData.answer,
+                        translation: selectedQuiz ? selectedQuiz.translation : targetData.translation,
+                        selectedQuiz: selectedQuiz ? { ...selectedQuiz, options: selectedOptions } : null
+                    };
+                }
+
+                this.currentTutoringItem = { data: tutoringData, type: isCollocation ? 'collocation' : 'vocab' };
 
                 // UI Loading
                 this.isApiLoading = true;
@@ -4287,7 +4329,7 @@
                 try {
                     const text = await GameAPI.getTutoringContent(
                         key,
-                        targetData,
+                        tutoringData,
                         isCollocation ? 'collocation' : 'vocab',
                         { model: LumiQuestionRuntime.selectedModel }
                     );
@@ -4351,8 +4393,9 @@
                     this.toMenu();
 
                     // Rumi Surprise Gift Logic
+                    const allowTicketGift = this.state.mode !== 'puzzle';
                     this.state.rumiGiftCount = this.state.rumiGiftCount || 0;
-                    if (this.state.rumiGiftCount < 3 && Math.random() < 0.3) {
+                    if (allowTicketGift && this.state.rumiGiftCount < 3 && Math.random() < 0.3) {
                         this.state.rumiGiftCount++;
                         this.state.tickets = (this.state.tickets || 0) + 1;
                         if (document.getElementById('ui-tickets')) document.getElementById('ui-tickets').innerText = this.state.tickets;

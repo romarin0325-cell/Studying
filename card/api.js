@@ -85,8 +85,17 @@ const GameAPI = {
         let targetInfo = "";
         if (type === 'collocation') {
             targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
-            if (targetData.options && targetData.options.length > 0) {
-                targetInfo += `\nOptions: [${targetData.options.join(', ')}]`;
+            if (targetData.question) {
+                targetInfo += `\nQuiz Prompt: '${targetData.question}'`;
+            }
+            if (targetData.answer) {
+                targetInfo += `\nCorrect Option: '${targetData.answer}'`;
+            }
+            const collocationOptions = Array.isArray(targetData.options)
+                ? targetData.options
+                : (targetData.selectedQuiz && Array.isArray(targetData.selectedQuiz.options) ? targetData.selectedQuiz.options : []);
+            if (collocationOptions.length > 0) {
+                targetInfo += `\nOptions: [${collocationOptions.join(', ')}]`;
             }
             targetInfo += `\n\n**[숙어 연상법 규칙]**`;
             targetInfo += `\n- 왜 이 단어들의 조합이 이 의미가 되는지 의미적 연결을 설명하십시오. (예: 'conduct a survey' → conduct는 '이끌다/수행하다'의 뉘앙스 → 설문조사를 '주도해서 진행'하는 이미지)`;
