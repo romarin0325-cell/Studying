@@ -17,7 +17,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 2.0 }] },
-            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
+            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 2.0 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
         ]
     },
     {
@@ -113,7 +113,7 @@ const CARDS = [
     {
         id: 'behemoth', name: '베히모스', grade: 'legend', element: 'nature', role: 'balancer',
         stats: { hp: 560, atk: 115, matk: 90, def: 75, mdef: 55 },
-        trait: { type: 'behemoth_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용시 20%확률로 적에게 스턴부여' },
+        trait: { type: 'behemoth_trait', val: 2.0, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용시 20%확률로 적에게 스턴부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '대지분쇄', type: 'phy', tier: 3, cost: 30, val: 3.5, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0, customLog: "대지의 축복으로 대지분쇄의 위력이 강력해집니다!" }] },
@@ -155,7 +155,7 @@ const CARDS = [
     {
         id: 'mawang', name: '마왕', grade: 'epic', element: 'fire', role: 'dealer',
         stats: { hp: 400, atk: 95, matk: 95, def: 60, mdef: 60 },
-        trait: { type: 'cond_debuff_3_dmg', val: 1.5, desc: '적이 디버프 3개 이상시 주는 대미지 1.5배' },
+        trait: { type: 'cond_debuff_3_dmg', val: 2.0, desc: '적이 디버프 3개 이상시 주는 대미지 1.5배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '데스핸드', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적에게 걸린 디버프 1종당 0.5배율 추가', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 0.5 }] },
@@ -215,7 +215,7 @@ const CARDS = [
     {
         id: 'pudding_princess', name: '푸딩프린세스', grade: 'epic', element: 'water', role: 'balancer',
         stats: { hp: 420, atk: 85, matk: 85, def: 60, mdef: 60 },
-        trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵 걸린 적에게 대미지 1.5배' },
+        trait: { type: 'cond_silence_dmg', val: 2.0, desc: '침묵 걸린 적에게 대미지 1.5배' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
@@ -238,7 +238,7 @@ const CARDS = [
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 적에게 기절 부여' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적이 디바인 3스택이면 대미지 1.5배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 1.5 }, { type: 'check_divine_3_stun_else_add' }] },
+            { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적이 디바인 3스택이면 대미지 2.0배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 2.0 }, { type: 'check_divine_3_stun_else_add' }] },
             { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1개 (디바인 소모 시 2개)', effects: [{ type: 'random_debuff_consume_divine' }] }
         ]
     },
@@ -251,7 +251,7 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '자장가', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '30%확률로 적에게 스턴 부여', effects: [{ type: 'chance_debuff', id: 'stun', chance: 0.3, duration: 1 }] },
-            { name: '솜사탕', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] }
+            { name: '솜사탕', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] }
         ]
     },
     {
@@ -260,7 +260,7 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '베이비브레스', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '베이비브레스', type: 'mag', tier: 1, cost: 10, val: 2.0, desc: '작열부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] }
         ]
     },
@@ -291,7 +291,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
-            { name: '문라이트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
+            { name: '문라이트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
         ]
     },
     {
@@ -321,17 +321,17 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
-            { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+            { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
         ]
     },
     {
         id: 'void_knight', name: '공허의기사', grade: 'rare', element: 'dark', role: 'balancer',
         stats: { hp: 360, atk: 110, matk: 55, def: 60, mdef: 55 },
-        trait: { type: 'cond_corrosion_dmg', val: 1.5, desc: '부식상태의 적에게 대미지 1.5배' },
+        trait: { type: 'cond_corrosion_dmg', val: 2.0, desc: '부식상태의 적에게 대미지 1.5배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '강타', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리', effects: [] },
-            { name: '급소베기', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] }
+            { name: '급소베기', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] }
         ]
     },
     {
@@ -340,7 +340,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'def', val: 50, desc: '선봉 배치시 방어력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 저주 중 하나 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
+            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 저주 중 하나 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
             { name: '수수께끼', type: 'sup', tier: 1, cost: 10, desc: '침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] }
         ]
     },
@@ -360,8 +360,8 @@ const CARDS = [
         trait: { type: 'death_debuff', debuff: 'darkness', desc: '사망시 암흑 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '미라지프레임', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '작열, 약화 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'weak' }] },
-            { name: '팬텀러쉬', type: 'phy', tier: 3, cost: 30, val: 1.5, desc: '작열, 저주 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'curse' }] }
+            { name: '미라지프레임', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열, 약화 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'weak' }] },
+            { name: '팬텀러쉬', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '작열, 저주 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'curse' }] }
         ]
     },
 
@@ -372,7 +372,7 @@ const CARDS = [
         trait: { type: 'death_sun_bless_chance', val: 0.5, desc: '사망시 50%확률로 태양의축복 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
+            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 2.0, desc: '1.5배 물리', effects: [] },
             { name: '멜팅허그', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -382,7 +382,7 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
+            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 2.0, desc: '1.5배 물리', effects: [] },
             { name: '강타', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리', effects: [] }
         ]
     },
@@ -399,7 +399,7 @@ const CARDS = [
     {
         id: 'vampire', name: '뱀파이어', grade: 'normal', element: 'dark', role: 'dealer',
         stats: { hp: 300, atk: 55, matk: 80, def: 45, mdef: 55 },
-        trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵상태 적에게 대미지 1.5배' },
+        trait: { type: 'cond_silence_dmg', val: 2.0, desc: '침묵상태 적에게 대미지 1.5배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '블러드드레인', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '상대가 저주시 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'curse', mult: 3.0 }] },
@@ -412,7 +412,7 @@ const CARDS = [
         trait: { type: 'syn_night_rabbit', val: 50, desc: '밤토끼 혹은 은토끼가 덱에 있을시 마공 마방 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
             { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼/은토끼 시너지 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0 }] }
         ]
     },
@@ -432,7 +432,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'mdef', val: 20, desc: '선봉 배치시 마방 20%증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '에너지볼', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '에너지볼', type: 'mag', tier: 1, cost: 10, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '스타파우더', type: 'sup', tier: 2, cost: 20, desc: '필드버프 스타파우더 발동', effects: [{ type: 'field_buff', id: 'star_powder' }] }
         ]
     },
@@ -442,7 +442,7 @@ const CARDS = [
         trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛 불이 있을시 마법공격력 50%증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 2.0, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
             { name: '캔디파라다이스', type: 'sup', tier: 2, cost: 20, desc: '필드버프 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'twinkle_party' }] }
         ]
     },
@@ -462,7 +462,7 @@ const CARDS = [
         trait: { type: 'mid_party_mdef_boost', val: 15, desc: '중견 배치시 덱 전체 마법방어력 15% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
+            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 2.0, desc: '1.5배 물리', effects: [] },
             { name: '바인드', type: 'sup', tier: 1, cost: 10, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] }
         ]
     },
@@ -472,7 +472,7 @@ const CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 1.5, desc: '1.5배 물리', effects: [] },
+            { name: '기습', type: 'phy', tier: 1, cost: 10, val: 2.0, desc: '1.5배 물리', effects: [] },
             { name: '다크니스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '2배 마법', effects: [] }
         ]
     },
@@ -482,7 +482,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'matk', val: 20, desc: '선봉 배치시 마공 20%증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '저주의불꽃', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] },
+            { name: '저주의불꽃', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] },
             { name: '침묵의불꽃', type: 'sup', tier: 1, cost: 10, desc: '침묵, 작열 부여', effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -610,7 +610,7 @@ const BONUS_CARDS = [
     {
         id: 'sakura', name: '사쿠라', grade: 'legend', element: 'fire', role: 'debuffer',
         stats: { hp: 500, atk: 95, matk: 125, def: 75, mdef: 75 },
-        trait: { type: 'cond_target_elements_dmg', val: 1.5, elements: ['nature', 'dark'], desc: '자연/어둠속성 적에게 대미지 1.5배' },
+        trait: { type: 'cond_target_elements_dmg', val: 2.0, elements: ['nature', 'dark'], desc: '자연/어둠속성 적에게 대미지 1.5배' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '봉인부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식/약화/침묵/저주/암흑 중 랜덤 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['corrosion', 'weak', 'silence', 'curse', 'darkness'] }] },
@@ -705,7 +705,7 @@ const BONUS_CARDS = [
         trait: { type: 'on_evasion_stun', desc: '회피 성공 시 상대에게 기절 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '댄싱대거', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '댄싱대거', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '하트브레이커', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '기절 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
         ]
     },
@@ -734,11 +734,11 @@ const BONUS_CARDS = [
     {
         id: 'fallen_angel', name: '타천사', grade: 'rare', element: 'dark', role: 'dealer',
         stats: { hp: 340, atk: 65, matk: 100, def: 55, mdef: 60 },
-        trait: { type: 'cond_darkness_dmg', val: 1.5, desc: '암흑 상태의 적에게 대미지 1.5배' },
+        trait: { type: 'cond_darkness_dmg', val: 2.0, desc: '암흑 상태의 적에게 대미지 1.5배' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '다크레이', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
-            { name: '타락의낙인', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '디바인 1스택 소모하고 암흑 부여', effects: [{ type: 'consume_divine_add_darkness' }] }
+            { name: '타락의낙인', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '디바인 1스택 소모하고 암흑 부여', effects: [{ type: 'consume_divine_add_darkness' }] }
         ]
     },
     {
@@ -779,8 +779,8 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'darkness', desc: '사망 시 암흑 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '사일런트스텝', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '반드시 치명타로 적중', effects: [{ type: 'force_crit' }] },
-            { name: '베놈슬래시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] }
+            { name: '사일런트스텝', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '반드시 치명타로 적중', effects: [{ type: 'force_crit' }] },
+            { name: '베놈슬래시', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] }
         ]
     },
     {
@@ -790,7 +790,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 5배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 5.0 }] },
-            { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['curse', 'silence'] }] }
+            { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '저주 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['curse', 'silence'] }] }
         ]
     },
     {
@@ -799,8 +799,8 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
-            { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
+            { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
     {
@@ -810,7 +810,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '홀리블레싱', type: 'sup', tier: 3, cost: 30, desc: '1턴 뒤 필드버프 성역 발동', effects: [{ type: 'delayed_attack_field', turns: 1, field: 'sanctuary' }] },
-            { name: '폭스플레임', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
+            { name: '폭스플레임', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
         ]
     },
     {
@@ -831,8 +831,8 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 430, atk: 115, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '루터: 이 카드로 승리 시 추가 드로우' },
         skills: [
-            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '갓킬러', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 빛속성 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'light', mult: 2.0 }] }
         ]
     },
@@ -852,7 +852,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
         skills: [
             { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
-            { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
+            { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
             { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
         ]
     },
@@ -944,7 +944,7 @@ const ENEMIES = [
         id: 'artificial_demon_god', name: '인조 마신', element: 'water',
         stats: { hp: 600, atk: 50, matk: 50, def: 60, mdef: 60 },
         skills: [
-            { name: '아이스빔', type: 'mag', rate: 0.3, val: 1.5, desc: '1.5배 마법 피해', effects: [] },
+            { name: '아이스빔', type: 'mag', rate: 0.3, val: 2.0, desc: '1.5배 마법 피해', effects: [] },
             { name: '파괴의형태', type: 'mag', rate: 0.0, val: 4.0, desc: '10턴째 4배 마법', effects: [] }
         ]
     },
@@ -1021,7 +1021,7 @@ const TRANSCENDENCE_CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '홍련각', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 2.0 }] },
-            { name: '천화낙영', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
+            { name: '천화낙영', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 2.0 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
         ]
     },
     {
@@ -1057,7 +1057,7 @@ const TRANSCENDENCE_CARDS = [
     {
         id: 'trans_behemoth', name: '베히모스(해방)', grade: 'transcendence', element: 'nature', role: 'dealer',
         stats: { hp: 620, atk: 120, matk: 100, def: 85, mdef: 65 },
-        trait: { type: 'behemoth_liberated_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용 시 20% 확률로 적에게 스턴 부여' },
+        trait: { type: 'behemoth_liberated_trait', val: 2.0, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용 시 20% 확률로 적에게 스턴 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '월드브레이커', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
