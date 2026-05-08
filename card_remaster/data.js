@@ -467,7 +467,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'debuffer',
+        id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'looter',
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
@@ -827,7 +827,7 @@ const BONUS_CARDS = [
 
 const BONUS_CARD_EXPANSION = [
     {
-        id: 'doom_luther', name: '둠', grade: 'legend', element: 'dark', role: 'luther', unlockSource: 'hidden',
+        id: 'doom_luther', name: '둠', grade: 'legend', element: 'dark', role: 'looter', unlockSource: 'hidden',
         stats: { hp: 430, atk: 115, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '루터: 이 카드로 승리 시 추가 드로우' },
         skills: [

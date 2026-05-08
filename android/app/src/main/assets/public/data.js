@@ -467,7 +467,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'debuffer',
+        id: 'mimic', name: '미믹', grade: 'normal', element: 'dark', role: 'looter',
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
