@@ -829,7 +829,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'doom_luther', name: '둠', grade: 'legend', element: 'dark', role: 'looter', unlockSource: 'hidden',
         stats: { hp: 430, atk: 115, matk: 70, def: 60, mdef: 60 },
-        trait: { type: 'looter', desc: '루터: 이 카드로 승리 시 추가 드로우' },
+        trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
             { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
