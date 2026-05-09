@@ -172,11 +172,16 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
             mdef: player.mdef
         };
 
-        player.maxHp = Math.floor(player.maxHp * (1 + blessing.multiplier));
+        // 앤트로피: 혼돈의 축복 효과 2배
+        let blessingMult = blessing.multiplier;
+        const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
+        if (hasEntropy) blessingMult *= 2;
+
+        player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
         player.hp = player.maxHp;
         player.blessing = blessing;
 
-        const mult = 1.0 + blessing.multiplier;
+        const mult = 1.0 + blessingMult;
         player.atk = Math.floor(player.atk * mult);
         player.matk = Math.floor(player.matk * mult);
         player.def = Math.floor(player.def * mult);
