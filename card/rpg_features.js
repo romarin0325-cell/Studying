@@ -448,11 +448,26 @@
     },
 
 
-    getStandardBonusCards() {
+    getAllStandardBonusCards() {
         if (typeof GameUtils !== 'undefined' && typeof GameUtils.getBonusCards === 'function') {
             return GameUtils.getBonusCards().filter(card => card.unlockSource !== 'hidden');
         }
         return BONUS_CARDS.filter(card => card.unlockSource !== 'hidden');
+    },
+
+
+    getReleasedStandardBonusCards() {
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        return this.getAllStandardBonusCards().filter(card => {
+            if (!card.releaseDate) return true;
+            return card.releaseDate <= todayStr;
+        });
+    },
+
+
+    getStandardBonusCards() {
+        return this.getReleasedStandardBonusCards();
     },
 
 

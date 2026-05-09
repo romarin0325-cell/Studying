@@ -900,7 +900,9 @@ const DELAYED_SKILL_EFFECT_TYPES = [
     'delayed_turn_scale_attack',
     'delayed_attack_debuff_scale',
     'delayed_random_unique_field_buffs',
-    'phantom_nightmare'
+    'phantom_nightmare',
+    'delayed_attack_random_field',
+    'delayed_attack_debuffs'
 ];
 
 function findDelayedSkillEffect(skill) {
@@ -944,6 +946,30 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
                     mult: delayedEff.darknessMult || 2.0,
                     customLog: '[악몽] 암흑 상태의 적에게 대미지 2배!'
                 }
+            ]
+        };
+    }
+
+    // delayed_attack_random_field — 일루미네이션 (프리즘트윈): resolve to attack + random field buff
+    if (delayedEff.type === 'delayed_attack_random_field') {
+        return {
+            ...skill,
+            isDelayed: true,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                { type: 'random_field_buff' }
+            ]
+        };
+    }
+
+    // delayed_attack_debuffs — 퍼펙트플랜 (퍼펙트아우로라): resolve to attack + multi debuffs
+    if (delayedEff.type === 'delayed_attack_debuffs') {
+        return {
+            ...skill,
+            isDelayed: true,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                ...delayedEff.debuffs.map(d => ({ type: 'debuff', id: d, stack: 1 }))
             ]
         };
     }
@@ -1260,6 +1286,22 @@ const SideEffects = {
                 options.expireLog = eff.expireLog || null;
             }
             ctx.applyFieldBuff(eff.id, options);
+
+            // 플레어리본: 같은 등급 덱일 때 특정 스킬 사용 시 추가 필드버프
+            const sourceTrait = ctx.source && ctx.source.proto && ctx.source.proto.trait;
+            if (sourceTrait && sourceTrait.type === 'cond_same_grade_skill_buff') {
+                if (ctx.skill && ctx.skill.name === sourceTrait.skillName) {
+                    const deckCards = (ctx.deck || []).filter(Boolean).map(cardId => {
+                        const allCards = [...CARDS, ...BONUS_CARDS];
+                        return allCards.find(c => c.id === cardId);
+                    }).filter(Boolean);
+                    const grades = deckCards.map(c => c.grade);
+                    if (grades.length > 0 && grades.every(g => g === grades[0])) {
+                        ctx.applyFieldBuff(sourceTrait.buff);
+                        ctx.logFn(`[특성] ${ctx.source.name}: 같은 등급 덱 조건 달성! [${getBuffName(sourceTrait.buff)}] 추가 부여!`);
+                    }
+                }
+            }
         },
         'heal_ratio': (ctx, eff) => {
             const ratio = eff.ratio || eff.val || 0;
@@ -1464,6 +1506,12 @@ const SideEffects = {
         },
         'delayed_attack_field': (ctx, eff) => {
             if (eff.field) ctx.applyFieldBuff(eff.field);
+        },
+        'delayed_attack_random_field': (ctx, eff) => {
+            // handled via buildResolvedDelayedSkill → random_field_buff
+        },
+        'delayed_attack_debuffs': (ctx, eff) => {
+            // handled via buildResolvedDelayedSkill → debuff effects
         },
         'delayed_turn_scale_attack': (ctx, eff) => {
             const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
@@ -1868,6 +1916,12 @@ const Logic = {
                 mult *= source.normalAttackPartyMult;
                 logFn(`[특성] 일반공격 강화! x${source.normalAttackPartyMult.toFixed(1)}`);
             }
+            // 프리즘트윈: 이 카드의 일반공격 대미지 배수
+            if (source.proto && source.proto.trait && source.proto.trait.type === 'self_normal_atk_dmg_boost') {
+                const selfMult = source.proto.trait.val || 2.0;
+                mult *= selfMult;
+                logFn(`[특성] ${source.name}: 일반공격 대미지 x${selfMult.toFixed(1)}!`);
+            }
         }
 
         // Trait Multipliers
@@ -2170,6 +2224,11 @@ const Logic = {
             active = true;
         }
 
+        // 프리즘트윈/앤트로피: 패시브 특성 활성화 표시
+        if (t.type === 'self_normal_atk_dmg_boost' || t.type === 'chaos_blessing_double') {
+            active = true;
+        }
+
         // Positional Traits (Generalized)
         if (t.type === 'pos_stat_boost' && idx !== undefined) {
             if (t.pos === idx) {
@@ -2209,11 +2268,44 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius']) - 1);
+            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder']) - 1);
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
                 p.matk = Math.floor(p.matk * (1 + boost));
+            }
+        }
+
+        // 언더독: 덱에 일반등급 3장 이상 + 대장 배치 시 공격/마공 증가
+        if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
+            const gradeCount = deckCtx.cards.filter(c => c && c.grade === (t.gradeRequired || 'normal')).length;
+            if (gradeCount >= (t.countRequired || 3) && idx === (t.pos !== undefined ? t.pos : 2)) {
+                active = true;
+                const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
+                const boost = 1 + (t.val || 0) / 100;
+                stats.forEach(s => {
+                    if (s === 'atk') p.atk = Math.floor(p.atk * boost);
+                    if (s === 'matk') p.matk = Math.floor(p.matk * boost);
+                    if (s === 'def') p.def = Math.floor(p.def * boost);
+                    if (s === 'mdef') p.mdef = Math.floor(p.mdef * boost);
+                });
+            }
+        }
+
+        // 구미호: 덱 전체가 같은 등급일 때 마공 증가
+        if (t.type === 'cond_same_grade_matk_boost') {
+            const grades = deckCtx.cards.map(c => c ? c.grade : null).filter(Boolean);
+            if (grades.length > 0 && grades.every(g => g === grades[0])) {
+                active = true;
+                p.matk = Math.floor(p.matk * (1 + (t.val || 0) / 100));
+            }
+        }
+
+        // 스컬드래곤: 대장 배치 시 자기 공격력 증가, 덱 전체 방어/마방 감소
+        if (t.type === 'leader_self_atk_party_def_down' && idx !== undefined) {
+            if (idx === 2) {
+                active = true;
+                p.atk = Math.floor(p.atk * (1 + (t.atkBoost || 100) / 100));
             }
         }
 
@@ -2244,6 +2336,11 @@ const Logic = {
             else if (tr && tr.type === 'mid_party_mdef_boost' && cardIdx === 1) {
                 partyBoost.mdef += (tr.val || 0);
             }
+            // 스컬드래곤: 대장 배치 시 덱 전체 방어/마방 감소
+            else if (tr && tr.type === 'leader_self_atk_party_def_down' && cardIdx === 2) {
+                partyBoost.def -= (tr.defDown || 50);
+                partyBoost.mdef -= (tr.defDown || 50);
+            }
         });
 
         if (partyBoost.atk) p.atk = Math.floor(p.atk * (1 + partyBoost.atk / 100));
@@ -2252,10 +2349,19 @@ const Logic = {
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
         if (partyBoost.crit) p.baseCrit += partyBoost.crit;
 
+        // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
+        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder'];
+        const dessertBoostTrait = activeCards.find(c => c.trait && c.trait.type === 'dessert_kingdom_crit_eva_boost');
+        if (dessertBoostTrait && dessertKingdomIds.includes(playerProto.id)) {
+            const boostVal = dessertBoostTrait.trait.val || 20;
+            p.baseCrit += boostVal;
+            p.baseEva += boostVal;
+        }
+
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon'];
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
             if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
@@ -2465,6 +2571,37 @@ const Logic = {
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
             logFn(`[특성] 헬하운드 사망! 트윙클 파티 발동!`);
+        }
+        // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
+        else if (t.type === 'death_dmg_mag_stun_cond') {
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon', 'dragon_miko'];
+            const hasDragon = deck && deck.some(cardId => {
+                if (!cardId || cardId === victim.proto.id) return false;
+                return dragonIds.includes(cardId);
+            });
+            if (hasDragon) {
+                this._applyDeathDamage(result, victim, killer, { name: '용혈의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 용혈의무녀: 드래곤의 힘으로 사망 반격!');
+                if (killer) {
+                    result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
+                    logFn('[특성] 용혈의무녀: 적에게 기절 부여!');
+                }
+            }
+        }
+        // 팅커벨: 덱 전부 같은 등급일 때 사망 시 마법대미지 + 기절
+        else if (t.type === 'death_dmg_mag_stun_same_grade') {
+            const deckCards = (deck || []).filter(Boolean).map(cardId => {
+                const allCards = [...CARDS, ...BONUS_CARDS];
+                return allCards.find(c => c.id === cardId);
+            }).filter(Boolean);
+            const grades = deckCards.map(c => c.grade);
+            const allSameGrade = grades.length > 0 && grades.every(g => g === grades[0]);
+            if (allSameGrade) {
+                this._applyDeathDamage(result, victim, killer, { name: '요정의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 팅커벨: 같은 등급 덱의 힘으로 사망 반격!');
+                if (killer) {
+                    result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
+                    logFn('[특성] 팅커벨: 적에게 기절 부여!');
+                }
+            }
         }
 
         // ─── Artifact Death Effects ─────────────────────────────
