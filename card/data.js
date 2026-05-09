@@ -304,7 +304,7 @@ const CARDS = [
         trait: { type: 'syn_nature_3_golem', val: 30, desc: '덱에 자연 3장 이상 시 공격력/방어력 30% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
+            { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 3.0, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
             { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
         ]
     },
@@ -971,6 +971,108 @@ const BONUS_CARD_EXPANSION = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '흑조의속삭임', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
             { name: '운명의무도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+        ]
+    },
+
+    // ─── June 2026 Bonus Card Wave ──────────────────────────────────────────────
+    {
+        id: 'prism_twin', name: '프리즘트윈', grade: 'rare', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 340, atk: 75, matk: 85, def: 60, mdef: 65 },
+        trait: { type: 'self_normal_atk_dmg_boost', val: 2.0, desc: '이 카드의 일반공격 대미지 2배' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '프리즘셔플', type: 'mag', tier: 2, cost: 20, val: 2.5, desc: '모든 필드버프를 랜덤 교체', effects: [{ type: 'roulette_field' }] },
+            { name: '일루미네이션', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '3턴 뒤 발동, 발동 시 랜덤 필드버프 부여', effects: [{ type: 'delayed_attack_random_field', turns: 3 }] }
+        ]
+    },
+    {
+        id: 'underdog', name: '언더독', grade: 'normal', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
+        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱에 일반등급이 3장 이상이고 대장 배치 시 공격력/마법공격력 100% 증가' },
+        skills: [
+            { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
+            { name: '기가크러셔', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '마법 4배율, 다음 턴 행동 불가', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
+        trait: { type: 'dessert_kingdom_crit_eva_boost', val: 20, desc: '디저트킹덤 카드 전체 치명타율/회피율 20% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '그랜드케이크', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '스타파우더 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'star_powder', mult: 3.0 }] },
+            { name: '캔디메테오', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '트윙클파티 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'twinkle_party', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
+        trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력/마법방어력 50% 감소' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '스컬브레스', type: 'mag', tier: 3, cost: 30, val: 5.0, desc: '현재 생명력 30% 감소', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.3 }] }
+        ]
+    },
+    {
+        id: 'dragon_miko', name: '용혈의무녀', grade: 'epic', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 395, atk: 80, matk: 95, def: 65, mdef: 70 },
+        trait: { type: 'death_dmg_mag_stun_cond', val: 5.0, condition: 'deck_has_dragon', desc: '덱에 드래곤이 존재할 경우 사망 시 500% 마법대미지와 기절 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '스파클', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 트윙클파티 부여, 작열 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '버닝스피릿', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'perfect_aurora', name: '퍼펙트아우로라', grade: 'legend', element: 'water', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 500, atk: 90, matk: 130, def: 75, mdef: 85 },
+        trait: { type: 'field_buff_immune', desc: '이 카드는 필드버프를 받지 않는다' },
+        skills: [
+            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '퍼펙트플랜', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '3턴 뒤 발동, 발동 시 약화/부식/침묵/저주/기절 부여', effects: [{ type: 'delayed_attack_debuffs', turns: 3, debuffs: ['weak', 'corrosion', 'silence', 'curse', 'stun'] }] }
+        ]
+    },
+    {
+        id: 'flare_ribbon', name: '플레어리본', grade: 'normal', element: 'fire', role: 'buffer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 325, atk: 55, matk: 60, def: 55, mdef: 50 },
+        trait: { type: 'cond_same_grade_skill_buff', skillName: '리듬하이', buff: 'sun_bless', desc: '덱 전체가 같은 등급일 경우 리듬하이 발동 시 태양의축복 추가 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '리듬하이', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '스파클래쉬', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율', effects: [] }
+        ]
+    },
+    {
+        id: 'entropy', name: '앤트로피', grade: 'rare', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 340, atk: 105, matk: 105, def: 50, mdef: 50 },
+        trait: { type: 'chaos_blessing_double', desc: '혼돈의 축복 효과가 2배로 적용된다' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '노바레퀴엠', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '필드버프를 전부 제거하고 제거한 수 x2.0 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 2.0 }] },
+            { name: '화이트노이즈', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.0 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.0 }, { type: 'clear_target_debuffs' }] }
+        ]
+    },
+    {
+        id: 'tinker_bell', name: '팅커벨', grade: 'rare', element: 'light', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 345, atk: 60, matk: 100, def: 55, mdef: 65 },
+        trait: { type: 'death_dmg_mag_stun_same_grade', val: 5.0, desc: '덱 전체가 같은 등급일 경우 사망 시 500% 마법대미지와 기절 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '픽시더스트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '디바인, 저주 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'curse' }] },
+            { name: '네버랜드', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인, 침묵 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'silence' }] }
+        ]
+    },
+    {
+        id: 'gumiho', name: '구미호', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 390, atk: 70, matk: 105, def: 70, mdef: 70 },
+        trait: { type: 'cond_same_grade_matk_boost', val: 100, desc: '덱 전체가 같은 등급일 경우 마법공격력 100% 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '여우불', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '암흑 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
+            { name: '요화천벌', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열/디바인 전부 소모, 소모한 스택당 1.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 1.0 }, { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.0 }] }
         ]
     }
 

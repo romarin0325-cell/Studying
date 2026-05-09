@@ -2209,7 +2209,7 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius']) - 1);
+            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder']) - 1);
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
@@ -2255,7 +2255,7 @@ const Logic = {
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon'];
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
             if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
