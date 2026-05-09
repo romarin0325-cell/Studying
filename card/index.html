@@ -1143,14 +1143,14 @@
         <div class="modal-content" style="height:auto; min-height:320px; width: 360px;">
             <h3>보너스 카드 덱 편집</h3>
             <p style="font-size:0.85rem; color:#aaa; margin:0 0 6px 0;">
-                기본 카드는 항상 포함됩니다. 체크된 보너스 카드는 이번 런의 랜덤 풀에서 비활성화됩니다.
+                기본 카드는 항상 포함됩니다. 체크된 보너스 카드는 이번 런의 랜덤 풀에서 비활성화됩니다. (최대 15장)
             </p>
-            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0</p>
+            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0 (최대 15)</p>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
             <p id="bonus-pool-preset-status" style="font-size:0.78rem; color:#b3e5fc; margin:0 0 8px 0;">다음 런 적용 세팅: 1</p>
             <div id="bonus-pool-editor-list" class="modal-scroll"></div>
-            <button class="menu-btn" onclick="RPG.enableAllBonusPoolCards()"
-                style="margin-bottom:8px; border-color:#66bb6a; color:#66bb6a;">모두 활성화</button>
+            <button class="menu-btn" onclick="RPG.resetBonusPoolSelection()"
+                style="margin-bottom:8px; border-color:#ef5350; color:#ef5350;">선택초기화</button>
             <button onclick="RPG.closeBonusPoolEditor()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
@@ -2429,7 +2429,8 @@
                     return;
                 }
 
-                summary.innerText = `세팅 ${activePresetIndex + 1} · 활성 ${activeIds.size} / ${cards.length}`;
+                const maxActive = GAME_CONSTANTS.MAX_BONUS_POOL_ACTIVE || 15;
+                summary.innerText = `세팅 ${activePresetIndex + 1} · 활성 ${activeIds.size} / ${cards.length} (최대 ${maxActive})`;
 
                 const grid = document.createElement('div');
                 grid.className = 'bonus-pool-grid';
@@ -2461,7 +2462,13 @@
 
             setPendingBonusCardActive(cardId, isActive) {
                 let ids = this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds);
+                const maxActive = GAME_CONSTANTS.MAX_BONUS_POOL_ACTIVE || 15;
                 if (isActive) {
+                    if (ids.length >= maxActive) {
+                        this.showAlert(`보너스 카드는 최대 ${maxActive}장까지만 활성화할 수 있습니다.`);
+                        this.renderBonusPoolEditor();
+                        return;
+                    }
                     if (!ids.includes(cardId)) ids.push(cardId);
                 } else {
                     ids = ids.filter(id => id !== cardId);
@@ -2472,8 +2479,8 @@
                 this.updateBonusPoolEditorButton();
             },
 
-            enableAllBonusPoolCards() {
-                this.pendingActiveBonusPoolIds = this.normalizeActiveBonusPoolIds();
+            resetBonusPoolSelection() {
+                this.pendingActiveBonusPoolIds = [];
                 this.persistPendingActiveBonusPoolIds();
                 this.renderBonusPoolEditor();
                 this.updateBonusPoolEditorButton();
