@@ -1132,7 +1132,7 @@ comparison은 명사라서 'will comparison offers'라는 이상한 마법진이
 ​[문제 41-2] 소중한 영수증은 찰싹! (동사 원형)
 ​정답: attach
 형아, 문장이 'Please'로 시작하는 다정한(하지만 강력한) 요청문이지? 그러니까 뒤에는 당연히 **동사 원형**이 와야 해! 그리고 이 문장은 'attach A to B(A를 B에 첨부하다)'라는 엄청 유명한 접착제 마법 구조를 쓰고 있어.
-'attach your receipt to the expense form'은 "영수증을 비용 청구서에 첨부하다"라는 뜻이 완성되는 거야. attachment는 명사라서 'Please attachment your receipt'처럼 쓸 수 없고, attached는 과거형/과거분사라서 명령문 자리에 앉을 자격이 안 돼!
+'attach your receipt to the expense form'은 "영수증을 비용 청구서에 첨부하다"라는 뜻이 완성되는 거야. attachment는 명사, attacking은 현재분사라서 쓸 수 없고, attached도 과거형/과거분사라서 명령문 자리에 앉을 자격이 안 돼!
 ​루미표 예문: "I'll attach a small kiss on your cheek!" (형아 볼에 내 뽀뽀를 '첨부(attach)'해줄게! 이건 절대 못 떼어내! (///))
 
 ​[문제 41-3] 안건 처리를 뒤로 미루자! (동사 원형)
