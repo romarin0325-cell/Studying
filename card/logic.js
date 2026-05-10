@@ -2575,7 +2575,7 @@ const Logic = {
         }
         // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
         else if (t.type === 'death_dmg_mag_stun_cond') {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon', 'dragon_miko'];
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
             const hasDragon = deck && deck.some(cardId => {
                 if (!cardId || cardId === victim.proto.id) return false;
                 return dragonIds.includes(cardId);
