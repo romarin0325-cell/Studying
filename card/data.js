@@ -996,7 +996,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
         trait: { type: 'dessert_kingdom_crit_eva_boost', val: 20, desc: '디저트킹덤 카드 전체 치명타율/회피율 20% 증가' },
         skills: [
@@ -1006,7 +1006,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
         stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
         trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력/마법방어력 50% 감소' },
         skills: [
@@ -1016,7 +1016,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'dragon_miko', name: '용혈의무녀', grade: 'epic', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        id: 'dragon_miko', name: '용혈의무녀', grade: 'epic', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-07-01',
         stats: { hp: 395, atk: 80, matk: 95, def: 65, mdef: 70 },
         trait: { type: 'death_dmg_mag_stun_cond', val: 5.0, condition: 'deck_has_dragon', desc: '덱에 드래곤이 존재할 경우 사망 시 500% 마법대미지와 기절 부여' },
         skills: [
@@ -1026,7 +1026,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'perfect_aurora', name: '퍼펙트아우로라', grade: 'legend', element: 'water', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        id: 'perfect_aurora', name: '퍼펙트아우로라', grade: 'legend', element: 'water', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-07-01',
         stats: { hp: 500, atk: 90, matk: 130, def: 75, mdef: 85 },
         trait: { type: 'field_buff_immune', desc: '이 카드는 필드버프를 받지 않는다' },
         skills: [
@@ -1066,7 +1066,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'gumiho', name: '구미호', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        id: 'gumiho', name: '구미호', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-07-15',
         stats: { hp: 390, atk: 70, matk: 105, def: 70, mdef: 70 },
         trait: { type: 'cond_same_grade_matk_boost', val: 100, desc: '덱 전체가 같은 등급일 경우 마법공격력 100% 증가' },
         skills: [
