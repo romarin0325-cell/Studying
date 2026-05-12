@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Card Game Structure Visual Map</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #111318;
+            --panel: #181c24;
+            --panel-2: #202736;
+            --line: #334057;
+            --text: #eef3ff;
+            --muted: #aab6ca;
+            --blue: #63b3ff;
+            --green: #6ee7a8;
+            --amber: #ffd166;
+            --pink: #ff8ab3;
+            --red: #ff7a7a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+            line-height: 1.55;
+        }
+
+        header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--line);
+            background: #141922;
+        }
+
+        main {
+            width: min(1280px, 100%);
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        h1, h2, h3, p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            font-size: 2rem;
+            letter-spacing: 0;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 1.35rem;
+        }
+
+        h3 {
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .sub {
+            max-width: 880px;
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+
+        .section {
+            margin-bottom: 28px;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+        }
+
+        .diagram-wrap {
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        svg {
+            display: block;
+            min-width: 1040px;
+            width: 100%;
+            height: auto;
+        }
+
+        .node rect {
+            rx: 8;
+            ry: 8;
+            stroke-width: 2;
+        }
+
+        .node text {
+            fill: var(--text);
+            font-size: 14px;
+            dominant-baseline: middle;
+            text-anchor: middle;
+        }
+
+        .node .small {
+            fill: var(--muted);
+            font-size: 12px;
+        }
+
+        .arrow {
+            stroke: #72819a;
+            stroke-width: 2;
+            marker-end: url(#arrow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .module {
+            min-height: 160px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel-2);
+        }
+
+        .module strong {
+            color: var(--amber);
+        }
+
+        .module p {
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: 0.93rem;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            padding: 3px 7px;
+            border: 1px solid #4a5770;
+            border-radius: 999px;
+            color: #d9e4ff;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .step {
+            position: relative;
+            min-height: 112px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #1c2330;
+        }
+
+        .step:not(:last-child)::after {
+            content: ">";
+            position: absolute;
+            top: 42px;
+            right: -11px;
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        .step .num {
+            display: inline-grid;
+            width: 24px;
+            height: 24px;
+            margin-bottom: 8px;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--blue);
+            color: #08111f;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+
+        .step p {
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .risk-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .risk-list li {
+            padding: 12px;
+            border-left: 4px solid var(--red);
+            border-radius: 6px;
+            background: #221d24;
+            color: #f0d7dd;
+        }
+
+        @media (max-width: 860px) {
+            header, main {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .flow {
+                grid-template-columns: 1fr;
+            }
+
+            .step:not(:last-child)::after {
+                content: "v";
+                top: auto;
+                right: 50%;
+                bottom: -18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Card Game Structure Visual Map</h1>
+        <p class="sub">`card/` 게임은 전통적인 클래스 계층보다 전역 데이터, 싱글턴 모듈, `RPG` 중심 객체를 조립해 동작합니다. 이 페이지는 유지보수자가 먼저 봐야 할 연결 관계와 흐름을 시각적으로 정리합니다.</p>
+    </header>
+
+    <main>
+        <section class="section">
+            <h2>모듈 의존 지도</h2>
+            <div class="diagram-wrap" aria-label="card game module dependency diagram">
+                <svg viewBox="0 0 1120 560" role="img">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#72819a"></path>
+                        </marker>
+                    </defs>
+
+                    <line class="arrow" x1="250" y1="110" x2="380" y2="110"></line>
+                    <line class="arrow" x1="250" y1="110" x2="380" y2="210"></line>
+                    <line class="arrow" x1="250" y1="110" x2="380" y2="310"></line>
+                    <line class="arrow" x1="250" y1="110" x2="380" y2="410"></line>
+                    <line class="arrow" x1="580" y1="310" x2="690" y2="230"></line>
+                    <line class="arrow" x1="580" y1="410" x2="690" y2="230"></line>
+                    <line class="arrow" x1="580" y1="410" x2="690" y2="330"></line>
+                    <line class="arrow" x1="890" y1="230" x2="980" y2="230"></line>
+                    <line class="arrow" x1="890" y1="330" x2="980" y2="330"></line>
+                    <line class="arrow" x1="580" y1="110" x2="690" y2="130"></line>
+                    <line class="arrow" x1="580" y1="210" x2="690" y2="130"></line>
+
+                    <g class="node">
+                        <rect x="40" y="60" width="210" height="100" fill="#1d3557" stroke="#63b3ff"></rect>
+                        <text x="145" y="95">index.html</text>
+                        <text class="small" x="145" y="124">DOM, RPG, QuizEngine</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="380" y="60" width="200" height="80" fill="#263238" stroke="#6ee7a8"></rect>
+                        <text x="480" y="92">data.js</text>
+                        <text class="small" x="480" y="116">카드/적/상수</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="380" y="170" width="200" height="80" fill="#263238" stroke="#6ee7a8"></rect>
+                        <text x="480" y="202">study data</text>
+                        <text class="small" x="480" y="226">vocab/collocation/TOEIC</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="380" y="270" width="200" height="80" fill="#342640" stroke="#ff8ab3"></rect>
+                        <text x="480" y="302">api.js</text>
+                        <text class="small" x="480" y="326">GameAPI, Lumi runtime</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="380" y="370" width="200" height="80" fill="#3d321f" stroke="#ffd166"></rect>
+                        <text x="480" y="402">logic.js</text>
+                        <text class="small" x="480" y="426">Storage, GameUtils, Logic</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="690" y="80" width="200" height="100" fill="#263238" stroke="#6ee7a8"></rect>
+                        <text x="790" y="115">RPGFeatureModules</text>
+                        <text class="small" x="790" y="144">RPG에 기능 주입</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="690" y="200" width="200" height="90" fill="#2c3044" stroke="#63b3ff"></rect>
+                        <text x="790" y="235">Browser APIs</text>
+                        <text class="small" x="790" y="260">DOM, localStorage, fetch</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="690" y="310" width="200" height="90" fill="#3a2230" stroke="#ff8ab3"></rect>
+                        <text x="790" y="345">BattleRuntime</text>
+                        <text class="small" x="790" y="370">전투 상태 머신</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="980" y="205" width="120" height="60" fill="#202736" stroke="#72819a"></rect>
+                        <text x="1040" y="235">저장/UI</text>
+                    </g>
+
+                    <g class="node">
+                        <rect x="980" y="305" width="120" height="60" fill="#202736" stroke="#72819a"></rect>
+                        <text x="1040" y="335">전투 결과</text>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>주요 모듈 카드</h2>
+            <div class="grid">
+                <article class="module">
+                    <h3><strong>RPG</strong> / index.html</h3>
+                    <p>상태와 UI 진입점의 중심입니다. 화면 전환, 덱, 전투 UI, 가챠, TOEIC, Lumi 화면이 모여 있습니다.</p>
+                    <div class="tags"><span class="tag">state</span><span class="tag">battle</span><span class="tag">render</span><span class="tag">events</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>RPGFeatureModules</strong> / rpg_features.js</h3>
+                    <p>`RPG`에 세이브, 보상, 미션, 모드별 진행 메소드를 주입합니다.</p>
+                    <div class="tags"><span class="tag">install</span><span class="tag">save</span><span class="tag">missions</span><span class="tag">rewards</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>BattleRuntime</strong> / battle_runtime.js</h3>
+                    <p>전투 초기화, 플레이어/적 턴, 스킬 실행, 필드 버프 만료를 처리합니다.</p>
+                    <div class="tags"><span class="tag">turns</span><span class="tag">skills</span><span class="tag">buffs</span><span class="tag">death</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>Logic</strong> / logic.js</h3>
+                    <p>스탯, 데미지, 회피, 특성, 적 행동 결정처럼 UI와 분리된 규칙 계산을 담당합니다.</p>
+                    <div class="tags"><span class="tag">stats</span><span class="tag">damage</span><span class="tag">traits</span><span class="tag">AI</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>GameUtils</strong> / logic.js</h3>
+                    <p>카드 조회, 카드 풀 생성, 가중치 추첨, 가챠 등급 계산 등 공통 유틸을 제공합니다.</p>
+                    <div class="tags"><span class="tag">cards</span><span class="tag">pool</span><span class="tag">gacha</span><span class="tag">shuffle</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>LumiQuestionRuntime</strong> / api.js</h3>
+                    <p>Lumi 채팅 세션, 모델 선택, 검색 토글, 취소/재시도, TOEIC 리뷰 컨텍스트를 관리합니다.</p>
+                    <div class="tags"><span class="tag">session</span><span class="tag">model</span><span class="tag">cancel</span><span class="tag">TOEIC</span></div>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>핵심 처리 흐름</h2>
+            <div class="flow">
+                <div class="step"><span class="num">1</span><h3>앱 로드</h3><p>index.html이 데이터와 로직 스크립트를 순차 로딩합니다.</p></div>
+                <div class="step"><span class="num">2</span><h3>모듈 주입</h3><p>hydrateModules가 RPGFeatureModules를 RPG에 설치합니다.</p></div>
+                <div class="step"><span class="num">3</span><h3>새 게임</h3><p>startGame과 initNewGame이 저장 데이터와 런 상태를 준비합니다.</p></div>
+                <div class="step"><span class="num">4</span><h3>덱/전투</h3><p>BattleRuntime이 전투 객체를 만들고 턴을 진행합니다.</p></div>
+                <div class="step"><span class="num">5</span><h3>규칙 계산</h3><p>Logic과 SideEffects가 데미지, 버프, 특성을 계산합니다.</p></div>
+                <div class="step"><span class="num">6</span><h3>보상/저장</h3><p>승패 처리 후 미션, 해금, 세이브를 갱신합니다.</p></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>장기 유지보수 리스크</h2>
+            <ul class="risk-list">
+                <li>`RPG`가 UI, 상태, 전투 진입점, 학습 기능을 모두 들고 있어 영향 범위가 큽니다.</li>
+                <li>`Object.assign` 주입 구조는 메소드 출처와 이름 충돌을 정적으로 파악하기 어렵습니다.</li>
+                <li>`LumiQuestionRuntime`에 중복 메소드명이 있어 뒤쪽 정의가 앞쪽 정의를 덮어씁니다.</li>
+                <li>전역 상수와 스크립트 로딩 순서 의존이 강해 모듈 경계가 약합니다.</li>
+                <li>전투 규칙이 `Logic`, `BattleRuntime`, `RPGFeatureMethods`에 흩어져 새 카드 추가 시 누락 위험이 있습니다.</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
