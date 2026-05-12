@@ -55,6 +55,9 @@
 
         const col = Storage.load(Storage.keys.COLLOCATION);
         if (col) this.state.wrongCollocations = col;
+
+        const colDetails = Storage.load(Storage.keys.COLLOCATION_DETAILS);
+        if (colDetails) this.state.wrongCollocationDetails = colDetails;
     },
 
 
@@ -62,6 +65,9 @@
         Storage.save(Storage.keys.VOCAB, this.state.wrongWords || []);
         if (this.state.wrongCollocations) {
             Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
+        }
+        if (this.state.wrongCollocationDetails) {
+            Storage.save(Storage.keys.COLLOCATION_DETAILS, this.state.wrongCollocationDetails);
         }
     },
 
