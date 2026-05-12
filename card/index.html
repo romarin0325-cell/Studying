@@ -4105,12 +4105,6 @@
                         retryBtn.onclick = () => this.retryLastLumiQuestion(message.userText, message.model);
                         actionWrap.appendChild(retryBtn);
 
-                        const alternateModel = LumiQuestionRuntime.getAlternateModel(message.model);
-                        const switchBtn = document.createElement('button');
-                        switchBtn.textContent = `${LumiQuestionRuntime.getModelLabel(alternateModel)}로 재시도`;
-                        switchBtn.onclick = () => this.retryLastLumiQuestion(message.userText, alternateModel);
-                        actionWrap.appendChild(switchBtn);
-
                         bubble.appendChild(actionWrap);
                     }
 
@@ -4245,8 +4239,7 @@
                     if (error.canceled) {
                         this.setLumiChatStatus(LumiQuestionRuntime.getCanceledStatus());
                     } else if (error.retryable) {
-                        const alternateModel = LumiQuestionRuntime.getAlternateModel(LumiQuestionRuntime.selectedModel);
-                        this.setLumiChatStatus(`응답이 흔들렸어. 다시 시도하거나 ${LumiQuestionRuntime.getModelLabel(alternateModel)}로 바꿔볼 수 있어.`);
+                        this.setLumiChatStatus('응답이 흔들렸어. 다시 시도해줘.');
                     } else {
                         this.setLumiChatStatus('답변 요청에 실패했어.');
                     }
@@ -4390,9 +4383,9 @@
                     } else if (msg.includes('safety') || msg.includes('blocked')) {
                         displayMsg = "안전 필터에 의해 생성이 차단되었습니다. 다른 단어로 시도해주세요.";
                     } else {
-                        displayMsg = "오류가 발생했습니다: " + msg;
+                        displayMsg = "알 수 없는 오류가 발생했습니다.";
                     }
-                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div><div style="font-size:0.7rem; color:#777; margin-top:5px;">(${msg})</div>`;
+                    contentBox.innerHTML = `<div style="color:#ef5350; font-weight:bold;">${displayMsg}</div>`;
                 } finally {
                     this.isApiLoading = false;
                 }
@@ -5096,8 +5089,7 @@
 
                 const visible = options.visible === true;
                 const disabled = options.disabled === true;
-                const fallbackModel = 'gemini-3.1-flash-lite-preview';
-                retryBtn.textContent = `${LumiQuestionRuntime.getModelLabel(fallbackModel)}로 다시 시도`;
+                retryBtn.textContent = '다시 시도';
                 retryBtn.style.display = visible ? 'block' : 'none';
                 retryBtn.disabled = disabled;
                 retryBtn.style.opacity = disabled ? '0.55' : '1';
@@ -5124,10 +5116,10 @@
                     displayMsg = 'API 사용량 한도에 도달했어.';
                 } else if (msg.includes('safety') || msg.includes('blocked')) {
                     displayMsg = '안전 필터로 인해 데이트 내용을 만들지 못했어.';
-                } else if (msg) {
-                    displayMsg = `오류: ${msg}`;
+                } else {
+                    displayMsg = '알 수 없는 오류가 발생했어.';
                 }
-                return `${displayMsg}<br><br><span style="font-size:0.85rem; color:#81d4fa;">아래 버튼으로 Lite 모델 재시도를 할 수 있어.</span>`;
+                return displayMsg;
             },
 
             async loadDateContent(apiKey, dateParams, modelId) {
