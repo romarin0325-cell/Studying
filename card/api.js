@@ -1065,7 +1065,12 @@ const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 - **말버릇:**
     - 질문할 때: "형아, ~인지 알아?", "혹시 ~해본 적 있어?"
     - 강조할 때: "바로 ~야!", "절대 안 돼!", "내가 보증할게!"
-    - 마무리: "약속해!"`;
+    - 마무리: "약속해!"
+
+## 3. 서술 시점 (POV)
+- 본문 서술은 반드시 **'나(형아)'의 1인칭 주인공 시점**으로 진행하세요. 
+- 루미가 자신의 행동을 '나'라고 지칭하며 일기장처럼 서술하는 것을 절대 금지합니다. 
+- 루미의 행동과 표정을 보고 내가(형아가) 느끼는 감정과 시각적 요소를 중심으로 묘사하세요.`;
 
 const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
 
@@ -1076,7 +1081,7 @@ const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
 
 [중요 작성 규칙]
 1. 절대 "[기]", "[승]", "[전]", "[결]"이나 "상황:", "묘사:" 같은 소제목, 라벨, 단락 구분 기호를 출력하지 마십시오. 처음부터 끝까지 자연스럽게 이어지는 하나의 웹소설처럼 작성해야 합니다.
-2. 분량 제한 없이 최대한 길고 풍부하게 작성하십시오.`;
+2. 상황 전개와 감정선 묘사를 극대화하여 전체 내용을 아주 길고 풍부하게 작성하십시오. 시선이 마주치는 순간의 정적, 피부에 닿는 온도, 미세한 숨결의 떨림 등 달콤하고 아득해지는 분위기 묘사를 세밀하게 추가해 텐션을 높이십시오.`;
 
 const DATE_THEMES = [
     { theme: '놀이공원', outfit: '캐주얼룩', location: 'outdoor' },
@@ -1122,13 +1127,18 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
     // 30% chance for unintentional innuendo during all dates (including secret dates)
     const enableEvent = RPG && RPG.global && RPG.global.tutoringEventEnabled !== false;
     if (enableEvent && Math.random() < 0.3) {
+        const INNUENDO_KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '미끄러짐', '얽힘', '발/장난', '침/혀', '우유/끈적함', '젖음/비침', '마사지/민감한부위', '수면/무방비'];
+        const innuendoKeyword = INNUENDO_KEYWORDS[Math.floor(Math.random() * INNUENDO_KEYWORDS.length)];
+        
         innuendoInstruction = `
+[고수위 상황 키워드]: ${innuendoKeyword}
 \n\n## [Special Direction: Unintentional Innuendo (Accidental)]
 1. 평소보다 루미가 적극적인 애정표현을 하며, 데이트의 상황이 플레이어로 하여금 야한 오해를 불러일으키도록 작성해야 합니다.
 2. 캐릭터는 순수한 의도로 행동해야 합니다. (일상 활동, 우연한 상황)
 3. 고수위 이벤트는 플레이어 시점에서만 애매한 해석이 가능해야 합니다.
 4. 캐릭터 대사는 의도 없이 나온 말이지만, 문맥상 이중적 해석이 가능해야 합니다.
 5. 스킨십은 있으나 성적 행위 암시는 없으며, 착각/우연을 강조해야 합니다.
+6. 위 [고수위 상황 키워드]를 자연스럽게 활용하여 우연한 스킨십이나 아찔한 해프닝을 구체적으로 연출하세요.
 `;
     }
 
@@ -1150,8 +1160,16 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
             contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
                 temperature: temperature,
+                maxOutputTokens: 12288,
                 thinkingConfig
-            }
+            },
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
         })
     });
 
