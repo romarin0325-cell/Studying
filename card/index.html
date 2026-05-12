@@ -1823,8 +1823,20 @@
                     options: [...q.options],
                     answer: q.answer,
                     onCorrect: () => callback(true),
-                    onWrong: () => {
+                    onWrong: (chosenText) => {
                         if (!RPG.state.wrongCollocations) RPG.state.wrongCollocations = [];
+                        if (!RPG.state.wrongCollocationDetails) RPG.state.wrongCollocationDetails = {};
+
+                        RPG.state.wrongCollocationDetails[q.parentId] = {
+                            question: q.question,
+                            options: q.options,
+                            answer: q.answer,
+                            translation: q.translation,
+                            wrongSelected: chosenText,
+                            timestamp: Date.now()
+                        };
+                        Storage.save(Storage.keys.COLLOCATION_DETAILS, RPG.state.wrongCollocationDetails);
+
                         if (!RPG.state.wrongCollocations.includes(q.parentId)) {
                             RPG.state.wrongCollocations.push(q.parentId);
                             Storage.save(Storage.keys.COLLOCATION, RPG.state.wrongCollocations);
@@ -4307,6 +4319,10 @@
                     if (isCollocation) {
                         this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== targetId);
                         Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
+                        if (this.state.wrongCollocationDetails && this.state.wrongCollocationDetails[targetId]) {
+                            delete this.state.wrongCollocationDetails[targetId];
+                            Storage.save(Storage.keys.COLLOCATION_DETAILS, this.state.wrongCollocationDetails);
+                        }
                     } else {
                         this.state.wrongWords = this.state.wrongWords.filter(w => w !== targetId);
                         Storage.save(Storage.keys.VOCAB, this.state.wrongWords);
@@ -4316,7 +4332,12 @@
 
                 let tutoringData = targetData;
                 if (isCollocation) {
-                    const selectedQuiz = QuizEngine.resolveCollocationTutoringQuiz(targetData);
+                    let selectedQuiz = null;
+                    if (this.state.wrongCollocationDetails && this.state.wrongCollocationDetails[targetData.id]) {
+                        selectedQuiz = this.state.wrongCollocationDetails[targetData.id];
+                    } else {
+                        selectedQuiz = QuizEngine.resolveCollocationTutoringQuiz(targetData);
+                    }
                     const selectedOptions = selectedQuiz && Array.isArray(selectedQuiz.options) ? [...selectedQuiz.options] : [];
                     tutoringData = {
                         ...targetData,
@@ -4324,6 +4345,7 @@
                         options: selectedOptions,
                         answer: selectedQuiz ? selectedQuiz.answer : targetData.answer,
                         translation: selectedQuiz ? selectedQuiz.translation : targetData.translation,
+                        wrongSelected: selectedQuiz ? selectedQuiz.wrongSelected : null,
                         selectedQuiz: selectedQuiz ? { ...selectedQuiz, options: selectedOptions } : null
                     };
                 }
@@ -4394,6 +4416,10 @@
                     if (item.type === 'collocation') {
                         this.state.wrongCollocations = this.state.wrongCollocations.filter(id => id !== data.id);
                         Storage.save(Storage.keys.COLLOCATION, this.state.wrongCollocations);
+                        if (this.state.wrongCollocationDetails && this.state.wrongCollocationDetails[data.id]) {
+                            delete this.state.wrongCollocationDetails[data.id];
+                            Storage.save(Storage.keys.COLLOCATION_DETAILS, this.state.wrongCollocationDetails);
+                        }
                     } else {
                         this.state.wrongWords = this.state.wrongWords.filter(w => w !== data.word);
                         Storage.save(Storage.keys.VOCAB, this.state.wrongWords);

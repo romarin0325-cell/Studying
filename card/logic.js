@@ -18,6 +18,7 @@ const Storage = {
         GLOBAL: 'cardRpgGlobal',
         VOCAB: 'cardRpgVocab',
         COLLOCATION: 'cardRpgCollocation',
+        COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
         API_KEY: 'cardRpgApiKey',
         RECORDS: 'cardRpgRecords'
     },
