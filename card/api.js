@@ -790,13 +790,6 @@ const LumiQuestionRuntime = {
         return '';
     },
 
-    getLoadingStatus(session) {
-        if (session && session.mode === 'toeic-review') {
-            return '문제와 해설을 기준으로 답변 정리 중...';
-        }
-        return '루미가 답변 정리 중...';
-    },
-
     getResetStatus(session) {
         if (session && session.mode === 'toeic-review') {
             return 'TOEIC 대화를 초기화했어.';
@@ -808,14 +801,6 @@ const LumiQuestionRuntime = {
         return '';
     },
 
-    buildErrorMessage(session, error) {
-        const detail = error && error.message ? error.message : String(error || '');
-        if (session && session.mode === 'toeic-review') {
-            return `(노트를 다시 넘기며) 방금 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
-        }
-        return `(마법구슬을 붙잡으며) 질문을 정리하다가 잠깐 흔들렸어.\n${detail}`;
-    },
-
     resetSession(session) {
         if (!session) {
             return createGeneralSession();
@@ -825,50 +810,6 @@ const LumiQuestionRuntime = {
             seedHistory: session.seedHistory || [],
             seedMessages: session.seedMessages || []
         });
-    },
-
-    buildRequestHistory(session, pendingUserContent) {
-        if (!session || session.mode !== 'toeic-review') {
-            return [...session.history, pendingUserContent];
-        }
-
-        const modelConfig = this.getModelConfig();
-        const toeicContext = buildToeicContext(session.source, { compact: modelConfig.flashLike });
-        const priorHistory = modelConfig.flashLike ? session.history.slice(-6) : session.history;
-
-        return [
-            { role: 'user', parts: [{ text: toeicContext }] },
-            ...cloneHistory(priorHistory),
-            pendingUserContent
-        ];
-    },
-
-    async sendMessage(apiKey, session, message) {
-        session.messages.push({ role: 'user', text: message });
-        const pendingUserContent = { role: 'user', parts: [{ text: message }] };
-        const modelConfig = this.getModelConfig();
-        const requestHistory = this.buildRequestHistory(session, pendingUserContent);
-        session.history.push(pendingUserContent);
-
-        const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
-            systemInstruction: session.systemInstruction,
-            enableSearch: session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
-            thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite-preview' ? 'medium' : session.thinkingLevel,
-            model: modelConfig.id
-        });
-
-        if (result && result.content) {
-            session.history.push(result.content);
-        }
-
-        session.messages.push({
-            role: 'model',
-            text: result.text,
-            sources: result.sources,
-            queries: result.queries
-        });
-
-        return result;
     },
 
     getModelLabel(modelId) {
