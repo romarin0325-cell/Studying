@@ -1,13 +1,13 @@
 /**
- * game.js — Game utilities, storage layer, and constants for Card RPG.
- *
+ * @file logic.js
+ * @module GameLogic
+ * @description
+ * Game utilities, central damage calculation, storage layer, and constants for Card RPG.
  * Provides:
- *   - Storage: Centralized localStorage abstraction with safe JSON parsing
- *   - GAME_CONSTANTS: Named constants replacing magic numbers
- *   - GACHA_RATES: Gacha probability tables per mode
- *   - GameUtils.buildCardPool(): Unified card pool builder (replaces 6 duplicated patterns)
- *   - GameUtils.resolveGachaGrade(): Grade determination from GACHA_RATES table
- *   - GameUtils.getCardById()/getAllCards()/buildDeckContext(): Shared card lookup and Joker-aware deck helpers
+ * - Storage: Centralized localStorage abstraction with safe JSON parsing
+ * - GAME_CONSTANTS: Named constants replacing magic numbers
+ * - Logic: Core calculation engine (Damage, Stats, Death/OnHit traits, SideEffects)
+ * - GameUtils: Deck helpers, pool selection, gacha tables
  */
 
 // ─── Storage Layer ────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ const Storage = {
         GLOBAL: 'cardRpgGlobal',
         VOCAB: 'cardRpgVocab',
         COLLOCATION: 'cardRpgCollocation',
+        COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
         API_KEY: 'cardRpgApiKey',
         RECORDS: 'cardRpgRecords'
     },
@@ -38,16 +39,84 @@ const Storage = {
     },
 
     /**
+     * Load with detailed status. Distinguishes between:
+     * - { ok: true, data } — parsed successfully
+     * - { ok: false, reason: 'missing' } — key doesn't exist
+     * - { ok: false, reason: 'parse_error', raw, error } — key exists but JSON is broken
+     * @param {string} key
+     * @returns {Object}
+     */
+    loadDetailed(key) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw === null) return { ok: false, reason: 'missing' };
+            const data = JSON.parse(raw);
+            return { ok: true, data };
+        } catch (e) {
+            let raw = null;
+            try { raw = localStorage.getItem(key); } catch (e2) { /* ignore */ }
+            console.error(`[Storage] Parse error for key "${key}":`, e);
+            return { ok: false, reason: 'parse_error', raw, error: e };
+        }
+    },
+
+    /**
      * Save data as JSON to localStorage.
      * @param {string} key
      * @param {*} data
+     * @returns {boolean} true if saved successfully
      */
     save(key, data) {
         try {
             localStorage.setItem(key, JSON.stringify(data));
+            return true;
         } catch (e) {
             console.error(`[Storage] Save error for key "${key}":`, e);
+            return false;
         }
+    },
+
+    /**
+     * Save backup only if validation passes and data hasn't regressed.
+     * @param {string} key - primary key (backup will use key + '_backup')
+     * @param {*} data - data to back up
+     * @param {Function} [validator] - returns true if data is structurally valid
+     * @returns {boolean}
+     */
+    saveBackup(key, data, validator) {
+        if (validator && !validator(data)) return false;
+        const backupKey = key + '_backup';
+        const existingBackup = this.load(backupKey);
+        if (existingBackup && validator && validator(existingBackup)) {
+            if (this._hasRegressed(existingBackup, data)) {
+                console.warn(`[Storage] Backup skipped for "${key}": regression detected`);
+                return false;
+            }
+        }
+        return this.save(backupKey, data);
+    },
+
+    /**
+     * Check if newData has fewer monotonically-increasing items than oldData.
+     * Used to prevent overwriting a good backup with regressed data.
+     * @param {Object} oldData
+     * @param {Object} newData
+     * @returns {boolean} true if regression detected
+     */
+    _hasRegressed(oldData, newData) {
+        const fields = [
+            'unlocked_bonus_cards',
+            'unlocked_modes',
+            'unlocked_divine_artifacts',
+            'unlocked_special_cards',
+            'unlocked_bonus_transcendence_cards'
+        ];
+        for (const field of fields) {
+            const oldVal = Array.isArray(oldData[field]) ? oldData[field].length : 0;
+            const newVal = Array.isArray(newData[field]) ? newData[field].length : 0;
+            if (newVal < oldVal) return true;
+        }
+        return false;
     },
 
     /**
@@ -79,7 +148,7 @@ const Storage = {
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
 
-const GAME_CONSTANTS = {
+window.GAME_CONSTANTS = {
     MAX_MP: 100,
     MAX_FIELD_BUFFS: 3,
     BASE_CRIT_MULT: 1.5,
@@ -92,6 +161,35 @@ const GAME_CONSTANTS = {
         BONUS_BLESSING_USES: 5,
         ENEMY_SCALE_BONUS: 0.2
     },
+
+    // Core combat stat constants
+    BASE_CRIT: 10,
+    BASE_EVA_BONUS: 5,
+    BLESSING_CRIT: 10,
+    BLESSING_EVA: 5,
+
+    // Debuff stat reductions
+    DEBUFF_REDUCTIONS: {
+        ATK: 0.2,      // weak
+        MATK: 0.2,     // silence
+        MDEF: 0.2,     // curse, temptation
+        DEF_BASE: 0.2, // darkness or corrosion
+        DEF_FULL: 0.4  // darkness AND corrosion
+    },
+
+    // Artifact specific bonus values
+    ARTIFACT_BONUSES: {
+        DARK_DIVINE_GRAY_CRIT: 20,
+        DARK_DIVINE_GRAY_EVA: 10,
+        DARK_VEIL_CRIT: 10,
+        DARK_VEIL_EVA: 10
+    },
+
+    ENEMY_SCALING: {
+        CYCLE_BONUS: 0.2,    // added to scale per cycle
+        HARD_MODE_MULT: 1.1  // multiplied to scale for hard modes
+    },
+
     INITIAL_TICKETS: {
         default: 20,
         suffering: 10,
@@ -112,6 +210,25 @@ const GAME_CONSTANTS = {
     SAGE_BLESSING_PICK_COUNT: 12,
     DEFAULT_BLESSING_USES: 3,
     MAX_BONUS_POOL_PRESETS: 3,
+    MAX_BONUS_POOL_ACTIVE: 15,
+
+    TUTORING_EVENT: {
+        PROB_BASE: 0.3,
+        PROB_HIGH: 0.5,
+        STAGE_THRESHOLD: 30
+    },
+
+    /** Stack cap configuration for stackable buffs/debuffs */
+    STACK_CAP: {
+        DEFAULT: 3,
+        ENHANCED: 5,
+        ENHANCED_ADD: 2,
+        /** Maps buff ID to the artifact that enhances it */
+        ARTIFACT_MAP: {
+            burn: 'over_flame',
+            divine: 'over_divine'
+        }
+    },
 
     // Costs
     COSTS: {
@@ -123,6 +240,8 @@ const GAME_CONSTANTS = {
     DRAFT: {
         INITIAL_REROLLS: 3
     },
+
+    DREAM_CORRIDOR_MAX_LIVES: 3,
 
     LOADING: {
         MAX_ATTEMPTS: 200,
@@ -181,6 +300,7 @@ const GAME_CONSTANTS = {
         'earth_bless': { atk: 0.25, matk: 0.25 },
         'twinkle_party': { atk: 0.2, crit: 15 },
         'star_powder': { def: 0.4, mdef: 0.4 },
+        'valentine': { def: 0.5, mdef: 0.5 },
         'arena': {},
         'reaper_realm': { crit: 40 },
         'gale': { crit: 20, evasion: 20 }
@@ -215,7 +335,7 @@ const DEFAULT_UNLOCKED_BONUS_CARD_IDS = ['ancient_soul', 'sun_priestess', 'cotto
 
 // ─── Artifact Definitions ─────────────────────────────────────────────────────
 
-const ARTIFACT_LIST = [
+const BASE_ARTIFACT_LIST = [
     { id: 'nature_blessing', name: '대자연의 축복', desc: '대지의축복 효과 2배' },
     { id: 'reverse', name: '리버스', desc: '자연속성 카드 사망시 필드버프 대지의축복 부여' },
     { id: 'milkshake', name: '밀크쉐이크', desc: '스타파우더 효과 2배' },
@@ -237,12 +357,105 @@ const ARTIFACT_LIST = [
     { id: 'double_attack', name: '더블어택', desc: '일반공격 위력 2.0배' },
     { id: 'death_roulette', name: '데스룰렛', desc: '모든 스킬 대미지 2배, 스킬 사용시 30% 확률로 사망' },
     { id: 'shadow_stab', name: '섀도우스탭', desc: '회피율 20%증가, 방어력과 마법방어력 30% 감소' },
-    { id: 'dragon_heart', name: '드래곤하트', desc: '베이비드래곤/레드드래곤/골드드래곤/에인션트드래곤 마공 100% 증가' },
+    { id: 'dragon_heart', name: '드래곤하트', desc: '드래곤의 마법 공격력 100% 증가' },
     { id: 'big_bang', name: '빅뱅', desc: '전설/초월 카드 사망시 물리 3배율 자폭대미지' },
     { id: 'companion', name: '길동무', desc: '사망시 적에게 대미지를 주는 특성이나 아티팩트 대미지 2배' },
     { id: 'kaleidoscope', name: '만화경', desc: '매 턴 개시시 모든 필드버프를 변경한다' },
     { id: 'blue_moon', name: '블루문', desc: '스킬 사용시 30%확률로 마나를 소비하지 않는다' }
 ];
+
+const DIVINE_ARTIFACT_UNLOCKS = [
+    {
+        id: 'divine_iris',
+        bossId: 'iris_love',
+        name: '신기 아이리스',
+        desc: '디바인 스택당 적의 방어력과 마법방어력 10% 추가 관통',
+        replaces: 'divine_piercing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'demon_iris',
+        bossId: 'iris_curse',
+        name: '마신기 아이리스',
+        desc: '작열 스택당 적의 방어력과 마법방어력 10% 추가 관통',
+        replaces: 'flame_piercing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_pharaoh',
+        bossId: 'pharaoh',
+        name: '신기 파라오',
+        desc: '방어력과 마법방어력 60% 증가, 회피율 30% 감소',
+        replaces: null,
+        unlockChance: 0.01
+    },
+    {
+        id: 'demon_beelzebub',
+        bossId: 'demon_god',
+        name: '마신기 벨제뷔트',
+        desc: '전설/초월 카드 사망시 물리 4배율 자폭대미지',
+        replaces: 'big_bang',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_thor',
+        bossId: 'thor',
+        name: '신기 토르',
+        desc: '스타파우더 효과 2.5배',
+        replaces: 'milkshake',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_flora',
+        bossId: 'flora',
+        name: '신기 플로라',
+        desc: '대지의축복 효과 2.5배',
+        replaces: 'nature_blessing',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_gray',
+        bossId: 'gray',
+        name: '신기 그레이',
+        desc: '어둠속성 카드 치명타 20%, 회피율 10% 증가',
+        replaces: 'veil_of_darkness',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_poseidon',
+        bossId: 'poseidon',
+        name: '신기 포세이돈',
+        desc: '스턴 중인 적에게 대미지 2.5배',
+        replaces: 'ice_break',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_ares',
+        bossId: 'ares',
+        name: '신기 아레스',
+        desc: '일반공격 위력 2.5배',
+        replaces: 'double_attack',
+        unlockChance: 0.01
+    },
+    {
+        id: 'divine_astea',
+        bossId: 'creator_god',
+        name: '신기 아스테아',
+        desc: '작열/디바인 전소모 스킬의 추가위력 3배',
+        replaces: 'holy_flame_burst',
+        unlockChance: 0.001
+    }
+];
+
+const ARTIFACT_LIST = [
+    ...BASE_ARTIFACT_LIST,
+    ...DIVINE_ARTIFACT_UNLOCKS.map(({ id, name, desc, replaces }) => ({ id, name, desc, replaces }))
+];
+
+let cachedAllCards = null;
+let cachedCardById = null;
+let cachedArtifactById = null;
+let cachedAllGrammarQuizzes = null;
 
 // ─── Game Utilities ───────────────────────────────────────────────────────────
 
@@ -258,11 +471,68 @@ const GameUtils = {
         return [...DEFAULT_UNLOCKED_BONUS_CARD_IDS];
     },
 
+    getArtifactById(id) {
+        if (!id) return null;
+        if (!cachedArtifactById) {
+            cachedArtifactById = new Map(ARTIFACT_LIST.map(artifact => [artifact.id, artifact]));
+        }
+        return cachedArtifactById.get(id) || null;
+    },
+
+    getDivineArtifactUnlocks() {
+        return DIVINE_ARTIFACT_UNLOCKS.map(artifact => ({ ...artifact }));
+    },
+
+    getDivineArtifactUnlockByBossId(bossId) {
+        if (!bossId) return null;
+        return DIVINE_ARTIFACT_UNLOCKS.find(artifact => artifact.bossId === bossId) || null;
+    },
+
+    getUnlockedDivineArtifactIds(globalData) {
+        const unlocked = Array.isArray(globalData && globalData.unlocked_divine_artifacts)
+            ? globalData.unlocked_divine_artifacts
+            : [];
+        const validIds = new Set(DIVINE_ARTIFACT_UNLOCKS.map(artifact => artifact.id));
+        const normalized = [];
+        unlocked.forEach(id => {
+            if (validIds.has(id) && !normalized.includes(id)) normalized.push(id);
+        });
+        return normalized;
+    },
+
+    getArtifactSelectionPool(globalData) {
+        const unlockedDivineIds = new Set(this.getUnlockedDivineArtifactIds(globalData));
+        const replacements = new Map();
+        const additions = [];
+
+        DIVINE_ARTIFACT_UNLOCKS.forEach(artifact => {
+            if (!unlockedDivineIds.has(artifact.id)) return;
+            if (artifact.replaces) replacements.set(artifact.replaces, artifact.id);
+            else additions.push(artifact.id);
+        });
+
+        const pool = BASE_ARTIFACT_LIST.map(artifact => {
+            const replacementId = replacements.get(artifact.id);
+            return replacementId ? this.getArtifactById(replacementId) : artifact;
+        }).filter(Boolean);
+
+        additions.forEach(id => {
+            const artifact = this.getArtifactById(id);
+            if (artifact) pool.push(artifact);
+        });
+
+        return pool;
+    },
+
     getAllTranscendenceCards() {
         return [
             ...(typeof TRANSCENDENCE_CARDS !== 'undefined' ? TRANSCENDENCE_CARDS : []),
             ...(typeof BONUS_TRANSCENDENCE_CARDS !== 'undefined' ? BONUS_TRANSCENDENCE_CARDS : [])
         ];
+    },
+
+    getSpecialCards() {
+        return typeof SPECIAL_CARDS !== 'undefined' ? SPECIAL_CARDS : [];
     },
 
     getUnlockedBonusTranscendenceCards(globalData) {
@@ -334,11 +604,15 @@ const GameUtils = {
      * @returns {Array}
      */
     getAllCards() {
-        return [
-            ...CARDS,
-            ...BONUS_CARDS,
-            ...this.getAllTranscendenceCards()
-        ];
+        if (!cachedAllCards) {
+            cachedAllCards = [
+                ...CARDS,
+                ...BONUS_CARDS,
+                ...this.getSpecialCards(),
+                ...this.getAllTranscendenceCards()
+            ];
+        }
+        return [...cachedAllCards];
     },
 
     /**
@@ -349,8 +623,32 @@ const GameUtils = {
      */
     getCardById(id, pool) {
         if (!id) return null;
-        const cards = Array.isArray(pool) ? pool : this.getAllCards();
-        return cards.find(card => card.id === id) || null;
+        if (Array.isArray(pool)) {
+            return pool.find(card => card.id === id) || null;
+        }
+        if (!cachedCardById) {
+            cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
+        }
+        return cachedCardById.get(id) || null;
+    },
+
+    shuffle(list) {
+        const shuffled = Array.isArray(list) ? [...list] : [];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    },
+
+    getAllGrammarQuizzes() {
+        if (!cachedAllGrammarQuizzes) {
+            cachedAllGrammarQuizzes = [];
+            GRAMMAR_DATA.forEach(lecture => {
+                cachedAllGrammarQuizzes.push(...(lecture.quizzes || []));
+            });
+        }
+        return [...cachedAllGrammarQuizzes];
     },
 
     /**
@@ -366,8 +664,15 @@ const GameUtils = {
             .map(id => this.getCardById(id, allCards))
             .filter(Boolean);
         const jokerCount = cards.filter(card => card.id === 'joker').length;
+        const nonJokerCards = cards.filter(card => card.id !== 'joker');
         const elementCounts = {};
         const cardCounts = {};
+
+        const getCardAliases = (card) => {
+            const aliases = new Set([card.id]);
+            if (card.specialBaseId) aliases.add(card.specialBaseId);
+            return aliases;
+        };
 
         cards.forEach(card => {
             cardCounts[card.id] = (cardCounts[card.id] || 0) + 1;
@@ -380,8 +685,11 @@ const GameUtils = {
             const allowedIds = new Set(ids || []);
             let count = jokerCount;
 
-            allowedIds.forEach(id => {
-                count += cardCounts[id] || 0;
+            nonJokerCards.forEach(card => {
+                const aliases = getCardAliases(card);
+                if ([...aliases].some(id => allowedIds.has(id))) {
+                    count++;
+                }
             });
 
             return count;
@@ -393,13 +701,35 @@ const GameUtils = {
             jokerCount,
             elementCounts,
             cardCounts,
-            hasCard: (id) => Boolean(cardCounts[id]) || (jokerCount > 0 && id !== 'joker'),
+            hasCard: (id) => {
+                if (id === 'joker') return jokerCount > 0;
+                return nonJokerCards.some(card => getCardAliases(card).has(id)) || jokerCount > 0;
+            },
             hasAnyCard: (ids) => countMatchingIds(ids) > 0,
             countMatchingIds,
             hasElement: (element) => jokerCount > 0 || Boolean(elementCounts[element]),
             countElement: (element) => (elementCounts[element] || 0) + jokerCount,
             countDeckAttributes: () => (jokerCount > 0 ? 5 : Object.keys(elementCounts).length)
         };
+    },
+
+    cardMatchesElement(card, element) {
+        return !!card && !!element && (card.id === 'joker' || card.element === element);
+    },
+
+    cardMatchesAnyId(card, ids) {
+        const targetIds = Array.isArray(ids) ? ids : [ids];
+        return !!card && (
+            card.id === 'joker' ||
+            targetIds.includes(card.id) ||
+            (card.specialBaseId && targetIds.includes(card.specialBaseId))
+        );
+    },
+
+    getRunPoolGradeBucket(card) {
+        if (!card) return 'normal';
+        if (card.grade === 'legend' || card.grade === 'transcendence' || card.grade === 'event') return 'legend';
+        return card.grade;
     },
 
     /**
@@ -412,6 +742,7 @@ const GameUtils = {
      * @param {string[]} [options.activeTranscendenceCards=[]] - IDs of active transcendence cards
      * @param {string[]} [options.activeBonusPoolIds=[]] - Enabled bonus card IDs for the current run
      * @param {string[]} [options.activeEventCards=[]] - IDs of active event cards for the current run
+     * @param {Object} [options.specialCardSelections={}] - Base card id => selected special card id
      * @param {boolean} [options.excludeTranscendence=false] - Filter out transcendence grade cards
      * @param {boolean} [options.excludeEvent=false] - Filter out event grade cards
      * @param {string}  [options.maxGrade] - Max grade filter: 'rare' or 'epic'
@@ -440,6 +771,18 @@ const GameUtils = {
         if (options.activeEventCards && options.activeEventCards.length > 0) {
             const eventObjs = CARDS.filter(c => c.grade === 'event' && options.activeEventCards.includes(c.id));
             pool = pool.concat(eventObjs);
+        }
+
+        if (options.specialCardSelections && Object.keys(options.specialCardSelections).length > 0) {
+            const specialById = new Map(this.getSpecialCards().map(card => [card.id, card]));
+            pool = pool.map(card => {
+                const selectedId = options.specialCardSelections[card.id];
+                const specialCard = specialById.get(selectedId);
+                if (specialCard && specialCard.specialBaseId === card.id) {
+                    return specialCard;
+                }
+                return card;
+            });
         }
 
         // Exclude transcendence grade
@@ -558,7 +901,10 @@ const DELAYED_SKILL_EFFECT_TYPES = [
     'delayed_random_attack',
     'delayed_turn_scale_attack',
     'delayed_attack_debuff_scale',
-    'phantom_nightmare'
+    'delayed_random_unique_field_buffs',
+    'phantom_nightmare',
+    'delayed_attack_random_field',
+    'delayed_attack_debuffs'
 ];
 
 function findDelayedSkillEffect(skill) {
@@ -606,6 +952,30 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
         };
     }
 
+    // delayed_attack_random_field — 일루미네이션 (프리즘트윈): resolve to attack + random field buff
+    if (delayedEff.type === 'delayed_attack_random_field') {
+        return {
+            ...skill,
+            isDelayed: true,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                { type: 'random_field_buff' }
+            ]
+        };
+    }
+
+    // delayed_attack_debuffs — 퍼펙트플랜 (퍼펙트아우로라): resolve to attack + multi debuffs
+    if (delayedEff.type === 'delayed_attack_debuffs') {
+        return {
+            ...skill,
+            isDelayed: true,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff),
+                ...delayedEff.debuffs.map(d => ({ type: 'debuff', id: d, stack: 1 }))
+            ]
+        };
+    }
+
     return skill;
 }
 
@@ -628,9 +998,14 @@ const DAMAGE_EFFECT_HANDLERS = {
             let mps = eff.multPerStack;
             // Artifact: holy_flame_burst — full-consume burn/divine skills only
             const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-            if (artifacts.includes('holy_flame_burst') && (eff.debuff === 'burn' || eff.debuff === 'divine')) {
-                mps *= 2.0;
-                ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+            if (eff.debuff === 'burn' || eff.debuff === 'divine') {
+                if (artifacts.includes('divine_astea')) {
+                    mps *= 3.0;
+                    ctx.logFn('[신기] 신기 아스테아: 전소모 추가위력 3배!');
+                } else if (artifacts.includes('holy_flame_burst')) {
+                    mps *= 2.0;
+                    ctx.logFn('[아티팩트] 홀리플레임버스트: 전소모 배율 2배!');
+                }
             }
             ctx.mult += (c * mps);
             removeVirtualStack(ctx.virtualTargetBuffs, eff.debuff, c);
@@ -819,12 +1194,7 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
         }
     },
-    'dream_form_execute': (ctx, eff) => {
-        if (ctx.fieldBuffs.some(buff => buff.name === 'arena')) {
-            ctx.mult += 4.0;
-            ctx.logFn('[융합] 아레나가 꿈의형태에 섞여 위력이 크게 증가합니다! (+4.0배)');
-        }
-    },
+    'dream_form_execute': () => { },
     'turn_modulo_dmg': (ctx, eff) => {
         // Need current turn. ctx does not have turn.
         // Add turn to ctx in calculateDamage.
@@ -847,27 +1217,53 @@ const DAMAGE_EFFECT_HANDLERS_EXTRA = {
         const maxTurn = eff.maxTurn || eff.turn || 0;
         if (ctx.turn && maxTurn > 0 && ctx.turn <= maxTurn) {
             ctx.mult *= eff.mult;
-            ctx.logFn(`[孖ｹ・ｱ] ${maxTurn}奓ｴ ・､﨑・ ・・･ ${eff.mult}・ｰ!`);
+            ctx.logFn(`[특성] ${maxTurn}턴 이내 위력 증가! 배율 ${eff.mult}배!`);
         }
     }
 };
 
 Object.assign(DAMAGE_EFFECT_HANDLERS, DAMAGE_EFFECT_HANDLERS_EXTRA);
 
+/**
+ * Shared stack cap utility — single source of truth for burn/divine stack limits.
+ * Used by both SideEffects (logic.js) and battle_runtime.js.
+ * @param {string} buffId - The buff/debuff identifier (e.g. 'burn', 'divine')
+ * @param {string[]} artifacts - Player's active artifact IDs
+ * @returns {{ cap: number, add: number } | null} null if not a capped stack buff
+ */
+function getStackCapInfo(buffId, artifacts) {
+    const cfg = GAME_CONSTANTS.STACK_CAP;
+    const enhancerArtifact = cfg.ARTIFACT_MAP[buffId];
+    if (!enhancerArtifact) return null;
+    const enhanced = Array.isArray(artifacts) && artifacts.includes(enhancerArtifact);
+    return {
+        cap: enhanced ? cfg.ENHANCED : cfg.DEFAULT,
+        add: enhanced ? cfg.ENHANCED_ADD : 1
+    };
+}
+
 const SideEffects = {
     handlers: {
+        'conditional_debuff_on_synergy': (ctx, eff) => {
+            if (!ctx.activeTraits.includes(eff.trait)) return;
+            (eff.debuffs || []).forEach(id => {
+                ctx.postActions.push({ kind: 'add_target_buff', id, value: 1, log: `[특성] ${ctx.getBuffName(id)} 부여!` });
+            });
+        },
         'buff': (ctx, eff) => {
             ctx.source.buffs[eff.id] = (eff.duration || 1);
+            if (eff.id === 'guard') {
+                const isBasicGuardSkill = ctx.skill && ctx.skill.name === '가드' && (eff.duration || 1) === 1;
+                ctx.source.guardEnhancedEligible = !!isBasicGuardSkill;
+            }
         },
         'debuff': (ctx, eff) => {
             let t = ctx.target;
             if (eff.stack) {
-                let maxStack = 3;
-                let addStack = 1;
-                // Artifact: over_flame / over_divine
                 const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-                if (eff.id === 'burn' && artifacts.includes('over_flame')) { maxStack = 5; addStack = 2; }
-                if (eff.id === 'divine' && artifacts.includes('over_divine')) { maxStack = 5; addStack = 2; }
+                const capInfo = getStackCapInfo(eff.id, artifacts);
+                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
+                const addStack = capInfo ? capInfo.add : 1;
 
                 t.buffs[eff.id] = Math.min((t.buffs[eff.id] || 0) + addStack, maxStack);
                 ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
@@ -879,8 +1275,12 @@ const SideEffects = {
         'self_debuff': (ctx, eff) => {
             let s = ctx.source;
             if (eff.stack) {
-                s.buffs[eff.id] = (s.buffs[eff.id] || 0) + 1;
-                if (s.buffs[eff.id] > 3) s.buffs[eff.id] = 3;
+                const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+                const capInfo = getStackCapInfo(eff.id, artifacts);
+                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
+                const addStack = capInfo ? capInfo.add : 1;
+
+                s.buffs[eff.id] = Math.min((s.buffs[eff.id] || 0) + addStack, maxStack);
                 ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
             } else {
                 s.buffs[eff.id] = 1;
@@ -888,7 +1288,28 @@ const SideEffects = {
             }
         },
         'field_buff': (ctx, eff) => {
-            ctx.applyFieldBuff(eff.id);
+            const options = {};
+            if (Number.isFinite(eff.durationTurns) && eff.durationTurns > 0) {
+                options.expiresAtTurn = ctx.battle.turn + eff.durationTurns;
+                options.expireLog = eff.expireLog || null;
+            }
+            ctx.applyFieldBuff(eff.id, options);
+
+            // 플레어리본: 같은 등급 덱일 때 특정 스킬 사용 시 추가 필드버프
+            const sourceTrait = ctx.source && ctx.source.proto && ctx.source.proto.trait;
+            if (sourceTrait && sourceTrait.type === 'cond_same_grade_skill_buff') {
+                if (ctx.skill && ctx.skill.name === sourceTrait.skillName) {
+                    const deckCards = (ctx.deck || []).filter(Boolean).map(cardId => {
+                        const allCards = [...CARDS, ...BONUS_CARDS];
+                        return allCards.find(c => c.id === cardId);
+                    }).filter(Boolean);
+                    const grades = deckCards.map(c => c.grade);
+                    if (grades.length > 0 && grades.every(g => g === grades[0])) {
+                        ctx.applyFieldBuff(sourceTrait.buff);
+                        ctx.logFn(`[특성] ${ctx.source.name}: 같은 등급 덱 조건 달성! [${getBuffName(sourceTrait.buff)}] 추가 부여!`);
+                    }
+                }
+            }
         },
         'heal_ratio': (ctx, eff) => {
             const ratio = eff.ratio || eff.val || 0;
@@ -902,6 +1323,20 @@ const SideEffects = {
             const pick = pool[Math.floor(Math.random() * pool.length)];
             ctx.applyFieldBuff(pick);
             ctx.logFn(`[랜덤] ${getBuffName(pick)} 부여!`);
+        },
+        'delayed_random_unique_field_buffs': (ctx, eff) => {
+            const pool = Array.isArray(eff.pool) ? [...eff.pool] : [];
+            const active = new Set((ctx.battle.fieldBuffs || []).map(buff => buff.name));
+            const available = pool.filter(id => !active.has(id));
+            const shuffled = (typeof GameUtils !== 'undefined' && typeof GameUtils.shuffle === 'function')
+                ? GameUtils.shuffle(available)
+                : available.sort(() => Math.random() - 0.5);
+            const picks = shuffled.slice(0, Math.max(0, eff.count || 0));
+
+            picks.forEach(id => {
+                ctx.applyFieldBuff(id);
+                ctx.logFn(`[선물] ${getBuffName(id)} 부여!`);
+            });
         },
         'conditional_field_buff': (ctx, eff) => {
             if (eff.condition === 'target_has_debuff' && ctx.target.buffs[eff.debuff]) ctx.applyFieldBuff(eff.id);
@@ -975,7 +1410,7 @@ const SideEffects = {
             if (count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
         },
         'clear_self_debuffs': (ctx, eff) => {
-            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun'];
+            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun', 'temptation'];
             let removed = 0;
             removable.forEach(id => {
                 if (ctx.source.buffs[id]) {
@@ -1053,7 +1488,7 @@ const SideEffects = {
             ctx.applyFieldBuff(pick);
         },
         'wild_card_debuff': (ctx, eff) => {
-            const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun'];
+            const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun', 'temptation'];
             let cleansed = 0;
             badBuffs.forEach(b => {
                 if (ctx.target.buffs[b]) {
@@ -1063,7 +1498,7 @@ const SideEffects = {
             });
             if (cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
 
-            let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine'];
+            let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'];
             pool.sort(() => 0.5 - Math.random());
 
             for (let i = 0; i < 2; i++) {
@@ -1079,6 +1514,12 @@ const SideEffects = {
         },
         'delayed_attack_field': (ctx, eff) => {
             if (eff.field) ctx.applyFieldBuff(eff.field);
+        },
+        'delayed_attack_random_field': (ctx, eff) => {
+            // handled via buildResolvedDelayedSkill → random_field_buff
+        },
+        'delayed_attack_debuffs': (ctx, eff) => {
+            // handled via buildResolvedDelayedSkill → debuff effects
         },
         'delayed_turn_scale_attack': (ctx, eff) => {
             const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
@@ -1186,9 +1627,6 @@ const SideEffects = {
                             ctx.target.buffs['stun'] = 1;
                             logMsg.push("여신(기절)");
                             break;
-                        case 'gale':
-                            logMsg.push("질풍(3.0배)");
-                            break;
                     }
                 });
                 if (logMsg.length > 0) ctx.logFn(`[꿈의형태] 초월 효과 발동! (${logMsg.join(', ')})`);
@@ -1214,14 +1652,14 @@ const Logic = {
             matk: char.matk,
             def: char.def,
             mdef: char.mdef,
-            crit: (char.baseCrit || 10),
-            evasion: (char.baseEva || 0) + 5
+            crit: (char.baseCrit || GAME_CONSTANTS.BASE_CRIT),
+            evasion: (char.baseEva || 0) + GAME_CONSTANTS.BASE_EVA_BONUS
         };
 
         // Blessings
         if (char.blessing) {
-            stats.crit += 10;
-            stats.evasion += 5;
+            stats.crit += GAME_CONSTANTS.BLESSING_CRIT;
+            stats.evasion += GAME_CONSTANTS.BLESSING_EVA;
         }
 
         // Check if character is Player (has proto)
@@ -1234,6 +1672,9 @@ const Logic = {
                 stats.evasion += trait.val;
                 stats.crit += trait.val;
             }
+            if (trait.type === 'weekday_crit_bonus' && new Date().getDay() === trait.weekday) {
+                stats.crit += trait.val || 0;
+            }
             if (trait.type === 'luna_jasmine_trait' && effectiveFieldBuffs.some(b => b.name === 'goddess_descent')) {
                 stats.evasion += 25;
                 stats.crit += 25;
@@ -1242,6 +1683,8 @@ const Logic = {
 
         // Multipliers
         let m = { atk: 1.0, matk: 1.0, def: 1.0, mdef: 1.0 };
+
+        let evasionPenalty = 0;
 
         // Handle Mushroom King here properly
         if (trait && trait.type === 'cond_earth_def_mdef' && effectiveFieldBuffs.some(b => b.name === 'earth_bless')) {
@@ -1263,6 +1706,11 @@ const Logic = {
             m.atk += boost;
             m.def += boost;
         }
+        if (trait && trait.type === 'opening_atk_matk' && battleTurn <= 3) {
+            const boost = (trait.val || 0) / 100;
+            m.atk += boost;
+            m.matk += boost;
+        }
         if (trait && trait.type === 'cond_sanctuary_atk_def' && effectiveFieldBuffs.some(b => b.name === 'sanctuary')) {
             const boost = (trait.val || 0) / 100;
             m.atk += boost;
@@ -1275,11 +1723,15 @@ const Logic = {
             effectiveFieldBuffs.forEach(fb => {
                 const bonus = GAME_CONSTANTS.FIELD_BUFF_STATS[fb.name];
                 if (bonus) {
-                    // Artifact: nature_blessing — double earth_bless effect
                     let artifactBuffMult = 1.0;
-                    if (fb.name === 'earth_bless' && artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
-                    // Artifact: milkshake — double star_powder effect
-                    if (fb.name === 'star_powder' && artifacts.includes('milkshake')) artifactBuffMult = 2.0;
+                    if (fb.name === 'earth_bless') {
+                        if (artifacts.includes('divine_flora')) artifactBuffMult = 2.5;
+                        else if (artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
+                    }
+                    if (fb.name === 'star_powder') {
+                        if (artifacts.includes('divine_thor')) artifactBuffMult = 2.5;
+                        else if (artifacts.includes('milkshake')) artifactBuffMult = 2.0;
+                    }
 
                     if (bonus.atk) m.atk += (bonus.atk * buffMult * artifactBuffMult);
                     if (bonus.matk) m.matk += (bonus.matk * buffMult * artifactBuffMult);
@@ -1303,14 +1755,15 @@ const Logic = {
         // Char Buffs/Debuffs
         let debuffMult = (mode === 'curse') ? 2.0 : 1.0;
 
-        if (char.buffs['weak']) m.atk -= (0.2 * debuffMult);
-        if (char.buffs['silence']) m.matk -= (0.2 * debuffMult);
+        if (char.buffs['weak']) m.atk -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.ATK * debuffMult);
+        if (char.buffs['silence']) m.matk -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MATK * debuffMult);
         if (char.buffs['evasion']) stats.evasion += 50;
-        if (char.buffs['curse']) m.mdef -= (0.2 * debuffMult);
+        if (char.buffs['curse']) m.mdef -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF * debuffMult);
+        if (char.buffs['temptation']) m.mdef -= (GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF * debuffMult);
 
         let defRed = 0.0;
-        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = 0.4;
-        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = 0.2;
+        if (char.buffs['darkness'] && char.buffs['corrosion']) defRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.DEF_FULL;
+        else if (char.buffs['darkness'] || char.buffs['corrosion']) defRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.DEF_BASE;
         // Artifact: assassin_nail — double darkness def reduction
         if (artifacts.includes('assassin_nail') && (char.buffs['darkness'] || char.buffs['corrosion'])) {
             defRed *= 2.0;
@@ -1319,21 +1772,26 @@ const Logic = {
 
         // Artifact: shadow_ball — darkness also reduces mdef
         if (artifacts.includes('shadow_ball') && char.buffs['darkness']) {
-            let mdefRed = 0.2;
+            let mdefRed = GAME_CONSTANTS.DEBUFF_REDUCTIONS.MDEF;
             if (artifacts.includes('assassin_nail')) mdefRed *= 2.0;
             m.mdef -= (mdefRed * debuffMult);
         }
 
-        // Artifact: veil_of_darkness — dark element crit/eva +10%
-        if (isPlayer && artifacts.includes('veil_of_darkness') && char.proto && char.proto.element === 'dark') {
-            stats.crit += 10;
-            stats.evasion += 10;
+        // Artifact: veil_of_darkness / divine_gray — dark element crit/eva boost
+        if (isPlayer && GameUtils.cardMatchesElement(char.proto, 'dark')) {
+            if (artifacts.includes('divine_gray')) {
+                stats.crit += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_DIVINE_GRAY_CRIT;
+                stats.evasion += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_DIVINE_GRAY_EVA;
+            } else if (artifacts.includes('veil_of_darkness')) {
+                stats.crit += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_VEIL_CRIT;
+                stats.evasion += GAME_CONSTANTS.ARTIFACT_BONUSES.DARK_VEIL_EVA;
+            }
         }
 
         // Artifact: rabbit_hole — specific rabbits crit/eva +20%
         if (isPlayer && artifacts.includes('rabbit_hole') && char.proto) {
             const rabbitIds = ['snow_rabbit', 'night_rabbit', 'silver_rabbit'];
-            if (rabbitIds.includes(char.proto.id)) {
+            if (GameUtils.cardMatchesAnyId(char.proto, rabbitIds)) {
                 stats.crit += 20;
                 stats.evasion += 20;
             }
@@ -1346,11 +1804,20 @@ const Logic = {
             m.mdef -= 0.3;
         }
 
+        if (isPlayer && artifacts.includes('divine_pharaoh')) {
+            m.def += 0.6;
+            m.mdef += 0.6;
+            evasionPenalty += 30;
+        }
+
         // Apply Multipliers
         stats.atk = Math.floor(stats.atk * Math.max(0, m.atk));
         stats.matk = Math.floor(stats.matk * Math.max(0, m.matk));
         stats.def = Math.floor(stats.def * Math.max(0, m.def));
         stats.mdef = Math.floor(stats.mdef * Math.max(0, m.mdef));
+        if (evasionPenalty > 0) {
+            stats.evasion = Math.max(0, stats.evasion - evasionPenalty);
+        }
 
         if (char.swapAtkMatk) {
             const nextAtk = stats.matk;
@@ -1387,8 +1854,13 @@ const Logic = {
         if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
 
         let critDmg = GAME_CONSTANTS.BASE_CRIT_MULT;
-        if (source.proto && sourceFieldBuffs.some(b => b.name === 'sun_bless')) critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS;
-        if (source.proto && sourceFieldBuffs.some(b => b.name === 'reaper_realm')) critDmg += 0.4;
+        const critBuffMult = (mode === 'flood' && source.proto) ? 2.0 : 1.0;
+        if (source.proto && sourceFieldBuffs.some(b => b.name === 'sun_bless')) {
+            critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS * critBuffMult;
+        }
+        if (source.proto && sourceFieldBuffs.some(b => b.name === 'reaper_realm')) {
+            critDmg += 0.4 * critBuffMult;
+        }
 
         let val = (skill.type === 'phy') ? srcStats.atk : srcStats.matk;
 
@@ -1451,6 +1923,12 @@ const Logic = {
             if (source.normalAttackPartyMult && source.normalAttackPartyMult > 1) {
                 mult *= source.normalAttackPartyMult;
                 logFn(`[특성] 일반공격 강화! x${source.normalAttackPartyMult.toFixed(1)}`);
+            }
+            // 프리즘트윈: 이 카드의 일반공격 대미지 배수
+            if (source.proto && source.proto.trait && source.proto.trait.type === 'self_normal_atk_dmg_boost') {
+                const selfMult = source.proto.trait.val || 2.0;
+                mult *= selfMult;
+                logFn(`[특성] ${source.name}: 일반공격 대미지 x${selfMult.toFixed(1)}!`);
             }
         }
 
@@ -1527,24 +2005,35 @@ const Logic = {
             logFn(`[효과] 마법방어력 ${Math.round(ctx.ignoreMdefRate * 100)}% 관통!`);
         }
 
-        // Artifact: flame_piercing — burn stacks x 10% physical defense penetration
-        if (artifacts.includes('flame_piercing') && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
-            let burnPen = ctx.baseTargetBuffs['burn'] * 0.1;
-            let ignore = Math.floor(rawDef * burnPen);
-            def = Math.max(0, def - ignore);
-            logFn(`[아티팩트] 플레임피어싱: 작열 ${ctx.baseTargetBuffs['burn']}스택! 방어력 ${Math.round(burnPen * 100)}% 관통!`);
+        // Artifact: demon_iris — burn stacks penetrate BOTH phy/mag defense (overrides flame_piercing)
+        if (artifacts.includes('demon_iris') && ctx.baseTargetBuffs['burn']) {
+            const rawVal = skill.type === 'phy' ? rawDef : rawMdef;
+            def = Math.max(0, def - this._calcStackPenetration('burn', ctx.baseTargetBuffs['burn'], 0.1, rawVal, '[신기] 마신기 아이리스', logFn));
         }
 
-        // Artifact: divine_piercing — divine stacks x 10% magic defense penetration
-        if (artifacts.includes('divine_piercing') && skill.type === 'mag' && ctx.baseTargetBuffs['divine']) {
-            let divinePen = ctx.baseTargetBuffs['divine'] * 0.1;
-            let ignore = Math.floor(rawMdef * divinePen);
-            def = Math.max(0, def - ignore);
-            logFn(`[아티팩트] 디바인피어싱: 디바인 ${ctx.baseTargetBuffs['divine']}스택! 마법방어력 ${Math.round(divinePen * 100)}% 관통!`);
+        // Artifact: flame_piercing — burn stacks x 10% physical defense penetration (skip if demon_iris active)
+        if (!artifacts.includes('demon_iris') && artifacts.includes('flame_piercing') && skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
+            def = Math.max(0, def - this._calcStackPenetration('burn', ctx.baseTargetBuffs['burn'], 0.1, rawDef, '[아티팩트] 플레임피어싱', logFn));
+        }
+
+        // Artifact: divine_iris — divine stacks penetrate BOTH phy/mag defense (overrides divine_piercing)
+        if (artifacts.includes('divine_iris') && ctx.baseTargetBuffs['divine']) {
+            const rawVal = skill.type === 'phy' ? rawDef : rawMdef;
+            def = Math.max(0, def - this._calcStackPenetration('divine', ctx.baseTargetBuffs['divine'], 0.1, rawVal, '[신기] 신기 아이리스', logFn));
+        }
+
+        // Artifact: divine_piercing — divine stacks x 10% magic defense penetration (skip if divine_iris active)
+        if (!artifacts.includes('divine_iris') && artifacts.includes('divine_piercing') && skill.type === 'mag' && ctx.baseTargetBuffs['divine']) {
+            def = Math.max(0, def - this._calcStackPenetration('divine', ctx.baseTargetBuffs['divine'], 0.1, rawMdef, '[아티팩트] 디바인피어싱', logFn));
+        }
+
+        if (artifacts.includes('divine_poseidon') && ctx.baseTargetBuffs['stun']) {
+            mult *= 2.5;
+            logFn('[신기] 신기 포세이돈: 스턴 중인 적에게 대미지 2.5배!');
         }
 
         // Artifact: ice_break — double damage to stunned targets
-        if (artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
+        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
             mult *= 2.0;
             logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
         }
@@ -1572,7 +2061,7 @@ const Logic = {
             let ignore = t.val;
             let baseDef = (skill.type === 'phy') ? target.def : target.mdef;
             def = Math.max(0, def - Math.floor(baseDef * ignore));
-            logFn("[특성] 치명타! 적 방어력 50% 추가 무시!");
+            logFn("[특성] 치명타! 방어/마방 50% 관통!");
         }
 
         // [초월 루미: 꿈의형태 리워크 로직]
@@ -1611,9 +2100,17 @@ const Logic = {
                         mult += 4.0;
                         logMsg.push("여신(4.0배)");
                         break;
+                    case 'valentine': // 발렌타인: 5배율
+                        mult += 5.0;
+                        logMsg.push("발렌타인(5.0배)");
+                        break;
                     case 'destiny_oath': // 운명의서약: 10배율
                         mult += 10.0;
                         logMsg.push("서약(10.0배)");
+                        break;
+                    case 'arena': // 아레나: 4배율
+                        mult += 4.0;
+                        logMsg.push("아레나(4.0배)");
                         break;
                     case 'reaper_realm': // 사신강림: 마방 50% 관통 + 1배율
                         {
@@ -1658,13 +2155,53 @@ const Logic = {
     },
 
     // 4. Initial Stats Calculation
+
+    /**
+     * Synergy activation/effect data table.
+     * cond: function(deckCtx) => boolean — whether this synergy is active
+     * apply: function(p, t) — apply stat boosts to player stats object p
+     */
+    _SYNERGY_TABLE: {
+        'syn_nature_3_all':        { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; } },
+        'syn_nature_3_golem':      { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.def *= 1.3; } },
+        'syn_water_3_ice_age':     { cond: d => d.countElement('water') >= 3,                     apply: () => {} },
+        'syn_fire_3_crit':         { cond: d => d.countElement('fire') >= 3,                      apply: p => { p.baseCrit += 30; } },
+        'syn_dark_3_matk':         { cond: d => d.countElement('dark') >= 3,                      apply: p => { p.matk *= 1.5; } },
+        'syn_light_fire_atk':      { cond: d => d.hasElement('light') && d.hasElement('fire'),    apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
+        'syn_light_dark_matk_mdef':{ cond: d => d.hasElement('light') && d.hasElement('dark'),    apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_light_3_matk_mdef':   { cond: d => d.countElement('light') >= 3,                     apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_water_nature':        { cond: d => d.hasElement('water') && d.hasElement('nature'),   apply: () => {} },
+        'syn_nature_3_matk':       { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.matk *= 1.5; } },
+        'syn_night_rabbit':        { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']),   apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_snow_rabbit':         { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),    apply: p => { p.atk *= 1.5; p.def *= 1.5; } },
+        'syn_silver_rabbit':       { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
+        'syn_water_3_atk_matk':    { cond: d => d.countElement('water') >= 3,                     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
+        'syn_fire_3_crit_burn':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_fire_3_atk_boost':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.atk *= (1 + t.val / 100); } },
+        'syn_dark_3_matk_boost':   { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
+        'syn_dark_3_all_stats':    { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; p.def *= m; p.mdef *= m; } },
+        'syn_dark_3_party_atk':    { cond: d => d.countElement('dark') >= 3,                      apply: () => {} },
+        'syn_water_2_moon_twinkle':{ cond: d => d.countElement('water') >= 2,                     apply: () => {} },
+        'syn_water_light_heart_star':      { cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
+        'syn_water_light_midnight_twinkle':{ cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
+        'syn_light_3_party_def_mdef':      { cond: d => d.countElement('light') >= 3,             apply: () => {} },
+        'syn_nature_3_party_def_mdef':     { cond: d => d.countElement('nature') >= 3,            apply: () => {} },
+        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_rabbit_valentine_snow':       { cond: d => d.hasAnyCard(['night_rabbit','silver_rabbit']), apply: () => {} },
+        'syn_rabbit_valentine_night':      { cond: d => d.hasAnyCard(['snow_rabbit','silver_rabbit']),  apply: () => {} },
+        'syn_rabbit_valentine_silver':     { cond: d => d.hasAnyCard(['snow_rabbit','night_rabbit']),   apply: () => {} },
+        'christmas_rabbit_snow':           { cond: d => d.hasAnyCard(['night_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_night':          { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_silver':         { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['night_rabbit']), apply: () => {} }
+    },
+
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
         // Base stats copy
         let p = {
-            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: 100,
+            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: GAME_CONSTANTS.MAX_MP || 100,
             atk: playerProto.stats.atk, matk: playerProto.stats.matk,
             def: playerProto.stats.def, mdef: playerProto.stats.mdef,
-            baseCrit: 10, baseEva: 0
+            baseCrit: GAME_CONSTANTS.BASE_CRIT, baseEva: 0
         };
 
         const deckCtx = GameUtils.buildDeckContext(deck, allCards);
@@ -1674,55 +2211,12 @@ const Logic = {
         const t = playerProto.trait;
         let active = false;
 
-        // Synergy Traits
+        // Synergy Traits — data-driven lookup
         if (t.type.startsWith('syn_')) {
-            if (t.type === 'syn_nature_3_all' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_nature_3_golem' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_water_3_ice_age' && deckCtx.countElement('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_light_fire_atk' && deckCtx.hasElement('light') && deckCtx.hasElement('fire')) active = true;
-            else if (t.type === 'syn_light_dark_matk_mdef' && deckCtx.hasElement('light') && deckCtx.hasElement('dark')) active = true;
-            else if (t.type === 'syn_light_3_matk_mdef' && deckCtx.countElement('light') >= 3) active = true;
-            else if (t.type === 'syn_water_nature' && deckCtx.hasElement('water') && deckCtx.hasElement('nature')) active = true;
-            else if (t.type === 'syn_nature_3_matk' && deckCtx.countElement('nature') >= 3) active = true;
-            else if (t.type === 'syn_night_rabbit' && deckCtx.hasAnyCard(['night_rabbit', 'silver_rabbit'])) active = true;
-            else if (t.type === 'syn_snow_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'silver_rabbit'])) active = true;
-            else if (t.type === 'syn_silver_rabbit' && deckCtx.hasAnyCard(['snow_rabbit', 'night_rabbit'])) active = true;
-            else if (t.type === 'syn_water_3_atk_matk' && deckCtx.countElement('water') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_crit_burn' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_fire_3_atk_boost' && deckCtx.countElement('fire') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_matk_boost' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_all_stats' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_dark_3_party_atk' && deckCtx.countElement('dark') >= 3) active = true;
-            else if (t.type === 'syn_water_2_moon_twinkle' && deckCtx.countElement('water') >= 2) active = true;
-            else if (t.type === 'syn_light_3_party_def_mdef' && deckCtx.countElement('light') >= 3) active = true;
-            else if (t.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) active = true;
-
-            if (active) {
-                if (t.type === 'syn_nature_3_all') { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; }
-                if (t.type === 'syn_nature_3_golem') { p.atk *= 1.3; p.def *= 1.3; }
-                if (t.type === 'syn_nature_3_matk') p.matk *= 1.5;
-                if (t.type === 'syn_fire_3_crit') p.baseCrit += 30;
-                if (t.type === 'syn_dark_3_matk') p.matk *= 1.5;
-                if (t.type === 'syn_light_fire_atk') p.matk *= (1 + t.val / 100);
-                if (t.type === 'syn_light_dark_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_light_3_matk_mdef') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_night_rabbit') { p.matk *= 1.5; p.mdef *= 1.5; }
-                if (t.type === 'syn_snow_rabbit') { p.atk *= 1.5; p.def *= 1.5; }
-                if (t.type === 'syn_silver_rabbit') { p.atk *= 1.5; p.matk *= 1.5; }
-                if (t.type === 'syn_water_3_atk_matk') { p.atk *= 1.5; p.matk *= 1.5; }
-                if (t.type === 'syn_fire_3_crit_burn') p.baseCrit += t.val;
-                if (t.type === 'syn_fire_3_atk_boost') p.atk *= (1 + t.val / 100);
-                if (t.type === 'syn_dark_3_matk_boost') p.matk *= (1 + t.val / 100);
-                if (t.type === 'syn_dark_3_all_stats') {
-                    p.atk *= (1 + t.val / 100);
-                    p.matk *= (1 + t.val / 100);
-                    p.def *= (1 + t.val / 100);
-                    p.mdef *= (1 + t.val / 100);
-                }
-                if (t.type === 'syn_dark_full_party_crit') p.baseCrit += t.val;
-
+            const entry = Logic._SYNERGY_TABLE[t.type];
+            if (entry && entry.cond(deckCtx)) {
+                active = true;
+                entry.apply(p, t);
                 p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
                 p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
             }
@@ -1733,7 +2227,19 @@ const Logic = {
             p.mdef = Math.floor(p.mdef * 1.5);
         }
 
+        if (t.type === 'guardian_hidden_trait') {
+            active = true;
+            if (idx === 0) {
+                p.atk = Math.floor(p.atk * (1 + (t.val || 0) / 100));
+            }
+        }
+
         if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {
+            active = true;
+        }
+
+        // 프리즘트윈/앤트로피: 패시브 특성 활성화 표시
+        if (t.type === 'self_normal_atk_dmg_boost' || t.type === 'chaos_blessing_double') {
             active = true;
         }
 
@@ -1750,6 +2256,11 @@ const Logic = {
                 p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
                 p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
             }
+        }
+
+        // Legacy positional trait — pos_rear_atk (rear = idx 2)
+        if (t.type === 'pos_rear_atk' && idx === 2) {
+            p.atk = Math.floor(p.atk * (1 + (t.val || 0) / 100));
         }
 
         if (t.type === 'rabbit_synergy_boost') {
@@ -1771,11 +2282,55 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius']) - 1);
+            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder']) - 1);
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
                 p.matk = Math.floor(p.matk * (1 + boost));
+            }
+        }
+
+        // 크리스마스 눈토끼: 밤토끼 AND 은토끼 동시 존재 → 올스탯 50%
+        if (t.type === 'christmas_rabbit_snow') {
+            if (deckCtx.hasCard('night_rabbit') && deckCtx.hasCard('silver_rabbit')) {
+                active = true;
+                p.atk = Math.floor(p.atk * 1.5);
+                p.matk = Math.floor(p.matk * 1.5);
+                p.def = Math.floor(p.def * 1.5);
+                p.mdef = Math.floor(p.mdef * 1.5);
+            }
+        }
+
+        // 언더독: 덱에 일반등급 3장 이상 + 대장 배치 시 공격/마공 증가
+        if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
+            const gradeCount = deckCtx.cards.filter(c => c && c.grade === (t.gradeRequired || 'normal')).length;
+            if (gradeCount >= (t.countRequired || 3) && idx === (t.pos !== undefined ? t.pos : 2)) {
+                active = true;
+                const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
+                const boost = 1 + (t.val || 0) / 100;
+                stats.forEach(s => {
+                    if (s === 'atk') p.atk = Math.floor(p.atk * boost);
+                    if (s === 'matk') p.matk = Math.floor(p.matk * boost);
+                    if (s === 'def') p.def = Math.floor(p.def * boost);
+                    if (s === 'mdef') p.mdef = Math.floor(p.mdef * boost);
+                });
+            }
+        }
+
+        // 구미호: 덱 전체가 같은 등급일 때 마공 증가
+        if (t.type === 'cond_same_grade_matk_boost') {
+            const grades = deckCtx.cards.map(c => c ? c.grade : null).filter(Boolean);
+            if (grades.length > 0 && grades.every(g => g === grades[0])) {
+                active = true;
+                p.matk = Math.floor(p.matk * (1 + (t.val || 0) / 100));
+            }
+        }
+
+        // 스컬드래곤: 대장 배치 시 자기 공격력 증가, 덱 전체 방어/마방 감소
+        if (t.type === 'leader_self_atk_party_def_down' && idx !== undefined) {
+            if (idx === 2) {
+                active = true;
+                p.atk = Math.floor(p.atk * (1 + (t.atkBoost || 100) / 100));
             }
         }
 
@@ -1796,11 +2351,62 @@ const Logic = {
                 partyBoost.def += (tr.val || 0);
                 partyBoost.mdef += (tr.val || 0);
             }
+            else if (tr && tr.type === 'syn_nature_3_party_def_mdef' && deckCtx.countElement('nature') >= 3) {
+                partyBoost.def += (tr.val || 0);
+                partyBoost.mdef += (tr.val || 0);
+            }
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
             }
             else if (tr && tr.type === 'mid_party_mdef_boost' && cardIdx === 1) {
                 partyBoost.mdef += (tr.val || 0);
+            }
+            // 스컬드래곤: 대장 배치 시 덱 전체 방어/마방 감소
+            else if (tr && tr.type === 'leader_self_atk_party_def_down' && cardIdx === 2) {
+                partyBoost.def -= (tr.defDown || 50);
+                partyBoost.mdef -= (tr.defDown || 50);
+            }
+            else if (tr && tr.type === 'christmas_rabbit_night') {
+                if (deckCtx.hasCard('snow_rabbit') && deckCtx.hasCard('silver_rabbit')) {
+                    partyBoost.crit += 20;
+                }
+            }
+        });
+
+        // 할로윈 토끼 peer buff 수집
+        const peerBoosts = {}; // { [playerIdx]: { atk, matk, def, mdef } }
+        activeCards.forEach((c, cardIdx) => {
+            const tr = c.trait;
+            if (!tr) return;
+            if (cardIdx !== 0) return; // 선봉만
+
+            if (tr.type === 'halloween_boost_snow') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['night_rabbit', 'silver_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].matk += 50;
+                        peerBoosts[ti].mdef += 50;
+                    }
+                });
+            } else if (tr.type === 'halloween_boost_night') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['snow_rabbit', 'silver_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].atk += 50;
+                        peerBoosts[ti].def += 50;
+                    }
+                });
+            } else if (tr.type === 'halloween_boost_silver') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['snow_rabbit', 'night_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].atk += 50;
+                        peerBoosts[ti].matk += 50;
+                    }
+                });
             }
         });
 
@@ -1810,11 +2416,28 @@ const Logic = {
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
         if (partyBoost.crit) p.baseCrit += partyBoost.crit;
 
+        const myPeerBoost = peerBoosts[idx];
+        if (myPeerBoost) {
+            if (myPeerBoost.atk) p.atk = Math.floor(p.atk * (1 + myPeerBoost.atk / 100));
+            if (myPeerBoost.matk) p.matk = Math.floor(p.matk * (1 + myPeerBoost.matk / 100));
+            if (myPeerBoost.def) p.def = Math.floor(p.def * (1 + myPeerBoost.def / 100));
+            if (myPeerBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + myPeerBoost.mdef / 100));
+        }
+
+        // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
+        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder'];
+        const dessertBoostTrait = activeCards.find(c => c.trait && c.trait.type === 'dessert_kingdom_crit_eva_boost');
+        if (dessertBoostTrait && dessertKingdomIds.includes(playerProto.id)) {
+            const boostVal = dessertBoostTrait.trait.val || 20;
+            p.baseCrit += boostVal;
+            p.baseEva += boostVal;
+        }
+
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon'];
-            if (dragonIds.includes(playerProto.id)) {
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
+            if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
         }
@@ -1848,7 +2471,7 @@ const Logic = {
             if (turn === 7 || turn === 14) skill = enemy.skills.find(s => s.name === '제노사이드');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '다크니스');
         }
-        else if (enemy.id === 'flora') {
+        else if (enemy.id === 'flora' || enemy.id === 'flora_valentine') {
             if (turn === 5 || turn === 10) skill = enemy.skills.find(s => s.name === '제네시스블룸');
             else if (r < 0.3) skill = enemy.skills.find(s => s.name === '블러썸템페스트');
         }
@@ -1859,7 +2482,7 @@ const Logic = {
                 skill = enemy.skills.find(s => s.name === skillName);
             }
         }
-        else if (enemy.id === 'thor') {
+        else if (enemy.id === 'thor' || enemy.id === 'thor_swimsuit') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '썬더러쉬');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '묠니르');
         }
@@ -1869,7 +2492,7 @@ const Logic = {
             else if (turn === 15) skill = enemy.skills.find(s => s.name === '디바우러');
             else if (r < 0.2) skill = enemy.skills.find(s => s.name === '트라이던트');
         }
-        else if (enemy.id === 'ares') {
+        else if (enemy.id === 'ares' || enemy.id === 'ares_halloween') {
             if (enemy.isCharging && enemy.chargeSkillId) {
                 const chargedSkill = enemy.skills.find(s => s.name === enemy.chargeSkillId);
                 return chargedSkill ? { ...chargedSkill, chargeReset: true } : { type: 'phy', val: 1.0, name: '일반 공격' };
@@ -1883,13 +2506,13 @@ const Logic = {
                     name: `${chargeSkillId} 차징`,
                     isChargeStart: true,
                     chargeMessage: chargeSkillId === '테라소드'
-                        ? '아레스가 테라소드의 힘을 끌어모읍니다...'
-                        : '아레스가 마그마이럽션의 화염을 응축합니다...'
+                        ? `${enemy.name}가 테라소드의 힘을 끌어모읍니다...`
+                        : `${enemy.name}가 마그마이럽션의 화염을 응축합니다...`
                 };
             }
             if (r < 0.2) skill = enemy.skills.find(s => s.name === '스피어레인');
         }
-        else if (enemy.id === 'creator_god') {
+        else if (enemy.id === 'creator_god' || enemy.id === 'astea_christmas') {
             if (enemy.isCharging) {
                 const chargedSkill = enemy.skills.find(s => s.name === '디바인블레이드');
                 return { ...chargedSkill, chargeReset: true };
@@ -1923,6 +2546,42 @@ const Logic = {
         return skill || { type: 'phy', val: 1.0, name: '일반 공격' };
     },
 
+    /**
+     * Shared helper for death-triggered damage effects.
+     * Consolidates: calculateDamage → companion artifact check → result accumulation → logging.
+     */
+    _applyDeathDamage: function (result, victim, killer, skillPartial, fieldBuffs, logFn, deck, turn, artifacts, logPrefix) {
+        const skill = { ...skillPartial, effects: skillPartial.effects || [] };
+        const dmgResult = this.calculateDamage(victim, killer, skill, fieldBuffs, [], logFn, null, deck, turn, artifacts);
+        if (artifacts.includes('companion')) {
+            dmgResult.dmg *= 2;
+            logFn(`[아티팩트] 길동무: ${skill.name} 대미지 2배!`);
+        }
+        if (dmgResult.dmg > 0) {
+            result.damageToKiller += dmgResult.dmg;
+            logFn(`${logPrefix} ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+        }
+    },
+
+    /**
+     * Shared helper for stack-based defense penetration (burn/divine artifacts).
+     * All penetration rates are additive (합연산).
+     * @param {string} buffId - Stack buff to check (e.g. 'burn', 'divine')
+     * @param {number} stacks - Current stack count
+     * @param {number} penPerStack - Penetration rate per stack (e.g. 0.1 = 10%)
+     * @param {number} rawDefValue - Raw defense value to penetrate against
+     * @param {string} label - Display label for log
+     * @param {Function} logFn - Logging function
+     * @returns {number} Amount of defense to subtract
+     */
+    _calcStackPenetration: function (buffId, stacks, penPerStack, rawDefValue, label, logFn) {
+        if (!stacks || stacks <= 0) return 0;
+        const penRate = stacks * penPerStack;
+        const ignore = Math.floor(rawDefValue * penRate);
+        logFn(`${label}: ${getBuffName(buffId)} ${stacks}스택! ${Math.round(penRate * 100)}% 관통!`);
+        return ignore;
+    },
+
     // 6. Handle Death Traits
     handleDeathTraits: function (victim, killer, fieldBuffs, logFn, deck, turn, artifacts) {
         if (!logFn) logFn = function () { };
@@ -1932,43 +2591,14 @@ const Logic = {
         const t = victim.proto.trait;
 
         if (t.type === 'death_dmg_mag') {
-            let dummySkill = { name: '사망 반격', type: 'mag', val: t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 사망 반격!');
         }
         else if (t.type === 'death_dmg_phy') {
-            let dummySkill = { name: '사망 반격', type: 'phy', val: t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 사망 반격!');
         }
         else if (t.type === 'death_dmg_debuff') {
             let cnt = Object.keys(killer.buffs).length;
-            let dummySkill = { name: '저주 반격', type: 'mag', val: cnt * t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 저주 반격! ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '저주 반격', type: 'mag', val: cnt * t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 저주 반격!');
         }
         else if (t.type === 'death_field_sun') {
             result.fieldBuffsToAdd.push('sun_bless');
@@ -2001,56 +2631,78 @@ const Logic = {
                 logFn('[특성] 사망 효과 발동! 적에게 약화, 부식, 저주, 침묵, 기절 부여.');
             }
         }
+        else if (t.type === 'death_multi_debuff_custom' && killer) {
+            (t.debuffs || []).forEach(debuff => {
+                result.killerDebuffs[debuff] = (result.killerDebuffs[debuff] || 0) + 1;
+            });
+            if ((t.debuffs || []).length > 0) {
+                logFn(`[특성] 사망 효과 발동! 적에게 ${(t.debuffs || []).map(getBuffName).join(', ')} 부여.`);
+            }
+        }
         else if (t.type === 'death_field_buff_count_dmg') {
             let count = fieldBuffs.length;
-            let dummySkill = { name: '사망 반격', type: 'mag', val: count * t.val, effects: [] };
-            let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-            // Artifact: companion
-            if (artifacts.includes('companion')) {
-                 dmgResult.dmg *= 2;
-                 logFn('[아티팩트] 길동무: 사망 반격 대미지 2배!');
-            }
-            if (dmgResult.dmg > 0) {
-                result.damageToKiller += dmgResult.dmg;
-                logFn(`[특성] 사망 반격! (필드버프 ${count}개) ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
-            }
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: count * t.val }, fieldBuffs, logFn, deck, turn, artifacts, `[특성] 사망 반격! (필드버프 ${count}개)`);
         }
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
             logFn(`[특성] 헬하운드 사망! 트윙클 파티 발동!`);
         }
+        // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
+        else if (t.type === 'death_dmg_mag_stun_cond') {
+            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
+            const hasDragon = deck && deck.some(cardId => {
+                if (!cardId || cardId === victim.proto.id) return false;
+                return GameUtils.cardMatchesAnyId({ id: cardId }, dragonIds);
+            });
+            if (hasDragon) {
+                this._applyDeathDamage(result, victim, killer, { name: '용혈의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 용혈의무녀: 드래곤의 힘으로 사망 반격!');
+                if (killer) {
+                    result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
+                    logFn('[특성] 용혈의무녀: 적에게 기절 부여!');
+                }
+            }
+        }
+        // 팅커벨: 덱 전부 같은 등급일 때 사망 시 마법대미지 + 기절
+        else if (t.type === 'death_dmg_mag_stun_same_grade') {
+            const deckCards = (deck || []).filter(Boolean).map(cardId => {
+                const allCards = [...CARDS, ...BONUS_CARDS];
+                return allCards.find(c => c.id === cardId);
+            }).filter(Boolean);
+            const grades = deckCards.map(c => c.grade);
+            const allSameGrade = grades.length > 0 && grades.every(g => g === grades[0]);
+            if (allSameGrade) {
+                this._applyDeathDamage(result, victim, killer, { name: '요정의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 팅커벨: 같은 등급 덱의 힘으로 사망 반격!');
+                if (killer) {
+                    result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
+                    logFn('[특성] 팅커벨: 적에게 기절 부여!');
+                }
+            }
+        }
 
         // ─── Artifact Death Effects ─────────────────────────────
 
         // Artifact: reverse — nature element death -> earth_bless field buff
-        if (artifacts.includes('reverse') && victim.proto && victim.proto.element === 'nature') {
+        if (artifacts.includes('reverse') && GameUtils.cardMatchesElement(victim.proto, 'nature')) {
             result.fieldBuffsToAdd.push('earth_bless');
             logFn(`[아티팩트] 리버스: 자연속성 카드 사망! 대지의 축복 부여!`);
         }
 
         // Artifact: frozen_body — water element death -> stun on killer
-        if (artifacts.includes('frozen_body') && victim.proto && victim.proto.element === 'water') {
+        if (artifacts.includes('frozen_body') && GameUtils.cardMatchesElement(victim.proto, 'water')) {
             if (killer) {
                 result.killerDebuffs['stun'] = 1;
                 logFn(`[아티팩트] 프로즌바디: 물속성 카드 사망! 적에게 스턴 부여!`);
             }
         }
 
-        // Artifact: big_bang — legend/transcendence death -> 3x physical self-destruct
-        if (artifacts.includes('big_bang') && victim.proto) {
+        // Artifact: big_bang / demon_beelzebub — legend/transcendence death -> physical self-destruct
+        if ((artifacts.includes('big_bang') || artifacts.includes('demon_beelzebub')) && victim.proto) {
             const grade = victim.proto.grade;
             if (grade === 'legend' || grade === 'transcendence') {
-                let dummySkill = { name: '빅뱅', type: 'phy', val: 3.0, effects: [] };
-                let dmgResult = this.calculateDamage(victim, killer, dummySkill, fieldBuffs, [], logFn, null, deck, turn);
-                // Artifact: companion
-                if (artifacts.includes('companion')) {
-                     dmgResult.dmg *= 2;
-                     logFn('[아티팩트] 길동무: 빅뱅 자폭 대미지 2배!');
-                }
-                if (dmgResult.dmg > 0) {
-                    result.damageToKiller += dmgResult.dmg;
-                    logFn(`[아티팩트] 빅뱅! 전설/초월 카드 자폭! <span class="log-dmg">${dmgResult.dmg}</span> 피해!`);
-                }
+                const isDivineBigBang = artifacts.includes('demon_beelzebub');
+                const skillName = isDivineBigBang ? '마신기 벨제뷔트' : '빅뱅';
+                const prefix = isDivineBigBang ? '[신기]' : '[아티팩트]';
+                this._applyDeathDamage(result, victim, killer, { name: skillName, type: 'phy', val: isDivineBigBang ? 4.0 : 3.0 }, fieldBuffs, logFn, deck, turn, artifacts, `${prefix} ${skillName}: 전설/초월 카드 자폭!`);
             }
         }
 

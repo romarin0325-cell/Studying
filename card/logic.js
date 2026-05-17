@@ -1244,6 +1244,18 @@ function getStackCapInfo(buffId, artifacts) {
 
 const SideEffects = {
     handlers: {
+        'conditional_debuff_on_synergy': (ctx, eff) => {
+            if (!ctx.activeTraits.includes(eff.trait)) return;
+            (eff.debuffs || []).forEach(id => {
+                ctx.postActions.push({ kind: 'add_target_buff', id, value: 1, log: `[특성] ${ctx.getBuffName(id)} 부여!` });
+            });
+        },
+        'conditional_debuff_on_synergy': (ctx, eff) => {
+            if (!ctx.activeTraits.includes(eff.trait)) return;
+            (eff.debuffs || []).forEach(id => {
+                ctx.postActions.push({ kind: 'add_target_buff', id, value: 1, log: `[특성] ${ctx.getBuffName(id)} 부여!` });
+            });
+        },
         'buff': (ctx, eff) => {
             ctx.source.buffs[eff.id] = (eff.duration || 1);
             if (eff.id === 'guard') {
@@ -2180,7 +2192,19 @@ const Logic = {
         'syn_water_light_midnight_twinkle':{ cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
         'syn_light_3_party_def_mdef':      { cond: d => d.countElement('light') >= 3,             apply: () => {} },
         'syn_nature_3_party_def_mdef':     { cond: d => d.countElement('nature') >= 3,            apply: () => {} },
-        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } }
+        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_rabbit_valentine_snow':       { cond: d => d.hasAnyCard(['night_rabbit','silver_rabbit']), apply: () => {} },
+        'syn_rabbit_valentine_night':      { cond: d => d.hasAnyCard(['snow_rabbit','silver_rabbit']),  apply: () => {} },
+        'syn_rabbit_valentine_silver':     { cond: d => d.hasAnyCard(['snow_rabbit','night_rabbit']),   apply: () => {} },
+        'christmas_rabbit_snow':           { cond: d => d.hasAnyCard(['night_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_night':          { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_silver':         { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['night_rabbit']), apply: () => {} },
+        'syn_rabbit_valentine_snow':       { cond: d => d.hasAnyCard(['night_rabbit','silver_rabbit']), apply: () => {} },
+        'syn_rabbit_valentine_night':      { cond: d => d.hasAnyCard(['snow_rabbit','silver_rabbit']),  apply: () => {} },
+        'syn_rabbit_valentine_silver':     { cond: d => d.hasAnyCard(['snow_rabbit','night_rabbit']),   apply: () => {} },
+        'christmas_rabbit_snow':           { cond: d => d.hasAnyCard(['night_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_night':          { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['silver_rabbit']), apply: () => {} },
+        'christmas_rabbit_silver':         { cond: d => d.hasAnyCard(['snow_rabbit']) && d.hasAnyCard(['night_rabbit']), apply: () => {} }
     },
 
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
@@ -2278,6 +2302,28 @@ const Logic = {
             }
         }
 
+        // 크리스마스 눈토끼: 밤토끼 AND 은토끼 동시 존재 → 올스탯 50%
+        if (t.type === 'christmas_rabbit_snow') {
+            if (deckCtx.hasCard('night_rabbit') && deckCtx.hasCard('silver_rabbit')) {
+                active = true;
+                p.atk = Math.floor(p.atk * 1.5);
+                p.matk = Math.floor(p.matk * 1.5);
+                p.def = Math.floor(p.def * 1.5);
+                p.mdef = Math.floor(p.mdef * 1.5);
+            }
+        }
+
+        // 크리스마스 눈토끼: 밤토끼 AND 은토끼 동시 존재 → 올스탯 50%
+        if (t.type === 'christmas_rabbit_snow') {
+            if (deckCtx.hasCard('night_rabbit') && deckCtx.hasCard('silver_rabbit')) {
+                active = true;
+                p.atk = Math.floor(p.atk * 1.5);
+                p.matk = Math.floor(p.matk * 1.5);
+                p.def = Math.floor(p.def * 1.5);
+                p.mdef = Math.floor(p.mdef * 1.5);
+            }
+        }
+
         // 언더독: 덱에 일반등급 3장 이상 + 대장 배치 시 공격/마공 증가
         if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
             const gradeCount = deckCtx.cards.filter(c => c && c.grade === (t.gradeRequired || 'normal')).length;
@@ -2343,6 +2389,48 @@ const Logic = {
                 partyBoost.def -= (tr.defDown || 50);
                 partyBoost.mdef -= (tr.defDown || 50);
             }
+            else if (tr && tr.type === 'christmas_rabbit_night') {
+                if (deckCtx.hasCard('snow_rabbit') && deckCtx.hasCard('silver_rabbit')) {
+                    partyBoost.crit += 20;
+                }
+            }
+        });
+
+        // 할로윈 토끼 peer buff 수집
+        const peerBoosts = {}; // { [playerIdx]: { atk, matk, def, mdef } }
+        activeCards.forEach((c, cardIdx) => {
+            const tr = c.trait;
+            if (!tr) return;
+            if (cardIdx !== 0) return; // 선봉만
+
+            if (tr.type === 'halloween_boost_snow') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['night_rabbit', 'silver_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].matk += 50;
+                        peerBoosts[ti].mdef += 50;
+                    }
+                });
+            } else if (tr.type === 'halloween_boost_night') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['snow_rabbit', 'silver_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].atk += 50;
+                        peerBoosts[ti].def += 50;
+                    }
+                });
+            } else if (tr.type === 'halloween_boost_silver') {
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx) return;
+                    if (GameUtils.cardMatchesAnyId(tc, ['snow_rabbit', 'night_rabbit'])) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        peerBoosts[ti].atk += 50;
+                        peerBoosts[ti].matk += 50;
+                    }
+                });
+            }
         });
 
         if (partyBoost.atk) p.atk = Math.floor(p.atk * (1 + partyBoost.atk / 100));
@@ -2350,6 +2438,14 @@ const Logic = {
         if (partyBoost.def) p.def = Math.floor(p.def * (1 + partyBoost.def / 100));
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
         if (partyBoost.crit) p.baseCrit += partyBoost.crit;
+
+        const myPeerBoost = peerBoosts[idx];
+        if (myPeerBoost) {
+            if (myPeerBoost.atk) p.atk = Math.floor(p.atk * (1 + myPeerBoost.atk / 100));
+            if (myPeerBoost.matk) p.matk = Math.floor(p.matk * (1 + myPeerBoost.matk / 100));
+            if (myPeerBoost.def) p.def = Math.floor(p.def * (1 + myPeerBoost.def / 100));
+            if (myPeerBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + myPeerBoost.mdef / 100));
+        }
 
         // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
         const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder'];

@@ -1093,7 +1093,31 @@ const SPECIAL_CARD_VARIANTS = [
     { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
     { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
     { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
-    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' }
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
+    { id: 'snow_rabbit_valentine', name: '눈토끼(발렌타인)', baseCardId: 'snow_rabbit', specialSeason: 'valentine' },
+    { id: 'night_rabbit_valentine', name: '밤토끼(발렌타인)', baseCardId: 'night_rabbit', specialSeason: 'valentine' },
+    { id: 'silver_rabbit_valentine', name: '은토끼(발렌타인)', baseCardId: 'silver_rabbit', specialSeason: 'valentine' },
+    { id: 'snow_rabbit_halloween', name: '눈토끼(할로윈)', baseCardId: 'snow_rabbit', specialSeason: 'halloween' },
+    { id: 'night_rabbit_halloween', name: '밤토끼(할로윈)', baseCardId: 'night_rabbit', specialSeason: 'halloween' },
+    { id: 'silver_rabbit_halloween', name: '은토끼(할로윈)', baseCardId: 'silver_rabbit', specialSeason: 'halloween' },
+    { id: 'snow_rabbit_swimsuit', name: '눈토끼(수영복)', baseCardId: 'snow_rabbit', specialSeason: 'beach' },
+    { id: 'night_rabbit_swimsuit', name: '밤토끼(수영복)', baseCardId: 'night_rabbit', specialSeason: 'beach' },
+    { id: 'silver_rabbit_swimsuit', name: '은토끼(수영복)', baseCardId: 'silver_rabbit', specialSeason: 'beach' },
+    { id: 'snow_rabbit_christmas', name: '눈토끼(크리스마스)', baseCardId: 'snow_rabbit', specialSeason: 'christmas' },
+    { id: 'night_rabbit_christmas', name: '밤토끼(크리스마스)', baseCardId: 'night_rabbit', specialSeason: 'christmas' },
+    { id: 'silver_rabbit_christmas', name: '은토끼(크리스마스)', baseCardId: 'silver_rabbit', specialSeason: 'christmas' },
+    { id: 'snow_rabbit_valentine', name: '눈토끼(발렌타인)', baseCardId: 'snow_rabbit', specialSeason: 'valentine' },
+    { id: 'night_rabbit_valentine', name: '밤토끼(발렌타인)', baseCardId: 'night_rabbit', specialSeason: 'valentine' },
+    { id: 'silver_rabbit_valentine', name: '은토끼(발렌타인)', baseCardId: 'silver_rabbit', specialSeason: 'valentine' },
+    { id: 'snow_rabbit_halloween', name: '눈토끼(할로윈)', baseCardId: 'snow_rabbit', specialSeason: 'halloween' },
+    { id: 'night_rabbit_halloween', name: '밤토끼(할로윈)', baseCardId: 'night_rabbit', specialSeason: 'halloween' },
+    { id: 'silver_rabbit_halloween', name: '은토끼(할로윈)', baseCardId: 'silver_rabbit', specialSeason: 'halloween' },
+    { id: 'snow_rabbit_swimsuit', name: '눈토끼(수영복)', baseCardId: 'snow_rabbit', specialSeason: 'beach' },
+    { id: 'night_rabbit_swimsuit', name: '밤토끼(수영복)', baseCardId: 'night_rabbit', specialSeason: 'beach' },
+    { id: 'silver_rabbit_swimsuit', name: '은토끼(수영복)', baseCardId: 'silver_rabbit', specialSeason: 'beach' },
+    { id: 'snow_rabbit_christmas', name: '눈토끼(크리스마스)', baseCardId: 'snow_rabbit', specialSeason: 'christmas' },
+    { id: 'night_rabbit_christmas', name: '밤토끼(크리스마스)', baseCardId: 'night_rabbit', specialSeason: 'christmas' },
+    { id: 'silver_rabbit_christmas', name: '은토끼(크리스마스)', baseCardId: 'silver_rabbit', specialSeason: 'christmas' }
 ];
 
 function cloneData(value) {
@@ -1274,6 +1298,180 @@ const SPECIAL_CARD_OVERRIDES = {
                     { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.5 }
                 ]
             }
+        ]
+    }),
+    'snow_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_snow', desc: '밤토끼 혹은 은토끼가 덱에 있을 경우 소다키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '소다키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_night', desc: '눈토끼 혹은 은토끼가 덱에 있을 경우 딥키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '딥키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '문라이트스트라이크')
+        ]
+    }),
+    'silver_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_silver', desc: '눈토끼 혹은 밤토끼가 덱에 있을 경우 화이트키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '화이트키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '크리스탈샤워')
+        ]
+    }),
+    'snow_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_snow', desc: '선봉시 덱의 밤토끼/은토끼 마공·마방 50% 증가' }
+    }),
+    'night_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_night', desc: '선봉시 덱의 눈토끼/은토끼 물공·물방 50% 증가' }
+    }),
+    'silver_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_silver', desc: '선봉시 덱의 눈토끼/밤토끼 물공·마공 50% 증가' }
+    }),
+    'snow_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '콜드스플래시', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion', duration: 1 }] },
+            { name: '서머판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'night_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '미드나잇다이빙', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness', duration: 1 }] },
+            { name: '루나세레나데', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'silver_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '실버서핑', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence', duration: 1 }] },
+            { name: '선샤인로맨스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'snow_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_snow', desc: '밤토끼와 은토끼가 덱에 있으면 물공/물방/마공/마방 50%↑' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'christmas_rabbit_snow', mult: 2.0 }] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_night', desc: '눈토끼와 은토끼가 덱에 있으면 덱 전체 치명타 20%↑' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라바이올렛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 약화·침묵·저주 부여', effects: [{ type: 'conditional_debuff_on_synergy', trait: 'christmas_rabbit_night', debuffs: ['weak', 'silence', 'curse'] }] },
+            cloneSkillByName(card, '문라이트스트라이크')
+        ]
+    }),
+    'silver_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_silver', desc: '눈토끼와 밤토끼가 덱에 있으면 울트라기프트 시 성역+달의축복' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라기프트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
+            cloneSkillByName(card, '크리스탈샤워')
+        ]
+    }),
+    'snow_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_snow', desc: '밤토끼 혹은 은토끼가 덱에 있을 경우 소다키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '소다키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_night', desc: '눈토끼 혹은 은토끼가 덱에 있을 경우 딥키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '딥키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '문라이트스트라이크')
+        ]
+    }),
+    'silver_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_silver', desc: '눈토끼 혹은 밤토끼가 덱에 있을 경우 화이트키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '화이트키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '크리스탈샤워')
+        ]
+    }),
+    'snow_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_snow', desc: '선봉시 덱의 밤토끼/은토끼 마공·마방 50% 증가' }
+    }),
+    'night_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_night', desc: '선봉시 덱의 눈토끼/은토끼 물공·물방 50% 증가' }
+    }),
+    'silver_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_boost_silver', desc: '선봉시 덱의 눈토끼/밤토끼 물공·마공 50% 증가' }
+    }),
+    'snow_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '콜드스플래시', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion', duration: 1 }] },
+            { name: '서머판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'night_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '미드나잇다이빙', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness', duration: 1 }] },
+            { name: '루나세레나데', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'silver_rabbit_swimsuit': card => ({
+        ...card,
+        skills: [
+            { name: '실버서핑', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence', duration: 1 }] },
+            { name: '선샤인로맨스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'charm', duration: 1 }] }
+        ]
+    }),
+    'snow_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_snow', desc: '밤토끼와 은토끼가 덱에 있으면 물공/물방/마공/마방 50%↑' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'christmas_rabbit_snow', mult: 2.0 }] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_night', desc: '눈토끼와 은토끼가 덱에 있으면 덱 전체 치명타 20%↑' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라바이올렛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 약화·침묵·저주 부여', effects: [{ type: 'conditional_debuff_on_synergy', trait: 'christmas_rabbit_night', debuffs: ['weak', 'silence', 'curse'] }] },
+            cloneSkillByName(card, '문라이트스트라이크')
+        ]
+    }),
+    'silver_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_silver', desc: '눈토끼와 밤토끼가 덱에 있으면 울트라기프트 시 성역+달의축복' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라기프트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
+            cloneSkillByName(card, '크리스탈샤워')
         ]
     })
 };
