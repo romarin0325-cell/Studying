@@ -2193,7 +2193,7 @@ const Logic = {
         'syn_rabbit_valentine_night':  { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),  apply: () => {} },
         'syn_rabbit_valentine_silver': { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),   apply: () => {} },
         // 토끼 크리스마스 은토끼 시너지 (울트라기프트 추가 필드버프 트리거용)
-        'christmas_rabbit_trio_gift':  { cond: d => d.hasCard('snow_rabbit') && d.hasCard('night_rabbit'), apply: () => {} }
+        'syn_christmas_rabbit_trio_gift':  { cond: d => d.hasCard('snow_rabbit') && d.hasCard('night_rabbit'), apply: () => {} }
     },
 
     calculateInitialStats: function (playerProto, deck, allCards, idx) {

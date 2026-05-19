@@ -1379,7 +1379,7 @@ const SPECIAL_CARD_OVERRIDES = {
     }),
     'silver_rabbit_christmas': card => ({
         ...card,
-        trait: { type: 'christmas_rabbit_trio_gift', requiredPeers: ['snow_rabbit', 'night_rabbit'], desc: '눈토끼와 밤토끼가 모두 덱에 있으면 울트라기프트 사용시 성역+달의축복 추가 발동' },
+        trait: { type: 'syn_christmas_rabbit_trio_gift', requiredPeers: ['snow_rabbit', 'night_rabbit'], desc: '눈토끼와 밤토끼가 모두 덱에 있으면 울트라기프트 사용시 성역+달의축복 추가 발동' },
         skills: [
             cloneSkillByName(card, '배리어'),
             { name: '울트라기프트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
