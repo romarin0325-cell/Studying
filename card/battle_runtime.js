@@ -925,7 +925,7 @@ const BattleRuntime = {
         }
 
         // 크리스마스 은토끼: 특성 발동시 울트라기프트에 성역+달의축복 추가
-        if (rpg.battle.activeTraits.includes('christmas_rabbit_trio_gift') && skill.name === '울트라기프트') {
+        if (rpg.battle.activeTraits.includes('syn_christmas_rabbit_trio_gift') && skill.name === '울트라기프트') {
             rpg.log('[특성] 은토끼(크리스마스): 성역과 달의축복 추가 발동!');
             BattleRuntime.applyFieldBuff(rpg, 'sanctuary');
             BattleRuntime.applyFieldBuff(rpg, 'moon_bless');
