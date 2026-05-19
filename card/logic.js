@@ -2351,7 +2351,11 @@ const Logic = {
         // Party-wide Stat Boost Traits (Event)
         const peerBoosts = {}; // { [playerIdx]: { atk, matk, def, mdef } }
         const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0, crit: 0 };
-        activeCards.forEach((c, cardIdx) => {
+
+        const fullDeckCards = (deck || []).map(id => id ? GameUtils.getCardById(id, allCards) : null);
+
+        fullDeckCards.forEach((c, originalIdx) => {
+            if (!c) return;
             const tr = c.trait;
             if (tr && tr.type === 'party_stat_boost') {
                 const stats = Array.isArray(tr.stat) ? tr.stat : [tr.stat];
@@ -2373,11 +2377,11 @@ const Logic = {
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
             }
-            else if (tr && tr.type === 'mid_party_mdef_boost' && cardIdx === 1) {
+            else if (tr && tr.type === 'mid_party_mdef_boost' && originalIdx === 1) {
                 partyBoost.mdef += (tr.val || 0);
             }
             // 스컬드래곤: 대장 배치 시 덱 전체 방어/마방 감소
-            else if (tr && tr.type === 'leader_self_atk_party_def_down' && cardIdx === 2) {
+            else if (tr && tr.type === 'leader_self_atk_party_def_down' && originalIdx === 2) {
                 partyBoost.def -= (tr.defDown || 50);
                 partyBoost.mdef -= (tr.defDown || 50);
             }
@@ -2388,12 +2392,12 @@ const Logic = {
                 }
             }
             // 할로윈 토끼: 선봉(idx 0)일 때 특정 페어 토끼 스탯 증가
-            else if (tr && tr.type === 'halloween_rabbit_peer_boost' && cardIdx === 0) {
+            else if (tr && tr.type === 'halloween_rabbit_peer_boost' && originalIdx === 0) {
                 const peerIds = tr.peerIds || [];
                 const boostStats = Array.isArray(tr.stat) ? tr.stat : [tr.stat];
                 const boostVal = tr.val || 0;
-                activeCards.forEach((tc, ti) => {
-                    if (ti === cardIdx || !tc) return;
+                fullDeckCards.forEach((tc, ti) => {
+                    if (ti === originalIdx || !tc) return;
                     if (GameUtils.cardMatchesAnyId(tc, peerIds)) {
                         if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
                         boostStats.forEach(s => { if (peerBoosts[ti][s] !== undefined) peerBoosts[ti][s] += boostVal; });
@@ -2420,7 +2424,7 @@ const Logic = {
         // 할로윈 토끼 특성 활성화 표시 (선봉이고 페어가 존재할 때)
         if (t.type === 'halloween_rabbit_peer_boost' && idx === 0) {
             const peerIds = t.peerIds || [];
-            if (activeCards.some((c, ci) => ci !== 0 && GameUtils.cardMatchesAnyId(c, peerIds))) {
+            if (fullDeckCards.some((c, ci) => ci !== 0 && c && GameUtils.cardMatchesAnyId(c, peerIds))) {
                 active = true;
             }
         }
