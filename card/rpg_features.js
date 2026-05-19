@@ -14,7 +14,10 @@
         { baseId: 'jasmine', label: '자스민' },
         { baseId: 'rumi', label: '루미' },
         { baseId: 'luna', label: '루나' },
-        { baseId: 'zeke', label: '지크' }
+        { baseId: 'zeke', label: '지크' },
+        { baseId: 'snow_rabbit', label: '눈토끼' },
+        { baseId: 'night_rabbit', label: '밤토끼' },
+        { baseId: 'silver_rabbit', label: '은토끼' }
     ];
 
     const SPECIAL_MISSION_SEASONS = {
@@ -23,28 +26,32 @@
             title: '스페셜미션(발렌타인)',
             bossId: 'flora_valentine',
             bossName: '플로라(발렌타인)',
-            rewardCardIds: ['luna_valentine', 'jasmine_valentine', 'rumi_valentine']
+            rewardCardIds: ['luna_valentine', 'jasmine_valentine', 'rumi_valentine',
+                            'snow_rabbit_valentine', 'night_rabbit_valentine', 'silver_rabbit_valentine']
         },
         beach: {
             id: 'beach',
             title: '스페셜미션(해변)',
             bossId: 'thor_swimsuit',
             bossName: '토르(수영복)',
-            rewardCardIds: ['jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit']
+            rewardCardIds: ['jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit',
+                            'snow_rabbit_swimsuit', 'night_rabbit_swimsuit', 'silver_rabbit_swimsuit']
         },
         halloween: {
             id: 'halloween',
             title: '스페셜미션(할로윈)',
             bossId: 'ares_halloween',
             bossName: '아레스(할로윈)',
-            rewardCardIds: ['luna_halloween', 'zeke_halloween', 'rumi_halloween']
+            rewardCardIds: ['luna_halloween', 'zeke_halloween', 'rumi_halloween',
+                            'snow_rabbit_halloween', 'night_rabbit_halloween', 'silver_rabbit_halloween']
         },
         christmas: {
             id: 'christmas',
             title: '스페셜미션(크리스마스)',
             bossId: 'astea_christmas',
             bossName: '아스테아(크리스마스)',
-            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas']
+            rewardCardIds: ['luna_christmas', 'jasmine_christmas', 'rumi_christmas',
+                            'snow_rabbit_christmas', 'night_rabbit_christmas', 'silver_rabbit_christmas']
         }
     };
 
@@ -301,9 +308,21 @@
         const season = SPECIAL_MISSION_SEASONS[seasonId];
         if (!season) return [];
 
+        // 토끼 변주는 2027-01-01 이후에만 보상 풀에 포함
+        const RABBIT_RELEASE_DATE = '2027-01-01';
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const rabbitVariantIds = new Set([
+            'snow_rabbit_valentine', 'night_rabbit_valentine', 'silver_rabbit_valentine',
+            'snow_rabbit_halloween', 'night_rabbit_halloween', 'silver_rabbit_halloween',
+            'snow_rabbit_swimsuit', 'night_rabbit_swimsuit', 'silver_rabbit_swimsuit',
+            'snow_rabbit_christmas', 'night_rabbit_christmas', 'silver_rabbit_christmas'
+        ]);
+
         const unlocked = new Set(this.global.unlocked_special_cards || []);
         return season.rewardCardIds
             .filter(id => !unlocked.has(id))
+            .filter(id => !rabbitVariantIds.has(id) || todayStr >= RABBIT_RELEASE_DATE)
             .map(id => this.getCardData(id))
             .filter(Boolean);
     },

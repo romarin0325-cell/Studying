@@ -1600,6 +1600,13 @@ const SideEffects = {
             ctx.applyFieldBuff(pick);
             ctx.logFn(`코스믹 하모니: [${getBuffName(pick)}] 생성!`);
         },
+        'conditional_debuff_on_synergy': (ctx, eff) => {
+            if (!ctx.activeTraits || !ctx.activeTraits.includes(eff.trait)) return;
+            (eff.debuffs || []).forEach(id => {
+                ctx.target.buffs[id] = 1;
+                ctx.logFn(`[특성] ${getBuffName(id)} 부여!`);
+            });
+        },
         'dream_form_execute': (ctx, eff) => {
             if (ctx.battle.fieldBuffs.length > 0) {
                 let logMsg = [];
@@ -2180,7 +2187,13 @@ const Logic = {
         'syn_water_light_midnight_twinkle':{ cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
         'syn_light_3_party_def_mdef':      { cond: d => d.countElement('light') >= 3,             apply: () => {} },
         'syn_nature_3_party_def_mdef':     { cond: d => d.countElement('nature') >= 3,            apply: () => {} },
-        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } }
+        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } },
+        // 토끼 발렌타인 시너지 (발동 시 효과 없음, activeTraits 등록용)
+        'syn_rabbit_valentine_snow':   { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']), apply: () => {} },
+        'syn_rabbit_valentine_night':  { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),  apply: () => {} },
+        'syn_rabbit_valentine_silver': { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),   apply: () => {} },
+        // 토끼 크리스마스 은토끼 시너지 (울트라기프트 추가 필드버프 트리거용)
+        'christmas_rabbit_trio_gift':  { cond: d => d.hasCard('snow_rabbit') && d.hasCard('night_rabbit'), apply: () => {} }
     },
 
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
@@ -2311,7 +2324,32 @@ const Logic = {
             }
         }
 
+        // 크리스마스 토끼 3장 조합 시너지
+        if (t.type === 'christmas_rabbit_trio' && t.requiredPeers) {
+            if (t.requiredPeers.every(id => deckCtx.hasCard(id))) {
+                active = true;
+                const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
+                const boost = 1 + (t.val || 0) / 100;
+                stats.forEach(s => {
+                    if (s === 'atk') p.atk *= boost;
+                    if (s === 'matk') p.matk *= boost;
+                    if (s === 'def') p.def *= boost;
+                    if (s === 'mdef') p.mdef *= boost;
+                });
+                p.atk = Math.floor(p.atk); p.matk = Math.floor(p.matk);
+                p.def = Math.floor(p.def); p.mdef = Math.floor(p.mdef);
+            }
+        }
+
+        // 크리스마스 밤토끼: 3장 조합시 파티 전체 치명타 증가
+        if (t.type === 'christmas_rabbit_trio_crit' && t.requiredPeers) {
+            if (t.requiredPeers.every(id => deckCtx.hasCard(id))) {
+                active = true;
+            }
+        }
+
         // Party-wide Stat Boost Traits (Event)
+        const peerBoosts = {}; // { [playerIdx]: { atk, matk, def, mdef } }
         const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0, crit: 0 };
         activeCards.forEach((c, cardIdx) => {
             const tr = c.trait;
@@ -2343,6 +2381,25 @@ const Logic = {
                 partyBoost.def -= (tr.defDown || 50);
                 partyBoost.mdef -= (tr.defDown || 50);
             }
+            // 크리스마스 밤토끼: 3장 조합시 파티 전체 치명타 증가
+            else if (tr && tr.type === 'christmas_rabbit_trio_crit' && tr.requiredPeers) {
+                if (tr.requiredPeers.every(id => deckCtx.hasCard(id))) {
+                    partyBoost.crit += (tr.val || 0);
+                }
+            }
+            // 할로윈 토끼: 선봉(idx 0)일 때 특정 페어 토끼 스탯 증가
+            else if (tr && tr.type === 'halloween_rabbit_peer_boost' && cardIdx === 0) {
+                const peerIds = tr.peerIds || [];
+                const boostStats = Array.isArray(tr.stat) ? tr.stat : [tr.stat];
+                const boostVal = tr.val || 0;
+                activeCards.forEach((tc, ti) => {
+                    if (ti === cardIdx || !tc) return;
+                    if (GameUtils.cardMatchesAnyId(tc, peerIds)) {
+                        if (!peerBoosts[ti]) peerBoosts[ti] = { atk: 0, matk: 0, def: 0, mdef: 0 };
+                        boostStats.forEach(s => { if (peerBoosts[ti][s] !== undefined) peerBoosts[ti][s] += boostVal; });
+                    }
+                });
+            }
         });
 
         if (partyBoost.atk) p.atk = Math.floor(p.atk * (1 + partyBoost.atk / 100));
@@ -2350,6 +2407,23 @@ const Logic = {
         if (partyBoost.def) p.def = Math.floor(p.def * (1 + partyBoost.def / 100));
         if (partyBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + partyBoost.mdef / 100));
         if (partyBoost.crit) p.baseCrit += partyBoost.crit;
+
+        // 할로윈 토끼 peer boost 적용
+        const myPeerBoost = peerBoosts[idx];
+        if (myPeerBoost) {
+            if (myPeerBoost.atk) p.atk = Math.floor(p.atk * (1 + myPeerBoost.atk / 100));
+            if (myPeerBoost.matk) p.matk = Math.floor(p.matk * (1 + myPeerBoost.matk / 100));
+            if (myPeerBoost.def) p.def = Math.floor(p.def * (1 + myPeerBoost.def / 100));
+            if (myPeerBoost.mdef) p.mdef = Math.floor(p.mdef * (1 + myPeerBoost.mdef / 100));
+        }
+
+        // 할로윈 토끼 특성 활성화 표시 (선봉이고 페어가 존재할 때)
+        if (t.type === 'halloween_rabbit_peer_boost' && idx === 0) {
+            const peerIds = t.peerIds || [];
+            if (activeCards.some((c, ci) => ci !== 0 && GameUtils.cardMatchesAnyId(c, peerIds))) {
+                active = true;
+            }
+        }
 
         // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
         const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder'];

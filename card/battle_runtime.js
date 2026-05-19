@@ -909,6 +909,27 @@ const BattleRuntime = {
             rpg.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
         }
+
+        // 토끼 발렌타인 시너지: 스킬 사용시 발렌타인 필드버프 발동
+        if (rpg.battle.activeTraits.includes('syn_rabbit_valentine_snow') && skill.name === '소다키스') {
+            rpg.log('[특성] 눈토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+        if (rpg.battle.activeTraits.includes('syn_rabbit_valentine_night') && skill.name === '딥키스') {
+            rpg.log('[특성] 밤토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+        if (rpg.battle.activeTraits.includes('syn_rabbit_valentine_silver') && skill.name === '화이트키스') {
+            rpg.log('[특성] 은토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+
+        // 크리스마스 은토끼: 특성 발동시 울트라기프트에 성역+달의축복 추가
+        if (rpg.battle.activeTraits.includes('christmas_rabbit_trio_gift') && skill.name === '울트라기프트') {
+            rpg.log('[특성] 은토끼(크리스마스): 성역과 달의축복 추가 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'sanctuary');
+            BattleRuntime.applyFieldBuff(rpg, 'moon_bless');
+        }
     },
 
     expireFieldBuffs(rpg, turn) {
