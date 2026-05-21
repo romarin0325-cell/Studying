@@ -1466,6 +1466,9 @@
 
 
     winBattle() {
+        if (this.battle && this.battle.isFinished) return;
+        if (this.battle) this.battle.isFinished = true;
+
         let transMsg = this.cleanupTranscendenceCards();
         let deadMsg = this.handlePermadeath(this.battle.players);
         if (transMsg) deadMsg += transMsg;
@@ -1674,6 +1677,9 @@
 
 
     loseBattle() {
+        if (this.battle && this.battle.isFinished) return;
+        if (this.battle) this.battle.isFinished = true;
+
         let transMsg = this.cleanupTranscendenceCards();
         // No saveRecord here (User request: only on New Game)
 
