@@ -238,6 +238,7 @@ const BattleRuntime = {
         rpg.battle.turn = 1;
         rpg.battle.currentPlayerIdx = 0;
         rpg.battle.isNewTurn = true;
+        rpg.battle.isFinished = false;
 
         while (
             rpg.battle.currentPlayerIdx < GAME_CONSTANTS.DECK_SIZE &&
@@ -666,6 +667,9 @@ const BattleRuntime = {
     },
 
     executeSkill(rpg, source, target, skill, isDelayed = false) {
+        if (rpg.battle && rpg.battle.isFinished) return;
+        if (!target || target.hp <= 0 || !source || source.isDead) return;
+
         if (!isDelayed && !skill.isDelayed) {
             if (rpg.hasArtifact('blue_moon') && Math.random() < 0.3) {
                 rpg.log('[아티팩트] 블루문: 마나 소비 없이 스킬 사용!');
