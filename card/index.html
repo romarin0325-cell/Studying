@@ -5100,7 +5100,7 @@
                 const contentBox = document.getElementById('date-content');
                 if (!contentBox || !dateParams) return;
 
-                const isFallback = modelId === 'gemini-3.1-flash-lite-preview';
+                const isFallback = modelId === 'gemini-3.1-flash-lite';
                 const modelNote = isFallback
                     ? `<br><span style="font-size:0.8rem; color:#81d4fa;">${LumiQuestionRuntime.getModelLabel(modelId)} 모델로 다시 시도 중...</span>`
                     : '';
@@ -5126,7 +5126,7 @@
                 const contentBox = document.getElementById('date-content');
                 if (!contentBox || !dateParams) return false;
 
-                const isFallback = modelId === 'gemini-3.1-flash-lite-preview';
+                const isFallback = modelId === 'gemini-3.1-flash-lite';
                 this.isApiLoading = true;
                 this.updateDateRetryButton({ visible: isFallback, disabled: true });
                 this.setDateLoadingState(dateParams, modelId);
@@ -5190,7 +5190,7 @@
                 const key = this.ensureApiKey('데이트를 다시 시도하려면');
                 if (!key) return this.showAlert("API 키가 없어 데이트를 다시 시도할 수 없습니다.");
 
-                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite-preview');
+                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite');
             },
 
             finishDate() {

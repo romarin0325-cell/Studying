@@ -69,7 +69,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 const LUMI_MODEL_OPTIONS = Object.freeze([
     { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
     { id: 'gemini-3-flash-preview', label: 'Flash', flashLike: true, allowSearch: true },
-    { id: 'gemini-3.1-flash-lite-preview', label: 'Lite', flashLike: true, allowSearch: false }
+    { id: 'gemini-3.1-flash-lite', label: 'Lite', flashLike: true, allowSearch: false }
 ]);
 
 function getLumiModelConfig(modelId) {
@@ -312,7 +312,7 @@ function buildThinkingConfig(modelConfig, thinkingLevel = 'high') {
     }
 
     return {
-        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.id === 'gemini-3.1-flash-lite-preview' && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
+        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.id === 'gemini-3.1-flash-lite' && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
     };
 }
 
@@ -933,7 +933,7 @@ const LumiQuestionRuntime = {
                     ? getLumiOrbSystemInstruction(this.searchEnabled)
                     : session.systemInstruction,
                 enableSearch: this.searchEnabled && session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
-                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite-preview' ? 'medium' : session.thinkingLevel,
+                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite' ? 'medium' : session.thinkingLevel,
                 model: modelConfig.id,
                 signal: controller.signal,
                 timeoutMs: 120000
@@ -984,7 +984,7 @@ window.LumiQuestionRuntime = LumiQuestionRuntime;
 // --- Date System ---
 
 const DATE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
-const DATE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite-preview';
+const DATE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite';
 
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
