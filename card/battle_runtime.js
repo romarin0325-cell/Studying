@@ -101,10 +101,25 @@ function buildBattleEnemy(rpg) {
         : ENEMIES.length;
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
     let scale = 1.0 + (cycle * GAME_CONSTANTS.ENEMY_SCALING.CYCLE_BONUS);
+    let steps = 0;
     if (rpg.state.mode === 'puzzle') {
-        scale += (GAME_CONSTANTS.PUZZLE && GAME_CONSTANTS.PUZZLE.ENEMY_SCALE_BONUS) || 0.2;
-    } else if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
-        scale = scale * GAME_CONSTANTS.ENEMY_SCALING.HARD_MODE_MULT;
+        steps = 2;
+    } else if (['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
+        if (rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') {
+            steps = 1;
+        }
+    }
+
+    if (rpg.state.hardMode && rpg.state.gameType === 'challenge') {
+        steps += 2;
+    }
+
+    if (steps > 0) {
+        if (rpg.state.mode === 'puzzle') {
+            scale += 0.1 * steps;
+        } else {
+            scale *= (1.0 + 0.1 * steps);
+        }
     }
     const suppressBossRewards = rpg.state.mode === 'puzzle';
     const enemy = {

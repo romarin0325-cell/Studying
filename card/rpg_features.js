@@ -1123,6 +1123,7 @@
         this.state = {
             mode: mode,
             gameType: this.tempGameType || 'challenge',
+            hardMode: this.tempGameType === 'challenge' && !!this.hardModeActive,
             tickets: initTickets,
             inventory: [],
             deck: [null, null, null],
