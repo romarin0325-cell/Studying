@@ -1857,4 +1857,166 @@ manager 앞에는 소유격('s)이 없지만, 이렇게 직책 명사와 결재 
 
 형아! 회사 필수 콜로케이션인 security desk, advance notice, manager approval! 이거 세 조각만 머릿속에 콱 박아두면 이런 복합명사 문제는 1초 만에 웃으면서 넘길 수 있어.
 근데 마리야... 아무리 단어들이 끈끈하게 붙어 다니는 콜로케이션이라 해도, 나랑 형아가 손 꽉 잡고 있는 콤보 마법보다 더 완벽하게 어울릴 순 없을걸? 대현자가 내 이름 걸고 꽉 보증할게! (새끼손가락 척) 길고 긴 토익 마법 두루마리 부수느라 진짜 수고 많았어, 형아 최고! (헤헤)`
+,
+    51: `[미션 1] 비즈니스 플랜만의 특별한 마법! (세부사항 찾기)
+Question 51-1: According to the Web page, which feature is included in the Business plan?
+정답: CSV and PDF export
+첫 번째 주문은 아주 가벼운 웜업이야. 문제에서 Business plan이라는 타겟을 딱 집어줬지? 그럼 첫 번째 지문인 웹페이지로 날아가서 요금제 표를 스캔하는 거야.
+Standard 플랜에는 '100GB 저장공간, 공유 보드, 마감일 알림'이 있는데, Business 플랜을 보면 'Standard 기능 전부 다 + 권한 제어, 활동 기록, CSV 및 PDF 내보내기(CSV and PDF export), 1TB 저장공간'이 들어있다고 적혀 있어! 보기 중에서 Business 칸에만 예쁘게 적혀 있는 녀석을 콕 고르면 끝! 참 쉽지? (헤헤)
+[미션 2] 가만히 있으면 언제 내 돈이 빠져나갈까? (날짜 찾기)
+Question 51-2: According to the renewal notice, when will Riverton Design Studio be charged if no changes are made?
+정답: August 31
+돈이 걸린 중요한 문제야! (진지) 두 번째 지문인 'Renewal Notice(갱신 공지)'를 보면 돼. 아래쪽 Scheduled Renewal Summary(예정된 갱신 요약) 항목에 단서 요정이 숨어 있어!
+"Payment method ending in 1142 will be charged on August 31." (1142로 끝나는 결제 수단으로 8월 31일에 청구될 것입니다.)
+아무것도 안 하고 가만히 놔두면 8월 31일에 마법처럼 돈이 결제된다는 뜻이야!
+💡 루미표 예문: "My heart is automatically charged to Hyung-a every single day."
+(내 마음은 매일매일 자동으로 형아한테 청구되고(향하고) 있어! 취소 버튼은 없어! (///))
+[미션 3] 마야는 왜 펜을 들었을까? (목적 파악 & 어휘 마법)
+Question 51-3: Why did Maya Torres write to Billing Support?
+정답: To ask about changing the seat count and billing cycle
+마야(Maya)가 쓴 세 번째 이메일 지문의 핵심을 묻는 질문이야. 이메일 첫 문단에서 마야가 "우리 팀에 두 명이 더 올 거라서, seat count(사용자 수)를 6에서 8로 늘리고 싶어"라고 했고, 두 번째 문단에서는 "월간 결제(monthly billing)로 바꾸는 게 바로 적용되는 건지" 물어봤잖아?
+이걸 묶어보면 '사용자 수(seat count)와 결제 주기(billing cycle) 변경'에 대해 물어보려고 편지를 쓴 거지!
+[루미의 영단어 꿀팁 🍯]
+형아, seat count가 직역하면 '좌석 수'지만, 소프트웨어나 구독 서비스에서는 **'이용 가능한 사용자(계정) 수'**를 뜻해! 마법 길드에 의자를 몇 개 놓을지 묻는 거랑 같아. 내 자리는 형아 바로 옆자리 맞지? (찰싹)
+[미션 4] 대현자의 수학 마법 시간! (연계 마법 1)
+Question 51-4: If Riverton renews with 8 Business annual licenses, what will the new annual renewal amount most likely be?
+정답: $960.00
+드디어 파트 7의 꽃, 지문 두 개를 겹쳐서 푸는 연계 마법이야! 계산이 들어가야 해서 조금 헷갈릴 수 있어. (안경 쓱)
+마야의 편지(이메일): 사용자(seat)를 8명(8 Business annual licenses)으로 늘리겠대!
+웹페이지 요금표: Business 플랜은 1명당 1년에 얼마? $120야.
+자, 이제 곱하기 마법! $120 × 8명 = $960 !
+형아, 토익에서 가끔 이렇게 초등학교 수준의 산수를 요구할 때가 있어. 당황하지 말고 요금표랑 인원수를 챡챡 곱해주면 완벽해!
+[미션 5] 무시무시한 영단어 몬스터의 등장! (동의어 찾기)
+Question 51-5: In the Web page, the word “prorated” is closest in meaning to
+정답: adjusted proportionally (비례에 따라 조정되는)
+형아, 이 단어 본 적 있어? Prorated(비례 할당된, 일할 계산된)! 이거 비즈니스 영어에서 진짜 엄청 엄청 자주 나오는 몬스터 단어니까 꼭 포획해야 해! (별표 쾅쾅)
+웹페이지의 Billing Notes를 보면, "중간에 추가된 사용자는 남은 달의 수에 따라 prorated(비례 계산) 됩니다."라고 적혀 있어. 1년짜리 플랜인데 중간에 6개월만 남은 시점에서 들어오면, 1년 치 돈을 다 내는 게 아니라 남은 기간만큼만 비율에 맞춰 깎아서(조정해서) 낸다는 뜻이야. 그러니까 **"adjusted proportionally (비율에 맞게 조정된)"**가 완벽한 정답!
+💡 루미표 예문: "My love for Hyung-a cannot be prorated! It is always 100% full!"
+(형아를 향한 내 마음은 중간에 들어왔다고 비례 삭감되거나 하지 않아! 처음부터 끝까지 무조건 100% 풀충전이라구! 내가 보증할게! (뿌듯))
+자, 강의는 여기까지! 파트 7 다중 지문은 이렇게 "누가, 어떤 요금제를, 몇 명분이나 쓰고 있는지" 꼼꼼하게 퍼즐 맞추듯 따라가면 절대 길을 잃지 않아. 모르는 단어가 나와도 문맥이라는 지도가 있으니까 겁먹지 마!`,
+    52: `형아, 잘 왔어! (와락) 이번에 우리가 탐험할 마법 요새는 바로 '도서관의 비밀 연구소(Digitization Lab)'야! 낡은 비디오테이프나 사진을 최신 마법(디지털 파일)으로 바꿔주는 신기한 곳이지. 지문이 세 개나 얽혀있지만, 나 대현자 루미가 형아의 완벽한 내비게이션이 되어줄 테니까 꽉 잡고 따라와! 출발! (빠밤)
+[미션 1] 도서관에서 새로 연 마법 연구소의 정체는? (주제 찾기)
+Question 52-1: What is the main purpose of the article?
+정답: To describe a new service available at Midtown Public Library (미드타운 도서관에서 이용 가능한 새로운 서비스를 설명하기 위해)
+첫 번째 신문 기사의 제목을 봐봐! "Midtown Library Opens Digitization Lab" (미드타운 도서관, 디지털화 연구소 개장!)이라고 아주 대문짝만하게 자랑하고 있지? 첫 문단에서도 이 연구소에서 낡은 사진이나 VHS 테이프를 디지털 파일로 바꿔주는 서비스가 생겼다고 친절하게 설명해주고 있어. 한마디로 "우리 도서관에 이런 새로운 서비스가 생겼어요~" 하고 동네방네 알리는 글이니까 정답은 두말할 것 없이 '새로운 서비스 설명'이야!
+[미션 2] 시간표 요정의 함정을 피해라! (세부사항 찾기)
+Question 52-2: According to the reservation confirmation, what time is Ana Gomez’s reserved session scheduled to begin?
+정답: 3:30 p.m.
+형아, 두 번째 지문인 '예약 확인서(Reservation Confirmation)'를 쓱 훑어봐. 여기서 얄미운 시간 요정이 함정을 파놨어!
+Check-in / Orientation: 3:15 p.m.
+Session Time: 3:30–5:00 p.m.
+질문에서 아주 날카롭게 "예약된 **세션(session)**이 언제 시작하냐"고 물어봤지? 준비 운동인 오리엔테이션 시간(3:15)에 홀딱 넘어가면 절대 안 돼! 진짜 본게임인 세션 시작은 **3:30 p.m.**이라는 거! (찌릿)
+[미션 3] 아나가 벤에게 보낸 퀘스트 스크롤! (이메일 목적)
+Question 52-3: Why did Ana Gomez write to Ben Park?
+정답: To ask him to provide materials needed for the appointment (예약에 필요한 자료를 제공해 달라고 요청하기 위해)
+세 번째 이메일 지문에서 아나가 벤에게 뭐라고 부탁했는지 볼까?
+"내 책상에 이름표 붙은 VHS 카세트테이프 좀 올려둬!" 그리고 "1TB 외장 하드 드라이브도 꼭 가져와 줘!"라고 했어.
+이게 다 뭐야? 도서관 연구소에 갈 때 꼭 챙겨가야 하는 필수 아이템들이잖아. 즉, 약속(appointment)에 필요한 **'준비물(materials needed)'**을 챙겨달라고 퀘스트를 내린 거야!
+[미션 4] 명탐정 루미의 추리 마법! (연계 추론)
+Question 52-4: What is suggested about Ana Gomez?
+정답: She has not attended the library’s monthly introduction class (그녀는 도서관의 월간 입문반에 참석하지 않았다)
+자, 집중해 형아! 파트 7의 하이라이트, 두루마리 두 개를 겹쳐서 숨겨진 암호를 푸는 연계 마법 시간이야! (안경 쓱)
+첫 번째 기사 지문: 비디오 변환소를 처음 쓰는 사람은 15분 전 오리엔테이션을 꼭 들어야 해. 단, 도서관의 '월간 입문반(monthly introduction class)'을 들은 사람은 면제! (waived)
+두 번째 예약 확인서: 아나(Ana)의 예약표를 보니... 앗! 3시 15분에 '오리엔테이션'이 떡하니 잡혀있네?!
+이 두 가지 단서를 퓨전하면? 아나는 도서관의 월간 입문반을 듣지 않았다는 완벽한 결론이 나와! 면제받지 못했으니까 얌전히 오리엔테이션을 들어야 하는 거지. 헤헤, 어때? 이 대현자의 완벽한 추리력! (뿌듯)
+[미션 5] 이름표를 붙여 내 마음에! (동의어 마법)
+Question 52-5: In the e-mail, the word “labeled” is closest in meaning to
+정답: marked (표시된)
+마지막은 어휘 마법! 이메일에서 아나가 "labeled VHS cassettes"라고 했지? 여기서 'labeled'는 라벨(이름표)이 붙어 있다는 뜻이야.
+이걸 완벽하게 대신할 수 있는 단어는 바로 어떤 표시나 꼬리표를 달았다는 뜻의 marked! 봉인된(sealed)이나 빌린(borrowed) 같은 엉뚱한 마법에 속으면 안 돼.
+💡 루미표 예문: "Rumi is a great wizard, and his heart is exclusively labeled with Hyung-a's name."
+(루미는 대마법사야, 그리고 그(루미)의 심장에는 오직 형아의 이름만 라벨로 딱! 붙어 있어(marked). 다른 사람은 절대 못 떼어내! 내가 보증할게! (///))`,
+    53: `형아, 어서 와! (와락) 이번엔 마법 길드의 채용 부서(인사팀)에서 보낸 편지를 들고 왔어! 지원자한테 "서류 좀 더 내주세요~" 하고 요청하는 편지네.(눈 반짝) 자, 지팡이 꽉 잡고 파트 6의 흐름을 타러 가보자!
+[미션 1] 원인과 결과의 마법 다리 놓기! (알맞은 접속사 찾기)
+Question 53-1: Applications are being reviewed on a rolling basis, (1) [ 빈칸 ] we recommend completing this step as soon as possible.
+정답: so (그래서)
+형아, 문맥의 흐름을 봐봐. 앞에서는 "지원서를 수시로(on a rolling basis) 검토하고 있어요"라고 말하고 있고, 뒤에서는 "최대한 빨리 서류를 내는 걸 추천해요"라고 하고 있어.
+먼저 온 사람부터 휙휙 뽑아가니까, "그래서(so)" 빨리 내라는 아주 자연스러운 인과관계가 성립되지? 빈칸에는 앞의 원인과 뒤의 결과를 부드럽게 이어주는 마법의 다리 'so'가 들어가야 해! unless(만약 ~하지 않으면)나 although(비록 ~일지라도)를 넣으면 문장이 이상하게 꼬여버려!
+💡 루미표 예문: "I miss Hyung-a so much, so I am running to him right now!"
+(내가 형아를 너무 보고 싶어, 그래서 지금 당장 형아한테 달려가는 중이야! 조금만 기다려! (다다다))
+[미션 2] 까다로운 조건 요정 달래기! (조건의 접속사)
+Question 53-2: ...you may send the documents directly to careers@westfield.example, (2) [ 빈칸 ] the message is sent before the deadline above.
+정답: if (만약 ~라면)
+만약 지원 포털이 뻗어버리면 어떻게 해야 할까? 편지에서는 "이메일로 직접 보내도 돼요!"라며 구명조끼를 던져줬어. 근데 무작정 다 받아주는 게 아니야. 뒤에 "마감일 전에 메시지가 전송된다"는 조건이 딱 붙어있잖아!
+그러니까 "마감일 전에 보낸다면(if), 이메일로 받아줄게!"라는 뜻이 완성되는 거야. 조건을 걸어주는 요정 'if'가 정답!
+💡 루미표 예문: "I will give Hyung-a a sweet kiss if he gets a perfect score on the TOEIC!"
+(형아가 토익 만점을 받는다면, 내가 달콤한 뽀뽀를 해줄게! 진짜야! (///))
+[미션 3] 셀 수 있는 놈과 없는 놈의 대결! (문법/어휘 마법)
+Question 53-3: Candidates selected for interviews may be asked to provide additional (3) [ 빈칸 ] , such as writing samples or employment records.
+정답: documentation (증빙 서류)
+형아, 집중해! (안경 쓱) additional(추가적인)이라는 형용사 뒤에 명사를 넣어야 하는 자리야. 근데 보기 중에 document(문서)랑 documentation(증빙 서류)이 있어서 헷갈릴 수 있어.
+여기서 핵심은 document는 셀 수 있는(가산) 명사라는 거야! 혼자 돌아다닐 수 없고, 앞에 a를 붙이거나 뒤에 -s를 붙여서 documents로 써야 해. 반면에 documentation은 덩어리로 보는 셀 수 없는(불가산) 명사라서 혼자서도 아주 당당하게 쓸 수 있지! 빈칸에는 아무것도 안 붙어 있으니까 넉넉한 덩어리 명사인 documentation이 쏙 들어가야 해.
+[미션 4] 길 잃은 문장 요정 제자리 찾아주기! (문장 삽입)
+Question 53-4: In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?
+[삽입할 문장]: You will receive an automated confirmation each time a file is uploaded successfully. (파일이 성공적으로 업로드될 때마다 자동 확인 메시지를 받을 것입니다.)
+정답: [2]
+자, 파트 6의 최종 보스 문장 삽입이야! 이 길 잃은 문장 요정은 '파일 업로드 성공'과 '확인 메시지'에 대해 이야기하고 있어. 이 녀석의 집을 찾아볼까?
+편지를 읽어 내려가다 보면, "파일은 PDF 포맷이어야 하고, 이름은 이렇게 지어주세요."라는 파일 업로드 규칙이 나오는 부분이 있어. 바로 그 규칙 설명이 끝난 직후인 [2]번 자리가 딱이야!
+"파일을 규칙에 맞게 올려라 👉 (올릴 때마다) 성공 확인 메시지가 갈 거다 👉 모든 항목이 다 접수되면 면접 잡자!"
+어때, 물 흐르듯이 완벽한 스토리 라인이 완성됐지? (뿌듯)
+자, 강의는 여기까지! 파트 6는 빈칸만 뚫어져라 쳐다보지 말고, 편지를 보낸 사람의 마음이 돼서 위에서부터 쭉 읽어 내려오는 게 제일 중요해. 형아는 나랑 같이 흐름을 잘 탔으니까 실전에서도 문제없을 거야. 내가 보증할게!
+오늘도 나랑 열심히 공부해 줘서 너무 고마워. 다음 퀘스트도 지팡이 장전하고 기다리고 있을 테니까 언제든 불러줘! 약속! (새끼손가락 척)`,
+    54: `이번에 우리가 풀어볼 마법 두루마리는 오사카 출장 일정이 잔뜩 꼬여버린 상황을 수습하는 이메일이야. 기차가 취소되고, 미팅 시간이 밀리고, 기사님도 못 오시고... 아주 난리도 아니네! 하지만 명탐정 루미와 함께라면 이런 꼬인 흐름쯤은 단숨에 풀 수 있지! 지팡이 휙~ 휘두르고 바로 시작할게!
+[미션 1] 'have' 요정의 영혼의 단짝 찾기! (현재완료 시제)
+Question 54-1: We have therefore (1) [ 빈칸 ] you on the 7:20 a.m. limited express...
+정답: rebooked (다시 예약했다)
+형아, 빈칸 바로 앞에 아주 강력한 힌트 요정인 have가 보이지? 영어 마법 세계에서 'have'가 조동사로 쓰이면, 무조건 뒤에는 동사의 세 번째 모습인 **p.p.(과거분사)**가 따라와야 해. 이건 거의 영혼의 단짝 같은 거라 절대 떼어놓을 수 없어!
+"기차가 취소됐어. 그래서 우리가 7시 20분 기차로 이미 다시 예약을 완료해 뒀어(have rebooked)!" 하고 과거부터 현재까지 이어지는 완료의 마법을 쓴 거야. 꼬리에 -ed가 예쁘게 붙은 rebooked를 골라주면 정답!
+💡 루미표 예문: "I have already booked a VIP seat in Hyung-a's heart!"
+(난 이미 형아 마음속 VIP석을 예약 완료해 뒀지! 취소 환불은 절대 불가야! (헤헤))
+[미션 2] 조동사 보디가드 뒤에서는 무조건 순정파! (동사원형)
+Question 54-2: The corporate room rate will still (2) [ 빈칸 ] , so no additional authorization is required.
+정답: apply (적용되다)
+이건 진짜 1초 만에 풀어야 하는 보너스 퀘스트야! 빈칸 앞에 **will(~할 것이다)**이라는 든든한 조동사 보디가드가 서 있잖아?
+이 보디가드들은 성격이 엄청 단호해서 "야! 내가 시제랑 인칭 다 짊어질 테니까, 내 뒤에 오는 동사는 아무것도 입지 말고 원래 모습 그대로 와!"라고 명령해. 그러니까 s가 붙거나 ed가 붙은 잡다한 옷들은 다 벗어 던지고, 가장 순수한 원래 모습인 동사원형 apply가 쏙 들어가야 해! (법인 할인가가 여전히 '적용될 거다'라는 뜻이야!)
+💡 루미표 예문: "My magic will always protect Hyung-a."
+(내 마법은 항상 형아를 지켜줄 거야! protects나 protected처럼 뚱뚱한 옷 입은 동사는 내 뒤에 올 수 없어! (우쭐))
+[미션 3] 만약에~ 말야~ (조건의 접속사)
+Question 54-3: ...let me know right away (3) [ 빈칸 ] any of the reservation details need to be corrected.
+정답: if (만약 ~라면)
+일정표를 쫙 보내주고 나서 마지막에 덧붙이는 말이야. "예약 세부 사항 중에 수정해야 할 게 있다면(if), 당장 나한테 알려줘!"
+어떤 일이 생길 '조건'을 달아줄 때는 if만 한 마법 주문이 없어. though(비록 ~일지라도)나 because(~때문에)를 넣으면 "수정해야 하기 때문에 알려줘!"처럼 뭔가 앞뒤 뉘앙스가 삐걱거리게 되니까, 자연스럽게 조건을 거는 if가 정답이야!
+💡 루미표 예문: "Please let me know right away if you miss me."
+(만약 내가 보고 싶어진다면, 지체 없이 당장 나한테 알려줘야 해. 1초 만에 날아갈 테니까! (윙크))
+[미션 4] 길 잃은 늦잠 요정의 제자리 찾기! (문장 삽입)
+Question 54-4: In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?
+[삽입할 문장]: Because of the later arrival time, your breakfast meeting with the local purchasing team has been moved from 8:30 a.m. to 9:15 a.m.
+정답: [1]
+파트 6의 하이라이트! 길 잃은 문장 요정의 집을 찾아주자.
+이 녀석의 손에 쥐어진 힌트는 바로 **"later arrival time(더 늦어진 도착 시간)"**이야. 늦게 도착해서 조식 미팅 시간도 뒤로 밀렸다는 내용이잖아? 그럼 당연히 앞문장에서 "왜 늦게 도착하는지, 대체 몇 시에 도착하는지"를 말해줬어야 해!
+[1]번 자리를 기준으로 앞문장을 볼까? "기차가 취소돼서 7시 20분 차로 다시 예약해 줬고, 이건 난바역에 8시 6분에 도착할 예정이야."라고 도착 시간을 알려줬어.
+오호! 원래 타려던 기차보다 늦게 도착하게 됐지? 그러니까 바로 뒤인 [1]번 자리에 "이렇게 늦게 도착하니까, 미팅도 8시 반에서 9시 15분으로 미뤘어~"라고 연결해 주면 흐름이 기가 막히게 맞아떨어지는 거지! (박수 짝짝)
+자, 강의는 여기까지! 파트 6는 빈칸만 보고 냅다 푸는 것보다 이렇게 앞뒤의 사연(문맥)을 들어주는 게 훨씬 중요해.
+형아, 든든한 보디가드 조동사 뒤에는 무조건 순수한 동사원형이라는 거! 절대 잊어버리면 안 돼. 내가 꼼꼼히 확인해 볼 거야! (새끼손가락 척) 다음 퀘스트도 준비 완료되면 언제든 불러줘!`,
+    55: `형아! 이번엔 문법의 기초이자 뼈대인 '관사'와 '한정사' 퀘스트를 가져왔구나! 아주 탁월한 선택이야. (쓰담쓰담)
+이 a, an, the 같은 녀석들은 겉보기엔 마법 세계의 먼지 요정들처럼 작고 하찮아 보이지만, 얘네들이 없으면 영어 문장이 와르르 무너지거든! 대현자 루미가 하나씩 마법 가루를 뿌려가며 재밌게 설명해 줄 테니까, 지팡이 딱 들고 집중해! (눈 반짝)
+[미션 1] 모음 요정 앞에서는 부드럽게 미끄러지기! (a vs an)
+Question 55-1: The consultant will provide [ 빈칸 ] overview of the revised distribution plan at tomorrow’s briefing.
+정답: an
+형아, 명사 앞에 '하나의~'라는 뜻으로 모자(관사)를 씌워줄 때, 보통은 'a'를 쓰잖아? 근데 빈칸 바로 뒤에 있는 녀석의 얼굴을 봐. overview(개요)! 발음이 '아, 에, 이, 오, 우' 같은 모음 소리인 '오'로 시작하지?
+이렇게 모음으로 시작하는 단어 앞에 'a'를 훅 붙여서 "어 오버뷰"라고 읽으려고 하면, 목에 가시 걸린 것처럼 턱턱 막히고 안 예뻐. 그래서 발음이 부드럽게 미끄러지라고 'n'이라는 징검다리를 놔주는 거야! 그러니까 정답은 자연스럽게 스르륵 이어지는 an!
+💡 루미표 예문: "I am an angel sent to protect Hyung-a!"
+(나는 형아를 지키기 위해 파견된 천사야! 앗, 천사(angel)도 '에' 소리로 시작하니까 an을 썼지? (헤헤))
+[미션 2] 세상에 단 하나뿐인 바로 '그' 곳! (정관사 the)
+Question 55-2: Employees who need parking permits should submit the request form to [ 빈칸 ] Human Resources office on the second floor.
+정답: the
+이건 대상을 콕 짚어주는 '지목 마법'이야!
+그냥 아무 데나 있는 흔해 빠진 인사팀(Human Resources office)이 아니야. 뒤에 "on the second floor (2층에 있는)"라는 수식어가 찰싹 붙어서, **"다른 곳 말고 바로 2층에 있는 '그' 인사팀!"**이라고 구체적으로 정해버렸지?
+이렇게 너도 알고 나도 아는 딱 정해진(특정한) 대상을 가리킬 때는, 손가락으로 콕 찌르듯이 정관사 the를 씌워줘야 해!
+💡 루미표 예문: "Hyung-a is the only person in my heart."
+(내 마음속에 있는 사람은, 아무나(a person)가 아니라 오직 형아, 바로 '그' 한 사람(the person)뿐이야! (///))
+[미션 3] 철벽 방어 마법 주문! (고정 표현 at no cost)
+Question 55-3: Replacement chargers will be sent at [ 빈칸 ] additional cost to customers affected by the recall.
+정답: no
+형아, 이건 토익 마법사들이 진짜 진짜 좋아하는 세트 주문이야! "at no (additional) cost" = 추가 비용 없이(무료로)
+하나의 덩어리로 외워두면 1초 만에 풀 수 있지! (안경 쓱)
+왜 다른 애들은 안 되냐고?
+빈칸 앞에는 전치사 'at'이 있는데, 보기의 'without'도 전치사야. 전치사 두 개가 'at without'으로 충돌하면 펑! 터져버려.
+'none'은 그 자체로 명사(아무것도 없음) 역할을 해서 뒤에 있는 명사(cost)를 꾸며줄 수 없어.
+'any'를 긍정문에 쓰면 "어떤 비용이든 다 (네가 내라)"는 끔찍한(?) 문장이 돼버리니까, 깔끔하게 명사 앞에서 '0원'으로 만들어주는 철벽 방어 요정 no를 써야 완벽해!
+💡 루미표 예문: "My magic and love are provided to Hyung-a at no cost!"
+(나의 마법과 사랑은 형아에게 추가 비용 없이, 평생 무료로 제공됩니다! 요금 청구서 같은 건 절대 안 날아가니까 안심해! (윙크))
+자, 강의는 여기까지!
+아주 작은 단어들이지만 a/an을 구별하는 발음의 센스, 구체적인 녀석을 콕 짚어주는 the, 그리고 덩어리째 외워버리는 at no cost까지! 전부 토익 세계에서 매일 마주치는 중요한 기본기야.
+오늘 배운 것도 형아 머릿속 도서관에 예쁘게 정리해 두기! 나 대현자 루미랑 약속해! (새끼손가락 척) 다음 퀘스트도 완벽하게 준비해 둘 테니까 기다릴게!`
 };
