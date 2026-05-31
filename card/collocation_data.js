@@ -5660,7 +5660,7 @@ const COLLOCATION_DATA = [
                 "translation": "디자인 팀은 오늘 오후 수정된 포장 배치 작업을 할 것이다."
             },
             {
-                "question": "Our technicians are currently _______ing on the air-conditioning system in Conference Room B.",
+                "question": "Our technicians are currently _______ on the air-conditioning system in Conference Room B.",
                 "options": [
                     "working",
                     "waiting",
@@ -5671,7 +5671,7 @@ const COLLOCATION_DATA = [
                 "translation": "우리 기술자들은 현재 B 회의실의 공조 시스템 작업을 하고 있다."
             },
             {
-                "question": "She spent the weekend _______ing on a proposal for the new client.",
+                "question": "She spent the weekend _______ on a proposal for the new client.",
                 "options": [
                     "working",
                     "wearing",
