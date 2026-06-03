@@ -1074,8 +1074,27 @@ const BONUS_CARD_EXPANSION = [
             { name: '여우불', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '암흑 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
             { name: '요화천벌', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열/디바인 전부 소모, 소모한 스택당 1.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 1.0 }, { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.0 }] }
         ]
+    },
+    {
+        id: 'venom', name: '베놈', grade: 'legend', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-07-15',
+        stats: { hp: 520, atk: 115, matk: 100, def: 70, mdef: 70 },
+        trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'corrosion', desc: '사망시 400% 물리대미지 + 부식' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '피해 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '5턴에 걸쳐 매 턴 1배 마법대미지와 랜덤 디버프 부여', effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
+            { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
+        ]
+    },
+    {
+        id: 'dainichi_nyorai', name: '대일여래', grade: 'legend', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-07-30',
+        stats: { hp: 550, atk: 105, matk: 110, def: 75, mdef: 75 },
+        trait: { type: 'death_clear_field_add_buff', buff: 'earth_bless', desc: '사망시 모든 필드버프를 제거하고 대지의축복 부여' },
+        skills: [
+            { name: '오지관제', type: 'sup', tier: 1, cost: 10, desc: '가드 부여, 무작위 필드버프 생성', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'random_field_buff' }] },
+            { name: '일체지광', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '파쇄륜', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '모든 필드버프를 소모하고 제거한 수 x1.5 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 1.5 }] }
+        ]
     }
-
 ];
 
 BONUS_CARDS.push(...BONUS_CARD_EXPANSION);

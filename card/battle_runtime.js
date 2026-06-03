@@ -570,6 +570,10 @@ const BattleRuntime = {
             killer.tookDamageThisTurn = true;
         }
 
+        if (result.clearFieldBuffs) {
+            rpg.battle.fieldBuffs = [];
+        }
+
         if (result.fieldBuffsToAdd && result.fieldBuffsToAdd.length > 0) {
             result.fieldBuffsToAdd.forEach(buffId => BattleRuntime.applyFieldBuff(rpg, buffId));
         }
@@ -753,7 +757,7 @@ const BattleRuntime = {
                 ? buildResolvedDelayedSkill(modifiedSkill, delayedEff, rpg.battle.turn)
                 : modifiedSkill;
 
-            if (delayedEff.type === 'phantom_nightmare') {
+            if (delayedEff.type === 'phantom_nightmare' || delayedEff.type === 'multi_delayed_attack') {
                 const nightmareTurns = Array.isArray(delayedEff.turns)
                     ? delayedEff.turns
                     : [1, 2, 3, 4, 5];

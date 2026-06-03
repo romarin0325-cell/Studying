@@ -904,7 +904,8 @@ const DELAYED_SKILL_EFFECT_TYPES = [
     'delayed_random_unique_field_buffs',
     'phantom_nightmare',
     'delayed_attack_random_field',
-    'delayed_attack_debuffs'
+    'delayed_attack_debuffs',
+    'multi_delayed_attack'
 ];
 
 function findDelayedSkillEffect(skill) {
@@ -972,6 +973,16 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 ...delayedEff.debuffs.map(d => ({ type: 'debuff', id: d, stack: 1 }))
+            ]
+        };
+    }
+
+    if (delayedEff.type === 'multi_delayed_attack') {
+        return {
+            ...skill,
+            isDelayed: true,
+            effects: [
+                ...(skill.effects || []).filter(effect => effect !== delayedEff)
             ]
         };
     }
@@ -1339,8 +1350,8 @@ const SideEffects = {
             let pool = [...eff.pool].sort(() => 0.5 - Math.random());
             for (let i = 0; i < eff.count; i++) {
                 if (pool[i]) {
-                    ctx.target.buffs[pool[i]] = 1;
-                    ctx.logFn(`적에게 [${getBuffName(pool[i])}] 부여.`);
+                    const isStackable = (pool[i] === 'burn' || pool[i] === 'divine');
+                    SideEffects.handlers['debuff'](ctx, { id: pool[i], stack: isStackable ? 1 : undefined });
                 }
             }
         },
@@ -2647,6 +2658,18 @@ const Logic = {
         else if (t.type === 'death_field_buff_count_dmg') {
             let count = fieldBuffs.length;
             this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: count * t.val }, fieldBuffs, logFn, deck, turn, artifacts, `[특성] 사망 반격! (필드버프 ${count}개)`);
+        }
+        else if (t.type === 'death_dmg_phy_debuff') {
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 맹독 폭발!');
+            if (killer) {
+                result.killerDebuffs[t.debuff] = (result.killerDebuffs[t.debuff] || 0) + 1;
+                logFn(`[특성] 맹독 발동! 적에게 [${getBuffName(t.debuff)}] 부여.`);
+            }
+        }
+        else if (t.type === 'death_clear_field_add_buff') {
+            result.clearFieldBuffs = true;
+            result.fieldBuffsToAdd.push(t.buff);
+            logFn(`[특성] 사망 효과 발동! 모든 필드버프를 제거하고 [${getBuffName(t.buff)}] 부여.`);
         }
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
