@@ -1466,8 +1466,7 @@ const TOEIC_DATA = [
       }
     ],
     "passage": "Document 1: Training Notice \n \nHARBORTECH ANALYTICS — Client Data Privacy Refresher (On-site) \nLocation: HarborTech HQ, Room 5D \nDate: Tuesday, August 4, 2026 \nSessions: \n \nSession A: 9:00–11:00 a.m. \n \nSession B: 2:00–4:00 p.m. \n \nCheck-in: Opens 40 minutes before each session at the Reception Desk. \nID: Contractors and visitors must present a government-issued photo ID to receive a badge. \n \nCertificate of Completion: \nCertificates are issued only to participants who \n \nattend the entire session, and \n \ncomplete the online Quiz by 6:00 p.m. on the same day. \n \nVisitor Parking (Limited): \nParking passes must be requested by 12:00 p.m. two business days before the training date. \nWithout a pass, attendees should use public transportation or be dropped off. \n \nDocument 2: E-mail \n \nSubject: Privacy Refresher (Aug 4) — arrival time and certificate \nFrom: Kenji Nakamura <kenji.n@partnerco.com> \nTo: Training Desk <training@harbortech.com> \nDate: July 29, 2026 \n \nHello, \n \nI registered for Session B (2:00–4:00 p.m.) on August 4. I may be tied up on a client call and might arrive around 2:30 p.m. \n \nIf I arrive at 2:30, can I still receive the Certificate of Completion? \n \nDo I need a parking pass, or can I park on-site without one? \n \nWhen will I receive the link for the Quiz? \n \nThank you, \nKenji Nakamura \n \nDocument 3: E-mail \n \nSubject: Re: Privacy Refresher (Aug 4) — arrival time and certificate \nFrom: Training Desk <training@harbortech.com> \nTo: Kenji Nakamura <kenji.n@partnerco.com> \nDate: July 29, 2026 \n \nHi Kenji, \n \nThanks for your message. \n \nCertificate: To be eligible, you must attend the session from the beginning to the end. If you arrive at 2:30, you may still attend, but you will not qualify for the certificate. If you need the certificate, please switch to Session A or plan to arrive by 2:00 p.m. for Session B. \n \nParking: Visitor parking is limited. If you need a pass for August 4, please send your license plate number by Friday, July 31 at 12:00 p.m. \n \nQuiz: The quiz link will be sent by e-mail after the session and must be completed by 6:00 p.m. on August 4. \n \nBest regards, \nTraining Desk"
-  }
-  ,
+  },
   {
     "id": 31,
     "type": "part5",
@@ -1661,61 +1660,7 @@ const TOEIC_DATA = [
         "answer": "arranged"
       }
     ],
-    "passage": `Document 1: Notice 
- 
-NORTHPOINT CONSULTING 
-Office Relocation Schedule 
-Date: September 28, 2026 
- 
-NorthPoint Consulting will move from Floor 8 to Suite 1200 on Monday, October 19. To ensure a smooth transition, please follow the schedule below. 
- 
-Thursday, October 15 
-- New locker assignments will be e-mailed to employees. 
- 
-Friday, October 16 
-- Pack personal desk items and active files by 12:00 p.m. 
-- Place archived files that are not needed for daily work in blue cartons for off-site storage pickup. 
-- Label all computer accessories and desk organizers with your name. 
-- Desktop phones will be disconnected after 6:00 p.m. 
- 
-Sunday, October 18 
-- Parking garage access cards for Suite 1200 will be activated. 
- 
-Monday, October 19 
-- Employees may begin using the new office and lockers at 7:30 a.m. 
-- The mailroom on Floor 12 will begin accepting incoming packages at 10:00 a.m. 
- 
-Document 2: E-mail 
- 
-Subject: Move-day questions 
-From: Dana Cho <dcho@northpoint.com> 
-To: Leo Ramirez <lramirez@northpoint.com> 
-Date: October 12, 2026 
- 
-Hi Leo, 
- 
-I will be at a client site for most of Friday, October 16, so I may not return before noon. Can my team assistant seal and label my blue cartons for off-site storage if I leave the files organized on Thursday? 
- 
-Also, our product sample kits are scheduled to be picked up by courier on Monday morning. Would it be possible to have them staged near the new reception desk in Suite 1200 instead of the old mailroom? 
- 
-Thanks, 
-Dana 
- 
-Document 3: E-mail 
- 
-Subject: Re: Move-day questions 
-From: Leo Ramirez <lramirez@northpoint.com> 
-To: Dana Cho <dcho@northpoint.com> 
-Date: October 12, 2026 
- 
-Hi Dana, 
- 
-Yes. If you sort the files beforehand, your assistant may seal the blue cartons and add your name labels on Friday morning. 
- 
-As for the sample kits, we can have them staged near the reception desk. However, the courier should arrive after 10:00 a.m. because the Floor 12 mailroom will not be ready to handle packages before then. Please ask someone from your team to meet the courier when they arrive. 
- 
-Best, 
-Leo`
+    "passage": "Document 1: Notice \n \nNORTHPOINT CONSULTING \nOffice Relocation Schedule \nDate: September 28, 2026 \n \nNorthPoint Consulting will move from Floor 8 to Suite 1200 on Monday, October 19. To ensure a smooth transition, please follow the schedule below. \n \nThursday, October 15 \n- New locker assignments will be e-mailed to employees. \n \nFriday, October 16 \n- Pack personal desk items and active files by 12:00 p.m. \n- Place archived files that are not needed for daily work in blue cartons for off-site storage pickup. \n- Label all computer accessories and desk organizers with your name. \n- Desktop phones will be disconnected after 6:00 p.m. \n \nSunday, October 18 \n- Parking garage access cards for Suite 1200 will be activated. \n \nMonday, October 19 \n- Employees may begin using the new office and lockers at 7:30 a.m. \n- The mailroom on Floor 12 will begin accepting incoming packages at 10:00 a.m. \n \nDocument 2: E-mail \n \nSubject: Move-day questions \nFrom: Dana Cho <dcho@northpoint.com> \nTo: Leo Ramirez <lramirez@northpoint.com> \nDate: October 12, 2026 \n \nHi Leo, \n \nI will be at a client site for most of Friday, October 16, so I may not return before noon. Can my team assistant seal and label my blue cartons for off-site storage if I leave the files organized on Thursday? \n \nAlso, our product sample kits are scheduled to be picked up by courier on Monday morning. Would it be possible to have them staged near the new reception desk in Suite 1200 instead of the old mailroom? \n \nThanks, \nDana \n \nDocument 3: E-mail \n \nSubject: Re: Move-day questions \nFrom: Leo Ramirez <lramirez@northpoint.com> \nTo: Dana Cho <dcho@northpoint.com> \nDate: October 12, 2026 \n \nHi Dana, \n \nYes. If you sort the files beforehand, your assistant may seal the blue cartons and add your name labels on Friday morning. \n \nAs for the sample kits, we can have them staged near the reception desk. However, the courier should arrive after 10:00 a.m. because the Floor 12 mailroom will not be ready to handle packages before then. Please ask someone from your team to meet the courier when they arrive. \n \nBest, \nLeo"
   },
   {
     "id": 35,
@@ -1807,19 +1752,7 @@ Leo`
         "answer": "[4]"
       }
     ],
-    "passage": `Directions: Read the text below and choose the best answer for each blank. 
- 
-Subject: Annual Retail Expo Badge Pickup Information 
- 
-Dear Exhibitors, 
- 
-To reduce wait times on opening day, all exhibitors are strongly (1) _______ to pick up badges and registration packets on the afternoon before the Annual Retail Expo begins. Early pickup will take place on Wednesday, October 7, from 2:00 p.m. to 6:00 p.m. in Hall B of the Meridian Convention Center. [1] 
- 
-When you arrive, please use the west entrance and bring a photo ID. Your company badge packets will be released only to the person listed as the primary booth contact, (2) _______ a substitute name has been submitted in advance. [2] 
- 
-Each packet will include exhibitor badges, a floor map, and unloading instructions for the loading dock. Booth setup may begin at 7:00 a.m. on Thursday, October 8, but the exhibition floor will not open to visitors until 10:00 a.m. [3] 
- 
-If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mail (3) _______ Tuesday, October 6, so we can hold your materials at the information counter on Thursday morning. [4]`
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Annual Retail Expo Badge Pickup Information \n \nDear Exhibitors, \n \nTo reduce wait times on opening day, all exhibitors are strongly (1) _______ to pick up badges and registration packets on the afternoon before the Annual Retail Expo begins. Early pickup will take place on Wednesday, October 7, from 2:00 p.m. to 6:00 p.m. in Hall B of the Meridian Convention Center. [1] \n \nWhen you arrive, please use the west entrance and bring a photo ID. Your company badge packets will be released only to the person listed as the primary booth contact, (2) _______ a substitute name has been submitted in advance. [2] \n \nEach packet will include exhibitor badges, a floor map, and unloading instructions for the loading dock. Booth setup may begin at 7:00 a.m. on Thursday, October 8, but the exhibition floor will not open to visitors until 10:00 a.m. [3] \n \nIf you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mail (3) _______ Tuesday, October 6, so we can hold your materials at the information counter on Thursday morning. [4]"
   },
   {
     "id": 37,
@@ -2438,7 +2371,7 @@ If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mai
         "answer": "stopped"
       }
     ]
-  }  ,
+  },
   {
     "id": 51,
     "type": "part6",
@@ -2646,6 +2579,275 @@ If you expect to arrive after 6:00 p.m. on Wednesday, please reply to this e-mai
       }
     ],
     "passage": "Directions: Read the text messages below and answer the questions. \n \nOfficeChat Messages \n \n[9:08 A.M.] Mina Cho \nHi, Daniel. I just spoke with the printing vendor. The welcome packets for tomorrow’s supplier workshop won’t arrive until 2:00 p.m. because their delivery truck broke down. \n \n[9:10 A.M.] Daniel Lee \nThat’s a problem. Registration starts at 1:30 p.m. Can they print a smaller batch at their downtown branch and send it earlier? \n \n[9:12 A.M.] Mina Cho \nI asked. They can prepare 40 packets by noon, but someone from our office would need to pick them up. \n \n[9:13 A.M.] Daniel Lee \nThat should work. We only have 35 confirmed attendees so far. Could you send me the branch address? \n \n[9:15 A.M.] Mina Cho \nSure. It’s 214 Wexler Avenue, about ten minutes from here by car. Also, they said the remaining packets will be delivered to the conference center later in the afternoon. \n \n[9:18 A.M.] Daniel Lee \nGreat. I’ll ask Kevin to pick up the first batch before lunch. By the way, did the hotel confirm the extra chairs we requested for Room Cedar? \n \n[9:20 A.M.] Mina Cho \nYes. They’ll add 15 more chairs before 11:00 a.m. But the front desk said we need to use the side entrance tomorrow because the main lobby floor is being polished. \n \n[9:22 A.M.] Daniel Lee \nThanks for letting me know. I’ll update the message on the event app so attendees see the entrance change."
+  },
+  {
+    "id": 55,
+    "type": "part7",
+    "title": "55강 (Part 7) — Part 7 Multiple Passages (Set 12)",
+    "questions": [
+      {
+        "id": "55-1",
+        "question": "According to the Web page, which feature is included in the Business plan?",
+        "options": [
+          "100 GB of storage",
+          "Shared task boards",
+          "CSV and PDF export",
+          "Due-date reminders"
+        ],
+        "answer": "CSV and PDF export"
+      },
+      {
+        "id": "55-2",
+        "question": "According to the renewal notice, when will Riverton Design Studio be charged if no changes are made?",
+        "options": [
+          "August 26",
+          "August 29",
+          "August 31",
+          "September 1"
+        ],
+        "answer": "August 31"
+      },
+      {
+        "id": "55-3",
+        "question": "Why did Maya Torres write to Billing Support?",
+        "options": [
+          "To request a refund for extra licenses",
+          "To ask about changing the seat count and billing cycle",
+          "To report that the renewal notice was sent too early",
+          "To cancel Riverton Design Studio’s account immediately"
+        ],
+        "answer": "To ask about changing the seat count and billing cycle"
+      },
+      {
+        "id": "55-4",
+        "question": "If Riverton renews with 8 Business annual licenses, what will the new annual renewal amount most likely be?",
+        "options": [
+          "$840.00",
+          "$900.00",
+          "$960.00",
+          "$1,020.00"
+        ],
+        "answer": "$960.00"
+      },
+      {
+        "id": "55-5",
+        "question": "In the Web page, the word “prorated” is closest in meaning to",
+        "options": [
+          "adjusted proportionally",
+          "paid automatically",
+          "renewed monthly",
+          "shared equally"
+        ],
+        "answer": "adjusted proportionally"
+      }
+    ],
+    "passage": "Document 1: Web Page\n\nTASKFLOW CLOUD\nTeam Plan Overview\n\nChoose the plan that fits your team.\n\nStandard\n$84 per user/year\nIncludes:\n- Shared task boards\n- Due-date reminders\n- 100 GB of storage\n\nBusiness\n$120 per user/year\nIncludes all Standard features, plus:\n- Permission controls\n- Activity history\n- CSV and PDF export\n- 1 TB of storage\n\nBilling Notes\n- Annual plans renew automatically on the renewal date shown in your account.\n- Renewal notices are e-mailed 14 days before the renewal date.\n- Additional users added at renewal are billed at the regular annual rate.\n- Additional users added mid-cycle are prorated based on the number of full months remaining.\n- Changes from annual to monthly billing take effect on the next renewal date.\n\nDocument 2: Renewal Notice\n\nTASKFLOW CLOUD — Renewal Notice\nNotice Date: August 17, 2027\nAccount: Riverton Design Studio\nCurrent Plan: Business (Annual)\nCurrent Users: 6\nRenewal Date: August 31, 2027\nAmount Due on Renewal: $720.00\n\nScheduled Renewal Summary\n- Plan will renew as Business (Annual).\n- 6 user licenses will renew automatically.\n- Payment method ending in 1142 will be charged on August 31.\n- To change seat count or billing frequency for this renewal, update your account by August 29.\n\nDocument 3: E-mail\n\nSubject: August 31 renewal — seat count question\nFrom: Maya Torres <maya@rivertondesign.com>\nTo: Billing Support <billing@taskflowcloud.com>\nDate: August 26, 2027\n\nHello,\n\nI received the renewal notice for our Business annual plan. We expect two new project coordinators to start in early September, so I’d like to increase our seat count from six to eight. Please confirm whether I can make that change for the August 31 renewal instead of adding the licenses this week.\n\nAlso, our finance manager asked whether switching to monthly billing would take effect right away or only after the current annual term ends.\n\nThank you,\nMaya Torres\nStudio Manager"
+  },
+  {
+    "id": 56,
+    "type": "part7",
+    "title": "56강 (Part 7) — Part 7 Multiple Passages (Set 13)",
+    "questions": [
+      {
+        "id": "56-1",
+        "question": "What is the main purpose of the article?",
+        "options": [
+          "To announce the relocation of a library branch",
+          "To describe a new service available at Midtown Public Library",
+          "To request donations for a community history project",
+          "To explain how to join the library’s staff"
+        ],
+        "answer": "To describe a new service available at Midtown Public Library"
+      },
+      {
+        "id": "56-2",
+        "question": "According to the reservation confirmation, what time is Ana Gomez’s reserved session scheduled to begin?",
+        "options": [
+          "3:00 p.m.",
+          "3:15 p.m.",
+          "3:30 p.m.",
+          "5:00 p.m."
+        ],
+        "answer": "3:30 p.m."
+      },
+      {
+        "id": "56-3",
+        "question": "Why did Ana Gomez write to Ben Park?",
+        "options": [
+          "To ask him to reserve a second appointment",
+          "To remind him to attend the library orientation",
+          "To ask him to provide materials needed for the appointment",
+          "To tell him that the project has been postponed"
+        ],
+        "answer": "To ask him to provide materials needed for the appointment"
+      },
+      {
+        "id": "56-4",
+        "question": "What is suggested about Ana Gomez?",
+        "options": [
+          "She has already paid for two appointments",
+          "She has not attended the library’s monthly introduction class",
+          "She reserved the Photo Station instead of the Video Conversion Station",
+          "She made the reservation more than 14 days in advance"
+        ],
+        "answer": "She has not attended the library’s monthly introduction class"
+      },
+      {
+        "id": "56-5",
+        "question": "In the e-mail, the word “labeled” is closest in meaning to",
+        "options": [
+          "borrowed",
+          "marked",
+          "repaired",
+          "sealed"
+        ],
+        "answer": "marked"
+      }
+    ],
+    "passage": "Document 1: Article\n\nCITY LIFE WEEKLY\nMidtown Library Opens Digitization Lab for Public Use\n\nThe Midtown Public Library has opened a new Digitization Lab on the second floor of its West Annex. The lab allows visitors to convert old photographs, slides, and VHS tapes into digital files using library equipment. The service is available Tuesday through Saturday by reservation.\n\nTwo types of stations are offered. The Photo Station includes a flatbed scanner and slide converter and costs $12 for a 90-minute session. The Video Conversion Station, which transfers VHS tapes to digital files, costs $18 for 90 minutes.\n\nBecause the video equipment requires a short setup demonstration, first-time Video Conversion Station users must arrive 15 minutes before their session for an orientation. This requirement is waived for people who have attended the library’s monthly introduction class. All users should bring their own external storage drive to save files. Reservations can be made through the library Web site up to 14 days in advance.\n\nDocument 2: Reservation Confirmation\n\nMIDTOWN PUBLIC LIBRARY — Digitization Lab Reservation\nName: Ana Gomez\nReservation No.: DL-91874\nDate: Friday, September 18, 2027\nStation: Video Conversion Station\nCheck-in / Orientation: 3:15 p.m.\nSession Time: 3:30–5:00 p.m.\nFee: $18.00\nBring: VHS tapes and an external storage drive\nCancellation: Cancel by Thursday, September 17, 12:00 p.m. for a full refund\nLocation: West Annex, 2nd Floor\n\nDocument 3: E-mail\n\nSubject: Friday digitization appointment\nFrom: Ana Gomez <ana.gomez@riverwatch.org>\nTo: Ben Park <ben.park@riverwatch.org>\nDate: September 16, 2027\n\nHi Ben,\n\nI booked the library’s Video Conversion Station for Friday afternoon so we can digitize the interview tapes for the Riverwatch history project. Could you leave the labeled VHS cassettes on my desk before you head out tomorrow?\n\nThe library provides the converter, but we need to bring our own external drive to save the files. If you still have the 1 TB drive we used for last month’s presentation, please bring that as well.\n\nThanks,\nAna"
+  },
+  {
+    "id": 57,
+    "type": "part6",
+    "title": "57강 (Part 6) — 채용 지원 서류 보완 요청 이메일 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "57-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "so",
+          "unless",
+          "whereas",
+          "although"
+        ],
+        "answer": "so"
+      },
+      {
+        "id": "57-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "if",
+          "because",
+          "despite",
+          "meanwhile"
+        ],
+        "answer": "if"
+      },
+      {
+        "id": "57-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "document",
+          "documented",
+          "documentation",
+          "documenting"
+        ],
+        "answer": "documentation"
+      },
+      {
+        "id": "57-4",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: You will receive an automated confirmation each time a file is uploaded successfully.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[2]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nSubject: Additional Materials for Your Application\n\nDear Ms. Ahmed,\n\nThank you for applying for the Inventory Planning Specialist position at Westfield Logistics. After an initial review of your résumé, we would like to continue with your application. Before we arrange interviews, please upload a copy of your spreadsheet certification and your most recent reference list through the applicant portal. [1]\n\nAll supporting documents should be submitted by 5:00 p.m. on Thursday, September 10. Files must be in PDF format, and each file name should include your last name and the job title. [2] Once all items have been received, a recruiting coordinator will contact you to schedule a 30-minute online interview.\n\nApplications are being reviewed on a rolling basis, (1) _______ we recommend completing this step as soon as possible. [3] If you have already uploaded the requested materials, you do not need to send them again. Instead, reply to this e-mail so we can confirm that your file is complete.\n\nIf you have trouble using the portal, you may send the documents directly to careers@westfield.example, (2) _______ the message is sent before the deadline above. [4] Candidates selected for interviews may be asked to provide additional (3) _______ , such as writing samples or employment records.\n\nThank you again for your interest in Westfield Logistics.\n\nSincerely,\nHiring Team\nWestfield Logistics"
+  },
+  {
+    "id": 58,
+    "type": "part6",
+    "title": "58강 (Part 6) — 출장 일정 변경 + 호텔 예약 조정 안내 (지문 1개 + 4문항)",
+    "questions": [
+      {
+        "id": "58-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "rebooked",
+          "rebooking",
+          "rebook",
+          "rebooks"
+        ],
+        "answer": "rebooked"
+      },
+      {
+        "id": "58-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "apply",
+          "applies",
+          "applied",
+          "applying"
+        ],
+        "answer": "apply"
+      },
+      {
+        "id": "58-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "if",
+          "though",
+          "unless",
+          "because"
+        ],
+        "answer": "if"
+      },
+      {
+        "id": "58-4",
+        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: Because of the later arrival time, your breakfast meeting with the local purchasing team has been moved from 8:30 a.m. to 9:15 a.m.",
+        "options": [
+          "[1]",
+          "[2]",
+          "[3]",
+          "[4]"
+        ],
+        "answer": "[1]"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nSubject: Revised Itinerary for the Osaka Supplier Visit\n\nDear Mr. Ito,\n\nDue to scheduled maintenance on the Airport Express line, the 6:45 a.m. train from Kansai Airport to central Osaka on Wednesday, October 14, has been canceled. We have therefore (1) _______ you on the 7:20 a.m. limited express, which is expected to arrive at Namba Station at 8:06 a.m. [1]\n\nYour reservation at the Harbor View Hotel has also been updated. Because the plant tour at Shinsei Components will end later than originally planned, your checkout date has been changed from Wednesday, October 14, to Thursday, October 15. The corporate room rate will still (2) _______ , so no additional authorization is required. [2]\n\nThe driver who was scheduled to meet you at Namba Station is no longer available. However, the hotel operates a complimentary shuttle from Stop C every 20 minutes, and the trip to the hotel takes about 12 minutes. [3]\n\nPlease review the attached itinerary carefully and let me know right away (3) _______ any of the reservation details need to be corrected. Once you confirm the changes, I will send the updated booking numbers and final meeting agenda. [4]\n\nBest regards,\nNaoko Sato\nTravel Coordinator\nKeihin Industrial Group"
+  },
+  {
+    "id": 59,
+    "type": "part5",
+    "title": "59강 (Part 5) — 관사/한정사/고정 표현 (3문항)",
+    "questions": [
+      {
+        "id": "59-1",
+        "question": "The consultant will provide ______ overview of the revised distribution plan at tomorrow’s briefing.",
+        "options": [
+          "a",
+          "an",
+          "the",
+          "each"
+        ],
+        "answer": "an"
+      },
+      {
+        "id": "59-2",
+        "question": "Employees who need parking permits should submit the request form to ______ Human Resources office on the second floor.",
+        "options": [
+          "a",
+          "an",
+          "the",
+          "some"
+        ],
+        "answer": "the"
+      },
+      {
+        "id": "59-3",
+        "question": "Replacement chargers will be sent at ______ additional cost to customers affected by the recall.",
+        "options": [
+          "any",
+          "no",
+          "none",
+          "without"
+        ],
+        "answer": "no"
+      }
+    ]
   }
-
 ];
