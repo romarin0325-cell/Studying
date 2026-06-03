@@ -63,6 +63,204 @@
   - 아군의 모든 특성을 무효화하는 효과는 `logic.js` 등 전투 전반에 걸쳐 큰 수정을 요구합니다. 초기 스탯 계산, 패시브 시너지 연산, 사망 시 특성 발동(`handleDeathTraits`), 피격 시 특성 발동(`handleOnHitTraits`) 등 특성이 관여하는 모든 런타임 구간에서 "파티 내에 '기억도살자'가 살아있을 경우 특성 무시"라는 예외 처리 플래그를 추가해야 하므로 구조적으로 사이드 이펙트 버그가 발생할 위험이 높습니다.
 
 
+### 🛠 구현 타당성 분석
+
+**요약**
+"아군 전체 특성 무효화"는 현재 엔진 구조상 최소 36개 코드 경로에 예외 처리가 필요하며, 완전한 사이드이펙트 예측이 불가능합니다. 아래에 세부 분석과 대안을 제시합니다.
+
+#### 1. 특성이 관여하는 런타임 구간 전수 조사
+
+**A. 전투 초기화 — `calculateInitialStats` (`logic.js:2210-2461`)**
+특성 타입별로 스탯 보정이 적용되는 구간입니다. 기억도살자가 덱에 있으면 이 모든 보정을 무시해야 합니다.
+
+| # | 특성 타입 | 영향 | 줄 번호 |
+|---|---|---|---|
+| 1 | `syn_*` (시너지 테이블 전체, 20+종) | 자신+파티 스탯 부스트 | 2227-2234 |
+| 2 | `cure_master_trait` | 마방 1.5배 | 2237-2240 |
+| 3 | `guardian_hidden_trait` | 선봉 공격력 증가 | 2242-2247 |
+| 4 | `party_normal_attack_dmg` | 파티 일반공격 강화 플래그 | 2249 |
+| 5 | `reverse_atk_matk_party` | 파티 공/마공 스왑 플래그 | 2249 |
+| 6 | `self_normal_atk_dmg_boost` | 자신 일반공격 배수 | 2254 |
+| 7 | `chaos_blessing_double` | 혼돈 축복 2배 | 2254 |
+| 8 | `pos_stat_boost` | 포지션별 스탯 부스트 | 2259-2271 |
+| 9 | `pos_rear_atk` | 후위 공격력 | 2274 |
+| 10 | `rabbit_synergy_boost` | 토끼 시너지 | 2278-2285 |
+| 11 | `slime_synergy_boost` | 슬라임 시너지 | 2287-2294 |
+| 12 | `dessert_kingdom_synergy_boost` | 디저트킹덤 시너지 | 2296-2303 |
+| 13 | `cond_grade_count_leader_boost` | 등급 조건부 리더 부스트 | 2306-2319 |
+| 14 | `cond_same_grade_matk_boost` | 같은 등급 마공 부스트 | 2322-2328 |
+| 15 | `leader_self_atk_party_def_down` | 스컬드래곤 리더 공격력/파티 방감 | 2331-2336 |
+| 16 | `christmas_rabbit_trio` | 크리스마스 토끼 3장 조합 | 2339-2353 |
+| 17 | `christmas_rabbit_trio_crit` | 크리스마스 밤토끼 치명타 | 2356-2360 |
+| 18 | `party_stat_boost` | 파티 전체 스탯 부스트 (이벤트) | 2371-2376 |
+| 19 | `syn_dark_3_party_atk` | 어둠 3장 파티 공격력 | 2377-2379 |
+| 20 | `syn_light_3_party_def_mdef` | 빛 3장 파티 방/마방 | 2380-2383 |
+| 21 | `syn_nature_3_party_def_mdef` | 자연 3장 파티 방/마방 | 2384-2387 |
+| 22 | `syn_dark_full_party_crit` | 어둠 3장 파티 치명타 | 2388-2390 |
+| 23 | `mid_party_mdef_boost` | 중앙 배치 파티 마방 | 2391-2393 |
+| 24 | `halloween_rabbit_peer_boost` | 할로윈 토끼 페어 부스트 | 2406-2417 |
+| 25 | `dessert_kingdom_crit_eva_boost` | 디저트킹덤 치명타/회피 | 2445-2450 |
+
+> **CAUTION**
+> 이 함수 하나에만 25개 이상의 특성 분기가 존재합니다. "기억도살자가 덱에 있으면 모든 특성 무효"를 적용하려면, 이 함수의 진입부에서 전체 특성 연산을 스킵하는 글로벌 플래그가 필요합니다.
+
+**B. 전투 중 스탯 재계산 — `calculateStats` (`logic.js:1680-1765`)**
+매 턴 실시간으로 특성 기반 스탯 보정을 다시 계산합니다.
+
+| # | 특성 타입 | 영향 |
+|---|---|---|
+| 1 | `cond_no_field_buff_eva_crit` | 루나: 필드버프 없을 시 회피/치명타 증가 |
+| 2 | `weekday_crit_bonus` | 요일 치명타 보너스 |
+| 3 | `luna_jasmine_trait` | 여신강림 시 회피/치명타 증가 |
+| 4 | `cond_earth_def_mdef` | 대지축복 방/마방 증가 |
+| 5 | `cond_sun_matk_mdef` | 태양축복 마공/마방 증가 |
+| 6 | `luther_guard_mastery` | 가드 시 공/마공 증가 |
+| 7 | `opening_atk_def` | 개전 3턴 공/방 증가 |
+| 8 | `opening_atk_matk` | 개전 3턴 공/마공 증가 |
+| 9 | `cond_sanctuary_atk_def` | 성역 시 공/방 증가 |
+| 10 | `cond_twinkle_all` | 트윙클파티 시 전스탯 증가 |
+| 11 | `field_buff_immune` | 필드버프 면역 |
+
+**C. 대미지 계산 — `calculateDamage` (`logic.js:1906-1995`)**
+
+| # | 특성 타입 | 영향 |
+|---|---|---|
+| 1 | `all_advantage` | 모든 상성 우위 |
+| 2 | `self_normal_atk_dmg_boost` | 일반공격 배수 |
+| 3 | `cond_darkness_dmg` | 암흑 대상 추가 피해 |
+| 4 | `cond_silence_dmg` | 침묵 대상 추가 피해 |
+| 5 | `cond_corrosion_dmg` | 부식 대상 추가 피해 |
+| 6 | `cond_target_elements_dmg` | 특정 속성 추가 피해 |
+| 7 | `cond_debuff_3_dmg` | 디버프 3개 이상 추가 피해 |
+| 8 | `cond_divine_3_dmg` | 디바인 3스택 추가 피해 |
+| 9 | `behemoth_trait` / `behemoth_liberated_trait` | 디버프 3개 이상 파괴적 일격 |
+| 10 | `guard_stun_double_dmg` | 기절 적 추가 피해 |
+| 11 | `burn_stack_phy_pen` | 작열 스택 물리관통 |
+| 12 | `luna_jasmine_trait` | 디바인 3스택 추가 피해 |
+
+**D. 전투 런타임 — `battle_runtime.js` (26개소)**
+
+| 구간 | 특성 타입 | 영향 |
+|---|---|---|
+| `buildBattlePlayer` (L162-168) | `activeTrait` 등록, `instant_delayed_skills` | 시너지 및 지연스킬 즉시발동 |
+| `startBattleInit` (L233-249) | `reverse_atk_matk_party`, `party_normal_attack_dmg`, `guardian_hidden_trait` | 파티 전체 공/마공 스왑, 일반공격 강화, 가드 강화 |
+| 적 턴 (L471-473) | `on_evasion_stun` | 회피 성공 시 기절 부여 |
+| 적 턴 (L537-538) | `guard_stun_double_dmg` | 가드 성공 시 기절 부여 |
+| `handleLinkedDeathTraits` (L580-648) | `ally_light_death_base_matk_mag`, `ally_death_base_atk_phy` | 아군 사망 시 반격 |
+| `executeSkill` (L711-746) | `normal_attack_burn_divine`, `cure_master_trait`, `syn_fire_3_crit_burn`, `behemoth_trait`, `behemoth_liberated_trait` | 일반공격 추가효과, 기절, 작열 |
+| `applySkillEffects` (L912-951) | `syn_water_nature`, `syn_water_light_*`, `syn_rabbit_valentine_*`, `syn_christmas_rabbit_trio_gift` | 시너지 연계 필드버프 |
+| `applySkillEffects` (L1293-1307) | `cond_same_grade_skill_buff` | 같은 등급 조건 필드버프 |
+
+**E. 사망/피격 특성 — `handleDeathTraits` & `handleOnHitTraits`**
+- `handleDeathTraits` (`logic.js:2601-2738`): 사망한 카드의 특성으로 발동 → 15종 이상의 사망 특성
+- `handleOnHitTraits` (`logic.js:2740-2759`): `cure_master_trait`, `on_hit_random_debuff`
+
+#### 2. 사이드이펙트 리스크 분석
+
+> **WARNING**
+> 예측 불가능한 사이드이펙트 위험이 매우 높습니다.
+
+**완전 예측 불가능한 영역**
+
+| 리스크 | 설명 | 심각도 |
+|---|---|---|
+| 스컬드래곤 디메리트 무효화 | `leader_self_atk_party_def_down`은 파티 방/마방을 깎는 디메리트 특성인데, 이것까지 무효화하면 이득이 됨. 특성 억제가 디메리트 특성도 지우므로 의도치 않은 상위호환 발생 | 🔴 높음 |
+| 기억도살자 자신의 특성 | "아군 전체 특성 무효화"가 자기 자신에게도 적용되나? 그렇다면 특성 자체가 자기모순. 아니라면 자기 자신은 왜 예외인지 설명 필요 | 🔴 높음 |
+| 사망 특성 타이밍 | 기억도살자가 살아있을 때만 억제인지, 사망 후에도 억제가 유지되는지에 따라 완전히 다른 게임 경험. 기억도살자 사망 → 억제 해제 → 나머지 카드 사망 특성 발동 가능? | 🔴 높음 |
+| `activeTraits` 배열 오염 | `buildBattlePlayer`에서 이미 `activeTraits`에 push된 시너지 키를 나중에 제거해야 함. 초기화 순서에 민감한 구조 | 🟡 중간 |
+| `calculateInitialStats` 이중 호출 | 기억도살자가 덱의 몇 번째냐에 따라 앞 카드는 이미 특성 적용 완료 → 나중에 되돌려야 함 | 🟡 중간 |
+| 향후 신규 특성 추가 시 | 새 특성을 추가할 때마다 기억도살자 예외 처리를 잊으면 버그 발생. 영구적 유지보수 부담 | 🔴 높음 |
+| `chaos_blessing_double` | 앤트로피의 혼돈 축복 2배 효과는 `buildBattlePlayer` 내부에서 처리됨 (`battle_runtime.js:192`). 이것은 `calculateInitialStats` 외부이므로 별도 억제 필요 | 🟡 중간 |
+
+**부분적으로 예측 가능한 영역**
+- `calculateStats`와 `calculateDamage`의 특성 분기: 여기에 `traitsSuppressed` 플래그를 체크하는 guard clause를 넣으면 처리 가능하나, 산재된 `if (trait && trait.type === ...)` 패턴 36개 이상에 모두 추가해야 함.
+- `executeSkill`의 일반공격 추가효과: `source.proto.trait.type` 체크가 5곳에 하드코딩되어 있음.
+
+#### 3. 구현 방식 비교
+
+**방식 A: 글로벌 플래그 (`traitsSuppressed`)**
+- 전투 초기화 시:
+  ```javascript
+  if (덱에 memory_slaughterer 존재)
+    rpg.battle.traitsSuppressed = true;
+  ```
+- 모든 특성 체크 구간에서:
+  ```javascript
+  if (rpg.battle.traitsSuppressed) return;
+  ```
+- **장점**: 개념적으로 단순
+- **단점**: 36+ 코드 경로에 guard clause 삽입 필요. `calculateInitialStats`는 `rpg.battle` 컨텍스트를 받지 않으므로 시그니처 변경 필요. 신규 특성 추가 시 guard clause 누락 리스크.
+- **변경 파일**: `logic.js` (~30곳), `battle_runtime.js` (~20곳)
+- **예상 diff**: +100~150줄
+- **리스크**: 🔴 높음 — 누락 시 사일런트 버그
+
+**방식 B: `proto.trait`을 더미로 교체**
+- 전투 초기화 시:
+  ```javascript
+  if (덱에 memory_slaughterer 존재)
+    모든 플레이어의 proto.trait을 { type: 'none', desc: '특성 억제됨' }으로 교체
+  ```
+- **장점**: 기존 코드 수정 최소화. 모든 특성 분기가 자연스럽게 무시됨.
+- **단점**: `proto`는 원본 카드 데이터 객체를 참조하므로, 직접 수정하면 전역 데이터 오염. 깊은 복사가 필요하며 이 경우 `proto` 참조 일관성이 깨짐. 사망 특성, 피격 특성도 전부 무효화되어 "사망 시 반격" 같은 기대 행동이 사라짐 (이것이 의도된 것인지 확인 필요).
+- **리스크**: 🟡 중간 — 깊은 복사 비용 + `proto` 참조 오염 위험
+
+**방식 C: 특성을 "약화" 수준으로 기획 변경 ⭐ 권장**
+**"아군 전체 특성 무효화" 대신 "아군 시너지/패시브 스탯 보정만 무효화"**로 축소합니다.
+- 구현:
+  ```javascript
+  calculateInitialStats에서 deck에 memory_slaughterer가 있으면
+    시너지 테이블(syn_*) 스킵
+    파티 스탯 부스트(party_stat_boost, syn_*_party_*) 스킵
+  ```
+  사망 특성, 피격 특성, 전투 중 트리거 특성은 유지
+- **장점**: 수정 범위가 `calculateInitialStats` 1개 함수로 한정. 사망/피격 특성은 건드리지 않으므로 런타임 안정성 유지. "특성 무효화"의 핵심 페널티(스탯 버프 제거)는 보존하면서 사이드이펙트 제어 가능.
+- **단점**: 원래 기획의 "완전 무효화"보다 페널티가 약해짐.
+- **변경 파일**: `logic.js` (1개 함수), `battle_runtime.js` (초기화 부분 일부)
+- **예상 diff**: +20~30줄
+- **리스크**: 🟢 낮음
+
+#### 4. 스킬 분석 (부수적)
+스킬 자체는 기존 엔진으로 문제없이 구현 가능합니다.
+
+| 스킬 | 구현 방식 | 기존 선례 |
+|---|---|---|
+| 회피태세 | `{ type: 'buff', id: 'evasion', duration: 1 }` | 루나 등 다수 |
+| 스티그마 (2.5x, 13턴 이후 2배) | `{ type: 'dmg_boost_turn_limit' }` 역방향 변형, 또는 새 핸들러 `dmg_boost_after_turn` 추가 | `dmg_boost_turn_limit` 존재 |
+| 메모리길로틴 (5x + 자신 스턴) | `val: 5.0` + `{ type: 'self_debuff', id: 'stun' }` | 루나의 다크메테오 (4.5x + 스턴)와 동일 패턴 |
+
+> **NOTE**
+> 스티그마의 "13턴 이후 배율 2배"는 기존 `dmg_boost_turn_limit`의 역조건 (N턴 이내 → N턴 이후)이므로 `dmg_boost_after_turn` 핸들러를 새로 추가하면 됩니다. 3줄 내외의 변경으로 구현 가능합니다.
+
+#### 5. 최종 판단
+
+**원안 ("아군 전체 특성 완전 무효화") — 🔴 파기 권장**
+| 항목 | 평가 |
+|---|---|
+| 구현 가능성 | 가능하나 위험 |
+| 사이드이펙트 예측 | 불가능 — 디메리트 특성 역이용, 사망 특성 타이밍, `activeTraits` 배열 오염, `calculateInitialStats` 호출 순서 의존성 등 구조적으로 완전 예측 불가 |
+| 유지보수 비용 | 매우 높음 — 향후 모든 신규 특성에 guard clause 추가 필요 |
+| 테스트 커버리지 | 현재 smoke test로는 검증 불가능 — 모든 특성 조합을 수동 검증해야 함 |
+
+**축소안 (방식 C: 시너지/패시브 스탯 보정만 무효) — 🟢 권장**
+| 항목 | 평가 |
+|---|---|
+| 구현 가능성 | 용이 |
+| 사이드이펙트 예측 | 가능 — `calculateInitialStats` 1개 함수 내부 |
+| 유지보수 비용 | 낮음 |
+| 게임플레이 임팩트 | 충분히 큰 페널티 (시너지 스탯 버프 전부 제거) |
+
+**Open Questions**
+> **IMPORTANT**
+> 축소안으로 진행할 경우, 정확히 어떤 범위를 "무효화"로 잡을지 확인이 필요합니다:
+> - 시너지 스탯 보정 (`syn_*`, `party_stat_boost` 등) → 무효
+> - 사망 특성 (`death_dmg_*`, `death_field_*` 등) → 유지? 무효?
+> - 피격 특성 (`on_hit_random_debuff`, `cure_master_trait`) → 유지? 무효?
+> - 전투 중 조건부 배율 특성 (`cond_darkness_dmg` 등) → 유지? 무효?
+
+> **IMPORTANT**
+> 기억도살자 사망 시 억제가 해제되어 나머지 아군의 특성이 부활하나요? 아니면 전투 종료까지 영구 억제인가요?
+
+
 ## 4. 홀리밤 (Holy Bomb)
 - **속성**: 빛 (Light)
 - **등급**: 노멀 (Normal)
