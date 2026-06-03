@@ -749,6 +749,34 @@ const GameUtils = {
      * @returns {Array} Array of card objects
      */
     buildCardPool(globalData, options = {}) {
+        if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
+            // [Factory Mode] Limit pool entirely to the drafted 32 cards
+            const allPossible = [
+                ...CARDS,
+                ...this.getBonusCards(),
+                ...this.getAllTranscendenceCards(),
+                ...(typeof SPECIAL_CARDS !== 'undefined' ? SPECIAL_CARDS : [])
+            ];
+            const factorySet = new Set(options.factoryPool);
+            let pool = allPossible.filter(c => factorySet.has(c.id));
+            
+            // Still respect maxGrade if specified (e.g. for great sage blessing)
+            if (options.maxGrade) {
+                const gradeOrder = {
+                    transcendence: 0,
+                    legend: 1,
+                    epic: 2,
+                    rare: 3,
+                    normal: 4,
+                    event: 5
+                };
+                const getGradeVal = (g) => gradeOrder[g] ?? 99;
+                const limitVal = getGradeVal(options.maxGrade);
+                pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
+            }
+            return pool;
+        }
+
         let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');
 
         // Add unlocked bonus cards
