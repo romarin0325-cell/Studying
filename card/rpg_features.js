@@ -1139,7 +1139,9 @@
             wrongWords: [],
             quiz_stats: { correct: 0, total: 0 },
             chaosPool: [],
+            factoryPool: [],
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
+            factoryDraft: { active: false, round: 1, maxRounds: 8, pool: [], seenCards: [], currentBundles: [] },
             artifacts: [],
             pendingEnemyId: null,
             pendingEnemyStage: null,
@@ -1170,6 +1172,7 @@
             let allCards = GameUtils.buildCardPool(this.global, {
                 includeTranscendence: true,
                 activeTranscendenceCards: this.state.activeTranscendenceCards,
+                factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
                 activeBonusPoolIds: this.state.activeBonusPoolIds,
                 specialCardSelections: this.state.activeSpecialCardSelections,
                 // [목적] 해당 런에서 획득한 이벤트 카드를 카오스 모드 시작 풀에 포함
@@ -1180,6 +1183,15 @@
 
             this.state.chaosPool = picks;
             this.state.inventory = [...picks];
+        }
+
+        if (mode === 'factory') {
+            this.state.factoryDraft.active = true;
+            this.state.factoryDraft.round = 1;
+            this.state.factoryDraft.maxRounds = 8; // 8 rounds * 4 cards = 32
+            this.state.factoryDraft.pool = [];
+            this.state.factoryDraft.seenCards = [];
+            this.generateFactoryBundles();
         }
 
         // Origin Mode: Add Transcendence Cards directly to Inventory
@@ -1307,6 +1319,7 @@
         let pool = GameUtils.buildCardPool(this.global, {
             excludeTranscendence: true,
             excludeEvent: true,
+            factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
             specialCardSelections: this.state.activeSpecialCardSelections,
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
@@ -1385,6 +1398,7 @@
         let pool = GameUtils.buildCardPool(this.global, {
             includeTranscendence: true,
             activeTranscendenceCards: this.state.activeTranscendenceCards,
+            factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
             specialCardSelections: this.state.activeSpecialCardSelections,
             // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함
@@ -1403,11 +1417,68 @@
         // Clear options for next round
         this.state.draft.currentOptions = [];
 
+        this.saveGame();
+
         if (this.state.deck.indexOf(null) === -1) {
             this.showAlert("덱 구성 완료!");
-            this.toMenu();
+            this.state.draft.active = false;
+            this.showScreen('screen-deck');
         } else {
             this.startDraft();
+        }
+    },
+
+    generateFactoryBundles() {
+        const baseCards = CARDS || [];
+        const unlockedBonusCards = this.getUnlockedBonusCards() || [];
+        let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence');
+
+        const selectedSet = new Set(this.state.factoryDraft.pool);
+        let availablePool = fullPool.filter(c => !selectedSet.has(c.id));
+
+        const getGradePool = (grade) => availablePool.filter(c => c.grade === grade);
+
+        const pickRandom = (arr, count = 1) => {
+            let shuffled = [...arr].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        };
+
+        const normalPicks = pickRandom(getGradePool('normal'), 2);
+        const rarePicks = pickRandom(getGradePool('rare'), 2);
+        const epicPicks = pickRandom(getGradePool('epic'), 2);
+        const legendPicks = pickRandom(getGradePool('legend'), 2);
+
+        // bundle 1 gets the 0-th index of picks, bundle 2 gets the 1-st index.
+        const bundle1 = [normalPicks[0].id, rarePicks[0].id, epicPicks[0].id, legendPicks[0].id];
+        const bundle2 = [normalPicks[1].id, rarePicks[1].id, epicPicks[1].id, legendPicks[1].id];
+
+        this.state.factoryDraft.currentBundles = [bundle1, bundle2];
+
+        this.showScreen('screen-factory-draft');
+        this.renderFactoryDraftScreen();
+    },
+
+    selectFactoryBundle(index) {
+        const bundle = this.state.factoryDraft.currentBundles[index];
+        if (!bundle) return;
+
+        this.state.factoryDraft.pool.push(...bundle);
+        this.state.factoryDraft.round++;
+        this.state.factoryDraft.currentBundles = [];
+
+        this.saveGame();
+
+        if (this.state.factoryDraft.round > this.state.factoryDraft.maxRounds) {
+            this.state.factoryDraft.active = false;
+            this.state.factoryPool = [...this.state.factoryDraft.pool];
+            this.state.inventory = [];
+            this.state.deck = [null, null, null];
+            this.state.tickets = 20;
+            
+            this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 32장의 전용 풀을 바탕으로 모험을 시작합니다.");
+            this.toMenu();
+        } else {
+            this.generateFactoryBundles();
         }
     },
 
@@ -1540,6 +1611,7 @@
             let allCards = GameUtils.buildCardPool(this.global, {
                 includeTranscendence: true,
                 activeTranscendenceCards: this.state.activeTranscendenceCards,
+                factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
                 activeBonusPoolIds: this.state.activeBonusPoolIds,
                 specialCardSelections: this.state.activeSpecialCardSelections,
                 // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
