@@ -504,7 +504,7 @@ const CARDS = [
         trait: { type: 'party_stat_boost', stat: 'atk', val: 30, desc: '파티 전체 공격력 30%상승' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '미드나잇쇼', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '암흑, 부식 부여', effects: [{ type: 'debuff', id: 'darkness' }, { type: 'debuff', id: 'corrosion' }] },
+            { name: '미드나잇쇼', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '암흑, 유혹 부여', effects: [{ type: 'debuff', id: 'darkness' }, { type: 'debuff', id: 'temptation' }] },
             { name: '커튼콜', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '저주 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'curse', mult: 3.0 }] }
         ]
     },
@@ -515,7 +515,7 @@ const CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '특제생크림', type: 'sup', tier: 3, cost: 30, desc: '필드버프 대지의축복, 스타파우더 부여', effects: [{ type: 'field_buff', id: 'earth_bless' }, { type: 'field_buff', id: 'star_powder' }] },
-            { name: '달콤한유혹', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '약화, 저주 부여', effects: [{ type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }] }
+            { name: '달콤한유혹', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '약화, 유혹 부여', effects: [{ type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'temptation' }] }
         ]
     },
     {
@@ -544,7 +544,7 @@ const CARDS = [
         trait: { type: 'party_stat_boost', stat: ['atk', 'matk', 'def', 'mdef'], val: 15, desc: '파티 전체 공격/마공 방어/마방 15%상승' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '하트샤워', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '디바인, 침묵 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'silence' }] },
+            { name: '하트샤워', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '디바인, 유혹 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'temptation' }] },
             { name: '순백의축복', type: 'sup', tier: 3, cost: 30, desc: '필드버프 운명의서약 부여', effects: [{ type: 'field_buff', id: 'destiny_oath' }] }
         ]
     }
