@@ -1082,7 +1082,7 @@ const BONUS_CARD_EXPANSION = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '피해 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '5턴에 걸쳐 매 턴 1배 마법대미지와 랜덤 디버프 부여', effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
-            { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness', stack: 1 }] }
+            { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
         ]
     },
     {
