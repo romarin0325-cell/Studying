@@ -762,8 +762,17 @@ const GameUtils = {
             
             // Still respect maxGrade if specified (e.g. for great sage blessing)
             if (options.maxGrade) {
-                const limitVal = this.getGradeSortValue(options.maxGrade);
-                pool = pool.filter(c => this.getGradeSortValue(c.grade) >= limitVal);
+                const gradeOrder = {
+                    transcendence: 0,
+                    legend: 1,
+                    epic: 2,
+                    rare: 3,
+                    normal: 4,
+                    event: 5
+                };
+                const getGradeVal = (g) => gradeOrder[g] ?? 99;
+                const limitVal = getGradeVal(options.maxGrade);
+                pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
             }
             return pool;
         }

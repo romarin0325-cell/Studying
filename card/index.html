@@ -2798,7 +2798,9 @@
                         () => {
                             this.initNewGame(this.selectedModeId);
                             modal.classList.remove('active');
-                            this.toMenu();
+                            if (this.selectedModeId !== 'factory') {
+                                this.toMenu();
+                            }
                         }
                     );
                 };
@@ -3596,6 +3598,7 @@
                 const renderBundle = (bundle, container) => {
                     bundle.forEach(id => {
                         const card = this.getCardData(id);
+                        if (!card) return;
                         const el = document.createElement('div');
                         el.className = 'card-item ' + card.grade;
                         el.style.display = 'flex';

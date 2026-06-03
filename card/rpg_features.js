@@ -1448,9 +1448,9 @@
         const epicPicks = pickRandom(getGradePool('epic'), 2);
         const legendPicks = pickRandom(getGradePool('legend'), 2);
 
-        // bundle 1 gets the 0-th index of picks, bundle 2 gets the 1-st index.
-        const bundle1 = [normalPicks[0].id, rarePicks[0].id, epicPicks[0].id, legendPicks[0].id];
-        const bundle2 = [normalPicks[1].id, rarePicks[1].id, epicPicks[1].id, legendPicks[1].id];
+        // Use optional chaining to prevent crashes if fewer than 2 cards are available
+        const bundle1 = [normalPicks[0]?.id, rarePicks[0]?.id, epicPicks[0]?.id, legendPicks[0]?.id].filter(Boolean);
+        const bundle2 = [normalPicks[1]?.id, rarePicks[1]?.id, epicPicks[1]?.id, legendPicks[1]?.id].filter(Boolean);
 
         this.state.factoryDraft.currentBundles = [bundle1, bundle2];
 
@@ -1462,11 +1462,9 @@
         const bundle = this.state.factoryDraft.currentBundles[index];
         if (!bundle) return;
 
-        this.state.factoryDraft.pool.push(...bundle);
+        this.state.factoryDraft.pool.push(...bundle.filter(Boolean));
         this.state.factoryDraft.round++;
         this.state.factoryDraft.currentBundles = [];
-
-        this.saveGame();
 
         if (this.state.factoryDraft.round > this.state.factoryDraft.maxRounds) {
             this.state.factoryDraft.active = false;
@@ -1480,6 +1478,8 @@
         } else {
             this.generateFactoryBundles();
         }
+
+        this.saveGame();
     },
 
 
