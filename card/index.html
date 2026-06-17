@@ -1431,11 +1431,24 @@
         <div class="modal-content" style="height:auto;">
             <h3>메뉴</h3>
             <button id="btn-toggle-tutoring" class="menu-btn" onclick="RPG.toggleTutoringEvent()">개인과외 이벤트: ON</button>
+            <button class="menu-btn" onclick="RPG.openCardPoolViewer()">카드풀 확인</button>
             <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
             <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
             <button class="menu-btn" onclick="RPG.toTitle()" style="border-color:#f44336; color:#ef5350;">타이틀로</button>
             <button onclick="document.getElementById('modal-menu').classList.remove('active')"
                 style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-card-pool" class="modal">
+        <div class="modal-content" style="height:85%; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>카드풀 확인</h3>
+                <button onclick="document.getElementById('modal-card-pool').classList.remove('active')"
+                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">닫기</button>
+            </div>
+            <p id="card-pool-info" style="font-size:0.85rem; color:#aaa; margin-bottom:8px;"></p>
+            <div id="card-pool-grid" class="card-grid"></div>
         </div>
     </div>
 
@@ -2881,6 +2894,63 @@
                     btn.style.borderColor = isOn ? '#4caf50' : '#555';
                     btn.style.color = isOn ? '#fff' : '#aaa';
                 }
+            },
+
+            openCardPoolViewer() {
+                const mode = this.state.mode;
+                let pool;
+
+                if (mode === 'factory' && this.state.factoryPool && this.state.factoryPool.length > 0) {
+                    // 팩토리: 드래프트된 40장 한정
+                    pool = GameUtils.buildCardPool(this.global, {
+                        factoryPool: this.state.factoryPool,
+                        specialCardSelections: this.state.activeSpecialCardSelections
+                    });
+                } else if (mode === 'chaos') {
+                    // 카오스: state.chaosPool (초월 포함 가능)
+                    const ids = this.state.chaosPool || [];
+                    pool = ids.map(id => this.getCardData(id)).filter(Boolean);
+                } else {
+                    // 통상/드래프트/아티팩트 등
+                    const includeT = (mode === 'draft');
+                    pool = GameUtils.buildCardPool(this.global, {
+                        includeTranscendence: includeT,
+                        activeTranscendenceCards: includeT ? this.state.activeTranscendenceCards : [],
+                        activeBonusPoolIds: this.state.activeBonusPoolIds,
+                        specialCardSelections: this.state.activeSpecialCardSelections,
+                        activeEventCards: this.state.activeEventCards,
+                        maxGrade: GameUtils.getMaxGradeForMode(mode)
+                    });
+                }
+
+                // 등급 오름차순 정렬 (normal → rare → epic → legend → transcendence)
+                const gradeAsc = { normal: 0, event: 1, rare: 2, epic: 3, legend: 4, transcendence: 5 };
+                pool.sort((a, b) => {
+                    const gd = (gradeAsc[a.grade] ?? 99) - (gradeAsc[b.grade] ?? 99);
+                    return gd !== 0 ? gd : a.name.localeCompare(b.name, 'ko');
+                });
+
+                // Info text
+                const modeLabel = { origin: '오리진', restriction: '제한', balance: '밸런스',
+                    flood: '범람', chaos: '카오스', draft: '드래프트', factory: '팩토리',
+                    artifact: '아티팩트', puzzle: '퍼즐' };
+                const label = modeLabel[mode] || mode;
+                document.getElementById('card-pool-info').innerText =
+                    `현재 모드: ${label} | 풀 카드 수: ${pool.length}장`;
+
+                // Render cards (pool viewer shows unique cards)
+                const grid = document.getElementById('card-pool-grid');
+                grid.innerHTML = '';
+                for (const card of pool) {
+                    const el = document.createElement('div');
+                    el.className = `card-item ${card.grade}`;
+                    el.innerHTML = `<div class="portrait"><img src="${card.name}.png" onerror="this.style.display='none'"></div><div>${card.name}</div>`;
+                    el.onclick = () => this.showCardInfo(card.id);
+                    grid.appendChild(el);
+                }
+
+                document.getElementById('modal-menu').classList.remove('active');
+                document.getElementById('modal-card-pool').classList.add('active');
             },
 
             // --- Chaos Roulette ---
