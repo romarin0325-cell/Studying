@@ -68,7 +68,8 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
     { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
-    { id: 'gemini-3.1-flash-lite', label: 'Flash(Lite)', flashLike: true, allowSearch: true }
+    { id: 'gemini-3-flash-preview', label: 'Flash', flashLike: true, allowSearch: true },
+    { id: 'gemini-3.1-flash-lite', label: 'Lite', flashLike: true, allowSearch: false }
 ]);
 
 function getLumiModelConfig(modelId) {
@@ -982,7 +983,7 @@ window.LumiQuestionRuntime = LumiQuestionRuntime;
 
 // --- Date System ---
 
-const DATE_PRIMARY_MODEL_ID = 'gemini-3.1-flash-lite';
+const DATE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
 const DATE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite';
 
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
