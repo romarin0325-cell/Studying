@@ -68,8 +68,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
     { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
-    { id: 'gemini-3.1-flash', label: 'Flash', flashLike: true, allowSearch: true },
-    { id: 'gemini-3.1-flash-lite', label: 'Lite', flashLike: true, allowSearch: false }
+    { id: 'gemini-3.1-flash-lite', label: 'Flash(Lite)', flashLike: true, allowSearch: true }
 ]);
 
 function getLumiModelConfig(modelId) {
@@ -1057,7 +1056,7 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
     if (dateParams.daysSinceLastDate >= 7) {
         lonelinessPart = `\n\n[중요: 서운함 표현] 이전 데이트 날짜와 현재 데이트 날짜가 ${dateParams.daysSinceLastDate}일이나 차이납니다. 데이트 초반에 요즘 데이트하러 자주 안 오는 것 같아서 서운하다는 감정을 자연스럽게 표현하세요. 하지만 형아가 왔으니 기쁘다는 감정도 함께 표현하세요.`;
     } else if (dateParams.daysSinceLastDate <= 3) {
-        lonelinessPart = `\n\n[중요: 애정 강화] 자주 데이트를 하게 되어 기쁘고 설레는 마음을 담아 전체적인 톤에서 애정과 플러팅을 한층 더 강화하세요. 형아와의 관계가 점점 더 깊어지고 애틋해지는 듯한 묘사를 추가하되, 정확한 데이트 간격이나 날짜는 절대 언급하지 마세요.`;
+        lonelinessPart = `\n\n[중요: 애정 강화] 자주 데이트를 하게 되어 기쁘고 설레는 마음을 담아 전체적인 톤에서 애정과 플러팅을 한층 더 강화하세요. 형아와의 관계가 점점 더 깊어지고 애틋해지는 듯한 묘사를 추가하되, 정확한 데이트 간격이나 날짜는 언급하지 마세요.`;
     }
 
     let secretPart = '';
@@ -1072,7 +1071,7 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
     if (enableEvent && Math.random() < 0.3) {
         const INNUENDO_KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '미끄러짐', '얽힘', '발/장난', '침/혀', '우유/끈적함', '젖음/비침', '마사지/민감한부위', '수면/무방비'];
         const innuendoKeyword = INNUENDO_KEYWORDS[Math.floor(Math.random() * INNUENDO_KEYWORDS.length)];
-        
+
         innuendoInstruction = `
 [고수위 상황 키워드]: ${innuendoKeyword}
 \n\n## [Special Direction: Unintentional Innuendo (Accidental)]
