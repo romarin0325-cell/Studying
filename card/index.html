@@ -1112,18 +1112,18 @@
 
     <div id="modal-mode-select" class="modal">
         <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
-            <div style="position:relative;">
-                <h3>게임 모드 선택</h3>
+            <div style="position:relative; margin-bottom: 10px;">
+                <h3 style="margin: 0;">게임 모드 선택</h3>
                 <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()"
-                    style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스
+                    style="display:none; position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스
                     룰렛</button>
                 <button id="btn-hard-mode" onclick="RPG.toggleHardMode()"
-                    style="display:none; position:absolute; top:-5px; right:0; padding:5px 10px; font-size:0.8rem; background:#333; border:1px solid #ff5252; color:#ff5252; border-radius:5px;">하드모드 OFF</button>
+                    style="display:none; position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ff5252; color:#ff5252; border-radius:5px;">하드모드 OFF</button>
             </div>
-            <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-bottom:10px;">
+            <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-bottom:10px;">
             </div>
             <div id="mode-desc"
-                style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:100px; overflow-y:auto; text-align:left;">
+                style="font-size:0.8rem; color:#ccc; background:#333; padding:10px; border-radius:5px; height:130px; overflow-y:auto; text-align:left;">
                 모드를 선택해주세요.
             </div>
             <button id="btn-enter-mode" class="menu-btn"
@@ -2733,8 +2733,8 @@
                 MODES.forEach(m => {
                     const btn = document.createElement('button');
                     btn.className = "menu-btn";
-                    btn.style.padding = "10px";
-                    btn.style.fontSize = "0.9rem";
+                    btn.style.padding = "8px";
+                    btn.style.fontSize = "0.8rem";
                     btn.innerText = m.name;
                     btn.id = `mode-btn-${m.id}`;
 
@@ -5351,7 +5351,7 @@
                 // Show date modal
                 document.getElementById('modal-date').classList.add('active');
                 this.updateDateRetryButton({ visible: false, disabled: true });
-                await this.loadDateContent(key, dateParams, 'gemini-3-flash-preview');
+                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite');
             },
 
             async retryDateWithFallback() {
