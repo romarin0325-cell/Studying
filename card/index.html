@@ -979,7 +979,7 @@
             <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
         </div>
         <div id="screen-factory-draft" class="screen">
-            <h3 style="margin:5px 0;">팩토리 드래프트 (<span id="factory-round-text">1/8 라운드</span>)</h3>
+            <h3 style="margin:5px 0;">팩토리 드래프트 (<span id="factory-round-text">1/10 라운드</span>)</h3>
             <div style="text-align:center; margin-bottom:5px; font-size:0.9rem; color:#ccc;">
                 두 묶음 중 하나를 선택하세요.<br>(선택받지 못한 묶음의 카드는 나중에 다시 등장할 수 있습니다)
             </div>
@@ -2708,7 +2708,7 @@
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'factory', name: '팩토리', desc: '시작 시 32장의 카드를 번들 단위로 드래프트하여 덱 풀을 구성합니다.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀을 구성합니다.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' }
                 ];
 
@@ -5351,7 +5351,7 @@
                 // Show date modal
                 document.getElementById('modal-date').classList.add('active');
                 this.updateDateRetryButton({ visible: false, disabled: true });
-                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite');
+                await this.loadDateContent(key, dateParams, 'gemini-3-flash-preview');
             },
 
             async retryDateWithFallback() {
