@@ -1141,7 +1141,7 @@
             chaosPool: [],
             factoryPool: [],
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
-            factoryDraft: { active: false, round: 1, maxRounds: 8, pool: [], seenCards: [], currentBundles: [] },
+            factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [] },
             artifacts: [],
             pendingEnemyId: null,
             pendingEnemyStage: null,
@@ -1188,7 +1188,7 @@
         if (mode === 'factory') {
             this.state.factoryDraft.active = true;
             this.state.factoryDraft.round = 1;
-            this.state.factoryDraft.maxRounds = 8; // 8 rounds * 4 cards = 32
+            this.state.factoryDraft.maxRounds = 10; // 10 rounds * 4 cards = 40
             this.state.factoryDraft.pool = [];
             this.state.factoryDraft.seenCards = [];
             this.generateFactoryBundles();
@@ -1430,7 +1430,7 @@
 
     generateFactoryBundles() {
         const baseCards = CARDS || [];
-        const unlockedBonusCards = this.getUnlockedBonusCards() || [];
+        const unlockedBonusCards = [...this.getReleasedStandardBonusCards(), ...this.getHiddenBonusCards()];
         let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence');
 
         const selectedSet = new Set(this.state.factoryDraft.pool);
@@ -1473,7 +1473,7 @@
             this.state.deck = [null, null, null];
             this.state.tickets = 20;
             
-            this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 32장의 전용 풀을 바탕으로 모험을 시작합니다.");
+            this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 40장의 전용 풀을 바탕으로 모험을 시작합니다.");
             this.toMenu();
         } else {
             this.generateFactoryBundles();

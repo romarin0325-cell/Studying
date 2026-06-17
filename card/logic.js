@@ -750,7 +750,7 @@ const GameUtils = {
      */
     buildCardPool(globalData, options = {}) {
         if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
-            // [Factory Mode] Limit pool entirely to the drafted 32 cards
+            // [Factory Mode] Limit pool entirely to the drafted 40 cards
             const allPossible = [
                 ...CARDS,
                 ...this.getBonusCards(),
