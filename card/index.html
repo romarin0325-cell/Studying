@@ -2923,10 +2923,10 @@
                     });
                 }
 
-                // 등급 오름차순 정렬 (normal → rare → epic → legend → transcendence)
-                const gradeAsc = { normal: 0, event: 1, rare: 2, epic: 3, legend: 4, transcendence: 5 };
+                // 등급 내림차순 정렬 (transcendence → legend → epic → rare → event → normal)
+                const gradeDesc = { transcendence: 0, legend: 1, epic: 2, rare: 3, event: 4, normal: 5 };
                 pool.sort((a, b) => {
-                    const gd = (gradeAsc[a.grade] ?? 99) - (gradeAsc[b.grade] ?? 99);
+                    const gd = (gradeDesc[a.grade] ?? 99) - (gradeDesc[b.grade] ?? 99);
                     return gd !== 0 ? gd : a.name.localeCompare(b.name, 'ko');
                 });
 
