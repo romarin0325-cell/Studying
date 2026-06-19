@@ -1239,7 +1239,7 @@
         </div>
     </div>
 
-    <div id="modal-card" class="modal">
+    <div id="modal-card" class="modal" style="z-index: 120;">
         <div class="modal-content">
             <h3 id="md-name">Name</h3>
             <div class="modal-scroll">
@@ -1440,7 +1440,7 @@
         </div>
     </div>
 
-    <div id="modal-card-pool" class="modal">
+    <div id="modal-card-pool" class="modal" style="z-index: 110;">
         <div class="modal-content" style="height:85%; overflow-y:auto;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>카드풀 확인</h3>
@@ -2931,9 +2931,11 @@
                 });
 
                 // Info text
-                const modeLabel = { origin: '오리진', restriction: '제한', balance: '밸런스',
-                    flood: '범람', chaos: '카오스', draft: '드래프트', factory: '팩토리',
-                    artifact: '아티팩트', puzzle: '퍼즐' };
+                const modeLabel = { origin: '오리진', restriction: '제약의 시련', balance: '균형의 도전',
+                    suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브',
+                    curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스',
+                    draft: '드래프트', factory: '팩토리', artifact: '아티팩트',
+                    overdrive: '오버드라이브', dream_corridor: '꿈의회랑' };
                 const label = modeLabel[mode] || mode;
                 document.getElementById('card-pool-info').innerText =
                     `현재 모드: ${label} | 풀 카드 수: ${pool.length}장`;
