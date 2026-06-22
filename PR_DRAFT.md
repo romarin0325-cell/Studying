@@ -1,19 +1,42 @@
 # Title
-card: update Gemini model IDs, refine date intervals, and optimize mode select UI
+card: fix card pool viewer bugs + 포춘쿠키(리스닝+운세) 기능 설계서 추가
 
 ## Summary
-- **Gemini Model Update**: Replaced deprecated `gemini-3-flash-preview` with `gemini-3.1-flash-lite` in the API primary model ID and UI load triggers.
-- **Date System Logic Adjustment**:
-  - Refactored `getDateContent` in `api.js` to change the loneliness/disappointment response threshold from 3 days to 7 days (`daysSinceLastDate >= 7`).
-  - Added an affection/flirtation boost for dates within 3 days (`daysSinceLastDate <= 3`) without mentioning exact days/durations.
-  - Left the 3-to-7-day range clear of any special prompt injections.
-- **Mode Select Modal UI Optimization**:
-  - Reduced individual button padding (`10px` -> `8px`) and font size (`0.9rem` -> `0.8rem`) in `#mode-list`.
-  - Shrunk grid gap (`5px` -> `4px`) and reduced `<h3>` margin top/bottom.
-  - Increased the description box (`#mode-desc`) height from `100px` to `130px` to prevent overflow and visibility issues on mobile with 11+ modes.
+
+### 1. 카드풀 뷰어 버그 수정
+- 모드 라벨 표시 및 z-index 이슈 해결
+
+### 2. 🥠 포춘쿠키 기능 설계서 (`docs/fortune_cookie_design.md`)
+
+타이틀 화면에 **포춘쿠키** 메뉴를 추가하는 기능의 종합 설계서입니다. 코드 구현은 포함되지 않습니다.
+
+#### 핵심 설계
+
+| 항목 | 설계 |
+|---|---|
+| **1일 1회 제한** | AM/PM 로직 — 오전(오늘 운세), 오후(내일 운세), 오후 사용 시 다음 오전 차단 |
+| **운세 시스템** | 10단계 (대길~대기만성), 하위 등급도 긍정적 해석. 날짜 시드 기반 결정론적 생성 |
+| **운세 다양성** | 3계층 조합: 등급 메시지 + 배경설정(계절/생일/요일/학습) + 키워드(꽃/기분/디저트/색) |
+| **리스닝** | TOEIC Part 2(1문항), Part 3(3문항), Part 4(3문항). Part 1 제외(사진 매핑 필요) |
+| **MP3** | 문제별 개별 파일. `card/listening/audio/` 에 배치 |
+| **기초 강의** | ❌ 별도 강의 없음 — Phase 1 화면에 Part별 한 줄 팁만 표시 |
+| **AI 해설** | ✅ 기존 루미 질문하기(`LumiQuestionRuntime`) 연동. 운세 화면에서 선택적 질문 |
+| **RPG 보상 연동** | ❌ 현재 미연동 |
+
+#### 플로우
+```
+🥠 포춘쿠키 클릭 → MP3 재생 → 문제 풀기 → 운세 표시 (+ 선택적 루미 질문)
+```
+
+#### 파일 구조 (구현 시)
+- `card/listening_data.js` — 리스닝 문제 데이터
+- `card/fortune_cookie.js` — 포춘쿠키 로직 (운세 + 리스닝 통합)
+- `card/listening/audio/` — MP3 파일 저장 폴더
+- `card/index.html` — 버튼 + 모달 + CSS 추가
 
 ## Testing
-- Ran validation tests with `npm run verify` (smoke tests and lint checks passed successfully).
+- `npm run verify` 통과 (smoke tests + lint checks)
 
 ## Notes
-- None
+- 포춘쿠키 설계서는 구현 계획만 포함하며, 실제 코드 변경은 없습니다.
+- MP3 파일은 교재 구매 후 별도로 준비가 필요합니다.
