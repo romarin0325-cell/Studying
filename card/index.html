@@ -938,6 +938,7 @@
             <div class="title-screen-actions">
                 <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로하기</button>
                 <button id="btn-start-load" class="menu-btn" onclick="RPG.startGame('load')" disabled>이어하기</button>
+                <button id="btn-fortune-cookie" class="menu-btn" onclick="FortuneCookie.open()" style="border-color: #ffd700; color: #ffd700;">🥠 포춘쿠키</button>
                 <button id="btn-title-question" class="menu-btn" onclick="RPG.openLumiQuestion()"
                     disabled>질문하기</button>
                 <button id="btn-title-mission" class="menu-btn" onclick="RPG.openMissionHub()"
@@ -1588,7 +1589,9 @@
                 { src: 'api.js', label: 'API 모듈' },
                 { src: 'logic.js', label: '게임 로직' },
                 { src: 'battle_runtime.js', label: '전투 런타임' },
-                { src: 'rpg_features.js', label: 'RPG Feature Modules' }
+                { src: 'rpg_features.js', label: 'RPG Feature Modules' },
+                { src: 'listening_data.js', label: '리스닝 데이터' },
+                { src: 'fortune_cookie.js', label: '포춘쿠키 로직' }
             ];
             var idx = 0;
 
@@ -5535,6 +5538,39 @@
             RPG.waitForInitialDataLoad();
         });
     </script>
+
+    <!-- Fortune Cookie Modal -->
+    <div id="modal-fortune-cookie" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <!-- Phase 1: Listening -->
+            <div id="fortune-listening-phase" style="display: none; flex-direction: column; align-items: center;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
+                
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                    <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 10px; border-color: #4caf50; color: #4caf50;">▶ 다시 듣기</button>
+                    <div id="fortune-part-tip" style="font-size: 0.85rem; color: #ccc; margin-top: 5px;"></div>
+                </div>
+
+                <div id="fortune-options-container" style="display: flex; flex-direction: column; width: 100%; gap: 5px; margin-bottom: 15px;">
+                    <!-- Options injected here -->
+                </div>
+
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto;">닫기</button>
+            </div>
+
+            <!-- Phase 2: Result -->
+            <div id="fortune-result-phase" style="display: none; flex-direction: column; align-items: center;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>
+                
+                <div id="fortune-result-grade" style="color: #ffd700; font-size: 1.5rem; font-weight: bold; margin: 15px 0;"></div>
+                <div id="fortune-result-message" style="font-style: italic; font-size: 1.1rem; line-height: 1.5; color: #fff; margin-bottom: 20px; padding: 0 10px;"></div>
+
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto;">닫기</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
