@@ -19,6 +19,7 @@ const FortuneCookie = {
     const btn = document.getElementById('btn-fortune-cookie');
     if(btn) {
       btn.addEventListener('click', () => this.open());
+      btn.disabled = false;
     }
   },
 
@@ -28,7 +29,10 @@ const FortuneCookie = {
     if (now.getHours() >= 12) {
       now.setDate(now.getDate() + 1);
     }
-    return now.toISOString().split('T')[0];
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   },
 
   canUse() {
@@ -45,7 +49,14 @@ const FortuneCookie = {
 
   open() {
     if (!this.canUse()) {
-      const savedResult = JSON.parse(localStorage.getItem('fortuneCookieLastResult') || '{}');
+      let savedResult = {};
+      try {
+        const raw = localStorage.getItem('fortuneCookieLastResult');
+        if (raw) savedResult = JSON.parse(raw);
+      } catch (e) {
+        console.warn("로컬 스토리지 파싱 에러 복구", e);
+        savedResult = {};
+      }
       this.showFortunePhase(savedResult);
       return;
     }
@@ -187,3 +198,6 @@ const FortuneCookie = {
     }
   }
 };
+
+// 스크립트 로드 완료 시 자동 실행
+FortuneCookie.init();
