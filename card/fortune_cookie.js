@@ -112,8 +112,8 @@ const FortuneCookie = {
       this.audio.pause();
     }
     this.audio = new Audio(this.currentSet.audioFile);
-    // 기본적으로 자동 재생 시도
-    this.playAudio();
+    // 기본적으로 자동 재생하지 않고 사용자가 버튼을 눌렀을 때 재생하도록 주석 처리
+    // this.playAudio();
   },
 
   playAudio() {
@@ -141,7 +141,7 @@ const FortuneCookie = {
     }, 1500);
   },
 
-  generateAndShowFortune() {
+  async generateAndShowFortune() {
     let totalWeight = FORTUNE_GRADES.reduce((sum, g) => sum + g.weight, 0);
     let rand = Math.random() * totalWeight;
     let selectedGrade = FORTUNE_GRADES[FORTUNE_GRADES.length - 1]; // fallback
@@ -157,14 +157,100 @@ const FortuneCookie = {
     const randMsgIndex = Math.floor(Math.random() * selectedGrade.messages.length);
     const message = selectedGrade.messages[randMsgIndex];
 
+    // 키워드 선택
+    const gradeName = selectedGrade.grade;
+    let keywordPool = GameAPI.FORTUNE_NORMAL_KEYWORDS;
+    if (gradeName.includes("소흉반전") || gradeName.includes("흉전길") || gradeName.includes("대기만성")) {
+      keywordPool = GameAPI.FORTUNE_LOW_KEYWORDS;
+    }
+    const keyword = keywordPool[Math.floor(Math.random() * keywordPool.length)];
+
+    // 이벤트 판정
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+    let event = 'none';
+    if (m === 1 && d === 1) event = '새해';
+    else if (m === 12 && d === 25) event = '크리스마스';
+    else if (m === 4 && d === 3) event = '생일';
+
+    // 시간대 판정
+    const timeOfDay = now.getHours() < 12 ? 'morning' : 'afternoon';
+
     const result = {
       grade: selectedGrade.grade,
-      message: message,
-      dateStr: this.getTodayDateString()
+      message: message, // 정적 폴백 메시지
+      dateStr: this.getTodayDateString(),
+      keyword: keyword,
+      event: event,
+      timeOfDay: timeOfDay,
+      lumiMessage: null // API 대사가 들어갈 자리
     };
 
+    // 1차 캐싱 (API 응답 전)
     this.markUsed(result);
     this.showFortunePhase(result);
+
+    // API 호출
+    this.callFortuneApi(result, 'gemini-3-flash-preview');
+  },
+
+  async callFortuneApi(result, modelId) {
+    const msgBox = document.getElementById('fortune-result-message');
+    const retryBtn = document.getElementById('fortune-retry-btn');
+    
+    msgBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">루미가 운세를 읽고 있어요...<br><span style="font-size:0.8rem; color:#aaa;">키워드: ${result.keyword}</span></div>`;
+    retryBtn.style.display = 'none';
+
+    // RPG.ensureApiKey()가 fortune_cookie.js에서 직접 접근 안 될 수 있으므로 전역 접근 고려 (또는 localStorage에서 읽기)
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) {
+      msgBox.innerHTML = `"${result.message}"`;
+      msgBox.style.fontStyle = "italic";
+      return;
+    }
+
+    try {
+      const text = await GameAPI.getFortuneContent(apiKey, {
+        grade: result.grade,
+        gradeDescription: result.message,
+        keyword: result.keyword,
+        timeOfDay: result.timeOfDay,
+        event: result.event
+      }, { model: modelId });
+
+      result.lumiMessage = text;
+      this.markUsed(result); // 최종 저장
+      this.renderFortuneMessage(result);
+
+    } catch (e) {
+      console.error("포춘쿠키 API 실패", e);
+      if (modelId === 'gemini-3-flash-preview') {
+        msgBox.innerHTML = `<div style="text-align:center; color:#ef5350;">운세를 불러오다 깜빡했어요.<br><span style="font-size:0.8rem;">(API 호출 실패)</span></div>`;
+        retryBtn.style.display = 'block';
+        this._lastResultForRetry = result; // 재시도를 위해 임시 저장
+      } else {
+        // Fallback마저 실패하면 정적 메시지 출력
+        this.renderFortuneMessage(result);
+      }
+    }
+  },
+
+  retryWithFallback() {
+    if (!this._lastResultForRetry) return;
+    this.callFortuneApi(this._lastResultForRetry, 'gemini-3.1-flash-lite');
+  },
+
+  renderFortuneMessage(result) {
+    const msgBox = document.getElementById('fortune-result-message');
+    if (result.lumiMessage) {
+      const formatted = result.lumiMessage.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+      msgBox.innerHTML = formatted;
+      msgBox.style.fontStyle = "normal";
+    } else {
+      msgBox.innerHTML = `"${result.message}"`;
+      msgBox.style.fontStyle = "italic";
+    }
   },
 
   showFortunePhase(result) {
@@ -182,13 +268,22 @@ const FortuneCookie = {
 
     document.getElementById('fortune-result-date').innerText = `── ${result.dateStr} 운세 ──`;
     document.getElementById('fortune-result-grade').innerText = `【 ${result.grade} 】`;
-    document.getElementById('fortune-result-grade').style.color = "#ffd700";
-    document.getElementById('fortune-result-grade').style.fontSize = "1.5rem";
-    document.getElementById('fortune-result-grade').style.margin = "10px 0";
     
-    document.getElementById('fortune-result-message').innerText = `"${result.message}"`;
-    document.getElementById('fortune-result-message').style.fontStyle = "italic";
-    document.getElementById('fortune-result-message').style.lineHeight = "1.5";
+    // 이전에 저장된 결과에 lumiMessage가 있다면 바로 렌더링, 없으면 정적 메시지
+    if (result.lumiMessage || result.lumiMessage === null) {
+       // null인 경우는 위에서 callFortuneApi가 실행되며 로딩창으로 바뀔 것임
+       // 그러나 로컬스토리지에서 복원했는데 null인 경우 (로딩중 꺼진 경우)를 대비해 정적 메시지로 폴백
+       if (result.lumiMessage === null) {
+         this.renderFortuneMessage(result);
+       } else {
+         this.renderFortuneMessage(result);
+       }
+    } else {
+      this.renderFortuneMessage(result);
+    }
+    
+    // retry 버튼 숨기기 (복원 시)
+    document.getElementById('fortune-retry-btn').style.display = 'none';
   },
 
   close() {

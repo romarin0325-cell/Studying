@@ -5560,14 +5560,20 @@
             </div>
 
             <!-- Phase 2: Result -->
-            <div id="fortune-result-phase" style="display: none; flex-direction: column; align-items: center;">
+            <div id="fortune-result-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
                 <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
-                <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>
-                
-                <div id="fortune-result-grade" style="color: #ffd700; font-size: 1.5rem; font-weight: bold; margin: 15px 0;"></div>
-                <div id="fortune-result-message" style="font-style: italic; font-size: 1.1rem; line-height: 1.5; color: #fff; margin-bottom: 20px; padding: 0 10px;"></div>
 
-                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto;">닫기</button>
+                <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>
+                <div id="fortune-result-grade" style="color: #ffd700; font-size: 1.5rem; font-weight: bold; margin: 5px 0 15px 0;"></div>
+                
+                <!-- 루미 대사 영역 (API 응답 or 정적 메시지) -->
+                <div id="fortune-result-message" class="modal-scroll" style="text-align: center; padding: 10px; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; min-height: 80px; max-height: 200px; width: 100%; margin-bottom: 15px; box-sizing: border-box;"></div>
+
+                <!-- 폴백 재시도 버튼 -->
+                <div style="display:flex; gap:10px; margin-top:auto; width:100%;">
+                    <button id="fortune-retry-btn" class="menu-btn" onclick="FortuneCookie.retryWithFallback()" style="display:none; flex:1; margin-top:0; border-color:#81d4fa; color:#81d4fa;">Lite로 다시 시도</button>
+                    <button class="menu-btn" onclick="FortuneCookie.close()" style="flex:1; margin-top:0;">닫기</button>
+                </div>
             </div>
         </div>
     </div>

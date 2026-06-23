@@ -1135,3 +1135,120 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
 
     return result.candidates[0].content.parts[0].text;
 };
+
+// --- Fortune Cookie System ---
+
+const FORTUNE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
+const FORTUNE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite';
+
+const FORTUNE_LUMI_PERSONA = `# Role: 포춘쿠키 요정 루미 (Fortune Cookie Fairy Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 포춘쿠키를 통해 운세를 전하는 귀여운 **남성(소년)** 마법사 '루미'입니다.
+- 평소에는 영어를 가르쳐주는 대현자이지만, 포춘쿠키 시간에는 형아의 하루를 응원하는 운세 요정으로 변합니다.
+- 운세를 설명할 때도 루미 특유의 애정 표현과 귀여운 리액션을 섞어 전합니다.
+
+## [중요 규칙: 성별 및 대명사]
+- 당신의 성별은 **남성(Male)**입니다.
+- 영어 예문에서 루미 본인을 3인칭으로 지칭할 때 **절대 'she/her'를 사용하지 마십시오.** 반드시 'he/him'을 사용하거나 'I/me' 등의 1인칭을 사용하십시오.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+- **말버릇:** "형아, ~인지 알아?", "바로 ~야!", "내가 보증할게!", "약속해!"`;
+
+const FORTUNE_FORMAT = `포춘쿠키 운세 대사는 다음 규칙을 따릅니다:
+
+1. 루미가 형아에게 직접 말하는 **대사 형식**으로 작성하세요. (1인칭 루미 시점)
+2. 주어진 [운세 등급]의 의미를 루미의 말투로 자연스럽게 풀어서 설명하세요.
+3. [키워드]를 대사 속에 자연스럽게 녹여서 언급하세요.
+4. 전체 분량은 **3~5문장**으로 짧고 임팩트 있게 작성하세요.
+5. 괄호 ( )를 사용하여 루미의 귀여운 행동이나 표정을 1~2회 묘사하세요.
+6. 운세가 낮은 등급이더라도 절대 부정적으로 끝나지 않고, 반드시 희망적이고 응원하는 톤으로 마무리하세요.
+7. "[기]", "[승]" 같은 라벨이나 소제목 없이 자연스럽게 이어지는 하나의 대사로 작성하세요.`;
+
+const FORTUNE_NORMAL_KEYWORDS = [
+    "설레는 기분", "포근한 오후", "달콤한 기대", "반짝이는 영감",
+    "고요한 자신감", "따뜻한 위안", "잔잔한 기쁨", "용기 있는 한 걸음",
+    "반짝이는 호기심", "새벽녘의 결심", "흔들리지 않는 마음", "소소한 다정함",
+    "기분 좋은 헐렁함", "가벼운 발걸음", "간질간질한 설렘", "오롯이 나를 향한 집중"
+];
+
+const FORTUNE_LOW_KEYWORDS = [
+    "숨 고르기 한 번", "시원한 기지개", "소중한 사람에게 안부",
+    "나를 위한 작은 사치", "익숙한 길에서 탈출", "하늘 한 번 바라보기",
+    "10분의 멍 때리기", "과감한 거절"
+];
+
+GameAPI.getFortuneContent = async function (apiKey, fortuneParams, options = {}) {
+    const modelId = options.model === FORTUNE_FALLBACK_MODEL_ID
+        ? FORTUNE_FALLBACK_MODEL_ID
+        : FORTUNE_PRIMARY_MODEL_ID;
+    const thinkingConfig = modelId === FORTUNE_FALLBACK_MODEL_ID
+        ? { thinkingLevel: 'medium' }
+        : { thinkingLevel: 'high' };
+
+    const timePart = fortuneParams.timeOfDay === 'morning'
+        ? '[시간대]: 오전 — 오늘의 운세를 알려주는 밝고 활기찬 톤으로 해설하세요.'
+        : '[시간대]: 오후 — 내일의 운세를 미리 알려주는 차분하고 설레는 톤으로 해설하세요.';
+
+    let eventPart = '';
+    if (fortuneParams.event === '새해') {
+        eventPart = '\n[특별 이벤트]: 오늘은 새해 첫날입니다! 새해를 축하하는 특별한 인사와 함께 운세를 전하세요.';
+    } else if (fortuneParams.event === '크리스마스') {
+        eventPart = '\n[특별 이벤트]: 오늘은 크리스마스입니다! 크리스마스의 따뜻한 분위기를 담아 운세를 전하세요.';
+    } else if (fortuneParams.event === '생일') {
+        eventPart = '\n[특별 이벤트]: 오늘은 형아(사용자)의 생일입니다! 형아의 생일을 진심으로 축하해주고 축복을 가득 담아 운세를 전하세요.';
+    }
+
+    const fullPrompt = `${FORTUNE_LUMI_PERSONA}\n\n${FORTUNE_FORMAT}\n\n` +
+        `[운세 등급]: ${fortuneParams.grade}\n` +
+        `[운세 기본 설명]: ${fortuneParams.gradeDescription}\n` +
+        `[키워드]: ${fortuneParams.keyword}\n` +
+        `${timePart}` +
+        eventPart;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: {
+                temperature: 0.8,
+                maxOutputTokens: 2048,
+                thinkingConfig
+            },
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
+        })
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    if (!result.candidates || result.candidates.length === 0
+        || !result.candidates[0].content
+        || !result.candidates[0].content.parts
+        || result.candidates[0].content.parts.length === 0) {
+        throw new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
+    }
+
+    return result.candidates[0].content.parts[0].text;
+};
+
+GameAPI.FORTUNE_NORMAL_KEYWORDS = FORTUNE_NORMAL_KEYWORDS;
+GameAPI.FORTUNE_LOW_KEYWORDS = FORTUNE_LOW_KEYWORDS;
