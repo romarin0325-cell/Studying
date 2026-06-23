@@ -165,8 +165,11 @@ const FortuneCookie = {
     }
     const keyword = keywordPool[Math.floor(Math.random() * keywordPool.length)];
 
-    // 이벤트 판정
+    // 이벤트 판정 (오전=오늘, 오후=내일 운세이므로 날짜 통일)
     const now = new Date();
+    if (now.getHours() >= 12) {
+      now.setDate(now.getDate() + 1);
+    }
     const m = now.getMonth() + 1;
     const d = now.getDate();
     let event = 'none';
