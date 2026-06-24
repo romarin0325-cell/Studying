@@ -13,7 +13,9 @@ const FORTUNE_GRADES = [
 
 const FortuneCookie = {
   currentSet: null,
+  currentMultiSession: null,
   audio: null,
+  _timerId: null,
 
   init() {
     const btn = document.getElementById('btn-fortune-cookie');
@@ -70,31 +72,44 @@ const FortuneCookie = {
     const randIndex = Math.floor(Math.random() * LISTENING_DATA.length);
     this.currentSet = LISTENING_DATA[randIndex];
     
-    this.showListeningPhase();
+    if (this.currentSet.part === 2) {
+      this.showListeningPhase();
+    } else {
+      // Part 3/4
+      this.currentMultiSession = {
+        qIndex: 0,
+        results: [],
+        totalQuestions: this.currentSet.questions.length
+      };
+      
+      if (this.audio) {
+        this.audio.pause();
+      }
+      this.audio = new Audio(this.currentSet.audioFile);
+      
+      this.showMultiHub();
+    }
   },
 
   showListeningPhase() {
     document.getElementById('modal-fortune-cookie').classList.add('active');
     document.getElementById('fortune-listening-phase').style.display = 'flex';
+    document.getElementById('fortune-multi-hub-phase').style.display = 'none';
+    document.getElementById('fortune-multi-q-phase').style.display = 'none';
+    document.getElementById('fortune-explanation-phase').style.display = 'none';
     document.getElementById('fortune-result-phase').style.display = 'none';
     
     // UI 업데이트
     document.getElementById('fortune-part-title').innerText = this.currentSet.setTitle;
-    
-    let tip = "";
-    if (this.currentSet.part === 2) tip = "💡 질문을 듣고 가장 적절한 응답을 고르세요.";
-    else if (this.currentSet.part === 3) tip = "💡 두 사람의 대화를 듣고 이어지는 질문에 답하세요.";
-    else if (this.currentSet.part === 4) tip = "💡 담화를 듣고 이어지는 질문에 답하세요.";
-    document.getElementById('fortune-part-tip').innerText = tip;
+    document.getElementById('fortune-part-tip').innerText = "💡 질문을 듣고 가장 적절한 응답을 고르세요.";
 
     // 문제 보기 초기화 (Part 2는 1문제이므로 일단 첫 번째 문제만 로드)
     const qData = this.currentSet.questions[0];
     const optionsContainer = document.getElementById('fortune-options-container');
     optionsContainer.innerHTML = '';
 
-    const labels = ['(A)', '(B)', '(C)', '(D)'];
-    // Part 2는 보통 3지선다
-    const optionCount = this.currentSet.part === 2 ? 3 : 4;
+    const labels = ['(A)', '(B)', '(C)'];
+    const optionCount = 3;
     
     for (let i = 0; i < optionCount; i++) {
       const btn = document.createElement('button');
@@ -118,8 +133,14 @@ const FortuneCookie = {
 
   playAudio() {
     if (this.audio) {
-      this.audio.currentTime = 0;
-      this.audio.play().catch(e => console.log("Auto-play blocked by browser. Please click Play manually.", e));
+      if (this.audio.paused) {
+        if (this.audio.ended) {
+          this.audio.currentTime = 0;
+        }
+        this.audio.play().catch(e => console.log("Auto-play blocked by browser. Please click Play manually.", e));
+      } else {
+        this.audio.pause();
+      }
     }
   },
 
@@ -136,9 +157,151 @@ const FortuneCookie = {
     }
 
     // 1.5초 후 운세 보여주기
-    setTimeout(() => {
+    this._timerId = setTimeout(() => {
       this.generateAndShowFortune();
     }, 1500);
+  },
+
+  showMultiHub() {
+    document.getElementById('modal-fortune-cookie').classList.add('active');
+    
+    // Hide all phases
+    document.getElementById('fortune-listening-phase').style.display = 'none';
+    document.getElementById('fortune-multi-q-phase').style.display = 'none';
+    document.getElementById('fortune-explanation-phase').style.display = 'none';
+    document.getElementById('fortune-result-phase').style.display = 'none';
+    
+    // Show Multi Hub
+    document.getElementById('fortune-multi-hub-phase').style.display = 'flex';
+    
+    const set = this.currentSet;
+    document.getElementById('fortune-multi-part-title').innerText = `${set.setTitle} (Part ${set.part})`;
+    
+    const session = this.currentMultiSession;
+    const btn = document.getElementById('fortune-multi-q-btn');
+    btn.innerText = `📝 문제 풀기 (${session.qIndex + 1}/${session.totalQuestions})`;
+  },
+
+  showMultiQuestion() {
+    document.getElementById('fortune-multi-hub-phase').style.display = 'none';
+    document.getElementById('fortune-multi-q-phase').style.display = 'flex';
+    
+    const session = this.currentMultiSession;
+    const qData = this.currentSet.questions[session.qIndex];
+    
+    document.getElementById('fortune-multi-q-title').innerText = `문제 ${session.qIndex + 1}/${session.totalQuestions}`;
+    document.getElementById('fortune-multi-q-text').innerText = qData.questionText;
+    
+    const optionsContainer = document.getElementById('fortune-multi-options-container');
+    optionsContainer.innerHTML = '';
+    
+    const labels = ['(A)', '(B)', '(C)', '(D)'];
+    for (let i = 0; i < 4; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'menu-btn option-btn';
+      btn.innerText = `${labels[i]} ${qData.options[i]}`;
+      btn.style.padding = "10px";
+      btn.style.marginBottom = "5px";
+      btn.style.fontSize = "0.95rem";
+      btn.style.textAlign = "left";
+      btn.onclick = () => this.handleMultiAnswer(i, btn, qData.answer);
+      optionsContainer.appendChild(btn);
+    }
+    
+    const feedback = document.getElementById('fortune-multi-q-feedback');
+    feedback.style.display = 'none';
+    feedback.className = '';
+    feedback.innerText = '';
+  },
+
+  handleMultiAnswer(selectedIndex, btnElement, correctIndex) {
+    const buttons = document.querySelectorAll('#fortune-multi-options-container .option-btn');
+    buttons.forEach(b => b.disabled = true);
+
+    const feedback = document.getElementById('fortune-multi-q-feedback');
+    feedback.style.display = 'block';
+
+    const isCorrect = (selectedIndex === correctIndex);
+
+    if (isCorrect) {
+      btnElement.classList.add('correct');
+      feedback.style.color = '#4caf50';
+      feedback.innerText = '정답입니다!';
+    } else {
+      btnElement.classList.add('wrong');
+      buttons[correctIndex].classList.add('correct');
+      feedback.style.color = '#ef5350';
+      feedback.innerText = '오답입니다...';
+    }
+    
+    this.currentMultiSession.results.push({
+      isCorrect,
+      userAnswer: selectedIndex,
+      correctIndex
+    });
+    
+    this.currentMultiSession.qIndex++;
+    
+    this._timerId = setTimeout(() => {
+      if (this.currentMultiSession.qIndex < this.currentMultiSession.totalQuestions) {
+        this.showMultiHub();
+      } else {
+        if (this.audio) this.audio.pause();
+        this.showExplanation();
+      }
+    }, 1500);
+  },
+
+  showExplanation() {
+    document.getElementById('fortune-multi-q-phase').style.display = 'none';
+    document.getElementById('fortune-explanation-phase').style.display = 'flex';
+    
+    const set = this.currentSet;
+    const results = this.currentMultiSession.results;
+    let html = '';
+
+    // 1. English Script
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<div style="color:#81d4fa; font-weight:bold; margin-bottom:8px;">📝 English Script</div>`;
+    html += `<div style="color:#e0e0e0; line-height:1.7; white-space: pre-wrap;">${set.passage}</div>`;
+    html += `</div>`;
+
+    // 2. 지문 해석
+    html += `<div style="margin-bottom:15px;">`;
+    html += `<div style="color:#ffd700; font-weight:bold; margin-bottom:8px;">📖 지문 해석</div>`;
+    html += `<div style="color:#ccc; line-height:1.7; white-space: pre-wrap;">${set.passageKo}</div>`;
+    html += `</div>`;
+
+    // 3. 문제별 정오답
+    const labels = ['(A)', '(B)', '(C)', '(D)'];
+    set.questions.forEach((q, idx) => {
+      const result = results[idx];
+      const icon = result.isCorrect ? '✅' : '❌';
+
+      html += `<hr style="border-color:#333; margin:15px 0;">`;
+      html += `<div style="font-weight:bold; color:#fff; margin-bottom:8px;">${String(idx+1).padStart(2,'0')}번 ${icon}</div>`;
+      html += `<div style="color:#e0e0e0; margin-bottom:10px;">${q.questionText}<br><span style="font-size:0.85rem;color:#aaa">${q.questionTextKo}</span></div>`;
+
+      q.options.forEach((opt, optIdx) => {
+        let style = 'color:#aaa;';
+        let suffix = '';
+        if (optIdx === q.answer) {
+          style = 'color:#4caf50; font-weight:bold;';
+          suffix = ' ✅';
+        } else if (!result.isCorrect && optIdx === result.userAnswer) {
+          style = 'color:#ef5350;';
+          suffix = ' ❌ (내 선택)';
+        }
+        html += `<div style="${style} margin-left:10px; margin-bottom:6px;">${labels[optIdx]} ${opt}<br><span style="font-size:0.85rem;color:#777">${q.optionsKo[optIdx]}</span>${suffix}</div>`;
+      });
+    });
+
+    document.getElementById('fortune-explanation-scroll').innerHTML = html;
+  },
+
+  goToFortuneFromExplanation() {
+    document.getElementById('fortune-explanation-phase').style.display = 'none';
+    this.generateAndShowFortune();
   },
 
   async generateAndShowFortune() {
@@ -259,6 +422,9 @@ const FortuneCookie = {
   showFortunePhase(result) {
     document.getElementById('modal-fortune-cookie').classList.add('active');
     document.getElementById('fortune-listening-phase').style.display = 'none';
+    document.getElementById('fortune-multi-hub-phase').style.display = 'none';
+    document.getElementById('fortune-multi-q-phase').style.display = 'none';
+    document.getElementById('fortune-explanation-phase').style.display = 'none';
     document.getElementById('fortune-result-phase').style.display = 'flex';
 
     if (this.audio) {
@@ -290,6 +456,10 @@ const FortuneCookie = {
   },
 
   close() {
+    if (this._timerId) {
+      clearTimeout(this._timerId);
+      this._timerId = null;
+    }
     document.getElementById('modal-fortune-cookie').classList.remove('active');
     if (this.audio) {
       this.audio.pause();
