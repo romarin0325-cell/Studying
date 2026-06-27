@@ -644,7 +644,7 @@ const BattleRuntime = {
                 killer.hp -= dmgResult.dmg;
                 killer.tookDamageThisTurn = true;
                 const traitLog = player.proto.trait.type === 'ally_death_base_atk_phy'
-                    ? `[특성] ${player.name}: 아군 사망 반응!`
+                    ? `[특성] ${player.name}: 애쉬의 화염이 적을 불태웁니다.`
                     : `[특성] ${player.name}: 빛속성 아군의 희생에 반응!`;
                 rpg.log(`${traitLog} ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
             }
@@ -724,7 +724,7 @@ const BattleRuntime = {
             Math.random() < ((source.proto.trait.val || 0) / 100)
         ) {
             target.buffs.stun = 1;
-            rpg.log("[특성] 큐어마스터: 마법 구슬이 반응해 적에게 [기절] 부여!");
+            rpg.log("[특성] 큐어마스터: 레모네이드의 향으로 적에게 [기절] 부여!");
         }
 
         if (

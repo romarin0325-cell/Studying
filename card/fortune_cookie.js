@@ -21,7 +21,7 @@ const FortuneCookie = {
     const btn = document.getElementById('btn-fortune-cookie');
     if(btn) {
       btn.addEventListener('click', () => this.open());
-      btn.disabled = false;
+      // disabled 해제는 setStartButtonsEnabled()가 담당 (다른 버튼과 동시에 활성화)
     }
   },
 
