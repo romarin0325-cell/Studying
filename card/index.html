@@ -710,6 +710,8 @@
             font-size: 0.92rem;
             line-height: 1.7;
             white-space: pre-wrap;
+            word-break: keep-all;
+            overflow-wrap: break-word;
             text-align: left;
             color: #e0e0e0;
             margin-bottom: 10px;
@@ -2572,10 +2574,12 @@
                 const btnLoad = document.getElementById('btn-start-load');
                 const btnQuestion = document.getElementById('btn-title-question');
                 const btnMission = document.getElementById('btn-title-mission');
+                const btnFortune = document.getElementById('btn-fortune-cookie');
                 if (btnNew) btnNew.disabled = !enabled;
                 if (btnLoad) btnLoad.disabled = !enabled;
                 if (btnQuestion) btnQuestion.disabled = !enabled;
                 if (btnMission) btnMission.disabled = !enabled;
+                if (btnFortune) btnFortune.disabled = !enabled;
 
                 const loading = document.getElementById('title-loading');
                 if (loading) {
@@ -3684,7 +3688,7 @@
                         el.innerHTML = `
                             <img src="${card.name}.png" style="width:30px; height:40px; object-fit:cover; border:1px solid #777; border-radius:3px;" onerror="this.style.display='none'">
                             <div>
-                                <div style="font-weight:bold;">[${card.grade.toUpperCase()}] ${card.name}</div>
+                                <div style="font-weight:bold;">${card.name}</div>
                                 <div style="font-size:0.75rem; color:#ccc;">${card.role} / ${card.element}</div>
                             </div>
                         `;
@@ -5592,8 +5596,12 @@
             <!-- Phase 1.7: Explanation View (Part 3/4) -->
             <div id="fortune-explanation-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
                 <h2 style="color: #ffd700; margin-top: 0;">📝 해설</h2>
+
+                <div class="portrait" style="width: 80px; height: 106px; border-color: #ffd700; margin: 0 auto 12px auto; flex-shrink: 0;">
+                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                </div>
                 
-                <div id="fortune-explanation-scroll" class="modal-scroll toeic-passage-scroll" style="width: 100%; text-align: left; padding: 15px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; height: 350px; margin-bottom: 15px;">
+                <div id="fortune-explanation-scroll" class="modal-scroll toeic-passage-scroll" style="width: 100%; text-align: left; padding: 15px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; max-height: 45vh; overflow-y: auto; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; margin-bottom: 15px;">
                     <!-- Explanation injected here -->
                 </div>
 

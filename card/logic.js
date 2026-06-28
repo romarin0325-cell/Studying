@@ -341,7 +341,7 @@ const BASE_ARTIFACT_LIST = [
     { id: 'milkshake', name: '밀크쉐이크', desc: '스타파우더 효과 2배' },
     { id: 'buff_overload', name: '버프오버로드', desc: '필드버프 상한 5개로 변경' },
     { id: 'shadow_ball', name: '섀도우볼', desc: '암흑 효과가 마법방어도 감소하도록 변경' },
-    { id: 'assassin_nail', name: '어쌔신네일', desc: '암흑 효과 2배 적용' },
+    { id: 'assassin_nail', name: '어쌔신네일', desc: '암흑/부식 효과 2배 적용' },
     { id: 'veil_of_darkness', name: '베일오브다크니스', desc: '어둠속성 카드 치명타와 회피율 10% 증가' },
     { id: 'rabbit_hole', name: '래빗홀', desc: '눈토끼, 밤토끼, 은토끼의 치명타와 회피율 20% 증가' },
     { id: 'lucky_vicky', name: '럭키비키', desc: '치명타 혹은 회피 발생시 마나 10 회복' },
@@ -2419,10 +2419,9 @@ const Logic = {
             else if (tr && tr.type === 'mid_party_mdef_boost' && originalIdx === 1) {
                 partyBoost.mdef += (tr.val || 0);
             }
-            // 스컬드래곤: 대장 배치 시 덱 전체 방어/마방 감소
+            // 스컬드래곤: 대장 배치 시 덱 전체 방어 감소
             else if (tr && tr.type === 'leader_self_atk_party_def_down' && originalIdx === 2) {
                 partyBoost.def -= (tr.defDown || 50);
-                partyBoost.mdef -= (tr.defDown || 50);
             }
             // 크리스마스 밤토끼: 3장 조합시 파티 전체 치명타 증가
             else if (tr && tr.type === 'christmas_rabbit_trio_crit' && tr.requiredPeers) {

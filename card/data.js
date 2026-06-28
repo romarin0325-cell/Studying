@@ -1008,7 +1008,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
         stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
-        trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력/마법방어력 50% 감소' },
+        trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력 50% 감소' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
@@ -1545,7 +1545,7 @@ const TRANSCENDENCE_CARDS = [
         trait: { type: 'behemoth_liberated_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용 시 20% 확률로 적에게 스턴 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '월드브레이커', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
+            { name: '월드브레이커', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0, customLog: "대지의 축복으로 월드브레이커의 위력이 강력해집니다!" }] },
             { name: '제로그라비티', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '다음 턴에 공격 (적에게 걸린 디버프 1종당 0.5배율 추가)', effects: [{ type: 'delayed_attack_debuff_scale', turns: 1, multPerDebuff: 0.5 }] }
         ]
     },
