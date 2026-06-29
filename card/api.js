@@ -478,7 +478,7 @@ async function requestLumiQuestion(apiKey, history, options = {}) {
         const content = candidate && candidate.content;
         const parts = content && Array.isArray(content.parts) ? content.parts : [];
         const text = parts
-            .filter(part => typeof part.text === 'string')
+            .filter(part => !part.thought && typeof part.text === 'string')
             .map(part => part.text)
             .join('')
             .trim();

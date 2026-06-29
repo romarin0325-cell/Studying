@@ -368,8 +368,7 @@ const FortuneCookie = {
     msgBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">루미가 운세를 읽고 있어요...<br><span style="font-size:0.8rem; color:#aaa;">키워드: ${result.keyword}</span></div>`;
     retryBtn.style.display = 'none';
 
-    // RPG.ensureApiKey()가 fortune_cookie.js에서 직접 접근 안 될 수 있으므로 전역 접근 고려 (또는 localStorage에서 읽기)
-    const apiKey = localStorage.getItem('gemini_api_key');
+    const apiKey = Storage.getRaw(Storage.keys.API_KEY);
     if (!apiKey) {
       msgBox.innerHTML = `"${result.message}"`;
       msgBox.style.fontStyle = "italic";
