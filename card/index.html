@@ -2039,7 +2039,7 @@
                 enemy: null,
                 fieldBuffs: [],
                 currentPlayerIdx: 0,
-                phase: 'start', // start, player, enemy, end
+                phase: 'start', // start, player-resolving, player-ready, enemy-pending, enemy-resolving
                 delayedEffects: [],
                 activeTraits: [], // List of active deck synergy traits
                 isNewTurn: true
@@ -3610,12 +3610,16 @@
             setupControls(p) {
                 const panel = document.getElementById('battle-controls');
                 panel.innerHTML = "";
+                const executePlayerSkill = skill => {
+                    panel.querySelectorAll('button').forEach(button => { button.disabled = true; });
+                    RPG.executeSkill(p, RPG.battle.enemy, skill);
+                };
 
                 // Normal Attack
                 const btn = document.createElement('button');
                 btn.className = 'skill-btn phy';
                 btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
-                btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, RPG.NORMAL_ATTACK);
+                btn.onclick = () => executePlayerSkill(RPG.NORMAL_ATTACK);
                 panel.appendChild(btn);
 
                 // Skills
@@ -3624,7 +3628,7 @@
                     btn.className = `skill-btn ${s.type}`;
                     btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
                     if (p.mp < s.cost) btn.disabled = true;
-                    else btn.onclick = () => RPG.executeSkill(p, RPG.battle.enemy, s);
+                    else btn.onclick = () => executePlayerSkill(s);
                     panel.appendChild(btn);
                 });
             },
@@ -4682,7 +4686,7 @@
 
                         this.openInfoModal("루미의 깜짝 선물!",
                             `<div style="text-align:center;">
-                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448af f;">
+                                <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448aff;">
                                     <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 형아! 공부하느라 고생했어! (헤헤)<br>이거 줄게, 받아!<br><br>

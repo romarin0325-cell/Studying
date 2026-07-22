@@ -707,6 +707,23 @@ const GameUtils = {
             },
             hasAnyCard: (ids) => countMatchingIds(ids) > 0,
             countMatchingIds,
+            matchesRequiredCardSlots: (ids) => {
+                const availableCards = [...nonJokerCards];
+                let availableJokers = jokerCount;
+
+                return (ids || []).every(id => {
+                    const matchIndex = availableCards.findIndex(card => getCardAliases(card).has(id));
+                    if (matchIndex !== -1) {
+                        availableCards.splice(matchIndex, 1);
+                        return true;
+                    }
+                    if (availableJokers > 0) {
+                        availableJokers--;
+                        return true;
+                    }
+                    return false;
+                });
+            },
             hasElement: (element) => jokerCount > 0 || Boolean(elementCounts[element]),
             countElement: (element) => (elementCounts[element] || 0) + jokerCount,
             countDeckAttributes: () => (jokerCount > 0 ? 5 : Object.keys(elementCounts).length)
@@ -1000,7 +1017,11 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
             isDelayed: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
-                ...delayedEff.debuffs.map(d => ({ type: 'debuff', id: d, stack: 1 }))
+                ...delayedEff.debuffs.map(id => ({
+                    type: 'debuff',
+                    id,
+                    ...(id === 'burn' || id === 'divine' ? { stack: 1 } : {})
+                }))
             ]
         };
     }
@@ -1016,6 +1037,20 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
     }
 
     return skill;
+}
+
+function resolveRandomMultiplier(eff, source) {
+    let max = eff.max;
+    if (
+        source &&
+        source.proto &&
+        source.proto.trait &&
+        source.proto.trait.type === 'syn_water_3_ice_age' &&
+        source.activeTrait === 'syn_water_3_ice_age'
+    ) {
+        max = 10.0;
+    }
+    return eff.min + Math.floor(Math.random() * (max - eff.min + 1));
 }
 
 const DAMAGE_EFFECT_HANDLERS = {
@@ -1036,7 +1071,7 @@ const DAMAGE_EFFECT_HANDLERS = {
             let c = current;
             let mps = eff.multPerStack;
             // Artifact: holy_flame_burst — full-consume burn/divine skills only
-            const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
+            const artifacts = ctx.artifacts || [];
             if (eff.debuff === 'burn' || eff.debuff === 'divine') {
                 if (artifacts.includes('divine_astea')) {
                     mps *= 3.0;
@@ -1068,6 +1103,16 @@ const DAMAGE_EFFECT_HANDLERS = {
             matched = true;
             if (!eff.customLog) ctx.logFn(`[시너지] 조건 만족! 위력 ${eff.mult}배 증가!`);
         }
+        else if (
+            eff.condition === 'source_trait_active' &&
+            ctx.source &&
+            ctx.source.proto &&
+            ctx.source.proto.trait &&
+            ctx.source.activeTrait === ctx.source.proto.trait.type
+        ) {
+            ctx.mult *= eff.mult;
+            matched = true;
+        }
         else if (eff.condition === 'target_stack' && ctx.baseTargetBuffs[eff.debuff]) {
             ctx.mult += (ctx.baseTargetBuffs[eff.debuff] * eff.multPerStack);
         }
@@ -1077,7 +1122,7 @@ const DAMAGE_EFFECT_HANDLERS = {
             if (!eff.customLog) ctx.logFn(`[특성] ${getBuffName(eff.debuff)} ${eff.count || 1}스택 이상 대상 추가 피해! (배율 x${eff.mult})`);
         }
         else if (eff.condition === 'target_debuff_count_scale') {
-            let bonus = (Object.keys(ctx.baseTargetBuffs).length * eff.multPerDebuff);
+            let bonus = (StatusRules.countNegativeKinds(ctx.baseTargetBuffs) * eff.multPerDebuff);
             ctx.mult += bonus;
             if (bonus > 0 && !eff.customLog) ctx.logFn(`[특성] 디버프 대상 추가 피해! (배율 +${bonus.toFixed(1)})`);
         }
@@ -1185,15 +1230,13 @@ const DAMAGE_EFFECT_HANDLERS = {
         }
     },
     'cond_target_debuff_3_dmg': (ctx, eff) => {
-        if (Object.keys(ctx.baseTargetBuffs).length >= 3) {
+        if (StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
             ctx.mult *= eff.mult;
             ctx.logFn("적 디버프 3개 이상! 위력 2배!");
         }
     },
     'random_mult': (ctx, eff) => {
-        let max = eff.max;
-        if (ctx.activeTraits.includes('syn_water_3_ice_age')) max = 10.0;
-        ctx.mult = eff.min + Math.floor(Math.random() * (max - eff.min + 1));
+        ctx.mult = resolveRandomMultiplier(eff, ctx.source);
         ctx.logFn(`무작위 위력! x${ctx.mult.toFixed(1)}`);
     },
     'random_mult_moon_boost': (ctx, eff) => {
@@ -1281,6 +1324,45 @@ function getStackCapInfo(buffId, artifacts) {
     };
 }
 
+const NEGATIVE_STATUS_IDS = Object.freeze([
+    'darkness', 'corrosion', 'silence', 'curse', 'weak', 'temptation',
+    'burn', 'divine', 'stun'
+]);
+
+const StatusRules = {
+    isNegative(id) {
+        return NEGATIVE_STATUS_IDS.includes(id);
+    },
+
+    countNegativeKinds(buffs) {
+        return Object.keys(buffs || {}).filter(id => this.isNegative(id) && buffs[id] > 0).length;
+    },
+
+    clearNegative(target) {
+        if (!target || !target.buffs) return 0;
+        let removed = 0;
+        NEGATIVE_STATUS_IDS.forEach(id => {
+            if (!target.buffs[id]) return;
+            delete target.buffs[id];
+            removed++;
+        });
+        return removed;
+    },
+
+    add(target, id, applications = 1, artifacts = []) {
+        if (!target || !target.buffs || !id || applications <= 0) return 0;
+        const capInfo = getStackCapInfo(id, artifacts);
+        if (!capInfo) {
+            target.buffs[id] = 1;
+            return 1;
+        }
+
+        const nextValue = (target.buffs[id] || 0) + (applications * capInfo.add);
+        target.buffs[id] = Math.min(nextValue, capInfo.cap);
+        return target.buffs[id];
+    }
+};
+
 const SideEffects = {
     handlers: {
         'buff': (ctx, eff) => {
@@ -1291,34 +1373,15 @@ const SideEffects = {
             }
         },
         'debuff': (ctx, eff) => {
-            let t = ctx.target;
-            if (eff.stack) {
-                const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-                const capInfo = getStackCapInfo(eff.id, artifacts);
-                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
-                const addStack = capInfo ? capInfo.add : 1;
-
-                t.buffs[eff.id] = Math.min((t.buffs[eff.id] || 0) + addStack, maxStack);
-                ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${t.buffs[eff.id]}스택.`);
-            } else {
-                t.buffs[eff.id] = 1;
-                ctx.logFn(`${t === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] 부여.`);
-            }
+            const target = ctx.target;
+            const value = StatusRules.add(target, eff.id, eff.stack || 1, ctx.artifacts || []);
+            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            ctx.logFn(`${target === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'self_debuff': (ctx, eff) => {
-            let s = ctx.source;
-            if (eff.stack) {
-                const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
-                const capInfo = getStackCapInfo(eff.id, artifacts);
-                const maxStack = capInfo ? capInfo.cap : GAME_CONSTANTS.STACK_CAP.DEFAULT;
-                const addStack = capInfo ? capInfo.add : 1;
-
-                s.buffs[eff.id] = Math.min((s.buffs[eff.id] || 0) + addStack, maxStack);
-                ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${s.buffs[eff.id]}스택.`);
-            } else {
-                s.buffs[eff.id] = 1;
-                ctx.logFn(`자신에게 [${getBuffName(eff.id)}] 부여.`);
-            }
+            const value = StatusRules.add(ctx.source, eff.id, eff.stack || 1, ctx.artifacts || []);
+            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'field_buff': (ctx, eff) => {
             const options = {};
@@ -1333,8 +1396,7 @@ const SideEffects = {
             if (sourceTrait && sourceTrait.type === 'cond_same_grade_skill_buff') {
                 if (ctx.skill && ctx.skill.name === sourceTrait.skillName) {
                     const deckCards = (ctx.deck || []).filter(Boolean).map(cardId => {
-                        const allCards = [...CARDS, ...BONUS_CARDS];
-                        return allCards.find(c => c.id === cardId);
+                        return GameUtils.getCardById(cardId);
                     }).filter(Boolean);
                     const grades = deckCards.map(c => c.grade);
                     if (grades.length > 0 && grades.every(g => g === grades[0])) {
@@ -1403,7 +1465,7 @@ const SideEffects = {
             }
         },
         'conditional_debuff': (ctx, eff) => {
-            if (eff.condition === 'target_debuff_count' && Object.keys(ctx.target.buffs).length >= eff.count) {
+            if (eff.condition === 'target_debuff_count' && StatusRules.countNegativeKinds(ctx.target.buffs) >= eff.count) {
                 ctx.target.buffs[eff.debuff] = 1;
                 ctx.logFn(`조건 만족! 적에게 [${getBuffName(eff.debuff)}] 부여.`);
             }
@@ -1438,19 +1500,11 @@ const SideEffects = {
             }
         },
         'clear_target_debuffs': (ctx, eff) => {
-            const count = Object.keys(ctx.target.buffs).length;
-            ctx.target.buffs = {};
+            const count = StatusRules.clearNegative(ctx.target);
             if (count > 0) ctx.logFn(`적의 모든 디버프를 제거했습니다! (${count}개)`);
         },
         'clear_self_debuffs': (ctx, eff) => {
-            const removable = ['darkness', 'corrosion', 'silence', 'curse', 'weak', 'burn', 'divine', 'stun', 'temptation'];
-            let removed = 0;
-            removable.forEach(id => {
-                if (ctx.source.buffs[id]) {
-                    delete ctx.source.buffs[id];
-                    removed++;
-                }
-            });
+            const removed = StatusRules.clearNegative(ctx.source);
             ctx.logFn(removed > 0 ? `자신의 디버프 ${removed}개를 해제했다!` : '해제할 디버프가 없었다.');
         },
         'remove_random_field_buff': (ctx, eff) => {
@@ -1462,18 +1516,12 @@ const SideEffects = {
             const removed = ctx.battle.fieldBuffs.splice(idx, 1)[0];
             ctx.logFn(`필드버프 [${getBuffName(removed.name)}] 이(가) 사라졌다!`);
         },
-        'set_self_stats': (ctx, eff) => {
-            const stats = eff.stats || {};
-            if (typeof stats.atk === 'number') ctx.source.atk = stats.atk;
-            if (typeof stats.matk === 'number') ctx.source.matk = stats.matk;
-            if (typeof stats.def === 'number') {
-                ctx.source.def = stats.def;
-                if (typeof ctx.source.baseDef === 'number') ctx.source.baseDef = stats.def;
-            }
-            if (typeof stats.mdef === 'number') {
-                ctx.source.mdef = stats.mdef;
-                if (typeof ctx.source.baseMdef === 'number') ctx.source.baseMdef = stats.mdef;
-            }
+        'swap_self_stats': (ctx) => {
+            [['atk', 'matk'], ['def', 'mdef'], ['baseAtk', 'baseMatk'], ['baseDef', 'baseMdef']]
+                .forEach(([left, right]) => {
+                    if (typeof ctx.source[left] !== 'number' || typeof ctx.source[right] !== 'number') return;
+                    [ctx.source[left], ctx.source[right]] = [ctx.source[right], ctx.source[left]];
+                });
             ctx.logFn('전투 성향이 변화했다!');
         },
         'consume_all_burn_cond_buff': (ctx, eff) => {
@@ -1491,8 +1539,7 @@ const SideEffects = {
                 ctx.target.buffs['stun'] = 1;
                 ctx.logFn("디바인 3스택 확인! 적을 기절시킵니다!");
             } else {
-                ctx.target.buffs['divine'] = (ctx.target.buffs['divine'] || 0) + 1;
-                if (ctx.target.buffs['divine'] > 3) ctx.target.buffs['divine'] = 3;
+                StatusRules.add(ctx.target, 'divine', 1, ctx.artifacts || []);
                 ctx.logFn("디바인 스택 추가.");
             }
         },
@@ -1520,15 +1567,13 @@ const SideEffects = {
             const pick = buffs[Math.floor(Math.random() * buffs.length)];
             ctx.applyFieldBuff(pick);
         },
+        'prism_shuffle_field': (ctx) => {
+            const count = ctx.replaceFieldBuffs ? ctx.replaceFieldBuffs() : 0;
+            if (count <= 0) return;
+            ctx.logFn(`[프리즘셔플] 필드버프 ${count}개를 같은 수의 버프로 교체했습니다.`);
+        },
         'wild_card_debuff': (ctx, eff) => {
-            const badBuffs = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'stun', 'temptation'];
-            let cleansed = 0;
-            badBuffs.forEach(b => {
-                if (ctx.target.buffs[b]) {
-                    delete ctx.target.buffs[b];
-                    cleansed++;
-                }
-            });
+            const cleansed = StatusRules.clearNegative(ctx.target);
             if (cleansed > 0) ctx.logFn(`적의 디버프를 모두 해제했습니다! (${cleansed}개)`);
 
             let pool = ['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'];
@@ -1536,8 +1581,7 @@ const SideEffects = {
 
             for (let i = 0; i < 2; i++) {
                 if (pool[i] === 'burn' || pool[i] === 'divine') {
-                    ctx.target.buffs[pool[i]] = (ctx.target.buffs[pool[i]] || 0) + 1;
-                    if (ctx.target.buffs[pool[i]] > 3) ctx.target.buffs[pool[i]] = 3;
+                    StatusRules.add(ctx.target, pool[i], 1, ctx.artifacts || []);
                     ctx.logFn(`적에게 [${getBuffName(pool[i])}] 스택 추가.`);
                 } else {
                     ctx.target.buffs[pool[i]] = 1;
@@ -1640,7 +1684,14 @@ const SideEffects = {
             ctx.logFn(`코스믹 하모니: [${getBuffName(pick)}] 생성!`);
         },
         'conditional_debuff_on_synergy': (ctx, eff) => {
-            if (!ctx.activeTraits || !ctx.activeTraits.includes(eff.trait)) return;
+            const sourceTraitActive = eff.condition === 'source_trait_active'
+                && ctx.source
+                && ctx.source.proto
+                && ctx.source.proto.trait
+                && ctx.source.activeTrait === ctx.source.proto.trait.type;
+            const sharedTraitActive = ctx.activeTraits && ctx.activeTraits.includes(eff.trait);
+            const active = eff.condition === 'source_trait_active' ? sourceTraitActive : sharedTraitActive;
+            if (!active) return;
             (eff.debuffs || []).forEach(id => {
                 ctx.target.buffs[id] = 1;
                 ctx.logFn(`[특성] ${getBuffName(id)} 부여!`);
@@ -1874,6 +1925,16 @@ const Logic = {
         return Math.random() * 100 < stats.evasion;
     },
 
+    resolveSkillMultiplier: function (skill, source, logFn) {
+        let mult = Number.isFinite(skill.val) ? skill.val : 1.0;
+        const randomEffect = (skill.effects || []).find(effect => effect.type === 'random_mult');
+        if (randomEffect) {
+            mult = resolveRandomMultiplier(randomEffect, source);
+            if (logFn) logFn(`랜덤 배율! x${mult.toFixed(1)}`);
+        }
+        return mult;
+    },
+
     // 3. Damage Calculation
     calculateDamage: function (source, target, skill, fieldBuffs, activeTraits, logFn, mode, deck, turn, artifacts) {
         if (!logFn) logFn = function () { };
@@ -1923,7 +1984,8 @@ const Logic = {
             mode: mode,
             deck: deck,
             turn: turn,
-            mult: skill.val || 1.0,
+            artifacts: artifacts,
+            mult: Number.isFinite(skill.val) ? skill.val : 1.0,
             ignoreMdefRate: 0,
             postActions: []
         };
@@ -1991,7 +2053,7 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn(`[특성] ${source.name}: 특정 속성 적에게 추가 피해!`);
             }
-            if (t.type === 'cond_debuff_3_dmg' && Object.keys(ctx.baseTargetBuffs).length >= 3) {
+            if (t.type === 'cond_debuff_3_dmg' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 디버프 3개 이상 대상 추가 피해!");
             }
@@ -1999,11 +2061,11 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 디바인 3스택 이상 대상 추가 피해!");
             }
-            if (t.type === 'behemoth_trait' && Object.keys(ctx.baseTargetBuffs).length >= 3) {
+            if (t.type === 'behemoth_trait' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 베히모스: 디버프 3개 이상 대상 파괴적 일격!");
             }
-            if (t.type === 'cond_target_debuff_3_dmg' && Object.keys(ctx.baseTargetBuffs).length >= 3) {
+            if (t.type === 'cond_target_debuff_3_dmg' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 심해의 주인: 적 디버프 3개 이상! 위력 폭발!");
             }
@@ -2011,7 +2073,7 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 루나&자스민: 디바인 3스택 이상! 위력 2배!");
             }
-            if (t.type === 'behemoth_liberated_trait' && Object.keys(ctx.baseTargetBuffs).length >= 3) {
+            if (t.type === 'behemoth_liberated_trait' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 해방된 베히모스: 디버프 3개 이상! 파괴적 일격!");
             }
@@ -2186,6 +2248,14 @@ const Logic = {
         let finalMult = mult * (1.0 + dmgBonus);
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
 
+        if (target.buffs.guard) {
+            const guardReduction = target.guardEnhancedEligible
+                ? (target.guardDamageReduction || 0.5)
+                : 0.5;
+            finalDmg = Math.floor(finalDmg * (1 - guardReduction));
+            logFn(`${target.name} 가드 성공! 피해 ${Math.round(guardReduction * 100)}% 감소.`);
+        }
+
         return {
             dmg: finalDmg,
             isCrit: isCrit,
@@ -2226,13 +2296,13 @@ const Logic = {
         'syn_water_light_midnight_twinkle':{ cond: d => d.hasElement('water') && d.hasElement('light'), apply: () => {} },
         'syn_light_3_party_def_mdef':      { cond: d => d.countElement('light') >= 3,             apply: () => {} },
         'syn_nature_3_party_def_mdef':     { cond: d => d.countElement('nature') >= 3,            apply: () => {} },
-        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_dark_full_party_crit':        { cond: d => d.countElement('dark') >= 3,              apply: () => {} },
         // 토끼 발렌타인 시너지 (발동 시 효과 없음, activeTraits 등록용)
         'syn_rabbit_valentine_snow':   { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']), apply: () => {} },
         'syn_rabbit_valentine_night':  { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),  apply: () => {} },
         'syn_rabbit_valentine_silver': { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),   apply: () => {} },
         // 토끼 크리스마스 은토끼 시너지 (울트라기프트 추가 필드버프 트리거용)
-        'syn_christmas_rabbit_trio_gift':  { cond: d => d.hasCard('snow_rabbit') && d.hasCard('night_rabbit'), apply: () => {} }
+        'syn_christmas_rabbit_trio_gift':  { cond: d => d.matchesRequiredCardSlots(['snow_rabbit', 'night_rabbit']), apply: () => {} }
     },
 
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
@@ -2365,7 +2435,7 @@ const Logic = {
 
         // 크리스마스 토끼 3장 조합 시너지
         if (t.type === 'christmas_rabbit_trio' && t.requiredPeers) {
-            if (t.requiredPeers.every(id => deckCtx.hasCard(id))) {
+            if (deckCtx.matchesRequiredCardSlots(t.requiredPeers)) {
                 active = true;
                 const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
                 const boost = 1 + (t.val || 0) / 100;
@@ -2382,7 +2452,7 @@ const Logic = {
 
         // 크리스마스 밤토끼: 3장 조합시 파티 전체 치명타 증가
         if (t.type === 'christmas_rabbit_trio_crit' && t.requiredPeers) {
-            if (t.requiredPeers.every(id => deckCtx.hasCard(id))) {
+            if (deckCtx.matchesRequiredCardSlots(t.requiredPeers)) {
                 active = true;
             }
         }
@@ -2425,7 +2495,7 @@ const Logic = {
             }
             // 크리스마스 밤토끼: 3장 조합시 파티 전체 치명타 증가
             else if (tr && tr.type === 'christmas_rabbit_trio_crit' && tr.requiredPeers) {
-                if (tr.requiredPeers.every(id => deckCtx.hasCard(id))) {
+                if (deckCtx.matchesRequiredCardSlots(tr.requiredPeers)) {
                     partyBoost.crit += (tr.val || 0);
                 }
             }
@@ -2492,6 +2562,11 @@ const Logic = {
     decideEnemyAction: function (enemy, turn) {
         let skill = null;
         let r = Math.random();
+        const hasDedicatedPolicy = [
+            'artificial_demon_god', 'iris_love', 'iris_curse', 'pharaoh', 'demon_god',
+            'flora', 'flora_valentine', 'gray', 'thor', 'thor_swimsuit', 'poseidon',
+            'ares', 'ares_halloween', 'creator_god', 'astea_christmas'
+        ].includes(enemy.id);
 
         if (enemy.id === 'artificial_demon_god') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '파괴의형태');
@@ -2580,7 +2655,7 @@ const Logic = {
             }
         }
 
-        if (!skill && Math.random() < 0.3 && enemy.skills.length > 0) {
+        if (!skill && !hasDedicatedPolicy && Math.random() < 0.3 && enemy.skills.length > 0) {
             const validSkills = enemy.skills.filter(s => s.rate > 0);
             if (validSkills.length > 0) {
                 skill = validSkills[Math.floor(Math.random() * validSkills.length)];
@@ -2640,7 +2715,7 @@ const Logic = {
             this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 사망 반격!');
         }
         else if (t.type === 'death_dmg_debuff') {
-            let cnt = Object.keys(killer.buffs).length;
+            let cnt = StatusRules.countNegativeKinds(killer.buffs);
             this._applyDeathDamage(result, victim, killer, { name: '저주 반격', type: 'mag', val: cnt * t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 저주 반격!');
         }
         else if (t.type === 'death_field_sun') {
@@ -2720,8 +2795,7 @@ const Logic = {
         // 팅커벨: 덱 전부 같은 등급일 때 사망 시 마법대미지 + 기절
         else if (t.type === 'death_dmg_mag_stun_same_grade') {
             const deckCards = (deck || []).filter(Boolean).map(cardId => {
-                const allCards = [...CARDS, ...BONUS_CARDS];
-                return allCards.find(c => c.id === cardId);
+                return GameUtils.getCardById(cardId);
             }).filter(Boolean);
             const grades = deckCards.map(c => c.grade);
             const allSameGrade = grades.length > 0 && grades.every(g => g === grades[0]);

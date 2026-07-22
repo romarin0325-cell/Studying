@@ -305,7 +305,7 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 3.0, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
-            { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+            { name: '콜로세움', type: 'sup', tier: 3, cost: 30, desc: '필드버프 아레나 부여, 적에게 약화 부여', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'debuff', id: 'weak' }] }
         ]
     },
     {
@@ -397,7 +397,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
-            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼/은토끼 시너지 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0 }] }
+            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] }
         ]
     },
     {
@@ -405,7 +405,7 @@ const CARDS = [
         stats: { hp: 300, atk: 70, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'syn_silver_rabbit', val: 50, desc: '눈토끼 혹은 밤토끼가 덱에 있을시 물공 마공 50% 증가' },
         skills: [
-            { name: '헤븐리루어', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_silver_rabbit', mult: 2.0 }] },
+            { name: '헤븐리루어', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] },
             { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] }
         ]
@@ -981,7 +981,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'self_normal_atk_dmg_boost', val: 2.0, desc: '이 카드의 일반공격 대미지 2배' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '프리즘셔플', type: 'mag', tier: 2, cost: 20, val: 2.5, desc: '모든 필드버프를 랜덤 교체', effects: [{ type: 'roulette_field' }] },
+            { name: '프리즘셔플', type: 'mag', tier: 2, cost: 20, val: 2.5, desc: '현재 필드버프 수를 유지하며 랜덤 교체', effects: [{ type: 'prism_shuffle_field' }] },
             { name: '일루미네이션', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '3턴 뒤 발동, 발동 시 랜덤 필드버프 부여', effects: [{ type: 'delayed_attack_random_field', turns: 3 }] }
         ]
     },
@@ -1383,7 +1383,7 @@ const SPECIAL_CARD_OVERRIDES = {
         trait: { type: 'christmas_rabbit_trio', requiredPeers: ['night_rabbit', 'silver_rabbit'], stat: ['atk', 'matk', 'def', 'mdef'], val: 50, desc: '밤토끼와 은토끼가 모두 덱에 있으면 물공/마공/물방/마방 50% 증가' },
         skills: [
             cloneSkillByName(card, '배리어'),
-            { name: '울트라판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'christmas_rabbit_trio', mult: 2.0 }] },
+            { name: '울트라판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] },
             cloneSkillByName(card, '실버스톰')
         ]
     }),
@@ -1392,7 +1392,7 @@ const SPECIAL_CARD_OVERRIDES = {
         trait: { type: 'christmas_rabbit_trio_crit', requiredPeers: ['snow_rabbit', 'silver_rabbit'], val: 20, desc: '눈토끼와 은토끼가 모두 덱에 있으면 덱 전체 치명타 20% 증가' },
         skills: [
             cloneSkillByName(card, '배리어'),
-            { name: '울트라바이올렛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 약화·침묵·저주 부여', effects: [{ type: 'conditional_debuff_on_synergy', trait: 'christmas_rabbit_trio_crit', debuffs: ['weak', 'silence', 'curse'] }] },
+            { name: '울트라바이올렛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 약화·침묵·저주 부여', effects: [{ type: 'conditional_debuff_on_synergy', condition: 'source_trait_active', debuffs: ['weak', 'silence', 'curse'] }] },
             cloneSkillByName(card, '문라이트')
         ]
     }),
@@ -1655,7 +1655,7 @@ ENEMIES.push(
             { name: '묠니르', type: 'mag', rate: 0.2, val: 2.0, desc: '마법공격 2배율', effects: [] },
             {
                 name: '썬더러쉬', type: 'mag', rate: 0.0, val: 3.0, desc: '마법공격 3배율, 사용 후 전투 성향 변화',
-                effects: [{ type: 'set_self_stats', stats: { atk: 50, matk: 100, def: 50, mdef: 100 } }]
+                effects: [{ type: 'swap_self_stats' }]
             }
         ]
     },
