@@ -331,7 +331,9 @@ async function verifyCombatRules(page) {
           enemy,
           players: options.players || [],
           currentPlayerIdx: 0,
-          isNewTurn: false
+          isNewTurn: false,
+          isFinished: false,
+          phase: 'player-ready'
         },
         logs,
         didWin: false,
@@ -417,6 +419,7 @@ async function verifyCombatRules(page) {
     const stackedTarget = makeDummy({}, { hp: 99999, mdef: 100 });
     const stackedRpg = makeRpg({ deck: ['phantom', null, null], enemy: stackedTarget, players: [stackedSource, null, null], turn: 1 });
     BattleRuntime.executeSkill(stackedRpg, stackedSource, stackedTarget, stackedSource.skills[1]);
+    stackedRpg.battle.phase = 'player-ready';
     BattleRuntime.executeSkill(stackedRpg, stackedSource, stackedTarget, stackedSource.skills[1]);
     stackedRpg.logs.length = 0;
     stackedRpg.battle.turn = 2;
@@ -481,6 +484,7 @@ async function verifyCombatRules(page) {
     const temptationStats = Logic.calculateStats(makeDummy({ curse: 1, temptation: 1 }, { mdef: 100 }), [], 'origin', [], 1);
 
     const valentineRumi = cloneCard('rumi_valentine');
+    valentineRumi.activeTrait = 'syn_water_light_heart_star';
     const valentineRpg = makeRpg({
       deck: ['rumi_valentine', 'jasmine', null],
       enemy: makeDummy(),
@@ -492,6 +496,7 @@ async function verifyCombatRules(page) {
     const valentineBuffNames = valentineRpg.battle.fieldBuffs.map(buff => buff.name).sort();
 
     const swimsuitRumi = cloneCard('rumi_swimsuit');
+    swimsuitRumi.activeTrait = 'syn_water_light_midnight_twinkle';
     const swimsuitRpg = makeRpg({
       deck: ['rumi_swimsuit', 'jasmine', null],
       enemy: makeDummy(),
