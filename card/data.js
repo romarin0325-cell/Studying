@@ -1232,7 +1232,7 @@ const BONUS_CARD_EXPANSION = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '솔라크레센토', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '태양의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
-            { name: '루나트레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+            { name: '루나크레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
         ]
     }
 ];
