@@ -940,6 +940,10 @@ function getEffectiveFieldBuffs(char, fieldBuffs) {
     return isFieldBuffImmune(char) ? [] : fieldBuffs;
 }
 
+function getMaxMana(char) {
+    return char && Number.isFinite(char.maxMp) ? char.maxMp : GAME_CONSTANTS.MAX_MP;
+}
+
 const DELAYED_SKILL_EFFECT_TYPES = [
     'delayed_attack',
     'delayed_attack_field',
@@ -950,6 +954,7 @@ const DELAYED_SKILL_EFFECT_TYPES = [
     'phantom_nightmare',
     'delayed_attack_random_field',
     'delayed_attack_debuffs',
+    'delayed_field_buffs',
     'multi_delayed_attack'
 ];
 
@@ -964,6 +969,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
     if (delayedEff.type === 'delayed_turn_scale_attack') {
         return {
             ...skill,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 { type: 'dmg_boost_turn_scale', scale: delayedEff.scale, startTurn: currentTurn }
@@ -974,6 +980,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
     if (delayedEff.type === 'delayed_attack_debuff_scale') {
         return {
             ...skill,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 { type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: delayedEff.multPerDebuff }
@@ -985,6 +992,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
         return {
             ...skill,
             isDelayed: true,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 {
@@ -1003,6 +1011,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
         return {
             ...skill,
             isDelayed: true,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 { type: 'random_field_buff' }
@@ -1015,6 +1024,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
         return {
             ...skill,
             isDelayed: true,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
                 ...delayedEff.debuffs.map(id => ({
@@ -1030,13 +1040,17 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
         return {
             ...skill,
             isDelayed: true,
+            isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff)
             ]
         };
     }
 
-    return skill;
+    return {
+        ...skill,
+        isActualDelayedTrigger: true
+    };
 }
 
 function resolveRandomMultiplier(eff, source) {
@@ -1413,6 +1427,13 @@ const SideEffects = {
             ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + heal);
             ctx.logFn(`HP ${heal} 회복!`);
         },
+        'mana_restore': (ctx, eff) => {
+            const amount = eff.val || eff.amount || 0;
+            if (!ctx.source || amount <= 0) return;
+            const before = ctx.source.mp;
+            ctx.source.mp = Math.min(getMaxMana(ctx.source), ctx.source.mp + amount);
+            ctx.logFn(`마나 ${ctx.source.mp - before} 회복!`);
+        },
         'random_field_buff': (ctx, eff) => {
             const pool = eff.pool || ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'arena'];
             const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -1534,6 +1555,17 @@ const SideEffects = {
                 ctx.logFn("소모할 작열이 없어 대지의 축복을 불러옵니다.");
             }
         },
+        'moon_to_sun': (ctx) => {
+            const moonIndex = ctx.battle.fieldBuffs.findIndex(buff => buff.name === 'moon_bless');
+            if (moonIndex === -1) {
+                ctx.applyFieldBuff('moon_bless');
+                return;
+            }
+
+            ctx.battle.fieldBuffs.splice(moonIndex, 1);
+            ctx.logFn('필드버프 [달의축복] 소모!');
+            ctx.applyFieldBuff('sun_bless');
+        },
         'check_divine_3_stun_else_add': (ctx, eff) => {
             if ((ctx.target.buffs['divine'] || 0) >= 3) {
                 ctx.target.buffs['stun'] = 1;
@@ -1598,6 +1630,9 @@ const SideEffects = {
         'delayed_attack_debuffs': (ctx, eff) => {
             // handled via buildResolvedDelayedSkill → debuff effects
         },
+        'delayed_field_buffs': (ctx, eff) => {
+            (eff.buffs || []).forEach(buffId => ctx.applyFieldBuff(buffId));
+        },
         'delayed_turn_scale_attack': (ctx, eff) => {
             const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
             if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
@@ -1629,6 +1664,7 @@ const SideEffects = {
             ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
         },
         'random_skill_trigger_from_list': (ctx, eff) => {
+            const triggerName = ctx.skill && ctx.skill.name ? ctx.skill.name : '데스티니룰렛';
             const skillMap = [
                 { id: 'gold_dragon', skill: '얼티밋브레스' },
                 { id: 'zeke', skill: '라그나로크' },
@@ -1652,7 +1688,7 @@ const SideEffects = {
                 const resolvedSkill = buildResolvedDelayedSkill(skill, delayedEff, ctx.battle.turn);
 
                 if (delayedEff) {
-                    ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+                    ctx.logFn(`[${triggerName}] ${card.name}의 ${skill.name} 발동!`);
                     if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
                         ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
                         ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
@@ -1665,7 +1701,7 @@ const SideEffects = {
                         ctx.logFn(`(지연 발동) ${delayedEff.turns}턴 뒤에 공격합니다.`);
                     }
                 } else {
-                    ctx.logFn(`[데스티니룰렛] ${card.name}의 ${skill.name} 발동!`);
+                    ctx.logFn(`[${triggerName}] ${card.name}의 ${skill.name} 발동!`);
                     ctx.executeSkill(ctx.source, ctx.target, skill, true);
                 }
             }
@@ -1707,11 +1743,11 @@ const SideEffects = {
                             logMsg.push("대지(완전회복)");
                             break;
                         case 'star_powder':
-                            ctx.source.mp = Math.min(GAME_CONSTANTS.MAX_MP, ctx.source.mp + 30);
+                            ctx.source.mp = Math.min(getMaxMana(ctx.source), ctx.source.mp + 30);
                             logMsg.push("스타(MP+30)");
                             break;
                         case 'sanctuary':
-                            ctx.source.mp = Math.min(GAME_CONSTANTS.MAX_MP, ctx.source.mp + 20);
+                            ctx.source.mp = Math.min(getMaxMana(ctx.source), ctx.source.mp + 20);
                             logMsg.push("성역(MP+20)");
                             break;
                         case 'goddess_descent':
@@ -1802,6 +1838,19 @@ const Logic = {
             m.atk += boost;
             m.matk += boost;
         }
+        if (trait && trait.type === 'opening_self_atk_party_mdef_down' && battleTurn <= (trait.turns || 2)) {
+            m.atk += (trait.atkBoost || 0) / 100;
+        }
+        if (char.alternatingAttackStatPercent) {
+            const shift = char.alternatingAttackStatPercent / 100;
+            if (battleTurn % 2 === 0) {
+                m.atk += shift;
+                m.matk -= shift;
+            } else {
+                m.atk -= shift;
+                m.matk += shift;
+            }
+        }
         if (trait && trait.type === 'cond_sanctuary_atk_def' && effectiveFieldBuffs.some(b => b.name === 'sanctuary')) {
             const boost = (trait.val || 0) / 100;
             m.atk += boost;
@@ -1815,6 +1864,9 @@ const Logic = {
                 const bonus = GAME_CONSTANTS.FIELD_BUFF_STATS[fb.name];
                 if (bonus) {
                     let artifactBuffMult = 1.0;
+                    const personalBuffMult = fb.name === 'arena'
+                        ? 1.0
+                        : (char.fieldBuffStatMult || 1.0);
                     if (fb.name === 'earth_bless') {
                         if (artifacts.includes('divine_flora')) artifactBuffMult = 2.5;
                         else if (artifacts.includes('nature_blessing')) artifactBuffMult = 2.0;
@@ -1824,12 +1876,13 @@ const Logic = {
                         else if (artifacts.includes('milkshake')) artifactBuffMult = 2.0;
                     }
 
-                    if (bonus.atk) m.atk += (bonus.atk * buffMult * artifactBuffMult);
-                    if (bonus.matk) m.matk += (bonus.matk * buffMult * artifactBuffMult);
-                    if (bonus.def) m.def += (bonus.def * buffMult * artifactBuffMult);
-                    if (bonus.mdef) m.mdef += (bonus.mdef * buffMult * artifactBuffMult);
-                    if (bonus.crit) stats.crit += (bonus.crit * buffMult * artifactBuffMult);
-                    if (bonus.evasion) stats.evasion += (bonus.evasion * buffMult * artifactBuffMult);
+                    const totalBuffMult = buffMult * artifactBuffMult * personalBuffMult;
+                    if (bonus.atk) m.atk += (bonus.atk * totalBuffMult);
+                    if (bonus.matk) m.matk += (bonus.matk * totalBuffMult);
+                    if (bonus.def) m.def += (bonus.def * totalBuffMult);
+                    if (bonus.mdef) m.mdef += (bonus.mdef * totalBuffMult);
+                    if (bonus.crit) stats.crit += (bonus.crit * totalBuffMult);
+                    if (bonus.evasion) stats.evasion += (bonus.evasion * totalBuffMult);
                 }
             });
         }
@@ -2308,7 +2361,8 @@ const Logic = {
     calculateInitialStats: function (playerProto, deck, allCards, idx) {
         // Base stats copy
         let p = {
-            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp, mp: GAME_CONSTANTS.MAX_MP || 100,
+            maxHp: playerProto.stats.hp, hp: playerProto.stats.hp,
+            maxMp: GAME_CONSTANTS.MAX_MP || 100, mp: GAME_CONSTANTS.MAX_MP || 100,
             atk: playerProto.stats.atk, matk: playerProto.stats.matk,
             def: playerProto.stats.def, mdef: playerProto.stats.mdef,
             baseCrit: GAME_CONSTANTS.BASE_CRIT, baseEva: 0
@@ -2344,8 +2398,32 @@ const Logic = {
             }
         }
 
-        if (t.type === 'party_normal_attack_dmg' || t.type === 'reverse_atk_matk_party') {
+        if ([
+            'party_normal_attack_dmg',
+            'reverse_atk_matk_party',
+            'party_all_stats_mana_cost',
+            'alternate_party_atk_matk_turn',
+            'field_kaleidoscope_each_turn',
+            'alternate_skill_type_mana',
+            'opening_self_atk_party_mdef_down'
+        ].includes(t.type)) {
             active = true;
+        }
+
+        if (t.type === 'vanguard_delayed_mana_restore' && idx === 0) {
+            active = true;
+        }
+
+        if (t.type === 'vanguard_all_grade_party_def_mdef' && idx === 0) {
+            const grades = deckCtx.cards.map(card => card.grade);
+            if (grades.length > 0 && grades.every(grade => grade === (t.gradeRequired || 'normal'))) {
+                active = true;
+            }
+        }
+
+        if (t.type === 'leader_field_stat_double' && idx === 2) {
+            active = true;
+            p.fieldBuffStatMult = t.val || 2.0;
         }
 
         // 프리즘트윈/앤트로피: 패시브 특성 활성화 표시
@@ -2485,6 +2563,23 @@ const Logic = {
             }
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
+            }
+            else if (tr && tr.type === 'party_all_stats_mana_cost') {
+                const boost = tr.statVal || 0;
+                partyBoost.atk += boost;
+                partyBoost.matk += boost;
+                partyBoost.def += boost;
+                partyBoost.mdef += boost;
+            }
+            else if (tr && tr.type === 'opening_self_atk_party_mdef_down') {
+                partyBoost.mdef -= (tr.mdefDown || 0);
+            }
+            else if (tr && tr.type === 'vanguard_all_grade_party_def_mdef' && originalIdx === 0) {
+                const grades = fullDeckCards.filter(Boolean).map(card => card.grade);
+                if (grades.length > 0 && grades.every(grade => grade === (tr.gradeRequired || 'normal'))) {
+                    partyBoost.def += (tr.val || 0);
+                    partyBoost.mdef += (tr.val || 0);
+                }
             }
             else if (tr && tr.type === 'mid_party_mdef_boost' && originalIdx === 1) {
                 partyBoost.mdef += (tr.val || 0);
@@ -2762,10 +2857,12 @@ const Logic = {
             this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'mag', val: count * t.val }, fieldBuffs, logFn, deck, turn, artifacts, `[특성] 사망 반격! (필드버프 ${count}개)`);
         }
         else if (t.type === 'death_dmg_phy_debuff') {
-            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 맹독 폭발!');
+            const effectName = t.logName || '맹독';
+            this._applyDeathDamage(result, victim, killer, { name: '사망 반격', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, `[특성] ${effectName} 폭발!`);
             if (killer) {
-                result.killerDebuffs[t.debuff] = (result.killerDebuffs[t.debuff] || 0) + 1;
-                logFn(`[특성] 맹독 발동! 적에게 [${getBuffName(t.debuff)}] 부여.`);
+                const stack = t.stack || 1;
+                result.killerDebuffs[t.debuff] = (result.killerDebuffs[t.debuff] || 0) + stack;
+                logFn(`[특성] ${effectName} 발동! 적에게 [${getBuffName(t.debuff)}] ${stack > 1 ? `${stack}스택 ` : ''}부여.`);
             }
         }
         else if (t.type === 'death_clear_field_add_buff') {
@@ -2805,6 +2902,15 @@ const Logic = {
                     result.killerDebuffs['stun'] = (result.killerDebuffs['stun'] || 0) + 1;
                     logFn('[특성] 팅커벨: 적에게 기절 부여!');
                 }
+            }
+        }
+        else if (t.type === 'death_dmg_phy_same_grade') {
+            const deckCards = (deck || []).filter(Boolean).map(cardId => {
+                return GameUtils.getCardById(cardId);
+            }).filter(Boolean);
+            const grades = deckCards.map(card => card.grade);
+            if (grades.length > 0 && grades.every(grade => grade === grades[0])) {
+                this._applyDeathDamage(result, victim, killer, { name: '축제의 피날레', type: 'phy', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 폭죽소녀: 축제의 피날레!');
             }
         }
 

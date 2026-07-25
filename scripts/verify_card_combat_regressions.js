@@ -31,7 +31,7 @@ function run() {
 
   const cardRoot = path.join(process.cwd(), 'card');
   assert.strictEqual(fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8').includes('#448af f'), false);
-  ['data.js', 'logic.js', 'battle_runtime.js'].forEach(fileName => {
+  ['data.js', 'logic.js', 'battle_runtime.js', 'rpg_features.js'].forEach(fileName => {
     const filePath = path.join(cardRoot, fileName);
     vm.runInContext(fs.readFileSync(filePath, 'utf8'), sandbox, { filename: filePath });
   });
@@ -40,7 +40,7 @@ function run() {
     const quiet = () => {};
     const getCard = id => GameUtils.getCardById(id);
     const makeUnit = (overrides = {}) => ({
-      id: 'unit', name: 'unit', hp: 1000, maxHp: 1000, mp: 100,
+      id: 'unit', name: 'unit', hp: 1000, maxHp: 1000, mp: 100, maxMp: 100,
       atk: 100, matk: 100, def: 0, mdef: 0,
       baseCrit: -100, baseEva: 0, buffs: {}, element: null,
       ...overrides
@@ -54,6 +54,220 @@ function run() {
     assert.strictEqual(golem.skills.find(skill => skill.name === '차지어택').val, 3.0);
     assert.strictEqual(getCard('prism_twin').skills.find(skill => skill.name === '프리즘셔플').effects[0].type, 'prism_shuffle_field');
     assert.strictEqual(getCard('joker').skills.find(skill => skill.name === '레인보우룰렛').effects[0].type, 'roulette_field');
+
+    // The complete August–October wave is registered with deterministic release gates.
+    const bonusWaveExpectations = [
+      ['discipline_captain', '선도부장', 'normal', 'nature', 'balancer', '2026-08-01', [330, 65, 65, 60, 60]],
+      ['supernova', '초신성', 'legend', 'fire', 'dealer', '2026-08-01', [500, 125, 105, 60, 60]],
+      ['shooting_star_boy', '별똥별소년', 'normal', 'light', 'dealer', '2026-08-15', [290, 85, 60, 45, 55]],
+      ['victoria', '빅토리아', 'legend', 'light', 'buffer', '2026-08-15', [540, 100, 95, 80, 75]],
+      ['holy_night', '홀리밤', 'normal', 'light', 'dealer', '2026-09-01', [300, 85, 55, 45, 45]],
+      ['paladin', '팔라딘', 'epic', 'light', 'balancer', '2026-09-01', [400, 105, 75, 70, 70]],
+      ['mad_scientist', '매드사이언티스트', 'rare', 'nature', 'balancer', '2026-09-15', [350, 80, 80, 55, 55]],
+      ['grand_merchant', '대상인', 'rare', 'light', 'balancer', '2026-09-15', [340, 75, 90, 55, 60]],
+      ['comet_tracker', '혜성추적자', 'rare', 'fire', 'balancer', '2026-10-01', [345, 65, 100, 55, 60]],
+      ['prophet', '예언자', 'legend', 'water', 'buffer', '2026-10-01', [500, 90, 110, 75, 85]],
+      ['fireworks_girl', '폭죽소녀', 'epic', 'fire', 'dealer', '2026-10-15', [390, 100, 80, 55, 55]],
+      ['astrologer', '점성술사', 'epic', 'water', 'dealer', null, [390, 90, 95, 60, 65]],
+      ['sun_moon_sword_maiden', '일월검희', 'legend', 'light', 'dealer', null, [500, 130, 110, 65, 70]]
+    ];
+    const bonusWaveIds = bonusWaveExpectations.map(entry => entry[0]);
+    bonusWaveExpectations.forEach(([id, name, grade, element, role, releaseDate, stats]) => {
+      const card = getCard(id);
+      assert(card, 'missing bonus card: ' + id);
+      assert.deepStrictEqual(
+        [card.name, card.grade, card.element, card.role, card.releaseDate || null],
+        [name, grade, element, role, releaseDate]
+      );
+      assert.deepStrictEqual(
+        [card.stats.hp, card.stats.atk, card.stats.matk, card.stats.def, card.stats.mdef],
+        stats
+      );
+      assert.strictEqual(card.unlockSource, releaseDate ? 'bonus' : 'hidden');
+      assert(card.trait.desc && card.trait.desc.trim());
+      assert(card.skills.every(skill => skill.desc && skill.desc.trim()));
+    });
+    assert.strictEqual(
+      GameUtils.getBonusCards().filter(card => bonusWaveIds.includes(card.id)).length,
+      bonusWaveIds.length
+    );
+
+    const dragonClaw = getCard('gold_dragon').skills.find(skill => skill.name === '드래곤크로');
+    const starfallDash = getCard('shooting_star_boy').skills.find(skill => skill.name === '스타폴대쉬');
+    const comparableSkill = skill => JSON.stringify({
+      type: skill.type,
+      tier: skill.tier,
+      cost: skill.cost,
+      val: skill.val,
+      desc: skill.desc,
+      effects: skill.effects
+    });
+    assert.strictEqual(comparableSkill(starfallDash), comparableSkill(dragonClaw));
+
+    const traitWiring = {
+      discipline_captain: { type: 'vanguard_all_grade_party_def_mdef', gradeRequired: 'normal', val: 100 },
+      supernova: { type: 'death_dmg_phy_debuff', val: 4, debuff: 'burn', stack: 3 },
+      shooting_star_boy: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 50 },
+      victoria: { type: 'leader_field_stat_double', val: 2 },
+      holy_night: { type: 'death_dmg_phy', val: 3 },
+      paladin: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100 },
+      mad_scientist: { type: 'party_all_stats_mana_cost', statVal: 30, costMult: 2 },
+      grand_merchant: { type: 'death_next_ally_max_mana', val: 20 },
+      comet_tracker: { type: 'vanguard_delayed_mana_restore', val: 10 },
+      prophet: { type: 'field_kaleidoscope_each_turn' },
+      fireworks_girl: { type: 'death_dmg_phy_same_grade', val: 8 },
+      astrologer: { type: 'alternate_party_atk_matk_turn', val: 50 },
+      sun_moon_sword_maiden: { type: 'alternate_skill_type_mana', val: 10 }
+    };
+    Object.entries(traitWiring).forEach(([cardId, expected]) => {
+      const trait = getCard(cardId).trait;
+      Object.entries(expected).forEach(([key, value]) => {
+        assert.strictEqual(trait[key], value, cardId + ' trait.' + key);
+      });
+    });
+
+    const expectedSkills = [
+      ['discipline_captain', '잔소리', 'phy', 2, 20, 2, [{ type: 'debuff', id: 'silence' }]],
+      ['discipline_captain', '기강확립', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'weak' }]],
+      ['supernova', '파이널버스트', 'phy', 3, 30, 6, [{ type: 'suicide' }]],
+      ['supernova', '코어멜트다운', 'mag', 3, 30, 2.5, [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2 }]],
+      ['shooting_star_boy', '슈팅플레어', 'mag', 2, 20, 1.5, [{ type: 'debuff', id: 'burn', stack: 1 }]],
+      ['victoria', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'guard', duration: 3 }]],
+      ['victoria', '에태르랜스', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'corrosion' }]],
+      ['victoria', '기적의증명', 'sup', 3, 30, null, [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }]],
+      ['holy_night', '샤이닝팝', 'phy', 2, 20, 2, []],
+      ['holy_night', '라스트캐럴', 'phy', 3, 30, 4, [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2 }, { type: 'suicide' }]],
+      ['paladin', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'guard', duration: 3 }]],
+      ['paladin', '홀리그라운드', 'mag', 3, 30, 1, [{ type: 'field_buff', id: 'sanctuary' }]],
+      ['paladin', '듀얼브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3 }]],
+      ['mad_scientist', '익스페리먼트', 'mag', 2, 20, 2, [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'silence', mult: 2 }]],
+      ['mad_scientist', '다크인젝션', 'phy', 2, 20, 1.5, [{ type: 'debuff', id: 'darkness' }]],
+      ['grand_merchant', '마나콜렉트', 'sup', 1, 10, null, [{ type: 'mana_restore', val: 30 }]],
+      ['grand_merchant', '골드러쉬', 'mag', 3, 30, 2, [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'weak', mult: 2.5 }]],
+      ['comet_tracker', '코멧트래킹', 'mag', 3, 30, 4, [{ type: 'delayed_attack', turns: 2 }]],
+      ['comet_tracker', '코멧플레임', 'mag', 3, 30, 2.5, [{ type: 'debuff', id: 'burn', stack: 1 }]],
+      ['prophet', '샤이닝오라클', 'sup', 2, 20, null, [{ type: 'random_field_buff' }]],
+      ['prophet', '슈퍼내추럴', 'sup', 3, 30, null, [{ type: 'random_skill_trigger_from_list' }]],
+      ['fireworks_girl', '스파클캐논', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'burn', stack: 1 }]],
+      ['astrologer', '스텔라리딩', 'sup', 3, 30, null, [{ type: 'moon_to_sun' }]],
+      ['astrologer', '솔라브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'sun_bless', mult: 4 }]],
+      ['sun_moon_sword_maiden', '솔라크레센토', 'phy', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2 }]],
+      ['sun_moon_sword_maiden', '루나트레센토', 'mag', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2 }]]
+    ];
+    expectedSkills.forEach(([cardId, name, type, tier, cost, val, effects]) => {
+      const skill = getCard(cardId).skills.find(candidate => candidate.name === name);
+      assert(skill, cardId + ' is missing ' + name);
+      assert.deepStrictEqual(
+        [skill.type, skill.tier, skill.cost, Number.isFinite(skill.val) ? skill.val : null],
+        [type, tier, cost, val]
+      );
+      assert.strictEqual(JSON.stringify(skill.effects), JSON.stringify(effects), cardId + ' ' + name);
+    });
+    const festivalWiring = getCard('fireworks_girl').skills.find(skill => skill.name === '페스티벌나이트');
+    assert.deepStrictEqual(
+      [
+        festivalWiring.type,
+        festivalWiring.tier,
+        festivalWiring.cost,
+        festivalWiring.val,
+        JSON.stringify(festivalWiring.effects[0].turns),
+        festivalWiring.effects[1].debuff,
+        festivalWiring.effects[1].mult
+      ],
+      ['phy', 3, 30, 1.5, '[1,2,3]', 'burn', 2]
+    );
+    assert.strictEqual(getCard('paladin').skills.length, 4);
+    assert.strictEqual(getCard('victoria').skills.length, 3);
+
+    const featureHost = {
+      global: { unlocked_special_cards: [] },
+      getCardData: getCard
+    };
+    RPGFeatureModules.install(featureHost);
+    const datedWaveIds = bonusWaveExpectations.filter(entry => entry[5]).map(entry => entry[0]);
+    const releasedWaveIds = date => featureHost.getReleasedStandardBonusCards(date)
+      .map(card => card.id)
+      .filter(id => datedWaveIds.includes(id))
+      .sort();
+    const expectedReleasedIds = ids => [...ids].sort();
+    assert.deepStrictEqual(releasedWaveIds(new Date(2026, 6, 31, 12)), []);
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 7, 1, 12)),
+      expectedReleasedIds(['discipline_captain', 'supernova'])
+    );
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 7, 15, 12)),
+      expectedReleasedIds(['discipline_captain', 'supernova', 'shooting_star_boy', 'victoria'])
+    );
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 8, 1, 12)),
+      expectedReleasedIds([
+        'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
+        'holy_night', 'paladin'
+      ])
+    );
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 8, 15, 12)),
+      expectedReleasedIds([
+        'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
+        'holy_night', 'paladin', 'mad_scientist', 'grand_merchant'
+      ])
+    );
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 9, 1, 12)),
+      expectedReleasedIds([
+        'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
+        'holy_night', 'paladin', 'mad_scientist', 'grand_merchant',
+        'comet_tracker', 'prophet'
+      ])
+    );
+    assert.deepStrictEqual(
+      releasedWaveIds(new Date(2026, 9, 15, 12)),
+      expectedReleasedIds(datedWaveIds)
+    );
+    assert(featureHost.getHiddenBonusCards().some(card => card.id === 'astrologer'));
+    assert(featureHost.getHiddenBonusCards().some(card => card.id === 'sun_moon_sword_maiden'));
+    assert.strictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2030, 0, 1))
+        .some(card => ['astrologer', 'sun_moon_sword_maiden'].includes(card.id)),
+      false
+    );
+    const allHiddenBonusIds = featureHost.getHiddenBonusCards().map(card => card.id);
+    ['astrologer', 'sun_moon_sword_maiden'].forEach(targetId => {
+      const monthlyMissionHost = {
+        global: {
+          unlocked_bonus_cards: allHiddenBonusIds.filter(id => id !== targetId)
+        },
+        getCardData: getCard
+      };
+      RPGFeatureModules.install(monthlyMissionHost);
+      assert.strictEqual(
+        monthlyMissionHost.createMonthlyMissionState().rewardCardId,
+        targetId,
+        targetId + ' must remain obtainable from the monthly mission'
+      );
+    });
+
+    // Swimsuit Luna is reachable through the real beach mission reward selection.
+    const beachHost = {
+      global: {
+        unlocked_special_cards: [
+          'jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit',
+          'snow_rabbit_swimsuit', 'night_rabbit_swimsuit', 'silver_rabbit_swimsuit'
+        ]
+      },
+      getCardData: getCard
+    };
+    RPGFeatureModules.install(beachHost);
+    assert.deepStrictEqual(
+      Array.from(beachHost.getRemainingSpecialRewardCards('beach'), card => card.id),
+      ['luna_swimsuit']
+    );
+    const beachMission = beachHost.createSpecialMissionState({
+      season: beachHost.getCurrentSpecialSeason(new Date(2026, 6, 15)),
+      unlocked: true
+    });
+    assert.strictEqual(beachMission.rewardCardId, 'luna_swimsuit');
 
     // One Joker can fill only one missing slot in a conjunctive card requirement.
     assert.strictEqual(
@@ -180,6 +394,145 @@ function run() {
     const blackSwanInit = Logic.calculateInitialStats(blackSwan, ['black_swan', 'vampire', 'vampire'], GameUtils.getAllCards(), 0);
     assert.strictEqual(blackSwanInit.stats.baseCrit, GAME_CONSTANTS.BASE_CRIT + 20);
 
+    const allCardData = GameUtils.getAllCards();
+    const buildWaveUnit = (id, deck, idx) => {
+      const proto = getCard(id);
+      const init = Logic.calculateInitialStats(proto, deck, allCardData, idx);
+      return makeUnit({
+        id,
+        name: proto.name,
+        ...init.stats,
+        proto,
+        activeTrait: init.activeTrait,
+        pos: idx,
+        isDead: false,
+        skills: JSON.parse(JSON.stringify(proto.skills)),
+        buffs: {}
+      });
+    };
+
+    // New positional, opening-turn, party-stat, and field-stat traits use engine conventions.
+    const allNormalDeck = ['discipline_captain', 'marshmallow', 'kobold'];
+    const disciplineFront = buildWaveUnit('discipline_captain', allNormalDeck, 0);
+    const disciplinedPeer = buildWaveUnit('marshmallow', allNormalDeck, 1);
+    assert.strictEqual(disciplineFront.activeTrait, 'vanguard_all_grade_party_def_mdef');
+    assert.deepStrictEqual([disciplineFront.def, disciplineFront.mdef], [120, 120]);
+    assert.deepStrictEqual([disciplinedPeer.def, disciplinedPeer.mdef], [100, 100]);
+    const mixedDiscipline = buildWaveUnit(
+      'discipline_captain',
+      ['discipline_captain', 'marshmallow', 'paladin'],
+      0
+    );
+    assert.strictEqual(mixedDiscipline.activeTrait, null);
+    assert.deepStrictEqual([mixedDiscipline.def, mixedDiscipline.mdef], [60, 60]);
+
+    const starDeck = ['shooting_star_boy', 'marshmallow', 'kobold'];
+    const shootingStar = buildWaveUnit('shooting_star_boy', starDeck, 0);
+    assert.strictEqual(shootingStar.mdef, 27);
+    assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 1).atk, 170);
+    assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 2).atk, 170);
+    assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 3).atk, 85);
+    const starSkillTarget = makeUnit({ hp: 5000, maxHp: 5000 });
+    const fullHpStar = { ...shootingStar, hp: shootingStar.maxHp, baseCrit: -100 };
+    const hurtStar = { ...shootingStar, hp: shootingStar.maxHp - 1, baseCrit: -100 };
+    const fullHpStarDamage = Logic.calculateDamage(
+      fullHpStar, starSkillTarget, starfallDash, [], [], quiet, 'default', starDeck, 3, []
+    ).dmg;
+    const hurtStarDamage = Logic.calculateDamage(
+      hurtStar, starSkillTarget, starfallDash, [], [], quiet, 'default', starDeck, 3, []
+    ).dmg;
+    assert.strictEqual(fullHpStarDamage, hurtStarDamage * 2);
+
+    const madDeck = ['mad_scientist', 'luna', 'paladin'];
+    const madScientist = buildWaveUnit('mad_scientist', madDeck, 0);
+    const madScientistPeer = buildWaveUnit('luna', madDeck, 1);
+    assert.deepStrictEqual(
+      [madScientist.atk, madScientist.matk, madScientist.def, madScientist.mdef],
+      [104, 104, 71, 71]
+    );
+    assert.deepStrictEqual(
+      [madScientistPeer.atk, madScientistPeer.matk, madScientistPeer.def, madScientistPeer.mdef],
+      [169, 169, 78, 84]
+    );
+
+    assert.strictEqual(
+      buildWaveUnit('paladin', ['marshmallow', 'paladin', 'kobold'], 1).atk,
+      210
+    );
+    assert.strictEqual(
+      buildWaveUnit('paladin', ['paladin', 'marshmallow', 'kobold'], 0).atk,
+      105
+    );
+
+    const victoriaLeader = buildWaveUnit('victoria', ['marshmallow', 'kobold', 'victoria'], 2);
+    const victoriaFront = buildWaveUnit('victoria', ['victoria', 'marshmallow', 'kobold'], 0);
+    assert.strictEqual(victoriaLeader.fieldBuffStatMult, 2);
+    assert.strictEqual(victoriaFront.fieldBuffStatMult, undefined);
+    assert.deepStrictEqual(
+      [
+        Logic.calculateStats(victoriaLeader, [{ name: 'sun_bless' }], 'default', [], 1).atk,
+        Logic.calculateStats(victoriaFront, [{ name: 'sun_bless' }], 'default', [], 1).atk
+      ],
+      [160, 130]
+    );
+
+    const alternatingUnit = makeUnit({ atk: 100, matk: 100, alternatingAttackStatPercent: 50 });
+    assert.deepStrictEqual(
+      [
+        Logic.calculateStats(alternatingUnit, [], 'default', [], 1).atk,
+        Logic.calculateStats(alternatingUnit, [], 'default', [], 1).matk
+      ],
+      [50, 150]
+    );
+    assert.deepStrictEqual(
+      [
+        Logic.calculateStats(alternatingUnit, [], 'default', [], 2).atk,
+        Logic.calculateStats(alternatingUnit, [], 'default', [], 2).matk
+      ],
+      [150, 50]
+    );
+
+    // New death effects preserve exact damage and stack conditions.
+    const deathTarget = makeUnit({ hp: 10000, maxHp: 10000, baseCrit: -100 });
+    const supernovaUnit = buildWaveUnit('supernova', ['supernova'], 0);
+    supernovaUnit.baseCrit = -100;
+    const supernovaDeath = Logic.handleDeathTraits(
+      supernovaUnit, deathTarget, [], quiet, ['supernova'], 1, []
+    );
+    assert.strictEqual(supernovaDeath.damageToKiller, 500);
+    assert.strictEqual(supernovaDeath.killerDebuffs.burn, 3);
+
+    const fireworksUnit = buildWaveUnit(
+      'fireworks_girl',
+      ['fireworks_girl', 'astrologer', 'paladin'],
+      0
+    );
+    fireworksUnit.baseCrit = -100;
+    assert.strictEqual(
+      Logic.handleDeathTraits(
+        fireworksUnit,
+        deathTarget,
+        [],
+        quiet,
+        ['fireworks_girl', 'astrologer', 'paladin'],
+        1,
+        []
+      ).damageToKiller,
+      800
+    );
+    assert.strictEqual(
+      Logic.handleDeathTraits(
+        fireworksUnit,
+        deathTarget,
+        [],
+        quiet,
+        ['fireworks_girl', 'supernova'],
+        1,
+        []
+      ).damageToKiller,
+      0
+    );
+
     const makeRpg = (source, deck, fieldBuffs = []) => ({
       state: { deck, artifacts: [], mode: 'default' },
       battle: { players: [source], enemy: makeUnit({ id: 'enemy' }), fieldBuffs, activeTraits: [], delayedEffects: [], turn: 1, currentPlayerIdx: 0, phase: 'player-ready', isFinished: false },
@@ -192,6 +545,236 @@ function run() {
       renderBattleView: quiet,
       renderBattleControls: quiet
     });
+
+    // Battle initialization applies the scientist's cost penalty and astrologer's party cycle.
+    const makeBattleInitRpg = deck => ({
+      state: {
+        deck,
+        artifacts: [],
+        chaosBuffs: [],
+        mode: 'default',
+        gameType: 'standard',
+        enemyScale: 0,
+        hardMode: false
+      },
+      battle: {},
+      NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1, effects: [] },
+      getCardData: getCard,
+      getCurrentStageEnemyData: () => ENEMIES[0],
+      hasArtifact: () => false,
+      showBattleScreen: quiet,
+      showAlert: message => { throw new Error(message); },
+      clearBattleLog: quiet,
+      log: quiet,
+      renderBattleView: quiet,
+      renderBattleControls: quiet,
+      winBattle: quiet,
+      loseBattle: quiet
+    });
+    const startPlayerTurnOriginal = BattleRuntime.TurnManager.startPlayerTurn;
+    BattleRuntime.TurnManager.startPlayerTurn = quiet;
+    const waveInitRpg = makeBattleInitRpg(['mad_scientist', 'astrologer', 'grand_merchant']);
+    BattleRuntime.startBattleInit(waveInitRpg);
+    BattleRuntime.TurnManager.startPlayerTurn = startPlayerTurnOriginal;
+    assert.deepStrictEqual(
+      Array.from(waveInitRpg.battle.players[0].skills, skill => skill.cost),
+      [20, 40, 40]
+    );
+    assert(waveInitRpg.battle.players.every(unit => unit.alternatingAttackStatPercent === 50));
+    assert(waveInitRpg.battle.players.every(unit => unit.maxMp === 100 && unit.mp === 100));
+
+    // The merchant hands 20 maximum and current mana to the next living ally.
+    const merchantVictim = buildWaveUnit('grand_merchant', ['grand_merchant', 'marshmallow', 'kobold'], 0);
+    merchantVictim.isDead = true;
+    const deadMiddle = makeUnit({ name: 'dead middle', pos: 1, isDead: true });
+    const merchantSuccessor = makeUnit({ name: 'successor', pos: 2, isDead: false, mp: 100, maxMp: 100 });
+    const merchantRpg = makeRpg(merchantVictim, ['grand_merchant', 'marshmallow', 'kobold']);
+    merchantRpg.battle.players = [merchantVictim, deadMiddle, merchantSuccessor];
+    BattleRuntime.handleDeathTraits(merchantRpg, merchantVictim, merchantRpg.battle.enemy);
+    assert.deepStrictEqual([merchantSuccessor.mp, merchantSuccessor.maxMp], [120, 120]);
+    BattleRuntime.applySkillEffects(
+      merchantRpg,
+      merchantSuccessor,
+      merchantRpg.battle.enemy,
+      getCard('grand_merchant').skills.find(skill => skill.name === '마나콜렉트')
+    );
+    assert.deepStrictEqual([merchantSuccessor.mp, merchantSuccessor.maxMp], [120, 120]);
+
+    // The comet trait recovers mana only when a reserved delayed skill actually fires.
+    scheduledCallbacks.length = 0;
+    const cometSource = buildWaveUnit('comet_tracker', ['comet_tracker'], 0);
+    const cometRpg = makeRpg(cometSource, ['comet_tracker']);
+    cometRpg.battle.activeTraits = ['vanguard_delayed_mana_restore'];
+    cometRpg.battle.enemy = makeUnit({ id: 'comet-target', hp: 5000, maxHp: 5000 });
+    const cometTracking = cometSource.skills.find(skill => skill.name === '코멧트래킹');
+    BattleRuntime.executeSkill(cometRpg, cometSource, cometRpg.battle.enemy, cometTracking);
+    assert.strictEqual(cometSource.mp, 70);
+    assert.strictEqual(cometRpg.battle.delayedEffects.length, 1);
+    const reservedComet = cometRpg.battle.delayedEffects[0].skill;
+    assert.strictEqual(reservedComet.isActualDelayedTrigger, true);
+    assert.strictEqual(cometRpg.battle.delayedEffects[0].turn, 3);
+    cometRpg.battle.turn = 3;
+    cometRpg.battle.isNewTurn = false;
+    BattleRuntime.TurnManager.startPlayerTurn(cometRpg);
+    assert.strictEqual(cometSource.mp, 80);
+    assert.strictEqual(cometRpg.battle.delayedEffects.length, 0);
+    cometSource.mp = 50;
+    BattleRuntime.executeSkill(
+      cometRpg,
+      cometSource,
+      cometRpg.battle.enemy,
+      { name: '즉시 랜덤 보조', type: 'sup', cost: 0, effects: [] },
+      true
+    );
+    assert.strictEqual(cometSource.mp, 50);
+
+    const instantTracker = buildWaveUnit(
+      'comet_tracker',
+      ['comet_tracker', 'time_ruler', 'time_magician'],
+      0
+    );
+    const instantDelayedCaster = buildWaveUnit(
+      'time_ruler',
+      ['comet_tracker', 'time_ruler', 'time_magician'],
+      1
+    );
+    const instantTimeMagician = buildWaveUnit(
+      'time_magician',
+      ['comet_tracker', 'time_ruler', 'time_magician'],
+      2
+    );
+    const instantDelayRpg = makeRpg(
+      instantTracker,
+      ['comet_tracker', 'time_ruler', 'time_magician']
+    );
+    instantDelayRpg.battle.players = [instantTracker, instantDelayedCaster, instantTimeMagician];
+    instantDelayRpg.battle.currentPlayerIdx = 1;
+    instantDelayRpg.battle.activeTraits = ['vanguard_delayed_mana_restore', 'instant_delayed_skills'];
+    instantDelayRpg.battle.enemy = makeUnit({ id: 'instant-delay-target', hp: 5000, maxHp: 5000 });
+    BattleRuntime.executeSkill(
+      instantDelayRpg,
+      instantDelayedCaster,
+      instantDelayRpg.battle.enemy,
+      instantDelayedCaster.skills.find(skill => skill.name === '종언의예고')
+    );
+    assert.strictEqual(instantDelayedCaster.mp, 80);
+    assert.strictEqual(instantDelayRpg.battle.delayedEffects.length, 0);
+
+    // Victoria's proof resolves after three turns and creates both fixed field buffs.
+    scheduledCallbacks.length = 0;
+    const proofSource = buildWaveUnit('victoria', ['victoria'], 0);
+    const proofRpg = makeRpg(proofSource, ['victoria']);
+    proofRpg.battle.enemy = makeUnit({ id: 'proof-target', hp: 5000, maxHp: 5000 });
+    const miracleProof = proofSource.skills.find(skill => skill.name === '기적의증명');
+    BattleRuntime.executeSkill(proofRpg, proofSource, proofRpg.battle.enemy, miracleProof);
+    assert.strictEqual(proofRpg.battle.delayedEffects[0].turn, 4);
+    proofRpg.battle.turn = 4;
+    proofRpg.battle.isNewTurn = false;
+    BattleRuntime.TurnManager.startPlayerTurn(proofRpg);
+    assert.strictEqual(proofRpg.battle.delayedEffects.length, 0);
+    assert.deepStrictEqual(
+      Array.from(proofRpg.battle.fieldBuffs, buff => buff.name).sort(),
+      ['goddess_descent', 'twinkle_party']
+    );
+
+    // Festival Night schedules exactly three Phantom-style hits and checks burn on every hit.
+    scheduledCallbacks.length = 0;
+    const fireworksSource = buildWaveUnit('fireworks_girl', ['fireworks_girl'], 0);
+    fireworksSource.baseCrit = -100;
+    const fireworksRpg = makeRpg(fireworksSource, ['fireworks_girl']);
+    fireworksRpg.battle.enemy = makeUnit({
+      id: 'festival-target',
+      hp: 10000,
+      maxHp: 10000,
+      buffs: { burn: 1 }
+    });
+    const festivalNight = fireworksSource.skills.find(skill => skill.name === '페스티벌나이트');
+    BattleRuntime.executeSkill(fireworksRpg, fireworksSource, fireworksRpg.battle.enemy, festivalNight);
+    assert.deepStrictEqual(
+      Array.from(fireworksRpg.battle.delayedEffects, effect => effect.turn),
+      [2, 3, 4]
+    );
+    BattleRuntime.executeSkill(
+      fireworksRpg,
+      fireworksSource,
+      fireworksRpg.battle.enemy,
+      fireworksRpg.battle.delayedEffects[0].skill,
+      true
+    );
+    delete fireworksRpg.battle.enemy.buffs.burn;
+    fireworksRpg.battle.delayedEffects.slice(1).forEach(effect => {
+      BattleRuntime.executeSkill(fireworksRpg, fireworksSource, fireworksRpg.battle.enemy, effect.skill, true);
+    });
+    assert.strictEqual(fireworksRpg.battle.enemy.hp, 9400);
+
+    // Stellar Reading alternates moon creation and moon-to-sun conversion.
+    const astrologerSource = buildWaveUnit('astrologer', ['astrologer'], 0);
+    const astrologerRpg = makeRpg(astrologerSource, ['astrologer']);
+    const stellarReading = astrologerSource.skills.find(skill => skill.name === '스텔라리딩');
+    BattleRuntime.applySkillEffects(astrologerRpg, astrologerSource, astrologerRpg.battle.enemy, stellarReading);
+    assert.deepStrictEqual(
+      Array.from(astrologerRpg.battle.fieldBuffs, buff => buff.name),
+      ['moon_bless']
+    );
+    BattleRuntime.applySkillEffects(astrologerRpg, astrologerSource, astrologerRpg.battle.enemy, stellarReading);
+    assert.deepStrictEqual(
+      Array.from(astrologerRpg.battle.fieldBuffs, buff => buff.name),
+      ['sun_bless']
+    );
+
+    // Prophet and the Kaleidoscope artifact share one replacement pass per turn.
+    const prophetTraitSource = buildWaveUnit('prophet', ['prophet'], 0);
+    const prophetTraitRpg = makeRpg(prophetTraitSource, ['prophet'], [{ name: 'sun_bless' }]);
+    prophetTraitRpg.battle.activeTraits = ['field_kaleidoscope_each_turn'];
+    prophetTraitRpg.battle.isNewTurn = true;
+    let kaleidoscopeReplacementCount = 0;
+    const replaceFieldBuffsOriginal = BattleRuntime.replaceFieldBuffsLikeKaleidoscope;
+    BattleRuntime.replaceFieldBuffsLikeKaleidoscope = rpg => {
+      kaleidoscopeReplacementCount++;
+      return replaceFieldBuffsOriginal(rpg);
+    };
+    BattleRuntime.TurnManager.startPlayerTurn(prophetTraitRpg);
+    assert.strictEqual(kaleidoscopeReplacementCount, 1);
+    assert.strictEqual(prophetTraitRpg.battle.fieldBuffs.length, 1);
+
+    const prophetCombinedSource = buildWaveUnit('prophet', ['prophet'], 0);
+    const prophetCombinedRpg = makeRpg(
+      prophetCombinedSource,
+      ['prophet'],
+      [{ name: 'sun_bless' }]
+    );
+    prophetCombinedRpg.battle.activeTraits = ['field_kaleidoscope_each_turn'];
+    prophetCombinedRpg.battle.isNewTurn = true;
+    prophetCombinedRpg.hasArtifact = id => id === 'kaleidoscope';
+    kaleidoscopeReplacementCount = 0;
+    BattleRuntime.TurnManager.startPlayerTurn(prophetCombinedRpg);
+    BattleRuntime.replaceFieldBuffsLikeKaleidoscope = replaceFieldBuffsOriginal;
+    assert.strictEqual(kaleidoscopeReplacementCount, 1);
+    assert.strictEqual(prophetCombinedRpg.battle.fieldBuffs.length, 1);
+
+    // Sun-Moon Sword Maiden restores mana only after a manual skill-type change.
+    scheduledCallbacks.length = 0;
+    const swordMaiden = buildWaveUnit('sun_moon_sword_maiden', ['sun_moon_sword_maiden'], 0);
+    swordMaiden.mp = 60;
+    const swordRpg = makeRpg(swordMaiden, ['sun_moon_sword_maiden']);
+    swordRpg.battle.enemy = makeUnit({ id: 'sword-target', hp: 10000, maxHp: 10000 });
+    const useSwordSkill = (name, type) => {
+      swordRpg.battle.phase = 'player-ready';
+      assert.strictEqual(
+        BattleRuntime.executeSkill(
+          swordRpg,
+          swordMaiden,
+          swordRpg.battle.enemy,
+          { name, type, cost: 10, val: type === 'sup' ? undefined : 1, effects: [] }
+        ),
+        true
+      );
+      return swordMaiden.mp;
+    };
+    assert.strictEqual(useSwordSkill('첫 물리', 'phy'), 50);
+    assert.strictEqual(useSwordSkill('같은 물리', 'phy'), 40);
+    assert.strictEqual(useSwordSkill('마법 전환', 'mag'), 40);
+    assert.strictEqual(useSwordSkill('보조 전환', 'sup'), 40);
 
     // The complete effect context lets Flare Ribbon inspect special-card grades.
     const flare = makeUnit({ id: 'flare_ribbon', proto: getCard('flare_ribbon') });

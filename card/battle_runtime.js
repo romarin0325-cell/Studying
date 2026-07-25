@@ -221,6 +221,8 @@ const BattleRuntime = {
         const hasAttackSwap = rpg.battle.players.some(player => player && player.proto && player.proto.trait.type === 'reverse_atk_matk_party');
         const normalAttackTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_normal_attack_dmg');
         const guardBoostTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'guardian_hidden_trait');
+        const manaCostTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_all_stats_mana_cost');
+        const alternatingStatsTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'alternate_party_atk_matk_turn');
         if (hasAttackSwap || normalAttackTrait) {
             rpg.battle.players.forEach(player => {
                 if (!player) return;
@@ -235,6 +237,22 @@ const BattleRuntime = {
                 player.guardDamageReduction = Math.max(player.guardDamageReduction || 0, guardReduction);
             });
             rpg.log('[특성] 가디언: 덱 전체 가드 효과가 강화됩니다!');
+        }
+        if (manaCostTrait) {
+            const costMult = manaCostTrait.proto.trait.costMult || 2.0;
+            rpg.battle.players.forEach(player => {
+                if (!player || !Array.isArray(player.skills)) return;
+                player.skills.forEach(skill => {
+                    if (Number.isFinite(skill.cost)) skill.cost = Math.floor(skill.cost * costMult);
+                });
+            });
+            rpg.log(`[특성] ${manaCostTrait.name}: 덱 전체 스킬 마나 소비 ${costMult}배!`);
+        }
+        if (alternatingStatsTrait) {
+            const shift = alternatingStatsTrait.proto.trait.val || 50;
+            rpg.battle.players.forEach(player => {
+                if (player) player.alternatingAttackStatPercent = shift;
+            });
         }
         rpg.battle.fieldBuffs = [];
         rpg.battle.delayedEffects = [];
@@ -293,10 +311,13 @@ const BattleRuntime = {
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
-                if (rpg.hasArtifact('kaleidoscope')) {
+                const hasProphetTrait = BattleRuntime.hasActiveTrait(rpg, 'field_kaleidoscope_each_turn');
+                if (rpg.hasArtifact('kaleidoscope') || hasProphetTrait) {
                     const count = battle.fieldBuffs.length;
                     if (count > 0) {
-                        rpg.log('[아티팩트] 만화경: 필드 버프 재구성!');
+                        rpg.log(hasProphetTrait
+                            ? '[특성] 예언자: 필드 버프 재구성!'
+                            : '[아티팩트] 만화경: 필드 버프 재구성!');
                         BattleRuntime.replaceFieldBuffsLikeKaleidoscope(rpg);
                     }
                 }
@@ -457,7 +478,7 @@ const BattleRuntime = {
             if (Logic.checkEvasion(target, skill.type, battle.fieldBuffs, rpg.state.mode, rpg.state.artifacts || [], battle.turn)) {
                 rpg.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
                 if (rpg.hasArtifact('lucky_vicky')) {
-                    target.mp = Math.min(GAME_CONSTANTS.MAX_MP, target.mp + 10);
+                    target.mp = Math.min(getMaxMana(target), target.mp + 10);
                     rpg.log('[아티팩트] 럭키비키: 회피 성공! 마나 10 회복!');
                 }
                 if (target.proto && target.proto.trait && target.proto.trait.type === 'on_evasion_stun') {
@@ -571,6 +592,17 @@ const BattleRuntime = {
         }
 
         applyStackMap(rpg, killer, result.killerDebuffs);
+
+        if (victim && victim.proto && victim.proto.trait && victim.proto.trait.type === 'death_next_ally_max_mana') {
+            const amount = victim.proto.trait.val || 20;
+            const players = Array.isArray(rpg.battle.players) ? rpg.battle.players : [];
+            const nextAlly = players.find(player => player && !player.isDead && player.pos > victim.pos);
+            if (nextAlly) {
+                nextAlly.maxMp = getMaxMana(nextAlly) + amount;
+                nextAlly.mp = Math.min(nextAlly.maxMp, nextAlly.mp + amount);
+                rpg.log(`[특성] ${victim.name}: 다음 아군 ${nextAlly.name}의 최대마나와 현재마나 ${amount} 증가!`);
+            }
+        }
     },
 
     handleLinkedDeathTraits(rpg, victim, killer) {
@@ -588,6 +620,7 @@ const BattleRuntime = {
                 name: player.name,
                 hp: player.proto.stats.hp,
                 maxHp: player.proto.stats.hp,
+                maxMp: GAME_CONSTANTS.MAX_MP,
                 mp: GAME_CONSTANTS.MAX_MP,
                 atk: player.proto.stats.atk,
                 matk: player.proto.stats.matk,
@@ -677,9 +710,34 @@ const BattleRuntime = {
         return (rpg.battle.activeTraits || []).includes(id);
     },
 
+    restoreDelayedTriggerMana(rpg, source, skill) {
+        if (
+            !source ||
+            !skill ||
+            !skill.isActualDelayedTrigger ||
+            !BattleRuntime.hasActiveTrait(rpg, 'vanguard_delayed_mana_restore')
+        ) {
+            return 0;
+        }
+
+        const tracker = (rpg.battle.players || []).find(player =>
+            player && player.proto && player.proto.trait &&
+            player.proto.trait.type === 'vanguard_delayed_mana_restore' &&
+            player.pos === 0
+        );
+        const amount = tracker ? (tracker.proto.trait.val || 10) : 10;
+        const before = source.mp;
+        source.mp = Math.min(getMaxMana(source), source.mp + amount);
+        const restored = source.mp - before;
+        rpg.log(`[특성] 혜성추적자: 지연 스킬 발동! ${source.name}의 마나 ${restored} 회복!`);
+        return restored;
+    },
+
     executeSkill(rpg, source, target, skill, isDelayed = false) {
         if (rpg.battle && rpg.battle.isFinished) return false;
         if (!target || target.hp <= 0 || !source || source.isDead) return false;
+
+        if (isDelayed) BattleRuntime.restoreDelayedTriggerMana(rpg, source, skill);
 
         const cost = Number.isFinite(skill.cost) ? skill.cost : 0;
         if (!isDelayed) {
@@ -695,6 +753,17 @@ const BattleRuntime = {
                 rpg.log('[아티팩트] 블루문: 마나 소비 없이 스킬 사용!');
             } else {
                 source.mp -= cost;
+            }
+
+            if (source.proto && source.proto.trait && source.proto.trait.type === 'alternate_skill_type_mana') {
+                const previousType = source.lastManualSkillType;
+                if (previousType && previousType !== skill.type) {
+                    const amount = source.proto.trait.val || 10;
+                    const before = source.mp;
+                    source.mp = Math.min(getMaxMana(source), source.mp + amount);
+                    rpg.log(`[특성] ${source.name}: 스킬 타입 전환! 마나 ${source.mp - before} 회복!`);
+                }
+                source.lastManualSkillType = skill.type;
             }
         }
 
@@ -794,7 +863,10 @@ const BattleRuntime = {
                         announce: nightmareMessages[index] || `${resolvedDelayedSkill.name} 발동!`
                     });
                 });
-                rpg.log(`${skill.name} 준비... (1~5턴 뒤 연속 발동)`);
+                const firstTurn = Math.min(...nightmareTurns);
+                const lastTurn = Math.max(...nightmareTurns);
+                const turnLabel = firstTurn === lastTurn ? `${firstTurn}턴 뒤` : `${firstTurn}~${lastTurn}턴 뒤`;
+                rpg.log(`${skill.name} 준비... (${turnLabel} 연속 발동)`);
                 BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                 BattleRuntime.resolveSourceDeath(rpg, source, target);
                 if (target.hp <= 0) {
@@ -808,6 +880,7 @@ const BattleRuntime = {
             if (BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills')) {
                 rpg.log('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
                 modifiedSkill = resolvedDelayedSkill;
+                BattleRuntime.restoreDelayedTriggerMana(rpg, source, modifiedSkill);
             } else {
                 rpg.log(`${skill.name} 준비... (${delayedEff.turns}턴 뒤 발동)`);
                 rpg.battle.delayedEffects.push({
@@ -835,7 +908,7 @@ const BattleRuntime = {
         }
 
         if (dmgResult.luckyVicky) {
-            source.mp = Math.min(GAME_CONSTANTS.MAX_MP, source.mp + 10);
+            source.mp = Math.min(getMaxMana(source), source.mp + 10);
             rpg.log('[아티팩트] 럭키비키: 치명타 발생! 마나 10 회복!');
         }
 

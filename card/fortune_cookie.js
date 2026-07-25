@@ -358,7 +358,7 @@ const FortuneCookie = {
     this.showFortunePhase(result);
 
     // API 호출
-    this.callFortuneApi(result, 'gemini-3-flash-preview');
+    this.callFortuneApi(result, FORTUNE_PRIMARY_MODEL_ID);
   },
 
   async callFortuneApi(result, modelId) {
@@ -390,7 +390,7 @@ const FortuneCookie = {
 
     } catch (e) {
       console.error("포춘쿠키 API 실패", e);
-      if (modelId === 'gemini-3-flash-preview') {
+      if (modelId === FORTUNE_PRIMARY_MODEL_ID) {
         msgBox.innerHTML = `<div style="text-align:center; color:#ef5350;">운세를 불러오다 깜빡했어요.<br><span style="font-size:0.8rem;">(API 호출 실패)</span></div>`;
         retryBtn.style.display = 'block';
         this._lastResultForRetry = result; // 재시도를 위해 임시 저장
@@ -403,7 +403,7 @@ const FortuneCookie = {
 
   retryWithFallback() {
     if (!this._lastResultForRetry) return;
-    this.callFortuneApi(this._lastResultForRetry, 'gemini-3.1-flash-lite');
+    this.callFortuneApi(this._lastResultForRetry, FORTUNE_FALLBACK_MODEL_ID);
   },
 
   renderFortuneMessage(result) {
