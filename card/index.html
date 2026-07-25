@@ -3644,7 +3644,7 @@
 
                     let hpPct = (p.hp / p.maxHp) * 100;
                     document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
-                    let mpPct = (p.mp / 100) * 100;
+                    let mpPct = (p.mp / (p.maxMp || GAME_CONSTANTS.MAX_MP)) * 100;
                     document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
                     let buffTxt = Object.keys(p.buffs).map(k => BUFF_NAMES[k] || k).join(',');
@@ -4044,7 +4044,7 @@
                 };
 
                 let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
-                if (side === 'player') content += `MP: ${char.mp}<br>`;
+                if (side === 'player') content += `MP: ${char.mp}/${char.maxMp || GAME_CONSTANTS.MAX_MP}<br>`;
                 content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
                 content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
                 content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
@@ -5356,7 +5356,7 @@
                 const contentBox = document.getElementById('date-content');
                 if (!contentBox || !dateParams) return;
 
-                const isFallback = modelId === 'gemini-3.1-flash-lite';
+                const isFallback = modelId === DATE_FALLBACK_MODEL_ID;
                 const modelNote = isFallback
                     ? `<br><span style="font-size:0.8rem; color:#81d4fa;">${LumiQuestionRuntime.getModelLabel(modelId)} 모델로 다시 시도 중...</span>`
                     : '';
@@ -5382,7 +5382,7 @@
                 const contentBox = document.getElementById('date-content');
                 if (!contentBox || !dateParams) return false;
 
-                const isFallback = modelId === 'gemini-3.1-flash-lite';
+                const isFallback = modelId === DATE_FALLBACK_MODEL_ID;
                 this.isApiLoading = true;
                 this.updateDateRetryButton({ visible: isFallback, disabled: true });
                 this.setDateLoadingState(dateParams, modelId);
@@ -5434,7 +5434,7 @@
                 // Show date modal
                 document.getElementById('modal-date').classList.add('active');
                 this.updateDateRetryButton({ visible: false, disabled: true });
-                await this.loadDateContent(key, dateParams, 'gemini-3-flash-preview');
+                await this.loadDateContent(key, dateParams, DATE_PRIMARY_MODEL_ID);
             },
 
             async retryDateWithFallback() {
@@ -5446,7 +5446,7 @@
                 const key = this.ensureApiKey('데이트를 다시 시도하려면');
                 if (!key) return this.showAlert("API 키가 없어 데이트를 다시 시도할 수 없습니다.");
 
-                await this.loadDateContent(key, dateParams, 'gemini-3.1-flash-lite');
+                await this.loadDateContent(key, dateParams, DATE_FALLBACK_MODEL_ID);
             },
 
             finishDate() {

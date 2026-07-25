@@ -66,11 +66,26 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
    - [Special Direction]이 없으면 이 항목을 생략하십시오.
 8. **강의 마무리 멘트**`;
 
+const GEMINI_FLASH_MODEL_ID = 'gemini-3.6-flash';
+const GEMINI_FLASH_LITE_MODEL_ID = 'gemini-3.5-flash-lite';
+const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
+
 const LUMI_MODEL_OPTIONS = Object.freeze([
-    { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
-    { id: 'gemini-3-flash-preview', label: 'Flash', flashLike: true, allowSearch: true },
-    { id: 'gemini-3.1-flash-lite', label: 'Lite', flashLike: true, allowSearch: false }
+    { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true, allowSampling: true },
+    { id: GEMINI_FLASH_MODEL_ID, label: 'Flash', flashLike: true, allowSearch: true, allowSampling: false },
+    { id: GEMINI_FLASH_LITE_MODEL_ID, label: 'Lite', flashLike: true, allowSearch: false, allowSampling: false }
 ]);
+
+function getGeminiGenerateContentUrl(modelId) {
+    return `${GEMINI_GENERATE_CONTENT_ROOT}/${encodeURIComponent(modelId)}:generateContent`;
+}
+
+function getGeminiRequestHeaders(apiKey) {
+    return {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+    };
+}
 
 function getLumiModelConfig(modelId) {
     return LUMI_MODEL_OPTIONS.find(option => option.id === modelId) || LUMI_MODEL_OPTIONS[0];
@@ -197,17 +212,21 @@ const GameAPI = {
         // 3. 프롬프트 조합
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
+        const generationConfig = {
+            maxOutputTokens: isMisunderstandingMode ? 12288 : 6144,
+            thinkingConfig: buildThinkingConfig(modelConfig, 'high')
+        };
+        if (modelConfig.allowSampling) {
+            generationConfig.temperature = isMisunderstandingMode ? 0.65 : 0.4;
+        }
+
         // 4. API 호출 (flash 기반 high reasoning / BLOCK_NONE 사용)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.id}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        const response = await fetch(getGeminiGenerateContentUrl(modelConfig.id), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getGeminiRequestHeaders(apiKey),
             body: JSON.stringify({
                 contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: {
-                    temperature: isMisunderstandingMode ? 0.65 : 0.4,
-                    maxOutputTokens: isMisunderstandingMode ? 12288 : 6144,
-                    thinkingConfig: buildThinkingConfig(modelConfig, 'high')
-                },
+                generationConfig,
                 safetySettings: [
                     { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
                     { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
@@ -312,7 +331,7 @@ function buildThinkingConfig(modelConfig, thinkingLevel = 'high') {
     }
 
     return {
-        thinkingLevel: normalizeThinkingLevel(modelConfig && modelConfig.id === 'gemini-3.1-flash-lite' && thinkingLevel === 'high' ? 'medium' : thinkingLevel)
+        thinkingLevel: normalizeThinkingLevel(thinkingLevel)
     };
 }
 
@@ -451,11 +470,9 @@ async function requestLumiQuestion(apiKey, history, options = {}) {
     const requestSignal = createRequestSignal(signal, timeoutMs);
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelConfig.id}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        const response = await fetch(getGeminiGenerateContentUrl(modelConfig.id), {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: getGeminiRequestHeaders(apiKey),
             body: JSON.stringify(payload),
             signal: requestSignal.signal
         });
@@ -933,7 +950,7 @@ const LumiQuestionRuntime = {
                     ? getLumiOrbSystemInstruction(this.searchEnabled)
                     : session.systemInstruction,
                 enableSearch: this.searchEnabled && session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
-                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === 'gemini-3.1-flash-lite' ? 'medium' : session.thinkingLevel,
+                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === GEMINI_FLASH_LITE_MODEL_ID ? 'medium' : session.thinkingLevel,
                 model: modelConfig.id,
                 signal: controller.signal,
                 timeoutMs: 120000
@@ -983,8 +1000,8 @@ window.LumiQuestionRuntime = LumiQuestionRuntime;
 
 // --- Date System ---
 
-const DATE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
-const DATE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite';
+const DATE_PRIMARY_MODEL_ID = GEMINI_FLASH_MODEL_ID;
+const DATE_FALLBACK_MODEL_ID = GEMINI_FLASH_LITE_MODEL_ID;
 
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
@@ -1094,15 +1111,12 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
         `[비밀플래그]: ${dateParams.secret ? 'on' : 'off'}` +
         lonelinessPart + secretPart;
 
-    const temperature = innuendoInstruction ? 0.85 : 0.8;
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+    const response = await fetch(getGeminiGenerateContentUrl(modelId), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getGeminiRequestHeaders(apiKey),
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
-                temperature: temperature,
                 maxOutputTokens: 12288,
                 thinkingConfig
             },
@@ -1138,8 +1152,8 @@ GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
 
 // --- Fortune Cookie System ---
 
-const FORTUNE_PRIMARY_MODEL_ID = 'gemini-3-flash-preview';
-const FORTUNE_FALLBACK_MODEL_ID = 'gemini-3.1-flash-lite';
+const FORTUNE_PRIMARY_MODEL_ID = GEMINI_FLASH_MODEL_ID;
+const FORTUNE_FALLBACK_MODEL_ID = GEMINI_FLASH_LITE_MODEL_ID;
 
 const FORTUNE_LUMI_PERSONA = `# Role: 포춘쿠키 요정 루미 (Fortune Cookie Fairy Rumi)
 
@@ -1210,13 +1224,12 @@ GameAPI.getFortuneContent = async function (apiKey, fortuneParams, options = {})
         `${timePart}` +
         eventPart;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+    const response = await fetch(getGeminiGenerateContentUrl(modelId), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getGeminiRequestHeaders(apiKey),
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
-                temperature: 0.8,
                 maxOutputTokens: 2048,
                 thinkingConfig
             },

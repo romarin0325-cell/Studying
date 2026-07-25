@@ -33,10 +33,13 @@ async function run() {
 
     localStorage.clear();
     RPG.loadGlobalData();
+    const getCurrentSpecialSeasonOriginal = RPG.getCurrentSpecialSeason;
+    const beachSeason = getCurrentSpecialSeasonOriginal.call(RPG, new Date(2026, 6, 15));
+    RPG.getCurrentSpecialSeason = () => beachSeason;
 
     const titleButtons = [...document.querySelectorAll('.title-screen-actions button')].map(btn => btn.innerText.trim());
     assert(
-      JSON.stringify(titleButtons) === JSON.stringify(['새로하기', '이어하기', '질문하기', '미션확인']),
+      JSON.stringify(titleButtons) === JSON.stringify(['새로하기', '이어하기', '포춘쿠키', '질문하기', '미션확인']),
       'title_menu',
       titleButtons.join(', ')
     );
@@ -186,6 +189,7 @@ async function run() {
     );
 
     const rewardId = RPG.global.specialMission.rewardCardId;
+    assert(rewardId === 'luna_swimsuit', 'swimsuit_luna_reward', rewardId);
     RPG.global.specialMission.missions.challenge3.progress = 3;
     RPG.global.specialMission.missions.toeic3.progress = 3;
     RPG.global.specialMission.missions.boss.progress = 1;
@@ -214,6 +218,7 @@ async function run() {
       `${rewardId} replaces ${rewardCard.specialBaseId}`
     );
 
+    RPG.getCurrentSpecialSeason = getCurrentSpecialSeasonOriginal;
     return output;
   });
 

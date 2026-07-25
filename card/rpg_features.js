@@ -34,7 +34,7 @@
             title: '스페셜미션(해변)',
             bossId: 'thor_swimsuit',
             bossName: '토르(수영복)',
-            rewardCardIds: ['jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit',
+            rewardCardIds: ['luna_swimsuit', 'jasmine_swimsuit', 'rumi_swimsuit', 'zeke_swimsuit',
                             'snow_rabbit_swimsuit', 'night_rabbit_swimsuit', 'silver_rabbit_swimsuit']
         },
         halloween: {
@@ -481,8 +481,8 @@
     },
 
 
-    getReleasedStandardBonusCards() {
-        const today = new Date();
+    getReleasedStandardBonusCards(date = new Date()) {
+        const today = date;
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         return this.getAllStandardBonusCards().filter(card => {
             if (!card.releaseDate) return true;

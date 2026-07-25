@@ -1094,6 +1094,146 @@ const BONUS_CARD_EXPANSION = [
             { name: '일체지광', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '파쇄륜', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '모든 필드버프를 소모하고 제거한 수 x1.5 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 1.5 }] }
         ]
+    },
+
+    // ─── August–October 2026 Bonus Card Wave ───────────────────────────────────
+    {
+        id: 'discipline_captain', name: '선도부장', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-08-01',
+        stats: { hp: 330, atk: 65, matk: 65, def: 60, mdef: 60 },
+        trait: { type: 'vanguard_all_grade_party_def_mdef', gradeRequired: 'normal', val: 100, desc: '선봉 배치 및 덱 전체 일반등급 시 덱 전체 방어력/마법방어력 100% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '잔소리', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
+            { name: '기강확립', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+        ]
+    },
+    {
+        id: 'supernova', name: '초신성', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-08-01',
+        stats: { hp: 500, atk: 125, matk: 105, def: 60, mdef: 60 },
+        trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'burn', stack: 3, logName: '초신성', desc: '사망 시 적에게 400% 물리대미지와 작열 3스택 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '파이널버스트', type: 'phy', tier: 3, cost: 30, val: 6.0, desc: '물리 6배율, 사용 후 사망', effects: [{ type: 'suicide' }] },
+            { name: '코어멜트다운', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고 소모한 스택당 2.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.0 }] }
+        ]
+    },
+    {
+        id: 'shooting_star_boy', name: '별똥별소년', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-08-15',
+        stats: { hp: 290, atk: 85, matk: 60, def: 45, mdef: 55 },
+        trait: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 50, desc: '전투 시작 후 2턴간 공격력 100% 증가 / 덱 전체 마법방어력 50% 감소' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '스타폴대쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '슈팅플레어', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'victoria', name: '빅토리아', grade: 'legend', element: 'light', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-08-15',
+        stats: { hp: 540, atk: 100, matk: 95, def: 80, mdef: 75 },
+        trait: { type: 'leader_field_stat_double', val: 2.0, desc: '대장 배치 시 아레나를 제외한 필드버프의 능력치 효과를 2배로 받음' },
+        skills: [
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '에태르랜스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '기적의증명', type: 'sup', tier: 3, cost: 30, desc: '3턴 뒤 필드버프 여신강림과 트윙클파티 부여', effects: [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }] }
+        ]
+    },
+    {
+        id: 'holy_night', name: '홀리밤', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-09-01',
+        stats: { hp: 300, atk: 85, matk: 55, def: 45, mdef: 45 },
+        trait: { type: 'death_dmg_phy', val: 3.0, desc: '사망 시 적에게 300% 물리대미지' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '샤이닝팝', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율', effects: [] },
+            { name: '라스트캐럴', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '디바인을 전부 소모하고 소모한 스택당 2.0배율 추가, 사용 후 사망', effects: [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2.0 }, { type: 'suicide' }] }
+        ]
+    },
+    {
+        id: 'paladin', name: '팔라딘', grade: 'epic', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-01',
+        stats: { hp: 400, atk: 105, matk: 75, def: 70, mdef: 70 },
+        trait: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100, desc: '중견 배치 시 공격력 100% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '홀리그라운드', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1배율, 필드버프 성역 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }] },
+            { name: '듀얼브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '아레나 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'mad_scientist', name: '매드사이언티스트', grade: 'rare', element: 'nature', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-15',
+        stats: { hp: 350, atk: 80, matk: 80, def: 55, mdef: 55 },
+        trait: { type: 'party_all_stats_mana_cost', statVal: 30, costMult: 2.0, desc: '덱 전체 공격력/마법공격력/방어력/마법방어력 30% 증가 / 스킬 마나 소비 2배' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '익스페리먼트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'silence', mult: 2.0 }] },
+            { name: '다크인젝션', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
+        ]
+    },
+    {
+        id: 'grand_merchant', name: '대상인', grade: 'rare', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-15',
+        stats: { hp: 340, atk: 75, matk: 90, def: 55, mdef: 60 },
+        trait: { type: 'death_next_ally_max_mana', val: 20, desc: '사망 시 다음 아군의 최대마나와 현재마나 20 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '마나콜렉트', type: 'sup', tier: 1, cost: 10, desc: '마나 30 회복', effects: [{ type: 'mana_restore', val: 30 }] },
+            { name: '골드러쉬', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '약화 상태의 적에게 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'weak', mult: 2.5 }] }
+        ]
+    },
+    {
+        id: 'comet_tracker', name: '혜성추적자', grade: 'rare', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-10-01',
+        stats: { hp: 345, atk: 65, matk: 100, def: 55, mdef: 60 },
+        trait: { type: 'vanguard_delayed_mana_restore', val: 10, desc: '선봉 배치 시 덱의 지연 스킬이 실제 발동할 때 시전자가 마나 10 회복' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '코멧트래킹', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '2턴 뒤 발동하는 마법 4배율 공격', effects: [{ type: 'delayed_attack', turns: 2 }] },
+            { name: '코멧플레임', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'prophet', name: '예언자', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-10-01',
+        stats: { hp: 500, atk: 90, matk: 110, def: 75, mdef: 85 },
+        trait: { type: 'field_kaleidoscope_each_turn', desc: '매 턴 시작 시 모든 필드버프를 무작위로 변경' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '샤이닝오라클', type: 'sup', tier: 2, cost: 20, desc: '랜덤한 필드버프 생성', effects: [{ type: 'random_field_buff' }] },
+            { name: '슈퍼내추럴', type: 'sup', tier: 3, cost: 30, desc: '데스티니룰렛과 동일한 풀에서 랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
+        ]
+    },
+    {
+        id: 'fireworks_girl', name: '폭죽소녀', grade: 'epic', element: 'fire', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-10-15',
+        stats: { hp: 390, atk: 100, matk: 80, def: 55, mdef: 55 },
+        trait: { type: 'death_dmg_phy_same_grade', val: 8.0, desc: '덱 전체가 같은 등급일 경우 사망 시 적에게 800% 물리대미지' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            {
+                name: '페스티벌나이트', type: 'phy', tier: 3, cost: 30, val: 1.5,
+                desc: '1~3턴 뒤 연속 발동, 작열 상태의 적에게 대미지 2배',
+                effects: [
+                    { type: 'multi_delayed_attack', turns: [1, 2, 3], messages: ['첫번째 폭죽이 터진다!', '두번째 폭죽이 터진다!', '마지막 폭죽이 터진다!'] },
+                    { type: 'dmg_boost', condition: 'target_debuff', debuff: 'burn', mult: 2.0 }
+                ]
+            },
+            { name: '스파클캐논', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'astrologer', name: '점성술사', grade: 'epic', element: 'water', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 390, atk: 90, matk: 95, def: 60, mdef: 65 },
+        trait: { type: 'alternate_party_atk_matk_turn', val: 50, desc: '덱 전체가 홀수 턴에는 공격력 50% 감소·마법공격력 50% 증가, 짝수 턴에는 마법공격력 50% 감소·공격력 50% 증가' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '스텔라리딩', type: 'sup', tier: 3, cost: 30, desc: '달의축복 부여, 이미 있으면 소모하고 태양의축복 부여', effects: [{ type: 'moon_to_sun' }] },
+            { name: '솔라브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '태양의축복 소모 시 대미지 4배', effects: [{ type: 'consume_field_buff_dmg', buff: 'sun_bless', mult: 4.0 }] }
+        ]
+    },
+    {
+        id: 'sun_moon_sword_maiden', name: '일월검희', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 500, atk: 130, matk: 110, def: 65, mdef: 70 },
+        trait: { type: 'alternate_skill_type_mana', val: 10, desc: '이전에 사용한 스킬과 다른 타입의 스킬 사용 시 마나 10 회복' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '솔라크레센토', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '태양의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
+            { name: '루나트레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+        ]
     }
 ];
 
