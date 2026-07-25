@@ -152,7 +152,7 @@ function run() {
       ['astrologer', '스텔라리딩', 'sup', 3, 30, null, [{ type: 'moon_to_sun' }]],
       ['astrologer', '솔라브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'sun_bless', mult: 4 }]],
       ['sun_moon_sword_maiden', '솔라크레센토', 'phy', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2 }]],
-      ['sun_moon_sword_maiden', '루나트레센토', 'mag', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2 }]]
+      ['sun_moon_sword_maiden', '루나크레센토', 'mag', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2 }]]
     ];
     expectedSkills.forEach(([cardId, name, type, tier, cost, val, effects]) => {
       const skill = getCard(cardId).skills.find(candidate => candidate.name === name);
