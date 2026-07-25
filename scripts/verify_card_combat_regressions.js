@@ -552,6 +552,24 @@ function run() {
       renderBattleControls: quiet
     });
 
+    // Transcendence Lumi restores 20 MP on normal attacks, capped at max MP.
+    const dreamLumi = makeUnit({
+      id: 'trans_lumi', name: '루미(꿈의형태)', mp: 90, maxMp: 100,
+      proto: getCard('trans_lumi'), buffs: {}, baseCrit: -100
+    });
+    const dreamLumiRpg = makeRpg(dreamLumi, ['trans_lumi']);
+    const originalEndPlayerTurn = BattleRuntime.TurnManager.endPlayerTurn;
+    BattleRuntime.TurnManager.endPlayerTurn = quiet;
+    BattleRuntime.executeSkill(
+      dreamLumiRpg, dreamLumi, dreamLumiRpg.battle.enemy, dreamLumiRpg.NORMAL_ATTACK
+    );
+    BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurn;
+    assert.strictEqual(dreamLumi.mp, 100);
+    assert.deepStrictEqual(
+      [dreamLumi.proto.trait.type, dreamLumi.proto.trait.val],
+      ['normal_attack_mana_restore', 20]
+    );
+
     // Destiny Roulette and Supernatural share the complete 14-skill pool.
     const roulettePool = [
       ['gold_dragon', '얼티밋브레스'],

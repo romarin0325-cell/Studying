@@ -1692,7 +1692,7 @@ const TRANSCENDENCE_CARDS = [
     {
         id: 'trans_lumi', name: '루미(꿈의형태)', grade: 'transcendence', element: 'water', role: 'buffer',
         stats: { hp: 540, atk: 90, matk: 140, def: 90, mdef: 100 },
-        trait: { type: 'cosmic_harmony_random_buff', desc: '코스믹하모니 사용시 태양의축복, 달의축복, 스타파우더 중 랜덤한 필드버프 생성' },
+        trait: { type: 'normal_attack_mana_restore', val: 20, desc: '일반 공격 시 마나 20 회복' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '코스믹하모니', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '랜덤 필드버프 생성 (태양/달/스타파우더)', effects: [{ type: 'random_field_buff_lumi' }] },

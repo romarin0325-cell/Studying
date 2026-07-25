@@ -788,6 +788,17 @@ const BattleRuntime = {
             skill.name === rpg.NORMAL_ATTACK.name &&
             source.proto &&
             source.proto.trait &&
+            source.proto.trait.type === 'normal_attack_mana_restore'
+        ) {
+            const before = source.mp;
+            source.mp = Math.min(getMaxMana(source), source.mp + (source.proto.trait.val || 20));
+            rpg.log(`[특성] ${source.name}: 일반 공격으로 마나 ${source.mp - before} 회복!`);
+        }
+
+        if (
+            skill.name === rpg.NORMAL_ATTACK.name &&
+            source.proto &&
+            source.proto.trait &&
             source.proto.trait.type === 'cure_master_trait' &&
             Math.random() < ((source.proto.trait.val || 0) / 100)
         ) {
