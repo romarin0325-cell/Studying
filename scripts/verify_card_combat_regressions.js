@@ -411,6 +411,12 @@ function run() {
       });
     };
 
+    // Time Magician's balance adjustment is reflected in its source stats.
+    assert.deepStrictEqual(
+      Object.values(getCard('time_magician').stats),
+      [330, 70, 90, 50, 55]
+    );
+
     // New positional, opening-turn, party-stat, and field-stat traits use engine conventions.
     const allNormalDeck = ['discipline_captain', 'marshmallow', 'kobold'];
     const disciplineFront = buildWaveUnit('discipline_captain', allNormalDeck, 0);
@@ -545,6 +551,64 @@ function run() {
       renderBattleView: quiet,
       renderBattleControls: quiet
     });
+
+    // Transcendence Lumi restores 20 MP on normal attacks, capped at max MP.
+    const dreamLumi = makeUnit({
+      id: 'trans_lumi', name: '루미(꿈의형태)', mp: 90, maxMp: 100,
+      proto: getCard('trans_lumi'), buffs: {}, baseCrit: -100
+    });
+    const dreamLumiRpg = makeRpg(dreamLumi, ['trans_lumi']);
+    const originalEndPlayerTurn = BattleRuntime.TurnManager.endPlayerTurn;
+    BattleRuntime.TurnManager.endPlayerTurn = quiet;
+    BattleRuntime.executeSkill(
+      dreamLumiRpg, dreamLumi, dreamLumiRpg.battle.enemy, dreamLumiRpg.NORMAL_ATTACK
+    );
+    BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurn;
+    assert.strictEqual(dreamLumi.mp, 100);
+    assert.deepStrictEqual(
+      [dreamLumi.proto.trait.type, dreamLumi.proto.trait.val],
+      ['normal_attack_mana_restore', 20]
+    );
+
+    // Destiny Roulette and Supernatural share the complete 14-skill pool.
+    const roulettePool = [
+      ['gold_dragon', '얼티밋브레스'],
+      ['zeke', '라그나로크'],
+      ['jasmine', '여신강림'],
+      ['frozen_witch', '블리자드'],
+      ['behemoth', '어스퀘이크'],
+      ['gray', '차원절단'],
+      ['rumi', '밀키웨이엑스터시'],
+      ['phoenix', '메테오임팩트'],
+      ['time_ruler', '섀도우트위스트'],
+      ['cinderella', '미드나잇스펠'],
+      ['luna', '다크메테오'],
+      ['sakura', '봉인부'],
+      ['cure_master', '레모네이드'],
+      ['perfect_aurora', '퍼펙트플랜']
+    ];
+    const rouletteSource = makeUnit({ id: 'roulette-source', proto: getCard('trans_chaos_lord') });
+    const rouletteRpg = makeRpg(rouletteSource, ['trans_chaos_lord']);
+    const rouletteSkill = rouletteSource.proto.skills.find(skill => skill.name === '데스티니룰렛');
+    const originalRouletteRandom = Math.random;
+    const originalExecuteSkill = BattleRuntime.executeSkill;
+    roulettePool.forEach(([cardId, skillName], index) => {
+      const executedSkills = [];
+      rouletteRpg.battle.delayedEffects = [];
+      Math.random = () => (index + 0.1) / roulettePool.length;
+      BattleRuntime.executeSkill = (rpg, source, target, triggeredSkill) => executedSkills.push(triggeredSkill.name);
+      BattleRuntime.applySkillEffects(rouletteRpg, rouletteSource, rouletteRpg.battle.enemy, rouletteSkill);
+      const expectedSkill = getCard(cardId).skills.find(skill => skill.name === skillName);
+      assert(expectedSkill, 'roulette target is missing: ' + cardId + '/' + skillName);
+      if (findDelayedSkillEffect(expectedSkill)) {
+        assert.strictEqual(rouletteRpg.battle.delayedEffects.length, 1);
+        assert.strictEqual(rouletteRpg.battle.delayedEffects[0].skill.name, skillName);
+      } else {
+        assert.deepStrictEqual(executedSkills, [skillName]);
+      }
+    });
+    Math.random = originalRouletteRandom;
+    BattleRuntime.executeSkill = originalExecuteSkill;
 
     // Battle initialization applies the scientist's cost penalty and astrologer's party cycle.
     const makeBattleInitRpg = deck => ({

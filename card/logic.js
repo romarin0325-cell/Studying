@@ -1674,8 +1674,12 @@ const SideEffects = {
                 { id: 'gray', skill: '차원절단' },
                 { id: 'rumi', skill: '밀키웨이엑스터시' },
                 { id: 'phoenix', skill: '메테오임팩트' },
-                { id: 'time_ruler', skill: '섀도우트위스트' }
-                , { id: 'cinderella', skill: '미드나잇스펠' }
+                { id: 'time_ruler', skill: '섀도우트위스트' },
+                { id: 'cinderella', skill: '미드나잇스펠' },
+                { id: 'luna', skill: '다크메테오' },
+                { id: 'sakura', skill: '봉인부' },
+                { id: 'cure_master', skill: '레모네이드' },
+                { id: 'perfect_aurora', skill: '퍼펙트플랜' }
             ];
 
             const pick = skillMap[Math.floor(Math.random() * skillMap.length)];
