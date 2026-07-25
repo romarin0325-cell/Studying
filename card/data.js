@@ -759,7 +759,7 @@ const BONUS_CARDS = [
     },
     {
         id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer', unlockSource: 'hidden',
-        stats: { hp: 350, atk: 75, matk: 95, def: 60, mdef: 60 },
+        stats: { hp: 330, atk: 70, matk: 90, def: 50, mdef: 55 },
         trait: { type: 'instant_delayed_skills', desc: '덱의 지연 스킬이 즉시 발동' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
