@@ -40,7 +40,14 @@ function run() {
     'openBonusPoolEditor()',
     'bonusPoolPresets:',
     'activeBonusPoolPresetIndex:',
-    "name: 'RPGFeatureModules'"
+    "name: 'RPGFeatureModules'",
+    'id="screen-artifact-reserve-draft"',
+    'id="menu-artifact-area"',
+    'id="artifact-check-title"',
+    "id: 'artifact_chaos'",
+    "id: 'artifact_reserve'",
+    "!['origin', 'archive'].includes(m.id)",
+    "!['artifact_chaos', 'artifact_reserve'].includes(m.id)"
   ]);
 
   mustContain(path.join(cardRoot, 'rpg_features.js'), [
@@ -54,7 +61,11 @@ function run() {
     'claimSpecialMissionReward()',
     'tryUnlockSpecialMissionFromDreamCorridor(stageNumber)',
     'getCurrentSpecialSeason(date = new Date())',
-    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)'
+    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
+    'resetArtifactChaosRound()',
+    'generateArtifactReserveBundles()',
+    'toggleArtifactReserveArtifact(id)',
+    'consumeArtifactReserveUsesForBattle()'
   ]);
 
   mustContain(path.join(cardRoot, 'logic.js'), [
@@ -91,7 +102,8 @@ function run() {
     "syn_water_light_heart_star",
     "skill.name === '하트오버드라이브'",
     "syn_water_light_midnight_twinkle",
-    "skill.name === '미드나잇판타지'"
+    "skill.name === '미드나잇판타지'",
+    "artifact_reserve"
   ]);
   mustContain(path.join(cardRoot, 'toeic.js'), ['const TOEIC_DATA']);
 

@@ -972,6 +972,12 @@
                     카오스 셔플 (티켓 1장)
                 </button>
             </div>
+            <div id="menu-artifact-area" style="display:none; margin-bottom:10px;">
+                <button id="btn-artifact-menu" class="menu-btn" onclick="RPG.openArtifactCheck()"
+                    style="border-color:#ffd700; color:#ffd700;">
+                    아티팩트 확인
+                </button>
+            </div>
             <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
             <button class="menu-btn" onclick="RPG.openCollection()">카드 확인</button>
             <button class="menu-btn" onclick="RPG.openLibrary()">도서관</button>
@@ -1007,6 +1013,27 @@
                 <button class="menu-btn" onclick="RPG.openFactoryViewDeck()" style="width:200px; background:#333; color:#4fc3f7; border-color:#4fc3f7;">
                     현재 구성 중인 덱 보기
                 </button>
+                <button class="menu-btn" onclick="RPG.toMenu()" style="width:200px;">나가기</button>
+            </div>
+        </div>
+        <div id="screen-artifact-reserve-draft" class="screen">
+            <h3 style="margin:5px 0;">아티팩트 리저브 (<span id="artifact-reserve-round-text">1/4 선택</span>)</h3>
+            <div style="text-align:center; margin-bottom:5px; font-size:0.86rem; color:#ccc;">
+                두 아티팩트 세트 중 하나를 선택하세요.<br>(선택하지 않은 아티팩트는 다음 선택지에 다시 등장할 수 있습니다)
+            </div>
+            <div style="display:flex; flex:1; gap:8px; padding:5px; overflow-y:auto; justify-content:center; min-height:0;">
+                <div id="artifact-reserve-bundle-0" onclick="RPG.selectArtifactReserveBundle(0)"
+                    style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; border:2px solid #6a5d18; border-radius:8px; padding:7px; background:#222; cursor:pointer;">
+                    <div style="text-align:center; font-weight:bold; color:#ffd700;">A 세트 선택</div>
+                    <div id="artifact-reserve-bundle-0-items" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+                <div id="artifact-reserve-bundle-1" onclick="RPG.selectArtifactReserveBundle(1)"
+                    style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; border:2px solid #6a5d18; border-radius:8px; padding:7px; background:#222; cursor:pointer;">
+                    <div style="text-align:center; font-weight:bold; color:#ffd700;">B 세트 선택</div>
+                    <div id="artifact-reserve-bundle-1-items" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
+            <div style="margin-top:auto; margin-bottom:40px; padding-bottom:10px; display:flex; justify-content:center;">
                 <button class="menu-btn" onclick="RPG.toMenu()" style="width:200px;">나가기</button>
             </div>
         </div>
@@ -1114,7 +1141,7 @@
     </div>
 
     <div id="modal-mode-select" class="modal">
-        <div class="modal-content" style="height:auto; min-height:400px; width: 360px;">
+        <div class="modal-content" style="height:auto; min-height:400px; max-height:88vh; overflow-y:auto; width: 360px;">
             <div style="position:relative; margin-bottom: 10px;">
                 <h3 style="margin: 0;">게임 모드 선택</h3>
                 <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()"
@@ -1423,8 +1450,8 @@
 
     <div id="modal-artifact-check" class="modal" style="z-index: 200;">
         <div class="modal-content" style="height:auto;">
-            <h3 style="color:#ffd700;">보유 아티팩트</h3>
-            <div id="artifact-check-list" style="text-align:left; font-size:0.85rem; line-height:1.6;"></div>
+            <h3 id="artifact-check-title" style="color:#ffd700;">보유 아티팩트</h3>
+            <div id="artifact-check-list" style="text-align:left; font-size:0.85rem; line-height:1.6; max-height:55vh; overflow-y:auto;"></div>
             <button onclick="document.getElementById('modal-artifact-check').classList.remove('active')"
                 style="margin-top:10px; width:100%; padding:10px;">닫기</button>
         </div>
@@ -2727,17 +2754,20 @@
                     { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'artifact_chaos', name: '아티팩트카오스', desc: '카오스모드와 동일하지만, 매 스테이지마다 랜덤 아티팩트 4개를 추가로 받습니다.\n메뉴에서 활성 아티팩트를 확인할 수 있고, 셔플 시 아티팩트도 초기화됩니다. 강화된 적 출현.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀을 구성합니다.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' }
+                    { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀을 구성.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' },
+                    { id: 'artifact_reserve', name: '아티팩트리저브', desc: '아티팩트 세트 선택을 4회 반복해 12개 풀을 구성. 각 아티팩트는 2회 사용 가능하며 전투 전 최대 4개를 수동 활성화합니다. 강화된 적 출현.\n(성공조건: 24 스테이지)' }
                 ];
 
                 if (this.tempGameType === 'endless') {
-                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact'].includes(m.id));
+                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact', 'artifact_reserve'].includes(m.id));
                     MODES.forEach(m => {
                         if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개).\n고유한 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 없음 / 무한)';
+                        if (m.id === 'artifact_reserve') m.desc = '아티팩트 세트 선택을 4회 반복해 12개 풀을 구성. 각 아티팩트는 2회 사용 가능하며 전투 전 최대 4개를 수동 활성화합니다. 강화된 적 출현.\n(성공조건: 없음 / 무한)';
                     });
                     if (this.global.hiddenStudyReady) {
                         MODES.push({
@@ -2747,7 +2777,10 @@
                         });
                     }
                 } else if (this.tempGameType === 'challenge') {
-                    MODES = MODES.filter(m => m.id !== 'origin');
+                    MODES = MODES.filter(m => !['origin', 'archive'].includes(m.id));
+                } else {
+                    // 신규 아티팩트 변형은 챌린지 전용이며, 리저브만 엔드리스에도 제공한다.
+                    MODES = MODES.filter(m => !['artifact_chaos', 'artifact_reserve'].includes(m.id));
                 }
 
                 MODES.forEach(m => {
@@ -2776,7 +2809,7 @@
                             let steps = 0;
                             if (m.id === 'puzzle') {
                                 steps = 2;
-                            } else if (['artifact', 'flood', 'curse'].includes(m.id)) {
+                            } else if (['artifact', 'artifact_chaos', 'artifact_reserve', 'flood', 'curse'].includes(m.id)) {
                                 steps = 1;
                             }
                             if (this.hardModeActive) {
@@ -2818,7 +2851,7 @@
                         () => {
                             this.initNewGame(this.selectedModeId);
                             modal.classList.remove('active');
-                            if (this.selectedModeId !== 'factory') {
+                            if (!['factory', 'artifact_reserve'].includes(this.selectedModeId)) {
                                 this.toMenu();
                             }
                         }
@@ -2844,6 +2877,8 @@
                 const gachaArea = document.getElementById('menu-gacha-area');
                 const draftArea = document.getElementById('menu-draft-area');
                 const chaosArea = document.getElementById('menu-chaos-area');
+                const artifactArea = document.getElementById('menu-artifact-area');
+                const artifactMenuBtn = document.getElementById('btn-artifact-menu');
                 const normalGachaBtn = document.getElementById('btn-normal-gacha');
                 const challengeGachaBtn = document.getElementById('btn-challenge-gacha');
 
@@ -2855,16 +2890,18 @@
                     challengeGachaBtn.innerText = '도전 뽑기';
                     challengeGachaBtn.onclick = () => this.openChallengeGacha();
                 }
+                if (artifactMenuBtn) artifactMenuBtn.onclick = () => this.openArtifactCheck();
 
                 // Hide all first
                 gachaArea.style.display = 'none';
                 draftArea.style.display = 'none';
                 if (chaosArea) chaosArea.style.display = 'none';
+                if (artifactArea) artifactArea.style.display = 'none';
 
                 if (this.state.mode === 'draft') {
                     draftArea.style.display = 'block';
                 }
-                else if (this.state.mode === 'chaos') {
+                else if (['chaos', 'artifact_chaos'].includes(this.state.mode)) {
                     if (chaosArea) chaosArea.style.display = 'block';
                 }
                 else if (this.state.mode === 'puzzle') {
@@ -2876,6 +2913,23 @@
                 }
                 else {
                     gachaArea.style.display = 'flex';
+                }
+
+                if (this.state.mode === 'artifact_chaos' && artifactArea && artifactMenuBtn) {
+                    artifactArea.style.display = 'block';
+                    artifactMenuBtn.innerText = `현재 활성 아티팩트 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS})`;
+                }
+                if (this.state.mode === 'artifact_reserve' && artifactArea && artifactMenuBtn) {
+                    artifactArea.style.display = 'block';
+                    if (this.state.artifactReserveDraft && this.state.artifactReserveDraft.active) {
+                        artifactMenuBtn.innerText = `아티팩트 리저브 선택 계속 (${this.state.artifactReserveDraft.round}/${this.state.artifactReserveDraft.maxRounds})`;
+                        artifactMenuBtn.onclick = () => {
+                            this.showScreen('screen-artifact-reserve-draft');
+                            this.renderArtifactReserveDraftScreen();
+                        };
+                    } else {
+                        artifactMenuBtn.innerText = `아티팩트 풀 관리 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
+                    }
                 }
             },
             toTitle() {
@@ -2913,7 +2967,7 @@
                         factoryPool: this.state.factoryPool,
                         specialCardSelections: this.state.activeSpecialCardSelections
                     });
-                } else if (mode === 'chaos') {
+                } else if (['chaos', 'artifact_chaos'].includes(mode)) {
                     // 카오스: state.chaosPool (초월 포함 가능)
                     const ids = this.state.chaosPool || [];
                     pool = ids.map(id => this.getCardData(id)).filter(Boolean);
@@ -2940,8 +2994,8 @@
                 // Info text
                 const modeLabel = { origin: '오리진', restriction: '제약의 시련', balance: '균형의 도전',
                     suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브',
-                    curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스',
-                    draft: '드래프트', factory: '팩토리', artifact: '아티팩트',
+                    curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스', artifact_chaos: '아티팩트카오스',
+                    draft: '드래프트', factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브',
                     overdrive: '오버드라이브', dream_corridor: '꿈의회랑' };
                 const label = modeLabel[mode] || mode;
                 document.getElementById('card-pool-info').innerText =
@@ -3005,16 +3059,18 @@
                 document.getElementById('sage-uses').innerText = this.state.greatSageBlessingUses;
 
                 const chaosModal = document.getElementById('modal-chaos');
-                const isArtifactMobileLayout = this.state.mode === 'artifact' &&
+                const isArtifactMode = ['artifact', 'artifact_chaos', 'artifact_reserve'].includes(this.state.mode);
+                const isArtifactMobileLayout = isArtifactMode &&
                     (this.state.gameType === 'challenge' || this.state.gameType === 'endless');
                 chaosModal.classList.toggle('artifact-mobile-compact', isArtifactMobileLayout);
 
-                // Show artifact check button only in artifact mode
+                // Artifact variants expose their current artifact state here.
                 const artBtn = document.getElementById('btn-artifact-check');
                 const modal = document.getElementById('modal-chaos');
                 const sageDesc = document.getElementById('great-sage-desc');
                 if (artBtn) {
-                    artBtn.style.display = (this.state.mode === 'artifact') ? 'block' : 'none';
+                    artBtn.style.display = isArtifactMode ? 'block' : 'none';
+                    artBtn.innerText = this.state.mode === 'artifact_reserve' ? '아티팩트 풀 관리' : '아티팩트 확인';
                 }
                 if (sageDesc) {
                     sageDesc.innerText = this.state.mode === 'puzzle'
@@ -3022,7 +3078,7 @@
                         : '문법 퀴즈 성공 시 12명에게 축복 + 티켓 1장';
                 }
 
-                if (this.state.mode === 'artifact') {
+                if (isArtifactMode) {
                     modal.classList.add('artifact-mode');
                 } else {
                     modal.classList.remove('artifact-mode');
@@ -3142,31 +3198,26 @@
                     return this.showAlert("셔플할 티켓이 부족합니다.");
                 }
 
+                const isArtifactChaos = this.state.mode === 'artifact_chaos';
+
                 this.showDoubleConfirm(
-                    `현재 보유한 모든 카드와 덱 구성이 사라집니다.<br>
+                    `현재 보유한 모든 카드와 덱 구성${isArtifactChaos ? ', 활성 아티팩트' : ''}이 사라집니다.<br>
             티켓 1장을 사용하여 새로운 15장을 받으시겠습니까?`,
-                    `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리가 모두 초기화됩니다.`,
+                    `정말 셔플하시겠습니까?<br>현재 덱과 인벤토리${isArtifactChaos ? ', 아티팩트' : ''}가 모두 초기화됩니다.`,
                     () => {
                         this.state.tickets -= GAME_CONSTANTS.COSTS.CHAOS_SHUFFLE;
                         document.getElementById('ui-tickets').innerText = this.state.tickets;
 
-                        let allCards = GameUtils.buildCardPool(this.global, {
-                            includeTranscendence: true,
-                            activeTranscendenceCards: this.state.activeTranscendenceCards,
-                            factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
-                            activeBonusPoolIds: this.state.activeBonusPoolIds,
-                            specialCardSelections: this.state.activeSpecialCardSelections,
-                            // [목적] 카오스 셔플 시 획득한 이벤트 카드를 풀에 포함
-                            activeEventCards: this.state.activeEventCards
-                        });
+                        const artifactIds = isArtifactChaos
+                            ? this.resetArtifactChaosRound()
+                            : (() => {
+                                this.state.deck = [null, null, null];
+                                this.resetChaosRunPool();
+                                return [];
+                            })();
+                        const newPicks = this.state.chaosPool || [];
 
-                        const newPicks = this.buildChaosPoolCardIds(allCards);
-
-                        this.state.chaosPool = newPicks;
-                        this.state.inventory = [...newPicks];
-                        this.state.deck = [null, null, null];
-
-                        this.saveGame();
+                        this.saveGame(false);
 
                         let legendCnt = 0, epicCnt = 0;
                         newPicks.forEach(id => {
@@ -3175,10 +3226,16 @@
                             if (c.grade === 'epic') epicCnt++;
                         });
 
+                        const artifactText = artifactIds.length > 0
+                            ? `<br><br><b>새 아티팩트 (${artifactIds.length}개)</b><br>${artifactIds.map(id => {
+                                const artifact = GameUtils.getArtifactById(id);
+                                return artifact ? `${artifact.name}: ${artifact.desc}` : id;
+                            }).join('<br>')}`
+                            : '';
                         this.showAlert(
-                            `<b>카오스 셔플 완료!</b><br><br>
+                            `<b>${isArtifactChaos ? '아티팩트카오스' : '카오스'} 셔플 완료!</b><br><br>
                     새로운 15장이 지급되었습니다.<br>
-                    (전설: ${legendCnt}, 에픽: ${epicCnt})<br><br>
+                    (전설: ${legendCnt}, 에픽: ${epicCnt})${artifactText}<br><br>
                     * 덱이 초기화되었으니 다시 구성해주세요.`
                         );
                     }
@@ -3390,7 +3447,7 @@
             // --- Wordbook & Quiz ---
             openWordbook() {
                 document.getElementById('modal-library').classList.remove('active');
-                if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                if (['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode)) {
                     this.openCollocationBook();
                     return;
                 }
@@ -3424,7 +3481,7 @@
             },
 
             resetWrongWords() {
-                if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                if (['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode)) {
                     this.state.wrongCollocations = [];
                     Storage.remove(Storage.keys.COLLOCATION);
                     this.showAlert("숙어/구동사 복습 상태가 초기화되었습니다.");
@@ -3706,6 +3763,30 @@
                 }
             },
 
+            renderArtifactReserveDraftScreen() {
+                const draft = this.state.artifactReserveDraft;
+                if (!draft) return;
+
+                document.getElementById('artifact-reserve-round-text').innerText = `${draft.round}/${draft.maxRounds} 선택`;
+                const containers = [
+                    document.getElementById('artifact-reserve-bundle-0-items'),
+                    document.getElementById('artifact-reserve-bundle-1-items')
+                ];
+
+                containers.forEach((container, index) => {
+                    container.innerHTML = '';
+                    const bundle = (draft.currentBundles || [])[index] || [];
+                    bundle.forEach(id => {
+                        const artifact = GameUtils.getArtifactById(id);
+                        if (!artifact) return;
+                        const entry = document.createElement('div');
+                        entry.style.cssText = 'padding:7px; background:#302d1f; border:1px solid #6a5d18; border-radius:5px; text-align:left;';
+                        entry.innerHTML = `<b style="color:#ffd700; font-size:0.83rem;">${artifact.name}</b><br><span style="color:#ddd; font-size:0.75rem; line-height:1.35;">${artifact.desc}</span>`;
+                        container.appendChild(entry);
+                    });
+                });
+            },
+
             openFactoryViewDeck() {
                 const pool = this.state.factoryDraft.pool;
                 document.getElementById('screen-factory-draft').classList.remove('active');
@@ -3802,6 +3883,7 @@
                 }
 
                 if (this.state.mode === 'chaos') msg += "<br><br>카오스 모드: 덱과 인벤토리가 초기화되었습니다.";
+                if (this.state.mode === 'artifact_chaos') msg += "<br><br>아티팩트카오스 모드: 덱과 인벤토리, 아티팩트가 초기화되었습니다.";
                 if (this.state.mode === 'draft') msg += "<br><br>드래프트 모드: 덱과 인벤토리가 초기화되었습니다.";
 
                 if (deadMsg) msg += "<br><br>" + deadMsg;
@@ -3883,7 +3965,7 @@
                                 }
                             );
                         }
-                        else if (this.state.mode === 'chaos' || this.state.mode === 'draft') {
+                        else if (['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode)) {
                             this.showConfirm("추가 보상을 위한 콜로케이션 퀴즈에 도전하시겠습니까?\n(성공 시 드로우권 1장 획득)",
                                 () => {
                                     this.startCollocationQuiz((success) => {
@@ -4524,10 +4606,10 @@
 
             openPrivateTutoring() {
                 const mode = this.state.mode;
-                let list = (mode === 'chaos' || mode === 'draft') ? this.state.wrongCollocations : this.state.wrongWords;
+                let list = (['chaos', 'artifact_chaos', 'draft'].includes(mode)) ? this.state.wrongCollocations : this.state.wrongWords;
 
                 if (!list || list.length === 0) {
-                    let msg = (mode === 'chaos' || mode === 'draft') ? "오답노트에 등록된 숙어/구동사가 없습니다." : "오답노트에 등록된 단어가 없습니다.";
+                    let msg = (['chaos', 'artifact_chaos', 'draft'].includes(mode)) ? "오답노트에 등록된 숙어/구동사가 없습니다." : "오답노트에 등록된 단어가 없습니다.";
                     return this.showAlert(msg);
                 }
 
@@ -4548,7 +4630,7 @@
                 if (!key) return this.showAlert("API 키가 없어 개인과외를 시작할 수 없습니다.");
 
                 const mode = this.state.mode;
-                const isCollocation = (mode === 'chaos' || mode === 'draft');
+                const isCollocation = ['chaos', 'artifact_chaos', 'draft'].includes(mode);
                 let list = isCollocation ? this.state.wrongCollocations : this.state.wrongWords;
 
                 if (!list || list.length === 0) return this.showAlert("학습할 오답 내용이 없습니다.");
@@ -4759,11 +4841,43 @@
             openArtifactCheck() {
                 const owned = this.state.artifacts || [];
                 const list = document.getElementById('artifact-check-list');
+                const title = document.getElementById('artifact-check-title');
+
+                if (this.state.mode === 'artifact_reserve') {
+                    const reservePool = this.state.artifactReservePool || [];
+                    const activeCount = owned.length;
+                    if (title) title.innerText = `아티팩트 풀 (${activeCount}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
+                    list.innerHTML = '';
+
+                    reservePool.forEach(entry => {
+                        const artifact = GameUtils.getArtifactById(entry.id);
+                        if (!artifact) return;
+                        const isActive = owned.includes(entry.id);
+                        const remainingUses = Math.max(0, entry.remainingUses || 0);
+                        const button = document.createElement('button');
+                        button.className = 'menu-btn';
+                        button.disabled = remainingUses <= 0;
+                        button.style.cssText = `margin:0 0 8px; padding:9px; text-align:left; border-color:${isActive ? '#4caf50' : '#6a5d18'}; color:${remainingUses > 0 ? '#f5df78' : '#777'}; background:${isActive ? '#263a29' : '#333'};`;
+                        button.innerHTML = `<div style="display:flex; justify-content:space-between; gap:8px;"><b>${artifact.name}</b><span style="white-space:nowrap; color:${isActive ? '#81c784' : '#ffd700'};">${isActive ? '활성' : '비활성'} · ${remainingUses}회</span></div><span style="display:block; margin-top:3px; color:#ccc; font-size:0.78rem; font-weight:normal;">${artifact.desc}</span>`;
+                        button.onclick = () => {
+                            if (this.toggleArtifactReserveArtifact(entry.id)) this.openArtifactCheck();
+                        };
+                        list.appendChild(button);
+                    });
+
+                    if (reservePool.length === 0) {
+                        list.innerHTML = '<div style="color:#aaa; text-align:center;">아티팩트 풀이 아직 완성되지 않았습니다.</div>';
+                    }
+                    document.getElementById('modal-artifact-check').classList.add('active');
+                    return;
+                }
+
+                if (title) title.innerText = this.state.mode === 'artifact_chaos' ? '현재 활성 아티팩트' : '보유 아티팩트';
                 if (owned.length === 0) {
                     list.innerHTML = '<div style="color:#aaa; text-align:center;">보유한 아티팩트가 없습니다.</div>';
                 } else {
                     list.innerHTML = owned.map(id => {
-                        const art = ARTIFACT_LIST.find(a => a.id === id);
+                        const art = GameUtils.getArtifactById(id);
                         if (!art) return '';
                         return `<div style="margin-bottom:8px; padding:8px; background:#333; border-radius:5px; border-left: 3px solid #ffd700;">
                             <b style="color:#ffd700;">${art.name}</b><br>
@@ -5463,7 +5577,7 @@
                     const cardId = dateParams.cardId;
                     const cardName = dateParams.cardName;
 
-                    const isPoolMode = ['chaos', 'draft'].includes(this.state.mode);
+                    const isPoolMode = ['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode);
                     let rewardDetail = "";
 
                     if (isPoolMode) {

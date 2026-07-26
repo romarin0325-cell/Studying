@@ -78,7 +78,7 @@ function buildBattleEnemy(rpg) {
     let steps = 0;
     if (rpg.state.mode === 'puzzle') {
         steps = 2;
-    } else if (['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
+    } else if (['artifact', 'artifact_chaos', 'artifact_reserve', 'flood', 'curse'].includes(rpg.state.mode)) {
         if (rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') {
             steps = 1;
         }
@@ -199,6 +199,10 @@ const BattleRuntime = {
     },
 
     startBattleInit(rpg) {
+        if (rpg.state.mode === 'artifact_reserve' && rpg.state.artifactReserveDraft && rpg.state.artifactReserveDraft.active) {
+            return rpg.showAlert("아티팩트 리저브 선택을 먼저 완료해주세요.");
+        }
+
         if (rpg.state.mode === 'puzzle') {
             if (!rpg.state.puzzlePiecesClaimed) {
                 return rpg.showAlert("퍼즐 모드는 먼저 퍼즐조각획득을 완료해야 합니다.");
@@ -210,6 +214,10 @@ const BattleRuntime = {
 
         if (rpg.state.deck.every(cardId => cardId === null)) {
             return rpg.showAlert("덱을 완성해주세요.");
+        }
+
+        if (rpg.state.mode === 'artifact_reserve' && typeof rpg.consumeArtifactReserveUsesForBattle === 'function') {
+            rpg.consumeArtifactReserveUsesForBattle();
         }
 
         rpg.showBattleScreen();
@@ -342,6 +350,10 @@ const BattleRuntime = {
                 battle.currentPlayerIdx++;
                 BattleRuntime.TurnManager.startPlayerTurn(rpg);
                 return;
+            }
+
+            if (!Number.isFinite(player.enteredAtTurn)) {
+                player.enteredAtTurn = battle.turn;
             }
 
             const dueEffects = battle.delayedEffects.filter(effect => effect.turn === battle.turn);
