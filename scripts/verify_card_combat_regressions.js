@@ -107,7 +107,7 @@ function run() {
     const traitWiring = {
       discipline_captain: { type: 'vanguard_all_grade_party_def_mdef', gradeRequired: 'normal', val: 100 },
       supernova: { type: 'death_dmg_phy_debuff', val: 4, debuff: 'burn', stack: 3 },
-      shooting_star_boy: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 50 },
+      shooting_star_boy: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 30 },
       victoria: { type: 'leader_field_stat_double', val: 2 },
       holy_night: { type: 'death_dmg_phy', val: 3 },
       paladin: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100 },
@@ -268,6 +268,80 @@ function run() {
       unlocked: true
     });
     assert.strictEqual(beachMission.rewardCardId, 'luna_swimsuit');
+
+    // Beginner safety gives Factory/Restriction/Balance tickets instead of a free Rumi.
+    ['factory', 'restriction', 'balance'].forEach((mode, index) => {
+      const safetyHost = {
+        global: { unlocked_bonus_cards: [] },
+        state: { gameType: 'challenge', tickets: index === 0 ? 20 : 10, inventory: [] }
+      };
+      RPGFeatureModules.install(safetyHost);
+      safetyHost.applyBeginnerChallengeSafety(mode);
+      assert.strictEqual(safetyHost.state.tickets, index === 0 ? 23 : 13);
+      assert.strictEqual(safetyHost.state.inventory.includes('rumi'), false);
+    });
+
+    // Divine artifact unlocks replace their base artifact in both new mode pools.
+    const divineArtifactPool = GameUtils.getArtifactSelectionPool({ unlocked_divine_artifacts: ['divine_flora'] });
+    assert(divineArtifactPool.some(artifact => artifact.id === 'divine_flora'));
+    assert.strictEqual(divineArtifactPool.some(artifact => artifact.id === 'nature_blessing'), false);
+
+    const reserveHost = {
+      global: { unlocked_divine_artifacts: ['divine_flora'] },
+      state: {
+        mode: 'artifact_reserve',
+        artifacts: [],
+        artifactReservePool: [],
+        artifactReserveDraft: { active: true, round: 1, maxRounds: 4, pool: [], currentBundles: [] }
+      },
+      showScreen: quiet,
+      renderArtifactReserveDraftScreen: quiet,
+      showAlert: quiet,
+      toMenu: quiet
+    };
+    RPGFeatureModules.install(reserveHost);
+    reserveHost.saveGame = quiet;
+    for (let round = 0; round < 4; round++) {
+      reserveHost.generateArtifactReserveBundles();
+      const bundles = reserveHost.state.artifactReserveDraft.currentBundles;
+      assert.deepStrictEqual(Array.from(bundles, bundle => bundle.length), [3, 3]);
+      assert.strictEqual(new Set(bundles.flat()).size, 6);
+      assert.strictEqual(
+        bundles.flat().some(id => reserveHost.state.artifactReserveDraft.pool.includes(id)),
+        false
+      );
+      reserveHost.selectArtifactReserveBundle(0);
+    }
+    assert.strictEqual(reserveHost.state.artifactReserveDraft.active, false);
+    assert.strictEqual(reserveHost.state.artifactReservePool.length, 12);
+    assert.strictEqual(new Set(reserveHost.state.artifactReservePool.map(entry => entry.id)).size, 12);
+    assert(reserveHost.state.artifactReservePool.every(entry => entry.remainingUses === 2));
+    const reserveIds = reserveHost.state.artifactReservePool.map(entry => entry.id);
+    reserveIds.slice(0, 4).forEach(id => assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(id), true));
+    assert.strictEqual(reserveHost.state.artifacts.length, 4);
+    assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(reserveIds[4]), false);
+    assert.deepStrictEqual(Array.from(reserveHost.consumeArtifactReserveUsesForBattle()).sort(), Array.from(reserveIds.slice(0, 4)).sort());
+    assert(reserveHost.state.artifactReservePool.slice(0, 4).every(entry => entry.remainingUses === 1));
+    reserveHost.resetArtifactReserveActivations();
+    assert.strictEqual(reserveHost.state.artifacts.length, 0);
+    reserveHost.state.artifactReservePool[0].remainingUses = 0;
+    assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(reserveIds[0]), false);
+
+    const artifactChaosHost = {
+      global: { unlocked_divine_artifacts: ['divine_flora'], unlocked_bonus_cards: [] },
+      state: {
+        mode: 'artifact_chaos', artifacts: [], chaosPool: [], inventory: [], deck: [null, null, null],
+        activeTranscendenceCards: [], activeBonusPoolIds: [], activeSpecialCardSelections: {}, activeEventCards: []
+      }
+    };
+    RPGFeatureModules.install(artifactChaosHost);
+    const artifactChaosIds = artifactChaosHost.resetArtifactChaosRound();
+    const allowedArtifactIds = new Set(divineArtifactPool.map(artifact => artifact.id));
+    assert.strictEqual(artifactChaosHost.state.chaosPool.length, GAME_CONSTANTS.CHAOS_POOL_SIZE);
+    assert.deepStrictEqual(Array.from(artifactChaosHost.state.inventory), Array.from(artifactChaosHost.state.chaosPool));
+    assert.strictEqual(artifactChaosIds.length, GAME_CONSTANTS.MAX_ARTIFACTS);
+    assert.strictEqual(new Set(artifactChaosIds).size, GAME_CONSTANTS.MAX_ARTIFACTS);
+    assert(artifactChaosIds.every(id => allowedArtifactIds.has(id)));
 
     // One Joker can fill only one missing slot in a conjunctive card requirement.
     assert.strictEqual(
@@ -434,10 +508,16 @@ function run() {
 
     const starDeck = ['shooting_star_boy', 'marshmallow', 'kobold'];
     const shootingStar = buildWaveUnit('shooting_star_boy', starDeck, 0);
-    assert.strictEqual(shootingStar.mdef, 27);
+    assert.strictEqual(shootingStar.mdef, 38);
     assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 1).atk, 170);
     assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 2).atk, 170);
     assert.strictEqual(Logic.calculateStats(shootingStar, [], 'default', [], 3).atk, 85);
+    const lateShootingStar = { ...shootingStar, enteredAtTurn: 3 };
+    assert.strictEqual(Logic.calculateStats(lateShootingStar, [], 'default', [], 3).atk, 170);
+    assert.strictEqual(Logic.calculateStats(lateShootingStar, [], 'default', [], 4).atk, 170);
+    assert.strictEqual(Logic.calculateStats(lateShootingStar, [], 'default', [], 5).atk, 85);
+    const duplicateStarDeck = ['shooting_star_boy', 'shooting_star_boy', 'shooting_star_boy'];
+    assert(Logic.calculateInitialStats(getCard('shooting_star_boy'), duplicateStarDeck, GameUtils.getAllCards(), 0).stats.mdef >= 0);
     const starSkillTarget = makeUnit({ hp: 5000, maxHp: 5000 });
     const fullHpStar = { ...shootingStar, hp: shootingStar.maxHp, baseCrit: -100 };
     const hurtStar = { ...shootingStar, hp: shootingStar.maxHp - 1, baseCrit: -100 };
@@ -460,6 +540,17 @@ function run() {
       [madScientistPeer.atk, madScientistPeer.matk, madScientistPeer.def, madScientistPeer.mdef],
       [169, 169, 78, 84]
     );
+    const duplicateMadDeck = ['mad_scientist', 'mad_scientist', 'luna'];
+    const duplicateMadScientist = buildWaveUnit('mad_scientist', duplicateMadDeck, 0);
+    const duplicateMadPeer = buildWaveUnit('luna', duplicateMadDeck, 2);
+    assert.deepStrictEqual(
+      [duplicateMadScientist.atk, duplicateMadScientist.matk, duplicateMadScientist.def, duplicateMadScientist.mdef],
+      [104, 104, 71, 71]
+    );
+    assert.deepStrictEqual(
+      [duplicateMadPeer.atk, duplicateMadPeer.matk, duplicateMadPeer.def, duplicateMadPeer.mdef],
+      [169, 169, 78, 84]
+    );
 
     assert.strictEqual(
       buildWaveUnit('paladin', ['marshmallow', 'paladin', 'kobold'], 1).atk,
@@ -480,6 +571,20 @@ function run() {
         Logic.calculateStats(victoriaFront, [{ name: 'sun_bless' }], 'default', [], 1).atk
       ],
       [160, 130]
+    );
+    const forcedCrit = { name: '검증용 치명타', type: 'phy', val: 1, effects: [{ type: 'force_crit' }] };
+    const critTarget = makeUnit({ def: 0, mdef: 0 });
+    assert.strictEqual(
+      Logic.calculateDamage(victoriaLeader, critTarget, forcedCrit, [{ name: 'sun_bless' }], [], quiet, 'default', [], 1, []).dmg,
+      432
+    );
+    assert.strictEqual(
+      Logic.calculateDamage(victoriaFront, critTarget, forcedCrit, [{ name: 'sun_bless' }], [], quiet, 'default', [], 1, []).dmg,
+      273
+    );
+    assert.strictEqual(
+      Logic.calculateDamage(victoriaLeader, critTarget, forcedCrit, [{ name: 'sun_bless' }], [], quiet, 'flood', [], 1, []).dmg,
+      858
     );
 
     const alternatingUnit = makeUnit({ atk: 100, matk: 100, alternatingAttackStatPercent: 50 });
@@ -646,6 +751,24 @@ function run() {
     );
     assert(waveInitRpg.battle.players.every(unit => unit.alternatingAttackStatPercent === 50));
     assert(waveInitRpg.battle.players.every(unit => unit.maxMp === 100 && unit.mp === 100));
+
+    const reserveBattleRpg = makeBattleInitRpg(['marshmallow', null, null]);
+    reserveBattleRpg.state.mode = 'artifact_reserve';
+    reserveBattleRpg.state.artifactReserveDraft = { active: false };
+    let reserveUseCalls = 0;
+    reserveBattleRpg.consumeArtifactReserveUsesForBattle = () => { reserveUseCalls++; return []; };
+    BattleRuntime.TurnManager.startPlayerTurn = quiet;
+    BattleRuntime.startBattleInit(reserveBattleRpg);
+    BattleRuntime.TurnManager.startPlayerTurn = startPlayerTurnOriginal;
+    assert.strictEqual(reserveUseCalls, 1);
+
+    const buildScaledEnemy = (mode, gameType) => buildBattleEnemy({
+      state: { mode, gameType, enemyScale: 0, hardMode: false },
+      getCurrentStageEnemyData: () => ENEMIES[0]
+    });
+    assert.strictEqual(buildScaledEnemy('default', 'challenge').maxHp, ENEMIES[0].stats.hp);
+    assert.strictEqual(buildScaledEnemy('artifact_chaos', 'challenge').maxHp, Math.floor(ENEMIES[0].stats.hp * 1.1));
+    assert.strictEqual(buildScaledEnemy('artifact_reserve', 'endless').maxHp, Math.floor(ENEMIES[0].stats.hp * 1.1));
 
     // The merchant hands 20 maximum and current mana to the next living ally.
     const merchantVictim = buildWaveUnit('grand_merchant', ['grand_merchant', 'marshmallow', 'kobold'], 0);

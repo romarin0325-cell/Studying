@@ -853,8 +853,13 @@
             return;
         }
 
-        if (mode === 'chaos' || mode === 'draft') {
+        if (mode === 'chaos' || mode === 'artifact_chaos' || mode === 'draft') {
             this.state.tickets += 5;
+            return;
+        }
+
+        if (['factory', 'restriction', 'balance'].includes(mode)) {
+            this.state.tickets += 3;
             return;
         }
 
@@ -993,7 +998,12 @@
 
 
     isGradeBalancedRunMode() {
-        return ['chaos', 'draft'].includes(this.state.mode);
+        return ['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode);
+    },
+
+
+    isChaosPoolMode(mode = this.state.mode) {
+        return mode === 'chaos' || mode === 'artifact_chaos';
     },
 
 
@@ -1054,6 +1064,138 @@
     },
 
 
+    buildChaosRunCardPool() {
+        return GameUtils.buildCardPool(this.global, {
+            includeTranscendence: true,
+            activeTranscendenceCards: this.state.activeTranscendenceCards,
+            activeBonusPoolIds: this.state.activeBonusPoolIds,
+            specialCardSelections: this.state.activeSpecialCardSelections,
+            activeEventCards: this.state.activeEventCards
+        });
+    },
+
+
+    resetChaosRunPool() {
+        const picks = this.buildChaosPoolCardIds(this.buildChaosRunCardPool());
+        this.state.chaosPool = picks;
+        this.state.inventory = [...picks];
+        return picks;
+    },
+
+
+    resetArtifactChaosRound() {
+        this.state.inventory = [];
+        this.state.deck = [null, null, null];
+        this.resetChaosRunPool();
+
+        const artifactPool = typeof GameUtils.getArtifactSelectionPool === 'function'
+            ? GameUtils.getArtifactSelectionPool(this.global)
+            : ARTIFACT_LIST;
+        this.state.artifacts = GameUtils.shuffle(artifactPool)
+            .slice(0, GAME_CONSTANTS.MAX_ARTIFACTS)
+            .map(artifact => artifact.id);
+
+        return [...this.state.artifacts];
+    },
+
+
+    getArtifactReserveEntry(id) {
+        return (this.state.artifactReservePool || []).find(entry => entry.id === id) || null;
+    },
+
+
+    generateArtifactReserveBundles() {
+        const draft = this.state.artifactReserveDraft;
+        if (!draft) return;
+
+        const selectedIds = new Set(draft.pool || []);
+        const artifactPool = typeof GameUtils.getArtifactSelectionPool === 'function'
+            ? GameUtils.getArtifactSelectionPool(this.global)
+            : ARTIFACT_LIST;
+        const available = artifactPool.filter(artifact => !selectedIds.has(artifact.id));
+        const picks = GameUtils.shuffle(available).slice(0, 6).map(artifact => artifact.id);
+
+        draft.currentBundles = [picks.slice(0, 3), picks.slice(3, 6)];
+        this.showScreen('screen-artifact-reserve-draft');
+        this.renderArtifactReserveDraftScreen();
+    },
+
+
+    selectArtifactReserveBundle(index) {
+        const draft = this.state.artifactReserveDraft;
+        const bundle = draft && draft.currentBundles && draft.currentBundles[index];
+        if (!Array.isArray(bundle) || bundle.length === 0) return;
+
+        draft.pool.push(...bundle);
+        draft.round++;
+        draft.currentBundles = [];
+
+        if (draft.round > draft.maxRounds) {
+            draft.active = false;
+            this.state.artifactReservePool = draft.pool.map(id => ({ id, remainingUses: 2 }));
+            this.state.artifacts = [];
+            this.showAlert('아티팩트 리저브 풀이 완성되었습니다! 전투마다 최대 4개를 활성화할 수 있습니다.');
+            this.toMenu();
+        } else {
+            this.generateArtifactReserveBundles();
+        }
+
+        this.saveGame(false);
+    },
+
+
+    toggleArtifactReserveArtifact(id) {
+        const entry = this.getArtifactReserveEntry(id);
+        if (!entry) return false;
+
+        const activeIds = [...new Set(this.state.artifacts || [])];
+        if (activeIds.includes(id)) {
+            this.state.artifacts = activeIds.filter(activeId => activeId !== id);
+            this.saveGame(false);
+            return true;
+        }
+
+        if ((entry.remainingUses || 0) <= 0) {
+            this.showAlert('사용 횟수가 모두 소진된 아티팩트입니다.');
+            return false;
+        }
+        if (activeIds.length >= GAME_CONSTANTS.MAX_ARTIFACTS) {
+            this.showAlert(`한 전투에는 아티팩트를 최대 ${GAME_CONSTANTS.MAX_ARTIFACTS}개까지 활성화할 수 있습니다.`);
+            return false;
+        }
+
+        this.state.artifacts = [...activeIds, id];
+        this.saveGame(false);
+        return true;
+    },
+
+
+    consumeArtifactReserveUsesForBattle() {
+        if (this.state.mode !== 'artifact_reserve') return [];
+
+        const entries = this.state.artifactReservePool || [];
+        const activeIds = [...new Set(this.state.artifacts || [])].filter(id => {
+            const entry = entries.find(item => item.id === id);
+            return entry && (entry.remainingUses || 0) > 0;
+        });
+
+        activeIds.forEach(id => {
+            const entry = entries.find(item => item.id === id);
+            entry.remainingUses--;
+        });
+        this.state.artifacts = activeIds;
+        this.saveGame(false);
+        return activeIds;
+    },
+
+
+    resetArtifactReserveActivations() {
+        if (this.state.mode !== 'artifact_reserve') return;
+        this.state.artifacts = [];
+        this.saveGame(false);
+    },
+
+
     resetPendingActiveBonusPoolIds() {
         this.syncPendingActiveBonusPoolIds();
         this.updateBonusPoolEditorButton();
@@ -1093,6 +1235,10 @@
                 if (!this.state.mode) this.state.mode = 'origin';
                 if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
                 if (!this.state.artifacts) this.state.artifacts = [];
+                if (!this.state.artifactReserveDraft) {
+                    this.state.artifactReserveDraft = { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] };
+                }
+                if (!Array.isArray(this.state.artifactReservePool)) this.state.artifactReservePool = [];
                 if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
                 if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
                 if (this.state.puzzlePiecesClaimed === undefined) this.state.puzzlePiecesClaimed = false;
@@ -1142,6 +1288,8 @@
             factoryPool: [],
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
             factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [] },
+            artifactReserveDraft: { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] },
+            artifactReservePool: [],
             artifacts: [],
             pendingEnemyId: null,
             pendingEnemyStage: null,
@@ -1169,20 +1317,11 @@
         this.applyBeginnerChallengeSafety(mode);
 
         if (mode === 'chaos') {
-            let allCards = GameUtils.buildCardPool(this.global, {
-                includeTranscendence: true,
-                activeTranscendenceCards: this.state.activeTranscendenceCards,
-                factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
-                activeBonusPoolIds: this.state.activeBonusPoolIds,
-                specialCardSelections: this.state.activeSpecialCardSelections,
-                // [목적] 해당 런에서 획득한 이벤트 카드를 카오스 모드 시작 풀에 포함
-                activeEventCards: this.state.activeEventCards
-            });
+            this.resetChaosRunPool();
+        }
 
-            const picks = this.buildChaosPoolCardIds(allCards);
-
-            this.state.chaosPool = picks;
-            this.state.inventory = [...picks];
+        if (mode === 'artifact_chaos') {
+            this.resetArtifactChaosRound();
         }
 
         if (mode === 'factory') {
@@ -1194,8 +1333,17 @@
             this.generateFactoryBundles();
         }
 
+        if (mode === 'artifact_reserve') {
+            this.state.artifactReserveDraft.active = true;
+            this.state.artifactReserveDraft.round = 1;
+            this.state.artifactReserveDraft.maxRounds = 4;
+            this.state.artifactReserveDraft.pool = [];
+            this.state.artifactReserveDraft.currentBundles = [];
+            this.generateArtifactReserveBundles();
+        }
+
         // Origin Mode: Add Transcendence Cards directly to Inventory
-        if (mode !== 'chaos' && mode !== 'draft' && this.state.activeTranscendenceCards.length > 0) {
+        if (!this.isChaosPoolMode(mode) && mode !== 'draft' && this.state.activeTranscendenceCards.length > 0) {
             this.state.inventory.push(...this.state.activeTranscendenceCards);
             setTimeout(() => this.showAlert(`초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`), 500);
         }
@@ -1471,7 +1619,6 @@
             this.state.factoryPool = [...this.state.factoryDraft.pool];
             this.state.inventory = [];
             this.state.deck = [null, null, null];
-            this.state.tickets = 20;
             
             this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 40장의 전용 풀을 바탕으로 모험을 시작합니다.");
             this.toMenu();
@@ -1492,7 +1639,7 @@
 
 
     cleanupTranscendenceCards() {
-        if (['draft', 'chaos'].includes(this.state.mode)) return "";
+        if (this.isChaosPoolMode() || this.state.mode === 'draft') return "";
 
         let removedNames = [];
         this.battle.players.forEach((p, idx) => {
@@ -1603,24 +1750,24 @@
             this.incrementMonthlyMissionProgress('endless35', 1);
         }
 
-        // Chaos/Draft: Reset Deck/Inventory
-        if (mode === 'chaos') {
-            this.state.inventory = [];
-            this.state.deck = [null, null, null];
-
-            let allCards = GameUtils.buildCardPool(this.global, {
-                includeTranscendence: true,
-                activeTranscendenceCards: this.state.activeTranscendenceCards,
-                factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
-                activeBonusPoolIds: this.state.activeBonusPoolIds,
-                specialCardSelections: this.state.activeSpecialCardSelections,
-                // [목적] 전투 승리 후 카오스 풀 초기화 시 획득한 이벤트 카드를 포함
-                activeEventCards: this.state.activeEventCards
-            });
-            const nextPicks = this.buildChaosPoolCardIds(allCards);
-            this.state.chaosPool = nextPicks;
-            this.state.inventory = [...nextPicks];
+        // Chaos: Reset Deck/Inventory. Artifact Chaos also grants a fresh artifact set.
+        if (this.isChaosPoolMode(mode)) {
+            if (mode === 'artifact_chaos') {
+                const artifactIds = this.resetArtifactChaosRound();
+                const artifactNames = artifactIds.map(id => {
+                    const artifact = GameUtils.getArtifactById(id);
+                    return artifact ? artifact.name : id;
+                });
+                const artifactMsg = `아티팩트카오스: 덱과 아티팩트가 초기화되었습니다. 새 아티팩트: ${artifactNames.join(', ')}`;
+                deadMsg = deadMsg ? `${deadMsg}<br>${artifactMsg}` : artifactMsg;
+            } else {
+                this.state.inventory = [];
+                this.state.deck = [null, null, null];
+                this.resetChaosRunPool();
+            }
         }
+
+        this.resetArtifactReserveActivations();
 
         if (mode === 'draft') {
             this.resetDraftState();
@@ -1756,7 +1903,7 @@
         let transMsg = this.cleanupTranscendenceCards();
         // No saveRecord here (User request: only on New Game)
 
-        if (['chaos', 'draft'].includes(this.state.mode)) {
+        if (this.isChaosPoolMode() || this.state.mode === 'draft') {
             this.saveRecord();
         }
 
@@ -1765,7 +1912,7 @@
             this.saveGlobalData();
         }
 
-        if (['chaos', 'draft'].includes(this.state.mode)) {
+        if (this.isChaosPoolMode() || this.state.mode === 'draft') {
             Storage.remove(Storage.keys.SAVE);
 
             let msg = "패배했습니다...<br>이 모드는 패배 시 데이터가 초기화됩니다.";
@@ -1780,6 +1927,7 @@
         this.state.chaosBuffs = [];
         this.state.activeChaosBlessing = [];
         this.state.activeSageBlessing = [];
+        this.resetArtifactReserveActivations();
 
         let deadMsg = this.handlePermadeath(this.battle.players);
         if (this.state.mode === 'dream_corridor') {

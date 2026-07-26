@@ -202,7 +202,8 @@ window.GAME_CONSTANTS = {
         curse: 10,
         chaos: 0,
         draft: 5,
-        artifact: 10
+        artifact: 10,
+        artifact_chaos: 0
     },
     DECK_SIZE: 3,
     MAX_RECORDS: 5,
@@ -262,13 +263,16 @@ window.GAME_CONSTANTS = {
         flood: 24,
         chaos: 24,
         draft: 24,
-        artifact: 30
+        artifact: 30,
+        artifact_chaos: 24,
+        artifact_reserve: 24
     },
 
     MODE_REWARDS: {
         default: 1,
         suffering: 0,
         chaos: 0,
+        artifact_chaos: 0,
         puzzle: 0
     },
 
@@ -1842,7 +1846,8 @@ const Logic = {
             m.atk += boost;
             m.matk += boost;
         }
-        if (trait && trait.type === 'opening_self_atk_party_mdef_down' && battleTurn <= (trait.turns || 2)) {
+        const turnsSinceEntry = battleTurn - (Number.isFinite(char.enteredAtTurn) ? char.enteredAtTurn : 1);
+        if (trait && trait.type === 'opening_self_atk_party_mdef_down' && turnsSinceEntry >= 0 && turnsSinceEntry < (trait.turns || 2)) {
             m.atk += (trait.atkBoost || 0) / 100;
         }
         if (char.alternatingAttackStatPercent) {
@@ -2012,7 +2017,8 @@ const Logic = {
         if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
 
         let critDmg = GAME_CONSTANTS.BASE_CRIT_MULT;
-        const critBuffMult = (mode === 'flood' && source.proto) ? 2.0 : 1.0;
+        const critBuffMult = ((mode === 'flood' && source.proto) ? 2.0 : 1.0)
+            * (source.fieldBuffStatMult || 1.0);
         if (source.proto && sourceFieldBuffs.some(b => b.name === 'sun_bless')) {
             critDmg += GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS * critBuffMult;
         }
@@ -2544,6 +2550,7 @@ const Logic = {
         const partyBoost = { atk: 0, matk: 0, def: 0, mdef: 0, crit: 0 };
 
         const fullDeckCards = (deck || []).map(id => id ? GameUtils.getCardById(id, allCards) : null);
+        let hasPartyAllStatsManaCost = false;
 
         fullDeckCards.forEach((c, originalIdx) => {
             if (!c) return;
@@ -2568,7 +2575,8 @@ const Logic = {
             else if (tr && tr.type === 'syn_dark_full_party_crit' && deckCtx.countElement('dark') >= 3) {
                 partyBoost.crit += (tr.val || 0);
             }
-            else if (tr && tr.type === 'party_all_stats_mana_cost') {
+            else if (tr && tr.type === 'party_all_stats_mana_cost' && !hasPartyAllStatsManaCost) {
+                hasPartyAllStatsManaCost = true;
                 const boost = tr.statVal || 0;
                 partyBoost.atk += boost;
                 partyBoost.matk += boost;

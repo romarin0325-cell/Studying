@@ -1120,7 +1120,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'shooting_star_boy', name: '별똥별소년', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-08-15',
         stats: { hp: 290, atk: 85, matk: 60, def: 45, mdef: 55 },
-        trait: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 50, desc: '전투 시작 후 2턴간 공격력 100% 증가 / 덱 전체 마법방어력 50% 감소' },
+        trait: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 30, desc: '등장 후 2턴간 공격력 100% 증가 / 덱 전체 마법방어력 30% 감소' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '스타폴대쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
