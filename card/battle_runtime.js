@@ -216,10 +216,6 @@ const BattleRuntime = {
             return rpg.showAlert("덱을 완성해주세요.");
         }
 
-        if (rpg.state.mode === 'artifact_reserve' && typeof rpg.consumeArtifactReserveUsesForBattle === 'function') {
-            rpg.consumeArtifactReserveUsesForBattle();
-        }
-
         rpg.showBattleScreen();
         rpg.battle.enemy = buildBattleEnemy(rpg);
         rpg.battle.activeTraits = [];

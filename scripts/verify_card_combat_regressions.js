@@ -322,7 +322,6 @@ function run() {
     assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(reserveIds[4]), false);
     assert.deepStrictEqual(Array.from(reserveHost.consumeArtifactReserveUsesForBattle()).sort(), Array.from(reserveIds.slice(0, 4)).sort());
     assert(reserveHost.state.artifactReservePool.slice(0, 4).every(entry => entry.remainingUses === 1));
-    reserveHost.resetArtifactReserveActivations();
     assert.strictEqual(reserveHost.state.artifacts.length, 0);
     reserveHost.state.artifactReservePool[0].remainingUses = 0;
     assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(reserveIds[0]), false);
@@ -760,7 +759,7 @@ function run() {
     BattleRuntime.TurnManager.startPlayerTurn = quiet;
     BattleRuntime.startBattleInit(reserveBattleRpg);
     BattleRuntime.TurnManager.startPlayerTurn = startPlayerTurnOriginal;
-    assert.strictEqual(reserveUseCalls, 1);
+    assert.strictEqual(reserveUseCalls, 0);
 
     const buildScaledEnemy = (mode, gameType) => buildBattleEnemy({
       state: { mode, gameType, enemyScale: 0, hardMode: false },
