@@ -1183,18 +1183,10 @@
             const entry = entries.find(item => item.id === id);
             entry.remainingUses--;
         });
-        this.state.artifacts = activeIds;
+        this.state.artifacts = [];
         this.saveGame(false);
         return activeIds;
     },
-
-
-    resetArtifactReserveActivations() {
-        if (this.state.mode !== 'artifact_reserve') return;
-        this.state.artifacts = [];
-        this.saveGame(false);
-    },
-
 
     resetPendingActiveBonusPoolIds() {
         this.syncPendingActiveBonusPoolIds();
@@ -1246,7 +1238,6 @@
                 this.state.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections || this.global.activeSpecialCardSelections);
                 if (this.state.mode === 'dream_corridor' && this.state.dreamCorridorLives === undefined) this.state.dreamCorridorLives = 3;
                 this.loadStudyProgress();
-
                 this.showAlert("불러오기 완료");
                 this.toMenu();
             } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openTypeSelect(); }
@@ -1767,7 +1758,7 @@
             }
         }
 
-        this.resetArtifactReserveActivations();
+        this.consumeArtifactReserveUsesForBattle();
 
         if (mode === 'draft') {
             this.resetDraftState();
@@ -1927,7 +1918,7 @@
         this.state.chaosBuffs = [];
         this.state.activeChaosBlessing = [];
         this.state.activeSageBlessing = [];
-        this.resetArtifactReserveActivations();
+        this.consumeArtifactReserveUsesForBattle();
 
         let deadMsg = this.handlePermadeath(this.battle.players);
         if (this.state.mode === 'dream_corridor') {
