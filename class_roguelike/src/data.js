@@ -796,7 +796,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 1,
-    stats: { atk: 14, matk: 6 },
+    stats: { atk: 20, matk: 8 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '수많은 흠집이 남았지만 묵직한 날은 아직 믿을 만하다.'
@@ -807,7 +807,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 2,
-    stats: { atk: 28, matk: 12 },
+    stats: { atk: 40, matk: 12 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '달빛을 머금은 강철이 휘두를 때마다 낮은 울음을 낸다.'
@@ -818,7 +818,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 3,
-    stats: { atk: 42, matk: 18 },
+    stats: { atk: 60, matk: 16 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '마룡의 척추를 통째로 벼려 만든 난폭한 무기.'
@@ -829,7 +829,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 4,
-    stats: { atk: 56, matk: 24 },
+    stats: { atk: 80, matk: 20 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '붉은 빛이 칼날을 따라 흐르며 주변의 그림자를 삼킨다.'
@@ -840,7 +840,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 5,
-    stats: { atk: 70, matk: 30 },
+    stats: { atk: 100, matk: 24 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '한 시대의 끝을 알렸다고 전해지는 전설의 대검.'
@@ -906,7 +906,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 1,
-    stats: { atk: 4, matk: 14, maxMana: 30 },
+    stats: { atk: 5, matk: 30, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '작은 마나석이 주문의 첫 문장을 또렷하게 잡아준다.'
@@ -917,7 +917,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 2,
-    stats: { atk: 8, matk: 28, maxMana: 30 },
+    stats: { atk: 10, matk: 50, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '끝에 박힌 청금석에서 서늘한 별빛이 맴돈다.'
@@ -928,7 +928,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 3,
-    stats: { atk: 12, matk: 42, maxMana: 30 },
+    stats: { atk: 15, matk: 70, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '응결된 마력이 투명한 몸체 속에서 모래처럼 흐른다.'
@@ -939,7 +939,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 4,
-    stats: { atk: 16, matk: 56, maxMana: 30 },
+    stats: { atk: 20, matk: 90, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '별자리의 움직임에 따라 주문의 궤도가 바뀐다.'
@@ -950,7 +950,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 5,
-    stats: { atk: 20, matk: 70, maxMana: 30 },
+    stats: { atk: 25, matk: 110, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '사라진 별들의 이름을 모두 기억하는 전설의 스태프.'
@@ -961,7 +961,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 1,
-    stats: { atk: 4, matk: 11, regen: 4 },
+    stats: { atk: 2, matk: 20, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '희미한 마력이 숨 쉬듯 밝아졌다 어두워진다.'
@@ -972,7 +972,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 2,
-    stats: { atk: 8, matk: 22, regen: 4 },
+    stats: { atk: 4, matk: 40, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '집중하면 오래된 주문의 속삭임이 들린다.'
@@ -983,7 +983,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 3,
-    stats: { atk: 12, matk: 33, regen: 4 },
+    stats: { atk: 6, matk: 60, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '검푸른 표면 안쪽에서 작은 달이 차오르고 기운다.'
@@ -994,7 +994,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 4,
-    stats: { atk: 16, matk: 44, regen: 4 },
+    stats: { atk: 8, matk: 80, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '빛을 삼킨 만큼 짙은 마력을 되돌려준다.'
@@ -1005,7 +1005,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 5,
-    stats: { atk: 20, matk: 55, regen: 4 },
+    stats: { atk: 10, matk: 100, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '멈춘 시간의 핵을 봉인한 전설의 오브.'
@@ -1016,7 +1016,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'heavy',
     tier: 1,
-    stats: { def: 18, mdef: 12 },
+    stats: { def: 30, mdef: 20 },
     armorSkills: ['guard'],
     text: '물리방어 매우높음. 마법방어 높음. 메인스킬 가드.',
     flavor: '투박하지만 정면의 일격을 묵묵히 받아낸다.'
@@ -1027,7 +1027,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'heavy',
     tier: 2,
-    stats: { def: 36, mdef: 24 },
+    stats: { def: 60, mdef: 40 },
     armorSkills: ['guard'],
     text: '물리방어 매우높음. 마법방어 높음. 메인스킬 가드.',
     flavor: '촘촘히 겹친 판금이 작은 성벽처럼 몸을 감싼다.'
@@ -1038,7 +1038,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'heavy',
     tier: 3,
-    stats: { def: 54, mdef: 36 },
+    stats: { def: 90, mdef: 60 },
     armorSkills: ['guard'],
     text: '물리방어 매우높음. 마법방어 높음. 메인스킬 가드.',
     flavor: '불길과 저주를 견딘 비늘이 갑주의 이음새를 지킨다.'
@@ -1049,7 +1049,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'heavy',
     tier: 4,
-    stats: { def: 72, mdef: 48 },
+    stats: { def: 120, mdef: 80 },
     armorSkills: ['guard'],
     text: '물리방어 매우높음. 마법방어 높음. 메인스킬 가드.',
     flavor: '붉은 월광이 피격 순간 방패 모양으로 번진다.'
@@ -1060,7 +1060,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'heavy',
     tier: 5,
-    stats: { def: 90, mdef: 60 },
+    stats: { def: 150, mdef: 100 },
     armorSkills: ['guard'],
     text: '물리방어 매우높음. 마법방어 높음. 메인스킬 가드.',
     flavor: '무너진 왕국의 마지막 성벽을 벼려 만든 전설의 갑주.'
@@ -1071,7 +1071,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'light',
     tier: 1,
-    stats: { def: 14, mdef: 8 },
+    stats: { def: 22, mdef: 14 },
     armorSkills: ['dodge_stance'],
     text: '물리방어 높음. 마법방어 보통. 메인스킬 회피태세.',
     flavor: '움직임을 막지 않도록 가죽과 얇은 철판을 엮었다.'
@@ -1082,7 +1082,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'light',
     tier: 2,
-    stats: { def: 28, mdef: 16 },
+    stats: { def: 44, mdef: 22 },
     armorSkills: ['dodge_stance'],
     text: '물리방어 높음. 마법방어 보통. 메인스킬 회피태세.',
     flavor: '빠르게 몸을 틀면 잿빛 잔상이 뒤에 남는다.'
@@ -1093,7 +1093,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'light',
     tier: 3,
-    stats: { def: 42, mdef: 24 },
+    stats: { def: 66, mdef: 30 },
     armorSkills: ['dodge_stance'],
     text: '물리방어 높음. 마법방어 보통. 메인스킬 회피태세.',
     flavor: '발소리와 옷깃의 마찰음까지 그림자 속에 감춘다.'
@@ -1104,7 +1104,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'light',
     tier: 4,
-    stats: { def: 56, mdef: 32 },
+    stats: { def: 88, mdef: 38 },
     armorSkills: ['dodge_stance'],
     text: '물리방어 높음. 마법방어 보통. 메인스킬 회피태세.',
     flavor: '유성 조각을 얇게 펴 만든 비늘이 몸의 흐름을 따른다.'
@@ -1115,7 +1115,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'light',
     tier: 5,
-    stats: { def: 70, mdef: 40 },
+    stats: { def: 110, mdef: 46 },
     armorSkills: ['dodge_stance'],
     text: '물리방어 높음. 마법방어 보통. 메인스킬 회피태세.',
     flavor: '치명적인 순간마다 착용자를 반 박자 먼저 움직이는 전설의 경갑.'
@@ -1126,7 +1126,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'cloth',
     tier: 1,
-    stats: { def: 5, mdef: 10, maxMana: 20 },
+    stats: { def: 8, mdef: 20, maxMana: 20 },
     armorSkills: ['barrier', 'magic_guard'],
     text: '물리방어 낮음. 마법방어 보통. 마나 20증가. 메인스킬 배리어, 매직가드.',
     flavor: '기초 방호 주문이 옷자락을 따라 은은히 빛난다.'
@@ -1137,7 +1137,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'cloth',
     tier: 2,
-    stats: { def: 10, mdef: 20, maxMana: 20 },
+    stats: { def: 16, mdef: 30, maxMana: 20 },
     armorSkills: ['barrier', 'magic_guard'],
     text: '물리방어 낮음. 마법방어 보통. 마나 20증가. 메인스킬 배리어, 매직가드.',
     flavor: '달빛으로 수놓은 문양이 마력을 고르게 순환시킨다.'
@@ -1148,7 +1148,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'cloth',
     tier: 3,
-    stats: { def: 15, mdef: 30, maxMana: 20 },
+    stats: { def: 24, mdef: 40, maxMana: 20 },
     armorSkills: ['barrier', 'magic_guard'],
     text: '물리방어 낮음. 마법방어 보통. 마나 20증가. 메인스킬 배리어, 매직가드.',
     flavor: '깊은 밤을 닮은 천 위로 작은 성운이 천천히 흐른다.'
@@ -1159,7 +1159,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'cloth',
     tier: 4,
-    stats: { def: 20, mdef: 40, maxMana: 20 },
+    stats: { def: 32, mdef: 50, maxMana: 20 },
     armorSkills: ['barrier', 'magic_guard'],
     text: '물리방어 낮음. 마법방어 보통. 마나 20증가. 메인스킬 배리어, 매직가드.',
     flavor: '별의 배열로 짠 결계가 강력한 주문을 흘려보낸다.'
@@ -1170,7 +1170,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'armor',
     type: 'cloth',
     tier: 5,
-    stats: { def: 25, mdef: 50, maxMana: 20 },
+    stats: { def: 40, mdef: 60, maxMana: 20 },
     armorSkills: ['barrier', 'magic_guard'],
     text: '물리방어 낮음. 마법방어 보통. 마나 20증가. 메인스킬 배리어, 매직가드.',
     flavor: '세계가 처음 맞이한 밤의 조각으로 지었다는 전설의 로브.'
