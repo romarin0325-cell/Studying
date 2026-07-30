@@ -796,7 +796,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 1,
-    stats: { atk: 20, matk: 8 },
+    stats: { atk: 20, matk: 10 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '수많은 흠집이 남았지만 묵직한 날은 아직 믿을 만하다.'
@@ -807,7 +807,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 2,
-    stats: { atk: 40, matk: 12 },
+    stats: { atk: 40, matk: 20 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '달빛을 머금은 강철이 휘두를 때마다 낮은 울음을 낸다.'
@@ -818,7 +818,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 3,
-    stats: { atk: 60, matk: 16 },
+    stats: { atk: 60, matk: 30 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '마룡의 척추를 통째로 벼려 만든 난폭한 무기.'
@@ -829,7 +829,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 4,
-    stats: { atk: 80, matk: 20 },
+    stats: { atk: 80, matk: 40 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '붉은 빛이 칼날을 따라 흐르며 주변의 그림자를 삼킨다.'
@@ -840,7 +840,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'greatsword',
     tier: 5,
-    stats: { atk: 100, matk: 24 },
+    stats: { atk: 100, matk: 50 },
     armorSkills: [],
     text: '물리공격력 매우 높음. 마법공격력 보통.',
     flavor: '한 시대의 끝을 알렸다고 전해지는 전설의 대검.'
@@ -851,7 +851,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'dagger',
     tier: 1,
-    stats: { atk: 10, matk: 8, critChance: 0.1 },
+    stats: { atk: 10, matk: 10, critChance: 0.1 },
     armorSkills: [],
     text: '물리공격력 보통. 마법공격력 보통. 치명타확률 10%증가.',
     flavor: '손에 익기 쉬워 빈틈을 노리는 데 알맞다.'
@@ -862,7 +862,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'dagger',
     tier: 2,
-    stats: { atk: 20, matk: 16, critChance: 0.1 },
+    stats: { atk: 20, matk: 20, critChance: 0.1 },
     armorSkills: [],
     text: '물리공격력 보통. 마법공격력 보통. 치명타확률 10%증가.',
     flavor: '희뿌연 날이 움직임의 잔상을 흐린다.'
@@ -873,7 +873,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'dagger',
     tier: 3,
-    stats: { atk: 30, matk: 24, critChance: 0.1 },
+    stats: { atk: 30, matk: 30, critChance: 0.1 },
     armorSkills: [],
     text: '물리공격력 보통. 마법공격력 보통. 치명타확률 10%증가.',
     flavor: '그림자 속 급소를 찾아 스스로 방향을 트는 기묘한 칼날.'
@@ -884,7 +884,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'dagger',
     tier: 4,
-    stats: { atk: 40, matk: 32, critChance: 0.1 },
+    stats: { atk: 40, matk: 40, critChance: 0.1 },
     armorSkills: [],
     text: '물리공격력 보통. 마법공격력 보통. 치명타확률 10%증가.',
     flavor: '초승달을 닮은 날이 두 겹의 상처를 남긴다.'
@@ -895,7 +895,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'dagger',
     tier: 5,
-    stats: { atk: 50, matk: 40, critChance: 0.1 },
+    stats: { atk: 50, matk: 50, critChance: 0.1 },
     armorSkills: [],
     text: '물리공격력 보통. 마법공격력 보통. 치명타확률 10%증가.',
     flavor: '보이지 않는 운명의 실마저 끊는다는 전설의 단검.'
@@ -906,7 +906,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 1,
-    stats: { atk: 5, matk: 30, maxMana: 30 },
+    stats: { atk: 5, matk: 20, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '작은 마나석이 주문의 첫 문장을 또렷하게 잡아준다.'
@@ -917,7 +917,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 2,
-    stats: { atk: 10, matk: 50, maxMana: 30 },
+    stats: { atk: 10, matk: 40, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '끝에 박힌 청금석에서 서늘한 별빛이 맴돈다.'
@@ -928,7 +928,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 3,
-    stats: { atk: 15, matk: 70, maxMana: 30 },
+    stats: { atk: 15, matk: 60, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '응결된 마력이 투명한 몸체 속에서 모래처럼 흐른다.'
@@ -939,7 +939,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 4,
-    stats: { atk: 20, matk: 90, maxMana: 30 },
+    stats: { atk: 20, matk: 80, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '별자리의 움직임에 따라 주문의 궤도가 바뀐다.'
@@ -950,7 +950,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'staff',
     tier: 5,
-    stats: { atk: 25, matk: 110, maxMana: 30 },
+    stats: { atk: 25, matk: 100, maxMana: 30 },
     armorSkills: [],
     text: '마법공격력 높음. 물리공격력 낮음. 마나 30증가.',
     flavor: '사라진 별들의 이름을 모두 기억하는 전설의 스태프.'
@@ -961,7 +961,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 1,
-    stats: { atk: 2, matk: 20, regen: 4 },
+    stats: { atk: 5, matk: 10, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '희미한 마력이 숨 쉬듯 밝아졌다 어두워진다.'
@@ -972,7 +972,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 2,
-    stats: { atk: 4, matk: 40, regen: 4 },
+    stats: { atk: 10, matk: 20, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '집중하면 오래된 주문의 속삭임이 들린다.'
@@ -983,7 +983,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 3,
-    stats: { atk: 6, matk: 60, regen: 4 },
+    stats: { atk: 15, matk: 30, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '검푸른 표면 안쪽에서 작은 달이 차오르고 기운다.'
@@ -994,7 +994,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 4,
-    stats: { atk: 8, matk: 80, regen: 4 },
+    stats: { atk: 20, matk: 40, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '빛을 삼킨 만큼 짙은 마력을 되돌려준다.'
@@ -1005,7 +1005,7 @@ const EQUIPMENT_CATALOG = [
     slot: 'weapon',
     type: 'orb',
     tier: 5,
-    stats: { atk: 10, matk: 100, regen: 4 },
+    stats: { atk: 25, matk: 50, regen: 4 },
     armorSkills: [],
     text: '마법공격력 보통. 물리공격력 낮음. 마나회복 4증가.',
     flavor: '멈춘 시간의 핵을 봉인한 전설의 오브.'
