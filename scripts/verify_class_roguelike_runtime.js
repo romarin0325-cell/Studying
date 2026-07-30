@@ -181,7 +181,7 @@ let browser;
   }, additiveSeed);
   await page.locator('.bottom-nav').waitFor();
   const passiveStats = await page.evaluate(() => window.__TRINITY_TEST__.getStats());
-  assert.equal(passiveStats.def, 70, 'base+gear 58 with Paladin +20% should round to 70');
+  assert.equal(passiveStats.def, 84, 'base+gear 70 with Paladin +20% should round to 84');
 
   await page.locator('[data-action="open-dungeon"][data-dungeon-id="dungeon_1"]').click();
   await page.locator('[data-action="enter-dungeon"]').click();
@@ -202,12 +202,12 @@ let browser;
   const useDivineArmor = page.locator('[data-action="use-selected-skill"]');
   await assertReachable(useDivineArmor, 'landscape class skill execution button');
   await useDivineArmor.click();
-  await page.waitForFunction(() => window.__TRINITY_TEST__.getBattleStats().def === 87);
+  await page.waitForFunction(() => window.__TRINITY_TEST__.getBattleStats().def === 105);
   const buffedStats = await page.evaluate(() => window.__TRINITY_TEST__.getBattleStats());
   assert.equal(
     buffedStats.def,
-    87,
-    'Paladin +20% and Divine Armor +30% must add to +50% on the 58 base+gear defense'
+    105,
+    'Paladin +20% and Divine Armor +30% must add to +50% on the 70 base+gear defense'
   );
   await page.waitForFunction(() => {
     const battle = window.__TRINITY_TEST__.getState().battle;
