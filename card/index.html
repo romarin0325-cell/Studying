@@ -2915,7 +2915,7 @@
                     gachaArea.style.display = 'flex';
                 }
 
-                if (this.state.mode === 'artifact_chaos' && artifactArea && artifactMenuBtn) {
+                /* if (this.state.mode === 'artifact_chaos' && artifactArea && artifactMenuBtn) {
                     artifactArea.style.display = 'block';
                     artifactMenuBtn.innerText = `현재 활성 아티팩트 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS})`;
                 }
@@ -2930,7 +2930,7 @@
                     } else {
                         artifactMenuBtn.innerText = `아티팩트 풀 관리 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
                     }
-                }
+                } */
             },
             toTitle() {
                 // No saveRecord here
@@ -3070,7 +3070,25 @@
                 const sageDesc = document.getElementById('great-sage-desc');
                 if (artBtn) {
                     artBtn.style.display = isArtifactMode ? 'block' : 'none';
-                    artBtn.innerText = this.state.mode === 'artifact_reserve' ? '아티팩트 풀 관리' : '아티팩트 확인';
+                    if (this.state.mode === 'artifact_chaos') {
+                        artBtn.innerText = `현재 활성 아티팩트 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS})`;
+                        artBtn.onclick = () => this.openArtifactCheck();
+                    } else if (this.state.mode === 'artifact_reserve') {
+                        if (this.state.artifactReserveDraft && this.state.artifactReserveDraft.active) {
+                            artBtn.innerText = `아티팩트 리저브 선택 계속 (${this.state.artifactReserveDraft.round}/${this.state.artifactReserveDraft.maxRounds})`;
+                            artBtn.onclick = () => {
+                                document.getElementById('modal-chaos').classList.remove('active');
+                                this.showScreen('screen-artifact-reserve-draft');
+                                this.renderArtifactReserveDraftScreen();
+                            };
+                        } else {
+                            artBtn.innerText = `아티팩트 풀 관리 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
+                            artBtn.onclick = () => this.openArtifactCheck();
+                        }
+                    } else {
+                        artBtn.innerText = '아티팩트 확인';
+                        artBtn.onclick = () => this.openArtifactCheck();
+                    }
                 }
                 if (sageDesc) {
                     sageDesc.innerText = this.state.mode === 'puzzle'
