@@ -49,6 +49,14 @@
             margin-top: 0;
         }
 
+        code {
+            padding: 0.08em 0.3em;
+            border-radius: 4px;
+            background: #101722;
+            color: #d9e4ff;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
         h1 {
             margin-bottom: 8px;
             font-size: 2rem;
@@ -110,6 +118,7 @@
         }
 
         .arrow {
+            fill: none;
             stroke: #72819a;
             stroke-width: 2;
             marker-end: url(#arrow);
@@ -237,7 +246,7 @@
 <body>
     <header>
         <h1>Card Game Structure Visual Map</h1>
-        <p class="sub">`card/` 게임은 전통적인 클래스 계층보다 전역 데이터, 싱글턴 모듈, `RPG` 중심 객체를 조립해 동작합니다. 이 페이지는 유지보수자가 먼저 봐야 할 연결 관계와 흐름을 시각적으로 정리합니다.</p>
+        <p class="sub"><code>card/</code> 게임은 역할이 좁은 클래스와 전역 싱글턴 모듈을 <code>RPG</code>에서 조립해 동작합니다. 이 페이지는 유지보수자가 먼저 봐야 할 연결 관계와 흐름을 시각적으로 정리합니다.</p>
     </header>
 
     <main>
@@ -255,30 +264,32 @@
                     <line class="arrow" x1="250" y1="110" x2="380" y2="210"></line>
                     <line class="arrow" x1="250" y1="110" x2="380" y2="310"></line>
                     <line class="arrow" x1="250" y1="110" x2="380" y2="410"></line>
+                    <path class="arrow" d="M 250 80 L 320 35 L 790 35 L 790 80"></path>
+                    <path class="arrow" d="M 250 140 L 300 500 L 790 500 L 790 400"></path>
+                    <path class="arrow" d="M 250 70 L 300 15 L 950 15 L 950 245 L 890 245"></path>
                     <line class="arrow" x1="580" y1="310" x2="690" y2="230"></line>
-                    <line class="arrow" x1="580" y1="410" x2="690" y2="230"></line>
-                    <line class="arrow" x1="580" y1="410" x2="690" y2="330"></line>
-                    <line class="arrow" x1="890" y1="230" x2="980" y2="230"></line>
-                    <line class="arrow" x1="890" y1="330" x2="980" y2="330"></line>
-                    <line class="arrow" x1="580" y1="110" x2="690" y2="130"></line>
-                    <line class="arrow" x1="580" y1="210" x2="690" y2="130"></line>
+                    <line class="arrow" x1="580" y1="410" x2="690" y2="250"></line>
+                    <line class="arrow" x1="690" y1="370" x2="580" y2="410"></line>
+                    <path class="arrow" d="M 690 335 L 650 335 L 650 40 L 480 40 L 480 60"></path>
+                    <line class="arrow" x1="690" y1="110" x2="580" y2="110"></line>
+                    <path class="arrow" d="M 690 150 L 625 150 L 625 410 L 580 410"></path>
 
                     <g class="node">
                         <rect x="40" y="60" width="210" height="100" fill="#1d3557" stroke="#63b3ff"></rect>
                         <text x="145" y="95">index.html</text>
-                        <text class="small" x="145" y="124">DOM, RPG, QuizEngine</text>
+                        <text class="small" x="145" y="124">RPG, Quiz, Image, Mission</text>
                     </g>
 
                     <g class="node">
                         <rect x="380" y="60" width="200" height="80" fill="#263238" stroke="#6ee7a8"></rect>
                         <text x="480" y="92">data.js</text>
-                        <text class="small" x="480" y="116">카드/적/상수</text>
+                        <text class="small" x="480" y="116">카드/적/스킬/특성</text>
                     </g>
 
                     <g class="node">
                         <rect x="380" y="170" width="200" height="80" fill="#263238" stroke="#6ee7a8"></rect>
                         <text x="480" y="202">study data</text>
-                        <text class="small" x="480" y="226">vocab/collocation/TOEIC</text>
+                        <text class="small" x="480" y="226">vocab/grammar/TOEIC/listening</text>
                     </g>
 
                     <g class="node">
@@ -290,7 +301,7 @@
                     <g class="node">
                         <rect x="380" y="370" width="200" height="80" fill="#3d321f" stroke="#ffd166"></rect>
                         <text x="480" y="402">logic.js</text>
-                        <text class="small" x="480" y="426">Storage, GameUtils, Logic</text>
+                        <text class="small" x="480" y="426">Storage, Migrator, Utils, Logic</text>
                     </g>
 
                     <g class="node">
@@ -311,15 +322,7 @@
                         <text class="small" x="790" y="370">전투 상태 머신</text>
                     </g>
 
-                    <g class="node">
-                        <rect x="980" y="205" width="120" height="60" fill="#202736" stroke="#72819a"></rect>
-                        <text x="1040" y="235">저장/UI</text>
-                    </g>
-
-                    <g class="node">
-                        <rect x="980" y="305" width="120" height="60" fill="#202736" stroke="#72819a"></rect>
-                        <text x="1040" y="335">전투 결과</text>
-                    </g>
+                    <text x="920" y="475" fill="#aab6ca" font-size="12">화살표: 호출·사용 주체 → 의존 대상</text>
                 </svg>
             </div>
         </section>
@@ -334,23 +337,38 @@
                 </article>
                 <article class="module">
                     <h3><strong>RPGFeatureModules</strong> / rpg_features.js</h3>
-                    <p>`RPG`에 세이브, 보상, 미션, 모드별 진행 메소드를 주입합니다.</p>
+                    <p>충돌 검사 후 <code>RPG</code>에 세이브, 보상, 미션 규칙, 모드별 진행 메소드를 주입합니다.</p>
                     <div class="tags"><span class="tag">install</span><span class="tag">save</span><span class="tag">missions</span><span class="tag">rewards</span></div>
                 </article>
                 <article class="module">
                     <h3><strong>BattleRuntime</strong> / battle_runtime.js</h3>
-                    <p>전투 초기화, 플레이어/적 턴, 스킬 실행, 필드 버프 만료를 처리합니다.</p>
+                    <p>전투 초기화와 스킬 실행을 처리하고, <code>TurnManager</code>가 플레이어/적 턴을 진행합니다.</p>
                     <div class="tags"><span class="tag">turns</span><span class="tag">skills</span><span class="tag">buffs</span><span class="tag">death</span></div>
                 </article>
                 <article class="module">
                     <h3><strong>Logic</strong> / logic.js</h3>
-                    <p>스탯, 데미지, 회피, 특성, 적 행동 결정처럼 UI와 분리된 규칙 계산을 담당합니다.</p>
+                    <p>스탯, 대미지, 회피, 특성, 적 행동 결정처럼 UI와 분리된 규칙 계산을 담당합니다.</p>
                     <div class="tags"><span class="tag">stats</span><span class="tag">damage</span><span class="tag">traits</span><span class="tag">AI</span></div>
                 </article>
                 <article class="module">
                     <h3><strong>GameUtils</strong> / logic.js</h3>
                     <p>카드 조회, 카드 풀 생성, 가중치 추첨, 가챠 등급 계산 등 공통 유틸을 제공합니다.</p>
                     <div class="tags"><span class="tag">cards</span><span class="tag">pool</span><span class="tag">gacha</span><span class="tag">shuffle</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>SaveDataMigrator</strong> / logic.js</h3>
+                    <p>레거시 런 저장의 필드를 보존하면서 누락 구조를 보정하고 UI 전용 상태를 저장에서 제외합니다.</p>
+                    <div class="tags"><span class="tag">save</span><span class="tag">compatibility</span><span class="tag">migration</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>ImageAssetManager</strong> / index.html</h3>
+                    <p>메인 코드에서 이미지 파일명, 사전 로드, 오류 숨김과 동적 DOM 이미지를 한 경로로 관리합니다.</p>
+                    <div class="tags"><span class="tag">image</span><span class="tag">mobile</span><span class="tag">fallback</span></div>
+                </article>
+                <article class="module">
+                    <h3><strong>MissionView</strong> / index.html</h3>
+                    <p>전달받은 미션 뷰 모델을 DOM으로 그리기만 하며 저장 상태는 변경하지 않습니다.</p>
+                    <div class="tags"><span class="tag">DOM</span><span class="tag">missions</span><span class="tag">render</span></div>
                 </article>
                 <article class="module">
                     <h3><strong>LumiQuestionRuntime</strong> / api.js</h3>
@@ -363,11 +381,11 @@
         <section class="section">
             <h2>핵심 처리 흐름</h2>
             <div class="flow">
-                <div class="step"><span class="num">1</span><h3>앱 로드</h3><p>index.html이 데이터와 로직 스크립트를 순차 로딩합니다.</p></div>
-                <div class="step"><span class="num">2</span><h3>모듈 주입</h3><p>hydrateModules가 RPGFeatureModules를 RPG에 설치합니다.</p></div>
+                <div class="step"><span class="num">1</span><h3>앱 로드</h3><p>index.html이 12개 스크립트를 모바일 <code>file://</code> 환경을 고려한 순서로 로딩합니다.</p></div>
+                <div class="step"><span class="num">2</span><h3>검사/조립</h3><p>완료·오류·필수 전역과 메소드 충돌을 확인한 뒤 기능을 설치합니다.</p></div>
                 <div class="step"><span class="num">3</span><h3>새 게임</h3><p>startGame과 initNewGame이 저장 데이터와 런 상태를 준비합니다.</p></div>
-                <div class="step"><span class="num">4</span><h3>덱/전투</h3><p>BattleRuntime이 전투 객체를 만들고 턴을 진행합니다.</p></div>
-                <div class="step"><span class="num">5</span><h3>규칙 계산</h3><p>Logic과 SideEffects가 데미지, 버프, 특성을 계산합니다.</p></div>
+                <div class="step"><span class="num">4</span><h3>덱/전투</h3><p>BattleRuntime이 전투 객체를 만들고 <code>TurnManager</code>가 턴을 진행합니다.</p></div>
+                <div class="step"><span class="num">5</span><h3>규칙 계산</h3><p>Logic은 대미지·특성을 계산하고 SideEffects는 부가 효과를 적용합니다.</p></div>
                 <div class="step"><span class="num">6</span><h3>보상/저장</h3><p>승패 처리 후 미션, 해금, 세이브를 갱신합니다.</p></div>
             </div>
         </section>
@@ -375,11 +393,10 @@
         <section class="section">
             <h2>장기 유지보수 리스크</h2>
             <ul class="risk-list">
-                <li>`RPG`가 UI, 상태, 전투 진입점, 학습 기능을 모두 들고 있어 영향 범위가 큽니다.</li>
-                <li>`Object.assign` 주입 구조는 메소드 출처와 이름 충돌을 정적으로 파악하기 어렵습니다.</li>
-                <li>`LumiQuestionRuntime`에 중복 메소드명이 있어 뒤쪽 정의가 앞쪽 정의를 덮어씁니다.</li>
-                <li>전역 상수와 스크립트 로딩 순서 의존이 강해 모듈 경계가 약합니다.</li>
-                <li>전투 규칙이 `Logic`, `BattleRuntime`, `RPGFeatureMethods`에 흩어져 새 카드 추가 시 누락 위험이 있습니다.</li>
+                <li><code>RPG</code>가 UI, 상태, 전투 진입점, 학습 기능을 모두 들고 있어 영향 범위가 큽니다.</li>
+                <li><code>Object.assign</code> 주입 구조는 충돌을 실행 시 막지만 메소드 출처를 정적 import만큼 쉽게 파악할 수 없습니다.</li>
+                <li>전역 상수와 스크립트 로딩 순서 의존은 검사와 테스트로 보호되지만 모듈 경계는 여전히 약합니다.</li>
+                <li>전투 규칙이 <code>Logic</code>, <code>BattleRuntime</code>, <code>RPGFeatureMethods</code>에 흩어져 새 카드 추가 시 누락 위험이 있습니다.</li>
             </ul>
         </section>
     </main>

@@ -433,11 +433,19 @@
             border-radius: 12px;
             border: 1px solid #444;
             width: 320px;
+            box-sizing: border-box;
+            max-width: calc(100vw - 16px);
             max-height: 80vh;
             display: flex;
             flex-direction: column;
             text-align: center;
             color: #e0e0e0;
+        }
+
+        #screen-title {
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
         }
 
         .modal-scroll {
@@ -557,7 +565,7 @@
             display: none;
         }
 
-        /* Artifact mode mobile UI fix for Chaos modal */
+        /* Compact artifact controls keep every Chaos action reachable on mobile. */
         #modal-chaos.artifact-mode .menu-btn {
             padding: 8px !important;
             margin-bottom: 5px !important;
@@ -615,6 +623,26 @@
 
             #modal-chaos.artifact-mobile-compact .chaos-close-btn {
                 margin-top: 6px !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                /* Inline desktop widths must still be clamped on narrow phones. */
+                max-width: calc(100vw - 16px) !important;
+            }
+        }
+
+        @media (max-height: 500px) {
+            #screen-title {
+                justify-content: flex-start;
+            }
+
+            .modal-content {
+                min-height: 0 !important;
+                max-height: calc(100vh - 16px) !important;
+                max-height: calc(100dvh - 16px) !important;
+                overflow-y: auto;
             }
         }
 
@@ -934,7 +962,7 @@
 <body>
     <div class="header">Card RPG</div>
     <div class="container">
-        <div id="screen-title" class="screen active" style="justify-content: center; align-items: center;">
+        <div id="screen-title" class="screen active">
             <h1 style="color:#ffd700;">Card RPG</h1>
             <div id="title-loading" class="title-loading">⏳ 데이터 로딩 중... 잠시만 기다려주세요.</div>
             <div class="title-screen-actions">
@@ -954,7 +982,7 @@
                 style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
                 <div style="margin-bottom:5px;">다음 상대: <span id="next-enemy-text">?</span></div>
                 <div class="portrait" style="width:80px; height:106px; margin:0 auto; border-color:#ff5252;"><img
-                        id="next-enemy-img" src="" onerror="this.style.display='none'"
+                        id="next-enemy-img"
                         style="width:100%; height:100%; object-fit:contain;"></div>
             </div>
             <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
@@ -970,12 +998,6 @@
                 <button class="menu-btn" onclick="RPG.reshuffleChaosPool()"
                     style="border-color:#ff5252; color:#ff5252;">
                     카오스 셔플 (티켓 1장)
-                </button>
-            </div>
-            <div id="menu-artifact-area" style="display:none; margin-bottom:10px;">
-                <button id="btn-artifact-menu" class="menu-btn" onclick="RPG.openArtifactCheck()"
-                    style="border-color:#ffd700; color:#ffd700;">
-                    아티팩트 확인
                 </button>
             </div>
             <button class="menu-btn" onclick="RPG.openDeck()">덱 구성</button>
@@ -1114,7 +1136,7 @@
                 <div id="player-actor-box" class="battle-actor player"
                     onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
                     <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="p-name">Player</div>
-                    <div class="portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
+                    <div class="portrait"><img id="p-img"></div>
                     <div class="actor-hp-bar">
                         <div id="p-hp-bar" class="actor-hp-fill"></div>
                     </div>
@@ -1128,7 +1150,7 @@
 
                 <div id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)">
                     <div style="font-size:0.7rem; color:#ccc; margin-bottom:2px;" id="e-name">Enemy</div>
-                    <div class="portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
+                    <div class="portrait"><img id="e-img"></div>
                     <div class="actor-hp-bar">
                         <div id="e-hp-bar" class="actor-hp-fill"></div>
                     </div>
@@ -1253,7 +1275,7 @@
             <button id="btn-claim-special-mission" class="menu-btn" onclick="RPG.claimSpecialMissionReward()"
                 style="border-color:#ffca28; color:#ffe082;">보상받기</button>
             </div>
-            <button onclick="RPG.closeMonthlyMission()" style="width:100%; padding:10px;">닫기</button>
+            <button onclick="RPG.closeMissionView()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
 
@@ -1273,7 +1295,7 @@
         <div class="modal-content">
             <h3 id="md-name">Name</h3>
             <div class="modal-scroll">
-                <div class="portrait" style="width:150px; height:200px; margin:0 auto;"><img id="md-img" src=""
+                <div class="portrait" style="width:150px; height:200px; margin:0 auto;"><img id="md-img"
                         style="width:100%; height:100%; object-fit:contain;"></div>
                 <p id="md-grade" style="font-size:0.8rem; margin:5px 0;">Grade</p>
                 <div id="md-stats"
@@ -1339,7 +1361,7 @@
             <h3 id="lecture-title">강의 제목</h3>
             <div style="display: flex; justify-content: center; margin-bottom: 10px;">
                 <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;">
-                    <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                    <img data-image-src="루미.png" alt="Rumi">
                 </div>
             </div>
             <div id="lecture-content" class="modal-scroll"
@@ -1377,7 +1399,7 @@
                 </div>
             </div>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
-                <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                <img data-image-src="루미.png" alt="Rumi">
             </div>
             <div id="tutoring-content" class="modal-scroll"
                 style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
@@ -1589,7 +1611,7 @@
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3 style="color: #ff80ab;">💕 루미와의 데이트</h3>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #ff80ab; margin: 0 auto 10px auto;">
-                <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                <img data-image-src="루미.png" alt="Rumi">
             </div>
             <div id="date-content" class="modal-scroll"
                 style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
@@ -1606,6 +1628,7 @@
 
     <script>
         window._scriptLoadErrors = [];
+        window._scriptLoadComplete = false;
         // Sequential script loader — loads one file at a time for mobile file:// reliability
         (function () {
             var scripts = [
@@ -1623,42 +1646,61 @@
                 { src: 'fortune_cookie.js', label: '포춘쿠키 로직' }
             ];
             var idx = 0;
+            var scriptTimeoutMs = Number(window._scriptLoadTimeoutMs) || 15000;
 
             function loadNext() {
-                if (idx >= scripts.length) return;
+                if (idx >= scripts.length) {
+                    window._scriptLoadComplete = true;
+                    return;
+                }
                 var info = scripts[idx];
                 var el = document.createElement('script');
                 el.src = info.src;
+                // Dynamic scripts default to async. Force ordering for mobile file:// WebViews.
+                el.async = false;
 
-                el.onload = function () {
+                var settled = false;
+                var timeoutId = setTimeout(function () {
+                    finish(false);
+                }, scriptTimeoutMs);
+
+                function finish(succeeded) {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    el.onload = null;
+                    el.onerror = null;
+                    if (!succeeded) {
+                        window._scriptLoadErrors.push(info.src);
+                        el.remove();
+                    }
                     idx++;
-                    updateProgress();
-                    // 🚀 핵심 수정: 모바일 기기의 파일 I/O 및 메모리 정리를 위해 100ms 대기 후 다음 파일 로드
+                    updateProgress(info.label);
+                    // Continue so the final error screen can list every missing or stalled file.
                     setTimeout(loadNext, 100);
-                };
+                }
 
-                el.onerror = function () {
-                    window._scriptLoadErrors.push(info.src);
-                    idx++;
-                    updateProgress();
-                    // 에러 발생 시에도 기기가 쉴 수 있게 대기 시간 부여
-                    setTimeout(loadNext, 100);
-                };
+                el.onload = function () { finish(true); };
+                el.onerror = function () { finish(false); };
 
-                // head보다는 body에 추가하는 것이 모바일 웹뷰 메모리 처리에 더 안정적입니다.
+                // Appending to body is more reliable in the targeted mobile WebViews.
                 document.body.appendChild(el);
             }
 
-            function updateProgress() {
+            function updateProgress(completedLabel) {
+                // waitForInitialDataLoad owns the final error message.
+                if (window._scriptLoadErrors.length > 0) return;
                 var el = document.getElementById('title-loading');
-                if (el) el.innerText = '⏳ 데이터 로딩 중 (' + idx + '/' + scripts.length + ')... 잠시만 기다려주세요.';
+                if (el) {
+                    el.innerText = '⏳ ' + completedLabel + ' 완료 (' + idx + '/' + scripts.length + ')...';
+                }
             }
 
-            // 첫 스크립트 로드 시작 전에도 DOM이 안정화될 시간을 약간 줍니다.
+            // Let the parsed DOM settle before starting mobile file I/O.
             setTimeout(loadNext, 50);
         })();
     </script>
-    <script defer>
+    <script>
         /**
          * QuizEngine — Unified quiz rendering system for Card RPG.
          *
@@ -2011,8 +2053,239 @@
                 : 3;
 
         /**
-         * RPG Game Namespace
-         * Encapsulates all game logic, state, and UI handling.
+         * Main-page image model.
+         *
+         * Image source selection and browser load/error handling intentionally
+         * stay in index.html. Data and battle modules pass entities only; they do
+         * not know how image files are named or displayed.
+         */
+        class ImageAssetManager {
+            constructor() {
+                this.requestIds = new WeakMap();
+                this.sources = new WeakMap();
+            }
+
+            getEntitySource(entity) {
+                if (typeof entity === 'string') return entity;
+                if (!entity) return '';
+                return entity.imageFile || `${entity.name}.png`;
+            }
+
+            load(img, entity, options = {}) {
+                if (!img) return;
+
+                const source = this.getEntitySource(entity);
+                const parent = options.parent || null;
+                img.alt = options.alt || (entity && entity.name) || '';
+                if (this.sources.get(img) === source && !options.force) return;
+
+                const requestId = (this.requestIds.get(img) || 0) + 1;
+                this.requestIds.set(img, requestId);
+                this.sources.set(img, source);
+
+                if (!source) {
+                    img.removeAttribute('src');
+                    img.style.display = 'none';
+                    if (parent && options.toggleParent) parent.style.display = 'none';
+                    return;
+                }
+
+                // Load the real element once while hidden so failures never flash a broken icon.
+                img.removeAttribute('src');
+                img.style.display = 'none';
+                if (parent && options.toggleParent) parent.style.display = 'none';
+                img.onload = () => {
+                    if (this.requestIds.get(img) !== requestId) return;
+                    img.onload = null;
+                    img.onerror = null;
+                    img.style.display = 'block';
+                    if (parent && options.toggleParent) parent.style.display = '';
+                };
+                img.onerror = () => {
+                    if (this.requestIds.get(img) !== requestId) return;
+                    img.onload = null;
+                    img.onerror = null;
+                    img.removeAttribute('src');
+                    img.style.display = 'none';
+                    if (parent && options.toggleParent) parent.style.display = 'none';
+                };
+                img.src = source;
+            }
+
+            createImage(entity, options = {}) {
+                const img = document.createElement('img');
+                if (options.className) img.className = options.className;
+                if (options.style) img.style.cssText = options.style;
+                this.load(img, entity, options);
+                return img;
+            }
+
+            createPortrait(entity, options = {}) {
+                const portrait = document.createElement(options.wrapperTag || 'div');
+                portrait.className = options.wrapperClass || 'portrait';
+                if (options.wrapperStyle) portrait.style.cssText = options.wrapperStyle;
+                portrait.appendChild(this.createImage(entity, {
+                    alt: options.alt,
+                    style: options.imageStyle
+                }));
+                return portrait;
+            }
+
+            hydrate(root = document) {
+                root.querySelectorAll('img[data-image-src]').forEach(img => {
+                    const source = img.dataset.imageSrc;
+                    if (img.dataset.loadedImageSrc === source) return;
+                    img.dataset.loadedImageSrc = source;
+                    this.load(img, source, { alt: img.alt });
+                });
+            }
+        }
+
+        /**
+         * DOM-only renderer for monthly, weekly, and special missions.
+         * Mission state is prepared by RPG; this class never mutates save data.
+         */
+        class MissionView {
+            getElement(id) {
+                return document.getElementById(id);
+            }
+
+            setReward(button, label, reward, onShowCard, emptyLabel = '보상이 없습니다') {
+                label.textContent = reward ? reward.name : emptyLabel;
+                button.disabled = !reward;
+                button.style.opacity = reward ? '1' : '0.5';
+                button.onclick = reward ? (() => onShowCard(reward.id)) : null;
+            }
+
+            renderMissionItems(container, missions, palette) {
+                container.innerHTML = '';
+                Object.values(missions || {}).forEach(mission => {
+                    const cleared = (mission.progress || 0) >= mission.target;
+                    const item = document.createElement('div');
+                    item.style.padding = '10px';
+                    item.style.marginBottom = '8px';
+                    item.style.border = `1px solid ${cleared ? palette.border : '#555'}`;
+                    item.style.borderRadius = '8px';
+                    item.style.background = cleared ? palette.background : '#2a2a2a';
+
+                    const title = document.createElement('div');
+                    title.style.fontWeight = 'bold';
+                    title.style.color = cleared ? palette.text : '#fff';
+                    title.textContent = `${cleared ? '완료' : '진행'} · ${mission.label}`;
+
+                    const progress = document.createElement('div');
+                    progress.style.fontSize = '0.85rem';
+                    progress.style.color = '#b0bec5';
+                    progress.style.marginTop = '4px';
+                    progress.textContent = `${mission.progress}/${mission.target}`;
+
+                    item.appendChild(title);
+                    item.appendChild(progress);
+                    container.appendChild(item);
+                });
+            }
+
+            renderLockedSpecial(container) {
+                container.innerHTML = '';
+                const message = document.createElement('div');
+                message.style.cssText = 'padding:12px; border:1px solid #444; border-radius:8px; background:#2a2a2a; color:#aaa; font-size:0.85rem;';
+                message.textContent = '꿈의회랑에서 창조신 아스테아를 돌파하면 확률적으로 스페셜 미션이 해금됩니다.';
+                container.appendChild(message);
+            }
+
+            render(model) {
+                const {
+                    viewType,
+                    monthly,
+                    weekly,
+                    special,
+                    season,
+                    reward,
+                    specialReward,
+                    weeklyRewardAmount,
+                    monthlyAllClear,
+                    weeklyAllClear,
+                    specialAllClear,
+                    onShowCard
+                } = model;
+
+                const title = this.getElement('mission-modal-title');
+                const monthlySection = this.getElement('monthly-mission-section');
+                const weeklySection = this.getElement('weekly-mission-section');
+                const specialSection = this.getElement('special-mission-section');
+                const monthlyList = this.getElement('monthly-mission-list');
+                const weeklyList = this.getElement('weekly-mission-list');
+                const specialList = this.getElement('special-mission-list');
+                const monthlyClaim = this.getElement('btn-claim-monthly-mission');
+                const weeklyClaim = this.getElement('btn-claim-weekly-mission');
+                const specialClaim = this.getElement('btn-claim-special-mission');
+
+                title.textContent = viewType === 'weekly'
+                    ? '주간 미션'
+                    : viewType === 'special' ? season.title : '월간 미션';
+                monthlySection.style.display = viewType === 'monthly' ? 'block' : 'none';
+                weeklySection.style.display = viewType === 'weekly' ? 'block' : 'none';
+                specialSection.style.display = viewType === 'special' ? 'block' : 'none';
+
+                this.getElement('monthly-mission-status').textContent = `${monthly.monthKey} 월 미션`;
+                this.getElement('weekly-mission-status').textContent = `${weekly.weekLabel} 주간 미션`;
+                this.getElement('special-mission-status').textContent = special.unlocked
+                    ? `${season.title} · 시즌 보상 진행`
+                    : `${season.title} · 아직 해금되지 않았습니다`;
+                this.getElement('weekly-mission-reward-name').textContent = `카오스 티켓 ${weeklyRewardAmount}장`;
+
+                this.setReward(
+                    this.getElement('btn-monthly-mission-reward'),
+                    this.getElement('monthly-mission-reward-name'),
+                    reward,
+                    onShowCard
+                );
+                this.setReward(
+                    this.getElement('btn-special-mission-reward'),
+                    this.getElement('special-mission-reward-name'),
+                    specialReward,
+                    onShowCard,
+                    '해금된 스페셜 미션이 없습니다'
+                );
+
+                this.renderMissionItems(monthlyList, monthly.missions, {
+                    border: '#66bb6a',
+                    background: 'rgba(102, 187, 106, 0.12)',
+                    text: '#a5d6a7'
+                });
+                this.renderMissionItems(weeklyList, weekly.missions, {
+                    border: '#7e57c2',
+                    background: 'rgba(126, 87, 194, 0.16)',
+                    text: '#d1c4e9'
+                });
+                if (special.unlocked) {
+                    this.renderMissionItems(specialList, special.missions, {
+                        border: '#ffb74d',
+                        background: 'rgba(255, 183, 77, 0.16)',
+                        text: '#ffe0b2'
+                    });
+                } else {
+                    this.renderLockedSpecial(specialList);
+                }
+
+                monthlyClaim.disabled = !monthlyAllClear || monthly.claimed || !reward;
+                monthlyClaim.style.opacity = monthlyClaim.disabled ? '0.5' : '1';
+                monthlyClaim.textContent = monthly.claimed ? '보상 수령 완료' : '보상받기';
+                weeklyClaim.disabled = !weeklyAllClear || weekly.claimed;
+                weeklyClaim.style.opacity = weeklyClaim.disabled ? '0.5' : '1';
+                weeklyClaim.textContent = weekly.claimed ? '보상 수령 완료' : '보상받기';
+                specialClaim.disabled = !special.unlocked || !specialAllClear || !specialReward;
+                specialClaim.style.opacity = specialClaim.disabled ? '0.5' : '1';
+                specialClaim.textContent = special.unlocked ? '보상받기' : '해금 전';
+            }
+        }
+
+        const ImageAssets = new ImageAssetManager();
+        const MissionScreen = new MissionView();
+
+        /**
+         * RPG composition root and browser UI entrypoint.
+         * Pure calculations live in Logic; turn processing lives in BattleRuntime.
          */
         const RPG = {
             global: {
@@ -2023,7 +2296,6 @@
                 achievements: { origin: false },
                 chaosTickets: 0,
                 chaosTicketVersion: 0,
-                lastRewardDate: null,
                 lastAttendanceDate: null,
                 pendingTranscendenceCards: [],
                 bonusPoolPresets: [null, null, null],
@@ -2039,7 +2311,7 @@
                 lumiSearchEnabled: true
             },
 
-            // Game State (Session Persistent)
+            // Run state persisted by SaveDataMigrator through saveGame().
             state: {
                 mode: 'origin',
                 tickets: 20,
@@ -2075,8 +2347,6 @@
             // UI Helper Variables
             selectedSlot: -1,
             tempOnClose: null,
-            tempConfirmYes: null,
-            tempConfirmNo: null,
             isApiLoading: false,
             pendingActiveBonusPoolIds: [],
             selectedSpecialCardGroup: null,
@@ -2113,7 +2383,8 @@
 
             openMissionHub() {
                 // Load from disk only if not yet loaded (title screen entry point)
-                if (!this._globalLoaded) this.loadGlobalData();
+                if (!this._globalLoaded && !this.loadGlobalData()) return;
+                if (this._globalStorageBroken) return;
                 this.ensureMonthlyMissionState();
                 this.ensureWeeklyMissionState();
                 this.ensureSpecialMissionState();
@@ -2166,14 +2437,14 @@
             openMonthlyMission() {
                 this.closeMissionHub();
                 this.missionViewType = 'monthly';
-                this.renderMonthlyMission();
+                this.renderMissionView();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
 
             openWeeklyMission() {
                 this.closeMissionHub();
                 this.missionViewType = 'weekly';
-                this.renderMonthlyMission();
+                this.renderMissionView();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
 
@@ -2181,138 +2452,35 @@
                 this.closeMissionHub();
                 if (!this.isSpecialMissionVisible()) return this.showAlert("해금된 스페셜 미션이 없습니다.");
                 this.missionViewType = 'special';
-                this.renderMonthlyMission();
+                this.renderMissionView();
                 document.getElementById('modal-monthly-mission').classList.add('active');
             },
 
-            closeMonthlyMission() {
+            closeMissionView() {
                 document.getElementById('modal-monthly-mission').classList.remove('active');
             },
 
-            renderMonthlyMission() {
+            renderMissionView() {
                 const monthly = this.ensureMonthlyMissionState();
                 const weekly = this.ensureWeeklyMissionState();
                 const special = this.ensureSpecialMissionState();
                 const season = this.getCurrentSpecialSeason();
                 const reward = monthly.rewardCardId ? this.getCardData(monthly.rewardCardId) : null;
-                const missionModalTitle = document.getElementById('mission-modal-title');
-                const weeklySection = document.getElementById('weekly-mission-section');
-                const monthlySection = document.getElementById('monthly-mission-section');
-                const specialSection = document.getElementById('special-mission-section');
-                const rewardNameEl = document.getElementById('monthly-mission-reward-name');
-                const rewardBtn = document.getElementById('btn-monthly-mission-reward');
-                const list = document.getElementById('monthly-mission-list');
-                const status = document.getElementById('monthly-mission-status');
-                const claimBtn = document.getElementById('btn-claim-monthly-mission');
-                const weeklyList = document.getElementById('weekly-mission-list');
-                const weeklyStatus = document.getElementById('weekly-mission-status');
-                const weeklyRewardName = document.getElementById('weekly-mission-reward-name');
-                const weeklyClaimBtn = document.getElementById('btn-claim-weekly-mission');
                 const specialReward = special.rewardCardId ? this.getCardData(special.rewardCardId) : null;
-                const specialStatus = document.getElementById('special-mission-status');
-                const specialRewardName = document.getElementById('special-mission-reward-name');
-                const specialRewardBtn = document.getElementById('btn-special-mission-reward');
-                const specialList = document.getElementById('special-mission-list');
-                const specialClaimBtn = document.getElementById('btn-claim-special-mission');
-
-                rewardNameEl.innerText = reward ? reward.name : '보상이 없습니다';
-                rewardBtn.disabled = !reward;
-                rewardBtn.style.opacity = reward ? '1' : '0.5';
-                rewardBtn.onclick = reward ? (() => this.showCardInfo(reward.id)) : null;
-                specialRewardName.innerText = specialReward ? specialReward.name : '해금된 스페셜 미션이 없습니다';
-                specialRewardBtn.disabled = !specialReward;
-                specialRewardBtn.style.opacity = specialReward ? '1' : '0.5';
-                specialRewardBtn.onclick = specialReward ? (() => this.showCardInfo(specialReward.id)) : null;
-
-                const allClear = this.areAllMonthlyMissionsCleared();
-                const weeklyAllClear = this.areAllWeeklyMissionsCleared();
-                const specialAllClear = this.areAllSpecialMissionsCleared();
-                const viewType = this.missionViewType || 'monthly';
-                const showWeekly = viewType === 'weekly';
-                const showMonthly = viewType === 'monthly';
-                const showSpecial = viewType === 'special';
-                missionModalTitle.innerText =
-                    viewType === 'weekly'
-                        ? '주간 미션'
-                        : viewType === 'special'
-                            ? season.title
-                            : '월간 미션';
-                weeklySection.style.display = showWeekly ? 'block' : 'none';
-                monthlySection.style.display = showMonthly ? 'block' : 'none';
-                specialSection.style.display = showSpecial ? 'block' : 'none';
-                status.innerText = `${monthly.monthKey} 월 미션`;
-                weeklyStatus.innerText = `${weekly.weekLabel} 주간 미션`;
-                specialStatus.innerText = special.unlocked
-                    ? `${season.title} · 시즌 보상 진행`
-                    : `${season.title} · 아직 해금되지 않았습니다`;
-                const weeklyRewardAmount = this.getWeeklyChaosTicketRewardAmount();
-                weeklyRewardName.innerText = `카오스 티켓 ${weeklyRewardAmount}장`;
-                list.innerHTML = '';
-                weeklyList.innerHTML = '';
-                specialList.innerHTML = '';
-
-                Object.values(monthly.missions || {}).forEach(mission => {
-                    const cleared = (mission.progress || 0) >= mission.target;
-                    const item = document.createElement('div');
-                    item.style.padding = '10px';
-                    item.style.marginBottom = '8px';
-                    item.style.border = `1px solid ${cleared ? '#66bb6a' : '#555'}`;
-                    item.style.borderRadius = '8px';
-                    item.style.background = cleared ? 'rgba(102, 187, 106, 0.12)' : '#2a2a2a';
-                    item.innerHTML = `
-                        <div style="font-weight:bold; color:${cleared ? '#a5d6a7' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
-                        <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
-                    `;
-                    list.appendChild(item);
+                MissionScreen.render({
+                    viewType: this.missionViewType || 'monthly',
+                    monthly,
+                    weekly,
+                    special,
+                    season,
+                    reward,
+                    specialReward,
+                    weeklyRewardAmount: this.getWeeklyChaosTicketRewardAmount(),
+                    monthlyAllClear: this.areAllMonthlyMissionsCleared(),
+                    weeklyAllClear: this.areAllWeeklyMissionsCleared(),
+                    specialAllClear: this.areAllSpecialMissionsCleared(),
+                    onShowCard: id => this.showCardInfo(id)
                 });
-
-                Object.values(weekly.missions || {}).forEach(mission => {
-                    const cleared = (mission.progress || 0) >= mission.target;
-                    const item = document.createElement('div');
-                    item.style.padding = '10px';
-                    item.style.marginBottom = '8px';
-                    item.style.border = `1px solid ${cleared ? '#7e57c2' : '#555'}`;
-                    item.style.borderRadius = '8px';
-                    item.style.background = cleared ? 'rgba(126, 87, 194, 0.16)' : '#2a2a2a';
-                    item.innerHTML = `
-                        <div style="font-weight:bold; color:${cleared ? '#d1c4e9' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
-                        <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
-                    `;
-                    weeklyList.appendChild(item);
-                });
-
-                if (special.unlocked) {
-                    Object.values(special.missions || {}).forEach(mission => {
-                        const cleared = (mission.progress || 0) >= mission.target;
-                        const item = document.createElement('div');
-                        item.style.padding = '10px';
-                        item.style.marginBottom = '8px';
-                        item.style.border = `1px solid ${cleared ? '#ffb74d' : '#555'}`;
-                        item.style.borderRadius = '8px';
-                        item.style.background = cleared ? 'rgba(255, 183, 77, 0.16)' : '#2a2a2a';
-                        item.innerHTML = `
-                            <div style="font-weight:bold; color:${cleared ? '#ffe0b2' : '#fff'};">${cleared ? '완료' : '진행'} · ${mission.label}</div>
-                            <div style="font-size:0.85rem; color:#b0bec5; margin-top:4px;">${mission.progress}/${mission.target}</div>
-                        `;
-                        specialList.appendChild(item);
-                    });
-                } else {
-                    specialList.innerHTML = `
-                        <div style="padding:12px; border:1px solid #444; border-radius:8px; background:#2a2a2a; color:#aaa; font-size:0.85rem;">
-                            꿈의회랑에서 창조신 아스테아를 돌파하면 확률적으로 스페셜 미션이 해금됩니다.
-                        </div>
-                    `;
-                }
-
-                claimBtn.disabled = !allClear || monthly.claimed || !reward;
-                claimBtn.style.opacity = claimBtn.disabled ? '0.5' : '1';
-                claimBtn.innerText = monthly.claimed ? '보상 수령 완료' : '보상받기';
-                weeklyClaimBtn.disabled = !weeklyAllClear || weekly.claimed;
-                weeklyClaimBtn.style.opacity = weeklyClaimBtn.disabled ? '0.5' : '1';
-                weeklyClaimBtn.innerText = weekly.claimed ? '보상 수령 완료' : '보상받기';
-                specialClaimBtn.disabled = !special.unlocked || !specialAllClear || !specialReward;
-                specialClaimBtn.style.opacity = specialClaimBtn.disabled ? '0.5' : '1';
-                specialClaimBtn.innerText = special.unlocked ? '보상받기' : '해금 전';
             },
 
             renderBonusPoolPresetButtons() {
@@ -2528,7 +2696,6 @@
                     const item = document.createElement('label');
                     item.className = `bonus-pool-item${isActive ? '' : ' is-disabled'}`;
                     item.innerHTML = `
-                        <div class="portrait"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
                         <div class="bonus-pool-name">${card.name}</div>
                         <div class="bonus-pool-grade">${card.grade.toUpperCase()} / ${card.role}</div>
                         <div class="bonus-pool-toggle">
@@ -2536,6 +2703,7 @@
                             <span>사용</span>
                         </div>
                     `;
+                    item.insertBefore(ImageAssets.createPortrait(card), item.firstChild);
 
                     const checkbox = item.querySelector('input');
                     checkbox.addEventListener('change', () => {
@@ -2587,13 +2755,39 @@
                     { name: 'Logic', ref: typeof Logic !== 'undefined' ? Logic : null },
                     { name: 'SideEffects', ref: typeof SideEffects !== 'undefined' ? SideEffects : null },
                     { name: 'GameUtils', ref: typeof GameUtils !== 'undefined' ? GameUtils : null },
+                    { name: 'SaveDataMigrator', ref: typeof SaveDataMigrator !== 'undefined' ? SaveDataMigrator : null },
                     { name: 'BattleRuntime', ref: typeof BattleRuntime !== 'undefined' ? BattleRuntime : null },
                     { name: 'QuizEngine', ref: typeof QuizEngine !== 'undefined' ? QuizEngine : null },
                     { name: 'TOEIC_DATA', ref: typeof TOEIC_DATA !== 'undefined' ? TOEIC_DATA : null },
                     { name: 'GameAPI', ref: typeof GameAPI !== 'undefined' ? GameAPI : null },
-                    { name: 'RPGFeatureModules', ref: typeof RPGFeatureModules !== 'undefined' ? RPGFeatureModules : null }
+                    { name: 'RPGFeatureModules', ref: typeof RPGFeatureModules !== 'undefined' ? RPGFeatureModules : null },
+                    { name: 'LISTENING_DATA', ref: typeof LISTENING_DATA !== 'undefined' ? LISTENING_DATA : null },
+                    { name: 'FortuneCookie', ref: typeof FortuneCookie !== 'undefined' ? FortuneCookie : null }
                 ];
                 return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
+            },
+
+            showInitialLoadFailure(message, detail) {
+                const loading = document.getElementById('title-loading');
+                if (!loading) return;
+
+                loading.classList.remove('hidden');
+                loading.innerHTML = '';
+
+                const title = document.createElement('div');
+                title.textContent = `⚠️ ${message}`;
+                loading.appendChild(title);
+
+                const hint = document.createElement('div');
+                hint.style.cssText = 'font-size:0.8rem; color:#aaa; margin-top:4px;';
+                hint.textContent = detail;
+                loading.appendChild(hint);
+
+                const retry = document.createElement('button');
+                retry.textContent = '새로고침';
+                retry.style.cssText = 'margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;';
+                retry.onclick = () => location.reload();
+                loading.appendChild(retry);
             },
 
             setStartButtonsEnabled(enabled) {
@@ -2628,30 +2822,42 @@
                 const pollingMs = loadingConfig.POLLING_MS;
 
                 const checkReady = () => {
-                    // Check for script load errors first
+                    // Do not declare success or failure until the sequential loader finishes.
+                    if (!window._scriptLoadComplete) {
+                        setTimeout(checkReady, pollingMs);
+                        return;
+                    }
+
                     if (window._scriptLoadErrors && window._scriptLoadErrors.length > 0) {
-                        const loading = document.getElementById('title-loading');
-                        if (loading) {
-                            loading.innerHTML = `⚠️ 스크립트 로드 실패: ${window._scriptLoadErrors.join(', ')}<br><span style="font-size:0.8rem; color:#aaa;">파일이 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
-                        }
+                        this.showInitialLoadFailure(
+                            `스크립트 로드 실패: ${window._scriptLoadErrors.join(', ')}`,
+                            '파일이 index.html과 같은 폴더에 있는지 확인해주세요.'
+                        );
                         return;
                     }
 
                     const missing = this.getMissingRequiredData();
                     if (missing.length === 0) {
-                        this.hydrateModules();
-                        this.setStartButtonsEnabled(true);
+                        try {
+                            this.hydrateModules();
+                            if (!this._featuresInstalled) throw new Error('RPG 기능 설치가 완료되지 않았습니다.');
+                            this.setStartButtonsEnabled(true);
+                        } catch (error) {
+                            console.error('[RPG] Initial module installation failed:', error);
+                            this.showInitialLoadFailure(
+                                '게임 초기화 실패',
+                                error && error.message ? error.message : 'RPG 기능 모듈을 설치하지 못했습니다.'
+                            );
+                        }
                         return;
                     }
 
                     attempts++;
                     if (attempts >= maxAttempts) {
-                        const loading = document.getElementById('title-loading');
-                        if (loading) {
-                            const errorInfo = window._scriptLoadErrors && window._scriptLoadErrors.length > 0
-                                ? `<br>로드 실패 파일: ${window._scriptLoadErrors.join(', ')}` : '';
-                            loading.innerHTML = `⚠️ 로딩 시간 초과: ${missing.map(d => d.name).join(', ')}${errorInfo}<br><span style="font-size:0.8rem; color:#aaa;">모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.</span><br><button onclick="location.reload()" style="margin-top:8px; padding:8px 16px; border-radius:4px; border:1px solid #ff5252; background:#b71c1c; color:#fff; cursor:pointer; font-size:0.9rem;">새로고침</button>`;
-                        }
+                        this.showInitialLoadFailure(
+                            `로딩 시간 초과: ${missing.map(d => d.name).join(', ')}`,
+                            '모든 .js 파일이 index.html과 같은 폴더에 있는지 확인해주세요.'
+                        );
                         return;
                     }
 
@@ -2869,16 +3075,15 @@
                 const nextEnemy = this.getCurrentStageEnemyData();
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                imgEl.src = `${nextEnemy.name}.png`;
-                imgEl.style.display = 'none';
-                imgEl.parentElement.style.display = 'none';
+                ImageAssets.load(imgEl, nextEnemy, {
+                    parent: imgEl.parentElement,
+                    toggleParent: true
+                });
 
                 // Mode Specific Menu Areas
                 const gachaArea = document.getElementById('menu-gacha-area');
                 const draftArea = document.getElementById('menu-draft-area');
                 const chaosArea = document.getElementById('menu-chaos-area');
-                const artifactArea = document.getElementById('menu-artifact-area');
-                const artifactMenuBtn = document.getElementById('btn-artifact-menu');
                 const normalGachaBtn = document.getElementById('btn-normal-gacha');
                 const challengeGachaBtn = document.getElementById('btn-challenge-gacha');
 
@@ -2890,13 +3095,10 @@
                     challengeGachaBtn.innerText = '도전 뽑기';
                     challengeGachaBtn.onclick = () => this.openChallengeGacha();
                 }
-                if (artifactMenuBtn) artifactMenuBtn.onclick = () => this.openArtifactCheck();
-
                 // Hide all first
                 gachaArea.style.display = 'none';
                 draftArea.style.display = 'none';
                 if (chaosArea) chaosArea.style.display = 'none';
-                if (artifactArea) artifactArea.style.display = 'none';
 
                 if (this.state.mode === 'draft') {
                     draftArea.style.display = 'block';
@@ -2915,25 +3117,9 @@
                     gachaArea.style.display = 'flex';
                 }
 
-                /* if (this.state.mode === 'artifact_chaos' && artifactArea && artifactMenuBtn) {
-                    artifactArea.style.display = 'block';
-                    artifactMenuBtn.innerText = `현재 활성 아티팩트 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS})`;
-                }
-                if (this.state.mode === 'artifact_reserve' && artifactArea && artifactMenuBtn) {
-                    artifactArea.style.display = 'block';
-                    if (this.state.artifactReserveDraft && this.state.artifactReserveDraft.active) {
-                        artifactMenuBtn.innerText = `아티팩트 리저브 선택 계속 (${this.state.artifactReserveDraft.round}/${this.state.artifactReserveDraft.maxRounds})`;
-                        artifactMenuBtn.onclick = () => {
-                            this.showScreen('screen-artifact-reserve-draft');
-                            this.renderArtifactReserveDraftScreen();
-                        };
-                    } else {
-                        artifactMenuBtn.innerText = `아티팩트 풀 관리 (${(this.state.artifacts || []).length}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
-                    }
-                } */
             },
             toTitle() {
-                // No saveRecord here
+                // Merely changing screens must not write or reinterpret run records.
                 this.showScreen('screen-title');
             },
             showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
@@ -3007,7 +3193,10 @@
                 for (const card of pool) {
                     const el = document.createElement('div');
                     el.className = `card-item ${card.grade}`;
-                    el.innerHTML = `<div class="portrait"><img src="${card.name}.png" onerror="this.style.display='none'"></div><div>${card.name}</div>`;
+                    el.appendChild(ImageAssets.createPortrait(card));
+                    const label = document.createElement('div');
+                    label.textContent = card.name;
+                    el.appendChild(label);
                     el.onclick = () => this.showCardInfo(card.id);
                     grid.appendChild(el);
                 }
@@ -3018,7 +3207,7 @@
 
             // --- Chaos Roulette ---
             openChaosRoulette() {
-                // Fix: 모달이 화면을 가리는 문제 수정
+                // Only one full-screen chooser may intercept input at a time.
                 document.getElementById('modal-mode-select').classList.remove('active');
 
                 this.showScreen('screen-chaos-roulette');
@@ -3042,8 +3231,13 @@
                 const modal = document.getElementById('modal-gacha');
                 const content = document.getElementById('gacha-result');
                 document.getElementById('gacha-title').innerText = "초월 소환 성공!";
-                content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>
-            <div class="portrait" style="width:120px; height:160px; margin:0 auto; border-color:#ffd700;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>다음 오리진 게임 전설 풀에 추가되었습니다!</p>`;
+                content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>`;
+                content.appendChild(ImageAssets.createPortrait(pick, {
+                    wrapperStyle: 'width:120px; height:160px; margin:0 auto; border-color:#ffd700;'
+                }));
+                const resultMessage = document.createElement('p');
+                resultMessage.textContent = '다음 오리진 게임 전설 풀에 추가되었습니다!';
+                content.appendChild(resultMessage);
                 modal.classList.add('active');
             },
 
@@ -3414,8 +3608,13 @@
                 let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
                 if (pick.grade === 'transcendence') msgTitle = title;
                 document.getElementById('gacha-title').innerText = msgTitle;
-                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>
-            <div class="portrait" style="width:120px; height:160px; margin:0 auto;"><img src="${pick.name}.png" onerror="this.style.display='none'"></div><p>새로운 동료를 얻었습니다!</p>`;
+                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>`;
+                content.appendChild(ImageAssets.createPortrait(pick, {
+                    wrapperStyle: 'width:120px; height:160px; margin:0 auto;'
+                }));
+                const resultMessage = document.createElement('p');
+                resultMessage.textContent = '새로운 동료를 얻었습니다!';
+                content.appendChild(resultMessage);
                 modal.classList.add('active');
             },
 
@@ -3548,15 +3747,18 @@
             renderCardList(containerId, list, clickHandler) {
                 const box = document.getElementById(containerId);
                 box.innerHTML = "";
-                let counts = {};
+                const counts = {};
                 list.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
                 const sortedIds = this.sortCardIdsByGrade(Object.keys(counts));
-                for (let id of sortedIds) {
+                for (const id of sortedIds) {
                     const data = this.getCardData(id);
                     if (!data) continue;
                     const el = document.createElement('div');
                     el.className = `card-item ${data.grade}`;
-                    el.innerHTML = `<div class="portrait"><img src="${data.name}.png" onerror="this.style.display='none'"></div><div>${data.name} (x${counts[id]})</div>`;
+                    el.appendChild(ImageAssets.createPortrait(data));
+                    const label = document.createElement('div');
+                    label.textContent = `${data.name} (x${counts[id]})`;
+                    el.appendChild(label);
                     el.onclick = () => clickHandler(id);
                     box.appendChild(el);
                 }
@@ -3566,7 +3768,7 @@
                 const data = this.getCardData(id);
                 if (!data) return;
                 document.getElementById('md-name').innerText = data.name;
-                document.getElementById('md-img').src = `${data.name}.png`;
+                ImageAssets.load(document.getElementById('md-img'), data);
                 document.getElementById('md-grade').className = data.grade;
                 document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
                 document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
@@ -3613,7 +3815,8 @@
                 this.toMenu();
             },
 
-            // --- Battle Logic Start ---
+            // --- Battle compatibility adapters ---
+            // Keep existing HTML/console entrypoints stable; add new battle rules in BattleRuntime.
 
             startBattleInit() {
                 return BattleRuntime.startBattleInit(this);
@@ -3714,8 +3917,7 @@
                 if (p && !p.isDead) {
                     document.getElementById('p-name').innerText = p.name;
                     const pImg = document.getElementById('p-img');
-                    pImg.src = `${p.name}.png`;
-                    pImg.style.display = 'block';
+                    ImageAssets.load(pImg, p);
 
                     let hpPct = (p.hp / p.maxHp) * 100;
                     document.getElementById('p-hp-bar').style.width = `${Math.max(0, hpPct)}%`;
@@ -3734,8 +3936,7 @@
                 document.getElementById('e-hp-bar').style.width = `${Math.max(0, eHpPct)}%`;
                 document.getElementById('e-name').innerText = e.name;
                 const eImg = document.getElementById('e-img');
-                eImg.src = `${e.name}.png`;
-                eImg.style.display = 'block';
+                ImageAssets.load(eImg, e);
 
                 let eBuffTxt = Object.keys(e.buffs).map(k => `${BUFF_NAMES[k] || k}${e.buffs[k] > 1 ? e.buffs[k] : ''}`).join(' ');
                 document.getElementById('e-buffs').innerText = eBuffTxt;
@@ -3765,12 +3966,14 @@
                         el.style.padding = '3px';
                         el.style.fontSize = '0.85rem';
                         el.innerHTML = `
-                            <img src="${card.name}.png" style="width:30px; height:40px; object-fit:cover; border:1px solid #777; border-radius:3px;" onerror="this.style.display='none'">
                             <div>
                                 <div style="font-weight:bold;">${card.name}</div>
                                 <div style="font-size:0.75rem; color:#ccc;">${card.role} / ${card.element}</div>
                             </div>
                         `;
+                        el.insertBefore(ImageAssets.createImage(card, {
+                            style: 'width:30px; height:40px; object-fit:cover; border:1px solid #777; border-radius:3px;'
+                        }), el.firstChild);
                         container.appendChild(el);
                     });
                 };
@@ -3860,12 +4063,14 @@
 
                     el.innerHTML = `
                 <div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:${color}">${card.name}</div>
-                <div class="portrait" style="flex:1; margin-bottom:5px; width:100%;"><img src="${card.name}.png" onerror="this.style.display='none'"></div>
                 <div style="display:flex; gap:2px; width:100%;">
                     <button onclick="event.stopPropagation(); RPG.showCardInfo('${card.id}')" style="flex:1; font-size:0.7rem; padding:3px; background:#444; color:#fff; border:1px solid #666;">상세</button>
                     <button onclick="event.stopPropagation(); RPG.selectDraftCard('${card.id}')" style="flex:2; font-size:0.7rem; padding:3px; background:#1b5e20; color:#fff; border:1px solid #4caf50;">선택</button>
                 </div>
             `;
+                    el.insertBefore(ImageAssets.createPortrait(card, {
+                        wrapperStyle: 'flex:1; margin-bottom:5px; width:100%;'
+                    }), el.children[1]);
                     grid.appendChild(el);
                 });
             },
@@ -4190,7 +4395,9 @@
 
             openInfoModal(title, content, onClose = null) {
                 document.getElementById('info-title').innerText = title;
-                document.getElementById('info-content').innerHTML = content;
+                const infoContent = document.getElementById('info-content');
+                infoContent.innerHTML = content;
+                ImageAssets.hydrate(infoContent);
                 document.getElementById('modal-info').classList.add('active');
                 this.tempOnClose = onClose;
             },
@@ -4204,7 +4411,9 @@
             },
 
             showConfirm(msg, onYes, onNo) {
-                document.getElementById('confirm-msg').innerHTML = msg;
+                const confirmMessage = document.getElementById('confirm-msg');
+                confirmMessage.innerHTML = msg;
+                ImageAssets.hydrate(confirmMessage);
                 const modal = document.getElementById('modal-confirm');
                 const btnYes = document.getElementById('confirm-yes');
                 const btnNo = document.getElementById('confirm-no');
@@ -4229,7 +4438,9 @@
                 this.showConfirm(msg1, () => {
                     // Step 1 Yes -> Open Step 2
                     setTimeout(() => {
-                        document.getElementById('confirm-msg').innerHTML = msg2;
+                        const confirmMessage = document.getElementById('confirm-msg');
+                        confirmMessage.innerHTML = msg2;
+                        ImageAssets.hydrate(confirmMessage);
                         const modal = document.getElementById('modal-confirm');
                         const btnYes = document.getElementById('confirm-yes');
                         const btnNo = document.getElementById('confirm-no');
@@ -4490,17 +4701,6 @@
                 }
             },
 
-            changeLumiModel(model) {
-                LumiQuestionRuntime.setSelectedModel(model);
-                this.updateLumiModelButtons();
-                const session = this.getActiveLumiChatSession();
-                if (session && session.inFlight) {
-                    this.setLumiChatStatus('모델 변경은 다음 질문부터 적용돼. 지금 응답에 적용하려면 취소 후 다시 시도해줘.');
-                } else {
-                    this.setLumiChatStatus('');
-                }
-            },
-
             toggleLumiChatModel() {
                 LumiQuestionRuntime.cycleSelectedModel();
                 this.updateLumiModelButtons();
@@ -4514,8 +4714,9 @@
                     return;
                 }
 
-                // [버그수정] global이 아직 디스크에서 로드되지 않았으면 먼저 로드
-                if (!this._globalLoaded) this.loadGlobalData();
+                // Search preference belongs to global save data, so load it before mutation.
+                if (!this._globalLoaded && !this.loadGlobalData()) return;
+                if (this._globalStorageBroken) return;
 
                 const nextEnabled = !(this.global.lumiSearchEnabled !== false);
                 this.global.lumiSearchEnabled = nextEnabled;
@@ -4787,7 +4988,7 @@
                         this.openInfoModal("루미의 깜짝 선물!",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448aff;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 형아! 공부하느라 고생했어! (헤헤)<br>이거 줄게, 받아!<br><br>
                                 <b style="color:#ffd700; font-size:1.2rem;">[티켓 1장 획득]</b><br>
@@ -5315,14 +5516,14 @@
                 const hub = document.getElementById('toeic-review-hub');
                 hub.innerHTML = '';
                 hub.style.display = 'flex';
-                hub.style.flexDirection = 'column'; // Vertical list as per request (Part 5 is 5 buttons)
+                hub.style.flexDirection = 'column'; // Part 5 renders one question button per row.
 
                 // Update Title
                 let typeName = "문제";
                 if (set.type === 'part5') typeName = "파트5 문제";
                 else if (set.type === 'part6') typeName = "파트6 문제";
                 else if (set.type === 'part7') typeName = "파트7 문제";
-                // Force simplified title for review, especially Part 5 as requested
+                // Keep the review title shorter than the in-progress practice title.
                 document.getElementById('toeic-title').innerText = `${typeName} (리뷰)`;
 
                 // 1. Passage Button (Part 6/7 only)
@@ -5460,7 +5661,7 @@
                 this.showConfirm(
                     `<div style="text-align:center;">
                         <div class="portrait" style="width:80px; height:106px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                            <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                            <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                         </div>
                         <b style="color:#ff80ab;">루미의 보너스 데이트 신청!</b><br><br>
                         (헤헤) 형아~ 퀴즈 열심히 푸느라 고생했어!<br>
@@ -5625,7 +5826,7 @@
                     this.openInfoModal("💕 비밀 데이트 종료",
                         `<div style="text-align:center;">
                             <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                             </div>
                             루미와의 특별한 비밀 데이트가 끝났어요!<br><br>
                             <b style="color:#ffd700; font-size:1.2rem;">🎴 이벤트 카드 획득: ${cardName}</b><br>
@@ -5646,7 +5847,7 @@
                         this.openInfoModal("💕 데이트 종료",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 루미와의 즐거운 데이트가 끝났어요!<br><br>
                                 <span style="color:#ff80ab;">(헤헤) 형아... 다음에는 특별한 데이트를 준비해둘게!</span><br>
@@ -5659,7 +5860,7 @@
                         this.openInfoModal("💕 데이트 종료",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 루미와의 즐거운 데이트가 끝났어요!<br><br>
                                 <span style="color:#ff80ab;">(뿌듯) 형아, 오늘 너무 재밌었어! 또 데이트하자!</span><br><br>
@@ -5671,10 +5872,11 @@
             },
         };
 
-        // Use DOMContentLoaded instead of 'load' to avoid being blocked by
-        // missing image resources (e.g., 루미.png). DOMContentLoaded fires after
-        // HTML parsing and deferred scripts complete, but before images load.
+        // DOMContentLoaded is not blocked by missing images. The sequential
+        // script loader may still be running, so waitForInitialDataLoad also
+        // waits for window._scriptLoadComplete before enabling any button.
         document.addEventListener('DOMContentLoaded', () => {
+            ImageAssets.hydrate(document);
             RPG.waitForInitialDataLoad();
         });
     </script>
@@ -5745,7 +5947,7 @@
                 <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
 
                 <div class="portrait" style="width: 80px; height: 106px; border-color: #ffd700; margin: 0 auto 12px auto; flex-shrink: 0;">
-                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                 </div>
 
                 <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>

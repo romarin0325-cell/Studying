@@ -2,7 +2,7 @@
  * @file data.js
  * @module GameData
  * @description
- * Contains static data definitions for cards, enemies, synergy types, and artifacts.
+ * Contains static data definitions for cards, enemies, and their skill/trait schemas.
  * Acts as the read-only dictionary for game content.
  * 
  * Role guide:
@@ -916,7 +916,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'guardian', name: '가디언', grade: 'epic', element: 'nature', role: 'balancer', unlockSource: 'hidden',
         stats: { hp: 410, atk: 110, matk: 65, def: 70, mdef: 75 },
-        trait: { type: 'guardian_hidden_trait', val: 30, guardReduction: 0.75, desc: '선봉 배치 시 공격력 30% 증가 / 덱 전체 가드 피해 감소율 75%로 강화' },
+        trait: { type: 'guardian_hidden_trait', val: 30, guardReduction: 0.75, desc: '선봉 배치 시 공격력 30% 증가 / 덱 전체의 [가드] 스킬 피해 감소율을 75%로 강화' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '배틀필드', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
@@ -1613,7 +1613,6 @@ const ENEMIES = [
         stats: { hp: 1400, atk: 110, matk: 110, def: 100, mdef: 100 },
         skills: [
             { name: '다크니스', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법 피해', effects: [] },
-            { name: '데스핸드', type: 'phy', rate: 0.0, val: 2.0, desc: '기본 2배 (디버프 비례)', effects: [] },
             { name: '제노사이드', type: 'phy', rate: 0.0, val: 3.5, desc: '7/14턴 3.5배 물리', effects: [] }
         ]
     },
@@ -1709,7 +1708,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
-            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
+            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타율 +40%p (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
         ]
     },
     {

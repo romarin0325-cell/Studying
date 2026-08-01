@@ -2,12 +2,12 @@
  * @file rpg_features.js
  * @module RPGFeatures
  * @description
- * Contains the core UI and logic for all RPG out-of-battle features.
+ * Contains state rules and orchestration for RPG features outside battle.
  * Responsibilities include:
  * - Managing specific game modes (Endless, Chaos, Draft, Dream Corridor)
- * - Handling events, shops, gacha, and inventory/deck management UI
+ * - Handling events, shops, gacha, and inventory/deck workflows
  * - Mission progression and rewards processing
- * - Central state loop (menu navigation)
+ * - Run/global save lifecycle (mission DOM rendering stays in MissionView)
  */
 (function () {
     const SPECIAL_CARD_GROUPS = [
@@ -93,10 +93,10 @@
      * @returns {boolean}
      */
     validateGlobalData(data) {
-        if (!data || typeof data !== 'object') return false;
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
         if (!Array.isArray(data.unlocked_bonus_cards)) return false;
         if (!Array.isArray(data.unlocked_modes)) return false;
-        if (!data.achievements || typeof data.achievements !== 'object') return false;
+        if (!data.achievements || typeof data.achievements !== 'object' || Array.isArray(data.achievements)) return false;
         return true;
     },
 
@@ -107,9 +107,13 @@
     _tryRestoreFromBackup() {
         const backupResult = Storage.loadDetailed(Storage.keys.GLOBAL + '_backup');
         if (backupResult.ok && this.validateGlobalData(backupResult.data)) {
+            const restoredGlobal = { ...this.global, ...backupResult.data };
+            if (!Storage.save(Storage.keys.GLOBAL, restoredGlobal)) {
+                console.error('[RPG] GLOBAL backup was valid but could not be restored to primary storage');
+                return false;
+            }
             console.warn('[RPG] Restored GLOBAL from backup');
-            this.global = { ...this.global, ...backupResult.data };
-            Storage.save(Storage.keys.GLOBAL, this.global);
+            this.global = restoredGlobal;
             this.showAlert('⚠️ 해금 데이터를 백업에서 복구했습니다.\n일부 최근 진행이 누락될 수 있습니다.');
             return true;
         }
@@ -117,6 +121,8 @@
     },
 
     loadGlobalData() {
+        this._globalLoaded = false;
+        this._globalStorageBroken = false;
         const result = Storage.loadDetailed(Storage.keys.GLOBAL);
 
         if (result.ok) {
@@ -128,30 +134,23 @@
                     this._globalStorageBroken = true;
                     this.showAlert('⚠️ 해금 데이터가 손상되었습니다.\n자동 초기화가 차단되었습니다.\n복구/백업을 확인해주세요.');
                     this._globalLoaded = true;
-                    return;
+                    return false;
                 }
             }
         } else if (result.reason === 'parse_error') {
             console.error('[RPG] GLOBAL parse error detected!');
             // Preserve corrupted raw data for forensics
-            try {
-                localStorage.setItem(
-                    Storage.keys.GLOBAL + '_corrupt_' + Date.now(),
-                    result.raw || ''
-                );
-            } catch (e) { /* quota — ignore */ }
+            Storage.setRaw(Storage.keys.GLOBAL + '_corrupt_' + Date.now(), result.raw || '');
             if (!this._tryRestoreFromBackup()) {
                 this._globalStorageBroken = true;
                 this.showAlert('⚠️ 해금 데이터가 손상되었습니다.\n자동 초기화가 차단되었습니다.\n복구/백업을 확인해주세요.');
                 this._globalLoaded = true;
-                return;
+                return false;
             }
         }
         // reason === 'missing': first run, use defaults (normal)
 
         this._globalLoaded = true;
-
-        if (this._globalStorageBroken) return;
 
         const changedBonusCards = this.ensureDefaultUnlockedBonusCards();
         const changedDivineArtifacts = this.ensureDivineArtifactState();
@@ -160,10 +159,11 @@
         const changed = changedBonusCards || changedDivineArtifacts || changedTicketState || changedSpecialData;
         this.ensureBonusPoolPresetState();
         if (changed) this.saveGlobalData();
+        return true;
     },
 
     saveGlobalData() {
-        // Block save if global was never loaded from disk (primary bug fix)
+        // Prevent in-memory defaults from overwriting disk data before the first load.
         if (!this._globalLoaded) {
             console.warn('[RPG] saveGlobalData blocked: global not yet loaded from disk');
             return false;
@@ -310,8 +310,7 @@
 
         // 토끼 변주는 2027-01-01 이후에만 보상 풀에 포함
         const RABBIT_RELEASE_DATE = '2027-01-01';
-        const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const todayStr = this.getCurrentDateKey();
         const rabbitVariantIds = new Set([
             'snow_rabbit_valentine', 'night_rabbit_valentine', 'silver_rabbit_valentine',
             'snow_rabbit_halloween', 'night_rabbit_halloween', 'silver_rabbit_halloween',
@@ -447,9 +446,9 @@
         this.saveGlobalData();
 
         if (typeof this.updateSpecialCardEditorButton === 'function') this.updateSpecialCardEditorButton();
-        if (typeof this.renderMonthlyMission === 'function') this.renderMonthlyMission();
+        if (typeof this.renderMissionView === 'function') this.renderMissionView();
         if (typeof this.renderMissionHub === 'function') this.renderMissionHub();
-        if (typeof this.closeMonthlyMission === 'function') this.closeMonthlyMission();
+        if (typeof this.closeMissionView === 'function') this.closeMissionView();
 
         this.openInfoModal('스페셜 미션 보상', `<b>${reward.name}</b> 스페셜 카드를 획득했습니다!`);
     },
@@ -482,8 +481,7 @@
 
 
     getReleasedStandardBonusCards(date = new Date()) {
-        const today = date;
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const todayStr = this.getCurrentDateKey(date);
         return this.getAllStandardBonusCards().filter(card => {
             if (!card.releaseDate) return true;
             return card.releaseDate <= todayStr;
@@ -567,12 +565,11 @@
         start.setDate(localDate.getDate() - diffToMonday);
         const end = new Date(start);
         end.setDate(start.getDate() + 6);
-        const format = value => `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
 
         return {
-            key: format(start),
-            label: `${format(start)} ~ ${format(end)}`,
-            todayKey: format(localDate)
+            key: this.getCurrentDateKey(start),
+            label: `${this.getCurrentDateKey(start)} ~ ${this.getCurrentDateKey(end)}`,
+            todayKey: this.getCurrentDateKey(localDate)
         };
     },
 
@@ -694,7 +691,7 @@
         monthly.claimed = true;
         this.saveGlobalData();
         this.updateBonusPoolEditorButton();
-        this.renderMonthlyMission();
+        this.renderMissionView();
         this.openInfoModal('월간 미션 보상', `<b>${reward.name}</b> 이(가) 보너스 카드로 해금되었습니다!`);
     },
 
@@ -708,7 +705,7 @@
         weekly.claimed = true;
         this.global.chaosTickets = (this.global.chaosTickets || 0) + rewardAmount;
         this.saveGlobalData();
-        this.renderMonthlyMission();
+        this.renderMissionView();
         this.openInfoModal('주간 미션 보상', `카오스 티켓 ${rewardAmount}장을 획득했습니다!`);
     },
 
@@ -1208,39 +1205,60 @@
             return; // 게임 진입 차단
         }
 
-        this.loadGlobalData();
+        if (!this.loadGlobalData()) return;
         this.ensureMonthlyMissionState();
         this.ensureWeeklyMissionState();
         this.ensureSpecialMissionState();
         this.trackDailyAttendance();
 
         if (mode === 'load') {
-            const save = Storage.load(Storage.keys.SAVE);
-            if (save) {
-                this.state = { ...this.state, ...save };
-                if (this.state.chaosBlessingUses === undefined) this.state.chaosBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
-                if (this.state.greatSageBlessingUses === undefined) this.state.greatSageBlessingUses = GAME_CONSTANTS.DEFAULT_BLESSING_USES;
-                if (!this.state.chaosBuffs) this.state.chaosBuffs = [];
-                if (!this.state.activeChaosBlessing) this.state.activeChaosBlessing = [];
-                if (!this.state.activeSageBlessing) this.state.activeSageBlessing = [];
-                if (!this.state.tutoredItems) this.state.tutoredItems = [];
-                if (!this.state.mode) this.state.mode = 'origin';
-                if (!this.state.quiz_stats) this.state.quiz_stats = { correct: 0, total: 0 };
-                if (!this.state.artifacts) this.state.artifacts = [];
-                if (!this.state.artifactReserveDraft) {
-                    this.state.artifactReserveDraft = { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] };
+            const saveResult = Storage.loadDetailed(Storage.keys.SAVE);
+            if (!saveResult.ok) {
+                if (saveResult.reason === 'parse_error') {
+                    const hasRawSave = typeof saveResult.raw === 'string';
+                    const backupSaved = hasRawSave && Storage.setRaw(
+                        `${Storage.keys.SAVE}_corrupt_${Date.now()}`,
+                        saveResult.raw
+                    );
+                    const backupMessage = backupSaved
+                        ? '<br>복구용 사본을 별도 키에도 보관했습니다.'
+                        : '';
+                    this.showAlert(
+                        `저장 데이터가 손상되어 불러오기를 중단했습니다.<br>`
+                        + `원본 저장은 변경하지 않았습니다.${backupMessage}<br>`
+                        + '새 게임을 시작하려면 타이틀에서 [새로하기]를 직접 선택해주세요.'
+                    );
+                    return;
                 }
-                if (!Array.isArray(this.state.artifactReservePool)) this.state.artifactReservePool = [];
-                if (this.state.pendingEnemyId === undefined) this.state.pendingEnemyId = null;
-                if (this.state.pendingEnemyStage === undefined) this.state.pendingEnemyStage = null;
-                if (this.state.puzzlePiecesClaimed === undefined) this.state.puzzlePiecesClaimed = false;
-                this.state.activeBonusPoolIds = this.normalizeActiveBonusPoolIds(this.state.activeBonusPoolIds);
-                this.state.activeSpecialCardSelections = this.normalizeSpecialCardSelections(this.state.activeSpecialCardSelections || this.global.activeSpecialCardSelections);
-                if (this.state.mode === 'dream_corridor' && this.state.dreamCorridorLives === undefined) this.state.dreamCorridorLives = 3;
-                this.loadStudyProgress();
-                this.showAlert("불러오기 완료");
-                this.toMenu();
-            } else { this.showAlert("저장된 데이터가 없습니다. 새로 시작합니다."); this.openTypeSelect(); }
+
+                this.showAlert('저장된 데이터가 없습니다. 새로 시작합니다.');
+                this.openTypeSelect();
+                return;
+            }
+
+            const migratedState = SaveDataMigrator.normalizeRunState(saveResult.data, this.state, {
+                defaultBlessingUses: GAME_CONSTANTS.DEFAULT_BLESSING_USES,
+                defaultDraftRerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS,
+                normalizeBonusPoolIds: ids => this.normalizeActiveBonusPoolIds(ids),
+                normalizeSpecialSelections: selections => this.normalizeSpecialCardSelections(selections),
+                defaultSpecialSelections: this.global.activeSpecialCardSelections
+            });
+            if (!migratedState) {
+                const futureVersion = SaveDataMigrator.isFutureVersion(saveResult.data);
+                const message = futureVersion
+                    ? '이 저장 데이터는 더 최신 버전에서 생성되어 현재 버전으로 불러올 수 없습니다.'
+                    : '저장 데이터 형식이 올바르지 않아 불러오기를 중단했습니다.';
+                this.showAlert(
+                    `${message}<br>기존 데이터는 변경하지 않았습니다.<br>`
+                    + '새 게임을 시작하려면 타이틀에서 [새로하기]를 직접 선택해주세요.'
+                );
+                return;
+            }
+
+            this.state = migratedState;
+            this.loadStudyProgress();
+            this.showAlert('불러오기 완료');
+            this.toMenu();
         } else {
             // New Game Logic: Show Type Select
             this.openTypeSelect();
@@ -1249,8 +1267,7 @@
 
 
     initNewGame(mode = 'origin') {
-        // Record saving logic (Only for Origin mode as per request "Record check only for Origin")
-        // Check previous state
+        // Origin records are closed when the next run begins; other modes close on defeat.
         if (this.state.mode === 'origin' && this.state.enemyScale > 0) {
             this.saveRecord();
         }
@@ -1345,8 +1362,7 @@
 
 
     saveGame(showMessage = true) {
-        const saveState = { ...this.state };
-        delete saveState.currentToeicSession;
+        const saveState = SaveDataMigrator.serializeRunState(this.state);
 
         const saveOk = Storage.save(Storage.keys.SAVE, saveState);
         this.saveStudyProgress();
@@ -1892,7 +1908,7 @@
         if (this.battle) this.battle.isFinished = true;
 
         let transMsg = this.cleanupTranscendenceCards();
-        // No saveRecord here (User request: only on New Game)
+        // Origin records are written by initNewGame so returning to title cannot duplicate them.
 
         if (this.isChaosPoolMode() || this.state.mode === 'draft') {
             this.saveRecord();
@@ -1933,11 +1949,6 @@
         if (deadMsg) msg += "<br><br>" + deadMsg;
         if (transMsg) msg += transMsg;
         this.openInfoModal("전투 결과", msg, () => this.toMenu());
-    },
-
-
-    getEffectiveStats(char, fieldBuffs) {
-        return Logic.calculateStats(char, fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
     },
 
 
@@ -2047,6 +2058,11 @@
 
     window.RPGFeatureModules = {
         install(rpg) {
+            const collisions = Object.keys(RPGFeatureMethods)
+                .filter(name => Object.prototype.hasOwnProperty.call(rpg, name));
+            if (collisions.length > 0) {
+                throw new Error(`RPG feature method collision: ${collisions.join(', ')}`);
+            }
             Object.assign(rpg, RPGFeatureMethods);
         }
     };
