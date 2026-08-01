@@ -42,7 +42,6 @@ function run() {
     'activeBonusPoolPresetIndex:',
     "name: 'RPGFeatureModules'",
     'id="screen-artifact-reserve-draft"',
-    'id="menu-artifact-area"',
     'id="artifact-check-title"',
     "id: 'artifact_chaos'",
     "id: 'artifact_reserve'",

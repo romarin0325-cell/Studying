@@ -2,9 +2,10 @@
  * @file logic.js
  * @module GameLogic
  * @description
- * Game utilities, central damage calculation, storage layer, and constants for Card RPG.
+ * Game utilities, save compatibility, central damage calculation, and constants for Card RPG.
  * Provides:
  * - Storage: Centralized localStorage abstraction with safe JSON parsing
+ * - SaveDataMigrator: Backward-compatible run-save normalization/serialization
  * - GAME_CONSTANTS: Named constants replacing magic numbers
  * - Logic: Core calculation engine (Damage, Stats, Death/OnHit traits, SideEffects)
  * - GameUtils: Deck helpers, pool selection, gacha tables
@@ -20,7 +21,9 @@ const Storage = {
         COLLOCATION: 'cardRpgCollocation',
         COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
         API_KEY: 'cardRpgApiKey',
-        RECORDS: 'cardRpgRecords'
+        RECORDS: 'cardRpgRecords',
+        FORTUNE_LAST_USED: 'fortuneCookieLastUsedDate',
+        FORTUNE_LAST_RESULT: 'fortuneCookieLastResult'
     },
 
     /**
@@ -124,7 +127,13 @@ const Storage = {
      * @param {string} key
      */
     remove(key) {
-        localStorage.removeItem(key);
+        try {
+            localStorage.removeItem(key);
+            return true;
+        } catch (e) {
+            console.error(`[Storage] Remove error for key "${key}":`, e);
+            return false;
+        }
     },
 
     /**
@@ -133,7 +142,12 @@ const Storage = {
      * @returns {string|null}
      */
     getRaw(key) {
-        return localStorage.getItem(key);
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            console.error(`[Storage] Read error for key "${key}":`, e);
+            return null;
+        }
     },
 
     /**
@@ -142,9 +156,164 @@ const Storage = {
      * @param {string} value
      */
     setRaw(key, value) {
-        localStorage.setItem(key, value);
+        try {
+            localStorage.setItem(key, value);
+            return true;
+        } catch (e) {
+            console.error(`[Storage] Write error for key "${key}":`, e);
+            return false;
+        }
     }
 };
+
+// ─── Save Data Compatibility ─────────────────────────────────────────────────
+
+/**
+ * Normalizes persisted run data without renaming or removing existing fields.
+ *
+ * Keep migrations here so beginners can find every save-compatibility rule in
+ * one place. Unknown properties inside supported schemas are preserved, future
+ * schema versions are rejected, and UI-only state is removed only on save.
+ */
+class SaveDataMigrator {
+    static getSchemaVersion(rawSave) {
+        if (!rawSave || rawSave.saveSchemaVersion === undefined) return 0;
+        const version = rawSave.saveSchemaVersion;
+        return Number.isInteger(version) && version >= 0 ? version : null;
+    }
+
+    static isFutureVersion(rawSave) {
+        const version = SaveDataMigrator.getSchemaVersion(rawSave);
+        return version !== null && version > SaveDataMigrator.CURRENT_VERSION;
+    }
+
+    static mergeObjectDefaults(value, defaults, arrayKeys = []) {
+        const isObject = value && typeof value === 'object' && !Array.isArray(value);
+        const normalized = isObject ? { ...defaults, ...value } : { ...defaults };
+        arrayKeys.forEach(key => {
+            if (!Array.isArray(normalized[key])) normalized[key] = [];
+        });
+        return normalized;
+    }
+
+    static normalizeRunState(rawSave, defaultState, options = {}) {
+        if (!rawSave || typeof rawSave !== 'object' || Array.isArray(rawSave)) return null;
+        const savedVersion = SaveDataMigrator.getSchemaVersion(rawSave);
+        if (savedVersion === null || savedVersion > SaveDataMigrator.CURRENT_VERSION) return null;
+
+        const state = { ...(defaultState || {}), ...rawSave };
+        const defaultBlessingUses = Number.isFinite(options.defaultBlessingUses)
+            ? options.defaultBlessingUses
+            : 3;
+        const defaultDraftRerolls = Number.isFinite(options.defaultDraftRerolls)
+            ? options.defaultDraftRerolls
+            : 3;
+        const ensureArray = key => {
+            if (!Array.isArray(state[key])) state[key] = [];
+        };
+
+        [
+            'inventory',
+            'chaosBuffs',
+            'activeChaosBlessing',
+            'activeSageBlessing',
+            'tutoredItems',
+            'artifacts',
+            'artifactReservePool',
+            'activeBonusPoolIds',
+            'activeTranscendenceCards',
+            'activeEventCards',
+            'chaosPool',
+            'factoryPool',
+            'completedToeicSets',
+            'wrongWords',
+            'wrongCollocations'
+        ].forEach(ensureArray);
+
+        if (!Array.isArray(state.deck)) state.deck = [null, null, null];
+        if (!state.mode) state.mode = 'origin';
+        if (!state.gameType) state.gameType = 'challenge';
+        if (typeof state.hardMode !== 'boolean') state.hardMode = false;
+        const savedQuizStats = state.quiz_stats;
+        const validQuizStats = savedQuizStats
+            && typeof savedQuizStats === 'object'
+            && !Array.isArray(savedQuizStats);
+        const normalizeQuizCount = value => {
+            const count = Number(value);
+            return Number.isFinite(count) && count >= 0 ? Math.floor(count) : 0;
+        };
+        state.quiz_stats = validQuizStats
+            ? {
+                ...savedQuizStats,
+                correct: normalizeQuizCount(savedQuizStats.correct),
+                total: normalizeQuizCount(savedQuizStats.total)
+            }
+            : { correct: 0, total: 0 };
+        if (!state.wrongCollocationDetails || typeof state.wrongCollocationDetails !== 'object'
+            || Array.isArray(state.wrongCollocationDetails)) {
+            state.wrongCollocationDetails = {};
+        }
+        if (state.chaosBlessingUses === undefined) state.chaosBlessingUses = defaultBlessingUses;
+        if (state.greatSageBlessingUses === undefined) state.greatSageBlessingUses = defaultBlessingUses;
+        if (state.pendingEnemyId === undefined) state.pendingEnemyId = null;
+        if (state.pendingEnemyStage === undefined) state.pendingEnemyStage = null;
+        if (state.puzzlePiecesClaimed === undefined) state.puzzlePiecesClaimed = false;
+
+        state.draft = SaveDataMigrator.mergeObjectDefaults(state.draft, {
+            active: false,
+            round: 0,
+            rerolls: defaultDraftRerolls,
+            currentOptions: []
+        }, ['currentOptions']);
+
+        state.factoryDraft = SaveDataMigrator.mergeObjectDefaults(state.factoryDraft, {
+            active: false,
+            round: 1,
+            maxRounds: 10,
+            pool: [],
+            seenCards: [],
+            currentBundles: []
+        }, ['pool', 'seenCards', 'currentBundles']);
+
+        state.artifactReserveDraft = SaveDataMigrator.mergeObjectDefaults(state.artifactReserveDraft, {
+            active: false,
+            round: 1,
+            maxRounds: 4,
+            pool: [],
+            currentBundles: []
+        }, ['pool', 'currentBundles']);
+
+        if (typeof options.normalizeBonusPoolIds === 'function') {
+            state.activeBonusPoolIds = options.normalizeBonusPoolIds(state.activeBonusPoolIds);
+        }
+        if (typeof options.normalizeSpecialSelections === 'function') {
+            state.activeSpecialCardSelections = options.normalizeSpecialSelections(
+                state.activeSpecialCardSelections || options.defaultSpecialSelections || {}
+            );
+        } else if (!state.activeSpecialCardSelections || typeof state.activeSpecialCardSelections !== 'object') {
+            state.activeSpecialCardSelections = {};
+        }
+
+        if (state.mode === 'dream_corridor' && state.dreamCorridorLives === undefined) {
+            state.dreamCorridorLives = 3;
+        }
+
+        state.saveSchemaVersion = SaveDataMigrator.CURRENT_VERSION;
+        return state;
+    }
+
+    static serializeRunState(state) {
+        const saveState = { ...(state || {}) };
+        delete saveState.currentToeicSession;
+        const stateVersion = SaveDataMigrator.getSchemaVersion(saveState);
+        saveState.saveSchemaVersion = stateVersion === null
+            ? SaveDataMigrator.CURRENT_VERSION
+            : Math.max(stateVersion, SaveDataMigrator.CURRENT_VERSION);
+        return saveState;
+    }
+}
+
+SaveDataMigrator.CURRENT_VERSION = 1;
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
 
@@ -286,15 +455,7 @@ window.GAME_CONSTANTS = {
     WEEKLY_CHAOS_TICKET_REWARD: 3,
     CHAOS_TICKET_VERSION: 2,
 
-    // Battle Settings
-    BATTLE: {
-        MANA_GAIN_TURN: 20,
-        MANA_GAIN_HIT: 10,
-        MANA_GAIN_ATTACK: 10,
-        TRAIT_TRIGGER_CHANCE: 30 // For some traits
-    },
-
-    // Field Buff Stats (Moved from logic.js)
+    // Field buff stat contributions. Runtime multipliers are applied elsewhere.
     FIELD_BUFF_STATS: {
         'sun_bless': { atk: 0.3, matk: 0.3 },
         'moon_bless': { matk: 0.3, evasion: 15 },
@@ -481,10 +642,6 @@ const GameUtils = {
             cachedArtifactById = new Map(ARTIFACT_LIST.map(artifact => [artifact.id, artifact]));
         }
         return cachedArtifactById.get(id) || null;
-    },
-
-    getDivineArtifactUnlocks() {
-        return DIVINE_ARTIFACT_UNLOCKS.map(artifact => ({ ...artifact }));
     },
 
     getDivineArtifactUnlockByBossId(bossId) {
@@ -909,9 +1066,7 @@ const GameUtils = {
 
 
 
-// FIELD_BUFF_STATS moved to GAME_CONSTANTS in game.js
-
-// Helper for Buff Names (Moved out to be accessible)
+// Shared display-name lookup used by damage and side-effect logs.
 function getBuffName(key) {
     if (typeof BUFF_NAMES !== 'undefined') {
         return BUFF_NAMES[key] || key;
@@ -937,6 +1092,11 @@ function isFieldBuffImmune(char) {
         char.proto.trait &&
         char.proto.trait.type === 'field_buff_immune'
     );
+}
+
+// Both IDs remain valid aliases for compatibility with existing data inspection tools.
+function isBehemothTraitType(type) {
+    return type === 'behemoth_trait' || type === 'behemoth_liberated_trait';
 }
 
 function getEffectiveFieldBuffs(char, fieldBuffs) {
@@ -967,7 +1127,7 @@ function findDelayedSkillEffect(skill) {
     return skill.effects.find(eff => DELAYED_SKILL_EFFECT_TYPES.includes(eff.type)) || null;
 }
 
-function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
+function buildResolvedDelayedSkill(skill, delayedEff) {
     if (!skill || !delayedEff) return skill;
 
     if (delayedEff.type === 'delayed_turn_scale_attack') {
@@ -976,7 +1136,7 @@ function buildResolvedDelayedSkill(skill, delayedEff, currentTurn) {
             isActualDelayedTrigger: true,
             effects: [
                 ...(skill.effects || []).filter(effect => effect !== delayedEff),
-                { type: 'dmg_boost_turn_scale', scale: delayedEff.scale, startTurn: currentTurn }
+                { type: 'dmg_boost_turn_scale', scale: delayedEff.scale }
             ]
         };
     }
@@ -1115,11 +1275,6 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult *= eff.mult;
             matched = true;
             if (!eff.customLog) ctx.logFn(`[특성] ${getBuffName(eff.debuff)} 대상 추가 피해! (배율 x${eff.mult})`);
-        }
-        else if (eff.condition === 'synergy_active' && ctx.activeTraits.includes(eff.trait)) {
-            ctx.mult *= eff.mult;
-            matched = true;
-            if (!eff.customLog) ctx.logFn(`[시너지] 조건 만족! 위력 ${eff.mult}배 증가!`);
         }
         else if (
             eff.condition === 'source_trait_active' &&
@@ -1271,21 +1426,6 @@ const DAMAGE_EFFECT_HANDLERS = {
         ctx.mult = eff.min + Math.floor(Math.random() * (eff.max - eff.min + 1));
         ctx.logFn(`무작위 위력! x${ctx.mult.toFixed(1)}`);
     },
-    'field_buff_combo_dmg': (ctx, eff) => {
-        let buffs = ctx.sourceFieldBuffs.map(b => b.name);
-        let hasSun = buffs.includes('sun_bless');
-        let hasMoon = buffs.includes('moon_bless');
-
-        if (hasSun) {
-            let count = ctx.sourceFieldBuffs.length;
-            ctx.mult += count * 1.0;
-            ctx.logFn(`태양의 축복: 필드버프 ${count}개! 배율 +${count.toFixed(1)}`);
-        }
-        if (hasMoon) {
-            ctx.ignoreMdefRate = (ctx.ignoreMdefRate || 0) + 0.2;
-            ctx.logFn("달의 축복: 마법방어력 20% 관통!");
-        }
-    },
     'count_deck_attr_dmg': (ctx, eff) => {
         if (ctx.deck) {
             const deckCtx = GameUtils.buildDeckContext(ctx.deck);
@@ -1294,10 +1434,7 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.logFn(`덱 속성 ${count}종! 위력 +${count.toFixed(1)}배!`);
         }
     },
-    'dream_form_execute': () => { },
     'turn_modulo_dmg': (ctx, eff) => {
-        // Need current turn. ctx does not have turn.
-        // Add turn to ctx in calculateDamage.
         if (ctx.turn && ctx.turn % eff.mod === 0) {
             ctx.mult *= eff.mult;
             ctx.logFn(`${eff.mod}의 배수 턴(${ctx.turn})! 위력 ${eff.mult}배!`);
@@ -1384,10 +1521,12 @@ const StatusRules = {
 const SideEffects = {
     handlers: {
         'buff': (ctx, eff) => {
-            ctx.source.buffs[eff.id] = (eff.duration || 1);
-            if (eff.id === 'guard') {
-                const isBasicGuardSkill = ctx.skill && ctx.skill.name === '가드' && (eff.duration || 1) === 1;
-                ctx.source.guardEnhancedEligible = !!isBasicGuardSkill;
+            const duration = eff.duration || 1;
+            // Reapplying a shorter buff must not erase turns already earned.
+            ctx.source.buffs[eff.id] = Math.max(ctx.source.buffs[eff.id] || 0, duration);
+            if (eff.id === 'guard' && ctx.skill && ctx.skill.name === '가드') {
+                // Guardian strengthens only the exact skill named "가드".
+                ctx.source.guardEnhancedTurns = Math.max(ctx.source.guardEnhancedTurns || 0, duration);
             }
         },
         'debuff': (ctx, eff) => {
@@ -1423,13 +1562,6 @@ const SideEffects = {
                     }
                 }
             }
-        },
-        'heal_ratio': (ctx, eff) => {
-            const ratio = eff.ratio || eff.val || 0;
-            if (ratio <= 0) return;
-            const heal = Math.max(1, Math.floor(ctx.source.maxHp * ratio));
-            ctx.source.hp = Math.min(ctx.source.maxHp, ctx.source.hp + heal);
-            ctx.logFn(`HP ${heal} 회복!`);
         },
         'mana_restore': (ctx, eff) => {
             const amount = eff.val || eff.amount || 0;
@@ -1628,44 +1760,8 @@ const SideEffects = {
         'delayed_attack_field': (ctx, eff) => {
             if (eff.field) ctx.applyFieldBuff(eff.field);
         },
-        'delayed_attack_random_field': (ctx, eff) => {
-            // handled via buildResolvedDelayedSkill → random_field_buff
-        },
-        'delayed_attack_debuffs': (ctx, eff) => {
-            // handled via buildResolvedDelayedSkill → debuff effects
-        },
         'delayed_field_buffs': (ctx, eff) => {
             (eff.buffs || []).forEach(buffId => ctx.applyFieldBuff(buffId));
-        },
-        'delayed_turn_scale_attack': (ctx, eff) => {
-            const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
-            if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
-                ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
-                ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
-                return;
-            }
-
-            ctx.battle.delayedEffects.push({
-                turn: ctx.battle.turn + eff.turns,
-                source: ctx.source,
-                skill: resolvedSkill
-            });
-            ctx.logFn(`인과역전! ${eff.turns}턴 후 발동합니다!`);
-        },
-        'delayed_attack_debuff_scale': (ctx, eff) => {
-            const resolvedSkill = buildResolvedDelayedSkill(ctx.skill, eff, ctx.battle.turn);
-            if (ctx.activeTraits && ctx.activeTraits.includes('instant_delayed_skills')) {
-                ctx.logFn('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
-                ctx.executeSkill(ctx.source, ctx.target, resolvedSkill, true);
-                return;
-            }
-
-            ctx.battle.delayedEffects.push({
-                turn: ctx.battle.turn + eff.turns,
-                source: ctx.source,
-                skill: resolvedSkill
-            });
-            ctx.logFn(`제로그라비티! ${eff.turns}턴 후 발동합니다!`);
         },
         'random_skill_trigger_from_list': (ctx, eff) => {
             const triggerName = ctx.skill && ctx.skill.name ? ctx.skill.name : '데스티니룰렛';
@@ -1693,7 +1789,7 @@ const SideEffects = {
 
             if (skill) {
                 const delayedEff = findDelayedSkillEffect(skill);
-                const resolvedSkill = buildResolvedDelayedSkill(skill, delayedEff, ctx.battle.turn);
+                const resolvedSkill = buildResolvedDelayedSkill(skill, delayedEff);
 
                 if (delayedEff) {
                     ctx.logFn(`[${triggerName}] ${card.name}의 ${skill.name} 발동!`);
@@ -1712,13 +1808,6 @@ const SideEffects = {
                     ctx.logFn(`[${triggerName}] ${card.name}의 ${skill.name} 발동!`);
                     ctx.executeSkill(ctx.source, ctx.target, skill, true);
                 }
-            }
-        },
-        'apply_lumi_guard': (ctx, eff) => {
-            let buffs = ctx.battle.fieldBuffs.map(b => b.name);
-            if (buffs.includes('star_powder')) {
-                ctx.source.buffs['guard'] = 1;
-                ctx.logFn("스타파우더: 가드 효과(버프) 적용!");
             }
         },
         'random_field_buff_lumi': (ctx, eff) => {
@@ -1787,7 +1876,7 @@ const Logic = {
             matk: char.matk,
             def: char.def,
             mdef: char.mdef,
-            crit: (char.baseCrit || GAME_CONSTANTS.BASE_CRIT),
+            crit: Number.isFinite(char.baseCrit) ? char.baseCrit : GAME_CONSTANTS.BASE_CRIT,
             evasion: (char.baseEva || 0) + GAME_CONSTANTS.BASE_EVA_BONUS
         };
 
@@ -2009,12 +2098,15 @@ const Logic = {
         const sourceFieldBuffs = getEffectiveFieldBuffs(source, fieldBuffs);
         const targetFieldBuffs = getEffectiveFieldBuffs(target, fieldBuffs);
 
-        // 1. Critical
-        let isCrit = Math.random() * 100 < srcStats.crit;
-        if (skill.effects && skill.effects.some(e => e.type === 'force_crit')) isCrit = true;
-        // Check force_crit_chance
-        const forceCritChance = skill.effects ? skill.effects.find(e => e.type === 'force_crit_chance') : null;
-        if (forceCritChance && Math.random() * 100 < forceCritChance.val) isCrit = true;
+        // 1. Critical: chance modifiers are additive percentage points.
+        const effects = Array.isArray(skill.effects) ? skill.effects : [];
+        const alwaysCritical = effects.some(effect => effect.type === 'force_crit');
+        const criticalBonus = effects
+            .filter(effect => effect.type === 'force_crit_chance')
+            .reduce((sum, effect) => sum + (Number(effect.val) || 0), 0);
+        const criticalChance = Math.max(0, Math.min(100, srcStats.crit + criticalBonus));
+        const criticalRoll = Math.random() * 100;
+        let isCrit = alwaysCritical || criticalRoll < criticalChance;
 
         let critDmg = GAME_CONSTANTS.BASE_CRIT_MULT;
         const critBuffMult = ((mode === 'flood' && source.proto) ? 2.0 : 1.0)
@@ -2072,7 +2164,7 @@ const Logic = {
                     handler(ctx, eff);
                 } else {
                     // Fallback for types not in DAMAGE_EFFECT_HANDLERS (side effects)
-                    // Do nothing here, handled in RPG.applySkillEffects
+                    // Do nothing here; BattleRuntime.applySkillEffects handles it after damage.
                 }
             });
         }
@@ -2124,21 +2216,13 @@ const Logic = {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 디바인 3스택 이상 대상 추가 피해!");
             }
-            if (t.type === 'behemoth_trait' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
+            if (isBehemothTraitType(t.type) && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
-                logFn("[특성] 베히모스: 디버프 3개 이상 대상 파괴적 일격!");
-            }
-            if (t.type === 'cond_target_debuff_3_dmg' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
-                dmgBonus += (t.val - 1.0);
-                logFn("[특성] 심해의 주인: 적 디버프 3개 이상! 위력 폭발!");
+                logFn(`[특성] ${source.name}: 디버프 3개 이상 대상 파괴적 일격!`);
             }
             if (t.type === 'luna_jasmine_trait' && (ctx.baseTargetBuffs['divine'] || 0) >= 3) {
                 dmgBonus += (t.val - 1.0);
                 logFn("[특성] 루나&자스민: 디바인 3스택 이상! 위력 2배!");
-            }
-            if (t.type === 'behemoth_liberated_trait' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
-                dmgBonus += (t.val - 1.0);
-                logFn("[특성] 해방된 베히모스: 디버프 3개 이상! 파괴적 일격!");
             }
         }
 
@@ -2203,7 +2287,7 @@ const Logic = {
             logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
         }
 
-        // [추가] 신데렐라: 스택 비례 방어 무시
+        // Cinderella uses the target's pre-hit stack snapshot for penetration.
         if (t && t.type === 'ignore_def_mdef_by_stack') {
             let ignoreRate = 0;
             if (skill.type === 'phy' && ctx.baseTargetBuffs['burn']) {
@@ -2296,7 +2380,7 @@ const Logic = {
                 }
             });
 
-            // 2. 로그 출력 (버프 소모 제거 -> SideEffect로 이동)
+            // Consumption runs later in SideEffects; this block only reports the fused fields.
             logFn(`[꿈의형태] 필드 버프 ${ctx.baseFieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
         }
 
@@ -2312,8 +2396,8 @@ const Logic = {
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
 
         if (target.buffs.guard) {
-            const guardReduction = target.guardEnhancedEligible
-                ? (target.guardDamageReduction || 0.5)
+            const guardReduction = target.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
+                ? target.guardDamageReduction
                 : 0.5;
             finalDmg = Math.floor(finalDmg * (1 - guardReduction));
             logFn(`${target.name} 가드 성공! 피해 ${Math.round(guardReduction * 100)}% 감소.`);
@@ -2340,6 +2424,7 @@ const Logic = {
         'syn_water_3_ice_age':     { cond: d => d.countElement('water') >= 3,                     apply: () => {} },
         'syn_fire_3_crit':         { cond: d => d.countElement('fire') >= 3,                      apply: p => { p.baseCrit += 30; } },
         'syn_dark_3_matk':         { cond: d => d.countElement('dark') >= 3,                      apply: p => { p.matk *= 1.5; } },
+        // Legacy ID says "atk", but the established card description and behavior increase MATK.
         'syn_light_fire_atk':      { cond: d => d.hasElement('light') && d.hasElement('fire'),    apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
         'syn_light_dark_matk_mdef':{ cond: d => d.hasElement('light') && d.hasElement('dark'),    apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
         'syn_light_3_matk_mdef':   { cond: d => d.countElement('light') >= 3,                     apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
@@ -2351,7 +2436,6 @@ const Logic = {
         'syn_water_3_atk_matk':    { cond: d => d.countElement('water') >= 3,                     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
         'syn_fire_3_crit_burn':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.baseCrit += t.val; } },
         'syn_fire_3_atk_boost':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.atk *= (1 + t.val / 100); } },
-        'syn_dark_3_matk_boost':   { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
         'syn_dark_3_all_stats':    { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; p.def *= m; p.mdef *= m; } },
         'syn_dark_3_party_atk':    { cond: d => d.countElement('dark') >= 3,                      apply: () => {} },
         'syn_water_2_moon_twinkle':{ cond: d => d.countElement('water') >= 2,                     apply: () => {} },

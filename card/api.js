@@ -736,10 +736,6 @@ const LumiQuestionRuntime = {
         return this.searchEnabled;
     },
 
-    getSearchEnabled() {
-        return this.searchEnabled;
-    },
-
     getSearchButtonLabel(session = null) {
         if (session && session.enableSearch === false) {
             return '검색 OFF';

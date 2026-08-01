@@ -57,11 +57,15 @@ function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
         const duration = target.buffs[buffId];
         if (!duration) return;
 
+        if (buffId === 'guard' && target.guardEnhancedTurns > 0) {
+            if (target.guardEnhancedTurns > 1) target.guardEnhancedTurns--;
+            else delete target.guardEnhancedTurns;
+        }
+
         if (duration > 1) {
             target.buffs[buffId] = duration - 1;
         } else {
             delete target.buffs[buffId];
-            if (buffId === 'guard') delete target.guardEnhancedEligible;
         }
     });
 }
@@ -119,10 +123,6 @@ function buildBattleEnemy(rpg) {
         bonusRewardTickets: !suppressBossRewards && baseEnemy.hiddenBossFor && !baseEnemy.noBonusRewards ? 3 : 0,
         bonusTranscendenceReward: suppressBossRewards || baseEnemy.noBonusRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
     };
-
-    if (baseEnemy.id === 'creator_god') {
-        enemy.chargeTurn = 0;
-    }
 
     return enemy;
 }
@@ -240,7 +240,7 @@ const BattleRuntime = {
                 if (!player) return;
                 player.guardDamageReduction = Math.max(player.guardDamageReduction || 0, guardReduction);
             });
-            rpg.log('[특성] 가디언: 덱 전체 가드 효과가 강화됩니다!');
+            rpg.log('[특성] 가디언: 덱 전체의 [가드] 스킬 효과가 강화됩니다!');
         }
         if (manaCostTrait) {
             const costMult = manaCostTrait.proto.trait.costMult || 2.0;
@@ -510,8 +510,8 @@ const BattleRuntime = {
             const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
             if (guardSucceeded) {
-                const guardReduction = target.guardEnhancedEligible
-                    ? (target.guardDamageReduction || 0.5)
+                const guardReduction = target.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
+                    ? target.guardDamageReduction
                     : 0.5;
                 dmg *= (1 - guardReduction);
                 const guardPercent = Math.round(guardReduction * 100);
@@ -634,7 +634,7 @@ const BattleRuntime = {
                 matk: player.proto.stats.matk,
                 def: player.proto.stats.def,
                 mdef: player.proto.stats.mdef,
-                baseCrit: player.baseCrit || 10,
+                baseCrit: Number.isFinite(player.baseCrit) ? player.baseCrit : GAME_CONSTANTS.BASE_CRIT,
                 baseEva: 0,
                 buffs: {},
                 proto: {
@@ -824,14 +824,9 @@ const BattleRuntime = {
             rpg.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
         }
 
-        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait' && Math.random() < 0.2) {
+        if (source.proto && source.proto.trait && isBehemothTraitType(source.proto.trait.type) && Math.random() < 0.2) {
             target.buffs.stun = 1;
-            rpg.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
-        }
-
-        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait' && Math.random() < 0.2) {
-            target.buffs.stun = 1;
-            rpg.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
+            rpg.log(`[특성] ${source.name}: 20% 확률로 적을 기절시킵니다!`);
         }
 
         const delayedEff = typeof findDelayedSkillEffect === 'function'
@@ -840,7 +835,7 @@ const BattleRuntime = {
 
         if (delayedEff && !isDelayed) {
             const resolvedDelayedSkill = typeof buildResolvedDelayedSkill === 'function'
-                ? buildResolvedDelayedSkill(modifiedSkill, delayedEff, rpg.battle.turn)
+                ? buildResolvedDelayedSkill(modifiedSkill, delayedEff)
                 : modifiedSkill;
 
             if (delayedEff.type === 'phantom_nightmare' || delayedEff.type === 'multi_delayed_attack') {

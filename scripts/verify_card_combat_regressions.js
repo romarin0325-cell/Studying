@@ -434,6 +434,142 @@ function run() {
       Logic.calculateDamage(attacker, guardedTarget, { name: 'hit', type: 'phy', val: 1, effects: [] }, [], [], quiet, 'default', [], 1, []).dmg,
       50
     );
+    const enhancedGuardTarget = makeUnit({
+      buffs: { guard: 1 },
+      guardDamageReduction: 0.75,
+      guardEnhancedTurns: 1
+    });
+    assert.strictEqual(
+      Logic.calculateDamage(attacker, enhancedGuardTarget, { name: 'hit', type: 'phy', val: 1, effects: [] }, [], [], quiet, 'default', [], 1, []).dmg,
+      25
+    );
+
+    const nonEnhancedGuardTarget = makeUnit({ buffs: { guard: 3 }, guardDamageReduction: 0.75 });
+    assert.strictEqual(
+      Logic.calculateDamage(attacker, nonEnhancedGuardTarget, { name: 'hit', type: 'phy', val: 1, effects: [] }, [], [], quiet, 'default', [], 1, []).dmg,
+      50
+    );
+
+    // A short refresh cannot erase a longer guard; only the exact "가드" skill is enhanced.
+    const longGuardSource = makeUnit({ buffs: { guard: 3 } });
+    SideEffects.apply(
+      { source: longGuardSource, skill: { name: '가드' } },
+      { type: 'buff', id: 'guard', duration: 1 }
+    );
+    assert.strictEqual(longGuardSource.buffs.guard, 3);
+    assert.strictEqual(longGuardSource.guardEnhancedTurns, 1);
+    const divineArmorSource = makeUnit({ buffs: {} });
+    SideEffects.apply(
+      { source: divineArmorSource, skill: { name: '디바인아머' } },
+      { type: 'buff', id: 'guard', duration: 3 }
+    );
+    assert.strictEqual(divineArmorSource.guardEnhancedTurns, undefined);
+    tickTurnBuffs(longGuardSource);
+    assert.strictEqual(longGuardSource.buffs.guard, 2);
+    assert.strictEqual(longGuardSource.guardEnhancedTurns, undefined);
+
+    // The real Guardian deck setup shares the reduction value, but only the exact skill activates it.
+    const guardianBattle = {
+      state: {
+        mode: 'origin', gameType: 'challenge', hardMode: false, enemyScale: 0,
+        deck: ['guardian', 'victoria', null], chaosBuffs: [], artifacts: []
+      },
+      battle: { players: [], enemy: null, fieldBuffs: [], activeTraits: [], delayedEffects: [] },
+      getCardData: getCard,
+      getCurrentStageEnemyData: () => ENEMIES[0],
+      showBattleScreen: quiet,
+      clearBattleLog: quiet,
+      renderBattleView: quiet,
+      hasArtifact: () => false,
+      log: quiet,
+      loseBattle: quiet
+    };
+    const originalStartPlayerTurn = BattleRuntime.TurnManager.startPlayerTurn;
+    BattleRuntime.TurnManager.startPlayerTurn = quiet;
+    BattleRuntime.startBattleInit(guardianBattle);
+    BattleRuntime.TurnManager.startPlayerTurn = originalStartPlayerTurn;
+    const guardianUnit = guardianBattle.battle.players[0];
+    const victoriaUnit = guardianBattle.battle.players[1];
+    assert.strictEqual(guardianUnit.guardDamageReduction, 0.75);
+    assert.strictEqual(victoriaUnit.guardDamageReduction, 0.75);
+    const guardianGuard = guardianUnit.skills.find(skill => skill.name === '가드');
+    SideEffects.apply({ source: guardianUnit, skill: guardianGuard }, guardianGuard.effects[0]);
+    const divineArmor = victoriaUnit.skills.find(skill => skill.name === '디바인아머');
+    SideEffects.apply({ source: victoriaUnit, skill: divineArmor }, divineArmor.effects[0]);
+    assert.strictEqual(guardianUnit.guardEnhancedTurns, 1);
+    assert.strictEqual(victoriaUnit.guardEnhancedTurns, undefined);
+    guardianUnit.def = 0;
+    victoriaUnit.def = 0;
+    assert.strictEqual(
+      Logic.calculateDamage(attacker, guardianUnit, { name: 'hit', type: 'phy', val: 1, effects: [] }, [], [], quiet, 'default', [], 1, []).dmg,
+      25
+    );
+    assert.strictEqual(
+      Logic.calculateDamage(attacker, victoriaUnit, { name: 'hit', type: 'phy', val: 1, effects: [] }, [], [], quiet, 'default', [], 1, []).dmg,
+      50
+    );
+
+    // "Critical chance +40%" adds percentage points instead of rolling a second 40% lottery.
+    const criticalRandom = Math.random;
+    const dimensionZero = getCard('trans_gray').skills.find(skill => skill.name === '디멘션제로');
+    Math.random = () => 0.49;
+    assert.strictEqual(
+      Logic.calculateDamage(
+        makeUnit({ baseCrit: 10, proto: getCard('trans_gray') }),
+        makeUnit(),
+        dimensionZero,
+        [],
+        [],
+        quiet,
+        'default',
+        [],
+        1,
+        []
+      ).isCrit,
+      true
+    );
+    Math.random = () => 0.05;
+    assert.strictEqual(
+      Logic.calculateDamage(
+        makeUnit({ baseCrit: 0 }),
+        makeUnit(),
+        { name: 'zero crit', type: 'phy', val: 1, effects: [] },
+        [],
+        [],
+        quiet,
+        'default',
+        [],
+        1,
+        []
+      ).isCrit,
+      false
+    );
+    const dreamForm = getCard('trans_lumi').skills.find(skill => skill.name === '꿈의형태');
+    Math.random = () => 0.99;
+    assert.strictEqual(
+      Logic.calculateDamage(
+        makeUnit({ baseCrit: -100, proto: getCard('trans_lumi') }),
+        makeUnit(),
+        dreamForm,
+        [{ name: 'sun_bless', turns: 1 }],
+        [],
+        quiet,
+        'default',
+        [],
+        1,
+        []
+      ).isCrit,
+      true,
+      'Dream Form must be able to promote a non-critical roll to a critical hit'
+    );
+    Math.random = criticalRandom;
+
+    assert.strictEqual(isBehemothTraitType('behemoth_trait'), true);
+    assert.strictEqual(isBehemothTraitType('behemoth_liberated_trait'), true);
+    assert.strictEqual(
+      ENEMIES.find(enemy => enemy.id === 'demon_god').skills.some(skill => skill.name === '데스핸드'),
+      false
+    );
 
     // Enemy debuffs use the same mode-aware stat calculation as player attacks.
     const weakenedEnemy = makeUnit({ buffs: { weak: 1 } });
