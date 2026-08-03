@@ -2420,7 +2420,7 @@
     </div>
 
     <div id="modal-chaos" class="modal">
-        <div class="modal-content" style="height:auto; min-height: 550px;">
+        <div class="modal-content" style="height:auto; min-height: 400px; max-height: 85vh; overflow-y: auto;">
             <h3 class="chaos-title">혼돈의 축복</h3>
             <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대
                 3회)</p>
@@ -4516,9 +4516,9 @@
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
                 imgEl.src = `${nextEnemy.name}.png`;
-                imgEl.style.display = 'block';
+                imgEl.style.display = 'none';
                 if (imgEl.parentElement) {
-                    imgEl.parentElement.style.display = 'flex';
+                    imgEl.parentElement.style.display = 'none';
                     imgEl.parentElement.dataset.fallback = RemasterUI.fallbackLabel(nextEnemy.name);
                 }
 
