@@ -1280,13 +1280,13 @@
     </div>
 
     <div id="modal-special-card-editor" class="modal">
-        <div class="modal-content" style="height:auto; min-height:420px; width:380px; max-height:85vh; overflow-y:auto;">
+        <div class="modal-content" style="height:auto; min-height:500px; width:380px; max-height:85vh; overflow-y:auto;">
             <h3>스페셜카드 편집</h3>
             <p id="special-card-editor-summary" style="font-size:0.82rem; color:#ffecb3; margin:0 0 8px 0;">
                 기본 카드와 획득한 스페셜 카드 중 다음 런에서 사용할 버전을 선택합니다.
             </p>
-            <div id="special-card-group-list" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:10px;"></div>
-            <div id="special-card-editor-list" class="modal-scroll" style="max-height:360px;"></div>
+            <div id="special-card-group-list" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:10px;"></div>
+            <div id="special-card-editor-list" class="modal-scroll" style="max-height:500px;"></div>
             <button onclick="RPG.closeSpecialCardEditor()" style="width:100%; padding:10px;">닫기</button>
         </div>
     </div>
@@ -1427,7 +1427,7 @@
     </div>
 
     <div id="modal-chaos" class="modal">
-        <div class="modal-content" style="height:auto; min-height: 550px;">
+        <div class="modal-content" style="height:auto; min-height: 400px; max-height: 85vh; overflow-y: auto;">
             <h3 class="chaos-title">혼돈의 축복</h3>
             <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대
                 3회)</p>
@@ -3075,10 +3075,9 @@
                 const nextEnemy = this.getCurrentStageEnemyData();
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                ImageAssets.load(imgEl, nextEnemy, {
-                    parent: imgEl.parentElement,
-                    toggleParent: true
-                });
+                // image loaded dynamically or not at all depending on options
+                imgEl.style.display = 'none';
+                imgEl.parentElement.style.display = 'none';
 
                 // Mode Specific Menu Areas
                 const gachaArea = document.getElementById('menu-gacha-area');

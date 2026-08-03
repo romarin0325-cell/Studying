@@ -2061,7 +2061,7 @@
                     <div id="next-enemy-preview" class="enemy-preview">
                         <div class="enemy-preview__label">NEXT THREAT</div>
                         <div class="enemy-preview__name"><span id="next-enemy-text">?</span></div>
-                        <div class="portrait enemy-preview__portrait"><img id="next-enemy-img" src="" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:contain;"></div>
+                        <div class="portrait enemy-preview__portrait"><img id="next-enemy-img" style="width:100%; height:100%; object-fit:contain;"></div>
                     </div>
                 </section>
                 <section class="menu-section glass-panel">
@@ -2165,7 +2165,7 @@
                             <span class="actor-lane">ALLY</span>
                             <strong id="p-name">Player</strong>
                         </div>
-                        <div class="portrait actor-portrait"><img id="p-img" src="" onerror="this.style.display='none'"></div>
+                        <div class="portrait actor-portrait"><img id="p-img" ></div>
                         <div class="actor-bar-wrap">
                             <div class="actor-bar-meta"><span>HP</span><span id="p-hp-text">0 / 0</span></div>
                             <div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div>
@@ -2184,7 +2184,7 @@
                             <span class="actor-lane">BOSS</span>
                             <strong id="e-name">Enemy</strong>
                         </div>
-                        <div class="portrait actor-portrait"><img id="e-img" src="" onerror="this.style.display='none'"></div>
+                        <div class="portrait actor-portrait"><img id="e-img" ></div>
                         <div class="actor-bar-wrap">
                             <div class="actor-bar-meta"><span>HP</span><span id="e-hp-text">0 / 0</span></div>
                             <div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div>
@@ -2359,7 +2359,7 @@
             <h3 id="lecture-title">강의 제목</h3>
             <div style="display: flex; justify-content: center; margin-bottom: 10px;">
                 <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;">
-                    <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                    <img src="루미.png"  alt="Rumi">
                 </div>
             </div>
             <div id="lecture-content" class="modal-scroll"
@@ -2392,7 +2392,7 @@
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3>루미의 개인과외</h3>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
-                <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                <img src="루미.png"  alt="Rumi">
             </div>
             <div id="tutoring-content" class="modal-scroll"
                 style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
@@ -2420,7 +2420,7 @@
     </div>
 
     <div id="modal-chaos" class="modal">
-        <div class="modal-content" style="height:auto; min-height: 550px;">
+        <div class="modal-content" style="height:auto; min-height: 400px; max-height: 85vh; overflow-y: auto;">
             <h3 class="chaos-title">혼돈의 축복</h3>
             <p class="chaos-desc" style="font-size:0.8rem; color:#aaa;">전투 시 무작위 카드에게 강력한 축복을 내립니다.<br>(전투 종료 시 사라짐, 최대
                 3회)</p>
@@ -2621,7 +2621,7 @@
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3 style="color: #ff80ab;">💕 루미와의 데이트</h3>
             <div class="portrait" style="width: 100px; height: 130px; border-color: #ff80ab; margin: 0 auto 10px auto;">
-                <img src="루미.png" onerror="this.src=''" alt="Rumi">
+                <img src="루미.png"  alt="Rumi">
             </div>
             <div id="date-content" class="modal-scroll"
                 style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
@@ -4515,10 +4515,10 @@
                 const nextEnemy = this.getCurrentStageEnemyData();
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                imgEl.src = `${nextEnemy.name}.png`;
-                imgEl.style.display = 'block';
+                // image loaded dynamically or not at all depending on options
+                imgEl.style.display = 'none';
                 if (imgEl.parentElement) {
-                    imgEl.parentElement.style.display = 'flex';
+                    imgEl.parentElement.style.display = 'none';
                     imgEl.parentElement.dataset.fallback = RemasterUI.fallbackLabel(nextEnemy.name);
                 }
 
@@ -6538,7 +6538,7 @@
                         this.openInfoModal("루미의 깜짝 선물!",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#448af f;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img src="루미.png"  alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 형아! 공부하느라 고생했어! (헤헤)<br>이거 줄게, 받아!<br><br>
                                 <b style="color:#ffd700; font-size:1.2rem;">[티켓 1장 획득]</b><br>
@@ -7195,7 +7195,7 @@
                 this.showConfirm(
                     `<div style="text-align:center;">
                         <div class="portrait" style="width:80px; height:106px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                            <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                            <img src="루미.png"  alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                         </div>
                         <b style="color:#ff80ab;">루미의 보너스 데이트 신청!</b><br><br>
                         (헤헤) 형아~ 퀴즈 열심히 푸느라 고생했어!<br>
@@ -7356,7 +7356,7 @@
                     this.openInfoModal("💕 비밀 데이트 종료",
                         `<div style="text-align:center;">
                             <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                <img src="루미.png"  alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                             </div>
                             루미와의 특별한 비밀 데이트가 끝났어요!<br><br>
                             <b style="color:#ffd700; font-size:1.2rem;">🎴 이벤트 카드 획득: ${cardName}</b><br>
@@ -7377,7 +7377,7 @@
                         this.openInfoModal("💕 데이트 종료",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img src="루미.png"  alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 루미와의 즐거운 데이트가 끝났어요!<br><br>
                                 <span style="color:#ff80ab;">(헤헤) 형아... 다음에는 특별한 데이트를 준비해둘게!</span><br>
@@ -7390,7 +7390,7 @@
                         this.openInfoModal("💕 데이트 종료",
                             `<div style="text-align:center;">
                                 <div class="portrait" style="width:120px; height:160px; margin:0 auto 10px auto; border-color:#ff80ab;">
-                                    <img src="루미.png" onerror="this.src=''" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                                    <img src="루미.png"  alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                                 루미와의 즐거운 데이트가 끝났어요!<br><br>
                                 <span style="color:#ff80ab;">(뿌듯) 형아, 오늘 너무 재밌었어! 또 데이트하자!</span><br><br>
