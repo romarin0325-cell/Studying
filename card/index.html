@@ -982,7 +982,7 @@
                 style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
                 <div style="margin-bottom:5px;">다음 상대: <span id="next-enemy-text">?</span></div>
                 <div class="portrait" style="width:80px; height:106px; margin:0 auto; border-color:#ff5252;"><img
-                        id="next-enemy-img" src="" onerror="this.style.display='none'"
+                        id="next-enemy-img"
                         style="width:100%; height:100%; object-fit:contain;"></div>
             </div>
             <div id="menu-gacha-area" style="display:flex; gap:5px; margin-bottom:10px;">
@@ -3075,7 +3075,7 @@
                 const nextEnemy = this.getCurrentStageEnemyData();
                 document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                imgEl.src = `${nextEnemy.name}.png`;
+                // image loaded dynamically or not at all depending on options
                 imgEl.style.display = 'none';
                 imgEl.parentElement.style.display = 'none';
 
