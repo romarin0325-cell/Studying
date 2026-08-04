@@ -203,8 +203,8 @@ function run() {
 
     const succubus = getCard('succubus');
     assert.deepStrictEqual(
-      [succubus.name, succubus.grade, succubus.element, succubus.role, succubus.unlockSource],
-      ['서큐버스', 'rare', 'dark', 'debuffer', 'bonus']
+      [succubus.name, succubus.grade, succubus.element, succubus.role, succubus.unlockSource, succubus.releaseDate],
+      ['서큐버스', 'rare', 'dark', 'debuffer', 'bonus', '2026-10-30']
     );
     assert.deepStrictEqual(
       [succubus.stats.hp, succubus.stats.atk, succubus.stats.matk, succubus.stats.def, succubus.stats.mdef],
@@ -224,8 +224,8 @@ function run() {
 
     const trauma = getCard('trauma');
     assert.deepStrictEqual(
-      [trauma.name, trauma.grade, trauma.element, trauma.role, trauma.unlockSource],
-      ['트라우마', 'epic', 'dark', 'dealer', 'bonus']
+      [trauma.name, trauma.grade, trauma.element, trauma.role, trauma.unlockSource, trauma.releaseDate || null],
+      ['트라우마', 'epic', 'dark', 'dealer', 'hidden', null]
     );
     assert.deepStrictEqual(
       [trauma.stats.hp, trauma.stats.atk, trauma.stats.matk, trauma.stats.def, trauma.stats.mdef],
@@ -246,8 +246,8 @@ function run() {
 
     const greatDetective = getCard('great_detective');
     assert.deepStrictEqual(
-      [greatDetective.name, greatDetective.grade, greatDetective.element, greatDetective.role, greatDetective.unlockSource],
-      ['명탐정', 'epic', 'water', 'balancer', 'bonus']
+      [greatDetective.name, greatDetective.grade, greatDetective.element, greatDetective.role, greatDetective.unlockSource, greatDetective.releaseDate || null],
+      ['명탐정', 'epic', 'water', 'balancer', 'hidden', null]
     );
     assert.deepStrictEqual(
       [greatDetective.stats.hp, greatDetective.stats.atk, greatDetective.stats.matk, greatDetective.stats.def, greatDetective.stats.mdef],
@@ -261,8 +261,8 @@ function run() {
 
     const blueMoonPriest = getCard('blue_moon_priest');
     assert.deepStrictEqual(
-      [blueMoonPriest.name, blueMoonPriest.grade, blueMoonPriest.element, blueMoonPriest.role, blueMoonPriest.unlockSource],
-      ['푸른달의사제', 'legend', 'water', 'buffer', 'bonus']
+      [blueMoonPriest.name, blueMoonPriest.grade, blueMoonPriest.element, blueMoonPriest.role, blueMoonPriest.unlockSource, blueMoonPriest.releaseDate],
+      ['푸른달의사제', 'legend', 'water', 'buffer', 'bonus', '2026-10-30']
     );
     assert.deepStrictEqual(
       [blueMoonPriest.stats.hp, blueMoonPriest.stats.atk, blueMoonPriest.stats.matk, blueMoonPriest.stats.def, blueMoonPriest.stats.mdef],
@@ -284,6 +284,7 @@ function run() {
       .map(card => card.id)
       .filter(id => datedWaveIds.includes(id))
       .sort();
+    const october30BonusIds = ['succubus', 'blue_moon_priest'];
     const expectedReleasedIds = ids => [...ids].sort();
     assert.deepStrictEqual(releasedWaveIds(new Date(2026, 6, 31, 12)), []);
     assert.deepStrictEqual(
@@ -319,6 +320,18 @@ function run() {
     assert.deepStrictEqual(
       releasedWaveIds(new Date(2026, 9, 15, 12)),
       expectedReleasedIds(datedWaveIds)
+    );
+    assert.strictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 9, 29, 12))
+        .some(card => october30BonusIds.includes(card.id)),
+      false
+    );
+    assert.deepStrictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 9, 30, 12))
+        .filter(card => october30BonusIds.includes(card.id))
+        .map(card => card.id)
+        .sort(),
+      october30BonusIds.slice().sort()
     );
     assert(featureHost.getHiddenBonusCards().some(card => card.id === 'astrologer'));
     assert(featureHost.getHiddenBonusCards().some(card => card.id === 'sun_moon_sword_maiden'));

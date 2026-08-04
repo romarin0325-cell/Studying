@@ -1235,7 +1235,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'succubus', name: '서큐버스', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus',
+        id: 'succubus', name: '서큐버스', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
         stats: { hp: 340, atk: 70, matk: 95, def: 55, mdef: 65 },
         trait: { type: 'death_debuff', debuff: 'silence', desc: '사망 시 적에게 침묵 부여' },
         skills: [
@@ -1245,7 +1245,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'trauma', name: '트라우마', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'bonus',
+        id: 'trauma', name: '트라우마', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'hidden',
         stats: { hp: 400, atk: 75, matk: 115, def: 65, mdef: 75 },
         trait: { type: 'leader_hp_cost_on_skill', ratio: 0.35, desc: '스킬 발동 시 대장 생명력 35% 소모' },
         skills: [
@@ -1255,7 +1255,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'great_detective', name: '명탐정', grade: 'epic', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        id: 'great_detective', name: '명탐정', grade: 'epic', element: 'water', role: 'balancer', unlockSource: 'hidden',
         stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
         trait: { type: 'deck_turn_modulo_force_crit', mod: 5, desc: '덱 전체가 5의 배수 턴에 반드시 치명타' },
         skills: [
@@ -1265,7 +1265,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'blue_moon_priest', name: '푸른달의사제', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus',
+        id: 'blue_moon_priest', name: '푸른달의사제', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
         stats: { hp: 500, atk: 90, matk: 120, def: 75, mdef: 80 },
         trait: { type: 'vanguard_moon_bless_every_3_turns', mod: 3, desc: '선봉 배치 시 3의 배수 턴마다 달의축복 부여' },
         skills: [
