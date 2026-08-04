@@ -195,6 +195,7 @@ function run() {
       JSON.stringify(absoluteArmor.effects),
       JSON.stringify([{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }])
     );
+    assert.deepStrictEqual([absoluteArmor.tier, terraSword.tier], [3, 2]);
     assert.strictEqual(JSON.stringify(terraSword.effects), JSON.stringify([{ type: 'field_buff', id: 'arena' }]));
 
     assert.strictEqual(getCard('ash').trait.desc.startsWith('애쉬가 생존해 있을 경우,'), true);
@@ -254,7 +255,7 @@ function run() {
     );
     assert.deepStrictEqual([greatDetective.trait.type, greatDetective.trait.mod], ['deck_turn_modulo_force_crit', 5]);
     assert.strictEqual(
-      JSON.stringify(greatDetective.skills.find(skill => skill.name === '루시드프래시').effects),
+      JSON.stringify(greatDetective.skills.find(skill => skill.name === '루시드플래시').effects),
       JSON.stringify([{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }])
     );
 
@@ -907,7 +908,7 @@ function run() {
     const detectiveSource = buildWaveUnit('great_detective', ['great_detective'], 0);
     detectiveSource.baseCrit = -100;
     const detectiveTarget = makeUnit({ def: 0, mdef: 0, buffs: {} });
-    const lucidFlash = detectiveSource.skills.find(skill => skill.name === '루시드프래시');
+    const lucidFlash = detectiveSource.skills.find(skill => skill.name === '루시드플래시');
     assert.strictEqual(
       Logic.calculateDamage(detectiveSource, detectiveTarget, lucidFlash, [], ['deck_turn_modulo_force_crit'], quiet, 'default', [], 4, []).isCrit,
       false

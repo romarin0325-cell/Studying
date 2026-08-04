@@ -1260,7 +1260,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'deck_turn_modulo_force_crit', mod: 5, desc: '덱 전체가 5의 배수 턴에 반드시 치명타' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '루시드프래시', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 5의 배수 턴에 침묵, 저주, 디바인 부여', effects: [{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }] },
+            { name: '루시드플래시', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 5의 배수 턴에 침묵, 저주, 디바인 부여', effects: [{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }] },
             { name: '파이널앤서', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 5의 배수 턴에는 위력 2배', effects: [{ type: 'turn_modulo_dmg', mod: 5, mult: 2.0 }] }
         ]
     },
@@ -1777,8 +1777,8 @@ const BONUS_TRANSCENDENCE_CARDS = [
             desc: '덱에 불 3장 이상 시 공격력 100% 증가'
         },
         skills: [
-            { name: '앱솔루트아머', type: 'sup', tier: 2, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }] },
-            { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나 발동', effects: [{ type: 'field_buff', id: 'arena' }] },
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '테라소드', type: 'phy', tier: 2, cost: 30, val: 2.0, desc: '필드버프 아레나 발동', effects: [{ type: 'field_buff', id: 'arena' }] },
             { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
         ]
     },
