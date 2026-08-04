@@ -465,7 +465,7 @@
 
         .bonus-pool-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             margin-top: 10px;
         }
@@ -2249,10 +2249,10 @@
     </div>
 
     <div id="modal-bonus-pool-editor" class="modal">
-        <div class="modal-content" style="height:auto; min-height:320px; width: 360px;">
+        <div class="modal-content" style="height:auto; min-height:320px; width: 380px; max-width: 95vw;">
             <h3>보너스 카드 덱 편집</h3>
             <p style="font-size:0.85rem; color:#aaa; margin:0 0 6px 0;">
-                기본 카드는 항상 포함됩니다. 체크된 보너스 카드는 이번 런의 랜덤 풀에서 비활성화됩니다.
+                기본 카드는 항상 포함됩니다.
             </p>
             <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0</p>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
