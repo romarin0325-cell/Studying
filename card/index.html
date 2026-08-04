@@ -432,7 +432,7 @@
             padding: 20px;
             border-radius: 12px;
             border: 1px solid #444;
-            width: 320px;
+            width: 360px;
             box-sizing: border-box;
             max-width: calc(100vw - 16px);
             max-height: 80vh;
@@ -635,6 +635,7 @@
             .modal-content {
                 /* Inline desktop widths must still be clamped on narrow phones. */
                 max-width: calc(100vw - 16px) !important;
+                padding: 14px;
             }
 
             #modal-chaos .modal-content {
@@ -663,6 +664,16 @@
             #modal-chaos .chaos-close-btn {
                 margin-top: 6px !important;
                 padding: 10px;
+            }
+
+            /* Info modal: 축복 결과 등에서 텍스트 공간 확보 */
+            #modal-info .modal-content {
+                padding: 12px;
+            }
+
+            #modal-info #info-content {
+                font-size: 0.82rem;
+                line-height: 1.35;
             }
         }
 
@@ -827,25 +838,29 @@
 
         .lumi-chat-top {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
             border-bottom: 1px solid #444;
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .lumi-chat-title {
             margin: 0;
             color: #ffd700;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .lumi-chat-controls {
             display: flex;
-            width: 100%;
+            flex: 1;
+            min-width: 0;
             justify-content: flex-end;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 4px;
         }
 
         .lumi-chat-controls button {
@@ -853,8 +868,8 @@
             border: 1px solid #555;
             color: #ccc;
             border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
+            padding: 3px 6px;
+            font-size: 0.72rem;
             cursor: pointer;
         }
 
@@ -1313,7 +1328,7 @@
     </div>
 
     <div id="modal-special-card-editor" class="modal">
-        <div class="modal-content" style="height:auto; min-height:500px; width:380px; max-height:85vh; overflow-y:auto;">
+        <div class="modal-content" style="height:auto; min-height:500px; width:400px; max-height:85vh; overflow-y:auto;">
             <h3>스페셜카드 편집</h3>
             <p id="special-card-editor-summary" style="font-size:0.82rem; color:#ffecb3; margin:0 0 8px 0;">
                 기본 카드와 획득한 스페셜 카드 중 다음 런에서 사용할 버전을 선택합니다.
@@ -1407,16 +1422,15 @@
     <div id="modal-wordbook" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3>단어장</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 0.8rem; color: #aaa;">빨간색: 틀린 단어</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 4px; flex-wrap: nowrap;">
+                <span style="font-size: 0.72rem; color: #aaa; white-space: nowrap;">빨간색:틀린단어</span>
                 <label
-                    style="font-size: 0.8rem; color: #aaa; margin-left: 10px; display: flex; align-items: center; cursor: pointer;">
+                    style="font-size: 0.72rem; color: #aaa; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">
                     <input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()"
-                        style="margin-right: 5px;"> 틀린 단어만 보기
+                        style="margin-right: 3px;"> 틀린단어만
                 </label>
                 <button class="menu-btn" onclick="RPG.resetWrongWords()"
-                    style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0; background: #555;">복습
-                    초기화</button>
+                    style="width: auto; padding: 4px 8px; font-size: 0.72rem; margin: 0; background: #555; white-space: nowrap;">복습초기화</button>
             </div>
             <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
             <button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
@@ -3428,7 +3442,7 @@
                 }
                 msg += "<br><b>[새로 적용된 축복]</b><br>";
                 newBuffs.forEach(b => {
-                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}%, 치명타/회피율 증가<br>`;
+                    msg += `[${b.name}] +${Math.round(b.multiplier * 100)}% 치명타/회피↑<br>`;
                 });
                 msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
 
