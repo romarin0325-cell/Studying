@@ -315,6 +315,11 @@ const BattleRuntime = {
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
+                if (BattleRuntime.hasActiveTrait(rpg, 'vanguard_moon_bless_every_3_turns') && battle.turn % 3 === 0) {
+                    BattleRuntime.applyFieldBuff(rpg, 'moon_bless');
+                    rpg.log('[특성] 푸른달의사제: 달의축복 부여!');
+                }
+
                 const hasProphetTrait = BattleRuntime.hasActiveTrait(rpg, 'field_kaleidoscope_each_turn');
                 if (rpg.hasArtifact('kaleidoscope') || hasProphetTrait) {
                     const count = battle.fieldBuffs.length;
@@ -620,7 +625,7 @@ const BattleRuntime = {
         players.forEach(player => {
             if (!player || !player.proto || !player.proto.trait) return;
             if (player.proto.trait.type !== 'ally_light_death_base_matk_mag' && player.proto.trait.type !== 'ally_death_base_atk_phy') return;
-            if (player.isDead && player !== victim) return;
+            if (player.isDead) return;
             if (killer.hp <= 0) return;
             if (player.proto.trait.type === 'ally_light_death_base_matk_mag' && !GameUtils.cardMatchesElement(victim.proto, 'light')) return;
 
@@ -695,7 +700,11 @@ const BattleRuntime = {
     },
 
     maybeTriggerDeathRoulette(rpg, source, skill, isDelayed = false) {
-        if (!rpg.hasArtifact('death_roulette') || isDelayed || skill.name === rpg.NORMAL_ATTACK.name) {
+        const isDelayedReservation = !isDelayed &&
+            typeof findDelayedSkillEffect === 'function' &&
+            findDelayedSkillEffect(skill) &&
+            !BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills');
+        if (!rpg.hasArtifact('death_roulette') || isDelayedReservation || skill.name === rpg.NORMAL_ATTACK.name) {
             return false;
         }
         if (Math.random() >= 0.3) return false;
@@ -739,6 +748,28 @@ const BattleRuntime = {
         const restored = source.mp - before;
         rpg.log(`[특성] 혜성추적자: 지연 스킬 발동! ${source.name}의 마나 ${restored} 회복!`);
         return restored;
+    },
+
+    applyLeaderHpCostOnSkill(rpg, source, target, skill) {
+        const trait = source && source.proto && source.proto.trait;
+        if (!trait || trait.type !== 'leader_hp_cost_on_skill' || skill.name === rpg.NORMAL_ATTACK.name) {
+            return false;
+        }
+
+        const leader = (rpg.battle.players || []).find(player => player && player.pos === 2 && !player.isDead);
+        if (!leader) return false;
+
+        const ratio = Number.isFinite(trait.ratio) ? trait.ratio : 0.35;
+        const amount = Math.max(1, Math.round((leader.maxHp || 0) * ratio));
+        if (amount <= 0) return false;
+
+        leader.hp = Math.max(0, leader.hp - amount);
+        rpg.log(`[특성] ${source.name}: 대장 ${leader.name}의 생명력 ${amount} 소모!`);
+        if (leader.hp <= 0) {
+            BattleRuntime.resolveSourceDeath(rpg, leader, target);
+            return true;
+        }
+        return false;
     },
 
     executeSkill(rpg, source, target, skill, isDelayed = false) {
@@ -824,14 +855,23 @@ const BattleRuntime = {
             rpg.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
         }
 
-        if (source.proto && source.proto.trait && isBehemothTraitType(source.proto.trait.type) && Math.random() < 0.2) {
-            target.buffs.stun = 1;
-            rpg.log(`[특성] ${source.name}: 20% 확률로 적을 기절시킵니다!`);
-        }
-
         const delayedEff = typeof findDelayedSkillEffect === 'function'
             ? findDelayedSkillEffect(modifiedSkill)
             : null;
+        const isMultiDelayedEffect = delayedEff &&
+            (delayedEff.type === 'phantom_nightmare' || delayedEff.type === 'multi_delayed_attack');
+        const resolvesImmediately = delayedEff && !isDelayed &&
+            BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills') && !isMultiDelayedEffect;
+
+        if (
+            source.proto && source.proto.trait &&
+            isBehemothTraitType(source.proto.trait.type) &&
+            (!delayedEff || isDelayed || resolvesImmediately) &&
+            Math.random() < 0.2
+        ) {
+            target.buffs.stun = 1;
+            rpg.log(`[특성] ${source.name}: 20% 확률로 적을 기절시킵니다!`);
+        }
 
         if (delayedEff && !isDelayed) {
             const resolvedDelayedSkill = typeof buildResolvedDelayedSkill === 'function'
@@ -859,7 +899,6 @@ const BattleRuntime = {
                         rpg.log(message);
                         BattleRuntime.executeSkill(rpg, source, target, resolvedDelayedSkill, true);
                     });
-                    BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                     BattleRuntime.resolveSourceDeath(rpg, source, target);
                     if (target.hp <= 0) {
                         rpg.winBattle();
@@ -881,7 +920,6 @@ const BattleRuntime = {
                 const lastTurn = Math.max(...nightmareTurns);
                 const turnLabel = firstTurn === lastTurn ? `${firstTurn}턴 뒤` : `${firstTurn}~${lastTurn}턴 뒤`;
                 rpg.log(`${skill.name} 준비... (${turnLabel} 연속 발동)`);
-                BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                 BattleRuntime.resolveSourceDeath(rpg, source, target);
                 if (target.hp <= 0) {
                     rpg.winBattle();
@@ -902,7 +940,6 @@ const BattleRuntime = {
                     source: source,
                     skill: resolvedDelayedSkill
                 });
-                BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                 BattleRuntime.resolveSourceDeath(rpg, source, target);
                 if (target.hp <= 0) {
                     rpg.winBattle();
@@ -931,7 +968,8 @@ const BattleRuntime = {
         if (dmgResult.dmg > 0) {
             BattleRuntime.handleOnHitTraits(rpg, target, source);
         }
-        BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+        BattleRuntime.applyLeaderHpCostOnSkill(rpg, source, target, modifiedSkill);
+        if (!source.isDead) BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
         BattleRuntime.resolveSourceDeath(rpg, source, target);
 
         if (target.hp <= 0) {

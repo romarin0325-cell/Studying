@@ -1501,7 +1501,7 @@
 
         let msg = "<b>혼돈의 축복 적용!</b><br>새로운 축복이 부여되었습니다.<br><br><b>[새로 적용된 축복]</b><br>";
         newBuffs.forEach(b => {
-            msg += `[${b.name}] +${Math.round(b.multiplier * 100)}% 치명타/회피↑<br>`;
+            msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}% 치명타/회피↑<br>`;
         });
         msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b><br>(전투 시작 시 해당 카드의 체력이 모두 회복됩니다.)`;
         setTimeout(() => {

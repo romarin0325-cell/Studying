@@ -838,10 +838,9 @@
 
         .lumi-chat-top {
             display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
             border-bottom: 1px solid #444;
             padding-bottom: 6px;
         }
@@ -852,12 +851,12 @@
             font-size: 0.95rem;
             flex-shrink: 0;
             white-space: nowrap;
+            align-self: flex-start;
         }
 
         .lumi-chat-controls {
             display: flex;
-            flex: 1;
-            min-width: 0;
+            width: 100%;
             justify-content: flex-end;
             flex-wrap: wrap;
             gap: 4px;
@@ -3442,7 +3441,7 @@
                 }
                 msg += "<br><b>[새로 적용된 축복]</b><br>";
                 newBuffs.forEach(b => {
-                    msg += `[${b.name}] +${Math.round(b.multiplier * 100)}% 치명타/회피↑<br>`;
+                    msg += `[${b.name}] 올스탯 +${Math.round(b.multiplier * 100)}% 치명타/회피↑<br>`;
                 });
                 msg += `<br><b>(현재 총 활성화된 축복: ${this.state.chaosBuffs.length}개)</b>`;
 
