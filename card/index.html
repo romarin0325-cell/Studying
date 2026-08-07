@@ -241,6 +241,17 @@
             font-size: 0.8rem;
         }
 
+        .battle-artifact-btn {
+            display: none;
+            padding: 2px 7px;
+            border: 1px solid #ffd700;
+            border-radius: 4px;
+            background: #333;
+            color: #ffd700;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
         .field-buffs {
             height: 20px;
             font-size: 0.7rem;
@@ -1067,9 +1078,13 @@
                 <button class="menu-btn" onclick="RPG.startDraft()" style="border-color:#00e676; color:#00e676;">덱 빌딩
                     (드래프트)</button>
             </div>
-            <div id="menu-chaos-area" style="display:none; margin-bottom:10px;">
+            <div id="menu-chaos-area" style="display:none; gap:5px; margin-bottom:10px;">
+                <button id="btn-menu-artifact-check" class="menu-btn" onclick="RPG.openArtifactCheck()"
+                    style="display:none; flex:1; border-color:#ffd700; color:#ffd700;">
+                    아티팩트 확인
+                </button>
                 <button class="menu-btn" onclick="RPG.reshuffleChaosPool()"
-                    style="border-color:#ff5252; color:#ff5252;">
+                    style="flex:1; border-color:#ff5252; color:#ff5252;">
                     카오스 셔플 (티켓 1장)
                 </button>
             </div>
@@ -1203,6 +1218,8 @@
         </div>
         <div id="screen-battle" class="screen">
             <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span>
+                <button id="btn-battle-artifact-check" class="battle-artifact-btn"
+                    onclick="RPG.openArtifactCheck()">아티팩트 확인</button>
                 <div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div>
             </div>
             <div class="visual-stage">
@@ -3155,6 +3172,7 @@
                 const gachaArea = document.getElementById('menu-gacha-area');
                 const draftArea = document.getElementById('menu-draft-area');
                 const chaosArea = document.getElementById('menu-chaos-area');
+                const menuArtifactBtn = document.getElementById('btn-menu-artifact-check');
                 const normalGachaBtn = document.getElementById('btn-normal-gacha');
                 const challengeGachaBtn = document.getElementById('btn-challenge-gacha');
 
@@ -3170,12 +3188,16 @@
                 gachaArea.style.display = 'none';
                 draftArea.style.display = 'none';
                 if (chaosArea) chaosArea.style.display = 'none';
+                if (menuArtifactBtn) menuArtifactBtn.style.display = 'none';
 
                 if (this.state.mode === 'draft') {
                     draftArea.style.display = 'block';
                 }
                 else if (['chaos', 'artifact_chaos'].includes(this.state.mode)) {
-                    if (chaosArea) chaosArea.style.display = 'block';
+                    if (chaosArea) chaosArea.style.display = 'flex';
+                    if (menuArtifactBtn && this.state.mode === 'artifact_chaos') {
+                        menuArtifactBtn.style.display = 'block';
+                    }
                 }
                 else if (this.state.mode === 'puzzle') {
                     if (normalGachaBtn) {
@@ -3194,7 +3216,11 @@
                 this.showScreen('screen-title');
             },
             showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
-            showBattleScreen() { this.showScreen('screen-battle'); },
+            showBattleScreen() {
+                this.showScreen('screen-battle');
+                const artifactBtn = document.getElementById('btn-battle-artifact-check');
+                if (artifactBtn) artifactBtn.style.display = this.state.mode === 'artifact_chaos' ? 'block' : 'none';
+            },
             clearBattleLog() { document.getElementById('battle-log').innerHTML = ""; },
             renderBattleView() { this.renderBattlefield(); },
             renderBattleControls(player) { this.setupControls(player); },
