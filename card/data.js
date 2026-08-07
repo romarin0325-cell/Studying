@@ -866,7 +866,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'cherry_prince', name: '체리프린스', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
         stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
-        trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
+        trait: { type: 'burn_stack_phy_pen', val: 0.3, desc: '작열 1스택당 적의 물리방어력 30% 관통' },
         skills: [
             { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },

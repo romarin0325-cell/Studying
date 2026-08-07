@@ -225,6 +225,13 @@
             object-fit: contain;
         }
 
+        .lumi-modal-portrait {
+            width: 100px;
+            height: auto;
+            aspect-ratio: 3 / 4;
+            flex-shrink: 0;
+        }
+
         .battle-header {
             display: flex;
             justify-content: space-between;
@@ -633,9 +640,28 @@
 
         @media (max-width: 600px) {
             .modal-content {
-                /* Inline desktop widths must still be clamped on narrow phones. */
+                /* Recover the pre-border-box content width while keeping an 8px safe edge. */
+                width: calc(100vw - 16px) !important;
                 max-width: calc(100vw - 16px) !important;
                 padding: 14px;
+            }
+
+            #modal-lecture-view .modal-content,
+            #modal-wordbook .modal-content,
+            #modal-tutoring .modal-content,
+            #modal-lumi-question .modal-content,
+            #modal-date .modal-content {
+                /* PR #435 moved padding inside the 80vh cap; 85dvh restores the old usable height. */
+                height: 85vh !important;
+                height: 85dvh !important;
+                max-height: 85vh !important;
+                max-height: 85dvh !important;
+            }
+
+            #tutoring-content,
+            #date-content {
+                /* Let dialogue scroll instead of vertically squashing Lumi's portrait. */
+                min-height: 0 !important;
             }
 
             #modal-chaos .modal-content {
@@ -1407,7 +1433,7 @@
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;">
             <h3 id="lecture-title">강의 제목</h3>
             <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-                <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff;">
+                <div class="portrait lumi-modal-portrait" style="border-color: #448aff;">
                     <img data-image-src="루미.png" alt="Rumi">
                 </div>
             </div>
@@ -1444,7 +1470,7 @@
                     <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">Pro</button>
                 </div>
             </div>
-            <div class="portrait" style="width: 100px; height: 130px; border-color: #448aff; margin: 0 auto 10px auto;">
+            <div class="portrait lumi-modal-portrait" style="border-color: #448aff; margin: 0 auto 10px auto;">
                 <img data-image-src="루미.png" alt="Rumi">
             </div>
             <div id="tutoring-content" class="modal-scroll"
@@ -1656,7 +1682,7 @@
     <div id="modal-date" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3 style="color: #ff80ab;">💕 루미와의 데이트</h3>
-            <div class="portrait" style="width: 100px; height: 130px; border-color: #ff80ab; margin: 0 auto 10px auto;">
+            <div class="portrait lumi-modal-portrait" style="border-color: #ff80ab; margin: 0 auto 10px auto;">
                 <img data-image-src="루미.png" alt="Rumi">
             </div>
             <div id="date-content" class="modal-scroll"
