@@ -1602,6 +1602,13 @@ const SideEffects = {
                 }
             }
         },
+        'turn_modulo_debuffs': (ctx, eff) => {
+            if (!ctx.turn || !eff.mod || ctx.turn % eff.mod !== 0) return;
+            (eff.debuffs || []).forEach(id => {
+                const isStackable = id === 'burn' || id === 'divine';
+                SideEffects.handlers['debuff'](ctx, { id, stack: isStackable ? 1 : undefined });
+            });
+        },
         'consume_debuff_then_random_debuff': (ctx, eff) => {
             const debuff = eff.debuff;
             const count = eff.count || 1;
@@ -2100,7 +2107,11 @@ const Logic = {
 
         // 1. Critical: chance modifiers are additive percentage points.
         const effects = Array.isArray(skill.effects) ? skill.effects : [];
-        const alwaysCritical = effects.some(effect => effect.type === 'force_crit');
+        const deckTurnForceCrit = Array.isArray(activeTraits) &&
+            activeTraits.includes('deck_turn_modulo_force_crit') &&
+            Number.isFinite(turn) &&
+            turn % 5 === 0;
+        const alwaysCritical = effects.some(effect => effect.type === 'force_crit') || deckTurnForceCrit;
         const criticalBonus = effects
             .filter(effect => effect.type === 'force_crit_chance')
             .reduce((sum, effect) => sum + (Number(effect.val) || 0), 0);
@@ -2116,6 +2127,9 @@ const Logic = {
         }
         if (source.proto && sourceFieldBuffs.some(b => b.name === 'reaper_realm')) {
             critDmg += 0.4 * critBuffMult;
+        }
+        if (deckTurnForceCrit) {
+            logFn('[특성] 명탐정: 5의 배수 턴, 덱 전체 치명타!');
         }
 
         let val = (skill.type === 'phy') ? srcStats.atk : srcStats.matk;
@@ -2327,7 +2341,7 @@ const Logic = {
                         break;
                     case 'moon_bless': // 달: 마방 30% 관통 + 1배율
                         {
-                            let ignore = Math.floor(tgtStats.mdef * 0.3);
+                            let ignore = Math.floor(rawMdef * 0.3);
                             def = Math.max(0, def - ignore);
                             mult += 1.0;
                             logMsg.push(`달(관통 ${ignore}/1.0배)`);
@@ -2363,7 +2377,7 @@ const Logic = {
                         break;
                     case 'reaper_realm': // 사신강림: 마방 50% 관통 + 1배율
                         {
-                            let ignore = Math.floor(tgtStats.mdef * 0.5);
+                            let ignore = Math.floor(rawMdef * 0.5);
                             def = Math.max(0, def - ignore);
                             mult += 1.0;
                             logMsg.push(`사신(관통 ${ignore}/1.0배)`);
@@ -2498,6 +2512,7 @@ const Logic = {
             'party_all_stats_mana_cost',
             'alternate_party_atk_matk_turn',
             'field_kaleidoscope_each_turn',
+            'deck_turn_modulo_force_crit',
             'alternate_skill_type_mana',
             'opening_self_atk_party_mdef_down'
         ].includes(t.type)) {
@@ -2505,6 +2520,10 @@ const Logic = {
         }
 
         if (t.type === 'vanguard_delayed_mana_restore' && idx === 0) {
+            active = true;
+        }
+
+        if (t.type === 'vanguard_moon_bless_every_3_turns' && idx === 0) {
             active = true;
         }
 

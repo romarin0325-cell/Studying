@@ -30,7 +30,12 @@ function run() {
   vm.createContext(sandbox);
 
   const cardRoot = path.join(process.cwd(), 'card');
-  assert.strictEqual(fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8').includes('#448af f'), false);
+  const indexHtml = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
+  const rpgFeaturesSource = fs.readFileSync(path.join(cardRoot, 'rpg_features.js'), 'utf8');
+  assert.strictEqual(indexHtml.includes('#448af f'), false);
+  assert(indexHtml.includes('올스탯 +${Math.round(b.multiplier * 100)}%'));
+  assert(rpgFeaturesSource.includes('올스탯 +${Math.round(b.multiplier * 100)}%'));
+  assert(/\.lumi-chat-top\s*\{[^}]*flex-direction:\s*column;/s.test(indexHtml));
   ['data.js', 'logic.js', 'battle_runtime.js', 'rpg_features.js'].forEach(fileName => {
     const filePath = path.join(cardRoot, fileName);
     vm.runInContext(fs.readFileSync(filePath, 'utf8'), sandbox, { filename: filePath });
@@ -68,7 +73,7 @@ function run() {
       ['comet_tracker', '혜성추적자', 'rare', 'fire', 'balancer', '2026-10-01', [345, 65, 100, 55, 60]],
       ['prophet', '예언자', 'legend', 'water', 'buffer', '2026-10-01', [500, 90, 110, 75, 85]],
       ['fireworks_girl', '폭죽소녀', 'epic', 'fire', 'dealer', '2026-10-15', [390, 100, 80, 55, 55]],
-      ['astrologer', '점성술사', 'epic', 'water', 'dealer', null, [390, 90, 95, 60, 65]],
+      ['astrologer', '점성술사', 'epic', 'water', 'buffer', null, [390, 90, 85, 60, 70]],
       ['sun_moon_sword_maiden', '일월검희', 'legend', 'light', 'dealer', null, [500, 130, 110, 65, 70]]
     ];
     const bonusWaveIds = bonusWaveExpectations.map(entry => entry[0]);
@@ -176,8 +181,98 @@ function run() {
       ],
       ['phy', 3, 30, 1.5, '[1,2,3]', 'burn', 2]
     );
-    assert.strictEqual(getCard('paladin').skills.length, 4);
+    assert.strictEqual(getCard('paladin').skills.length, 3);
     assert.strictEqual(getCard('victoria').skills.length, 3);
+
+    const auroraReflection = getCard('aurora').skills.find(skill => skill.name === '리플렉션');
+    assert.strictEqual(auroraReflection.effects[0].id, 'silence');
+    assert.strictEqual(auroraReflection.desc.includes('침묵'), true);
+
+    const transAres = getCard('trans_ares');
+    const absoluteArmor = transAres.skills.find(skill => skill.name === '앱솔루트아머');
+    const terraSword = transAres.skills.find(skill => skill.name === '테라소드');
+    assert.strictEqual(
+      JSON.stringify(absoluteArmor.effects),
+      JSON.stringify([{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }])
+    );
+    assert.deepStrictEqual([absoluteArmor.tier, terraSword.tier], [3, 2]);
+    assert.strictEqual(JSON.stringify(terraSword.effects), JSON.stringify([{ type: 'field_buff', id: 'arena' }]));
+
+    assert.strictEqual(getCard('ash').trait.desc.startsWith('애쉬가 생존해 있을 경우,'), true);
+    assert.strictEqual(getCard('jasmine_christmas').trait.desc.startsWith('자스민이 생존해 있을 경우,'), true);
+
+    const succubus = getCard('succubus');
+    assert.deepStrictEqual(
+      [succubus.name, succubus.grade, succubus.element, succubus.role, succubus.unlockSource, succubus.releaseDate],
+      ['서큐버스', 'rare', 'dark', 'debuffer', 'bonus', '2026-10-30']
+    );
+    assert.deepStrictEqual(
+      [succubus.stats.hp, succubus.stats.atk, succubus.stats.matk, succubus.stats.def, succubus.stats.mdef],
+      [340, 70, 95, 55, 65]
+    );
+    assert.strictEqual(succubus.trait.type, 'death_debuff');
+    assert.strictEqual(succubus.trait.debuff, 'silence');
+    assert.strictEqual(
+      JSON.stringify(succubus.skills.find(skill => skill.name === '다크판타지').effects),
+      JSON.stringify([
+        { type: 'consume_debuff_fixed', debuff: 'darkness', count: 1, mult: 1.0, customLog: '암흑 1스택 소모!' },
+        { type: 'debuff', id: 'weak' },
+        { type: 'debuff', id: 'corrosion' },
+        { type: 'debuff', id: 'curse' }
+      ])
+    );
+
+    const trauma = getCard('trauma');
+    assert.deepStrictEqual(
+      [trauma.name, trauma.grade, trauma.element, trauma.role, trauma.unlockSource, trauma.releaseDate || null],
+      ['트라우마', 'epic', 'dark', 'dealer', 'hidden', null]
+    );
+    assert.deepStrictEqual(
+      [trauma.stats.hp, trauma.stats.atk, trauma.stats.matk, trauma.stats.def, trauma.stats.mdef],
+      [400, 75, 115, 65, 75]
+    );
+    assert.deepStrictEqual(
+      [trauma.trait.type, trauma.trait.ratio],
+      ['leader_hp_cost_on_skill', 0.35]
+    );
+    assert.strictEqual(
+      JSON.stringify(trauma.skills.find(skill => skill.name === '스티그마').effects),
+      JSON.stringify([{ type: 'debuff', id: 'curse' }, { type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'darkness' }])
+    );
+    assert.strictEqual(
+      JSON.stringify(trauma.skills.find(skill => skill.name === '마인드브레이커').effects),
+      JSON.stringify([{ type: 'delayed_attack', turns: 3 }])
+    );
+
+    const greatDetective = getCard('great_detective');
+    assert.deepStrictEqual(
+      [greatDetective.name, greatDetective.grade, greatDetective.element, greatDetective.role, greatDetective.unlockSource, greatDetective.releaseDate || null],
+      ['명탐정', 'epic', 'water', 'balancer', 'hidden', null]
+    );
+    assert.deepStrictEqual(
+      [greatDetective.stats.hp, greatDetective.stats.atk, greatDetective.stats.matk, greatDetective.stats.def, greatDetective.stats.mdef],
+      [395, 90, 90, 65, 65]
+    );
+    assert.deepStrictEqual([greatDetective.trait.type, greatDetective.trait.mod], ['deck_turn_modulo_force_crit', 5]);
+    assert.strictEqual(
+      JSON.stringify(greatDetective.skills.find(skill => skill.name === '루시드플래시').effects),
+      JSON.stringify([{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }])
+    );
+
+    const blueMoonPriest = getCard('blue_moon_priest');
+    assert.deepStrictEqual(
+      [blueMoonPriest.name, blueMoonPriest.grade, blueMoonPriest.element, blueMoonPriest.role, blueMoonPriest.unlockSource, blueMoonPriest.releaseDate],
+      ['푸른달의사제', 'legend', 'water', 'buffer', 'bonus', '2026-10-30']
+    );
+    assert.deepStrictEqual(
+      [blueMoonPriest.stats.hp, blueMoonPriest.stats.atk, blueMoonPriest.stats.matk, blueMoonPriest.stats.def, blueMoonPriest.stats.mdef],
+      [500, 90, 120, 75, 80]
+    );
+    assert.deepStrictEqual([blueMoonPriest.trait.type, blueMoonPriest.trait.mod], ['vanguard_moon_bless_every_3_turns', 3]);
+    assert.strictEqual(
+      JSON.stringify(blueMoonPriest.skills.find(skill => skill.name === '창조의기도').effects),
+      JSON.stringify([{ type: 'delayed_attack_field', turns: 3, field: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }])
+    );
 
     const featureHost = {
       global: { unlocked_special_cards: [] },
@@ -189,6 +284,7 @@ function run() {
       .map(card => card.id)
       .filter(id => datedWaveIds.includes(id))
       .sort();
+    const october30BonusIds = ['succubus', 'blue_moon_priest'];
     const expectedReleasedIds = ids => [...ids].sort();
     assert.deepStrictEqual(releasedWaveIds(new Date(2026, 6, 31, 12)), []);
     assert.deepStrictEqual(
@@ -224,6 +320,18 @@ function run() {
     assert.deepStrictEqual(
       releasedWaveIds(new Date(2026, 9, 15, 12)),
       expectedReleasedIds(datedWaveIds)
+    );
+    assert.strictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 9, 29, 12))
+        .some(card => october30BonusIds.includes(card.id)),
+      false
+    );
+    assert.deepStrictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 9, 30, 12))
+        .filter(card => october30BonusIds.includes(card.id))
+        .map(card => card.id)
+        .sort(),
+      october30BonusIds.slice().sort()
     );
     assert(featureHost.getHiddenBonusCards().some(card => card.id === 'astrologer'));
     assert(featureHost.getHiddenBonusCards().some(card => card.id === 'sun_moon_sword_maiden'));
@@ -791,6 +899,191 @@ function run() {
       renderBattleView: quiet,
       renderBattleControls: quiet
     });
+
+    // Ash and Christmas Jasmine retaliate only while their own card is alive.
+    const deadAsh = buildWaveUnit('ash', ['ash'], 0);
+    const ashKiller = makeUnit({ hp: 5000, maxHp: 5000, buffs: {} });
+    const ashLinkedRpg = makeRpg(deadAsh, ['ash']);
+    deadAsh.isDead = true;
+    ashLinkedRpg.battle.players = [deadAsh];
+    BattleRuntime.handleLinkedDeathTraits(ashLinkedRpg, deadAsh, ashKiller);
+    assert.strictEqual(ashKiller.hp, 5000);
+
+    const deadChristmasJasmine = buildWaveUnit('jasmine_christmas', ['jasmine_christmas'], 0);
+    const jasmineKiller = makeUnit({ hp: 5000, maxHp: 5000, buffs: {} });
+    const jasmineLinkedRpg = makeRpg(deadChristmasJasmine, ['jasmine_christmas']);
+    deadChristmasJasmine.isDead = true;
+    jasmineLinkedRpg.battle.players = [deadChristmasJasmine];
+    BattleRuntime.handleLinkedDeathTraits(jasmineLinkedRpg, deadChristmasJasmine, jasmineKiller);
+    assert.strictEqual(jasmineKiller.hp, 5000);
+
+    // Great Detective applies its deck-wide fifth-turn critical and conditional debuffs.
+    const detectiveSource = buildWaveUnit('great_detective', ['great_detective'], 0);
+    detectiveSource.baseCrit = -100;
+    const detectiveTarget = makeUnit({ def: 0, mdef: 0, buffs: {} });
+    const lucidFlash = detectiveSource.skills.find(skill => skill.name === '루시드플래시');
+    assert.strictEqual(
+      Logic.calculateDamage(detectiveSource, detectiveTarget, lucidFlash, [], ['deck_turn_modulo_force_crit'], quiet, 'default', [], 4, []).isCrit,
+      false
+    );
+    assert.strictEqual(
+      Logic.calculateDamage(detectiveSource, detectiveTarget, lucidFlash, [], ['deck_turn_modulo_force_crit'], quiet, 'default', [], 5, []).isCrit,
+      true
+    );
+    const detectiveRpg = makeRpg(detectiveSource, ['great_detective']);
+    detectiveRpg.battle.turn = 5;
+    BattleRuntime.applySkillEffects(detectiveRpg, detectiveSource, detectiveRpg.battle.enemy, lucidFlash);
+    assert.deepStrictEqual(
+      [detectiveRpg.battle.enemy.buffs.silence, detectiveRpg.battle.enemy.buffs.curse, detectiveRpg.battle.enemy.buffs.divine],
+      [1, 1, 1]
+    );
+    const finalAnswer = detectiveSource.skills.find(skill => skill.name === '파이널앤서');
+    const finalAnswerTurnFour = Logic.calculateDamage(
+      detectiveSource, detectiveTarget, finalAnswer, [], [], quiet, 'default', [], 4, []
+    ).dmg;
+    const finalAnswerTurnFive = Logic.calculateDamage(
+      detectiveSource, detectiveTarget, finalAnswer, [], [], quiet, 'default', [], 5, []
+    ).dmg;
+    assert.strictEqual(finalAnswerTurnFive, finalAnswerTurnFour * 2);
+
+    // The Blue Moon Priest vanguard trait remains active after its owner dies.
+    assert.strictEqual(
+      Logic.calculateInitialStats(getCard('blue_moon_priest'), ['blue_moon_priest'], GameUtils.getAllCards(), 0).activeTrait,
+      'vanguard_moon_bless_every_3_turns'
+    );
+    assert.strictEqual(
+      Logic.calculateInitialStats(getCard('blue_moon_priest'), ['blue_moon_priest'], GameUtils.getAllCards(), 1).activeTrait,
+      null
+    );
+    const fallenMoonPriest = buildWaveUnit('blue_moon_priest', ['blue_moon_priest', 'marshmallow'], 0);
+    const moonFallback = buildWaveUnit('marshmallow', ['blue_moon_priest', 'marshmallow'], 1);
+    const moonTraitRpg = makeRpg(fallenMoonPriest, ['blue_moon_priest', 'marshmallow']);
+    fallenMoonPriest.isDead = true;
+    moonTraitRpg.battle.players = [fallenMoonPriest, moonFallback];
+    moonTraitRpg.battle.activeTraits = ['vanguard_moon_bless_every_3_turns'];
+    moonTraitRpg.battle.turn = 3;
+    moonTraitRpg.battle.isNewTurn = true;
+    BattleRuntime.TurnManager.startPlayerTurn(moonTraitRpg);
+    assert.strictEqual(moonTraitRpg.battle.fieldBuffs.some(buff => buff.name === 'moon_bless'), true);
+
+    const originalEndPlayerTurnForNewCards = BattleRuntime.TurnManager.endPlayerTurn;
+    BattleRuntime.TurnManager.endPlayerTurn = quiet;
+
+    // Creation Prayer holds both its field and debuff effects until the delayed hit resolves.
+    const creationCaster = buildWaveUnit('blue_moon_priest', ['blue_moon_priest'], 0);
+    const creationRpg = makeRpg(creationCaster, ['blue_moon_priest']);
+    creationRpg.battle.enemy = makeUnit({ id: 'creation-target', hp: 5000, maxHp: 5000, buffs: {} });
+    const creationPrayer = creationCaster.skills.find(skill => skill.name === '창조의기도');
+    BattleRuntime.executeSkill(creationRpg, creationCaster, creationRpg.battle.enemy, creationPrayer);
+    assert.strictEqual(creationRpg.battle.fieldBuffs.some(buff => buff.name === 'sanctuary'), false);
+    assert.strictEqual(creationRpg.battle.enemy.buffs.divine, undefined);
+    const resolvedCreationPrayer = creationRpg.battle.delayedEffects[0].skill;
+    BattleRuntime.executeSkill(creationRpg, creationCaster, creationRpg.battle.enemy, resolvedCreationPrayer, true);
+    assert.strictEqual(creationRpg.battle.fieldBuffs.some(buff => buff.name === 'sanctuary'), true);
+    assert.strictEqual(creationRpg.battle.enemy.buffs.divine, 1);
+
+    // Trauma drains max-HP-based leader health when a skill actually resolves and permits death traits.
+    const traumaCaster = buildWaveUnit('trauma', ['trauma', null, 'succubus'], 0);
+    const traumaLeader = buildWaveUnit('succubus', ['trauma', null, 'succubus'], 2);
+    const traumaRpg = makeRpg(traumaCaster, ['trauma', null, 'succubus']);
+    traumaRpg.battle.players = [traumaCaster, null, traumaLeader];
+    traumaRpg.battle.enemy = makeUnit({ id: 'trauma-target', hp: 5000, maxHp: 5000, buffs: {} });
+    const traumaTestSkill = { name: '검증용 스킬', type: 'sup', cost: 0, effects: [] };
+    const traumaLeaderHp = [];
+    for (let use = 0; use < 3; use++) {
+      traumaRpg.battle.phase = 'player-ready';
+      assert.strictEqual(BattleRuntime.executeSkill(traumaRpg, traumaCaster, traumaRpg.battle.enemy, traumaTestSkill), true);
+      traumaLeaderHp.push(traumaLeader.hp);
+    }
+    assert.deepStrictEqual(traumaLeaderHp, [221, 102, 0]);
+    assert.strictEqual(traumaLeader.isDead, true);
+    assert.strictEqual(traumaRpg.battle.enemy.buffs.silence, 1);
+
+    const delayedTraumaCaster = buildWaveUnit('trauma', ['trauma', null, 'succubus'], 0);
+    const delayedTraumaLeader = buildWaveUnit('succubus', ['trauma', null, 'succubus'], 2);
+    const delayedTraumaRpg = makeRpg(delayedTraumaCaster, ['trauma', null, 'succubus']);
+    delayedTraumaRpg.battle.players = [delayedTraumaCaster, null, delayedTraumaLeader];
+    delayedTraumaRpg.battle.enemy = makeUnit({ id: 'delayed-trauma-target', hp: 5000, maxHp: 5000, buffs: {} });
+    const mindBreaker = delayedTraumaCaster.skills.find(skill => skill.name === '마인드브레이커');
+    BattleRuntime.executeSkill(delayedTraumaRpg, delayedTraumaCaster, delayedTraumaRpg.battle.enemy, mindBreaker);
+    assert.strictEqual(delayedTraumaLeader.hp, 340);
+    BattleRuntime.executeSkill(
+      delayedTraumaRpg,
+      delayedTraumaCaster,
+      delayedTraumaRpg.battle.enemy,
+      delayedTraumaRpg.battle.delayedEffects[0].skill,
+      true
+    );
+    assert.strictEqual(delayedTraumaLeader.hp, 221);
+
+    // Behemoth's stun and Death Roulette both wait for a delayed attack to trigger.
+    const delayedBehemoth = buildWaveUnit('behemoth', ['behemoth'], 0);
+    delayedBehemoth.baseCrit = -100;
+    const delayedBehemothRpg = makeRpg(delayedBehemoth, ['behemoth']);
+    delayedBehemothRpg.battle.enemy = makeUnit({ id: 'behemoth-target', hp: 1, maxHp: 1, buffs: {} });
+    delayedBehemothRpg.hasArtifact = id => id === 'death_roulette';
+    const earthquake = delayedBehemoth.skills.find(skill => skill.name === '어스퀘이크');
+    const originalDelayedTimingRandom = Math.random;
+    Math.random = () => 0;
+    BattleRuntime.executeSkill(delayedBehemothRpg, delayedBehemoth, delayedBehemothRpg.battle.enemy, earthquake);
+    assert.strictEqual(delayedBehemothRpg.battle.enemy.buffs.stun, undefined);
+    assert.strictEqual(delayedBehemoth.isDead, false);
+    BattleRuntime.executeSkill(
+      delayedBehemothRpg,
+      delayedBehemoth,
+      delayedBehemothRpg.battle.enemy,
+      delayedBehemothRpg.battle.delayedEffects[0].skill,
+      true
+    );
+    Math.random = originalDelayedTimingRandom;
+    assert.strictEqual(delayedBehemothRpg.battle.enemy.buffs.stun, 1);
+    assert.strictEqual(delayedBehemothRpg.battle.enemy.hp <= 0, true);
+    assert.strictEqual(delayedBehemoth.isDead, true);
+
+    const multiDelayedBehemoth = buildWaveUnit('behemoth', ['behemoth'], 0);
+    multiDelayedBehemoth.baseCrit = -100;
+    const multiDelayedRpg = makeRpg(multiDelayedBehemoth, ['behemoth']);
+    multiDelayedRpg.battle.enemy = makeUnit({ id: 'multi-behemoth-target', hp: 10000, maxHp: 10000, buffs: {} });
+    multiDelayedRpg.hasArtifact = id => id === 'death_roulette';
+    const multiDelayedSkill = {
+      name: '검증용 다단 지연', type: 'mag', cost: 0, val: 1.0,
+      effects: [{ type: 'multi_delayed_attack', turns: [1, 2] }]
+    };
+    const originalMultiDelayedTimingRandom = Math.random;
+    Math.random = () => 0;
+    BattleRuntime.executeSkill(multiDelayedRpg, multiDelayedBehemoth, multiDelayedRpg.battle.enemy, multiDelayedSkill);
+    assert.strictEqual(multiDelayedRpg.battle.delayedEffects.length, 2);
+    assert.strictEqual(multiDelayedRpg.battle.enemy.buffs.stun, undefined);
+    assert.strictEqual(multiDelayedBehemoth.isDead, false);
+    BattleRuntime.executeSkill(
+      multiDelayedRpg,
+      multiDelayedBehemoth,
+      multiDelayedRpg.battle.enemy,
+      multiDelayedRpg.battle.delayedEffects[0].skill,
+      true
+    );
+    Math.random = originalMultiDelayedTimingRandom;
+    assert.strictEqual(multiDelayedRpg.battle.enemy.buffs.stun, 1);
+    assert.strictEqual(multiDelayedBehemoth.isDead, true);
+
+    BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurnForNewCards;
+
+    // Dream Form penetration is additive with curse: 20% curse + 30% moon + 50% reaper fully removes 100 MDEF.
+    const dreamAdditiveSource = makeUnit({ matk: 100, baseCrit: -100, proto: getCard('trans_lumi'), buffs: {} });
+    const dreamAdditiveTarget = makeUnit({ mdef: 100, buffs: { curse: 1 }, baseCrit: -100 });
+    const dreamAdditiveResult = Logic.calculateDamage(
+      dreamAdditiveSource,
+      dreamAdditiveTarget,
+      getCard('trans_lumi').skills.find(skill => skill.name === '꿈의형태'),
+      [{ name: 'moon_bless' }, { name: 'reaper_realm' }],
+      [],
+      quiet,
+      'default',
+      [],
+      1,
+      []
+    );
+    assert.strictEqual(dreamAdditiveResult.dmg, 520);
 
     // Transcendence Lumi restores 20 MP on normal attacks, capped at max MP.
     const dreamLumi = makeUnit({

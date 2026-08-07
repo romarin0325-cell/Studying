@@ -753,7 +753,7 @@ const BONUS_CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
             { name: '리버설', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 마법공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '침묵 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'silence' }, { type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '라비린스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'corrosion', mult: 2.0 }] }
         ]
     },
@@ -926,7 +926,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'ash', name: '애쉬', grade: 'epic', element: 'fire', role: 'dealer', unlockSource: 'hidden',
         stats: { hp: 420, atk: 120, matk: 70, def: 50, mdef: 50 },
-        trait: { type: 'ally_death_base_atk_phy', val: 3.0, desc: '아군이 사망할 때 자신의 기본 공격력 기준 물리 반격' },
+        trait: { type: 'ally_death_base_atk_phy', val: 3.0, desc: '애쉬가 생존해 있을 경우, 아군 사망 시 자신의 기본 공격력 기준 물리 반격' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '아마겟돈', type: 'phy', tier: 3, cost: 30, val: 7.0, desc: '현재 생명력 50% 소모, 다음 턴 휴식', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.5 }, { type: 'self_debuff', id: 'stun', duration: 1 }] },
@@ -1152,7 +1152,6 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 400, atk: 105, matk: 75, def: 70, mdef: 70 },
         trait: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100, desc: '중견 배치 시 공격력 100% 증가' },
         skills: [
-            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '홀리그라운드', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1배율, 필드버프 성역 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }] },
             { name: '듀얼브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '아레나 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3.0 }] }
@@ -1216,8 +1215,8 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'astrologer', name: '점성술사', grade: 'epic', element: 'water', role: 'dealer', unlockSource: 'hidden',
-        stats: { hp: 390, atk: 90, matk: 95, def: 60, mdef: 65 },
+        id: 'astrologer', name: '점성술사', grade: 'epic', element: 'water', role: 'buffer', unlockSource: 'hidden',
+        stats: { hp: 390, atk: 90, matk: 85, def: 60, mdef: 70 },
         trait: { type: 'alternate_party_atk_matk_turn', val: 50, desc: '덱 전체가 홀수 턴에는 공격력 50% 감소·마법공격력 50% 증가, 짝수 턴에는 마법공격력 50% 감소·공격력 50% 증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
@@ -1233,6 +1232,46 @@ const BONUS_CARD_EXPANSION = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '솔라크레센토', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '태양의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
             { name: '루나크레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'succubus', name: '서큐버스', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
+        stats: { hp: 340, atk: 70, matk: 95, def: 55, mdef: 65 },
+        trait: { type: 'death_debuff', debuff: 'silence', desc: '사망 시 적에게 침묵 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '페이탈핑크', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] },
+            { name: '다크판타지', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '암흑 소모 후 약화, 부식, 저주 부여', effects: [{ type: 'consume_debuff_fixed', debuff: 'darkness', count: 1, mult: 1.0, customLog: '암흑 1스택 소모!' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] }
+        ]
+    },
+    {
+        id: 'trauma', name: '트라우마', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 400, atk: 75, matk: 115, def: 65, mdef: 75 },
+        trait: { type: 'leader_hp_cost_on_skill', ratio: 0.35, desc: '스킬 발동 시 대장 생명력 35% 소모' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '스티그마', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 저주, 침묵, 암흑 부여', effects: [{ type: 'debuff', id: 'curse' }, { type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'darkness' }] },
+            { name: '마인드브레이커', type: 'mag', tier: 3, cost: 30, val: 7.0, desc: '3턴 뒤 발동하는 마법 7배율 공격', effects: [{ type: 'delayed_attack', turns: 3 }] }
+        ]
+    },
+    {
+        id: 'great_detective', name: '명탐정', grade: 'epic', element: 'water', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
+        trait: { type: 'deck_turn_modulo_force_crit', mod: 5, desc: '덱 전체가 5의 배수 턴에 반드시 치명타' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '루시드플래시', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 5의 배수 턴에 침묵, 저주, 디바인 부여', effects: [{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }] },
+            { name: '파이널앤서', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 5의 배수 턴에는 위력 2배', effects: [{ type: 'turn_modulo_dmg', mod: 5, mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'blue_moon_priest', name: '푸른달의사제', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
+        stats: { hp: 500, atk: 90, matk: 120, def: 75, mdef: 80 },
+        trait: { type: 'vanguard_moon_bless_every_3_turns', mod: 3, desc: '선봉 배치 시 3의 배수 턴마다 달의축복 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '창조의기도', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '3턴 뒤 발동, 성역 전개 및 디바인 1스택 부여', effects: [{ type: 'delayed_attack_field', turns: 3, field: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '파괴의기도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '사신강림 소모 시 위력 4배', effects: [{ type: 'consume_field_buff_dmg', buff: 'reaper_realm', mult: 4.0 }] }
         ]
     }
 ];
@@ -1407,7 +1446,7 @@ const SPECIAL_CARD_OVERRIDES = {
         ...card,
         role: 'balancer',
         stats: { hp: 500, atk: 85, matk: 110, def: 85, mdef: 85 },
-        trait: { type: 'ally_light_death_base_matk_mag', val: 2.0, desc: '덱의 빛속성 카드가 사망할 때 자신의 기본 마공 기준 2배율 반격' },
+        trait: { type: 'ally_light_death_base_matk_mag', val: 2.0, desc: '자스민이 생존해 있을 경우, 덱의 빛속성 카드 사망 시 자신의 기본 마공 기준 2배율 반격' },
         skills: [
             cloneData(SHARED_MAGIC_GUARD_SKILL),
             {
@@ -1738,8 +1777,8 @@ const BONUS_TRANSCENDENCE_CARDS = [
             desc: '덱에 불 3장 이상 시 공격력 100% 증가'
         },
         skills: [
-            { name: '앱솔루트아머', type: 'sup', tier: 2, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
-            { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나, 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '테라소드', type: 'phy', tier: 2, cost: 30, val: 2.0, desc: '필드버프 아레나 발동', effects: [{ type: 'field_buff', id: 'arena' }] },
             { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
         ]
     },
