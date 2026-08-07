@@ -137,6 +137,63 @@ async function run() {
         assert(portraitModalBounds.top >= -1 && portraitModalBounds.bottom <= 569);
 
         await normal.page.evaluate(() => RPG.closeInfoModal());
+        const learningModalLayout = await normal.page.evaluate(() => {
+            const measureModal = id => {
+                const modal = document.getElementById(id);
+                modal.classList.add('active');
+                const rect = modal.querySelector('.modal-content').getBoundingClientRect();
+                modal.classList.remove('active');
+                return {
+                    left: rect.left,
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    width: rect.width,
+                    height: rect.height
+                };
+            };
+
+            const tutoring = document.getElementById('modal-tutoring');
+            tutoring.classList.add('active');
+            const portrait = tutoring.querySelector('.lumi-modal-portrait');
+            const portraitRect = portrait.getBoundingClientRect();
+            const portraitWidth = portrait.clientWidth;
+            const portraitHeight = portrait.clientHeight;
+            const dialogueHeight = document.getElementById('tutoring-content').getBoundingClientRect().height;
+            const portraitFlexShrink = getComputedStyle(portrait).flexShrink;
+            tutoring.classList.remove('active');
+
+            return {
+                modals: [
+                    'modal-lecture-view',
+                    'modal-wordbook',
+                    'modal-tutoring',
+                    'modal-lumi-question',
+                    'modal-date'
+                ].map(measureModal),
+                portraitWidth,
+                portraitHeight,
+                portraitOuterWidth: portraitRect.width,
+                portraitOuterHeight: portraitRect.height,
+                portraitFlexShrink,
+                dialogueHeight
+            };
+        });
+        learningModalLayout.modals.forEach(bounds => {
+            assert(bounds.left >= 7 && bounds.right <= 313);
+            assert(bounds.top >= 0 && bounds.bottom <= 568);
+            assert(bounds.width >= 303 && bounds.width <= 305);
+            assert(bounds.height >= 482 && bounds.height <= 484);
+        });
+        assert.strictEqual(learningModalLayout.portraitFlexShrink, '0');
+        assert(Math.abs(
+            learningModalLayout.portraitHeight / learningModalLayout.portraitWidth - (4 / 3)
+        ) < 0.02);
+        assert(Math.abs(
+            learningModalLayout.portraitOuterHeight / learningModalLayout.portraitOuterWidth - (4 / 3)
+        ) < 0.03);
+        assert(learningModalLayout.dialogueHeight > 100);
+
         await normal.page.setViewportSize({ width: 568, height: 320 });
         const landscapeState = await normal.page.evaluate(() => {
             const screen = document.getElementById('screen-title');

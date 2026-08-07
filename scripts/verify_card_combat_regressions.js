@@ -60,6 +60,28 @@ function run() {
     assert.strictEqual(getCard('prism_twin').skills.find(skill => skill.name === '프리즘셔플').effects[0].type, 'prism_shuffle_field');
     assert.strictEqual(getCard('joker').skills.find(skill => skill.name === '레인보우룰렛').effects[0].type, 'roulette_field');
 
+    const cherryPrince = getCard('cherry_prince');
+    assert.deepStrictEqual(
+      [cherryPrince.trait.type, cherryPrince.trait.val, cherryPrince.trait.desc],
+      ['burn_stack_phy_pen', 0.3, '작열 1스택당 적의 물리방어력 30% 관통']
+    );
+    const cherryPhysicalSkill = cherryPrince.skills.find(skill => skill.type === 'phy');
+    const cherryDamageLog = [];
+    const cherryDamage = Logic.calculateDamage(
+      makeUnit({ atk: cherryPrince.stats.atk, proto: cherryPrince }),
+      makeUnit({ def: 100, buffs: { burn: 1 } }),
+      cherryPhysicalSkill,
+      [],
+      [],
+      message => cherryDamageLog.push(message),
+      'default',
+      [],
+      1,
+      []
+    ).dmg;
+    assert.strictEqual(cherryDamage, 132);
+    assert(cherryDamageLog.some(message => message.includes('물리방어 30% 관통')));
+
     // The complete August–October wave is registered with deterministic release gates.
     const bonusWaveExpectations = [
       ['discipline_captain', '선도부장', 'normal', 'nature', 'balancer', '2026-08-01', [330, 65, 65, 60, 60]],
