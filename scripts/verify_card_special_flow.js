@@ -71,6 +71,22 @@ async function run() {
 
     const originalRandom = Math.random;
     const season = RPG.getCurrentSpecialSeason();
+    [
+      [5, 0],
+      [6, 0.15],
+      [12, 0.20],
+      [18, 0.25],
+      [24, 0.30],
+      [30, 0.35],
+      [36, 0.40],
+      [42, 0.40]
+    ].forEach(([stage, expectedChance]) => {
+      assert(
+        RPG.getSpecialMissionUnlockChance(stage) === expectedChance,
+        'special_unlock_chance',
+        `stage ${stage}: ${RPG.getSpecialMissionUnlockChance(stage)}`
+      );
+    });
     Math.random = () => 0;
     const unlockMsg = RPG.tryUnlockSpecialMissionFromDreamCorridor(6);
     Math.random = originalRandom;
