@@ -294,12 +294,12 @@
 
 
     getSpecialMissionUnlockChance(stageNumber) {
-        if (stageNumber >= 36) return 0.35;
-        if (stageNumber >= 30) return 0.30;
-        if (stageNumber >= 24) return 0.25;
-        if (stageNumber >= 18) return 0.20;
-        if (stageNumber >= 12) return 0.15;
-        if (stageNumber >= 6) return 0.10;
+        if (stageNumber >= 36) return 0.40;
+        if (stageNumber >= 30) return 0.35;
+        if (stageNumber >= 24) return 0.30;
+        if (stageNumber >= 18) return 0.25;
+        if (stageNumber >= 12) return 0.20;
+        if (stageNumber >= 6) return 0.15;
         return 0;
     },
 
