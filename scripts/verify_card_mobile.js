@@ -210,6 +210,36 @@ async function run() {
         assert.strictEqual(landscapeState.lastButtonVisible, true);
 
         await normal.page.setViewportSize({ width: 390, height: 844 });
+        const artifactChaosMenuLayout = await normal.page.evaluate(() => {
+            RPG.initNewGame('artifact_chaos');
+            RPG.toMenu();
+
+            const area = document.getElementById('menu-chaos-area');
+            const artifactButton = document.getElementById('btn-menu-artifact-check');
+            const shuffleButton = area.querySelector('button[onclick="RPG.reshuffleChaosPool()"]');
+            const areaStyle = getComputedStyle(area);
+            const artifactRect = artifactButton.getBoundingClientRect();
+            const shuffleRect = shuffleButton.getBoundingClientRect();
+
+            return {
+                areaDisplay: areaStyle.display,
+                flexDirection: areaStyle.flexDirection,
+                artifactVisible: getComputedStyle(artifactButton).display !== 'none',
+                artifactLeft: artifactRect.left,
+                artifactRight: artifactRect.right,
+                artifactWidth: artifactRect.width,
+                shuffleLeft: shuffleRect.left,
+                shuffleWidth: shuffleRect.width
+            };
+        });
+        assert.strictEqual(artifactChaosMenuLayout.areaDisplay, 'flex');
+        assert.strictEqual(artifactChaosMenuLayout.flexDirection, 'row');
+        assert.strictEqual(artifactChaosMenuLayout.artifactVisible, true);
+        assert(artifactChaosMenuLayout.artifactRight <= artifactChaosMenuLayout.shuffleLeft);
+        assert(Math.abs(
+            artifactChaosMenuLayout.artifactWidth - artifactChaosMenuLayout.shuffleWidth
+        ) <= 1);
+
         const corruptSaveState = await normal.page.evaluate(() => {
             const raw = '{broken-json';
             RPG.toTitle();
