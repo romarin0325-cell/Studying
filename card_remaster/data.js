@@ -1,23 +1,27 @@
+/**
+ * @file data.js
+ * @module GameData
+ * @description
+ * Contains static data definitions for cards, enemies, and their skill/trait schemas.
+ * Acts as the read-only dictionary for game content.
+ *
+ * Role guide:
+ * - dealer: pure damage finisher focused on closing fights.
+ * - balancer: mixed offense/utility that covers multiple situations.
+ * - buffer: field buff or protection specialist that raises party stability.
+ * - debuffer: pressure card that stacks status effects or disruption.
+ * - looter: reward-oriented finisher that helps card acquisition flow.
+ */
 const CARDS = [
     // --- Legend ---
     {
         id: 'deep_lord', name: '심해의주인', grade: 'legend', element: 'water', role: 'dealer',
         stats: { hp: 520, atk: 110, matk: 120, def: 70, mdef: 70 },
-        trait: { type: 'syn_water_3_atk_matk', val: 50, desc: '덱에 물 3장일시 물리공격력 마법공격력 50% 증가' },
+        trait: { type: 'syn_water_3_atk_matk', val: 50, desc: '덱에 물 3장 이상 시 물리공격력 마법공격력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '월광해류', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개 제거하고 위력 2배', effects: [{ type: 'remove_field_buff_dmg', mult: 2.0 }] },
             { name: '심연의포옹', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적이 디버프 3개 이상일 때 위력 2배', effects: [{ type: 'cond_target_debuff_3_dmg', mult: 2.0 }] }
-        ]
-    },
-    {
-        id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
-        stats: { hp: 510, atk: 115, matk: 135, def: 60, mdef: 60 },
-        trait: { type: 'normal_attack_burn_divine', desc: '일반공격시 적에게 작열, 디바인 부여' },
-        skills: [
-            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 2.0 }] },
-            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
         ]
     },
     {
@@ -53,7 +57,7 @@ const CARDS = [
     {
         id: 'rumi', name: '루미', grade: 'legend', element: 'water', role: 'buffer',
         stats: { hp: 500, atk: 90, matk: 120, def: 80, mdef: 90 },
-        trait: { type: 'syn_water_nature', desc: '덱에 물 자연이 있을 경우, 문라이트세레나에 트윙클파티 필드버프 추가발동' },
+        trait: { type: 'syn_water_nature', desc: '덱에 물과 자연이 있을 경우, 문라이트세레나 발동 시 트윙클파티 추가 발동' },
         skills: [
             { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '필드버프 스타파우더 발동', effects: [{ type: 'field_buff', id: 'star_powder' }] },
             { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, desc: '필드버프 달의축복 발동', effects: [{ type: 'field_buff', id: 'moon_bless' }] },
@@ -73,7 +77,7 @@ const CARDS = [
     {
         id: 'world_tree', name: '세계수', grade: 'legend', element: 'nature', role: 'buffer',
         stats: { hp: 600, atk: 90, matk: 90, def: 60, mdef: 60 },
-        trait: { type: 'syn_nature_3_all', val: 30, desc: '덱이 전부 자연일 시 공격/마공/방어/마방 30%증가' },
+        trait: { type: 'syn_nature_3_all', val: 30, desc: '덱이 전부 자연일 시 공격/마공/방어/마방 30% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '대지의분노', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 대지의축복 발동', effects: [{ type: 'field_buff', id: 'earth_bless' }] },
@@ -123,19 +127,9 @@ const CARDS = [
 
     // --- Epic ---
     {
-        id: 'sun_priestess', name: '태양의무녀', grade: 'epic', element: 'nature', role: 'buffer', unlockSource: 'bonus',
-        stats: { hp: 400, atk: 75, matk: 105, def: 65, mdef: 75 },
-        trait: { type: 'death_field_buff_count_dmg', val: 2.0, desc: '사망시 적용중인 필드버프수 x2배율 대미지' },
-        skills: [
-            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '풍요의축제', type: 'sup', tier: 3, cost: 30, desc: '작열스택 소모시 태양의축복, 없을시 대지의축복', effects: [{ type: 'consume_all_burn_cond_buff' }] },
-            { name: '태양의춤', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 2.0 }] }
-        ]
-    },
-    {
         id: 'storm_sage', name: '폭풍의현자', grade: 'epic', element: 'nature', role: 'debuffer',
         stats: { hp: 380, atk: 75, matk: 110, def: 60, mdef: 75 },
-        trait: { type: 'syn_nature_3_matk', val: 50, desc: '자연속성 3덱일시 마법공격력 50%증가' },
+        trait: { type: 'syn_nature_3_matk', val: 50, desc: '덱에 자연 3장 이상 시 마법공격력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '러스트브리즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 약화 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
@@ -185,7 +179,7 @@ const CARDS = [
     {
         id: 'flame_sage', name: '화염의현자', grade: 'epic', element: 'fire', role: 'buffer',
         stats: { hp: 380, atk: 75, matk: 105, def: 65, mdef: 80 },
-        trait: { type: 'syn_fire_3_crit', val: 30, desc: '덱에 불 3장일시 치명타 확률 30%증가' },
+        trait: { type: 'syn_fire_3_crit', val: 30, desc: '덱에 불 3장 이상 시 치명타율 30% 증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '프로미넌스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열스택 추가', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
@@ -195,7 +189,7 @@ const CARDS = [
     {
         id: 'avalanche_maid', name: '아발란체메이드', grade: 'epic', element: 'water', role: 'balancer',
         stats: { hp: 410, atk: 95, matk: 90, def: 60, mdef: 60 },
-        trait: { type: 'syn_water_3_ice_age', val: 0, desc: '덱에 물 3장일시 아이스에이지 최대배율 대폭 증가' },
+        trait: { type: 'syn_water_3_ice_age', val: 0, desc: '덱에 물 3장 이상 시 아이스에이지 최대배율 대폭 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '빙하의일격', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
@@ -205,7 +199,7 @@ const CARDS = [
     {
         id: 'archangel', name: '대천사', grade: 'epic', element: 'light', role: 'balancer',
         stats: { hp: 400, atk: 70, matk: 95, def: 65, mdef: 80 },
-        trait: { type: 'syn_light_dark_matk_mdef', val: 50, desc: '덱에 빛, 어둠이 있을 경우 마법공격력, 마법방어력 50%증가' },
+        trait: { type: 'syn_light_dark_matk_mdef', val: 50, desc: '덱에 빛과 어둠이 있을 경우 마법공격력/마법방어력 50% 증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '성역전개', type: 'sup', tier: 2, cost: 20, desc: '필드버프 성역 발동 및 적에게 디바인 1스택 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }] },
@@ -225,7 +219,7 @@ const CARDS = [
     {
         id: 'ghost_king', name: '고스트킹', grade: 'epic', element: 'dark', role: 'debuffer',
         stats: { hp: 390, atk: 80, matk: 100, def: 60, mdef: 75 },
-        trait: { type: 'syn_dark_3_matk', val: 50, desc: '덱에 3장 어둠일시 마법공격력 50%증가' },
+        trait: { type: 'syn_dark_3_matk', val: 50, desc: '덱에 어둠 3장 이상 시 마법공격력 50% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '고스트소울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인, 암흑 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'darkness' }] },
@@ -244,16 +238,6 @@ const CARDS = [
     },
 
     // --- Rare ---
-    {
-        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
-        stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
-        trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
-        skills: [
-            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '자장가', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '30%확률로 적에게 스턴 부여', effects: [{ type: 'chance_debuff', id: 'stun', chance: 0.3, duration: 1 }] },
-            { name: '솜사탕', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] }
-        ]
-    },
     {
         id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 45 },
@@ -317,11 +301,11 @@ const CARDS = [
     {
         id: 'golem', name: '골렘', grade: 'rare', element: 'nature', role: 'balancer',
         stats: { hp: 385, atk: 75, matk: 55, def: 80, mdef: 40 },
-        trait: { type: 'syn_nature_3_golem', val: 30, desc: '덱에 자연 3장일시 공격력 방어력 30%증가' },
+        trait: { type: 'syn_nature_3_golem', val: 30, desc: '덱에 자연 3장 이상 시 공격력/방어력 30% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
-            { name: '록스매시', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+            { name: '차지어택', type: 'phy', tier: 2, cost: 20, val: 3.0, desc: '다음턴 휴식 (대지의축복 시 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
+            { name: '콜로세움', type: 'sup', tier: 3, cost: 30, desc: '필드버프 아레나 부여, 적에게 약화 부여', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'debuff', id: 'weak' }] }
         ]
     },
     {
@@ -347,7 +331,7 @@ const CARDS = [
     {
         id: 'silent_librarian', name: '침묵의사서', grade: 'rare', element: 'water', role: 'debuffer',
         stats: { hp: 330, atk: 70, matk: 95, def: 55, mdef: 75 },
-        trait: { type: 'death_dmg_mag', val: 2.0, desc: '사망시 적에게 200% 마법대미지' },
+        trait: { type: 'death_dmg_mag', val: 3.0, desc: '사망시 적에게 300% 마법대미지' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '사일런트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
@@ -413,7 +397,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '스노우샷', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
-            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '밤토끼/은토끼 시너지 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_night_rabbit', mult: 2.0 }] }
+            { name: '실버스톰', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] }
         ]
     },
     {
@@ -421,7 +405,7 @@ const CARDS = [
         stats: { hp: 300, atk: 70, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'syn_silver_rabbit', val: 50, desc: '눈토끼 혹은 밤토끼가 덱에 있을시 물공 마공 50% 증가' },
         skills: [
-            { name: '헤븐리루어', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'synergy_active', trait: 'syn_silver_rabbit', mult: 2.0 }] },
+            { name: '헤븐리루어', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '특성 발동 중 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] },
             { name: '깡총깡총', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '어둠 상태시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] }
         ]
@@ -439,7 +423,7 @@ const CARDS = [
     {
         id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer',
         stats: { hp: 310, atk: 65, matk: 70, def: 50, mdef: 50 },
-        trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛 불이 있을시 마법공격력 50%증가' },
+        trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛과 불이 있을 경우 마법공격력 50% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '캔디버스트', type: 'mag', tier: 1, cost: 10, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
@@ -484,16 +468,6 @@ const CARDS = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '저주의불꽃', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 부여', effects: [{ type: 'debuff', id: 'curse' }] },
             { name: '침묵의불꽃', type: 'sup', tier: 1, cost: 10, desc: '침묵, 작열 부여', effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'burn', stack: 1 }] }
-        ]
-    },
-    {
-        id: 'joker', name: '조커', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus',
-        stats: { hp: 280, atk: 70, matk: 70, def: 45, mdef: 45 },
-        trait: { type: 'joker_wild', desc: '이 카드는 모든 속성, 모든 이름으로 취급' },
-        skills: [
-            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '레인보우룰렛', type: 'sup', tier: 10, cost: 100, desc: '모든 필드버프 교체', effects: [{ type: 'roulette_field' }] },
-            { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 랜덤 디버프 2종 부여', effects: [{ type: 'wild_card_debuff' }] }
         ]
     },
 
@@ -565,7 +539,7 @@ const BONUS_CARDS = [
     {
         id: 'gray', name: '그레이', grade: 'legend', element: 'dark', role: 'dealer',
         stats: { hp: 480, atk: 145, matk: 125, def: 65, mdef: 65 },
-        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '영혼절단', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~10배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 10.0 }] },
@@ -614,7 +588,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '봉인부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식/약화/침묵/저주/암흑 중 랜덤 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['corrosion', 'weak', 'silence', 'curse', 'darkness'] }] },
-            { name: '폭염부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1종 소모, 대미지 2배', effects: [{ type: 'consume_random_debuff_fixed_mult', count: 1, mult: 2.0, pool: ['burn', 'divine', 'corrosion', 'weak', 'silence', 'curse', 'darkness', 'stun'] }] }
+            { name: '폭염부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1종 소모, 대미지 2배', effects: [{ type: 'consume_random_debuff_fixed_mult', count: 1, mult: 2.0, pool: ['burn', 'divine', 'corrosion', 'weak', 'silence', 'curse', 'darkness', 'stun', 'temptation'] }] }
         ]
     },
     {
@@ -648,11 +622,22 @@ const BONUS_CARDS = [
         ]
     },
 
+    {
+        id: 'ancient_soul', name: '에인션트소울', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 510, atk: 115, matk: 135, def: 60, mdef: 60 },
+        trait: { type: 'normal_attack_burn_divine', desc: '일반공격시 적에게 작열, 디바인 부여' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '성염', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '필드버프 성역 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sanctuary', mult: 2.0 }] },
+            { name: '영혼수확', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.5 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.5 }, { type: 'clear_target_debuffs' }] }
+        ]
+    },
+
     // --- Epic ---
     {
         id: 'priest_of_end', name: '종말의사제', grade: 'epic', element: 'dark', role: 'buffer',
         stats: { hp: 400, atk: 55, matk: 105, def: 80, mdef: 80 },
-        trait: { type: 'syn_dark_3_all_stats', val: 40, desc: '덱에 어둠 3장 이상 시 공격/방어/마법공격력/마법방어력 40% 증가' },
+        trait: { type: 'syn_dark_3_all_stats', val: 40, desc: '덱이 전부 어둠일 시 공격/마공/방어/마방 40% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
@@ -692,7 +677,7 @@ const BONUS_CARDS = [
     {
         id: 'eclipse_queen', name: '이클립스퀸', grade: 'epic', element: 'dark', role: 'balancer',
         stats: { hp: 395, atk: 110, matk: 85, def: 65, mdef: 65 },
-        trait: { type: 'syn_dark_3_party_atk', val: 50, desc: '덱에 어둠 3장 이상 시 파티 전체 공격력 50% 증가' },
+        trait: { type: 'syn_dark_3_party_atk', val: 50, desc: '덱이 전부 어둠일 시 파티 전체 공격력 50% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '섀도우코로나', type: 'phy', tier: 2, cost: 20, val: 2.5, desc: '암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
@@ -707,6 +692,17 @@ const BONUS_CARDS = [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '댄싱대거', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '하트브레이커', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '기절 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
+        ]
+    },
+
+    {
+        id: 'sun_priestess', name: '태양의무녀', grade: 'epic', element: 'nature', role: 'buffer', unlockSource: 'bonus',
+        stats: { hp: 400, atk: 75, matk: 105, def: 65, mdef: 75 },
+        trait: { type: 'death_field_buff_count_dmg', val: 2.0, desc: '사망시 적용중인 필드버프수 x2배율 대미지' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '풍요의축제', type: 'sup', tier: 3, cost: 30, desc: '작열스택 소모시 태양의축복, 없을시 대지의축복', effects: [{ type: 'consume_all_burn_cond_buff' }] },
+            { name: '태양의춤', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'burn', count: 1, mult: 2.0 }] }
         ]
     },
 
@@ -757,18 +753,29 @@ const BONUS_CARDS = [
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
             { name: '리버설', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 마법공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '침묵 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'silence' }, { type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '라비린스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'corrosion', mult: 2.0 }] }
         ]
     },
     {
-        id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer',
-        stats: { hp: 350, atk: 75, matk: 95, def: 60, mdef: 60 },
+        id: 'time_magician', name: '시간의마술사', grade: 'rare', element: 'dark', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 330, atk: 70, matk: 90, def: 50, mdef: 55 },
         trait: { type: 'instant_delayed_skills', desc: '덱의 지연 스킬이 즉시 발동' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '엑셀레이터', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
             { name: '데스클록', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
+        ]
+    },
+
+    {
+        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
+        trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '자장가', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '30%확률로 적에게 스턴 부여', effects: [{ type: 'chance_debuff', id: 'stun', chance: 0.3, duration: 1 }] },
+            { name: '솜사탕', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] }
         ]
     },
 
@@ -799,7 +806,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
             { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -822,6 +829,16 @@ const BONUS_CARDS = [
             { name: '솔라플레어', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '사용 후 2턴 뒤에 공격', effects: [{ type: 'delayed_attack', turns: 2 }] },
             { name: '어쓰블라썸', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '대지의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] }
         ]
+    },
+    {
+        id: 'joker', name: '조커', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus',
+        stats: { hp: 280, atk: 70, matk: 70, def: 45, mdef: 45 },
+        trait: { type: 'joker_wild', desc: '이 카드는 모든 속성, 모든 이름으로 취급' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '레인보우룰렛', type: 'sup', tier: 10, cost: 100, desc: '모든 필드버프 교체', effects: [{ type: 'roulette_field' }] },
+            { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 랜덤 디버프 2종 부여', effects: [{ type: 'wild_card_debuff' }] }
+        ]
     }
 ];
 
@@ -831,8 +848,8 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 430, atk: 115, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'looter', desc: '이 카드로 승리 시 추가 드로우' },
         skills: [
-            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '갓킬러', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 빛속성 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'light', mult: 2.0 }] }
         ]
     },
@@ -849,11 +866,31 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'cherry_prince', name: '체리프린스', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus',
         stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
-        trait: { type: 'burn_stack_phy_pen', val: 0.2, desc: '작열 1스택당 적의 물리방어력 20% 관통' },
+        trait: { type: 'burn_stack_phy_pen', val: 0.3, desc: '작열 1스택당 적의 물리방어력 30% 관통' },
         skills: [
             { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
             { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
+        ]
+    },
+    {
+        id: 'sylphid', name: '실피드', grade: 'legend', element: 'nature', role: 'dealer', unlockSource: 'bonus',
+        stats: { hp: 480, atk: 150, matk: 100, def: 65, mdef: 60 },
+        trait: { type: 'opening_atk_matk', val: 50, desc: '3턴 이내 공격력/마법공격력 50% 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '실프스탭', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '3턴간 지속되는 필드버프 질풍 발동', effects: [{ type: 'field_buff', id: 'gale', durationTurns: 3 }] },
+            { name: '템페스트크로', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '질풍 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'gale', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
+        trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '스위트드롭', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '스타파우더 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'star_powder', mult: 2.0 }] },
+            { name: '시트러스윙크', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '트윙클파티 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'twinkle_party', mult: 2.0 }] }
         ]
     },
     {
@@ -869,11 +906,31 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'santa', name: '산타', grade: 'epic', element: 'light', role: 'buffer', unlockSource: 'bonus',
         stats: { hp: 400, atk: 100, matk: 100, def: 60, mdef: 60 },
-        trait: { type: 'syn_light_3_party_def_mdef', val: 30, desc: '덱이 전부 빛속성일 때 덱 전체 방어력/마법방어력 30% 증가' },
+        trait: { type: 'syn_light_3_party_def_mdef', val: 30, desc: '덱이 전부 빛일 시 파티 전체 방어력/마법방어력 30% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격을 1회 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '프레젠트', type: 'sup', tier: 3, cost: 30, desc: '랜덤한 필드버프를 부여', effects: [{ type: 'random_field_buff' }] },
             { name: '징글벨', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1~5배율, 적에게 디바인 부여', effects: [{ type: 'random_mult', min: 1.0, max: 5.0 }, { type: 'debuff', id: 'divine', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'guardian', name: '가디언', grade: 'epic', element: 'nature', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 410, atk: 110, matk: 65, def: 70, mdef: 75 },
+        trait: { type: 'guardian_hidden_trait', val: 30, guardReduction: 0.75, desc: '선봉 배치 시 공격력 30% 증가 / 덱 전체의 [가드] 스킬 피해 감소율을 75%로 강화' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '배틀필드', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
+            { name: '판게아리버스', type: 'mag', tier: 3, cost: 30, val: 7.0, desc: '4턴 뒤 발동하는 마법 공격', effects: [{ type: 'delayed_attack', turns: 4 }] }
+        ]
+    },
+    {
+        id: 'ash', name: '애쉬', grade: 'epic', element: 'fire', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 420, atk: 120, matk: 70, def: 50, mdef: 50 },
+        trait: { type: 'ally_death_base_atk_phy', val: 3.0, desc: '애쉬가 생존해 있을 경우, 아군 사망 시 자신의 기본 공격력 기준 물리 반격' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '아마겟돈', type: 'phy', tier: 3, cost: 30, val: 7.0, desc: '현재 생명력 50% 소모, 다음 턴 휴식', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.5 }, { type: 'self_debuff', id: 'stun', duration: 1 }] },
+            { name: '드림파이어', type: 'mag', tier: 3, cost: 30, val: 1.5, desc: '마법 공격 후 회피 태세 진입', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] }
         ]
     },
     {
@@ -907,28 +964,645 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'black_swan', name: '블랙스완', grade: 'normal', element: 'dark', role: 'dealer', unlockSource: 'hidden',
+        id: 'black_swan', name: '블랙스완', grade: 'normal', element: 'dark', role: 'dealer', unlockSource: 'bonus',
         stats: { hp: 310, atk: 60, matk: 90, def: 50, mdef: 55 },
-        trait: { type: 'syn_dark_full_party_crit', val: 20, desc: '덱 전체가 어둠속성인 경우 덱 전체 치명타율 20% 증가' },
+        trait: { type: 'syn_dark_full_party_crit', val: 20, desc: '덱이 전부 어둠일 시 파티 전체 치명타율 20% 증가' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '흑조의속삭임', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
             { name: '운명의무도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
         ]
     },
+
+    // ─── June 2026 Bonus Card Wave ──────────────────────────────────────────────
     {
-        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'bonus',
-        stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
-        trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
+        id: 'prism_twin', name: '프리즘트윈', grade: 'rare', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 340, atk: 75, matk: 85, def: 60, mdef: 65 },
+        trait: { type: 'self_normal_atk_dmg_boost', val: 2.0, desc: '이 카드의 일반공격 대미지 2배' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '프리즘셔플', type: 'mag', tier: 2, cost: 20, val: 2.5, desc: '현재 필드버프 수를 유지하며 랜덤 교체', effects: [{ type: 'prism_shuffle_field' }] },
+            { name: '일루미네이션', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '3턴 뒤 발동, 발동 시 랜덤 필드버프 부여', effects: [{ type: 'delayed_attack_random_field', turns: 3 }] }
+        ]
+    },
+    {
+        id: 'underdog', name: '언더독', grade: 'normal', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
+        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱에 일반등급이 3장 이상이고 대장 배치 시 공격력/마법공격력 100% 증가' },
+        skills: [
+            { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
+            { name: '기가크러셔', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '마법 4배율, 다음 턴 행동 불가', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
+        trait: { type: 'dessert_kingdom_crit_eva_boost', val: 20, desc: '디저트킹덤 카드 전체 치명타율/회피율 20% 증가' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '스위트드롭', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '스타파우더 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'star_powder', mult: 2.0 }] },
-            { name: '시트러스윙크', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '트윙클파티 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'twinkle_party', mult: 2.0 }] }
+            { name: '그랜드케이크', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '스타파우더 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'star_powder', mult: 3.0 }] },
+            { name: '캔디메테오', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '트윙클파티 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'twinkle_party', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
+        trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력 50% 감소' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '드래곤크로', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '스컬브레스', type: 'mag', tier: 3, cost: 30, val: 5.0, desc: '현재 생명력 30% 감소', effects: [{ type: 'self_hp_cost_ratio', ratio: 0.3 }] }
+        ]
+    },
+    {
+        id: 'dragon_miko', name: '용혈의무녀', grade: 'epic', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-07-01',
+        stats: { hp: 395, atk: 80, matk: 95, def: 65, mdef: 70 },
+        trait: { type: 'death_dmg_mag_stun_cond', val: 5.0, condition: 'deck_has_dragon', desc: '덱에 드래곤이 존재할 경우 사망 시 500% 마법대미지와 기절 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '스파클', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 트윙클파티 부여, 작열 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '버닝스피릿', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'perfect_aurora', name: '퍼펙트아우로라', grade: 'legend', element: 'water', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-07-01',
+        stats: { hp: 500, atk: 90, matk: 130, def: 75, mdef: 85 },
+        trait: { type: 'field_buff_immune', desc: '이 카드는 필드버프를 받지 않는다' },
+        skills: [
+            { name: '진실의거울', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 상대의 물리공격 무효화', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '허실의거울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 상대의 마법공격 무효화', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '퍼펙트플랜', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '3턴 뒤 발동, 발동 시 약화/부식/침묵/저주/기절 부여', effects: [{ type: 'delayed_attack_debuffs', turns: 3, debuffs: ['weak', 'corrosion', 'silence', 'curse', 'stun'] }] }
+        ]
+    },
+    {
+        id: 'flare_ribbon', name: '플레어리본', grade: 'normal', element: 'fire', role: 'buffer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 325, atk: 55, matk: 60, def: 55, mdef: 50 },
+        trait: { type: 'cond_same_grade_skill_buff', skillName: '리듬하이', buff: 'sun_bless', desc: '덱 전체가 같은 등급일 경우 리듬하이 발동 시 태양의축복 추가 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '리듬하이', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여', effects: [{ type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '스파클래쉬', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율', effects: [] }
+        ]
+    },
+    {
+        id: 'entropy', name: '앤트로피', grade: 'rare', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        stats: { hp: 340, atk: 105, matk: 105, def: 50, mdef: 50 },
+        trait: { type: 'chaos_blessing_double', desc: '혼돈의 축복 효과가 2배로 적용된다' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '노바레퀴엠', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '필드버프를 전부 제거하고 제거한 수 x2.0 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 2.0 }] },
+            { name: '화이트노이즈', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적 디버프 1개당 배율 1.0 증가, 사용 후 적 디버프 해제', effects: [{ type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: 1.0 }, { type: 'clear_target_debuffs' }] }
+        ]
+    },
+    {
+        id: 'tinker_bell', name: '팅커벨', grade: 'rare', element: 'light', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-06-01',
+        stats: { hp: 345, atk: 60, matk: 100, def: 55, mdef: 65 },
+        trait: { type: 'death_dmg_mag_stun_same_grade', val: 5.0, desc: '덱 전체가 같은 등급일 경우 사망 시 500% 마법대미지와 기절 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '픽시더스트', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '디바인, 저주 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'curse' }] },
+            { name: '네버랜드', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인, 침묵 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'silence' }] }
+        ]
+    },
+    {
+        id: 'gumiho', name: '구미호', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-07-15',
+        stats: { hp: 390, atk: 70, matk: 105, def: 70, mdef: 70 },
+        trait: { type: 'cond_same_grade_matk_boost', val: 100, desc: '덱 전체가 같은 등급일 경우 마법공격력 100% 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '여우불', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '암흑 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
+            { name: '요화천벌', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '작열/디바인 전부 소모, 소모한 스택당 1.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 1.0 }, { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.0 }] }
+        ]
+    },
+    {
+        id: 'venom', name: '베놈', grade: 'legend', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-07-15',
+        stats: { hp: 520, atk: 115, matk: 100, def: 70, mdef: 70 },
+        trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'corrosion', desc: '사망시 400% 물리대미지 + 부식' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '피해 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '5턴에 걸쳐 매 턴 1배 마법대미지와 랜덤 디버프 부여', effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
+            { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
+        ]
+    },
+    {
+        id: 'dainichi_nyorai', name: '대일여래', grade: 'legend', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-07-30',
+        stats: { hp: 550, atk: 105, matk: 110, def: 75, mdef: 75 },
+        trait: { type: 'death_clear_field_add_buff', buff: 'earth_bless', desc: '사망시 모든 필드버프를 제거하고 대지의축복 부여' },
+        skills: [
+            { name: '오지관제', type: 'sup', tier: 1, cost: 10, desc: '가드 부여, 무작위 필드버프 생성', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'random_field_buff' }] },
+            { name: '일체지광', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '파쇄륜', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '모든 필드버프를 소모하고 제거한 수 x1.5 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 1.5 }] }
+        ]
+    },
+
+    // ─── August–October 2026 Bonus Card Wave ───────────────────────────────────
+    {
+        id: 'discipline_captain', name: '선도부장', grade: 'normal', element: 'nature', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-08-01',
+        stats: { hp: 330, atk: 65, matk: 65, def: 60, mdef: 60 },
+        trait: { type: 'vanguard_all_grade_party_def_mdef', gradeRequired: 'normal', val: 100, desc: '선봉 배치 및 덱 전체 일반등급 시 덱 전체 방어력/마법방어력 100% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '잔소리', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
+            { name: '기강확립', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+        ]
+    },
+    {
+        id: 'supernova', name: '초신성', grade: 'legend', element: 'fire', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-08-01',
+        stats: { hp: 500, atk: 125, matk: 105, def: 60, mdef: 60 },
+        trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'burn', stack: 3, logName: '초신성', desc: '사망 시 적에게 400% 물리대미지와 작열 3스택 부여' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '파이널버스트', type: 'phy', tier: 3, cost: 30, val: 6.0, desc: '물리 6배율, 사용 후 사망', effects: [{ type: 'suicide' }] },
+            { name: '코어멜트다운', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고 소모한 스택당 2.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.0 }] }
+        ]
+    },
+    {
+        id: 'shooting_star_boy', name: '별똥별소년', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-08-15',
+        stats: { hp: 290, atk: 85, matk: 60, def: 45, mdef: 55 },
+        trait: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 30, desc: '등장 후 2턴간 공격력 100% 증가 / 덱 전체 마법방어력 30% 감소' },
+        skills: [
+            { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
+            { name: '스타폴대쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '2배 물리 피해 (자신의 생명력이 100%일시 위력 2배)', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '슈팅플레어', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '마법 1.5배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'victoria', name: '빅토리아', grade: 'legend', element: 'light', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-08-15',
+        stats: { hp: 540, atk: 100, matk: 95, def: 80, mdef: 75 },
+        trait: { type: 'leader_field_stat_double', val: 2.0, desc: '대장 배치 시 아레나를 제외한 필드버프의 능력치 효과를 2배로 받음' },
+        skills: [
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '에태르랜스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '기적의증명', type: 'sup', tier: 3, cost: 30, desc: '3턴 뒤 필드버프 여신강림과 트윙클파티 부여', effects: [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }] }
+        ]
+    },
+    {
+        id: 'holy_night', name: '홀리밤', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-09-01',
+        stats: { hp: 300, atk: 85, matk: 55, def: 45, mdef: 45 },
+        trait: { type: 'death_dmg_phy', val: 3.0, desc: '사망 시 적에게 300% 물리대미지' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '샤이닝팝', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율', effects: [] },
+            { name: '라스트캐럴', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '디바인을 전부 소모하고 소모한 스택당 2.0배율 추가, 사용 후 사망', effects: [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2.0 }, { type: 'suicide' }] }
+        ]
+    },
+    {
+        id: 'paladin', name: '팔라딘', grade: 'epic', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-01',
+        stats: { hp: 400, atk: 105, matk: 75, def: 70, mdef: 70 },
+        trait: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100, desc: '중견 배치 시 공격력 100% 증가' },
+        skills: [
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '홀리그라운드', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1배율, 필드버프 성역 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }] },
+            { name: '듀얼브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '아레나 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3.0 }] }
+        ]
+    },
+    {
+        id: 'mad_scientist', name: '매드사이언티스트', grade: 'rare', element: 'nature', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-15',
+        stats: { hp: 350, atk: 80, matk: 80, def: 55, mdef: 55 },
+        trait: { type: 'party_all_stats_mana_cost', statVal: 30, costMult: 2.0, desc: '덱 전체 공격력/마법공격력/방어력/마법방어력 30% 증가 / 스킬 마나 소비 2배' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '익스페리먼트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '침묵 상태의 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'silence', mult: 2.0 }] },
+            { name: '다크인젝션', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
+        ]
+    },
+    {
+        id: 'grand_merchant', name: '대상인', grade: 'rare', element: 'light', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-09-15',
+        stats: { hp: 340, atk: 75, matk: 90, def: 55, mdef: 60 },
+        trait: { type: 'death_next_ally_max_mana', val: 20, desc: '사망 시 다음 아군의 최대마나와 현재마나 20 증가' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '마나콜렉트', type: 'sup', tier: 1, cost: 10, desc: '마나 30 회복', effects: [{ type: 'mana_restore', val: 30 }] },
+            { name: '골드러쉬', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '약화 상태의 적에게 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'weak', mult: 2.5 }] }
+        ]
+    },
+    {
+        id: 'comet_tracker', name: '혜성추적자', grade: 'rare', element: 'fire', role: 'balancer', unlockSource: 'bonus', releaseDate: '2026-10-01',
+        stats: { hp: 345, atk: 65, matk: 100, def: 55, mdef: 60 },
+        trait: { type: 'vanguard_delayed_mana_restore', val: 10, desc: '선봉 배치 시 덱의 지연 스킬이 실제 발동할 때 시전자가 마나 10 회복' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '코멧트래킹', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '2턴 뒤 발동하는 마법 4배율 공격', effects: [{ type: 'delayed_attack', turns: 2 }] },
+            { name: '코멧플레임', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'prophet', name: '예언자', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-10-01',
+        stats: { hp: 500, atk: 90, matk: 110, def: 75, mdef: 85 },
+        trait: { type: 'field_kaleidoscope_each_turn', desc: '매 턴 시작 시 모든 필드버프를 무작위로 변경' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '샤이닝오라클', type: 'sup', tier: 2, cost: 20, desc: '랜덤한 필드버프 생성', effects: [{ type: 'random_field_buff' }] },
+            { name: '슈퍼내추럴', type: 'sup', tier: 3, cost: 30, desc: '데스티니룰렛과 동일한 풀에서 랜덤 스킬 발동', effects: [{ type: 'random_skill_trigger_from_list' }] }
+        ]
+    },
+    {
+        id: 'fireworks_girl', name: '폭죽소녀', grade: 'epic', element: 'fire', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-10-15',
+        stats: { hp: 390, atk: 100, matk: 80, def: 55, mdef: 55 },
+        trait: { type: 'death_dmg_phy_same_grade', val: 8.0, desc: '덱 전체가 같은 등급일 경우 사망 시 적에게 800% 물리대미지' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            {
+                name: '페스티벌나이트', type: 'phy', tier: 3, cost: 30, val: 1.5,
+                desc: '1~3턴 뒤 연속 발동, 작열 상태의 적에게 대미지 2배',
+                effects: [
+                    { type: 'multi_delayed_attack', turns: [1, 2, 3], messages: ['첫번째 폭죽이 터진다!', '두번째 폭죽이 터진다!', '마지막 폭죽이 터진다!'] },
+                    { type: 'dmg_boost', condition: 'target_debuff', debuff: 'burn', mult: 2.0 }
+                ]
+            },
+            { name: '스파클캐논', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
+        ]
+    },
+    {
+        id: 'astrologer', name: '점성술사', grade: 'epic', element: 'water', role: 'buffer', unlockSource: 'hidden',
+        stats: { hp: 390, atk: 90, matk: 85, def: 60, mdef: 70 },
+        trait: { type: 'alternate_party_atk_matk_turn', val: 50, desc: '덱 전체가 홀수 턴에는 공격력 50% 감소·마법공격력 50% 증가, 짝수 턴에는 마법공격력 50% 감소·공격력 50% 증가' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '스텔라리딩', type: 'sup', tier: 3, cost: 30, desc: '달의축복 부여, 이미 있으면 소모하고 태양의축복 부여', effects: [{ type: 'moon_to_sun' }] },
+            { name: '솔라브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '태양의축복 소모 시 대미지 4배', effects: [{ type: 'consume_field_buff_dmg', buff: 'sun_bless', mult: 4.0 }] }
+        ]
+    },
+    {
+        id: 'sun_moon_sword_maiden', name: '일월검희', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 500, atk: 130, matk: 110, def: 65, mdef: 70 },
+        trait: { type: 'alternate_skill_type_mana', val: 10, desc: '이전에 사용한 스킬과 다른 타입의 스킬 사용 시 마나 10 회복' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '솔라크레센토', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '태양의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
+            { name: '루나크레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '달의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'succubus', name: '서큐버스', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
+        stats: { hp: 340, atk: 70, matk: 95, def: 55, mdef: 65 },
+        trait: { type: 'death_debuff', debuff: 'silence', desc: '사망 시 적에게 침묵 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '페이탈핑크', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] },
+            { name: '다크판타지', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '암흑 소모 후 약화, 부식, 저주 부여', effects: [{ type: 'consume_debuff_fixed', debuff: 'darkness', count: 1, mult: 1.0, customLog: '암흑 1스택 소모!' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] }
+        ]
+    },
+    {
+        id: 'trauma', name: '트라우마', grade: 'epic', element: 'dark', role: 'dealer', unlockSource: 'hidden',
+        stats: { hp: 400, atk: 75, matk: 115, def: 65, mdef: 75 },
+        trait: { type: 'leader_hp_cost_on_skill', ratio: 0.35, desc: '스킬 발동 시 대장 생명력 35% 소모' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '스티그마', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 저주, 침묵, 암흑 부여', effects: [{ type: 'debuff', id: 'curse' }, { type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'darkness' }] },
+            { name: '마인드브레이커', type: 'mag', tier: 3, cost: 30, val: 7.0, desc: '3턴 뒤 발동하는 마법 7배율 공격', effects: [{ type: 'delayed_attack', turns: 3 }] }
+        ]
+    },
+    {
+        id: 'great_detective', name: '명탐정', grade: 'epic', element: 'water', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
+        trait: { type: 'deck_turn_modulo_force_crit', mod: 5, desc: '덱 전체가 5의 배수 턴에 반드시 치명타' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '루시드플래시', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 5의 배수 턴에 침묵, 저주, 디바인 부여', effects: [{ type: 'turn_modulo_debuffs', mod: 5, debuffs: ['silence', 'curse', 'divine'] }] },
+            { name: '파이널앤서', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 5의 배수 턴에는 위력 2배', effects: [{ type: 'turn_modulo_dmg', mod: 5, mult: 2.0 }] }
+        ]
+    },
+    {
+        id: 'blue_moon_priest', name: '푸른달의사제', grade: 'legend', element: 'water', role: 'buffer', unlockSource: 'bonus', releaseDate: '2026-10-30',
+        stats: { hp: 500, atk: 90, matk: 120, def: 75, mdef: 80 },
+        trait: { type: 'vanguard_moon_bless_every_3_turns', mod: 3, desc: '선봉 배치 시 3의 배수 턴마다 달의축복 부여' },
+        skills: [
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '창조의기도', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '3턴 뒤 발동, 성역 전개 및 디바인 1스택 부여', effects: [{ type: 'delayed_attack_field', turns: 3, field: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '파괴의기도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '사신강림 소모 시 위력 4배', effects: [{ type: 'consume_field_buff_dmg', buff: 'reaper_realm', mult: 4.0 }] }
         ]
     }
 ];
 
 BONUS_CARDS.push(...BONUS_CARD_EXPANSION);
+
+const SPECIAL_CARD_VARIANTS = [
+    { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
+    { id: 'jasmine_valentine', name: '자스민(발렌타인)', baseCardId: 'jasmine', specialSeason: 'valentine' },
+    { id: 'rumi_valentine', name: '루미(발렌타인)', baseCardId: 'rumi', specialSeason: 'valentine' },
+    { id: 'luna_swimsuit', name: '루나(수영복)', baseCardId: 'luna', specialSeason: 'beach' },
+    { id: 'jasmine_swimsuit', name: '자스민(수영복)', baseCardId: 'jasmine', specialSeason: 'beach' },
+    { id: 'rumi_swimsuit', name: '루미(수영복)', baseCardId: 'rumi', specialSeason: 'beach' },
+    { id: 'zeke_swimsuit', name: '지크(수영복)', baseCardId: 'zeke', specialSeason: 'beach' },
+    { id: 'luna_halloween', name: '루나(할로윈)', baseCardId: 'luna', specialSeason: 'halloween' },
+    { id: 'zeke_halloween', name: '지크(할로윈)', baseCardId: 'zeke', specialSeason: 'halloween' },
+    { id: 'rumi_halloween', name: '루미(할로윈)', baseCardId: 'rumi', specialSeason: 'halloween' },
+    { id: 'luna_christmas', name: '루나(크리스마스)', baseCardId: 'luna', specialSeason: 'christmas' },
+    { id: 'jasmine_christmas', name: '자스민(크리스마스)', baseCardId: 'jasmine', specialSeason: 'christmas' },
+    { id: 'rumi_christmas', name: '루미(크리스마스)', baseCardId: 'rumi', specialSeason: 'christmas' },
+    // --- 토끼 시즌 변주 ---
+    { id: 'snow_rabbit_valentine', name: '눈토끼(발렌타인)', baseCardId: 'snow_rabbit', specialSeason: 'valentine' },
+    { id: 'night_rabbit_valentine', name: '밤토끼(발렌타인)', baseCardId: 'night_rabbit', specialSeason: 'valentine' },
+    { id: 'silver_rabbit_valentine', name: '은토끼(발렌타인)', baseCardId: 'silver_rabbit', specialSeason: 'valentine' },
+    { id: 'snow_rabbit_halloween', name: '눈토끼(할로윈)', baseCardId: 'snow_rabbit', specialSeason: 'halloween' },
+    { id: 'night_rabbit_halloween', name: '밤토끼(할로윈)', baseCardId: 'night_rabbit', specialSeason: 'halloween' },
+    { id: 'silver_rabbit_halloween', name: '은토끼(할로윈)', baseCardId: 'silver_rabbit', specialSeason: 'halloween' },
+    { id: 'snow_rabbit_swimsuit', name: '눈토끼(수영복)', baseCardId: 'snow_rabbit', specialSeason: 'beach' },
+    { id: 'night_rabbit_swimsuit', name: '밤토끼(수영복)', baseCardId: 'night_rabbit', specialSeason: 'beach' },
+    { id: 'silver_rabbit_swimsuit', name: '은토끼(수영복)', baseCardId: 'silver_rabbit', specialSeason: 'beach' },
+    { id: 'snow_rabbit_christmas', name: '눈토끼(크리스마스)', baseCardId: 'snow_rabbit', specialSeason: 'christmas' },
+    { id: 'night_rabbit_christmas', name: '밤토끼(크리스마스)', baseCardId: 'night_rabbit', specialSeason: 'christmas' },
+    { id: 'silver_rabbit_christmas', name: '은토끼(크리스마스)', baseCardId: 'silver_rabbit', specialSeason: 'christmas' }
+];
+
+function cloneData(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function cloneSkillByName(card, skillName) {
+    return cloneData(card.skills.find(skill => skill.name === skillName));
+}
+
+const SHARED_MAGIC_GUARD_SKILL = {
+    name: '매직가드',
+    type: 'sup',
+    tier: 1,
+    cost: 10,
+    desc: '마법공격 무효',
+    effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }]
+};
+
+const SANTA_FIELD_BUFF_POOL = [
+    'sun_bless',
+    'moon_bless',
+    'sanctuary',
+    'goddess_descent',
+    'earth_bless',
+    'twinkle_party',
+    'star_powder',
+    'arena'
+];
+
+const SPECIAL_CARD_OVERRIDES = {
+    'luna_valentine': card => ({
+        ...card,
+        stats: { hp: 480, atk: 130, matk: 125, def: 65, mdef: 65 },
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            cloneSkillByName(card, '이클립스'),
+            { name: '스위트커스', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+        ]
+    }),
+    'jasmine_valentine': card => ({
+        ...card,
+        stats: { hp: 500, atk: 85, matk: 125, def: 75, mdef: 80 },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '벨벳인챈트', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 필드버프 발렌타인 발동', effects: [{ type: 'field_buff', id: 'valentine' }] },
+            cloneSkillByName(card, '여신강림')
+        ]
+    }),
+    'rumi_valentine': card => ({
+        ...card,
+        role: 'balancer',
+        stats: { hp: 490, atk: 90, matk: 130, def: 80, mdef: 90 },
+        trait: { type: 'syn_water_light_heart_star', desc: '덱에 물과 빛이 있을 경우, 하트오버드라이브 발동 시 스타파우더 추가 발동' },
+        skills: [
+            { name: '초콜릿샤워', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 유혹과 침묵 부여', effects: [{ type: 'debuff', id: 'temptation' }, { type: 'debuff', id: 'silence' }] },
+            { name: '하트오버드라이브', type: 'sup', tier: 2, cost: 20, desc: '필드버프 발렌타인 발동', effects: [{ type: 'field_buff', id: 'valentine' }] },
+            cloneSkillByName(card, '매직가드')
+        ]
+    }),
+    'luna_swimsuit': card => ({
+        ...card,
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            { name: '루나틱스플래시', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (암흑 상태의 적에게 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: 2.0 }] },
+            { name: '나이트메어비치', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '사용 후 3턴 뒤에 공격', effects: [{ type: 'delayed_attack', turns: 3 }] }
+        ]
+    }),
+    'jasmine_swimsuit': card => ({
+        ...card,
+        stats: { hp: 500, atk: 85, matk: 120, def: 80, mdef: 80 },
+        trait: { type: 'death_field_buff_count_dmg', val: 2.0, desc: '사망 시 적용 중인 필드버프 수 x2배율 대미지' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '스플래시미라지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 태양의축복 상태에서 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
+            { name: '코랄블룸', type: 'sup', tier: 3, cost: 30, desc: '랜덤한 필드버프를 부여', effects: [{ type: 'random_field_buff' }] }
+        ]
+    }),
+    'rumi_swimsuit': card => ({
+        ...card,
+        stats: { hp: 490, atk: 90, matk: 130, def: 85, mdef: 85 },
+        trait: { type: 'syn_water_light_midnight_twinkle', desc: '덱에 물과 빛이 있을 경우, 미드나잇판타지 발동 시 트윙클파티 추가 발동' },
+        skills: [
+            { name: '소다블래스트', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 물속성 적에게 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_element', element: 'water', mult: 2.0 }] },
+            { name: '미드나잇판타지', type: 'sup', tier: 3, cost: 30, desc: '필드버프 태양의축복 발동', effects: [{ type: 'field_buff', id: 'sun_bless' }] },
+            cloneSkillByName(card, '매직가드')
+        ]
+    }),
+    'zeke_swimsuit': card => ({
+        ...card,
+        stats: { hp: 550, atk: 140, matk: 80, def: 60, mdef: 55 },
+        skills: [
+            cloneSkillByName(card, '가드'),
+            { name: '워터멜론크래시', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 자신의 생명력이 100%일 때 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'hp_full', mult: 2.0, log: 'HP 100% 특수 효과! 위력 2배!' }] },
+            { name: '코코넛드롭', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 적 생명력이 50% 이하일 때 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'target_hp_below', val: 0.5, mult: 2.0 }] }
+        ]
+    }),
+    'luna_halloween': card => ({
+        ...card,
+        stats: { hp: 480, atk: 130, matk: 125, def: 65, mdef: 65 },
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            { name: '펌킨크래시', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '암흑 1스택 소모, 암흑 상태의 적에게 대미지 3배', effects: [{ type: 'consume_debuff_fixed', debuff: 'darkness', count: 1, mult: 3.0 }] },
+            { name: '러브포션', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+        ]
+    }),
+    'zeke_halloween': card => ({
+        ...card,
+        stats: { hp: 530, atk: 120, matk: 120, def: 65, mdef: 50 },
+        skills: [
+            cloneSkillByName(card, '가드'),
+            { name: '에인션트버닝', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.0 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.0 }] },
+            { name: '본디지허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 침묵과 저주 부여', effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'curse' }] }
+        ]
+    }),
+    'rumi_halloween': card => ({
+        ...card,
+        role: 'debuffer',
+        stats: { hp: 490, atk: 110, matk: 130, def: 75, mdef: 75 },
+        trait: { type: 'death_multi_debuff_custom', debuffs: ['curse', 'corrosion', 'stun'], desc: '사망 시 적에게 저주, 부식, 기절 부여' },
+        skills: [
+            { name: '호핑스매시', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
+            { name: '탈리스만씰', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
+            cloneSkillByName(card, '매직가드')
+        ]
+    }),
+    'luna_christmas': card => ({
+        ...card,
+        role: 'dealer',
+        stats: { hp: 480, atk: 130, matk: 130, def: 60, mdef: 65 },
+        trait: { type: 'weekday_crit_bonus', weekday: 6, val: 35, desc: '토요일 치명타율 35% 증가' },
+        skills: [
+            cloneSkillByName(card, '회피태세'),
+            { name: '홀리메테오', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 1스택 소모하여 대미지 2배', effects: [{ type: 'consume_debuff_fixed', debuff: 'divine', count: 1, mult: 2.0 }] },
+            { name: '캔디크러쉬', type: 'phy', tier: 3, cost: 30, val: 5.0, desc: '다음 턴 행동 불가', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }] }
+        ]
+    }),
+    'jasmine_christmas': card => ({
+        ...card,
+        role: 'balancer',
+        stats: { hp: 500, atk: 85, matk: 110, def: 85, mdef: 85 },
+        trait: { type: 'ally_light_death_base_matk_mag', val: 2.0, desc: '자스민이 생존해 있을 경우, 덱의 빛속성 카드 사망 시 자신의 기본 마공 기준 2배율 반격' },
+        skills: [
+            cloneData(SHARED_MAGIC_GUARD_SKILL),
+            {
+                name: '얼티밋기프트',
+                type: 'sup',
+                tier: 3,
+                cost: 30,
+                desc: '5턴 뒤 랜덤한 필드버프 3종 부여',
+                effects: [{
+                    type: 'delayed_random_unique_field_buffs',
+                    turns: 5,
+                    count: 3,
+                    pool: SANTA_FIELD_BUFF_POOL
+                }]
+            },
+            { name: '미라클페스티벌', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 적에게 디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
+        ]
+    }),
+    'rumi_christmas': card => ({
+        ...card,
+        role: 'dealer',
+        stats: { hp: 490, atk: 100, matk: 130, def: 80, mdef: 80 },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
+        skills: [
+            cloneSkillByName(card, '매직가드'),
+            { name: '스타라이트캐롤', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
+            {
+                name: '오로라이그니션',
+                type: 'mag',
+                tier: 3,
+                cost: 30,
+                val: 2.5,
+                desc: '작열과 디바인을 전부 소모하고 소모한 스택당 1.5배율 추가',
+                effects: [
+                    { type: 'consume_debuff_all', debuff: 'burn', multPerStack: 1.5 },
+                    { type: 'consume_debuff_all', debuff: 'divine', multPerStack: 1.5 }
+                ]
+            }
+        ]
+    }),
+    // --- 토끼 발렌타인 변주 (페어 조건부 발렌타인 필드버프, 스탯 그대로) ---
+    'snow_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_snow', desc: '밤토끼 혹은 은토끼가 덱에 있을 경우 소다키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '소다키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_night', desc: '눈토끼 혹은 은토끼가 덱에 있을 경우 딥키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '딥키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '문라이트')
+        ]
+    }),
+    'silver_rabbit_valentine': card => ({
+        ...card,
+        trait: { type: 'syn_rabbit_valentine_silver', desc: '눈토끼 혹은 밤토끼가 덱에 있을 경우 화이트키스 사용시 발렌타인 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '화이트키스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율', effects: [] },
+            cloneSkillByName(card, '헤븐리루어')
+        ]
+    }),
+    // --- 토끼 할로윈 변주 (선봉 배치시 페어 토끼 강화, 스킬/스탯 그대로) ---
+    'snow_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_rabbit_peer_boost', peerIds: ['night_rabbit', 'silver_rabbit'], stat: ['matk', 'mdef'], val: 50, desc: '선봉 배치시 덱의 밤토끼/은토끼 마공·마방 50% 증가' }
+    }),
+    'night_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_rabbit_peer_boost', peerIds: ['snow_rabbit', 'silver_rabbit'], stat: ['atk', 'def'], val: 50, desc: '선봉 배치시 덱의 눈토끼/은토끼 물공·물방 50% 증가' }
+    }),
+    'silver_rabbit_halloween': card => ({
+        ...card,
+        trait: { type: 'halloween_rabbit_peer_boost', peerIds: ['snow_rabbit', 'night_rabbit'], stat: ['atk', 'matk'], val: 50, desc: '선봉 배치시 덱의 눈토끼/밤토끼 물공·마공 50% 증가' }
+    }),
+    // --- 토끼 수영복 변주 (강력한 디버프, 배리어 유지) ---
+    'snow_rabbit_swimsuit': card => ({
+        ...card,
+        trait: { type: 'syn_night_rabbit', val: 50, desc: '밤토끼 혹은 은토끼가 덱에 있을시 마공 마방 50% 증가' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '콜드스플래시', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '서머판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+        ]
+    }),
+    'night_rabbit_swimsuit': card => ({
+        ...card,
+        trait: { type: 'syn_snow_rabbit', val: 50, desc: '눈토끼 혹은 은토끼가 덱에 있을시 물공 물방 50% 증가' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '미드나잇다이빙', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] },
+            { name: '루나세레나데', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+        ]
+    }),
+    'silver_rabbit_swimsuit': card => ({
+        ...card,
+        trait: { type: 'syn_silver_rabbit', val: 50, desc: '눈토끼 혹은 밤토끼가 덱에 있을시 물공 마공 50% 증가' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '실버서핑', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '물리 2.5배율, 침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] },
+            { name: '선샤인로맨스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 유혹 부여', effects: [{ type: 'debuff', id: 'temptation' }] }
+        ]
+    }),
+    // --- 토끼 크리스마스 변주 (3장 조합 궁극 시너지) ---
+    'snow_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_trio', requiredPeers: ['night_rabbit', 'silver_rabbit'], stat: ['atk', 'matk', 'def', 'mdef'], val: 50, desc: '밤토끼와 은토끼가 모두 덱에 있으면 물공/마공/물방/마방 50% 증가' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라판타지', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 대미지 2배', effects: [{ type: 'dmg_boost', condition: 'source_trait_active', mult: 2.0 }] },
+            cloneSkillByName(card, '실버스톰')
+        ]
+    }),
+    'night_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'christmas_rabbit_trio_crit', requiredPeers: ['snow_rabbit', 'silver_rabbit'], val: 20, desc: '눈토끼와 은토끼가 모두 덱에 있으면 덱 전체 치명타 20% 증가' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라바이올렛', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 특성 발동시 약화·침묵·저주 부여', effects: [{ type: 'conditional_debuff_on_synergy', condition: 'source_trait_active', debuffs: ['weak', 'silence', 'curse'] }] },
+            cloneSkillByName(card, '문라이트')
+        ]
+    }),
+    'silver_rabbit_christmas': card => ({
+        ...card,
+        trait: { type: 'syn_christmas_rabbit_trio_gift', requiredPeers: ['snow_rabbit', 'night_rabbit'], desc: '눈토끼와 밤토끼가 모두 덱에 있으면 울트라기프트 사용시 성역+달의축복 추가 발동' },
+        skills: [
+            cloneSkillByName(card, '배리어'),
+            { name: '울트라기프트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '마법 2.5배율, 필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] },
+            cloneSkillByName(card, '헤븐리루어')
+        ]
+    })
+};
+
+const SPECIAL_CARDS = SPECIAL_CARD_VARIANTS.map(variant => {
+    const baseCard = [...CARDS, ...BONUS_CARDS].find(card => card.id === variant.baseCardId);
+    if (!baseCard) return null;
+
+    const specialCard = {
+        ...cloneData(baseCard),
+        id: variant.id,
+        name: variant.name,
+        specialCard: true,
+        specialSeason: variant.specialSeason,
+        specialBaseId: variant.baseCardId,
+        unlockSource: 'special'
+    };
+
+    const override = SPECIAL_CARD_OVERRIDES[variant.id];
+    return override ? override(specialCard) : specialCard;
+}).filter(Boolean);
 
 const ENDLESS_ENEMY_ROTATION = [
     'artificial_demon_god',
@@ -974,11 +1648,10 @@ const ENEMIES = [
         ]
     },
     {
-        id: 'demon_god', name: '마신', element: 'dark',
+        id: 'demon_god', name: '마신 벨제뷔트', element: 'dark',
         stats: { hp: 1400, atk: 110, matk: 110, def: 100, mdef: 100 },
         skills: [
             { name: '다크니스', type: 'mag', rate: 0.2, val: 2.0, desc: '2배 마법 피해', effects: [] },
-            { name: '데스핸드', type: 'phy', rate: 0.0, val: 2.0, desc: '기본 2배 (디버프 비례)', effects: [] },
             { name: '제노사이드', type: 'phy', rate: 0.0, val: 3.5, desc: '7/14턴 3.5배 물리', effects: [] }
         ]
     },
@@ -994,16 +1667,6 @@ const ENEMIES = [
 ];
 
 const TRANSCENDENCE_CARDS = [
-    {
-        id: 'trans_gray', name: '사신그레이', grade: 'transcendence', element: 'dark', role: 'dealer',
-        stats: { hp: 530, atk: 150, matk: 135, def: 75, mdef: 75 },
-        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 시 적 방어력 50% 추가 무시' },
-        skills: [
-            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
-            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타 확률 40%추가 (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
-        ]
-    },
     {
         id: 'trans_executor', name: '종언의집행자', grade: 'transcendence', element: 'dark', role: 'debuffer',
         stats: { hp: 560, atk: 125, matk: 125, def: 70, mdef: 70 },
@@ -1060,14 +1723,14 @@ const TRANSCENDENCE_CARDS = [
         trait: { type: 'behemoth_liberated_trait', val: 1.5, desc: '적이 디버프 3개 이상일 때 대미지 1.5배 / 스킬 사용 시 20% 확률로 적에게 스턴 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '월드브레이커', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] },
+            { name: '월드브레이커', type: 'phy', tier: 3, cost: 30, val: 4.0, desc: '다음 턴 휴식 (대지의축복 시 위력 2배)', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }, { type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0, customLog: "대지의 축복으로 월드브레이커의 위력이 강력해집니다!" }] },
             { name: '제로그라비티', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '다음 턴에 공격 (적에게 걸린 디버프 1종당 0.5배율 추가)', effects: [{ type: 'delayed_attack_debuff_scale', turns: 1, multPerDebuff: 0.5 }] }
         ]
     },
     {
         id: 'trans_lumi', name: '루미(꿈의형태)', grade: 'transcendence', element: 'water', role: 'buffer',
         stats: { hp: 540, atk: 90, matk: 140, def: 90, mdef: 100 },
-        trait: { type: 'cosmic_harmony_random_buff', desc: '코스믹하모니 사용시 태양의축복, 달의축복, 스타파우더 중 랜덤한 필드버프 생성' },
+        trait: { type: 'normal_attack_mana_restore', val: 20, desc: '일반 공격 시 마나 20 회복' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '코스믹하모니', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '랜덤 필드버프 생성 (태양/달/스타파우더)', effects: [{ type: 'random_field_buff_lumi' }] },
@@ -1077,6 +1740,16 @@ const TRANSCENDENCE_CARDS = [
 ];
 
 const BONUS_TRANSCENDENCE_CARDS = [
+    {
+        id: 'trans_gray', name: '사신그레이', grade: 'transcendence', element: 'dark', role: 'dealer',
+        stats: { hp: 530, atk: 150, matk: 135, def: 75, mdef: 75 },
+        trait: { type: 'crit_ignore_def_add', val: 0.5, desc: '치명타 발생시 방어/마방 50% 관통' },
+        skills: [
+            { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
+            { name: '보이드이터', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '2~4배율 랜덤 (달의축복 시 2~12배율)', effects: [{ type: 'random_mult_moon_boost', min: 2.0, max: 4.0, boostMax: 12.0 }] },
+            { name: '디멘션제로', type: 'phy', tier: 3, cost: 30, val: 3.0, desc: '치명타율 +40%p (4의 배수 턴에 대미지 2배)', effects: [{ type: 'turn_modulo_dmg', mod: 4, mult: 2.0 }, { type: 'force_crit_chance', val: 40 }] }
+        ]
+    },
     {
         id: 'trans_thor', name: '뇌신토르', grade: 'transcendence', element: 'light', role: 'dealer',
         stats: { hp: 530, atk: 110, matk: 150, def: 65, mdef: 85 },
@@ -1104,8 +1777,8 @@ const BONUS_TRANSCENDENCE_CARDS = [
             desc: '덱에 불 3장 이상 시 공격력 100% 증가'
         },
         skills: [
-            { name: '앱솔루트아머', type: 'sup', tier: 2, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
-            { name: '테라소드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '필드버프 아레나, 트윙클파티 발동', effects: [{ type: 'field_buff', id: 'arena' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '테라소드', type: 'phy', tier: 2, cost: 30, val: 2.0, desc: '필드버프 아레나 발동', effects: [{ type: 'field_buff', id: 'arena' }] },
             { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
         ]
     },
@@ -1122,12 +1795,22 @@ const BONUS_TRANSCENDENCE_CARDS = [
             { name: '트라이던트', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '전투 시작 후 5턴 이내일 때 대미지 2배', effects: [{ type: 'dmg_boost_turn_limit', maxTurn: 5, mult: 2.0 }] },
             { name: '어비스프레셔', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 1개를 제거하고 대미지 2배', effects: [{ type: 'remove_field_buff_dmg', mult: 2.0 }] }
         ]
+    },
+    {
+        id: 'trans_flora', name: '플로라', grade: 'transcendence', element: 'nature', role: 'buffer',
+        stats: { hp: 550, atk: 110, matk: 120, def: 85, mdef: 85 },
+        trait: { type: 'syn_nature_3_party_def_mdef', val: 50, desc: '덱이 전부 자연일 시 파티 전체 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '제네시스블룸', type: 'sup', tier: 3, cost: 30, desc: '필드버프 태양의축복, 대지의축복 발동', effects: [{ type: 'field_buff', id: 'sun_bless' }, { type: 'field_buff', id: 'earth_bless' }] },
+            { name: '블러썸템페스트', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '반드시 치명타로 적중', effects: [{ type: 'force_crit' }] }
+        ]
     }
 ];
 
 ENEMIES.push(
     {
-        id: 'flora', name: '꽃의 여신 플로라', element: 'nature',
+        id: 'flora', name: '꽃의 여신 플로라', element: 'nature', hiddenBossFor: 'artificial_demon_god', bonusTranscendenceReward: 'trans_flora',
         stats: { hp: 700, atk: 70, matk: 70, def: 70, mdef: 70 },
         skills: [
             { name: '제네시스블룸', type: 'sup', rate: 0.0, val: 0, desc: '대미지 반감, 자신에게 걸린 모든 디버프를 해제', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'clear_self_debuffs' }] },
@@ -1135,7 +1818,7 @@ ENEMIES.push(
         ]
     },
     {
-        id: 'gray', name: '사신 그레이', element: 'dark',
+        id: 'gray', name: '사신 그레이', element: 'dark', hiddenBossFor: 'iris_love', bonusTranscendenceReward: 'trans_gray',
         stats: { hp: 800, atk: 90, matk: 90, def: 60, mdef: 60 },
         skills: [
             { name: '영혼절단', type: 'mag', rate: 0.0, val: 2.0, desc: '2~4배율 랜덤 마법공격', effects: [{ type: 'random_mult', min: 2.0, max: 4.0 }] },
@@ -1150,7 +1833,7 @@ ENEMIES.push(
             { name: '묠니르', type: 'mag', rate: 0.2, val: 2.0, desc: '마법공격 2배율', effects: [] },
             {
                 name: '썬더러쉬', type: 'mag', rate: 0.0, val: 3.0, desc: '마법공격 3배율, 사용 후 전투 성향 변화',
-                effects: [{ type: 'set_self_stats', stats: { atk: 50, matk: 100, def: 50, mdef: 100 } }]
+                effects: [{ type: 'swap_self_stats' }]
             }
         ]
     },
@@ -1175,14 +1858,64 @@ ENEMIES.push(
     }
 );
 
+[
+    {
+        id: 'flora_valentine',
+        name: '플로라(발렌타인)',
+        copyFromId: 'flora',
+        element: 'nature',
+        specialSeason: 'valentine',
+        stats: { hp: 1400, atk: 130, matk: 130, def: 120, mdef: 120 }
+    },
+    {
+        id: 'thor_swimsuit',
+        name: '토르(수영복)',
+        copyFromId: 'thor',
+        element: 'light',
+        specialSeason: 'beach',
+        stats: { hp: 1500, atk: 80, matk: 140, def: 80, mdef: 140 }
+    },
+    {
+        id: 'ares_halloween',
+        name: '아레스(할로윈)',
+        copyFromId: 'ares',
+        element: 'fire',
+        specialSeason: 'halloween',
+        stats: { hp: 1500, atk: 125, matk: 125, def: 105, mdef: 105 }
+    },
+    {
+        id: 'astea_christmas',
+        name: '아스테아(크리스마스)',
+        copyFromId: 'creator_god',
+        element: 'light',
+        specialSeason: 'christmas',
+        stats: { hp: 1600, atk: 120, matk: 140, def: 110, mdef: 110 }
+    }
+].forEach(variant => {
+    const baseEnemy = ENEMIES.find(enemy => enemy.id === variant.copyFromId);
+    if (!baseEnemy) return;
+
+    ENEMIES.push({
+        id: variant.id,
+        name: variant.name,
+        element: variant.element,
+        stats: cloneData(variant.stats),
+        skills: cloneData(baseEnemy.skills),
+        isSpecialBoss: true,
+        specialSeason: variant.specialSeason,
+        noBonusRewards: true
+    });
+});
+
 const BUFF_NAMES = {
-    'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화',
+    'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화', 'temptation': '유혹',
     'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
     'magic_guard': '매직가드', 'guard': '가드',
     'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
     'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
     'goddess_descent': '여신강림', 'destiny_oath': '운명의서약', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',
     'star_powder': '스타파우더',
+    'valentine': '발렌타인',
     'arena': '아레나',
     'reaper_realm': '사신강림',
     'gale': '질풍'

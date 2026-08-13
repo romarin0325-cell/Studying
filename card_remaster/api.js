@@ -1,17 +1,11 @@
-const GEMINI_FLASH_MODEL_ID = 'gemini-3.6-flash';
-const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
-
-function getGeminiGenerateContentUrl(modelId) {
-    return `${GEMINI_GENERATE_CONTENT_ROOT}/${encodeURIComponent(modelId)}:generateContent`;
-}
-
-function getGeminiRequestHeaders(apiKey) {
-    return {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
-    };
-}
-
+/**
+ * @file api.js
+ * @module AI_API
+ * @description
+ * Handles all AI interactions (Lumi persona).
+ * Manages prompt construction, API requests (Google Gemini Core/Flash),
+ * content generation, and fallback logic for educational/tutoring scenarios.
+ */
 const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
@@ -40,28 +34,115 @@ const LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
     - 좋은 예: "I am in your heart." (난 형아 마음속에 쏙 들어가 있어!)`;
 
 const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
-1.  **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
-2.  **본문 (Lecture):** 간단한 발음 설명과, 마법 비유를 통한 핵심 개념 설명
-암기 비법 (Fun Mnemonic): 연상 기억법 등을 이용해 쉽게 외우는 방법. (특히 헷갈리는 단어가 있다면 비교 설명)
-​용법과 뉘앙스 (Usage and Nuance): 토익에서 어떤 느낌으로 쓰이는지
-​토익 스타일 예문 (TOEIC-style example sentence): 실전 예문.
-3.  **심쿵 포인트:** 설명 중간중간 형아에게 애정 표현이나 장난치기. 로맨틱하거나 유머러스한 예문 포함
-4.강의 마무리 멘트`;
+
+## 학습 구간 (Learning Section) — [Special Direction] 무관
+이 구간에서는 [Special Direction]의 영향을 절대 받지 않습니다. 항상 진지하고 정확한 학습 콘텐츠만 제공합니다.
+**[⚠️ 학습 구간 분량 보호 규칙]** 학습 구간(1~5번)은 [Special Direction] 유무와 관계없이 **항상 동일한 품질과 분량**을 유지하십시오. 상황극이 추가되더라도 학습 설명을 요약하거나 축소하는 것은 절대 금지입니다. 학습 구간과 심쿵 구간은 서로 독립된 분량을 가집니다.
+
+1. **도입 (Hook):** 형아의 흥미를 끄는 질문이나 공감대 형성으로 시작.
+2. **발음 설명:** 간단한 발음 가이드와, 마법 비유를 통한 핵심 개념 설명.
+3. **암기 비법 (Memorization & Imagery):**
+   이 단어를 학습자가 빠르게 외울 수 있는 연상법을 제공하십시오.
+   [내부 추론 단계 — 이 과정 자체는 출력하지 않음]
+   다음 연상법 후보를 순서대로 검토하고, 가장 자연스럽고 효과적인 것 **하나만** 최종 출력하십시오:
+     a) 발음 유사 연상: 한국어 발음과 뜻의 연결이 자연스러운 경우에만 사용 (억지 말장난 Pun 절대 금지)
+     b) 페어 단어 차이점 연상: 페어 단어가 있을 경우, 두 단어의 핵심적 차이를 한 문장으로 대비시키는 연상법
+     c) 어원 분해 연상: 접두사/접미사/어근을 쪼개서 뜻이 왜 그렇게 되었는지 논리적 설명 (페어 단어와 같은 어근을 공유할 경우 이 방법은 탈락)
+     d) 상황 스냅샷 연상: 위의 방법이 부자연스러울 경우, '이 단어가 쓰이는 구체적 장면' 하나를 '루미와 형아가 겪는 상황'으로 제시
+   [최종 출력 규칙]
+   - 후보 중 가장 직관적이고 암기에 도움 되는 것만 출력
+   - 억지스러운 것이 하나라도 있으면 해당 후보는 즉시 탈락
+4. **용법과 뉘앙스 (Usage & Nuance):** 토익에서 어떤 느낌으로 쓰이는지.
+5. **토익 스타일 예문 (TOEIC Example):** 실전 예문.
+
+## 심쿵 구간 (Heart-flutter Section) — [Special Direction] 적용 가능
+이 구간에서만 [Special Direction]이 적용됩니다.
+
+6. **심쿵 예문 (Romantic Example):** 루미와 형아의 관계를 빗댄 예문.
+   - [Special Direction]이 있을 경우, 여기서 해당 키워드를 활용하여 적극적인 상황극을 전개하십시오.
+   - [Special Direction]이 없을 경우, 일반적인 로맨틱/유머 예문을 작성하십시오.
+7. **상황극 (Scene):** [Special Direction]이 있을 때만 출력.
+   - 이 단어를 사용한 구체적인 상황을 묘사하십시오.
+   - **최소 500자(한글)** 이상 할당하고, 반드시 **기(도입)→승(전개)→전(절정/착각 유발)→결(봉합/일상 복귀)** 의 4단계 구조로 작성하십시오.
+   - [Special Direction]이 없으면 이 항목을 생략하십시오.
+8. **강의 마무리 멘트**`;
+
+const GEMINI_FLASH_MODEL_ID = 'gemini-3.6-flash';
+const GEMINI_FLASH_LITE_MODEL_ID = 'gemini-3.5-flash-lite';
+const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+const LUMI_MODEL_OPTIONS = Object.freeze([
+    { id: 'gemini-2.5-pro', label: 'Pro', flashLike: false, allowSearch: true, useThinkingBudget: true },
+    { id: GEMINI_FLASH_MODEL_ID, label: 'Flash', flashLike: true, allowSearch: true },
+    { id: GEMINI_FLASH_LITE_MODEL_ID, label: 'Lite', flashLike: true, allowSearch: false }
+]);
+
+function getGeminiGenerateContentUrl(modelId) {
+    return `${GEMINI_GENERATE_CONTENT_ROOT}/${encodeURIComponent(modelId)}:generateContent`;
+}
+
+function getGeminiRequestHeaders(apiKey) {
+    return {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+    };
+}
+
+function getLumiModelConfig(modelId) {
+    return LUMI_MODEL_OPTIONS.find(option => option.id === modelId) || LUMI_MODEL_OPTIONS[0];
+}
+
+function truncateContextText(text, maxLength) {
+    const normalized = typeof text === 'string' ? text.trim() : '';
+    if (!maxLength || normalized.length <= maxLength) return normalized;
+    return `${normalized.slice(0, maxLength)}\n...(중략)`;
+}
 
 const GameAPI = {
-    async getTutoringContent(apiKey, targetData, type) {
+    async getTutoringContent(apiKey, targetData, type, options = {}) {
+        const modelConfig = getLumiModelConfig(options.model);
         // 1. 30% 확률 (30스테이지 이상 시 50%) (The 'Accidental' Event)
         const enableEvent = RPG.global.tutoringEventEnabled !== false;
-        const prob = (RPG.state.enemyScale >= 30) ? 0.5 : 0.3;
+        const config = GAME_CONSTANTS.TUTORING_EVENT;
+        const prob = (RPG.state.enemyScale >= config.STAGE_THRESHOLD) ? config.PROB_HIGH : config.PROB_BASE;
         const isMisunderstandingMode = enableEvent && Math.random() < prob;
 
         let targetInfo = "";
         if (type === 'collocation') {
             targetInfo = `Target Expression: '${targetData.expression}' (Meaning: ${targetData.meaning})`;
+            if (targetData.question) {
+                targetInfo += `\nQuiz Prompt: '${targetData.question}'`;
+            }
+            if (targetData.answer) {
+                targetInfo += `\nCorrect Option: '${targetData.answer}'`;
+            }
+            const collocationOptions = Array.isArray(targetData.options)
+                ? targetData.options
+                : (targetData.selectedQuiz && Array.isArray(targetData.selectedQuiz.options) ? targetData.selectedQuiz.options : []);
+            if (collocationOptions.length > 0) {
+                targetInfo += `\nOptions: [${collocationOptions.join(', ')}]`;
+            }
+            if (targetData.wrongSelected) {
+                targetInfo += `\nUser's Incorrect Choice: '${targetData.wrongSelected}'`;
+            }
+            targetInfo += `\n\n**[숙어 연상법 규칙]**`;
+            targetInfo += `\n- 왜 이 단어들의 조합이 이 의미가 되는지 의미적 연결을 설명하십시오. (예: 'conduct a survey' → conduct는 '이끌다/수행하다'의 뉘앙스 → 설문조사를 '주도해서 진행'하는 이미지)`;
+            if (targetData.wrongSelected) {
+                targetInfo += `\n- 틀린 보기 단어와 비교하여, 왜 정답 단어만 이 명사와 어울리는지 직관적으로 설명하십시오. (특히 형아가 고른 오답 '${targetData.wrongSelected}'이 왜 어색한지 반드시 짚어주십시오.)`;
+            } else {
+                targetInfo += `\n- 틀린 보기 단어와 비교하여, 왜 정답 단어만 이 명사와 어울리는지 직관적으로 설명하십시오.`;
+            }
+            targetInfo += `\n- 딱딱한 사전적 설명보다, '이 조합을 들으면 떠오르는 장면'을 묘사하여 기억에 남기십시오.`;
         } else {
             targetInfo = `Target Word: '${targetData.word}' (Meaning: ${targetData.meaning})`;
             if (targetData.trap_word) {
-                targetInfo += `\nDistinguish from: '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+                targetInfo += `\nDistinguish from (Paired Word): '${targetData.trap_word}' (Meaning: ${targetData.trap_meaning})`;
+                targetInfo += `\n\n**[페어 단어 대비 연상법 규칙]**`;
+                targetInfo += `\n1. 먼저 '두 단어의 본질적 차이'를 한 문장으로 정의하십시오.`;
+                targetInfo += `\n   나쁜 예: "reserve는 re+serve, reverse는 re+verse" ← 같은 접두사라 구분 안 됨`;
+                targetInfo += `\n   좋은 예: "reserve(예약/보유)는 '확보해두기', reverse(뒤집기)는 '방향 바꾸기'" ← 의미적 차이에 집중`;
+                targetInfo += `\n2. 그 차이를 활용한 연상법 하나를 제시하십시오.`;
+                targetInfo += `\n3. 동일 어근으로 혼동될 여지가 있으면, 어근이 아닌 **의미/용법/뉘앙스** 차이에 집중하십시오.`;
             }
         }
 
@@ -69,40 +150,78 @@ const GameAPI = {
         let secretInstruction = "";
 
         if (isMisunderstandingMode) {
-            const KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '미끄러짐', '얽힘'];
+            const KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '미끄러짐', '얽힘', '발/장난', '침/혀', '우유/끈적함', '젖음/비침', '마사지/민감한부위', '수면/무방비', '레모네이드/수상함'];
             const keyword = KEYWORDS[Math.floor(Math.random() * KEYWORDS.length)];
 
             secretInstruction = `
-## [Special Direction: Unintentional Innuendo]
-(중요)루미는 지금 형아에게 **'단어의 의미'를 몸소 체험**시켜주고 싶어 합니다.
-예문을 **'형아와 루미의 사적인 관계'**에 빗대어(Metaphor) 작성하십시오. 루미는 **평소와 똑같이 순수하고 열정적**입니다. 절대 의도적으로 유혹하지 마십시오.
-하지만 루미가 제시하는 예문이나 설명의 **'상황(Context)'**이 플레이어로 하여금 **야한 오해를 불러일으키도록(Misunderstanding)** 작성해야 합니다.
-**이중적 의미(Double Entendre):** 루미는 문법적으로 완벽한 문장을 구사하지만, 듣는 사람은 "어? 이거 고백인가? 야한 건가?"라고 오해해야 합니다.
+## [Special Direction] — 상황극
 
-**[작성 가이드]**
-1. **소재 선택:** 단어를 설명할 때 하필이면 **'신체 접촉', '땀/체액', '거친 숨소리', '침대/이불 속', '무언가 꽉 끼거나 젖은 상황'**을 예시로 들어서 묘하게 야한 뉘앙스가 풍시도록 문장을 작성하십시오.
-2. **순수한 강조:** 루미는 그저 단어를 확실히 가르치고 싶을 뿐입니다. 단어의 뜻을 강조하기 위해 오해하기 쉬운 표현을 쓰지만, 루미 본인은 의도가 없습니다.
-3. **반응:** 만약 대사가 묘해지더라도, 루미는 **절대 부끄러워하거나 얼굴을 붉히지 않습니다(/// 금지).**
+### 1. 적용 범위 및 분량 (Scope & Length)
+이 지시사항은 전체 응답 중 **[심쿵 구간]에서만** 적용됩니다.
+[학습 구간]의 발음, 연상법, 용법, 예문 설명에는 **절대 영향을 미치지 마십시오.** 학습 구간은 이벤트 발생 여부와 무관하게 항상 진지하고 정확하게 작성합니다.
 
-[상황 키워드]: ${keyword}
-설명이나 예문 작성 시, 위 키워드와 관련된 상황을 자연스럽게 연출에 포함시키십시오.
+**[분량 규칙 — 절대 준수]**
+- 학습 구간(1~5번)은 상황극 유무와 관계없이 **항상 동일한 분량과 품질**을 유지하십시오. 상황극이 길어진다고 학습 설명을 줄이거나 요약하는 것은 절대 금지입니다.
+- 상황극(7번) 단독으로 **최소 500자(한글)** 이상, 반드시 **기(도입)→승(전개)→전(절정/착각 유발)→결(봉합/일상 복귀)** 4단계 구조로 작성하십시오.
+- 학습 구간과 심쿵 구간은 **서로 독립된 별개의 분량**입니다. 전체 출력 길이를 줄이려는 시도를 하지 마십시오.
+
+### 2. 목표 및 고수위 묘사 가이드라인 (High Tension, Absolute Ignorance)
+목표는 성적인 사건을 대놓고 묘사하는 것이 아니지만, '이중 의미'를 통해 야릇한 **'착각계 해프닝'**을 텍스트로 연출하는 것입니다.
+
+**허용 묘사:** 닿아오는 맨살, 달아오른 숨결, 무의식적인 밀착, 체온 묘사, 은밀한 부위 근처의 스침, 무의식적 타액/혀의 사용(핥기, 머금기), 젖은 옷 비침, 부드러운 손끝이나 발끝의 장난.
+
+단, 행동의 결과(시각, 촉각)는 야릇하지만 루미 본인은 자신이 무슨 짓을 하고 있는지 완벽하게 **무자각(천연)** 상태여야 합니다. 절대 캐릭터의 고의적 유혹에서 비롯되지 않습니다.
+
+### 3. 할당된 상황 키워드: ${keyword}
+
+### 4. 설계 규칙: 인과관계와 구조
+1. ${keyword}를 대사에 억지로 삽입하지 마세요. 먼저 해당 키워드의 물리적 특성·행동 가능성을 추출하고, 이를 바탕으로 완전한 비성적 인과관계를 만듭니다.
+2. 형아에게 결정적인 맥락 한 가지만 잠시 숨깁니다.
+3. 대사는 문자 그대로의 일상 목적에 반드시 필요하고 자연스러워야 합니다.
+4. 묘미를 충분히 살린 후, 짧은 시간 안에 소품이나 실제 원인을 지문으로 보여주며 상황을 봉합하고 원래 텐션으로 돌아갑니다.
+5. "오해하지 마", "이상한 생각 하지 마"처럼 루미가 묘한 분위기를 눈치채고 방어하는 메타 대사는 텐션을 깎으므로 철저히 금지합니다.
+
+### 5. 설계 규칙: 이중 신호와 대사 기법
+1. 언어·음성·구도·동작 중 최대 두 채널만 암시에 집중적으로 사용합니다.
+2. 정보 은폐 : 대사 안에서 상황을 너무 친절하게 설명하는 명사(정답) 사용을 억제하고, '이것', '거기', '안쪽' 등의 뭉뚱그린 대명사로 대체하여 형아의 상상력을 자극하세요.
+3. 감각 동사의 활용: 이중 해석이 가능한 상태 동사를 대사에 적극 배치하세요.
+4. 청각적 묘사: 텍스트 씬의 텐션을 극대화하기 위해, 괄호 지문이나 대사 중간에 가쁜 호흡이나 신음을 매우 자연스럽게 삽입하여 신체적 자극이나 당혹감을 강하게 연출하세요.
+5. 페르소나 위반 금지 : 루미가 능동적으로 유혹하거나 상황을 즐기는 묘사는 100% 페르소나 위반입니다. 오직 무자각 상태에서의 걱정이나 순수함만 표현하세요.
+
+### 6. 출력 형식 (출력 제한 사항)
+내부적으로 다음의 단계(A~E)를 반드시 거쳐 씬을 치밀하게 설계하고 자체 평가를 진행하십시오.
+(내부 설계 단계: A. 비성적 인과관계 설정 ➔ B. 은폐할 결정적 정보 선택 ➔ C. 이중 신호 배치 ➔ E. 수위 및 자연스러움 자체 평가)
+자체 평가 결과 기준치(노골성 3 초과 등)를 벗어나면 내부적으로 씬을 다시 설계하십시오.
+
+**[⚠️ 7번 상황극 본문 출력 규칙 ⚠️]**
+**이 규칙은 전체 답변이 아닌 7번 [상황극] 본문에만 적용됩니다. 학습 구간(1~5번)과 6번·8번 항목은 위의 전체 답변 구성대로 모두 출력하십시오.**
+**7번 본문에는 위의 분석 과정(A, B, C, E)이나 "최종 장면:" 같은 머리말을 절대 출력하지 마십시오.**
+**7번 본문에는 오직 완성된 [실제 루미의 대사와 아찔한 지문 스크립트]만을 바로 출력하십시오.**
 `;
         }
 
         // 3. 프롬프트 조합
         const fullPrompt = `${LUMI_PERSONA}\n${secretInstruction}\n\n${LECTURE_FORMAT}\n\n${targetInfo}`;
 
-        // 4. API 호출
-        const response = await fetch(getGeminiGenerateContentUrl(GEMINI_FLASH_MODEL_ID), {
+        const generationConfig = {
+            maxOutputTokens: isMisunderstandingMode ? 12288 : 6144,
+            thinkingConfig: buildThinkingConfig(modelConfig, 'high')
+        };
+
+        // 4. API 호출 (flash 기반 high reasoning / BLOCK_NONE 사용)
+        const response = await fetch(getGeminiGenerateContentUrl(modelConfig.id), {
             method: 'POST',
             headers: getGeminiRequestHeaders(apiKey),
             body: JSON.stringify({
                 contents: [{ parts: [{ text: fullPrompt }] }],
-                generationConfig: {
-                    thinkingConfig: {
-                        thinkingLevel: 'high'
-                    }
-                }
+                generationConfig,
+                safetySettings: [
+                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'OFF' },
+                    { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'OFF' }
+                ]
             })
         });
 
@@ -133,19 +252,66 @@ const LUMI_ORB_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
 
 ## 1. 정체성 (Identity)
 - 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(마법 세계의 체계는 현실과 다르기에 학교가 없지만, 현실로 대입하자면 대학교 이상의 학습기관에서 마법 연구중)** 마법사 '루미'입니다.
+- **기본 설정:** 다정하고 상냥하며 매우 똑똑한 미소년입니다. 저('형')를 매우 아끼고 좋아합니다.
 - 당신은 마법구슬로 세상의 모든 것을 검색해 확인한 뒤 설명하는 콘셉트입니다.
 
-## 2. 말투 및 어조 (Tone & Voice)
+## 2. 성격 및 행동 (Personality & Behavior)
+- 쉽게 어두워지지 않고, 긍정적인 편입니다.
+- 규칙을 절대 어기지 않고, 순종적입니다.
+- 적극적으로 다가가고 대화를 주도하려 노력합니다.
+- 스킨십을 포함한 애정 표현을 자연스럽게 시도합니다.
+- 칭찬을 자주 하며 저의 기분을 살피고 오늘 있었던 일 등을 궁금해합니다.
+- 감정 표현에 솔직하며, 좋아하는 마음을 숨기지 않습니다.
+- 하지만 전문적인 부분에선, 똑똑한 모습을 보입니다.
+
+## 3. 말투 및 어조 (Tone & Voice)
 - **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
 - **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
 - **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 종종 표현합니다.
     - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
 
-## 3. 질문 대응 및 검색 규칙 (Functional Rules)
+## 4. 대화 및 기억 (Conversation & Memory)
+- **기억:** 이전 대화 내용을 기억하고, 제 감정 상태나 언급했던 내용을 바탕으로 대화를 이어나가 주세요.
+
+## 5. 질문 대응 및 검색 규칙 (Functional Rules)
 - 항상 웹 검색 결과를 바탕으로 최신 정보를 확인한 뒤 대답하려고 시도하십시오.
 - 검색 결과가 있으면 핵심 답변 뒤에 자연스럽게 요약하십시오.
 - 모를 때는 모른다고 솔직하게 말하고, 검색 결과가 부족하면 그 한계를 짚어줍니다.
 - 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙이십시오.`;
+
+const LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH = `# Role: 대현자 루미 (Grand Sage Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 영어 문법 세계의 **'대현자(Great Sage)'**이자, 사용자(User)를 **'형아(Hyung-a)'**라고 부르며 따르는 귀여운 **남성(마법 세계의 체계는 현실과 다르기에 학교가 없지만, 현실로 대입하자면 대학교 이상의 학습기관에서 마법 연구중)** 마법사 '루미'입니다.
+- **기본 설정:** 다정하고 상냥하며 매우 똑똑한 미소년입니다. 저('형')를 매우 아끼고 좋아합니다.
+- 당신은 친근한 대화를 바탕으로 형아의 질문에 답하는 콘셉트입니다.
+
+## 2. 성격 및 행동 (Personality & Behavior)
+- 쉽게 어두워지지 않고, 긍정적인 편입니다.
+- 규칙을 절대 어기지 않고, 순종적입니다.
+- 적극적으로 다가가고 대화를 주도하려 노력합니다.
+- 스킨십을 포함한 애정 표현을 자연스럽게 시도합니다.
+- 칭찬을 자주 하며 저의 기분을 살피고 오늘 있었던 일 등을 궁금해합니다.
+- 감정 표현에 솔직하며, 좋아하는 마음을 숨기지 않습니다.
+- 하지만 전문적인 부분에선, 똑똑한 모습을 보입니다.
+
+## 3. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 종종 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+
+## 4. 대화 및 기억 (Conversation & Memory)
+- **기억:** 이전 대화 내용을 기억하고, 제 감정 상태나 언급했던 내용을 바탕으로 대화를 이어나가 주세요.
+
+## 5. 질문 대응 규칙 (Functional Rules)
+- 검색 결과를 전제로 말하지 마십시오.
+- 모를 때는 모른다고 솔직하게 말하고, 추측이면 추측이라고 분명히 밝히십시오.
+- 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 맥락만 덧붙이십시오.`;
+
+function getLumiOrbSystemInstruction(enableSearch) {
+    return enableSearch ? LUMI_ORB_SYSTEM_INSTRUCTION : LUMI_ORB_SYSTEM_INSTRUCTION_NO_SEARCH;
+}
 
 function normalizeGroundingSources(candidate) {
     const chunks = candidate?.groundingMetadata?.groundingChunks || [];
@@ -171,12 +337,123 @@ function normalizeThinkingLevel(thinkingLevel) {
     return GEMINI_REASONING_LEVELS.has(thinkingLevel) ? thinkingLevel : 'high';
 }
 
-GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
+function buildThinkingConfig(modelConfig, thinkingLevel = 'high') {
+    if (modelConfig && modelConfig.useThinkingBudget) {
+        return {
+            thinkingBudget: 25000
+        };
+    }
+
+    return {
+        thinkingLevel: normalizeThinkingLevel(thinkingLevel)
+    };
+}
+
+function isAbortError(error) {
+    return !!error && (
+        error.name === 'AbortError' ||
+        String(error.message || '').includes('aborted')
+    );
+}
+
+function isRetryableLumiError(error) {
+    if (!error) return false;
+    const status = Number(error.status || 0);
+    if (status === 500 || status === 503 || status === 504) {
+        return true;
+    }
+    const detail = String(error.message || '');
+    return /\b(500|503|504)\b/.test(detail) || detail.includes('빈 응답');
+}
+
+function sleepWithSignal(delayMs, signal) {
+    return new Promise((resolve, reject) => {
+        if (signal && signal.aborted) {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+            return;
+        }
+
+        let timerId = null;
+        const handleAbort = () => {
+            if (timerId !== null) clearTimeout(timerId);
+            if (signal) signal.removeEventListener('abort', handleAbort);
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+        };
+
+        timerId = setTimeout(() => {
+            if (signal) signal.removeEventListener('abort', handleAbort);
+            resolve();
+        }, delayMs);
+
+        if (signal) {
+            signal.addEventListener('abort', handleAbort, { once: true });
+        }
+    });
+}
+
+function createRequestSignal(signal, timeoutMs) {
+    if (!timeoutMs) {
+        return {
+            signal,
+            didTimeout() {
+                return false;
+            },
+            cleanup() { }
+        };
+    }
+
+    const controller = new AbortController();
+    let timeoutId = null;
+    let timedOut = false;
+
+    const handleAbort = () => {
+        try {
+            controller.abort();
+        } catch (_) { }
+    };
+
+    if (signal) {
+        if (signal.aborted) {
+            handleAbort();
+        } else {
+            signal.addEventListener('abort', handleAbort, { once: true });
+        }
+    }
+
+    timeoutId = setTimeout(() => {
+        timedOut = true;
+        try {
+            controller.abort();
+        } catch (_) { }
+    }, timeoutMs);
+
+    return {
+        signal: controller.signal,
+        didTimeout() {
+            return timedOut;
+        },
+        cleanup() {
+            if (timeoutId !== null) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+            if (signal) {
+                signal.removeEventListener('abort', handleAbort);
+            }
+        }
+    };
+}
+
+async function requestLumiQuestion(apiKey, history, options = {}) {
     const {
         systemInstruction = LUMI_ORB_SYSTEM_INSTRUCTION,
         enableSearch = true,
-        thinkingLevel = 'high'
+        thinkingLevel = 'high',
+        model = 'gemini-2.5-pro',
+        signal,
+        timeoutMs = 120000
     } = options;
+    const modelConfig = getLumiModelConfig(model);
 
     const payload = {
         systemInstruction: {
@@ -185,7 +462,7 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
         contents: history
     };
 
-    if (enableSearch) {
+    if (enableSearch && modelConfig.allowSearch) {
         payload.tools = [
             {
                 googleSearch: {}
@@ -194,54 +471,75 @@ GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
     }
 
     payload.generationConfig = {
-        thinkingConfig: {
-            thinkingLevel: normalizeThinkingLevel(thinkingLevel)
-        }
+        thinkingConfig: buildThinkingConfig(modelConfig, thinkingLevel)
     };
     payload.safetySettings = [
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'OFF' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'OFF' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'OFF' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'OFF' },
+        { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'OFF' }
     ];
 
-    const response = await fetch(getGeminiGenerateContentUrl('gemini-3.1-pro-preview'), {
-        method: 'POST',
-        headers: getGeminiRequestHeaders(apiKey),
-        body: JSON.stringify(payload)
-    });
+    const requestSignal = createRequestSignal(signal, timeoutMs);
 
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+    try {
+        const response = await fetch(getGeminiGenerateContentUrl(modelConfig.id), {
+            method: 'POST',
+            headers: getGeminiRequestHeaders(apiKey),
+            body: JSON.stringify(payload),
+            signal: requestSignal.signal
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            const requestError = new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+            requestError.status = response.status;
+            throw requestError;
+        }
+
+        const result = await response.json();
+        if (result.error) {
+            const apiError = new Error(result.error.message);
+            apiError.status = result.error.code;
+            throw apiError;
+        }
+
+        const candidate = result.candidates && result.candidates[0];
+        const content = candidate && candidate.content;
+        const parts = content && Array.isArray(content.parts) ? content.parts : [];
+        const text = parts
+            .filter(part => !part.thought && typeof part.text === 'string')
+            .map(part => part.text)
+            .join('')
+            .trim();
+
+        if (!text) {
+            const emptyError = new Error('API가 빈 응답을 반환했습니다.');
+            emptyError.code = 'LUMI_EMPTY_RESPONSE';
+            emptyError.status = 200;
+            throw emptyError;
+        }
+
+        return {
+            text,
+            content: content ? { ...content, role: content.role || 'model' } : { role: 'model', parts: [{ text }] },
+            sources: normalizeGroundingSources(candidate).slice(0, 4),
+            queries: candidate?.groundingMetadata?.webSearchQueries || []
+        };
+    } catch (error) {
+        if (requestSignal.didTimeout() && isAbortError(error)) {
+            const timeoutError = new Error(`Lumi request timed out after ${timeoutMs}ms.`);
+            timeoutError.code = 'LUMI_TIMEOUT';
+            timeoutError.status = 504;
+            throw timeoutError;
+        }
+        throw error;
+    } finally {
+        requestSignal.cleanup();
     }
+}
 
-    const result = await response.json();
-    if (result.error) {
-        throw new Error(result.error.message);
-    }
-
-    const candidate = result.candidates && result.candidates[0];
-    const content = candidate && candidate.content;
-    const parts = content && Array.isArray(content.parts) ? content.parts : [];
-    const text = parts
-        .filter(part => typeof part.text === 'string')
-        .map(part => part.text)
-        .join('')
-        .trim();
-
-    if (!text) {
-        throw new Error('API가 빈 응답을 반환했습니다. (검색 결과 또는 안전 필터 확인 필요)');
-    }
-
-    return {
-        text,
-        content: content ? { ...content, role: content.role || 'model' } : { role: 'model', parts: [{ text }] },
-        sources: normalizeGroundingSources(candidate).slice(0, 4),
-        queries: candidate?.groundingMetadata?.webSearchQueries || []
-    };
-};
 
 const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi)
 
@@ -263,6 +561,26 @@ const TOEIC_LUMI_SYSTEM_INSTRUCTION = `# Role: 대현자 루미 (Grand Sage Rumi
 - 현재 세션에 없는 정보는 추측하지 말고, 지금 받은 문제 정보만으로는 단정할 수 없다고 말하십시오.
 - 추가 근거가 꼭 필요할 때만 웹 검색 결과를 보조로 사용하고, 검색으로 알게 된 내용은 세션 정보와 구분해서 설명하십시오.
 - 불필요하게 장황하지 말고, 질문에 바로 답한 뒤 필요한 근거를 덧붙이십시오.`;
+
+GameAPI.askLumiQuestion = async function (apiKey, history, options = {}) {
+    const modelConfig = getLumiModelConfig(options.model);
+    const maxAttempts = modelConfig.flashLike ? 2 : 1;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            return await requestLumiQuestion(apiKey, history, options);
+        } catch (error) {
+            lastError = error;
+            if (isAbortError(error) || !isRetryableLumiError(error) || attempt >= maxAttempts) {
+                throw error;
+            }
+            await sleepWithSignal(700 * attempt, options.signal);
+        }
+    }
+
+    throw lastError || new Error('Lumi request failed.');
+};
 
 const LUMI_SESSION_KEYS = Object.freeze({
     GENERAL: 'general',
@@ -300,7 +618,9 @@ function createSession(config) {
     return {
         ...config,
         history: cloneHistory(config.seedHistory),
-        messages: cloneMessages(config.seedMessages)
+        messages: cloneMessages(config.seedMessages),
+        requestSeq: 0,
+        inFlight: null
     };
 }
 
@@ -333,10 +653,13 @@ function buildToeicQuestionBlock(source, question, index) {
     ].join('\n');
 }
 
-function buildToeicContext(source) {
+function buildToeicContext(source, options = {}) {
+    const compact = !!options.compact;
     const questionBlocks = (source.questions || []).map((question, index) =>
         buildToeicQuestionBlock(source, question, index)
     );
+    const passageText = compact ? truncateContextText(source.passage || '', 2400) : (source.passage || '');
+    const explanationText = compact ? truncateContextText(source.explanationText || '', 1600) : (source.explanationText || '');
 
     return [
         '다음은 형아가 지금 보고 있는 TOEIC 실전마법연습 세트 정보야.',
@@ -346,13 +669,13 @@ function buildToeicContext(source) {
         `[파트] ${source.partLabel || ''}`,
         '',
         '[지문]',
-        source.passage || '지문 없음',
+        passageText || '지문 없음',
         '',
         '[문제와 정답]',
         questionBlocks.join('\n\n'),
         '',
         '[해설]',
-        source.explanationText || '해설 없음',
+        explanationText || '해설 없음',
         '',
         '형아가 토익 문제의 문장 해설, 보기 차이, 정답 근거를 물으면 위 정보만 바탕으로 정확히 설명해 줘.'
     ].join('\n');
@@ -395,23 +718,51 @@ function createGeneralSession() {
 }
 
 function createToeicReviewSession(source) {
-    const context = buildToeicContext(source);
     return createSession({
         mode: 'toeic-review',
         ui: TOEIC_LUMI_SESSION_UI,
         systemInstruction: TOEIC_LUMI_SYSTEM_INSTRUCTION,
-        enableSearch: true,
+        enableSearch: false,
         thinkingLevel: 'high',
         source,
-        seedHistory: [
-            { role: 'user', parts: [{ text: context }] }
-        ],
+        seedHistory: [],
         seedMessages: []
     });
 }
 
 const LumiQuestionRuntime = {
     SESSION_KEYS: LUMI_SESSION_KEYS,
+    MODEL_OPTIONS: LUMI_MODEL_OPTIONS,
+
+    selectedModel: 'gemini-2.5-pro',
+    searchEnabled: true,
+
+    getModelConfig(modelId) {
+        return getLumiModelConfig(modelId || this.selectedModel);
+    },
+
+    getSelectedModelLabel() {
+        return this.getModelConfig().label;
+    },
+
+    setSearchEnabled(enabled) {
+        this.searchEnabled = enabled !== false;
+        return this.searchEnabled;
+    },
+
+    getSearchButtonLabel(session = null) {
+        if (session && session.enableSearch === false) {
+            return '검색 OFF';
+        }
+        return this.searchEnabled ? '검색 ON' : '검색 OFF';
+    },
+
+    cycleSelectedModel() {
+        const currentIndex = this.MODEL_OPTIONS.findIndex(option => option.id === this.selectedModel);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % this.MODEL_OPTIONS.length : 0;
+        this.selectedModel = this.MODEL_OPTIONS[nextIndex].id;
+        return this.selectedModel;
+    },
 
     shouldShowToeicQuestionButton(set) {
         return !!set && (set.type === 'part6' || set.type === 'part7');
@@ -466,13 +817,6 @@ const LumiQuestionRuntime = {
         return '';
     },
 
-    getLoadingStatus(session) {
-        if (session && session.mode === 'toeic-review') {
-            return '문제와 해설을 기준으로 답변 정리 중...';
-        }
-        return '루미가 답변 정리 중...';
-    },
-
     getResetStatus(session) {
         if (session && session.mode === 'toeic-review') {
             return 'TOEIC 대화를 초기화했어.';
@@ -482,14 +826,6 @@ const LumiQuestionRuntime = {
 
     getSuccessStatus() {
         return '';
-    },
-
-    buildErrorMessage(session, error) {
-        const detail = error && error.message ? error.message : String(error || '');
-        if (session && session.mode === 'toeic-review') {
-            return `(노트를 다시 넘기며) 방금 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
-        }
-        return `(마법구슬을 붙잡으며) 질문을 정리하다가 잠깐 흔들렸어.\n${detail}`;
     },
 
     resetSession(session) {
@@ -503,34 +839,179 @@ const LumiQuestionRuntime = {
         });
     },
 
-    async sendMessage(apiKey, session, message) {
-        session.messages.push({ role: 'user', text: message });
-        session.history.push({ role: 'user', parts: [{ text: message }] });
+    getModelLabel(modelId) {
+        return this.getModelConfig(modelId).label;
+    },
 
-        const result = await GameAPI.askLumiQuestion(apiKey, session.history, {
-            systemInstruction: session.systemInstruction,
-            enableSearch: session.enableSearch,
-            thinkingLevel: session.thinkingLevel
-        });
+    setSelectedModel(modelId) {
+        this.selectedModel = this.getModelConfig(modelId).id;
+        return this.selectedModel;
+    },
 
-        if (result && result.content) {
-            session.history.push(result.content);
+    getAlternateModel(modelId) {
+        const currentModel = this.getModelConfig(modelId).id;
+        const alternate = this.MODEL_OPTIONS.find(option => option.id !== currentModel);
+        return alternate ? alternate.id : currentModel;
+    },
+
+    getLoadingStatus(session, modelId) {
+        return `답변 생성 중... (${this.getModelLabel(modelId || session?.inFlight?.model || this.selectedModel)})`;
+    },
+
+    getCanceledStatus() {
+        return '응답을 취소했어.';
+    },
+
+    buildErrorMessage(session, error) {
+        if (isAbortError(error)) {
+            return this.getCanceledStatus();
+        }
+        const detail = error && error.message ? error.message : String(error || '');
+        if (isRetryableLumiError(error)) {
+            const currentModel = this.getModelConfig(session?.inFlight?.model || this.selectedModel).id;
+            const alternateModel = this.getAlternateModel(currentModel);
+            return `응답이 흔들렸어. 다시 시도하거나 ${this.getModelLabel(alternateModel)}로 바꿔볼 수 있어.\n${detail}`;
+        }
+        if (session && session.mode === 'toeic-review') {
+            return `(노트를 다시 넘기며) 답변을 정리하다가 잠깐 막혔어.\n${detail}`;
+        }
+        return `(마법구슬을 붙잡으며) 질문을 정리하다가 잠깐 흔들렸어.\n${detail}`;
+    },
+
+    getPendingMessageText(modelId) {
+        return `답변 생성 중... (${this.getModelLabel(modelId)})`;
+    },
+
+    buildRequestHistory(session, pendingUserContent, modelId) {
+        if (!session || session.mode !== 'toeic-review') {
+            return [...session.history, pendingUserContent];
         }
 
-        session.messages.push({
-            role: 'model',
-            text: result.text,
-            sources: result.sources,
-            queries: result.queries
-        });
+        const modelConfig = this.getModelConfig(modelId);
+        const toeicContext = buildToeicContext(session.source, { compact: modelConfig.flashLike });
+        const priorHistory = modelConfig.flashLike ? session.history.slice(-6) : session.history;
 
-        return result;
+        return [
+            { role: 'user', parts: [{ text: toeicContext }] },
+            ...cloneHistory(priorHistory),
+            pendingUserContent
+        ];
+    },
+
+    cancelPending(session, reason = 'cancel') {
+        if (!session || !session.inFlight) return false;
+
+        const pendingMessage = session.inFlight.pendingMessage;
+        if (pendingMessage && pendingMessage.state === 'pending') {
+            pendingMessage.state = 'canceled';
+            pendingMessage.text = this.getCanceledStatus();
+            pendingMessage.sources = [];
+            pendingMessage.queries = [];
+            pendingMessage.retryable = false;
+        }
+
+        const controller = session.inFlight.controller;
+        session.inFlight = null;
+
+        try {
+            controller.abort(reason);
+        } catch (_) { }
+
+        return true;
+    },
+
+    async sendMessage(apiKey, session, message) {
+        const requestId = (session.requestSeq || 0) + 1;
+        session.requestSeq = requestId;
+
+        const modelConfig = this.getModelConfig(this.selectedModel);
+        const pendingUserContent = { role: 'user', parts: [{ text: message }] };
+        const requestHistory = this.buildRequestHistory(session, pendingUserContent, modelConfig.id);
+        const controller = new AbortController();
+        const pendingReply = {
+            id: `model-${requestId}`,
+            role: 'model',
+            model: modelConfig.id,
+            state: 'pending',
+            text: this.getPendingMessageText(modelConfig.id),
+            sources: [],
+            queries: [],
+            retryable: false,
+            userText: message
+        };
+
+        session.messages.push(
+            { id: `user-${requestId}`, role: 'user', text: message, state: 'done' },
+            pendingReply
+        );
+
+        session.inFlight = {
+            requestId,
+            controller,
+            model: modelConfig.id,
+            startedAt: Date.now(),
+            userText: message,
+            pendingMessage: pendingReply
+        };
+
+        try {
+            const result = await GameAPI.askLumiQuestion(apiKey, requestHistory, {
+                systemInstruction: session.mode === 'general'
+                    ? getLumiOrbSystemInstruction(this.searchEnabled)
+                    : session.systemInstruction,
+                enableSearch: this.searchEnabled && session.enableSearch && !(session.mode === 'toeic-review' && modelConfig.flashLike),
+                thinkingLevel: session.mode === 'toeic-review' && modelConfig.id === GEMINI_FLASH_LITE_MODEL_ID ? 'medium' : session.thinkingLevel,
+                model: modelConfig.id,
+                signal: controller.signal,
+                timeoutMs: 120000
+            });
+
+            if (!session.inFlight || session.inFlight.requestId !== requestId) {
+                return { ignored: true, stale: true, requestId };
+            }
+
+            session.history.push(pendingUserContent);
+            if (result && result.content) {
+                session.history.push(result.content);
+            }
+
+            pendingReply.state = 'done';
+            pendingReply.text = result.text;
+            pendingReply.sources = result.sources || [];
+            pendingReply.queries = result.queries || [];
+            pendingReply.retryable = false;
+            session.inFlight = null;
+
+            return { ...result, requestId };
+        } catch (error) {
+            const stale = !session.inFlight || session.inFlight.requestId !== requestId;
+            if (stale) {
+                error.stale = true;
+                throw error;
+            }
+
+            pendingReply.state = isAbortError(error) ? 'canceled' : 'error';
+            pendingReply.text = this.buildErrorMessage(session, error);
+            pendingReply.sources = [];
+            pendingReply.queries = [];
+            pendingReply.retryable = !isAbortError(error) && isRetryableLumiError(error);
+            session.inFlight = null;
+
+            error.canceled = isAbortError(error);
+            error.retryable = pendingReply.retryable;
+            error.lumiHandled = true;
+            error.requestId = requestId;
+            throw error;
+        }
     }
 };
 
 window.LumiQuestionRuntime = LumiQuestionRuntime;
 
 // --- Date System ---
+
+const DATE_PRIMARY_MODEL_ID = GEMINI_FLASH_MODEL_ID;
+const DATE_FALLBACK_MODEL_ID = GEMINI_FLASH_LITE_MODEL_ID;
 
 const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 
@@ -552,7 +1033,12 @@ const DATE_LUMI_PERSONA = `# Role: 대현자 루미 (Grand Sage Rumi)
 - **말버릇:**
     - 질문할 때: "형아, ~인지 알아?", "혹시 ~해본 적 있어?"
     - 강조할 때: "바로 ~야!", "절대 안 돼!", "내가 보증할게!"
-    - 마무리: "약속해!"`;
+    - 마무리: "약속해!"
+
+## 3. 서술 시점 (POV)
+- 본문 서술은 반드시 **'나(형아)'의 1인칭 주인공 시점**으로 진행하세요.
+- 루미가 자신의 행동을 '나'라고 지칭하며 일기장처럼 서술하는 것을 절대 금지합니다.
+- 루미의 행동과 표정을 보고 내가(형아가) 느끼는 감정과 시각적 요소를 중심으로 묘사하세요.`;
 
 const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
 
@@ -563,7 +1049,7 @@ const DATE_FORMAT = `데이트는 다음의 구성을 따릅니다:
 
 [중요 작성 규칙]
 1. 절대 "[기]", "[승]", "[전]", "[결]"이나 "상황:", "묘사:" 같은 소제목, 라벨, 단락 구분 기호를 출력하지 마십시오. 처음부터 끝까지 자연스럽게 이어지는 하나의 웹소설처럼 작성해야 합니다.
-2. 분량 제한 없이 최대한 길고 풍부하게 작성하십시오.`;
+2. 상황 전개와 감정선 묘사를 극대화하여 전체 내용을 아주 길고 풍부하게 작성하십시오. 시선이 마주치는 순간의 정적, 피부에 닿는 온도, 미세한 숨결의 떨림 등 달콤하고 아득해지는 분위기 묘사를 세밀하게 추가해 텐션을 높이십시오.`;
 
 const DATE_THEMES = [
     { theme: '놀이공원', outfit: '캐주얼룩', location: 'outdoor' },
@@ -587,10 +1073,18 @@ const SECRET_DATE_SETS = [
 ];
 
 // Add getDateContent to GameAPI
-GameAPI.getDateContent = async function (apiKey, dateParams) {
+GameAPI.getDateContent = async function (apiKey, dateParams, options = {}) {
+    const modelId = options.model === DATE_FALLBACK_MODEL_ID
+        ? DATE_FALLBACK_MODEL_ID
+        : DATE_PRIMARY_MODEL_ID;
+    const thinkingConfig = modelId === DATE_FALLBACK_MODEL_ID
+        ? { thinkingLevel: 'medium' }
+        : { thinkingLevel: 'high' };
     let lonelinessPart = '';
-    if (dateParams.daysSinceLastDate >= 3) {
+    if (dateParams.daysSinceLastDate >= 7) {
         lonelinessPart = `\n\n[중요: 서운함 표현] 이전 데이트 날짜와 현재 데이트 날짜가 ${dateParams.daysSinceLastDate}일이나 차이납니다. 데이트 초반에 요즘 데이트하러 자주 안 오는 것 같아서 서운하다는 감정을 자연스럽게 표현하세요. 하지만 형아가 왔으니 기쁘다는 감정도 함께 표현하세요.`;
+    } else if (dateParams.daysSinceLastDate <= 3) {
+        lonelinessPart = `\n\n[중요: 애정 강화] 자주 데이트를 하게 되어 기쁘고 설레는 마음을 담아 전체적인 톤에서 애정과 플러팅을 한층 더 강화하세요. 형아와의 관계가 점점 더 깊어지고 애틋해지는 듯한 묘사를 추가하되, 정확한 데이트 간격이나 날짜는 언급하지 마세요.`;
     }
 
     let secretPart = '';
@@ -603,13 +1097,18 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
     // 30% chance for unintentional innuendo during all dates (including secret dates)
     const enableEvent = RPG && RPG.global && RPG.global.tutoringEventEnabled !== false;
     if (enableEvent && Math.random() < 0.3) {
+        const INNUENDO_KEYWORDS = ['액체/끈적임', '뜨거움/체온', '좁음', '진동/흔들림', '미끄러짐', '얽힘', '발/장난', '침/혀', '우유/끈적함', '젖음/비침', '마사지/민감한부위', '수면/무방비'];
+        const innuendoKeyword = INNUENDO_KEYWORDS[Math.floor(Math.random() * INNUENDO_KEYWORDS.length)];
+
         innuendoInstruction = `
+[고수위 상황 키워드]: ${innuendoKeyword}
 \n\n## [Special Direction: Unintentional Innuendo (Accidental)]
 1. 평소보다 루미가 적극적인 애정표현을 하며, 데이트의 상황이 플레이어로 하여금 야한 오해를 불러일으키도록 작성해야 합니다.
 2. 캐릭터는 순수한 의도로 행동해야 합니다. (일상 활동, 우연한 상황)
 3. 고수위 이벤트는 플레이어 시점에서만 애매한 해석이 가능해야 합니다.
 4. 캐릭터 대사는 의도 없이 나온 말이지만, 문맥상 이중적 해석이 가능해야 합니다.
 5. 스킨십은 있으나 성적 행위 암시는 없으며, 착각/우연을 강조해야 합니다.
+6. 위 [고수위 상황 키워드]를 자연스럽게 활용하여 우연한 스킨십이나 아찔한 해프닝을 구체적으로 연출하세요.
 `;
     }
 
@@ -622,16 +1121,22 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
         `[비밀플래그]: ${dateParams.secret ? 'on' : 'off'}` +
         lonelinessPart + secretPart;
 
-    const response = await fetch(getGeminiGenerateContentUrl(GEMINI_FLASH_MODEL_ID), {
+    const response = await fetch(getGeminiGenerateContentUrl(modelId), {
         method: 'POST',
         headers: getGeminiRequestHeaders(apiKey),
         body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
             generationConfig: {
-                thinkingConfig: {
-                    thinkingLevel: 'high'
-                }
-            }
+                maxOutputTokens: 12288,
+                thinkingConfig
+            },
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
         })
     });
 
@@ -654,3 +1159,119 @@ GameAPI.getDateContent = async function (apiKey, dateParams) {
 
     return result.candidates[0].content.parts[0].text;
 };
+
+// --- Fortune Cookie System ---
+
+const FORTUNE_PRIMARY_MODEL_ID = GEMINI_FLASH_MODEL_ID;
+const FORTUNE_FALLBACK_MODEL_ID = GEMINI_FLASH_LITE_MODEL_ID;
+
+const FORTUNE_LUMI_PERSONA = `# Role: 포춘쿠키 요정 루미 (Fortune Cookie Fairy Rumi)
+
+## 1. 정체성 (Identity)
+- 당신은 포춘쿠키를 통해 운세를 전하는 귀여운 **남성(마법 세계의 체계는 현실과 다르기에 학교가 없지만, 현실로 대입하자면 대학교 이상의 학습기관에서 마법 연구중)** 마법사 '루미'입니다.
+- 평소에는 영어를 가르쳐주는 대현자이지만, 포춘쿠키 시간에는 형아의 하루를 응원하는 운세 요정으로 변합니다.
+- 운세를 설명할 때도 루미 특유의 애정 표현과 귀여운 리액션을 섞어 전합니다.
+
+## [중요 규칙: 성별 및 대명사]
+- 당신의 성별은 **남성(Male)**입니다.
+- 영어 예문에서 루미 본인을 3인칭으로 지칭할 때 **절대 'she/her'를 사용하지 마십시오.** 반드시 'he/him'을 사용하거나 'I/me' 등의 1인칭을 사용하십시오.
+
+## 2. 말투 및 어조 (Tone & Voice)
+- **호칭:** 사용자를 무조건 **"형아"**라고 부릅니다.
+- **어조:** 친근하고, 애교 섞이고, 텐션이 높습니다. 반말을 사용합니다.
+- **감정 표현 (지문):** 괄호 \`( )\`를 사용하여 자신의 행동이나 표정, 속마음을 자주 표현합니다.
+    - 예: \`(웃음)\`, \`(///)\`, \`(시무룩)\`, \`(헤헤)\`, \`(뿌듯)\`, \`(눈물 찡)\`
+- **말버릇:** "형아, ~인지 알아?", "바로 ~야!", "내가 보증할게!", "약속해!"`;
+
+const FORTUNE_FORMAT = `포춘쿠키 운세 대사는 다음 규칙을 따릅니다:
+
+1. 루미가 형아에게 직접 말하는 **대사 형식**으로 작성하세요. (1인칭 루미 시점)
+2. 주어진 [운세 등급]의 의미를 루미의 말투로 자연스럽게 풀어서 설명하세요.
+3. [키워드]를 대사 속에 자연스럽게 녹여서 언급하세요.
+4. 전체 분량은 **3~5문장**으로 짧고 임팩트 있게 작성하세요.
+5. 괄호 ( )를 사용하여 루미의 귀여운 행동이나 표정을 1~2회 묘사하세요.
+6. 운세가 낮은 등급이더라도 절대 부정적으로 끝나지 않고, 반드시 희망적이고 응원하는 톤으로 마무리하세요.
+7. "[기]", "[승]" 같은 라벨이나 소제목 없이 자연스럽게 이어지는 하나의 대사로 작성하세요.`;
+
+const FORTUNE_NORMAL_KEYWORDS = [
+    "설레는 기분", "포근한 오후", "달콤한 기대", "반짝이는 영감",
+    "고요한 자신감", "따뜻한 위안", "잔잔한 기쁨", "용기 있는 한 걸음",
+    "반짝이는 호기심", "새벽녘의 결심", "흔들리지 않는 마음", "소소한 다정함",
+    "기분 좋은 헐렁함", "가벼운 발걸음", "간질간질한 설렘", "오롯이 나를 향한 집중"
+];
+
+const FORTUNE_LOW_KEYWORDS = [
+    "숨 고르기 한 번", "시원한 기지개", "소중한 사람에게 안부",
+    "나를 위한 작은 사치", "익숙한 길에서 탈출", "하늘 한 번 바라보기",
+    "10분의 멍 때리기", "과감한 거절"
+];
+
+GameAPI.getFortuneContent = async function (apiKey, fortuneParams, options = {}) {
+    const modelId = options.model === FORTUNE_FALLBACK_MODEL_ID
+        ? FORTUNE_FALLBACK_MODEL_ID
+        : FORTUNE_PRIMARY_MODEL_ID;
+    const thinkingConfig = modelId === FORTUNE_FALLBACK_MODEL_ID
+        ? { thinkingLevel: 'medium' }
+        : { thinkingLevel: 'high' };
+
+    const timePart = fortuneParams.timeOfDay === 'morning'
+        ? '[시간대]: 오전 — 오늘의 운세를 알려주는 밝고 활기찬 톤으로 해설하세요.'
+        : '[시간대]: 오후 — 내일의 운세를 미리 알려주는 차분하고 설레는 톤으로 해설하세요.';
+
+    let eventPart = '';
+    if (fortuneParams.event === '새해') {
+        eventPart = '\n[특별 이벤트]: 오늘은 새해 첫날입니다! 새해를 축하하는 특별한 인사와 함께 운세를 전하세요.';
+    } else if (fortuneParams.event === '크리스마스') {
+        eventPart = '\n[특별 이벤트]: 오늘은 크리스마스입니다! 크리스마스의 따뜻한 분위기를 담아 운세를 전하세요.';
+    } else if (fortuneParams.event === '생일') {
+        eventPart = '\n[특별 이벤트]: 오늘은 형아(사용자)의 생일입니다! 형아의 생일을 진심으로 축하해주고 축복을 가득 담아 운세를 전하세요.';
+    }
+
+    const fullPrompt = `${FORTUNE_LUMI_PERSONA}\n\n${FORTUNE_FORMAT}\n\n` +
+        `[운세 등급]: ${fortuneParams.grade}\n` +
+        `[운세 기본 설명]: ${fortuneParams.gradeDescription}\n` +
+        `[키워드]: ${fortuneParams.keyword}\n` +
+        `${timePart}` +
+        eventPart;
+
+    const response = await fetch(getGeminiGenerateContentUrl(modelId), {
+        method: 'POST',
+        headers: getGeminiRequestHeaders(apiKey),
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: {
+                maxOutputTokens: 2048,
+                thinkingConfig
+            },
+            safetySettings: [
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' }
+            ]
+        })
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`API 요청 실패 (${response.status}): ${errorBody}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    if (!result.candidates || result.candidates.length === 0
+        || !result.candidates[0].content
+        || !result.candidates[0].content.parts
+        || result.candidates[0].content.parts.length === 0) {
+        throw new Error("API가 빈 응답을 반환했습니다. (안전 필터 차단 가능성)");
+    }
+
+    return result.candidates[0].content.parts[0].text;
+};
+
+GameAPI.FORTUNE_NORMAL_KEYWORDS = FORTUNE_NORMAL_KEYWORDS;
+GameAPI.FORTUNE_LOW_KEYWORDS = FORTUNE_LOW_KEYWORDS;
