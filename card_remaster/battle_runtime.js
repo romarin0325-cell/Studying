@@ -1,31 +1,17 @@
 /**
- * battle_runtime.js — Non-visual battle runtime for Card RPG.
- *
- * Keeps battle state transitions and skill/effect resolution outside index.html
+ * @file battle_runtime.js
+ * @module BattleRuntime
+ * @description
+ * Contains the non-visual battle state machine and turn execution logic.
+ * Keeps battle state transitions and skill/effect resolution separate from UI code
  * while preserving the existing RPG method names and DOM entrypoints.
  */
-
-function getStackCap(rpg, buffId) {
-    if (buffId === 'burn') return rpg.hasArtifact('over_flame') ? 5 : 3;
-    if (buffId === 'divine') return rpg.hasArtifact('over_divine') ? 5 : 3;
-    return null;
-}
 
 function applyStackMap(rpg, target, buffMap) {
     if (!target || !target.buffs || !buffMap) return;
 
     Object.keys(buffMap).forEach(buffId => {
-        const cap = getStackCap(rpg, buffId);
-        const nextValue = (target.buffs[buffId] || 0) + buffMap[buffId];
-
-        if (cap === null) {
-            // Non-stack debuffs/buffs are represented as presence flags.
-            target.buffs[buffId] = buffMap[buffId] > 0 ? 1 : 0;
-            if (target.buffs[buffId] <= 0) delete target.buffs[buffId];
-            return;
-        }
-
-        target.buffs[buffId] = Math.min(nextValue, cap);
+        StatusRules.add(target, buffId, buffMap[buffId], rpg.state.artifacts || []);
     });
 }
 
@@ -33,9 +19,15 @@ function applyQueuedAction(rpg, target, action) {
     if (!action || !target) return;
 
     switch (action.kind) {
-        case 'clear_field_buffs':
+        case 'clear_field_buffs': {
+            const removedBuffs = [...rpg.battle.fieldBuffs];
             rpg.battle.fieldBuffs = [];
+            removedBuffs.forEach(buff => rpg.emitUIEvent?.({
+                type: 'field-buff-remove',
+                buffId: buff.name
+            }));
             break;
+        }
         case 'remove_target_stack': {
             const nextValue = (target.buffs[action.id] || 0) - (action.count || 0);
             if (nextValue > 0) target.buffs[action.id] = nextValue;
@@ -43,24 +35,25 @@ function applyQueuedAction(rpg, target, action) {
             break;
         }
         case 'add_target_buff': {
-            const value = action.value || 1;
-            const stackCap = getStackCap(rpg, action.id);
-            if (stackCap === null) {
-                target.buffs[action.id] = value > 0 ? 1 : 0;
-                if (target.buffs[action.id] <= 0) delete target.buffs[action.id];
-            } else {
-                target.buffs[action.id] = Math.min((target.buffs[action.id] || 0) + value, stackCap);
-            }
+            const value = Number.isFinite(action.value) ? action.value : 1;
+            StatusRules.add(target, action.id, value, rpg.state.artifacts || []);
             break;
         }
         case 'remove_field_buff_by_name': {
             const idx = rpg.battle.fieldBuffs.findIndex(buff => buff.name === action.id);
-            if (idx !== -1) rpg.battle.fieldBuffs.splice(idx, 1);
+            if (idx !== -1) {
+                const [removed] = rpg.battle.fieldBuffs.splice(idx, 1);
+                rpg.emitUIEvent?.({ type: 'field-buff-remove', buffId: removed.name });
+            }
             break;
         }
-        case 'remove_first_field_buff':
-            if (rpg.battle.fieldBuffs.length > 0) rpg.battle.fieldBuffs.shift();
+        case 'remove_first_field_buff': {
+            if (rpg.battle.fieldBuffs.length > 0) {
+                const removed = rpg.battle.fieldBuffs.shift();
+                rpg.emitUIEvent?.({ type: 'field-buff-remove', buffId: removed.name });
+            }
             break;
+        }
         default:
             break;
     }
@@ -77,8 +70,16 @@ function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
         const duration = target.buffs[buffId];
         if (!duration) return;
 
-        if (duration > 1) target.buffs[buffId] = duration - 1;
-        else delete target.buffs[buffId];
+        if (buffId === 'guard' && target.guardEnhancedTurns > 0) {
+            if (target.guardEnhancedTurns > 1) target.guardEnhancedTurns--;
+            else delete target.guardEnhancedTurns;
+        }
+
+        if (duration > 1) {
+            target.buffs[buffId] = duration - 1;
+        } else {
+            delete target.buffs[buffId];
+        }
     });
 }
 
@@ -90,11 +91,26 @@ function buildBattleEnemy(rpg) {
         ? ENDLESS_ENEMY_ROTATION.length
         : ENEMIES.length;
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
-    let scale = 1.0 + (cycle * 0.2);
+    let scale = 1.0 + (cycle * GAME_CONSTANTS.ENEMY_SCALING.CYCLE_BONUS);
+    let steps = 0;
     if (rpg.state.mode === 'puzzle') {
-        scale += (GAME_CONSTANTS.PUZZLE && GAME_CONSTANTS.PUZZLE.ENEMY_SCALE_BONUS) || 0.2;
-    } else if ((rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') && ['artifact', 'flood', 'curse'].includes(rpg.state.mode)) {
-        scale = scale * 1.1;
+        steps = 2;
+    } else if (['artifact', 'artifact_chaos', 'artifact_reserve', 'flood', 'curse'].includes(rpg.state.mode)) {
+        if (rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') {
+            steps = 1;
+        }
+    }
+
+    if (rpg.state.hardMode && rpg.state.gameType === 'challenge') {
+        steps += 2;
+    }
+
+    if (steps > 0) {
+        if (rpg.state.mode === 'puzzle') {
+            scale += 0.1 * steps;
+        } else {
+            scale *= (1.0 + 0.1 * steps);
+        }
     }
     const suppressBossRewards = rpg.state.mode === 'puzzle';
     const enemy = {
@@ -116,13 +132,10 @@ function buildBattleEnemy(rpg) {
         tookDamageThisTurn: false,
         lastHitType: null,
         isHiddenBoss: !!baseEnemy.hiddenBossFor,
-        bonusRewardTickets: !suppressBossRewards && baseEnemy.hiddenBossFor ? 3 : 0,
-        bonusTranscendenceReward: suppressBossRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
+        isSpecialBoss: !!baseEnemy.isSpecialBoss,
+        bonusRewardTickets: !suppressBossRewards && baseEnemy.hiddenBossFor && !baseEnemy.noBonusRewards ? 3 : 0,
+        bonusTranscendenceReward: suppressBossRewards || baseEnemy.noBonusRewards ? null : (baseEnemy.bonusTranscendenceReward || null)
     };
-
-    if (baseEnemy.id === 'creator_god') {
-        enemy.chargeTurn = 0;
-    }
 
     return enemy;
 }
@@ -146,6 +159,7 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
         proto: proto,
         name: proto.name,
         ...init.stats,
+        activeTrait: init.activeTrait || null,
         buffs: {},
         pos: idx,
         isDead: false,
@@ -161,36 +175,52 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
             mdef: player.mdef
         };
 
-        player.maxHp = Math.floor(player.maxHp * (1 + blessing.multiplier));
+        // 앤트로피: 혼돈의 축복 효과 2배
+        let blessingMult = blessing.multiplier;
+        const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
+        if (hasEntropy) blessingMult *= 2;
+
+        player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
         player.hp = player.maxHp;
         player.blessing = blessing;
 
-        const mult = 1.0 + blessing.multiplier;
+        const mult = 1.0 + blessingMult;
         player.atk = Math.floor(player.atk * mult);
         player.matk = Math.floor(player.matk * mult);
         player.def = Math.floor(player.def * mult);
         player.mdef = Math.floor(player.mdef * mult);
     }
 
-    if (proto.trait.type.startsWith('pos_')) {
-        const trait = proto.trait;
-        const active =
-            (trait.type.includes('van') && idx === 0) ||
-            (trait.type.includes('mid') && idx === 1) ||
-            (trait.type.includes('rear') && idx === 2);
-        if (active) {
-            if (trait.type.includes('_atk')) player.atk = Math.floor(player.atk * (1 + trait.val / 100));
-            if (trait.type.includes('_matk')) player.matk = Math.floor(player.matk * (1 + trait.val / 100));
-            if (trait.type.includes('_def')) player.def = Math.floor(player.def * (1 + trait.val / 100));
-            if (trait.type.includes('_mdef')) player.mdef = Math.floor(player.mdef * (1 + trait.val / 100));
-        }
-    }
+    // NOTE: Positional traits ('pos_stat_boost') are handled in Logic.calculateInitialStats.
+    // Do NOT add positional stat boosts here to avoid double-application.
 
     return player;
 }
 
 const BattleRuntime = {
+    replaceFieldBuffsLikeKaleidoscope(rpg) {
+        const count = rpg.battle.fieldBuffs.length;
+        if (count <= 0) return 0;
+
+        const pool = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS)
+            .filter(buffId => buffId !== 'destiny_oath')
+            .sort(() => 0.5 - Math.random());
+        const removedBuffs = [...rpg.battle.fieldBuffs];
+        rpg.battle.fieldBuffs = [];
+        removedBuffs.forEach(buff => rpg.emitUIEvent?.({
+            type: 'field-buff-remove',
+            buffId: buff.name
+        }));
+        pool.slice(0, Math.min(count, pool.length))
+            .forEach(buffId => BattleRuntime.applyFieldBuff(rpg, buffId));
+        return Math.min(count, pool.length);
+    },
+
     startBattleInit(rpg) {
+        if (rpg.state.mode === 'artifact_reserve' && rpg.state.artifactReserveDraft && rpg.state.artifactReserveDraft.active) {
+            return rpg.showAlert("아티팩트 리저브 선택을 먼저 완료해주세요.");
+        }
+
         if (rpg.state.mode === 'puzzle') {
             if (!rpg.state.puzzlePiecesClaimed) {
                 return rpg.showAlert("퍼즐 모드는 먼저 퍼즐조각획득을 완료해야 합니다.");
@@ -212,6 +242,9 @@ const BattleRuntime = {
         rpg.battle.players = rpg.state.deck.map((cardId, idx) => buildBattlePlayer(rpg, cardId, idx, allCards));
         const hasAttackSwap = rpg.battle.players.some(player => player && player.proto && player.proto.trait.type === 'reverse_atk_matk_party');
         const normalAttackTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_normal_attack_dmg');
+        const guardBoostTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'guardian_hidden_trait');
+        const manaCostTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'party_all_stats_mana_cost');
+        const alternatingStatsTrait = rpg.battle.players.find(player => player && player.proto && player.proto.trait.type === 'alternate_party_atk_matk_turn');
         if (hasAttackSwap || normalAttackTrait) {
             rpg.battle.players.forEach(player => {
                 if (!player) return;
@@ -219,11 +252,37 @@ const BattleRuntime = {
                 if (normalAttackTrait) player.normalAttackPartyMult = normalAttackTrait.proto.trait.val || 1.0;
             });
         }
+        if (guardBoostTrait) {
+            const guardReduction = Math.max(0, Math.min(0.95, guardBoostTrait.proto.trait.guardReduction || 0.75));
+            rpg.battle.players.forEach(player => {
+                if (!player) return;
+                player.guardDamageReduction = Math.max(player.guardDamageReduction || 0, guardReduction);
+            });
+            rpg.log('[특성] 가디언: 덱 전체의 [가드] 스킬 효과가 강화됩니다!');
+        }
+        if (manaCostTrait) {
+            const costMult = manaCostTrait.proto.trait.costMult || 2.0;
+            rpg.battle.players.forEach(player => {
+                if (!player || !Array.isArray(player.skills)) return;
+                player.skills.forEach(skill => {
+                    if (Number.isFinite(skill.cost)) skill.cost = Math.floor(skill.cost * costMult);
+                });
+            });
+            rpg.log(`[특성] ${manaCostTrait.name}: 덱 전체 스킬 마나 소비 ${costMult}배!`);
+        }
+        if (alternatingStatsTrait) {
+            const shift = alternatingStatsTrait.proto.trait.val || 50;
+            rpg.battle.players.forEach(player => {
+                if (player) player.alternatingAttackStatPercent = shift;
+            });
+        }
         rpg.battle.fieldBuffs = [];
         rpg.battle.delayedEffects = [];
         rpg.battle.turn = 1;
         rpg.battle.currentPlayerIdx = 0;
         rpg.battle.isNewTurn = true;
+        rpg.battle.isFinished = false;
+        rpg.battle.phase = 'starting';
 
         while (
             rpg.battle.currentPlayerIdx < GAME_CONSTANTS.DECK_SIZE &&
@@ -257,12 +316,14 @@ const BattleRuntime = {
         }
 
         rpg.renderBattleView();
+        rpg.emitUIEvent?.({ type: 'battle-start' });
         BattleRuntime.TurnManager.startPlayerTurn(rpg);
     },
 
     TurnManager: {
         startPlayerTurn(rpg) {
             const battle = rpg.battle;
+            battle.phase = 'player-resolving';
             if (battle.currentPlayerIdx >= GAME_CONSTANTS.DECK_SIZE) {
                 rpg.loseBattle();
                 return;
@@ -273,17 +334,19 @@ const BattleRuntime = {
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
-                if (rpg.hasArtifact('kaleidoscope')) {
+                if (BattleRuntime.hasActiveTrait(rpg, 'vanguard_moon_bless_every_3_turns') && battle.turn % 3 === 0) {
+                    BattleRuntime.applyFieldBuff(rpg, 'moon_bless');
+                    rpg.log('[특성] 푸른달의사제: 달의축복 부여!');
+                }
+
+                const hasProphetTrait = BattleRuntime.hasActiveTrait(rpg, 'field_kaleidoscope_each_turn');
+                if (rpg.hasArtifact('kaleidoscope') || hasProphetTrait) {
                     const count = battle.fieldBuffs.length;
                     if (count > 0) {
-                        battle.fieldBuffs = [];
-                        rpg.log('[아티팩트] 만화경: 필드 버프 재구성!');
-
-                        const allBuffs = Object.keys(GAME_CONSTANTS.FIELD_BUFF_STATS)
-                            .filter(buffId => buffId !== 'destiny_oath');
-                        const pool = [...allBuffs].sort(() => 0.5 - Math.random());
-                        const picks = pool.slice(0, Math.min(count, pool.length));
-                        picks.forEach(buffId => BattleRuntime.applyFieldBuff(rpg, buffId));
+                        rpg.log(hasProphetTrait
+                            ? '[특성] 예언자: 필드 버프 재구성!'
+                            : '[아티팩트] 만화경: 필드 버프 재구성!');
+                        BattleRuntime.replaceFieldBuffsLikeKaleidoscope(rpg);
                     }
                 }
 
@@ -292,10 +355,10 @@ const BattleRuntime = {
                     battle.enemy.mdef = battle.enemy.baseMdef;
                     if (battle.turn % 2 === 0) {
                         battle.enemy.def = Math.floor(battle.enemy.def * 1.5);
-                        rpg.log("마신의 권능: 짝수 턴 물리방어력 50% 증가.");
+                        rpg.log(`${battle.enemy.name}의 권능: 짝수 턴 물리방어력 50% 증가.`);
                     } else {
                         battle.enemy.mdef = Math.floor(battle.enemy.mdef * 1.5);
-                        rpg.log("마신의 권능: 홀수 턴 마법방어력 50% 증가.");
+                        rpg.log(`${battle.enemy.name}의 권능: 홀수 턴 마법방어력 50% 증가.`);
                     }
                 }
             }
@@ -307,6 +370,10 @@ const BattleRuntime = {
                 battle.currentPlayerIdx++;
                 BattleRuntime.TurnManager.startPlayerTurn(rpg);
                 return;
+            }
+
+            if (!Number.isFinite(player.enteredAtTurn)) {
+                player.enteredAtTurn = battle.turn;
             }
 
             const dueEffects = battle.delayedEffects.filter(effect => effect.turn === battle.turn);
@@ -327,6 +394,11 @@ const BattleRuntime = {
             tickTurnBuffs(player);
 
             rpg.renderBattleView();
+            rpg.emitUIEvent?.({
+                type: 'turn-start',
+                turn: battle.turn,
+                actor: 'player'
+            });
 
             if (player.buffs.stun) {
                 rpg.log(`${player.name} 기절로 인해 행동 불가.`);
@@ -335,15 +407,19 @@ const BattleRuntime = {
                 return;
             }
 
+            battle.phase = 'player-ready';
             rpg.renderBattleControls(player);
         },
 
         endPlayerTurn(rpg) {
+            if (!rpg.battle || !['player-ready', 'player-resolving'].includes(rpg.battle.phase)) return;
+            rpg.battle.phase = 'enemy-pending';
             setTimeout(() => BattleRuntime.TurnManager.startEnemyTurn(rpg), 500);
         },
 
         startEnemyTurn(rpg) {
             const battle = rpg.battle;
+            battle.phase = 'enemy-resolving';
             const enemy = battle.enemy;
             if (enemy.hp <= 0) {
                 rpg.winBattle();
@@ -406,22 +482,35 @@ const BattleRuntime = {
             }
 
             const skill = skillInfo;
+            rpg.emitUIEvent?.({
+                type: 'skill-cast',
+                source: 'enemy',
+                target: 'player',
+                skillName: skill.name,
+                skillType: skill.type,
+                delayed: false
+            });
             if (skill.type !== 'phy' && skill.type !== 'mag') {
                 rpg.log(`${enemy.name}・・${skill.name}!`);
                 BattleRuntime.applySkillEffects(rpg, enemy, target, skill);
+                rpg.renderBattleView?.();
                 BattleRuntime.TurnManager.endEnemyTurn(rpg);
                 return;
             }
-            let val = skill.type === 'phy' ? enemy.atk : enemy.matk;
-            let mult = skill.val || 1.0;
+            const enemyStats = Logic.calculateStats(
+                enemy,
+                battle.fieldBuffs,
+                rpg.state.mode,
+                rpg.state.artifacts || [],
+                battle.turn
+            );
+            let val = skill.type === 'phy' ? enemyStats.atk : enemyStats.matk;
+            let mult = Logic.resolveSkillMultiplier(skill, enemy, msg => rpg.log(msg));
 
             if (enemy.id === 'pharaoh' && skill.name === '고대의저주' && enemy.tookDamageThisTurn) {
                 mult = 3.0;
                 rpg.log("고대의 저주: 턴 내 피격 감지! 대미지 3배로 반격!");
             }
-
-            if (enemy.buffs.weak && skill.type === 'phy') val *= 0.8;
-            if (enemy.buffs.silence && skill.type === 'mag') val *= 0.8;
 
             const tgtStats = Logic.calculateStats(
                 target,
@@ -434,24 +523,28 @@ const BattleRuntime = {
 
             if (Logic.checkEvasion(target, skill.type, battle.fieldBuffs, rpg.state.mode, rpg.state.artifacts || [], battle.turn)) {
                 rpg.log(`${target.name} 회피 성공! (${skill.name} 회피)`);
+                rpg.emitUIEvent?.({ type: 'evade', source: 'enemy', target: 'player' });
                 if (rpg.hasArtifact('lucky_vicky')) {
-                    target.mp = Math.min(GAME_CONSTANTS.MAX_MP, target.mp + 10);
+                    target.mp = Math.min(getMaxMana(target), target.mp + 10);
                     rpg.log('[아티팩트] 럭키비키: 회피 성공! 마나 10 회복!');
                 }
                 if (target.proto && target.proto.trait && target.proto.trait.type === 'on_evasion_stun') {
                     enemy.buffs.stun = 1;
                     rpg.log(`[특성] ${target.name}: 회피 반격! 적에게 [기절] 부여.`);
                 }
+                rpg.renderBattleView?.();
                 BattleRuntime.TurnManager.endEnemyTurn(rpg);
                 return;
             }
             if (target.buffs.barrier && skill.type === 'phy') {
                 rpg.log(`${target.name} 배리어로 방어!`);
+                rpg.emitUIEvent?.({ type: 'block', source: 'enemy', target: 'player', blockType: 'barrier' });
                 BattleRuntime.TurnManager.endEnemyTurn(rpg);
                 return;
             }
             if (target.buffs.magic_guard && skill.type === 'mag') {
                 rpg.log(`${target.name} 매직가드로 방어!`);
+                rpg.emitUIEvent?.({ type: 'block', source: 'enemy', target: 'player', blockType: 'magic_guard' });
                 BattleRuntime.TurnManager.endEnemyTurn(rpg);
                 return;
             }
@@ -459,11 +552,24 @@ const BattleRuntime = {
             const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
             if (guardSucceeded) {
-                dmg *= 0.5;
-                rpg.log(`${target.name} 가드 성공! 피해 반감.`);
+                const guardReduction = target.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
+                    ? target.guardDamageReduction
+                    : 0.5;
+                dmg *= (1 - guardReduction);
+                const guardPercent = Math.round(guardReduction * 100);
+                rpg.log(`${target.name} 가드 성공! 피해 ${guardPercent}% 감소.`);
+                rpg.emitUIEvent?.({ type: 'guard', source: 'enemy', target: 'player' });
             }
             dmg = Math.floor(dmg);
             target.hp -= dmg;
+            rpg.emitUIEvent?.({
+                type: 'damage',
+                source: 'enemy',
+                target: 'player',
+                amount: dmg,
+                skillType: skill.type,
+                critical: false
+            });
             if (dmg > 0) {
                 target.tookDamageThisTurn = true;
                 BattleRuntime.handleOnHitTraits(rpg, target, enemy);
@@ -484,7 +590,9 @@ const BattleRuntime = {
                 target.isDead = true;
                 target.hp = 0;
                 rpg.log(`${target.name} 쓰러짐!`);
+                rpg.emitUIEvent?.({ type: 'actor-death', source: 'enemy', target: 'player' });
                 BattleRuntime.handleDeathTraits(rpg, target, enemy);
+                BattleRuntime.handleLinkedDeathTraits(rpg, target, enemy);
 
                 battle.currentPlayerIdx++;
                 while (battle.currentPlayerIdx < GAME_CONSTANTS.DECK_SIZE) {
@@ -507,6 +615,7 @@ const BattleRuntime = {
                 rpg.log(`[특성] ${target.name}: 가드 성공! 적에게 [기절] 부여.`);
             }
 
+            rpg.renderBattleView?.();
             if (enemy.hp <= 0) rpg.winBattle();
             else BattleRuntime.TurnManager.endEnemyTurn(rpg);
         },
@@ -535,11 +644,97 @@ const BattleRuntime = {
             killer.tookDamageThisTurn = true;
         }
 
+        if (result.clearFieldBuffs) {
+            rpg.battle.fieldBuffs = [];
+        }
+
         if (result.fieldBuffsToAdd && result.fieldBuffsToAdd.length > 0) {
             result.fieldBuffsToAdd.forEach(buffId => BattleRuntime.applyFieldBuff(rpg, buffId));
         }
 
         applyStackMap(rpg, killer, result.killerDebuffs);
+
+        if (victim && victim.proto && victim.proto.trait && victim.proto.trait.type === 'death_next_ally_max_mana') {
+            const amount = victim.proto.trait.val || 20;
+            const players = Array.isArray(rpg.battle.players) ? rpg.battle.players : [];
+            const nextAlly = players.find(player => player && !player.isDead && player.pos > victim.pos);
+            if (nextAlly) {
+                nextAlly.maxMp = getMaxMana(nextAlly) + amount;
+                nextAlly.mp = Math.min(nextAlly.maxMp, nextAlly.mp + amount);
+                rpg.log(`[특성] ${victim.name}: 다음 아군 ${nextAlly.name}의 최대마나와 현재마나 ${amount} 증가!`);
+            }
+        }
+    },
+
+    handleLinkedDeathTraits(rpg, victim, killer) {
+        if (!victim || !killer || killer.hp <= 0 || !victim.proto) return;
+
+        const players = Array.isArray(rpg.battle.players) ? rpg.battle.players : [];
+        players.forEach(player => {
+            if (!player || !player.proto || !player.proto.trait) return;
+            if (player.proto.trait.type !== 'ally_light_death_base_matk_mag' && player.proto.trait.type !== 'ally_death_base_atk_phy') return;
+            if (player.isDead) return;
+            if (killer.hp <= 0) return;
+            if (player.proto.trait.type === 'ally_light_death_base_matk_mag' && !GameUtils.cardMatchesElement(victim.proto, 'light')) return;
+
+            const proxySource = {
+                name: player.name,
+                hp: player.proto.stats.hp,
+                maxHp: player.proto.stats.hp,
+                maxMp: GAME_CONSTANTS.MAX_MP,
+                mp: GAME_CONSTANTS.MAX_MP,
+                atk: player.proto.stats.atk,
+                matk: player.proto.stats.matk,
+                def: player.proto.stats.def,
+                mdef: player.proto.stats.mdef,
+                baseCrit: Number.isFinite(player.baseCrit) ? player.baseCrit : GAME_CONSTANTS.BASE_CRIT,
+                baseEva: 0,
+                buffs: {},
+                proto: {
+                    ...player.proto,
+                    trait: { type: 'field_buff_immune' }
+                }
+            };
+            const retaliationSkill = player.proto.trait.type === 'ally_death_base_atk_phy'
+                ? {
+                    name: '화염 반격',
+                    type: 'phy',
+                    val: player.proto.trait.val || 3.0,
+                    effects: []
+                }
+                : {
+                    name: '성야의 기적',
+                    type: 'mag',
+                    val: player.proto.trait.val || 2.0,
+                    effects: []
+                };
+            const dmgResult = Logic.calculateDamage(
+                proxySource,
+                killer,
+                retaliationSkill,
+                rpg.battle.fieldBuffs,
+                [],
+                msg => rpg.log(msg),
+                rpg.state.mode,
+                rpg.state.deck,
+                rpg.battle.turn,
+                rpg.state.artifacts || []
+            );
+
+            if (rpg.hasArtifact('companion')) {
+                dmgResult.dmg *= 2;
+                rpg.log(`[아티팩트] 길동무: ${retaliationSkill.name} 대미지 2배!`);
+            }
+
+            if (dmgResult.dmg > 0) {
+                killer.hp -= dmgResult.dmg;
+                killer.tookDamageThisTurn = true;
+                const traitLog = player.proto.trait.type === 'ally_death_base_atk_phy'
+                    ? `[특성] ${player.name}: 애쉬의 화염이 적을 불태웁니다.`
+                    : `[특성] ${player.name}: 빛속성 아군의 희생에 반응!`;
+                rpg.log(`${traitLog} ${dmgResult.isCrit ? 'Critical! ' : ''}<span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+            }
+        });
     },
 
     handleOnHitTraits(rpg, victim, attacker) {
@@ -553,7 +748,11 @@ const BattleRuntime = {
     },
 
     maybeTriggerDeathRoulette(rpg, source, skill, isDelayed = false) {
-        if (!rpg.hasArtifact('death_roulette') || isDelayed || skill.name === rpg.NORMAL_ATTACK.name) {
+        const isDelayedReservation = !isDelayed &&
+            typeof findDelayedSkillEffect === 'function' &&
+            findDelayedSkillEffect(skill) &&
+            !BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills');
+        if (!rpg.hasArtifact('death_roulette') || isDelayedReservation || skill.name === rpg.NORMAL_ATTACK.name) {
             return false;
         }
         if (Math.random() >= 0.3) return false;
@@ -568,35 +767,128 @@ const BattleRuntime = {
 
         source.isDead = true;
         rpg.log(`${source.name} 사망!`);
+        rpg.emitUIEvent?.({ type: 'actor-death', source: 'enemy', target: 'player' });
         BattleRuntime.handleDeathTraits(rpg, source, target);
+        BattleRuntime.handleLinkedDeathTraits(rpg, source, target);
     },
 
     hasActiveTrait(rpg, id) {
         return (rpg.battle.activeTraits || []).includes(id);
     },
 
+    restoreDelayedTriggerMana(rpg, source, skill) {
+        if (
+            !source ||
+            !skill ||
+            !skill.isActualDelayedTrigger ||
+            !BattleRuntime.hasActiveTrait(rpg, 'vanguard_delayed_mana_restore')
+        ) {
+            return 0;
+        }
+
+        const tracker = (rpg.battle.players || []).find(player =>
+            player && player.proto && player.proto.trait &&
+            player.proto.trait.type === 'vanguard_delayed_mana_restore' &&
+            player.pos === 0
+        );
+        const amount = tracker ? (tracker.proto.trait.val || 10) : 10;
+        const before = source.mp;
+        source.mp = Math.min(getMaxMana(source), source.mp + amount);
+        const restored = source.mp - before;
+        rpg.log(`[특성] 혜성추적자: 지연 스킬 발동! ${source.name}의 마나 ${restored} 회복!`);
+        return restored;
+    },
+
+    applyLeaderHpCostOnSkill(rpg, source, target, skill) {
+        const trait = source && source.proto && source.proto.trait;
+        if (!trait || trait.type !== 'leader_hp_cost_on_skill' || skill.name === rpg.NORMAL_ATTACK.name) {
+            return false;
+        }
+
+        const leader = (rpg.battle.players || []).find(player => player && player.pos === 2 && !player.isDead);
+        if (!leader) return false;
+
+        const ratio = Number.isFinite(trait.ratio) ? trait.ratio : 0.35;
+        const amount = Math.max(1, Math.round((leader.maxHp || 0) * ratio));
+        if (amount <= 0) return false;
+
+        leader.hp = Math.max(0, leader.hp - amount);
+        rpg.log(`[특성] ${source.name}: 대장 ${leader.name}의 생명력 ${amount} 소모!`);
+        if (leader.hp <= 0) {
+            BattleRuntime.resolveSourceDeath(rpg, leader, target);
+            return true;
+        }
+        return false;
+    },
+
     executeSkill(rpg, source, target, skill, isDelayed = false) {
-        if (!isDelayed && !skill.isDelayed) {
+        if (rpg.battle && rpg.battle.isFinished) return false;
+        if (!target || target.hp <= 0 || !source || source.isDead) return false;
+
+        if (isDelayed) BattleRuntime.restoreDelayedTriggerMana(rpg, source, skill);
+
+        const cost = Number.isFinite(skill.cost) ? skill.cost : 0;
+        if (!isDelayed) {
+            const currentPlayer = rpg.battle.players[rpg.battle.currentPlayerIdx];
+            if (rpg.battle.phase !== 'player-ready' || currentPlayer !== source || source.mp < cost) {
+                return false;
+            }
+            rpg.battle.phase = 'player-resolving';
+        }
+
+        if (!isDelayed) {
             if (rpg.hasArtifact('blue_moon') && Math.random() < 0.3) {
                 rpg.log('[아티팩트] 블루문: 마나 소비 없이 스킬 사용!');
             } else {
-                source.mp -= skill.cost;
+                source.mp -= cost;
+            }
+
+            if (source.proto && source.proto.trait && source.proto.trait.type === 'alternate_skill_type_mana') {
+                const previousType = source.lastManualSkillType;
+                if (previousType && previousType !== skill.type) {
+                    const amount = source.proto.trait.val || 10;
+                    const before = source.mp;
+                    source.mp = Math.min(getMaxMana(source), source.mp + amount);
+                    rpg.log(`[특성] ${source.name}: 스킬 타입 전환! 마나 ${source.mp - before} 회복!`);
+                }
+                source.lastManualSkillType = skill.type;
             }
         }
 
         let modifiedSkill = skill;
-        if (rpg.hasArtifact('double_attack') && skill.name === rpg.NORMAL_ATTACK.name) {
-            modifiedSkill = { ...skill, val: (skill.val || 1.0) * 2.0 };
+        if (skill.name === rpg.NORMAL_ATTACK.name) {
+            if (rpg.hasArtifact('divine_ares')) {
+                modifiedSkill = { ...skill, val: (Number.isFinite(skill.val) ? skill.val : 1.0) * 2.5 };
+            } else if (rpg.hasArtifact('double_attack')) {
+                modifiedSkill = { ...skill, val: (Number.isFinite(skill.val) ? skill.val : 1.0) * 2.0 };
+            }
         }
 
         rpg.log(`<b>${source.name}</b>의 <b>${skill.name}</b>!`);
+        rpg.emitUIEvent?.({
+            type: 'skill-cast',
+            source: 'player',
+            target: 'enemy',
+            skillName: skill.name,
+            skillType: modifiedSkill.type,
+            delayed: !!isDelayed
+        });
 
         if (skill.name === rpg.NORMAL_ATTACK.name && source.proto && source.proto.trait && source.proto.trait.type === 'normal_attack_burn_divine') {
-            const burnAdd = rpg.hasArtifact('over_flame') ? 2 : 1;
-            const divineAdd = rpg.hasArtifact('over_divine') ? 2 : 1;
-            target.buffs.burn = Math.min((target.buffs.burn || 0) + burnAdd, getStackCap(rpg, 'burn'));
-            target.buffs.divine = Math.min((target.buffs.divine || 0) + divineAdd, getStackCap(rpg, 'divine'));
+            StatusRules.add(target, 'burn', 1, rpg.state.artifacts || []);
+            StatusRules.add(target, 'divine', 1, rpg.state.artifacts || []);
             rpg.log("[특성] 일반 공격 추가 효과: 작열, 디바인 부여!");
+        }
+
+        if (
+            skill.name === rpg.NORMAL_ATTACK.name &&
+            source.proto &&
+            source.proto.trait &&
+            source.proto.trait.type === 'normal_attack_mana_restore'
+        ) {
+            const before = source.mp;
+            source.mp = Math.min(getMaxMana(source), source.mp + (source.proto.trait.val || 20));
+            rpg.log(`[특성] ${source.name}: 일반 공격으로 마나 ${source.mp - before} 회복!`);
         }
 
         if (
@@ -607,7 +899,7 @@ const BattleRuntime = {
             Math.random() < ((source.proto.trait.val || 0) / 100)
         ) {
             target.buffs.stun = 1;
-            rpg.log("[특성] 큐어마스터: 마법 구슬이 반응해 적에게 [기절] 부여!");
+            rpg.log("[특성] 큐어마스터: 레모네이드의 향으로 적에게 [기절] 부여!");
         }
 
         if (
@@ -616,31 +908,34 @@ const BattleRuntime = {
             source.proto.trait &&
             source.proto.trait.type === 'syn_fire_3_crit_burn'
         ) {
-            const burnAdd = rpg.hasArtifact('over_flame') ? 2 : 1;
-            target.buffs.burn = Math.min((target.buffs.burn || 0) + burnAdd, getStackCap(rpg, 'burn'));
+            StatusRules.add(target, 'burn', 1, rpg.state.artifacts || []);
             rpg.log("[특성] 피닉스: 일반 공격 시 작열 부여!");
-        }
-
-        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_trait' && Math.random() < 0.2) {
-            target.buffs.stun = 1;
-            rpg.log("[특성] 베히모스의 위압감! 적을 기절시킵니다!");
-        }
-
-        if (source.proto && source.proto.trait && source.proto.trait.type === 'behemoth_liberated_trait' && Math.random() < 0.2) {
-            target.buffs.stun = 1;
-            rpg.log("[특성] 해방된 베히모스: 20% 확률로 적을 기절시킵니다!");
         }
 
         const delayedEff = typeof findDelayedSkillEffect === 'function'
             ? findDelayedSkillEffect(modifiedSkill)
             : null;
+        const isMultiDelayedEffect = delayedEff &&
+            (delayedEff.type === 'phantom_nightmare' || delayedEff.type === 'multi_delayed_attack');
+        const resolvesImmediately = delayedEff && !isDelayed &&
+            BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills') && !isMultiDelayedEffect;
+
+        if (
+            source.proto && source.proto.trait &&
+            isBehemothTraitType(source.proto.trait.type) &&
+            (!delayedEff || isDelayed || resolvesImmediately) &&
+            Math.random() < 0.2
+        ) {
+            target.buffs.stun = 1;
+            rpg.log(`[특성] ${source.name}: 20% 확률로 적을 기절시킵니다!`);
+        }
 
         if (delayedEff && !isDelayed) {
             const resolvedDelayedSkill = typeof buildResolvedDelayedSkill === 'function'
-                ? buildResolvedDelayedSkill(modifiedSkill, delayedEff, rpg.battle.turn)
+                ? buildResolvedDelayedSkill(modifiedSkill, delayedEff)
                 : modifiedSkill;
 
-            if (delayedEff.type === 'phantom_nightmare') {
+            if (delayedEff.type === 'phantom_nightmare' || delayedEff.type === 'multi_delayed_attack') {
                 const nightmareTurns = Array.isArray(delayedEff.turns)
                     ? delayedEff.turns
                     : [1, 2, 3, 4, 5];
@@ -661,12 +956,12 @@ const BattleRuntime = {
                         rpg.log(message);
                         BattleRuntime.executeSkill(rpg, source, target, resolvedDelayedSkill, true);
                     });
-                    BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                     BattleRuntime.resolveSourceDeath(rpg, source, target);
                     if (target.hp <= 0) {
                         rpg.winBattle();
                         return;
                     }
+                    rpg.renderBattleView?.();
                     BattleRuntime.TurnManager.endPlayerTurn(rpg);
                     return;
                 }
@@ -679,13 +974,16 @@ const BattleRuntime = {
                         announce: nightmareMessages[index] || `${resolvedDelayedSkill.name} 발동!`
                     });
                 });
-                rpg.log(`${skill.name} 준비... (1~5턴 뒤 연속 발동)`);
-                BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+                const firstTurn = Math.min(...nightmareTurns);
+                const lastTurn = Math.max(...nightmareTurns);
+                const turnLabel = firstTurn === lastTurn ? `${firstTurn}턴 뒤` : `${firstTurn}~${lastTurn}턴 뒤`;
+                rpg.log(`${skill.name} 준비... (${turnLabel} 연속 발동)`);
                 BattleRuntime.resolveSourceDeath(rpg, source, target);
                 if (target.hp <= 0) {
                     rpg.winBattle();
                     return;
                 }
+                rpg.renderBattleView?.();
                 BattleRuntime.TurnManager.endPlayerTurn(rpg);
                 return;
             }
@@ -693,6 +991,7 @@ const BattleRuntime = {
             if (BattleRuntime.hasActiveTrait(rpg, 'instant_delayed_skills')) {
                 rpg.log('[특성] 시간의마술사: 지연 스킬 즉시 발동!');
                 modifiedSkill = resolvedDelayedSkill;
+                BattleRuntime.restoreDelayedTriggerMana(rpg, source, modifiedSkill);
             } else {
                 rpg.log(`${skill.name} 준비... (${delayedEff.turns}턴 뒤 발동)`);
                 rpg.battle.delayedEffects.push({
@@ -700,12 +999,12 @@ const BattleRuntime = {
                     source: source,
                     skill: resolvedDelayedSkill
                 });
-                BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
                 BattleRuntime.resolveSourceDeath(rpg, source, target);
                 if (target.hp <= 0) {
                     rpg.winBattle();
                     return;
                 }
+                rpg.renderBattleView?.();
                 BattleRuntime.TurnManager.endPlayerTurn(rpg);
                 return;
             }
@@ -716,11 +1015,19 @@ const BattleRuntime = {
         if (dmgResult.dmg > 0) {
             target.hp -= dmgResult.dmg;
             target.tookDamageThisTurn = true;
+            rpg.emitUIEvent?.({
+                type: 'damage',
+                source: 'player',
+                target: 'enemy',
+                amount: dmgResult.dmg,
+                skillType: modifiedSkill.type,
+                critical: !!dmgResult.isCrit
+            });
             rpg.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
         }
 
         if (dmgResult.luckyVicky) {
-            source.mp = Math.min(GAME_CONSTANTS.MAX_MP, source.mp + 10);
+            source.mp = Math.min(getMaxMana(source), source.mp + 10);
             rpg.log('[아티팩트] 럭키비키: 치명타 발생! 마나 10 회복!');
         }
 
@@ -729,15 +1036,19 @@ const BattleRuntime = {
         if (dmgResult.dmg > 0) {
             BattleRuntime.handleOnHitTraits(rpg, target, source);
         }
-        BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
+        BattleRuntime.applyLeaderHpCostOnSkill(rpg, source, target, modifiedSkill);
+        if (!source.isDead) BattleRuntime.maybeTriggerDeathRoulette(rpg, source, modifiedSkill, isDelayed);
         BattleRuntime.resolveSourceDeath(rpg, source, target);
+        rpg.renderBattleView?.();
 
         if (target.hp <= 0) {
+            rpg.emitUIEvent?.({ type: 'actor-death', source: 'player', target: 'enemy' });
             rpg.winBattle();
             return;
         }
 
         if (!isDelayed) BattleRuntime.TurnManager.endPlayerTurn(rpg);
+        return true;
     },
 
     calcDamage(rpg, source, target, skill) {
@@ -759,7 +1070,7 @@ const BattleRuntime = {
         if (target.id === 'demon_god') {
             const battle = rpg.battle;
             if ((battle.turn % 2 === 0 && skill.type === 'phy') || (battle.turn % 2 !== 0 && skill.type === 'mag')) {
-                rpg.log("(마신의 권능: 방어력 상승 적용중)");
+                rpg.log(`(${target.name}의 권능: 방어력 상승 적용중)`);
             }
         }
 
@@ -784,7 +1095,12 @@ const BattleRuntime = {
             logFn: msg => rpg.log(msg),
             getBuffName: id => (BUFF_NAMES[id] || id),
             applyFieldBuff: (id, options) => BattleRuntime.applyFieldBuff(rpg, id, options),
+            replaceFieldBuffs: () => BattleRuntime.replaceFieldBuffsLikeKaleidoscope(rpg),
             battle: rpg.battle,
+            deck: rpg.state.deck,
+            artifacts: rpg.state.artifacts || [],
+            mode: rpg.state.mode,
+            turn: rpg.battle.turn,
             executeSkill: (nextSource, nextTarget, nextSkill, delayed) =>
                 BattleRuntime.executeSkill(rpg, nextSource, nextTarget, nextSkill, delayed),
             getCardData: id => rpg.getCardData(id)
@@ -796,14 +1112,53 @@ const BattleRuntime = {
             }
         });
 
-        if (rpg.battle.activeTraits.includes('syn_water_nature') && skill.name === '문라이트세레나') {
+        const sourceTraitIs = traitId => !!(
+            source &&
+            source.proto &&
+            source.proto.trait &&
+            source.proto.trait.type === traitId &&
+            source.activeTrait === traitId
+        );
+
+        if (sourceTraitIs('syn_water_nature') && skill.name === '문라이트세레나') {
             rpg.log("루미의 특성 발동! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
         }
 
-        if (rpg.battle.activeTraits.includes('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
+        if (sourceTraitIs('syn_water_light_heart_star') && skill.name === '하트오버드라이브') {
+            rpg.log("[특성] 루미(발렌타인): 스타파우더 추가!");
+            BattleRuntime.applyFieldBuff(rpg, 'star_powder');
+        }
+
+        if (sourceTraitIs('syn_water_light_midnight_twinkle') && skill.name === '미드나잇판타지') {
+            rpg.log("[특성] 루미(수영복): 트윙클파티 추가!");
+            BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
+        }
+
+        if (sourceTraitIs('syn_water_2_moon_twinkle') && skill.name === '실버문베일') {
             rpg.log("[특성] 세이렌의 노래! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
+        }
+
+        // 토끼 발렌타인 시너지: 스킬 사용시 발렌타인 필드버프 발동
+        if (sourceTraitIs('syn_rabbit_valentine_snow') && skill.name === '소다키스') {
+            rpg.log('[특성] 눈토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+        if (sourceTraitIs('syn_rabbit_valentine_night') && skill.name === '딥키스') {
+            rpg.log('[특성] 밤토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+        if (sourceTraitIs('syn_rabbit_valentine_silver') && skill.name === '화이트키스') {
+            rpg.log('[특성] 은토끼(발렌타인): 발렌타인 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'valentine');
+        }
+
+        // 크리스마스 은토끼: 특성 발동시 울트라기프트에 성역+달의축복 추가
+        if (sourceTraitIs('syn_christmas_rabbit_trio_gift') && skill.name === '울트라기프트') {
+            rpg.log('[특성] 은토끼(크리스마스): 성역과 달의축복 추가 발동!');
+            BattleRuntime.applyFieldBuff(rpg, 'sanctuary');
+            BattleRuntime.applyFieldBuff(rpg, 'moon_bless');
         }
     },
 
@@ -814,11 +1169,18 @@ const BattleRuntime = {
         rpg.battle.fieldBuffs = rpg.battle.fieldBuffs.filter(buff => !(buff.expiresAtTurn && buff.expiresAtTurn <= turn));
         expiredBuffs.forEach(buff => {
             rpg.log(buff.expireLog || `필드버프 [${BUFF_NAMES[buff.name]}] 소멸.`);
+            rpg.emitUIEvent?.({ type: 'field-buff-remove', buffId: buff.name });
         });
     },
 
     applyFieldBuff(rpg, id, options = {}) {
-        if (rpg.battle.fieldBuffs.some(buff => buff.name === id)) {
+        const existingBuff = rpg.battle.fieldBuffs.find(buff => buff.name === id);
+        if (existingBuff) {
+            if (Number.isFinite(options.expiresAtTurn)) {
+                Object.assign(existingBuff, options);
+                rpg.emitUIEvent?.({ type: 'field-buff-refresh', buffId: id });
+                return rpg.log(`필드버프 [${BUFF_NAMES[id]}] 지속 턴 갱신!`);
+            }
             return rpg.log(`필드버프 [${BUFF_NAMES[id]}] 이미 존재.`);
         }
 
@@ -826,9 +1188,11 @@ const BattleRuntime = {
         if (rpg.battle.fieldBuffs.length >= maxBuffs) {
             const removed = rpg.battle.fieldBuffs.shift();
             rpg.log(`필드버프 [${BUFF_NAMES[removed.name]}] 소멸.`);
+            rpg.emitUIEvent?.({ type: 'field-buff-remove', buffId: removed.name });
         }
 
         rpg.battle.fieldBuffs.push({ name: id, ...options });
+        rpg.emitUIEvent?.({ type: 'field-buff-add', buffId: id });
         rpg.log(`필드버프 [${BUFF_NAMES[id]}] 발동!`);
     }
 };
