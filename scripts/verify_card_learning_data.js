@@ -175,6 +175,26 @@ function run() {
           .map(match => Number(match[1]));
         return references.length > 0 && references.every(id => id === set.id);
       }),
+      reviewedToeicExplanationEvidenceMatches:
+        [70, 71, 72].every(id => TOEIC_EXPLANATIONS[id].startsWith(
+          '자료: get-toeic.com 공개 TOEIC 형식 연습문제 기반 검증·교정본 (ETS 공식 기출문제 아님).'
+        )) &&
+        [73, 74, 75, 76, 77, 78].every(id => TOEIC_EXPLANATIONS[id].startsWith(
+          '자료: ALC ENGLISH JOURNAL 공개 TOEIC 형식 연습문제 기반 검증·교정본 (ETS 공식 기출문제 아님).'
+        )) &&
+        TOEIC_EXPLANATIONS[77].includes('open a second location next spring') &&
+        TOEIC_EXPLANATIONS[77].includes('neither of us can arrive before noon') &&
+        TOEIC_EXPLANATIONS[77].includes('Hiring and Training Part-Time Staff') &&
+        TOEIC_EXPLANATIONS[77].includes('6석이 남아 있어') &&
+        TOEIC_EXPLANATIONS[77].includes('payment is received by September 24') &&
+        !TOEIC_EXPLANATIONS[77].includes('not be able to arrive until 2:00 P.M.') &&
+        TOEIC_EXPLANATIONS[78].includes('water began leaking from the bottom') &&
+        TOEIC_EXPLANATIONS[78].includes('stopped halfway through the brewing cycle') &&
+        TOEIC_EXPLANATIONS[78].includes('Repair was completed within one business day') &&
+        !TOEIC_EXPLANATIONS[78].includes('pool of water') &&
+        !TOEIC_EXPLANATIONS[78].includes('26일에 접수') &&
+        !TOEIC_EXPLANATIONS[78].includes('27일(1영업일 만에)') &&
+        !TOEIC_EXPLANATIONS[78].includes('2영업일 이상'),
       activeToeicMaxId: Math.max(...TOEIC_DATA.map(item => item.id)),
       reserveToeicMaxId: Math.max(...TOEIC_RESERVE_DATA.map(item => item.id))
     };
@@ -205,6 +225,7 @@ function run() {
   assert.strictEqual(audit.explanationKeysMatch, true);
   assert.strictEqual(audit.sequentialGlobalToeicIds, true);
   assert.strictEqual(audit.shiftedExplanationReferencesMatch, true);
+  assert.strictEqual(audit.reviewedToeicExplanationEvidenceMatches, true);
   assert.strictEqual(audit.activeToeicMaxId, 78);
   assert.strictEqual(audit.reserveToeicMaxId, 69);
 
