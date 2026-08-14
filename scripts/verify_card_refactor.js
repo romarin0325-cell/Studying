@@ -12,8 +12,14 @@ function createStorage() {
     };
 }
 
+function loadGrammarData(filePath) {
+    const source = fs.readFileSync(filePath, 'utf8');
+    return vm.runInNewContext(`${source}\nGRAMMAR_DATA;`, {}, { filename: filePath });
+}
+
 function run() {
     const cardRoot = path.join(process.cwd(), 'card');
+    const remasterRoot = path.join(process.cwd(), 'card_remaster');
     const indexSource = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
     const logicSource = fs.readFileSync(path.join(cardRoot, 'logic.js'), 'utf8');
     const fortuneSource = fs.readFileSync(path.join(cardRoot, 'fortune_cookie.js'), 'utf8');
@@ -27,6 +33,45 @@ function run() {
     assert.strictEqual(indexSource.includes('src=""'), false);
     assert.strictEqual(indexSource.includes('id="menu-artifact-area"'), false);
     assert.strictEqual(fortuneSource.includes('localStorage.'), false);
+
+    const grammarPath = path.join(cardRoot, 'grammar_data.js');
+    const remasterGrammarPath = path.join(remasterRoot, 'grammar_data.js');
+    const grammarSource = fs.readFileSync(grammarPath, 'utf8');
+    const remasterGrammarSource = fs.readFileSync(remasterGrammarPath, 'utf8');
+    const grammarData = loadGrammarData(grammarPath);
+    const expectedLectureIds = Array.from({ length: 30 }, (_, index) => index + 1);
+
+    assert.strictEqual(remasterGrammarSource, grammarSource, 'card and card_remaster grammar data must stay aligned');
+    assert.deepStrictEqual([...grammarData.map(lecture => lecture.id)], expectedLectureIds);
+    grammarData.forEach(lecture => {
+        assert(
+            lecture.content.startsWith(`[제${lecture.id}강]`),
+            `${lecture.id}강 content heading is out of sync`
+        );
+        const embeddedHeadingIds = [...lecture.content.matchAll(/\[제(\d+)강\]/g)]
+            .map(match => Number(match[1]));
+        assert.deepStrictEqual(
+            embeddedHeadingIds,
+            [lecture.id],
+            `${lecture.id}강 must contain exactly one matching content heading`
+        );
+        assert.strictEqual((lecture.content.match(/\*/g) || []).length, 0, `${lecture.id}강 contains markdown asterisks`);
+        assert.strictEqual((lecture.content.match(/^\s*>/gm) || []).length, 0, `${lecture.id}강 contains markdown quotes`);
+        assert.strictEqual((lecture.content.match(/`/g) || []).length, 0, `${lecture.id}강 contains markdown code marks`);
+        assert.strictEqual(
+            (lecture.content.match(/\p{Extended_Pictographic}/gu) || []).length,
+            0,
+            `${lecture.id}강 contains pictographic emoji`
+        );
+        assert.strictEqual(
+            (lecture.content.match(/[\u200B\uFE0E\uFE0F\u200D]/g) || []).length,
+            0,
+            `${lecture.id}강 contains invisible emoji formatting characters`
+        );
+        (lecture.quizzes || []).forEach(quiz => {
+            assert.strictEqual(quiz.lecture_id, lecture.id, `${lecture.id}강 quiz reference is out of sync`);
+        });
+    });
 
     const loaderBlock = indexSource.match(/var scripts = \[([\s\S]*?)\n\s*\];/);
     assert(loaderBlock, 'sequential loader list not found');
