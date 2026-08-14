@@ -207,6 +207,31 @@ test('SaveRepository falls back from malformed JSON and rejects future schemas',
   assert.throws(() => repository.loadMeta(), FutureSchemaVersionError);
 });
 
+test('SaveRepository reports volatile fallback when browser storage cannot persist', () => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  const logger = { warnings: [], warn(message) { this.warnings.push(message); } };
+  const blockedStorage = {
+    getItem() { return null; },
+    setItem() { throw new Error('blocked'); },
+    removeItem() {},
+  };
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    get: () => blockedStorage,
+  });
+  try {
+    const repository = new SaveRepository({ logger });
+    assert.equal(repository.isPersistent, false);
+    assert.equal(repository.persistence.kind, 'memory');
+    assert.equal(repository.persistence.reason, 'unavailable');
+    assert.ok(repository.storage instanceof MemoryStorage);
+    assert.equal(logger.warnings.length, 1);
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, 'localStorage', descriptor);
+    else delete globalThis.localStorage;
+  }
+});
+
 test('SaveRepository preserves unknown fields and refuses to regress a meta backup', () => {
   const storage = new MemoryStorage();
   const repository = new SaveRepository({ storage, logger: { warn() {} } });

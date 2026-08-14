@@ -17,6 +17,8 @@ npm run build:defense-hero-local
 
 생성되는 `defense_hero/dist-local/HeroCoreDefense.html` 하나만 휴대폰에 복사한다. Android에서는 CX 파일 탐색기와 같은 앱에서 이 파일을 탭한 뒤 Chrome 또는 시스템 WebView로 열 수 있다. 인터넷, Git 저장소, PC 서버는 플레이할 때 필요하지 않다. 게임 진행은 해당 모바일 브라우저의 로컬 저장소에 보관되므로, 파일을 다른 브라우저로 열거나 브라우저 데이터를 삭제하면 저장이 이어지지 않을 수 있다.
 
+파일 뷰어나 브라우저가 로컬 저장소를 차단하면 화면 상단에 `저장이 유지되지 않는 임시 실행입니다` 경고가 계속 표시된다. 이 상태에서는 새로고침하거나 창을 닫을 때 진행이 사라지므로 경고가 없는 Chrome/WebView로 다시 열어야 한다.
+
 배포 HTML은 자동 생성 파일이다. 직접 수정하지 말고 `defense_hero/js`, `defense_hero/css`, `defense_hero/index.html`을 수정한 뒤 위 빌드 명령을 다시 실행한다. 선언된 이미지 파일이 실제로 존재하면 HTML 내부의 data URI로 포함하고, 아직 없는 선택 이미지에는 Canvas 폴백을 사용한다.
 
 ### 개발 서버

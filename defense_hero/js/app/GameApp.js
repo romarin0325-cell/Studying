@@ -107,13 +107,14 @@ function updateBrowserHistory(method) {
 }
 
 export class GameApp {
-  constructor({ root, modalRoot, toast, backButton, homeButton, sceneKicker }) {
+  constructor({ root, modalRoot, toast, backButton, homeButton, sceneKicker, storageWarning }) {
     this.root = root;
     this.modalRoot = modalRoot;
     this.toastNode = toast;
     this.backButton = backButton;
     this.homeButton = homeButton;
     this.sceneKicker = sceneKicker;
+    this.storageWarning = storageWarning;
     this.router = new SceneRouter((route, action) => this.#onRoute(route, action));
     this.repository = new SaveRepository();
     this.controller = new RunController({ repository: this.repository, SeededRng, content });
@@ -172,6 +173,7 @@ export class GameApp {
       this.controller = new RunController({ repository: this.repository, SeededRng, content });
       this.controller.initialize();
     }
+    this.#syncStorageWarning();
     this.#bindGlobalEvents();
     this.router.reset("title");
   }
@@ -183,6 +185,7 @@ export class GameApp {
       meta: clone(this.controller.meta),
       battle: this.battle?.getSnapshot?.() ?? null,
       stagePlan: clone(this.currentStagePlan),
+      storagePersistent: this.repository.isPersistent,
     };
   }
 
@@ -212,6 +215,10 @@ export class GameApp {
     const result = validator();
     const errors = Array.isArray(result) ? result : result?.errors;
     if (errors?.length) throw new Error(`콘텐츠 데이터 검증 실패: ${errors.join(", ")}`);
+  }
+
+  #syncStorageWarning() {
+    this.storageWarning?.classList.toggle("is-hidden", this.repository.isPersistent);
   }
 
   #bindGlobalEvents() {

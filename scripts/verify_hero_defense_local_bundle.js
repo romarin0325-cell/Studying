@@ -46,6 +46,24 @@ async function verifyContext(browser, options, label) {
   await context.close();
 }
 
+async function verifyVolatileStorageWarning(browser) {
+  const context = await browser.newContext({ viewport: { width: 915, height: 412 } });
+  await context.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get() { throw new DOMException("Storage blocked", "SecurityError"); },
+    });
+  });
+  const page = await context.newPage();
+  await page.goto(pathToFileURL(bundlePath).href, { waitUntil: "load" });
+  await page.waitForFunction(() => Boolean(window.__heroDefenseDebug?.getState));
+  const warning = page.locator("#storage-warning");
+  await warning.waitFor({ state: "visible" });
+  assert.match(await warning.innerText(), /저장이 유지되지 않는 임시 실행/);
+  assert.equal(await page.evaluate(() => window.__heroDefenseDebug.getState().storagePersistent), false);
+  await context.close();
+}
+
 async function main() {
   assert.ok(fs.existsSync(bundlePath), "단일 HTML이 없습니다. 먼저 npm run build:defense-hero-local을 실행하세요.");
   const outputFiles = fs.readdirSync(path.dirname(bundlePath), { withFileTypes: true }).filter((entry) => entry.isFile());
@@ -66,6 +84,7 @@ async function main() {
       isMobile: true,
       hasTouch: true,
     }, "android-landscape");
+    await verifyVolatileStorageWarning(browser);
   } finally {
     await browser.close();
   }

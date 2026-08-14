@@ -7,6 +7,7 @@ const app = new GameApp({
   backButton: document.querySelector("#back-button"),
   homeButton: document.querySelector("#home-button"),
   sceneKicker: document.querySelector("#scene-kicker"),
+  storageWarning: document.querySelector("#storage-warning"),
 });
 
 window.__heroDefenseDebug = {
