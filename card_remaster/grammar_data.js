@@ -69,7 +69,7 @@ const GRAMMAR_DATA = [
     {
         "id": 2,
         "title": "영어식 사고 전환 (일반동사와 SVO)",
-        "content": "[제2강] 영어식 사고의 전환: 결론부터 말하는 용기 (SVO)\n\n형아, 혹시 한국말 할 때 제일 답답한 게 뭔지 알아? 바로 \"말은 끝까지 들어봐야 안다\"는 거야! 한국어는 \"나는... 어제... 맛있는 치킨을...\" 하고 뜸을 들이다가 맨 마지막에 \"먹었어\"라고 결론을 내잖아. (SOV 구조: 주어-목적어-동사)\n하지만 영어는 성격이 아주 급해! (마치 형아를 보고 싶어 하는 내 마음처럼? (웃음)) 영어는 주어가 나오자마자 \"했다!\" 하고 결론(동사)부터 냅다 질러버려야 해.\n\n1. 누가(Who) → 한다(Does) → 무엇을(What)\n이 순서를 기억해! 이게 영어의 전부야. 한국어는 \"나는 (너를) 좋아해\"지만, 영어는 \"나는 (좋아해) 너를\" 순서로 흘러가.\n\n한국어: 나(Subject)는 너(Object)를 사랑해(Verb). (중요한 말이 맨 뒤에 숨어있어!)\n영어: I(Subject) love(Verb) you(Object). (사랑한다는 말부터 박고 시작해!)\n\n2. 머뭇거리지 마! '동사'부터 뱉어!\n형아가 영어로 말할 때 입이 안 떨어지는 이유가 뭔지 알아? 머릿속으로 \"치킨을... 영어로 뭐더라?\" 하고 목적어부터 찾고 있어서 그래. 하지만 영어 고수는 주어(I)를 뱉자마자 0.1초 만에 동사(ate, like, want)를 선택해.\n\n형아가 커피를 마시고 싶을 때:\n(X) \"음... Coffee...\" (이미 늦었어!)\n(O) \"I want\" (난 원해!) ... \"coffee.\" (커피를.)\n(O) \"I drink\" (난 마셔!) ... \"water.\" (물을.)\n\n3. 루미의 추천: 마법의 동사 5개\n복잡한 단어 필요 없어. 일단 이 5개만 있으면 형아도 수다쟁이가 될 수 있어. 주어(I) 뒤에 얘네들을 바로 붙이는 연습만 해봐!\n\nwant (원해) → I want...\nneed (필요해) → I need...\nlike (좋아해) → I like...\nhave (가지고 있어) → I have...\nlove (사랑해) → I love...\n\n형아, 나 봐봐. \"I love... Hyung-a!\" 어때? 동사부터 말하니까 마음이 더 빨리 전달되는 것 같지 않아? (///)\n\n자, 오늘 수업은 여기까지! 종 쳤다! 딩동댕동~ 오늘 배운 \"결론부터 말하기\", 잊지 마! 주어 다음엔 무조건 동사! 알겠지?",
+        "content": "[제2강] 영어식 사고의 전환: 결론부터 말하는 용기 (SVO)\n\n형아, 혹시 한국말 할 때 제일 답답한 게 뭔지 알아? 바로 \"말은 끝까지 들어봐야 안다\"는 거야! 한국어는 \"나는... 어제... 맛있는 치킨을...\" 하고 뜸을 들이다가 맨 마지막에 \"먹었어\"라고 결론을 내잖아. (SOV 구조: 주어-목적어-동사)\n하지만 영어는 성격이 아주 급해! (마치 형아를 보고 싶어 하는 내 마음처럼? (웃음)) 영어는 주어가 나오자마자 \"했다!\" 하고 결론(동사)부터 냅다 질러버려야 해.\n\n1. 누가(Who) → 한다(Does) → 무엇을(What)\n이 순서를 기억해! 이게 영어 문장의 기본 뼈대야. 한국어는 \"나는 (너를) 좋아해\"지만, 영어는 \"나는 (좋아해) 너를\" 순서로 흘러가.\n\n한국어: 나(Subject)는 너(Object)를 사랑해(Verb). (중요한 말이 맨 뒤에 숨어있어!)\n영어: I(Subject) love(Verb) you(Object). (사랑한다는 말부터 박고 시작해!)\n\n2. 머뭇거리지 마! '동사'부터 뱉어!\n형아가 영어로 말할 때 입이 안 떨어지는 이유가 뭔지 알아? 머릿속으로 \"치킨을... 영어로 뭐더라?\" 하고 목적어부터 찾고 있어서 그래. 하지만 영어 고수는 주어(I)를 뱉자마자 0.1초 만에 동사(ate, like, want)를 선택해.\n\n형아가 커피를 마시고 싶을 때:\n(X) \"음... Coffee...\" (이미 늦었어!)\n(O) \"I want\" (난 원해!) ... \"coffee.\" (커피를.)\n(O) \"I drink\" (난 마셔!) ... \"water.\" (물을.)\n\n3. 루미의 추천: 마법의 동사 5개\n복잡한 단어 필요 없어. 일단 이 5개만 있으면 형아도 수다쟁이가 될 수 있어. 주어(I) 뒤에 얘네들을 바로 붙이는 연습만 해봐!\n\nwant (원해) → I want...\nneed (필요해) → I need...\nlike (좋아해) → I like...\nhave (가지고 있어) → I have...\nlove (사랑해) → I love...\n\n형아, 나 봐봐. \"I love... Hyung-a!\" 어때? 동사부터 말하니까 마음이 더 빨리 전달되는 것 같지 않아? (///)\n\n자, 오늘 수업은 여기까지! 종 쳤다! 딩동댕동~ 오늘 배운 \"결론부터 말하기\", 잊지 마! 주어 다음엔 무조건 동사! 알겠지?",
         "quizzes": [
             {
                 "desc": "다음 중 \"나는 물을 마셔.\"를 영어식 순서로 올바르게 배열한 것은?",
@@ -2006,6 +2006,341 @@ const GRAMMAR_DATA = [
                 ],
                 "answer": "who",
                 "lecture_id": 30
+            }
+        ]
+    },
+    {
+        "id": 31,
+        "title": "빈칸의 직업 찾기 (품사와 어형)",
+        "content": "[제31강] 빈칸의 직업 찾기: 뜻보다 자리를 먼저 봐! (명사·형용사·부사·동사)\n\n형아, TOEIC 빈칸에 success, successful, successfully, succeed가 한꺼번에 나오면 머리가 빙글 돌지?\n그런데 네 단어는 전부 “성공” 비슷한 뜻이야. 뜻만 보고 싸우면 넷 다 정답처럼 보여!\n이럴 때는 단어의 뜻보다 빈칸이 맡아야 할 직업, 즉 품사를 먼저 찾는 거야.\n\n1. 이름표 자리: 명사\n사람·사물·일의 이름이 필요한 자리야.\n특히 the [ ] of처럼 관사 뒤에서 하나의 대상을 말하면 명사일 가능성이 커.\n“The expansion of the factory was announced.”\n(공장의 확장이 발표되었어.)\nexpansion은 ‘확장’이라는 일의 이름이니까 명사!\n\n2. 꾸며주는 옷: 형용사\n형용사는 바로 뒤의 명사를 꾸며주거나, Be동사 뒤에서 주어의 상태를 설명해.\n“We need a reliable supplier.”\n(우리는 믿을 만한 공급업체가 필요해.)\nsupplier라는 명사를 꾸미니까 reliable!\n\n3. 행동의 속도 조절 장치: 부사\n부사는 동사나 형용사를 꾸며줘.\n“The technician responded promptly.”\n(기술자가 신속하게 응답했어.)\nresponded라는 행동이 어떻게 이루어졌는지 알려주니까 promptly!\n“highly effective”처럼 형용사 앞에서도 부사가 올 수 있어.\n\n4. 실제 행동 자리: 동사\n주어 뒤에서 행동을 만들거나, can / will / must 같은 조동사 뒤에 동사 원형이 와.\n“All applicants must submit the form.”\n(모든 지원자는 서류를 제출해야 해.)\nmust 뒤니까 submit이 쌩얼로 출동!\n\n5. 꼬리는 힌트일 뿐, 절대 법칙은 아니야\n-tion, -ment는 명사인 경우가 많고,\n-ive, -able은 형용사인 경우가 많고,\n-ly는 부사인 경우가 많아.\n하지만 friendly처럼 -ly인데 형용사인 반항아도 있어.\n그러니까 꼬리는 힌트로 보고, 마지막 판정은 문장 속 자리로 해!\n\n[루미의 TOEIC 주문]\n“뜻부터 번역하지 말고, 빈칸의 직업부터 찾아라!”\n빈칸 뒤에 명사가 있니? 우선 형용사 후보를 확인!\n동사를 꾸미니? 부사 후보!\n조동사 뒤니? 동사 원형!\n이렇게 자리부터 보면 긴 문장도 갑자기 블록 퍼즐처럼 보여. 형아, 이제 네가 문법 길드의 인사 담당자야!",
+        "quizzes": [
+            {
+                "desc": "그 회사는 지역 사업의 확장을 발표했어.",
+                "question": "\"The company announced the [ ] of its regional operations.\"",
+                "options": [
+                    "expansion",
+                    "expand",
+                    "expansive",
+                    "expansively"
+                ],
+                "answer": "expansion",
+                "lecture_id": 31
+            },
+            {
+                "desc": "예산을 승인하기 전에 신뢰할 만한 견적이 필요해.",
+                "question": "\"We need a [ ] estimate before approving the budget.\"",
+                "options": [
+                    "rely",
+                    "reliable",
+                    "reliably",
+                    "reliability"
+                ],
+                "answer": "reliable",
+                "lecture_id": 31
+            },
+            {
+                "desc": "기술자는 요청에 신속하게 응답했어.",
+                "question": "\"The technician responded [ ] to the request.\"",
+                "options": [
+                    "prompt",
+                    "promptly",
+                    "promptness",
+                    "prompted"
+                ],
+                "answer": "promptly",
+                "lecture_id": 31
+            },
+            {
+                "desc": "그 새로운 정책은 매우 효과적이야.",
+                "question": "\"The new policy is highly [ ].\"",
+                "options": [
+                    "effect",
+                    "effective",
+                    "effectively",
+                    "effects"
+                ],
+                "answer": "effective",
+                "lecture_id": 31
+            },
+            {
+                "desc": "모든 지원자는 금요일까지 서류를 제출해야 해.",
+                "question": "\"All applicants must [ ] the form by Friday.\"",
+                "options": [
+                    "submit",
+                    "submission",
+                    "submitted",
+                    "submitting"
+                ],
+                "answer": "submit",
+                "lecture_id": 31
+            }
+        ]
+    },
+    {
+        "id": 32,
+        "title": "문장인가 명사인가 (전치사와 접속사)",
+        "content": "[제32강] 문장인가 명사인가: 다리의 길이를 확인해! (전치사 vs 접속사)\n\n형아, because와 because of는 뜻이 거의 똑같아 보여.\nalthough와 despite도 둘 다 “비록 ~이지만”이라고 번역되지.\n그런데 TOEIC은 뜻보다 뒤에 무엇이 오는지를 보고 함정을 파!\n비밀은 아주 간단해. 뒤에 작은 문장이 오느냐, 명사 덩어리가 오느냐야.\n\n1. 접속사: 완성된 작은 문장을 데려온다\n접속사는 주어 + 동사가 있는 문장을 연결해.\nbecause + 주어 + 동사\n“The event was canceled because it rained.”\n(비가 왔기 때문에 행사가 취소됐어.)\n\nalthough / even though + 주어 + 동사\n“Although the weather was bad, the flight departed.”\n(날씨가 나빴지만 비행기는 출발했어.)\n\nwhile + 주어 + 동사\n“Please wait while we check the system.”\n(우리가 시스템을 확인하는 동안 기다려 줘.)\n\n2. 전치사: 명사 덩어리를 데려온다\n전치사 뒤에는 명사나 동명사(-ing)가 와.\nbecause of + 명사\n“The event was canceled because of the rain.”\n(비 때문에 행사가 취소됐어.)\n\ndespite / in spite of + 명사\n“Despite the bad weather, the flight departed.”\n(나쁜 날씨에도 불구하고 비행기는 출발했어.)\n\nduring + 명사\n“Please remain seated during the presentation.”\n(발표 중에는 자리에 앉아 있어 줘.)\n\n3. 번역보다 오른쪽 한 칸을 먼저 봐\nbecause [the rain]은 안 돼. 주어와 동사가 없으니까 because of가 필요해.\ndespite [it rained]도 안 돼. 완성된 문장이니까 although가 필요해.\n\n[루미의 다리 점검 주문]\n“주어 + 동사가 보이면 접속사, 명사 덩어리면 전치사!”\n형아가 빈칸 오른쪽만 살짝 확인하면, 길게 해석하지 않아도 정답이 먼저 손을 들 거야.\n마법 다리도 길이에 맞는 부품을 써야 안 무너지거든!",
+        "quizzes": [
+            {
+                "desc": "폭우 때문에 야외 행사가 취소됐어.",
+                "question": "\"The outdoor event was canceled [ ] the heavy rain.\"",
+                "options": [
+                    "because",
+                    "because of",
+                    "although",
+                    "while"
+                ],
+                "answer": "because of",
+                "lecture_id": 32
+            },
+            {
+                "desc": "날씨가 궂었지만 비행기는 정시에 출발했어.",
+                "question": "\"[ ] the weather was inclement, the flight departed on time.\"",
+                "options": [
+                    "Despite",
+                    "During",
+                    "Although",
+                    "Because of"
+                ],
+                "answer": "Although",
+                "lecture_id": 32
+            },
+            {
+                "desc": "발표 중에는 자리에 앉아 있어 주세요.",
+                "question": "\"Please remain seated [ ] the presentation.\"",
+                "options": [
+                    "while",
+                    "during",
+                    "although",
+                    "because"
+                ],
+                "answer": "during",
+                "lecture_id": 32
+            },
+            {
+                "desc": "우리가 보고서를 검토하는 동안 불이 꺼졌어.",
+                "question": "\"The lights went out [ ] we were reviewing the report.\"",
+                "options": [
+                    "during",
+                    "despite",
+                    "while",
+                    "because of"
+                ],
+                "answer": "while",
+                "lecture_id": 32
+            },
+            {
+                "desc": "작은 지연에도 불구하고 프로젝트는 예정대로 끝났어.",
+                "question": "\"[ ] a minor delay, the project was completed on schedule.\"",
+                "options": [
+                    "Although",
+                    "Despite",
+                    "Because",
+                    "While"
+                ],
+                "answer": "Despite",
+                "lecture_id": 32
+            }
+        ]
+    },
+    {
+        "id": 33,
+        "title": "문장 속 작은 상자 (명사절과 간접의문문)",
+        "content": "[제33강] 문장 속 작은 상자: 문장 하나를 물건처럼 넣어봐! (That / Whether / What)\n\n형아, “나는 그 소식을 알아”에서 ‘그 소식’은 명사지?\n그런데 영어는 “그 배송이 도착했다는 사실”처럼 문장 전체도 하나의 정보 상자처럼 다룰 수 있어.\n이렇게 문장 속에서 명사 자리에 들어가는 작은 문장을 명사절이라고 해.\n이름은 어려워 보여도, 상자에 붙이는 라벨 세 개만 기억하면 돼!\n\n1. That: “~라는 사실” 상자\nthat 뒤에는 주어 + 동사가 완성된 문장이 와.\n“The manager confirmed that the shipment had arrived.”\n(매니저는 배송이 도착했다는 사실을 확인했어.)\nthat 자체는 ‘무엇’을 대신하지 않고, 뒤의 완성된 내용을 포장해 주는 테이프야.\n\n2. Whether / If: “그런지 아닌지” 상자\n답이 Yes인지 No인지 아직 모를 때 써.\n“We need to know whether the supplier can meet the deadline.”\n(공급업체가 마감일을 맞출 수 있는지 알아야 해.)\n회화에서는 if도 자주 쓰지만, 시험 문장에서는 whether가 더 또렷하게 보일 때가 많아.\n특히 whether or not처럼 ‘인지 아닌지’를 드러내기도 해.\n\n3. What: “무엇 / ~하는 것”을 상자 안에서 직접 맡는다\nwhat은 단순한 테이프가 아니라, 문장 속에서 빠진 물건 역할까지 해.\n“Please tell me what you need.”\n(네가 무엇을 필요로 하는지 말해 줘.)\nyou need 뒤에 목적어가 비어 있지? 그 자리를 what이 맡은 거야.\n\n4. 간접 질문은 얌전한 평서문 어순\n직접 물으면 “Where is the meeting?”\n다른 문장 안에 넣으면 “Do you know where the meeting is?”\n안쪽 문장은 더 이상 소리쳐 묻는 질문이 아니니까, 주어 + 동사 순서로 얌전히 돌아와.\n(X) Do you know where is the meeting?\n(O) Do you know where the meeting is?\n\n[루미의 상자 검사 주문]\n뒤가 완성된 문장이면 that,\nYes/No가 궁금하면 whether,\n안쪽 문장에서 ‘무엇’ 자리가 비어 있으면 what!\n그리고 질문이 문장 속으로 들어가면 주어가 동사보다 먼저!\n형아, 이제 긴 문장 안에 작은 문장이 숨어 있어도 상자째로 들어 올리면 돼. 하나도 안 무거워!",
+        "quizzes": [
+            {
+                "desc": "부장은 계약서가 유효하다는 사실을 확인했어.",
+                "question": "\"The director confirmed [ ] the contract was valid.\"",
+                "options": [
+                    "what",
+                    "that",
+                    "whether or",
+                    "where"
+                ],
+                "answer": "that",
+                "lecture_id": 33
+            },
+            {
+                "desc": "공급업체가 마감일을 맞출 수 있는지 알아야 해.",
+                "question": "\"We need to know [ ] the supplier can meet the deadline.\"",
+                "options": [
+                    "that",
+                    "what",
+                    "whether",
+                    "who"
+                ],
+                "answer": "whether",
+                "lecture_id": 33
+            },
+            {
+                "desc": "무엇이 지연을 일으켰는지 설명해 주세요.",
+                "question": "\"Please explain [ ] caused the delay.\"",
+                "options": [
+                    "that",
+                    "what",
+                    "whether",
+                    "where"
+                ],
+                "answer": "what",
+                "lecture_id": 33
+            },
+            {
+                "desc": "회의가 어디에서 열릴지 말씀해 주시겠어요?",
+                "question": "\"Could you tell me where the meeting [ ]?\"",
+                "options": [
+                    "will be held",
+                    "will held",
+                    "will it be held",
+                    "is it held"
+                ],
+                "answer": "will be held",
+                "lecture_id": 33
+            },
+            {
+                "desc": "그 보고서는 고객 만족도가 높아졌다는 것을 보여 줘.",
+                "question": "\"The report shows [ ] customer satisfaction has increased.\"",
+                "options": [
+                    "what",
+                    "that",
+                    "whether",
+                    "how many"
+                ],
+                "answer": "that",
+                "lecture_id": 33
+            }
+        ]
+    },
+    {
+        "id": 34,
+        "title": "남은 선택지 정리 (Another, Other, Others, Those)",
+        "content": "[제34강] 남은 선택지 정리: 이름표를 붙일까, 혼자 세울까? (Another / Other / Others / Those)\n\n형아, another랑 other는 둘 다 “다른”이라고 번역돼서 아주 닮았지?\n하지만 뒤에 명사를 데려오는지, 자기가 명사 대신 서는지를 보면 금방 구별할 수 있어.\n카드 덱에서 한 장 더 뽑는지, 남은 카드들을 가리키는지 생각해 봐!\n\n1. Another + 단수 명사: 하나 더!\nan + other가 합쳐진 느낌이야.\n“We need another copy.”\n(사본 한 부가 더 필요해.)\n셀 수 있는 단수 명사와 짝을 이뤄.\n\n2. Other + 명사: 다른 ~들\nother는 뒤의 명사를 꾸며주는 이름표야.\n“Please consider other options.”\n(다른 선택지들도 검토해 주세요.)\n보통 복수 명사나 셀 수 없는 명사 앞에서 많이 보여.\nother information, other employees처럼!\n\n3. Others: 다른 사람들 / 다른 것들\nothers는 자기가 명사 대신 서니까 뒤에 명사를 또 붙이지 않아.\n“Some employees work remotely; others come to the office.”\n(일부 직원은 원격 근무하고, 다른 직원들은 사무실에 와.)\n(X) others employees\n(O) other employees / others\n\n4. The other / The others: 정해진 남은 쪽\n둘 중 하나를 말한 뒤 남은 하나는 the other.\n“One room is occupied, and the other is available.”\n여러 개 중 이미 정해진 나머지 전부는 the others야.\n\n5. Those: 저것들, 또는 ‘그 사람들/것들’\nthose도 복수 명사 대신 설 수 있어.\n뒤에 설명을 붙여 “~한 사람들”이라고 자주 써.\n“Those interested should apply by Friday.”\n(관심 있는 분들은 금요일까지 신청해야 해.)\nTOEIC 공지문에서 꽤 그럴듯하게 숨어 나오는 표현이야.\n\n[루미의 카드 정리 주문]\n하나 더 + 단수 명사 = another\n뒤에 명사가 보인다 = other\n명사 없이 혼자 선다 = others\n정해진 나머지 하나 = the other\n“~한 사람들”을 가리킨다 = those\n형아, 이제 비슷하게 생긴 카드들도 덱 슬롯을 보면 정체가 다 보여!",
+        "quizzes": [
+            {
+                "desc": "청구서 사본이 한 부 더 필요해.",
+                "question": "\"We need [ ] copy of the invoice.\"",
+                "options": [
+                    "other",
+                    "others",
+                    "another",
+                    "the others"
+                ],
+                "answer": "another",
+                "lecture_id": 34
+            },
+            {
+                "desc": "매니저는 몇 가지 다른 제안을 요청했어.",
+                "question": "\"The manager asked for several [ ] suggestions.\"",
+                "options": [
+                    "another",
+                    "other",
+                    "others",
+                    "the other"
+                ],
+                "answer": "other",
+                "lecture_id": 34
+            },
+            {
+                "desc": "회의실은 두 개야. 하나는 사용 중이고 나머지 하나는 비어 있어.",
+                "question": "\"There are two conference rooms. One is occupied, and [ ] is available.\"",
+                "options": [
+                    "another",
+                    "other",
+                    "others",
+                    "the other"
+                ],
+                "answer": "the other",
+                "lecture_id": 34
+            },
+            {
+                "desc": "일부 직원은 원격 근무하고, 다른 직원들은 매일 출근해.",
+                "question": "\"Some employees work remotely; [ ] come to the office every day.\"",
+                "options": [
+                    "other",
+                    "another",
+                    "others",
+                    "the other"
+                ],
+                "answer": "others",
+                "lecture_id": 34
+            },
+            {
+                "desc": "사전에 등록한 사람들만 행사장에 들어갈 수 있어.",
+                "question": "\"Only [ ] who registered in advance may enter the venue.\"",
+                "options": [
+                    "those",
+                    "another",
+                    "other",
+                    "the other"
+                ],
+                "answer": "those",
+                "lecture_id": 34
+            }
+        ]
+    },
+    {
+        "id": 35,
+        "title": "문맥의 방향표지판 (접속부사)",
+        "content": "[제35강] 문맥의 방향표지판: 다음 문장은 어디로 갈까? (However / Therefore / Moreover / Otherwise / Meanwhile)\n\n형아, Part 6에서는 빈칸 한 칸만 보는 게 아니라 앞문장과 뒷문장의 관계를 묻기도 해.\n단어 뜻을 전부 번역하지 않아도, 두 문장이 같은 방향인지 반대 방향인지부터 보면 돼.\n오늘은 문장 사이에 세우는 다섯 개의 표지판을 배우자!\n\n1. However: 하지만, 예상과 반대로!\n앞문장과 뒤문장이 충돌할 때 세우는 유턴 표지판이야.\n“The weather was bad. However, the event continued.”\n(날씨는 나빴어. 하지만 행사는 계속됐어.)\n\n2. Therefore: 그러므로, 그 결과!\n앞이 원인이고 뒤가 결과일 때 쓰는 화살표야.\n“Demand increased. Therefore, the company expanded production.”\n(수요가 늘었어. 그러므로 회사는 생산을 확대했어.)\n\n3. Moreover / In addition: 게다가, 정보 하나 더!\n앞의 설명에 같은 방향의 정보를 더 얹어.\n“The software is faster. Moreover, it is easier to use.”\n(그 소프트웨어는 더 빨라. 게다가 사용하기도 쉬워.)\n\n4. Otherwise: 그렇지 않으면!\n앞의 행동을 하지 않았을 때 생길 결과를 경고해.\n“Submit the form today. Otherwise, your application may be delayed.”\n(오늘 서류를 제출해. 그렇지 않으면 신청이 지연될 수 있어.)\n\n5. Meanwhile: 그동안 / 한편\n같은 시간에 다른 일이 진행될 때 카메라를 옆 장면으로 돌려.\n“The technicians repaired the machine. Meanwhile, the sales team contacted customers.”\n(기술팀이 기계를 수리했어. 그동안 영업팀은 고객에게 연락했어.)\n\n[루미의 표지판 판독 주문]\n반전이면 However,\n결과면 Therefore,\n같은 방향으로 하나 더면 Moreover,\n안 하면 생길 일이면 Otherwise,\n동시에 다른 장면이면 Meanwhile!\n형아, Part 6의 긴 지문도 문장마다 표지판만 세우면 미로가 아니라 일직선 도로가 돼. 내가 옆에서 내비게이션 해줄게!",
+        "quizzes": [
+            {
+                "desc": "수요가 증가했어. 그래서 회사는 생산을 확대했어.",
+                "question": "\"Demand increased sharply. [ ], the company expanded production.\"",
+                "options": [
+                    "However",
+                    "Therefore",
+                    "Otherwise",
+                    "Meanwhile"
+                ],
+                "answer": "Therefore",
+                "lecture_id": 35
+            },
+            {
+                "desc": "날씨는 나빴어. 하지만 행사는 예정대로 계속됐어.",
+                "question": "\"The weather was inclement. [ ], the event continued as scheduled.\"",
+                "options": [
+                    "Moreover",
+                    "Therefore",
+                    "However",
+                    "Otherwise"
+                ],
+                "answer": "However",
+                "lecture_id": 35
+            },
+            {
+                "desc": "오늘 서류를 제출하세요. 그렇지 않으면 신청이 지연될 수 있어요.",
+                "question": "\"Submit the form today. [ ], your application may be delayed.\"",
+                "options": [
+                    "However",
+                    "Otherwise",
+                    "Moreover",
+                    "Therefore"
+                ],
+                "answer": "Otherwise",
+                "lecture_id": 35
+            },
+            {
+                "desc": "새 소프트웨어는 더 빨라. 게다가 사용하기도 더 쉬워.",
+                "question": "\"The new software is faster. [ ], it is easier to use.\"",
+                "options": [
+                    "Moreover",
+                    "However",
+                    "Otherwise",
+                    "Meanwhile"
+                ],
+                "answer": "Moreover",
+                "lecture_id": 35
+            },
+            {
+                "desc": "기술팀은 기계를 수리했어. 한편 영업팀은 고객들에게 연락했어.",
+                "question": "\"The technicians repaired the machine. [ ], the sales team contacted customers.\"",
+                "options": [
+                    "Therefore",
+                    "Otherwise",
+                    "Meanwhile",
+                    "However"
+                ],
+                "answer": "Meanwhile",
+                "lecture_id": 35
             }
         ]
     }
