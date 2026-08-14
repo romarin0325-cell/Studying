@@ -345,14 +345,46 @@ export class MemoryStorage {
   }
 }
 
-function resolveStorage(storage) {
-  if (storage) return storage;
+function canPersist(storage) {
+  const probeKey = '__heroDefenseStorageProbe__';
+  let previousValue = null;
+  let hadPreviousValue = false;
   try {
-    if (globalThis.localStorage) return globalThis.localStorage;
+    previousValue = storage.getItem(probeKey);
+    hadPreviousValue = previousValue !== null;
+    storage.setItem(probeKey, 'available');
+    const persisted = storage.getItem(probeKey) === 'available';
+    if (hadPreviousValue) storage.setItem(probeKey, previousValue);
+    else storage.removeItem(probeKey);
+    return persisted;
+  } catch {
+    try {
+      if (hadPreviousValue) storage.setItem(probeKey, previousValue);
+      else storage.removeItem(probeKey);
+    } catch {
+      // The storage is already unusable; the in-memory fallback is clean.
+    }
+    return false;
+  }
+}
+
+function resolveStorage(storage) {
+  if (storage) {
+    const isMemory = storage instanceof MemoryStorage;
+    return {
+      storage,
+      persistent: !isMemory,
+      reason: isMemory ? 'explicit-memory' : null,
+    };
+  }
+  try {
+    if (globalThis.localStorage && canPersist(globalThis.localStorage)) {
+      return { storage: globalThis.localStorage, persistent: true, reason: null };
+    }
   } catch {
     // Access to localStorage can be denied in privacy/sandboxed contexts.
   }
-  return new MemoryStorage();
+  return { storage: new MemoryStorage(), persistent: false, reason: 'unavailable' };
 }
 
 function assertStorage(storage) {
@@ -374,10 +406,20 @@ export class SaveRepository {
       migrations = {},
     } = normalized;
 
-    this.storage = resolveStorage(storage);
+    const resolvedStorage = resolveStorage(storage);
+    this.storage = resolvedStorage.storage;
     assertStorage(this.storage);
     this.logger = logger;
     this.migrations = migrations;
+    this.isPersistent = resolvedStorage.persistent;
+    this.persistence = Object.freeze({
+      persistent: resolvedStorage.persistent,
+      kind: resolvedStorage.persistent ? 'persistent' : 'memory',
+      reason: resolvedStorage.reason,
+    });
+    if (resolvedStorage.reason === 'unavailable') {
+      this._warn('Persistent browser storage is unavailable; using volatile in-memory storage.');
+    }
   }
 
   loadMeta() {

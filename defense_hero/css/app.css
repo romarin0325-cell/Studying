@@ -105,6 +105,24 @@ select:focus-visible,
   gap: 10px;
 }
 
+.storage-warning {
+  display: grid;
+  margin: 6px 0 8px;
+  padding: 10px 14px;
+  gap: 3px;
+  border: 1px solid rgba(255, 111, 121, .62);
+  border-radius: var(--radius-sm);
+  background: rgba(91, 23, 37, .92);
+  color: #ffe7eb;
+  font-size: .78rem;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .26);
+}
+
+.storage-warning span {
+  color: #ffcbd3;
+}
+
 .brand-lockup {
   grid-column: 2;
   display: flex;
