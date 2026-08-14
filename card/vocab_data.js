@@ -370,7 +370,27 @@ const VOCAB_ADDITIONS = [
     { w: 'client', m: '(명) 고객; (명) 의뢰인', tm: '(명) 기후; (명) 분위기', tw: 'climate' },
     { w: 'survey', m: '(명) 설문 조사; (명) 조사', tm: '(명) 수술; (명) 진료실', tw: 'surgery' },
     { w: 'billing', m: '(명) 청구; (명) 청구 업무', tm: '(명) 건물; (명) 건축', tw: 'building' },
-    { w: 'visitor', m: '(명) 방문객; (명) 손님', tm: '(명) 승자; (명) 우승자', tw: 'victor' }
+    { w: 'visitor', m: '(명) 방문객; (명) 손님', tm: '(명) 승자; (명) 우승자', tw: 'victor' },
+    { w: 'appreciate', m: '(동) 감사하다; (동) 가치를 인정하다', tm: '(동) 가치가 하락하다; (동) 감가상각하다', tw: 'depreciate' },
+    { w: 'finalize', m: '(동) 마무리하다; (동) 최종 확정하다', tm: '(동) 공식화하다; (동) 정식 절차로 만들다', tw: 'formalize' },
+    { w: 'extend', m: '(동) 연장하다; (동) 확대하다', tm: '(명) 정도; (명) 범위', tw: 'extent' },
+    { w: 'ongoing', m: '(형) 계속 진행 중인', tm: '(형) 들어오는; (형) 새로 취임하는', tw: 'incoming' },
+    { w: 'alternative', m: '(명) 대안; (형) 대체 가능한', tm: '(명) 변경; (명) 수정', tw: 'alteration' },
+    { w: 'performance', m: '(명) 성과, 실적; (명) 성능; (명) 공연', tm: '(명) 공연자; (명) 성과를 내는 사람·제품', tw: 'performer' },
+    { w: 'staffing', m: '(명) 인력 배치; (명) 인력 운영', tm: '(명) 준비·배치; (명) 무대 설치', tw: 'staging' },
+    { w: 'funding', m: '(명) 자금 지원; (명) 재원', tm: '(명) 설립; (형) 창립의', tw: 'founding' },
+    { w: 'headquarters', m: '(명) 본사; (명) 본부', tm: '(명) 인원수; (명) 직원 수', tw: 'headcount' },
+    { w: 'investor', m: '(명) 투자자', tm: '(명) 발명가', tw: 'inventor' },
+    { w: 'analyze', m: '(동) 분석하다', tm: '(동) 항목별로 적다; (동) 명세화하다', tw: 'itemize' },
+    { w: 'insufficient', m: '(형) 불충분한; (형) 부족한', tm: '(형) 비효율적인', tw: 'inefficient' },
+    { w: 'colleague', m: '(명) 동료', tm: '(명) 목록, 카탈로그; (동) 목록화하다', tw: 'catalog' },
+    { w: 'suggestion', m: '(명) 제안, 제의; (명) 암시', tm: '(명) 혼잡; (명) 정체', tw: 'congestion' },
+    { w: 'guidance', m: '(명) 지도, 안내; (명) 지침', tm: '(명) 관리 체계; (명) 지배 구조', tw: 'governance' },
+    { w: 'suspend', m: '(동) 일시 중단하다; (동) 정직시키다', tm: '(동) 나누어 주다; (동) 제공하다', tw: 'dispense' },
+    { w: 'progress', m: '(명) 진전, 발전; (동) 진전하다', tm: '(명) 프로그램; (명) 계획', tw: 'program' },
+    { w: 'record', m: '(명) 기록; (동) 기록하다', tm: '(명) 합의; (동) 부여하다', tw: 'accord' },
+    { w: 'eager', m: '(형) 열망하는; (형) 몹시 하고 싶어 하는', tm: '(명) 원장; (명) 회계 장부', tw: 'ledger' },
+    { w: 'creative', m: '(형) 창의적인; (형) 독창적인', tm: '(형) 시정하는; (명) 교정 조치', tw: 'corrective' }
 ];
 
 VOCAB_SOURCE.push(...VOCAB_ADDITIONS);
