@@ -85,6 +85,27 @@ function makeSeed() {
   return `STAR-${now.slice(-7)}`;
 }
 
+function runtimeAssetManifest() {
+  const manifest = Data.ASSET_MANIFEST ?? Data.ASSETS ?? [];
+  const embeddedAssets = globalThis.__HERO_DEFENSE_EMBEDDED_ASSETS__;
+  if (!embeddedAssets || typeof embeddedAssets !== "object") return manifest;
+  return manifest.flatMap((entry) => {
+    const embeddedPath = embeddedAssets[entry.path];
+    return embeddedPath ? [{ ...entry, path: embeddedPath }] : [];
+  });
+}
+
+function updateBrowserHistory(method) {
+  try {
+    if (typeof globalThis.history?.[method] !== "function") return false;
+    globalThis.history[method]({ heroDefense: true }, "");
+    return true;
+  } catch {
+    // Some Android file viewers expose an opaque file/content origin.
+    return false;
+  }
+}
+
 export class GameApp {
   constructor({ root, modalRoot, toast, backButton, homeButton, sceneKicker }) {
     this.root = root;
@@ -94,9 +115,9 @@ export class GameApp {
     this.homeButton = homeButton;
     this.sceneKicker = sceneKicker;
     this.router = new SceneRouter((route, action) => this.#onRoute(route, action));
-    this.repository = new SaveRepository({ storage: globalThis.localStorage });
+    this.repository = new SaveRepository();
     this.controller = new RunController({ repository: this.repository, SeededRng, content });
-    this.assets = new AssetManager(Data.ASSET_MANIFEST ?? Data.ASSETS ?? []);
+    this.assets = new AssetManager(runtimeAssetManifest());
     this.assets.preload("menu");
     this.draftDeck = clone(DEFAULT_DECK);
     this.activeDeckSlot = null;
@@ -215,10 +236,9 @@ export class GameApp {
     this.backButton.classList.toggle("is-hidden", ["title", "hub", "map", "battle"].includes(route.name));
     this.homeButton.classList.toggle("is-hidden", ["title", "hub", "battle"].includes(route.name));
     this.sceneKicker.textContent = SCREEN_KICKERS[route.name] ?? "Hero Core Defense";
-    if (action === "push" && this.historyReady) history.pushState({ heroDefense: true }, "");
+    if (action === "push" && this.historyReady) updateBrowserHistory("pushState");
     if (!this.historyReady) {
-      history.replaceState({ heroDefense: true }, "");
-      this.historyReady = true;
+      this.historyReady = updateBrowserHistory("replaceState");
     }
     this.#render(route);
     window.scrollTo?.(0, 0);
@@ -263,7 +283,7 @@ export class GameApp {
           },
           onCancel: () => this.battle?.togglePause?.(false),
         });
-        if (fromHistory) history.pushState({ heroDefense: true }, "");
+        if (fromHistory) updateBrowserHistory("pushState");
         return;
       }
       this.controller.saveRun?.({ checkpoint: true });
@@ -285,7 +305,7 @@ export class GameApp {
         },
         onCancel: () => this.battle?.togglePause?.(false),
       });
-      if (fromHistory) history.pushState({ heroDefense: true }, "");
+      if (fromHistory) updateBrowserHistory("pushState");
       return;
     }
     if (!this.router.back()) this.router.reset("title");

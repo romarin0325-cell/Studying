@@ -100,6 +100,7 @@ export const STARTING_BLESSINGS = STARTING_BLESSING_DEFINITIONS;
 export const FIXED_CHALLENGES = FIXED_CHALLENGE_DEFINITIONS;
 export const SPECIAL_TILES = SPECIAL_TILE_DEFINITIONS;
 export const ASSETS = ASSET_MANIFEST;
+export const STAGES = STAGE_DEFINITIONS;
 
 const EXPECTED_COUNTS = Object.freeze({
   elements: 5,
@@ -517,6 +518,8 @@ export function validateContent({ throwOnError = false, assetManifest = ASSET_MA
   }
   return result;
 }
+
+export const validateData = validateContent;
 
 export {
   BOSS_BY_ID,
