@@ -45,8 +45,7 @@
             this.currentIndex = savedIndex >= 0 ? savedIndex : 0;
             this.repeatMode = ['off', 'all', 'one'].includes(prefs.repeatMode) ? prefs.repeatMode : 'all';
             this.shuffle = prefs.shuffle === true;
-            const rate = Number(prefs.playbackRate);
-            this.audio.playbackRate = [0.75, 1, 1.25, 1.5, 2].includes(rate) ? rate : 1;
+            this.applyPlaybackRate(prefs.playbackRate);
             if ('preservesPitch' in this.audio) this.audio.preservesPitch = true;
 
             this.bindAudioEvents();
@@ -243,9 +242,16 @@
 
         setPlaybackRate(value) {
             if (!this.audio) return;
-            const rate = Number(value);
-            this.audio.playbackRate = [0.75, 1, 1.25, 1.5, 2].includes(rate) ? rate : 1;
+            this.applyPlaybackRate(value);
             this.render();
+        },
+
+        applyPlaybackRate(value) {
+            const rate = Number(value);
+            const normalizedRate = [0.75, 1, 1.25, 1.5, 2].includes(rate) ? rate : 1;
+            this.audio.defaultPlaybackRate = normalizedRate;
+            this.audio.playbackRate = normalizedRate;
+            return normalizedRate;
         },
 
         toggleRepeat() {

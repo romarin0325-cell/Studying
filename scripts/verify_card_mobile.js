@@ -59,12 +59,14 @@ async function run() {
             scriptErrors: []
         });
 
-        const musicModalLayout = await normal.page.evaluate(() => {
+        const musicModalLayout = await normal.page.evaluate(async () => {
             MusicPlayer.open();
             const modal = document.getElementById('modal-music-player');
             const panel = modal.querySelector('.modal-content');
             const rect = panel.getBoundingClientRect();
             const controlsRect = panel.querySelector('.music-control-row').getBoundingClientRect();
+            MusicPlayer.setPlaybackRate(1.5);
+            await MusicPlayer.next();
             const result = {
                 active: modal.classList.contains('active'),
                 noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
@@ -75,8 +77,11 @@ async function run() {
                 controlsVisible: controlsRect.top >= rect.top - 1
                     && controlsRect.bottom <= rect.bottom + 1,
                 title: document.getElementById('music-track-title').textContent,
-                source: document.getElementById('music-audio').getAttribute('src')
+                source: document.getElementById('music-audio').getAttribute('src'),
+                playbackRate: MusicPlayer.audio.playbackRate,
+                defaultPlaybackRate: MusicPlayer.audio.defaultPlaybackRate
             };
+            MusicPlayer.setPlaybackRate(1);
             MusicPlayer.close();
             return result;
         });
@@ -87,6 +92,8 @@ async function run() {
         assert.strictEqual(musicModalLayout.controlsVisible, true);
         assert.strictEqual(musicModalLayout.title, 'おかえり、兄ちゃん');
         assert.strictEqual(musicModalLayout.source, 'おかえり、兄ちゃん.mp3');
+        assert.strictEqual(musicModalLayout.playbackRate, 1.5);
+        assert.strictEqual(musicModalLayout.defaultPlaybackRate, 1.5);
 
         const imageState = await normal.page.evaluate(async () => {
             const waitUntil = async predicate => {

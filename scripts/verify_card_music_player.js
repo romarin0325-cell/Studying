@@ -49,6 +49,7 @@ class FakeAudio extends FakeElement {
         this.ended = false;
         this.currentTime = 0;
         this.duration = 180;
+        this.defaultPlaybackRate = 1;
         this.playbackRate = 1;
         this.preservesPitch = false;
         this.src = '';
@@ -57,6 +58,7 @@ class FakeAudio extends FakeElement {
 
     load() {
         this.loadCount++;
+        this.playbackRate = this.defaultPlaybackRate;
         this.paused = true;
         this.dispatch('loadedmetadata');
     }
@@ -94,7 +96,15 @@ async function run() {
     const audio = new FakeAudio();
     elements.set('music-audio', audio);
 
-    const saved = new Map();
+    const saved = new Map([
+        ['cardRpgMusicPrefs', {
+            trackId: 'okaeri_aniichan',
+            currentTime: 30,
+            playbackRate: 1.5,
+            repeatMode: 'all',
+            shuffle: false
+        }]
+    ]);
     const Storage = {
         keys: { MUSIC_PREFS: 'cardRpgMusicPrefs' },
         load: key => saved.has(key) ? saved.get(key) : null,
@@ -150,9 +160,16 @@ async function run() {
     );
     assert.strictEqual(audio.src, 'おかえり、兄ちゃん.mp3');
     assert.strictEqual(audio.preservesPitch, true);
+    assert.strictEqual(audio.currentTime, 30);
+    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
+    assert.strictEqual(audio.playbackRate, 1.5);
     assert.strictEqual(mediaSession.metadata.title, 'おかえり、兄ちゃん');
     ['play', 'pause', 'previoustrack', 'nexttrack', 'seekbackward', 'seekforward', 'seekto']
         .forEach(action => assert.strictEqual(typeof mediaSession.handlers[action], 'function'));
+
+    await player.next();
+    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
+    assert.strictEqual(audio.playbackRate, 1.5, 'restored rate must survive the next track load');
 
     player.open();
     assert.strictEqual(elements.get('modal-music-player').classList.contains('active'), true);
@@ -163,8 +180,16 @@ async function run() {
     assert.strictEqual(elements.get('modal-music-player').classList.contains('active'), false);
     assert.strictEqual(audio.paused, false, 'closing the modal must not stop playback');
 
+    player.setPlaybackRate('1.25');
+    assert.strictEqual(audio.defaultPlaybackRate, 1.25);
+    await player.next();
+    assert.strictEqual(audio.playbackRate, 1.25, 'selected rate must survive the next track load');
+
     player.setPlaybackRate('1.5');
-    assert.strictEqual(audio.playbackRate, 1.5);
+    player.repeatMode = 'all';
+    player.handleEnded();
+    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
+    assert.strictEqual(audio.playbackRate, 1.5, 'selected rate must survive all-track repeat');
     player.commitSeek(50);
     assert.strictEqual(audio.currentTime, 90);
     assert.strictEqual(elements.get('music-current-time').textContent, '1:30');
