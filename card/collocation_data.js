@@ -5878,5 +5878,495 @@ const COLLOCATION_DATA = [
                 "translation": "Green 씨는 청구서 총액에 서비스 수수료가 포함되어 있지 않다고 지적했다."
             }
         ]
+    },
+    {
+        "id": 121,
+        "expression": "call it a day",
+        "meaning": "오늘 할 일을 마치다; 일을 마무리하다",
+        "options": [
+            "call",
+            "make",
+            "take",
+            "give"
+        ],
+        "question": "We have completed all urgent orders, so let's _______ it a day and continue the remaining work tomorrow.",
+        "answer": "call",
+        "translation": "긴급 주문을 모두 처리했으니 오늘 일은 마치고 남은 업무는 내일 계속합시다.",
+        "quizzes": [
+            {
+                "question": "We have completed all urgent orders, so let's _______ it a day and continue the remaining work tomorrow.",
+                "options": [
+                    "call",
+                    "make",
+                    "take",
+                    "give"
+                ],
+                "answer": "call",
+                "translation": "긴급 주문을 모두 처리했으니 오늘 일은 마치고 남은 업무는 내일 계속합시다."
+            },
+            {
+                "question": "After six hours of negotiations, both teams decided to _______ it a day.",
+                "options": [
+                    "call",
+                    "bring",
+                    "turn",
+                    "put"
+                ],
+                "answer": "call",
+                "translation": "6시간의 협상 끝에 양측은 오늘 협상을 마무리하기로 했다."
+            },
+            {
+                "question": "The technicians fixed the main issue and agreed to _______ it a day before overtime costs increased.",
+                "options": [
+                    "call",
+                    "close",
+                    "finish",
+                    "stop"
+                ],
+                "answer": "call",
+                "translation": "기술자들은 주요 문제를 해결하고 초과근무 비용이 늘기 전에 오늘 작업을 마치기로 했다."
+            }
+        ]
+    },
+    {
+        "id": 122,
+        "expression": "break the ice",
+        "meaning": "어색한 분위기를 풀다",
+        "options": [
+            "break",
+            "raise",
+            "hold",
+            "carry"
+        ],
+        "question": "The host told a light joke to _______ the ice before the workshop began.",
+        "answer": "break",
+        "translation": "진행자는 워크숍이 시작되기 전에 어색한 분위기를 풀기 위해 가벼운 농담을 했다.",
+        "quizzes": [
+            {
+                "question": "The host told a light joke to _______ the ice before the workshop began.",
+                "options": [
+                    "break",
+                    "raise",
+                    "hold",
+                    "carry"
+                ],
+                "answer": "break",
+                "translation": "진행자는 워크숍이 시작되기 전에 어색한 분위기를 풀기 위해 가벼운 농담을 했다."
+            },
+            {
+                "question": "A short team-building activity can help _______ the ice among new employees.",
+                "options": [
+                    "break",
+                    "drop",
+                    "cut",
+                    "move"
+                ],
+                "answer": "break",
+                "translation": "짧은 팀 빌딩 활동은 신입 직원들 사이의 어색함을 푸는 데 도움이 될 수 있다."
+            },
+            {
+                "question": "Ms. Lee introduced herself first to _______ the ice at the networking reception.",
+                "options": [
+                    "break",
+                    "raise",
+                    "clear",
+                    "split"
+                ],
+                "answer": "break",
+                "translation": "Lee 씨는 네트워킹 리셉션에서 어색한 분위기를 풀기 위해 먼저 자신을 소개했다."
+            }
+        ]
+    },
+    {
+        "id": 123,
+        "expression": "cut corners",
+        "meaning": "시간이나 비용을 아끼려고 필요한 절차·품질을 희생하다",
+        "options": [
+            "cut",
+            "turn",
+            "mark",
+            "cover"
+        ],
+        "question": "The contractor was warned not to _______ corners on safety inspections.",
+        "answer": "cut",
+        "translation": "그 계약업체는 안전 점검에서 필요한 절차를 생략하지 말라는 경고를 받았다.",
+        "quizzes": [
+            {
+                "question": "The contractor was warned not to _______ corners on safety inspections.",
+                "options": [
+                    "cut",
+                    "turn",
+                    "mark",
+                    "cover"
+                ],
+                "answer": "cut",
+                "translation": "그 계약업체는 안전 점검에서 필요한 절차를 생략하지 말라는 경고를 받았다."
+            },
+            {
+                "question": "Trying to _______ corners on product testing could lead to costly recalls.",
+                "options": [
+                    "cut",
+                    "round",
+                    "fill",
+                    "close"
+                ],
+                "answer": "cut",
+                "translation": "제품 시험 절차를 줄이려 하면 비용이 큰 리콜로 이어질 수 있다."
+            },
+            {
+                "question": "The manager refused to _______ corners merely to meet an unrealistic deadline.",
+                "options": [
+                    "cut",
+                    "pass",
+                    "cross",
+                    "skip"
+                ],
+                "answer": "cut",
+                "translation": "관리자는 비현실적인 마감일을 맞추기 위해 필요한 절차나 품질을 희생하는 것을 거부했다."
+            }
+        ]
+    },
+    {
+        "id": 124,
+        "expression": "get out of hand",
+        "meaning": "통제 불능이 되다",
+        "options": [
+            "get",
+            "go",
+            "turn",
+            "run"
+        ],
+        "question": "The discussion began calmly but started to _______ out of hand after several complaints.",
+        "answer": "get",
+        "translation": "토론은 차분하게 시작됐지만 여러 불만이 나온 뒤 통제하기 어려워지기 시작했다.",
+        "quizzes": [
+            {
+                "question": "The discussion began calmly but started to _______ out of hand after several complaints.",
+                "options": [
+                    "get",
+                    "go",
+                    "turn",
+                    "run"
+                ],
+                "answer": "get",
+                "translation": "토론은 차분하게 시작됐지만 여러 불만이 나온 뒤 통제하기 어려워지기 시작했다."
+            },
+            {
+                "question": "Without a clear budget, project expenses can quickly _______ out of hand.",
+                "options": [
+                    "get",
+                    "move",
+                    "come",
+                    "take"
+                ],
+                "answer": "get",
+                "translation": "명확한 예산이 없으면 프로젝트 비용은 빠르게 통제 불능이 될 수 있다."
+            },
+            {
+                "question": "The supervisor stepped in before the disagreement could _______ out of hand.",
+                "options": [
+                    "get",
+                    "give",
+                    "set",
+                    "fall"
+                ],
+                "answer": "get",
+                "translation": "감독자는 의견 충돌이 통제 불능이 되기 전에 개입했다."
+            }
+        ]
+    },
+    {
+        "id": 125,
+        "expression": "hit the nail on the head",
+        "meaning": "정확히 맞히다; 핵심을 찌르다",
+        "options": [
+            "hit",
+            "held",
+            "took",
+            "set"
+        ],
+        "question": "The consultant _______ the nail on the head when she identified poor inventory tracking as the main cause.",
+        "answer": "hit",
+        "translation": "그 컨설턴트는 부실한 재고 추적을 주된 원인으로 지목하며 정확히 핵심을 짚었다.",
+        "quizzes": [
+            {
+                "question": "The consultant _______ the nail on the head when she identified poor inventory tracking as the main cause.",
+                "options": [
+                    "hit",
+                    "held",
+                    "took",
+                    "set"
+                ],
+                "answer": "hit",
+                "translation": "그 컨설턴트는 부실한 재고 추적을 주된 원인으로 지목하며 정확히 핵심을 짚었다."
+            },
+            {
+                "question": "Your explanation really _______ the nail on the head; the delay was caused by missing approval.",
+                "options": [
+                    "hits",
+                    "puts",
+                    "finds",
+                    "drives"
+                ],
+                "answer": "hits",
+                "translation": "당신의 설명은 정확히 핵심을 짚었다. 지연의 원인은 승인 누락이었다."
+            },
+            {
+                "question": "Mr. Park _______ the nail on the head by pointing out that the schedule allowed no time for testing.",
+                "options": [
+                    "hit",
+                    "bent",
+                    "pressed",
+                    "fixed"
+                ],
+                "answer": "hit",
+                "translation": "Park 씨는 일정에 시험 시간이 전혀 없다는 점을 지적하며 핵심을 정확히 짚었다."
+            }
+        ]
+    },
+    {
+        "id": 126,
+        "expression": "miss the boat",
+        "meaning": "기회를 놓치다",
+        "options": [
+            "miss",
+            "lose",
+            "leave",
+            "skip"
+        ],
+        "question": "Companies that wait too long to adopt the new standard may _______ the boat.",
+        "answer": "miss",
+        "translation": "새 기준의 도입을 지나치게 미루는 회사는 기회를 놓칠 수 있다.",
+        "quizzes": [
+            {
+                "question": "Companies that wait too long to adopt the new standard may _______ the boat.",
+                "options": [
+                    "miss",
+                    "lose",
+                    "leave",
+                    "skip"
+                ],
+                "answer": "miss",
+                "translation": "새 기준의 도입을 지나치게 미루는 회사는 기회를 놓칠 수 있다."
+            },
+            {
+                "question": "Submit the application today so you do not _______ the boat on the early-registration discount.",
+                "options": [
+                    "miss",
+                    "drop",
+                    "pass",
+                    "avoid"
+                ],
+                "answer": "miss",
+                "translation": "조기 등록 할인 기회를 놓치지 않도록 오늘 신청서를 제출하세요."
+            },
+            {
+                "question": "We _______ the boat on the first venue, but another conference room is still available.",
+                "options": [
+                    "missed",
+                    "lost",
+                    "passed",
+                    "dropped"
+                ],
+                "answer": "missed",
+                "translation": "첫 번째 행사장 기회는 놓쳤지만 다른 회의실은 아직 이용할 수 있다."
+            }
+        ]
+    },
+    {
+        "id": 127,
+        "expression": "to make matters worse",
+        "meaning": "설상가상으로; 더 나쁜 것은",
+        "options": [
+            "worse",
+            "worst",
+            "badly",
+            "harder"
+        ],
+        "question": "The shipment arrived late, and to make matters _______, several items were damaged.",
+        "answer": "worse",
+        "translation": "배송이 늦게 도착했고, 설상가상으로 몇몇 품목은 손상되어 있었다.",
+        "quizzes": [
+            {
+                "question": "The shipment arrived late, and to make matters _______, several items were damaged.",
+                "options": [
+                    "worse",
+                    "worst",
+                    "badly",
+                    "harder"
+                ],
+                "answer": "worse",
+                "translation": "배송이 늦게 도착했고, 설상가상으로 몇몇 품목은 손상되어 있었다."
+            },
+            {
+                "question": "The server failed during the presentation. To make matters _______, the backup file was also corrupted.",
+                "options": [
+                    "worse",
+                    "lower",
+                    "shorter",
+                    "later"
+                ],
+                "answer": "worse",
+                "translation": "발표 중 서버가 고장 났고, 설상가상으로 백업 파일도 손상되어 있었다."
+            },
+            {
+                "question": "The invoice contained the wrong quantity and, to make matters _______, it was sent to the wrong client.",
+                "options": [
+                    "worse",
+                    "worst",
+                    "further",
+                    "badly"
+                ],
+                "answer": "worse",
+                "translation": "청구서에는 잘못된 수량이 적혀 있었고, 설상가상으로 다른 고객에게 발송되었다."
+            }
+        ]
+    },
+    {
+        "id": 128,
+        "expression": "go back to the drawing board",
+        "meaning": "계획이 실패해 처음부터 다시 검토하다",
+        "options": [
+            "the drawing board",
+            "the notice board",
+            "the meeting agenda",
+            "the production line"
+        ],
+        "question": "The prototype failed the safety test, so the engineers must go back to _______.",
+        "answer": "the drawing board",
+        "translation": "시제품이 안전 시험에 실패했기 때문에 엔지니어들은 계획을 처음부터 다시 검토해야 한다.",
+        "quizzes": [
+            {
+                "question": "The prototype failed the safety test, so the engineers must go back to _______.",
+                "options": [
+                    "the drawing board",
+                    "the notice board",
+                    "the meeting agenda",
+                    "the production line"
+                ],
+                "answer": "the drawing board",
+                "translation": "시제품이 안전 시험에 실패했기 때문에 엔지니어들은 계획을 처음부터 다시 검토해야 한다."
+            },
+            {
+                "question": "After the client rejected the proposal, the design team went back to _______.",
+                "options": [
+                    "the drawing board",
+                    "the front desk",
+                    "the final report",
+                    "the loading dock"
+                ],
+                "answer": "the drawing board",
+                "translation": "고객이 제안서를 거절한 뒤 디자인 팀은 계획을 처음부터 다시 검토했다."
+            },
+            {
+                "question": "The cost estimate exceeded the budget, forcing us to go back to _______.",
+                "options": [
+                    "the drawing board",
+                    "the balance sheet",
+                    "the waiting list",
+                    "the service counter"
+                ],
+                "answer": "the drawing board",
+                "translation": "비용 견적이 예산을 초과해 우리는 계획을 처음부터 다시 검토해야 했다."
+            }
+        ]
+    },
+    {
+        "id": 129,
+        "expression": "the ball is in your court",
+        "meaning": "이제 결정하거나 행동할 차례가 상대에게 있다",
+        "options": [
+            "court",
+            "office",
+            "field",
+            "desk"
+        ],
+        "question": "We have sent the revised contract, so the ball is now in your _______.",
+        "answer": "court",
+        "translation": "우리는 수정 계약서를 보냈으므로 이제 결정할 차례는 당신에게 있다.",
+        "quizzes": [
+            {
+                "question": "We have sent the revised contract, so the ball is now in your _______.",
+                "options": [
+                    "court",
+                    "office",
+                    "field",
+                    "desk"
+                ],
+                "answer": "court",
+                "translation": "우리는 수정 계약서를 보냈으므로 이제 결정할 차례는 당신에게 있다."
+            },
+            {
+                "question": "The candidate has received the offer; the ball is in her _______ now.",
+                "options": [
+                    "court",
+                    "seat",
+                    "room",
+                    "hand"
+                ],
+                "answer": "court",
+                "translation": "지원자는 제안을 받았으므로 이제 결정할 차례는 그녀에게 있다."
+            },
+            {
+                "question": "Our team has completed the analysis, and the ball is now in the finance department's _______.",
+                "options": [
+                    "court",
+                    "budget",
+                    "account",
+                    "schedule"
+                ],
+                "answer": "court",
+                "translation": "우리 팀은 분석을 마쳤고 이제 행동할 차례는 재무 부서에 있다."
+            }
+        ]
+    },
+    {
+        "id": 130,
+        "expression": "in hot water",
+        "meaning": "곤경에 빠진; 곤경에 처한",
+        "options": [
+            "in",
+            "on",
+            "at",
+            "under"
+        ],
+        "question": "The supplier could be _______ hot water for ignoring the safety regulations.",
+        "answer": "in",
+        "translation": "그 공급업체는 안전 규정을 무시한 일로 곤경에 처할 수 있다.",
+        "quizzes": [
+            {
+                "question": "The supplier could be _______ hot water for ignoring the safety regulations.",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "under"
+                ],
+                "answer": "in",
+                "translation": "그 공급업체는 안전 규정을 무시한 일로 곤경에 처할 수 있다."
+            },
+            {
+                "question": "The accountant found himself _______ hot water after approving the payment without documentation.",
+                "options": [
+                    "in",
+                    "over",
+                    "through",
+                    "beside"
+                ],
+                "answer": "in",
+                "translation": "그 회계 담당자는 증빙 없이 지급을 승인한 뒤 곤경에 처했다."
+            },
+            {
+                "question": "Missing another regulatory deadline may leave the company _______ hot water.",
+                "options": [
+                    "in",
+                    "on",
+                    "at",
+                    "over"
+                ],
+                "answer": "in",
+                "translation": "규제 마감일을 또 놓치면 회사가 곤경에 처할 수 있다."
+            }
+        ]
     }
 ];

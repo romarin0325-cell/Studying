@@ -2760,63 +2760,11 @@ const TOEIC_DATA = [
   },
   {
     "id": 58,
-    "type": "part6",
-    "title": "58강 (Part 6) — 출장 일정 변경 + 호텔 예약 조정 안내 (지문 1개 + 4문항)",
+    "type": "part5",
+    "title": "58강 (Part 5) — 관사/한정사/고정 표현 (3문항)",
     "questions": [
       {
         "id": "58-1",
-        "question": "Select the best answer for blank (1).",
-        "options": [
-          "rebooked",
-          "rebooking",
-          "rebook",
-          "rebooks"
-        ],
-        "answer": "rebooked"
-      },
-      {
-        "id": "58-2",
-        "question": "Select the best answer for blank (2).",
-        "options": [
-          "apply",
-          "applies",
-          "applied",
-          "applying"
-        ],
-        "answer": "apply"
-      },
-      {
-        "id": "58-3",
-        "question": "Select the best answer for blank (3).",
-        "options": [
-          "if",
-          "though",
-          "unless",
-          "because"
-        ],
-        "answer": "if"
-      },
-      {
-        "id": "58-4",
-        "question": "Sentence Insertion \n \nIn which of the positions marked [1], [2], [3], and [4] does the following sentence best belong? \n \nSentence: Because of the later arrival time, your breakfast meeting with the local purchasing team has been moved from 8:30 a.m. to 9:15 a.m.",
-        "options": [
-          "[1]",
-          "[2]",
-          "[3]",
-          "[4]"
-        ],
-        "answer": "[1]"
-      }
-    ],
-    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nSubject: Revised Itinerary for the Osaka Supplier Visit\n\nDear Mr. Ito,\n\nDue to scheduled maintenance on the Airport Express line, the 6:45 a.m. train from Kansai Airport to central Osaka on Wednesday, October 14, has been canceled. We have therefore (1) _______ you on the 7:20 a.m. limited express, which is expected to arrive at Namba Station at 8:06 a.m. [1]\n\nYour reservation at the Harbor View Hotel has also been updated. Because the plant tour at Shinsei Components will end later than originally planned, your checkout date has been changed from Wednesday, October 14, to Thursday, October 15. The corporate room rate will still (2) _______ , so no additional authorization is required. [2]\n\nThe driver who was scheduled to meet you at Namba Station is no longer available. However, the hotel operates a complimentary shuttle from Stop C every 20 minutes, and the trip to the hotel takes about 12 minutes. [3]\n\nPlease review the attached itinerary carefully and let me know right away (3) _______ any of the reservation details need to be corrected. Once you confirm the changes, I will send the updated booking numbers and final meeting agenda. [4]\n\nBest regards,\nNaoko Sato\nTravel Coordinator\nKeihin Industrial Group"
-  },
-  {
-    "id": 59,
-    "type": "part5",
-    "title": "59강 (Part 5) — 관사/한정사/고정 표현 (3문항)",
-    "questions": [
-      {
-        "id": "59-1",
         "question": "The consultant will provide ______ overview of the revised distribution plan at tomorrow’s briefing.",
         "options": [
           "a",
@@ -2827,7 +2775,7 @@ const TOEIC_DATA = [
         "answer": "an"
       },
       {
-        "id": "59-2",
+        "id": "58-2",
         "question": "Employees who need parking permits should submit the request form to ______ Human Resources office on the second floor.",
         "options": [
           "a",
@@ -2838,7 +2786,7 @@ const TOEIC_DATA = [
         "answer": "the"
       },
       {
-        "id": "59-3",
+        "id": "58-3",
         "question": "Replacement chargers will be sent at ______ additional cost to customers affected by the recall.",
         "options": [
           "any",
@@ -2849,5 +2797,459 @@ const TOEIC_DATA = [
         "answer": "no"
       }
     ]
+  },
+  {
+    "id": 70,
+    "type": "part5",
+    "title": "70강 (Part 5) — 부사·품사·조건절 (공개 연습문제 Q1–Q3)",
+    "questions": [
+      {
+        "id": "70-1",
+        "question": "Ms. Ortega's development team contributed _______ to the successful launch of the newest mobile application.",
+        "options": [
+          "automatically",
+          "substantially",
+          "sharply",
+          "accordingly"
+        ],
+        "answer": "substantially"
+      },
+      {
+        "id": "70-2",
+        "question": "In order to meet production targets, inspection equipment that breaks down easily should be checked on a _______ basis.",
+        "options": [
+          "regular",
+          "regularly",
+          "regularize",
+          "regularity"
+        ],
+        "answer": "regular"
+      },
+      {
+        "id": "70-3",
+        "question": "_______ you experience any problems with the building's equipment, you should contact the property manager.",
+        "options": [
+          "Because of",
+          "In case of",
+          "Promptly",
+          "If"
+        ],
+        "answer": "If"
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "type": "part5",
+    "title": "71강 (Part 5) — 업무 어휘·기계 상태·직업 명사 (공개 연습문제 Q4–Q6)",
+    "questions": [
+      {
+        "id": "71-1",
+        "question": "Employees must park in the _______ parking lot until the renovation of the company building is completed.",
+        "options": [
+          "frequent",
+          "generous",
+          "complicated",
+          "temporary"
+        ],
+        "answer": "temporary"
+      },
+      {
+        "id": "71-2",
+        "question": "Although the assembly machine has been used for more than 20 years, it is still _______.",
+        "options": [
+          "annual",
+          "experienced",
+          "operational",
+          "previous"
+        ],
+        "answer": "operational"
+      },
+      {
+        "id": "71-3",
+        "question": "Medical _______ are supposed to investigate the characteristics and effects of newly developed materials.",
+        "options": [
+          "expert",
+          "expertise",
+          "experts",
+          "expertly"
+        ],
+        "answer": "experts"
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "type": "part5",
+    "title": "72강 (Part 5) — 품사·대명사·수동태 (공개 연습문제 Q7–Q9)",
+    "questions": [
+      {
+        "id": "72-1",
+        "question": "Darwin Construction, renowned for its _______ designs, has won the bid for the Dalton City Library.",
+        "options": [
+          "innovation",
+          "innovate",
+          "innovatively",
+          "innovative"
+        ],
+        "answer": "innovative"
+      },
+      {
+        "id": "72-2",
+        "question": "Please make sure that _______ address is correct in the designated section of the order form.",
+        "options": [
+          "yours",
+          "yourself",
+          "your",
+          "you"
+        ],
+        "answer": "your"
+      },
+      {
+        "id": "72-3",
+        "question": "Mr. Thompson was _______ as the marketing director after a successful market development in Asia.",
+        "options": [
+          "appointing",
+          "appointed",
+          "appoint",
+          "appoints"
+        ],
+        "answer": "appointed"
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "type": "part6",
+    "title": "73강 (Part 6) — 사무공간 피드백 메모 (4문항)",
+    "questions": [
+      {
+        "id": "73-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "equipment",
+          "information",
+          "permission",
+          "attendance"
+        ],
+        "answer": "information"
+      },
+      {
+        "id": "73-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "Please answer the questions as honestly as possible.",
+          "The office will be closed during the renovation period.",
+          "All employees must attend a training session next week.",
+          "The new furniture catalog is now available online."
+        ],
+        "answer": "Please answer the questions as honestly as possible."
+      },
+      {
+        "id": "73-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "reviewed",
+          "were reviewing",
+          "will be reviewed",
+          "have reviewed"
+        ],
+        "answer": "will be reviewed"
+      },
+      {
+        "id": "73-4",
+        "question": "Select the best answer for blank (4).",
+        "options": [
+          "submit",
+          "install",
+          "replace",
+          "deliver"
+        ],
+        "answer": "submit"
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nTo: All Staff\nFrom: Facilities Department\nDate: March 4\nSubject: Office Workspace Feedback\n\nNext week, each employee will receive a feedback form about our office workspace. The purpose of the form is to collect opinions about meeting rooms, shared areas, and individual workstations. The (1) _______ gathered will help us decide which improvements should be made later this year.\n\n(2) _______\n\nWe are especially interested in hearing about any areas that are too noisy, too crowded, or difficult to use.\n\nAfter the forms are submitted, all comments (3) _______ by the facilities team and discussed with department managers. A summary of the results will be shared with staff members in April.\n\nIf you do not want your name to appear on the form, you may (4) _______ it anonymously. Completed forms should be placed in the collection box near the reception desk by Friday, March 15."
+  },
+  {
+    "id": 74,
+    "type": "part6",
+    "title": "74강 (Part 6) — 행사 장비 대여 광고 (4문항)",
+    "questions": [
+      {
+        "id": "74-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "extensive",
+          "intentional",
+          "optional",
+          "repeated"
+        ],
+        "answer": "extensive"
+      },
+      {
+        "id": "74-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "within",
+          "during",
+          "until",
+          "toward"
+        ],
+        "answer": "within"
+      },
+      {
+        "id": "74-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "separate",
+          "separately",
+          "separation",
+          "separating"
+        ],
+        "answer": "separately"
+      },
+      {
+        "id": "74-4",
+        "question": "Select the best answer for blank (4).",
+        "options": [
+          "We also offer setup and removal services for an additional fee.",
+          "Our outdoor equipment should not be used during summer months.",
+          "Customers may cancel reservations only after an event has ended.",
+          "Several of our employees previously worked at a hotel."
+        ],
+        "answer": "We also offer setup and removal services for an additional fee."
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nGreenfield Event Rentals provides equipment and support services for conferences, award ceremonies, and outdoor festivals. We carry an (1) _______ range of items, including tables, chairs, display stands, lighting equipment, and portable sound systems.\n\nOur staff can help you decide which items are best suited to your event space. After you submit a request through our Web site, a rental coordinator will review the details and send you a price estimate (2) _______ two business days.\n\nFor large events, we recommend reserving equipment at least three weeks in advance. Smaller orders can often be handled on shorter notice, although delivery fees are calculated (3) _______ according to distance.\n\n(4) _______\n\nTo view our full catalog or request assistance with planning your next event, visit www.greenfieldeventrentals.com."
+  },
+  {
+    "id": 75,
+    "type": "part6",
+    "title": "75강 (Part 6) — 입사 시작일 안내 이메일 (4문항)",
+    "questions": [
+      {
+        "id": "75-1",
+        "question": "Select the best answer for blank (1).",
+        "options": [
+          "relocation",
+          "subscription",
+          "inspection",
+          "permission"
+        ],
+        "answer": "relocation"
+      },
+      {
+        "id": "75-2",
+        "question": "Select the best answer for blank (2).",
+        "options": [
+          "throughout",
+          "among",
+          "beside",
+          "toward"
+        ],
+        "answer": "throughout"
+      },
+      {
+        "id": "75-3",
+        "question": "Select the best answer for blank (3).",
+        "options": [
+          "so",
+          "but",
+          "after",
+          "whether"
+        ],
+        "answer": "but"
+      },
+      {
+        "id": "75-4",
+        "question": "Select the best answer for blank (4).",
+        "options": [
+          "I hope you will consider applying for another position.",
+          "In the meantime, I am happy to help with any practical arrangements.",
+          "Our next exhibition will close at the end of this week.",
+          "Unfortunately, the position has already been filled."
+        ],
+        "answer": "In the meantime, I am happy to help with any practical arrangements."
+      }
+    ],
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nTo: Daniel Ruiz <druiz@ruizdesign.com>\nFrom: Amanda Lee <alee@northbridgearts.org>\nDate: April 12\nSubject: Starting Date\n\nDear Mr. Ruiz,\n\nI am very pleased that you have accepted the position of exhibition coordinator at Northbridge Arts Center. We know that leaving your current job and moving to Northbridge is a significant (1) _______, and we appreciate the confidence you have shown in joining our team.\n\nPlease feel free to contact me (2) _______ your first few weeks here if you have any questions about your duties, your schedule, or the city itself. I want to make your transition as easy as possible.\n\nWe hope you will be able to start on Monday, May 6, (3) _______ if that date is difficult for any reason, please let me know as soon as possible.\n\n(4) _______ I have also attached a short guide with information about nearby apartments, public transportation, and local services.\n\nBest regards,\nAmanda Lee\nDirector\nNorthbridge Arts Center"
+  },
+  {
+    "id": 76,
+    "type": "part7",
+    "title": "76강 (Part 7) — 제품 교육 장소 선정 온라인 채팅 (4문항)",
+    "questions": [
+      {
+        "id": "76-1",
+        "question": "What is the main purpose of the discussion?",
+        "options": [
+          "To select a location for a training session",
+          "To decide who will lead a sales meeting",
+          "To arrange transportation for hotel guests",
+          "To review the results of a product launch"
+        ],
+        "answer": "To select a location for a training session"
+      },
+      {
+        "id": "76-2",
+        "question": "At 2:23 P.M., what does Mr. Patel mean when he writes, \"That may be worth it\"?",
+        "options": [
+          "The training session should be canceled.",
+          "The higher rental fee may be acceptable.",
+          "The hotel should offer a discount.",
+          "The office projector should be repaired."
+        ],
+        "answer": "The higher rental fee may be acceptable."
+      },
+      {
+        "id": "76-3",
+        "question": "What concern does Ms. Garcia express?",
+        "options": [
+          "Some attendees may arrive late.",
+          "The auditorium may not have enough seats.",
+          "The venue may be difficult for visitors to reach.",
+          "The training materials may not be ready in time."
+        ],
+        "answer": "The venue may be difficult for visitors to reach."
+      },
+      {
+        "id": "76-4",
+        "question": "What will Mr. Turner probably do next?",
+        "options": [
+          "Reserve airline tickets",
+          "Send a budget file",
+          "Contact a business center",
+          "Repair some equipment"
+        ],
+        "answer": "Contact a business center"
+      }
+    ],
+    "passage": "Directions: Read the texts below and answer the questions.\n\nSophia Lee [2:15 P.M.]\nHi, everyone. We need to decide where to hold next month's product training session. The Riverside Hotel just told me their main conference room is no longer available on June 12.\n\nMark Patel [2:17 P.M.]\nThat's a problem. We've already invited 80 sales representatives, and some of them are flying in that morning.\n\nElena Garcia [2:18 P.M.]\nCould we use the training room at our downtown office?\n\nSophia Lee [2:20 P.M.]\nIt only seats 45 people. Also, the projector there has been unreliable recently.\n\nJames Turner [2:21 P.M.]\nI checked with the Civic Business Center last week. Their auditorium is free on June 12, and it can hold 100 people. The rental fee is a little higher than the hotel's, though.\n\nMark Patel [2:23 P.M.]\nThat may be worth it. We can't risk moving the session to a room that's too small.\n\nElena Garcia [2:24 P.M.]\nI agree. But we should make sure the location is easy to reach from the airport. Some of the representatives won't be familiar with the city.\n\nJames Turner [2:26 P.M.]\nThere's a direct shuttle from the airport to the Civic Business Center every 30 minutes. I can send everyone the schedule once the venue is confirmed.\n\nSophia Lee [2:27 P.M.]\nGood. James, please call the center and ask them to hold the auditorium for us until tomorrow morning. Mark, could you check whether the extra rental cost fits our budget?\n\nMark Patel [2:28 P.M.]\nSure. I'll look at the budget file now and get back to you before 4.\n\nJames Turner [2:29 P.M.]\nI'll contact the center right away."
+  },
+  {
+    "id": 77,
+    "type": "part7",
+    "title": "77강 (Part 7) — 소상공인 워크숍 안내·이메일·일정표 (5문항)",
+    "questions": [
+      {
+        "id": "77-1",
+        "question": "What is indicated about Eastvale Small Business Workshop Day?",
+        "options": [
+          "It is intended mainly for university students.",
+          "It allows participants to attend more than one workshop.",
+          "It will be held at several different locations.",
+          "It requires participants to bring printed materials."
+        ],
+        "answer": "It allows participants to attend more than one workshop."
+      },
+      {
+        "id": "77-2",
+        "question": "What is the purpose of Ms. Kim's e-mail?",
+        "options": [
+          "To ask whether certain workshops are available",
+          "To request a refund for a canceled event",
+          "To recommend a speaker for a workshop",
+          "To ask for directions to a convention center"
+        ],
+        "answer": "To ask whether certain workshops are available"
+      },
+      {
+        "id": "77-3",
+        "question": "What is suggested about Ms. Kim?",
+        "options": [
+          "She recently hired a new store manager.",
+          "She plans to expand her business.",
+          "She has attended the event before.",
+          "She sells merchandise online."
+        ],
+        "answer": "She plans to expand her business."
+      },
+      {
+        "id": "77-4",
+        "question": "When will Mr. Vega most likely be able to attend the workshop?",
+        "options": [
+          "At 9:00 A.M.",
+          "At 10:30 A.M.",
+          "At 12:30 P.M.",
+          "At 2:30 P.M."
+        ],
+        "answer": "At 2:30 P.M."
+      },
+      {
+        "id": "77-5",
+        "question": "How much will Ms. Kim and Mr. Vega probably pay in total?",
+        "options": [
+          "$45",
+          "$60",
+          "$90",
+          "$120"
+        ],
+        "answer": "$90"
+      }
+    ],
+    "passage": "Directions: Read the texts below and answer the questions.\n\n[Document 1]\n\nEastvale Small Business Workshop Day\nSaturday, October 5\nEastvale Convention Center\n\nEastvale Business Association invites local business owners and managers to a one-day workshop event designed to provide practical advice for growing small companies. Participants may attend up to two workshops. The registration fee includes lunch and digital copies of all workshop materials.\n\nWorkshops include:\n\nPromoting Your Business Online\nLearn how to create a simple social media plan and attract new customers.\n\nStock Control for Small Retailers\nFind out how to track inventory and avoid ordering too much merchandise.\n\nFinancing Your Next Expansion\nGet advice on preparing documents before applying for a bank loan.\n\nHiring and Training Part-Time Staff\nLearn strategies for recruiting and training seasonal employees.\n\nThe registration fee is $45 per person if payment is received by September 24. After that date, the fee is $60 per person. Space is limited, so participants should choose their workshop preferences when registering online at www.eastvalebusiness.org.\n\n\n[Document 2]\n\nTo: Samuel Reed <sreed@eastvalebusiness.org>\nFrom: Nora Kim <nkim@kimflower.com>\nDate: September 22\nSubject: Workshop Registration\n\nDear Mr. Reed,\n\nI am planning to register myself and my store manager, Carlos Vega, for the Eastvale Small Business Workshop Day. We operate a flower shop, and we are hoping to open a second location next spring, so we especially need advice on preparing bank documents. Carlos would also like to attend a session about hiring short-term assistants before the holiday season. However, neither of us can arrive before noon because we have several morning deliveries that day.\n\nBefore I complete the online registration form, could you confirm whether the afternoon sessions related to these topics still have space? Also, since today is September 22, I assume the early registration rate still applies.\n\nSincerely,\nNora Kim\nKim Flower Studio\n\n\n[Document 3]\n\nEastvale Small Business Workshop Day — Schedule\n\n8:30 A.M. — Registration opens — Lobby — —\n9:00–10:15 A.M. — Promoting Your Business Online — Room 1 — Seats available\n10:30–11:45 A.M. — Stock Control for Small Retailers — Room 2 — Seats available\n11:45 A.M.–12:45 P.M. — Lunch — Atrium — —\n1:00–2:15 P.M. — Financing Your Next Expansion — Room 1 — 4 seats available\n1:00–2:15 P.M. — Hiring and Training Part-Time Staff — Room 2 — Full\n2:30–3:45 P.M. — Hiring and Training Part-Time Staff — Room 2 — 6 seats available\n2:30–3:45 P.M. — Promoting Your Business Online — Room 1 — Seats available"
+  },
+  {
+    "id": 78,
+    "type": "part7",
+    "title": "78강 (Part 7) — 커피메이커 보증·이메일·서비스 보고서 (5문항)",
+    "questions": [
+      {
+        "id": "78-1",
+        "question": "What is indicated about BeanTech's warranty service?",
+        "options": [
+          "Customers must provide proof of purchase.",
+          "Repairs are completed within one business day.",
+          "Replacement units are given to all customers.",
+          "Cleaning supplies are provided free of charge."
+        ],
+        "answer": "Customers must provide proof of purchase."
+      },
+      {
+        "id": "78-2",
+        "question": "What is the purpose of Ms. Cho's e-mail?",
+        "options": [
+          "To ask about the cost of a new product",
+          "To report a problem with a coffee maker",
+          "To request a copy of a purchase receipt",
+          "To complain about a late delivery"
+        ],
+        "answer": "To report a problem with a coffee maker"
+      },
+      {
+        "id": "78-3",
+        "question": "Why was the repair most likely approved under warranty?",
+        "options": [
+          "The problem was found to be a defect under normal use.",
+          "The customer had purchased an extended warranty.",
+          "The damage was caused by regular mineral buildup.",
+          "The customer agreed to pay for parts and labor."
+        ],
+        "answer": "The problem was found to be a defect under normal use."
+      },
+      {
+        "id": "78-4",
+        "question": "What did Mr. Bennett do?",
+        "options": [
+          "He filled out a service request.",
+          "He replaced a water-line valve.",
+          "He cleaned mineral deposits from a machine.",
+          "He contacted Ms. Cho about a receipt."
+        ],
+        "answer": "He replaced a water-line valve."
+      },
+      {
+        "id": "78-5",
+        "question": "Why was a temporary replacement unit not issued?",
+        "options": [
+          "The repair was completed quickly.",
+          "Ms. Cho did not attach a purchase receipt.",
+          "The machine was no longer under warranty.",
+          "The replacement units were all being repaired."
+        ],
+        "answer": "The repair was completed quickly."
+      }
+    ],
+    "passage": "Directions: Read the texts below and answer the questions.\n\n[Document 1]\n\nBeanTech Office Equipment\nWarranty and Service Information\n\nAll BeanTech OfficeBrew 300 coffee makers come with a 12-month limited warranty from the date of purchase. The warranty covers defects in parts and workmanship under normal office use. It does not cover damage caused by misuse, unauthorized repairs, or failure to clean mineral deposits from the machine.\n\nTo request warranty service, customers must complete the service form at www.beantechoffice.com/support and attach a copy of their purchase receipt. Once the form is received, a service representative will contact the customer within one business day.\n\nCorporate customers whose machines must remain at our repair center for more than two business days may request a temporary replacement unit at no additional charge. Replacement units are subject to availability and must be returned within three business days after the original machine is repaired.\n\n\n[Document 2]\n\nTo: service@beantechoffice.com\nFrom: Linda Cho <lcho@meritonconsulting.com>\nDate: August 7\nSubject: OfficeBrew 300 service request\n\nDear BeanTech Service Team,\n\nI have just completed the online service form for our OfficeBrew 300 coffee maker and attached the purchase receipt. We bought the machine on February 10 for the client lounge at Meriton Consulting. Yesterday, water began leaking from the bottom of the machine, and this morning it stopped halfway through the brewing cycle.\n\nI have cleaned the machine regularly, and no one in our office has attempted to repair it. We have several clients visiting on Friday, August 11, so we need a working coffee maker in the lounge by then.\n\nCould you let me know whether this problem is likely to be covered by the warranty? Also, if the repair takes more than two business days, would it be possible to receive a temporary replacement unit?\n\nSincerely,\nLinda Cho\nOffice Administrator\nMeriton Consulting\n\n\n[Document 3]\n\nBeanTech Office Equipment — Service Report\n\nService Request: BT-4581\nCustomer: Meriton Consulting\nContact Person: Linda Cho\nModel: OfficeBrew 300\nPurchase Date: February 10\nInspection Date: August 8\nTechnician: Ralph Bennett\n\nProblem Found:\nA cracked water-line valve was causing water to leak from the bottom of the machine. The leak also caused the automatic shutoff system to stop the brewing cycle.\n\nCondition of Machine:\nNo evidence of mineral buildup, external damage, or unauthorized repair was found.\n\nAction Taken:\nThe water-line valve was replaced, and the machine was tested for 20 brewing cycles.\n\nWarranty Status:\nApproved. Parts and labor are covered by the warranty.\n\nReturn Arrangement:\nThe repaired machine will be sent by courier on August 9 between 2:00 P.M. and 4:00 P.M.\n\nNotes:\nRepair was completed within one business day. A temporary replacement unit was not issued."
   }
 ];
