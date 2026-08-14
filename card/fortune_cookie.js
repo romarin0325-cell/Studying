@@ -186,6 +186,9 @@ const FortuneCookie = {
     playAudio() {
         if (this.audio) {
             if (this.audio.paused) {
+                if (window.MusicPlayer && typeof window.MusicPlayer.pauseForStudy === 'function') {
+                    window.MusicPlayer.pauseForStudy();
+                }
                 if (this.audio.ended) {
                     this.audio.currentTime = 0;
                 }
@@ -510,6 +513,9 @@ const FortuneCookie = {
         document.getElementById('modal-fortune-cookie').classList.remove('active');
         if (this.audio) {
             this.audio.pause();
+        }
+        if (window.MusicPlayer && typeof window.MusicPlayer.resumeAfterStudy === 'function') {
+            window.MusicPlayer.resumeAfterStudy();
         }
     },
 };

@@ -48,14 +48,45 @@ async function run() {
             featureInstalled: RPG._featuresInstalled,
             listeningReady: typeof LISTENING_DATA !== 'undefined' && LISTENING_DATA.length > 0,
             fortuneReady: typeof FortuneCookie !== 'undefined',
+            musicReady: typeof MusicPlayer !== 'undefined' && MusicPlayer.tracks.length === 1,
             scriptErrors: [...window._scriptLoadErrors]
         }));
         assert.deepStrictEqual(bootState, {
             featureInstalled: true,
             listeningReady: true,
             fortuneReady: true,
+            musicReady: true,
             scriptErrors: []
         });
+
+        const musicModalLayout = await normal.page.evaluate(() => {
+            MusicPlayer.open();
+            const modal = document.getElementById('modal-music-player');
+            const panel = modal.querySelector('.modal-content');
+            const rect = panel.getBoundingClientRect();
+            const controlsRect = panel.querySelector('.music-control-row').getBoundingClientRect();
+            const result = {
+                active: modal.classList.contains('active'),
+                noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
+                left: rect.left,
+                top: rect.top,
+                right: rect.right,
+                bottom: rect.bottom,
+                controlsVisible: controlsRect.top >= rect.top - 1
+                    && controlsRect.bottom <= rect.bottom + 1,
+                title: document.getElementById('music-track-title').textContent,
+                source: document.getElementById('music-audio').getAttribute('src')
+            };
+            MusicPlayer.close();
+            return result;
+        });
+        assert.strictEqual(musicModalLayout.active, true);
+        assert.strictEqual(musicModalLayout.noHorizontalOverflow, true);
+        assert(musicModalLayout.left >= -1 && musicModalLayout.right <= 391);
+        assert(musicModalLayout.top >= -1 && musicModalLayout.bottom <= 845);
+        assert.strictEqual(musicModalLayout.controlsVisible, true);
+        assert.strictEqual(musicModalLayout.title, 'おかえり、兄ちゃん');
+        assert.strictEqual(musicModalLayout.source, 'おかえり、兄ちゃん.mp3');
 
         const imageState = await normal.page.evaluate(async () => {
             const waitUntil = async predicate => {
@@ -128,6 +159,24 @@ async function run() {
         assert(desktopModalWidth > 500 && desktopModalWidth <= 601);
 
         await normal.page.setViewportSize({ width: 320, height: 568 });
+        const compactMusicModalBounds = await normal.page.evaluate(() => {
+            MusicPlayer.open();
+            const panel = document.querySelector('#modal-music-player .modal-content');
+            const rect = panel.getBoundingClientRect();
+            const result = {
+                left: rect.left,
+                top: rect.top,
+                right: rect.right,
+                bottom: rect.bottom,
+                noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1
+            };
+            MusicPlayer.close();
+            return result;
+        });
+        assert(compactMusicModalBounds.left >= -1 && compactMusicModalBounds.right <= 321);
+        assert(compactMusicModalBounds.top >= -1 && compactMusicModalBounds.bottom <= 569);
+        assert.strictEqual(compactMusicModalBounds.noHorizontalOverflow, true);
+
         const portraitModalBounds = await normal.page.evaluate(() => {
             RPG.openInfoModal('모바일 경계 검사', '긴 내용 '.repeat(300));
             const rect = document.querySelector('#modal-info .modal-content').getBoundingClientRect();
@@ -197,7 +246,7 @@ async function run() {
         await normal.page.setViewportSize({ width: 568, height: 320 });
         const landscapeState = await normal.page.evaluate(() => {
             const screen = document.getElementById('screen-title');
-            const lastButton = document.getElementById('btn-title-mission');
+            const lastButton = document.getElementById('btn-title-music');
             screen.scrollTop = screen.scrollHeight;
             const screenRect = screen.getBoundingClientRect();
             const buttonRect = lastButton.getBoundingClientRect();

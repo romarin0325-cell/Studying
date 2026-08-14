@@ -1041,6 +1041,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="music_player.css">
 </head>
 
 <body>
@@ -1057,6 +1058,7 @@
                     disabled>질문하기</button>
                 <button id="btn-title-mission" class="menu-btn" onclick="RPG.openMissionHub()"
                     disabled>미션확인</button>
+                <button id="btn-title-music" class="menu-btn" onclick="MusicPlayer.open()" disabled>음악재생</button>
             </div>
         </div>
         <div id="screen-menu" class="screen">
@@ -1568,10 +1570,52 @@
         </div>
     </div>
 
+    <div id="modal-music-player" class="modal" role="dialog" aria-modal="true" aria-labelledby="music-player-heading">
+        <div class="modal-content music-player-panel">
+            <div class="music-player-kicker">CARD RPG MUSIC</div>
+            <div class="music-player-disc" aria-hidden="true"><span>♪</span></div>
+            <h3 id="music-player-heading">음악재생</h3>
+            <strong id="music-track-title" class="music-track-title">おかえり、兄ちゃん</strong>
+            <span id="music-track-meta" class="music-track-meta">Card RPG</span>
+            <div id="music-status" class="music-status" aria-live="polite">재생 준비</div>
+
+            <label class="music-progress-label" for="music-progress">재생 위치</label>
+            <input id="music-progress" class="music-progress" type="range" min="0" max="100" value="0" step="0.1"
+                oninput="MusicPlayer.previewSeek(this.value)" onchange="MusicPlayer.commitSeek(this.value)">
+            <div class="music-time-row"><span id="music-current-time">0:00</span><span id="music-duration">0:00</span></div>
+
+            <div class="music-control-row">
+                <button type="button" onclick="MusicPlayer.previous()" aria-label="이전 곡">⏮</button>
+                <button type="button" onclick="MusicPlayer.seekBy(-10)" aria-label="10초 뒤로">−10</button>
+                <button id="music-play-toggle" type="button" class="music-play-toggle" onclick="MusicPlayer.toggle()" aria-label="재생">▶</button>
+                <button type="button" onclick="MusicPlayer.seekBy(10)" aria-label="10초 앞으로">+10</button>
+                <button type="button" onclick="MusicPlayer.next()" aria-label="다음 곡">⏭</button>
+            </div>
+
+            <div class="music-option-row">
+                <label for="music-playback-rate">배속</label>
+                <select id="music-playback-rate" onchange="MusicPlayer.setPlaybackRate(this.value)">
+                    <option value="0.75">0.75×</option>
+                    <option value="1">1.0×</option>
+                    <option value="1.25">1.25×</option>
+                    <option value="1.5">1.5×</option>
+                    <option value="2">2.0×</option>
+                </select>
+                <button id="music-repeat-toggle" type="button" onclick="MusicPlayer.toggleRepeat()">전체 반복</button>
+                <button id="music-shuffle-toggle" type="button" onclick="MusicPlayer.toggleShuffle()" aria-pressed="false">셔플 OFF</button>
+            </div>
+
+            <p class="music-background-note">창을 닫아도 음악은 계속 재생됩니다. 모바일 잠금화면 제어는 브라우저 지원 범위에서 동작합니다.</p>
+            <button type="button" class="menu-btn music-close-button" onclick="MusicPlayer.close()">닫기</button>
+            <audio id="music-audio" preload="metadata"></audio>
+        </div>
+    </div>
+
     <div id="modal-menu" class="modal">
         <div class="modal-content" style="height:auto;">
             <h3>메뉴</h3>
             <button id="btn-toggle-tutoring" class="menu-btn" onclick="RPG.toggleTutoringEvent()">개인과외 이벤트: ON</button>
+            <button class="menu-btn" onclick="document.getElementById('modal-menu').classList.remove('active'); MusicPlayer.open();">음악재생</button>
             <button class="menu-btn" onclick="RPG.openCardPoolViewer()">카드풀 확인</button>
             <button class="menu-btn" onclick="RPG.saveGame()">저장하기</button>
             <button class="menu-btn" onclick="RPG.showRecords()">기록 확인</button>
@@ -1732,7 +1776,8 @@
                 { src: 'battle_runtime.js', label: '전투 런타임' },
                 { src: 'rpg_features.js', label: 'RPG Feature Modules' },
                 { src: 'listening_data.js', label: '리스닝 데이터' },
-                { src: 'fortune_cookie.js', label: '포춘쿠키 로직' }
+                { src: 'fortune_cookie.js', label: '포춘쿠키 로직' },
+                { src: 'music_player.js', label: '음악 플레이어' }
             ];
             var idx = 0;
             var scriptTimeoutMs = Number(window._scriptLoadTimeoutMs) || 15000;
@@ -2851,7 +2896,8 @@
                     { name: 'GameAPI', ref: typeof GameAPI !== 'undefined' ? GameAPI : null },
                     { name: 'RPGFeatureModules', ref: typeof RPGFeatureModules !== 'undefined' ? RPGFeatureModules : null },
                     { name: 'LISTENING_DATA', ref: typeof LISTENING_DATA !== 'undefined' ? LISTENING_DATA : null },
-                    { name: 'FortuneCookie', ref: typeof FortuneCookie !== 'undefined' ? FortuneCookie : null }
+                    { name: 'FortuneCookie', ref: typeof FortuneCookie !== 'undefined' ? FortuneCookie : null },
+                    { name: 'MusicPlayer', ref: typeof MusicPlayer !== 'undefined' ? MusicPlayer : null }
                 ];
                 return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
             },
@@ -2885,11 +2931,13 @@
                 const btnQuestion = document.getElementById('btn-title-question');
                 const btnMission = document.getElementById('btn-title-mission');
                 const btnFortune = document.getElementById('btn-fortune-cookie');
+                const btnMusic = document.getElementById('btn-title-music');
                 if (btnNew) btnNew.disabled = !enabled;
                 if (btnLoad) btnLoad.disabled = !enabled;
                 if (btnQuestion) btnQuestion.disabled = !enabled;
                 if (btnMission) btnMission.disabled = !enabled;
                 if (btnFortune) btnFortune.disabled = !enabled;
+                if (btnMusic) btnMusic.disabled = !enabled;
 
                 const loading = document.getElementById('title-loading');
                 if (loading) {
