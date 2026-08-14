@@ -91,9 +91,10 @@ function run() {
         'battle_runtime.js',
         'rpg_features.js',
         'listening_data.js',
-        'fortune_cookie.js'
+        'fortune_cookie.js',
+        'music_player.js'
     ]);
-    ['SaveDataMigrator', 'LISTENING_DATA', 'FortuneCookie'].forEach(name => {
+    ['SaveDataMigrator', 'LISTENING_DATA', 'FortuneCookie', 'MusicPlayer'].forEach(name => {
         assert(indexSource.includes(`{ name: '${name}'`), `${name} is missing from initial readiness checks`);
     });
     assert(indexSource.includes('if (!window._scriptLoadComplete)'));
@@ -123,6 +124,7 @@ function run() {
             COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
             API_KEY: 'cardRpgApiKey',
             RECORDS: 'cardRpgRecords',
+            MUSIC_PREFS: 'cardRpgMusicPrefs',
             FORTUNE_LAST_USED: 'fortuneCookieLastUsedDate',
             FORTUNE_LAST_RESULT: 'fortuneCookieLastResult'
         };

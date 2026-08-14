@@ -39,7 +39,7 @@ async function run() {
 
     const titleButtons = [...document.querySelectorAll('.title-screen-actions button')].map(btn => btn.innerText.trim());
     assert(
-      JSON.stringify(titleButtons) === JSON.stringify(['새로하기', '이어하기', '포춘쿠키', '질문하기', '미션확인']),
+      JSON.stringify(titleButtons) === JSON.stringify(['새로하기', '이어하기', '포춘쿠키', '질문하기', '미션확인', '음악재생']),
       'title_menu',
       titleButtons.join(', ')
     );
