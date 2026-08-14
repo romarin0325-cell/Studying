@@ -39,6 +39,7 @@ function run() {
     const grammarSource = fs.readFileSync(grammarPath, 'utf8');
     const remasterGrammarSource = fs.readFileSync(remasterGrammarPath, 'utf8');
     const grammarData = loadGrammarData(grammarPath);
+    const grammarById = new Map(grammarData.map(lecture => [lecture.id, lecture]));
     const expectedLectureIds = Array.from({ length: 35 }, (_, index) => index + 1);
 
     assert.strictEqual(remasterGrammarSource, grammarSource, 'card and card_remaster grammar data must stay aligned');
@@ -75,6 +76,20 @@ function run() {
             assert(quiz.options.includes(quiz.answer), `${lecture.id}강 quiz answer must exist in its options`);
         });
     });
+
+    const reviewedLessonCoverage = new Map([
+        [31, ['highly effective', 'highly는 형용사 effective를 꾸미는 부사']],
+        [32, ['while + 주어 + 동사', 'during + 명사', 'while 뒤엔 문장, during 뒤엔 명사']],
+        [34, ['The other / The others', 'One room is occupied, and the other is available.', 'the others 뒤에는 명사를 다시 붙이지 않아']],
+        [35, ['동시 장면이면 Meanwhile']]
+    ]);
+    reviewedLessonCoverage.forEach((snippets, lectureId) => {
+        const content = grammarById.get(lectureId)?.content || '';
+        snippets.forEach(snippet => {
+            assert(content.includes(snippet), `${lectureId}강 is missing reviewed quiz material: ${snippet}`);
+        });
+    });
+    assert.strictEqual(grammarById.get(34).content.includes('혼자서는 절대 못 써!'), false);
 
     const loaderBlock = indexSource.match(/var scripts = \[([\s\S]*?)\n\s*\];/);
     assert(loaderBlock, 'sequential loader list not found');
