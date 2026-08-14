@@ -39,7 +39,7 @@ function run() {
     const grammarSource = fs.readFileSync(grammarPath, 'utf8');
     const remasterGrammarSource = fs.readFileSync(remasterGrammarPath, 'utf8');
     const grammarData = loadGrammarData(grammarPath);
-    const expectedLectureIds = Array.from({ length: 30 }, (_, index) => index + 1);
+    const expectedLectureIds = Array.from({ length: 35 }, (_, index) => index + 1);
 
     assert.strictEqual(remasterGrammarSource, grammarSource, 'card and card_remaster grammar data must stay aligned');
     assert.deepStrictEqual([...grammarData.map(lecture => lecture.id)], expectedLectureIds);
@@ -68,8 +68,11 @@ function run() {
             0,
             `${lecture.id}강 contains invisible emoji formatting characters`
         );
-        (lecture.quizzes || []).forEach(quiz => {
+        const quizzes = lecture.quizzes || [];
+        assert.strictEqual(quizzes.length, 5, `${lecture.id}강 must contain exactly five quizzes`);
+        quizzes.forEach(quiz => {
             assert.strictEqual(quiz.lecture_id, lecture.id, `${lecture.id}강 quiz reference is out of sync`);
+            assert(quiz.options.includes(quiz.answer), `${lecture.id}강 quiz answer must exist in its options`);
         });
     });
 
