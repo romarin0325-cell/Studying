@@ -13,7 +13,6 @@ function run() {
     'collocation_data.js',
     'toeic_explanations.js',
     'toeic.js',
-    'toeic_reserve_data.js'
   ].forEach((fileName) => {
     const filePath = path.join(cardRoot, fileName);
     vm.runInContext(fs.readFileSync(filePath, 'utf8'), sandbox, { filename: filePath });
@@ -54,12 +53,11 @@ function run() {
     const vocabEntriesByWord = new Map(VOCAB_DATA.map(item => [item.word, item]));
     const collocationsById = new Map(COLLOCATION_DATA.map(item => [item.id, item]));
     const toeicById = new Map(TOEIC_DATA.map(item => [item.id, item]));
-    const reserveIds = new Set(TOEIC_RESERVE_DATA.map(item => item.id));
-    const allToeicQuestions = [...TOEIC_DATA, ...TOEIC_RESERVE_DATA]
+    const allToeicQuestions = [...TOEIC_DATA]
       .flatMap(set => set.questions.map(question =>
         ((set.passage || '') + '\\n' + question.question).trim().toLowerCase()
       ));
-    const allToeicSets = [...TOEIC_DATA, ...TOEIC_RESERVE_DATA];
+    const allToeicSets = [...TOEIC_DATA];
     const words = value => new Set(String(value || '')
       .toLowerCase()
       .replace(/[’‘]/g, "'")
@@ -149,7 +147,6 @@ function run() {
             ? !set?.passage
             : typeof set?.passage === 'string' && set.passage.length > 0,
           blanksValid: type !== 'part6' || [1, 2, 3, 4].every(blank => set.passage.includes('(' + blank + ') _______')),
-          reserveCollision: reserveIds.has(id)
         };
       }),
       uniqueVocabWords: new Set(VOCAB_DATA.map(item => item.word.toLowerCase())).size === VOCAB_DATA.length,
@@ -195,8 +192,7 @@ function run() {
         !TOEIC_EXPLANATIONS[78].includes('26일에 접수') &&
         !TOEIC_EXPLANATIONS[78].includes('27일(1영업일 만에)') &&
         !TOEIC_EXPLANATIONS[78].includes('2영업일 이상'),
-      activeToeicMaxId: Math.max(...TOEIC_DATA.map(item => item.id)),
-      reserveToeicMaxId: Math.max(...TOEIC_RESERVE_DATA.map(item => item.id))
+      activeToeicMaxId: Math.max(...TOEIC_DATA.map(item => item.id))
     };
   })())`, sandbox));
 
@@ -211,8 +207,7 @@ function run() {
     set.explanationExists &&
     set.answersExplained &&
     set.passageValid &&
-    set.blanksValid &&
-    !set.reserveCollision
+    set.blanksValid
   ), 'Reviewed TOEIC sets are incomplete or mismatched');
   assert.strictEqual(audit.uniqueVocabWords, true);
   assert.strictEqual(audit.uniqueCollocationIds, true);
@@ -227,7 +222,6 @@ function run() {
   assert.strictEqual(audit.shiftedExplanationReferencesMatch, true);
   assert.strictEqual(audit.reviewedToeicExplanationEvidenceMatches, true);
   assert.strictEqual(audit.activeToeicMaxId, 78);
-  assert.strictEqual(audit.reserveToeicMaxId, 69);
 
   console.log('Card learning data verification passed (20 vocab pairs, 10 collocations, 9 TOEIC sets / 35 questions).');
 }
