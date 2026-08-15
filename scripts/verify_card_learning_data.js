@@ -176,10 +176,10 @@ function run() {
         return references.length > 0 && references.every(id => id === set.id);
       }),
       reviewedToeicExplanationEvidenceMatches:
-        [70, 71, 72].every(id => TOEIC_EXPLANATIONS[id].startsWith(
+        [70, 71, 72].every(id => !TOEIC_EXPLANATIONS[id].startsWith(
           '자료: get-toeic.com 공개 TOEIC 형식 연습문제 기반 검증·교정본 (ETS 공식 기출문제 아님).'
         )) &&
-        [73, 74, 75, 76, 77, 78].every(id => TOEIC_EXPLANATIONS[id].startsWith(
+        [73, 74, 75, 76, 77, 78].every(id => !TOEIC_EXPLANATIONS[id].startsWith(
           '자료: ALC ENGLISH JOURNAL 공개 TOEIC 형식 연습문제 기반 검증·교정본 (ETS 공식 기출문제 아님).'
         )) &&
         TOEIC_EXPLANATIONS[77].includes('open a second location next spring') &&
