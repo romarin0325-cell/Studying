@@ -34,6 +34,25 @@ async function fileExists(filePath) {
   }
 }
 
+const localModulePlugin = {
+  name: "hero-defense-local-modules",
+  setup(buildApi) {
+    buildApi.onResolve({ filter: /^\./ }, (args) => {
+      const baseDirectory = args.resolveDir || path.dirname(args.importer);
+      const resolved = path.resolve(baseDirectory, args.path);
+      if (resolved !== APP_ROOT && !resolved.startsWith(`${APP_ROOT}${path.sep}`)) {
+        return { errors: [{ text: `Module escapes defense_hero: ${args.path}` }] };
+      }
+      return { path: resolved, namespace: "hero-defense-local" };
+    });
+    buildApi.onLoad({ filter: /.*/, namespace: "hero-defense-local" }, async (args) => ({
+      contents: await readFile(args.path, "utf8"),
+      loader: "js",
+      resolveDir: path.dirname(args.path),
+    }));
+  },
+};
+
 async function collectEmbeddedAssets() {
   const assetModulePath = path.join(APP_ROOT, "js", "data", "assets.js");
   const assetModule = await import(pathToFileURL(assetModulePath).href);
@@ -64,15 +83,21 @@ export async function buildHeroDefenseLocal({ outputPath = DEFAULT_OUTPUT, minif
     "globalThis.__HERO_DEFENSE_LOCAL_FILE__=true;",
     `globalThis.__HERO_DEFENSE_EMBEDDED_ASSETS__=Object.freeze(${JSON.stringify(assetData.embeddedAssets)});`,
   ].join("");
+  const entrySource = await readFile(path.join(APP_ROOT, "js", "main.js"), "utf8");
   const bundle = await build({
-    absWorkingDir: APP_ROOT,
-    entryPoints: ["./js/main.js"],
+    stdin: {
+      contents: entrySource,
+      loader: "js",
+      resolveDir: path.join(APP_ROOT, "js"),
+      sourcefile: "main.js",
+    },
     bundle: true,
     charset: "utf8",
     format: "iife",
     legalComments: "none",
     minify,
     platform: "browser",
+    plugins: [localModulePlugin],
     target: ["chrome90", "safari15"],
     write: false,
     banner: { js: embeddedAssetBanner },
