@@ -461,7 +461,7 @@
         }
 
         #screen-title {
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             overflow-y: auto;
         }
@@ -575,7 +575,7 @@
         .title-loading {
             width: 100%;
             max-width: 320px;
-            margin: 0 auto 14px auto;
+            margin: 0 auto 5vh auto;
             padding: 10px 12px;
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.45);
@@ -861,7 +861,11 @@
             max-width: 280px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1.5vh;
+        }
+
+        .title-screen-actions .menu-btn {
+            margin-bottom: 0;
         }
 
         .lumi-chat-modal {
@@ -1048,7 +1052,7 @@
     <div class="header">Card RPG</div>
     <div class="container">
         <div id="screen-title" class="screen active">
-            <h1 style="color:#ffd700;">Card RPG</h1>
+            <h1 style="color:#ffd700; margin-top: 15vh; margin-bottom: 5vh; font-size: 2.5rem;">Card RPG</h1>
             <div id="title-loading" class="title-loading">⏳ 데이터 로딩 중... 잠시만 기다려주세요.</div>
             <div class="title-screen-actions">
                 <button id="btn-start-new" class="menu-btn" onclick="RPG.startGame('new')" disabled>새로하기</button>
