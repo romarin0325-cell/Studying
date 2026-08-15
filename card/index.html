@@ -657,6 +657,22 @@
                 padding: 14px;
             }
 
+            #screen-title {
+                justify-content: center;
+            }
+
+            #screen-title > h1 {
+                margin: 0 0 clamp(18px, 3dvh, 28px) !important;
+            }
+
+            .title-loading {
+                margin-bottom: clamp(12px, 2dvh, 18px);
+            }
+
+            .title-screen-actions {
+                gap: clamp(7px, 1.2dvh, 10px);
+            }
+
             #modal-lecture-view .modal-content,
             #modal-wordbook .modal-content,
             #modal-tutoring .modal-content,
@@ -667,6 +683,17 @@
                 height: 85dvh !important;
                 max-height: 85vh !important;
                 max-height: 85dvh !important;
+            }
+
+            #modal-lecture-view .modal-content {
+                height: 92vh !important;
+                height: 92dvh !important;
+                max-height: calc(100vh - 16px) !important;
+                max-height: calc(100dvh - 16px) !important;
+            }
+
+            #lecture-content {
+                min-height: 0;
             }
 
             #tutoring-content,
@@ -1574,11 +1601,10 @@
         </div>
     </div>
 
-    <div id="modal-music-player" class="modal" role="dialog" aria-modal="true" aria-labelledby="music-player-heading">
+    <div id="modal-music-player" class="modal" role="dialog" aria-modal="true" aria-label="음악 재생">
         <div class="modal-content music-player-panel">
             <div class="music-player-kicker">CARD RPG MUSIC</div>
             <div class="music-player-disc" aria-hidden="true"><span>♪</span></div>
-            <h3 id="music-player-heading">음악재생</h3>
             <strong id="music-track-title" class="music-track-title">おかえり、兄ちゃん</strong>
             <span id="music-track-meta" class="music-track-meta">Card RPG</span>
             <div id="music-status" class="music-status" aria-live="polite">재생 준비</div>
@@ -1589,25 +1615,34 @@
             <div class="music-time-row"><span id="music-current-time">0:00</span><span id="music-duration">0:00</span></div>
 
             <div class="music-control-row">
-                <button type="button" onclick="MusicPlayer.previous()" aria-label="이전 곡">⏮</button>
-                <button type="button" onclick="MusicPlayer.seekBy(-10)" aria-label="10초 뒤로">−10</button>
+                <button id="music-previous" type="button" onclick="MusicPlayer.previous()" aria-label="이전 곡">⏮</button>
+                <button id="music-seek-backward" type="button" onclick="MusicPlayer.seekBy(-10)" aria-label="10초 뒤로">−10</button>
                 <button id="music-play-toggle" type="button" class="music-play-toggle" onclick="MusicPlayer.toggle()" aria-label="재생">▶</button>
-                <button type="button" onclick="MusicPlayer.seekBy(10)" aria-label="10초 앞으로">+10</button>
-                <button type="button" onclick="MusicPlayer.next()" aria-label="다음 곡">⏭</button>
+                <button id="music-seek-forward" type="button" onclick="MusicPlayer.seekBy(10)" aria-label="10초 앞으로">+10</button>
+                <button id="music-next" type="button" onclick="MusicPlayer.next()" aria-label="다음 곡">⏭</button>
             </div>
 
             <div class="music-option-row">
                 <label for="music-playback-rate">배속</label>
-                <select id="music-playback-rate" onchange="MusicPlayer.setPlaybackRate(this.value)">
-                    <option value="0.75">0.75×</option>
-                    <option value="1">1.0×</option>
-                    <option value="1.25">1.25×</option>
-                    <option value="1.5">1.5×</option>
-                    <option value="2">2.0×</option>
-                </select>
+                <button id="music-playback-rate" type="button" onclick="MusicPlayer.cyclePlaybackRate()"
+                    aria-label="재생 배속 변경">1.0×</button>
                 <button id="music-repeat-toggle" type="button" onclick="MusicPlayer.toggleRepeat()">전체 반복</button>
                 <button id="music-shuffle-toggle" type="button" onclick="MusicPlayer.toggleShuffle()" aria-pressed="false">셔플 OFF</button>
             </div>
+
+            <section class="music-track-library" aria-labelledby="music-track-list-heading">
+                <div class="music-track-library-heading">
+                    <strong id="music-track-list-heading">곡 목록</strong>
+                    <span id="music-track-count">0곡</span>
+                </div>
+                <div id="music-track-list" class="music-track-list" role="list"></div>
+                <div class="music-playlist-mode-row" role="group" aria-label="재생 목록 선택">
+                    <button id="music-mode-all" type="button" onclick="MusicPlayer.setPlaylistMode('all')"
+                        aria-pressed="true">전체 곡</button>
+                    <button id="music-mode-favorites" type="button" onclick="MusicPlayer.setPlaylistMode('favorites')"
+                        aria-pressed="false">★ 즐겨찾기만</button>
+                </div>
+            </section>
 
             <p class="music-background-note">창을 닫아도 음악은 계속 재생됩니다. 모바일 잠금화면 제어는 브라우저 지원 범위에서 동작합니다.</p>
             <button type="button" class="menu-btn music-close-button" onclick="MusicPlayer.close()">닫기</button>
@@ -1781,6 +1816,7 @@
                 { src: 'rpg_features.js', label: 'RPG Feature Modules' },
                 { src: 'listening_data.js', label: '리스닝 데이터' },
                 { src: 'fortune_cookie.js', label: '포춘쿠키 로직' },
+                { src: 'music_manifest.js', label: '음악 목록' },
                 { src: 'music_player.js', label: '음악 플레이어' }
             ];
             var idx = 0;
