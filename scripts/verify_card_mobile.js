@@ -42,7 +42,7 @@ async function run() {
 
     try {
         const normal = await preparePage(browser, { width: 390, height: 844 });
-        await normal.page.route('**/music_manifest.js', route => route.fulfill({
+        await normal.page.route('**/music_data.js', route => route.fulfill({
             status: 200,
             contentType: 'application/javascript',
             body: `window.CARD_MUSIC_TRACKS = Object.freeze(${JSON.stringify(MUSIC_FIXTURE_TRACKS)});`

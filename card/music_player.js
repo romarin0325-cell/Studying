@@ -570,7 +570,7 @@
                 shuffle.setAttribute('aria-pressed', this.shuffle ? 'true' : 'false');
             }
             if (status && !this._statusOverride) {
-                status.textContent = track ? (this.audio.paused ? '일시정지' : '재생 중') : 'MUSIC_으로 시작하는 MP3를 추가해주세요.';
+                status.textContent = track ? (this.audio.paused ? '일시정지' : '재생 중') : '음악 데이터 파일을 확인해주세요.';
                 status.classList.remove('is-error');
             }
             const hasTrack = Boolean(track);

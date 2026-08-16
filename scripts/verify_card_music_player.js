@@ -357,7 +357,7 @@ async function verifySavedFavoritesAndEmptyStates() {
         assert.strictEqual(player.tracks.length, 0);
         assert.strictEqual(audio.loadCount, 0);
         assert.strictEqual(elements.get('music-track-title').textContent, '재생할 곡 없음');
-        assert.strictEqual(elements.get('music-status').textContent, 'MUSIC_으로 시작하는 MP3를 추가해주세요.');
+        assert.strictEqual(elements.get('music-status').textContent, '음악 데이터 파일을 확인해주세요.');
         assert.strictEqual(elements.get('music-track-count').textContent, '0곡');
         assert.strictEqual(elements.get('music-track-list').children.length, 1);
         assert.strictEqual(elements.get('music-track-list').children[0].textContent, '등록된 음악이 없습니다.');
@@ -373,9 +373,9 @@ async function verifySavedFavoritesAndEmptyStates() {
 
 function verifyHtmlIntegration() {
     const html = fs.readFileSync(path.join(process.cwd(), 'card', 'index.html'), 'utf8');
-    const manifestPosition = html.indexOf("{ src: 'music_manifest.js'");
+    const dataPosition = html.indexOf("{ src: 'music_data.js'");
     const playerPosition = html.indexOf("{ src: 'music_player.js'");
-    assert(manifestPosition >= 0 && manifestPosition < playerPosition, 'manifest must load before the player');
+    assert(dataPosition >= 0 && dataPosition < playerPosition, 'music data must load before the player');
     assert(html.includes('id="music-track-list"'));
     assert(html.includes('id="music-mode-favorites"'));
     assert(html.includes('id="music-playback-rate" type="button"'), 'playback rate must use the themed button');
