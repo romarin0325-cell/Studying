@@ -5,6 +5,13 @@ const { pathToFileURL } = require('url');
 const { chromium } = require('playwright');
 
 const BOOT_TIMEOUT_MS = 20000;
+const MUSIC_FIXTURE_TRACKS = Array.from({ length: 12 }, (_, index) => ({
+    id: `fixtures/MUSIC_Test_${String(index + 1).padStart(2, '0')}.mp3`,
+    title: index === 0 ? '모바일 레이아웃 테스트 음악' : `테스트 음악 ${index + 1}`,
+    artist: 'Card RPG',
+    album: 'Card RPG Music',
+    src: `fixtures/MUSIC_Test_${String(index + 1).padStart(2, '0')}.mp3`
+}));
 
 async function preparePage(browser, viewport) {
     const page = await browser.newPage({ viewport });
@@ -35,6 +42,11 @@ async function run() {
 
     try {
         const normal = await preparePage(browser, { width: 390, height: 844 });
+        await normal.page.route('**/music_manifest.js', route => route.fulfill({
+            status: 200,
+            contentType: 'application/javascript',
+            body: `window.CARD_MUSIC_TRACKS = Object.freeze(${JSON.stringify(MUSIC_FIXTURE_TRACKS)});`
+        }));
         await normal.page.goto(fileUrl, { waitUntil: 'domcontentloaded' });
         await waitForLoader(normal.page);
         await normal.page.waitForFunction(
@@ -48,7 +60,7 @@ async function run() {
             featureInstalled: RPG._featuresInstalled,
             listeningReady: typeof LISTENING_DATA !== 'undefined' && LISTENING_DATA.length > 0,
             fortuneReady: typeof FortuneCookie !== 'undefined',
-            musicReady: typeof MusicPlayer !== 'undefined' && MusicPlayer.tracks.length === 1,
+            musicReady: typeof MusicPlayer !== 'undefined' && Array.isArray(MusicPlayer.tracks),
             scriptErrors: [...window._scriptLoadErrors]
         }));
         assert.deepStrictEqual(bootState, {
@@ -59,25 +71,56 @@ async function run() {
             scriptErrors: []
         });
 
+        const portraitTitleLayout = await normal.page.evaluate(() => {
+            const screen = document.getElementById('screen-title');
+            const heading = screen.querySelector('h1');
+            const actions = screen.querySelector('.title-screen-actions');
+            const screenRect = screen.getBoundingClientRect();
+            const headingRect = heading.getBoundingClientRect();
+            const actionsRect = actions.getBoundingClientRect();
+            return {
+                scrollable: screen.scrollHeight > screen.clientHeight,
+                topSpace: headingRect.top - screenRect.top,
+                bottomSpace: screenRect.bottom - actionsRect.bottom,
+                actionsLeft: actionsRect.left,
+                actionsRight: actionsRect.right
+            };
+        });
+        assert.strictEqual(portraitTitleLayout.scrollable, false);
+        assert(Math.abs(portraitTitleLayout.topSpace - portraitTitleLayout.bottomSpace) <= 2);
+        assert(portraitTitleLayout.actionsLeft >= 0 && portraitTitleLayout.actionsRight <= 390);
+
         const musicModalLayout = await normal.page.evaluate(async () => {
             MusicPlayer.open();
             const modal = document.getElementById('modal-music-player');
             const panel = modal.querySelector('.modal-content');
             const rect = panel.getBoundingClientRect();
             const controlsRect = panel.querySelector('.music-control-row').getBoundingClientRect();
+            const library = panel.querySelector('.music-track-library');
+            const libraryRect = library.getBoundingClientRect();
+            const list = document.getElementById('music-track-list');
+            const favoriteRect = list.querySelector('.music-favorite-toggle').getBoundingClientRect();
             MusicPlayer.setPlaybackRate(1.5);
-            await MusicPlayer.next();
             const result = {
                 active: modal.classList.contains('active'),
                 noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
+                panelDoesNotScroll: panel.scrollHeight <= panel.clientHeight + 1,
                 left: rect.left,
                 top: rect.top,
                 right: rect.right,
                 bottom: rect.bottom,
                 controlsVisible: controlsRect.top >= rect.top - 1
                     && controlsRect.bottom <= rect.bottom + 1,
+                libraryVisible: libraryRect.top >= rect.top - 1 && libraryRect.bottom <= rect.bottom + 1,
+                listOwnsOverflow: ['auto', 'scroll'].includes(getComputedStyle(list).overflowY),
+                listHasOwnScroll: list.scrollHeight > list.clientHeight,
+                favoriteWidth: favoriteRect.width,
+                favoriteHeight: favoriteRect.height,
+                trackCount: MusicPlayer.tracks.length,
                 title: document.getElementById('music-track-title').textContent,
                 source: document.getElementById('music-audio').getAttribute('src'),
+                visibleHeadingRemoved: !document.getElementById('music-player-heading'),
+                rateControlTag: document.getElementById('music-playback-rate').tagName,
                 playbackRate: MusicPlayer.audio.playbackRate,
                 defaultPlaybackRate: MusicPlayer.audio.defaultPlaybackRate
             };
@@ -87,11 +130,20 @@ async function run() {
         });
         assert.strictEqual(musicModalLayout.active, true);
         assert.strictEqual(musicModalLayout.noHorizontalOverflow, true);
+        assert.strictEqual(musicModalLayout.panelDoesNotScroll, true);
         assert(musicModalLayout.left >= -1 && musicModalLayout.right <= 391);
         assert(musicModalLayout.top >= -1 && musicModalLayout.bottom <= 845);
         assert.strictEqual(musicModalLayout.controlsVisible, true);
-        assert.strictEqual(musicModalLayout.title, 'おかえり、兄ちゃん');
-        assert.strictEqual(musicModalLayout.source, 'おかえり、兄ちゃん.mp3');
+        assert.strictEqual(musicModalLayout.libraryVisible, true);
+        assert.strictEqual(musicModalLayout.listOwnsOverflow, true);
+        assert.strictEqual(musicModalLayout.trackCount, MUSIC_FIXTURE_TRACKS.length);
+        assert.strictEqual(musicModalLayout.title, MUSIC_FIXTURE_TRACKS[0].title);
+        assert.strictEqual(musicModalLayout.source, MUSIC_FIXTURE_TRACKS[0].src);
+        assert.strictEqual(musicModalLayout.visibleHeadingRemoved, true);
+        assert.strictEqual(musicModalLayout.rateControlTag, 'BUTTON');
+        assert.strictEqual(musicModalLayout.listHasOwnScroll, true);
+        assert(musicModalLayout.favoriteWidth >= 44);
+        assert(musicModalLayout.favoriteHeight >= 44);
         assert.strictEqual(musicModalLayout.playbackRate, 1.5);
         assert.strictEqual(musicModalLayout.defaultPlaybackRate, 1.5);
 
@@ -166,16 +218,46 @@ async function run() {
         assert(desktopModalWidth > 500 && desktopModalWidth <= 601);
 
         await normal.page.setViewportSize({ width: 320, height: 568 });
+        const compactTitleLayout = await normal.page.evaluate(() => {
+            const screen = document.getElementById('screen-title');
+            const headingRect = screen.querySelector('h1').getBoundingClientRect();
+            const actionsRect = screen.querySelector('.title-screen-actions').getBoundingClientRect();
+            const screenRect = screen.getBoundingClientRect();
+            return {
+                scrollable: screen.scrollHeight > screen.clientHeight,
+                topSpace: headingRect.top - screenRect.top,
+                bottomSpace: screenRect.bottom - actionsRect.bottom,
+                actionsLeft: actionsRect.left,
+                actionsRight: actionsRect.right
+            };
+        });
+        assert.strictEqual(compactTitleLayout.scrollable, false);
+        assert(Math.abs(compactTitleLayout.topSpace - compactTitleLayout.bottomSpace) <= 2);
+        assert(compactTitleLayout.actionsLeft >= 0 && compactTitleLayout.actionsRight <= 320);
+
         const compactMusicModalBounds = await normal.page.evaluate(() => {
             MusicPlayer.open();
             const panel = document.querySelector('#modal-music-player .modal-content');
             const rect = panel.getBoundingClientRect();
+            const controlsRect = panel.querySelector('.music-control-row').getBoundingClientRect();
+            const library = panel.querySelector('.music-track-library');
+            const libraryRect = library.getBoundingClientRect();
+            const list = document.getElementById('music-track-list');
+            const favoriteRect = list.querySelector('.music-favorite-toggle').getBoundingClientRect();
             const result = {
                 left: rect.left,
                 top: rect.top,
                 right: rect.right,
                 bottom: rect.bottom,
-                noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1
+                noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
+                panelDoesNotScroll: panel.scrollHeight <= panel.clientHeight + 1,
+                controlsVisible: controlsRect.top >= rect.top - 1 && controlsRect.bottom <= rect.bottom + 1,
+                libraryVisible: libraryRect.top >= rect.top - 1 && libraryRect.bottom <= rect.bottom + 1,
+                listOwnsOverflow: ['auto', 'scroll'].includes(getComputedStyle(list).overflowY),
+                listHasOwnScroll: list.scrollHeight > list.clientHeight,
+                favoriteWidth: favoriteRect.width,
+                favoriteHeight: favoriteRect.height,
+                rateControlTag: document.getElementById('music-playback-rate').tagName
             };
             MusicPlayer.close();
             return result;
@@ -183,6 +265,14 @@ async function run() {
         assert(compactMusicModalBounds.left >= -1 && compactMusicModalBounds.right <= 321);
         assert(compactMusicModalBounds.top >= -1 && compactMusicModalBounds.bottom <= 569);
         assert.strictEqual(compactMusicModalBounds.noHorizontalOverflow, true);
+        assert.strictEqual(compactMusicModalBounds.panelDoesNotScroll, true);
+        assert.strictEqual(compactMusicModalBounds.controlsVisible, true);
+        assert.strictEqual(compactMusicModalBounds.libraryVisible, true);
+        assert.strictEqual(compactMusicModalBounds.listOwnsOverflow, true);
+        assert.strictEqual(compactMusicModalBounds.listHasOwnScroll, true);
+        assert(compactMusicModalBounds.favoriteWidth >= 44);
+        assert(compactMusicModalBounds.favoriteHeight >= 44);
+        assert.strictEqual(compactMusicModalBounds.rateControlTag, 'BUTTON');
 
         const portraitModalBounds = await normal.page.evaluate(() => {
             RPG.openInfoModal('모바일 경계 검사', '긴 내용 '.repeat(300));
@@ -209,6 +299,28 @@ async function run() {
                 };
             };
 
+            const lectureModal = document.getElementById('modal-lecture-view');
+            const lectureContent = document.getElementById('lecture-content');
+            lectureContent.textContent = '긴 문법 강의 내용 '.repeat(300);
+            lectureModal.classList.add('active');
+            const lecturePanelRect = lectureModal.querySelector('.modal-content').getBoundingClientRect();
+            const lectureContentRect = lectureContent.getBoundingClientRect();
+            const lectureCloseRect = lectureModal.querySelector('button').getBoundingClientRect();
+            const lecture = {
+                left: lecturePanelRect.left,
+                top: lecturePanelRect.top,
+                right: lecturePanelRect.right,
+                bottom: lecturePanelRect.bottom,
+                width: lecturePanelRect.width,
+                height: lecturePanelRect.height,
+                contentHeight: lectureContentRect.height,
+                contentScrollable: lectureContent.scrollHeight > lectureContent.clientHeight,
+                closeVisible: lectureCloseRect.top >= lecturePanelRect.top - 1
+                    && lectureCloseRect.bottom <= lecturePanelRect.bottom + 1
+            };
+            lectureModal.classList.remove('active');
+            lectureContent.textContent = '';
+
             const tutoring = document.getElementById('modal-tutoring');
             tutoring.classList.add('active');
             const portrait = tutoring.querySelector('.lumi-modal-portrait');
@@ -221,12 +333,12 @@ async function run() {
 
             return {
                 modals: [
-                    'modal-lecture-view',
                     'modal-wordbook',
                     'modal-tutoring',
                     'modal-lumi-question',
                     'modal-date'
                 ].map(measureModal),
+                lecture,
                 portraitWidth,
                 portraitHeight,
                 portraitOuterWidth: portraitRect.width,
@@ -241,6 +353,13 @@ async function run() {
             assert(bounds.width >= 303 && bounds.width <= 305);
             assert(bounds.height >= 482 && bounds.height <= 484);
         });
+        assert(learningModalLayout.lecture.left >= 7 && learningModalLayout.lecture.right <= 313);
+        assert(learningModalLayout.lecture.top >= 7 && learningModalLayout.lecture.bottom <= 561);
+        assert(learningModalLayout.lecture.width >= 303 && learningModalLayout.lecture.width <= 305);
+        assert(learningModalLayout.lecture.height >= 521 && learningModalLayout.lecture.height <= 524);
+        assert(learningModalLayout.lecture.contentHeight >= 200);
+        assert.strictEqual(learningModalLayout.lecture.contentScrollable, true);
+        assert.strictEqual(learningModalLayout.lecture.closeVisible, true);
         assert.strictEqual(learningModalLayout.portraitFlexShrink, '0');
         assert(Math.abs(
             learningModalLayout.portraitHeight / learningModalLayout.portraitWidth - (4 / 3)
@@ -254,16 +373,75 @@ async function run() {
         const landscapeState = await normal.page.evaluate(() => {
             const screen = document.getElementById('screen-title');
             const lastButton = document.getElementById('btn-title-music');
+            const heading = screen.querySelector('h1');
+            const screenRectBeforeScroll = screen.getBoundingClientRect();
+            const headingRect = heading.getBoundingClientRect();
             screen.scrollTop = screen.scrollHeight;
             const screenRect = screen.getBoundingClientRect();
             const buttonRect = lastButton.getBoundingClientRect();
             return {
                 scrollable: screen.scrollHeight > screen.clientHeight,
+                topGap: headingRect.top - screenRectBeforeScroll.top,
                 lastButtonVisible: buttonRect.top >= screenRect.top - 1 && buttonRect.bottom <= screenRect.bottom + 1
             };
         });
         assert.strictEqual(landscapeState.scrollable, true);
+        assert(landscapeState.topGap >= -1 && landscapeState.topGap <= 2);
         assert.strictEqual(landscapeState.lastButtonVisible, true);
+
+        const landscapeMusicLayout = await normal.page.evaluate(() => {
+            MusicPlayer.open();
+            const panel = document.querySelector('#modal-music-player .music-player-panel');
+            const controls = panel.querySelector('.music-control-row');
+            const options = panel.querySelector('.music-option-row');
+            const library = panel.querySelector('.music-track-library');
+            const list = document.getElementById('music-track-list');
+            const close = panel.querySelector('.music-close-button');
+            const panelRect = panel.getBoundingClientRect();
+            const controlsRect = controls.getBoundingClientRect();
+            const optionsRect = options.getBoundingClientRect();
+            const libraryRect = library.getBoundingClientRect();
+            const closeRect = close.getBoundingClientRect();
+            const controlButtonRect = controls.querySelector('button').getBoundingClientRect();
+            const modeButtonRect = document.getElementById('music-mode-all').getBoundingClientRect();
+            const favoriteRect = list.querySelector('.music-favorite-toggle').getBoundingClientRect();
+            const result = {
+                left: panelRect.left,
+                top: panelRect.top,
+                right: panelRect.right,
+                bottom: panelRect.bottom,
+                noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
+                panelDoesNotScroll: panel.scrollHeight <= panel.clientHeight + 1,
+                controlsVisible: controlsRect.top >= panelRect.top - 1 && controlsRect.bottom <= panelRect.bottom + 1,
+                optionsVisible: optionsRect.top >= panelRect.top - 1 && optionsRect.bottom <= panelRect.bottom + 1,
+                libraryVisible: libraryRect.top >= panelRect.top - 1 && libraryRect.bottom <= panelRect.bottom + 1,
+                closeVisible: closeRect.top >= panelRect.top - 1 && closeRect.bottom <= panelRect.bottom + 1,
+                sideBySide: controlsRect.right <= libraryRect.left,
+                listOwnsOverflow: ['auto', 'scroll'].includes(getComputedStyle(list).overflowY),
+                listHasOwnScroll: list.scrollHeight > list.clientHeight,
+                controlButtonHeight: controlButtonRect.height,
+                modeButtonHeight: modeButtonRect.height,
+                favoriteWidth: favoriteRect.width,
+                favoriteHeight: favoriteRect.height
+            };
+            MusicPlayer.close();
+            return result;
+        });
+        assert(landscapeMusicLayout.left >= 7 && landscapeMusicLayout.right <= 561);
+        assert(landscapeMusicLayout.top >= 7 && landscapeMusicLayout.bottom <= 313);
+        assert.strictEqual(landscapeMusicLayout.noHorizontalOverflow, true);
+        assert.strictEqual(landscapeMusicLayout.panelDoesNotScroll, true);
+        assert.strictEqual(landscapeMusicLayout.controlsVisible, true);
+        assert.strictEqual(landscapeMusicLayout.optionsVisible, true);
+        assert.strictEqual(landscapeMusicLayout.libraryVisible, true);
+        assert.strictEqual(landscapeMusicLayout.closeVisible, true);
+        assert.strictEqual(landscapeMusicLayout.sideBySide, true);
+        assert.strictEqual(landscapeMusicLayout.listOwnsOverflow, true);
+        assert.strictEqual(landscapeMusicLayout.listHasOwnScroll, true);
+        assert(landscapeMusicLayout.controlButtonHeight >= 36);
+        assert(landscapeMusicLayout.modeButtonHeight >= 36);
+        assert(landscapeMusicLayout.favoriteWidth >= 44);
+        assert(landscapeMusicLayout.favoriteHeight >= 44);
 
         await normal.page.setViewportSize({ width: 390, height: 844 });
         const artifactChaosMenuLayout = await normal.page.evaluate(() => {

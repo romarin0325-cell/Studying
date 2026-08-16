@@ -1,13 +1,15 @@
 {
   "scripts": {
-    "lint": "node --check card/logic.js && node --check card/data.js && node --check card/vocab_data.js && node --check card/collocation_data.js && node --check card/toeic.js && node --check card/toeic_explanations.js && node --check card/api.js && node --check card/battle_runtime.js && node --check card/rpg_features.js && node --check card/fortune_cookie.js && node --check card/music_player.js && node --check card_remaster/api.js && npm run lint:defense-hero && npm run lint:defense-hero-v2",
+    "lint": "node --check card/logic.js && node --check card/data.js && node --check card/vocab_data.js && node --check card/collocation_data.js && node --check card/toeic.js && node --check card/toeic_explanations.js && node --check card/api.js && node --check card/battle_runtime.js && node --check card/rpg_features.js && node --check card/fortune_cookie.js && node --check card/music_manifest.js && node --check card/music_player.js && node --check scripts/generate_card_music_manifest.js && node --check card_remaster/api.js && npm run lint:defense-hero && npm run lint:defense-hero-v2",
     "lint:defense-hero": "node scripts/verify_hero_defense.js",
     "lint:defense-hero-v2": "node scripts/verify_hero_defense_v2.js",
     "build:defense-hero-local": "node scripts/build_hero_defense_local.mjs",
     "build:defense-hero-v2-local": "node scripts/build_hero_defense_v2_local.mjs",
     "serve:defense-hero": "node scripts/serve_hero_defense.js",
     "serve:defense-hero-v2": "node scripts/serve_hero_defense_v2.js",
-    "test:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_refactor.js && node scripts/verify_card_music_player.js && node scripts/verify_card_learning_data.js && node scripts/verify_card_combat_regressions.js && node scripts/verify_gemini_api_models.js && node scripts/verify_card_remaster_smoke.js && node scripts/verify_idle_hero_smoke.js",
+    "generate:card-music": "node scripts/generate_card_music_manifest.js",
+    "test:card-music-manifest": "node scripts/verify_card_music_manifest.js",
+    "test:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_refactor.js && npm run test:card-music-manifest && node scripts/verify_card_music_player.js && node scripts/verify_card_learning_data.js && node scripts/verify_card_combat_regressions.js && node scripts/verify_gemini_api_models.js && node scripts/verify_card_remaster_smoke.js && node scripts/verify_idle_hero_smoke.js",
     "test:browser": "node scripts/verify_card_mobile.js && node scripts/verify_card_special_flow.js && node scripts/verify_card_remaster_browser.js",
     "test:defense-hero": "node --test defense_hero/tests/unit/*.test.mjs defense_hero/tests/integration/*.test.mjs",
     "test:defense-hero:local": "npm run build:defense-hero-local && node scripts/verify_hero_defense_local_bundle.js",

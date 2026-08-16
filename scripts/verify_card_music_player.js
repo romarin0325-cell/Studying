@@ -20,12 +20,18 @@ class FakeClassList {
 }
 
 class FakeElement {
-    constructor() {
+    constructor(tagName = 'div') {
+        this.tagName = String(tagName).toUpperCase();
         this.classList = new FakeClassList();
+        this.className = '';
         this.textContent = '';
         this.value = '';
+        this.type = '';
+        this.disabled = false;
         this.attributes = new Map();
         this.listeners = new Map();
+        this.children = [];
+        this.parentNode = null;
     }
 
     addEventListener(type, listener) {
@@ -34,8 +40,21 @@ class FakeElement {
         this.listeners.set(type, listeners);
     }
 
-    dispatch(type) {
-        (this.listeners.get(type) || []).forEach(listener => listener({ type, target: this }));
+    dispatch(type, details = {}) {
+        const event = { type, target: this, ...details };
+        (this.listeners.get(type) || []).forEach(listener => listener(event));
+    }
+
+    appendChild(child) {
+        child.parentNode = this;
+        this.children.push(child);
+        return child;
+    }
+
+    replaceChildren(...children) {
+        this.children.forEach(child => { child.parentNode = null; });
+        this.children = [];
+        children.forEach(child => this.appendChild(child));
     }
 
     setAttribute(name, value) { this.attributes.set(name, String(value)); }
@@ -44,7 +63,7 @@ class FakeElement {
 
 class FakeAudio extends FakeElement {
     constructor() {
-        super();
+        super('audio');
         this.paused = true;
         this.ended = false;
         this.currentTime = 0;
@@ -77,34 +96,48 @@ class FakeAudio extends FakeElement {
     }
 }
 
-async function run() {
+const TRACKS = [
+    {
+        id: 'MUSIC_First.mp3',
+        title: 'First',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'MUSIC_First.mp3'
+    },
+    {
+        id: 'nested/MUSIC_둘째.MP3',
+        title: '둘째',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'nested/MUSIC_둘째.MP3'
+    },
+    {
+        id: 'MUSIC_Third.mp3',
+        title: 'Third',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'MUSIC_Third.mp3'
+    }
+];
+
+function createHarness({ tracks = TRACKS, savedPrefs = null, includeManifest = true } = {}) {
     const elements = new Map();
     const ids = [
-        'modal-music-player',
-        'music-track-title',
-        'music-track-meta',
-        'music-status',
-        'music-progress',
-        'music-current-time',
-        'music-duration',
-        'music-play-toggle',
-        'music-playback-rate',
-        'music-repeat-toggle',
-        'music-shuffle-toggle'
+        'modal-music-player', 'music-track-title', 'music-track-meta', 'music-status',
+        'music-progress', 'music-current-time', 'music-duration', 'music-previous',
+        'music-seek-backward', 'music-play-toggle', 'music-seek-forward', 'music-next',
+        'music-playback-rate', 'music-repeat-toggle', 'music-shuffle-toggle',
+        'music-track-count', 'music-track-list', 'music-mode-all', 'music-mode-favorites'
     ];
-    ids.forEach(id => elements.set(id, new FakeElement()));
+    ids.forEach(id => {
+        const tagName = id === 'music-progress' ? 'input' : id === 'music-track-list' ? 'div' : 'button';
+        elements.set(id, new FakeElement(tagName));
+    });
     const audio = new FakeAudio();
     elements.set('music-audio', audio);
 
-    const saved = new Map([
-        ['cardRpgMusicPrefs', {
-            trackId: 'okaeri_aniichan',
-            currentTime: 30,
-            playbackRate: 1.5,
-            repeatMode: 'all',
-            shuffle: false
-        }]
-    ]);
+    const saved = new Map();
+    if (savedPrefs) saved.set('cardRpgMusicPrefs', JSON.parse(JSON.stringify(savedPrefs)));
     const Storage = {
         keys: { MUSIC_PREFS: 'cardRpgMusicPrefs' },
         load: key => saved.has(key) ? saved.get(key) : null,
@@ -114,10 +147,7 @@ async function run() {
         }
     };
     const mediaSession = {
-        handlers: {},
-        metadata: null,
-        playbackState: 'none',
-        positionState: null,
+        handlers: {}, metadata: null, playbackState: 'none', positionState: null,
         setActionHandler(action, handler) { this.handlers[action] = handler; },
         setPositionState(state) { this.positionState = { ...state }; }
     };
@@ -126,50 +156,57 @@ async function run() {
     }
     const sandbox = {
         console,
-        document: { getElementById: id => elements.get(id) || null },
-        navigator: { mediaSession },
-        MediaMetadata,
-        Storage,
-        Date,
-        Math,
-        Number,
-        String,
-        Object,
-        Array,
-        Promise
+        document: {
+            getElementById: id => elements.get(id) || null,
+            createElement: tagName => new FakeElement(tagName)
+        },
+        navigator: { mediaSession }, MediaMetadata, Storage, Date, Math, Number,
+        String, Object, Array, Set, Promise
     };
+    if (includeManifest) sandbox.CARD_MUSIC_TRACKS = tracks;
     sandbox.window = sandbox;
     sandbox.globalThis = sandbox;
     vm.createContext(sandbox);
 
     const playerPath = path.join(process.cwd(), 'card', 'music_player.js');
     vm.runInContext(fs.readFileSync(playerPath, 'utf8'), sandbox, { filename: playerPath });
-    const player = sandbox.MusicPlayer;
+    return { audio, elements, mediaSession, player: sandbox.MusicPlayer, sandbox, saved };
+}
+
+async function verifyMainPlayerFlow() {
+    const harness = createHarness({
+        savedPrefs: {
+            trackId: TRACKS[1].id,
+            currentTime: 30,
+            playbackRate: 1.5,
+            repeatMode: 'all',
+            shuffle: false
+        }
+    });
+    const { audio, elements, mediaSession, player, sandbox, saved } = harness;
 
     assert(player, 'MusicPlayer was not exported');
-    assert.strictEqual(player.tracks.length, 1);
-    assert.deepStrictEqual(
-        JSON.parse(JSON.stringify(player.tracks[0])),
-        {
-            id: 'okaeri_aniichan',
-            title: 'おかえり、兄ちゃん',
-            artist: 'Card RPG',
-            album: 'Card RPG Music',
-            src: 'おかえり、兄ちゃん.mp3'
-        }
-    );
-    assert.strictEqual(audio.src, 'おかえり、兄ちゃん.mp3');
+    assert.strictEqual(player.tracks.length, 3);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(player.tracks)), TRACKS);
+    assert.strictEqual(player.playlistMode, 'all', 'old preferences must default to all tracks');
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(player.favoriteTrackIds)), []);
+    assert.strictEqual(audio.src, TRACKS[1].src);
     assert.strictEqual(audio.preservesPitch, true);
     assert.strictEqual(audio.currentTime, 30);
     assert.strictEqual(audio.defaultPlaybackRate, 1.5);
     assert.strictEqual(audio.playbackRate, 1.5);
-    assert.strictEqual(mediaSession.metadata.title, 'おかえり、兄ちゃん');
+    assert.strictEqual(mediaSession.metadata.title, TRACKS[1].title);
+    assert.strictEqual(elements.get('music-playback-rate').textContent, '1.5×');
+    assert.strictEqual(elements.get('music-track-count').textContent, '3곡');
+    assert.strictEqual(elements.get('music-track-list').children.length, 3);
+    assert.strictEqual(elements.get('music-play-toggle').disabled, false);
     ['play', 'pause', 'previoustrack', 'nexttrack', 'seekbackward', 'seekforward', 'seekto']
         .forEach(action => assert.strictEqual(typeof mediaSession.handlers[action], 'function'));
 
     await player.next();
-    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
-    assert.strictEqual(audio.playbackRate, 1.5, 'restored rate must survive the next track load');
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[2].id);
+    assert.strictEqual(audio.paused, true, 'selecting the next track while paused must remain paused');
+    assert.strictEqual(audio.playbackRate, 1.5, 'restored rate must survive a track load');
 
     player.open();
     assert.strictEqual(elements.get('modal-music-player').classList.contains('active'), true);
@@ -180,25 +217,38 @@ async function run() {
     assert.strictEqual(elements.get('modal-music-player').classList.contains('active'), false);
     assert.strictEqual(audio.paused, false, 'closing the modal must not stop playback');
 
+    await player.selectTrack(TRACKS[0].id);
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[0].id);
+    assert.strictEqual(audio.paused, false, 'selecting a track while playing must continue playback');
+    player.pause();
+    await player.selectTrack(TRACKS[2].id);
+    assert.strictEqual(audio.paused, true, 'selecting a track while paused must remain paused');
+
     player.setPlaybackRate('1.25');
     assert.strictEqual(audio.defaultPlaybackRate, 1.25);
     await player.next();
     assert.strictEqual(audio.playbackRate, 1.25, 'selected rate must survive the next track load');
+    player.cyclePlaybackRate();
+    assert.strictEqual(audio.playbackRate, 1.5);
+    assert.strictEqual(elements.get('music-playback-rate').textContent, '1.5×');
+    [2, 0.75, 1, 1.25, 1.5].forEach(expectedRate => {
+        player.cyclePlaybackRate();
+        assert.strictEqual(audio.playbackRate, expectedRate);
+    });
 
-    player.setPlaybackRate('1.5');
-    player.repeatMode = 'all';
-    player.handleEnded();
-    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
-    assert.strictEqual(audio.playbackRate, 1.5, 'selected rate must survive all-track repeat');
     player.commitSeek(50);
     assert.strictEqual(audio.currentTime, 90);
     assert.strictEqual(elements.get('music-current-time').textContent, '1:30');
-
     player.toggleRepeat();
     assert.strictEqual(player.repeatMode, 'one');
     player.toggleShuffle();
     assert.strictEqual(player.shuffle, true);
 
+    const studyAudio = new FakeAudio();
+    studyAudio.paused = false;
+    sandbox.FortuneCookie = { audio: studyAudio };
+    await player.play();
+    assert.strictEqual(studyAudio.paused, true, 'music playback must pause study audio');
     player.pauseForStudy();
     assert.strictEqual(audio.paused, true);
     await player.resumeAfterStudy();
@@ -212,18 +262,130 @@ async function run() {
     mediaSession.handlers.seekto({ seekTime: 30 });
     assert.strictEqual(audio.currentTime, 30);
 
+    await player.toggleFavorite(TRACKS[0].id);
+    await player.toggleFavorite(TRACKS[2].id);
+    await player.setPlaylistMode('favorites');
+    assert.strictEqual(player.playlistMode, 'favorites');
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(player.getActiveTrackIndexes())), [0, 2]);
+    assert.strictEqual(elements.get('music-mode-favorites').getAttribute('aria-pressed'), 'true');
+
+    await player.selectTrack(TRACKS[1].id);
+    assert.strictEqual(player.playlistMode, 'all', 'selecting a nonfavorite from the full list must leave favorites-only mode');
+    await player.setPlaylistMode('favorites');
+
+    await player.selectTrack(TRACKS[0].id);
+    audio.currentTime = 0;
+    player.shuffle = false;
+    await player.next();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[2].id, 'next must stay inside favorites');
+    audio.currentTime = 0;
+    await mediaSession.handlers.nexttrack();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[0].id, 'Media Session next must stay inside favorites');
+    audio.currentTime = 0;
+    await mediaSession.handlers.previoustrack();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[2].id, 'Media Session previous must stay inside favorites');
+
+    player.repeatMode = 'off';
+    audio.currentTime = 180;
+    player.handleEnded();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[2].id, 'repeat off must stop at the active playlist end');
+    assert.strictEqual(audio.currentTime, 0);
+    player.repeatMode = 'all';
+    player.handleEnded();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[0].id, 'repeat all must wrap inside favorites');
+
+    await player.toggleFavorite(TRACKS[2].id);
+    player.shuffle = true;
+    await player.next();
+    assert.strictEqual(player.getCurrentTrack().id, TRACKS[0].id, 'one-track shuffle must not loop or leave favorites');
+
+    await player.play();
+    const playingSource = audio.src;
+    const loadCount = audio.loadCount;
+    await player.toggleFavorite(TRACKS[0].id);
+    assert.strictEqual(player.playlistMode, 'all', 'removing the last favorite must return to all tracks');
+    assert.strictEqual(audio.src, playingSource, 'removing the last favorite must not reload the current audio');
+    assert.strictEqual(audio.loadCount, loadCount, 'removing the last favorite must not load another track');
+    assert.strictEqual(audio.paused, false, 'removing the last favorite must not stop playback');
+    assert(elements.get('music-status').textContent.includes('전체 곡'));
+
+    const emptyFavoriteResult = await player.setPlaylistMode('favorites');
+    assert.strictEqual(emptyFavoriteResult, false);
+    assert.strictEqual(player.playlistMode, 'all');
+    assert.strictEqual(audio.paused, false);
+    assert.strictEqual(audio.loadCount, loadCount);
+    assert.strictEqual(elements.get('music-status').textContent, '즐겨찾기 곡이 없습니다.');
+
     const prefs = saved.get('cardRpgMusicPrefs');
-    assert.strictEqual(prefs.trackId, 'okaeri_aniichan');
     assert.strictEqual(prefs.playbackRate, 1.5);
-    assert.strictEqual(prefs.repeatMode, 'one');
+    assert.strictEqual(prefs.repeatMode, 'all');
     assert.strictEqual(prefs.shuffle, true);
+    assert.deepStrictEqual(prefs.favoriteTrackIds, []);
+    assert.strictEqual(prefs.playlistMode, 'all');
     assert.strictEqual(mediaSession.positionState.duration, 180);
     assert.strictEqual(mediaSession.positionState.playbackRate, 1.5);
 
     audio.dispatch('error');
-    assert(elements.get('music-status').textContent.includes('おかえり、兄ちゃん.mp3'));
+    assert(elements.get('music-status').textContent.includes(player.getCurrentTrack().src));
     assert.strictEqual(elements.get('music-status').classList.contains('is-error'), true);
+}
 
+async function verifySavedFavoritesAndEmptyStates() {
+    const favoriteHarness = createHarness({
+        savedPrefs: {
+            trackId: TRACKS[1].id,
+            currentTime: 77,
+            playbackRate: 1,
+            repeatMode: 'all',
+            shuffle: false,
+            favoriteTrackIds: [TRACKS[0].id, 'missing/MUSIC_Old.mp3', TRACKS[2].id, TRACKS[0].id],
+            playlistMode: 'favorites'
+        }
+    });
+    assert.strictEqual(favoriteHarness.player.playlistMode, 'favorites');
+    assert.deepStrictEqual(
+        JSON.parse(JSON.stringify(favoriteHarness.player.favoriteTrackIds)),
+        [TRACKS[0].id, TRACKS[2].id],
+        'stale and duplicate favorites must be ignored'
+    );
+    assert.strictEqual(favoriteHarness.player.getCurrentTrack().id, TRACKS[0].id);
+    assert.strictEqual(favoriteHarness.audio.currentTime, 0, 'saved time from a different track must not be restored');
+
+    for (const includeManifest of [true, false]) {
+        const emptyHarness = createHarness({ tracks: [], includeManifest });
+        const { audio, elements, mediaSession, player } = emptyHarness;
+        assert.strictEqual(player.tracks.length, 0);
+        assert.strictEqual(audio.loadCount, 0);
+        assert.strictEqual(elements.get('music-track-title').textContent, '재생할 곡 없음');
+        assert.strictEqual(elements.get('music-status').textContent, 'MUSIC_으로 시작하는 MP3를 추가해주세요.');
+        assert.strictEqual(elements.get('music-track-count').textContent, '0곡');
+        assert.strictEqual(elements.get('music-track-list').children.length, 1);
+        assert.strictEqual(elements.get('music-track-list').children[0].textContent, '등록된 음악이 없습니다.');
+        assert.strictEqual(elements.get('music-play-toggle').disabled, true);
+        assert.strictEqual(elements.get('music-mode-all').disabled, true);
+        assert.strictEqual(mediaSession.metadata, null);
+        assert.strictEqual(await player.play(), false);
+        assert.strictEqual(await player.next(), false);
+        mediaSession.handlers.seekforward({ seekOffset: 10 });
+        mediaSession.handlers.seekto({ seekTime: 10 });
+    }
+}
+
+function verifyHtmlIntegration() {
+    const html = fs.readFileSync(path.join(process.cwd(), 'card', 'index.html'), 'utf8');
+    const manifestPosition = html.indexOf("{ src: 'music_manifest.js'");
+    const playerPosition = html.indexOf("{ src: 'music_player.js'");
+    assert(manifestPosition >= 0 && manifestPosition < playerPosition, 'manifest must load before the player');
+    assert(html.includes('id="music-track-list"'));
+    assert(html.includes('id="music-mode-favorites"'));
+    assert(html.includes('id="music-playback-rate" type="button"'), 'playback rate must use the themed button');
+    assert(!html.includes('<h3 id="music-player-heading">음악재생</h3>'), 'redundant visible heading must be removed');
+}
+
+async function run() {
+    verifyHtmlIntegration();
+    await verifyMainPlayerFlow();
+    await verifySavedFavoritesAndEmptyStates();
     console.log('Card music player verification passed.');
 }
 

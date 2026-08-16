@@ -6,15 +6,11 @@
 (function () {
     'use strict';
 
-    const TRACKS = Object.freeze([
-        Object.freeze({
-            id: 'okaeri_aniichan',
-            title: 'おかえり、兄ちゃん',
-            artist: 'Card RPG',
-            album: 'Card RPG Music',
-            src: 'おかえり、兄ちゃん.mp3'
-        })
-    ]);
+    const TRACKS = Array.isArray(window.CARD_MUSIC_TRACKS)
+        ? Object.freeze(window.CARD_MUSIC_TRACKS.slice())
+        : Object.freeze([]);
+
+    const PLAYBACK_RATES = Object.freeze([0.75, 1, 1.25, 1.5, 2]);
 
     const REPEAT_LABELS = {
         off: '반복 OFF',
@@ -28,6 +24,8 @@
         currentIndex: 0,
         repeatMode: 'all',
         shuffle: false,
+        favoriteTrackIds: [],
+        playlistMode: 'all',
         _initialized: false,
         _pendingSeek: 0,
         _resumeAfterStudy: false,
@@ -45,15 +43,31 @@
             this.currentIndex = savedIndex >= 0 ? savedIndex : 0;
             this.repeatMode = ['off', 'all', 'one'].includes(prefs.repeatMode) ? prefs.repeatMode : 'all';
             this.shuffle = prefs.shuffle === true;
+            const knownTrackIds = new Set(this.tracks.map(track => track.id));
+            this.favoriteTrackIds = Array.isArray(prefs.favoriteTrackIds)
+                ? [...new Set(prefs.favoriteTrackIds.filter(id => typeof id === 'string' && knownTrackIds.has(id)))]
+                : [];
+            this.playlistMode = prefs.playlistMode === 'favorites' && this.favoriteTrackIds.length > 0
+                ? 'favorites'
+                : 'all';
+            if (this.playlistMode === 'favorites' && !this.favoriteTrackIds.includes(prefs.trackId)) {
+                this.currentIndex = this.getActiveTrackIndexes()[0];
+            }
             this.applyPlaybackRate(prefs.playbackRate);
             if ('preservesPitch' in this.audio) this.audio.preservesPitch = true;
 
             this.bindAudioEvents();
             this.bindMediaSession();
-            this.loadTrack(this.currentIndex, {
-                autoplay: false,
-                startTime: Number.isFinite(Number(prefs.currentTime)) ? Number(prefs.currentTime) : 0
-            });
+            if (this.tracks.length > 0) {
+                this.loadTrack(this.currentIndex, {
+                    autoplay: false,
+                    startTime: this.currentIndex === savedIndex && Number.isFinite(Number(prefs.currentTime))
+                        ? Number(prefs.currentTime)
+                        : 0
+                });
+            } else {
+                this.render();
+            }
         },
 
         bindAudioEvents() {
@@ -119,8 +133,21 @@
             return this.tracks[this.currentIndex] || null;
         },
 
+        getActiveTrackIndexes() {
+            if (this.playlistMode !== 'favorites') {
+                return this.tracks.map((track, index) => index);
+            }
+            const favoriteIds = new Set(this.favoriteTrackIds);
+            return this.tracks
+                .map((track, index) => favoriteIds.has(track.id) ? index : -1)
+                .filter(index => index >= 0);
+        },
+
         loadTrack(index, options = {}) {
-            if (!this.audio || this.tracks.length === 0) return Promise.resolve(false);
+            if (!this.audio || this.tracks.length === 0) {
+                this.render();
+                return Promise.resolve(false);
+            }
             const normalized = ((index % this.tracks.length) + this.tracks.length) % this.tracks.length;
             this.currentIndex = normalized;
             const startTime = Math.max(0, Number(options.startTime) || 0);
@@ -148,11 +175,12 @@
         },
 
         toggle() {
-            return this.audio && this.audio.paused ? this.play() : this.pause();
+            if (!this.audio || !this.getCurrentTrack()) return Promise.resolve(false);
+            return this.audio.paused ? this.play() : this.pause();
         },
 
         play() {
-            if (!this.audio) return Promise.resolve(false);
+            if (!this.audio || !this.getCurrentTrack()) return Promise.resolve(false);
             this.pauseStudyAudio();
             const playResult = this.audio.play();
             if (!playResult || typeof playResult.then !== 'function') return Promise.resolve(true);
@@ -173,7 +201,7 @@
         },
 
         previous() {
-            if (!this.audio) return Promise.resolve(false);
+            if (!this.audio || this.getActiveTrackIndexes().length === 0) return Promise.resolve(false);
             if (this.audio.currentTime > 3) {
                 this.seekTo(0);
                 return Promise.resolve(true);
@@ -182,28 +210,104 @@
         },
 
         next() {
-            if (!this.audio) return Promise.resolve(false);
+            if (!this.audio || this.getActiveTrackIndexes().length === 0) return Promise.resolve(false);
             return this.loadTrack(this.pickAdjacentIndex(1), { autoplay: !this.audio.paused });
         },
 
         pickAdjacentIndex(direction) {
-            if (this.shuffle && this.tracks.length > 1) {
-                let nextIndex = this.currentIndex;
-                while (nextIndex === this.currentIndex) {
-                    nextIndex = Math.floor(Math.random() * this.tracks.length);
-                }
-                return nextIndex;
+            const activeIndexes = this.getActiveTrackIndexes();
+            if (activeIndexes.length === 0) return this.currentIndex;
+            if (activeIndexes.length === 1) return activeIndexes[0];
+            const currentPosition = activeIndexes.indexOf(this.currentIndex);
+            if (this.shuffle) {
+                const candidates = activeIndexes.filter(index => index !== this.currentIndex);
+                return candidates[Math.floor(Math.random() * candidates.length)];
             }
-            return this.currentIndex + direction;
+            if (currentPosition < 0) {
+                return direction < 0 ? activeIndexes[activeIndexes.length - 1] : activeIndexes[0];
+            }
+            const nextPosition = ((currentPosition + direction) % activeIndexes.length + activeIndexes.length)
+                % activeIndexes.length;
+            return activeIndexes[nextPosition];
+        },
+
+        selectTrack(trackId) {
+            const nextIndex = this.tracks.findIndex(track => track.id === trackId);
+            if (nextIndex < 0) return Promise.resolve(false);
+            if (this.playlistMode === 'favorites' && !this.favoriteTrackIds.includes(trackId)) {
+                this.playlistMode = 'all';
+            }
+            if (nextIndex === this.currentIndex) {
+                this.render();
+                this.savePrefs(true);
+                return Promise.resolve(true);
+            }
+            return this.loadTrack(nextIndex, { autoplay: !this.audio.paused });
+        },
+
+        toggleFavorite(trackId) {
+            if (!this.tracks.some(track => track.id === trackId)) return Promise.resolve(false);
+            const isFavorite = this.favoriteTrackIds.includes(trackId);
+            this.favoriteTrackIds = isFavorite
+                ? this.favoriteTrackIds.filter(id => id !== trackId)
+                : [...this.favoriteTrackIds, trackId];
+
+            if (this.playlistMode === 'favorites') {
+                const activeIndexes = this.getActiveTrackIndexes();
+                if (activeIndexes.length === 0) {
+                    this.playlistMode = 'all';
+                    this.setStatus('즐겨찾기가 없어 전체 곡으로 전환했습니다.', false);
+                } else if (!activeIndexes.includes(this.currentIndex)) {
+                    return this.loadTrack(activeIndexes[0], { autoplay: !this.audio.paused });
+                }
+            }
+            this.render();
+            this.savePrefs(true);
+            return Promise.resolve(true);
+        },
+
+        setPlaylistMode(mode) {
+            if (mode !== 'favorites') {
+                this.playlistMode = 'all';
+                this._statusOverride = '';
+                this.render();
+                this.savePrefs(true);
+                return Promise.resolve(true);
+            }
+
+            const favoriteIndexes = this.tracks
+                .map((track, index) => this.favoriteTrackIds.includes(track.id) ? index : -1)
+                .filter(index => index >= 0);
+            if (favoriteIndexes.length === 0) {
+                this.playlistMode = 'all';
+                this.setStatus('즐겨찾기 곡이 없습니다.', false);
+                this.render();
+                this.savePrefs(true);
+                return Promise.resolve(false);
+            }
+
+            this.playlistMode = 'favorites';
+            this._statusOverride = '';
+            if (!favoriteIndexes.includes(this.currentIndex)) {
+                return this.loadTrack(favoriteIndexes[0], { autoplay: !this.audio.paused });
+            }
+            this.render();
+            this.savePrefs(true);
+            return Promise.resolve(true);
         },
 
         handleEnded() {
+            const activeIndexes = this.getActiveTrackIndexes();
+            if (activeIndexes.length === 0) {
+                this.render();
+                return;
+            }
             if (this.repeatMode === 'one') {
                 this.seekTo(0);
                 this.play();
                 return;
             }
-            const atLastTrack = this.currentIndex === this.tracks.length - 1;
+            const atLastTrack = activeIndexes.indexOf(this.currentIndex) === activeIndexes.length - 1;
             if (this.repeatMode === 'off' && atLastTrack) {
                 this.seekTo(0);
                 this.render();
@@ -246,9 +350,17 @@
             this.render();
         },
 
+        cyclePlaybackRate() {
+            if (!this.audio || !this.getCurrentTrack()) return;
+            const currentRate = Number(this.audio.playbackRate) || 1;
+            const currentRateIndex = PLAYBACK_RATES.indexOf(currentRate);
+            const nextRate = PLAYBACK_RATES[(currentRateIndex + 1 + PLAYBACK_RATES.length) % PLAYBACK_RATES.length];
+            this.setPlaybackRate(nextRate);
+        },
+
         applyPlaybackRate(value) {
             const rate = Number(value);
-            const normalizedRate = [0.75, 1, 1.25, 1.5, 2].includes(rate) ? rate : 1;
+            const normalizedRate = PLAYBACK_RATES.includes(rate) ? rate : 1;
             this.audio.defaultPlaybackRate = normalizedRate;
             this.audio.playbackRate = normalizedRate;
             return normalizedRate;
@@ -304,15 +416,22 @@
                     : Math.max(0, Number(this.audio.currentTime) || 0),
                 playbackRate: Number(this.audio.playbackRate) || 1,
                 repeatMode: this.repeatMode,
-                shuffle: this.shuffle
+                shuffle: this.shuffle,
+                favoriteTrackIds: this.tracks
+                    .filter(item => this.favoriteTrackIds.includes(item.id))
+                    .map(item => item.id),
+                playlistMode: this.playlistMode
             });
         },
 
         updateMetadata() {
             if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-            if (typeof MediaMetadata === 'undefined') return;
             const track = this.getCurrentTrack();
-            if (!track) return;
+            if (!track) {
+                navigator.mediaSession.metadata = null;
+                return;
+            }
+            if (typeof MediaMetadata === 'undefined') return;
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: track.title,
                 artist: track.artist,
@@ -353,6 +472,73 @@
             status.classList.toggle('is-error', isError === true);
         },
 
+        renderTrackList() {
+            const list = document.getElementById('music-track-list');
+            const count = document.getElementById('music-track-count');
+            const allMode = document.getElementById('music-mode-all');
+            const favoritesMode = document.getElementById('music-mode-favorites');
+            if (count) count.textContent = `${this.tracks.length}곡`;
+            if (allMode) {
+                const isActive = this.playlistMode === 'all';
+                allMode.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                allMode.classList.toggle('is-active', isActive);
+                allMode.disabled = this.tracks.length === 0;
+            }
+            if (favoritesMode) {
+                const isActive = this.playlistMode === 'favorites';
+                favoritesMode.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                favoritesMode.classList.toggle('is-active', isActive);
+                favoritesMode.disabled = this.tracks.length === 0;
+            }
+            if (!list || typeof document.createElement !== 'function') return;
+            if (typeof list.replaceChildren === 'function') list.replaceChildren();
+            else list.textContent = '';
+
+            if (this.tracks.length === 0) {
+                const empty = document.createElement('p');
+                empty.className = 'music-track-empty';
+                empty.textContent = '등록된 음악이 없습니다.';
+                list.appendChild(empty);
+                return;
+            }
+
+            this.tracks.forEach((track, index) => {
+                const row = document.createElement('div');
+                const favoriteButton = document.createElement('button');
+                const trackButton = document.createElement('button');
+                const title = document.createElement('span');
+                const artist = document.createElement('span');
+                const isFavorite = this.favoriteTrackIds.includes(track.id);
+                const isCurrent = index === this.currentIndex;
+
+                row.className = `music-track-row${isCurrent ? ' is-current' : ''}`;
+                row.setAttribute('role', 'listitem');
+                if (isCurrent) row.setAttribute('aria-current', 'true');
+
+                favoriteButton.type = 'button';
+                favoriteButton.className = 'music-favorite-toggle';
+                favoriteButton.textContent = isFavorite ? '★' : '☆';
+                favoriteButton.setAttribute('aria-label', `${track.title} 즐겨찾기 ${isFavorite ? '해제' : '등록'}`);
+                favoriteButton.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
+                favoriteButton.addEventListener('click', () => this.toggleFavorite(track.id));
+
+                trackButton.type = 'button';
+                trackButton.className = 'music-track-select';
+                trackButton.setAttribute('aria-label', `${track.title} 선택`);
+                trackButton.addEventListener('click', () => this.selectTrack(track.id));
+                title.className = 'music-track-row-title';
+                title.textContent = track.title;
+                artist.className = 'music-track-row-artist';
+                artist.textContent = track.artist;
+                trackButton.appendChild(title);
+                trackButton.appendChild(artist);
+
+                row.appendChild(favoriteButton);
+                row.appendChild(trackButton);
+                list.appendChild(row);
+            });
+        },
+
         render() {
             if (!this.audio) return;
             const track = this.getCurrentTrack();
@@ -370,16 +556,39 @@
                 playButton.textContent = this.audio.paused ? '▶' : '⏸';
                 playButton.setAttribute('aria-label', this.audio.paused ? '재생' : '일시정지');
             }
-            if (rate) rate.value = String(Number(this.audio.playbackRate) || 1);
+            if (rate) {
+                const playbackRate = Number(this.audio.playbackRate) || 1;
+                rate.value = String(playbackRate);
+                if (rate.tagName !== 'SELECT') {
+                    rate.textContent = `${Number.isInteger(playbackRate) ? playbackRate.toFixed(1) : playbackRate}×`;
+                }
+                rate.setAttribute('aria-label', `재생 배속 ${playbackRate}배. 눌러서 변경`);
+            }
             if (repeat) repeat.textContent = REPEAT_LABELS[this.repeatMode];
             if (shuffle) {
                 shuffle.textContent = this.shuffle ? '셔플 ON' : '셔플 OFF';
                 shuffle.setAttribute('aria-pressed', this.shuffle ? 'true' : 'false');
             }
             if (status && !this._statusOverride) {
-                status.textContent = this.audio.paused ? '일시정지' : '재생 중';
+                status.textContent = track ? (this.audio.paused ? '일시정지' : '재생 중') : 'MUSIC_으로 시작하는 MP3를 추가해주세요.';
                 status.classList.remove('is-error');
             }
+            const hasTrack = Boolean(track);
+            [
+                'music-previous',
+                'music-seek-backward',
+                'music-play-toggle',
+                'music-seek-forward',
+                'music-next',
+                'music-playback-rate',
+                'music-repeat-toggle',
+                'music-shuffle-toggle',
+                'music-progress'
+            ].forEach(id => {
+                const control = document.getElementById(id);
+                if (control) control.disabled = !hasTrack;
+            });
+            this.renderTrackList();
             this.renderProgress();
         },
 

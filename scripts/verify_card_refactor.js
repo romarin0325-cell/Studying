@@ -107,6 +107,7 @@ function run() {
         'rpg_features.js',
         'listening_data.js',
         'fortune_cookie.js',
+        'music_manifest.js',
         'music_player.js'
     ]);
     ['SaveDataMigrator', 'LISTENING_DATA', 'FortuneCookie', 'MusicPlayer'].forEach(name => {
