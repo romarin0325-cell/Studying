@@ -1,2 +1,2 @@
 @echo off
-start index.html
+start "" "%~dp0index.html"
