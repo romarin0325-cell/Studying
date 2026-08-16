@@ -93,5 +93,26 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         artist: 'Card RPG',
         album: 'Card RPG Music',
         src: '주머니에아침하나.mp3'
+    }),
+    Object.freeze({
+        id: 'かわいいは狂気.mp3',
+        title: 'かわいいは狂気',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'かわいいは狂気.mp3'
+    }),
+    Object.freeze({
+        id: '雨まちターミナル.mp3',
+        title: '雨まちターミナル',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '雨まちターミナル.mp3'
+    }),
+    Object.freeze({
+        id: 'どくどくきゃんでぃー.mp3',
+        title: 'どくどくきゃんでぃー',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'どくどくきゃんでぃー.mp3'
     })
 ]);
