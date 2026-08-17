@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const FLASH_MODEL_ID = 'gemini-3.6-flash';
+const FLASH_MODEL_ID = 'gemini-3.7-flash';
 const FLASH_LITE_MODEL_ID = 'gemini-3.5-flash-lite';
 const LEGACY_MODEL_IDS = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite'];
 

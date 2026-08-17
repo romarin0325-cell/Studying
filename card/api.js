@@ -67,7 +67,7 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
    - [Special Direction]이 없으면 이 항목을 생략하십시오.
 8. **강의 마무리 멘트**`;
 
-const GEMINI_FLASH_MODEL_ID = 'gemini-3.6-flash';
+const GEMINI_FLASH_MODEL_ID = 'gemini-3.7-flash';
 const GEMINI_FLASH_LITE_MODEL_ID = 'gemini-3.5-flash-lite';
 const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
 

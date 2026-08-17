@@ -1,4 +1,4 @@
-const GEMINI_FLASH_MODEL_ID = 'gemini-3.6-flash';
+const GEMINI_FLASH_MODEL_ID = 'gemini-3.7-flash';
 const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function getGeminiGenerateContentUrl(modelId) {
