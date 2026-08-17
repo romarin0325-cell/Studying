@@ -83,6 +83,67 @@ test('suppressed duplicate area effects keep their damage popup without drawing 
   });
 });
 
+test('melee hit draws three slash arcs and a four-point star flash', () => {
+  const renderer = new EffectRenderer();
+  const context = createContextRecorder();
+  renderer.push({
+    effectPreset: 'basic_melee_hit',
+    element: 'fire',
+    suppressEffect: false,
+    x: 3,
+    y: 3,
+  });
+  renderer.update(0.15);
+  renderer.render(context, TEST_LAYOUT);
+  assert.equal(context.calls.filter(([name]) => name === 'moveTo').length, 1, 'only the star flash traces a polygon');
+  assert.equal(context.calls.filter(([name]) => name === 'lineTo').length, 7, 'a four-point star closes through seven edges');
+});
+
+test('skill cast sparkle renders on the caster without a damage popup', () => {
+  const renderer = new EffectRenderer();
+  assert.equal(renderer.push({
+    type: 'skill_cast',
+    effectPreset: 'skill_cast',
+    element: 'light',
+    sourceId: 'rumi',
+    targetId: 'rumi',
+    x: 2.5,
+    y: 3.5,
+    visualOnly: true,
+  }), true);
+  assert.deepEqual(renderer.snapshotCaps(), {
+    effects: 1,
+    popups: 0,
+    effectCap: 250,
+    popupCap: 40,
+  }, 'cast events carry no amount, so no popup may appear');
+
+  const context = createContextRecorder();
+  renderer.update(0.2);
+  renderer.render(context, TEST_LAYOUT);
+
+  renderer.update(2);
+  assert.equal(renderer.snapshotCaps().effects, 0, 'cast sparkle expires within its 0.55s life');
+});
+
+test('burst basic hits keep a single trace while drawing amplified impact rings', () => {
+  const renderer = new EffectRenderer();
+  const context = createContextRecorder();
+  renderer.push({
+    effectPreset: 'basic_ranged_hit',
+    attackArchetype: 'burst',
+    element: 'dark',
+    sourceX: 1,
+    sourceY: 1,
+    x: 4,
+    y: 4,
+  });
+  renderer.update(0.1);
+  renderer.render(context, TEST_LAYOUT);
+  assert.equal(context.calls.filter(([name]) => name === 'moveTo').length, 1);
+  assert.equal(context.calls.filter(([name]) => name === 'lineTo').length, 1);
+});
+
 test('ranged effects draw from the source while each shotgun hit draws exactly one pellet trail', () => {
   const ranged = new EffectRenderer();
   const rangedContext = createContextRecorder();

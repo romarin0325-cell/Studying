@@ -14,6 +14,7 @@ import {
   createSkillAction,
   resolveSkillAction,
 } from '../../js/battle/systems/SkillSystem.js';
+import { SKILL_CAST_EVENT_CONTRACT } from '../../js/content/effects.js';
 
 function runtimeHero({
   id,
@@ -147,7 +148,7 @@ test('all low-HP targets are locked before resolution and later actions never re
   assert.equal(doomed.hp, 0);
   assert.equal(fallback.hp, 100, 'later actions are spent on their locked target instead of retargeting');
   assert.deepEqual(
-    state.events.filter(({ actionKind }) => actionKind).map(({ sourceId, actionKind, targetId }) => (
+    state.events.filter(({ type, actionKind }) => type === 'hit' && actionKind).map(({ sourceId, actionKind, targetId }) => (
       `${sourceId}:${actionKind}:${targetId}`
     )),
     [
@@ -156,6 +157,11 @@ test('all low-HP targets are locked before resolution and later actions never re
       'late:skill:doomed',
       'late:basic:doomed',
     ],
+  );
+  assert.deepEqual(
+    state.events.filter(({ type }) => type === 'skill_cast').map(({ sourceId, targetId }) => `${sourceId}:${targetId}`),
+    ['early:early', 'late:late'],
+    'each resolved skill emits one visual-only cast sparkle event targeting the caster',
   );
 });
 
@@ -170,6 +176,30 @@ test('skill readiness does not reset or consume the independent basic timer', ()
   assert.equal(hero.skillTimer, 5);
   resolveSkillAction(state, action);
   assert.equal(hero.attackTimer, 0.75);
+});
+
+test('skill cast sparkle event follows the display contract and never consumes RNG or damage', () => {
+  const hero = runtimeHero({ id: 'caster', attackTimer: 99, skillTimer: 0 });
+  Object.assign(hero, { x: 2, y: 3 });
+  const target = runtimeEnemy({ id: 'target', spawnOrder: 1 });
+  const state = runtimeState([hero], [target]);
+  const action = createSkillAction(state, hero, 0);
+  const drawsBefore = state.rngDrawCount;
+  resolveSkillAction(state, action);
+
+  const casts = state.events.filter(({ type }) => type === 'skill_cast');
+  assert.equal(casts.length, 1);
+  const cast = casts[0];
+  for (const field of SKILL_CAST_EVENT_CONTRACT.requiredFields) {
+    assert.ok(Object.hasOwn(cast, field), `skill_cast.${field}`);
+  }
+  assert.equal(cast.effectPreset, 'skill_cast');
+  assert.equal(cast.sourceId, 'caster');
+  assert.equal(cast.targetId, 'caster');
+  assert.deepEqual([cast.x, cast.y], [2.5, 3.5]);
+  assert.equal(cast.visualOnly, true);
+  assert.equal(Number.isFinite(cast.amount), false, 'cast events must not spawn damage popups');
+  assert.equal(state.rngDrawCount, drawsBefore + 1, 'only the hit consumes the critical roll');
 });
 
 test('area impacts and per-target status RNG resolve in ascending spawn order', () => {
