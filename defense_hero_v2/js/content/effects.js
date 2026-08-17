@@ -45,8 +45,8 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'basic_melee_hit',
     displayName: '근접 기본 타격',
-    durationSeconds: 0.22,
-    shape: 'slash_and_impact_ring',
+    durationSeconds: 0.3,
+    shape: 'triple_slash_and_star_flash',
     particleCount: 5,
     radiusScale: 0.55,
   },
@@ -74,6 +74,14 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
     shape: 'expanding_wave',
     radiusCells: 2,
     particleCount: 12,
+  },
+  {
+    id: 'skill_cast',
+    displayName: '스킬 시전 반짝임',
+    durationSeconds: 0.55,
+    shape: 'sparkle_ring_on_caster',
+    particleCount: 6,
+    radiusScale: 0.65,
   },
   {
     id: 'skill_single_hit',
@@ -141,6 +149,13 @@ export const DISPLAY_EVENT_CONTRACT = deepFreeze({
     'sourceX', 'sourceY', 'vectorX', 'vectorY', 'missed', 'visualOnly', 'suppressEffect',
   ],
   rendererMayMutateBattleState: false,
+});
+
+export const SKILL_CAST_EVENT_CONTRACT = deepFreeze({
+  type: 'skill_cast',
+  requiredFields: ['type', 'actionKind', 'attackArchetype', 'effectPreset', 'element', 'sourceId', 'targetId', 'x', 'y'],
+  optionalFields: ['sourceX', 'sourceY', 'visualOnly'],
+  targetIsCaster: true,
 });
 
 export default EFFECT_PRESET_DEFINITIONS;

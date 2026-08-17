@@ -7,10 +7,11 @@ const COLORS = Object.freeze({
 });
 
 const LIFE_BY_PRESET = Object.freeze({
-  basic_melee_hit: 0.24,
+  basic_melee_hit: 0.3,
   basic_ranged_hit: 0.28,
   basic_shotgun_hit: 0.34,
   basic_area_hit: 0.42,
+  skill_cast: 0.55,
   skill_single_hit: 0.52,
   skill_area_hit: 0.68,
   status_apply: 0.65,
@@ -27,6 +28,18 @@ function drawRing(context, x, y, radius, color, alpha, width = 2) {
   context.arc(x, y, Math.max(1, radius), 0, Math.PI * 2);
   context.stroke();
   context.restore();
+}
+
+function drawStar(context, x, y, outerRadius, innerRadius, points, rotation) {
+  context.beginPath();
+  for (let index = 0; index < points * 2; index += 1) {
+    const angle = rotation + (index * Math.PI) / points;
+    const radius = index % 2 === 0 ? outerRadius : innerRadius;
+    const vx = x + Math.cos(angle) * radius;
+    const vy = y + Math.sin(angle) * radius;
+    if (index === 0) context.moveTo(vx, vy); else context.lineTo(vx, vy);
+  }
+  context.closePath();
 }
 
 function effectSourcePoint(layout, effect, fallback) {
@@ -116,15 +129,21 @@ export class EffectRenderer {
       case 'basic_melee_hit': {
         context.globalAlpha = fade;
         context.strokeStyle = color;
-        context.lineWidth = Math.max(2, cell * 0.09);
-        context.beginPath();
-        context.arc(point.x, point.y, cell * (0.22 + progress * 0.35), -2.4, 0.65);
-        context.stroke();
-        drawRing(context, point.x, point.y, cell * (0.12 + progress * 0.2), '#fff', fade, 2);
+        context.lineWidth = Math.max(2, cell * 0.1);
+        for (const arcRotation of [-0.5, 0.15, 0.8]) {
+          context.beginPath();
+          context.arc(point.x, point.y, cell * (0.3 + progress * 0.22), arcRotation, arcRotation + 1.15);
+          context.stroke();
+        }
+        context.fillStyle = '#fff';
+        drawStar(context, point.x, point.y, cell * (0.14 + progress * 0.24), cell * (0.06 + progress * 0.1), 4, progress * 0.9);
+        context.fill();
+        drawRing(context, point.x, point.y, cell * (0.1 + progress * 0.2), color, fade * 0.8, 2);
         break;
       }
       case 'basic_ranged_hit': {
         const source = effectSourcePoint(layout, effect, point);
+        const burst = effect.attackArchetype === 'burst';
         const head = drawAnimatedTrace(
           context,
           source,
@@ -132,9 +151,10 @@ export class EffectRenderer {
           progress,
           color,
           fade,
-          Math.max(2, cell * 0.08),
+          Math.max(2, cell * (burst ? 0.16 : 0.08)),
         );
-        drawRing(context, point.x, point.y, cell * (0.08 + progress * 0.28), color, fade, 2);
+        drawRing(context, point.x, point.y, cell * (burst ? 0.16 + progress * 0.56 : 0.08 + progress * 0.28), color, fade, burst ? 4 : 2);
+        if (burst && !this.reduced) drawRing(context, point.x, point.y, cell * (0.32 + progress * 0.5), '#fff', fade * 0.6, 2);
         context.globalAlpha = fade;
         context.fillStyle = '#fff';
         context.fillRect(head.x - 1, head.y - cell * 0.08, 2, cell * 0.16);
@@ -150,6 +170,32 @@ export class EffectRenderer {
       case 'basic_area_hit':
         drawRing(context, point.x, point.y, radius * (0.4 + progress * 0.6), color, fade, 3);
         break;
+      case 'skill_cast': {
+        context.globalAlpha = fade;
+        context.strokeStyle = '#ffffff';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.arc(point.x, point.y, cell * (0.3 + progress * 0.35), 0, Math.PI * 2);
+        context.stroke();
+        if (!this.reduced) {
+          context.fillStyle = color;
+          for (let index = 0; index < 6; index += 1) {
+            const angle = (index * Math.PI) / 3 + progress * 1.8;
+            const distance = cell * (0.35 + ((index % 3) / 3) * 0.2 + progress * 0.15);
+            drawStar(
+              context,
+              point.x + Math.cos(angle) * distance,
+              point.y + Math.sin(angle) * distance - progress * cell * 0.2,
+              cell * 0.07 * fade + cell * 0.02,
+              cell * 0.03,
+              4,
+              angle,
+            );
+            context.fill();
+          }
+        }
+        break;
+      }
       case 'skill_single_hit': {
         drawRing(context, point.x, point.y, cell * (0.25 + progress * 0.45), '#fff', fade, 4);
         drawRing(context, point.x, point.y, cell * (0.12 + progress * 0.35), color, fade, 2);

@@ -47,7 +47,7 @@ const EXPECTED_BUFF_IDS = [
 const EXPECTED_STATUS_IDS = ['slow', 'stun', 'corrosion', 'curse', 'darkness', 'poison', 'stun_immunity'];
 const EXPECTED_EFFECT_PRESET_IDS = [
   'basic_melee_hit', 'basic_ranged_hit', 'basic_shotgun_hit', 'basic_area_hit',
-  'skill_single_hit', 'skill_area_hit', 'status_apply', 'critical_hit', 'advantage_hit',
+  'skill_cast', 'skill_single_hit', 'skill_area_hit', 'status_apply', 'critical_hit', 'advantage_hit',
 ];
 const EXPECTED_MATCHUPS = {
   normal: [1, 1, 1, 1, 1, 1],
@@ -72,7 +72,7 @@ export const CONTENT_COUNTS = deepFreeze({
   buffs: 7,
   statuses: 7,
   debuffs: 6,
-  effectPresets: 9,
+  effectPresets: 10,
   directionalAssetIds: 66,
 });
 

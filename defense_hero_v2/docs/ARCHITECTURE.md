@@ -178,6 +178,8 @@ schema를 바꿀 때는 [`schemas.js`](../js/persistence/schemas.js), [`SaveRepo
 
 `radius`, `critical`, `advantageous`, `statusId`, `pelletIndex`, `sourceX`, `sourceY`, `vectorX`, `vectorY` 등은 프리셋에 따라 추가된다. producer가 새 event shape를 만들면 content validator, EffectRenderer dispatcher, effect tests를 함께 갱신한다.
 
+스킬 시전 반짝임은 타격이 아니므로 `type: 'skill_cast'`인 별도 시각 이벤트를 사용한다. 시전자 자신에게 적용되는 `visualOnly` 이벤트이며 `content/effects.js`의 `SKILL_CAST_EVENT_CONTRACT`가 필드를 고정한다. 피해 팝업이 없도록 `amount`를 넣지 않는다.
+
 ## 12. 새 기능을 배치하는 기준
 
 - 숫자와 조합만 달라짐: `content/`에 선언한다.

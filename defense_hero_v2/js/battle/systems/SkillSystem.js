@@ -64,6 +64,20 @@ export function createSkillAction(state, hero, deltaSeconds, landscape = false) 
 export function resolveSkillAction(state, action) {
   const { source: hero, impacts } = action;
   const skill = hero.definition.skill;
+  state.events.push({
+    type: 'skill_cast',
+    actionKind: 'skill',
+    attackArchetype: skill.shape,
+    effectPreset: 'skill_cast',
+    element: hero.definition.element,
+    sourceId: hero.id,
+    sourceX: hero.x + 0.5,
+    sourceY: hero.y + 0.5,
+    targetId: hero.id,
+    x: hero.x + 0.5,
+    y: hero.y + 0.5,
+    visualOnly: true,
+  });
   for (const { target } of impacts) {
     hitSkillTarget(
       state,

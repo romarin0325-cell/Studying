@@ -85,7 +85,7 @@ test('strict content validation covers every required V2 definition and optional
     buffs: 7,
     statuses: 7,
     debuffs: 6,
-    effectPresets: 9,
+    effectPresets: 10,
     assets: null,
   });
 
