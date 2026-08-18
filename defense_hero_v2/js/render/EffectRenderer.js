@@ -20,6 +20,7 @@ const LIFE_BY_PRESET = Object.freeze({
 });
 
 const SKILL_TRAVEL_SECONDS = 0.26;
+const SKILL_IMPACT_PRESETS = new Set(['skill_single_hit', 'skill_area_hit']);
 
 function drawRing(context, x, y, radius, color, alpha, width = 2) {
   context.save();
@@ -94,8 +95,12 @@ export class EffectRenderer {
       && event.effectPreset !== 'critical_hit'
       && Number.isFinite(event.amount);
     if (!drawsEffect && !drawsPopup) return false;
-    const travel = event.type === 'hit' && event.actionKind === 'skill' ? SKILL_TRAVEL_SECONDS : 0;
-    const effect = { ...event, age: 0, life: life ?? 0.5, travel };
+    const skillHit = event.type === 'hit' && event.actionKind === 'skill';
+    const travel = skillHit ? SKILL_TRAVEL_SECONDS : 0;
+    // Only the primary impact flies as a projectile; crit/advantage/status overlays
+    // stay hidden during the same travel window so they detonate in sync.
+    const flies = travel > 0 && SKILL_IMPACT_PRESETS.has(event.effectPreset) && !event.suppressEffect;
+    const effect = { ...event, age: 0, life: life ?? 0.5, travel, flies };
     if (drawsEffect) {
       this.effects.push(effect);
       if (this.effects.length > EFFECT_CAP) this.effects.splice(0, this.effects.length - EFFECT_CAP);
@@ -138,7 +143,7 @@ export class EffectRenderer {
   #drawEffect(context, layout, effect) {
     const travel = effect.travel ?? 0;
     if (travel > 0 && effect.age < travel) {
-      this.#drawSkillProjectile(context, layout, effect, travel);
+      if (effect.flies) this.#drawSkillProjectile(context, layout, effect, travel);
       return;
     }
     const point = layout.logicalToCanvas(effect.x, effect.y);

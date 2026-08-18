@@ -198,6 +198,38 @@ test('skill hits fly from the caster before detonating and their popup waits for
   assert.equal(renderer.snapshotCaps().popups, 0, 'popup lifetime is extended by the travel phase');
 });
 
+test('skill overlays wait out the travel window without drawing extra projectiles', () => {
+  const renderer = new EffectRenderer();
+  const common = { type: 'hit', actionKind: 'skill', element: 'light', sourceX: 1, sourceY: 1, x: 5, y: 5 };
+  renderer.push({ ...common, effectPreset: 'skill_single_hit', amount: 80 });
+  renderer.push({ ...common, effectPreset: 'critical_hit', amount: 80 });
+  renderer.push({ ...common, effectPreset: 'status_apply', statusId: 'burn' });
+  assert.equal(renderer.snapshotCaps().effects, 3);
+
+  const midFlight = createContextRecorder();
+  renderer.update(0.13);
+  renderer.render(midFlight, TEST_LAYOUT);
+  assert.equal(
+    midFlight.calls.filter(([name]) => name === 'moveTo').length,
+    2,
+    'one trail plus one star polygon: overlays stay hidden during travel',
+  );
+  assert.equal(
+    midFlight.calls.filter(([name]) => name === 'lineTo').length,
+    8,
+    'the single projectile traces one trail edge and seven star edges',
+  );
+
+  renderer.update(0.2);
+  const impact = createContextRecorder();
+  renderer.render(impact, TEST_LAYOUT);
+  const impactPolygons = impact.calls.filter(([name]) => name === 'moveTo');
+  assert.ok(
+    impactPolygons.length > 0 && impactPolygons.every(([, x]) => x >= 40),
+    'after arrival polygons only start at the target, never along the flight path',
+  );
+});
+
 test('ranged effects draw from the source while each shotgun hit draws exactly one pellet trail', () => {
   const ranged = new EffectRenderer();
   const rangedContext = createContextRecorder();
