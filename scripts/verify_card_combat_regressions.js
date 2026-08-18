@@ -1217,7 +1217,7 @@ function run() {
       getCurrentStageEnemyData: () => ENEMIES[0]
     });
     assert.strictEqual(buildScaledEnemy('default', 'challenge').maxHp, ENEMIES[0].stats.hp);
-    assert.strictEqual(buildScaledEnemy('artifact_chaos', 'challenge').maxHp, Math.floor(ENEMIES[0].stats.hp * 1.1));
+    assert.strictEqual(buildScaledEnemy('artifact_chaos', 'challenge').maxHp, Math.floor(ENEMIES[0].stats.hp * 1.2));
     assert.strictEqual(buildScaledEnemy('artifact_reserve', 'endless').maxHp, Math.floor(ENEMIES[0].stats.hp * 1.1));
 
     // The merchant hands 20 maximum and current mana to the next living ally.

@@ -80,9 +80,9 @@ function buildBattleEnemy(rpg) {
     const cycle = Math.floor(rpg.state.enemyScale / cycleLength);
     let scale = 1.0 + (cycle * GAME_CONSTANTS.ENEMY_SCALING.CYCLE_BONUS);
     let steps = 0;
-    if (rpg.state.mode === 'puzzle') {
+    if (rpg.state.mode === 'puzzle' || rpg.state.mode === 'artifact_chaos') {
         steps = 2;
-    } else if (['artifact', 'artifact_chaos', 'artifact_reserve', 'flood', 'curse'].includes(rpg.state.mode)) {
+    } else if (['artifact', 'artifact_reserve', 'flood', 'curse'].includes(rpg.state.mode)) {
         if (rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') {
             steps = 1;
         }
