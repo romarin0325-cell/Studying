@@ -174,7 +174,9 @@ export class BattleScreen {
     for (let index = 0; index < steps; index += 1) {
       this.session.step(deltaSeconds, { landscape: this.renderer.layout.landscape });
     }
-    this.effectRenderer.update(deltaSeconds * steps);
+    const gameDeltaSeconds = this.session.state.paused ? 0 : deltaSeconds * steps;
+    this.effectRenderer.update(gameDeltaSeconds);
+    this.renderer.advanceGameTime(gameDeltaSeconds);
     this.#consumeEvents();
   }
 
@@ -346,9 +348,15 @@ export class BattleScreen {
   }
 
   debugStepTicks(count = 1) {
-    for (let index = 0; index < Number(count); index += 1) {
+    const ticks = Math.max(0, Number(count) || 0);
+    for (let index = 0; index < ticks; index += 1) {
       this.session.step(FIXED_TICK_SECONDS, { landscape: this.renderer.layout.landscape });
     }
+    const gameDeltaSeconds = this.session.state.paused
+      ? 0
+      : FIXED_TICK_SECONDS * ticks * this.session.state.speed;
+    this.effectRenderer.update(gameDeltaSeconds);
+    this.renderer.advanceGameTime(gameDeltaSeconds);
     this.#consumeEvents();
     this.#render();
     return this.getDebugState();

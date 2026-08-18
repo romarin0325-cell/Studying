@@ -2,9 +2,7 @@ import { ViewportLayout, logicalToViewPoint } from './ViewportLayout.js';
 import { SpriteResolver, drawResolvedSprite } from './SpriteResolver.js';
 import { HERO_BY_ID } from '../content/heroes.js';
 
-const BURST_PULSE_MS = 150;
-
-const nowMs = () => globalThis.performance?.now?.() ?? Date.now();
+const BURST_PULSE_SECONDS = 0.15;
 
 const DEFENSE_COLORS = Object.freeze({
   normal: '#f5d48a',
@@ -46,8 +44,14 @@ export class BattleRenderer {
     this.sprites = new SpriteResolver(assetManager);
     this.effectRenderer = effectRenderer;
     this.lastSnapshot = null;
+    this.gameTimeSeconds = 0;
     this.lastAttackTimers = new Map();
     this.burstPulses = new Map();
+  }
+
+  advanceGameTime(deltaSeconds) {
+    const delta = Number(deltaSeconds);
+    if (Number.isFinite(delta) && delta > 0) this.gameTimeSeconds += delta;
   }
 
   resize() {
@@ -172,11 +176,11 @@ export class BattleRenderer {
   #burstPulseScale(hero) {
     const previousTimer = this.lastAttackTimers.get(hero.id);
     if (previousTimer !== undefined && hero.attackTimer > previousTimer + 1) {
-      this.burstPulses.set(hero.id, nowMs() + BURST_PULSE_MS);
+      this.burstPulses.set(hero.id, this.gameTimeSeconds + BURST_PULSE_SECONDS);
     }
     this.lastAttackTimers.set(hero.id, hero.attackTimer);
-    const remaining = (this.burstPulses.get(hero.id) ?? 0) - nowMs();
-    return remaining > 0 ? 1 + 0.18 * (remaining / BURST_PULSE_MS) : 1;
+    const remaining = (this.burstPulses.get(hero.id) ?? 0) - this.gameTimeSeconds;
+    return remaining > 0 ? 1 + 0.18 * (remaining / BURST_PULSE_SECONDS) : 1;
   }
 
   #drawLevelBadge(context, point, level, cell) {
