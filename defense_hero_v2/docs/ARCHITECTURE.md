@@ -180,6 +180,10 @@ schema를 바꿀 때는 [`schemas.js`](../js/persistence/schemas.js), [`SaveRepo
 
 스킬 시전 반짝임은 타격이 아니므로 `type: 'skill_cast'`인 별도 시각 이벤트를 사용한다. 시전자 자신에게 적용되는 `visualOnly` 이벤트이며 `content/effects.js`의 `SKILL_CAST_EVENT_CONTRACT`가 필드를 고정한다. 피해 팝업이 없도록 `amount`를 넣지 않는다.
 
+스킬 타격(`actionKind: 'skill'`인 `hit` 이벤트) 시각은 즉시 터지지 않고 시전자(`sourceX`, `sourceY`)에서 대상 지점까지 약 0.26초 비행한 뒤 폭발한다. 비행과 피해 팝업 지연은 `EffectRenderer`만 관리하는 렌더 전용 표현이며, 시뮬레이션 피해는 기존처럼 동일 틱에 적용되므로 결정론에 영향을 주지 않는다.
+
+이펙트 수명, 팝업, 버스트 스프라이트 펄스는 실제 시간(wall-clock)이 아니라 게임 시간을 따른다. 게임 시간은 `BattleScreen`이 매 프레임 `paused ? 0 : delta × speed`를 `EffectRenderer.update()`와 `BattleRenderer.advanceGameTime()`에 전달하며 쌓이므로, 일시정지 중에는 시각이 얼고 ×2 배속에서는 게임과 함께 빨라진다.
+
 ## 12. 새 기능을 배치하는 기준
 
 - 숫자와 조합만 달라짐: `content/`에 선언한다.
