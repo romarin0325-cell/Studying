@@ -474,9 +474,9 @@
 
         .deck-slot {
             width: 100%;
-            height: 50px;
+            height: 44px;
             background: #333;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             border: 1px dashed #555;
             display: flex;
             align-items: center;
@@ -1204,20 +1204,20 @@
             <div id="collection-grid" class="card-grid"></div>
         </div>
         <div id="screen-deck" class="screen">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>덱 구성</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <h3 style="margin:4px 0;">덱 구성</h3>
                 <button onclick="RPG.toMenu()"
-                    style="background:#fff; color:#000; padding:5px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
+                    style="background:#fff; color:#000; padding:5px 12px; border:1px solid #ccc; cursor:pointer;">뒤로</button>
             </div>
-            <div style="margin-bottom:10px;">
+            <div style="margin-bottom:6px;">
                 <div id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉 (클릭하여 선택)</div>
                 <div id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견 (클릭하여 선택)</div>
                 <div id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">대장 (클릭하여 선택)</div>
             </div>
             <div style="flex:1; overflow-y:auto; border-top:1px solid #333;">
-                <div id="deck-card-list" class="card-grid"></div>
+                <div id="deck-card-list" class="card-grid" style="padding-bottom:15px;"></div>
             </div>
-            <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-bottom: 60px;">확인</button>
+            <button class="menu-btn" onclick="RPG.confirmDeck()" style="margin-top:6px; margin-bottom: 20px; padding:12px;">확인</button>
         </div>
         <div id="screen-chaos-roulette" class="screen">
             <div
@@ -1481,16 +1481,16 @@
 
     <div id="modal-lecture-view" class="modal" style="z-index: 150;">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 90vh;">
-            <h3 id="lecture-title">강의 제목</h3>
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <h3 id="lecture-title" style="margin: 0 0 6px 0;">강의 제목</h3>
+            <div style="display: flex; justify-content: center; margin-bottom: 6px;">
                 <div class="portrait lumi-modal-portrait" style="border-color: #448aff;">
                     <img data-image-src="루미.png" alt="Rumi">
                 </div>
             </div>
             <div id="lecture-content" class="modal-scroll"
-                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">
+                style="text-align: left; padding: 8px 10px; font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap;">
             </div>
-            <button onclick="RPG.closeLectureView()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+            <button onclick="RPG.closeLectureView()" style="margin-top:6px; width:100%; padding:8px;">닫기</button>
         </div>
     </div>
 
@@ -1514,27 +1514,25 @@
 
     <div id="modal-tutoring" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
-            <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <h3 style="margin:0;">루미의 개인과외</h3>
-                <div style="width:100%; display:flex; justify-content:flex-end;">
-                    <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:6px 10px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa;">Pro</button>
-                </div>
+                <button id="tutoring-model-btn" onclick="RPG.toggleLumiChatModel()" style="padding:4px 8px; border:1px solid #448aff; border-radius:6px; background:#1f1f1f; color:#81d4fa; font-size:0.85rem;">Pro</button>
             </div>
-            <div class="portrait lumi-modal-portrait" style="border-color: #448aff; margin: 0 auto 10px auto;">
+            <div class="portrait lumi-modal-portrait" style="border-color: #448aff; margin: 0 auto 6px auto;">
                 <img data-image-src="루미.png" alt="Rumi">
             </div>
             <div id="tutoring-content" class="modal-scroll"
-                style="text-align: left; padding: 10px; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 200px;">
+                style="text-align: left; padding: 8px 10px; font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 120px;">
                 수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
                 <button class="menu-btn" onclick="RPG.startTutoringSession()" style="flex: 1; margin-bottom: 0;">수업
                     시작</button>
                 <button id="btn-tutoring-quiz" class="menu-btn" onclick="RPG.startTutoringQuiz()"
                     style="flex: 1; margin-bottom: 0; display: none; border-color: #ffd700; color: #ffd700;">퀴즈
                     풀기</button>
             </div>
-            <button onclick="RPG.closePrivateTutoring()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+            <button onclick="RPG.closePrivateTutoring()" style="margin-top:6px; width:100%; padding:8px;">닫기</button>
         </div>
     </div>
 
