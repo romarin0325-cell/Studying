@@ -10,7 +10,11 @@
         ? Object.freeze(window.CARD_MUSIC_TRACKS.slice())
         : Object.freeze([]);
 
-    const PLAYBACK_RATES = Object.freeze([0.75, 1, 1.25, 1.5, 2]);
+    const PLAYBACK_RATES = Object.freeze([1, 1.25]);
+    const RATE_BUTTON_IDS = Object.freeze({
+        1: 'music-rate-1',
+        1.25: 'music-rate-125'
+    });
 
     const REPEAT_LABELS = {
         off: '반복 OFF',
@@ -350,6 +354,19 @@
             this.render();
         },
 
+        renderPlaybackRateControls() {
+            const playbackRate = Number(this.audio && this.audio.playbackRate) || 1;
+            const hasTrack = Boolean(this.getCurrentTrack());
+            PLAYBACK_RATES.forEach(rate => {
+                const button = document.getElementById(RATE_BUTTON_IDS[rate]);
+                if (!button) return;
+                const isActive = playbackRate === rate;
+                button.classList.toggle('is-active', isActive);
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                button.disabled = !hasTrack;
+            });
+        },
+
         cyclePlaybackRate() {
             if (!this.audio || !this.getCurrentTrack()) return;
             const currentRate = Number(this.audio.playbackRate) || 1;
@@ -526,10 +543,14 @@
                 trackButton.className = 'music-track-select';
                 trackButton.setAttribute('aria-label', `${track.title} 선택`);
                 trackButton.addEventListener('click', () => this.selectTrack(track.id));
+                const indexLabel = document.createElement('span');
+                indexLabel.className = 'music-track-row-index';
+                indexLabel.textContent = String(index + 1).padStart(2, '0');
                 title.className = 'music-track-row-title';
                 title.textContent = track.title;
                 artist.className = 'music-track-row-artist';
                 artist.textContent = track.artist;
+                trackButton.appendChild(indexLabel);
                 trackButton.appendChild(title);
                 trackButton.appendChild(artist);
 
@@ -545,7 +566,6 @@
             const title = document.getElementById('music-track-title');
             const meta = document.getElementById('music-track-meta');
             const playButton = document.getElementById('music-play-toggle');
-            const rate = document.getElementById('music-playback-rate');
             const repeat = document.getElementById('music-repeat-toggle');
             const shuffle = document.getElementById('music-shuffle-toggle');
             const status = document.getElementById('music-status');
@@ -556,14 +576,7 @@
                 playButton.textContent = this.audio.paused ? '▶' : '⏸';
                 playButton.setAttribute('aria-label', this.audio.paused ? '재생' : '일시정지');
             }
-            if (rate) {
-                const playbackRate = Number(this.audio.playbackRate) || 1;
-                rate.value = String(playbackRate);
-                if (rate.tagName !== 'SELECT') {
-                    rate.textContent = `${Number.isInteger(playbackRate) ? playbackRate.toFixed(1) : playbackRate}×`;
-                }
-                rate.setAttribute('aria-label', `재생 배속 ${playbackRate}배. 눌러서 변경`);
-            }
+            this.renderPlaybackRateControls();
             if (repeat) repeat.textContent = REPEAT_LABELS[this.repeatMode];
             if (shuffle) {
                 shuffle.textContent = this.shuffle ? '셔플 ON' : '셔플 OFF';
@@ -580,7 +593,6 @@
                 'music-play-toggle',
                 'music-seek-forward',
                 'music-next',
-                'music-playback-rate',
                 'music-repeat-toggle',
                 'music-shuffle-toggle',
                 'music-progress'

@@ -187,34 +187,7 @@ defense_hero/
 
 ## 테스트
 
-저장소 루트에서 Hero Core Defense의 단위·통합 테스트 전체를 실행한다.
-
-```powershell
-npm run test:defense-hero
-npm run test:defense-hero:local
-npm run test:defense-hero:browser
-```
-
-필요하면 Node 테스트 러너로 범위를 직접 나눠 실행할 수 있다.
-
-```powershell
-node --test "defense_hero/tests/unit/*.test.mjs"
-node --test "defense_hero/tests/integration/*.test.mjs"
-```
-
-콘텐츠 정의를 수정했다면 통합 데이터 검증도 실행한다.
-
-```powershell
-node --input-type=module -e "import('./defense_hero/js/data/content.js').then(m=>console.log(m.validateContent({throwOnError:true})))"
-```
-
-최종 완료 판정 전에는 저장소 루트의 전체 검증도 반드시 통과해야 한다.
-
-```powershell
-npm run verify
-```
-
-`npm run verify`에는 정적 검사, `test:defense-hero`, 모바일 가로 Playwright 스모크가 연결되어 있다. 브라우저 스모크는 새 게임→배치→실제 전투 판정→성장→다음 지도→재실행/계속하기와 0.2배 조준, 44px 탭, 세로 회전 가드를 확인한다.
+Defense Hero V1은 사용하지 않는다. `npm run verify`는 이 폴더를 검사하지 않는다. 현재 활성 디펜스는 `defense_hero_v2/`다.
 
 ## 디버그 API
 
