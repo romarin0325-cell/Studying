@@ -45,7 +45,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'basic_melee_hit',
     displayName: '근접 기본 타격',
-    durationSeconds: 0.3,
+    durationSeconds: 0.42,
     shape: 'triple_slash_and_star_flash',
     particleCount: 5,
     radiusScale: 0.55,
@@ -53,7 +53,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'basic_ranged_hit',
     displayName: '원거리 기본 타격',
-    durationSeconds: 0.20,
+    durationSeconds: 0.4,
     shape: 'small_flash_and_afterglow',
     particleCount: 4,
     radiusScale: 0.38,
@@ -61,7 +61,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'basic_shotgun_hit',
     displayName: '샷건 기본 타격',
-    durationSeconds: 0.28,
+    durationSeconds: 0.48,
     shape: 'three_trails_and_impacts',
     trailCount: 3,
     particleCountPerImpact: 3,
@@ -70,7 +70,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'basic_area_hit',
     displayName: '범위 기본 타격',
-    durationSeconds: 0.38,
+    durationSeconds: 0.58,
     shape: 'expanding_wave',
     radiusCells: 2,
     particleCount: 12,
@@ -78,7 +78,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'skill_cast',
     displayName: '스킬 시전 반짝임',
-    durationSeconds: 0.55,
+    durationSeconds: 0.75,
     shape: 'sparkle_ring_on_caster',
     particleCount: 6,
     radiusScale: 0.65,
@@ -86,7 +86,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'skill_single_hit',
     displayName: '단일 스킬 타격',
-    durationSeconds: 0.48,
+    durationSeconds: 0.72,
     shape: 'large_glyph_and_focus_flash',
     particleCount: 16,
     radiusScale: 0.85,
@@ -94,7 +94,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'skill_area_hit',
     displayName: '범위 스킬 타격',
-    durationSeconds: 0.60,
+    durationSeconds: 0.9,
     shape: 'glyph_and_expanding_wave',
     radiusCells: 3,
     particleCount: 24,
@@ -102,7 +102,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'status_apply',
     displayName: '상태이상 적용',
-    durationSeconds: 0.45,
+    durationSeconds: 0.85,
     shape: 'status_icon_rise',
     particleCount: 4,
     radiusScale: 0.35,
@@ -110,7 +110,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'critical_hit',
     displayName: '치명타 강조',
-    durationSeconds: 0.30,
+    durationSeconds: 0.6,
     shape: 'amplified_impact',
     particleCount: 8,
     radiusScale: 0.75,
@@ -119,7 +119,7 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
   {
     id: 'advantage_hit',
     displayName: '상성 우위 강조',
-    durationSeconds: 0.34,
+    durationSeconds: 0.65,
     shape: 'advantage_outline',
     particleCount: 6,
     radiusScale: 0.82,
