@@ -100,7 +100,7 @@ async function run() {
             const libraryRect = library.getBoundingClientRect();
             const list = document.getElementById('music-track-list');
             const favoriteRect = list.querySelector('.music-favorite-toggle').getBoundingClientRect();
-            MusicPlayer.setPlaybackRate(1.5);
+            MusicPlayer.setPlaybackRate(1.25);
             const result = {
                 active: modal.classList.contains('active'),
                 noHorizontalOverflow: panel.scrollWidth <= panel.clientWidth + 1,
@@ -120,7 +120,8 @@ async function run() {
                 title: document.getElementById('music-track-title').textContent,
                 source: document.getElementById('music-audio').getAttribute('src'),
                 visibleHeadingRemoved: !document.getElementById('music-player-heading'),
-                rateControlTag: document.getElementById('music-playback-rate').tagName,
+                rateOneTag: document.getElementById('music-rate-1').tagName,
+                rateBoostTag: document.getElementById('music-rate-125').tagName,
                 playbackRate: MusicPlayer.audio.playbackRate,
                 defaultPlaybackRate: MusicPlayer.audio.defaultPlaybackRate
             };
@@ -140,12 +141,13 @@ async function run() {
         assert.strictEqual(musicModalLayout.title, MUSIC_FIXTURE_TRACKS[0].title);
         assert.strictEqual(musicModalLayout.source, MUSIC_FIXTURE_TRACKS[0].src);
         assert.strictEqual(musicModalLayout.visibleHeadingRemoved, true);
-        assert.strictEqual(musicModalLayout.rateControlTag, 'BUTTON');
+        assert.strictEqual(musicModalLayout.rateOneTag, 'BUTTON');
+        assert.strictEqual(musicModalLayout.rateBoostTag, 'BUTTON');
         assert.strictEqual(musicModalLayout.listHasOwnScroll, true);
         assert(musicModalLayout.favoriteWidth >= 44);
         assert(musicModalLayout.favoriteHeight >= 44);
-        assert.strictEqual(musicModalLayout.playbackRate, 1.5);
-        assert.strictEqual(musicModalLayout.defaultPlaybackRate, 1.5);
+        assert.strictEqual(musicModalLayout.playbackRate, 1.25);
+        assert.strictEqual(musicModalLayout.defaultPlaybackRate, 1.25);
 
         const imageState = await normal.page.evaluate(async () => {
             const waitUntil = async predicate => {
@@ -257,7 +259,8 @@ async function run() {
                 listHasOwnScroll: list.scrollHeight > list.clientHeight,
                 favoriteWidth: favoriteRect.width,
                 favoriteHeight: favoriteRect.height,
-                rateControlTag: document.getElementById('music-playback-rate').tagName
+                rateOneTag: document.getElementById('music-rate-1').tagName,
+                rateBoostTag: document.getElementById('music-rate-125').tagName
             };
             MusicPlayer.close();
             return result;
@@ -272,7 +275,8 @@ async function run() {
         assert.strictEqual(compactMusicModalBounds.listHasOwnScroll, true);
         assert(compactMusicModalBounds.favoriteWidth >= 44);
         assert(compactMusicModalBounds.favoriteHeight >= 44);
-        assert.strictEqual(compactMusicModalBounds.rateControlTag, 'BUTTON');
+        assert.strictEqual(compactMusicModalBounds.rateOneTag, 'BUTTON');
+        assert.strictEqual(compactMusicModalBounds.rateBoostTag, 'BUTTON');
 
         const portraitModalBounds = await normal.page.evaluate(() => {
             RPG.openInfoModal('모바일 경계 검사', '긴 내용 '.repeat(300));

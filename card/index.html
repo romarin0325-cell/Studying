@@ -1623,9 +1623,10 @@
             </div>
 
             <div class="music-option-row">
-                <label for="music-playback-rate">배속</label>
-                <button id="music-playback-rate" type="button" onclick="MusicPlayer.cyclePlaybackRate()"
-                    aria-label="재생 배속 변경">1.0×</button>
+                <button id="music-rate-1" type="button" class="music-rate-toggle" onclick="MusicPlayer.setPlaybackRate(1)"
+                    aria-pressed="true" aria-label="1배속">1×</button>
+                <button id="music-rate-125" type="button" class="music-rate-toggle" onclick="MusicPlayer.setPlaybackRate(1.25)"
+                    aria-pressed="false" aria-label="1.25배속">1.25×</button>
                 <button id="music-repeat-toggle" type="button" onclick="MusicPlayer.toggleRepeat()">전체 반복</button>
                 <button id="music-shuffle-toggle" type="button" onclick="MusicPlayer.toggleShuffle()" aria-pressed="false">셔플 OFF</button>
             </div>
@@ -1644,7 +1645,6 @@
                 </div>
             </section>
 
-            <p class="music-background-note">창을 닫아도 음악은 계속 재생됩니다. 모바일 잠금화면 제어는 브라우저 지원 범위에서 동작합니다.</p>
             <button type="button" class="menu-btn music-close-button" onclick="MusicPlayer.close()">닫기</button>
             <audio id="music-audio" preload="metadata"></audio>
         </div>

@@ -18,13 +18,6 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         src: '他人役の予選落ち.mp3'
     }),
     Object.freeze({
-        id: 'スキの未払金.mp3',
-        title: 'スキの未払金',
-        artist: 'Card RPG',
-        album: 'Card RPG Music',
-        src: 'スキの未払金.mp3'
-    }),
-    Object.freeze({
         id: '月面町内会長.mp3',
         title: '月面町内会長',
         artist: 'Card RPG',

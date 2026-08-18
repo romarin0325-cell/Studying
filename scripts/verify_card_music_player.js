@@ -126,7 +126,7 @@ function createHarness({ tracks = TRACKS, savedPrefs = null, includeManifest = t
         'modal-music-player', 'music-track-title', 'music-track-meta', 'music-status',
         'music-progress', 'music-current-time', 'music-duration', 'music-previous',
         'music-seek-backward', 'music-play-toggle', 'music-seek-forward', 'music-next',
-        'music-playback-rate', 'music-repeat-toggle', 'music-shuffle-toggle',
+        'music-rate-1', 'music-rate-125', 'music-repeat-toggle', 'music-shuffle-toggle',
         'music-track-count', 'music-track-list', 'music-mode-all', 'music-mode-favorites'
     ];
     ids.forEach(id => {
@@ -178,7 +178,7 @@ async function verifyMainPlayerFlow() {
         savedPrefs: {
             trackId: TRACKS[1].id,
             currentTime: 30,
-            playbackRate: 1.5,
+            playbackRate: 1.25,
             repeatMode: 'all',
             shuffle: false
         }
@@ -193,10 +193,11 @@ async function verifyMainPlayerFlow() {
     assert.strictEqual(audio.src, TRACKS[1].src);
     assert.strictEqual(audio.preservesPitch, true);
     assert.strictEqual(audio.currentTime, 30);
-    assert.strictEqual(audio.defaultPlaybackRate, 1.5);
-    assert.strictEqual(audio.playbackRate, 1.5);
+    assert.strictEqual(audio.defaultPlaybackRate, 1.25);
+    assert.strictEqual(audio.playbackRate, 1.25);
     assert.strictEqual(mediaSession.metadata.title, TRACKS[1].title);
-    assert.strictEqual(elements.get('music-playback-rate').textContent, '1.5×');
+    assert.strictEqual(elements.get('music-rate-1').getAttribute('aria-pressed'), 'false');
+    assert.strictEqual(elements.get('music-rate-125').getAttribute('aria-pressed'), 'true');
     assert.strictEqual(elements.get('music-track-count').textContent, '3곡');
     assert.strictEqual(elements.get('music-track-list').children.length, 3);
     assert.strictEqual(elements.get('music-play-toggle').disabled, false);
@@ -206,7 +207,7 @@ async function verifyMainPlayerFlow() {
     await player.next();
     assert.strictEqual(player.getCurrentTrack().id, TRACKS[2].id);
     assert.strictEqual(audio.paused, true, 'selecting the next track while paused must remain paused');
-    assert.strictEqual(audio.playbackRate, 1.5, 'restored rate must survive a track load');
+    assert.strictEqual(audio.playbackRate, 1.25, 'restored rate must survive a track load');
 
     player.open();
     assert.strictEqual(elements.get('modal-music-player').classList.contains('active'), true);
@@ -224,14 +225,17 @@ async function verifyMainPlayerFlow() {
     await player.selectTrack(TRACKS[2].id);
     assert.strictEqual(audio.paused, true, 'selecting a track while paused must remain paused');
 
-    player.setPlaybackRate('1.25');
-    assert.strictEqual(audio.defaultPlaybackRate, 1.25);
+    player.setPlaybackRate('1');
+    assert.strictEqual(audio.defaultPlaybackRate, 1);
     await player.next();
-    assert.strictEqual(audio.playbackRate, 1.25, 'selected rate must survive the next track load');
+    assert.strictEqual(audio.playbackRate, 1, 'selected rate must survive the next track load');
+    player.setPlaybackRate(1.5);
+    assert.strictEqual(audio.playbackRate, 1, 'unsupported rates must fall back to 1x');
     player.cyclePlaybackRate();
-    assert.strictEqual(audio.playbackRate, 1.5);
-    assert.strictEqual(elements.get('music-playback-rate').textContent, '1.5×');
-    [2, 0.75, 1, 1.25, 1.5].forEach(expectedRate => {
+    assert.strictEqual(audio.playbackRate, 1.25);
+    assert.strictEqual(elements.get('music-rate-1').getAttribute('aria-pressed'), 'false');
+    assert.strictEqual(elements.get('music-rate-125').getAttribute('aria-pressed'), 'true');
+    [1, 1.25].forEach(expectedRate => {
         player.cyclePlaybackRate();
         assert.strictEqual(audio.playbackRate, expectedRate);
     });
@@ -317,13 +321,13 @@ async function verifyMainPlayerFlow() {
     assert.strictEqual(elements.get('music-status').textContent, '즐겨찾기 곡이 없습니다.');
 
     const prefs = saved.get('cardRpgMusicPrefs');
-    assert.strictEqual(prefs.playbackRate, 1.5);
+    assert.strictEqual(prefs.playbackRate, 1.25);
     assert.strictEqual(prefs.repeatMode, 'all');
     assert.strictEqual(prefs.shuffle, true);
     assert.deepStrictEqual(prefs.favoriteTrackIds, []);
     assert.strictEqual(prefs.playlistMode, 'all');
     assert.strictEqual(mediaSession.positionState.duration, 180);
-    assert.strictEqual(mediaSession.positionState.playbackRate, 1.5);
+    assert.strictEqual(mediaSession.positionState.playbackRate, 1.25);
 
     audio.dispatch('error');
     assert(elements.get('music-status').textContent.includes(player.getCurrentTrack().src));
@@ -378,8 +382,14 @@ function verifyHtmlIntegration() {
     assert(dataPosition >= 0 && dataPosition < playerPosition, 'music data must load before the player');
     assert(html.includes('id="music-track-list"'));
     assert(html.includes('id="music-mode-favorites"'));
-    assert(html.includes('id="music-playback-rate" type="button"'), 'playback rate must use the themed button');
+    assert(html.includes('id="music-rate-1" type="button"'), '1x rate must use a themed toggle');
+    assert(html.includes('id="music-rate-125" type="button"'), '1.25x rate must use a themed toggle');
+    assert(!html.includes('id="music-playback-rate"'), 'legacy single rate control must be removed');
+    assert(!html.includes('music-background-note'), 'browser-policy note must be removed');
+    assert(!html.includes('창을 닫아도 음악은 계속 재생됩니다'));
     assert(!html.includes('<h3 id="music-player-heading">음악재생</h3>'), 'redundant visible heading must be removed');
+    const musicData = fs.readFileSync(path.join(process.cwd(), 'card', 'music_data.js'), 'utf8');
+    assert(!musicData.includes('スキの未払金'), 'unpaid-love track must be removed from the playlist');
 }
 
 async function run() {
