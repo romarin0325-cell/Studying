@@ -9,12 +9,13 @@ function heroAssetIds(heroId) {
   };
 }
 
-function trait(id, level, name, conditions, effects) {
+function trait(id, level, name, conditions, effects, description = '') {
   return {
     id,
     level,
     name,
     displayName: name,
+    description,
     conditions,
     effects,
   };
@@ -89,16 +90,16 @@ export const HEROES = deepFreeze([
     traits: [
       trait('rumi_star_form', 4, '별의형태', [], [
         { type: 'provide_aura', buffId: 'star_powder', range: 8 },
-      ]),
+      ], '범위 8 오라로 아군에게 스타파우더(사거리 +1)를 뿌린다.'),
       trait('rumi_moon_form', 4, '달의형태', [], [
         { type: 'provide_aura', buffId: 'moon_bless', range: 8 },
-      ]),
+      ], '범위 8 오라로 아군에게 달의축복(공격 속도 15% 증가)을 건다.'),
       trait('rumi_dream_form', 6, '꿈의형태', [], [
         { type: 'increase_aura_range_tier', target: 'all_allied_aura_providers', maximumRange: 10 },
-      ]),
+      ], '아군 오라 제공자의 오라 범위를 한 단계 넓힌다. (최대 10)'),
       trait('rumi_sun_form', 6, '태양의형태', [], [
         { type: 'provide_aura', buffId: 'sun_bless', range: 8 },
-      ]),
+      ], '범위 8 오라로 아군에게 태양의축복(물리 피해 +20%, 치명타 피해 +50%)을 건다.'),
     ],
     assetIds: heroAssetIds('rumi'),
   },
@@ -135,21 +136,21 @@ export const HEROES = deepFreeze([
         { type: 'target_has_status', statusId: 'darkness' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '어둠 상태의 적에게 주는 피해가 2배가 된다.'),
       trait('luna_genocide', 4, '제노사이드', [
         { type: 'source_has_no_named_buff' },
       ], [
         { type: 'add_crit_chance', value: 0.15, target: 'source' },
-      ]),
+      ], '버프를 받지 않은 동안 치명타 확률 +15%p.'),
       trait('luna_evil_eye', 6, '마안', [], [
         { type: 'floor_matchup_multiplier', value: 1, dimension: 'attack_type' },
-      ]),
+      ], '상성 배수의 하한을 1.0으로 고정해 불리한 상성에서도 피해가 깎이지 않는다.'),
       trait('luna_god_killer', 6, '갓킬러', [
         { type: 'is_boss' },
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'multiply_damage', value: 3, damageKind: 'direct' },
-      ]),
+      ], '보스에게 스킬로 주는 피해가 3배가 된다.'),
     ],
     assetIds: heroAssetIds('luna'),
   },
@@ -185,22 +186,22 @@ export const HEROES = deepFreeze([
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'apply_status', statusId: 'slow', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '기본 공격이 적중하면 감속을 건다.'),
       trait('cinderella_divine_piercing', 4, '디바인피어싱', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'apply_status', statusId: 'curse', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '스킬이 적중하면 저주를 건다.'),
       trait('cinderella_shattering_beat', 6, '샤터링비트', [
         { type: 'target_has_any_debuff' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '디버프가 있는 적에게 주는 피해가 1.5배가 된다.'),
       trait('cinderella_miracle_spell', 6, '미라클스펠', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'apply_status', statusId: 'stun', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '스킬이 적중하면 기절을 건다.'),
     ],
     assetIds: heroAssetIds('cinderella'),
   },
@@ -235,20 +236,20 @@ export const HEROES = deepFreeze([
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '스킬 피해가 2배가 된다.'),
       trait('zeke_heavy_impact', 4, '헤비임팩트', [
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'apply_status', statusId: 'slow', chance: 0.5, trigger: 'after_hit', rngScope: 'hit' },
-      ]),
+      ], '기본 공격 적중 시 50% 확률로 감속을 건다.'),
       trait('zeke_prominence', 6, '프로미넌스', [], [
         { type: 'provide_aura', buffId: 'sun_bless', range: 6 },
-      ]),
+      ], '범위 6 오라로 아군에게 태양의축복(물리 피해 +20%, 치명타 피해 +50%)을 건다.'),
       trait('zeke_ragnarok', 6, '라그나로크', [
         { type: 'core_below_ratio', ratio: 0.5, inclusive: false },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '코어 내구도가 50% 미만이면 주는 피해가 2배가 된다.'),
     ],
     assetIds: heroAssetIds('zeke'),
   },
@@ -283,20 +284,20 @@ export const HEROES = deepFreeze([
         { type: 'target_element', element: 'fire' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '화속성 적에게 주는 피해가 1.5배가 된다.'),
       trait('snow_rabbit_cold_chaser', 4, '콜드체이서', [
         { type: 'target_has_status', statusId: 'slow' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '감속된 적에게 주는 피해가 1.5배가 된다.'),
       trait('snow_rabbit_rabbit_hole', 6, '래빗홀', [], [
         { type: 'add_team_crit_chance', value: 0.20, targetTag: 'rabbit', dedupeKey: 'rabbit_hole' },
-      ]),
+      ], '토끼 태그 영웅들의 팀 치명타 확률 +20%p. (중복 제공자 1회만 적용)'),
       trait('snow_rabbit_silver_burst', 6, '실버버스트', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '스킬 피해가 1.5배가 된다.'),
     ],
     assetIds: heroAssetIds('snow_rabbit'),
   },
@@ -330,18 +331,18 @@ export const HEROES = deepFreeze([
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'apply_status', statusId: 'corrosion', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '기본 공격이 적중하면 부식을 건다.'),
       trait('avalanche_maid_quick_service', 4, '퀵서비스', [], [
         { type: 'multiply_skill_cooldown', value: 0.80, target: 'source' },
-      ]),
+      ], '스킬 쿨다운이 20% 줄어든다.'),
       trait('avalanche_maid_russian_roulette', 6, '러시안룰렛', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'random_damage_multiplier', choices: [0.5, 2], weights: [1, 1], rngScope: 'skill_action' },
-      ]),
+      ], '스킬 피해가 무작위로 ×0.5 또는 ×2가 된다.'),
       trait('avalanche_maid_moonlight_service', 6, '문라이트서비스', [], [
         { type: 'provide_aura', buffId: 'moon_bless', range: 6 },
-      ]),
+      ], '범위 6 오라로 아군에게 달의축복(공격 속도 15% 증가)을 건다.'),
     ],
     assetIds: heroAssetIds('avalanche_maid'),
   },
@@ -375,18 +376,18 @@ export const HEROES = deepFreeze([
         { type: 'target_has_status', statusId: 'darkness' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '어둠 상태의 적에게 주는 피해가 1.5배가 된다.'),
       trait('night_rabbit_long_jump', 4, '롱점프', [], [
         { type: 'add_range', value: 1, target: 'source' },
-      ]),
+      ], '공격 범위가 +1 늘어난다.'),
       trait('night_rabbit_rabbit_hole', 6, '래빗홀', [], [
         { type: 'add_team_crit_chance', value: 0.20, targetTag: 'rabbit', dedupeKey: 'rabbit_hole' },
-      ]),
+      ], '토끼 태그 영웅들의 팀 치명타 확률 +20%p. (중복 제공자 1회만 적용)'),
       trait('night_rabbit_full_moon_jump', 6, '풀문점프', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '스킬 피해가 1.5배가 된다.'),
     ],
     assetIds: heroAssetIds('night_rabbit'),
   },
@@ -420,19 +421,19 @@ export const HEROES = deepFreeze([
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'apply_status', statusId: 'corrosion', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '기본 공격이 적중하면 부식을 건다.'),
       trait('guardian_world_shield', 4, '월드실드', [], [
         { type: 'multiply_core_damage', value: 0.5, target: 'core', dedupeKey: 'world_shield' },
-      ]),
+      ], '코어가 받는 피해가 절반이 된다.'),
       trait('guardian_battlefield', 6, '배틀필드', [], [
         { type: 'provide_aura', buffId: 'earth_bless', range: 4 },
-      ]),
+      ], '범위 4 오라로 아군에게 대지의축복(직접 피해 +20%)을 건다.'),
       trait('guardian_ground_zero', 6, '그라운드제로', [
         { type: 'target_has_status', statusId: 'slow' },
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '감속된 적에게 스킬 피해가 2배가 된다.'),
     ],
     assetIds: heroAssetIds('guardian'),
   },
@@ -472,22 +473,22 @@ export const HEROES = deepFreeze([
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'apply_status', statusId: 'corrosion', chance: 0.5, trigger: 'after_hit', rngScope: 'pellet' },
-      ]),
+      ], '기본 공격 산탄 알마다 50% 확률로 부식을 건다.'),
       trait('storm_sage_downburst', 4, '다운버스트', [
         { type: 'attack_kind', attackKind: 'skill' },
       ], [
         { type: 'apply_status', statusId: 'slow', chance: 1, trigger: 'after_hit' },
-      ]),
+      ], '스킬 적중 시 감속을 건다.'),
       trait('storm_sage_earth_resonance', 6, '어스레조넌스', [
         { type: 'source_has_buff', buffId: 'earth_bless' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '대지의축복 버프를 받는 동안 주는 피해가 2배가 된다.'),
       trait('storm_sage_sky_breaker', 6, '스카이브레이커', [
         { type: 'target_defense_type', defenseType: 'air' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '공중형 적에게 주는 피해가 2배가 된다.'),
     ],
     assetIds: heroAssetIds('storm_sage'),
   },
@@ -522,21 +523,21 @@ export const HEROES = deepFreeze([
         { type: 'target_element', element: 'dark' },
       ], [
         { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-      ]),
+      ], '어둠 속성 적에게 주는 피해가 1.5배가 된다.'),
       trait('lightning_sage_thunder_execution', 4, '썬더엑시큐션', [
         { type: 'is_boss' },
         { type: 'attack_kind', attackKind: 'basic' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct' },
-      ]),
+      ], '보스에게 기본 공격 피해가 2배가 된다.'),
       trait('lightning_sage_chain_judgment', 6, '체인저지먼트', [], [
         { type: 'multiply_damage_by_debuff_count', amountPerDebuff: 0.5, uniqueStatusIdsOnly: true },
-      ]),
+      ], '적에게 걸린 고유 디버프 하나당 피해가 +50%씩 증가한다.'),
       trait('lightning_sage_revenge_thunder', 6, '리벤지썬더', [
         { type: 'core_damaged_previous_wave' },
       ], [
         { type: 'multiply_damage', value: 2, damageKind: 'direct', expiresAfterWave: true },
-      ]),
+      ], '이전 웨이브에 코어가 피해를 입었다면 이번 웨이브 동안 주는 피해가 2배가 된다.'),
     ],
     assetIds: heroAssetIds('lightning_sage'),
   },

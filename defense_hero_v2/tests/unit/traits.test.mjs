@@ -74,6 +74,8 @@ test('all ten heroes expose exactly two Lv4 and two Lv6 generic trait choices', 
       assert.equal(typeof trait.id, 'string');
       assert.ok(trait.id.length > 0);
       assert.equal(typeof trait.name, 'string');
+      assert.equal(typeof trait.description, 'string', `${trait.id} description must be a string`);
+      assert.ok(trait.description.length > 0, `${trait.id} description is required`);
       assert.ok(Array.isArray(trait.conditions));
       assert.ok(Array.isArray(trait.effects));
       assert.ok(trait.effects.length > 0);

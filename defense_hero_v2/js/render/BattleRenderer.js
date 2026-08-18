@@ -1,8 +1,10 @@
 import { ViewportLayout, logicalToViewPoint } from './ViewportLayout.js';
 import { SpriteResolver, drawResolvedSprite } from './SpriteResolver.js';
 import { HERO_BY_ID } from '../content/heroes.js';
+import { AURA_BUFF_BY_ID } from '../content/buffs.js';
 
 const BURST_PULSE_SECONDS = 0.15;
+const BUFF_GLOW_PERIOD_SECONDS = 2.4;
 
 const DEFENSE_COLORS = Object.freeze({
   normal: '#f5d48a',
@@ -45,8 +47,13 @@ export class BattleRenderer {
     this.effectRenderer = effectRenderer;
     this.lastSnapshot = null;
     this.gameTimeSeconds = 0;
+    this.reduced = false;
     this.lastAttackTimers = new Map();
     this.burstPulses = new Map();
+  }
+
+  setReduced(reduced) {
+    this.reduced = Boolean(reduced);
   }
 
   advanceGameTime(deltaSeconds) {
@@ -148,6 +155,7 @@ export class BattleRenderer {
     for (const hero of heroes) {
       if (!hero.placed) continue;
       const point = this.layout.logicalCellCenterToCanvas(hero.x, hero.y);
+      this.#drawBuffGlow(context, hero, point, cell);
       let size = cell * 1.35;
       if (HERO_BY_ID[hero.id]?.attack?.archetype === 'burst') {
         size *= this.#burstPulseScale(hero);
@@ -169,8 +177,58 @@ export class BattleRenderer {
         context.fillText(hero.name.slice(0, 1), point.x, point.y);
         context.restore();
       }
+      this.#drawBuffDots(context, hero, point, cell);
       this.#drawLevelBadge(context, point, hero.level, cell);
     }
+  }
+
+  #heroBuffs(hero) {
+    return (hero.buffs ?? []).map((buffId) => AURA_BUFF_BY_ID[buffId]).filter(Boolean);
+  }
+
+  #drawBuffGlow(context, hero, point, cell) {
+    if (this.reduced) return;
+    const buffs = this.#heroBuffs(hero);
+    if (buffs.length === 0) return;
+    context.save();
+    buffs.forEach((buff, index) => {
+      const pulse = 0.5 + 0.5 * Math.sin(this.gameTimeSeconds * (Math.PI * 2 / BUFF_GLOW_PERIOD_SECONDS) + index * 1.3);
+      const radius = cell * (0.56 + index * 0.1) + cell * 0.04 * pulse;
+      const alphaHex = Math.round((0.2 + 0.22 * pulse) * 255).toString(16).padStart(2, '0');
+      const gradient = context.createRadialGradient(point.x, point.y, radius * 0.35, point.x, point.y, radius);
+      gradient.addColorStop(0, `${buff.color}00`);
+      gradient.addColorStop(0.75, `${buff.color}00`);
+      gradient.addColorStop(1, `${buff.color}${alphaHex}`);
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = `${buff.color}${alphaHex}`;
+      context.lineWidth = Math.max(1, cell * 0.045);
+      context.beginPath();
+      context.arc(point.x, point.y, radius * 0.94, 0, Math.PI * 2);
+      context.stroke();
+    });
+    context.restore();
+  }
+
+  #drawBuffDots(context, hero, point, cell) {
+    const buffs = this.#heroBuffs(hero);
+    if (buffs.length === 0) return;
+    context.save();
+    buffs.forEach((buff, index) => {
+      const x = point.x + (index - (buffs.length - 1) / 2) * cell * 0.2;
+      const y = point.y + cell * 0.5;
+      context.fillStyle = '#19142ddd';
+      context.beginPath();
+      context.arc(x, y, cell * 0.085, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = buff.color;
+      context.beginPath();
+      context.arc(x, y, cell * 0.055, 0, Math.PI * 2);
+      context.fill();
+    });
+    context.restore();
   }
 
   #burstPulseScale(hero) {

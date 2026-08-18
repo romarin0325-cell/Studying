@@ -418,6 +418,32 @@ async function runOrientationTransition(browser, baseUrl, artifactsDirectory) {
   }
 }
 
+async function verifyInWaveHeroSheet(page, label) {
+  await page.locator('[data-hero-card]').first().click();
+  const backdrop = page.locator('[data-hero-sheet]');
+  await backdrop.waitFor({ state: 'visible' });
+  const sheetState = await page.evaluate(() => {
+    const body = document.querySelector('[data-hero-sheet] [data-sheet-body]');
+    const controls = [...document.querySelectorAll('[data-hero-sheet] [data-level-up], [data-hero-sheet] [data-level-trait]')];
+    return {
+      phase: globalThis.__heroDefenseV2Debug.getState().battle.snapshot.phase,
+      text: body.textContent,
+      controlCount: controls.length,
+      enabledControls: controls.filter((button) => !button.disabled).length,
+    };
+  });
+  assert.equal(sheetState.phase, 'WAVE_RUNNING', `${label}: hero sheet must open while the wave is running`);
+  assert.ok(sheetState.text.includes('공격력'), `${label}: derived stats are missing from the in-battle sheet`);
+  assert.ok(sheetState.text.includes('전투 중에는 보기만 가능해'), `${label}: read-only notice is missing from the in-battle sheet`);
+  assert.ok(!sheetState.text.includes('multiply damage'), `${label}: raw effect type leaked into the hero sheet`);
+  assert.ok(sheetState.controlCount > 0, `${label}: hero sheet lost its growth controls`);
+  assert.equal(sheetState.enabledControls, 0, `${label}: in-battle hero sheet must keep growth controls disabled`);
+  await page.locator('[data-action="close-sheet"]').click();
+  await backdrop.waitFor({ state: 'hidden' });
+  const phaseAfter = await page.evaluate(() => globalThis.__heroDefenseV2Debug.getState().battle.snapshot.phase);
+  assert.equal(phaseAfter, 'WAVE_RUNNING', `${label}: closing the in-battle sheet disturbed the active wave`);
+}
+
 async function completeFirstWaveAtDoubleSpeed(page, viewport, screenshotPath) {
   const label = describeViewport(viewport);
   await page.locator('[data-action="auto-place"]').click();
@@ -436,6 +462,8 @@ async function completeFirstWaveAtDoubleSpeed(page, viewport, screenshotPath) {
   assert.equal(started.phase, 'WAVE_RUNNING', `${label}: wave did not start`);
   assert.equal(started.wave.number, 1, `${label}: the wrong wave started`);
   assert.equal(started.wave.completedCount, 0, `${label}: wave completion was counted before deterministic stepping`);
+
+  await verifyInWaveHeroSheet(page, label);
 
   const performance = await measureActiveWavePerformance(page, label);
   console.log(`Hero Defense V2 active-wave performance ${label}: ${performance.framesPerSecond.toFixed(1)}fps, update p95 ${performance.updateP95.toFixed(3)}ms, render p95 ${performance.renderP95.toFixed(3)}ms`);
