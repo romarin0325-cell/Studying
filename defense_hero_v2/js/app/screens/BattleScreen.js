@@ -2,6 +2,13 @@ import { GameLoop } from '../../core/GameLoop.js';
 import { BATTLE_PHASE, FIXED_TICK_SECONDS } from '../../core/enums.js';
 import { BattleSession } from '../../battle/BattleSession.js';
 import { allHeroesPlaced } from '../../battle/systems/PlacementSystem.js';
+import { getAttackInterval } from '../../battle/systems/BasicAttackSystem.js';
+import { getSkillCooldown } from '../../battle/systems/SkillSystem.js';
+import { getEffectiveRange } from '../../battle/systems/TargetingSystem.js';
+import { buffEffects } from '../../battle/systems/AuraSystem.js';
+import { AURA_BUFF_BY_ID } from '../../content/buffs.js';
+import { ATTACK_FAMILIES, LEVEL_DAMAGE_MULTIPLIERS } from '../../content/combat.js';
+import { STATUS_BY_ID } from '../../content/statuses.js';
 import { BattleRenderer } from '../../render/BattleRenderer.js';
 import { EffectRenderer } from '../../render/EffectRenderer.js';
 import { drawResolvedSprite } from '../../render/SpriteResolver.js';
@@ -12,6 +19,15 @@ const PHASE_LABELS = Object.freeze({
 
 function traitOptions(hero, level) {
   return (hero.definition.traits ?? []).filter((trait) => trait.level === level);
+}
+
+function buffTotal(hero, effectType) {
+  return buffEffects(hero, effectType).reduce((sum, effect) => sum + Number(effect.value), 0);
+}
+
+function formatNumber(value, digits = 1) {
+  const rounded = Number(value.toFixed(digits));
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
 }
 
 export class BattleScreen {
@@ -33,6 +49,8 @@ export class BattleScreen {
     this.effectRenderer = null;
     this.loop = null;
     this.selectedHeroId = formation?.mainId ?? checkpoint?.formation?.mainId;
+    this.openSheetHeroId = null;
+    this.lastSheetSignature = '';
     this.resizeObserver = null;
     this.resultTimer = null;
     this.audioContext = null;
@@ -87,6 +105,7 @@ export class BattleScreen {
       assetManager: this.assetManager,
       effectRenderer: this.effectRenderer,
     });
+    this.renderer.setReduced(this.settings.reducedEffects);
     this.#paintHeroAvatars();
     this.#bindEvents();
     this.#resize();
@@ -152,7 +171,10 @@ export class BattleScreen {
     for (const card of this.root.querySelectorAll('[data-hero-card]')) {
       card.addEventListener('click', () => {
         this.selectedHeroId = card.dataset.heroCard;
-        if (this.session.state.phase === BATTLE_PHASE.INTERMISSION) this.#openHeroSheet(this.selectedHeroId);
+        const phase = this.session.state.phase;
+        if ([BATTLE_PHASE.WAVE_RUNNING, BATTLE_PHASE.INTERMISSION].includes(phase)) {
+          this.#openHeroSheet(this.selectedHeroId);
+        }
         this.#refreshUi(this.session.snapshot());
       });
     }
@@ -268,18 +290,81 @@ export class BattleScreen {
   #openHeroSheet(heroId) {
     const hero = this.session.state.heroes.find((candidate) => candidate.id === heroId);
     if (!hero) return;
+    this.openSheetHeroId = heroId;
+    this.lastSheetSignature = '';
+    const sheet = this.root.querySelector('[data-hero-sheet]');
+    sheet.hidden = false;
+    this.#renderHeroSheet();
+  }
+
+  #sheetSignature(hero) {
+    const state = this.session.state;
+    return [
+      state.phase,
+      state.crystals,
+      hero.level,
+      [...hero.buffs.keys()].join(','),
+      Object.values(hero.selectedTraits).filter(Boolean).join(','),
+    ].join('|');
+  }
+
+  #renderHeroSheet() {
+    const sheet = this.root?.querySelector('[data-hero-sheet]');
+    if (!sheet || sheet.hidden || !this.openSheetHeroId) return;
+    const hero = this.session.state.heroes.find((candidate) => candidate.id === this.openSheetHeroId);
+    if (!hero) return;
+    const signature = this.#sheetSignature(hero);
+    if (signature === this.lastSheetSignature) return;
+    this.lastSheetSignature = signature;
+
+    const state = this.session.state;
+    const readOnly = state.phase === BATTLE_PHASE.WAVE_RUNNING;
     const nextLevel = Math.min(6, hero.level + 1);
     const options = traitOptions(hero, nextLevel);
-    const canGrow = this.session.state.crystals > 0 && hero.level < 6;
+    const canGrow = !readOnly && state.crystals > 0 && hero.level < 6;
     const controls = options.length
-      ? options.map((trait) => `<button class="trait-choice secondary-button" type="button" data-level-trait="${trait.id}" ${canGrow ? '' : 'disabled'}><b>${trait.name}</b><small>${trait.effects.map((effect) => effect.type.replaceAll('_', ' ')).join(' · ')}</small></button>`).join('')
+      ? options.map((trait) => `<button class="trait-choice secondary-button" type="button" data-level-trait="${trait.id}" ${canGrow ? '' : 'disabled'}><b>${trait.name}</b><small>${trait.description}</small></button>`).join('')
       : `<button class="primary-button" type="button" data-level-up ${canGrow ? '' : 'disabled'}>꿈의 결정 1개로 Lv${nextLevel}</button>`;
-    const sheet = this.root.querySelector('[data-hero-sheet]');
-    sheet.querySelector('[data-sheet-body]').innerHTML = `<span class="eyebrow">영웅 성장 · 결정 ${this.session.state.crystals}</span><h2>${hero.definition.name} <small>Lv${hero.level}</small></h2><p>${hero.definition.skill.name} · ${hero.definition.skill.cooldown}초</p><div class="selected-traits">${Object.values(hero.selectedTraits).filter(Boolean).map((id) => `<span>${id}</span>`).join('') || '<span>선택 특성 없음</span>'}</div><div class="level-controls">${controls}</div><p class="sheet-note">웨이브 사이에는 카드를 고른 뒤 전장을 눌러 자유롭게 재배치할 수 있어.</p>`;
-    sheet.hidden = false;
-    sheet.querySelector('[data-level-up]')?.addEventListener('click', () => this.#levelHero(heroId, null));
+
+    const levelMultiplier = LEVEL_DAMAGE_MULTIPLIERS[hero.level] ?? 1;
+    const attackType = hero.definition.attack.attackType;
+    const familyBonus = ATTACK_FAMILIES.physical.includes(attackType)
+      ? buffTotal(hero, 'physical_damage_bonus')
+      : ATTACK_FAMILIES.magical.includes(attackType)
+        ? buffTotal(hero, 'magic_damage_bonus')
+        : 0;
+    const damage = hero.definition.attack.damage * levelMultiplier * (1 + buffTotal(hero, 'direct_damage_bonus') + familyBonus);
+    const skill = hero.definition.skill;
+    const skillDamage = skill.damage * levelMultiplier;
+    const onHitNames = (skill.onHitEffects ?? [])
+      .map((effect) => STATUS_BY_ID[effect.statusId]?.displayName ?? effect.statusId)
+      .filter((name, index, list) => list.indexOf(name) === index);
+    const buffChips = [...hero.buffs.keys()]
+      .map((buffId) => AURA_BUFF_BY_ID[buffId])
+      .filter(Boolean)
+      .map((buff) => `<span class="buff-chip" style="border-color:${buff.color}; color:${buff.color}">${buff.displayName}<small>${buff.description}</small></span>`)
+      .join('');
+    const selectedTraits = Object.values(hero.selectedTraits).filter(Boolean)
+      .map((traitId) => (hero.definition.traits ?? []).find((trait) => trait.id === traitId))
+      .filter(Boolean)
+      .map((trait) => `<span><b>${trait.name}</b> · ${trait.description}</span>`)
+      .join('') || '<span>선택 특성 없음</span>';
+
+    sheet.querySelector('[data-sheet-body]').innerHTML = `<span class="eyebrow">영웅 성장 · 결정 ${state.crystals}</span><h2>${hero.definition.name} <small>Lv${hero.level}</small></h2>
+      <div class="stat-grid">
+        <div><small>공격력</small><strong>${formatNumber(damage)}</strong></div>
+        <div><small>공격 간격</small><strong>${formatNumber(getAttackInterval(state, hero), 2)}초</strong></div>
+        <div><small>사거리</small><strong>${getEffectiveRange(state, hero)}</strong></div>
+        <div><small>스킬 쿨다운</small><strong>${formatNumber(getSkillCooldown(state, hero), 1)}초</strong></div>
+      </div>
+      <p class="sheet-skill"><b>${skill.name}</b> · 피해 ${formatNumber(skillDamage)} · ${skill.shape === 'area' ? '범위 3' : '단일'}${onHitNames.length ? ` · 적중 시 ${onHitNames.join(' · ')}` : ''}</p>
+      <div class="buff-chips">${buffChips || '<span class="buff-empty">활성 버프 없음</span>'}</div>
+      <div class="selected-traits">${selectedTraits}</div>
+      <div class="level-controls">${controls}</div>
+      <p class="sheet-note">${readOnly ? '전투 중에는 보기만 가능해. 레벨업과 특성 선택은 웨이브 사이에 할 수 있어.' : '웨이브 사이에는 카드를 고른 뒤 전장을 눌러 자유롭게 재배치할 수 있어.'}</p>`;
+    sheet.querySelector('[data-level-up]')?.addEventListener('click', () => this.#levelHero(this.openSheetHeroId, null));
     for (const button of sheet.querySelectorAll('[data-level-trait]')) {
-      button.addEventListener('click', () => this.#levelHero(heroId, button.dataset.levelTrait));
+      button.addEventListener('click', () => this.#levelHero(this.openSheetHeroId, button.dataset.levelTrait));
     }
   }
 
@@ -292,6 +377,8 @@ export class BattleScreen {
   #closeHeroSheet() {
     const sheet = this.root?.querySelector('[data-hero-sheet]');
     if (sheet) sheet.hidden = true;
+    this.openSheetHeroId = null;
+    this.lastSheetSignature = '';
   }
 
   #refreshUi(snapshot) {
@@ -321,6 +408,10 @@ export class BattleScreen {
       const cooldown = Math.max(runtime.attackTimer, runtime.skillTimer);
       card.querySelector('[data-cooldown]').style.setProperty('--cooldown', String(Math.min(1, cooldown / Math.max(1, runtime.definition.skill.cooldown))));
     }
+    if (this.openSheetHeroId) {
+      if ([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT].includes(snapshot.phase)) this.#closeHeroSheet();
+      else this.#renderHeroSheet();
+    }
   }
 
   #resize() {
@@ -333,6 +424,7 @@ export class BattleScreen {
     this.settings = settings;
     this.effectRenderer?.setReduced(settings.reducedEffects);
     this.effectRenderer?.setDamageNumbers(settings.damageNumbers);
+    this.renderer?.setReduced(settings.reducedEffects);
   }
 
   debugAutoPlace() {

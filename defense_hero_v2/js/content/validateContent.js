@@ -155,6 +155,9 @@ function validateBuffs(errors) {
   exactIdSet(BUFFS, EXPECTED_BUFF_IDS, 'buffs', errors);
   uniqueIds(BUFFS, 'buffs', errors);
   for (const buff of BUFFS) {
+    if (typeof buff.displayName !== 'string' || !buff.displayName) errors.push(`buffs.${buff.id}: displayName is required.`);
+    if (typeof buff.description !== 'string' || !buff.description) errors.push(`buffs.${buff.id}: description is required.`);
+    if (typeof buff.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(buff.color)) errors.push(`buffs.${buff.id}: color must be a #rrggbb hex value.`);
     if (!Array.isArray(buff.effects) || buff.effects.length === 0) errors.push(`buffs.${buff.id}: effects are required.`);
     for (const effect of buff.effects ?? []) {
       if (!BUFF_EFFECT_TYPE_IDS.includes(effect.type)) errors.push(`buffs.${buff.id}: unknown effect '${effect.type}'.`);
@@ -285,6 +288,7 @@ function validateHeroes(sets, errors) {
       if (![4, 6].includes(definition.level)) errors.push(`${traitContext}: trait level must be 4 or 6.`);
       else byLevel[definition.level] += 1;
       if (typeof definition.name !== 'string' || !definition.name) errors.push(`${traitContext}: name is required.`);
+      if (typeof definition.description !== 'string' || !definition.description) errors.push(`${traitContext}: description is required.`);
       if (!Array.isArray(definition.conditions) || !Array.isArray(definition.effects) || definition.effects.length === 0) {
         errors.push(`${traitContext}: conditions/effects contract is invalid.`);
         continue;

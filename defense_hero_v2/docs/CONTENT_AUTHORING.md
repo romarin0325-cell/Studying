@@ -97,18 +97,18 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
   traits: [
     trait('example_hero_trait_a', 4, '특성A', [], [
       { type: 'add_range', value: 1, target: 'source' },
-    ]),
+    ], '공격 범위가 +1 늘어난다.'),
     trait('example_hero_trait_b', 4, '특성B', [], [
       { type: 'multiply_skill_cooldown', value: 0.8, target: 'source' },
-    ]),
+    ], '스킬 쿨다운이 20% 줄어든다.'),
     trait('example_hero_trait_c', 6, '특성C', [], [
       { type: 'provide_aura', buffId: 'gale', range: 6 },
-    ]),
+    ], '범위 6 오라로 아군에게 질풍(스킬 쿨다운 20% 감소)을 건다.'),
     trait('example_hero_trait_d', 6, '특성D', [
       { type: 'is_boss' },
     ], [
       { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-    ]),
+    ], '보스에게 주는 피해가 1.5배가 된다.'),
   ],
   assetIds: heroAssetIds('example_hero'),
 }
@@ -125,6 +125,7 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 - 스킬 쿨다운은 현재 `5`, `7`, `9`초만 검증을 통과한다.
 - 스킬 `shape`는 `single` 또는 `area`다. `single` 반경은 `0`, `area` 반경은 `3`이어야 한다.
 - 특성은 정확히 네 개이며 Lv4 두 개, Lv6 두 개다.
+- 특성에는 한국어 `description`이 필수다. 특성 선택 버튼과 정보 시트가 원시 effect 유형 대신 이 문구를 그대로 표시하므로, 효과 수치를 담은 완성된 문장으로 쓴다.
 - `tags`는 팀 효과의 대상 판별에 사용된다. 현재 `rabbit` 태그가 래빗홀 치명타 효과에 사용된다.
 
 공격 유형별 추가 필드:
@@ -145,14 +146,14 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 
 ## 4. 특성: 조건과 효과 레지스트리
 
-특성은 런타임 함수를 데이터에 넣지 않고 조건/효과 레코드로 작성한다.
+특성은 런타임 함수를 데이터에 넣지 않고 조건/효과 레코드로 작성한다. 마지막 인자인 한국어 `description`은 UI에 그대로 노출된다.
 
 ```js
 trait('snow_rabbit_cold_chaser', 4, '콜드체이서', [
   { type: 'target_has_status', statusId: 'slow' },
 ], [
   { type: 'multiply_damage', value: 1.5, damageKind: 'direct' },
-])
+], '감속된 적에게 주는 피해가 1.5배가 된다.')
 ```
 
 실행 흐름은 다음과 같다.
@@ -219,6 +220,8 @@ trait('snow_rabbit_cold_chaser', 4, '콜드체이서', [
 {
   id: 'gale',
   displayName: '질풍',
+  description: '스킬 쿨다운 20% 감소',
+  color: '#82f0d4',
   stacking: 'unique_by_id',
   effects: [
     { type: 'skill_cooldown_multiplier', value: 0.80, combine: 'multiply' },
@@ -227,6 +230,8 @@ trait('snow_rabbit_cold_chaser', 4, '콜드체이서', [
 ```
 
 - 각 버프에는 하나 이상의 `effects`가 필요하다.
+- `displayName`과 한국어 `description`은 필수다. 정보 시트의 버프 칩이 두 필드를 그대로 표시한다.
+- `color`는 `#rrggbb` 형식 필수다. 영웅 스프라이트 뒤 글로우와 발밑 버프 점, 정보 시트 칩의 색으로 사용된다.
 - 효과 `type`은 `BUFF_EFFECT_TYPE_IDS`에 있어야 하고 `value`는 양의 유한수여야 한다.
 - 오라 범위는 현재 `4`, `6`, `8`, `10` 티어만 허용된다.
 - 오라는 배치된 제공자와 대상의 셀 중앙 간 유클리드 거리를 사용하며 경계값을 포함한다. 제공자 자신도 범위 안이면 버프를 받는다.

@@ -89,6 +89,10 @@ CSS transform, browser zoom, DPR 때문에 `offsetX / cellWidth`를 직접 계�
 - 390×844 → 844×390 → 390×844 회전 뒤 같은 logical placement가 유지된다.
 - hero sheet를 닫은 뒤 canvas가 다시 pointer input을 받아야 한다.
 
+영웅 정보 시트는 웨이브 사이뿐 아니라 `WAVE_RUNNING` 중에도 카드를 눌러 열 수 있다. 전투 중에는 읽기 전용으로 레벨업·특성 버튼이 비활성화되고, derived 스탯(공격력·공격 간격·사거리·스킬 쿨다운), 스킬 효과, 버프 칩이 표시된다. derived 스탯은 `getAttackInterval()`, `getSkillCooldown()`, `getEffectiveRange()`와 버프 합산 결과를 그대로 사용해 전투 계산과 어긋나지 않게 유지한다.
+
+버프는 영웅 스프라이트 위에서 두 겹으로 표시된다. 스프라이트 뒤의 버프 색 글로우는 게임 시간 기준 느린 pulse로 돈다(일시정지 시 멈추고, reduced motion 설정에서는 생략한다). 발밑에는 버프 색 점 행을 항상 그려 reduced 설정과 무관하게 보유 버프를 식별할 수 있다. 색과 이름은 `buffs.js`의 `color`·`displayName`에서 가져온다.
+
 짧은 landscape에서는 action control을 한 줄 44px로 유지해 hero rail 높이를 확보한다. difficulty chip은 작은 화면에서도 Easy와 잠긴 Normal/Hard가 모두 보여야 하며 `display: none`으로 숨기지 않는다.
 
 ## 5. 방향과 sprite 선택
