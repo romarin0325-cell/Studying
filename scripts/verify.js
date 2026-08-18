@@ -1,6 +1,6 @@
 'use strict';
 
-const { execSync, spawnSync } = require('child_process');
+const { execFileSync, execSync, spawnSync } = require('child_process');
 
 const TARGET_STEPS = {
   card: ['lint:card', 'test:card:smoke', 'test:card:browser'],
@@ -24,9 +24,20 @@ function gitLines(args) {
   }
 }
 
+function refExists(ref) {
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--end-of-options', `${ref}^{commit}`], {
+      stdio: ['ignore', 'pipe', 'ignore']
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 function upstreamBase() {
-  for (const candidate of ['origin/main', 'origin/master']) {
-    if (gitLines(`rev-parse --verify ${candidate}`).length > 0) return candidate;
+  for (const candidate of ['origin/main', 'origin/master', 'main', 'master']) {
+    if (refExists(candidate)) return candidate;
   }
   return '';
 }
@@ -69,8 +80,10 @@ function selectTargets(files) {
 }
 
 function runNpm(script) {
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const result = spawnSync(npmCmd, ['run', script], { stdio: 'inherit' });
+  const result = spawnSync('npm', ['run', script], {
+    stdio: 'inherit',
+    shell: true
+  });
   if (result.status !== 0) {
     process.exit(result.status || 1);
   }

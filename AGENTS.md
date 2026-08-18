@@ -7,7 +7,7 @@ Functional correctness of the browser app is more important than refactoring or 
 Before opening a PR or marking the task done, run:
 - npm run verify
 
-`npm run verify` inspects the current branch and working tree, then runs checks only for the games that changed.
+`npm run verify` inspects the current branch and working tree, then runs checks only for the games that changed. It prefers `origin/main` as the base and falls back to local `main` only when that remote ref is missing.
 
 Current targets:
 - `card/`, `card_remaster/`: card lint, smoke, and browser checks
