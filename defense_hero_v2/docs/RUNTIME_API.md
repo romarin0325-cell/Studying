@@ -485,7 +485,7 @@ tick
   -> target.id
 ```
 
-범위 impact는 target spawn order 순으로, shotgun damage impact는 target spawn order와 pellet index 순으로 처리한다. skill timer와 basic timer는 독립이며 둘 다 준비되면 같은 tick에 skill과 basic이 모두 생성된다.
+범위·노바 impact는 target spawn order 순으로, shotgun damage impact는 target spawn order와 pellet index 순으로, laser impact는 빔 진행 방향 거리 순(동률 시 spawn order)으로 처리한다. skill timer와 basic timer는 독립이며 둘 다 준비되면 같은 tick에 skill과 basic이 모두 생성된다.
 
 아래 변경은 금지한다.
 
@@ -621,12 +621,13 @@ target tie-break를 변경하면 action lock과 RNG 소비 순서가 바뀐다. 
 
 - `getAttackInterval(state, hero)`: 기본 interval × aura × trait.
 - `resolveShotgunHits(source, target, enemies, { includeMisses = false, ...options }?)`: pellet별 가장 가까운 충돌을 계산. 기본 반환에는 적중 pellet만 포함되고, `includeMisses: true`일 때 target이 없는 miss descriptor도 포함.
-- `createBasicAttackAction(state, hero, delta, landscape?)`: timer 감소, target/impact/pellet lock, 통계와 다음 timer 설정.
-- `resolveBasicAttackAction(state, action)`: 잠긴 impact에 피해·상태·visual event 적용.
+- `resolveLaserHits(source, target, enemies, { range, normalRadius, bossRadius }?)`: 대상 방향 직선 복도 내 모든 적을 빔 진행 거리 순(동률 시 spawn order)으로 반환.
+- `createBasicAttackAction(state, hero, delta, landscape?)`: timer 감소, target/impact/pellet lock, 통계와 다음 timer 설정. nova는 영웅 중심 반경(`attack.radius`)에 적이 없으면 timer를 소모하지 않고 대기한다.
+- `resolveBasicAttackAction(state, action)`: 잠긴 impact에 피해·상태·visual event 적용. nova/laser는 cast당 visualOnly event 하나 + impact별 `suppressEffect` 피해 event를 발행한다.
 - `updateBasicAttackForHero(...)`: create+resolve 편의 함수. 전체 전투 pipeline에서는 사용하지 말고 ActionSystem을 사용.
 - `applyOnHitStatuses(...)`: skill과 공유하는 after-hit 상태 적용 함수.
 
-shotgun은 pellet마다 독립 target, critical roll, status roll을 가진다. visual trail event와 damage event가 분리되고 damage event는 중복 이펙트를 막기 위해 `suppressEffect`를 쓸 수 있다.
+shotgun은 pellet마다 독립 target, critical roll, status roll을 가진다. nova/laser도 impact마다 독립 피해·critical·status 판정을 한다. visual event와 damage event가 분리되고 damage event는 중복 이펙트를 막기 위해 `suppressEffect`를 쓸 수 있다.
 
 ### SkillSystem
 

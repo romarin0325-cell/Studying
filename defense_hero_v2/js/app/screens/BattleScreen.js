@@ -357,7 +357,7 @@ export class BattleScreen {
         <div><small>사거리</small><strong>${getEffectiveRange(state, hero)}</strong></div>
         <div><small>스킬 쿨다운</small><strong>${formatNumber(getSkillCooldown(state, hero), 1)}초</strong></div>
       </div>
-      <p class="sheet-skill"><b>${skill.name}</b> · 피해 ${formatNumber(skillDamage)} · ${skill.shape === 'area' ? '범위 3' : '단일'}${onHitNames.length ? ` · 적중 시 ${onHitNames.join(' · ')}` : ''}</p>
+      <p class="sheet-skill"><b>${skill.name}</b> · 피해 ${formatNumber(skillDamage)} · ${skill.shape === 'area' ? '범위 3' : skill.shape === 'melee' ? '근접 한방' : '단일'}${onHitNames.length ? ` · 적중 시 ${onHitNames.join(' · ')}` : ''}</p>
       <div class="buff-chips">${buffChips || '<span class="buff-empty">활성 버프 없음</span>'}</div>
       <div class="selected-traits">${selectedTraits}</div>
       <div class="level-controls">${controls}</div>

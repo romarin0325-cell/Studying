@@ -76,6 +76,20 @@ export const EFFECT_PRESET_DEFINITIONS = deepFreeze([
     particleCount: 12,
   },
   {
+    id: 'basic_nova_hit',
+    displayName: '노바 기본 타격',
+    durationSeconds: 0.55,
+    shape: 'lightning_spokes_and_ring',
+    spokeCount: 6,
+    radiusCells: 2.5,
+  },
+  {
+    id: 'basic_laser_hit',
+    displayName: '레이저 기본 타격',
+    durationSeconds: 0.34,
+    shape: 'piercing_beam',
+  },
+  {
     id: 'skill_cast',
     displayName: '스킬 시전 반짝임',
     durationSeconds: 0.75,

@@ -84,7 +84,7 @@ export class FormationScreen {
   #openInfo(id) {
     const hero = [...MAIN_HEROES, ...NORMAL_HEROES].find((candidate) => candidate.id === id);
     const sheet = this.root.querySelector('[data-sheet]');
-    sheet.querySelector('[data-sheet-body]').innerHTML = `<span class="eyebrow">${roleNames[hero.role]}</span><h2>${hero.name}</h2><h3>${hero.skill.name}</h3><p>${hero.skill.shape === 'area' ? `범위 ${hero.skill.radius}` : '단일'} · 쿨타임 ${hero.skill.cooldown}초 · 피해 ${hero.skill.damage}</p><div class="trait-list">${hero.traits.map((trait) => `<div><b>Lv${trait.level} ${trait.name}</b><small>${trait.effects.map((effect) => effect.type.replaceAll('_', ' ')).join(' · ')}</small></div>`).join('')}</div>`;
+    sheet.querySelector('[data-sheet-body]').innerHTML = `<span class="eyebrow">${roleNames[hero.role]}</span><h2>${hero.name}</h2><h3>${hero.skill.name}</h3><p>${hero.skill.shape === 'area' ? `범위 ${hero.skill.radius}` : hero.skill.shape === 'melee' ? '근접 한방' : '단일'} · 쿨타임 ${hero.skill.cooldown}초 · 피해 ${hero.skill.damage}</p><div class="trait-list">${hero.traits.map((trait) => `<div><b>Lv${trait.level} ${trait.name}</b><small>${trait.effects.map((effect) => effect.type.replaceAll('_', ' ')).join(' · ')}</small></div>`).join('')}</div>`;
     sheet.hidden = false;
   }
 
