@@ -1071,6 +1071,25 @@
                 padding: 12px;
             }
         }
+
+        #modal-bonus-pool-editor .modal-content {
+            padding: 10px;
+        }
+        #modal-bonus-pool-editor h3 {
+            margin: 0 0 5px 0;
+        }
+        #modal-bonus-pool-editor #bonus-pool-editor-summary {
+            margin: 0 0 4px 0 !important;
+        }
+        #modal-bonus-pool-editor .bonus-preset-row {
+            margin: 0 0 5px 0;
+        }
+        #modal-bonus-pool-editor #bonus-pool-preset-status {
+            margin: 0 0 4px 0 !important;
+        }
+        #modal-bonus-pool-editor .modal-scroll {
+            margin-bottom: 5px;
+        }
     </style>
     <link rel="stylesheet" href="music_player.css">
 </head>
@@ -1347,7 +1366,11 @@
 
     <div id="modal-bonus-pool-editor" class="modal">
         <div class="modal-content" style="height:auto; min-height:320px; width: 360px;">
-            <h3>보너스 카드 덱 편집</h3>
+            <div style="position:relative; margin-bottom: 5px;">
+                <h3 style="margin: 0;">보너스 카드 덱 편집</h3>
+                <button onclick="RPG.randomizeBonusPoolSelection()"
+                    style="position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #4fc3f7; color:#4fc3f7; border-radius:5px;">(랜덤)</button>
+            </div>
             <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0 (최대 15)</p>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
             <p id="bonus-pool-preset-status" style="font-size:0.78rem; color:#b3e5fc; margin:0 0 8px 0;">다음 런 적용 세팅: 1</p>
@@ -2909,6 +2932,22 @@
 
             resetBonusPoolSelection() {
                 this.pendingActiveBonusPoolIds = [];
+                this.persistPendingActiveBonusPoolIds();
+                this.renderBonusPoolEditor();
+                this.updateBonusPoolEditorButton();
+            },
+
+            randomizeBonusPoolSelection() {
+                const unlockedCards = this.getUnlockedBonusCards();
+                if (!unlockedCards || unlockedCards.length === 0) return;
+
+                const maxActive = GAME_CONSTANTS.MAX_BONUS_POOL_ACTIVE || 15;
+                const limit = Math.min(unlockedCards.length, maxActive);
+
+                const shuffled = [...unlockedCards].sort(() => 0.5 - Math.random());
+                const selectedIds = shuffled.slice(0, limit).map(card => card.id);
+
+                this.pendingActiveBonusPoolIds = selectedIds;
                 this.persistPendingActiveBonusPoolIds();
                 this.renderBonusPoolEditor();
                 this.updateBonusPoolEditorButton();
