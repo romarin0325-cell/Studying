@@ -11,6 +11,8 @@ const LIFE_BY_PRESET = Object.freeze({
   basic_ranged_hit: 0.4,
   basic_shotgun_hit: 0.48,
   basic_area_hit: 0.58,
+  basic_nova_hit: 0.55,
+  basic_laser_hit: 0.34,
   skill_cast: 0.75,
   skill_single_hit: 0.72,
   skill_area_hit: 0.9,
@@ -200,6 +202,56 @@ export class EffectRenderer {
       case 'basic_area_hit':
         drawRing(context, point.x, point.y, radius * (0.4 + progress * 0.6), color, fade, 3);
         break;
+      case 'basic_nova_hit': {
+        // Jagged lightning spokes radiate from the caster; jitter stays
+        // index-seeded so the bolts are stable frame to frame.
+        const reach = radius * (0.35 + progress * 0.65);
+        const spokeCount = 6;
+        context.lineJoin = 'miter';
+        for (let index = 0; index < spokeCount; index += 1) {
+          const baseAngle = (index * Math.PI * 2) / spokeCount + 0.42;
+          const cos = Math.cos(baseAngle);
+          const sin = Math.sin(baseAngle);
+          const drawSpoke = (width, style, alpha) => {
+            context.globalAlpha = alpha;
+            context.strokeStyle = style;
+            context.lineWidth = width;
+            context.beginPath();
+            for (let segment = 0; segment <= 3; segment += 1) {
+              const fraction = segment / 3;
+              const distance = reach * (0.18 + fraction * 0.82);
+              const side = (segment + index) % 2 === 0 ? 1 : -1;
+              const jitter = segment === 0 || segment === 3 ? 0 : cell * 0.16 * side;
+              const vx = point.x + cos * distance - sin * jitter;
+              const vy = point.y + sin * distance + cos * jitter;
+              if (segment === 0) context.moveTo(vx, vy); else context.lineTo(vx, vy);
+            }
+            context.stroke();
+          };
+          drawSpoke(Math.max(3, cell * 0.11), color, fade * 0.55);
+          drawSpoke(Math.max(1.5, cell * 0.05), '#ffffff', fade);
+        }
+        drawRing(context, point.x, point.y, reach, color, fade * 0.45, 2);
+        if (!this.reduced) drawRing(context, point.x, point.y, reach * 0.55, '#fff', fade * 0.35, 1.5);
+        break;
+      }
+      case 'basic_laser_hit': {
+        const source = effectSourcePoint(layout, effect, point);
+        const drawBeam = (width, style, alpha) => {
+          context.globalAlpha = alpha;
+          context.strokeStyle = style;
+          context.lineWidth = width;
+          context.beginPath();
+          context.moveTo(source.x, source.y);
+          context.lineTo(point.x, point.y);
+          context.stroke();
+        };
+        if (!this.reduced) drawBeam(cell * 0.5, color, fade * 0.30);
+        drawBeam(cell * 0.24, color, fade * 0.65);
+        drawBeam(Math.max(2, cell * 0.09), '#ffffff', fade * 0.9);
+        drawRing(context, point.x, point.y, cell * (0.1 + progress * 0.22), color, fade, 2.5);
+        break;
+      }
       case 'skill_cast': {
         context.globalAlpha = fade;
         context.strokeStyle = '#ffffff';

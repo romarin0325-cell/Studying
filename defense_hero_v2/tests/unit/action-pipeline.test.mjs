@@ -53,7 +53,8 @@ function runtimeHero({
         range: 6,
         interval: attackInterval,
         damage: attackDamage,
-        radius: archetype === 'area' ? 2 : undefined,
+        radius: archetype === 'area' ? 2 : archetype === 'nova' ? 2.5 : undefined,
+        ...(archetype === 'laser' ? { normalCollisionRadius: 0.45, bossCollisionRadius: 0.6 } : {}),
       },
       skill: {
         attackType: 'normal',
@@ -296,4 +297,116 @@ test('shotgun impacts preserve pellet independence while resolving by target spa
   assert.equal(Boolean(spawn2.statuses.poison), false);
   assert.equal(Boolean(spawn3.statuses.poison), true);
   assert.equal(state.rngDrawCount, 6, 'each pellet consumes its critical roll then its own status roll');
+});
+
+test('nova waits for enemies inside the hero-centered radius and strikes them in spawn order', () => {
+  const hero = runtimeHero({
+    id: 'nova-caster',
+    archetype: 'nova',
+    attackDamage: 20,
+    attackInterval: 2.5,
+    attackTimer: 0,
+    skillTimer: 99,
+  });
+  Object.assign(hero.definition.attack, { range: 4 });
+  const outside = runtimeEnemy({ id: 'outside', spawnOrder: 1, progress: 30, x: 3.5, y: 0.5 });
+  const insideLate = runtimeEnemy({ id: 'inside-late', spawnOrder: 3, progress: 10, x: 2, y: 1.5 });
+  const insideEarly = runtimeEnemy({ id: 'inside-early', spawnOrder: 2, progress: 20, x: 1.5, y: 2.5 });
+  const state = runtimeState([hero], [outside, insideLate, insideEarly], [0.99, 0.99]);
+
+  const action = createBasicAttackAction(state, hero, 0);
+  assert.equal(action.target.id, 'outside', 'trigger targeting still priorit path progress within range');
+  assert.deepEqual(action.impacts.map(({ target }) => target.id), ['inside-early', 'inside-late']);
+  resolveBasicAttackAction(state, action);
+
+  const novaVisuals = state.events.filter(({ visualOnly }) => visualOnly);
+  assert.equal(novaVisuals.length, 1);
+  assert.deepEqual([novaVisuals[0].x, novaVisuals[0].y], [0.5, 0.5], 'nova bursts from the caster, not the target');
+  assert.equal(novaVisuals[0].effectPreset, 'basic_nova_hit');
+  assert.equal(novaVisuals[0].radius, 2.5);
+  const damageEvents = state.events.filter(({ effectPreset, visualOnly }) => (
+    effectPreset === 'basic_nova_hit' && !visualOnly
+  ));
+  assert.deepEqual(damageEvents.map(({ targetId }) => targetId), ['inside-early', 'inside-late']);
+  assert.ok(damageEvents.every(({ suppressEffect, attackArchetype }) => suppressEffect && attackArchetype === 'nova'));
+  assert.equal(outside.hp, 100, 'enemies inside trigger range but outside the nova radius stay untouched');
+  assert.equal(hero.attackTimer, 2.5);
+  assert.equal(state.rngDrawCount, 2, 'each struck enemy consumes one critical roll');
+});
+
+test('nova holds its swing while only out-of-radius enemies are in range', () => {
+  const hero = runtimeHero({
+    id: 'nova-holder',
+    archetype: 'nova',
+    attackTimer: 0,
+    skillTimer: 99,
+  });
+  Object.assign(hero.definition.attack, { range: 4 });
+  const distant = runtimeEnemy({ id: 'distant', spawnOrder: 1, progress: 9, x: 3.5, y: 0.5 });
+  const state = runtimeState([hero], [distant], [0.99]);
+
+  assert.equal(createBasicAttackAction(state, hero, 0), null);
+  assert.equal(hero.attackTimer, 0, 'the timer is not consumed while waiting for enemies to close in');
+  assert.equal(hero.stats.basicAttacks, 0);
+  assert.equal(state.events.length, 0);
+});
+
+test('laser pierces every enemy along the corridor in distance order with one beam event', () => {
+  const hero = runtimeHero({
+    id: 'laser-caster',
+    archetype: 'laser',
+    attackDamage: 24,
+    attackInterval: 3,
+    attackTimer: 0,
+    skillTimer: 99,
+  });
+  Object.assign(hero.definition.attack, { range: 8 });
+  const far = runtimeEnemy({ id: 'far', spawnOrder: 1, progress: 40, x: 6.5, y: 0.5 });
+  const near = runtimeEnemy({ id: 'near', spawnOrder: 3, progress: 20, x: 2.5, y: 0.5 });
+  const side = runtimeEnemy({ id: 'side', spawnOrder: 2, progress: 30, x: 4.5, y: 2 });
+  const behind = runtimeEnemy({ id: 'behind', spawnOrder: 4, progress: 10, x: -2.5, y: 0.5 });
+  const state = runtimeState([hero], [far, near, side, behind], [0.99, 0.99]);
+
+  const action = createBasicAttackAction(state, hero, 0);
+  assert.equal(action.target.id, 'far');
+  assert.deepEqual(action.impacts.map(({ target }) => target.id), ['near', 'far']);
+  resolveBasicAttackAction(state, action);
+
+  const beams = state.events.filter(({ visualOnly }) => visualOnly);
+  assert.equal(beams.length, 1);
+  assert.equal(beams[0].effectPreset, 'basic_laser_hit');
+  assert.deepEqual([beams[0].sourceX, beams[0].sourceY], [0.5, 0.5]);
+  assert.deepEqual([beams[0].x, beams[0].y], [8.5, 0.5], 'beam runs the full attack range toward the target');
+  assert.deepEqual([beams[0].vectorX, beams[0].vectorY], [1, 0]);
+  const damageEvents = state.events.filter(({ effectPreset, visualOnly }) => (
+    effectPreset === 'basic_laser_hit' && !visualOnly
+  ));
+  assert.deepEqual(damageEvents.map(({ targetId }) => targetId), ['near', 'far']);
+  assert.ok(damageEvents.every(({ suppressEffect, attackArchetype }) => suppressEffect && attackArchetype === 'laser'));
+  assert.equal(side.hp, 100, 'enemies off the corridor are not pierced');
+  assert.equal(behind.hp, 100, 'enemies behind the caster are not pierced');
+  assert.equal(state.rngDrawCount, 2, 'each pierced enemy consumes one critical roll');
+});
+
+test('melee skill shape is a single-target strike tagged with the melee archetype', () => {
+  const hero = runtimeHero({
+    id: 'melee-skill-caster',
+    attackTimer: 99,
+    skillTimer: 0,
+    skillShape: 'melee',
+    skillDamage: 73,
+  });
+  const primary = runtimeEnemy({ id: 'primary', spawnOrder: 1, progress: 9, x: 2.5, y: 0.5 });
+  const bystander = runtimeEnemy({ id: 'bystander', spawnOrder: 2, progress: 8, x: 2.4, y: 0.7 });
+  const state = runtimeState([hero], [primary, bystander], [0.99]);
+
+  const action = createSkillAction(state, hero, 0);
+  assert.deepEqual(action.impacts.map(({ target }) => target.id), ['primary']);
+  resolveSkillAction(state, action);
+
+  const damageEvents = state.events.filter(({ effectPreset }) => effectPreset === 'skill_single_hit');
+  assert.equal(damageEvents.length, 1);
+  assert.equal(damageEvents[0].attackArchetype, 'melee');
+  assert.equal(damageEvents[0].targetId, 'primary');
+  assert.equal(bystander.hp, 100, 'melee skills never splash');
 });

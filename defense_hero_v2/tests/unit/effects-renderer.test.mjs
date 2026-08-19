@@ -280,3 +280,43 @@ test('ranged effects draw from the source while each shotgun hit draws exactly o
     [40, 50],
   );
 });
+
+test('nova draws six jagged lightning spokes from the caster', () => {
+  const renderer = new EffectRenderer();
+  const context = createContextRecorder();
+  renderer.push({
+    effectPreset: 'basic_nova_hit',
+    element: 'nature',
+    radius: 2.5,
+    x: 5,
+    y: 5,
+  });
+  renderer.update(0.2);
+  renderer.render(context, TEST_LAYOUT);
+  // 6 spokes × 2 strokes (glow + white core), each spoke is moveTo + 3 lineTo.
+  assert.equal(context.calls.filter(([name]) => name === 'moveTo').length, 12);
+  assert.equal(context.calls.filter(([name]) => name === 'lineTo').length, 36);
+});
+
+test('laser draws a beam from the caster to the beam endpoint', () => {
+  const renderer = new EffectRenderer();
+  const context = createContextRecorder();
+  renderer.push({
+    effectPreset: 'basic_laser_hit',
+    element: 'light',
+    sourceX: 1,
+    sourceY: 2,
+    x: 9,
+    y: 2,
+    vectorX: 1,
+    vectorY: 0,
+  });
+  renderer.update(0.1);
+  renderer.render(context, TEST_LAYOUT);
+  const moves = context.calls.filter(([name]) => name === 'moveTo');
+  const lines = context.calls.filter(([name]) => name === 'lineTo');
+  assert.equal(moves.length, 3, 'glow + mid + core beam layers');
+  assert.equal(lines.length, 3);
+  assert.ok(moves.every(([, x, y]) => x === 10 && y === 20), 'every layer starts at the caster');
+  assert.ok(lines.every(([, x, y]) => x === 90 && y === 20), 'every layer ends at the beam endpoint');
+});

@@ -119,11 +119,11 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 - `position`과 `kind`는 둘 다 `main` 또는 `normal`이어야 하며 서로 같아야 한다.
 - `element`: `fire`, `water`, `nature`, `light`, `dark` 중 하나.
 - `role`: `dealer`, `balancer`, `buffer`, `debuffer` 중 하나.
-- `attack.archetype`: `melee`, `burst`, `rapid`, `shotgun`, `area` 중 하나.
+- `attack.archetype`: `melee`, `burst`, `rapid`, `shotgun`, `area`, `nova`, `laser` 중 하나.
 - `attack.attackType`: `normal`, `anti_air`, `lethal`, `magic`, `flame`, `holy` 중 하나.
 - `attack.range`, `interval`, `damage`는 양의 유한수다.
 - 스킬 쿨다운은 현재 `5`, `7`, `9`초만 검증을 통과한다.
-- 스킬 `shape`는 `single` 또는 `area`다. `single` 반경은 `0`, `area` 반경은 `3`이어야 한다.
+- 스킬 `shape`는 `single`, `area`, `melee` 중 하나다. `single`·`melee` 반경은 `0`, `area` 반경은 `3`이어야 한다. `melee`는 단일 대상 큰 한방(배율 ×1.3)이다.
 - 특성은 정확히 네 개이며 Lv4 두 개, Lv6 두 개다.
 - 특성에는 한국어 `description`이 필수다. 특성 선택 버튼과 정보 시트가 원시 effect 유형 대신 이 문구를 그대로 표시하므로, 효과 수치를 담은 완성된 문장으로 쓴다.
 - `tags`는 팀 효과의 대상 판별에 사용된다. 현재 `rabbit` 태그가 래빗홀 치명타 효과에 사용된다.
@@ -132,6 +132,8 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 
 - `shotgun`: `pelletCount`, `spreadDegrees`, `normalCollisionRadius`, `bossCollisionRadius`를 현재 샷건 데이터처럼 제공한다. 실제 충돌은 `BasicAttackSystem.resolveShotgunHits()`가 `spreadDegrees`와 두 충돌 반경을 사용한다.
 - `area`: `radius`를 제공한다. 기본 공격의 중심 대상 주변에 적용된다.
+- `nova`: `radius`를 제공한다. **영웅 중심** 반경 안에 든 모든 적을 타격하며, 반경이 비어 있으면 타이머를 소모하지 않고 대기한다. 시각 프리셋은 `basic_nova_hit`.
+- `laser`: `normalCollisionRadius`, `bossCollisionRadius`를 제공한다. 대상 방향 직선 복도 내 모든 적을 거리 순으로 관통한다. 시각 프리셋은 `basic_laser_hit`.
 - 그 외 공격은 한 대상에 적용된다. 근접/원거리 시각 프리셋 선택은 `BasicAttackSystem`에도 연결돼 있으므로 새로운 `archetype` 추가는 데이터 수정만으로 끝나지 않는다.
 
 새 영웅을 추가할 때 함께 바꿀 곳:

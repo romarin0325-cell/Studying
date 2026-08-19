@@ -8,8 +8,8 @@ export function deepFreeze(value, seen = new WeakSet()) {
 export const ELEMENT_IDS = deepFreeze(['fire', 'water', 'nature', 'light', 'dark']);
 export const ROLE_IDS = deepFreeze(['dealer', 'balancer', 'buffer', 'debuffer']);
 export const POSITION_IDS = deepFreeze(['main', 'normal']);
-export const ATTACK_ARCHETYPE_IDS = deepFreeze(['melee', 'burst', 'rapid', 'shotgun', 'area']);
-export const SKILL_SHAPE_IDS = deepFreeze(['single', 'area']);
+export const ATTACK_ARCHETYPE_IDS = deepFreeze(['melee', 'burst', 'rapid', 'shotgun', 'area', 'nova', 'laser']);
+export const SKILL_SHAPE_IDS = deepFreeze(['single', 'area', 'melee']);
 
 export const ATTACK_TYPE_IDS = deepFreeze([
   'normal',
@@ -158,10 +158,31 @@ export const ATTACK_ARCHETYPE_DEFINITIONS = deepFreeze([
     displayName: '범위형',
     range: 5,
     intervalSeconds: 2,
-    baseDamage: 16,
-    standardDps: 8,
+    baseDamage: 20,
+    standardDps: 10,
     radius: 2,
     hitEffectPreset: 'basic_area_hit',
+  },
+  {
+    id: 'nova',
+    displayName: '노바형',
+    range: 4,
+    intervalSeconds: 2.5,
+    baseDamage: 20,
+    standardDps: 8,
+    radius: 2.5,
+    hitEffectPreset: 'basic_nova_hit',
+  },
+  {
+    id: 'laser',
+    displayName: '레이저형',
+    range: 8,
+    intervalSeconds: 3,
+    baseDamage: 24,
+    standardDps: 8,
+    normalCollisionRadius: 0.45,
+    bossCollisionRadius: 0.6,
+    hitEffectPreset: 'basic_laser_hit',
   },
 ]);
 
@@ -176,7 +197,7 @@ export const SKILL_BASE_DAMAGE_BY_ROLE = deepFreeze({
   9: { buffer: 54, debuffer: 54, balancer: 72, dealer: 90 },
 });
 
-export const SKILL_SHAPE_MULTIPLIERS = deepFreeze({ single: 1, area: 0.75 });
+export const SKILL_SHAPE_MULTIPLIERS = deepFreeze({ single: 1, area: 0.75, melee: 1.3 });
 export const SKILL_AREA_RADIUS = 3;
 
 export const LEVEL_DAMAGE_MULTIPLIERS = deepFreeze({

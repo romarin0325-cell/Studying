@@ -129,19 +129,22 @@ sprite 목적 사각형은 manifest의 `pivotX`, `pivotY`를 사용한다. 현�
 
 전투 판정은 display event를 발행하고 [`EffectRenderer`](../js/render/EffectRenderer.js)가 preset별 visual로 바꾼다. renderer가 피해량이나 상태 성공 여부를 다시 계산하면 안 된다.
 
-현재 preset은 아홉 개다.
+현재 preset은 열두 개다.
 
 - `basic_melee_hit`
 - `basic_ranged_hit`
 - `basic_shotgun_hit`
 - `basic_area_hit`
+- `basic_nova_hit`
+- `basic_laser_hit`
+- `skill_cast`
 - `skill_single_hit`
 - `skill_area_hit`
 - `status_apply`
 - `critical_hit`
 - `advantage_hit`
 
-ranged event에는 source와 target 좌표가 있어야 trail을 그릴 수 있다. shotgun은 pellet마다 event 하나와 `pelletIndex`, 진행 vector를 전달하며, event 하나가 세 줄을 다시 그리면 안 된다. area visual은 선택된 impact center에 cast당 한 번 그린다.
+ranged event에는 source와 target 좌표가 있어야 trail을 그릴 수 있다. shotgun은 pellet마다 event 하나와 `pelletIndex`, 진행 vector를 전달하며, event 하나가 세 줄을 다시 그리면 안 된다. area visual은 선택된 impact center에 cast당 한 번 그린다. nova는 영웅 중심에서 여섯 갈래 번개 스포크를 cast당 한 번(visualOnly event) 그리고, laser는 시전자에서 빔 끝점(`vectorX/vectorY × range`)까지 cast당 한 번 그린다. 두 아키타입 모두 피해 event는 `suppressEffect`로 중복 이펙트를 막는다.
 
 `reducedEffects`가 켜져도 판정 event 자체를 누락하지 말고 particle 수와 장식을 줄인다. `damageNumbers`는 popup 표현만, `screenShake`는 critical/core visual만, `sound`는 event SFX만 제어해야 한다.
 

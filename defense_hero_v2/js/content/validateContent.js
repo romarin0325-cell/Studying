@@ -47,6 +47,7 @@ const EXPECTED_BUFF_IDS = [
 const EXPECTED_STATUS_IDS = ['slow', 'stun', 'corrosion', 'curse', 'darkness', 'poison', 'stun_immunity'];
 const EXPECTED_EFFECT_PRESET_IDS = [
   'basic_melee_hit', 'basic_ranged_hit', 'basic_shotgun_hit', 'basic_area_hit',
+  'basic_nova_hit', 'basic_laser_hit',
   'skill_cast', 'skill_single_hit', 'skill_area_hit', 'status_apply', 'critical_hit', 'advantage_hit',
 ];
 const EXPECTED_MATCHUPS = {
@@ -72,7 +73,7 @@ export const CONTENT_COUNTS = deepFreeze({
   buffs: 7,
   statuses: 7,
   debuffs: 6,
-  effectPresets: 10,
+  effectPresets: 12,
   directionalAssetIds: 66,
 });
 
@@ -270,11 +271,21 @@ function validateHeroes(sets, errors) {
     if (!isPositiveFinite(hero.attack?.range) || !isPositiveFinite(hero.attack?.interval) || !isPositiveFinite(hero.attack?.damage)) {
       errors.push(`${context}: basic attack range/interval/damage must be positive.`);
     }
+    if (hero.attack?.archetype === 'nova' && !isPositiveFinite(hero.attack.radius)) {
+      errors.push(`${context}: nova attacks require a positive radius.`);
+    }
+    if (
+      hero.attack?.archetype === 'laser'
+      && (!isPositiveFinite(hero.attack.normalCollisionRadius) || !isPositiveFinite(hero.attack.bossCollisionRadius))
+    ) {
+      errors.push(`${context}: laser attacks require positive normal/boss collision radii.`);
+    }
     if (!sets.effectPresets.has(hero.attack?.effectPreset)) errors.push(`${context}: unknown basic effect preset.`);
     if (!sets.attackTypes.has(hero.skill?.attackType) || !SKILL_SHAPE_IDS.includes(hero.skill?.shape)) errors.push(`${context}: invalid skill type/shape.`);
     if (![5, 7, 9].includes(hero.skill?.cooldown) || !isPositiveFinite(hero.skill?.damage)) errors.push(`${context}: invalid skill cooldown/damage.`);
     if (hero.skill?.shape === 'area' && hero.skill.radius !== 3) errors.push(`${context}: area skills must have radius 3.`);
     if (hero.skill?.shape === 'single' && hero.skill.radius !== 0) errors.push(`${context}: single skills must have radius 0.`);
+    if (hero.skill?.shape === 'melee' && hero.skill.radius !== 0) errors.push(`${context}: melee skills must have radius 0.`);
     if (!sets.effectPresets.has(hero.skill?.effectPreset)) errors.push(`${context}: unknown skill effect preset.`);
     for (const [index, effect] of (hero.skill?.onHitEffects ?? []).entries()) {
       validateOperation(effect, `${context}.skill.onHitEffects[${index}]`, sets, errors);
