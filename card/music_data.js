@@ -107,5 +107,12 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         artist: 'Card RPG',
         album: 'Card RPG Music',
         src: 'どくどくきゃんでぃー.mp3'
+    }),
+    Object.freeze({
+        id: '劣等星シンドローム.mp3',
+        title: '劣等星シンドローム',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '劣等星シンドローム.mp3'
     })
 ]);
