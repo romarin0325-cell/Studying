@@ -43,10 +43,6 @@ export function expandOrthogonalPath(waypoints) {
   return cells;
 }
 
-function repeatPattern(pattern, repeatCount) {
-  return Array.from({ length: repeatCount }, () => pattern).flat();
-}
-
 function makeWave(number, groups, spawnOrder, { boss = false } = {}) {
   return {
     number,
@@ -109,94 +105,39 @@ const LONG_BOULEVARD_WAYPOINTS = [
   point(11, 10),
 ];
 
+function singleWave(number, enemyId, count) {
+  return makeWave(number, [{ enemyId, count }], Array(count).fill(enemyId));
+}
+
+// Phase 4: 모든 일반 웨이브는 단일 적 타입(20~30마리)으로 구성한다.
+// 고대유적 게이트 보정: 경로 압축으로 클리어 중앙값이 7분 게이트 아래로 내려가
+// §5.5 허용 보정(수량 상한 30까지 증량 + baseHp +10%)에 더해 적 speed -10%로
+// 이동 시간을 복원했다. 상세 근거는 BALANCE_DESIGN_SHEET.md 참고.
 const ancientRuinsWaves = [
-  makeWave(1, [{ enemyId: 'ruin_scarab', count: 30 }], Array(30).fill('ruin_scarab')),
-  makeWave(2, [
-    { enemyId: 'ruin_scarab', count: 20 },
-    { enemyId: 'sand_wisp', count: 10 },
-  ], repeatPattern(['ruin_scarab', 'ruin_scarab', 'sand_wisp'], 10)),
-  makeWave(3, [
-    { enemyId: 'ruin_scarab', count: 18 },
-    { enemyId: 'stone_guard', count: 12 },
-  ], repeatPattern(['ruin_scarab', 'ruin_scarab', 'ruin_scarab', 'stone_guard', 'stone_guard'], 6)),
-  makeWave(4, [
-    { enemyId: 'ruin_scarab', count: 10 },
-    { enemyId: 'sand_wisp', count: 10 },
-    { enemyId: 'regrowth_idol', count: 10 },
-  ], repeatPattern(['ruin_scarab', 'sand_wisp', 'regrowth_idol'], 10)),
+  singleWave(1, 'ruin_scarab', 30),
+  singleWave(2, 'sand_wisp', 30),
+  singleWave(3, 'stone_guard', 22),
+  singleWave(4, 'regrowth_idol', 26),
   makeWave(5, [{ enemyId: 'flora', count: 1 }], ['flora'], { boss: true }),
-  makeWave(6, [
-    { enemyId: 'ember_scarab', count: 15 },
-    { enemyId: 'regrowth_idol', count: 15 },
-  ], repeatPattern(['ember_scarab', 'regrowth_idol'], 15)),
-  makeWave(7, [
-    { enemyId: 'sand_wisp', count: 10 },
-    { enemyId: 'stone_guard', count: 10 },
-    { enemyId: 'ruin_scarab', count: 10 },
-  ], repeatPattern(['sand_wisp', 'stone_guard', 'ruin_scarab'], 10)),
-  makeWave(8, [
-    { enemyId: 'regrowth_idol', count: 10 },
-    { enemyId: 'stone_guard', count: 10 },
-    { enemyId: 'ember_scarab', count: 10 },
-  ], repeatPattern(['regrowth_idol', 'stone_guard', 'ember_scarab'], 10)),
-  makeWave(9, [
-    { enemyId: 'ruin_scarab', count: 6 },
-    { enemyId: 'ember_scarab', count: 6 },
-    { enemyId: 'sand_wisp', count: 6 },
-    { enemyId: 'stone_guard', count: 6 },
-    { enemyId: 'regrowth_idol', count: 6 },
-  ], repeatPattern(['ruin_scarab', 'ember_scarab', 'sand_wisp', 'stone_guard', 'regrowth_idol'], 6)),
+  singleWave(6, 'ember_scarab', 30),
+  singleWave(7, 'sand_wisp', 30),
+  singleWave(8, 'stone_guard', 24),
+  singleWave(9, 'regrowth_idol', 28),
   makeWave(10, [{ enemyId: 'pharaoh', count: 1 }], ['pharaoh'], { boss: true }),
 ];
 
 const chaosRiftWaves = [
-  makeWave(1, [{ enemyId: 'rift_shade', count: 30 }], Array(30).fill('rift_shade')),
-  makeWave(2, [
-    { enemyId: 'rift_shade', count: 20 },
-    { enemyId: 'rift_wing', count: 10 },
-  ], repeatPattern(['rift_shade', 'rift_shade', 'rift_wing'], 10)),
-  makeWave(3, [
-    { enemyId: 'rift_shade', count: 15 },
-    { enemyId: 'abyss_armor', count: 15 },
-  ], repeatPattern(['rift_shade', 'abyss_armor'], 15)),
-  makeWave(4, [
-    { enemyId: 'rift_shade', count: 10 },
-    { enemyId: 'chaos_spawn', count: 10 },
-    { enemyId: 'lesser_demon', count: 10 },
-  ], repeatPattern(['rift_shade', 'chaos_spawn', 'lesser_demon'], 10)),
+  singleWave(1, 'rift_shade', 30),
+  singleWave(2, 'rift_wing', 30),
+  singleWave(3, 'abyss_armor', 20),
+  singleWave(4, 'chaos_spawn', 24),
   makeWave(5, [{ enemyId: 'reaper', count: 1 }], ['reaper'], { boss: true }),
-  makeWave(6, [
-    { enemyId: 'rift_wing', count: 15 },
-    { enemyId: 'lesser_demon', count: 15 },
-  ], repeatPattern(['rift_wing', 'lesser_demon'], 15)),
-  makeWave(7, [
-    { enemyId: 'abyss_armor', count: 10 },
-    { enemyId: 'chaos_spawn', count: 10 },
-    { enemyId: 'lesser_demon', count: 10 },
-  ], repeatPattern(['abyss_armor', 'chaos_spawn', 'lesser_demon'], 10)),
-  makeWave(8, [
-    { enemyId: 'rift_wing', count: 8 },
-    { enemyId: 'abyss_armor', count: 8 },
-    { enemyId: 'chaos_spawn', count: 7 },
-    { enemyId: 'lesser_demon', count: 7 },
-  ], [
-    ...repeatPattern(['rift_wing', 'abyss_armor', 'chaos_spawn', 'lesser_demon'], 7),
-    'rift_wing',
-    'abyss_armor',
-  ]),
-  makeWave(9, [
-    { enemyId: 'rift_shade', count: 6 },
-    { enemyId: 'rift_wing', count: 6 },
-    { enemyId: 'abyss_armor', count: 6 },
-    { enemyId: 'chaos_spawn', count: 6 },
-    { enemyId: 'lesser_demon', count: 6 },
-  ], repeatPattern(['rift_shade', 'rift_wing', 'abyss_armor', 'chaos_spawn', 'lesser_demon'], 6)),
+  singleWave(6, 'lesser_demon', 30),
+  singleWave(7, 'rift_wing', 30),
+  singleWave(8, 'abyss_armor', 22),
+  singleWave(9, 'rift_shade', 30),
   makeWave(10, [{ enemyId: 'demon_god', count: 1 }], ['demon_god'], { boss: true }),
 ];
-
-function singleWave(number, enemyId, count) {
-  return makeWave(number, [{ enemyId, count }], Array(count).fill(enemyId));
-}
 
 const crossroadsWaves = [
   singleWave(1, 'rift_shade', 30),

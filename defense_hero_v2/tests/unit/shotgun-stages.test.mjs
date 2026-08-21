@@ -149,44 +149,51 @@ const EXPECTED_PATHS = Object.freeze({
 const EXPECTED_WAVES = Object.freeze({
   ancient_ruins: Object.freeze([
     [{ enemyId: 'ruin_scarab', count: 30 }],
-    [{ enemyId: 'ruin_scarab', count: 20 }, { enemyId: 'sand_wisp', count: 10 }],
-    [{ enemyId: 'ruin_scarab', count: 18 }, { enemyId: 'stone_guard', count: 12 }],
-    [{ enemyId: 'ruin_scarab', count: 10 }, { enemyId: 'sand_wisp', count: 10 }, { enemyId: 'regrowth_idol', count: 10 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 22 }],
+    [{ enemyId: 'regrowth_idol', count: 26 }],
     [{ enemyId: 'flora', count: 1 }],
-    [{ enemyId: 'ember_scarab', count: 15 }, { enemyId: 'regrowth_idol', count: 15 }],
-    [{ enemyId: 'sand_wisp', count: 10 }, { enemyId: 'stone_guard', count: 10 }, { enemyId: 'ruin_scarab', count: 10 }],
-    [{ enemyId: 'regrowth_idol', count: 10 }, { enemyId: 'stone_guard', count: 10 }, { enemyId: 'ember_scarab', count: 10 }],
-    [
-      { enemyId: 'ruin_scarab', count: 6 },
-      { enemyId: 'ember_scarab', count: 6 },
-      { enemyId: 'sand_wisp', count: 6 },
-      { enemyId: 'stone_guard', count: 6 },
-      { enemyId: 'regrowth_idol', count: 6 },
-    ],
+    [{ enemyId: 'ember_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 24 }],
+    [{ enemyId: 'regrowth_idol', count: 28 }],
     [{ enemyId: 'pharaoh', count: 1 }],
   ]),
   chaos_rift: Object.freeze([
     [{ enemyId: 'rift_shade', count: 30 }],
-    [{ enemyId: 'rift_shade', count: 20 }, { enemyId: 'rift_wing', count: 10 }],
-    [{ enemyId: 'rift_shade', count: 15 }, { enemyId: 'abyss_armor', count: 15 }],
-    [{ enemyId: 'rift_shade', count: 10 }, { enemyId: 'chaos_spawn', count: 10 }, { enemyId: 'lesser_demon', count: 10 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 20 }],
+    [{ enemyId: 'chaos_spawn', count: 24 }],
     [{ enemyId: 'reaper', count: 1 }],
-    [{ enemyId: 'rift_wing', count: 15 }, { enemyId: 'lesser_demon', count: 15 }],
-    [{ enemyId: 'abyss_armor', count: 10 }, { enemyId: 'chaos_spawn', count: 10 }, { enemyId: 'lesser_demon', count: 10 }],
-    [
-      { enemyId: 'rift_wing', count: 8 },
-      { enemyId: 'abyss_armor', count: 8 },
-      { enemyId: 'chaos_spawn', count: 7 },
-      { enemyId: 'lesser_demon', count: 7 },
-    ],
-    [
-      { enemyId: 'rift_shade', count: 6 },
-      { enemyId: 'rift_wing', count: 6 },
-      { enemyId: 'abyss_armor', count: 6 },
-      { enemyId: 'chaos_spawn', count: 6 },
-      { enemyId: 'lesser_demon', count: 6 },
-    ],
+    [{ enemyId: 'lesser_demon', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 22 }],
+    [{ enemyId: 'rift_shade', count: 30 }],
     [{ enemyId: 'demon_god', count: 1 }],
+  ]),
+  crossroads: Object.freeze([
+    [{ enemyId: 'rift_shade', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 20 }],
+    [{ enemyId: 'chaos_spawn', count: 24 }],
+    [{ enemyId: 'reaper', count: 1 }],
+    [{ enemyId: 'lesser_demon', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 22 }],
+    [{ enemyId: 'chaos_spawn', count: 26 }],
+    [{ enemyId: 'demon_god', count: 1 }],
+  ]),
+  long_boulevard: Object.freeze([
+    [{ enemyId: 'ruin_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 20 }],
+    [{ enemyId: 'regrowth_idol', count: 24 }],
+    [{ enemyId: 'flora', count: 1 }],
+    [{ enemyId: 'ember_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 22 }],
+    [{ enemyId: 'regrowth_idol', count: 26 }],
+    [{ enemyId: 'pharaoh', count: 1 }],
   ]),
 });
 
@@ -246,7 +253,7 @@ test('every stage exposes a legal 15-cell placement whitelist with curated recom
   }
 });
 
-test('all 20 waves have the exact enemy counts, compositions, and crystal rewards', () => {
+test('all 40 waves have the exact single-type enemy counts and crystal rewards', () => {
   let checkedWaves = 0;
   for (const [stageId, expectedGroups] of Object.entries(EXPECTED_WAVES)) {
     const stage = STAGE_BY_ID[stageId];
@@ -264,8 +271,12 @@ test('all 20 waves have the exact enemy counts, compositions, and crystal reward
       assert.equal(wave.spawnOrder.length, expectedCount);
       assert.deepEqual(frequencies(wave.spawnOrder), expectedComposition);
       assert.equal(wave.kind, [5, 10].includes(index + 1) ? 'boss' : 'normal');
+      if (wave.kind === 'normal') {
+        assert.equal(wave.groups.length, 1, `${stageId} wave ${wave.number} must be single-type`);
+        assert.ok(wave.enemyCount >= 20 && wave.enemyCount <= 30);
+      }
       checkedWaves += 1;
     });
   }
-  assert.equal(checkedWaves, 20);
+  assert.equal(checkedWaves, 40);
 });
