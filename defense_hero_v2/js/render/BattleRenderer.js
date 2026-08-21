@@ -1,10 +1,12 @@
 import { ViewportLayout, logicalToViewPoint } from './ViewportLayout.js';
 import { SpriteResolver, drawResolvedSprite } from './SpriteResolver.js';
+import { BATTLE_PHASE } from '../core/enums.js';
 import { HERO_BY_ID } from '../content/heroes.js';
 import { AURA_BUFF_BY_ID } from '../content/buffs.js';
 
 const BURST_PULSE_SECONDS = 0.15;
 const BUFF_GLOW_PERIOD_SECONDS = 2.4;
+const UI_BAND_FIRST_ROW = 12;
 
 const DEFENSE_COLORS = Object.freeze({
   normal: '#f5d48a',
@@ -35,6 +37,12 @@ export function spriteDestination(point, size, entry = null) {
     width: size,
     height: size,
   };
+}
+
+// 상단 행 스프라이트가 보드 밖으로 돌출되는 것을 방지한다 (영웅 size=1.35, 보스 1.65 → pivotY 0.75 기준 돌출).
+export function clampSpriteToBoard(dest, boardRect) {
+  if (dest.y < boardRect.y) dest.y = boardRect.y;
+  return dest;
 }
 
 export class BattleRenderer {
@@ -113,10 +121,26 @@ export class BattleRenderer {
   #drawBoard(context, snapshot) {
     const path = new Set(snapshot.stage.path.map(({ x, y }) => `${x},${y}`));
     const obstacles = new Set(snapshot.stage.obstacles.map(({ x, y }) => `${x},${y}`));
+    const placementSet = new Set((snapshot.stage.placementCells ?? []).map(({ x, y }) => `${x},${y}`));
+    const isPlacementPhase = [BATTLE_PHASE.PREPARATION, BATTLE_PHASE.INTERMISSION].includes(snapshot.phase);
     for (let y = 0; y < 16; y += 1) {
+      if (y === UI_BAND_FIRST_ROW) {
+        const lineY = this.#cellRect(0, UI_BAND_FIRST_ROW).y;
+        context.strokeStyle = 'rgba(255,255,255,0.2)';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(0, lineY);
+        context.lineTo(this.layout.cssWidth, lineY);
+        context.stroke();
+      }
       for (let x = 0; x < 12; x += 1) {
         const rect = this.#cellRect(x, y);
         const key = `${x},${y}`;
+        if (y >= UI_BAND_FIRST_ROW) {
+          context.fillStyle = 'rgba(10, 8, 20, 0.6)';
+          context.fillRect(rect.x, rect.y, rect.width, rect.height);
+          continue;
+        }
         context.fillStyle = path.has(key)
           ? 'rgba(219, 180, 113, 0.32)'
           : ((x + y) % 2 ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.075)');
@@ -128,6 +152,16 @@ export class BattleRenderer {
           context.fillStyle = 'rgba(67,74,93,0.9)';
           roundedRect(context, rect.x + rect.width * 0.16, rect.y + rect.height * 0.16, rect.width * 0.68, rect.height * 0.68, 4);
           context.fill();
+        }
+        if (isPlacementPhase && placementSet.size > 0) {
+          if (placementSet.has(key)) {
+            context.strokeStyle = 'rgba(120, 230, 170, 0.6)';
+            context.lineWidth = 2;
+            context.strokeRect(rect.x + 1, rect.y + 1, Math.max(0, rect.width - 2), Math.max(0, rect.height - 2));
+          } else if (!path.has(key) && !obstacles.has(key)) {
+            context.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            context.fillRect(rect.x, rect.y, rect.width, rect.height);
+          }
         }
       }
     }
@@ -161,7 +195,8 @@ export class BattleRenderer {
         size *= this.#burstPulseScale(hero);
       }
       const resolved = this.sprites.resolve({ kind: 'hero', id: hero.id, direction: hero.direction });
-      if (!drawResolvedSprite(context, resolved, spriteDestination(point, size, resolved?.entry))) {
+      const heroDest = clampSpriteToBoard(spriteDestination(point, size, resolved?.entry), this.layout.boardRect);
+      if (!drawResolvedSprite(context, resolved, heroDest)) {
         context.save();
         context.fillStyle = ELEMENT_COLORS[hero.element] ?? '#fff';
         context.strokeStyle = '#fff';
@@ -265,7 +300,8 @@ export class BattleRenderer {
       if (enemy.isBoss) {
         const size = cell * 1.65;
         const resolved = this.sprites.resolve({ kind: 'boss', id: enemy.enemyId, direction: enemy.direction });
-        if (!drawResolvedSprite(context, resolved, spriteDestination(point, size, resolved?.entry))) {
+        const bossDest = clampSpriteToBoard(spriteDestination(point, size, resolved?.entry), this.layout.boardRect);
+        if (!drawResolvedSprite(context, resolved, bossDest)) {
           this.#drawEnemyToken(context, point, enemy.defenseType, cell * 0.5, enemy.name.slice(0, 1));
         }
       } else {

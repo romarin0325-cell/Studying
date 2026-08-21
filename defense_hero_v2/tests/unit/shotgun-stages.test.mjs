@@ -126,15 +126,23 @@ test('each shotgun pellet independently deals damage, rolls critical, and applie
 
 const EXPECTED_PATHS = Object.freeze({
   ancient_ruins: Object.freeze([
-    { x: 0, y: 1 }, { x: 10, y: 1 }, { x: 10, y: 4 }, { x: 1, y: 4 },
-    { x: 1, y: 7 }, { x: 10, y: 7 }, { x: 10, y: 10 }, { x: 1, y: 10 },
-    { x: 1, y: 13 }, { x: 10, y: 13 }, { x: 10, y: 15 }, { x: 11, y: 15 },
+    { x: 0, y: 1 }, { x: 10, y: 1 }, { x: 10, y: 5 }, { x: 1, y: 5 },
+    { x: 1, y: 9 }, { x: 10, y: 9 },
   ]),
   chaos_rift: Object.freeze([
-    { x: 0, y: 15 }, { x: 0, y: 0 }, { x: 11, y: 0 }, { x: 11, y: 14 },
-    { x: 2, y: 14 }, { x: 2, y: 3 }, { x: 9, y: 3 }, { x: 9, y: 11 },
-    { x: 4, y: 11 }, { x: 4, y: 6 }, { x: 7, y: 6 }, { x: 7, y: 9 },
-    { x: 6, y: 9 }, { x: 6, y: 8 }, { x: 5, y: 8 },
+    { x: 0, y: 11 }, { x: 0, y: 0 }, { x: 11, y: 0 }, { x: 11, y: 10 },
+    { x: 2, y: 10 }, { x: 2, y: 2 }, { x: 9, y: 2 }, { x: 9, y: 8 },
+    { x: 4, y: 8 }, { x: 4, y: 4 }, { x: 7, y: 4 }, { x: 7, y: 6 },
+    { x: 5, y: 6 },
+  ]),
+  crossroads: Object.freeze([
+    { x: 0, y: 4 }, { x: 11, y: 4 }, { x: 11, y: 11 }, { x: 0, y: 11 },
+    { x: 0, y: 7 }, { x: 3, y: 7 }, { x: 3, y: 9 }, { x: 8, y: 9 },
+    { x: 8, y: 7 }, { x: 5, y: 7 }, { x: 5, y: 5 },
+  ]),
+  long_boulevard: Object.freeze([
+    { x: 0, y: 1 }, { x: 11, y: 1 }, { x: 11, y: 5 }, { x: 0, y: 5 },
+    { x: 0, y: 10 }, { x: 11, y: 10 },
   ]),
 });
 
@@ -190,7 +198,7 @@ function frequencies(ids) {
   return counts;
 }
 
-test('both stage paths are fixed, orthogonal, in bounds, and never repeat a cell', () => {
+test('all four stage paths are fixed, orthogonal, in the top 12x12 combat area, and never repeat a cell', () => {
   for (const [stageId, expectedWaypoints] of Object.entries(EXPECTED_PATHS)) {
     const stage = STAGE_BY_ID[stageId];
     assert.deepEqual(stage.map.pathWaypoints, expectedWaypoints, `${stageId} fixed waypoints`);
@@ -203,10 +211,37 @@ test('both stage paths are fixed, orthogonal, in bounds, and never repeat a cell
     for (let index = 0; index < stage.map.pathCells.length; index += 1) {
       const cell = stage.map.pathCells[index];
       assert.ok(cell.x >= 0 && cell.x < stage.map.columns);
-      assert.ok(cell.y >= 0 && cell.y < stage.map.rows);
+      assert.ok(cell.y >= 0 && cell.y <= 11, `${stageId} path cell must stay in the combat area`);
       if (index === 0) continue;
       const previous = stage.map.pathCells[index - 1];
       assert.equal(Math.abs(cell.x - previous.x) + Math.abs(cell.y - previous.y), 1);
+    }
+  }
+});
+
+test('every stage exposes a legal 15-cell placement whitelist with curated recommendations', () => {
+  for (const stage of Object.values(STAGE_BY_ID)) {
+    const context = stage.id;
+    const placementCells = stage.map.placementCells;
+    assert.equal(placementCells.length, 15, `${context} requires exactly 15 placement cells`);
+    const pathKeys = new Set(stage.map.pathCells.map(({ x, y }) => `${x},${y}`));
+    const obstacleKeys = new Set(stage.map.obstacles.map(({ x, y }) => `${x},${y}`));
+    const placementKeys = new Set();
+    for (const cell of placementCells) {
+      const key = `${cell.x},${cell.y}`;
+      assert.ok(cell.y >= 1 && cell.y <= 11, `${context} placement ${key} must be within rows 1~11`);
+      assert.ok(!pathKeys.has(key), `${context} placement ${key} overlaps the path`);
+      assert.ok(!obstacleKeys.has(key), `${context} placement ${key} overlaps an obstacle`);
+      assert.ok(!placementKeys.has(key), `${context} placement ${key} is duplicated`);
+      placementKeys.add(key);
+    }
+    for (const slot of [0, 1, 2, 3, 4]) {
+      const recommended = stage.map.recommendedPlacements?.[slot];
+      assert.ok(recommended, `${context} recommendedPlacements must include slot ${slot}`);
+      assert.ok(
+        placementKeys.has(`${recommended.x},${recommended.y}`),
+        `${context} recommendedPlacements[${slot}] must be whitelisted`,
+      );
     }
   }
 });

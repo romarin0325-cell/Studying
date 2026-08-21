@@ -135,6 +135,7 @@ export class BattleSession {
         theme: this.state.stage.theme,
         path: this.state.stage.path.map((cell) => ({ ...cell })),
         obstacles: this.state.stage.obstacles.map((cell) => ({ ...cell })),
+        placementCells: (this.state.stage.placementCells ?? []).map((cell) => ({ ...cell })),
       },
       heroes: this.state.heroes.map((hero) => ({
         id: hero.id,

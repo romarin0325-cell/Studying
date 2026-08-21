@@ -12,6 +12,8 @@ export function canPlaceHero(state, heroId, x, y) {
   if (!Number.isInteger(x) || !Number.isInteger(y)) return false;
   if (x < 0 || x >= BOARD.columns || y < 0 || y >= BOARD.rows) return false;
   if (stageBlockedCells(state.stage).has(keyOf(x, y))) return false;
+  const whitelist = state.stage.placementCells;
+  if (whitelist?.length && !whitelist.some((cell) => cell.x === x && cell.y === y)) return false;
   return !state.heroes.some((hero) => hero.id !== heroId && hero.placed && hero.x === x && hero.y === y);
 }
 
@@ -39,10 +41,17 @@ function pathDistanceSquared(stage, x, y) {
 
 export function autoPlaceHeroes(state) {
   const blocked = stageBlockedCells(state.stage);
+  const whitelist = state.stage.placementCells;
   const cells = [];
-  for (let y = 0; y < BOARD.rows; y += 1) {
-    for (let x = 0; x < BOARD.columns; x += 1) {
+  if (whitelist?.length) {
+    for (const { x, y } of whitelist) {
       if (!blocked.has(keyOf(x, y))) cells.push({ x, y, score: pathDistanceSquared(state.stage, x, y) });
+    }
+  } else {
+    for (let y = 0; y < BOARD.rows; y += 1) {
+      for (let x = 0; x < BOARD.columns; x += 1) {
+        if (!blocked.has(keyOf(x, y))) cells.push({ x, y, score: pathDistanceSquared(state.stage, x, y) });
+      }
     }
   }
   cells.sort((left, right) => left.score - right.score || left.y - right.y || left.x - right.x);

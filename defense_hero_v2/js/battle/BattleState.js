@@ -66,6 +66,8 @@ export function createBattleState({
     theme: stage.id === 'chaos_rift' ? 'chaos' : 'ruins',
     path: stage.map.pathCells,
     obstacles: stage.map.obstacles,
+    placementCells: stage.map.placementCells ?? [],
+    recommendedPlacements: stage.map.recommendedPlacements,
   };
   return {
     sessionId: checkpoint?.sessionId ?? `${Date.now().toString(36)}-${seed}`,

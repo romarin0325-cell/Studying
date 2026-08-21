@@ -8,7 +8,7 @@ import {
   spriteAssetId,
 } from '../../js/render/SpriteResolver.js';
 import { DIRECTION } from '../../js/core/enums.js';
-import { spriteDestination } from '../../js/render/BattleRenderer.js';
+import { spriteDestination, clampSpriteToBoard } from '../../js/render/BattleRenderer.js';
 
 const MANIFEST = Object.freeze([
   { id: 'battle/rumi/front', type: 'image', path: '/rumi-front.webp', preloadGroup: 'battle', pivotX: 0.5 },
@@ -187,5 +187,21 @@ test('battle sprite destination anchors the manifest pivot on the logical entity
   assert.deepEqual(
     spriteDestination({ x: 100, y: 200 }, 80),
     { x: 60, y: 140, width: 80, height: 80 },
+  );
+});
+
+test('top-row hero and boss sprites are clamped inside the board rect', () => {
+  // 12×16 보드, 셀 10px 기준 boardRect. y=0 셀 중심 = y 5px.
+  const boardRect = { x: 0, y: 0, width: 120, height: 160 };
+  const cellCenter = { x: 55, y: 5 };
+  const heroDestination = clampSpriteToBoard(spriteDestination(cellCenter, 10 * 1.35), boardRect);
+  assert.ok(heroDestination.y >= boardRect.y, 'hero sprite must not overshoot the board top');
+  const bossDestination = clampSpriteToBoard(spriteDestination(cellCenter, 10 * 1.65), boardRect);
+  assert.ok(bossDestination.y >= boardRect.y, 'boss sprite must not overshoot the board top');
+  // 보드 안쪽 스프라이트는 클램프의 영향을 받지 않는다.
+  const innerPoint = { x: 55, y: 85 };
+  assert.deepEqual(
+    clampSpriteToBoard(spriteDestination(innerPoint, 13.5), boardRect),
+    spriteDestination(innerPoint, 13.5),
   );
 });
