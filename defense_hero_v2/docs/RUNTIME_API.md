@@ -194,7 +194,7 @@ new ResultScreen({
 })
 ```
 
-`result.victory`, `result.wave`, `result.elapsedSeconds`를 읽어 결과와 세 이동 버튼을 표시한다. 공개 수명주기 메서드는 `mount(root)`, `destroy()`다.
+`result.victory`, `result.wave`, `result.elapsedSeconds`를 읽어 결과와 세 이동 버튼을 표시한다. `result.heroReport`(영웅별 `heroId/name/element/damage/kills`)가 있으면 누적 대미지 바 패널도 그린다. 공개 수명 주기 메서드는 `mount(root)`, `destroy()`다.
 
 ## 3. Core 클래스
 
@@ -553,10 +553,10 @@ state.registry.remove('projectiles', projectile.id);
 소스: [PlacementSystem.js](../js/battle/systems/PlacementSystem.js)
 
 - `stageBlockedCells(stage) -> Set<string>`: path와 obstacle 셀 키.
-- `canPlaceHero(state, heroId, x, y) -> boolean`: phase, 정수 좌표, 12×16 범위, 막힌 셀, 영웅 중복을 검증.
+- `canPlaceHero(state, heroId, x, y) -> boolean`: phase, 정수 좌표, 12×16 범위, 막힌 셀, 영웅 중복을 검증하고, 스테이지에 `placementCells` 화이트리스트가 있으면 그 안의 셀만 허용한다.
 - `placeHero(state, heroId, x, y) -> boolean`: 존재하지 않는 편성 영웅은 예외, 불가능한 셀은 false.
 - `allHeroesPlaced(state) -> boolean`: 정확히 5명이고 모두 배치되었는지 확인.
-- `autoPlaceHeroes(state) -> Array<{ id, x, y }>`: 추천 좌표 우선, 이후 path 가까운 합법 셀을 안정 정렬해 배치.
+- `autoPlaceHeroes(state) -> Array<{ id, x, y }>`: 슬롯별 `recommendedPlacements` 우선, 이후 화이트리스트(없으면 전체 보드)에서 path 가까운 합법 셀을 안정 정렬해 배치.
 
 ### WaveSystem
 
@@ -566,7 +566,8 @@ state.registry.remove('projectiles', projectile.id);
 - `startWave(state) -> boolean`: phase/배치 확인, queue와 wave RNG 설정, 영웅 timer/target/direction 초기화, `wave_started` event 생성.
 - `updateWaveSpawning(state, deltaSeconds)`: interval과 적 cap을 지키며 spawn.
 - `isWaveClear(state) -> boolean`: queue 소진과 active 적 0 확인.
-- `completeWave(state) -> boolean`: 결정 보상, 이전 wave 코어 피해 flag, intermission/victory, `wave_completed` event 처리.
+- `completeWave(state) -> boolean`: 결정 보상, 이전 wave 코어 피해 flag, intermission/victory, `wave_completed` event 처리. 승리 시 `state.result`에 `heroReport`를 포함한다.
+- `buildHeroReport(state) -> Array`: 영웅별 누적 대미지/처치 리포트 생성. 승리(WaveSystem)와 패배(MovementSystem)가 공용한다.
 
 spawn 순서와 `spawnOrder`는 targeting/action/RNG 순서의 일부다. 보기 좋게 섞는다는 이유로 랜덤화하지 않는다.
 
@@ -575,7 +576,7 @@ spawn 순서와 `spawnOrder`는 targeting/action/RNG 순서의 일부다. 보기
 소스: [MovementSystem.js](../js/battle/systems/MovementSystem.js)
 
 - `coreDamageMultiplier(state) -> number`: 팀에서 dedupe된 core damage 특성의 곱.
-- `damageCore(state, amount = 1) -> number`: 실제 피해 적용, wave flag/event, 내구도 0이면 패배 설정.
+- `damageCore(state, amount = 1) -> number`: 실제 피해 적용, wave flag/event, 내구도 0이면 패배 설정. 패배 시 `state.result`에 `heroReport`를 포함한다.
 - `updateMovement(state, deltaSeconds, landscape = false)`: stun 제외, slow 배율 적용, path 보간, core 도달, 보스 방향 갱신.
 
 `landscape`는 논리 이동 경로를 바꾸지 않고 화면 방향 sprite 판정에만 영향을 준다.

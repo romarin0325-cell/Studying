@@ -55,6 +55,14 @@ landscape vector:          (dx, dy) → (-dy, dx)
 
 렌더 시작 시 `layout.beginFrame(context)`를 호출해 DPR transform과 clear를 적용한다. board cell, radius, sprite 위치는 `logicalToCanvas`, `logicalCellCenterToCanvas`, `logicalRadiusToCanvas`를 사용한다.
 
+Phase 4 렌더 계약:
+
+- 전투 영역은 상단 12×12(y 0~11). `#drawBoard`는 y ≥ 12 행을 어둡게 칠하고 구분선을 그려 UI 밴드로 표시한다.
+- 배치 페이즈(PREPARATION/INTERMISSION)에는 `placementCells` 화이트리스트를 초록 테두리로 하이라이트하고, 나머지 비경로 셀은 어둡게 딤 처리한다.
+- 영웅 sprite(`#drawHeroes`)와 보스 sprite(`#drawEnemies`)는 `clampSpriteToBoard(dest, boardRect)`로 보드 상단 밖 삐져나감을 클램프한다.
+- StageSelectScreen은 스테이지 카드마다 10웨이브 칩 스트립(`wave-strip`)을 그리고, 칩 탭 시 적 이름·방어타입·수량 팝오버(`wave-popover`)를 표시한다. 정적 `STAGES` 기반이라 저장소와 무관하다.
+- ResultScreen은 `result.heroReport`가 있으면 영웅별 누적 대미지 바 패널(`hero-report`)을 승리/패배 공통으로 표시한다.
+
 ### pointer 입력
 
 ```js
