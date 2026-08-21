@@ -71,7 +71,9 @@ function spawnEnemy(state, enemyId) {
   const waveDefinition = state.stage.waves[state.wave.number - 1];
   const waveMultiplier = Number(waveDefinition.hpMultiplier ?? 1);
   const bossMultiplier = definition.isBoss ? Number(state.difficulty.bossHpMultiplier ?? 1) : 1;
-  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier;
+  const stageHpMultiplier = definition.isBoss ? 1 : Number(state.stage.enemyHpMultiplier ?? 1);
+  const stageSpeedMultiplier = definition.isBoss ? 1 : Number(state.stage.enemySpeedMultiplier ?? 1);
+  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier * stageHpMultiplier;
   const first = state.stage.path[0];
   state.wave.spawnSerial += 1;
   const enemy = state.registry.add('enemies', {
@@ -84,7 +86,7 @@ function spawnEnemy(state, enemyId) {
     isBoss: Boolean(definition.isBoss),
     hp: maxHp,
     maxHp,
-    speed: definition.speed * state.difficulty.speedMultiplier,
+    speed: definition.speed * state.difficulty.speedMultiplier * stageSpeedMultiplier,
     progress: 0,
     spawnOrder: state.wave.spawnSerial,
     x: first.x + 0.5,

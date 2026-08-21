@@ -58,7 +58,7 @@ export function validateCheckpoint(value) {
     ...stage.map.pathCells.map(({ x, y }) => `${x},${y}`),
     ...stage.map.obstacles.map(({ x, y }) => `${x},${y}`),
   ]);
-  // 화이트리스트가 있으면, 화이트리스트 밖의 모든 셀을 blocked로 처리한다.
+  // 화이트리스트 밖 셀은 blocked다. 옛 배치 좌표는 마이그레이션하지 않고 검증 실패로 버린다.
   if (stage.map.placementCells?.length) {
     const allowed = new Set(stage.map.placementCells.map(({ x, y }) => `${x},${y}`));
     for (let y = 0; y < 16; y += 1) {

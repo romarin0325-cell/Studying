@@ -110,9 +110,8 @@ function singleWave(number, enemyId, count) {
 }
 
 // Phase 4: 모든 일반 웨이브는 단일 적 타입(20~30마리)으로 구성한다.
-// 고대유적 게이트 보정: 경로 압축으로 클리어 중앙값이 7분 게이트 아래로 내려가
-// §5.5 허용 보정(수량 상한 30까지 증량 + baseHp +10%)에 더해 적 speed -10%로
-// 이동 시간을 복원했다. 상세 근거는 BALANCE_DESIGN_SHEET.md 참고.
+// 고대유적 게이트 보정은 스테이지 배율(일반 적 HP +10%, speed -10%)로만 적용한다.
+// 같은 로스터를 재사용하는 long_boulevard에는 전하지 않는다.
 const ancientRuinsWaves = [
   singleWave(1, 'ruin_scarab', 30),
   singleWave(2, 'sand_wisp', 30),
@@ -170,6 +169,9 @@ export const STAGES = deepFreeze([
     id: 'ancient_ruins',
     name: '고대유적',
     displayName: '고대유적',
+    theme: 'ruins',
+    enemyHpMultiplier: 1.1,
+    enemySpeedMultiplier: 0.9,
     representativeElement: 'nature',
     featuredDefenseTypes: ['normal', 'heavy', 'regeneration'],
     midBossId: 'flora',
@@ -207,6 +209,7 @@ export const STAGES = deepFreeze([
     id: 'chaos_rift',
     name: '혼돈의틈',
     displayName: '혼돈의틈',
+    theme: 'chaos',
     representativeElement: 'dark',
     featuredDefenseTypes: ['air', 'heavy', 'demon'],
     midBossId: 'reaper',
@@ -244,6 +247,7 @@ export const STAGES = deepFreeze([
     id: 'crossroads',
     name: '십자 교차로',
     displayName: '십자 교차로',
+    theme: 'chaos',
     representativeElement: 'light',
     featuredDefenseTypes: ['air', 'heavy', 'demon'],
     midBossId: 'reaper',
@@ -280,6 +284,7 @@ export const STAGES = deepFreeze([
     id: 'long_boulevard',
     name: '긴 직선 대로',
     displayName: '긴 직선 대로',
+    theme: 'ruins',
     representativeElement: 'fire',
     featuredDefenseTypes: ['normal', 'regeneration', 'heavy'],
     midBossId: 'flora',

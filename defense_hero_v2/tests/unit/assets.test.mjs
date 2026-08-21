@@ -204,4 +204,8 @@ test('top-row hero and boss sprites are clamped inside the board rect', () => {
     clampSpriteToBoard(spriteDestination(innerPoint, 13.5), boardRect),
     spriteDestination(innerPoint, 13.5),
   );
+  const rightOverflow = { x: 110, y: 40, width: 20, height: 20 };
+  const clampedRight = clampSpriteToBoard(rightOverflow, boardRect);
+  assert.ok(clampedRight.x + clampedRight.width <= boardRect.x + boardRect.width);
+  assert.ok(clampedRight.x >= boardRect.x);
 });

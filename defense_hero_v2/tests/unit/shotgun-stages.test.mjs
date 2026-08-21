@@ -5,6 +5,10 @@ import {
   resolveShotgunHits,
   updateBasicAttackForHero,
 } from '../../js/battle/systems/BasicAttackSystem.js';
+import { createBattleState } from '../../js/battle/BattleState.js';
+import { canPlaceHero } from '../../js/battle/systems/PlacementSystem.js';
+import { buildHeroReport } from '../../js/battle/systems/WaveSystem.js';
+import { DEFAULT_FORMATION } from '../../js/content/heroes.js';
 import { STAGE_BY_ID, expandOrthogonalPath } from '../../js/content/stages.js';
 
 const SHOTGUN_ANGLES = [-12, 0, 12];
@@ -242,15 +246,43 @@ test('every stage exposes a legal 15-cell placement whitelist with curated recom
       assert.ok(!placementKeys.has(key), `${context} placement ${key} is duplicated`);
       placementKeys.add(key);
     }
+    const recommendedKeys = new Set();
     for (const slot of [0, 1, 2, 3, 4]) {
       const recommended = stage.map.recommendedPlacements?.[slot];
       assert.ok(recommended, `${context} recommendedPlacements must include slot ${slot}`);
-      assert.ok(
-        placementKeys.has(`${recommended.x},${recommended.y}`),
-        `${context} recommendedPlacements[${slot}] must be whitelisted`,
-      );
+      const key = `${recommended.x},${recommended.y}`;
+      assert.ok(placementKeys.has(key), `${context} recommendedPlacements[${slot}] must be whitelisted`);
+      assert.ok(!recommendedKeys.has(key), `${context} recommendedPlacements[${slot}] is duplicated`);
+      recommendedKeys.add(key);
     }
+    assert.ok(['ruins', 'chaos'].includes(stage.theme), `${context} theme must be ruins or chaos`);
   }
+});
+
+test('placement whitelist rejects off-list cells and recommended cells stay legal', () => {
+  const state = createBattleState({
+    stageId: 'ancient_ruins',
+    difficultyId: 'easy',
+    formation: { mainId: DEFAULT_FORMATION.mainId, heroIds: [...DEFAULT_FORMATION.heroIds] },
+  });
+  const allowed = state.stage.placementCells[0];
+  assert.equal(canPlaceHero(state, state.heroes[0].id, allowed.x, allowed.y), true);
+  assert.equal(canPlaceHero(state, state.heroes[0].id, 6, 0), false);
+});
+
+test('buildHeroReport copies each hero damage and kill total', () => {
+  const state = createBattleState({
+    stageId: 'long_boulevard',
+    difficultyId: 'easy',
+    formation: { mainId: DEFAULT_FORMATION.mainId, heroIds: [...DEFAULT_FORMATION.heroIds] },
+  });
+  state.heroes[0].stats.damage = 12.4;
+  state.heroes[0].stats.kills = 3;
+  const report = buildHeroReport(state);
+  assert.equal(report.length, 5);
+  assert.equal(report[0].heroId, state.heroes[0].id);
+  assert.equal(report[0].damage, 12.4);
+  assert.equal(report[0].kills, 3);
 });
 
 test('all 40 waves have the exact single-type enemy counts and crystal rewards', () => {

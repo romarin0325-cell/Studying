@@ -1,6 +1,6 @@
 import { ViewportLayout, logicalToViewPoint } from './ViewportLayout.js';
 import { SpriteResolver, drawResolvedSprite } from './SpriteResolver.js';
-import { BATTLE_PHASE } from '../core/enums.js';
+import { BATTLE_PHASE, BOARD } from '../core/enums.js';
 import { HERO_BY_ID } from '../content/heroes.js';
 import { AURA_BUFF_BY_ID } from '../content/buffs.js';
 
@@ -39,9 +39,11 @@ export function spriteDestination(point, size, entry = null) {
   };
 }
 
-// 상단 행 스프라이트가 보드 밖으로 돌출되는 것을 방지한다 (영웅 size=1.35, 보스 1.65 → pivotY 0.75 기준 돌출).
 export function clampSpriteToBoard(dest, boardRect) {
-  if (dest.y < boardRect.y) dest.y = boardRect.y;
+  const maxX = boardRect.x + boardRect.width - dest.width;
+  const maxY = boardRect.y + boardRect.height - dest.height;
+  dest.x = Math.min(Math.max(dest.x, boardRect.x), maxX);
+  dest.y = Math.min(Math.max(dest.y, boardRect.y), maxY);
   return dest;
 }
 
@@ -123,16 +125,15 @@ export class BattleRenderer {
     const obstacles = new Set(snapshot.stage.obstacles.map(({ x, y }) => `${x},${y}`));
     const placementSet = new Set((snapshot.stage.placementCells ?? []).map(({ x, y }) => `${x},${y}`));
     const isPlacementPhase = [BATTLE_PHASE.PREPARATION, BATTLE_PHASE.INTERMISSION].includes(snapshot.phase);
+    const bandStart = this.layout.logicalToCanvas(0, UI_BAND_FIRST_ROW);
+    const bandEnd = this.layout.logicalToCanvas(BOARD.columns, UI_BAND_FIRST_ROW);
+    context.strokeStyle = 'rgba(255,255,255,0.2)';
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(bandStart.x, bandStart.y);
+    context.lineTo(bandEnd.x, bandEnd.y);
+    context.stroke();
     for (let y = 0; y < 16; y += 1) {
-      if (y === UI_BAND_FIRST_ROW) {
-        const lineY = this.#cellRect(0, UI_BAND_FIRST_ROW).y;
-        context.strokeStyle = 'rgba(255,255,255,0.2)';
-        context.lineWidth = 2;
-        context.beginPath();
-        context.moveTo(0, lineY);
-        context.lineTo(this.layout.cssWidth, lineY);
-        context.stroke();
-      }
       for (let x = 0; x < 12; x += 1) {
         const rect = this.#cellRect(x, y);
         const key = `${x},${y}`;

@@ -160,6 +160,14 @@ test('content creates finite deterministic wave state for every fixed stage', ()
     assert.ok(firstEnemy.hp > 0);
     assert.equal(firstEnemy.x, stage.map.spawn.x + 0.5);
     assert.equal(firstEnemy.y, stage.map.spawn.y + 0.5);
+    if (stage.id === 'ancient_ruins') {
+      assert.equal(firstEnemy.hp, 80 * 0.65 * 0.85 * 1.1);
+      assert.equal(firstEnemy.speed, 1.2 * 0.95 * 0.9);
+    }
+    if (stage.id === 'long_boulevard') {
+      assert.equal(firstEnemy.hp, 80 * 0.65 * 0.85);
+      assert.equal(firstEnemy.speed, 1.2 * 0.95);
+    }
   }
 });
 

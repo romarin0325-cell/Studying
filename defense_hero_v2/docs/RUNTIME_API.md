@@ -136,7 +136,7 @@ new StageSelectScreen({
 })
 ```
 
-`mount(root)`가 스테이지 카드와 선택 가능한 Easy 난도를 표시한다. 체크포인트가 있으면 계속하기 배너가 추가된다. 공개 수명주기 메서드는 `mount(root)`, `destroy()`다.
+`mount(root)`가 스테이지 카드와 선택 가능한 Easy 난도를 표시한다. 체크포인트가 있으면 계속하기 배너가 추가된다. 웨이브 칩 팝오버는 바깥 포인터, Esc, 리사이즈, 스트립 스크롤에 닫히거나 다시 맞춰지며 화면 아래로 넘치면 칩 위에 띄운다. 공개 수명주기 메서드는 `mount(root)`, `destroy()`다.
 
 #### FormationScreen
 
@@ -564,7 +564,7 @@ state.registry.remove('projectiles', projectile.id);
 
 - `buildFixedSpawnSequence(entries) -> string[]`: 고정 composition을 결정론적 spawn ID 순서로 변환.
 - `startWave(state) -> boolean`: phase/배치 확인, queue와 wave RNG 설정, 영웅 timer/target/direction 초기화, `wave_started` event 생성.
-- `updateWaveSpawning(state, deltaSeconds)`: interval과 적 cap을 지키며 spawn.
+- `updateWaveSpawning(state, deltaSeconds)`: interval과 적 cap을 지키며 spawn. 일반 적 HP/속도에 `stage.enemyHpMultiplier` / `stage.enemySpeedMultiplier`를 곱하고, 보스에는 적용하지 않는다.
 - `isWaveClear(state) -> boolean`: queue 소진과 active 적 0 확인.
 - `completeWave(state) -> boolean`: 결정 보상, 이전 wave 코어 피해 flag, intermission/victory, `wave_completed` event 처리. 승리 시 `state.result`에 `heroReport`를 포함한다.
 - `buildHeroReport(state) -> Array`: 영웅별 누적 대미지/처치 리포트 생성. 승리(WaveSystem)와 패배(MovementSystem)가 공용한다.

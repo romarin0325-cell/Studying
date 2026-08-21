@@ -411,15 +411,21 @@ function validateStageMap(stage, errors) {
     if (obstacleKeys.has(key)) errors.push(`${context}: placementCell ${key} overlaps an obstacle.`);
     placementKeys.add(key);
   }
+  const recommendedKeys = new Set();
   for (const slot of [0, 1, 2, 3, 4]) {
     const recommended = map.recommendedPlacements?.[slot];
     if (!recommended) {
       errors.push(`${context}: recommendedPlacements must include slot ${slot}.`);
       continue;
     }
-    if (!placementKeys.has(coordinateKey(recommended))) {
+    const key = coordinateKey(recommended);
+    if (!placementKeys.has(key)) {
       errors.push(`${context}: recommendedPlacements[${slot}] must be one of the placement cells.`);
     }
+    if (recommendedKeys.has(key)) {
+      errors.push(`${context}: recommendedPlacements[${slot}] duplicates another slot.`);
+    }
+    recommendedKeys.add(key);
   }
 }
 
@@ -436,6 +442,13 @@ function validateStages(sets, errors) {
       errors.push(`${context}: invalid difficulty visibility contract.`);
     }
     if (!sets.enemies.has(stage.midBossId) || !sets.enemies.has(stage.finalBossId)) errors.push(`${context}: boss references are invalid.`);
+    if (!['ruins', 'chaos'].includes(stage.theme)) errors.push(`${context}: theme must be ruins or chaos.`);
+    if (stage.enemyHpMultiplier !== undefined && !isPositiveFinite(stage.enemyHpMultiplier)) {
+      errors.push(`${context}: enemyHpMultiplier must be positive and finite.`);
+    }
+    if (stage.enemySpeedMultiplier !== undefined && !isPositiveFinite(stage.enemySpeedMultiplier)) {
+      errors.push(`${context}: enemySpeedMultiplier must be positive and finite.`);
+    }
     validateStageMap(stage, errors);
     if (!Array.isArray(stage.waves) || stage.waves.length !== 10) errors.push(`${context}: exactly ten waves are required.`);
     for (const [index, wave] of (stage.waves ?? []).entries()) {

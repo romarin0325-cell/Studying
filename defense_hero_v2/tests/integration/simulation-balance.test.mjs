@@ -20,9 +20,9 @@ const MAX_TICKS = 60 * 60 * 15;
 const TARGETS = Object.freeze({
   ancient_ruins: { minimumClearRate: 0.80, minimumMinutes: 7, maximumMinutes: 9 },
   chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 9, maximumMinutes: 11 },
+  crossroads: { minimumClearRate: 0.65, minimumMinutes: 5, maximumMinutes: 12 },
+  long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 5, maximumMinutes: 10 },
 });
-// Only the two launch-gated stages enter the full 60-formation matrix; the
-// Phase 4 maps crossroads/long_boulevard get a lighter three-wave smoke below.
 const GATED_STAGE_IDS = Object.keys(TARGETS);
 // Conservative input-time allowance for the automated policy: 15 seconds for
 // initial review/placement plus 10 seconds at each of the nine intermissions
@@ -333,7 +333,7 @@ if (!isMainThread && workerData?.simulationBalanceWorker) {
     }
   });
 
-  test('all 60 formations terminate deterministically on both fixed Easy stages within caps', async (context) => {
+  test('all 60 formations terminate deterministically on every Easy stage within caps', async (context) => {
     const matrix = await runBalanceMatrix();
     for (const stageId of GATED_STAGE_IDS) {
       const results = matrix[stageId];
@@ -365,47 +365,6 @@ if (!isMainThread && workerData?.simulationBalanceWorker) {
       context.diagnostic(
         `${stageId}: ${(summary.clearRate * 100).toFixed(1)}% clear; combat ${summary.minimumCombatMinutes.toFixed(2)}-${summary.maximumCombatMinutes.toFixed(2)} min (median ${summary.medianCombatMinutes.toFixed(2)}); estimated play +${summary.standardInputSeconds}s input ${summary.minimumEstimatedPlayMinutes.toFixed(2)}-${summary.maximumEstimatedPlayMinutes.toFixed(2)} min (median ${summary.medianEstimatedPlayMinutes.toFixed(2)})`,
       );
-    }
-  });
-
-  // Phase 4 smoke: the two redesigned-era maps carry no launch gates yet, so
-  // verify only that the standard policy auto-places cleanly and clears waves 1~3.
-  test('crossroads and long_boulevard auto-place and clear the first three waves', () => {
-    for (const stageId of ['crossroads', 'long_boulevard']) {
-      const label = `${stageId}/smoke`;
-      const session = new BattleSession({
-        stageId,
-        difficultyId: 'easy',
-        formation: formations[0],
-        seed: `balance:v2:smoke:${stageId}`,
-      });
-      try {
-        assert.equal(session.applyNow('auto_place'), true, `${label}: auto-place`);
-        assert.equal(session.state.heroes.every((hero) => hero.placed), true, `${label}: five heroes placed`);
-        let ticks = 0;
-        while (
-          !TERMINAL_PHASES.has(session.state.phase)
-          && session.state.wave.completedCount < 3
-          && ticks < MAX_TICKS
-        ) {
-          if ([BATTLE_PHASE.PREPARATION, BATTLE_PHASE.INTERMISSION].includes(session.state.phase)) {
-            applyStandardGrowthPolicy(session);
-            assert.equal(session.applyNow('start_wave'), true, `${label}: start wave`);
-          }
-          session.step(FIXED_TICK_SECONDS);
-          ticks += 1;
-        }
-        assert.ok(
-          session.state.wave.completedCount >= 3,
-          `${label}: expected three completed waves, got ${session.state.wave.completedCount}`,
-        );
-        assertFiniteRuntime(session.state, label);
-        for (const [type, cap] of Object.entries(ENTITY_ACTIVE_CAPS)) {
-          assert.ok(session.state.registry[type].size <= cap, `${label}: ${type} cap`);
-        }
-      } finally {
-        session.destroy();
-      }
     }
   });
 

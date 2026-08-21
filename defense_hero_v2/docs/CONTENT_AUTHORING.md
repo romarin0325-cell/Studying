@@ -57,8 +57,8 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 - 영웅 10명: 메인 4명 + 일반 6명
 - 영웅마다 Lv4 선택지 2개 + Lv6 선택지 2개: 특성 40개
 - 일반 적 10종 + 보스 4종
-- 스테이지 2개, 각 10웨이브
-- 버프 7종, 상태 7종, 공개 디버프 6종, 이펙트 프리셋 9종
+- 스테이지 4개, 각 10웨이브(총 40)
+- 버프 7종, 상태 7종, 공개 디버프 6종, 이펙트 프리셋 12종
 - 출시 에셋 66개
 
 따라서 기존 항목의 수치·표시명만 바꾸는 작업과, 항목을 추가·삭제하는 작업은 다르다. 추가·삭제할 때는 `validateContent.js`의 `EXPECTED_*_IDS`, `CONTENT_COUNTS`와 해당 테스트의 고정 기대값을 의도적으로 함께 갱신해야 한다.
@@ -370,8 +370,9 @@ const EXAMPLE_WAYPOINTS = [
 배치 화이트리스트 규칙 (`placementCells`):
 
 - 스테이지마다 정확히 15칸, y 1~11, 중복 금지, 경로·장애물과 겹침 금지다.
-- `recommendedPlacements`는 슬롯 0~4 전부 화이트리스트 안의 셀을 가리켜야 한다. 슬롯 0은 메인 영웅 자리라 첫 레인 인접칸을 권장한다(근접 메인 사거리 2).
-- 런타임 배치는 화이트리스트로만 허용된다. 체크포인트는 화이트리스트 밖 셀을 `blockedCells`로 변환해 구 세이브를 흡수한다.
+- `recommendedPlacements`는 슬롯 0~4 전부 화이트리스트 안의 **서로 다른** 셀을 가리켜야 한다. 슬롯 0은 메인 영웅 자리라 첫 레인 인접칸을 권장한다(근접 메인 사거리 2).
+- 런타임 배치는 화이트리스트로만 허용된다. 맵 재설계 이후 화이트리스트 밖(또는 옛 경로 위) 배치는 마이그레이션하지 않고 `validateCheckpoint`가 실패한다. `SaveRepositoryV2.loadCheckpoint()`는 그 세이브를 버리고 Continue를 숨긴다.
+- `theme`은 `ruins` 또는 `chaos`다. 고대유적 게이트 보정(`enemyHpMultiplier` 1.1, `enemySpeedMultiplier` 0.9)은 해당 스테이지 일반 적 스폰에만 곱해지며, 같은 로스터를 쓰는 `long_boulevard`에는 적용되지 않는다.
 
 웨이브는 `makeWave(number, groups, spawnOrder, options)`로 만든다. Phase 4부터 모든 일반 웨이브는 단일 적 타입이다.
 

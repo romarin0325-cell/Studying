@@ -15,7 +15,18 @@ export class StageSelectScreen {
     this.onSettings = onSettings;
     this.root = null;
     this.popover = null;
+    this.popoverChip = null;
     this.popoverChipKey = null;
+    this.popoverStrip = null;
+    this.onDocumentPointerDown = (event) => {
+      if (!this.popover) return;
+      if (event.target.closest?.('[data-wave-chip]') || this.popover.contains(event.target)) return;
+      this.#hideWavePopover();
+    };
+    this.onPopoverKeyDown = (event) => {
+      if (event.key === 'Escape') this.#hideWavePopover();
+    };
+    this.onPopoverViewportChange = () => this.#positionWavePopover();
   }
 
   mount(root) {
@@ -104,22 +115,46 @@ export class StageSelectScreen {
       <strong>${waveNumber}웨이브 · ${enemy?.name ?? wave.groups[0].enemyId}</strong>
       <span>${defenseNames[enemy?.defenseType] ?? '일반'} 방어 타입 · ${wave.enemyCount}마리${bossWave ? ' · 보스' : ''}</span>`;
     document.body.appendChild(popover);
+    this.popover = popover;
+    this.popoverChip = chip;
+    this.popoverChipKey = chip.dataset.waveChip;
+    this.popoverStrip = chip.closest('.wave-strip');
+    this.#positionWavePopover();
+    document.addEventListener('pointerdown', this.onDocumentPointerDown, true);
+    document.addEventListener('keydown', this.onPopoverKeyDown);
+    window.addEventListener('resize', this.onPopoverViewportChange);
+    this.popoverStrip?.addEventListener('scroll', this.onPopoverViewportChange);
+  }
+
+  #positionWavePopover() {
+    const chip = this.popoverChip;
+    const popover = this.popover;
+    if (!chip || !popover) return;
     const chipRect = chip.getBoundingClientRect();
     const popoverRect = popover.getBoundingClientRect();
     const left = Math.max(8, Math.min(
       chipRect.left + chipRect.width / 2 - popoverRect.width / 2,
       window.innerWidth - popoverRect.width - 8,
     ));
+    const below = chipRect.bottom + 6;
+    const above = chipRect.top - popoverRect.height - 6;
+    const top = below + popoverRect.height <= window.innerHeight - 8
+      ? below
+      : Math.max(8, above);
     popover.style.left = `${left}px`;
-    popover.style.top = `${chipRect.bottom + 6}px`;
-    this.popover = popover;
-    this.popoverChipKey = chip.dataset.waveChip;
+    popover.style.top = `${top}px`;
   }
 
   #hideWavePopover() {
+    document.removeEventListener('pointerdown', this.onDocumentPointerDown, true);
+    document.removeEventListener('keydown', this.onPopoverKeyDown);
+    window.removeEventListener('resize', this.onPopoverViewportChange);
+    this.popoverStrip?.removeEventListener('scroll', this.onPopoverViewportChange);
     this.popover?.remove();
     this.popover = null;
+    this.popoverChip = null;
     this.popoverChipKey = null;
+    this.popoverStrip = null;
   }
 
   destroy() {
