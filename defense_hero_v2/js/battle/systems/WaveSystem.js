@@ -120,6 +120,17 @@ export function isWaveClear(state) {
     && state.registry.activeEnemyCount() === 0;
 }
 
+// 승패 결과 화면에 표시할 영웅별 누적 대미지 리포트를 만든다.
+export function buildHeroReport(state) {
+  return state.heroes.map((hero) => ({
+    heroId: hero.id,
+    name: hero.definition.name,
+    element: hero.definition.element,
+    damage: hero.stats.damage,
+    kills: hero.stats.kills,
+  }));
+}
+
 export function completeWave(state) {
   if (!isWaveClear(state)) return false;
   const waveNumber = state.wave.number;
@@ -129,7 +140,12 @@ export function completeWave(state) {
   state.wave.completedCount += 1;
   if (waveNumber >= 10) {
     state.phase = BATTLE_PHASE.VICTORY;
-    state.result = { victory: true, wave: 10, elapsedSeconds: state.elapsedSeconds };
+    state.result = {
+      victory: true,
+      wave: 10,
+      elapsedSeconds: state.elapsedSeconds,
+      heroReport: buildHeroReport(state),
+    };
   } else {
     state.nextWave = waveNumber + 1;
     state.phase = BATTLE_PHASE.INTERMISSION;
