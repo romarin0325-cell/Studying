@@ -71,7 +71,9 @@ function spawnEnemy(state, enemyId) {
   const waveDefinition = state.stage.waves[state.wave.number - 1];
   const waveMultiplier = Number(waveDefinition.hpMultiplier ?? 1);
   const bossMultiplier = definition.isBoss ? Number(state.difficulty.bossHpMultiplier ?? 1) : 1;
-  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier;
+  const stageHpMultiplier = definition.isBoss ? 1 : Number(state.stage.enemyHpMultiplier ?? 1);
+  const stageSpeedMultiplier = definition.isBoss ? 1 : Number(state.stage.enemySpeedMultiplier ?? 1);
+  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier * stageHpMultiplier;
   const first = state.stage.path[0];
   state.wave.spawnSerial += 1;
   const enemy = state.registry.add('enemies', {
@@ -84,7 +86,7 @@ function spawnEnemy(state, enemyId) {
     isBoss: Boolean(definition.isBoss),
     hp: maxHp,
     maxHp,
-    speed: definition.speed * state.difficulty.speedMultiplier,
+    speed: definition.speed * state.difficulty.speedMultiplier * stageSpeedMultiplier,
     progress: 0,
     spawnOrder: state.wave.spawnSerial,
     x: first.x + 0.5,
@@ -120,6 +122,17 @@ export function isWaveClear(state) {
     && state.registry.activeEnemyCount() === 0;
 }
 
+// 승패 결과 화면에 표시할 영웅별 누적 대미지 리포트를 만든다.
+export function buildHeroReport(state) {
+  return state.heroes.map((hero) => ({
+    heroId: hero.id,
+    name: hero.definition.name,
+    element: hero.definition.element,
+    damage: hero.stats.damage,
+    kills: hero.stats.kills,
+  }));
+}
+
 export function completeWave(state) {
   if (!isWaveClear(state)) return false;
   const waveNumber = state.wave.number;
@@ -129,7 +142,12 @@ export function completeWave(state) {
   state.wave.completedCount += 1;
   if (waveNumber >= 10) {
     state.phase = BATTLE_PHASE.VICTORY;
-    state.result = { victory: true, wave: 10, elapsedSeconds: state.elapsedSeconds };
+    state.result = {
+      victory: true,
+      wave: 10,
+      elapsedSeconds: state.elapsedSeconds,
+      heroReport: buildHeroReport(state),
+    };
   } else {
     state.nextWave = waveNumber + 1;
     state.phase = BATTLE_PHASE.INTERMISSION;

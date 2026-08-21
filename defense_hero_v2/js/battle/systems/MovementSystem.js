@@ -2,6 +2,7 @@ import { BATTLE_PHASE } from '../../core/enums.js';
 import { collectUniqueTeamTraitEffects } from './TraitSystem.js';
 import { isStunned, movementSpeedMultiplier } from './StatusSystem.js';
 import { updateBossDirection } from './DirectionSystem.js';
+import { buildHeroReport } from './WaveSystem.js';
 
 function pathPosition(path, progress) {
   const clamped = Math.max(0, Math.min(path.length - 1, progress));
@@ -29,7 +30,12 @@ export function damageCore(state, amount = 1) {
   state.events.push({ type: 'core_damaged', amount: actual, durability: state.core.durability });
   if (state.core.durability <= 0) {
     state.phase = BATTLE_PHASE.DEFEAT;
-    state.result = { victory: false, wave: state.wave.number, elapsedSeconds: state.elapsedSeconds };
+    state.result = {
+      victory: false,
+      wave: state.wave.number,
+      elapsedSeconds: state.elapsedSeconds,
+      heroReport: buildHeroReport(state),
+    };
     state.events.push({ type: 'battle_defeated', wave: state.wave.number });
   }
   return actual;

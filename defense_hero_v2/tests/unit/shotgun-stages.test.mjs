@@ -5,6 +5,10 @@ import {
   resolveShotgunHits,
   updateBasicAttackForHero,
 } from '../../js/battle/systems/BasicAttackSystem.js';
+import { createBattleState } from '../../js/battle/BattleState.js';
+import { canPlaceHero } from '../../js/battle/systems/PlacementSystem.js';
+import { buildHeroReport } from '../../js/battle/systems/WaveSystem.js';
+import { DEFAULT_FORMATION } from '../../js/content/heroes.js';
 import { STAGE_BY_ID, expandOrthogonalPath } from '../../js/content/stages.js';
 
 const SHOTGUN_ANGLES = [-12, 0, 12];
@@ -126,59 +130,74 @@ test('each shotgun pellet independently deals damage, rolls critical, and applie
 
 const EXPECTED_PATHS = Object.freeze({
   ancient_ruins: Object.freeze([
-    { x: 0, y: 1 }, { x: 10, y: 1 }, { x: 10, y: 4 }, { x: 1, y: 4 },
-    { x: 1, y: 7 }, { x: 10, y: 7 }, { x: 10, y: 10 }, { x: 1, y: 10 },
-    { x: 1, y: 13 }, { x: 10, y: 13 }, { x: 10, y: 15 }, { x: 11, y: 15 },
+    { x: 0, y: 1 }, { x: 10, y: 1 }, { x: 10, y: 5 }, { x: 1, y: 5 },
+    { x: 1, y: 9 }, { x: 10, y: 9 },
   ]),
   chaos_rift: Object.freeze([
-    { x: 0, y: 15 }, { x: 0, y: 0 }, { x: 11, y: 0 }, { x: 11, y: 14 },
-    { x: 2, y: 14 }, { x: 2, y: 3 }, { x: 9, y: 3 }, { x: 9, y: 11 },
-    { x: 4, y: 11 }, { x: 4, y: 6 }, { x: 7, y: 6 }, { x: 7, y: 9 },
-    { x: 6, y: 9 }, { x: 6, y: 8 }, { x: 5, y: 8 },
+    { x: 0, y: 11 }, { x: 0, y: 0 }, { x: 11, y: 0 }, { x: 11, y: 10 },
+    { x: 2, y: 10 }, { x: 2, y: 2 }, { x: 9, y: 2 }, { x: 9, y: 8 },
+    { x: 4, y: 8 }, { x: 4, y: 4 }, { x: 7, y: 4 }, { x: 7, y: 6 },
+    { x: 5, y: 6 },
+  ]),
+  crossroads: Object.freeze([
+    { x: 0, y: 4 }, { x: 11, y: 4 }, { x: 11, y: 11 }, { x: 0, y: 11 },
+    { x: 0, y: 7 }, { x: 3, y: 7 }, { x: 3, y: 9 }, { x: 8, y: 9 },
+    { x: 8, y: 7 }, { x: 5, y: 7 }, { x: 5, y: 5 },
+  ]),
+  long_boulevard: Object.freeze([
+    { x: 0, y: 1 }, { x: 11, y: 1 }, { x: 11, y: 5 }, { x: 0, y: 5 },
+    { x: 0, y: 10 }, { x: 11, y: 10 },
   ]),
 });
 
 const EXPECTED_WAVES = Object.freeze({
   ancient_ruins: Object.freeze([
     [{ enemyId: 'ruin_scarab', count: 30 }],
-    [{ enemyId: 'ruin_scarab', count: 20 }, { enemyId: 'sand_wisp', count: 10 }],
-    [{ enemyId: 'ruin_scarab', count: 18 }, { enemyId: 'stone_guard', count: 12 }],
-    [{ enemyId: 'ruin_scarab', count: 10 }, { enemyId: 'sand_wisp', count: 10 }, { enemyId: 'regrowth_idol', count: 10 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 22 }],
+    [{ enemyId: 'regrowth_idol', count: 26 }],
     [{ enemyId: 'flora', count: 1 }],
-    [{ enemyId: 'ember_scarab', count: 15 }, { enemyId: 'regrowth_idol', count: 15 }],
-    [{ enemyId: 'sand_wisp', count: 10 }, { enemyId: 'stone_guard', count: 10 }, { enemyId: 'ruin_scarab', count: 10 }],
-    [{ enemyId: 'regrowth_idol', count: 10 }, { enemyId: 'stone_guard', count: 10 }, { enemyId: 'ember_scarab', count: 10 }],
-    [
-      { enemyId: 'ruin_scarab', count: 6 },
-      { enemyId: 'ember_scarab', count: 6 },
-      { enemyId: 'sand_wisp', count: 6 },
-      { enemyId: 'stone_guard', count: 6 },
-      { enemyId: 'regrowth_idol', count: 6 },
-    ],
+    [{ enemyId: 'ember_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 24 }],
+    [{ enemyId: 'regrowth_idol', count: 28 }],
     [{ enemyId: 'pharaoh', count: 1 }],
   ]),
   chaos_rift: Object.freeze([
     [{ enemyId: 'rift_shade', count: 30 }],
-    [{ enemyId: 'rift_shade', count: 20 }, { enemyId: 'rift_wing', count: 10 }],
-    [{ enemyId: 'rift_shade', count: 15 }, { enemyId: 'abyss_armor', count: 15 }],
-    [{ enemyId: 'rift_shade', count: 10 }, { enemyId: 'chaos_spawn', count: 10 }, { enemyId: 'lesser_demon', count: 10 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 20 }],
+    [{ enemyId: 'chaos_spawn', count: 24 }],
     [{ enemyId: 'reaper', count: 1 }],
-    [{ enemyId: 'rift_wing', count: 15 }, { enemyId: 'lesser_demon', count: 15 }],
-    [{ enemyId: 'abyss_armor', count: 10 }, { enemyId: 'chaos_spawn', count: 10 }, { enemyId: 'lesser_demon', count: 10 }],
-    [
-      { enemyId: 'rift_wing', count: 8 },
-      { enemyId: 'abyss_armor', count: 8 },
-      { enemyId: 'chaos_spawn', count: 7 },
-      { enemyId: 'lesser_demon', count: 7 },
-    ],
-    [
-      { enemyId: 'rift_shade', count: 6 },
-      { enemyId: 'rift_wing', count: 6 },
-      { enemyId: 'abyss_armor', count: 6 },
-      { enemyId: 'chaos_spawn', count: 6 },
-      { enemyId: 'lesser_demon', count: 6 },
-    ],
+    [{ enemyId: 'lesser_demon', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 22 }],
+    [{ enemyId: 'rift_shade', count: 30 }],
     [{ enemyId: 'demon_god', count: 1 }],
+  ]),
+  crossroads: Object.freeze([
+    [{ enemyId: 'rift_shade', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 20 }],
+    [{ enemyId: 'chaos_spawn', count: 24 }],
+    [{ enemyId: 'reaper', count: 1 }],
+    [{ enemyId: 'lesser_demon', count: 30 }],
+    [{ enemyId: 'rift_wing', count: 30 }],
+    [{ enemyId: 'abyss_armor', count: 22 }],
+    [{ enemyId: 'chaos_spawn', count: 26 }],
+    [{ enemyId: 'demon_god', count: 1 }],
+  ]),
+  long_boulevard: Object.freeze([
+    [{ enemyId: 'ruin_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 20 }],
+    [{ enemyId: 'regrowth_idol', count: 24 }],
+    [{ enemyId: 'flora', count: 1 }],
+    [{ enemyId: 'ember_scarab', count: 30 }],
+    [{ enemyId: 'sand_wisp', count: 30 }],
+    [{ enemyId: 'stone_guard', count: 22 }],
+    [{ enemyId: 'regrowth_idol', count: 26 }],
+    [{ enemyId: 'pharaoh', count: 1 }],
   ]),
 });
 
@@ -190,7 +209,7 @@ function frequencies(ids) {
   return counts;
 }
 
-test('both stage paths are fixed, orthogonal, in bounds, and never repeat a cell', () => {
+test('all four stage paths are fixed, orthogonal, in the top 12x12 combat area, and never repeat a cell', () => {
   for (const [stageId, expectedWaypoints] of Object.entries(EXPECTED_PATHS)) {
     const stage = STAGE_BY_ID[stageId];
     assert.deepEqual(stage.map.pathWaypoints, expectedWaypoints, `${stageId} fixed waypoints`);
@@ -203,7 +222,7 @@ test('both stage paths are fixed, orthogonal, in bounds, and never repeat a cell
     for (let index = 0; index < stage.map.pathCells.length; index += 1) {
       const cell = stage.map.pathCells[index];
       assert.ok(cell.x >= 0 && cell.x < stage.map.columns);
-      assert.ok(cell.y >= 0 && cell.y < stage.map.rows);
+      assert.ok(cell.y >= 0 && cell.y <= 11, `${stageId} path cell must stay in the combat area`);
       if (index === 0) continue;
       const previous = stage.map.pathCells[index - 1];
       assert.equal(Math.abs(cell.x - previous.x) + Math.abs(cell.y - previous.y), 1);
@@ -211,7 +230,62 @@ test('both stage paths are fixed, orthogonal, in bounds, and never repeat a cell
   }
 });
 
-test('all 20 waves have the exact enemy counts, compositions, and crystal rewards', () => {
+test('every stage exposes a legal 15-cell placement whitelist with curated recommendations', () => {
+  for (const stage of Object.values(STAGE_BY_ID)) {
+    const context = stage.id;
+    const placementCells = stage.map.placementCells;
+    assert.equal(placementCells.length, 15, `${context} requires exactly 15 placement cells`);
+    const pathKeys = new Set(stage.map.pathCells.map(({ x, y }) => `${x},${y}`));
+    const obstacleKeys = new Set(stage.map.obstacles.map(({ x, y }) => `${x},${y}`));
+    const placementKeys = new Set();
+    for (const cell of placementCells) {
+      const key = `${cell.x},${cell.y}`;
+      assert.ok(cell.y >= 1 && cell.y <= 11, `${context} placement ${key} must be within rows 1~11`);
+      assert.ok(!pathKeys.has(key), `${context} placement ${key} overlaps the path`);
+      assert.ok(!obstacleKeys.has(key), `${context} placement ${key} overlaps an obstacle`);
+      assert.ok(!placementKeys.has(key), `${context} placement ${key} is duplicated`);
+      placementKeys.add(key);
+    }
+    const recommendedKeys = new Set();
+    for (const slot of [0, 1, 2, 3, 4]) {
+      const recommended = stage.map.recommendedPlacements?.[slot];
+      assert.ok(recommended, `${context} recommendedPlacements must include slot ${slot}`);
+      const key = `${recommended.x},${recommended.y}`;
+      assert.ok(placementKeys.has(key), `${context} recommendedPlacements[${slot}] must be whitelisted`);
+      assert.ok(!recommendedKeys.has(key), `${context} recommendedPlacements[${slot}] is duplicated`);
+      recommendedKeys.add(key);
+    }
+    assert.ok(['ruins', 'chaos'].includes(stage.theme), `${context} theme must be ruins or chaos`);
+  }
+});
+
+test('placement whitelist rejects off-list cells and recommended cells stay legal', () => {
+  const state = createBattleState({
+    stageId: 'ancient_ruins',
+    difficultyId: 'easy',
+    formation: { mainId: DEFAULT_FORMATION.mainId, heroIds: [...DEFAULT_FORMATION.heroIds] },
+  });
+  const allowed = state.stage.placementCells[0];
+  assert.equal(canPlaceHero(state, state.heroes[0].id, allowed.x, allowed.y), true);
+  assert.equal(canPlaceHero(state, state.heroes[0].id, 6, 0), false);
+});
+
+test('buildHeroReport copies each hero damage and kill total', () => {
+  const state = createBattleState({
+    stageId: 'long_boulevard',
+    difficultyId: 'easy',
+    formation: { mainId: DEFAULT_FORMATION.mainId, heroIds: [...DEFAULT_FORMATION.heroIds] },
+  });
+  state.heroes[0].stats.damage = 12.4;
+  state.heroes[0].stats.kills = 3;
+  const report = buildHeroReport(state);
+  assert.equal(report.length, 5);
+  assert.equal(report[0].heroId, state.heroes[0].id);
+  assert.equal(report[0].damage, 12.4);
+  assert.equal(report[0].kills, 3);
+});
+
+test('all 40 waves have the exact single-type enemy counts and crystal rewards', () => {
   let checkedWaves = 0;
   for (const [stageId, expectedGroups] of Object.entries(EXPECTED_WAVES)) {
     const stage = STAGE_BY_ID[stageId];
@@ -229,8 +303,12 @@ test('all 20 waves have the exact enemy counts, compositions, and crystal reward
       assert.equal(wave.spawnOrder.length, expectedCount);
       assert.deepEqual(frequencies(wave.spawnOrder), expectedComposition);
       assert.equal(wave.kind, [5, 10].includes(index + 1) ? 'boss' : 'normal');
+      if (wave.kind === 'normal') {
+        assert.equal(wave.groups.length, 1, `${stageId} wave ${wave.number} must be single-type`);
+        assert.ok(wave.enemyCount >= 20 && wave.enemyCount <= 30);
+      }
       checkedWaves += 1;
     });
   }
-  assert.equal(checkedWaves, 20);
+  assert.equal(checkedWaves, 40);
 });

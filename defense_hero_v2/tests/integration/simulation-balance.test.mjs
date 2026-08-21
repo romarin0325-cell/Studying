@@ -13,7 +13,6 @@ import { ENTITY_ACTIVE_CAPS } from '../../js/battle/EntityRegistry.js';
 import { createCheckpointFromState } from '../../js/battle/BattleState.js';
 import { BATTLE_PHASE, FIXED_TICK_SECONDS } from '../../js/core/enums.js';
 import { MAIN_HEROES, NORMAL_HEROES } from '../../js/content/heroes.js';
-import { STAGES } from '../../js/content/stages.js';
 import { validateCheckpoint } from '../../js/persistence/schemas.js';
 
 const TERMINAL_PHASES = new Set([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT]);
@@ -21,7 +20,10 @@ const MAX_TICKS = 60 * 60 * 15;
 const TARGETS = Object.freeze({
   ancient_ruins: { minimumClearRate: 0.80, minimumMinutes: 7, maximumMinutes: 9 },
   chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 9, maximumMinutes: 11 },
+  crossroads: { minimumClearRate: 0.65, minimumMinutes: 5, maximumMinutes: 12 },
+  long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 5, maximumMinutes: 10 },
 });
+const GATED_STAGE_IDS = Object.keys(TARGETS);
 // Conservative input-time allowance for the automated policy: 15 seconds for
 // initial review/placement plus 10 seconds at each of the nine intermissions
 // to spend crystals, choose Lv4 traits and consider repositioning. This is
@@ -288,8 +290,8 @@ function runSimulationWorker(jobs) {
 
 function runBalanceMatrix() {
   matrixPromise ??= (async () => {
-    const jobs = STAGES.flatMap((stage) => formations.map((formation, formationIndex) => ({
-      stageId: stage.id,
+    const jobs = GATED_STAGE_IDS.flatMap((stageId) => formations.map((formation, formationIndex) => ({
+      stageId,
       formationIndex,
       formation,
     })));
@@ -297,7 +299,7 @@ function runBalanceMatrix() {
     const chunks = Array.from({ length: workerCount }, () => []);
     jobs.forEach((job, index) => chunks[index % workerCount].push(job));
     const batches = await Promise.all(chunks.map(runSimulationWorker));
-    const matrix = Object.fromEntries(STAGES.map((stage) => [stage.id, Array(formations.length)]));
+    const matrix = Object.fromEntries(GATED_STAGE_IDS.map((stageId) => [stageId, Array(formations.length)]));
     for (const result of batches.flat()) matrix[result.stageId][result.formationIndex] = result.result;
     return matrix;
   })();
@@ -331,37 +333,37 @@ if (!isMainThread && workerData?.simulationBalanceWorker) {
     }
   });
 
-  test('all 60 formations terminate deterministically on both fixed Easy stages within caps', async (context) => {
+  test('all 60 formations terminate deterministically on every Easy stage within caps', async (context) => {
     const matrix = await runBalanceMatrix();
-    for (const stage of STAGES) {
-      const results = matrix[stage.id];
+    for (const stageId of GATED_STAGE_IDS) {
+      const results = matrix[stageId];
       assert.equal(results.length, 60);
       assert.ok(results.every(({ phase }) => TERMINAL_PHASES.has(phase)));
-      const summary = summarize(stage.id, results);
+      const summary = summarize(stageId, results);
       context.diagnostic(`BALANCE ${JSON.stringify(summary)}`);
-      assert.ok(summary.updateP95Ms <= 4, `${stage.id}: update p95 ${summary.updateP95Ms}ms exceeds 4ms`);
+      assert.ok(summary.updateP95Ms <= 4, `${stageId}: update p95 ${summary.updateP95Ms}ms exceeds 4ms`);
       for (const [type, cap] of Object.entries(ENTITY_ACTIVE_CAPS)) {
-        assert.ok(summary.maxima[type] <= cap, `${stage.id}: ${type} cap`);
+        assert.ok(summary.maxima[type] <= cap, `${stageId}: ${type} cap`);
       }
     }
   });
 
   test('standard auto-placement and balanced Lv4 growth meet launch Easy clear-rate gates', async (context) => {
     const matrix = await runBalanceMatrix();
-    for (const stage of STAGES) {
-      const summary = summarize(stage.id, matrix[stage.id]);
-      const target = TARGETS[stage.id];
+    for (const stageId of GATED_STAGE_IDS) {
+      const summary = summarize(stageId, matrix[stageId]);
+      const target = TARGETS[stageId];
       assert.ok(
         summary.clearRate >= target.minimumClearRate,
-        `${stage.id}: ${(summary.clearRate * 100).toFixed(1)}% < ${(target.minimumClearRate * 100).toFixed(0)}% clear-rate gate`,
+        `${stageId}: ${(summary.clearRate * 100).toFixed(1)}% < ${(target.minimumClearRate * 100).toFixed(0)}% clear-rate gate`,
       );
       assert.ok(
         summary.medianEstimatedPlayMinutes >= target.minimumMinutes
           && summary.medianEstimatedPlayMinutes <= target.maximumMinutes,
-        `${stage.id}: estimated median ${summary.medianEstimatedPlayMinutes.toFixed(2)} min is outside ${target.minimumMinutes}-${target.maximumMinutes} min`,
+        `${stageId}: estimated median ${summary.medianEstimatedPlayMinutes.toFixed(2)} min is outside ${target.minimumMinutes}-${target.maximumMinutes} min`,
       );
       context.diagnostic(
-        `${stage.id}: ${(summary.clearRate * 100).toFixed(1)}% clear; combat ${summary.minimumCombatMinutes.toFixed(2)}-${summary.maximumCombatMinutes.toFixed(2)} min (median ${summary.medianCombatMinutes.toFixed(2)}); estimated play +${summary.standardInputSeconds}s input ${summary.minimumEstimatedPlayMinutes.toFixed(2)}-${summary.maximumEstimatedPlayMinutes.toFixed(2)} min (median ${summary.medianEstimatedPlayMinutes.toFixed(2)})`,
+        `${stageId}: ${(summary.clearRate * 100).toFixed(1)}% clear; combat ${summary.minimumCombatMinutes.toFixed(2)}-${summary.maximumCombatMinutes.toFixed(2)} min (median ${summary.medianCombatMinutes.toFixed(2)}); estimated play +${summary.standardInputSeconds}s input ${summary.minimumEstimatedPlayMinutes.toFixed(2)}-${summary.maximumEstimatedPlayMinutes.toFixed(2)} min (median ${summary.medianEstimatedPlayMinutes.toFixed(2)})`,
       );
     }
   });
