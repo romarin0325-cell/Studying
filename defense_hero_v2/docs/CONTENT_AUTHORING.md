@@ -57,8 +57,8 @@ export const DEFINITION_BY_ID = deepFreeze(Object.fromEntries(
 - 영웅 10명: 메인 4명 + 일반 6명
 - 영웅마다 Lv4 선택지 2개 + Lv6 선택지 2개: 특성 40개
 - 일반 적 10종 + 보스 4종
-- 스테이지 2개, 각 10웨이브
-- 버프 7종, 상태 7종, 공개 디버프 6종, 이펙트 프리셋 9종
+- 스테이지 4개, 각 10웨이브(총 40)
+- 버프 7종, 상태 7종, 공개 디버프 6종, 이펙트 프리셋 12종
 - 출시 에셋 66개
 
 따라서 기존 항목의 수치·표시명만 바꾸는 작업과, 항목을 추가·삭제하는 작업은 다르다. 추가·삭제할 때는 `validateContent.js`의 `EXPECTED_*_IDS`, `CONTENT_COUNTS`와 해당 테스트의 고정 기대값을 의도적으로 함께 갱신해야 한다.
@@ -324,7 +324,7 @@ boss({
 
 ## 8. 스테이지, 경로, 웨이브
 
-스테이지는 12×16 논리 보드를 사용한다. 경로는 꼭 `expandOrthogonalPath()`로 웨이포인트를 셀 목록으로 확장한다.
+스테이지는 12×16 논리 보드를 사용한다. 전투 영역은 상단 12×12(y 0~11)로 고정하고, 하단 y 12~15는 렌더러가 UI 밴드로 그린다. 경로는 꼭 `expandOrthogonalPath()`로 웨이포인트를 셀 목록으로 확장한다.
 
 ```js
 const EXAMPLE_WAYPOINTS = [
@@ -352,6 +352,8 @@ const EXAMPLE_WAYPOINTS = [
     pathWaypoints: EXAMPLE_WAYPOINTS,
     pathCells: expandOrthogonalPath(EXAMPLE_WAYPOINTS),
     obstacles: [point(3, 2)],
+    placementCells: [/* 정확히 15칸 */],
+    recommendedPlacements: { 0: point(1, 2) /* 슬롯 0~4, 화이트리스트 안 */ },
   },
   waves: exampleWaves,
 }
@@ -361,29 +363,31 @@ const EXAMPLE_WAYPOINTS = [
 
 - 웨이포인트는 둘 이상이고 좌표는 정수다.
 - 각 구간은 가로 또는 세로 한 방향으로만 이동해야 하며 길이 0 구간은 금지다.
-- 확장된 모든 셀은 보드 안에 있어야 하고 같은 셀을 두 번 방문할 수 없다.
+- 확장된 모든 셀은 전투 영역(y ≤ 11) 안에 있어야 하고 같은 셀을 두 번 방문할 수 없다.
 - 첫 셀은 `spawn`, 마지막 셀은 `core`와 같아야 한다.
-- 장애물은 보드 안에서 서로 달라야 하며 경로와 겹치면 안 된다.
+- 장애물은 보드 안에서 서로 달라야 하며 경로와 겹치면 안 되고 y ≤ 11을 지킨다.
 
-웨이브는 `makeWave(number, groups, spawnOrder, options)`로 만든다.
+배치 화이트리스트 규칙 (`placementCells`):
+
+- 스테이지마다 정확히 15칸, y 1~11, 중복 금지, 경로·장애물과 겹침 금지다.
+- `recommendedPlacements`는 슬롯 0~4 전부 화이트리스트 안의 **서로 다른** 셀을 가리켜야 한다. 슬롯 0은 메인 영웅 자리라 첫 레인 인접칸을 권장한다(근접 메인 사거리 2).
+- 런타임 배치는 화이트리스트로만 허용된다. 맵 재설계 이후 화이트리스트 밖(또는 옛 경로 위) 배치는 마이그레이션하지 않고 `validateCheckpoint`가 실패한다. `SaveRepositoryV2.loadCheckpoint()`는 그 세이브를 버리고 Continue를 숨긴다.
+- `theme`은 `ruins` 또는 `chaos`다. 고대유적 게이트 보정(`enemyHpMultiplier` 1.1, `enemySpeedMultiplier` 0.9)은 해당 스테이지 일반 적 스폰에만 곱해지며, 같은 로스터를 쓰는 `long_boulevard`에는 적용되지 않는다.
+
+웨이브는 `makeWave(number, groups, spawnOrder, options)`로 만든다. Phase 4부터 모든 일반 웨이브는 단일 적 타입이다.
 
 ```js
-makeWave(
-  2,
-  [
-    { enemyId: 'ruin_scarab', count: 20 },
-    { enemyId: 'sand_wisp', count: 10 },
-  ],
-  repeatPattern(['ruin_scarab', 'ruin_scarab', 'sand_wisp'], 10),
-)
+// 단일 타입 헬퍼(stages.js)
+singleWave(2, 'sand_wisp', 30)
 ```
 
-- 일반 웨이브는 30마리, 5·10웨이브는 보스 1마리로 고정돼 있다.
+- 일반 웨이브는 단일 적 타입 20~30마리, 5·10웨이브는 보스 1마리다.
 - 5웨이브의 한 마리는 `midBossId`, 10웨이브의 한 마리는 `finalBossId`여야 한다.
 - `groups` 합계, `spawnOrder` 길이, `spawnOrder` 안의 ID별 빈도는 모두 일치해야 한다.
-- `spawnOrder`가 실제 고정 출현 순서다. 혼합 출현은 `repeatPattern()` 등으로 명시적으로 만든다. 런타임의 `buildFixedSpawnSequence()`는 `spawnOrder`가 없는 다른 입력 형태를 위한 결정론적 대체 경로지만, 현재 `makeWave()`와 검증 계약은 명시적 `spawnOrder`를 제공한다.
+- `spawnOrder`가 실제 고정 출현 순서다. 런타임의 `buildFixedSpawnSequence()`는 `spawnOrder`가 없는 다른 입력 형태를 위한 결정론적 대체 경로지만, 현재 `makeWave()`와 검증 계약은 명시적 `spawnOrder`를 제공한다.
 - HP 배율, 꿈결정 보상, 기본 스폰 간격은 각각 `WAVE_HP_MULTIPLIERS[number]`, `DREAM_CRYSTAL_REWARDS[number - 1]`, `WAVE_RULES.baseSpawnIntervalSeconds`에서 들어간다.
 - 현재 한 스테이지의 총 보상은 15이며 체크포인트도 `crystals <= 15`, `nextWave <= 10`을 고정한다.
+- 신규 스테이지는 기존 적 로스터를 재사용한다(`crossroads`는 혼돈의틈 로스터, `long_boulevard`는 고대유적 로스터). `enemy.stageId`는 정보성 필드이며 웨이브 참조 가능 적만 규정한다. 신규 적 추가 시 66개 에셋 계약(`directionalAssetIds`)도 함께 점검한다.
 
 스테이지나 경로/웨이브 구성을 바꾸면 `shotgun-stages.test.mjs`의 고정 웨이포인트와 웨이브 기대값을 갱신한다. 새 스테이지는 `validateContent.js`의 기대 ID/수량, `simulation-balance.test.mjs`의 스테이지별 기준, 브라우저 검증의 기본 스테이지 참조도 점검한다.
 

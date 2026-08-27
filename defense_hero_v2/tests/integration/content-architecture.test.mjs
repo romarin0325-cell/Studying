@@ -80,8 +80,8 @@ test('strict content validation covers every required V2 definition and optional
     enemies: 14,
     normalEnemies: 10,
     bosses: 4,
-    stages: 2,
-    waves: 20,
+    stages: 4,
+    waves: 40,
     buffs: 7,
     statuses: 7,
     debuffs: 6,
@@ -136,7 +136,7 @@ test('public content collections, lookup tables and aliases are deeply immutable
   for (const preset of EFFECT_PRESETS) assert.strictEqual(EFFECT_PRESET_BY_ID[preset.id], preset);
 });
 
-test('content creates finite deterministic wave state for both fixed stages', () => {
+test('content creates finite deterministic wave state for every fixed stage', () => {
   for (const stage of STAGES) {
     const state = createBattleState({
       stageId: stage.id,
@@ -160,6 +160,14 @@ test('content creates finite deterministic wave state for both fixed stages', ()
     assert.ok(firstEnemy.hp > 0);
     assert.equal(firstEnemy.x, stage.map.spawn.x + 0.5);
     assert.equal(firstEnemy.y, stage.map.spawn.y + 0.5);
+    if (stage.id === 'ancient_ruins') {
+      assert.equal(firstEnemy.hp, 80 * 0.65 * 0.85 * 1.1);
+      assert.equal(firstEnemy.speed, 1.2 * 0.95 * 0.9);
+    }
+    if (stage.id === 'long_boulevard') {
+      assert.equal(firstEnemy.hp, 80 * 0.65 * 0.85);
+      assert.equal(firstEnemy.speed, 1.2 * 0.95);
+    }
   }
 });
 

@@ -58,6 +58,16 @@ export function validateCheckpoint(value) {
     ...stage.map.pathCells.map(({ x, y }) => `${x},${y}`),
     ...stage.map.obstacles.map(({ x, y }) => `${x},${y}`),
   ]);
+  // 화이트리스트 밖 셀은 blocked다. 옛 배치 좌표는 마이그레이션하지 않고 검증 실패로 버린다.
+  if (stage.map.placementCells?.length) {
+    const allowed = new Set(stage.map.placementCells.map(({ x, y }) => `${x},${y}`));
+    for (let y = 0; y < 16; y += 1) {
+      for (let x = 0; x < 12; x += 1) {
+        const key = `${x},${y}`;
+        if (!allowed.has(key)) blockedCells.add(key);
+      }
+    }
+  }
   for (const [heroId, placement] of Object.entries(value.placements)) {
     assert(typeof heroId === 'string' && heroId, 'Checkpoint placement hero id is invalid');
     assert(isRecord(placement), 'Checkpoint placement must be an object');

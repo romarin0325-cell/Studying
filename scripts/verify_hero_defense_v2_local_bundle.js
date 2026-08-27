@@ -14,13 +14,21 @@ const DEBUG_GLOBAL = "__heroDefenseV2Debug";
 function attachDiagnostics(page, bundleUrl) {
   const failures = [];
   const unexpectedRequests = [];
+  // Chromium과 Node의 file:// URL은 드라이브 문자 대소문자/percent-encoding이
+  // 다를 수 있으므로 WHATWG URL + 드라이브 문자 소문자로 정규화해 비교한다.
+  const normalizeUrl = (url) => {
+    try {
+      return new URL(url).href.replace(/^file:\/\/\/([a-zA-Z]):/, (match, drive) => `file:///${drive.toLowerCase()}:`);
+    } catch { return url; }
+  };
+  const normalizedBundleUrl = normalizeUrl(bundleUrl);
   page.on("pageerror", (error) => failures.push(`pageerror: ${error.message}`));
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`console: ${message.text()}`);
   });
   page.on("request", (request) => {
     const url = request.url();
-    if (url === bundleUrl || url === "about:blank" || url.startsWith("data:") || url.startsWith("blob:")) return;
+    if (normalizeUrl(url) === normalizedBundleUrl || url === "about:blank" || url.startsWith("data:") || url.startsWith("blob:")) return;
     unexpectedRequests.push(url);
   });
   return { failures, unexpectedRequests };
@@ -57,10 +65,18 @@ async function verifyContext(browser, bundleUrl, options, label) {
       `${label}: file:// localStorage did not survive reload`,
     );
 
-    const externalPerformanceEntries = await page.evaluate((currentBundle) => performance
-      .getEntriesByType("resource")
-      .map((entry) => entry.name)
-      .filter((url) => url !== currentBundle && !url.startsWith("data:") && !url.startsWith("blob:")), bundleUrl);
+    const externalPerformanceEntries = await page.evaluate((currentBundle) => {
+      const normalize = (url) => {
+        try {
+          return new URL(url).href.replace(/^file:\/\/\/([a-zA-Z]):/, (match, drive) => `file:///${drive.toLowerCase()}:`);
+        } catch { return url; }
+      };
+      const normalizedBundle = normalize(currentBundle);
+      return performance
+        .getEntriesByType("resource")
+        .map((entry) => entry.name)
+        .filter((url) => normalize(url) !== normalizedBundle && !url.startsWith("data:") && !url.startsWith("blob:"));
+    }, bundleUrl);
     assert.deepEqual(externalPerformanceEntries, [], `${label}: external resource entries remain`);
     assert.deepEqual(diagnostics.unexpectedRequests, [], `${label}: external requests\n${diagnostics.unexpectedRequests.join("\n")}`);
     assert.deepEqual(diagnostics.failures, [], `${label}: browser errors\n${diagnostics.failures.join("\n")}`);

@@ -40,7 +40,7 @@ const EXPECTED_ENEMY_IDS = [
   'ruin_scarab', 'ember_scarab', 'sand_wisp', 'stone_guard', 'regrowth_idol', 'flora', 'pharaoh',
   'rift_shade', 'rift_wing', 'abyss_armor', 'chaos_spawn', 'lesser_demon', 'reaper', 'demon_god',
 ];
-const EXPECTED_STAGE_IDS = ['ancient_ruins', 'chaos_rift'];
+const EXPECTED_STAGE_IDS = ['ancient_ruins', 'chaos_rift', 'crossroads', 'long_boulevard'];
 const EXPECTED_BUFF_IDS = [
   'moon_bless', 'sun_bless', 'earth_bless', 'twinkle_party', 'sanctuary', 'star_powder', 'gale',
 ];
@@ -68,8 +68,8 @@ export const CONTENT_COUNTS = deepFreeze({
   enemies: 14,
   normalEnemies: 10,
   bosses: 4,
-  stages: 2,
-  waves: 20,
+  stages: 4,
+  waves: 40,
   buffs: 7,
   statuses: 7,
   debuffs: 6,
@@ -352,6 +352,9 @@ function validateEnemies(sets, errors) {
   }
 }
 
+const COMBAT_AREA_MAX_ROW = 11;
+const PLACEMENT_CELL_COUNT = 15;
+
 function withinBoard(cell) {
   return Number.isInteger(cell?.x)
     && Number.isInteger(cell?.y)
@@ -378,15 +381,51 @@ function validateStageMap(stage, errors) {
   const pathKeys = expanded.map(coordinateKey);
   if (new Set(pathKeys).size !== pathKeys.length) errors.push(`${context}: path may not visit a cell twice.`);
   if (pathKeys.some((key, index) => !withinBoard(expanded[index]))) errors.push(`${context}: path leaves the board.`);
+  for (const cell of expanded) {
+    if (cell.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: path cell ${coordinateKey(cell)} exceeds the combat area (y<=11).`);
+  }
   if (coordinateKey(expanded[0]) !== coordinateKey(map.spawn)) errors.push(`${context}: first path cell must be spawn.`);
   if (coordinateKey(expanded.at(-1)) !== coordinateKey(map.core)) errors.push(`${context}: last path cell must be core.`);
+  if (map.spawn?.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: spawn exceeds the combat area (y<=11).`);
+  if (map.core?.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: core exceeds the combat area (y<=11).`);
   const obstacleKeys = new Set();
   for (const obstacle of map.obstacles ?? []) {
     const key = coordinateKey(obstacle);
     if (!withinBoard(obstacle)) errors.push(`${context}: obstacle ${key} leaves the board.`);
+    if (obstacle.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: obstacle ${key} exceeds the combat area (y<=11).`);
     if (obstacleKeys.has(key)) errors.push(`${context}: duplicate obstacle ${key}.`);
     if (pathKeys.includes(key)) errors.push(`${context}: obstacle ${key} overlaps the path.`);
     obstacleKeys.add(key);
+  }
+  const placementCells = map.placementCells ?? [];
+  if (placementCells.length !== PLACEMENT_CELL_COUNT) {
+    errors.push(`${context}: exactly ${PLACEMENT_CELL_COUNT} placement cells are required, got ${placementCells.length}.`);
+  }
+  const placementKeys = new Set();
+  for (const cell of placementCells) {
+    const key = coordinateKey(cell);
+    if (!withinBoard(cell)) errors.push(`${context}: placementCell ${key} leaves the board.`);
+    else if (cell.y < 1 || cell.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: placementCell ${key} must be within rows 1~11.`);
+    if (placementKeys.has(key)) errors.push(`${context}: duplicate placementCell ${key}.`);
+    if (pathKeys.includes(key)) errors.push(`${context}: placementCell ${key} overlaps the path.`);
+    if (obstacleKeys.has(key)) errors.push(`${context}: placementCell ${key} overlaps an obstacle.`);
+    placementKeys.add(key);
+  }
+  const recommendedKeys = new Set();
+  for (const slot of [0, 1, 2, 3, 4]) {
+    const recommended = map.recommendedPlacements?.[slot];
+    if (!recommended) {
+      errors.push(`${context}: recommendedPlacements must include slot ${slot}.`);
+      continue;
+    }
+    const key = coordinateKey(recommended);
+    if (!placementKeys.has(key)) {
+      errors.push(`${context}: recommendedPlacements[${slot}] must be one of the placement cells.`);
+    }
+    if (recommendedKeys.has(key)) {
+      errors.push(`${context}: recommendedPlacements[${slot}] duplicates another slot.`);
+    }
+    recommendedKeys.add(key);
   }
 }
 
@@ -403,6 +442,13 @@ function validateStages(sets, errors) {
       errors.push(`${context}: invalid difficulty visibility contract.`);
     }
     if (!sets.enemies.has(stage.midBossId) || !sets.enemies.has(stage.finalBossId)) errors.push(`${context}: boss references are invalid.`);
+    if (!['ruins', 'chaos'].includes(stage.theme)) errors.push(`${context}: theme must be ruins or chaos.`);
+    if (stage.enemyHpMultiplier !== undefined && !isPositiveFinite(stage.enemyHpMultiplier)) {
+      errors.push(`${context}: enemyHpMultiplier must be positive and finite.`);
+    }
+    if (stage.enemySpeedMultiplier !== undefined && !isPositiveFinite(stage.enemySpeedMultiplier)) {
+      errors.push(`${context}: enemySpeedMultiplier must be positive and finite.`);
+    }
     validateStageMap(stage, errors);
     if (!Array.isArray(stage.waves) || stage.waves.length !== 10) errors.push(`${context}: exactly ten waves are required.`);
     for (const [index, wave] of (stage.waves ?? []).entries()) {
@@ -410,8 +456,15 @@ function validateStages(sets, errors) {
       const waveContext = `${context}.waves[${waveNumber}]`;
       const bossWave = waveNumber === 5 || waveNumber === 10;
       if (wave.number !== waveNumber || wave.kind !== (bossWave ? 'boss' : 'normal')) errors.push(`${waveContext}: invalid number/kind.`);
-      const expectedCount = bossWave ? 1 : 30;
-      if (wave.enemyCount !== expectedCount || wave.spawnOrder?.length !== expectedCount) errors.push(`${waveContext}: expected ${expectedCount} enemies.`);
+      if (bossWave) {
+        if (wave.enemyCount !== 1 || wave.spawnOrder?.length !== 1) errors.push(`${waveContext}: boss wave must have exactly 1 enemy.`);
+      } else {
+        if (wave.enemyCount < 20 || wave.enemyCount > 30) {
+          errors.push(`${waveContext}: normal wave must have 20~30 enemies, got ${wave.enemyCount}.`);
+        }
+        if (wave.spawnOrder?.length !== wave.enemyCount) errors.push(`${waveContext}: spawnOrder length must match enemyCount.`);
+        if ((wave.groups ?? []).length !== 1) errors.push(`${waveContext}: normal wave must contain exactly one enemy type.`);
+      }
       if (wave.hpMultiplier !== WAVE_HP_MULTIPLIERS[waveNumber]) errors.push(`${waveContext}: invalid HP multiplier.`);
       if (wave.dreamCrystalReward !== DREAM_CRYSTAL_REWARDS[waveNumber - 1]) errors.push(`${waveContext}: invalid crystal reward.`);
       if (wave.spawnIntervalSeconds !== WAVE_RULES.baseSpawnIntervalSeconds) errors.push(`${waveContext}: invalid base spawn interval.`);
@@ -421,7 +474,7 @@ function validateStages(sets, errors) {
         if (!sets.enemies.has(enemyId)) errors.push(`${waveContext}: unknown enemy '${enemyId}'.`);
         actualCounts.set(enemyId, (actualCounts.get(enemyId) ?? 0) + 1);
       }
-      if ([...declaredCounts.values()].reduce((sum, count) => sum + count, 0) !== expectedCount) errors.push(`${waveContext}: group total is invalid.`);
+      if ([...declaredCounts.values()].reduce((sum, count) => sum + count, 0) !== wave.enemyCount) errors.push(`${waveContext}: group total is invalid.`);
       for (const [enemyId, count] of declaredCounts) {
         if (actualCounts.get(enemyId) !== count) errors.push(`${waveContext}: spawn order count for '${enemyId}' is invalid.`);
       }

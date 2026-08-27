@@ -30,11 +30,11 @@ function makeCheckpoint(overrides = {}) {
       heroIds: [...FORMATION.heroIds],
     },
     placements: {
-      rumi: { x: 0, y: 0 },
-      snow_rabbit: { x: 1, y: 0 },
-      avalanche_maid: { x: 2, y: 0 },
-      guardian: { x: 3, y: 0 },
-      lightning_sage: { x: 4, y: 0 },
+      rumi: { x: 5, y: 3 },
+      snow_rabbit: { x: 6, y: 7 },
+      avalanche_maid: { x: 2, y: 7 },
+      guardian: { x: 8, y: 3 },
+      lightning_sage: { x: 11, y: 2 },
     },
     nextWave: 6,
     coreDurability: 7.5,
@@ -110,6 +110,10 @@ test('validateCheckpoint requires exactly the five formed heroes on unique in-bo
   blocked.placements.rumi = { x: 0, y: 1 };
   assert.throws(() => validateCheckpoint(blocked), /placement is blocked/);
 
+  const offWhitelist = makeCheckpoint();
+  offWhitelist.placements.rumi = { x: 6, y: 0 };
+  assert.throws(() => validateCheckpoint(offWhitelist), /placement is blocked/);
+
   for (const [coordinate, value] of [['x', -1], ['x', 12], ['x', 1.5], ['y', -1], ['y', 16], ['y', 1.5]]) {
     const invalid = makeCheckpoint();
     invalid.placements.rumi[coordinate] = value;
@@ -168,11 +172,11 @@ test('SaveRepositoryV2 saves immutable copies, creates a backup and falls back f
   const first = repository.saveCheckpoint(firstInput);
   assert.equal(first.schemaVersion, CHECKPOINT_SCHEMA_VERSION);
   firstInput.placements.rumi.x = 11;
-  assert.equal(repository.loadCheckpoint().placements.rumi.x, 0);
+  assert.equal(repository.loadCheckpoint().placements.rumi.x, 5);
 
   const loaded = repository.loadCheckpoint();
   loaded.placements.rumi.x = 9;
-  assert.equal(repository.loadCheckpoint().placements.rumi.x, 0, 'loaded checkpoints must be detached clones');
+  assert.equal(repository.loadCheckpoint().placements.rumi.x, 5, 'loaded checkpoints must be detached clones');
 
   repository.saveCheckpoint(makeCheckpoint({ nextWave: 3, crystals: 2 }));
   assert.equal(JSON.parse(storage.getItem(SAVE_KEYS_V2.checkpointBackup)).nextWave, 2);

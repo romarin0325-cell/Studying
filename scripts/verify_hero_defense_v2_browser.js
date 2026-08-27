@@ -241,11 +241,23 @@ async function calculateLegalPlacementTarget(page, heroIndex = 0) {
     ]);
     if (hero.placed) blocked.add(`${hero.x},${hero.y}`);
     let cell = null;
-    for (let y = 0; y < 16 && !cell; y += 1) {
-      for (let x = 0; x < 12; x += 1) {
-        if (!blocked.has(`${x},${y}`)) {
-          cell = { x, y };
+    // Phase 4 이후 배치는 placementCells 화이트리스트로 제한되므로
+    // 화이트리스트가 있으면 그 안에서 빈 셀을 고른다.
+    const whitelist = Array.isArray(snapshot.stage.placementCells) ? snapshot.stage.placementCells : [];
+    if (whitelist.length > 0) {
+      for (const candidate of whitelist) {
+        if (!blocked.has(`${candidate.x},${candidate.y}`)) {
+          cell = { x: candidate.x, y: candidate.y };
           break;
+        }
+      }
+    } else {
+      for (let y = 0; y < 16 && !cell; y += 1) {
+        for (let x = 0; x < 12; x += 1) {
+          if (!blocked.has(`${x},${y}`)) {
+            cell = { x, y };
+            break;
+          }
         }
       }
     }
