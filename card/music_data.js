@@ -114,5 +114,103 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         artist: 'Card RPG',
         album: 'Card RPG Music',
         src: '劣等星シンドローム.mp3'
+    }),
+    Object.freeze({
+        id: 'チョコっとじゃ足りない.mp3',
+        title: 'チョコっとじゃ足りない',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'チョコっとじゃ足りない.mp3'
+    }),
+    Object.freeze({
+        id: 'あとごふん.mp3',
+        title: 'あとごふん',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'あとごふん.mp3'
+    }),
+    Object.freeze({
+        id: 'トリック・オア・ほめて！.mp3',
+        title: 'トリック・オア・ほめて！',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'トリック・オア・ほめて！.mp3'
+    }),
+    Object.freeze({
+        id: 'かわいいって言ってよね.mp3',
+        title: 'かわいいって言ってよね',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'かわいいって言ってよね.mp3'
+    }),
+    Object.freeze({
+        id: '小さな賢者のクリスマス.mp3',
+        title: '小さな賢者のクリスマス',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '小さな賢者のクリスマス.mp3'
+    }),
+    Object.freeze({
+        id: '仮面市場.mp3',
+        title: '仮面市場',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '仮面市場.mp3'
+    }),
+    Object.freeze({
+        id: '何卒.mp3',
+        title: '何卒',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '何卒.mp3'
+    }),
+    Object.freeze({
+        id: '深海郵便.mp3',
+        title: '深海郵便',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '深海郵便.mp3'
+    }),
+    Object.freeze({
+        id: 'なんだっけ.mp3',
+        title: 'なんだっけ',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'なんだっけ.mp3'
+    }),
+    Object.freeze({
+        id: '眠る前の花丸.mp3',
+        title: '眠る前の花丸',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '眠る前の花丸.mp3'
+    }),
+    Object.freeze({
+        id: '傘だけ.mp3',
+        title: '傘だけ',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '傘だけ.mp3'
+    }),
+    Object.freeze({
+        id: 'ノーカン.mp3',
+        title: 'ノーカン',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'ノーカン.mp3'
+    }),
+    Object.freeze({
+        id: 'ワンモアセット.mp3',
+        title: 'ワンモアセット',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'ワンモアセット.mp3'
+    }),
+    Object.freeze({
+        id: 'フォユフォユ.mp3',
+        title: 'フォユフォユ',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'フォユフォユ.mp3'
     })
 ]);
