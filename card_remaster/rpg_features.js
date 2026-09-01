@@ -1577,7 +1577,7 @@
         if (this.state.deck.indexOf(null) === -1) {
             this.showAlert("덱 구성 완료!");
             this.state.draft.active = false;
-            this.showScreen('screen-deck');
+            this.openDeck();
         } else {
             this.startDraft();
         }
