@@ -235,10 +235,21 @@
         .battle-header {
             display: flex;
             justify-content: space-between;
-            padding: 5px;
+            align-items: center;
+            padding: 5px 8px;
             background: #222;
             border-radius: 5px;
             font-size: 0.8rem;
+            min-height: 30px;
+            box-sizing: border-box;
+            gap: 8px;
+        }
+
+        .battle-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
         .battle-artifact-btn {
@@ -250,16 +261,21 @@
             color: #ffd700;
             font-size: 0.7rem;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .field-buffs {
             height: 20px;
+            line-height: 20px;
             font-size: 0.7rem;
             color: #81d4fa;
-            text-align: center;
+            text-align: right;
             overflow: hidden;
             white-space: nowrap;
+            text-overflow: ellipsis;
             cursor: pointer;
+            flex: 1;
+            min-width: 0;
         }
 
         .visual-stage {
@@ -1269,9 +1285,12 @@
             <div id="transcendence-grid" class="card-grid"></div>
         </div>
         <div id="screen-battle" class="screen">
-            <div class="battle-header"><span>Turn: <span id="bt-turn">1</span></span>
-                <button id="btn-battle-artifact-check" class="battle-artifact-btn"
-                    onclick="RPG.openArtifactCheck()">아티팩트 확인</button>
+            <div class="battle-header">
+                <div class="battle-header-left">
+                    <span>Turn: <span id="bt-turn">1</span></span>
+                    <button id="btn-battle-artifact-check" class="battle-artifact-btn"
+                        onclick="RPG.openArtifactCheck()">아티팩트 확인</button>
+                </div>
                 <div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div>
             </div>
             <div class="visual-stage">
@@ -3344,7 +3363,8 @@
             showBattleScreen() {
                 this.showScreen('screen-battle');
                 const artifactBtn = document.getElementById('btn-battle-artifact-check');
-                if (artifactBtn) artifactBtn.style.display = this.state.mode === 'artifact_chaos' ? 'block' : 'none';
+                const isArtifactMode = ['artifact', 'artifact_chaos', 'artifact_reserve'].includes(this.state.mode);
+                if (artifactBtn) artifactBtn.style.display = isArtifactMode ? 'inline-block' : 'none';
             },
             clearBattleLog() { document.getElementById('battle-log').innerHTML = ""; },
             renderBattleView() { this.renderBattlefield(); },
@@ -5285,6 +5305,25 @@
                 const title = document.getElementById('artifact-check-title');
 
                 if (this.state.mode === 'artifact_reserve') {
+                    const inBattle = this.battle && !this.battle.isFinished;
+                    if (inBattle) {
+                        if (title) title.innerText = '현재 활성 아티팩트';
+                        if (owned.length === 0) {
+                            list.innerHTML = '<div style="color:#aaa; text-align:center;">활성화된 아티팩트가 없습니다.</div>';
+                        } else {
+                            list.innerHTML = owned.map(id => {
+                                const art = GameUtils.getArtifactById(id);
+                                if (!art) return '';
+                                return `<div style="margin-bottom:8px; padding:8px; background:#333; border-radius:5px; border-left: 3px solid #ffd700;">
+                                    <b style="color:#ffd700;">${art.name}</b><br>
+                                    <span style="color:#ccc;">${art.desc}</span>
+                                </div>`;
+                            }).join('');
+                        }
+                        document.getElementById('modal-artifact-check').classList.add('active');
+                        return;
+                    }
+
                     const reservePool = this.state.artifactReservePool || [];
                     const activeCount = owned.length;
                     if (title) title.innerText = `아티팩트 풀 (${activeCount}/${GAME_CONSTANTS.MAX_ARTIFACTS} 활성)`;
