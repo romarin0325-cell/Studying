@@ -1167,7 +1167,7 @@
     },
 
 
-    consumeArtifactReserveUsesForBattle() {
+    consumeArtifactReserveUsesForBattle(autoSave = true) {
         if (this.state.mode !== 'artifact_reserve') return [];
 
         const entries = this.state.artifactReservePool || [];
@@ -1181,7 +1181,9 @@
             entry.remainingUses--;
         });
         this.state.artifacts = [];
-        this.saveGame(false);
+        if (autoSave && typeof this.saveGame === 'function') {
+            this.saveGame(false);
+        }
         return activeIds;
     },
 
@@ -1934,7 +1936,7 @@
         this.state.chaosBuffs = [];
         this.state.activeChaosBlessing = [];
         this.state.activeSageBlessing = [];
-        this.consumeArtifactReserveUsesForBattle();
+        this.consumeArtifactReserveUsesForBattle(false);
 
         let deadMsg = this.handlePermadeath(this.battle.players);
         if (this.state.mode === 'dream_corridor') {
