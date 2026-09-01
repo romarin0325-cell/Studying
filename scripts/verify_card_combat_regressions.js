@@ -456,6 +456,33 @@ function run() {
     reserveHost.state.artifactReservePool[0].remainingUses = 0;
     assert.strictEqual(reserveHost.toggleArtifactReserveArtifact(reserveIds[0]), false);
 
+    // Verify autoSave control in consumeArtifactReserveUsesForBattle
+    let saveGameCallCount = 0;
+    reserveHost.saveGame = () => { saveGameCallCount++; };
+    reserveHost.state.artifactReservePool[1].remainingUses = 2;
+    reserveHost.state.artifacts = [reserveIds[1]];
+    assert.deepStrictEqual(reserveHost.consumeArtifactReserveUsesForBattle(false), [reserveIds[1]]);
+    assert.strictEqual(reserveHost.state.artifactReservePool[1].remainingUses, 1);
+    assert.strictEqual(saveGameCallCount, 0, 'consumeArtifactReserveUsesForBattle(false) must not call saveGame');
+
+    reserveHost.state.artifacts = [reserveIds[1]];
+    assert.deepStrictEqual(reserveHost.consumeArtifactReserveUsesForBattle(true), [reserveIds[1]]);
+    assert.strictEqual(reserveHost.state.artifactReservePool[1].remainingUses, 0);
+    assert.strictEqual(saveGameCallCount, 1, 'consumeArtifactReserveUsesForBattle(true) must call saveGame');
+
+    // Verify loseBattle does NOT save game in artifact_reserve mode
+    saveGameCallCount = 0;
+    reserveHost.battle = { isFinished: false, players: [] };
+    reserveHost.cleanupTranscendenceCards = () => '';
+    reserveHost.handlePermadeath = () => '';
+    reserveHost.openInfoModal = quiet;
+    reserveHost.state.chaosBlessingUses = 2;
+    reserveHost.state.chaosBuffs = [{ id: 'test', multiplier: 0.2 }];
+    reserveHost.loseBattle();
+    assert.strictEqual(saveGameCallCount, 0, 'loseBattle in artifact_reserve must not call saveGame on defeat');
+    assert.strictEqual(reserveHost.state.chaosBlessingUses, GAME_CONSTANTS.DEFAULT_BLESSING_USES);
+    assert.strictEqual(reserveHost.state.chaosBuffs.length, 0);
+
     const artifactChaosHost = {
       global: { unlocked_divine_artifacts: ['divine_flora'], unlocked_bonus_cards: [] },
       state: {
