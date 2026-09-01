@@ -688,11 +688,13 @@ function buildToeicReviewSource(toeicSession, explanationText) {
     if (!toeicSession || !toeicSession.set) return null;
 
     const set = toeicSession.set;
-    const partLabel = set.type === 'part6'
-        ? '파트 6'
-        : set.type === 'part7'
-            ? '파트 7'
-            : '문제';
+    const partLabel = set.type === 'part5'
+        ? '파트 5'
+        : set.type === 'part6'
+            ? '파트 6'
+            : set.type === 'part7'
+                ? '파트 7'
+                : '문제';
 
     return {
         setId: set.id,
@@ -768,7 +770,7 @@ const LumiQuestionRuntime = {
     },
 
     shouldShowToeicQuestionButton(set) {
-        return !!set && (set.type === 'part6' || set.type === 'part7');
+        return !!set && ['part5', 'part6', 'part7'].includes(set.type);
     },
 
     ensureGeneralSession(sessionStore) {
