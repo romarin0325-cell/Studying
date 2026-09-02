@@ -1215,6 +1215,18 @@
                 <button class="menu-btn" onclick="RPG.toMenu()" style="width:200px;">나가기</button>
             </div>
         </div>
+        <div id="screen-perfect-plan-draft" class="screen">
+            <h3 style="margin:5px 0;">퍼펙트플랜 (<span id="perfect-plan-step-text">전설 0/10</span>)</h3>
+            <p id="perfect-plan-help" style="text-align:center; margin-bottom:5px; font-size:0.9rem; color:#ccc;">
+                해금된 전설 카드에서 10장을 선택하세요.
+            </p>
+            <div id="perfect-plan-grid" class="bonus-pool-grid" style="flex:1; overflow-y:auto; padding:5px;"></div>
+            <div style="margin-top:auto; margin-bottom:40px; padding-bottom:10px; display:flex; gap:10px; justify-content:center;">
+                <button class="menu-btn" onclick="RPG.resetPerfectPlanCurrentGrade()" style="width:100px;">초기화</button>
+                <button class="menu-btn" id="btn-perfect-plan-prev" onclick="RPG.goPerfectPlanPrevStep()" style="width:100px;">이전</button>
+                <button class="menu-btn" id="btn-perfect-plan-next" onclick="RPG.confirmPerfectPlanCurrentGrade()" style="width:100px; background:#1b5e20; border-color:#4caf50;">다음</button>
+            </div>
+        </div>
         <div id="screen-draft" class="screen">
             <h3 style="margin:5px 0;">덱 빌딩 (<span id="draft-round-text">선봉</span> 선발)</h3>
             <div style="text-align:center; margin-bottom:2px;">
@@ -3197,11 +3209,12 @@
                     { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀 구성.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개). 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' },
-                    { id: 'artifact_reserve', name: '아티팩트리저브', desc: '아티팩트 세트 선택 4회 반복으로 12개 풀 구성. 각 아티팩트는 2회 사용 가능, 전투 전 최대 4개 수동 활성화. 강화된 적 출현.\n(성공조건: 24 스테이지)' }
+                    { id: 'artifact_reserve', name: '아티팩트리저브', desc: '아티팩트 세트 선택 4회 반복으로 12개 풀 구성. 각 아티팩트는 2회 사용 가능, 전투 전 최대 4개 수동 활성화. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
+                    { id: 'perfect_plan', name: '퍼펙트플랜', desc: '해금된 전설/에픽/레어/노말에서 각 10장씩 골라 40장 전용 풀을 만든 뒤 오리진과 같이 진행. 강화된 적 출현(1.1배).\n(성공조건: 없음 / 무한)' }
                 ];
 
                 if (this.tempGameType === 'endless') {
-                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact', 'artifact_reserve'].includes(m.id));
+                    MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact', 'artifact_reserve', 'perfect_plan'].includes(m.id));
                     MODES.forEach(m => {
                         if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
                         if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
@@ -3216,10 +3229,10 @@
                         });
                     }
                 } else if (this.tempGameType === 'challenge') {
-                    MODES = MODES.filter(m => !['origin', 'archive'].includes(m.id));
+                    MODES = MODES.filter(m => !['origin', 'archive'].includes(m.id) && m.id !== 'perfect_plan');
                 } else {
                     // 신규 아티팩트 변형은 챌린지 전용이며, 리저브만 엔드리스에도 제공한다.
-                    MODES = MODES.filter(m => !['artifact_chaos', 'artifact_reserve'].includes(m.id));
+                    MODES = MODES.filter(m => !['artifact_chaos', 'artifact_reserve'].includes(m.id) && m.id !== 'perfect_plan');
                 }
 
                 MODES.forEach(m => {
@@ -3230,7 +3243,7 @@
                     btn.innerText = m.name;
                     btn.id = `mode-btn-${m.id}`;
 
-                    const isUnlocked = m.id === 'dream_corridor' || this.global.unlocked_modes.includes(m.id);
+                    const isUnlocked = m.id === 'dream_corridor' || m.id === 'perfect_plan' || this.global.unlocked_modes.includes(m.id);
                     if (isUnlocked) {
                         const hardCleared = this.global.hardChallengeCleared && this.global.hardChallengeCleared[m.id];
                         if (this.tempGameType === 'challenge' && hardCleared) {
@@ -3290,7 +3303,7 @@
                         () => {
                             this.initNewGame(this.selectedModeId);
                             modal.classList.remove('active');
-                            if (!['factory', 'artifact_reserve'].includes(this.selectedModeId)) {
+                            if (!['factory', 'artifact_reserve', 'perfect_plan'].includes(this.selectedModeId)) {
                                 this.toMenu();
                             }
                         }
@@ -3301,6 +3314,9 @@
             },
 
             toMenu() {
+                if (this.state.mode === 'perfect_plan' && this.state.perfectPlanDraft && this.state.perfectPlanDraft.active) {
+                    return this.openPerfectPlanDraft();
+                }
                 this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
                 this.showScreen('screen-menu');
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
@@ -3389,8 +3405,8 @@
                 const mode = this.state.mode;
                 let pool;
 
-                if (mode === 'factory' && this.state.factoryPool && this.state.factoryPool.length > 0) {
-                    // 팩토리: 드래프트된 40장 한정
+                if (GameUtils.usesLimitedCardPool(mode) && this.state.factoryPool && this.state.factoryPool.length > 0) {
+                    // 팩토리/퍼펙트플랜: 드래프트된 40장 한정
                     pool = GameUtils.buildCardPool(this.global, {
                         factoryPool: this.state.factoryPool,
                         specialCardSelections: this.state.activeSpecialCardSelections
@@ -3424,7 +3440,7 @@
                     suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브',
                     curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스', artifact_chaos: '아티팩트카오스',
                     draft: '드래프트', factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브',
-                    overdrive: '오버드라이브', dream_corridor: '꿈의회랑' };
+                    overdrive: '오버드라이브', dream_corridor: '꿈의회랑', perfect_plan: '퍼펙트플랜' };
                 const label = modeLabel[mode] || mode;
                 document.getElementById('card-pool-info').innerText =
                     `현재 모드: ${label} | 풀 카드 수: ${pool.length}장`;
@@ -3608,7 +3624,7 @@
                 let pool = GameUtils.buildCardPool(this.global, {
                     excludeTranscendence: true,
                     excludeEvent: true,
-                    factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
                     activeBonusPoolIds: this.state.activeBonusPoolIds,
                     specialCardSelections: this.state.activeSpecialCardSelections,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
@@ -3736,7 +3752,7 @@
                 const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
                 const count = puzzleConfig.PIECE_COUNT || 36;
                 const pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
                     activeBonusPoolIds: this.state.activeBonusPoolIds,
                     specialCardSelections: this.state.activeSpecialCardSelections
                 });
@@ -3818,7 +3834,7 @@
 
                 // Build Pool
                 let pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
                     activeBonusPoolIds: this.state.activeBonusPoolIds,
                     specialCardSelections: this.state.activeSpecialCardSelections
                 }).filter(card => card.grade === grade);
@@ -3831,7 +3847,7 @@
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
                     pool = GameUtils.buildCardPool(this.global, {
-                        factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+                        factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
                         activeBonusPoolIds: this.state.activeBonusPoolIds,
                         specialCardSelections: this.state.activeSpecialCardSelections
                     }).filter(card => card.grade === 'normal');
@@ -4272,6 +4288,165 @@
                 };
 
                 this.renderCardList('collection-grid', pool, (id) => this.showCardInfo(id));
+            },
+
+            // --- Perfect Plan Draft Logic ---
+            openPerfectPlanDraft() {
+                this.showScreen('screen-perfect-plan-draft');
+                this.renderPerfectPlanDraft();
+            },
+
+            renderPerfectPlanDraft() {
+                const draft = this.state.perfectPlanDraft;
+                if (!draft) return;
+                const grades = (typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN)
+                    ? GAME_CONSTANTS.PERFECT_PLAN.GRADES
+                    : ['legend', 'epic', 'rare', 'normal'];
+                const gradeNames = { legend: '전설', epic: '에픽', rare: '레어', normal: '노말' };
+                const currentGrade = grades[draft.step] || 'legend';
+                const gradeName = gradeNames[currentGrade] || currentGrade;
+                const pool = this.getPerfectPlanGradePool(currentGrade);
+                const required = this.getPerfectPlanRequiredCount(currentGrade);
+
+                const stepText = document.getElementById('perfect-plan-step-text');
+                const helpText = document.getElementById('perfect-plan-help');
+                const grid = document.getElementById('perfect-plan-grid');
+                const prevBtn = document.getElementById('btn-perfect-plan-prev');
+                const nextBtn = document.getElementById('btn-perfect-plan-next');
+
+                if (stepText) {
+                    stepText.innerText = `${gradeName} ${draft.currentGradeSelected.length}/${required}`;
+                }
+                if (helpText) {
+                    if (draft.step === grades.length - 1 && draft.currentGradeSelected.length === required) {
+                        helpText.innerText = '다음을 누르면 모험이 시작됩니다.';
+                    } else {
+                        helpText.innerText = `해금된 ${gradeName} 카드에서 ${required}장을 선택하세요.`;
+                    }
+                }
+                if (prevBtn) {
+                    prevBtn.style.display = draft.step > 0 ? 'inline-block' : 'none';
+                }
+                if (nextBtn) {
+                    nextBtn.innerText = draft.step === grades.length - 1 ? '시작' : '다음';
+                }
+
+                if (!grid) return;
+                grid.innerHTML = '';
+
+                const selectedSet = new Set(draft.currentGradeSelected);
+
+                pool.forEach(card => {
+                    const isChecked = selectedSet.has(card.id);
+                    const item = document.createElement('label');
+                    item.className = `bonus-pool-item${isChecked ? '' : ' is-disabled'}`;
+                    item.innerHTML = `
+                        <div class="bonus-pool-name">${card.name}</div>
+                        <div class="bonus-pool-grade">${card.grade.toUpperCase()} / ${card.role}</div>
+                        <div class="bonus-pool-toggle">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''}>
+                            <span>선택</span>
+                        </div>
+                    `;
+                    item.insertBefore(ImageAssets.createPortrait(card), item.firstChild);
+
+                    const checkbox = item.querySelector('input');
+                    checkbox.addEventListener('change', () => {
+                        this.togglePerfectPlanCard(card.id, checkbox.checked);
+                    });
+
+                    grid.appendChild(item);
+                });
+            },
+
+            togglePerfectPlanCard(cardId, isChecked) {
+                const draft = this.state.perfectPlanDraft;
+                if (!draft) return;
+                const grades = (typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN)
+                    ? GAME_CONSTANTS.PERFECT_PLAN.GRADES
+                    : ['legend', 'epic', 'rare', 'normal'];
+                const currentGrade = grades[draft.step] || 'legend';
+                const required = this.getPerfectPlanRequiredCount(currentGrade);
+
+                if (isChecked) {
+                    if (draft.currentGradeSelected.length >= required) {
+                        this.showAlert(`이 등급은 ${required}장까지 선택할 수 있습니다.`);
+                        this.renderPerfectPlanDraft();
+                        return;
+                    }
+                    if (!draft.currentGradeSelected.includes(cardId)) {
+                        draft.currentGradeSelected.push(cardId);
+                    }
+                } else {
+                    draft.currentGradeSelected = draft.currentGradeSelected.filter(id => id !== cardId);
+                }
+                this.saveGame(false);
+                this.renderPerfectPlanDraft();
+            },
+
+            resetPerfectPlanCurrentGrade() {
+                const draft = this.state.perfectPlanDraft;
+                if (!draft) return;
+                draft.currentGradeSelected = [];
+                this.saveGame(false);
+                this.renderPerfectPlanDraft();
+            },
+
+            confirmPerfectPlanCurrentGrade() {
+                const draft = this.state.perfectPlanDraft;
+                if (!draft) return;
+                const grades = (typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN)
+                    ? GAME_CONSTANTS.PERFECT_PLAN.GRADES
+                    : ['legend', 'epic', 'rare', 'normal'];
+                const currentGrade = grades[draft.step] || 'legend';
+                const required = this.getPerfectPlanRequiredCount(currentGrade);
+
+                if (draft.currentGradeSelected.length !== required) {
+                    return this.showAlert(`정확히 ${required}장을 선택해야 합니다. (현재: ${draft.currentGradeSelected.length}장)`);
+                }
+
+                draft.selected.push(...draft.currentGradeSelected);
+                draft.currentGradeSelected = [];
+                draft.step++;
+
+                if (draft.step >= grades.length) {
+                    this.finishPerfectPlanDraft();
+                } else {
+                    this.saveGame(false);
+                    this.renderPerfectPlanDraft();
+                }
+            },
+
+            goPerfectPlanPrevStep() {
+                const draft = this.state.perfectPlanDraft;
+                if (!draft || draft.step <= 0) return;
+                const grades = (typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN)
+                    ? GAME_CONSTANTS.PERFECT_PLAN.GRADES
+                    : ['legend', 'epic', 'rare', 'normal'];
+
+                draft.step--;
+                const prevGrade = grades[draft.step];
+                const prevRequired = this.getPerfectPlanRequiredCount(prevGrade);
+
+                draft.currentGradeSelected = draft.selected.slice(-prevRequired);
+                draft.selected = draft.selected.slice(0, -prevRequired);
+                this.saveGame(false);
+                this.renderPerfectPlanDraft();
+            },
+
+            finishPerfectPlanDraft() {
+                this.state.perfectPlanDraft.active = false;
+                this.state.factoryPool = [...this.state.perfectPlanDraft.selected];
+                this.state.inventory = [...(this.state.activeTranscendenceCards || [])];
+                this.state.deck = [null, null, null];
+                this.saveGame(false);
+
+                let msg = '퍼펙트플랜 구성이 완료되었습니다!<br>방금 고른 40장의 전용 풀을 바탕으로 모험을 시작합니다.';
+                if (this.state.activeTranscendenceCards && this.state.activeTranscendenceCards.length > 0) {
+                    msg += `<br><br>초월 카드 ${this.state.activeTranscendenceCards.length}장이 인벤토리에 합류했습니다!`;
+                }
+                this.showAlert(msg);
+                this.toMenu();
             },
 
             // --- Draft Logic ---
