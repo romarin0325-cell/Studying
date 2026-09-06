@@ -284,6 +284,13 @@ class SaveDataMigrator {
             currentBundles: []
         }, ['pool', 'currentBundles']);
 
+        state.perfectPlanDraft = SaveDataMigrator.mergeObjectDefaults(state.perfectPlanDraft, {
+            active: false,
+            step: 0,
+            selected: [],
+            currentGradeSelected: []
+        }, ['selected', 'currentGradeSelected']);
+
         if (typeof options.normalizeBonusPoolIds === 'function') {
             state.activeBonusPoolIds = options.normalizeBonusPoolIds(state.activeBonusPoolIds);
         }
@@ -410,6 +417,12 @@ window.GAME_CONSTANTS = {
 
     DRAFT: {
         INITIAL_REROLLS: 3
+    },
+
+    PERFECT_PLAN: {
+        GRADES: ['legend', 'epic', 'rare', 'normal'],
+        PICKS_PER_GRADE: 10,
+        HIDDEN_BOSS_AFTER_STAGE: 12
     },
 
     DREAM_CORRIDOR_MAX_LIVES: 3,
@@ -939,6 +952,18 @@ const GameUtils = {
             const factorySet = new Set(options.factoryPool);
             let pool = allPossible.filter(c => factorySet.has(c.id));
             
+            if (options.specialCardSelections && Object.keys(options.specialCardSelections).length > 0) {
+                const specialById = new Map(this.getSpecialCards().map(card => [card.id, card]));
+                pool = pool.map(card => {
+                    const selectedId = options.specialCardSelections[card.id];
+                    const specialCard = specialById.get(selectedId);
+                    if (specialCard && specialCard.specialBaseId === card.id) {
+                        return specialCard;
+                    }
+                    return card;
+                });
+            }
+
             // Still respect maxGrade if specified (e.g. for great sage blessing)
             if (options.maxGrade) {
                 const gradeOrder = {
@@ -1062,6 +1087,15 @@ const GameUtils = {
         return GAME_CONSTANTS.MODE_CLEAR_STAGES[mode] !== undefined
             ? GAME_CONSTANTS.MODE_CLEAR_STAGES[mode]
             : GAME_CONSTANTS.MODE_CLEAR_STAGES.default;
+    },
+
+    /**
+     * Check if a mode uses a limited 40-card factoryPool.
+     * @param {string} mode
+     * @returns {boolean}
+     */
+    usesLimitedCardPool(mode) {
+        return mode === 'factory' || mode === 'perfect_plan';
     }
 };
 

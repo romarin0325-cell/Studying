@@ -775,9 +775,12 @@
         ) {
             enemyId = this.getCurrentSpecialSeason().bossId;
         }
+        const hiddenAfter = (this.state.mode === 'perfect_plan')
+            ? ((typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN) ? GAME_CONSTANTS.PERFECT_PLAN.HIDDEN_BOSS_AFTER_STAGE : 12)
+            : 30;
         if (this.state.mode === 'puzzle' && stageNumber > rotation.length && hiddenBossMap[baseId]) {
             enemyId = hiddenBossMap[baseId];
-        } else if (this.state.gameType === 'endless' && stageNumber > 30 && hiddenBossMap[baseId] && Math.random() < 0.3) {
+        } else if (this.state.gameType === 'endless' && stageNumber > hiddenAfter && hiddenBossMap[baseId] && Math.random() < 0.3) {
             enemyId = hiddenBossMap[baseId];
         }
 
@@ -818,6 +821,30 @@
         return this.getStandardBonusCards()
             .concat(this.getHiddenBonusCards())
             .filter(card => unlocked.has(card.id));
+    },
+
+
+    getPerfectPlanGradePool(grade) {
+        const unlockedBonusIds = new Set(this.global.unlocked_bonus_cards || []);
+        const base = (typeof CARDS !== 'undefined' ? CARDS : []).filter(card =>
+            card.grade === grade
+            && !card.hide_from_gacha
+            && card.unlockSource !== 'bonus'
+            && card.unlockSource !== 'hidden'
+        );
+        const bonus = this.getUnlockedBonusCards().filter(card =>
+            card.grade === grade && unlockedBonusIds.has(card.id)
+        );
+        return this.sortCardDataByGrade([...base, ...bonus]);
+    },
+
+
+    getPerfectPlanRequiredCount(grade) {
+        const available = this.getPerfectPlanGradePool(grade).length;
+        const target = (typeof GAME_CONSTANTS !== 'undefined' && GAME_CONSTANTS.PERFECT_PLAN)
+            ? GAME_CONSTANTS.PERFECT_PLAN.PICKS_PER_GRADE
+            : 10;
+        return Math.min(target, available);
     },
 
 
@@ -1270,7 +1297,7 @@
 
     initNewGame(mode = 'origin') {
         // Origin records are closed when the next run begins; other modes close on defeat.
-        if (this.state.mode === 'origin' && this.state.enemyScale > 0) {
+        if (['origin', 'perfect_plan'].includes(this.state.mode) && this.state.enemyScale > 0) {
             this.saveRecord();
         }
 
@@ -1299,6 +1326,7 @@
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
             factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [] },
             artifactReserveDraft: { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] },
+            perfectPlanDraft: { active: false, step: 0, selected: [], currentGradeSelected: [] },
             artifactReservePool: [],
             artifacts: [],
             pendingEnemyId: null,
@@ -1350,6 +1378,15 @@
             this.state.artifactReserveDraft.pool = [];
             this.state.artifactReserveDraft.currentBundles = [];
             this.generateArtifactReserveBundles();
+        }
+
+        if (mode === 'perfect_plan') {
+            this.state.perfectPlanDraft.active = true;
+            this.state.perfectPlanDraft.step = 0;
+            this.state.perfectPlanDraft.selected = [];
+            this.state.perfectPlanDraft.currentGradeSelected = [];
+            this.state.factoryPool = [];
+            this.openPerfectPlanDraft();
         }
 
         // Origin Mode: Add Transcendence Cards directly to Inventory
@@ -1476,7 +1513,7 @@
         let pool = GameUtils.buildCardPool(this.global, {
             excludeTranscendence: true,
             excludeEvent: true,
-            factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
             specialCardSelections: this.state.activeSpecialCardSelections,
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
@@ -1555,7 +1592,7 @@
         let pool = GameUtils.buildCardPool(this.global, {
             includeTranscendence: true,
             activeTranscendenceCards: this.state.activeTranscendenceCards,
-            factoryPool: this.state.mode === 'factory' ? this.state.factoryPool : null,
+            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
             activeBonusPoolIds: this.state.activeBonusPoolIds,
             specialCardSelections: this.state.activeSpecialCardSelections,
             // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함

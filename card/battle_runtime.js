@@ -82,7 +82,7 @@ function buildBattleEnemy(rpg) {
     let steps = 0;
     if (rpg.state.mode === 'puzzle' || rpg.state.mode === 'artifact_chaos') {
         steps = 2;
-    } else if (['artifact', 'artifact_reserve', 'flood', 'curse'].includes(rpg.state.mode)) {
+    } else if (['artifact', 'artifact_reserve', 'flood', 'curse', 'perfect_plan'].includes(rpg.state.mode)) {
         if (rpg.state.gameType === 'challenge' || rpg.state.gameType === 'endless') {
             steps = 1;
         }
@@ -201,6 +201,13 @@ const BattleRuntime = {
     startBattleInit(rpg) {
         if (rpg.state.mode === 'artifact_reserve' && rpg.state.artifactReserveDraft && rpg.state.artifactReserveDraft.active) {
             return rpg.showAlert("아티팩트 리저브 선택을 먼저 완료해주세요.");
+        }
+
+        if (rpg.state.mode === 'perfect_plan' && rpg.state.perfectPlanDraft && rpg.state.perfectPlanDraft.active) {
+            return rpg.showAlert('퍼펙트플랜 카드 선택을 먼저 완료해주세요.');
+        }
+        if (rpg.state.mode === 'perfect_plan' && (!rpg.state.factoryPool || rpg.state.factoryPool.length === 0)) {
+            return rpg.showAlert('퍼펙트플랜 카드 선택을 먼저 완료해주세요.');
         }
 
         if (rpg.state.mode === 'puzzle') {
