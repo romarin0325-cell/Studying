@@ -1495,6 +1495,16 @@ function run() {
     );
     const burningSyrup = bruleeWitch.skills.find(skill => skill.name === '버닝시럽');
     const holyGlaze = bruleeWitch.skills.find(skill => skill.name === '홀리글레이즈');
+    const magicGuard = bruleeWitch.skills.find(skill => skill.name === '매직가드');
+    assert.strictEqual(bruleeWitch.skills.length, 3);
+    assert.deepStrictEqual(
+      [magicGuard.type, magicGuard.tier, magicGuard.cost, magicGuard.desc],
+      ['sup', 1, 10, '마법공격 무효']
+    );
+    assert.strictEqual(
+      JSON.stringify(magicGuard.effects),
+      JSON.stringify([{ type: 'buff', id: 'magic_guard', duration: 1 }])
+    );
     assert.deepStrictEqual(
       [burningSyrup.type, burningSyrup.tier, burningSyrup.cost, burningSyrup.val],
       ['phy', 3, 30, 2]

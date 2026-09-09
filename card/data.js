@@ -1282,7 +1282,8 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'death_twinkle', desc: '사망 시 필드버프 트윙클파티 발동' },
         skills: [
             { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
-            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] }
+            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] },
+            { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
         ]
     }
 ];
