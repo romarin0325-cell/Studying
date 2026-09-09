@@ -21,7 +21,7 @@ async function run() {
     return !!loading && loading.classList.contains('hidden');
   }, { timeout: 15000 });
 
-  const results = await page.evaluate(() => {
+  const results = await page.evaluate(async () => {
     const output = [];
     const record = (name, detail) => output.push({ name, result: 'PASS', detail });
     const assert = (condition, name, detail) => {
@@ -43,6 +43,50 @@ async function run() {
       'title_menu',
       titleButtons.join(', ')
     );
+
+    const fullscreenBtn = document.getElementById('btn-game-fullscreen');
+    assert(!!fullscreenBtn, 'fullscreen_button', 'missing');
+    assert(!!fullscreenBtn.closest('#screen-menu'), 'fullscreen_button_menu', 'not on main menu');
+    assert(
+      !RPG.showScreen.toString().includes('Fullscreen') &&
+      !RPG.openSystemMenu.toString().includes('Fullscreen') &&
+      !RPG.toMenu.toString().includes('Fullscreen'),
+      'fullscreen_no_screen_hook',
+      'showScreen/menu hooks stay fullscreen-free'
+    );
+
+    let fullscreenTarget = null;
+    let fullscreenOptions = null;
+    let exitCalls = 0;
+    let currentFullscreen = null;
+    Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, get: () => true });
+    Object.defineProperty(document, 'fullscreenElement', { configurable: true, get: () => currentFullscreen });
+    document.documentElement.requestFullscreen = async function (options) {
+      fullscreenTarget = this;
+      fullscreenOptions = options;
+      currentFullscreen = this;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    };
+    document.exitFullscreen = async function () {
+      exitCalls += 1;
+      currentFullscreen = null;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    };
+    RPG.syncGameFullscreenButton();
+    assert(fullscreenBtn.innerText.trim() === '⛶ 전체화면', 'fullscreen_label_idle', fullscreenBtn.innerText.trim());
+    await RPG.toggleGameFullscreen();
+    assert(fullscreenTarget === document.documentElement, 'fullscreen_target', String(fullscreenTarget && fullscreenTarget.nodeName));
+    assert(fullscreenOptions && fullscreenOptions.navigationUI === 'hide', 'fullscreen_nav_ui', JSON.stringify(fullscreenOptions));
+    assert(fullscreenBtn.innerText.trim() === '⛶ 전체화면 종료', 'fullscreen_label_active', fullscreenBtn.innerText.trim());
+    assert(fullscreenBtn.getAttribute('aria-pressed') === 'true', 'fullscreen_aria_active', fullscreenBtn.getAttribute('aria-pressed'));
+    await RPG.toggleGameFullscreen();
+    assert(exitCalls === 1, 'fullscreen_exit', String(exitCalls));
+    assert(fullscreenBtn.innerText.trim() === '⛶ 전체화면', 'fullscreen_label_after_exit', fullscreenBtn.innerText.trim());
+    currentFullscreen = document.documentElement;
+    document.dispatchEvent(new Event('fullscreenchange'));
+    assert(fullscreenBtn.innerText.trim() === '⛶ 전체화면 종료', 'fullscreen_change_sync', fullscreenBtn.innerText.trim());
+    currentFullscreen = null;
+    document.dispatchEvent(new Event('fullscreenchange'));
 
     RPG.openMissionHub();
     const missionButtons = [...document.querySelectorAll('#mission-hub-list button')].map(btn => btn.innerText.replace(/\s+/g, ' ').trim());

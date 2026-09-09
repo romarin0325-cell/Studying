@@ -1164,6 +1164,7 @@
             <button class="menu-btn" onclick="RPG.startBattleInit()"
                 style="background:#b71c1c; border-color:#f44336;">전투 진입</button>
             <button class="menu-btn" onclick="RPG.openSystemMenu()">메뉴</button>
+            <button id="btn-game-fullscreen" class="menu-btn" type="button" onclick="RPG.toggleGameFullscreen()" aria-pressed="false">⛶ 전체화면</button>
         </div>
         <div id="screen-factory-draft" class="screen">
             <h3 style="margin:5px 0;">팩토리 드래프트 (<span id="factory-round-text">1/10 라운드</span>)</h3>
@@ -3389,6 +3390,61 @@
             openSystemMenu() {
                 this.updateSystemMenuUI();
                 document.getElementById('modal-menu').classList.add('active');
+            },
+
+            getGameFullscreenElement() {
+                return document.fullscreenElement || null;
+            },
+
+            canUseGameFullscreen() {
+                const root = document.documentElement;
+                return !!(document.fullscreenEnabled && root && typeof root.requestFullscreen === 'function');
+            },
+
+            syncGameFullscreenButton() {
+                const btn = document.getElementById('btn-game-fullscreen');
+                if (!btn) return;
+                if (!this.canUseGameFullscreen()) {
+                    btn.disabled = true;
+                    btn.textContent = '⛶ 전체화면 미지원';
+                    btn.setAttribute('aria-pressed', 'false');
+                    return;
+                }
+                const active = !!this.getGameFullscreenElement();
+                btn.disabled = false;
+                btn.textContent = active ? '⛶ 전체화면 종료' : '⛶ 전체화면';
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            },
+
+            async toggleGameFullscreen() {
+                try {
+                    if (this.getGameFullscreenElement()) {
+                        if (typeof document.exitFullscreen === 'function') {
+                            await document.exitFullscreen();
+                        }
+                        return;
+                    }
+                    const root = document.documentElement;
+                    if (!this.canUseGameFullscreen()) {
+                        console.warn('Fullscreen toggle failed: API unavailable');
+                        this.syncGameFullscreenButton();
+                        return;
+                    }
+                    try {
+                        await root.requestFullscreen({ navigationUI: 'hide' });
+                    } catch (error) {
+                        await root.requestFullscreen();
+                    }
+                } catch (error) {
+                    console.warn('Fullscreen toggle failed:', error);
+                }
+            },
+
+            bindGameFullscreen() {
+                if (this._fullscreenBound) return;
+                this._fullscreenBound = true;
+                document.addEventListener('fullscreenchange', () => this.syncGameFullscreenButton());
+                this.syncGameFullscreenButton();
             },
 
             updateSystemMenuUI() {
@@ -6313,6 +6369,7 @@
         // waits for window._scriptLoadComplete before enabling any button.
         document.addEventListener('DOMContentLoaded', () => {
             ImageAssets.hydrate(document);
+            RPG.bindGameFullscreen();
             RPG.waitForInitialDataLoad();
         });
     </script>
