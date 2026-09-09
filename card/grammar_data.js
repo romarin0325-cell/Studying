@@ -499,7 +499,7 @@ const GRAMMAR_DATA = [
             },
             {
                 "desc": "다음 빈칸에 들어갈 알맞은 말은?",
-                "question": "\"Would you like [ ] beverages?\" (음료 좀 드시겠어요?)",
+                "question": "\"I brought [ ] beverages for you.\" (내가 음료 좀 가져왔어.)",
                 "options": [
                     "any",
                     "some",
@@ -757,7 +757,7 @@ const GRAMMAR_DATA = [
                 "desc": "다음 빈칸에 들어갈 알맞은 전치사는?",
                 "question": "\"The conference will be held [ ] the venue.\" (회의는 그 행사장에서 열릴 거야.)",
                 "options": [
-                    "in",
+                    "into",
                     "on",
                     "at",
                     "for"
@@ -1022,8 +1022,8 @@ const GRAMMAR_DATA = [
                 "lecture_id": 16
             },
             {
-                "desc": "그 가게는 지난 일요일에 문을 열지 않았어.",
-                "question": "\"The store [ ] not open last Sunday.\"",
+                "desc": "그 가게는 지난 일요일에 바쁘지 않았어.",
+                "question": "\"The store [ ] not busy last Sunday.\"",
                 "options": [
                     "did",
                     "was",
