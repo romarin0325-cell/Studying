@@ -212,5 +212,26 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         artist: 'Card RPG',
         album: 'Card RPG Music',
         src: 'フォユフォユ.mp3'
+    }),
+    Object.freeze({
+        id: 'ひとくち、こっち向いて。.mp3',
+        title: 'ひとくち、こっち向いて。',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'ひとくち、こっち向いて。.mp3'
+    }),
+    Object.freeze({
+        id: '用はないけど.mp3',
+        title: '用はないけど',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: '用はないけど.mp3'
+    }),
+    Object.freeze({
+        id: 'ルミ・ノエル.mp3',
+        title: 'ルミ・ノエル',
+        artist: 'Card RPG',
+        album: 'Card RPG Music',
+        src: 'ルミ・ノエル.mp3'
     })
 ]);
