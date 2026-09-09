@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1526">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="별의 잔향 — 네 명의 수호자와 떠나는 네 개의 하늘. 오프라인 판타지 슈팅게임.">
+  <title>별의 잔향 · ASTRAL BLOOM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="ambient" aria-hidden="true"></div>
+  <main id="app">
+    <canvas id="world" aria-label="슈팅 전장. 화면을 드래그하거나 방향키로 이동하고, 봄 버튼 또는 스페이스로 필살기를 사용하세요."></canvas>
+    <div id="screen"></div>
+    <div id="hud" hidden>
+      <div class="hud-top">
+        <div class="score-block"><small id="stage-label">01 / AZURE RUINS</small><strong id="score">000000</strong><div id="lives" aria-label="남은 생명"></div></div>
+        <div class="hud-actions"><button class="round-button sound-toggle" aria-label="소리 끄기">♪</button><button class="round-button" id="pause" aria-label="일시정지">Ⅱ</button></div>
+      </div>
+      <div class="boss-hud" id="boss-hud" hidden><div><span id="boss-name"></span><span id="boss-phase"></span></div><div class="boss-track"><i id="boss-health"></i><b></b><b></b></div><small id="pattern-name"></small></div>
+      <div class="combo-hud" id="combo-hud"><b id="combo"></b><span id="multiplier"></span><i id="combo-meter"></i></div>
+      <div class="bottom-hud"><div class="power-block"><small>SHOT POWER</small><div id="power"></div><span id="weapon-label"></span></div><div class="bomb-wrap"><span id="bomb-label"></span><button id="bomb" aria-label="봄 사용"><span>❖</span><b>BLOOM</b><small id="bomb-count">3</small></button></div></div>
+    </div>
+    <div id="announcement" aria-live="polite"></div>
+    <div id="toast" role="status"></div>
+    <div id="modal" hidden></div>
+    <div id="loading"><div class="loading-sigil">✧</div><h1>ASTRAL BLOOM</h1><p>별빛을 모으는 중</p><span>그림과 음악은 이 안에 모두 담겨 있어요.</span></div>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

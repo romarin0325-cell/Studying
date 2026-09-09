@@ -1,0 +1,11 @@
+{
+  "name": "astral-bloom",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node serve.mjs",
+    "test": "node --test tests/engine.test.mjs",
+    "verify": "npm test && npm run build && node verify.mjs"
+  }
+}
