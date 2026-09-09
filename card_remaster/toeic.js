@@ -797,7 +797,7 @@ const TOEIC_DATA = [
       },
       {
         "id": "17-2",
-        "question": "Please send a brief _______ of today’s meeting to the department head by 5 p.m.",
+        "question": "Please send a brief _______ of the key decisions made during today’s meeting to the department head by 5 p.m.",
         "options": [
           "invoice",
           "summary",
