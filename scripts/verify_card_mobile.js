@@ -237,6 +237,24 @@ async function run() {
         assert(Math.abs(compactTitleLayout.topSpace - compactTitleLayout.bottomSpace) <= 2);
         assert(compactTitleLayout.actionsLeft >= 0 && compactTitleLayout.actionsRight <= 320);
 
+        const compactMenuFullscreen = await normal.page.evaluate(() => {
+            RPG.showScreen('screen-menu');
+            const menu = document.getElementById('screen-menu');
+            const btn = document.getElementById('btn-game-fullscreen');
+            const style = window.getComputedStyle(menu);
+            btn.scrollIntoView({ block: 'nearest' });
+            const menuRect = menu.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+            const reachable = btnRect.top >= menuRect.top - 1 && btnRect.bottom <= menuRect.bottom + 1;
+            RPG.showScreen('screen-title');
+            return {
+                overflowY: style.overflowY,
+                reachable
+            };
+        });
+        assert(['auto', 'scroll', 'overlay'].includes(compactMenuFullscreen.overflowY));
+        assert.strictEqual(compactMenuFullscreen.reachable, true);
+
         const compactMusicModalBounds = await normal.page.evaluate(() => {
             MusicPlayer.open();
             const panel = document.querySelector('#modal-music-player .modal-content');
