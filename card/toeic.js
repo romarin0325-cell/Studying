@@ -22,7 +22,7 @@ const TOEIC_DATA = [
           "review",
           "reviewed",
           "are reviewing",
-          "have reviewed"
+          "had reviewed"
         ],
         "answer": "are reviewing"
       },
@@ -187,7 +187,7 @@ const TOEIC_DATA = [
         "options": [
           "assure",
           "ensure",
-          "insure",
+          "inquire",
           "secure"
         ],
         "answer": "ensure"
@@ -616,7 +616,7 @@ const TOEIC_DATA = [
         "question": "The manager discussed the proposal with the team _______.",
         "options": [
           "only yesterday",
-          "yesterday only",
+          "on yesterday",
           "only with yesterday",
           "yesterday with only"
         ],
@@ -786,7 +786,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "17-1",
-        "question": "All staff must follow the new security _______ when entering the server room, including the badge-check process.",
+        "question": "All staff must complete the new security _______ when entering the server room, including the badge-check process.",
         "options": [
           "policy",
           "procedure",
@@ -799,10 +799,10 @@ const TOEIC_DATA = [
         "id": "17-2",
         "question": "Please send a brief _______ of today’s meeting to the department head by 5 p.m.",
         "options": [
-          "report",
+          "invoice",
           "summary",
-          "memo",
-          "notice"
+          "schedule",
+          "venue"
         ],
         "answer": "summary"
       },
@@ -811,9 +811,9 @@ const TOEIC_DATA = [
         "question": "Before releasing the monthly statement, the accounting team must _______ the figures against the supporting documents.",
         "options": [
           "verify",
-          "confirm",
+          "notify",
           "realize",
-          "certify"
+          "signify"
         ],
         "answer": "verify"
       }
@@ -894,7 +894,7 @@ const TOEIC_DATA = [
           "in",
           "on",
           "at",
-          "by"
+          "during"
         ],
         "answer": "at"
       },
@@ -1108,7 +1108,7 @@ const TOEIC_DATA = [
         "id": "23-3",
         "question": "The new filing system is more _______ because it reduces the time needed to locate documents.",
         "options": [
-          "effective",
+          "defective",
           "efficient",
           "extensive",
           "evident"
@@ -1345,8 +1345,8 @@ const TOEIC_DATA = [
         "options": [
           "so that",
           "but",
-          "because",
-          "and"
+          "despite",
+          "during"
         ],
         "answer": "so that"
       },
@@ -1684,7 +1684,7 @@ const TOEIC_DATA = [
         "options": [
           "enroll",
           "enrolled",
-          "enrolling",
+          "enrolls",
           "enrollment"
         ],
         "answer": "enrolled"
@@ -2422,7 +2422,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Invitation to First-Round Interview — Operations Coordinator Position \n \nDear Ms. Rivera, \n \nThank you for applying for the Operations Coordinator position at Millstone Distribution. We have reviewed your resume and cover letter and were (1) _______ impressed by your experience coordinating shipment records and communicating with outside vendors. We would like to invite you to a first-round interview with our hiring team. The interview will be conducted online and should last about 30 minutes. [1] \n \nInterviews are being scheduled for Tuesday, May 5, 2026. We are currently offering two time slots: 10:00 a.m. and 2:00 p.m. [2] Once your preferred time is confirmed, we will send a calendar invitation, a video meeting link, and brief instructions for joining the session. \n \nBefore the interview, please review the attached job description and be prepared to discuss one example of a time you improved a process or solved an unexpected problem at work. You do not need to prepare a presentation, but it would be helpful to have a few specific results or numbers ready. [3] \n \nIf you are no longer available or wish to withdraw your application, please let us know as soon as possible (2) _______ we can update our records and contact other applicants. [4] If you require any accommodation during the hiring process, please inform us in advance so that we can make the necessary (3) _______ before the interview. \n \nThank you again for your interest in Millstone Distribution. We look forward to hearing from you. \n \nSincerely, \nDana Cole \nRecruiting Coordinator \nMillstone Distribution"
+    "passage": "Directions: Read the text below and choose the best answer for each blank. \n \nSubject: Invitation to First-Round Interview — Operations Coordinator Position \n \nDear Ms. Rivera, \n \nThank you for applying for the Operations Coordinator position at Millstone Distribution. We have reviewed your resume and cover letter and were (1) _______ impressed by your experience coordinating shipment records and communicating with outside vendors. We would like to invite you to a first-round interview with our hiring team. The interview will be conducted online and should last about 30 minutes. [1] \n \nInterviews are being scheduled for Tuesday, May 5, 2026. We are currently offering two time slots: 10:00 a.m. and 2:00 p.m. [2] Once your preferred time is confirmed, we will send a calendar invitation, a video meeting link, and brief instructions for joining the session. \n \nBefore the interview, please review the attached job description and be prepared to discuss one example of a time you improved a process or solved an unexpected problem at work. You do not need to prepare a presentation, but it would be helpful to have a few specific results or numbers ready. [3] \n \nIf you are no longer available or wish to withdraw your application, please let us know as soon as possible (2) _______ we can update our records and contact other applicants. [4] If you require any accommodation during the hiring process, please inform us in advance so that we can make all the necessary (3) _______ before the interview. \n \nThank you again for your interest in Millstone Distribution. We look forward to hearing from you. \n \nSincerely, \nDana Cole \nRecruiting Coordinator \nMillstone Distribution"
   },
   {
     "id": 52,
@@ -2587,7 +2587,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "55-1",
-        "question": "According to the Web page, which feature is included in the Business plan?",
+        "question": "According to the Web page, which feature is available in the Business plan but not in the Standard plan?",
         "options": [
           "100 GB of storage",
           "Shared task boards",
@@ -2805,7 +2805,7 @@ const TOEIC_DATA = [
     "questions": [
       {
         "id": "59-1",
-        "question": "Please confirm ______ the revised contract has been signed by both parties.",
+        "question": "Please confirm ______ the revised contract has been signed by both parties or not.",
         "options": [
           "whether",
           "what",
@@ -2819,15 +2819,15 @@ const TOEIC_DATA = [
         "question": "The technician demonstrated ______ the wireless scanner should be reset after each shift.",
         "options": [
           "how",
-          "that",
-          "where",
+          "what",
+          "whose",
           "which"
         ],
         "answer": "how"
       },
       {
         "id": "59-3",
-        "question": "We have not yet decided ______ the temporary reception desk will be removed from the lobby.",
+        "question": "We have not yet decided ______ the temporary reception desk will be removed from the lobby—Friday evening or Monday morning.",
         "options": [
           "when",
           "that",
@@ -2847,10 +2847,10 @@ const TOEIC_DATA = [
         "id": "60-1",
         "question": "The package was sent to the wrong branch; ______, a replacement order was prepared immediately.",
         "options": [
-          "however",
+          "similarly",
           "therefore",
           "otherwise",
-          "instead"
+          "likewise"
         ],
         "answer": "therefore"
       },
@@ -3116,10 +3116,10 @@ const TOEIC_DATA = [
         "id": "65-2",
         "question": "Select the best answer for blank (2).",
         "options": [
-          "at",
+          "in",
           "by",
-          "for",
-          "until"
+          "during",
+          "through"
         ],
         "answer": "by"
       },
@@ -3129,7 +3129,7 @@ const TOEIC_DATA = [
         "options": [
           "prepare",
           "prepared",
-          "preparation",
+          "preparatory",
           "preparations"
         ],
         "answer": "preparations"
@@ -3290,7 +3290,7 @@ const TOEIC_DATA = [
         "options": [
           "notice",
           "notify",
-          "notification",
+          "notified",
           "notifying"
         ],
         "answer": "notice"
@@ -3473,7 +3473,7 @@ const TOEIC_DATA = [
           "submit",
           "install",
           "replace",
-          "deliver"
+          "display"
         ],
         "answer": "submit"
       }
@@ -3563,7 +3563,7 @@ const TOEIC_DATA = [
         "id": "75-3",
         "question": "Select the best answer for blank (3).",
         "options": [
-          "so",
+          "nor",
           "but",
           "after",
           "whether"
