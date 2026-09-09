@@ -1479,6 +1479,129 @@ function run() {
     BattleRuntime.applySkillEffects(rumiRpg, rumi, rumiRpg.battle.enemy, { name: '문라이트세레나', effects: [] });
     assert.strictEqual(rumiRpg.battle.fieldBuffs.some(buff => buff.name === 'twinkle_party'), true);
 
+    const bruleeWitch = getCard('brulee_witch');
+    const bruleeDebuffPool = ['curse', 'darkness', 'silence', 'weak', 'corrosion'];
+    assert.deepStrictEqual(
+      [bruleeWitch.name, bruleeWitch.grade, bruleeWitch.element, bruleeWitch.role, bruleeWitch.unlockSource, bruleeWitch.releaseDate],
+      ['브륄레위치', 'epic', 'nature', 'debuffer', 'bonus', '2026-11-15']
+    );
+    assert.deepStrictEqual(
+      [bruleeWitch.stats.hp, bruleeWitch.stats.atk, bruleeWitch.stats.matk, bruleeWitch.stats.def, bruleeWitch.stats.mdef],
+      [395, 90, 90, 65, 65]
+    );
+    assert.deepStrictEqual(
+      [bruleeWitch.trait.type, bruleeWitch.trait.desc],
+      ['death_twinkle', '사망 시 필드버프 트윙클파티 발동']
+    );
+    const burningSyrup = bruleeWitch.skills.find(skill => skill.name === '버닝시럽');
+    const holyGlaze = bruleeWitch.skills.find(skill => skill.name === '홀리글레이즈');
+    assert.deepStrictEqual(
+      [burningSyrup.type, burningSyrup.tier, burningSyrup.cost, burningSyrup.val],
+      ['phy', 3, 30, 2]
+    );
+    assert.deepStrictEqual(
+      [holyGlaze.type, holyGlaze.tier, holyGlaze.cost, holyGlaze.val],
+      ['mag', 3, 30, 2]
+    );
+    assert.strictEqual(
+      JSON.stringify(burningSyrup.effects),
+      JSON.stringify([{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: bruleeDebuffPool, customLog: '작열 1스택 소모!' }])
+    );
+    assert.strictEqual(
+      JSON.stringify(holyGlaze.effects),
+      JSON.stringify([{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: bruleeDebuffPool, customLog: '디바인 1스택 소모!' }])
+    );
+    assert.strictEqual(
+      JSON.stringify(getCard('fairy_queen').skills.find(skill => skill.name === '이터널위스퍼').effects),
+      JSON.stringify([{ type: 'random_debuff_consume_divine' }])
+    );
+    assert.strictEqual(
+      JSON.stringify(getCard('desert_fox').skills.find(skill => skill.name === '황금폭풍').effects),
+      JSON.stringify([{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }])
+    );
+    assert.strictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 10, 14, 12)).some(card => card.id === 'brulee_witch'),
+      false
+    );
+    assert.strictEqual(
+      featureHost.getReleasedStandardBonusCards(new Date(2026, 10, 15, 12)).some(card => card.id === 'brulee_witch'),
+      true
+    );
+
+    const countPoolDebuffs = buffs => bruleeDebuffPool.filter(id => buffs[id]);
+    const noBurnTarget = makeUnit({ buffs: {} });
+    SideEffects.apply({ target: noBurnTarget, source: makeUnit(), logFn: quiet }, burningSyrup.effects[0]);
+    assert.deepStrictEqual(noBurnTarget.buffs, {});
+    const burnTarget = makeUnit({ buffs: { burn: 3 } });
+    SideEffects.apply({ target: burnTarget, source: makeUnit(), logFn: quiet }, burningSyrup.effects[0]);
+    assert.strictEqual(burnTarget.buffs.burn, 2);
+    assert.strictEqual(countPoolDebuffs(burnTarget.buffs).length, 2);
+    assert.strictEqual(new Set(countPoolDebuffs(burnTarget.buffs)).size, 2);
+    const cursedBurnTarget = makeUnit({ buffs: { burn: 1, curse: 1 } });
+    SideEffects.apply({ target: cursedBurnTarget, source: makeUnit(), logFn: quiet }, burningSyrup.effects[0]);
+    assert.strictEqual(cursedBurnTarget.buffs.burn, undefined);
+    assert.strictEqual(cursedBurnTarget.buffs.curse, 1);
+    assert(countPoolDebuffs(cursedBurnTarget.buffs).length >= 2);
+    assert(countPoolDebuffs(cursedBurnTarget.buffs).length <= 3);
+
+    const noDivineTarget = makeUnit({ buffs: {} });
+    SideEffects.apply({ target: noDivineTarget, source: makeUnit(), logFn: quiet }, holyGlaze.effects[0]);
+    assert.deepStrictEqual(noDivineTarget.buffs, {});
+    const glazeDivineTarget = makeUnit({ buffs: { divine: 2 } });
+    SideEffects.apply({ target: glazeDivineTarget, source: makeUnit(), logFn: quiet }, holyGlaze.effects[0]);
+    assert.strictEqual(glazeDivineTarget.buffs.divine, 1);
+    assert.strictEqual(countPoolDebuffs(glazeDivineTarget.buffs).length, 2);
+
+    const bruleeCaster = buildWaveUnit('brulee_witch', ['brulee_witch'], 0);
+    bruleeCaster.baseCrit = -100;
+    bruleeCaster.mp = 100;
+    const syrupRpg = makeRpg(bruleeCaster, ['brulee_witch']);
+    syrupRpg.battle.enemy.hp = 1000;
+    syrupRpg.battle.enemy.maxHp = 1000;
+    syrupRpg.battle.enemy.def = 0;
+    syrupRpg.battle.enemy.buffs = {};
+    assert.strictEqual(BattleRuntime.executeSkill(syrupRpg, bruleeCaster, syrupRpg.battle.enemy, burningSyrup), true);
+    assert.strictEqual(bruleeCaster.mp, 70);
+    assert.strictEqual(syrupRpg.battle.enemy.hp, 820);
+    assert.deepStrictEqual(countPoolDebuffs(syrupRpg.battle.enemy.buffs), []);
+
+    const glazeCaster = buildWaveUnit('brulee_witch', ['brulee_witch'], 0);
+    glazeCaster.baseCrit = -100;
+    glazeCaster.mp = 100;
+    const glazeRpg = makeRpg(glazeCaster, ['brulee_witch']);
+    glazeRpg.battle.enemy.hp = 1000;
+    glazeRpg.battle.enemy.maxHp = 1000;
+    glazeRpg.battle.enemy.mdef = 0;
+    glazeRpg.battle.enemy.buffs = { divine: 1 };
+    assert.strictEqual(BattleRuntime.executeSkill(glazeRpg, glazeCaster, glazeRpg.battle.enemy, holyGlaze), true);
+    assert.strictEqual(glazeCaster.mp, 70);
+    assert.strictEqual(glazeRpg.battle.enemy.hp, 820);
+    assert.strictEqual(glazeRpg.battle.enemy.buffs.divine, undefined);
+    assert.strictEqual(countPoolDebuffs(glazeRpg.battle.enemy.buffs).length, 2);
+
+    const bruleeDeathLogs = [];
+    const bruleeVictim = buildWaveUnit('brulee_witch', ['brulee_witch'], 0);
+    const bruleeDeath = Logic.handleDeathTraits(bruleeVictim, deathTarget, [], msg => bruleeDeathLogs.push(msg), ['brulee_witch'], 1, []);
+    assert.deepStrictEqual(bruleeDeath.fieldBuffsToAdd, ['twinkle_party']);
+    assert(bruleeDeathLogs.some(message => message.includes('[특성] 브륄레위치 사망! 트윙클파티 발동!')));
+    assert.strictEqual(bruleeDeathLogs.some(message => message.includes('헬하운드')), false);
+    const hellhoundLogs = [];
+    const hellhoundVictim = buildWaveUnit('hellhound', ['hellhound'], 0);
+    const hellhoundDeath = Logic.handleDeathTraits(hellhoundVictim, deathTarget, [], msg => hellhoundLogs.push(msg), ['hellhound'], 1, []);
+    assert.deepStrictEqual(hellhoundDeath.fieldBuffsToAdd, ['twinkle_party']);
+    assert(hellhoundLogs.some(message => message.includes('[특성] 헬하운드 사망! 트윙클파티 발동!')));
+
+    const dessertDeck = ['brulee_witch', 'cream_maid', 'harmonius'];
+    const harmoniusInit = Logic.calculateInitialStats(getCard('harmonius'), dessertDeck, GameUtils.getAllCards(), 2);
+    assert.strictEqual(harmoniusInit.stats.atk, 240);
+    assert.strictEqual(harmoniusInit.stats.matk, 230);
+    const sugarBruleeInit = Logic.calculateInitialStats(getCard('brulee_witch'), ['sugar_powder', 'brulee_witch'], GameUtils.getAllCards(), 1);
+    assert.strictEqual(sugarBruleeInit.stats.baseCrit, GAME_CONSTANTS.BASE_CRIT + 20);
+    assert.strictEqual(sugarBruleeInit.stats.baseEva, 20);
+    const sugarMaidInit = Logic.calculateInitialStats(getCard('cream_maid'), ['sugar_powder', 'cream_maid'], GameUtils.getAllCards(), 1);
+    assert.strictEqual(sugarMaidInit.stats.baseCrit, GAME_CONSTANTS.BASE_CRIT + 20);
+    assert.strictEqual(sugarMaidInit.stats.baseEva, 20);
+
     // A dedicated enemy policy consumes only its own decision roll.
     let randomCalls = 0;
     Math.random = () => { randomCalls++; return 0.9; };

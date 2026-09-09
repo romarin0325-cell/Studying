@@ -1273,6 +1273,17 @@ const BONUS_CARD_EXPANSION = [
             { name: '창조의기도', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '3턴 뒤 발동, 성역 전개 및 디바인 1스택 부여', effects: [{ type: 'delayed_attack_field', turns: 3, field: 'sanctuary' }, { type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '파괴의기도', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '사신강림 소모 시 위력 4배', effects: [{ type: 'consume_field_buff_dmg', buff: 'reaper_realm', mult: 4.0 }] }
         ]
+    },
+
+    // ─── November 2026 Bonus Card Wave ────────────────────────────────────────
+    {
+        id: 'brulee_witch', name: '브륄레위치', grade: 'epic', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-15',
+        stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
+        trait: { type: 'death_twinkle', desc: '사망 시 필드버프 트윙클파티 발동' },
+        skills: [
+            { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
+            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] }
+        ]
     }
 ];
 

@@ -2618,7 +2618,7 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder']) - 1);
+            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch']) - 1);
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
@@ -2783,7 +2783,7 @@ const Logic = {
         }
 
         // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
-        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder'];
+        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch'];
         const dessertBoostTrait = activeCards.find(c => c.trait && c.trait.type === 'dessert_kingdom_crit_eva_boost');
         if (dessertBoostTrait && dessertKingdomIds.includes(playerProto.id)) {
             const boostVal = dessertBoostTrait.trait.val || 20;
@@ -3022,7 +3022,7 @@ const Logic = {
         }
         else if (t.type === 'death_twinkle') {
             result.fieldBuffsToAdd.push('twinkle_party');
-            logFn(`[특성] 헬하운드 사망! 트윙클 파티 발동!`);
+            logFn(`[특성] ${victim.proto.name} 사망! 트윙클파티 발동!`);
         }
         // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
         else if (t.type === 'death_dmg_mag_stun_cond') {
