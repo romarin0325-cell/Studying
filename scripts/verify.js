@@ -3,6 +3,7 @@
 const { execFileSync, execSync, spawnSync } = require('child_process');
 
 const TARGET_STEPS = {
+  shooter: ['verify:shooter'],
   card: ['lint:card', 'test:card:smoke', 'test:card:browser'],
   idle: ['test:idle:smoke'],
   'defense-v2': [
@@ -55,6 +56,10 @@ function changedFiles() {
 function selectTargets(files) {
   const targets = new Set();
   for (const file of files) {
+    if (file.startsWith('shooter/')) {
+      targets.add('shooter');
+      continue;
+    }
     if (
       file.startsWith('card/')
       || file.startsWith('card_remaster/')
@@ -76,7 +81,7 @@ function selectTargets(files) {
       targets.add('defense-v2');
     }
   }
-  return ['card', 'idle', 'defense-v2'].filter(target => targets.has(target));
+  return ['shooter', 'card', 'idle', 'defense-v2'].filter(target => targets.has(target));
 }
 
 function runNpm(script) {

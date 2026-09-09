@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Astral Bloom render stress fixture</title>
+<style>html,body{margin:0;background:#080e1c;width:100%;height:100%}canvas{display:block;width:100%;height:100%}</style><canvas id="world"></canvas>
+<script type="module">
+import {Game} from '../engine.js';
+import {Renderer,loadArt} from '../render.js';
+import {LIMITS} from '../content.js';
+// Asset URLs are rooted for the dedicated local development server.
+globalThis.ASTRAL_ASSETS={heroes:'/assets/heroes.png',bosses:'/assets/bosses.png',enemies:'/assets/enemies.png',worlds:'/assets/worlds.jpg'};
+const art=await loadArt(),renderer=new Renderer(document.getElementById('world'),art);
+const g=new Game({hero:2,weapon:0,stage:3,height:renderer.height});
+g.spawnBoss();g.phase='boss';g.boss.hp=900000;g.boss.maxHp=900000;g.boss.y=180;g.player.invincible=9000;g.power=5;
+for(let i=0;i<LIMITS.bullets;i++)g.enemyBullet(15+i*37%420,180+i*79%(g.height-300),Math.PI/2,40,{color:['#efa5ff','#ffb677','#a7e9ff'][i%3],shape:i%2?'diamond':'orb'});
+let last=performance.now(),samples=[],frames=0;
+function render(now){const elapsed=(now-last)/1000,dt=Math.min(.05,elapsed);last=now;g.update(dt);g.player.invincible=9000;renderer.observeFrame(elapsed);
+  while(g.bullets.length<LIMITS.bullets)g.enemyBullet(20+Math.random()*410,140,Math.PI/2,50,{color:'#efb1ff'});
+  g.particlesAt(225,300,'#ffd6ae',8);renderer.render(g,dt);frames++;if(frames>180)samples.push(elapsed);
+  globalThis.stressResult={frames,fps:samples.length/samples.reduce((a,b)=>a+b,0),p95:samples.length? [...samples].sort((a,b)=>a-b)[Math.floor(samples.length*.95)]*1000:0,bullets:g.bullets.length,particles:g.particles.length,quality:renderer.quality,width:innerWidth,height:innerHeight};
+  requestAnimationFrame(render);
+}requestAnimationFrame(render);
+</script>
