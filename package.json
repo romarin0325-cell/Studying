@@ -15,6 +15,8 @@
     "test:defense-hero-v2:browser": "node scripts/verify_hero_defense_v2_browser.js",
     "verify:shooter": "npm run verify --prefix shooter",
     "verify:remaster-grok": "npm run verify --prefix remaster_grok",
+    "build:astra": "npm run build --prefix remaster_astra",
+    "verify:astra": "npm run verify --prefix remaster_astra",
     "verify": "node scripts/verify.js"
   },
   "dependencies": {
