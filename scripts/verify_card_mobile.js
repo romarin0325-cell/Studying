@@ -51,6 +51,7 @@ async function run() {
         await waitForLoader(normal.page);
         await normal.page.waitForFunction(
             () => [...document.querySelectorAll('.title-screen-actions button')]
+                .filter(button => button.id !== 'btn-game-fullscreen')
                 .every(button => !button.disabled),
             null,
             { timeout: BOOT_TIMEOUT_MS }
@@ -237,23 +238,20 @@ async function run() {
         assert(Math.abs(compactTitleLayout.topSpace - compactTitleLayout.bottomSpace) <= 2);
         assert(compactTitleLayout.actionsLeft >= 0 && compactTitleLayout.actionsRight <= 320);
 
-        const compactMenuFullscreen = await normal.page.evaluate(() => {
-            RPG.showScreen('screen-menu');
-            const menu = document.getElementById('screen-menu');
+        const compactTitleFullscreen = await normal.page.evaluate(() => {
+            const screen = document.getElementById('screen-title');
             const btn = document.getElementById('btn-game-fullscreen');
-            const style = window.getComputedStyle(menu);
-            btn.scrollIntoView({ block: 'nearest' });
-            const menuRect = menu.getBoundingClientRect();
+            const screenRect = screen.getBoundingClientRect();
             const btnRect = btn.getBoundingClientRect();
-            const reachable = btnRect.top >= menuRect.top - 1 && btnRect.bottom <= menuRect.bottom + 1;
-            RPG.showScreen('screen-title');
             return {
-                overflowY: style.overflowY,
-                reachable
+                onTitle: !!btn.closest('#screen-title'),
+                onInternalMenu: !!btn.closest('#screen-menu'),
+                reachable: btnRect.top >= screenRect.top - 1 && btnRect.bottom <= screenRect.bottom + 1
             };
         });
-        assert(['auto', 'scroll', 'overlay'].includes(compactMenuFullscreen.overflowY));
-        assert.strictEqual(compactMenuFullscreen.reachable, true);
+        assert.strictEqual(compactTitleFullscreen.onTitle, true);
+        assert.strictEqual(compactTitleFullscreen.onInternalMenu, false);
+        assert.strictEqual(compactTitleFullscreen.reachable, true);
 
         const compactMusicModalBounds = await normal.page.evaluate(() => {
             MusicPlayer.open();
@@ -394,7 +392,7 @@ async function run() {
         await normal.page.setViewportSize({ width: 568, height: 320 });
         const landscapeState = await normal.page.evaluate(() => {
             const screen = document.getElementById('screen-title');
-            const lastButton = document.getElementById('btn-title-music');
+            const lastButton = document.getElementById('btn-game-fullscreen');
             const heading = screen.querySelector('h1');
             const screenRectBeforeScroll = screen.getBoundingClientRect();
             const headingRect = heading.getBoundingClientRect();
@@ -665,6 +663,7 @@ async function run() {
         );
         const missingState = await missingScript.page.evaluate(() => ({
             allDisabled: [...document.querySelectorAll('.title-screen-actions button')]
+                .filter(button => button.id !== 'btn-game-fullscreen')
                 .every(button => button.disabled),
             hasRetry: !!document.querySelector('#title-loading button'),
             errors: [...window._scriptLoadErrors]
@@ -700,6 +699,7 @@ async function run() {
         );
         const stalledState = await stalledScript.page.evaluate(() => ({
             allDisabled: [...document.querySelectorAll('.title-screen-actions button')]
+                .filter(button => button.id !== 'btn-game-fullscreen')
                 .every(button => button.disabled),
             hasRetry: !!document.querySelector('#title-loading button'),
             errors: [...window._scriptLoadErrors]
@@ -725,6 +725,7 @@ async function run() {
         );
         const installState = await installFailure.page.evaluate(() => ({
             allDisabled: [...document.querySelectorAll('.title-screen-actions button')]
+                .filter(button => button.id !== 'btn-game-fullscreen')
                 .every(button => button.disabled),
             text: document.getElementById('title-loading').textContent
         }));

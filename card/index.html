@@ -50,12 +50,6 @@
             display: flex;
         }
 
-        #screen-menu {
-            min-height: 0;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
         .menu-btn {
             background: #333;
             border: 1px solid #555;
@@ -1131,12 +1125,12 @@
                 <button id="btn-title-mission" class="menu-btn" onclick="RPG.openMissionHub()"
                     disabled>미션확인</button>
                 <button id="btn-title-music" class="menu-btn" onclick="MusicPlayer.open()" disabled>음악재생</button>
+                <button id="btn-game-fullscreen" class="menu-btn" type="button" onclick="RPG.toggleGameFullscreen()" aria-pressed="false">⛶ 전체화면</button>
             </div>
         </div>
         <div id="screen-menu" class="screen">
             <div style="text-align:center; padding: 10px;">보유 티켓: <span id="ui-tickets" style="color:#ffd700">0</span>장
             </div>
-            <button id="btn-game-fullscreen" class="menu-btn" type="button" onclick="RPG.toggleGameFullscreen()" aria-pressed="false">⛶ 전체화면</button>
             <div id="next-enemy-preview"
                 style="text-align:center; padding: 10px; background: #222; border-radius: 5px; margin-bottom: 10px; border: 1px solid #444; color: #ffcc80;">
                 <div style="margin-bottom:5px;">다음 상대: <span id="next-enemy-text">?</span></div>
