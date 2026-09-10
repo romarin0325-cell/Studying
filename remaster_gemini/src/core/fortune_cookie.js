@@ -194,7 +194,10 @@ const FortuneCookie = {
                 }
                 this.audio
                     .play()
-                    .catch((e) => console.log('Auto-play blocked by browser. Please click Play manually.', e));
+                    .catch((e) => {
+                        console.warn('[FortuneCookie] Audio playback failed:', e);
+                        alert('오디오를 재생할 수 없습니다. 로컬 음원 파일을 확인해주세요.\n(' + (this.currentSet?.audioFile || '') + ')');
+                    });
             } else {
                 this.audio.pause();
             }
@@ -521,4 +524,5 @@ const FortuneCookie = {
 };
 
 // 스크립트 로드 완료 시 자동 실행
+window.FortuneCookie = FortuneCookie;
 FortuneCookie.init();

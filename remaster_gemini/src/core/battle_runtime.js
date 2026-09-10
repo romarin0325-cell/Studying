@@ -534,6 +534,20 @@ const BattleRuntime = {
             if (dmg > 0) {
                 target.tookDamageThisTurn = true;
                 BattleRuntime.handleOnHitTraits(rpg, target, enemy);
+                if (window.AppView && AppView.showDamage) {
+                    const playerBox = document.getElementById('battle-players-box') || document.querySelector('.player-box');
+                    let x, y;
+                    if (playerBox) {
+                        const rect = playerBox.getBoundingClientRect();
+                        x = rect.left + rect.width / 2;
+                        y = rect.top + rect.height / 2;
+                    }
+                    AppView.showDamage(dmg, false, x, y);
+                }
+                if (window.SFX) {
+                    if (skill.type === 'mag') SFX.magic();
+                    else SFX.slash();
+                }
             }
             rpg.log(`${enemy.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
             BattleRuntime.applySkillEffects(rpg, enemy, target, skill);
@@ -963,6 +977,23 @@ const BattleRuntime = {
             target.hp -= dmgResult.dmg;
             target.tookDamageThisTurn = true;
             rpg.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+
+            // Floating Combat Damage & SFX
+            if (window.AppView && AppView.showDamage) {
+                const enemyBox = document.getElementById('battle-enemy-box') || document.querySelector('.enemy-box');
+                let x, y;
+                if (enemyBox) {
+                    const rect = enemyBox.getBoundingClientRect();
+                    x = rect.left + rect.width / 2;
+                    y = rect.top + rect.height / 2;
+                }
+                AppView.showDamage(dmgResult.dmg, dmgResult.isCrit, x, y);
+            }
+            if (window.SFX) {
+                if (dmgResult.isCrit) SFX.crit();
+                else if (modifiedSkill.type === 'mag') SFX.magic();
+                else SFX.slash();
+            }
         }
 
         if (dmgResult.luckyVicky) {

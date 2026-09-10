@@ -97,11 +97,15 @@ node build.mjs
 Playwright 헤드리스 브라우저를 통해 `dist/CardRPG.html`의 전체 라이프사이클을 테스트합니다.
 
 - 타이틀 로딩 및 시작 버튼 활성화 검증
-- 새 게임 시작 및 `screen-menu` 로비 네비게이션 검증
-- 하단 독 탭 전환 (`로비` ↔ `덱 편성` ↔ `카드 도감`)
-- 전투 진입, 플레이어/적 상태 렌더링, 스킬 버튼 활성화
-- 1턴 일반 공격 실행 및 데미지/로그 기록 및 적 턴 반격 처리 검증
-- 화면별 스크린샷 캡처 및 검증
+- 타이틀 로딩 및 오프라인 독립성 검증 (외부 네트워크 요청 0건)
+- UI 클릭 기반 게임 타입 & 모드 선택 모달 진입 및 `.mode-item.is-selected` 스타일 검증
+- 메인 로비 진입, 모드/스테이지 배지 및 3슬롯 출전 편대(선봉, 중견, 대장) 쇼케이스 검증
+- 모드별 카드 획득 규칙 가드(`getAllowedModeActions()`) 검증 (오리진 모드 드래프트 차단 등)
+- 카드 등급별 고유 테두리 및 셀레스티얼 고대비 선택 링 검증
+- ImageAssetManager 비동기 이미지 로딩 레이스 컨디션 안전성 검증
+- 하단 네비게이션 독과 화면 전환 양방향 동기화 검증
+- 포춘쿠키 전역 객체 export 및 별의 성소 연동 검증
+- 실전 전투 턴 액션, 데미지 계산, 플로팅 데미지 VFX 및 전투 로그 검증
 
 ```bash
 cd remaster_gemini
@@ -110,14 +114,30 @@ node test_bundle.mjs
 
 테스트 실행 결과:
 ```text
-🧪 Testing CardRPG.html in headless browser...
-✅ Title screen loaded and ready.
-✅ Navigated to Main Hub / screen-menu.
-✅ Switched to Deck screen: true
-✅ Switched to Collection screen: true
-✅ Switched back to Lobby: true
-✅ Battle state verified: { battleActive: true, playerName: '심해의주인', enemyName: '인조 마신', skillButtonsCount: 4 }
-⚔️ Executing normal attack in battle...
-✅ Battle turn action executed successfully
-🎉 ALL TEST FLOWS PASSED PERFECTLY!
+🧪 Starting Strict Verification Suite for Card RPG Remaster...
+▶ [Point 7] Verifying Title Screen and Offline Independence...
+  ✓ Zero external network requests detected (Pure Offline Standalone)
+  ✓ Title screen elements fully operational
+▶ [Point 2] Testing Mode Selection UI & CSS Classes...
+  ✓ Game type select modal opened via UI click
+  ✓ Mode selection modal opened via UI click
+  ✓ Successfully transitioned to Lobby via full UI interaction
+▶ [Point 9] Verifying Lobby Showcase & Vanguard Formation...
+  ✓ Lobby Showcase & Vanguard Formation fully rendered
+▶ [Point 1] Testing Mode Card Acquisition Rules...
+  ✓ Mode card acquisition permissions strictly enforced
+▶ [Point 2] Testing Card Grade Colors and Selection Ring...
+  ✓ Card grade styling and high-contrast selection ring verified
+▶ [Point 3] Testing ImageAssetManager Race Condition Safety...
+  ✓ ImageAssetManager request ID race condition guard verified
+▶ [Point 4] Testing Dock Navigation & Screen Synchronization...
+  ✓ Dock synchronization with screen transitions verified
+▶ [Point 5] Testing Fortune Cookie Export & Sanctuary Invocation...
+  ✓ Fortune Cookie global export and Sanctuary modal flow verified
+▶ [Point 8] Testing Real Combat Turn Action, Damage Calculation, and VFX...
+  ✓ Battle arena active
+  ✓ Combat attack dealt damage and logged action successfully
+========================================================
+🎉 ALL 9 CRITICAL FEEDBACK POINTS FULLY VERIFIED & PASSED!
+========================================================
 ```

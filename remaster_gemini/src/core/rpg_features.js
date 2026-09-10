@@ -1570,7 +1570,96 @@
         QuizEngine.show(config);
     },
 
+    getAllowedModeActions(mode = this.state?.mode) {
+        switch (mode) {
+            case 'draft':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: true,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'chaos':
+            case 'artifact_chaos':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: true,
+                    canChaosBlessing: true,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'puzzle':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: true,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'factory':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: true,
+                    canArtifactReserve: false,
+                };
+            case 'artifact_reserve':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: true,
+                };
+            case 'perfect_plan':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'origin':
+            default:
+                return {
+                    canNormalGacha: true,
+                    canChallengeGacha: true,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+        }
+    },
+
     startDraft() {
+        const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+        if (allowed && !allowed.canDraft) {
+            return this.showAlert("현재 모드에서는 드래프트가 허용되지 않습니다.");
+        }
+
         if (this.state.deck.every(x => x !== null)) {
             return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
         }
@@ -1605,6 +1694,11 @@
 
 
     selectDraftCard(id) {
+        const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+        if (allowed && !allowed.canDraft) {
+            return this.showAlert("현재 모드에서는 드래프트를 진행할 수 없습니다.");
+        }
+
         this.state.inventory.push(id);
         this.state.deck[this.state.draft.round] = id;
 
@@ -1733,6 +1827,7 @@
     winBattle() {
         if (this.battle && this.battle.isFinished) return;
         if (this.battle) this.battle.isFinished = true;
+        if (window.SFX && typeof SFX.victory === 'function') SFX.victory();
 
         let transMsg = this.cleanupTranscendenceCards();
         let deadMsg = this.handlePermadeath(this.battle.players);
@@ -1945,6 +2040,7 @@
     loseBattle() {
         if (this.battle && this.battle.isFinished) return;
         if (this.battle) this.battle.isFinished = true;
+        if (window.SFX && typeof SFX.defeat === 'function') SFX.defeat();
 
         let transMsg = this.cleanupTranscendenceCards();
         // Origin records are written by initNewGame so returning to title cannot duplicate them.

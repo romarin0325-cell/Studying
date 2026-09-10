@@ -123,12 +123,21 @@ const SFX = {
         });
     },
 
+    victory() {
+        this.fanfare();
+    },
+
     // Defeat solemn chime
     defeat() {
         const notes = [392, 349.23, 311.13, 261.63];
         notes.forEach((n, i) => {
             setTimeout(() => this.playTone(n, 'sine', 0.4, 0.15, 0.01), i * 150);
         });
+    },
+
+    toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
     }
 };
 

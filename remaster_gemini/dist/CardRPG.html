@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>별의 성소 · Card RPG (Celestial Azure Remaster)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
 
         body {
@@ -1214,17 +1213,17 @@ body::before {
 
 /* Tactile Celestial Glass Buttons */
 .menu-btn {
-    background: linear-gradient(180deg, rgba(22, 38, 74, 0.85) 0%, rgba(13, 24, 48, 0.95) 100%) !important;
-    border: 1px solid var(--border-glass) !important;
-    color: #f1f5f9 !important;
-    padding: 13px 16px !important;
-    border-radius: var(--radius-md) !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
+    background: linear-gradient(180deg, rgba(22, 38, 74, 0.85) 0%, rgba(13, 24, 48, 0.95) 100%);
+    border: 1px solid var(--border-glass);
+    color: #f1f5f9;
+    padding: 13px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
     letter-spacing: 0.02em;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
 }
@@ -1242,15 +1241,15 @@ body::before {
 }
 
 .menu-btn:hover {
-    border-color: var(--primary) !important;
-    box-shadow: 0 6px 20px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    border-color: var(--primary);
+    box-shadow: 0 6px 20px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 .menu-btn:active {
-    transform: translateY(1px) scale(0.98) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* Heroic Sortie Button */
@@ -1293,35 +1292,85 @@ body::before {
 
 /* Modern Card Items */
 .card-item {
-    background: linear-gradient(180deg, rgba(20, 32, 60, 0.88) 0%, rgba(11, 18, 36, 0.95) 100%) !important;
-    border: 1.5px solid var(--border-glass) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(180deg, rgba(20, 32, 60, 0.88) 0%, rgba(11, 18, 36, 0.95) 100%);
+    border: 2px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .card-item:hover {
     transform: translateY(-4px) scale(1.03);
     border-color: var(--primary);
-    box-shadow: 0 10px 24px var(--primary-glow) !important;
+    box-shadow: 0 10px 24px var(--primary-glow);
     z-index: 10;
 }
 
-.card-item.selected {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 20px var(--gold-glow) !important;
-}
-
-/* Rarity Glows */
+/* Distinct Grade Tier Borders & Visual Accents */
 .card-item.legend {
-    border-color: var(--crimson) !important;
-    box-shadow: 0 0 16px var(--crimson-glow) !important;
+    border-color: #ff5252;
+    color: #ff5252;
+    box-shadow: 0 0 14px rgba(255, 82, 82, 0.4);
     animation: glow-legend 2.5s infinite;
 }
 
 .card-item.epic {
-    border-color: var(--violet) !important;
-    box-shadow: 0 0 14px var(--violet-glow) !important;
+    border-color: #e040fb;
+    color: #e040fb;
+    box-shadow: 0 0 12px rgba(224, 64, 251, 0.35);
+    animation: glow-epic 2.5s infinite;
+}
+
+.card-item.rare {
+    border-color: #38bdf8;
+    color: #7dd3fc;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.card-item.normal {
+    border-color: #94a3b8;
+    color: #cbd5e1;
+}
+
+.card-item.event {
+    border-color: #00e676;
+    color: #69f0ae;
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+    animation: glow-event 2.5s infinite;
+}
+
+.card-item.transcendence {
+    border-color: #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+    animation: glow-gold 2.5s infinite;
+}
+
+/* Universal High-Contrast Selection Ring (Non-conflicting with grade borders) */
+.card-item.selected,
+.card-item.is-selected {
+    outline: 3px solid #38bdf8 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.95), inset 0 0 8px rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Mode Selection Items */
+.mode-item {
+    transition: all 0.2s ease;
+}
+.mode-item.is-unlocked {
+    color: #c084fc;
+    border-color: rgba(192, 132, 252, 0.4);
+}
+.mode-item.is-cleared {
+    color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.4);
+}
+.menu-btn.mode-item.is-selected,
+.mode-item.is-selected {
+    border-color: #ffd700 !important;
+    color: #ffd700 !important;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6) !important;
 }
 
 /* Modernized Battle Arena */
@@ -1444,9 +1493,13 @@ body::before {
    Celestial Azure Remaster - Title & Lobby Enhancements
    ========================================================================== */
 
-/* Hide Bottom Dock on Title and Battle */
+/* Hide Bottom Dock on Title, Battle, and Draft Screens */
 #screen-title.active ~ .hub-navigation-dock,
-#screen-battle.active ~ .hub-navigation-dock {
+#screen-battle.active ~ .hub-navigation-dock,
+#screen-draft.active ~ .hub-navigation-dock,
+#screen-factory-draft.active ~ .hub-navigation-dock,
+#screen-artifact-reserve-draft.active ~ .hub-navigation-dock,
+#screen-perfect-plan-draft.active ~ .hub-navigation-dock {
     display: none !important;
 }
 
@@ -1903,6 +1956,214 @@ body::before {
     object-fit: contain;
 }
 
+/* Vanguard Formation Showcase in Lobby */
+.lobby-vanguard-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vanguard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vanguard-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.vanguard-edit-btn {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #7dd3fc;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vanguard-edit-btn:hover {
+    background: rgba(56, 189, 248, 0.25);
+    color: #ffffff;
+}
+
+.vanguard-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.vanguard-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1.5px solid var(--border-glass);
+    cursor: pointer;
+    min-height: 56px;
+    transition: all 0.2s ease;
+}
+
+.vanguard-slot:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.vanguard-slot-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 3px;
+}
+
+.vanguard-slot.empty {
+    border-style: dashed;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.vanguard-empty-hint {
+    font-size: 0.74rem;
+    color: #64748b;
+}
+
+.vanguard-card-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.vanguard-card-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.vanguard-card-grade {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+.vanguard-card-grade.legend { color: #ff5252; }
+.vanguard-card-grade.epic { color: #e040fb; }
+.vanguard-card-grade.rare { color: #38bdf8; }
+.vanguard-card-grade.normal { color: #94a3b8; }
+.vanguard-card-grade.event { color: #00e676; }
+.vanguard-card-grade.transcendence { color: #ffd700; }
+
+.vanguard-slot.filled.legend { border-color: rgba(255, 82, 82, 0.5); }
+.vanguard-slot.filled.epic { border-color: rgba(224, 64, 251, 0.5); }
+.vanguard-slot.filled.rare { border-color: rgba(56, 189, 248, 0.5); }
+.vanguard-slot.filled.normal { border-color: rgba(148, 163, 184, 0.4); }
+.vanguard-slot.filled.event { border-color: rgba(0, 230, 118, 0.5); }
+.vanguard-slot.filled.transcendence { border-color: rgba(255, 215, 0, 0.6); }
+
+.vanguard-warning-bar {
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 0.76rem;
+    color: #fca5a5;
+    text-align: center;
+    cursor: pointer;
+    animation: warningPulse 2s infinite ease-in-out;
+}
+
+@keyframes warningPulse {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; border-color: rgba(244, 63, 94, 0.7); }
+}
+
+/* Lobby Header Bar & Badges */
+.lobby-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(14, 28, 54, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+}
+
+.lobby-status-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.lobby-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.lobby-badge.mode {
+    background: rgba(192, 132, 252, 0.15);
+    border: 1px solid rgba(192, 132, 252, 0.45);
+    color: #e879f9;
+}
+
+.lobby-badge.stage {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #38bdf8;
+}
+
+.lobby-ticket-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.lobby-ticket-badge .ticket-title {
+    display: none;
+}
+
+.lobby-ticket-badge .ticket-count {
+    color: #ffd700;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.lobby-sys-btn {
+    width: auto !important;
+    padding: 6px 12px !important;
+    margin-bottom: 0 !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    white-space: nowrap;
+}
+
+
 
 </style>
 </head>
@@ -1979,6 +2240,10 @@ body::before {
 
         <div id="screen-menu" class="screen">
             <div class="lobby-header-bar">
+                <div class="lobby-status-group">
+                    <span id="lobby-mode-name" class="lobby-badge mode">오리진</span>
+                    <span id="lobby-stage-num" class="lobby-badge stage">Stage 1</span>
+                </div>
                 <div class="lobby-ticket-badge">
                     <span class="ticket-icon">🎟️</span>
                     <span class="ticket-title">성소 티켓</span>
@@ -2730,6 +2995,89 @@ body::before {
         </div>
     </div>
 
+    <!-- Fortune Cookie Modal -->
+    <div id="modal-fortune-cookie" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <!-- Phase 1: Listening -->
+            <div id="fortune-listening-phase" style="display: none; flex-direction: column; align-items: center;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
+                
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                    <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 10px; border-color: #4caf50; color: #4caf50;">▶ 다시 듣기</button>
+                    <div id="fortune-part-tip" style="font-size: 0.85rem; color: #ccc; margin-top: 5px;"></div>
+                </div>
+
+                <div id="fortune-options-container" style="display: flex; flex-direction: column; width: 100%; gap: 5px; margin-bottom: 15px;">
+                    <!-- Options injected here -->
+                </div>
+
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto;">닫기</button>
+            </div>
+            <!-- Phase 1.5: Multi-Question Hub (Part 3/4) -->
+            <div id="fortune-multi-hub-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-multi-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
+                <div style="font-size: 0.9rem; color: #ccc; margin-bottom: 15px; text-align: center;">
+                    💡 담화를 듣고 이어지는 질문에 답하세요.
+                </div>
+                
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                    <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 0; border-color: #4caf50; color: #4caf50;">🎧 듣기 (재생/일시정지)</button>
+                </div>
+
+                <button id="fortune-multi-q-btn" class="menu-btn" onclick="FortuneCookie.showMultiQuestion()" style="margin-bottom: 15px; width: 100%;">📝 문제 풀기 (1/2)</button>
+                
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto; width: 100%;">닫기</button>
+            </div>
+
+            <!-- Phase 1.6: Multi-Question View (Part 3/4) -->
+            <div id="fortune-multi-q-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div id="fortune-multi-q-title" style="margin-bottom: 15px; font-weight: bold; color: #fff; font-size: 1.1rem; text-align: center;">문제 1/2</div>
+                <div id="fortune-multi-q-text" style="color: #e0e0e0; margin-bottom: 20px; font-size: 1rem; text-align: center; line-height: 1.4;"></div>
+                
+                <div id="fortune-multi-options-container" style="display: flex; flex-direction: column; width: 100%; gap: 5px; margin-bottom: 15px;">
+                    <!-- Options injected here -->
+                </div>
+
+                <div id="fortune-multi-q-feedback" style="display: none; margin-bottom: 15px; font-weight: bold; text-align: center; width: 100%; padding: 10px; border-radius: 4px;"></div>
+
+                <button class="menu-btn" onclick="FortuneCookie.showMultiHub()" style="margin-top: auto; width: 100%;">↩ 돌아가기</button>
+            </div>
+
+            <!-- Phase 1.7: Explanation View (Part 3/4) -->
+            <div id="fortune-explanation-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">📝 해설</h2>
+
+                <div id="fortune-explanation-scroll" class="modal-scroll toeic-passage-scroll" style="width: 100%; text-align: left; padding: 15px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; max-height: 45vh; overflow-y: auto; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; margin-bottom: 15px;">
+                    <!-- Explanation injected here -->
+                </div>
+
+                <button class="menu-btn" onclick="FortuneCookie.goToFortuneFromExplanation()" style="margin-top: auto; width: 100%; border-color: #ffd700; color: #ffd700;">🥠 운세 보기</button>
+            </div>
+
+            <!-- Phase 2: Result -->
+            <div id="fortune-result-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+
+                <div class="portrait" style="width: 80px; height: 106px; border-color: #ffd700; margin: 0 auto 12px auto; flex-shrink: 0;">
+                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                </div>
+
+                <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>
+                <div id="fortune-result-grade" style="color: #ffd700; font-size: 1.5rem; font-weight: bold; margin: 5px 0 15px 0;"></div>
+                
+                <!-- 루미 대사 영역 (API 응답 or 정적 메시지) -->
+                <div id="fortune-result-message" class="modal-scroll" style="text-align: center; padding: 10px; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; min-height: 80px; max-height: 200px; width: 100%; margin-bottom: 15px; box-sizing: border-box;"></div>
+
+                <!-- 폴백 재시도 버튼 -->
+                <div style="display:flex; gap:10px; margin-top:auto; width:100%;">
+                    <button id="fortune-retry-btn" class="menu-btn" onclick="FortuneCookie.retryWithFallback()" style="display:none; flex:1; margin-top:0; border-color:#81d4fa; color:#81d4fa;">Lite로 다시 시도</button>
+                    <button class="menu-btn" onclick="FortuneCookie.close()" style="flex:1; margin-top:0;">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script>
 window._scriptLoadErrors = [];
@@ -2861,12 +3209,21 @@ const SFX = {
         });
     },
 
+    victory() {
+        this.fanfare();
+    },
+
     // Defeat solemn chime
     defeat() {
         const notes = [392, 349.23, 311.13, 261.63];
         notes.forEach((n, i) => {
             setTimeout(() => this.playTone(n, 'sine', 0.4, 0.15, 0.01), i * 150);
         });
+    },
+
+    toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
     }
 };
 
@@ -22989,6 +23346,20 @@ const BattleRuntime = {
             if (dmg > 0) {
                 target.tookDamageThisTurn = true;
                 BattleRuntime.handleOnHitTraits(rpg, target, enemy);
+                if (window.AppView && AppView.showDamage) {
+                    const playerBox = document.getElementById('battle-players-box') || document.querySelector('.player-box');
+                    let x, y;
+                    if (playerBox) {
+                        const rect = playerBox.getBoundingClientRect();
+                        x = rect.left + rect.width / 2;
+                        y = rect.top + rect.height / 2;
+                    }
+                    AppView.showDamage(dmg, false, x, y);
+                }
+                if (window.SFX) {
+                    if (skill.type === 'mag') SFX.magic();
+                    else SFX.slash();
+                }
             }
             rpg.log(`${enemy.name}의 ${skill.name}! <span class="log-dmg">${dmg}</span> 피해.`);
             BattleRuntime.applySkillEffects(rpg, enemy, target, skill);
@@ -23418,6 +23789,23 @@ const BattleRuntime = {
             target.hp -= dmgResult.dmg;
             target.tookDamageThisTurn = true;
             rpg.log(`${dmgResult.isCrit ? 'Critical! ' : ''}적에게 <span class="log-dmg">${dmgResult.dmg}</span> 피해.`);
+
+            // Floating Combat Damage & SFX
+            if (window.AppView && AppView.showDamage) {
+                const enemyBox = document.getElementById('battle-enemy-box') || document.querySelector('.enemy-box');
+                let x, y;
+                if (enemyBox) {
+                    const rect = enemyBox.getBoundingClientRect();
+                    x = rect.left + rect.width / 2;
+                    y = rect.top + rect.height / 2;
+                }
+                AppView.showDamage(dmgResult.dmg, dmgResult.isCrit, x, y);
+            }
+            if (window.SFX) {
+                if (dmgResult.isCrit) SFX.crit();
+                else if (modifiedSkill.type === 'mag') SFX.magic();
+                else SFX.slash();
+            }
         }
 
         if (dmgResult.luckyVicky) {
@@ -25159,7 +25547,96 @@ const BattleRuntime = {
         QuizEngine.show(config);
     },
 
+    getAllowedModeActions(mode = this.state?.mode) {
+        switch (mode) {
+            case 'draft':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: true,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'chaos':
+            case 'artifact_chaos':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: true,
+                    canChaosBlessing: true,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'puzzle':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: true,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'factory':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: true,
+                    canArtifactReserve: false,
+                };
+            case 'artifact_reserve':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: true,
+                };
+            case 'perfect_plan':
+                return {
+                    canNormalGacha: false,
+                    canChallengeGacha: false,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+            case 'origin':
+            default:
+                return {
+                    canNormalGacha: true,
+                    canChallengeGacha: true,
+                    canDraft: false,
+                    canChaosShuffle: false,
+                    canChaosBlessing: false,
+                    canPuzzleClaim: false,
+                    canFactoryDraft: false,
+                    canArtifactReserve: false,
+                };
+        }
+    },
+
     startDraft() {
+        const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+        if (allowed && !allowed.canDraft) {
+            return this.showAlert("현재 모드에서는 드래프트가 허용되지 않습니다.");
+        }
+
         if (this.state.deck.every(x => x !== null)) {
             return this.showAlert("이미 덱이 완성되어 있습니다. 전투에 진입하세요.");
         }
@@ -25194,6 +25671,11 @@ const BattleRuntime = {
 
 
     selectDraftCard(id) {
+        const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+        if (allowed && !allowed.canDraft) {
+            return this.showAlert("현재 모드에서는 드래프트를 진행할 수 없습니다.");
+        }
+
         this.state.inventory.push(id);
         this.state.deck[this.state.draft.round] = id;
 
@@ -25322,6 +25804,7 @@ const BattleRuntime = {
     winBattle() {
         if (this.battle && this.battle.isFinished) return;
         if (this.battle) this.battle.isFinished = true;
+        if (window.SFX && typeof SFX.victory === 'function') SFX.victory();
 
         let transMsg = this.cleanupTranscendenceCards();
         let deadMsg = this.handlePermadeath(this.battle.players);
@@ -25534,6 +26017,7 @@ const BattleRuntime = {
     loseBattle() {
         if (this.battle && this.battle.isFinished) return;
         if (this.battle) this.battle.isFinished = true;
+        if (window.SFX && typeof SFX.defeat === 'function') SFX.defeat();
 
         let transMsg = this.cleanupTranscendenceCards();
         // Origin records are written by initNewGame so returning to title cannot duplicate them.
@@ -25894,7 +26378,10 @@ const FortuneCookie = {
                 }
                 this.audio
                     .play()
-                    .catch((e) => console.log('Auto-play blocked by browser. Please click Play manually.', e));
+                    .catch((e) => {
+                        console.warn('[FortuneCookie] Audio playback failed:', e);
+                        alert('오디오를 재생할 수 없습니다. 로컬 음원 파일을 확인해주세요.\n(' + (this.currentSet?.audioFile || '') + ')');
+                    });
             } else {
                 this.audio.pause();
             }
@@ -26221,6 +26708,7 @@ const FortuneCookie = {
 };
 
 // 스크립트 로드 완료 시 자동 실행
+window.FortuneCookie = FortuneCookie;
 FortuneCookie.init();
 
 
@@ -27492,22 +27980,49 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 img.removeAttribute('src');
                 img.style.display = 'none';
                 if (parent && options.toggleParent) parent.style.display = 'none';
-                img.onload = () => {
+
+                let candidates = [source];
+                if (!source.startsWith('data:') && !source.startsWith('http')) {
+                    const cleanName = source.replace(/^(\.\/|\.\.\/)+/, '').replace(/^card\//, '');
+                    candidates = [
+                        source,
+                        './' + cleanName,
+                        '../card/' + cleanName,
+                        '../../card/' + cleanName,
+                        'card/' + cleanName,
+                        './assets/' + cleanName
+                    ];
+                    // Deduplicate while preserving order
+                    candidates = [...new Set(candidates)];
+                }
+
+                let candidateIndex = 0;
+                const tryCandidate = () => {
                     if (this.requestIds.get(img) !== requestId) return;
-                    img.onload = null;
-                    img.onerror = null;
-                    img.style.display = 'block';
-                    if (parent && options.toggleParent) parent.style.display = '';
+                    if (candidateIndex >= candidates.length) {
+                        img.removeAttribute('src');
+                        img.style.display = 'none';
+                        if (parent && options.toggleParent) parent.style.display = 'none';
+                        return;
+                    }
+                    const currentCandidate = candidates[candidateIndex++];
+                    img.onload = () => {
+                        if (this.requestIds.get(img) !== requestId) return;
+                        img.onload = null;
+                        img.onerror = null;
+                        img.style.display = 'block';
+                        if (parent && options.toggleParent) parent.style.display = '';
+                    };
+                    img.onerror = () => {
+                        if (this.requestIds.get(img) !== requestId) return;
+                        img.onload = null;
+                        img.onerror = null;
+                        tryCandidate();
+                    };
+                    img.src = currentCandidate;
                 };
-                img.onerror = () => {
-                    if (this.requestIds.get(img) !== requestId) return;
-                    img.onload = null;
-                    img.onerror = null;
-                    img.removeAttribute('src');
-                    img.style.display = 'none';
-                    if (parent && options.toggleParent) parent.style.display = 'none';
-                };
-                img.src = source;
+
+                tryCandidate();
             }
 
             createImage(entity, options = {}) {
@@ -28409,7 +28924,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
 
                 MODES.forEach(m => {
                     const btn = document.createElement('button');
-                    btn.className = "menu-btn";
+                    btn.className = "menu-btn mode-item";
                     btn.style.padding = "8px";
                     btn.style.fontSize = "0.8rem";
                     btn.innerText = m.name;
@@ -28419,9 +28934,9 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     if (isUnlocked) {
                         const hardCleared = this.global.hardChallengeCleared && this.global.hardChallengeCleared[m.id];
                         if (this.tempGameType === 'challenge' && hardCleared) {
-                            btn.style.color = "#ff5252";
+                            btn.classList.add('is-cleared');
                         } else {
-                            btn.style.color = "#e040fb"; // Purple for unlocked
+                            btn.classList.add('is-unlocked');
                         }
                     }
 
@@ -28458,8 +28973,8 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                         desc.innerText = `[${m.name}]\n${descText}`;
 
                         // Visual Update
-                        list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
-                        btn.style.borderColor = '#ffd700';
+                        list.querySelectorAll('.mode-item').forEach(b => b.classList.remove('is-selected'));
+                        btn.classList.add('is-selected');
                     };
                     list.appendChild(btn);
                 });
@@ -28494,11 +29009,33 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 this.ensureMonthlyMissionState();
                 const nextEnemy = this.getCurrentStageEnemyData();
-                document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
+                const nextEnemyText = document.getElementById('next-enemy-text');
+                if (nextEnemyText) nextEnemyText.innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                // image loaded dynamically or not at all depending on options
-                imgEl.style.display = 'none';
-                imgEl.parentElement.style.display = 'none';
+                if (imgEl) {
+                    ImageAssets.load(imgEl, nextEnemy, { parent: imgEl.parentElement, toggleParent: true });
+                }
+
+                // Mode & Stage badge update
+                const modeNameEl = document.getElementById('lobby-mode-name');
+                const stageNumEl = document.getElementById('lobby-stage-num');
+                if (modeNameEl) {
+                    const modeLabels = {
+                        origin: '오리진', draft: '드래프트', chaos: '카오스', artifact_chaos: '아티팩트카오스',
+                        puzzle: '퍼즐', factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브',
+                        perfect_plan: '퍼펙트플랜', dream_corridor: '꿈의회랑', restriction: '제약의시련',
+                        balance: '균형의도전', suffering: '고난의여정', archive: '아카이브', curse: '저주의증폭', flood: '축복의범람'
+                    };
+                    modeNameEl.innerText = modeLabels[this.state.mode] || this.state.mode || '일반';
+                }
+                if (stageNumEl) {
+                    stageNumEl.innerText = `Stage ${this.state.enemyScale + 1}`;
+                }
+
+                // Render vanguard formation showcase
+                if (window.AppView && AppView.renderLobbyVanguard) {
+                    AppView.renderLobbyVanguard(this);
+                }
 
                 // Mode Specific Menu Areas
                 const gachaArea = document.getElementById('menu-gacha-area');
@@ -28547,7 +29084,14 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 // Merely changing screens must not write or reinterpret run records.
                 this.showScreen('screen-title');
             },
-            showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+            showScreen(id) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                const target = document.getElementById(id);
+                if (target) target.classList.add('active');
+                if (window.AppView && AppView.syncDockWithScreen) {
+                    AppView.syncDockWithScreen(id);
+                }
+            },
             showBattleScreen() {
                 this.showScreen('screen-battle');
                 const artifactBtn = document.getElementById('btn-battle-artifact-check');
@@ -29031,12 +29575,20 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
 
             openGacha() {
                 if (this.state.mode === 'puzzle') return this.openPuzzlePieces();
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && !allowed.canNormalGacha) {
+                    return this.showAlert("현재 모드에서는 일반 소환이 허용되지 않습니다.");
+                }
                 if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
                 this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 this.runGacha(false);
             },
 
             openChallengeGacha() {
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && !allowed.canChallengeGacha) {
+                    return this.showAlert("현재 모드에서는 도전 소환이 허용되지 않습니다.");
+                }
                 if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
 
                 // 티켓 선차감
@@ -29053,6 +29605,10 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
             },
 
             runGacha(isChallenge) {
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && ((isChallenge && !allowed.canChallengeGacha) || (!isChallenge && !allowed.canNormalGacha))) {
+                    return this.showAlert("현재 모드에서는 카드 소환이 허용되지 않습니다.");
+                }
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 const mode = this.state.mode;
 
@@ -31548,7 +32104,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
 /**
  * Celestial Azure UI Controller & View Enhancer
  * Manages modern Hub navigation dock, vanguard showcase,
- * floating combat numbers, Web Audio interactions, and fallback asset resolution.
+ * floating combat numbers, Web Audio interactions, and screen sync.
  */
 const AppView = {
     activeTab: 'lobby',
@@ -31557,7 +32113,6 @@ const AppView = {
         this.injectBottomDock();
         this.enhanceHubLayout();
         this.bindGlobalSounds();
-        this.enhanceImageFallbacks();
         console.log('[Celestial Azure] AppView initialized successfully.');
     },
 
@@ -31565,53 +32120,10 @@ const AppView = {
     bindGlobalSounds() {
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button, .menu-btn, .card-item, .dock-tab');
-            if (btn && window.SFX) {
+            if (btn && window.SFX && typeof SFX.click === 'function') {
                 SFX.click();
             }
         });
-    },
-
-    // Candidate paths for card portraits
-    enhanceImageFallbacks() {
-        if (typeof ImageAssets !== 'undefined' && ImageAssets.load) {
-            const origLoad = ImageAssets.load.bind(ImageAssets);
-            ImageAssets.load = (img, entity, options = {}) => {
-                if (!img) return;
-                origLoad(img, entity, options);
-
-                const origError = img.onerror;
-                img.onerror = () => {
-                    const rawName = (typeof entity === 'string') ? entity : ((entity && entity.name) ? entity.name : '');
-                    if (!rawName) return;
-                    const cleanName = rawName.endsWith('.png') ? rawName : (rawName + '.png');
-                    
-                    const candidates = [
-                        '../card/' + cleanName,
-                        '../../card/' + cleanName,
-                        'card/' + cleanName,
-                        './' + cleanName
-                    ];
-
-                    let attempt = 0;
-                    const tryNext = () => {
-                        if (attempt >= candidates.length) {
-                            if (origError) origError();
-                            return;
-                        }
-                        const candidate = candidates[attempt++];
-                        const testImg = new Image();
-                        testImg.onload = () => {
-                            img.src = candidate;
-                            img.style.display = 'block';
-                            if (options.parent && options.toggleParent) options.parent.style.display = '';
-                        };
-                        testImg.onerror = tryNext;
-                        testImg.src = candidate;
-                    };
-                    tryNext();
-                };
-            };
-        }
     },
 
     // Bottom Navigation Dock
@@ -31650,17 +32162,38 @@ const AppView = {
         }
     },
 
-    switchTab(tab) {
+    syncDockUI(tab) {
         this.activeTab = tab;
         document.querySelectorAll('.dock-tab').forEach(el => {
             el.classList.toggle('active', el.dataset.tab === tab);
         });
+    },
+
+    syncDockWithScreen(screenId) {
+        const screenToTab = {
+            'screen-menu': 'lobby',
+            'screen-deck': 'deck',
+            'screen-collection': 'cards',
+            'screen-library': 'library',
+            'screen-study': 'library',
+            'screen-toeic': 'library',
+            'screen-toeic-select': 'library',
+            'screen-toeic-result': 'library'
+        };
+        const tab = screenToTab[screenId];
+        if (tab) {
+            this.syncDockUI(tab);
+        }
+    },
+
+    switchTab(tab) {
+        this.syncDockUI(tab);
 
         if (typeof RPG === 'undefined') return;
 
         switch (tab) {
             case 'lobby':
-                RPG.showScreen('screen-menu');
+                RPG.toMenu();
                 break;
             case 'deck':
                 RPG.openDeck();
@@ -31677,44 +32210,95 @@ const AppView = {
         }
     },
 
-    // Sanctuary Hub Modal (Gacha, Blessing Altar, Factory Draft, Fortune Cookie)
+    // Sanctuary Hub Modal with Dynamic Mode Actions
     openSanctuaryModal() {
         let modal = document.getElementById('modal-sanctuary-hub');
         if (!modal) {
             modal = document.createElement('div');
             modal.id = 'modal-sanctuary-hub';
             modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 440px; width: 92%;">
-                    <h2 style="margin-top: 0; text-align: center; color: var(--primary-light);">🔮 별의 성소 (Sanctuary)</h2>
-                    <p style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px;">
-                        신비로운 별의 힘으로 카드를 소환하고 카오스의 축복을 받으세요.
-                    </p>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="menu-btn" onclick="RPG.openGacha(); document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="border-color: #38bdf8; color: #7dd3fc;">
-                            ✨ 일반 뽑기 (티켓 1장)
-                        </button>
-                        <button class="menu-btn" onclick="RPG.openChallengeGacha(); document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="border-color: #c084fc; color: #e879f9;">
-                            🔮 도전 뽑기 (고급 소환)
-                        </button>
-                        <button class="menu-btn" onclick="RPG.openChaosBlessing(); document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="border-color: #fbbf24; color: #fde047;">
-                            ⚡ 축복의 제단 (카오스 축복)
-                        </button>
-                        <button class="menu-btn" onclick="if (RPG.startDraft) RPG.startDraft(); document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="border-color: #34d399; color: #6ee7b7;">
-                            🃏 덱 빌딩 (드래프트 모드)
-                        </button>
-                        <button class="menu-btn" onclick="if (window.FortuneCookie) FortuneCookie.open(); document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="border-color: #f472b6; color: #f472b6;">
-                            🥠 오늘의 포춘쿠키 (리스닝 학습)
-                        </button>
-                    </div>
-                    <button class="menu-btn" onclick="document.getElementById('modal-sanctuary-hub').classList.remove('active');" style="margin-top: 20px; width: 100%;">
-                        닫기
-                    </button>
-                </div>
-            `;
             document.body.appendChild(modal);
         }
+
+        const allowed = (typeof RPG !== 'undefined' && RPG.getAllowedModeActions)
+            ? RPG.getAllowedModeActions()
+            : { canNormalGacha: true, canChallengeGacha: true, canDraft: false, canChaosBlessing: false };
+
+        const mode = (typeof RPG !== 'undefined' && RPG.state) ? RPG.state.mode : 'origin';
+
+        let buttonsHtml = '';
+        if (allowed.canNormalGacha) {
+            buttonsHtml += `
+                <button class="menu-btn" onclick="RPG.openGacha(); AppView.closeSanctuaryModal();" style="border-color: #38bdf8; color: #7dd3fc;">
+                    ✨ 일반 소환 (티켓 1장)
+                </button>
+            `;
+        }
+        if (allowed.canChallengeGacha) {
+            buttonsHtml += `
+                <button class="menu-btn" onclick="RPG.openChallengeGacha(); AppView.closeSanctuaryModal();" style="border-color: #c084fc; color: #e879f9;">
+                    🔮 도전 소환 (고급 퀴즈 소환)
+                </button>
+            `;
+        }
+        if (allowed.canChaosBlessing) {
+            buttonsHtml += `
+                <button class="menu-btn" onclick="RPG.openChaosBlessing(); AppView.closeSanctuaryModal();" style="border-color: #fbbf24; color: #fde047;">
+                    ⚡ 축복의 제단 (카오스 축복)
+                </button>
+            `;
+        }
+        if (allowed.canDraft) {
+            buttonsHtml += `
+                <button class="menu-btn" onclick="if (RPG.startDraft) RPG.startDraft(); AppView.closeSanctuaryModal();" style="border-color: #34d399; color: #6ee7b7;">
+                    🃏 덱 빌딩 (드래프트)
+                </button>
+            `;
+        }
+        // Fortune Cookie is always available as daily study feature
+        buttonsHtml += `
+            <button class="menu-btn" id="btn-sanctuary-fortune" onclick="AppView.openFortuneFromSanctuary();" style="border-color: #f472b6; color: #f472b6;">
+                🥠 오늘의 포춘쿠키 (리스닝 학습)
+            </button>
+        `;
+
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 440px; width: 92%;">
+                <h2 style="margin-top: 0; text-align: center; color: var(--primary-light);">🔮 별의 성소 (Sanctuary)</h2>
+                <p style="text-align: center; color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">
+                    [${mode.toUpperCase()}] 별의 인도에 따라 소환과 축복을 진행합니다.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${buttonsHtml}
+                </div>
+                <button class="menu-btn" onclick="AppView.closeSanctuaryModal();" style="margin-top: 18px; width: 100%;">
+                    닫기
+                </button>
+            </div>
+        `;
+
         modal.classList.add('active');
+    },
+
+    openFortuneFromSanctuary() {
+        this.closeSanctuaryModal();
+        if (typeof FortuneCookie !== 'undefined' && typeof FortuneCookie.open === 'function') {
+            FortuneCookie.open();
+        } else if (window.FortuneCookie && typeof window.FortuneCookie.open === 'function') {
+            window.FortuneCookie.open();
+        } else {
+            alert('포춘쿠키 모듈이 준비되지 않았습니다.');
+        }
+    },
+
+    closeSanctuaryModal() {
+        const modal = document.getElementById('modal-sanctuary-hub');
+        if (modal) modal.classList.remove('active');
+        // Restore dock active tab to the visible screen
+        const activeScreen = document.querySelector('.screen.active');
+        if (activeScreen) {
+            this.syncDockWithScreen(activeScreen.id);
+        }
     },
 
     // Hub Layout Visual Polish
@@ -31731,6 +32315,65 @@ const AppView = {
                 btn.innerHTML = '⚔️ 전 투 출 격 (SORTIE)';
             }
         });
+    },
+
+    // Render 3-slot vanguard formation showcase in lobby
+    renderLobbyVanguard(rpg) {
+        let container = document.getElementById('lobby-vanguard-container');
+        if (!container) {
+            // Find insertion point before Sortie button
+            const sortieBtn = document.querySelector('.btn-sortie');
+            if (!sortieBtn) return;
+
+            container = document.createElement('div');
+            container.id = 'lobby-vanguard-container';
+            container.className = 'lobby-vanguard-container';
+            sortieBtn.parentElement.insertBefore(container, sortieBtn);
+        }
+
+        const deck = (rpg.state && Array.isArray(rpg.state.deck)) ? rpg.state.deck : [null, null, null];
+        const slotNames = ['선봉', '중견', '대장'];
+        const slotsHtml = slotNames.map((slotTitle, idx) => {
+            const cardId = deck[idx];
+            const card = cardId ? rpg.getCardData(cardId) : null;
+            if (card) {
+                const gradeClass = card.grade || 'normal';
+                return `
+                    <div class="vanguard-slot filled ${gradeClass}" onclick="RPG.openDeck()" title="${card.name} (${slotTitle})">
+                        <span class="vanguard-slot-label">${slotTitle}</span>
+                        <div class="vanguard-card-mini">
+                            <span class="vanguard-card-name">${card.name}</span>
+                            <span class="vanguard-card-grade ${gradeClass}">${card.grade.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="vanguard-slot empty" onclick="RPG.openDeck()" title="슬롯 비어있음 - 클릭하여 편성">
+                        <span class="vanguard-slot-label">${slotTitle}</span>
+                        <div class="vanguard-empty-hint">+ 미편성</div>
+                    </div>
+                `;
+            }
+        }).join('');
+
+        const isDeckIncomplete = deck.some(c => c === null);
+        const warningHtml = isDeckIncomplete ? `
+            <div class="vanguard-warning-bar" onclick="RPG.openDeck()">
+                <span>⚠️ 출격 전 덱 3장을 모두 편성하세요 [덱 편성]</span>
+            </div>
+        ` : '';
+
+        container.innerHTML = `
+            <div class="vanguard-header">
+                <span class="vanguard-title">⚔️ 출전 편대 (Vanguard Formation)</span>
+                <button class="vanguard-edit-btn" onclick="RPG.openDeck()">편성 변경</button>
+            </div>
+            <div class="vanguard-slots-grid">
+                ${slotsHtml}
+            </div>
+            ${warningHtml}
+        `;
     },
 
     // Floating Combat Damage Text
