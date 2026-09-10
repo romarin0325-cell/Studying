@@ -253,6 +253,25 @@ async function run() {
         assert.strictEqual(compactTitleFullscreen.onInternalMenu, false);
         assert.strictEqual(compactTitleFullscreen.reachable, true);
 
+        const compactInternalMenuLayout = await normal.page.evaluate(() => {
+            RPG.showScreen('screen-menu');
+            const menu = document.getElementById('screen-menu');
+            const targetBtn = menu.querySelector('button[onclick="RPG.openSystemMenu()"]')
+                || menu.querySelector('button[onclick="RPG.startBattleInit()"]');
+            const style = window.getComputedStyle(menu);
+            targetBtn.scrollIntoView({ block: 'nearest' });
+            const menuRect = menu.getBoundingClientRect();
+            const btnRect = targetBtn.getBoundingClientRect();
+            const reachable = btnRect.top >= menuRect.top - 1 && btnRect.bottom <= menuRect.bottom + 1;
+            RPG.showScreen('screen-title');
+            return {
+                overflowY: style.overflowY,
+                reachable
+            };
+        });
+        assert(['auto', 'scroll', 'overlay'].includes(compactInternalMenuLayout.overflowY));
+        assert.strictEqual(compactInternalMenuLayout.reachable, true);
+
         const compactMusicModalBounds = await normal.page.evaluate(() => {
             MusicPlayer.open();
             const panel = document.querySelector('#modal-music-player .modal-content');
