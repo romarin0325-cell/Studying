@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d2235">
+  <title>ASTRA — Card RPG</title>
+  {{STYLES}}
+</head>
+<body class="astra" data-screen="title">
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="m12 7 2 5-2 5-2-5Z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="8" y="3" width="12" height="18" rx="2"/><path d="M5 6H3v15M12 8h4m-4 4h4m-4 4h2"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1 3-2 6-3 10-1V4c-4-2-7-1-10 1Zm0 0v15M5 8l4 1m6 0 4-1"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="17" cy="16" rx="3" ry="3"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6m8 4v6"/></symbol>
+    <symbol id="i-mission" viewBox="0 0 24 24"><path d="M7 3h10v4H7zM7 5H4v16h16V5h-3M8 12l2 2 6-4m-8 8h8"/></symbol>
+    <symbol id="i-sword" viewBox="0 0 24 24"><path d="m5 19 3-3M3 17l4 4M7 13l4 4M9 15 20 4V1h-3L6 12"/></symbol>
+  </defs></svg>
+  <div class="world-backdrop" aria-hidden="true"></div>
+  <header class="astra-header">
+    <a class="brand" href="#" onclick="Astra.home(); return false" aria-label="ASTRA 홈"><svg><use href="#i-star"/></svg><span>ASTRA<small>CARD RPG</small></span></a>
+    <div class="header header-status" aria-live="polite">하늘의 기록실</div>
+    <div class="header-tools">
+      <button class="icon-button" onclick="MusicPlayer.open()" aria-label="음악 재생"><svg><use href="#i-music"/></svg></button>
+      <button class="icon-button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
+    </div>
+  </header>
+  <main class="container" id="main-content">
+    <section id="screen-title" class="screen active" aria-label="타이틀">
+      <div class="title-coordinate eyebrow">THE CELESTIAL ARCHIVE <span>01 /</span></div>
+      <div class="title-copy">
+        <p class="eyebrow">LEARN. COLLECT. ASCEND.</p>
+        <h1>ASTRA<span>하늘의 기록실</span></h1>
+        <p class="title-description">한 장의 카드, 하나의 가능성.<br>배움이 모여 새로운 세계를 연다.</p>
+        <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
+        <div class="title-screen-actions">
+          <button id="btn-start-load" class="primary" onclick="RPG.startGame('load')" disabled><span>여정 이어가기<small>CONTINUE</small></span><svg><use href="#i-arrow"/></svg></button>
+          <button id="btn-start-new" class="secondary" onclick="RPG.startGame('new')" disabled>새로운 여정 <span>NEW JOURNEY</span></button>
+        </div>
+      </div>
+      <div class="title-seal" aria-hidden="true"><svg><use href="#i-star"/></svg><span>AD ASTRA</span></div>
+      <div class="title-utilities">
+        <button id="btn-fortune-cookie" disabled><span class="utility-number">01</span><span>포춘쿠키<small>오늘의 리스닝</small></span><svg><use href="#i-arrow"/></svg></button>
+        <button id="btn-title-question" onclick="RPG.openLumiQuestion()" disabled><span class="utility-number">02</span><span>루미에게 질문<small>함께 풀어가는 영어</small></span><svg><use href="#i-arrow"/></svg></button>
+        <button id="btn-title-mission" onclick="RPG.openMissionHub()" disabled><span class="utility-number">03</span><span>미션 보드<small>이번 주의 작은 목표</small></span><svg><use href="#i-arrow"/></svg></button>
+        <button id="btn-title-music" onclick="MusicPlayer.open()" disabled><span class="utility-number">04</span><span>음악 감상<small>여정을 채우는 선율</small></span><svg><use href="#i-arrow"/></svg></button>
+      </div>
+      <footer class="title-footer"><span>ASTRA EDITION</span><button onclick="Astra.settings()">저장 데이터 · 로컬 에셋</button><span>ENGLISH × CARD STRATEGY</span></footer>
+    </section>
+    <section id="screen-menu" class="screen" aria-label="로비">
+      <div class="page-heading"><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>여정의 시작</h1></div><div class="ticket-counter"><small>소환 티켓</small><span id="ui-tickets">0</span><svg><use href="#i-star"/></svg></div></div>
+      <div class="lobby-layout">
+        <section class="party-showcase" aria-label="출전 파티">
+          <div class="section-label"><span>FORMATION <b>출전 파티</b></span><button class="text-button" onclick="RPG.openDeck()">편성하기 ↗</button></div>
+          <div id="astra-party" class="party-lineup"></div>
+          <div class="party-caption"><span id="astra-party-note">당신만의 조합을 완성하세요.</span><span>Ⅰ — Ⅱ — Ⅲ</span></div>
+        </section>
+        <aside class="departure-panel">
+          <div id="next-enemy-preview" class="next-opponent"><p class="eyebrow">NEXT ENCOUNTER</p><div class="encounter-heading"><h2 id="astra-stage">01</h2><div><small id="astra-mode">오리진</small><strong id="next-enemy-text">다음 상대</strong></div></div><div class="portrait"><img id="next-enemy-img" alt="다음 상대"></div><div class="route-track" aria-hidden="true"><i class="current"></i><i></i><i></i><i></i><i></i></div></div>
+          <button id="astra-depart" class="primary depart" onclick="RPG.startBattleInit()"><svg><use href="#i-sword"/></svg><span>전투 출전<small>BEGIN ENCOUNTER</small></span><svg><use href="#i-arrow"/></svg></button>
+          <p id="astra-depart-help" class="departure-hint">준비가 끝났다면, 다음 장으로.</p>
+          <div class="recruit-block"><div class="section-label"><span>RECRUIT <b>새로운 동료</b></span></div>
+            <div id="menu-gacha-area"><button id="btn-normal-gacha" class="menu-btn" onclick="RPG.openGacha()">일반 뽑기 (1장)</button><button id="btn-challenge-gacha" class="menu-btn" onclick="RPG.openChallengeGacha()">도전 뽑기</button></div>
+            <div id="menu-draft-area" style="display:none"><button class="menu-btn" onclick="RPG.startDraft()">드래프트 시작</button></div>
+            <div id="menu-chaos-area" style="display:none"><button id="btn-menu-artifact-check" class="menu-btn" style="display:none" onclick="RPG.openArtifactCheck()">아티팩트 확인</button><button class="menu-btn" onclick="RPG.reshuffleChaosPool()">카오스 셔플</button></div>
+          </div>
+        </aside>
+      </div>
+      <div class="lobby-shortcuts"><button onclick="Astra.learn()"><svg><use href="#i-book"/></svg><span>배움의 기록<small id="astra-study-note">단어 · 문법 · TOEIC</small></span><span>↗</span></button><button onclick="RPG.openMissionHub()"><svg><use href="#i-mission"/></svg><span>미션 보드<small>목표를 달성하고 보상받기</small></span><span>↗</span></button><button onclick="RPG.openChaosBlessing()"><svg><use href="#i-star"/></svg><span>축복의 제단<small>다음 전투를 위한 준비</small></span><span>↗</span></button></div>
+    </section>
+    <section id="screen-collection" class="screen" aria-label="카드 도감">
+      <div class="page-heading"><div><p class="eyebrow">THE COLLECTION</p><h1>카드 도감 <small id="collection-count"></small></h1></div><button class="secondary compact" onclick="RPG.toMenu()">로비로</button></div>
+      <div class="collection-toolbar"><label class="search-field"><svg><use href="#i-grid"/></svg><input id="card-search" type="search" placeholder="카드 이름, 속성, 역할 검색" aria-label="카드 검색"></label><select id="card-grade" aria-label="카드 등급"><option value="all">모든 등급</option><option value="legend">전설</option><option value="epic">영웅</option><option value="rare">희귀</option><option value="normal">일반</option><option value="transcendence">초월</option><option value="event">이벤트</option></select><button id="collection-scope" class="secondary compact" aria-pressed="false">보유 카드</button></div>
+      <div id="collection-grid" class="card-grid"></div><p id="collection-empty" class="empty-message" hidden>조건에 맞는 카드가 없습니다.</p>
+    </section>
+    <section id="screen-deck" class="screen" aria-label="파티 편성">
+      <div class="page-heading"><div><p class="eyebrow">BUILD YOUR FORMATION</p><h1>파티 편성</h1></div><button class="secondary compact" onclick="RPG.toMenu()">로비로</button></div>
+      <p class="screen-description">배치할 자리를 선택한 뒤 보유 카드를 골라주세요. 선봉부터 차례로 전투에 나섭니다.</p>
+      <div class="deck-formation"><button id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉</button><button id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견</button><button id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">대장</button></div>
+      <div class="section-label"><span>AVAILABLE CARDS <b>보유 카드</b></span><span id="deck-hint">카드를 선택하세요</span></div>
+      <div id="deck-card-list" class="card-grid"></div>
+      <div class="deck-confirm"><span>배치 효과와 속성을 함께 확인하세요.</span><button class="primary compact" onclick="RPG.confirmDeck()">편성 완료 <svg><use href="#i-arrow"/></svg></button></div>
+    </section>
+    <section id="screen-study" class="screen" aria-label="학습 기록실">
+      <div class="page-heading"><div><p class="eyebrow">KNOWLEDGE BECOMES POWER</p><h1>배움의 기록실</h1></div><span class="study-emblem"><svg><use href="#i-book"/></svg></span></div>
+      <div class="study-feature"><div><p class="eyebrow">FIELD PRACTICE / TOEIC</p><h2>한 문제씩,<br>더 넓은 세계로.</h2><p>실전 지문을 읽고, 근거를 찾고, 나의 답을 완성하세요.</p><button class="primary compact" onclick="RPG.openToeicMenu()">실전 연습 시작 <svg><use href="#i-arrow"/></svg></button></div><div class="study-orbit" aria-hidden="true"><svg><use href="#i-star"/></svg><span>READ<br>THINK<br>GROW</span></div></div>
+      <div class="study-grid"><button onclick="RPG.openMagicClass()"><span class="eyebrow">01 / GRAMMAR</span><h3>루미의 마법교실</h3><p>개념에서 예문까지, 차근차근 익히는 문법.</p><span class="text-link">강의 펼치기 ↗</span></button><button onclick="RPG.openWordbook()"><span class="eyebrow">02 / VOCABULARY</span><h3>나의 단어장</h3><p>틀렸던 단어와 연어를 다시 만나보세요.</p><span class="text-link">단어장 열기 ↗</span></button><button onclick="RPG.openPrivateTutoring()"><span class="eyebrow">03 / TUTORING</span><h3>루미의 개인과외</h3><p>오답을 이해하고 나만의 학습으로 연결해요.</p><span class="text-link">복습 시작하기 ↗</span></button><button onclick="RPG.openLumiQuestion()"><span class="eyebrow">04 / ASK LUMI</span><h3>궁금한 순간, 질문</h3><p>잘 풀리지 않는 영어를 함께 살펴보세요.</p><span class="text-link">질문하기 ↗</span></button></div>
+    </section>
+    <section id="screen-battle" class="screen" aria-label="전투">
+      <div class="battle-header"><div class="battle-header-left"><span class="eyebrow">ENCOUNTER <b>TURN <span id="bt-turn">1</span></b></span><button id="btn-battle-artifact-check" class="battle-artifact-btn" onclick="RPG.openArtifactCheck()">아티팩트</button></div><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div></div>
+      <div class="visual-stage"><button id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"><small>YOUR VANGUARD</small><strong id="p-name">Player</strong><div class="portrait"><img id="p-img" alt="출전 카드"></div><div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div><div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div><div id="p-buffs" class="actor-buffs"></div></button><div class="battle-versus" aria-hidden="true"><svg><use href="#i-star"/></svg><span>VS</span></div><button id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)"><small>OPPONENT</small><strong id="e-name">Enemy</strong><div class="portrait"><img id="e-img" alt="상대"></div><div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div><div id="e-buffs" class="actor-buffs"></div></button></div>
+      <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div><div id="battle-controls" class="control-panel"></div>
+    </section>
+    {{OTHER_SCREENS}}
+  </main>
+  <nav class="astra-nav" aria-label="주 메뉴"><button data-nav="menu" onclick="RPG.toMenu()"><svg><use href="#i-home"/></svg><span>로비</span></button><button data-nav="deck" onclick="RPG.openDeck()"><svg><use href="#i-cards"/></svg><span>편성</span></button><button data-nav="collection" onclick="RPG.openCollection()"><svg><use href="#i-grid"/></svg><span>도감</span></button><button data-nav="study" onclick="Astra.learn()"><svg><use href="#i-book"/></svg><span>학습</span></button><button data-nav="system" onclick="Astra.settings()"><svg><use href="#i-settings"/></svg><span>설정</span></button></nav>
+  {{MODALS}}
+  <div id="modal-astra-settings" class="modal" role="dialog" aria-modal="true" aria-labelledby="astra-settings-title"><div class="modal-content settings-panel"><p class="eyebrow">YOUR ARCHIVE</p><h2 id="astra-settings-title">설정과 기록</h2><div class="settings-grid"><button class="menu-btn" onclick="Astra.closeSettings(); RPG.openSystemMenu()">게임 메뉴 · 저장 · 기록</button><button id="btn-game-fullscreen" class="menu-btn" onclick="RPG.toggleGameFullscreen()" aria-pressed="false">전체화면</button><button class="menu-btn" onclick="Astra.exportSave()">기록 파일 내보내기</button><label class="menu-btn file-label">기록 파일 가져오기<input id="astra-import" type="file" accept="application/json,.json"></label></div><p class="settings-note">기존 Card와 저장 형식을 공유합니다. HTML을 옮길 때는 기록 파일도 함께 내보내세요. API 키는 내보내지 않습니다.</p><h3>로컬 초상화</h3><p class="settings-note">기존 PNG와 음원은 HTML 옆에 그대로 두세요. 초상화 폴더가 따로 있다면 상대 경로를 지정할 수 있습니다.</p><form id="asset-path-form"><label for="asset-path">초상화 폴더 경로</label><div class="path-row"><input id="asset-path" placeholder="예: portraits/ 또는 ../card/" autocomplete="off"><button class="primary compact" type="submit">적용</button></div></form><button class="menu-btn" onclick="document.getElementById('portrait-files').click()">기기에서 초상화 폴더 선택</button><input id="portrait-files" type="file" accept="image/*" multiple webkitdirectory hidden><p id="asset-status" class="settings-note" role="status">폴더 선택은 현재 실행 중에만 유지됩니다.</p><button class="secondary" onclick="Astra.closeSettings()">닫기</button></div></div>
+  <div id="astra-toast" role="status" aria-live="polite"></div>
+  {{SCRIPTS}}
+</body>
+</html>

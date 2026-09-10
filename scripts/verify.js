@@ -3,6 +3,7 @@
 const { execFileSync, execSync, spawnSync } = require('child_process');
 
 const TARGET_STEPS = {
+  astra: ['verify:astra'],
   shooter: ['verify:shooter'],
   'remaster-grok': ['verify:remaster-grok'],
   card: ['lint:card', 'test:card:smoke', 'test:card:browser'],
@@ -57,6 +58,10 @@ function changedFiles() {
 function selectTargets(files) {
   const targets = new Set();
   for (const file of files) {
+    if (file.startsWith('remaster_astra/')) {
+      targets.add('astra');
+      continue;
+    }
     if (file.startsWith('shooter/')) {
       targets.add('shooter');
       continue;
@@ -74,6 +79,7 @@ function selectTargets(files) {
     ) {
       targets.add('card');
       if (file.startsWith('card/')) targets.add('remaster-grok');
+      if (file.startsWith('card/')) targets.add('astra');
       continue;
     }
     if (file.startsWith('idle_hero/') || file === 'scripts/verify_idle_hero_smoke.js') {
@@ -87,7 +93,7 @@ function selectTargets(files) {
       targets.add('defense-v2');
     }
   }
-  return ['shooter', 'remaster-grok', 'card', 'idle', 'defense-v2'].filter(target => targets.has(target));
+  return ['astra', 'shooter', 'remaster-grok', 'card', 'idle', 'defense-v2'].filter(target => targets.has(target));
 }
 
 function runNpm(script) {

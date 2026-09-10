@@ -1,0 +1,10 @@
+{
+  "name": "card-rpg-astra",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "verify": "node --check src/astra.js && node build.mjs && node tests/verify.mjs && node tests/flows.mjs",
+    "serve": "node serve.mjs"
+  }
+}
