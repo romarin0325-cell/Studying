@@ -44,12 +44,22 @@ for (const name of ['sky-title.png', 'sky-hub.png', 'sky-battle.png', 'panel-fra
   assert.deepEqual([...buf.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10], `${name} is not png`);
 }
 
-const syntax = ['src/portraits.js', 'src/sky.js', 'src/shell.js', 'tools/build.mjs', 'tools/compose.mjs'];
+const syntax = ['src/portraits.js', 'src/sky.js', 'src/shell.js', 'tools/build.mjs', 'tools/compose.mjs', 'tools/serve.mjs'];
 for (const file of syntax) {
   const result = spawnSync(process.execPath, ['--check', path.join(root, file)], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr || file);
 }
 
+const theme = fs.readFileSync(path.join(root, 'src', 'theme.css'), 'utf8');
+assert(theme.includes('#screen-title') && theme.includes('overflow-y: auto'), 'title must scroll on short screens');
+assert(theme.includes('.skill-btn.phy') && theme.includes('.card-item.legend') && theme.includes('.battle-actor.dead'));
+assert(html.includes('getCurrentStageEnemyData') || fs.readFileSync(path.join(root, 'src', 'shell.js'), 'utf8').includes('getCurrentStageEnemyData'));
+assert(fs.readFileSync(path.join(root, 'src', 'shell.js'), 'utf8').includes('after(rpg)'));
+assert(fs.readFileSync(path.join(root, 'tools', 'serve.mjs'), 'utf8').includes("listen(4177, '127.0.0.1'"));
+
 assert(html.includes('id="modal-library"') && html.includes('id="modal-toeic-practice"'));
 assert(html.includes('RPGFeatureModules.install') || html.includes('hydrateModules'));
+
+const tests = spawnSync(process.execPath, [path.join(root, 'tests', 'runtime.test.mjs')], { encoding: 'utf8' });
+assert.equal(tests.status, 0, tests.stderr || tests.stdout);
 console.log('Azure Archive verification passed.');

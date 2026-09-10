@@ -17,20 +17,35 @@
   add('./portraits/');
   add('../');
 
-  const failed = new WeakMap();
+  const state = new WeakMap();
+
+  function entry(img, source) {
+    const current = state.get(img);
+    if (!current || current.source !== source) {
+      const next = { source, skip: 0 };
+      state.set(img, next);
+      return next;
+    }
+    return current;
+  }
 
   window.AzurePortraits = {
     bases,
     resolve(source, img) {
       if (!source) return '';
       if (/^(?:https?:|data:|blob:)/i.test(source)) return source;
-      const skip = (img && failed.get(img)) || 0;
+      const skip = img ? entry(img, source).skip : 0;
       const base = bases[Math.min(skip, bases.length - 1)] || '';
       return base + source;
     },
-    noteFailure(img) {
-      failed.set(img, ((failed.get(img) || 0) + 1));
-      return (failed.get(img) || 0) < bases.length;
+    noteFailure(img, source) {
+      if (!img) return false;
+      const current = entry(img, source);
+      current.skip += 1;
+      return current.skip < bases.length;
+    },
+    reset(img) {
+      if (img) state.delete(img);
     }
   };
 })();

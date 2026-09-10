@@ -132,8 +132,8 @@ function compose() {
   html = mustReplace(
     html,
     /<style>[\s\S]*?<\/style>\s*<link rel="stylesheet" href="music_player.css">/,
-    `<link rel="stylesheet" href="theme.css">
-    <link rel="stylesheet" href="music_player.css">
+    `<link rel="stylesheet" href="music_player.css">
+    <link rel="stylesheet" href="theme.css">
     <script src="portraits.js"></script>
     <script src="sky.js"></script>
     <script src="shell.js"></script>`,
