@@ -73,6 +73,7 @@ function selectTargets(files) {
       || file === 'scripts/verify_gemini_api_models.js'
     ) {
       targets.add('card');
+      if (file.startsWith('card/')) targets.add('remaster-grok');
       continue;
     }
     if (file.startsWith('idle_hero/') || file === 'scripts/verify_idle_hero_smoke.js') {

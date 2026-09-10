@@ -34,8 +34,8 @@ for (const name of ['sky-title.png', 'sky-hub.png', 'sky-battle.png', 'panel-fra
 const musicCss = fs.readFileSync(path.join(cardRoot, 'music_player.css'), 'utf8');
 
 html = html
-  .replace('<link rel="stylesheet" href="theme.css">', `<style>${css}</style>`)
-  .replace('<link rel="stylesheet" href="music_player.css">', `<style>${musicCss}</style>`);
+  .replace('<link rel="stylesheet" href="music_player.css">', `<style>${musicCss}</style>`)
+  .replace('<link rel="stylesheet" href="theme.css">', `<style>${css}</style>`);
 
 for (const file of ['portraits.js', 'sky.js', 'shell.js']) {
   const code = fs.readFileSync(path.join(srcDir, file), 'utf8');

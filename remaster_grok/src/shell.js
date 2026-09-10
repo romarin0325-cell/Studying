@@ -8,7 +8,6 @@
     overdrive: '오버드라이브', dream_corridor: '꿈의회랑'
   };
   const TYPE_LABELS = { standard: '일반', challenge: '챌린지', endless: '엔드리스' };
-  const ROLE = ['선봉', '중견', '대장'];
   const byId = id => document.getElementById(id);
 
   function patchPortraits(imageAssets) {
@@ -18,18 +17,15 @@
       if (!img) return;
       const source = this.getEntitySource(entity);
       const resolved = window.AzurePortraits ? AzurePortraits.resolve(source, img) : source;
-      const wrapped = { ...options };
-      const prevError = img.onerror;
-      original(img, resolved, wrapped);
+      original(img, resolved, options);
       const onError = img.onerror;
       img.onerror = event => {
-        if (window.AzurePortraits && AzurePortraits.noteFailure(img)) {
+        if (window.AzurePortraits && AzurePortraits.noteFailure(img, source)) {
           this.sources.delete(img);
           this.load(img, entity, { ...options, force: true });
           return;
         }
         if (typeof onError === 'function') onError.call(img, event);
-        if (typeof prevError === 'function') prevError.call(img, event);
       };
     };
     imageAssets._azurePatched = true;
@@ -48,6 +44,39 @@
     });
   }
 
+  function renderEnemy(rpg) {
+    const img = byId('next-enemy-img');
+    const frame = img && img.parentElement;
+    if (!img || !rpg || typeof rpg.getCurrentStageEnemyData !== 'function') return;
+    const nextEnemy = rpg.getCurrentStageEnemyData();
+    if (!nextEnemy) {
+      img.style.display = 'none';
+      if (frame) frame.style.display = 'none';
+      return;
+    }
+    img.style.display = '';
+    if (frame) frame.style.display = '';
+    if (window.ImageAssets) {
+      ImageAssets.load(img, nextEnemy, { parent: frame, toggleParent: true, force: true });
+    }
+  }
+
+  function renderBattleChrome(rpg) {
+    const playerBox = byId('player-actor-box');
+    const enemyBox = byId('enemy-actor-box');
+    const player = rpg && rpg.battle && rpg.battle.players
+      ? rpg.battle.players[rpg.battle.currentPlayerIdx]
+      : null;
+    const enemy = rpg && rpg.battle ? rpg.battle.enemy : null;
+    if (playerBox) {
+      playerBox.classList.toggle('turn', !!(player && !player.isDead));
+      playerBox.classList.toggle('dead', !!(player && player.isDead));
+    }
+    if (enemyBox) {
+      enemyBox.classList.toggle('dead', !!(enemy && enemy.isDead));
+    }
+  }
+
   function renderHub(rpg) {
     if (!rpg || !rpg.state) return;
     const mode = byId('hub-mode-name');
@@ -59,9 +88,12 @@
       meta.textContent = `${type} · Stage ${Number(rpg.state.enemyScale || 0) + 1}`;
     }
     if (stage) stage.textContent = `Stage ${Number(rpg.state.enemyScale || 0) + 1}`;
-    const brand = document.getElementById('app');
-    if (brand) brand.dataset.screen = document.querySelector('.screen.active')?.id || '';
+    const app = document.getElementById('app');
+    const active = document.querySelector('.screen.active');
+    if (app) app.dataset.screen = active ? active.id : '';
+    document.body.dataset.screen = active ? active.id : '';
     renderParty(rpg);
+    renderEnemy(rpg);
   }
 
   function hook(rpg) {
@@ -71,23 +103,19 @@
       if (typeof original !== 'function') return;
       rpg[name] = function patched(...args) {
         const result = original.apply(this, args);
-        after.call(this, args, result);
+        after(rpg);
         return result;
       };
     };
-    wrap('showScreen', () => {
-      const app = document.getElementById('app');
-      const active = document.querySelector('.screen.active');
-      if (app) app.dataset.screen = active ? active.id : '';
-      document.body.dataset.screen = active ? active.id : '';
-      renderHub(this);
-    });
-    wrap('toMenu', () => renderHub(this));
-    wrap('confirmDeck', () => renderHub(this));
+    wrap('showScreen', () => renderHub(rpg));
+    wrap('toMenu', () => renderHub(rpg));
+    wrap('confirmDeck', () => renderHub(rpg));
+    wrap('renderBattlefield', () => renderBattleChrome(rpg));
     rpg._azureHooked = true;
   }
 
   window.AzureShell = {
+    renderHub,
     install(rpg, imageAssets) {
       if (imageAssets) {
         window.ImageAssets = imageAssets;
