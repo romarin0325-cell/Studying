@@ -1206,17 +1206,17 @@ body::before {
 
 /* Tactile Celestial Glass Buttons */
 .menu-btn {
-    background: linear-gradient(180deg, rgba(22, 38, 74, 0.85) 0%, rgba(13, 24, 48, 0.95) 100%) !important;
-    border: 1px solid var(--border-glass) !important;
-    color: #f1f5f9 !important;
-    padding: 13px 16px !important;
-    border-radius: var(--radius-md) !important;
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
+    background: linear-gradient(180deg, rgba(22, 38, 74, 0.85) 0%, rgba(13, 24, 48, 0.95) 100%);
+    border: 1px solid var(--border-glass);
+    color: #f1f5f9;
+    padding: 13px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
     letter-spacing: 0.02em;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
 }
@@ -1234,15 +1234,15 @@ body::before {
 }
 
 .menu-btn:hover {
-    border-color: var(--primary) !important;
-    box-shadow: 0 6px 20px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    border-color: var(--primary);
+    box-shadow: 0 6px 20px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 .menu-btn:active {
-    transform: translateY(1px) scale(0.98) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* Heroic Sortie Button */
@@ -1285,35 +1285,85 @@ body::before {
 
 /* Modern Card Items */
 .card-item {
-    background: linear-gradient(180deg, rgba(20, 32, 60, 0.88) 0%, rgba(11, 18, 36, 0.95) 100%) !important;
-    border: 1.5px solid var(--border-glass) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(180deg, rgba(20, 32, 60, 0.88) 0%, rgba(11, 18, 36, 0.95) 100%);
+    border: 2px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .card-item:hover {
     transform: translateY(-4px) scale(1.03);
     border-color: var(--primary);
-    box-shadow: 0 10px 24px var(--primary-glow) !important;
+    box-shadow: 0 10px 24px var(--primary-glow);
     z-index: 10;
 }
 
-.card-item.selected {
-    border-color: var(--gold) !important;
-    box-shadow: 0 0 20px var(--gold-glow) !important;
-}
-
-/* Rarity Glows */
+/* Distinct Grade Tier Borders & Visual Accents */
 .card-item.legend {
-    border-color: var(--crimson) !important;
-    box-shadow: 0 0 16px var(--crimson-glow) !important;
+    border-color: #ff5252;
+    color: #ff5252;
+    box-shadow: 0 0 14px rgba(255, 82, 82, 0.4);
     animation: glow-legend 2.5s infinite;
 }
 
 .card-item.epic {
-    border-color: var(--violet) !important;
-    box-shadow: 0 0 14px var(--violet-glow) !important;
+    border-color: #e040fb;
+    color: #e040fb;
+    box-shadow: 0 0 12px rgba(224, 64, 251, 0.35);
+    animation: glow-epic 2.5s infinite;
+}
+
+.card-item.rare {
+    border-color: #38bdf8;
+    color: #7dd3fc;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.card-item.normal {
+    border-color: #94a3b8;
+    color: #cbd5e1;
+}
+
+.card-item.event {
+    border-color: #00e676;
+    color: #69f0ae;
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+    animation: glow-event 2.5s infinite;
+}
+
+.card-item.transcendence {
+    border-color: #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+    animation: glow-gold 2.5s infinite;
+}
+
+/* Universal High-Contrast Selection Ring (Non-conflicting with grade borders) */
+.card-item.selected,
+.card-item.is-selected {
+    outline: 3px solid #38bdf8 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.95), inset 0 0 8px rgba(56, 189, 248, 0.3) !important;
+}
+
+/* Mode Selection Items */
+.mode-item {
+    transition: all 0.2s ease;
+}
+.mode-item.is-unlocked {
+    color: #c084fc;
+    border-color: rgba(192, 132, 252, 0.4);
+}
+.mode-item.is-cleared {
+    color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.4);
+}
+.menu-btn.mode-item.is-selected,
+.mode-item.is-selected {
+    border-color: #ffd700 !important;
+    color: #ffd700 !important;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6) !important;
 }
 
 /* Modernized Battle Arena */
@@ -1436,9 +1486,13 @@ body::before {
    Celestial Azure Remaster - Title & Lobby Enhancements
    ========================================================================== */
 
-/* Hide Bottom Dock on Title and Battle */
+/* Hide Bottom Dock on Title, Battle, and Draft Screens */
 #screen-title.active ~ .hub-navigation-dock,
-#screen-battle.active ~ .hub-navigation-dock {
+#screen-battle.active ~ .hub-navigation-dock,
+#screen-draft.active ~ .hub-navigation-dock,
+#screen-factory-draft.active ~ .hub-navigation-dock,
+#screen-artifact-reserve-draft.active ~ .hub-navigation-dock,
+#screen-perfect-plan-draft.active ~ .hub-navigation-dock {
     display: none !important;
 }
 
@@ -1894,4 +1948,212 @@ body::before {
     height: 100%;
     object-fit: contain;
 }
+
+/* Vanguard Formation Showcase in Lobby */
+.lobby-vanguard-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vanguard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vanguard-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.vanguard-edit-btn {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #7dd3fc;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vanguard-edit-btn:hover {
+    background: rgba(56, 189, 248, 0.25);
+    color: #ffffff;
+}
+
+.vanguard-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.vanguard-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1.5px solid var(--border-glass);
+    cursor: pointer;
+    min-height: 56px;
+    transition: all 0.2s ease;
+}
+
+.vanguard-slot:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.vanguard-slot-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 3px;
+}
+
+.vanguard-slot.empty {
+    border-style: dashed;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.vanguard-empty-hint {
+    font-size: 0.74rem;
+    color: #64748b;
+}
+
+.vanguard-card-mini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.vanguard-card-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.vanguard-card-grade {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+.vanguard-card-grade.legend { color: #ff5252; }
+.vanguard-card-grade.epic { color: #e040fb; }
+.vanguard-card-grade.rare { color: #38bdf8; }
+.vanguard-card-grade.normal { color: #94a3b8; }
+.vanguard-card-grade.event { color: #00e676; }
+.vanguard-card-grade.transcendence { color: #ffd700; }
+
+.vanguard-slot.filled.legend { border-color: rgba(255, 82, 82, 0.5); }
+.vanguard-slot.filled.epic { border-color: rgba(224, 64, 251, 0.5); }
+.vanguard-slot.filled.rare { border-color: rgba(56, 189, 248, 0.5); }
+.vanguard-slot.filled.normal { border-color: rgba(148, 163, 184, 0.4); }
+.vanguard-slot.filled.event { border-color: rgba(0, 230, 118, 0.5); }
+.vanguard-slot.filled.transcendence { border-color: rgba(255, 215, 0, 0.6); }
+
+.vanguard-warning-bar {
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 0.76rem;
+    color: #fca5a5;
+    text-align: center;
+    cursor: pointer;
+    animation: warningPulse 2s infinite ease-in-out;
+}
+
+@keyframes warningPulse {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; border-color: rgba(244, 63, 94, 0.7); }
+}
+
+/* Lobby Header Bar & Badges */
+.lobby-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(14, 28, 54, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+}
+
+.lobby-status-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.lobby-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.lobby-badge.mode {
+    background: rgba(192, 132, 252, 0.15);
+    border: 1px solid rgba(192, 132, 252, 0.45);
+    color: #e879f9;
+}
+
+.lobby-badge.stage {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #38bdf8;
+}
+
+.lobby-ticket-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.lobby-ticket-badge .ticket-title {
+    display: none;
+}
+
+.lobby-ticket-badge .ticket-count {
+    color: #ffd700;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.lobby-sys-btn {
+    width: auto !important;
+    padding: 6px 12px !important;
+    margin-bottom: 0 !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    white-space: nowrap;
+}
+
 

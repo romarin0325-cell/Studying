@@ -391,22 +391,49 @@
                 img.removeAttribute('src');
                 img.style.display = 'none';
                 if (parent && options.toggleParent) parent.style.display = 'none';
-                img.onload = () => {
+
+                let candidates = [source];
+                if (!source.startsWith('data:') && !source.startsWith('http')) {
+                    const cleanName = source.replace(/^(\.\/|\.\.\/)+/, '').replace(/^card\//, '');
+                    candidates = [
+                        source,
+                        './' + cleanName,
+                        '../card/' + cleanName,
+                        '../../card/' + cleanName,
+                        'card/' + cleanName,
+                        './assets/' + cleanName
+                    ];
+                    // Deduplicate while preserving order
+                    candidates = [...new Set(candidates)];
+                }
+
+                let candidateIndex = 0;
+                const tryCandidate = () => {
                     if (this.requestIds.get(img) !== requestId) return;
-                    img.onload = null;
-                    img.onerror = null;
-                    img.style.display = 'block';
-                    if (parent && options.toggleParent) parent.style.display = '';
+                    if (candidateIndex >= candidates.length) {
+                        img.removeAttribute('src');
+                        img.style.display = 'none';
+                        if (parent && options.toggleParent) parent.style.display = 'none';
+                        return;
+                    }
+                    const currentCandidate = candidates[candidateIndex++];
+                    img.onload = () => {
+                        if (this.requestIds.get(img) !== requestId) return;
+                        img.onload = null;
+                        img.onerror = null;
+                        img.style.display = 'block';
+                        if (parent && options.toggleParent) parent.style.display = '';
+                    };
+                    img.onerror = () => {
+                        if (this.requestIds.get(img) !== requestId) return;
+                        img.onload = null;
+                        img.onerror = null;
+                        tryCandidate();
+                    };
+                    img.src = currentCandidate;
                 };
-                img.onerror = () => {
-                    if (this.requestIds.get(img) !== requestId) return;
-                    img.onload = null;
-                    img.onerror = null;
-                    img.removeAttribute('src');
-                    img.style.display = 'none';
-                    if (parent && options.toggleParent) parent.style.display = 'none';
-                };
-                img.src = source;
+
+                tryCandidate();
             }
 
             createImage(entity, options = {}) {
@@ -1308,7 +1335,7 @@
 
                 MODES.forEach(m => {
                     const btn = document.createElement('button');
-                    btn.className = "menu-btn";
+                    btn.className = "menu-btn mode-item";
                     btn.style.padding = "8px";
                     btn.style.fontSize = "0.8rem";
                     btn.innerText = m.name;
@@ -1318,9 +1345,9 @@
                     if (isUnlocked) {
                         const hardCleared = this.global.hardChallengeCleared && this.global.hardChallengeCleared[m.id];
                         if (this.tempGameType === 'challenge' && hardCleared) {
-                            btn.style.color = "#ff5252";
+                            btn.classList.add('is-cleared');
                         } else {
-                            btn.style.color = "#e040fb"; // Purple for unlocked
+                            btn.classList.add('is-unlocked');
                         }
                     }
 
@@ -1357,8 +1384,8 @@
                         desc.innerText = `[${m.name}]\n${descText}`;
 
                         // Visual Update
-                        list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
-                        btn.style.borderColor = '#ffd700';
+                        list.querySelectorAll('.mode-item').forEach(b => b.classList.remove('is-selected'));
+                        btn.classList.add('is-selected');
                     };
                     list.appendChild(btn);
                 });
@@ -1393,11 +1420,33 @@
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 this.ensureMonthlyMissionState();
                 const nextEnemy = this.getCurrentStageEnemyData();
-                document.getElementById('next-enemy-text').innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
+                const nextEnemyText = document.getElementById('next-enemy-text');
+                if (nextEnemyText) nextEnemyText.innerText = `${nextEnemy.name} [Stage ${this.state.enemyScale + 1}]`;
                 const imgEl = document.getElementById('next-enemy-img');
-                // image loaded dynamically or not at all depending on options
-                imgEl.style.display = 'none';
-                imgEl.parentElement.style.display = 'none';
+                if (imgEl) {
+                    ImageAssets.load(imgEl, nextEnemy, { parent: imgEl.parentElement, toggleParent: true });
+                }
+
+                // Mode & Stage badge update
+                const modeNameEl = document.getElementById('lobby-mode-name');
+                const stageNumEl = document.getElementById('lobby-stage-num');
+                if (modeNameEl) {
+                    const modeLabels = {
+                        origin: '오리진', draft: '드래프트', chaos: '카오스', artifact_chaos: '아티팩트카오스',
+                        puzzle: '퍼즐', factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브',
+                        perfect_plan: '퍼펙트플랜', dream_corridor: '꿈의회랑', restriction: '제약의시련',
+                        balance: '균형의도전', suffering: '고난의여정', archive: '아카이브', curse: '저주의증폭', flood: '축복의범람'
+                    };
+                    modeNameEl.innerText = modeLabels[this.state.mode] || this.state.mode || '일반';
+                }
+                if (stageNumEl) {
+                    stageNumEl.innerText = `Stage ${this.state.enemyScale + 1}`;
+                }
+
+                // Render vanguard formation showcase
+                if (window.AppView && AppView.renderLobbyVanguard) {
+                    AppView.renderLobbyVanguard(this);
+                }
 
                 // Mode Specific Menu Areas
                 const gachaArea = document.getElementById('menu-gacha-area');
@@ -1446,7 +1495,14 @@
                 // Merely changing screens must not write or reinterpret run records.
                 this.showScreen('screen-title');
             },
-            showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+            showScreen(id) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                const target = document.getElementById(id);
+                if (target) target.classList.add('active');
+                if (window.AppView && AppView.syncDockWithScreen) {
+                    AppView.syncDockWithScreen(id);
+                }
+            },
             showBattleScreen() {
                 this.showScreen('screen-battle');
                 const artifactBtn = document.getElementById('btn-battle-artifact-check');
@@ -1930,12 +1986,20 @@
 
             openGacha() {
                 if (this.state.mode === 'puzzle') return this.openPuzzlePieces();
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && !allowed.canNormalGacha) {
+                    return this.showAlert("현재 모드에서는 일반 소환이 허용되지 않습니다.");
+                }
                 if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
                 this.state.tickets -= GAME_CONSTANTS.COSTS.GACHA_SINGLE;
                 this.runGacha(false);
             },
 
             openChallengeGacha() {
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && !allowed.canChallengeGacha) {
+                    return this.showAlert("현재 모드에서는 도전 소환이 허용되지 않습니다.");
+                }
                 if (this.state.tickets < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.showAlert("티켓이 부족합니다.");
 
                 // 티켓 선차감
@@ -1952,6 +2016,10 @@
             },
 
             runGacha(isChallenge) {
+                const allowed = this.getAllowedModeActions ? this.getAllowedModeActions() : null;
+                if (allowed && ((isChallenge && !allowed.canChallengeGacha) || (!isChallenge && !allowed.canNormalGacha))) {
+                    return this.showAlert("현재 모드에서는 카드 소환이 허용되지 않습니다.");
+                }
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 const mode = this.state.mode;
 

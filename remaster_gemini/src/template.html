@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>별의 성소 · Card RPG (Celestial Azure Remaster)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
     <!-- STYLESHEET_PLACEHOLDER -->
 </head>
 <body>
@@ -80,6 +79,10 @@
 
         <div id="screen-menu" class="screen">
             <div class="lobby-header-bar">
+                <div class="lobby-status-group">
+                    <span id="lobby-mode-name" class="lobby-badge mode">오리진</span>
+                    <span id="lobby-stage-num" class="lobby-badge stage">Stage 1</span>
+                </div>
                 <div class="lobby-ticket-badge">
                     <span class="ticket-icon">🎟️</span>
                     <span class="ticket-title">성소 티켓</span>
@@ -831,6 +834,89 @@
         </div>
     </div>
 
+    <!-- Fortune Cookie Modal -->
+    <div id="modal-fortune-cookie" class="modal">
+        <div class="modal-content" style="max-width: 400px; width: 90%;">
+            <!-- Phase 1: Listening -->
+            <div id="fortune-listening-phase" style="display: none; flex-direction: column; align-items: center;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
+                
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                    <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 10px; border-color: #4caf50; color: #4caf50;">▶ 다시 듣기</button>
+                    <div id="fortune-part-tip" style="font-size: 0.85rem; color: #ccc; margin-top: 5px;"></div>
+                </div>
+
+                <div id="fortune-options-container" style="display: flex; flex-direction: column; width: 100%; gap: 5px; margin-bottom: 15px;">
+                    <!-- Options injected here -->
+                </div>
+
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto;">닫기</button>
+            </div>
+            <!-- Phase 1.5: Multi-Question Hub (Part 3/4) -->
+            <div id="fortune-multi-hub-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+                <div id="fortune-multi-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
+                <div style="font-size: 0.9rem; color: #ccc; margin-bottom: 15px; text-align: center;">
+                    💡 담화를 듣고 이어지는 질문에 답하세요.
+                </div>
+                
+                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                    <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 0; border-color: #4caf50; color: #4caf50;">🎧 듣기 (재생/일시정지)</button>
+                </div>
+
+                <button id="fortune-multi-q-btn" class="menu-btn" onclick="FortuneCookie.showMultiQuestion()" style="margin-bottom: 15px; width: 100%;">📝 문제 풀기 (1/2)</button>
+                
+                <button class="menu-btn" onclick="FortuneCookie.close()" style="margin-top: auto; width: 100%;">닫기</button>
+            </div>
+
+            <!-- Phase 1.6: Multi-Question View (Part 3/4) -->
+            <div id="fortune-multi-q-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <div id="fortune-multi-q-title" style="margin-bottom: 15px; font-weight: bold; color: #fff; font-size: 1.1rem; text-align: center;">문제 1/2</div>
+                <div id="fortune-multi-q-text" style="color: #e0e0e0; margin-bottom: 20px; font-size: 1rem; text-align: center; line-height: 1.4;"></div>
+                
+                <div id="fortune-multi-options-container" style="display: flex; flex-direction: column; width: 100%; gap: 5px; margin-bottom: 15px;">
+                    <!-- Options injected here -->
+                </div>
+
+                <div id="fortune-multi-q-feedback" style="display: none; margin-bottom: 15px; font-weight: bold; text-align: center; width: 100%; padding: 10px; border-radius: 4px;"></div>
+
+                <button class="menu-btn" onclick="FortuneCookie.showMultiHub()" style="margin-top: auto; width: 100%;">↩ 돌아가기</button>
+            </div>
+
+            <!-- Phase 1.7: Explanation View (Part 3/4) -->
+            <div id="fortune-explanation-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">📝 해설</h2>
+
+                <div id="fortune-explanation-scroll" class="modal-scroll toeic-passage-scroll" style="width: 100%; text-align: left; padding: 15px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; max-height: 45vh; overflow-y: auto; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; margin-bottom: 15px;">
+                    <!-- Explanation injected here -->
+                </div>
+
+                <button class="menu-btn" onclick="FortuneCookie.goToFortuneFromExplanation()" style="margin-top: auto; width: 100%; border-color: #ffd700; color: #ffd700;">🥠 운세 보기</button>
+            </div>
+
+            <!-- Phase 2: Result -->
+            <div id="fortune-result-phase" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
+
+                <div class="portrait" style="width: 80px; height: 106px; border-color: #ffd700; margin: 0 auto 12px auto; flex-shrink: 0;">
+                    <img data-image-src="루미.png" alt="Rumi" style="width:100%; height:100%; object-fit:contain;">
+                </div>
+
+                <div id="fortune-result-date" style="color: #aaa; font-size: 0.9rem; margin-bottom: 10px;"></div>
+                <div id="fortune-result-grade" style="color: #ffd700; font-size: 1.5rem; font-weight: bold; margin: 5px 0 15px 0;"></div>
+                
+                <!-- 루미 대사 영역 (API 응답 or 정적 메시지) -->
+                <div id="fortune-result-message" class="modal-scroll" style="text-align: center; padding: 10px; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; min-height: 80px; max-height: 200px; width: 100%; margin-bottom: 15px; box-sizing: border-box;"></div>
+
+                <!-- 폴백 재시도 버튼 -->
+                <div style="display:flex; gap:10px; margin-top:auto; width:100%;">
+                    <button id="fortune-retry-btn" class="menu-btn" onclick="FortuneCookie.retryWithFallback()" style="display:none; flex:1; margin-top:0; border-color:#81d4fa; color:#81d4fa;">Lite로 다시 시도</button>
+                    <button class="menu-btn" onclick="FortuneCookie.close()" style="flex:1; margin-top:0;">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- SCRIPT_PLACEHOLDER -->
 </body>
