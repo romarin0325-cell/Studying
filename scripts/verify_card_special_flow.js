@@ -37,16 +37,20 @@ async function run() {
     const beachSeason = getCurrentSpecialSeasonOriginal.call(RPG, new Date(2026, 6, 15));
     RPG.getCurrentSpecialSeason = () => beachSeason;
 
-    const titleButtons = [...document.querySelectorAll('.title-screen-actions button')].map(btn => btn.innerText.trim());
+    const titleButtons = [...document.querySelectorAll('.title-screen-actions button')];
+    const titleLabels = titleButtons
+      .filter(btn => btn.id !== 'btn-game-fullscreen')
+      .map(btn => btn.innerText.trim());
     assert(
-      JSON.stringify(titleButtons) === JSON.stringify(['새로하기', '이어하기', '포춘쿠키', '질문하기', '미션확인', '음악재생']),
+      JSON.stringify(titleLabels) === JSON.stringify(['새로하기', '이어하기', '포춘쿠키', '질문하기', '미션확인', '음악재생']),
       'title_menu',
-      titleButtons.join(', ')
+      titleLabels.join(', ')
     );
 
     const fullscreenBtn = document.getElementById('btn-game-fullscreen');
     assert(!!fullscreenBtn, 'fullscreen_button', 'missing');
-    assert(!!fullscreenBtn.closest('#screen-menu'), 'fullscreen_button_menu', 'not on main menu');
+    assert(!!fullscreenBtn.closest('#screen-title'), 'fullscreen_button_menu', 'not on title menu');
+    assert(!fullscreenBtn.closest('#screen-menu'), 'fullscreen_button_internal', 'still on internal menu');
     assert(
       !RPG.showScreen.toString().includes('Fullscreen') &&
       !RPG.openSystemMenu.toString().includes('Fullscreen') &&
