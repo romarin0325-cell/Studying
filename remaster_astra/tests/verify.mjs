@@ -100,6 +100,20 @@ try {
   assert.ok(await mobile.locator('#collection-grid .card-item').count() > 0);
   await mobile.locator('#collection-scope').click();
   assert.ok(await mobile.locator('#collection-grid .card-item').count() > 3);
+  const categoryIds = await mobile.evaluate(() => {
+    const cards = [CARDS[0],BONUS_CARDS[0],TRANSCENDENCE_CARDS[0],SPECIAL_CARDS[0]].filter(Boolean);
+    RPG.state.inventory = cards.map(card => card.id);
+    Astra.allCards = false;
+    document.getElementById('card-search').value = '';
+    document.getElementById('card-grade').value = 'all';
+    Astra.renderCollection();
+    return cards.map(card => card.id);
+  });
+  const ownedCategoryIds = await mobile.locator('#collection-grid .card-item').evaluateAll(items => items.map(item => item.dataset.cardId));
+  assert.deepEqual(new Set(ownedCategoryIds),new Set(categoryIds));
+  await mobile.locator('#collection-scope').click();
+  const allCategoryIds = new Set(await mobile.locator('#collection-grid .card-item').evaluateAll(items => items.map(item => item.dataset.cardId)));
+  for (const id of categoryIds) assert.equal(allCategoryIds.has(id),true,`${id} must remain visible in the full collection`);
   await mobile.locator('#card-search').fill('no-matching-card');
   assert.equal(await mobile.locator('#collection-empty').isVisible(),true);
   results.push('Collection search, all/owned filter, real normal grade and detail dialog');
@@ -128,7 +142,7 @@ try {
 
   // Explicit missing-image and local-folder loading paths. Fixture is test-only.
   const tinyPNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD1kAAAAASUVORK5CYII=','base64');
-  await mobile.evaluate(() => { RPG.openCollection(); Astra.allCards=false; document.getElementById('card-search').value=''; document.getElementById('card-grade').value='all'; Astra.renderCollection(); });
+  await mobile.evaluate(() => { RPG.state.inventory=['luna']; RPG.openCollection(); Astra.allCards=false; document.getElementById('card-search').value=''; document.getElementById('card-grade').value='all'; Astra.renderCollection(); });
   await mobile.waitForFunction(() => document.querySelector('#collection-grid img')?.dataset.fallback === 'true');
   await mobile.evaluate(bytes => {
     Astra.selectPortraitFiles([new File([new Uint8Array(bytes)], '루나.png', {type:'image/png'})]);
@@ -137,20 +151,63 @@ try {
   assert.equal(await mobile.evaluate(() => Astra.setPortraitPath('https://external.example/')),false);
   results.push('Missing-portrait emblems, local file selection, external portrait URL rejection');
 
-  await mobile.evaluate(() => { RPG.saveGame(false); Storage.setRaw(Storage.keys.FORTUNE_LAST_USED,'2026-09-10'); Storage.save(Storage.keys.API_KEY,'test-key-not-a-secret'); Astra.settings(); });
+  await mobile.evaluate(() => {
+    const weekly = RPG.ensureWeeklyMissionState();
+    weekly.claimed = false;
+    Object.values(weekly.missions).forEach(mission => { mission.progress = mission.target; });
+    RPG.saveGame(false);
+    Storage.setRaw(Storage.keys.FORTUNE_LAST_USED,'2026-09-10');
+    Storage.save(Storage.keys.API_KEY,'test-key-not-a-secret');
+    Astra.settings();
+  });
   const [download] = await Promise.all([mobile.waitForEvent('download'),mobile.locator('[onclick="Astra.exportSave()"]').click()]);
   const downloadPath = await download.path();
   const backup = JSON.parse(await fs.readFile(downloadPath,'utf8'));
   assert.equal(backup.format,'astra-progress');
   assert.equal('cardRpgApiKey' in backup.values,false);
   assert.equal(backup.values.fortuneCookieLastUsedDate,'2026-09-10');
+  await mobile.evaluate(() => {
+    RPG.global.chaosTickets = 2;
+    RPG._globalLoaded = true;
+    Storage.save(Storage.keys.GLOBAL,RPG.global);
+  });
+  backup.values.cardRpgGlobal.chaosTickets = 99;
   await mobile.locator('#astra-import').setInputFiles({name:'progress.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
-  await mobile.locator('#confirm-yes').click();
+  await Promise.all([
+    mobile.waitForEvent('load'),
+    mobile.locator('#confirm-yes').click()
+  ]);
+  await mobile.waitForFunction(() => Astra.ready);
   assert.equal(await mobile.locator('#screen-title').isVisible(),true);
+  assert.match(await mobile.locator('#astra-toast').textContent(),/기록을 가져왔습니다.*초상화/);
   assert.equal(await mobile.evaluate(() => Storage.getRaw(Storage.keys.FORTUNE_LAST_USED)),'2026-09-10');
-  const invalid = await mobile.evaluate(() => { try { Astra.validateImport({format:'astra-progress',version:99,values:{}}); return false; } catch { return true; } });
-  assert.equal(invalid,true);
-  results.push('Backup download/import round trip, credentials excluded, future format rejected');
+  await mobile.locator('#btn-title-mission').click();
+  await mobile.locator('#mission-hub-list button').filter({hasText:'주간'}).click();
+  await mobile.locator('#btn-claim-weekly-mission').click();
+  assert.equal(await mobile.evaluate(() => JSON.parse(localStorage.getItem(Storage.keys.GLOBAL)).chaosTickets),102);
+
+  const invalidPayloads = [
+    {format:'astra-progress',version:1,values:{cardRpgSave:null}},
+    {format:'astra-progress',version:1,values:{cardRpgSave:false}},
+    {format:'astra-progress',version:1,values:{cardRpgSave:0}},
+    {format:'astra-progress',version:1,values:{cardRpgGlobal:{}}},
+    {format:'astra-progress',version:1,values:{cardRpgGlobal:{unlocked_bonus_cards:false,unlocked_modes:[],achievements:{}}}},
+    {format:'astra-progress',version:99,values:{}}
+  ];
+  for (const payload of invalidPayloads) {
+    const result = await mobile.evaluate(async payload => {
+      document.querySelectorAll('.modal.active').forEach(el => el.classList.remove('active'));
+      const keys = Astra.backupKeys();
+      const before = Object.fromEntries(keys.map(key => [key,localStorage.getItem(key)]));
+      await Astra.importFile(new File([JSON.stringify(payload)],'invalid.json',{type:'application/json'}));
+      const after = Object.fromEntries(keys.map(key => [key,localStorage.getItem(key)]));
+      return {before,after,notice:document.getElementById('astra-toast').textContent,confirm:document.getElementById('modal-confirm').classList.contains('active')};
+    },payload);
+    assert.deepEqual(result.after,result.before);
+    assert.equal(result.confirm,false);
+    assert.match(result.notice,/(기록|버전|여정)/);
+  }
+  results.push('Atomic backup import, invalid value rejection, reload hydration, credentials excluded and future format rejection');
 
   for (const viewport of [{width:360,height:800},{width:390,height:844},{width:412,height:915},{width:390,height:667},{width:1440,height:960}]) {
     const page = await newPage(viewport);

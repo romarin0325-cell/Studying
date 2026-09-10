@@ -50,7 +50,28 @@ try {
     if (mode === 'factory') {
       assert.equal(result.screen,'screen-factory-draft');
       await page.locator('#factory-bundle-0').click();
-      assert.equal(await page.evaluate(() => RPG.state.factoryDraft.round),2);
+      if (await page.locator('#modal-info').isVisible()) await page.locator('#modal-info button').click();
+      const beforePreview = await page.evaluate(() => ({
+        round:RPG.state.factoryDraft.round,
+        pool:[...RPG.state.factoryDraft.pool],
+        bundles:RPG.state.factoryDraft.currentBundles.map(bundle => [...bundle])
+      }));
+      assert.equal(beforePreview.round,2);
+      await page.getByRole('button',{name:'현재 구성 중인 덱 보기'}).click();
+      assert.equal(await page.locator('#collection-title').textContent(),'현재 구성 중인 덱');
+      assert.equal(await page.locator('#collection-toolbar').isVisible(),false);
+      assert.equal(await page.locator('.astra-nav').isVisible(),false);
+      assert.ok(await page.locator('#collection-grid .card-item').count() > 0);
+      await page.locator('#collection-grid .card-item').first().click();
+      assert.equal(await page.locator('#modal-card').isVisible(),true);
+      await page.locator('#modal-card button').click();
+      await page.locator('#collection-back').click();
+      assert.equal(await page.locator('#screen-factory-draft').isVisible(),true);
+      assert.deepEqual(await page.evaluate(() => ({
+        round:RPG.state.factoryDraft.round,
+        pool:[...RPG.state.factoryDraft.pool],
+        bundles:RPG.state.factoryDraft.currentBundles.map(bundle => [...bundle])
+      })),beforePreview);
     }
     if (mode === 'artifact_reserve') {
       assert.equal(result.screen,'screen-artifact-reserve-draft');
@@ -60,6 +81,33 @@ try {
     if (mode === 'perfect_plan') assert.equal(result.screen,'screen-perfect-plan-draft');
   }
   console.log('PASS 16 mode initialization paths, draft cards, factory and artifact reserve selections');
+
+  for (const mode of ['chaos','artifact_chaos']) {
+    await dismiss();
+    const originalDeck = await page.evaluate(mode => {
+      Object.assign(RPG.state,{
+        mode,
+        tickets:5,
+        inventory:['marshmallow','kobold','golem'],
+        deck:['marshmallow','kobold','golem']
+      });
+      RPG.toMenu();
+      return [...RPG.state.deck];
+    },mode);
+    await page.getByRole('button',{name:'카오스 셔플'}).click();
+    await page.locator('#confirm-no').click();
+    assert.deepEqual(await page.evaluate(() => RPG.state.deck),originalDeck);
+    assert.equal(await page.locator('#astra-party .party-card.empty').count(),0);
+
+    await page.getByRole('button',{name:'카오스 셔플'}).click();
+    await page.locator('#confirm-yes').click();
+    await page.waitForFunction(() => document.getElementById('confirm-msg').textContent.includes('정말'));
+    await page.locator('#confirm-yes').click();
+    assert.deepEqual(await page.evaluate(() => RPG.state.deck),[null,null,null]);
+    assert.equal(await page.locator('#astra-party .party-card.empty').count(),3);
+    assert.equal(await page.locator('#astra-depart').isEnabled(),false);
+  }
+  console.log('PASS chaos and artifact chaos confirmed shuffles refresh the lobby; cancellation preserves the party');
 
   await boot();
   for (const part of ['part5','part6','part7']) {

@@ -5,6 +5,7 @@
 const Astra = {
   ready: false,
   allCards: false,
+  collectionContext: 'library',
   localPortraits: new Map(),
   portraitPath: '',
   modalStack: [],
@@ -35,6 +36,25 @@ const Astra = {
       const result = original.apply(this, args);
       after.apply(Astra, args);
       return result;
+    };
+  },
+  hookDoubleConfirmed(name, after) {
+    const original = RPG[name];
+    if (typeof original !== 'function' || typeof RPG.showDoubleConfirm !== 'function') throw new Error(`Missing Card API: ${name}`);
+    RPG[name] = function (...args) {
+      const showDoubleConfirm = this.showDoubleConfirm;
+      let intercepted = false;
+      this.showDoubleConfirm = function (firstMessage, secondMessage, onYes) {
+        intercepted = true;
+        this.showDoubleConfirm = showDoubleConfirm;
+        return showDoubleConfirm.call(this, firstMessage, secondMessage, () => {
+          const result = onYes?.();
+          after.apply(Astra, args);
+          return result;
+        });
+      };
+      try { return original.apply(this, args); }
+      finally { if (!intercepted) this.showDoubleConfirm = showDoubleConfirm; }
     };
   },
   home() {
@@ -133,6 +153,10 @@ const Astra = {
   },
   screenChanged(id) {
     const kind = id.replace('screen-', '');
+    if (kind !== 'collection' && this.collectionContext === 'factory') {
+      this.collectionContext = 'library';
+      delete document.body.dataset.collectionContext;
+    }
     document.body.dataset.screen = ['title','menu','collection','deck','study','battle'].includes(kind) ? kind : 'draft';
     document.querySelectorAll('[data-nav]').forEach(button => {
       if (button.dataset.nav === kind) button.setAttribute('aria-current','page');
@@ -210,7 +234,7 @@ const Astra = {
   renderCollection() {
     const counts = new Map();
     for (const id of RPG.state.inventory) counts.set(id,(counts.get(id)||0)+1);
-    const source = this.allCards ? [...CARDS, ...BONUS_CARDS, ...TRANSCENDENCE_CARDS, ...BONUS_TRANSCENDENCE_CARDS] : [...counts.keys()].map(id => RPG.getCardData(id)).filter(Boolean);
+    const source = this.allCards ? GameUtils.getAllCards() : [...counts.keys()].map(id => RPG.getCardData(id)).filter(Boolean);
     const cards = new Map(source.map(card => [card.id,card]));
     const query = this.$('card-search').value.trim().toLocaleLowerCase();
     const grade = this.$('card-grade').value;
@@ -224,6 +248,34 @@ const Astra = {
     this.$('collection-count').textContent = `${filtered.length}종`;
     this.$('collection-scope').textContent = this.allCards ? '전체 도감' : '보유 카드';
     this.$('collection-scope').setAttribute('aria-pressed',String(this.allCards));
+  },
+  openCollection() {
+    this.collectionContext = 'library';
+    delete document.body.dataset.collectionContext;
+    this.$('collection-title').textContent = '카드 도감';
+    this.$('collection-back').textContent = '로비로';
+    this.$('collection-back').onclick = () => RPG.toMenu();
+    RPG.showScreen('screen-collection');
+    this.renderCollection();
+  },
+  openFactoryViewDeck() {
+    const draft = RPG.state.factoryDraft;
+    if (!draft || !draft.active) return RPG.toMenu();
+    const pool = draft.pool || [];
+    this.collectionContext = 'factory';
+    document.body.dataset.collectionContext = 'factory';
+    this.$('collection-title').textContent = '현재 구성 중인 덱';
+    this.$('collection-count').textContent = `${pool.length}장`;
+    this.$('collection-back').textContent = '드래프트로';
+    this.$('collection-back').onclick = () => {
+      delete document.body.dataset.collectionContext;
+      this.collectionContext = 'library';
+      RPG.showScreen('screen-factory-draft');
+      RPG.renderFactoryDraftScreen();
+    };
+    RPG.showScreen('screen-collection');
+    this.renderCards('collection-grid', pool, id => RPG.showCardInfo(id));
+    this.$('collection-empty').hidden = pool.length !== 0;
   },
   renderDeckSlots() {
     ['선봉','중견','대장'].forEach((role, index) => {
@@ -271,7 +323,11 @@ const Astra = {
     const allowed = new Set(this.backupKeys());
     const safe = Object.fromEntries(Object.entries(values).filter(([key]) => allowed.has(key)));
     if (!Object.keys(safe).length) throw new Error('게임 기록이 들어 있지 않습니다.');
-    if (safe[Storage.keys.SAVE]) {
+    const hasOwn = key => Object.prototype.hasOwnProperty.call(safe, key);
+    if (hasOwn(Storage.keys.GLOBAL) && !RPG.validateGlobalData(safe[Storage.keys.GLOBAL])) {
+      throw new Error('전역 기록 형식이 잘못되었습니다.');
+    }
+    if (hasOwn(Storage.keys.SAVE)) {
       const normalized = SaveDataMigrator.normalizeRunState(safe[Storage.keys.SAVE], RPG.state, {
         defaultBlessingUses:GAME_CONSTANTS.DEFAULT_BLESSING_USES,
         defaultDraftRerolls:GAME_CONSTANTS.DRAFT.INITIAL_REROLLS,
@@ -282,7 +338,6 @@ const Astra = {
       if (!normalized) throw new Error('불러올 수 없는 여정 기록입니다.');
     }
     for (const [key,value] of Object.entries(safe)) {
-      if (key === Storage.keys.GLOBAL && (!value || typeof value !== 'object' || Array.isArray(value))) throw new Error('전역 기록 형식이 잘못되었습니다.');
       if ([Storage.keys.VOCAB,Storage.keys.COLLOCATION,Storage.keys.RECORDS].includes(key) && !Array.isArray(value)) throw new Error('학습 또는 전투 기록 형식이 잘못되었습니다.');
       if (key === Storage.keys.FORTUNE_LAST_USED && (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))) throw new Error('포춘쿠키 기록 형식이 잘못되었습니다.');
     }
@@ -296,13 +351,14 @@ const Astra = {
       RPG.showConfirm('이 파일의 기록을 가져올까요?<br>같은 항목의 현재 저장 기록이 교체됩니다.', () => {
         const previous = new Map();
         try {
-          for (const [key,value] of Object.entries(safe)) {
-            previous.set(key,localStorage.getItem(key));
-            localStorage.setItem(key,key === Storage.keys.FORTUNE_LAST_USED ? value : JSON.stringify(value));
+          for (const key of this.backupKeys()) previous.set(key,localStorage.getItem(key));
+          const writes = new Map(Object.entries(safe).map(([key,value]) => [key,key === Storage.keys.FORTUNE_LAST_USED ? value : JSON.stringify(value)]));
+          for (const [key,raw] of writes) localStorage.setItem(key,raw);
+          for (const [key,raw] of writes) {
+            if (localStorage.getItem(key) !== raw) throw new Error(`Failed to verify imported key: ${key}`);
           }
-          this.closeSettings();
-          RPG.toTitle();
-          this.toast('기록을 가져왔습니다. 이어가기로 여정을 열어주세요.');
+          try { sessionStorage.setItem('astraImportNotice','기록을 가져왔습니다. 메모리를 새 기록으로 다시 불러왔어요. 직접 선택한 초상화 파일은 다시 연결해주세요.'); } catch { /* Reload still protects in-memory state. */ }
+          location.reload();
         } catch {
           for (const [key,raw] of previous) {
             try { if (raw === null) localStorage.removeItem(key); else localStorage.setItem(key,raw); } catch { /* Report failure below. */ }
@@ -395,8 +451,10 @@ const Astra = {
       }
     });
     RPG.renderCardList = (containerId,list,callback) => this.renderCards(containerId,list,callback);
-    RPG.openCollection = () => { RPG.showScreen('screen-collection'); this.renderCollection(); };
+    RPG.openCollection = () => this.openCollection();
+    RPG.openFactoryViewDeck = () => this.openFactoryViewDeck();
     RPG.openLibrary = () => this.learn();
+    this.hookDoubleConfirmed('reshuffleChaosPool',this.renderParty);
     this.$('card-search').addEventListener('input',() => this.renderCollection());
     this.$('card-grade').addEventListener('change',() => this.renderCollection());
     this.$('collection-scope').addEventListener('click',() => { this.allCards = !this.allCards; this.renderCollection(); });
@@ -412,6 +470,13 @@ const Astra = {
     this.installDialogs();
     this.ready = true;
     this.screenChanged('screen-title');
+    try {
+      const importNotice = sessionStorage.getItem('astraImportNotice');
+      if (importNotice) {
+        sessionStorage.removeItem('astraImportNotice');
+        this.toast(importNotice);
+      }
+    } catch { /* Session storage may be unavailable for local files. */ }
   }
 };
 Astra.installImages();
