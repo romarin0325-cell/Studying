@@ -594,7 +594,7 @@ const BONUS_CARDS = [
     {
         id: 'galaxy_whale', name: '은하고래', grade: 'legend', element: 'light', role: 'dealer',
         stats: { hp: 490, atk: 105, matk: 145, def: 65, mdef: 65 },
-        trait: { type: 'syn_light_3_matk_mdef', desc: '덱에 빛 3장 이상 시 마법공격력/마법방어력 50% 증가' },
+        trait: { type: 'syn_light_3_matk_mdef', val: 50, desc: '덱에 빛 3장 이상 시 마법공격력/마법방어력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '슈퍼노바펄스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 모두 소모, 소모한 개수당 2.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2.0 }] },

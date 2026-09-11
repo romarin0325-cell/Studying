@@ -240,6 +240,47 @@ function run() {
         );
         assert.strictEqual(Logic._SYNERGY_TABLE.syn_dark_3_matk_boost, undefined);
 
+        const targetSynergyVals = {
+            syn_nature_3_all: 30,
+            syn_nature_3_golem: 30,
+            syn_fire_3_crit: 30,
+            syn_dark_3_matk: 50,
+            syn_light_dark_matk_mdef: 50,
+            syn_light_3_matk_mdef: 50,
+            syn_nature_3_matk: 50,
+            syn_night_rabbit: 50,
+            syn_snow_rabbit: 50,
+            syn_silver_rabbit: 50,
+            syn_water_3_atk_matk: 50
+        };
+        const allCards = GameUtils.getAllCards();
+        const synergyUsers = allCards.filter(card => card.trait && Object.hasOwn(targetSynergyVals, card.trait.type));
+        assert(synergyUsers.some(card => card.id === 'galaxy_whale'));
+        synergyUsers.forEach(card => {
+            assert(Number.isFinite(card.trait.val), card.id + ' missing finite trait.val');
+            assert.strictEqual(card.trait.val, targetSynergyVals[card.trait.type], card.id + ' val drifted from current effect');
+        });
+        const whale = GameUtils.getCardById('galaxy_whale');
+        const lightIds = allCards.filter(card => card.element === 'light').slice(0, 3).map(card => card.id);
+        assert.strictEqual(lightIds.length, 3);
+        const whaleOn = Logic.calculateInitialStats(whale, lightIds, allCards, 0);
+        const whaleOff = Logic.calculateInitialStats(whale, [whale.id, null, null], allCards, 0);
+        assert.strictEqual(whaleOn.activeTrait, 'syn_light_3_matk_mdef');
+        assert.strictEqual(whaleOff.activeTrait, null);
+        assert.strictEqual(whaleOn.stats.matk, Math.floor(whale.stats.matk * 1.5));
+        assert.strictEqual(whaleOn.stats.mdef, Math.floor(whale.stats.mdef * 1.5));
+        assert.strictEqual(whaleOff.stats.matk, whale.stats.matk);
+        assert.ok(Number.isFinite(whaleOn.stats.matk));
+        const whale25 = Logic.calculateInitialStats({ ...whale, trait: { ...whale.trait, val: 25 } }, lightIds, allCards, 0);
+        const whale0 = Logic.calculateInitialStats({ ...whale, trait: { ...whale.trait, val: 0 } }, lightIds, allCards, 0);
+        assert.strictEqual(whale25.stats.matk, Math.floor(whale.stats.matk * 1.25));
+        assert.strictEqual(whale0.stats.matk, whale.stats.matk);
+        assert.strictEqual(whale.trait.val, 50);
+        const fireCrit = allCards.find(card => card.trait && card.trait.type === 'syn_fire_3_crit');
+        const fireIds = allCards.filter(card => card.element === 'fire').slice(0, 3).map(card => card.id);
+        const critOn = Logic.calculateInitialStats(fireCrit, fireIds, allCards, 0);
+        assert.strictEqual(critOn.stats.baseCrit, GAME_CONSTANTS.BASE_CRIT + 30);
+
         const backupGlobal = {
             unlocked_modes: ['origin'],
             unlocked_bonus_cards: [],
