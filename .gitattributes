@@ -1,0 +1,2 @@
+# Preserve the legacy snapshot byte-for-byte, including its historical whitespace.
+card_legacy/index.html whitespace=-trailing-space

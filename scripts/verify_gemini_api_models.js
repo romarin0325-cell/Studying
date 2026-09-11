@@ -51,13 +51,12 @@ function makeGeminiResponse() {
 
 async function run() {
   const root = process.cwd();
-  const cardApiPath = path.join(root, 'card', 'api.js');
-  const remasterApiPath = path.join(root, 'card_remaster', 'api.js');
+  const cardRoot = path.join(root, 'card', 'game');
+  const cardApiPath = path.join(cardRoot, 'api.js');
   const relatedFiles = [
     cardApiPath,
-    path.join(root, 'card', 'index.html'),
-    path.join(root, 'card', 'fortune_cookie.js'),
-    remasterApiPath
+    path.join(cardRoot, 'index.html'),
+    path.join(cardRoot, 'fortune_cookie.js')
   ];
 
   relatedFiles.forEach(filePath => {
@@ -67,16 +66,10 @@ async function run() {
     });
   });
   assertOfficialRequestShape(cardApiPath);
-  assertOfficialRequestShape(remasterApiPath);
-  const remasterApiSource = fs.readFileSync(remasterApiPath, 'utf8');
+  const cardApiSource = fs.readFileSync(cardApiPath, 'utf8');
   assert(
-    remasterApiSource.includes(`const GEMINI_FLASH_MODEL_ID = '${FLASH_MODEL_ID}';`),
-    'card_remaster/api.js must target the current Flash model'
-  );
-  assert.strictEqual(
-    remasterApiSource.includes('temperature'),
-    false,
-    'card_remaster/api.js must not send removed sampling parameters to Gemini 3.x'
+    cardApiSource.includes(`const GEMINI_FLASH_MODEL_ID = '${FLASH_MODEL_ID}';`),
+    'card/game/api.js must target the current Flash model'
   );
 
   const requests = [];

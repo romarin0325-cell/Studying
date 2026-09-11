@@ -29,7 +29,7 @@ function run() {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
 
-  const cardRoot = path.join(process.cwd(), 'card');
+  const cardRoot = path.join(process.cwd(), 'card', 'game');
   const indexHtml = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
   const rpgFeaturesSource = fs.readFileSync(path.join(cardRoot, 'rpg_features.js'), 'utf8');
   assert.strictEqual(indexHtml.includes('#448af f'), false);

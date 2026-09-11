@@ -18,8 +18,7 @@ function loadGrammarData(filePath) {
 }
 
 function run() {
-    const cardRoot = path.join(process.cwd(), 'card');
-    const remasterRoot = path.join(process.cwd(), 'card_remaster');
+    const cardRoot = path.join(process.cwd(), 'card', 'game');
     const indexSource = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
     const logicSource = fs.readFileSync(path.join(cardRoot, 'logic.js'), 'utf8');
     const fortuneSource = fs.readFileSync(path.join(cardRoot, 'fortune_cookie.js'), 'utf8');
@@ -35,14 +34,11 @@ function run() {
     assert.strictEqual(fortuneSource.includes('localStorage.'), false);
 
     const grammarPath = path.join(cardRoot, 'grammar_data.js');
-    const remasterGrammarPath = path.join(remasterRoot, 'grammar_data.js');
     const grammarSource = fs.readFileSync(grammarPath, 'utf8');
-    const remasterGrammarSource = fs.readFileSync(remasterGrammarPath, 'utf8');
     const grammarData = loadGrammarData(grammarPath);
     const grammarById = new Map(grammarData.map(lecture => [lecture.id, lecture]));
     const expectedLectureIds = Array.from({ length: 35 }, (_, index) => index + 1);
 
-    assert.strictEqual(remasterGrammarSource, grammarSource, 'card and card_remaster grammar data must stay aligned');
     assert.deepStrictEqual([...grammarData.map(lecture => lecture.id)], expectedLectureIds);
     grammarData.forEach(lecture => {
         assert(

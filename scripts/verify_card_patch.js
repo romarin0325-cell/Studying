@@ -28,7 +28,7 @@ function createStaticServer(rootDir) {
   return http.createServer((req, res) => {
     const requestUrl = new URL(req.url, 'http://127.0.0.1');
     let pathname = decodeURIComponent(requestUrl.pathname);
-    if (pathname === '/') pathname = '/card/index.html';
+    if (pathname === '/') pathname = '/card/game/index.html';
 
     const resolvedPath = path.join(rootDir, pathname);
     const normalizedRoot = path.resolve(rootDir);
@@ -661,23 +661,19 @@ async function main() {
   try {
     results.push({
       name: '질문하기 플로',
-      details: await withPage(browser, baseUrl, 'card/index.html', verifyLumiQuestionFlow)
+      details: await withPage(browser, baseUrl, 'card/game/index.html', verifyLumiQuestionFlow)
     });
     results.push({
       name: '메인 UI 및 주간미션 플로',
-      details: await withPage(browser, baseUrl, 'card/index.html', verifyMainUiAndMissionFlow)
+      details: await withPage(browser, baseUrl, 'card/game/index.html', verifyMainUiAndMissionFlow)
     });
     results.push({
       name: '초보 안전장치 및 챌린지 보상',
-      details: await withPage(browser, baseUrl, 'card/index.html', verifyBeginnerSafetyAndClearReward)
+      details: await withPage(browser, baseUrl, 'card/game/index.html', verifyBeginnerSafetyAndClearReward)
     });
     results.push({
       name: '전투 규칙 검증',
-      details: await withPage(browser, baseUrl, 'card/index.html', verifyCombatRules)
-    });
-    results.push({
-      name: '리마스터 동기화 검증',
-      details: await withPage(browser, baseUrl, 'card_remaster/index.html', verifyRemasterSync)
+      details: await withPage(browser, baseUrl, 'card/game/index.html', verifyCombatRules)
     });
   } finally {
     await browser.close();

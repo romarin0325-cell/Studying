@@ -4,7 +4,7 @@ const path = require('path');
 const vm = require('vm');
 
 function run() {
-  const cardRoot = path.join(process.cwd(), 'card');
+  const cardRoot = path.join(process.cwd(), 'card', 'game');
   const sandbox = { console };
   vm.createContext(sandbox);
 
