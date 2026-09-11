@@ -1,0 +1,20 @@
+{
+  "source": "Card learning data",
+  "files": [
+    {
+      "file": "vocab_data.js",
+      "sha256": "7bed56d1c23d88a8c71e0d94a679985d3b97ea2dfccb720b48d5c63ae2effc37",
+      "entries": 381
+    },
+    {
+      "file": "collocation_data.js",
+      "sha256": "6b659bfb33c5ccac69efcf7e9351ee6ff20133a45f3efe38a03894c7bd67517e",
+      "entries": 130
+    },
+    {
+      "file": "grammar_data.js",
+      "sha256": "20f4d5b1edca4afcfa1a80dfaa5b4954363073c52259b66b7b716f145efa00a4",
+      "entries": 35
+    }
+  ]
+}

@@ -1,13 +1,17 @@
-import { HEROES, STAGES, LIMITS, clamp } from './content.js';
+import { HEROES, STAGES, DUNGEONS, LIMITS, clamp } from './content.js';
+import { DIFFICULTIES, loadoutStats } from './meta.js';
 const TAU = Math.PI * 2;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export class Game {
-  constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', onEvent = () => {} } = {}) {
+  constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], onEvent = () => {} } = {}) {
     this.hero = HEROES[hero]; this.heroIndex = hero; this.weaponIndex = weapon; this.weapon = this.hero.weapons[weapon].id;
     this.width = 450; this.height = height; this.seed = seed; this.mode = mode; this.onEvent = onEvent;
-    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: 5, lives: mode === 'relaxed' ? 6 : 5, invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
+    this.difficulty = DIFFICULTIES.find(d => d.id === mode) || DIFFICULTIES[1];
+    this.loadout = loadoutStats(artifacts, this.difficulty.id); this.artifacts = new Set(this.loadout.ids);
+    this.maxLife = this.loadout.maxLife; this.maxBombs = this.loadout.maxBombs; this.room = 0; this.reviveUsed = false; this.fairyFire = 0;
+    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: 5, lives: this.loadout.lives, invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
     this.score = 0; this.bestCombo = 0; this.combo = 0; this.comboTime = 0; this.graze = 0; this.kills = 0;
-    this.power = 1; this.powerPoints = 0; this.bombs = 3; this.attackBonus = 1; this.bombTime = 0; this.bombPulse = 0;
+    this.power = 1; this.powerPoints = 0; this.bombs = this.loadout.bombs; this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
     this.time = 0; this.totalTime = 0; this.phase = 'intro'; this.phaseTime = 0; this.finished = false;
     this.shots = []; this.bullets = []; this.enemies = []; this.particles = []; this.pickups = []; this.effects = []; this.hazards = [];
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
@@ -15,12 +19,16 @@ export class Game {
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
   emit(type, data = {}) { this.onEvent({ type, ...data }); }
-  startStage(index) {
-    this.stageIndex = index; this.stage = STAGES[index]; this.time = 0; this.phase = 'intro'; this.phaseTime = 0;
+  startStage(index, room = 0) {
+    this.stageIndex = index; this.room = room; this.dungeon = DUNGEONS[index];
+    this.stage = { ...STAGES[index], name: this.dungeon.rooms[room], duration: 25 + index * 3 + room * 5 };
+    this.time = 0; this.phase = 'intro'; this.phaseTime = 0;
     this.spawnTime = 0; this.wave = 0; this.boss = null; this.bossDefeated = false; this.bossPattern = -1; this.bossClock = 0;
+    this.sentinelSpawned = false;
     this.enemies.length = this.bullets.length = this.shots.length = this.hazards.length = this.pickups.length = 0;
     this.player.x = this.player.targetX = 225; this.player.y = this.player.targetY = this.height * .79;
-    this.player.invincible = 3; this.emit('stage', { stage: index });
+    this.effects.length = this.particles.length = 0; this.player.fire = 0; this.bombTime = 0;
+    this.player.invincible = 3; this.emit('stage', { stage: index, room });
   }
   nearest(x, y, range = 1000, exclude = null) {
     let best = null, bestD = range;
@@ -52,10 +60,11 @@ export class Game {
       case 'homing':
         p.fire = .14; for (let i = 0; i < 2 + Math.floor(this.power / 2); i++) this.shot((i - (1 + Math.floor(this.power / 2)) / 2) * .24, damage * .72, 'star', { homing: true, r: 7, speed: 520 }); break;
       case 'laser': {
-        p.fire = .075; const width = 13 + this.power * 3;
-        this.effect('beam', { x: p.x, y: p.y - 25, width, life: .11, color: '#fff0b5' });
+        p.fire += .075; const width = 13 + this.power * 3;
         for (const e of this.enemies) if (e.y < p.y && Math.abs(e.x - p.x) < e.r + width / 2) {
-          e.lock = (e.lock || 0) + .075; this.damage(e, damage * .61 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
+          if (e.lastLaserHit === undefined || this.totalTime - e.lastLaserHit > .15) e.lock = 0;
+          e.lastLaserHit = this.totalTime; e.lock = Math.min(3.25, (e.lock || 0) + .075);
+          this.damage(e, damage * .61 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
         } break;
       }
       case 'dagger':
@@ -80,15 +89,24 @@ export class Game {
             this.damage(next, damage * (i === 0 ? 2.7 : 1.8), next.x, next.y); from = next;
             next = this.enemies.filter(e => !hit.has(e) && e.hp > 0 && distance(e, from) < 210).sort((a, b) => distance(a, from) - distance(b, from))[0];
           }
-        } else this.shot(0, damage, 'petal', { vy: -480 }); break;
+        } else { p.fire = .05; p.recoil = 0; return; } break;
       }
       case 'petal':
         p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.8 : 1.08), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 3, r: 10 }); break;
+      case 'frost':
+        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.35, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: 1.6 }); break;
+      case 'snowflake':
+        p.fire = .24; this.shot(0, damage * 2.7, 'snow', { homing: true, bounce: 3, r: 13 }); break;
+      case 'glass':
+        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 1.95, 'glass', { x: p.x+i*13, pierce: true, vy: -650, r: 12 }); break;
+      case 'midnight':
+        p.fire = .14; this.shot(Math.sin(this.totalTime*5)*.18, damage * 1.7, 'clock', { homing: true, mark: true, r: 10 }); break;
     }
     this.emit('shot', { weapon: this.weapon });
   }
   damage(enemy, amount, x, y) {
     if (enemy.hp <= 0 || (enemy.boss && this.phase !== 'boss')) return;
+    amount *= 1 + (this.artifacts.has('pendant') && this.power === 5 ? .2 : 0) + (this.artifacts.has('dragon') && this.player.lives === 1 ? .4 : 0) + (this.artifacts.has('chocolate') && (enemy.boss || enemy.miniboss) ? .5 : 0);
     enemy.hp -= amount; enemy.flash = .07; this.stats.damage += amount; this.stats.hits++;
     if (this.random() < .2) this.particlesAt(x, y, this.hero.color, 2);
     if (enemy.hp > 0) return;
@@ -103,6 +121,8 @@ export class Game {
       for (const e of this.enemies) e.hp = 0;
       this.emit('bossDefeated', { stage: this.stageIndex });
     } else {
+      this.specialDeath(enemy);
+      if (enemy.miniboss) this.emit('sentinelDefeated');
       this.drop(x, y, 'score');
       if (this.kills % 4 === 0 || enemy.elite) this.drop(x + 12, y, 'power');
       if (this.kills % 37 === 0) this.drop(x - 12, y, 'life');
@@ -116,21 +136,25 @@ export class Game {
     this.bullets.length = 0;
   }
   bomb() {
-    if (!['wave', 'boss', 'warning'].includes(this.phase) || this.bombs <= 0) return false;
-    this.bombs--; this.stats.bombs++; this.bombTime = this.heroIndex === 1 ? 4 : 5; this.bombPulse = 0;
+    if (!['wave', 'boss', 'warning'].includes(this.phase)) return false;
+    if (this.bombs > 0) this.bombs--;
+    else if (this.artifacts.has('mask') && this.player.lives > 1) this.player.lives--;
+    else return false;
+    this.stats.bombs++; this.bombTime = this.heroIndex === 1 ? 4 : 5; this.bombPulse = 0;
     this.player.invincible = Math.max(this.player.invincible, this.bombTime); this.clearBullets(true); this.hazards.length = 0;
-    if (this.heroIndex === 3) this.player.lives = Math.min(6, this.player.lives + 1);
-    for (const e of [...this.enemies]) this.damage(e, this.heroIndex === 2 ? 450 : 260, e.x, e.y);
+    if (this.heroIndex === 3) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
+    for (const e of [...this.enemies]) this.damage(e, (this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y);
     this.emit('bomb', { hero: this.heroIndex }); return true;
   }
   hitPlayer() {
     const p = this.player; if (p.invincible > 0 || this.finished || !['wave', 'boss'].includes(this.phase)) return false;
-    p.lives--; this.stats.deaths++; p.invincible = 2.5; this.combo = 0; this.comboTime = 0;
+    if (this.artifacts.has('shield') && this.bombs > 0) this.bombs--; else p.lives--;
+    this.stats.deaths++; p.invincible = this.artifacts.has('cloak') ? 3 : 2.5; this.combo = 0; this.comboTime = 0;
     this.power = Math.max(1, this.power - 1); this.clearBullets(); this.particlesAt(p.x, p.y, '#fff', 30); this.emit('hurt');
     if (p.lives <= 0) { this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
   }
   enemyBullet(x, y, angle, speed, options = {}) {
-    const relaxed = this.mode === 'relaxed' ? .78 : 1;
+    const relaxed = this.difficulty.speed;
     this.add('bullets', { x, y, vx: Math.cos(angle) * speed * relaxed, vy: Math.sin(angle) * speed * relaxed, r: 5, age: 0, color: this.stage.color, shape: 'orb', ...options }, LIMITS.bullets);
   }
   fan(x, y, count, speed, spread, aim = Math.PI / 2, opts = {}) {
@@ -148,14 +172,37 @@ export class Game {
           { hp: 38 + stage * 10, speed: 68 + stage * 8 + (type === 3 ? 25 : 0), move: type === 0 ? 'drift' : type === 1 ? 'curve' : type === 2 ? 'zigzag' : 'dive', side: left ? 1 : -1, fire: 1.8 + i * .25, image: stage, r: 19 });
       }
     }
+    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: stage, r: 25, hp: 115 + stage*35, speed: 53, move: 'sentry', fire: 2, image: stage, countdown: 4.5 });
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
-    this.add('enemies', { x, y, ox: x, age: 0, maxHp: data.hp, flash: 0, ...data }, LIMITS.enemies);
+    const hp = data.hp * this.difficulty.hp * (1 + this.room*.12);
+    this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
+  }
+  specialDeath(e) {
+    if (e.special === 0) this.effect('detonation', { x: e.x, y: e.y, radius: 82, life: 1.05, fired: false, color: '#ffb574' });
+    if (e.special === 1) for (const side of [-1,0,1]) this.spawnEnemy(clamp(e.x+side*22,25,425),e.y, { hp: 16, r: 12, speed: 170, move: 'curve', side, fire: .65, image: 1, offspring: true });
+  }
+  spawnSentinel() {
+    this.sentinelSpawned = true; this.clearBullets();
+    this.spawnEnemy(225, -80, { miniboss: true, elite: true, hp: 1150 + this.stageIndex*340, r: 38, speed: 65, move: 'sentry', fire: 1.8, image: this.stageIndex });
+    this.emit('sentinel', { name: this.dungeon.sentinel });
+  }
+  sentinelAttack(e) {
+    const aim = Math.atan2(this.player.y-e.y,this.player.x-e.x);
+    if (this.stageIndex === 0) { this.fan(e.x,e.y,7,120,.18,aim); this.addHazard(clamp(this.player.x,45,405),24); }
+    if (this.stageIndex === 1) for (const side of [-1,1]) this.fan(e.x+side*40,e.y,5,112,.2,Math.PI/2+side*Math.sin(e.age)*.6,{shape:'heart'});
+    if (this.stageIndex === 2) for(let i=0;i<16;i++) this.enemyBullet(e.x,e.y,i*TAU/16+e.age*.3,118,{shape:'diamond'});
+    if (this.stageIndex === 3) this.fan(e.x,e.y,3,62,.45,aim,{r:16,split:true,shape:'diamond'});
+  }
+  clearRoom() {
+    if (this.phase !== 'wave') return;
+    this.phase = 'clear'; this.phaseTime = 0; this.clearBullets(true); this.hazards.length = this.enemies.length = this.effects.length = 0;
+    this.score += this.player.lives * 700; this.emit('roomClear', {room:this.room});
   }
   spawnBoss() {
     this.enemies.length = 0; this.clearBullets(); this.hazards.length = 0;
-    const hp = this.stage.hp * (this.mode === 'relaxed' ? .85 : 1);
+    const hp = this.stage.hp * this.difficulty.hp * .78;
     this.boss = { boss: true, x: 225, y: -100, age: 0, hp, maxHp: hp, r: 42, flash: 0, fire: 1.5, image: this.stageIndex };
     this.enemies.push(this.boss); this.phase = 'warning'; this.phaseTime = 0; this.emit('warning');
   }
@@ -191,16 +238,22 @@ export class Game {
     this.emit('enemyShot', { boss: true });
   }
   addHazard(x, width) { if (this.hazards.length < 5) this.hazards.push({ x, width, age: 0, warn: 1.4, life: 2.25 }); }
-  chooseUpgrade(id) {
-    if (this.phase !== 'upgrade') return false;
-    if (id === 'power') this.attackBonus *= 1.18;
-    else if (id === 'life') this.player.lives = Math.min(6, this.player.lives + 2);
-    else if (id === 'bomb') this.bombs = Math.min(5, this.bombs + 1);
-    else return false;
-    this.startStage(this.stageIndex + 1); return true;
+  completeQuiz(reward = null) {
+    if (this.phase !== 'quiz' || ![null,'life','bomb'].includes(reward)) return false;
+    if (reward === 'life') this.player.lives = Math.min(this.maxLife,this.player.lives+1);
+    if (reward === 'bomb') this.bombs = Math.min(this.maxBombs,this.bombs+1);
+    if(this.room===2){this.phase='victory';this.finished=true;this.emit('victory');return true;}
+    this.startStage(this.stageIndex, this.room+1); return true;
+  }
+  revive(correct) {
+    if (this.phase !== 'defeat' || this.reviveUsed) return false;
+    this.reviveUsed = true;
+    if (!correct) return false;
+    this.finished = false; this.player.lives = Math.min(2,this.maxLife); this.player.invincible = 4;
+    this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
   }
   update(dt) {
-    if (this.finished || this.phase === 'upgrade' || dt <= 0) return;
+    if (this.finished || this.phase === 'quiz' || dt <= 0) return;
     dt = Math.min(dt, .05); this.totalTime += dt; this.phaseTime += dt;
     const p = this.player; p.invincible = Math.max(0, p.invincible - dt); p.recoil = Math.max(0, p.recoil - dt * 8);
     const dx = p.targetX - p.x, dy = p.targetY - p.y, len = Math.hypot(dx, dy), step = Math.min(1, 1250 * dt / Math.max(1, len));
@@ -209,32 +262,45 @@ export class Game {
     if (this.phase === 'intro' && this.phaseTime > 2.4) { this.phase = 'wave'; this.phaseTime = 0; }
     if (this.phase === 'wave') {
       this.time += dt; this.spawnTime -= dt;
-      if (this.time >= this.stage.duration) this.spawnBoss();
-      else if (this.spawnTime <= 0) { this.spawnWave(); this.spawnTime = Math.max(2.8, 3.8 - this.stageIndex * .2); }
+      if (this.room === 1 && this.time > this.stage.duration*.55 && !this.sentinelSpawned) this.spawnSentinel();
+      if (this.time >= this.stage.duration) {
+        if (this.room === 2) this.spawnBoss();
+        else if (!this.enemies.some(e=>e.miniboss && e.hp>0)) this.clearRoom();
+      } else if (this.spawnTime <= 0) { this.spawnWave(); this.spawnTime = Math.max(2.5,3.8-this.stageIndex*.2) * this.difficulty.interval; }
     }
     if (this.phase === 'warning' && this.phaseTime > 3) { this.phase = 'boss'; this.phaseTime = 0; this.emit('bossStart'); }
     if (['wave', 'boss'].includes(this.phase)) this.fire(dt);
     for (const e of this.enemies) {
-      if (e.hp <= 0) continue; e.age += dt; e.flash = Math.max(0, e.flash - dt);
+      if (e.hp <= 0) continue; e.slow = Math.max(0,(e.slow || 0)-dt);
+      const chilled = e.slow > 0 || (this.heroIndex === 4 && this.bombTime > 0);
+      e.age += dt * (chilled ? .6 : 1); e.flash = Math.max(0, e.flash - dt);
       if (e.boss) {
         const targetY = this.phase === 'warning' ? 150 : 155 + Math.sin(e.age * .65) * 26;
         e.y += (targetY - e.y) * Math.min(1, dt * 2);
         e.x = 225 + Math.sin(e.age * .6) * (this.stageIndex === 3 ? 95 : 105);
-        if (this.phase === 'boss') this.bossAttack(dt);
+        if (this.phase === 'boss') this.bossAttack(dt * (chilled ? .7 : 1));
       } else {
-        e.y += e.speed * dt;
+        const slow = e.slow > 0 || (this.heroIndex === 4 && this.bombTime > 0) ? .48 : 1;
+        e.y += e.speed * dt * slow;
         if (e.move === 'curve') e.x = clamp(e.ox + Math.sin(e.age * 1.4) * 95 * e.side, 25, 425);
         if (e.move === 'zigzag') e.x = clamp(e.ox + Math.sin(e.age * 2.3) * 55, 25, 425);
         if (e.move === 'drift') e.x = e.ox + Math.sin(e.age) * 18;
-        if (e.move === 'sentry' && e.y > 155) e.y -= e.speed * dt * .85;
+        if (e.move === 'sentry' && e.y > 155) e.y -= e.speed * dt * slow * (e.miniboss ? 1 : .85);
+        if (e.special === 2 && e.y > 0) {
+          e.countdown -= dt;
+          if (e.countdown <= 0) { for(let i=0;i<20;i++) this.enemyBullet(e.x,e.y,i*TAU/20,145,{shape:'diamond'}); e.countdown = 4.5; this.emit('curseBurst'); }
+        }
         e.fire -= dt;
         if (e.fire <= 0 && e.y > 30 && e.y < this.height * .62 && ['wave', 'boss'].includes(this.phase)) {
           const aim = Math.atan2(p.y - e.y, p.x - e.x);
-          this.fan(e.x, e.y + 10, e.elite ? 5 : 1 + (this.stageIndex >= 2 ? 2 : 0), 105 + this.stageIndex * 14, .17, aim, { color: e.elite ? '#ffc184' : this.stage.color });
-          e.fire = e.elite ? 1.5 : 2.9;
+          if (e.miniboss) this.sentinelAttack(e);
+          else if (e.special === 3) this.enemyBullet(e.x,e.y,aim,58,{r:17,split:true,shape:'diamond'});
+          else this.fan(e.x, e.y + 10, e.elite ? 5 : 1 + (this.stageIndex >= 2 ? 2 : 0), 105 + this.stageIndex * 14, .17, aim, { color: e.elite ? '#ffc184' : this.stage.color });
+          e.fire = (e.elite ? 1.5 : 2.9) * this.difficulty.interval;
         }
       }
       if (distance(e, p) < e.r + p.radius) this.hitPlayer();
+      if(this.finished)return;
     }
     this.enemies = this.enemies.filter(e => e.hp > 0 && e.y < this.height + 70);
     for (const s of this.shots) {
@@ -243,21 +309,31 @@ export class Game {
       s.x += s.vx * dt; s.y += s.vy * dt; if (s.wave) s.x += Math.sin(s.life * 10) * s.wave;
       for (const e of this.enemies) {
         if (e.hp <= 0 || s.hit.has(e) || (e.boss && this.phase !== 'boss')) continue;
-        if (distance(s, e) < e.r + s.r) { s.hit.add(e); this.damage(e, s.damage, s.x, s.y); if (!s.pierce) { s.life = 0; break; } if (s.type === 'lance') this.effect('burst', { x: e.x, y: e.y, radius: 40, life: .3, color: '#ffb66a' }); }
+        if (distance(s, e) < e.r + s.r) {
+          s.hit.add(e); this.damage(e, s.damage, s.x, s.y);
+          if (s.slow) e.slow = s.slow;
+          if (s.mark && e.hp > 0) { e.marks = (e.marks || 0)+1; if(e.marks >= 3) {e.marks=0;this.effect('burst',{x:e.x,y:e.y,radius:90,life:.45,color:'#ffc4e3'});for(const target of [...this.enemies]) if(distance(e,target)<100) this.damage(target,s.damage*2.5,target.x,target.y);} }
+          if (s.bounce > 0) { const next=this.enemies.find(t=>t.hp>0&&!s.hit.has(t)&&distance(e,t)<300); if(next) {s.bounce--; const d=Math.max(1,distance(s,next));s.vx=(next.x-s.x)/d*560;s.vy=(next.y-s.y)/d*560;s.homing=false;break;} }
+          if (!s.pierce) { s.life = 0; break; } if (s.type === 'lance') this.effect('burst', { x: e.x, y: e.y, radius: 40, life: .3, color: '#ffb66a' });
+        }
       }
     }
     this.shots = this.shots.filter(s => s.life > 0 && s.y > -70 && s.y < this.height + 30 && s.x > -80 && s.x < 530);
     for (const b of this.bullets) {
       b.age += dt; if (b.turn) { const a = b.turn * dt, c = Math.cos(a), s = Math.sin(a), vx = b.vx; b.vx = vx * c - b.vy * s; b.vy = vx * s + b.vy * c; }
-      b.x += b.vx * dt; b.y += b.vy * dt;
+      const bulletSlow = this.heroIndex === 4 && this.bombTime > 0 ? .35 : 1;
+      b.x += b.vx * dt * bulletSlow; b.y += b.vy * dt * bulletSlow;
       const d = distance(b, p);
+      if (b.split && (d < 155 || b.age > 3.7)) { b.dead = true; b.split = false; this.fan(b.x,b.y,9,125,TAU/9,Math.PI/2,{r:4}); this.effect('burst',{x:b.x,y:b.y,radius:35,life:.3,color:this.stage.color}); continue; }
       if (d < b.r + p.radius && p.invincible <= 0) { b.dead = true; this.hitPlayer(); }
       else if (d < 24 && !b.grazed && p.invincible <= 0) { b.grazed = true; this.graze++; this.score += 25 * this.multiplier; this.emit('graze'); }
+      if(this.finished)return;
       if (this.weapon === 'petal' && d < 28 && Math.sin(this.totalTime * 2) > .97) { b.dead = true; this.particlesAt(b.x, b.y, '#f7dfaa', 2); }
     }
     this.bullets = this.bullets.filter(b => !b.dead && b.age < 14 && b.y < this.height + 25 && b.y > -150 && b.x > -80 && b.x < 530);
     this.stats.maxBullets = Math.max(this.stats.maxBullets, this.bullets.length);
     for (const h of this.hazards) { h.age += dt; if (h.age > h.warn && Math.abs(p.x - h.x) < h.width / 2 + p.radius) this.hitPlayer(); }
+    if(this.finished)return;
     this.hazards = this.hazards.filter(h => h.age < h.life);
     for (const d of this.pickups) {
       d.age += dt; const dist = distance(d, p), magnet = dist < 125 || p.y < this.height * .32 || this.phase === 'clear';
@@ -270,21 +346,26 @@ export class Game {
       this.bombTime -= dt; this.bombPulse -= dt;
       if (this.bombPulse <= 0) {
         this.bombPulse = .25; this.clearBullets(true);
-        for (const e of [...this.enemies]) { this.damage(e, (this.heroIndex === 1 ? 65 : this.heroIndex === 3 ? 27 : 42) * this.attackBonus, e.x, e.y); this.effect(this.heroIndex === 1 ? 'slash' : 'burst', { x: e.x, y: e.y + 30, radius: 64, life: .3, color: this.hero.color }); }
+        for (const e of [...this.enemies]) { this.damage(e, (this.heroIndex === 1 ? 65 : this.heroIndex === 3 ? 27 : this.heroIndex === 5 ? 55 : 42) * this.attackBonus * this.loadout.bomb, e.x, e.y); this.effect(this.heroIndex === 1 ? 'slash' : 'burst', { x: e.x, y: e.y + 30, radius: 64, life: .3, color: this.hero.color }); }
       }
+    }
+    if (this.artifacts.has('leaf') && ['wave','boss'].includes(this.phase)) {
+      this.fairyFire -= dt; if(this.fairyFire<=0) {this.fairyFire=.3;this.shot(0,12*this.attackBonus,'star',{x:p.x+Math.cos(this.totalTime*2)*44,y:p.y-20,homing:true,r:5});}
     }
     for (const q of this.particles) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= .97; }
     this.particles = this.particles.filter(q => q.life > 0);
-    for (const f of this.effects) f.age += dt;
+    for (const f of this.effects) {
+      f.age += dt;
+      if(f.type==='detonation' && !f.fired && f.age>.75) {f.fired=true;this.fan(f.x,f.y,10,115,TAU/10);if(distance(f,p)<f.radius)this.hitPlayer();}
+    }
     this.effects = this.effects.filter(f => f.age < f.life);
     if (this.phase === 'clear' && this.phaseTime > 3.4) {
-      if (this.stageIndex === 3) { this.phase = 'victory'; this.finished = true; this.emit('victory'); }
-      else { this.phase = 'upgrade'; this.emit('upgrade'); }
+      this.phase = 'quiz'; this.emit('quiz', { kind: ['vocab','collocation','grammar'][this.room] });
     }
   }
   collect(type) {
     if (type === 'power') { if (this.power < 5 && ++this.powerPoints >= 3) { this.power++; this.powerPoints = 0; this.emit('powerup'); } else if (this.power >= 5) this.score += 250; }
-    if (type === 'life') { this.player.lives = Math.min(6, this.player.lives + 1); this.emit('heal'); }
+    if (type === 'life') { this.player.lives = Math.min(this.maxLife, this.player.lives + 1); this.emit('heal'); }
     if (type === 'score') this.score += 50 * this.multiplier;
     this.emit('pickup', { item: type });
   }
