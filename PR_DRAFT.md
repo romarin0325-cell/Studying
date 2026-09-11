@@ -14,7 +14,7 @@ fix(card): 아티팩트 리저브 패배 시 비정상 세이브 제거 및 혼�
 
 ### 2. 변경 내용
 - **`consumeArtifactReserveUsesForBattle(autoSave = true)` 파라미터화**:
-  - `card/rpg_features.js` 및 `card_remaster/rpg_features.js`의 `consumeArtifactReserveUsesForBattle`에 `autoSave` 매개변수를 추가(기본값 `true`).
+  - `card/game/rpg_features.js`의 `consumeArtifactReserveUsesForBattle`에 `autoSave` 매개변수를 추가(기본값 `true`).
   - `loseBattle()`에서는 `this.consumeArtifactReserveUsesForBattle(false)`로 호출하여 패배 시 일체의 디스크 저장이 발생하지 않도록 차단.
 - **모드 간 세이브 정책 정합성 통일**:
   - 다른 일반/챌린지 모드와 동일하게 패배 시에는 디스크 저장을 하지 않음으로써, 패배 후 재로드 시 전투 전 세이브해 둔 혼돈의 축복 상태(버프 목록 및 잔여 횟수)와 아티팩트 잔여 횟수가 온전히 보존됩니다.

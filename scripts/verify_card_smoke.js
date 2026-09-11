@@ -12,7 +12,7 @@ function mustContain(filePath, snippets) {
 }
 
 function run() {
-  const cardRoot = path.join(process.cwd(), 'card');
+  const cardRoot = path.join(process.cwd(), 'card', 'game');
 
   mustContain(path.join(cardRoot, 'index.html'), [
     'id="modal-toeic-practice"',

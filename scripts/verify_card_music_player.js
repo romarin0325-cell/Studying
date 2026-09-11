@@ -168,7 +168,7 @@ function createHarness({ tracks = TRACKS, savedPrefs = null, includeManifest = t
     sandbox.globalThis = sandbox;
     vm.createContext(sandbox);
 
-    const playerPath = path.join(process.cwd(), 'card', 'music_player.js');
+    const playerPath = path.join(process.cwd(), 'card', 'game', 'music_player.js');
     vm.runInContext(fs.readFileSync(playerPath, 'utf8'), sandbox, { filename: playerPath });
     return { audio, elements, mediaSession, player: sandbox.MusicPlayer, sandbox, saved };
 }
@@ -376,7 +376,7 @@ async function verifySavedFavoritesAndEmptyStates() {
 }
 
 function verifyHtmlIntegration() {
-    const html = fs.readFileSync(path.join(process.cwd(), 'card', 'index.html'), 'utf8');
+    const html = fs.readFileSync(path.join(process.cwd(), 'card', 'game', 'index.html'), 'utf8');
     const dataPosition = html.indexOf("{ src: 'music_data.js'");
     const playerPosition = html.indexOf("{ src: 'music_player.js'");
     assert(dataPosition >= 0 && dataPosition < playerPosition, 'music data must load before the player');
@@ -388,7 +388,7 @@ function verifyHtmlIntegration() {
     assert(!html.includes('music-background-note'), 'browser-policy note must be removed');
     assert(!html.includes('창을 닫아도 음악은 계속 재생됩니다'));
     assert(!html.includes('<h3 id="music-player-heading">음악재생</h3>'), 'redundant visible heading must be removed');
-    const musicData = fs.readFileSync(path.join(process.cwd(), 'card', 'music_data.js'), 'utf8');
+    const musicData = fs.readFileSync(path.join(process.cwd(), 'card', 'game', 'music_data.js'), 'utf8');
     assert(!musicData.includes('スキの未払金'), 'unpaid-love track must be removed from the playlist');
 }
 

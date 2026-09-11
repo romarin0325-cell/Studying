@@ -5,7 +5,7 @@ const { pathToFileURL } = require('url');
 async function run() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  const fileUrl = pathToFileURL(path.join(process.cwd(), 'card', 'index.html')).href;
+  const fileUrl = pathToFileURL(path.join(process.cwd(), 'card', 'game', 'index.html')).href;
 
   await page.addInitScript(() => {
     try {

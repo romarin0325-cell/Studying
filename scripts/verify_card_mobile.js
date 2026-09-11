@@ -37,7 +37,7 @@ async function waitForLoader(page) {
 
 async function run() {
     const browser = await chromium.launch({ headless: true });
-    const cardRoot = path.join(process.cwd(), 'card');
+    const cardRoot = path.join(process.cwd(), 'card', 'game');
     const fileUrl = pathToFileURL(path.join(cardRoot, 'index.html')).href;
 
     try {

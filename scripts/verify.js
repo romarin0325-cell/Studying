@@ -3,17 +3,8 @@
 const { execFileSync, execSync, spawnSync } = require('child_process');
 
 const TARGET_STEPS = {
-  astra: ['verify:astra'],
   shooter: ['verify:shooter'],
-  'remaster-grok': ['verify:remaster-grok'],
-  card: ['lint:card', 'test:card:smoke', 'test:card:browser'],
-  idle: ['test:idle:smoke'],
-  'defense-v2': [
-    'lint:defense-hero-v2',
-    'test:defense-hero-v2',
-    'test:defense-hero-v2:local',
-    'test:defense-hero-v2:browser'
-  ]
+  card: ['lint:card', 'test:card:smoke', 'test:card:browser', 'verify:card']
 };
 
 function gitLines(args) {
@@ -58,42 +49,20 @@ function changedFiles() {
 function selectTargets(files) {
   const targets = new Set();
   for (const file of files) {
-    if (file.startsWith('remaster_astra/')) {
-      targets.add('astra');
-      continue;
-    }
     if (file.startsWith('shooter/')) {
       targets.add('shooter');
       continue;
     }
-    if (file.startsWith('remaster_grok/')) {
-      targets.add('remaster-grok');
-      continue;
-    }
     if (
       file.startsWith('card/')
-      || file.startsWith('card_remaster/')
-      || file.startsWith('card_manual/')
       || file.startsWith('scripts/verify_card_')
       || file === 'scripts/verify_gemini_api_models.js'
     ) {
       targets.add('card');
-      if (file.startsWith('card/')) targets.add('remaster-grok');
-      if (file.startsWith('card/')) targets.add('astra');
       continue;
-    }
-    if (file.startsWith('idle_hero/') || file === 'scripts/verify_idle_hero_smoke.js') {
-      targets.add('idle');
-      continue;
-    }
-    if (
-      file.startsWith('defense_hero_v2/')
-      || file.includes('hero_defense_v2')
-    ) {
-      targets.add('defense-v2');
     }
   }
-  return ['astra', 'shooter', 'remaster-grok', 'card', 'idle', 'defense-v2'].filter(target => targets.has(target));
+  return ['shooter', 'card'].filter(target => targets.has(target));
 }
 
 function runNpm(script) {
@@ -110,7 +79,7 @@ function run() {
   const files = changedFiles();
   const targets = selectTargets(files);
   if (targets.length === 0) {
-    console.log('No active game changes detected. Defense Hero V1 is unused and skipped.');
+    console.log('No active game changes detected.');
     return;
   }
 
