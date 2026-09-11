@@ -635,16 +635,27 @@ function run() {
       getCardData: getCard,
       getCurrentStageEnemyData: () => ENEMIES[0],
       showBattleScreen: quiet,
-      clearBattleLog: quiet,
+      initLogs: [],
+      clearCalls: 0,
+      clearBattleLog() { this.clearCalls += 1; this.initLogs.length = 0; },
       renderBattleView: quiet,
       hasArtifact: () => false,
-      log: quiet,
+      log(message) { this.initLogs.push(String(message)); },
       loseBattle: quiet
     };
     const originalStartPlayerTurn = BattleRuntime.TurnManager.startPlayerTurn;
     BattleRuntime.TurnManager.startPlayerTurn = quiet;
     BattleRuntime.startBattleInit(guardianBattle);
     BattleRuntime.TurnManager.startPlayerTurn = originalStartPlayerTurn;
+    assert.strictEqual(guardianBattle.clearCalls, 1);
+    assert(guardianBattle.initLogs.some(line => line.includes('[특성] 가디언')));
+    assert(guardianBattle.initLogs.some(line => line.includes('전투 개시!')));
+    const rejectedBattle = {
+      state: { mode: 'origin', deck: [null, null, null] },
+      showAlert: quiet,
+      clearBattleLog() { throw new Error('rejected battle must not clear the log'); }
+    };
+    BattleRuntime.startBattleInit(rejectedBattle);
     const guardianUnit = guardianBattle.battle.players[0];
     const victoriaUnit = guardianBattle.battle.players[1];
     assert.strictEqual(guardianUnit.guardDamageReduction, 0.75);

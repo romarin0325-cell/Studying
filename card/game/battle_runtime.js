@@ -224,6 +224,7 @@ const BattleRuntime = {
         }
 
         rpg.showBattleScreen();
+        rpg.clearBattleLog();
         rpg.battle.enemy = buildBattleEnemy(rpg);
         rpg.battle.activeTraits = [];
 
@@ -280,7 +281,6 @@ const BattleRuntime = {
             rpg.battle.currentPlayerIdx++;
         }
 
-        rpg.clearBattleLog();
         rpg.log(`전투 개시! 적: ${rpg.battle.enemy.name}`);
         if (rpg.battle.activeTraits.includes('instant_delayed_skills')) {
             rpg.log('[특성] 시간의마술사: 덱의 지연 스킬이 즉시 발동합니다!');
