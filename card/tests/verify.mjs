@@ -7,7 +7,7 @@ import { chromium } from 'playwright';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'test-results');
 await fs.mkdir(output, {recursive:true});
-const htmlPath = path.join(root, 'dist/CardRPG-Astra.html');
+const htmlPath = path.join(root, 'dist/DREAMWEAVER.html');
 const html = await fs.readFile(htmlPath, 'utf8');
 assert.equal(/<script[^>]+src=|<link[^>]+stylesheet|fonts\.googleapis/.test(html), false, 'The distribution must not depend on external JS/CSS/fonts');
 const original = await fs.readFile(path.join(root, 'game/index.html'), 'utf8');

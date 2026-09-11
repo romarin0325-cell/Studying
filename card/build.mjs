@@ -16,7 +16,7 @@ function between(start, end) {
 }
 const scripts = [...source.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 if (scripts.length !== 2 || !scripts[1][1].includes('const RPG =')) {
-  throw new Error('Card controller contract changed; review the ASTRA builder.');
+  throw new Error('Card controller contract changed; review the DREAMWEAVER builder.');
 }
 const dependencies = ['data.js', 'vocab_data.js', 'collocation_data.js', 'grammar_data.js',
   'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'battle_runtime.js',
@@ -41,5 +41,6 @@ let html = await read('src/shell.html');
 for (const [key, value] of Object.entries(parts)) html = html.replace(`{{${key}}}`, () => value);
 if (/\{\{[A-Z_]+\}\}/.test(html)) throw new Error('Unresolved build placeholder');
 await fs.mkdir(path.join(root, 'dist'), { recursive: true });
-await fs.writeFile(path.join(root, 'dist/CardRPG-Astra.html'), html);
-console.log(`ASTRA: ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB. Open dist/CardRPG-Astra.html; portraits/audio stay beside the HTML.`);
+html = html.replace(/[ \t]+$/gm, '');
+await fs.writeFile(path.join(root, 'dist/DREAMWEAVER.html'), html);
+console.log(`DREAMWEAVER: ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB. Open dist/DREAMWEAVER.html; portraits/audio stay beside the HTML.`);
