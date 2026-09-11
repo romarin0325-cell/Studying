@@ -80,6 +80,12 @@ try {
   await page.waitForFunction(() => window.astralDiagnostics.phase === 'wave'); assert.equal((await page.evaluate(() => window.astralDiagnostics)).storageAvailable, false);
   report.checks.push('Storage-blocked file environments remain playable');
   await blocked.close();
+  const legacy = await browser.newContext({ viewport: { width: 390, height: 844 }, offline: true });
+  await legacy.addInitScript(() => localStorage.setItem('astral-bloom-v1', JSON.stringify({ settings: { mode: 'relaxed' } })));
+  const legacyPage = await legacy.newPage();legacyPage.on('pageerror', e => report.errors.push(e.message));await legacyPage.goto(pathToFileURL(file).href);
+  await legacyPage.waitForFunction(() => window.astralDiagnostics?.ready);assert.equal((await legacyPage.evaluate(() => window.astralDiagnostics.difficulty)), 'easy');
+  report.checks.push('Legacy relaxed difficulty migrates to easy in the offline app');
+  await legacy.close();
   assert.deepEqual(report.errors, [], 'No uncaught browser errors'); assert.deepEqual(report.requests, [], 'No network requests in the offline build');
 } finally {
   await fs.writeFile(path.join(root, 'artifacts', 'verification.json'), JSON.stringify(report, null, 2));

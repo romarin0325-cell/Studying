@@ -7,7 +7,7 @@ export const ARTIFACTS = [
   { id: 'cloak', name: '유령망토', icon: '☾', rarity: 'normal', text: '피격 후 3초 무적' },
   { id: 'crown', name: '로열크라운', icon: '♕', rarity: 'normal', text: '봄 공격력 +30%', bomb: .30 },
   { id: 'shield', name: '수호방패', icon: '◈', rarity: 'normal', text: '피격 시 생명 대신 봄을 먼저 소모' },
-  { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 봄 사용 · 생명 2 이상' },
+  { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 발동 · 스테이지당 3회' },
   { id: 'pendant', name: '검은펜던트', icon: '♦', rarity: 'rare', text: '파워 최대일 때 공격력 +20%' },
   { id: 'chocolate', name: '드림초콜릿', icon: '▦', rarity: 'rare', text: '보스에게 공격력 +50%' },
   { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명 1일 때 공격력 +40%' },
@@ -20,6 +20,7 @@ export const DIFFICULTIES = [
   { id: 'normal', name: '중간', hp: 1, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .25 },
   { id: 'hard', name: '어려움', hp: 1.3, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .45 }
 ];
+export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
 export function dailyHeroes(date = new Date()) { const day = date.getDay(); return day === 0 ? [0,1,2,3,4,5] : day <= 2 ? [0,1] : day <= 4 ? [2,3] : [4,5]; }
