@@ -3265,7 +3265,7 @@ const BONUS_CARDS = [
     {
         id: 'galaxy_whale', name: '은하고래', grade: 'legend', element: 'light', role: 'dealer',
         stats: { hp: 490, atk: 105, matk: 145, def: 65, mdef: 65 },
-        trait: { type: 'syn_light_3_matk_mdef', desc: '덱에 빛 3장 이상 시 마법공격력/마법방어력 50% 증가' },
+        trait: { type: 'syn_light_3_matk_mdef', val: 50, desc: '덱에 빛 3장 이상 시 마법공격력/마법방어력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '슈퍼노바펄스', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 모두 소모, 소모한 개수당 2.0배율 추가', effects: [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2.0 }] },
@@ -21204,12 +21204,6 @@ const Logic = {
             logFn('[신기] 신기 포세이돈: 스턴 중인 적에게 대미지 2.5배!');
         }
 
-        // Artifact: ice_break — double damage to stunned targets
-        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
-            mult *= 2.0;
-            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
-        }
-
         // Cinderella uses the target's pre-hit stack snapshot for penetration.
         if (t && t.type === 'ignore_def_mdef_by_stack') {
             let ignoreRate = 0;
@@ -21307,6 +21301,12 @@ const Logic = {
             logFn(`[꿈의형태] 필드 버프 ${ctx.baseFieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
         }
 
+        // Artifact: ice_break — double the fused skill multiplier, including Dream Form adds.
+        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
+            mult *= 2.0;
+            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
+        }
+
         if (isCrit) val *= critDmg;
 
         // Artifact: death_roulette — double all skill damage
@@ -21342,21 +21342,21 @@ const Logic = {
      * apply: function(p, t) — apply stat boosts to player stats object p
      */
     _SYNERGY_TABLE: {
-        'syn_nature_3_all':        { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.matk *= 1.3; p.def *= 1.3; p.mdef *= 1.3; } },
-        'syn_nature_3_golem':      { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.atk *= 1.3; p.def *= 1.3; } },
+        'syn_nature_3_all':        { cond: d => d.countElement('nature') >= 3,                    apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; p.def *= m; p.mdef *= m; } },
+        'syn_nature_3_golem':      { cond: d => d.countElement('nature') >= 3,                    apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.def *= m; } },
         'syn_water_3_ice_age':     { cond: d => d.countElement('water') >= 3,                     apply: () => {} },
-        'syn_fire_3_crit':         { cond: d => d.countElement('fire') >= 3,                      apply: p => { p.baseCrit += 30; } },
-        'syn_dark_3_matk':         { cond: d => d.countElement('dark') >= 3,                      apply: p => { p.matk *= 1.5; } },
+        'syn_fire_3_crit':         { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.baseCrit += t.val; } },
+        'syn_dark_3_matk':         { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { p.matk *= 1 + t.val / 100; } },
         // Legacy ID says "atk", but the established card description and behavior increase MATK.
         'syn_light_fire_atk':      { cond: d => d.hasElement('light') && d.hasElement('fire'),    apply: (p, t) => { p.matk *= (1 + t.val / 100); } },
-        'syn_light_dark_matk_mdef':{ cond: d => d.hasElement('light') && d.hasElement('dark'),    apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
-        'syn_light_3_matk_mdef':   { cond: d => d.countElement('light') >= 3,                     apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
+        'syn_light_dark_matk_mdef':{ cond: d => d.hasElement('light') && d.hasElement('dark'),    apply: (p, t) => { const m = 1 + t.val / 100; p.matk *= m; p.mdef *= m; } },
+        'syn_light_3_matk_mdef':   { cond: d => d.countElement('light') >= 3,                     apply: (p, t) => { const m = 1 + t.val / 100; p.matk *= m; p.mdef *= m; } },
         'syn_water_nature':        { cond: d => d.hasElement('water') && d.hasElement('nature'),   apply: () => {} },
-        'syn_nature_3_matk':       { cond: d => d.countElement('nature') >= 3,                    apply: p => { p.matk *= 1.5; } },
-        'syn_night_rabbit':        { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']),   apply: p => { p.matk *= 1.5; p.mdef *= 1.5; } },
-        'syn_snow_rabbit':         { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),    apply: p => { p.atk *= 1.5; p.def *= 1.5; } },
-        'syn_silver_rabbit':       { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
-        'syn_water_3_atk_matk':    { cond: d => d.countElement('water') >= 3,                     apply: p => { p.atk *= 1.5; p.matk *= 1.5; } },
+        'syn_nature_3_matk':       { cond: d => d.countElement('nature') >= 3,                    apply: (p, t) => { p.matk *= 1 + t.val / 100; } },
+        'syn_night_rabbit':        { cond: d => d.hasAnyCard(['night_rabbit', 'silver_rabbit']),   apply: (p, t) => { const m = 1 + t.val / 100; p.matk *= m; p.mdef *= m; } },
+        'syn_snow_rabbit':         { cond: d => d.hasAnyCard(['snow_rabbit', 'silver_rabbit']),    apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.def *= m; } },
+        'syn_silver_rabbit':       { cond: d => d.hasAnyCard(['snow_rabbit', 'night_rabbit']),     apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; } },
+        'syn_water_3_atk_matk':    { cond: d => d.countElement('water') >= 3,                     apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; } },
         'syn_fire_3_crit_burn':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.baseCrit += t.val; } },
         'syn_fire_3_atk_boost':    { cond: d => d.countElement('fire') >= 3,                      apply: (p, t) => { p.atk *= (1 + t.val / 100); } },
         'syn_dark_3_all_stats':    { cond: d => d.countElement('dark') >= 3,                      apply: (p, t) => { const m = 1 + t.val / 100; p.atk *= m; p.matk *= m; p.def *= m; p.mdef *= m; } },
@@ -22226,6 +22226,7 @@ const BattleRuntime = {
         }
 
         rpg.showBattleScreen();
+        rpg.clearBattleLog();
         rpg.battle.enemy = buildBattleEnemy(rpg);
         rpg.battle.activeTraits = [];
 
@@ -22282,7 +22283,6 @@ const BattleRuntime = {
             rpg.battle.currentPlayerIdx++;
         }
 
-        rpg.clearBattleLog();
         rpg.log(`전투 개시! 적: ${rpg.battle.enemy.name}`);
         if (rpg.battle.activeTraits.includes('instant_delayed_skills')) {
             rpg.log('[특성] 시간의마술사: 덱의 지연 스킬이 즉시 발동합니다!');
@@ -28159,7 +28159,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'artifact_chaos', name: '아티팩트카오스', desc: '카오스 기반 + 매 스테이지 랜덤 아티팩트 4개 추가 획득. 셔플 시 아티팩트도 초기화. 크게 강화된 적 출현.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
                     { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀 구성.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀 구성.\n(성공조건: 24 스테이지)' },
                     { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개). 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' },
                     { id: 'artifact_reserve', name: '아티팩트리저브', desc: '아티팩트 세트 선택 4회 반복으로 12개 풀 구성. 각 아티팩트는 2회 사용 가능, 전투 전 최대 4개 수동 활성화. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'perfect_plan', name: '퍼펙트플랜', desc: '해금된 전설/에픽/레어/노말에서 각 10장씩 골라 40장 전용 풀을 만든 뒤 오리진과 같이 진행. 강화된 적 출현(1.1배).\n(성공조건: 없음 / 무한)' }
@@ -30473,8 +30473,10 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     btn.onclick = () => {
                         this.state.artifacts.push(art.id);
                         document.getElementById('modal-artifact-select').classList.remove('active');
-                        this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
-                        this.saveGame();
+                        const saved = this.saveGame(false);
+                        if (saved === true) {
+                            this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
+                        }
                         this.toMenu();
                     };
                     list.appendChild(btn);
