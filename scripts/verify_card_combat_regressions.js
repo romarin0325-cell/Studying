@@ -730,6 +730,18 @@ function run() {
       true,
       'Dream Form must be able to promote a non-critical roll to a critical hit'
     );
+    const dreamAttacker = makeUnit({
+      atk: 100, matk: 100, def: 0, mdef: 0, baseCrit: -100, proto: getCard('trans_lumi')
+    });
+    const stunTarget = makeUnit({ def: 0, mdef: 0, buffs: { stun: 1 } });
+    const fusedTarget = makeUnit({ def: 0, mdef: 0 });
+    const iceDream = Logic.calculateDamage(
+      dreamAttacker, stunTarget, dreamForm, [{ name: 'sun_bless', turns: 1 }], [], quiet, 'default', [], 1, ['ice_break']
+    ).dmg;
+    const rouletteDream = Logic.calculateDamage(
+      dreamAttacker, fusedTarget, dreamForm, [{ name: 'sun_bless', turns: 1 }], [], quiet, 'default', [], 1, ['death_roulette']
+    ).dmg;
+    assert.strictEqual(iceDream, rouletteDream, '2x artifacts must multiply after Dream Form fusion');
     Math.random = criticalRandom;
 
     assert.strictEqual(isBehemothTraitType('behemoth_trait'), true);

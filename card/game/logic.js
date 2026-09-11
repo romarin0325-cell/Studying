@@ -2330,12 +2330,6 @@ const Logic = {
             logFn('[신기] 신기 포세이돈: 스턴 중인 적에게 대미지 2.5배!');
         }
 
-        // Artifact: ice_break — double damage to stunned targets
-        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
-            mult *= 2.0;
-            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
-        }
-
         // Cinderella uses the target's pre-hit stack snapshot for penetration.
         if (t && t.type === 'ignore_def_mdef_by_stack') {
             let ignoreRate = 0;
@@ -2431,6 +2425,12 @@ const Logic = {
 
             // Consumption runs later in SideEffects; this block only reports the fused fields.
             logFn(`[꿈의형태] 필드 버프 ${ctx.baseFieldBuffs.length}개 융합 계산! (${logMsg.join(', ')})`);
+        }
+
+        // Artifact: ice_break — double the fused skill multiplier, including Dream Form adds.
+        if (!artifacts.includes('divine_poseidon') && artifacts.includes('ice_break') && ctx.baseTargetBuffs['stun']) {
+            mult *= 2.0;
+            logFn(`[아티팩트] 아이스브레이크: 스턴 중인 적에게 대미지 2배!`);
         }
 
         if (isCrit) val *= critDmg;
