@@ -162,7 +162,7 @@ const Astra = {
       if (button.dataset.nav === kind) button.setAttribute('aria-current','page');
       else button.removeAttribute('aria-current');
     });
-    const names = { title:'하늘의 기록실', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
+    const names = { title:'꿈을 엮는 기록실', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
     const status = document.querySelector('.header-status');
     if (status) status.textContent = names[kind] || '새로운 조합을 선택하세요';
     if (kind === 'title') {
@@ -307,7 +307,7 @@ const Astra = {
       const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)], {type:'application/json'}));
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Astra-progress-${new Date().toISOString().slice(0,10)}.json`;
+      link.download = `Dreamweaver-progress-${new Date().toISOString().slice(0,10)}.json`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       this.toast('저장된 기록을 내보냈습니다. 진행 중인 여정은 게임 메뉴에서 먼저 저장하세요.');

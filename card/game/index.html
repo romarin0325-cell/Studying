@@ -1662,7 +1662,7 @@
 
     <div id="modal-music-player" class="modal" role="dialog" aria-modal="true" aria-label="음악 재생">
         <div class="modal-content music-player-panel">
-            <div class="music-player-kicker">CARD RPG MUSIC</div>
+            <div class="music-player-kicker">DREAM SESSIONS <span>꿈결의 선율</span></div>
             <div class="music-player-disc" aria-hidden="true"><span>♪</span></div>
             <strong id="music-track-title" class="music-track-title">おかえり、兄ちゃん</strong>
             <span id="music-track-meta" class="music-track-meta">Card RPG</span>
@@ -3551,6 +3551,7 @@
                 const modal = document.getElementById('modal-gacha');
                 const content = document.getElementById('gacha-result');
                 document.getElementById('gacha-title').innerText = "초월 소환 성공!";
+                content.dataset.grade = pick.grade;
                 content.innerHTML = `<div class="card-item transcendence" style="border:2px solid #ffd700; color:#ffd700; font-size:1.2rem; font-weight:bold; margin-bottom:10px; animation: glow-gold 2s infinite;">[초월] ${pick.name}</div>`;
                 content.appendChild(ImageAssets.createPortrait(pick, {
                     wrapperStyle: 'width:120px; height:160px; margin:0 auto; border-color:#ffd700;'
@@ -3928,6 +3929,7 @@
                 let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
                 if (pick.grade === 'transcendence') msgTitle = title;
                 document.getElementById('gacha-title').innerText = msgTitle;
+                content.dataset.grade = pick.grade;
                 content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>`;
                 content.appendChild(ImageAssets.createPortrait(pick, {
                     wrapperStyle: 'width:120px; height:160px; margin:0 auto;'

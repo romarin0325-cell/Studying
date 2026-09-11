@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "verify": "node --check src/astra.js && node build.mjs && node tests/verify.mjs && node tests/flows.mjs",
+    "verify": "node --check src/astra.js && node build.mjs && node tests/verify.mjs && node tests/flows.mjs && node tests/dreamweaver.mjs",
     "serve": "node serve.mjs"
   }
 }

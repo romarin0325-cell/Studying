@@ -233,5 +233,18 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
         artist: 'Card RPG',
         album: 'Card RPG Music',
         src: 'ルミ・ノエル.mp3'
-    })
+    }),
+    Object.freeze({ id: '隠すな、最後まで.mp3', title: '隠すな、最後まで', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '隠すな、最後まで.mp3' }),
+    Object.freeze({ id: '泡より先に.mp3', title: '泡より先に', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '泡より先に.mp3' }),
+    Object.freeze({ id: '風だけ知ってる.mp3', title: '風だけ知ってる', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '風だけ知ってる.mp3' }),
+    Object.freeze({ id: '何回目、まだ.mp3', title: '何回目、まだ', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '何回目、まだ.mp3' }),
+    Object.freeze({ id: '放課後、心臓はメロンソーダ.mp3', title: '放課後、心臓はメロンソーダ', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '放課後、心臓はメロンソーダ.mp3' }),
+    Object.freeze({ id: '早口で好き.mp3', title: '早口で好き', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '早口で好き.mp3' }),
+    Object.freeze({ id: 'ミュート、してある.mp3', title: 'ミュート、してある', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: 'ミュート、してある.mp3' }),
+    Object.freeze({ id: 'さきにいくもんみないでよ.mp3', title: 'さきにいくもんみないでよ', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: 'さきにいくもんみないでよ.mp3' }),
+    Object.freeze({ id: '生クリーム、まだ泡立ててる.mp3', title: '生クリーム、まだ泡立ててる', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '生クリーム、まだ泡立ててる.mp3' }),
+    Object.freeze({ id: '終電には間に合った.mp3', title: '終電には間に合った', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: '終電には間に合った.mp3' }),
+    Object.freeze({ id: 'おすわりは犬のほう.mp3', title: 'おすわりは犬のほう', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: 'おすわりは犬のほう.mp3' }),
+    Object.freeze({ id: 'ホットミルク、何杯目？.mp3', title: 'ホットミルク、何杯目？', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: 'ホットミルク、何杯目？.mp3' }),
+    Object.freeze({ id: 'ドライヤー、まだ.mp3', title: 'ドライヤー、まだ', artist: 'DREAMWEAVER', album: 'Dream Sessions', src: 'ドライヤー、まだ.mp3' })
 ]);

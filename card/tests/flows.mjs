@@ -9,7 +9,7 @@ const errors = [];
 const page = await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
 page.on('pageerror',error => errors.push(error.message));
 const boot = async () => {
-  await page.goto(pathToFileURL(path.join(root,'dist/CardRPG-Astra.html')).href);
+  await page.goto(pathToFileURL(path.join(root,'dist/DREAMWEAVER.html')).href);
   await page.waitForFunction(() => Astra.ready);
   await page.evaluate(() => { localStorage.clear(); RPG.loadGlobalData(); });
 };
@@ -150,7 +150,7 @@ try {
   const mediaURL=pathToFileURL(mediaPath).href;
   await dismiss();
   await page.evaluate(url => {
-    MusicPlayer.tracks=[{id:'fixture-a',title:'재생 검증 A',artist:'ASTRA',src:url},{id:'fixture-b',title:'재생 검증 B',artist:'ASTRA',src:url}];
+    MusicPlayer.tracks=[{id:'fixture-a',title:'재생 검증 A',artist:'DREAMWEAVER',src:url},{id:'fixture-b',title:'재생 검증 B',artist:'DREAMWEAVER',src:url}];
     MusicPlayer.currentIndex=0;
     MusicPlayer.loadTrack(0);
     MusicPlayer.open();

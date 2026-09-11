@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0d2235">
-  <title>ASTRA — Card RPG</title>
+  <title>DREAMWEAVER — Card RPG</title>
   {{STYLES}}
 </head>
 <body class="astra" data-screen="title">
@@ -22,8 +22,8 @@
   </defs></svg>
   <div class="world-backdrop" aria-hidden="true"></div>
   <header class="astra-header">
-    <a class="brand" href="#" onclick="Astra.home(); return false" aria-label="ASTRA 홈"><svg><use href="#i-star"/></svg><span>ASTRA<small>CARD RPG</small></span></a>
-    <div class="header header-status" aria-live="polite">하늘의 기록실</div>
+    <a class="brand" href="#" onclick="Astra.home(); return false" aria-label="DREAMWEAVER 홈"><svg><use href="#i-star"/></svg><span>DREAMWEAVER<small>CARD RPG</small></span></a>
+    <div class="header header-status" aria-live="polite">꿈을 엮는 기록실</div>
     <div class="header-tools">
       <button class="icon-button" onclick="MusicPlayer.open()" aria-label="음악 재생"><svg><use href="#i-music"/></svg></button>
       <button class="icon-button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
@@ -31,25 +31,25 @@
   </header>
   <main class="container" id="main-content">
     <section id="screen-title" class="screen active" aria-label="타이틀">
-      <div class="title-coordinate eyebrow">THE CELESTIAL ARCHIVE <span>01 /</span></div>
+      <div class="title-coordinate eyebrow">A LITTLE MAGIC, A NEW DREAM <span>01 /</span></div>
       <div class="title-copy">
-        <p class="eyebrow">LEARN. COLLECT. ASCEND.</p>
-        <h1>ASTRA<span>하늘의 기록실</span></h1>
-        <p class="title-description">한 장의 카드, 하나의 가능성.<br>배움이 모여 새로운 세계를 연다.</p>
+        <p class="eyebrow">WORDS BECOME WORLDS.</p>
+        <h1>DREAM<span class="title-word">WEAVER</span><span>꿈을 엮는 기록실</span></h1>
+        <p class="title-description">단어는 주문이 되고, 카드는 동료가 된다.<br>작은 배움으로 엮어가는 꿈속의 여정.</p>
         <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
         <div class="title-screen-actions">
           <button id="btn-start-load" class="primary" onclick="RPG.startGame('load')" disabled><span>여정 이어가기<small>CONTINUE</small></span><svg><use href="#i-arrow"/></svg></button>
           <button id="btn-start-new" class="secondary" onclick="RPG.startGame('new')" disabled>새로운 여정 <span>NEW JOURNEY</span></button>
         </div>
       </div>
-      <div class="title-seal" aria-hidden="true"><svg><use href="#i-star"/></svg><span>AD ASTRA</span></div>
+      <div class="title-seal" aria-hidden="true"><svg><use href="#i-star"/></svg><span>DREAM MAGIC</span></div>
       <div class="title-utilities">
         <button id="btn-fortune-cookie" disabled><span class="utility-number">01</span><span>포춘쿠키<small>오늘의 리스닝</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-question" onclick="RPG.openLumiQuestion()" disabled><span class="utility-number">02</span><span>루미에게 질문<small>함께 풀어가는 영어</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-mission" onclick="RPG.openMissionHub()" disabled><span class="utility-number">03</span><span>미션 보드<small>이번 주의 작은 목표</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-music" onclick="MusicPlayer.open()" disabled><span class="utility-number">04</span><span>음악 감상<small>여정을 채우는 선율</small></span><svg><use href="#i-arrow"/></svg></button>
       </div>
-      <footer class="title-footer"><span>ASTRA EDITION</span><button onclick="Astra.settings()">저장 데이터 · 로컬 에셋</button><span>ENGLISH × CARD STRATEGY</span></footer>
+      <footer class="title-footer"><span>WOVEN FROM DREAMS</span><button onclick="Astra.settings()">저장 데이터 · 로컬 에셋</button><span>ENGLISH × CARD STRATEGY</span></footer>
     </section>
     <section id="screen-menu" class="screen" aria-label="로비">
       <div class="page-heading"><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>여정의 시작</h1></div><div class="ticket-counter"><small>소환 티켓</small><span id="ui-tickets">0</span><svg><use href="#i-star"/></svg></div></div>
