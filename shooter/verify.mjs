@@ -14,6 +14,7 @@ try {
   for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 844, height: 390 }]) {
     const context = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true, offline: true });
     const page = await context.newPage();
+    await page.clock.install({time:new Date(2026,8,13,12)});
     page.on('pageerror', e => report.errors.push(e.message));
     page.on('request', req => { if (/^https?:/.test(req.url())) report.requests.push(req.url()); });
     await page.goto(pathToFileURL(file).href);
@@ -31,12 +32,16 @@ try {
     await page.screenshot({ path: path.join(root, 'artifacts', `sortie-${viewport.width}.png`) });
     report.viewports.push({ viewport, geometry });
     if (viewport.width !== 390) { await context.close(); continue; }
-    for (let h = 0; h < 4; h++) {
+    for (let h = 0; h < 6; h++) {
       await page.locator(`[data-hero="${h}"]`).click();
-      assert.equal(await page.locator('.hero-large').getAttribute('alt'), ['루미', '루나', '지크', '자스민'][h] + '의 SD 일러스트');
+      assert.equal(await page.locator('.hero-large').getAttribute('alt'), ['루미', '루나', '지크', '자스민','눈토끼','신데렐라'][h] + '의 SD 일러스트');
       for (let w = 0; w < 2; w++) { await page.locator(`[data-weapon="${w}"]`).click(); assert.equal(await page.locator(`[data-weapon="${w}"]`).getAttribute('aria-pressed'), 'true'); }
     }
-    report.checks.push('All four heroes and eight weapon choices work');
+    report.checks.push('All six heroes and twelve weapon choices work on Sunday');
+    await page.locator('#library').click();await page.locator('#library-search').fill('amenities');assert.ok(await page.locator('#library-list').textContent());
+    await page.locator('[data-tab="grammar"]').click();await page.locator('[data-lecture="0"]').click();assert.ok((await page.locator('.lecture-copy').textContent()).length>100);await page.locator('#lecture-back').click();await page.locator('#library-close').click();
+    await page.locator('#equipment').click();assert.equal(await page.locator('.artifact.selected').count(),3);await page.locator('[data-artifact="spellbook"]').click();assert.equal(await page.locator('.artifact.selected').count(),2);await page.locator('[data-artifact="spellbook"]').click();await page.locator('#equipment-done').click();
+    report.checks.push('Library search, grammar lecture and three-slot artifact selection');
     await page.locator('[data-hero="0"]').click();
     await page.locator('#launch').click();
     await page.locator('#help-done').click();
@@ -63,9 +68,9 @@ try {
     assert.ok(report.frameProbe.stats.shots > 10 && report.frameProbe.stats.damage > 0, 'Live combat fires and deals damage');
     await page.screenshot({ path: path.join(root, 'artifacts', 'battle-mobile.png') });
     await page.locator('#pause').click(); await page.locator('#return').click();
-    await page.locator('[data-stage="3"]').click(); await page.locator('#launch').click();
+    await page.locator('#dungeons').click();await page.locator('[data-dungeon="3"]').click();await page.locator('[data-difficulty="hard"]').click();await page.locator('#dungeon-done').click(); await page.locator('#launch').click();
     await page.waitForFunction(() => window.astralDiagnostics.stage === 3 && window.astralDiagnostics.phase === 'wave');
-    report.checks.push('Fourth-stage practice can launch offline');
+    report.checks.push('Fourth dungeon hard mode can launch offline');
     await context.close();
   }
   const blocked = await browser.newContext({ viewport: { width: 390, height: 844 }, offline: true });

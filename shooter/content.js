@@ -17,6 +17,16 @@ export const HEROES = [
   ] }
 ];
 
+HEROES.push(
+  { id: 'snow', name: '눈토끼', title: '겨울을 깨우는 설원 마법사', en: 'SNOW RABBIT', gender: 'male', color: '#a5eaff', shadow: '#467dad', sigil: '❄', quote: '차가운 바람도, 우리 편으로 만들면 돼.', description: '얼음 결정으로 적을 늦추고 눈꽃을 튕기는 남성 마법사.', bomb: '프로즌 월드', bombInfo: '5초간 적과 적탄을 느리게 하고 눈보라로 공격해요.', weapons: [
+    { id: 'frost', name: '프로즌 샤드', tag: '빙결 · 제어형', description: '쌍얼음창이 적을 관통하고 잠시 느리게 해요.', power: 4, reach: 4 },
+    { id: 'snowflake', name: '스노우 바운드', tag: '도약 · 추적형', description: '눈꽃이 명중한 적에서 다른 적에게 최대 세 번 튕겨요.', power: 3, reach: 5 }
+  ] },
+  { id: 'cinderella', name: '신데렐라', title: '자정을 거스르는 유리 마법사', en: 'CINDERELLA', gender: 'male', color: '#ffc4e3', shadow: '#a35196', sigil: '♢', quote: '열두 시가 지나도, 우리의 마법은 계속돼.', description: '크리스탈 킥과 미드나잇 스펠을 다루는 남성 마법사.', bomb: '미드나잇 · 미라클', bombInfo: '유리시계가 탄을 지우고, 5초간 유리 결정이 적에게 연속으로 폭발해요.', weapons: [
+    { id: 'glass', name: '크리스탈 킥', tag: '유리창 · 관통형', description: '엇갈리는 유리구두 궤적이 적을 꿰뚫어요.', power: 5, reach: 3 },
+    { id: 'midnight', name: '미드나잇 스펠', tag: '표식 · 폭발형', description: '유도 마법이 세 번 명중하면 표식이 주변까지 폭발해요.', power: 4, reach: 4 }
+  ] }
+);
 export const STAGES = [
   { id: 0, name: '푸른 시간의 유적', en: 'THE AZURE RUINS', boss: '인조마신', subtitle: '별을 모방한 마음', color: '#7de4f5', dark: '#071d34', pattern: ['프리즘 세례', '청금석의 궤도', '불완전한 태양'], intro: '나는… 누구의 소원을 위해 태어났지?', outro: '따뜻해… 이게 진짜 별빛이구나.', duration: 42, hp: 3800 },
   { id: 1, name: '영원한 장미 정원', en: 'THE ETERNAL GARDEN', boss: '사랑의 여신 아이리스', subtitle: '놓아주지 못한 사랑', color: '#ffb4da', dark: '#321831', pattern: ['장미의 약속', '포옹의 나선', '영원이라는 새장'], intro: '여기 머물러요. 영원히 사랑받을 수 있도록.', outro: '사랑은… 붙잡는 것만은 아니었군요.', duration: 46, hp: 5000 },
@@ -24,11 +34,17 @@ export const STAGES = [
   { id: 3, name: '검은 태양의 왕좌', en: 'THRONE OF THE ECLIPSE', boss: '마신 벨제뷔트', subtitle: '마지막 밤의 군주', color: '#ed9bff', dark: '#1b102c', pattern: ['심연의 칙령', '멸망의 왕관', '검은 태양'], intro: '별은 꺼진다. 너희의 작은 소원도.', outro: '이 작은 빛들이… 밤을 끝내는가.', duration: 54, hp: 8500 }
 ];
 
-export const UPGRADES = [
-  { id: 'power', icon: '✦', name: '별의 심장', text: '공격력 +18%', detail: '더 밝고, 더 강하게.' },
-  { id: 'life', icon: '♡', name: '새벽의 축복', text: '생명 2 회복', detail: '다음 하늘을 위한 작은 기도.' },
-  { id: 'bomb', icon: '❖', name: '기적의 씨앗', text: '봄 1개 추가 · 최대 5', detail: '가장 필요한 순간에 피어나요.' }
+export const DUNGEONS = [
+  { id: 0, name: '마도제국', en: 'ARCANE EMPIRE', sentinel: '프리즘 집행관', special: '폭주 마력핵', mechanic: '격파 후 경고 원이 터져요. 자폭 범위를 벗어나세요.', rooms: ['제국의 외곽', '프리즘 관문', '인조 신의 실험실'] },
+  { id: 1, name: '빛의 신전', en: 'TEMPLE OF LIGHT', sentinel: '장미의 성전기사', special: '분열의 세라핌', mechanic: '격파하면 작은 고속 적 세 마리로 분열해요.', rooms: ['장미의 회랑', '서약의 관문', '영원한 사랑의 제단'] },
+  { id: 2, name: '어둠의 신전', en: 'TEMPLE OF SHADOW', sentinel: '황혼의 심판관', special: '저주 시계', mechanic: '시계가 차기 전에 격파하세요. 늦으면 탄막이 터져요.', rooms: ['그림자 회랑', '저주의 관문', '일곱 빛의 파멸'] },
+  { id: 3, name: '혼돈의 틈', en: 'RIFT OF CHAOS', sentinel: '심연의 문지기', special: '혼돈의 배아', mechanic: '느린 대형탄이 다가오면 여러 탄으로 갈라져요.', rooms: ['균열의 가장자리', '심연의 관문', '검은 태양의 왕좌'] }
 ];
+STAGES.forEach((stage, i) => { stage.name = DUNGEONS[i].name; stage.en = DUNGEONS[i].en; });
+STAGES[0].pattern = ['아이스빔', '프리즘 세례', '파괴의 형태'];
+STAGES[1].pattern = ['홀리 레이', '소울 드레인', '더 홀리'];
+STAGES[2].boss = '저주의 여신 아이리스'; STAGES[2].pattern = ['프레임 샷', '금단의 회랑', '아포칼립스'];
+STAGES[3].pattern = ['다크니스', '멸망의 왕관', '제노사이드'];
 
 export const LIMITS = Object.freeze({ enemies: 40, bullets: 360, shots: 170, particles: 180, pickups: 55, effects: 40 });
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));

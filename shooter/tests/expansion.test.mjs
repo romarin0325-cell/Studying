@@ -1,0 +1,42 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Game} from '../engine.js';
+import {ARTIFACTS,DIFFICULTIES,createProfile,dailyHeroes,heroAvailable,unlockHero,weekKey,claimDungeon,drawArtifact,loadoutStats} from '../meta.js';
+import {LIBRARY,makeQuestion,recordAnswer} from '../learning.js';
+import {Renderer} from '../render.js';
+const tick=(g,t)=>{for(let i=0;i<t*60;i++)g.update(1/60);};
+function target(g,x=225,y=200){g.spawnEnemy(x,y,{hp:100000,r:30,speed:0,fire:999,image:0});return g.enemies.at(-1);}
+function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=400;return g;}
+test('chain stays silent without targets and reacquires without petal fallback',()=>{const g=combat({hero:3});tick(g,.5);assert.equal(g.shots.length,0);assert.equal(g.stats.shots,0);const e=target(g);tick(g,.06);assert.ok(e.hp<e.maxHp);assert.ok(g.effects.some(f=>f.type==='chain'));});
+test('laser focus resets across a gap and creates no stored beam trails',()=>{const g=combat({weapon:1}),e=target(g);tick(g,2);assert.ok(e.lock>1.8);assert.ok(!g.effects.some(f=>f.type==='beam'));g.move(400,400);tick(g,.5);g.move(225,400);tick(g,.16);assert.ok(e.lock<.3);tick(g,5);assert.equal(e.lock,3.25);});
+test('all fifteen artifacts have live effects and stacking respects three distinct slots',()=>{
+  assert.equal(ARTIFACTS.length,15);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,6);
+  const base=combat(),e=target(base);base.damage(e,100,0,0);
+  for(const [ids,expected] of [[['pendant'],120],[['dragon'],140],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
+  assert.deepEqual(loadoutStats(['frozen','dream','nail']).maxLife,5);assert.equal(loadoutStats(['nail']).maxLife,2);assert.equal(loadoutStats(['nail','crystal']).attack,1.3);
+  assert.equal(loadoutStats(['spellbook','crown','core']).bomb,2);assert.equal(loadoutStats(['holy']).bombs,4);assert.equal(loadoutStats(['holy']).maxBombs,6);
+  assert.equal(loadoutStats(['dream','dream']).maxLife,6);assert.equal(loadoutStats(['spellbook','crown','core','dream']).maxLife,4);
+  const cloak=combat({artifacts:['cloak']});cloak.player.invincible=0;cloak.hitPlayer();assert.equal(cloak.player.invincible,3);
+  const shield=combat({artifacts:['shield']});shield.player.invincible=0;shield.hitPlayer();assert.equal(shield.player.lives,3);assert.equal(shield.bombs,2);shield.bombs=0;shield.player.invincible=0;shield.hitPlayer();assert.equal(shield.player.lives,2);
+  const mask=combat({artifacts:['mask']});mask.bombs=0;assert.ok(mask.bomb());assert.equal(mask.player.lives,2);mask.bombTime=0;assert.ok(mask.bomb());assert.equal(mask.player.lives,1);assert.equal(mask.bomb(),false);
+  const fairy=combat({artifacts:['leaf'],hero:3});tick(fairy,.35);assert.ok(fairy.stats.shots>=2);assert.ok(fairy.shots.some(s=>s.homing));
+  const b=combat({artifacts:['spellbook','crown','core']});target(b);b.bomb();assert.equal(b.stats.damage,520);
+});
+test('all four special monsters produce their promised patterns',()=>{
+  const empire=combat();const e=target(empire);e.special=0;empire.damage(e,1e6,e.x,e.y);assert.equal(empire.bullets.length,0);tick(empire,.8);assert.ok(empire.bullets.length>=10);
+  const light=combat({stage:1}),s=target(light);s.special=1;light.damage(s,1e6,s.x,s.y);const offspring=light.enemies.filter(e=>e.offspring);assert.equal(offspring.length,3);assert.ok(offspring.every(e=>e.speed===170&&e.special===undefined));
+  const dark=combat({stage:2}),d=target(dark);d.special=2;d.countdown=.1;tick(dark,.2);assert.ok(dark.bullets.length>=20);
+  const chaos=combat({stage:3});chaos.enemyBullet(225,260,Math.PI/2,30,{r:17,split:true});tick(chaos,.02);assert.equal(chaos.bullets.length,9);assert.ok(chaos.bullets.every(b=>!b.split&&b.r===4));
+});
+test('revival is one attempt per whole dungeon and all heals respect loadout cap',()=>{const g=combat();g.player.lives=1;g.player.invincible=0;g.hitPlayer();assert.equal(g.phase,'defeat');assert.ok(g.revive(true));assert.equal(g.player.lives,2);g.player.lives=1;g.player.invincible=0;g.hitPlayer();assert.equal(g.revive(true),false);const low=combat({hero:3,artifacts:['nail']});low.bomb();low.collect('life');assert.equal(low.player.lives,2);const wrong=combat();wrong.player.lives=1;wrong.player.invincible=0;wrong.hitPlayer();assert.equal(wrong.revive(false),false);assert.equal(wrong.revive(true),false);});
+test('calendar rotation and off-day unlock expire at the next local day',()=>{const p=createProfile();for(let d=14;d<21;d++){const date=new Date(2026,8,d,12);assert.deepEqual(dailyHeroes(date),d<16?[0,1]:d<18?[2,3]:d<20?[4,5]:[0,1,2,3,4,5]);}const mon=new Date(2026,8,14,23,59);assert.equal(heroAvailable(p,4,mon),false);unlockHero(p,4,mon);assert.ok(heroAvailable(p,4,mon));assert.equal(heroAvailable(p,4,new Date(2026,8,15)),false);});
+test('four weekly claims maximum across difficulties, reset Monday, tickets retain odds',()=>{const p=createProfile(),sunday=new Date(2026,8,20,23,59),monday=new Date(2026,8,21);assert.notEqual(weekKey(sunday),weekKey(monday));for(let d=0;d<4;d++){assert.ok(claimDungeon(p,d,'hard',sunday));assert.equal(claimDungeon(p,d,'easy',sunday),null);}assert.equal(p.tickets.length,4);assert.ok(claimDungeon(p,0,'easy',monday));assert.equal(p.tickets.length,5);const reload=createProfile(JSON.parse(JSON.stringify(p)));assert.equal(claimDungeon(reload,0,'normal',monday),null);for(const mode of DIFFICULTIES){const profile=createProfile();profile.tickets=[{difficulty:mode.id,dungeon:0}];let calls=0;const result=drawArtifact(profile,()=>calls++===0?mode.rare-.001:0);assert.equal(result.artifact.rarity,'rare');assert.equal(profile.tickets.length,0);assert.equal(drawArtifact(profile),null);}});
+test('library uses actual Card content, grammar lecture references and persistent mistakes',()=>{assert.equal(LIBRARY.grammar.length,35);assert.ok(LIBRARY.vocab.length>300);assert.ok(LIBRARY.collocation.length>=130);for(const kind of ['vocab','collocation','grammar'])for(const n of [0,.13,.53,.999]){const q=makeQuestion(kind,()=>n);assert.ok(q.options.includes(q.answer));assert.equal(new Set(q.options).size,q.options.length);if(kind==='grammar')assert.ok(q.lecture.content.length>100);const p=createProfile();recordAnswer(p,q,'wrong');assert.equal(p.learning.mistakes.length,1);recordAnswer(p,q,q.answer);assert.equal(p.learning.mistakes.length,0);assert.equal(p.learning.total,2);assert.equal(p.learning.correct,1);}});
+test('each difficulty changes actual health and projectile speed, later dungeons scale',()=>{const hp=[],speed=[];for(const mode of DIFFICULTIES){const g=combat({mode:mode.id}),e=target(g);hp.push(e.maxHp);g.enemyBullet(0,0,0,100);speed.push(g.bullets[0].vx);}assert.ok(hp[0]<hp[1]&&hp[1]<hp[2]);assert.ok(speed[0]<speed[1]&&speed[1]<speed[2]);});
+test('renderer draws all laser layers at current player position on every frame',()=>{const g=combat({weapon:1}),rects=[];const renderer={c:{save(){},restore(){},fillRect(...v){rects.push(v);},drawImage(){}},glow(){return {};}};Renderer.prototype.drawLaser.call(renderer,g);assert.equal(rects[2][0],g.player.x-2.5);g.player.x=370;rects.length=0;Renderer.prototype.drawLaser.call(renderer,g);assert.equal(rects[2][0],367.5);assert.equal(rects.length,3);});
+test('frost slows movement, snowflakes jump, and midnight marks explode on three hits',()=>{
+ const frost=combat({hero:4});const e=target(frost,225,260);e.speed=100;tick(frost,.4);assert.ok(e.slow>0);const old=e.y;tick(frost,.3);assert.ok(e.y-old<30);
+ const snow=combat({hero:4,weapon:1});const a=target(snow,225,260),b=target(snow,320,250);tick(snow,2);assert.ok(a.hp<a.maxHp&&b.hp<b.maxHp);
+ const midnight=combat({hero:5,weapon:1});const t=target(midnight,225,260);tick(midnight,1.4);assert.ok(midnight.effects.some(e=>e.type==='burst'));assert.ok(t.hp<t.maxHp-150);
+});
+test('all imported grammar and collocation questions have valid options and lecture links',()=>{for(const q of LIBRARY.collocation){assert.ok(q.options.includes(q.answer),`collocation ${q.id}`);assert.ok(q.question&&q.expression&&q.meaning);}for(const l of LIBRARY.grammar)for(const q of l.quizzes){assert.ok(q.options.includes(q.answer));assert.ok(LIBRARY.grammar.some(t=>t.id===q.lecture_id));}});
