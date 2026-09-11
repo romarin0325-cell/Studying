@@ -6,9 +6,9 @@ const $ = id => document.getElementById(id);
 export class CampaignUI {
   constructor(options) { Object.assign(this,options); }
   relicImage(id){return `<img src="${this.art.urls.relics[ARTIFACTS.findIndex(a=>a.id===id)]}" alt="">`;}
-  chooseHero(index,done) {
+  chooseHero(index,done,failed=()=>this.closeModal()) {
     if(heroAvailable(this.profile,index)) return done();
-    this.quiz('grammar',`${HEROES[index].name}와 오늘의 계약`, correct=>{if(correct){unlockHero(this.profile,index);this.save();done();}else this.closeModal();});
+    this.quiz('grammar',`${HEROES[index].name}와 오늘의 계약`, correct=>{if(correct){unlockHero(this.profile,index);this.save();done();}else failed();});
   }
   quiz(kind,title,done,provided = null) {
     const q=provided || makeQuestion(kind), lecture=q.lecture || LIBRARY.grammar.find(l=>l.id===q.lectureId);

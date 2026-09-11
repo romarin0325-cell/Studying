@@ -1,5 +1,5 @@
 import { HEROES, STAGES, DUNGEONS, clamp } from './content.js';
-import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES } from './meta.js';
+import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES, normalizeDifficulty } from './meta.js';
 import { CampaignUI } from './menus.js';
 import { Game } from './engine.js';
 import { Renderer, loadArt } from './render.js';
@@ -15,7 +15,7 @@ const preferences = saved.settings && typeof saved.settings === 'object' ? saved
 const profile = createProfile(saved.campaign);
 let chosenHero = clamp(Number(preferences.hero) || 0, 0, 5), chosenWeapon = 0, chosenStage = 0;
 if(!heroAvailable(profile,chosenHero)) chosenHero=dailyHeroes()[0];
-let difficulty = DIFFICULTIES.some(d=>d.id===preferences.mode)?preferences.mode:'normal';
+let difficulty = normalizeDifficulty(preferences.mode);
 audio.enabled = preferences.sound !== false;
 let art, renderer, game = null, paused = false, raf = 0, last = 0, accumulator = 0, hudTimer = 0;
 let announcementTimer = 0, toastTimer = 0, pointer = null, keys = new Set(), frameSamples = [], startingStage = 0;
@@ -75,7 +75,7 @@ function showHelp(launchAfter) {
   $('help-done').onclick = () => { saved.tutorial = true; save(); closeModal(); if (launchAfter) startGame(); };
 }
 function startGame(stage = chosenStage) {
-  if(!heroAvailable(profile,chosenHero)) {menus.chooseHero(chosenHero,()=>startGame(stage));return;}
+  if(!heroAvailable(profile,chosenHero)) {menus.chooseHero(chosenHero,()=>startGame(stage),showSortie);return;}
   cancelAnimationFrame(raf); closeModal(); hideAnnouncement(); audio.start();
   screen.hidden = true; hud.hidden = false; world.style.display = 'block'; renderer.resize();
   paused = false; keys.clear(); pointer = null; accumulator = 0; last = 0; frameSamples = []; startingStage = stage;
@@ -110,7 +110,7 @@ function renderHud() {
   $('score').textContent = String(Math.round(game.score)).padStart(6, '0');
   const lives = `${game.player.lives}/${game.maxLife}`; if ($('lives').dataset.value !== lives) { $('lives').dataset.value = lives; $('lives').innerHTML = Array.from({ length: game.maxLife }, (_, i) => `<span class="${i < game.player.lives ? '' : 'empty'}"></span>`).join(''); $('lives').setAttribute('aria-label', `생명 ${lives}`); }
   const power = String(game.power); if ($('power').dataset.value !== power) { $('power').dataset.value = power; $('power').innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < game.power ? 'on' : ''}"></i>`).join(''); }
-  $('bomb-count').textContent = String(game.bombs); $('bomb').disabled = (game.bombs <= 0 && !(game.artifacts.has('mask')&&game.player.lives>1)) || !['wave', 'boss', 'warning'].includes(game.phase);
+  $('bomb-count').textContent = String(game.bombs); $('bomb').disabled = game.bombTime > 0 || (game.bombs <= 0 && !(game.artifacts.has('mask')&&game.player.lives>1&&game.maskUses<3)) || !['wave', 'boss', 'warning'].includes(game.phase);
   $('combo-hud').style.opacity = game.combo > 1 ? '1' : '0'; $('combo').textContent = `${game.combo} COMBO`; $('multiplier').textContent = `SCORE ×${game.multiplier}`;
   $('combo-meter').style.transform = `scaleX(${Math.max(0, game.comboTime / 3.6)})`;
   const bossVisible = ['warning', 'boss'].includes(game.phase) && game.boss;
@@ -201,7 +201,7 @@ window.addEventListener('resize', () => {
 // Read-only telemetry for diagnostics, including offline/browser regression checks.
 Object.defineProperty(globalThis, 'astralDiagnostics', { get() { return {
   ready: !!art, phase: game?.phase || 'sortie', hero: chosenHero, weapon: chosenWeapon, stage: game?.stageIndex ?? chosenStage,
-  paused, score: game?.score || 0, power: game?.power || 0, bombs: game?.bombs ?? 0, lives: game?.player.lives ?? 0, maxLife:game?.maxLife, room:game?.room, difficulty, reviveUsed:game?.reviveUsed,
+  paused, score: game?.score || 0, power: game?.power || 0, bombs: game?.bombs ?? 0, lives: game?.player.lives ?? 0, maxLife:game?.maxLife, room:game?.room, difficulty, reviveUsed:game?.reviveUsed, maskUses:game?.maskUses,
   player: game ? { x: game.player.x, y: game.player.y } : null, bullets: game?.bullets.length || 0,
   frames: frameSamples.length, fps: frameSamples.length ? Math.round(frameSamples.length / frameSamples.reduce((a, b) => a + b, 0)) : 0,
   quality: renderer?.quality, stats: game ? { ...game.stats } : null, storageAvailable, audioState: audio.context?.state || 'idle'

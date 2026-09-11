@@ -11,7 +11,7 @@ for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'sent
 // keeping the offline exporter portable in restricted Windows folders as well.
 const modules = [
   ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'LIMITS', 'clamp']],
-  ['meta.js', ['ARTIFACTS','DIFFICULTIES','dayKey','weekKey','dailyHeroes','createProfile','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
+  ['meta.js', ['ARTIFACTS','DIFFICULTIES','normalizeDifficulty','dayKey','weekKey','dailyHeroes','createProfile','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
   ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']], ['menus.js',['CampaignUI']],
   ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt']],
   ['audio.js', ['AudioDirector']], ['app.js', []]

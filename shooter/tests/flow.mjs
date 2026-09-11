@@ -48,6 +48,8 @@ try{
  await click('#launch');await page.clock.runFor(4000);await page.evaluate(()=>{const g=__flow.game;g.player.lives=1;g.player.invincible=0;g.hitPlayer();});await click('#revive-quiz');await answer();await page.clock.runFor(100);assert.equal((await state()).reviveUsed,true);
  await page.evaluate(()=>{const g=__flow.game;g.player.lives=1;g.player.invincible=0;g.hitPlayer();});assert.equal(await page.locator('#revive-quiz').count(),0);assert.ok(await page.locator('#again').isVisible());
  checks.push('Reload retains claim and mistakes; exactly one grammar revival');
- await click('#sortie-return');await click('#library');await click('[data-tab="mistakes"]');assert.ok((await page.locator('#library-list').textContent()).includes('1개'));await click('#practice');await answer();assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),0);
+ await page.clock.setSystemTime(new Date(2026,8,15,12));await click('#again');assert.ok(await page.locator('#quiz-now').isVisible());await answer(false);
+ assert.ok(await page.locator('#launch').isVisible());assert.equal((await state()).phase,'sortie');checks.push('Expired daily unlock and failed retry quiz return safely to sortie');
+ await click('#library');await click('[data-tab="mistakes"]');assert.ok((await page.locator('#library-list').textContent()).includes('2개'));await click('#practice');await answer();await click('#practice');await answer();assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),0);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,errors},null,2));await fs.writeFile(new URL('artifacts/flow.json',root),JSON.stringify({checks,errors},null,2));
 }finally{await browser.close();}

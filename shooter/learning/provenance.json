@@ -1,5 +1,5 @@
 {
-  "source": "Card learning data",
+  "source": "card/game (active Card source)",
   "files": [
     {
       "file": "vocab_data.js",

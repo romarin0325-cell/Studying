@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../engine.js';
-import {ARTIFACTS,DIFFICULTIES,createProfile,dailyHeroes,heroAvailable,unlockHero,weekKey,claimDungeon,drawArtifact,loadoutStats} from '../meta.js';
+import {ARTIFACTS,DIFFICULTIES,createProfile,dailyHeroes,heroAvailable,unlockHero,weekKey,claimDungeon,drawArtifact,loadoutStats,normalizeDifficulty} from '../meta.js';
 import {LIBRARY,makeQuestion,recordAnswer} from '../learning.js';
 import {Renderer} from '../render.js';
 const tick=(g,t)=>{for(let i=0;i<t*60;i++)g.update(1/60);};
@@ -18,9 +18,21 @@ test('all fifteen artifacts have live effects and stacking respects three distin
   assert.equal(loadoutStats(['dream','dream']).maxLife,6);assert.equal(loadoutStats(['spellbook','crown','core','dream']).maxLife,4);
   const cloak=combat({artifacts:['cloak']});cloak.player.invincible=0;cloak.hitPlayer();assert.equal(cloak.player.invincible,3);
   const shield=combat({artifacts:['shield']});shield.player.invincible=0;shield.hitPlayer();assert.equal(shield.player.lives,3);assert.equal(shield.bombs,2);shield.bombs=0;shield.player.invincible=0;shield.hitPlayer();assert.equal(shield.player.lives,2);
-  const mask=combat({artifacts:['mask']});mask.bombs=0;assert.ok(mask.bomb());assert.equal(mask.player.lives,2);mask.bombTime=0;assert.ok(mask.bomb());assert.equal(mask.player.lives,1);assert.equal(mask.bomb(),false);
   const fairy=combat({artifacts:['leaf'],hero:3});tick(fairy,.35);assert.ok(fairy.stats.shots>=2);assert.ok(fairy.shots.some(s=>s.homing));
   const b=combat({artifacts:['spellbook','crown','core']});target(b);b.bomb();assert.equal(b.stats.damage,520);
+});
+test('madness mask cannot refund Jasmine, overlap, or exceed three uses per stage',()=>{
+  const g=combat({hero:3,artifacts:['mask','frozen','dream']});g.bombs=0;target(g);
+  assert.equal(g.player.lives,6);assert.ok(g.bomb());assert.equal(g.player.lives,5);assert.equal(g.maskUses,1);
+  assert.equal(g.bomb(),false);assert.equal(g.player.lives,5);assert.equal(g.maskUses,1);
+  let successes=1;
+  for(let i=0;i<99;i++){g.bombTime=0;if(g.bomb())successes++;}
+  assert.equal(successes,3);assert.equal(g.stats.bombs,3);assert.equal(g.maskUses,3);assert.equal(g.player.lives,3);assert.equal(g.stats.damage,780);
+  g.startStage(0,1);g.phase='boss';g.bombs=0;assert.equal(g.maskUses,0);assert.ok(g.bomb());assert.equal(g.player.lives,2);
+});
+test('permanent and conditional attack artifacts add once while bomb bonuses stay separate',()=>{
+  const mixed=combat({artifacts:['nail','crystal','chocolate']}),boss=target(mixed);boss.miniboss=true;mixed.damage(boss,100,0,0);assert.equal(mixed.stats.damage,180);
+  const bomb=combat({artifacts:['nail','chocolate','spellbook']}),bombBoss=target(bomb);bombBoss.miniboss=true;bomb.bomb();assert.equal(bomb.stats.damage,546);
 });
 test('all four special monsters produce their promised patterns',()=>{
   const empire=combat();const e=target(empire);e.special=0;empire.damage(e,1e6,e.x,e.y);assert.equal(empire.bullets.length,0);tick(empire,.8);assert.ok(empire.bullets.length>=10);
@@ -30,6 +42,7 @@ test('all four special monsters produce their promised patterns',()=>{
 });
 test('revival is one attempt per whole dungeon and all heals respect loadout cap',()=>{const g=combat();g.player.lives=1;g.player.invincible=0;g.hitPlayer();assert.equal(g.phase,'defeat');assert.ok(g.revive(true));assert.equal(g.player.lives,2);g.player.lives=1;g.player.invincible=0;g.hitPlayer();assert.equal(g.revive(true),false);const low=combat({hero:3,artifacts:['nail']});low.bomb();low.collect('life');assert.equal(low.player.lives,2);const wrong=combat();wrong.player.lives=1;wrong.player.invincible=0;wrong.hitPlayer();assert.equal(wrong.revive(false),false);assert.equal(wrong.revive(true),false);});
 test('calendar rotation and off-day unlock expire at the next local day',()=>{const p=createProfile();for(let d=14;d<21;d++){const date=new Date(2026,8,d,12);assert.deepEqual(dailyHeroes(date),d<16?[0,1]:d<18?[2,3]:d<20?[4,5]:[0,1,2,3,4,5]);}const mon=new Date(2026,8,14,23,59);assert.equal(heroAvailable(p,4,mon),false);unlockHero(p,4,mon);assert.ok(heroAvailable(p,4,mon));assert.equal(heroAvailable(p,4,new Date(2026,8,15)),false);});
+test('legacy relaxed difficulty migrates to easy before invalid values fall back',()=>{assert.equal(normalizeDifficulty('relaxed'),'easy');assert.equal(normalizeDifficulty('easy'),'easy');assert.equal(normalizeDifficulty('normal'),'normal');assert.equal(normalizeDifficulty('hard'),'hard');assert.equal(normalizeDifficulty('unknown'),'normal');assert.equal(normalizeDifficulty(undefined),'normal');});
 test('four weekly claims maximum across difficulties, reset Monday, tickets retain odds',()=>{const p=createProfile(),sunday=new Date(2026,8,20,23,59),monday=new Date(2026,8,21);assert.notEqual(weekKey(sunday),weekKey(monday));for(let d=0;d<4;d++){assert.ok(claimDungeon(p,d,'hard',sunday));assert.equal(claimDungeon(p,d,'easy',sunday),null);}assert.equal(p.tickets.length,4);assert.ok(claimDungeon(p,0,'easy',monday));assert.equal(p.tickets.length,5);const reload=createProfile(JSON.parse(JSON.stringify(p)));assert.equal(claimDungeon(reload,0,'normal',monday),null);for(const mode of DIFFICULTIES){const profile=createProfile();profile.tickets=[{difficulty:mode.id,dungeon:0}];let calls=0;const result=drawArtifact(profile,()=>calls++===0?mode.rare-.001:0);assert.equal(result.artifact.rarity,'rare');assert.equal(profile.tickets.length,0);assert.equal(drawArtifact(profile),null);}});
 test('library uses actual Card content, grammar lecture references and persistent mistakes',()=>{assert.equal(LIBRARY.grammar.length,35);assert.ok(LIBRARY.vocab.length>300);assert.ok(LIBRARY.collocation.length>=130);for(const kind of ['vocab','collocation','grammar'])for(const n of [0,.13,.53,.999]){const q=makeQuestion(kind,()=>n);assert.ok(q.options.includes(q.answer));assert.equal(new Set(q.options).size,q.options.length);if(kind==='grammar')assert.ok(q.lecture.content.length>100);const p=createProfile();recordAnswer(p,q,'wrong');assert.equal(p.learning.mistakes.length,1);recordAnswer(p,q,q.answer);assert.equal(p.learning.mistakes.length,0);assert.equal(p.learning.total,2);assert.equal(p.learning.correct,1);}});
 test('each difficulty changes actual health and projectile speed, later dungeons scale',()=>{const hp=[],speed=[];for(const mode of DIFFICULTIES){const g=combat({mode:mode.id}),e=target(g);hp.push(e.maxHp);g.enemyBullet(0,0,0,100);speed.push(g.bullets[0].vx);}assert.ok(hp[0]<hp[1]&&hp[1]<hp[2]);assert.ok(speed[0]<speed[1]&&speed[1]<speed[2]);});
