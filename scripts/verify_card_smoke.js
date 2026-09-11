@@ -56,6 +56,9 @@ function run() {
     '아티팩트 획득: ${art.name}'
   ]);
   const artifactPick = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
+  if (/id: 'factory'[\s\S]{0,220}패배 시 데이터 삭제/.test(artifactPick)) {
+    throw new Error('factory mode still claims save deletion on defeat');
+  }
   if (/아티팩트 획득: \$\{art\.name\}[\s\S]{0,80}this\.saveGame\(\)/.test(artifactPick)) {
     throw new Error('artifact pick still overwrites the acquire alert with saveGame()');
   }
