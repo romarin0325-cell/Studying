@@ -51,8 +51,17 @@ function run() {
     "id: 'artifact_chaos'",
     "id: 'artifact_reserve'",
     "!['origin', 'archive'].includes(m.id)",
-    "!['artifact_chaos', 'artifact_reserve'].includes(m.id)"
+    "!['artifact_chaos', 'artifact_reserve'].includes(m.id)",
+    'const saved = this.saveGame(false);',
+    '아티팩트 획득: ${art.name}'
   ]);
+  const artifactPick = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
+  if (/아티팩트 획득: \$\{art\.name\}[\s\S]{0,80}this\.saveGame\(\)/.test(artifactPick)) {
+    throw new Error('artifact pick still overwrites the acquire alert with saveGame()');
+  }
+  if (!fs.readFileSync(path.join(cardRoot, 'rpg_features.js'), 'utf8').includes("if (showMessage) this.showAlert('저장되었습니다.')")) {
+    throw new Error('manual save success alert contract changed');
+  }
 
   mustContain(path.join(cardRoot, 'rpg_features.js'), [
     'window.RPGFeatureModules = {',

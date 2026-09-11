@@ -5528,8 +5528,10 @@
                     btn.onclick = () => {
                         this.state.artifacts.push(art.id);
                         document.getElementById('modal-artifact-select').classList.remove('active');
-                        this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
-                        this.saveGame();
+                        const saved = this.saveGame(false);
+                        if (saved === true) {
+                            this.showAlert(`아티팩트 획득: ${art.name}!\n${art.desc}`);
+                        }
                         this.toMenu();
                     };
                     list.appendChild(btn);
