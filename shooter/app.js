@@ -88,10 +88,12 @@ function showSortie() {
 }
 function showHelp(launchAfter) {
   const hero = HEROES[chosenHero];
+  const bombTitle = chosenRandom ? '랜덤으로 만나는 수호자' : hero.bomb;
+  const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 필살기는 캐릭터마다 다르며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
   setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">새로운 수호자들, 네 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
-    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${hero.bomb}</b>${hero.bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
+    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
     <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 1·2스테이지 뒤 퀴즈는 생명이나 봄 회복, 마지막 퀴즈는 최종 점수 +10%. 퀴즈 도전은 선택이에요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
-    <button class="primary" id="help-done">${launchAfter ? '준비됐어요 · 출격' : '알겠어요'}</button>`);
+    <button class="primary" id="help-done">${launchAfter ? (chosenRandom ? '수호자 만나기' : '준비됐어요 · 출격') : '알겠어요'}</button>`);
   $('help-done').onclick = () => { saved.tutorial = true; save(); closeModal(); if (launchAfter) startGame(); };
 }
 function startGame(stage = chosenStage, randomResolved = false) {

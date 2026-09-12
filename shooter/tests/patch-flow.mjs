@@ -10,6 +10,29 @@ assert.notEqual(html,original);await fs.mkdir(new URL('artifacts/',root),{recurs
 const file=new URL('artifacts/patch-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],checks=[];
 try{
+ // Help must describe the unresolved random selection in both entry points.
+ const helpContext=await browser.newContext({viewport:{width:390,height:844},offline:true});
+ const helpPage=await helpContext.newPage();helpPage.on('pageerror',e=>errors.push(e.message));
+ await helpPage.goto(file.href);await helpPage.waitForFunction(()=>astralDiagnostics?.ready);
+ await helpPage.locator('#random-hero').click();await helpPage.locator('#launch').click();
+ const helpText=()=>helpPage.locator('.help-list').innerText();
+ assert.match(await helpText(),/랜덤으로 만나는 수호자/);
+ assert.ok(!(await helpText()).includes(HEROES[0].bomb));
+ assert.equal(await helpPage.locator('#help-done').textContent(),'수호자 만나기');
+ await helpPage.locator('#help-done').click();
+ const drawnHero=await helpPage.evaluate(()=>astralDiagnostics.hero);
+ assert.ok((await helpPage.locator('.tiny-note').innerText()).includes(HEROES[drawnHero].bombInfo));
+ await helpPage.locator('#random-cancel').click();await helpPage.locator('#help').click();
+ assert.match(await helpText(),/랜덤으로 만나는 수호자/);
+ assert.ok(!(await helpText()).includes(HEROES[drawnHero].bomb));
+ await helpPage.locator('#help-done').click();
+ // Fix the weekday so Rumi is available without a quiz.
+ await helpPage.clock.install({time:new Date(2026,8,14,12)});
+ await helpPage.locator('[data-hero="0"]').click();await helpPage.locator('#help').click();
+ assert.ok((await helpText()).includes(HEROES[0].bomb));
+ assert.ok((await helpText()).includes(HEROES[0].bombInfo));
+ assert.doesNotMatch(await helpText(),/랜덤으로 만나는 수호자/);
+ await helpContext.close();checks.push('Random first-flight and lobby help stay generic; reveal and normal help show the actual ultimate');
  const context=await browser.newContext({viewport:{width:390,height:844},offline:true});const page=await context.newPage();
  page.on('pageerror',e=>errors.push(e.message));await page.clock.install({time:new Date(2026,8,14,12)});
  await page.goto(file.href);await page.waitForFunction(()=>astralDiagnostics?.ready);
