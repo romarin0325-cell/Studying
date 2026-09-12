@@ -15,6 +15,57 @@ const Astra = {
   modeNames: { origin:'오리진', draft:'드래프트', chaos:'카오스', artifact:'아티팩트', artifact_chaos:'아티팩트 카오스', artifact_reserve:'아티팩트 리저브', factory:'팩토리', perfect_plan:'퍼펙트플랜', puzzle:'퍼즐', archive:'아카이브', dream_corridor:'꿈의 회랑' },
 
   $(id) { return document.getElementById(id); },
+  setTheme(name) {
+    const themes = {astra:'#0d2235',strawberry:'#fff2f6',dreamsky:'#eff9ff'};
+    if (!Object.prototype.hasOwnProperty.call(themes,name)) name = 'astra';
+    document.body.dataset.theme = name;
+    document.querySelector('meta[name="theme-color"]').content = themes[name];
+    document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.themeChoice === name)));
+    document.querySelectorAll('img[data-fallback=true]').forEach(img => {
+      // Never replace a real portrait or interrupt an in-flight local image load.
+      if (img.src.startsWith('data:image/svg+xml')) img.src = this.fallback(img._astraEntity);
+    });
+    try { localStorage.setItem('dreamweaverTheme',name); } catch { /* Theme remains usable for this session. */ }
+  },
+  openGrades() {
+    const select = this.$('card-grade');
+    const options = this.$('grade-options');
+    options.replaceChildren();
+    for (const option of select.options) {
+      const button = this.text('button',option.textContent,'secondary compact');
+      button.dataset.gradeChoice = option.value;
+      button.setAttribute('aria-pressed',String(select.value === option.value));
+      button.onclick = () => {
+        select.value = option.value;
+        this.$('grade-picker-open').textContent = `${option.textContent} ▾`;
+        this.$('modal-grade-picker').classList.remove('active');
+        this.renderCollection();
+      };
+      options.append(button);
+    }
+    this.$('modal-grade-picker').classList.add('active');
+  },
+  syncFullscreenShortcut() {
+    const button = this.$('btn-game-fullscreen');
+    const label = button.textContent;
+    button.setAttribute('aria-label',label);
+    button.title = label;
+    button.textContent = document.fullscreenElement ? '⛶−' : '⛶';
+  },
+  installChatViewport() {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const modal = this.$('modal-lumi-question');
+    const update = () => {
+      // Follow only the visible chat viewport; do not scroll the page or trap zoom.
+      if (viewport.scale !== 1) { modal.style.removeProperty('--chat-height'); modal.style.removeProperty('--chat-top'); return; }
+      modal.style.setProperty('--chat-height',`${viewport.height}px`);
+      modal.style.setProperty('--chat-top',`${viewport.offsetTop}px`);
+    };
+    viewport.addEventListener('resize',update);
+    viewport.addEventListener('scroll',update);
+    update();
+  },
   icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -83,6 +134,8 @@ const Astra = {
   // This emblem is deliberately a card back, never a generated replacement
   // portrait. Native image loading still resolves each exact original filename.
   fallback(entity) {
+    const themed = window.DREAMWEAVER_THEME_CARDS?.[document.body.dataset.theme];
+    if (themed) return themed;
     const color = { fire:'#d8a999', water:'#a5dfff', nature:'#b5d6bd', light:'#e7ca94', dark:'#bdb5dd' }[entity?.element] || '#a5dfff';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><g fill="none" stroke="${color}"><path opacity=".25" d="M90 15 162 60v120l-72 45-72-45V60Z"/><path opacity=".2" d="M90 32 145 68v104l-55 36-55-36V68Z"/><circle cx="90" cy="120" r="46" opacity=".35"/><path stroke-width="1.5" d="m90 68 14 38 38 14-38 14-14 38-14-38-38-14 38-14Z"/><path opacity=".65" fill="${color}" fill-opacity=".12" d="m90 88 11 32-11 32-11-32Z"/><path opacity=".5" d="M56 58h12m44 0h12M56 182h12m44 0h12M90 45v9m0 132v9"/></g></svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -162,7 +215,7 @@ const Astra = {
       if (button.dataset.nav === kind) button.setAttribute('aria-current','page');
       else button.removeAttribute('aria-current');
     });
-    const names = { title:'꿈을 엮는 기록실', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
+    const names = { title:'타이틀', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
     const status = document.querySelector('.header-status');
     if (status) status.textContent = names[kind] || '새로운 조합을 선택하세요';
     if (kind === 'title') {
@@ -433,6 +486,12 @@ const Astra = {
   },
   init() {
     if (this.ready) return;
+    let theme = 'astra';
+    try { theme = localStorage.getItem('dreamweaverTheme') || theme; } catch { /* Use default. */ }
+    this.setTheme(theme);
+    this.installChatViewport();
+    this.hook('syncGameFullscreenButton',this.syncFullscreenShortcut);
+    RPG.syncGameFullscreenButton();
     if (!RPG._featuresInstalled) throw new Error('ASTRA requires installed Card feature modules.');
     this.hook('showScreen',this.screenChanged);
     this.hook('toMenu',this.renderParty);

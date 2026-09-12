@@ -96,7 +96,8 @@ try {
   assert.equal(await mobile.locator('#md-name').textContent(),'루나');
   await mobile.keyboard.press('Escape');
   await mobile.locator('#card-search').fill('');
-  await mobile.locator('#card-grade').selectOption('normal');
+  await mobile.locator('#grade-picker-open').click();
+  await mobile.locator('[data-grade-choice=normal]').click();
   assert.ok(await mobile.locator('#collection-grid .card-item').count() > 0);
   await mobile.locator('#collection-scope').click();
   assert.ok(await mobile.locator('#collection-grid .card-item').count() > 3);

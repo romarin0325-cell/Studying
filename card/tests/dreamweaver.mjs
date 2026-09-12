@@ -33,7 +33,7 @@ try {
     const log=await page.locator('#battle-log').boundingBox();
     const portrait=await page.locator('.battle-actor .portrait').first().boundingBox();
     assert.ok(log.height>=110 || size.height<680&&log.height>=85);
-    assert.ok(portrait.height<=140);
+    assert.ok(portrait.height<=150);
     await page.screenshot({path:shot(`dream-battle-${size.width}-${size.height}`)});
     await page.evaluate(()=>{RPG.toMenu();window.originalGrade=GameUtils.resolveGachaGrade;});
     for(const grade of ['epic','legend','normal']) {

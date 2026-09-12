@@ -1,0 +1,64 @@
+/* Shared geometry: themes never override dimensions, placement or typography. */
+#screen-title { justify-content:flex-start; }
+.title-copy { margin:18px 0; }
+.title-copy h1 { margin:8px 0 22px; }
+.title-copy h1>span.title-word:last-child { font:inherit; margin:0; letter-spacing:inherit; color:var(--paper); }
+.title-utilities { margin-top:0; flex-shrink:0; }
+.fullscreen-shortcut { font-size:21px; }
+.grade-picker { width:370px!important; height:auto!important; }
+#grade-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+#grade-options button[aria-pressed=true] { border-color:var(--sky); background:var(--sky); color:var(--ink); }
+.theme-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:18px; }
+.theme-choices button { padding:10px 4px; font-size:12px; }
+.theme-choices button[aria-pressed=true] { outline:2px solid var(--sky); outline-offset:2px; }
+.astra .card-item.unowned { opacity:1; }
+.card-item.unowned .portrait { opacity:.65; }
+.deck-heading { gap:8px; }
+.deck-heading h1 { flex:1; text-align:center; }
+.deck-heading .deck-confirm { padding:0; border:0; }
+.astra #modal-card .modal-content { height:min(760px,calc(100dvh - 20px)); padding:16px; }
+.astra #modal-card h3 { margin:0 0 8px; font-size:19px; }
+.astra #modal-card .modal-scroll>.portrait { width:90px!important; height:120px!important; margin:0 auto 5px!important; }
+.astra #md-grade { padding:2px 0; font-size:11px!important; line-height:1.4; }
+.astra #md-stats { padding:7px 9px!important; margin:4px 0!important; line-height:1.45; font-size:12px!important; }
+.astra #md-skills { font-size:12px!important; line-height:1.5; }
+.astra #md-skills p { padding:5px 0; margin:0!important; }
+.astra #modal-lumi-question { top:var(--chat-top,0px); height:var(--chat-height,100dvh); bottom:auto; padding:8px; }
+.astra #modal-lumi-question .modal-content { height:100%!important; max-height:100%!important; padding:12px; gap:6px; }
+.lumi-chat-top { gap:5px; padding-bottom:5px; }
+.lumi-chat-input { font-size:16px; }
+.lumi-chat-status:empty { display:none; }
+.astra #modal-tutoring { padding:8px; }
+.astra #modal-tutoring .modal-content { height:calc(100dvh - 16px)!important; max-height:calc(100dvh - 16px)!important; padding:12px; }
+.astra #modal-tutoring .lumi-modal-portrait { height:75px!important; width:62px!important; }
+.astra #modal-tutoring h3 { font-size:18px; }
+.astra #tutoring-content { flex:1; min-height:0!important; }
+.study-feature { padding:18px; margin-bottom:12px; }
+.study-feature>div { display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px; }
+.study-feature h2 { font-size:20px; margin:0; }
+.study-feature .primary { margin:0; }
+.study-grid { gap:10px; }
+.study-grid>button { padding:18px; }
+.study-grid h3 { font-size:16px; margin:0 0 6px; }
+.study-grid>button>span { font-size:11px; color:var(--muted); }
+#screen-study .page-heading h1 { font-size:23px; }
+.astra .control-panel { max-height:none; overflow:visible; height:auto; grid-auto-rows:minmax(44px,auto); gap:6px; padding:8px; }
+.astra .skill-btn { min-height:44px; padding:6px; }
+.astra .actor-buffs { min-height:0; margin-top:3px; font-size:9px; max-height:24px; overflow-y:auto; }
+.battle-actor>strong { margin:2px 0 4px!important; }
+@media(max-width:760px) {
+  .astra-header { padding:8px 14px; height:60px; gap:6px; }.brand>svg { display:none; }.brand>span { font-size:12px; }.header-tools { gap:5px; }
+  .container { padding-top:12px; }.title-copy { margin:12px 0 18px; }.title-copy h1 { font-size:clamp(43px,12vw,57px); }
+  #screen-deck .page-heading { margin-bottom:8px; }#screen-deck h1 { font-size:18px; margin:0; }#screen-deck .compact { padding:7px 10px; min-height:40px; font-size:12px; }
+  .deck-formation { gap:6px; margin-bottom:8px; }.astra .deck-slot { min-height:56px; padding:7px 3px; gap:0; border-radius:12px; }.deck-slot .portrait { display:none; }.deck-slot strong { margin-top:3px; font-size:11px; }
+  #deck-card-list,#collection-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding-bottom:6px; }
+  #deck-card-list .card-item,#collection-grid .card-item { padding:5px; }
+  #deck-card-list .portrait,#collection-grid .portrait { height:clamp(85px,14vh,116px); margin-bottom:4px; }
+  #deck-card-list .card-name,#collection-grid .card-name { font-size:11px; }
+  .collection-toolbar { margin-bottom:8px; gap:6px; }.collection-toolbar .search-field input { padding:9px 0; }
+  #screen-collection .page-heading { margin-bottom:8px; }#screen-collection .page-heading .eyebrow { display:none; }#screen-collection h1 { font-size:21px; }
+  #screen-study .page-heading { margin-bottom:12px; }.study-feature { padding:14px; }.study-feature h2 { font-size:16px; }.study-feature .primary { min-height:42px; padding:9px; font-size:12px; }.study-grid>button { padding:16px 12px; }.study-grid h3 { font-size:14px; }
+  body[data-screen=battle] .container { padding-top:8px; padding-bottom:8px; }#screen-battle { gap:6px; }.astra .battle-header { padding:6px 10px; }.astra .visual-stage { padding:7px 12px; }.astra .battle-actor .portrait { height:clamp(96px,17vh,148px); margin-bottom:4px; }.battle-actor>small { display:none; }.astra .actor-mp-bar { margin-top:4px; }
+  .astra .log-container { min-height:85px; padding:8px; }.astra .control-panel { max-height:none; }.astra .skill-btn { font-size:11px; min-height:44px; padding:5px; }
+}
+@media(max-height:680px) and (max-width:760px) { .astra .battle-actor .portrait { height:96px; }.astra .battle-artifact-btn { min-height:30px; }.astra .log-container { min-height:70px; } }

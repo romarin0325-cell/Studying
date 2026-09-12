@@ -25,16 +25,23 @@ const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</sc
 const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
-let theme = await read('src/astra.css');
+let theme = await read('src/astra.css') + '\n' + await read('src/mobile.css') + '\n' + await read('src/themes.css');
 const art = await fs.readFile(path.join(root, 'assets/observatory.png'));
 theme = theme.replaceAll('url("../assets/observatory.png")', `url("data:image/png;base64,${art.toString('base64')}")`);
+const themeCards = {};
+const encodeSVG = async file => `data:image/svg+xml;base64,${(await fs.readFile(path.join(root, 'assets', file))).toString('base64')}`;
+for (const name of ['strawberry','dreamsky']) {
+  themeCards[name] = await encodeSVG(`${name}-card.svg`);
+  theme = theme.replaceAll(`url("../assets/${name}-mark.svg")`, `url("${await encodeSVG(`${name}-mark.svg`)}")`);
+}
+theme = theme.replaceAll('url("../assets/dreamsky-backdrop.svg")', `url("${await encodeSVG('dreamsky-backdrop.svg')}")`);
 const parts = {
   STYLES: `<style>${css}\n${musicCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
   MODALS: between('<div id="modal-mode-select"', '<script>')
     + between('<!-- Fortune Cookie Modal -->', '</body>'),
-  SCRIPTS: inline('window._scriptLoadErrors=[];window._scriptLoadComplete=true;')
+  SCRIPTS: inline(`window._scriptLoadErrors=[];window._scriptLoadComplete=true;window.DREAMWEAVER_THEME_CARDS=${JSON.stringify(themeCards)};`)
     + code.map(inline).join('\n') + inline(scripts[1][1]) + inline(await read('src/astra.js'))
 };
 let html = await read('src/shell.html');
