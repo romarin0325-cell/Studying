@@ -1,0 +1,89 @@
+{
+  "tool": "image_gen.imagegen",
+  "delivered": {
+    "heroes": "assets/heroes.png",
+    "companions": "assets/companions.png",
+    "secrets": "assets/secrets.png"
+  },
+  "notes": [
+    "Chroma backgrounds are decoded once by loadArt, not during gameplay.",
+    "companions initial speculative dark-haired design was replaced with the supplied white curly hair / black hoodie Night Rabbit reference.",
+    "Jasmine in both atlases was corrected to share the original long white dress and round golden sun staff.",
+    "Face-width normalization and cell bounds in render.js are part of the delivered sprite scale."
+  ],
+  "generations": [
+    {
+      "step": "cast-main",
+      "mode": "edit",
+      "references": [
+        "heroes.png",
+        "companions.png"
+      ],
+      "prompt": "Edit into one consistent premium anime SD game sprite atlas, EXACT 2x2 equal square cells, transparent background. References image1 for painting style and four identities; image2 for Luna's revised costume. Top-left Rumi male blond blue eyes white turquoise bow hat star gold ornaments white shorts turquoise ribbon sandals with bare feet, open flowing cape; top-right Luna adult female lilac bob black lace hood draped dark halter gold hip chains purple gem bare legs black pumps, natural relaxed floating legs with clearly connected thighs knees and feet, no crossed anatomical tangles; bottom-left Zeke male orange flame hair black armor red coat large flame sword; bottom-right Jasmine adult female long lavender hair white draped gown gold tiara sun staff. All four SAME HEAD DIAMETER about 22% of cell width and same 2.8 heads tall SD proportions. Rumi NOT larger head than anyone. Bodies head-to-foot approximately 65% cell height; Zeke only 5% taller. Small floating poses, friendly expressive eyes, crisp delicate illustrated shading matching reference. Every whole silhouette accessories hair cape sword fits within its own cell with 10% empty margins on every side, no crossing grid midlines. Keep reference core costume details, no added armor on Luna, no new accessories. No labels grids text scenery shadows under feet. Actual transparent background."
+    },
+    {
+      "step": "cast-companions",
+      "mode": "edit",
+      "references": [
+        "companions.png"
+      ],
+      "prompt": "Create a consistent premium anime SD game sprite atlas, EXACT 2x2 equal square cells, actual transparent background, same painting style as reference. SAME HEAD DIAMETER for all humanoids approximately 22% cell width and 2.8 heads tall proportions. Top-left cute male Snow Rabbit: icy blue short hair blue eyes, exactly TWO white rabbit ears, blue bowtie white cuffs glossy blue bunny costume, flat masculine chest, bare legs NO stockings, blue shoes, ice wand, friendly floating upright pose. Top-right male Cinderella: silver white long twintails pink ribbons red eyes, white corset magical dress pink frilled skirt large red chest bow with pearl, detached white sleeves, glass shoes; same head size as Snow Rabbit, slightly taller body but do NOT shrink head because of twintails. Bottom-left male Night Rabbit, Snow Rabbit's nocturnal counterpart: short midnight-violet hair violet eyes, exactly TWO black rabbit ears lavender interiors, black violet bunny costume with flat masculine chest, purple bowtie white cuffs bare legs dark shoes, golden crescent wand, mischievous gentle smile, floating upright. Bottom-right small World Tree fairy preserve reference identity golden leaf wings green leaf dress. For first three keep full body height about65% cell height excluding ears, accessories contained each cell with10% outer and central green-free transparent margin. No text labels borders floor shadows background scenery. Cute charming NONsexual game sprites and natural leg anatomy. Match all heads and scale explicitly."
+    },
+    {
+      "step": "cast-secrets",
+      "mode": "edit",
+      "references": [
+        "companions.png",
+        "루나자스민2.jpg",
+        "시간의마술사.png",
+        "트라우마.png"
+      ],
+      "prompt": "Create 2x2 sprite atlas on genuinely transparent background for Astral Bloom premium anime SD shooter. Image1 style/proportions reference, other images identities/costumes. Exact equal square cells, each full silhouette fits with 8% margins, no text labels grids scenery. Top-left TWO adult female twin sisters Luna and Jasmine affectionately HOLDING HANDS floating side by side, looking gently at each other. Luna lavender bob black lace hood draped dark halter purple cape gold hip chains bare legs black pumps; Jasmine long lavender hair gold tiara white gown sun staff. A tender imagined happy future, NOT a combat back-to-back pose. Each sister has same head diameter22% cell width; don't miniaturize heads because TWO people, bodies around2.8 heads tall. Top-right male time magician brown short hair green eyes purple-black tailored coat with magenta lapels cape shorts purple boots crystal staff as image3, 2.8head SD body, head22%cellwidth. Bottom-left his dark Cinderella form: same male brown hair green eyes now long brown twintails pink bows, black pink corset dress layered black pink skirt detached dark sleeves glass slippers as image4, defiant wounded smile; same head diameter/body proportions, fully nonsexual. Bottom-right one ornate flat magical ultimate sigil: intertwined crescent moon star clock motifs silver ivory gold pale violet, circular spell seal only no character. All subjects coherent refined SD hand-painted illustration style as image1, consistent head sizes across humanoids, no oversized heads. Transparent background no contact shadow."
+    },
+    {
+      "step": "companions-final",
+      "mode": "edit",
+      "references": [
+        "exec-7198b6dc-47c1-4f7a-8634-a5f11101b492.png",
+        "밤토끼 (2).png"
+      ],
+      "prompt": "Edit first reference sprite atlas. Preserve its exact polished SD game art style, head proportions and the top-left Snow Rabbit, top-right Cinderella, bottom-right fairy designs. REPLACE ONLY bottom-left Night Rabbit with the male character in reference 2: fluffy WHITE SILVER CURLY HAIR with prominent curls, PURPLE EYES, exactly TWO WHITE rabbit ears with pink inside, oversized BLACK HOODIE with small outlined HEART patch, black short shorts under hoodie, dark choker, white loose socks and black platform shoes with silver HEART buckle. Cute modest nonsexual floating game pose, both hands loosely forward, natural legs, no pinup pose. No wand needed, small purple moon motes. Same head size as Snow Rabbit. IMPORTANT atlas safe layout: exactly FOUR isolated subjects centered each in its own quarter of 2x2 square grid. Scale ALL four down 18% within their own cells for fully empty transparent gutters and margins (at least 9% of cell width on every side including ears and hair). Nothing crosses horizontal or vertical midline. Genuine transparent alpha background, no drawn checkerboard, no text."
+    },
+    {
+      "step": "main-final",
+      "mode": "edit",
+      "references": [
+        "exec-f2fd4c21-049a-4b5d-939f-178fbeff22ad.png"
+      ],
+      "prompt": "Edit this four-character game sprite atlas purely to fix atlas spacing. Preserve each character identity, outfit, lovely SD illustration, face, pose, all details exactly. Four isolated subjects in equal 2x2 cells. Scale each subject down 20% about its own cell center. Leave fully empty transparent gutters and margins around every cell including weapons/capes/feet. No subject crosses x50% or y50% boundary; no clipping. Same face/head diameter for all four. True transparent alpha background, no drawn checkerboard. No text."
+    },
+    {
+      "step": "secrets-final",
+      "mode": "edit",
+      "references": [
+        "exec-716603be-abb4-466f-bc32-b053b95b348f.png"
+      ],
+      "prompt": "Edit this 2x2 game sprite atlas to fix overlapping cells. Preserve the exact polished SD illustrations, face proportions and designs. Top-left is ONE paired sprite of TWO sisters gently holding hands: lavender bob black lace hood assassin and long lavender hair white gown golden tiara saint. Top-right brown-haired green-eyed male time magician purple black coat shorts magenta cape staff. Bottom-left male Dark Cinderella brown twintails pink ribbons green eyes black pink magical dress. Bottom-right ornate clock star sigil. Scale all subjects down within their respective cells to leave 10% empty transparent margin on all sides. The pair's entire staff, cape and hair MUST stay inside top-left quarter with zero overlap over centerline. Do not merge the hands or create extra limbs. Each sister head diameter close to other characters, though paired sprite wider. True transparent alpha background, no drawn checkerboard, no text."
+    },
+    {
+      "step": "match-jasmine",
+      "mode": "edit",
+      "prompt": "Edit ONLY BOTTOM-RIGHT Jasmine in reference1 four-character atlas. Other three characters and blank gutters unchanged. Jasmine must be SAME character and EXACT SAME OUTFIT as long lavender-haired white-gowned saint in TOP-LEFT PAIR of reference2, guided by original ref3: long flowing floor-length WHITE gown (not short frilly skirt, not armor), simple fitted high-neck bodice with silver embroidery, bare shoulders and detached long flowing slit sleeves, gold openwork tiara, lavender long wavy hair and blue eyes, a slender GOLD SUN STAFF with round GOLD orb (not green). White shoes peeking under long skirt. Same SD face size and body scale as current bottom-right, flowing floating pose, natural legs under long gown. REMOVE excess gold armor and flower clusters on chest/waist, remove short layered skirt. Match duo Jasmine's dress and tiara precisely. Four equal 2x2 cells with same empty margins. Transparent alpha background (do not draw checkerboard), no text."
+    },
+    {
+      "step": "export-companions-and-secrets",
+      "mode": "edit",
+      "prompt": "Technical sprite atlas export. Preserve every subject from reference EXACTLY, including costumes, anatomy, faces, poses, rendering, colors and relative size. Replace ALL gray/white checkerboard background with perfectly SOLID FLAT CHROMA GREEN RGB(0,255,0) #00FF00, also every empty hole between limbs/capes and staff. Background no gradient no texture no checkerboard no glow. Clean antialiased edges. Four equal 2x2 cells, enforce at least 7% green space on every cell boundary so no feet/hair/props cross the central x/y lines. Only if necessary slightly move subjects within their own cell to keep inside. Do not alter characters or add text."
+    },
+    {
+      "step": "export-main",
+      "mode": "edit",
+      "prompt": "Technical sprite atlas export. Preserve every subject from reference EXACTLY, including costumes, anatomy, faces, poses, rendering, colors and relative size. Replace ALL gray/white checkerboard background with perfectly SOLID FLAT CHROMA GREEN RGB(0,255,0) #00FF00, also every empty hole between limbs/capes and staff. Background no gradient no texture no checkerboard no glow. Clean antialiased edges. Four equal 2x2 cells, enforce at least 7% green space on every cell boundary so no feet/hair/props cross the central x/y lines. Only if necessary slightly move subjects within their own cell to keep inside. Do not alter characters or add text. Keep corrected bottom-right Jasmine's long flowing white gown, bare shoulders detached flowing sleeves, silver embroidery, gold tiara and GOLD round sun staff exactly as reference. No short skirt or ornate gold armor."
+    },
+    {
+      "step": "match-duo-jasmine",
+      "mode": "edit",
+      "prompt": "Edit ONLY Jasmine (long lavender hair white gown female on RIGHT SIDE of the top-left pair) in reference1 atlas to exactly match bottom-right Jasmine from reference2. Same plain fitted white high-neck silver-embroidered bodice, bare shoulders, detached flowing long slit sleeves, LONG white layered gown covering both legs with just white shoe tips visible, same gold openwork tiara and same round golden SUN STAFF with FOUR simple gold pointed rays and gold orb. Remove the many-point crystal star orb, remove gold belts / jewels / ankle straps, remove high thigh opening. Keep her hand gently holding Luna's hand. Both women are adult. Keep Luna, time magician, Dark Cinderella and sigil unchanged. Preserve SD proportions and drawing style. Entire duo inside top-left quarter. Background solid bright #00FF00, all transparent holes solid green, NO checkerboard anywhere, no text."
+    }
+  ]
+}

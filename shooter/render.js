@@ -7,18 +7,23 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png' };
+  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png' };
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
   })));
-  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],sentinels:[],relics:[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
-  for (const kind of ['heroes', 'bosses', 'enemies','companions','sentinels','relics']) {
+  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
+  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics']) {
     const columns=kind==='relics'?4:2;
     for (let i = 0; i < columns*columns; i++) {
-      const sheet = images[kind], w = sheet.width / columns, h = sheet.height / columns;
+      const sheet = images[kind], w = sheet.width * (kind==='secrets'&&i===0?.52:kind==='secrets'&&i===1?.46:1/columns);
+      const sourceX=kind==='secrets'&&i===1?sheet.width*.54:(i%columns)*w;
+      // The original companion export has Cinderella's shoe just below its nominal cell.
+      const top=kind==='companions'&&i===3?.54:kind==='companions'&&i===2?.51:Math.floor(i/columns)/columns;
+      const bottom=kind==='companions'&&i===1?.535:Math.floor(i/columns+1)/columns;
+      const h=sheet.height*(bottom-top);
       const sw = Math.floor(w), sh = Math.floor(h), raw = canvas(sw, sh), rc = raw.getContext('2d', { willReadFrequently: true });
-      rc.drawImage(sheet, (i % columns) * w, Math.floor(i / columns) * h, w, h, 0, 0, sw, sh);
+      rc.drawImage(sheet, sourceX, top*sheet.height, w, h, 0, 0, sw, sh);
       // Decode the chroma export once. Gameplay uses cached, genuinely transparent textures.
       const pixels = rc.getImageData(0, 0, sw, sh), d = pixels.data;
       const keyed = new Uint8Array(sw * sh);
@@ -40,17 +45,30 @@ export async function loadArt() {
         }
       }
       rc.putImageData(pixels, 0, 0);
-      const cut = canvas(384, 384), c = cut.getContext('2d');
-      if(kind==='companions') {
+      const character=['heroes','companions','secrets'].includes(kind),size=character?512:384;
+      const cut = canvas(size, size), c = cut.getContext('2d');
+      if(character) {
         let x0=sw,y0=sh,x1=0,y1=0;
         for(let y=0;y<sh;y++)for(let x=0;x<sw;x++)if(d[(y*sw+x)*4+3]>30){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}
-        const w=x1-x0+1,h=y1-y0+1,scale=352/Math.max(w,h);c.drawImage(raw,x0,y0,w,h,(384-w*scale)/2,(384-h*scale)/2,w*scale,h*scale);
+        // Measured face widths, not cape/ear bounding boxes, determine the cast scale.
+        const faces={heroes:[.106,.102,.099,.101],companions:[.13,.110,.119,.105],secrets:[.078,.100,.103,.35]};
+        const target=kind==='secrets'&&i===0?73:100;
+        const w=x1-x0+1,h=y1-y0+1,scale=kind==='secrets'&&i===3?470/Math.max(w,h):Math.min(target/(sheet.width*faces[kind][i]),470/Math.max(w,h));
+        c.drawImage(raw,x0,y0,w,h,(size-w*scale)/2,(size-h*scale)/2,w*scale,h*scale);
       }else c.drawImage(raw, 0, 0, 384, 384);
       result[kind].push(cut);
       if (result.urls[kind]) result.urls[kind].push(cut.toDataURL('image/png'));
     }
   }
-  result.heroes[1]=result.companions[0];result.heroes.push(result.companions[1],result.companions[2]);
+  result.heroes.push(result.companions[0],result.companions[1],result.companions[2],result.secrets[0],result.secrets[1]);
+  result.dark=result.secrets[2];result.sigil=result.secrets[3];
+  // A native icon follows the relic palette and remains crisp at inventory sizes.
+  const magnet=canvas(384,384),mc=magnet.getContext('2d');mc.translate(192,180);mc.rotate(-.35);
+  mc.strokeStyle='#765122';mc.lineWidth=86;mc.beginPath();mc.arc(0,0,78,0,Math.PI);mc.stroke();
+  mc.strokeStyle='#efd086';mc.lineWidth=68;mc.stroke();
+  for(const x of [-78,78]){mc.fillStyle='#fff2cb';mc.fillRect(x-34,-66,68,66);mc.strokeStyle='#a67535';mc.lineWidth=5;mc.strokeRect(x-34,-66,68,66);}
+  mc.fillStyle='#ffeda5';star(mc,-128,-100,24);mc.fill();star(mc,128,-112,17);mc.fill();
+  result.relics[15]=magnet;result.urls.relics[15]=magnet.toDataURL('image/png');
   result.urls.heroes=result.heroes.map(c=>c.toDataURL('image/png'));
   for (let i = 0; i < 4; i++) {
     const im = images.worlds, cut = canvas(450, 1200), c = cut.getContext('2d');
@@ -119,7 +137,15 @@ export class Renderer {
       c.fillStyle = active ? '#edd5ffbb' : '#f8a2ec18'; c.fillRect(hazard.x - hazard.width / 2, 70, hazard.width, h);
       c.strokeStyle = active ? '#fff' : '#ffb7f1'; c.lineWidth = active ? 3 : 1; c.setLineDash(active ? [] : [8, 12]);
       c.beginPath(); c.moveTo(hazard.x, 76); c.lineTo(hazard.x, h); c.stroke(); c.setLineDash([]);
-      if (!active) { c.fillStyle = '#ffe0f4'; c.font = 'bold 10px sans-serif'; c.textAlign = 'center'; c.fillText('주의', hazard.x, h - 160); }
+    }
+    for (const z of g.zones) {
+      const color=z.kind==='haven'?'#f8d8ec':'#c496ff';
+      c.save();c.globalAlpha=Math.min(.35,z.life*.35);c.drawImage(this.glow(color),z.x-z.r,z.y-z.r,z.r*2,z.r*2);
+      c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.arc(z.x,z.y,z.r,0,TAU);c.stroke();
+      for(let i=0;i<5;i++){const a=t*.7+i*TAU/5;c.fillStyle=color;star(c,z.x+Math.cos(a)*z.r*.7,z.y+Math.sin(a)*z.r*.7,5);c.fill();}c.restore();
+    }
+    if(g.weapon==='orbit' && g.bombTime<=0) {
+      for(const orb of g.orbitCenters()) {this.sprite(this.art.sigil,orb.x,orb.y,84,-t*2,1,.8);}
     }
     if(g.weapon==='laser' && ['wave','boss'].includes(g.phase)) this.drawLaser(g);
     for (const shot of g.shots) this.drawShot(shot, g);
@@ -139,13 +165,13 @@ export class Renderer {
     }
     for (const drop of g.pickups) this.drawPickup(drop, t);
     for (const f of g.effects) if (f.type !== 'beam') this.drawEffect(f, g);
+    if (g.bombTime > 0) this.drawBomb(g);
     this.drawPlayer(g);
     for (const b of g.bullets) this.drawBullet(b);
     for (let i = 0; i < g.particles.length; i += this.quality ? 1 : 2) {
       const q = g.particles[i]; c.globalAlpha = clamp(q.life / .4, 0, 1); c.fillStyle = q.color; star(c, q.x, q.y, q.r, 4, q.life * 2); c.fill();
     }
     c.globalAlpha = 1;
-    if (g.bombTime > 0) this.drawBomb(g);
     if (this.bombFlash > 0) { c.fillStyle = g.hero.color; c.globalAlpha = this.bombFlash * .38; c.fillRect(0, 0, 450, h); c.globalAlpha = 1; }
     if (this.flash > 0) { c.strokeStyle = `rgba(255,110,140,${this.flash})`; c.lineWidth = 22; c.strokeRect(0, 0, 450, h); }
     c.restore();
@@ -156,8 +182,14 @@ export class Renderer {
     if (s.type === 'star') {
       c.globalAlpha = .38; c.fillStyle = g.hero.color; c.beginPath(); c.moveTo(-4, 0); c.lineTo(0, 32); c.lineTo(4, 0); c.fill(); c.globalAlpha = 1;
       c.strokeStyle = '#5086b4'; c.lineWidth = 2; c.fillStyle = '#fff5b5'; star(c, 0, 0, 9, 5, g.totalTime * 4); c.fill(); c.stroke();
-    } else if (['ice','glass','snow','clock'].includes(s.type)) {
-      c.strokeStyle='#ffffff';c.fillStyle=s.type==='ice'||s.type==='snow'?'#9decff':'#ffbce9';c.lineWidth=1.4;
+    } else if (['nightmoon','nightstar','seed','promise'].includes(s.type)) {
+      const large=s.type==='nightmoon';c.drawImage(this.glow(g.hero.color),-s.r*1.8,-s.r*1.8,s.r*3.6,s.r*3.6);
+      c.fillStyle=large?'#8663c5':'#fff0db';c.strokeStyle='#fff0ff';c.lineWidth=1.7;
+      if(large){c.beginPath();c.arc(0,0,s.r,0,TAU);c.fill();c.stroke();c.fillStyle='#efd7ff';star(c,0,0,s.r*.7,4,g.totalTime);c.fill();}
+      else {star(c,0,0,s.r,s.type==='promise'?4:5,g.totalTime*2);c.fill();c.stroke();}
+    } else if (['ice','glass','snow','clock','darkglass','timehand'].includes(s.type)) {
+      c.strokeStyle='#ffffff';c.fillStyle=s.type==='ice'||s.type==='snow'?'#9decff':s.type==='darkglass'?'#c56cff':'#ffbce9';c.lineWidth=1.4;
+      if(s.type==='darkglass')c.scale(1.7,1.5);
       if(s.type==='snow'){star(c,0,0,13,6,g.totalTime*4);c.fill();c.stroke();}
       else if(s.type==='clock'){c.beginPath();c.arc(0,0,8,0,TAU);c.stroke();c.beginPath();c.moveTo(0,-5);c.lineTo(0,0);c.lineTo(5,2);c.stroke();}
       else{c.beginPath();c.moveTo(0,-23);c.lineTo(7,0);c.lineTo(0,15);c.lineTo(-7,0);c.closePath();c.fill();c.stroke();}
@@ -206,17 +238,16 @@ export class Renderer {
     for (const side of [-1, 1]) { c.beginPath(); c.moveTo(side * 14, 10); c.quadraticCurveTo(side * 23 + Math.sin(t * 4) * 7, 37, side * 9, 59); c.stroke(); }
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
-    this.sprite(this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, 82, p.tilt, 1 - p.recoil * .035, opacity);
+    this.sprite(g.heroIndex===8&&g.bombTime>0?this.art.dark:this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
     // The tiny luminous core is the actual hitbox; the illustration and cape are safe.
-    c.fillStyle = '#11162a'; c.beginPath(); c.arc(p.x, p.y, 6.5, 0, TAU); c.fill();
+    c.fillStyle = '#11162a'; c.beginPath(); c.arc(p.x, p.y, p.radius, 0, TAU); c.fill();
     c.strokeStyle = '#fff8dc'; c.lineWidth = 1.6; c.stroke(); c.fillStyle = '#b6f9ff'; c.beginPath(); c.arc(p.x, p.y, 2.5, 0, TAU); c.fill();
   }
   drawEffect(f, g) {
     const c = this.c, q = clamp(f.age / f.life, 0, 1); c.save();
     if(f.type==='detonation') {
       c.fillStyle=f.age<.75?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
-      c.fillStyle='#fff';c.font='bold 13px sans-serif';c.textAlign='center';c.fillText(f.age<.75?'자폭 주의':'',f.x,f.y);
     } else if (f.type === 'beam') {
       c.globalAlpha = .2; c.fillStyle = '#f5cf79'; c.fillRect(f.x - f.width, 50, f.width * 2, Math.max(0, f.y - 50));
       c.globalAlpha = .65; c.fillStyle = '#ffe3a2'; c.fillRect(f.x - f.width / 2, 50, f.width, Math.max(0, f.y - 50));
@@ -236,14 +267,21 @@ export class Renderer {
     } c.restore();
   }
   drawLaser(g) {
-    const c=this.c,p=g.player,width=13+g.power*3,y=p.y-25,length=Math.max(0,y-50);
-    c.save();c.fillStyle='#f5cf79';c.globalAlpha=.18;c.fillRect(p.x-width,50,width*2,length);
-    c.fillStyle='#ffe3a2';c.globalAlpha=.6;c.fillRect(p.x-width/2,50,width,length);
-    c.fillStyle='#ffffef';c.globalAlpha=.9;c.fillRect(p.x-2.5,50,5,length);
+    const c=this.c,p=g.player,width=13+g.power*3,y=p.y-25,length=Math.max(0,y);
+    c.save();c.fillStyle='#f5cf79';c.globalAlpha=.18;c.fillRect(p.x-width,0,width*2,length);
+    c.fillStyle='#ffe3a2';c.globalAlpha=.6;c.fillRect(p.x-width/2,0,width,length);
+    c.fillStyle='#ffffef';c.globalAlpha=.9;c.fillRect(p.x-2.5,0,5,length);
     c.drawImage(this.glow('#ffdf82'),p.x-20,y-20,40,40);c.restore();
   }
   drawBomb(g) {
     const c = this.c, t = g.totalTime, remaining = g.bombTime;
+    const age=(g.bombDuration||5)-remaining;
+    // Reuse one cached sigil and the existing portrait: no full-screen filters or new textures per frame.
+    this.sprite(this.art.sigil,g.player.x,g.player.y,240+Math.min(age,1)*90,t*.35,1,Math.min(.5,remaining*.5));
+    if(age<1.1){const q=age/1.1,fade=Math.sin(q*Math.PI)*.85;
+      this.sprite(g.heroIndex===8?this.art.dark:this.art.heroes[g.heroIndex],350-q*80,this.height*.43,300+q*35,-.08,1,fade);
+      c.save();c.strokeStyle=g.hero.color;c.globalAlpha=1-q;c.lineWidth=5*(1-q);c.beginPath();c.arc(g.player.x,g.player.y,30+q*500,0,TAU);c.stroke();c.restore();
+    }
     c.save(); c.strokeStyle = g.hero.color; c.lineWidth = 2; c.globalAlpha = .25;
     const cx = g.player.x, cy = g.player.y;
     if (g.heroIndex === 0) {

@@ -38,7 +38,7 @@ export class AudioDirector {
   }
   event(event) {
     const t = this.context?.currentTime || 0;
-    if (event.type === 'shot') { if (t - this.lastShot < .15) return; this.lastShot = t; const heavy = ['lance', 'melee'].includes(event.weapon); this.note(heavy ? 180 : 850, heavy ? .14 : .065, heavy ? .07 : .026, 'triangle', null, heavy ? 65 : 350); }
+    if (event.type === 'shot') { if (t - this.lastShot < .15) return; this.lastShot = t; const heavy = ['lance', 'melee','nightfall','darkglass'].includes(event.weapon); this.note(heavy ? 180 : 850, heavy ? .14 : .065, heavy ? .07 : .026, 'triangle', null, heavy ? 65 : 350); }
     if (event.type === 'kill') { this.note(event.boss ? 110 : 220, event.boss ? .8 : .13, event.boss ? .25 : .045, 'triangle', null, 45); }
     if (event.type === 'pickup') this.note(event.item === 'power' ? 1250 : 1568, .10, .026);
     if (event.type === 'graze') this.note(2100, .045, .015);

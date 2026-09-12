@@ -7,8 +7,8 @@ function fixture(hero = 0, weapon = 0) {
   const g = new Game({ hero, weapon }); g.phase = 'boss'; g.player.x = g.player.targetX = 225; g.player.y = g.player.targetY = 370;
   g.spawnEnemy(225, 245, { hp: 100000, r: 30, speed: 0, fire: 999, image: 0 }); return g;
 }
-test('all twelve weapons damage a target through the real update loop', () => {
-  for (let h = 0; h < 6; h++) for (let w = 0; w < 2; w++) {
+test('all eighteen weapons damage a target through the real update loop', () => {
+  for (let h = 0; h < HEROES.length; h++) for (let w = 0; w < 2; w++) {
     const g = fixture(h, w); tick(g, 3);
     assert.ok(g.stats.damage > 120, `${HEROES[h].weapons[w].id} damage=${g.stats.damage}`);
     assert.ok(Number.isFinite(g.stats.damage));
@@ -22,7 +22,7 @@ test('homing actually curves toward an off-axis target; spread covers distinct l
 test('piercing blades hit a column; chain reaches a second target', () => {
   for (const [h, w] of [[1, 0], [2, 1], [3, 0]]) {
     const g = fixture(h, w); g.spawnEnemy(225, 150, { hp: 100000, r: 25, speed: 0, fire: 999, image: 0 }); tick(g, 2);
-    assert.ok(g.enemies.every(e => e.hp < 100000), `${h}/${w} did not reach both enemies`);
+    assert.ok(g.enemies.every(e => e.hp < e.maxHp), `${h}/${w} did not reach both enemies`);
   }
 });
 test('melee clears nearby projectiles and has much stronger close damage', () => {
@@ -68,7 +68,7 @@ test('each dungeon ends only after three rooms and its own final boss', () => {
       tick(g,3.6);assert.equal(g.phase,'quiz');const time=g.totalTime;tick(g,2);assert.equal(g.totalTime,time);g.completeQuiz('bomb');
     }
     g.spawnBoss();tick(g,3.2);g.damage(g.boss,1e6,225,150);tick(g,3.6);
-    assert.equal(g.phase,'quiz');g.completeQuiz('life');assert.equal(g.phase,'victory');assert.equal(g.finished,true);assert.equal(g.stats.bossKills,1);assert.equal(g.stageIndex,stage);
+    assert.equal(g.phase,'quiz');g.completeQuiz('score');assert.equal(g.phase,'victory');assert.equal(g.finished,true);assert.equal(g.stats.bossKills,1);assert.equal(g.stageIndex,stage);
   }
 });
 test('defeat stops the simulation; movement clamps to touch-safe bounds', () => {
