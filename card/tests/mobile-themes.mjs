@@ -5,7 +5,59 @@ const browser=await chromium.launch();
 const errors=[];
 const path=name=>fileURLToPath(new URL(`../test-results/${name}.png`,import.meta.url));
 const url=new URL('../dist/DREAMWEAVER.html',import.meta.url).href;
+async function assertContrast(page,textSelector,surfaceSelector) {
+ const colors=await page.locator(textSelector).evaluate((el,surface)=>{
+  const paint=getComputedStyle(document.querySelector(surface));
+  return {text:getComputedStyle(el).color,background:paint.backgroundImage==='none'?paint.backgroundColor:paint.backgroundImage};
+ },surfaceSelector);
+ const rgb=value=>(value.match(/[\d.]+/g)||[]).map(Number);
+ const luminance=value=>rgb(value).slice(0,3).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);
+ const paints=colors.background.match(/rgba?\([^)]+\)/g)||[];
+ assert.ok(paints.length,`${surfaceSelector} has a measurable background`);
+ for(const color of paints) {
+  assert.ok((rgb(color)[3]??1)===1,`${surfaceSelector} requires an opaque theme surface`);
+  const a=luminance(colors.text),b=luminance(color);
+  const contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+  assert.ok(contrast>=4.5,`${textSelector}: contrast ${contrast.toFixed(2)} against ${color}`);
+ }
+}
 try {
+ // Exercise artifact modes explicitly: the artifact button is hidden in origin mode.
+ for(const width of [390,1440]) {
+  const page=await browser.newPage({viewport:{width,height:960},reducedMotion:'reduce'});
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(url);await page.waitForFunction(()=>Astra.ready);
+  const geometry={};
+  for(const theme of ['strawberry','dreamsky']) {
+   await page.evaluate(theme=>{
+    Astra.setTheme(theme);RPG.loadGlobalData();
+    Object.assign(RPG.state,{mode:'artifact',gameType:'endless',tickets:20,enemyScale:0,artifacts:[],deck:['marshmallow','kobold','golem'],inventory:['marshmallow','kobold','golem']});RPG.toMenu();
+   },theme);
+   await assertContrast(page,'.ticket-counter small','.ticket-counter');
+   await assertContrast(page,'#ui-tickets','.ticket-counter');
+   if(width>760) {
+    assert.ok(await page.locator('.route-track').isVisible());
+    const route=await page.locator('.route-track i').first().evaluate(el=>({line:getComputedStyle(el).backgroundColor,current:getComputedStyle(el,'::before').backgroundColor,inactive:getComputedStyle(el.nextElementSibling,'::before').backgroundColor}));
+    assert.notEqual(route.current,route.inactive,'Current route point remains distinct');
+    assert.ok(!route.line.startsWith('rgba'),'Route line is opaque on light panels');
+   }
+   await page.screenshot({path:path(`contrast-${theme}-lobby-${width}`)});
+   await page.locator('#astra-depart').click();
+   await page.locator('#btn-battle-artifact-check').waitFor({state:'visible'});
+   await assertContrast(page,'#btn-battle-artifact-check','#btn-battle-artifact-check');
+   const box=await page.locator('#btn-battle-artifact-check').boundingBox();
+   if(theme==='strawberry')geometry.artifact=box;else assert.deepEqual(box,geometry.artifact);
+   await page.screenshot({path:path(`contrast-${theme}-artifact-${width}`)});
+   await page.locator('#btn-battle-artifact-check').click();
+   await page.locator('#modal-artifact-check').waitFor({state:'visible'});
+   await page.keyboard.press('Escape');
+   await page.evaluate(()=>{RPG.tempGameType='endless';RPG.openModeSelect();});
+   await page.locator('#btn-chaos-roulette').waitFor({state:'visible'});
+   await assertContrast(page,'#btn-chaos-roulette','#btn-chaos-roulette');
+   await page.keyboard.press('Escape');
+  }
+  await page.close();
+ }
  for(const size of [{width:360,height:640},{width:390,height:844},{width:412,height:915}]) {
   const page=await browser.newPage({viewport:size,reducedMotion:'reduce'});
   page.on('pageerror',e=>errors.push(e.message));
