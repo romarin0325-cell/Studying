@@ -5,13 +5,16 @@ import {Game} from '../engine.js';
 import {Renderer,loadArt} from '../render.js';
 import {LIMITS} from '../content.js';
 // Asset URLs are rooted for the dedicated local development server.
-globalThis.ASTRAL_ASSETS={heroes:'/assets/heroes.png',bosses:'/assets/bosses.png',enemies:'/assets/enemies.png',worlds:'/assets/worlds.jpg',companions:'/assets/companions.png',sentinels:'/assets/sentinels.png',relics:'/assets/relics.png'};
+globalThis.ASTRAL_ASSETS={heroes:'/assets/heroes.png',bosses:'/assets/bosses.png',enemies:'/assets/enemies.png',worlds:'/assets/worlds.jpg',companions:'/assets/companions.png',secrets:'/assets/secrets.png',sentinels:'/assets/sentinels.png',relics:'/assets/relics.png'};
 const art=await loadArt(),renderer=new Renderer(document.getElementById('world'),art);
-const g=new Game({hero:5,weapon:1,stage:3,artifacts:['leaf','dream','core'],height:renderer.height});
+const params=new URLSearchParams(location.search),hero=Number(params.get('hero')||7);
+const g=new Game({hero,weapon:1,stage:3,artifacts:['leaf','dream','core'],height:renderer.height});
 g.spawnBoss();g.phase='boss';g.boss.hp=900000;g.boss.maxHp=900000;g.boss.y=180;g.player.invincible=9000;g.power=5;
 for(let i=0;i<LIMITS.bullets;i++)g.enemyBullet(15+i*37%420,180+i*79%(g.height-300),Math.PI/2,40,{color:['#efa5ff','#ffb677','#a7e9ff'][i%3],shape:i%2?'diamond':'orb'});
 let last=performance.now(),samples=[],frames=0;
 function render(now){const elapsed=(now-last)/1000,dt=Math.min(.05,elapsed);last=now;g.update(dt);g.player.invincible=9000;renderer.observeFrame(elapsed);
+  g.bombTime=4.6;g.bombDuration=5;
+  while(g.zones.length<8)g.zones.push({x:60+g.zones.length*45,y:250+g.zones.length%3*90,r:90,damage:1,kind:'haven',life:3,tick:0});
   while(g.bullets.length<LIMITS.bullets)g.enemyBullet(20+Math.random()*410,140,Math.PI/2,50,{color:'#efb1ff'});
   g.particlesAt(225,300,'#ffd6ae',8);renderer.render(g,dt);frames++;if(frames>180)samples.push(elapsed);
   globalThis.stressResult={frames,fps:samples.length/samples.reduce((a,b)=>a+b,0),p95:samples.length? [...samples].sort((a,b)=>a-b)[Math.floor(samples.length*.95)]*1000:0,bullets:g.bullets.length,particles:g.particles.length,quality:renderer.quality,width:innerWidth,height:innerHeight};

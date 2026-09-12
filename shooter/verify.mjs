@@ -32,12 +32,12 @@ try {
     await page.screenshot({ path: path.join(root, 'artifacts', `sortie-${viewport.width}.png`) });
     report.viewports.push({ viewport, geometry });
     if (viewport.width !== 390) { await context.close(); continue; }
-    for (let h = 0; h < 6; h++) {
+    for (const h of [0,1,2,3,4,6]) {
       await page.locator(`[data-hero="${h}"]`).click();
-      assert.equal(await page.locator('.hero-large').getAttribute('alt'), ['루미', '루나', '지크', '자스민','눈토끼','신데렐라'][h] + '의 SD 일러스트');
+      assert.equal(await page.locator('.hero-large').getAttribute('alt'), ['루미', '루나', '지크', '자스민','눈토끼','신데렐라','밤토끼'][h] + '의 SD 일러스트');
       for (let w = 0; w < 2; w++) { await page.locator(`[data-weapon="${w}"]`).click(); assert.equal(await page.locator(`[data-weapon="${w}"]`).getAttribute('aria-pressed'), 'true'); }
     }
-    report.checks.push('All six heroes and twelve weapon choices work on Sunday');
+    report.checks.push('All six normal heroes and twelve weapon choices work on Sunday; hidden heroes absent');
     await page.locator('#library').click();await page.locator('#library-search').fill('amenities');assert.ok(await page.locator('#library-list').textContent());
     await page.locator('[data-tab="grammar"]').click();await page.locator('[data-lecture="0"]').click();assert.ok((await page.locator('.lecture-copy').textContent()).length>100);await page.locator('#lecture-back').click();await page.locator('#library-close').click();
     await page.locator('#equipment').click();assert.equal(await page.locator('.artifact.selected').count(),3);await page.locator('[data-artifact="spellbook"]').click();assert.equal(await page.locator('.artifact.selected').count(),2);await page.locator('[data-artifact="spellbook"]').click();await page.locator('#equipment-done').click();

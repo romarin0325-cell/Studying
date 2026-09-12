@@ -1,5 +1,5 @@
 import { HEROES, STAGES, DUNGEONS, clamp } from './content.js';
-import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES, normalizeDifficulty } from './meta.js';
+import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES, normalizeDifficulty, randomHero } from './meta.js';
 import { CampaignUI } from './menus.js';
 import { Game } from './engine.js';
 import { Renderer, loadArt } from './render.js';
@@ -13,7 +13,7 @@ let saved = {}, storageAvailable = true;
 try { saved = JSON.parse(localStorage.getItem(storeKey) || '{}') || {}; } catch { storageAvailable = false; }
 const preferences = saved.settings && typeof saved.settings === 'object' ? saved.settings : {};
 const profile = createProfile(saved.campaign);
-let chosenHero = clamp(Number(preferences.hero) || 0, 0, 5), chosenWeapon = 0, chosenStage = 0;
+let chosenHero = clamp(Number(preferences.hero) || 0, 0, HEROES.length-1), chosenWeapon = 0, chosenStage = 0;
 if(!heroAvailable(profile,chosenHero)) chosenHero=dailyHeroes()[0];
 let difficulty = normalizeDifficulty(preferences.mode);
 audio.enabled = preferences.sound !== false;
@@ -21,9 +21,10 @@ let art, renderer, game = null, paused = false, raf = 0, last = 0, accumulator =
 let announcementTimer = 0, toastTimer = 0, pointer = null, keys = new Set(), frameSamples = [], startingStage = 0;
 let runCount = 0;
 let menus;
+let chosenRandom = preferences.random === true;
 function save() {
   saved.campaign = profile;
-  saved.settings = { hero: chosenHero, mode: difficulty, sound: audio.enabled };
+  saved.settings = { hero: chosenHero, random: chosenRandom, mode: difficulty, sound: audio.enabled };
   try { localStorage.setItem(storeKey, JSON.stringify(saved)); } catch { storageAvailable = false; }
 }
 function toast(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').classList.add('visible'); toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 1800); }
@@ -39,43 +40,71 @@ function closeModal() { modal.hidden = true; modal.innerHTML = ''; }
 function syncSound() { document.querySelectorAll('.sound-toggle').forEach(b => { b.textContent = audio.enabled ? '♪' : '♩'; b.setAttribute('aria-label', audio.enabled ? '소리 끄기' : '소리 켜기'); b.setAttribute('aria-pressed', String(audio.enabled)); }); }
 function soundClick() { audio.setEnabled(!audio.enabled); if (audio.enabled && !paused) audio.start(); save(); syncSound(); }
 function bindSounds() { document.querySelectorAll('.sound-toggle').forEach(b => { b.onclick = soundClick; }); syncSound(); }
+function syncFullscreen() {
+  const button=$('fullscreen');if(!button)return;
+  const active=!!document.fullscreenElement;
+  button.textContent=active?'⤢':'⛶';button.setAttribute('aria-label',active?'전체화면 나가기':'전체화면');button.setAttribute('aria-pressed',String(active));
+}
+async function toggleFullscreen() {
+  try {
+    if(document.fullscreenElement) await document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen) {
+      try { await document.documentElement.requestFullscreen({navigationUI:'hide'}); }
+      catch { await document.documentElement.requestFullscreen(); }
+    } else toast('이 브라우저는 전체화면을 지원하지 않아요. 홈 화면에 추가하면 더 넓게 볼 수 있어요.');
+  } catch { toast('전체화면을 열지 못했어요. 브라우저에서 다시 시도해주세요.'); }
+  syncFullscreen();
+}
+document.addEventListener('fullscreenchange',syncFullscreen);
 function bestKey() { return `${difficulty}-${chosenStage}`; }
 function showSortie() {
   cancelAnimationFrame(raf); game = null; paused = false; keys.clear(); pointer = null; audio.boss = false;
   hideAnnouncement(); closeModal(); hud.hidden = true; world.style.display = 'none'; screen.hidden = false;
+  if (!chosenRandom && HEROES[chosenHero].hidden) chosenHero=dailyHeroes()[0];
   const hero = HEROES[chosenHero], stage = STAGES[chosenStage];
   app.style.setProperty('--accent', hero.color); app.style.setProperty('--scene', `url("${art.urls.worlds[chosenStage]}")`);
   $('ambient').style.backgroundImage = `url("${art.urls.worlds[chosenStage]}")`;
   screen.innerHTML = `<section class="sortie">
-    <header class="masthead"><div class="brand"><i>✧</i> ASTRAL BLOOM</div><div class="masthead-actions"><button class="round-button" id="help" aria-label="플레이 방법">?</button><button class="round-button sound-toggle" aria-label="소리 끄기">♪</button></div></header>
-    <div class="sortie-top"><div class="hero-heading"><span class="small-caps">${hero.title}</span><h1>${hero.name}</h1><span class="english-name">${hero.en}</span></div><span class="hero-index">0${chosenHero + 1}</span><div class="hero-aura"></div><img class="hero-large" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}의 SD 일러스트"><p class="hero-quote">“${hero.quote}”</p></div>
-    <div class="sortie-controls"><p class="rotation-note">${menus.rotationLabel()}</p><nav class="roster" aria-label="캐릭터 선택">${HEROES.map((h, i) => `<button class="${i === chosenHero ? 'active' : ''}" data-hero="${i}" aria-label="${h.name} 선택${heroAvailable(profile,i)?'':' · 문법 해금'}" aria-pressed="${i === chosenHero}"><img src="${art.urls.heroes[i]}" alt=""><span>${heroAvailable(profile,i)?'':'◇ '}${h.name}</span></button>`).join('')}</nav>
-    <div class="section-heading"><h2>공격 스타일</h2><small>두 가지 빛, 서로 다른 궤적</small></div>
-    <div class="weapons">${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
-    <p class="weapon-description">${hero.weapons[chosenWeapon].description}</p>
+    <header class="masthead"><div class="brand"><i>✧</i> ASTRAL BLOOM</div><div class="masthead-actions"><button class="round-button" id="fullscreen" aria-label="전체화면">⛶</button><button class="round-button" id="help" aria-label="플레이 방법">?</button><button class="round-button sound-toggle" aria-label="소리 끄기">♪</button></div></header>
+    <div class="sortie-top"><div class="hero-heading"><span class="small-caps">${chosenRandom?'새로운 만남을 향해':hero.title}</span><h1>${chosenRandom?'랜덤':hero.name}</h1><span class="english-name">${chosenRandom?'A CHANCE ENCOUNTER':hero.en}</span></div><span class="hero-index">0${chosenHero + 1}</span><div class="hero-aura"></div><img class="hero-large ${chosenRandom?'random-portrait':''}" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}의 SD 일러스트"><p class="hero-quote">“${chosenRandom?'오늘의 수호자, 혹은 숨겨진 이야기와 만나요.':hero.quote}”</p></div>
+    <div class="sortie-controls"><p class="rotation-note">${menus.rotationLabel()}</p><nav class="roster" aria-label="캐릭터 선택">${HEROES.flatMap((h, i) => h.hidden ? [] : `<button class="${!chosenRandom && i === chosenHero ? 'active' : ''}" data-hero="${i}" aria-label="${h.name} 선택${heroAvailable(profile,i)?'':' · 문법 해금'}" aria-pressed="${!chosenRandom && i === chosenHero}"><img src="${art.urls.heroes[i]}" alt=""><span>${heroAvailable(profile,i)?'':'◇ '}${h.name}</span></button>`).join('')}<button id="random-hero" class="${chosenRandom?'active':''}" aria-pressed="${chosenRandom}"><span class="random-sigil">✧</span><span>랜덤</span></button></nav>
+    <div class="section-heading"><h2>공격 스타일</h2><small>${chosenRandom?'출격 전 만남과 스타일 선택':'두 가지 빛, 서로 다른 궤적'}</small></div>
+    <div class="weapons" ${chosenRandom?'hidden':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
+    <p class="weapon-description">${chosenRandom?'랜덤 출격에서만 히든 캐릭터를 만날 수 있어요. 히든 확률 20%. 만난 뒤 공격 스타일을 고를 수 있어요.':hero.weapons[chosenWeapon].description}</p>
     <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons"><small>던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
     <button class="launch" id="launch">${stage.name} 출격<span>THREE STAGES</span><b>→</b></button>
     <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>BEST ${Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
   </section>`;
-  screen.querySelectorAll('[data-hero]').forEach(b => b.onclick = () => menus.chooseHero(Number(b.dataset.hero),()=>{ chosenHero = Number(b.dataset.hero); chosenWeapon = 0; save(); showSortie(); }));
+  screen.querySelectorAll('[data-hero]').forEach(b => b.onclick = () => menus.chooseHero(Number(b.dataset.hero),()=>{ chosenRandom = false; chosenHero = Number(b.dataset.hero); chosenWeapon = 0; save(); showSortie(); }));
   screen.querySelectorAll('[data-weapon]').forEach(b => b.onclick = () => { chosenWeapon = Number(b.dataset.weapon); showSortie(); });
   screen.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { chosenStage = Number(b.dataset.stage); showSortie(); });
   $('dungeons').onclick=()=>menus.dungeons(chosenStage,difficulty,(stage,mode)=>{chosenStage=stage;difficulty=mode;save();showSortie();});
   $('equipment').onclick=()=>menus.equipment(showSortie);$('library').onclick=()=>menus.library();
   $('help').onclick = () => showHelp(false);
+  $('random-hero').onclick=()=>{chosenRandom=true;save();showSortie();};
+  syncFullscreen();$('fullscreen').onclick=toggleFullscreen;
   $('launch').onclick = () => { audio.start(); if (!saved.tutorial) showHelp(true); else startGame(); };
   bindSounds();
 }
 function showHelp(launchAfter) {
   const hero = HEROES[chosenHero];
-  setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">여섯 수호자, 네 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
-    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${hero.bomb}</b>${hero.bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
-    <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 매 스테이지 뒤의 퀴즈를 맞히면 생명이나 봄을 회복해요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
-    <button class="primary" id="help-done">${launchAfter ? '준비됐어요 · 출격' : '알겠어요'}</button>`);
+  const bombTitle = chosenRandom ? '랜덤으로 만나는 수호자' : hero.bomb;
+  const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 필살기는 캐릭터마다 다르며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
+  setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">새로운 수호자들, 네 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
+    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
+    <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 1·2스테이지 뒤 퀴즈는 생명이나 봄 회복, 마지막 퀴즈는 최종 점수 +10%. 퀴즈 도전은 선택이에요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
+    <button class="primary" id="help-done">${launchAfter ? (chosenRandom ? '수호자 만나기' : '준비됐어요 · 출격') : '알겠어요'}</button>`);
   $('help-done').onclick = () => { saved.tutorial = true; save(); closeModal(); if (launchAfter) startGame(); };
 }
-function startGame(stage = chosenStage) {
-  if(!heroAvailable(profile,chosenHero)) {menus.chooseHero(chosenHero,()=>startGame(stage),showSortie);return;}
+function startGame(stage = chosenStage, randomResolved = false) {
+  if(chosenRandom && !randomResolved){
+    chosenHero=randomHero(profile);chosenWeapon=0;
+    const hero=HEROES[chosenHero];
+    setModal(`<span class="small-caps">${hero.hidden?'HIDDEN ENCOUNTER':'YOUR COMPANION'}</span><h2>${hero.name}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}"><p class="intro-copy">${hero.description}</p><div class="random-weapons">${hero.weapons.map((w,i)=>`<button class="secondary ${i===0?'selected':''}" data-random-weapon="${i}" aria-pressed="${i===0}"><b>${w.name}</b><small>${w.description}</small></button>`).join('')}</div><p class="tiny-note">필살기 · ${hero.bomb}<br>${hero.bombInfo}</p><button class="primary" id="random-launch">이 모습으로 출격</button><button class="secondary" id="random-cancel">출격 준비로</button>`);
+    document.querySelectorAll('[data-random-weapon]').forEach(b=>b.onclick=()=>{chosenWeapon=Number(b.dataset.randomWeapon);document.querySelectorAll('[data-random-weapon]').forEach(item=>{const selected=Number(item.dataset.randomWeapon)===chosenWeapon;item.classList.toggle('selected',selected);item.setAttribute('aria-pressed',String(selected));});});
+    $('random-launch').onclick=()=>startGame(stage,true);$('random-cancel').onclick=showSortie;return;
+  }
+  if(!chosenRandom && !heroAvailable(profile,chosenHero)) {menus.chooseHero(chosenHero,()=>startGame(stage),showSortie);return;}
   cancelAnimationFrame(raf); closeModal(); hideAnnouncement(); audio.start();
   screen.hidden = true; hud.hidden = false; world.style.display = 'block'; renderer.resize();
   paused = false; keys.clear(); pointer = null; accumulator = 0; last = 0; frameSamples = []; startingStage = stage;
@@ -91,7 +120,7 @@ function handleEvent(event) {
     audio.stage = event.stage; audio.boss = false;
     $('stage-label').textContent = `${DUNGEONS[event.stage].name} · ${event.room+1}/3`;
     $('ambient').style.backgroundImage = `url("${art.urls.worlds[event.stage]}")`;
-    announce(`STAGE ${event.room+1} / 3`, DUNGEONS[event.stage].rooms[event.room], DUNGEONS[event.stage].mechanic);
+    announce(`STAGE ${event.room+1} / 3`, DUNGEONS[event.stage].rooms[event.room], '');
   }
   if (event.type === 'warning') { audio.boss = true; announce('GUARDIAN APPROACHING', STAGES[game.stageIndex].boss, `“${game.stage.intro}”`, 2900); }
   if (event.type === 'pattern') { $('pattern-name').textContent = event.name; if (event.phase > 0) toast(`✧ ${event.name}`); }
@@ -146,11 +175,12 @@ function continueFlight() {closeModal();audio.start();renderHud();last=0;accumul
 function resolveStageQuiz(reward=null){game.completeQuiz(reward);if(!game.finished)continueFlight();}
 function showStageQuiz(kind) {
   hideAnnouncement();keys.clear();pointer=null;
-  menus.quiz(kind,`${game.room+1}스테이지 · 별빛 시험`,correct=>{
+  menus.offerQuiz('퀴즈에 도전하고 보상을 받을까요?', game.room===2?'정답을 맞히면 최종 점수가 10% 증가해요. 건너뛰어도 클리어 보상을 받을 수 있어요.':'정답을 맞히면 생명 1 또는 봄 1을 회복해요. 건너뛰면 바로 다음 스테이지로 이동해요.', ()=>menus.quiz(kind,'퀴즈',correct=>{
     if(!correct){resolveStageQuiz();return;}
+    if(game.room===2){resolveStageQuiz('score');return;}
     setModal(`<span class="small-caps">A LITTLE RECOVERY</span><h2>기억이 힘이 되었어요</h2><p class="intro-copy">생명 ${game.player.lives}/${game.maxLife} · 봄 ${game.bombs}/${game.maxBombs}</p><button class="primary" id="reward-life">생명 1 회복</button><button class="secondary" id="reward-bomb">봄 1 회복</button>`);
     $('reward-life').onclick=()=>resolveStageQuiz('life');$('reward-bomb').onclick=()=>resolveStageQuiz('bomb');
-  });
+  }),()=>resolveStageQuiz());
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);
@@ -166,7 +196,7 @@ function finish(won) {
   saved.best[key]=Math.max(old,Math.round(game.score));save();
   const rank=won?(game.stats.deaths===0?'S':game.stats.deaths<4?'A':'B'):'—';
   const message=won?(ticket?'이번 주 첫 클리어! 아티팩트 뽑기권을 받았어요.':'이 던전의 주간 보상은 이미 받았어요. 다른 던전에도 도전해보세요.'):'도서관에서 오답을 복습하고 유물 조합을 바꿔보세요.';
-  setModal(`<span class="small-caps">${won?'DUNGEON LIBERATED':'THE STARS WILL WAIT'}</span><h2>${won?DUNGEONS[startingStage].name+' 클리어':'다음 비행을 기다릴게요'}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${HEROES[chosenHero].name}"><p class="intro-copy">${message}</p><div class="result-score">${Math.round(game.score).toLocaleString()}</div><span class="small-caps">${game.score>old?'NEW PERSONAL BEST':'RANK '+rank} · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</span><div class="result-grid"><div><small>최고 콤보</small><b>${game.bestCombo}</b></div><div><small>스침 보너스</small><b>${game.graze}</b></div><div><small>도달 스테이지</small><b>${game.room+1}/3</b></div></div><button class="primary" id="again">던전 처음부터 다시 도전</button><button class="secondary" id="sortie-return">출격 준비로</button><p class="save-note">${storageAvailable?'기록과 수집 현황을 이 기기에 저장했어요.':'이 환경에서는 기록을 저장할 수 없어요. 현재 실행 중에는 계속 플레이할 수 있어요.'}</p>`);
+  setModal(`<span class="small-caps">${won?'DUNGEON LIBERATED':'THE STARS WILL WAIT'}</span><h2>${won?DUNGEONS[startingStage].name+' 클리어':'다음 비행을 기다릴게요'}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${HEROES[chosenHero].name}"><p class="intro-copy">${message}</p><div class="result-score">${Math.round(game.score).toLocaleString()}</div>${game.scoreBonus?`<p class="score-bonus">마지막 퀴즈 +10% · +${game.scoreBonus.toLocaleString()}점</p>`:''}<span class="small-caps">${game.score>old?'NEW PERSONAL BEST':'RANK '+rank} · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</span><div class="result-grid"><div><small>최고 콤보</small><b>${game.bestCombo}</b></div><div><small>스침 보너스</small><b>${game.graze}</b></div><div><small>도달 스테이지</small><b>${game.room+1}/3</b></div></div><button class="primary" id="again">던전 처음부터 다시 도전</button><button class="secondary" id="sortie-return">출격 준비로</button><p class="save-note">${storageAvailable?'기록과 수집 현황을 이 기기에 저장했어요.':'이 환경에서는 기록을 저장할 수 없어요. 현재 실행 중에는 계속 플레이할 수 있어요.'}</p>`);
   $('again').onclick=()=>startGame(startingStage);$('sortie-return').onclick=showSortie;
 }
 $('pause').onclick = pauseGame;
@@ -200,7 +230,7 @@ window.addEventListener('resize', () => {
 });
 // Read-only telemetry for diagnostics, including offline/browser regression checks.
 Object.defineProperty(globalThis, 'astralDiagnostics', { get() { return {
-  ready: !!art, phase: game?.phase || 'sortie', hero: chosenHero, weapon: chosenWeapon, stage: game?.stageIndex ?? chosenStage,
+  ready: !!art, phase: game?.phase || 'sortie', hero: chosenHero, random: chosenRandom, weapon: chosenWeapon, stage: game?.stageIndex ?? chosenStage,
   paused, score: game?.score || 0, power: game?.power || 0, bombs: game?.bombs ?? 0, lives: game?.player.lives ?? 0, maxLife:game?.maxLife, room:game?.room, difficulty, reviveUsed:game?.reviveUsed, maskUses:game?.maskUses,
   player: game ? { x: game.player.x, y: game.player.y } : null, bullets: game?.bullets.length || 0,
   frames: frameSamples.length, fps: frameSamples.length ? Math.round(frameSamples.length / frameSamples.reduce((a, b) => a + b, 0)) : 0,

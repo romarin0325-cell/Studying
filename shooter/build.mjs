@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const assets = {};
-for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'sentinels','relics']) {
+for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels','relics']) {
   const ext = name === 'worlds' ? 'jpg' : 'png';
   assets[name] = `data:image/${ext === 'jpg' ? 'jpeg' : 'png'};base64,${(await fs.readFile(path.join(root, 'assets', `${name}.${ext}`))).toString('base64')}`;
 }
@@ -11,7 +11,7 @@ for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'sent
 // keeping the offline exporter portable in restricted Windows folders as well.
 const modules = [
   ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'LIMITS', 'clamp']],
-  ['meta.js', ['ARTIFACTS','DIFFICULTIES','normalizeDifficulty','dayKey','weekKey','dailyHeroes','createProfile','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
+  ['meta.js', ['ARTIFACTS','DIFFICULTIES','normalizeDifficulty','randomHero','dayKey','weekKey','dailyHeroes','createProfile','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
   ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']], ['menus.js',['CampaignUI']],
   ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt']],
   ['audio.js', ['AudioDirector']], ['app.js', []]

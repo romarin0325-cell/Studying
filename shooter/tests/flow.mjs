@@ -18,6 +18,7 @@ try{
  const shot=name=>page.screenshot({path:fileURLToPath(new URL(`artifacts/${name}.png`,root))});
  const state=()=>page.evaluate(()=>astralDiagnostics);
  async function answer(correct=true){
+   if(await page.locator('#quiz-accept').count())await click('#quiz-accept');
    if(await page.locator('#quiz-now').count())await click('#quiz-now');
    const prompt=await page.locator('.quiz-prompt').textContent();
    const q=[...LIBRARY.grammar.flatMap(l=>l.quizzes||[]),...LIBRARY.collocation].find(q=>q.question===prompt);
@@ -25,7 +26,7 @@ try{
    const options=page.locator('[data-answer]'),labels=await options.allTextContents();
    const index=labels.findIndex(s=>correct?s===expected:s!==expected);assert.ok(index>=0);await options.nth(index).click();await click('#quiz-continue');
  }
- await click('[data-hero="4"]');await click('#read-first');assert.ok((await page.locator('.lecture-copy').textContent()).length>200);await click('#lecture-back');await answer();
+ await click('[data-hero="4"]');await click('#quiz-accept');await click('#read-first');assert.ok((await page.locator('.lecture-copy').textContent()).length>200);await click('#lecture-back');await answer();
  assert.equal((await state()).hero,4);checks.push('Off-day grammar lecture and successful daily unlock');
  await shot('snow-sortie');await click('[data-hero="1"]');await shot('luna-sortie');await click('[data-hero="4"]');
  await click('#dungeons');await shot('dungeon-select');await click('[data-difficulty="easy"]');await click('#dungeon-done');
@@ -41,14 +42,14 @@ try{
  checks.push('Sentinel gate and collocation wrong-answer continuation without blessing');
  await page.evaluate(()=>{const g=__flow.game;g.spawnBoss();g.player.invincible=999;});await page.clock.runFor(3500);
  await page.evaluate(()=>{const g=__flow.game;g.damage(g.boss,1e6,g.boss.x,g.boss.y);});await page.clock.runFor(4000);
- assert.equal((await state()).phase,'quiz');await answer();await click('#reward-bomb');assert.equal((await state()).phase,'victory');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),1);await shot('dungeon-reward');
+ assert.equal((await state()).phase,'quiz');await answer();assert.equal((await state()).phase,'victory');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),1);await shot('dungeon-reward');
  await click('#sortie-return');await click('#equipment');await shot('artifact-collection');await click('#draw-ticket');await shot('artifact-draw');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),0);await click('#reveal-done');await click('#equipment-done');
  checks.push('First clear ticket and single-use artifact draw');
  await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>Object.keys(__flow.profile.claims).length),1);assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),1);
  await click('#launch');await page.clock.runFor(4000);await page.evaluate(()=>{const g=__flow.game;g.player.lives=1;g.player.invincible=0;g.hitPlayer();});await click('#revive-quiz');await answer();await page.clock.runFor(100);assert.equal((await state()).reviveUsed,true);
  await page.evaluate(()=>{const g=__flow.game;g.player.lives=1;g.player.invincible=0;g.hitPlayer();});assert.equal(await page.locator('#revive-quiz').count(),0);assert.ok(await page.locator('#again').isVisible());
  checks.push('Reload retains claim and mistakes; exactly one grammar revival');
- await page.clock.setSystemTime(new Date(2026,8,15,12));await click('#again');assert.ok(await page.locator('#quiz-now').isVisible());await answer(false);
+ await page.clock.setSystemTime(new Date(2026,8,15,12));await click('#again');assert.ok(await page.locator('#quiz-accept').isVisible());await answer(false);
  assert.ok(await page.locator('#launch').isVisible());assert.equal((await state()).phase,'sortie');checks.push('Expired daily unlock and failed retry quiz return safely to sortie');
  await click('#library');await click('[data-tab="mistakes"]');assert.ok((await page.locator('#library-list').textContent()).includes('2개'));await click('#practice');await answer();await click('#practice');await answer();assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),0);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,errors},null,2));await fs.writeFile(new URL('artifacts/flow.json',root),JSON.stringify({checks,errors},null,2));
