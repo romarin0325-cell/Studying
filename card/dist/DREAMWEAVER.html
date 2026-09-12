@@ -1867,6 +1867,127 @@ body[data-screen=menu] .container { padding-top:12px; }
 }
 @media(max-height:680px) and (max-width:760px) { .astra .battle-actor .portrait { height:75px; }.astra .control-panel { max-height:32vh; }.astra .log-container { min-height:85px; }.astra #modal-music-player .music-player-panel { padding:12px; }.music-player-kicker { margin-bottom:8px; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+
+/* Shared geometry: themes never override dimensions, placement or typography. */
+#screen-title { justify-content:flex-start; }
+.title-copy { margin:18px 0; }
+.title-copy h1 { margin:8px 0 22px; }
+.title-copy h1>span.title-word:last-child { font:inherit; margin:0; letter-spacing:inherit; color:var(--paper); }
+.title-utilities { margin-top:0; flex-shrink:0; }
+.fullscreen-shortcut { font-size:21px; }
+.grade-picker { width:370px!important; height:auto!important; }
+#grade-options { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+#grade-options button[aria-pressed=true] { border-color:var(--sky); background:var(--sky); color:var(--ink); }
+.theme-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:18px; }
+.theme-choices button { padding:10px 4px; font-size:12px; }
+.theme-choices button[aria-pressed=true] { outline:2px solid var(--sky); outline-offset:2px; }
+.astra .card-item.unowned { opacity:1; }
+.card-item.unowned .portrait { opacity:.65; }
+.deck-heading { gap:8px; }
+.deck-heading h1 { flex:1; text-align:center; }
+.deck-heading .deck-confirm { padding:0; border:0; }
+.astra #modal-card .modal-content { height:min(760px,calc(100dvh - 20px)); padding:16px; }
+.astra #modal-card h3 { margin:0 0 8px; font-size:19px; }
+.astra #modal-card .modal-scroll>.portrait { width:90px!important; height:120px!important; margin:0 auto 5px!important; }
+.astra #md-grade { padding:2px 0; font-size:11px!important; line-height:1.4; }
+.astra #md-stats { padding:7px 9px!important; margin:4px 0!important; line-height:1.45; font-size:12px!important; }
+.astra #md-skills { font-size:12px!important; line-height:1.5; }
+.astra #md-skills p { padding:5px 0; margin:0!important; }
+.astra #modal-lumi-question { top:var(--chat-top,0px); height:var(--chat-height,100dvh); bottom:auto; padding:8px; }
+.astra #modal-lumi-question .modal-content { height:100%!important; max-height:100%!important; padding:12px; gap:6px; }
+.lumi-chat-top { gap:5px; padding-bottom:5px; }
+.lumi-chat-input { font-size:16px; }
+.lumi-chat-status:empty { display:none; }
+.astra #modal-tutoring { padding:8px; }
+.astra #modal-tutoring .modal-content { height:calc(100dvh - 16px)!important; max-height:calc(100dvh - 16px)!important; padding:12px; }
+.astra #modal-tutoring .lumi-modal-portrait { height:75px!important; width:62px!important; }
+.astra #modal-tutoring h3 { font-size:18px; }
+.astra #tutoring-content { flex:1; min-height:0!important; }
+.study-feature { padding:18px; margin-bottom:12px; }
+.study-feature>div { display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px; }
+.study-feature h2 { font-size:20px; margin:0; }
+.study-feature .primary { margin:0; }
+.study-grid { gap:10px; }
+.study-grid>button { padding:18px; }
+.study-grid h3 { font-size:16px; margin:0 0 6px; }
+.study-grid>button>span { font-size:11px; color:var(--muted); }
+#screen-study .page-heading h1 { font-size:23px; }
+.astra .control-panel { max-height:none; overflow:visible; height:auto; grid-auto-rows:minmax(44px,auto); gap:6px; padding:8px; }
+.astra .skill-btn { min-height:44px; padding:6px; }
+.astra .actor-buffs { min-height:0; margin-top:3px; font-size:9px; max-height:24px; overflow-y:auto; }
+.battle-actor>strong { margin:2px 0 4px!important; }
+@media(max-width:760px) {
+  .astra-header { padding:8px 14px; height:60px; gap:6px; }.brand>svg { display:none; }.brand>span { font-size:12px; }.header-tools { gap:5px; }
+  .container { padding-top:12px; }.title-copy { margin:12px 0 18px; }.title-copy h1 { font-size:clamp(43px,12vw,57px); }
+  #screen-deck .page-heading { margin-bottom:8px; }#screen-deck h1 { font-size:18px; margin:0; }#screen-deck .compact { padding:7px 10px; min-height:40px; font-size:12px; }
+  .deck-formation { gap:6px; margin-bottom:8px; }.astra .deck-slot { min-height:56px; padding:7px 3px; gap:0; border-radius:12px; }.deck-slot .portrait { display:none; }.deck-slot strong { margin-top:3px; font-size:11px; }
+  #deck-card-list,#collection-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; padding-bottom:6px; }
+  #deck-card-list .card-item,#collection-grid .card-item { padding:5px; }
+  #deck-card-list .portrait,#collection-grid .portrait { height:clamp(85px,14vh,116px); margin-bottom:4px; }
+  #deck-card-list .card-name,#collection-grid .card-name { font-size:11px; }
+  .collection-toolbar { margin-bottom:8px; gap:6px; }.collection-toolbar .search-field input { padding:9px 0; }
+  #screen-collection .page-heading { margin-bottom:8px; }#screen-collection .page-heading .eyebrow { display:none; }#screen-collection h1 { font-size:21px; }
+  #screen-study .page-heading { margin-bottom:12px; }.study-feature { padding:14px; }.study-feature h2 { font-size:16px; }.study-feature .primary { min-height:42px; padding:9px; font-size:12px; }.study-grid>button { padding:16px 12px; }.study-grid h3 { font-size:14px; }
+  body[data-screen=battle] .container { padding-top:8px; padding-bottom:8px; }#screen-battle { gap:6px; }.astra .battle-header { padding:6px 10px; }.astra .visual-stage { padding:7px 12px; }.astra .battle-actor .portrait { height:clamp(96px,17vh,148px); margin-bottom:4px; }.battle-actor>small { display:none; }.astra .actor-mp-bar { margin-top:4px; }
+  .astra .log-container { min-height:85px; padding:8px; }.astra .control-panel { max-height:none; }.astra .skill-btn { font-size:11px; min-height:44px; padding:5px; }
+}
+@media(max-height:680px) and (max-width:760px) { .astra .battle-actor .portrait { height:96px; }.astra .battle-artifact-btn { min-height:30px; }.astra .log-container { min-height:70px; } }
+
+/* Paint only. Theme switches must preserve every screen's geometry. */
+body[data-theme=strawberry] { --ink:#fff2f6; --panel:#fffafd; --panel-soft:#fbe0e9; --sky:#a43f66; --sky-bright:#822b50; --paper:#4c2939; --muted:#805466; --line:#d6a4b6; --gold:#9c6813; --wash:#f4bcd2; --button:#f9d6e4; --button-fill:linear-gradient(#fffaf7,#f9d6e4); --primary-fill:linear-gradient(#b5557b,#96395e); --theme-mark:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE2IDEwQzQgMyAyIDE1IDkgMjRxNyAxMCAxNCAwYzctOSA1LTIxLTctMTRaIiBmaWxsPSIjZWU5YmI3IiBzdHJva2U9IiNhNzRjNzAiIHN0cm9rZS13aWR0aD0iMS4zIi8+PHBhdGggZD0ibTE2IDExLTgtMyA1LTItMS01IDUgNiA0LTV2NWw1IDEtOSA0WiIgZmlsbD0iI2I2Y2ZhZiIgc3Ryb2tlPSIjNzE4ZDZlIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGcgZmlsbD0iI2ZmZjlkZCI+PGVsbGlwc2UgY3g9IjEwIiBjeT0iMTUiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjIyIiBjeT0iMTUiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjE2IiBjeT0iMjAiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjEzIiBjeT0iMjUiIHJ4PSIxIiByeT0iMS41Ii8+PGVsbGlwc2UgY3g9IjIxIiBjeT0iMjMiIHJ4PSIxIiByeT0iMS41Ii8+PC9nPjwvc3ZnPgo="); color-scheme:light; }
+body[data-theme=dreamsky] { --ink:#eff9ff; --panel:#fff; --panel-soft:#def0fa; --sky:#21668c; --sky-bright:#164f70; --paper:#24465e; --muted:#536e81; --line:#a9cedf; --gold:#936318; --wash:#b3e1f5; --button:#d5effc; --button-fill:linear-gradient(#fff,#e1f3fd); --primary-fill:linear-gradient(#387fa7,#276187); --theme-mark:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMjMiIGN5PSI4IiByPSI3IiBmaWxsPSIjZjRkOTk5Ii8+PHBhdGggZD0iTTI0IDFhNyA3IDAgMCAwIDUgMTFBNyA3IDAgMCAxIDI0IDFaIiBmaWxsPSIjZTNmNGZmIi8+PHBhdGggZD0iTTcgMjhjLTkgMC04LTExLTEtMTItMS05IDExLTEzIDE2LTQgNy00IDEzIDIgMTAgNyA3IDctMSA5LTUgOVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgLTEpIHNjYWxlKC45NCkiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzc4YWNjYSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48cGF0aCBkPSJNMTAgMjFoMW0xMCAwaDEiIHN0cm9rZT0iIzU3ODlhOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4K"); color-scheme:light; }
+body[data-theme=strawberry] .world-backdrop { background:radial-gradient(circle,#dfa7bb45 1px,transparent 1.5px) 0 0/22px 22px,radial-gradient(ellipse at 12% 15%,#fff 0 8%,transparent 32%),radial-gradient(ellipse at 90% 70%,#ffd6e6,transparent 55%),linear-gradient(145deg,#fff7fa,#f8dce9); }
+body[data-theme=dreamsky] .world-backdrop { background:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MjAgOTAwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pbiBzbGljZSI+CiAgPGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJkYXkiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iI2I5ZTRmOCIvPjxzdG9wIG9mZnNldD0iLjYiIHN0b3AtY29sb3I9IiNlOGY3ZmYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmOWZjZmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICA8cGF0aCBmaWxsPSJ1cmwoI2RheSkiIGQ9Ik0wIDBoNDIwdjkwMEgweiIvPgogIDxnIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii44Ij4KICAgIDxwYXRoIGQ9Ik0tMzAgMjE2Yy0zMy0zOC00LTcxIDMxLTY3IDUtNTEgNjgtNjYgOTAtMjAgMzUtMTIgNjUgMTUgNjEgNDQgNDUgMSA2MSA0MyAyNyA2M0gtMzBaIi8+CiAgICA8cGF0aCBkPSJNMjkxIDM2NGMtMzEtMjEtMTUtNTMgMTAtNTMtNC00MCA0Ni01MyA2My0yMSAzNS0xNSA1NyAxMCA1MyAzMCAzMy0yIDQ3IDMxIDI4IDQ2WiIvPgogICAgPHBhdGggZD0iTS0zNSA3MjdjLTI1LTQyIDctNjkgNDMtNjIgNS01MCA2NC01OCA4NS0xMiAzMi0xMiA2NSAxMiA1OSA0MyAzMyA5IDM3IDI4IDIzIDQ5WiIvPgogICAgPHBhdGggZD0iTTE5OCA4NDdjLTIzLTIzLTEwLTUzIDE4LTUyLTUtMzkgMzktNTUgNjAtMjggMjctMjYgNzEtNCA2OCAyNyA0NS0xOSA4OCA0IDgxIDUzWiIvPgogIDwvZz4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iLjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+PHBhdGggZD0iTTI5MSA0NTdoNTRtMTIgMGgxNU0yMDAgNTc3aDM0bTEzIDBoNThNNTYgODAyaDMxbTEyIDBoMzgiLz48L2c+CiAgPGNpcmNsZSBjeD0iMzQyIiBjeT0iMTYzIiByPSIyOCIgZmlsbD0iI2ZmZjBjNCIgb3BhY2l0eT0iLjkiLz4KICA8cGF0aCBkPSJNMzUwIDEzNWEyOCAyOCAwIDAgMCAxNyA0N0EyOCAyOCAwIDAgMSAzNTAgMTM1WiIgZmlsbD0iI2M3ZWFmYiIvPgo8L3N2Zz4K") center top/cover no-repeat,#e8f7ff; }
+body[data-theme=strawberry] .world-backdrop::after,body[data-theme=dreamsky] .world-backdrop::after { background:none; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.astra-header,.astra-nav,.modal-content,.party-card,.departure-panel,.study-grid>button,.lobby-shortcuts>button,.battle-header,.control-panel,.log-container,.card-item,.deck-slot,.music-track-library) { background:var(--panel)!important; border-color:var(--line)!important; color:var(--paper)!important; box-shadow:0 6px 20px color-mix(in srgb,var(--wash) 28%,transparent); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.primary,.secondary,.menu-btn,.icon-button,.skill-btn,.text-button,.astra-nav button,.modal-content button) { background:var(--button-fill)!important; border-color:var(--line)!important; color:var(--paper)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.primary,[aria-current=page],[aria-pressed=true],#confirm-yes) { background:var(--primary-fill)!important; color:#fff!important; border-color:var(--sky)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.party-card .portrait,.card-item .portrait,.battle-actor .portrait,.visual-stage,.study-feature,.search-field,.lumi-chat-log,#tutoring-content,#md-stats,.lumi-chat-bubble,.modal-scroll) { background:var(--panel-soft)!important; color:var(--paper)!important; border-color:var(--line)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(h1,h2,h3,.party-card strong,.battle-actor>strong,.card-name,.music-track-title,.music-track-row-title,.title-utilities button>span,.study-feature p,.study-feature .eyebrow,#md-skills p,.lumi-chat-bubble,.lumi-chat-title,.lumi-chat-send-btn) { color:var(--paper)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.eyebrow,.card-meta,.party-card small,.party-caption,.section-label,.music-track-meta,.music-time-row,.settings-note,.lumi-chat-meta,.lumi-chat-status,.skill-btn span,.title-utilities small,.departure-hint) { color:var(--muted)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(input,textarea,select) { background:var(--panel)!important; color:var(--paper)!important; border-color:var(--line)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) ::placeholder { color:var(--muted); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .card-grade { background:var(--panel); color:var(--sky); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .modal { background:#26334766; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-music-player .music-player-panel { background:var(--panel)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(#astra-toast,.music-track-row.is-current) { background:var(--panel-soft); color:var(--paper); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .title-utilities { background:color-mix(in srgb,var(--panel) 90%,transparent); border-color:var(--line); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .actor-hp-bar { background:#749a9740; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .actor-hp-fill { background:#398f78; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .enemy .actor-hp-fill { background:#b85e79; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.header-status,.battle-versus) { color:var(--muted); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .log-line { border-color:var(--line); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .log-info { color:var(--sky); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .log-dmg { color:#ad354d; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .log-heal { color:#24765e; }
+/* Shared light-theme contrast, including secondary game dialogs. */
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .menu-btn:hover:not(:disabled),body:is([data-theme=strawberry],[data-theme=dreamsky]) .skill-btn:hover:not(:disabled) { background:var(--button)!important; border-color:var(--sky)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .menu-btn span { color:inherit!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.menu-btn.correct,.menu-btn.correct:hover) { background:#d8efdf!important; color:#235e3b!important; border-color:#6b9f7c!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.menu-btn.wrong,.menu-btn.wrong:hover) { background:#f8dce1!important; color:#842e46!important; border-color:#c88191!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(#toeic-passage-scroll,#toeic-explanation-scroll,#fortune-explanation-scroll,#mode-desc) { background:var(--panel-soft)!important; color:var(--paper)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #mode-list button[aria-pressed=true] { background:var(--primary-fill)!important; color:#fff!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.music-track-library-heading,#music-track-count) { color:var(--muted); border-color:var(--line); }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.lumi-chat-top,.portrait) { border-color:var(--line)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.modal-scroll,.card-grid) { scrollbar-color:var(--line) transparent; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .card-item.legend { border-top-color:var(--gold)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .card-item.epic { border-top-color:#a77cbc!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .card-item.rare { border-top-color:var(--sky)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) .deck-slot[aria-pressed=true] :is(small,strong) { color:#fff; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) svg:has(use[href="#i-star"]) { background:var(--theme-mark) center/contain no-repeat; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) use[href="#i-star"] { opacity:0; }
+/* Strawberry Milk: cream, stitched paper and a little berry stamp. No box sizes change. */
+body[data-theme=strawberry] :is(.astra-header,.astra-nav) { background:linear-gradient(#fffdf9,#fff2f6)!important; box-shadow:inset 0 -3px #f4ccda,0 4px 18px #dd94b52b; }
+body[data-theme=strawberry] :is(.modal-content,.title-utilities,.card-item,.study-grid>button,.departure-panel) { outline:1px dashed #e8b1c5; outline-offset:-5px; box-shadow:inset 0 0 0 3px #fffdf8,0 5px 16px #d8a0b329; }
+body[data-theme=strawberry] :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button) { box-shadow:inset 0 2px #fff8,0 2px 0 #d6a4b63b; }
+body[data-theme=strawberry] .visual-stage { background:radial-gradient(ellipse at 50% 100%,#fffdf8 25%,transparent 70%),#fbe4ed!important; box-shadow:inset 0 0 0 3px #fffdf8; }
+body[data-theme=strawberry] .title-utilities { background:var(--theme-mark) right 9px bottom 9px/25px 25px no-repeat,var(--panel); }
+/* Dream Sky: cloud pillows, moonlight and soft blue edges. Radii affect paint only. */
+body[data-theme=dreamsky] :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button) { border-radius:24px; box-shadow:inset 0 2px #fff9,0 3px 0 #b0d5e640; }
+body[data-theme=dreamsky] :is(.card-item,.deck-slot,.study-grid>button,.modal-content,.title-utilities) { border-radius:24px; box-shadow:inset 0 0 0 3px #fff,0 7px 24px #78b8d22b; }
+body[data-theme=dreamsky] :is(.astra-header,.astra-nav) { background:linear-gradient(#ffffffef,#edf8ffef)!important; box-shadow:inset 0 -3px #fff,0 5px 25px #71a9c322; }
+body[data-theme=dreamsky] .visual-stage { background:radial-gradient(ellipse at 15% 100%,#fff 30%,transparent 31%),radial-gradient(ellipse at 90% 95%,#fff 25%,transparent 26%),linear-gradient(#d2ecfa,#eff9ff)!important; box-shadow:inset 0 0 0 3px #fff; }
+body[data-theme=dreamsky] .title-utilities { background:var(--theme-mark) right 8px bottom 7px/28px 28px no-repeat,var(--panel); }
 </style>
 </head>
 <body class="astra" data-screen="title">
@@ -1885,33 +2006,30 @@ body[data-screen=menu] .container { padding-top:12px; }
   <div class="world-backdrop" aria-hidden="true"></div>
   <header class="astra-header">
     <a class="brand" href="#" onclick="Astra.home(); return false" aria-label="DREAMWEAVER 홈"><svg><use href="#i-star"/></svg><span>DREAMWEAVER<small>CARD RPG</small></span></a>
-    <div class="header header-status" aria-live="polite">꿈을 엮는 기록실</div>
+    <div class="header header-status" aria-live="polite">타이틀</div>
     <div class="header-tools">
       <button class="icon-button" onclick="MusicPlayer.open()" aria-label="음악 재생"><svg><use href="#i-music"/></svg></button>
+      <button id="btn-game-fullscreen" class="icon-button fullscreen-shortcut" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false">⛶</button>
       <button class="icon-button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
     </div>
   </header>
   <main class="container" id="main-content">
     <section id="screen-title" class="screen active" aria-label="타이틀">
-      <div class="title-coordinate eyebrow">A LITTLE MAGIC, A NEW DREAM <span>01 /</span></div>
       <div class="title-copy">
-        <p class="eyebrow">WORDS BECOME WORLDS.</p>
-        <h1>DREAM<span class="title-word">WEAVER</span><span>꿈을 엮는 기록실</span></h1>
-        <p class="title-description">단어는 주문이 되고, 카드는 동료가 된다.<br>작은 배움으로 엮어가는 꿈속의 여정.</p>
+        <h1>DREAM<span class="title-word">WEAVER</span></h1>
         <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
         <div class="title-screen-actions">
           <button id="btn-start-load" class="primary" onclick="RPG.startGame('load')" disabled><span>여정 이어가기<small>CONTINUE</small></span><svg><use href="#i-arrow"/></svg></button>
           <button id="btn-start-new" class="secondary" onclick="RPG.startGame('new')" disabled>새로운 여정 <span>NEW JOURNEY</span></button>
         </div>
       </div>
-      <div class="title-seal" aria-hidden="true"><svg><use href="#i-star"/></svg><span>DREAM MAGIC</span></div>
       <div class="title-utilities">
         <button id="btn-fortune-cookie" disabled><span class="utility-number">01</span><span>포춘쿠키<small>오늘의 리스닝</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-question" onclick="RPG.openLumiQuestion()" disabled><span class="utility-number">02</span><span>루미에게 질문<small>함께 풀어가는 영어</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-mission" onclick="RPG.openMissionHub()" disabled><span class="utility-number">03</span><span>미션 보드<small>이번 주의 작은 목표</small></span><svg><use href="#i-arrow"/></svg></button>
         <button id="btn-title-music" onclick="MusicPlayer.open()" disabled><span class="utility-number">04</span><span>음악 감상<small>여정을 채우는 선율</small></span><svg><use href="#i-arrow"/></svg></button>
       </div>
-      <footer class="title-footer"><span>WOVEN FROM DREAMS</span><button onclick="Astra.settings()">저장 데이터 · 로컬 에셋</button><span>ENGLISH × CARD STRATEGY</span></footer>
+
     </section>
     <section id="screen-menu" class="screen" aria-label="로비">
       <div class="page-heading"><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>여정의 시작</h1></div><div class="ticket-counter"><small>소환 티켓</small><span id="ui-tickets">0</span><svg><use href="#i-star"/></svg></div></div>
@@ -1936,21 +2054,20 @@ body[data-screen=menu] .container { padding-top:12px; }
     </section>
     <section id="screen-collection" class="screen" aria-label="카드 도감">
       <div class="page-heading"><div><p class="eyebrow">THE COLLECTION</p><h1><span id="collection-title">카드 도감</span> <small id="collection-count"></small></h1></div><button id="collection-back" class="secondary compact" type="button">로비로</button></div>
-      <div id="collection-toolbar" class="collection-toolbar"><label class="search-field"><svg><use href="#i-grid"/></svg><input id="card-search" type="search" placeholder="카드 이름, 속성, 역할 검색" aria-label="카드 검색"></label><select id="card-grade" aria-label="카드 등급"><option value="all">모든 등급</option><option value="legend">전설</option><option value="epic">영웅</option><option value="rare">희귀</option><option value="normal">일반</option><option value="transcendence">초월</option><option value="event">이벤트</option></select><button id="collection-scope" class="secondary compact" aria-pressed="false">보유 카드</button></div>
+      <div id="collection-toolbar" class="collection-toolbar"><label class="search-field"><svg><use href="#i-grid"/></svg><input id="card-search" type="search" placeholder="카드 이름, 속성, 역할 검색" aria-label="카드 검색"></label><button id="grade-picker-open" class="secondary compact" onclick="Astra.openGrades()" aria-haspopup="dialog">모든 등급 ▾</button><select id="card-grade" aria-label="카드 등급" hidden><option value="all">모든 등급</option><option value="legend">전설</option><option value="epic">영웅</option><option value="rare">희귀</option><option value="normal">일반</option><option value="transcendence">초월</option><option value="event">이벤트</option><option value="special">스페셜</option></select><button id="collection-scope" class="secondary compact" aria-pressed="false">보유 카드</button></div>
       <div id="collection-grid" class="card-grid"></div><p id="collection-empty" class="empty-message" hidden>조건에 맞는 카드가 없습니다.</p>
     </section>
     <section id="screen-deck" class="screen" aria-label="파티 편성">
-      <div class="page-heading"><div><p class="eyebrow">BUILD YOUR FORMATION</p><h1>파티 편성</h1></div><button class="secondary compact" onclick="RPG.toMenu()">로비로</button></div>
-      <p class="screen-description">배치할 자리를 선택한 뒤 보유 카드를 골라주세요. 선봉부터 차례로 전투에 나섭니다.</p>
+      <div class="page-heading deck-heading"><button class="secondary compact" onclick="RPG.toMenu()">로비로</button><h1>파티 편성</h1><div class="deck-confirm"><button class="primary compact" onclick="RPG.confirmDeck()">편성 완료</button></div></div>
       <div class="deck-formation"><button id="slot-0" class="deck-slot" onclick="RPG.selectDeckSlot(0)">선봉</button><button id="slot-1" class="deck-slot" onclick="RPG.selectDeckSlot(1)">중견</button><button id="slot-2" class="deck-slot" onclick="RPG.selectDeckSlot(2)">대장</button></div>
       <div class="section-label"><span>AVAILABLE CARDS <b>보유 카드</b></span><span id="deck-hint">카드를 선택하세요</span></div>
       <div id="deck-card-list" class="card-grid"></div>
-      <div class="deck-confirm"><span>배치 효과와 속성을 함께 확인하세요.</span><button class="primary compact" onclick="RPG.confirmDeck()">편성 완료 <svg><use href="#i-arrow"/></svg></button></div>
+
     </section>
     <section id="screen-study" class="screen" aria-label="학습 기록실">
-      <div class="page-heading"><div><p class="eyebrow">KNOWLEDGE BECOMES POWER</p><h1>배움의 기록실</h1></div><span class="study-emblem"><svg><use href="#i-book"/></svg></span></div>
-      <div class="study-feature"><div><p class="eyebrow">FIELD PRACTICE / TOEIC</p><h2>한 문제씩,<br>더 넓은 세계로.</h2><p>실전 지문을 읽고, 근거를 찾고, 나의 답을 완성하세요.</p><button class="primary compact" onclick="RPG.openToeicMenu()">실전 연습 시작 <svg><use href="#i-arrow"/></svg></button></div><div class="study-orbit" aria-hidden="true"><svg><use href="#i-star"/></svg><span>READ<br>THINK<br>GROW</span></div></div>
-      <div class="study-grid"><button onclick="RPG.openMagicClass()"><span class="eyebrow">01 / GRAMMAR</span><h3>루미의 마법교실</h3><p>개념에서 예문까지, 차근차근 익히는 문법.</p><span class="text-link">강의 펼치기 ↗</span></button><button onclick="RPG.openWordbook()"><span class="eyebrow">02 / VOCABULARY</span><h3>나의 단어장</h3><p>틀렸던 단어와 연어를 다시 만나보세요.</p><span class="text-link">단어장 열기 ↗</span></button><button onclick="RPG.openPrivateTutoring()"><span class="eyebrow">03 / TUTORING</span><h3>루미의 개인과외</h3><p>오답을 이해하고 나만의 학습으로 연결해요.</p><span class="text-link">복습 시작하기 ↗</span></button><button onclick="RPG.openLumiQuestion()"><span class="eyebrow">04 / ASK LUMI</span><h3>궁금한 순간, 질문</h3><p>잘 풀리지 않는 영어를 함께 살펴보세요.</p><span class="text-link">질문하기 ↗</span></button></div>
+      <div class="page-heading"><h1>배움의 기록실</h1></div>
+      <div class="study-feature"><div><h2>실전 연습 · TOEIC</h2><button class="primary compact" onclick="RPG.openToeicMenu()">연습 시작 <svg><use href="#i-arrow"/></svg></button></div></div>
+      <div class="study-grid"><button onclick="RPG.openMagicClass()"><h3>루미의 마법교실</h3><span>문법 강의 ↗</span></button><button onclick="RPG.openWordbook()"><h3>나의 단어장</h3><span>단어 · 연어 ↗</span></button><button onclick="RPG.openPrivateTutoring()"><h3>루미의 개인과외</h3><span>오답 복습 ↗</span></button><button onclick="RPG.openLumiQuestion()"><h3>루미에게 질문</h3><span>영어 질문 ↗</span></button></div>
     </section>
     <section id="screen-battle" class="screen" aria-label="전투">
       <div class="battle-header"><div class="battle-header-left"><span class="eyebrow">ENCOUNTER <b>TURN <span id="bt-turn">1</span></b></span><button id="btn-battle-artifact-check" class="battle-artifact-btn" onclick="RPG.openArtifactCheck()">아티팩트</button></div><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div></div>
@@ -2667,9 +2784,10 @@ body[data-screen=menu] .container { padding-top:12px; }
         </div>
     </div>
 
-  <div id="modal-astra-settings" class="modal" role="dialog" aria-modal="true" aria-labelledby="astra-settings-title"><div class="modal-content settings-panel"><p class="eyebrow">YOUR ARCHIVE</p><h2 id="astra-settings-title">설정과 기록</h2><div class="settings-grid"><button class="menu-btn" onclick="Astra.closeSettings(); RPG.openSystemMenu()">게임 메뉴 · 저장 · 기록</button><button id="btn-game-fullscreen" class="menu-btn" onclick="RPG.toggleGameFullscreen()" aria-pressed="false">전체화면</button><button class="menu-btn" onclick="Astra.exportSave()">기록 파일 내보내기</button><label class="menu-btn file-label">기록 파일 가져오기<input id="astra-import" type="file" accept="application/json,.json"></label></div><p class="settings-note">기존 Card와 저장 형식을 공유합니다. HTML을 옮길 때는 기록 파일도 함께 내보내세요. API 키는 내보내지 않습니다.</p><h3>로컬 초상화</h3><p class="settings-note">기존 PNG와 음원은 HTML 옆에 그대로 두세요. 초상화 폴더가 따로 있다면 상대 경로를 지정할 수 있습니다.</p><form id="asset-path-form"><label for="asset-path">초상화 폴더 경로</label><div class="path-row"><input id="asset-path" placeholder="예: portraits/ 또는 ../card/" autocomplete="off"><button class="primary compact" type="submit">적용</button></div></form><button class="menu-btn" onclick="document.getElementById('portrait-files').click()">기기에서 초상화 폴더 선택</button><input id="portrait-files" type="file" accept="image/*" multiple webkitdirectory hidden><p id="asset-status" class="settings-note" role="status">폴더 선택은 현재 실행 중에만 유지됩니다.</p><button class="secondary" onclick="Astra.closeSettings()">닫기</button></div></div>
+  <div id="modal-astra-settings" class="modal" role="dialog" aria-modal="true" aria-labelledby="astra-settings-title"><div class="modal-content settings-panel"><p class="eyebrow">YOUR ARCHIVE</p><h2 id="astra-settings-title">설정과 기록</h2><div class="settings-grid"><button class="menu-btn" onclick="Astra.closeSettings(); RPG.openSystemMenu()">게임 메뉴 · 저장 · 기록</button><button class="menu-btn" onclick="Astra.exportSave()">기록 파일 내보내기</button><label class="menu-btn file-label">기록 파일 가져오기<input id="astra-import" type="file" accept="application/json,.json"></label></div><p class="settings-note">기존 Card와 저장 형식을 공유합니다. HTML을 옮길 때는 기록 파일도 함께 내보내세요. API 키는 내보내지 않습니다.</p><h3>테마</h3><div class="theme-choices" role="group" aria-label="화면 테마"><button data-theme-choice="astra" onclick="Astra.setTheme('astra')">아스트라</button><button data-theme-choice="strawberry" onclick="Astra.setTheme('strawberry')">딸기우유</button><button data-theme-choice="dreamsky" onclick="Astra.setTheme('dreamsky')">드림스카이</button></div><h3>로컬 초상화</h3><p class="settings-note">기존 PNG와 음원은 HTML 옆에 그대로 두세요. 초상화 폴더가 따로 있다면 상대 경로를 지정할 수 있습니다.</p><form id="asset-path-form"><label for="asset-path">초상화 폴더 경로</label><div class="path-row"><input id="asset-path" placeholder="예: portraits/ 또는 ../card/" autocomplete="off"><button class="primary compact" type="submit">적용</button></div></form><button class="menu-btn" onclick="document.getElementById('portrait-files').click()">기기에서 초상화 폴더 선택</button><input id="portrait-files" type="file" accept="image/*" multiple webkitdirectory hidden><p id="asset-status" class="settings-note" role="status">폴더 선택은 현재 실행 중에만 유지됩니다.</p><button class="secondary" onclick="Astra.closeSettings()">닫기</button></div></div>
+  <div id="modal-grade-picker" class="modal" role="dialog" aria-modal="true" aria-labelledby="grade-picker-title"><div class="modal-content grade-picker"><h3 id="grade-picker-title">카드 등급</h3><div id="grade-options"></div><button class="secondary compact" onclick="document.getElementById('modal-grade-picker').classList.remove('active')">닫기</button></div></div>
   <div id="astra-toast" role="status" aria-live="polite"></div>
-  <script>window._scriptLoadErrors=[];window._scriptLoadComplete=true;</script><script>/**
+  <script>window._scriptLoadErrors=[];window._scriptLoadComplete=true;window.DREAMWEAVER_THEME_CARDS={"strawberry":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMjQwIj4KICA8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9Im1pbGsiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iI2ZmZmRmOCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZjZTBlOSIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMjQwIiByeD0iMjQiIGZpbGw9InVybCgjbWlsaykiLz4KICA8cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjIwIiByeD0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2U5YjNjNSIvPgogIDxyZWN0IHg9IjE3IiB5PSIxNyIgd2lkdGg9IjE0NiIgaGVpZ2h0PSIyMDYiIHJ4PSIxOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTRhNWJhIiBzdHJva2UtZGFzaGFycmF5PSIyIDUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxnIGZpbGw9IiNmM2JhY2UiPjxjaXJjbGUgY3g9IjM1IiBjeT0iNDMiIHI9IjIiLz48Y2lyY2xlIGN4PSIxNDUiIGN5PSI0MyIgcj0iMiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iMTk3IiByPSIyIi8+PGNpcmNsZSBjeD0iMTQ1IiBjeT0iMTk3IiByPSIyIi8+PC9nPgogIDxwYXRoIGQ9Ik02MSA1M3ExNC0xMCAyOSAwIDE1LTEwIDI5IDBNNjUgMTkxcTI1IDE0IDUwIDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Q4OTRhZCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8ZWxsaXBzZSBjeD0iOTAiIGN5PSIxNzEiIHJ4PSIzNCIgcnk9IjUiIGZpbGw9IiNlY2MwY2QiIG9wYWNpdHk9Ii41Ii8+CiAgPHBhdGggZD0iTTkwIDk1QzU0IDcyIDQyIDEwOCA2MSAxNDFxMTUgMjUgMjkgMjggMTQtMyAyOS0yOGMxOS0zMyA3LTY5LTI5LTQ2WiIgZmlsbD0iI2U5ODlhNiIgc3Ryb2tlPSIjYjk1MDc1IiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJtOTAgOTctMjQtNyAxMi02LTUtMTIgMTggMTQgMTQtMTQtMiAxMyAxNSA1LTI2IDhaIiBmaWxsPSIjYjJjOWFkIiBzdHJva2U9IiM3NDkyNzMiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPGcgZmlsbD0iI2ZmZjRkNSI+PGVsbGlwc2UgY3g9IjY3IiBjeT0iMTA4IiByeD0iMiIgcnk9IjMiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA2NyAxMDgpIi8+PGVsbGlwc2UgY3g9IjExMSIgY3k9IjEwNiIgcng9IjIiIHJ5PSIzIiB0cmFuc2Zvcm09InJvdGF0ZSgyNSAxMTEgMTA2KSIvPjxlbGxpcHNlIGN4PSI3NCIgY3k9IjE0MyIgcng9IjIiIHJ5PSIzIi8+PGVsbGlwc2UgY3g9IjEwNSIgY3k9IjE0MSIgcng9IjIiIHJ5PSIzIi8+PGVsbGlwc2UgY3g9IjkwIiBjeT0iMTU1IiByeD0iMiIgcnk9IjMiLz48L2c+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjODEzYzU4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+PHBhdGggZD0iTTc3IDEyM3YybTI2LTJ2Mm0tMTcgN3E0IDQgOCAwIi8+PC9nPgogIDxnIGZpbGw9IiNmNmI2YzgiPjxlbGxpcHNlIGN4PSI3MiIgY3k9IjEyOSIgcng9IjUiIHJ5PSIzIi8+PGVsbGlwc2UgY3g9IjEwOSIgY3k9IjEyOSIgcng9IjUiIHJ5PSIzIi8+PC9nPgogIDxwYXRoIGQ9Ik00MCA3N2MtOC05LTE0IDIgMCAxMCAxNC04IDgtMTkgMC0xMFptMTAwIDg2Yy03LTgtMTIgMiAwIDkgMTItNyA3LTE3IDAtOVoiIGZpbGw9IiNlOWIzYzUiLz4KPC9zdmc+Cg==","dreamsky":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMjQwIj4KICA8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InNreSIgeDI9IjAiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjZDhlZmZjIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZjhmY2ZmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNDAiIHJ4PSIzMCIgZmlsbD0idXJsKCNza3kpIi8+CiAgPHJlY3QgeD0iMTEiIHk9IjExIiB3aWR0aD0iMTU4IiBoZWlnaHQ9IjIxOCIgcng9IjI5IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxwYXRoIGQ9Ik0zMyA1NXEtOC0xMSAzLTE2IDMtMTUgMTUtOCAxNC01IDE3IDggMTQgMiA5IDEzTTExNyAxOTJxLTctOSAyLTEzIDMtMTIgMTMtNyAxMS01IDE0IDYgMTEgMSA4IDEwIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuOCIvPgogIDxjaXJjbGUgY3g9IjExMiIgY3k9IjkyIiByPSIyNiIgZmlsbD0iI2Y0ZGZhZCIvPgogIDxwYXRoIGQ9Ik0xMTQgNjVhMjcgMjcgMCAwIDAgMjIgMzlBMjYgMjYgMCAwIDEgMTE0IDY1WiIgZmlsbD0iI2U3ZjRmYiIvPgogIDxlbGxpcHNlIGN4PSI4NyIgY3k9IjE3NCIgcng9IjQxIiByeT0iNSIgZmlsbD0iI2I5ZDllZCIgb3BhY2l0eT0iLjQiLz4KICA8cGF0aCBkPSJNNTMgMTYwYy0yNi0xLTI0LTMzLTItMzYtMy0yOCAzMy0zOCA0Ny0xNCAyMC0xNSA0MCAxIDM4IDE4IDI1IDcgMjAgMzMtNCAzM1oiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzkxYmVkOSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHBhdGggZD0iTTY5IDEzOXE0IDQgOCAwbTIwIDBxNCA0IDggMG0tMjIgOHE0IDMgOCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTdlOWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGcgZmlsbD0iI2YxYzZkNCI+PGVsbGlwc2UgY3g9IjY1IiBjeT0iMTQ2IiByeD0iNSIgcnk9IjMiLz48ZWxsaXBzZSBjeD0iMTA4IiBjeT0iMTQ2IiByeD0iNSIgcnk9IjMiLz48L2c+CiAgPGcgZmlsbD0iIzk0YzZlMCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI5MSIgcj0iMiIvPjxjaXJjbGUgY3g9IjE0NSIgY3k9IjY5IiByPSIyIi8+PGNpcmNsZSBjeD0iMzkiIGN5PSIxODciIHI9IjIiLz48L2c+CiAgPHBhdGggZD0iTTUzIDIwMnEzNSAxMCA2OSAwIiBmaWxsPSJub25lIiBzdHJva2U9IiNiN2Q4ZWMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo="};</script><script>/**
  * @file data.js
  * @module GameData
  * @description
@@ -31344,6 +31462,57 @@ const Astra = {
   modeNames: { origin:'오리진', draft:'드래프트', chaos:'카오스', artifact:'아티팩트', artifact_chaos:'아티팩트 카오스', artifact_reserve:'아티팩트 리저브', factory:'팩토리', perfect_plan:'퍼펙트플랜', puzzle:'퍼즐', archive:'아카이브', dream_corridor:'꿈의 회랑' },
 
   $(id) { return document.getElementById(id); },
+  setTheme(name) {
+    const themes = {astra:'#0d2235',strawberry:'#fff2f6',dreamsky:'#eff9ff'};
+    if (!Object.prototype.hasOwnProperty.call(themes,name)) name = 'astra';
+    document.body.dataset.theme = name;
+    document.querySelector('meta[name="theme-color"]').content = themes[name];
+    document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.themeChoice === name)));
+    document.querySelectorAll('img[data-fallback=true]').forEach(img => {
+      // Never replace a real portrait or interrupt an in-flight local image load.
+      if (img.src.startsWith('data:image/svg+xml')) img.src = this.fallback(img._astraEntity);
+    });
+    try { localStorage.setItem('dreamweaverTheme',name); } catch { /* Theme remains usable for this session. */ }
+  },
+  openGrades() {
+    const select = this.$('card-grade');
+    const options = this.$('grade-options');
+    options.replaceChildren();
+    for (const option of select.options) {
+      const button = this.text('button',option.textContent,'secondary compact');
+      button.dataset.gradeChoice = option.value;
+      button.setAttribute('aria-pressed',String(select.value === option.value));
+      button.onclick = () => {
+        select.value = option.value;
+        this.$('grade-picker-open').textContent = `${option.textContent} ▾`;
+        this.$('modal-grade-picker').classList.remove('active');
+        this.renderCollection();
+      };
+      options.append(button);
+    }
+    this.$('modal-grade-picker').classList.add('active');
+  },
+  syncFullscreenShortcut() {
+    const button = this.$('btn-game-fullscreen');
+    const label = button.textContent;
+    button.setAttribute('aria-label',label);
+    button.title = label;
+    button.textContent = document.fullscreenElement ? '⛶−' : '⛶';
+  },
+  installChatViewport() {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const modal = this.$('modal-lumi-question');
+    const update = () => {
+      // Follow only the visible chat viewport; do not scroll the page or trap zoom.
+      if (viewport.scale !== 1) { modal.style.removeProperty('--chat-height'); modal.style.removeProperty('--chat-top'); return; }
+      modal.style.setProperty('--chat-height',`${viewport.height}px`);
+      modal.style.setProperty('--chat-top',`${viewport.offsetTop}px`);
+    };
+    viewport.addEventListener('resize',update);
+    viewport.addEventListener('scroll',update);
+    update();
+  },
   icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -31412,6 +31581,8 @@ const Astra = {
   // This emblem is deliberately a card back, never a generated replacement
   // portrait. Native image loading still resolves each exact original filename.
   fallback(entity) {
+    const themed = window.DREAMWEAVER_THEME_CARDS?.[document.body.dataset.theme];
+    if (themed) return themed;
     const color = { fire:'#d8a999', water:'#a5dfff', nature:'#b5d6bd', light:'#e7ca94', dark:'#bdb5dd' }[entity?.element] || '#a5dfff';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><g fill="none" stroke="${color}"><path opacity=".25" d="M90 15 162 60v120l-72 45-72-45V60Z"/><path opacity=".2" d="M90 32 145 68v104l-55 36-55-36V68Z"/><circle cx="90" cy="120" r="46" opacity=".35"/><path stroke-width="1.5" d="m90 68 14 38 38 14-38 14-14 38-14-38-38-14 38-14Z"/><path opacity=".65" fill="${color}" fill-opacity=".12" d="m90 88 11 32-11 32-11-32Z"/><path opacity=".5" d="M56 58h12m44 0h12M56 182h12m44 0h12M90 45v9m0 132v9"/></g></svg>`;
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -31491,7 +31662,7 @@ const Astra = {
       if (button.dataset.nav === kind) button.setAttribute('aria-current','page');
       else button.removeAttribute('aria-current');
     });
-    const names = { title:'꿈을 엮는 기록실', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
+    const names = { title:'타이틀', menu:'로비 / 여정', deck:'파티 편성', collection:'카드 도감', study:'배움의 기록실', battle:'전투 진행 중' };
     const status = document.querySelector('.header-status');
     if (status) status.textContent = names[kind] || '새로운 조합을 선택하세요';
     if (kind === 'title') {
@@ -31762,6 +31933,12 @@ const Astra = {
   },
   init() {
     if (this.ready) return;
+    let theme = 'astra';
+    try { theme = localStorage.getItem('dreamweaverTheme') || theme; } catch { /* Use default. */ }
+    this.setTheme(theme);
+    this.installChatViewport();
+    this.hook('syncGameFullscreenButton',this.syncFullscreenShortcut);
+    RPG.syncGameFullscreenButton();
     if (!RPG._featuresInstalled) throw new Error('ASTRA requires installed Card feature modules.');
     this.hook('showScreen',this.screenChanged);
     this.hook('toMenu',this.renderParty);
