@@ -119,7 +119,8 @@ const Astra = {
     this.$('asset-path').value = this.portraitPath;
     const gameMenu = document.querySelector('.settings-grid button');
     gameMenu.disabled = document.body.dataset.screen === 'title';
-    gameMenu.textContent = gameMenu.disabled ? '게임 메뉴 (여정 진입 후)' : '게임 메뉴 · 저장 · 기록';
+    gameMenu.textContent = gameMenu.disabled ? '여정 시작 후' : '게임 메뉴';
+    gameMenu.title = '저장 · 기록 관리';
     this.$('modal-astra-settings').classList.add('active');
   },
   closeSettings() { this.$('modal-astra-settings').classList.remove('active'); },
@@ -240,6 +241,7 @@ const Astra = {
       const card = id ? RPG.getCardData(id) : null;
       const button = document.createElement('button');
       button.className = `party-card${card ? '' : ' empty'}`;
+      if (card) button.dataset.grade = card.grade;
       button.setAttribute('aria-label', `${slots[index]}: ${card?.name || '비어 있음'}, 편성하기`);
       button.onclick = () => { RPG.openDeck(); RPG.selectDeckSlot(index); };
       button.append(this.text('span', `${positions[index]} / ${slots[index]}`, 'party-position'));
@@ -263,6 +265,7 @@ const Astra = {
     const button = document.createElement('button');
     button.className = `card-item ${card.grade}${count ? '' : ' unowned'}`;
     button.dataset.cardId = card.id;
+    button.dataset.grade = card.grade;
     button.setAttribute('aria-label', `${card.name}, ${this.gradeNames[card.grade] || card.grade}, ${count ? `${count}장 보유` : '미보유'}`);
     button.append(ImageAssets.createPortrait(card));
     button.append(this.text('span', this.gradeNames[card.grade] || card.grade, 'card-grade'));
@@ -273,6 +276,43 @@ const Astra = {
     button.append(meta);
     button.onclick = onClick;
     return button;
+  },
+  renderBattleStatuses() {
+    const render = (id, buffs) => {
+      const box = this.$(id);
+      box.replaceChildren();
+      for (const [key,value] of Object.entries(buffs || {})) {
+        if (!value) continue;
+        const negative = StatusRules.isNegative(key);
+        const label = `${negative ? '−' : '+'} ${BUFF_NAMES[key] || key}${typeof value === 'number' ? ` ${value}` : ''}`;
+        const badge = this.text('span',label,`status-badge ${negative ? 'status-negative' : 'status-positive'}`);
+        badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
+        box.append(badge);
+      }
+    };
+    render('p-buffs',RPG.battle.players[RPG.battle.currentPlayerIdx]?.buffs);
+    render('e-buffs',RPG.battle.enemy?.buffs);
+  },
+  decorateSummon() {
+    const result = this.$('gacha-result');
+    if (!this.$('modal-gacha').classList.contains('active') || result.querySelector('.summon-seal')) return;
+    const grade = result.dataset.grade;
+    if (!['epic','legend','transcendence','special'].includes(grade)) return;
+    const seal = this.text('div','', 'summon-seal');
+    seal.setAttribute('aria-hidden','true');
+    result.append(seal);
+    const stars = this.text('div','', 'summon-particles');
+    stars.setAttribute('aria-hidden','true');
+    for (let i=0;i<12;i++) {
+      const mote = this.text('i','');
+      mote.style.setProperty('--angle',`${i*30}deg`);
+      mote.style.setProperty('--delay',`${i%4*55}ms`);
+      stars.append(mote);
+    }
+    result.append(stars);
+    const banner = this.text('div',`${this.gradeNames[grade]} · 새로운 인연`, 'summon-rarity');
+    banner.setAttribute('role','status');
+    result.append(banner);
   },
   renderCards(containerId, list, clickHandler) {
     const box = this.$(containerId);
@@ -494,7 +534,16 @@ const Astra = {
     RPG.syncGameFullscreenButton();
     if (!RPG._featuresInstalled) throw new Error('ASTRA requires installed Card feature modules.');
     this.hook('showScreen',this.screenChanged);
+    this.hook('showCardInfo',id => {
+      const card = RPG.getCardData(id);
+      if (!card) return;
+      this.$('modal-card').dataset.grade = card.grade;
+      this.$('md-grade').textContent = `${this.gradeNames[card.grade] || card.grade} · ${this.roleNames[card.role] || card.role} · ${this.elementNames[card.element] || card.element}`;
+    });
     this.hook('toMenu',this.renderParty);
+    this.hook('renderBattlefield',this.renderBattleStatuses);
+    this.hook('runGacha',this.decorateSummon);
+    this.hook('spinChaosRoulette',this.decorateSummon);
     this.hook('updateDeckSlots',this.renderDeckSlots);
     this.hook('selectDeckSlot',this.updateSlotSelection);
     this.hook('openDeck',() => {

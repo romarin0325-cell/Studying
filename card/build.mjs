@@ -25,16 +25,15 @@ const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</sc
 const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
-let theme = await read('src/astra.css') + '\n' + await read('src/mobile.css') + '\n' + await read('src/themes.css');
+let theme = await read('src/astra.css') + '\n' + await read('src/mobile.css') + '\n' + await read('src/themes.css') + '\n' + await read('src/polish.css');
 const art = await fs.readFile(path.join(root, 'assets/observatory.png'));
 theme = theme.replaceAll('url("../assets/observatory.png")', `url("data:image/png;base64,${art.toString('base64')}")`);
 const themeCards = {};
 const encodeSVG = async file => `data:image/svg+xml;base64,${(await fs.readFile(path.join(root, 'assets', file))).toString('base64')}`;
-for (const name of ['strawberry','dreamsky']) {
-  themeCards[name] = await encodeSVG(`${name}-card.svg`);
-  theme = theme.replaceAll(`url("../assets/${name}-mark.svg")`, `url("${await encodeSVG(`${name}-mark.svg`)}")`);
+for (const [key,name] of [['strawberry','magical'],['dreamsky','dreamsky']]) themeCards[key] = await encodeSVG(`${name}-card.svg`);
+for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+\.svg)"\)/g)) {
+  theme = theme.replaceAll(reference, `url("${await encodeSVG(file)}")`);
 }
-theme = theme.replaceAll('url("../assets/dreamsky-backdrop.svg")', `url("${await encodeSVG('dreamsky-backdrop.svg')}")`);
 const parts = {
   STYLES: `<style>${css}\n${musicCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
