@@ -1,5 +1,5 @@
 import { Game } from '../engine.js';
-import { HEROES } from '../content.js';
+import { HEROES, DUNGEONS } from '../content.js';
 import fs from 'node:fs/promises';
 // A conservative deterministic autopilot is a balance probe, not a claim about human difficulty.
 export function pilot(g) {
@@ -16,20 +16,20 @@ export function pilot(g) {
       for (const t of [0, .22, .48]) { const d = Math.hypot(x - b.x - b.vx * t, y - b.y - b.vy * t); cost += d < 70 ? (70 - d) ** 2 * .018 : 0; }
     }
     for (const e of g.enemies) { const d = Math.hypot(e.x - x, e.y - y); if (d < e.r + 40) cost += 400; }
-    for (const h of g.hazards) if (Math.abs(x - h.x) < h.width / 2 + 30) cost += 700;
+    for (const h of g.hazards) if (Math.abs((h.axis==='horizontal'?y:x) - h.x) < h.width / 2 + 30) cost += 700;
     for (const d of g.pickups) if (d.type !== 'score') cost -= Math.max(0, 100 - Math.hypot(d.x - x, d.y - y)) * .12;
     if (cost < bestCost) { bestCost = cost; best = { x, y }; }
   }
   if (best) g.move(best.x, best.y);
   if (g.bombs && !g.bombTime && (bestCost > 170 || p.lives <= 2 && g.phase === 'boss')) g.bomb();
 }
-if (process.argv[1]?.endsWith('balance.mjs')) {
+if (/[\\/]balance\.mjs$/.test(process.argv[1]||'')) {
   const report=[];
-  for(const mode of ['easy','normal','hard']) for(let stage=0;stage<4;stage++) for (let h = 0; h < HEROES.length; h++) for (let w = 0; w < 2; w++) {
+  for(const mode of ['easy','normal','hard']) for(let stage=0;stage<DUNGEONS.length;stage++) for (let h = 0; h < HEROES.length; h++) for (let w = 0; w < 2; w++) {
     const g = new Game({ hero: h, weapon: w, stage,mode,seed: 92,artifacts:['spellbook','frozen','crystal'] });
     for (let i = 0; i < 60 * 540 && !g.finished; i++) { if (i % 6 === 0) pilot(g); g.update(1 / 60); }
     report.push({hero:HEROES[h].name,weapon:g.weapon,mode,stage,phase:g.phase,lives:g.player.lives,time:Math.round(g.totalTime),maxBullets:g.stats.maxBullets});
   }
   await fs.mkdir(new URL('../artifacts/',import.meta.url),{recursive:true});await fs.writeFile(new URL('../artifacts/balance.json',import.meta.url),JSON.stringify(report,null,2));
-  console.log(JSON.stringify({runs:report.length,wins:report.filter(r=>r.phase==='victory').length,stalled:report.filter(r=>!['victory','defeat'].includes(r.phase)),byDifficulty:['easy','normal','hard'].map(mode=>({mode,wins:report.filter(r=>r.mode===mode&&r.phase==='victory').length,total:HEROES.length*8})),defeats:report.filter(r=>r.phase==='defeat')},null,2));
+  console.log(JSON.stringify({runs:report.length,wins:report.filter(r=>r.phase==='victory').length,stalled:report.filter(r=>!['victory','defeat'].includes(r.phase)),byDifficulty:['easy','normal','hard'].map(mode=>({mode,wins:report.filter(r=>r.mode===mode&&r.phase==='victory').length,total:HEROES.length*DUNGEONS.length*2})),defeats:report.filter(r=>r.phase==='defeat')},null,2));
 }

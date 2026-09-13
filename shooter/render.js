@@ -7,20 +7,20 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png' };
+  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png' };
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
   })));
-  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
-  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics']) {
+  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[],tides:[],'bloom-fx':[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
+  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx']) {
     const columns=kind==='relics'?4:2;
     for (let i = 0; i < columns*columns; i++) {
       const sheet = images[kind], w = sheet.width * (kind==='secrets'&&i===0?.52:kind==='secrets'&&i===1?.46:1/columns);
       const sourceX=kind==='secrets'&&i===1?sheet.width*.54:(i%columns)*w;
       // The original companion export has Cinderella's shoe just below its nominal cell.
-      const top=kind==='companions'&&i===3?.54:kind==='companions'&&i===2?.51:Math.floor(i/columns)/columns;
-      const bottom=kind==='companions'&&i===1?.535:Math.floor(i/columns+1)/columns;
+      const top=kind==='tides'?(i<2?0:.53):kind==='companions'&&i===3?.54:kind==='companions'&&i===2?.51:Math.floor(i/columns)/columns;
+      const bottom=kind==='tides'?(i<2?.53:1):kind==='companions'&&i===1?.535:Math.floor(i/columns+1)/columns;
       const h=sheet.height*(bottom-top);
       const sw = Math.floor(w), sh = Math.floor(h), raw = canvas(sw, sh), rc = raw.getContext('2d', { willReadFrequently: true });
       rc.drawImage(sheet, sourceX, top*sheet.height, w, h, 0, 0, sw, sh);
@@ -29,7 +29,7 @@ export async function loadArt() {
       const keyed = new Uint8Array(sw * sh);
       for (let j = 0; j < d.length; j += 4) {
         const r = d[j], g = d[j + 1], b = d[j + 2];
-        if (g > 150 && g > r * 1.7 && g > b * 1.65) {
+        if (!['tides','bloom-fx'].includes(kind) && g > 150 && g > r * 1.7 && g > b * 1.65) {
           keyed[j / 4] = 1;
           const a = clamp((Math.max(r, b) - 45) / 80, 0, 1);
           d[j + 3] = Math.round(a * 255); d[j + 1] = Math.min(g, Math.max(r, b) * 1.12);
@@ -74,6 +74,20 @@ export async function loadArt() {
     const im = images.worlds, cut = canvas(450, 1200), c = cut.getContext('2d');
     c.drawImage(im, i * im.width / 4, 0, im.width / 4, im.height, 0, 0, 450, 1200);
     result.worlds.push(cut); result.urls.worlds.push(cut.toDataURL('image/jpeg', .87));
+  }
+  // New transparent art is decoded once; no per-frame image filters or allocations.
+  result.bosses.splice(3,0,result.tides[0],result.tides[1]);
+  result.sentinels.splice(3,0,result.tides[2],result.tides[3]);
+  result.enemies.splice(3,0,result.tides[2],result.tides[3]);
+  const extraWorlds=[];
+  for(let i=0;i<2;i++){const im=images['tide-worlds'],cut=canvas(450,1200);cut.getContext('2d').drawImage(im,i*im.width/2,0,im.width/2,im.height,0,0,450,1200);extraWorlds.push(cut);}
+  result.worlds.splice(3,0,...extraWorlds);result.urls.worlds=result.worlds.map(c=>c.toDataURL('image/jpeg',.87));
+  result.urls.bosses=result.bosses.map(c=>c.toDataURL('image/png'));
+  const darkFairy=canvas(512,512),df=darkFairy.getContext('2d');df.filter='invert(1)';df.drawImage(result.companions[3],0,0,512,512);result.darkFairy=darkFairy;
+  for(let i=0;i<6;i++){
+    const icon=canvas(384,384),c=icon.getContext('2d'),sheet=images['tide-relics'];
+    c.drawImage(sheet,(i%3)*sheet.width/3,Math.floor(i/3)*sheet.height/2,sheet.width/3,sheet.height/2,0,0,384,384);
+    result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));
   }
   return result;
 }
@@ -133,10 +147,12 @@ export class Renderer {
     for (let i = 0; i < (this.quality ? 35 : 16); i++) { const m = this.motes[i]; c.globalAlpha = .15 + Math.sin(t + i) * .1; c.beginPath(); c.arc(m.x + Math.sin(t * .3 + i) * 12, (m.y + t * m.speed) % h, m.r, 0, TAU); c.fill(); }
     c.globalAlpha = 1;
     for (const hazard of g.hazards) {
-      const active = hazard.age > hazard.warn;
-      c.fillStyle = active ? '#edd5ffbb' : '#f8a2ec18'; c.fillRect(hazard.x - hazard.width / 2, 70, hazard.width, h);
-      c.strokeStyle = active ? '#fff' : '#ffb7f1'; c.lineWidth = active ? 3 : 1; c.setLineDash(active ? [] : [8, 12]);
-      c.beginPath(); c.moveTo(hazard.x, 76); c.lineTo(hazard.x, h); c.stroke(); c.setLineDash([]);
+      const active=hazard.age>hazard.warn,horizontal=hazard.axis==='horizontal';
+      c.save();c.fillStyle=active?'#b7f4ff99':'#ffb7f126';
+      if(horizontal)c.fillRect(0,hazard.x-hazard.width/2,450,hazard.width);
+      else c.fillRect(hazard.x-hazard.width/2,0,hazard.width,h);
+      c.strokeStyle=active?'#fff':'#ffb7f1';c.lineWidth=active?3:1;c.setLineDash(active?[]:[8,12]);
+      c.beginPath();c.moveTo(horizontal?0:hazard.x,horizontal?hazard.x:0);c.lineTo(horizontal?450:hazard.x,horizontal?hazard.x:h);c.stroke();c.restore();
     }
     for (const z of g.zones) {
       const color=z.kind==='haven'?'#f8d8ec':'#c496ff';
@@ -144,8 +160,8 @@ export class Renderer {
       c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.arc(z.x,z.y,z.r,0,TAU);c.stroke();
       for(let i=0;i<5;i++){const a=t*.7+i*TAU/5;c.fillStyle=color;star(c,z.x+Math.cos(a)*z.r*.7,z.y+Math.sin(a)*z.r*.7,5);c.fill();}c.restore();
     }
-    if(g.weapon==='orbit' && g.bombTime<=0) {
-      for(const orb of g.orbitCenters()) {this.sprite(this.art.sigil,orb.x,orb.y,84,-t*2,1,.8);}
+    if(g.weapon==='orbit' && (g.bombTime<=0||g.artifacts.has('sun'))) {
+      for(const orb of g.orbitCenters()) {this.sprite(this.art.sigil,orb.x,orb.y,100.8,-t*2,1,.8);}
     }
     if(g.weapon==='laser' && ['wave','boss'].includes(g.phase)) this.drawLaser(g);
     for (const shot of g.shots) this.drawShot(shot, g);
@@ -156,9 +172,9 @@ export class Renderer {
         for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(0, 0, 73 + i * 10, 0, TAU); c.stroke(); }
         for (let i = 0; i < 8; i++) { star(c, Math.cos(i * TAU / 8) * 82, Math.sin(i * TAU / 8) * 82, 5); c.stroke(); } c.restore();
       }
-      const size = e.boss ? (g.stageIndex === 3 ? 184 : 164) : e.miniboss?125:e.elite ? 84 : e.offspring?32:55;
+      const size = e.boss ? (g.stageIndex === 5 ? 184 : 164) : e.miniboss?125:e.elite ? 84 : e.offspring?32:55;
       this.sprite(e.boss ? this.art.bosses[e.image] : e.miniboss?this.art.sentinels[e.image]:this.art.enemies[e.image], e.x, e.y + bob, size, e.boss ? Math.sin(e.age) * .025 : Math.sin(e.age * 2) * .08, 1, e.flash > 0 ? .63 : 1);
-      if(e.special!==undefined){c.strokeStyle=['#ffbc74','#ffb4db','#dfaaff','#ddadff'][e.special];c.lineWidth=2;c.beginPath();c.arc(e.x,e.y,31,0,TAU);c.stroke();c.fillStyle='#fff';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(e.special===2?Math.ceil(e.countdown):['!','Ⅲ','','◇'][e.special],e.x,e.y-37);}
+      if(e.special!==undefined){c.strokeStyle=g.stage.color;c.lineWidth=2;c.beginPath();c.arc(e.x,e.y,31,0,TAU);c.stroke();c.fillStyle='#fff';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(e.special===2?Math.ceil(e.countdown):['','Ⅲ','','✿','↔','◇'][e.special],e.x,e.y-37);}
       if(e.marks){c.fillStyle='#ffbedf';for(let i=0;i<e.marks;i++){star(c,e.x-6+i*12,e.y-30,4);c.fill();}}
       if (e.flash > 0) { c.globalCompositeOperation = 'lighter'; c.drawImage(this.glow('#ffffff'), e.x - 16, e.y - 16, 32, 32); c.globalCompositeOperation = 'source-over'; }
       if (e.elite) { c.fillStyle = '#1c102b'; c.fillRect(e.x - 26, e.y - 40, 52, 3); c.fillStyle = g.stage.color; c.fillRect(e.x - 26, e.y - 40, 52 * Math.max(0, e.hp / e.maxHp), 3); }
@@ -231,14 +247,15 @@ export class Renderer {
   }
   drawPlayer(g) {
     const c = this.c, p = g.player, t = g.totalTime;
-    if(g.artifacts.has('leaf'))this.sprite(this.art.companions[3],p.x+Math.cos(t*2)*44,p.y-22+Math.sin(t*2)*12,40);
+    if(g.artifacts.has('leaf'))this.sprite(this.art.companions[3],p.x+44,p.y-22+Math.sin(t*2)*8,40);
+    if(g.artifacts.has('mirror'))this.sprite(this.art.darkFairy,p.x-44,p.y-22-Math.sin(t*2)*8,40);
     c.save(); c.translate(p.x, p.y);
     c.globalAlpha = .3; c.strokeStyle = g.hero.color; c.lineWidth = 1.5;
     c.beginPath(); c.ellipse(0, 19, 25, 8, 0, 0, TAU); c.stroke();
     for (const side of [-1, 1]) { c.beginPath(); c.moveTo(side * 14, 10); c.quadraticCurveTo(side * 23 + Math.sin(t * 4) * 7, 37, side * 9, 59); c.stroke(); }
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
-    this.sprite(g.heroIndex===8&&g.bombTime>0?this.art.dark:this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
+    this.sprite(g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0?this.art.dark:this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
     // The tiny luminous core is the actual hitbox; the illustration and cape are safe.
     c.fillStyle = '#11162a'; c.beginPath(); c.arc(p.x, p.y, p.radius, 0, TAU); c.fill();
@@ -246,7 +263,8 @@ export class Renderer {
   }
   drawEffect(f, g) {
     const c = this.c, q = clamp(f.age / f.life, 0, 1); c.save();
-    if(f.type==='detonation') {
+    if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
+    } else if(f.type==='detonation') {
       c.fillStyle=f.age<.75?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
     } else if (f.type === 'beam') {
       c.globalAlpha = .2; c.fillStyle = '#f5cf79'; c.fillRect(f.x - f.width, 50, f.width * 2, Math.max(0, f.y - 50));
@@ -276,6 +294,7 @@ export class Renderer {
   drawBomb(g) {
     const c = this.c, t = g.totalTime, remaining = g.bombTime;
     const age=(g.bombDuration||5)-remaining;
+    if(g.artifacts.has('sun')){const q=age/g.bombDuration;this.sprite(this.art['bloom-fx'][1],225,this.height*.4,220+q*400,q*.2,1,Math.sin(Math.PI*Math.min(.99,q))*.9);return;}
     // Reuse one cached sigil and the existing portrait: no full-screen filters or new textures per frame.
     this.sprite(this.art.sigil,g.player.x,g.player.y,240+Math.min(age,1)*90,t*.35,1,Math.min(.5,remaining*.5));
     if(age<1.1){const q=age/1.1,fade=Math.sin(q*Math.PI)*.85;
@@ -290,9 +309,7 @@ export class Renderer {
     } else if (g.heroIndex === 1) {
       for (const side of [-1, 1]) this.sprite(this.art.heroes[1], cx + side * 52, cy - 20 + Math.sin(t * 8) * 14, 70, side * .22, 1, .35);
     } else if (g.heroIndex === 2) {
-      c.translate(cx, cy); c.fillStyle = '#ffb76c'; c.beginPath(); c.moveTo(0, -120);
-      c.bezierCurveTo(-35, -230, -200, -260, -215, -170); c.quadraticCurveTo(-110, -180, 0, 20);
-      c.quadraticCurveTo(110, -180, 215, -170); c.bezierCurveTo(200, -260, 35, -230, 0, -120); c.fill();
+      this.sprite(this.art['bloom-fx'][0],cx,cy-145-Math.sin(age*2)*20,390,0,1,.9);
     } else if(g.heroIndex===4) {
       c.translate(cx,cy);c.rotate(t*.5);for(let i=0;i<6;i++){c.rotate(TAU/6);c.beginPath();c.moveTo(0,20);c.lineTo(0,180);c.moveTo(0,100);c.lineTo(-35,70);c.moveTo(0,100);c.lineTo(35,70);c.stroke();}
     } else if(g.heroIndex===5) {
@@ -300,6 +317,10 @@ export class Renderer {
     } else {
       c.translate(cx, cy); c.rotate(t * .5); for (let i = 0; i < 8; i++) { c.rotate(TAU / 8); c.beginPath(); c.ellipse(0, 48, 32, 75, 0, 0, TAU); c.stroke(); }
     }
-    c.globalAlpha = .1 * Math.min(1, remaining); c.fillStyle = g.hero.color; c.fillRect(-450, -this.height, 900, this.height * 2); c.restore();
+    c.restore();
+    const fx=g.heroIndex===0?1:g.heroIndex===4?2:g.heroIndex===3||g.heroIndex===7?3:-1;
+    if(fx>=0)this.sprite(this.art['bloom-fx'][fx],cx,cy-70,270+Math.sin(age*3)*12,t*.15,1,.5*Math.min(1,remaining));
+    if(g.heroIndex===1||g.heroIndex===5||g.heroIndex===6||g.heroIndex===8)this.sprite(this.art.sigil,cx,cy-90,300,-t*.25,1,.55*Math.min(1,remaining));
+    c.save();c.globalAlpha = .1 * Math.min(1, remaining); c.fillStyle = g.hero.color; c.fillRect(-450, -this.height, 900, this.height * 2); c.restore();
   }
 }
