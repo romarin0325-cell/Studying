@@ -1983,12 +1983,14 @@ body[data-theme=strawberry] :is(.modal-content,.title-utilities,.card-item,.stud
 body[data-theme=strawberry] :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button) { box-shadow:inset 0 2px #fff8,0 2px 0 #d6a4b63b; }
 body[data-theme=strawberry] .visual-stage { background:radial-gradient(ellipse at 50% 100%,#fffdf8 25%,transparent 70%),#fbe4ed!important; box-shadow:inset 0 0 0 3px #fffdf8; }
 body[data-theme=strawberry] .title-utilities { background:var(--theme-mark) right 9px bottom 9px/25px 25px no-repeat,var(--panel); }
+body[data-theme=strawberry] .title-copy h1 { font-family:"Yu Gothic UI","Malgun Gothic",sans-serif; }
 /* Dream Sky: cloud pillows, moonlight and soft blue edges. Radii affect paint only. */
 body[data-theme=dreamsky] :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button) { border-radius:24px; box-shadow:inset 0 2px #fff9,0 3px 0 #b0d5e640; }
 body[data-theme=dreamsky] :is(.card-item,.deck-slot,.study-grid>button,.modal-content,.title-utilities) { border-radius:24px; box-shadow:inset 0 0 0 3px #fff,0 7px 24px #78b8d22b; }
 body[data-theme=dreamsky] :is(.astra-header,.astra-nav) { background:linear-gradient(#ffffffef,#edf8ffef)!important; box-shadow:inset 0 -3px #fff,0 5px 25px #71a9c322; }
 body[data-theme=dreamsky] .visual-stage { background:radial-gradient(ellipse at 15% 100%,#fff 30%,transparent 31%),radial-gradient(ellipse at 90% 95%,#fff 25%,transparent 26%),linear-gradient(#d2ecfa,#eff9ff)!important; box-shadow:inset 0 0 0 3px #fff; }
 body[data-theme=dreamsky] .title-utilities { background:var(--theme-mark) right 8px bottom 7px/28px 28px no-repeat,var(--panel); }
+body[data-theme=dreamsky] .title-copy h1 { font-family:"Segoe UI Variable","Segoe UI",sans-serif; }
 
 /* Route decoration shares the light panel palette, including the active halo. */
 body:is([data-theme=strawberry],[data-theme=dreamsky]) .route-track i { background:var(--line); }
@@ -4794,6 +4796,20 @@ const BUFF_NAMES = {
     'reaper_realm': '사신강림',
     'gale': '질풍'
 };
+
+// User-facing labels are kept separate from stable card, mode, and save IDs.
+// BUFF_NAMES remains the compatibility lookup used throughout the battle runtime.
+const DISPLAY_NAMES = Object.freeze({
+    element: Object.freeze({ fire: '불', water: '물', nature: '자연', wind: '바람', light: '빛', dark: '어둠', earth: '대지', normal: '무속성' }),
+    role: Object.freeze({ dealer: '딜러', balancer: '밸런서', buffer: '버퍼', debuffer: '디버퍼', looter: '루터', tank: '탱커', healer: '힐러' }),
+    grade: Object.freeze({ normal: '노멀', rare: '레어', epic: '에픽', legend: '전설', transcendence: '초월', event: '이벤트', special: '이벤트' }),
+    mode: Object.freeze({
+        origin: '오리진', restriction: '제약의 시련', balance: '균형의 도전', suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브',
+        curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스', artifact_chaos: '아티팩트카오스', draft: '드래프트',
+        factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브', perfect_plan: '퍼펙트플랜', dream_corridor: '꿈의회랑'
+    }),
+    resource: Object.freeze({ tickets: '뽑기 티켓', chaosTickets: '카오스 티켓' })
+});
 </script>
 <script>const VOCAB_SOURCE = [
     { w: 'amenities', m: '(명) 편의시설', tm: '(명) 적, 앙숙; (명) 반대 세력', tw: 'enemies' },
@@ -19491,6 +19507,7 @@ window.GAME_CONSTANTS = {
     },
 
     DREAM_CORRIDOR_MAX_LIVES: 3,
+    DREAM_CORRIDOR_TOEIC_WRONG_THRESHOLD: 2,
 
     LOADING: {
         MAX_ATTEMPTS: 200,
@@ -20589,6 +20606,15 @@ const StatusRules = {
         return NEGATIVE_STATUS_IDS.includes(id);
     },
 
+    isStackable(id, artifacts = []) {
+        return !!getStackCapInfo(id, artifacts);
+    },
+
+    formatDisplay(id, value, artifacts = []) {
+        const name = getBuffName(id);
+        return this.isStackable(id, artifacts) ? `${name} ${value}스택` : name;
+    },
+
     countNegativeKinds(buffs) {
         return Object.keys(buffs || {}).filter(id => this.isNegative(id) && buffs[id] > 0).length;
     },
@@ -20632,12 +20658,12 @@ const SideEffects = {
         'debuff': (ctx, eff) => {
             const target = ctx.target;
             const value = StatusRules.add(target, eff.id, eff.stack || 1, ctx.artifacts || []);
-            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`${target === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'self_debuff': (ctx, eff) => {
             const value = StatusRules.add(ctx.source, eff.id, eff.stack || 1, ctx.artifacts || []);
-            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'field_buff': (ctx, eff) => {
@@ -25251,8 +25277,14 @@ const BattleRuntime = {
             countHiddenUnlock: false,
             countMonthly: false,
             countSpecial: false,
-            onComplete: () => finishSuccess('실전마법연습'),
-            onFailure: () => fail('실전마법연습')
+            onComplete: result => {
+                const wrongCount = result && Array.isArray(result.wrongList) ? result.wrongList.length : 0;
+                if (wrongCount >= GAME_CONSTANTS.DREAM_CORRIDOR_TOEIC_WRONG_THRESHOLD) {
+                    fail('실전마법연습');
+                    return;
+                }
+                finishSuccess('실전마법연습');
+            }
         });
     },
 
@@ -28371,7 +28403,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                         MODES.push({
                             id: 'dream_corridor',
                             name: '꿈의회랑',
-                            desc: '학습용 히든 엔드리스 모드. 전투 종료 후 퀴즈 자동 진행, 오답 3회까지 유예. (3회 오답 시 런 실패 / 오답 즉시 저장)\n(실전마법연습 3회로 출현)'
+                            desc: '전투 후 학습 문제 자동 진행. TOEIC Part 5·6·7은 세트에서 2문제 이상 오답이면 오답 1회로 기록됩니다. 오답 3회 또는 전투 패배 시 런이 종료됩니다.\n(실전마법연습 3회 후 출현)'
                         });
                     }
                 } else if (this.tempGameType === 'challenge') {
@@ -29060,22 +29092,18 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
 
                 const modal = document.getElementById('modal-gacha');
                 const content = document.getElementById('gacha-result');
-                let color = '#bdbdbd', title = "획득!";
-                if (pick.grade === 'transcendence') { color = '#ffd700'; title = "🌟 초월 카드 강림! 🌟"; }
-                else if (grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
-                else if (grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
+                let color = '#bdbdbd';
+                if (pick.grade === 'transcendence') color = '#ffd700';
+                else if (grade === 'legend') color = '#ff5252';
+                else if (grade === 'epic') color = '#e040fb';
 
-                let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
-                if (pick.grade === 'transcendence') msgTitle = title;
-                document.getElementById('gacha-title').innerText = msgTitle;
+                document.getElementById('gacha-title').innerText = '획득';
                 content.dataset.grade = pick.grade;
-                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>`;
+                const gradeName = DISPLAY_NAMES.grade[pick.grade] || pick.grade;
+                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${gradeName}] ${pick.name}</div>`;
                 content.appendChild(ImageAssets.createPortrait(pick, {
                     wrapperStyle: 'width:120px; height:160px; margin:0 auto;'
                 }));
-                const resultMessage = document.createElement('p');
-                resultMessage.textContent = '새로운 동료를 얻었습니다!';
-                content.appendChild(resultMessage);
                 modal.classList.add('active');
             },
 
@@ -29399,7 +29427,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 const eImg = document.getElementById('e-img');
                 ImageAssets.load(eImg, e);
 
-                let eBuffTxt = Object.keys(e.buffs).map(k => `${BUFF_NAMES[k] || k}${e.buffs[k] > 1 ? e.buffs[k] : ''}`).join(' ');
+                let eBuffTxt = Object.keys(e.buffs).filter(k => e.buffs[k]).map(k => StatusRules.formatDisplay(k, e.buffs[k], this.state.artifacts || [])).join(' ');
                 document.getElementById('e-buffs').innerText = eBuffTxt;
 
                 document.getElementById('bt-turn').innerText = this.battle.turn;
@@ -29947,12 +29975,9 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 else char = this.battle.enemy;
                 if (!char) return;
 
-                let buffs = Object.keys(char.buffs).map(k => {
-                    let name = BUFF_NAMES[k] || k;
-                    let val = char.buffs[k];
-                    if (val === true) return name;
-                    return `${name}(${val})`;
-                }).join(', ') || '없음';
+                let buffs = Object.keys(char.buffs).filter(k => char.buffs[k])
+                    .map(k => StatusRules.formatDisplay(k, char.buffs[k], this.state.artifacts || []))
+                    .join(', ') || '없음';
 
                 const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
 
@@ -31532,10 +31557,10 @@ const Astra = {
   localPortraits: new Map(),
   portraitPath: '',
   modalStack: [],
-  elementNames: { fire:'불', water:'물', nature:'자연', wind:'바람', light:'빛', dark:'어둠', earth:'대지', normal:'무속성' },
-  roleNames: { dealer:'공격', balancer:'균형', buffer:'지원', debuffer:'약화', looter:'수집', tank:'방어', healer:'회복' },
-  gradeNames: { legend:'전설', epic:'영웅', rare:'희귀', normal:'일반', transcendence:'초월', event:'이벤트', special:'스페셜' },
-  modeNames: { origin:'오리진', draft:'드래프트', chaos:'카오스', artifact:'아티팩트', artifact_chaos:'아티팩트 카오스', artifact_reserve:'아티팩트 리저브', factory:'팩토리', perfect_plan:'퍼펙트플랜', puzzle:'퍼즐', archive:'아카이브', dream_corridor:'꿈의 회랑' },
+  get elementNames() { return DISPLAY_NAMES.element; },
+  get roleNames() { return DISPLAY_NAMES.role; },
+  get gradeNames() { return DISPLAY_NAMES.grade; },
+  get modeNames() { return DISPLAY_NAMES.mode; },
 
   $(id) { return document.getElementById(id); },
   setTheme(name) {
@@ -31807,7 +31832,7 @@ const Astra = {
       for (const [key,value] of Object.entries(buffs || {})) {
         if (!value) continue;
         const negative = StatusRules.isNegative(key);
-        const label = `${negative ? '−' : '+'} ${BUFF_NAMES[key] || key}${typeof value === 'number' ? ` ${value}` : ''}`;
+        const label = `${negative ? '−' : '+'} ${StatusRules.formatDisplay(key, value, RPG.state.artifacts || [])}`;
         const badge = this.text('span',label,`status-badge ${negative ? 'status-negative' : 'status-positive'}`);
         badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
         box.append(badge);
@@ -31833,9 +31858,6 @@ const Astra = {
       stars.append(mote);
     }
     result.append(stars);
-    const banner = this.text('div',`${this.gradeNames[grade]} · 새로운 인연`, 'summon-rarity');
-    banner.setAttribute('role','status');
-    result.append(banner);
   },
   renderCards(containerId, list, clickHandler) {
     const box = this.$(containerId);

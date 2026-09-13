@@ -1932,3 +1932,17 @@ const BUFF_NAMES = {
     'reaper_realm': '사신강림',
     'gale': '질풍'
 };
+
+// User-facing labels are kept separate from stable card, mode, and save IDs.
+// BUFF_NAMES remains the compatibility lookup used throughout the battle runtime.
+const DISPLAY_NAMES = Object.freeze({
+    element: Object.freeze({ fire: '불', water: '물', nature: '자연', wind: '바람', light: '빛', dark: '어둠', earth: '대지', normal: '무속성' }),
+    role: Object.freeze({ dealer: '딜러', balancer: '밸런서', buffer: '버퍼', debuffer: '디버퍼', looter: '루터', tank: '탱커', healer: '힐러' }),
+    grade: Object.freeze({ normal: '노멀', rare: '레어', epic: '에픽', legend: '전설', transcendence: '초월', event: '이벤트', special: '이벤트' }),
+    mode: Object.freeze({
+        origin: '오리진', restriction: '제약의 시련', balance: '균형의 도전', suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브',
+        curse: '저주의 증폭', flood: '축복의 범람', chaos: '카오스', artifact_chaos: '아티팩트카오스', draft: '드래프트',
+        factory: '팩토리', artifact: '아티팩트', artifact_reserve: '아티팩트리저브', perfect_plan: '퍼펙트플랜', dream_corridor: '꿈의회랑'
+    }),
+    resource: Object.freeze({ tickets: '뽑기 티켓', chaosTickets: '카오스 티켓' })
+});

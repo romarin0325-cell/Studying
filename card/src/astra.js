@@ -9,10 +9,10 @@ const Astra = {
   localPortraits: new Map(),
   portraitPath: '',
   modalStack: [],
-  elementNames: { fire:'불', water:'물', nature:'자연', wind:'바람', light:'빛', dark:'어둠', earth:'대지', normal:'무속성' },
-  roleNames: { dealer:'공격', balancer:'균형', buffer:'지원', debuffer:'약화', looter:'수집', tank:'방어', healer:'회복' },
-  gradeNames: { legend:'전설', epic:'영웅', rare:'희귀', normal:'일반', transcendence:'초월', event:'이벤트', special:'스페셜' },
-  modeNames: { origin:'오리진', draft:'드래프트', chaos:'카오스', artifact:'아티팩트', artifact_chaos:'아티팩트 카오스', artifact_reserve:'아티팩트 리저브', factory:'팩토리', perfect_plan:'퍼펙트플랜', puzzle:'퍼즐', archive:'아카이브', dream_corridor:'꿈의 회랑' },
+  get elementNames() { return DISPLAY_NAMES.element; },
+  get roleNames() { return DISPLAY_NAMES.role; },
+  get gradeNames() { return DISPLAY_NAMES.grade; },
+  get modeNames() { return DISPLAY_NAMES.mode; },
 
   $(id) { return document.getElementById(id); },
   setTheme(name) {
@@ -284,7 +284,7 @@ const Astra = {
       for (const [key,value] of Object.entries(buffs || {})) {
         if (!value) continue;
         const negative = StatusRules.isNegative(key);
-        const label = `${negative ? '−' : '+'} ${BUFF_NAMES[key] || key}${typeof value === 'number' ? ` ${value}` : ''}`;
+        const label = `${negative ? '−' : '+'} ${StatusRules.formatDisplay(key, value, RPG.state.artifacts || [])}`;
         const badge = this.text('span',label,`status-badge ${negative ? 'status-negative' : 'status-positive'}`);
         badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
         box.append(badge);
@@ -310,9 +310,6 @@ const Astra = {
       stars.append(mote);
     }
     result.append(stars);
-    const banner = this.text('div',`${this.gradeNames[grade]} · 새로운 인연`, 'summon-rarity');
-    banner.setAttribute('role','status');
-    result.append(banner);
   },
   renderCards(containerId, list, clickHandler) {
     const box = this.$(containerId);

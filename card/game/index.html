@@ -3235,7 +3235,7 @@
                         MODES.push({
                             id: 'dream_corridor',
                             name: '꿈의회랑',
-                            desc: '학습용 히든 엔드리스 모드. 전투 종료 후 퀴즈 자동 진행, 오답 3회까지 유예. (3회 오답 시 런 실패 / 오답 즉시 저장)\n(실전마법연습 3회로 출현)'
+                            desc: '전투 후 학습 문제 자동 진행. TOEIC Part 5·6·7은 세트에서 2문제 이상 오답이면 오답 1회로 기록됩니다. 오답 3회 또는 전투 패배 시 런이 종료됩니다.\n(실전마법연습 3회 후 출현)'
                         });
                     }
                 } else if (this.tempGameType === 'challenge') {
@@ -3924,22 +3924,18 @@
 
                 const modal = document.getElementById('modal-gacha');
                 const content = document.getElementById('gacha-result');
-                let color = '#bdbdbd', title = "획득!";
-                if (pick.grade === 'transcendence') { color = '#ffd700'; title = "🌟 초월 카드 강림! 🌟"; }
-                else if (grade === 'legend') { color = '#ff5252'; title = "🎉 대박! 전설 카드! 🎉"; }
-                else if (grade === 'epic') { color = '#e040fb'; title = "✨ 에픽 카드! ✨"; }
+                let color = '#bdbdbd';
+                if (pick.grade === 'transcendence') color = '#ffd700';
+                else if (grade === 'legend') color = '#ff5252';
+                else if (grade === 'epic') color = '#e040fb';
 
-                let msgTitle = isChallenge ? "도전 뽑기 성공!" : "획득!";
-                if (pick.grade === 'transcendence') msgTitle = title;
-                document.getElementById('gacha-title').innerText = msgTitle;
+                document.getElementById('gacha-title').innerText = '획득';
                 content.dataset.grade = pick.grade;
-                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${pick.grade.toUpperCase()}] ${pick.name}</div>`;
+                const gradeName = DISPLAY_NAMES.grade[pick.grade] || pick.grade;
+                content.innerHTML = `<div style="color:${color}; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">[${gradeName}] ${pick.name}</div>`;
                 content.appendChild(ImageAssets.createPortrait(pick, {
                     wrapperStyle: 'width:120px; height:160px; margin:0 auto;'
                 }));
-                const resultMessage = document.createElement('p');
-                resultMessage.textContent = '새로운 동료를 얻었습니다!';
-                content.appendChild(resultMessage);
                 modal.classList.add('active');
             },
 
@@ -4263,7 +4259,7 @@
                 const eImg = document.getElementById('e-img');
                 ImageAssets.load(eImg, e);
 
-                let eBuffTxt = Object.keys(e.buffs).map(k => `${BUFF_NAMES[k] || k}${e.buffs[k] > 1 ? e.buffs[k] : ''}`).join(' ');
+                let eBuffTxt = Object.keys(e.buffs).filter(k => e.buffs[k]).map(k => StatusRules.formatDisplay(k, e.buffs[k], this.state.artifacts || [])).join(' ');
                 document.getElementById('e-buffs').innerText = eBuffTxt;
 
                 document.getElementById('bt-turn').innerText = this.battle.turn;
@@ -4811,12 +4807,9 @@
                 else char = this.battle.enemy;
                 if (!char) return;
 
-                let buffs = Object.keys(char.buffs).map(k => {
-                    let name = BUFF_NAMES[k] || k;
-                    let val = char.buffs[k];
-                    if (val === true) return name;
-                    return `${name}(${val})`;
-                }).join(', ') || '없음';
+                let buffs = Object.keys(char.buffs).filter(k => char.buffs[k])
+                    .map(k => StatusRules.formatDisplay(k, char.buffs[k], this.state.artifacts || []))
+                    .join(', ') || '없음';
 
                 const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
 
