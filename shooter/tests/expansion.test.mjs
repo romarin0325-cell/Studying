@@ -9,8 +9,8 @@ function target(g,x=225,y=200){g.spawnEnemy(x,y,{hp:100000,r:30,speed:0,fire:999
 function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=400;return g;}
 test('chain stays silent without targets and reacquires without petal fallback',()=>{const g=combat({hero:3});tick(g,.5);assert.equal(g.shots.length,0);assert.equal(g.stats.shots,0);const e=target(g);tick(g,.06);assert.ok(e.hp<e.maxHp);assert.ok(g.effects.some(f=>f.type==='chain'));});
 test('laser focus resets across a gap and creates no stored beam trails',()=>{const g=combat({weapon:1}),e=target(g);tick(g,2);assert.ok(e.lock>1.8);assert.ok(!g.effects.some(f=>f.type==='beam'));g.move(400,400);tick(g,.5);g.move(225,400);tick(g,.16);assert.ok(e.lock<.3);tick(g,5);assert.equal(e.lock,3.25);});
-test('all twenty-two artifacts have live effects and stacking respects three distinct slots',()=>{
-  assert.equal(ARTIFACTS.length,22);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,8);
+test('artifact catalog and legacy effects have live effects and stacking respects three distinct slots',()=>{
+  assert.equal(ARTIFACTS.length,32);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,12);
   const base=combat(),e=target(base);base.damage(e,100,0,0);
   for(const [ids,expected] of [[['pendant'],120],[['dragon'],140],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
   assert.deepEqual(loadoutStats(['frozen','dream','nail']).maxLife,5);assert.equal(loadoutStats(['nail']).maxLife,2);assert.equal(loadoutStats(['nail','crystal']).attack,1.3);

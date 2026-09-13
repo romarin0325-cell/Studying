@@ -43,7 +43,7 @@ try{
  await page.evaluate(()=>{const g=__flow.game;g.spawnBoss();g.player.invincible=999;});await page.clock.runFor(3500);
  await page.evaluate(()=>{const g=__flow.game;g.damage(g.boss,1e6,g.boss.x,g.boss.y);});await page.clock.runFor(4000);
  assert.equal((await state()).phase,'quiz');await answer();assert.equal((await state()).phase,'victory');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),1);await shot('dungeon-reward');
- await click('#sortie-return');await click('#equipment');await shot('artifact-collection');await click('#draw-ticket');await shot('artifact-draw');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),0);await click('#reveal-done');await click('#equipment-done');
+ await click('#sortie-return');await click('#equipment');await shot('artifact-collection');await click('#draw-ticket');await click('#quiz-decline');await shot('artifact-draw');assert.equal(await page.evaluate(()=>__flow.profile.tickets.length),0);await click('#reveal-done');await click('#equipment-done');
  checks.push('First clear ticket and single-use artifact draw');
  await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>Object.keys(__flow.profile.claims).length),1);assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),1);
  await click('#launch');await page.clock.runFor(4000);await page.evaluate(()=>{const g=__flow.game;g.player.lives=1;g.player.invincible=0;g.hitPlayer();});await click('#revive-quiz');await answer();await page.clock.runFor(100);assert.equal((await state()).reviveUsed,true);

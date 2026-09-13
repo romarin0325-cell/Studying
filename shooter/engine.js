@@ -8,10 +8,12 @@ export class Game {
     this.width = 450; this.height = height; this.seed = seed; this.mode = mode; this.onEvent = onEvent;
     this.difficulty = DIFFICULTIES.find(d => d.id === mode) || DIFFICULTIES[1];
     this.loadout = loadoutStats(artifacts, this.difficulty.id); this.artifacts = new Set(this.loadout.ids);
-    this.maxLife = this.loadout.maxLife + (this.hero.lifeBonus || 0); this.maxBombs = this.loadout.maxBombs; this.room = 0; this.reviveUsed = false; this.fairyFire = 0; this.darkFairyFire = 0; this.maskUses = 0;
-    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: this.hero.radius || 5, lives: this.loadout.lives, invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
+    this.maxLife = this.loadout.maxLife + (this.hero.lifeBonus || 0); this.maxBombs = this.loadout.maxBombs + (this.hero.bombBonus || 0); this.room = 0; this.reviveUsed = false; this.fairyFire = 0; this.darkFairyFire = 0; this.maskUses = 0;
+    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: this.hero.radius || 5, lives: this.loadout.lives + (this.hero.lifeBonus || 0), barrier: this.artifacts.has('clover'), invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
     this.score = 0; this.bestCombo = 0; this.combo = 0; this.comboTime = 0; this.graze = 0; this.kills = 0;
-    this.power = this.artifacts.has('origin') ? 2 : 1; this.powerPoints = 0; this.bombs = this.loadout.bombs; this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
+    this.power = this.artifacts.has('origin') ? 2 : 1; this.powerPoints = 0; this.bombs = this.loadout.bombs + (this.hero.bombBonus || 0); this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
+    this.comboDuration = this.artifacts.has('hourglass') ? 5.6 : 3.6;
+    this.powerRequirement = this.artifacts.has('dew') ? 2 : 3;
     this.time = 0; this.totalTime = 0; this.phase = 'intro'; this.phaseTime = 0; this.finished = false;
     this.zones = []; this.areaFire = 0; this.scoreBonus = 0; this.shots = []; this.bullets = []; this.enemies = []; this.particles = []; this.pickups = []; this.effects = []; this.hazards = [];
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
@@ -59,7 +61,7 @@ export class Game {
     p.recoil = 1;
     if (this.heroIndex === 8 && !this.artifacts.has('sun') && this.bombTime > 0) {
       p.fire = .16;
-      for (const side of [-1,1]) this.shot(side*.055, damage*3.8*this.loadout.bomb, 'darkglass', { x:p.x+side*14, r:17, pierce:true, vy:-700 });
+      for (const side of [-1,1]) this.shot(side*.055, damage*3.8*this.loadout.bomb, 'darkglass', { x:p.x+side*14, r:17, pierce:true, vy:-700, damageKind:'bomb' });
       this.emit('shot', { weapon:'darkglass' }); return;
     }
     switch (this.weapon) {
@@ -74,7 +76,7 @@ export class Game {
         } break;
       }
       case 'dagger':
-        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .75, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
+        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .75 * 1.1, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
       case 'melee': {
         p.fire = .70; const reach = 156 + this.power * 8;
         this.effect('slash', { x: p.x, y: p.y, radius: reach, life: .3, color: this.hero.color, alternate: this.stats.shots++ % 2 });
@@ -86,7 +88,7 @@ export class Game {
       case 'spread':
         p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.7 : 1), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .45, 'fire', { r: 5 }); } break;
       case 'lance':
-        p.fire = .36; this.shot(0, damage * 5.5, 'lance', { pierce: true, r: 21, vy: -500 }); break;
+        p.fire = .36; this.shot(0, damage * 5.5 * 1.05, 'lance', { pierce: true, r: 21, vy: -500 }); break;
       case 'chain': {
         p.fire = .23; const target = this.nearest(p.x, p.y - 70, 530);
         if (target) { const hit = new Set(); let from = { x: p.x, y: p.y - 24 }, next = target;
@@ -100,30 +102,30 @@ export class Game {
       case 'petal':
         p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.53 : .918), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 3, r: 10 }); break;
       case 'frost':
-        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.215, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: 1.6 }); break;
+        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.215 * 1.1, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
       case 'snowflake':
-        p.fire = .24; this.shot(0, damage * 2.43, 'snow', { homing: true, bounce: 3, r: 13 }); break;
+        p.fire = .24; this.shot(0, damage * 2.43, 'snow', { homing: true, bounce: this.power===5?4:3, r: 13 }); break;
       case 'glass':
-        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.535, 'glass', { x: p.x+i*13, pierce: true, vy: -650, r: 12 }); break;
+        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.535 * 1.1, 'glass', { x: p.x+i*(this.power===5?16:13), pierce: true, vy: -650, r: 12*(this.power===5?1.1:1) }); break;
       case 'midnight':
-        p.fire = .14; this.shot(Math.sin(this.totalTime*5)*.18, damage * 1.87, 'clock', { homing: true, mark: true, r: 10 }); break;
+        p.fire = .14; this.shot(Math.sin(this.totalTime*5)*.18, damage * 1.87, 'clock', { homing: true, mark: true, markRadius: this.power===5?120:100, r: 10 }); break;
       case 'nightfall':
-        p.fire = .48; this.shot(0,damage*6.72,'nightmoon',{r:28.8,vy:-360}); break;
+        p.fire = .48; this.shot(0,damage*6.72*1.1,'nightmoon',{r:28.8+(this.power===5?10:0),vy:-360}); break;
       case 'dreamfield':
         p.fire = .18; this.shot(0,damage*.95,'nightstar',{r:7,vy:-620});
         if (this.totalTime >= this.areaFire) {
           this.areaFire = this.totalTime + 1.15;
-          this.shot(0,damage*.9,'seed',{r:14,vy:-400,homing:true,zone:true,zoneDamage:damage*.70,fuse:1.45});
+          this.shot(0,damage*.9,'seed',{r:14,vy:-400,homing:true,zone:true,zoneDamage:damage*.70,zoneRadius:this.power===5?100:90,fuse:1.45});
         } break;
       case 'promise':
         p.fire = .20;
-        for (const side of [-1,1]) this.shot(side*.12,damage*1.95,'promise',{x:p.x+side*20,homing:true,r:10,echo:true});
+        for (const side of [-1,1]) this.shot(side*.12,damage*1.95,'promise',{x:p.x+side*20,homing:true,r:10,echo:true,echoRadius:this.power===5?96:80});
         break;
       case 'haven':
-        p.fire = .42; this.shot(0,damage*1.8,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.1,fuse:1,zoneKind:'haven'}); break;
+        p.fire = .42; this.shot(0,damage*1.8,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.1,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
       case 'rewind':
         p.fire = .25;
-        for (const side of [-1,1]) this.shot(side*.045,damage*1.9,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
+        for (const side of [-1,1]) this.shot(side*.045,damage*1.9*1.1,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
         break;
       case 'orbit': {
         p.fire = .12;
@@ -162,21 +164,27 @@ export class Game {
     s.zone=false;
     // Refresh a sanctuary instead of stacking its damage indefinitely.
     const kind=s.zoneKind || 'night', existing=this.zones.find(z=>z.kind===kind && distance(z,s)<60);
-    if (existing) { existing.life=3; existing.x=s.x; existing.y=s.y; return; }
-    this.add('zones',{x:s.x,y:s.y,r:kind==='haven'?100:90,damage:s.zoneDamage,kind,life:3,tick:0},8);
-    this.effect('burst',{x:s.x,y:s.y,radius:90,life:.5,color:this.hero.color});
+    const radius=s.zoneRadius ?? (kind==='haven'?100:90);
+    if (existing) { existing.life=3; existing.x=s.x; existing.y=s.y; existing.r=radius; existing.damage=s.zoneDamage; return; }
+    this.add('zones',{x:s.x,y:s.y,r:radius,damage:s.zoneDamage,kind,life:3,tick:0},8);
+    this.effect('burst',{x:s.x,y:s.y,radius,life:.5,color:this.hero.color});
   }
-  damage(enemy, amount, x, y) {
+  damage(enemy, amount, x, y, kind = 'attack') {
     if (enemy.hp <= 0 || (enemy.boss && this.phase !== 'boss')) return;
     const artifactAttack = this.attackBonus - 1
       + (this.artifacts.has('pendant') && this.power === 5 ? .2 : 0)
       + (this.artifacts.has('dragon') && this.player.lives === 1 ? .4 : 0)
-      + (this.artifacts.has('chocolate') && (enemy.boss || enemy.miniboss) ? .5 : 0);
+      + (this.artifacts.has('chocolate') && (enemy.boss || enemy.miniboss) ? .5 : 0)
+      + (this.artifacts.has('witch') && !enemy.boss && !enemy.miniboss && !enemy.elite ? .2 : 0)
+      + (this.artifacts.has('silver') && (enemy.elite || enemy.miniboss) ? .3 : 0)
+      + (this.artifacts.has('eye') && this.bombs === 0 ? .3 : 0)
+      + (this.artifacts.has('startboost') && this.power === 1 ? .5 : 0)
+      + (kind === 'attack' ? this.loadout.normalAttack : 0);
     amount *= 1 + artifactAttack;
     enemy.hp -= amount; enemy.flash = .07; this.stats.damage += amount; this.stats.hits++;
     if (this.random() < .2) this.particlesAt(x, y, this.hero.color, 2);
     if (enemy.hp > 0) return;
-    this.kills++; this.combo++; this.comboTime = 3.6; this.bestCombo = Math.max(this.bestCombo, this.combo);
+    this.kills++; this.combo++; this.comboTime = this.comboDuration; this.bestCombo = Math.max(this.bestCombo, this.combo);
     const points = (enemy.boss ? 15000 : enemy.elite ? 600 : 100) * this.multiplier;
     this.score += Math.round(points); this.particlesAt(x, y, enemy.boss ? '#fff3cf' : this.stage.color, enemy.boss ? 70 : 15, enemy.boss ? 2.5 : 1);
     this.effect('burst', { x, y, radius: enemy.boss ? 180 : 38, life: enemy.boss ? 1.6 : .4, color: this.stage.color });
@@ -215,16 +223,25 @@ export class Game {
     const pulse=this.heroIndex===1?65:this.heroIndex===3?27:this.heroIndex===5?55:42;
     // Measured against the previous release at the game's fixed 60 Hz simulation:
     // Luna applied 16 pulses; the five-second ultimates applied 19, not 20.
-    this.bombDamagePool=corona||this.heroIndex===8?0:this.heroIndex===6?1540:pulse*(this.heroIndex===1?16:19);
+    this.bombDamagePool=corona||this.heroIndex===8?0:this.heroIndex===6?1640:pulse*(this.heroIndex===1?16:19);
     this.player.invincible = Math.max(this.player.invincible, !corona && this.heroIndex === 8 ? 2.5 : this.bombTime); this.clearBullets(true); this.hazards.length = 0;
     if (!corona && this.heroIndex === 3 && !paidWithLife) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
     if(!corona&&this.heroIndex===4)this.frostTime=this.bombDuration+5;
     if(!corona&&this.heroIndex===6){this.power=Math.max(1,this.power-1);this.powerPoints=0;}
-    for (const e of [...this.enemies]) this.damage(e, (corona?1600:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y);
+    for (const e of [...this.enemies]) this.damage(e, (corona?1700:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
     this.emit('bomb', { hero: this.heroIndex, corona }); return true;
+  }
+  grantBarrier() {
+    if (this.player.barrier) return false;
+    this.player.barrier = true; this.emit('barrier'); return true;
   }
   hitPlayer() {
     const p = this.player; if (p.invincible > 0 || this.finished || !['wave', 'boss'].includes(this.phase)) return false;
+    if (p.barrier) {
+      p.barrier = false; p.invincible = this.artifacts.has('cloak') ? 4 : 2.5;
+      this.effect('barrierBreak', {x:p.x,y:p.y,radius:48,life:.45,color:'#8cefff'});
+      this.particlesAt(p.x,p.y,'#a9f5ff',12); this.emit('barrierBreak'); return true;
+    }
     if (this.artifacts.has('shield') && this.bombs > 0) this.bombs--; else p.lives--;
     this.stats.deaths++; p.invincible = this.artifacts.has('cloak') ? 4 : 2.5; this.combo = 0; this.comboTime = 0;
     this.power = Math.max(1, this.power - 1); this.clearBullets(); this.particlesAt(p.x, p.y, '#fff', 30); this.emit('hurt');
@@ -249,7 +266,7 @@ export class Game {
           { hp: 38 + stage * 10, speed: 68 + stage * 8 + (type === 3 ? 25 : 0), move: type === 0 ? 'drift' : type === 1 ? 'curve' : type === 2 ? 'zigzag' : 'dive', side: left ? 1 : -1, fire: 1.8 + i * .25, image: stage, r: 19 });
       }
     }
-    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: stage, r: 25, hp: (115 + stage*35)*(stage===3?1.65:1), speed: 53, move: 'sentry', fire: 2, image: stage, countdown: 3 });
+    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: stage, elite:stage===4, r: 25, hp: (115 + stage*35)*(stage===3?1.65:stage===4?1.1/1.2:1), speed: 53, move: 'sentry', fire: 2, image: stage, countdown: 3 });
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
@@ -401,10 +418,10 @@ export class Game {
         if (e.fire <= 0 && e.y > 30 && e.y < this.height * .62 && ['wave', 'boss'].includes(this.phase)) {
           const aim = Math.atan2(p.y - e.y, p.x - e.x);
           if (e.miniboss) this.sentinelAttack(e);
-          else if(e.special===4)this.fan(e.x,e.y,3,130,.3,aim,{r:6,ricochet:5});
+          else if(e.special===4)this.fan(e.x,e.y,4,130,.3,aim,{r:6,ricochet:5});
           else if (e.special === 5) this.enemyBullet(e.x,e.y,aim,58,{r:17,split:true,shape:'diamond'});
           else this.fan(e.x, e.y + 10, e.elite ? 5 : 1 + (this.stageIndex >= 2 ? 2 : 0), 105 + this.stageIndex * 14, .17, aim, { color: e.elite ? '#ffc184' : this.stage.color });
-          e.fire = (e.elite ? 1.5 : 2.9) * this.difficulty.interval;
+          e.fire = (e.elite && e.special!==4 ? 1.5 : 2.9) * this.difficulty.interval;
         }
       }
       if (distance(e, p) < e.r + p.radius) this.hitPlayer();
@@ -420,14 +437,14 @@ export class Game {
       for (const e of this.enemies) {
         if (e.hp <= 0 || s.hit.has(e) || (e.boss && this.phase !== 'boss')) continue;
         if (distance(s, e) < e.r + s.r) {
-          s.hit.add(e); this.damage(e, s.damage, s.x, s.y);
+          s.hit.add(e); this.damage(e, s.damage, s.x, s.y, s.damageKind);
           if (s.zone) this.plantZone(s);
           if (s.echo) {
-            this.effect('burst',{x:e.x,y:e.y,radius:66,life:.3,color:'#f8dfef'});
-            for (const other of [...this.enemies]) if(other!==e && distance(e,other)<80) this.damage(other,s.damage*.3,other.x,other.y);
+            this.effect('burst',{x:e.x,y:e.y,radius:s.echoRadius,life:.3,color:'#f8dfef'});
+            for (const other of [...this.enemies]) if(other!==e && distance(e,other)<s.echoRadius) this.damage(other,s.damage*.3,other.x,other.y);
           }
           if (s.slow) e.slow = s.slow;
-          if (s.mark && e.hp > 0) { e.marks = (e.marks || 0)+1; if(e.marks >= 3) {e.marks=0;this.effect('burst',{x:e.x,y:e.y,radius:90,life:.45,color:'#ffc4e3'});for(const target of [...this.enemies]) if(distance(e,target)<100) this.damage(target,s.damage*2.5,target.x,target.y);} }
+          if (s.mark && e.hp > 0) { e.marks = (e.marks || 0)+1; if(e.marks >= 3) {e.marks=0;this.effect('burst',{x:e.x,y:e.y,radius:s.markRadius,life:.45,color:'#ffc4e3'});for(const target of [...this.enemies]) if(distance(e,target)<s.markRadius) this.damage(target,s.damage*2.5,target.x,target.y);} }
           if (s.bounce > 0) { const next=this.enemies.find(t=>t.hp>0&&!s.hit.has(t)&&distance(e,t)<300); if(next) {s.bounce--; const d=Math.max(1,distance(s,next));s.vx=(next.x-s.x)/d*560;s.vy=(next.y-s.y)/d*560;s.homing=false;break;} }
           if (!s.pierce) { s.life = 0; break; } if (s.type === 'lance') this.effect('burst', { x: e.x, y: e.y, radius: 40, life: .3, color: '#ffb66a' });
         }
@@ -452,8 +469,8 @@ export class Game {
         if(b.y<b.r&&b.vy<0 || b.y>this.height-b.r&&b.vy>0){b.vy=-b.vy;b.y=clamp(b.y,b.r,this.height-b.r);}
       }
       if (b.split && (d < 155 || b.age > 3.7)) { b.dead = true; b.split = false; this.fan(b.x,b.y,9,125,TAU/9,Math.PI/2,{r:4}); this.effect('burst',{x:b.x,y:b.y,radius:35,life:.3,color:this.stage.color}); continue; }
-      if (d < b.r + p.radius && p.invincible <= 0) { b.dead = true; this.hitPlayer(); }
-      else if (d < 24 && !b.grazed && p.invincible <= 0) { b.grazed = true; this.graze++; this.score += 25 * this.multiplier; this.emit('graze'); }
+      if (d < b.r + p.radius && p.invincible <= 0) { b.dead = !p.barrier; this.hitPlayer(); }
+      else if (d < 24 && !b.grazed && p.invincible <= 0) { b.grazed = true; this.graze++; this.score += 25 * this.multiplier; if(this.artifacts.has('slipper') && this.graze%20===0)this.grantBarrier(); this.emit('graze'); }
       if(this.finished)return;
       if (this.weapon === 'petal' && d < 28 && Math.sin(this.totalTime * 2) > .97) { b.dead = true; this.particlesAt(b.x, b.y, '#f7dfaa', 2); }
     }
@@ -475,7 +492,7 @@ export class Game {
       const ticks=Math.floor((this.bombElapsed+1e-9)/.25),count=ticks-this.bombTicks;
       if(count>0){this.bombTicks=ticks;if(this.heroIndex!==8||this.artifacts.has('sun'))this.clearBullets(true);
         const amount=this.bombDamagePool/(this.bombDuration/.25)*count*this.loadout.bomb;
-        if(amount>0)for(const e of [...this.enemies]){this.damage(e,amount,e.x,e.y);this.effect('burst',{x:e.x,y:e.y,radius:44,life:.2,color:this.hero.color});}
+        if(amount>0)for(const e of [...this.enemies]){this.damage(e,amount,e.x,e.y,'bomb');this.effect('burst',{x:e.x,y:e.y,radius:44,life:.2,color:this.hero.color});}
       }
     }
     for(const [artifact,timer,side] of [['leaf','fairyFire',1],['mirror','darkFairyFire',-1]])if(this.artifacts.has(artifact)&&['wave','boss'].includes(this.phase)) {
@@ -493,7 +510,7 @@ export class Game {
     }
   }
   collect(type) {
-    if (type === 'power') { if (this.power < 5 && ++this.powerPoints >= 3) { this.power++; this.powerPoints = 0; this.emit('powerup'); } else if (this.power >= 5) this.score += 250; }
+    if (type === 'power') { if (this.power < 5 && ++this.powerPoints >= this.powerRequirement) { this.power++; this.powerPoints = 0; this.emit('powerup'); } else if (this.power >= 5) this.score += 250; }
     if (type === 'life') { this.player.lives = Math.min(this.maxLife, this.player.lives + 1); this.emit('heal'); }
     if (type === 'score') this.score += 50 * this.multiplier;
     this.emit('pickup', { item: type });

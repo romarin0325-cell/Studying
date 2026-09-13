@@ -42,6 +42,8 @@ export class AudioDirector {
     if (event.type === 'kill') { this.note(event.boss ? 110 : 220, event.boss ? .8 : .13, event.boss ? .25 : .045, 'triangle', null, 45); }
     if (event.type === 'pickup') this.note(event.item === 'power' ? 1250 : 1568, .10, .026);
     if (event.type === 'graze') this.note(2100, .045, .015);
+    if (event.type === 'barrier') [880,1320].forEach((f,i)=>this.note(f,.22,.045,'sine',t+i*.07));
+    if (event.type === 'barrierBreak') this.note(1450,.18,.055,'triangle',t,350);
     if (event.type === 'hurt') { this.note(160, .35, .17, 'sawtooth', null, 45); this.note(55, .5, .13); }
     if (['powerup', 'heal', 'victory', 'bossDefeated'].includes(event.type)) [523, 659, 784, 1046].forEach((f, i) => this.note(f, .5, .09, 'sine', t + i * .10));
     if (event.type === 'bomb') { this.note(80, 1.5, .24, 'triangle', null, 30); [440, 554, 659, 880, 1108].forEach((f, i) => this.note(f, 1.3, .10, 'sine', t + i * .07)); }

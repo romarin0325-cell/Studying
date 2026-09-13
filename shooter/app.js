@@ -27,7 +27,7 @@ let menus;
 let chosenRandom = preferences.random === true;
 const sortieScroll={top:0,roster:0};
 function bombDetails(index) {
-  return profile.equipped.includes('sun')&&profile.owned.includes('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 1600의 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
+  return profile.equipped.includes('sun')&&profile.owned.includes('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 1700의 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
 }
 function save() {
   saved.campaign = profile;
@@ -101,7 +101,7 @@ function showHelp(launchAfter) {
   const bombTitle = chosenRandom ? '랜덤으로 만나는 수호자' : hero.bomb;
   const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 하루 10회, 모든 수호자는 같은 확률이에요. 필살기는 캐릭터와 유물에 따라 달라지며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
   setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">새로운 수호자들, 여섯 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
-    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
+    <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P ${profile.equipped.includes('dew')?'두':'세'} 개마다 화력이 올라요. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
     <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 1·2스테이지 뒤 퀴즈는 생명이나 봄 회복, 마지막 퀴즈는 최종 점수 +10%. 퀴즈 도전은 선택이에요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
     <button class="primary" id="help-done">${launchAfter ? (chosenRandom ? '수호자 만나기' : '준비됐어요 · 출격') : '알겠어요'}</button>`);
   $('help-done').onclick = () => { saved.tutorial = true; save(); closeModal(); if (launchAfter) startGame(); };
@@ -151,9 +151,11 @@ function renderHud() {
   $('score').textContent = String(Math.round(game.score)).padStart(6, '0');
   const lives = `${game.player.lives}/${game.maxLife}`; if ($('lives').dataset.value !== lives) { $('lives').dataset.value = lives; $('lives').innerHTML = Array.from({ length: game.maxLife }, (_, i) => `<span class="${i < game.player.lives ? '' : 'empty'}"></span>`).join(''); $('lives').setAttribute('aria-label', `생명 ${lives}`); }
   const power = String(game.power); if ($('power').dataset.value !== power) { $('power').dataset.value = power; $('power').innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < game.power ? 'on' : ''}"></i>`).join(''); }
+  $('barrier-status').hidden = !game.player.barrier;
+  $('barrier-status').textContent = game.player.barrier ? '◇ 보호막' : '';
   $('bomb-count').textContent = String(game.bombs); $('bomb').disabled = game.bombTime > 0 || (game.bombs <= 0 && !(game.artifacts.has('mask')&&game.player.lives>1&&game.maskUses<3)) || !['wave', 'boss', 'warning'].includes(game.phase);
   $('combo-hud').style.opacity = game.combo > 1 ? '1' : '0'; $('combo').textContent = `${game.combo} COMBO`; $('multiplier').textContent = `SCORE ×${game.multiplier}`;
-  $('combo-meter').style.transform = `scaleX(${Math.max(0, game.comboTime / 3.6)})`;
+  $('combo-meter').style.transform = `scaleX(${Math.max(0, game.comboTime / game.comboDuration)})`;
   const bossVisible = ['warning', 'boss'].includes(game.phase) && game.boss;
   $('boss-hud').hidden = !bossVisible;
   if (bossVisible) { $('boss-name').textContent = game.stage.boss; $('boss-phase').textContent = `PHASE ${Math.max(1, game.bossPattern + 1)} / 3`; $('boss-health').style.width = `${Math.max(0, game.boss.hp / game.boss.maxHp) * 100}%`; }
