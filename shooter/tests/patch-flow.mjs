@@ -58,10 +58,10 @@ try{
  await page.evaluate(()=>{const g=__patch.game;g.phase='quiz';g.emit('quiz',{kind:'vocab'});});await shot('quiz-consent');await click('#quiz-decline');assert.equal((await state()).room,1);assert.equal(await page.evaluate(()=>__patch.profile.learning.total),total);
  await page.evaluate(()=>{const g=__patch.game;g.room=2;g.phase='quiz';g.emit('quiz',{kind:'grammar'});});await click('#quiz-decline');assert.equal((await state()).phase,'victory');assert.ok(await page.locator('#again').isVisible());await click('#sortie-return');
  checks.push('Declining stage quizzes records no answer, advances rooms and completes final result');
- // Force only the two character draws in this test; production randomness is restored immediately.
+ // Force only the character draw in this test; production randomness is restored immediately.
  for(const [index,h] of [5,7,8].entries()){
    await click('#random-hero');
-   await page.evaluate(index=>{const real=Math.random,values=[.1,(index+.5)/3];Math.random=()=>{const value=values.shift();if(!values.length)Math.random=real;return value;};},index);
+   await page.evaluate(h=>{const real=Math.random;Math.random=()=>{Math.random=real;return (h+.5)/9;};},h);
    await click('#launch');assert.equal((await state()).hero,h);assert.equal(await page.locator('[data-random-weapon]').count(),2);await shot(`hidden-${h}-selection`);
    await click('[data-random-weapon="1"]');await click('#random-launch');assert.equal((await state()).weapon,1);await page.clock.runFor(3000);
    await page.evaluate(()=>{const g=__patch.game;g.player.invincible=999;g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=430;g.spawnEnemy(225,300,{hp:100000,r:38,speed:0,fire:999,image:0});g.power=3;});

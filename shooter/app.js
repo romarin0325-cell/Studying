@@ -1,5 +1,5 @@
 import { HEROES, STAGES, DUNGEONS, clamp } from './content.js';
-import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES, normalizeDifficulty, randomHero } from './meta.js';
+import { createProfile, heroAvailable, dailyHeroes, claimDungeon, DIFFICULTIES, normalizeDifficulty, randomHero, consumeRandom, randomRemaining } from './meta.js';
 import { CampaignUI } from './menus.js';
 import { Game } from './engine.js';
 import { Renderer, loadArt } from './render.js';
@@ -13,6 +13,9 @@ let saved = {}, storageAvailable = true;
 try { saved = JSON.parse(localStorage.getItem(storeKey) || '{}') || {}; } catch { storageAvailable = false; }
 const preferences = saved.settings && typeof saved.settings === 'object' ? saved.settings : {};
 const profile = createProfile(saved.campaign);
+if(saved.campaign?.version!==3 && saved.best) {
+  for(const mode of ['easy','normal','hard'])if(saved.best[`${mode}-3`]!==undefined){saved.best[`${mode}-5`]=saved.best[`${mode}-3`];delete saved.best[`${mode}-3`];}
+}
 let chosenHero = clamp(Number(preferences.hero) || 0, 0, HEROES.length-1), chosenWeapon = 0, chosenStage = 0;
 if(!heroAvailable(profile,chosenHero)) chosenHero=dailyHeroes()[0];
 let difficulty = normalizeDifficulty(preferences.mode);
@@ -22,6 +25,10 @@ let announcementTimer = 0, toastTimer = 0, pointer = null, keys = new Set(), fra
 let runCount = 0;
 let menus;
 let chosenRandom = preferences.random === true;
+const sortieScroll={top:0,roster:0};
+function bombDetails(index) {
+  return profile.equipped.includes('sun')&&profile.owned.includes('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 1600의 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
+}
 function save() {
   saved.campaign = profile;
   saved.settings = { hero: chosenHero, random: chosenRandom, mode: difficulty, sound: audio.enabled };
@@ -58,6 +65,8 @@ async function toggleFullscreen() {
 document.addEventListener('fullscreenchange',syncFullscreen);
 function bestKey() { return `${difficulty}-${chosenStage}`; }
 function showSortie() {
+  const oldSortie=screen.querySelector('.sortie');
+  if(oldSortie&&!screen.hidden){sortieScroll.top=oldSortie.scrollTop;sortieScroll.roster=screen.querySelector('.roster')?.scrollLeft||0;}
   cancelAnimationFrame(raf); game = null; paused = false; keys.clear(); pointer = null; audio.boss = false;
   hideAnnouncement(); closeModal(); hud.hidden = true; world.style.display = 'none'; screen.hidden = false;
   if (!chosenRandom && HEROES[chosenHero].hidden) chosenHero=dailyHeroes()[0];
@@ -69,8 +78,8 @@ function showSortie() {
     <div class="sortie-top"><div class="hero-heading"><span class="small-caps">${chosenRandom?'새로운 만남을 향해':hero.title}</span><h1>${chosenRandom?'랜덤':hero.name}</h1><span class="english-name">${chosenRandom?'A CHANCE ENCOUNTER':hero.en}</span></div><span class="hero-index">0${chosenHero + 1}</span><div class="hero-aura"></div><img class="hero-large ${chosenRandom?'random-portrait':''}" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}의 SD 일러스트"><p class="hero-quote">“${chosenRandom?'오늘의 수호자, 혹은 숨겨진 이야기와 만나요.':hero.quote}”</p></div>
     <div class="sortie-controls"><p class="rotation-note">${menus.rotationLabel()}</p><nav class="roster" aria-label="캐릭터 선택">${HEROES.flatMap((h, i) => h.hidden ? [] : `<button class="${!chosenRandom && i === chosenHero ? 'active' : ''}" data-hero="${i}" aria-label="${h.name} 선택${heroAvailable(profile,i)?'':' · 문법 해금'}" aria-pressed="${!chosenRandom && i === chosenHero}"><img src="${art.urls.heroes[i]}" alt=""><span>${heroAvailable(profile,i)?'':'◇ '}${h.name}</span></button>`).join('')}<button id="random-hero" class="${chosenRandom?'active':''}" aria-pressed="${chosenRandom}"><span class="random-sigil">✧</span><span>랜덤</span></button></nav>
     <div class="section-heading"><h2>공격 스타일</h2><small>${chosenRandom?'출격 전 만남과 스타일 선택':'두 가지 빛, 서로 다른 궤적'}</small></div>
-    <div class="weapons" ${chosenRandom?'hidden':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
-    <p class="weapon-description">${chosenRandom?'랜덤 출격에서만 히든 캐릭터를 만날 수 있어요. 히든 확률 20%. 만난 뒤 공격 스타일을 고를 수 있어요.':hero.weapons[chosenWeapon].description}</p>
+    <div class="weapons ${chosenRandom?'random-weapons-placeholder':''}" ${chosenRandom?'inert aria-hidden="true"':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
+    <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/10회 남음 · 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
     <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons"><small>던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
     <button class="launch" id="launch">${stage.name} 출격<span>THREE STAGES</span><b>→</b></button>
     <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>BEST ${Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
@@ -85,12 +94,13 @@ function showSortie() {
   syncFullscreen();$('fullscreen').onclick=toggleFullscreen;
   $('launch').onclick = () => { audio.start(); if (!saved.tutorial) showHelp(true); else startGame(); };
   bindSounds();
+  screen.querySelector('.sortie').scrollTop=sortieScroll.top;screen.querySelector('.roster').scrollLeft=sortieScroll.roster;
 }
 function showHelp(launchAfter) {
-  const hero = HEROES[chosenHero];
+  const hero = bombDetails(chosenHero);
   const bombTitle = chosenRandom ? '랜덤으로 만나는 수호자' : hero.bomb;
-  const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 필살기는 캐릭터마다 다르며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
-  setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">새로운 수호자들, 네 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
+  const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 하루 10회, 모든 수호자는 같은 확률이에요. 필살기는 캐릭터와 유물에 따라 달라지며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
+  setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">새로운 수호자들, 여섯 개의 던전.<br>손끝으로 작은 빛을 지켜주세요.</p>
     <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P 세 개마다 화력 상승. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
     <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 1·2스테이지 뒤 퀴즈는 생명이나 봄 회복, 마지막 퀴즈는 최종 점수 +10%. 퀴즈 도전은 선택이에요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
     <button class="primary" id="help-done">${launchAfter ? (chosenRandom ? '수호자 만나기' : '준비됐어요 · 출격') : '알겠어요'}</button>`);
@@ -98,9 +108,11 @@ function showHelp(launchAfter) {
 }
 function startGame(stage = chosenStage, randomResolved = false) {
   if(chosenRandom && !randomResolved){
-    chosenHero=randomHero(profile);chosenWeapon=0;
+    const draw=consumeRandom(profile);
+    if(draw===null){setModal('<h2>오늘의 만남을 모두 사용했어요</h2><p class="intro-copy">랜덤 출격은 하루 10회예요. 자정 이후 다시 만날 수 있어요. 일반 캐릭터로는 계속 출격할 수 있어요.</p><button class="primary" id="random-limit-return">출격 준비로</button>');$('random-limit-return').onclick=showSortie;return;}
+    chosenHero=draw;chosenWeapon=0;save();
     const hero=HEROES[chosenHero];
-    setModal(`<span class="small-caps">${hero.hidden?'HIDDEN ENCOUNTER':'YOUR COMPANION'}</span><h2>${hero.name}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}"><p class="intro-copy">${hero.description}</p><div class="random-weapons">${hero.weapons.map((w,i)=>`<button class="secondary ${i===0?'selected':''}" data-random-weapon="${i}" aria-pressed="${i===0}"><b>${w.name}</b><small>${w.description}</small></button>`).join('')}</div><p class="tiny-note">필살기 · ${hero.bomb}<br>${hero.bombInfo}</p><button class="primary" id="random-launch">이 모습으로 출격</button><button class="secondary" id="random-cancel">출격 준비로</button>`);
+    setModal(`<span class="small-caps">${hero.hidden?'HIDDEN ENCOUNTER':'YOUR COMPANION'}</span><h2>${hero.name}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}"><p class="intro-copy">${hero.description}</p><div class="random-weapons">${hero.weapons.map((w,i)=>`<button class="secondary ${i===0?'selected':''}" data-random-weapon="${i}" aria-pressed="${i===0}"><b>${w.name}</b><small>${w.description}</small></button>`).join('')}</div><p class="tiny-note">필살기 · ${bombDetails(chosenHero).bomb}<br>${bombDetails(chosenHero).bombInfo}</p><button class="primary" id="random-launch">이 모습으로 출격</button><button class="secondary" id="random-cancel">출격 준비로</button>`);
     document.querySelectorAll('[data-random-weapon]').forEach(b=>b.onclick=()=>{chosenWeapon=Number(b.dataset.randomWeapon);document.querySelectorAll('[data-random-weapon]').forEach(item=>{const selected=Number(item.dataset.randomWeapon)===chosenWeapon;item.classList.toggle('selected',selected);item.setAttribute('aria-pressed',String(selected));});});
     $('random-launch').onclick=()=>startGame(stage,true);$('random-cancel').onclick=showSortie;return;
   }
@@ -110,7 +122,7 @@ function startGame(stage = chosenStage, randomResolved = false) {
   paused = false; keys.clear(); pointer = null; accumulator = 0; last = 0; frameSamples = []; startingStage = stage;
   game = new Game({ hero: chosenHero, weapon: chosenWeapon, stage, artifacts:profile.equipped.filter(id=>profile.owned.includes(id)), height: renderer.height, mode: difficulty, seed: 1471 + ++runCount, onEvent: handleEvent });
   $('weapon-label').textContent = HEROES[chosenHero].weapons[chosenWeapon].name;
-  $('bomb-label').textContent = HEROES[chosenHero].bomb;
+  $('bomb-label').textContent = bombDetails(chosenHero).bomb;
   app.style.setProperty('--accent', HEROES[chosenHero].color);
   renderHud(); bindSounds(); raf = requestAnimationFrame(frame);
 }
@@ -124,7 +136,7 @@ function handleEvent(event) {
   }
   if (event.type === 'warning') { audio.boss = true; announce('GUARDIAN APPROACHING', STAGES[game.stageIndex].boss, `“${game.stage.intro}”`, 2900); }
   if (event.type === 'pattern') { $('pattern-name').textContent = event.name; if (event.phase > 0) toast(`✧ ${event.name}`); }
-  if (event.type === 'bomb') announce('ASTRAL BLOOM', HEROES[event.hero].bomb, '', 1800, true);
+  if (event.type === 'bomb') announce('ASTRAL BLOOM', event.corona?'코로나':HEROES[event.hero].bomb, '', 1800, true);
   if (event.type === 'powerup') toast(`✦ SHOT POWER ${game.power}`);
   if (event.type === 'heal') toast('♡ 생명 회복');
   if (event.type === 'bossDefeated') { audio.boss = false; announce('SKY LIBERATED', '하늘을 되찾았어요', `“${game.stage.outro}”`, 3000); }
@@ -153,7 +165,8 @@ function frame(now) {
   if (keys.size && !game.finished && game.phase !== 'quiz') {
     const x = Number(keys.has('ArrowRight') || keys.has('d')) - Number(keys.has('ArrowLeft') || keys.has('a'));
     const y = Number(keys.has('ArrowDown') || keys.has('s')) - Number(keys.has('ArrowUp') || keys.has('w'));
-    const rate = keys.has('Shift') ? 160 : 390, norm = x && y ? Math.SQRT1_2 : 1;
+    const speedScale=Math.max(200,(game.hero.speed||1250)+game.loadout.speed)/(game.hero.speed||1250);
+    const rate = (keys.has('Shift') ? 160 : 390)*speedScale, norm = x && y ? Math.SQRT1_2 : 1;
     game.move(game.player.x + x * rate * delta * norm, game.player.y + y * rate * delta * norm);
   }
   accumulator += delta; let ticks = 0;
@@ -195,7 +208,7 @@ function finish(won) {
   if(!saved.best||typeof saved.best!=='object')saved.best={};
   saved.best[key]=Math.max(old,Math.round(game.score));save();
   const rank=won?(game.stats.deaths===0?'S':game.stats.deaths<4?'A':'B'):'—';
-  const message=won?(ticket?'이번 주 첫 클리어! 아티팩트 뽑기권을 받았어요.':'이 던전의 주간 보상은 이미 받았어요. 다른 던전에도 도전해보세요.'):'도서관에서 오답을 복습하고 유물 조합을 바꿔보세요.';
+  const message=won?(ticket?`이번 주 첫 클리어! 아티팩트 뽑기권 ${ticket.count}장을 받았어요.`:'이 던전의 주간 보상은 이미 받았어요. 다른 던전에도 도전해보세요.'):'도서관에서 오답을 복습하고 유물 조합을 바꿔보세요.';
   setModal(`<span class="small-caps">${won?'DUNGEON LIBERATED':'THE STARS WILL WAIT'}</span><h2>${won?DUNGEONS[startingStage].name+' 클리어':'다음 비행을 기다릴게요'}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${HEROES[chosenHero].name}"><p class="intro-copy">${message}</p><div class="result-score">${Math.round(game.score).toLocaleString()}</div>${game.scoreBonus?`<p class="score-bonus">마지막 퀴즈 +10% · +${game.scoreBonus.toLocaleString()}점</p>`:''}<span class="small-caps">${game.score>old?'NEW PERSONAL BEST':'RANK '+rank} · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</span><div class="result-grid"><div><small>최고 콤보</small><b>${game.bestCombo}</b></div><div><small>스침 보너스</small><b>${game.graze}</b></div><div><small>도달 스테이지</small><b>${game.room+1}/3</b></div></div><button class="primary" id="again">던전 처음부터 다시 도전</button><button class="secondary" id="sortie-return">출격 준비로</button><p class="save-note">${storageAvailable?'기록과 수집 현황을 이 기기에 저장했어요.':'이 환경에서는 기록을 저장할 수 없어요. 현재 실행 중에는 계속 플레이할 수 있어요.'}</p>`);
   $('again').onclick=()=>startGame(startingStage);$('sortie-return').onclick=showSortie;
 }

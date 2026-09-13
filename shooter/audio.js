@@ -26,8 +26,8 @@ export class AudioDirector {
     const c = this.context, beat = this.boss ? .145 : .19;
     if (this.next < c.currentTime - .5) this.next = c.currentTime;
     while (this.next < c.currentTime + .22) {
-      const scales = [[0, 3, 7, 10, 12, 7, 3, 10], [0, 4, 7, 11, 12, 7, 4, 11], [0, 3, 6, 10, 12, 10, 6, 3], [0, 2, 7, 10, 12, 7, 2, 10]];
-      const roots = [57, 53, 56, 52], chord = [0, -5, -2, -7][Math.floor(this.step / 32) % 4], scale = scales[this.stage];
+      const scales = [[0, 3, 7, 10, 12, 7, 3, 10], [0, 4, 7, 11, 12, 7, 4, 11], [0, 3, 6, 10, 12, 10, 6, 3], [0, 4, 7, 9, 12, 9, 7, 4], [0, 2, 5, 7, 12, 7, 5, 2], [0, 2, 7, 10, 12, 7, 2, 10]];
+      const roots = [57, 53, 56, 60, 50, 52], chord = [0, -5, -2, -7][Math.floor(this.step / 32) % 4], scale = scales[this.stage];
       const midi = roots[this.stage] + chord + scale[this.step % 8] + (this.step % 16 > 11 ? 12 : 0), hz = n => 440 * 2 ** ((n - 69) / 12);
       this.note(hz(midi + 12), beat * 2.8, .055, 'sine', this.next);
       if (this.step % 4 === 0) { this.note(hz(roots[this.stage] + chord - 12), beat * 3.6, .13, 'triangle', this.next); this.note(110, .10, .08, 'sine', this.next, 43); }

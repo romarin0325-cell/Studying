@@ -39,7 +39,7 @@ test('bombs have distinct healing/buff durations and cannot be used in menus', (
   for (let h = 0; h < 4; h++) {
     const g = fixture(h); g.player.lives = 2; g.enemyBullet(20, 20, 0, 100);
     assert.equal(g.bomb(), true); assert.equal(g.bombs, 2); assert.equal(g.bullets.length, 0);
-    assert.equal(g.player.lives, h === 3 ? 3 : 2); assert.equal(g.bombTime, h === 1 ? 4 : 5);
+    assert.equal(g.player.lives, h === 3 ? 3 : 2); assert.equal(g.bombTime, h === 1 ? 3 : 4);
     g.phase = 'quiz'; assert.equal(g.bomb(), false);
   }
 });
@@ -49,8 +49,8 @@ test('power cap, score multiplier, recovery caps and quiz guard', () => {
   assert.equal(g.completeQuiz('life'), false); g.phase = 'quiz'; assert.equal(g.completeQuiz('invalid'), false);
   assert.equal(g.completeQuiz('life'), true); assert.equal(g.room, 1); assert.equal(g.attackBonus, 1);
 });
-test('four bosses have three phases, telegraphed hazards and bounded projectiles', () => {
-  for (let stage = 0; stage < 4; stage++) {
+test('six bosses have three phases, telegraphed hazards and bounded projectiles', () => {
+  for (let stage = 0; stage < STAGES.length; stage++) {
     const patterns = [];
     const g = new Game({ stage, onEvent: e => { if (e.type === 'pattern') patterns.push(e.phase); } });
     g.spawnBoss(); tick(g, 3.2); assert.equal(g.phase, 'boss');
@@ -60,7 +60,7 @@ test('four bosses have three phases, telegraphed hazards and bounded projectiles
   }
 });
 test('each dungeon ends only after three rooms and its own final boss', () => {
-  for(let stage=0;stage<4;stage++){
+  for(let stage=0;stage<STAGES.length;stage++){
     const g=new Game({stage});g.player.invincible=999;
     for(let room=0;room<2;room++){
       assert.equal(g.room,room);g.phase='wave';g.time=g.stage.duration+.1;
