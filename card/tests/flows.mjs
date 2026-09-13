@@ -137,6 +137,59 @@ try {
   }
   console.log('PASS TOEIC Parts 5/6/7, passage navigation, answer progression, completion and rewards');
 
+  await boot();
+  const corridorOutcome = await page.evaluate(() => {
+    const originalTimeout = window.setTimeout;
+    const originalOpenInfoModal = RPG.openInfoModal;
+    const originalFailRun = RPG.failDreamCorridorRun;
+    window.setTimeout = callback => { callback(); return 0; };
+    const outcomes = {};
+
+    const runSet = (part, wrongAnswers) => {
+      const set = TOEIC_DATA.find(item => item.type === part && item.questions.length >= 2);
+      RPG.state.completedToeicSets = TOEIC_DATA.filter(item => item.id !== set.id).map(item => item.id);
+      RPG.state.mode = 'dream_corridor';
+      RPG.state.enemyScale = 6;
+      RPG.state.dreamCorridorLives = GAME_CONSTANTS.DREAM_CORRIDOR_MAX_LIVES;
+      const events = [];
+      RPG.openInfoModal = (title, message) => events.push({ title, message });
+      RPG.failDreamCorridorRun = message => events.push({ title: 'run-failed', message });
+      RPG.finishDreamCorridorBattle('');
+
+      for (let index = 0; index < set.questions.length; index++) {
+        const session = RPG.state.currentToeicSession;
+        if (session.set.type !== 'part5') RPG.showToeicQuestions();
+        const question = session.expandedQuestions[session.qIndex];
+        const selected = wrongAnswers.includes(index)
+          ? question.options.find(option => option !== question.answer)
+          : question.answer;
+        const button = [...document.querySelectorAll('#toeic-options button')]
+          .find(candidate => candidate.innerText === selected);
+        RPG.checkToeicAnswer(button, selected, question.answer);
+      }
+
+      return { lives: RPG.state.dreamCorridorLives, events };
+    };
+
+    for (const part of ['part5', 'part6', 'part7']) {
+      const oneWrong = runSet(part, [0]);
+      const twoWrong = runSet(part, [0, 1]);
+      outcomes[part] = { oneWrong, twoWrong };
+    }
+
+    window.setTimeout = originalTimeout;
+    RPG.openInfoModal = originalOpenInfoModal;
+    RPG.failDreamCorridorRun = originalFailRun;
+    return outcomes;
+  });
+  for (const part of ['part5', 'part6', 'part7']) {
+    assert.equal(corridorOutcome[part].oneWrong.lives, 3, `${part} retains all corridor lives after one wrong answer`);
+    assert.equal(corridorOutcome[part].oneWrong.events.at(-1).title, '꿈의회랑');
+    assert.equal(corridorOutcome[part].twoWrong.lives, 2, `${part} spends one corridor life after two wrong answers`);
+    assert.equal(corridorOutcome[part].twoWrong.events.at(-1).title, '꿈의회랑 ─ 오답');
+  }
+  console.log('PASS Dream Corridor TOEIC Parts 5/6/7 allow one wrong answer and charge one life for two or more');
+
   // Local generated WAV exercises browser decoding/playback; it is test data,
   // not a substitute for the user's private music or listening files.
   const samples = 44100;

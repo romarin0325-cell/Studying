@@ -82,7 +82,7 @@ try {
     RPG.battle.enemy.buffs={silence:1,burn:3,evasion:1};RPG.battle.fieldBuffs=[{name:'moon_bless',duration:3}];RPG.renderBattlefield();
    });
    await readable(page.locator('.status-positive'));await readable(page.locator('.status-negative'));await readable(page.locator('.field-buffs'));
-   assert.match(await page.locator('#p-buffs').innerText(),/−/);assert.match(await page.locator('#p-buffs').innerText(),/\+/);
+   assert.match(await page.locator('#p-buffs').innerText(),/− 약화/);assert.doesNotMatch(await page.locator('#p-buffs').innerText(),/약화 1/);assert.match(await page.locator('#p-buffs').innerText(),/\+/);
    for(const button of await page.locator('#battle-controls .skill-btn').all()) {const r=await button.boundingBox();assert.ok(r.y+r.height<=size.height,'All skills stay visible with status badges');}
    await page.screenshot({path:shot(`${theme}-statuses-${size.width}`)});
    await page.locator('#player-actor-box').click();
@@ -93,7 +93,7 @@ try {
    for(const grade of ['normal','epic','legend']) {
     await page.evaluate(grade=>{GameUtils.resolveGachaGrade=()=>grade;RPG.runGacha(false);},grade);
     assert.equal(await page.locator('.summon-seal').count(),grade==='normal'?0:1);
-    if(grade!=='normal') {await readable(page.locator('.summon-rarity'));assert.equal(await page.locator('.summon-particles').isVisible(),false);}
+    if(grade!=='normal') {assert.equal(await page.locator('.summon-rarity').count(),0);assert.equal(await page.locator('.summon-particles').isVisible(),false);}
     await page.locator('#modal-gacha button').click();
    }
    await page.emulateMedia({reducedMotion:'no-preference'});
@@ -106,7 +106,7 @@ try {
    await page.evaluate(()=>{GameUtils.resolveGachaGrade=window.originalGachaGrade;});
    await page.evaluate(()=>{RPG.global.chaosTickets=1;RPG.global.pendingTranscendenceCards=[];RPG.spinChaosRoulette();});
    assert.equal(await page.locator('.summon-seal').count(),1);
-   await readable(page.locator('.summon-rarity'));
+   assert.equal(await page.locator('.summon-rarity').count(),0);
    await page.locator('#modal-gacha button').click();
    for(const scene of ['weekly','monthly','blessing','music']) {
     await page.evaluate(scene=>({weekly:()=>RPG.openWeeklyMission(),monthly:()=>RPG.openMonthlyMission(),blessing:()=>RPG.openChaosBlessing(),music:()=>MusicPlayer.open()})[scene](),scene);

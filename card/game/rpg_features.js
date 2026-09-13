@@ -1926,8 +1926,14 @@
             countHiddenUnlock: false,
             countMonthly: false,
             countSpecial: false,
-            onComplete: () => finishSuccess('실전마법연습'),
-            onFailure: () => fail('실전마법연습')
+            onComplete: result => {
+                const wrongCount = result && Array.isArray(result.wrongList) ? result.wrongList.length : 0;
+                if (wrongCount >= GAME_CONSTANTS.DREAM_CORRIDOR_TOEIC_WRONG_THRESHOLD) {
+                    fail('실전마법연습');
+                    return;
+                }
+                finishSuccess('실전마법연습');
+            }
         });
     },
 

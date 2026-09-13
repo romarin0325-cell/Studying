@@ -426,6 +426,7 @@ window.GAME_CONSTANTS = {
     },
 
     DREAM_CORRIDOR_MAX_LIVES: 3,
+    DREAM_CORRIDOR_TOEIC_WRONG_THRESHOLD: 2,
 
     LOADING: {
         MAX_ATTEMPTS: 200,
@@ -1524,6 +1525,15 @@ const StatusRules = {
         return NEGATIVE_STATUS_IDS.includes(id);
     },
 
+    isStackable(id, artifacts = []) {
+        return !!getStackCapInfo(id, artifacts);
+    },
+
+    formatDisplay(id, value, artifacts = []) {
+        const name = getBuffName(id);
+        return this.isStackable(id, artifacts) ? `${name} ${value}스택` : name;
+    },
+
     countNegativeKinds(buffs) {
         return Object.keys(buffs || {}).filter(id => this.isNegative(id) && buffs[id] > 0).length;
     },
@@ -1567,12 +1577,12 @@ const SideEffects = {
         'debuff': (ctx, eff) => {
             const target = ctx.target;
             const value = StatusRules.add(target, eff.id, eff.stack || 1, ctx.artifacts || []);
-            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`${target === ctx.source ? '자신' : '적'}에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'self_debuff': (ctx, eff) => {
             const value = StatusRules.add(ctx.source, eff.id, eff.stack || 1, ctx.artifacts || []);
-            const stackable = !!getStackCapInfo(eff.id, ctx.artifacts || []);
+            const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
         },
         'field_buff': (ctx, eff) => {
