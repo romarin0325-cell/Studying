@@ -25,3 +25,16 @@
 .equipment-list .artifact-grid{max-height:none;overflow:visible;margin:10px 0 20px}.relic-section h3{font-size:13px;color:var(--gold);padding:9px 0;border-bottom:1px solid #ffffff22}.relic-section+ .relic-section h3{color:#dfb8ff}
 .equipment-footer{flex:none;border-top:1px solid #ffffff25;padding-top:5px;background:#142036}.equipment-footer .tiny-note{margin:7px 0;text-align:center}.equipment-footer #equipment-done{margin-top:0}
 .dungeon-list{max-height:43dvh;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+.equipment-panel{padding:14px!important}
+.equipment-head h2{font-size:22px}.equipment-head .intro-copy{margin:0 0 7px;font-size:11px}
+.equipment-list .artifact-grid{gap:6px;margin:7px 0 12px}
+.equipment-list .artifact{min-height:98px;padding:8px;border-radius:9px;display:grid;grid-template-columns:42px 1fr;column-gap:7px;align-content:start;align-items:center}
+.equipment-list .artifact img{width:42px;height:42px;margin:0;border-radius:7px;grid-row:1/3}
+.equipment-list .artifact b{font-size:11px;overflow-wrap:anywhere}.equipment-list .artifact em{grid-column:2;grid-row:2;font-size:7px;margin:2px 0;letter-spacing:.04em}
+.equipment-list .artifact small{grid-column:1/-1;font-size:10px;line-height:1.5;margin-top:6px}
+.equipment-list .artifact.selected{box-shadow:inset 0 0 0 1px #f4d69566}
+.equipment-footer .primary,.equipment-footer .secondary{padding:10px;min-height:40px}.equipment-footer .tiny-note{margin:4px 0}
+#barrier-status{color:#a8f5ff;font-size:10px;margin-top:8px}#barrier-status[hidden]{display:none}
+@media(min-width:420px){.equipment-list .artifact-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.equipment-list .artifact{grid-template-columns:1fr;min-height:142px;text-align:center}.equipment-list .artifact img{grid-row:auto;margin:0 auto 5px}.equipment-list .artifact em{grid-column:1;grid-row:4}.equipment-list .artifact small{grid-column:1}}
+@media(max-width:359px){.equipment-list .artifact{grid-template-columns:32px 1fr;column-gap:4px;padding:6px}.equipment-list .artifact img{width:32px;height:32px}.equipment-list .artifact b{font-size:10px}.equipment-list .artifact em{font-size:6px}}
+@media(max-height:450px){.equipment-panel{height:96%;padding:10px!important}.equipment-head{display:flex;align-items:center;justify-content:space-between}.equipment-head h2{font-size:18px}.equipment-head .intro-copy{font-size:10px;margin:0}.equipment-footer{display:flex;gap:8px;align-items:center}.equipment-footer button{flex:1;margin:4px 0!important}.equipment-list .artifact{min-height:98px;grid-template-columns:32px 1fr;text-align:left}.equipment-list .artifact img{grid-row:1/3;width:32px;height:32px}.equipment-list .artifact em{grid-column:2;grid-row:2}.equipment-list .artifact small{grid-column:1/-1}}

@@ -13,12 +13,12 @@ test('random is uniform over all nine heroes and limited to ten persisted reveal
  assert.equal(consumeRandom(p,()=>{throw Error('exhausted draw must not roll')},today),null);
  assert.equal(randomRemaining(p,tomorrow),10);assert.equal(consumeRandom(p,()=>.99,tomorrow),8);assert.equal(randomRemaining(p,tomorrow),9);
 });
-test('old Chaos claims and tickets migrate once and all ticket rarities use the same 20 percent boundary',()=>{
+test('old Chaos claims and tickets migrate once and all ticket rarities use the same 15 percent base boundary',()=>{
  const date=new Date(2026,8,14),old={version:2,claims:{'2026-09-14:3':'hard'},tickets:[{dungeon:3,difficulty:'hard'}]};
  const p=createProfile(old);assert.equal(p.claims['2026-09-14:5'],'hard');assert.equal(p.claims['2026-09-14:3'],undefined);assert.equal(p.tickets[0].dungeon,5);
  assert.equal(claimDungeon(p,5,'hard',date),null);assert.equal(claimDungeon(p,3,'hard',date).count,2);assert.equal(p.tickets.length,3);
  assert.deepEqual(createProfile(JSON.parse(JSON.stringify(p))),p);
- for(const difficulty of ['easy','normal','hard'])for(const [chance,rarity] of [[.1999,'rare'],[.2,'normal']]){
+ for(const difficulty of ['easy','normal','hard'])for(const [chance,rarity] of [[.1499,'rare'],[.15,'normal']]){
    const q=createProfile();q.tickets=[{dungeon:0,difficulty}];let n=0;assert.equal(drawArtifact(q,()=>n++===0?chance:0).artifact.rarity,rarity);
  }
 });
@@ -44,7 +44,7 @@ test('stage recovery triggers once before optional quiz, also on final boss and 
 });
 test('shortened bombs retain damage budgets at different frame steps and Night pays a power level',()=>{
  // Reproduced from origin/main engine at 60 Hz; Night's requested total is the exception.
- const totals=[1058,1300,1248,773,1058,1305,1800,1058,80];
+ const totals=[1058,1300,1248,773,1058,1305,1900,1058,80];
  for(const dt of [1/60,.05])for(let hero=0;hero<9;hero++){
   const g=combat({hero});g.player.fire=999;target(g);g.power=3;g.bomb();
   assert.equal(g.bombDuration,hero===8?10:hero===1?3:4);assert.equal(g.player.invincible,hero===8?2.5:g.bombDuration);
@@ -55,17 +55,17 @@ test('shortened bombs retain damage budgets at different frame steps and Night p
 test('Corona replaces every hero ultimate including healing, power cost, freeze and transformation',()=>{
  for(let hero=0;hero<9;hero++){
   const g=combat({hero,artifacts:['sun']});g.player.fire=999;g.player.lives=1;g.power=3;target(g);g.bomb();
-  assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,1600);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
-  tick(g,1.1);assert.equal(g.stats.damage,1600);assert.equal(g.bombTime,0);
+  assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,1700);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
+  tick(g,1.1);assert.equal(g.stats.damage,1700);assert.equal(g.bombTime,0);
  }
- const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,2720);
+ const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,2890);
 });
 test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
  const g=combat({hero:4});g.player.fire=999;g.bomb();tick(g,4);assert.ok(g.frostTime>4.99);assert.ok(g.player.invincible<1e-8);
  g.enemyBullet(20,200,Math.PI/2,100);tick(g,1);assert.ok(Math.abs(g.bullets[0].y-235)<1e-7);tick(g,4.1);assert.equal(g.frostTime,0);
 });
-test('Night large shot is 20 percent larger and stronger and does not track an off-axis enemy',()=>{
- const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.equal(shot.damage,84);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
+test('Night large shot retains its size, gains damage and does not track an off-axis enemy',()=>{
+ const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.ok(Math.abs(shot.damage-92.4)<1e-8);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
 });
 test('orbit sweeps fast movement and each enemy and each orb has its own damage cooldown',()=>{
  const g=combat({hero:8,weapon:1});g.player.x=g.player.targetX=30;

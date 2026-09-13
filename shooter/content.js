@@ -19,22 +19,22 @@ export const HEROES = [
 
 HEROES.push(
   { id: 'snow', radius: 4, name: '눈토끼', title: '겨울을 깨우는 설원 마법사', en: 'SNOW RABBIT', gender: 'male', color: '#a5eaff', shadow: '#467dad', sigil: '❄', quote: '차가운 바람도, 우리 편으로 만들면 돼.', description: '얼음 결정으로 적을 늦추고 눈꽃을 튕기는 남성 마법사.', bomb: '프로즌 월드', bombInfo: '4초간 눈보라로 공격해요. 무적이 끝난 뒤에도 5초간 적과 적탄의 감속이 남아요.', weapons: [
-    { id: 'frost', name: '프로즌 샤드', tag: '빙결 · 제어형', description: '쌍얼음창이 적을 관통하고 잠시 느리게 해요.', power: 4, reach: 4 },
-    { id: 'snowflake', name: '스노우 바운드', tag: '도약 · 추적형', description: '눈꽃이 명중한 적에서 다른 적에게 최대 세 번 튕겨요.', power: 3, reach: 5 }
+    { id: 'frost', name: '프로즌 샤드', tag: '빙결 · 제어형', description: '쌍얼음창이 적을 관통하고 느리게 해요. P5에서 감속이 2초로 늘어나요.', power: 4, reach: 4 },
+    { id: 'snowflake', name: '스노우 바운드', tag: '도약 · 추적형', description: '눈꽃이 다른 적에게 세 번 튕겨요. P5에서는 네 번 도약해요.', power: 3, reach: 5 }
   ] },
   { id: 'cinderella', hidden: true, lifeBonus: 1, name: '신데렐라', title: '자정을 거스르는 유리 마법사', en: 'CINDERELLA', gender: 'male', color: '#ffc4e3', shadow: '#a35196', sigil: '♢', quote: '열두 시가 지나도, 우리의 마법은 계속돼.', description: '크리스탈 킥과 미드나잇 스펠을 다루는 남성 마법사.', bomb: '미드나잇 · 미라클', bombInfo: '유리시계가 탄을 지우고, 4초간 유리 결정이 적에게 연속으로 폭발해요.', weapons: [
-    { id: 'glass', name: '크리스탈 킥', tag: '유리창 · 관통형', description: '엇갈리는 유리구두 궤적이 적을 꿰뚫어요.', power: 5, reach: 3 },
-    { id: 'midnight', name: '미드나잇 스펠', tag: '표식 · 폭발형', description: '유도 마법이 세 번 명중하면 표식이 주변까지 폭발해요.', power: 4, reach: 4 }
+    { id: 'glass', name: '크리스탈 킥', tag: '유리창 · 관통형', description: '유리창이 적을 관통해요. P5에서 간격과 탄 크기가 커져요.', power: 5, reach: 3 },
+    { id: 'midnight', name: '미드나잇 스펠', tag: '표식 · 폭발형', description: '세 번 명중하면 표식이 폭발해요. P5에서 폭발 범위가 20% 넓어져요.', power: 4, reach: 4 }
   ] }
 );
 HEROES.push(
-  { id: 'night', name: '밤토끼', title: '잠들지 못한 밤의 친구', en: 'NIGHT RABBIT', gender: 'male', radius: 4, color: '#dcadff', shadow: '#785494', sigil: '☽', quote: '잠이 오지 않으면, 나랑 조금만 더 있자.', description: '흰 곱슬머리와 검은 후드. 조용히 오래 머무는 밤의 마법.', bomb: '굿나잇 허그', bombInfo: '4초간 총 1800의 피해를 줘요. 사용하면 파워가 1단계 내려가요.', weapons: [
-    { id: 'nightfall', name: '문드롭', tag: '대형탄 · 일격형', description: '조금 느린 주기로 묵직한 달을 보내요. 크고 강한 달이 전방으로 곧게 날아가요.', power: 4, reach: 4 },
-    { id: 'dreamfield', name: '슬립리스 나이트', tag: '장판 · 지속형', description: '작은 직선탄 사이로 꿈의 씨앗을 보내요. 폭발한 자리에 3초간 밤이 머물러요.', power: 3, reach: 5 }
+  { id: 'night', bombBonus: 1, name: '밤토끼', title: '잠들지 못한 밤의 친구', en: 'NIGHT RABBIT', gender: 'male', radius: 4, color: '#dcadff', shadow: '#785494', sigil: '☽', quote: '잠이 오지 않으면, 나랑 조금만 더 있자.', description: '흰 곱슬머리와 검은 후드. 조용히 오래 머무는 밤의 마법.', bomb: '굿나잇 허그', bombInfo: '4초간 총 1900의 피해를 줘요. 사용하면 파워가 1단계 내려가요.', weapons: [
+    { id: 'nightfall', name: '문드롭', tag: '대형탄 · 일격형', description: '묵직한 달이 전방으로 곧게 날아가요. P5에서 달이 더 커져요.', power: 4, reach: 4 },
+    { id: 'dreamfield', name: '슬립리스 나이트', tag: '장판 · 지속형', description: '꿈의 씨앗이 3초간 장판을 남겨요. P5에서 반경이 10 늘어나요.', power: 3, reach: 5 }
   ] },
-  { id: 'sisters', name: '루나&자스민', hidden: true, lifeBonus: 1, radius: 6, title: '이야기 속에서만 만난 내일', en: 'AN UNWRITTEN TOMORROW', color: '#e3c4fa', shadow: '#866599', sigil: '∞', quote: '이 이야기에서만큼은, 끝까지 손을 놓지 말자.', description: '이야기꾼 루나의 소망 속 모습. 서로의 진심을 이해하고 함께한 미래는 현실에 오지 않았어요.', bomb: '끝나지 않는 이야기', bombInfo: '함께 바란 내일이 펼쳐져 4초간 탄을 지우고 전장을 감싸요.', weapons: [
-    { id: 'promise', name: '이어 쓴 내일', tag: '약속 · 추적형', description: '손끝에서 이어진 두 빛이 같은 미래를 향해 날아가요. 약속이 닿으면 주변에도 빛이 퍼져요.', power: 5, reach: 5 },
-    { id: 'haven', name: '우리의 작은 집', tag: '영역 · 집중형', description: '앞으로 보낸 빛이 적 곁에 두 사람의 안식처를 만들어요. 머무는 적에게 지속 피해를 줘요.', power: 5, reach: 4 }
+  { id: 'sisters', bombBonus: 1, name: '루나&자스민', hidden: true, lifeBonus: 1, radius: 6, title: '이야기 속에서만 만난 내일', en: 'AN UNWRITTEN TOMORROW', color: '#e3c4fa', shadow: '#866599', sigil: '∞', quote: '이 이야기에서만큼은, 끝까지 손을 놓지 말자.', description: '이야기꾼 루나의 소망 속 모습. 서로의 진심을 이해하고 함께한 미래는 현실에 오지 않았어요.', bomb: '끝나지 않는 이야기', bombInfo: '함께 바란 내일이 펼쳐져 4초간 탄을 지우고 전장을 감싸요.', weapons: [
+    { id: 'promise', name: '이어 쓴 내일', tag: '약속 · 추적형', description: '두 빛이 적을 따라가며 반향을 남겨요. P5에서 반향 범위가 20% 넓어져요.', power: 5, reach: 5 },
+    { id: 'haven', name: '우리의 작은 집', tag: '영역 · 집중형', description: '적 곁에 지속 피해를 주는 안식처를 만들어요. P5에서 반경이 10% 넓어져요.', power: 5, reach: 4 }
   ] },
   { id: 'time', name: '시간의마술사', hidden: true, lifeBonus: 1, title: '열두 시에 남겨진 소망', en: 'THE TIME MAGICIAN', color: '#efa5ed', shadow: '#875397', sigil: '◷', quote: '이번에는… 다른 결말일 수 있을까.', description: '바뀌지 않는 결말을 수없이 돌려본 소년. 누군가 그 절망이 틀렸다고 말해주기를 기다려요.', bomb: '다크신데렐라', bombInfo: '약한 전체 공격 후 10초간 강력한 유리탄을 쏴요. 무적은 처음 2.5초예요.', weapons: [
     { id: 'rewind', name: '리와인드', tag: '시계침 · 관통형', description: '엇갈린 두 시간의 바늘이 적을 관통하며 하늘을 다시 써요.', power: 4, reach: 4 },

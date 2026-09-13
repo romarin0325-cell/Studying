@@ -7,7 +7,7 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png' };
+  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png' };
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
@@ -62,13 +62,6 @@ export async function loadArt() {
   }
   result.heroes.push(result.companions[0],result.companions[1],result.companions[2],result.secrets[0],result.secrets[1]);
   result.dark=result.secrets[2];result.sigil=result.secrets[3];
-  // A native icon follows the relic palette and remains crisp at inventory sizes.
-  const magnet=canvas(384,384),mc=magnet.getContext('2d');mc.translate(192,180);mc.rotate(-.35);
-  mc.strokeStyle='#765122';mc.lineWidth=86;mc.beginPath();mc.arc(0,0,78,0,Math.PI);mc.stroke();
-  mc.strokeStyle='#efd086';mc.lineWidth=68;mc.stroke();
-  for(const x of [-78,78]){mc.fillStyle='#fff2cb';mc.fillRect(x-34,-66,68,66);mc.strokeStyle='#a67535';mc.lineWidth=5;mc.strokeRect(x-34,-66,68,66);}
-  mc.fillStyle='#ffeda5';star(mc,-128,-100,24);mc.fill();star(mc,128,-112,17);mc.fill();
-  result.relics[15]=magnet;result.urls.relics[15]=magnet.toDataURL('image/png');
   result.urls.heroes=result.heroes.map(c=>c.toDataURL('image/png'));
   for (let i = 0; i < 4; i++) {
     const im = images.worlds, cut = canvas(450, 1200), c = cut.getContext('2d');
@@ -89,6 +82,21 @@ export async function loadArt() {
     c.drawImage(sheet,(i%3)*sheet.width/3,Math.floor(i/3)*sheet.height/2,sheet.width/3,sheet.height/2,0,0,384,384);
     result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));
   }
+  // Append the ten new relics in catalog order and replace the old flat magnet.
+  const relicBounds=[[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
+  for(let i=0;i<11;i++){
+    const icon=canvas(192,192),c=icon.getContext('2d'),sheet=images['shield-relics'];
+    const [x,y,w,h]=relicBounds[i],scale=180/Math.max(w,h);c.fillStyle='#142036';c.fillRect(0,0,192,192);
+    c.drawImage(sheet,x/1448*sheet.width,y/1086*sheet.height,w/1448*sheet.width,h/1086*sheet.height,(192-w*scale)/2,(192-h*scale)/2,w*scale,h*scale);
+    const index=i===10?15:22+i;result.relics[index]=icon;result.urls.relics[index]=icon.toDataURL('image/png');
+  }
+  // A transparent cached effect keeps the hitbox readable without per-frame filters.
+  const barrier=canvas(192,192),bc=barrier.getContext('2d');
+  const glow=bc.createRadialGradient(96,96,58,96,96,88);glow.addColorStop(0,'#79eaff00');glow.addColorStop(.75,'#79eaff22');glow.addColorStop(1,'#79eaff00');bc.fillStyle=glow;bc.fillRect(0,0,192,192);
+  bc.strokeStyle='#a8f5ff';bc.lineWidth=2;bc.beginPath();bc.arc(96,96,77,0,TAU);bc.stroke();
+  bc.strokeStyle='#6ddcfb66';bc.lineWidth=1;bc.beginPath();bc.arc(96,96,71,0,TAU);bc.stroke();
+  for(let i=0;i<6;i++){const a=i*TAU/6;bc.fillStyle='#d9ffff';star(bc,96+Math.cos(a)*77,96+Math.sin(a)*77,6,4,a);bc.fill();}
+  result.barrier=barrier;
   return result;
 }
 
@@ -206,6 +214,7 @@ export class Renderer {
     } else if (['ice','glass','snow','clock','darkglass','timehand'].includes(s.type)) {
       c.strokeStyle='#ffffff';c.fillStyle=s.type==='ice'||s.type==='snow'?'#9decff':s.type==='darkglass'?'#c56cff':'#ffbce9';c.lineWidth=1.4;
       if(s.type==='darkglass')c.scale(1.7,1.5);
+      if(s.type==='glass')c.scale(s.r/12,s.r/12);
       if(s.type==='snow'){star(c,0,0,13,6,g.totalTime*4);c.fill();c.stroke();}
       else if(s.type==='clock'){c.beginPath();c.arc(0,0,8,0,TAU);c.stroke();c.beginPath();c.moveTo(0,-5);c.lineTo(0,0);c.lineTo(5,2);c.stroke();}
       else{c.beginPath();c.moveTo(0,-23);c.lineTo(7,0);c.lineTo(0,15);c.lineTo(-7,0);c.closePath();c.fill();c.stroke();}
@@ -256,6 +265,7 @@ export class Renderer {
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
     this.sprite(g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0?this.art.dark:this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
+    if(p.barrier)this.sprite(this.art.barrier,p.x,p.y,118+Math.sin(t*3)*3,t*.12,1,.9);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
     // The tiny luminous core is the actual hitbox; the illustration and cape are safe.
     c.fillStyle = '#11162a'; c.beginPath(); c.arc(p.x, p.y, p.radius, 0, TAU); c.fill();
@@ -263,7 +273,10 @@ export class Renderer {
   }
   drawEffect(f, g) {
     const c = this.c, q = clamp(f.age / f.life, 0, 1); c.save();
-    if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
+    if(f.type==='barrierBreak'){
+      c.strokeStyle='#b8f8ff';c.globalAlpha=1-q;c.lineWidth=2;
+      for(let i=0;i<6;i++){const a=i*TAU/6+q*.3;c.beginPath();c.arc(f.x,f.y,f.radius*(1+q*.7),a,a+.55);c.stroke();}
+    } else if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
     } else if(f.type==='detonation') {
       c.fillStyle=f.age<.75?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
     } else if (f.type === 'beam') {

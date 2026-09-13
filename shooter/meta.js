@@ -20,12 +20,22 @@ export const ARTIFACTS = [
   { id: 'origin', name: '시작의보석', icon: '◆', rarity: 'normal', text: '시작 파워 +1' },
   { id: 'boots', name: '바람의장화', icon: '➶', rarity: 'normal', text: '이동속도 +200', speed: 200 },
   { id: 'moonlight', name: '월광의목걸이', icon: '☽', rarity: 'rare', text: '스테이지 클리어마다 봄 1 추가 회복' },
-  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 코로나로 교체 · 피해 1600 · 지속/무적 1초' }
+  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 코로나로 교체 · 피해 1700 · 지속/무적 1초' },
+  { id: 'hourglass', name: '모래시계', rarity: 'normal', text: '콤보 유지 시간 +2초' },
+  { id: 'clover', name: '네잎클로버', rarity: 'normal', text: '시작 시 피격 1회를 막는 보호막 생성' },
+  { id: 'witch', name: '마녀의계약서', rarity: 'normal', text: '일반 몬스터에게 피해 +20%' },
+  { id: 'silver', name: '은탄', rarity: 'normal', text: '엘리트·중간 보스에게 피해 +30%' },
+  { id: 'eye', name: '마안', rarity: 'normal', text: '봄이 없을 때 공격력 +30%' },
+  { id: 'startboost', name: '스타트부스트', rarity: 'normal', text: '파워 1일 때 공격력 +50%' },
+  { id: 'slipper', name: '유리구두', rarity: 'rare', text: '그레이즈 20회마다 보호막 생성 · 중첩 불가' },
+  { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P 3개 → 2개' },
+  { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 −10% · 봄 공격력 +60%', normalAttack: -.10, bomb: .60 },
+  { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 −20% · 일반 공격력 +30%', normalAttack: .30, bomb: -.20 }
 ];
 export const DIFFICULTIES = [
-  { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .20, tickets: 1 },
-  { id: 'normal', name: '보통', hp: 1.15, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .20, tickets: 1 },
-  { id: 'hard', name: '어려움', hp: 1.56, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .20, tickets: 2 }
+  { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
+  { id: 'normal', name: '보통', hp: 1.15, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .15, tickets: 1 },
+  { id: 'hard', name: '어려움', hp: 1.56, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .15, tickets: 2 }
 ];
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
@@ -67,9 +77,9 @@ export function claimDungeon(profile, dungeon, difficulty, date = new Date()) {
   if (profile.claims[key]) return null;
   const ticket = { dungeon, difficulty, week }; profile.claims[key] = difficulty; const count=DIFFICULTIES.find(d=>d.id===difficulty).tickets; for(let i=0;i<count;i++)profile.tickets.push({...ticket}); return {...ticket,count};
 }
-export function drawArtifact(profile, random = Math.random) {
+export function drawArtifact(profile, random = Math.random, quizCorrect = false) {
   const ticket = profile.tickets.shift(); if (!ticket) return null;
-  const chance = .20;
+  const chance = quizCorrect ? .30 : .15;
   const rarity = random() < chance ? 'rare' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
   const artifact = pool[Math.min(pool.length-1, Math.floor(Math.max(0, random()) * pool.length))];
   const duplicate = profile.owned.includes(artifact.id); if (!duplicate) profile.owned.push(artifact.id);
@@ -80,5 +90,5 @@ export function loadoutStats(ids = [], difficulty = 'normal') {
   const sum = field => equipment.reduce((n,a) => n+(a[field] || 0), 0);
   const mode=DIFFICULTIES.find(d=>d.id===difficulty) || DIFFICULTIES[1];
   return { ids: equipment.map(a=>a.id), maxLife: Math.max(1, mode.maxLife + sum('life')), lives:Math.max(1,mode.lives+sum('life')),
-    speed: sum('speed'), attack: 1+sum('attack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: 5+sum('bombs') };
+    speed: sum('speed'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: 5+sum('bombs') };
 }
