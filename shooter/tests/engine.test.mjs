@@ -39,13 +39,13 @@ test('bombs have distinct healing/buff durations and cannot be used in menus', (
   for (let h = 0; h < 4; h++) {
     const g = fixture(h); g.player.lives = 2; g.enemyBullet(20, 20, 0, 100);
     assert.equal(g.bomb(), true); assert.equal(g.bombs, 2); assert.equal(g.bullets.length, 0);
-    assert.equal(g.player.lives, h === 3 ? 3 : 2); assert.equal(g.bombTime, h === 1 ? 3 : 4);
+    assert.equal(g.player.lives, h === 3 ? 3 : 2); assert.equal(g.bombTime, h === 0 ? 4 : h === 1 ? 2 : 3);
     g.phase = 'quiz'; assert.equal(g.bomb(), false);
   }
 });
 test('power cap, score multiplier, recovery caps and quiz guard', () => {
   const g = fixture(); for (let i = 0; i < 30; i++) g.collect('power'); assert.equal(g.power, 5);
-  g.combo = 120; assert.equal(g.multiplier, 5); for (let i = 0; i < 20; i++) g.collect('life'); assert.equal(g.player.lives, g.maxLife);
+  g.phase='wave';g.combo = 120; assert.equal(g.multiplier, 5); for (let i = 0; i < 20; i++) g.collect('life'); assert.equal(g.player.lives, g.maxLife);
   assert.equal(g.completeQuiz('life'), false); g.phase = 'quiz'; assert.equal(g.completeQuiz('invalid'), false);
   assert.equal(g.completeQuiz('life'), true); assert.equal(g.room, 1); assert.equal(g.attackBonus, 1);
 });

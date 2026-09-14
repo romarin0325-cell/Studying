@@ -2,6 +2,9 @@ import { HEROES, STAGES, DUNGEONS, LIMITS, clamp } from './content.js';
 import { DIFFICULTIES, loadoutStats } from './meta.js';
 const TAU = Math.PI * 2;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
+const BOMB_INVULNERABILITY = [4,2,3,3,3,3,3,3,2];
+const DUNGEON_ENEMY_SCALE = [1.06,1.08,1.10,1.12,1.14,1.35];
 export class Game {
   constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], onEvent = () => {} } = {}) {
     this.hero = HEROES[hero]; this.heroIndex = hero; this.weaponIndex = weapon; this.weapon = this.hero.weapons[weapon].id;
@@ -13,9 +16,9 @@ export class Game {
     this.score = 0; this.bestCombo = 0; this.combo = 0; this.comboTime = 0; this.graze = 0; this.kills = 0;
     this.power = this.artifacts.has('origin') ? 2 : 1; this.powerPoints = 0; this.bombs = this.loadout.bombs + (this.hero.bombBonus || 0); this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
     this.comboDuration = this.artifacts.has('hourglass') ? 5.6 : 3.6;
-    this.powerRequirement = this.artifacts.has('dew') ? 2 : 3;
+    this.powerRequirement = ([0,7].includes(this.heroIndex) ? 4 : 3) - (this.artifacts.has('dew') ? 1 : 0);
     this.time = 0; this.totalTime = 0; this.phase = 'intro'; this.phaseTime = 0; this.finished = false;
-    this.zones = []; this.areaFire = 0; this.scoreBonus = 0; this.shots = []; this.bullets = []; this.enemies = []; this.particles = []; this.pickups = []; this.effects = []; this.hazards = [];
+    this.zones = []; this.areaFire = 0; this.scoreBonus = 0; this.rankBonus = 0; this.timeBonus = 0; this.bonusesFinalized = false; this.shots = []; this.bullets = []; this.enemies = []; this.particles = []; this.pickups = []; this.effects = []; this.hazards = [];
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
     this.startStage(stage);
   }
@@ -25,7 +28,7 @@ export class Game {
     this.stageIndex = index; this.room = room; this.dungeon = DUNGEONS[index];
     this.stage = { ...STAGES[index], name: this.dungeon.rooms[room], duration: 25 + index * 3 + room * 5 };
     this.time = 0; this.phase = 'intro'; this.phaseTime = 0;
-    this.spawnTime = 0; this.wave = 0; this.boss = null; this.bossDefeated = false; this.bossPattern = -1; this.bossClock = 0;
+    this.spawnTime = 0; this.wave = 0; this.boss = null; this.bossDefeated = false; this.bossPattern = -1; this.bossClock = 0; this.bossElapsed = 0; this.bossClearTime = Infinity;
     this.sentinelSpawned = false;
     this.enemies.length = this.bullets.length = this.shots.length = this.hazards.length = this.pickups.length = 0;
     this.player.x = this.player.targetX = 225; this.player.y = this.player.targetY = this.height * .79;
@@ -66,13 +69,13 @@ export class Game {
     }
     switch (this.weapon) {
       case 'homing':
-        p.fire = .14; for (let i = 0; i < 2 + Math.floor(this.power / 2); i++) this.shot((i - (1 + Math.floor(this.power / 2)) / 2) * .24, damage * .648, 'star', { homing: true, r: 7, speed: 520 }); break;
+        p.fire = .14; for (let i = 0; i < 2 + Math.floor(this.power / 2); i++) this.shot((i - (1 + Math.floor(this.power / 2)) / 2) * .24, damage * .7128, 'star', { homing: true, r: 7, speed: 520 }); break;
       case 'laser': {
         p.fire += .075; const width = 13 + this.power * 3;
         for (const e of this.enemies) if (e.y < p.y && Math.abs(e.x - p.x) < e.r + width / 2) {
           if (e.lastLaserHit === undefined || this.totalTime - e.lastLaserHit > .15) e.lock = 0;
           e.lastLaserHit = this.totalTime; e.lock = Math.min(3.25, (e.lock || 0) + .075);
-          this.damage(e, damage * .732 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
+          this.damage(e, damage * .9516 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
         } break;
       }
       case 'dagger':
@@ -119,10 +122,10 @@ export class Game {
         } break;
       case 'promise':
         p.fire = .20;
-        for (const side of [-1,1]) this.shot(side*.12,damage*1.95,'promise',{x:p.x+side*20,homing:true,r:10,echo:true,echoRadius:this.power===5?96:80});
+        for (const side of [-1,1]) this.shot(side*.12,damage*2.106,'promise',{x:p.x+side*20,homing:true,r:10,echo:true,echoRadius:this.power===5?96:80});
         break;
       case 'haven':
-        p.fire = .42; this.shot(0,damage*1.8,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.1,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
+        p.fire = .42; this.shot(0,damage*1.944,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.268,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
       case 'rewind':
         p.fire = .25;
         for (const side of [-1,1]) this.shot(side*.045,damage*1.9*1.1,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
@@ -184,14 +187,15 @@ export class Game {
     enemy.hp -= amount; enemy.flash = .07; this.stats.damage += amount; this.stats.hits++;
     if (this.random() < .2) this.particlesAt(x, y, this.hero.color, 2);
     if (enemy.hp > 0) return;
-    this.kills++; this.combo++; this.comboTime = this.comboDuration; this.bestCombo = Math.max(this.bestCombo, this.combo);
-    const points = (enemy.boss ? 15000 : enemy.elite ? 600 : 100) * this.multiplier;
+    this.kills++;
+    if (!enemy.boss) { this.combo++; this.comboTime = this.comboDuration; this.bestCombo = Math.max(this.bestCombo, this.combo); }
+    const points = enemy.boss ? 15000 : (enemy.elite ? 600 : 100) * this.multiplier;
     this.score += Math.round(points); this.particlesAt(x, y, enemy.boss ? '#fff3cf' : this.stage.color, enemy.boss ? 70 : 15, enemy.boss ? 2.5 : 1);
     this.effect('burst', { x, y, radius: enemy.boss ? 180 : 38, life: enemy.boss ? 1.6 : .4, color: this.stage.color });
     this.emit('kill', { boss: !!enemy.boss, x, y, points });
     if (enemy.boss) {
-      this.recoverRoom(); this.stats.bossKills++; this.bossDefeated = true; this.phase = 'clear'; this.phaseTime = 0;
-      this.score += this.player.lives * 1000; this.clearBullets(true); this.hazards.length = 0;
+      this.recoverRoom(); this.stats.bossKills++; this.bossDefeated = true; this.bossClearTime = this.bossElapsed; this.phase = 'clear'; this.phaseTime = 0;
+      this.score += this.player.lives * 1000; this.clearBullets(); this.hazards.length = 0;
       for (const e of this.enemies) e.hp = 0;
       this.emit('bossDefeated', { stage: this.stageIndex });
     } else {
@@ -202,7 +206,8 @@ export class Game {
       if (this.kills % 37 === 0) this.drop(x - 12, y, 'life');
     }
   }
-  get multiplier() { return 1 + Math.min(4, Math.floor(this.combo / 10)); }
+  get multiplier() { return ['warning','boss'].includes(this.phase) ? 1 : 1 + Math.min(4, Math.floor(this.combo / 10)); }
+  get rank() { return this.stats.deaths === 0 ? 'S' : this.stats.deaths < 4 ? 'A' : 'B'; }
   drop(x, y, type) { this.add('pickups', { x, y, type, age: 0, vx: (this.random() - .5) * 45 }, LIMITS.pickups); }
   clearBullets(reward = false) {
     if (reward) this.score += this.bullets.length * 8;
@@ -218,13 +223,14 @@ export class Game {
     }
     else return false;
     const corona=this.artifacts.has('sun');
-    this.stats.bombs++; this.bombTime = corona?1:this.heroIndex===8?10:this.heroIndex===1?3:4;
+    this.stats.bombs++; this.bombTime = corona ? 1 : BOMB_DURATIONS[this.heroIndex];
     this.bombDuration=this.bombTime;this.bombElapsed=0;this.bombTicks=0;
+    this.bombInvincibility = corona ? 1 : BOMB_INVULNERABILITY[this.heroIndex];
     const pulse=this.heroIndex===1?65:this.heroIndex===3?27:this.heroIndex===5?55:42;
     // Measured against the previous release at the game's fixed 60 Hz simulation:
     // Luna applied 16 pulses; the five-second ultimates applied 19, not 20.
     this.bombDamagePool=corona||this.heroIndex===8?0:this.heroIndex===6?1640:pulse*(this.heroIndex===1?16:19);
-    this.player.invincible = Math.max(this.player.invincible, !corona && this.heroIndex === 8 ? 2.5 : this.bombTime); this.clearBullets(true); this.hazards.length = 0;
+    this.player.invincible = Math.max(this.player.invincible, this.bombInvincibility); this.clearBullets(true); this.hazards.length = 0;
     if (!corona && this.heroIndex === 3 && !paidWithLife) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
     if(!corona&&this.heroIndex===4)this.frostTime=this.bombDuration+5;
     if(!corona&&this.heroIndex===6){this.power=Math.max(1,this.power-1);this.powerPoints=0;}
@@ -270,7 +276,7 @@ export class Game {
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
-    const hp = data.hp * this.difficulty.hp * (this.stageIndex===5?1.35:1) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1);
+    const hp = data.hp * this.difficulty.hp * DUNGEON_ENEMY_SCALE[this.stageIndex] * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1);
     this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
   }
   specialDeath(e) {
@@ -299,11 +305,12 @@ export class Game {
   }
   clearRoom() {
     if (this.phase !== 'wave') return;
-    this.recoverRoom(); this.phase = 'clear'; this.phaseTime = 0; this.clearBullets(true); this.hazards.length = this.enemies.length = this.effects.length = 0;
+    this.recoverRoom(); this.phase = 'clear'; this.phaseTime = 0; this.clearBullets(); this.hazards.length = this.enemies.length = this.effects.length = 0;
     this.score += this.player.lives * 700; this.emit('roomClear', {room:this.room});
   }
   spawnBoss() {
     this.enemies.length = 0; this.clearBullets(); this.hazards.length = 0;
+    this.combo = 0; this.comboTime = 0; this.bossElapsed = 0;
     const hp = this.stage.hp * this.difficulty.hp * .78 * 1.2;
     this.boss = { boss: true, x: 225, y: -100, age: 0, hp, maxHp: hp, r: 42, flash: 0, fire: 1.5, image: this.stageIndex };
     this.enemies.push(this.boss); this.phase = 'warning'; this.phaseTime = 0; this.emit('warning');
@@ -358,8 +365,14 @@ export class Game {
     if (reward === 'score') { this.scoreBonus = Math.round(this.score * .1); this.score += this.scoreBonus; }
     if (reward === 'life') this.player.lives = Math.min(this.maxLife,this.player.lives+1);
     if (reward === 'bomb') this.bombs = Math.min(this.maxBombs,this.bombs+1);
-    if(this.room===2){this.phase='victory';this.finished=true;this.emit('victory');return true;}
+    if(this.room===2){this.finalizeClearBonuses();this.phase='victory';this.finished=true;this.emit('victory');return true;}
     this.startStage(this.stageIndex, this.room+1); return true;
+  }
+  finalizeClearBonuses() {
+    if (this.bonusesFinalized) return;
+    this.timeBonus = this.bossClearTime <= 20 ? 2000 : this.bossClearTime <= 30 ? 1500 : this.bossClearTime <= 40 ? 1000 : 0;
+    this.rankBonus = this.rank === 'S' ? 2000 : this.rank === 'A' ? 1000 : 0;
+    this.score += this.timeBonus + this.rankBonus; this.bonusesFinalized = true;
   }
   revive(correct) {
     if (this.phase !== 'defeat' || this.reviveUsed) return false;
@@ -388,6 +401,7 @@ export class Game {
       } else if (this.spawnTime <= 0) { this.spawnWave(); this.spawnTime = Math.max(2.5,3.8-this.stageIndex*.2) * this.difficulty.interval; }
     }
     if (this.phase === 'warning' && this.phaseTime > 3) { this.phase = 'boss'; this.phaseTime = 0; this.emit('bossStart'); }
+    if (this.phase === 'boss') this.bossElapsed += dt;
     if (['wave', 'boss'].includes(this.phase)) this.fire(dt);
     for (const e of this.enemies) {
       if (e.hp <= 0) continue; e.prevX=e.x;e.prevY=e.y; e.slow = Math.max(0,(e.slow || 0)-dt);
@@ -496,7 +510,7 @@ export class Game {
       }
     }
     for(const [artifact,timer,side] of [['leaf','fairyFire',1],['mirror','darkFairyFire',-1]])if(this.artifacts.has(artifact)&&['wave','boss'].includes(this.phase)) {
-      this[timer]-=dt;if(this[timer]<=0){this[timer]=.3;this.shot(0,12,side===1?'star':'nightstar',{x:p.x+side*44,y:p.y-20,homing:true,r:5});}
+      this[timer]-=dt;if(this[timer]<=0){this[timer]=.3;this.shot(0,15,side===1?'star':'nightstar',{x:p.x+side*44,y:p.y-20,homing:true,r:5});}
     }
     for (const q of this.particles) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= .97; }
     this.particles = this.particles.filter(q => q.life > 0);

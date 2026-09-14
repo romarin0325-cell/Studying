@@ -28,7 +28,7 @@ export const ARTIFACTS = [
   { id: 'eye', name: '마안', rarity: 'normal', text: '봄이 없을 때 공격력 +30%' },
   { id: 'startboost', name: '스타트부스트', rarity: 'normal', text: '파워 1일 때 공격력 +50%' },
   { id: 'slipper', name: '유리구두', rarity: 'rare', text: '그레이즈 20회마다 보호막 생성 · 중첩 불가' },
-  { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P 3개 → 2개' },
+  { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P −1 · 공격력 +5%', attack: .05 },
   { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 −10% · 봄 공격력 +60%', normalAttack: -.10, bomb: .60 },
   { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 −20% · 일반 공격력 +30%', normalAttack: .30, bomb: -.20 }
 ];
@@ -37,6 +37,14 @@ export const DIFFICULTIES = [
   { id: 'normal', name: '보통', hp: 1.15, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .15, tickets: 1 },
   { id: 'hard', name: '어려움', hp: 1.56, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .15, tickets: 2 }
 ];
+export const BASE_HEROES = Object.freeze([
+  { hero:0, name:'루미' }, { hero:1, name:'루나' }, { hero:2, name:'지크' },
+  { hero:3, name:'자스민' }, { hero:4, name:'눈토끼' }, { hero:6, name:'밤토끼' }
+]);
+export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,1].flatMap(weapon=>[
+  { id:`${hero}-${weapon}-all`, hero, weapon, difficulty:null, name:`${name} ${weapon?'B':'A'} · 여섯 하늘`, text:`${name}의 ${weapon?'B':'A'} 무기로 모든 던전 클리어` },
+  { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${weapon?'B':'A'} · 어려움`, text:`${name}의 ${weapon?'B':'A'} 무기로 모든 던전 어려움 클리어` }
+])));
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
@@ -45,15 +53,33 @@ export function createProfile(raw = {}) {
   if(!raw || typeof raw !== 'object')raw={};
   const valid = id => ARTIFACTS.some(a => a.id === id);
   // Preserve old Chaos ownership when it moves from index 3 to index 5.
-  const migrate = raw.version !== 3;
+  const migrate = !Number.isFinite(Number(raw.version)) || Number(raw.version) < 3;
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
-  return { version: 3, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard):[0-5]$/.test(key)));
+  return { version: 4, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
     tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(t => DIFFICULTIES.some(d => d.id === t.difficulty) && Number.isInteger(t.dungeon) && t.dungeon >= 0 && t.dungeon < (migrate?4:6)).map(t=>({...t,dungeon:migrate&&t.dungeon===3?5:t.dungeon})) : [],
     unlocks: raw.unlocks && typeof raw.unlocks === 'object' ? raw.unlocks : {},
+    clears,
     learning: raw.learning && typeof raw.learning === 'object' ? raw.learning : { correct: 0, total: 0, mistakes: [], read: [] } };
+}
+export function recordDungeonClear(profile,hero,weapon,dungeon,difficulty) {
+  if(!BASE_HEROES.some(entry=>entry.hero===hero)||![0,1].includes(weapon)||!Number.isInteger(dungeon)||dungeon<0||dungeon>5||!DIFFICULTIES.some(mode=>mode.id===difficulty))return false;
+  if(!profile.clears||typeof profile.clears!=='object')profile.clears={};
+  profile.clears[`${hero}:${weapon}:${difficulty}:${dungeon}`]=true;return true;
+}
+export function achievementProgress(profile) {
+  const clears=profile?.clears&&typeof profile.clears==='object'?profile.clears:{};
+  return ACHIEVEMENTS.map(achievement=>{
+    let progress=0;
+    for(let dungeon=0;dungeon<6;dungeon++) {
+      const modes=achievement.difficulty?[achievement.difficulty]:DIFFICULTIES.map(mode=>mode.id);
+      if(modes.some(mode=>clears[`${achievement.hero}:${achievement.weapon}:${mode}:${dungeon}`]))progress++;
+    }
+    return {...achievement,progress,complete:progress===6};
+  });
 }
 export function heroAvailable(profile, hero, date = new Date()) { return [0,1,2,3,4,6].includes(hero) && (dailyHeroes(date).includes(hero) || profile.unlocks[hero] === dayKey(date)); }
 export function unlockHero(profile, hero, date = new Date()) { if ([0,1,2,3,4,6].includes(hero)) profile.unlocks[hero] = dayKey(date); }
