@@ -4,6 +4,7 @@ import {Game} from '../engine.js';
 import {ARTIFACTS,DIFFICULTIES,createProfile,dailyHeroes,heroAvailable,unlockHero,weekKey,claimDungeon,drawArtifact,loadoutStats,normalizeDifficulty,randomHero} from '../meta.js';
 import {LIBRARY,makeQuestion,recordAnswer} from '../learning.js';
 import {Renderer} from '../render.js';
+import {HEROES} from '../content.js';
 const tick=(g,t)=>{for(let i=0;i<t*60;i++)g.update(1/60);};
 function target(g,x=225,y=200){g.spawnEnemy(x,y,{hp:100000,r:30,speed:0,fire:999,image:0});return g.enemies.at(-1);}
 function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=400;return g;}
@@ -55,9 +56,18 @@ test('frost slows movement, snowflakes jump, and midnight marks explode on three
 test('all imported grammar and collocation questions have valid options and lecture links',()=>{for(const q of LIBRARY.collocation){assert.ok(q.options.includes(q.answer),`collocation ${q.id}`);assert.ok(q.question&&q.expression&&q.meaning);}for(const l of LIBRARY.grammar)for(const q of l.quizzes){assert.ok(q.options.includes(q.answer));assert.ok(LIBRARY.grammar.some(t=>t.id===q.lecture_id));}});
 test('final quiz adds ten percent exactly once, and declining still completes the dungeon',()=>{
   const g=combat();g.room=2;g.phase='quiz';g.score=12345;const lives=g.player.lives,bombs=g.bombs;
-  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,13580);assert.equal(g.scoreBonus,1235);
+  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,15580);assert.equal(g.scoreBonus,1235);assert.equal(g.rankBonus,2000);
   assert.equal(g.completeQuiz('score'),false);assert.equal(g.player.lives,lives);assert.equal(g.bombs,bombs);
-  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,456);
+  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,2456);
+});
+test('boss combat resets combo, ignores its multiplier and adds exact time and rank bonuses at victory',()=>{
+  const g=combat();g.phase='wave';g.combo=49;g.comboTime=2;g.spawnBoss();assert.equal(g.combo,0);assert.equal(g.comboTime,0);
+  g.phase='boss';g.bossElapsed=20;g.bullets=Array.from({length:80},()=>({x:0,y:0}));g.damage(g.boss,1e9,0,0);
+  assert.equal(g.score,18000);assert.equal(g.combo,0);assert.equal(g.bullets.length,0);
+  g.phase='quiz';g.room=2;g.completeQuiz();assert.equal(g.timeBonus,2000);assert.equal(g.rankBonus,2000);assert.equal(g.score,22000);
+  for(const [seconds,deaths,timeBonus,rankBonus] of [[30,1,1500,1000],[40,4,1000,0],[40.01,0,0,2000]]){
+    const run=combat();run.room=2;run.phase='quiz';run.bossClearTime=seconds;run.stats.deaths=deaths;run.completeQuiz();assert.equal(run.timeBonus,timeBonus);assert.equal(run.rankBonus,rankBonus);
+  }
 });
 test('combo countdown freezes between targets, during quizzes and between rooms',()=>{
   const g=combat();g.combo=15;g.comboTime=1;tick(g,2);assert.equal(g.combo,15);assert.equal(g.comboTime,1);
@@ -77,10 +87,10 @@ test('new hitboxes, life caps and Zeke movement speed are reflected in the simul
   for(const h of [5,7,8])assert.equal(combat({hero:h}).maxLife,5);
   const z=combat({hero:2});z.move(225,800);z.update(.05);assert.equal(z.player.y,455);
 });
-test('health tuning applies each difficulty multiplier and elite/boss surcharge exactly once',()=>{
+test('health tuning applies difficulty, dungeon and elite/boss multipliers exactly once',()=>{
   for(const [i,prior,multiplier] of [[0,.76,1.1],[1,1,1.15],[2,1.3,1.2]]){
     const g=combat({mode:DIFFICULTIES[i].id});g.spawnEnemy(0,0,{hp:100});g.spawnEnemy(0,0,{hp:100,elite:true});
-    assert.ok(Math.abs(g.enemies[0].hp-100*prior*multiplier)<1e-9);
+    assert.ok(Math.abs(g.enemies[0].hp-100*prior*multiplier*1.06)<1e-9);
     assert.ok(Math.abs(g.enemies[1].hp/g.enemies[0].hp-1.2)<1e-9);
     g.spawnBoss();assert.ok(Math.abs(g.boss.maxHp-g.stage.hp*prior*multiplier*.78*1.2)<1e-9);
   }
@@ -101,12 +111,27 @@ test('laser reaches top of viewport in both damage and all rendered layers',()=>
   const rects=[],r={c:{save(){},restore(){},fillRect(...args){rects.push(args)},drawImage(){}},glow(){return {}}};
   Renderer.prototype.drawLaser.call(r,g);assert.ok(rects.every(rect=>rect[1]===0&&rect[3]===g.player.y-25));
 });
+test('Rumi and Sisters receive the requested weapon DPS increases without cadence changes',()=>{
+  const rumi=combat({hero:0});rumi.power=1;rumi.player.fire=0;rumi.fire(.001);assert.ok(Math.abs(rumi.shots[0].damage-12.5*.7128)<1e-9);assert.equal(rumi.player.fire,.14);
+  const laser=combat({hero:0,weapon:1}),laserTarget=target(laser,225,200);laser.power=1;laser.player.fire=0;laser.fire(.001);assert.ok(Math.abs(laserTarget.maxHp-laserTarget.hp-12.5*.9516*1.015)<1e-9);assert.equal(laser.player.fire,.074);
+  const promise=combat({hero:7}),haven=combat({hero:7,weapon:1});for(const g of [promise,haven]){g.power=1;g.player.fire=0;g.fire(.001);}
+  assert.ok(Math.abs(promise.shots[0].damage-12.5*2.106)<1e-9);assert.equal(promise.player.fire,.20);
+  assert.ok(Math.abs(haven.shots[0].damage-12.5*1.944)<1e-9);assert.ok(Math.abs(haven.shots[0].zoneDamage-12.5*2.268)<1e-9);assert.equal(haven.player.fire,.42);
+});
+test('new weapon descriptions omit P5 callouts while their mechanics remain active',()=>{
+  assert.ok(HEROES.slice(4).flatMap(hero=>hero.weapons).every(weapon=>!weapon.description.includes('P5')));
+});
 test('night and sanctuary zones persist, deal damage and do not stack without limit',()=>{
   for(const h of [6,7]){const g=combat({hero:h,weapon:1}),e=target(g,225,200);tick(g,4);assert.ok(g.zones.length>0);assert.ok(g.zones.length<=8);assert.ok(g.stats.damage>200);const before=e.hp;g.player.fire=999;tick(g,.4);assert.ok(e.hp<before);g.startStage(0,1);assert.equal(g.zones.length,0);}
 });
 test('time orbit deals high damage at a safe offset, transformation expires and costs a bomb',()=>{
   const orbit=combat({hero:8,weapon:1});target(orbit,225,280);tick(orbit,3);assert.ok(orbit.stats.damage/3>250);
-  orbit.player.invincible=0;const bombs=orbit.bombs;assert.ok(orbit.bomb());assert.equal(orbit.bombs,bombs-1);assert.equal(orbit.bombTime,10);assert.equal(orbit.player.invincible,2.5);
-  tick(orbit,3);assert.ok(orbit.shots.some(s=>s.type==='darkglass'));assert.equal(orbit.player.invincible,0);assert.equal(orbit.bomb(),false);
-  tick(orbit,7.1);assert.equal(orbit.bombTime,0);tick(orbit,3);assert.ok(!orbit.shots.some(s=>s.type==='darkglass'));
+  orbit.player.invincible=0;const bombs=orbit.bombs;assert.ok(orbit.bomb());assert.equal(orbit.bombs,bombs-1);assert.equal(orbit.bombTime,10);assert.equal(orbit.player.invincible,2);assert.equal(orbit.bombInvincibility,2);
+  tick(orbit,2.1);assert.ok(orbit.shots.some(s=>s.type==='darkglass'));assert.equal(orbit.player.invincible,0);assert.equal(orbit.bomb(),false);
+  tick(orbit,8.1);assert.equal(orbit.bombTime,0);tick(orbit,3);assert.ok(!orbit.shots.some(s=>s.type==='darkglass'));
+});
+test('Time Magician keeps ten-second transformation but its surrounding bloom ends with two-second immunity',()=>{
+  const g=combat({hero:8});g.bomb();g.bombTime=7;g.bombElapsed=3;let sprites=0;
+  Renderer.prototype.drawBomb.call({c:{},art:{},height:900,sprite(){sprites++;}},g);
+  assert.equal(sprites,0);assert.equal(g.bombDuration,10);assert.equal(g.bombInvincibility,2);
 });

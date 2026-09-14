@@ -30,7 +30,7 @@ try{
  assert.equal(await page.evaluate(()=>__shields.art.urls.relics.length),32);
  for(const id of ['clover','slipper','dew'])await click(`[data-artifact="${id}"]`);
  assert.equal(await page.locator('[data-artifact].selected').count(),3);await shot('selected-relics');await click('#equipment-done');
- await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('P 두 개'));await click('#help-done');
+ await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('P 세 개'));await click('#help-done');
  await click('[data-hero="0"]');await click('#launch');await page.clock.runFor(2600);
  await page.evaluate(()=>{const g=__shields.game;g.phase='boss';g.enemies=[];g.bullets=[];g.player.fire=999;g.player.invincible=0;});
  await page.clock.runFor(100);assert.ok(await page.locator('#barrier-status').isVisible());await shot('barrier-active');
@@ -41,8 +41,8 @@ try{
  assert.deepEqual(after.resources,before);assert.equal(after.bullets,2);assert.ok(after.immune>2.3);await shot('barrier-break');
  await page.evaluate(()=>{const g=__shields.game;g.bullets=[];g.player.invincible=0;g.graze=19;g.enemyBullet(g.player.x+18,g.player.y,0,0);});
  await page.clock.runFor(100);assert.equal(await page.evaluate(()=>__shields.game.graze),20);assert.ok(await page.locator('#barrier-status').isVisible());
- await page.evaluate(()=>{const g=__shields.game;g.collect('power');g.collect('power');});assert.equal(await page.evaluate(()=>__shields.game.power),2);
- checks.push('Offline gameplay: clover barrier, break immunity without bullet clear, slipper recharge and two-P powerup');
+ await page.evaluate(()=>{const g=__shields.game;g.collect('power');g.collect('power');g.collect('power');});assert.equal(await page.evaluate(()=>__shields.game.power),2);
+ checks.push('Offline gameplay: clover barrier, break immunity without bullet clear, slipper recharge and Rumi three-P dew powerup');
  await click('#pause');await click('#return');await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);
  assert.deepEqual(await page.evaluate(()=>__shields.profile.equipped),['clover','slipper','dew']);
  // Exercise skipped, correct vocabulary, and incorrect collocation draws at the same roll.

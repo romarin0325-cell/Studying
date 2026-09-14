@@ -1,5 +1,5 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { ARTIFACTS, DIFFICULTIES, weekKey, dailyHeroes, heroAvailable, unlockHero, drawArtifact } from './meta.js';
+import { ARTIFACTS, DIFFICULTIES, weekKey, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = id => document.getElementById(id);
@@ -87,9 +87,15 @@ export class CampaignUI {
       $('quiz-decline').textContent='아니오 · 바로 뽑기';
     };
   }
+  achievements() {
+    const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;
+    this.setModal(`<span class="small-caps">ACHIEVEMENTS</span><h2>수호자의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length} · 업적 보상은 없어요.</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/6</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
+    $('achievements-close').onclick=this.closeModal;
+  }
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {
     const week=weekKey();
     this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>여섯 개의 하늘</h2><div class="dungeon-list">${DUNGEONS.map(d=>`<button class="dungeon-card ${selected===d.id?'selected':''}" data-dungeon="${d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>DUNGEON 0${d.id+1} · 3 STAGES</small><b>${d.name}</b><span>${STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.id}`]?'이번 주 보상 수령':`주간 첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note">뒤쪽 던전일수록 적의 체력·탄속·패턴이 강해져요. 주간 보상은 월요일 0시 초기화, 난이도와 관계없이 던전당 한 번이에요.</p><button class="primary" id="dungeon-done">이 하늘로 출격 준비</button>`);
+    document.querySelector('.panel').classList.add('dungeon-panel');
     document.querySelector('.dungeon-list').scrollTop=scroll;document.querySelector('.panel').scrollTop=panelScroll;
     const positions=()=>[document.querySelector('.dungeon-list').scrollTop,document.querySelector('.panel').scrollTop];
     document.querySelectorAll('[data-dungeon]').forEach(b=>b.onclick=()=>this.dungeons(Number(b.dataset.dungeon),mode,done,...positions()));

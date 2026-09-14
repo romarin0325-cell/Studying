@@ -39,9 +39,12 @@ try{
  const click=s=>page.locator(s).click(),state=()=>page.evaluate(()=>astralDiagnostics);
  const shot=name=>page.screenshot({path:fileURLToPath(new URL(`artifacts/${name}.png`,root))});
  for(const h of [5,7,8])assert.equal(await page.locator(`[data-hero="${h}"]`).count(),0);
- await click('#fullscreen');await page.waitForFunction(()=>!!document.fullscreenElement);await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
+ await click('#achievements');assert.equal(await page.locator('.achievement').count(),24);assert.match(await page.locator('.intro-copy').textContent(),/보상은 없어요/);await shot('achievements');await click('#achievements-close');
+ await click('#fullscreen');await page.waitForFunction(()=>!!document.fullscreenElement);await click('#dungeons');
+ const dungeonFit=await page.evaluate(()=>{const panel=document.querySelector('.dungeon-panel'),list=document.querySelector('.dungeon-list'),title=panel.querySelector('h2');return {panel:panel.scrollHeight<=panel.clientHeight,list:list.scrollHeight<=list.clientHeight,title:parseFloat(getComputedStyle(title).fontSize)};});
+ assert.deepEqual(dungeonFit,{panel:true,list:true,title:27});await shot('dungeon-fullscreen-fit');await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
  await click('[data-hero="6"]');assert.ok(await page.locator('#quiz-accept').isVisible());await click('#quiz-decline');assert.equal((await state()).hero,0);assert.ok(await page.locator('#launch').isVisible());
- checks.push('Fullscreen toggles and locked hero decline leaves selection unchanged');
+ checks.push('Achievement mini-button exposes 24 no-reward goals; fullscreen dungeon selection fits without scrolling; locked hero decline is safe');
  await click('#library');await page.locator('#library-search').fill('amenities');await click('#library-all');
  assert.equal(await page.locator('#library-search').inputValue(),'');assert.equal(await page.locator('#library-page').textContent(),`1 / ${Math.ceil(LIBRARY.vocab.length/30)}`);
  let viewed=0;

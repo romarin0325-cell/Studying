@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../engine.js';
 import {STAGES,DUNGEONS} from '../content.js';
-import {createProfile,consumeRandom,randomRemaining,claimDungeon,drawArtifact,loadoutStats} from '../meta.js';
+import {createProfile,consumeRandom,randomRemaining,claimDungeon,drawArtifact,loadoutStats,recordDungeonClear,achievementProgress} from '../meta.js';
 const tick=(g,t,dt=1/60)=>{for(let elapsed=0;elapsed<t-1e-9;elapsed+=dt)g.update(Math.min(dt,t-elapsed));};
 function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=500;g.player.invincible=0;return g;}
 function target(g,x=225,y=150,r=25){g.spawnEnemy(x,y,{hp:1e7,r,speed:0,fire:999,image:0});return g.enemies.at(-1);}
@@ -34,7 +34,8 @@ test('light and dark fairies each fire independently with identical damage',()=>
  for(const artifacts of [['leaf'],['mirror'],['leaf','mirror']]){
   const g=combat({hero:3,artifacts});g.player.fire=999;const e=target(g,225,250,80);tick(g,3);damage.push(e.maxHp-e.hp);
  }
- assert.ok(damage[0]>0);assert.equal(damage[0],damage[1]);assert.ok(Math.abs(damage[2]-damage[0]*2)<1e-6);
+  assert.ok(damage[0]>0);assert.equal(damage[0],damage[1]);assert.ok(Math.abs(damage[2]-damage[0]*2)<1e-6);
+  const shot=combat({artifacts:['leaf']});shot.player.fire=999;shot.update(.01);assert.equal(shot.shots[0].damage,15);
 });
 test('stage recovery triggers once before optional quiz, also on final boss and respects caps',()=>{
  const g=combat({artifacts:['will','moonlight']});g.player.lives=1;g.bombs=0;g.phase='wave';g.clearRoom();g.clearRoom();assert.equal(g.player.lives,2);assert.equal(g.bombs,1);
@@ -45,9 +46,10 @@ test('stage recovery triggers once before optional quiz, also on final boss and 
 test('shortened bombs retain damage budgets at different frame steps and Night pays a power level',()=>{
  // Reproduced from origin/main engine at 60 Hz; Night's requested total is the exception.
  const totals=[1058,1300,1248,773,1058,1305,1900,1058,80];
- for(const dt of [1/60,.05])for(let hero=0;hero<9;hero++){
+  const durations=[4,2,3,3,3,3,3,3,10],invincibility=[4,2,3,3,3,3,3,3,2];
+  for(const dt of [1/60,.05])for(let hero=0;hero<9;hero++){
   const g=combat({hero});g.player.fire=999;target(g);g.power=3;g.bomb();
-  assert.equal(g.bombDuration,hero===8?10:hero===1?3:4);assert.equal(g.player.invincible,hero===8?2.5:g.bombDuration);
+   assert.equal(g.bombDuration,durations[hero]);assert.equal(g.player.invincible,invincibility[hero]);
   if(hero===6)assert.equal(g.power,2);tick(g,g.bombDuration+.1,dt);
   assert.ok(Math.abs(g.stats.damage-totals[hero])<1e-5,`${hero} at ${dt}: ${g.stats.damage}`);assert.equal(g.bombTime,0);
  }
@@ -61,7 +63,7 @@ test('Corona replaces every hero ultimate including healing, power cost, freeze 
  const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,2890);
 });
 test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
- const g=combat({hero:4});g.player.fire=999;g.bomb();tick(g,4);assert.ok(g.frostTime>4.99);assert.ok(g.player.invincible<1e-8);
+  const g=combat({hero:4});g.player.fire=999;g.bomb();tick(g,3);assert.ok(g.frostTime>4.99);assert.ok(g.player.invincible<1e-8);
  g.enemyBullet(20,200,Math.PI/2,100);tick(g,1);assert.ok(Math.abs(g.bullets[0].y-235)<1e-7);tick(g,4.1);assert.equal(g.frostTime,0);
 });
 test('Night large shot retains its size, gains damage and does not track an off-axis enemy',()=>{
@@ -92,9 +94,19 @@ test('only Poseidon creates a telegraphed horizontal and vertical cross, both ax
   g.update(.05);assert.equal(g.player.lives,3);tick(g,.1);assert.equal(g.player.lives,2);
  }
 });
-test('forest preserves former Chaos boss health while sea and final Chaos progress beyond it',()=>{
- assert.equal(DUNGEONS.length,6);assert.equal(STAGES[3].hp,8500);assert.ok(STAGES[4].hp>STAGES[3].hp);assert.ok(STAGES[5].hp>STAGES[4].hp*1.4);
+test('lower dungeon health rises in steps while final Chaos stays at its prior health',()=>{
+ assert.equal(DUNGEONS.length,6);assert.deepEqual(STAGES.map(stage=>stage.hp),[4200,5600,7400,9600,12500,17000]);
  const g=combat({stage:2});g.player.fire=999;const e=target(g);e.special=2;e.countdown=3;tick(g,2.9);assert.equal(g.bullets.length,0);tick(g,.15);assert.equal(g.bullets.length,20);
+});
+test('base-six A and B weapon achievements track any and hard clears without rewards',()=>{
+ const profile=createProfile();
+ for(let dungeon=0;dungeon<6;dungeon++)recordDungeonClear(profile,3,0,dungeon,dungeon===5?'hard':'normal');
+ let jasmine=achievementProgress(profile).filter(row=>row.hero===3&&row.weapon===0);
+ assert.deepEqual(jasmine.map(row=>[row.progress,row.complete]),[[6,true],[1,false]]);
+ for(let dungeon=0;dungeon<6;dungeon++)recordDungeonClear(profile,3,0,dungeon,'hard');
+ jasmine=achievementProgress(createProfile(JSON.parse(JSON.stringify(profile)))).filter(row=>row.hero===3&&row.weapon===0);
+ assert.ok(jasmine.every(row=>row.complete));assert.equal(achievementProgress(profile).length,24);
+ assert.equal(recordDungeonClear(profile,5,0,0,'hard'),false);
 });
 test('power pickups keep 90 percent of the prior eligible drops',()=>{
  let eligible=0,dropped=0;const g=combat();g.drop=(_x,_y,type)=>{if(type==='power')dropped++;};

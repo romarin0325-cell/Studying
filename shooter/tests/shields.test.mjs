@@ -93,11 +93,12 @@ test('normal-only modifiers do not leak into bomb impacts, pulses or transformed
  for(const [ids,expected] of [[['sun','bigbang'],2720],[['sun','kaleidoscope'],1360]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
 });
 
-test('verdant dew needs two P per level, respects P5 and starting jewel, and works after power loss',()=>{
- for(const ids of [[],['dew'],['dew','origin']]){const g=game({artifacts:ids}),req=ids.includes('dew')?2:3;let p=g.power;
+test('verdant dew removes one required P and adds five percent attack for standard and four-P heroes',()=>{
+ for(const [hero,ids,req] of [[1,[],3],[1,['dew'],2],[0,[],4],[0,['dew'],3],[7,[],4],[7,['dew','origin'],3]]){const g=game({hero,artifacts:ids});let p=g.power;
   while(p<5){for(let i=1;i<req;i++){g.collect('power');assert.equal(g.power,p);}g.collect('power');assert.equal(g.power,++p);assert.equal(g.powerPoints,0);}
   const before=g.score;g.collect('power');assert.equal(g.power,5);assert.equal(g.score,before+250);g.hitPlayer();assert.equal(g.power,4);for(let i=0;i<req;i++)g.collect('power');assert.equal(g.power,5);
  }
+ const plain=game({hero:1}),dew=game({hero:1,artifacts:['dew']}),a=target(plain),b=target(dew);plain.damage(a,100,0,0);dew.damage(b,100,0,0);near(a.maxHp-a.hp,100);near(b.maxHp-b.hp,105);
 });
 
 test('six requested weapons gain damage at every power without altering their firing intervals',()=>{
@@ -135,6 +136,6 @@ test('hidden life and Night/Sisters bomb bonuses apply to initial resources and 
 });
 
 test('sea ricochet specialist gains ten percent health and one projectile while preserving cadence',()=>{
- const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*1.1);assert.equal(e.elite,true);
+ const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*1.1*1.14);assert.equal(e.elite,true);
  g.enemies=[e];e.x=e.ox=100;e.y=100;e.fire=0;g.update(.001);assert.equal(g.bullets.length,4);assert.ok(g.bullets.every(b=>b.ricochet===5));near(e.fire,2.9);
 });

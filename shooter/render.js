@@ -308,12 +308,14 @@ export class Renderer {
     const c = this.c, t = g.totalTime, remaining = g.bombTime;
     const age=(g.bombDuration||5)-remaining;
     if(g.artifacts.has('sun')){const q=age/g.bombDuration;this.sprite(this.art['bloom-fx'][1],225,this.height*.4,220+q*400,q*.2,1,Math.sin(Math.PI*Math.min(.99,q))*.9);return;}
+    const auraActive=g.heroIndex!==8||age<(g.bombInvincibility||0);
     // Reuse one cached sigil and the existing portrait: no full-screen filters or new textures per frame.
-    this.sprite(this.art.sigil,g.player.x,g.player.y,240+Math.min(age,1)*90,t*.35,1,Math.min(.5,remaining*.5));
+    if(auraActive)this.sprite(this.art.sigil,g.player.x,g.player.y,240+Math.min(age,1)*90,t*.35,1,Math.min(.5,remaining*.5));
     if(age<1.1){const q=age/1.1,fade=Math.sin(q*Math.PI)*.85;
       this.sprite(g.heroIndex===8?this.art.dark:this.art.heroes[g.heroIndex],350-q*80,this.height*.43,300+q*35,-.08,1,fade);
       c.save();c.strokeStyle=g.hero.color;c.globalAlpha=1-q;c.lineWidth=5*(1-q);c.beginPath();c.arc(g.player.x,g.player.y,30+q*500,0,TAU);c.stroke();c.restore();
     }
+    if(!auraActive)return;
     c.save(); c.strokeStyle = g.hero.color; c.lineWidth = 2; c.globalAlpha = .25;
     const cx = g.player.x, cy = g.player.y;
     if (g.heroIndex === 0) {
