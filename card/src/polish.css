@@ -3,10 +3,23 @@ body.astra { --stat-up:#9ce1ba; --stat-down:#ffc1d0; --stat-neutral:var(--paper)
 body[data-theme=strawberry] { --ink:#fff1fa; --panel:#fffafe; --panel-soft:#f5e5f2; --sky:#9f386d; --sky-bright:#802755; --paper:#492840; --muted:#76536c; --line:#d6acc9; --wash:#ecc5df; --button:#f2d6e8; --button-fill:linear-gradient(#fff9fd,#f2d6e8); --primary-fill:linear-gradient(#ad477e,#913161); --frame-art:url("../assets/magical-frame.svg"); --button-art:url("../assets/magical-button.svg"); --theme-mark:url("../assets/magical-mark.svg"); }
 body[data-theme=dreamsky] { --primary-fill:linear-gradient(#34799f,#276187); --frame-art:url("../assets/dreamsky-frame.svg"); --button-art:url("../assets/dreamsky-button.svg"); --theme-mark:url("../assets/dreamsky-mark.svg"); }
 body:is([data-theme=strawberry],[data-theme=dreamsky]) { --stat-up:#246549; --stat-down:#9a3154; --stat-neutral:var(--paper); --positive-ink:#20563c; --positive-fill:#e0f0e6; --negative-ink:#862b50; --negative-fill:#fae3ed; --rarity-accent:#566578; }
-.astra .actor-buffs { display:flex; flex-wrap:wrap; gap:3px; height:auto; max-height:36px; min-height:0; margin-top:4px; overflow:auto; color:var(--paper); }
+.astra .actor-buffs { display:flex; flex-wrap:wrap; align-content:flex-start; gap:3px; height:38px; min-height:38px; max-height:38px; flex-shrink:0; margin-top:4px; overflow:auto; color:var(--paper); scrollbar-width:thin; }
 .status-badge { display:inline-block; flex:none; border-radius:5px; padding:1px 4px; font-size:10px; line-height:1.5; white-space:nowrap; }
 .status-positive { background:var(--positive-fill); color:var(--positive-ink); }
 .status-negative { background:var(--negative-fill); color:var(--negative-ink); }
+.astra .visual-stage { align-items:flex-start; }
+.astra .battle-actor>strong { height:18px; line-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.astra .battle-actor .portrait { height:clamp(112px,18vh,150px); width:auto; max-width:100%; aspect-ratio:3/5; align-self:center; border-radius:10px; flex-shrink:0; }
+.astra .battle-header { height:40px; min-height:40px; flex:0 0 40px; }
+.astra .battle-header .battle-artifact-btn { min-height:28px; padding:4px 8px; margin:0; }
+.astra .battle-header .field-buffs { max-height:30px; overflow:auto; }
+.astra .party-card .portrait { width:auto; max-width:100%; aspect-ratio:3/5; margin:0 auto; border-radius:10px; }
+.astra #gacha-result>.portrait { width:129px!important; height:215px!important; border-radius:10px; }
+.astra #artifact-check-list .reserve-option { padding:12px!important; background:var(--panel-soft)!important; color:var(--paper)!important; border:1px solid var(--line)!important; border-radius:10px; line-height:1.5; }
+.astra #artifact-check-list .reserve-option[aria-pressed=true] { border-color:var(--sky)!important; box-shadow:inset 3px 0 var(--sky); }
+.astra #artifact-check-list .reserve-option-state { color:var(--muted); font-size:11px; }
+.astra #artifact-check-list .reserve-option[aria-pressed=true] .reserve-option-state { color:var(--stat-up); }
+.astra #artifact-check-list .reserve-option-desc { color:var(--paper); }
 .astra .field-buffs { color:var(--paper); background:var(--panel-soft); border-radius:6px; padding:2px 5px; }
 .astra .field-buffs:empty { display:none; }
 .stat-value { font-weight:600; font-variant-numeric:tabular-nums; }
@@ -24,9 +37,10 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) { --stat-up:#246549; --st
 .astra .mission-item.complete .mission-item-title { color:var(--stat-up)!important; }
 .astra :is(#weekly-mission-section,#monthly-mission-section,#special-mission-section)>div:nth-child(2)>div:first-child { color:var(--muted)!important; }
 .astra :is(#weekly-mission-reward-name,#monthly-mission-reward-name,#special-mission-reward-name) { color:var(--paper)!important; }
-.astra #modal-card .modal-scroll>.portrait { width:110px!important; height:146px!important; }
-@media(max-width:760px) { #collection-grid .portrait { height:clamp(104px,17vh,144px); } }
-/* Color + a written grade + a distinct mark, including special and event cards. */
+.astra #modal-card .modal-scroll>.portrait { height:clamp(170px,22vh,185px)!important; width:auto!important; aspect-ratio:3/5; border-radius:10px; margin:6px auto 10px!important; }
+.astra #modal-card h3 { font-size:20px; }
+.astra #md-skills { font-size:13px!important; }
+/* Grade is carried by frame color and line pattern; the full name remains in the accessible label/detail. */
 :is([data-grade=normal],.card-item.normal) { --rank-mark:'○'; }
 :is([data-grade=rare],.card-item.rare) { --rarity-accent:#9ed4ff; --rank-mark:'◇'; }
 :is([data-grade=epic],.card-item.epic) { --rarity-accent:#d2b5ff; --rank-mark:'◆'; }
@@ -40,12 +54,15 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) :is([data-grade=legend],.
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is([data-grade=transcendence],.card-item.transcendence) { --rarity-accent:#1a6b66; }
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is([data-grade=special],.card-item.special) { --rarity-accent:#a13769; }
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is([data-grade=event],.card-item.event) { --rarity-accent:#4e6a28; }
-body.astra .card-item[data-grade] { border:2px solid var(--rarity-accent)!important; }
-body.astra .card-item .card-grade { background:var(--panel); color:var(--rarity-accent); font-weight:650; border:1px solid var(--rarity-accent); z-index:2; }
-.card-grade::before { content:var(--rank-mark,'○'); margin-right:3px; }
+body.astra .card-item[data-grade] { border:2px solid var(--rarity-accent)!important; box-shadow:none; }
+.card-item[data-grade=epic] { --frame-line:1px solid; }
+.card-item[data-grade=legend] { --frame-line:3px double; }
+.card-item[data-grade=transcendence] { --frame-line:3px double; --frame-corner:3px; }
+.card-item[data-grade=event],.card-item[data-grade=special] { --frame-line:1px dashed; }
+.astra .card-item[data-grade]::after { content:''; position:absolute; inset:2px; border:var(--frame-line,0px solid) var(--rarity-accent); border-radius:var(--frame-corner,8px); background:none; pointer-events:none; }
 .astra #md-grade { color:var(--rarity-accent); font-weight:600; letter-spacing:0; }
-.astra :is(.card-item,.party-card,#gacha-result>.portrait,.battle-actor .portrait) { position:relative; }
-.astra :is(.card-item,.party-card,#gacha-result>.portrait,.battle-actor .portrait)::after { content:''; position:absolute; inset:2px; background:var(--frame-art) center/100% 100% no-repeat; pointer-events:none; border-radius:inherit; }
+.astra :is(.card-item>.portrait,.party-card>.portrait,#gacha-result>.portrait,.battle-actor .portrait) { position:relative; }
+.astra :is(.card-item>.portrait,.party-card>.portrait,#gacha-result>.portrait,.battle-actor .portrait)::after { content:''; position:absolute; inset:0; background:var(--frame-art) center/100% 100% no-repeat; pointer-events:none; border-radius:inherit; }
 .astra :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button) { position:relative; }
 .astra :is(.primary,.secondary,.menu-btn,.skill-btn,.icon-button)::after { content:''; position:absolute; inset:1px; background:var(--button-art) center/100% 100% no-repeat; pointer-events:none; border-radius:inherit; }
 /* One short summoning sequence: seal, outward motes, then a lasting grade banner. */

@@ -46,6 +46,8 @@ try {
    await page.locator('#btn-battle-artifact-check').waitFor({state:'visible'});
    await assertContrast(page,'#btn-battle-artifact-check','#btn-battle-artifact-check');
    const box=await page.locator('#btn-battle-artifact-check').boundingBox();
+   const header=await page.locator('.battle-header').boundingBox();
+   assert.ok(box.y>=header.y&&box.y+box.height<=header.y+header.height,'Artifact action fits inside its header');
    if(theme==='strawberry')geometry.artifact=box;else assert.deepEqual(box,geometry.artifact);
    await page.screenshot({path:path(`contrast-${theme}-artifact-${width}`)});
    await page.locator('#btn-battle-artifact-check').click();

@@ -77,6 +77,14 @@ try {
       assert.equal(result.screen,'screen-artifact-reserve-draft');
       await page.locator('#artifact-reserve-bundle-0').click();
       assert.equal(await page.evaluate(() => RPG.state.artifactReserveDraft.round),2);
+      for(let round=0;round<3;round++) await page.locator('#artifact-reserve-bundle-0').click();
+      await dismiss();
+      await page.evaluate(()=>RPG.openChaosBlessing());
+      await page.locator('#btn-artifact-check').click();
+      assert.equal(await page.locator('#artifact-check-list .reserve-option').count(),12,'The first battle must not lock the completed reserve pool');
+      await page.locator('#artifact-check-list .reserve-option').first().click();
+      assert.equal(await page.locator('#artifact-check-list .reserve-option[aria-pressed=true]').count(),1);
+      assert.match(await page.locator('#artifact-check-title').innerText(),/1\/4/);
     }
     if (mode === 'perfect_plan') assert.equal(result.screen,'screen-perfect-plan-draft');
   }
