@@ -4829,7 +4829,8 @@
                 if (side === 'player') content += `MP: ${char.mp}/${char.maxMp || GAME_CONSTANTS.MAX_MP}<br>`;
                 content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
                 content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
-                content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
+                // Enemy attacks do not roll critical hits; player attacks do not roll enemy evasion.
+                if (side === 'player') content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
                 content += `상태: ${buffs}<br><br>`;
 
                 if (side === 'player') {
@@ -5542,7 +5543,7 @@
                 const title = document.getElementById('artifact-check-title');
 
                 if (this.state.mode === 'artifact_reserve') {
-                    const inBattle = this.battle && !this.battle.isFinished;
+                    const inBattle = this.battle?.enemy && this.battle.players?.length > 0 && !this.battle.isFinished;
                     if (inBattle) {
                         if (title) title.innerText = '현재 활성 아티팩트';
                         if (owned.length === 0) {
@@ -5572,10 +5573,11 @@
                         const isActive = owned.includes(entry.id);
                         const remainingUses = Math.max(0, entry.remainingUses || 0);
                         const button = document.createElement('button');
-                        button.className = 'menu-btn';
+                        button.className = 'menu-btn reserve-option';
+                        button.setAttribute('aria-pressed', String(isActive));
                         button.disabled = remainingUses <= 0;
                         button.style.cssText = `margin:0 0 8px; padding:9px; text-align:left; border-color:${isActive ? '#4caf50' : '#6a5d18'}; color:${remainingUses > 0 ? '#f5df78' : '#777'}; background:${isActive ? '#263a29' : '#333'};`;
-                        button.innerHTML = `<div style="display:flex; justify-content:space-between; gap:8px;"><b>${artifact.name}</b><span style="white-space:nowrap; color:${isActive ? '#81c784' : '#ffd700'};">${isActive ? '활성' : '비활성'} · ${remainingUses}회</span></div><span style="display:block; margin-top:3px; color:#ccc; font-size:0.78rem; font-weight:normal;">${artifact.desc}</span>`;
+                        button.innerHTML = `<div style="display:flex; justify-content:space-between; gap:8px;"><b>${artifact.name}</b><span class="reserve-option-state" style="white-space:nowrap;">${isActive ? '활성' : '비활성'} · ${remainingUses}회</span></div><span class="reserve-option-desc" style="display:block; margin-top:5px; font-size:0.78rem; font-weight:normal;">${artifact.desc}</span>`;
                         button.onclick = () => {
                             if (this.toggleArtifactReserveArtifact(entry.id)) this.openArtifactCheck();
                         };

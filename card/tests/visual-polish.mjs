@@ -44,17 +44,50 @@ try {
    await readable(page.locator('.settings-grid .menu-btn'));
    await readable(page.locator('.theme-choices button[aria-pressed="true"],#modal-astra-settings .primary'));
    await page.locator('[onclick="Astra.closeSettings()"]:visible').click();
+   await page.locator('[data-nav=deck]').click();
+   const deckCard=await page.locator('#deck-card-list .card-item').first().boundingBox();
+   const deckPortrait=await page.locator('#deck-card-list .portrait').first().boundingBox();
    await page.locator('[data-nav=collection]').click();
+   const collectionCard=await page.locator('#collection-grid .card-item').first().boundingBox();
+   const collectionPortrait=await page.locator('#collection-grid .portrait').first().boundingBox();
+   assert.equal(collectionCard.width,deckCard.width);assert.equal(collectionCard.height,deckCard.height,'Both catalog destinations share one card size');
+   assert.equal(collectionPortrait.height,deckPortrait.height);
+   assert.ok(Math.abs(collectionPortrait.width/collectionPortrait.height-.6)<.01,'Catalog portrait is 3:5');
    assert.ok((await page.locator('#collection-grid .portrait').first().boundingBox()).height>=104);
    const accents=await page.locator('#collection-grid .card-item').evaluateAll(els=>els.map(el=>getComputedStyle(el).borderTopColor));
    assert.equal(new Set(accents).size,accents.length,'Every actual grade has its own border color');
-   await readable(page.locator('#collection-grid .card-grade'));
+   assert.equal(await page.locator('#collection-grid .card-grade').count(),0,'No overlaid grade labels');
+   await readable(page.locator('#collection-grid .card-meta'));
+   assert.ok(await page.locator('#collection-grid .card-meta').evaluateAll(els=>els.every(el=>{const card=el.closest('.card-item').getBoundingClientRect(),r=el.getBoundingClientRect();return r.left-card.left>=8&&card.right-r.right>=8&&card.bottom-r.bottom>=7&&parseFloat(getComputedStyle(el).fontSize)>=11;})),'Metadata stays inside the frame safe area');
    await page.screenshot({path:shot(`${theme}-collection-${size.width}`)});
    await page.locator('#collection-grid .card-item').first().click();
-   assert.equal((await page.locator('#modal-card .portrait').boundingBox()).height,146);
+   const detailPortrait=await page.locator('#modal-card .portrait').boundingBox();
+   assert.ok(detailPortrait.height>=170);assert.ok(Math.abs(detailPortrait.width/detailPortrait.height-.6)<.01);
    await readable(page.locator('#md-grade'));
    await page.screenshot({path:shot(`${theme}-detail-${size.width}`)});
    await page.keyboard.press('Escape');
+   // A real 3:5 image request through the local portrait adapter, with edge markers to expose cropping.
+   await page.evaluate(()=>{
+    const id=document.querySelector('#collection-grid .card-item').dataset.cardId,card=RPG.getCardData(id);
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="300" height="500"><rect width="300" height="500" fill="#d7e8ed"/><path d="M0 5H300M0 495H300M5 0V500M295 0V500" stroke="#517487" stroke-width="10"/><circle cx="150" cy="130" r="60" fill="#90aab8"/><path d="M60 425V280a90 90 0 0 1 180 0v145Z" fill="#90aab8"/><text x="150" y="468" font-size="24" text-anchor="middle" fill="#263f4a">3:5 TEST IMAGE</text></svg>';
+    Astra.localPortraits.set((card.imageFile||`${card.name}.png`).normalize('NFC'),URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})));Astra.renderCollection();
+   });
+   await page.waitForFunction(()=>document.querySelector('#collection-grid img').naturalHeight===500);
+   const imageFit=await page.locator('#collection-grid img').first().evaluate(el=>({width:el.clientWidth,height:el.clientHeight,fit:getComputedStyle(el).objectFit}));
+   assert.ok(Math.abs(imageFit.width/imageFit.height-.6)<.02);assert.equal(imageFit.fit,'contain');
+   await page.screenshot({path:shot(`${theme}-portrait-fit-${size.width}`)});
+   await page.evaluate(()=>{
+    RPG.state.mode='artifact_reserve';RPG.battle={players:[],enemy:null};
+    RPG.state.artifactReservePool=ARTIFACT_LIST.slice(0,12).map(a=>({id:a.id,remainingUses:2}));RPG.state.artifacts=[];RPG.openArtifactCheck();
+   });
+   assert.equal(await page.locator('#artifact-check-list .reserve-option').count(),12);
+   await page.locator('#artifact-check-list .reserve-option').first().click();
+   assert.equal(await page.locator('#artifact-check-list .reserve-option[aria-pressed=true]').count(),1);
+   await readable(page.locator('.reserve-option b,.reserve-option-state,.reserve-option-desc'));
+   assert.ok(await page.locator('.reserve-option').evaluateAll(els=>els.every(el=>{const box=el.getBoundingClientRect();return [...el.querySelectorAll('b,span')].every(node=>{const r=node.getBoundingClientRect();return r.left-box.left>=12&&box.right-r.right>=12;});})),'Artifact text stays away from the decorative border');
+   await page.screenshot({path:shot(`${theme}-reserve-${size.width}`)});
+   await page.keyboard.press('Escape');
+   await page.evaluate(()=>{RPG.state.mode='origin';RPG.state.artifacts=[];});
    await page.locator('[data-nav=study]').click();
    await page.locator('[onclick="RPG.openMagicClass()"]:visible').click();
    await page.locator('#lecture-list button').first().click();
@@ -77,6 +110,15 @@ try {
    await page.screenshot({path:shot(`${theme}-date-${size.width}`)});
    await page.evaluate(()=>document.getElementById('modal-date').classList.remove('active'));
    await page.locator('[data-nav=menu]').click();await page.locator('#astra-depart').click();
+   await page.evaluate(()=>{RPG.battle.players[RPG.battle.currentPlayerIdx].buffs={};RPG.battle.enemy.buffs={};RPG.renderBattlefield();});
+   const emptyPositions=await page.locator('.battle-actor .portrait').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+   await page.evaluate(()=>{const many={weak:2,corrosion:3,burn:3,darkness:1,silence:1,stun:1,evasion:1,guard:1,barrier:1,magic_guard:1,curse:2,divine:2};RPG.battle.players[RPG.battle.currentPlayerIdx].buffs={...many};RPG.battle.enemy.buffs={...many};RPG.renderBattlefield();});
+   const crowdedPositions=await page.locator('.battle-actor .portrait').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+   assert.deepEqual(crowdedPositions,emptyPositions,'Accumulating statuses never shifts either portrait');
+   await page.screenshot({path:shot(`${theme}-crowded-statuses-${size.width}`)});
+   await page.locator('#enemy-actor-box').click();
+   assert.doesNotMatch(await page.locator('#modal-info').innerText(),/치명타율|회피율/,'Enemy details omit rates that combat does not use');
+   await page.keyboard.press('Escape');
    await page.evaluate(()=>{
     const p=RPG.battle.players[RPG.battle.currentPlayerIdx];p.buffs={weak:1,evasion:1,corrosion:2};
     RPG.battle.enemy.buffs={silence:1,burn:3,evasion:1};RPG.battle.fieldBuffs=[{name:'moon_bless',duration:3}];RPG.renderBattlefield();
@@ -86,6 +128,7 @@ try {
    for(const button of await page.locator('#battle-controls .skill-btn').all()) {const r=await button.boundingBox();assert.ok(r.y+r.height<=size.height,'All skills stay visible with status badges');}
    await page.screenshot({path:shot(`${theme}-statuses-${size.width}`)});
    await page.locator('#player-actor-box').click();
+   assert.match(await page.locator('#modal-info').innerText(),/치명타율/);
    for(const kind of ['up','down','neutral']) await readable(page.locator(`.stat-${kind}`));
    await page.screenshot({path:shot(`${theme}-stats-${size.width}`)});
    await page.keyboard.press('Escape');

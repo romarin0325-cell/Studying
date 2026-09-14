@@ -268,7 +268,6 @@ const Astra = {
     button.dataset.grade = card.grade;
     button.setAttribute('aria-label', `${card.name}, ${this.gradeNames[card.grade] || card.grade}, ${count ? `${count}장 보유` : '미보유'}`);
     button.append(ImageAssets.createPortrait(card));
-    button.append(this.text('span', this.gradeNames[card.grade] || card.grade, 'card-grade'));
     button.append(this.text('span', card.name, 'card-name'));
     const meta = this.text('span','', 'card-meta');
     meta.append(this.text('span', this.elementNames[card.element] || card.element));
