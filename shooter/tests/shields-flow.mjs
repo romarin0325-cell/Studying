@@ -26,8 +26,8 @@ try{
   if(viewport.width===390)assert.ok(geometry.visible>=6,JSON.stringify(geometry));
   await shot(`inventory-${viewport.width}`);checks.push({viewport,...geometry});
  }
- await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.artifact.normal').count(),20);assert.equal(await page.locator('.artifact.rare').count(),12);
- assert.equal(await page.evaluate(()=>__shields.art.urls.relics.length),32);
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.artifact.normal').count(),20);assert.equal(await page.locator('.artifact.rare').count(),14);
+ assert.equal(await page.evaluate(()=>__shields.art.urls.relics.length),36);
  for(const id of ['clover','slipper','dew'])await click(`[data-artifact="${id}"]`);
  assert.equal(await page.locator('[data-artifact].selected').count(),3);await shot('selected-relics');await click('#equipment-done');
  await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('P 세 개'));await click('#help-done');

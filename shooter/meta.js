@@ -8,7 +8,7 @@ export const ARTIFACTS = [
   { id: 'cloak', name: '투명망토', icon: '☾', rarity: 'normal', text: '피격 후 4초 무적' },
   { id: 'crown', name: '로열크라운', icon: '♕', rarity: 'normal', text: '봄 공격력 +30%', bomb: .30 },
   { id: 'shield', name: '수호방패', icon: '◈', rarity: 'normal', text: '피격 시 생명 대신 봄을 먼저 소모' },
-  { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 발동 · 스테이지당 3회' },
+  { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 발동 · 런당 3회' },
   { id: 'pendant', name: '검은펜던트', icon: '♦', rarity: 'rare', text: '파워 최대일 때 공격력 +20%' },
   { id: 'chocolate', name: '드림초콜릿', icon: '▦', rarity: 'rare', text: '보스에게 공격력 +50%' },
   { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명 1일 때 공격력 +50%' },
@@ -31,8 +31,15 @@ export const ARTIFACTS = [
   { id: 'slipper', name: '유리구두', rarity: 'rare', text: '그레이즈 20회마다 보호막 생성 · 중첩 불가' },
   { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P −1 · 공격력 +5%', attack: .05 },
   { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 −10% · 봄 공격력 +60%', normalAttack: -.10, bomb: .60 },
-  { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 −20% · 일반 공격력 +30%', normalAttack: .30, bomb: -.20 }
+  { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 −20% · 일반 공격력 +30%', normalAttack: .30, bomb: -.20 },
+  { id: 'fairycloak', name: '요정의망토', rarity: 'rare', text: '피격반경 −2 · 최대 생명 +1', radius: -2, life: 1 },
+  { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
+  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 3 획득' },
+  { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' }
 ];
+export function artifactText(artifact, challenge = false) {
+  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 3 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가'}[artifact.id] || artifact.text) : artifact.text;
+}
 export const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
   { id: 'normal', name: '보통', hp: 1.15, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .15, tickets: 1 },
@@ -108,15 +115,16 @@ export function claimDungeon(profile, dungeon, difficulty, date = new Date()) {
 export function drawArtifact(profile, random = Math.random, quizCorrect = false) {
   const ticket = profile.tickets.shift(); if (!ticket) return null;
   const chance = quizCorrect ? .30 : .15;
-  const rarity = random() < chance ? 'rare' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
+  const roll = random(), epic = quizCorrect ? .02 : .01;
+  const rarity = roll < chance ? 'rare' : roll < chance + epic ? 'epic' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
   const artifact = pool[Math.min(pool.length-1, Math.floor(Math.max(0, random()) * pool.length))];
   const duplicate = profile.owned.includes(artifact.id); if (!duplicate) profile.owned.push(artifact.id);
   return { artifact, duplicate, ticket };
 }
-export function loadoutStats(ids = [], difficulty = 'normal') {
-  const equipment = [...new Set(ids)].slice(0,3).map(id => ARTIFACTS.find(a => a.id === id)).filter(Boolean);
+export function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
+  const equipment = [...new Set(ids)].map(id => ARTIFACTS.find(a => a.id === id)).filter(Boolean).slice(0,slots);
   const sum = field => equipment.reduce((n,a) => n+(a[field] || 0), 0);
   const mode=DIFFICULTIES.find(d=>d.id===difficulty) || DIFFICULTIES[1];
   return { ids: equipment.map(a=>a.id), maxLife: Math.max(1, mode.maxLife + sum('life')), lives:Math.max(1,mode.lives+sum('life')),
-    speed: sum('speed'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: 5+sum('bombs') };
+    radius: sum('radius'), speed: sum('speed'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: 5+sum('bombs') };
 }

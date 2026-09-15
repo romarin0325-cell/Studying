@@ -20,7 +20,7 @@ try{
  await click('#equipment');
  for(const size of [{width:320,height:568},{width:390,height:844},{width:430,height:932},{width:844,height:390}]){
   await page.setViewportSize(size);const done=await page.locator('#equipment-done').boundingBox();assert.ok(done.y>=0&&done.y+done.height<=size.height);
-  assert.equal(await page.locator('.relic-section').count(),2);await page.locator('.equipment-list').evaluate(el=>el.scrollTop=el.scrollHeight);const next=await page.locator('#equipment-done').boundingBox();assert.equal(done.y,next.y);
+  assert.deepEqual(await page.locator('.relic-section h3').allTextContents(),['일반 아티팩트','레어 아티팩트','에픽 아티팩트']);await page.locator('.equipment-list').evaluate(el=>el.scrollTop=el.scrollHeight);const next=await page.locator('#equipment-done').boundingBox();assert.equal(done.y,next.y);
  }
  await page.setViewportSize({width:390,height:844});await shot('relics');await click('#equipment-done');
  await click('#dungeons');await page.locator('.dungeon-list').evaluate(el=>el.scrollTop=el.scrollHeight);const dungeonScroll=await page.locator('.dungeon-list').evaluate(el=>el.scrollTop);

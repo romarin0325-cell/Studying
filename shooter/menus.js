@@ -1,5 +1,5 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { ARTIFACTS, DIFFICULTIES, weekKey, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
+import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = id => document.getElementById(id);
@@ -70,7 +70,7 @@ export class CampaignUI {
   equipment(refresh) {
     const p=this.profile;
     const scroll=document.querySelector('.equipment-list')?.scrollTop||0;
-    this.setModal(`<div class="equipment-head"><h2>별의 유물함</h2><p class="intro-copy">선택 ${p.equipped.length}/3 · 수집 ${p.owned.length}/${ARTIFACTS.length}</p></div><div class="equipment-list">${['normal','rare'].map(rarity=>`<section class="relic-section" aria-label="${rarity==='rare'?'레어':'일반'} 아티팩트"><h3>${rarity==='rare'?'레어':'일반'} 아티팩트</h3><div class="artifact-grid">${ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>`<button class="artifact ${p.equipped.includes(a.id)?'selected':''} ${a.rarity}" data-artifact="${a.id}" ${p.owned.includes(a.id)?'':'disabled'} aria-pressed="${p.equipped.includes(a.id)}">${this.relicImage(a.id)}<b>${a.name}</b><small>${a.text}</small><em>${p.owned.includes(a.id)?a.rarity==='rare'?'RARE':'NORMAL':'미보유'}</em></button>`).join('')}</div></section>`).join('')}</div><footer class="equipment-footer"><button class="primary" id="draw-ticket" ${p.tickets.length?'':'disabled'}>아티팩트 뽑기 · ${p.tickets.length}장</button><button class="secondary" id="equipment-done">장착 완료</button></footer>`);
+    this.setModal(`<div class="equipment-head"><h2>별의 유물함</h2><p class="intro-copy">선택 ${p.equipped.length}/3 · 수집 ${p.owned.length}/${ARTIFACTS.length}</p></div><div class="equipment-list">${['normal','rare','epic'].map(rarity=>`<section class="relic-section" aria-label="${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트"><h3>${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트</h3><div class="artifact-grid">${ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>`<button class="artifact ${p.equipped.includes(a.id)?'selected':''} ${a.rarity}" data-artifact="${a.id}" ${p.owned.includes(a.id)?'':'disabled'} aria-pressed="${p.equipped.includes(a.id)}">${this.relicImage(a.id)}<b>${a.name}</b><small>${a.text}</small><em>${p.owned.includes(a.id)?a.rarity.toUpperCase():'미보유'}</em></button>`).join('')}</div></section>`).join('')}</div><footer class="equipment-footer"><button class="primary" id="draw-ticket" ${p.tickets.length?'':'disabled'}>아티팩트 뽑기 · ${p.tickets.length}장</button><button class="secondary" id="equipment-done">장착 완료</button></footer>`);
     document.querySelector('.panel').classList.add('equipment-panel');document.querySelector('.equipment-list').scrollTop=scroll;
     document.querySelectorAll('[data-artifact]').forEach(b=>b.onclick=()=>{const id=b.dataset.artifact;if(p.equipped.includes(id))p.equipped=p.equipped.filter(a=>a!==id);else if(p.equipped.length<3)p.equipped.push(id);else return this.toast('유물은 세 개까지 장착할 수 있어요');this.save();this.equipment(refresh);});
     $('equipment-done').onclick=()=>{this.closeModal();refresh();};
@@ -80,9 +80,9 @@ export class CampaignUI {
       const draw=correct=>{
         if(resolved)return;resolved=true;
         const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);this.save();const a=result.artifact;
-        this.setModal(`<span class="small-caps">${a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${result.duplicate?'이미 소유한 유물이에요. 다음 주에 새로운 별을 찾아봐요.':'새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.'}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
+        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${result.duplicate?'이미 소유한 유물이에요. 다음 주에 새로운 별을 찾아봐요.':'새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.'}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
       };
-      this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어 유물을 만날 기회가 높아져요.',
+      this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
         ()=>this.quiz(Math.random()<.5?'vocab':'collocation','',draw),()=>draw(false));
       $('quiz-decline').textContent='아니오 · 바로 뽑기';
     };
@@ -94,13 +94,28 @@ export class CampaignUI {
   }
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {
     const week=weekKey();
-    this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>여섯 개의 하늘</h2><div class="dungeon-list">${DUNGEONS.map(d=>`<button class="dungeon-card ${selected===d.id?'selected':''}" data-dungeon="${d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>DUNGEON 0${d.id+1} · 3 STAGES</small><b>${d.name}</b><span>${STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.id}`]?'이번 주 보상 수령':`주간 첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note">뒤쪽 던전일수록 적의 체력·탄속·패턴이 강해져요. 주간 보상은 월요일 0시 초기화, 난이도와 관계없이 던전당 한 번이에요.</p><button class="primary" id="dungeon-done">이 하늘로 출격 준비</button>`);
+    this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>여섯 개의 하늘</h2><div class="dungeon-list">${DUNGEONS.filter(d=>!d.challengeOnly).map(d=>`<button class="dungeon-card ${selected===d.id?'selected':''}" data-dungeon="${d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>DUNGEON 0${d.id+1} · 3 STAGES</small><b>${d.name}</b><span>${STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.id}`]?'이번 주 보상 수령':`주간 첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy dungeon-description">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note">뒤쪽 던전일수록 적의 체력·탄속·패턴이 강해져요. 주간 보상은 월요일 0시 초기화, 난이도와 관계없이 던전당 한 번이에요.</p><button class="primary" id="dungeon-done">이 하늘로 출격 준비</button><button class="secondary" id="challenge-mode">챌린지 · 일곱 하늘 이어가기</button>`);
     document.querySelector('.panel').classList.add('dungeon-panel');
     document.querySelector('.dungeon-list').scrollTop=scroll;document.querySelector('.panel').scrollTop=panelScroll;
     const positions=()=>[document.querySelector('.dungeon-list').scrollTop,document.querySelector('.panel').scrollTop];
     document.querySelectorAll('[data-dungeon]').forEach(b=>b.onclick=()=>this.dungeons(Number(b.dataset.dungeon),mode,done,...positions()));
     document.querySelectorAll('[data-difficulty]').forEach(b=>b.onclick=()=>this.dungeons(selected,b.dataset.difficulty,done,...positions()));
+    $('challenge-mode').onclick=()=>{
+      this.setModal(`<span class="small-caps">SEVEN SKIES · CHALLENGE</span><h2>끝없이 이어지는 하늘</h2><p class="intro-copy">마도제국부터 혼돈의 틈을 넘어 천계의 계단까지, 일곱 던전의 21스테이지를 이어가요.</p><div class="lecture-copy">장착한 유물로 출발해 보스 퀴즈를 맞힐 때마다 새로운 유물을 골라요. 최대 9개까지 함께할 수 있어요.<br>부활 기회는 여행 전체에서 한 번, 광기의가면은 총 세 번이에요.</div><button class="primary" id="challenge-done">챌린지 출격 준비 · ${DIFFICULTIES.find(d=>d.id===mode).name}</button><button class="secondary" id="challenge-back">던전 선택으로</button>`);
+      $('challenge-done').onclick=()=>{this.closeModal();done(0,mode,true);};$('challenge-back').onclick=()=>this.dungeons(selected,mode,done,scroll,panelScroll);
+    };
     $('dungeon-done').onclick=()=>{this.closeModal();done(selected,mode);};
+  }
+  runArtifacts(game,back) {
+    this.setModal(`<h2>함께하는 유물</h2><p class="intro-copy">${game.artifacts.size}/9 · 생명 ${game.player.lives}/${game.maxLife} · 봄 ${game.bombs}/${game.maxBombs}</p><div class="run-artifact-list">${[...game.artifacts].map(id=>{const a=ARTIFACTS.find(a=>a.id===id);return `<div class="run-artifact ${a.rarity}">${this.relicImage(id)}<span><b>${a.name}</b><small>${artifactText(a,true)}</small></span></div>`;}).join('')||'<p class="intro-copy">아직 함께하는 유물이 없어요.</p>'}</div><button class="primary" id="run-artifacts-back">돌아가기</button>`);
+    $('run-artifacts-back').onclick=back;
+  }
+  challengeReward(game,done) {
+    const ids=game.challengeChoices();
+    if(!ids.length){game.completeQuiz();done();return;}
+    this.setModal(`<span class="small-caps">A GIFT FOR THE JOURNEY</span><h2>다음 하늘의 동행</h2><p class="intro-copy">이번 챌린지에 함께할 유물 하나를 선택하세요.</p><div class="challenge-choices">${ids.map(id=>{const a=ARTIFACTS.find(a=>a.id===id);return `<button class="run-artifact ${a.rarity}" data-challenge-artifact="${id}">${this.relicImage(id)}<span><b>${a.name}</b><small>${artifactText(a,true)}</small></span></button>`;}).join('')}</div><button class="secondary" id="choice-equipped">현재 적용 유물 · ${game.artifacts.size}/9</button>`);
+    document.querySelectorAll('[data-challenge-artifact]').forEach(b=>b.onclick=()=>{if(game.chooseChallengeArtifact(b.dataset.challengeArtifact))done();});
+    $('choice-equipped').onclick=()=>this.runArtifacts(game,()=>this.challengeReward(game,done));
   }
   rotationLabel() { return dailyHeroes().length===6?'일요일 · 모든 수호자와 함께':`오늘의 수호자 · ${dailyHeroes().map(i=>HEROES[i].name).join(' · ')}`; }
 }

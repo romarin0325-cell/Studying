@@ -7,14 +7,14 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png' };
+  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png',astea:'assets/astea.png','celestial-relics':'assets/celestial-relics.png','celestial-world':'assets/celestial-world.png' };
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
   })));
-  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[],tides:[],'bloom-fx':[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
-  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx']) {
-    const columns=kind==='relics'?4:2;
+  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[],tides:[],astea:[],'bloom-fx':[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
+  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx','astea']) {
+    const columns=kind==='astea'?1:kind==='relics'?4:2;
     for (let i = 0; i < columns*columns; i++) {
       const sheet = images[kind], w = sheet.width * (kind==='secrets'&&i===0?.52:kind==='secrets'&&i===1?.46:1/columns);
       const sourceX=kind==='secrets'&&i===1?sheet.width*.54:(i%columns)*w;
@@ -75,6 +75,8 @@ export async function loadArt() {
   const extraWorlds=[];
   for(let i=0;i<2;i++){const im=images['tide-worlds'],cut=canvas(450,1200);cut.getContext('2d').drawImage(im,i*im.width/2,0,im.width/2,im.height,0,0,450,1200);extraWorlds.push(cut);}
   result.worlds.splice(3,0,...extraWorlds);result.urls.worlds=result.worlds.map(c=>c.toDataURL('image/jpeg',.87));
+  result.bosses.push(result.astea[0]);result.enemies.push(result.enemies[1]);result.sentinels.push(result.sentinels[1]);
+  const celestial=canvas(450,1200);celestial.getContext('2d').drawImage(images['celestial-world'],0,0,450,1200);result.worlds.push(celestial);result.urls.worlds.push(celestial.toDataURL('image/jpeg',.87));
   result.urls.bosses=result.bosses.map(c=>c.toDataURL('image/png'));
   const darkFairy=canvas(512,512),df=darkFairy.getContext('2d');df.filter='invert(1)';df.drawImage(result.companions[3],0,0,512,512);result.darkFairy=darkFairy;
   for(let i=0;i<6;i++){
@@ -90,6 +92,7 @@ export async function loadArt() {
     c.drawImage(sheet,x/1448*sheet.width,y/1086*sheet.height,w/1448*sheet.width,h/1086*sheet.height,(192-w*scale)/2,(192-h*scale)/2,w*scale,h*scale);
     const index=i===10?15:22+i;result.relics[index]=icon;result.urls.relics[index]=icon.toDataURL('image/png');
   }
+  for(let i=0;i<4;i++){const icon=canvas(192,192),im=images['celestial-relics'];icon.getContext('2d').drawImage(im,i%2*im.width/2,Math.floor(i/2)*im.height/2,im.width/2,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
   // A transparent cached effect keeps the hitbox readable without per-frame filters.
   const barrier=canvas(192,192),bc=barrier.getContext('2d');
   const glow=bc.createRadialGradient(96,96,58,96,96,88);glow.addColorStop(0,'#79eaff00');glow.addColorStop(.75,'#79eaff22');glow.addColorStop(1,'#79eaff00');bc.fillStyle=glow;bc.fillRect(0,0,192,192);
@@ -276,6 +279,7 @@ export class Renderer {
     if(f.type==='barrierBreak'){
       c.strokeStyle='#b8f8ff';c.globalAlpha=1-q;c.lineWidth=2;
       for(let i=0;i<6;i++){const a=i*TAU/6+q*.3;c.beginPath();c.arc(f.x,f.y,f.radius*(1+q*.7),a,a+.55);c.stroke();}
+    } else if(f.type==='celestialWarning'){c.fillStyle='#ffe1a322';c.fillRect(f.gap-62,78,124,g.height-78);c.strokeStyle='#ffe1a3';c.lineWidth=2;c.setLineDash([8,8]);for(const x of [f.gap-62,f.gap+62]){c.beginPath();c.moveTo(x,78);c.lineTo(x,g.height);c.stroke();}c.setLineDash([]);for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62){star(c,x,f.bottom?g.height-24:85,7);c.stroke();}
     } else if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
     } else if(f.type==='detonation') {
       c.fillStyle=f.age<.75?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
