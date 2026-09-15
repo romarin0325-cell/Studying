@@ -89,7 +89,7 @@ export class CampaignUI {
   }
   achievements() {
     const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;
-    this.setModal(`<span class="small-caps">ACHIEVEMENTS</span><h2>수호자의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length} · 업적 보상은 없어요.</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/6</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
+    this.setModal(`<span class="small-caps">ACHIEVEMENTS</span><h2>수호자의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length}</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/6</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
     $('achievements-close').onclick=this.closeModal;
   }
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {

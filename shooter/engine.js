@@ -79,7 +79,7 @@ export class Game {
         } break;
       }
       case 'dagger':
-        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .75 * 1.1, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
+        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * 0.825, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
       case 'melee': {
         p.fire = .70; const reach = 156 + this.power * 8;
         this.effect('slash', { x: p.x, y: p.y, radius: reach, life: .3, color: this.hero.color, alternate: this.stats.shots++ % 2 });
@@ -91,7 +91,7 @@ export class Game {
       case 'spread':
         p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.7 : 1), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .45, 'fire', { r: 5 }); } break;
       case 'lance':
-        p.fire = .36; this.shot(0, damage * 5.5 * 1.05, 'lance', { pierce: true, r: 21, vy: -500 }); break;
+        p.fire = .36; this.shot(0, damage * 5.775, 'lance', { pierce: true, r: 21, vy: -500 }); break;
       case 'chain': {
         p.fire = .23; const target = this.nearest(p.x, p.y - 70, 530);
         if (target) { const hit = new Set(); let from = { x: p.x, y: p.y - 24 }, next = target;
@@ -105,15 +105,15 @@ export class Game {
       case 'petal':
         p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.53 : .918), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 3, r: 10 }); break;
       case 'frost':
-        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.215 * 1.1, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
+        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.3365, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
       case 'snowflake':
         p.fire = .24; this.shot(0, damage * 2.43, 'snow', { homing: true, bounce: this.power===5?4:3, r: 13 }); break;
       case 'glass':
-        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.535 * 1.1, 'glass', { x: p.x+i*(this.power===5?16:13), pierce: true, vy: -650, r: 12*(this.power===5?1.1:1) }); break;
+        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.7885, 'glass', { x: p.x+i*(this.power===5?16:13), pierce: true, vy: -650, r: 12*(this.power===5?1.1:1) }); break;
       case 'midnight':
         p.fire = .14; this.shot(Math.sin(this.totalTime*5)*.18, damage * 1.87, 'clock', { homing: true, mark: true, markRadius: this.power===5?120:100, r: 10 }); break;
       case 'nightfall':
-        p.fire = .48; this.shot(0,damage*6.72*1.1,'nightmoon',{r:28.8+(this.power===5?10:0),vy:-360}); break;
+        p.fire = .48; this.shot(0,damage*7.392,'nightmoon',{r:28.8+(this.power===5?10:0),vy:-360}); break;
       case 'dreamfield':
         p.fire = .18; this.shot(0,damage*.95,'nightstar',{r:7,vy:-620});
         if (this.totalTime >= this.areaFire) {
@@ -128,7 +128,7 @@ export class Game {
         p.fire = .42; this.shot(0,damage*1.944,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.268,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
       case 'rewind':
         p.fire = .25;
-        for (const side of [-1,1]) this.shot(side*.045,damage*1.9*1.1,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
+        for (const side of [-1,1]) this.shot(side*.045,damage*2.09,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
         break;
       case 'orbit': {
         p.fire = .12;
@@ -157,7 +157,7 @@ export class Game {
         const q=clamp(-(ax*dx+ay*dy)/(dx*dx+dy*dy||1),0,1);
         if(Math.hypot(ax+dx*q,ay+dy*q)<e.r+50.4) {
           hits.set(e,this.totalTime+.12);
-          this.damage(e,(10+this.power*2.5)*6.2*1.2,e.x,e.y);
+          this.damage(e,(10+this.power*2.5)*7.44,e.x,e.y);
         }
       }
     });
@@ -176,7 +176,7 @@ export class Game {
     if (enemy.hp <= 0 || (enemy.boss && this.phase !== 'boss')) return;
     const artifactAttack = this.attackBonus - 1
       + (this.artifacts.has('pendant') && this.power === 5 ? .2 : 0)
-      + (this.artifacts.has('dragon') && this.player.lives === 1 ? .4 : 0)
+      + (this.artifacts.has('dragon') && this.player.lives === 1 ? .5 : 0)
       + (this.artifacts.has('chocolate') && (enemy.boss || enemy.miniboss) ? .5 : 0)
       + (this.artifacts.has('witch') && !enemy.boss && !enemy.miniboss && !enemy.elite ? .2 : 0)
       + (this.artifacts.has('silver') && (enemy.elite || enemy.miniboss) ? .3 : 0)
@@ -234,7 +234,7 @@ export class Game {
     if (!corona && this.heroIndex === 3 && !paidWithLife) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
     if(!corona&&this.heroIndex===4)this.frostTime=this.bombDuration+5;
     if(!corona&&this.heroIndex===6){this.power=Math.max(1,this.power-1);this.powerPoints=0;}
-    for (const e of [...this.enemies]) this.damage(e, (corona?1700:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
+    for (const e of [...this.enemies]) this.damage(e, (corona?1900:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
     this.emit('bomb', { hero: this.heroIndex, corona }); return true;
   }
   grantBarrier() {
@@ -272,7 +272,7 @@ export class Game {
           { hp: 38 + stage * 10, speed: 68 + stage * 8 + (type === 3 ? 25 : 0), move: type === 0 ? 'drift' : type === 1 ? 'curve' : type === 2 ? 'zigzag' : 'dive', side: left ? 1 : -1, fire: 1.8 + i * .25, image: stage, r: 19 });
       }
     }
-    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: stage, elite:stage===4, r: 25, hp: (115 + stage*35)*(stage===3?1.65:stage===4?1.1/1.2:1), speed: 53, move: 'sentry', fire: 2, image: stage, countdown: 3 });
+    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: stage, elite:stage===4, r: 25, hp: (115 + stage*35)*(stage===3?1.65:stage===4?0.9167:1), speed: 53, move: 'sentry', fire: 2, image: stage, countdown: 3 });
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
@@ -311,7 +311,7 @@ export class Game {
   spawnBoss() {
     this.enemies.length = 0; this.clearBullets(); this.hazards.length = 0;
     this.combo = 0; this.comboTime = 0; this.bossElapsed = 0;
-    const hp = this.stage.hp * this.difficulty.hp * .78 * 1.2;
+    const hp = this.stage.hp * this.difficulty.hp * 0.936;
     this.boss = { boss: true, x: 225, y: -100, age: 0, hp, maxHp: hp, r: 42, flash: 0, fire: 1.5, image: this.stageIndex };
     this.enemies.push(this.boss); this.phase = 'warning'; this.phaseTime = 0; this.emit('warning');
   }
@@ -356,7 +356,7 @@ export class Game {
         if (phase > 0 && Math.floor(t * 2) % 3 === 0) this.addHazard(60 + Math.floor(this.random() * 4) * 110, phase === 2 ? 34 : 26);
         if (phase === 2) this.fan(b.x, b.y, 3, speed + 35, .16, aim); break;
     }
-    if(this.stageIndex===5){b.fire*=.82;if(phase===2)this.fan(b.x,b.y,2,speed+45,.24,aim,{split:true,r:12});}
+    if(this.stageIndex===5){b.fire*=.943;if(phase===2)this.fan(b.x,b.y,2,speed+45,.24,aim,{split:true,r:12});}
     this.emit('enemyShot', { boss: true });
   }
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
@@ -370,8 +370,8 @@ export class Game {
   }
   finalizeClearBonuses() {
     if (this.bonusesFinalized) return;
-    this.timeBonus = this.bossClearTime <= 20 ? 2000 : this.bossClearTime <= 30 ? 1500 : this.bossClearTime <= 40 ? 1000 : 0;
-    this.rankBonus = this.rank === 'S' ? 2000 : this.rank === 'A' ? 1000 : 0;
+    this.timeBonus = this.bossClearTime <= 20 ? 6000 : this.bossClearTime <= 30 ? 4500 : this.bossClearTime <= 40 ? 3000 : this.bossClearTime <= 50 ? 1500 : 0;
+    this.rankBonus = this.rank === 'S' ? 4000 : this.rank === 'A' ? 2000 : 0;
     this.score += this.timeBonus + this.rankBonus; this.bonusesFinalized = true;
   }
   revive(correct) {
@@ -435,7 +435,7 @@ export class Game {
           else if(e.special===4)this.fan(e.x,e.y,4,130,.3,aim,{r:6,ricochet:5});
           else if (e.special === 5) this.enemyBullet(e.x,e.y,aim,58,{r:17,split:true,shape:'diamond'});
           else this.fan(e.x, e.y + 10, e.elite ? 5 : 1 + (this.stageIndex >= 2 ? 2 : 0), 105 + this.stageIndex * 14, .17, aim, { color: e.elite ? '#ffc184' : this.stage.color });
-          e.fire = (e.elite && e.special!==4 ? 1.5 : 2.9) * this.difficulty.interval;
+          e.fire = (e.miniboss ? 1.83 : e.elite && e.special!==4 ? 1.5 : 2.9) * this.difficulty.interval;
         }
       }
       if (distance(e, p) < e.r + p.radius) this.hitPlayer();
@@ -482,7 +482,7 @@ export class Game {
         if(b.x<b.r&&b.vx<0 || b.x>450-b.r&&b.vx>0){b.vx=-b.vx;b.x=clamp(b.x,b.r,450-b.r);}
         if(b.y<b.r&&b.vy<0 || b.y>this.height-b.r&&b.vy>0){b.vy=-b.vy;b.y=clamp(b.y,b.r,this.height-b.r);}
       }
-      if (b.split && (d < 155 || b.age > 3.7)) { b.dead = true; b.split = false; this.fan(b.x,b.y,9,125,TAU/9,Math.PI/2,{r:4}); this.effect('burst',{x:b.x,y:b.y,radius:35,life:.3,color:this.stage.color}); continue; }
+      if (b.split && (d < 178 || b.age > 3.7)) { b.dead = true; b.split = false; this.fan(b.x,b.y,9,125,TAU/9,Math.PI/2,{r:4}); this.effect('burst',{x:b.x,y:b.y,radius:35,life:.3,color:this.stage.color}); continue; }
       if (d < b.r + p.radius && p.invincible <= 0) { b.dead = !p.barrier; this.hitPlayer(); }
       else if (d < 24 && !b.grazed && p.invincible <= 0) { b.grazed = true; this.graze++; this.score += 25 * this.multiplier; if(this.artifacts.has('slipper') && this.graze%20===0)this.grantBarrier(); this.emit('graze'); }
       if(this.finished)return;
