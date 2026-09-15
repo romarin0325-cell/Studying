@@ -2265,7 +2265,8 @@ const Logic = {
             }
             if (t.type === 'cond_target_elements_dmg' && Array.isArray(t.elements) && t.elements.includes(target.element)) {
                 dmgBonus += (t.val - 1.0);
-                logFn(`[특성] ${source.name}: 특정 속성 적에게 추가 피해!`);
+                const elementName = DISPLAY_NAMES.element[target.element] || target.element;
+                logFn(`[특성] ${source.name}: ${elementName} 속성 적에게 추가 피해!`);
             }
             if (t.type === 'cond_debuff_3_dmg' && StatusRules.countNegativeKinds(ctx.baseTargetBuffs) >= 3) {
                 dmgBonus += (t.val - 1.0);
