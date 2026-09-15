@@ -320,14 +320,14 @@ const FortuneCookie = {
 
         // 1. English Script
         html += `<div style="margin-bottom:15px;">`;
-        html += `<div style="color:#81d4fa; font-weight:bold; margin-bottom:8px;">📝 English Script</div>`;
-        html += `<div style="color:#e0e0e0; line-height:1.7; white-space: pre-wrap;">${set.passage}</div>`;
+        html += `<div style="color:var(--sky,#81d4fa); font-weight:bold; margin-bottom:8px;">📝 English Script</div>`;
+        html += `<div style="color:var(--paper,#e0e0e0); line-height:1.7; white-space: pre-wrap;">${set.passage}</div>`;
         html += `</div>`;
 
         // 2. 지문 해석
         html += `<div style="margin-bottom:15px;">`;
-        html += `<div style="color:#ffd700; font-weight:bold; margin-bottom:8px;">📖 지문 해석</div>`;
-        html += `<div style="color:#ccc; line-height:1.7; white-space: pre-wrap;">${set.passageKo}</div>`;
+        html += `<div style="color:var(--sky-bright,#ffd700); font-weight:bold; margin-bottom:8px;">📖 지문 해석</div>`;
+        html += `<div style="color:var(--paper,#ccc); line-height:1.7; white-space: pre-wrap;">${set.passageKo}</div>`;
         html += `</div>`;
 
         // 3. 문제별 정오답
@@ -336,21 +336,21 @@ const FortuneCookie = {
             const result = results[idx];
             const icon = result.isCorrect ? '✅' : '❌';
 
-            html += `<hr style="border-color:#333; margin:15px 0;">`;
-            html += `<div style="font-weight:bold; color:#fff; margin-bottom:8px;">${String(idx + 1).padStart(2, '0')}번 ${icon}</div>`;
-            html += `<div style="color:#e0e0e0; margin-bottom:10px;">${q.questionText}<br><span style="font-size:0.85rem;color:#aaa">${q.questionTextKo}</span></div>`;
+            html += `<hr style="border-color:var(--line,#333); margin:15px 0;">`;
+            html += `<div style="font-weight:bold; color:var(--paper,#fff); margin-bottom:8px;">${String(idx + 1).padStart(2, '0')}번 ${icon}</div>`;
+            html += `<div style="color:var(--paper,#e0e0e0); margin-bottom:10px;">${q.questionText}<br><span style="font-size:0.85rem;color:var(--muted,#aaa)">${q.questionTextKo}</span></div>`;
 
             q.options.forEach((opt, optIdx) => {
-                let style = 'color:#aaa;';
+                let style = 'color:var(--muted,#aaa);';
                 let suffix = '';
                 if (optIdx === q.answer) {
-                    style = 'color:#4caf50; font-weight:bold;';
+                    style = 'color:var(--stat-up,#4caf50); font-weight:bold;';
                     suffix = ' ✅';
                 } else if (!result.isCorrect && optIdx === result.userAnswer) {
-                    style = 'color:#ef5350;';
+                    style = 'color:var(--stat-down,#ef5350);';
                     suffix = ' ❌ (내 선택)';
                 }
-                html += `<div style="${style} margin-left:10px; margin-bottom:6px;">${labels[optIdx]} ${opt}<br><span style="font-size:0.85rem;color:#777">${q.optionsKo[optIdx]}</span>${suffix}</div>`;
+                html += `<div style="${style} margin-left:10px; margin-bottom:6px;">${labels[optIdx]} ${opt}<br><span style="font-size:0.85rem;color:var(--muted,#777)">${q.optionsKo[optIdx]}</span>${suffix}</div>`;
             });
         });
 
@@ -423,7 +423,7 @@ const FortuneCookie = {
         const msgBox = document.getElementById('fortune-result-message');
         const retryBtn = document.getElementById('fortune-retry-btn');
 
-        msgBox.innerHTML = `<div style="text-align:center; color:#ff80ab;">루미가 운세를 읽고 있어요...<br><span style="font-size:0.8rem; color:#aaa;">키워드: ${result.keyword}</span></div>`;
+        msgBox.innerHTML = `<div style="text-align:center; color:var(--sky,#ff80ab);">루미가 운세를 읽고 있어요...<br><span style="font-size:0.8rem; color:var(--muted,#aaa);">키워드: ${result.keyword}</span></div>`;
         retryBtn.style.display = 'none';
 
         const apiKey = Storage.getRaw(Storage.keys.API_KEY);
@@ -452,7 +452,7 @@ const FortuneCookie = {
         } catch (e) {
             console.error('포춘쿠키 API 실패', e);
             if (modelId === FORTUNE_PRIMARY_MODEL_ID) {
-                msgBox.innerHTML = `<div style="text-align:center; color:#ef5350;">운세를 불러오다 깜빡했어요.<br><span style="font-size:0.8rem;">(API 호출 실패)</span></div>`;
+                msgBox.innerHTML = `<div style="text-align:center; color:var(--stat-down,#ef5350);">운세를 불러오다 깜빡했어요.<br><span style="font-size:0.8rem;">(API 호출 실패)</span></div>`;
                 retryBtn.style.display = 'block';
                 this._lastResultForRetry = result; // 재시도를 위해 임시 저장
             } else {

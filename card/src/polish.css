@@ -1,4 +1,5 @@
 /* Shared readability and decorative skins. Art has transparent centers and no hit targets. */
+@font-face { font-family:DreamJua; src:url("../assets/Jua-Regular.ttf") format("truetype"); font-style:normal; font-weight:400; font-display:swap; }
 body.astra { --stat-up:#9ce1ba; --stat-down:#ffc1d0; --stat-neutral:var(--paper); --positive-ink:#c1efd5; --positive-fill:#173c32; --negative-ink:#ffd1df; --negative-fill:#482a3b; --frame-art:url("../assets/astra-frame.svg"); --button-art:url("../assets/astra-button.svg"); --theme-mark:url("../assets/astra-mark.svg"); --rarity-accent:#bdcedb; }
 body[data-theme=strawberry] { --ink:#fff1fa; --panel:#fffafe; --panel-soft:#f5e5f2; --sky:#9f386d; --sky-bright:#802755; --paper:#492840; --muted:#76536c; --line:#d6acc9; --wash:#ecc5df; --button:#f2d6e8; --button-fill:linear-gradient(#fff9fd,#f2d6e8); --primary-fill:linear-gradient(#ad477e,#913161); --frame-art:url("../assets/magical-frame.svg"); --button-art:url("../assets/magical-button.svg"); --theme-mark:url("../assets/magical-mark.svg"); }
 body[data-theme=dreamsky] { --primary-fill:linear-gradient(#34799f,#276187); --frame-art:url("../assets/dreamsky-frame.svg"); --button-art:url("../assets/dreamsky-button.svg"); --theme-mark:url("../assets/dreamsky-mark.svg"); }
@@ -81,3 +82,91 @@ body.astra .card-item[data-grade] { border:2px solid var(--rarity-accent)!import
 @keyframes summon-flight { from { opacity:0; transform:rotate(var(--angle)) translateY(-55px) scale(.3); } 20% { opacity:1; } to { opacity:0; transform:rotate(var(--angle)) translateY(-155px) scale(.6); } }
 @keyframes summon-caption { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 @media(prefers-reduced-motion:reduce) { .summon-particles { display:none; }.summon-seal { opacity:.2; } }
+
+/* Magical Girl illustration skin: independent of the shared screen geometry. */
+body[data-theme=strawberry] .world-backdrop { background:url("../assets/magical-sanctuary.png") center top/cover no-repeat,#ffe4ed; }
+body[data-theme=strawberry] :is(.page-heading h1,.section-label b,.menu-btn,.primary,.secondary,.astra-nav button,.modal-content h3,.study-grid h3,.party-card strong) { font-family:DreamJua,"Malgun Gothic",sans-serif; font-weight:400; letter-spacing:0; }
+body[data-theme=strawberry] .title-seal { background:var(--theme-mark) center/contain no-repeat; opacity:.12; border:0; }
+body[data-theme=strawberry] .title-seal>* { opacity:0; }
+body[data-theme=strawberry] .party-card { background:#fff8fbea!important; }
+body[data-theme=strawberry] :is(.departure-panel,.title-utilities) { background:#fff8fbed!important; }
+
+/* Compact lobby. The screen owns its scrolling, just like the catalog. */
+.astra :is(.screen,.container,.modal-content) { scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+.astra :is(.screen,.container,.modal-content)::-webkit-scrollbar { width:5px; height:5px; }
+.astra :is(.screen,.container,.modal-content)::-webkit-scrollbar-thumb { background:var(--line); border-radius:10px; }
+#screen-menu>.page-heading { margin-bottom:10px; }
+#screen-menu>.page-heading h1 { margin:0; font-size:23px; }
+.party-label { margin:0; font-size:12px; }
+.party-label>span { font-size:10px; letter-spacing:0; color:var(--muted); }
+.party-caption { padding:0; }
+#screen-menu .party-lineup { padding-top:16px; padding-bottom:8px; }
+#screen-menu .party-card strong { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#screen-menu .lobby-shortcuts { margin-top:14px; }
+.astra #card-pool-info { color:var(--muted)!important; }
+.astra #modal-card-pool .modal-content { width:min(680px,100%)!important; }
+.astra #card-pool-grid { min-height:0; overflow-y:auto; padding:3px; }
+
+/* Mode actions participate in layout, so long Korean labels cannot overlap. */
+.astra .mode-select-heading { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:8px; }
+.astra .mode-select-heading h3 { margin:0; padding:0; border:0; font-size:19px; }
+.astra .mode-select-heading button { position:static!important; flex:none; min-height:36px; margin:0; padding:7px 9px!important; white-space:nowrap; }
+.astra #mode-list .menu-btn { min-height:43px; margin:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:3px; }
+.astra #mode-list .hard-cleared { border-color:var(--gold)!important; box-shadow:inset 3px 0 var(--gold); }
+.astra #mode-list .hard-cleared:not([aria-pressed=true]) { color:var(--clear-ink,var(--gold))!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) { --clear-ink:#71501c; }
+.hard-clear-badge { font:600 9px/1.3 "Segoe UI",sans-serif; letter-spacing:.04em; color:inherit; }
+.astra #mode-list .menu-btn[aria-pressed=true] { outline:2px solid var(--sky); outline-offset:-2px; }
+
+/* Named surfaces replace legacy black panels and preserve semantic states. */
+.astra .special-card-option { background:var(--panel)!important; border-color:var(--line)!important; color:var(--paper); }
+.astra .special-card-option[data-active=true] { background:var(--panel-soft)!important; border-color:var(--sky)!important; box-shadow:inset 3px 0 var(--sky); }
+.astra .special-card-option>div:first-child { color:var(--paper)!important; }
+.astra .special-card-option>div:nth-child(2),.astra #special-card-editor-summary { color:var(--muted)!important; }
+.astra #mission-hub-list .menu-btn { text-align:left; padding:15px 17px!important; font-size:16px; }
+.astra #mission-hub-list .menu-btn span { color:var(--paper)!important; font-size:11px!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie :is([id^=fortune-],.fortune-audio-panel) { color:var(--paper)!important; border-color:var(--line)!important; }
+.astra #modal-fortune-cookie .fortune-audio-panel { background:var(--panel-soft)!important; border-color:var(--line)!important; }
+.astra #fortune-multi-hub-phase>div:not([id]) { color:var(--paper)!important; }
+.astra #modal-fortune-cookie .portrait { background:var(--panel-soft)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .option-btn { background:var(--button)!important; color:var(--paper)!important; border-color:var(--line)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .option-btn.correct { background:var(--positive-fill)!important; color:var(--positive-ink)!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .option-btn.wrong { background:var(--negative-fill)!important; color:var(--negative-ink)!important; }
+
+/* The reward is a tangible card, with a quiet halo instead of continuous glitter. */
+.astra .mission-reward-showcase { display:grid; grid-template-columns:90px minmax(0,1fr); column-gap:16px; align-content:center; align-items:center; position:relative; isolation:isolate; overflow:hidden; text-align:left; min-height:172px; }
+.mission-reward-showcase::before { content:''; position:absolute; width:155px; height:155px; border:1px solid var(--rarity-accent); border-radius:50%; left:-24px; top:9px; opacity:.2; z-index:-1; box-shadow:0 0 0 10px var(--panel-soft),0 0 0 11px var(--line); }
+.astra .mission-reward-showcase>.reward-card-preview { grid-column:1; grid-row:1/6; padding:0; margin:0; border:0!important; border-radius:8px; background:transparent!important; transform:rotate(-3deg); }
+.astra .mission-reward-showcase>.reward-card-preview:hover { transform:rotate(0); }
+.reward-card-preview .portrait { width:84px; height:140px; margin:0; background:var(--panel-soft)!important; border:2px solid var(--rarity-accent)!important; border-radius:8px; box-shadow:0 5px 10px #0002; }
+.reward-card-preview img { object-fit:contain; }
+.astra .mission-reward-showcase>div { grid-column:2; }
+.astra .mission-reward-showcase>div:first-of-type { color:var(--muted)!important; font-size:11px!important; }
+.astra .mission-reward-showcase>div:nth-of-type(2) { color:var(--paper)!important; font-size:20px; line-height:1.3; overflow-wrap:anywhere; }
+.astra .mission-reward-showcase>.menu-btn { grid-column:2; min-height:38px; padding:8px; font-size:11px; }
+.reward-progress { margin-top:9px; font-size:10px; color:var(--muted); }
+.reward-progress progress { display:block; width:100%; height:5px; margin-top:5px; border:0; border-radius:5px; overflow:hidden; background:var(--line); accent-color:var(--sky); }
+.reward-progress progress::-webkit-progress-bar { background:var(--line); }
+.reward-progress progress::-webkit-progress-value { background:var(--sky); }
+.astra #modal-monthly-mission .modal-content { height:min(740px,calc(100dvh - 28px))!important; min-height:0!important; display:flex; flex-direction:column; overflow:hidden; padding:18px; }
+.astra #modal-monthly-mission .modal-content>h3 { margin:0 0 10px; padding-bottom:8px; flex:none; }
+.astra #modal-monthly-mission .modal-content>button { flex:none; }
+.astra :is(#monthly-mission-section,#special-mission-section)[style*="block"] { display:flex!important; flex:1; flex-direction:column; min-height:0; }
+.astra :is(#monthly-mission-section,#special-mission-section)>:not(.modal-scroll) { flex:none; }
+.astra :is(#monthly-mission-list,#special-mission-list) { flex:1; min-height:70px; max-height:none!important; overflow-y:auto; }
+.astra :is(#monthly-mission-list,#special-mission-list)>.mission-item { padding:10px!important; margin-bottom:6px!important; line-height:1.4; }
+.astra #weekly-mission-section { min-height:0; overflow-y:auto; }
+.astra #btn-claim-monthly-mission:not(:disabled) { background:var(--sky)!important; color:var(--ink)!important; }
+@media(max-width:760px) {
+  #screen-menu .lobby-layout { gap:9px; }
+  #screen-menu .party-position { padding:5px 0 3px; }
+  #screen-menu .party-card small { margin-bottom:3px; }
+  #screen-menu .party-caption { font-size:10px; }
+  #screen-menu .departure-panel { padding:12px; gap:7px 12px; }
+  #screen-menu .depart { min-height:58px; }
+  #screen-menu .recruit-block { padding-top:8px; }
+  #screen-menu .lobby-shortcuts button { padding:10px; }
+  #screen-menu .lobby-shortcuts small { display:none; }
+  #screen-menu .lobby-shortcuts { gap:6px; }
+  .astra #modal-card-pool .modal-content { padding:16px; }
+}

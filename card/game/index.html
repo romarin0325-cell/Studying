@@ -1344,13 +1344,13 @@
 
     <div id="modal-mode-select" class="modal">
         <div class="modal-content" style="height:auto; min-height:400px; max-height:88vh; overflow-y:auto; width: 360px;">
-            <div style="position:relative; margin-bottom: 10px;">
+            <div class="mode-select-heading" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
                 <h3 style="margin: 0;">게임 모드 선택</h3>
                 <button id="btn-chaos-roulette" onclick="RPG.openChaosRoulette()"
-                    style="display:none; position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스
+                    style="display:none; position:static; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ffd700; color:#ffd700; border-radius:5px;">카오스
                     룰렛</button>
                 <button id="btn-hard-mode" onclick="RPG.toggleHardMode()"
-                    style="display:none; position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ff5252; color:#ff5252; border-radius:5px;">하드모드 OFF</button>
+                    style="display:none; position:static; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #ff5252; color:#ff5252; border-radius:5px;">하드모드 OFF</button>
             </div>
             <div id="mode-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-bottom:10px;">
             </div>
@@ -2808,6 +2808,7 @@
                     btn.style.padding = '10px';
                     btn.style.borderColor = group.baseId === this.selectedSpecialCardGroup ? '#ffd54f' : '#555';
                     btn.style.color = group.baseId === this.selectedSpecialCardGroup ? '#ffe082' : '#eee';
+                    btn.setAttribute('aria-pressed', String(group.baseId === this.selectedSpecialCardGroup));
                     btn.innerHTML = `${group.label}<br><span style="font-size:0.75rem; color:#b0bec5;">스페셜 ${ownedCount}장</span>`;
                     btn.onclick = () => {
                         this.selectedSpecialCardGroup = group.baseId;
@@ -2836,10 +2837,12 @@
                     item.style.border = `1px solid ${isActive ? '#ffd54f' : '#555'}`;
                     item.style.borderRadius = '8px';
                     item.style.background = isActive ? 'rgba(255, 213, 79, 0.12)' : '#2a2a2a';
+                    item.className = 'special-card-option';
+                    item.dataset.active = String(isActive);
                     item.style.marginBottom = '8px';
                     item.innerHTML = `
                         <div style="font-weight:bold; color:${isActive ? '#ffe082' : '#fff'};">${card.name}</div>
-                        <div style="font-size:0.78rem; color:#b0bec5; margin:4px 0 8px 0;">${card.grade.toUpperCase()} / ${card.role} / ${card.element}</div>
+                        <div style="font-size:0.78rem; color:#b0bec5; margin:4px 0 8px 0;">${DISPLAY_NAMES.grade[card.grade] || card.grade} · ${DISPLAY_NAMES.role[card.role] || card.role} · ${DISPLAY_NAMES.element[card.element] || card.element}</div>
                     `;
 
                     const actionRow = document.createElement('div');
@@ -3214,9 +3217,9 @@
                     { id: 'archive', name: '아카이브', desc: '매 스테이지 종료 후 문법 퀴즈. 정답률 80% 이상 필요.\n(성공조건: 18 스테이지)' },
                     { id: 'curse', name: '저주의 증폭', desc: '디버프의 스탯 감소 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
                     { id: 'flood', name: '축복의 범람', desc: '필드 버프의 강화 효과 2배. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
-                    { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'artifact_chaos', name: '아티팩트카오스', desc: '카오스 기반 + 매 스테이지 랜덤 아티팩트 4개 추가 획득. 셔플 시 아티팩트도 초기화. 크게 강화된 적 출현.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
-                    { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 데이터 삭제)' },
+                    { id: 'chaos', name: '카오스', desc: '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 24 스테이지 / 패배 시 런 실패)' },
+                    { id: 'artifact_chaos', name: '아티팩트카오스', desc: '카오스 기반 + 매 스테이지 랜덤 아티팩트 4개 추가 획득. 셔플 시 아티팩트도 초기화. 크게 강화된 적 출현.\n(성공조건: 24 스테이지 / 패배 시 런 실패)' },
+                    { id: 'draft', name: '드래프트', desc: '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 24 스테이지 / 패배 시 런 실패)' },
                     { id: 'factory', name: '팩토리', desc: '시작 시 40장의 카드를 번들 단위로 드래프트하여 덱 풀 구성.\n(성공조건: 24 스테이지)' },
                     { id: 'artifact', name: '아티팩트', desc: '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개). 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 30 스테이지)' },
                     { id: 'artifact_reserve', name: '아티팩트리저브', desc: '아티팩트 세트 선택 4회 반복으로 12개 풀 구성. 각 아티팩트는 2회 사용 가능, 전투 전 최대 4개 수동 활성화. 강화된 적 출현.\n(성공조건: 24 스테이지)' },
@@ -3226,8 +3229,8 @@
                 if (this.tempGameType === 'endless') {
                     MODES = MODES.filter(m => ['origin', 'draft', 'chaos', 'artifact', 'artifact_reserve', 'perfect_plan'].includes(m.id));
                     MODES.forEach(m => {
-                        if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
-                        if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 데이터 삭제)';
+                        if (m.id === 'chaos') m.desc = '매 전투 덱/인벤토리 초기화. 무작위 15장 풀에서 뽑기 진행.\n(성공조건: 없음 / 무한 / 패배 시 런 실패)';
+                        if (m.id === 'draft') m.desc = '뽑기 대신 덱 빌딩(드래프트)으로 3명을 선발하여 전투.\n(성공조건: 없음 / 무한 / 패배 시 런 실패)';
                         if (m.id === 'artifact') m.desc = '매 보스(창조신) 클리어 시 아티팩트 획득 (최대 4개). 아티팩트 효과로 전투를 유리하게! 강화된 적 출현.\n(성공조건: 없음 / 무한)';
                         if (m.id === 'artifact_reserve') m.desc = '아티팩트 세트 선택 4회 반복으로 12개 풀 구성. 각 아티팩트는 2회 사용 가능, 전투 전 최대 4개 수동 활성화. 강화된 적 출현.\n(성공조건: 없음 / 무한)';
                     });
@@ -3510,19 +3513,8 @@
                 document.getElementById('card-pool-info').innerText =
                     `현재 모드: ${label} | 풀 카드 수: ${pool.length}장`;
 
-                // Render cards (pool viewer shows unique cards)
-                const grid = document.getElementById('card-pool-grid');
-                grid.innerHTML = '';
-                for (const card of pool) {
-                    const el = document.createElement('div');
-                    el.className = `card-item ${card.grade}`;
-                    el.appendChild(ImageAssets.createPortrait(card));
-                    const label = document.createElement('div');
-                    label.textContent = card.name;
-                    el.appendChild(label);
-                    el.onclick = () => this.showCardInfo(card.id);
-                    grid.appendChild(el);
-                }
+                // Share the catalog renderer, including themed frames and accessible buttons.
+                this.renderCardList('card-pool-grid', [...new Set(pool.map(card => card.id))], id => this.showCardInfo(id));
 
                 document.getElementById('modal-menu').classList.remove('active');
                 document.getElementById('modal-card-pool').classList.add('active');
@@ -6390,7 +6382,7 @@
                 <h2 style="color: #ffd700; margin-top: 0;">🥠 오늘의 포춘쿠키</h2>
                 <div id="fortune-part-title" style="margin-bottom: 10px; font-weight: bold; color: #81d4fa;"></div>
                 
-                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                <div class="fortune-audio-panel" style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
                     <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 10px; border-color: #4caf50; color: #4caf50;">▶ 다시 듣기</button>
                     <div id="fortune-part-tip" style="font-size: 0.85rem; color: #ccc; margin-top: 5px;"></div>
                 </div>
@@ -6409,7 +6401,7 @@
                     💡 담화를 듣고 이어지는 질문에 답하세요.
                 </div>
                 
-                <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
+                <div class="fortune-audio-panel" style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; width: 100%; margin-bottom: 15px;">
                     <button class="menu-btn" onclick="FortuneCookie.playAudio()" style="margin-bottom: 0; border-color: #4caf50; color: #4caf50;">🎧 듣기 (재생/일시정지)</button>
                 </div>
 

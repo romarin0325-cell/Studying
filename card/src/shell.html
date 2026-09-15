@@ -49,10 +49,10 @@
 
     </section>
     <section id="screen-menu" class="screen" aria-label="로비">
-      <div class="page-heading"><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>여정의 시작</h1></div><div class="ticket-counter"><small>소환 티켓</small><span id="ui-tickets">0</span><svg><use href="#i-star"/></svg></div></div>
+      <div class="page-heading"><div><h1>로비</h1></div><div class="ticket-counter"><small>소환 티켓</small><span id="ui-tickets">0</span><svg><use href="#i-star"/></svg></div></div>
       <div class="lobby-layout">
         <section class="party-showcase" aria-label="출전 파티">
-          <div class="section-label"><span>FORMATION <b>출전 파티</b></span><button class="text-button" onclick="RPG.openDeck()">편성하기 ↗</button></div>
+          <div class="section-label party-label"><b>파티</b><span>카드를 눌러 편성</span></div>
           <div id="astra-party" class="party-lineup"></div>
           <div class="party-caption"><span id="astra-party-note">당신만의 조합을 완성하세요.</span><span>Ⅰ — Ⅱ — Ⅲ</span></div>
         </section>
@@ -60,7 +60,7 @@
           <div id="next-enemy-preview" class="next-opponent"><p class="eyebrow">NEXT ENCOUNTER</p><div class="encounter-heading"><h2 id="astra-stage">01</h2><div><small id="astra-mode">오리진</small><strong id="next-enemy-text">다음 상대</strong></div></div><div class="portrait"><img id="next-enemy-img" alt="다음 상대"></div><div class="route-track" aria-hidden="true"><i class="current"></i><i></i><i></i><i></i><i></i></div></div>
           <button id="astra-depart" class="primary depart" onclick="RPG.startBattleInit()"><svg><use href="#i-sword"/></svg><span>전투 출전<small>BEGIN ENCOUNTER</small></span><svg><use href="#i-arrow"/></svg></button>
           <p id="astra-depart-help" class="departure-hint">준비가 끝났다면, 다음 장으로.</p>
-          <div class="recruit-block"><div class="section-label"><span>RECRUIT <b>새로운 동료</b></span></div>
+          <div class="recruit-block">
             <div id="menu-gacha-area"><button id="btn-normal-gacha" class="menu-btn" onclick="RPG.openGacha()">일반 뽑기 (1장)</button><button id="btn-challenge-gacha" class="menu-btn" onclick="RPG.openChallengeGacha()">도전 뽑기</button></div>
             <div id="menu-draft-area" style="display:none"><button class="menu-btn" onclick="RPG.startDraft()">드래프트 시작</button></div>
             <div id="menu-chaos-area" style="display:none"><button id="btn-menu-artifact-check" class="menu-btn" style="display:none" onclick="RPG.openArtifactCheck()">아티팩트 확인</button><button class="menu-btn" onclick="RPG.reshuffleChaosPool()">카오스 셔플</button></div>

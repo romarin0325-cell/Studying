@@ -26,16 +26,19 @@ const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(ga
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
 let theme = await read('src/astra.css') + '\n' + await read('src/mobile.css') + '\n' + await read('src/themes.css') + '\n' + await read('src/polish.css');
-const art = await fs.readFile(path.join(root, 'assets/observatory.png'));
-theme = theme.replaceAll('url("../assets/observatory.png")', `url("data:image/png;base64,${art.toString('base64')}")`);
 const themeCards = {};
-const encodeSVG = async file => `data:image/svg+xml;base64,${(await fs.readFile(path.join(root, 'assets', file))).toString('base64')}`;
-for (const [key,name] of [['strawberry','magical'],['dreamsky','dreamsky']]) themeCards[key] = await encodeSVG(`${name}-card.svg`);
-for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+\.svg)"\)/g)) {
-  theme = theme.replaceAll(reference, `url("${await encodeSVG(file)}")`);
+const assetTypes = {'.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf'};
+const encodeAsset = async file => {
+  const mime = assetTypes[path.extname(file)];
+  if (!mime || path.basename(file) !== file) throw new Error(`Unsupported inline asset: ${file}`);
+  return `data:${mime};base64,${(await fs.readFile(path.join(root, 'assets', file))).toString('base64')}`;
+};
+for (const [key,file] of [['strawberry','magical-card.png'],['dreamsky','dreamsky-card.svg']]) themeCards[key] = await encodeAsset(file);
+for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
+  theme = theme.replaceAll(reference, `url("${await encodeAsset(file)}")`);
 }
 const parts = {
-  STYLES: `<style>${css}\n${musicCSS}\n${theme}</style>`,
+  STYLES: `<style>/* Bundled Jua font license:\n${await read('assets/Jua-OFL.txt')}\n*/\n${css}\n${musicCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
   MODALS: between('<div id="modal-mode-select"', '<script>')

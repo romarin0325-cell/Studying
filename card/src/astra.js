@@ -23,7 +23,7 @@ const Astra = {
     document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.themeChoice === name)));
     document.querySelectorAll('img[data-fallback=true]').forEach(img => {
       // Never replace a real portrait or interrupt an in-flight local image load.
-      if (img.src.startsWith('data:image/svg+xml')) img.src = this.fallback(img._astraEntity);
+      if (img.src.startsWith('data:image/')) img.src = this.fallback(img._astraEntity);
     });
     try { localStorage.setItem('dreamweaverTheme',name); } catch { /* Theme remains usable for this session. */ }
   },
@@ -151,6 +151,7 @@ const Astra = {
       const resolved = selected || (filename ? this.portraitPath + filename : '');
       img.dataset.astraSource = filename;
       img._astraEntity = entity;
+      delete img.dataset.fallback;
       originalLoad(img, resolved, { ...options, alt:options.alt || entity?.name || filename.replace(/\.png$/i, '') });
       const originalError = img.onerror;
       if (originalError) {
@@ -166,7 +167,7 @@ const Astra = {
       if (originalSuccess) {
         img.onload = () => {
           originalSuccess();
-          delete img.dataset.fallback;
+          if (!img.src.startsWith('data:image/')) delete img.dataset.fallback;
         };
       }
       if (!filename) {
@@ -263,15 +264,16 @@ const Astra = {
   },
   cardButton(card, count, onClick) {
     const button = document.createElement('button');
-    button.className = `card-item ${card.grade}${count ? '' : ' unowned'}`;
+    const availability = count === null ? '풀 카드' : count ? `${count}장 보유` : '미보유';
+    button.className = `card-item ${card.grade}${count === 0 ? ' unowned' : ''}`;
     button.dataset.cardId = card.id;
     button.dataset.grade = card.grade;
-    button.setAttribute('aria-label', `${card.name}, ${this.gradeNames[card.grade] || card.grade}, ${count ? `${count}장 보유` : '미보유'}`);
+    button.setAttribute('aria-label', `${card.name}, ${this.gradeNames[card.grade] || card.grade}, ${availability}`);
     button.append(ImageAssets.createPortrait(card));
     button.append(this.text('span', card.name, 'card-name'));
     const meta = this.text('span','', 'card-meta');
     meta.append(this.text('span', this.elementNames[card.element] || card.element));
-    meta.append(this.text('span', count ? `×${count}` : '미보유'));
+    meta.append(this.text('span', count ? `×${count}` : availability));
     button.append(meta);
     button.onclick = onClick;
     return button;
@@ -291,6 +293,32 @@ const Astra = {
     };
     render('p-buffs',RPG.battle.players[RPG.battle.currentPlayerIdx]?.buffs);
     render('e-buffs',RPG.battle.enemy?.buffs);
+  },
+  decorateMissionReward() {
+    const rewardId = RPG.missionViewType === 'special' ? RPG.global.specialMission?.rewardCardId : RPG.global.monthlyMission?.rewardCardId;
+    const card = RPG.getCardData(rewardId);
+    const section = this.$(RPG.missionViewType === 'special' ? 'special-mission-section' : 'monthly-mission-section');
+    const panel = section.children[1];
+    panel.classList.add('mission-reward-showcase');
+    panel.querySelector('.reward-card-preview')?.remove();
+    panel.querySelector('.reward-progress')?.remove();
+    if (!card) { panel.classList.remove('mission-reward-showcase'); delete panel.dataset.grade; return; }
+    panel.dataset.grade = card.grade;
+    const preview = this.text('button','','reward-card-preview');
+    preview.setAttribute('aria-label',`${card.name} 보상 카드 자세히 보기`);
+    preview.append(ImageAssets.createPortrait(card));
+    preview.onclick = () => RPG.showCardInfo(card.id);
+    panel.prepend(preview);
+    const mission = RPG.missionViewType === 'special' ? RPG.global.specialMission : RPG.global.monthlyMission;
+    const objectives = Object.values(mission.missions || {});
+    const complete = objectives.filter(item => (item.progress || 0) >= item.target).length;
+    const progress = this.text('div',mission.claimed ? '수령 완료' : `${complete} / ${objectives.length} 미션 완료`,'reward-progress');
+    const meter = document.createElement('progress');
+    meter.max = Math.max(1,objectives.length);
+    meter.value = complete;
+    meter.setAttribute('aria-label','보상 획득까지 완료한 미션');
+    progress.append(meter);
+    panel.append(progress);
   },
   decorateSummon() {
     const result = this.$('gacha-result');
@@ -317,7 +345,7 @@ const Astra = {
     for (const id of list) counts.set(id,(counts.get(id)||0)+1);
     for (const id of RPG.sortCardIdsByGrade([...counts.keys()])) {
       const card = RPG.getCardData(id);
-      if (card) box.append(this.cardButton(card, counts.get(id), () => clickHandler(id)));
+      if (card) box.append(this.cardButton(card, containerId === 'card-pool-grid' ? null : counts.get(id), () => clickHandler(id)));
     }
   },
   renderCollection() {
@@ -537,6 +565,7 @@ const Astra = {
       this.$('md-grade').textContent = `${this.gradeNames[card.grade] || card.grade} · ${this.roleNames[card.role] || card.role} · ${this.elementNames[card.element] || card.element}`;
     });
     this.hook('toMenu',this.renderParty);
+    this.hook('renderMissionView',this.decorateMissionReward);
     this.hook('renderBattlefield',this.renderBattleStatuses);
     this.hook('runGacha',this.decorateSummon);
     this.hook('spinChaosRoulette',this.decorateSummon);
@@ -548,12 +577,20 @@ const Astra = {
     });
     this.hook('openModeSelect',() => {
       for (const button of this.$('mode-list').querySelectorAll('button')) {
+        const mode = button.id.replace('mode-btn-','');
+        if (RPG.tempGameType === 'challenge' && RPG.global.hardChallengeCleared?.[mode]) {
+          button.classList.add('hard-cleared');
+          button.append(this.text('small','✦ HARD CLEAR','hard-clear-badge'));
+          button.setAttribute('aria-label',`${button.firstChild.textContent}, 하드모드 클리어`);
+        }
         button.setAttribute('aria-pressed','false');
         button.addEventListener('click',() => {
           for (const item of this.$('mode-list').querySelectorAll('button')) item.setAttribute('aria-pressed',String(item.id === `mode-btn-${RPG.selectedModeId}`));
         });
       }
     });
+    this.hook('toggleHardMode',() => this.$('btn-hard-mode').setAttribute('aria-pressed',String(RPG.hardModeActive)));
+    this.hook('openModeSelect',() => this.$('btn-hard-mode').setAttribute('aria-pressed','false'));
     RPG.renderCardList = (containerId,list,callback) => this.renderCards(containerId,list,callback);
     RPG.openCollection = () => this.openCollection();
     RPG.openFactoryViewDeck = () => this.openFactoryViewDeck();
