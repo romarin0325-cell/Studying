@@ -9,7 +9,7 @@ function target(g,tags={},x=225,y=200){g.spawnEnemy(x,y,{hp:1e7,r:1,speed:0,fire
 function graze(g,n){for(let i=0;i<n;i++){g.bullets=[];g.enemyBullet(g.player.x+18,g.player.y,0,0);g.update(.001);}}
 
 test('ten new artifacts enter their rarity pools and survive save/load',()=>{
- const added=ARTIFACTS.slice(22);assert.equal(added.length,10);assert.equal(added.filter(a=>a.rarity==='normal').length,6);
+ const added=ARTIFACTS.slice(22,32);assert.equal(added.length,10);assert.equal(added.filter(a=>a.rarity==='normal').length,6);
  for(const a of added){const p=createProfile({owned:[a.id],equipped:[a.id]});assert.ok(p.owned.includes(a.id));assert.deepEqual(p.equipped,[a.id]);
   const pool=ARTIFACTS.filter(b=>b.rarity===a.rarity);p.tickets=[{difficulty:'normal',dungeon:0}];let i=0;
   assert.equal(drawArtifact(p,()=>i++===0?(a.rarity==='rare'?0:1):(pool.indexOf(a)+.5)/pool.length).artifact.id,a.id);
@@ -21,7 +21,7 @@ test('draw uses 15 percent rare normally and 30 percent only on a correct option
   const boundary=correct?.30:.15;
   for(const roll of [0,boundary-.000001,boundary,.999999]){
    const p=createProfile({tickets:[{difficulty,dungeon:0},{difficulty,dungeon:1}]}),before=p.tickets.length;let n=0;
-   const result=drawArtifact(p,()=>n++===0?roll:0,correct);assert.equal(result.artifact.rarity,roll<boundary?'rare':'normal');assert.equal(p.tickets.length,before-1);
+   const result=drawArtifact(p,()=>n++===0?roll:0,correct);assert.equal(result.artifact.rarity,roll<boundary?'rare':roll<boundary+(correct?.02:.01)?'epic':'normal');assert.equal(p.tickets.length,before-1);
    const next=drawArtifact(p,()=>.2);assert.equal(next.artifact.rarity,'normal','quiz benefit is not carried over');assert.equal(drawArtifact(p),null);
   }
  }
@@ -90,7 +90,7 @@ test('normal-only modifiers do not leak into bomb impacts, pulses or transformed
   const time=game({hero:8,artifacts:ids});time.bomb();time.player.fire=0;time.fire(.001);assert.ok(time.shots.every(s=>s.damageKind==='bomb'));
   const t=target(time,{},time.shots[0].x,time.shots[0].y);time.shots=[time.shots[0]];time.shots[0].vx=time.shots[0].vy=0;time.update(.001);near(t.maxHp-t.hp,12.5*3.8*bomb);
  }
- for(const [ids,expected] of [[['sun','bigbang'],2720],[['sun','kaleidoscope'],1360]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
+ for(const [ids,expected] of [[['sun','bigbang'],3040],[['sun','kaleidoscope'],1520]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
 });
 
 test('verdant dew removes one required P and adds five percent attack for standard and four-P heroes',()=>{
@@ -136,6 +136,6 @@ test('hidden life and Night/Sisters bomb bonuses apply to initial resources and 
 });
 
 test('sea ricochet specialist gains ten percent health and one projectile while preserving cadence',()=>{
- const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*1.1*1.14);assert.equal(e.elite,true);
+ const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*.9167*1.2*1.14);assert.equal(e.elite,true);
  g.enemies=[e];e.x=e.ox=100;e.y=100;e.fire=0;g.update(.001);assert.equal(g.bullets.length,4);assert.ok(g.bullets.every(b=>b.ricochet===5));near(e.fire,2.9);
 });

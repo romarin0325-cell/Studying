@@ -1,18 +1,19 @@
 import { HEROES, STAGES, DUNGEONS, LIMITS, clamp } from './content.js';
-import { DIFFICULTIES, loadoutStats } from './meta.js';
+import { ARTIFACTS, DIFFICULTIES, loadoutStats } from './meta.js';
 const TAU = Math.PI * 2;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
 const BOMB_INVULNERABILITY = [4,2,3,3,3,3,3,3,2];
-const DUNGEON_ENEMY_SCALE = [1.06,1.08,1.10,1.12,1.14,1.35];
+const DUNGEON_ENEMY_SCALE = [1.06,1.08,1.10,1.12,1.14,1.35,1.48];
 export class Game {
-  constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], onEvent = () => {} } = {}) {
+  constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], challenge = false, onEvent = () => {} } = {}) {
+    this.challenge = challenge; this.pendingArtifacts = null; this.celestialWave = 0;
     this.hero = HEROES[hero]; this.heroIndex = hero; this.weaponIndex = weapon; this.weapon = this.hero.weapons[weapon].id;
     this.width = 450; this.height = height; this.seed = seed; this.mode = mode; this.onEvent = onEvent;
     this.difficulty = DIFFICULTIES.find(d => d.id === mode) || DIFFICULTIES[1];
     this.loadout = loadoutStats(artifacts, this.difficulty.id); this.artifacts = new Set(this.loadout.ids);
     this.maxLife = this.loadout.maxLife + (this.hero.lifeBonus || 0); this.maxBombs = this.loadout.maxBombs + (this.hero.bombBonus || 0); this.room = 0; this.reviveUsed = false; this.fairyFire = 0; this.darkFairyFire = 0; this.maskUses = 0;
-    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: this.hero.radius || 5, lives: this.loadout.lives + (this.hero.lifeBonus || 0), barrier: this.artifacts.has('clover'), invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
+    this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: Math.max(1,(this.hero.radius || 5)+this.loadout.radius), lives: this.loadout.lives + (this.hero.lifeBonus || 0), barrier: this.artifacts.has('clover'), invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
     this.score = 0; this.bestCombo = 0; this.combo = 0; this.comboTime = 0; this.graze = 0; this.kills = 0;
     this.power = this.artifacts.has('origin') ? 2 : 1; this.powerPoints = 0; this.bombs = this.loadout.bombs + (this.hero.bombBonus || 0); this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
     this.comboDuration = this.artifacts.has('hourglass') ? 5.6 : 3.6;
@@ -20,7 +21,11 @@ export class Game {
     this.time = 0; this.totalTime = 0; this.phase = 'intro'; this.phaseTime = 0; this.finished = false;
     this.zones = []; this.areaFire = 0; this.scoreBonus = 0; this.rankBonus = 0; this.timeBonus = 0; this.bonusesFinalized = false; this.shots = []; this.bullets = []; this.enemies = []; this.particles = []; this.pickups = []; this.effects = []; this.hazards = [];
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
-    this.startStage(stage);
+    if(challenge) {
+      if(this.artifacts.has('resurgence'))this.player.lives=this.maxLife;
+      if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    }
+    this.startStage(challenge ? 0 : stage);
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
   emit(type, data = {}) { this.onEvent({ type, ...data }); }
@@ -32,7 +37,9 @@ export class Game {
     this.sentinelSpawned = false;
     this.enemies.length = this.bullets.length = this.shots.length = this.hazards.length = this.pickups.length = 0;
     this.player.x = this.player.targetX = 225; this.player.y = this.player.targetY = this.height * .79;
-    this.zones.length = 0; this.areaFire = 0; this.effects.length = this.particles.length = 0; this.player.fire = 0; this.bombTime = 0; this.maskUses = 0;
+    this.zones.length = 0; this.areaFire = 0; this.effects.length = this.particles.length = 0; this.player.fire = 0; this.bombTime = 0;
+    this.pendingArtifacts = null; this.celestialWave = 0;
+    if(this.artifacts.has('blessing'))this.player.barrier=true;
     this.frostTime = 0; this.orbitHits = [new WeakMap(),new WeakMap()]; this.orbitPrevious = null; this.roomRecovered = false;
     this.player.invincible = 3; this.emit('stage', { stage: index, room });
   }
@@ -276,6 +283,10 @@ export class Game {
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
+    if(this.stageIndex===6 && !data.offspring && (data.elite || data.special!==undefined)) {
+      const patterns=this.room===0?[3,0]:[1,5];
+      data={...data,elite:true,special:patterns[this.celestialWave++%2]};
+    }
     const hp = data.hp * this.difficulty.hp * DUNGEON_ENEMY_SCALE[this.stageIndex] * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1);
     this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
   }
@@ -296,6 +307,7 @@ export class Game {
     if(this.stageIndex===3)this.fan(e.x,e.y,9,130,.19,aim,{shape:'petal'});
     if(this.stageIndex===4)this.fan(e.x,e.y,5,150,.3,aim,{r:7,ricochet:5});
     if(this.stageIndex===5){this.fan(e.x,e.y,3,75,.45,aim,{r:16,split:true,shape:'diamond'});this.addHazard(clamp(this.player.x,40,410),28);}
+    if(this.stageIndex===6){this.fan(e.x,e.y,5,150,.22,aim,{shape:'diamond'});if(e.special===5)this.enemyBullet(e.x,e.y,aim,65,{r:16,split:true});}
   }
   recoverRoom() {
     if(this.roomRecovered)return;
@@ -318,7 +330,7 @@ export class Game {
   bossAttack(dt) {
     const b = this.boss; if (!b || b.hp <= 0) return;
     const phase = b.hp / b.maxHp > .67 ? 0 : b.hp / b.maxHp > .34 ? 1 : 2;
-    if (phase !== this.bossPattern) { this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; b.fire = 1.2; this.emit('pattern', { phase, name: this.stage.pattern[phase] }); }
+    if (phase !== this.bossPattern) { this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>f.type!=='celestialWarning'); b.fire = 1.2; this.emit('pattern', { phase, name: this.stage.pattern[phase] }); }
     this.bossClock += dt; b.fire -= dt; if (b.fire > 0) return;
     const aim = Math.atan2(this.player.y - b.y, this.player.x - b.x);
     const speed = 102 + this.stageIndex * 10 + phase * 12;
@@ -355,6 +367,24 @@ export class Game {
         for (const side of [-1, 1]) this.fan(b.x + side * 55, b.y + 10, 4 + phase, speed, .18, Math.PI / 2 + side * Math.sin(t) * .5, { color: side === 1 ? '#e2a3ff' : '#ffb882', shape: 'diamond' });
         if (phase > 0 && Math.floor(t * 2) % 3 === 0) this.addHazard(60 + Math.floor(this.random() * 4) * 110, phase === 2 ? 34 : 26);
         if (phase === 2) this.fan(b.x, b.y, 3, speed + 35, .16, aim); break;
+      case 6:
+        b.fire=phase===2?2.6:1.25;
+        if(phase===0) {
+          this.fan(b.x,b.y,5,150,.19,aim,{shape:'diamond'});
+          if(t>=(b.nextLight||0)) {
+            b.nextLight=t+4;
+            const gap=clamp(this.player.x,85,365);
+            this.effect('celestialWarning',{x:gap,y:this.height-28,life:1.5,wait:1.2,gap,bottom:true,color:'#ffe1a3'});
+          }
+        } else if(phase===1) {
+          this.fan(b.x,b.y,7,155,.22,Math.PI/2,{shape:'diamond'});
+          if(t>=(b.nextBlade||0)) {b.nextBlade=t+4.5;this.addHazard(clamp(this.player.x,70,380),28);this.addHazard(clamp(this.player.y,240,this.height-120),28,'horizontal');}
+        } else {
+          // A fixed, telegraphed corridor stays open for this entire volley.
+          const gap=[90,225,360][(b.judgmentCount||0)%3];b.judgmentCount=(b.judgmentCount||0)+1;
+          this.effect('celestialWarning',{x:gap,y:80,life:1.5,wait:1.2,gap,bottom:false,color:'#ffe1a3'});
+        }
+        break;
     }
     if(this.stageIndex===5){b.fire*=.943;if(phase===2)this.fan(b.x,b.y,2,speed+45,.24,aim,{split:true,r:12});}
     this.emit('enemyShot', { boss: true });
@@ -362,11 +392,44 @@ export class Game {
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
   completeQuiz(reward = null) {
     if (this.phase !== 'quiz' || !(this.room === 2 ? [null,'score'] : [null,'life','bomb']).includes(reward)) return false;
+    if(this.challenge && this.room===2 && this.stageIndex<6) {
+      if(reward!==null)return false;
+      this.startStage(this.stageIndex+1);return true;
+    }
     if (reward === 'score') { this.scoreBonus = Math.round(this.score * .1); this.score += this.scoreBonus; }
     if (reward === 'life') this.player.lives = Math.min(this.maxLife,this.player.lives+1);
     if (reward === 'bomb') this.bombs = Math.min(this.maxBombs,this.bombs+1);
-    if(this.room===2){this.finalizeClearBonuses();this.phase='victory';this.finished=true;this.emit('victory');return true;}
+    if(this.room===2){if(!this.challenge)this.finalizeClearBonuses();this.phase='victory';this.finished=true;this.emit('victory');return true;}
     this.startStage(this.stageIndex, this.room+1); return true;
+  }
+  challengeChoices() {
+    if(!this.challenge || this.phase!=='quiz' || this.room!==2 || this.stageIndex>=6 || this.artifacts.size>=9)return [];
+    if(!this.pendingArtifacts) {
+      const pool=ARTIFACTS.filter(a=>!this.artifacts.has(a.id));
+      this.pendingArtifacts=[];
+      while(pool.length && this.pendingArtifacts.length<3)this.pendingArtifacts.push(pool.splice(Math.floor(this.random()*pool.length),1)[0].id);
+    }
+    return [...this.pendingArtifacts];
+  }
+  chooseChallengeArtifact(id) {
+    if(!this.challenge || this.phase!=='quiz' || this.room!==2 || this.stageIndex>=6 || this.artifacts.size>=9 || !this.pendingArtifacts?.includes(id) || this.artifacts.has(id))return false;
+    const old=this.loadout, oldMax=this.maxLife;
+    this.artifacts.add(id);this.loadout=loadoutStats([...this.artifacts],this.mode,9);
+    this.maxLife=this.loadout.maxLife+(this.hero.lifeBonus||0);
+    this.maxBombs=this.loadout.maxBombs+(this.hero.bombBonus||0);
+    this.player.lives=clamp(this.player.lives+this.maxLife-oldMax,1,this.maxLife);
+    this.player.radius=Math.max(1,(this.hero.radius||5)+this.loadout.radius);
+    this.bombs=clamp(this.bombs+this.loadout.bombs-old.bombs,0,this.maxBombs);
+    this.attackBonus=this.loadout.attack;
+    this.comboDuration=this.artifacts.has('hourglass')?5.6:3.6;
+    this.powerRequirement=([0,7].includes(this.heroIndex)?4:3)-(this.artifacts.has('dew')?1:0);
+    if(id==='origin')this.power=Math.min(5,this.power+1);
+    while(this.powerPoints>=this.powerRequirement && this.power<5){this.powerPoints-=this.powerRequirement;this.power++;}
+    if(id==='resurgence')this.player.lives=this.maxLife;
+    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    if(id==='clover')this.player.barrier=true;
+    this.pendingArtifacts=null;
+    return this.completeQuiz();
   }
   finalizeClearBonuses() {
     if (this.bonusesFinalized) return;
@@ -378,7 +441,8 @@ export class Game {
     if (this.phase !== 'defeat' || this.reviveUsed) return false;
     this.reviveUsed = true;
     if (!correct) return false;
-    this.finished = false; this.player.lives = Math.min(2,this.maxLife); this.player.invincible = 4;
+    this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
+    if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
     this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
   }
   update(dt) {
@@ -516,6 +580,13 @@ export class Game {
     this.particles = this.particles.filter(q => q.life > 0);
     for (const f of this.effects) {
       f.age += dt;
+      if(f.type==='celestialWarning' && !f.fired && f.age>=f.wait && this.phase==='boss') {
+        f.fired=true;
+        for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62) {
+          this.enemyBullet(x,f.bottom?this.height+8:75,f.bottom?-Math.PI/2:Math.PI/2,f.bottom?110:165,{shape:'diamond',color:'#ffe1a3',r:6});
+          if(!f.bottom)this.enemyBullet(x,28,Math.PI/2,165,{shape:'diamond',color:'#eacbff',r:6});
+        }
+      }
       if(f.type==='detonation' && !f.fired && f.age>.75) {f.fired=true;this.fan(f.x,f.y,10,115,TAU/10);if(distance(f,p)<f.radius)this.hitPlayer();}
     }
     this.effects = this.effects.filter(f => f.age < f.life);

@@ -11,9 +11,9 @@ function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=
 test('chain stays silent without targets and reacquires without petal fallback',()=>{const g=combat({hero:3});tick(g,.5);assert.equal(g.shots.length,0);assert.equal(g.stats.shots,0);const e=target(g);tick(g,.06);assert.ok(e.hp<e.maxHp);assert.ok(g.effects.some(f=>f.type==='chain'));});
 test('laser focus resets across a gap and creates no stored beam trails',()=>{const g=combat({weapon:1}),e=target(g);tick(g,2);assert.ok(e.lock>1.8);assert.ok(!g.effects.some(f=>f.type==='beam'));g.move(400,400);tick(g,.5);g.move(225,400);tick(g,.16);assert.ok(e.lock<.3);tick(g,5);assert.equal(e.lock,3.25);});
 test('artifact catalog and legacy effects have live effects and stacking respects three distinct slots',()=>{
-  assert.equal(ARTIFACTS.length,32);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,12);
+  assert.equal(ARTIFACTS.length,36);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,14);
   const base=combat(),e=target(base);base.damage(e,100,0,0);
-  for(const [ids,expected] of [[['pendant'],120],[['dragon'],140],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
+  for(const [ids,expected] of [[['pendant'],120],[['dragon'],150],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
   assert.deepEqual(loadoutStats(['frozen','dream','nail']).maxLife,5);assert.equal(loadoutStats(['nail']).maxLife,2);assert.equal(loadoutStats(['nail','crystal']).attack,1.3);
   assert.equal(loadoutStats(['spellbook','crown','core']).bomb,2);assert.equal(loadoutStats(['holy']).bombs,4);assert.equal(loadoutStats(['holy']).maxBombs,6);
   assert.equal(loadoutStats(['dream','dream']).maxLife,6);assert.equal(loadoutStats(['spellbook','crown','core','dream']).maxLife,4);
@@ -22,14 +22,14 @@ test('artifact catalog and legacy effects have live effects and stacking respect
   const fairy=combat({artifacts:['leaf'],hero:3});tick(fairy,.35);assert.ok(fairy.stats.shots>=2);assert.ok(fairy.shots.some(s=>s.homing));
   const b=combat({artifacts:['spellbook','crown','core']});target(b);b.bomb();assert.equal(b.stats.damage,520);
 });
-test('madness mask cannot refund Jasmine, overlap, or exceed three uses per stage',()=>{
+test('madness mask cannot refund Jasmine, overlap, or exceed three uses per run',()=>{
   const g=combat({hero:3,artifacts:['mask','frozen','dream']});g.bombs=0;target(g);
   assert.equal(g.player.lives,6);assert.ok(g.bomb());assert.equal(g.player.lives,5);assert.equal(g.maskUses,1);
   assert.equal(g.bomb(),false);assert.equal(g.player.lives,5);assert.equal(g.maskUses,1);
   let successes=1;
   for(let i=0;i<99;i++){g.bombTime=0;if(g.bomb())successes++;}
   assert.equal(successes,3);assert.equal(g.stats.bombs,3);assert.equal(g.maskUses,3);assert.equal(g.player.lives,3);assert.equal(g.stats.damage,780);
-  g.startStage(0,1);g.phase='boss';g.bombs=0;assert.equal(g.maskUses,0);assert.ok(g.bomb());assert.equal(g.player.lives,2);
+  g.startStage(0,1);g.phase='boss';g.bombs=0;assert.equal(g.maskUses,3);assert.equal(g.bomb(),false);assert.equal(g.player.lives,3);
 });
 test('permanent and conditional attack artifacts add once while bomb bonuses stay separate',()=>{
   const mixed=combat({artifacts:['nail','crystal','chocolate']}),boss=target(mixed);boss.miniboss=true;mixed.damage(boss,100,0,0);assert.equal(mixed.stats.damage,180);
@@ -56,16 +56,16 @@ test('frost slows movement, snowflakes jump, and midnight marks explode on three
 test('all imported grammar and collocation questions have valid options and lecture links',()=>{for(const q of LIBRARY.collocation){assert.ok(q.options.includes(q.answer),`collocation ${q.id}`);assert.ok(q.question&&q.expression&&q.meaning);}for(const l of LIBRARY.grammar)for(const q of l.quizzes){assert.ok(q.options.includes(q.answer));assert.ok(LIBRARY.grammar.some(t=>t.id===q.lecture_id));}});
 test('final quiz adds ten percent exactly once, and declining still completes the dungeon',()=>{
   const g=combat();g.room=2;g.phase='quiz';g.score=12345;const lives=g.player.lives,bombs=g.bombs;
-  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,15580);assert.equal(g.scoreBonus,1235);assert.equal(g.rankBonus,2000);
+  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,17580);assert.equal(g.scoreBonus,1235);assert.equal(g.rankBonus,4000);
   assert.equal(g.completeQuiz('score'),false);assert.equal(g.player.lives,lives);assert.equal(g.bombs,bombs);
-  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,2456);
+  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,4456);
 });
 test('boss combat resets combo, ignores its multiplier and adds exact time and rank bonuses at victory',()=>{
   const g=combat();g.phase='wave';g.combo=49;g.comboTime=2;g.spawnBoss();assert.equal(g.combo,0);assert.equal(g.comboTime,0);
   g.phase='boss';g.bossElapsed=20;g.bullets=Array.from({length:80},()=>({x:0,y:0}));g.damage(g.boss,1e9,0,0);
   assert.equal(g.score,18000);assert.equal(g.combo,0);assert.equal(g.bullets.length,0);
-  g.phase='quiz';g.room=2;g.completeQuiz();assert.equal(g.timeBonus,2000);assert.equal(g.rankBonus,2000);assert.equal(g.score,22000);
-  for(const [seconds,deaths,timeBonus,rankBonus] of [[30,1,1500,1000],[40,4,1000,0],[40.01,0,0,2000]]){
+  g.phase='quiz';g.room=2;g.completeQuiz();assert.equal(g.timeBonus,6000);assert.equal(g.rankBonus,4000);assert.equal(g.score,28000);
+  for(const [seconds,deaths,timeBonus,rankBonus] of [[30,1,4500,2000],[40,4,3000,0],[40.01,0,1500,4000],[50.01,0,0,4000]]){
     const run=combat();run.room=2;run.phase='quiz';run.bossClearTime=seconds;run.stats.deaths=deaths;run.completeQuiz();assert.equal(run.timeBonus,timeBonus);assert.equal(run.rankBonus,rankBonus);
   }
 });

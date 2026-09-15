@@ -18,7 +18,7 @@ test('old Chaos claims and tickets migrate once and all ticket rarities use the 
  const p=createProfile(old);assert.equal(p.claims['2026-09-14:5'],'hard');assert.equal(p.claims['2026-09-14:3'],undefined);assert.equal(p.tickets[0].dungeon,5);
  assert.equal(claimDungeon(p,5,'hard',date),null);assert.equal(claimDungeon(p,3,'hard',date).count,2);assert.equal(p.tickets.length,3);
  assert.deepEqual(createProfile(JSON.parse(JSON.stringify(p))),p);
- for(const difficulty of ['easy','normal','hard'])for(const [chance,rarity] of [[.1499,'rare'],[.15,'normal']]){
+ for(const difficulty of ['easy','normal','hard'])for(const [chance,rarity] of [[.1499,'rare'],[.15,'epic'],[.16,'normal']]){
    const q=createProfile();q.tickets=[{dungeon:0,difficulty}];let n=0;assert.equal(drawArtifact(q,()=>n++===0?chance:0).artifact.rarity,rarity);
  }
 });
@@ -57,10 +57,10 @@ test('shortened bombs retain damage budgets at different frame steps and Night p
 test('Corona replaces every hero ultimate including healing, power cost, freeze and transformation',()=>{
  for(let hero=0;hero<9;hero++){
   const g=combat({hero,artifacts:['sun']});g.player.fire=999;g.player.lives=1;g.power=3;target(g);g.bomb();
-  assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,1700);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
-  tick(g,1.1);assert.equal(g.stats.damage,1700);assert.equal(g.bombTime,0);
+  assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,1900);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
+  tick(g,1.1);assert.equal(g.stats.damage,1900);assert.equal(g.bombTime,0);
  }
- const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,2890);
+ const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,3230);
 });
 test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
   const g=combat({hero:4});g.player.fire=999;g.bomb();tick(g,3);assert.ok(g.frostTime>4.99);assert.ok(g.player.invincible<1e-8);
@@ -95,7 +95,7 @@ test('only Poseidon creates a telegraphed horizontal and vertical cross, both ax
  }
 });
 test('lower dungeon health rises in steps while final Chaos stays at its prior health',()=>{
- assert.equal(DUNGEONS.length,6);assert.deepEqual(STAGES.map(stage=>stage.hp),[4200,5600,7400,9600,12500,17000]);
+ assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[4200,5600,7400,9600,12500,17000]);
  const g=combat({stage:2});g.player.fire=999;const e=target(g);e.special=2;e.countdown=3;tick(g,2.9);assert.equal(g.bullets.length,0);tick(g,.15);assert.equal(g.bullets.length,20);
 });
 test('base-six A and B weapon achievements track any and hard clears without rewards',()=>{

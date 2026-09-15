@@ -24,10 +24,11 @@ let art, renderer, game = null, paused = false, raf = 0, last = 0, accumulator =
 let announcementTimer = 0, toastTimer = 0, pointer = null, keys = new Set(), frameSamples = [], startingStage = 0;
 let runCount = 0;
 let menus;
+let chosenChallenge = false;
 let chosenRandom = preferences.random === true;
 const sortieScroll={top:0,roster:0};
-function bombDetails(index) {
-  return profile.equipped.includes('sun')&&profile.owned.includes('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 1700의 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
+function bombDetails(index,active=false) {
+  return (active && game ? game.artifacts.has('sun') : profile.equipped.includes('sun')&&profile.owned.includes('sun')) ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 1900의 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
 }
 function powerRequirement(index=chosenHero) { return ([0,7].includes(index)?4:3)-(profile.equipped.includes('dew')?1:0); }
 function save() {
@@ -81,14 +82,14 @@ function showSortie() {
     <div class="section-heading"><h2>공격 스타일</h2><small>${chosenRandom?'출격 전 만남과 스타일 선택':'두 가지 빛, 서로 다른 궤적'}</small></div>
     <div class="weapons ${chosenRandom?'random-weapons-placeholder':''}" ${chosenRandom?'inert aria-hidden="true"':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
     <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/10회 남음 · 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
-    <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons"><small>던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
-    <button class="launch" id="launch">${stage.name} 출격<span>THREE STAGES</span><b>→</b></button>
-    <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>BEST ${Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
+    <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons"><small>던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${chosenChallenge?'챌린지':stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
+    <button class="launch" id="launch">${chosenChallenge?'챌린지':stage.name} 출격<span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'THREE STAGES'}</span><b>→</b></button>
+    <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'BEST '+Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
   </section>`;
   screen.querySelectorAll('[data-hero]').forEach(b => b.onclick = () => menus.chooseHero(Number(b.dataset.hero),()=>{ chosenRandom = false; chosenHero = Number(b.dataset.hero); chosenWeapon = 0; save(); showSortie(); }));
   screen.querySelectorAll('[data-weapon]').forEach(b => b.onclick = () => { chosenWeapon = Number(b.dataset.weapon); showSortie(); });
   screen.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { chosenStage = Number(b.dataset.stage); showSortie(); });
-  $('dungeons').onclick=()=>menus.dungeons(chosenStage,difficulty,(stage,mode)=>{chosenStage=stage;difficulty=mode;save();showSortie();});
+  $('dungeons').onclick=()=>menus.dungeons(chosenStage,difficulty,(stage,mode,challenge=false)=>{chosenStage=stage;chosenChallenge=challenge;difficulty=mode;save();showSortie();});
   $('equipment').onclick=()=>menus.equipment(showSortie);$('library').onclick=()=>menus.library();
   $('help').onclick = () => showHelp(false);$('achievements').onclick=()=>menus.achievements();
   $('random-hero').onclick=()=>{chosenRandom=true;save();showSortie();};
@@ -121,7 +122,8 @@ function startGame(stage = chosenStage, randomResolved = false) {
   cancelAnimationFrame(raf); closeModal(); hideAnnouncement(); audio.start();
   screen.hidden = true; hud.hidden = false; world.style.display = 'block'; renderer.resize();
   paused = false; keys.clear(); pointer = null; accumulator = 0; last = 0; frameSamples = []; startingStage = stage;
-  game = new Game({ hero: chosenHero, weapon: chosenWeapon, stage, artifacts:profile.equipped.filter(id=>profile.owned.includes(id)), height: renderer.height, mode: difficulty, seed: 1471 + ++runCount, onEvent: handleEvent });
+  game = new Game({ hero: chosenHero, weapon: chosenWeapon, stage, challenge:chosenChallenge, artifacts:profile.equipped.filter(id=>profile.owned.includes(id)), height: renderer.height, mode: difficulty, seed: 1471 + ++runCount, onEvent: handleEvent });
+  $('run-artifacts').hidden=!game.challenge;
   $('weapon-label').textContent = HEROES[chosenHero].weapons[chosenWeapon].name;
   $('bomb-label').textContent = bombDetails(chosenHero).bomb;
   app.style.setProperty('--accent', HEROES[chosenHero].color);
@@ -149,6 +151,7 @@ function handleEvent(event) {
 }
 function renderHud() {
   if (!game) return;
+  $('bomb-label').textContent=bombDetails(game.heroIndex,true).bomb;
   $('score').textContent = String(Math.round(game.score)).padStart(6, '0');
   const lives = `${game.player.lives}/${game.maxLife}`; if ($('lives').dataset.value !== lives) { $('lives').dataset.value = lives; $('lives').innerHTML = Array.from({ length: game.maxLife }, (_, i) => `<span class="${i < game.player.lives ? '' : 'empty'}"></span>`).join(''); $('lives').setAttribute('aria-label', `생명 ${lives}`); }
   const power = String(game.power); if ($('power').dataset.value !== power) { $('power').dataset.value = power; $('power').innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < game.power ? 'on' : ''}"></i>`).join(''); }
@@ -183,7 +186,8 @@ function frame(now) {
 function pauseGame() {
   if (!game || game.finished || game.phase === 'quiz' || paused) return;
   paused = true; cancelAnimationFrame(raf); audio.pause(); keys.clear(); pointer = null; hideAnnouncement();
-  setModal(`<span class="small-caps">A MOMENT BETWEEN STARS</span><h2>잠시, 숨 고르기</h2><p class="intro-copy">${game.stage.name}<br>별들은 여기서 기다리고 있어요.</p><button class="primary" id="resume">계속 날아가기</button><button class="secondary" id="restart">던전 처음부터 다시 시작</button><button class="secondary" id="return">출격 화면으로</button><p class="tiny-note">다시 시작하면 현재 던전의 1스테이지를 생명·화력·점수 초기 상태로 플레이해요.</p>`);
+  setModal(`<span class="small-caps">A MOMENT BETWEEN STARS</span><h2>잠시, 숨 고르기</h2><p class="intro-copy">${game.stage.name}<br>별들은 여기서 기다리고 있어요.</p><button class="primary" id="resume">계속 날아가기</button>${game.challenge?'<button class="secondary" id="pause-artifacts">현재 적용 유물</button>':''}<button class="secondary" id="restart">${game.challenge?'챌린지':'던전'} 처음부터 다시 시작</button><button class="secondary" id="return">출격 화면으로</button><p class="tiny-note">${game.challenge?'다시 시작하면 마도제국부터 시작하며 이번에 얻은 유물은 사라져요.':'다시 시작하면 현재 던전의 1스테이지를 생명·화력·점수 초기 상태로 플레이해요.'}</p>`);
+  if($('pause-artifacts'))$('pause-artifacts').onclick=()=>menus.runArtifacts(game,()=>{paused=false;pauseGame();});
   $('resume').onclick = resumeGame; $('restart').onclick = () => startGame(game.stageIndex); $('return').onclick = showSortie;
 }
 function resumeGame() { if (!game || !paused) return; paused = false; closeModal(); audio.start(); last = 0; accumulator = 0; raf = requestAnimationFrame(frame); }
@@ -191,8 +195,10 @@ function continueFlight() {closeModal();audio.start();renderHud();last=0;accumul
 function resolveStageQuiz(reward=null){game.completeQuiz(reward);if(!game.finished)continueFlight();}
 function showStageQuiz(kind) {
   hideAnnouncement();keys.clear();pointer=null;
-  menus.offerQuiz('퀴즈에 도전하고 보상을 받을까요?', game.room===2?'정답을 맞히면 최종 점수가 10% 증가해요. 건너뛰어도 클리어 보상을 받을 수 있어요.':'정답을 맞히면 생명 1 또는 봄 1을 회복해요. 건너뛰면 바로 다음 스테이지로 이동해요.', ()=>menus.quiz(kind,'퀴즈',correct=>{
+  const relicReward=game.challenge && game.room===2 && game.stageIndex<6;
+  menus.offerQuiz('퀴즈에 도전하고 보상을 받을까요?', relicReward?'정답을 맞히면 세 유물 중 하나를 골라 이번 챌린지에 추가해요.':game.room===2?'정답을 맞히면 최종 점수가 10% 증가해요.':'정답을 맞히면 생명 1 또는 봄 1을 회복해요. 건너뛰면 바로 다음 스테이지로 이동해요.', ()=>menus.quiz(kind,'퀴즈',correct=>{
     if(!correct){resolveStageQuiz();return;}
+    if(relicReward){menus.challengeReward(game,()=>{continueFlight();});return;}
     if(game.room===2){resolveStageQuiz('score');return;}
     setModal(`<span class="small-caps">A LITTLE RECOVERY</span><h2>기억이 힘이 되었어요</h2><p class="intro-copy">생명 ${game.player.lives}/${game.maxLife} · 봄 ${game.bombs}/${game.maxBombs}</p><button class="primary" id="reward-life">생명 1 회복</button><button class="secondary" id="reward-bomb">봄 1 회복</button>`);
     $('reward-life').onclick=()=>resolveStageQuiz('life');$('reward-bomb').onclick=()=>resolveStageQuiz('bomb');
@@ -200,12 +206,17 @@ function showStageQuiz(kind) {
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);
-  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${Math.min(2,game.maxLife)}으로 부활해요.<br>한 번의 던전 도전에서 기회는 한 번뿐이에요.</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
+  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 3개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
   $('revive-decline').onclick=()=>{game.revive(false);finish(false);};
   $('revive-quiz').onclick=()=>menus.quiz('grammar','다시 피어나는 별',correct=>{if(game.revive(correct))continueFlight();else finish(false);});
 }
 function finish(won) {
   hideAnnouncement();
+  if(game.challenge) {
+    setModal(`<span class="small-caps">SEVEN SKIES</span><h2>${won?'모든 하늘의 끝에서':'다시 이어질 여행'}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${HEROES[chosenHero].name}"><p class="intro-copy">${DUNGEONS[game.stageIndex].name} · ${game.room+1}/3<br>스테이지 ${game.stageIndex*3+game.room+1}/21 · 유물 ${game.artifacts.size}/9</p><div class="result-score">${Math.round(game.score).toLocaleString()}</div>${game.scoreBonus?`<p class="score-bonus">마지막 퀴즈 +10% · +${game.scoreBonus.toLocaleString()}점</p>`:''}<button class="secondary" id="result-artifacts">함께한 유물</button><button class="primary" id="again">챌린지 처음부터 다시 도전</button><button class="secondary" id="sortie-return">출격 준비로</button>`);
+    $('result-artifacts').onclick=()=>menus.runArtifacts(game,()=>finish(won));
+    $('again').onclick=()=>startGame(0);$('sortie-return').onclick=showSortie;return;
+  }
   const ticket=won?claimDungeon(profile,startingStage,difficulty):null;
   if(won)recordDungeonClear(profile,chosenHero,chosenWeapon,startingStage,difficulty);
   const key=bestKey(),old=Number(saved.best?.[key])||0;
@@ -217,6 +228,7 @@ function finish(won) {
   $('again').onclick=()=>startGame(startingStage);$('sortie-return').onclick=showSortie;
 }
 $('pause').onclick = pauseGame;
+$('run-artifacts').onclick=()=>{if(game&&!game.finished&&game.phase!=='quiz'){pauseGame();menus.runArtifacts(game,resumeGame);}};
 $('bomb').onclick = () => { if (!paused) game?.bomb(); };
 world.addEventListener('pointerdown', event => {
   if (!game || paused || game.finished || game.phase === 'quiz' || pointer) return;
@@ -247,7 +259,7 @@ window.addEventListener('resize', () => {
 });
 // Read-only telemetry for diagnostics, including offline/browser regression checks.
 Object.defineProperty(globalThis, 'astralDiagnostics', { get() { return {
-  ready: !!art, phase: game?.phase || 'sortie', hero: chosenHero, random: chosenRandom, weapon: chosenWeapon, stage: game?.stageIndex ?? chosenStage,
+  challenge:game?.challenge??chosenChallenge, artifacts:game?[...game.artifacts]:[], ready: !!art, phase: game?.phase || 'sortie', hero: chosenHero, random: chosenRandom, weapon: chosenWeapon, stage: game?.stageIndex ?? chosenStage,
   paused, score: game?.score || 0, power: game?.power || 0, bombs: game?.bombs ?? 0, lives: game?.player.lives ?? 0, maxLife:game?.maxLife, room:game?.room, difficulty, reviveUsed:game?.reviveUsed, maskUses:game?.maskUses,
   player: game ? { x: game.player.x, y: game.player.y } : null, bullets: game?.bullets.length || 0,
   frames: frameSamples.length, fps: frameSamples.length ? Math.round(frameSamples.length / frameSamples.reduce((a, b) => a + b, 0)) : 0,

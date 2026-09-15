@@ -73,5 +73,11 @@ STAGES[1].pattern = ['홀리 레이', '소울 드레인', '더 홀리'];
 STAGES[2].boss = '저주의 여신 아이리스'; STAGES[2].pattern = ['프레임 샷', '금단의 회랑', '아포칼립스'];
 STAGES[5].pattern = ['다크니스', '멸망의 왕관', '제노사이드'];
 
+// The seventh sky belongs only to the continuous challenge.
+DUNGEONS.push({id:6,challengeOnly:true,name:'천계의 계단',en:'STAIRWAY TO ETERNITY',sentinel:'빛의 문지기',special:'천계의 수호자',mechanic:'공간을 넘는 수호자와 분열하는 빛 너머, 창조신이 기다려요.',rooms:['여명의 계단','갈라지는 빛의 관문','창조의 옥좌']});
+STAGES.push({id:6,name:'천계의 계단',en:'STAIRWAY TO ETERNITY',boss:'창조신 아스테아',subtitle:'모든 하늘의 시작',color:'#ffe1a3',dark:'#211d37',pattern:['앱솔루트 라이트','디바인 블레이드','저지먼트'],intro:'이곳까지 닿은 너희의 소망을 보여 주렴.',outro:'너희가 걸어갈 하늘은, 이제 너희의 것이란다.',duration:62,hp:22000});
+const weaponNames={dagger:'루나틱 위치',spread:'프레임 윙',chain:'라이트닝 체인',petal:'홀리 플라워',nightfall:'문 드롭'};
+HEROES.forEach(hero=>hero.weapons.forEach(weapon=>{if(weaponNames[weapon.id])weapon.name=weaponNames[weapon.id];}));
+
 export const LIMITS = Object.freeze({ enemies: 40, bullets: 360, shots: 170, particles: 180, pickups: 55, effects: 40 });
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
