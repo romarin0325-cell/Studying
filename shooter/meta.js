@@ -1,3 +1,4 @@
+import { HEROES } from './content.js';
 export const ARTIFACTS = [
   { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 +20%', bomb: .20 },
   { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 +25% · 최대 생명 −2', attack: .25, life: -2 },
@@ -10,7 +11,7 @@ export const ARTIFACTS = [
   { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 발동 · 스테이지당 3회' },
   { id: 'pendant', name: '검은펜던트', icon: '♦', rarity: 'rare', text: '파워 최대일 때 공격력 +20%' },
   { id: 'chocolate', name: '드림초콜릿', icon: '▦', rarity: 'rare', text: '보스에게 공격력 +50%' },
-  { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명 1일 때 공격력 +40%' },
+  { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명 1일 때 공격력 +50%' },
   { id: 'core', name: '마나코어', icon: '✺', rarity: 'rare', text: '봄 공격력 +50%', bomb: .50 },
   { id: 'leaf', name: '세계수의잎', icon: '❧', rarity: 'rare', text: '곁에서 자동 공격하는 페어리 소환' },
   { id: 'dream', name: '꿈의조각', icon: '✧', rarity: 'rare', text: '최대 생명 +2', life: 2 },
@@ -20,7 +21,7 @@ export const ARTIFACTS = [
   { id: 'origin', name: '시작의보석', icon: '◆', rarity: 'normal', text: '시작 파워 +1' },
   { id: 'boots', name: '바람의장화', icon: '➶', rarity: 'normal', text: '이동속도 +200', speed: 200 },
   { id: 'moonlight', name: '월광의목걸이', icon: '☽', rarity: 'rare', text: '스테이지 클리어마다 봄 1 추가 회복' },
-  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 코로나로 교체 · 피해 1700 · 지속/무적 1초' },
+  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 코로나로 교체 · 피해 1900 · 지속/무적 1초' },
   { id: 'hourglass', name: '모래시계', rarity: 'normal', text: '콤보 유지 시간 +2초' },
   { id: 'clover', name: '네잎클로버', rarity: 'normal', text: '시작 시 피격 1회를 막는 보호막 생성' },
   { id: 'witch', name: '마녀의계약서', rarity: 'normal', text: '일반 몬스터에게 피해 +20%' },
@@ -41,10 +42,11 @@ export const BASE_HEROES = Object.freeze([
   { hero:0, name:'루미' }, { hero:1, name:'루나' }, { hero:2, name:'지크' },
   { hero:3, name:'자스민' }, { hero:4, name:'눈토끼' }, { hero:6, name:'밤토끼' }
 ]);
-export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,1].flatMap(weapon=>[
-  { id:`${hero}-${weapon}-all`, hero, weapon, difficulty:null, name:`${name} ${weapon?'B':'A'} · 여섯 하늘`, text:`${name}의 ${weapon?'B':'A'} 무기로 모든 던전 클리어` },
-  { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${weapon?'B':'A'} · 어려움`, text:`${name}의 ${weapon?'B':'A'} 무기로 모든 던전 어려움 클리어` }
-])));
+const _josa=(name)=>{const c=name.charCodeAt(name.length-1);return(c>=0xAC00&&(c-0xAC00)%28!==0)?'으로':'로';};
+export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,1].flatMap(weapon=>{const wName=HEROES[hero].weapons[weapon].name;return[
+  { id:`${hero}-${weapon}-all`, hero, weapon, difficulty:null, name:`${name} ${wName} · 여섯 하늘`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 클리어` },
+  { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${wName} · 어려움`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 어려움 클리어` }
+];})));
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
