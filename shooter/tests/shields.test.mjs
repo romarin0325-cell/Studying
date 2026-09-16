@@ -101,9 +101,19 @@ test('verdant dew removes one required P and adds five percent attack for standa
  const plain=game({hero:1}),dew=game({hero:1,artifacts:['dew']}),a=target(plain),b=target(dew);plain.damage(a,100,0,0);dew.damage(b,100,0,0);near(a.maxHp-a.hp,100);near(b.maxHp-b.hp,105);
 });
 
-test('six requested weapons gain damage at every power without altering their firing intervals',()=>{
- for(const [hero,weapon,coefficient,bonus,period] of [[1,0,.75,1.1,.095],[2,1,5.5,1.05,.36],[4,0,1.215,1.1,.19],[5,0,2.535,1.1,.23],[6,0,6.72,1.1,.48],[8,0,1.9,1.1,.25]])
-  for(const power of [1,2,3,4,5]){const g=game({hero,weapon});g.power=power;g.player.fire=0;g.fire(.001);near(g.shots[0].damage,(10+power*2.5)*(hero===2?1.1:1)*coefficient*bonus);near(g.player.fire,period);}
+test('requested projectile weapons use direct final coefficients at every power without cadence changes',()=>{
+ for(const [hero,weapon,coefficient,period] of [[1,0,.8415,.095],[2,1,5.94825,.36],[4,0,1.36323,.19],[5,0,2.84427,.23],[6,0,7.53984,.48],[8,0,2.1318,.25]])
+  for(const power of [1,2,3,4,5]){const g=game({hero,weapon});g.power=power;g.player.fire=0;g.fire(.001);near(g.shots[0].damage,(10+power*2.5)*(hero===2?1.1:1)*coefficient);near(g.player.fire,period);}
+});
+test('all remaining adjusted weapon components use direct final coefficients',()=>{
+ const atPowerOne=(hero,weapon)=>{const g=game({hero,weapon});g.power=1;g.player.fire=0;return g;};
+ const melee=atPowerOne(1,1);target(melee,{},225,520);melee.fire(.001);near(melee.stats.damage,12.5*13.77);near(melee.shots[0].damage,12.5*.57375);
+ const spread=atPowerOne(2,0);spread.fire(.001);assert.deepEqual(spread.shots.map(s=>Number(s.damage.toFixed(6))),[14.025,23.8425,14.025]);
+ const chain=atPowerOne(3,0);target(chain);chain.fire(.001);near(chain.stats.damage,12.5*2.646);
+ const petal=atPowerOne(3,1);petal.fire(.001);assert.deepEqual(petal.shots.map(s=>Number(s.damage.toFixed(6))),[11.13075,18.55125,11.13075]);
+ const snow=atPowerOne(4,1);snow.fire(.001);near(snow.shots[0].damage,12.5*2.3814);
+ const midnight=atPowerOne(5,1);midnight.fire(.001);near(midnight.shots[0].damage,12.5*1.8326);
+ const dream=atPowerOne(6,1);dream.fire(.001);near(dream.shots.find(s=>s.type==='nightstar').damage,12.5*.931);const seed=dream.shots.find(s=>s.type==='seed');near(seed.damage,12.5*.882);near(seed.zoneDamage,12.5*.686);
 });
 
 test('P5 shot geometry and control effects are captured when firing, including visible glass size',()=>{
@@ -136,6 +146,6 @@ test('hidden life and Night/Sisters bomb bonuses apply to initial resources and 
 });
 
 test('sea ricochet specialist gains ten percent health and one projectile while preserving cadence',()=>{
- const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*.9167*1.2*1.14);assert.equal(e.elite,true);
+ const g=game({stage:4});g.wave=1;g.spawnWave();const e=g.enemies.find(e=>e.special===4);near(e.maxHp,255*1.15*.9167*1.2*1.30);assert.equal(e.elite,true);
  g.enemies=[e];e.x=e.ox=100;e.y=100;e.fire=0;g.update(.001);assert.equal(g.bullets.length,4);assert.ok(g.bullets.every(b=>b.ricochet===5));near(e.fire,2.9);
 });

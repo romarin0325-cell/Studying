@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const assets = {};
-for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels','relics','tides','bloom-fx','tide-worlds','tide-relics','shield-relics','astea','celestial-relics','celestial-world']) {
+for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels','relics','tides','bloom-fx','tide-worlds','tide-relics','shield-relics','astea','celestial-relics','celestial-world','balance-relics']) {
   const ext = name === 'worlds' ? 'jpg' : 'png';
   assets[name] = `data:image/${ext === 'jpg' ? 'jpeg' : 'png'};base64,${(await fs.readFile(path.join(root, 'assets', `${name}.${ext}`))).toString('base64')}`;
 }

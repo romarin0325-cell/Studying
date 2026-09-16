@@ -67,7 +67,7 @@ test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
  g.enemyBullet(20,200,Math.PI/2,100);tick(g,1);assert.ok(Math.abs(g.bullets[0].y-235)<1e-7);tick(g,4.1);assert.equal(g.frostTime,0);
 });
 test('Night large shot retains its size, gains damage and does not track an off-axis enemy',()=>{
- const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.ok(Math.abs(shot.damage-92.4)<1e-8);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
+ const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.ok(Math.abs(shot.damage-94.248)<1e-8);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
 });
 test('orbit sweeps fast movement and each enemy and each orb has its own damage cooldown',()=>{
  const g=combat({hero:8,weapon:1});g.player.x=g.player.targetX=30;
@@ -95,7 +95,7 @@ test('only Poseidon creates a telegraphed horizontal and vertical cross, both ax
  }
 });
 test('lower dungeon health rises in steps while final Chaos stays at its prior health',()=>{
- assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[4200,5600,7400,9600,12500,17000]);
+ assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[5500,7200,9400,11900,14500,17000]);
  const g=combat({stage:2});g.player.fire=999;const e=target(g);e.special=2;e.countdown=3;tick(g,2.9);assert.equal(g.bullets.length,0);tick(g,.15);assert.equal(g.bullets.length,20);
 });
 test('base-six A and B weapon achievements track any and hard clears without rewards',()=>{
@@ -112,4 +112,10 @@ test('power pickups keep 90 percent of the prior eligible drops',()=>{
  let eligible=0,dropped=0;const g=combat();g.drop=(_x,_y,type)=>{if(type==='power')dropped++;};
  for(let i=0;i<2000;i++){g.enemies=[];const e=target(g,100,100);e.elite=i%5===0;if((g.kills+1)%4===0||e.elite)eligible++;g.damage(e,1e9,e.x,e.y);}
  assert.ok(dropped/eligible>.86&&dropped/eligible<.94,`${dropped}/${eligible}`);
+});
+test('challenge ordinary enemies drop power at about twenty percent while elites keep legacy drops',()=>{
+ let ordinary=0,elite=0;const g=combat({challenge:true});g.drop=(_x,_y,type)=>{if(type==='power')(g.__elite?elite++:ordinary++);};
+ for(let i=0;i<4000;i++){g.enemies=[];const e=target(g,100,100);g.__elite=false;g.damage(e,1e9,e.x,e.y);}
+ for(let i=0;i<1000;i++){g.enemies=[];const e=target(g,100,100);e.elite=true;g.__elite=true;g.damage(e,1e9,e.x,e.y);}
+ assert.ok(ordinary/4000>.18&&ordinary/4000<.22,`${ordinary}/4000`);assert.ok(elite/1000>.86&&elite/1000<.94,`${elite}/1000`);
 });

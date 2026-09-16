@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../engine.js';
 import {ARTIFACTS, artifactText, createProfile, drawArtifact} from '../meta.js';
-import {DUNGEONS, STAGES, LIMITS} from '../content.js';
+import {DUNGEONS, STAGES, LIMITS, HEROES} from '../content.js';
 const tick=(g,t)=>{for(let elapsed=0;elapsed<t;elapsed+=1/60)g.update(1/60);};
 const offer=(g,id)=>{g.phase='quiz';g.room=2;g.pendingArtifacts=[id];assert.ok(g.chooseChallengeArtifact(id));};
 
@@ -91,6 +91,17 @@ test('challenge acquired stat artifacts refresh caps, hitbox, attack and P requi
   offer(g,'blessing');assert.equal(g.artifacts.size,9);assert.equal(g.player.barrier,true);
   assert.deepEqual(g.challengeChoices(),[]);
 });
+test('new relic effects, epic promotions, descriptions and gender-free cast data stay coherent',()=>{
+  assert.equal(ARTIFACTS.find(a=>a.id==='fairycloak').rarity,'epic');assert.equal(ARTIFACTS.find(a=>a.id==='chocolate').rarity,'epic');
+  assert.ok(ARTIFACTS.every(a=>!/[+−()]/.test(a.text)));assert.ok(HEROES.every(h=>!('gender' in h)&&!/(남성|여성|소년)/.test(h.description)));
+  const steel=new Game({artifacts:['steelshield']});steel.phase='wave';steel.player.invincible=0;steel.power=5;steel.hitPlayer();assert.equal(steel.power,5);
+  const burning=new Game({artifacts:['burningcore']});burning.phase='wave';burning.player.invincible=0;burning.power=5;burning.powerPoints=2;burning.hitPlayer();assert.deepEqual([burning.power,burning.powerPoints],[1,0]);
+  const ring=new Game({artifacts:['rainbowring']});assert.deepEqual([ring.bombs,ring.maxBombs],[2,2]);const acquiredRing=new Game({challenge:true,artifacts:['holy']});acquiredRing.bombs=6;offer(acquiredRing,'rainbowring');assert.deepEqual([acquiredRing.bombs,acquiredRing.maxBombs],[3,3]);
+  const carnival=new Game({artifacts:['chaoscarnival']});assert.deepEqual([carnival.bombs,carnival.maxBombs],[5,7]);carnival.phase='wave';carnival.player.invincible=999;carnival.player.fire=999;carnival.player.y=carnival.player.targetY=100;carnival.drop(225,400,'power');const before=carnival.pickups[0].y;carnival.update(.05);assert.ok(carnival.pickups[0].y>before);
+  for(const [ids,barrier,expected] of [[['starpowder'],true,120],[['starpowder'],false,100],[['cursedsword'],false,115]]){const g=new Game({artifacts:ids});g.phase='boss';g.player.barrier=barrier;g.spawnEnemy(225,200,{hp:1e6,r:1,speed:0,fire:999,image:0});g.damage(g.enemies[0],100,0,0);assert.ok(Math.abs(g.stats.damage-expected)<1e-9);}
+  const cursed=new Game({artifacts:['cursedsword']});cursed.phase='boss';cursed.kills=36;const drops=[];cursed.drop=(_x,_y,type)=>drops.push(type);cursed.spawnEnemy(225,200,{hp:1,r:1,speed:0,fire:999,image:0});cursed.damage(cursed.enemies[0],10,0,0);assert.ok(!drops.includes('life'));
+  const origin=new Game({challenge:true});origin.power=3;offer(origin,'origin');assert.equal(origin.power,4);assert.equal(artifactText(ARTIFACTS.find(a=>a.id==='origin'),true),'파워 1 증가');
+});
 test('celestial elites combine the requested pairs and all boss phases remain bounded',()=>{
   assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.equal(STAGES[6].boss,'창조신 아스테아');
   for(const [room,expected] of [[0,[3,0]],[1,[1,5]]]) {
@@ -100,10 +111,10 @@ test('celestial elites combine the requested pairs and all boss phases remain bo
   }
   for(let phase=0;phase<3;phase++) {
     const g=new Game({challenge:true});g.startStage(6,2);g.spawnBoss();g.phase='boss';g.player.invincible=999;g.player.fire=999;g.boss.hp=g.boss.maxHp*[1,.6,.3][phase];
-    tick(g,2.5);assert.equal(g.bossPattern,phase);
-    if(phase===0)assert.ok(g.bullets.some(b=>b.vy<0));
-    if(phase===1)assert.deepEqual(new Set(g.hazards.map(h=>h.axis)),new Set(['vertical','horizontal']));
-    if(phase===2)assert.ok(g.bullets.every(b=>Math.abs(b.x-90)>62));
+    tick(g,phase===0?1.3:3.2);assert.equal(g.bossPattern,phase);
+    if(phase===0)assert.equal(g.bullets.length,7);
+    if(phase===1){assert.deepEqual(new Set(g.hazards.map(h=>h.axis)),new Set(['vertical','horizontal']));assert.equal(g.boss.asteaCrossCount,2);assert.deepEqual(g.hazards.slice(0,2).map(h=>h.x),[225,Math.min(g.height-120,Math.max(240,g.player.y))]);assert.notDeepEqual(g.hazards.slice(2,4).map(h=>h.x),g.hazards.slice(0,2).map(h=>h.x));}
+    if(phase===2){assert.ok(g.bullets.length>=5);assert.deepEqual(new Set(g.hazards.map(h=>h.axis)),new Set(['vertical','horizontal']));}
     tick(g,12);assert.ok(g.bullets.length<=LIMITS.bullets);assert.ok(g.hazards.length<=6);
   }
 });

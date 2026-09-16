@@ -7,7 +7,7 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png',astea:'assets/astea.png','celestial-relics':'assets/celestial-relics.png','celestial-world':'assets/celestial-world.png' };
+  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png',astea:'assets/astea.png','celestial-relics':'assets/celestial-relics.png','celestial-world':'assets/celestial-world.png','balance-relics':'assets/balance-relics.png' };
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
@@ -93,6 +93,7 @@ export async function loadArt() {
     const index=i===10?15:22+i;result.relics[index]=icon;result.urls.relics[index]=icon.toDataURL('image/png');
   }
   for(let i=0;i<4;i++){const icon=canvas(192,192),im=images['celestial-relics'];icon.getContext('2d').drawImage(im,i%2*im.width/2,Math.floor(i/2)*im.height/2,im.width/2,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
+  for(let i=0;i<6;i++){const icon=canvas(192,192),im=images['balance-relics'];icon.getContext('2d').drawImage(im,i%3*im.width/3,Math.floor(i/3)*im.height/2,im.width/3,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
   // A transparent cached effect keeps the hitbox readable without per-frame filters.
   const barrier=canvas(192,192),bc=barrier.getContext('2d');
   const glow=bc.createRadialGradient(96,96,58,96,96,88);glow.addColorStop(0,'#79eaff00');glow.addColorStop(.75,'#79eaff22');glow.addColorStop(1,'#79eaff00');bc.fillStyle=glow;bc.fillRect(0,0,192,192);

@@ -11,7 +11,7 @@ function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=
 test('chain stays silent without targets and reacquires without petal fallback',()=>{const g=combat({hero:3});tick(g,.5);assert.equal(g.shots.length,0);assert.equal(g.stats.shots,0);const e=target(g);tick(g,.06);assert.ok(e.hp<e.maxHp);assert.ok(g.effects.some(f=>f.type==='chain'));});
 test('laser focus resets across a gap and creates no stored beam trails',()=>{const g=combat({weapon:1}),e=target(g);tick(g,2);assert.ok(e.lock>1.8);assert.ok(!g.effects.some(f=>f.type==='beam'));g.move(400,400);tick(g,.5);g.move(225,400);tick(g,.16);assert.ok(e.lock<.3);tick(g,5);assert.equal(e.lock,3.25);});
 test('artifact catalog and legacy effects have live effects and stacking respects three distinct slots',()=>{
-  assert.equal(ARTIFACTS.length,36);assert.equal(ARTIFACTS.filter(a=>a.rarity==='rare').length,14);
+  assert.equal(ARTIFACTS.length,42);assert.deepEqual(['normal','rare','epic'].map(r=>ARTIFACTS.filter(a=>a.rarity===r).length),[22,16,4]);
   const base=combat(),e=target(base);base.damage(e,100,0,0);
   for(const [ids,expected] of [[['pendant'],120],[['dragon'],150],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
   assert.deepEqual(loadoutStats(['frozen','dream','nail']).maxLife,5);assert.equal(loadoutStats(['nail']).maxLife,2);assert.equal(loadoutStats(['nail','crystal']).attack,1.3);
@@ -90,7 +90,7 @@ test('new hitboxes, life caps and Zeke movement speed are reflected in the simul
 test('health tuning applies difficulty, dungeon and elite/boss multipliers exactly once',()=>{
   for(const [i,prior,multiplier] of [[0,.76,1.1],[1,1,1.15],[2,1.3,1.2]]){
     const g=combat({mode:DIFFICULTIES[i].id});g.spawnEnemy(0,0,{hp:100});g.spawnEnemy(0,0,{hp:100,elite:true});
-    assert.ok(Math.abs(g.enemies[0].hp-100*prior*multiplier*1.06)<1e-9);
+    assert.ok(Math.abs(g.enemies[0].hp-100*prior*multiplier*1.12)<1e-9);
     assert.ok(Math.abs(g.enemies[1].hp/g.enemies[0].hp-1.2)<1e-9);
     g.spawnBoss();assert.ok(Math.abs(g.boss.maxHp-g.stage.hp*prior*multiplier*.78*1.2)<1e-9);
   }
@@ -102,7 +102,7 @@ test('golden magnet attracts items beyond ordinary range and respects pickup bou
   const p=magnet.powerPoints;tick(magnet,1);assert.ok(magnet.powerPoints>p);
 });
 test('Luna slashes less often, leaving a window for incoming bullets',()=>{
-  const g=combat({hero:1,weapon:1});target(g,225,320);g.fire(.001);assert.equal(g.player.fire,.70);const first=g.stats.damage;assert.equal(first,168.75);
+  const g=combat({hero:1,weapon:1});target(g,225,320);g.fire(.001);assert.equal(g.player.fire,.70);const first=g.stats.damage;assert.equal(first,172.125);
   g.enemyBullet(225,360,0,0);g.fire(.28);assert.equal(g.bullets.length,1);assert.equal(g.stats.damage,first);
   g.fire(.43);assert.equal(g.bullets.length,0);assert.equal(g.stats.damage,first*2);
 });
@@ -111,12 +111,12 @@ test('laser reaches top of viewport in both damage and all rendered layers',()=>
   const rects=[],r={c:{save(){},restore(){},fillRect(...args){rects.push(args)},drawImage(){}},glow(){return {}}};
   Renderer.prototype.drawLaser.call(r,g);assert.ok(rects.every(rect=>rect[1]===0&&rect[3]===g.player.y-25));
 });
-test('Rumi and Sisters receive the requested weapon DPS increases without cadence changes',()=>{
-  const rumi=combat({hero:0});rumi.power=1;rumi.player.fire=0;rumi.fire(.001);assert.ok(Math.abs(rumi.shots[0].damage-12.5*.7128)<1e-9);assert.equal(rumi.player.fire,.14);
-  const laser=combat({hero:0,weapon:1}),laserTarget=target(laser,225,200);laser.power=1;laser.player.fire=0;laser.fire(.001);assert.ok(Math.abs(laserTarget.maxHp-laserTarget.hp-12.5*.9516*1.015)<1e-9);assert.equal(laser.player.fire,.074);
+test('Rumi and Sisters use the requested direct DPS coefficients without cadence changes',()=>{
+  const rumi=combat({hero:0});rumi.power=1;rumi.player.fire=0;rumi.fire(.001);assert.ok(Math.abs(rumi.shots[0].damage-12.5*.698544)<1e-9);assert.equal(rumi.player.fire,.14);
+  const laser=combat({hero:0,weapon:1}),laserTarget=target(laser,225,200);laser.power=1;laser.player.fire=0;laser.fire(.001);assert.ok(Math.abs(laserTarget.maxHp-laserTarget.hp-12.5*.989664*1.015)<1e-9);assert.equal(laser.player.fire,.074);
   const promise=combat({hero:7}),haven=combat({hero:7,weapon:1});for(const g of [promise,haven]){g.power=1;g.player.fire=0;g.fire(.001);}
-  assert.ok(Math.abs(promise.shots[0].damage-12.5*2.106)<1e-9);assert.equal(promise.player.fire,.20);
-  assert.ok(Math.abs(haven.shots[0].damage-12.5*1.944)<1e-9);assert.ok(Math.abs(haven.shots[0].zoneDamage-12.5*2.268)<1e-9);assert.equal(haven.player.fire,.42);
+  assert.ok(Math.abs(promise.shots[0].damage-12.5*2.06388)<1e-9);assert.equal(promise.player.fire,.20);
+  assert.ok(Math.abs(haven.shots[0].damage-12.5*1.90512)<1e-9);assert.ok(Math.abs(haven.shots[0].zoneDamage-12.5*2.22264)<1e-9);assert.equal(haven.player.fire,.42);
 });
 test('new weapon descriptions omit P5 callouts while their mechanics remain active',()=>{
   assert.ok(HEROES.slice(4).flatMap(hero=>hero.weapons).every(weapon=>!weapon.description.includes('P5')));
