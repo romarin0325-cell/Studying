@@ -1,44 +1,50 @@
 import { HEROES } from './content.js';
 export const ARTIFACTS = [
-  { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 +20%', bomb: .20 },
-  { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 +25% · 최대 생명 −2', attack: .25, life: -2 },
-  { id: 'frozen', name: '프로즌하트', icon: '♡', rarity: 'normal', text: '최대 생명 +1', life: 1 },
-  { id: 'crystal', name: '마나수정', icon: '◇', rarity: 'normal', text: '공격력 +5%', attack: .05 },
-  { id: 'holy', name: '홀리밤', icon: '❖', rarity: 'normal', text: '시작 봄과 최대 봄 +1', bombs: 1 },
+  { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 20% 증가', bomb: .20 },
+  { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 25% 증가 · 최대 생명 2 감소', attack: .25, life: -2 },
+  { id: 'frozen', name: '프로즌하트', icon: '♡', rarity: 'normal', text: '최대 생명 1 증가', life: 1 },
+  { id: 'crystal', name: '마나수정', icon: '◇', rarity: 'normal', text: '공격력 5% 증가', attack: .05 },
+  { id: 'holy', name: '홀리밤', icon: '❖', rarity: 'normal', text: '소지 봄과 최대 봄 1 증가', bombs: 1 },
   { id: 'cloak', name: '투명망토', icon: '☾', rarity: 'normal', text: '피격 후 4초 무적' },
-  { id: 'crown', name: '로열크라운', icon: '♕', rarity: 'normal', text: '봄 공격력 +30%', bomb: .30 },
+  { id: 'crown', name: '로열크라운', icon: '♕', rarity: 'normal', text: '봄 공격력 30% 증가', bomb: .30 },
   { id: 'shield', name: '수호방패', icon: '◈', rarity: 'normal', text: '피격 시 생명 대신 봄을 먼저 소모' },
   { id: 'mask', name: '광기의가면', icon: '◐', rarity: 'normal', text: '봄이 없으면 생명 1로 발동 · 런당 3회' },
-  { id: 'pendant', name: '검은펜던트', icon: '♦', rarity: 'rare', text: '파워 최대일 때 공격력 +20%' },
-  { id: 'chocolate', name: '드림초콜릿', icon: '▦', rarity: 'rare', text: '보스에게 공격력 +50%' },
-  { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명 1일 때 공격력 +50%' },
-  { id: 'core', name: '마나코어', icon: '✺', rarity: 'rare', text: '봄 공격력 +50%', bomb: .50 },
+  { id: 'pendant', name: '검은펜던트', icon: '♦', rarity: 'rare', text: '파워가 최대일 때 공격력 20% 증가' },
+  { id: 'chocolate', name: '드림초콜릿', icon: '▦', rarity: 'epic', text: '보스에게 주는 피해 50% 증가' },
+  { id: 'dragon', name: '드래곤하트', icon: '♥', rarity: 'rare', text: '생명이 1일 때 공격력 50% 증가' },
+  { id: 'core', name: '마나코어', icon: '✺', rarity: 'rare', text: '봄 공격력 50% 증가', bomb: .50 },
   { id: 'leaf', name: '세계수의잎', icon: '❧', rarity: 'rare', text: '곁에서 자동 공격하는 페어리 소환' },
-  { id: 'dream', name: '꿈의조각', icon: '✧', rarity: 'rare', text: '최대 생명 +2', life: 2 },
-  { id: 'magnet', name: '황금자석', icon: '⊂', rarity: 'normal', text: '아이템 획득 범위 +300' },
-  { id: 'mirror', name: '악마의거울', icon: '◐', rarity: 'normal', text: '이동속도 −300 · 다크페어리 소환', speed: -300 },
+  { id: 'dream', name: '꿈의조각', icon: '✧', rarity: 'rare', text: '최대 생명 2 증가', life: 2 },
+  { id: 'magnet', name: '황금자석', icon: '⊂', rarity: 'normal', text: '아이템 흡인 범위 300 증가', attraction: 300 },
+  { id: 'mirror', name: '악마의거울', icon: '◐', rarity: 'normal', text: '이동속도 300 감소 · 다크페어리 소환', speed: -300 },
   { id: 'will', name: '수호의의지', icon: '♡', rarity: 'normal', text: '스테이지 클리어마다 생명 1 추가 회복' },
-  { id: 'origin', name: '시작의보석', icon: '◆', rarity: 'normal', text: '시작 파워 +1' },
-  { id: 'boots', name: '바람의장화', icon: '➶', rarity: 'normal', text: '이동속도 +200', speed: 200 },
+  { id: 'origin', name: '시작의보석', icon: '◆', rarity: 'normal', text: '시작 파워 1 증가' },
+  { id: 'boots', name: '바람의장화', icon: '➶', rarity: 'normal', text: '이동속도 200 증가', speed: 200 },
   { id: 'moonlight', name: '월광의목걸이', icon: '☽', rarity: 'rare', text: '스테이지 클리어마다 봄 1 추가 회복' },
-  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 코로나로 교체 · 피해 1900 · 지속/무적 1초' },
-  { id: 'hourglass', name: '모래시계', rarity: 'normal', text: '콤보 유지 시간 +2초' },
+  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 피해 1900의 코로나로 교체 · 지속과 무적 1초' },
+  { id: 'hourglass', name: '모래시계', rarity: 'normal', text: '콤보 유지 시간 2초 증가' },
   { id: 'clover', name: '네잎클로버', rarity: 'normal', text: '시작 시 피격 1회를 막는 보호막 생성' },
-  { id: 'witch', name: '마녀의계약서', rarity: 'normal', text: '일반 몬스터에게 피해 +20%' },
-  { id: 'silver', name: '은탄', rarity: 'normal', text: '엘리트·중간 보스에게 피해 +30%' },
-  { id: 'eye', name: '마안', rarity: 'normal', text: '봄이 없을 때 공격력 +30%' },
-  { id: 'startboost', name: '스타트부스트', rarity: 'normal', text: '파워 1일 때 공격력 +50%' },
+  { id: 'witch', name: '마녀의계약서', rarity: 'normal', text: '일반 몬스터에게 주는 피해 20% 증가' },
+  { id: 'silver', name: '은탄', rarity: 'normal', text: '엘리트와 중간 보스에게 주는 피해 30% 증가' },
+  { id: 'eye', name: '마안', rarity: 'normal', text: '봄이 없을 때 공격력 30% 증가' },
+  { id: 'startboost', name: '스타트부스트', rarity: 'normal', text: '파워가 1일 때 공격력 50% 증가' },
   { id: 'slipper', name: '유리구두', rarity: 'rare', text: '그레이즈 20회마다 보호막 생성 · 중첩 불가' },
-  { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P −1 · 공격력 +5%', attack: .05 },
-  { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 −10% · 봄 공격력 +60%', normalAttack: -.10, bomb: .60 },
-  { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 −20% · 일반 공격력 +30%', normalAttack: .30, bomb: -.20 },
-  { id: 'fairycloak', name: '요정의망토', rarity: 'rare', text: '피격반경 −2 · 최대 생명 +1', radius: -2, life: 1 },
+  { id: 'dew', name: '신록의이슬', rarity: 'rare', text: '파워업에 필요한 P 1 감소 · 공격력 5% 증가', attack: .05 },
+  { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 10% 감소 · 봄 공격력 60% 증가', normalAttack: -.10, bomb: .60 },
+  { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 20% 감소 · 일반 공격력 30% 증가', normalAttack: .30, bomb: -.20 },
+  { id: 'fairycloak', name: '요정의망토', rarity: 'epic', text: '피격 반경 2 감소 · 최대 생명 1 증가', radius: -2, life: 1 },
   { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
   { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 3 획득' },
-  { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' }
+  { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' },
+  { id: 'steelshield', name: '강철방패', rarity: 'normal', text: '피격 시 파워 감소 방지' },
+  { id: 'cursedsword', name: '저주의검', rarity: 'rare', text: '공격력 15% 증가 · 회복 아이템 드랍 제거', attack: .15 },
+  { id: 'burningcore', name: '버닝코어', rarity: 'rare', text: '일반 공격력 30% 증가 · 피격 시 파워 초기화', normalAttack: .30 },
+  { id: 'rainbowring', name: '레인보우링', rarity: 'rare', text: '일반 공격력 20% 증가 · 최대 봄 3 감소', normalAttack: .20, bombCapacity: -3 },
+  { id: 'starpowder', name: '스타파우더', rarity: 'normal', text: '보호막이 있을 때 공격력 20% 증가' },
+  { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
 ];
 export function artifactText(artifact, challenge = false) {
-  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 3 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가'}[artifact.id] || artifact.text) : artifact.text;
+  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 3 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
 export const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
@@ -126,5 +132,5 @@ export function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
   const sum = field => equipment.reduce((n,a) => n+(a[field] || 0), 0);
   const mode=DIFFICULTIES.find(d=>d.id===difficulty) || DIFFICULTIES[1];
   return { ids: equipment.map(a=>a.id), maxLife: Math.max(1, mode.maxLife + sum('life')), lives:Math.max(1,mode.lives+sum('life')),
-    radius: sum('radius'), speed: sum('speed'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: 5+sum('bombs') };
+    radius: sum('radius'), speed: sum('speed'), attraction: sum('attraction'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: Math.max(0,5+sum('bombs')+sum('bombCapacity')) };
 }
