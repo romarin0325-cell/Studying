@@ -40,63 +40,6 @@ function normalizeManifest(manifest) {
   });
 }
 
-function isGeneratedLightBackground(red, green, blue) {
-  return Math.min(red, green, blue) >= 224
-    && Math.max(red, green, blue) - Math.min(red, green, blue) <= 14;
-}
-
-function removeConnectedGeneratedBackground(image, entry) {
-  if (!['opaque-checkerboard-from-generation', 'generated-white'].includes(entry?.backgroundStatus)) return image;
-  const canvas = globalThis.document?.createElement?.('canvas');
-  const context = canvas?.getContext?.('2d', { willReadFrequently: true });
-  const width = image.naturalWidth || image.width;
-  const height = image.naturalHeight || image.height;
-  if (!context || !width || !height) return image;
-
-  canvas.width = width;
-  canvas.height = height;
-  context.drawImage(image, 0, 0);
-  const imageData = context.getImageData(0, 0, width, height);
-  const { data } = imageData;
-  const visited = new Uint8Array(width * height);
-  const pending = new Int32Array(width * height);
-  let head = 0;
-  let tail = 0;
-  const enqueue = (index) => {
-    if (visited[index]) return;
-    const offset = index * 4;
-    const background = entry.backgroundStatus === 'generated-white'
-      ? Math.min(data[offset], data[offset + 1], data[offset + 2]) >= 240
-      : isGeneratedLightBackground(data[offset], data[offset + 1], data[offset + 2]);
-    if (!background) return;
-    visited[index] = 1;
-    pending[tail] = index;
-    tail += 1;
-  };
-
-  for (let x = 0; x < width; x += 1) {
-    enqueue(x);
-    enqueue((height - 1) * width + x);
-  }
-  for (let y = 1; y < height - 1; y += 1) {
-    enqueue(y * width);
-    enqueue(y * width + width - 1);
-  }
-  while (head < tail) {
-    const index = pending[head];
-    head += 1;
-    const x = index % width;
-    const y = Math.floor(index / width);
-    data[index * 4 + 3] = 0;
-    if (x > 0) enqueue(index - 1);
-    if (x + 1 < width) enqueue(index + 1);
-    if (y > 0) enqueue(index - width);
-    if (y + 1 < height) enqueue(index + width);
-  }
-  context.putImageData(imageData, 0, 0);
-  return canvas;
-}
-
 function defaultImageLoader(path, entry) {
   if (typeof globalThis.Image !== 'function') {
     return Promise.reject(new Error('Image loading is unavailable in this environment.'));
@@ -104,13 +47,7 @@ function defaultImageLoader(path, entry) {
   return new Promise((resolve, reject) => {
     const image = new globalThis.Image();
     image.decoding = 'async';
-    image.onload = () => {
-      try {
-        resolve(removeConnectedGeneratedBackground(image, entry));
-      } catch {
-        resolve(image);
-      }
-    };
+    image.onload = () => resolve(image);
     image.onerror = () => reject(new Error(`Could not load image: ${path}`));
     image.src = globalThis.__HERO_DEFENSE_V2_EMBEDDED_ASSETS__?.[path] ?? path;
   });
@@ -150,15 +87,16 @@ function defaultAudioLoader(path) {
 export class AssetManager {
   constructor(manifestOrOptions = [], maybeOptions = {}) {
     const usingOptionsObject = isRecord(manifestOrOptions)
-      && (Object.hasOwn(manifestOrOptions, 'manifest')
-        || Object.hasOwn(manifestOrOptions, 'imageLoader')
-        || Object.hasOwn(manifestOrOptions, 'audioLoader'));
+      && (Object.prototype.hasOwnProperty.call(manifestOrOptions, 'manifest')
+        || Object.prototype.hasOwnProperty.call(manifestOrOptions, 'imageLoader')
+        || Object.prototype.hasOwnProperty.call(manifestOrOptions, 'audioLoader'));
     const options = usingOptionsObject ? manifestOrOptions : maybeOptions;
     const manifest = usingOptionsObject ? (manifestOrOptions.manifest ?? []) : manifestOrOptions;
     const {
       imageLoader = defaultImageLoader,
       audioLoader = defaultAudioLoader,
       logger = console,
+      timeoutMs = 5000,
     } = options;
     if (typeof imageLoader !== 'function') throw new TypeError('imageLoader must be a function.');
     if (typeof audioLoader !== 'function') throw new TypeError('audioLoader must be a function.');
@@ -168,6 +106,7 @@ export class AssetManager {
     this.imageLoader = imageLoader;
     this.audioLoader = audioLoader;
     this.logger = logger;
+    this.timeoutMs = timeoutMs;
     this.resourcesById = new Map();
     this.resourcesByRequest = new Map();
     this.pendingByRequest = new Map();
@@ -252,7 +191,15 @@ export class AssetManager {
     if (!pending) {
       const loader = entry.type === 'image' ? this.imageLoader : this.audioLoader;
       pending = Promise.resolve()
-        .then(() => loader(entry.path, entry))
+        .then(() => new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('Asset load timed out: ' + entry.path)), this.timeoutMs);
+          try {
+            Promise.resolve(loader(entry.path, entry)).then(resolve, reject).finally(() => clearTimeout(timer));
+          } catch (error) {
+            clearTimeout(timer);
+            reject(error);
+          }
+        }))
         .then((resource) => {
           if (resource === null || resource === undefined) {
             throw new Error(`Loader returned no resource for ${entry.path}`);

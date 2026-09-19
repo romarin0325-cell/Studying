@@ -385,7 +385,7 @@ function validateStageMap(stage, errors) {
     if (cell.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: path cell ${coordinateKey(cell)} exceeds the combat area (y<=11).`);
   }
   if (coordinateKey(expanded[0]) !== coordinateKey(map.spawn)) errors.push(`${context}: first path cell must be spawn.`);
-  if (coordinateKey(expanded.at(-1)) !== coordinateKey(map.core)) errors.push(`${context}: last path cell must be core.`);
+  if (coordinateKey(expanded[expanded.length - 1]) !== coordinateKey(map.core)) errors.push(`${context}: last path cell must be core.`);
   if (map.spawn?.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: spawn exceeds the combat area (y<=11).`);
   if (map.core?.y > COMBAT_AREA_MAX_ROW) errors.push(`${context}: core exceeds the combat area (y<=11).`);
   const obstacleKeys = new Set();

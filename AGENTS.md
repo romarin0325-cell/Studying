@@ -20,6 +20,7 @@ Current targets:
 - Do not say the task is complete if verify fails.
 - Do not open a PR if verify fails.
 - Do not run unused game suites. Automatic verification must not run Defense.
+- The dedicated Defense PR workflow is an explicit exception: it runs Defense checks when Defense, its tooling, dependencies, or workflow changes. Root `npm run verify` still excludes Defense.
 - Prefer the smallest diff that restores working behavior.
 - If UI behavior cannot be fully verified, state exactly what remains unverified.
 - For frontend tasks, use image inputs/output when helpful and compare against the requested behavior.

@@ -18,13 +18,13 @@ The pause curtain, settings auto-pause and hidden-page auto-pause protect the ru
 
 ## Renderer and release
 
-Presentation copy lives in `presentation.js`; atlas frames in `Illustrations.js`. Companion crop bounds are measured per pose because generated cells are not perfectly aligned. Source PNGs are opaque white, not true alpha; AssetManager removes edge-connected white once on load.
+Presentation copy lives in `presentation.js`; atlas frames in `Illustrations.js`. Companion crop bounds are measured per pose because generated cells are not perfectly aligned. Release sprites are preprocessed alpha WebP; original generation sources remain in Git history. AssetManager only decodes images and bounds requests with a five-second timeout.
 
 BattleRenderer displays the active logical 12×12 battlefield. The engine retains its 12×16 coordinate contract; the unused lower rows are no longer a canvas UI band. Battlefield ViewportLayout fits the available surface and rotates display/input together in landscape. Legacy layout helper contracts remain intact.
 
 Cached terrain/path, depth-sorted sprites, idle bob, attack poses, lunge, elemental trails, petals and sparse motes supply motion. Reduced effects disables decorative movement. Damage numbers and sound can be disabled. UI refresh is 10 Hz; simulation stays fixed at 60 Hz; DPR is capped at 2 and effect pools are bounded. Sounds are procedural and rate-limited; this release has no music track.
 
-The 15.41 MiB HTML embeds all 70 manifest entries and needs no adjacent files or server. Art provenance and exact prompts are in [STARWARD_ART_PROMPTS.md](./STARWARD_ART_PROMPTS.md).
+The 5.15 MiB HTML embeds all 70 manifest entries and needs no adjacent files or server. Art provenance and exact prompts are in [STARWARD_ART_PROMPTS.md](./STARWARD_ART_PROMPTS.md).
 
 ## Validation boundaries
 
