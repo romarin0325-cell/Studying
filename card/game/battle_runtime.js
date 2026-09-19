@@ -127,6 +127,121 @@ function buildBattleEnemy(rpg) {
     return enemy;
 }
 
+function findChaosBlessing(rpg, cardId) {
+    return (rpg.state.chaosBuffs || []).find(buff => buff.id === cardId) || null;
+}
+
+function applyBlessingStats(rpg, player, blessing, options = {}) {
+    if (!player) return;
+    if (!blessing) {
+        player.blessing = null;
+        return;
+    }
+
+    player.baseStatsWithoutBlessing = {
+        atk: player.atk,
+        matk: player.matk,
+        def: player.def,
+        mdef: player.mdef
+    };
+
+    let blessingMult = blessing.multiplier;
+    const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
+    if (hasEntropy) blessingMult *= 2;
+
+    const keepHp = options.keepHp === true;
+    const previousHp = player.hp;
+    player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
+    player.hp = keepHp ? Math.min(previousHp, player.maxHp) : player.maxHp;
+    player.blessing = blessing;
+
+    const mult = 1.0 + blessingMult;
+    player.atk = Math.floor(player.atk * mult);
+    player.matk = Math.floor(player.matk * mult);
+    player.def = Math.floor(player.def * mult);
+    player.mdef = Math.floor(player.mdef * mult);
+}
+
+function cloneSkillsWithCostModifiers(rpg, protoSkills) {
+    const skills = JSON.parse(JSON.stringify(protoSkills || []));
+    const manaCostTrait = rpg.battle && rpg.battle.players
+        ? rpg.battle.players.find(unit => unit && unit.proto && unit.proto.trait && unit.proto.trait.type === 'party_all_stats_mana_cost')
+        : null;
+    if (manaCostTrait) {
+        const costMult = manaCostTrait.proto.trait.costMult || 2.0;
+        skills.forEach(skill => {
+            if (Number.isFinite(skill.cost)) skill.cost = Math.floor(skill.cost * costMult);
+        });
+    }
+    if (rpg.hasArtifact && rpg.hasArtifact('support_boost')) {
+        skills.forEach(skill => {
+            if (skill.type === 'sup') skill.cost = 0;
+        });
+    }
+    return skills;
+}
+
+function applyBattleForm(rpg, player, formId) {
+    if (!rpg || !player || !formId) return false;
+    const baseCardId = player.baseCardId || player.id;
+    const currentFormId = player.formId || (player.proto && player.proto.id) || player.id;
+    if (!GameUtils.canTransformTo(currentFormId, formId)) return false;
+    const formProto = GameUtils.getCardById(formId);
+    if (!formProto || !formProto.battleOnly || formProto.baseCardId !== baseCardId) return false;
+
+    const preserved = {
+        hp: player.hp,
+        mp: player.mp,
+        maxMp: player.maxMp,
+        buffs: player.buffs,
+        guardEnhancedTurns: player.guardEnhancedTurns,
+        pos: player.pos,
+        isDead: player.isDead,
+        enteredAtTurn: player.enteredAtTurn,
+        swapAtkMatk: player.swapAtkMatk,
+        normalAttackPartyMult: player.normalAttackPartyMult,
+        guardDamageReduction: player.guardDamageReduction,
+        alternatingAttackStatPercent: player.alternatingAttackStatPercent,
+        lastManualSkillType: player.lastManualSkillType,
+        fieldBuffStatMult: player.fieldBuffStatMult
+    };
+
+    const allCards = GameUtils.getAllCards();
+    const init = Logic.calculateInitialStats(formProto, rpg.state.deck, allCards, player.pos);
+    player.proto = formProto;
+    player.formId = formId;
+    player.baseCardId = baseCardId;
+    player.id = baseCardId;
+    player.name = formProto.name;
+    player.maxHp = init.stats.maxHp;
+    player.atk = init.stats.atk;
+    player.matk = init.stats.matk;
+    player.def = init.stats.def;
+    player.mdef = init.stats.mdef;
+    player.baseCrit = init.stats.baseCrit;
+    player.baseEva = init.stats.baseEva;
+    player.activeTrait = init.activeTrait || null;
+    player.hp = preserved.hp;
+    applyBlessingStats(rpg, player, findChaosBlessing(rpg, baseCardId), { keepHp: true });
+    player.mp = preserved.mp;
+    player.maxMp = preserved.maxMp;
+    player.buffs = preserved.buffs || {};
+    if (preserved.guardEnhancedTurns) player.guardEnhancedTurns = preserved.guardEnhancedTurns;
+    player.pos = preserved.pos;
+    player.isDead = preserved.isDead;
+    if (preserved.enteredAtTurn !== undefined) player.enteredAtTurn = preserved.enteredAtTurn;
+    if (preserved.swapAtkMatk) player.swapAtkMatk = preserved.swapAtkMatk;
+    if (preserved.normalAttackPartyMult) player.normalAttackPartyMult = preserved.normalAttackPartyMult;
+    if (preserved.guardDamageReduction) player.guardDamageReduction = preserved.guardDamageReduction;
+    if (preserved.alternatingAttackStatPercent) player.alternatingAttackStatPercent = preserved.alternatingAttackStatPercent;
+    if (preserved.lastManualSkillType) player.lastManualSkillType = preserved.lastManualSkillType;
+    if (preserved.fieldBuffStatMult) player.fieldBuffStatMult = preserved.fieldBuffStatMult;
+    player.skills = cloneSkillsWithCostModifiers(rpg, formProto.skills);
+    rpg.log(`${player.name}으로 변신!`);
+    if (typeof rpg.renderBattleView === 'function') rpg.renderBattleView();
+    return true;
+}
+
 function buildBattlePlayer(rpg, cardId, idx, allCards) {
     if (!cardId) return null;
 
@@ -143,6 +258,8 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
 
     const player = {
         id: proto.id,
+        baseCardId: proto.id,
+        formId: proto.id,
         proto: proto,
         name: proto.name,
         ...init.stats,
@@ -153,30 +270,7 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
         skills: JSON.parse(JSON.stringify(proto.skills))
     };
 
-    const blessing = (rpg.state.chaosBuffs || []).find(buff => buff.id === player.id);
-    if (blessing) {
-        player.baseStatsWithoutBlessing = {
-            atk: player.atk,
-            matk: player.matk,
-            def: player.def,
-            mdef: player.mdef
-        };
-
-        // 앤트로피: 혼돈의 축복 효과 2배
-        let blessingMult = blessing.multiplier;
-        const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
-        if (hasEntropy) blessingMult *= 2;
-
-        player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
-        player.hp = player.maxHp;
-        player.blessing = blessing;
-
-        const mult = 1.0 + blessingMult;
-        player.atk = Math.floor(player.atk * mult);
-        player.matk = Math.floor(player.matk * mult);
-        player.def = Math.floor(player.def * mult);
-        player.mdef = Math.floor(player.mdef * mult);
-    }
+    applyBlessingStats(rpg, player, findChaosBlessing(rpg, player.id));
 
     // NOTE: Positional traits ('pos_stat_boost') are handled in Logic.calculateInitialStats.
     // Do NOT add positional stat boosts here to avoid double-application.
@@ -185,6 +279,8 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
 }
 
 const BattleRuntime = {
+    applyBattleForm,
+
     replaceFieldBuffsLikeKaleidoscope(rpg) {
         const count = rpg.battle.fieldBuffs.length;
         if (count <= 0) return 0;
@@ -1040,7 +1136,8 @@ const BattleRuntime = {
             turn: rpg.battle.turn,
             executeSkill: (nextSource, nextTarget, nextSkill, delayed) =>
                 BattleRuntime.executeSkill(rpg, nextSource, nextTarget, nextSkill, delayed),
-            getCardData: id => rpg.getCardData(id)
+            getCardData: id => rpg.getCardData(id),
+            applyBattleForm: (unit, formId) => applyBattleForm(rpg, unit, formId)
         };
 
         skill.effects.forEach(effect => {

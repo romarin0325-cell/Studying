@@ -45,7 +45,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer',
+        id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer', tags: ['dragon'],
         stats: { hp: 540, atk: 125, matk: 95, def: 60, mdef: 60 },
         trait: { type: 'pos_stat_boost', pos: 2, stat: ['atk', 'matk'], val: 35, desc: '대장 배치시 공격력 마법공격력 35%증가' },
         skills: [
@@ -157,7 +157,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'red_dragon', name: '레드드래곤', grade: 'epic', element: 'fire', role: 'dealer',
+        id: 'red_dragon', name: '레드드래곤', grade: 'epic', element: 'fire', role: 'dealer', tags: ['dragon'],
         stats: { hp: 420, atk: 105, matk: 80, def: 60, mdef: 50 },
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'atk', val: 50, desc: '선봉일시 공격력 50%증가' },
         skills: [
@@ -207,7 +207,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'pudding_princess', name: '푸딩프린세스', grade: 'epic', element: 'water', role: 'balancer',
+        id: 'pudding_princess', name: '푸딩프린세스', grade: 'epic', element: 'water', role: 'balancer', tags: ['dessert_kingdom'],
         stats: { hp: 420, atk: 85, matk: 85, def: 60, mdef: 60 },
         trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵 걸린 적에게 대미지 1.5배' },
         skills: [
@@ -239,7 +239,7 @@ const CARDS = [
 
     // --- Rare ---
     {
-        id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
+        id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter', tags: ['dragon'],
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 45 },
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
@@ -289,7 +289,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'cream_maid', name: '생크림메이드', grade: 'rare', element: 'light', role: 'buffer',
+        id: 'cream_maid', name: '생크림메이드', grade: 'rare', element: 'light', role: 'buffer', tags: ['dessert_kingdom'],
         stats: { hp: 340, atk: 75, matk: 85, def: 60, mdef: 60 },
         trait: { type: 'cond_twinkle_all', val: 50, desc: '트윙클파티 상태에서 물리/마법공격력 50%증가' },
         skills: [
@@ -324,7 +324,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'def', val: 50, desc: '선봉 배치시 방어력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 저주 중 하나 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
+            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적에게 [부식, 저주] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
             { name: '수수께끼', type: 'sup', tier: 1, cost: 10, desc: '침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] }
         ]
     },
@@ -351,7 +351,7 @@ const CARDS = [
 
     // --- Normal ---
     {
-        id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer',
+        id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 75, matk: 70, def: 50, mdef: 50 },
         trait: { type: 'death_sun_bless_chance', val: 0.5, desc: '사망시 50%확률로 태양의축복 부여' },
         skills: [
@@ -421,7 +421,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer',
+        id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 65, matk: 70, def: 50, mdef: 50 },
         trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛과 불이 있을 경우 마법공격력 50% 증가' },
         skills: [
@@ -602,7 +602,7 @@ const BONUS_CARDS = [
         ]
     },
     {
-        id: 'ancient_dragon', name: '에인션트드래곤', grade: 'legend', element: 'nature', role: 'debuffer',
+        id: 'ancient_dragon', name: '에인션트드래곤', grade: 'legend', element: 'nature', role: 'debuffer', tags: ['dragon'],
         stats: { hp: 530, atk: 115, matk: 95, def: 70, mdef: 70 },
         trait: { type: 'death_multi_debuff', desc: '사망시 적에게 약화, 부식, 저주, 침묵, 기절 부여' },
         skills: [
@@ -743,7 +743,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_field_buff', buff: 'earth_bless', desc: '사망 시 필드버프 대지의축복 부여' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '블루메모리', type: 'sup', tier: 2, cost: 20, desc: '디바인 부여 및 약화/침묵 중 하나 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
+            { name: '블루메모리', type: 'sup', tier: 2, cost: 20, desc: '적에게 디바인 1스택을 부여하고, [약화, 침묵] 중 무작위 1종 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
             { name: '미드나잇가든', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '대지의축복 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'earth_bless', mult: 3.0 }] }
         ]
     },
@@ -769,7 +769,7 @@ const BONUS_CARDS = [
     },
 
     {
-        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus', tags: ['dessert_kingdom'],
         stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
         skills: [
@@ -884,7 +884,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
+        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden', tags: ['dessert_kingdom'],
         stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
         trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
         skills: [
@@ -988,7 +988,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'underdog', name: '언더독', grade: 'normal', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
-        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱에 일반등급이 3장 이상이고 대장 배치 시 공격력/마법공격력 100% 증가' },
+        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱 전체가 같은 등급이고 대장 배치 시 공격력/마법공격력 100% 증가 (빈 슬롯은 등급 비교에서 제외)' },
         skills: [
             { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
@@ -996,7 +996,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
         trait: { type: 'dessert_kingdom_crit_eva_boost', val: 20, desc: '디저트킹덤 카드 전체 치명타율/회피율 20% 증가' },
         skills: [
@@ -1006,7 +1006,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15', tags: ['dragon'],
         stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
         trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력 50% 감소' },
         skills: [
@@ -1277,18 +1277,76 @@ const BONUS_CARD_EXPANSION = [
 
     // ─── November 2026 Bonus Card Wave ────────────────────────────────────────
     {
-        id: 'brulee_witch', name: '브륄레위치', grade: 'epic', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-15',
+        id: 'brulee_witch', name: '브륄레위치', grade: 'epic', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-15', tags: ['dessert_kingdom'],
         stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
         trait: { type: 'death_twinkle', desc: '사망 시 필드버프 트윙클파티 발동' },
         skills: [
-            { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
-            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] },
+            { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 적에게 [저주, 암흑, 침묵, 약화, 부식] 중 무작위 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
+            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 적에게 [저주, 암흑, 침묵, 약화, 부식] 중 무작위 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'miracle_larva', name: '미라클라바', grade: 'epic', element: 'nature', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 420, atk: 70, matk: 80, def: 70, mdef: 70 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '변태', type: 'sup', tier: 1, cost: 10, desc: '미러코쿤으로 변신', effects: [{ type: 'transform', formId: 'mirror_cocoon' }] },
+            { name: '실크바인드', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '적에게 약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+        ]
+    },
+    {
+        id: 'toffee_apple', name: '토피애플', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-30', tags: ['dessert_kingdom'],
+        stats: { hp: 340, atk: 75, matk: 105, def: 50, mdef: 50 },
+        trait: { type: 'cond_silence_def_mdef', val: 50, desc: '침묵 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '애프터테이스트', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '사용 후 2턴 뒤 공격하고 적에게 암흑·저주 부여', effects: [{ type: 'delayed_attack', turns: 2 }, { type: 'debuff', id: 'darkness' }, { type: 'debuff', id: 'curse' }] },
+            { name: '슈거노이즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 약화, 자신에게 침묵 부여', effects: [{ type: 'debuff', id: 'weak' }, { type: 'self_debuff', id: 'silence' }] }
         ]
     }
 ];
 
 BONUS_CARDS.push(...BONUS_CARD_EXPANSION);
+
+const BATTLE_ONLY_FORMS = [
+    {
+        id: 'mirror_cocoon', name: '미러코쿤', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 70, matk: 40, def: 90, mdef: 90 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '리버설', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 마법공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '변태', type: 'sup', tier: 2, cost: 20, desc: '오로라윙 또는 어비스윙으로 우화', effects: [{ type: 'transform_choice', forms: ['aurora_wing', 'abyss_wing'] }] },
+            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '침묵 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'silence' }, { type: 'buff', id: 'barrier', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'aurora_wing', name: '오로라윙', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 130, matk: 100, def: 80, mdef: 80 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '미라클파우더', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '스타파우더·트윙클파티 부여', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '뷰티토네이도', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '현재 필드버프 1종당 배율 +2.0', effects: [{ type: 'dmg_boost', condition: 'field_buff_kind_count', addPerBuff: 2.0 }] }
+        ]
+    },
+    {
+        id: 'abyss_wing', name: '어비스윙', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 120, matk: 130, def: 70, mdef: 70 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '카오스파우더', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 작열 1스택·디바인 1스택·부식 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'corrosion' }] },
+            { name: '베놈더스트', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '적에게 침묵·약화·저주·암흑 부여', effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }, { type: 'debuff', id: 'darkness' }] }
+        ]
+    }
+];
+
+const MIRACLE_FORM_TRANSITIONS = Object.freeze({
+    miracle_larva: Object.freeze(['mirror_cocoon']),
+    mirror_cocoon: Object.freeze(['aurora_wing', 'abyss_wing'])
+});
 
 const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },

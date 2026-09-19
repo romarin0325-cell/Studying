@@ -378,6 +378,8 @@ const Astra = {
   openFactoryViewDeck() {
     const draft = RPG.state.factoryDraft;
     if (!draft || !draft.active) return RPG.toMenu();
+    const body = this.$('factory-draft-body');
+    if (body) draft.scrollTop = body.scrollTop;
     const pool = draft.pool || [];
     this.collectionContext = 'factory';
     document.body.dataset.collectionContext = 'factory';

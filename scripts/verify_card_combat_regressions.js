@@ -1635,6 +1635,189 @@ function run() {
     assert.strictEqual(sugarMaidInit.stats.baseCrit, GAME_CONSTANTS.BASE_CRIT + 20);
     assert.strictEqual(sugarMaidInit.stats.baseEva, 20);
 
+    try {
+    const allIds = GameUtils.getAllCards().map(card => card.id);
+    assert.strictEqual(new Set(allIds).size, allIds.length);
+    ['miracle_larva', 'toffee_apple'].forEach(id => assert(getCard(id), id));
+    ['mirror_cocoon', 'aurora_wing', 'abyss_wing'].forEach(id => {
+      assert(GameUtils.isBattleOnlyCard(id), id);
+      assert.strictEqual(allIds.includes(id), false, id + ' leaked into collectable cards');
+    });
+    assert.strictEqual(GameUtils.hasCardTag('joker', 'dragon'), false);
+    assert.strictEqual(GameUtils.hasCardTag('joker', 'dessert_kingdom'), false);
+    ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'].forEach(id => {
+      assert.strictEqual(GameUtils.hasCardTag(id, 'dragon'), true, id);
+    });
+    ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch', 'toffee_apple'].forEach(id => {
+      assert.strictEqual(GameUtils.hasCardTag(id, 'dessert_kingdom'), true, id);
+    });
+    assert.strictEqual(GameUtils.hasCardTag({ id: 'baby_dragon' }, 'dragon'), true);
+
+    const jokerDessert = Logic.calculateInitialStats(getCard('harmonius'), ['harmonius', 'joker', 'candy_boy'], GameUtils.getAllCards(), 0);
+    const noJokerDessert = Logic.calculateInitialStats(getCard('harmonius'), ['harmonius', null, 'candy_boy'], GameUtils.getAllCards(), 0);
+    assert.strictEqual(jokerDessert.stats.atk, noJokerDessert.stats.atk);
+    const toffeeDessert = Logic.calculateInitialStats(getCard('harmonius'), ['harmonius', 'toffee_apple', 'candy_boy'], GameUtils.getAllCards(), 0);
+    assert.strictEqual(toffeeDessert.stats.atk, 240);
+    assert.strictEqual(toffeeDessert.stats.matk, 230);
+
+    const underdogSame = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', 'kobold', 'underdog'], GameUtils.getAllCards(), 2);
+    assert.strictEqual(underdogSame.activeTrait, 'cond_grade_count_leader_boost');
+    assert.strictEqual(underdogSame.stats.atk, 160);
+    const underdogMixed = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', 'cream_maid', 'underdog'], GameUtils.getAllCards(), 2);
+    assert.strictEqual(underdogMixed.activeTrait, null);
+    const underdogGap = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', null, 'underdog'], GameUtils.getAllCards(), 2);
+    assert.strictEqual(underdogGap.activeTrait, 'cond_grade_count_leader_boost');
+    const underdogSolo = Logic.calculateInitialStats(getCard('underdog'), [null, null, 'underdog'], GameUtils.getAllCards(), 2);
+    assert.strictEqual(underdogSolo.activeTrait, 'cond_grade_count_leader_boost');
+    const underdogFront = Logic.calculateInitialStats(getCard('underdog'), ['underdog', 'marshmallow', 'kobold'], GameUtils.getAllCards(), 0);
+    assert.strictEqual(underdogFront.activeTrait, null);
+    assert.strictEqual(GameUtils.hasUniformGrade([null, null, null]), false);
+
+    const sphinxStorm = getCard('sphinx').skills.find(skill => skill.name === '샌드스톰');
+    const forgetBlue = getCard('forget_me_not').skills.find(skill => skill.name === '블루메모리');
+    const syrupDesc = getCard('brulee_witch').skills.find(skill => skill.name === '버닝시럽');
+    const glazeDesc = getCard('brulee_witch').skills.find(skill => skill.name === '홀리글레이즈');
+    assert(sphinxStorm.desc.includes(GameUtils.formatRandomDebuffPhrase(['corrosion', 'curse'], 1)));
+    assert(forgetBlue.desc.includes('디바인 1스택'));
+    assert(forgetBlue.desc.includes(GameUtils.formatRandomDebuffPhrase(['weak', 'silence'], 1)));
+    assert(syrupDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
+    assert(glazeDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
+    assert.strictEqual(syrupDesc.effects[0].randomCount, 2);
+
+    const larva = getCard('miracle_larva');
+    assert.deepStrictEqual([larva.grade, larva.element, larva.role, larva.unlockSource], ['epic', 'nature', 'balancer', 'hidden']);
+    assert.deepStrictEqual(Object.values(larva.stats), [420, 70, 80, 70, 70]);
+    const toffee = getCard('toffee_apple');
+    assert.deepStrictEqual([toffee.grade, toffee.element, toffee.role, toffee.unlockSource, toffee.releaseDate], ['rare', 'dark', 'debuffer', 'bonus', '2026-11-30']);
+    assert.deepStrictEqual(Object.values(toffee.stats), [340, 75, 105, 50, 50]);
+
+    const dateKey = date => date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    const todayGate = date => GameUtils.getBonusCards().some(card => (
+      card.id === 'toffee_apple' && card.unlockSource !== 'hidden' && (!card.releaseDate || card.releaseDate <= dateKey(date))
+    ));
+    assert.strictEqual(todayGate(new Date(2026, 10, 29)), false);
+    assert.strictEqual(todayGate(new Date(2026, 10, 30)), true);
+    assert.strictEqual(todayGate(new Date(2026, 11, 1)), true);
+    assert.strictEqual(todayGate(new Date(2027, 0, 1)), true);
+
+    const larvaUnit = buildWaveUnit('miracle_larva', ['miracle_larva'], 0);
+    larvaUnit.hp = 200;
+    larvaUnit.mp = 100;
+    larvaUnit.buffs = { silence: 1 };
+    const larvaRpg = makeRpg(larvaUnit, ['miracle_larva']);
+    larvaRpg.state.chaosBuffs = [{ id: 'miracle_larva', multiplier: 0.3 }];
+    BattleRuntime.applyBattleForm(larvaRpg, larvaUnit, 'mirror_cocoon');
+    assert.strictEqual(larvaUnit.formId, 'mirror_cocoon');
+    assert.strictEqual(larvaUnit.id, 'miracle_larva');
+    assert.strictEqual(larvaUnit.hp, 200);
+    assert.strictEqual(larvaUnit.name, '미러코쿤');
+    assert.strictEqual(larvaUnit.buffs.silence, 1);
+    assert.strictEqual(BattleRuntime.applyBattleForm(larvaRpg, larvaUnit, 'miracle_larva'), false, 'reverse transform');
+    assert.strictEqual(BattleRuntime.applyBattleForm(larvaRpg, larvaUnit, 'aurora_wing'), true, 'adult transform');
+    assert.strictEqual(larvaUnit.formId, 'aurora_wing');
+    assert.strictEqual(larvaUnit.hp, 200);
+    assert.strictEqual(BattleRuntime.applyBattleForm(larvaRpg, larvaUnit, 'abyss_wing'), false);
+
+    const blessed = buildWaveUnit('miracle_larva', ['miracle_larva'], 0);
+    const blessedRpg = makeRpg(blessed, ['miracle_larva']);
+    blessedRpg.state.chaosBuffs = [{ id: 'miracle_larva', multiplier: 0.3 }];
+    blessedRpg.battle.players = [blessed];
+    const blessedInit = (id => {
+      const unit = buildWaveUnit(id, ['miracle_larva'], 0);
+      unit.baseCardId = 'miracle_larva';
+      unit.formId = id;
+      const rpg = makeRpg(unit, ['miracle_larva']);
+      rpg.state.chaosBuffs = [{ id: 'miracle_larva', multiplier: 0.3 }];
+      const stats = Logic.calculateInitialStats(getCard(id), ['miracle_larva'], GameUtils.getAllCards(), 0).stats;
+      unit.maxHp = stats.maxHp;
+      unit.atk = stats.atk;
+      unit.matk = stats.matk;
+      unit.def = stats.def;
+      unit.mdef = stats.mdef;
+      rpg.battle.players = [unit];
+      const blessing = rpg.state.chaosBuffs[0];
+      let blessingMult = blessing.multiplier;
+      unit.maxHp = Math.floor(unit.maxHp * (1 + blessingMult));
+      unit.atk = Math.floor(unit.atk * (1 + blessingMult));
+      unit.matk = Math.floor(unit.matk * (1 + blessingMult));
+      unit.def = Math.floor(unit.def * (1 + blessingMult));
+      unit.mdef = Math.floor(unit.mdef * (1 + blessingMult));
+      unit.blessing = blessing;
+      return unit;
+    });
+    const larvaBlessed = blessedInit('miracle_larva');
+    assert.deepStrictEqual([larvaBlessed.maxHp, larvaBlessed.atk, larvaBlessed.matk, larvaBlessed.def, larvaBlessed.mdef], [546, 91, 104, 91, 91]);
+    const cocoonBlessed = blessedInit('mirror_cocoon');
+    assert.deepStrictEqual([cocoonBlessed.maxHp, cocoonBlessed.atk, cocoonBlessed.matk, cocoonBlessed.def, cocoonBlessed.mdef], [546, 91, 52, 117, 117]);
+    const auroraBlessed = blessedInit('aurora_wing');
+    assert.deepStrictEqual([auroraBlessed.maxHp, auroraBlessed.atk, auroraBlessed.matk, auroraBlessed.def, auroraBlessed.mdef], [546, 169, 130, 104, 104]);
+    const abyssBlessed = blessedInit('abyss_wing');
+    assert.deepStrictEqual([abyssBlessed.maxHp, abyssBlessed.atk, abyssBlessed.matk, abyssBlessed.def, abyssBlessed.mdef], [546, 156, 169, 91, 91]);
+    const critStats = Logic.calculateStats(Object.assign(larvaBlessed, { proto: getCard('miracle_larva'), buffs: {} }), [], 'default', [], 1);
+    assert.strictEqual(critStats.crit, GAME_CONSTANTS.BASE_CRIT + GAME_CONSTANTS.BLESSING_CRIT);
+    assert.strictEqual(critStats.evasion, GAME_CONSTANTS.BASE_EVA_BONUS + GAME_CONSTANTS.BLESSING_EVA);
+
+    const earthKing = buildWaveUnit('mushroom_king', ['mushroom_king'], 0);
+    const earthLarva = buildWaveUnit('miracle_larva', ['miracle_larva'], 0);
+    const earthField = [{ name: 'earth_bless' }];
+    assert.strictEqual(Logic.calculateStats(earthKing, earthField, 'default', [], 1).def, 120);
+    assert.strictEqual(Logic.calculateStats(earthLarva, earthField, 'default', [], 1).def, 105);
+    assert.strictEqual(Logic.calculateStats(earthLarva, [], 'default', [], 1).def, 70);
+
+    const tornado = getCard('aurora_wing').skills.find(skill => skill.name === '뷰티토네이도');
+    const tornadoUnit = buildWaveUnit('aurora_wing', ['miracle_larva'], 0);
+    tornadoUnit.proto = getCard('aurora_wing');
+    tornadoUnit.baseCrit = -100;
+    const tornadoTarget = makeUnit({ def: 0, mdef: 0, hp: 5000, maxHp: 5000, buffs: {} });
+    const tornadoDmg = n => Logic.calculateDamage(tornadoUnit, tornadoTarget, tornado, Array.from({ length: n }, (_, i) => ({ name: 'buff' + i })), [], quiet, 'default', ['miracle_larva'], 1, []).dmg;
+    const base0 = tornadoDmg(0);
+    assert.strictEqual(tornadoDmg(1), base0 * 2);
+    assert.strictEqual(tornadoDmg(2), base0 * 3);
+    assert.strictEqual(tornadoDmg(3), base0 * 4);
+
+    const toffeeUnit = buildWaveUnit('toffee_apple', ['toffee_apple'], 0);
+    const silentToffee = Object.assign({}, toffeeUnit, { buffs: { silence: 1 } });
+    assert.deepStrictEqual([Logic.calculateStats(toffeeUnit, [], 'default', [], 1).def, Logic.calculateStats(toffeeUnit, [], 'default', [], 1).mdef], [50, 50]);
+    assert.deepStrictEqual([Logic.calculateStats(silentToffee, [], 'default', [], 1).def, Logic.calculateStats(silentToffee, [], 'default', [], 1).mdef], [75, 75]);
+    assert.ok(Logic.calculateStats(silentToffee, [], 'default', [], 1).matk < Logic.calculateStats(toffeeUnit, [], 'default', [], 1).matk);
+
+    const sugarCaster = buildWaveUnit('toffee_apple', ['toffee_apple'], 0);
+    sugarCaster.baseCrit = -100;
+    const sugarRpg = makeRpg(sugarCaster, ['toffee_apple']);
+    sugarRpg.battle.enemy = makeUnit({ id: 'dummy', hp: 1000, maxHp: 1000, def: 0, mdef: 0, buffs: {} });
+    const sugarNoise = sugarCaster.skills.find(skill => skill.name === '슈거노이즈');
+    assert.strictEqual(BattleRuntime.executeSkill(sugarRpg, sugarCaster, sugarRpg.battle.enemy, sugarNoise), true, 'sugar noise');
+    assert.strictEqual(sugarRpg.battle.enemy.buffs.weak, 1);
+    assert.ok(sugarCaster.buffs.silence);
+
+    const afterCaster = buildWaveUnit('toffee_apple', ['toffee_apple'], 0);
+    afterCaster.baseCrit = -100;
+    afterCaster.mp = 100;
+    const afterRpg = makeRpg(afterCaster, ['toffee_apple']);
+    afterRpg.battle.enemy = makeUnit({ id: 'dummy', hp: 1000, maxHp: 1000, def: 0, mdef: 0, buffs: {} });
+    const aftertaste = afterCaster.skills.find(skill => skill.name === '애프터테이스트');
+    scheduledCallbacks.length = 0;
+    BattleRuntime.executeSkill(afterRpg, afterCaster, afterRpg.battle.enemy, aftertaste);
+    assert.strictEqual(afterCaster.mp, 70);
+    assert.strictEqual(afterRpg.battle.delayedEffects.length, 1);
+    assert.strictEqual(afterRpg.battle.delayedEffects[0].turn, 3);
+    assert.strictEqual(afterRpg.battle.enemy.buffs.darkness, undefined);
+    afterRpg.battle.turn = 2;
+    assert.strictEqual(afterRpg.battle.delayedEffects.some(effect => effect.turn === afterRpg.battle.turn), false);
+    afterRpg.battle.turn = 3;
+    afterRpg.battle.phase = 'player-ready';
+    afterRpg.battle.isFinished = false;
+    afterRpg.battle.isNewTurn = false;
+    BattleRuntime.TurnManager.startPlayerTurn(afterRpg);
+    assert.ok(afterRpg.battle.enemy.hp < 1000);
+    assert.ok(afterRpg.battle.enemy.buffs.darkness);
+    assert.ok(afterRpg.battle.enemy.buffs.curse);
+    assert.strictEqual(afterCaster.mp, 70);
+    } catch (error) {
+      error.message = 'miracle/toffee:' + error.message;
+      throw error;
+    }
+
     // A dedicated enemy policy consumes only its own decision roll.
     let randomCalls = 0;
     Math.random = () => { randomCalls++; return 0.9; };

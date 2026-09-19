@@ -1857,6 +1857,9 @@ input::placeholder { color:#97b1c3; }
 .astra #screen-draft>h3,.astra #screen-factory-draft>h3,.astra #screen-artifact-reserve-draft>h3,.astra #screen-perfect-plan-draft>h3 { font-size:21px; font-weight:500; letter-spacing:-.04em; padding-bottom:10px; }
 .astra #draft-reroll-cnt { color:var(--sky)!important; }
 .astra #factory-bundle-0,.astra #factory-bundle-1,.astra #artifact-reserve-bundle-0,.astra #artifact-reserve-bundle-1 { border-color:var(--line)!important; background:var(--panel)!important; border-radius:18px!important; padding:12px!important; }
+.astra .factory-card-row { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); }
+.astra .factory-select-btn,.astra .factory-aux-btn { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); border-radius:12px; }
+.astra #factory-select-0,.astra #factory-select-1 { background:var(--sky); color:var(--ink); border-color:var(--sky); font-weight:700; }
 .astra .bonus-pool-item { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
 .astra #gacha-result { text-align:center; padding:12px 0; }
 .astra #gacha-result>.portrait { width:160px!important; height:215px!important; border-radius:48px 48px 12px 12px; border-color:var(--sky)!important; margin-top:17px!important; }
@@ -2035,6 +2038,99 @@ body[data-screen=menu] .container { padding-top:12px; }
   .astra .log-container { min-height:85px; padding:8px; }.astra .control-panel { max-height:none; }.astra .skill-btn { font-size:11px; min-height:44px; padding:5px; }
 }
 @media(max-height:680px) and (max-width:760px) { .astra .battle-actor .portrait { height:96px; }.astra .battle-artifact-btn { min-height:30px; }.astra .log-container { min-height:70px; } }
+
+#screen-factory-draft {
+  container-type: inline-size;
+  container-name: factory-draft;
+  min-height: 0;
+  box-sizing: border-box;
+}
+.factory-draft-title { margin: 5px 0; font-size: 18px; line-height: 24px; flex-shrink: 0; }
+.factory-draft-help { text-align: center; margin-bottom: 8px; font-size: 0.9rem; color: var(--muted, #ccc); flex-shrink: 0; }
+.factory-draft-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.factory-bundle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  min-width: 0;
+  cursor: default;
+}
+.factory-bundle-title { text-align: center; font-weight: bold; font-size: 18px; line-height: 24px; margin: 0; }
+.factory-bundle-cards { display: flex; flex-direction: column; gap: 8px; }
+.factory-card-row {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 120px;
+  padding: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  border-radius: 12px;
+}
+.astra #screen-factory-draft .factory-card-row .portrait,
+.factory-card-row .portrait {
+  width: 60px;
+  height: 100px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.factory-card-row .portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.factory-card-text { min-width: 0; }
+.factory-card-name { font-size: 16px; line-height: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.factory-card-meta { font-size: 13px; line-height: 18px; margin-top: 4px; color: var(--muted, #ccc); }
+.factory-select-btn { min-height: 48px; width: 100%; box-sizing: border-box; }
+.factory-draft-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+.factory-aux-btn { width: min(100%, 240px); min-height: 44px; }
+@container factory-draft (min-width: 768px) {
+  .factory-draft-body {
+    flex-direction: row;
+    align-items: stretch;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 16px;
+    width: 100%;
+  }
+  .factory-bundle { flex: 1; min-width: 0; }
+  .factory-card-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 140px;
+  }
+  .astra #screen-factory-draft .factory-card-row .portrait,
+  .factory-card-row .portrait { width: 72px; height: 120px; }
+}
 
 /* Paint only. Theme switches must preserve every screen's geometry. */
 body[data-theme=strawberry] { --ink:#fff2f6; --panel:#fffafd; --panel-soft:#fbe0e9; --sky:#a43f66; --sky-bright:#822b50; --paper:#4c2939; --muted:#805466; --line:#d6a4b6; --gold:#9c6813; --wash:#f4bcd2; --button:#f9d6e4; --button-fill:linear-gradient(#fffaf7,#f9d6e4); --primary-fill:linear-gradient(#b5557b,#96395e); --theme-mark:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+PGcgc3Ryb2tlPSIjYTU0YjgwIiBzdHJva2Utd2lkdGg9IjEuNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0ibTE1IDIyLTEyLTkgMSAxMyAxMSAxLTQgMTAgMTAtNiA5IDYtNC0xMCAxMS0xIDEtMTMtMTMgOSIgZmlsbD0iI2VmYzRkZiIvPjxwYXRoIGQ9Ik0yMCAxMkM5LTEgMCAxNiAyMCAyOSA0MCAxNiAzMS0xIDIwIDEyWiIgZmlsbD0iI2U2OTBiZCIvPjxwYXRoIGQ9Im0yMCAxNSA0IDUtNCA1LTQtNVoiIGZpbGw9IiNmZmYzYzkiIHN0cm9rZT0iI2IxODQ0OCIvPjwvZz48L3N2Zz4NCg=="); color-scheme:light; }
@@ -2358,33 +2454,30 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
       <div class="visual-stage"><button id="player-actor-box" class="battle-actor player" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"><small>YOUR VANGUARD</small><strong id="p-name">Player</strong><div class="portrait"><img id="p-img" alt="출전 카드"></div><div class="actor-hp-bar"><div id="p-hp-bar" class="actor-hp-fill"></div></div><div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div><div id="p-buffs" class="actor-buffs"></div></button><div class="battle-versus" aria-hidden="true"><svg><use href="#i-star"/></svg><span>VS</span></div><button id="enemy-actor-box" class="battle-actor enemy" onclick="RPG.showBattleStat('enemy', 0)"><small>OPPONENT</small><strong id="e-name">Enemy</strong><div class="portrait"><img id="e-img" alt="상대"></div><div class="actor-hp-bar"><div id="e-hp-bar" class="actor-hp-fill"></div></div><div id="e-buffs" class="actor-buffs"></div></button></div>
       <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div><div id="battle-controls" class="control-panel"></div>
     </section>
-    <div id="screen-factory-draft" class="screen">
-            <h3 style="margin:5px 0;">팩토리 드래프트 (<span id="factory-round-text">1/10 라운드</span>)</h3>
-            <div style="text-align:center; margin-bottom:5px; font-size:0.9rem; color:#ccc;">
+    <div id="screen-factory-draft" class="screen factory-draft-screen">
+            <h3 class="factory-draft-title">팩토리 드래프트 (<span id="factory-round-text">1/10 라운드</span>)</h3>
+            <div class="factory-draft-help">
                 두 묶음 중 하나를 선택하세요.<br>(선택받지 못한 묶음의 카드는 나중에 다시 등장할 수 있습니다)
             </div>
 
-            <div style="display:flex; flex:1; gap:10px; padding:5px; overflow-y:auto; justify-content:center;">
-                <!-- Bundle 1 -->
-                <div style="flex:1; max-width:300px; display:flex; flex-direction:column; gap:5px; border:2px solid #555; border-radius:8px; padding:5px; background:#222; cursor:pointer;"
-                     onclick="RPG.selectFactoryBundle(0)" id="factory-bundle-0">
-                    <div style="text-align:center; font-weight:bold; color:#fff; margin-bottom:5px;">A 묶음 선택</div>
-                    <div id="factory-bundle-0-cards" style="display:grid; grid-template-columns: 1fr; gap:5px;"></div>
+            <div id="factory-draft-body" class="factory-draft-body">
+                <div id="factory-bundle-0" class="factory-bundle">
+                    <div class="factory-bundle-title">A 묶음</div>
+                    <div id="factory-bundle-0-cards" class="factory-bundle-cards"></div>
+                    <button type="button" id="factory-select-0" class="factory-select-btn" onclick="RPG.selectFactoryBundle(0)">A 묶음 선택</button>
                 </div>
-
-                <!-- Bundle 2 -->
-                <div style="flex:1; max-width:300px; display:flex; flex-direction:column; gap:5px; border:2px solid #555; border-radius:8px; padding:5px; background:#222; cursor:pointer;"
-                     onclick="RPG.selectFactoryBundle(1)" id="factory-bundle-1">
-                    <div style="text-align:center; font-weight:bold; color:#fff; margin-bottom:5px;">B 묶음 선택</div>
-                    <div id="factory-bundle-1-cards" style="display:grid; grid-template-columns: 1fr; gap:5px;"></div>
+                <div id="factory-bundle-1" class="factory-bundle">
+                    <div class="factory-bundle-title">B 묶음</div>
+                    <div id="factory-bundle-1-cards" class="factory-bundle-cards"></div>
+                    <button type="button" id="factory-select-1" class="factory-select-btn" onclick="RPG.selectFactoryBundle(1)">B 묶음 선택</button>
                 </div>
             </div>
 
-            <div style="margin-top:auto; margin-bottom: 40px; padding-bottom: 10px; display:flex; flex-direction:column; gap:5px; align-items:center;">
-                <button class="menu-btn" onclick="RPG.openFactoryViewDeck()" style="width:200px; background:#333; color:#4fc3f7; border-color:#4fc3f7;">
+            <div class="factory-draft-actions">
+                <button type="button" class="menu-btn factory-aux-btn" onclick="RPG.openFactoryViewDeck()">
                     현재 구성 중인 덱 보기
                 </button>
-                <button class="menu-btn" onclick="RPG.toMenu()" style="width:200px;">나가기</button>
+                <button type="button" class="menu-btn factory-aux-btn" onclick="RPG.toMenu()">나가기</button>
             </div>
         </div>
         <div id="screen-artifact-reserve-draft" class="screen">
@@ -2614,6 +2707,15 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
                 <div id="md-skills" style="font-size:0.8rem; text-align:left;"></div>
             </div>
             <button onclick="RPG.closeModal()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modal-form-choice" class="modal" style="z-index: 130;">
+        <div class="modal-content" style="height:auto;">
+            <h3>성체 선택</h3>
+            <p id="form-choice-help" style="font-size:0.86rem; color:#ccc; margin:0 0 12px 0;">오로라윙 또는 어비스윙으로 우화합니다.</p>
+            <div id="form-choice-buttons" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" onclick="RPG.cancelFormChoice()" style="margin-top:12px; width:100%; padding:10px; min-height:44px;">취소</button>
         </div>
     </div>
 
@@ -3118,7 +3220,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer',
+        id: 'gold_dragon', name: '골드드래곤', grade: 'legend', element: 'light', role: 'dealer', tags: ['dragon'],
         stats: { hp: 540, atk: 125, matk: 95, def: 60, mdef: 60 },
         trait: { type: 'pos_stat_boost', pos: 2, stat: ['atk', 'matk'], val: 35, desc: '대장 배치시 공격력 마법공격력 35%증가' },
         skills: [
@@ -3230,7 +3332,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'red_dragon', name: '레드드래곤', grade: 'epic', element: 'fire', role: 'dealer',
+        id: 'red_dragon', name: '레드드래곤', grade: 'epic', element: 'fire', role: 'dealer', tags: ['dragon'],
         stats: { hp: 420, atk: 105, matk: 80, def: 60, mdef: 50 },
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'atk', val: 50, desc: '선봉일시 공격력 50%증가' },
         skills: [
@@ -3280,7 +3382,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'pudding_princess', name: '푸딩프린세스', grade: 'epic', element: 'water', role: 'balancer',
+        id: 'pudding_princess', name: '푸딩프린세스', grade: 'epic', element: 'water', role: 'balancer', tags: ['dessert_kingdom'],
         stats: { hp: 420, atk: 85, matk: 85, def: 60, mdef: 60 },
         trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵 걸린 적에게 대미지 1.5배' },
         skills: [
@@ -3312,7 +3414,7 @@ const CARDS = [
 
     // --- Rare ---
     {
-        id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter',
+        id: 'baby_dragon', name: '베이비드래곤', grade: 'rare', element: 'fire', role: 'looter', tags: ['dragon'],
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 45 },
         trait: { type: 'looter', desc: '이 카드로 승리시 추가 드로우' },
         skills: [
@@ -3362,7 +3464,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'cream_maid', name: '생크림메이드', grade: 'rare', element: 'light', role: 'buffer',
+        id: 'cream_maid', name: '생크림메이드', grade: 'rare', element: 'light', role: 'buffer', tags: ['dessert_kingdom'],
         stats: { hp: 340, atk: 75, matk: 85, def: 60, mdef: 60 },
         trait: { type: 'cond_twinkle_all', val: 50, desc: '트윙클파티 상태에서 물리/마법공격력 50%증가' },
         skills: [
@@ -3397,7 +3499,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 0, stat: 'def', val: 50, desc: '선봉 배치시 방어력 50%증가' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '부식 저주 중 하나 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
+            { name: '샌드스톰', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적에게 [부식, 저주] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['corrosion', 'curse'] }] },
             { name: '수수께끼', type: 'sup', tier: 1, cost: 10, desc: '침묵 부여', effects: [{ type: 'debuff', id: 'silence' }] }
         ]
     },
@@ -3424,7 +3526,7 @@ const CARDS = [
 
     // --- Normal ---
     {
-        id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer',
+        id: 'marshmallow', name: '마시멜로', grade: 'normal', element: 'fire', role: 'balancer', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 75, matk: 70, def: 50, mdef: 50 },
         trait: { type: 'death_sun_bless_chance', val: 0.5, desc: '사망시 50%확률로 태양의축복 부여' },
         skills: [
@@ -3494,7 +3596,7 @@ const CARDS = [
         ]
     },
     {
-        id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer',
+        id: 'candy_boy', name: '캔디보이', grade: 'normal', element: 'light', role: 'buffer', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 65, matk: 70, def: 50, mdef: 50 },
         trait: { type: 'syn_light_fire_atk', val: 50, desc: '덱에 빛과 불이 있을 경우 마법공격력 50% 증가' },
         skills: [
@@ -3675,7 +3777,7 @@ const BONUS_CARDS = [
         ]
     },
     {
-        id: 'ancient_dragon', name: '에인션트드래곤', grade: 'legend', element: 'nature', role: 'debuffer',
+        id: 'ancient_dragon', name: '에인션트드래곤', grade: 'legend', element: 'nature', role: 'debuffer', tags: ['dragon'],
         stats: { hp: 530, atk: 115, matk: 95, def: 70, mdef: 70 },
         trait: { type: 'death_multi_debuff', desc: '사망시 적에게 약화, 부식, 저주, 침묵, 기절 부여' },
         skills: [
@@ -3816,7 +3918,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_field_buff', buff: 'earth_bless', desc: '사망 시 필드버프 대지의축복 부여' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '블루메모리', type: 'sup', tier: 2, cost: 20, desc: '디바인 부여 및 약화/침묵 중 하나 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
+            { name: '블루메모리', type: 'sup', tier: 2, cost: 20, desc: '적에게 디바인 1스택을 부여하고, [약화, 침묵] 중 무작위 1종 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
             { name: '미드나잇가든', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '대지의축복 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'earth_bless', mult: 3.0 }] }
         ]
     },
@@ -3842,7 +3944,7 @@ const BONUS_CARDS = [
     },
 
     {
-        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        id: 'cotton_candy_sheep', name: '솜사탕양', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus', tags: ['dessert_kingdom'],
         stats: { hp: 350, atk: 85, matk: 85, def: 65, mdef: 55 },
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망시 상대에게 스턴 부여' },
         skills: [
@@ -3957,7 +4059,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden',
+        id: 'harmonius', name: '하모니어스', grade: 'legend', element: 'light', role: 'dealer', unlockSource: 'hidden', tags: ['dessert_kingdom'],
         stats: { hp: 480, atk: 120, matk: 115, def: 75, mdef: 75 },
         trait: { type: 'dessert_kingdom_synergy_boost', val: 50, desc: '덱에 있는 자신을 제외한 디저트킹덤 카드 하나당 공격력/마법공격력 50% 증가' },
         skills: [
@@ -4061,7 +4163,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'underdog', name: '언더독', grade: 'normal', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
-        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱에 일반등급이 3장 이상이고 대장 배치 시 공격력/마법공격력 100% 증가' },
+        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱 전체가 같은 등급이고 대장 배치 시 공격력/마법공격력 100% 증가 (빈 슬롯은 등급 비교에서 제외)' },
         skills: [
             { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
@@ -4069,7 +4171,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        id: 'sugar_powder', name: '슈가파우더', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15', tags: ['dessert_kingdom'],
         stats: { hp: 310, atk: 70, matk: 70, def: 50, mdef: 45 },
         trait: { type: 'dessert_kingdom_crit_eva_boost', val: 20, desc: '디저트킹덤 카드 전체 치명타율/회피율 20% 증가' },
         skills: [
@@ -4079,7 +4181,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15',
+        id: 'skull_dragon', name: '스컬드래곤', grade: 'rare', element: 'dark', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-06-15', tags: ['dragon'],
         stats: { hp: 355, atk: 110, matk: 70, def: 60, mdef: 55 },
         trait: { type: 'leader_self_atk_party_def_down', atkBoost: 100, defDown: 50, desc: '대장 배치 시 자기 공격력 100% 증가, 덱 전체 방어력 50% 감소' },
         skills: [
@@ -4350,18 +4452,76 @@ const BONUS_CARD_EXPANSION = [
 
     // ─── November 2026 Bonus Card Wave ────────────────────────────────────────
     {
-        id: 'brulee_witch', name: '브륄레위치', grade: 'epic', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-15',
+        id: 'brulee_witch', name: '브륄레위치', grade: 'epic', element: 'nature', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-15', tags: ['dessert_kingdom'],
         stats: { hp: 395, atk: 90, matk: 90, def: 65, mdef: 65 },
         trait: { type: 'death_twinkle', desc: '사망 시 필드버프 트윙클파티 발동' },
         skills: [
-            { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
-            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 저주/암흑/침묵/약화/부식 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] },
+            { name: '버닝시럽', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 작열 1스택 소모 시 적에게 [저주, 암흑, 침묵, 약화, 부식] 중 무작위 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '작열 1스택 소모!' }] },
+            { name: '홀리글레이즈', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 디바인 1스택 소모 시 적에게 [저주, 암흑, 침묵, 약화, 부식] 중 무작위 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'divine', count: 1, randomCount: 2, pool: ['curse', 'darkness', 'silence', 'weak', 'corrosion'], customLog: '디바인 1스택 소모!' }] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'miracle_larva', name: '미라클라바', grade: 'epic', element: 'nature', role: 'balancer', unlockSource: 'hidden',
+        stats: { hp: 420, atk: 70, matk: 80, def: 70, mdef: 70 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '변태', type: 'sup', tier: 1, cost: 10, desc: '미러코쿤으로 변신', effects: [{ type: 'transform', formId: 'mirror_cocoon' }] },
+            { name: '실크바인드', type: 'mag', tier: 1, cost: 10, val: 1.0, desc: '적에게 약화 부여', effects: [{ type: 'debuff', id: 'weak' }] }
+        ]
+    },
+    {
+        id: 'toffee_apple', name: '토피애플', grade: 'rare', element: 'dark', role: 'debuffer', unlockSource: 'bonus', releaseDate: '2026-11-30', tags: ['dessert_kingdom'],
+        stats: { hp: 340, atk: 75, matk: 105, def: 50, mdef: 50 },
+        trait: { type: 'cond_silence_def_mdef', val: 50, desc: '침묵 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '애프터테이스트', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '사용 후 2턴 뒤 공격하고 적에게 암흑·저주 부여', effects: [{ type: 'delayed_attack', turns: 2 }, { type: 'debuff', id: 'darkness' }, { type: 'debuff', id: 'curse' }] },
+            { name: '슈거노이즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 약화, 자신에게 침묵 부여', effects: [{ type: 'debuff', id: 'weak' }, { type: 'self_debuff', id: 'silence' }] }
         ]
     }
 ];
 
 BONUS_CARDS.push(...BONUS_CARD_EXPANSION);
+
+const BATTLE_ONLY_FORMS = [
+    {
+        id: 'mirror_cocoon', name: '미러코쿤', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 70, matk: 40, def: 90, mdef: 90 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '리버설', type: 'sup', tier: 2, cost: 20, desc: '저주 부여 및 마법공격 무효', effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
+            { name: '변태', type: 'sup', tier: 2, cost: 20, desc: '오로라윙 또는 어비스윙으로 우화', effects: [{ type: 'transform_choice', forms: ['aurora_wing', 'abyss_wing'] }] },
+            { name: '리플렉션', type: 'sup', tier: 2, cost: 20, desc: '침묵 부여 및 물리공격 무효', effects: [{ type: 'debuff', id: 'silence' }, { type: 'buff', id: 'barrier', duration: 1 }] }
+        ]
+    },
+    {
+        id: 'aurora_wing', name: '오로라윙', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 130, matk: 100, def: 80, mdef: 80 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '미라클파우더', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '스타파우더·트윙클파티 부여', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'field_buff', id: 'twinkle_party' }] },
+            { name: '뷰티토네이도', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '현재 필드버프 1종당 배율 +2.0', effects: [{ type: 'dmg_boost', condition: 'field_buff_kind_count', addPerBuff: 2.0 }] }
+        ]
+    },
+    {
+        id: 'abyss_wing', name: '어비스윙', grade: 'epic', element: 'nature', role: 'balancer', battleOnly: true, baseCardId: 'miracle_larva',
+        stats: { hp: 420, atk: 120, matk: 130, def: 70, mdef: 70 },
+        trait: { type: 'cond_earth_def_mdef', val: 50, desc: '대지의축복 상태에서 방어력/마법방어력 50% 증가' },
+        skills: [
+            { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
+            { name: '카오스파우더', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 작열 1스택·디바인 1스택·부식 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'corrosion' }] },
+            { name: '베놈더스트', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '적에게 침묵·약화·저주·암흑 부여', effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'weak' }, { type: 'debuff', id: 'curse' }, { type: 'debuff', id: 'darkness' }] }
+        ]
+    }
+];
+
+const MIRACLE_FORM_TRANSITIONS = Object.freeze({
+    miracle_larva: Object.freeze(['mirror_cocoon']),
+    mirror_cocoon: Object.freeze(['aurora_wing', 'abyss_wing'])
+});
 
 const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
@@ -21663,7 +21823,10 @@ class SaveDataMigrator {
             maxRounds: 10,
             pool: [],
             seenCards: [],
-            currentBundles: []
+            currentBundles: [],
+            choiceSeq: 0,
+            busy: false,
+            scrollTop: 0
         }, ['pool', 'seenCards', 'currentBundles']);
 
         state.artifactReserveDraft = SaveDataMigrator.mergeObjectDefaults(state.artifactReserveDraft, {
@@ -22037,6 +22200,40 @@ const GameUtils = {
         ];
     },
 
+    getBattleOnlyForms() {
+        return typeof BATTLE_ONLY_FORMS !== 'undefined' ? [...BATTLE_ONLY_FORMS] : [];
+    },
+
+    isBattleOnlyCard(cardOrId) {
+        const card = typeof cardOrId === 'string' ? this.getCardById(cardOrId) : cardOrId;
+        return !!(card && card.battleOnly);
+    },
+
+    hasCardTag(cardOrId, tag) {
+        if (!cardOrId || !tag) return false;
+        const id = typeof cardOrId === 'string' ? cardOrId : cardOrId.id;
+        const def = this.getCardById(id);
+        return !!(def && Array.isArray(def.tags) && def.tags.includes(tag));
+    },
+
+    hasUniformGrade(deck, allCards) {
+        const grades = (deck || [])
+            .map(id => (id ? this.getCardById(id, allCards) : null))
+            .filter(Boolean)
+            .map(card => card.grade);
+        return grades.length > 0 && grades.every(grade => grade === grades[0]);
+    },
+
+    canTransformTo(currentFormId, nextFormId) {
+        const allowed = (typeof MIRACLE_FORM_TRANSITIONS !== 'undefined' && MIRACLE_FORM_TRANSITIONS[currentFormId]) || [];
+        return allowed.includes(nextFormId);
+    },
+
+    formatRandomDebuffPhrase(pool, count) {
+        const names = (pool || []).map(id => (typeof BUFF_NAMES !== 'undefined' && BUFF_NAMES[id]) || id);
+        return `[${names.join(', ')}] 중 무작위 ${count}종`;
+    },
+
     getDefaultUnlockedBonusCardIds() {
         return [...DEFAULT_UNLOCKED_BONUS_CARD_IDS];
     },
@@ -22194,6 +22391,7 @@ const GameUtils = {
         }
         if (!cachedCardById) {
             cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
+            this.getBattleOnlyForms().forEach(card => cachedCardById.set(card.id, card));
         }
         return cachedCardById.get(id) || null;
     },
@@ -22369,7 +22567,7 @@ const GameUtils = {
                 const limitVal = getGradeVal(options.maxGrade);
                 pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
             }
-            return pool;
+            return pool.filter(card => !card.battleOnly);
         }
 
         let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');
@@ -22425,7 +22623,7 @@ const GameUtils = {
             pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
         }
 
-        return pool;
+        return pool.filter(card => !card.battleOnly);
     },
 
     /**
@@ -22744,6 +22942,11 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult *= eff.mult;
             matched = true;
         }
+        else if (eff.condition === 'field_buff_kind_count') {
+            const n = Array.isArray(ctx.sourceFieldBuffs) ? ctx.sourceFieldBuffs.length : 0;
+            ctx.mult += n * (eff.addPerBuff || 2.0);
+            matched = n > 0;
+        }
         else if (eff.condition === 'target_element') {
             const elements = eff.elements || (eff.element ? [eff.element] : []);
             if (elements.includes(ctx.target.element)) {
@@ -22974,6 +23177,16 @@ const SideEffects = {
             const value = StatusRules.add(ctx.source, eff.id, eff.stack || 1, ctx.artifacts || []);
             const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
+        },
+        'transform': (ctx, eff) => {
+            const formId = (ctx.skill && ctx.skill.chosenFormId) || eff.formId;
+            if (!formId || typeof ctx.applyBattleForm !== 'function') return;
+            ctx.applyBattleForm(ctx.source, formId);
+        },
+        'transform_choice': (ctx, eff) => {
+            const formId = ctx.skill && ctx.skill.chosenFormId;
+            if (!formId || !(eff.forms || []).includes(formId) || typeof ctx.applyBattleForm !== 'function') return;
+            ctx.applyBattleForm(ctx.source, formId);
         },
         'field_buff': (ctx, eff) => {
             const options = {};
@@ -23356,6 +23569,11 @@ const Logic = {
         if (trait && trait.type === 'cond_earth_def_mdef' && effectiveFieldBuffs.some(b => b.name === 'earth_bless')) {
             m.def += 0.5;
             m.mdef += 0.5;
+        }
+        if (trait && trait.type === 'cond_silence_def_mdef' && char.buffs && char.buffs.silence) {
+            const boost = (trait.val || 0) / 100;
+            m.def += boost;
+            m.mdef += boost;
         }
         if (trait && trait.type === 'cond_sun_matk_mdef' && effectiveFieldBuffs.some(b => b.name === 'sun_bless')) {
             const boost = (trait.val || 0) / 100;
@@ -24019,7 +24237,9 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch']) - 1);
+            const count = (deck || []).filter((id, slot) => (
+                slot !== idx && id && GameUtils.hasCardTag(id, 'dessert_kingdom')
+            )).length;
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
@@ -24027,10 +24247,9 @@ const Logic = {
             }
         }
 
-        // 언더독: 덱에 일반등급 3장 이상 + 대장 배치 시 공격/마공 증가
+        // 언더독: 빈 슬롯을 제외한 실제 배치 카드의 등급이 전부 같고 대장 배치 시 공격/마공 증가
         if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
-            const gradeCount = deckCtx.cards.filter(c => c && c.grade === (t.gradeRequired || 'normal')).length;
-            if (gradeCount >= (t.countRequired || 3) && idx === (t.pos !== undefined ? t.pos : 2)) {
+            if (GameUtils.hasUniformGrade(deck, allCards) && idx === (t.pos !== undefined ? t.pos : 2)) {
                 active = true;
                 const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
                 const boost = 1 + (t.val || 0) / 100;
@@ -24184,9 +24403,8 @@ const Logic = {
         }
 
         // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
-        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch'];
         const dessertBoostTrait = activeCards.find(c => c.trait && c.trait.type === 'dessert_kingdom_crit_eva_boost');
-        if (dessertBoostTrait && dessertKingdomIds.includes(playerProto.id)) {
+        if (dessertBoostTrait && GameUtils.hasCardTag(playerProto, 'dessert_kingdom')) {
             const boostVal = dessertBoostTrait.trait.val || 20;
             p.baseCrit += boostVal;
             p.baseEva += boostVal;
@@ -24195,8 +24413,7 @@ const Logic = {
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
-            if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
+            if (GameUtils.hasCardTag(playerProto, 'dragon')) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
         }
@@ -24427,10 +24644,9 @@ const Logic = {
         }
         // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
         else if (t.type === 'death_dmg_mag_stun_cond') {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
             const hasDragon = deck && deck.some(cardId => {
                 if (!cardId || cardId === victim.proto.id) return false;
-                return GameUtils.cardMatchesAnyId({ id: cardId }, dragonIds);
+                return GameUtils.hasCardTag(cardId, 'dragon');
             });
             if (hasDragon) {
                 this._applyDeathDamage(result, victim, killer, { name: '용혈의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 용혈의무녀: 드래곤의 힘으로 사망 반격!');
@@ -24656,6 +24872,121 @@ function buildBattleEnemy(rpg) {
     return enemy;
 }
 
+function findChaosBlessing(rpg, cardId) {
+    return (rpg.state.chaosBuffs || []).find(buff => buff.id === cardId) || null;
+}
+
+function applyBlessingStats(rpg, player, blessing, options = {}) {
+    if (!player) return;
+    if (!blessing) {
+        player.blessing = null;
+        return;
+    }
+
+    player.baseStatsWithoutBlessing = {
+        atk: player.atk,
+        matk: player.matk,
+        def: player.def,
+        mdef: player.mdef
+    };
+
+    let blessingMult = blessing.multiplier;
+    const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
+    if (hasEntropy) blessingMult *= 2;
+
+    const keepHp = options.keepHp === true;
+    const previousHp = player.hp;
+    player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
+    player.hp = keepHp ? Math.min(previousHp, player.maxHp) : player.maxHp;
+    player.blessing = blessing;
+
+    const mult = 1.0 + blessingMult;
+    player.atk = Math.floor(player.atk * mult);
+    player.matk = Math.floor(player.matk * mult);
+    player.def = Math.floor(player.def * mult);
+    player.mdef = Math.floor(player.mdef * mult);
+}
+
+function cloneSkillsWithCostModifiers(rpg, protoSkills) {
+    const skills = JSON.parse(JSON.stringify(protoSkills || []));
+    const manaCostTrait = rpg.battle && rpg.battle.players
+        ? rpg.battle.players.find(unit => unit && unit.proto && unit.proto.trait && unit.proto.trait.type === 'party_all_stats_mana_cost')
+        : null;
+    if (manaCostTrait) {
+        const costMult = manaCostTrait.proto.trait.costMult || 2.0;
+        skills.forEach(skill => {
+            if (Number.isFinite(skill.cost)) skill.cost = Math.floor(skill.cost * costMult);
+        });
+    }
+    if (rpg.hasArtifact && rpg.hasArtifact('support_boost')) {
+        skills.forEach(skill => {
+            if (skill.type === 'sup') skill.cost = 0;
+        });
+    }
+    return skills;
+}
+
+function applyBattleForm(rpg, player, formId) {
+    if (!rpg || !player || !formId) return false;
+    const baseCardId = player.baseCardId || player.id;
+    const currentFormId = player.formId || (player.proto && player.proto.id) || player.id;
+    if (!GameUtils.canTransformTo(currentFormId, formId)) return false;
+    const formProto = GameUtils.getCardById(formId);
+    if (!formProto || !formProto.battleOnly || formProto.baseCardId !== baseCardId) return false;
+
+    const preserved = {
+        hp: player.hp,
+        mp: player.mp,
+        maxMp: player.maxMp,
+        buffs: player.buffs,
+        guardEnhancedTurns: player.guardEnhancedTurns,
+        pos: player.pos,
+        isDead: player.isDead,
+        enteredAtTurn: player.enteredAtTurn,
+        swapAtkMatk: player.swapAtkMatk,
+        normalAttackPartyMult: player.normalAttackPartyMult,
+        guardDamageReduction: player.guardDamageReduction,
+        alternatingAttackStatPercent: player.alternatingAttackStatPercent,
+        lastManualSkillType: player.lastManualSkillType,
+        fieldBuffStatMult: player.fieldBuffStatMult
+    };
+
+    const allCards = GameUtils.getAllCards();
+    const init = Logic.calculateInitialStats(formProto, rpg.state.deck, allCards, player.pos);
+    player.proto = formProto;
+    player.formId = formId;
+    player.baseCardId = baseCardId;
+    player.id = baseCardId;
+    player.name = formProto.name;
+    player.maxHp = init.stats.maxHp;
+    player.atk = init.stats.atk;
+    player.matk = init.stats.matk;
+    player.def = init.stats.def;
+    player.mdef = init.stats.mdef;
+    player.baseCrit = init.stats.baseCrit;
+    player.baseEva = init.stats.baseEva;
+    player.activeTrait = init.activeTrait || null;
+    player.hp = preserved.hp;
+    applyBlessingStats(rpg, player, findChaosBlessing(rpg, baseCardId), { keepHp: true });
+    player.mp = preserved.mp;
+    player.maxMp = preserved.maxMp;
+    player.buffs = preserved.buffs || {};
+    if (preserved.guardEnhancedTurns) player.guardEnhancedTurns = preserved.guardEnhancedTurns;
+    player.pos = preserved.pos;
+    player.isDead = preserved.isDead;
+    if (preserved.enteredAtTurn !== undefined) player.enteredAtTurn = preserved.enteredAtTurn;
+    if (preserved.swapAtkMatk) player.swapAtkMatk = preserved.swapAtkMatk;
+    if (preserved.normalAttackPartyMult) player.normalAttackPartyMult = preserved.normalAttackPartyMult;
+    if (preserved.guardDamageReduction) player.guardDamageReduction = preserved.guardDamageReduction;
+    if (preserved.alternatingAttackStatPercent) player.alternatingAttackStatPercent = preserved.alternatingAttackStatPercent;
+    if (preserved.lastManualSkillType) player.lastManualSkillType = preserved.lastManualSkillType;
+    if (preserved.fieldBuffStatMult) player.fieldBuffStatMult = preserved.fieldBuffStatMult;
+    player.skills = cloneSkillsWithCostModifiers(rpg, formProto.skills);
+    rpg.log(`${player.name}으로 변신!`);
+    if (typeof rpg.renderBattleView === 'function') rpg.renderBattleView();
+    return true;
+}
+
 function buildBattlePlayer(rpg, cardId, idx, allCards) {
     if (!cardId) return null;
 
@@ -24672,6 +25003,8 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
 
     const player = {
         id: proto.id,
+        baseCardId: proto.id,
+        formId: proto.id,
         proto: proto,
         name: proto.name,
         ...init.stats,
@@ -24682,30 +25015,7 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
         skills: JSON.parse(JSON.stringify(proto.skills))
     };
 
-    const blessing = (rpg.state.chaosBuffs || []).find(buff => buff.id === player.id);
-    if (blessing) {
-        player.baseStatsWithoutBlessing = {
-            atk: player.atk,
-            matk: player.matk,
-            def: player.def,
-            mdef: player.mdef
-        };
-
-        // 앤트로피: 혼돈의 축복 효과 2배
-        let blessingMult = blessing.multiplier;
-        const hasEntropy = rpg.state.deck && rpg.state.deck.includes('entropy');
-        if (hasEntropy) blessingMult *= 2;
-
-        player.maxHp = Math.floor(player.maxHp * (1 + blessingMult));
-        player.hp = player.maxHp;
-        player.blessing = blessing;
-
-        const mult = 1.0 + blessingMult;
-        player.atk = Math.floor(player.atk * mult);
-        player.matk = Math.floor(player.matk * mult);
-        player.def = Math.floor(player.def * mult);
-        player.mdef = Math.floor(player.mdef * mult);
-    }
+    applyBlessingStats(rpg, player, findChaosBlessing(rpg, player.id));
 
     // NOTE: Positional traits ('pos_stat_boost') are handled in Logic.calculateInitialStats.
     // Do NOT add positional stat boosts here to avoid double-application.
@@ -24714,6 +25024,8 @@ function buildBattlePlayer(rpg, cardId, idx, allCards) {
 }
 
 const BattleRuntime = {
+    applyBattleForm,
+
     replaceFieldBuffsLikeKaleidoscope(rpg) {
         const count = rpg.battle.fieldBuffs.length;
         if (count <= 0) return 0;
@@ -25569,7 +25881,8 @@ const BattleRuntime = {
             turn: rpg.battle.turn,
             executeSkill: (nextSource, nextTarget, nextSkill, delayed) =>
                 BattleRuntime.executeSkill(rpg, nextSource, nextTarget, nextSkill, delayed),
-            getCardData: id => rpg.getCardData(id)
+            getCardData: id => rpg.getCardData(id),
+            applyBattleForm: (unit, formId) => applyBattleForm(rpg, unit, formId)
         };
 
         skill.effects.forEach(effect => {
@@ -26985,7 +27298,7 @@ const BattleRuntime = {
             chaosPool: [],
             factoryPool: [],
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
-            factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [] },
+            factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [], choiceSeq: 0, busy: false, scrollTop: 0 },
             artifactReserveDraft: { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] },
             perfectPlanDraft: { active: false, step: 0, selected: [], currentGradeSelected: [] },
             artifactReservePool: [],
@@ -27029,6 +27342,9 @@ const BattleRuntime = {
             this.state.factoryDraft.maxRounds = 10; // 10 rounds * 4 cards = 40
             this.state.factoryDraft.pool = [];
             this.state.factoryDraft.seenCards = [];
+            this.state.factoryDraft.choiceSeq = 0;
+            this.state.factoryDraft.busy = false;
+            this.state.factoryDraft.scrollTop = 0;
             this.generateFactoryBundles();
         }
 
@@ -27286,7 +27602,7 @@ const BattleRuntime = {
     generateFactoryBundles() {
         const baseCards = CARDS || [];
         const unlockedBonusCards = [...this.getReleasedStandardBonusCards(), ...this.getHiddenBonusCards()];
-        let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence');
+        let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence' && !c.battleOnly);
 
         const selectedSet = new Set(this.state.factoryDraft.pool);
         let availablePool = fullPool.filter(c => !selectedSet.has(c.id));
@@ -27307,30 +27623,41 @@ const BattleRuntime = {
         const bundle1 = [normalPicks[0]?.id, rarePicks[0]?.id, epicPicks[0]?.id, legendPicks[0]?.id].filter(Boolean);
         const bundle2 = [normalPicks[1]?.id, rarePicks[1]?.id, epicPicks[1]?.id, legendPicks[1]?.id].filter(Boolean);
 
+        this.state.factoryDraft.choiceSeq = (this.state.factoryDraft.choiceSeq || 0) + 1;
         this.state.factoryDraft.currentBundles = [bundle1, bundle2];
+        this.state.factoryDraft.scrollTop = 0;
 
         this.showScreen('screen-factory-draft');
         this.renderFactoryDraftScreen();
     },
 
     selectFactoryBundle(index) {
-        const bundle = this.state.factoryDraft.currentBundles[index];
-        if (!bundle) return;
+        const draft = this.state.factoryDraft;
+        if (!draft || !draft.active || draft.busy) return;
+        const seq = draft.choiceSeq;
+        const bundle = draft.currentBundles && draft.currentBundles[index];
+        if (!bundle || !bundle.length) return;
 
-        this.state.factoryDraft.pool.push(...bundle.filter(Boolean));
-        this.state.factoryDraft.round++;
-        this.state.factoryDraft.currentBundles = [];
+        draft.busy = true;
+        draft.pool.push(...bundle.filter(Boolean));
+        draft.round++;
+        draft.currentBundles = [];
+        draft.scrollTop = 0;
 
-        if (this.state.factoryDraft.round > this.state.factoryDraft.maxRounds) {
-            this.state.factoryDraft.active = false;
-            this.state.factoryPool = [...this.state.factoryDraft.pool];
+        if (draft.round > draft.maxRounds) {
+            draft.active = false;
+            draft.busy = false;
+            this.state.factoryPool = [...draft.pool];
             this.state.inventory = [];
             this.state.deck = [null, null, null];
 
             this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 40장의 전용 풀을 바탕으로 모험을 시작합니다.");
             this.toMenu();
-        } else {
+        } else if (draft.choiceSeq === seq) {
             this.generateFactoryBundles();
+            draft.busy = false;
+        } else {
+            draft.busy = false;
         }
 
         this.saveGame();
@@ -31698,9 +32025,61 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     btn.className = `skill-btn ${s.type}`;
                     btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
                     if (p.mp < s.cost) btn.disabled = true;
-                    else btn.onclick = () => executePlayerSkill(s);
+                    else btn.onclick = () => {
+                        const choice = (s.effects || []).find(effect => effect.type === 'transform_choice');
+                        if (choice) {
+                            this.openFormChoice(choice.forms, formId => {
+                                executePlayerSkill({ ...s, chosenFormId: formId });
+                            });
+                            return;
+                        }
+                        executePlayerSkill(s);
+                    };
                     panel.appendChild(btn);
                 });
+            },
+
+            openFormChoice(formIds, onSelect) {
+                const modal = document.getElementById('modal-form-choice');
+                const box = document.getElementById('form-choice-buttons');
+                if (!modal || !box) return;
+                const current = this.battle.players[this.battle.currentPlayerIdx];
+                const snapshot = {
+                    mp: current && current.mp,
+                    formId: current && current.formId,
+                    turn: this.battle.turn,
+                    phase: this.battle.phase,
+                    finished: this.battle.isFinished
+                };
+                this._formChoice = { onSelect, snapshot };
+                box.replaceChildren();
+                (formIds || []).forEach(id => {
+                    const card = this.getCardData(id);
+                    if (!card) return;
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'menu-btn';
+                    button.style.minHeight = '48px';
+                    button.textContent = card.name;
+                    button.onclick = () => this.confirmFormChoice(id);
+                    box.appendChild(button);
+                });
+                modal.classList.add('active');
+            },
+
+            confirmFormChoice(formId) {
+                const pending = this._formChoice;
+                const source = this.battle && this.battle.players[this.battle.currentPlayerIdx];
+                document.getElementById('modal-form-choice').classList.remove('active');
+                this._formChoice = null;
+                if (!pending || !source || this.battle.isFinished || this.battle.phase !== 'player-ready') return;
+                if (source.formId !== pending.snapshot.formId || this.battle.turn !== pending.snapshot.turn) return;
+                pending.onSelect(formId);
+            },
+
+            cancelFormChoice() {
+                document.getElementById('modal-form-choice').classList.remove('active');
+                this._formChoice = null;
             },
 
             renderBattlefield() {
@@ -31739,33 +32118,40 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
 
             renderFactoryDraftScreen() {
                 const d = this.state.factoryDraft;
+                if (!d) return;
                 document.getElementById('factory-round-text').innerText = `${d.round}/${d.maxRounds} 라운드`;
 
                 const bundle0Container = document.getElementById('factory-bundle-0-cards');
                 const bundle1Container = document.getElementById('factory-bundle-1-cards');
+                const body = document.getElementById('factory-draft-body');
                 bundle0Container.innerHTML = '';
                 bundle1Container.innerHTML = '';
 
                 const renderBundle = (bundle, container) => {
-                    bundle.forEach(id => {
+                    (bundle || []).forEach(id => {
                         const card = this.getCardData(id);
                         if (!card) return;
-                        const el = document.createElement('div');
-                        el.className = 'card-item ' + card.grade;
-                        el.style.display = 'flex';
-                        el.style.alignItems = 'center';
-                        el.style.gap = '5px';
-                        el.style.padding = '3px';
-                        el.style.fontSize = '0.85rem';
-                        el.innerHTML = `
-                            <div>
-                                <div style="font-weight:bold;">${card.name}</div>
-                                <div style="font-size:0.75rem; color:#ccc;">${card.role} / ${card.element}</div>
-                            </div>
-                        `;
-                        el.insertBefore(ImageAssets.createImage(card, {
-                            style: 'width:30px; height:40px; object-fit:cover; border:1px solid #777; border-radius:3px;'
-                        }), el.firstChild);
+                        const el = document.createElement('button');
+                        el.type = 'button';
+                        el.className = 'factory-card-row';
+                        el.dataset.cardId = card.id;
+                        el.dataset.grade = card.grade;
+                        el.setAttribute('aria-label', `${card.name} 상세 보기`);
+                        const text = document.createElement('div');
+                        text.className = 'factory-card-text';
+                        const name = document.createElement('div');
+                        name.className = 'factory-card-name';
+                        name.textContent = card.name;
+                        const meta = document.createElement('div');
+                        meta.className = 'factory-card-meta';
+                        meta.textContent = [
+                            DISPLAY_NAMES.grade[card.grade] || card.grade,
+                            DISPLAY_NAMES.element[card.element] || card.element,
+                            DISPLAY_NAMES.role[card.role] || card.role
+                        ].join(' · ');
+                        text.append(name, meta);
+                        el.append(ImageAssets.createPortrait(card), text);
+                        el.onclick = () => this.showCardInfo(card.id);
                         container.appendChild(el);
                     });
                 };
@@ -31773,6 +32159,13 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 if (d.currentBundles && d.currentBundles.length === 2) {
                     renderBundle(d.currentBundles[0], bundle0Container);
                     renderBundle(d.currentBundles[1], bundle1Container);
+                }
+
+                if (body) {
+                    body.scrollTop = d.scrollTop || 0;
+                    body.onscroll = () => {
+                        if (this.state.factoryDraft) this.state.factoryDraft.scrollTop = body.scrollTop;
+                    };
                 }
             },
 
@@ -34231,6 +34624,8 @@ const Astra = {
   openFactoryViewDeck() {
     const draft = RPG.state.factoryDraft;
     if (!draft || !draft.active) return RPG.toMenu();
+    const body = this.$('factory-draft-body');
+    if (body) draft.scrollTop = body.scrollTop;
     const pool = draft.pool || [];
     this.collectionContext = 'factory';
     document.body.dataset.collectionContext = 'factory';
