@@ -37,7 +37,7 @@ try {
   }
   checks.push('Fullscreen achievements and all six dungeon cards align at four mobile/landscape sizes; Chaos text does not shift actions');
   await page.setViewportSize({width:390,height:844});await click('#dungeons');await click('#challenge-mode');await click('#challenge-done');
-  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*천계의 계단/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('data:image'));await shot('challenge-lobby');
+  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('data:image'));await shot('challenge-lobby');
   await click('#launch');if(await page.locator('#help-done').count())await click('#help-done');
   await page.clock.runFor(2700);assert.equal(await page.evaluate(()=>__challenge.game.challenge),true);
   const profileBefore=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,claims:__challenge.profile.claims,tickets:__challenge.profile.tickets,clears:__challenge.profile.clears,best:__challenge.saved.best}));
@@ -58,6 +58,7 @@ try {
     }
   }
   assert.equal(await page.evaluate(()=>__challenge.game.artifacts.size),9);assert.equal(await page.evaluate(()=>__challenge.game.phase),'victory');
+  assert.match(await page.locator('.panel').innerText(),/보스 타임어택 총합/);assert.match(await page.locator('.panel').innerText(),/RANK/);
   const profileAfter=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,claims:__challenge.profile.claims,tickets:__challenge.profile.tickets,clears:__challenge.profile.clears,best:__challenge.saved.best}));
   assert.equal(profileAfter,profileBefore);await shot('victory');
   await click('#result-artifacts');assert.equal(await page.locator('.run-artifact').count(),9);await click('#run-artifacts-back');await click('#again');

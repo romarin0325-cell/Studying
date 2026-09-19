@@ -90,7 +90,7 @@ test('normal-only modifiers do not leak into bomb impacts, pulses or transformed
   const time=game({hero:8,artifacts:ids});time.bomb();time.player.fire=0;time.fire(.001);assert.ok(time.shots.every(s=>s.damageKind==='bomb'));
   const t=target(time,{},time.shots[0].x,time.shots[0].y);time.shots=[time.shots[0]];time.shots[0].vx=time.shots[0].vy=0;time.update(.001);near(t.maxHp-t.hp,12.5*3.8*bomb);
  }
- for(const [ids,expected] of [[['sun','bigbang'],3040],[['sun','kaleidoscope'],1520]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
+  for(const [ids,expected] of [[['sun','bigbang'],3200],[['sun','kaleidoscope'],1600]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
 });
 
 test('verdant dew removes one required P and adds five percent attack for standard and four-P heroes',()=>{
@@ -102,15 +102,16 @@ test('verdant dew removes one required P and adds five percent attack for standa
 });
 
 test('requested projectile weapons use direct final coefficients at every power without cadence changes',()=>{
- for(const [hero,weapon,coefficient,period] of [[1,0,.8415,.095],[2,1,5.94825,.36],[4,0,1.36323,.19],[5,0,2.84427,.23],[6,0,7.53984,.48],[8,0,2.1318,.25]])
+  for(const [hero,weapon,coefficient,period] of [[1,0,.85833,.095],[2,1,6.067215,.36],[4,0,1.36323,.19],[5,0,2.84427,.23],[6,0,7.53984,.48],[8,0,2.174436,.25]])
   for(const power of [1,2,3,4,5]){const g=game({hero,weapon});g.power=power;g.player.fire=0;g.fire(.001);near(g.shots[0].damage,(10+power*2.5)*(hero===2?1.1:1)*coefficient);near(g.player.fire,period);}
 });
 test('all remaining adjusted weapon components use direct final coefficients',()=>{
  const atPowerOne=(hero,weapon)=>{const g=game({hero,weapon});g.power=1;g.player.fire=0;return g;};
  const melee=atPowerOne(1,1);target(melee,{},225,520);melee.fire(.001);near(melee.stats.damage,12.5*13.77);near(melee.shots[0].damage,12.5*.57375);
- const spread=atPowerOne(2,0);spread.fire(.001);assert.deepEqual(spread.shots.map(s=>Number(s.damage.toFixed(6))),[14.025,23.8425,14.025]);
+  const spread=atPowerOne(2,0);spread.fire(.001);assert.deepEqual(spread.shots.map(s=>Number(s.damage.toFixed(6))),[14.3055,24.31935,14.3055]);
  const chain=atPowerOne(3,0);target(chain);chain.fire(.001);near(chain.stats.damage,12.5*2.646);
- const petal=atPowerOne(3,1);petal.fire(.001);assert.deepEqual(petal.shots.map(s=>Number(s.damage.toFixed(6))),[11.13075,18.55125,11.13075]);
+  const petal=atPowerOne(3,1);petal.fire(.001);assert.deepEqual(petal.shots.map(s=>Number(s.damage.toFixed(6))),[11.13075,18.55125,11.13075]);assert.equal(petal.shots.every(s=>s.homing),false);
+  const petalMax=game({hero:3,weapon:1});petalMax.power=5;petalMax.player.fire=0;petalMax.fire(.001);assert.equal(petalMax.shots.every(s=>s.homing),true);
  const snow=atPowerOne(4,1);snow.fire(.001);near(snow.shots[0].damage,12.5*2.3814);
  const midnight=atPowerOne(5,1);midnight.fire(.001);near(midnight.shots[0].damage,12.5*1.8326);
  const dream=atPowerOne(6,1);dream.fire(.001);near(dream.shots.find(s=>s.type==='nightstar').damage,12.5*.931);const seed=dream.shots.find(s=>s.type==='seed');near(seed.damage,12.5*.882);near(seed.zoneDamage,12.5*.686);
@@ -120,6 +121,7 @@ test('P5 shot geometry and control effects are captured when firing, including v
  for(const p of [4,5]){
   const fire=(hero,weapon)=>{const g=game({hero,weapon});g.power=p;g.player.fire=0;g.fire(.001);return g;};
   assert.equal(fire(4,0).shots[0].slow,p===5?2:1.6);assert.equal(fire(4,1).shots[0].bounce,p===5?4:3);
+   assert.equal(fire(3,1).shots[0].homing,p===5);
   const glass=fire(5,0).shots;near(glass[0].r,p===5?13.2:12);assert.equal(glass[1].x-glass[0].x,p===5?32:26);
   near(fire(6,0).shots[0].r,p===5?38.8:28.8);
   for(const [hero,weapon,radius] of [[6,1,p===5?100:90],[7,1,p===5?110:100]]){

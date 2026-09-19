@@ -7,7 +7,7 @@ export const HEROES = [
     { id: 'dagger', name: '루나틱위치', tag: '관통 · 고속형', description: '빠른 그림자 칼날이 적의 대열을 관통해요.', power: 4, reach: 4 },
     { id: 'melee', name: '어쌔신', tag: '근접 · 고위험', description: '넓은 전방 참격. 가까이 다가가면 강력해지고 적탄도 베어요.', power: 5, reach: 2 }
   ] },
-  { id: 'zeke', radius: 6, speed: 1100, name: '지크', title: '새벽을 여는 화염검사', en: 'ZEKE', color: '#ffb27e', shadow: '#a04430', sigil: '✦', quote: '길이 없다면, 내가 먼저 열겠어.', description: '불꽃을 두른 대검으로 넓은 화염과 관통 공격을 펼치는 수호자.', bomb: '샤이닝플레임', bombInfo: '불사조가 전장을 휩쓸어요. 3초간 화력이 75% 증가해요.', weapons: [
+    { id: 'zeke', radius: 6, speed: 1100, name: '지크', title: '새벽을 여는 화염검사', en: 'ZEKE', color: '#ffb27e', shadow: '#a04430', sigil: '✦', quote: '길이 없다면, 내가 먼저 열겠어.', description: '불꽃을 두른 대검으로 넓은 화염과 관통 공격을 펼치는 수호자.', bomb: '샤이닝플레임', bombInfo: '불사조가 전장을 휩쓸어요. 3초간 화력이 증가해요.', weapons: [
     { id: 'spread', name: '프레임윙', tag: '3웨이 · 광역형', description: '세 방향의 불꽃이 넓게 퍼져요. 파워업으로 화염이 늘어나요.', power: 3, reach: 5 },
     { id: 'lance', name: '프로미넌스', tag: '관통 · 폭발형', description: '거대한 불의 검을 발사해요. 관통한 적에게 폭발을 남겨요.', power: 5, reach: 3 }
   ] },
@@ -28,7 +28,7 @@ HEROES.push(
   ] }
 );
 HEROES.push(
-  { id: 'night', bombBonus: 1, name: '밤토끼', title: '잠들지 못한 밤의 친구', en: 'NIGHT RABBIT', radius: 4, color: '#dcadff', shadow: '#785494', sigil: '☽', quote: '잠이 오지 않으면, 나랑 조금만 더 있자.', description: '밤의 마법으로 묵직한 달과 오래 머무는 꿈의 영역을 펼치는 수호자.', bomb: '굿나잇 허그', bombInfo: '3초간 총 1900의 피해를 줘요. 사용하면 파워가 1단계 내려가요.', weapons: [
+    { id: 'night', bombBonus: 1, name: '밤토끼', title: '잠들지 못한 밤의 친구', en: 'NIGHT RABBIT', radius: 4, color: '#dcadff', shadow: '#785494', sigil: '☽', quote: '잠이 오지 않으면, 나랑 조금만 더 있자.', description: '밤의 마법으로 묵직한 달과 오래 머무는 꿈의 영역을 펼치는 수호자.', bomb: '굿나잇 허그', bombInfo: '3초간 적에게 피해를 줘요. 사용하면 파워가 1단계 내려가요.', weapons: [
     { id: 'nightfall', name: '문드롭', tag: '대형탄 · 일격형', description: '묵직한 달이 전방으로 곧게 날아가요.', power: 4, reach: 4 },
     { id: 'dreamfield', name: '슬립리스 나이트', tag: '장판 · 지속형', description: '꿈의 씨앗이 3초간 장판을 남겨요.', power: 3, reach: 5 }
   ] },
