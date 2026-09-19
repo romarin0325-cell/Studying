@@ -203,7 +203,7 @@ export class Game {
     this.emit('kill', { boss: !!enemy.boss, x, y, points });
     if (enemy.boss) {
       this.recoverRoom(); this.stats.bossKills++; this.bossDefeated = true; this.bossClearTime = this.bossElapsed; this.phase = 'clear'; this.phaseTime = 0;
-      this.score += this.player.lives * 1000; if (this.challenge) this.awardBossTimeBonus(); this.clearBullets(); this.hazards.length = 0;
+      if (this.challenge) this.awardBossTimeBonus(); this.clearBullets(); this.hazards.length = 0;
       for (const e of this.enemies) e.hp = 0;
       this.emit('bossDefeated', { stage: this.stageIndex });
     } else {
@@ -216,7 +216,7 @@ export class Game {
     }
   }
   get multiplier() { return ['warning','boss'].includes(this.phase) ? 1 : 1 + Math.min(4, Math.floor(this.combo / 10)); }
-  get rank() { return this.stats.deaths <= 5 ? 'S' : this.stats.deaths <= 15 ? 'A' : 'B'; }
+  get rank() { return this.challenge ? (this.stats.deaths <= 5 ? 'S' : this.stats.deaths <= 15 ? 'A' : 'B') : (this.stats.deaths === 0 ? 'S' : this.stats.deaths < 4 ? 'A' : 'B'); }
   bossTimeScore(seconds) { return seconds <= 20 ? 15000 : seconds <= 30 ? 10000 : seconds <= 40 ? 5000 : 0; }
   awardBossTimeBonus() {
     const bonus = this.bossTimeScore(this.bossClearTime);
@@ -328,7 +328,7 @@ export class Game {
   clearRoom() {
     if (this.phase !== 'wave') return;
     this.recoverRoom(); this.phase = 'clear'; this.phaseTime = 0; this.clearBullets(); this.hazards.length = this.enemies.length = this.effects.length = 0;
-    this.score += this.player.lives * 700; this.emit('roomClear', {room:this.room});
+    this.emit('roomClear', {room:this.room});
   }
   spawnBoss() {
     this.enemies.length = 0; this.clearBullets(); this.hazards.length = 0;
@@ -466,7 +466,7 @@ export class Game {
       this.timeBonus = this.bossTimeScore(this.bossClearTime);
       this.score += this.timeBonus;
     }
-    this.rankBonus = this.rank === 'S' ? 10000 : this.rank === 'A' ? 5000 : 0;
+    this.rankBonus = this.challenge ? (this.rank === 'S' ? 10000 : this.rank === 'A' ? 5000 : 0) : (this.rank === 'S' ? 4000 : this.rank === 'A' ? 2000 : 0);
     this.score += this.rankBonus; this.bonusesFinalized = true;
   }
   revive(correct) {
