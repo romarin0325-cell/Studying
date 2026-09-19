@@ -1,0 +1,72 @@
+name: Defense
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: defense-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      defense: ${{ steps.scope.outputs.defense }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: scope
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo 'defense=true' >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE" "$HEAD" | grep -E '^(defense/|scripts/.*defense.*|package(-lock)?\.json$|\.github/workflows/defense\.yml$)' >/dev/null; then
+            echo 'defense=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'defense=false' >> "$GITHUB_OUTPUT"
+          fi
+  checks:
+    needs: changes
+    if: needs.changes.outputs.defense == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run lint:defense
+      - run: npm run test:defense
+      - run: npm run test:defense:local
+      - run: git diff --exit-code -- defense/dist-local/HeroCoreDefense.html
+      - run: npm run test:defense:browser
+      - run: npm run test:defense:experience
+      - run: npm run test:defense:resilience
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: defense-browser-evidence
+          path: |
+            /tmp/hero-defense-v2-browser-*/
+            /tmp/starward-experience-*/
+            /tmp/defense-resilience-*/
+  gate:
+    name: Defense release gate
+    needs: [changes, checks]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          SCOPE: ${{ needs.changes.result }}
+          CHANGED: ${{ needs.changes.outputs.defense }}
+          CHECKS: ${{ needs.checks.result }}
+        run: |
+          test "$SCOPE" = success
+          if test "$CHANGED" = true; then test "$CHECKS" = success; fi

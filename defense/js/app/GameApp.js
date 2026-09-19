@@ -29,11 +29,12 @@ export class GameApp {
       result: ResultScreen,
     });
     this.destroyed = false;
+    this.mediaFailures = new Set();
   }
 
   start() {
     this.#updateStorageWarning();
-    this.assetManager.preload('menu').catch((error) => console.warn('V2 menu asset preload failed', error));
+    this.preloadArt('menu');
     this.showStages();
     globalThis.__heroDefenseV2Debug = {
       getState: () => this.getDebugState(),
@@ -48,6 +49,16 @@ export class GameApp {
       stepTicks: (count = 1) => this.scene.current?.debugStepTicks?.(count),
     };
     return this;
+  }
+
+  async preloadArt(selection, fallbackIds = []) {
+    const summary = await this.assetManager.preload(selection);
+    for (const id of summary.failed) this.mediaFailures.add(id);
+    if (summary.failed.length && fallbackIds.length) {
+      const fallback = await this.assetManager.preload(fallbackIds);
+      for (const id of fallback.failed) this.mediaFailures.add(id);
+    }
+    return summary;
   }
 
   showStages() {
@@ -66,7 +77,7 @@ export class GameApp {
   showFormation(stageId = this.selectedStageId, difficultyId = this.difficultyId) {
     this.selectedStageId = stageId;
     this.difficultyId = difficultyId;
-    this.assetManager.preload('formation').catch((error) => console.warn('V2 formation asset preload failed', error));
+    this.preloadArt('formation');
     this.scene.show('formation', {
       stageId,
       initialFormation: this.formation,
@@ -94,7 +105,7 @@ export class GameApp {
       ...heroIds.map((id) => `portrait/${id}`),
       ...['heroes', 'companions', 'creatures', 'worlds'].map(id => `illustration/${id}`),
     ];
-    this.assetManager.preload(battleAssetIds).catch((error) => console.warn('V2 battle asset preload failed', error));
+    this.preloadArt(['illustration/heroes','illustration/companions','illustration/creatures','illustration/worlds'], battleAssetIds.filter(id => !id.startsWith('illustration/')));
     this.scene.show('battle', {
       stageId: this.selectedStageId,
       difficultyId: this.difficultyId,
@@ -156,6 +167,7 @@ export class GameApp {
   getDebugState() {
     return {
       scene: this.scene.currentName,
+      mediaFailures: [...this.mediaFailures],
       persistentStorage: this.repository.isPersistent,
       selectedStageId: this.selectedStageId,
       formation: { mainId: this.formation.mainId, heroIds: [...this.formation.heroIds] },

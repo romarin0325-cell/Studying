@@ -1,3 +1,5 @@
+import { drawFallbackToken } from './CanvasShapes.js';
+import { HERO_BY_ID } from '../content/heroes.js';
 const MAIN = ["rumi", "luna", "cinderella", "zeke"];
 const COMPANIONS = ["snow_rabbit", "avalanche_maid", "night_rabbit", "guardian", "storm_sage", "lightning_sage"];
 const CREATURES = ["ruin_scarab", "ember_scarab", "sand_wisp", "stone_guard", "regrowth_idol", "rift_shade", "rift_wing", "abyss_armor", "chaos_spawn", "lesser_demon", "flora", "pharaoh", "reaper", "demon_god", "core", "portal"];
@@ -34,9 +36,14 @@ export function paintPortraits(root, manager, selector = "[data-portrait]") {
     if (!root?.isConnected) return;
     for (const canvas of root.querySelectorAll(selector)) {
       const id = canvas.dataset.portrait ?? canvas.dataset.heroAvatar;
-      const art = illustration(manager, id);
-      if (!art) continue;
+      const art = illustration(manager, id) ?? (manager.getImage(`portrait/${id}`) ? { image: manager.getImage(`portrait/${id}`), frame: { x: 0, y: 0, width: 1, height: 1 } } : null);
       const ctx = canvas.getContext("2d");
+      canvas.dataset.portraitSource = !art ? 'token' : illustration(manager, id) ? 'atlas' : 'legacy';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!art) {
+        drawFallbackToken(ctx, { x: canvas.width/2, y: canvas.height/2, size: canvas.height*.85, label: HERO_BY_ID[id]?.name?.slice(0,1) ?? '?', kind: 'hero' });
+        continue;
+      }
       const { image, frame } = art;
       const iw = image.naturalWidth || image.width, ih = image.naturalHeight || image.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -46,5 +53,14 @@ export function paintPortraits(root, manager, selector = "[data-portrait]") {
     }
   };
   paint();
-  manager.preload(["illustration/heroes", "illustration/companions"]).then(paint);
+  // Repaint each completed atlas independently. A hanging companion request
+  // must not hide a loaded main portrait (or delay its fallback).
+  for (const atlas of ['heroes', 'companions']) {
+    manager.preload([`illustration/${atlas}`]).then(async summary => {
+      paint();
+      if (!summary.failed.length) return;
+      const ids = atlas === 'heroes' ? MAIN : COMPANIONS;
+      await Promise.all(ids.map(id => manager.preload([`portrait/${id}`]).then(paint)));
+    });
+  }
 }

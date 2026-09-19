@@ -22,5 +22,5 @@ export function assetUrl(path) {
   return globalThis.__HERO_DEFENSE_V2_EMBEDDED_ASSETS__?.[path] ?? path;
 }
 export function worldStyle(index = 0) {
-  return `background-image:url('${assetUrl("./assets/moonlit/worlds.png")}');background-position:${index % 2 ? "100%" : "0%"} ${index > 1 ? "100%" : "0%"}`;
+  return `background-image:url('${assetUrl("./assets/moonlit/worlds.webp")}');background-position:${index % 2 ? "100%" : "0%"} ${index > 1 ? "100%" : "0%"}`;
 }

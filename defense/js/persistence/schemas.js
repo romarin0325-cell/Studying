@@ -60,7 +60,7 @@ export function validateCheckpoint(value) {
   );
   assert(isRecord(value.placements), 'Checkpoint placements must be an object');
   assert(Object.keys(value.placements).length === 5, 'Checkpoint must place all five heroes');
-  assert(formationIds.every((id) => Object.hasOwn(value.placements, id)), 'Checkpoint placements must match formation');
+  assert(formationIds.every((id) => Object.prototype.hasOwnProperty.call(value.placements, id)), 'Checkpoint placements must match formation');
   const occupiedCells = new Set();
   const blockedCells = new Set([
     ...stage.map.pathCells.map(({ x, y }) => `${x},${y}`),
@@ -90,12 +90,12 @@ export function validateCheckpoint(value) {
   assert(Number.isFinite(value.coreDurability) && value.coreDurability > 0 && value.coreDurability <= 10, 'Checkpoint core durability is invalid');
   assert(Number.isInteger(value.crystals) && value.crystals >= 0 && value.crystals <= 15, 'Checkpoint crystals are invalid');
   assert(isRecord(value.levels), 'Checkpoint levels must be an object');
-  assert(Object.keys(value.levels).length === 5 && formationIds.every((id) => Object.hasOwn(value.levels, id)), 'Checkpoint levels must match formation');
+  assert(Object.keys(value.levels).length === 5 && formationIds.every((id) => Object.prototype.hasOwnProperty.call(value.levels, id)), 'Checkpoint levels must match formation');
   for (const level of Object.values(value.levels)) {
     assert(Number.isInteger(level) && level >= 1 && level <= 6, 'Checkpoint hero level is invalid');
   }
   assert(isRecord(value.traits), 'Checkpoint traits must be an object');
-  assert(Object.keys(value.traits).length === 5 && formationIds.every((id) => Object.hasOwn(value.traits, id)), 'Checkpoint traits must match formation');
+  assert(Object.keys(value.traits).length === 5 && formationIds.every((id) => Object.prototype.hasOwnProperty.call(value.traits, id)), 'Checkpoint traits must match formation');
   for (const heroId of formationIds) {
     const selected = value.traits[heroId];
     const hero = HERO_BY_ID[heroId];
@@ -129,7 +129,7 @@ export function validateCheckpoint(value) {
     'Checkpoint RNG state is invalid',
   );
   assert(isRecord(value.nextWaveFlags), 'Checkpoint next-wave flags are required');
-  if (Object.hasOwn(value.nextWaveFlags, 'coreDamagedPreviousWave')) {
+  if (Object.prototype.hasOwnProperty.call(value.nextWaveFlags, 'coreDamagedPreviousWave')) {
     assert(typeof value.nextWaveFlags.coreDamagedPreviousWave === 'boolean', 'Checkpoint core damage flag is invalid');
   }
   return value;

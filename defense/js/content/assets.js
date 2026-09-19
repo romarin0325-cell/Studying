@@ -41,7 +41,7 @@ export const SOURCE_ATLASES = deepFreeze({
     },
     hasAlpha: false,
     transparencyRequired: true,
-    transparencyStatus: 'runtime-connected-background-removal',
+    transparencyStatus: 'opaque-generation-source',
   },
   heroes_companions_a: {
     id: 'heroes_companions_a',
@@ -59,7 +59,7 @@ export const SOURCE_ATLASES = deepFreeze({
     },
     hasAlpha: false,
     transparencyRequired: true,
-    transparencyStatus: 'runtime-connected-background-removal',
+    transparencyStatus: 'opaque-generation-source',
   },
   heroes_companions_b: {
     id: 'heroes_companions_b',
@@ -75,7 +75,7 @@ export const SOURCE_ATLASES = deepFreeze({
     },
     hasAlpha: false,
     transparencyRequired: true,
-    transparencyStatus: 'runtime-connected-background-removal',
+    transparencyStatus: 'opaque-generation-source',
   },
   bosses: {
     id: 'bosses',
@@ -93,7 +93,7 @@ export const SOURCE_ATLASES = deepFreeze({
     },
     hasAlpha: false,
     transparencyRequired: true,
-    transparencyStatus: 'runtime-connected-background-removal',
+    transparencyStatus: 'opaque-generation-source',
   },
 });
 
@@ -144,14 +144,15 @@ function commonImageMetadata(atlas) {
     type: 'image',
     optional: true,
     fallbackAllowed: true,
-    fallbackAllowedIn: ['development'],
-    fallbackMode: 'development-only',
+    fallbackAllowedIn: ['development', 'release'],
+    fallbackMode: 'always',
     releaseRequired: true,
-    releaseFallbackAllowed: false,
+    releaseFallbackAllowed: true,
     transparencyRequired: true,
-    hasAlpha: atlas.hasAlpha,
-    transparencyStatus: atlas.transparencyStatus,
-    backgroundStatus: atlas.hasAlpha ? 'transparent' : 'opaque-checkerboard-from-generation',
+    hasAlpha: true,
+    transparencyStatus: 'prepared-alpha',
+    backgroundStatus: 'transparent',
+    sourceBackgroundStatus: 'opaque-checkerboard-from-generation',
   };
 }
 
@@ -162,7 +163,7 @@ function portraitEntry(heroId) {
   return {
     id: `portrait/${heroId}`,
     path: `./assets/characters/portraits/${heroId}.webp`,
-    preloadGroup: ['menu', 'formation'],
+    preloadGroup: 'fallback',
     entityKind: 'hero',
     entityId: heroId,
     direction,
@@ -205,10 +206,11 @@ const bossBattleSprites = BOSS_IDS.flatMap((bossId) => DIRECTIONS.map((direction
 
 export const ASSET_MANIFEST = deepFreeze([
   ...['heroes', 'companions', 'creatures', 'worlds'].map((id) => ({
-    id: `illustration/${id}`, type: 'image', path: `./assets/moonlit/${id}.png`,
-    preloadGroup: ['menu', 'formation', 'battle'], releaseRequired: true,
+    id: `illustration/${id}`, type: 'image', path: `./assets/moonlit/${id}.webp`,
+    preloadGroup: id === 'worlds' ? ['menu','battle'] : id === 'creatures' ? 'battle' : ['formation','battle'], releaseRequired: true,
+    hasAlpha: id !== 'worlds', sourceBackgroundStatus: id === 'worlds' ? 'painted-scene' : 'generated-white',
     pivotX: .5, pivotY: .5,
-    backgroundStatus: id === 'worlds' ? 'painted-scene' : 'generated-white',
+    backgroundStatus: id === 'worlds' ? 'painted-scene' : 'transparent',
   })),
   ...portraits,
   ...heroBattleSprites,

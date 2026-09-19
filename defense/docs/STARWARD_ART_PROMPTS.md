@@ -1,6 +1,6 @@
 # Starward art provenance
 
-Generated with the built-in image generation tool on 2026-09-20. User-provided character references determined identity and costume. Exact prompts follow. Output files are in `assets/moonlit/`. Heroes use the corrected white-background generation. Runtime edge-connected white removal produces transparent render surfaces; source files are opaque PNGs. Companions use measured per-pose rectangles in `Illustrations.js` to avoid adjacent-pose bleed.
+Generated with the built-in image generation tool on 2026-09-20. User-provided character references determined identity and costume. Exact prompts follow. Output files are in `assets/moonlit/`. Heroes use the corrected white-background generation. The original opaque PNGs are retained in Git history. Release assets are now preprocessed alpha WebP (quality 90, alpha quality 100); no background removal runs in the browser. Companions use measured per-pose rectangles in `Illustrations.js` to avoid adjacent-pose bleed.
 
 ## mainPrompt
 

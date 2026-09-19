@@ -3,6 +3,7 @@ import { SpriteResolver, drawResolvedSprite } from "./SpriteResolver.js";
 import { illustration } from "./Illustrations.js";
 import { HERO_BY_ID } from "../content/heroes.js";
 import { JOURNEYS } from "../content/presentation.js";
+import { roundedRect, drawFallbackToken } from './CanvasShapes.js';
 export function spriteDestination(point, size, entry = null) {
   return { x: point.x - size * (entry?.pivotX ?? 0.5), y: point.y - size * (entry?.pivotY ?? 0.75), width: size, height: size };
 }
@@ -130,7 +131,7 @@ export class BattleRenderer {
       this.cache = { key, surface };
     }
     ctx.drawImage(this.cache.surface, 0, 0, w, h);
-    const cell = this.layout.logicalRadiusToCanvas(1), first = snapshot.stage.path[0], last = snapshot.stage.path.at(-1);
+    const cell = this.layout.logicalRadiusToCanvas(1), first = snapshot.stage.path[0], last = snapshot.stage.path[snapshot.stage.path.length - 1];
     if (first) this.drawProp(ctx, "portal", this.layout.logicalCellCenterToCanvas(first.x, first.y), cell * 1.9);
     if (last) this.drawProp(ctx, "core", this.layout.logicalCellCenterToCanvas(last.x, last.y), cell * 1.9);
     if (snapshot.phase === "PREPARATION") for (let i = 4; i < snapshot.stage.path.length - 1; i += 7) {
@@ -151,6 +152,7 @@ export class BattleRenderer {
   drawProp(ctx, id, point, size) {
     const art = illustration(this.assetManager, id);
     if (art) drawResolvedSprite(ctx, art, { x: point.x - size / 2, y: point.y - size * 0.8, width: size, height: size });
+    else drawFallbackToken(ctx, { x: point.x, y: point.y-size*.2, size: size*.65, kind: id, label: id === 'core' ? '✦' : '→', color: id === 'core' ? '#298fa5' : '#79609d' });
   }
   drawPlacements(ctx, snapshot) {
     const canPlace = ["PREPARATION", "INTERMISSION"].includes(snapshot.phase), cell = this.layout.logicalRadiusToCanvas(1);
@@ -200,7 +202,7 @@ export class BattleRenderer {
     const bob = this.reduced ? 0 : e.hero ? Math.sin(t * 2 + e.slot) * 1 : Math.sin(t * (air ? 5 : 12) + e.progress) * cell * 0.035;
     const size = cell * (e.hero ? 2.15 : e.isBoss ? 2.6 : 1.18);
     let art = illustration(this.assetManager, e.hero ? e.id : e.enemyId, attack);
-    if (!art) art = this.sprites.resolve({ kind: e.hero ? "hero" : "boss", id: e.hero ? e.id : e.enemyId, direction: e.direction });
+    if (!art && (e.hero || e.isBoss)) art = this.sprites.resolve({ kind: e.hero ? "hero" : "boss", id: e.hero ? e.id : e.enemyId, direction: e.direction });
     ctx.save();
     ctx.fillStyle = "#1d334b30";
     ctx.beginPath();
@@ -234,11 +236,12 @@ export class BattleRenderer {
       drawResolvedSprite(ctx, art, { x: -width / 2, y: -height * 0.87, width, height });
       ctx.restore();
     }
+    if (!art) drawFallbackToken(ctx, { x: p.x, y: p.y-size*.35, size: size*.7, label: e.name?.slice(0,1) ?? '?', color: COLORS[e.element] ?? '#7b638f', kind: e.isBoss ? 'boss' : e.defenseType });
     if (e.hero) {
       ctx.save();
       ctx.fillStyle = "#fffdf0ee";
       ctx.beginPath();
-      ctx.roundRect(p.x - cell * 0.42, p.y + cell * 0.12, cell * 0.84, 13, 5);
+      roundedRect(ctx, p.x - cell * 0.42, p.y + cell * 0.12, cell * 0.84, 13, 5);
       ctx.fill();
       ctx.fillStyle = "#536763";
       ctx.font = "bold 9px system-ui";

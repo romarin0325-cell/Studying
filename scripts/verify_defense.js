@@ -174,7 +174,7 @@ function verifyReleaseAssets(manifest) {
       else {
         match = entryPath.match(/^\.\/assets\/bosses\/([^/]+)\/(front|back|left|right)\.webp$/);
         if (match) addDirection(bossDirections, match[1], match[2]);
-        else if (!/^\.\/assets\/moonlit\/(heroes|companions|worlds|creatures)\.png$/.test(entryPath)) throw new Error(`Required release asset does not follow the release contract: ${entryPath}`);
+        else if (!/^\.\/assets\/moonlit\/(heroes|companions|worlds|creatures)\.webp$/.test(entryPath)) throw new Error(`Required release asset does not follow the release contract: ${entryPath}`);
       }
     }
 
