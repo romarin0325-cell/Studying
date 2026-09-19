@@ -47,6 +47,17 @@ function drawStar(context, x, y, outerRadius, innerRadius, points, rotation) {
   context.closePath();
 }
 
+function drawShard(context, x, y, length, angle, color) {
+  const dx = Math.cos(angle), dy = Math.sin(angle);
+  context.fillStyle = color;
+  context.beginPath();
+  context.moveTo(x + dx*length, y + dy*length);
+  context.lineTo(x - dy*length*.27, y + dx*length*.27);
+  context.lineTo(x - dx*length*.6, y - dy*length*.6);
+  context.lineTo(x + dy*length*.27, y - dx*length*.27);
+  context.closePath(); context.fill();
+}
+
 function effectSourcePoint(layout, effect, fallback) {
   if (!Number.isFinite(effect.sourceX) || !Number.isFinite(effect.sourceY)) return fallback;
   return layout.logicalToCanvas(effect.sourceX, effect.sourceY);
@@ -170,7 +181,7 @@ export class EffectRenderer {
         context.fillStyle = '#fff';
         drawStar(context, point.x, point.y, cell * (0.16 + progress * 0.26), cell * (0.07 + progress * 0.11), 4, progress * 0.9);
         context.fill();
-        drawRing(context, point.x, point.y, cell * (0.12 + progress * 0.24), color, fade * 0.9, 3);
+        if (!this.reduced) for(let i=0;i<4;i++) { const angle=i*1.7; drawShard(context,point.x+Math.cos(angle)*cell*progress,point.y+Math.sin(angle)*cell*progress,cell*.14*fade,angle,color); }
         break;
       }
       case 'basic_ranged_hit': {
@@ -185,8 +196,8 @@ export class EffectRenderer {
           fade,
           Math.max(2, cell * (burst ? 0.16 : 0.08)),
         );
-        drawRing(context, point.x, point.y, cell * (burst ? 0.16 + progress * 0.56 : 0.08 + progress * 0.28), color, fade, burst ? 4 : 2);
-        if (burst && !this.reduced) drawRing(context, point.x, point.y, cell * (0.32 + progress * 0.5), '#fff', fade * 0.6, 2);
+        drawShard(context,head.x,head.y,cell*(burst?.42:.25),Math.atan2(point.y-source.y,point.x-source.x),color);
+        if (burst && !this.reduced) for(let i=0;i<5;i++) { const angle=i*1.256;drawShard(context,point.x+Math.cos(angle)*cell*progress*.65,point.y+Math.sin(angle)*cell*progress*.65,cell*.17*fade,angle,'#ecfaff'); }
         context.globalAlpha = fade;
         context.fillStyle = '#fff';
         context.fillRect(head.x - 1, head.y - cell * 0.08, 2, cell * 0.16);
@@ -195,12 +206,15 @@ export class EffectRenderer {
       }
       case 'basic_shotgun_hit': {
         const source = effectSourcePoint(layout, effect, point);
-        drawAnimatedTrace(context, source, point, progress, color, fade, Math.max(2, cell * 0.065), 0.4);
-        if (!effect.missed) drawRing(context, point.x, point.y, cell * (0.06 + progress * 0.16), color, fade, 2);
+        const head = drawAnimatedTrace(context, source, point, progress, color, fade, Math.max(2, cell * 0.065), 0.4);
+        context.fillStyle = color;
+        drawStar(context,head.x,head.y,cell*.15,cell*.05,4,progress*3); context.fill();
         break;
       }
       case 'basic_area_hit':
-        drawRing(context, point.x, point.y, radius * (0.4 + progress * 0.6), color, fade, 3);
+        context.globalAlpha = fade;
+        for(let i=0;i<(this.reduced?3:7);i++) { const angle=i*.898+progress*.4;const reach=radius*(.12+progress*.7);drawShard(context,point.x+Math.cos(angle)*reach,point.y+Math.sin(angle)*reach,cell*.24*fade,angle,'#f3c8df'); }
+        context.fillStyle='#fff9e7';drawStar(context,point.x,point.y,cell*.4*fade,cell*.1,6,progress);context.fill();
         break;
       case 'basic_nova_hit': {
         // Jagged lightning spokes radiate from the caster; jitter stays
@@ -279,8 +293,8 @@ export class EffectRenderer {
         break;
       }
       case 'skill_single_hit': {
-        drawRing(context, point.x, point.y, cell * (0.28 + progress * 0.5), '#fff', fade, 5);
-        drawRing(context, point.x, point.y, cell * (0.14 + progress * 0.38), color, fade, 3);
+        context.globalAlpha=fade;
+        for(let i=0;i<(this.reduced?3:7);i++) { const angle=i*.898;drawShard(context,point.x+Math.cos(angle)*cell*progress*.9,point.y+Math.sin(angle)*cell*progress*.9,cell*.4*fade,angle,color); }
         context.globalAlpha = fade;
         context.fillStyle = '#fff';
         drawStar(context, point.x, point.y, cell * (0.14 + progress * 0.22), cell * 0.05, 4, progress * 1.2);
@@ -288,8 +302,15 @@ export class EffectRenderer {
         break;
       }
       case 'skill_area_hit': {
-        drawRing(context, point.x, point.y, radius * (0.25 + progress * 0.75), color, fade, 5);
-        if (!this.reduced) drawRing(context, point.x, point.y, radius * (0.7 - progress * 0.25), '#fff', fade * 0.7, 2.5);
+        drawRing(context, point.x, point.y, radius * (0.25 + progress * 0.75), color, fade*.4, 1.5);
+        context.globalAlpha=fade;
+        for(let i=0;i<(this.reduced?4:9);i++) {
+          const angle=i*2.4,d=radius*Math.sqrt((i+1)/9)*(.4+progress*.55);
+          const x=point.x+Math.cos(angle)*d,y=point.y+Math.sin(angle)*d-cell*(1-progress)*.5;
+          drawShard(context,x,y,cell*.3*fade,Math.PI/2,color);
+          context.fillStyle='#fffbe5';drawStar(context,x,y,cell*.16*fade,cell*.04,4,angle);context.fill();
+          if(effect.type==='starfall'){context.strokeStyle='#fff7d5';context.lineWidth=1;context.beginPath();context.moveTo(x,y-cell*2*fade);context.lineTo(x,y);context.stroke();}
+        }
         break;
       }
       case 'status_apply': {
@@ -323,9 +344,9 @@ export class EffectRenderer {
     context.save();
     context.globalAlpha = 1 - progress;
     context.fillStyle = popup.critical ? '#ffe57f' : '#ffffff';
-    context.strokeStyle = '#3b173f';
-    context.lineWidth = 4;
-    context.font = `900 ${Math.max(15, layout.logicalRadiusToCanvas(0.4))}px system-ui`;
+    context.strokeStyle = '#536b69';
+    context.lineWidth = 2.5;
+    context.font = `800 ${Math.max(11, layout.logicalRadiusToCanvas(0.35))}px system-ui`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     const label = `${Math.round(popup.amount ?? 0)}${popup.critical ? '!' : ''}`;

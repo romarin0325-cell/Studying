@@ -11,7 +11,10 @@ import { ATTACK_FAMILIES, LEVEL_DAMAGE_MULTIPLIERS } from '../../content/combat.
 import { STATUS_BY_ID } from '../../content/statuses.js';
 import { BattleRenderer } from '../../render/BattleRenderer.js';
 import { EffectRenderer } from '../../render/EffectRenderer.js';
-import { drawResolvedSprite } from '../../render/SpriteResolver.js';
+import { paintPortraits } from '../../render/Illustrations.js';
+import { JOURNEYS, HERO_COPY, COUNTERS, DEFENSE_LABELS } from '../../content/presentation.js';
+import { STAGE_BY_ID } from '../../content/stages.js';
+import { ENEMY_BY_ID } from '../../content/enemies.js';
 
 const PHASE_LABELS = Object.freeze({
   PREPARATION: '배치 준비', WAVE_RUNNING: '방어 중', INTERMISSION: '웨이브 사이', VICTORY: '승리', DEFEAT: '패배',
@@ -33,6 +36,7 @@ function formatNumber(value, digits = 1) {
 export class BattleScreen {
   constructor({
     stageId,
+    difficultyId = 'easy',
     formation,
     checkpoint = null,
     repository,
@@ -42,7 +46,7 @@ export class BattleScreen {
     onBack,
     onResult,
   } = {}) {
-    Object.assign(this, { stageId, formation, checkpoint, repository, assetManager, settings, onSettings, onBack, onResult });
+    Object.assign(this, { stageId, difficultyId, formation, checkpoint, repository, assetManager, settings, onSettings, onBack, onResult });
     this.root = null;
     this.session = null;
     this.renderer = null;
@@ -56,6 +60,15 @@ export class BattleScreen {
     this.audioContext = null;
     this.shakeTimer = null;
     this.boundResize = () => this.#resize();
+    this.lastPhase = null;
+    this.lastUiAt = 0;
+    this.spellAiming = false;
+    this.boundVisibility = () => {
+      if (this.document.hidden && !this.session.state.paused && this.session.state.phase === BATTLE_PHASE.WAVE_RUNNING) {
+        this.session.applyNow('toggle_pause');
+        this.#refreshUi(this.session.snapshot());
+      }
+    };
   }
 
   mount(root) {
@@ -66,7 +79,7 @@ export class BattleScreen {
     root.innerHTML = `<section class="screen battle-screen" data-screen="battle">
       <header class="battle-hud">
         <button class="icon-button battle-back" type="button" data-action="back" aria-label="스테이지 선택">‹</button>
-        <div class="hud-stat hud-core"><small>CORE</small><strong data-core>10 / 10</strong></div>
+        <div class="hud-stat hud-core"><small>♡ 코어</small><strong data-core>10 / 10</strong></div>
         <div class="hud-stat hud-wave"><small>WAVE</small><strong data-wave>준비</strong></div>
         <div class="hud-stat hud-crystals"><small>◆ 꿈의 결정</small><strong data-crystals>0</strong></div>
         <span class="phase-chip" data-phase>배치 준비</span>
@@ -74,24 +87,32 @@ export class BattleScreen {
       </header>
       <div class="battle-layout">
         <div class="battle-board-shell" data-board-shell>
-          <canvas id="battle-canvas" aria-label="12×16 전장"></canvas>
+          <canvas id="battle-canvas" aria-label="수호자 배치와 별의 기원 조준 전장"></canvas>
+          <div class="battle-intel"><span data-intel></span><b data-enemy-count></b></div>
+          <div class="wave-announcement" role="status" data-announcement hidden></div>
+          <div class="boss-hud" data-boss-hud hidden><span data-boss-name></span><div><i data-boss-health></i></div></div>
+          <div class="pause-curtain" data-pause-curtain hidden><span class="eyebrow">잠시 쉬어가요</span><h2>별들이 기다리고 있어요</h2><button class="primary-button" data-action="resume">계속하기 ▷</button><button class="ghost-button" data-action="retreat">여정으로 돌아가기</button><p>진행 중인 웨이브는 처음부터 이어집니다.</p></div>
           <div class="board-hint" data-board-hint>영웅 카드를 고르고 빈 칸을 눌러 배치해</div>
         </div>
         <aside class="battle-panel">
+          <div class="selection-brief" data-selection-brief></div>
           <div class="hero-rail" data-hero-rail>${this.#heroCards()}</div>
           <div class="battle-actions">
             <button class="secondary-button compact" type="button" data-action="auto-place">자동 배치</button>
+            <button class="secondary-button compact starfall-button" type="button" data-action="starfall" hidden>✧ 별의 기원</button>
             <button class="primary-button compact" type="button" data-action="start-wave">1웨이브 시작</button>
             <button class="icon-button labeled" type="button" data-action="pause" aria-label="일시정지"><span>Ⅱ</span><small>정지</small></button>
             <button class="icon-button labeled" type="button" data-action="speed" aria-label="속도"><span data-speed>×1</span><small>속도</small></button>
           </div>
         </aside>
       </div>
+      <div class="sheet-backdrop growth-backdrop" data-growth hidden><section class="info-sheet growth-sheet" role="dialog" aria-modal="true" aria-label="웨이브 성장"><div class="growth-heading"><div><span class="eyebrow" data-growth-wave></span><h2>조금 더 강해질 시간</h2></div><b data-growth-crystals></b></div><p data-next-enemy></p><div data-growth-list></div><div class="growth-actions"><button class="secondary-button" data-action="reposition">배치 바꾸기</button><button class="primary-button" data-action="growth-next">다음 웨이브 →</button></div></section></div>
       <div class="sheet-backdrop" data-hero-sheet hidden><section class="info-sheet battle-hero-sheet" role="dialog" aria-modal="true"><button class="sheet-close icon-button" type="button" data-action="close-sheet" aria-label="닫기">×</button><div data-sheet-body></div></section></div>
     </section>`;
 
     this.session = new BattleSession({
       stageId: this.stageId,
+      difficultyId: this.difficultyId,
       formation: this.formation,
       checkpoint: this.checkpoint,
       repository: this.repository,
@@ -106,8 +127,10 @@ export class BattleScreen {
       effectRenderer: this.effectRenderer,
     });
     this.renderer.setReduced(this.settings.reducedEffects);
+    this.session.applyNow('set_speed', { speed: 2 });
     this.#paintHeroAvatars();
     this.#bindEvents();
+    this.document.addEventListener('visibilitychange', this.boundVisibility);
     this.#resize();
     this.#refreshUi(this.session.snapshot());
     this.loop = new GameLoop({
@@ -120,36 +143,19 @@ export class BattleScreen {
   #heroCards() {
     const ids = [this.formation?.mainId ?? this.checkpoint?.formation?.mainId, ...(this.formation?.heroIds ?? this.checkpoint?.formation?.heroIds ?? [])];
     return ids.map((id, slot) => `<button class="battle-hero-card ${id === this.selectedHeroId ? 'selected' : ''}" type="button" data-hero-card="${id}" data-slot="${slot}">
-      <canvas class="battle-hero-avatar" data-hero-avatar="${id}" width="64" height="64" aria-hidden="true"></canvas><span class="battle-hero-copy"><b data-hero-name>${id}</b><small>Lv<span data-level>1</span></small></span><span class="hero-cooldown" data-cooldown></span>
+      <canvas class="battle-hero-avatar" data-hero-avatar="${id}" width="160" height="150" aria-hidden="true"></canvas><span class="battle-hero-copy"><b data-hero-name>${id}</b><small>Lv<span data-level>1</span></small></span><span class="hero-cooldown" data-cooldown></span>
     </button>`).join('');
   }
 
-  #paintHeroAvatars() {
-    const ids = [this.formation?.mainId ?? this.checkpoint?.formation?.mainId, ...(this.formation?.heroIds ?? this.checkpoint?.formation?.heroIds ?? [])];
-    const assetIds = ids.map((id) => `portrait/${id}`);
-    const paint = () => {
-      if (!this.root) return;
-      for (const canvas of this.root.querySelectorAll('[data-hero-avatar]')) {
-        const assetId = `portrait/${canvas.dataset.heroAvatar}`;
-        const image = this.assetManager?.getImage(assetId);
-        const entry = this.assetManager?.getEntry(assetId);
-        const context = canvas.getContext('2d');
-        if (!context || !image) continue;
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        drawResolvedSprite(context, { image, frame: entry?.frame ?? null }, {
-          x: 0,
-          y: 0,
-          width: canvas.width,
-          height: canvas.height,
-        });
-      }
-    };
-    paint();
-    this.assetManager?.preload(assetIds).then(paint).catch(() => {});
-  }
+  #paintHeroAvatars() { paintPortraits(this.root, this.assetManager, '[data-hero-avatar]'); }
 
   #bindEvents() {
-    this.root.querySelector('[data-action="back"]').addEventListener('click', this.onBack);
+    this.root.querySelector('[data-action="back"]').addEventListener('click', () => {
+      if (this.session.state.phase !== BATTLE_PHASE.WAVE_RUNNING) { this.onBack(); return; }
+      if (!this.session.state.paused) this.session.applyNow('toggle_pause');
+      this.#refreshUi(this.session.snapshot());
+    });
+    this.root.querySelector('[data-action="retreat"]').onclick = this.onBack;
     this.root.querySelector('[data-action="settings"]').addEventListener('click', this.onSettings);
     this.root.querySelector('[data-action="auto-place"]').addEventListener('click', () => {
       this.session.applyNow('auto_place');
@@ -160,6 +166,17 @@ export class BattleScreen {
       this.session.applyNow('start_wave');
       this.#refreshUi(this.session.snapshot());
     });
+    this.root.querySelector('[data-action="starfall"]').addEventListener('click', () => {
+      this.spellAiming = !this.spellAiming;
+      this.renderer.spellAiming = this.spellAiming;
+      this.#refreshUi(this.session.snapshot());
+    });
+    this.root.querySelector('[data-action="resume"]').onclick = () => { this.session.applyNow('toggle_pause'); this.#refreshUi(this.session.snapshot()); };
+    this.root.querySelector('[data-action="reposition"]').onclick = () => { this.root.querySelector('[data-growth]').hidden = true; };
+    this.root.querySelector('[data-action="growth-next"]').onclick = () => {
+      this.root.querySelector('[data-growth]').hidden = true;
+      this.#ensureAudioContext(); this.session.applyNow('start_wave'); this.#refreshUi(this.session.snapshot());
+    };
     this.root.querySelector('[data-action="pause"]').addEventListener('click', () => {
       this.session.applyNow('toggle_pause');
       this.#refreshUi(this.session.snapshot());
@@ -169,7 +186,29 @@ export class BattleScreen {
       this.#refreshUi(this.session.snapshot());
     });
     for (const card of this.root.querySelectorAll('[data-hero-card]')) {
+      let gesture = null;
+      card.addEventListener('pointerdown', event => {
+        if (!['PREPARATION','INTERMISSION'].includes(this.session.state.phase)) return;
+        gesture = { x: event.clientX, y: event.clientY, moved: false };
+        card.setPointerCapture(event.pointerId);
+      });
+      card.addEventListener('pointermove', event => {
+        if (!gesture) return;
+        if (Math.hypot(event.clientX-gesture.x,event.clientY-gesture.y) > 8) gesture.moved = true;
+        if (!gesture.moved) return;
+        this.selectedHeroId = card.dataset.heroCard;
+        const point = this.renderer.clientToLogical(event.clientX,event.clientY);
+        this.renderer.draggingHeroId = this.selectedHeroId;
+        this.renderer.aim = point.inside ? point : null;
+        this.#refreshUi(this.session.snapshot());
+      });
+      card.addEventListener('pointerup', event => {
+        if (gesture?.moved) { this.suppressCardClickUntil = performance.now()+250; this.#handleBoardPointer(event); }
+        gesture = null; this.renderer.draggingHeroId = null; this.renderer.aim = null;
+      });
+      card.addEventListener('pointercancel', () => { gesture = null; this.renderer.draggingHeroId = null; this.renderer.aim = null; });
       card.addEventListener('click', () => {
+        if (performance.now() < (this.suppressCardClickUntil ?? 0)) return;
         this.selectedHeroId = card.dataset.heroCard;
         const phase = this.session.state.phase;
         if ([BATTLE_PHASE.WAVE_RUNNING, BATTLE_PHASE.INTERMISSION].includes(phase)) {
@@ -179,6 +218,12 @@ export class BattleScreen {
       });
     }
     this.renderer.canvas.addEventListener('pointerdown', (event) => this.#handleBoardPointer(event));
+    this.renderer.canvas.addEventListener('pointermove', (event) => {
+      if (!this.spellAiming && !['PREPARATION', 'INTERMISSION'].includes(this.session.state.phase)) return;
+      const point = this.renderer.clientToLogical(event.clientX, event.clientY);
+      this.renderer.aim = point.inside ? { x: point.x, y: point.y } : null;
+    });
+    this.renderer.canvas.addEventListener('pointerleave', () => { this.renderer.aim = null; });
     this.root.querySelector('[data-action="close-sheet"]').addEventListener('click', () => this.#closeHeroSheet());
     this.root.querySelector('[data-hero-sheet]').addEventListener('click', (event) => {
       if (event.target === event.currentTarget) this.#closeHeroSheet();
@@ -208,7 +253,8 @@ export class BattleScreen {
     const renderStarted = globalThis.performance?.now?.() ?? Date.now();
     this.renderer.render(snapshot);
     this.session.recordRenderDuration((globalThis.performance?.now?.() ?? Date.now()) - renderStarted);
-    this.#refreshUi(snapshot);
+    const now = performance.now();
+    if (now - this.lastUiAt > 100 || snapshot.phase !== this.lastPhase) { this.#refreshUi(snapshot); this.lastUiAt = now; }
     if ([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT].includes(snapshot.phase) && !this.resultTimer) {
       this.loop?.stop();
       this.resultTimer = globalThis.setTimeout(() => this.onResult({ result: snapshot.result, snapshot }), 280);
@@ -218,6 +264,7 @@ export class BattleScreen {
   #consumeEvents() {
     for (const event of this.session.consumeVisualEvents()) {
       this.#applyFeedback(event);
+      this.renderer.feedback(event);
       if (!event.effectPreset) continue;
       this.effectRenderer.push(event);
     }
@@ -237,7 +284,7 @@ export class BattleScreen {
   }
 
   #applyFeedback(event) {
-    if (this.settings.screenShake && (event.type === 'core_damaged' || event.effectPreset === 'critical_hit')) {
+    if (this.settings.screenShake && event.type === 'core_damaged') {
       const board = this.root?.querySelector('[data-board-shell]');
       if (board) {
         board.classList.remove('shake');
@@ -248,7 +295,9 @@ export class BattleScreen {
       }
     }
     if (!this.settings.sound) return;
-    const frequency = event.type === 'core_damaged'
+    const hit = event.type === 'hit' && !event.suppressEffect && performance.now() - (this.lastHitSound ?? 0) > 115;
+    if (hit) this.lastHitSound = performance.now();
+    const frequency = hit ? ({fire:220, water:740, light:990, nature:440, dark:330})[event.element] ?? 660 : event.type === 'starfall' ? 1174 : event.type === 'core_damaged'
       ? 130
       : event.type === 'wave_completed'
         ? 880
@@ -264,24 +313,42 @@ export class BattleScreen {
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
       const start = audioContext.currentTime;
-      oscillator.type = event.type === 'core_damaged' ? 'sawtooth' : 'sine';
+      oscillator.type = event.type === 'core_damaged' ? 'triangle' : 'sine';
       oscillator.frequency.setValueAtTime(frequency, start);
-      gain.gain.setValueAtTime(0.035, start);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.07);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * (hit ? .72 : 1.5), start+.09);
+      gain.gain.setValueAtTime(hit ? .012 : .03, start);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + .12);
       oscillator.connect(gain);
       gain.connect(audioContext.destination);
       oscillator.start(start);
-      oscillator.stop(start + 0.075);
+      oscillator.stop(start + .13);
+      oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
     } catch {
       // Audio feedback is optional; combat must continue if the device rejects it.
     }
   }
 
   #handleBoardPointer(event) {
+    const boardPoint = this.renderer.clientToLogical(event.clientX, event.clientY);
+    if (this.spellAiming) {
+      if (boardPoint.inside && this.session.applyNow('cast_starfall', { x: boardPoint.x, y: boardPoint.y })) {
+        this.spellAiming = false; this.renderer.spellAiming = false; this.renderer.aim = null;
+        this.#refreshUi(this.session.snapshot());
+      } else this.#announce('적이 있는 곳을 골라주세요');
+      return;
+    }
+    const tapped = this.session.state.heroes.find(h => h.placed && Math.hypot(h.x + .5 - boardPoint.x, h.y + .5 - boardPoint.y) < .65);
+    if (tapped) {
+      this.selectedHeroId = tapped.id;
+      if (this.session.state.phase === BATTLE_PHASE.WAVE_RUNNING) this.#openHeroSheet(tapped.id);
+      this.#refreshUi(this.session.snapshot()); return;
+    }
     if (![BATTLE_PHASE.PREPARATION, BATTLE_PHASE.INTERMISSION].includes(this.session.state.phase)) return;
     const point = this.renderer.clientToLogical(event.clientX, event.clientY);
     if (!point.inside || !this.selectedHeroId) return;
-    if (!this.session.applyNow('place_hero', { heroId: this.selectedHeroId, x: point.cellX, y: point.cellY })) return;
+    const legal = this.session.state.stage.placementCells.filter(cell => !this.session.state.heroes.some(h => h.id !== this.selectedHeroId && h.placed && h.x === cell.x && h.y === cell.y));
+    const nearest = legal.sort((a,b) => Math.hypot(a.x+.5-point.x,a.y+.5-point.y)-Math.hypot(b.x+.5-point.x,b.y+.5-point.y))[0];
+    if (!nearest || Math.hypot(nearest.x+.5-point.x,nearest.y+.5-point.y) > .85 || !this.session.applyNow('place_hero', { heroId: this.selectedHeroId, x: nearest.x, y: nearest.y })) { this.#announce('밝은 원 위에 배치할 수 있어요'); return; }
     const next = this.session.state.heroes.find((hero) => !hero.placed);
     if (next) this.selectedHeroId = next.id;
     this.#refreshUi(this.session.snapshot());
@@ -372,6 +439,7 @@ export class BattleScreen {
     this.session.applyNow('level_up', { heroId, traitId });
     this.#closeHeroSheet();
     this.#refreshUi(this.session.snapshot());
+    if (this.session.state.phase === BATTLE_PHASE.INTERMISSION) this.#showGrowth();
   }
 
   #closeHeroSheet() {
@@ -383,6 +451,28 @@ export class BattleScreen {
 
   #refreshUi(snapshot) {
     if (!this.root) return;
+    const changedPhase = this.lastPhase !== snapshot.phase;
+    this.lastPhase = snapshot.phase;
+    const running = snapshot.phase === BATTLE_PHASE.WAVE_RUNNING;
+    this.renderer.selectedHeroId = this.selectedHeroId;
+    const selected = this.session.state.heroes.find(h => h.id === this.selectedHeroId);
+    this.renderer.selectedRange = selected ? getEffectiveRange(this.session.state, selected) : 3;
+    const waveDefinition = STAGE_BY_ID[this.stageId ?? snapshot.stageId]?.waves[(running ? snapshot.wave.number : snapshot.nextWave) - 1];
+    const enemy = ENEMY_BY_ID[waveDefinition?.groups[0].enemyId];
+    this.root.querySelector('[data-intel]').textContent = `${running ? '' : '다음 · '}${enemy?.name ?? ''} · ${COUNTERS[enemy?.defenseType] ?? ''}`;
+    this.root.querySelector('[data-enemy-count]').textContent = running ? `${Math.max(0,snapshot.wave.total-snapshot.wave.spawned)+snapshot.wave.alive} 남음` : '';
+    this.root.querySelector('[data-selection-brief]').textContent = this.spellAiming ? '적 무리를 누르세요 · 1.5초 정지, 4초 감속' : running ? `${JOURNEYS[snapshot.stageId].title} · 수호자를 누르면 전투 정보` : `${selected?.definition.name ?? ''} · ${HERO_COPY[selected?.id]?.[1] ?? ''} · 사거리 ${this.renderer.selectedRange}`;
+    this.root.querySelector('[data-pause-curtain]').hidden = !snapshot.paused || !running;
+    const spell = this.root.querySelector('[data-action="starfall"]');
+    spell.hidden = !running;
+    spell.disabled = !snapshot.starfallReady || snapshot.paused;
+    spell.textContent = this.spellAiming ? '선택 취소' : snapshot.starfallReady ? '✧ 별의 기원' : '기원 사용 완료';
+    spell.classList.toggle('aiming', this.spellAiming);
+    const boss = snapshot.enemies.find(e => e.isBoss);
+    this.root.querySelector('[data-boss-hud]').hidden = !boss;
+    if (boss) { this.root.querySelector('[data-boss-name]').textContent = `${boss.name} · ${snapshot.wave.number === 10 ? '코어 도달 시 패배' : '돌파 피해 3'}`; this.root.querySelector('[data-boss-health]').style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`; }
+    if (changedPhase && snapshot.phase === BATTLE_PHASE.INTERMISSION) { this.spellAiming = false; this.renderer.spellAiming = false; this.#showGrowth(); }
+    if (changedPhase && running) { this.root.querySelector('[data-growth]').hidden = true; this.#closeHeroSheet(); this.#announce(`${waveDefinition?.kind === 'boss' ? '수호신 출현' : 'WAVE'} ${snapshot.wave.number.toString().padStart(2,'0')}`); }
     this.root.querySelector('[data-core]').textContent = `${Number.isInteger(snapshot.core.durability) ? snapshot.core.durability : snapshot.core.durability.toFixed(1)} / ${snapshot.core.maxDurability}`;
     this.root.querySelector('[data-wave]').textContent = snapshot.phase === BATTLE_PHASE.WAVE_RUNNING ? `${snapshot.wave.number} · ${snapshot.wave.alive}` : `${snapshot.nextWave} / 10`;
     this.root.querySelector('[data-crystals]').textContent = snapshot.crystals;
@@ -392,26 +482,52 @@ export class BattleScreen {
     start.textContent = snapshot.phase === BATTLE_PHASE.INTERMISSION ? `${snapshot.nextWave}웨이브 시작` : snapshot.phase === BATTLE_PHASE.PREPARATION ? '1웨이브 시작' : '방어 중';
     const auto = this.root.querySelector('[data-action="auto-place"]');
     auto.disabled = snapshot.phase === BATTLE_PHASE.WAVE_RUNNING;
+    auto.hidden = running;
     const pause = this.root.querySelector('[data-action="pause"]');
     pause.disabled = snapshot.phase !== BATTLE_PHASE.WAVE_RUNNING;
     pause.querySelector('span').textContent = snapshot.paused ? '▶' : 'Ⅱ';
     this.root.querySelector('[data-speed]').textContent = `×${snapshot.speed}`;
     const hint = this.root.querySelector('[data-board-hint]');
-    hint.hidden = allHeroesPlaced(this.session.state);
+    hint.hidden = !this.spellAiming && allHeroesPlaced(this.session.state);
+    hint.textContent = this.spellAiming ? '적 무리를 누르면 별의 기원이 내려요' : '수호자를 고르고 밝은 원을 눌러 배치하세요';
     for (const card of this.root.querySelectorAll('[data-hero-card]')) {
       const hero = snapshot.heroes.find((candidate) => candidate.id === card.dataset.heroCard);
       card.classList.toggle('selected', hero.id === this.selectedHeroId);
       card.classList.toggle('placed', hero.placed);
-      card.querySelector('[data-hero-name]').textContent = hero.name;
+      card.querySelector('[data-hero-name]').textContent = ({ avalanche_maid: '메이드', lightning_sage: '번개 현자', storm_sage: '폭풍 현자' })[hero.id] ?? hero.name; card.setAttribute('aria-label', `${hero.name} Lv${hero.level}`);
       card.querySelector('[data-level]').textContent = hero.level;
       const runtime = this.session.state.heroes.find((candidate) => candidate.id === hero.id);
-      const cooldown = Math.max(runtime.attackTimer, runtime.skillTimer);
+      const cooldown = runtime.skillTimer;
       card.querySelector('[data-cooldown]').style.setProperty('--cooldown', String(Math.min(1, cooldown / Math.max(1, runtime.definition.skill.cooldown))));
     }
     if (this.openSheetHeroId) {
       if ([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT].includes(snapshot.phase)) this.#closeHeroSheet();
       else this.#renderHeroSheet();
     }
+  }
+
+  #announce(text) {
+    const label = this.root?.querySelector('[data-announcement]');
+    if (!label) return;
+    label.textContent = text; label.hidden = false;
+    clearTimeout(this.announcementTimer);
+    this.announcementTimer = setTimeout(() => { if (label.isConnected) label.hidden = true; }, 1600);
+  }
+
+  #showGrowth() {
+    const state = this.session.state, sheet = this.root.querySelector('[data-growth]');
+    sheet.querySelector('[data-growth-wave]').textContent = `WAVE ${state.wave.number || state.nextWave-1} CLEAR`;
+    sheet.querySelector('[data-growth-crystals]').textContent = `✧ ${state.crystals}`;
+    const next = ENEMY_BY_ID[state.stage.waves[state.nextWave-1].groups[0].enemyId];
+    sheet.querySelector('[data-next-enemy]').textContent = `다음은 ${next.name} · ${COUNTERS[next.defenseType]}`;
+    sheet.querySelector('[data-growth-list]').innerHTML = state.heroes.map(hero => `<button class="growth-row" data-grow-hero="${hero.id}" ${hero.level>=6 || state.crystals<1?'disabled':''}><canvas data-portrait="${hero.id}" width="100" height="90"></canvas><span><b>${hero.definition.name}</b><small>Lv.${hero.level} · ${HERO_COPY[hero.id][1]}</small></span><strong>${hero.level>=6?'MAX':`✧ 1 <small>${[3,5].includes(hero.level)?'특성 선택':'성장 ↑'}</small>`}</strong></button>`).join('');
+    for (const button of sheet.querySelectorAll('[data-grow-hero]')) button.onclick = () => {
+      const hero = state.heroes.find(h => h.id === button.dataset.growHero);
+      if ([3,5].includes(hero.level)) { sheet.hidden = true; this.#openHeroSheet(hero.id); }
+      else this.#levelHero(hero.id, null);
+    };
+    sheet.hidden = false;
+    paintPortraits(sheet, this.assetManager);
   }
 
   #resize() {
@@ -473,6 +589,8 @@ export class BattleScreen {
     globalThis.removeEventListener?.('resize', this.boundResize);
     if (this.resultTimer) globalThis.clearTimeout(this.resultTimer);
     if (this.shakeTimer) globalThis.clearTimeout(this.shakeTimer);
+    clearTimeout(this.announcementTimer);
+    this.document.removeEventListener('visibilitychange', this.boundVisibility);
     this.audioContext?.close?.().catch?.(() => {});
     this.document?.documentElement?.classList.remove('battle-active');
     this.document?.body?.classList.remove('battle-active');

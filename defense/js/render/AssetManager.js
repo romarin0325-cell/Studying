@@ -46,7 +46,7 @@ function isGeneratedLightBackground(red, green, blue) {
 }
 
 function removeConnectedGeneratedBackground(image, entry) {
-  if (entry?.backgroundStatus !== 'opaque-checkerboard-from-generation') return image;
+  if (!['opaque-checkerboard-from-generation', 'generated-white'].includes(entry?.backgroundStatus)) return image;
   const canvas = globalThis.document?.createElement?.('canvas');
   const context = canvas?.getContext?.('2d', { willReadFrequently: true });
   const width = image.naturalWidth || image.width;
@@ -65,7 +65,10 @@ function removeConnectedGeneratedBackground(image, entry) {
   const enqueue = (index) => {
     if (visited[index]) return;
     const offset = index * 4;
-    if (!isGeneratedLightBackground(data[offset], data[offset + 1], data[offset + 2])) return;
+    const background = entry.backgroundStatus === 'generated-white'
+      ? Math.min(data[offset], data[offset + 1], data[offset + 2]) >= 240
+      : isGeneratedLightBackground(data[offset], data[offset + 1], data[offset + 2]);
+    if (!background) return;
     visited[index] = 1;
     pending[tail] = index;
     tail += 1;

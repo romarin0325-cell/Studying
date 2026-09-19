@@ -10,6 +10,7 @@
     "test:defense": "node --test defense/tests/unit/*.test.mjs defense/tests/integration/*.test.mjs",
     "test:defense:local": "npm run build:defense-local && node scripts/verify_defense_local_bundle.js",
     "test:defense:browser": "node scripts/verify_defense_browser.js",
+    "test:defense:experience": "node scripts/verify_defense_experience.js",
     "verify:shooter": "npm run verify --prefix shooter",
     "build:card": "npm run build --prefix card",
     "verify:card": "npm run verify --prefix card",

@@ -1,6 +1,21 @@
 import { BATTLE_PHASE } from '../../core/enums.js';
 import { autoPlaceHeroes, placeHero } from './PlacementSystem.js';
 import { startWave } from './WaveSystem.js';
+import { applyStatus } from './StatusSystem.js';
+
+export function castStarfall(state, x, y) {
+  if (state.phase !== BATTLE_PHASE.WAVE_RUNNING || state.paused || !state.starfallReady) return false;
+  if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 12 || y < 0 || y > 12) return false;
+  const targets = [...state.enemies.values()].filter(enemy => !enemy.dead && Math.hypot(enemy.x - x, enemy.y - y) <= 2.6);
+  if (!targets.length) return false;
+  state.starfallReady = false;
+  for (const enemy of targets) {
+    applyStatus(enemy, 'stun', { duration: 1.5 });
+    applyStatus(enemy, 'slow', { duration: 4 });
+  }
+  state.events.push({ type: 'starfall', effectPreset: 'skill_area_hit', element: 'light', x, y, radius: 2.6 });
+  return true;
+}
 
 function traitOptions(hero, level) {
   const traits = hero.definition.traits;
@@ -25,6 +40,8 @@ export function levelUpHero(state, heroId, traitId = null) {
 
 export function executeCommand(state, command) {
   switch (command.type) {
+    case 'cast_starfall':
+      return castStarfall(state, command.payload.x, command.payload.y);
     case 'place_hero':
       return placeHero(state, command.payload.heroId, command.payload.x, command.payload.y);
     case 'auto_place':

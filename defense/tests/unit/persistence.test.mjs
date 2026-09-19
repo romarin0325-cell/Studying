@@ -71,7 +71,7 @@ test('validateCheckpoint rejects invalid identity, difficulty and formation data
   assert.throws(() => validateCheckpoint(makeCheckpoint({ sessionId: '' })), /sessionId/);
   assert.throws(() => validateCheckpoint(makeCheckpoint({ stageId: '' })), /stageId/);
   assert.throws(() => validateCheckpoint(makeCheckpoint({ stageId: 'retired_stage' })), /stageId.*unknown/);
-  assert.throws(() => validateCheckpoint(makeCheckpoint({ difficultyId: 'normal' })), /Only easy/);
+  assert.throws(() => validateCheckpoint(makeCheckpoint({ difficultyId: 'hard' })), /Only story and trial/);
   assert.throws(() => validateCheckpoint(makeCheckpoint({ formation: null })), /formation/);
   assert.throws(() => validateCheckpoint(makeCheckpoint({
     formation: { mainId: '', heroIds: [...FORMATION.heroIds] },

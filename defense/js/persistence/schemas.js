@@ -38,13 +38,21 @@ export function validateCheckpoint(value) {
   assert(typeof value.stageId === 'string' && value.stageId.length > 0, 'Checkpoint stageId is required');
   const stage = STAGE_BY_ID[value.stageId];
   assert(Boolean(stage), 'Checkpoint stageId is unknown');
-  assert(value.difficultyId === 'easy', 'Only easy checkpoints are supported');
+  assert(['easy', 'normal'].includes(value.difficultyId), 'Only story and trial checkpoints are supported');
   assert(isRecord(value.formation), 'Checkpoint formation is required');
   assert(typeof value.formation.mainId === 'string' && value.formation.mainId.length > 0, 'Checkpoint main hero is required');
   assert(Array.isArray(value.formation.heroIds) && value.formation.heroIds.length === 4, 'Checkpoint needs four normal heroes');
   assert(value.formation.heroIds.every((id) => typeof id === 'string' && id.length > 0), 'Checkpoint normal hero ids are invalid');
   const formationIds = [value.formation.mainId, ...value.formation.heroIds];
   assert(new Set(formationIds).size === 5, 'Checkpoint formation must be unique');
+  if (value.elapsedSeconds !== undefined) assert(Number.isFinite(value.elapsedSeconds) && value.elapsedSeconds >= 0, 'Checkpoint elapsed time is invalid');
+  if (value.heroStats !== undefined) {
+    assert(isRecord(value.heroStats) && Object.keys(value.heroStats).length === 5, 'Checkpoint report must contain five heroes');
+    for (const id of formationIds) {
+      const report = value.heroStats[id];
+      assert(isRecord(report) && ['damage', 'kills', 'basicAttacks', 'skills'].every(key => Number.isFinite(report[key]) && report[key] >= 0), 'Checkpoint hero report is invalid');
+    }
+  }
   assert(HERO_BY_ID[value.formation.mainId]?.position === 'main', 'Checkpoint main hero is invalid');
   assert(
     value.formation.heroIds.every((id) => HERO_BY_ID[id]?.position === 'normal'),

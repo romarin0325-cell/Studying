@@ -47,6 +47,7 @@ export function startWave(state) {
   const wave = state.stage.waves[state.nextWave - 1];
   if (!wave) throw new RangeError(`Stage has no wave ${state.nextWave}`);
   state.phase = BATTLE_PHASE.WAVE_RUNNING;
+  state.starfallReady = true;
   state.wave.number = state.nextWave;
   state.wave.spawnQueue = Array.isArray(wave.spawnOrder)
     ? [...wave.spawnOrder]

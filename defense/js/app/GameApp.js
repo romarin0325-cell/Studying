@@ -8,6 +8,7 @@ import { StageSelectScreen } from './screens/StageSelectScreen.js';
 import { FormationScreen } from './screens/FormationScreen.js';
 import { BattleScreen } from './screens/BattleScreen.js';
 import { ResultScreen } from './screens/ResultScreen.js';
+import { JOURNEYS } from '../content/presentation.js';
 
 export class GameApp {
   constructor({ documentRef = globalThis.document, repository = null } = {}) {
@@ -19,6 +20,7 @@ export class GameApp {
     this.settings = this.repository.loadSettings();
     this.assetManager = new AssetManager({ manifest: ASSET_MANIFEST });
     this.selectedStageId = 'ancient_ruins';
+    this.difficultyId = 'easy';
     this.formation = { mainId: DEFAULT_FORMATION.mainId, heroIds: [...DEFAULT_FORMATION.heroIds] };
     this.scene = new SceneController(this.sceneRoot, {
       stages: StageSelectScreen,
@@ -52,14 +54,18 @@ export class GameApp {
     const checkpoint = this.repository.loadCheckpoint();
     this.scene.show('stages', {
       checkpoint,
-      onFormation: (stageId) => this.showFormation(stageId),
+      stageId: this.selectedStageId,
+      difficultyId: this.difficultyId,
+      progress: this.repository.loadProgress(),
+      onFormation: (stageId, difficultyId) => this.showFormation(stageId, difficultyId),
       onContinue: () => checkpoint && this.showBattle({ checkpoint }),
       onSettings: () => this.openSettings(),
     });
   }
 
-  showFormation(stageId = this.selectedStageId) {
+  showFormation(stageId = this.selectedStageId, difficultyId = this.difficultyId) {
     this.selectedStageId = stageId;
+    this.difficultyId = difficultyId;
     this.assetManager.preload('formation').catch((error) => console.warn('V2 formation asset preload failed', error));
     this.scene.show('formation', {
       stageId,
@@ -75,6 +81,7 @@ export class GameApp {
 
   showBattle({ stageId = this.selectedStageId, formation = this.formation, checkpoint = null } = {}) {
     this.selectedStageId = checkpoint?.stageId ?? stageId;
+    this.difficultyId = checkpoint?.difficultyId ?? this.difficultyId;
     this.formation = checkpoint?.formation
       ? { mainId: checkpoint.formation.mainId, heroIds: [...checkpoint.formation.heroIds] }
       : { mainId: formation.mainId, heroIds: [...formation.heroIds] };
@@ -85,10 +92,12 @@ export class GameApp {
       ...heroIds.flatMap((id) => DIRECTIONS.map((direction) => `battle/${id}/${direction}`)),
       ...bossIds.flatMap((id) => DIRECTIONS.map((direction) => `boss/${id}/${direction}`)),
       ...heroIds.map((id) => `portrait/${id}`),
+      ...['heroes', 'companions', 'creatures', 'worlds'].map(id => `illustration/${id}`),
     ];
     this.assetManager.preload(battleAssetIds).catch((error) => console.warn('V2 battle asset preload failed', error));
     this.scene.show('battle', {
       stageId: this.selectedStageId,
+      difficultyId: this.difficultyId,
       formation: this.formation,
       checkpoint,
       repository: this.repository,
@@ -96,15 +105,17 @@ export class GameApp {
       settings: this.settings,
       onSettings: () => this.openSettings(),
       onBack: () => this.showStages(),
-      onResult: ({ result }) => {
+      onResult: ({ result, snapshot }) => {
         this.repository.clearCheckpoint();
+        result.stars = result.victory ? (snapshot.core.durability >= 10 ? 3 : snapshot.core.durability >= 6 ? 2 : 1) : 0;
+        if (result.victory) this.repository.recordVictory(`${this.selectedStageId}:${this.difficultyId}`, result.stars, result.elapsedSeconds);
         this.showResult(result);
       },
     });
   }
 
   showResult(result) {
-    const stageName = STAGE_BY_ID[this.selectedStageId]?.name ?? this.selectedStageId;
+    const stageName = JOURNEYS[this.selectedStageId]?.title ?? this.selectedStageId;
     this.scene.show('result', {
       result,
       stageName,
@@ -115,6 +126,9 @@ export class GameApp {
   }
 
   openSettings() {
+    const battle = this.scene.currentName === 'battle' ? this.scene.current : null;
+    const resume = battle?.session?.state.phase === 'WAVE_RUNNING' && !battle.session.state.paused;
+    if (resume) battle.session.applyNow('toggle_pause');
     const backdrop = this.document.createElement('div');
     backdrop.className = 'modal-backdrop';
     backdrop.dataset.settingsModal = '';
@@ -127,7 +141,7 @@ export class GameApp {
         ${this.#settingToggle('reducedEffects', '이펙트 간소화')}
       </div>
     </section>`;
-    const close = () => backdrop.remove();
+    const close = () => { backdrop.remove(); if (resume && this.scene.current === battle && battle.session.state.paused) battle.session.applyNow('toggle_pause'); };
     backdrop.querySelector('[data-action="close-settings"]').addEventListener('click', close);
     backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
     for (const input of backdrop.querySelectorAll('input[data-setting]')) {

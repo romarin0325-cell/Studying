@@ -225,7 +225,7 @@ export const HEROES = deepFreeze([
     skill: skill({
       id: 'zeke_ignis_smash',
       name: '이그니스스매시',
-      attackType: 'normal',
+      attackType: 'flame',
       cooldown: 7,
       shape: 'melee',
       damage: 73,

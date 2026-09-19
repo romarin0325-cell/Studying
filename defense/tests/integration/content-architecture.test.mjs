@@ -90,9 +90,9 @@ test('strict content validation covers every required V2 definition and optional
   });
 
   const assets = ASSET_MANIFEST;
-  assert.equal(assets.length, 66);
+  assert.equal(assets.length, 70);
   const withAssets = validateContent({ assets, throwOnError: true });
-  assert.equal(withAssets.counts.assets, 66);
+  assert.equal(withAssets.counts.assets, 70);
 
   const missingDirection = validateContent({ assets: assets.slice(0, -1) });
   assert.equal(missingDirection.valid, false);

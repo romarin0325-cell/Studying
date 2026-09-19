@@ -146,8 +146,8 @@ function validateCombat(errors) {
   const easy = DIFFICULTIES.find(({ id }) => id === 'easy');
   const normal = DIFFICULTIES.find(({ id }) => id === 'normal');
   const hard = DIFFICULTIES.find(({ id }) => id === 'hard');
-  if (!easy?.selectable || normal?.selectable || hard?.selectable) {
-    errors.push('combat.difficulties: only easy may be selectable in V2.');
+  if (!easy?.selectable || !normal?.selectable || hard?.selectable) {
+    errors.push('combat.difficulties: story and trial must be selectable; hard stays reserved.');
   }
   if (BOARD_RULES.columns !== 12 || BOARD_RULES.rows !== 16) errors.push('combat.board: logical board must be 12x16.');
 }
@@ -438,7 +438,7 @@ function validateStages(sets, errors) {
     if (stage.featuredDefenseTypes?.length !== 3 || stage.featuredDefenseTypes.some((id) => !sets.defenseTypes.has(id))) {
       errors.push(`${context}: exactly three valid featured defense types are required.`);
     }
-    if (!sameValues(stage.availableDifficultyIds, ['easy']) || !sameValues(stage.displayedDifficultyIds, ['easy', 'normal', 'hard'])) {
+    if (!sameValues(stage.availableDifficultyIds, ['easy', 'normal']) || !sameValues(stage.displayedDifficultyIds, ['easy', 'normal'])) {
       errors.push(`${context}: invalid difficulty visibility contract.`);
     }
     if (!sets.enemies.has(stage.midBossId) || !sets.enemies.has(stage.finalBossId)) errors.push(`${context}: boss references are invalid.`);

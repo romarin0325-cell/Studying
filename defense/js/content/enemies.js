@@ -110,7 +110,7 @@ export const ENEMIES = deepFreeze([
     id: 'pharaoh',
     name: '파라오',
     element: 'nature',
-    baseHp: 5200,
+    baseHp: 3200,
     speed: 0.65,
     stageId: 'ancient_ruins',
   }),
