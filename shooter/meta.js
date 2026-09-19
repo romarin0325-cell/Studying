@@ -21,7 +21,7 @@ export const ARTIFACTS = [
   { id: 'origin', name: '시작의보석', icon: '◆', rarity: 'normal', text: '시작 파워 1 증가' },
   { id: 'boots', name: '바람의장화', icon: '➶', rarity: 'normal', text: '이동속도 200 증가', speed: 200 },
   { id: 'moonlight', name: '월광의목걸이', icon: '☽', rarity: 'rare', text: '스테이지 클리어마다 봄 1 추가 회복' },
-  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 피해 1900의 코로나로 교체 · 지속과 무적 1초' },
+  { id: 'sun', name: '황금의태양', icon: '☀', rarity: 'rare', text: '필살기를 피해 2000의 코로나로 교체 · 지속과 무적 1초' },
   { id: 'hourglass', name: '모래시계', rarity: 'normal', text: '콤보 유지 시간 2초 증가' },
   { id: 'clover', name: '네잎클로버', rarity: 'normal', text: '시작 시 피격 1회를 막는 보호막 생성' },
   { id: 'witch', name: '마녀의계약서', rarity: 'normal', text: '일반 몬스터에게 주는 피해 20% 증가' },

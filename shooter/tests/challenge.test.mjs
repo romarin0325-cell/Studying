@@ -53,13 +53,22 @@ test('twenty-one challenge rooms preserve run resources and finish only after As
     assert.equal(g.finished,index===20);
   }
   assert.equal(acquired,6);assert.equal(g.artifacts.size,9);assert.equal(g.loadout.ids.length,9);
-  assert.equal(g.score,11000);assert.equal(g.phase,'victory');assert.equal(g.completeQuiz('score'),false);
+  assert.equal(g.score,21000);assert.equal(g.rankBonus,10000);assert.equal(g.phase,'victory');assert.equal(g.completeQuiz('score'),false);
 });
-test('declines advance across dungeons without finalizing ordinary bonuses',()=>{
+test('declines advance across dungeons and still apply rank at the end',()=>{
   const g=new Game({challenge:true});
   for(let i=0;i<21;i++){g.phase='quiz';assert.ok(g.completeQuiz());}
-  assert.equal(g.phase,'victory');assert.equal(g.artifacts.size,0);assert.equal(g.score,0);
-  assert.equal(g.rankBonus,0);assert.equal(g.timeBonus,0);
+  assert.equal(g.phase,'victory');assert.equal(g.artifacts.size,0);assert.equal(g.score,10000);
+  assert.equal(g.rankBonus,10000);assert.equal(g.timeBonus,0);
+});
+test('challenge sums each boss time-attack bonus and shows rank at the end',()=>{
+  const g=new Game({challenge:true});
+  for(const [stage,seconds] of [[0,20],[1,30],[2,40],[3,50]]){
+    g.startStage(stage,2);g.spawnBoss();g.phase='boss';g.bossElapsed=seconds;g.damage(g.boss,1e9,0,0);
+  }
+  assert.equal(g.timeBonus,30000);
+  g.phase='quiz';g.room=2;g.stageIndex=6;g.completeQuiz();
+  assert.equal(g.rankBonus,10000);assert.equal(g.phase,'victory');
 });
 test('challenge instant variants activate on selection and do not retrigger on revival',()=>{
   const g=new Game({challenge:true});g.player.lives=1;g.bombs=0;

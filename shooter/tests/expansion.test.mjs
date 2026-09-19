@@ -56,16 +56,16 @@ test('frost slows movement, snowflakes jump, and midnight marks explode on three
 test('all imported grammar and collocation questions have valid options and lecture links',()=>{for(const q of LIBRARY.collocation){assert.ok(q.options.includes(q.answer),`collocation ${q.id}`);assert.ok(q.question&&q.expression&&q.meaning);}for(const l of LIBRARY.grammar)for(const q of l.quizzes){assert.ok(q.options.includes(q.answer));assert.ok(LIBRARY.grammar.some(t=>t.id===q.lecture_id));}});
 test('final quiz adds ten percent exactly once, and declining still completes the dungeon',()=>{
   const g=combat();g.room=2;g.phase='quiz';g.score=12345;const lives=g.player.lives,bombs=g.bombs;
-  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,17580);assert.equal(g.scoreBonus,1235);assert.equal(g.rankBonus,4000);
+  assert.equal(g.completeQuiz('life'),false);assert.ok(g.completeQuiz('score'));assert.equal(g.score,23580);assert.equal(g.scoreBonus,1235);assert.equal(g.rankBonus,10000);
   assert.equal(g.completeQuiz('score'),false);assert.equal(g.player.lives,lives);assert.equal(g.bombs,bombs);
-  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,4456);
+  const skip=combat();skip.room=2;skip.phase='quiz';skip.score=456;assert.ok(skip.completeQuiz());assert.equal(skip.phase,'victory');assert.equal(skip.score,10456);
 });
 test('boss combat resets combo, ignores its multiplier and adds exact time and rank bonuses at victory',()=>{
   const g=combat();g.phase='wave';g.combo=49;g.comboTime=2;g.spawnBoss();assert.equal(g.combo,0);assert.equal(g.comboTime,0);
   g.phase='boss';g.bossElapsed=20;g.bullets=Array.from({length:80},()=>({x:0,y:0}));g.damage(g.boss,1e9,0,0);
   assert.equal(g.score,18000);assert.equal(g.combo,0);assert.equal(g.bullets.length,0);
-  g.phase='quiz';g.room=2;g.completeQuiz();assert.equal(g.timeBonus,6000);assert.equal(g.rankBonus,4000);assert.equal(g.score,28000);
-  for(const [seconds,deaths,timeBonus,rankBonus] of [[30,1,4500,2000],[40,4,3000,0],[40.01,0,1500,4000],[50.01,0,0,4000]]){
+  g.phase='quiz';g.room=2;g.completeQuiz();assert.equal(g.timeBonus,15000);assert.equal(g.rankBonus,10000);assert.equal(g.score,43000);
+  for(const [seconds,deaths,timeBonus,rankBonus] of [[30,1,10000,10000],[40,6,5000,5000],[40.01,15,0,5000],[50.01,16,0,0]]){
     const run=combat();run.room=2;run.phase='quiz';run.bossClearTime=seconds;run.stats.deaths=deaths;run.completeQuiz();assert.equal(run.timeBonus,timeBonus);assert.equal(run.rankBonus,rankBonus);
   }
 });

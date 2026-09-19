@@ -86,7 +86,7 @@ export class Game {
         } break;
       }
       case 'dagger':
-        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .8415, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
+        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .85833, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
       case 'melee': {
         p.fire = .70; const reach = 156 + this.power * 8;
         this.effect('slash', { x: p.x, y: p.y, radius: reach, life: .3, color: this.hero.color, alternate: this.stats.shots++ % 2 });
@@ -96,9 +96,9 @@ export class Game {
         this.shot(0, damage * .57375, 'moon', { vy: -430, r: 15 }); break;
       }
       case 'spread':
-        p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.734 : 1.02), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .459, 'fire', { r: 5 }); } break;
+        p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.76868 : 1.0404), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .46818, 'fire', { r: 5 }); } break;
       case 'lance':
-        p.fire = .36; this.shot(0, damage * 5.94825, 'lance', { pierce: true, r: 21, vy: -500 }); break;
+        p.fire = .36; this.shot(0, damage * 6.067215, 'lance', { pierce: true, r: 21, vy: -500 }); break;
       case 'chain': {
         p.fire = .23; const target = this.nearest(p.x, p.y - 70, 530);
         if (target) { const hit = new Set(); let from = { x: p.x, y: p.y - 24 }, next = target;
@@ -110,7 +110,7 @@ export class Game {
         } else { p.fire = .05; p.recoil = 0; return; } break;
       }
       case 'petal':
-        p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.4841 : .89046), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 3, r: 10 }); break;
+        p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.4841 : .89046), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 5, r: 10 }); break;
       case 'frost':
         p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.36323, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
       case 'snowflake':
@@ -135,7 +135,7 @@ export class Game {
         p.fire = .42; this.shot(0,damage*1.90512,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.22264,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
       case 'rewind':
         p.fire = .25;
-        for (const side of [-1,1]) this.shot(side*.045,damage*2.1318,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
+        for (const side of [-1,1]) this.shot(side*.045,damage*2.174436,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
         break;
       case 'orbit': {
         p.fire = .12;
@@ -203,7 +203,7 @@ export class Game {
     this.emit('kill', { boss: !!enemy.boss, x, y, points });
     if (enemy.boss) {
       this.recoverRoom(); this.stats.bossKills++; this.bossDefeated = true; this.bossClearTime = this.bossElapsed; this.phase = 'clear'; this.phaseTime = 0;
-      this.score += this.player.lives * 1000; this.clearBullets(); this.hazards.length = 0;
+      this.score += this.player.lives * 1000; if (this.challenge) this.awardBossTimeBonus(); this.clearBullets(); this.hazards.length = 0;
       for (const e of this.enemies) e.hp = 0;
       this.emit('bossDefeated', { stage: this.stageIndex });
     } else {
@@ -216,10 +216,14 @@ export class Game {
     }
   }
   get multiplier() { return ['warning','boss'].includes(this.phase) ? 1 : 1 + Math.min(4, Math.floor(this.combo / 10)); }
-  get rank() { return this.stats.deaths === 0 ? 'S' : this.stats.deaths < 4 ? 'A' : 'B'; }
+  get rank() { return this.stats.deaths <= 5 ? 'S' : this.stats.deaths <= 15 ? 'A' : 'B'; }
+  bossTimeScore(seconds) { return seconds <= 20 ? 15000 : seconds <= 30 ? 10000 : seconds <= 40 ? 5000 : 0; }
+  awardBossTimeBonus() {
+    const bonus = this.bossTimeScore(this.bossClearTime);
+    this.timeBonus += bonus; this.score += bonus;
+  }
   drop(x, y, type) { this.add('pickups', { x, y, type, age: 0, vx: (this.random() - .5) * 45 }, LIMITS.pickups); }
-  clearBullets(reward = false) {
-    if (reward) this.score += this.bullets.length * 8;
+  clearBullets() {
     for (let i = 0; i < this.bullets.length; i += 5) this.particlesAt(this.bullets[i].x, this.bullets[i].y, this.hero.color, 2);
     this.bullets.length = 0;
   }
@@ -243,7 +247,7 @@ export class Game {
     if (!corona && this.heroIndex === 3 && !paidWithLife) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
     if(!corona&&this.heroIndex===4)this.frostTime=this.bombDuration+5;
     if(!corona&&this.heroIndex===6){this.power=Math.max(1,this.power-1);this.powerPoints=0;}
-    for (const e of [...this.enemies]) this.damage(e, (corona?1900:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
+    for (const e of [...this.enemies]) this.damage(e, (corona?2000:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
     this.emit('bomb', { hero: this.heroIndex, corona }); return true;
   }
   grantBarrier() {
@@ -424,7 +428,7 @@ export class Game {
     if (reward === 'score') { this.scoreBonus = Math.round(this.score * .1); this.score += this.scoreBonus; }
     if (reward === 'life') this.player.lives = Math.min(this.maxLife,this.player.lives+1);
     if (reward === 'bomb') this.bombs = Math.min(this.maxBombs,this.bombs+1);
-    if(this.room===2){if(!this.challenge)this.finalizeClearBonuses();this.phase='victory';this.finished=true;this.emit('victory');return true;}
+    if(this.room===2){this.finalizeClearBonuses();this.phase='victory';this.finished=true;this.emit('victory');return true;}
     this.startStage(this.stageIndex, this.room+1); return true;
   }
   challengeChoices() {
@@ -458,9 +462,12 @@ export class Game {
   }
   finalizeClearBonuses() {
     if (this.bonusesFinalized) return;
-    this.timeBonus = this.bossClearTime <= 20 ? 6000 : this.bossClearTime <= 30 ? 4500 : this.bossClearTime <= 40 ? 3000 : this.bossClearTime <= 50 ? 1500 : 0;
-    this.rankBonus = this.rank === 'S' ? 4000 : this.rank === 'A' ? 2000 : 0;
-    this.score += this.timeBonus + this.rankBonus; this.bonusesFinalized = true;
+    if (!this.challenge) {
+      this.timeBonus = this.bossTimeScore(this.bossClearTime);
+      this.score += this.timeBonus;
+    }
+    this.rankBonus = this.rank === 'S' ? 10000 : this.rank === 'A' ? 5000 : 0;
+    this.score += this.rankBonus; this.bonusesFinalized = true;
   }
   revive(correct) {
     if (this.phase !== 'defeat' || this.reviveUsed) return false;

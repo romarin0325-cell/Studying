@@ -57,10 +57,10 @@ test('shortened bombs retain damage budgets at different frame steps and Night p
 test('Corona replaces every hero ultimate including healing, power cost, freeze and transformation',()=>{
  for(let hero=0;hero<9;hero++){
   const g=combat({hero,artifacts:['sun']});g.player.fire=999;g.player.lives=1;g.power=3;target(g);g.bomb();
-  assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,1900);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
-  tick(g,1.1);assert.equal(g.stats.damage,1900);assert.equal(g.bombTime,0);
- }
- const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,3230);
+   assert.equal(g.bombTime,1);assert.equal(g.player.invincible,1);assert.equal(g.stats.damage,2000);assert.equal(g.player.lives,1);assert.equal(g.power,3);assert.equal(g.frostTime,0);
+   tick(g,1.1);assert.equal(g.stats.damage,2000);assert.equal(g.bombTime,0);
+  }
+  const g=combat({artifacts:['sun','spellbook','core']});target(g);g.bomb();assert.equal(g.stats.damage,3400);
 });
 test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
   const g=combat({hero:4});g.player.fire=999;g.bomb();tick(g,3);assert.ok(g.frostTime>4.99);assert.ok(g.player.invincible<1e-8);
