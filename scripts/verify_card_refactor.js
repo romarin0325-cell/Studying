@@ -66,7 +66,7 @@ function run() {
             `${lecture.id}강 contains invisible emoji formatting characters`
         );
         const quizzes = lecture.quizzes || [];
-        assert.strictEqual(quizzes.length, 5, `${lecture.id}강 must contain exactly five quizzes`);
+        assert.strictEqual(quizzes.length, 10, `${lecture.id}강 must contain exactly ten quizzes`);
         quizzes.forEach(quiz => {
             assert.strictEqual(quiz.lecture_id, lecture.id, `${lecture.id}강 quiz reference is out of sync`);
             assert(quiz.options.includes(quiz.answer), `${lecture.id}강 quiz answer must exist in its options`);
