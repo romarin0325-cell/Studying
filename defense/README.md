@@ -1,40 +1,30 @@
-# Hero Core Defense
+# 별의 수호자 · Starward
 
-`defense/` is the active deterministic tower-defense implementation promoted from the V2 codebase. The previous Defense implementations were removed.
+Portrait-first fantasy tower defense on the deterministic Defense V2 engine: four illustrated journeys, ten guardians and ten waves, with Story and Trial difficulties.
 
-## Maintainer wiki
+## Play
 
-Start with [`docs/README.md`](./docs/README.md). It links the architecture overview, class/runtime API, content authoring guide, and UI/rendering/release handbook. The documentation is written for future maintainers and includes extension examples, invariants, test commands, and release checklists.
+Open `defense/dist-local/HeroCoreDefense.html` directly. This 15.41 MiB file includes all art, code and styles and makes no network requests. Source development uses `npm run serve:defense` at http://127.0.0.1:4174/.
 
-## Run
+Choose one protagonist and four companions. Tap a card then a glowing position, or drag the card onto the battlefield. Automatic placement provides a starting formation. Spend crystals between waves; choose traits at Lv4 and Lv6. Aim **별의 기원** once per wave to stop a threatening group. Combat starts at 2× speed; pause, speed, sound and effect controls remain available.
 
-From the repository root:
+Final bosses must be defeated: a breach ends the run. Midbosses inflict three core damage. Medals persist separately for each difficulty. Continue restarts an unfinished wave at its saved boundary.
 
-```powershell
-npm run serve:defense
-```
+## Art and documentation
 
-Open `http://127.0.0.1:4174/`. The source entry uses ES modules and therefore needs HTTP.
+Four atlases in `assets/moonlit/` provide 20 character poses, 10 enemies, 4 bosses, 2 props and 4 environments. Opaque white sprite backgrounds are removed once on load. The prior 66 portrait/directional assets remain fallback entries, giving 70 embedded release assets.
 
-## Mobile single-file build
+Read [current release and design notes](docs/STARWARD_RELEASE.md), [exact generation prompts](docs/STARWARD_ART_PROMPTS.md) and the [underlying engine wiki](docs/README.md).
 
-```powershell
-npm run build:defense-local
-```
-
-The self-contained output is `defense/dist-local/HeroCoreDefense.html`. It is the supported `file://` entry for mobile browsers and WebViews.
-
-## Art assets
-
-The release manifest contains 66 individual 512×512 WebP files: 10 portraits, 40 directional hero sprites, and 16 directional boss sprites. The generated source atlases are kept under `assets/source-atlases/` for traceability. The image generator returned opaque checkerboard pixels instead of an alpha channel, so the manifest records `hasAlpha: false` and the loader removes only the bright background connected to each image edge at runtime. Development still retains the specified front/token fallback; release validation requires all 66 files.
-
-## Validation
+## Build and validation
 
 ```powershell
 npm run lint:defense
 npm run test:defense
 npm run test:defense:local
 npm run test:defense:browser
+npm run test:defense:experience
+npm run verify
 ```
 
-The repository completion gate remains `npm run verify`.
+The local test rebuilds the HTML; run it before the experience test. Experience checks use real UI decisions and accelerated deterministic battle ticks. Root verification deliberately excludes Defense, so the explicit Defense checks above remain necessary.

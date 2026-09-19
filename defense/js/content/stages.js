@@ -176,8 +176,8 @@ export const STAGES = deepFreeze([
     featuredDefenseTypes: ['normal', 'heavy', 'regeneration'],
     midBossId: 'flora',
     finalBossId: 'pharaoh',
-    availableDifficultyIds: ['easy'],
-    displayedDifficultyIds: ['easy', 'normal', 'hard'],
+    availableDifficultyIds: ['easy', 'normal'],
+    displayedDifficultyIds: ['easy', 'normal'],
     map: {
       columns: BOARD_RULES.columns,
       rows: BOARD_RULES.rows,
@@ -214,8 +214,8 @@ export const STAGES = deepFreeze([
     featuredDefenseTypes: ['air', 'heavy', 'demon'],
     midBossId: 'reaper',
     finalBossId: 'demon_god',
-    availableDifficultyIds: ['easy'],
-    displayedDifficultyIds: ['easy', 'normal', 'hard'],
+    availableDifficultyIds: ['easy', 'normal'],
+    displayedDifficultyIds: ['easy', 'normal'],
     map: {
       columns: BOARD_RULES.columns,
       rows: BOARD_RULES.rows,
@@ -252,8 +252,8 @@ export const STAGES = deepFreeze([
     featuredDefenseTypes: ['air', 'heavy', 'demon'],
     midBossId: 'reaper',
     finalBossId: 'demon_god',
-    availableDifficultyIds: ['easy'],
-    displayedDifficultyIds: ['easy', 'normal', 'hard'],
+    availableDifficultyIds: ['easy', 'normal'],
+    displayedDifficultyIds: ['easy', 'normal'],
     map: {
       columns: BOARD_RULES.columns,
       rows: BOARD_RULES.rows,
@@ -289,8 +289,8 @@ export const STAGES = deepFreeze([
     featuredDefenseTypes: ['normal', 'regeneration', 'heavy'],
     midBossId: 'flora',
     finalBossId: 'pharaoh',
-    availableDifficultyIds: ['easy'],
-    displayedDifficultyIds: ['easy', 'normal', 'hard'],
+    availableDifficultyIds: ['easy', 'normal'],
+    displayedDifficultyIds: ['easy', 'normal'],
     map: {
       columns: BOARD_RULES.columns,
       rows: BOARD_RULES.rows,

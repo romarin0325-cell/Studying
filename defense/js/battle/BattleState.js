@@ -39,7 +39,7 @@ function createRuntimeHero(id, slot, checkpoint) {
     skillTimer: 0,
     lastTargetId: null,
     buffs: new Map(),
-    stats: { damage: 0, kills: 0, basicAttacks: 0, skills: 0 },
+    stats: clone(checkpoint?.heroStats?.[id] ?? { damage: 0, kills: 0, basicAttacks: 0, skills: 0 }),
   };
 }
 
@@ -79,7 +79,7 @@ export function createBattleState({
     seed,
     rng,
     tick: 0,
-    elapsedSeconds: 0,
+    elapsedSeconds: checkpoint?.elapsedSeconds ?? 0,
     phase: checkpoint && heroes.every((hero) => hero.placed) && checkpoint.nextWave > 1
       ? BATTLE_PHASE.INTERMISSION
       : BATTLE_PHASE.PREPARATION,
@@ -122,6 +122,8 @@ export function createCheckpointFromState(state) {
   }
   return {
     schemaVersion: 1,
+    elapsedSeconds: state.elapsedSeconds,
+    heroStats: Object.fromEntries(state.heroes.map(hero => [hero.id, { ...hero.stats }])),
     sessionId: state.sessionId,
     stageId: state.stageId,
     difficultyId: state.difficultyId,

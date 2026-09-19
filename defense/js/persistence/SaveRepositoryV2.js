@@ -75,6 +75,20 @@ export class SaveRepositoryV2 {
     return null;
   }
 
+  loadProgress() {
+    const value = parseJson(this.storage.getItem('starwardJourneyProgress'));
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(Object.entries(value).filter(([, record]) => record && Number.isInteger(record.stars) && record.stars >= 1 && record.stars <= 3 && Number.isFinite(record.seconds) && record.seconds >= 0));
+  }
+
+  recordVictory(stageId, stars, seconds) {
+    if (!Number.isInteger(stars) || stars < 1 || stars > 3 || !Number.isFinite(seconds) || seconds < 0) return false;
+    const progress = this.loadProgress(), prior = progress[stageId];
+    progress[stageId] = { stars: Math.max(prior?.stars ?? 0, stars), seconds: Math.min(prior?.seconds ?? Infinity, seconds) };
+    this.storage.setItem('starwardJourneyProgress', JSON.stringify(progress));
+    return true;
+  }
+
   saveCheckpoint(checkpoint) {
     const candidate = clone({ ...checkpoint, schemaVersion: CHECKPOINT_SCHEMA_VERSION });
     validateCheckpoint(candidate);

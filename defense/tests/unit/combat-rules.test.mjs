@@ -131,7 +131,7 @@ test('level growth, crystal economy and difficulty availability are immutable fi
   assert.equal(TOTAL_DREAM_CRYSTALS, 15);
   assert.deepEqual(DIFFICULTIES.map(({ id, selectable }) => ({ id, selectable })), [
     { id: 'easy', selectable: true },
-    { id: 'normal', selectable: false },
+    { id: 'normal', selectable: true },
     { id: 'hard', selectable: false },
   ]);
   assertDeepFrozen(COMBAT_RULES);

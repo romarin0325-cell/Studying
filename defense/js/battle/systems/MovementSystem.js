@@ -52,7 +52,11 @@ export function updateMovement(state, deltaSeconds, landscape = false) {
       enemy.x = end.x + 0.5;
       enemy.y = end.y + 0.5;
       enemy.reachedCore = true;
-      damageCore(state, 1);
+      // The final guardian is the objective, not a one-heart leak that grants a
+      // victory as soon as the wave empties. World Shield still protects against
+      // normal enemies and the three-heart midboss breach.
+      const finalBoss = enemy.isBoss && state.wave.number === 10;
+      damageCore(state, finalBoss ? state.core.maxDurability / coreDamageMultiplier(state) : enemy.isBoss ? 3 : 1);
       continue;
     }
     const position = pathPosition(state.stage.path, enemy.progress);

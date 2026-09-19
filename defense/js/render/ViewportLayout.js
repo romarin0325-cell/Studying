@@ -19,7 +19,8 @@ export function logicalVectorToScreen(dx, dy, landscape = false) {
 }
 
 export class ViewportLayout {
-  constructor({ canvas = null, dprCap = 2 } = {}) {
+  constructor({ canvas = null, dprCap = 2, battlefield = false } = {}) {
+    this.battlefield = battlefield;
     this.canvas = canvas;
     this.dprCap = dprCap;
     this.landscape = false;
@@ -30,10 +31,12 @@ export class ViewportLayout {
   }
 
   get viewColumns() {
+    if (this.battlefield) return 12;
     return this.landscape ? BOARD.rows : BOARD.columns;
   }
 
   get viewRows() {
+    if (this.battlefield) return 12;
     return this.landscape ? BOARD.columns : BOARD.rows;
   }
 
@@ -56,6 +59,10 @@ export class ViewportLayout {
       width: boardWidth,
       height: boardHeight,
     };
+    if (this.battlefield) {
+      const inset = Math.min(this.cssWidth, this.cssHeight) * .065;
+      this.boardRect = { x: inset, y: inset + 12, width: this.cssWidth - inset * 2, height: this.cssHeight - inset * 2 - 24 };
+    }
 
     if (this.canvas) {
       this.canvas.width = Math.max(1, Math.round(this.cssWidth * this.dpr));
@@ -72,7 +79,7 @@ export class ViewportLayout {
   }
 
   logicalToCanvas(x, y) {
-    const point = logicalToViewPoint(x, y, this.landscape);
+    const point = this.battlefield && this.landscape ? { x: 12 - y, y: x } : logicalToViewPoint(x, y, this.landscape);
     return {
       x: this.boardRect.x + (point.x / this.viewColumns) * this.boardRect.width,
       y: this.boardRect.y + (point.y / this.viewRows) * this.boardRect.height,
@@ -98,7 +105,7 @@ export class ViewportLayout {
     const viewX = ((canvasX - this.boardRect.x) / this.boardRect.width) * this.viewColumns;
     const viewY = ((canvasY - this.boardRect.y) / this.boardRect.height) * this.viewRows;
     const inside = viewX >= 0 && viewY >= 0 && viewX < this.viewColumns && viewY < this.viewRows;
-    const logical = viewToLogicalPoint(viewX, viewY, this.landscape);
+    const logical = this.battlefield && this.landscape ? { x: viewY, y: 12 - viewX } : viewToLogicalPoint(viewX, viewY, this.landscape);
     return {
       x: logical.x,
       y: logical.y,

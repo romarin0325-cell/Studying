@@ -204,6 +204,12 @@ const bossBattleSprites = BOSS_IDS.flatMap((bossId) => DIRECTIONS.map((direction
 )));
 
 export const ASSET_MANIFEST = deepFreeze([
+  ...['heroes', 'companions', 'creatures', 'worlds'].map((id) => ({
+    id: `illustration/${id}`, type: 'image', path: `./assets/moonlit/${id}.png`,
+    preloadGroup: ['menu', 'formation', 'battle'], releaseRequired: true,
+    pivotX: .5, pivotY: .5,
+    backgroundStatus: id === 'worlds' ? 'painted-scene' : 'generated-white',
+  })),
   ...portraits,
   ...heroBattleSprites,
   ...bossBattleSprites,

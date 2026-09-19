@@ -18,17 +18,18 @@ import { validateCheckpoint } from '../../js/persistence/schemas.js';
 const TERMINAL_PHASES = new Set([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT]);
 const MAX_TICKS = 60 * 60 * 15;
 const TARGETS = Object.freeze({
-  ancient_ruins: { minimumClearRate: 0.80, minimumMinutes: 7, maximumMinutes: 9 },
-  chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 9, maximumMinutes: 11 },
-  crossroads: { minimumClearRate: 0.65, minimumMinutes: 5, maximumMinutes: 12 },
-  long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 5, maximumMinutes: 10 },
+  ancient_ruins: { minimumClearRate: 0.80, minimumMinutes: 3, maximumMinutes: 5.5 },
+  chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 4, maximumMinutes: 7 },
+  crossroads: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
+  long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 3, maximumMinutes: 5.5 },
 });
 const GATED_STAGE_IDS = Object.keys(TARGETS);
 // Conservative input-time allowance for the automated policy: 15 seconds for
-// initial review/placement plus 10 seconds at each of the nine intermissions
+// initial review/placement plus 6 seconds at each of the nine intermissions
 // to spend crystals, choose Lv4 traits and consider repositioning. This is
-// deliberately separate from deterministic combat elapsed time.
-const STANDARD_INPUT_SECONDS = 15 + (9 * 10);
+// deliberately separate from deterministic combat elapsed time. Estimated wall time
+// uses the new default 2x playback; this is a model, not a human playtest.
+const STANDARD_INPUT_SECONDS = 15 + (9 * 6);
 
 function choose(values, count, offset = 0, prefix = [], output = []) {
   if (prefix.length === count) {
@@ -237,7 +238,7 @@ function summarize(stageId, results) {
   const victories = results.filter(({ victory }) => victory);
   const combatMinutes = victories.map(({ elapsedSeconds }) => elapsedSeconds / 60);
   const estimatedPlayMinutes = victories.map(
-    ({ elapsedSeconds }) => (elapsedSeconds + STANDARD_INPUT_SECONDS) / 60,
+    ({ elapsedSeconds }) => (elapsedSeconds / 2 + STANDARD_INPUT_SECONDS) / 60,
   );
   const updateSamples = results.flatMap(({ updateSamples }) => updateSamples);
   return {

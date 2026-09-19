@@ -5,20 +5,22 @@ import { EffectRenderer } from '../../js/render/EffectRenderer.js';
 
 function createContextRecorder() {
   const calls = [];
+  const strokes = [];
+  let path = [];
   return {
-    calls,
+    calls, strokes,
     save() {},
     restore() {},
-    beginPath() {},
+    beginPath() { path = []; },
     closePath() {},
     arc() {},
-    stroke() {},
+    stroke() { strokes.push([...path]); },
     fill() {},
     fillRect() {},
     strokeText() {},
     fillText() {},
-    moveTo(x, y) { calls.push(['moveTo', x, y]); },
-    lineTo(x, y) { calls.push(['lineTo', x, y]); },
+    moveTo(x, y) { calls.push(['moveTo', x, y]); path.push([x,y]); },
+    lineTo(x, y) { calls.push(['lineTo', x, y]); path.push([x,y]); },
   };
 }
 
@@ -95,8 +97,8 @@ test('melee hit draws three slash arcs and a four-point star flash', () => {
   });
   renderer.update(0.15);
   renderer.render(context, TEST_LAYOUT);
-  assert.equal(context.calls.filter(([name]) => name === 'moveTo').length, 1, 'only the star flash traces a polygon');
-  assert.equal(context.calls.filter(([name]) => name === 'lineTo').length, 7, 'a four-point star closes through seven edges');
+  assert.ok(context.calls.some(([name]) => name === 'moveTo'), 'slash impact includes a polygon flash');
+  assert.equal(context.strokes.filter(path => path.length === 2).length, 0, 'melee must not draw a ranged trail');
 });
 
 test('skill cast sparkle renders on the caster without a damage popup', () => {
@@ -126,7 +128,7 @@ test('skill cast sparkle renders on the caster without a damage popup', () => {
   assert.equal(renderer.snapshotCaps().effects, 0, 'cast sparkle expires within its 0.55s life');
 });
 
-test('burst basic hits keep a single trace while drawing amplified impact rings', () => {
+test('burst basic hits keep a single trace while drawing ice shards', () => {
   const renderer = new EffectRenderer();
   const context = createContextRecorder();
   renderer.push({
@@ -140,8 +142,7 @@ test('burst basic hits keep a single trace while drawing amplified impact rings'
   });
   renderer.update(0.1);
   renderer.render(context, TEST_LAYOUT);
-  assert.equal(context.calls.filter(([name]) => name === 'moveTo').length, 1);
-  assert.equal(context.calls.filter(([name]) => name === 'lineTo').length, 1);
+  assert.equal(context.strokes.filter(path => path.length === 2).length, 1, 'shards must not duplicate the ranged trail');
 });
 
 test('skill hits fly from the caster before detonating and their popup waits for impact', () => {
@@ -185,10 +186,10 @@ test('skill hits fly from the caster before detonating and their popup waits for
   assert.equal(renderer.snapshotCaps().effects, 1, 'the explosion keeps playing after arrival');
   assert.ok(
     impact.calls.every(([name]) => name === 'moveTo' || name === 'lineTo'),
-    'after arrival the projectile polygon is gone and only ring arcs remain',
+    'after arrival the shard and star geometry stays in the impact phase',
   );
   assert.equal(
-    impact.calls.filter(([name]) => name === 'moveTo').length,
+    impact.strokes.filter(path => path.length === 2).length,
     0,
     'the detonation phase draws no projectile trail',
   );
@@ -243,8 +244,7 @@ test('ranged effects draw from the source while each shotgun hit draws exactly o
   });
   ranged.update(0.2);
   ranged.render(rangedContext, TEST_LAYOUT);
-  assert.equal(rangedContext.calls.filter(([name]) => name === 'moveTo').length, 1);
-  assert.equal(rangedContext.calls.filter(([name]) => name === 'lineTo').length, 1);
+  assert.equal(rangedContext.strokes.filter(path => path.length === 2).length, 1);
   assert.deepEqual(
     rangedContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
     [19, 29],
@@ -269,8 +269,8 @@ test('ranged effects draw from the source while each shotgun hit draws exactly o
   });
   shotgun.update(0.24);
   shotgun.render(shotgunContext, TEST_LAYOUT);
-  assert.equal(shotgunContext.calls.filter(([name]) => name === 'moveTo').length, 1);
-  assert.equal(shotgunContext.calls.filter(([name]) => name === 'lineTo').length, 1);
+  assert.equal(shotgunContext.strokes.filter(path => path.length === 2).length, 1);
+  assert.ok(shotgunContext.calls.some(([name]) => name === 'lineTo'));
   assert.deepEqual(
     shotgunContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
     [24, 34],

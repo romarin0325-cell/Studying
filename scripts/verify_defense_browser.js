@@ -263,7 +263,7 @@ async function calculateLegalPlacementTarget(page, heroIndex = 0) {
     }
     if (!cell) throw new Error('No legal placement cell found');
     const canvasBounds = document.querySelector('#battle-canvas').getBoundingClientRect();
-    const viewX = layout.landscape ? 16 - (cell.y + 0.5) : cell.x + 0.5;
+    const viewX = layout.landscape ? layout.viewColumns - (cell.y + 0.5) : cell.x + 0.5;
     const viewY = layout.landscape ? cell.x + 0.5 : cell.y + 0.5;
     return {
       heroId: hero.id,
@@ -336,6 +336,7 @@ async function verifyHeroSheetInputRecovery(page, viewport, screenshotPath) {
   const label = describeViewport(viewport);
   const before = await page.evaluate(() => globalThis.__heroDefenseV2Debug.getState().battle.snapshot);
   assert.equal(before.phase, 'INTERMISSION', `${label}: hero sheet test requires intermission`);
+  await page.locator('[data-action=reposition]').click();
 
   await page.locator('[data-hero-card]').first().click();
   const backdrop = page.locator('[data-hero-sheet]');
@@ -467,7 +468,7 @@ async function completeFirstWaveAtDoubleSpeed(page, viewport, screenshotPath) {
 
   await page.locator('[data-action="speed"]').click();
   const speed = await page.evaluate(() => globalThis.__heroDefenseV2Debug.getState().battle.snapshot.speed);
-  assert.equal(speed, 2, `${label}: speed control did not switch to 2x`);
+  assert.equal(speed, 1, `${label}: speed control did not switch from default 2x to 1x`);
 
   await page.locator('[data-action="start-wave"]').click();
   const started = await page.evaluate(() => globalThis.__heroDefenseV2Debug.getState().battle.snapshot);

@@ -1,384 +1,276 @@
-import { ViewportLayout, logicalToViewPoint } from './ViewportLayout.js';
-import { SpriteResolver, drawResolvedSprite } from './SpriteResolver.js';
-import { BATTLE_PHASE, BOARD } from '../core/enums.js';
-import { HERO_BY_ID } from '../content/heroes.js';
-import { AURA_BUFF_BY_ID } from '../content/buffs.js';
-
-const BURST_PULSE_SECONDS = 0.15;
-const BUFF_GLOW_PERIOD_SECONDS = 2.4;
-const UI_BAND_FIRST_ROW = 12;
-
-const DEFENSE_COLORS = Object.freeze({
-  normal: '#f5d48a',
-  air: '#8ce5ff',
-  heavy: '#aeb8cf',
-  regeneration: '#70dc8c',
-  demon: '#d085ed',
-  boss: '#ff7089',
-});
-
-const ELEMENT_COLORS = Object.freeze({
-  fire: '#ff7155', water: '#55c8ff', nature: '#79d76b', light: '#ffe27a', dark: '#bb83e8',
-});
-
-function roundedRect(context, x, y, width, height, radius) {
-  const safe = Math.min(radius, width / 2, height / 2);
-  context.beginPath();
-  context.roundRect?.(x, y, width, height, safe);
-  if (!context.roundRect) context.rect(x, y, width, height);
-}
-
+import { ViewportLayout } from "./ViewportLayout.js";
+import { SpriteResolver, drawResolvedSprite } from "./SpriteResolver.js";
+import { illustration } from "./Illustrations.js";
+import { HERO_BY_ID } from "../content/heroes.js";
+import { JOURNEYS } from "../content/presentation.js";
 export function spriteDestination(point, size, entry = null) {
-  const pivotX = Number.isFinite(entry?.pivotX) ? entry.pivotX : 0.5;
-  const pivotY = Number.isFinite(entry?.pivotY) ? entry.pivotY : 0.75;
-  return {
-    x: point.x - size * pivotX,
-    y: point.y - size * pivotY,
-    width: size,
-    height: size,
-  };
+  return { x: point.x - size * (entry?.pivotX ?? 0.5), y: point.y - size * (entry?.pivotY ?? 0.75), width: size, height: size };
 }
-
-export function clampSpriteToBoard(dest, boardRect) {
-  const maxX = boardRect.x + boardRect.width - dest.width;
-  const maxY = boardRect.y + boardRect.height - dest.height;
-  dest.x = Math.min(Math.max(dest.x, boardRect.x), maxX);
-  dest.y = Math.min(Math.max(dest.y, boardRect.y), maxY);
+export function clampSpriteToBoard(dest, rect) {
+  dest.x = Math.min(Math.max(dest.x, rect.x), rect.x + rect.width - dest.width);
+  dest.y = Math.min(Math.max(dest.y, rect.y), rect.y + rect.height - dest.height);
   return dest;
 }
-
+const COLORS = { water: "#8ddfe9", fire: "#ffad76", nature: "#bbdf8f", light: "#ffedac", dark: "#c7b0f0" };
 export class BattleRenderer {
   constructor({ canvas, assetManager, effectRenderer = null } = {}) {
-    if (!canvas?.getContext) throw new TypeError('BattleRenderer requires a canvas');
+    if (!canvas?.getContext) throw new TypeError("BattleRenderer requires a canvas");
     this.canvas = canvas;
-    this.context = canvas.getContext('2d');
-    this.layout = new ViewportLayout({ canvas, dprCap: 2 });
+    this.context = canvas.getContext("2d");
+    this.assetManager = assetManager;
+    this.layout = new ViewportLayout({ canvas, dprCap: 2, battlefield: true });
     this.sprites = new SpriteResolver(assetManager);
     this.effectRenderer = effectRenderer;
-    this.lastSnapshot = null;
     this.gameTimeSeconds = 0;
     this.reduced = false;
-    this.lastAttackTimers = new Map();
-    this.burstPulses = new Map();
+    this.attacks = /* @__PURE__ */ new Map();
+    this.selectedHeroId = null;
+    this.aim = null;
+    this.cache = null;
   }
-
-  setReduced(reduced) {
-    this.reduced = Boolean(reduced);
+  setReduced(value) {
+    this.reduced = Boolean(value);
   }
-
-  advanceGameTime(deltaSeconds) {
-    const delta = Number(deltaSeconds);
+  advanceGameTime(delta) {
     if (Number.isFinite(delta) && delta > 0) this.gameTimeSeconds += delta;
   }
-
   resize() {
-    const bounds = this.canvas.parentElement?.getBoundingClientRect?.() ?? this.canvas.getBoundingClientRect();
-    return this.layout.resize(bounds.width, bounds.height, globalThis.devicePixelRatio ?? 1);
+    this.cache = null;
+    const b = this.canvas.parentElement.getBoundingClientRect();
+    return this.layout.resize(b.width, b.height, globalThis.devicePixelRatio ?? 1);
   }
-
+  clientToLogical(x, y) {
+    return this.layout.clientToLogical(x, y, this.canvas.getBoundingClientRect());
+  }
+  feedback(event) {
+    if (event.sourceId && ["hit", "skill_cast"].includes(event.type)) this.attacks.set(event.sourceId, { until: this.gameTimeSeconds + 0.3, x: event.x, y: event.y });
+  }
   render(snapshot) {
     this.lastSnapshot = snapshot;
-    const context = this.context;
-    this.layout.beginFrame(context);
-    this.#drawBackdrop(context, snapshot.stage.theme);
-    this.#drawBoard(context, snapshot);
-    this.#drawHeroes(context, snapshot.heroes);
-    this.#drawEnemies(context, snapshot.enemies);
-    this.effectRenderer?.render(context, this.layout);
+    const ctx = this.context;
+    this.layout.beginFrame(ctx);
+    this.drawTerrain(ctx, snapshot);
+    this.drawPlacements(ctx, snapshot);
+    const entities = [...snapshot.heroes.filter((h) => h.placed).map((h) => ({ ...h, hero: true })), ...snapshot.enemies];
+    entities.sort((a, b) => this.point(a).y - this.point(b).y);
+    for (const entity of entities) this.drawEntity(ctx, entity, snapshot);
+    if (this.draggingHeroId && this.aim) {
+      const hero = snapshot.heroes.find((h) => h.id === this.draggingHeroId);
+      if (hero) {
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        this.drawEntity(ctx, { ...hero, hero: true, x: this.aim.x - 0.5, y: this.aim.y - 0.5 }, snapshot);
+        ctx.restore();
+      }
+    }
+    this.effectRenderer?.render(ctx, this.layout);
+    if (!this.reduced) this.drawMotes(ctx);
   }
-
-  clientToLogical(clientX, clientY) {
-    return this.layout.clientToLogical(clientX, clientY, this.canvas.getBoundingClientRect());
+  point(entity) {
+    return entity.hero ? this.layout.logicalCellCenterToCanvas(entity.x, entity.y) : this.layout.logicalToCanvas(entity.x, entity.y);
   }
-
-  #drawBackdrop(context, theme) {
-    const gradient = context.createLinearGradient(0, 0, 0, this.layout.cssHeight);
-    if (theme === 'chaos') {
-      gradient.addColorStop(0, '#171027');
-      gradient.addColorStop(1, '#321335');
+  drawTerrain(ctx, snapshot) {
+    const w = this.layout.cssWidth, h = this.layout.cssHeight, world = this.assetManager.getImage("illustration/worlds");
+    const key = `${snapshot.stage.id}:${w}:${h}:${Boolean(world)}`;
+    if (this.cache?.key !== key) {
+      const surface = document.createElement("canvas");
+      surface.width = Math.ceil(w * this.layout.dpr);
+      surface.height = Math.ceil(h * this.layout.dpr);
+      const c = surface.getContext("2d");
+      c.scale(this.layout.dpr, this.layout.dpr);
+      c.fillStyle = "#aac6af";
+      c.fillRect(0, 0, w, h);
+      if (world) {
+        const index = JOURNEYS[snapshot.stage.id]?.art ?? 0, iw = world.naturalWidth || world.width, ih = world.naturalHeight || world.height;
+        c.drawImage(world, index % 2 * iw / 2, Math.floor(index / 2) * ih / 2, iw / 2, ih / 2, 0, 0, w, h);
+      }
+      const path = snapshot.stage.path, cell2 = this.layout.logicalRadiusToCanvas(1), dark = snapshot.stage.theme === "chaos";
+      const trace = () => {
+        c.beginPath();
+        path.forEach((p, i) => {
+          const q = this.layout.logicalCellCenterToCanvas(p.x, p.y);
+          if (i) c.lineTo(q.x, q.y);
+          else c.moveTo(q.x, q.y);
+        });
+      };
+      c.lineJoin = "round";
+      c.lineCap = "round";
+      c.save();
+      c.translate(0, 3);
+      c.strokeStyle = dark ? "#28294088" : "#526d5c70";
+      c.lineWidth = cell2 * 0.98;
+      trace();
+      c.stroke();
+      c.restore();
+      c.strokeStyle = dark ? "#737c9d" : "#c3b99c";
+      c.lineWidth = cell2 * 0.94;
+      trace();
+      c.stroke();
+      c.strokeStyle = dark ? "#a0a6bc" : "#ebe0c5";
+      c.lineWidth = cell2 * 0.78;
+      trace();
+      c.stroke();
+      c.strokeStyle = dark ? "#b4b7c6" : "#f5ebd5";
+      c.lineWidth = cell2 * 0.54;
+      trace();
+      c.stroke();
+      for (let i = 1; i < path.length - 1; i++) {
+        const p = this.layout.logicalCellCenterToCanvas(path[i].x, path[i].y), next = this.layout.logicalCellCenterToCanvas(path[i + 1].x, path[i + 1].y), angle = Math.atan2(next.y - p.y, next.x - p.x);
+        c.save();
+        c.translate(p.x, p.y);
+        c.rotate(angle);
+        c.strokeStyle = dark ? "#727c9444" : "#b4a78b55";
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(0, -cell2 * 0.3);
+        c.lineTo(0, cell2 * 0.3);
+        c.stroke();
+        c.restore();
+      }
+      this.cache = { key, surface };
+    }
+    ctx.drawImage(this.cache.surface, 0, 0, w, h);
+    const cell = this.layout.logicalRadiusToCanvas(1), first = snapshot.stage.path[0], last = snapshot.stage.path.at(-1);
+    if (first) this.drawProp(ctx, "portal", this.layout.logicalCellCenterToCanvas(first.x, first.y), cell * 1.9);
+    if (last) this.drawProp(ctx, "core", this.layout.logicalCellCenterToCanvas(last.x, last.y), cell * 1.9);
+    if (snapshot.phase === "PREPARATION") for (let i = 4; i < snapshot.stage.path.length - 1; i += 7) {
+      const p = snapshot.stage.path[i], n = snapshot.stage.path[i + 1], q = this.layout.logicalCellCenterToCanvas(p.x, p.y), r = this.layout.logicalCellCenterToCanvas(n.x, n.y);
+      ctx.save();
+      ctx.translate(q.x, q.y);
+      ctx.rotate(Math.atan2(r.y - q.y, r.x - q.x));
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = "#716c57";
+      ctx.beginPath();
+      ctx.moveTo(4, 0);
+      ctx.lineTo(-3, -4);
+      ctx.lineTo(-3, 4);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  drawProp(ctx, id, point, size) {
+    const art = illustration(this.assetManager, id);
+    if (art) drawResolvedSprite(ctx, art, { x: point.x - size / 2, y: point.y - size * 0.8, width: size, height: size });
+  }
+  drawPlacements(ctx, snapshot) {
+    const canPlace = ["PREPARATION", "INTERMISSION"].includes(snapshot.phase), cell = this.layout.logicalRadiusToCanvas(1);
+    const hero = snapshot.heroes.find((h) => h.id === this.selectedHeroId);
+    const center = this.aim ?? (hero?.placed ? { x: hero.x + 0.5, y: hero.y + 0.5 } : null);
+    if (center && (canPlace || this.spellAiming)) {
+      const p = this.layout.logicalToCanvas(center.x, center.y), range = this.spellAiming ? 2.6 : this.selectedRange ?? HERO_BY_ID[hero?.id]?.attack.range ?? 3;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(this.layout.boardRect.x, this.layout.boardRect.y, this.layout.boardRect.width, this.layout.boardRect.height);
+      ctx.clip();
+      ctx.fillStyle = this.spellAiming ? "#b9e8ff30" : "#d5f2ea25";
+      ctx.strokeStyle = this.spellAiming ? "#e2f8ff" : "#fcfff4";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 5]);
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, range * this.layout.boardRect.width / 12, range * this.layout.boardRect.height / 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (!canPlace) return;
+    for (const spot of snapshot.stage.placementCells) {
+      if (snapshot.heroes.some((h) => h.placed && h.x === spot.x && h.y === spot.y)) continue;
+      const p = this.layout.logicalCellCenterToCanvas(spot.x, spot.y);
+      ctx.save();
+      ctx.fillStyle = "#fcfff0cc";
+      ctx.strokeStyle = "#628d79bb";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, cell * 0.42, cell * 0.29, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = "#789986";
+      ctx.beginPath();
+      ctx.moveTo(p.x - 4, p.y);
+      ctx.lineTo(p.x + 4, p.y);
+      ctx.moveTo(p.x, p.y - 4);
+      ctx.lineTo(p.x, p.y + 4);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  drawEntity(ctx, e, snapshot) {
+    const p = this.point(e), cell = this.layout.logicalRadiusToCanvas(1), pulse = this.attacks.get(e.id), attack = e.hero && pulse?.until > this.gameTimeSeconds;
+    const t = this.gameTimeSeconds, air = !e.hero && e.defenseType === "air";
+    const bob = this.reduced ? 0 : e.hero ? Math.sin(t * 2 + e.slot) * 1 : Math.sin(t * (air ? 5 : 12) + e.progress) * cell * 0.035;
+    const size = cell * (e.hero ? 2.15 : e.isBoss ? 2.6 : 1.18);
+    let art = illustration(this.assetManager, e.hero ? e.id : e.enemyId, attack);
+    if (!art) art = this.sprites.resolve({ kind: e.hero ? "hero" : "boss", id: e.hero ? e.id : e.enemyId, direction: e.direction });
+    ctx.save();
+    ctx.fillStyle = "#1d334b30";
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 3, size * 0.23, cell * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    if (e.hero && e.id === this.selectedHeroId && snapshot.phase !== "WAVE_RUNNING") {
+      ctx.strokeStyle = "#fffbe1";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, cell * 0.6, cell * 0.32, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (e.hero && e.buffs?.length) {
+      ctx.strokeStyle = COLORS[e.element];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y, cell * 0.57, cell * 0.25, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (art) {
+      const iw = art.image.naturalWidth || art.image.width, ih = art.image.naturalHeight || art.image.height;
+      const ratio = art.frame ? art.frame.width * iw / (art.frame.height * ih) : 1;
+      const height = size, width = height * ratio;
+      const lunge = attack && !this.reduced ? Math.sin((pulse.until - t) / 0.3 * Math.PI) * cell * 0.13 : 0;
+      const flip = e.direction === "left";
+      ctx.save();
+      ctx.translate(p.x + (flip ? -lunge : lunge), p.y - bob - (air ? cell * 0.17 : 0));
+      if (flip) ctx.scale(-1, 1);
+      if (attack && !this.reduced) ctx.rotate(flip ? -0.035 : 0.035);
+      drawResolvedSprite(ctx, art, { x: -width / 2, y: -height * 0.87, width, height });
+      ctx.restore();
+    }
+    if (e.hero) {
+      ctx.save();
+      ctx.fillStyle = "#fffdf0ee";
+      ctx.beginPath();
+      ctx.roundRect(p.x - cell * 0.42, p.y + cell * 0.12, cell * 0.84, 13, 5);
+      ctx.fill();
+      ctx.fillStyle = "#536763";
+      ctx.font = "bold 9px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(`Lv.${e.level}`, p.x, p.y + cell * 0.12 + 10);
+      ctx.restore();
     } else {
-      gradient.addColorStop(0, '#17233a');
-      gradient.addColorStop(1, '#3f2b25');
-    }
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, this.layout.cssWidth, this.layout.cssHeight);
-  }
-
-  #cellRect(x, y) {
-    const corners = [
-      this.layout.logicalToCanvas(x, y),
-      this.layout.logicalToCanvas(x + 1, y),
-      this.layout.logicalToCanvas(x, y + 1),
-      this.layout.logicalToCanvas(x + 1, y + 1),
-    ];
-    const xs = corners.map((point) => point.x);
-    const ys = corners.map((point) => point.y);
-    return {
-      x: Math.min(...xs), y: Math.min(...ys),
-      width: Math.max(...xs) - Math.min(...xs),
-      height: Math.max(...ys) - Math.min(...ys),
-    };
-  }
-
-  #drawBoard(context, snapshot) {
-    const path = new Set(snapshot.stage.path.map(({ x, y }) => `${x},${y}`));
-    const obstacles = new Set(snapshot.stage.obstacles.map(({ x, y }) => `${x},${y}`));
-    const placementSet = new Set((snapshot.stage.placementCells ?? []).map(({ x, y }) => `${x},${y}`));
-    const isPlacementPhase = [BATTLE_PHASE.PREPARATION, BATTLE_PHASE.INTERMISSION].includes(snapshot.phase);
-    const bandStart = this.layout.logicalToCanvas(0, UI_BAND_FIRST_ROW);
-    const bandEnd = this.layout.logicalToCanvas(BOARD.columns, UI_BAND_FIRST_ROW);
-    context.strokeStyle = 'rgba(255,255,255,0.2)';
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(bandStart.x, bandStart.y);
-    context.lineTo(bandEnd.x, bandEnd.y);
-    context.stroke();
-    for (let y = 0; y < 16; y += 1) {
-      for (let x = 0; x < 12; x += 1) {
-        const rect = this.#cellRect(x, y);
-        const key = `${x},${y}`;
-        if (y >= UI_BAND_FIRST_ROW) {
-          context.fillStyle = 'rgba(10, 8, 20, 0.6)';
-          context.fillRect(rect.x, rect.y, rect.width, rect.height);
-          continue;
-        }
-        context.fillStyle = path.has(key)
-          ? 'rgba(219, 180, 113, 0.32)'
-          : ((x + y) % 2 ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.075)');
-        context.fillRect(rect.x, rect.y, rect.width, rect.height);
-        context.strokeStyle = 'rgba(255,255,255,0.08)';
-        context.lineWidth = 1;
-        context.strokeRect(rect.x + 0.5, rect.y + 0.5, Math.max(0, rect.width - 1), Math.max(0, rect.height - 1));
-        if (obstacles.has(key)) {
-          context.fillStyle = 'rgba(67,74,93,0.9)';
-          roundedRect(context, rect.x + rect.width * 0.16, rect.y + rect.height * 0.16, rect.width * 0.68, rect.height * 0.68, 4);
-          context.fill();
-        }
-        if (isPlacementPhase && placementSet.size > 0) {
-          if (placementSet.has(key)) {
-            context.strokeStyle = 'rgba(120, 230, 170, 0.6)';
-            context.lineWidth = 2;
-            context.strokeRect(rect.x + 1, rect.y + 1, Math.max(0, rect.width - 2), Math.max(0, rect.height - 2));
-          } else if (!path.has(key) && !obstacles.has(key)) {
-            context.fillStyle = 'rgba(0, 0, 0, 0.35)';
-            context.fillRect(rect.x, rect.y, rect.width, rect.height);
-          }
-        }
+      const width = cell * (e.isBoss ? 1.4 : 0.67), y = p.y - size * 0.82;
+      ctx.fillStyle = "#233c4277";
+      ctx.fillRect(p.x - width / 2, y, width, 3);
+      ctx.fillStyle = e.isBoss ? "#e6a5bd" : "#bfe4a0";
+      ctx.fillRect(p.x - width / 2, y, width * Math.max(0, e.hp / e.maxHp), 3);
+      if (e.statuses?.slow || e.statuses?.stun) {
+        ctx.strokeStyle = e.statuses.stun ? "#fdf6bd" : "#a5e4ff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y, cell * 0.4, cell * 0.2, 0, 0, Math.PI * 2);
+        ctx.stroke();
       }
     }
-    const start = snapshot.stage.path[0];
-    const core = snapshot.stage.path.at(-1);
-    this.#drawCellLabel(context, start.x, start.y, 'IN', '#7de9ff');
-    this.#drawCellLabel(context, core.x, core.y, 'CORE', '#ffdd78');
   }
-
-  #drawCellLabel(context, x, y, label, color) {
-    const rect = this.#cellRect(x, y);
-    context.save();
-    context.fillStyle = `${color}33`;
-    context.fillRect(rect.x, rect.y, rect.width, rect.height);
-    context.fillStyle = color;
-    context.font = `800 ${Math.max(7, Math.min(rect.width, rect.height) * 0.26)}px system-ui`;
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.fillText(label, rect.x + rect.width / 2, rect.y + rect.height / 2);
-    context.restore();
-  }
-
-  #drawHeroes(context, heroes) {
-    const cell = this.layout.logicalRadiusToCanvas(1);
-    for (const hero of heroes) {
-      if (!hero.placed) continue;
-      const point = this.layout.logicalCellCenterToCanvas(hero.x, hero.y);
-      this.#drawBuffGlow(context, hero, point, cell);
-      let size = cell * 1.35;
-      if (HERO_BY_ID[hero.id]?.attack?.archetype === 'burst') {
-        size *= this.#burstPulseScale(hero);
-      }
-      const resolved = this.sprites.resolve({ kind: 'hero', id: hero.id, direction: hero.direction });
-      const heroDest = clampSpriteToBoard(spriteDestination(point, size, resolved?.entry), this.layout.boardRect);
-      if (!drawResolvedSprite(context, resolved, heroDest)) {
-        context.save();
-        context.fillStyle = ELEMENT_COLORS[hero.element] ?? '#fff';
-        context.strokeStyle = '#fff';
-        context.lineWidth = Math.max(1, cell * 0.05);
-        context.beginPath();
-        context.arc(point.x, point.y, cell * 0.36, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        context.fillStyle = '#1b1630';
-        context.font = `900 ${Math.max(9, cell * 0.25)}px system-ui`;
-        context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText(hero.name.slice(0, 1), point.x, point.y);
-        context.restore();
-      }
-      this.#drawBuffDots(context, hero, point, cell);
-      this.#drawLevelBadge(context, point, hero.level, cell);
+  drawMotes(ctx) {
+    ctx.save();
+    for (let i = 0; i < 9; i++) {
+      const t = this.gameTimeSeconds * 0.14 + i * 1.7, x = (Math.sin(i * 43) * 0.5 + 0.5) * this.layout.cssWidth, y = (i / 9 + this.gameTimeSeconds * 8e-3) % 1 * this.layout.cssHeight;
+      ctx.globalAlpha = 0.15 + 0.2 * (0.5 + 0.5 * Math.sin(t));
+      ctx.fillStyle = "#fff9d8";
+      ctx.beginPath();
+      ctx.arc(x + Math.sin(t) * 9, y, 1.5, 0, Math.PI * 2);
+      ctx.fill();
     }
-  }
-
-  #heroBuffs(hero) {
-    return (hero.buffs ?? []).map((buffId) => AURA_BUFF_BY_ID[buffId]).filter(Boolean);
-  }
-
-  #drawBuffGlow(context, hero, point, cell) {
-    if (this.reduced) return;
-    const buffs = this.#heroBuffs(hero);
-    if (buffs.length === 0) return;
-    context.save();
-    buffs.forEach((buff, index) => {
-      const pulse = 0.5 + 0.5 * Math.sin(this.gameTimeSeconds * (Math.PI * 2 / BUFF_GLOW_PERIOD_SECONDS) + index * 1.3);
-      const radius = cell * (0.56 + index * 0.1) + cell * 0.04 * pulse;
-      const alphaHex = Math.round((0.2 + 0.22 * pulse) * 255).toString(16).padStart(2, '0');
-      const gradient = context.createRadialGradient(point.x, point.y, radius * 0.35, point.x, point.y, radius);
-      gradient.addColorStop(0, `${buff.color}00`);
-      gradient.addColorStop(0.75, `${buff.color}00`);
-      gradient.addColorStop(1, `${buff.color}${alphaHex}`);
-      context.fillStyle = gradient;
-      context.beginPath();
-      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
-      context.fill();
-      context.strokeStyle = `${buff.color}${alphaHex}`;
-      context.lineWidth = Math.max(1, cell * 0.045);
-      context.beginPath();
-      context.arc(point.x, point.y, radius * 0.94, 0, Math.PI * 2);
-      context.stroke();
-    });
-    context.restore();
-  }
-
-  #drawBuffDots(context, hero, point, cell) {
-    const buffs = this.#heroBuffs(hero);
-    if (buffs.length === 0) return;
-    context.save();
-    buffs.forEach((buff, index) => {
-      const x = point.x + (index - (buffs.length - 1) / 2) * cell * 0.2;
-      const y = point.y + cell * 0.5;
-      context.fillStyle = '#19142ddd';
-      context.beginPath();
-      context.arc(x, y, cell * 0.085, 0, Math.PI * 2);
-      context.fill();
-      context.fillStyle = buff.color;
-      context.beginPath();
-      context.arc(x, y, cell * 0.055, 0, Math.PI * 2);
-      context.fill();
-    });
-    context.restore();
-  }
-
-  #burstPulseScale(hero) {
-    const previousTimer = this.lastAttackTimers.get(hero.id);
-    if (previousTimer !== undefined && hero.attackTimer > previousTimer + 1) {
-      this.burstPulses.set(hero.id, this.gameTimeSeconds + BURST_PULSE_SECONDS);
-    }
-    this.lastAttackTimers.set(hero.id, hero.attackTimer);
-    const remaining = (this.burstPulses.get(hero.id) ?? 0) - this.gameTimeSeconds;
-    return remaining > 0 ? 1 + 0.18 * (remaining / BURST_PULSE_SECONDS) : 1;
-  }
-
-  #drawLevelBadge(context, point, level, cell) {
-    context.save();
-    context.fillStyle = '#151528dd';
-    context.strokeStyle = '#ffe79b';
-    context.lineWidth = 1;
-    context.beginPath();
-    context.arc(point.x + cell * 0.3, point.y - cell * 0.3, cell * 0.15, 0, Math.PI * 2);
-    context.fill();
-    context.stroke();
-    context.fillStyle = '#fff';
-    context.font = `800 ${Math.max(7, cell * 0.16)}px system-ui`;
-    context.textAlign = 'center';
-    context.textBaseline = 'middle';
-    context.fillText(level, point.x + cell * 0.3, point.y - cell * 0.3);
-    context.restore();
-  }
-
-  #drawEnemies(context, enemies) {
-    const cell = this.layout.logicalRadiusToCanvas(1);
-    for (const enemy of enemies) {
-      const point = this.layout.logicalToCanvas(enemy.x, enemy.y);
-      if (enemy.isBoss) {
-        const size = cell * 1.65;
-        const resolved = this.sprites.resolve({ kind: 'boss', id: enemy.enemyId, direction: enemy.direction });
-        const bossDest = clampSpriteToBoard(spriteDestination(point, size, resolved?.entry), this.layout.boardRect);
-        if (!drawResolvedSprite(context, resolved, bossDest)) {
-          this.#drawEnemyToken(context, point, enemy.defenseType, cell * 0.5, enemy.name.slice(0, 1));
-        }
-      } else {
-        this.#drawEnemyToken(context, point, enemy.defenseType, cell * 0.3, '');
-      }
-      this.#drawHealth(context, point, enemy.hp / enemy.maxHp, cell, enemy.isBoss);
-      this.#drawStatuses(context, point, enemy.statuses, cell);
-    }
-  }
-
-  #drawEnemyToken(context, point, defenseType, radius, label) {
-    context.save();
-    context.fillStyle = DEFENSE_COLORS[defenseType] ?? '#fff';
-    context.strokeStyle = '#2a1836';
-    context.lineWidth = Math.max(1, radius * 0.18);
-    context.beginPath();
-    if (defenseType === 'air') {
-      context.moveTo(point.x, point.y - radius);
-      context.lineTo(point.x + radius, point.y + radius * 0.7);
-      context.lineTo(point.x - radius, point.y + radius * 0.7);
-    } else if (defenseType === 'heavy') {
-      context.rect(point.x - radius, point.y - radius, radius * 2, radius * 2);
-    } else if (defenseType === 'regeneration') {
-      for (let index = 0; index < 8; index += 1) {
-        const angle = index * Math.PI / 4;
-        const value = index % 2 ? radius * 0.55 : radius;
-        const x = point.x + Math.cos(angle) * value;
-        const y = point.y + Math.sin(angle) * value;
-        if (index === 0) context.moveTo(x, y); else context.lineTo(x, y);
-      }
-    } else if (defenseType === 'demon') {
-      context.moveTo(point.x, point.y - radius);
-      context.lineTo(point.x + radius, point.y);
-      context.lineTo(point.x, point.y + radius);
-      context.lineTo(point.x - radius, point.y);
-    } else {
-      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
-    }
-    context.closePath();
-    context.fill();
-    context.stroke();
-    if (label) {
-      context.fillStyle = '#23152c';
-      context.font = `900 ${Math.max(8, radius * 0.8)}px system-ui`;
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-      context.fillText(label, point.x, point.y);
-    }
-    context.restore();
-  }
-
-  #drawHealth(context, point, ratio, cell, boss) {
-    const width = cell * (boss ? 0.95 : 0.62);
-    const height = Math.max(3, cell * 0.08);
-    const x = point.x - width / 2;
-    const y = point.y - cell * (boss ? 0.72 : 0.48);
-    context.fillStyle = '#1a1525cc';
-    context.fillRect(x, y, width, height);
-    context.fillStyle = ratio > 0.5 ? '#78e58d' : ratio > 0.2 ? '#ffd55f' : '#ff6b78';
-    context.fillRect(x, y, width * Math.max(0, Math.min(1, ratio)), height);
-  }
-
-  #drawStatuses(context, point, statuses, cell) {
-    const ids = Object.keys(statuses ?? {}).filter((id) => id !== 'stun_immunity').slice(0, 4);
-    ids.forEach((id, index) => {
-      context.fillStyle = '#19142ddd';
-      context.beginPath();
-      context.arc(point.x + (index - (ids.length - 1) / 2) * cell * 0.16, point.y + cell * 0.42, cell * 0.075, 0, Math.PI * 2);
-      context.fill();
-      context.fillStyle = '#fff';
-      context.font = `700 ${Math.max(5, cell * 0.08)}px system-ui`;
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-      context.fillText(id.slice(0, 1).toUpperCase(), point.x + (index - (ids.length - 1) / 2) * cell * 0.16, point.y + cell * 0.42);
-    });
+    ctx.restore();
   }
 }
-
 export default BattleRenderer;

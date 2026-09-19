@@ -119,6 +119,7 @@ export class BattleSession {
       phase: this.state.phase,
       speed: this.state.speed,
       paused: this.state.paused,
+      starfallReady: Boolean(this.state.starfallReady),
       core: { ...this.state.core },
       crystals: this.state.crystals,
       nextWave: this.state.nextWave,

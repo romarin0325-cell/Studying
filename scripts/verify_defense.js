@@ -6,7 +6,7 @@ const { pathToFileURL } = require("node:url");
 const APP_ROOT = path.resolve(__dirname, "..", "defense");
 const JS_ROOT = path.join(APP_ROOT, "js");
 const SYSTEM_ROOT = path.join(JS_ROOT, "battle", "systems");
-const EXPECTED_RELEASE_ASSET_COUNT = 66;
+const EXPECTED_RELEASE_ASSET_COUNT = 70;
 const DIRECTIONS = Object.freeze(["front", "back", "left", "right"]);
 
 const REQUIRED_FILES = Object.freeze([
@@ -174,7 +174,7 @@ function verifyReleaseAssets(manifest) {
       else {
         match = entryPath.match(/^\.\/assets\/bosses\/([^/]+)\/(front|back|left|right)\.webp$/);
         if (match) addDirection(bossDirections, match[1], match[2]);
-        else throw new Error(`Required release asset does not follow the V2 file contract: ${entryPath}`);
+        else if (!/^\.\/assets\/moonlit\/(heroes|companions|worlds|creatures)\.png$/.test(entryPath)) throw new Error(`Required release asset does not follow the release contract: ${entryPath}`);
       }
     }
 
