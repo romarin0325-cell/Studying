@@ -70,6 +70,17 @@ test('challenge sums each boss time-attack bonus and shows rank at the end',()=>
   g.phase='quiz';g.room=2;g.stageIndex=6;g.completeQuiz();
   assert.equal(g.rankBonus,10000);assert.equal(g.phase,'victory');
 });
+test('challenge defeat does not grant rank bonus while keeping earned time-attack points',()=>{
+  const g=new Game({challenge:true});
+  g.startStage(0,2);g.spawnBoss();g.phase='boss';g.bossElapsed=20;g.damage(g.boss,1e9,0,0);
+  assert.equal(g.timeBonus,15000);assert.equal(g.rankBonus,0);
+  g.phase='defeat';g.finished=true;
+  assert.equal(g.bonusesFinalized,false);assert.equal(g.rankBonus,0);
+});
+test('challenge rank uses five and fifteen hits while dungeons keep the original ranks',()=>{
+  const dungeon=new Game();dungeon.stats.deaths=1;assert.equal(dungeon.rank,'A');dungeon.stats.deaths=4;assert.equal(dungeon.rank,'B');
+  const challenge=new Game({challenge:true});challenge.stats.deaths=5;assert.equal(challenge.rank,'S');challenge.stats.deaths=15;assert.equal(challenge.rank,'A');challenge.stats.deaths=16;assert.equal(challenge.rank,'B');
+});
 test('challenge instant variants activate on selection and do not retrigger on revival',()=>{
   const g=new Game({challenge:true});g.player.lives=1;g.bombs=0;
   offer(g,'resurgence');assert.equal(g.player.lives,g.maxLife);
