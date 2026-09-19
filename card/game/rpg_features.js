@@ -1324,7 +1324,7 @@
             chaosPool: [],
             factoryPool: [],
             draft: { active: false, round: 0, rerolls: GAME_CONSTANTS.DRAFT.INITIAL_REROLLS, currentOptions: [] },
-            factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [] },
+            factoryDraft: { active: false, round: 1, maxRounds: 10, pool: [], seenCards: [], currentBundles: [], choiceSeq: 0, busy: false, scrollTop: 0 },
             artifactReserveDraft: { active: false, round: 1, maxRounds: 4, pool: [], currentBundles: [] },
             perfectPlanDraft: { active: false, step: 0, selected: [], currentGradeSelected: [] },
             artifactReservePool: [],
@@ -1368,6 +1368,9 @@
             this.state.factoryDraft.maxRounds = 10; // 10 rounds * 4 cards = 40
             this.state.factoryDraft.pool = [];
             this.state.factoryDraft.seenCards = [];
+            this.state.factoryDraft.choiceSeq = 0;
+            this.state.factoryDraft.busy = false;
+            this.state.factoryDraft.scrollTop = 0;
             this.generateFactoryBundles();
         }
 
@@ -1625,7 +1628,7 @@
     generateFactoryBundles() {
         const baseCards = CARDS || [];
         const unlockedBonusCards = [...this.getReleasedStandardBonusCards(), ...this.getHiddenBonusCards()];
-        let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence');
+        let fullPool = [...baseCards, ...unlockedBonusCards].filter(c => c.grade !== 'transcendence' && !c.battleOnly);
 
         const selectedSet = new Set(this.state.factoryDraft.pool);
         let availablePool = fullPool.filter(c => !selectedSet.has(c.id));
@@ -1646,30 +1649,41 @@
         const bundle1 = [normalPicks[0]?.id, rarePicks[0]?.id, epicPicks[0]?.id, legendPicks[0]?.id].filter(Boolean);
         const bundle2 = [normalPicks[1]?.id, rarePicks[1]?.id, epicPicks[1]?.id, legendPicks[1]?.id].filter(Boolean);
 
+        this.state.factoryDraft.choiceSeq = (this.state.factoryDraft.choiceSeq || 0) + 1;
         this.state.factoryDraft.currentBundles = [bundle1, bundle2];
+        this.state.factoryDraft.scrollTop = 0;
 
         this.showScreen('screen-factory-draft');
         this.renderFactoryDraftScreen();
     },
 
     selectFactoryBundle(index) {
-        const bundle = this.state.factoryDraft.currentBundles[index];
-        if (!bundle) return;
+        const draft = this.state.factoryDraft;
+        if (!draft || !draft.active || draft.busy) return;
+        const seq = draft.choiceSeq;
+        const bundle = draft.currentBundles && draft.currentBundles[index];
+        if (!bundle || !bundle.length) return;
 
-        this.state.factoryDraft.pool.push(...bundle.filter(Boolean));
-        this.state.factoryDraft.round++;
-        this.state.factoryDraft.currentBundles = [];
+        draft.busy = true;
+        draft.pool.push(...bundle.filter(Boolean));
+        draft.round++;
+        draft.currentBundles = [];
+        draft.scrollTop = 0;
 
-        if (this.state.factoryDraft.round > this.state.factoryDraft.maxRounds) {
-            this.state.factoryDraft.active = false;
-            this.state.factoryPool = [...this.state.factoryDraft.pool];
+        if (draft.round > draft.maxRounds) {
+            draft.active = false;
+            draft.busy = false;
+            this.state.factoryPool = [...draft.pool];
             this.state.inventory = [];
             this.state.deck = [null, null, null];
             
             this.showAlert("팩토리 드래프트가 완료되었습니다!<br>방금 구성한 40장의 전용 풀을 바탕으로 모험을 시작합니다.");
             this.toMenu();
-        } else {
+        } else if (draft.choiceSeq === seq) {
             this.generateFactoryBundles();
+            draft.busy = false;
+        } else {
+            draft.busy = false;
         }
 
         this.saveGame();

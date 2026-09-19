@@ -49,7 +49,7 @@ try {
     }
     if (mode === 'factory') {
       assert.equal(result.screen,'screen-factory-draft');
-      await page.locator('#factory-bundle-0').click();
+      await page.locator('#factory-select-0').click();
       if (await page.locator('#modal-info').isVisible()) await page.locator('#modal-info button').click();
       const beforePreview = await page.evaluate(() => ({
         round:RPG.state.factoryDraft.round,
@@ -72,6 +72,34 @@ try {
         pool:[...RPG.state.factoryDraft.pool],
         bundles:RPG.state.factoryDraft.currentBundles.map(bundle => [...bundle])
       })),beforePreview);
+      const factoryUi = await page.evaluate(() => {
+        const row = document.querySelector('.factory-card-row');
+        const art = row?.querySelector('.portrait');
+        const name = row?.querySelector('.factory-card-name');
+        const meta = row?.querySelector('.factory-card-meta');
+        const artBox = art?.getBoundingClientRect();
+        const nameStyle = name && getComputedStyle(name);
+        const metaStyle = meta && getComputedStyle(meta);
+        return {
+          parentClick: Boolean(document.getElementById('factory-bundle-0').getAttribute('onclick')),
+          metaText: meta?.textContent || '',
+          nameSize: nameStyle && parseFloat(nameStyle.fontSize),
+          metaSize: metaStyle && parseFloat(metaStyle.fontSize),
+          artW: artBox && Math.round(artBox.width),
+          artH: artBox && Math.round(artBox.height)
+        };
+      });
+      assert.equal(factoryUi.parentClick, false);
+      assert.equal(/dealer|nature|balancer/.test(factoryUi.metaText), false);
+      assert.ok(factoryUi.nameSize >= 16);
+      assert.ok(factoryUi.metaSize >= 13);
+      assert.equal(factoryUi.artW, 60);
+      assert.equal(factoryUi.artH, 100);
+      await page.locator('.factory-card-row').first().click();
+      assert.equal(await page.locator('#modal-card').isVisible(), true);
+      const roundAfterDetail = await page.evaluate(() => RPG.state.factoryDraft.round);
+      assert.equal(roundAfterDetail, 2);
+      await page.locator('#modal-card button').click();
     }
     if (mode === 'artifact_reserve') {
       assert.equal(result.screen,'screen-artifact-reserve-draft');

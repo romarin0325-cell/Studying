@@ -69,3 +69,96 @@
   .astra .log-container { min-height:85px; padding:8px; }.astra .control-panel { max-height:none; }.astra .skill-btn { font-size:11px; min-height:44px; padding:5px; }
 }
 @media(max-height:680px) and (max-width:760px) { .astra .battle-actor .portrait { height:96px; }.astra .battle-artifact-btn { min-height:30px; }.astra .log-container { min-height:70px; } }
+
+#screen-factory-draft {
+  container-type: inline-size;
+  container-name: factory-draft;
+  min-height: 0;
+  box-sizing: border-box;
+}
+.factory-draft-title { margin: 5px 0; font-size: 18px; line-height: 24px; flex-shrink: 0; }
+.factory-draft-help { text-align: center; margin-bottom: 8px; font-size: 0.9rem; color: var(--muted, #ccc); flex-shrink: 0; }
+.factory-draft-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.factory-bundle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  min-width: 0;
+  cursor: default;
+}
+.factory-bundle-title { text-align: center; font-weight: bold; font-size: 18px; line-height: 24px; margin: 0; }
+.factory-bundle-cards { display: flex; flex-direction: column; gap: 8px; }
+.factory-card-row {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 120px;
+  padding: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  border-radius: 12px;
+}
+.astra #screen-factory-draft .factory-card-row .portrait,
+.factory-card-row .portrait {
+  width: 60px;
+  height: 100px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.factory-card-row .portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.factory-card-text { min-width: 0; }
+.factory-card-name { font-size: 16px; line-height: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.factory-card-meta { font-size: 13px; line-height: 18px; margin-top: 4px; color: var(--muted, #ccc); }
+.factory-select-btn { min-height: 48px; width: 100%; box-sizing: border-box; }
+.factory-draft-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+.factory-aux-btn { width: min(100%, 240px); min-height: 44px; }
+@container factory-draft (min-width: 768px) {
+  .factory-draft-body {
+    flex-direction: row;
+    align-items: stretch;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 16px;
+    width: 100%;
+  }
+  .factory-bundle { flex: 1; min-width: 0; }
+  .factory-card-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 140px;
+  }
+  .astra #screen-factory-draft .factory-card-row .portrait,
+  .factory-card-row .portrait { width: 72px; height: 120px; }
+}

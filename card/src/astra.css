@@ -236,6 +236,9 @@ input::placeholder { color:#97b1c3; }
 .astra #screen-draft>h3,.astra #screen-factory-draft>h3,.astra #screen-artifact-reserve-draft>h3,.astra #screen-perfect-plan-draft>h3 { font-size:21px; font-weight:500; letter-spacing:-.04em; padding-bottom:10px; }
 .astra #draft-reroll-cnt { color:var(--sky)!important; }
 .astra #factory-bundle-0,.astra #factory-bundle-1,.astra #artifact-reserve-bundle-0,.astra #artifact-reserve-bundle-1 { border-color:var(--line)!important; background:var(--panel)!important; border-radius:18px!important; padding:12px!important; }
+.astra .factory-card-row { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); }
+.astra .factory-select-btn,.astra .factory-aux-btn { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); border-radius:12px; }
+.astra #factory-select-0,.astra #factory-select-1 { background:var(--sky); color:var(--ink); border-color:var(--sky); font-weight:700; }
 .astra .bonus-pool-item { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
 .astra #gacha-result { text-align:center; padding:12px 0; }
 .astra #gacha-result>.portrait { width:160px!important; height:215px!important; border-radius:48px 48px 12px 12px; border-color:var(--sky)!important; margin-top:17px!important; }

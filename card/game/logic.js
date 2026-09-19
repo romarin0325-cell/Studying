@@ -273,7 +273,10 @@ class SaveDataMigrator {
             maxRounds: 10,
             pool: [],
             seenCards: [],
-            currentBundles: []
+            currentBundles: [],
+            choiceSeq: 0,
+            busy: false,
+            scrollTop: 0
         }, ['pool', 'seenCards', 'currentBundles']);
 
         state.artifactReserveDraft = SaveDataMigrator.mergeObjectDefaults(state.artifactReserveDraft, {
@@ -647,6 +650,40 @@ const GameUtils = {
         ];
     },
 
+    getBattleOnlyForms() {
+        return typeof BATTLE_ONLY_FORMS !== 'undefined' ? [...BATTLE_ONLY_FORMS] : [];
+    },
+
+    isBattleOnlyCard(cardOrId) {
+        const card = typeof cardOrId === 'string' ? this.getCardById(cardOrId) : cardOrId;
+        return !!(card && card.battleOnly);
+    },
+
+    hasCardTag(cardOrId, tag) {
+        if (!cardOrId || !tag) return false;
+        const id = typeof cardOrId === 'string' ? cardOrId : cardOrId.id;
+        const def = this.getCardById(id);
+        return !!(def && Array.isArray(def.tags) && def.tags.includes(tag));
+    },
+
+    hasUniformGrade(deck, allCards) {
+        const grades = (deck || [])
+            .map(id => (id ? this.getCardById(id, allCards) : null))
+            .filter(Boolean)
+            .map(card => card.grade);
+        return grades.length > 0 && grades.every(grade => grade === grades[0]);
+    },
+
+    canTransformTo(currentFormId, nextFormId) {
+        const allowed = (typeof MIRACLE_FORM_TRANSITIONS !== 'undefined' && MIRACLE_FORM_TRANSITIONS[currentFormId]) || [];
+        return allowed.includes(nextFormId);
+    },
+
+    formatRandomDebuffPhrase(pool, count) {
+        const names = (pool || []).map(id => (typeof BUFF_NAMES !== 'undefined' && BUFF_NAMES[id]) || id);
+        return `[${names.join(', ')}] 중 무작위 ${count}종`;
+    },
+
     getDefaultUnlockedBonusCardIds() {
         return [...DEFAULT_UNLOCKED_BONUS_CARD_IDS];
     },
@@ -804,6 +841,7 @@ const GameUtils = {
         }
         if (!cachedCardById) {
             cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
+            this.getBattleOnlyForms().forEach(card => cachedCardById.set(card.id, card));
         }
         return cachedCardById.get(id) || null;
     },
@@ -979,7 +1017,7 @@ const GameUtils = {
                 const limitVal = getGradeVal(options.maxGrade);
                 pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
             }
-            return pool;
+            return pool.filter(card => !card.battleOnly);
         }
 
         let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');
@@ -1035,7 +1073,7 @@ const GameUtils = {
             pool = pool.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
         }
 
-        return pool;
+        return pool.filter(card => !card.battleOnly);
     },
 
     /**
@@ -1354,6 +1392,11 @@ const DAMAGE_EFFECT_HANDLERS = {
             ctx.mult *= eff.mult;
             matched = true;
         }
+        else if (eff.condition === 'field_buff_kind_count') {
+            const n = Array.isArray(ctx.sourceFieldBuffs) ? ctx.sourceFieldBuffs.length : 0;
+            ctx.mult += n * (eff.addPerBuff || 2.0);
+            matched = n > 0;
+        }
         else if (eff.condition === 'target_element') {
             const elements = eff.elements || (eff.element ? [eff.element] : []);
             if (elements.includes(ctx.target.element)) {
@@ -1584,6 +1627,16 @@ const SideEffects = {
             const value = StatusRules.add(ctx.source, eff.id, eff.stack || 1, ctx.artifacts || []);
             const stackable = StatusRules.isStackable(eff.id, ctx.artifacts || []);
             ctx.logFn(`자신에게 [${getBuffName(eff.id)}] ${stackable ? `${value}스택.` : '부여.'}`);
+        },
+        'transform': (ctx, eff) => {
+            const formId = (ctx.skill && ctx.skill.chosenFormId) || eff.formId;
+            if (!formId || typeof ctx.applyBattleForm !== 'function') return;
+            ctx.applyBattleForm(ctx.source, formId);
+        },
+        'transform_choice': (ctx, eff) => {
+            const formId = ctx.skill && ctx.skill.chosenFormId;
+            if (!formId || !(eff.forms || []).includes(formId) || typeof ctx.applyBattleForm !== 'function') return;
+            ctx.applyBattleForm(ctx.source, formId);
         },
         'field_buff': (ctx, eff) => {
             const options = {};
@@ -1966,6 +2019,11 @@ const Logic = {
         if (trait && trait.type === 'cond_earth_def_mdef' && effectiveFieldBuffs.some(b => b.name === 'earth_bless')) {
             m.def += 0.5;
             m.mdef += 0.5;
+        }
+        if (trait && trait.type === 'cond_silence_def_mdef' && char.buffs && char.buffs.silence) {
+            const boost = (trait.val || 0) / 100;
+            m.def += boost;
+            m.mdef += boost;
         }
         if (trait && trait.type === 'cond_sun_matk_mdef' && effectiveFieldBuffs.some(b => b.name === 'sun_bless')) {
             const boost = (trait.val || 0) / 100;
@@ -2629,7 +2687,9 @@ const Logic = {
         }
 
         if (t.type === 'dessert_kingdom_synergy_boost') {
-            const count = Math.max(0, deckCtx.countMatchingIds(['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch']) - 1);
+            const count = (deck || []).filter((id, slot) => (
+                slot !== idx && id && GameUtils.hasCardTag(id, 'dessert_kingdom')
+            )).length;
             if (count > 0) {
                 const boost = count * (t.val / 100);
                 p.atk = Math.floor(p.atk * (1 + boost));
@@ -2637,10 +2697,9 @@ const Logic = {
             }
         }
 
-        // 언더독: 덱에 일반등급 3장 이상 + 대장 배치 시 공격/마공 증가
+        // 언더독: 빈 슬롯을 제외한 실제 배치 카드의 등급이 전부 같고 대장 배치 시 공격/마공 증가
         if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
-            const gradeCount = deckCtx.cards.filter(c => c && c.grade === (t.gradeRequired || 'normal')).length;
-            if (gradeCount >= (t.countRequired || 3) && idx === (t.pos !== undefined ? t.pos : 2)) {
+            if (GameUtils.hasUniformGrade(deck, allCards) && idx === (t.pos !== undefined ? t.pos : 2)) {
                 active = true;
                 const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
                 const boost = 1 + (t.val || 0) / 100;
@@ -2794,9 +2853,8 @@ const Logic = {
         }
 
         // 슈가파우더: 디저트킹덤 전체 치명타/회피율 증가
-        const dessertKingdomIds = ['candy_boy', 'marshmallow', 'cotton_candy_sheep', 'cream_maid', 'pudding_princess', 'harmonius', 'sugar_powder', 'brulee_witch'];
         const dessertBoostTrait = activeCards.find(c => c.trait && c.trait.type === 'dessert_kingdom_crit_eva_boost');
-        if (dessertBoostTrait && dessertKingdomIds.includes(playerProto.id)) {
+        if (dessertBoostTrait && GameUtils.hasCardTag(playerProto, 'dessert_kingdom')) {
             const boostVal = dessertBoostTrait.trait.val || 20;
             p.baseCrit += boostVal;
             p.baseEva += boostVal;
@@ -2805,8 +2863,7 @@ const Logic = {
         // Artifact: dragon_heart — dragon cards matk +100%
         const artifacts = (typeof RPG !== 'undefined' && RPG.state && RPG.state.artifacts) ? RPG.state.artifacts : [];
         if (artifacts.includes('dragon_heart')) {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
-            if (GameUtils.cardMatchesAnyId(playerProto, dragonIds)) {
+            if (GameUtils.hasCardTag(playerProto, 'dragon')) {
                 p.matk = Math.floor(p.matk * 2.0);
             }
         }
@@ -3037,10 +3094,9 @@ const Logic = {
         }
         // 용혈의무녀: 덱에 드래곤 있을 때 사망 시 마법대미지 + 기절
         else if (t.type === 'death_dmg_mag_stun_cond') {
-            const dragonIds = ['baby_dragon', 'red_dragon', 'gold_dragon', 'ancient_dragon', 'skull_dragon'];
             const hasDragon = deck && deck.some(cardId => {
                 if (!cardId || cardId === victim.proto.id) return false;
-                return GameUtils.cardMatchesAnyId({ id: cardId }, dragonIds);
+                return GameUtils.hasCardTag(cardId, 'dragon');
             });
             if (hasDragon) {
                 this._applyDeathDamage(result, victim, killer, { name: '용혈의 사망 반격', type: 'mag', val: t.val }, fieldBuffs, logFn, deck, turn, artifacts, '[특성] 용혈의무녀: 드래곤의 힘으로 사망 반격!');
