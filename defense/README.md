@@ -4,7 +4,7 @@ Portrait-first fantasy tower defense on the deterministic Defense V2 engine: fou
 
 ## Play
 
-Open `defense/dist-local/HeroCoreDefense.html` directly. This 15.41 MiB file includes all art, code and styles and makes no network requests. Source development uses `npm run serve:defense` at http://127.0.0.1:4174/.
+Open `defense/dist-local/HeroCoreDefense.html` directly. This 5.15 MiB file includes all art, code and styles and makes no network requests. Source development uses `npm run serve:defense` at http://127.0.0.1:4174/.
 
 Choose one protagonist and four companions. Tap a card then a glowing position, or drag the card onto the battlefield. Automatic placement provides a starting formation. Spend crystals between waves; choose traits at Lv4 and Lv6. Aim **별의 기원** once per wave to stop a threatening group. Combat starts at 2× speed; pause, speed, sound and effect controls remain available.
 
@@ -12,7 +12,7 @@ Final bosses must be defeated: a breach ends the run. Midbosses inflict three co
 
 ## Art and documentation
 
-Four atlases in `assets/moonlit/` provide 20 character poses, 10 enemies, 4 bosses, 2 props and 4 environments. Opaque white sprite backgrounds are removed once on load. The prior 66 portrait/directional assets remain fallback entries, giving 70 embedded release assets.
+Four atlases in `assets/moonlit/` provide 20 character poses, 10 enemies, 4 bosses, 2 props and 4 environments. Sprites are prepared as alpha WebP before release; the browser performs no pixel extraction. The prior 66 portrait/directional assets are also prepared with alpha and loaded only on demand for fallback, giving 70 embedded release assets.
 
 Read [current release and design notes](docs/STARWARD_RELEASE.md), [exact generation prompts](docs/STARWARD_ART_PROMPTS.md) and the [underlying engine wiki](docs/README.md).
 

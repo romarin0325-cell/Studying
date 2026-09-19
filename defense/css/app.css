@@ -64,6 +64,8 @@ p {
   z-index: 100;
 }
 .screen {
+  height: 100vh;
+
   height: 100dvh;
   max-width: 900px;
   margin: 0 auto;
@@ -536,6 +538,8 @@ p {
 .info-sheet,
 .settings-modal {
   width: min(100%, 480px);
+  max-height: 85vh;
+
   max-height: 85dvh;
   overflow: auto;
   position: relative;
