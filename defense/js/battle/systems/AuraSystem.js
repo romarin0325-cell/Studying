@@ -27,12 +27,12 @@ export function recomputeAuras(state) {
       source,
       rng: state.rng,
     }, createModifierAccumulator());
-    for (const aura of modifier.auras) {
+    for (const aura of [...source.definition.innateAuras ?? [], ...modifier.auras]) {
       if (!AURA_BUFF_BY_ID[aura.buffId]) throw new RangeError(`Unknown aura buff: ${aura.buffId}`);
       const range = increaseAuraRange(aura.range, teamIncreases);
       const sourcePoint = { x: source.x + 0.5, y: source.y + 0.5 };
       for (const target of state.heroes) {
-        if (!target.placed) continue;
+        if (!target.placed || target.definition.auraImmune) continue;
         const targetPoint = { x: target.x + 0.5, y: target.y + 0.5 };
         if (distance(sourcePoint, targetPoint) > range + Number.EPSILON) continue;
         if (!target.buffs.has(aura.buffId)) target.buffs.set(aura.buffId, { sources: new Set(), range });

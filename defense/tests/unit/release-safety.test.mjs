@@ -4,7 +4,7 @@ import { AssetManager } from '../../js/render/AssetManager.js';
 import { formatElapsedTime } from '../../js/app/screens/ResultScreen.js';
 import { roundedRect } from '../../js/render/CanvasShapes.js';
 import { BattleRenderer } from '../../js/render/BattleRenderer.js';
-import { removeBackground } from '../../../scripts/prepare_defense_art.mjs';
+import { keySpritePixels } from '../../../scripts/import_defense_sprite.mjs';
 
 test('result time carries rounded seconds into minutes',()=>{
   for(const [value,expected] of [[179.49,'2분 59초'],[179.5,'3분 0초'],[59.99,'1분 0초'],[0,'0분 0초'],[NaN,'0분 0초']])
@@ -45,13 +45,9 @@ test('missing creature atlas paints ordinary enemy bodies and both objectives',(
   assert.deepEqual(labels,['✦','→','유']);
   assert.equal(queries.some(id=>id.startsWith('boss/ruin_scarab/')),false);
 });
-test('offline alpha preparation preserves enclosed white costume details',()=>{
-  const width=5,height=5,data=Buffer.alloc(width*height*4,255);
-  for(let y=1;y<=3;y++)for(let x=1;x<=3;x++)if(x!==2||y!==2){
-    const i=(y*width+x)*4;data[i]=20;data[i+1]=50;data[i+2]=80;
-  }
-  removeBackground(data,width,height,true);
-  assert.equal(data[3],0);
-  assert.equal(data[(2*width+2)*4+3],255);
-  assert.equal(data[(1*width+1)*4+3],255);
+test('offline hue key preserves even edge-connected white hair and pale costumes',()=>{
+  const data=Buffer.from([255,255,255,255, 255,0,255,255, 140,0,140,255, 200,235,255,255, 240,190,210,255]);
+  keySpritePixels(data,5,1);
+  assert.deepEqual([data[3],data[7],data[11],data[15],data[19]],[255,0,0,255,255]);
+  assert.deepEqual([...data.subarray(0,3)],[255,255,255]);
 });

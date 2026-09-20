@@ -35,6 +35,7 @@ import { STAGES, expandOrthogonalPath } from './stages.js';
 const EXPECTED_HERO_IDS = [
   'rumi', 'luna', 'cinderella', 'zeke',
   'snow_rabbit', 'avalanche_maid', 'night_rabbit', 'guardian', 'storm_sage', 'lightning_sage',
+  'red_dragon', 'flame_sage', 'mushroom_king', 'great_detective', 'siren', 'phantom',
 ];
 const EXPECTED_ENEMY_IDS = [
   'ruin_scarab', 'ember_scarab', 'sand_wisp', 'stone_guard', 'regrowth_idol', 'flora', 'pharaoh',
@@ -44,7 +45,7 @@ const EXPECTED_STAGE_IDS = ['ancient_ruins', 'chaos_rift', 'crossroads', 'long_b
 const EXPECTED_BUFF_IDS = [
   'moon_bless', 'sun_bless', 'earth_bless', 'twinkle_party', 'sanctuary', 'star_powder', 'gale',
 ];
-const EXPECTED_STATUS_IDS = ['slow', 'stun', 'corrosion', 'curse', 'darkness', 'poison', 'stun_immunity'];
+const EXPECTED_STATUS_IDS = ['slow', 'stun', 'corrosion', 'curse', 'darkness', 'poison', 'stun_immunity', 'burn'];
 const EXPECTED_EFFECT_PRESET_IDS = [
   'basic_melee_hit', 'basic_ranged_hit', 'basic_shotgun_hit', 'basic_area_hit',
   'basic_nova_hit', 'basic_laser_hit',
@@ -60,21 +61,21 @@ const EXPECTED_MATCHUPS = {
 };
 
 export const CONTENT_COUNTS = deepFreeze({
-  heroes: 10,
+  heroes: 16,
   mainHeroes: 4,
-  normalHeroes: 6,
-  level4Traits: 20,
-  level6Traits: 20,
+  normalHeroes: 12,
+  level4Traits: 32,
+  level6Traits: 32,
   enemies: 14,
   normalEnemies: 10,
   bosses: 4,
   stages: 4,
   waves: 40,
   buffs: 7,
-  statuses: 7,
-  debuffs: 6,
+  statuses: 8,
+  debuffs: 7,
   effectPresets: 12,
-  directionalAssetIds: 66,
+  directionalAssetIds: 96,
 });
 
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -171,7 +172,7 @@ function validateBuffs(errors) {
 function validateStatuses(errors) {
   exactIdSet(STATUSES, EXPECTED_STATUS_IDS, 'statuses', errors);
   uniqueIds(STATUSES, 'statuses', errors);
-  if (DEBUFF_DEFINITIONS.length !== CONTENT_COUNTS.debuffs) errors.push('statuses: exactly six public debuffs are required.');
+  if (DEBUFF_DEFINITIONS.length !== CONTENT_COUNTS.debuffs) errors.push('statuses: exactly seven public debuffs are required.');
   for (const status of STATUSES) {
     if (!isPositiveFinite(status.duration)) errors.push(`statuses.${status.id}: duration must be positive.`);
     if (status.debuff !== (status.kind === 'debuff')) errors.push(`statuses.${status.id}: debuff flag disagrees with kind.`);
@@ -256,7 +257,7 @@ function validateHeroes(sets, errors) {
   exactIdSet(HEROES, EXPECTED_HERO_IDS, 'heroes', errors);
   uniqueIds(HEROES, 'heroes', errors);
   if (MAIN_HEROES.length !== CONTENT_COUNTS.mainHeroes || NORMAL_HEROES.length !== CONTENT_COUNTS.normalHeroes) {
-    errors.push('heroes: expected four main and six normal heroes.');
+    errors.push('heroes: expected four main and twelve normal heroes.');
   }
   const traitIds = new Set();
   let level4Traits = 0;
@@ -282,8 +283,8 @@ function validateHeroes(sets, errors) {
     }
     if (!sets.effectPresets.has(hero.attack?.effectPreset)) errors.push(`${context}: unknown basic effect preset.`);
     if (!sets.attackTypes.has(hero.skill?.attackType) || !SKILL_SHAPE_IDS.includes(hero.skill?.shape)) errors.push(`${context}: invalid skill type/shape.`);
-    if (![5, 7, 9].includes(hero.skill?.cooldown) || !isPositiveFinite(hero.skill?.damage)) errors.push(`${context}: invalid skill cooldown/damage.`);
-    if (hero.skill?.shape === 'area' && hero.skill.radius !== 3) errors.push(`${context}: area skills must have radius 3.`);
+    if (!isPositiveFinite(hero.skill?.cooldown) || !isPositiveFinite(hero.skill?.damage)) errors.push(`${context}: invalid skill cooldown/damage.`);
+    if (hero.skill?.shape === 'area' && !isPositiveFinite(hero.skill.radius)) errors.push(`${context}: area skills require a positive radius.`);
     if (hero.skill?.shape === 'single' && hero.skill.radius !== 0) errors.push(`${context}: single skills must have radius 0.`);
     if (hero.skill?.shape === 'melee' && hero.skill.radius !== 0) errors.push(`${context}: melee skills must have radius 0.`);
     if (!sets.effectPresets.has(hero.skill?.effectPreset)) errors.push(`${context}: unknown skill effect preset.`);
@@ -318,7 +319,7 @@ function validateHeroes(sets, errors) {
     }
   }
   if (level4Traits !== CONTENT_COUNTS.level4Traits || level6Traits !== CONTENT_COUNTS.level6Traits) {
-    errors.push(`heroes: expected 20 Lv4 and 20 Lv6 traits, received ${level4Traits}/${level6Traits}.`);
+    errors.push(`heroes: expected 32 Lv4 and 32 Lv6 traits, received ${level4Traits}/${level6Traits}.`);
   }
   if (!sets.heroes.has(DEFAULT_FORMATION.mainId)
     || DEFAULT_FORMATION.heroIds.length !== 4

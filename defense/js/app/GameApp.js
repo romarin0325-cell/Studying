@@ -9,6 +9,10 @@ import { FormationScreen } from './screens/FormationScreen.js';
 import { BattleScreen } from './screens/BattleScreen.js';
 import { ResultScreen } from './screens/ResultScreen.js';
 import { JOURNEYS } from '../content/presentation.js';
+import { bindFullscreen } from './Fullscreen.js';
+import { openFieldGuide } from './FieldGuide.js';
+import { SoundDirector } from '../audio/SoundDirector.js';
+import { heroIllustrationId } from '../render/Illustrations.js';
 
 export class GameApp {
   constructor({ documentRef = globalThis.document, repository = null } = {}) {
@@ -18,6 +22,11 @@ export class GameApp {
     if (!this.sceneRoot || !this.overlayRoot) throw new Error('Hero Defense V2 app roots are missing');
     this.repository = repository ?? new SaveRepositoryV2();
     this.settings = this.repository.loadSettings();
+    this.audio = new SoundDirector(); this.audio.setSettings(this.settings);
+    this.audioGesture = () => { this.audio.unlock(); this.audio.event({ type: 'select' }); };
+    this.audioVisibility = () => { if (this.document.hidden) this.audio.suspend(); else if (this.audio.context) this.audio.unlock(); };
+    this.document.addEventListener('pointerdown', this.audioGesture, { passive: true });
+    this.document.addEventListener('visibilitychange', this.audioVisibility);
     this.assetManager = new AssetManager({ manifest: ASSET_MANIFEST });
     this.selectedStageId = 'ancient_ruins';
     this.difficultyId = 'easy';
@@ -62,6 +71,7 @@ export class GameApp {
   }
 
   showStages() {
+    this.audio.setMode('menu');
     const checkpoint = this.repository.loadCheckpoint();
     this.scene.show('stages', {
       checkpoint,
@@ -75,6 +85,7 @@ export class GameApp {
   }
 
   showFormation(stageId = this.selectedStageId, difficultyId = this.difficultyId) {
+    this.audio.setMode('menu');
     this.selectedStageId = stageId;
     this.difficultyId = difficultyId;
     this.preloadArt('formation');
@@ -103,9 +114,9 @@ export class GameApp {
       ...heroIds.flatMap((id) => DIRECTIONS.map((direction) => `battle/${id}/${direction}`)),
       ...bossIds.flatMap((id) => DIRECTIONS.map((direction) => `boss/${id}/${direction}`)),
       ...heroIds.map((id) => `portrait/${id}`),
-      ...['heroes', 'companions', 'creatures', 'worlds'].map(id => `illustration/${id}`),
     ];
-    this.preloadArt(['illustration/heroes','illustration/companions','illustration/creatures','illustration/worlds'], battleAssetIds.filter(id => !id.startsWith('illustration/')));
+    const primaryIds = [...new Set(heroIds.map(heroIllustrationId)), 'illustration/combat-fx','illustration/creatures','illustration/worlds'];
+    this.preloadArt(primaryIds, battleAssetIds);
     this.scene.show('battle', {
       stageId: this.selectedStageId,
       difficultyId: this.difficultyId,
@@ -114,11 +125,16 @@ export class GameApp {
       repository: this.repository,
       assetManager: this.assetManager,
       settings: this.settings,
+      audio: this.audio,
       onSettings: () => this.openSettings(),
       onBack: () => this.showStages(),
       onResult: ({ result, snapshot }) => {
         this.repository.clearCheckpoint();
         result.stars = result.victory ? (snapshot.core.durability >= 10 ? 3 : snapshot.core.durability >= 6 ? 2 : 1) : 0;
+        const previous = this.repository.loadProgress()[`${this.selectedStageId}:${this.difficultyId}`];
+        result.firstClear = result.victory && !previous;
+        result.newBest = result.victory && (!previous || result.stars > previous.stars || result.elapsedSeconds < previous.seconds);
+        result.coreDurability = snapshot.core.durability;
         if (result.victory) this.repository.recordVictory(`${this.selectedStageId}:${this.difficultyId}`, result.stars, result.elapsedSeconds);
         this.showResult(result);
       },
@@ -126,10 +142,18 @@ export class GameApp {
   }
 
   showResult(result) {
+    this.audio.setMode('menu');
+    if (result.victory) this.audio.event({ type: 'victory' });
     const stageName = JOURNEYS[this.selectedStageId]?.title ?? this.selectedStageId;
     this.scene.show('result', {
       result,
       stageName,
+      stageId: this.selectedStageId,
+      assetManager: this.assetManager,
+      onNext: () => {
+        const ids = Object.keys(JOURNEYS), next = ids[ids.indexOf(this.selectedStageId) + 1];
+        if (next) this.showFormation(next); else this.showStages();
+      },
       onRetry: () => this.showBattle({ stageId: this.selectedStageId, formation: this.formation }),
       onFormation: () => this.showFormation(this.selectedStageId),
       onStages: () => this.showStages(),
@@ -146,18 +170,25 @@ export class GameApp {
     backdrop.innerHTML = `<section class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="modal-heading"><div><span class="eyebrow">환경 설정</span><h2 id="settings-title">꿈의 전장 설정</h2></div><button class="icon-button" type="button" data-action="close-settings" aria-label="닫기">×</button></div>
       <div class="setting-list">
+        <button class="setting-row text-button" data-action="fullscreen">⛶ 전체화면 전환</button>
+        <button class="setting-row text-button" data-action="guide">상성표와 전투 도감 ↗</button>
         ${this.#settingToggle('sound', '사운드')}
+        ${this.#settingToggle('music', '배경 음악')}
         ${this.#settingToggle('damageNumbers', '대미지 숫자')}
         ${this.#settingToggle('screenShake', '화면 흔들림')}
         ${this.#settingToggle('reducedEffects', '이펙트 간소화')}
       </div>
     </section>`;
-    const close = () => { backdrop.remove(); if (resume && this.scene.current === battle && battle.session.state.paused) battle.session.applyNow('toggle_pause'); };
+    const unbindFullscreen = bindFullscreen(backdrop);
+    backdrop.querySelector('[data-action="guide"]').onclick = () => openFieldGuide(backdrop);
+    const close = () => { unbindFullscreen(); backdrop.remove(); if (resume && this.scene.current === battle && battle.session.state.paused) battle.session.applyNow('toggle_pause'); };
     backdrop.querySelector('[data-action="close-settings"]').addEventListener('click', close);
     backdrop.addEventListener('click', (event) => { if (event.target === backdrop) close(); });
     for (const input of backdrop.querySelectorAll('input[data-setting]')) {
       input.addEventListener('change', () => {
         this.settings = this.repository.saveSettings({ ...this.settings, [input.dataset.setting]: input.checked });
+        this.audio.setSettings(this.settings);
+        if (this.settings.sound) this.audio.unlock();
         this.scene.current?.updateSettings?.(this.settings);
       });
     }
@@ -178,6 +209,9 @@ export class GameApp {
 
   destroy() {
     this.destroyed = true;
+    this.audio.destroy();
+    this.document.removeEventListener('pointerdown', this.audioGesture);
+    this.document.removeEventListener('visibilitychange', this.audioVisibility);
     this.scene.destroy();
     this.overlayRoot.replaceChildren();
     delete globalThis.__heroDefenseV2Debug;

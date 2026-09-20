@@ -12,7 +12,10 @@ import {
   normalizeSettings,
   SAVE_KEYS_V2,
   validateCheckpoint,
+  migrateCheckpoint,
 } from '../../js/persistence/schemas.js';
+import { LEGACY_PLACEMENTS } from '../../js/persistence/LegacyPlacements.js';
+import { STAGE_BY_ID } from '../../js/content/stages.js';
 
 const FORMATION = Object.freeze({
   mainId: 'rumi',
@@ -32,9 +35,9 @@ function makeCheckpoint(overrides = {}) {
     placements: {
       rumi: { x: 5, y: 3 },
       snow_rabbit: { x: 6, y: 7 },
-      avalanche_maid: { x: 2, y: 7 },
-      guardian: { x: 8, y: 3 },
-      lightning_sage: { x: 11, y: 2 },
+      avalanche_maid: { x: 2, y: 6 },
+      guardian: { x: 7, y: 3 },
+      lightning_sage: { x: 11, y: 1 },
     },
     nextWave: 6,
     coreDurability: 7.5,
@@ -223,6 +226,7 @@ test('safe legacy settings migrate once without modifying V1 storage', () => {
   const repository = new SaveRepositoryV2({ storage, logger: { warn() {} } });
   assert.deepEqual(repository.loadSettings(), {
     sound: false,
+    music: true,
     damageNumbers: false,
     screenShake: false,
     reducedEffects: true,
@@ -266,6 +270,7 @@ test('settings normalization is frozen, boolean-only and isolated under V2 keys'
   });
   assert.deepEqual(normalized, {
     sound: false,
+    music: true,
     damageNumbers: true,
     screenShake: true,
     reducedEffects: true,
@@ -277,6 +282,7 @@ test('settings normalization is frozen, boolean-only and isolated under V2 keys'
   const saved = repository.saveSettings({ sound: false, damageNumbers: false });
   assert.deepEqual(saved, {
     sound: false,
+    music: true,
     damageNumbers: false,
     screenShake: true,
     reducedEffects: false,
@@ -297,4 +303,27 @@ test('MemoryStorage implements Web Storage string conversion and stable key acce
   storage.clear();
   assert.equal(storage.length, 0);
   assert.equal(storage.key(0), null);
+});
+
+test('schema 1 maps migrate without losing the wave, growth, resources or deterministic RNG', () => {
+  for (const stageId of Object.keys(LEGACY_PLACEMENTS)) {
+    const legacy = makeCheckpoint({ schemaVersion: 1, stageId, elapsedSeconds: 179.5 });
+    const ids = [FORMATION.mainId, ...FORMATION.heroIds];
+    legacy.placements = Object.fromEntries(ids.map((id,i)=>[id, Object.fromEntries(['x','y'].map((axis,j)=>[axis,LEGACY_PLACEMENTS[stageId][i][j]]))]));
+    const original = JSON.stringify(legacy);
+    const migrated = migrateCheckpoint(legacy);
+    assert.equal(migrated.schemaVersion, 2);
+    assert.equal(JSON.stringify(legacy), original, 'loading never rewrites the original object or backup');
+    for (const key of ['nextWave','levels','traits','crystals','coreDurability','elapsedSeconds','rngSnapshot','nextWaveFlags','formation'])
+      assert.deepEqual(migrated[key],legacy[key],stageId+'/'+key);
+    assert.equal(new Set(Object.values(migrated.placements).map(p=>p.x+','+p.y)).size,5);
+    assert.ok(Object.values(migrated.placements).every(p=>STAGE_BY_ID[stageId].map.placementCells.some(c=>c.x===p.x&&c.y===p.y)));
+    const storage = new MemoryStorage({[SAVE_KEYS_V2.checkpoint]:original});
+    const repository = new SaveRepositoryV2({storage,logger:{warn(){}}});
+    assert.deepEqual(repository.loadCheckpoint(),migrated);
+    assert.equal(storage.getItem(SAVE_KEYS_V2.checkpoint),original);
+    assert.deepEqual(migrateCheckpoint(migrated),migrated);
+    legacy.placements[ids[0]] = {x:-1,y:0};
+    assert.throws(()=>migrateCheckpoint(legacy),/placement x/,'corrupt legacy coordinates are rejected, not silently repaired');
+  }
 });

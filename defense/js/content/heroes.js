@@ -55,6 +55,16 @@ function skill({ id, name, attackType, cooldown, shape, damage, radius = 0, onHi
   };
 }
 
+function companion(id, name, gender, element, role, basic, special, traits, extra = {}) {
+  return { id, name, displayName: name, gender, element, role, position: 'normal', kind: 'normal',
+    tags: [], attack: attack(basic), skill: skill({ id: id + '_skill', ...special }), traits,
+    assetIds: heroAssetIds(id), ...extra };
+}
+const status = (statusId, durationSeconds = 4) => ({ type: 'apply_status', statusId, durationSeconds, chance: 1 });
+const damage = value => ({ type: 'multiply_damage', value, damageKind: 'direct' });
+const whenStatus = statusId => ({ type: 'target_has_status', statusId });
+const skillOnly = { type: 'attack_kind', attackKind: 'skill' };
+
 export const HEROES = deepFreeze([
   {
     id: 'rumi',
@@ -543,6 +553,69 @@ export const HEROES = deepFreeze([
     ],
     assetIds: heroAssetIds('lightning_sage'),
   },
+  companion('red_dragon', '레드드래곤', 'female', 'fire', 'dealer',
+    { archetype: 'shotgun', attackType: 'flame', range: 3.4, interval: 1.8, damage: 7,
+      pelletCount: 3, spreadDegrees: [-16, 0, 16], normalCollisionRadius: .3, bossCollisionRadius: .45,
+      effectPreset: 'basic_shotgun_hit' },
+    { name: '파이어브레스', attackType: 'flame', cooldown: 8, shape: 'area', damage: 45, radius: 2,
+      onHitEffects: [status('burn', 4)] },
+    [
+      trait('red_dragon_embers', 4, '잔불 추격', [whenStatus('burn')], [damage(1.4)], '작열 상태의 적에게 직접 피해 +40%.'),
+      trait('red_dragon_claws', 4, '용의 발톱', [], [status('corrosion', 4)], '공격 적중 시 4초 부식. 물리 공격 동료와 연계한다.'),
+      trait('red_dragon_solar', 6, '태양의 날개', [{ type: 'source_has_buff', buffId: 'sun_bless' }], [damage(1.5)], '태양의축복을 받는 동안 직접 피해 +50%.'),
+      trait('red_dragon_breath', 6, '용의 포효', [skillOnly], [damage(1.6), status('stun', .7)], '브레스 피해 +60%, 0.7초 기절.'),
+    ], { tags: ['dragon'] }),
+  companion('flame_sage', '화염의현자', 'male', 'fire', 'buffer',
+    { archetype: 'rapid', attackType: 'flame', range: 2.6, interval: 1.1, damage: 7, effectPreset: 'basic_ranged_hit' },
+    { name: '프로미넌스', attackType: 'flame', cooldown: 8, shape: 'area', damage: 28, radius: 1.8,
+      onHitEffects: [status('burn', 5)] },
+    [
+      trait('flame_sage_cinders', 4, '불씨 전파', [{ type: 'attack_kind', attackKind: 'basic' }], [status('burn', 4)], '기본 공격으로도 4초 작열을 남긴다.'),
+      trait('flame_sage_sanctuary', 4, '불꽃 성역', [], [{ type: 'provide_aura', buffId: 'sanctuary', range: 4 }], '주변 범위 4에 마법 피해 +30% 오라.'),
+      trait('flame_sage_trinity', 6, '세 개의 태양', [{ type: 'team_element_count', element: 'fire', count: 3 }], [{ type: 'provide_aura', buffId: 'twinkle_party', range: 4 }], '배치한 화속성 영웅이 3명 이상이면 주변 치명타 확률 +20%p.'),
+      trait('flame_sage_eruption', 6, '화산의 심장', [whenStatus('burn')], [damage(1.8)], '작열 적에게 직접 피해 +80%.'),
+    ], { innateAuras: [{ buffId: 'sun_bless', range: 4 }] }),
+  companion('mushroom_king', '머쉬룸킹', 'male', 'nature', 'dealer',
+    { archetype: 'nova', attackType: 'magic', range: 2.3, radius: 2.3, interval: 2.1, damage: 16,
+      statuses: [status('poison', 5)], effectPreset: 'basic_nova_hit' },
+    { name: '그랜드슬램', attackType: 'normal', cooldown: 8, shape: 'area', damage: 40, radius: 2,
+      onHitEffects: [status('slow', 2)] },
+    [
+      trait('mushroom_king_harvest', 4, '마지막 수확', [{ type: 'target_hp_below_ratio', ratio: .5 }], [damage(1.5)], '생명력 50% 이하의 적에게 직접 피해 +50%.'),
+      trait('mushroom_king_mycelium', 4, '균사의 숲', [], [{ type: 'add_range', value: .6 }], '포자 노바와 스킬 표적 사거리 +0.6.'),
+      trait('mushroom_king_earth', 6, '대지의 왕관', [{ type: 'source_has_buff', buffId: 'earth_bless' }], [damage(1.7)], '대지의축복을 받으면 직접 피해 +70%.'),
+      trait('mushroom_king_spores', 6, '깊은 포자', [skillOnly], [status('curse', 6), status('poison', 8)], '스킬이 6초 저주와 8초 중독을 남긴다.'),
+    ]),
+  companion('great_detective', '명탐정', 'male', 'water', 'balancer',
+    { archetype: 'laser', attackType: 'holy', range: 6, interval: 2.6, damage: 19,
+      normalCollisionRadius: .35, bossCollisionRadius: .5, effectPreset: 'basic_laser_hit' },
+    { name: '파이널 앤서', attackType: 'holy', cooldown: 8, shape: 'single', damage: 52, onHitEffects: [status('curse', 5)] },
+    [
+      trait('great_detective_evidence', 4, '다섯 번째 단서', [{ type: 'attack_count_modulo', mod: 5 }], [{ type: 'add_crit_chance', value: 1 }], '다섯 번째 기본 공격마다 반드시 치명타.'),
+      trait('great_detective_lucid', 4, '루시드 플래시', [skillOnly], [status('darkness', 4)], '스킬이 4초 암흑을 남겨 모든 직접 공격을 돕는다.'),
+      trait('great_detective_answer', 6, '완벽한 추론', [{ type: 'target_has_any_debuff' }], [damage(1.5)], '디버프가 있는 적에게 직접 피해 +50%.'),
+      trait('great_detective_search', 6, '넓은 수사망', [], [{ type: 'add_range', value: 1.5 }], '관통과 스킬 표적 사거리 +1.5.'),
+    ]),
+  companion('siren', '세이렌', 'female', 'water', 'buffer',
+    { archetype: 'rapid', attackType: 'magic', range: 2.8, interval: 1.3, damage: 7, effectPreset: 'basic_ranged_hit' },
+    { name: '타이달 스크림', attackType: 'magic', cooldown: 9, shape: 'area', damage: 25, radius: 2,
+      onHitEffects: [status('slow', 3)] },
+    [
+      trait('siren_duet', 4, '달빛 이중창', [{ type: 'team_element_count', element: 'water', count: 2 }], [{ type: 'provide_aura', buffId: 'twinkle_party', range: 4 }], '배치한 물속성 영웅이 2명 이상이면 주변 치명타 확률 +20%p.'),
+      trait('siren_echo', 4, '메아리', [], [{ type: 'multiply_skill_cooldown', value: .7 }], '타이달 스크림 쿨다운 30% 감소.'),
+      trait('siren_starlight', 6, '별빛 항로', [], [{ type: 'provide_aura', buffId: 'star_powder', range: 4 }], '주변 범위 4에 사거리 +1 오라.'),
+      trait('siren_lullaby', 6, '깊은 자장가', [skillOnly], [status('stun', 1)], '타이달 스크림이 1초 기절도 남긴다.'),
+    ], { innateAuras: [{ buffId: 'moon_bless', range: 4 }] }),
+  companion('phantom', '팬텀', 'male', 'dark', 'dealer',
+    { archetype: 'burst', attackType: 'magic', range: 5, interval: 2.4, damage: 29, effectPreset: 'basic_ranged_hit' },
+    { name: '나이트메어', attackType: 'magic', cooldown: 9, shape: 'area', damage: 50, radius: 1.8,
+      onHitEffects: [status('darkness', 4)] },
+    [
+      trait('phantom_nightmare', 4, '잠들지 않는 악몽', [whenStatus('darkness')], [damage(1.5)], '암흑 상태의 적에게 직접 피해 +50%.'),
+      trait('phantom_curse', 4, '저주받은 인형', [{ type: 'attack_kind', attackKind: 'basic' }], [status('curse', 4)], '기본 공격이 4초 저주를 남긴다.'),
+      trait('phantom_solitude', 6, '혼자만의 세계', [], [{ type: 'add_range', value: 1.5 }, { type: 'multiply_skill_cooldown', value: .85 }], '사거리 +1.5, 스킬 쿨다운 15% 감소.'),
+      trait('phantom_dread', 6, '악몽의 왕', [], [{ type: 'multiply_damage_by_debuff_count', amountPerDebuff: .2 }], '적의 고유 디버프 하나당 직접 피해 +20%.'),
+    ], { auraImmune: true }),
 ]);
 
 export const HERO_BY_ID = deepFreeze(Object.fromEntries(HEROES.map((hero) => [hero.id, hero])));

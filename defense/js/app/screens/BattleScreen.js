@@ -5,6 +5,7 @@ import { allHeroesPlaced } from '../../battle/systems/PlacementSystem.js';
 import { getAttackInterval } from '../../battle/systems/BasicAttackSystem.js';
 import { getSkillCooldown } from '../../battle/systems/SkillSystem.js';
 import { getEffectiveRange } from '../../battle/systems/TargetingSystem.js';
+import { placementPreview } from '../../battle/PlacementPreview.js';
 import { buffEffects } from '../../battle/systems/AuraSystem.js';
 import { AURA_BUFF_BY_ID } from '../../content/buffs.js';
 import { ATTACK_FAMILIES, LEVEL_DAMAGE_MULTIPLIERS } from '../../content/combat.js';
@@ -12,7 +13,7 @@ import { STATUS_BY_ID } from '../../content/statuses.js';
 import { BattleRenderer } from '../../render/BattleRenderer.js';
 import { EffectRenderer } from '../../render/EffectRenderer.js';
 import { paintPortraits } from '../../render/Illustrations.js';
-import { JOURNEYS, HERO_COPY, COUNTERS, DEFENSE_LABELS } from '../../content/presentation.js';
+import { JOURNEYS, HERO_COPY, DEFENSE_LABELS } from '../../content/presentation.js';
 import { STAGE_BY_ID } from '../../content/stages.js';
 import { ENEMY_BY_ID } from '../../content/enemies.js';
 
@@ -42,11 +43,12 @@ export class BattleScreen {
     repository,
     assetManager,
     settings,
+    audio,
     onSettings,
     onBack,
     onResult,
   } = {}) {
-    Object.assign(this, { stageId, difficultyId, formation, checkpoint, repository, assetManager, settings, onSettings, onBack, onResult });
+    Object.assign(this, { stageId, difficultyId, formation, checkpoint, repository, assetManager, settings, audio, onSettings, onBack, onResult });
     this.root = null;
     this.session = null;
     this.renderer = null;
@@ -118,7 +120,7 @@ export class BattleScreen {
       repository: this.repository,
       seed: `${this.stageId}:easy:v2`,
     });
-    this.effectRenderer = new EffectRenderer();
+    this.effectRenderer = new EffectRenderer({ assetManager: this.assetManager });
     this.effectRenderer.setReduced(this.settings.reducedEffects);
     this.effectRenderer.setDamageNumbers(this.settings.damageNumbers);
     this.renderer = new BattleRenderer({
@@ -127,6 +129,7 @@ export class BattleScreen {
       effectRenderer: this.effectRenderer,
     });
     this.renderer.setReduced(this.settings.reducedEffects);
+    this.renderer.getPlacementPreview = point => placementPreview(this.session.state, this.selectedHeroId, point);
     this.session.applyNow('set_speed', { speed: 2 });
     this.#paintHeroAvatars();
     this.#bindEvents();
@@ -270,18 +273,7 @@ export class BattleScreen {
     }
   }
 
-  #ensureAudioContext() {
-    if (!this.settings.sound) return null;
-    const AudioContextClass = globalThis.AudioContext ?? globalThis.webkitAudioContext;
-    if (typeof AudioContextClass !== 'function') return null;
-    try {
-      this.audioContext ??= new AudioContextClass();
-      if (this.audioContext.state === 'suspended') this.audioContext.resume?.().catch?.(() => {});
-      return this.audioContext;
-    } catch {
-      return null;
-    }
-  }
+  #ensureAudioContext() { return this.audio?.unlock() ?? null; }
 
   #applyFeedback(event) {
     if (this.settings.screenShake && event.type === 'core_damaged') {
@@ -294,38 +286,7 @@ export class BattleScreen {
         this.shakeTimer = globalThis.setTimeout(() => board.classList.remove('shake'), 180);
       }
     }
-    if (!this.settings.sound) return;
-    const hit = event.type === 'hit' && !event.suppressEffect && performance.now() - (this.lastHitSound ?? 0) > 115;
-    if (hit) this.lastHitSound = performance.now();
-    const frequency = hit ? ({fire:220, water:740, light:990, nature:440, dark:330})[event.element] ?? 660 : event.type === 'starfall' ? 1174 : event.type === 'core_damaged'
-      ? 130
-      : event.type === 'wave_completed'
-        ? 880
-        : event.type === 'wave_started'
-          ? 620
-          : event.effectPreset === 'critical_hit'
-            ? 980
-            : null;
-    if (!frequency) return;
-    const audioContext = this.#ensureAudioContext();
-    if (!audioContext || audioContext.state === 'closed') return;
-    try {
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const start = audioContext.currentTime;
-      oscillator.type = event.type === 'core_damaged' ? 'triangle' : 'sine';
-      oscillator.frequency.setValueAtTime(frequency, start);
-      oscillator.frequency.exponentialRampToValueAtTime(frequency * (hit ? .72 : 1.5), start+.09);
-      gain.gain.setValueAtTime(hit ? .012 : .03, start);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + .12);
-      oscillator.connect(gain);
-      gain.connect(audioContext.destination);
-      oscillator.start(start);
-      oscillator.stop(start + .13);
-      oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-    } catch {
-      // Audio feedback is optional; combat must continue if the device rejects it.
-    }
+    this.audio?.event(event);
   }
 
   #handleBoardPointer(event) {
@@ -454,12 +415,16 @@ export class BattleScreen {
     const changedPhase = this.lastPhase !== snapshot.phase;
     this.lastPhase = snapshot.phase;
     const running = snapshot.phase === BATTLE_PHASE.WAVE_RUNNING;
+    this.audio?.setMode(snapshot.paused ? 'paused' : running ? 'battle' : 'menu');
     this.renderer.selectedHeroId = this.selectedHeroId;
     const selected = this.session.state.heroes.find(h => h.id === this.selectedHeroId);
+    const previewPoint = this.renderer.aim ?? (selected?.placed ? { x: selected.x + .5, y: selected.y + .5 } : null);
+    const preview = !running && previewPoint ? placementPreview(this.session.state, this.selectedHeroId, previewPoint) : null;
     this.renderer.selectedRange = selected ? getEffectiveRange(this.session.state, selected) : 3;
+    if (preview) this.renderer.selectedRange = preview.geometry.range;
     const waveDefinition = STAGE_BY_ID[this.stageId ?? snapshot.stageId]?.waves[(running ? snapshot.wave.number : snapshot.nextWave) - 1];
     const enemy = ENEMY_BY_ID[waveDefinition?.groups[0].enemyId];
-    this.root.querySelector('[data-intel]').textContent = `${running ? '' : '다음 · '}${enemy?.name ?? ''} · ${COUNTERS[enemy?.defenseType] ?? ''}`;
+    this.root.querySelector('[data-intel]').textContent = `${running ? '' : '다음 · '}${enemy?.name ?? ''} · ${DEFENSE_LABELS[enemy?.defenseType] ?? ''}형`;
     this.root.querySelector('[data-enemy-count]').textContent = running ? `${Math.max(0,snapshot.wave.total-snapshot.wave.spawned)+snapshot.wave.alive} 남음` : '';
     this.root.querySelector('[data-selection-brief]').textContent = this.spellAiming ? '적 무리를 누르세요 · 1.5초 정지, 4초 감속' : running ? `${JOURNEYS[snapshot.stageId].title} · 수호자를 누르면 전투 정보` : `${selected?.definition.name ?? ''} · ${HERO_COPY[selected?.id]?.[1] ?? ''} · 사거리 ${this.renderer.selectedRange}`;
     this.root.querySelector('[data-pause-curtain]').hidden = !snapshot.paused || !running;
@@ -489,7 +454,7 @@ export class BattleScreen {
     this.root.querySelector('[data-speed]').textContent = `×${snapshot.speed}`;
     const hint = this.root.querySelector('[data-board-hint]');
     hint.hidden = !this.spellAiming && allHeroesPlaced(this.session.state);
-    hint.textContent = this.spellAiming ? '적 무리를 누르면 별의 기원이 내려요' : '수호자를 고르고 밝은 원을 눌러 배치하세요';
+    hint.textContent = this.spellAiming ? '적 무리를 누르면 별의 기원이 내려요' : '수호자를 고르고 빈 자리에 배치하세요';
     for (const card of this.root.querySelectorAll('[data-hero-card]')) {
       const hero = snapshot.heroes.find((candidate) => candidate.id === card.dataset.heroCard);
       card.classList.toggle('selected', hero.id === this.selectedHeroId);
@@ -519,7 +484,7 @@ export class BattleScreen {
     sheet.querySelector('[data-growth-wave]').textContent = `WAVE ${state.wave.number || state.nextWave-1} CLEAR`;
     sheet.querySelector('[data-growth-crystals]').textContent = `✧ ${state.crystals}`;
     const next = ENEMY_BY_ID[state.stage.waves[state.nextWave-1].groups[0].enemyId];
-    sheet.querySelector('[data-next-enemy]').textContent = `다음은 ${next.name} · ${COUNTERS[next.defenseType]}`;
+    sheet.querySelector('[data-next-enemy]').textContent = `다음은 ${next.name} · ${DEFENSE_LABELS[next.defenseType]}형`;
     sheet.querySelector('[data-growth-list]').innerHTML = state.heroes.map(hero => `<button class="growth-row" data-grow-hero="${hero.id}" ${hero.level>=6 || state.crystals<1?'disabled':''}><canvas data-portrait="${hero.id}" width="100" height="90"></canvas><span><b>${hero.definition.name}</b><small>Lv.${hero.level} · ${HERO_COPY[hero.id][1]}</small></span><strong>${hero.level>=6?'MAX':`✧ 1 <small>${[3,5].includes(hero.level)?'특성 선택':'성장 ↑'}</small>`}</strong></button>`).join('');
     for (const button of sheet.querySelectorAll('[data-grow-hero]')) button.onclick = () => {
       const hero = state.heroes.find(h => h.id === button.dataset.growHero);

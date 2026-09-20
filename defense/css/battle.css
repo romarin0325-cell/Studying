@@ -671,3 +671,17 @@ body.battle-active {
 /* Keep the roster readable after spending the last growth crystal. */
 .growth-row:disabled { opacity: 1; }
 .growth-row:disabled > strong { opacity: .42; }
+
+/* The battlefield is framed by dark instruments, keeping the painted world readable. */
+.battle-hud{background:linear-gradient(#294660,#20364e);border-bottom:2px solid #aa9563;box-shadow:0 3px 9px #0d25394a}
+.battle-hud .icon-button{color:#daeafa;box-shadow:none}.hud-stat{border-color:#647b8c66}.hud-stat small{color:#9cb9cd}.hud-stat strong{color:#ecf5fd}.hud-core strong{color:#f4b7af}.hud-crystals strong{color:#f4d591}
+.battle-panel{background:linear-gradient(#2d4862,#21384f);border-top:2px solid #9c8b65;box-shadow:0 -5px 15px #0d25392a}
+.selection-brief{color:#c1d5e7;font-size:10px}
+.battle-hero-card{border-radius:7px;background:linear-gradient(#eaf3fa,#c1d4e3);border-color:#7796ae;box-shadow:inset 0 1px #ffffffbb}
+.battle-hero-card.selected{background:linear-gradient(#fff4d7,#dbe7ee);border-color:#e6c582;box-shadow:inset 0 0 0 1px #f2dba2}
+.battle-hero-copy b{color:#2c4c68}.battle-hero-copy small{color:#5c7890}.hero-cooldown{background:#527fa5}
+.battle-intel{border-radius:5px;background:#20384be8;color:#d8e9f5;border:1px solid #b7c6c659}
+.battle-intel b{color:#efcf8f}.board-hint{border-radius:6px;background:#233c52eb;color:#f3e8cb;font-size:10px;line-height:1.6;white-space:normal;max-width:92%;border:1px solid #bdac7877;padding:7px 11px}
+.battle-panel .icon-button{background:#304f6a;color:#dfeefa;border-color:#68869c;box-shadow:inset 0 1px #6b889e}
+.wave-announcement{background:#152d47ee;color:#ffedbc;border:1px solid #b8a170;border-radius:7px;letter-spacing:.13em;font-weight:800}
+.growth-heading h2{color:#2b4965}.growth-actions button{border-radius:7px}.boss-hud{background:#20364ee6;border-radius:5px;color:#f2d7bd}

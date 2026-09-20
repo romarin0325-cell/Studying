@@ -4,6 +4,7 @@ import {
   SAVE_KEYS_V2,
   normalizeSettings,
   validateCheckpoint,
+  migrateCheckpoint,
 } from './schemas.js';
 
 const clone = (value) => (value === undefined ? undefined : JSON.parse(JSON.stringify(value)));
@@ -66,8 +67,7 @@ export class SaveRepositoryV2 {
       const parsed = parseJson(this.storage.getItem(key));
       if (!parsed) continue;
       try {
-        validateCheckpoint(parsed);
-        return clone(parsed);
+        return clone(migrateCheckpoint(parsed));
       } catch (error) {
         this.#warn(`V2 체크포인트를 읽지 못했어요: ${error.message}`);
       }

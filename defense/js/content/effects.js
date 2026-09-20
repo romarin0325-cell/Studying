@@ -12,6 +12,9 @@ export const TRAIT_HOOK_IDS = deepFreeze([
 ]);
 
 export const CONDITION_TYPE_IDS = deepFreeze([
+  'team_element_count',
+  'target_hp_below_ratio',
+  'attack_count_modulo',
   'always',
   'target_element',
   'target_defense_type',

@@ -72,27 +72,27 @@ test('strict content validation covers every required V2 definition and optional
   const withoutAssets = validateContent({ throwOnError: true });
   assert.equal(withoutAssets.valid, true);
   assert.deepEqual(withoutAssets.counts, {
-    heroes: 10,
+    heroes: 16,
     mainHeroes: 4,
-    normalHeroes: 6,
-    level4Traits: 20,
-    level6Traits: 20,
+    normalHeroes: 12,
+    level4Traits: 32,
+    level6Traits: 32,
     enemies: 14,
     normalEnemies: 10,
     bosses: 4,
     stages: 4,
     waves: 40,
     buffs: 7,
-    statuses: 7,
-    debuffs: 6,
+    statuses: 8,
+    debuffs: 7,
     effectPresets: 12,
     assets: null,
   });
 
   const assets = ASSET_MANIFEST;
-  assert.equal(assets.length, 70);
+  assert.equal(assets.length, 103);
   const withAssets = validateContent({ assets, throwOnError: true });
-  assert.equal(withAssets.counts.assets, 70);
+  assert.equal(withAssets.counts.assets, 103);
 
   const missingDirection = validateContent({ assets: assets.slice(0, -1) });
   assert.equal(missingDirection.valid, false);

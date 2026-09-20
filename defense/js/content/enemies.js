@@ -176,7 +176,7 @@ export const ENEMIES = deepFreeze([
     id: 'demon_god',
     name: '마신',
     element: 'dark',
-    baseHp: 6500,
+    baseHp: 4400,
     speed: 0.62,
     stageId: 'chaos_rift',
   }),

@@ -43,9 +43,84 @@ async function grow(page) {
     snapshot = next;
   }
 }
+async function verifyTacticalUI(browser) {
+  const context = await browser.newContext({viewport:{width:390,height:844}});
+  await context.addInitScript(()=>{
+    const NativeAudio=window.AudioContext;
+    window.AudioContext=class extends NativeAudio {
+      constructor(...args) { super(...args); window.__audioProbe=this; }
+      createGain() {
+        const gain=super.createGain();
+        if(!this.probe) { this.masterProbe=gain; this.probe=this.createAnalyser(); gain.connect(this.probe); }
+        return gain;
+      }
+    };
+  });
+  const page=await context.newPage(), errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(url); await page.waitForFunction(()=>Boolean(globalThis.__heroDefenseV2Debug));
+  for(const viewport of [{width:320,height:568},{width:390,height:844},{width:844,height:390}]) {
+    await page.setViewportSize(viewport);
+    let original;
+    for(const stage of ['ancient_ruins','chaos_rift','crossroads','long_boulevard']) {
+      await page.locator('[data-stage="'+stage+'"]').click();
+      const bounds=await page.locator('.journey-scene').boundingBox();
+      original??=bounds;
+      assert.ok(Math.abs(bounds.height-original.height)<1 && Math.abs(bounds.y-original.y)<1,'stage copy moves the main art');
+      await assertFits(page);
+    }
+  }
+  await page.setViewportSize({width:390,height:844});
+  await click(page,'guide');
+  assert.equal(await page.locator('.matchup-table tbody td').count(),36);
+  assert.equal(await page.locator('.placement-guide').count(),0);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('[data-field-guide]').count(),0);
+  await click(page,'fullscreen');
+  await page.waitForFunction(()=>Boolean(document.fullscreenElement));
+  assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),true);
+  await click(page,'fullscreen');
+  await page.waitForFunction(()=>!document.fullscreenElement);
+  assert.equal(await page.evaluate(()=>Boolean(document.fullscreenElement)),false);
+  await page.waitForTimeout(500);
+  const audio=await page.evaluate(()=>{
+    const ctx=window.__audioProbe,data=new Float32Array(ctx.probe.fftSize);
+    ctx.probe.getFloatTimeDomainData(data);
+    return {state:ctx.state,peak:Math.max(...data.map(Math.abs))};
+  });
+  assert.equal(audio.state,'running'); assert.ok(audio.peak>0 && audio.peak<1,'audio graph is silent or clipping');
+  await click(page,'settings'); await page.locator('[data-setting="music"]').uncheck(); await page.locator('[data-setting="sound"]').uncheck();
+  await page.waitForTimeout(450);
+  assert.equal(await page.evaluate(()=>__heroDefenseV2Debug.getState().settings.music),false);
+  assert.ok(await page.evaluate(()=>__audioProbe.masterProbe.gain.value<.001));
+  await click(page,'close-settings');
+  await page.locator('[data-stage="ancient_ruins"]').click();
+  await page.screenshot({path:path.join(output,'tactics-menu.png')});
+  await click(page,'formation');
+  assert.equal(await page.locator('[data-position="normal"]').count(),12);
+  await page.waitForFunction(()=>[...document.querySelectorAll('[data-portrait]')].every(c=>c.dataset.portraitSource==='atlas'));
+  for(const id of ['red_dragon','flame_sage','mushroom_king','great_detective','siren','phantom']) {
+    await page.locator('[data-hero-id="'+id+'"] [data-action="select"]').click();
+    assert.equal(await page.locator('[data-replace]').count(),4);
+    await page.locator('[data-replace]').first().click();
+    assert.equal(await page.locator('[data-position="normal"].selected').count(),4);
+    assert.equal(await page.locator('[data-hero-id="'+id+'"] [data-action="select"]').getAttribute('aria-pressed'),'true');
+  }
+  await page.screenshot({path:path.join(output,'tactics-roster.png')});
+  await click(page,'ready'); await click(page,'auto-place');
+  assert.equal((await state(page)).heroes.length,5);
+  await page.screenshot({path:path.join(output,'tactics-placement.png')});
+  await click(page,'start-wave'); await page.evaluate(()=>__heroDefenseV2Debug.stepTicks(400));
+  await page.waitForTimeout(450);
+  await page.screenshot({path:path.join(output,'tactics-battle.png')});
+  assert.deepEqual(errors,[]);
+  await context.close();
+  console.log('Tactical UI: stable stage geometry, 36 matchups, 12 companions, six swaps, fullscreen, audio/mute and new roster combat passed');
+}
 (async()=>{
   const browser = await chromium.launch({headless:true});
   try {
+    await verifyTacticalUI(browser);
     for(const difficulty of ['easy','normal']) {
       const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,hasTouch:true,isMobile:true});
       const page=await context.newPage(), errors=[], network=[];
@@ -70,7 +145,7 @@ async function grow(page) {
       await page.mouse.up();
       const placed=(await state(page)).heroes.find(h=>h.id==='cinderella');
       assert.equal(placed.placed,true,'drag did not place hero');
-      assert.deepEqual({x:placed.x,y:placed.y},cell);
+      assert.deepEqual({x:placed.x,y:placed.y},{x:cell.x,y:cell.y});
       await click(page,'auto-place');
       await click(page,'start-wave');
       await click(page,'settings');
@@ -109,8 +184,17 @@ async function grow(page) {
         await click(page,'growth-next');
       }
       await page.locator('[data-screen="result"]').waitFor();
-      assert.match(await page.locator('[data-screen="result"]').innerText(),/우리의 별을 지켜냈어요/);
+      assert.match(await page.locator('[data-screen="result"]').innerText(),/수호 성공/);
+      await page.waitForTimeout(900);
+      assert.ok(await page.locator('.result-stars .earned').count()>0);
       await page.screenshot({path:path.join(output,difficulty+'-result.png')});
+      for (const viewport of [{width:320,height:568},{width:844,height:390}]) {
+        await page.setViewportSize(viewport);
+        await assertFits(page);
+        await page.locator('[data-action="stages"]').scrollIntoViewIfNeeded();
+        await page.screenshot({path:path.join(output,`${difficulty}-result-${viewport.width}.png`)});
+      }
+      await page.setViewportSize({width:390,height:844});
       await click(page,'stages');
       assert.match(await page.locator('.journey-title').innerText(),/수호 완료/);
       await page.reload();

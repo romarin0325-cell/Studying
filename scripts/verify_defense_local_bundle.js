@@ -8,7 +8,7 @@ const REPOSITORY_ROOT = path.resolve(__dirname, "..");
 const APP_ROOT = path.join(REPOSITORY_ROOT, "defense");
 const BUNDLE_PATH = path.join(APP_ROOT, "dist-local", "HeroCoreDefense.html");
 const ASSET_MODULE_PATH = path.join(APP_ROOT, "js", "content", "assets.js");
-const EXPECTED_RELEASE_ASSET_COUNT = 70;
+const EXPECTED_RELEASE_ASSET_COUNT = 103;
 const DEBUG_GLOBAL = "__heroDefenseV2Debug";
 
 function attachDiagnostics(page, bundleUrl) {

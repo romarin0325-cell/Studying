@@ -11,6 +11,7 @@ import { createBattleActions, resolveBattleActions } from './systems/ActionSyste
 import { applyPoisonDamage } from './systems/DamageSystem.js';
 import { cleanupEntities } from './systems/CleanupSystem.js';
 import { allHeroesPlaced } from './systems/PlacementSystem.js';
+import { migrateCheckpoint } from '../persistence/schemas.js';
 
 const now = () => globalThis.performance?.now?.() ?? Date.now();
 
@@ -33,6 +34,7 @@ export class BattleSession {
     checkpoint = null,
     repository = null,
   } = {}) {
+    if (checkpoint) checkpoint = migrateCheckpoint(checkpoint);
     this.repository = repository;
     this.events = new EventBus();
     this.commands = new CommandQueue();
@@ -65,7 +67,7 @@ export class BattleSession {
     const started = now();
     for (const command of this.commands.drainThrough(this.state.tick)) executeCommand(this.state, command);
     updateWaveSpawning(this.state, deltaSeconds);
-    updateStatuses(this.state, deltaSeconds, (target, amount) => applyPoisonDamage(this.state, target, amount));
+    updateStatuses(this.state, deltaSeconds, (target, amount, statusId) => applyPoisonDamage(this.state, target, amount, statusId));
     updateMovement(this.state, deltaSeconds, landscape);
     if (this.state.phase === BATTLE_PHASE.DEFEAT) this.repository?.clearCheckpoint?.();
     recomputeAuras(this.state);

@@ -2,6 +2,12 @@ import { deepFreeze } from './combat.js';
 
 export const STATUS_DEFINITIONS = deepFreeze([
   {
+    id: 'burn', displayName: '작열', kind: 'debuff', debuff: true,
+    duration: 4, durationSeconds: 4, refresh: 'max_remaining', maximumStacks: 1,
+    periodicDps: 5, element: 'fire',
+    effects: [{ type: 'periodic_fixed_damage', damagePerStack: 5, tickIntervalSeconds: 1, canCrit: false }],
+  },
+  {
     id: 'slow',
     displayName: '감속',
     kind: 'debuff',

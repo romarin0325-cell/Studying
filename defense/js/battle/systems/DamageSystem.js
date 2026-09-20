@@ -127,6 +127,7 @@ export function applyDirectDamage(options) {
     sourceX,
     sourceY,
     targetId: target.id,
+    targetIsBoss: Boolean(target.isBoss),
     x: target.x,
     y: target.y,
     radius: options.radius,
@@ -159,12 +160,12 @@ export function applyDirectDamage(options) {
   return result;
 }
 
-export function applyPoisonDamage(state, target, amount) {
-  const actual = Math.max(0, Number(amount));
+export function applyPoisonDamage(state, target, amount, statusId = 'poison') {
+  const actual = Math.min(target.hp, Math.max(0, Number(amount)));
   target.hp = Math.max(0, target.hp - actual);
   if (target.hp <= 0) target.dead = true;
   state.events.push({
-    type: 'poison_tick', effectPreset: 'status_apply', element: 'nature',
+    type: statusId + '_tick', effectPreset: 'status_apply', element: statusId === 'burn' ? 'fire' : 'nature', statusId,
     targetId: target.id, x: target.x, y: target.y, amount: actual,
   });
   return actual;

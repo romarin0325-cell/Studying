@@ -59,12 +59,12 @@ function contextFor(source, overrides = {}) {
   };
 }
 
-test('all ten heroes expose exactly two Lv4 and two Lv6 generic trait choices', () => {
-  assert.equal(HEROES.length, 10);
-  assert.equal(HERO_TRAITS.length, 40);
-  assert.equal(HERO_TRAITS.filter(({ level }) => level === 4).length, 20);
-  assert.equal(HERO_TRAITS.filter(({ level }) => level === 6).length, 20);
-  assert.equal(new Set(HERO_TRAITS.map(({ id }) => id)).size, 40);
+test('all sixteen heroes expose exactly two Lv4 and two Lv6 generic trait choices', () => {
+  assert.equal(HEROES.length, 16);
+  assert.equal(HERO_TRAITS.length, 64);
+  assert.equal(HERO_TRAITS.filter(({ level }) => level === 4).length, 32);
+  assert.equal(HERO_TRAITS.filter(({ level }) => level === 6).length, 32);
+  assert.equal(new Set(HERO_TRAITS.map(({ id }) => id)).size, 64);
 
   for (const hero of HEROES) {
     assert.equal(hero.traits.length, 4, hero.id);
@@ -116,7 +116,7 @@ test('trait data is deeply frozen, function-free and covered by generic registri
   }
 });
 
-test('all forty Lv4/Lv6 hero build combinations compile without character-specific dispatch', () => {
+test('all sixty-four Lv4/Lv6 hero build combinations compile without character-specific dispatch', () => {
   let combinationCount = 0;
   const observedTraitIds = new Set();
   for (const hero of HEROES) {
@@ -133,8 +133,8 @@ test('all forty Lv4/Lv6 hero build combinations compile without character-specif
       }
     }
   }
-  assert.equal(combinationCount, 40);
-  assert.equal(observedTraitIds.size, 40);
+  assert.equal(combinationCount, 64);
+  assert.equal(observedTraitIds.size, 64);
 });
 
 test('representative conditions and effects execute through the shared trait compiler', () => {
