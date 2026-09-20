@@ -3307,7 +3307,7 @@ const CARDS = [
         trait: { type: 'syn_nature_3_matk', val: 50, desc: '덱에 자연 3장 이상 시 마법공격력 50% 증가' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '러스트브리즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 약화 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
+            { name: '러스트브리즈', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 [약화, 부식] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
             { name: '팬텀게일', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '필드버프 대지의축복이 있을시 적에게 저주와 침묵 부여', effects: [{ type: 'conditional_field_debuff', field: 'earth_bless', debuffs: ['curse', 'silence'] }] }
         ]
     },
@@ -3387,7 +3387,7 @@ const CARDS = [
         trait: { type: 'cond_silence_dmg', val: 1.5, desc: '침묵 걸린 적에게 대미지 1.5배' },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
+            { name: '푸딩러쉬', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적에게 [약화, 침묵] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] },
             { name: '푸딩파라다이스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '필드버프 스타파우더 부여', effects: [{ type: 'field_buff', id: 'star_powder' }] }
         ]
     },
@@ -3398,7 +3398,7 @@ const CARDS = [
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, desc: '회피율 50% 증가', effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
             { name: '고스트소울', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인, 암흑 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'debuff', id: 'darkness' }] },
-            { name: '네더커스', type: 'sup', tier: 2, cost: 20, desc: '저주 침묵 약화 부식 중 랜덤 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['curse', 'silence', 'weak', 'corrosion'] }] }
+            { name: '네더커스', type: 'sup', tier: 2, cost: 20, desc: '적에게 [저주, 침묵, 약화, 부식] 중 무작위 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['curse', 'silence', 'weak', 'corrosion'] }] }
         ]
     },
     {
@@ -3408,7 +3408,7 @@ const CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, desc: '물리공격 무효', effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '스피릿왈츠', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적이 디바인 3스택이면 대미지 2배 + 스턴, 아니면 디바인 부여', effects: [{ type: 'dmg_boost', condition: 'target_stack_at_least', debuff: 'divine', count: 3, mult: 2.0 }, { type: 'check_divine_3_stun_else_add' }] },
-            { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1개 (디바인 소모 시 2개)', effects: [{ type: 'random_debuff_consume_divine' }] }
+            { name: '이터널위스퍼', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적에게 [저주, 암흑, 침묵, 약화, 부식] 중 무작위 1종 부여 (디바인 소모 시 무작위 2종)', effects: [{ type: 'random_debuff_consume_divine' }] }
         ]
     },
 
@@ -3752,8 +3752,8 @@ const BONUS_CARDS = [
         trait: { type: 'ignore_def_mdef_by_stack', val: 0.1, desc: '작열 1스택당 방어력 10% 무시 / 디바인 1스택당 마법방어력 10% 무시' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '크리스탈킥', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '작열 부여 및 약화/부식 중 하나 추가 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
-            { name: '미드나잇스펠', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '디바인 부여 및 침묵/저주 중 하나 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['silence', 'curse'] }] }
+            { name: '크리스탈킥', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '적에게 작열 1스택을 부여하고, [약화, 부식] 중 무작위 1종 추가 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
+            { name: '미드나잇스펠', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적에게 디바인 1스택을 부여하고, [침묵, 저주] 중 무작위 1종 추가 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }, { type: 'random_debuff', count: 1, pool: ['silence', 'curse'] }] }
         ]
     },
     {
@@ -3762,7 +3762,7 @@ const BONUS_CARDS = [
         trait: { type: 'cond_target_elements_dmg', val: 1.5, elements: ['nature', 'dark'], desc: '자연/어둠속성 적에게 대미지 1.5배' },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, desc: '마법공격 무효', effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '봉인부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '부식/약화/침묵/저주/암흑 중 랜덤 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['corrosion', 'weak', 'silence', 'curse', 'darkness'] }] },
+            { name: '봉인부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '적에게 [부식, 약화, 침묵, 저주, 암흑] 중 무작위 2종 부여', effects: [{ type: 'random_debuff', count: 2, pool: ['corrosion', 'weak', 'silence', 'curse', 'darkness'] }] },
             { name: '폭염부', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '랜덤 디버프 1종 소모, 대미지 2배', effects: [{ type: 'consume_random_debuff_fixed_mult', count: 1, mult: 2.0, pool: ['burn', 'divine', 'corrosion', 'weak', 'silence', 'curse', 'darkness', 'stun', 'temptation'] }] }
         ]
     },
@@ -3842,10 +3842,10 @@ const BONUS_CARDS = [
     {
         id: 'jellyfish_princess', name: '젤리피쉬프린세스', grade: 'epic', element: 'water', role: 'debuffer',
         stats: { hp: 410, atk: 80, matk: 85, def: 75, mdef: 70 },
-        trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: '해파리독: 피격 시 부식/약화/침묵/저주/기절 중 랜덤 부여' },
+        trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: '해파리독: 피격 시 적에게 [부식, 약화, 침묵, 저주, 기절] 중 무작위 1종 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '오로라텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '약화 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
+            { name: '오로라텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '적에게 [약화, 부식] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
             { name: '크리스탈레퀴엠', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '기절 상태의 적에게 대미지 3배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
         ]
     },
@@ -3972,7 +3972,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '제트슬라이드', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '기절한 적에게 대미지 5배', effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 5.0 }] },
-            { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '저주 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['curse', 'silence'] }] }
+            { name: '콜드웨이크', type: 'mag', tier: 2, cost: 20, val: 1.5, desc: '적에게 [저주, 침묵] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['curse', 'silence'] }] }
         ]
     },
     {
@@ -3981,7 +3981,7 @@ const BONUS_CARDS = [
         trait: { type: 'death_debuff', debuff: 'burn', stack: 3, desc: '사망 시 적에게 작열 3스택 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '작열 1스택 소모 및 약화/부식/저주/침묵 중 랜덤 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
+            { name: '황금폭풍', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '작열 1스택 소모 시 적에게 [약화, 부식, 저주, 침묵] 중 무작위 2종 부여', effects: [{ type: 'consume_debuff_then_random_debuff', debuff: 'burn', count: 1, randomCount: 2, pool: ['weak', 'corrosion', 'curse', 'silence'], customLog: '작열 1스택 소모!' }] },
             { name: '모래돌진', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -4012,7 +4012,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '대미지 반감', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '레인보우룰렛', type: 'sup', tier: 10, cost: 100, desc: '모든 필드버프 교체', effects: [{ type: 'roulette_field' }] },
-            { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 랜덤 디버프 2종 부여', effects: [{ type: 'wild_card_debuff' }] }
+            { name: '와일드카드', type: 'sup', tier: 10, cost: 100, desc: '적의 디버프를 모두 제거하고 적에게 [저주, 암흑, 침묵, 약화, 부식, 작열, 디바인, 유혹] 중 무작위 2종 부여', effects: [{ type: 'wild_card_debuff' }] }
         ]
     }
 ];
@@ -4114,7 +4114,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망 시 적에게 기절 부여' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '앵커체인', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 적에게 침묵 혹은 부식 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['silence', 'corrosion'] }] },
+            { name: '앵커체인', type: 'phy', tier: 2, cost: 20, val: 2.0, desc: '물리 2배율, 적에게 [침묵, 부식] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['silence', 'corrosion'] }] },
             { name: '선상결투', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] }
         ]
     },
@@ -4125,7 +4125,7 @@ const BONUS_CARD_EXPANSION = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '와일드러쉬', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '물리 2배율, 적에게 작열 부여', effects: [{ type: 'debuff', id: 'burn', stack: 1 }] },
-            { name: '블레이즈크로', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 적에게 약화 혹은 침묵 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] }
+            { name: '블레이즈크로', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 적에게 [약화, 침묵] 중 무작위 1종 부여', effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'silence'] }] }
         ]
     },
     {
@@ -4163,7 +4163,7 @@ const BONUS_CARD_EXPANSION = [
     {
         id: 'underdog', name: '언더독', grade: 'normal', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
-        trait: { type: 'cond_grade_count_leader_boost', gradeRequired: 'normal', countRequired: 3, pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱 전체가 같은 등급이고 대장 배치 시 공격력/마법공격력 100% 증가 (빈 슬롯은 등급 비교에서 제외)' },
+        trait: { type: 'cond_same_grade_leader_boost', pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱 전체가 같은 등급이고 대장 배치 시 공격력/마법공격력 100% 증가 (빈 슬롯은 등급 비교에서 제외)' },
         skills: [
             { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
             { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
@@ -4256,7 +4256,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'corrosion', desc: '사망시 400% 물리대미지 + 부식' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, desc: '피해 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '5턴에 걸쳐 매 턴 1배 마법대미지와 랜덤 디버프 부여', effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
+            { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, desc: '5턴에 걸쳐 매 턴 1배 마법대미지와 적에게 [약화, 침묵, 부식, 저주, 암흑, 디바인, 작열, 유혹] 중 무작위 1종 부여', effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
             { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, desc: '적에게 암흑 부여', effects: [{ type: 'debuff', id: 'darkness' }] }
         ]
     },
@@ -24248,7 +24248,7 @@ const Logic = {
         }
 
         // 언더독: 빈 슬롯을 제외한 실제 배치 카드의 등급이 전부 같고 대장 배치 시 공격/마공 증가
-        if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
+        if (t.type === 'cond_same_grade_leader_boost' && idx !== undefined) {
             if (GameUtils.hasUniformGrade(deck, allCards) && idx === (t.pos !== undefined ? t.pos : 2)) {
                 active = true;
                 const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
