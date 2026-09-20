@@ -3,17 +3,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const assets = {};
-for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels','relics','tides','bloom-fx','tide-worlds','tide-relics','shield-relics','astea','celestial-relics','celestial-world','balance-relics']) {
+for (const name of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels','relics','tides','bloom-fx','tide-worlds','tide-relics','shield-relics','astea','celestial-relics','celestial-world','balance-relics',...['harmonious','gold-dragon','ancient-soul','behemoth','time-ruler'].flatMap(name=>[name,name+'-world'])]) {
   const ext = name === 'worlds' ? 'jpg' : 'png';
   assets[name] = `data:image/${ext === 'jpg' ? 'jpeg' : 'png'};base64,${(await fs.readFile(path.join(root, 'assets', `${name}.${ext}`))).toString('base64')}`;
 }
 // These five local modules are deliberately bundled without resolving parent directories,
 // keeping the offline exporter portable in restricted Windows folders as well.
 const modules = [
-  ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'LIMITS', 'clamp']],
-  ['meta.js', ['ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','ACHIEVEMENTS','normalizeDifficulty','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
+  ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'EVENT_DUNGEONS', 'LIMITS', 'clamp']],
+  ['meta.js', ['ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','ACHIEVEMENTS','normalizeDifficulty','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
   ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']], ['menus.js',['CampaignUI']],
-  ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt']],
+  ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt', 'BOSS_PRESENTATION']],
   ['audio.js', ['AudioDirector']], ['app.js', []]
 ];
 let script = '(() => {\n"use strict";\n';

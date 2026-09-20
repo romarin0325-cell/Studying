@@ -27,20 +27,23 @@ try {
     await click('#achievements');
     const rows=await page.locator('.achievement').evaluateAll(rows=>rows.map(row=>({height:row.getBoundingClientRect().height,overflow:row.scrollHeight>row.clientHeight+1})));
     assert.equal(new Set(rows.map(r=>r.height)).size,1);assert.ok(rows.every(r=>!r.overflow));await shot(`achievements-${viewport.width}`);await click('#achievements-close');
-    await click('#dungeons');assert.equal(await page.locator('[data-dungeon]').count(),6);
+    await click('#dungeons');assert.equal(await page.locator('[data-dungeon]').count(),7);assert.equal(await page.locator('.dungeon-card').count(),8);
     const offsets=await page.locator('.dungeon-card').evaluateAll(rows=>rows.map(row=>{const top=row.getBoundingClientRect().top;return [...row.children].map(el=>Math.round(el.getBoundingClientRect().top-top));}));
     assert.ok(offsets.every(row=>JSON.stringify(row)===JSON.stringify(offsets[0])));
+    const cardText=await page.locator('.dungeon-card small,.dungeon-card b,.dungeon-card em').evaluateAll(rows=>rows.map(el=>({text:el.textContent,overflow:el.scrollWidth>el.clientWidth+1})));
+    assert.ok(cardText.every(el=>!el.overflow),JSON.stringify({viewport,cardText}));
     await click('[data-dungeon="0"]');const before=await page.locator('#dungeon-done').boundingBox();
     await click('[data-dungeon="5"]');const after=await page.locator('#dungeon-done').boundingBox();assert.equal(before.y,after.y);
-    const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('data:image'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
+    await page.locator('#challenge-mode').scrollIntoViewIfNeeded();const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('data:image'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
     await shot(`dungeons-${viewport.width}`);await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
   }
-  checks.push('Fullscreen achievements and all six dungeon cards align at four mobile/landscape sizes; Chaos text does not shift actions');
+  checks.push('Fullscreen achievements and eight destination cards align at four mobile/landscape sizes; actions remain stable and cards scroll into view');
   await page.setViewportSize({width:390,height:844});await click('#dungeons');await click('#challenge-mode');await click('#challenge-done');
   assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('data:image'));await shot('challenge-lobby');
   await click('#launch');if(await page.locator('#help-done').count())await click('#help-done');
   await page.clock.runFor(2700);assert.equal(await page.evaluate(()=>__challenge.game.challenge),true);
-  const profileBefore=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,claims:__challenge.profile.claims,tickets:__challenge.profile.tickets,clears:__challenge.profile.clears,best:__challenge.saved.best}));
+  const profileBefore=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,clears:__challenge.profile.clears,best:__challenge.saved.best}));
+  const ticketsBefore=await page.evaluate(()=>__challenge.profile.tickets.length);
   await click('#run-artifacts');assert.equal(await page.locator('.run-artifact').count(),3);await click('#run-artifacts-back');
   await page.evaluate(()=>{__challenge.game.maskUses=3;__challenge.game.reviveUsed=true;});
   for(let i=0;i<21;i++) {
@@ -59,21 +62,21 @@ try {
   }
   assert.equal(await page.evaluate(()=>__challenge.game.artifacts.size),9);assert.equal(await page.evaluate(()=>__challenge.game.phase),'victory');
   assert.match(await page.locator('.panel').innerText(),/보스 타임어택 총합/);assert.match(await page.locator('.panel').innerText(),/RANK/);
-  const profileAfter=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,claims:__challenge.profile.claims,tickets:__challenge.profile.tickets,clears:__challenge.profile.clears,best:__challenge.saved.best}));
-  assert.equal(profileAfter,profileBefore);await shot('victory');
-  await click('#result-artifacts');assert.equal(await page.locator('.run-artifact').count(),9);await click('#run-artifacts-back');await click('#again');
+  const profileAfter=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,clears:__challenge.profile.clears,best:__challenge.saved.best}));
+  assert.equal(profileAfter,profileBefore);assert.equal(await page.evaluate(()=>__challenge.profile.tickets.length),ticketsBefore+1);await shot('victory');
+  await click('#result-artifacts');assert.equal(await page.locator('.run-artifact').count(),9);await click('#run-artifacts-back');assert.equal(await page.evaluate(()=>__challenge.profile.tickets.length),ticketsBefore+1);await click('#again');
   assert.deepEqual(await page.evaluate(()=>{const g=__challenge.game;return [g.stageIndex,g.room,g.artifacts.size,g.maskUses,g.reviveUsed];}),[0,0,3,0,false]);
-  checks.push('All 21 real clear/quiz screens progress, six optional boss quizzes award unique choices, nine run artifacts stay out of profile rewards and restart resets the run');
+  checks.push('All 21 clear/quiz screens progress, nine run artifacts stay out of permanent inventory, one weekly ticket is saved and restart resets the run');
   await page.evaluate(()=>{const g=__challenge.game;g.startStage(6,2);g.spawnBoss();g.phase='boss';g.boss.y=150;g.player.invincible=999;g.player.fire=999;});
   for(const [phase,hp] of [[0,1],[1,.6],[2,.3]]) {
     await page.evaluate(hp=>{const g=__challenge.game;g.boss.hp=g.boss.maxHp*hp;g.bossPattern=-1;},hp);await page.clock.runFor(1700);await shot(`astea-${phase}`);
   }
-  assert.equal(await page.evaluate(()=>__challenge.art.bosses.length),7);assert.equal(await page.evaluate(()=>__challenge.art.urls.relics.length),42);
+  assert.equal(await page.evaluate(()=>__challenge.art.bosses.length),12);assert.equal(await page.evaluate(()=>__challenge.art.urls.relics.length),42);
   // Check decoded sprite bounds; style and head/body proportions require visual review.
   const bounds=await page.evaluate(()=>__challenge.art.bosses.map(canvas=>{const c=canvas.getContext('2d'),d=c.getImageData(0,0,canvas.width,canvas.height).data;let x0=canvas.width,y0=canvas.height,x1=0,y1=0;for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(d[(y*canvas.width+x)*4+3]>30){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}return {w:x1-x0+1,h:y1-y0+1};}));
   assert.ok(bounds.every(b=>b.w>0&&b.w<=384&&b.h>0&&b.h<=384));
   await page.evaluate(()=>{const art=__challenge.art;document.body.innerHTML='<main id="comparison" style="display:flex;background:#14233c"></main>';for(let i=0;i<art.bosses.length;i++){const img=new Image();img.src=art.urls.bosses[i];img.style='width:180px;height:180px';document.querySelector('#comparison').append(img);}});
-  await page.setViewportSize({width:1260,height:180});await page.locator('#comparison img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await shot('boss-comparison');
-  assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push({art:'All seven boss sprites decode within the 384px cell; comparison captured at equal display size for visual review',bounds});checks.push('Astea and all three patterns render offline without network requests or page errors');
+  await page.setViewportSize({width:2160,height:180});await page.locator('#comparison img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await shot('boss-comparison');
+  assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push({art:'All twelve boss sprites decode within the 384px cache; production-scale comparison is captured separately by events-flow',bounds});checks.push('Astea and all three patterns render offline without network requests or page errors');
   await fs.writeFile(new URL('artifacts/challenge-flow.json',root),JSON.stringify({checks,errors,network},null,2));console.log(JSON.stringify({checks,errors,network},null,2));
 } finally {await browser.close();}

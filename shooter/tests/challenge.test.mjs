@@ -123,7 +123,7 @@ test('new relic effects, epic promotions, descriptions and gender-free cast data
   const origin=new Game({challenge:true});origin.power=3;offer(origin,'origin');assert.equal(origin.power,4);assert.equal(artifactText(ARTIFACTS.find(a=>a.id==='origin'),true),'파워 1 증가');
 });
 test('celestial elites combine the requested pairs and all boss phases remain bounded',()=>{
-  assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.equal(STAGES[6].boss,'창조신 아스테아');
+  assert.equal(DUNGEONS.filter(d=>!d.challengeOnly&&!d.event).length,6);assert.equal(STAGES[6].boss,'창조신 아스테아');
   for(const [room,expected] of [[0,[3,0]],[1,[1,5]]]) {
     const g=new Game({challenge:true});g.startStage(6,room);g.phase='wave';
     for(let i=0;i<5;i++)g.spawnWave();

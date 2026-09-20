@@ -95,7 +95,7 @@ test('only Poseidon creates a telegraphed horizontal and vertical cross, both ax
  }
 });
 test('lower dungeon health rises in steps while final Chaos stays at its prior health',()=>{
- assert.equal(DUNGEONS.filter(d=>!d.challengeOnly).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[5500,7200,9400,11900,14500,17000]);
+ assert.equal(DUNGEONS.filter(d=>!d.challengeOnly&&!d.event).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[5500,7200,9400,11900,14500,17000]);
  const g=combat({stage:2});g.player.fire=999;const e=target(g);e.special=2;e.countdown=3;tick(g,2.9);assert.equal(g.bullets.length,0);tick(g,.15);assert.equal(g.bullets.length,20);
 });
 test('base-six A and B weapon achievements track any and hard clears without rewards',()=>{

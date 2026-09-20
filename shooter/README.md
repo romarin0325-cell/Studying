@@ -139,3 +139,5 @@ node shooter/tests/patch-flow.mjs
 
 
 챌린지와 에픽 유물의 최신 규칙은 [CHALLENGE_PATCH.md](CHALLENGE_PATCH.md), 아스테아와 천계 에셋 제작 내역은 [ART_CELESTIAL.md](ART_CELESTIAL.md)를 참고하세요.
+
+주간 이벤트 5종·8개 출격 메뉴·챌린지/이벤트 주간 보상 및 최신 난이도는 [WEEKLY_EVENTS_PATCH.md](WEEKLY_EVENTS_PATCH.md)가 위의 이전 패치 설명보다 우선합니다. 보스 시각 통일 기준은 [BOSS_ART_GUIDE.md](BOSS_ART_GUIDE.md), 이번 최종 이미지 프롬프트와 파일은 [ART_WEEKLY_EVENTS.md](ART_WEEKLY_EVENTS.md)에 있습니다.
