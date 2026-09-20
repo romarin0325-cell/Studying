@@ -1,4 +1,4 @@
-import { HEROES } from './content.js';
+import { HEROES, EVENT_DUNGEONS } from './content.js';
 export const ARTIFACTS = [
   { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 20% 증가', bomb: .20 },
   { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 25% 증가 · 최대 생명 2 감소', attack: .25, life: -2 },
@@ -63,6 +63,12 @@ export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
+// The local Monday key is the seed: reloads and profile resets never reroll the event.
+export function weeklyEvent(date = new Date()) {
+  let hash=2166136261;
+  for(const char of `astral-weekly-event:${weekKey(date)}`)hash=Math.imul(hash^char.charCodeAt(0),16777619)>>>0;
+  return EVENT_DUNGEONS[hash%EVENT_DUNGEONS.length];
+}
 export function dailyHeroes(date = new Date()) { const day = date.getDay(); return day === 0 ? [0,1,2,3,4,6] : day <= 2 ? [0,1] : day <= 4 ? [2,3] : [4,6]; }
 export function createProfile(raw = {}) {
   if(!raw || typeof raw !== 'object')raw={};
@@ -72,10 +78,10 @@ export function createProfile(raw = {}) {
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
   const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard):[0-5]$/.test(key)));
-  return { version: 4, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  return { version: 5, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
-    tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(t => DIFFICULTIES.some(d => d.id === t.difficulty) && Number.isInteger(t.dungeon) && t.dungeon >= 0 && t.dungeon < (migrate?4:6)).map(t=>({...t,dungeon:migrate&&t.dungeon===3?5:t.dungeon})) : [],
+    tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(t => t && DIFFICULTIES.some(d => d.id === t.difficulty) && Number.isInteger(t.dungeon) && t.dungeon >= 0 && t.dungeon < (migrate?4:8)).map(t=>({...t,dungeon:migrate&&t.dungeon===3?5:t.dungeon})) : [],
     unlocks: raw.unlocks && typeof raw.unlocks === 'object' ? raw.unlocks : {},
     clears,
     learning: raw.learning && typeof raw.learning === 'object' ? raw.learning : { correct: 0, total: 0, mistakes: [], read: [] } };
@@ -113,10 +119,14 @@ export function consumeRandom(profile,random=Math.random,date=new Date()) {
   return randomHero(profile,random,date);
 }
 export function claimDungeon(profile, dungeon, difficulty, date = new Date()) {
-  if (!Number.isInteger(dungeon) || dungeon < 0 || dungeon > 5 || !DIFFICULTIES.some(d => d.id === difficulty)) return null;
+  if (!Number.isInteger(dungeon) || dungeon < 0 || dungeon > 11 || !DIFFICULTIES.some(d => d.id === difficulty)) return null;
+  if (dungeon>=7 && dungeon!==weeklyEvent(date).id) return null;
+  // Six ordinary rewards, one challenge reward, one shared weekly event reward.
+  const eventDungeon=dungeon>=7?dungeon:undefined;
+  if(eventDungeon!==undefined)dungeon=7;
   const week = weekKey(date), key = `${week}:${dungeon}`;
   if (profile.claims[key]) return null;
-  const ticket = { dungeon, difficulty, week }; profile.claims[key] = difficulty; const count=DIFFICULTIES.find(d=>d.id===difficulty).tickets; for(let i=0;i<count;i++)profile.tickets.push({...ticket}); return {...ticket,count};
+  const ticket = { dungeon, difficulty, week, ...(eventDungeon===undefined?{}:{eventDungeon}) }; profile.claims[key] = difficulty; const count=DIFFICULTIES.find(d=>d.id===difficulty).tickets; for(let i=0;i<count;i++)profile.tickets.push({...ticket}); return {...ticket,count};
 }
 export function drawArtifact(profile, random = Math.random, quizCorrect = false) {
   const ticket = profile.tickets.shift(); if (!ticket) return null;

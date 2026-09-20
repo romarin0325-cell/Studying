@@ -73,7 +73,18 @@ STAGES[5].pattern = ['다크니스', '멸망의 왕관', '제노사이드'];
 
 // The seventh sky belongs only to the continuous challenge.
 DUNGEONS.push({id:6,challengeOnly:true,name:'천계의 계단',en:'STAIRWAY TO ETERNITY',sentinel:'빛의 문지기',special:'천계의 수호자',mechanic:'공간을 넘는 수호자와 분열하는 빛 너머, 창조신이 기다려요.',rooms:['여명의 계단','갈라지는 빛의 관문','창조의 옥좌']});
-STAGES.push({id:6,name:'천계의 계단',en:'STAIRWAY TO ETERNITY',boss:'창조신 아스테아',subtitle:'모든 하늘의 시작',color:'#ffe1a3',dark:'#211d37',pattern:['앱솔루트 라이트','디바인 블레이드','저지먼트'],intro:'이곳까지 닿은 너희의 소망을 보여 주렴.',outro:'너희가 걸어갈 하늘은, 이제 너희의 것이란다.',duration:62,hp:22000});
+STAGES.push({id:6,name:'천계의 계단',en:'STAIRWAY TO ETERNITY',boss:'창조신 아스테아',subtitle:'모든 하늘의 시작',color:'#ffe1a3',dark:'#211d37',pattern:['앱솔루트 라이트','디바인 블레이드','저지먼트'],intro:'이곳까지 닿은 너희의 소망을 보여 주렴.',outro:'너희가 걸어갈 하늘은, 이제 너희의 것이란다.',duration:62,hp:23100});
+export const EVENT_DUNGEONS = [
+  {id:7,event:true,asset:'harmonious',name:'디저트킹덤',en:'DESSERT KINGDOM',boss:'하모니어스',specialType:1,color:'#ffb8d6',dark:'#301b35',sentinel:'슈가 크라운',special:'분열하는 마카롱',mechanic:'분열한 작은 적은 0.5초 동안 피해를 받지 않아요.',rooms:['설탕빛 거리','마카롱 관문','하모니어스의 무대'],pattern:['슈가 왈츠','마카롱 리본','스위트 하모니'],intro:'달콤한 별빛에 맞춰 함께 춤춰요!',outro:'우리의 다음 무대에도 놀러 와요.'},
+  {id:8,event:true,asset:'gold-dragon',name:'용의둥지',en:'GOLDEN NEST',boss:'골드드래곤',specialType:4,color:'#ffdc7d',dark:'#2b2115',sentinel:'황금 비늘의 파수꾼',special:'반향의 용린',mechanic:'용린의 탄은 해저신전처럼 5초 동안 가장자리에서 반사돼요.',rooms:['황금빛 절벽','비늘의 관문','보물의 둥지'],pattern:['황금 비늘','드래곤 윙','태양의 보물'],intro:'내 보물보다 빛나는 별이 있구나.',outro:'그 빛은 너희가 가져도 좋겠지.'},
+  {id:9,event:true,asset:'ancient-soul',name:'속삭임의동굴',en:'WHISPERING CAVERN',boss:'에인션트소울',specialType:3,color:'#ffc184',dark:'#252138',sentinel:'고대 불꽃의 문지기',special:'공간을 건너는 혼령',mechanic:'혼령이 빛나는 예고 지점으로 순간이동해요.',rooms:['메아리의 입구','혼령의 관문','고대 불꽃의 방'],pattern:['혼령의 메아리','속삭이는 나선','영원의 불씨'],intro:'오래된 불꽃도 너희의 발소리를 기억해.',outro:'이 동굴에 새로운 이야기가 남겠구나.'},
+  {id:10,event:true,asset:'behemoth',name:'봉인된대지',en:'SEALED EARTH',boss:'베히모스',specialType:0,color:'#c6ed8b',dark:'#1c2b29',sentinel:'사슬의 집행자',special:'붕괴하는 봉인핵',mechanic:'격파 후 큰 경고 원이 터져요. 마도제국보다 넓은 범위를 벗어나세요.',rooms:['균열의 황야','사슬의 관문','봉인의 심장'],pattern:['대지의 맥동','끊어진 사슬','거인의 각성'],intro:'이 사슬 너머까지 버틸 수 있겠어?',outro:'좋아, 너희가 내 봉인을 넘어섰다.'},
+  {id:11,event:true,asset:'time-ruler',name:'시간의도서관',en:'LIBRARY OF TIME',boss:'시간의지배자',specialType:2,color:'#b9d4ff',dark:'#191f32',sentinel:'시계탑의 기록자',special:'멈추지 않는 시계',mechanic:'시계가 차기 전에 격파하세요. 3초마다 많은 탄을 발사해요.',rooms:['기억의 서가','시계의 관문','열두 시의 기록실'],pattern:['시계의 정원','정지한 문장','다시 흐르는 시간'],intro:'아직 쓰이지 않은 순간을 보여줄래?',outro:'다음 장의 시간은 너희에게 맡길게.'}
+];
+for(const dungeon of EVENT_DUNGEONS) {
+  DUNGEONS.push(dungeon);
+  STAGES.push({...dungeon,subtitle:'이번 주의 특별한 하늘',duration:60,hp:18200});
+}
 const weaponNames={dagger:'루나틱 위치',spread:'프레임 윙',chain:'라이트닝 체인',petal:'홀리 플라워',nightfall:'문 드롭'};
 HEROES.forEach(hero=>hero.weapons.forEach(weapon=>{if(weaponNames[weapon.id])weapon.name=weaponNames[weapon.id];}));
 

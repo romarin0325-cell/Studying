@@ -1,5 +1,5 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
+import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = id => document.getElementById(id);
@@ -93,8 +93,9 @@ export class CampaignUI {
     $('achievements-close').onclick=this.closeModal;
   }
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {
-    const week=weekKey();
-     this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>여섯 개의 하늘</h2><div class="dungeon-list">${DUNGEONS.filter(d=>!d.challengeOnly).map(d=>`<button class="dungeon-card ${selected===d.id?'selected':''}" data-dungeon="${d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>DUNGEON 0${d.id+1} · 3 STAGES</small><b>${d.name}</b><span>${STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.id}`]?'이번 주 보상 수령':`주간 첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy dungeon-description">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note">뒤쪽 던전일수록 적의 체력·탄속·패턴이 강해져요. 주간 보상은 월요일 0시 초기화, 난이도와 관계없이 던전당 한 번이에요.</p><button class="primary" id="dungeon-done">이 하늘로 출격 준비</button><button class="secondary challenge-card" id="challenge-mode" style="--challenge-art:url('${this.art.urls.worlds[6]}')"><small>CHALLENGE · 21 STAGES</small><b>챌린지</b><span>일곱 하늘 이어가기</span></button>`);
+    const week=weekKey(), event=weeklyEvent(), choices=[...DUNGEONS.slice(0,7),event];
+    if(DUNGEONS[selected]?.event)selected=event.id;
+    this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>새로운 하늘로</h2><div class="dungeon-list">${choices.map(d=>`<button class="dungeon-card ${d.event?'event-card':d.challengeOnly?'challenge-card':''} ${selected===d.id?'selected':''}" ${d.challengeOnly?'id="challenge-mode"':`data-dungeon="${d.id}"`} aria-pressed="${selected===d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>${d.event?'WEEKLY EVENT':d.challengeOnly?'CHALLENGE':`DUNGEON 0${d.id+1}`} · ${d.challengeOnly?21:3} STAGES</small><b>${d.challengeOnly?'챌린지':d.name}</b><span>${d.challengeOnly?'천계의 계단':d.boss||STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.event?7:d.id}`]?'이번 주 보상 수령':`첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy dungeon-description">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note weekly-note">이벤트는 매주 5개 중 하나가 열려요. 월요일 0시 갱신 · 주간 첫 보상은 일반 6던전, 챌린지, 이벤트에서 각각 한 번 받아요. 난이도를 바꿔도 중복 수령할 수 없어요.</p><button class="primary" id="dungeon-done">${selected===6?'챌린지':'이 하늘로'} 출격 준비</button>`);
     document.querySelector('.panel').classList.add('dungeon-panel');
     document.querySelector('.dungeon-list').scrollTop=scroll;document.querySelector('.panel').scrollTop=panelScroll;
     const positions=()=>[document.querySelector('.dungeon-list').scrollTop,document.querySelector('.panel').scrollTop];
@@ -104,7 +105,7 @@ export class CampaignUI {
       this.setModal(`<span class="small-caps">SEVEN SKIES · CHALLENGE</span><h2>끝없이 이어지는 하늘</h2><p class="intro-copy">마도제국부터 혼돈의 틈을 넘어 천계의 계단까지, 일곱 던전의 21스테이지를 이어가요.</p><div class="lecture-copy">장착한 유물로 출발해 보스 퀴즈를 맞힐 때마다 새로운 유물을 골라요. 최대 9개까지 함께할 수 있어요.<br>부활 기회는 여행 전체에서 한 번이에요.</div><button class="primary" id="challenge-done">챌린지 출격 준비 · ${DIFFICULTIES.find(d=>d.id===mode).name}</button><button class="secondary" id="challenge-back">던전 선택으로</button>`);
       $('challenge-done').onclick=()=>{this.closeModal();done(0,mode,true);};$('challenge-back').onclick=()=>this.dungeons(selected,mode,done,scroll,panelScroll);
     };
-    $('dungeon-done').onclick=()=>{this.closeModal();done(selected,mode);};
+    $('dungeon-done').onclick=()=>{this.closeModal();done(selected===6?0:selected,mode,selected===6);};
   }
   runArtifacts(game,back) {
     this.setModal(`<h2>함께하는 유물</h2><p class="intro-copy">${game.artifacts.size}/9 · 생명 ${game.player.lives}/${game.maxLife} · 봄 ${game.bombs}/${game.maxBombs}</p><div class="run-artifact-list">${[...game.artifacts].map(id=>{const a=ARTIFACTS.find(a=>a.id===id);return `<div class="run-artifact ${a.rarity}">${this.relicImage(id)}<span><b>${a.name}</b><small>${artifactText(a,true)}</small></span></div>`;}).join('')||'<p class="intro-copy">아직 함께하는 유물이 없어요.</p>'}</div><button class="primary" id="run-artifacts-back">돌아가기</button>`);
