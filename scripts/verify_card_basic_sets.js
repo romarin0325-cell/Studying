@@ -4,7 +4,16 @@ const path = require('path');
 const vm = require('vm');
 
 function run() {
-  const sandbox = { assert, console, localStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
+  const values = new Map();
+  const sandbox = {
+    assert,
+    console,
+    localStorage: {
+      getItem: key => (values.has(key) ? values.get(key) : null),
+      setItem: (key, value) => values.set(key, String(value)),
+      removeItem: key => values.delete(key)
+    }
+  };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
@@ -133,6 +142,66 @@ function run() {
     assert.strictEqual(restored.ok, true);
     const resolved = rules.resolveSnapshotCardPool(restored.snapshot, {}, catalogue);
     assert.strictEqual(resolved.length, 41);
+    const missingSnap = rules.validateSavedRunSnapshot({
+      source: 'basic_set',
+      baseCardIds: ['not_a_real_card_id'],
+      extraCardIds: []
+    }, catalogue);
+    assert.strictEqual(missingSnap.ok, false);
+    assert.strictEqual(missingSnap.code, 'unknown_id');
+    const badSource = rules.validateSavedRunSnapshot({ source: 'classic', baseCardIds: classic, extraCardIds: [] }, catalogue);
+    assert.strictEqual(badSource.ok, false);
+  `, sandbox);
+
+  const featuresPath = path.join(cardRoot, 'rpg_features.js');
+  vm.runInContext(fs.readFileSync(featuresPath, 'utf8'), sandbox, { filename: 'rpg_features.js' });
+  vm.runInContext(`
+    const alerts = [];
+    const rpg = {
+      _globalLoaded: true,
+      _globalStorageBroken: false,
+      _cardPoolEditorBusy: false,
+      pendingActiveBonusPoolIds: [],
+      global: {
+        unlocked_bonus_cards: GameUtils.getDefaultUnlockedBonusCardIds(),
+        cardPoolConfig: CardPoolRules.createEmptyConfig()
+      },
+      showAlert(message) { alerts.push(String(message)); }
+    };
+    RPGFeatureModules.install(rpg);
+    rpg.validateGlobalData = function () { return true; };
+    rpg.renderCardPoolEditor = function () {};
+    rpg.updateBonusPoolEditorButton = function () {};
+    rpg.getCardPoolAvailabilityContext = function () {
+      return {
+        catalogue: GameUtils.getAllCards(),
+        unlockedBonusIds: GameUtils.getDefaultUnlockedBonusCardIds(),
+        releasedBonusIds: GameUtils.getAllCards().map(card => card.id),
+        hiddenBonusIds: [],
+        defaultUnlockedBonusIds: GameUtils.getDefaultUnlockedBonusCardIds()
+      };
+    };
+    assert.strictEqual(rpg.saveGlobalData(), true);
+    assert.ok(rpg.global._storageStamp);
+    const firstStamp = rpg.global._storageStamp;
+    localStorage.setItem(Storage.keys.GLOBAL, JSON.stringify(Object.assign({}, rpg.global, { _storageStamp: 'other-tab' })));
+    rpg._cardPoolEditorDraft = CardPoolRules.cloneConfig(rpg.global.cardPoolConfig);
+    rpg._cardPoolEditorDraft.selectedSetId = 'classic';
+    assert.strictEqual(rpg.commitCardPoolEditorDraft(), false);
+    assert.ok(alerts.some(message => message.indexOf('다른 탭') >= 0));
+    assert.strictEqual(rpg.global._storageStamp, firstStamp);
+
+    alerts.length = 0;
+    localStorage.setItem(Storage.keys.GLOBAL, JSON.stringify(rpg.global));
+    const originalSave = Storage.save;
+    Storage.save = function () { return false; };
+    rpg._cardPoolEditorDraft = CardPoolRules.cloneConfig(rpg.global.cardPoolConfig);
+    rpg._cardPoolEditorDraft.profiles.classic.presets[0].extraCardIds = ['behemoth'];
+    const before = JSON.stringify(rpg.global.cardPoolConfig);
+    assert.strictEqual(rpg.commitCardPoolEditorDraft(), false);
+    assert.strictEqual(JSON.stringify(rpg.global.cardPoolConfig), before);
+    assert.deepStrictEqual(rpg.pendingActiveBonusPoolIds, []);
+    Storage.save = originalSave;
   `, sandbox);
 
   console.log('Card basic set verification passed.');
