@@ -1,11 +1,11 @@
 {
   "scripts": {
     "lint": "npm run lint:card",
-    "lint:card": "node --check card/game/logic.js && node --check card/game/data.js && node --check card/game/vocab_data.js && node --check card/game/collocation_data.js && node --check card/game/toeic.js && node --check card/game/toeic_explanations.js && node --check card/game/api.js && node --check card/game/battle_runtime.js && node --check card/game/rpg_features.js && node --check card/game/fortune_cookie.js && node --check card/game/music_data.js && node --check card/game/music_player.js && node --check card/src/astra.js",
+    "lint:card": "node --check card/game/logic.js && node --check card/game/data.js && node --check card/game/vocab_data.js && node --check card/game/collocation_data.js && node --check card/game/toeic.js && node --check card/game/toeic_explanations.js && node --check card/game/api.js && node --check card/game/battle_runtime.js && node --check card/game/rpg_features.js && node --check card/game/card_pool_rules.js && node --check card/game/card_pool_view.js && node --check card/game/fortune_cookie.js && node --check card/game/music_data.js && node --check card/game/music_player.js && node --check card/src/astra.js",
     "lint:defense": "node scripts/verify_defense.js",
     "build:defense-local": "node scripts/build_defense_local.mjs",
     "serve:defense": "node scripts/serve_defense.js",
-    "test:card:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_refactor.js && node scripts/verify_card_music_player.js && node scripts/verify_card_learning_data.js && node scripts/verify_card_combat_regressions.js && node scripts/verify_gemini_api_models.js",
+    "test:card:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_refactor.js && node scripts/verify_card_music_player.js && node scripts/verify_card_learning_data.js && node scripts/verify_card_combat_regressions.js && node scripts/verify_card_basic_sets.js && node scripts/verify_gemini_api_models.js",
     "test:card:browser": "node scripts/verify_card_mobile.js && node scripts/verify_card_special_flow.js",
     "test:defense": "node --test defense/tests/unit/*.test.mjs defense/tests/integration/*.test.mjs",
     "test:defense:local": "npm run build:defense-local && node scripts/verify_defense_local_bundle.js",

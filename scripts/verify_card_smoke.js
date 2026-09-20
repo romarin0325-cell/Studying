@@ -77,7 +77,7 @@ function run() {
     'claimSpecialMissionReward()',
     'tryUnlockSpecialMissionFromDreamCorridor(stageNumber)',
     'getCurrentSpecialSeason(date = new Date())',
-    'activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
+    'activeBonusPoolIds: runCardPool.extraCardIds ? runCardPool.extraCardIds.slice() : this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds)',
     'resetArtifactChaosRound()',
     'generateArtifactReserveBundles()',
     'toggleArtifactReserveArtifact(id)',

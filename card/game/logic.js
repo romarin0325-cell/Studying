@@ -294,8 +294,20 @@ class SaveDataMigrator {
             currentGradeSelected: []
         }, ['selected', 'currentGradeSelected']);
 
-        if (typeof options.normalizeBonusPoolIds === 'function') {
+        if (!state.runCardPool && typeof options.normalizeBonusPoolIds === 'function') {
             state.activeBonusPoolIds = options.normalizeBonusPoolIds(state.activeBonusPoolIds);
+        }
+        if (!state.runCardPool && Array.isArray(state.activeBonusPoolIds) && typeof CardPoolRules !== 'undefined') {
+            state.runCardPool = {
+                schemaVersion: 1,
+                source: 'basic_set',
+                setId: 'classic',
+                setRevision: 1,
+                presetIndex: 0,
+                baseCardIds: CardPoolRules.getClassicBaseCardIds(typeof GameUtils !== 'undefined' ? GameUtils.getAllCards() : []),
+                extraCardIds: state.activeBonusPoolIds.slice(),
+                migratedFromLegacy: true
+            };
         }
         if (typeof options.normalizeSpecialSelections === 'function') {
             state.activeSpecialCardSelections = options.normalizeSpecialSelections(
@@ -980,6 +992,40 @@ const GameUtils = {
      * @returns {Array} Array of card objects
      */
     buildCardPool(globalData, options = {}) {
+        const applyCommonPoolFilters = pool => {
+            let next = Array.isArray(pool) ? pool.slice() : [];
+            if (options.includeTranscendence && options.activeTranscendenceCards && options.activeTranscendenceCards.length > 0) {
+                const transObjs = this.getAllTranscendenceCards().filter(c => options.activeTranscendenceCards.includes(c.id));
+                next = next.concat(transObjs);
+            }
+            if (options.activeEventCards && options.activeEventCards.length > 0) {
+                const eventObjs = CARDS.filter(c => c.grade === 'event' && options.activeEventCards.includes(c.id));
+                next = next.concat(eventObjs);
+            }
+            if (options.specialCardSelections && Object.keys(options.specialCardSelections).length > 0) {
+                const specialById = new Map(this.getSpecialCards().map(card => [card.id, card]));
+                next = next.map(card => {
+                    const selectedId = options.specialCardSelections[card.id];
+                    const specialCard = specialById.get(selectedId);
+                    if (specialCard && specialCard.specialBaseId === card.id) return specialCard;
+                    return card;
+                });
+            }
+            if (options.excludeTranscendence) next = next.filter(c => c.grade !== 'transcendence');
+            if (options.excludeEvent) next = next.filter(c => c.grade !== 'event');
+            if (options.maxGrade === 'rare') next = next.filter(c => c.grade === 'rare' || c.grade === 'normal');
+            else if (options.maxGrade === 'epic') next = next.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+            return next.filter(card => card && !card.battleOnly);
+        };
+
+        if (options.limitedPoolMode) {
+            if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
+                options = { ...options, limitedPoolMode: false };
+            } else {
+                return [];
+            }
+        }
+
         if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
             // [Factory Mode] Limit pool entirely to the drafted 40 cards
             const allPossible = [
@@ -1018,6 +1064,17 @@ const GameUtils = {
                 pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
             }
             return pool.filter(card => !card.battleOnly);
+        }
+
+        if (Array.isArray(options.baseCardIds)) {
+            const seen = new Set();
+            const ids = [].concat(options.baseCardIds, options.extraCardIds || []).filter(id => {
+                if (!id || seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+            const pool = ids.map(id => this.getCardById(id)).filter(Boolean);
+            return applyCommonPoolFilters(pool);
         }
 
         let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');

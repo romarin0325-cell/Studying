@@ -1619,6 +1619,122 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 }
 
+#modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor {
+  display: flex;
+  flex-direction: column;
+  width: min(720px, calc(100vw - 16px));
+  max-width: 720px;
+  height: min(100vh, 100dvh);
+  max-height: min(100vh, 100dvh);
+  margin: 0 auto;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  min-height: 0;
+}
+@media (max-width: 320px) {
+  #modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor {
+    width: calc(100vw - 16px);
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+.card-pool-editor-header,
+.card-pool-editor-footer,
+.card-pool-tabs {
+  flex-shrink: 0;
+}
+.card-pool-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.card-pool-editor-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.card-pool-editor-note,
+.card-pool-editor-summary {
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.card-pool-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+.card-pool-tabs button {
+  flex: 1;
+  min-height: 44px;
+}
+.card-pool-editor-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.card-pool-editor-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+}
+.card-pool-editor-footer button {
+  flex: 1;
+  min-height: 48px;
+}
+.card-pool-icon-btn,
+.card-pool-row-action,
+.card-pool-filter button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.card-pool-set-row,
+.card-pool-card-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--line, #555);
+  border-radius: 12px;
+}
+.card-pool-card-row {
+  grid-template-columns: 60px minmax(0, 1fr);
+  align-items: center;
+}
+.card-pool-card-row .portrait {
+  width: 60px;
+  height: 100px;
+  flex-shrink: 0;
+}
+.card-pool-card-row .portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.card-pool-card-text { min-width: 0; }
+.card-pool-card-name { font-size: 16px; line-height: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.card-pool-card-meta,
+.card-pool-card-status { font-size: 13px; line-height: 18px; }
+.card-pool-set-name { font-size: 16px; font-weight: 700; }
+.card-pool-set-axis { font-size: 13px; }
+.card-pool-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-pool-search { width: 100%; min-height: 44px; box-sizing: border-box; margin-bottom: 8px; }
+.card-pool-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.card-pool-card-row.is-selected { outline: 2px solid var(--sky, #4fc3f7); }
+.card-pool-card-row.is-base { opacity: 1; }
+@media (max-width: 320px) {
+  .card-pool-card-row { grid-template-columns: 48px minmax(0, 1fr); }
+  .card-pool-card-row .portrait { width: 48px; height: 80px; }
+}
+@media (min-width: 768px) {
+  .card-pool-card-row { grid-template-columns: 72px minmax(0, 1fr); }
+  .card-pool-card-row .portrait { width: 72px; height: 120px; }
+  .card-pool-extra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+
 /* ASTRA: sky, paper, ink. Shared mechanics use the legacy layout rules above;
    this design system owns the shell, navigation, cards and responsive surfaces. */
 :root { --ink:#0d2235; --panel:#142d42; --panel-soft:#1b384f; --sky:#a5dfff; --sky-bright:#cceeff; --paper:#f2f8fb; --muted:#a9becd; --line:#a5dfff29; --gold:#e7ca94; --radius:18px; color-scheme:dark; }
@@ -2600,10 +2716,15 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
                 도전 모드 (Challenge)<br>
                 <span style="font-size:0.8rem; color:#e1bee7;">목표 스테이지 클리어 도전</span>
             </button>
-            <button id="btn-bonus-pool-editor" class="menu-btn" onclick="RPG.openBonusPoolEditor()"
+            <button id="btn-bonus-pool-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('extras')"
                 style="padding:12px; border-color:#4fc3f7; color:#4fc3f7; margin-bottom:8px;">
                 덱 편집<br>
-                <span style="font-size:0.8rem; color:#b3e5fc;">보너스 카드 ON/OFF</span>
+                <span id="btn-bonus-pool-editor-sub" style="font-size:0.8rem; color:#b3e5fc;">보너스 카드 ON/OFF</span>
+            </button>
+            <button id="btn-card-set-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('sets')"
+                style="padding:12px; border-color:#81c784; color:#a5d6a7; margin-bottom:8px;">
+                세트 편집<br>
+                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">시험 기능 · 선택 가능 0/5</span>
             </button>
             <button id="btn-special-card-editor" class="menu-btn" onclick="RPG.openSpecialCardEditor()"
                 style="display:none; padding:12px; border-color:#ffca28; color:#ffe082; margin-bottom:8px;">
@@ -2622,22 +2743,26 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
         </div>
     </div>
 
-    <div id="modal-bonus-pool-editor" class="modal">
-        <div class="modal-content" style="height:auto; min-height:320px; width: 360px;">
-            <div style="position:relative; margin-bottom: 5px;">
-                <h3 style="margin: 0;">보너스 카드 덱 편집</h3>
-                <button onclick="RPG.randomizeBonusPoolSelection()"
-                    style="position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #4fc3f7; color:#4fc3f7; border-radius:5px;">(랜덤)</button>
+    <div id="modal-bonus-pool-editor" class="modal card-pool-editor-modal" role="dialog" aria-modal="true" aria-labelledby="card-pool-editor-title">
+        <div class="modal-content card-pool-editor">
+            <div class="card-pool-editor-header">
+                <h3 id="card-pool-editor-title">획득 카드풀 편집</h3>
+                <button type="button" id="card-pool-editor-close" class="card-pool-icon-btn">닫기</button>
             </div>
-            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0 (최대 15)</p>
+            <p id="card-pool-editor-summary" class="card-pool-editor-summary">기존 기본덱 · 기본 45장 + 추가 0/15장</p>
+            <p class="card-pool-editor-note">다음 런에 적용됩니다. 현재 진행 중인 런은 유지됩니다. 저장하지 않으면 편집 내용이 사라질 수 있습니다.</p>
+            <div class="card-pool-tabs" role="tablist">
+                <button type="button" role="tab" id="card-pool-tab-sets">기본 세트</button>
+                <button type="button" role="tab" id="card-pool-tab-extras">추가 카드</button>
+            </div>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
-            <p id="bonus-pool-preset-status" style="font-size:0.78rem; color:#b3e5fc; margin:0 0 8px 0;">다음 런 적용 세팅: 1</p>
-            <div id="bonus-pool-editor-list" class="modal-scroll"></div>
-            <div style="display:flex; gap:8px; margin-top:6px;">
-                <button class="menu-btn" onclick="RPG.resetBonusPoolSelection()"
-                    style="flex:1; margin-bottom:0; border-color:#ef5350; color:#ef5350;">선택초기화</button>
-                <button class="menu-btn" onclick="RPG.closeBonusPoolEditor()"
-                    style="flex:1; margin-bottom:0;">닫기</button>
+            <p id="bonus-pool-preset-status" class="card-pool-editor-note">프리셋 1</p>
+            <div id="card-pool-editor-body" class="card-pool-editor-body"></div>
+            <div id="bonus-pool-editor-list" class="modal-scroll" hidden></div>
+            <p id="bonus-pool-editor-summary" hidden>세팅 1 · 활성 0 / 0 (최대 15)</p>
+            <div class="card-pool-editor-footer">
+                <button type="button" id="card-pool-editor-cancel" class="menu-btn">취소</button>
+                <button type="button" id="card-pool-editor-save" class="menu-btn">다음 런 설정 저장</button>
             </div>
         </div>
     </div>
@@ -4522,6 +4647,89 @@ const MIRACLE_FORM_TRANSITIONS = Object.freeze({
     miracle_larva: Object.freeze(['mirror_cocoon']),
     mirror_cocoon: Object.freeze(['aurora_wing', 'abyss_wing'])
 });
+
+const BASIC_CARD_SETS = Object.freeze([
+    Object.freeze({
+        id: 'classic',
+        revision: 1,
+        name: '기존 기본덱',
+        mainAxis: '기존 45장 구성 유지',
+        subAxes: Object.freeze([]),
+        resolver: 'existing_original_base_card_predicate',
+        trial: false,
+        cardsByGrade: null
+    }),
+    Object.freeze({
+        id: 'ember_relay',
+        revision: 1,
+        name: '홍련의 계승',
+        mainAxis: '작열의 유지와 소모',
+        subAxes: Object.freeze(['드래곤', '사망 시 계승', '태양·물리/마법 전환']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'flare_ribbon', 'executor', 'werebear']),
+            rare: Object.freeze(['baby_dragon', 'hellhound', 'mirage', 'light_elemental', 'void_knight', 'sphinx', 'forget_me_not', 'chaos_mage', 'siren', 'cream_maid']),
+            epic: Object.freeze(['red_dragon', 'flame_sage', 'dragon_miko', 'ash', 'sun_priestess', 'mawang', 'storm_sage', 'pudding_princess', 'lightning_sage', 'shadow_stalker']),
+            legend: Object.freeze(['gold_dragon', 'zeke', 'phoenix', 'cherry_prince', 'ancient_dragon', 'supernova', 'sakura', 'cinderella', 'sun_moon_sword_maiden', 'queen'])
+        })
+    }),
+    Object.freeze({
+        id: 'twilight_liturgy',
+        revision: 1,
+        name: '황혼의 성가',
+        mainAxis: '디바인의 유지·소모·전환',
+        subAxes: Object.freeze(['빛/어둠', '다종 디버프', '토끼·저등급 마무리']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'fairy', 'blessing_tail', 'holy_night', 'vampire', 'shadow_cat', 'snow_rabbit', 'silver_rabbit', 'black_swan']),
+            rare: Object.freeze(['aurora', 'night_rabbit', 'fallen_angel', 'cream_maid', 'tinker_bell', 'silent_librarian', 'light_elemental', 'forget_me_not', 'void_knight', 'sphinx']),
+            epic: Object.freeze(['archangel', 'fairy_queen', 'ghost_king', 'lightning_sage', 'unicorn', 'eclipse_queen', 'gumiho', 'mawang', 'santa', 'priest_of_end']),
+            legend: Object.freeze(['jasmine', 'galaxy_whale', 'cinderella', 'luna', 'doom_luther', 'time_ruler', 'ancient_soul', 'frozen_witch', 'deep_lord', 'victoria'])
+        })
+    }),
+    Object.freeze({
+        id: 'starlit_garden',
+        revision: 1,
+        name: '별빛 정원',
+        mainAxis: '필드버프의 축적·유지·소모',
+        subAxes: Object.freeze(['자연/물', '디저트', '저등급 소비형 피니셔']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'flare_ribbon', 'fairy']),
+            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'entropy', 'fenrir', 'prism_twin']),
+            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'miracle_larva', 'fairy_queen', 'avalanche_maid']),
+            legend: Object.freeze(['queen', 'rumi', 'world_tree', 'jasmine', 'deep_lord', 'victoria', 'dainichi_nyorai', 'sun_moon_sword_maiden', 'sylphid', 'zeke'])
+        })
+    }),
+    Object.freeze({
+        id: 'midnight_tide',
+        revision: 1,
+        name: '심야의 조류',
+        mainAxis: '방어로 시간을 확보하는 지연전',
+        subAxes: Object.freeze(['물/어둠', '기절·회피', '주기 턴 보상']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'sunflower', 'snow_penguin', 'shadow_cat', 'vampire', 'slime', 'snow_rabbit', 'silver_rabbit', 'marshmallow']),
+            rare: Object.freeze(['aurora', 'siren', 'fenrir', 'silent_librarian', 'legendary_captain', 'cotton_candy_sheep', 'prism_twin', 'night_rabbit', 'light_elemental', 'sphinx']),
+            epic: Object.freeze(['priest_of_end', 'guardian', 'great_detective', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
+            legend: Object.freeze(['time_ruler', 'phantom', 'venom', 'perfect_aurora', 'cure_master', 'deep_lord', 'frozen_witch', 'rumi', 'world_tree', 'doom_luther'])
+        })
+    }),
+    Object.freeze({
+        id: 'arena_company',
+        revision: 1,
+        name: '투기장의 연맹',
+        mainAxis: '평타·마나 절약',
+        subAxes: Object.freeze(['아레나', '치명타·방어 저하', '배치·동일등급']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'executor', 'discipline_captain', 'werebear', 'shadow_cat', 'black_swan', 'candy_boy', 'slime', 'mummy']),
+            rare: Object.freeze(['baby_dragon', 'ember_tiger', 'prism_twin', 'legendary_captain', 'golem', 'void_knight', 'fenrir', 'hellhound', 'cream_maid', 'forget_me_not']),
+            epic: Object.freeze(['paladin', 'guardian', 'eclipse_queen', 'crystal_dancer', 'red_dragon', 'flame_sage', 'pudding_princess', 'gumiho', 'mushroom_king', 'unicorn']),
+            legend: Object.freeze(['doom_luther', 'cherry_prince', 'phoenix', 'cure_master', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
+        })
+    })
+]);
 
 const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
@@ -21844,8 +22052,20 @@ class SaveDataMigrator {
             currentGradeSelected: []
         }, ['selected', 'currentGradeSelected']);
 
-        if (typeof options.normalizeBonusPoolIds === 'function') {
+        if (!state.runCardPool && typeof options.normalizeBonusPoolIds === 'function') {
             state.activeBonusPoolIds = options.normalizeBonusPoolIds(state.activeBonusPoolIds);
+        }
+        if (!state.runCardPool && Array.isArray(state.activeBonusPoolIds) && typeof CardPoolRules !== 'undefined') {
+            state.runCardPool = {
+                schemaVersion: 1,
+                source: 'basic_set',
+                setId: 'classic',
+                setRevision: 1,
+                presetIndex: 0,
+                baseCardIds: CardPoolRules.getClassicBaseCardIds(typeof GameUtils !== 'undefined' ? GameUtils.getAllCards() : []),
+                extraCardIds: state.activeBonusPoolIds.slice(),
+                migratedFromLegacy: true
+            };
         }
         if (typeof options.normalizeSpecialSelections === 'function') {
             state.activeSpecialCardSelections = options.normalizeSpecialSelections(
@@ -22530,6 +22750,40 @@ const GameUtils = {
      * @returns {Array} Array of card objects
      */
     buildCardPool(globalData, options = {}) {
+        const applyCommonPoolFilters = pool => {
+            let next = Array.isArray(pool) ? pool.slice() : [];
+            if (options.includeTranscendence && options.activeTranscendenceCards && options.activeTranscendenceCards.length > 0) {
+                const transObjs = this.getAllTranscendenceCards().filter(c => options.activeTranscendenceCards.includes(c.id));
+                next = next.concat(transObjs);
+            }
+            if (options.activeEventCards && options.activeEventCards.length > 0) {
+                const eventObjs = CARDS.filter(c => c.grade === 'event' && options.activeEventCards.includes(c.id));
+                next = next.concat(eventObjs);
+            }
+            if (options.specialCardSelections && Object.keys(options.specialCardSelections).length > 0) {
+                const specialById = new Map(this.getSpecialCards().map(card => [card.id, card]));
+                next = next.map(card => {
+                    const selectedId = options.specialCardSelections[card.id];
+                    const specialCard = specialById.get(selectedId);
+                    if (specialCard && specialCard.specialBaseId === card.id) return specialCard;
+                    return card;
+                });
+            }
+            if (options.excludeTranscendence) next = next.filter(c => c.grade !== 'transcendence');
+            if (options.excludeEvent) next = next.filter(c => c.grade !== 'event');
+            if (options.maxGrade === 'rare') next = next.filter(c => c.grade === 'rare' || c.grade === 'normal');
+            else if (options.maxGrade === 'epic') next = next.filter(c => c.grade === 'epic' || c.grade === 'rare' || c.grade === 'normal');
+            return next.filter(card => card && !card.battleOnly);
+        };
+
+        if (options.limitedPoolMode) {
+            if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
+                options = { ...options, limitedPoolMode: false };
+            } else {
+                return [];
+            }
+        }
+
         if (options.factoryPool && Array.isArray(options.factoryPool) && options.factoryPool.length > 0) {
             // [Factory Mode] Limit pool entirely to the drafted 40 cards
             const allPossible = [
@@ -22568,6 +22822,17 @@ const GameUtils = {
                 pool = pool.filter(c => getGradeVal(c.grade) >= limitVal);
             }
             return pool.filter(card => !card.battleOnly);
+        }
+
+        if (Array.isArray(options.baseCardIds)) {
+            const seen = new Set();
+            const ids = [].concat(options.baseCardIds, options.extraCardIds || []).filter(id => {
+                if (!id || seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+            const pool = ids.map(id => this.getCardById(id)).filter(Boolean);
+            return applyCommonPoolFilters(pool);
         }
 
         let pool = CARDS.filter(c => !c.hide_from_gacha && c.unlockSource !== 'bonus' && c.unlockSource !== 'hidden');
@@ -24743,6 +25008,445 @@ const Logic = {
     getBuffName: getBuffName
 };
 </script>
+<script>(function () {
+    const EXTRA_LIMIT = 15;
+    const PRESET_COUNT = 3;
+    const NEW_SET_SIZE = 40;
+    const GRADES = Object.freeze(['normal', 'rare', 'epic', 'legend']);
+    const ALLOWED_SET_IDS = Object.freeze(['classic', 'ember_relay', 'twilight_liturgy', 'starlit_garden', 'midnight_tide', 'arena_company']);
+
+    function cloneIds(ids) {
+        return Array.isArray(ids) ? ids.slice() : [];
+    }
+
+    function uniquePreserve(ids) {
+        const seen = new Set();
+        const out = [];
+        (ids || []).forEach(id => {
+            if (typeof id !== 'string' || !id || seen.has(id)) return;
+            if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
+            seen.add(id);
+            out.push(id);
+        });
+        return out;
+    }
+
+    function catalogueList(catalogue) {
+        return Array.isArray(catalogue) ? catalogue : [];
+    }
+
+    function byId(catalogue) {
+        const map = new Map();
+        catalogueList(catalogue).forEach(card => {
+            if (card && typeof card.id === 'string') map.set(card.id, card);
+        });
+        return map;
+    }
+
+    function isEligibleOriginalGrade(grade) {
+        return GRADES.indexOf(grade) >= 0;
+    }
+
+    function isClassicBaseCard(card) {
+        if (!card || card.battleOnly || card.hide_from_gacha) return false;
+        if (card.unlockSource === 'bonus' || card.unlockSource === 'hidden' || card.unlockSource === 'special') return false;
+        if (card.specialBaseId) return false;
+        return isEligibleOriginalGrade(card.grade);
+    }
+
+    function flattenSetCards(set) {
+        if (!set) return [];
+        if (set.resolver === 'existing_original_base_card_predicate') return null;
+        const out = [];
+        GRADES.forEach(grade => {
+            (set.cardsByGrade && set.cardsByGrade[grade] || []).forEach(id => out.push(id));
+        });
+        return out;
+    }
+
+    function emptyPresets() {
+        return [
+            { extraCardIds: [] },
+            { extraCardIds: [] },
+            { extraCardIds: [] }
+        ];
+    }
+
+    function emptyProfile() {
+        return {
+            activePresetIndex: 0,
+            presets: emptyPresets()
+        };
+    }
+
+    const CardPoolRules = {
+        EXTRA_LIMIT,
+        PRESET_COUNT,
+        NEW_SET_SIZE,
+        GRADES,
+        ALLOWED_SET_IDS,
+
+        getSets() {
+            return typeof BASIC_CARD_SETS !== 'undefined' ? BASIC_CARD_SETS : [];
+        },
+
+        getSet(setId) {
+            return this.getSets().find(set => set.id === setId) || null;
+        },
+
+        getClassicBaseCardIds(catalogue) {
+            const source = typeof CARDS !== 'undefined' ? CARDS : catalogueList(catalogue);
+            return source.filter(isClassicBaseCard).map(card => card.id);
+        },
+
+        getSetBaseCardIds(set, catalogue) {
+            if (!set) return [];
+            if (set.resolver === 'existing_original_base_card_predicate') {
+                return this.getClassicBaseCardIds(catalogue);
+            }
+            return flattenSetCards(set) || [];
+        },
+
+        validateSetDefinition(set, catalogue) {
+            const errors = [];
+            if (!set || !set.id) {
+                return { ok: false, errors: ['missing_set'] };
+            }
+            if (set.resolver === 'existing_original_base_card_predicate') {
+                const ids = this.getClassicBaseCardIds(catalogue);
+                if (ids.length === 0) errors.push('classic_empty');
+                return { ok: errors.length === 0, errors, ids };
+            }
+            const cards = set.cardsByGrade || {};
+            const seen = new Set();
+            GRADES.forEach(grade => {
+                const list = cards[grade] || [];
+                if (list.length !== 10) errors.push('grade_count:' + grade);
+                list.forEach(id => {
+                    if (seen.has(id)) errors.push('duplicate:' + id);
+                    seen.add(id);
+                    const card = byId(catalogue).get(id);
+                    if (!card) errors.push('missing:' + id);
+                    else if (card.battleOnly) errors.push('battleOnly:' + id);
+                    else if (card.specialBaseId) errors.push('special:' + id);
+                    else if (!isEligibleOriginalGrade(card.grade)) errors.push('ineligible:' + id);
+                    else if (card.grade !== grade) errors.push('grade_mismatch:' + id);
+                });
+            });
+            if (seen.size !== NEW_SET_SIZE) errors.push('size:' + seen.size);
+            return { ok: errors.length === 0, errors, ids: Array.from(seen) };
+        },
+
+        inspectCardAvailability(card, context) {
+            const unlocked = new Set(context && context.unlockedBonusIds || []);
+            const released = new Set(context && context.releasedBonusIds || []);
+            const hidden = new Set(context && context.hiddenBonusIds || []);
+            const defaults = new Set(context && context.defaultUnlockedBonusIds || []);
+            if (!card) return { status: 'definition_error', label: '세트 정의 오류' };
+            if (card.battleOnly || card.specialBaseId || !isEligibleOriginalGrade(card.grade)) {
+                return { status: 'definition_error', label: '세트 정의 오류' };
+            }
+            if (isClassicBaseCard(card)) {
+                return { status: 'base', label: '기본 제공' };
+            }
+            if (card.unlockSource === 'hidden') {
+                if (unlocked.has(card.id)) return { status: 'unlocked', label: '해금 완료' };
+                return { status: 'locked', label: '미해금', path: '히든 보너스 미션' };
+            }
+            if (card.unlockSource === 'bonus') {
+                if (card.releaseDate && !released.has(card.id) && !(context && context.ignoreReleaseDates)) {
+                    return { status: 'unreleased', label: '공개 예정 ' + card.releaseDate, path: '일반 보너스 수집' };
+                }
+                if (defaults.has(card.id) || unlocked.has(card.id)) {
+                    return { status: defaults.has(card.id) ? 'auto' : 'unlocked', label: defaults.has(card.id) ? '자동 제공' : '해금 완료' };
+                }
+                return { status: 'locked', label: '미해금', path: '일반 보너스 수집' };
+            }
+            if (hidden.has(card.id) && !unlocked.has(card.id)) {
+                return { status: 'locked', label: '미해금', path: '히든 보너스 미션' };
+            }
+            return { status: 'unknown', label: '해금 방법 확인 필요', path: '해금 방법 확인 필요' };
+        },
+
+        isCardAvailable(card, context) {
+            const info = this.inspectCardAvailability(card, context);
+            return info.status === 'base' || info.status === 'unlocked' || info.status === 'auto';
+        },
+
+        getSetAvailability(set, context) {
+            const catalogue = context && context.catalogue || [];
+            const definition = this.validateSetDefinition(set, catalogue);
+            if (!definition.ok) {
+                return {
+                    available: false,
+                    definitionError: true,
+                    readyCount: 0,
+                    total: set && set.resolver === 'existing_original_base_card_predicate' ? definition.ids.length : NEW_SET_SIZE,
+                    missingIds: [],
+                    errors: definition.errors
+                };
+            }
+            const ids = this.getSetBaseCardIds(set, catalogue);
+            const map = byId(catalogue);
+            const missingIds = [];
+            let readyCount = 0;
+            ids.forEach(id => {
+                const card = map.get(id);
+                if (this.isCardAvailable(card, context)) readyCount += 1;
+                else missingIds.push(id);
+            });
+            return {
+                available: missingIds.length === 0 && !definition.ok === false,
+                definitionError: false,
+                readyCount,
+                total: ids.length,
+                missingIds,
+                errors: []
+            };
+        },
+
+        getEligibleOriginalIds(catalogue, context) {
+            const map = byId(catalogue);
+            const ids = [];
+            catalogueList(catalogue).forEach(card => {
+                if (!card || !isEligibleOriginalGrade(card.grade)) return;
+                if (card.battleOnly || card.specialBaseId || card.hide_from_gacha) return;
+                if (this.isCardAvailable(card, context) || isClassicBaseCard(card)) {
+                    if (isClassicBaseCard(card) || this.isCardAvailable(card, context)) ids.push(card.id);
+                }
+            });
+            const unique = uniquePreserve(ids);
+            return unique.filter(id => {
+                const card = map.get(id);
+                return card && this.isCardAvailable(card, context);
+            });
+        },
+
+        getExtraCandidates(set, catalogue, context) {
+            const base = new Set(this.getSetBaseCardIds(set, catalogue));
+            return this.getEligibleOriginalIds(catalogue, context).filter(id => !base.has(id));
+        },
+
+        analyzeExtraSelection(ids, baseIds, availableIds, options) {
+            const base = new Set(baseIds || []);
+            const available = new Set(availableIds || []);
+            const original = cloneIds(ids);
+            const unique = uniquePreserve(ids);
+            const duplicates = original.length - unique.length;
+            const inBase = unique.filter(id => base.has(id));
+            const unavailable = unique.filter(id => !base.has(id) && !available.has(id));
+            const kept = unique.filter(id => !base.has(id) && available.has(id));
+            const overLimit = kept.length > EXTRA_LIMIT;
+            const reviewRequired = overLimit || unavailable.length > 0 || (options && options.legacyOverLimit);
+            return {
+                original,
+                unique,
+                kept,
+                inBase,
+                unavailable,
+                duplicates,
+                overLimit,
+                reviewRequired,
+                count: kept.length,
+                limit: EXTRA_LIMIT
+            };
+        },
+
+        validateNewRunSelection(selection, context) {
+            const set = selection && this.getSet(selection.setId);
+            if (!set) {
+                return { ok: false, code: 'unknown_set', message: '알 수 없는 기본 세트입니다. 다른 세트를 선택해 주세요.' };
+            }
+            const definition = this.validateSetDefinition(set, context.catalogue);
+            if (!definition.ok) {
+                return { ok: false, code: 'definition_error', message: '이 세트 정의가 올바르지 않아 사용할 수 없습니다.' };
+            }
+            const availability = this.getSetAvailability(set, context);
+            if (availability.definitionError || !availability.available) {
+                return { ok: false, code: 'locked', message: '해금되지 않은 카드가 있어 이 세트로 새 런을 시작할 수 없습니다.', missingIds: availability.missingIds };
+            }
+            const extras = this.analyzeExtraSelection(
+                selection.extraCardIds,
+                this.getSetBaseCardIds(set, context.catalogue),
+                this.getEligibleOriginalIds(context.catalogue, context)
+            );
+            if (extras.overLimit) {
+                return { ok: false, code: 'over_limit', message: '추가 카드는 15장을 넘을 수 없습니다.', analysis: extras };
+            }
+            if (extras.unavailable.length || extras.inBase.length) {
+                return { ok: false, code: 'review', message: '추가 카드 선택을 검토해야 합니다.', analysis: extras };
+            }
+            return {
+                ok: true,
+                set,
+                baseCardIds: this.getSetBaseCardIds(set, context.catalogue),
+                extraCardIds: extras.kept,
+                analysis: extras
+            };
+        },
+
+        validateSavedRunSnapshot(snapshot, catalogue) {
+            if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+                return { ok: false, code: 'missing' };
+            }
+            if (snapshot.source === 'mode_owned') return { ok: true, snapshot };
+            const base = uniquePreserve(snapshot.baseCardIds);
+            const extra = uniquePreserve(snapshot.extraCardIds);
+            const map = byId(catalogue);
+            const missing = base.concat(extra).filter(id => !map.get(id));
+            if (missing.length) return { ok: false, code: 'unknown_id', missing };
+            if (base.length === 0) return { ok: false, code: 'empty_base' };
+            return { ok: true, snapshot: { ...snapshot, baseCardIds: base, extraCardIds: extra } };
+        },
+
+        resolveSnapshotCardPool(snapshot, options, catalogue) {
+            const map = byId(catalogue);
+            const special = options && options.specialById;
+            const ids = uniquePreserve([].concat(snapshot.baseCardIds || [], snapshot.extraCardIds || []));
+            return ids.map(id => {
+                const card = map.get(id);
+                if (!card) return null;
+                const selectedId = options && options.specialCardSelections && options.specialCardSelections[id];
+                if (selectedId && special && special.get) {
+                    const variant = special.get(selectedId);
+                    if (variant && variant.specialBaseId === id) return variant;
+                }
+                return card;
+            }).filter(Boolean);
+        },
+
+        createEmptyProfile() {
+            return emptyProfile();
+        },
+
+        createEmptyConfig() {
+            const profiles = {};
+            ALLOWED_SET_IDS.forEach(id => {
+                profiles[id] = emptyProfile();
+            });
+            return {
+                version: 1,
+                revision: 1,
+                selectedSetId: 'classic',
+                profiles
+            };
+        },
+
+        cloneProfile(profile) {
+            const source = profile || emptyProfile();
+            const presets = Array.isArray(source.presets) ? source.presets : [];
+            const cloned = [];
+            for (let i = 0; i < PRESET_COUNT; i += 1) {
+                const extra = presets[i] && Array.isArray(presets[i].extraCardIds)
+                    ? uniquePreserve(presets[i].extraCardIds)
+                    : [];
+                cloned.push({ extraCardIds: extra });
+            }
+            const index = Number.isInteger(source.activePresetIndex) ? source.activePresetIndex : 0;
+            return {
+                activePresetIndex: Math.min(PRESET_COUNT - 1, Math.max(0, index)),
+                presets: cloned,
+                reviewFlags: Array.isArray(source.reviewFlags) ? source.reviewFlags.slice() : []
+            };
+        },
+
+        cloneConfig(config) {
+            const next = this.createEmptyConfig();
+            if (!config || typeof config !== 'object') return next;
+            if (ALLOWED_SET_IDS.indexOf(config.selectedSetId) >= 0) next.selectedSetId = config.selectedSetId;
+            ALLOWED_SET_IDS.forEach(id => {
+                next.profiles[id] = this.cloneProfile(config.profiles && config.profiles[id]);
+            });
+            next.version = 1;
+            next.revision = Number.isInteger(config.revision) ? config.revision : 1;
+            return next;
+        },
+
+        migrateLegacyBonusPresets(legacyPresets, activeIndex, unlockedBonusIds) {
+            const config = this.createEmptyConfig();
+            const max = PRESET_COUNT;
+            const presets = Array.isArray(legacyPresets) ? legacyPresets.slice(0, max) : [];
+            while (presets.length < max) presets.push(null);
+            const migrated = [];
+            const origins = [];
+            presets.forEach(preset => {
+                if (!Array.isArray(preset)) {
+                    if (preset == null) {
+                        origins.push('null_or_missing');
+                        migrated.push({ extraCardIds: uniquePreserve(unlockedBonusIds), origin: 'null_or_missing', reviewRequired: false });
+                    } else {
+                        origins.push('invalid');
+                        migrated.push({ extraCardIds: [], origin: 'invalid', reviewRequired: true });
+                    }
+                    return;
+                }
+                const unique = uniquePreserve(preset);
+                origins.push(preset.length === 0 ? 'explicit_empty' : 'explicit_array');
+                migrated.push({
+                    extraCardIds: unique,
+                    origin: preset.length === 0 ? 'explicit_empty' : 'explicit_array',
+                    reviewRequired: unique.length > EXTRA_LIMIT
+                });
+            });
+            config.profiles.classic.presets = migrated.map(item => ({ extraCardIds: item.extraCardIds.slice() }));
+            config.profiles.classic.activePresetIndex = Math.min(max - 1, Math.max(0, Number.isInteger(activeIndex) ? activeIndex : 0));
+            config.profiles.classic.legacyOrigins = origins;
+            config.profiles.classic.reviewFlags = migrated.map(item => item.reviewRequired);
+            return config;
+        },
+
+        pickRandomExtras(candidates, count, shuffleFn) {
+            const pool = uniquePreserve(candidates);
+            const take = Math.min(EXTRA_LIMIT, Math.max(0, count == null ? EXTRA_LIMIT : count), pool.length);
+            const shuffled = typeof shuffleFn === 'function' ? shuffleFn(pool) : pool.slice();
+            return shuffled.slice(0, take);
+        },
+
+        copyExtras(sourceIds, targetBaseIds, availableIds) {
+            const analysis = this.analyzeExtraSelection(sourceIds, targetBaseIds, availableIds);
+            return {
+                extraCardIds: analysis.kept,
+                excludedInBase: analysis.inBase,
+                excludedUnavailable: analysis.unavailable,
+                previewCount: analysis.kept.length
+            };
+        }
+    };
+
+    CardPoolRules.getSetAvailability = function (set, context) {
+        const catalogue = context && context.catalogue || [];
+        const definition = this.validateSetDefinition(set, catalogue);
+        const ids = definition.ok ? this.getSetBaseCardIds(set, catalogue) : [];
+        if (!definition.ok) {
+            return {
+                available: false,
+                definitionError: true,
+                readyCount: 0,
+                total: set && set.resolver === 'existing_original_base_card_predicate' ? 0 : NEW_SET_SIZE,
+                missingIds: [],
+                errors: definition.errors
+            };
+        }
+        const map = byId(catalogue);
+        const missingIds = [];
+        let readyCount = 0;
+        ids.forEach(id => {
+            if (this.isCardAvailable(map.get(id), context)) readyCount += 1;
+            else missingIds.push(id);
+        });
+        return {
+            available: missingIds.length === 0,
+            definitionError: false,
+            readyCount,
+            total: ids.length,
+            missingIds,
+            errors: []
+        };
+    };
+
+    window.CardPoolRules = CardPoolRules;
+})();
+</script>
 <script>/**
  * @file battle_runtime.js
  * @module BattleRuntime
@@ -26132,7 +26836,8 @@ const BattleRuntime = {
         const changedSpecialData = this.ensureSpecialDataState();
         const changed = changedBonusCards || changedDivineArtifacts || changedTicketState || changedSpecialData;
         this.ensureBonusPoolPresetState();
-        if (changed) this.saveGlobalData();
+        const changedPool = this.ensureCardPoolConfigState();
+        if (changed || changedPool) this.saveGlobalData();
         return true;
     },
 
@@ -26937,15 +27642,309 @@ const BattleRuntime = {
         this.saveGlobalData();
     },
 
+    getCardPoolCatalogue() {
+        return GameUtils.getAllCards();
+    },
+
+    getCardPoolAvailabilityContext() {
+        const catalogue = this.getCardPoolCatalogue();
+        const unlocked = this.global.unlocked_bonus_cards || [];
+        const released = (this.getReleasedStandardBonusCards() || []).map(card => card.id);
+        const hidden = (this.getHiddenBonusCards() || []).map(card => card.id);
+        const defaults = GameUtils.getDefaultUnlockedBonusCardIds();
+        return {
+            catalogue,
+            unlockedBonusIds: unlocked,
+            releasedBonusIds: released,
+            hiddenBonusIds: hidden,
+            defaultUnlockedBonusIds: defaults
+        };
+    },
+
+    ensureCardPoolConfigState() {
+        const rules = typeof CardPoolRules !== 'undefined' ? CardPoolRules : null;
+        if (!rules) return false;
+        const existing = this.global.cardPoolConfig;
+        if (existing && existing.version === 1 && existing.profiles && typeof existing.profiles === 'object') {
+            const cloned = rules.cloneConfig(existing);
+            const before = JSON.stringify(existing);
+            this.global.cardPoolConfig = cloned;
+            return JSON.stringify(cloned) !== before;
+        }
+        const unlocked = this.getUnlockedBonusCards().map(card => card.id);
+        this.global.cardPoolConfig = rules.migrateLegacyBonusPresets(
+            this.global.bonusPoolPresets,
+            this.global.activeBonusPoolPresetIndex,
+            unlocked
+        );
+        return true;
+    },
+
+    getSelectedCardPoolProfile() {
+        this.ensureCardPoolConfigState();
+        const config = this.global.cardPoolConfig;
+        return config.profiles[config.selectedSetId] || CardPoolRules.createEmptyProfile();
+    },
+
+    createRunCardPoolSnapshot(selection) {
+        const context = this.getCardPoolAvailabilityContext();
+        const validated = CardPoolRules.validateNewRunSelection(selection, context);
+        if (!validated.ok) return validated;
+        return {
+            ok: true,
+            snapshot: {
+                schemaVersion: 1,
+                source: 'basic_set',
+                setId: selection.setId,
+                setRevision: validated.set.revision,
+                presetIndex: selection.presetIndex || 0,
+                baseCardIds: validated.baseCardIds.slice(),
+                extraCardIds: validated.extraCardIds.slice(),
+                migratedFromLegacy: false
+            }
+        };
+    },
+
+    getRunCardPoolBuildOptions(extra = {}) {
+        const mode = this.state.mode;
+        const special = this.state.activeSpecialCardSelections;
+        if (GameUtils.usesLimitedCardPool(mode)) {
+            return Object.assign({
+                limitedPoolMode: true,
+                factoryPool: this.state.factoryPool,
+                specialCardSelections: special
+            }, extra);
+        }
+        const snap = this.state.runCardPool;
+        if (snap && snap.source === 'basic_set' && Array.isArray(snap.baseCardIds)) {
+            return Object.assign({
+                baseCardIds: snap.baseCardIds,
+                extraCardIds: snap.extraCardIds || [],
+                specialCardSelections: special,
+                activeEventCards: this.state.activeEventCards
+            }, extra);
+        }
+        return Object.assign({
+            activeBonusPoolIds: this.state.activeBonusPoolIds,
+            specialCardSelections: special,
+            activeEventCards: this.state.activeEventCards
+        }, extra);
+    },
+
+    openCardPoolEditor(tab) {
+        this.ensureCardPoolConfigState();
+        this._cardPoolEditorDraft = CardPoolRules.cloneConfig(this.global.cardPoolConfig);
+        this._cardPoolEditorTab = tab === 'sets' ? 'sets' : 'extras';
+        this._cardPoolEditorFilter = tab === 'sets' ? 'locked' : 'all';
+        this._cardPoolEditorSearch = '';
+        this._cardPoolEditorDetailSetId = null;
+        this._cardPoolEditorBusy = false;
+        const root = document.getElementById('modal-bonus-pool-editor');
+        if (root && typeof CardPoolView !== 'undefined') {
+            CardPoolView.bindChrome(root, {
+                onTab: next => { this._cardPoolEditorTab = next; this.renderCardPoolEditor(); },
+                onCancel: () => this.closeCardPoolEditor(true),
+                onClose: () => this.closeCardPoolEditor(true),
+                onSave: () => this.commitCardPoolEditorDraft()
+            });
+        }
+        this.renderCardPoolEditor();
+        if (root) root.classList.add('active');
+        this.renderBonusPoolPresetButtons();
+    },
+
+    closeCardPoolEditor(confirmIfDirty) {
+        const root = document.getElementById('modal-bonus-pool-editor');
+        const dirty = JSON.stringify(this._cardPoolEditorDraft) !== JSON.stringify(this.global.cardPoolConfig);
+        if (confirmIfDirty && dirty) {
+            this.showConfirm('저장하지 않은 변경을 버릴까요?', () => {
+                this._cardPoolEditorDraft = null;
+                if (root) root.classList.remove('active');
+            });
+            return;
+        }
+        this._cardPoolEditorDraft = null;
+        if (root) root.classList.remove('active');
+        this.updateBonusPoolEditorButton();
+    },
+
+    commitCardPoolEditorDraft() {
+        if (this._cardPoolEditorBusy) return false;
+        this._cardPoolEditorBusy = true;
+        const draft = this._cardPoolEditorDraft;
+        const context = this.getCardPoolAvailabilityContext();
+        const set = CardPoolRules.getSet(draft.selectedSetId);
+        const profile = draft.profiles[draft.selectedSetId];
+        const extras = profile.presets[profile.activePresetIndex].extraCardIds;
+        const validated = CardPoolRules.validateNewRunSelection({ setId: draft.selectedSetId, extraCardIds: extras }, context);
+        if (!validated.ok) {
+            this._cardPoolEditorBusy = false;
+            this.showAlert(validated.message);
+            return false;
+        }
+        const latest = Storage.loadDetailed(Storage.keys.GLOBAL);
+        if (latest.ok && latest.data && this.global._storageStamp && latest.data._storageStamp && latest.data._storageStamp !== this.global._storageStamp) {
+            this._cardPoolEditorBusy = false;
+            this.showAlert('다른 탭에서 저장 데이터가 바뀌었습니다. 덮어쓰지 않고 다시 확인하세요.');
+            return false;
+        }
+        if (latest.ok && latest.data) {
+            this.global = { ...this.global, ...latest.data };
+        }
+        this.global.cardPoolConfig = CardPoolRules.cloneConfig(draft);
+        this.global.cardPoolConfig.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = validated.extraCardIds.slice();
+        this.pendingActiveBonusPoolIds = validated.extraCardIds.slice();
+        const ok = this.saveGlobalData();
+        this._cardPoolEditorBusy = false;
+        if (!ok) {
+            this.showAlert('저장에 실패했습니다. 편집안을 유지합니다.');
+            return false;
+        }
+        this.showAlert('다음 런 설정을 저장했습니다.');
+        this.renderCardPoolEditor();
+        this.updateBonusPoolEditorButton();
+        return true;
+    },
+
+    renderCardPoolEditor() {
+        const root = document.getElementById('modal-bonus-pool-editor');
+        if (!root || !this._cardPoolEditorDraft || typeof CardPoolView === 'undefined') return;
+        const draft = this._cardPoolEditorDraft;
+        const context = this.getCardPoolAvailabilityContext();
+        const set = CardPoolRules.getSet(draft.selectedSetId);
+        const profile = draft.profiles[draft.selectedSetId];
+        const extras = profile.presets[profile.activePresetIndex].extraCardIds || [];
+        const baseIds = CardPoolRules.getSetBaseCardIds(set, context.catalogue);
+        const names = DISPLAY_NAMES;
+        const setModels = CardPoolRules.getSets().map(item => {
+            const availability = CardPoolRules.getSetAvailability(item, context);
+            const status = item.id === draft.selectedSetId
+                ? '선택 예정'
+                : (this.global.cardPoolConfig.selectedSetId === item.id ? '현재 사용' : (availability.available ? '사용 가능' : '미해금 ' + availability.missingIds.length + '장'));
+            const composition = item.resolver === 'existing_original_base_card_predicate'
+                ? '기존 기본덱 ' + baseIds.length + '장'
+                : '일반 10 · 레어 10 · 에픽 10 · 전설 10';
+            return {
+                id: item.id,
+                name: item.name,
+                trial: !!item.trial,
+                mainAxis: item.mainAxis,
+                subAxes: item.subAxes || [],
+                compositionText: item.id === 'classic' ? ('기존 기본덱 ' + CardPoolRules.getClassicBaseCardIds(context.catalogue).length + '장') : composition,
+                statusText: status,
+                canUse: availability.available && !availability.definitionError
+            };
+        });
+        const extraCandidates = CardPoolRules.getExtraCandidates(set, context.catalogue, context);
+        const map = new Map(context.catalogue.map(card => [card.id, card]));
+        const extraCards = extraCandidates.concat(this._cardPoolEditorFilter === 'base' ? baseIds : []).map(id => {
+            const card = map.get(id);
+            if (!card) return null;
+            const selected = extras.indexOf(id) >= 0;
+            const inBase = baseIds.indexOf(id) >= 0;
+            if (this._cardPoolEditorFilter === 'selected' && !selected) return null;
+            if (this._cardPoolEditorSearch && card.name.indexOf(this._cardPoolEditorSearch) < 0) return null;
+            return {
+                id,
+                name: card.name,
+                data: card,
+                metaText: [names.grade[card.grade] || card.grade, names.element[card.element] || card.element, names.role[card.role] || card.role].join(' · '),
+                statusText: inBase ? '기본 포함' : (selected ? '추가 선택' : '후보'),
+                selected,
+                inBase,
+                canToggle: !inBase && (selected || extras.length < 15)
+            };
+        }).filter(Boolean);
+        const usable = setModels.filter(item => item.trial && item.canUse).length;
+        const model = {
+            tab: this._cardPoolEditorTab,
+            summaryText: set.name + ' · 기본 ' + baseIds.length + '장 + 추가 ' + extras.length + '/15장',
+            sets: setModels,
+            extraCards,
+            search: this._cardPoolEditorSearch,
+            detailSet: this._cardPoolEditorDetailSetId ? CardPoolRules.getSet(this._cardPoolEditorDetailSetId) : null,
+            detailCards: []
+        };
+        if (model.detailSet) {
+            const detailIds = CardPoolRules.getSetBaseCardIds(model.detailSet, context.catalogue);
+            const filter = this._cardPoolEditorFilter;
+            model.detailCards = detailIds.map(id => {
+                const card = map.get(id);
+                if (!card) return null;
+                const info = CardPoolRules.inspectCardAvailability(card, context);
+                if (filter === 'locked' && info.status !== 'locked' && info.status !== 'unreleased' && info.status !== 'unknown') return null;
+                if (['normal', 'rare', 'epic', 'legend'].indexOf(filter) >= 0 && card.grade !== filter) return null;
+                return {
+                    id,
+                    name: card.name,
+                    data: card,
+                    metaText: [names.grade[card.grade] || card.grade, names.element[card.element] || card.element, names.role[card.role] || card.role].join(' · '),
+                    statusText: info.label + (info.path ? ' · ' + info.path : ''),
+                    inBase: true
+                };
+            }).filter(Boolean);
+        }
+        const sub = document.getElementById('btn-card-set-editor-sub');
+        if (sub) sub.textContent = '시험 기능 · 선택 가능 ' + usable + '/5';
+        CardPoolView.render(root, model, {
+            onSelectSet: id => {
+                const availability = CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context);
+                if (!availability.available) return;
+                this._cardPoolEditorDraft.selectedSetId = id;
+                this.renderCardPoolEditor();
+            },
+            onOpenSetDetail: id => {
+                this._cardPoolEditorDetailSetId = id;
+                const locked = !CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context).available;
+                this._cardPoolEditorFilter = locked ? 'locked' : 'all';
+                this.renderCardPoolEditor();
+            },
+            onSetFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
+            onSearch: value => { this._cardPoolEditorSearch = value; this.renderCardPoolEditor(); },
+            onExtraFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
+            onToggleExtra: id => {
+                const list = this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds;
+                const idx = list.indexOf(id);
+                if (idx >= 0) list.splice(idx, 1);
+                else if (list.length < 15) list.push(id);
+                this.renderCardPoolEditor();
+            },
+            onClearExtras: () => {
+                this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = [];
+                this.renderCardPoolEditor();
+            },
+            onRandomExtras: () => {
+                const candidates = CardPoolRules.getExtraCandidates(set, context.catalogue, context);
+                this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds =
+                    CardPoolRules.pickRandomExtras(candidates, 15, list => GameUtils.shuffle(list));
+                this.renderCardPoolEditor();
+            },
+            onCardDetail: id => this.showCardInfo(id)
+        });
+        this.renderBonusPoolPresetButtons();
+    },
+
+
+
 
     selectBonusPoolPreset(index) {
+        this.ensureCardPoolConfigState();
+        if (this._cardPoolEditorDraft) {
+            const profile = this._cardPoolEditorDraft.profiles[this._cardPoolEditorDraft.selectedSetId];
+            if (index < 0 || index >= 3) return;
+            profile.activePresetIndex = index;
+            this.renderCardPoolEditor();
+            return;
+        }
         this.ensureBonusPoolPresetState();
         if (index < 0 || index >= this.global.bonusPoolPresets.length) return;
-
         this.global.activeBonusPoolPresetIndex = index;
+        const config = this.global.cardPoolConfig;
+        if (config && config.profiles[config.selectedSetId]) {
+            config.profiles[config.selectedSetId].activePresetIndex = index;
+        }
         this.syncPendingActiveBonusPoolIds();
         this.saveGlobalData();
-        this.renderBonusPoolEditor();
         this.updateBonusPoolEditorButton();
     },
 
@@ -27063,13 +28062,10 @@ const BattleRuntime = {
 
 
     buildChaosRunCardPool() {
-        return GameUtils.buildCardPool(this.global, {
+        return GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             includeTranscendence: true,
-            activeTranscendenceCards: this.state.activeTranscendenceCards,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
-            activeEventCards: this.state.activeEventCards
-        });
+            activeTranscendenceCards: this.state.activeTranscendenceCards
+        }));
     },
 
 
@@ -27270,6 +28266,35 @@ const BattleRuntime = {
 
 
     initNewGame(mode = 'origin') {
+        this.ensureCardPoolConfigState();
+        let runCardPool;
+        if (GameUtils.usesLimitedCardPool(mode)) {
+            runCardPool = {
+                schemaVersion: 1,
+                source: 'mode_owned',
+                setId: null,
+                setRevision: 1,
+                presetIndex: 0,
+                baseCardIds: [],
+                extraCardIds: [],
+                migratedFromLegacy: false
+            };
+        } else {
+            const config = this.global.cardPoolConfig;
+            const profile = config.profiles[config.selectedSetId];
+            const extras = profile.presets[profile.activePresetIndex].extraCardIds;
+            const created = this.createRunCardPoolSnapshot({
+                setId: config.selectedSetId,
+                extraCardIds: extras,
+                presetIndex: profile.activePresetIndex
+            });
+            if (!created.ok) {
+                this.showAlert(created.message || '기본 세트 설정을 확인한 뒤 새 런을 시작해 주세요.');
+                return false;
+            }
+            runCardPool = created.snapshot;
+        }
+
         // Origin records are closed when the next run begins; other modes close on defeat.
         if (['origin', 'perfect_plan'].includes(this.state.mode) && this.state.enemyScale > 0) {
             this.saveRecord();
@@ -27290,7 +28315,8 @@ const BattleRuntime = {
             chaosBuffs: [],
             activeChaosBlessing: [],
             activeSageBlessing: [],
-            activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds),
+            activeBonusPoolIds: runCardPool.extraCardIds ? runCardPool.extraCardIds.slice() : this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds),
+            runCardPool,
             activeSpecialCardSelections: this.getActiveSpecialCardSelections('global'),
             tutoredItems: [],
             wrongWords: [],
@@ -27487,14 +28513,11 @@ const BattleRuntime = {
         this.state.chaosBlessingUses--;
 
         // 1. Build Pool
-        let pool = GameUtils.buildCardPool(this.global, {
+        let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             excludeTranscendence: true,
             excludeEvent: true,
-            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
-        });
+        }));
 
         // 2. Shuffle and Pick (Fisher-Yates: uniform)
         let picks = this.pickUniqueRandomCards(pool, count);
@@ -27566,15 +28589,10 @@ const BattleRuntime = {
 
 
     generateDraftOptions() {
-        let pool = GameUtils.buildCardPool(this.global, {
+        let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             includeTranscendence: true,
-            activeTranscendenceCards: this.state.activeTranscendenceCards,
-            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
-            // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함
-            activeEventCards: this.state.activeEventCards
-        });
+            activeTranscendenceCards: this.state.activeTranscendenceCards
+        }));
 
         const options = this.drawRunPoolCards(pool, 4, { allowDuplicates: true }).map(card => card.id);
         this.state.draft.currentOptions = options;
@@ -28099,6 +29117,160 @@ const BattleRuntime = {
             Object.assign(rpg, RPGFeatureMethods);
         }
     };
+})();
+</script>
+<script>(function () {
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text != null) node.textContent = text;
+        return node;
+    }
+
+    function bindOnce(root, key, type, handler) {
+        if (!root) return;
+        const store = root._cardPoolHandlers || (root._cardPoolHandlers = {});
+        if (store[key]) root.removeEventListener(type, store[key]);
+        store[key] = handler;
+        root.addEventListener(type, handler);
+    }
+
+    const CardPoolView = {
+        render(root, model, actions) {
+            if (!root || !model) return;
+            const title = root.querySelector('#card-pool-editor-title');
+            const summary = root.querySelector('#card-pool-editor-summary');
+            const body = root.querySelector('#card-pool-editor-body');
+            const setsTab = root.querySelector('#card-pool-tab-sets');
+            const extrasTab = root.querySelector('#card-pool-tab-extras');
+            if (title) title.textContent = '획득 카드풀 편집';
+            if (summary) summary.textContent = model.summaryText || '';
+            if (setsTab) {
+                setsTab.setAttribute('aria-selected', model.tab === 'sets' ? 'true' : 'false');
+            }
+            if (extrasTab) {
+                extrasTab.setAttribute('aria-selected', model.tab === 'extras' ? 'true' : 'false');
+            }
+            if (!body) return;
+            body.replaceChildren();
+            if (model.tab === 'sets') this.renderSets(body, model, actions);
+            else this.renderExtras(body, model, actions);
+        },
+
+        renderSets(body, model, actions) {
+            (model.sets || []).forEach(set => {
+                const row = el('div', 'card-pool-set-row');
+                row.appendChild(el('div', 'card-pool-set-name', set.name + (set.trial ? ' · 시험 기능' : '')));
+                row.appendChild(el('div', 'card-pool-set-axis', [set.mainAxis].concat(set.subAxes || []).join(' · ')));
+                row.appendChild(el('div', 'card-pool-card-meta', set.compositionText));
+                row.appendChild(el('div', 'card-pool-card-status', set.statusText));
+                const actionsRow = el('div', 'card-pool-actions');
+                const detail = el('button', 'card-pool-row-action', '구성·해금 조건');
+                detail.type = 'button';
+                detail.addEventListener('click', () => actions.onOpenSetDetail(set.id));
+                actionsRow.appendChild(detail);
+                const use = el('button', 'card-pool-row-action', set.canUse ? '이 세트 사용' : '선택 불가');
+                use.type = 'button';
+                use.disabled = !set.canUse;
+                if (set.canUse) use.addEventListener('click', () => actions.onSelectSet(set.id));
+                actionsRow.appendChild(use);
+                row.appendChild(actionsRow);
+                body.appendChild(row);
+            });
+            if (model.detailSet) this.renderSetDetail(body, model, actions);
+        },
+
+        renderSetDetail(body, model, actions) {
+            const wrap = el('div', 'card-pool-set-detail');
+            const filters = el('div', 'card-pool-filter');
+            ['all', 'locked', 'normal', 'rare', 'epic', 'legend'].forEach(key => {
+                const labels = { all: '전체', locked: '미해금만', normal: '일반', rare: '레어', epic: '에픽', legend: '전설' };
+                const btn = el('button', '', labels[key]);
+                btn.type = 'button';
+                btn.addEventListener('click', () => actions.onSetFilter(key));
+                filters.appendChild(btn);
+            });
+            wrap.appendChild(filters);
+            (model.detailCards || []).forEach(card => {
+                wrap.appendChild(this.cardRow(card, {
+                    onDetail: () => actions.onCardDetail(card.id)
+                }));
+            });
+            body.appendChild(wrap);
+        },
+
+        renderExtras(body, model, actions) {
+            const search = el('input', 'card-pool-search');
+            search.type = 'search';
+            search.placeholder = '카드 검색';
+            search.value = model.search || '';
+            search.addEventListener('input', () => actions.onSearch(search.value));
+            body.appendChild(search);
+            const filters = el('div', 'card-pool-filter');
+            [{ id: 'all', label: '전체 후보' }, { id: 'selected', label: '선택됨' }, { id: 'base', label: '기본 포함 카드 보기' }].forEach(item => {
+                const btn = el('button', '', item.label);
+                btn.type = 'button';
+                btn.addEventListener('click', () => actions.onExtraFilter(item.id));
+                filters.appendChild(btn);
+            });
+            body.appendChild(filters);
+            const tools = el('div', 'card-pool-actions');
+            const clear = el('button', 'card-pool-row-action', '선택 비우기');
+            clear.type = 'button';
+            clear.addEventListener('click', () => actions.onClearExtras());
+            const random = el('button', 'card-pool-row-action', '랜덤 15장');
+            random.type = 'button';
+            random.addEventListener('click', () => actions.onRandomExtras());
+            tools.appendChild(clear);
+            tools.appendChild(random);
+            body.appendChild(tools);
+            const grid = el('div', 'card-pool-extra-grid');
+            (model.extraCards || []).forEach(card => {
+                grid.appendChild(this.cardRow(card, {
+                    onDetail: () => actions.onCardDetail(card.id),
+                    onToggle: card.canToggle ? () => actions.onToggleExtra(card.id) : null,
+                    selected: card.selected
+                }));
+            });
+            body.appendChild(grid);
+        },
+
+        cardRow(card, options) {
+            const row = el('div', 'card-pool-card-row' + (options.selected ? ' is-selected' : '') + (card.inBase ? ' is-base' : ''));
+            if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
+                row.appendChild(ImageAssets.createPortrait(card.data || { name: card.name, id: card.id }));
+            } else {
+                row.appendChild(el('div', 'portrait'));
+            }
+            const text = el('div', 'card-pool-card-text');
+            const nameBtn = el('button', 'card-pool-card-name', card.name);
+            nameBtn.type = 'button';
+            nameBtn.addEventListener('click', options.onDetail);
+            text.appendChild(nameBtn);
+            text.appendChild(el('div', 'card-pool-card-meta', card.metaText));
+            text.appendChild(el('div', 'card-pool-card-status', card.statusText));
+            if (options.onToggle) {
+                const toggle = el('button', 'card-pool-row-action', card.selected ? '제외' : '추가');
+                toggle.type = 'button';
+                toggle.addEventListener('click', options.onToggle);
+                text.appendChild(toggle);
+            } else if (card.inBase) {
+                text.appendChild(el('div', 'card-pool-card-status', '기본 포함 · 추가 슬롯 미사용'));
+            }
+            row.appendChild(text);
+            return row;
+        },
+
+        bindChrome(root, actions) {
+            bindOnce(root.querySelector('#card-pool-tab-sets'), 'sets', 'click', () => actions.onTab('sets'));
+            bindOnce(root.querySelector('#card-pool-tab-extras'), 'extras', 'click', () => actions.onTab('extras'));
+            bindOnce(root.querySelector('#card-pool-editor-cancel'), 'cancel', 'click', () => actions.onCancel());
+            bindOnce(root.querySelector('#card-pool-editor-save'), 'save', 'click', () => actions.onSave());
+            bindOnce(root.querySelector('#card-pool-editor-close'), 'close', 'click', () => actions.onClose());
+        }
+    };
+
+    window.CardPoolView = CardPoolView;
 })();
 </script>
 <script>const LISTENING_DATA = [
@@ -30528,41 +31700,45 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
             renderBonusPoolPresetButtons() {
                 const container = document.getElementById('bonus-pool-preset-list');
                 if (!container) return;
-
-                this.ensureBonusPoolPresetState();
-                const activeIndex = this.getActiveBonusPoolPresetIndex();
-                const total = this.getUnlockedBonusCards().length;
+                this.ensureCardPoolConfigState();
+                const draft = this._cardPoolEditorDraft || this.global.cardPoolConfig;
+                const profile = draft.profiles[draft.selectedSetId];
+                const activeIndex = profile.activePresetIndex;
                 container.innerHTML = '';
-
-                this.global.bonusPoolPresets.forEach((preset, index) => {
+                profile.presets.forEach((preset, index) => {
                     const btn = document.createElement('button');
-                    const activeCount = this.getBonusPoolPresetIds(index).length;
+                    const activeCount = (preset.extraCardIds || []).length;
                     btn.type = 'button';
                     btn.className = `bonus-preset-btn${index === activeIndex ? ' is-active' : ''}`;
-                    btn.innerHTML = `세팅 ${index + 1}<span>${activeCount}/${total}</span>`;
+                    btn.textContent = `세팅 ${index + 1}`;
+                    const span = document.createElement('span');
+                    span.textContent = `${activeCount}/15`;
+                    btn.appendChild(span);
                     btn.onclick = () => this.selectBonusPoolPreset(index);
                     container.appendChild(btn);
                 });
             },
 
             closeBonusPoolEditor() {
-                document.getElementById('modal-bonus-pool-editor').classList.remove('active');
-                this.updateBonusPoolEditorButton();
+                this.closeCardPoolEditor(false);
             },
 
             updateBonusPoolEditorButton() {
                 const btn = document.getElementById('btn-bonus-pool-editor');
                 if (!btn) return;
-
-                this.ensureBonusPoolPresetState();
-                const total = this.getUnlockedBonusCards().length;
-                const active = this.getBonusPoolPresetIds().length;
-                const presetNo = this.getActiveBonusPoolPresetIndex() + 1;
-                const subText = total > 0
-                    ? `세팅 ${presetNo} 적용중 · 활성 ${active}/${total}`
-                    : '해금된 보너스 카드가 없습니다';
-
-                btn.innerHTML = `덱 편집<br><span style="font-size:0.8rem; color:#b3e5fc;">${subText}</span>`;
+                this.ensureCardPoolConfigState();
+                const config = this.global.cardPoolConfig;
+                const set = CardPoolRules.getSet(config.selectedSetId);
+                const profile = config.profiles[config.selectedSetId];
+                const extras = profile.presets[profile.activePresetIndex].extraCardIds.length;
+                const baseCount = CardPoolRules.getSetBaseCardIds(set, this.getCardPoolCatalogue()).length;
+                btn.innerHTML = `덱 편집<br><span id="btn-bonus-pool-editor-sub" style="font-size:0.8rem; color:#b3e5fc;">${set.name} · 추가 ${extras}/15</span>`;
+                const setBtn = document.getElementById('btn-card-set-editor-sub');
+                if (setBtn) {
+                    const context = this.getCardPoolAvailabilityContext();
+                    const usable = CardPoolRules.getSets().filter(item => item.trial && CardPoolRules.getSetAvailability(item, context).available).length;
+                    setBtn.textContent = `시험 기능 · 선택 가능 ${usable}/5`;
+                }
             },
 
             updateSpecialCardEditorButton() {
@@ -30703,9 +31879,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
             },
 
             openBonusPoolEditor() {
-                this.syncPendingActiveBonusPoolIds();
-                this.renderBonusPoolEditor();
-                document.getElementById('modal-bonus-pool-editor').classList.add('active');
+                this.openCardPoolEditor('extras');
             },
 
             renderBonusPoolEditor() {
@@ -30824,7 +31998,9 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     { name: 'RPGFeatureModules', ref: typeof RPGFeatureModules !== 'undefined' ? RPGFeatureModules : null },
                     { name: 'LISTENING_DATA', ref: typeof LISTENING_DATA !== 'undefined' ? LISTENING_DATA : null },
                     { name: 'FortuneCookie', ref: typeof FortuneCookie !== 'undefined' ? FortuneCookie : null },
-                    { name: 'MusicPlayer', ref: typeof MusicPlayer !== 'undefined' ? MusicPlayer : null }
+                    { name: 'MusicPlayer', ref: typeof MusicPlayer !== 'undefined' ? MusicPlayer : null },
+                    { name: 'CardPoolRules', ref: typeof CardPoolRules !== 'undefined' ? CardPoolRules : null },
+                    { name: 'CardPoolView', ref: typeof CardPoolView !== 'undefined' ? CardPoolView : null }
                 ];
                 return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
             },
@@ -31120,7 +32296,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                         `${mName} 모드로 시작하시겠습니까?`,
                         `정말 시작하시겠습니까?<br>현재 진행 중인 엔드리스 게임 데이터는 초기화됩니다.<br>(게임 시작 시 자동 저장됩니다)`,
                         () => {
-                            this.initNewGame(this.selectedModeId);
+                            if (this.initNewGame(this.selectedModeId) === false) return;
                             modal.classList.remove('active');
                             if (!['factory', 'artifact_reserve', 'perfect_plan'].includes(this.selectedModeId)) {
                                 this.toMenu();
@@ -31279,12 +32455,8 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 const mode = this.state.mode;
                 let pool;
 
-                if (GameUtils.usesLimitedCardPool(mode) && this.state.factoryPool && this.state.factoryPool.length > 0) {
-                    // 팩토리/퍼펙트플랜: 드래프트된 40장 한정
-                    pool = GameUtils.buildCardPool(this.global, {
-                        factoryPool: this.state.factoryPool,
-                        specialCardSelections: this.state.activeSpecialCardSelections
-                    });
+                if (GameUtils.usesLimitedCardPool(mode)) {
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions());
                 } else if (['chaos', 'artifact_chaos'].includes(mode)) {
                     // 카오스: state.chaosPool (초월 포함 가능)
                     const ids = this.state.chaosPool || [];
@@ -31292,14 +32464,11 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 } else {
                     // 통상/드래프트/아티팩트 등
                     const includeT = (mode === 'draft');
-                    pool = GameUtils.buildCardPool(this.global, {
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
                         includeTranscendence: includeT,
                         activeTranscendenceCards: includeT ? this.state.activeTranscendenceCards : [],
-                        activeBonusPoolIds: this.state.activeBonusPoolIds,
-                        specialCardSelections: this.state.activeSpecialCardSelections,
-                        activeEventCards: this.state.activeEventCards,
                         maxGrade: GameUtils.getMaxGradeForMode(mode)
-                    });
+                    }));
                 }
 
                 // 등급 내림차순 정렬 (transcendence → legend → epic → rare → event → normal)
@@ -31485,14 +32654,11 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 }
 
                 // Apply to 12 random cards
-                let pool = GameUtils.buildCardPool(this.global, {
+                let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
                     excludeTranscendence: true,
                     excludeEvent: true,
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
-                });
+                }));
 
                 let picks = this.pickUniqueRandomCards(pool, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
 
@@ -31615,11 +32781,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
             drawPuzzlePieceCards(useChallengeRates) {
                 const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
                 const count = puzzleConfig.PIECE_COUNT || 36;
-                const pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections
-                });
+                const pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions());
                 if (pool.length === 0) return [];
 
                 const picks = [];
@@ -31697,11 +32859,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 let grade = GameUtils.resolveGachaGrade(mode, isChallenge);
 
                 // Build Pool
-                let pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections
-                }).filter(card => card.grade === grade);
+                let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions()).filter(card => card.grade === grade);
 
 
                 if (pool.length === 0) {
@@ -31710,11 +32868,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                     // If somehow empty, fallback to normal
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
-                    pool = GameUtils.buildCardPool(this.global, {
-                        factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                        activeBonusPoolIds: this.state.activeBonusPoolIds,
-                        specialCardSelections: this.state.activeSpecialCardSelections
-                    }).filter(card => card.grade === 'normal');
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions()).filter(card => card.grade === 'normal');
                 }
 
                 const pick = pool[Math.floor(Math.random() * pool.length)];
