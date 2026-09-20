@@ -158,7 +158,8 @@
         const changedSpecialData = this.ensureSpecialDataState();
         const changed = changedBonusCards || changedDivineArtifacts || changedTicketState || changedSpecialData;
         this.ensureBonusPoolPresetState();
-        if (changed) this.saveGlobalData();
+        const changedPool = this.ensureCardPoolConfigState();
+        if (changed || changedPool) this.saveGlobalData();
         return true;
     },
 
@@ -963,15 +964,309 @@
         this.saveGlobalData();
     },
 
+    getCardPoolCatalogue() {
+        return GameUtils.getAllCards();
+    },
+
+    getCardPoolAvailabilityContext() {
+        const catalogue = this.getCardPoolCatalogue();
+        const unlocked = this.global.unlocked_bonus_cards || [];
+        const released = (this.getReleasedStandardBonusCards() || []).map(card => card.id);
+        const hidden = (this.getHiddenBonusCards() || []).map(card => card.id);
+        const defaults = GameUtils.getDefaultUnlockedBonusCardIds();
+        return {
+            catalogue,
+            unlockedBonusIds: unlocked,
+            releasedBonusIds: released,
+            hiddenBonusIds: hidden,
+            defaultUnlockedBonusIds: defaults
+        };
+    },
+
+    ensureCardPoolConfigState() {
+        const rules = typeof CardPoolRules !== 'undefined' ? CardPoolRules : null;
+        if (!rules) return false;
+        const existing = this.global.cardPoolConfig;
+        if (existing && existing.version === 1 && existing.profiles && typeof existing.profiles === 'object') {
+            const cloned = rules.cloneConfig(existing);
+            const before = JSON.stringify(existing);
+            this.global.cardPoolConfig = cloned;
+            return JSON.stringify(cloned) !== before;
+        }
+        const unlocked = this.getUnlockedBonusCards().map(card => card.id);
+        this.global.cardPoolConfig = rules.migrateLegacyBonusPresets(
+            this.global.bonusPoolPresets,
+            this.global.activeBonusPoolPresetIndex,
+            unlocked
+        );
+        return true;
+    },
+
+    getSelectedCardPoolProfile() {
+        this.ensureCardPoolConfigState();
+        const config = this.global.cardPoolConfig;
+        return config.profiles[config.selectedSetId] || CardPoolRules.createEmptyProfile();
+    },
+
+    createRunCardPoolSnapshot(selection) {
+        const context = this.getCardPoolAvailabilityContext();
+        const validated = CardPoolRules.validateNewRunSelection(selection, context);
+        if (!validated.ok) return validated;
+        return {
+            ok: true,
+            snapshot: {
+                schemaVersion: 1,
+                source: 'basic_set',
+                setId: selection.setId,
+                setRevision: validated.set.revision,
+                presetIndex: selection.presetIndex || 0,
+                baseCardIds: validated.baseCardIds.slice(),
+                extraCardIds: validated.extraCardIds.slice(),
+                migratedFromLegacy: false
+            }
+        };
+    },
+
+    getRunCardPoolBuildOptions(extra = {}) {
+        const mode = this.state.mode;
+        const special = this.state.activeSpecialCardSelections;
+        if (GameUtils.usesLimitedCardPool(mode)) {
+            return Object.assign({
+                limitedPoolMode: true,
+                factoryPool: this.state.factoryPool,
+                specialCardSelections: special
+            }, extra);
+        }
+        const snap = this.state.runCardPool;
+        if (snap && snap.source === 'basic_set' && Array.isArray(snap.baseCardIds)) {
+            return Object.assign({
+                baseCardIds: snap.baseCardIds,
+                extraCardIds: snap.extraCardIds || [],
+                specialCardSelections: special,
+                activeEventCards: this.state.activeEventCards
+            }, extra);
+        }
+        return Object.assign({
+            activeBonusPoolIds: this.state.activeBonusPoolIds,
+            specialCardSelections: special,
+            activeEventCards: this.state.activeEventCards
+        }, extra);
+    },
+
+    openCardPoolEditor(tab) {
+        this.ensureCardPoolConfigState();
+        this._cardPoolEditorDraft = CardPoolRules.cloneConfig(this.global.cardPoolConfig);
+        this._cardPoolEditorTab = tab === 'sets' ? 'sets' : 'extras';
+        this._cardPoolEditorFilter = tab === 'sets' ? 'locked' : 'all';
+        this._cardPoolEditorSearch = '';
+        this._cardPoolEditorDetailSetId = null;
+        this._cardPoolEditorBusy = false;
+        const root = document.getElementById('modal-bonus-pool-editor');
+        if (root && typeof CardPoolView !== 'undefined') {
+            CardPoolView.bindChrome(root, {
+                onTab: next => { this._cardPoolEditorTab = next; this.renderCardPoolEditor(); },
+                onCancel: () => this.closeCardPoolEditor(true),
+                onClose: () => this.closeCardPoolEditor(true),
+                onSave: () => this.commitCardPoolEditorDraft()
+            });
+        }
+        this.renderCardPoolEditor();
+        if (root) root.classList.add('active');
+        this.renderBonusPoolPresetButtons();
+    },
+
+    closeCardPoolEditor(confirmIfDirty) {
+        const root = document.getElementById('modal-bonus-pool-editor');
+        const dirty = JSON.stringify(this._cardPoolEditorDraft) !== JSON.stringify(this.global.cardPoolConfig);
+        if (confirmIfDirty && dirty) {
+            this.showConfirm('저장하지 않은 변경을 버릴까요?', () => {
+                this._cardPoolEditorDraft = null;
+                if (root) root.classList.remove('active');
+            });
+            return;
+        }
+        this._cardPoolEditorDraft = null;
+        if (root) root.classList.remove('active');
+        this.updateBonusPoolEditorButton();
+    },
+
+    commitCardPoolEditorDraft() {
+        if (this._cardPoolEditorBusy) return false;
+        this._cardPoolEditorBusy = true;
+        const draft = this._cardPoolEditorDraft;
+        const context = this.getCardPoolAvailabilityContext();
+        const set = CardPoolRules.getSet(draft.selectedSetId);
+        const profile = draft.profiles[draft.selectedSetId];
+        const extras = profile.presets[profile.activePresetIndex].extraCardIds;
+        const validated = CardPoolRules.validateNewRunSelection({ setId: draft.selectedSetId, extraCardIds: extras }, context);
+        if (!validated.ok) {
+            this._cardPoolEditorBusy = false;
+            this.showAlert(validated.message);
+            return false;
+        }
+        const latest = Storage.loadDetailed(Storage.keys.GLOBAL);
+        if (latest.ok && latest.data && this.global._storageStamp && latest.data._storageStamp && latest.data._storageStamp !== this.global._storageStamp) {
+            this._cardPoolEditorBusy = false;
+            this.showAlert('다른 탭에서 저장 데이터가 바뀌었습니다. 덮어쓰지 않고 다시 확인하세요.');
+            return false;
+        }
+        if (latest.ok && latest.data) {
+            this.global = { ...this.global, ...latest.data };
+        }
+        this.global.cardPoolConfig = CardPoolRules.cloneConfig(draft);
+        this.global.cardPoolConfig.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = validated.extraCardIds.slice();
+        this.pendingActiveBonusPoolIds = validated.extraCardIds.slice();
+        const ok = this.saveGlobalData();
+        this._cardPoolEditorBusy = false;
+        if (!ok) {
+            this.showAlert('저장에 실패했습니다. 편집안을 유지합니다.');
+            return false;
+        }
+        this.showAlert('다음 런 설정을 저장했습니다.');
+        this.renderCardPoolEditor();
+        this.updateBonusPoolEditorButton();
+        return true;
+    },
+
+    renderCardPoolEditor() {
+        const root = document.getElementById('modal-bonus-pool-editor');
+        if (!root || !this._cardPoolEditorDraft || typeof CardPoolView === 'undefined') return;
+        const draft = this._cardPoolEditorDraft;
+        const context = this.getCardPoolAvailabilityContext();
+        const set = CardPoolRules.getSet(draft.selectedSetId);
+        const profile = draft.profiles[draft.selectedSetId];
+        const extras = profile.presets[profile.activePresetIndex].extraCardIds || [];
+        const baseIds = CardPoolRules.getSetBaseCardIds(set, context.catalogue);
+        const names = DISPLAY_NAMES;
+        const setModels = CardPoolRules.getSets().map(item => {
+            const availability = CardPoolRules.getSetAvailability(item, context);
+            const status = item.id === draft.selectedSetId
+                ? '선택 예정'
+                : (this.global.cardPoolConfig.selectedSetId === item.id ? '현재 사용' : (availability.available ? '사용 가능' : '미해금 ' + availability.missingIds.length + '장'));
+            const composition = item.resolver === 'existing_original_base_card_predicate'
+                ? '기존 기본덱 ' + baseIds.length + '장'
+                : '일반 10 · 레어 10 · 에픽 10 · 전설 10';
+            return {
+                id: item.id,
+                name: item.name,
+                trial: !!item.trial,
+                mainAxis: item.mainAxis,
+                subAxes: item.subAxes || [],
+                compositionText: item.id === 'classic' ? ('기존 기본덱 ' + CardPoolRules.getClassicBaseCardIds(context.catalogue).length + '장') : composition,
+                statusText: status,
+                canUse: availability.available && !availability.definitionError
+            };
+        });
+        const extraCandidates = CardPoolRules.getExtraCandidates(set, context.catalogue, context);
+        const map = new Map(context.catalogue.map(card => [card.id, card]));
+        const extraCards = extraCandidates.concat(this._cardPoolEditorFilter === 'base' ? baseIds : []).map(id => {
+            const card = map.get(id);
+            if (!card) return null;
+            const selected = extras.indexOf(id) >= 0;
+            const inBase = baseIds.indexOf(id) >= 0;
+            if (this._cardPoolEditorFilter === 'selected' && !selected) return null;
+            if (this._cardPoolEditorSearch && card.name.indexOf(this._cardPoolEditorSearch) < 0) return null;
+            return {
+                id,
+                name: card.name,
+                data: card,
+                metaText: [names.grade[card.grade] || card.grade, names.element[card.element] || card.element, names.role[card.role] || card.role].join(' · '),
+                statusText: inBase ? '기본 포함' : (selected ? '추가 선택' : '후보'),
+                selected,
+                inBase,
+                canToggle: !inBase && (selected || extras.length < 15)
+            };
+        }).filter(Boolean);
+        const usable = setModels.filter(item => item.trial && item.canUse).length;
+        const model = {
+            tab: this._cardPoolEditorTab,
+            summaryText: set.name + ' · 기본 ' + baseIds.length + '장 + 추가 ' + extras.length + '/15장',
+            sets: setModels,
+            extraCards,
+            search: this._cardPoolEditorSearch,
+            detailSet: this._cardPoolEditorDetailSetId ? CardPoolRules.getSet(this._cardPoolEditorDetailSetId) : null,
+            detailCards: []
+        };
+        if (model.detailSet) {
+            const detailIds = CardPoolRules.getSetBaseCardIds(model.detailSet, context.catalogue);
+            const filter = this._cardPoolEditorFilter;
+            model.detailCards = detailIds.map(id => {
+                const card = map.get(id);
+                if (!card) return null;
+                const info = CardPoolRules.inspectCardAvailability(card, context);
+                if (filter === 'locked' && info.status !== 'locked' && info.status !== 'unreleased' && info.status !== 'unknown') return null;
+                if (['normal', 'rare', 'epic', 'legend'].indexOf(filter) >= 0 && card.grade !== filter) return null;
+                return {
+                    id,
+                    name: card.name,
+                    data: card,
+                    metaText: [names.grade[card.grade] || card.grade, names.element[card.element] || card.element, names.role[card.role] || card.role].join(' · '),
+                    statusText: info.label + (info.path ? ' · ' + info.path : ''),
+                    inBase: true
+                };
+            }).filter(Boolean);
+        }
+        const sub = document.getElementById('btn-card-set-editor-sub');
+        if (sub) sub.textContent = '시험 기능 · 선택 가능 ' + usable + '/5';
+        CardPoolView.render(root, model, {
+            onSelectSet: id => {
+                const availability = CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context);
+                if (!availability.available) return;
+                this._cardPoolEditorDraft.selectedSetId = id;
+                this.renderCardPoolEditor();
+            },
+            onOpenSetDetail: id => {
+                this._cardPoolEditorDetailSetId = id;
+                const locked = !CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context).available;
+                this._cardPoolEditorFilter = locked ? 'locked' : 'all';
+                this.renderCardPoolEditor();
+            },
+            onSetFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
+            onSearch: value => { this._cardPoolEditorSearch = value; this.renderCardPoolEditor(); },
+            onExtraFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
+            onToggleExtra: id => {
+                const list = this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds;
+                const idx = list.indexOf(id);
+                if (idx >= 0) list.splice(idx, 1);
+                else if (list.length < 15) list.push(id);
+                this.renderCardPoolEditor();
+            },
+            onClearExtras: () => {
+                this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = [];
+                this.renderCardPoolEditor();
+            },
+            onRandomExtras: () => {
+                const candidates = CardPoolRules.getExtraCandidates(set, context.catalogue, context);
+                this._cardPoolEditorDraft.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds =
+                    CardPoolRules.pickRandomExtras(candidates, 15, list => GameUtils.shuffle(list));
+                this.renderCardPoolEditor();
+            },
+            onCardDetail: id => this.showCardInfo(id)
+        });
+        this.renderBonusPoolPresetButtons();
+    },
+
+
+
 
     selectBonusPoolPreset(index) {
+        this.ensureCardPoolConfigState();
+        if (this._cardPoolEditorDraft) {
+            const profile = this._cardPoolEditorDraft.profiles[this._cardPoolEditorDraft.selectedSetId];
+            if (index < 0 || index >= 3) return;
+            profile.activePresetIndex = index;
+            this.renderCardPoolEditor();
+            return;
+        }
         this.ensureBonusPoolPresetState();
         if (index < 0 || index >= this.global.bonusPoolPresets.length) return;
-
         this.global.activeBonusPoolPresetIndex = index;
+        const config = this.global.cardPoolConfig;
+        if (config && config.profiles[config.selectedSetId]) {
+            config.profiles[config.selectedSetId].activePresetIndex = index;
+        }
         this.syncPendingActiveBonusPoolIds();
         this.saveGlobalData();
-        this.renderBonusPoolEditor();
         this.updateBonusPoolEditorButton();
     },
 
@@ -1089,13 +1384,10 @@
 
 
     buildChaosRunCardPool() {
-        return GameUtils.buildCardPool(this.global, {
+        return GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             includeTranscendence: true,
-            activeTranscendenceCards: this.state.activeTranscendenceCards,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
-            activeEventCards: this.state.activeEventCards
-        });
+            activeTranscendenceCards: this.state.activeTranscendenceCards
+        }));
     },
 
 
@@ -1296,6 +1588,35 @@
 
 
     initNewGame(mode = 'origin') {
+        this.ensureCardPoolConfigState();
+        let runCardPool;
+        if (GameUtils.usesLimitedCardPool(mode)) {
+            runCardPool = {
+                schemaVersion: 1,
+                source: 'mode_owned',
+                setId: null,
+                setRevision: 1,
+                presetIndex: 0,
+                baseCardIds: [],
+                extraCardIds: [],
+                migratedFromLegacy: false
+            };
+        } else {
+            const config = this.global.cardPoolConfig;
+            const profile = config.profiles[config.selectedSetId];
+            const extras = profile.presets[profile.activePresetIndex].extraCardIds;
+            const created = this.createRunCardPoolSnapshot({
+                setId: config.selectedSetId,
+                extraCardIds: extras,
+                presetIndex: profile.activePresetIndex
+            });
+            if (!created.ok) {
+                this.showAlert(created.message || '기본 세트 설정을 확인한 뒤 새 런을 시작해 주세요.');
+                return false;
+            }
+            runCardPool = created.snapshot;
+        }
+
         // Origin records are closed when the next run begins; other modes close on defeat.
         if (['origin', 'perfect_plan'].includes(this.state.mode) && this.state.enemyScale > 0) {
             this.saveRecord();
@@ -1316,7 +1637,8 @@
             chaosBuffs: [],
             activeChaosBlessing: [],
             activeSageBlessing: [],
-            activeBonusPoolIds: this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds),
+            activeBonusPoolIds: runCardPool.extraCardIds ? runCardPool.extraCardIds.slice() : this.normalizeActiveBonusPoolIds(this.pendingActiveBonusPoolIds),
+            runCardPool,
             activeSpecialCardSelections: this.getActiveSpecialCardSelections('global'),
             tutoredItems: [],
             wrongWords: [],
@@ -1513,14 +1835,11 @@
         this.state.chaosBlessingUses--;
 
         // 1. Build Pool
-        let pool = GameUtils.buildCardPool(this.global, {
+        let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             excludeTranscendence: true,
             excludeEvent: true,
-            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
             maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
-        });
+        }));
 
         // 2. Shuffle and Pick (Fisher-Yates: uniform)
         let picks = this.pickUniqueRandomCards(pool, count);
@@ -1592,15 +1911,10 @@
 
 
     generateDraftOptions() {
-        let pool = GameUtils.buildCardPool(this.global, {
+        let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
             includeTranscendence: true,
-            activeTranscendenceCards: this.state.activeTranscendenceCards,
-            factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-            activeBonusPoolIds: this.state.activeBonusPoolIds,
-            specialCardSelections: this.state.activeSpecialCardSelections,
-            // [목적] 드래프트 선택지에 획득한 이벤트 카드가 등장하도록 함
-            activeEventCards: this.state.activeEventCards
-        });
+            activeTranscendenceCards: this.state.activeTranscendenceCards
+        }));
 
         const options = this.drawRunPoolCards(pool, 4, { allowDuplicates: true }).map(card => card.id);
         this.state.draft.currentOptions = options;

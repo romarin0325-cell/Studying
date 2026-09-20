@@ -99,14 +99,16 @@ function run() {
         'toeic_explanations.js',
         'api.js',
         'logic.js',
+        'card_pool_rules.js',
         'battle_runtime.js',
         'rpg_features.js',
+        'card_pool_view.js',
         'listening_data.js',
         'fortune_cookie.js',
         'music_data.js',
         'music_player.js'
     ]);
-    ['SaveDataMigrator', 'LISTENING_DATA', 'FortuneCookie', 'MusicPlayer'].forEach(name => {
+    ['SaveDataMigrator', 'LISTENING_DATA', 'FortuneCookie', 'MusicPlayer', 'CardPoolRules', 'CardPoolView'].forEach(name => {
         assert(indexSource.includes(`{ name: '${name}'`), `${name} is missing from initial readiness checks`);
     });
     assert(indexSource.includes('if (!window._scriptLoadComplete)'));

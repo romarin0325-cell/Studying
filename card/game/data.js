@@ -1348,6 +1348,89 @@ const MIRACLE_FORM_TRANSITIONS = Object.freeze({
     mirror_cocoon: Object.freeze(['aurora_wing', 'abyss_wing'])
 });
 
+const BASIC_CARD_SETS = Object.freeze([
+    Object.freeze({
+        id: 'classic',
+        revision: 1,
+        name: '기존 기본덱',
+        mainAxis: '기존 45장 구성 유지',
+        subAxes: Object.freeze([]),
+        resolver: 'existing_original_base_card_predicate',
+        trial: false,
+        cardsByGrade: null
+    }),
+    Object.freeze({
+        id: 'ember_relay',
+        revision: 1,
+        name: '홍련의 계승',
+        mainAxis: '작열의 유지와 소모',
+        subAxes: Object.freeze(['드래곤', '사망 시 계승', '태양·물리/마법 전환']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'flare_ribbon', 'executor', 'werebear']),
+            rare: Object.freeze(['baby_dragon', 'hellhound', 'mirage', 'light_elemental', 'void_knight', 'sphinx', 'forget_me_not', 'chaos_mage', 'siren', 'cream_maid']),
+            epic: Object.freeze(['red_dragon', 'flame_sage', 'dragon_miko', 'ash', 'sun_priestess', 'mawang', 'storm_sage', 'pudding_princess', 'lightning_sage', 'shadow_stalker']),
+            legend: Object.freeze(['gold_dragon', 'zeke', 'phoenix', 'cherry_prince', 'ancient_dragon', 'supernova', 'sakura', 'cinderella', 'sun_moon_sword_maiden', 'queen'])
+        })
+    }),
+    Object.freeze({
+        id: 'twilight_liturgy',
+        revision: 1,
+        name: '황혼의 성가',
+        mainAxis: '디바인의 유지·소모·전환',
+        subAxes: Object.freeze(['빛/어둠', '다종 디버프', '토끼·저등급 마무리']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'fairy', 'blessing_tail', 'holy_night', 'vampire', 'shadow_cat', 'snow_rabbit', 'silver_rabbit', 'black_swan']),
+            rare: Object.freeze(['aurora', 'night_rabbit', 'fallen_angel', 'cream_maid', 'tinker_bell', 'silent_librarian', 'light_elemental', 'forget_me_not', 'void_knight', 'sphinx']),
+            epic: Object.freeze(['archangel', 'fairy_queen', 'ghost_king', 'lightning_sage', 'unicorn', 'eclipse_queen', 'gumiho', 'mawang', 'santa', 'priest_of_end']),
+            legend: Object.freeze(['jasmine', 'galaxy_whale', 'cinderella', 'luna', 'doom_luther', 'time_ruler', 'ancient_soul', 'frozen_witch', 'deep_lord', 'victoria'])
+        })
+    }),
+    Object.freeze({
+        id: 'starlit_garden',
+        revision: 1,
+        name: '별빛 정원',
+        mainAxis: '필드버프의 축적·유지·소모',
+        subAxes: Object.freeze(['자연/물', '디저트', '저등급 소비형 피니셔']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'flare_ribbon', 'fairy']),
+            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'entropy', 'fenrir', 'prism_twin']),
+            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'miracle_larva', 'fairy_queen', 'avalanche_maid']),
+            legend: Object.freeze(['queen', 'rumi', 'world_tree', 'jasmine', 'deep_lord', 'victoria', 'dainichi_nyorai', 'sun_moon_sword_maiden', 'sylphid', 'zeke'])
+        })
+    }),
+    Object.freeze({
+        id: 'midnight_tide',
+        revision: 1,
+        name: '심야의 조류',
+        mainAxis: '방어로 시간을 확보하는 지연전',
+        subAxes: Object.freeze(['물/어둠', '기절·회피', '주기 턴 보상']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'sunflower', 'snow_penguin', 'shadow_cat', 'vampire', 'slime', 'snow_rabbit', 'silver_rabbit', 'marshmallow']),
+            rare: Object.freeze(['aurora', 'siren', 'fenrir', 'silent_librarian', 'legendary_captain', 'cotton_candy_sheep', 'prism_twin', 'night_rabbit', 'light_elemental', 'sphinx']),
+            epic: Object.freeze(['priest_of_end', 'guardian', 'great_detective', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
+            legend: Object.freeze(['time_ruler', 'phantom', 'venom', 'perfect_aurora', 'cure_master', 'deep_lord', 'frozen_witch', 'rumi', 'world_tree', 'doom_luther'])
+        })
+    }),
+    Object.freeze({
+        id: 'arena_company',
+        revision: 1,
+        name: '투기장의 연맹',
+        mainAxis: '평타·마나 절약',
+        subAxes: Object.freeze(['아레나', '치명타·방어 저하', '배치·동일등급']),
+        trial: true,
+        cardsByGrade: Object.freeze({
+            normal: Object.freeze(['kobold', 'mimic', 'executor', 'discipline_captain', 'werebear', 'shadow_cat', 'black_swan', 'candy_boy', 'slime', 'mummy']),
+            rare: Object.freeze(['baby_dragon', 'ember_tiger', 'prism_twin', 'legendary_captain', 'golem', 'void_knight', 'fenrir', 'hellhound', 'cream_maid', 'forget_me_not']),
+            epic: Object.freeze(['paladin', 'guardian', 'eclipse_queen', 'crystal_dancer', 'red_dragon', 'flame_sage', 'pudding_princess', 'gumiho', 'mushroom_king', 'unicorn']),
+            legend: Object.freeze(['doom_luther', 'cherry_prince', 'phoenix', 'cure_master', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
+        })
+    })
+]);
+
 const SPECIAL_CARD_VARIANTS = [
     { id: 'luna_valentine', name: '루나(발렌타인)', baseCardId: 'luna', specialSeason: 'valentine' },
     { id: 'jasmine_valentine', name: '자스민(발렌타인)', baseCardId: 'jasmine', specialSeason: 'valentine' },

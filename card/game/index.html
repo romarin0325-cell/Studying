@@ -1114,6 +1114,7 @@
         }
     </style>
     <link rel="stylesheet" href="music_player.css">
+    <link rel="stylesheet" href="card_pool_editor.css">
 </head>
 
 <body>
@@ -1377,10 +1378,15 @@
                 도전 모드 (Challenge)<br>
                 <span style="font-size:0.8rem; color:#e1bee7;">목표 스테이지 클리어 도전</span>
             </button>
-            <button id="btn-bonus-pool-editor" class="menu-btn" onclick="RPG.openBonusPoolEditor()"
+            <button id="btn-bonus-pool-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('extras')"
                 style="padding:12px; border-color:#4fc3f7; color:#4fc3f7; margin-bottom:8px;">
                 덱 편집<br>
-                <span style="font-size:0.8rem; color:#b3e5fc;">보너스 카드 ON/OFF</span>
+                <span id="btn-bonus-pool-editor-sub" style="font-size:0.8rem; color:#b3e5fc;">보너스 카드 ON/OFF</span>
+            </button>
+            <button id="btn-card-set-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('sets')"
+                style="padding:12px; border-color:#81c784; color:#a5d6a7; margin-bottom:8px;">
+                세트 편집<br>
+                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">시험 기능 · 선택 가능 0/5</span>
             </button>
             <button id="btn-special-card-editor" class="menu-btn" onclick="RPG.openSpecialCardEditor()"
                 style="display:none; padding:12px; border-color:#ffca28; color:#ffe082; margin-bottom:8px;">
@@ -1399,22 +1405,26 @@
         </div>
     </div>
 
-    <div id="modal-bonus-pool-editor" class="modal">
-        <div class="modal-content" style="height:auto; min-height:320px; width: 360px;">
-            <div style="position:relative; margin-bottom: 5px;">
-                <h3 style="margin: 0;">보너스 카드 덱 편집</h3>
-                <button onclick="RPG.randomizeBonusPoolSelection()"
-                    style="position:absolute; top:-2px; right:0; padding:4px 8px; font-size:0.75rem; background:#333; border:1px solid #4fc3f7; color:#4fc3f7; border-radius:5px;">(랜덤)</button>
+    <div id="modal-bonus-pool-editor" class="modal card-pool-editor-modal" role="dialog" aria-modal="true" aria-labelledby="card-pool-editor-title">
+        <div class="modal-content card-pool-editor">
+            <div class="card-pool-editor-header">
+                <h3 id="card-pool-editor-title">획득 카드풀 편집</h3>
+                <button type="button" id="card-pool-editor-close" class="card-pool-icon-btn">닫기</button>
             </div>
-            <p id="bonus-pool-editor-summary" style="font-size:0.8rem; color:#81d4fa; margin:0 0 8px 0;">세팅 1 · 활성 0 / 0 (최대 15)</p>
+            <p id="card-pool-editor-summary" class="card-pool-editor-summary">기존 기본덱 · 기본 45장 + 추가 0/15장</p>
+            <p class="card-pool-editor-note">다음 런에 적용됩니다. 현재 진행 중인 런은 유지됩니다. 저장하지 않으면 편집 내용이 사라질 수 있습니다.</p>
+            <div class="card-pool-tabs" role="tablist">
+                <button type="button" role="tab" id="card-pool-tab-sets">기본 세트</button>
+                <button type="button" role="tab" id="card-pool-tab-extras">추가 카드</button>
+            </div>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
-            <p id="bonus-pool-preset-status" style="font-size:0.78rem; color:#b3e5fc; margin:0 0 8px 0;">다음 런 적용 세팅: 1</p>
-            <div id="bonus-pool-editor-list" class="modal-scroll"></div>
-            <div style="display:flex; gap:8px; margin-top:6px;">
-                <button class="menu-btn" onclick="RPG.resetBonusPoolSelection()"
-                    style="flex:1; margin-bottom:0; border-color:#ef5350; color:#ef5350;">선택초기화</button>
-                <button class="menu-btn" onclick="RPG.closeBonusPoolEditor()"
-                    style="flex:1; margin-bottom:0;">닫기</button>
+            <p id="bonus-pool-preset-status" class="card-pool-editor-note">프리셋 1</p>
+            <div id="card-pool-editor-body" class="card-pool-editor-body"></div>
+            <div id="bonus-pool-editor-list" class="modal-scroll" hidden></div>
+            <p id="bonus-pool-editor-summary" hidden>세팅 1 · 활성 0 / 0 (최대 15)</p>
+            <div class="card-pool-editor-footer">
+                <button type="button" id="card-pool-editor-cancel" class="menu-btn">취소</button>
+                <button type="button" id="card-pool-editor-save" class="menu-btn">다음 런 설정 저장</button>
             </div>
         </div>
     </div>
@@ -1877,8 +1887,10 @@
                 { src: 'toeic_explanations.js', label: '토익 해설' },
                 { src: 'api.js', label: 'API 모듈' },
                 { src: 'logic.js', label: '게임 로직' },
+                { src: 'card_pool_rules.js', label: '카드풀 규칙' },
                 { src: 'battle_runtime.js', label: '전투 런타임' },
                 { src: 'rpg_features.js', label: 'RPG Feature Modules' },
+                { src: 'card_pool_view.js', label: '카드풀 편집 UI' },
                 { src: 'listening_data.js', label: '리스닝 데이터' },
                 { src: 'fortune_cookie.js', label: '포춘쿠키 로직' },
                 { src: 'music_data.js', label: '음악 데이터' },
@@ -2728,41 +2740,45 @@
             renderBonusPoolPresetButtons() {
                 const container = document.getElementById('bonus-pool-preset-list');
                 if (!container) return;
-
-                this.ensureBonusPoolPresetState();
-                const activeIndex = this.getActiveBonusPoolPresetIndex();
-                const total = this.getUnlockedBonusCards().length;
+                this.ensureCardPoolConfigState();
+                const draft = this._cardPoolEditorDraft || this.global.cardPoolConfig;
+                const profile = draft.profiles[draft.selectedSetId];
+                const activeIndex = profile.activePresetIndex;
                 container.innerHTML = '';
-
-                this.global.bonusPoolPresets.forEach((preset, index) => {
+                profile.presets.forEach((preset, index) => {
                     const btn = document.createElement('button');
-                    const activeCount = this.getBonusPoolPresetIds(index).length;
+                    const activeCount = (preset.extraCardIds || []).length;
                     btn.type = 'button';
                     btn.className = `bonus-preset-btn${index === activeIndex ? ' is-active' : ''}`;
-                    btn.innerHTML = `세팅 ${index + 1}<span>${activeCount}/${total}</span>`;
+                    btn.textContent = `세팅 ${index + 1}`;
+                    const span = document.createElement('span');
+                    span.textContent = `${activeCount}/15`;
+                    btn.appendChild(span);
                     btn.onclick = () => this.selectBonusPoolPreset(index);
                     container.appendChild(btn);
                 });
             },
 
             closeBonusPoolEditor() {
-                document.getElementById('modal-bonus-pool-editor').classList.remove('active');
-                this.updateBonusPoolEditorButton();
+                this.closeCardPoolEditor(false);
             },
 
             updateBonusPoolEditorButton() {
                 const btn = document.getElementById('btn-bonus-pool-editor');
                 if (!btn) return;
-
-                this.ensureBonusPoolPresetState();
-                const total = this.getUnlockedBonusCards().length;
-                const active = this.getBonusPoolPresetIds().length;
-                const presetNo = this.getActiveBonusPoolPresetIndex() + 1;
-                const subText = total > 0
-                    ? `세팅 ${presetNo} 적용중 · 활성 ${active}/${total}`
-                    : '해금된 보너스 카드가 없습니다';
-
-                btn.innerHTML = `덱 편집<br><span style="font-size:0.8rem; color:#b3e5fc;">${subText}</span>`;
+                this.ensureCardPoolConfigState();
+                const config = this.global.cardPoolConfig;
+                const set = CardPoolRules.getSet(config.selectedSetId);
+                const profile = config.profiles[config.selectedSetId];
+                const extras = profile.presets[profile.activePresetIndex].extraCardIds.length;
+                const baseCount = CardPoolRules.getSetBaseCardIds(set, this.getCardPoolCatalogue()).length;
+                btn.innerHTML = `덱 편집<br><span id="btn-bonus-pool-editor-sub" style="font-size:0.8rem; color:#b3e5fc;">${set.name} · 추가 ${extras}/15</span>`;
+                const setBtn = document.getElementById('btn-card-set-editor-sub');
+                if (setBtn) {
+                    const context = this.getCardPoolAvailabilityContext();
+                    const usable = CardPoolRules.getSets().filter(item => item.trial && CardPoolRules.getSetAvailability(item, context).available).length;
+                    setBtn.textContent = `시험 기능 · 선택 가능 ${usable}/5`;
+                }
             },
 
             updateSpecialCardEditorButton() {
@@ -2903,9 +2919,7 @@
             },
 
             openBonusPoolEditor() {
-                this.syncPendingActiveBonusPoolIds();
-                this.renderBonusPoolEditor();
-                document.getElementById('modal-bonus-pool-editor').classList.add('active');
+                this.openCardPoolEditor('extras');
             },
 
             renderBonusPoolEditor() {
@@ -3024,7 +3038,9 @@
                     { name: 'RPGFeatureModules', ref: typeof RPGFeatureModules !== 'undefined' ? RPGFeatureModules : null },
                     { name: 'LISTENING_DATA', ref: typeof LISTENING_DATA !== 'undefined' ? LISTENING_DATA : null },
                     { name: 'FortuneCookie', ref: typeof FortuneCookie !== 'undefined' ? FortuneCookie : null },
-                    { name: 'MusicPlayer', ref: typeof MusicPlayer !== 'undefined' ? MusicPlayer : null }
+                    { name: 'MusicPlayer', ref: typeof MusicPlayer !== 'undefined' ? MusicPlayer : null },
+                    { name: 'CardPoolRules', ref: typeof CardPoolRules !== 'undefined' ? CardPoolRules : null },
+                    { name: 'CardPoolView', ref: typeof CardPoolView !== 'undefined' ? CardPoolView : null }
                 ];
                 return requiredData.filter(d => !d.ref || (Array.isArray(d.ref) && d.ref.length === 0));
             },
@@ -3320,7 +3336,7 @@
                         `${mName} 모드로 시작하시겠습니까?`,
                         `정말 시작하시겠습니까?<br>현재 진행 중인 엔드리스 게임 데이터는 초기화됩니다.<br>(게임 시작 시 자동 저장됩니다)`,
                         () => {
-                            this.initNewGame(this.selectedModeId);
+                            if (this.initNewGame(this.selectedModeId) === false) return;
                             modal.classList.remove('active');
                             if (!['factory', 'artifact_reserve', 'perfect_plan'].includes(this.selectedModeId)) {
                                 this.toMenu();
@@ -3479,12 +3495,8 @@
                 const mode = this.state.mode;
                 let pool;
 
-                if (GameUtils.usesLimitedCardPool(mode) && this.state.factoryPool && this.state.factoryPool.length > 0) {
-                    // 팩토리/퍼펙트플랜: 드래프트된 40장 한정
-                    pool = GameUtils.buildCardPool(this.global, {
-                        factoryPool: this.state.factoryPool,
-                        specialCardSelections: this.state.activeSpecialCardSelections
-                    });
+                if (GameUtils.usesLimitedCardPool(mode)) {
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions());
                 } else if (['chaos', 'artifact_chaos'].includes(mode)) {
                     // 카오스: state.chaosPool (초월 포함 가능)
                     const ids = this.state.chaosPool || [];
@@ -3492,14 +3504,11 @@
                 } else {
                     // 통상/드래프트/아티팩트 등
                     const includeT = (mode === 'draft');
-                    pool = GameUtils.buildCardPool(this.global, {
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
                         includeTranscendence: includeT,
                         activeTranscendenceCards: includeT ? this.state.activeTranscendenceCards : [],
-                        activeBonusPoolIds: this.state.activeBonusPoolIds,
-                        specialCardSelections: this.state.activeSpecialCardSelections,
-                        activeEventCards: this.state.activeEventCards,
                         maxGrade: GameUtils.getMaxGradeForMode(mode)
-                    });
+                    }));
                 }
 
                 // 등급 내림차순 정렬 (transcendence → legend → epic → rare → event → normal)
@@ -3685,14 +3694,11 @@
                 }
 
                 // Apply to 12 random cards
-                let pool = GameUtils.buildCardPool(this.global, {
+                let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions({
                     excludeTranscendence: true,
                     excludeEvent: true,
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections,
                     maxGrade: GameUtils.getMaxGradeForMode(this.state.mode)
-                });
+                }));
 
                 let picks = this.pickUniqueRandomCards(pool, GAME_CONSTANTS.SAGE_BLESSING_PICK_COUNT);
 
@@ -3815,11 +3821,7 @@
             drawPuzzlePieceCards(useChallengeRates) {
                 const puzzleConfig = GAME_CONSTANTS.PUZZLE || {};
                 const count = puzzleConfig.PIECE_COUNT || 36;
-                const pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections
-                });
+                const pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions());
                 if (pool.length === 0) return [];
 
                 const picks = [];
@@ -3897,11 +3899,7 @@
                 let grade = GameUtils.resolveGachaGrade(mode, isChallenge);
 
                 // Build Pool
-                let pool = GameUtils.buildCardPool(this.global, {
-                    factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                    activeBonusPoolIds: this.state.activeBonusPoolIds,
-                    specialCardSelections: this.state.activeSpecialCardSelections
-                }).filter(card => card.grade === grade);
+                let pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions()).filter(card => card.grade === grade);
 
 
                 if (pool.length === 0) {
@@ -3910,11 +3908,7 @@
                     // If somehow empty, fallback to normal
                     console.error("Empty pool for grade: " + grade);
                     grade = 'normal';
-                    pool = GameUtils.buildCardPool(this.global, {
-                        factoryPool: GameUtils.usesLimitedCardPool(this.state.mode) ? this.state.factoryPool : null,
-                        activeBonusPoolIds: this.state.activeBonusPoolIds,
-                        specialCardSelections: this.state.activeSpecialCardSelections
-                    }).filter(card => card.grade === 'normal');
+                    pool = GameUtils.buildCardPool(this.global, this.getRunCardPoolBuildOptions()).filter(card => card.grade === 'normal');
                 }
 
                 const pick = pool[Math.floor(Math.random() * pool.length)];
