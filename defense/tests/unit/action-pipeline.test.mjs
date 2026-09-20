@@ -315,7 +315,7 @@ test('nova waits for enemies inside the hero-centered radius and strikes them in
   const state = runtimeState([hero], [outside, insideLate, insideEarly], [0.99, 0.99]);
 
   const action = createBasicAttackAction(state, hero, 0);
-  assert.equal(action.target.id, 'outside', 'trigger targeting still priorit path progress within range');
+  assert.equal(action.target.id, 'inside-early', 'targeting uses the same effective radius as the nova hit');
   assert.deepEqual(action.impacts.map(({ target }) => target.id), ['inside-early', 'inside-late']);
   resolveBasicAttackAction(state, action);
 

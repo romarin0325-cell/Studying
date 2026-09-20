@@ -2,27 +2,26 @@ import { drawFallbackToken } from './CanvasShapes.js';
 import { HERO_BY_ID } from '../content/heroes.js';
 const MAIN = ["rumi", "luna", "cinderella", "zeke"];
 const COMPANIONS = ["snow_rabbit", "avalanche_maid", "night_rabbit", "guardian", "storm_sage", "lightning_sage"];
+const EMBER = ["red_dragon", "flame_sage", "mushroom_king"];
+const TIDE = ["great_detective", "siren", "phantom"];
 const CREATURES = ["ruin_scarab", "ember_scarab", "sand_wisp", "stone_guard", "regrowth_idol", "rift_shade", "rift_wing", "abyss_armor", "chaos_spawn", "lesser_demon", "flora", "pharaoh", "reaper", "demon_god", "core", "portal"];
-const COMPANION_BOUNDS = [
-  [[18, 0, 305, 368], [336, 0, 380, 368]],
-  [[730, 0, 303, 368], [1035, 0, 409, 368]],
-  [[25, 370, 276, 350], [332, 370, 386, 350]],
-  [[739, 367, 295, 355], [1038, 367, 404, 355]],
-  [[10, 722, 292, 360], [323, 716, 395, 367]],
-  [[729, 722, 282, 363], [1002, 722, 442, 363]]
-];
+export function heroIllustrationId(id) {
+  return 'illustration/' + (MAIN.includes(id) ? 'heroes' : COMPANIONS.includes(id) ? 'companions' : EMBER.includes(id) ? 'companions-ember' : 'companions-tide');
+}
 export function illustration(manager, id, attacking = false) {
   let imageId, frame;
   if (MAIN.includes(id)) {
     const row = MAIN.indexOf(id);
-    const boundaries = [0, 0.254, 0.501, 0.736, 1];
     imageId = "illustration/heroes";
-    frame = { x: attacking ? 0.5 : 0, y: boundaries[row], width: 0.5, height: boundaries[row + 1] - boundaries[row] };
+    frame = { x: attacking ? 0.5 : 0, y: row / 4, width: 0.5, height: 0.25 };
   } else if (COMPANIONS.includes(id)) {
     const index = COMPANIONS.indexOf(id);
     imageId = "illustration/companions";
-    const [x, y, w, h] = COMPANION_BOUNDS[index][Number(attacking)];
-    frame = { x: x / 1448, y: y / 1086, width: w / 1448, height: h / 1086 };
+    frame = { x: attacking ? 0.5 : 0, y: index / 6, width: 0.5, height: 1 / 6 };
+  } else if (EMBER.includes(id) || TIDE.includes(id)) {
+    const ember = EMBER.includes(id), row = (ember ? EMBER : TIDE).indexOf(id);
+    imageId = ember ? 'illustration/companions-ember' : 'illustration/companions-tide';
+    frame = { x: attacking ? .5 : 0, y: row / 3, width: .5, height: 1 / 3 };
   } else if (CREATURES.includes(id)) {
     const index = CREATURES.indexOf(id);
     imageId = "illustration/creatures";
@@ -55,11 +54,12 @@ export function paintPortraits(root, manager, selector = "[data-portrait]") {
   paint();
   // Repaint each completed atlas independently. A hanging companion request
   // must not hide a loaded main portrait (or delay its fallback).
-  for (const atlas of ['heroes', 'companions']) {
-    manager.preload([`illustration/${atlas}`]).then(async summary => {
+  const portraitIds = [...root.querySelectorAll(selector)].map(canvas => canvas.dataset.portrait ?? canvas.dataset.heroAvatar);
+  for (const atlasId of new Set(portraitIds.map(heroIllustrationId))) {
+    manager.preload([atlasId]).then(async summary => {
       paint();
       if (!summary.failed.length) return;
-      const ids = atlas === 'heroes' ? MAIN : COMPANIONS;
+      const ids = portraitIds.filter(id => heroIllustrationId(id) === atlasId);
       await Promise.all(ids.map(id => manager.preload([`portrait/${id}`]).then(paint)));
     });
   }

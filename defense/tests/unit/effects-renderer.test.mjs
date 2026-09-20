@@ -171,12 +171,12 @@ test('skill hits fly from the caster before detonating and their popup waits for
   renderer.render(midFlight, TEST_LAYOUT);
   assert.deepEqual(
     midFlight.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [16, 16],
+    [16, 8],
     'the projectile trail tail stays behind the caster side',
   );
   assert.deepEqual(
     midFlight.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [30, 30],
+    [30, 23],
     'the glowing projectile head is halfway to the target',
   );
 
@@ -247,11 +247,11 @@ test('ranged effects draw from the source while each shotgun hit draws exactly o
   assert.equal(rangedContext.strokes.filter(path => path.length === 2).length, 1);
   assert.deepEqual(
     rangedContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [19, 29],
+    [19, 21],
   );
   assert.deepEqual(
     rangedContext.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [30, 40],
+    [30, 33],
   );
 
   const shotgun = new EffectRenderer();
@@ -273,11 +273,11 @@ test('ranged effects draw from the source while each shotgun hit draws exactly o
   assert.ok(shotgunContext.calls.some(([name]) => name === 'lineTo'));
   assert.deepEqual(
     shotgunContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [24, 34],
+    [24, 25],
   );
   assert.deepEqual(
     shotgunContext.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [40, 50],
+    [40, 41],
   );
 });
 
@@ -317,6 +317,6 @@ test('laser draws a beam from the caster to the beam endpoint', () => {
   const lines = context.calls.filter(([name]) => name === 'lineTo');
   assert.equal(moves.length, 3, 'glow + mid + core beam layers');
   assert.equal(lines.length, 3);
-  assert.ok(moves.every(([, x, y]) => x === 10 && y === 20), 'every layer starts at the caster');
-  assert.ok(lines.every(([, x, y]) => x === 90 && y === 20), 'every layer ends at the beam endpoint');
+  assert.ok(moves.every(([, x, y]) => x === 10 && Math.abs(y - 10.8) < 1e-6), 'every layer starts at the caster chest');
+  assert.ok(lines.every(([, x, y]) => x === 90 && Math.abs(y - 10.8) < 1e-6), 'the complete ray has the same elevation and length as its preview');
 });

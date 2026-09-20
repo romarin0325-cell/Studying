@@ -1,10 +1,16 @@
 export const JOURNEYS = Object.freeze({
-  ancient_ruins: { chapter: "01", title: "새벽의 정원", subtitle: "구름 위에 잠든 첫 번째 별", note: "두 번 만나는 굽이에 수호자를 배치하세요.", counter: "중갑에는 마법 · 공중에는 대공", art: 0, color: "#6c9787" },
-  chaos_rift: { chapter: "02", title: "달그림자 숲", subtitle: "달빛마저 삼켜버린 깊은 틈", note: "나선 안쪽의 사거리를 겹쳐 집중 공격하세요.", counter: "악마에는 신성 · 공중에는 대공", art: 1, color: "#837fbd" },
-  crossroads: { chapter: "03", title: "별의 관측소", subtitle: "잊힌 왕국에 남겨진 약속", note: "교차 지점을 지키고 마지막 접근로를 보강하세요.", counter: "중갑에는 마법 · 보스에는 필살", art: 2, color: "#698b9c" },
-  long_boulevard: { chapter: "04", title: "황금빛 귀환로", subtitle: "끝나지 않은 이야기의 다음 장", note: "긴 직선은 관통 공격이 빛나는 곳입니다.", counter: "재생에는 화염 · 중갑에는 마법", art: 3, color: "#b39b63" }
+  ancient_ruins: { chapter: "01", title: "새벽의 정원", subtitle: "구름 위에 잠든 첫 번째 별", note: "세 번 굽이치는 수로를 따라 첫 여정이 시작됩니다.", counter: "중갑에는 마법 · 공중에는 대공", art: 0, color: "#6c9787" },
+  chaos_rift: { chapter: "02", title: "달그림자 숲", subtitle: "달빛마저 삼켜버린 깊은 틈", note: "서로 등을 맞댄 긴 길 사이로 달그림자가 번집니다.", counter: "악마에는 신성 · 공중에는 대공", art: 1, color: "#837fbd" },
+  crossroads: { chapter: "03", title: "별의 관측소", subtitle: "잊힌 왕국에 남겨진 약속", note: "외곽을 크게 돌아 안쪽으로 파고드는 길입니다.", counter: "중갑에는 마법 · 보스에는 필살", art: 2, color: "#698b9c" },
+  long_boulevard: { chapter: "04", title: "황금빛 귀환로", subtitle: "끝나지 않은 이야기의 다음 장", note: "긴 회랑 끝에서 마지막 별이 귀환을 기다립니다.", counter: "재생에는 화염 · 중갑에는 마법", art: 3, color: "#b39b63" }
 });
 export const HERO_COPY = Object.freeze({
+  red_dragon: ["작은 불꽃의 날개", "화염 산탄", "작열을 남기는 브레스. 태양의축복과 함께 강해집니다."],
+  flame_sage: ["태양을 품은 현자", "화염 · 지원", "범위 4 태양의축복. 짧은 공격 사거리 대신 동료를 강화합니다."],
+  mushroom_king: ["포자의 작은 왕", "중독 노바", "굽이에서 중독을 쌓고 지친 적을 마무리합니다."],
+  great_detective: ["푸른 단서의 추적자", "신성 관통", "직선의 악마를 꿰뚫고 저주로 마법 동료를 돕습니다."],
+  siren: ["달빛의 목소리", "물결 · 지원", "범위 4 달의축복. 물속성 동료와 치명타 이중창을 부릅니다."],
+  phantom: ["잠들지 않는 소년", "암흑 저격", "오라를 받지 않습니다. 암흑과 저주를 이어 혼자서 길을 지킵니다."],
   rumi: ["꿈을 엮는 소년", "별빛 산탄", "세 갈래 별빛과 오라로 함께 강해져요."],
   luna: ["달그림자 암살자", "보스 사냥", "짧은 사거리 안에서 보스에게 치명적인 일격."],
   cinderella: ["기적의 마법사", "광역 · 제어", "몰려오는 적을 늦추고 신성한 빛으로 정화해요."],

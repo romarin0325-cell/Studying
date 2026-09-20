@@ -14,7 +14,9 @@ function buffEffectTotal(hero, type) {
 
 export function getEffectiveRange(state, hero, attackKind = 'basic') {
   const modifiers = collectHeroTraitModifiers(state, hero, 'stat_modifier', { attackKind });
-  return hero.definition.attack.range + buffEffectTotal(hero, 'range_add') + modifiers.rangeAdd;
+  const attack = hero.definition.attack;
+  const base = attackKind === 'basic' && attack.archetype === 'nova' ? attack.radius ?? attack.range : attack.range;
+  return Math.max(0, base + buffEffectTotal(hero, 'range_add') + modifiers.rangeAdd);
 }
 
 export function targetPriority(left, right) {

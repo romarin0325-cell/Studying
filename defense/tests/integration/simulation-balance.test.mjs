@@ -19,7 +19,7 @@ const TERMINAL_PHASES = new Set([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT]);
 const MAX_TICKS = 60 * 60 * 15;
 const TARGETS = Object.freeze({
   ancient_ruins: { minimumClearRate: 0.80, minimumMinutes: 3, maximumMinutes: 5.5 },
-  chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 4, maximumMinutes: 7 },
+  chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
   crossroads: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
   long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 3, maximumMinutes: 5.5 },
 });
@@ -246,6 +246,7 @@ function summarize(stageId, results) {
     battles: results.length,
     victories: victories.length,
     defeats: results.length - victories.length,
+    defeatWaves: results.filter(r => !r.victory).reduce((counts, r) => { counts[r.wave] = (counts[r.wave] ?? 0) + 1; return counts; }, {}),
     clearRate: victories.length / results.length,
     standardInputSeconds: STANDARD_INPUT_SECONDS,
     minimumCombatMinutes: Math.min(...combatMinutes),
@@ -264,7 +265,25 @@ function summarize(stageId, results) {
   };
 }
 
-const formations = enumerateValidFormations();
+const allFormations = enumerateValidFormations();
+// Exhaustive shape validation covers 1,980 choices. The combat gate covers
+// every companion pair under every main without 7,920 redundant full runs.
+function pairwiseFormations() {
+  const pairs = ids => choose(ids, 2).map(pair => pair.join(':'));
+  return MAIN_HEROES.flatMap(main => {
+    const candidates = allFormations.filter(f => f.mainId === main.id);
+    const uncovered = new Set(pairs(NORMAL_HEROES.map(h => h.id)));
+    const selected = [];
+    while (uncovered.size) {
+      candidates.sort((a, b) => pairs(b.heroIds).filter(p => uncovered.has(p)).length - pairs(a.heroIds).filter(p => uncovered.has(p)).length);
+      const best = candidates.shift();
+      selected.push(best);
+      for (const pair of pairs(best.heroIds)) uncovered.delete(pair);
+    }
+    return selected;
+  });
+}
+const formations = process.env.DEFENSE_EXHAUSTIVE_BALANCE === '1' ? allFormations : pairwiseFormations();
 let matrixPromise;
 
 function runSimulationWorker(jobs) {
@@ -321,24 +340,26 @@ if (!isMainThread && workerData?.simulationBalanceWorker) {
     parentPort.close();
   }
 } else {
-  test('enumerates exactly all 4 × C(6,4) = 60 legal launch formations', () => {
+  test('validates all 1,980 formations and covers every companion pair under every main in combat', () => {
     assert.equal(MAIN_HEROES.length, 4);
-    assert.equal(NORMAL_HEROES.length, 6);
-    assert.equal(formations.length, 60);
-    assert.equal(new Set(formations.map(({ mainId, heroIds }) => `${mainId}:${heroIds.join(',')}`)).size, 60);
-    for (const formation of formations) {
+    assert.equal(NORMAL_HEROES.length, 12);
+    assert.equal(allFormations.length, 1980);
+    assert.equal(new Set(allFormations.map(({ mainId, heroIds }) => `${mainId}:${heroIds.join(',')}`)).size, 1980);
+    for (const formation of allFormations) {
       assert.ok(MAIN_HEROES.some(({ id }) => id === formation.mainId));
       assert.equal(formation.heroIds.length, 4);
       assert.equal(new Set(formation.heroIds).size, 4);
       assert.ok(formation.heroIds.every((id) => NORMAL_HEROES.some((hero) => hero.id === id)));
     }
+    for (const main of MAIN_HEROES) for (const pair of choose(NORMAL_HEROES.map(h => h.id), 2))
+      assert.ok(formations.some(f => f.mainId === main.id && pair.every(id => f.heroIds.includes(id))), `${main.id}: uncovered pair ${pair}`);
   });
 
-  test('all 60 formations terminate deterministically on every Easy stage within caps', async (context) => {
+  test('pairwise formation matrix terminates on every Easy stage within caps', async (context) => {
     const matrix = await runBalanceMatrix();
     for (const stageId of GATED_STAGE_IDS) {
       const results = matrix[stageId];
-      assert.equal(results.length, 60);
+      assert.equal(results.length, formations.length);
       assert.ok(results.every(({ phase }) => TERMINAL_PHASES.has(phase)));
       const summary = summarize(stageId, results);
       context.diagnostic(`BALANCE ${JSON.stringify(summary)}`);

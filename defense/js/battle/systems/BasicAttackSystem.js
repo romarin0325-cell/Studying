@@ -1,15 +1,15 @@
 import { buffEffects } from './AuraSystem.js';
+import { attackGeometry } from '../AttackGeometry.js';
 import { applyDirectDamage } from './DamageSystem.js';
 import { updateHeroDirection } from './DirectionSystem.js';
 import { applyStatus } from './StatusSystem.js';
 import {
   findTarget,
+  getEffectiveRange,
   spawnOrderPriority,
   targetsInRadius,
 } from './TargetingSystem.js';
 import { collectHeroTraitModifiers } from './TraitSystem.js';
-
-const DEG_TO_RAD = Math.PI / 180;
 
 function productBuff(hero, type) {
   return buffEffects(hero, type).reduce((product, effect) => product * Number(effect.value), 1);
@@ -20,12 +20,6 @@ export function getAttackInterval(state, hero) {
   return hero.definition.attack.interval
     * productBuff(hero, 'attack_interval_multiplier')
     * modifiers.attackIntervalMultiplier;
-}
-
-function rotate(vector, angle) {
-  const cosine = Math.cos(angle);
-  const sine = Math.sin(angle);
-  return { x: vector.x * cosine - vector.y * sine, y: vector.x * sine + vector.y * cosine };
 }
 
 export function resolveShotgunHits(sourcePoint, targetPoint, enemies, {
@@ -39,9 +33,8 @@ export function resolveShotgunHits(sourcePoint, targetPoint, enemies, {
   const dy = targetPoint.y - sourcePoint.y;
   const length = Math.hypot(dx, dy);
   if (length === 0) return [];
-  const forward = { x: dx / length, y: dy / length };
-  const pellets = angles.map((degrees, pelletIndex) => {
-    const direction = rotate(forward, degrees * DEG_TO_RAD);
+  const rays = attackGeometry({ archetype: 'shotgun', spreadDegrees: angles }, sourcePoint, targetPoint, range).rays;
+  const pellets = rays.map(({ direction }, pelletIndex) => {
     let hit = null;
     let hitDistance = Number.POSITIVE_INFINITY;
     for (const enemy of enemies) {
@@ -80,7 +73,7 @@ export function resolveLaserHits(sourcePoint, targetPoint, enemies, {
   const dy = targetPoint.y - sourcePoint.y;
   const length = Math.hypot(dx, dy);
   if (length === 0) return [];
-  const direction = { x: dx / length, y: dy / length };
+  const direction = attackGeometry({ archetype: 'laser' }, sourcePoint, targetPoint, range).rays[0].direction;
   const hits = [];
   for (const enemy of enemies) {
     if (enemy.dead || enemy.reachedCore) continue;
@@ -157,9 +150,10 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
   const target = findTarget(state, hero, 'basic');
   if (!target) return null;
   const attack = hero.definition.attack;
+  const geometry = attackGeometry(attack, { x: hero.x + 0.5, y: hero.y + 0.5 }, target, getEffectiveRange(state, hero));
   if (attack.archetype === 'nova') {
     const center = { x: hero.x + 0.5, y: hero.y + 0.5 };
-    const novaImpacts = targetsInRadius(state, center, attack.radius ?? 2.5)
+    const novaImpacts = targetsInRadius(state, center, geometry.radius)
       .map((enemy) => ({ target: enemy }));
     // Nova waits for enemies to enter the hero-centered radius instead of wasting the swing.
     if (novaImpacts.length === 0) return null;
@@ -176,6 +170,7 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
       targetSpawnOrder: target.spawnOrder ?? Number.MAX_SAFE_INTEGER,
       impacts: novaImpacts,
       pellets: null,
+      geometry,
     };
   }
   updateHeroDirection(hero, target, landscape);
@@ -187,7 +182,7 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
   if (attack.archetype === 'shotgun') {
     const sourcePoint = { x: hero.x + 0.5, y: hero.y + 0.5 };
     pellets = resolveShotgunHits(sourcePoint, target, [...state.enemies.values()], {
-      range: attack.range,
+      range: geometry.range,
       angles: attack.spreadDegrees,
       normalRadius: attack.normalCollisionRadius,
       bossRadius: attack.bossCollisionRadius,
@@ -197,7 +192,7 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
   } else if (attack.archetype === 'laser') {
     const sourcePoint = { x: hero.x + 0.5, y: hero.y + 0.5 };
     impacts = resolveLaserHits(sourcePoint, target, [...state.enemies.values()], {
-      range: attack.range,
+      range: geometry.range,
       normalRadius: attack.normalCollisionRadius,
       bossRadius: attack.bossCollisionRadius,
     }).map(({ target: pierced }) => ({ target: pierced }));
@@ -216,6 +211,7 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
     targetSpawnOrder: target.spawnOrder ?? Number.MAX_SAFE_INTEGER,
     impacts,
     pellets,
+    geometry,
   };
 }
 
@@ -230,11 +226,11 @@ export function resolveBasicAttackAction(state, action) {
       effectPreset: 'basic_nova_hit', element: hero.definition.element,
       sourceId: hero.id, sourceX, sourceY,
       targetId: action.target.id, x: sourceX, y: sourceY,
-      radius: attack.radius ?? 2.5,
+      radius: action.geometry.radius,
       visualOnly: true,
     });
     for (const impact of impacts) {
-      hitTarget(state, hero, impact.target, attack.damage, 'basic_nova_hit', attack.radius ?? 2.5, {
+      hitTarget(state, hero, impact.target, attack.damage, 'basic_nova_hit', action.geometry.radius, {
         attackArchetype: 'nova',
         suppressEffect: true,
       });
@@ -244,18 +240,16 @@ export function resolveBasicAttackAction(state, action) {
   if (attack.archetype === 'laser') {
     const sourceX = hero.x + 0.5;
     const sourceY = hero.y + 0.5;
-    const dx = action.target.x - sourceX;
-    const dy = action.target.y - sourceY;
-    const length = Math.hypot(dx, dy) || 1;
-    const vectorX = dx / length;
-    const vectorY = dy / length;
+    const { direction, end } = action.geometry.rays[0];
+    const vectorX = direction.x, vectorY = direction.y;
     state.events.push({
       type: 'hit', actionKind: 'basic', attackArchetype: 'laser',
       effectPreset: 'basic_laser_hit', element: hero.definition.element,
       sourceId: hero.id, sourceX, sourceY,
       targetId: action.target.id,
-      x: sourceX + vectorX * attack.range,
-      y: sourceY + vectorY * attack.range,
+      x: end.x,
+      y: end.y,
+      effectiveRange: action.geometry.range,
       vectorX, vectorY,
       visualOnly: true,
     });
@@ -274,14 +268,16 @@ export function resolveBasicAttackAction(state, action) {
     const sourceX = hero.x + 0.5;
     const sourceY = hero.y + 0.5;
     for (const pellet of pellets ?? []) {
-      const x = pellet.target?.x ?? sourceX + pellet.direction.x * attack.range;
-      const y = pellet.target?.y ?? sourceY + pellet.direction.y * attack.range;
+      const end = action.geometry.rays[pellet.pelletIndex].end;
+      const x = pellet.target ? sourceX + pellet.direction.x * pellet.distance : end.x;
+      const y = pellet.target ? sourceY + pellet.direction.y * pellet.distance : end.y;
       state.events.push({
         type: 'hit', actionKind: 'basic', attackArchetype: 'shotgun',
         effectPreset: 'basic_shotgun_hit', element: hero.definition.element,
         sourceId: hero.id, sourceX, sourceY,
         targetId: pellet.target?.id ?? null, x, y,
         pelletIndex: pellet.pelletIndex,
+        effectiveRange: action.geometry.range,
         vectorX: pellet.direction.x,
         vectorY: pellet.direction.y,
         missed: !pellet.target,

@@ -1,7 +1,8 @@
 import { HERO_BY_ID } from '../content/heroes.js';
 import { STAGE_BY_ID } from '../content/stages.js';
+import { LEGACY_PLACEMENTS } from './LegacyPlacements.js';
 
-export const CHECKPOINT_SCHEMA_VERSION = 1;
+export const CHECKPOINT_SCHEMA_VERSION = 2;
 
 export const SAVE_KEYS_V2 = Object.freeze({
   checkpoint: 'heroDefenseV2Checkpoint',
@@ -12,6 +13,7 @@ export const SAVE_KEYS_V2 = Object.freeze({
 
 export const DEFAULT_SETTINGS = Object.freeze({
   sound: true,
+  music: true,
   damageNumbers: true,
   screenShake: true,
   reducedEffects: false,
@@ -33,7 +35,7 @@ export function normalizeSettings(value = {}) {
 
 export function validateCheckpoint(value) {
   assert(isRecord(value), 'V2 checkpoint must be an object');
-  assert(value.schemaVersion === CHECKPOINT_SCHEMA_VERSION, 'Unsupported V2 checkpoint schema');
+  assert([1, CHECKPOINT_SCHEMA_VERSION].includes(value.schemaVersion), 'Unsupported V2 checkpoint schema');
   assert(typeof value.sessionId === 'string' && value.sessionId.length > 0, 'Checkpoint sessionId is required');
   assert(typeof value.stageId === 'string' && value.stageId.length > 0, 'Checkpoint stageId is required');
   const stage = STAGE_BY_ID[value.stageId];
@@ -62,13 +64,15 @@ export function validateCheckpoint(value) {
   assert(Object.keys(value.placements).length === 5, 'Checkpoint must place all five heroes');
   assert(formationIds.every((id) => Object.prototype.hasOwnProperty.call(value.placements, id)), 'Checkpoint placements must match formation');
   const occupiedCells = new Set();
-  const blockedCells = new Set([
+  const blockedCells = new Set(value.schemaVersion === 1 ? [] : [
     ...stage.map.pathCells.map(({ x, y }) => `${x},${y}`),
     ...stage.map.obstacles.map(({ x, y }) => `${x},${y}`),
   ]);
-  // 화이트리스트 밖 셀은 blocked다. 옛 배치 좌표는 마이그레이션하지 않고 검증 실패로 버린다.
-  if (stage.map.placementCells?.length) {
-    const allowed = new Set(stage.map.placementCells.map(({ x, y }) => `${x},${y}`));
+  const allowedCells = value.schemaVersion === 1
+    ? LEGACY_PLACEMENTS[value.stageId].map(([x, y]) => ({ x, y }))
+    : stage.map.placementCells;
+  if (allowedCells?.length) {
+    const allowed = new Set(allowedCells.map(({ x, y }) => `${x},${y}`));
     for (let y = 0; y < 16; y += 1) {
       for (let x = 0; x < 12; x += 1) {
         const key = `${x},${y}`;
@@ -133,4 +137,28 @@ export function validateCheckpoint(value) {
     assert(typeof value.nextWaveFlags.coreDamagedPreviousWave === 'boolean', 'Checkpoint core damage flag is invalid');
   }
   return value;
+}
+
+export function migrateCheckpoint(value) {
+  validateCheckpoint(value);
+  if (value.schemaVersion === CHECKPOINT_SCHEMA_VERSION) return value;
+  const migrated = JSON.parse(JSON.stringify(value));
+  const available = [...STAGE_BY_ID[value.stageId].map.placementCells];
+  const ids = [value.formation.mainId, ...value.formation.heroIds];
+  // Preserve still-legal occupied cells first, then find the nearest free cell
+  // for each displaced hero. No levels, currency, report, wave or RNG is reset.
+  for (const id of ids) {
+    const at = available.findIndex(c => c.x === value.placements[id].x && c.y === value.placements[id].y);
+    if (at >= 0) available.splice(at, 1);
+    else delete migrated.placements[id];
+  }
+  for (const id of ids) {
+    if (migrated.placements[id]) continue;
+    const old = value.placements[id];
+    available.sort((a, b) => (a.x-old.x)**2+(a.y-old.y)**2 - ((b.x-old.x)**2+(b.y-old.y)**2));
+    const { x, y } = available.shift();
+    migrated.placements[id] = { x, y };
+  }
+  migrated.schemaVersion = CHECKPOINT_SCHEMA_VERSION;
+  return validateCheckpoint(migrated);
 }

@@ -8,7 +8,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 export const APP_ROOT = path.join(REPOSITORY_ROOT, "defense");
 export const DEFAULT_OUTPUT = path.join(APP_ROOT, "dist-local", "HeroCoreDefense.html");
-export const EXPECTED_RELEASE_ASSET_COUNT = 70;
+export const EXPECTED_RELEASE_ASSET_COUNT = 103;
 
 const ENTRY_PATH = "./js/main.js";
 const ASSET_MODULE_PATH = path.join(APP_ROOT, "js", "content", "assets.js");
@@ -169,7 +169,7 @@ function inlineStylesheets(html, bundledCss) {
     const replacement = inserted
       ? ""
       : `<style data-bundled-from="${STYLESHEET_PATHS.join(",")}">\n${escapeInlineBlock(bundledCss, "style")}\n</style>`;
-    output = output.replace(tag, replacement);
+    output = output.replace(tag, () => replacement);
     inserted = true;
   }
   return output;
@@ -181,7 +181,7 @@ function inlineEntrypoint(html, javascript) {
   if (!entryTag) throw new Error(`V2 index.html does not load ${ENTRY_PATH}.`);
   return html.replace(
     entryTag,
-    `<script data-bundled-from="${ENTRY_PATH}">\n${escapeInlineBlock(javascript, "script")}\n</script>`,
+    () => `<script data-bundled-from="${ENTRY_PATH}">\n${escapeInlineBlock(javascript, "script")}\n</script>`,
   );
 }
 

@@ -92,13 +92,13 @@ function assertFiniteRuntime(session, label) {
   }
 }
 
-test('all 10 heroes execute all four final trait builds through the battle runtime', (context) => {
+test('all 16 heroes execute all four final trait builds through the battle runtime', (context) => {
   const builds = enumerateFinalTraitBuilds();
-  assert.equal(HEROES.length, 10);
-  assert.equal(builds.length, 40, '10 heroes × (2 Lv4 × 2 Lv6) must produce 40 builds');
+  assert.equal(HEROES.length, 16);
+  assert.equal(builds.length, 64, '16 heroes × (2 Lv4 × 2 Lv6) must produce 64 builds');
   assert.equal(
     new Set(builds.map(({ hero, lv4, lv6 }) => `${hero.id}:${lv4}:${lv6}`)).size,
-    40,
+    64,
     'every final build must be unique',
   );
 
@@ -120,7 +120,13 @@ test('all 10 heroes execute all four final trait builds through the battle runti
     try {
       const hero = levelToFinalBuild(session, definition.id, { lv4, lv6 }, label);
       assert.equal(session.applyNow('auto_place'), true, `${label}: auto-place`);
+      // Exercise this build at the first bend, independently of auto-placement
+      // and allies clearing the opening wave before this hero can attack.
+      const occupant = session.state.heroes.find(h=>h.id!==hero.id && h.x===9 && h.y===2);
+      if (occupant) { occupant.x=hero.x; occupant.y=hero.y; }
+      hero.x=9; hero.y=2;
       assert.equal(session.applyNow('start_wave'), true, `${label}: start wave`);
+      for (const ally of session.state.heroes) if (ally.id!==hero.id) { ally.attackTimer=999; ally.skillTimer=999; }
 
       let ticks = 0;
       while (

@@ -28,6 +28,7 @@ export function applyStatus(target, statusId, options = {}) {
     internal: definition.internal === true,
     remaining: Math.max(existing?.remaining ?? 0, duration),
     stacks: 1,
+    ...(definition.periodicDps ? { tickRemaining: existing?.tickRemaining ?? 1 } : {}),
   };
   return true;
 }
@@ -43,10 +44,10 @@ export function isStunned(target) {
 export function updateStatuses(state, deltaSeconds, applyPoisonDamage) {
   for (const target of state.enemies.values()) {
     for (const [statusId, status] of Object.entries(target.statuses ?? {})) {
-      if (statusId === 'poison') {
+      if (statusId === 'poison' || STATUS_BY_ID[statusId]?.periodicDps) {
         status.tickRemaining -= deltaSeconds;
         while (status.tickRemaining <= 0 && status.remaining > 0 && !target.dead) {
-          applyPoisonDamage(target, Number(STATUS_BY_ID.poison.poison_dps ?? 3) * status.stacks);
+          applyPoisonDamage(target, Number(STATUS_BY_ID[statusId].periodicDps ?? STATUS_BY_ID.poison.poison_dps ?? 3) * status.stacks, statusId);
           status.tickRemaining += 1;
         }
       }

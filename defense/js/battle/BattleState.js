@@ -4,6 +4,7 @@ import { HERO_BY_ID } from '../content/heroes.js';
 import { STAGE_BY_ID } from '../content/stages.js';
 import { DIFFICULTY_BY_ID } from '../content/combat.js';
 import { EntityRegistry } from './EntityRegistry.js';
+import { CHECKPOINT_SCHEMA_VERSION } from '../persistence/schemas.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -121,7 +122,7 @@ export function createCheckpointFromState(state) {
     traits[hero.id] = clone(hero.selectedTraits);
   }
   return {
-    schemaVersion: 1,
+    schemaVersion: CHECKPOINT_SCHEMA_VERSION,
     elapsedSeconds: state.elapsedSeconds,
     heroStats: Object.fromEntries(state.heroes.map(hero => [hero.id, { ...hero.stats }])),
     sessionId: state.sessionId,

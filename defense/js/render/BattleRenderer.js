@@ -25,6 +25,8 @@ export class BattleRenderer {
     this.gameTimeSeconds = 0;
     this.reduced = false;
     this.attacks = /* @__PURE__ */ new Map();
+    this.impacts = new Map();
+    this.departures = new Map();
     this.selectedHeroId = null;
     this.aim = null;
     this.cache = null;
@@ -34,6 +36,8 @@ export class BattleRenderer {
   }
   advanceGameTime(delta) {
     if (Number.isFinite(delta) && delta > 0) this.gameTimeSeconds += delta;
+    for (const [id, hit] of this.impacts) if (hit.until < this.gameTimeSeconds) this.impacts.delete(id);
+    for (const [id, death] of this.departures) if (death.until < this.gameTimeSeconds) this.departures.delete(id);
   }
   resize() {
     this.cache = null;
@@ -45,6 +49,11 @@ export class BattleRenderer {
   }
   feedback(event) {
     if (event.sourceId && ["hit", "skill_cast"].includes(event.type)) this.attacks.set(event.sourceId, { until: this.gameTimeSeconds + 0.3, x: event.x, y: event.y });
+    if (event.type === 'hit' && event.amount > 0 && !event.visualOnly) {
+      this.impacts.set(event.targetId, { until: this.gameTimeSeconds + .13, strength: event.critical ? 1 : .6 });
+    }
+    if (event.type === 'enemy_defeated' && this.departures.size < 24)
+      this.departures.set(event.enemy.id, { enemy: event.enemy, until: this.gameTimeSeconds + .24 });
   }
   render(snapshot) {
     this.lastSnapshot = snapshot;
@@ -55,6 +64,10 @@ export class BattleRenderer {
     const entities = [...snapshot.heroes.filter((h) => h.placed).map((h) => ({ ...h, hero: true })), ...snapshot.enemies];
     entities.sort((a, b) => this.point(a).y - this.point(b).y);
     for (const entity of entities) this.drawEntity(ctx, entity, snapshot);
+    if (!this.reduced) for (const { enemy, until } of this.departures.values()) {
+      ctx.save(); ctx.globalAlpha = Math.max(0, (until - this.gameTimeSeconds) / .24);
+      this.drawEntity(ctx, { ...enemy, departing: true }, snapshot); ctx.restore();
+    }
     if (this.draggingHeroId && this.aim) {
       const hero = snapshot.heroes.find((h) => h.id === this.draggingHeroId);
       if (hero) {
@@ -158,8 +171,10 @@ export class BattleRenderer {
     const canPlace = ["PREPARATION", "INTERMISSION"].includes(snapshot.phase), cell = this.layout.logicalRadiusToCanvas(1);
     const hero = snapshot.heroes.find((h) => h.id === this.selectedHeroId);
     const center = this.aim ?? (hero?.placed ? { x: hero.x + 0.5, y: hero.y + 0.5 } : null);
+    const preview = canPlace && !this.spellAiming && center ? this.getPlacementPreview?.(center) : null;
     if (center && (canPlace || this.spellAiming)) {
-      const p = this.layout.logicalToCanvas(center.x, center.y), range = this.spellAiming ? 2.6 : this.selectedRange ?? HERO_BY_ID[hero?.id]?.attack.range ?? 3;
+      const origin = preview?.geometry.source ?? center;
+      const p = this.layout.logicalToCanvas(origin.x, origin.y), range = this.spellAiming ? 2.6 : preview?.geometry.range ?? this.selectedRange ?? HERO_BY_ID[hero?.id]?.attack.range ?? 3;
       ctx.save();
       ctx.beginPath();
       ctx.rect(this.layout.boardRect.x, this.layout.boardRect.y, this.layout.boardRect.width, this.layout.boardRect.height);
@@ -172,6 +187,20 @@ export class BattleRenderer {
       ctx.ellipse(p.x, p.y, range * this.layout.boardRect.width / 12, range * this.layout.boardRect.height / 12, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      if (preview) {
+        const geometry = preview.geometry;
+        ctx.setLineDash([]);
+        if (['laser', 'shotgun'].includes(geometry.archetype)) for (const ray of geometry.rays) {
+          const end = this.layout.logicalToCanvas(ray.end.x, ray.end.y);
+          ctx.strokeStyle = '#fff1ba'; ctx.lineWidth = geometry.archetype === 'laser' ? Math.max(2, cell * .14) : 2;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(end.x, end.y); ctx.stroke();
+        }
+        for (const link of preview.links) {
+          const from = this.layout.logicalToCanvas(link.source.x, link.source.y), to = this.layout.logicalToCanvas(link.target.x, link.target.y);
+          ctx.strokeStyle = '#c7adff'; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+          ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+        }
+      }
       ctx.restore();
     }
     if (!canPlace) return;
@@ -179,20 +208,16 @@ export class BattleRenderer {
       if (snapshot.heroes.some((h) => h.placed && h.x === spot.x && h.y === spot.y)) continue;
       const p = this.layout.logicalCellCenterToCanvas(spot.x, spot.y);
       ctx.save();
-      ctx.fillStyle = "#fcfff0cc";
-      ctx.strokeStyle = "#628d79bb";
+      ctx.fillStyle = "#233449e6";
+      ctx.strokeStyle = '#d8c89c';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.ellipse(p.x, p.y, cell * 0.42, cell * 0.29, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      ctx.strokeStyle = "#789986";
-      ctx.beginPath();
-      ctx.moveTo(p.x - 4, p.y);
-      ctx.lineTo(p.x + 4, p.y);
-      ctx.moveTo(p.x, p.y - 4);
-      ctx.lineTo(p.x, p.y + 4);
-      ctx.stroke();
+      ctx.fillStyle = '#d8c89c'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `bold ${Math.max(11, cell * .42)}px system-ui`;
+      ctx.fillText('＋', p.x, p.y);
       ctx.restore();
     }
   }
@@ -231,9 +256,15 @@ export class BattleRenderer {
       const flip = e.direction === "left";
       ctx.save();
       ctx.translate(p.x + (flip ? -lunge : lunge), p.y - bob - (air ? cell * 0.17 : 0));
+      const hit = !e.hero && this.impacts.get(e.id);
+      if (hit && !this.reduced) {
+        const strength = (hit.until - t) / .13 * hit.strength;
+        ctx.scale(1 + strength * .075, 1 - strength * .06);
+        ctx.filter = `brightness(${1 + strength * 1.2})`;
+      }
       if (flip) ctx.scale(-1, 1);
       if (attack && !this.reduced) ctx.rotate(flip ? -0.035 : 0.035);
-      drawResolvedSprite(ctx, art, { x: -width / 2, y: -height * 0.87, width, height });
+      drawResolvedSprite(ctx, art, { x: -width / 2, y: -height * (e.hero ? .94 : .87), width, height });
       ctx.restore();
     }
     if (!art) drawFallbackToken(ctx, { x: p.x, y: p.y-size*.35, size: size*.7, label: e.name?.slice(0,1) ?? '?', color: COLORS[e.element] ?? '#7b638f', kind: e.isBoss ? 'boss' : e.defenseType });
@@ -248,7 +279,7 @@ export class BattleRenderer {
       ctx.textAlign = "center";
       ctx.fillText(`Lv.${e.level}`, p.x, p.y + cell * 0.12 + 10);
       ctx.restore();
-    } else {
+    } else if (!e.departing) {
       const width = cell * (e.isBoss ? 1.4 : 0.67), y = p.y - size * 0.82;
       ctx.fillStyle = "#233c4277";
       ctx.fillRect(p.x - width / 2, y, width, 3);
