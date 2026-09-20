@@ -1661,14 +1661,16 @@ function run() {
     assert.strictEqual(toffeeDessert.stats.matk, 230);
 
     const underdogSame = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', 'kobold', 'underdog'], GameUtils.getAllCards(), 2);
-    assert.strictEqual(underdogSame.activeTrait, 'cond_grade_count_leader_boost');
+    assert.strictEqual(underdogSame.activeTrait, 'cond_same_grade_leader_boost');
     assert.strictEqual(underdogSame.stats.atk, 160);
     const underdogMixed = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', 'cream_maid', 'underdog'], GameUtils.getAllCards(), 2);
     assert.strictEqual(underdogMixed.activeTrait, null);
     const underdogGap = Logic.calculateInitialStats(getCard('underdog'), ['marshmallow', null, 'underdog'], GameUtils.getAllCards(), 2);
-    assert.strictEqual(underdogGap.activeTrait, 'cond_grade_count_leader_boost');
+    assert.strictEqual(underdogGap.activeTrait, 'cond_same_grade_leader_boost');
     const underdogSolo = Logic.calculateInitialStats(getCard('underdog'), [null, null, 'underdog'], GameUtils.getAllCards(), 2);
-    assert.strictEqual(underdogSolo.activeTrait, 'cond_grade_count_leader_boost');
+    assert.strictEqual(underdogSolo.activeTrait, 'cond_same_grade_leader_boost');
+    assert.strictEqual(getCard('underdog').trait.gradeRequired, undefined);
+    assert.strictEqual(getCard('underdog').trait.countRequired, undefined);
     const underdogFront = Logic.calculateInitialStats(getCard('underdog'), ['underdog', 'marshmallow', 'kobold'], GameUtils.getAllCards(), 0);
     assert.strictEqual(underdogFront.activeTrait, null);
     assert.strictEqual(GameUtils.hasUniformGrade([null, null, null]), false);
@@ -1683,6 +1685,29 @@ function run() {
     assert(syrupDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
     assert(glazeDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
     assert.strictEqual(syrupDesc.effects[0].randomCount, 2);
+    const collectableAndForms = GameUtils.getAllCards().concat(GameUtils.getBattleOnlyForms());
+    collectableAndForms.forEach(card => {
+      (card.skills || []).forEach(skill => {
+        (skill.effects || []).forEach(effect => {
+          if (effect.type === 'random_debuff' && Array.isArray(effect.pool)) {
+            const phrase = GameUtils.formatRandomDebuffPhrase(effect.pool, effect.count);
+            assert(skill.desc.includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
+          }
+          if (effect.type === 'consume_debuff_then_random_debuff' && Array.isArray(effect.pool)) {
+            const phrase = GameUtils.formatRandomDebuffPhrase(effect.pool, effect.randomCount);
+            assert(skill.desc.includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
+          }
+        });
+      });
+      if (card.trait && card.trait.type === 'on_hit_random_debuff' && Array.isArray(card.trait.pool)) {
+        const phrase = GameUtils.formatRandomDebuffPhrase(card.trait.pool, 1);
+        assert(card.trait.desc.includes(phrase), card.id + ' trait missing ' + phrase);
+      }
+    });
+    const whisper = getCard('fairy_queen').skills.find(skill => skill.name === '이터널위스퍼');
+    const wild = getCard('joker').skills.find(skill => skill.name === '와일드카드');
+    assert(whisper.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 1)));
+    assert(wild.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'], 2)));
 
     const larva = getCard('miracle_larva');
     assert.deepStrictEqual([larva.grade, larva.element, larva.role, larva.unlockSource], ['epic', 'nature', 'balancer', 'hidden']);

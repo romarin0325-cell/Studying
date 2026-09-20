@@ -2698,7 +2698,7 @@ const Logic = {
         }
 
         // 언더독: 빈 슬롯을 제외한 실제 배치 카드의 등급이 전부 같고 대장 배치 시 공격/마공 증가
-        if (t.type === 'cond_grade_count_leader_boost' && idx !== undefined) {
+        if (t.type === 'cond_same_grade_leader_boost' && idx !== undefined) {
             if (GameUtils.hasUniformGrade(deck, allCards) && idx === (t.pos !== undefined ? t.pos : 2)) {
                 active = true;
                 const stats = Array.isArray(t.stat) ? t.stat : [t.stat];
