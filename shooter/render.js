@@ -1,5 +1,12 @@
-import { clamp } from './content.js';
+import { clamp, EVENT_DUNGEONS } from './content.js';
 const TAU = Math.PI * 2;
+// Head landmarks exclude horns, ears, trailing hair and halos. Larger bodies stay larger.
+export const BOSS_PRESENTATION = [
+  {size:164,offsetY:0},{size:164,offsetY:0},{size:164,offsetY:0},
+  {size:164,offsetY:0},{size:164,offsetY:0},{size:184,offsetY:0},
+  {size:190,offsetY:3},{size:156,offsetY:1},{size:218,offsetY:17},
+  {size:190,offsetY:13},{size:246,offsetY:44},{size:200,offsetY:11}
+];
 function star(c, x, y, r, points = 4, rotation = 0) {
   c.beginPath();
   for (let i = 0; i < points * 2; i++) { const a = i * Math.PI / points + rotation - Math.PI / 2, d = i % 2 ? r * .38 : r; const px = x + Math.cos(a) * d, py = y + Math.sin(a) * d; if (!i) c.moveTo(px, py); else c.lineTo(px, py); }
@@ -8,13 +15,16 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
   const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png',astea:'assets/astea.png','celestial-relics':'assets/celestial-relics.png','celestial-world':'assets/celestial-world.png','balance-relics':'assets/balance-relics.png' };
+  if(!globalThis.ASTRAL_ASSETS)for(const d of EVENT_DUNGEONS){sources[d.asset]=`assets/${d.asset}.png`;sources[d.asset+'-world']=`assets/${d.asset}-world.png`;}
   const images = {};
   await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
     const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
   })));
   const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[],tides:[],astea:[],'bloom-fx':[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
-  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx','astea']) {
-    const columns=kind==='astea'?1:kind==='relics'?4:2;
+  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx','astea',...EVENT_DUNGEONS.map(d=>d.asset)]) {
+    const standalone=kind==='astea'||EVENT_DUNGEONS.some(d=>d.asset===kind);
+    if(!result[kind])result[kind]=[];
+    const columns=standalone?1:kind==='relics'?4:2;
     for (let i = 0; i < columns*columns; i++) {
       const sheet = images[kind], w = sheet.width * (kind==='secrets'&&i===0?.52:kind==='secrets'&&i===1?.46:1/columns);
       const sourceX=kind==='secrets'&&i===1?sheet.width*.54:(i%columns)*w;
@@ -55,7 +65,8 @@ export async function loadArt() {
         const target=kind==='secrets'&&i===0?73:100;
         const w=x1-x0+1,h=y1-y0+1,scale=kind==='secrets'&&i===3?470/Math.max(w,h):Math.min(target/(sheet.width*faces[kind][i]),470/Math.max(w,h));
         c.drawImage(raw,x0,y0,w,h,(size-w*scale)/2,(size-h*scale)/2,w*scale,h*scale);
-      }else c.drawImage(raw, 0, 0, 384, 384);
+      }else if(standalone){const scale=384/Math.max(sw,sh);c.drawImage(raw,(384-sw*scale)/2,(384-sh*scale)/2,sw*scale,sh*scale);}
+      else c.drawImage(raw, 0, 0, 384, 384);
       result[kind].push(cut);
       if (result.urls[kind]) result.urls[kind].push(cut.toDataURL('image/png'));
     }
@@ -77,6 +88,10 @@ export async function loadArt() {
   result.worlds.splice(3,0,...extraWorlds);result.urls.worlds=result.worlds.map(c=>c.toDataURL('image/jpeg',.87));
   result.bosses.push(result.astea[0]);result.enemies.push(result.enemies[1]);result.sentinels.push(result.sentinels[1]);
   const celestial=canvas(450,1200);celestial.getContext('2d').drawImage(images['celestial-world'],0,0,450,1200);result.worlds.push(celestial);result.urls.worlds.push(celestial.toDataURL('image/jpeg',.87));
+  for(const d of EVENT_DUNGEONS){
+    result.bosses.push(result[d.asset][0]);result.enemies.push(result.enemies[d.specialType]);result.sentinels.push(result.sentinels[d.specialType]);
+    const world=canvas(450,1200);world.getContext('2d').drawImage(images[d.asset+'-world'],0,0,450,1200);result.worlds.push(world);result.urls.worlds.push(world.toDataURL('image/jpeg',.87));
+  }
   result.urls.bosses=result.bosses.map(c=>c.toDataURL('image/png'));
   const darkFairy=canvas(512,512),df=darkFairy.getContext('2d');df.filter='invert(1)';df.drawImage(result.companions[3],0,0,512,512);result.darkFairy=darkFairy;
   for(let i=0;i<6;i++){
@@ -92,7 +107,13 @@ export async function loadArt() {
     c.drawImage(sheet,x/1448*sheet.width,y/1086*sheet.height,w/1448*sheet.width,h/1086*sheet.height,(192-w*scale)/2,(192-h*scale)/2,w*scale,h*scale);
     const index=i===10?15:22+i;result.relics[index]=icon;result.urls.relics[index]=icon.toDataURL('image/png');
   }
-  for(let i=0;i<4;i++){const icon=canvas(192,192),im=images['celestial-relics'];icon.getContext('2d').drawImage(im,i%2*im.width/2,Math.floor(i/2)*im.height/2,im.width/2,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
+  for(let i=0;i<4;i++){
+    const icon=canvas(192,192),im=images['celestial-relics'],c=icon.getContext('2d');
+    // The miracle star sits above its nominal atlas-cell center; center the artwork, not the cell.
+    const box=i===2?[.008,.455,.484,.484]:[i%2/2,Math.floor(i/2)/2,.5,.5];
+    c.drawImage(im,box[0]*im.width,box[1]*im.height,box[2]*im.width,box[3]*im.height,0,0,192,192);
+    result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));
+  }
   for(let i=0;i<6;i++){const icon=canvas(192,192),im=images['balance-relics'];icon.getContext('2d').drawImage(im,i%3*im.width/3,Math.floor(i/3)*im.height/2,im.width/3,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
   // A transparent cached effect keeps the hitbox readable without per-frame filters.
   const barrier=canvas(192,192),bc=barrier.getContext('2d');
@@ -184,8 +205,9 @@ export class Renderer {
         for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(0, 0, 73 + i * 10, 0, TAU); c.stroke(); }
         for (let i = 0; i < 8; i++) { star(c, Math.cos(i * TAU / 8) * 82, Math.sin(i * TAU / 8) * 82, 5); c.stroke(); } c.restore();
       }
-      const size = e.boss ? (g.stageIndex === 5 ? 184 : 164) : e.miniboss?125:e.elite ? 84 : e.offspring?32:55;
-      this.sprite(e.boss ? this.art.bosses[e.image] : e.miniboss?this.art.sentinels[e.image]:this.art.enemies[e.image], e.x, e.y + bob, size, e.boss ? Math.sin(e.age) * .025 : Math.sin(e.age * 2) * .08, 1, e.flash > 0 ? .63 : 1);
+      const presentation=BOSS_PRESENTATION[e.image],size=e.boss?presentation.size:e.miniboss?125:e.elite?84:e.offspring?32:55;
+      this.sprite(e.boss ? this.art.bosses[e.image] : e.miniboss?this.art.sentinels[e.image]:this.art.enemies[e.image], e.x, e.y + bob + (e.boss?presentation.offsetY:0), size, e.boss ? Math.sin(e.age) * .025 : Math.sin(e.age * 2) * .08, 1, e.flash > 0 ? .63 : 1);
+      if(e.spawnInvincible>0){c.strokeStyle='#fff4d5';c.lineWidth=2;c.beginPath();c.arc(e.x,e.y,e.r+5,0,TAU);c.stroke();}
       if(e.special!==undefined){c.strokeStyle=g.stage.color;c.lineWidth=2;c.beginPath();c.arc(e.x,e.y,31,0,TAU);c.stroke();c.fillStyle='#fff';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(e.special===2?Math.ceil(e.countdown):['','Ⅲ','','✿','↔','◇'][e.special],e.x,e.y-37);}
       if(e.marks){c.fillStyle='#ffbedf';for(let i=0;i<e.marks;i++){star(c,e.x-6+i*12,e.y-30,4);c.fill();}}
       if (e.flash > 0) { c.globalCompositeOperation = 'lighter'; c.drawImage(this.glow('#ffffff'), e.x - 16, e.y - 16, 32, 32); c.globalCompositeOperation = 'source-over'; }
@@ -280,10 +302,10 @@ export class Renderer {
     if(f.type==='barrierBreak'){
       c.strokeStyle='#b8f8ff';c.globalAlpha=1-q;c.lineWidth=2;
       for(let i=0;i<6;i++){const a=i*TAU/6+q*.3;c.beginPath();c.arc(f.x,f.y,f.radius*(1+q*.7),a,a+.55);c.stroke();}
-    } else if(f.type==='celestialWarning'){c.fillStyle='#ffe1a322';c.fillRect(f.gap-62,78,124,g.height-78);c.strokeStyle='#ffe1a3';c.lineWidth=2;c.setLineDash([8,8]);for(const x of [f.gap-62,f.gap+62]){c.beginPath();c.moveTo(x,78);c.lineTo(x,g.height);c.stroke();}c.setLineDash([]);for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62){star(c,x,f.bottom?g.height-24:85,7);c.stroke();}
+    } else if(f.type==='celestialWarning'||f.type==='eventWave'){c.fillStyle='#ffe1a322';c.fillRect(f.gap-62,78,124,g.height-78);c.strokeStyle=f.color||'#ffe1a3';c.lineWidth=2;c.setLineDash([8,8]);for(const x of [f.gap-62,f.gap+62]){c.beginPath();c.moveTo(x,78);c.lineTo(x,g.height);c.stroke();}c.setLineDash([]);for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62){star(c,x,f.bottom?g.height-24:85,7);c.stroke();}
     } else if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
     } else if(f.type==='detonation') {
-      c.fillStyle=f.age<.75?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
+      c.fillStyle=f.age<(f.wait??.75)?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
     } else if (f.type === 'beam') {
       c.globalAlpha = .2; c.fillStyle = '#f5cf79'; c.fillRect(f.x - f.width, 50, f.width * 2, Math.max(0, f.y - 50));
       c.globalAlpha = .65; c.fillStyle = '#ffe3a2'; c.fillRect(f.x - f.width / 2, 50, f.width, Math.max(0, f.y - 50));

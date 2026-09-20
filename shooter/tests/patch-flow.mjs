@@ -42,9 +42,9 @@ try{
  await click('#achievements');assert.equal(await page.locator('.achievement').count(),24);assert.match(await page.locator('.intro-copy').textContent(),/달성 \d+\/24/);await shot('achievements');await click('#achievements-close');
  await click('#fullscreen');await page.waitForFunction(()=>!!document.fullscreenElement);await click('#dungeons');
  const dungeonFit=await page.evaluate(()=>{const panel=document.querySelector('.dungeon-panel'),list=document.querySelector('.dungeon-list'),title=panel.querySelector('h2');return {panel:panel.scrollHeight<=panel.clientHeight,list:list.scrollHeight<=list.clientHeight,title:parseFloat(getComputedStyle(title).fontSize)};});
- assert.deepEqual(dungeonFit,{panel:true,list:true,title:27});await shot('dungeon-fullscreen-fit');await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
+ assert.equal(dungeonFit.panel,true);assert.equal(dungeonFit.title,23);assert.equal(await page.locator('.dungeon-card').count(),8);await page.locator('.event-card').scrollIntoViewIfNeeded();await shot('dungeon-fullscreen-fit');await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
  await click('[data-hero="6"]');assert.ok(await page.locator('#quiz-accept').isVisible());await click('#quiz-decline');assert.equal((await state()).hero,0);assert.ok(await page.locator('#launch').isVisible());
- checks.push('Achievement mini-button exposes 24 no-reward goals; fullscreen dungeon selection fits without scrolling; locked hero decline is safe');
+ checks.push('Achievement mini-button exposes 24 no-reward goals; fullscreen eight-destination selection keeps fixed actions and scrollable cards; locked hero decline is safe');
  await click('#library');await page.locator('#library-search').fill('amenities');await click('#library-all');
  assert.equal(await page.locator('#library-search').inputValue(),'');assert.equal(await page.locator('#library-page').textContent(),`1 / ${Math.ceil(LIBRARY.vocab.length/30)}`);
  let viewed=0;
