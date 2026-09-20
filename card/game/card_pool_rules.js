@@ -186,7 +186,7 @@
                 else missingIds.push(id);
             });
             return {
-                available: missingIds.length === 0 && !definition.ok === false,
+                available: missingIds.length === 0,
                 definitionError: false,
                 readyCount,
                 total: ids.length,
@@ -280,6 +280,10 @@
                 return { ok: false, code: 'missing' };
             }
             if (snapshot.source === 'mode_owned') return { ok: true, snapshot };
+            if (snapshot.source !== 'basic_set') return { ok: false, code: 'unknown_source' };
+            if (!Array.isArray(snapshot.baseCardIds) || !Array.isArray(snapshot.extraCardIds || [])) {
+                return { ok: false, code: 'invalid_ids' };
+            }
             const base = uniquePreserve(snapshot.baseCardIds);
             const extra = uniquePreserve(snapshot.extraCardIds);
             const map = byId(catalogue);
@@ -401,37 +405,6 @@
                 previewCount: analysis.kept.length
             };
         }
-    };
-
-    CardPoolRules.getSetAvailability = function (set, context) {
-        const catalogue = context && context.catalogue || [];
-        const definition = this.validateSetDefinition(set, catalogue);
-        const ids = definition.ok ? this.getSetBaseCardIds(set, catalogue) : [];
-        if (!definition.ok) {
-            return {
-                available: false,
-                definitionError: true,
-                readyCount: 0,
-                total: set && set.resolver === 'existing_original_base_card_predicate' ? 0 : NEW_SET_SIZE,
-                missingIds: [],
-                errors: definition.errors
-            };
-        }
-        const map = byId(catalogue);
-        const missingIds = [];
-        let readyCount = 0;
-        ids.forEach(id => {
-            if (this.isCardAvailable(map.get(id), context)) readyCount += 1;
-            else missingIds.push(id);
-        });
-        return {
-            available: missingIds.length === 0,
-            definitionError: false,
-            readyCount,
-            total: ids.length,
-            missingIds,
-            errors: []
-        };
     };
 
     window.CardPoolRules = CardPoolRules;

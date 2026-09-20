@@ -174,6 +174,8 @@
             return false;
         }
 
+        const previousStamp = this.global._storageStamp;
+        this.global._storageStamp = `${Date.now()}:${Math.random().toString(16).slice(2)}`;
         const ok = Storage.save(Storage.keys.GLOBAL, this.global);
         if (ok) {
             Storage.saveBackup(
@@ -182,6 +184,7 @@
                 (d) => this.validateGlobalData(d)
             );
         } else {
+            this.global._storageStamp = previousStamp;
             console.error('[RPG] GLOBAL save failed!');
             this.showAlert('⚠️ 저장 실패! 저장공간이 부족할 수 있습니다.');
         }
@@ -1038,7 +1041,15 @@
             }, extra);
         }
         const snap = this.state.runCardPool;
-        if (snap && snap.source === 'basic_set' && Array.isArray(snap.baseCardIds)) {
+        if (snap && snap.source === 'basic_set') {
+            if (!Array.isArray(snap.baseCardIds)) {
+                return Object.assign({
+                    baseCardIds: [],
+                    extraCardIds: [],
+                    specialCardSelections: special,
+                    activeEventCards: this.state.activeEventCards
+                }, extra);
+            }
             return Object.assign({
                 baseCardIds: snap.baseCardIds,
                 extraCardIds: snap.extraCardIds || [],
@@ -1105,20 +1116,23 @@
             return false;
         }
         const latest = Storage.loadDetailed(Storage.keys.GLOBAL);
-        if (latest.ok && latest.data && this.global._storageStamp && latest.data._storageStamp && latest.data._storageStamp !== this.global._storageStamp) {
+        const diskStamp = latest.ok && latest.data ? latest.data._storageStamp : null;
+        if (diskStamp && diskStamp !== this.global._storageStamp) {
             this._cardPoolEditorBusy = false;
             this.showAlert('다른 탭에서 저장 데이터가 바뀌었습니다. 덮어쓰지 않고 다시 확인하세요.');
             return false;
         }
-        if (latest.ok && latest.data) {
-            this.global = { ...this.global, ...latest.data };
-        }
-        this.global.cardPoolConfig = CardPoolRules.cloneConfig(draft);
-        this.global.cardPoolConfig.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = validated.extraCardIds.slice();
+        const nextConfig = CardPoolRules.cloneConfig(draft);
+        nextConfig.profiles[draft.selectedSetId].presets[profile.activePresetIndex].extraCardIds = validated.extraCardIds.slice();
+        const previousConfig = this.global.cardPoolConfig;
+        const previousPending = this.pendingActiveBonusPoolIds;
+        this.global.cardPoolConfig = nextConfig;
         this.pendingActiveBonusPoolIds = validated.extraCardIds.slice();
         const ok = this.saveGlobalData();
         this._cardPoolEditorBusy = false;
         if (!ok) {
+            this.global.cardPoolConfig = previousConfig;
+            this.pendingActiveBonusPoolIds = previousPending;
             this.showAlert('저장에 실패했습니다. 편집안을 유지합니다.');
             return false;
         }
@@ -1574,6 +1588,22 @@
                     + '새 게임을 시작하려면 타이틀에서 [새로하기]를 직접 선택해주세요.'
                 );
                 return;
+            }
+
+            if (typeof CardPoolRules !== 'undefined' && migratedState.runCardPool) {
+                const snapshotCheck = CardPoolRules.validateSavedRunSnapshot(
+                    migratedState.runCardPool,
+                    this.getCardPoolCatalogue()
+                );
+                if (!snapshotCheck.ok) {
+                    this.showAlert(
+                        '진행 중 런의 카드풀 스냅샷이 올바르지 않아 불러오기를 중단했습니다.<br>'
+                        + '기존 데이터는 변경하지 않았습니다.<br>'
+                        + '새 게임을 시작하려면 타이틀에서 [새로하기]를 직접 선택해주세요.'
+                    );
+                    return;
+                }
+                migratedState.runCardPool = snapshotCheck.snapshot;
             }
 
             this.state = migratedState;
