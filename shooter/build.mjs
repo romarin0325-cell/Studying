@@ -4,7 +4,18 @@ import { fileURLToPath } from 'node:url';
 import { prepareAssets } from './prepare-assets.mjs';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, 'dist');
-const assetReport = await prepareAssets({ outputDirectory: path.join(dist, 'assets') });
+const tmpAssets = path.join(root, '.build-assets');
+const assetReport = await prepareAssets({ outputDirectory: tmpAssets });
+
+let embeddedAssets = 'globalThis.ASTRAL_EMBEDDED_ASSETS = {\n';
+for (const fileInfo of assetReport.output.files) {
+  const filePath = path.join(tmpAssets, fileInfo.file);
+  const data = await fs.readFile(filePath);
+  const b64 = data.toString('base64');
+  embeddedAssets += `  "assets/${fileInfo.file}": "data:image/webp;base64,${b64}",\n`;
+}
+embeddedAssets += '};\n';
+
 // These five local modules are deliberately bundled without resolving parent directories,
 // keeping the offline exporter portable in restricted Windows folders as well.
 const modules = [
@@ -26,7 +37,10 @@ script += '})();';
 let html = await fs.readFile(path.join(root, 'index.html'), 'utf8');
 const css = await fs.readFile(path.join(root, 'style.css'), 'utf8');
 html = html.replace('<link rel="stylesheet" href="style.css">', `<style>${css}</style>`)
-  .replace('<script type="module" src="app.js"></script>', `<script>globalThis.ASTRAL_ASSET_ROOT='assets';</script><script>${script.replaceAll('</script', '<\\/script')}</script>`);
+  .replace('<script type="module" src="app.js"></script>', `<script>${embeddedAssets}globalThis.ASTRAL_ASSET_ROOT='assets';</script><script>${script.replaceAll('</script', '<\\/script')}</script>`);
 await fs.mkdir(dist, { recursive: true });
 const destination = path.join(dist, 'AstralBloom.html'); await fs.writeFile(destination, html);
+
+await fs.rm(tmpAssets, { recursive: true, force: true });
+
 console.log(`Offline game: ${destination} (${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB HTML, ${(assetReport.output.bytes / 1024 / 1024).toFixed(2)} MiB WebP assets)`);

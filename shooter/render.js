@@ -23,10 +23,12 @@ export async function loadArt() {
   const imageFor = url => {
     if (!pending.has(url)) pending.set(url, new Promise((resolve, reject) => {
       const image = new Image(); image.decoding = 'async';
-      image.onload = () => resolve(image); image.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${url}`)); image.src = url;
+      image.onload = () => resolve(image); image.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${url}`));
+      image.src = globalThis.ASTRAL_EMBEDDED_ASSETS?.[url] ?? url;
     }));
     return pending.get(url);
   };
+  result.getDecodedCount = () => pending.size;
   const assign = (url, image) => {
     for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx']) urls[key].forEach((value, index) => { if (value === url) result[key][index] = image; });
     if (urls.dark === url) result.dark = image;
