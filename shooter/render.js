@@ -1,4 +1,5 @@
 import { clamp, EVENT_DUNGEONS } from './content.js';
+import { createArtUrls } from './art-manifest.js';
 const TAU = Math.PI * 2;
 // Head landmarks exclude horns, ears, trailing hair and halos. Larger bodies stay larger.
 export const BOSS_PRESENTATION = [
@@ -14,107 +15,39 @@ function star(c, x, y, r, points = 4, rotation = 0) {
 }
 const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 export async function loadArt() {
-  const sources = globalThis.ASTRAL_ASSETS || { heroes: 'assets/heroes.png', bosses: 'assets/bosses.png', enemies: 'assets/enemies.png', worlds: 'assets/worlds.jpg', companions:'assets/companions.png', secrets:'assets/secrets.png',sentinels:'assets/sentinels.png',relics:'assets/relics.png',tides:'assets/tides.png','bloom-fx':'assets/bloom-fx.png','tide-worlds':'assets/tide-worlds.png','tide-relics':'assets/tide-relics.png','shield-relics':'assets/shield-relics.png',astea:'assets/astea.png','celestial-relics':'assets/celestial-relics.png','celestial-world':'assets/celestial-world.png','balance-relics':'assets/balance-relics.png' };
-  if(!globalThis.ASTRAL_ASSETS)for(const d of EVENT_DUNGEONS){sources[d.asset]=`assets/${d.asset}.png`;sources[d.asset+'-world']=`assets/${d.asset}-world.png`;}
-  const images = {};
-  await Promise.all(Object.entries(sources).map(([id, src]) => new Promise((resolve, reject) => {
-    const im = new Image(); im.onload = () => { images[id] = im; resolve(); }; im.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${id}`)); im.src = src;
-  })));
-  const result = { heroes: [], bosses: [], enemies: [], worlds: [], companions:[],secrets:[],sentinels:[],relics:[],tides:[],astea:[],'bloom-fx':[], urls: { heroes: [], bosses: [], worlds: [],relics:[] } };
-  for (const kind of ['heroes', 'bosses', 'enemies','companions','secrets','sentinels','relics','tides','bloom-fx','astea',...EVENT_DUNGEONS.map(d=>d.asset)]) {
-    const standalone=kind==='astea'||EVENT_DUNGEONS.some(d=>d.asset===kind);
-    if(!result[kind])result[kind]=[];
-    const columns=standalone?1:kind==='relics'?4:2;
-    for (let i = 0; i < columns*columns; i++) {
-      const sheet = images[kind], w = sheet.width * (kind==='secrets'&&i===0?.52:kind==='secrets'&&i===1?.46:1/columns);
-      const sourceX=kind==='secrets'&&i===1?sheet.width*.54:(i%columns)*w;
-      // The original companion export has Cinderella's shoe just below its nominal cell.
-      const top=kind==='tides'?(i<2?0:.53):kind==='companions'&&i===3?.54:kind==='companions'&&i===2?.51:Math.floor(i/columns)/columns;
-      const bottom=kind==='tides'?(i<2?.53:1):kind==='companions'&&i===1?.535:Math.floor(i/columns+1)/columns;
-      const h=sheet.height*(bottom-top);
-      const sw = Math.floor(w), sh = Math.floor(h), raw = canvas(sw, sh), rc = raw.getContext('2d', { willReadFrequently: true });
-      rc.drawImage(sheet, sourceX, top*sheet.height, w, h, 0, 0, sw, sh);
-      // Decode the chroma export once. Gameplay uses cached, genuinely transparent textures.
-      const pixels = rc.getImageData(0, 0, sw, sh), d = pixels.data;
-      const keyed = new Uint8Array(sw * sh);
-      for (let j = 0; j < d.length; j += 4) {
-        const r = d[j], g = d[j + 1], b = d[j + 2];
-        if (!['tides','bloom-fx'].includes(kind) && g > 150 && g > r * 1.7 && g > b * 1.65) {
-          keyed[j / 4] = 1;
-          const a = clamp((Math.max(r, b) - 45) / 80, 0, 1);
-          d[j + 3] = Math.round(a * 255); d[j + 1] = Math.min(g, Math.max(r, b) * 1.12);
-        }
-      }
-      // Despill the adjacent antialiased edge before resizing, so green never bleeds
-      // into a white cloak when the texture is filtered at mobile sprite sizes.
-      for (let y = 1; y < sh - 1; y++) for (let x = 1; x < sw - 1; x++) {
-        const p = y * sw + x, j = p * 4;
-        if (!keyed[p] && (keyed[p - 1] || keyed[p + 1] || keyed[p - sw] || keyed[p + sw])) {
-          const strongest = Math.max(d[j], d[j + 2]), spill = d[j + 1] - strongest;
-          if (spill > 12) { d[j + 1] = strongest + 5; d[j + 3] = Math.round(d[j + 3] * (1 - clamp((spill - 12) / 230, 0, .8))); }
-        }
-      }
-      rc.putImageData(pixels, 0, 0);
-      const character=['heroes','companions','secrets'].includes(kind),size=character?512:384;
-      const cut = canvas(size, size), c = cut.getContext('2d');
-      if(character) {
-        let x0=sw,y0=sh,x1=0,y1=0;
-        for(let y=0;y<sh;y++)for(let x=0;x<sw;x++)if(d[(y*sw+x)*4+3]>30){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}
-        // Measured face widths, not cape/ear bounding boxes, determine the cast scale.
-        const faces={heroes:[.106,.102,.099,.101],companions:[.13,.110,.119,.105],secrets:[.078,.100,.103,.35]};
-        const target=kind==='secrets'&&i===0?73:100;
-        const w=x1-x0+1,h=y1-y0+1,scale=kind==='secrets'&&i===3?470/Math.max(w,h):Math.min(target/(sheet.width*faces[kind][i]),470/Math.max(w,h));
-        c.drawImage(raw,x0,y0,w,h,(size-w*scale)/2,(size-h*scale)/2,w*scale,h*scale);
-      }else if(standalone){const scale=384/Math.max(sw,sh);c.drawImage(raw,(384-sw*scale)/2,(384-sh*scale)/2,sw*scale,sh*scale);}
-      else c.drawImage(raw, 0, 0, 384, 384);
-      result[kind].push(cut);
-      if (result.urls[kind]) result.urls[kind].push(cut.toDataURL('image/png'));
-    }
-  }
-  result.heroes.push(result.companions[0],result.companions[1],result.companions[2],result.secrets[0],result.secrets[1]);
-  result.dark=result.secrets[2];result.sigil=result.secrets[3];
-  result.urls.heroes=result.heroes.map(c=>c.toDataURL('image/png'));
-  for (let i = 0; i < 4; i++) {
-    const im = images.worlds, cut = canvas(450, 1200), c = cut.getContext('2d');
-    c.drawImage(im, i * im.width / 4, 0, im.width / 4, im.height, 0, 0, 450, 1200);
-    result.worlds.push(cut); result.urls.worlds.push(cut.toDataURL('image/jpeg', .87));
-  }
-  // New transparent art is decoded once; no per-frame image filters or allocations.
-  result.bosses.splice(3,0,result.tides[0],result.tides[1]);
-  result.sentinels.splice(3,0,result.tides[2],result.tides[3]);
-  result.enemies.splice(3,0,result.tides[2],result.tides[3]);
-  const extraWorlds=[];
-  for(let i=0;i<2;i++){const im=images['tide-worlds'],cut=canvas(450,1200);cut.getContext('2d').drawImage(im,i*im.width/2,0,im.width/2,im.height,0,0,450,1200);extraWorlds.push(cut);}
-  result.worlds.splice(3,0,...extraWorlds);result.urls.worlds=result.worlds.map(c=>c.toDataURL('image/jpeg',.87));
-  result.bosses.push(result.astea[0]);result.enemies.push(result.enemies[1]);result.sentinels.push(result.sentinels[1]);
-  const celestial=canvas(450,1200);celestial.getContext('2d').drawImage(images['celestial-world'],0,0,450,1200);result.worlds.push(celestial);result.urls.worlds.push(celestial.toDataURL('image/jpeg',.87));
-  for(const d of EVENT_DUNGEONS){
-    result.bosses.push(result[d.asset][0]);result.enemies.push(result.enemies[d.specialType]);result.sentinels.push(result.sentinels[d.specialType]);
-    const world=canvas(450,1200);world.getContext('2d').drawImage(images[d.asset+'-world'],0,0,450,1200);result.worlds.push(world);result.urls.worlds.push(world.toDataURL('image/jpeg',.87));
-  }
-  result.urls.bosses=result.bosses.map(c=>c.toDataURL('image/png'));
-  const darkFairy=canvas(512,512),df=darkFairy.getContext('2d');df.filter='invert(1)';df.drawImage(result.companions[3],0,0,512,512);result.darkFairy=darkFairy;
-  for(let i=0;i<6;i++){
-    const icon=canvas(384,384),c=icon.getContext('2d'),sheet=images['tide-relics'];
-    c.drawImage(sheet,(i%3)*sheet.width/3,Math.floor(i/3)*sheet.height/2,sheet.width/3,sheet.height/2,0,0,384,384);
-    result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));
-  }
-  // Append the ten new relics in catalog order and replace the old flat magnet.
-  const relicBounds=[[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
-  for(let i=0;i<11;i++){
-    const icon=canvas(192,192),c=icon.getContext('2d'),sheet=images['shield-relics'];
-    const [x,y,w,h]=relicBounds[i],scale=180/Math.max(w,h);c.fillStyle='#142036';c.fillRect(0,0,192,192);
-    c.drawImage(sheet,x/1448*sheet.width,y/1086*sheet.height,w/1448*sheet.width,h/1086*sheet.height,(192-w*scale)/2,(192-h*scale)/2,w*scale,h*scale);
-    const index=i===10?15:22+i;result.relics[index]=icon;result.urls.relics[index]=icon.toDataURL('image/png');
-  }
-  for(let i=0;i<4;i++){
-    const icon=canvas(192,192),im=images['celestial-relics'],c=icon.getContext('2d');
-    // The miracle star sits above its nominal atlas-cell center; center the artwork, not the cell.
-    const box=i===2?[.008,.455,.484,.484]:[i%2/2,Math.floor(i/2)/2,.5,.5];
-    c.drawImage(im,box[0]*im.width,box[1]*im.height,box[2]*im.width,box[3]*im.height,0,0,192,192);
-    result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));
-  }
-  for(let i=0;i<6;i++){const icon=canvas(192,192),im=images['balance-relics'];icon.getContext('2d').drawImage(im,i%3*im.width/3,Math.floor(i/3)*im.height/2,im.width/3,im.height/2,0,0,192,192);result.relics.push(icon);result.urls.relics.push(icon.toDataURL('image/png'));}
+  const urls = createArtUrls(globalThis.ASTRAL_ASSET_ROOT || 'dist/assets');
+  const result = { ...urls };
+  for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx']) result[key] = Array(urls[key].length);
+  result['bloom-fx'] = result.bloomFx;
+  const pending = new Map();
+  const imageFor = url => {
+    if (!pending.has(url)) pending.set(url, new Promise((resolve, reject) => {
+      const image = new Image(); image.decoding = 'async';
+      image.onload = () => resolve(image); image.onerror = () => reject(new Error(`그림을 불러올 수 없어요: ${url}`)); image.src = url;
+    }));
+    return pending.get(url);
+  };
+  const assign = (url, image) => {
+    for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx']) urls[key].forEach((value, index) => { if (value === url) result[key][index] = image; });
+    if (urls.dark === url) result.dark = image;
+    if (urls.sigil === url) result.sigil = image;
+    if (urls.darkFairy === url) result.darkFairy = image;
+  };
+  const loadQueued = async paths => {
+    const queue = [...new Set(paths.filter(Boolean))]; let cursor = 0;
+    const worker = async () => { while (cursor < queue.length) { const url = queue[cursor++]; assign(url, await imageFor(url)); } };
+    await Promise.all(Array.from({ length: Math.min(3, queue.length) }, worker));
+  };
+  result.ensureStage = async stage => {
+    const event = EVENT_DUNGEONS.find(dungeon => dungeon.id === stage);
+    const enemyIndex = event?.specialType ?? stage;
+    await loadQueued([urls.worlds[stage], urls.bosses[stage], urls.enemies[enemyIndex], urls.sentinels[enemyIndex]]);
+  };
+  result.ensureGameplay = async ({ stage, hero, challenge }) => {
+    await loadQueued([urls.heroes[hero], urls.heroes[1], urls.dark, urls.sigil, urls.companions[3], urls.darkFairy, ...urls.bloomFx]);
+    await result.ensureStage(stage);
+    if (challenge) void result.ensureStage(stage + 1);
+  };
   // A transparent cached effect keeps the hitbox readable without per-frame filters.
   const barrier=canvas(192,192),bc=barrier.getContext('2d');
   const glow=bc.createRadialGradient(96,96,58,96,96,88);glow.addColorStop(0,'#79eaff00');glow.addColorStop(.75,'#79eaff22');glow.addColorStop(1,'#79eaff00');bc.fillStyle=glow;bc.fillRect(0,0,192,192);

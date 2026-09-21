@@ -1,0 +1,737 @@
+{
+  "source": {
+    "fileCount": 27,
+    "bytes": 61495245,
+    "files": [
+      {
+        "file": "heroes.png",
+        "bytes": 2016633
+      },
+      {
+        "file": "bosses.png",
+        "bytes": 2286849
+      },
+      {
+        "file": "enemies.png",
+        "bytes": 2169086
+      },
+      {
+        "file": "worlds.jpg",
+        "bytes": 582051
+      },
+      {
+        "file": "companions.png",
+        "bytes": 2008173
+      },
+      {
+        "file": "secrets.png",
+        "bytes": 2158715
+      },
+      {
+        "file": "sentinels.png",
+        "bytes": 2751579
+      },
+      {
+        "file": "relics.png",
+        "bytes": 2190910
+      },
+      {
+        "file": "tides.png",
+        "bytes": 2938804
+      },
+      {
+        "file": "bloom-fx.png",
+        "bytes": 2492814
+      },
+      {
+        "file": "tide-worlds.png",
+        "bytes": 3424557
+      },
+      {
+        "file": "tide-relics.png",
+        "bytes": 2558127
+      },
+      {
+        "file": "shield-relics.png",
+        "bytes": 2215251
+      },
+      {
+        "file": "astea.png",
+        "bytes": 1833451
+      },
+      {
+        "file": "celestial-relics.png",
+        "bytes": 2221479
+      },
+      {
+        "file": "celestial-world.png",
+        "bytes": 2672808
+      },
+      {
+        "file": "balance-relics.png",
+        "bytes": 2436055
+      },
+      {
+        "file": "harmonious.png",
+        "bytes": 1642897
+      },
+      {
+        "file": "harmonious-world.png",
+        "bytes": 2694129
+      },
+      {
+        "file": "gold-dragon.png",
+        "bytes": 1944642
+      },
+      {
+        "file": "gold-dragon-world.png",
+        "bytes": 2580357
+      },
+      {
+        "file": "ancient-soul.png",
+        "bytes": 1718057
+      },
+      {
+        "file": "ancient-soul-world.png",
+        "bytes": 2826303
+      },
+      {
+        "file": "behemoth.png",
+        "bytes": 1845485
+      },
+      {
+        "file": "behemoth-world.png",
+        "bytes": 2491017
+      },
+      {
+        "file": "time-ruler.png",
+        "bytes": 1895311
+      },
+      {
+        "file": "time-ruler-world.png",
+        "bytes": 2899705
+      }
+    ]
+  },
+  "output": {
+    "fileCount": 94,
+    "bytes": 5319036,
+    "format": "webp",
+    "files": [
+      {
+        "file": "heroes/0.webp",
+        "bytes": 59354,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "heroes/1.webp",
+        "bytes": 57456,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "heroes/2.webp",
+        "bytes": 61048,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "heroes/3.webp",
+        "bytes": 61914,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "bosses/0.webp",
+        "bytes": 45942,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bosses/1.webp",
+        "bytes": 65854,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bosses/2.webp",
+        "bytes": 68902,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bosses/3.webp",
+        "bytes": 71324,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "enemies/0.webp",
+        "bytes": 52278,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "enemies/1.webp",
+        "bytes": 57748,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "enemies/2.webp",
+        "bytes": 50246,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "enemies/3.webp",
+        "bytes": 48148,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "companions/0.webp",
+        "bytes": 50696,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "companions/1.webp",
+        "bytes": 73608,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "companions/2.webp",
+        "bytes": 40362,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "companions/3.webp",
+        "bytes": 78964,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "companions/dark-fairy.webp",
+        "bytes": 79012,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "secrets/0.webp",
+        "bytes": 67686,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "secrets/1.webp",
+        "bytes": 59406,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "secrets/2.webp",
+        "bytes": 74272,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "secrets/3.webp",
+        "bytes": 99782,
+        "width": 512,
+        "height": 512
+      },
+      {
+        "file": "sentinels/0.webp",
+        "bytes": 77304,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "sentinels/1.webp",
+        "bytes": 74186,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "sentinels/2.webp",
+        "bytes": 77710,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "sentinels/3.webp",
+        "bytes": 78328,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/0.webp",
+        "bytes": 36742,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/1.webp",
+        "bytes": 29332,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/2.webp",
+        "bytes": 33928,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/3.webp",
+        "bytes": 22060,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/4.webp",
+        "bytes": 32806,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/5.webp",
+        "bytes": 38434,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/6.webp",
+        "bytes": 35574,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/7.webp",
+        "bytes": 28434,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/8.webp",
+        "bytes": 29110,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/9.webp",
+        "bytes": 20924,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/10.webp",
+        "bytes": 30812,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/11.webp",
+        "bytes": 43804,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/12.webp",
+        "bytes": 40084,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/13.webp",
+        "bytes": 29402,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/14.webp",
+        "bytes": 31024,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "relics/15.webp",
+        "bytes": 29686,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tides/0.webp",
+        "bytes": 88342,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tides/1.webp",
+        "bytes": 98744,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tides/2.webp",
+        "bytes": 100626,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tides/3.webp",
+        "bytes": 104526,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bloom-fx/0.webp",
+        "bytes": 99472,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bloom-fx/1.webp",
+        "bytes": 88840,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bloom-fx/2.webp",
+        "bytes": 97878,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "bloom-fx/3.webp",
+        "bytes": 85724,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "astea/0.webp",
+        "bytes": 58356,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "harmonious/0.webp",
+        "bytes": 52960,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "gold-dragon/0.webp",
+        "bytes": 63076,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "ancient-soul/0.webp",
+        "bytes": 56690,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "behemoth/0.webp",
+        "bytes": 61848,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "time-ruler/0.webp",
+        "bytes": 57558,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "worlds/0.webp",
+        "bytes": 106680,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "worlds/1.webp",
+        "bytes": 117224,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "worlds/2.webp",
+        "bytes": 86724,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "worlds/3.webp",
+        "bytes": 105336,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "tide-worlds/0.webp",
+        "bytes": 160438,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "tide-worlds/1.webp",
+        "bytes": 152546,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "celestial-world/0.webp",
+        "bytes": 143146,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "harmonious-world/0.webp",
+        "bytes": 135842,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "gold-dragon-world/0.webp",
+        "bytes": 120818,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "ancient-soul-world/0.webp",
+        "bytes": 143702,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "behemoth-world/0.webp",
+        "bytes": 107600,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "time-ruler-world/0.webp",
+        "bytes": 159734,
+        "width": 450,
+        "height": 1200
+      },
+      {
+        "file": "tide-relics/0.webp",
+        "bytes": 52208,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tide-relics/1.webp",
+        "bytes": 55682,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tide-relics/2.webp",
+        "bytes": 53480,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tide-relics/3.webp",
+        "bytes": 51548,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tide-relics/4.webp",
+        "bytes": 36620,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "tide-relics/5.webp",
+        "bytes": 54112,
+        "width": 384,
+        "height": 384
+      },
+      {
+        "file": "shield-relics/0.webp",
+        "bytes": 11990,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/1.webp",
+        "bytes": 12256,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/2.webp",
+        "bytes": 9946,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/3.webp",
+        "bytes": 6630,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/4.webp",
+        "bytes": 9318,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/5.webp",
+        "bytes": 8724,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/6.webp",
+        "bytes": 9330,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/7.webp",
+        "bytes": 9876,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/8.webp",
+        "bytes": 13762,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/9.webp",
+        "bytes": 10436,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "shield-relics/10.webp",
+        "bytes": 11746,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "celestial-relics/0.webp",
+        "bytes": 9102,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "celestial-relics/1.webp",
+        "bytes": 8832,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "celestial-relics/2.webp",
+        "bytes": 9400,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "celestial-relics/3.webp",
+        "bytes": 10046,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/0.webp",
+        "bytes": 9882,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/1.webp",
+        "bytes": 7848,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/2.webp",
+        "bytes": 12276,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/3.webp",
+        "bytes": 10858,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/4.webp",
+        "bytes": 10564,
+        "width": 192,
+        "height": 192
+      },
+      {
+        "file": "balance-relics/5.webp",
+        "bytes": 14448,
+        "width": 192,
+        "height": 192
+      }
+    ]
+  },
+  "reduction": {
+    "bytes": 56176209,
+    "percent": 91.35
+  },
+  "qualityProbes": [
+    {
+      "source": "heroes.png",
+      "sourceBytes": 2016633,
+      "qualities": [
+        {
+          "quality": 72,
+          "bytes": 165002
+        },
+        {
+          "quality": 80,
+          "bytes": 198712
+        },
+        {
+          "quality": 88,
+          "bytes": 262918
+        },
+        {
+          "quality": 94,
+          "bytes": 354496
+        }
+      ]
+    },
+    {
+      "source": "worlds.jpg",
+      "sourceBytes": 582051,
+      "qualities": [
+        {
+          "quality": 72,
+          "bytes": 255800
+        },
+        {
+          "quality": 80,
+          "bytes": 324742
+        },
+        {
+          "quality": 88,
+          "bytes": 459294
+        },
+        {
+          "quality": 94,
+          "bytes": 631678
+        }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import {LIBRARY} from '../learning.js';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
-const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__shields={get game(){return game},get profile(){return profile},get art(){return art},renderer,ARTIFACTS,save};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__shields={get game(){return game},get profile(){return profile},get art(){return art},renderer,ARTIFACTS,save};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(html,original);await fs.mkdir(new URL('artifacts/',root),{recursive:true});
 const file=new URL('artifacts/shields-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],network=[],checks=[];
@@ -31,7 +31,7 @@ try{
  for(const id of ['clover','slipper','dew'])await click(`[data-artifact="${id}"]`);
  assert.equal(await page.locator('[data-artifact].selected').count(),3);await shot('selected-relics');await click('#equipment-done');
  await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('P 세 개'));await click('#help-done');
- await click('[data-hero="0"]');await click('#launch');await page.clock.runFor(2600);
+ await click('[data-hero="0"]');await click('#launch');await page.waitForFunction(()=>__shields.game?.phase==='wave');await page.clock.runFor(2600);
  await page.evaluate(()=>{const g=__shields.game;g.phase='boss';g.enemies=[];g.bullets=[];g.player.fire=999;g.player.invincible=0;});
  await page.clock.runFor(100);assert.ok(await page.locator('#barrier-status').isVisible());await shot('barrier-active');
  const before=await page.evaluate(()=>{const g=__shields.game;return [g.player.lives,g.bombs,g.power];});

@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import {weeklyEvent} from '../meta.js';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
-const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__events={get game(){return game},get art(){return art},get renderer(){return renderer},profile,saved,save,showSortie,finish,weeklyEvent,BOSS_PRESENTATION,STAGES};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__events={get game(){return game},get art(){return art},get renderer(){return renderer},profile,saved,save,showSortie,finish,weeklyEvent,BOSS_PRESENTATION,STAGES};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(html,original);await fs.mkdir(new URL('artifacts/',root),{recursive:true});
 const file=new URL('artifacts/events-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],network=[],checks=[];
@@ -24,7 +24,7 @@ try {
     const card=page.locator('.event-card');assert.equal(await card.getAttribute('data-dungeon'),String(id));assert.match(await card.innerText(),new RegExp(weeklyEvent(new Date(time)).name));
     await click(`[data-dungeon="${id}"]`);await click('[data-difficulty="hard"]');await shot(`menu-${id}`);await click('#dungeon-done');
     assert.match(await page.locator('#dungeons').innerText(),new RegExp(weeklyEvent(new Date(time)).name));
-    const before=await page.evaluate(()=>__events.profile.tickets.length);await click('#launch');
+    const before=await page.evaluate(()=>__events.profile.tickets.length);await click('#launch');await page.waitForFunction(()=>__events.game?.phase==='wave');
     for(let room=0;room<3;room++){
       assert.deepEqual(await page.evaluate(()=>[__events.game.stageIndex,__events.game.room]),[id,room]);
       await page.evaluate(()=>{const g=__events.game;g.player.fire=999;g.player.invincible=999;g.phase='wave';if(g.room===2){g.spawnBoss();g.phase='boss';g.boss.y=155;}else g.clearRoom();});
@@ -54,20 +54,10 @@ try {
   const tickets=await page.evaluate(()=>__events.profile.tickets.length);await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>__events.profile.tickets.length),tickets);
   await page.locator('#random-hero').scrollIntoViewIfNeeded();
   const sigil=await page.locator('.random-sigil').evaluate(el=>{const a=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {center:a.top+a.height/2,expected:p.top+(p.height-20)/2};});assert.ok(Math.abs(sigil.center-sigil.expected)<4);await shot('random-sigil');
-  // Production-scale contact sheet: scaling and offsets are exactly those used by Renderer.draw.
-  const png=await page.evaluate(()=>{
-    const {art,BOSS_PRESENTATION,STAGES}=__events,c=document.createElement('canvas');c.width=1800;c.height=1000;const x=c.getContext('2d');x.fillStyle='#15243c';x.fillRect(0,0,c.width,c.height);
-    for(let i=0;i<12;i++){
-      const col=i%6,row=Math.floor(i/6),cx=col*300+150,cy=row*500+150,p=BOSS_PRESENTATION[i],size=p.size*1.2;
-      x.strokeStyle='#7ca5c333';x.beginPath();x.moveTo(col*300,row*500+100);x.lineTo(col*300+300,row*500+100);x.stroke();
-      x.drawImage(art.bosses[i],cx-size/2,cy+p.offsetY*1.2-size/2,size,size);
-      x.font='17px sans-serif';x.textAlign='center';x.fillStyle='#e6efff';x.fillText(STAGES[i].boss,cx,row*500+410);x.font='13px sans-serif';x.fillStyle='#acbed5';x.fillText(`${i<6?'기존 기준':'새 에셋'} · ${p.size}px`,cx,row*500+438);
-      // Enlarged face/hand inspection belongs to source review, not this overview.
-    }
-    return c.toDataURL('image/png').split(',')[1];
-  });
-  await fs.writeFile(new URL('artifacts/boss-style-comparison.png',root),Buffer.from(png,'base64'));
-  const relic=await page.evaluate(()=>__events.art.urls.relics[34].split(',')[1]);await fs.writeFile(new URL('artifacts/miracle-centered.png',root),Buffer.from(relic,'base64'));
+  // Production-scale contact sheet: native images avoid a file:// canvas export while preserving Renderer.draw scales and offsets.
+  await page.evaluate(()=>{const {art,BOSS_PRESENTATION,STAGES}=__events;document.body.innerHTML='<main id="boss-style-comparison" style="display:grid;grid-template-columns:repeat(6,300px);grid-template-rows:repeat(2,500px);width:1800px;background:#15243c;color:#e6efff;font:17px sans-serif"></main>';for(let i=0;i<12;i++){const p=BOSS_PRESENTATION[i],cell=document.createElement('section');cell.style='position:relative;border-top:1px solid #7ca5c333;text-align:center';cell.innerHTML=`<img src="${art.urls.bosses[i]}" style="position:absolute;top:${100+p.offsetY*1.2}px;left:${150-p.size*.6}px;width:${p.size*1.2}px;height:${p.size*1.2}px;object-fit:contain"><b style="position:absolute;top:410px;left:0;width:100%">${STAGES[i].boss}</b><small style="position:absolute;top:438px;left:0;width:100%;color:#acbed5">${i<6?'기존 기준':'새 에셋'} · ${p.size}px</small>`;document.querySelector('#boss-style-comparison').append(cell);}});
+  await page.setViewportSize({width:1800,height:1000});await page.locator('#boss-style-comparison img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await page.screenshot({path:fileURLToPath(new URL('artifacts/boss-style-comparison.png',root))});
+  const relic=await page.evaluate(()=>__events.art.urls.relics[34]);await fs.copyFile(new URL(relic,new URL('dist/',root)),new URL('artifacts/miracle-centered.webp',root));
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push('Weekly rollover, persisted rewards, centered random sigil, twelve-boss production-scale comparison and miracle crop captured offline');
   await fs.writeFile(new URL('artifacts/events-flow.json',root),JSON.stringify({checks,errors,network},null,2));console.log(JSON.stringify({checks,errors,network},null,2));
 } finally {await browser.close();}

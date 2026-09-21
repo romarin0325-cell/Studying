@@ -7,7 +7,7 @@ try {
   const page=await browser.newPage({viewport:{width:1600,height:700}});
   await page.goto(new URL('dist/AstralBloom.html',root).href);await page.waitForFunction(()=>astralDiagnostics?.ready);
   const png=await page.evaluate(async()=>{
-    const im=new Image();im.src=ASTRAL_ASSETS.astea;await im.decode();
+    const im=new Image();im.src='assets/astea/0.webp';await im.decode();
     const c=document.createElement('canvas');c.width=1600;c.height=700;const x=c.getContext('2d');x.fillStyle='#15243c';x.fillRect(0,0,1600,700);
     const boxes=[[.27,.455,.15,.13],[.61,.445,.16,.13],[.385,.165,.21,.2]];
     const labels=['옷자락을 잡은 손','펼친 손 — 엄지 1 + 손가락 4','얼굴과 머리 비율'];

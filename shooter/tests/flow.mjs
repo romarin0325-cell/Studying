@@ -6,7 +6,7 @@ import {LIBRARY} from '../learning.js';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
 // Only this test copy exposes the run for deterministic combat setup. Production
 // output has no bridge. Quiz UI, persistence, rewards and renderer are unchanged.
-const harness=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'", "globalThis.__flow={get game(){return game},get profile(){return profile}};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const harness=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'", "globalThis.__flow={get game(){return game},get profile(){return profile}};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(harness,original);await fs.mkdir(new URL('artifacts/',root),{recursive:true});
 const file=new URL('artifacts/flow-offline.html',root);await fs.writeFile(file,harness);
 const browser=await chromium.launch({headless:true}),checks=[],errors=[];

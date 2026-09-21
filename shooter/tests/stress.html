@@ -4,8 +4,8 @@
 import {Game} from '../engine.js';
 import {Renderer,loadArt} from '../render.js';
 import {LIMITS} from '../content.js';
-// Asset URLs are rooted for the dedicated local development server.
-globalThis.ASTRAL_ASSETS=Object.fromEntries(['heroes','bosses','enemies','worlds','companions','secrets','sentinels','relics','tides','bloom-fx','tide-worlds','tide-relics','shield-relics','astea','celestial-relics','celestial-world'].map(name=>[name,`/assets/${name}.${name==='worlds'?'jpg':'png'}`]));
+// Preprocessed release assets are adjacent to the build directory.
+globalThis.ASTRAL_ASSET_ROOT='../dist/assets';
 const art=await loadArt(),renderer=new Renderer(document.getElementById('world'),art);
 const params=new URLSearchParams(location.search),hero=Number(params.get('hero')||7);
 const g=new Game({hero,weapon:1,stage:5,artifacts:['leaf','mirror','core'],height:renderer.height});

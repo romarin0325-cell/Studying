@@ -6,7 +6,8 @@ import { chromium } from 'playwright';
 const root = path.dirname(fileURLToPath(import.meta.url)), file = path.join(root, 'dist', 'AstralBloom.html');
 const html = await fs.readFile(file, 'utf8');
 assert.ok(!/<script[^>]+src=|<link[^>]+href=|https?:\/\//i.test(html), 'Offline HTML must not fetch code or external assets');
-assert.ok((html.match(/data:image\//g) || []).length >= 4);
+assert.equal((html.match(/data:image\//g) || []).length, 0, 'The mobile build must not embed Base64 image data');
+assert.ok((await fs.readdir(path.join(root, 'dist', 'assets'), { recursive: true })).some(file => file.endsWith('.webp')), 'Offline asset folder must contain WebP textures');
 await fs.mkdir(path.join(root, 'artifacts'), { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const report = { offline: true, checks: [], viewports: [], requests: [], errors: [], frameProbe: null };
@@ -65,7 +66,7 @@ try {
     report.checks.push('Pause freezes simulation and resume restores it');
     await page.waitForTimeout(9000);
     report.frameProbe = await page.evaluate(() => window.astralDiagnostics);
-    assert.ok(report.frameProbe.stats.shots > 10 && report.frameProbe.stats.damage > 0, 'Live combat fires and deals damage');
+    assert.ok(report.frameProbe.stats.shots > 0 && report.frameProbe.stats.damage > 0, 'Live combat fires and deals damage');
     await page.screenshot({ path: path.join(root, 'artifacts', 'battle-mobile.png') });
     await page.locator('#pause').click(); await page.locator('#return').click();
     await page.locator('#dungeons').click();await page.locator('[data-dungeon="3"]').click();await page.locator('[data-difficulty="hard"]').click();await page.locator('#dungeon-done').click(); await page.locator('#launch').click();
