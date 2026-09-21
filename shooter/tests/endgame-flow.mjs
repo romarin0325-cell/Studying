@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
-const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__end={get game(){return game},get profile(){return profile},get art(){return art},Game,save};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__end={get game(){return game},get profile(){return profile},get art(){return art},Game,save};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(html,original);const file=new URL('artifacts/endgame-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],network=[],checks=[];
 try{
@@ -37,17 +37,17 @@ try{
  // Ordinary departures remain possible after exhaustion, and Corona replaces HUD/help/actual behavior.
  await page.evaluate(()=>{__end.profile.randomDraws.count=10;__end.profile.owned.push('sun');__end.profile.equipped=['sun'];__end.save();});
  await click('[data-hero="0"]');await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('코로나'));await click('#help-done');
- await click('#launch');await page.clock.runFor(2800);await click('#bomb');assert.equal(await page.locator('#bomb-label').textContent(),'코로나');await page.clock.runFor(350);await shot('corona');
+ await click('#launch');await page.waitForFunction(()=>__end.game?.phase==='wave');await page.clock.runFor(2800);await click('#bomb');assert.equal(await page.locator('#bomb-label').textContent(),'코로나');await page.clock.runFor(350);await shot('corona');
  await click('#pause');await click('#return');
  // Render and fight every new boss in the actual offline canvas. Use a resilient test-only target.
  for(const stage of [3,4,5]){
-  await click('#dungeons');await click(`[data-dungeon="${stage}"]`);await click('#dungeon-done');await click('#launch');await page.clock.runFor(2800);
+  await click('#dungeons');await click(`[data-dungeon="${stage}"]`);await click('#dungeon-done');await click('#launch');await page.waitForFunction(()=>__end.game?.phase==='wave');await page.clock.runFor(2800);
   await page.evaluate(()=>{const g=__end.game;g.player.invincible=999;g.player.fire=999;g.spawnBoss();g.phase='boss';g.boss.y=150;g.boss.hp=g.boss.maxHp*.5;});
   await page.clock.runFor(1700);if(stage===4){assert.ok(await page.evaluate(()=>__end.game.hazards.some(h=>h.axis==='horizontal')));}
   await shot(`boss-${stage}`);await click('#pause');await click('#return');
  }
  await page.evaluate(()=>{__end.profile.equipped=[];__end.save();});
- await page.clock.setFixedTime(new Date(2026,8,13,12));await click('[data-hero="2"]');await click('#launch');await page.clock.runFor(2800);await click('#bomb');await page.clock.runFor(350);await shot('phoenix');
+ await page.clock.setFixedTime(new Date(2026,8,13,12));await click('[data-hero="2"]');await click('#launch');await page.waitForFunction(()=>__end.game?.phase==='wave');await page.clock.runFor(2800);await click('#bomb');await page.clock.runFor(350);await shot('phoenix');
  checks.push('Corona overrides help/HUD and launches without random uses; all six-dungeon assets render; Poseidon cross and phoenix render offline');
  await page.evaluate(()=>{
   const art=__end.art;document.body.innerHTML='<main id="atlas" style="display:grid;grid-template-columns:repeat(3,1fr);background:#14233c"></main>';

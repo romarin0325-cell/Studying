@@ -20,7 +20,7 @@ let chosenHero = clamp(Number(preferences.hero) || 0, 0, HEROES.length-1), chose
 if(!heroAvailable(profile,chosenHero)) chosenHero=dailyHeroes()[0];
 let difficulty = normalizeDifficulty(preferences.mode);
 audio.enabled = preferences.sound !== false;
-let art, renderer, game = null, paused = false, raf = 0, last = 0, accumulator = 0, hudTimer = 0;
+let art, renderer, game = null, paused = false, raf = 0, last = 0, accumulator = 0, hudTimer = 0, assetLoadPending = false;
 let announcementTimer = 0, toastTimer = 0, pointer = null, keys = new Set(), frameSamples = [], startingStage = 0;
 let runCount = 0;
 let menus;
@@ -110,7 +110,7 @@ function showHelp(launchAfter) {
     <button class="primary" id="help-done">${launchAfter ? (chosenRandom ? '수호자 만나기' : '준비됐어요 · 출격') : '알겠어요'}</button>`);
   $('help-done').onclick = () => { saved.tutorial = true; save(); closeModal(); if (launchAfter) startGame(); };
 }
-function startGame(stage = chosenStage, randomResolved = false) {
+async function startGame(stage = chosenStage, randomResolved = false) {
   if(chosenRandom && !randomResolved){
     const draw=consumeRandom(profile);
     if(draw===null){setModal('<h2>오늘의 만남을 모두 사용했어요</h2><p class="intro-copy">랜덤 출격은 하루 10회예요. 자정 이후 다시 만날 수 있어요. 일반 캐릭터로는 계속 출격할 수 있어요.</p><button class="primary" id="random-limit-return">출격 준비로</button>');$('random-limit-return').onclick=showSortie;return;}
@@ -123,6 +123,15 @@ function startGame(stage = chosenStage, randomResolved = false) {
   if(!chosenRandom && !heroAvailable(profile,chosenHero)) {menus.chooseHero(chosenHero,()=>startGame(stage),showSortie);return;}
   runRewardDate=new Date();
   if(DUNGEONS[stage]?.event)chosenStage=stage=weeklyEvent(runRewardDate).id;
+  if(assetLoadPending)return;
+  assetLoadPending=true;
+  const loading=$('loading');loading.hidden=false;loading.querySelector('p').textContent='출격에 필요한 별빛을 불러오는 중';
+  try {
+    await art.ensureGameplay({stage,hero:chosenHero,challenge:chosenChallenge});
+  } catch (error) {
+    loading.hidden=true;assetLoadPending=false;toast(`그림을 불러오지 못했어요: ${error.message}`);return;
+  }
+  loading.hidden=true;assetLoadPending=false;
   cancelAnimationFrame(raf); closeModal(); hideAnnouncement(); audio.start();
   screen.hidden = true; hud.hidden = false; world.style.display = 'block'; renderer.resize();
   paused = false; keys.clear(); pointer = null; accumulator = 0; last = 0; frameSamples = []; startingStage = stage;
@@ -196,17 +205,20 @@ function pauseGame() {
 }
 function resumeGame() { if (!game || !paused) return; paused = false; closeModal(); audio.start(); last = 0; accumulator = 0; raf = requestAnimationFrame(frame); }
 function continueFlight() {closeModal();audio.start();renderHud();last=0;accumulator=0;keys.clear();pointer=null;raf=requestAnimationFrame(frame);}
-function resolveStageQuiz(reward=null){game.completeQuiz(reward);if(!game.finished)continueFlight();}
+async function resolveStageQuiz(reward=null){
+  if(game.challenge&&game.room===2&&game.stageIndex<6)await art.ensureStage(game.stageIndex+1);
+  game.completeQuiz(reward);if(!game.finished)continueFlight();
+}
 function showStageQuiz(kind) {
   hideAnnouncement();keys.clear();pointer=null;
   const relicReward=game.challenge && game.room===2 && game.stageIndex<6;
   menus.offerQuiz('퀴즈에 도전하고 보상을 받을까요?', relicReward?'정답을 맞히면 세 유물 중 하나를 골라 이번 챌린지에 추가해요.':game.room===2?'정답을 맞히면 최종 점수가 10% 증가해요.':'정답을 맞히면 생명 1 또는 봄 1을 회복해요. 건너뛰면 바로 다음 스테이지로 이동해요.', ()=>menus.quiz(kind,'퀴즈',correct=>{
-    if(!correct){resolveStageQuiz();return;}
-    if(relicReward){menus.challengeReward(game,()=>{continueFlight();});return;}
+    if(!correct){void resolveStageQuiz();return;}
+    if(relicReward){menus.challengeReward(game,async()=>{await art.ensureStage(game.stageIndex);continueFlight();});return;}
     if(game.room===2){resolveStageQuiz('score');return;}
     setModal(`<span class="small-caps">A LITTLE RECOVERY</span><h2>기억이 힘이 되었어요</h2><p class="intro-copy">생명 ${game.player.lives}/${game.maxLife} · 봄 ${game.bombs}/${game.maxBombs}</p><button class="primary" id="reward-life">생명 1 회복</button><button class="secondary" id="reward-bomb">봄 1 회복</button>`);
-    $('reward-life').onclick=()=>resolveStageQuiz('life');$('reward-bomb').onclick=()=>resolveStageQuiz('bomb');
-  }),()=>resolveStageQuiz());
+    $('reward-life').onclick=()=>void resolveStageQuiz('life');$('reward-bomb').onclick=()=>void resolveStageQuiz('bomb');
+  }),()=>void resolveStageQuiz());
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);

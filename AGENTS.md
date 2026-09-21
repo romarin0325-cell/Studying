@@ -21,6 +21,7 @@ Current targets:
 - Do not open a PR if verify fails.
 - Do not run unused game suites. Automatic verification must not run Defense.
 - The dedicated Defense PR workflow is an explicit exception: it runs Defense checks when Defense, its tooling, dependencies, or workflow changes. Root `npm run verify` still excludes Defense.
+- A Card, Shooter, shared-release, or verification-rule PR must not invoke any Defense command (`lint:defense`, `test:defense*`, or a Defense browser suite) unless a file under `defense/` is in that PR's scoped diff. A stale Defense change elsewhere in the checkout is not an exception.
 - Prefer the smallest diff that restores working behavior.
 - If UI behavior cannot be fully verified, state exactly what remains unverified.
 - For frontend tasks, use image inputs/output when helpful and compare against the requested behavior.

@@ -5,7 +5,7 @@ import {chromium} from 'playwright';
 import {HEROES} from '../content.js';
 import {LIBRARY} from '../learning.js';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
-const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'", "globalThis.__patch={get game(){return game},get profile(){return profile},get art(){return art},get renderer(){return renderer}};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'", "globalThis.__patch={get game(){return game},get profile(){return profile},get art(){return art},get renderer(){return renderer}};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(html,original);await fs.mkdir(new URL('artifacts/',root),{recursive:true});
 const file=new URL('artifacts/patch-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],checks=[];
@@ -56,7 +56,7 @@ try{
  await click('#mistakes-reset');await click('#reset-confirm');assert.equal(await page.locator('[data-delete]').count(),0);assert.ok(await page.locator('#practice').isDisabled());await click('#library-close');
  await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>__patch.profile.learning.mistakes.length),0);
  checks.push(`All ${viewed} vocabulary entries reachable; delete, reset cancellation and persisted reset work`);
- await click('#launch');await click('#help-done');await page.clock.runFor(2800);
+ await click('#launch');await click('#help-done');await page.waitForFunction(()=>__patch.game?.phase==='wave');await page.clock.runFor(2800);
  const total=await page.evaluate(()=>__patch.profile.learning.total);
  await page.evaluate(()=>{const g=__patch.game;g.phase='quiz';g.emit('quiz',{kind:'vocab'});});await shot('quiz-consent');await click('#quiz-decline');assert.equal((await state()).room,1);assert.equal(await page.evaluate(()=>__patch.profile.learning.total),total);
  await page.evaluate(()=>{const g=__patch.game;g.room=2;g.phase='quiz';g.emit('quiz',{kind:'grammar'});});await click('#quiz-decline');assert.equal((await state()).phase,'victory');assert.ok(await page.locator('#again').isVisible());await click('#sortie-return');
@@ -66,7 +66,7 @@ try{
    await click('#random-hero');
    await page.evaluate(h=>{const real=Math.random;Math.random=()=>{Math.random=real;return (h+.5)/9;};},h);
    await click('#launch');assert.equal((await state()).hero,h);assert.equal(await page.locator('[data-random-weapon]').count(),2);await shot(`hidden-${h}-selection`);
-   await click('[data-random-weapon="1"]');await click('#random-launch');assert.equal((await state()).weapon,1);await page.clock.runFor(3000);
+   await click('[data-random-weapon="1"]');await click('#random-launch');await page.waitForFunction(()=>__patch.game?.phase==='wave');assert.equal((await state()).weapon,1);await page.clock.runFor(3000);
    await page.evaluate(()=>{const g=__patch.game;g.player.invincible=999;g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=430;g.spawnEnemy(225,300,{hp:100000,r:38,speed:0,fire:999,image:0});g.power=3;});
    await page.clock.runFor(1200);assert.ok((await state()).stats.damage>0);await shot(`hidden-${h}-battle`);
    await click('#bomb');await page.clock.runFor(320);await shot(`hidden-${h}-bloom`);
@@ -80,7 +80,7 @@ try{
    const art=__patch.art;
    document.body.innerHTML='<main id="cast" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:16px;background:#14233c;color:#fff;font:16px sans-serif"></main>';
    document.documentElement.style.overflow='auto';document.body.style.overflow='auto';
-   const entries=[...art.urls.heroes,art.dark.toDataURL('image/png')];
+   const entries=[...art.urls.heroes,art.urls.dark];
    entries.forEach((src,i)=>{const el=document.createElement('section');el.style='text-align:center;height:380px';el.innerHTML=`<h3>${names[i]||'다크신데렐라'}</h3><img src="${src}" style="width:${i===7?235:200}px;height:300px;object-fit:contain"><div>게임 코어 ${i===4||i===6?4:i===2||i===7?6:5}px</div>`;document.getElementById('cast').append(el);});
  },HEROES.map(h=>h.name));
  await page.locator('#cast img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await shot('cast-comparison');

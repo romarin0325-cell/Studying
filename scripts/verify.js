@@ -2,6 +2,9 @@
 
 const { execFileSync, execSync, spawnSync } = require('child_process');
 
+// Defense is intentionally absent: root verification is limited to the active
+// Card and Shooter products, even when unrelated Defense files are present.
+const AUTOMATIC_TARGETS = Object.freeze(['shooter', 'card']);
 const TARGET_STEPS = {
   shooter: ['verify:shooter'],
   card: ['lint:card', 'test:card:smoke', 'test:card:browser', 'verify:card']
@@ -62,7 +65,7 @@ function selectTargets(files) {
       continue;
     }
   }
-  return ['shooter', 'card'].filter(target => targets.has(target));
+  return AUTOMATIC_TARGETS.filter(target => targets.has(target));
 }
 
 function runNpm(script) {

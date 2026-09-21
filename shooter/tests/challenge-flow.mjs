@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 const root=new URL('../',import.meta.url),original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
-const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__challenge={get game(){return game},get menus(){return menus},get art(){return art},get renderer(){return renderer},profile,saved,save,makeQuestion};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
+const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).href}">`).replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__challenge={get game(){return game},get menus(){return menus},get art(){return art},get renderer(){return renderer},profile,saved,save,makeQuestion};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
 assert.notEqual(html,original);await fs.mkdir(new URL('artifacts/',root),{recursive:true});
 const file=new URL('artifacts/challenge-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],network=[],checks=[];
@@ -34,14 +34,14 @@ try {
     assert.ok(cardText.every(el=>!el.overflow),JSON.stringify({viewport,cardText}));
     await click('[data-dungeon="0"]');const before=await page.locator('#dungeon-done').boundingBox();
     await click('[data-dungeon="5"]');const after=await page.locator('#dungeon-done').boundingBox();assert.equal(before.y,after.y);
-    await page.locator('#challenge-mode').scrollIntoViewIfNeeded();const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('data:image'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
+    await page.locator('#challenge-mode').scrollIntoViewIfNeeded();const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('.webp'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
     await shot(`dungeons-${viewport.width}`);await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
   }
   checks.push('Fullscreen achievements and eight destination cards align at four mobile/landscape sizes; actions remain stable and cards scroll into view');
   await page.setViewportSize({width:390,height:844});await click('#dungeons');await click('#challenge-mode');await click('#challenge-done');
-  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('data:image'));await shot('challenge-lobby');
+  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('.webp'));await shot('challenge-lobby');
   await click('#launch');if(await page.locator('#help-done').count())await click('#help-done');
-  await page.clock.runFor(2700);assert.equal(await page.evaluate(()=>__challenge.game.challenge),true);
+  await page.waitForFunction(()=>__challenge.game?.phase==='wave');await page.clock.runFor(2700);assert.equal(await page.evaluate(()=>__challenge.game.challenge),true);
   const profileBefore=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,clears:__challenge.profile.clears,best:__challenge.saved.best}));
   const ticketsBefore=await page.evaluate(()=>__challenge.profile.tickets.length);
   await click('#run-artifacts');assert.equal(await page.locator('.run-artifact').count(),3);await click('#run-artifacts-back');
@@ -72,11 +72,11 @@ try {
     await page.evaluate(hp=>{const g=__challenge.game;g.boss.hp=g.boss.maxHp*hp;g.bossPattern=-1;},hp);await page.clock.runFor(1700);await shot(`astea-${phase}`);
   }
   assert.equal(await page.evaluate(()=>__challenge.art.bosses.length),12);assert.equal(await page.evaluate(()=>__challenge.art.urls.relics.length),42);
-  // Check decoded sprite bounds; style and head/body proportions require visual review.
-  const bounds=await page.evaluate(()=>__challenge.art.bosses.map(canvas=>{const c=canvas.getContext('2d'),d=c.getImageData(0,0,canvas.width,canvas.height).data;let x0=canvas.width,y0=canvas.height,x1=0,y1=0;for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++)if(d[(y*canvas.width+x)*4+3]>30){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}return {w:x1-x0+1,h:y1-y0+1};}));
-  assert.ok(bounds.every(b=>b.w>0&&b.w<=384&&b.h>0&&b.h<=384));
+  // The release uses preprocessed WebP files; decode their dimensions without a runtime canvas readback.
+  const bounds=await page.evaluate(async()=>Promise.all(__challenge.art.urls.bosses.map(async url=>{const image=new Image();image.src=url;await image.decode();return {w:image.naturalWidth,h:image.naturalHeight};})));
+  assert.ok(bounds.every(b=>b.w>0&&b.w<=512&&b.h>0&&b.h<=512));
   await page.evaluate(()=>{const art=__challenge.art;document.body.innerHTML='<main id="comparison" style="display:flex;background:#14233c"></main>';for(let i=0;i<art.bosses.length;i++){const img=new Image();img.src=art.urls.bosses[i];img.style='width:180px;height:180px';document.querySelector('#comparison').append(img);}});
   await page.setViewportSize({width:2160,height:180});await page.locator('#comparison img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await shot('boss-comparison');
-  assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push({art:'All twelve boss sprites decode within the 384px cache; production-scale comparison is captured separately by events-flow',bounds});checks.push('Astea and all three patterns render offline without network requests or page errors');
+  assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push({art:'All twelve preprocessed WebP boss sprites decode at their bounded release dimensions; production-scale comparison is captured separately by events-flow',bounds});checks.push('Astea and all three patterns render offline without network requests or page errors');
   await fs.writeFile(new URL('artifacts/challenge-flow.json',root),JSON.stringify({checks,errors,network},null,2));console.log(JSON.stringify({checks,errors,network},null,2));
 } finally {await browser.close();}
