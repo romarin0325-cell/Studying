@@ -143,6 +143,11 @@ try {
   await page.reload();await page.waitForFunction(()=>Astra.ready);
   await page.locator('#btn-title-question').click();
   await page.setViewportSize({width:size.width,height:410});
+  await page.waitForFunction(() => {
+   const height=window.visualViewport?.height;
+   const chatHeight=parseFloat(document.querySelector('#modal-lumi-question').style.getPropertyValue('--chat-height'));
+   return height<=410 && chatHeight<=410;
+  });
   await page.locator('#lumi-chat-input').fill('키보드 표시 영역 검증');
   const input=await page.locator('#lumi-chat-input').boundingBox();assert.ok(input.y>=0&&input.y+input.height<=410);
   await page.close();
