@@ -222,7 +222,7 @@ function showStageQuiz(kind) {
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);
-  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 3개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
+  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
   $('revive-decline').onclick=()=>{game.revive(false);finish(false);};
   $('revive-quiz').onclick=()=>menus.quiz('grammar','다시 피어나는 별',correct=>{if(game.revive(correct))continueFlight();else finish(false);});
 }

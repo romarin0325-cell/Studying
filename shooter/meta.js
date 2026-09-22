@@ -34,7 +34,7 @@ export const ARTIFACTS = [
   { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 20% 감소 · 일반 공격력 30% 증가', normalAttack: .30, bomb: -.20 },
   { id: 'fairycloak', name: '요정의망토', rarity: 'epic', text: '피격 반경 2 감소 · 최대 생명 1 증가', radius: -2, life: 1 },
   { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
-  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 3 획득' },
+  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득' },
   { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' },
   { id: 'steelshield', name: '강철방패', rarity: 'normal', text: '피격 시 파워 감소 방지' },
   { id: 'cursedsword', name: '저주의검', rarity: 'rare', text: '공격력 15% 증가 · 회복 아이템 드랍 제거', attack: .15 },
@@ -44,7 +44,7 @@ export const ARTIFACTS = [
   { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
 ];
 export function artifactText(artifact, challenge = false) {
-  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 3 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
+  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 5 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
 export const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },

@@ -26,11 +26,11 @@ function run() {
     const catalogue = GameUtils.getAllCards();
     const rules = CardPoolRules;
     const approved = {
-      ember_relay: ['kobold','mimic','marshmallow','jack_o_lantern','desert_fox','candy_boy','sunflower','flare_ribbon','executor','werebear','baby_dragon','hellhound','mirage','light_elemental','void_knight','sphinx','forget_me_not','chaos_mage','siren','cream_maid','red_dragon','flame_sage','dragon_miko','ash','sun_priestess','mawang','storm_sage','pudding_princess','lightning_sage','shadow_stalker','gold_dragon','zeke','phoenix','cherry_prince','ancient_dragon','supernova','sakura','cinderella','sun_moon_sword_maiden','queen'],
+      ember_relay: ['kobold','mimic','marshmallow','jack_o_lantern','desert_fox','candy_boy','sunflower','shooting_star_boy','executor','werebear','baby_dragon','hellhound','mirage','light_elemental','void_knight','sphinx','forget_me_not','chaos_mage','siren','cream_maid','red_dragon','flame_sage','dragon_miko','ash','sun_priestess','mawang','storm_sage','pudding_princess','lightning_sage','shadow_stalker','gold_dragon','zeke','phoenix','cherry_prince','ancient_dragon','supernova','sakura','cinderella','sun_moon_sword_maiden','queen'],
       twilight_liturgy: ['kobold','mimic','fairy','blessing_tail','holy_night','vampire','shadow_cat','snow_rabbit','silver_rabbit','black_swan','aurora','night_rabbit','fallen_angel','cream_maid','tinker_bell','silent_librarian','light_elemental','forget_me_not','void_knight','sphinx','archangel','fairy_queen','ghost_king','lightning_sage','unicorn','eclipse_queen','gumiho','mawang','santa','priest_of_end','jasmine','galaxy_whale','cinderella','luna','doom_luther','time_ruler','ancient_soul','frozen_witch','deep_lord','victoria'],
-      starlit_garden: ['kobold','mimic','candy_boy','marshmallow','sugar_powder','sunflower','slime','mummy','flare_ribbon','fairy','aurora','cream_maid','cotton_candy_sheep','siren','light_elemental','forget_me_not','golem','entropy','fenrir','prism_twin','unicorn','pudding_princess','storm_sage','mushroom_king','sun_priestess','flame_sage','santa','miracle_larva','fairy_queen','avalanche_maid','queen','rumi','world_tree','jasmine','deep_lord','victoria','dainichi_nyorai','sun_moon_sword_maiden','sylphid','zeke'],
-      midnight_tide: ['kobold','mimic','sunflower','snow_penguin','shadow_cat','vampire','slime','snow_rabbit','silver_rabbit','marshmallow','aurora','siren','fenrir','silent_librarian','legendary_captain','cotton_candy_sheep','prism_twin','night_rabbit','light_elemental','sphinx','priest_of_end','guardian','great_detective','crystal_dancer','jellyfish_princess','fairy_queen','avalanche_maid','pudding_princess','sun_priestess','shadow_stalker','time_ruler','phantom','venom','perfect_aurora','cure_master','deep_lord','frozen_witch','rumi','world_tree','doom_luther'],
-      arena_company: ['kobold','mimic','executor','discipline_captain','werebear','shadow_cat','black_swan','candy_boy','slime','mummy','baby_dragon','ember_tiger','prism_twin','legendary_captain','golem','void_knight','fenrir','hellhound','cream_maid','forget_me_not','paladin','guardian','eclipse_queen','crystal_dancer','red_dragon','flame_sage','pudding_princess','gumiho','mushroom_king','unicorn','doom_luther','cherry_prince','phoenix','cure_master','gray','sylphid','gold_dragon','zeke','world_tree','red_moon']
+      starlit_garden: ['kobold','mimic','candy_boy','marshmallow','sugar_powder','sunflower','slime','mummy','joker','fairy','aurora','cream_maid','cotton_candy_sheep','siren','light_elemental','forget_me_not','golem','sphinx','fenrir','prism_twin','unicorn','pudding_princess','storm_sage','mushroom_king','sun_priestess','flame_sage','santa','astrologer','fairy_queen','avalanche_maid','queen','rumi','world_tree','jasmine','deep_lord','victoria','dainichi_nyorai','sun_moon_sword_maiden','sylphid','zeke'],
+      midnight_tide: ['kobold','mimic','sunflower','snow_penguin','shadow_cat','vampire','slime','snow_rabbit','silver_rabbit','marshmallow','aurora','siren','fenrir','silent_librarian','legendary_captain','cotton_candy_sheep','prism_twin','night_rabbit','light_elemental','sphinx','priest_of_end','red_dragon','santa','crystal_dancer','jellyfish_princess','fairy_queen','avalanche_maid','pudding_princess','sun_priestess','shadow_stalker','time_ruler','phantom','venom','perfect_aurora','cure_master','deep_lord','frozen_witch','rumi','world_tree','doom_luther'],
+      arena_company: ['kobold','mimic','executor','discipline_captain','werebear','shadow_cat','black_swan','candy_boy','slime','mummy','baby_dragon','ember_tiger','prism_twin','legendary_captain','golem','void_knight','fenrir','hellhound','cream_maid','forget_me_not','paladin','guardian','eclipse_queen','crystal_dancer','red_dragon','flame_sage','pudding_princess','gumiho','mushroom_king','unicorn','ancient_soul','cherry_prince','phoenix','luna','gray','sylphid','gold_dragon','zeke','world_tree','red_moon']
     };
 
     const classic = rules.getClassicBaseCardIds(catalogue);
@@ -52,7 +52,7 @@ function run() {
     const released = catalogue.filter(card => card.unlockSource === 'bonus' && card.unlockSource !== 'hidden').map(card => card.id);
     const context = {
       catalogue,
-      unlockedBonusIds: unlocked.concat(['miracle_larva']),
+      unlockedBonusIds: unlocked.concat(['astrologer', 'miracle_larva']),
       releasedBonusIds: catalogue.filter(card => !card.releaseDate || card.releaseDate <= '2026-12-31').map(card => card.id),
       hiddenBonusIds: catalogue.filter(card => card.unlockSource === 'hidden').map(card => card.id),
       defaultUnlockedBonusIds: unlocked
@@ -60,13 +60,14 @@ function run() {
     const garden = rules.getSet('starlit_garden');
     const gardenAvail = rules.getSetAvailability(garden, Object.assign({}, context, { unlockedBonusIds: unlocked }));
     assert.strictEqual(gardenAvail.available, false);
-    assert(gardenAvail.missingIds.includes('miracle_larva'));
+    assert(gardenAvail.missingIds.includes('astrologer'));
     const gardenReady = rules.getSetAvailability(garden, context);
     assert.ok(gardenReady.total === 40);
 
     const extras = rules.getExtraCandidates(garden, catalogue, context);
     assert.ok(extras.includes('behemoth'));
-    assert.strictEqual(extras.includes('miracle_larva'), false);
+    assert.strictEqual(extras.includes('astrologer'), false);
+    assert.strictEqual(extras.includes('miracle_larva'), true);
     assert.strictEqual(extras.includes('mirror_cocoon'), false);
     assert.strictEqual(extras.includes('rumi_halloween'), false);
 
@@ -181,7 +182,43 @@ function run() {
         defaultUnlockedBonusIds: GameUtils.getDefaultUnlockedBonusCardIds()
       };
     };
+    const oldConfig = CardPoolRules.createEmptyConfig();
+    delete oldConfig.setRevisions; // v1 saves did not record individual set revisions.
+    oldConfig.selectedSetId = 'starlit_garden';
+    const movedToBase = {
+      ember_relay: ['shooting_star_boy'],
+      starlit_garden: ['joker', 'sphinx', 'astrologer'],
+      midnight_tide: ['red_dragon', 'santa'],
+      arena_company: ['ancient_soul', 'luna']
+    };
+    Object.entries(movedToBase).forEach(([setId, ids]) => {
+      oldConfig.profiles[setId].activePresetIndex = 2;
+      oldConfig.profiles[setId].presets.forEach(preset => {
+        preset.extraCardIds = ids.concat(['behemoth']);
+      });
+    });
+    oldConfig.profiles.twilight_liturgy.presets[1].extraCardIds = ['behemoth'];
+    rpg.global.cardPoolConfig = oldConfig;
+    assert.strictEqual(rpg.ensureCardPoolConfigState(), true);
+    const upgraded = rpg.global.cardPoolConfig;
+    const allUnlocked = catalogue.map(card => card.id);
+    const allAvailable = {
+      catalogue, unlockedBonusIds: allUnlocked, releasedBonusIds: allUnlocked,
+      hiddenBonusIds: [], defaultUnlockedBonusIds: allUnlocked
+    };
+    Object.entries(movedToBase).forEach(([setId, ids]) => {
+      assert.strictEqual(upgraded.setRevisions[setId], rules.getSet(setId).revision);
+      assert.strictEqual(upgraded.profiles[setId].activePresetIndex, 2);
+      upgraded.profiles[setId].presets.forEach(preset => {
+        assert.deepStrictEqual(preset.extraCardIds, ['behemoth']);
+        assert.strictEqual(rules.validateNewRunSelection({ setId, extraCardIds: preset.extraCardIds }, allAvailable).ok, true);
+      });
+      assert.deepStrictEqual(oldConfig.profiles[setId].presets[0].extraCardIds, ids.concat(['behemoth']));
+    });
+    assert.deepStrictEqual(upgraded.profiles.twilight_liturgy.presets[1].extraCardIds, ['behemoth']);
+    assert.strictEqual(rpg.ensureCardPoolConfigState(), false);
     assert.strictEqual(rpg.saveGlobalData(), true);
+    assert.deepStrictEqual(JSON.parse(localStorage.getItem(Storage.keys.GLOBAL)).cardPoolConfig.profiles.starlit_garden.presets[2].extraCardIds, ['behemoth']);
     assert.ok(rpg.global._storageStamp);
     const firstStamp = rpg.global._storageStamp;
     localStorage.setItem(Storage.keys.GLOBAL, JSON.stringify(Object.assign({}, rpg.global, { _storageStamp: 'other-tab' })));

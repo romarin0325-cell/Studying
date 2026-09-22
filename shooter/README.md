@@ -104,6 +104,12 @@ node shooter/tests/flow.mjs
 node shooter/tests/patch-flow.mjs
 ```
 
+### 커밋된 에셋 캐시
+
+`generated-assets/`에는 원본 아틀라스에서 생성한 94개 WebP와 `manifest.json`을 함께 커밋합니다. 매 빌드는 원본 이미지 SHA-256, 전처리 스크립트 SHA-256, 각 WebP의 SHA-256·크기를 확인합니다. 전처리 스크립트의 줄바꿈은 LF로 정규화해 운영체제별 체크아웃에서도 같은 해시를 사용합니다. 모두 일치하면 `sharp`를 불러오거나 이미지를 다시 가공하지 않고 캐시를 HTML에 바로 포함합니다.
+
+`assets/`의 원본 이미지 또는 `prepare-assets.mjs`의 전처리 규칙을 바꾼 PR에서는 `npm run build --prefix shooter`를 한 번 실행하고 변경된 `generated-assets/`와 `dist/AstralBloom.html`을 함께 커밋하세요. 캐시가 없거나 손상됐거나 해시가 다르면 빌드가 자동으로 94개 WebP를 다시 생성합니다.
+
 루트 `npm run verify`가 필수 완료 검사입니다. 슈터 검사에는 엔진·진행 규칙 테스트, 단일 HTML 재생성, 네 가지 화면 크기의 오프라인 Chromium 실행이 포함됩니다. `flow.mjs`는 배포 HTML의 테스트 전용 복사본에서 전투 상태에 접근해 강의·퀴즈·회복·중간보스 관문·최종 보상·뽑기·저장·부활 UI를 검증합니다. 배포본에는 테스트 조작 기능이 없습니다. 부하 검사는 별도의 실제 렌더링 fixture로 실행합니다.
 
 `tests/balance.mjs`의 자동 조작은 밸런스 비교용입니다. 사람의 체감 난이도를 보장하는 지표는 아닙니다. 브라우저 검사 또한 데스크톱 Chromium의 모바일 크기 검증이며 실제 휴대폰 측정과 구분해야 합니다.
@@ -129,7 +135,8 @@ node shooter/tests/patch-flow.mjs
 - `app.js`, `style.css`, `index.html`: 출격·HUD·조작·결과 UI.
 - `assets/`: 직접 생성한 캐릭터·보스·적 아틀라스와 배경.
 - `ART_PROMPTS.md`: 내장 이미지 생성 도구에 사용한 디자인 프롬프트와 참조 역할.
-- `build.mjs`: 외부 의존성 없이 코드와 이미지를 단일 HTML로 패킹.
+- `build.mjs`: 검증된 `generated-assets/` 캐시를 재사용해 코드와 이미지를 단일 HTML로 패킹.
+- `generated-assets/`: 원본과 전처리 규칙 해시로 검증되는 커밋 WebP 캐시.
 - `dist/AstralBloom.html`: 휴대폰에 복사할 최종 파일.
 - `artifacts/`: 로컬 검증 결과와 실제 화면 캡처. Git에서는 제외.
 

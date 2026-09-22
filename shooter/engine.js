@@ -5,6 +5,10 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
 const BOMB_INVULNERABILITY = [4,2,3,3,3,3,3,3,2];
 const DUNGEON_ENEMY_SCALE = [1.12,1.16,1.20,1.25,1.30,1.35,1.55];
+const MIRACLE_BOMBS = 5;
+// Events already use a higher base enemy tier, so this reaches above the forest
+// teleporter without applying its full 1.65 multiplier a second time.
+const EVENT_TELEPORT_HP_MULTIPLIER = 1.25;
 export class Game {
   constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], challenge = false, onEvent = () => {} } = {}) {
     this.challenge = challenge; this.pendingArtifacts = null; this.celestialWave = 0;
@@ -23,7 +27,7 @@ export class Game {
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
     if(challenge) {
       if(this.artifacts.has('resurgence'))this.player.lives=this.maxLife;
-      if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
+      if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     }
     this.startStage(challenge ? 0 : stage);
   }
@@ -290,7 +294,7 @@ export class Game {
           { hp: 38 + stage * 10, speed: 68 + stage * 8 + (type === 3 ? 25 : 0), move: type === 0 ? 'drift' : type === 1 ? 'curve' : type === 2 ? 'zigzag' : 'dive', side: left ? 1 : -1, fire: 1.8 + i * .25, image, r: 19 });
       }
     }
-    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: image, elite:image===4, r: 25, hp: (115 + stage*35)*(stage===3?1.65:stage===4?0.9167:1), speed: 53, move: 'sentry', fire: 2, image, countdown: 3 });
+    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: image, elite:image===4, r: 25, hp: 115 + stage*35, speed: 53, move: 'sentry', fire: 2, image, countdown: 3 });
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
@@ -298,7 +302,8 @@ export class Game {
       const patterns=this.room===0?[3,0]:[1,5];
       data={...data,elite:true,special:patterns[this.celestialWave++%2]};
     }
-    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1);
+    const specialHp = data.special === 3 ? (this.dungeon.event ? EVENT_TELEPORT_HP_MULTIPLIER : this.stageIndex === 3 ? 1.65 : 1) : data.special === 4 && this.stageIndex === 4 ? .9167 : 1;
+    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1) * specialHp;
     this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
   }
   specialDeath(e) {
@@ -425,8 +430,9 @@ export class Game {
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
-    b.fire=[1.45,1.3,1.15][phase];
-    // Decoration comes from paired colors and shapes, not fast or dense collision fields.
+    b.fire=[1.25,1.08,.92][phase];
+    // Every event pattern remains telegraphed, but now asks the player to move
+    // through a denser field rather than idling inside its central corridor.
     const ring=(count,speed,rotation,shape,extra={})=>{
       for(let i=0;i<count;i++) {
         const angle=i*TAU/count+rotation;
@@ -437,29 +443,29 @@ export class Game {
     };
     switch(this.dungeon.asset) {
       case 'harmonious':
-        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,4+phase,108,.22,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
-        if(phase>0)ring(16,82,t*.1,'petal');
+        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,5+phase,128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
+        if(phase>0)ring(18,110,t*.1,'petal');
         break;
       case 'gold-dragon':
-        for(const side of [-1,1])this.fan(b.x+side*55,b.y,5+phase,112,.16,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
-        if(phase===2)ring(20,86,t*.14,'diamond');
+        for(const side of [-1,1])this.fan(b.x+side*55,b.y,6+phase,132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
+        if(phase===2)ring(24,112,t*.14,'diamond');
         break;
       case 'ancient-soul':
-        ring(18+phase*4,95,t*.19,'petal',{turn:.07});
-        if(phase>0)this.fan(b.x,b.y,3,125,.25,aim,{shape:'diamond',color:'#fff1ba',r:4});
+        ring(20+phase*5,126,t*.19,'petal',{turn:.09});
+        if(phase>0)this.fan(b.x,b.y,4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
         break;
       case 'behemoth': {
-        b.fire=phase===2?1.65:1.9;
+        b.fire=phase===2?1.2:1.55;
         const gap=[100,225,350][(b.earthWave||0)%3]; b.earthWave=(b.earthWave||0)+1;
-        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase});
-        if(phase>0)ring(14,90,0,'diamond',{r:7});
+        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:26,corridor:72,projectileSpeed:140});
+        if(phase>0)ring(18,118,0,'diamond',{r:7});
         break;
       }
       case 'time-ruler':
-        b.fire=2.4;
+        b.fire=2.05;
         // An original clock volley inspired by Taisei's stop/release rhythm, not its code.
-        ring(12+phase*6,108,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
-        if(phase===2)this.fan(b.x,b.y,3,118,.3,aim,{shape:'diamond',color:'#fff1c2',r:4});
+        ring(16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
+        if(phase===2)this.fan(b.x,b.y,5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
         break;
     }
   }
@@ -499,7 +505,7 @@ export class Game {
     if(id==='origin')this.power=Math.min(5,this.power+1);
     while(this.powerPoints>=this.powerRequirement && this.power<5){this.powerPoints-=this.powerRequirement;this.power++;}
     if(id==='resurgence')this.player.lives=this.maxLife;
-    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     if(id==='clover')this.player.barrier=true;
     this.pendingArtifacts=null;
     return this.completeQuiz();
@@ -518,7 +524,7 @@ export class Game {
     this.reviveUsed = true;
     if (!correct) return false;
     this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
-    if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
   }
   update(dt) {
@@ -667,7 +673,7 @@ export class Game {
       }
       if(f.type==='eventWave' && !f.fired && f.age>=f.wait && this.phase==='boss') {
         f.fired=true;
-        for(let x=20;x<450;x+=28)if(Math.abs(x-f.gap)>62)this.enemyBullet(x,90,Math.PI/2,118,{shape:'diamond',color:f.color,r:6});
+        for(let x=20;x<450;x+=(f.spacing||28))if(Math.abs(x-f.gap)>=(f.corridor||62))this.enemyBullet(x,90,Math.PI/2,f.projectileSpeed||118,{shape:'diamond',color:f.color,r:6});
       }
       if(f.type==='detonation' && !f.fired && f.age>(f.wait??.75)) {f.fired=true;this.fan(f.x,f.y,10,115,TAU/10);if(distance(f,p)<f.radius)this.hitPlayer();}
     }

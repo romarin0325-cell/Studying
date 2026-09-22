@@ -992,6 +992,7 @@
         const existing = this.global.cardPoolConfig;
         if (existing && existing.version === 1 && existing.profiles && typeof existing.profiles === 'object') {
             const cloned = rules.cloneConfig(existing);
+            rules.migrateSetRevisions(cloned, this.getCardPoolCatalogue());
             const before = JSON.stringify(existing);
             this.global.cardPoolConfig = cloned;
             return JSON.stringify(cloned) !== before;
@@ -1075,7 +1076,7 @@
         const root = document.getElementById('modal-bonus-pool-editor');
         if (root && typeof CardPoolView !== 'undefined') {
             CardPoolView.bindChrome(root, {
-                onTab: next => { this._cardPoolEditorTab = next; this.renderCardPoolEditor(); },
+                onTab: next => { this._cardPoolEditorTab = next; this._cardPoolEditorFilter = 'all'; this._cardPoolEditorDetailSetId = null; this.renderCardPoolEditor(); },
                 onCancel: () => this.closeCardPoolEditor(true),
                 onClose: () => this.closeCardPoolEditor(true),
                 onSave: () => this.commitCardPoolEditorDraft()
@@ -1168,6 +1169,9 @@
                 subAxes: item.subAxes || [],
                 compositionText: item.id === 'classic' ? ('기존 기본덱 ' + CardPoolRules.getClassicBaseCardIds(context.catalogue).length + '장') : composition,
                 statusText: status,
+                selected: item.id === draft.selectedSetId,
+                readyCount: availability.readyCount,
+                total: availability.total,
                 canUse: availability.available && !availability.definitionError
             };
         });
@@ -1194,6 +1198,7 @@
         const usable = setModels.filter(item => item.trial && item.canUse).length;
         const model = {
             tab: this._cardPoolEditorTab,
+            filter: this._cardPoolEditorFilter,
             summaryText: set.name + ' · 기본 ' + baseIds.length + '장 + 추가 ' + extras.length + '/15장',
             sets: setModels,
             extraCards,
@@ -1221,7 +1226,7 @@
             }).filter(Boolean);
         }
         const sub = document.getElementById('btn-card-set-editor-sub');
-        if (sub) sub.textContent = '시험 기능 · 선택 가능 ' + usable + '/5';
+        if (sub) sub.textContent = '선택 가능 ' + usable + '/5';
         CardPoolView.render(root, model, {
             onSelectSet: id => {
                 const availability = CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context);
@@ -1235,6 +1240,7 @@
                 this._cardPoolEditorFilter = locked ? 'locked' : 'all';
                 this.renderCardPoolEditor();
             },
+            onCloseSetDetail: () => { this._cardPoolEditorDetailSetId = null; this.renderCardPoolEditor(); },
             onSetFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
             onSearch: value => { this._cardPoolEditorSearch = value; this.renderCardPoolEditor(); },
             onExtraFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },

@@ -25,6 +25,9 @@ test('fairy cloak shrinks actual collision radius and revival artifacts respect 
     assert.ok(g.revive(true));assert.equal(g.player.lives,g.maxLife);assert.equal(g.bombs,g.maxBombs);
     g.startStage(0,1);g.phase='defeat';assert.equal(g.revive(true),false);
   }
+  const miracle=new Game({artifacts:['miracle']});miracle.bombs=0;miracle.phase='defeat';miracle.finished=true;
+  assert.ok(miracle.revive(true));assert.equal(miracle.bombs,5);
+  const definition=ARTIFACTS.find(a=>a.id==='miracle');assert.equal(definition.text,'부활 시 봄 5 획득');assert.equal(artifactText(definition,true),'봄 5 획득');
 });
 test('blessing refreshes a single barrier every stage and keeps normal hit immunity',()=>{
   const g=new Game({artifacts:['blessing','clover','cloak']});
@@ -84,7 +87,7 @@ test('challenge rank uses five and fifteen hits while dungeons keep the original
 test('challenge instant variants activate on selection and do not retrigger on revival',()=>{
   const g=new Game({challenge:true});g.player.lives=1;g.bombs=0;
   offer(g,'resurgence');assert.equal(g.player.lives,g.maxLife);
-  offer(g,'miracle');assert.equal(g.bombs,3);
+  offer(g,'miracle');assert.equal(g.bombs,5);
   offer(g,'clover');assert.equal(g.player.barrier,true);
   g.phase='wave';g.player.invincible=0;g.hitPlayer();assert.equal(g.player.barrier,false);
   g.phase='defeat';g.finished=true;g.player.lives=0;g.bombs=0;assert.ok(g.revive(true));

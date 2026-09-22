@@ -6,10 +6,10 @@ import { createArtUrls } from './art-manifest.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(root, 'dist');
-const tmpAssets = path.join(root, '.build-assets');
+const generatedAssets = path.join(root, 'generated-assets');
 
-// 1. Preprocess raw assets into optimized WebPs in an isolated temporary build directory.
-const assetReport = await prepareAssets({ outputDirectory: tmpAssets, writeReport: false });
+// 1. Reuse the committed WebP cache when source images and processor logic match.
+const assetReport = await prepareAssets({ outputDirectory: generatedAssets, writeReport: false });
 
 // 2. Build-time integrity & self-checks (Requirement 11).
 const manifest = createArtUrls('assets');
@@ -37,7 +37,7 @@ for (const fileInfo of assetReport.output.files) {
   if (!requiredUrls.has(logicalPath)) {
     throw new Error(`Generated asset not present in manifest: ${logicalPath}`);
   }
-  const filePath = path.join(tmpAssets, fileInfo.file);
+  const filePath = path.join(generatedAssets, fileInfo.file);
   const data = await fs.readFile(filePath);
 
   // Validate that the file is strictly WebP format (RIFF....WEBP).
@@ -104,11 +104,8 @@ await fs.mkdir(dist, { recursive: true });
 const destination = path.join(dist, 'AstralBloom.html');
 await fs.writeFile(destination, html);
 
-// Remove intermediate build directory.
-await fs.rm(tmpAssets, { recursive: true, force: true });
-
 // Ensure legacy dist/assets and dist/asset-report.json are cleaned up from the output directory.
 await fs.rm(path.join(dist, 'assets'), { recursive: true, force: true });
 await fs.rm(path.join(dist, 'asset-report.json'), { force: true });
 
-console.log(`Offline single-file game: ${destination} (${(htmlBytes / 1024 / 1024).toFixed(2)} MiB HTML, 94 WebP assets embedded)`);
+console.log(`Offline single-file game: ${destination} (${(htmlBytes / 1024 / 1024).toFixed(2)} MiB HTML, 94 WebP assets embedded; cache ${assetReport.cache.hit ? 'hit' : 'regenerated'})`);
