@@ -22,7 +22,8 @@
             const body = root.querySelector('#card-pool-editor-body');
             const setsTab = root.querySelector('#card-pool-tab-sets');
             const extrasTab = root.querySelector('#card-pool-tab-extras');
-            if (title) title.textContent = '획득 카드풀 편집';
+            if (title) title.textContent = model.tab === 'sets' ? '세트 편집' : '덱 편집';
+            root.dataset.editorTab = model.tab;
             if (summary) summary.textContent = model.summaryText || '';
             if (setsTab) {
                 setsTab.setAttribute('aria-selected', model.tab === 'sets' ? 'true' : 'false');
@@ -31,45 +32,73 @@
                 extrasTab.setAttribute('aria-selected', model.tab === 'extras' ? 'true' : 'false');
             }
             if (!body) return;
+            const viewKey = model.tab + ':' + (model.detailSet ? model.detailSet.id : '') + ':' + model.filter;
+            const scrollTop = body.dataset.viewKey === viewKey ? body.scrollTop : 0;
+            const searchFocused = document.activeElement === body.querySelector('.card-pool-search');
+            const focusedCard = document.activeElement?.closest('[data-card-id]')?.dataset.cardId;
+            const focusedClass = document.activeElement?.className;
+            const selection = searchFocused ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
             body.replaceChildren();
             if (model.tab === 'sets') this.renderSets(body, model, actions);
             else this.renderExtras(body, model, actions);
+            body.dataset.viewKey = viewKey;
+            body.scrollTop = scrollTop;
+            if (searchFocused) {
+                const search = body.querySelector('.card-pool-search');
+                search?.focus({ preventScroll: true });
+                if (search && selection) search.setSelectionRange(...selection);
+            } else if (focusedCard) {
+                const row = [...body.querySelectorAll('[data-card-id]')].find(item => item.dataset.cardId === focusedCard);
+                const button = row && [...row.querySelectorAll('button')].find(item => item.className === focusedClass);
+                button?.focus({ preventScroll: true });
+            }
         },
 
         renderSets(body, model, actions) {
+            if (model.detailSet) {
+                this.renderSetDetail(body, model, actions);
+                return;
+            }
             (model.sets || []).forEach(set => {
-                const row = el('div', 'card-pool-set-row');
-                row.appendChild(el('div', 'card-pool-set-name', set.name + (set.trial ? ' · 시험 기능' : '')));
-                row.appendChild(el('div', 'card-pool-set-axis', [set.mainAxis].concat(set.subAxes || []).join(' · ')));
-                row.appendChild(el('div', 'card-pool-card-meta', set.compositionText));
-                row.appendChild(el('div', 'card-pool-card-status', set.statusText));
+                const row = el('div', 'card-pool-set-row' + (set.selected ? ' is-selected' : ''));
+                const heading = el('div', 'card-pool-set-heading');
+                heading.appendChild(el('div', 'card-pool-set-name', set.name));
+                heading.appendChild(el('span', 'card-pool-set-status', set.statusText));
+                row.appendChild(heading);
                 const actionsRow = el('div', 'card-pool-actions');
-                const detail = el('button', 'card-pool-row-action', '구성·해금 조건');
+                const detail = el('button', 'card-pool-row-action', '구성 · 해금 ' + set.readyCount + '/' + set.total);
                 detail.type = 'button';
                 detail.addEventListener('click', () => actions.onOpenSetDetail(set.id));
                 actionsRow.appendChild(detail);
-                const use = el('button', 'card-pool-row-action', set.canUse ? '이 세트 사용' : '선택 불가');
+                const use = el('button', 'card-pool-row-action', set.selected ? '선택됨' : (set.canUse ? '사용' : '미해금'));
                 use.type = 'button';
+                use.setAttribute('aria-pressed', String(set.selected));
                 use.disabled = !set.canUse;
                 if (set.canUse) use.addEventListener('click', () => actions.onSelectSet(set.id));
                 actionsRow.appendChild(use);
                 row.appendChild(actionsRow);
                 body.appendChild(row);
             });
-            if (model.detailSet) this.renderSetDetail(body, model, actions);
         },
 
         renderSetDetail(body, model, actions) {
             const wrap = el('div', 'card-pool-set-detail');
+            const back = el('button', 'card-pool-row-action', '‹ 세트 목록');
+            back.type = 'button';
+            back.addEventListener('click', actions.onCloseSetDetail);
+            wrap.appendChild(back);
+            wrap.appendChild(el('h4', 'card-pool-detail-title', model.detailSet.name));
             const filters = el('div', 'card-pool-filter');
             ['all', 'locked', 'normal', 'rare', 'epic', 'legend'].forEach(key => {
                 const labels = { all: '전체', locked: '미해금만', normal: '일반', rare: '레어', epic: '에픽', legend: '전설' };
                 const btn = el('button', '', labels[key]);
                 btn.type = 'button';
+                btn.setAttribute('aria-pressed', String(model.filter === key));
                 btn.addEventListener('click', () => actions.onSetFilter(key));
                 filters.appendChild(btn);
             });
             wrap.appendChild(filters);
+            if (!model.detailCards.length) wrap.appendChild(el('p', 'card-pool-empty', model.filter === 'locked' ? '모든 카드를 해금했습니다.' : '해당 카드가 없습니다.'));
             (model.detailCards || []).forEach(card => {
                 wrap.appendChild(this.cardRow(card, {
                     onDetail: () => actions.onCardDetail(card.id)
@@ -82,13 +111,16 @@
             const search = el('input', 'card-pool-search');
             search.type = 'search';
             search.placeholder = '카드 검색';
+            search.setAttribute('aria-label', '카드 검색');
             search.value = model.search || '';
-            search.addEventListener('input', () => actions.onSearch(search.value));
+            search.addEventListener('input', event => { if (!event.isComposing) actions.onSearch(search.value); });
+            search.addEventListener('compositionend', () => actions.onSearch(search.value));
             body.appendChild(search);
             const filters = el('div', 'card-pool-filter');
-            [{ id: 'all', label: '전체 후보' }, { id: 'selected', label: '선택됨' }, { id: 'base', label: '기본 포함 카드 보기' }].forEach(item => {
+            [{ id: 'all', label: '전체' }, { id: 'selected', label: '선택됨' }, { id: 'base', label: '기본 포함' }].forEach(item => {
                 const btn = el('button', '', item.label);
                 btn.type = 'button';
+                btn.setAttribute('aria-pressed', String(model.filter === item.id));
                 btn.addEventListener('click', () => actions.onExtraFilter(item.id));
                 filters.appendChild(btn);
             });
@@ -107,16 +139,20 @@
             (model.extraCards || []).forEach(card => {
                 grid.appendChild(this.cardRow(card, {
                     onDetail: () => actions.onCardDetail(card.id),
-                    onToggle: card.canToggle ? () => actions.onToggleExtra(card.id) : null,
-                    selected: card.selected
+                    onToggle: !card.inBase ? () => actions.onToggleExtra(card.id) : null,
+                    selected: card.selected,
+                    compact: true
                 }));
             });
             body.appendChild(grid);
+            if (!model.extraCards.length) body.appendChild(el('p', 'card-pool-empty', '해당 카드가 없습니다.'));
         },
 
         cardRow(card, options) {
             const row = el('div', 'card-pool-card-row' + (options.selected ? ' is-selected' : '') + (card.inBase ? ' is-base' : ''));
-            if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
+            row.dataset.cardId = card.id;
+            if (options.compact) row.classList.add('is-compact');
+            else if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
                 row.appendChild(ImageAssets.createPortrait(card.data || { name: card.name, id: card.id }));
             } else {
                 row.appendChild(el('div', 'portrait'));
@@ -127,14 +163,17 @@
             nameBtn.addEventListener('click', options.onDetail);
             text.appendChild(nameBtn);
             text.appendChild(el('div', 'card-pool-card-meta', card.metaText));
-            text.appendChild(el('div', 'card-pool-card-status', card.statusText));
+            if (!options.compact) text.appendChild(el('div', 'card-pool-card-status', card.statusText));
             if (options.onToggle) {
                 const toggle = el('button', 'card-pool-row-action', card.selected ? '제외' : '추가');
                 toggle.type = 'button';
+                toggle.disabled = !card.canToggle;
+                toggle.setAttribute('aria-pressed', String(card.selected));
+                toggle.setAttribute('aria-label', card.name + (card.selected ? ' 제외' : ' 추가'));
                 toggle.addEventListener('click', options.onToggle);
                 text.appendChild(toggle);
-            } else if (card.inBase) {
-                text.appendChild(el('div', 'card-pool-card-status', '기본 포함 · 추가 슬롯 미사용'));
+            } else if (options.compact && card.inBase) {
+                text.appendChild(el('div', 'card-pool-base-label', '기본 포함'));
             }
             row.appendChild(text);
             return row;

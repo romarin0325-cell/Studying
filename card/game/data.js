@@ -1361,13 +1361,13 @@ const BASIC_CARD_SETS = Object.freeze([
     }),
     Object.freeze({
         id: 'ember_relay',
-        revision: 1,
+        revision: 2,
         name: '홍련의 계승',
         mainAxis: '작열의 유지와 소모',
         subAxes: Object.freeze(['드래곤', '사망 시 계승', '태양·물리/마법 전환']),
         trial: true,
         cardsByGrade: Object.freeze({
-            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'flare_ribbon', 'executor', 'werebear']),
+            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'shooting_star_boy', 'executor', 'werebear']),
             rare: Object.freeze(['baby_dragon', 'hellhound', 'mirage', 'light_elemental', 'void_knight', 'sphinx', 'forget_me_not', 'chaos_mage', 'siren', 'cream_maid']),
             epic: Object.freeze(['red_dragon', 'flame_sage', 'dragon_miko', 'ash', 'sun_priestess', 'mawang', 'storm_sage', 'pudding_princess', 'lightning_sage', 'shadow_stalker']),
             legend: Object.freeze(['gold_dragon', 'zeke', 'phoenix', 'cherry_prince', 'ancient_dragon', 'supernova', 'sakura', 'cinderella', 'sun_moon_sword_maiden', 'queen'])
@@ -1389,21 +1389,21 @@ const BASIC_CARD_SETS = Object.freeze([
     }),
     Object.freeze({
         id: 'starlit_garden',
-        revision: 1,
+        revision: 2,
         name: '별빛 정원',
         mainAxis: '필드버프의 축적·유지·소모',
         subAxes: Object.freeze(['자연/물', '디저트', '저등급 소비형 피니셔']),
         trial: true,
         cardsByGrade: Object.freeze({
-            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'flare_ribbon', 'fairy']),
-            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'entropy', 'fenrir', 'prism_twin']),
-            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'miracle_larva', 'fairy_queen', 'avalanche_maid']),
+            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'joker', 'fairy']),
+            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'sphinx', 'fenrir', 'prism_twin']),
+            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'astrologer', 'fairy_queen', 'avalanche_maid']),
             legend: Object.freeze(['queen', 'rumi', 'world_tree', 'jasmine', 'deep_lord', 'victoria', 'dainichi_nyorai', 'sun_moon_sword_maiden', 'sylphid', 'zeke'])
         })
     }),
     Object.freeze({
         id: 'midnight_tide',
-        revision: 1,
+        revision: 2,
         name: '심야의 조류',
         mainAxis: '방어로 시간을 확보하는 지연전',
         subAxes: Object.freeze(['물/어둠', '기절·회피', '주기 턴 보상']),
@@ -1411,13 +1411,13 @@ const BASIC_CARD_SETS = Object.freeze([
         cardsByGrade: Object.freeze({
             normal: Object.freeze(['kobold', 'mimic', 'sunflower', 'snow_penguin', 'shadow_cat', 'vampire', 'slime', 'snow_rabbit', 'silver_rabbit', 'marshmallow']),
             rare: Object.freeze(['aurora', 'siren', 'fenrir', 'silent_librarian', 'legendary_captain', 'cotton_candy_sheep', 'prism_twin', 'night_rabbit', 'light_elemental', 'sphinx']),
-            epic: Object.freeze(['priest_of_end', 'guardian', 'great_detective', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
+            epic: Object.freeze(['priest_of_end', 'red_dragon', 'santa', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
             legend: Object.freeze(['time_ruler', 'phantom', 'venom', 'perfect_aurora', 'cure_master', 'deep_lord', 'frozen_witch', 'rumi', 'world_tree', 'doom_luther'])
         })
     }),
     Object.freeze({
         id: 'arena_company',
-        revision: 1,
+        revision: 2,
         name: '투기장의 연맹',
         mainAxis: '평타·마나 절약',
         subAxes: Object.freeze(['아레나', '치명타·방어 저하', '배치·동일등급']),
@@ -1426,7 +1426,7 @@ const BASIC_CARD_SETS = Object.freeze([
             normal: Object.freeze(['kobold', 'mimic', 'executor', 'discipline_captain', 'werebear', 'shadow_cat', 'black_swan', 'candy_boy', 'slime', 'mummy']),
             rare: Object.freeze(['baby_dragon', 'ember_tiger', 'prism_twin', 'legendary_captain', 'golem', 'void_knight', 'fenrir', 'hellhound', 'cream_maid', 'forget_me_not']),
             epic: Object.freeze(['paladin', 'guardian', 'eclipse_queen', 'crystal_dancer', 'red_dragon', 'flame_sage', 'pudding_princess', 'gumiho', 'mushroom_king', 'unicorn']),
-            legend: Object.freeze(['doom_luther', 'cherry_prince', 'phoenix', 'cure_master', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
+            legend: Object.freeze(['ancient_soul', 'cherry_prince', 'phoenix', 'luna', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
         })
     })
 ]);

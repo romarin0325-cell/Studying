@@ -32,7 +32,66 @@ try {
   await page.locator('#card-pool-editor-close').click();
   await page.evaluate(() => RPG.openCardPoolEditor('extras'));
   assert.equal(await page.locator('#card-pool-tab-extras').getAttribute('aria-selected'), 'true');
+  const body = page.locator('#card-pool-editor-body');
+  for (const width of [320, 390, 412]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.evaluate(() => {
+      RPG._cardPoolEditorDraft.profiles.classic.presets[0].extraCardIds = [];
+      RPG.renderCardPoolEditor();
+      document.querySelector('#card-pool-editor-body').scrollTop = 210;
+    });
+    const tile = page.locator('.card-pool-extra-grid .card-pool-card-row').nth(6);
+    const toggle = tile.locator('.card-pool-row-action');
+    const before = await tile.boundingBox();
+    const scroll = await body.evaluate(node => node.scrollTop);
+    await toggle.click();
+    assert.equal(await toggle.textContent(), '제외');
+    assert.deepEqual(await tile.boundingBox(), before, 'Adding must not move the tile');
+    assert.equal(await body.evaluate(node => node.scrollTop), scroll);
+    await toggle.click();
+    assert.equal(await toggle.textContent(), '추가');
+    assert.deepEqual(await tile.boundingBox(), before, 'Removing must not move the tile');
+    assert.equal(await body.evaluate(node => node.scrollTop), scroll);
+    assert.equal(await page.locator('.card-pool-extra-grid').evaluate(node => getComputedStyle(node).gridTemplateColumns.split(' ').length), 3);
+    assert.equal(await body.evaluate(node => node.scrollWidth <= node.clientWidth), true);
+  }
+  await page.evaluate(() => {
+    const candidates = CardPoolRules.getExtraCandidates(CardPoolRules.getSet('classic'), GameUtils.getAllCards(), RPG.getCardPoolAvailabilityContext());
+    RPG._cardPoolEditorDraft.profiles.classic.presets[0].extraCardIds = candidates.slice(0, 14);
+    RPG.renderCardPoolEditor();
+  });
+  const fifteenth = page.locator('.card-pool-extra-grid .card-pool-card-row').nth(14);
+  await fifteenth.scrollIntoViewIfNeeded();
+  const beforeLimit = await fifteenth.boundingBox();
+  await fifteenth.locator('.card-pool-row-action').click();
+  assert.equal(await page.locator('.card-pool-extra-grid [aria-pressed=true]').count(), 15);
+  assert.ok(await page.locator('.card-pool-extra-grid button:disabled').count() > 0);
+  assert.deepEqual(await fifteenth.boundingBox(), beforeLimit);
+  await fifteenth.locator('.card-pool-row-action').click();
+  assert.equal(await page.locator('.card-pool-extra-grid button:disabled').count(), 0);
+  await body.evaluate(node => { node.scrollTop = 0; });
+  await page.locator('.card-pool-search').pressSequentially('피닉스');
+  assert.equal(await page.locator('.card-pool-search').inputValue(), '피닉스');
+  assert.equal(await page.locator('.card-pool-search').evaluate(node => node === document.activeElement), true);
+  assert.equal(await page.locator('.card-pool-extra-grid .card-pool-card-row').count(), 1);
+  await page.locator('.card-pool-search').fill('');
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: path.join(output, 'basic-sets-390.png') });
+  for (const theme of ['astra', 'dreamsky', 'strawberry']) {
+    await page.evaluate(value => { document.body.dataset.theme = value; }, theme);
+    await page.locator('#card-pool-tab-sets').click();
+    assert.equal(await page.locator('.card-pool-set-row').count(), 6);
+    assert.equal(await body.innerText().then(text => text.includes('시험 기능')), false);
+    assert.equal(await page.locator('.card-pool-set-axis').count(), 0);
+    await page.screenshot({ path: path.join(output, `set-editor-${theme}-390.png`) });
+    await page.locator('.card-pool-set-row').nth(3).locator('.card-pool-row-action').first().click();
+    assert.equal(await page.locator('.card-pool-detail-title').textContent(), '별빛 정원');
+    assert.equal(await page.locator('.card-pool-set-row').count(), 0);
+    assert.equal(await body.evaluate(node => node.scrollWidth <= node.clientWidth), true);
+    await page.screenshot({ path: path.join(output, `set-unlocks-${theme}-390.png`) });
+    await page.locator('.card-pool-set-detail > button').click();
+    await page.locator('#card-pool-tab-extras').click();
+  }
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.screenshot({ path: path.join(output, 'basic-sets-1280.png') });
   assert.deepEqual(errors, []);
