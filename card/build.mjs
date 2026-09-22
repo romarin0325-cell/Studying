@@ -32,7 +32,10 @@ const assetTypes = {'.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf'}
 const encodeAsset = async file => {
   const mime = assetTypes[path.extname(file)];
   if (!mime || path.basename(file) !== file) throw new Error(`Unsupported inline asset: ${file}`);
-  return `data:${mime};base64,${(await fs.readFile(path.join(root, 'assets', file))).toString('base64')}`;
+  const bytes = await fs.readFile(path.join(root, 'assets', file));
+  // Git may check out SVG text with CRLF on Windows; normalize before encoding.
+  const stableBytes = mime === 'image/svg+xml' ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n')) : bytes;
+  return `data:${mime};base64,${stableBytes.toString('base64')}`;
 };
 for (const [key,file] of [['strawberry','magical-card.png'],['dreamsky','dreamsky-card.svg']]) themeCards[key] = await encodeAsset(file);
 for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
