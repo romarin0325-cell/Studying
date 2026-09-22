@@ -182,7 +182,43 @@ function run() {
         defaultUnlockedBonusIds: GameUtils.getDefaultUnlockedBonusCardIds()
       };
     };
+    const oldConfig = CardPoolRules.createEmptyConfig();
+    delete oldConfig.setRevisions; // v1 saves did not record individual set revisions.
+    oldConfig.selectedSetId = 'starlit_garden';
+    const movedToBase = {
+      ember_relay: ['shooting_star_boy'],
+      starlit_garden: ['joker', 'sphinx', 'astrologer'],
+      midnight_tide: ['red_dragon', 'santa'],
+      arena_company: ['ancient_soul', 'luna']
+    };
+    Object.entries(movedToBase).forEach(([setId, ids]) => {
+      oldConfig.profiles[setId].activePresetIndex = 2;
+      oldConfig.profiles[setId].presets.forEach(preset => {
+        preset.extraCardIds = ids.concat(['behemoth']);
+      });
+    });
+    oldConfig.profiles.twilight_liturgy.presets[1].extraCardIds = ['behemoth'];
+    rpg.global.cardPoolConfig = oldConfig;
+    assert.strictEqual(rpg.ensureCardPoolConfigState(), true);
+    const upgraded = rpg.global.cardPoolConfig;
+    const allUnlocked = catalogue.map(card => card.id);
+    const allAvailable = {
+      catalogue, unlockedBonusIds: allUnlocked, releasedBonusIds: allUnlocked,
+      hiddenBonusIds: [], defaultUnlockedBonusIds: allUnlocked
+    };
+    Object.entries(movedToBase).forEach(([setId, ids]) => {
+      assert.strictEqual(upgraded.setRevisions[setId], rules.getSet(setId).revision);
+      assert.strictEqual(upgraded.profiles[setId].activePresetIndex, 2);
+      upgraded.profiles[setId].presets.forEach(preset => {
+        assert.deepStrictEqual(preset.extraCardIds, ['behemoth']);
+        assert.strictEqual(rules.validateNewRunSelection({ setId, extraCardIds: preset.extraCardIds }, allAvailable).ok, true);
+      });
+      assert.deepStrictEqual(oldConfig.profiles[setId].presets[0].extraCardIds, ids.concat(['behemoth']));
+    });
+    assert.deepStrictEqual(upgraded.profiles.twilight_liturgy.presets[1].extraCardIds, ['behemoth']);
+    assert.strictEqual(rpg.ensureCardPoolConfigState(), false);
     assert.strictEqual(rpg.saveGlobalData(), true);
+    assert.deepStrictEqual(JSON.parse(localStorage.getItem(Storage.keys.GLOBAL)).cardPoolConfig.profiles.starlit_garden.presets[2].extraCardIds, ['behemoth']);
     assert.ok(rpg.global._storageStamp);
     const firstStamp = rpg.global._storageStamp;
     localStorage.setItem(Storage.keys.GLOBAL, JSON.stringify(Object.assign({}, rpg.global, { _storageStamp: 'other-tab' })));

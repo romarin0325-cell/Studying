@@ -992,6 +992,7 @@
         const existing = this.global.cardPoolConfig;
         if (existing && existing.version === 1 && existing.profiles && typeof existing.profiles === 'object') {
             const cloned = rules.cloneConfig(existing);
+            rules.migrateSetRevisions(cloned, this.getCardPoolCatalogue());
             const before = JSON.stringify(existing);
             this.global.cardPoolConfig = cloned;
             return JSON.stringify(cloned) !== before;
