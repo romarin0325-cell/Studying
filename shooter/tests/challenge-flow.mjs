@@ -34,12 +34,12 @@ try {
     assert.ok(cardText.every(el=>!el.overflow),JSON.stringify({viewport,cardText}));
     await click('[data-dungeon="0"]');const before=await page.locator('#dungeon-done').boundingBox();
     await click('[data-dungeon="5"]');const after=await page.locator('#dungeon-done').boundingBox();assert.equal(before.y,after.y);
-    await page.locator('#challenge-mode').scrollIntoViewIfNeeded();const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('.webp'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
+    await page.locator('#challenge-mode').scrollIntoViewIfNeeded();const bottom=await page.locator('#challenge-mode').boundingBox();const challengeBg=await page.locator('#challenge-mode').evaluate(el=>getComputedStyle(el).backgroundImage);assert.ok(challengeBg.includes('.webp') || challengeBg.includes('image/webp'));await shot('geometry-'+viewport.width);assert.ok(bottom.y>=0&&bottom.y+bottom.height<=viewport.height,JSON.stringify({viewport,bottom}));
     await shot(`dungeons-${viewport.width}`);await click('#dungeon-done');await click('#fullscreen');await page.waitForFunction(()=>!document.fullscreenElement);
   }
   checks.push('Fullscreen achievements and eight destination cards align at four mobile/landscape sizes; actions remain stable and cards scroll into view');
   await page.setViewportSize({width:390,height:844});await click('#dungeons');await click('#challenge-mode');await click('#challenge-done');
-  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('.webp'));await shot('challenge-lobby');
+  assert.match(await page.locator('#dungeons').innerText(),/챌린지[\s\S]*챌린지/);assert.ok((await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('.webp') || (await page.locator('#dungeons').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('image/webp'));await shot('challenge-lobby');
   await click('#launch');if(await page.locator('#help-done').count())await click('#help-done');
   await page.waitForFunction(()=>__challenge.game?.phase==='wave');await page.clock.runFor(2700);assert.equal(await page.evaluate(()=>__challenge.game.challenge),true);
   const profileBefore=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,clears:__challenge.profile.clears,best:__challenge.saved.best}));
