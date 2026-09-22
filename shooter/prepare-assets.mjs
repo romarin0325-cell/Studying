@@ -220,7 +220,9 @@ export async function prepareAssets({ outputDirectory = path.join(root, '.build-
     qualityProbes: await qualityProbe()
   };
   if (writeReport) {
-    await fs.writeFile(path.join(path.dirname(outputDirectory), 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+    const reportDirectory = path.join(root, 'artifacts');
+    await fs.mkdir(reportDirectory, { recursive: true });
+    await fs.writeFile(path.join(reportDirectory, 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
   }
   return report;
 }
