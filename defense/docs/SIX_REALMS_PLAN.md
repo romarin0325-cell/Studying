@@ -47,7 +47,7 @@ remain the technology stack; no external runtime service is required.
 | --- | --- |
 | Root `npm run verify` | Passed; unrelated Card/Shooter suites remain excluded for this scoped Defense change |
 | Defense lint | 60 runtime modules and 142 release assets validated |
-| Full unit/integration/balance suite | 150 passed after six-realm encounter tuning; later clock-presentation and hit-mask cache regressions also passed in the final 136-test focused run |
+| Full unit/integration/balance suite | 150 passed after six-realm encounter tuning; later clock-presentation and hit-mask cache regressions also passed in the final 137-test focused run |
 | Full formation simulations | 690 complete battles: 115 pairwise formations per realm; all 9,100 valid formations checked structurally |
 | Browser input/performance | Seven viewports from 320×568 to 1366×768; rotation, pointer input, square geometry and original performance gates passed |
 | Offline experience | Six real boss warnings and aimed interrupts, DPR-3 portrait/landscape, roster swaps, fullscreen, audio/mute, Easy/Normal ten-wave growth/traits/resume/victory |

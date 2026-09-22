@@ -128,6 +128,21 @@ test('skill cast sparkle renders on the caster without a damage popup', () => {
   assert.equal(renderer.snapshotCaps().effects, 0, 'cast sparkle expires within its 0.55s life');
 });
 
+test('clock cast keeps a small caster sparkle; the collapsing face belongs only to impact', () => {
+  const cast={type:'attack_prepare',actionKind:'skill',effectPreset:'skill_cast',element:'dark',x:2,y:3,radius:2,visualOnly:true};
+  const traces=[];
+  for(const vfx of [undefined,'clock']) {
+    const renderer=new EffectRenderer(),context=createContextRecorder();
+    renderer.push({...cast,vfx});renderer.update(.1);renderer.render(context,TEST_LAYOUT);
+    traces.push(context.calls);
+  }
+  assert.deepEqual(traces[1],traces[0],'preparation must not draw an early area collapse around the caster');
+  const renderer=new EffectRenderer(),context=createContextRecorder();
+  renderer.push({...cast,type:'hit',effectPreset:'skill_area_hit',vfx:'clock',x:5,y:6});
+  renderer.render(context,TEST_LAYOUT);
+  assert.equal(context.strokes.filter(path=>path.length===2).length,12,'impact has twelve clock marks');
+});
+
 test('burst impacts draw shards at the target without replaying the flight', () => {
   const renderer=new EffectRenderer(), context=createContextRecorder();
   renderer.push({effectPreset:'basic_ranged_hit',attackArchetype:'burst',element:'dark',sourceX:1,sourceY:1,x:4,y:4});

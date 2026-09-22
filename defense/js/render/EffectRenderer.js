@@ -203,7 +203,7 @@ export class EffectRenderer {
     const radius = layout.logicalRadiusToCanvas(effect.radius ?? 0.45);
     context.save();
     context.lineCap = 'round';
-    if (effect.vfx === 'clock') {
+    if (effect.vfx === 'clock' && effect.effectPreset === 'skill_area_hit') {
       drawClock(context, point, radius * (1 - progress * .3), 1, fade);
       if (!this.reduced) for (let i = 0; i < 12; i++) {
         const angle = i * Math.PI / 6;
