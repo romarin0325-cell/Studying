@@ -1,10 +1,16 @@
 import fs from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const scriptPath = fileURLToPath(import.meta.url);
+const root = path.dirname(scriptPath);
+let sharp;
+const getSharp = async () => sharp ||= (await import('sharp')).default;
+const CACHE_VERSION = 1;
+const GENERATED_ASSETS = path.join(root, 'generated-assets');
 const EVENT_ASSETS = ['harmonious', 'gold-dragon', 'ancient-soul', 'behemoth', 'time-ruler'];
+const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
 const ART_WEBP = { quality: 88, alphaQuality: 100, effort: 6 };
 const WORLD_WEBP = { quality: 84, alphaQuality: 100, effort: 6 };
 const CHARACTER_KINDS = new Set(['heroes', 'companions', 'secrets']);
@@ -19,6 +25,43 @@ const SHIELD_BOUNDS = [[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const imagePath = name => path.join(root, 'assets', `${name}${name === 'worlds' ? '.jpg' : '.png'}`);
 const webpPath = (destination, group, index) => path.join(destination, group, `${index}.webp`);
+const sha256 = data => createHash('sha256').update(data).digest('hex');
+
+async function sourceInventory() {
+  return Promise.all(ASSET_INPUTS.map(async name => {
+    const file = imagePath(name), data = await fs.readFile(file);
+    return { file: path.basename(file), bytes: data.length, sha256: sha256(data) };
+  }));
+}
+
+function cacheFilePath(directory, file) {
+  const rootPath = path.resolve(directory), candidate = path.resolve(rootPath, file);
+  return candidate.startsWith(`${rootPath}${path.sep}`) ? candidate : null;
+}
+
+async function readCachedReport(directory, fingerprint) {
+  try {
+    const manifest = JSON.parse(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8'));
+    if (manifest.version !== CACHE_VERSION || manifest.sourceHash !== fingerprint.sourceHash || manifest.processorHash !== fingerprint.processorHash) return null;
+    const files = manifest.report?.output?.files;
+    if (!Array.isArray(files) || files.length !== 94) return null;
+    for (const file of files) {
+      const destination = cacheFilePath(directory, file.file);
+      if (!destination || !Number.isInteger(file.bytes) || typeof file.sha256 !== 'string') return null;
+      const data = await fs.readFile(destination);
+      if (data.length !== file.bytes || sha256(data) !== file.sha256) return null;
+    }
+    return manifest.report;
+  } catch {
+    return null;
+  }
+}
+
+async function writeReport(report) {
+  const reportDirectory = path.join(root, 'artifacts');
+  await fs.mkdir(reportDirectory, { recursive: true });
+  await fs.writeFile(path.join(reportDirectory, 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+}
 
 function cropPixels(data, sourceWidth, left, top, width, height) {
   const output = Buffer.alloc(width * height * 4);
@@ -64,6 +107,7 @@ function alphaBounds(data, width, height) {
 }
 
 async function resizeRaw(data, width, height, targetWidth, targetHeight) {
+  const sharp = await getSharp();
   return sharp(data, { raw: { width, height, channels: 4 } })
     .resize(targetWidth, targetHeight, { fit: 'fill', kernel: sharp.kernel.lanczos3 })
     .raw().toBuffer();
@@ -80,10 +124,11 @@ async function containRaw(data, width, height, targetWidth, targetHeight) {
 }
 
 async function writeRaw(destination, data, width, height, options, outputs) {
+  const sharp = await getSharp();
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await sharp(data, { raw: { width, height, channels: 4 } }).webp(options).toFile(destination);
-  const stat = await fs.stat(destination);
-  outputs.push({ file: path.relative(path.dirname(path.dirname(destination)), destination).replaceAll('\\', '/'), bytes: stat.size, width, height });
+  const output = await fs.readFile(destination);
+  outputs.push({ file: path.relative(path.dirname(path.dirname(destination)), destination).replaceAll('\\', '/'), bytes: output.length, width, height, sha256: sha256(output) });
 }
 
 function cellGeometry(kind, index, sourceWidth, sourceHeight, columns) {
@@ -100,6 +145,7 @@ function cellGeometry(kind, index, sourceWidth, sourceHeight, columns) {
 }
 
 async function readRaw(name) {
+  const sharp = await getSharp();
   const input = imagePath(name);
   const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   return { input, data, width: info.width, height: info.height };
@@ -134,6 +180,7 @@ async function processSpriteSheet(name, destination, outputs) {
     }
     await writeRaw(webpPath(destination, name, index), output, size, size, ART_WEBP, outputs);
     if (name === 'companions' && index === 3) {
+      const sharp = await getSharp();
       const dark = await sharp(output, { raw: { width: 512, height: 512, channels: 4 } }).negate({ alpha: false }).raw().toBuffer();
       await writeRaw(path.join(destination, 'companions', 'dark-fairy.webp'), dark, 512, 512, ART_WEBP, outputs);
     }
@@ -141,13 +188,14 @@ async function processSpriteSheet(name, destination, outputs) {
 }
 
 async function processWorldAtlas(name, columns, destination, outputs) {
+  const sharp = await getSharp();
   const input = imagePath(name), metadata = await sharp(input).metadata();
   for (let index = 0; index < columns; index++) {
     const left = Math.floor(index * metadata.width / columns), right = Math.floor((index + 1) * metadata.width / columns);
     const output = webpPath(destination, name, index);
     await fs.mkdir(path.dirname(output), { recursive: true });
     await sharp(input).extract({ left, top: 0, width: right - left, height: metadata.height }).resize(450, 1200, { fit: 'fill' }).webp(WORLD_WEBP).toFile(output);
-    const stat = await fs.stat(output); outputs.push({ file: `${name}/${index}.webp`, bytes: stat.size, width: 450, height: 1200 });
+    const data = await fs.readFile(output); outputs.push({ file: `${name}/${index}.webp`, bytes: data.length, width: 450, height: 1200, sha256: sha256(data) });
   }
 }
 
@@ -188,6 +236,7 @@ async function processSmallRelics(name, columns, rows, destination, outputs, box
 }
 
 async function qualityProbe() {
+  const sharp = await getSharp();
   const probes = [];
   for (const name of ['heroes', 'worlds']) {
     const input = imagePath(name), sourceBytes = (await fs.stat(input)).size;
@@ -198,20 +247,28 @@ async function qualityProbe() {
   return probes;
 }
 
-export async function prepareAssets({ outputDirectory = path.join(root, '.build-assets'), writeReport = false } = {}) {
-  const inputNames = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
-  const source = await Promise.all(inputNames.map(async name => ({ file: path.basename(imagePath(name)), bytes: (await fs.stat(imagePath(name))).size })));
-  await fs.rm(outputDirectory, { recursive: true, force: true });
+export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeReport: shouldWriteReport = false } = {}) {
+  const cacheDirectory = path.resolve(outputDirectory);
+  if (!cacheDirectory.startsWith(`${root}${path.sep}`)) throw new Error(`Asset cache must stay inside shooter/: ${cacheDirectory}`);
+  const source = await sourceInventory();
+  const fingerprint = { sourceHash: sha256(JSON.stringify(source)), processorHash: sha256(await fs.readFile(scriptPath)) };
+  const cached = await readCachedReport(cacheDirectory, fingerprint);
+  if (cached) {
+    const report = { ...cached, cache: { hit: true, directory: path.relative(root, cacheDirectory).replaceAll('\\', '/') } };
+    if (shouldWriteReport) await writeReport(report);
+    return report;
+  }
+  await fs.rm(cacheDirectory, { recursive: true, force: true });
   const outputs = [];
-  for (const name of ['heroes', 'bosses', 'enemies', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'astea', ...EVENT_ASSETS]) await processSpriteSheet(name, outputDirectory, outputs);
-  await processWorldAtlas('worlds', 4, outputDirectory, outputs);
-  await processWorldAtlas('tide-worlds', 2, outputDirectory, outputs);
-  await processWorldAtlas('celestial-world', 1, outputDirectory, outputs);
-  for (const name of EVENT_ASSETS) await processWorldAtlas(`${name}-world`, 1, outputDirectory, outputs);
-  await processTideRelics(outputDirectory, outputs);
-  await processShieldRelics(outputDirectory, outputs);
-  await processSmallRelics('celestial-relics', 2, 2, outputDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.5],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
-  await processSmallRelics('balance-relics', 3, 2, outputDirectory, outputs);
+  for (const name of ['heroes', 'bosses', 'enemies', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'astea', ...EVENT_ASSETS]) await processSpriteSheet(name, cacheDirectory, outputs);
+  await processWorldAtlas('worlds', 4, cacheDirectory, outputs);
+  await processWorldAtlas('tide-worlds', 2, cacheDirectory, outputs);
+  await processWorldAtlas('celestial-world', 1, cacheDirectory, outputs);
+  for (const name of EVENT_ASSETS) await processWorldAtlas(`${name}-world`, 1, cacheDirectory, outputs);
+  await processTideRelics(cacheDirectory, outputs);
+  await processShieldRelics(cacheDirectory, outputs);
+  await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.5],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
+  await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs);
   const sourceBytes = source.reduce((total, item) => total + item.bytes, 0), outputBytes = outputs.reduce((total, item) => total + item.bytes, 0);
   const report = {
     source: { fileCount: source.length, bytes: sourceBytes, files: source },
@@ -219,15 +276,13 @@ export async function prepareAssets({ outputDirectory = path.join(root, '.build-
     reduction: { bytes: sourceBytes - outputBytes, percent: Number(((1 - outputBytes / sourceBytes) * 100).toFixed(2)) },
     qualityProbes: await qualityProbe()
   };
-  if (writeReport) {
-    const reportDirectory = path.join(root, 'artifacts');
-    await fs.mkdir(reportDirectory, { recursive: true });
-    await fs.writeFile(path.join(reportDirectory, 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
-  }
-  return report;
+  await fs.writeFile(path.join(cacheDirectory, 'manifest.json'), `${JSON.stringify({ version: CACHE_VERSION, ...fingerprint, report }, null, 2)}\n`);
+  const result = { ...report, cache: { hit: false, directory: path.relative(root, cacheDirectory).replaceAll('\\', '/') } };
+  if (shouldWriteReport) await writeReport(result);
+  return result;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const report = await prepareAssets({ writeReport: true });
-  console.log(JSON.stringify({ sourceBytes: report.source.bytes, outputBytes: report.output.bytes, reductionPercent: report.reduction.percent, files: report.output.fileCount }, null, 2));
+  console.log(JSON.stringify({ sourceBytes: report.source.bytes, outputBytes: report.output.bytes, reductionPercent: report.reduction.percent, files: report.output.fileCount, cacheHit: report.cache.hit }, null, 2));
 }

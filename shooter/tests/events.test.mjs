@@ -49,6 +49,9 @@ test('sealed explosion is larger and fully warned; other events retain their sou
   for(const d of EVENT_DUNGEONS){const g=combat(d.id);g.wave=1;g.spawnWave();assert.ok(g.enemies.some(e=>e.special===d.specialType));}
   const sea=combat(8);sea.spawnEnemy(200,150,{hp:100,special:4,r:20,speed:0,fire:0});tick(sea,.01);assert.equal(sea.bullets.length,4);assert.ok(sea.bullets.every(b=>b.ricochet===5));
   const soul=combat(9);soul.spawnEnemy(200,150,{hp:100,special:3,r:20,speed:0,fire:999});tick(soul,2.4);assert.ok(soul.enemies[0].teleportTarget);tick(soul,.7);assert.notEqual(soul.enemies[0].x,200);
+  const forest=combat(3);forest.wave=1;forest.spawnWave();const forestTeleporter=forest.enemies.find(e=>e.special===3);
+  const cavern=combat(9);cavern.wave=1;cavern.spawnWave();const cavernTeleporter=cavern.enemies.find(e=>e.special===3);
+  assert.ok(cavernTeleporter.maxHp>forestTeleporter.maxHp&&cavernTeleporter.maxHp<forestTeleporter.maxHp*1.2);
   const time=combat(11);time.spawnEnemy(200,150,{hp:100,special:2,countdown:3,r:20,speed:0,fire:999});tick(time,3.01);assert.equal(time.bullets.length,20);
 });
 test('all fifteen event boss phases are finite, capped and leave broad ring corridors',()=>{
@@ -56,7 +59,8 @@ test('all fifteen event boss phases are finite, capped and leave broad ring corr
     const g=combat(d.id);g.startStage(d.id,2);g.spawnBoss();g.phase='boss';g.player.fire=999;g.player.invincible=999;g.boss.y=150;g.boss.hp=g.boss.maxHp*[1,.6,.3][phase];
     tick(g,16);assert.equal(g.bossPattern,phase);assert.ok(g.bullets.length>0&&g.stats.maxBullets<=LIMITS.bullets);
     assert.ok(g.bullets.every(b=>[b.x,b.y,b.vx,b.vy].every(Number.isFinite)));
-    assert.ok(g.bullets.every(b=>Math.hypot(b.vx,b.vy)<150));
+    const fastest=Math.max(...g.bullets.map(b=>Math.hypot(b.vx,b.vy)));assert.ok(fastest>=125.9&&fastest<=142.1);
+    assert.ok(g.stats.maxBullets>=38);
   }
   const g=combat(11);g.spawnBoss();g.phase='boss';g.boss.y=150;tick(g,1.8);assert.ok(g.bullets.some(b=>b.stopped));tick(g,1.2);assert.ok(g.bullets.every(b=>!b.stopped));
 });

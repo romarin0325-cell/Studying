@@ -1,0 +1,863 @@
+{
+  "version": 1,
+  "sourceHash": "20a740c2b838bd548d4c9c093262d7c7e7fe5eff33e6d9a0efee9dfdfe20b751",
+  "processorHash": "5814d0aa40a0bbe5409641331f99261768febbbbc6cddf0f933ca23841f658dd",
+  "report": {
+    "source": {
+      "fileCount": 27,
+      "bytes": 61495245,
+      "files": [
+        {
+          "file": "heroes.png",
+          "bytes": 2016633,
+          "sha256": "19444a93e88e5e9d824f8cb7ca1ce4478ed8e1bd403c2756f7572ea6a2f7b010"
+        },
+        {
+          "file": "bosses.png",
+          "bytes": 2286849,
+          "sha256": "1871d8985d1ae50a40c62e67d2d3e826203c9941827b66d726efaf307cec1b8a"
+        },
+        {
+          "file": "enemies.png",
+          "bytes": 2169086,
+          "sha256": "a2471083ae6d3edfee0b17ed61ae8e81e34443112203c44213508c21fba4453a"
+        },
+        {
+          "file": "worlds.jpg",
+          "bytes": 582051,
+          "sha256": "c95482d98c83ad06190830ea820b3ff55491bb0b14d985d1e8b750fae8bc3bce"
+        },
+        {
+          "file": "companions.png",
+          "bytes": 2008173,
+          "sha256": "d73e0c40fe1f049b12a1bf1ce6b55bf2665d40bebcdfdad91f96bde19944b973"
+        },
+        {
+          "file": "secrets.png",
+          "bytes": 2158715,
+          "sha256": "45b7fd50b6e0e11a3343abeb8bf26cd5e11c9f03b74201b14c910cb2d563c727"
+        },
+        {
+          "file": "sentinels.png",
+          "bytes": 2751579,
+          "sha256": "ad1ac993fca436fb4a7eac7642dbd6735d68d3f983e73f56ee651de6e3debb73"
+        },
+        {
+          "file": "relics.png",
+          "bytes": 2190910,
+          "sha256": "69bdae7f542d7f939519c5d16c265b48bdfea83cb899c42fe8063f464046f89e"
+        },
+        {
+          "file": "tides.png",
+          "bytes": 2938804,
+          "sha256": "6db27772a23d62d5cd572479d0bc11da8530e78ec916ec1bed5ef3bbc9d4b5ba"
+        },
+        {
+          "file": "bloom-fx.png",
+          "bytes": 2492814,
+          "sha256": "1605145b30d40c5f36c696e0d4126d7f6370c51dcf0450a92e4945e26a5b09c5"
+        },
+        {
+          "file": "tide-worlds.png",
+          "bytes": 3424557,
+          "sha256": "7cf6e985ab53efe0705110fc245f6e3149274ce40873d024610198252976c48e"
+        },
+        {
+          "file": "tide-relics.png",
+          "bytes": 2558127,
+          "sha256": "1d6859a6813dd7770e9165e93647b9bfc53423f2759da18c8416430e893f5e27"
+        },
+        {
+          "file": "shield-relics.png",
+          "bytes": 2215251,
+          "sha256": "837c89c62025513a65ef4ca6aade41dfebb7172a482176bc045868e7f6dec272"
+        },
+        {
+          "file": "astea.png",
+          "bytes": 1833451,
+          "sha256": "e43dd7c869681b3590a11998df02f93ba59f785098109c1456db9b914fe32700"
+        },
+        {
+          "file": "celestial-relics.png",
+          "bytes": 2221479,
+          "sha256": "6a23950b308d0d9a7f263de97d0065e85f98c36fb367e88ab9e1bca955cbc9b5"
+        },
+        {
+          "file": "celestial-world.png",
+          "bytes": 2672808,
+          "sha256": "91031de836e0c901a04d076464a7e80922394d9611fe8a3e0bf476635efdaef9"
+        },
+        {
+          "file": "balance-relics.png",
+          "bytes": 2436055,
+          "sha256": "978fdf832fbfd082ecae0550086745262d51d6a3d7786f82f76384fbff70ab31"
+        },
+        {
+          "file": "harmonious.png",
+          "bytes": 1642897,
+          "sha256": "d2c74dcb0eae0ae14e459984d2618946fc83c85d47b10fb77763b30837b98730"
+        },
+        {
+          "file": "harmonious-world.png",
+          "bytes": 2694129,
+          "sha256": "1e89742f4672ab68e66096bee941c094b9b8d865d621974ef22080ee2d5d0cc8"
+        },
+        {
+          "file": "gold-dragon.png",
+          "bytes": 1944642,
+          "sha256": "ff4a954e8661ad4a3bcb1673d393a46f7a11d00cba0ff6d5ba7ac570754c9276"
+        },
+        {
+          "file": "gold-dragon-world.png",
+          "bytes": 2580357,
+          "sha256": "27784b6b77cf7c3b90e527bf03350c914ccb305cd66a0e2464a4fda16660adfc"
+        },
+        {
+          "file": "ancient-soul.png",
+          "bytes": 1718057,
+          "sha256": "e25d8e18cc2d7dcf4ff1e89f116299cc7e0c1abb28d085e52f90777bdee04174"
+        },
+        {
+          "file": "ancient-soul-world.png",
+          "bytes": 2826303,
+          "sha256": "20ccabc0b8eea5ce203f14db90f8aecf394d6fc8780e097db8b1510de74b4491"
+        },
+        {
+          "file": "behemoth.png",
+          "bytes": 1845485,
+          "sha256": "ef57cbc6a4607e9fed88701c50b621d2b95df1b4e4767ad74ee217c3dcf595be"
+        },
+        {
+          "file": "behemoth-world.png",
+          "bytes": 2491017,
+          "sha256": "68362752134001a6589530d7123ebe5aa667f0edf667ac492c13097880d685cc"
+        },
+        {
+          "file": "time-ruler.png",
+          "bytes": 1895311,
+          "sha256": "465819c72458a8ebfcd9fbb87257d6296a85cd8d799f795eefcc31e5f60ec6c4"
+        },
+        {
+          "file": "time-ruler-world.png",
+          "bytes": 2899705,
+          "sha256": "cae92e7470390c7e10becc23429ac047cd78f8a16c912c5e914623151d647cf7"
+        }
+      ]
+    },
+    "output": {
+      "fileCount": 94,
+      "bytes": 5319036,
+      "format": "webp",
+      "files": [
+        {
+          "file": "heroes/0.webp",
+          "bytes": 59354,
+          "width": 512,
+          "height": 512,
+          "sha256": "6ba1599b6bc4bf192d8d5b374aa7424fab37dcad6b498a0f0f0e748b29b7c647"
+        },
+        {
+          "file": "heroes/1.webp",
+          "bytes": 57456,
+          "width": 512,
+          "height": 512,
+          "sha256": "b188a9b9e1864d802243de380856fcfa416d9d50652dc68e2c79983423d23603"
+        },
+        {
+          "file": "heroes/2.webp",
+          "bytes": 61048,
+          "width": 512,
+          "height": 512,
+          "sha256": "9615e20fb8e9276f4f8681ef74899469b8310139edbbda6636940f625328c0e4"
+        },
+        {
+          "file": "heroes/3.webp",
+          "bytes": 61914,
+          "width": 512,
+          "height": 512,
+          "sha256": "84a5079cafd8788431cef1ed2e3dcf1d0c55bb70ae3993fc9ac6971f40d4e31e"
+        },
+        {
+          "file": "bosses/0.webp",
+          "bytes": 45942,
+          "width": 384,
+          "height": 384,
+          "sha256": "6343d7d4252e695da5bd7fa6c11f2f1d66c2c815018f502001bdd39ef2024730"
+        },
+        {
+          "file": "bosses/1.webp",
+          "bytes": 65854,
+          "width": 384,
+          "height": 384,
+          "sha256": "2bb01806ca1386aa8887474c7902ca61f7f8bb839dfa9412cdb6e6ebde7fb933"
+        },
+        {
+          "file": "bosses/2.webp",
+          "bytes": 68902,
+          "width": 384,
+          "height": 384,
+          "sha256": "e8c7c19669b841ce57cbc2b703787438a56def5abd6474a3deaf11578b68a6ac"
+        },
+        {
+          "file": "bosses/3.webp",
+          "bytes": 71324,
+          "width": 384,
+          "height": 384,
+          "sha256": "d2eadd864ffc03af1cb4aa003490feb9b549405189940786f01db405bc3c3f60"
+        },
+        {
+          "file": "enemies/0.webp",
+          "bytes": 52278,
+          "width": 384,
+          "height": 384,
+          "sha256": "f5aa5b5b722496654c7432d55d8eff2e61d106b5a39d96826c4f2e07e58940a4"
+        },
+        {
+          "file": "enemies/1.webp",
+          "bytes": 57748,
+          "width": 384,
+          "height": 384,
+          "sha256": "b30f6bff7b787aa694f9f1bfaa8c859251bf6d19f6e9496e2b8aa548cda70702"
+        },
+        {
+          "file": "enemies/2.webp",
+          "bytes": 50246,
+          "width": 384,
+          "height": 384,
+          "sha256": "e70a20cb364ed2c6b3069c255717cf30b50b8296d92e60b1be80c289a417ab5a"
+        },
+        {
+          "file": "enemies/3.webp",
+          "bytes": 48148,
+          "width": 384,
+          "height": 384,
+          "sha256": "db3bfdaa1f190edcdc7703f4f6722f5cb35346def49c94bd76e7286ab249da0d"
+        },
+        {
+          "file": "companions/0.webp",
+          "bytes": 50696,
+          "width": 512,
+          "height": 512,
+          "sha256": "a6b2414d4a1bc77edabfab2cdf7815c77300b26fa55729dea2239eceabb3fe31"
+        },
+        {
+          "file": "companions/1.webp",
+          "bytes": 73608,
+          "width": 512,
+          "height": 512,
+          "sha256": "24649fe33c6f86cdf89231f7bffe43ed832709d0da5bd26dd721a4da06dd2d6a"
+        },
+        {
+          "file": "companions/2.webp",
+          "bytes": 40362,
+          "width": 512,
+          "height": 512,
+          "sha256": "89033e4dad2659cc3e85711379f4b7acfa2fe4efb9ce158c98b74fcc956db813"
+        },
+        {
+          "file": "companions/3.webp",
+          "bytes": 78964,
+          "width": 512,
+          "height": 512,
+          "sha256": "3417e04dec0a4c7ffee4f2a46ae49d46f366023c3a5324d92739906dc3e0cc1c"
+        },
+        {
+          "file": "companions/dark-fairy.webp",
+          "bytes": 79012,
+          "width": 512,
+          "height": 512,
+          "sha256": "dec78d72b5c261fcc557fb4a98e86ad5acf9d76647ae64342ae062add3c808b2"
+        },
+        {
+          "file": "secrets/0.webp",
+          "bytes": 67686,
+          "width": 512,
+          "height": 512,
+          "sha256": "d7b3f3511f7147ad4d1651685955c03c47225d7a18e933499b14058742ea2a7a"
+        },
+        {
+          "file": "secrets/1.webp",
+          "bytes": 59406,
+          "width": 512,
+          "height": 512,
+          "sha256": "06f9e9b844fe156615596f007c0a1609d9a7331e00b90bbb43a5410c563710d9"
+        },
+        {
+          "file": "secrets/2.webp",
+          "bytes": 74272,
+          "width": 512,
+          "height": 512,
+          "sha256": "262520a11ed3e5370cd48a55f7c0a3cf888ca03d659b9fbdc39316e69e3ab19e"
+        },
+        {
+          "file": "secrets/3.webp",
+          "bytes": 99782,
+          "width": 512,
+          "height": 512,
+          "sha256": "0f72363b154d398b270255c4ab61ccbcfb3d203fb97f0ad85f17840f4c367991"
+        },
+        {
+          "file": "sentinels/0.webp",
+          "bytes": 77304,
+          "width": 384,
+          "height": 384,
+          "sha256": "44da3cf4ab1cf40661425c11c788b62aee9c2ea1541b43b0ac3e11979ad71382"
+        },
+        {
+          "file": "sentinels/1.webp",
+          "bytes": 74186,
+          "width": 384,
+          "height": 384,
+          "sha256": "b878e899ce59cbd2f76dfa7c0f5ec68723d3195a6ac40f6c4733a3908ccc5a1f"
+        },
+        {
+          "file": "sentinels/2.webp",
+          "bytes": 77710,
+          "width": 384,
+          "height": 384,
+          "sha256": "b96688666200ef3450c8e572302565be656f6b948f7b26b80488caa56d4a6155"
+        },
+        {
+          "file": "sentinels/3.webp",
+          "bytes": 78328,
+          "width": 384,
+          "height": 384,
+          "sha256": "8e856525f3453b09ddc3bf248f2b3a38526042a968425f307a053cb642a95325"
+        },
+        {
+          "file": "relics/0.webp",
+          "bytes": 36742,
+          "width": 384,
+          "height": 384,
+          "sha256": "27c039137585157ab0fa67c7d4d3026d431e8ee7378b2b353947c64b0e2212db"
+        },
+        {
+          "file": "relics/1.webp",
+          "bytes": 29332,
+          "width": 384,
+          "height": 384,
+          "sha256": "722edbb11ab276300295121208554181240b73c308bdef58dbc9307ca23b2007"
+        },
+        {
+          "file": "relics/2.webp",
+          "bytes": 33928,
+          "width": 384,
+          "height": 384,
+          "sha256": "1554780f426113a9ca8ebcdc93e889062debcf0defa3d7cec78a529299f1d268"
+        },
+        {
+          "file": "relics/3.webp",
+          "bytes": 22060,
+          "width": 384,
+          "height": 384,
+          "sha256": "033ae94c02b9abbe4640ac719abbcb0ab62c458d57629680c3312a42ba76bdc0"
+        },
+        {
+          "file": "relics/4.webp",
+          "bytes": 32806,
+          "width": 384,
+          "height": 384,
+          "sha256": "14af6468bc4c138f473877655b521b57d86b246f76587934f3ce749f410fdb39"
+        },
+        {
+          "file": "relics/5.webp",
+          "bytes": 38434,
+          "width": 384,
+          "height": 384,
+          "sha256": "f0cadd19719a92f93e295fe7f90cbf26800236d578e0af194e5ef06a16801e99"
+        },
+        {
+          "file": "relics/6.webp",
+          "bytes": 35574,
+          "width": 384,
+          "height": 384,
+          "sha256": "792db25f2f1a93220661a45df349b5c7f72170bc0ebb7556820858372d45adbf"
+        },
+        {
+          "file": "relics/7.webp",
+          "bytes": 28434,
+          "width": 384,
+          "height": 384,
+          "sha256": "6b319348d0135580a9fe5fb89041f4dabea260dd6156d1abecdd59d3dd7a3452"
+        },
+        {
+          "file": "relics/8.webp",
+          "bytes": 29110,
+          "width": 384,
+          "height": 384,
+          "sha256": "9137ff2c29373d76d37118ed1beda1ef76ff3961d3b94a583bab427bca071bb5"
+        },
+        {
+          "file": "relics/9.webp",
+          "bytes": 20924,
+          "width": 384,
+          "height": 384,
+          "sha256": "4f413a44e89aaee884492b69818c6e01328394aa5d65bf64444cca4323cb59d0"
+        },
+        {
+          "file": "relics/10.webp",
+          "bytes": 30812,
+          "width": 384,
+          "height": 384,
+          "sha256": "913c451f5dc25737f5b226a9dbea2651737612939b4a7407051e6571e62fc27e"
+        },
+        {
+          "file": "relics/11.webp",
+          "bytes": 43804,
+          "width": 384,
+          "height": 384,
+          "sha256": "be8a250f48190a7fc07d74e145dc932c095323278e5e23cd6db018345a4de449"
+        },
+        {
+          "file": "relics/12.webp",
+          "bytes": 40084,
+          "width": 384,
+          "height": 384,
+          "sha256": "019f850b78f83f0b0e62bf4c550b8b982c335480086b57768b546fe5b11ef0a0"
+        },
+        {
+          "file": "relics/13.webp",
+          "bytes": 29402,
+          "width": 384,
+          "height": 384,
+          "sha256": "7b0a5b13f6bde6430f82b244d160f05a0ed51841007d4466931bb19e3cd6e6b4"
+        },
+        {
+          "file": "relics/14.webp",
+          "bytes": 31024,
+          "width": 384,
+          "height": 384,
+          "sha256": "a603df32b48cbf16a0b76cedf7a2f0bb85ddf9d790a2c178252c394329316811"
+        },
+        {
+          "file": "relics/15.webp",
+          "bytes": 29686,
+          "width": 384,
+          "height": 384,
+          "sha256": "880d969d87e49cd98a9d42f07142460b01e8c5bfef7189e52a58c5d173f2b322"
+        },
+        {
+          "file": "tides/0.webp",
+          "bytes": 88342,
+          "width": 384,
+          "height": 384,
+          "sha256": "6ce0d91d438754009921dea47d7a6c254822ebafcfbdf361c9ea1d1287a23827"
+        },
+        {
+          "file": "tides/1.webp",
+          "bytes": 98744,
+          "width": 384,
+          "height": 384,
+          "sha256": "c83b8a3cecb4287b54b2a23a8930f68ce35cc14892e0736f36148e356ac56a56"
+        },
+        {
+          "file": "tides/2.webp",
+          "bytes": 100626,
+          "width": 384,
+          "height": 384,
+          "sha256": "d8a6353e4a4a88b1f9c2df53621baf7ffab346d24d7b806b984e404234be4190"
+        },
+        {
+          "file": "tides/3.webp",
+          "bytes": 104526,
+          "width": 384,
+          "height": 384,
+          "sha256": "666d4b292831fd958d44201a7e11dbf3fb4b2ded8c692a6fc36847028525ebc5"
+        },
+        {
+          "file": "bloom-fx/0.webp",
+          "bytes": 99472,
+          "width": 384,
+          "height": 384,
+          "sha256": "f7548b7a9443a8dc85d4bf78e3681b5d46232c897a28df9dd73e8a98d59dc898"
+        },
+        {
+          "file": "bloom-fx/1.webp",
+          "bytes": 88840,
+          "width": 384,
+          "height": 384,
+          "sha256": "6ad1ae066ef9734ef14d0836d62acd770f373ae6ad359d7cf61bda190172216b"
+        },
+        {
+          "file": "bloom-fx/2.webp",
+          "bytes": 97878,
+          "width": 384,
+          "height": 384,
+          "sha256": "d0b0bba2e5a5a32870813fa34fd1c8794ffa1e048021f378f0e835528920be4e"
+        },
+        {
+          "file": "bloom-fx/3.webp",
+          "bytes": 85724,
+          "width": 384,
+          "height": 384,
+          "sha256": "bd59d9684f7903259cacb7ee8fbff528bbb63704cf40d8e218ad98a03e1aa9dd"
+        },
+        {
+          "file": "astea/0.webp",
+          "bytes": 58356,
+          "width": 384,
+          "height": 384,
+          "sha256": "1332f6e331a6c2435918c5686af910438467b90aabd98e877507e4ecd278bee1"
+        },
+        {
+          "file": "harmonious/0.webp",
+          "bytes": 52960,
+          "width": 384,
+          "height": 384,
+          "sha256": "5883462c8d19b6579065f55a6a8aa5b2feca854bce48b213e3c26ab0bb29b564"
+        },
+        {
+          "file": "gold-dragon/0.webp",
+          "bytes": 63076,
+          "width": 384,
+          "height": 384,
+          "sha256": "12f1693b6300732fdc20a8cdb7f78b2e78c9029c116c1e23bda4d1c07fd67c6a"
+        },
+        {
+          "file": "ancient-soul/0.webp",
+          "bytes": 56690,
+          "width": 384,
+          "height": 384,
+          "sha256": "4fc8d0ef1013672f529ecca83a22d0915970fce3c59431b29be475550c695503"
+        },
+        {
+          "file": "behemoth/0.webp",
+          "bytes": 61848,
+          "width": 384,
+          "height": 384,
+          "sha256": "9d43aeb400fa46110bb5b434918ef59902532b9c036640f52e943d46abcd56f5"
+        },
+        {
+          "file": "time-ruler/0.webp",
+          "bytes": 57558,
+          "width": 384,
+          "height": 384,
+          "sha256": "30c174b96fdca3217c67fca28c85c5776b3e37b9ef1a3a8ee0ddced5af821133"
+        },
+        {
+          "file": "worlds/0.webp",
+          "bytes": 106680,
+          "width": 450,
+          "height": 1200,
+          "sha256": "2100835516dcbf05836a862c100653947cd0146698d714e36bb0f49560ce791d"
+        },
+        {
+          "file": "worlds/1.webp",
+          "bytes": 117224,
+          "width": 450,
+          "height": 1200,
+          "sha256": "e149e27344ccf4967c28aa68ac848be8b554693751eff9942460cfeb3bcf9379"
+        },
+        {
+          "file": "worlds/2.webp",
+          "bytes": 86724,
+          "width": 450,
+          "height": 1200,
+          "sha256": "a98fef4748a12c6c12467d431c6041b8a8b22be0cb916c31320148f3540d3390"
+        },
+        {
+          "file": "worlds/3.webp",
+          "bytes": 105336,
+          "width": 450,
+          "height": 1200,
+          "sha256": "d9b5d9556dba30f9e9c4a283c0a60dd089a12b38895b23133697fa4487585221"
+        },
+        {
+          "file": "tide-worlds/0.webp",
+          "bytes": 160438,
+          "width": 450,
+          "height": 1200,
+          "sha256": "144d2feb1ff4cea56d5ea2391210313a8616340d1459a6e77380bdcccb3b17f4"
+        },
+        {
+          "file": "tide-worlds/1.webp",
+          "bytes": 152546,
+          "width": 450,
+          "height": 1200,
+          "sha256": "abb2bebf3efad1d95dd921ed2fefaa54a0ce0147000c1389f04251ca794130cc"
+        },
+        {
+          "file": "celestial-world/0.webp",
+          "bytes": 143146,
+          "width": 450,
+          "height": 1200,
+          "sha256": "7dd6f8de7025a2af4de36949c42ef33aaa3537702c71c83197212abe4efb5a91"
+        },
+        {
+          "file": "harmonious-world/0.webp",
+          "bytes": 135842,
+          "width": 450,
+          "height": 1200,
+          "sha256": "7797cff2980e276205ce0e510f6074ba647e12c025bdf7846327c396c87d01e4"
+        },
+        {
+          "file": "gold-dragon-world/0.webp",
+          "bytes": 120818,
+          "width": 450,
+          "height": 1200,
+          "sha256": "fd4cbc7f8d3d221362ea713b1656ce40ab6944ac0306a5e45ab5705826c500ca"
+        },
+        {
+          "file": "ancient-soul-world/0.webp",
+          "bytes": 143702,
+          "width": 450,
+          "height": 1200,
+          "sha256": "c74f02769d056a5a0f6e2968b2ffc02b6a8457639a5eef26a3b51ddeb6c9437e"
+        },
+        {
+          "file": "behemoth-world/0.webp",
+          "bytes": 107600,
+          "width": 450,
+          "height": 1200,
+          "sha256": "8f2712d5ae9750e9c076bed81e85f01809946b1702f79b9a6fa211dbb018a44c"
+        },
+        {
+          "file": "time-ruler-world/0.webp",
+          "bytes": 159734,
+          "width": 450,
+          "height": 1200,
+          "sha256": "7423ed675433defdf0c6664bab68c5c29fa20c08c89fee2dda00db3deaaeda46"
+        },
+        {
+          "file": "tide-relics/0.webp",
+          "bytes": 52208,
+          "width": 384,
+          "height": 384,
+          "sha256": "e9d0012d23a8a9923bd22023e744eada22a0419b63209c624e24f5e32b7367c7"
+        },
+        {
+          "file": "tide-relics/1.webp",
+          "bytes": 55682,
+          "width": 384,
+          "height": 384,
+          "sha256": "bae620a9dfcd4aa281e097cc463cfefb9b09c76775c2f53378fbe90e5273ec4a"
+        },
+        {
+          "file": "tide-relics/2.webp",
+          "bytes": 53480,
+          "width": 384,
+          "height": 384,
+          "sha256": "fa962bcea5b5a51453c7e274fe510884e83cf3b85a5b480969d4ebfd8bf6ff97"
+        },
+        {
+          "file": "tide-relics/3.webp",
+          "bytes": 51548,
+          "width": 384,
+          "height": 384,
+          "sha256": "b8ff6aac384f8e6caf3ac67f61b9bf3a264b4fe8bbbbad456a993ce52d015502"
+        },
+        {
+          "file": "tide-relics/4.webp",
+          "bytes": 36620,
+          "width": 384,
+          "height": 384,
+          "sha256": "2a8db5bc8024eb4dcb05225c2c9df2e73336d2a7075c7fcdb8638eaf091c02f6"
+        },
+        {
+          "file": "tide-relics/5.webp",
+          "bytes": 54112,
+          "width": 384,
+          "height": 384,
+          "sha256": "f91279873ec786616ea73fbadde9237e02d547d76c9628a190e460a75947b328"
+        },
+        {
+          "file": "shield-relics/0.webp",
+          "bytes": 11990,
+          "width": 192,
+          "height": 192,
+          "sha256": "311ef9fe8d940e9b50c221ea69df772897235a45793219f0c4ec132de5d8ea0d"
+        },
+        {
+          "file": "shield-relics/1.webp",
+          "bytes": 12256,
+          "width": 192,
+          "height": 192,
+          "sha256": "6d30095fa97755dbd6d2878f5c4d54d9d16607a5f4960c230c5fc60b00d3ab81"
+        },
+        {
+          "file": "shield-relics/2.webp",
+          "bytes": 9946,
+          "width": 192,
+          "height": 192,
+          "sha256": "a3b063e4dbe6d7e8c1d260053bab98213dabb0b5b42a3355deac71e1b01febeb"
+        },
+        {
+          "file": "shield-relics/3.webp",
+          "bytes": 6630,
+          "width": 192,
+          "height": 192,
+          "sha256": "8d6cdc9f23a71474fe0bcc12acd6c0aac424a38a7e4a59a387b09795f8e9ae05"
+        },
+        {
+          "file": "shield-relics/4.webp",
+          "bytes": 9318,
+          "width": 192,
+          "height": 192,
+          "sha256": "097110f781ea3670a2125abbbd42845f26482ff63c5e316a2ee344cb26b74b0f"
+        },
+        {
+          "file": "shield-relics/5.webp",
+          "bytes": 8724,
+          "width": 192,
+          "height": 192,
+          "sha256": "6c00f3255bb73f6f00f924cd34dca0f98a4e077a02a590b41ec8909bafbbf61c"
+        },
+        {
+          "file": "shield-relics/6.webp",
+          "bytes": 9330,
+          "width": 192,
+          "height": 192,
+          "sha256": "0a38dc898856fbad174e888db7b98727f9881253c42678ac0ce93602d8dad2e7"
+        },
+        {
+          "file": "shield-relics/7.webp",
+          "bytes": 9876,
+          "width": 192,
+          "height": 192,
+          "sha256": "ff4cf87b3f00f6030abf47ba0492e0e5767045f0d2290f7f5eb9417d4bd755da"
+        },
+        {
+          "file": "shield-relics/8.webp",
+          "bytes": 13762,
+          "width": 192,
+          "height": 192,
+          "sha256": "00f9d3d82a7d800101320ef6d500c090ef907412eb8c45c7a4b2f2f6f38730df"
+        },
+        {
+          "file": "shield-relics/9.webp",
+          "bytes": 10436,
+          "width": 192,
+          "height": 192,
+          "sha256": "a68ed00f63bb9b1efb67c79817fd9c94dd07256ed7f808fdf7f5603465fa10ef"
+        },
+        {
+          "file": "shield-relics/10.webp",
+          "bytes": 11746,
+          "width": 192,
+          "height": 192,
+          "sha256": "5f840d51c23cba73a54d99fe19951f736d6c0a6e2a8dc4fa13e5c1dc92a7bb83"
+        },
+        {
+          "file": "celestial-relics/0.webp",
+          "bytes": 9102,
+          "width": 192,
+          "height": 192,
+          "sha256": "50af1589662fa4aee664a429dde6bd5120678fb8a97320b3682a43d87ba8b4fb"
+        },
+        {
+          "file": "celestial-relics/1.webp",
+          "bytes": 8832,
+          "width": 192,
+          "height": 192,
+          "sha256": "cc23132a4df8166f96b7065ed25caf44284db58a10499e3c81ca634d35c72cf3"
+        },
+        {
+          "file": "celestial-relics/2.webp",
+          "bytes": 9400,
+          "width": 192,
+          "height": 192,
+          "sha256": "d249ce52ea2ac5f8a3d22f15852b87aa8546cbeb4e3474255216c96edf938af5"
+        },
+        {
+          "file": "celestial-relics/3.webp",
+          "bytes": 10046,
+          "width": 192,
+          "height": 192,
+          "sha256": "a946fb1764b60d1eabd9088139f2ffb7ee7a9f6c1133f23a2863d0c4d68310ab"
+        },
+        {
+          "file": "balance-relics/0.webp",
+          "bytes": 9882,
+          "width": 192,
+          "height": 192,
+          "sha256": "46fb92fb236aa3a73c817dadd40eff68c2d6baa9d794bb9e3cfb117b3f52d70f"
+        },
+        {
+          "file": "balance-relics/1.webp",
+          "bytes": 7848,
+          "width": 192,
+          "height": 192,
+          "sha256": "13d46987520ce164cfc1675de92cd477ccbc037ffe344d21b38ad402ac47d16c"
+        },
+        {
+          "file": "balance-relics/2.webp",
+          "bytes": 12276,
+          "width": 192,
+          "height": 192,
+          "sha256": "37b91235f5b30ee722c6ad8abca942a523232f4dc09a99b7a86ff98493e04c91"
+        },
+        {
+          "file": "balance-relics/3.webp",
+          "bytes": 10858,
+          "width": 192,
+          "height": 192,
+          "sha256": "58a430a0e9fbed625f02387e2adecfe45787f7b48a420ee8063453ce9fef7815"
+        },
+        {
+          "file": "balance-relics/4.webp",
+          "bytes": 10564,
+          "width": 192,
+          "height": 192,
+          "sha256": "8aebf7cf12aeeefe9a38cf04a45b67550474344b2b449ca7e15b1fee085640ed"
+        },
+        {
+          "file": "balance-relics/5.webp",
+          "bytes": 14448,
+          "width": 192,
+          "height": 192,
+          "sha256": "ffe73d8f3bb0a91243b44df2c80500f397ab6d4e2700acea8662b177ff50383c"
+        }
+      ]
+    },
+    "reduction": {
+      "bytes": 56176209,
+      "percent": 91.35
+    },
+    "qualityProbes": [
+      {
+        "source": "heroes.png",
+        "sourceBytes": 2016633,
+        "qualities": [
+          {
+            "quality": 72,
+            "bytes": 165002
+          },
+          {
+            "quality": 80,
+            "bytes": 198712
+          },
+          {
+            "quality": 88,
+            "bytes": 262918
+          },
+          {
+            "quality": 94,
+            "bytes": 354496
+          }
+        ]
+      },
+      {
+        "source": "worlds.jpg",
+        "sourceBytes": 582051,
+        "qualities": [
+          {
+            "quality": 72,
+            "bytes": 255800
+          },
+          {
+            "quality": 80,
+            "bytes": 324742
+          },
+          {
+            "quality": 88,
+            "bytes": 459294
+          },
+          {
+            "quality": 94,
+            "bytes": 631678
+          }
+        ]
+      }
+    ]
+  }
+}

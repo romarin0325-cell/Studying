@@ -32,7 +32,7 @@
 .equipment-head{flex:none}.equipment-head h2{margin:2px 0 6px;font-size:25px}.equipment-head .intro-copy{margin-bottom:12px}
 .equipment-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px}
 .equipment-list .artifact-grid{max-height:none;overflow:visible;margin:10px 0 20px}.relic-section h3{font-size:13px;color:var(--gold);padding:9px 0;border-bottom:1px solid #ffffff22}.relic-section+ .relic-section h3{color:#dfb8ff}
-.equipment-footer{flex:none;border-top:1px solid #ffffff25;padding-top:5px;background:#142036}.equipment-footer .tiny-note{margin:7px 0;text-align:center}.equipment-footer #equipment-done{margin-top:0}
+.equipment-footer{flex:none;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:9px;border-top:1px solid #ffffff25;padding-top:10px;background:#142036}.equipment-footer button{min-width:0;margin:0!important;min-height:52px!important;padding:8px!important}.equipment-footer button b,.equipment-footer button small{display:block}.equipment-footer button b{font-size:12px}.equipment-footer button small{margin-top:3px;font-size:8px;font-weight:400;letter-spacing:.04em;opacity:.74}.equipment-footer .tiny-note{margin:7px 0;text-align:center}.equipment-footer #equipment-done{margin-top:0}
 .dungeon-list{max-height:43dvh;overflow-y:auto;overscroll-behavior:contain;padding:2px}
 .equipment-panel{padding:14px!important}
 .equipment-head h2{font-size:22px}.equipment-head .intro-copy{margin:0 0 7px;font-size:11px}
@@ -46,7 +46,7 @@
 #barrier-status{color:#a8f5ff;font-size:10px;margin-top:8px}#barrier-status[hidden]{display:none}
 @media(min-width:420px){.equipment-list .artifact-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.equipment-list .artifact{grid-template-columns:1fr;min-height:142px;text-align:center}.equipment-list .artifact img{grid-row:auto;margin:0 auto 5px}.equipment-list .artifact em{grid-column:1;grid-row:4}.equipment-list .artifact small{grid-column:1}}
 @media(max-width:359px){.equipment-list .artifact{grid-template-columns:32px 1fr;column-gap:4px;padding:6px}.equipment-list .artifact img{width:32px;height:32px}.equipment-list .artifact b{font-size:10px}.equipment-list .artifact em{font-size:6px}}
-@media(max-height:450px){.equipment-panel{height:96%;padding:10px!important}.equipment-head{display:flex;align-items:center;justify-content:space-between}.equipment-head h2{font-size:18px}.equipment-head .intro-copy{font-size:10px;margin:0}.equipment-footer{display:flex;gap:8px;align-items:center}.equipment-footer button{flex:1;margin:4px 0!important}.equipment-list .artifact{min-height:98px;grid-template-columns:32px 1fr;text-align:left}.equipment-list .artifact img{grid-row:1/3;width:32px;height:32px}.equipment-list .artifact em{grid-column:2;grid-row:2}.equipment-list .artifact small{grid-column:1/-1}}
+@media(max-height:450px){.equipment-panel{height:96%;padding:10px!important}.equipment-head{display:flex;align-items:center;justify-content:space-between}.equipment-head h2{font-size:18px}.equipment-head .intro-copy{font-size:10px;margin:0}.equipment-footer{gap:8px;padding-top:7px}.equipment-footer button{min-height:40px!important}.equipment-list .artifact{min-height:98px;grid-template-columns:32px 1fr;text-align:left}.equipment-list .artifact img{grid-row:1/3;width:32px;height:32px}.equipment-list .artifact em{grid-column:2;grid-row:2}.equipment-list .artifact small{grid-column:1/-1}}
 .dungeon-panel h2{font-size:27px;margin:9px 0 8px}:fullscreen .dungeon-panel{overflow:hidden}:fullscreen .dungeon-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:none;gap:7px;margin:10px 0}:fullscreen .dungeon-card{min-height:128px;padding:10px 7px}:fullscreen .dungeon-card b{font-size:16px}.achievement-list{display:grid;gap:8px;max-height:56dvh;overflow:auto;margin:16px 0 20px;padding-right:3px}.achievement{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:9px;border:1px solid #ffffff1f;border-radius:10px;background:#ffffff05;padding:11px}.achievement>i{font-style:normal;color:#8290a7;text-align:center}.achievement b,.achievement small{display:block}.achievement b{font-size:12px}.achievement small{font-size:9px;line-height:1.55;color:#9eacbf;margin-top:3px}.achievement em{font-size:10px;font-style:normal;color:#aab7ca}.achievement.complete{border-color:#f0d18a66;background:#f0d18a0d}.achievement.complete>i,.achievement.complete em{color:var(--gold)}
 
 /* Stable rows reserve the same space for every title and description. */
@@ -256,7 +256,7 @@ const ARTIFACTS = [
   { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 20% 감소 · 일반 공격력 30% 증가', normalAttack: .30, bomb: -.20 },
   { id: 'fairycloak', name: '요정의망토', rarity: 'epic', text: '피격 반경 2 감소 · 최대 생명 1 증가', radius: -2, life: 1 },
   { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
-  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 3 획득' },
+  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득' },
   { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' },
   { id: 'steelshield', name: '강철방패', rarity: 'normal', text: '피격 시 파워 감소 방지' },
   { id: 'cursedsword', name: '저주의검', rarity: 'rare', text: '공격력 15% 증가 · 회복 아이템 드랍 제거', attack: .15 },
@@ -266,7 +266,7 @@ const ARTIFACTS = [
   { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
 ];
 function artifactText(artifact, challenge = false) {
-  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 3 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
+  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 5 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
 const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
@@ -542,7 +542,7 @@ class CampaignUI {
   equipment(refresh) {
     const p=this.profile;
     const scroll=document.querySelector('.equipment-list')?.scrollTop||0;
-    this.setModal(`<div class="equipment-head"><h2>별의 유물함</h2><p class="intro-copy">선택 ${p.equipped.length}/3 · 수집 ${p.owned.length}/${ARTIFACTS.length}</p></div><div class="equipment-list">${['normal','rare','epic'].map(rarity=>`<section class="relic-section" aria-label="${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트"><h3>${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트</h3><div class="artifact-grid">${ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>`<button class="artifact ${p.equipped.includes(a.id)?'selected':''} ${a.rarity}" data-artifact="${a.id}" ${p.owned.includes(a.id)?'':'disabled'} aria-pressed="${p.equipped.includes(a.id)}">${this.relicImage(a.id)}<b>${a.name}</b><small>${a.text}</small><em>${p.owned.includes(a.id)?a.rarity.toUpperCase():'미보유'}</em></button>`).join('')}</div></section>`).join('')}</div><footer class="equipment-footer"><button class="primary" id="draw-ticket" ${p.tickets.length?'':'disabled'}>아티팩트 뽑기 · ${p.tickets.length}장</button><button class="secondary" id="equipment-done">장착 완료</button></footer>`);
+    this.setModal(`<div class="equipment-head"><h2>별의 유물함</h2><p class="intro-copy">선택 ${p.equipped.length}/3 · 수집 ${p.owned.length}/${ARTIFACTS.length}</p></div><div class="equipment-list">${['normal','rare','epic'].map(rarity=>`<section class="relic-section" aria-label="${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트"><h3>${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트</h3><div class="artifact-grid">${ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>`<button class="artifact ${p.equipped.includes(a.id)?'selected':''} ${a.rarity}" data-artifact="${a.id}" ${p.owned.includes(a.id)?'':'disabled'} aria-pressed="${p.equipped.includes(a.id)}">${this.relicImage(a.id)}<b>${a.name}</b><small>${a.text}</small><em>${p.owned.includes(a.id)?a.rarity.toUpperCase():'미보유'}</em></button>`).join('')}</div></section>`).join('')}</div><footer class="equipment-footer"><button class="primary" id="draw-ticket" ${p.tickets.length?'':'disabled'}><b>유물 뽑기</b><small>뽑기권 ${p.tickets.length}장</small></button><button class="secondary" id="equipment-done"><b>장착 저장</b><small>출격 준비로</small></button></footer>`);
     document.querySelector('.panel').classList.add('equipment-panel');document.querySelector('.equipment-list').scrollTop=scroll;
     document.querySelectorAll('[data-artifact]').forEach(b=>b.onclick=()=>{const id=b.dataset.artifact;if(p.equipped.includes(id))p.equipped=p.equipped.filter(a=>a!==id);else if(p.equipped.length<3)p.equipped.push(id);else return this.toast('유물은 세 개까지 장착할 수 있어요');this.save();this.equipment(refresh);});
     $('equipment-done').onclick=()=>{this.closeModal();refresh();};
@@ -600,6 +600,10 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
 const BOMB_INVULNERABILITY = [4,2,3,3,3,3,3,3,2];
 const DUNGEON_ENEMY_SCALE = [1.12,1.16,1.20,1.25,1.30,1.35,1.55];
+const MIRACLE_BOMBS = 5;
+// Events already use a higher base enemy tier, so this reaches above the forest
+// teleporter without applying its full 1.65 multiplier a second time.
+const EVENT_TELEPORT_HP_MULTIPLIER = 1.25;
 class Game {
   constructor({ hero = 0, weapon = 0, stage = 0, height = 900, seed = 41, mode = 'normal', artifacts = [], challenge = false, onEvent = () => {} } = {}) {
     this.challenge = challenge; this.pendingArtifacts = null; this.celestialWave = 0;
@@ -618,7 +622,7 @@ class Game {
     this.stats = { shots: 0, hits: 0, damage: 0, bombs: 0, maxBullets: 0, bossKills: 0, deaths: 0 };
     if(challenge) {
       if(this.artifacts.has('resurgence'))this.player.lives=this.maxLife;
-      if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
+      if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     }
     this.startStage(challenge ? 0 : stage);
   }
@@ -885,7 +889,7 @@ class Game {
           { hp: 38 + stage * 10, speed: 68 + stage * 8 + (type === 3 ? 25 : 0), move: type === 0 ? 'drift' : type === 1 ? 'curve' : type === 2 ? 'zigzag' : 'dive', side: left ? 1 : -1, fire: 1.8 + i * .25, image, r: 19 });
       }
     }
-    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: image, elite:image===4, r: 25, hp: (115 + stage*35)*(stage===3?1.65:stage===4?0.9167:1), speed: 53, move: 'sentry', fire: 2, image, countdown: 3 });
+    if (n % 3 === 1) this.spawnEnemy(70 + this.random()*310, -65, { special: image, elite:image===4, r: 25, hp: 115 + stage*35, speed: 53, move: 'sentry', fire: 2, image, countdown: 3 });
     this.emit('wave', { wave: n });
   }
   spawnEnemy(x, y, data) {
@@ -893,7 +897,8 @@ class Game {
       const patterns=this.room===0?[3,0]:[1,5];
       data={...data,elite:true,special:patterns[this.celestialWave++%2]};
     }
-    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1);
+    const specialHp = data.special === 3 ? (this.dungeon.event ? EVENT_TELEPORT_HP_MULTIPLIER : this.stageIndex === 3 ? 1.65 : 1) : data.special === 4 && this.stageIndex === 4 ? .9167 : 1;
+    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1) * specialHp;
     this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
   }
   specialDeath(e) {
@@ -1020,8 +1025,9 @@ class Game {
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
-    b.fire=[1.45,1.3,1.15][phase];
-    // Decoration comes from paired colors and shapes, not fast or dense collision fields.
+    b.fire=[1.25,1.08,.92][phase];
+    // Every event pattern remains telegraphed, but now asks the player to move
+    // through a denser field rather than idling inside its central corridor.
     const ring=(count,speed,rotation,shape,extra={})=>{
       for(let i=0;i<count;i++) {
         const angle=i*TAU/count+rotation;
@@ -1032,29 +1038,29 @@ class Game {
     };
     switch(this.dungeon.asset) {
       case 'harmonious':
-        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,4+phase,108,.22,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
-        if(phase>0)ring(16,82,t*.1,'petal');
+        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,5+phase,128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
+        if(phase>0)ring(18,110,t*.1,'petal');
         break;
       case 'gold-dragon':
-        for(const side of [-1,1])this.fan(b.x+side*55,b.y,5+phase,112,.16,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
-        if(phase===2)ring(20,86,t*.14,'diamond');
+        for(const side of [-1,1])this.fan(b.x+side*55,b.y,6+phase,132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
+        if(phase===2)ring(24,112,t*.14,'diamond');
         break;
       case 'ancient-soul':
-        ring(18+phase*4,95,t*.19,'petal',{turn:.07});
-        if(phase>0)this.fan(b.x,b.y,3,125,.25,aim,{shape:'diamond',color:'#fff1ba',r:4});
+        ring(20+phase*5,126,t*.19,'petal',{turn:.09});
+        if(phase>0)this.fan(b.x,b.y,4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
         break;
       case 'behemoth': {
-        b.fire=phase===2?1.65:1.9;
+        b.fire=phase===2?1.2:1.55;
         const gap=[100,225,350][(b.earthWave||0)%3]; b.earthWave=(b.earthWave||0)+1;
-        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase});
-        if(phase>0)ring(14,90,0,'diamond',{r:7});
+        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:26,corridor:72,projectileSpeed:140});
+        if(phase>0)ring(18,118,0,'diamond',{r:7});
         break;
       }
       case 'time-ruler':
-        b.fire=2.4;
+        b.fire=2.05;
         // An original clock volley inspired by Taisei's stop/release rhythm, not its code.
-        ring(12+phase*6,108,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
-        if(phase===2)this.fan(b.x,b.y,3,118,.3,aim,{shape:'diamond',color:'#fff1c2',r:4});
+        ring(16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
+        if(phase===2)this.fan(b.x,b.y,5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
         break;
     }
   }
@@ -1094,7 +1100,7 @@ class Game {
     if(id==='origin')this.power=Math.min(5,this.power+1);
     while(this.powerPoints>=this.powerRequirement && this.power<5){this.powerPoints-=this.powerRequirement;this.power++;}
     if(id==='resurgence')this.player.lives=this.maxLife;
-    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     if(id==='clover')this.player.barrier=true;
     this.pendingArtifacts=null;
     return this.completeQuiz();
@@ -1113,7 +1119,7 @@ class Game {
     this.reviveUsed = true;
     if (!correct) return false;
     this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
-    if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+3);
+    if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
     this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
   }
   update(dt) {
@@ -1262,7 +1268,7 @@ class Game {
       }
       if(f.type==='eventWave' && !f.fired && f.age>=f.wait && this.phase==='boss') {
         f.fired=true;
-        for(let x=20;x<450;x+=28)if(Math.abs(x-f.gap)>62)this.enemyBullet(x,90,Math.PI/2,118,{shape:'diamond',color:f.color,r:6});
+        for(let x=20;x<450;x+=(f.spacing||28))if(Math.abs(x-f.gap)>=(f.corridor||62))this.enemyBullet(x,90,Math.PI/2,f.projectileSpeed||118,{shape:'diamond',color:f.color,r:6});
       }
       if(f.type==='detonation' && !f.fired && f.age>(f.wait??.75)) {f.fired=true;this.fan(f.x,f.y,10,115,TAU/10);if(distance(f,p)<f.radius)this.hitPlayer();}
     }
@@ -1858,7 +1864,7 @@ function showStageQuiz(kind) {
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);
-  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 3개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
+  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
   $('revive-decline').onclick=()=>{game.revive(false);finish(false);};
   $('revive-quiz').onclick=()=>menus.quiz('grammar','다시 피어나는 별',correct=>{if(game.revive(correct))continueFlight();else finish(false);});
 }

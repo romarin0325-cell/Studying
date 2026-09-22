@@ -19,14 +19,14 @@ try{
  await shot('random-lobby');checks.push('Character scroll persists and random keeps the weapon slot dimensions at 320px');
  await click('#equipment');
  for(const size of [{width:320,height:568},{width:390,height:844},{width:430,height:932},{width:844,height:390}]){
-  await page.setViewportSize(size);const done=await page.locator('#equipment-done').boundingBox();assert.ok(done.y>=0&&done.y+done.height<=size.height);
+  await page.setViewportSize(size);const draw=await page.locator('#draw-ticket').boundingBox(),done=await page.locator('#equipment-done').boundingBox();assert.ok(done.y>=0&&done.y+done.height<=size.height);assert.ok(draw.x+draw.width+7<=done.x&&Math.abs(draw.y-done.y)<2);
   assert.deepEqual(await page.locator('.relic-section h3').allTextContents(),['일반 아티팩트','레어 아티팩트','에픽 아티팩트']);await page.locator('.equipment-list').evaluate(el=>el.scrollTop=el.scrollHeight);const next=await page.locator('#equipment-done').boundingBox();assert.equal(done.y,next.y);
  }
  await page.setViewportSize({width:390,height:844});await shot('relics');await click('#equipment-done');
  await click('#dungeons');await page.locator('.dungeon-list').evaluate(el=>el.scrollTop=el.scrollHeight);const dungeonScroll=await page.locator('.dungeon-list').evaluate(el=>el.scrollTop);
  await click('[data-dungeon="5"]');assert.ok(Math.abs(await page.locator('.dungeon-list').evaluate(el=>el.scrollTop)-dungeonScroll)<2);
  await click('[data-difficulty="hard"]');assert.equal(await page.locator('[data-difficulty="hard"] small').textContent(),'뽑기권 2장');await shot('dungeons');await click('#dungeon-done');
- checks.push('Equipment actions stay visible in four viewports; rarity groups and dungeon scroll work');
+ checks.push('Equipment draw and save actions remain visibly separated in four viewports; rarity groups and dungeon scroll work');
  // A reveal is charged even when cancelled. Reload cannot restore it.
  await click('#launch');await click('#help-done');await click('#random-cancel');assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
  await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
