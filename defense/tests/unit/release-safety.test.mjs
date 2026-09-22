@@ -17,6 +17,24 @@ test('missing roundRect constructs a closed four-corner path',()=>{
   assert.equal(calls.filter(c=>c[0]==='quadraticCurveTo').length,4);
   assert.equal(calls.at(-1)[0],'closePath');
 });
+
+test('hit masks cache the cropped alpha silhouette per image and frame without pixel readback',()=>{
+  const calls=[], surfaces=[];
+  const ownerDocument={createElement:()=>{
+    const context={drawImage:(...args)=>calls.push(args),fillRect(){},fillStyle:'',globalCompositeOperation:''};
+    const surface={width:0,height:0,getContext:()=>context}; surfaces.push(surface); return surface;
+  }};
+  const renderer={canvas:{ownerDocument},hitMasks:new WeakMap()};
+  const art={image:{width:1024,height:1024},frame:{x:.5,y:0,width:.5,height:.5}};
+  const first=BattleRenderer.prototype.hitMask.call(renderer,art);
+  assert.equal(first.width,256); assert.equal(first.height,256);
+  assert.equal(first.getContext().globalCompositeOperation,'source-in');
+  assert.deepEqual(calls[0].slice(1,5),[512,0,512,512]);
+  assert.equal(BattleRenderer.prototype.hitMask.call(renderer,art),first);
+  assert.equal(surfaces.length,1,'repeated hits must reuse the silhouette');
+  assert.notEqual(BattleRenderer.prototype.hitMask.call(renderer,{...art,frame:{...art.frame,x:0}}),first);
+  assert.notEqual(BattleRenderer.prototype.hitMask.call(renderer,{...art,image:{width:1024,height:1024}}),first);
+});
 test('hung and failed media settle, deduplicate, and never replace fallback with late resources',async()=>{
   let late, calls=0;
   const manager=new AssetManager({manifest:[

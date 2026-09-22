@@ -115,7 +115,7 @@ export class GameApp {
       ...bossIds.flatMap((id) => DIRECTIONS.map((direction) => `boss/${id}/${direction}`)),
       ...heroIds.map((id) => `portrait/${id}`),
     ];
-    const primaryIds = [...new Set(heroIds.map(heroIllustrationId)), 'illustration/combat-fx','illustration/creatures','illustration/worlds'];
+    const primaryIds = [...new Set(heroIds.map(heroIllustrationId)), 'illustration/combat-fx','illustration/creatures','illustration/realm-bosses','illustration/worlds'];
     this.preloadArt(primaryIds, battleAssetIds);
     this.scene.show('battle', {
       stageId: this.selectedStageId,

@@ -30,6 +30,7 @@ export class BattleRenderer {
     this.selectedHeroId = null;
     this.aim = null;
     this.cache = null;
+    this.hitMasks = new WeakMap();
   }
   setReduced(value) {
     this.reduced = Boolean(value);
@@ -42,13 +43,16 @@ export class BattleRenderer {
   resize() {
     this.cache = null;
     const b = this.canvas.parentElement.getBoundingClientRect();
-    return this.layout.resize(b.width, b.height, globalThis.devicePixelRatio ?? 1);
+    const view = this.canvas.ownerDocument?.defaultView;
+    const landscape = view ? view.innerWidth > view.innerHeight : null;
+    return this.layout.resize(b.width, b.height, globalThis.devicePixelRatio ?? 1, landscape);
   }
   clientToLogical(x, y) {
     return this.layout.clientToLogical(x, y, this.canvas.getBoundingClientRect());
   }
   feedback(event) {
-    if (event.sourceId && ["hit", "skill_cast"].includes(event.type)) this.attacks.set(event.sourceId, { until: this.gameTimeSeconds + 0.3, x: event.x, y: event.y });
+    if (event.sourceId && ["attack_prepare", "attack_launched", "skill_cast"].includes(event.type))
+      this.attacks.set(event.sourceId, { until: this.gameTimeSeconds + (event.actionKind === 'skill' ? .42 : .28), x: event.targetX ?? event.x, y: event.targetY ?? event.y });
     if (event.type === 'hit' && event.amount > 0 && !event.visualOnly) {
       this.impacts.set(event.targetId, { until: this.gameTimeSeconds + .13, strength: event.critical ? 1 : .6 });
     }
@@ -77,7 +81,7 @@ export class BattleRenderer {
         ctx.restore();
       }
     }
-    this.effectRenderer?.render(ctx, this.layout);
+    this.effectRenderer?.render(ctx, this.layout, snapshot.projectiles ?? []);
     if (!this.reduced) this.drawMotes(ctx);
   }
   point(entity) {
@@ -96,7 +100,7 @@ export class BattleRenderer {
       c.fillRect(0, 0, w, h);
       if (world) {
         const index = JOURNEYS[snapshot.stage.id]?.art ?? 0, iw = world.naturalWidth || world.width, ih = world.naturalHeight || world.height;
-        c.drawImage(world, index % 2 * iw / 2, Math.floor(index / 2) * ih / 2, iw / 2, ih / 2, 0, 0, w, h);
+        c.drawImage(world, index % 3 * iw / 3, Math.floor(index / 3) * ih / 2, iw / 3, ih / 2, 0, 0, w, h);
       }
       const path = snapshot.stage.path, cell2 = this.layout.logicalRadiusToCanvas(1), dark = snapshot.stage.theme === "chaos";
       const trace = () => {
@@ -166,6 +170,23 @@ export class BattleRenderer {
     const art = illustration(this.assetManager, id);
     if (art) drawResolvedSprite(ctx, art, { x: point.x - size / 2, y: point.y - size * 0.8, width: size, height: size });
     else drawFallbackToken(ctx, { x: point.x, y: point.y-size*.2, size: size*.65, kind: id, label: id === 'core' ? '✦' : '→', color: id === 'core' ? '#298fa5' : '#79609d' });
+  }
+  hitMask(art) {
+    const frame = art.frame ?? {x:0,y:0,width:1,height:1};
+    const key = `${frame.x}:${frame.y}:${frame.width}:${frame.height}`;
+    let frames = this.hitMasks.get(art.image);
+    if (!frames) { frames = new Map(); this.hitMasks.set(art.image, frames); }
+    if (frames.has(key)) return frames.get(key);
+    const surface = this.canvas.ownerDocument.createElement('canvas');
+    const iw = art.image.naturalWidth || art.image.width, ih = art.image.naturalHeight || art.image.height;
+    surface.width = Math.min(256, Math.max(1, Math.ceil(frame.width * iw)));
+    surface.height = Math.min(256, Math.max(1, Math.ceil(frame.height * ih)));
+    const context = surface.getContext('2d');
+    drawResolvedSprite(context, art, {x:0,y:0,width:surface.width,height:surface.height});
+    context.globalCompositeOperation = 'source-in';
+    context.fillStyle = '#ffffff'; context.fillRect(0,0,surface.width,surface.height);
+    frames.set(key, surface);
+    return surface;
   }
   drawPlacements(ctx, snapshot) {
     const canPlace = ["PREPARATION", "INTERMISSION"].includes(snapshot.phase), cell = this.layout.logicalRadiusToCanvas(1);
@@ -241,6 +262,19 @@ export class BattleRenderer {
       ctx.ellipse(p.x, p.y, cell * 0.6, cell * 0.32, 0, 0, Math.PI * 2);
       ctx.stroke();
     }
+    if (e.bossState && !e.departing) {
+      const cast=e.bossState;
+      if(['windup','active'].includes(cast.phase) || cast.interrupted) {
+        ctx.save();
+        ctx.strokeStyle=cast.interrupted?'#fff5b4':cast.phase==='windup'?'#ffca81':COLORS[e.element];
+        ctx.lineWidth=3;ctx.globalAlpha=.85;
+        ctx.beginPath();ctx.ellipse(p.x,p.y+2,cell*.85,cell*.35,0,0,Math.PI*2);ctx.stroke();
+        if(cast.phase==='windup') {
+          ctx.beginPath();ctx.arc(p.x,p.y-size*.46,cell*.98,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-cast.remaining/cast.duration));ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
     if (e.hero && e.buffs?.length) {
       ctx.strokeStyle = COLORS[e.element];
       ctx.lineWidth = 2;
@@ -257,14 +291,19 @@ export class BattleRenderer {
       ctx.save();
       ctx.translate(p.x + (flip ? -lunge : lunge), p.y - bob - (air ? cell * 0.17 : 0));
       const hit = !e.hero && this.impacts.get(e.id);
+      const hitStrength = hit && !this.reduced ? Math.max(0,(hit.until-t)/.13*hit.strength) : 0;
       if (hit && !this.reduced) {
-        const strength = (hit.until - t) / .13 * hit.strength;
-        ctx.scale(1 + strength * .075, 1 - strength * .06);
-        ctx.filter = `brightness(${1 + strength * 1.2})`;
+        ctx.scale(1 + hitStrength * .075, 1 - hitStrength * .06);
       }
       if (flip) ctx.scale(-1, 1);
       if (attack && !this.reduced) ctx.rotate(flip ? -0.035 : 0.035);
       drawResolvedSprite(ctx, art, { x: -width / 2, y: -height * (e.hero ? .94 : .87), width, height });
+      if (hitStrength) {
+        // Cache a small alpha silhouette once per frame. Per-hit Canvas filters
+        // otherwise create costly intermediate surfaces on high-DPR displays.
+        ctx.globalAlpha *= hitStrength * .62;
+        ctx.drawImage(this.hitMask(art), -width/2, -height*.87, width, height);
+      }
       ctx.restore();
     }
     if (!art) drawFallbackToken(ctx, { x: p.x, y: p.y-size*.35, size: size*.7, label: e.name?.slice(0,1) ?? '?', color: COLORS[e.element] ?? '#7b638f', kind: e.isBoss ? 'boss' : e.defenseType });

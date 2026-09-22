@@ -36,12 +36,13 @@ const EXPECTED_HERO_IDS = [
   'rumi', 'luna', 'cinderella', 'zeke',
   'snow_rabbit', 'avalanche_maid', 'night_rabbit', 'guardian', 'storm_sage', 'lightning_sage',
   'red_dragon', 'flame_sage', 'mushroom_king', 'great_detective', 'siren', 'phantom',
+  'queen', 'galaxy_whale', 'silver_rabbit', 'ancient_dragon', 'time_ruler',
 ];
 const EXPECTED_ENEMY_IDS = [
-  'ruin_scarab', 'ember_scarab', 'sand_wisp', 'stone_guard', 'regrowth_idol', 'flora', 'pharaoh',
-  'rift_shade', 'rift_wing', 'abyss_armor', 'chaos_spawn', 'lesser_demon', 'reaper', 'demon_god',
+  'ruin_scarab', 'ember_scarab', 'sand_wisp', 'stone_guard', 'regrowth_idol', 'flora', 'artificial_demon',
+  'rift_shade', 'rift_wing', 'abyss_armor', 'chaos_spawn', 'lesser_demon', 'love_iris', 'beelzebub', 'curse_iris', 'poseidon',
 ];
-const EXPECTED_STAGE_IDS = ['ancient_ruins', 'chaos_rift', 'crossroads', 'long_boulevard'];
+const EXPECTED_STAGE_IDS = ['ancient_ruins','crossroads','long_boulevard','fairy_forest','sunken_temple','chaos_rift'];
 const EXPECTED_BUFF_IDS = [
   'moon_bless', 'sun_bless', 'earth_bless', 'twinkle_party', 'sanctuary', 'star_powder', 'gale',
 ];
@@ -61,21 +62,21 @@ const EXPECTED_MATCHUPS = {
 };
 
 export const CONTENT_COUNTS = deepFreeze({
-  heroes: 16,
-  mainHeroes: 4,
-  normalHeroes: 12,
-  level4Traits: 32,
-  level6Traits: 32,
-  enemies: 14,
+  heroes: 21,
+  mainHeroes: 5,
+  normalHeroes: 16,
+  level4Traits: 42,
+  level6Traits: 42,
+  enemies: 16,
   normalEnemies: 10,
-  bosses: 4,
-  stages: 4,
-  waves: 40,
+  bosses: 6,
+  stages: 6,
+  waves: 60,
   buffs: 7,
   statuses: 8,
   debuffs: 7,
   effectPresets: 12,
-  directionalAssetIds: 96,
+  directionalAssetIds: 129,
 });
 
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -150,7 +151,7 @@ function validateCombat(errors) {
   if (!easy?.selectable || !normal?.selectable || hard?.selectable) {
     errors.push('combat.difficulties: story and trial must be selectable; hard stays reserved.');
   }
-  if (BOARD_RULES.columns !== 12 || BOARD_RULES.rows !== 16) errors.push('combat.board: logical board must be 12x16.');
+  if (BOARD_RULES.columns !== 12 || BOARD_RULES.rows !== 12) errors.push('combat.board: logical board must be 12x12.');
 }
 
 function validateBuffs(errors) {
@@ -202,6 +203,11 @@ function validateCondition(condition, context, sets, errors) {
   }
   if (condition.type === 'target_element' && !sets.elements.has(condition.element)) {
     errors.push(`${context}: unknown element '${String(condition.element)}'.`);
+  }
+  if (['team_element_count', 'team_tag_count'].includes(condition.type)) {
+    if (!Number.isInteger(condition.count) || condition.count < 1 || condition.count > 5) errors.push(`${context}: team count must be between 1 and 5.`);
+    if (condition.type === 'team_element_count' && !sets.elements.has(condition.element)) errors.push(`${context}: unknown team element.`);
+    if (condition.type === 'team_tag_count' && !HEROES.some(hero => hero.tags.includes(condition.tag))) errors.push(`${context}: unknown team tag.`);
   }
   if (condition.type === 'target_defense_type' && !sets.defenseTypes.has(condition.defenseType)) {
     errors.push(`${context}: unknown defense type '${String(condition.defenseType)}'.`);
@@ -257,7 +263,7 @@ function validateHeroes(sets, errors) {
   exactIdSet(HEROES, EXPECTED_HERO_IDS, 'heroes', errors);
   uniqueIds(HEROES, 'heroes', errors);
   if (MAIN_HEROES.length !== CONTENT_COUNTS.mainHeroes || NORMAL_HEROES.length !== CONTENT_COUNTS.normalHeroes) {
-    errors.push('heroes: expected four main and twelve normal heroes.');
+    errors.push(`heroes: expected ${CONTENT_COUNTS.mainHeroes} main and ${CONTENT_COUNTS.normalHeroes} normal heroes.`);
   }
   const traitIds = new Set();
   let level4Traits = 0;
@@ -285,6 +291,8 @@ function validateHeroes(sets, errors) {
     if (!sets.attackTypes.has(hero.skill?.attackType) || !SKILL_SHAPE_IDS.includes(hero.skill?.shape)) errors.push(`${context}: invalid skill type/shape.`);
     if (!isPositiveFinite(hero.skill?.cooldown) || !isPositiveFinite(hero.skill?.damage)) errors.push(`${context}: invalid skill cooldown/damage.`);
     if (hero.skill?.shape === 'area' && !isPositiveFinite(hero.skill.radius)) errors.push(`${context}: area skills require a positive radius.`);
+    if (hero.skill?.vfx !== undefined && (hero.skill.vfx !== 'clock' || hero.skill.shape !== 'area'))
+      errors.push(`${context}: clock presentation requires an area skill.`);
     if (hero.skill?.shape === 'single' && hero.skill.radius !== 0) errors.push(`${context}: single skills must have radius 0.`);
     if (hero.skill?.shape === 'melee' && hero.skill.radius !== 0) errors.push(`${context}: melee skills must have radius 0.`);
     if (!sets.effectPresets.has(hero.skill?.effectPreset)) errors.push(`${context}: unknown skill effect preset.`);
@@ -333,7 +341,7 @@ function validateEnemies(sets, errors) {
   exactIdSet(ENEMIES, EXPECTED_ENEMY_IDS, 'enemies', errors);
   uniqueIds(ENEMIES, 'enemies', errors);
   if (NORMAL_ENEMIES.length !== CONTENT_COUNTS.normalEnemies || BOSSES.length !== CONTENT_COUNTS.bosses) {
-    errors.push('enemies: expected ten normal enemies and four bosses.');
+    errors.push('enemies: expected ten normal enemies and six bosses.');
   }
   for (const enemy of ENEMIES) {
     const context = `enemies.${enemy.id}`;
@@ -343,6 +351,24 @@ function validateEnemies(sets, errors) {
     }
     if (enemy.isBoss !== (enemy.defenseType === 'boss')) errors.push(`${context}: boss flag and defense type disagree.`);
     if (enemy.isBoss) {
+      const ability = enemy.ability;
+      const required = {guard:['duration','damageTaken'],heal:['healRatio'],seal:['count','delay'],
+        bloom:['count','hpScale'],tide:['duration','speedMultiplier'],doom:['coreDamage']};
+      if (!isRecord(ability) || !Object.prototype.hasOwnProperty.call(required, ability.kind)) {
+        errors.push(`${context}: a supported boss ability is required.`);
+      } else {
+        for (const field of ['interval','windup','recovery','breakHpRatio',...required[ability.kind]]) {
+          if (!isPositiveFinite(ability[field])) errors.push(`${context}.ability.${field}: positive finite value required.`);
+        }
+        for (const field of ['name','description']) if (typeof ability[field] !== 'string' || !ability[field])
+          errors.push(`${context}.ability.${field}: text required.`);
+        if (ability.breakHpRatio > 1 || (ability.healRatio ?? 0) > 1 || (ability.damageTaken ?? 1) > 1)
+          errors.push(`${context}.ability: invalid health/damage fraction.`);
+        if (ability.count !== undefined && (!Number.isInteger(ability.count) || ability.count > 5))
+          errors.push(`${context}.ability.count: integer from 1 to 5 required.`);
+        if (ability.kind === 'bloom' && !NORMAL_ENEMIES.some(candidate => candidate.id === ability.enemyId))
+          errors.push(`${context}.ability.enemyId: a normal enemy is required.`);
+      }
       for (const direction of ['front', 'back', 'left', 'right']) {
         const expected = `boss/${enemy.id}/${direction}`;
         if (enemy.assetIds?.battle?.[direction] !== expected) errors.push(`${context}: directional asset id must be '${expected}'.`);
@@ -368,7 +394,7 @@ function withinBoard(cell) {
 function validateStageMap(stage, errors) {
   const context = `stages.${stage.id}.map`;
   const map = stage.map;
-  if (map?.columns !== 12 || map?.rows !== 16) errors.push(`${context}: board must be 12x16.`);
+  if (map?.columns !== 12 || map?.rows !== 12) errors.push(`${context}: board must be 12x12.`);
   let expanded = [];
   try {
     expanded = expandOrthogonalPath(map?.pathWaypoints);
@@ -466,7 +492,7 @@ function validateStages(sets, errors) {
         if (wave.spawnOrder?.length !== wave.enemyCount) errors.push(`${waveContext}: spawnOrder length must match enemyCount.`);
         if ((wave.groups ?? []).length !== 1) errors.push(`${waveContext}: normal wave must contain exactly one enemy type.`);
       }
-      if (wave.hpMultiplier !== WAVE_HP_MULTIPLIERS[waveNumber]) errors.push(`${waveContext}: invalid HP multiplier.`);
+      if (wave.hpMultiplier !== WAVE_HP_MULTIPLIERS[waveNumber]*(waveNumber===5?.58:1)) errors.push(`${waveContext}: invalid HP multiplier.`);
       if (wave.dreamCrystalReward !== DREAM_CRYSTAL_REWARDS[waveNumber - 1]) errors.push(`${waveContext}: invalid crystal reward.`);
       if (wave.spawnIntervalSeconds !== WAVE_RULES.baseSpawnIntervalSeconds) errors.push(`${waveContext}: invalid base spawn interval.`);
       const declaredCounts = new Map((wave.groups ?? []).map((group) => [group.enemyId, group.count]));

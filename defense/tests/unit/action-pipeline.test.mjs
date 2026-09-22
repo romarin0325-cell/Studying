@@ -130,7 +130,7 @@ test('battle action comparator fixes tick, slot, skill/basic, then target spawn 
   );
 });
 
-test('all low-HP targets are locked before resolution and later actions never retarget', () => {
+test('locked actions never re-damage a target killed by an earlier impact', () => {
   const lateSlot = runtimeHero({ id: 'late', slot: 1 });
   const earlySlot = runtimeHero({ id: 'early', slot: 0 });
   const fallback = runtimeEnemy({ id: 'fallback', spawnOrder: 2, progress: 8, hp: 100 });
@@ -140,9 +140,9 @@ test('all low-HP targets are locked before resolution and later actions never re
   const actions = createBattleActions(state, 0);
   assert.deepEqual(
     actions.map(({ source, actionKind }) => `${source.id}:${actionKind}`),
-    ['early:skill', 'early:basic', 'late:skill', 'late:basic'],
+    ['early:skill', 'late:skill'],
   );
-  assert.deepEqual(actions.map(({ target }) => target.id), ['doomed', 'doomed', 'doomed', 'doomed']);
+  assert.deepEqual(actions.map(({ target }) => target.id), ['doomed', 'doomed']);
 
   resolveBattleActions(state, actions);
   assert.equal(doomed.dead, true);
@@ -154,9 +154,6 @@ test('all low-HP targets are locked before resolution and later actions never re
     )),
     [
       'early:skill:doomed',
-      'early:basic:doomed',
-      'late:skill:doomed',
-      'late:basic:doomed',
     ],
   );
   assert.deepEqual(
@@ -224,13 +221,15 @@ test('area impacts and per-target status RNG resolve in ascending spawn order', 
   assert.deepEqual(action.impacts.map(({ target }) => target.id), ['spawn-1', 'spawn-2', 'spawn-3']);
   resolveSkillAction(state, action);
 
-  const damageEvents = state.events.filter(({ effectPreset }) => effectPreset === 'skill_area_hit');
+  const damageEvents = state.events.filter(({ effectPreset, visualOnly }) => effectPreset === 'skill_area_hit' && !visualOnly);
   assert.deepEqual(
     damageEvents.map(({ targetId }) => targetId),
     ['spawn-1', 'spawn-2', 'spawn-3'],
   );
-  assert.equal(damageEvents.filter(({ suppressEffect }) => !suppressEffect).length, 1);
-  assert.equal(damageEvents.find(({ suppressEffect }) => !suppressEffect).targetId, 'spawn-3');
+  assert.ok(damageEvents.every(({ suppressEffect }) => suppressEffect));
+  const explosion = state.events.filter(e => e.effectPreset === 'skill_area_hit' && e.visualOnly);
+  assert.equal(explosion.length,1);
+  assert.deepEqual([explosion[0].x,explosion[0].y],[spawn3.x,spawn3.y]);
   assert.ok(damageEvents.every(({ actionKind, attackArchetype }) => (
     actionKind === 'skill' && attackArchetype === 'area'
   )));

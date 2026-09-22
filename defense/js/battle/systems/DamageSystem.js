@@ -3,6 +3,7 @@ import {
   LEVEL_DAMAGE_MULTIPLIERS,
   ATTACK_FAMILIES,
   MATCHUP_TABLE,
+  getElementMultiplier,
 } from '../../content/combat.js';
 import { STATUS_BY_ID } from '../../content/statuses.js';
 import { buffEffects } from './AuraSystem.js';
@@ -57,15 +58,18 @@ export function calculateDirectDamage({
   baseDamage,
   attackType,
   attackKind,
+  attackCount,
   forceCritical = false,
   rng = state.waveRng ?? state.rng,
 } = {}) {
-  const context = { target, attackType, attackKind, rng };
+  const context = { target, attackType, attackKind, attackCount, rng };
   const trait = collectHeroTraitModifiers(state, source, 'before_damage', context);
   const stat = collectHeroTraitModifiers(state, source, 'stat_modifier', context);
   const levelMultiplier = LEVEL_DAMAGE_MULTIPLIERS[source.level] ?? 1;
   const rawMatchup = getMatchupMultiplier(attackType, target.defenseType);
   const matchup = Math.max(rawMatchup, trait.matchupFloor);
+  const elementMultiplier = getElementMultiplier(source.definition.element, target.element);
+  const bossDamageTaken = target.bossState?.damageTaken ?? 1;
 
   let buffBonus = sumBuff(source, 'direct_damage_bonus');
   if (PHYSICAL_ATTACK_TYPES.includes(attackType)) buffBonus += sumBuff(source, 'physical_damage_bonus');
@@ -87,6 +91,8 @@ export function calculateDirectDamage({
   const amount = Number(baseDamage)
     * levelMultiplier
     * matchup
+    * elementMultiplier
+    * bossDamageTaken
     * (1 + buffBonus)
     * (1 + debuffBonus)
     * trait.damageMultiplier
@@ -96,7 +102,7 @@ export function calculateDirectDamage({
     critical,
     matchup,
     advantageous: matchup >= 2,
-    factors: { levelMultiplier, matchup, buffBonus, debuffBonus, traitMultiplier: trait.damageMultiplier, critMultiplier },
+    factors: { levelMultiplier, matchup, elementMultiplier, bossDamageTaken, buffBonus, debuffBonus, traitMultiplier: trait.damageMultiplier, critMultiplier },
   };
 }
 

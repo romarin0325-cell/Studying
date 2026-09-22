@@ -4,13 +4,19 @@ const MAIN = ["rumi", "luna", "cinderella", "zeke"];
 const COMPANIONS = ["snow_rabbit", "avalanche_maid", "night_rabbit", "guardian", "storm_sage", "lightning_sage"];
 const EMBER = ["red_dragon", "flame_sage", "mushroom_king"];
 const TIDE = ["great_detective", "siren", "phantom"];
+const SOLO = {queen:'queen', galaxy_whale:'galaxy-whale', silver_rabbit:'silver-rabbit', ancient_dragon:'ancient-dragon', time_ruler:'time-ruler'};
+const BOSSES = ['artificial_demon','love_iris','curse_iris','flora','poseidon','beelzebub'];
 const CREATURES = ["ruin_scarab", "ember_scarab", "sand_wisp", "stone_guard", "regrowth_idol", "rift_shade", "rift_wing", "abyss_armor", "chaos_spawn", "lesser_demon", "flora", "pharaoh", "reaper", "demon_god", "core", "portal"];
 export function heroIllustrationId(id) {
+  if (SOLO[id]) return 'illustration/' + SOLO[id];
   return 'illustration/' + (MAIN.includes(id) ? 'heroes' : COMPANIONS.includes(id) ? 'companions' : EMBER.includes(id) ? 'companions-ember' : 'companions-tide');
 }
 export function illustration(manager, id, attacking = false) {
   let imageId, frame;
-  if (MAIN.includes(id)) {
+  if (SOLO[id]) {
+    imageId = 'illustration/' + SOLO[id];
+    frame = { x: attacking ? .5 : 0, y: 0, width: .5, height: 1 };
+  } else if (MAIN.includes(id)) {
     const row = MAIN.indexOf(id);
     imageId = "illustration/heroes";
     frame = { x: attacking ? 0.5 : 0, y: row / 4, width: 0.5, height: 0.25 };
@@ -22,6 +28,10 @@ export function illustration(manager, id, attacking = false) {
     const ember = EMBER.includes(id), row = (ember ? EMBER : TIDE).indexOf(id);
     imageId = ember ? 'illustration/companions-ember' : 'illustration/companions-tide';
     frame = { x: attacking ? .5 : 0, y: row / 3, width: .5, height: 1 / 3 };
+  } else if (BOSSES.includes(id)) {
+    const index=BOSSES.indexOf(id);
+    imageId='illustration/realm-bosses';
+    frame={x:index%3/3,y:Math.floor(index/3)/2,width:1/3,height:1/2};
   } else if (CREATURES.includes(id)) {
     const index = CREATURES.indexOf(id);
     imageId = "illustration/creatures";
@@ -34,6 +44,17 @@ export function paintPortraits(root, manager, selector = "[data-portrait]") {
   const paint = () => {
     if (!root?.isConnected) return;
     for (const canvas of root.querySelectorAll(selector)) {
+      // Use the displayed aspect ratio and enough physical pixels. A 96px
+      // replacement portrait on a DPR-3 phone used to upscale three times;
+      // differently shaped canvas/CSS boxes also distorted the painted body.
+      const rect = canvas.getBoundingClientRect?.();
+      if (rect?.width > 0 && rect?.height > 0) {
+        const dpr = Math.min(3, globalThis.devicePixelRatio ?? 1);
+        const width = Math.max(1, Math.round(rect.width * dpr));
+        const height = Math.max(1, Math.round(rect.height * dpr));
+        if (canvas.width !== width) canvas.width = width;
+        if (canvas.height !== height) canvas.height = height;
+      }
       const id = canvas.dataset.portrait ?? canvas.dataset.heroAvatar;
       const art = illustration(manager, id) ?? (manager.getImage(`portrait/${id}`) ? { image: manager.getImage(`portrait/${id}`), frame: { x: 0, y: 0, width: 1, height: 1 } } : null);
       const ctx = canvas.getContext("2d");
@@ -47,8 +68,10 @@ export function paintPortraits(root, manager, selector = "[data-portrait]") {
       const iw = image.naturalWidth || image.width, ih = image.naturalHeight || image.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const ratio = frame.width * iw / (frame.height * ih);
-      const height = canvas.height, width = height * ratio;
-      ctx.drawImage(image, frame.x * iw, frame.y * ih, frame.width * iw, frame.height * ih, (canvas.width - width) / 2, 0, width, height);
+      const height = Math.min(canvas.height, canvas.width / ratio), width = height * ratio;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(image, frame.x * iw, frame.y * ih, frame.width * iw, frame.height * ih, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
     }
   };
   paint();

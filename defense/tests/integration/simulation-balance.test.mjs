@@ -22,6 +22,8 @@ const TARGETS = Object.freeze({
   chaos_rift: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
   crossroads: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
   long_boulevard: { minimumClearRate: 0.80, minimumMinutes: 3, maximumMinutes: 5.5 },
+  fairy_forest: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
+  sunken_temple: { minimumClearRate: 0.65, minimumMinutes: 3, maximumMinutes: 5.5 },
 });
 const GATED_STAGE_IDS = Object.keys(TARGETS);
 // Conservative input-time allowance for the automated policy: 15 seconds for
@@ -266,8 +268,8 @@ function summarize(stageId, results) {
 }
 
 const allFormations = enumerateValidFormations();
-// Exhaustive shape validation covers 1,980 choices. The combat gate covers
-// every companion pair under every main without 7,920 redundant full runs.
+// Validate all 9,100 formation shapes. The combat gate covers every companion
+// pair under every main on all six stages without 54,600 redundant full runs.
 function pairwiseFormations() {
   const pairs = ids => choose(ids, 2).map(pair => pair.join(':'));
   return MAIN_HEROES.flatMap(main => {
@@ -340,11 +342,11 @@ if (!isMainThread && workerData?.simulationBalanceWorker) {
     parentPort.close();
   }
 } else {
-  test('validates all 1,980 formations and covers every companion pair under every main in combat', () => {
-    assert.equal(MAIN_HEROES.length, 4);
-    assert.equal(NORMAL_HEROES.length, 12);
-    assert.equal(allFormations.length, 1980);
-    assert.equal(new Set(allFormations.map(({ mainId, heroIds }) => `${mainId}:${heroIds.join(',')}`)).size, 1980);
+  test('validates all 9,100 formations and covers every companion pair under every main in combat', () => {
+    assert.equal(MAIN_HEROES.length, 5);
+    assert.equal(NORMAL_HEROES.length, 16);
+    assert.equal(allFormations.length, 9100);
+    assert.equal(new Set(allFormations.map(({ mainId, heroIds }) => `${mainId}:${heroIds.join(',')}`)).size, 9100);
     for (const formation of allFormations) {
       assert.ok(MAIN_HEROES.some(({ id }) => id === formation.mainId));
       assert.equal(formation.heroIds.length, 4);

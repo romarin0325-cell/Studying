@@ -40,10 +40,10 @@ export class ViewportLayout {
     return this.landscape ? BOARD.columns : BOARD.rows;
   }
 
-  resize(width, height, devicePixelRatio = globalThis.devicePixelRatio ?? 1) {
+  resize(width, height, devicePixelRatio = globalThis.devicePixelRatio ?? 1, landscape = null) {
     this.cssWidth = Math.max(1, Number(width) || 1);
     this.cssHeight = Math.max(1, Number(height) || 1);
-    this.landscape = isLandscapeViewport(this.cssWidth, this.cssHeight);
+    this.landscape = landscape ?? isLandscapeViewport(this.cssWidth, this.cssHeight);
     this.dpr = clamp(Number(devicePixelRatio) || 1, 1, this.dprCap);
 
     const aspect = this.viewColumns / this.viewRows;
@@ -60,8 +60,10 @@ export class ViewportLayout {
       height: boardHeight,
     };
     if (this.battlefield) {
-      const inset = Math.min(this.cssWidth, this.cssHeight) * .065;
-      this.boardRect = { x: inset, y: inset + 12, width: this.cssWidth - inset * 2, height: this.cssHeight - inset * 2 - 24 };
+      // One logical cell has one pixel scale in both axes. Screen space outside
+      // the square arena belongs to the UI, never to a stretched combat plane.
+      const side = Math.min(this.cssWidth, this.cssHeight) * .94;
+      this.boardRect = { x: (this.cssWidth - side) / 2, y: (this.cssHeight - side) / 2, width: side, height: side };
     }
 
     if (this.canvas) {

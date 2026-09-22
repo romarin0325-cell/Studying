@@ -92,13 +92,13 @@ function assertFiniteRuntime(session, label) {
   }
 }
 
-test('all 16 heroes execute all four final trait builds through the battle runtime', (context) => {
+test('every hero executes all four final trait builds through real attack impacts', (context) => {
   const builds = enumerateFinalTraitBuilds();
-  assert.equal(HEROES.length, 16);
-  assert.equal(builds.length, 64, '16 heroes × (2 Lv4 × 2 Lv6) must produce 64 builds');
+  assert.equal(HEROES.length, 21);
+  assert.equal(builds.length, HEROES.length * 4, 'each hero must produce four final builds');
   assert.equal(
     new Set(builds.map(({ hero, lv4, lv6 }) => `${hero.id}:${lv4}:${lv6}`)).size,
-    64,
+    HEROES.length * 4,
     'every final build must be unique',
   );
 
@@ -131,7 +131,8 @@ test('all 16 heroes execute all four final trait builds through the battle runti
       let ticks = 0;
       while (
         session.state.phase === BATTLE_PHASE.WAVE_RUNNING
-        && (hero.stats.basicAttacks === 0 || hero.stats.skills === 0)
+        && (!hitEvents.some(event => event.actionKind === 'basic' && event.amount > 0)
+          || !hitEvents.some(event => event.actionKind === 'skill' && event.amount > 0))
         && ticks < MAX_ACTION_TICKS
       ) {
         session.step(FIXED_TICK_SECONDS);

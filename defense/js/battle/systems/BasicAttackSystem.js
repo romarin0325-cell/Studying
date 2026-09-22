@@ -92,7 +92,7 @@ export function resolveLaserHits(sourcePoint, targetPoint, enemies, {
 
 function applyStatuses(state, hero, target, attackKind, configuredStatuses = [], metadata = {}) {
   const rng = state.waveRng ?? state.rng;
-  const trait = collectHeroTraitModifiers(state, hero, 'after_hit', { target, attackKind, rng });
+  const trait = collectHeroTraitModifiers(state, hero, 'after_hit', { target, attackKind, rng, ...metadata });
   const statuses = [
     ...configuredStatuses
       .filter((entry) => typeof entry === 'string' || entry?.type === 'apply_status' || entry?.statusId)
@@ -118,6 +118,7 @@ function applyStatuses(state, hero, target, attackKind, configuredStatuses = [],
 }
 
 function hitTarget(state, hero, target, baseDamage, effectPreset, radius, metadata = {}) {
+  if (target.dead || target.reachedCore) return null;
   const attackArchetype = metadata.attackArchetype ?? hero.definition.attack.archetype;
   const result = applyDirectDamage({
     state,
@@ -171,6 +172,7 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
       impacts: novaImpacts,
       pellets: null,
       geometry,
+      attackCount: hero.stats.basicAttacks,
     };
   }
   updateHeroDirection(hero, target, landscape);
@@ -212,7 +214,32 @@ export function createBasicAttackAction(state, hero, deltaSeconds, landscape = f
     impacts,
     pellets,
     geometry,
+    attackCount: hero.stats.basicAttacks,
   };
+}
+
+// Refresh moving targets at release, without consuming a second attack/cooldown.
+export function refreshBasicAction(state, action, target) {
+  const hero = action.source, attack = hero.definition.attack;
+  action.target = target;
+  action.geometry = attackGeometry(attack, { x: hero.x + .5, y: hero.y + .5 }, target, getEffectiveRange(state, hero));
+  const geometry = action.geometry, enemies = [...state.enemies.values()];
+  if (attack.archetype === 'shotgun') {
+    action.pellets = resolveShotgunHits(geometry.source, target, enemies, {
+      range: geometry.range, angles: attack.spreadDegrees, normalRadius: attack.normalCollisionRadius,
+      bossRadius: attack.bossCollisionRadius, includeMisses: true,
+    });
+    action.impacts = action.pellets.filter(p => p.target).sort(impactPriority);
+  } else if (attack.archetype === 'laser') {
+    action.impacts = resolveLaserHits(geometry.source, target, enemies, {
+      range: geometry.range, normalRadius: attack.normalCollisionRadius, bossRadius: attack.bossCollisionRadius,
+    });
+  } else if (attack.archetype === 'nova') {
+    action.impacts = targetsInRadius(state, geometry.source, geometry.radius).map(target => ({ target }));
+  } else if (attack.archetype === 'area') {
+    action.impacts = targetsInRadius(state, target, attack.radius ?? 2).map(target => ({ target }));
+  } else action.impacts = [{ target }];
+  return action;
 }
 
 export function resolveBasicAttackAction(state, action) {
@@ -233,6 +260,7 @@ export function resolveBasicAttackAction(state, action) {
       hitTarget(state, hero, impact.target, attack.damage, 'basic_nova_hit', action.geometry.radius, {
         attackArchetype: 'nova',
         suppressEffect: true,
+        attackCount: action.attackCount,
       });
     }
     return true;
@@ -259,6 +287,7 @@ export function resolveBasicAttackAction(state, action) {
         suppressEffect: true,
         vectorX,
         vectorY,
+        attackCount: action.attackCount,
       });
     }
     return true;
@@ -290,18 +319,26 @@ export function resolveBasicAttackAction(state, action) {
         vectorX: impact.direction.x,
         vectorY: impact.direction.y,
         suppressEffect: true,
+        attackCount: action.attackCount,
       });
     }
     return true;
   }
+  if (attack.archetype === 'area') {
+    const point = action.impactPoint ?? action.target;
+    state.events.push({ type: 'hit', actionKind: 'basic', attackArchetype: 'area',
+      effectPreset: 'basic_area_hit', element: hero.definition.element, sourceId: hero.id,
+      sourceX: hero.x + .5, sourceY: hero.y + .5, x: point.x, y: point.y,
+      radius: attack.radius ?? 2, visualOnly: true });
+  }
   for (const impact of impacts) {
     if (attack.archetype === 'area') {
       hitTarget(state, hero, impact.target, attack.damage, 'basic_area_hit', attack.radius ?? 2, {
-        suppressEffect: impact.target.id !== action.target.id,
+        suppressEffect: true, attackCount: action.attackCount,
       });
     } else {
       const preset = attack.archetype === 'melee' ? 'basic_melee_hit' : 'basic_ranged_hit';
-      hitTarget(state, hero, impact.target, attack.damage, preset);
+      hitTarget(state, hero, impact.target, attack.damage, preset, undefined, { attackCount: action.attackCount });
     }
   }
   return true;

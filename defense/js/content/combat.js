@@ -6,6 +6,19 @@ export function deepFreeze(value, seen = new WeakSet()) {
 }
 
 export const ELEMENT_IDS = deepFreeze(['fire', 'water', 'nature', 'light', 'dark']);
+export const ELEMENT_LABELS = deepFreeze({ fire: '불', water: '물', nature: '자연', light: '빛', dark: '어둠' });
+// CARD's elemental cycle, with the requested inverse penalty. Light and dark
+// counter each other; neither is assigned an arbitrary one-sided resistance.
+export const ELEMENT_MATCHUPS = deepFreeze({
+  fire:   { fire: 1, water: .8, nature: 1.2, light: 1, dark: 1 },
+  water:  { fire: 1.2, water: 1, nature: .8, light: 1, dark: 1 },
+  nature: { fire: .8, water: 1.2, nature: 1, light: 1, dark: 1 },
+  light:  { fire: 1, water: 1, nature: 1, light: 1, dark: 1.2 },
+  dark:   { fire: 1, water: 1, nature: 1, light: 1.2, dark: 1 },
+});
+export function getElementMultiplier(sourceElement, targetElement) {
+  return ELEMENT_MATCHUPS[sourceElement]?.[targetElement] ?? 1;
+}
 export const ROLE_IDS = deepFreeze(['dealer', 'balancer', 'buffer', 'debuffer']);
 export const POSITION_IDS = deepFreeze(['main', 'normal']);
 export const ATTACK_ARCHETYPE_IDS = deepFreeze(['melee', 'burst', 'rapid', 'shotgun', 'area', 'nova', 'laser']);
@@ -275,11 +288,11 @@ export const DIFFICULTIES = DIFFICULTY_DEFINITIONS;
 
 export const BOARD_RULES = deepFreeze({
   columns: 12,
-  rows: 16,
+  rows: 12,
   minimumX: 0,
   maximumX: 11,
   minimumY: 0,
-  maximumY: 15,
+  maximumY: 11,
   pathMovement: 'orthogonal',
   allowRepeatedPathCells: false,
   landscapeRotation: 'clockwise_90',
@@ -314,6 +327,7 @@ export const DAMAGE_FORMULA_ORDER = deepFreeze([
   'baseDamage',
   'levelMultiplier',
   'attackTypeMatchup',
+  'elementMatchup',
   'additiveDamageBuffs',
   'additiveReceivedDamageDebuffs',
   'independentTraitMultipliers',
@@ -356,6 +370,7 @@ export const COMBAT_RULES = deepFreeze({
   defenseTypes: DEFENSE_TYPE_IDS,
   attackFamilies: ATTACK_FAMILIES,
   matchups: MATCHUP_MULTIPLIERS,
+  elementMatchups: ELEMENT_MATCHUPS,
   critical: CRITICAL_RULES,
   levels: HERO_LEVEL_RULES,
   board: BOARD_RULES,

@@ -15,7 +15,7 @@ export class SoundDirector {
         this.master = this.context.createGain(); this.master.gain.value = .32;
         const compressor = this.context.createDynamicsCompressor();
         this.master.connect(compressor); compressor.connect(this.context.destination);
-        this.music = this.context.createGain(); this.music.gain.value = .45; this.music.connect(this.master);
+        this.music = this.context.createGain(); this.music.gain.value = .7; this.music.connect(this.master);
         this.noise = this.context.createBuffer(1, this.context.sampleRate * .3, this.context.sampleRate);
         const samples = this.noise.getChannelData(0); let seed = 12345;
         for (let i = 0; i < samples.length; i++) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; samples[i] = (seed / 4294967296 * 2 - 1); }
@@ -29,7 +29,7 @@ export class SoundDirector {
   setSettings(settings) {
     this.enabled = settings.sound; this.musicEnabled = settings.music !== false;
     if (this.master) this.master.gain.setTargetAtTime(this.enabled ? .32 : 0, this.context.currentTime, .04);
-    if (this.music) this.music.gain.setTargetAtTime(this.musicEnabled ? .45 : 0, this.context.currentTime, .1);
+    if (this.music) this.music.gain.setTargetAtTime(this.musicEnabled ? .7 : 0, this.context.currentTime, .1);
   }
   setMode(mode) { this.mode = mode; }
   tone(note, at, duration, gain, type = 'sine', bus = this.master) {
@@ -75,6 +75,9 @@ export class SoundDirector {
       return;
     }
     if (event.type === 'core_damaged') { this.tone(35,now,.32,.2,'triangle'); this.percussion(now,.14,true); }
+    if (event.type === 'boss_ability_started') [57,64].forEach((note,i)=>this.tone(note,now+i*.16,.42,.12,'triangle'));
+    if (event.type === 'boss_ability_interrupted') [81,86,93].forEach((note,i)=>this.tone(note,now+i*.05,.35,.11));
+    if (event.type === 'boss_ability_resolved') {this.tone(43,now,.4,.12,'triangle');this.percussion(now,.08,true);}
     if (event.type === 'starfall') [74,81,86,93].forEach((note,i)=>this.tone(note,now+i*.045,.45,.1));
     if (event.type === 'wave_completed') [74,77,81].forEach((note,i)=>this.tone(note,now+i*.09,.55,.13,'triangle'));
     if (event.type === 'victory') [62,69,74,77,81,86].forEach((note,i)=>this.tone(note,now+i*.12,1,.13,'triangle'));

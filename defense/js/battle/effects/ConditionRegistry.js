@@ -4,9 +4,13 @@ const activeDebuffNames = (target) => Object.entries(target?.statuses ?? {})
   .map(([id]) => id);
 
 export const CONDITION_REGISTRY = Object.freeze({
+  team_tag_count: (condition, context) => context.state.heroes.filter(h => h.placed && h.definition.tags?.includes(condition.tag)).length >= condition.count,
   team_element_count: (condition, context) => context.state.heroes.filter(h => h.placed && h.definition.element === condition.element).length >= condition.count,
   target_hp_below_ratio: (condition, context) => context.target?.hp / context.target?.maxHp <= condition.ratio,
-  attack_count_modulo: (condition, context) => context.attackKind === 'basic' && context.source.stats.basicAttacks > 0 && context.source.stats.basicAttacks % condition.mod === 0,
+  attack_count_modulo: (condition, context) => {
+    const count = context.attackCount ?? context.source.stats.basicAttacks;
+    return context.attackKind === 'basic' && count > 0 && count % condition.mod === 0;
+  },
   target_element: (condition, context) => context.target?.element === (condition.element ?? condition.value),
   target_defense_type: (condition, context) => context.target?.defenseType === (condition.defenseType ?? condition.value),
   target_has_status: (condition, context) => hasStatus(context.target, condition.statusId ?? condition.value),

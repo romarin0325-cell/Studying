@@ -1,6 +1,9 @@
 import { deepFreeze } from './combat.js';
 
 const DIRECTION_IDS = ['front', 'back', 'left', 'right'];
+export const BASIC_CADENCE_SCALE = deepFreeze({ rapid: 1.4, melee: 1.3, shotgun: 1.25, area: 1.25, nova: 1.2, laser: 1.15, burst: 1.1 });
+const SKILL_CADENCE_SECONDS = { 5: 9, 7: 12, 8: 14, 9: 16 };
+const precise = value => Math.round(value * 1000000) / 1000000;
 
 function heroAssetIds(heroId) {
   return {
@@ -22,36 +25,40 @@ function trait(id, level, name, conditions, effects, description = '') {
 }
 
 function attack({ archetype, attackType, range, interval, damage, effectPreset, ...rest }) {
+  const cadence = BASIC_CADENCE_SCALE[archetype];
   return {
     archetype,
     attackType,
     range,
-    interval,
-    intervalSeconds: interval,
-    damage,
-    baseDamage: damage,
+    interval: precise(interval * cadence),
+    intervalSeconds: precise(interval * cadence),
+    damage: precise(damage * cadence),
+    baseDamage: precise(damage * cadence),
     effectPreset,
     ...rest,
+    ...(rest.pelletDamage === undefined ? {} : { pelletDamage: precise(rest.pelletDamage * cadence) }),
   };
 }
 
-function skill({ id, name, attackType, cooldown, shape, damage, radius = 0, onHitEffects = [] }) {
+function skill({ id, name, attackType, cooldown, shape, damage, radius = 0, onHitEffects = [], vfx }) {
+  const cadence = SKILL_CADENCE_SECONDS[cooldown] ?? Math.round(cooldown * 1.75);
   return {
     id,
     name,
     displayName: name,
     attackType,
-    cooldown,
-    cooldownSeconds: cooldown,
+    cooldown: cadence,
+    cooldownSeconds: cadence,
     shape,
-    damage,
-    baseDamage: damage,
+    damage: precise(damage * cadence / cooldown),
+    baseDamage: precise(damage * cadence / cooldown),
     radius,
     effectPreset: shape === 'area' ? 'skill_area_hit' : 'skill_single_hit',
     autoTarget: true,
     holdAtReadyWithoutTarget: true,
     timerIndependentFromBasicAttack: true,
     onHitEffects,
+    ...(vfx ? { vfx } : {}),
   };
 }
 
@@ -616,6 +623,58 @@ export const HEROES = deepFreeze([
       trait('phantom_solitude', 6, '혼자만의 세계', [], [{ type: 'add_range', value: 1.5 }, { type: 'multiply_skill_cooldown', value: .85 }], '사거리 +1.5, 스킬 쿨다운 15% 감소.'),
       trait('phantom_dread', 6, '악몽의 왕', [], [{ type: 'multiply_damage_by_debuff_count', amountPerDebuff: .2 }], '적의 고유 디버프 하나당 직접 피해 +20%.'),
     ], { auraImmune: true }),
+  companion('queen', '여왕', 'female', 'nature', 'balancer',
+    { archetype: 'area', attackType: 'magic', range: 3.8, interval: 2, damage: 16, radius: 1.35, effectPreset: 'basic_area_hit' },
+    { name: '로열 블룸', attackType: 'magic', cooldown: 8, shape: 'area', damage: 42, radius: 2.25,
+      onHitEffects: [status('slow', 4)] },
+    [
+      trait('queen_thorn_court', 4, '가시의 궁정', [{type:'target_has_any_debuff'}], [damage(1.35)], '디버프가 있는 적에게 직접 피해 +35%.'),
+      trait('queen_star_garden', 4, '별의 정원', [], [{type:'provide_aura',buffId:'star_powder',range:4}], '범위 4에 사거리 +1 오라를 제공한다.'),
+      trait('queen_finale', 6, '피날레', [skillOnly], [{type:'multiply_damage_by_debuff_count',amountPerDebuff:.3}], '로열 블룸이 적의 고유 디버프 하나당 피해 +30%.'),
+      trait('queen_coronation', 6, '꽃의 대관식', [], [{type:'increase_aura_range_tier',value:1}], '배치한 수호자의 오라 범위를 한 단계 넓힌다.'),
+    ], { position:'main',kind:'main',innateAuras:[{buffId:'earth_bless',range:4}] }),
+  companion('galaxy_whale', '은하고래', 'male', 'light', 'dealer',
+    { archetype:'laser', attackType:'holy', range:6.5, interval:3, damage:25,
+      normalCollisionRadius:.38, bossCollisionRadius:.53, effectPreset:'basic_laser_hit' },
+    { name:'슈퍼노바 펄스', attackType:'holy', cooldown:9, shape:'area', damage:52, radius:2.5 },
+    [
+      trait('galaxy_whale_absolute_light', 4, '앱솔루트 라이트', [{type:'target_element',element:'dark'}], [damage(1.45)], '어둠 속성 적에게 직접 피해 +45%.'),
+      trait('galaxy_whale_constellation', 4, '세 별의 항로', [{type:'team_element_count',element:'light',count:3}], [damage(1.4)], '빛속성 수호자를 3명 이상 배치하면 직접 피해 +40%.'),
+      trait('galaxy_whale_supernova', 6, '초신성의 잔광', [skillOnly], [status('darkness',5),damage(1.4)], '펄스 피해 +40%, 5초 암흑으로 후속 공격을 돕는다.'),
+      trait('galaxy_whale_horizon', 6, '사건의 지평선', [], [{type:'add_range',value:1.5}], '관통과 스킬 표적 사거리 +1.5.'),
+    ]),
+  companion('silver_rabbit', '은토끼', 'male', 'light', 'dealer',
+    { archetype:'rapid', attackType:'holy', range:4.2, interval:.7, damage:7.5, effectPreset:'basic_ranged_hit' },
+    { name:'헤븐리 루레', attackType:'holy', cooldown:7, shape:'single', damage:57 },
+    [
+      trait('silver_rabbit_moon_chase', 4, '은빛 추격', [whenStatus('darkness')], [damage(1.5)], '암흑 상태의 적에게 직접 피해 +50%.'),
+      trait('silver_rabbit_trio', 4, '세 토끼의 약속', [{type:'team_tag_count',tag:'rabbit',count:3}], [damage(1.4)], '토끼 수호자를 3명 이상 배치하면 직접 피해 +40%.'),
+      trait('silver_rabbit_rabbit_hole', 6, '래빗홀', [], [{type:'add_team_crit_chance',value:.2,targetTag:'rabbit',dedupeKey:'rabbit_hole'}], '토끼 수호자의 치명타 확률 +20%p. 같은 래빗홀은 중첩되지 않는다.'),
+      trait('silver_rabbit_heavenly_lure', 6, '천상의 유인', [skillOnly], [damage(1.45),status('darkness',5)], '스킬 피해 +45%, 5초 암흑을 남긴다.'),
+    ], {tags:['rabbit']}),
+  companion('ancient_dragon', '에인션트드래곤', 'female', 'nature', 'debuffer',
+    { archetype:'shotgun', attackType:'flame', range:3.3, interval:2.2, damage:5.5,
+      pelletCount:3, spreadDegrees:[-15,0,15], normalCollisionRadius:.3, bossCollisionRadius:.45,
+      statuses:[status('corrosion',3)], effectPreset:'basic_shotgun_hit' },
+    { name:'에인션트 브레스', attackType:'flame', cooldown:9, shape:'area', damage:38, radius:2.2,
+      onHitEffects:[status('burn',6)] },
+    [
+      trait('ancient_dragon_claw', 4, '고룡의 발톱', [whenStatus('corrosion')], [damage(1.4)], '부식된 적에게 직접 피해 +40%.'),
+      trait('ancient_dragon_vines', 4, '뿌리 감옥', [skillOnly], [status('slow',5)], '브레스가 5초 감속을 남긴다.'),
+      trait('ancient_dragon_earth_breath', 6, '태고의 축복', [{type:'source_has_buff',buffId:'earth_bless'}], [damage(1.65)], '대지의축복을 받는 동안 직접 피해 +65%.'),
+      trait('ancient_dragon_ruin', 6, '고대의 재앙', [skillOnly], [status('curse',5),status('darkness',5)], '브레스가 5초 저주와 암흑을 남겨 동료의 공격을 돕는다.'),
+    ], {tags:['dragon']}),
+  companion('time_ruler', '시간의지배자', 'female', 'dark', 'debuffer',
+    { archetype:'area', attackType:'magic', range:4.5, interval:2.4, damage:15, radius:1.3,
+      statuses:[status('slow',2)], effectPreset:'basic_area_hit' },
+    { name:'종언의 예고', attackType:'magic', cooldown:9, shape:'area', damage:43, radius:2, vfx:'clock',
+      onHitEffects:[status('curse',5),status('slow',4)] },
+    [
+      trait('time_ruler_shadow_twist', 4, '섀도우 트위스트', [skillOnly], [status('darkness',5)], '종언의 예고가 5초 암흑도 남긴다.'),
+      trait('time_ruler_rewind', 4, '되감기', [], [{type:'multiply_skill_cooldown',value:.8}], '종언의 예고 쿨다운 20% 감소.'),
+      trait('time_ruler_stillness', 6, '정지한 순간', [skillOnly], [status('stun',1.1)], '종언의 예고가 1.1초 기절을 남긴다.'),
+      trait('time_ruler_last_hour', 6, '마지막 시각', [skillOnly], [{type:'multiply_damage_by_debuff_count',amountPerDebuff:.25}], '종언의 예고가 적의 고유 디버프 하나당 피해 +25%.'),
+    ]),
 ]);
 
 export const HERO_BY_ID = deepFreeze(Object.fromEntries(HEROES.map((hero) => [hero.id, hero])));

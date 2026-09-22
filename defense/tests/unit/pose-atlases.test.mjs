@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { HERO_IDS } from '../../js/content/assets.js';
 import { illustration } from '../../js/render/Illustrations.js';
 
-test('all 16 paired poses have real alpha, isolated square frames and a shared foot baseline', async () => {
+test('every paired pose has real alpha, isolated square frames and a shared foot baseline', async () => {
   const images={};
-  for(const name of ['heroes','companions','companions-ember','companions-tide']) {
+  for(const name of ['heroes','queen','galaxy-whale','silver-rabbit','ancient-dragon','time-ruler','companions','companions-ember','companions-tide']) {
     const file=new URL('../../assets/moonlit/'+name+'.webp',import.meta.url);
     const image=await sharp(fileURLToPath(file)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
     images['illustration/'+name]={width:image.info.width,height:image.info.height,...image};

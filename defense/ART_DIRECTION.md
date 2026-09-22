@@ -16,6 +16,14 @@ approved in-game cast, not an isolated attractive illustration.
   material. Never use white/luminance deletion or a checkerboard as transparency.
 - Every idle/attack pair uses one uniform scale and one foot baseline. Do not
   independently auto-fit poses: broad weapons must not shrink the attack body.
+- Calibrate the anatomical head against Rumi before packing. Judge the face/skull,
+  not a halo, rabbit ears, helmet or long hair. Keep that head scale across the
+  entire cast. A slightly shorter character has a modestly shorter torso/legs;
+  never enlarge the head to make up its height. Compare 64px and 96px proofs.
+- Snow Rabbit retains the original icy-blue hair, white/pink ears, teal bunny
+  costume, white opaque legwear and blue shoes. Do not substitute a winter coat.
+- Queen, Ancient Dragon and Time Ruler are female; Galaxy Whale and Silver Rabbit
+  are male. Preserve their supplied or CARD identity references conservatively.
 - Inspect each pair on dark and pale backgrounds, then at the actual game size.
   Inspect Zeke's head-to-torso/leg proportions and the Maid/Storm Sage hair explicitly.
   Transparent pixels, dimensions and filenames alone do not prove visual quality.
@@ -27,6 +35,11 @@ Character atlases have two columns (idle, attack), square 512px cells. Rows:
 | File | Row order |
 | --- | --- |
 | heroes.webp | rumi, luna, cinderella, zeke |
+| queen.webp | queen |
+| galaxy-whale.webp | galaxy_whale |
+| silver-rabbit.webp | silver_rabbit |
+| ancient-dragon.webp | ancient_dragon |
+| time-ruler.webp | time_ruler |
 | companions.webp | snow_rabbit, avalanche_maid, night_rabbit, guardian, storm_sage, lightning_sage |
 | companions-ember.webp | red_dragon, flame_sage, mushroom_king |
 | companions-tide.webp | great_detective, siren, phantom |
@@ -45,6 +58,11 @@ with ids, approximate input boundaries (x,y,w,h for every pose), and optional
 fallbackRoot. Keep the authoring input until visual approval. The release build
 validates alpha and fails on opaque sprites; it does not silently modify art.
 
+Worlds and bosses use separate 3×2 atlases of square cells, in the requested
+chapter order: artificial demon / Love Iris / Curse Iris; Flora / Poseidon /
+Beelzebub. Keep one source-cell scale across the six boss silhouettes, excluding
+horns/crowns/wings when comparing anatomical heads. The core design is unchanged.
+
 The 4×4 combat FX sheet uses screen compositing over black. Keep every frame
 isolated. Fire, water, nature and light/dark families share a crisp bright center
 and soft colored falloff. Normal hits remain smaller than skills. Preserve the
@@ -61,3 +79,4 @@ Record physical-device limitations rather than claiming desktop automation is
 iOS/Android performance certification.
 
 Exact prompts for this revision: [TACTICAL_ART_PROMPTS.md](docs/TACTICAL_ART_PROMPTS.md).
+Six-realms additions and revisions: [SIX_REALMS_ART_PROMPTS.md](docs/SIX_REALMS_ART_PROMPTS.md).

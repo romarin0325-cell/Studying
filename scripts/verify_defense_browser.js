@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..', 'defense');
 const VIEWPORTS = Object.freeze([
+  { width: 320, height: 568 },
   { width: 360, height: 800 },
   { width: 390, height: 844 },
   { width: 800, height: 360 },
@@ -186,6 +187,8 @@ function assertBattleLayout(geometry, expectedViewport, { checkPerformance = tru
   assertClose(geometry.canvas.top, geometry.boardShell.top, tolerance, `${label}: canvas top edge`);
   assertClose(geometry.canvas.width, geometry.boardShell.width, tolerance, `${label}: canvas width`);
   assertClose(geometry.canvas.height, geometry.boardShell.height, tolerance, `${label}: canvas height`);
+  assertClose(geometry.canvas.width, geometry.canvas.height, tolerance, `${label}: square arena`);
+  assertClose(geometry.debug.layout.boardRect.width, geometry.debug.layout.boardRect.height, tolerance, `${label}: equal logical distance scale`);
 
   assert.equal(geometry.debug.layout.landscape, expectedLandscape, `${label}: logical orientation mismatch`);
   if (expectedLandscape) {
@@ -194,8 +197,7 @@ function assertBattleLayout(geometry, expectedViewport, { checkPerformance = tru
     assertClose(geometry.boardShell.bottom, geometry.panel.bottom, tolerance, `${label}: landscape board/panel bottom edge`);
   } else {
     assert.ok(geometry.boardShell.bottom <= geometry.panel.top + tolerance, `${label}: portrait panel is not below the board`);
-    assertClose(geometry.boardShell.left, geometry.panel.left, tolerance, `${label}: portrait board/panel left edge`);
-    assertClose(geometry.boardShell.right, geometry.panel.right, tolerance, `${label}: portrait board/panel right edge`);
+    assertClose((geometry.boardShell.left+geometry.boardShell.right)/2, (geometry.panel.left+geometry.panel.right)/2, tolerance, `${label}: portrait arena centered over deck`);
   }
 
   assert.equal(geometry.rotationGuards.length, 0, `${label}: a forced-rotation overlay is visible`);

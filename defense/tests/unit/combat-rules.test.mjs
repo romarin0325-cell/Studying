@@ -9,6 +9,8 @@ import {
   DIFFICULTIES,
   LEVEL_DAMAGE_MULTIPLIERS,
   MATCHUP_TABLE,
+  ELEMENT_IDS,
+  getElementMultiplier,
   TOTAL_DREAM_CRYSTALS,
   WAVE_REWARDS,
 } from '../../js/content/combat.js';
@@ -108,6 +110,8 @@ test('direct damage applies level, matchup, additive buffs/debuffs, traits and c
   assert.deepEqual(result.factors, {
     levelMultiplier: 1.2,
     matchup: 0.75,
+    elementMultiplier: 1,
+    bossDamageTaken: 1,
     buffBonus: 0.4,
     debuffBonus: 0.5,
     traitMultiplier: 1.5,
@@ -115,6 +119,27 @@ test('direct damage applies level, matchup, additive buffs/debuffs, traits and c
   });
   closeTo(result.amount, 100 * 1.2 * 0.75 * (1 + 0.4) * (1 + 0.5) * 1.5 * 2);
   closeTo(result.amount, 567);
+});
+
+test('elemental advantage and resistance affect real basic and skill damage independently of attack type', () => {
+  const expected = [
+    [1, .8, 1.2, 1, 1], [1.2, 1, .8, 1, 1], [.8, 1.2, 1, 1, 1],
+    [1, 1, 1, 1, 1.2], [1, 1, 1, 1.2, 1],
+  ];
+  for (const [i, sourceElement] of ELEMENT_IDS.entries()) for (const [j, targetElement] of ELEMENT_IDS.entries()) {
+    assert.equal(getElementMultiplier(sourceElement, targetElement), expected[i][j]);
+    for (const attackKind of ['basic', 'skill']) {
+      const source = { id: 'source', level: 1, placed: true, buffs: new Map(), selectedTraits: [], stats: {damage:0,kills:0},
+        definition: { element: sourceElement, tags: [], traits: [], attack: {archetype:'burst'}, skill:{shape:'single'} } };
+      const target = {id:'target',element:targetElement,defenseType:'heavy',hp:1000,statuses:{},x:1,y:1};
+      const state = {heroes:[source],rng:{next:()=>.99},events:[]};
+      const result = applyDirectDamage({state,source,target,baseDamage:100,attackType:'magic',attackKind});
+      closeTo(result.amount, 200 * expected[i][j]);
+      closeTo(target.hp, 1000 - 200 * expected[i][j]);
+      assert.equal(result.factors.matchup, 2);
+    }
+  }
+  assert.equal(getElementMultiplier('water',undefined),1,'untyped targets remain neutral');
 });
 
 test('level growth, crystal economy and difficulty availability are immutable fixed rules', () => {

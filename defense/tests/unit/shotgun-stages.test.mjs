@@ -129,6 +129,8 @@ test('each shotgun pellet independently deals damage, rolls critical, and applie
 });
 
 const EXPECTED_PATHS = Object.freeze({
+  fairy_forest: [{x:0,y:1},{x:9,y:1},{x:9,y:5},{x:2,y:5},{x:2,y:9},{x:8,y:9},{x:8,y:11}],
+  sunken_temple: [{x:1,y:0},{x:1,y:9},{x:5,y:9},{x:5,y:2},{x:10,y:2},{x:10,y:10},{x:7,y:10},{x:7,y:6}],
   ancient_ruins: Object.freeze([
     { x: 0, y: 1 }, { x: 10, y: 1 }, { x: 10, y: 5 }, { x: 1, y: 5 },
     { x: 1, y: 9 }, { x: 10, y: 9 },
@@ -148,54 +150,378 @@ const EXPECTED_PATHS = Object.freeze({
 });
 
 const EXPECTED_WAVES = Object.freeze({
-  ancient_ruins: Object.freeze([
-    [{ enemyId: 'ruin_scarab', count: 30 }],
-    [{ enemyId: 'sand_wisp', count: 30 }],
-    [{ enemyId: 'stone_guard', count: 22 }],
-    [{ enemyId: 'regrowth_idol', count: 26 }],
-    [{ enemyId: 'flora', count: 1 }],
-    [{ enemyId: 'ember_scarab', count: 30 }],
-    [{ enemyId: 'sand_wisp', count: 30 }],
-    [{ enemyId: 'stone_guard', count: 24 }],
-    [{ enemyId: 'regrowth_idol', count: 28 }],
-    [{ enemyId: 'pharaoh', count: 1 }],
-  ]),
-  chaos_rift: Object.freeze([
-    [{ enemyId: 'rift_shade', count: 30 }],
-    [{ enemyId: 'rift_wing', count: 30 }],
-    [{ enemyId: 'abyss_armor', count: 20 }],
-    [{ enemyId: 'chaos_spawn', count: 24 }],
-    [{ enemyId: 'reaper', count: 1 }],
-    [{ enemyId: 'lesser_demon', count: 30 }],
-    [{ enemyId: 'rift_wing', count: 30 }],
-    [{ enemyId: 'abyss_armor', count: 22 }],
-    [{ enemyId: 'rift_shade', count: 30 }],
-    [{ enemyId: 'demon_god', count: 1 }],
-  ]),
-  crossroads: Object.freeze([
-    [{ enemyId: 'rift_shade', count: 30 }],
-    [{ enemyId: 'rift_wing', count: 30 }],
-    [{ enemyId: 'abyss_armor', count: 20 }],
-    [{ enemyId: 'chaos_spawn', count: 24 }],
-    [{ enemyId: 'reaper', count: 1 }],
-    [{ enemyId: 'lesser_demon', count: 30 }],
-    [{ enemyId: 'rift_wing', count: 30 }],
-    [{ enemyId: 'abyss_armor', count: 22 }],
-    [{ enemyId: 'chaos_spawn', count: 26 }],
-    [{ enemyId: 'demon_god', count: 1 }],
-  ]),
-  long_boulevard: Object.freeze([
-    [{ enemyId: 'ruin_scarab', count: 30 }],
-    [{ enemyId: 'sand_wisp', count: 30 }],
-    [{ enemyId: 'stone_guard', count: 20 }],
-    [{ enemyId: 'regrowth_idol', count: 24 }],
-    [{ enemyId: 'flora', count: 1 }],
-    [{ enemyId: 'ember_scarab', count: 30 }],
-    [{ enemyId: 'sand_wisp', count: 30 }],
-    [{ enemyId: 'stone_guard', count: 22 }],
-    [{ enemyId: 'regrowth_idol', count: 26 }],
-    [{ enemyId: 'pharaoh', count: 1 }],
-  ]),
+  "ancient_ruins": [
+    [
+      {
+        "enemyId": "ruin_scarab",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 26
+      }
+    ],
+    [
+      {
+        "enemyId": "artificial_demon",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "ember_scarab",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "artificial_demon",
+        "count": 1
+      }
+    ]
+  ],
+  "crossroads": [
+    [
+      {
+        "enemyId": "ruin_scarab",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 20
+      }
+    ],
+    [
+      {
+        "enemyId": "lesser_demon",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "love_iris",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "ember_scarab",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "abyss_armor",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "lesser_demon",
+        "count": 26
+      }
+    ],
+    [
+      {
+        "enemyId": "love_iris",
+        "count": 1
+      }
+    ]
+  ],
+  "long_boulevard": [
+    [
+      {
+        "enemyId": "rift_shade",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_wing",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "lesser_demon",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "chaos_spawn",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "curse_iris",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_shade",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_wing",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "abyss_armor",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "lesser_demon",
+        "count": 26
+      }
+    ],
+    [
+      {
+        "enemyId": "curse_iris",
+        "count": 1
+      }
+    ]
+  ],
+  "fairy_forest": [
+    [
+      {
+        "enemyId": "ruin_scarab",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 20
+      }
+    ],
+    [
+      {
+        "enemyId": "flora",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "ember_scarab",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 26
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "flora",
+        "count": 1
+      }
+    ]
+  ],
+  "sunken_temple": [
+    [
+      {
+        "enemyId": "ruin_scarab",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "sand_wisp",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "poseidon",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_shade",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_wing",
+        "count": 28
+      }
+    ],
+    [
+      {
+        "enemyId": "stone_guard",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "regrowth_idol",
+        "count": 26
+      }
+    ],
+    [
+      {
+        "enemyId": "poseidon",
+        "count": 1
+      }
+    ]
+  ],
+  "chaos_rift": [
+    [
+      {
+        "enemyId": "rift_shade",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_wing",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "abyss_armor",
+        "count": 20
+      }
+    ],
+    [
+      {
+        "enemyId": "chaos_spawn",
+        "count": 24
+      }
+    ],
+    [
+      {
+        "enemyId": "beelzebub",
+        "count": 1
+      }
+    ],
+    [
+      {
+        "enemyId": "lesser_demon",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_wing",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "abyss_armor",
+        "count": 22
+      }
+    ],
+    [
+      {
+        "enemyId": "rift_shade",
+        "count": 30
+      }
+    ],
+    [
+      {
+        "enemyId": "beelzebub",
+        "count": 1
+      }
+    ]
+  ]
 });
 
 const EXPECTED_REWARDS = Object.freeze([1, 1, 1, 1, 3, 2, 2, 2, 2, 0]);
@@ -206,7 +532,7 @@ function frequencies(ids) {
   return counts;
 }
 
-test('all four stage paths are fixed, orthogonal, in the top 12x12 combat area, and never repeat a cell', () => {
+test('all six stage paths are fixed, orthogonal, in the top 12x12 combat area, and never repeat a cell', () => {
   for (const [stageId, expectedWaypoints] of Object.entries(EXPECTED_PATHS)) {
     const stage = STAGE_BY_ID[stageId];
     assert.deepEqual(stage.map.pathWaypoints, expectedWaypoints, `${stageId} fixed waypoints`);
@@ -282,7 +608,7 @@ test('buildHeroReport copies each hero damage and kill total', () => {
   assert.equal(report[0].kills, 3);
 });
 
-test('all 40 waves have the exact single-type enemy counts and crystal rewards', () => {
+test('all 60 waves have the exact single-type enemy counts and crystal rewards', () => {
   let checkedWaves = 0;
   for (const [stageId, expectedGroups] of Object.entries(EXPECTED_WAVES)) {
     const stage = STAGE_BY_ID[stageId];
@@ -307,5 +633,5 @@ test('all 40 waves have the exact single-type enemy counts and crystal rewards',
       checkedWaves += 1;
     });
   }
-  assert.equal(checkedWaves, 40);
+  assert.equal(checkedWaves, 60);
 });

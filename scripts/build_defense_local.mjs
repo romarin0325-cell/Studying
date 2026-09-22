@@ -8,7 +8,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 export const APP_ROOT = path.join(REPOSITORY_ROOT, "defense");
 export const DEFAULT_OUTPUT = path.join(APP_ROOT, "dist-local", "HeroCoreDefense.html");
-export const EXPECTED_RELEASE_ASSET_COUNT = 103;
+export const EXPECTED_RELEASE_ASSET_COUNT = 142;
 
 const ENTRY_PATH = "./js/main.js";
 const ASSET_MODULE_PATH = path.join(APP_ROOT, "js", "content", "assets.js");
@@ -216,7 +216,7 @@ export async function buildHeroDefenseV2Local({
   minify = true,
   requireReleaseAssets = true,
 } = {}) {
-  if (requireReleaseAssets) await prepareArt({ checkOnly: true });
+  if (requireReleaseAssets) await prepareArt();
   const [htmlTemplate, cssSources, assetData] = await Promise.all([
     readFile(path.join(APP_ROOT, "index.html"), "utf8"),
     Promise.all(STYLESHEET_PATHS.map((stylesheet) => readFile(resolveInsideApp(stylesheet), "utf8"))),

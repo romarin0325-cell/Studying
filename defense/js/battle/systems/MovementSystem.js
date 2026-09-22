@@ -24,6 +24,7 @@ export function coreDamageMultiplier(state) {
 }
 
 export function damageCore(state, amount = 1) {
+  if (state.phase === BATTLE_PHASE.DEFEAT) return 0;
   const actual = amount * coreDamageMultiplier(state);
   state.core.durability = Math.max(0, state.core.durability - actual);
   state.wave.currentCoreDamaged = state.wave.currentCoreDamaged || actual > 0;
@@ -44,8 +45,10 @@ export function damageCore(state, amount = 1) {
 export function updateMovement(state, deltaSeconds, landscape = false) {
   if (state.phase !== BATTLE_PHASE.WAVE_RUNNING) return;
   for (const enemy of state.enemies.values()) {
+    if (state.phase !== BATTLE_PHASE.WAVE_RUNNING) break;
     if (enemy.dead || enemy.reachedCore || isStunned(enemy)) continue;
-    enemy.progress += enemy.speed * movementSpeedMultiplier(enemy) * deltaSeconds;
+    if (['windup','recovery'].includes(enemy.bossState?.phase)) continue;
+    enemy.progress += enemy.speed * movementSpeedMultiplier(enemy) * (enemy.bossState?.speedMultiplier??1) * deltaSeconds;
     if (enemy.progress >= state.stage.path.length - 1) {
       enemy.progress = state.stage.path.length - 1;
       const end = state.stage.path[state.stage.path.length - 1];

@@ -5,6 +5,7 @@ import {
   buffEffects,
   increaseAuraRange,
   recomputeAuras,
+  auraConnections,
 } from '../../js/battle/systems/AuraSystem.js';
 import {
   applyStatus,
@@ -39,6 +40,23 @@ function makeHero(id, x, y, {
 const auraState = (heroes) => ({
   heroes,
   rng: { next: () => 0.99 },
+});
+
+test('innate buff UI describes actual providers, recipients and effects after moving out of range', () => {
+  const sage=makeHero('flame_sage',0,0), siren=makeHero('siren',0,1), ally=makeHero('ally',3,0), phantom=makeHero('phantom',2,0);
+  sage.definition=HERO_BY_ID.flame_sage; siren.definition=HERO_BY_ID.siren; phantom.definition=HERO_BY_ID.phantom;
+  ally.definition.name='동료';
+  const state=auraState([sage,siren,ally,phantom]);
+  recomputeAuras(state);
+  const source=auraConnections(state,sage), target=auraConnections(state,ally);
+  assert.deepEqual(source.provided[0].recipients,['flame_sage','siren','ally']);
+  assert.equal(source.provided[0].range,4);
+  assert.ok(source.provided[0].description.includes('물리 피해 +20%'));
+  assert.deepEqual(target.received.map(buff=>buff.sourceNames),[['화염의현자'],['세이렌']]);
+  assert.equal(auraConnections(state,phantom).received.length,0);
+  ally.x=10; recomputeAuras(state);
+  assert.equal(auraConnections(state,ally).received.length,0);
+  assert.ok(!auraConnections(state,sage).provided[0].recipients.includes('ally'));
 });
 
 test('aura range upgrades follow 4 -> 6 -> 8 -> 10 and cap at the final tier', () => {

@@ -17,6 +17,7 @@ export function getSkillCooldown(state, hero) {
 }
 
 function hitSkillTarget(state, hero, target, radius, metadata = {}) {
+  if (target.dead || target.reachedCore) return null;
   const skill = hero.definition.skill;
   const result = applyDirectDamage({
     state,
@@ -64,7 +65,7 @@ export function createSkillAction(state, hero, deltaSeconds, landscape = false) 
 export function resolveSkillAction(state, action) {
   const { source: hero, impacts } = action;
   const skill = hero.definition.skill;
-  state.events.push({
+  if (!action.castEmitted) state.events.push({
     type: 'skill_cast',
     actionKind: 'skill',
     attackArchetype: skill.shape,
@@ -78,13 +79,20 @@ export function resolveSkillAction(state, action) {
     y: hero.y + 0.5,
     visualOnly: true,
   });
+  if (skill.shape === 'area') {
+    const point = action.impactPoint ?? action.target;
+    state.events.push({ type: 'hit', actionKind: 'skill', attackArchetype: 'area',
+      effectPreset: 'skill_area_hit', element: hero.definition.element, vfx: skill.vfx,
+      sourceId: hero.id, sourceX: hero.x + .5, sourceY: hero.y + .5,
+      x: point.x, y: point.y, radius: skill.radius ?? 3, visualOnly: true });
+  }
   for (const { target } of impacts) {
     hitSkillTarget(
       state,
       hero,
       target,
       skill.shape === 'area' ? skill.radius ?? 3 : undefined,
-      { suppressEffect: skill.shape === 'area' && target.id !== action.target.id },
+      { suppressEffect: skill.shape === 'area' },
     );
   }
   return true;
