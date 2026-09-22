@@ -152,7 +152,7 @@
             const row = el('div', 'card-pool-card-row' + (options.selected ? ' is-selected' : '') + (card.inBase ? ' is-base' : ''));
             row.dataset.cardId = card.id;
             if (options.compact) row.classList.add('is-compact');
-            else if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
+            if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
                 row.appendChild(ImageAssets.createPortrait(card.data || { name: card.name, id: card.id }));
             } else {
                 row.appendChild(el('div', 'portrait'));

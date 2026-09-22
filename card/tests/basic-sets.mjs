@@ -41,7 +41,16 @@ try {
       document.querySelector('#card-pool-editor-body').scrollTop = 210;
     });
     const tile = page.locator('.card-pool-extra-grid .card-pool-card-row').nth(6);
+    const portrait = tile.locator('.portrait');
+    const image = portrait.locator('img');
+    await image.evaluate(img => img.decode());
+    const art = await portrait.boundingBox();
+    const tileBox = await tile.boundingBox();
+    assert.ok(art.width / tileBox.width > 0.8, 'Artwork should fill the mobile tile');
+    assert.ok(Math.abs(art.width / art.height - 3 / 5) < 0.01, 'Artwork must be 3:5');
+    assert.equal(await image.evaluate(img => img.naturalWidth > 0 && getComputedStyle(img).display !== 'none'), true);
     const toggle = tile.locator('.card-pool-row-action');
+    await toggle.scrollIntoViewIfNeeded();
     const before = await tile.boundingBox();
     const scroll = await body.evaluate(node => node.scrollTop);
     await toggle.click();

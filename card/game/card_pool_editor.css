@@ -35,6 +35,8 @@
 .card-pool-filter { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
 .card-pool-extra-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px; }
 .card-pool-card-row.is-compact { display:block; padding:5px; margin:0; }
+.card-pool-card-row.is-compact .portrait { width:100%; height:auto; aspect-ratio:3/5; margin:0 0 5px; border:0; background:var(--panel-soft,#1b384f); }
+.card-pool-card-row.is-compact .portrait img { width:100%; height:100%; object-fit:contain; }
 .is-compact .card-pool-card-text { display:flex; flex-direction:column; text-align:center; }
 .is-compact .card-pool-card-name { height:44px; padding:2px; font-size:12px; line-height:16px; }
 .is-compact .card-pool-card-meta { height:32px; font-size:10px; line-height:15px; display:flex; align-items:center; justify-content:center; }
