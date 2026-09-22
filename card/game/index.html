@@ -1386,7 +1386,7 @@
             <button id="btn-card-set-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('sets')"
                 style="padding:12px; border-color:#81c784; color:#a5d6a7; margin-bottom:8px;">
                 세트 편집<br>
-                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">시험 기능 · 선택 가능 0/5</span>
+                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">선택 가능 0/5</span>
             </button>
             <button id="btn-special-card-editor" class="menu-btn" onclick="RPG.openSpecialCardEditor()"
                 style="display:none; padding:12px; border-color:#ffca28; color:#ffe082; margin-bottom:8px;">
@@ -1412,13 +1412,13 @@
                 <button type="button" id="card-pool-editor-close" class="card-pool-icon-btn">닫기</button>
             </div>
             <p id="card-pool-editor-summary" class="card-pool-editor-summary">기존 기본덱 · 기본 45장 + 추가 0/15장</p>
-            <p class="card-pool-editor-note">다음 런에 적용됩니다. 현재 진행 중인 런은 유지됩니다. 저장하지 않으면 편집 내용이 사라질 수 있습니다.</p>
+            <p class="card-pool-editor-note">저장한 구성은 다음 런부터 적용됩니다.</p>
             <div class="card-pool-tabs" role="tablist">
                 <button type="button" role="tab" id="card-pool-tab-sets">기본 세트</button>
                 <button type="button" role="tab" id="card-pool-tab-extras">추가 카드</button>
             </div>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
-            <p id="bonus-pool-preset-status" class="card-pool-editor-note">프리셋 1</p>
+            <p id="bonus-pool-preset-status" hidden>프리셋 1</p>
             <div id="card-pool-editor-body" class="card-pool-editor-body"></div>
             <div id="bonus-pool-editor-list" class="modal-scroll" hidden></div>
             <p id="bonus-pool-editor-summary" hidden>세팅 1 · 활성 0 / 0 (최대 15)</p>
@@ -2777,7 +2777,7 @@
                 if (setBtn) {
                     const context = this.getCardPoolAvailabilityContext();
                     const usable = CardPoolRules.getSets().filter(item => item.trial && CardPoolRules.getSetAvailability(item, context).available).length;
-                    setBtn.textContent = `시험 기능 · 선택 가능 ${usable}/5`;
+                    setBtn.textContent = `선택 가능 ${usable}/5`;
                 }
             },
 

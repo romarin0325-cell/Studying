@@ -1619,120 +1619,66 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     }
 }
 
+/* Share the app palette; keep the scroll region independent of editor controls. */
 #modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor {
-  display: flex;
-  flex-direction: column;
-  width: min(720px, calc(100vw - 16px));
-  max-width: 720px;
-  height: min(100vh, 100dvh);
-  max-height: min(100vh, 100dvh);
-  margin: 0 auto;
-  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-  box-sizing: border-box;
-  min-height: 0;
+  display:flex; flex-direction:column; width:min(720px,100%); max-width:720px;
+  height:calc(100dvh - 28px); max-height:calc(100dvh - 28px); min-height:0;
+  margin:0 auto; padding:16px 14px max(12px,env(safe-area-inset-bottom));
+  box-sizing:border-box; overflow:hidden; color:var(--paper,#edf6ff);
 }
-@media (max-width: 320px) {
-  #modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor {
-    width: calc(100vw - 16px);
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-}
-.card-pool-editor-header,
-.card-pool-editor-footer,
-.card-pool-tabs {
-  flex-shrink: 0;
-}
-.card-pool-editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.card-pool-editor-header h3 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-.card-pool-editor-note,
-.card-pool-editor-summary {
-  margin: 6px 0;
-  font-size: 13px;
-  line-height: 1.4;
-}
-.card-pool-tabs {
-  display: flex;
-  gap: 8px;
-  margin: 8px 0;
-}
-.card-pool-tabs button {
-  flex: 1;
-  min-height: 44px;
-}
-.card-pool-editor-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.card-pool-editor-footer {
-  display: flex;
-  gap: 8px;
-  padding-top: 8px;
-}
-.card-pool-editor-footer button {
-  flex: 1;
-  min-height: 48px;
-}
-.card-pool-icon-btn,
-.card-pool-row-action,
-.card-pool-filter button {
-  min-width: 44px;
-  min-height: 44px;
-}
-.card-pool-set-row,
-.card-pool-card-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  padding: 10px;
-  margin-bottom: 8px;
-  box-sizing: border-box;
-  border: 1px solid var(--line, #555);
-  border-radius: 12px;
-}
-.card-pool-card-row {
-  grid-template-columns: 60px minmax(0, 1fr);
-  align-items: center;
-}
-.card-pool-card-row .portrait {
-  width: 60px;
-  height: 100px;
-  flex-shrink: 0;
-}
-.card-pool-card-row .portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.card-pool-card-text { min-width: 0; }
-.card-pool-card-name { font-size: 16px; line-height: 22px; font-weight: 700; overflow-wrap: anywhere; }
-.card-pool-card-meta,
-.card-pool-card-status { font-size: 13px; line-height: 18px; }
-.card-pool-set-name { font-size: 16px; font-weight: 700; }
-.card-pool-set-axis { font-size: 13px; }
-.card-pool-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.card-pool-search { width: 100%; min-height: 44px; box-sizing: border-box; margin-bottom: 8px; }
-.card-pool-filter { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.card-pool-card-row.is-selected { outline: 2px solid var(--sky, #4fc3f7); }
-.card-pool-card-row.is-base { opacity: 1; }
-@media (max-width: 320px) {
-  .card-pool-card-row { grid-template-columns: 48px minmax(0, 1fr); }
-  .card-pool-card-row .portrait { width: 48px; height: 80px; }
-}
-@media (min-width: 768px) {
-  .card-pool-card-row { grid-template-columns: 72px minmax(0, 1fr); }
-  .card-pool-card-row .portrait { width: 72px; height: 120px; }
-  .card-pool-extra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card-pool-editor-header,.card-pool-editor-footer,.card-pool-tabs { flex-shrink:0; }
+.card-pool-editor-header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.card-pool-editor-header h3 { margin:0; font-size:20px; }
+.card-pool-editor-summary { margin:8px 0 2px; font-size:13px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.card-pool-editor-note { margin:2px 0 8px; color:var(--muted,#a9becd); font-size:11px; line-height:1.5; }
+.card-pool-tabs { display:flex; gap:6px; margin:4px 0 10px; }
+.card-pool-tabs button { flex:1; min-height:44px; }
+.card-pool-editor-body { flex:1 1 0; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; overflow-anchor:none; scrollbar-width:thin; padding:2px; }
+.card-pool-editor-footer { display:flex; gap:8px; padding-top:10px; }
+.card-pool-editor-footer button { flex:1; min-height:44px; margin:0; }
+.card-pool-icon-btn,.card-pool-row-action,.card-pool-filter button { min-width:44px; min-height:44px; padding:6px 10px; }
+.card-pool-set-row { padding:14px; margin-bottom:10px; border:1px solid var(--line,#456); background:var(--panel,#142d42); border-radius:14px; }
+.card-pool-set-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+.card-pool-set-name { font-size:16px; font-weight:600; }
+.card-pool-set-status { color:var(--muted,#a9becd); font-size:11px; white-space:nowrap; }
+.card-pool-actions { display:flex; gap:6px; }
+.card-pool-set-row .card-pool-actions>:first-child { flex:1; text-align:left; }
+.card-pool-set-row .card-pool-actions>:last-child { min-width:72px; }
+.card-pool-detail-title { font-size:19px; margin:14px 0; }
+.card-pool-card-row { display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:12px; padding:10px; margin-bottom:8px; border:1px solid var(--line,#456); border-radius:12px; background:var(--panel,#142d42); box-sizing:border-box; }
+.card-pool-card-row .portrait { width:48px; height:80px; margin:0; border-radius:6px; }
+.card-pool-card-row .portrait img { width:100%; height:100%; object-fit:contain; }
+.card-pool-card-text { min-width:0; }
+.card-pool-card-name { font-size:14px; line-height:20px; font-weight:600; overflow-wrap:anywhere; }
+.card-pool-card-meta,.card-pool-card-status { font-size:11px; line-height:17px; color:var(--muted,#a9becd); }
+.card-pool-card-status { margin-top:5px; color:var(--sky,#a5dfff); }
+.card-pool-search { width:100%; min-height:42px; box-sizing:border-box; margin-bottom:6px; }
+.card-pool-filter { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+.card-pool-extra-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px; }
+.card-pool-card-row.is-compact { display:block; padding:5px; margin:0; }
+.card-pool-card-row.is-compact .portrait { width:100%; height:auto; aspect-ratio:3/5; margin:0 0 5px; border:0; background:var(--panel-soft,#1b384f); }
+.card-pool-card-row.is-compact .portrait img { width:100%; height:100%; object-fit:contain; }
+.is-compact .card-pool-card-text { display:flex; flex-direction:column; text-align:center; }
+.is-compact .card-pool-card-name { height:44px; padding:2px; font-size:12px; line-height:16px; }
+.is-compact .card-pool-card-meta { height:32px; font-size:10px; line-height:15px; display:flex; align-items:center; justify-content:center; }
+.is-compact .card-pool-row-action,.card-pool-base-label { width:100%; height:44px; flex:none; font-size:12px; }
+.card-pool-base-label { display:grid; place-items:center; color:var(--muted,#a9becd); }
+.card-pool-empty { padding:24px 12px; text-align:center; color:var(--muted,#a9becd); }
+#modal-bonus-pool-editor .is-selected { border-color:var(--sky,#a5dfff); box-shadow:inset 0 0 0 1px var(--sky,#a5dfff); }
+#modal-bonus-pool-editor [aria-selected=true],
+#modal-bonus-pool-editor [aria-pressed=true],
+#modal-bonus-pool-editor .bonus-preset-btn.is-active { background:var(--panel-soft,#1b384f)!important; color:var(--sky-bright,#cceeff)!important; border-color:var(--sky,#a5dfff)!important; box-shadow:inset 0 -2px var(--sky,#a5dfff); }
+#modal-bonus-pool-editor .card-pool-card-name { background:transparent!important; color:var(--paper,#edf6ff)!important; border:0!important; box-shadow:none; }
+#modal-bonus-pool-editor .bonus-preset-row { flex-shrink:0; gap:6px; margin-bottom:8px; }
+#modal-bonus-pool-editor .bonus-preset-btn { flex-direction:row; gap:8px; padding:6px; }
+#modal-bonus-pool-editor .bonus-preset-btn span { color:var(--muted,#a9becd); font-variant-numeric:tabular-nums; }
+#modal-bonus-pool-editor[data-editor-tab=sets] #bonus-pool-preset-list { display:none; }
+@media(min-width:600px) { .card-pool-extra-grid { grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; } }
+@media(max-width:360px) {
+  #modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor { padding:12px 8px; }
+  .card-pool-editor-summary { font-size:11px; }
+  .card-pool-set-row { padding:10px; }
+  .is-compact .card-pool-card-name { font-size:11px; }
 }
 
 /* ASTRA: sky, paper, ink. Shared mechanics use the legacy layout rules above;
@@ -2724,7 +2670,7 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
             <button id="btn-card-set-editor" class="menu-btn" onclick="RPG.openCardPoolEditor('sets')"
                 style="padding:12px; border-color:#81c784; color:#a5d6a7; margin-bottom:8px;">
                 세트 편집<br>
-                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">시험 기능 · 선택 가능 0/5</span>
+                <span id="btn-card-set-editor-sub" style="font-size:0.8rem; color:#c8e6c9;">선택 가능 0/5</span>
             </button>
             <button id="btn-special-card-editor" class="menu-btn" onclick="RPG.openSpecialCardEditor()"
                 style="display:none; padding:12px; border-color:#ffca28; color:#ffe082; margin-bottom:8px;">
@@ -2750,13 +2696,13 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
                 <button type="button" id="card-pool-editor-close" class="card-pool-icon-btn">닫기</button>
             </div>
             <p id="card-pool-editor-summary" class="card-pool-editor-summary">기존 기본덱 · 기본 45장 + 추가 0/15장</p>
-            <p class="card-pool-editor-note">다음 런에 적용됩니다. 현재 진행 중인 런은 유지됩니다. 저장하지 않으면 편집 내용이 사라질 수 있습니다.</p>
+            <p class="card-pool-editor-note">저장한 구성은 다음 런부터 적용됩니다.</p>
             <div class="card-pool-tabs" role="tablist">
                 <button type="button" role="tab" id="card-pool-tab-sets">기본 세트</button>
                 <button type="button" role="tab" id="card-pool-tab-extras">추가 카드</button>
             </div>
             <div id="bonus-pool-preset-list" class="bonus-preset-row"></div>
-            <p id="bonus-pool-preset-status" class="card-pool-editor-note">프리셋 1</p>
+            <p id="bonus-pool-preset-status" hidden>프리셋 1</p>
             <div id="card-pool-editor-body" class="card-pool-editor-body"></div>
             <div id="bonus-pool-editor-list" class="modal-scroll" hidden></div>
             <p id="bonus-pool-editor-summary" hidden>세팅 1 · 활성 0 / 0 (최대 15)</p>
@@ -4661,13 +4607,13 @@ const BASIC_CARD_SETS = Object.freeze([
     }),
     Object.freeze({
         id: 'ember_relay',
-        revision: 1,
+        revision: 2,
         name: '홍련의 계승',
         mainAxis: '작열의 유지와 소모',
         subAxes: Object.freeze(['드래곤', '사망 시 계승', '태양·물리/마법 전환']),
         trial: true,
         cardsByGrade: Object.freeze({
-            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'flare_ribbon', 'executor', 'werebear']),
+            normal: Object.freeze(['kobold', 'mimic', 'marshmallow', 'jack_o_lantern', 'desert_fox', 'candy_boy', 'sunflower', 'shooting_star_boy', 'executor', 'werebear']),
             rare: Object.freeze(['baby_dragon', 'hellhound', 'mirage', 'light_elemental', 'void_knight', 'sphinx', 'forget_me_not', 'chaos_mage', 'siren', 'cream_maid']),
             epic: Object.freeze(['red_dragon', 'flame_sage', 'dragon_miko', 'ash', 'sun_priestess', 'mawang', 'storm_sage', 'pudding_princess', 'lightning_sage', 'shadow_stalker']),
             legend: Object.freeze(['gold_dragon', 'zeke', 'phoenix', 'cherry_prince', 'ancient_dragon', 'supernova', 'sakura', 'cinderella', 'sun_moon_sword_maiden', 'queen'])
@@ -4689,21 +4635,21 @@ const BASIC_CARD_SETS = Object.freeze([
     }),
     Object.freeze({
         id: 'starlit_garden',
-        revision: 1,
+        revision: 2,
         name: '별빛 정원',
         mainAxis: '필드버프의 축적·유지·소모',
         subAxes: Object.freeze(['자연/물', '디저트', '저등급 소비형 피니셔']),
         trial: true,
         cardsByGrade: Object.freeze({
-            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'flare_ribbon', 'fairy']),
-            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'entropy', 'fenrir', 'prism_twin']),
-            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'miracle_larva', 'fairy_queen', 'avalanche_maid']),
+            normal: Object.freeze(['kobold', 'mimic', 'candy_boy', 'marshmallow', 'sugar_powder', 'sunflower', 'slime', 'mummy', 'joker', 'fairy']),
+            rare: Object.freeze(['aurora', 'cream_maid', 'cotton_candy_sheep', 'siren', 'light_elemental', 'forget_me_not', 'golem', 'sphinx', 'fenrir', 'prism_twin']),
+            epic: Object.freeze(['unicorn', 'pudding_princess', 'storm_sage', 'mushroom_king', 'sun_priestess', 'flame_sage', 'santa', 'astrologer', 'fairy_queen', 'avalanche_maid']),
             legend: Object.freeze(['queen', 'rumi', 'world_tree', 'jasmine', 'deep_lord', 'victoria', 'dainichi_nyorai', 'sun_moon_sword_maiden', 'sylphid', 'zeke'])
         })
     }),
     Object.freeze({
         id: 'midnight_tide',
-        revision: 1,
+        revision: 2,
         name: '심야의 조류',
         mainAxis: '방어로 시간을 확보하는 지연전',
         subAxes: Object.freeze(['물/어둠', '기절·회피', '주기 턴 보상']),
@@ -4711,13 +4657,13 @@ const BASIC_CARD_SETS = Object.freeze([
         cardsByGrade: Object.freeze({
             normal: Object.freeze(['kobold', 'mimic', 'sunflower', 'snow_penguin', 'shadow_cat', 'vampire', 'slime', 'snow_rabbit', 'silver_rabbit', 'marshmallow']),
             rare: Object.freeze(['aurora', 'siren', 'fenrir', 'silent_librarian', 'legendary_captain', 'cotton_candy_sheep', 'prism_twin', 'night_rabbit', 'light_elemental', 'sphinx']),
-            epic: Object.freeze(['priest_of_end', 'guardian', 'great_detective', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
+            epic: Object.freeze(['priest_of_end', 'red_dragon', 'santa', 'crystal_dancer', 'jellyfish_princess', 'fairy_queen', 'avalanche_maid', 'pudding_princess', 'sun_priestess', 'shadow_stalker']),
             legend: Object.freeze(['time_ruler', 'phantom', 'venom', 'perfect_aurora', 'cure_master', 'deep_lord', 'frozen_witch', 'rumi', 'world_tree', 'doom_luther'])
         })
     }),
     Object.freeze({
         id: 'arena_company',
-        revision: 1,
+        revision: 2,
         name: '투기장의 연맹',
         mainAxis: '평타·마나 절약',
         subAxes: Object.freeze(['아레나', '치명타·방어 저하', '배치·동일등급']),
@@ -4726,7 +4672,7 @@ const BASIC_CARD_SETS = Object.freeze([
             normal: Object.freeze(['kobold', 'mimic', 'executor', 'discipline_captain', 'werebear', 'shadow_cat', 'black_swan', 'candy_boy', 'slime', 'mummy']),
             rare: Object.freeze(['baby_dragon', 'ember_tiger', 'prism_twin', 'legendary_captain', 'golem', 'void_knight', 'fenrir', 'hellhound', 'cream_maid', 'forget_me_not']),
             epic: Object.freeze(['paladin', 'guardian', 'eclipse_queen', 'crystal_dancer', 'red_dragon', 'flame_sage', 'pudding_princess', 'gumiho', 'mushroom_king', 'unicorn']),
-            legend: Object.freeze(['doom_luther', 'cherry_prince', 'phoenix', 'cure_master', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
+            legend: Object.freeze(['ancient_soul', 'cherry_prince', 'phoenix', 'luna', 'gray', 'sylphid', 'gold_dragon', 'zeke', 'world_tree', 'red_moon'])
         })
     })
 ]);
@@ -27726,7 +27672,7 @@ const BattleRuntime = {
         const root = document.getElementById('modal-bonus-pool-editor');
         if (root && typeof CardPoolView !== 'undefined') {
             CardPoolView.bindChrome(root, {
-                onTab: next => { this._cardPoolEditorTab = next; this.renderCardPoolEditor(); },
+                onTab: next => { this._cardPoolEditorTab = next; this._cardPoolEditorFilter = 'all'; this._cardPoolEditorDetailSetId = null; this.renderCardPoolEditor(); },
                 onCancel: () => this.closeCardPoolEditor(true),
                 onClose: () => this.closeCardPoolEditor(true),
                 onSave: () => this.commitCardPoolEditorDraft()
@@ -27819,6 +27765,9 @@ const BattleRuntime = {
                 subAxes: item.subAxes || [],
                 compositionText: item.id === 'classic' ? ('기존 기본덱 ' + CardPoolRules.getClassicBaseCardIds(context.catalogue).length + '장') : composition,
                 statusText: status,
+                selected: item.id === draft.selectedSetId,
+                readyCount: availability.readyCount,
+                total: availability.total,
                 canUse: availability.available && !availability.definitionError
             };
         });
@@ -27845,6 +27794,7 @@ const BattleRuntime = {
         const usable = setModels.filter(item => item.trial && item.canUse).length;
         const model = {
             tab: this._cardPoolEditorTab,
+            filter: this._cardPoolEditorFilter,
             summaryText: set.name + ' · 기본 ' + baseIds.length + '장 + 추가 ' + extras.length + '/15장',
             sets: setModels,
             extraCards,
@@ -27872,7 +27822,7 @@ const BattleRuntime = {
             }).filter(Boolean);
         }
         const sub = document.getElementById('btn-card-set-editor-sub');
-        if (sub) sub.textContent = '시험 기능 · 선택 가능 ' + usable + '/5';
+        if (sub) sub.textContent = '선택 가능 ' + usable + '/5';
         CardPoolView.render(root, model, {
             onSelectSet: id => {
                 const availability = CardPoolRules.getSetAvailability(CardPoolRules.getSet(id), context);
@@ -27886,6 +27836,7 @@ const BattleRuntime = {
                 this._cardPoolEditorFilter = locked ? 'locked' : 'all';
                 this.renderCardPoolEditor();
             },
+            onCloseSetDetail: () => { this._cardPoolEditorDetailSetId = null; this.renderCardPoolEditor(); },
             onSetFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
             onSearch: value => { this._cardPoolEditorSearch = value; this.renderCardPoolEditor(); },
             onExtraFilter: key => { this._cardPoolEditorFilter = key; this.renderCardPoolEditor(); },
@@ -29146,7 +29097,8 @@ const BattleRuntime = {
             const body = root.querySelector('#card-pool-editor-body');
             const setsTab = root.querySelector('#card-pool-tab-sets');
             const extrasTab = root.querySelector('#card-pool-tab-extras');
-            if (title) title.textContent = '획득 카드풀 편집';
+            if (title) title.textContent = model.tab === 'sets' ? '세트 편집' : '덱 편집';
+            root.dataset.editorTab = model.tab;
             if (summary) summary.textContent = model.summaryText || '';
             if (setsTab) {
                 setsTab.setAttribute('aria-selected', model.tab === 'sets' ? 'true' : 'false');
@@ -29155,45 +29107,73 @@ const BattleRuntime = {
                 extrasTab.setAttribute('aria-selected', model.tab === 'extras' ? 'true' : 'false');
             }
             if (!body) return;
+            const viewKey = model.tab + ':' + (model.detailSet ? model.detailSet.id : '') + ':' + model.filter;
+            const scrollTop = body.dataset.viewKey === viewKey ? body.scrollTop : 0;
+            const searchFocused = document.activeElement === body.querySelector('.card-pool-search');
+            const focusedCard = document.activeElement?.closest('[data-card-id]')?.dataset.cardId;
+            const focusedClass = document.activeElement?.className;
+            const selection = searchFocused ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
             body.replaceChildren();
             if (model.tab === 'sets') this.renderSets(body, model, actions);
             else this.renderExtras(body, model, actions);
+            body.dataset.viewKey = viewKey;
+            body.scrollTop = scrollTop;
+            if (searchFocused) {
+                const search = body.querySelector('.card-pool-search');
+                search?.focus({ preventScroll: true });
+                if (search && selection) search.setSelectionRange(...selection);
+            } else if (focusedCard) {
+                const row = [...body.querySelectorAll('[data-card-id]')].find(item => item.dataset.cardId === focusedCard);
+                const button = row && [...row.querySelectorAll('button')].find(item => item.className === focusedClass);
+                button?.focus({ preventScroll: true });
+            }
         },
 
         renderSets(body, model, actions) {
+            if (model.detailSet) {
+                this.renderSetDetail(body, model, actions);
+                return;
+            }
             (model.sets || []).forEach(set => {
-                const row = el('div', 'card-pool-set-row');
-                row.appendChild(el('div', 'card-pool-set-name', set.name + (set.trial ? ' · 시험 기능' : '')));
-                row.appendChild(el('div', 'card-pool-set-axis', [set.mainAxis].concat(set.subAxes || []).join(' · ')));
-                row.appendChild(el('div', 'card-pool-card-meta', set.compositionText));
-                row.appendChild(el('div', 'card-pool-card-status', set.statusText));
+                const row = el('div', 'card-pool-set-row' + (set.selected ? ' is-selected' : ''));
+                const heading = el('div', 'card-pool-set-heading');
+                heading.appendChild(el('div', 'card-pool-set-name', set.name));
+                heading.appendChild(el('span', 'card-pool-set-status', set.statusText));
+                row.appendChild(heading);
                 const actionsRow = el('div', 'card-pool-actions');
-                const detail = el('button', 'card-pool-row-action', '구성·해금 조건');
+                const detail = el('button', 'card-pool-row-action', '구성 · 해금 ' + set.readyCount + '/' + set.total);
                 detail.type = 'button';
                 detail.addEventListener('click', () => actions.onOpenSetDetail(set.id));
                 actionsRow.appendChild(detail);
-                const use = el('button', 'card-pool-row-action', set.canUse ? '이 세트 사용' : '선택 불가');
+                const use = el('button', 'card-pool-row-action', set.selected ? '선택됨' : (set.canUse ? '사용' : '미해금'));
                 use.type = 'button';
+                use.setAttribute('aria-pressed', String(set.selected));
                 use.disabled = !set.canUse;
                 if (set.canUse) use.addEventListener('click', () => actions.onSelectSet(set.id));
                 actionsRow.appendChild(use);
                 row.appendChild(actionsRow);
                 body.appendChild(row);
             });
-            if (model.detailSet) this.renderSetDetail(body, model, actions);
         },
 
         renderSetDetail(body, model, actions) {
             const wrap = el('div', 'card-pool-set-detail');
+            const back = el('button', 'card-pool-row-action', '‹ 세트 목록');
+            back.type = 'button';
+            back.addEventListener('click', actions.onCloseSetDetail);
+            wrap.appendChild(back);
+            wrap.appendChild(el('h4', 'card-pool-detail-title', model.detailSet.name));
             const filters = el('div', 'card-pool-filter');
             ['all', 'locked', 'normal', 'rare', 'epic', 'legend'].forEach(key => {
                 const labels = { all: '전체', locked: '미해금만', normal: '일반', rare: '레어', epic: '에픽', legend: '전설' };
                 const btn = el('button', '', labels[key]);
                 btn.type = 'button';
+                btn.setAttribute('aria-pressed', String(model.filter === key));
                 btn.addEventListener('click', () => actions.onSetFilter(key));
                 filters.appendChild(btn);
             });
             wrap.appendChild(filters);
+            if (!model.detailCards.length) wrap.appendChild(el('p', 'card-pool-empty', model.filter === 'locked' ? '모든 카드를 해금했습니다.' : '해당 카드가 없습니다.'));
             (model.detailCards || []).forEach(card => {
                 wrap.appendChild(this.cardRow(card, {
                     onDetail: () => actions.onCardDetail(card.id)
@@ -29206,13 +29186,16 @@ const BattleRuntime = {
             const search = el('input', 'card-pool-search');
             search.type = 'search';
             search.placeholder = '카드 검색';
+            search.setAttribute('aria-label', '카드 검색');
             search.value = model.search || '';
-            search.addEventListener('input', () => actions.onSearch(search.value));
+            search.addEventListener('input', event => { if (!event.isComposing) actions.onSearch(search.value); });
+            search.addEventListener('compositionend', () => actions.onSearch(search.value));
             body.appendChild(search);
             const filters = el('div', 'card-pool-filter');
-            [{ id: 'all', label: '전체 후보' }, { id: 'selected', label: '선택됨' }, { id: 'base', label: '기본 포함 카드 보기' }].forEach(item => {
+            [{ id: 'all', label: '전체' }, { id: 'selected', label: '선택됨' }, { id: 'base', label: '기본 포함' }].forEach(item => {
                 const btn = el('button', '', item.label);
                 btn.type = 'button';
+                btn.setAttribute('aria-pressed', String(model.filter === item.id));
                 btn.addEventListener('click', () => actions.onExtraFilter(item.id));
                 filters.appendChild(btn);
             });
@@ -29231,15 +29214,19 @@ const BattleRuntime = {
             (model.extraCards || []).forEach(card => {
                 grid.appendChild(this.cardRow(card, {
                     onDetail: () => actions.onCardDetail(card.id),
-                    onToggle: card.canToggle ? () => actions.onToggleExtra(card.id) : null,
-                    selected: card.selected
+                    onToggle: !card.inBase ? () => actions.onToggleExtra(card.id) : null,
+                    selected: card.selected,
+                    compact: true
                 }));
             });
             body.appendChild(grid);
+            if (!model.extraCards.length) body.appendChild(el('p', 'card-pool-empty', '해당 카드가 없습니다.'));
         },
 
         cardRow(card, options) {
             const row = el('div', 'card-pool-card-row' + (options.selected ? ' is-selected' : '') + (card.inBase ? ' is-base' : ''));
+            row.dataset.cardId = card.id;
+            if (options.compact) row.classList.add('is-compact');
             if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
                 row.appendChild(ImageAssets.createPortrait(card.data || { name: card.name, id: card.id }));
             } else {
@@ -29251,14 +29238,17 @@ const BattleRuntime = {
             nameBtn.addEventListener('click', options.onDetail);
             text.appendChild(nameBtn);
             text.appendChild(el('div', 'card-pool-card-meta', card.metaText));
-            text.appendChild(el('div', 'card-pool-card-status', card.statusText));
+            if (!options.compact) text.appendChild(el('div', 'card-pool-card-status', card.statusText));
             if (options.onToggle) {
                 const toggle = el('button', 'card-pool-row-action', card.selected ? '제외' : '추가');
                 toggle.type = 'button';
+                toggle.disabled = !card.canToggle;
+                toggle.setAttribute('aria-pressed', String(card.selected));
+                toggle.setAttribute('aria-label', card.name + (card.selected ? ' 제외' : ' 추가'));
                 toggle.addEventListener('click', options.onToggle);
                 text.appendChild(toggle);
-            } else if (card.inBase) {
-                text.appendChild(el('div', 'card-pool-card-status', '기본 포함 · 추가 슬롯 미사용'));
+            } else if (options.compact && card.inBase) {
+                text.appendChild(el('div', 'card-pool-base-label', '기본 포함'));
             }
             row.appendChild(text);
             return row;
@@ -31740,7 +31730,7 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
                 if (setBtn) {
                     const context = this.getCardPoolAvailabilityContext();
                     const usable = CardPoolRules.getSets().filter(item => item.trial && CardPoolRules.getSetAvailability(item, context).available).length;
-                    setBtn.textContent = `시험 기능 · 선택 가능 ${usable}/5`;
+                    setBtn.textContent = `선택 가능 ${usable}/5`;
                 }
             },
 
