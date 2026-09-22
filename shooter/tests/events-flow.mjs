@@ -57,7 +57,12 @@ try {
   // Production-scale contact sheet: native images avoid a file:// canvas export while preserving Renderer.draw scales and offsets.
   await page.evaluate(()=>{const {art,BOSS_PRESENTATION,STAGES}=__events;document.body.innerHTML='<main id="boss-style-comparison" style="display:grid;grid-template-columns:repeat(6,300px);grid-template-rows:repeat(2,500px);width:1800px;background:#15243c;color:#e6efff;font:17px sans-serif"></main>';for(let i=0;i<12;i++){const p=BOSS_PRESENTATION[i],cell=document.createElement('section');cell.style='position:relative;border-top:1px solid #7ca5c333;text-align:center';cell.innerHTML=`<img src="${art.urls.bosses[i]}" style="position:absolute;top:${100+p.offsetY*1.2}px;left:${150-p.size*.6}px;width:${p.size*1.2}px;height:${p.size*1.2}px;object-fit:contain"><b style="position:absolute;top:410px;left:0;width:100%">${STAGES[i].boss}</b><small style="position:absolute;top:438px;left:0;width:100%;color:#acbed5">${i<6?'기존 기준':'새 에셋'} · ${p.size}px</small>`;document.querySelector('#boss-style-comparison').append(cell);}});
   await page.setViewportSize({width:1800,height:1000});await page.locator('#boss-style-comparison img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())));await page.screenshot({path:fileURLToPath(new URL('artifacts/boss-style-comparison.png',root))});
-  const relic=await page.evaluate(()=>__events.art.urls.relics[34]);await fs.copyFile(new URL(relic,new URL('dist/',root)),new URL('artifacts/miracle-centered.webp',root));
+  const relic=await page.evaluate(()=>__events.art.urls.relics[34]);
+  if (relic.startsWith('data:')) {
+    await fs.writeFile(new URL('artifacts/miracle-centered.webp',root), Buffer.from(relic.split(',')[1], 'base64'));
+  } else {
+    await fs.copyFile(new URL(relic,new URL('dist/',root)),new URL('artifacts/miracle-centered.webp',root));
+  }
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);checks.push('Weekly rollover, persisted rewards, centered random sigil, twelve-boss production-scale comparison and miracle crop captured offline');
   await fs.writeFile(new URL('artifacts/events-flow.json',root),JSON.stringify({checks,errors,network},null,2));console.log(JSON.stringify({checks,errors,network},null,2));
 } finally {await browser.close();}

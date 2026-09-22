@@ -198,7 +198,7 @@ async function qualityProbe() {
   return probes;
 }
 
-export async function prepareAssets({ outputDirectory = path.join(root, 'dist', 'assets') } = {}) {
+export async function prepareAssets({ outputDirectory = path.join(root, '.build-assets'), writeReport = false } = {}) {
   const inputNames = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
   const source = await Promise.all(inputNames.map(async name => ({ file: path.basename(imagePath(name)), bytes: (await fs.stat(imagePath(name))).size })));
   await fs.rm(outputDirectory, { recursive: true, force: true });
@@ -219,11 +219,15 @@ export async function prepareAssets({ outputDirectory = path.join(root, 'dist', 
     reduction: { bytes: sourceBytes - outputBytes, percent: Number(((1 - outputBytes / sourceBytes) * 100).toFixed(2)) },
     qualityProbes: await qualityProbe()
   };
-  await fs.writeFile(path.join(path.dirname(outputDirectory), 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  if (writeReport) {
+    const reportDirectory = path.join(root, 'artifacts');
+    await fs.mkdir(reportDirectory, { recursive: true });
+    await fs.writeFile(path.join(reportDirectory, 'asset-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  }
   return report;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const report = await prepareAssets();
+  const report = await prepareAssets({ writeReport: true });
   console.log(JSON.stringify({ sourceBytes: report.source.bytes, outputBytes: report.output.bytes, reductionPercent: report.reduction.percent, files: report.output.fileCount }, null, 2));
 }

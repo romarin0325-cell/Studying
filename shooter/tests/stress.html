@@ -4,8 +4,13 @@
 import {Game} from '../engine.js';
 import {Renderer,loadArt} from '../render.js';
 import {LIMITS} from '../content.js';
-// Preprocessed release assets are adjacent to the build directory.
-globalThis.ASTRAL_ASSET_ROOT='../dist/assets';
+// Reuse the exact embedded WebP map from the single-file release so this fixture
+// exercises the same image payload without depending on a deleted dist/assets folder.
+const release=await fetch('../dist/AstralBloom.html').then(response=>{if(!response.ok)throw new Error(`Release HTML unavailable: ${response.status}`);return response.text();});
+const embedded=release.match(/globalThis\\.ASTRAL_EMBEDDED_ASSETS=(\\{.*?\\});\\n/);
+if(!embedded)throw new Error('Embedded asset map not found in release HTML');
+globalThis.ASTRAL_EMBEDDED_ASSETS=JSON.parse(embedded[1]);
+globalThis.ASTRAL_ASSET_ROOT='assets';
 const art=await loadArt(),renderer=new Renderer(document.getElementById('world'),art);
 const params=new URLSearchParams(location.search),hero=Number(params.get('hero')||7);
 const g=new Game({hero,weapon:1,stage:5,artifacts:['leaf','mirror','core'],height:renderer.height});
