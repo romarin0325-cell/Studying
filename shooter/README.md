@@ -106,7 +106,7 @@ node shooter/tests/patch-flow.mjs
 
 ### 커밋된 에셋 캐시
 
-`generated-assets/`에는 원본 아틀라스에서 생성한 94개 WebP와 `manifest.json`을 함께 커밋합니다. 매 빌드는 원본 이미지 SHA-256, 전처리 스크립트 SHA-256, 각 WebP의 SHA-256·크기를 확인합니다. 모두 일치하면 `sharp`를 불러오거나 이미지를 다시 가공하지 않고 캐시를 HTML에 바로 포함합니다.
+`generated-assets/`에는 원본 아틀라스에서 생성한 94개 WebP와 `manifest.json`을 함께 커밋합니다. 매 빌드는 원본 이미지 SHA-256, 전처리 스크립트 SHA-256, 각 WebP의 SHA-256·크기를 확인합니다. 전처리 스크립트의 줄바꿈은 LF로 정규화해 운영체제별 체크아웃에서도 같은 해시를 사용합니다. 모두 일치하면 `sharp`를 불러오거나 이미지를 다시 가공하지 않고 캐시를 HTML에 바로 포함합니다.
 
 `assets/`의 원본 이미지 또는 `prepare-assets.mjs`의 전처리 규칙을 바꾼 PR에서는 `npm run build --prefix shooter`를 한 번 실행하고 변경된 `generated-assets/`와 `dist/AstralBloom.html`을 함께 커밋하세요. 캐시가 없거나 손상됐거나 해시가 다르면 빌드가 자동으로 94개 WebP를 다시 생성합니다.
 

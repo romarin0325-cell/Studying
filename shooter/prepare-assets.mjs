@@ -247,17 +247,19 @@ async function qualityProbe() {
   return probes;
 }
 
-export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeReport: shouldWriteReport = false } = {}) {
+export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeReport: shouldWriteReport = false, requireCache = false } = {}) {
   const cacheDirectory = path.resolve(outputDirectory);
   if (!cacheDirectory.startsWith(`${root}${path.sep}`)) throw new Error(`Asset cache must stay inside shooter/: ${cacheDirectory}`);
   const source = await sourceInventory();
-  const fingerprint = { sourceHash: sha256(JSON.stringify(source)), processorHash: sha256(await fs.readFile(scriptPath)) };
+  const processorSource = (await fs.readFile(scriptPath, 'utf8')).replace(/\r\n/g, '\n');
+  const fingerprint = { sourceHash: sha256(JSON.stringify(source)), processorHash: sha256(processorSource) };
   const cached = await readCachedReport(cacheDirectory, fingerprint);
   if (cached) {
     const report = { ...cached, cache: { hit: true, directory: path.relative(root, cacheDirectory).replaceAll('\\', '/') } };
     if (shouldWriteReport) await writeReport(report);
     return report;
   }
+  if (requireCache) throw new Error('Committed WebP cache is missing or stale; run npm run build --prefix shooter and commit generated-assets');
   await fs.rm(cacheDirectory, { recursive: true, force: true });
   const outputs = [];
   for (const name of ['heroes', 'bosses', 'enemies', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'astea', ...EVENT_ASSETS]) await processSpriteSheet(name, cacheDirectory, outputs);
