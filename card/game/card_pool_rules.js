@@ -315,14 +315,17 @@
 
         createEmptyConfig() {
             const profiles = {};
+            const setRevisions = {};
             ALLOWED_SET_IDS.forEach(id => {
                 profiles[id] = emptyProfile();
+                setRevisions[id] = this.getSet(id)?.revision || 1;
             });
             return {
                 version: 1,
                 revision: 1,
                 selectedSetId: 'classic',
-                profiles
+                profiles,
+                setRevisions
             };
         },
 
@@ -350,10 +353,24 @@
             if (ALLOWED_SET_IDS.indexOf(config.selectedSetId) >= 0) next.selectedSetId = config.selectedSetId;
             ALLOWED_SET_IDS.forEach(id => {
                 next.profiles[id] = this.cloneProfile(config.profiles && config.profiles[id]);
+                // Older saves have no per-set revision; they predate the roster changes.
+                next.setRevisions[id] = Number.isInteger(config.setRevisions?.[id])
+                    ? config.setRevisions[id] : 1;
             });
             next.version = 1;
             next.revision = Number.isInteger(config.revision) ? config.revision : 1;
             return next;
+        },
+
+        migrateSetRevisions(config, catalogue) {
+            this.getSets().forEach(set => {
+                if ((config.setRevisions[set.id] || 1) >= set.revision) return;
+                const baseIds = new Set(this.getSetBaseCardIds(set, catalogue));
+                config.profiles[set.id].presets.forEach(preset => {
+                    preset.extraCardIds = preset.extraCardIds.filter(id => !baseIds.has(id));
+                });
+                config.setRevisions[set.id] = set.revision;
+            });
         },
 
         migrateLegacyBonusPresets(legacyPresets, activeIndex, unlockedBonusIds) {

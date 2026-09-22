@@ -15,7 +15,21 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => Astra.ready && RPG._featuresInstalled);
-  await page.evaluate(() => RPG.loadGlobalData());
+  const loadedPreset = await page.evaluate(() => {
+    const saved = structuredClone(RPG.global);
+    const config = CardPoolRules.createEmptyConfig();
+    delete config.setRevisions;
+    config.profiles.starlit_garden.presets[1].extraCardIds = ['joker', 'behemoth'];
+    saved.cardPoolConfig = config;
+    if (!Storage.save(Storage.keys.GLOBAL, saved)) throw new Error('Could not seed old save');
+    if (!RPG.loadGlobalData()) throw new Error('Could not load old save');
+    return {
+      extras: RPG.global.cardPoolConfig.profiles.starlit_garden.presets[1].extraCardIds,
+      persisted: Storage.loadDetailed(Storage.keys.GLOBAL).data.cardPoolConfig.profiles.starlit_garden.presets[1].extraCardIds
+    };
+  });
+  assert.deepEqual(loadedPreset.extras, ['behemoth']);
+  assert.deepEqual(loadedPreset.persisted, ['behemoth']);
   const order = await page.evaluate(() => {
     const buttons = [...document.querySelectorAll('#modal-type-select .menu-btn')].map(btn => btn.id);
     return buttons;
