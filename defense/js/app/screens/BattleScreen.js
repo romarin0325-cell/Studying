@@ -6,8 +6,7 @@ import { getAttackInterval } from '../../battle/systems/BasicAttackSystem.js';
 import { getSkillCooldown } from '../../battle/systems/SkillSystem.js';
 import { getEffectiveRange } from '../../battle/systems/TargetingSystem.js';
 import { placementPreview } from '../../battle/PlacementPreview.js';
-import { buffEffects } from '../../battle/systems/AuraSystem.js';
-import { AURA_BUFF_BY_ID } from '../../content/buffs.js';
+import { buffEffects, auraConnections } from '../../battle/systems/AuraSystem.js';
 import { ATTACK_FAMILIES, LEVEL_DAMAGE_MULTIPLIERS } from '../../content/combat.js';
 import { STATUS_BY_ID } from '../../content/statuses.js';
 import { BattleRenderer } from '../../render/BattleRenderer.js';
@@ -90,15 +89,23 @@ export class BattleScreen {
       <div class="battle-layout">
         <div class="battle-board-shell" data-board-shell>
           <canvas id="battle-canvas" aria-label="수호자 배치와 별의 기원 조준 전장"></canvas>
-          <div class="battle-intel"><span data-intel></span><b data-enemy-count></b></div>
           <div class="wave-announcement" role="status" data-announcement hidden></div>
-          <div class="boss-hud" data-boss-hud hidden><span data-boss-name></span><div><i data-boss-health></i></div></div>
           <div class="pause-curtain" data-pause-curtain hidden><span class="eyebrow">잠시 쉬어가요</span><h2>별들이 기다리고 있어요</h2><button class="primary-button" data-action="resume">계속하기 ▷</button><button class="ghost-button" data-action="retreat">여정으로 돌아가기</button><p>진행 중인 웨이브는 처음부터 이어집니다.</p></div>
           <div class="board-hint" data-board-hint>영웅 카드를 고르고 빈 칸을 눌러 배치해</div>
         </div>
         <aside class="battle-panel">
-          <div class="selection-brief" data-selection-brief></div>
+          <div class="battle-notice">
+            <div class="selection-brief" data-selection-brief></div>
+            <div class="battle-intel"><span data-intel></span><b data-enemy-count></b></div>
+            <div class="boss-hud" data-boss-hud hidden><span data-boss-name></span><div class="boss-health-track"><i data-boss-health></i></div><small data-boss-action></small><div class="boss-cast-track" data-boss-cast-track hidden><i data-boss-cast></i></div></div>
+          </div>
           <div class="hero-rail" data-hero-rail>${this.#heroCards()}</div>
+          <section class="command-focus" aria-label="선택한 수호자 상태">
+            <div class="command-focus-heading"><div><small data-focus-role></small><h2 data-focus-name></h2></div><button type="button" class="text-button" data-action="hero-details">상세 정보 ↗</button></div>
+            <div class="command-skill"><b data-focus-skill></b><span data-focus-charge></span></div>
+            <div class="command-charge-track"><i data-focus-meter></i></div>
+            <div class="command-auras" data-focus-auras></div>
+          </section>
           <div class="battle-actions">
             <button class="secondary-button compact" type="button" data-action="auto-place">자동 배치</button>
             <button class="secondary-button compact starfall-button" type="button" data-action="starfall" hidden>✧ 별의 기원</button>
@@ -146,13 +153,14 @@ export class BattleScreen {
   #heroCards() {
     const ids = [this.formation?.mainId ?? this.checkpoint?.formation?.mainId, ...(this.formation?.heroIds ?? this.checkpoint?.formation?.heroIds ?? [])];
     return ids.map((id, slot) => `<button class="battle-hero-card ${id === this.selectedHeroId ? 'selected' : ''}" type="button" data-hero-card="${id}" data-slot="${slot}">
-      <canvas class="battle-hero-avatar" data-hero-avatar="${id}" width="160" height="150" aria-hidden="true"></canvas><span class="battle-hero-copy"><b data-hero-name>${id}</b><small>Lv<span data-level>1</span></small></span><span class="hero-cooldown" data-cooldown></span>
+      <canvas class="battle-hero-avatar" data-hero-avatar="${id}" width="160" height="150" aria-hidden="true"></canvas><span class="battle-hero-copy"><b data-hero-name>${id}</b><small>Lv<span data-level>1</span></small></span><small class="hero-charge-label" data-charge-label></small><span class="hero-cooldown" data-cooldown></span>
     </button>`).join('');
   }
 
   #paintHeroAvatars() { paintPortraits(this.root, this.assetManager, '[data-hero-avatar]'); }
 
   #bindEvents() {
+    this.root.querySelector('[data-action="hero-details"]').onclick = () => this.#openHeroSheet(this.selectedHeroId);
     this.root.querySelector('[data-action="back"]').addEventListener('click', () => {
       if (this.session.state.phase !== BATTLE_PHASE.WAVE_RUNNING) { this.onBack(); return; }
       if (!this.session.state.paused) this.session.applyNow('toggle_pause');
@@ -233,7 +241,7 @@ export class BattleScreen {
     });
     if (typeof ResizeObserver === 'function') {
       this.resizeObserver = new ResizeObserver(this.boundResize);
-      this.resizeObserver.observe(this.root.querySelector('[data-board-shell]'));
+      this.resizeObserver.observe(this.root.querySelector('.battle-layout'));
     } else {
       globalThis.addEventListener('resize', this.boundResize);
     }
@@ -244,9 +252,9 @@ export class BattleScreen {
     for (let index = 0; index < steps; index += 1) {
       this.session.step(deltaSeconds, { landscape: this.renderer.layout.landscape });
     }
-    const gameDeltaSeconds = this.session.state.paused ? 0 : deltaSeconds * steps;
-    this.effectRenderer.update(gameDeltaSeconds);
-    this.renderer.advanceGameTime(gameDeltaSeconds);
+    const presentationDelta = this.session.state.paused ? 0 : deltaSeconds;
+    this.effectRenderer.update(presentationDelta);
+    this.renderer.advanceGameTime(presentationDelta);
     this.#consumeEvents();
   }
 
@@ -331,7 +339,8 @@ export class BattleScreen {
       state.phase,
       state.crystals,
       hero.level,
-      [...hero.buffs.keys()].join(','),
+      [...hero.buffs].map(([id, runtime]) => `${id}:${[...runtime.sources].join(',')}`).join(';'),
+      JSON.stringify(auraConnections(state, hero).provided.map(aura => [aura.id, aura.range, aura.recipients])),
       Object.values(hero.selectedTraits).filter(Boolean).join(','),
     ].join('|');
   }
@@ -367,11 +376,11 @@ export class BattleScreen {
     const onHitNames = (skill.onHitEffects ?? [])
       .map((effect) => STATUS_BY_ID[effect.statusId]?.displayName ?? effect.statusId)
       .filter((name, index, list) => list.indexOf(name) === index);
-    const buffChips = [...hero.buffs.keys()]
-      .map((buffId) => AURA_BUFF_BY_ID[buffId])
-      .filter(Boolean)
-      .map((buff) => `<span class="buff-chip" style="border-color:${buff.color}; color:${buff.color}">${buff.displayName}<small>${buff.description}</small></span>`)
+    const connections = auraConnections(state, hero);
+    const buffChips = connections.received
+      .map((buff) => `<span class="buff-chip" style="border-color:${buff.color}"><b>${buff.displayName}</b><small>${buff.description}</small><small>제공 · ${buff.sourceNames.join(', ')}</small></span>`)
       .join('');
+    const providerChips = connections.provided.map(aura => `<span class="buff-chip" style="border-color:${aura.color}"><b>${aura.displayName} · 범위 ${aura.range}</b><small>${aura.description}</small><small>받는 수호자 · ${aura.recipientNames.join(', ') || (hero.placed ? '현재 연결 없음' : '배치 후 연결')}</small></span>`).join('');
     const selectedTraits = Object.values(hero.selectedTraits).filter(Boolean)
       .map((traitId) => (hero.definition.traits ?? []).find((trait) => trait.id === traitId))
       .filter(Boolean)
@@ -385,8 +394,9 @@ export class BattleScreen {
         <div><small>사거리</small><strong>${getEffectiveRange(state, hero)}</strong></div>
         <div><small>스킬 쿨다운</small><strong>${formatNumber(getSkillCooldown(state, hero), 1)}초</strong></div>
       </div>
-      <p class="sheet-skill"><b>${skill.name}</b> · 피해 ${formatNumber(skillDamage)} · ${skill.shape === 'area' ? '범위 3' : skill.shape === 'melee' ? '근접 한방' : '단일'}${onHitNames.length ? ` · 적중 시 ${onHitNames.join(' · ')}` : ''}</p>
-      <div class="buff-chips">${buffChips || '<span class="buff-empty">활성 버프 없음</span>'}</div>
+      <p class="sheet-skill"><b>${skill.name}</b> · 피해 ${formatNumber(skillDamage)} · ${skill.shape === 'area' ? `범위 ${formatNumber(skill.radius)}` : skill.shape === 'melee' ? '근접 한방' : '단일'}${onHitNames.length ? ` · 적중 시 ${onHitNames.join(' · ')}` : ''}</p>
+      ${providerChips ? `<h3 class="aura-heading">제공하는 오라</h3><div class="buff-chips">${providerChips}</div>` : ''}
+      <h3 class="aura-heading">받고 있는 오라</h3><div class="buff-chips">${buffChips || `<span class="buff-empty">${hero.definition.auraImmune ? '오라를 받지 않는 수호자' : '현재 연결된 오라 없음'}</span>`}</div>
       <div class="selected-traits">${selectedTraits}</div>
       <div class="level-controls">${controls}</div>
       <p class="sheet-note">${readOnly ? '전투 중에는 보기만 가능해. 레벨업과 특성 선택은 웨이브 사이에 할 수 있어.' : '웨이브 사이에는 카드를 고른 뒤 전장을 눌러 자유롭게 재배치할 수 있어.'}</p>`;
@@ -431,11 +441,25 @@ export class BattleScreen {
     const spell = this.root.querySelector('[data-action="starfall"]');
     spell.hidden = !running;
     spell.disabled = !snapshot.starfallReady || snapshot.paused;
-    spell.textContent = this.spellAiming ? '선택 취소' : snapshot.starfallReady ? '✧ 별의 기원' : '기원 사용 완료';
+    spell.textContent = this.spellAiming ? '선택 취소' : snapshot.starfallReady ? '✧ 별의 기원' : '사용 완료';
     spell.classList.toggle('aiming', this.spellAiming);
     const boss = snapshot.enemies.find(e => e.isBoss);
     this.root.querySelector('[data-boss-hud]').hidden = !boss;
-    if (boss) { this.root.querySelector('[data-boss-name]').textContent = `${boss.name} · ${snapshot.wave.number === 10 ? '코어 도달 시 패배' : '돌파 피해 3'}`; this.root.querySelector('[data-boss-health]').style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`; }
+    this.root.querySelector('.battle-intel').hidden = !running || Boolean(boss) || this.spellAiming;
+    this.root.querySelector('[data-selection-brief]').hidden = running && (!this.spellAiming || Boolean(boss));
+    if (boss) {
+      this.root.querySelector('[data-boss-name]').textContent = boss.name + (snapshot.wave.number===5?' · 전조':'');
+      this.root.querySelector('[data-boss-health]').style.width = `${Math.max(0,boss.hp/boss.maxHp)*100}%`;
+      const cast=boss.bossState, casting=cast?.phase==='windup';
+      this.root.querySelector('[data-boss-cast-track]').hidden=!casting;
+      if(casting) this.root.querySelector('[data-boss-cast]').style.width=`${(1-cast.remaining/cast.duration)*100}%`;
+      this.root.querySelector('[data-boss-action]').textContent=!cast?'':casting
+        ? `${cast.name} · ${cast.remaining.toFixed(1)}초 / 기절·집중 공격으로 방해`
+        : cast.interrupted ? '시전 방해 · 받는 피해 +25%'
+        : cast.phase==='active' ? `${cast.name} 발동 중 · ${cast.remaining.toFixed(1)}초`
+        : cast.phase==='recovery' ? '시전 완료'
+        : `${cast.name}까지 ${Math.ceil(cast.remaining)}초`;
+    }
     if (changedPhase && snapshot.phase === BATTLE_PHASE.INTERMISSION) { this.spellAiming = false; this.renderer.spellAiming = false; this.#showGrowth(); }
     if (changedPhase && running) { this.root.querySelector('[data-growth]').hidden = true; this.#closeHeroSheet(); this.#announce(`${waveDefinition?.kind === 'boss' ? '수호신 출현' : 'WAVE'} ${snapshot.wave.number.toString().padStart(2,'0')}`); }
     this.root.querySelector('[data-core]').textContent = `${Number.isInteger(snapshot.core.durability) ? snapshot.core.durability : snapshot.core.durability.toFixed(1)} / ${snapshot.core.maxDurability}`;
@@ -462,13 +486,37 @@ export class BattleScreen {
       card.querySelector('[data-hero-name]').textContent = ({ avalanche_maid: '메이드', lightning_sage: '번개 현자', storm_sage: '폭풍 현자' })[hero.id] ?? hero.name; card.setAttribute('aria-label', `${hero.name} Lv${hero.level}`);
       card.querySelector('[data-level]').textContent = hero.level;
       const runtime = this.session.state.heroes.find((candidate) => candidate.id === hero.id);
-      const cooldown = runtime.skillTimer;
-      card.querySelector('[data-cooldown]').style.setProperty('--cooldown', String(Math.min(1, cooldown / Math.max(1, runtime.definition.skill.cooldown))));
+      const charging = snapshot.projectiles.find(action => action.sourceId === hero.id && action.actionKind === 'skill');
+      const cooldown = getSkillCooldown(this.session.state, runtime);
+      const charge = Math.max(0, Math.min(1, 1 - runtime.skillTimer / cooldown));
+      const label = !running ? (hero.placed ? '배치 완료' : '미배치') : charging ? (charging.phase === 'windup' ? '시전 중' : '발사') : runtime.skillTimer <= 0 ? '준비 완료' : `${Math.ceil(runtime.skillTimer)}초`;
+      card.dataset.skillState = charging ? 'casting' : charge >= 1 ? 'ready' : 'charging';
+      card.querySelector('[data-cooldown]').style.setProperty('--charge', String(charge));
+      card.querySelector('[data-charge-label]').textContent = label;
+      card.setAttribute('aria-label', `${hero.name} Lv${hero.level} · ${runtime.definition.skill.name} ${label}`);
     }
+    if (selected) this.#refreshCommandFocus(snapshot, selected);
     if (this.openSheetHeroId) {
       if ([BATTLE_PHASE.VICTORY, BATTLE_PHASE.DEFEAT].includes(snapshot.phase)) this.#closeHeroSheet();
       else this.#renderHeroSheet();
     }
+  }
+
+  #refreshCommandFocus(snapshot, hero) {
+    const state = this.session.state, focus = this.root.querySelector('.command-focus');
+    const connections = auraConnections(state, hero);
+    const cast = snapshot.projectiles.find(action => action.sourceId === hero.id && action.actionKind === 'skill');
+    const cooldown = getSkillCooldown(state, hero);
+    focus.querySelector('[data-focus-role]').textContent = `${HERO_COPY[hero.id]?.[1] ?? ''} · 사거리 ${formatNumber(getEffectiveRange(state, hero))}`;
+    focus.querySelector('[data-focus-name]').textContent = hero.definition.name;
+    focus.querySelector('[data-focus-skill]').textContent = hero.definition.skill.name;
+    focus.querySelector('[data-focus-charge]').textContent = cast ? (cast.phase === 'windup' ? '시전 준비' : '목표로 이동 중') : hero.skillTimer > 0 ? `${formatNumber(hero.skillTimer)}초 / ${formatNumber(cooldown)}초` : '표적이 들어오면 발동';
+    focus.querySelector('[data-focus-meter]').style.width = `${cast ? 100 : Math.max(0, Math.min(1, 1 - hero.skillTimer / cooldown)) * 100}%`;
+    const markup = connections.provided.map(aura => `<p><b>제공 · ${aura.displayName}</b><span>${aura.description} · ${aura.recipients.length}명 연결</span></p>`).join('')
+      + connections.received.map(aura => `<p><b>받음 · ${aura.displayName}</b><span>${aura.sourceNames.join(', ')} → ${aura.description}</span></p>`).join('');
+    const auras = focus.querySelector('[data-focus-auras]');
+    const content = markup || `<p class="no-aura">${hero.definition.auraImmune ? '오라를 받지 않는 수호자' : '현재 연결된 오라 없음'}</p>`;
+    if (auras.innerHTML !== content) auras.innerHTML = content;
   }
 
   #announce(text) {
@@ -497,7 +545,14 @@ export class BattleScreen {
 
   #resize() {
     if (!this.renderer) return;
+    const bounds = this.root.querySelector('.battle-layout').getBoundingClientRect();
+    const view = this.document.defaultView;
+    const landscape = view.innerWidth > view.innerHeight;
+    const deckReserve = landscape ? Math.min(360, bounds.width * .43) : view.innerHeight <= 690 ? 176 : 248;
+    const side = Math.max(1, Math.min(landscape ? bounds.width - deckReserve : bounds.width, landscape ? bounds.height : bounds.height - deckReserve));
+    this.root.querySelector('.battle-layout').style.setProperty('--arena-side', `${side}px`);
     this.renderer.resize();
+    this.#paintHeroAvatars();
     this.renderer.render(this.session?.snapshot?.() ?? { stage: { theme: 'ruins', path: [], obstacles: [] }, heroes: [], enemies: [] });
   }
 
@@ -525,12 +580,13 @@ export class BattleScreen {
     for (let index = 0; index < ticks; index += 1) {
       this.session.step(FIXED_TICK_SECONDS, { landscape: this.renderer.layout.landscape });
     }
-    const gameDeltaSeconds = this.session.state.paused
+    const presentationDelta = this.session.state.paused
       ? 0
-      : FIXED_TICK_SECONDS * ticks * this.session.state.speed;
-    this.effectRenderer.update(gameDeltaSeconds);
-    this.renderer.advanceGameTime(gameDeltaSeconds);
+      : FIXED_TICK_SECONDS * ticks / this.session.state.speed;
+    this.effectRenderer.update(presentationDelta);
+    this.renderer.advanceGameTime(presentationDelta);
     this.#consumeEvents();
+    this.#refreshUi(this.session.snapshot());
     this.#render();
     return this.getDebugState();
   }

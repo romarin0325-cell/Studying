@@ -14,22 +14,41 @@ function distance(source, target) {
   return Math.hypot(source.x - target.x, source.y - target.y);
 }
 
-export function recomputeAuras(state) {
-  for (const hero of state.heroes) hero.buffs = new Map();
+export function providedAuras(state, source) {
   const teamIncreases = collectUniqueTeamTraitEffects(state, 'team_modifier')
     .filter(({ effect }) => effect.type === 'increase_aura_range_tier')
     .reduce((total, { effect }) => total + Number(effect.value ?? 1), 0);
 
-  for (const source of state.heroes) {
-    if (!source.placed) continue;
-    const modifier = evaluateTraitHook(source, 'provide_aura', {
+  const modifier = evaluateTraitHook(source, 'provide_aura', {
       state,
       source,
       rng: state.rng,
-    }, createModifierAccumulator());
-    for (const aura of [...source.definition.innateAuras ?? [], ...modifier.auras]) {
+  }, createModifierAccumulator());
+  return [...source.definition.innateAuras ?? [], ...modifier.auras].map(aura => ({
+    ...aura, range: increaseAuraRange(aura.range, teamIncreases),
+  }));
+}
+
+export function auraConnections(state, hero) {
+  const names = ids => ids.map(id => state.heroes.find(h => h.id === id)?.definition.name ?? id);
+  return {
+    provided: providedAuras(state, hero).map(aura => {
+      const recipients = state.heroes.filter(target => target.buffs.get(aura.buffId)?.sources.has(hero.id));
+      return { ...AURA_BUFF_BY_ID[aura.buffId], range: aura.range, recipients: recipients.map(h => h.id), recipientNames: names(recipients.map(h => h.id)) };
+    }),
+    received: [...hero.buffs].map(([buffId, runtime]) => ({
+      ...AURA_BUFF_BY_ID[buffId], sources: [...runtime.sources], sourceNames: names([...runtime.sources]),
+    })),
+  };
+}
+
+export function recomputeAuras(state) {
+  for (const hero of state.heroes) hero.buffs = new Map();
+  for (const source of state.heroes) {
+    if (!source.placed) continue;
+    for (const aura of providedAuras(state, source)) {
       if (!AURA_BUFF_BY_ID[aura.buffId]) throw new RangeError(`Unknown aura buff: ${aura.buffId}`);
-      const range = increaseAuraRange(aura.range, teamIncreases);
+      const range = aura.range;
       const sourcePoint = { x: source.x + 0.5, y: source.y + 0.5 };
       for (const target of state.heroes) {
         if (!target.placed || target.definition.auraImmune) continue;

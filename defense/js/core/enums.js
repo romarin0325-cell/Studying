@@ -25,6 +25,6 @@ export const DIFFICULTY = Object.freeze({
   HARD: 'hard',
 });
 
-export const BOARD = Object.freeze({ columns: 12, rows: 16 });
+export const BOARD = Object.freeze({ columns: 12, rows: 12 });
 export const FIXED_TICK_RATE = 60;
 export const FIXED_TICK_SECONDS = 1 / FIXED_TICK_RATE;

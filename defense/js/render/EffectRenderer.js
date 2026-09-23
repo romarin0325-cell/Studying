@@ -22,9 +22,6 @@ const LIFE_BY_PRESET = Object.freeze({
   advantage_hit: 0.65,
 });
 
-const SKILL_TRAVEL_SECONDS = 0.26;
-const SKILL_IMPACT_PRESETS = new Set(['skill_single_hit', 'skill_area_hit']);
-
 function drawRing(context, x, y, radius, color, alpha, width = 2) {
   context.save();
   context.globalAlpha = alpha;
@@ -57,6 +54,26 @@ function drawShard(context, x, y, length, angle, color) {
   context.lineTo(x - dx*length*.6, y - dy*length*.6);
   context.lineTo(x + dy*length*.27, y - dx*length*.27);
   context.closePath(); context.fill();
+}
+
+function drawClock(context, point, radius, progress, alpha) {
+  drawRing(context, point.x, point.y, radius, '#a9e5ff', alpha * .6, 1.5);
+  drawRing(context, point.x, point.y, radius * .86, '#ecd08c', alpha, 2);
+  context.globalAlpha = alpha;
+  context.strokeStyle = '#ecd08c'; context.lineWidth = 2;
+  for (let i = 0; i < 12; i++) {
+    const angle = i * Math.PI / 6, inner = i % 3 === 0 ? .68 : .76;
+    context.beginPath();
+    context.moveTo(point.x + Math.cos(angle) * radius * inner, point.y + Math.sin(angle) * radius * inner);
+    context.lineTo(point.x + Math.cos(angle) * radius * .86, point.y + Math.sin(angle) * radius * .86);
+    context.stroke();
+  }
+  const angle = -Math.PI / 2 + progress * Math.PI * 2;
+  context.strokeStyle = '#fff8df'; context.lineWidth = 2.5;
+  context.beginPath(); context.moveTo(point.x, point.y - radius * .35);
+  context.lineTo(point.x, point.y);
+  context.lineTo(point.x + Math.cos(angle) * radius * .63, point.y + Math.sin(angle) * radius * .63);
+  context.stroke();
 }
 
 function effectSourcePoint(layout, effect, fallback) {
@@ -110,12 +127,9 @@ export class EffectRenderer {
       && event.effectPreset !== 'critical_hit'
       && Number.isFinite(event.amount);
     if (!drawsEffect && !drawsPopup) return false;
-    const skillHit = event.type === 'hit' && event.actionKind === 'skill';
-    const travel = skillHit ? SKILL_TRAVEL_SECONDS : 0;
-    // Only the primary impact flies as a projectile; crit/advantage/status overlays
-    // stay hidden during the same travel window so they detonate in sync.
-    const flies = travel > 0 && SKILL_IMPACT_PRESETS.has(event.effectPreset) && !event.suppressEffect;
-    const effect = { ...event, age: 0, life: life ?? 0.5, travel, flies };
+    // A hit event now means the simulation has reached impact. Never defer its
+    // numbers or flash behind a second, presentation-only projectile.
+    const effect = { ...event, age: 0, life: life ?? 0.5, travel: 0, flies: false };
     if (drawsEffect) {
       this.effects.push(effect);
       if (this.effects.length > EFFECT_CAP) this.effects.splice(0, this.effects.length - EFFECT_CAP);
@@ -133,37 +147,54 @@ export class EffectRenderer {
     this.popups = this.popups.filter(({ age, life, travel }) => age < travel + life);
   }
 
-  render(context, layout) {
+  render(context, layout, projectiles = []) {
+    for (const projectile of projectiles) this.#drawProjectile(context, layout, projectile);
     for (const effect of this.effects) this.#drawEffect(context, layout, effect);
     for (const popup of this.popups) this.#drawPopup(context, layout, popup);
   }
 
-  #drawSkillProjectile(context, layout, effect, travel) {
-    const target = combatAnchor(layout, effect.x, effect.y, effect.targetIsBoss ? 'boss' : 'enemy');
-    const source = effectSourcePoint(layout, effect, target);
-    const progress = Math.min(1, effect.age / travel);
-    const color = COLORS[effect.element] ?? COLORS.neutral;
+  #drawProjectile(context, layout, projectile) {
+    const target = combatAnchor(layout, projectile.targetX, projectile.targetY,
+      projectile.attackArchetype === 'area' ? 'ground' : projectile.targetIsBoss ? 'boss' : 'enemy');
+    const source = effectSourcePoint(layout, projectile, target);
+    const progress = projectile.progress, skill = projectile.actionKind === 'skill';
+    const color = COLORS[projectile.element] ?? COLORS.neutral;
     const cell = layout.logicalRadiusToCanvas(1);
     context.save();
     context.lineCap = 'round';
-    const head = drawAnimatedTrace(context, source, target, progress, color, 0.85, Math.max(3, cell * 0.12), 0.35);
-    drawRing(context, head.x, head.y, cell * 0.18, color, 0.9, 3);
+    if (projectile.vfx === 'clock') {
+      // The face fills with the actual fixed-tick cast/flight progress. Its
+      // collapse and damage share impact; this is never a second fake delay.
+      drawClock(context, target, cell * projectile.radius,
+        projectile.phase === 'windup' ? 0 : progress, projectile.phase === 'windup' ? .5 : .9);
+      drawRing(context, source.x, source.y, cell * .3, color, .8, 2);
+      context.restore(); return;
+    }
+    if (projectile.phase === 'windup') {
+      drawRing(context, source.x, source.y, cell * (.17 + progress * .23), color, .45 + progress * .5, skill ? 3 : 1.5);
+      if (skill) {
+        drawRing(context, target.x, target.y, cell * (projectile.radius || .45), color, .25 + progress * .3, 1.5);
+        context.fillStyle = '#fff'; drawStar(context, source.x, source.y, cell*(.10+progress*.18), cell*.08, 4, progress); context.fill();
+      }
+      context.restore(); return;
+    }
+    const head = drawAnimatedTrace(context, source, target, progress, color, .9, Math.max(2, cell * (skill ? .16 : .09)), skill ? .35 : .2);
+    const row = ({fire:0,water:1,nature:2})[projectile.element];
+    const index = row === undefined ? (projectile.element === 'dark' ? 14 : 12) : row * 4;
+    if (!this.reduced) this.#stamp(context, index, head, cell * (skill ? 1.9 : 1.05), 1, Math.atan2(target.y-source.y,target.x-source.x));
+    drawRing(context, head.x, head.y, cell * (skill ? .23 : .12), color, .9, skill ? 3 : 2);
     context.globalAlpha = 1;
     context.fillStyle = '#fff';
-    drawStar(context, head.x, head.y, cell * 0.16, cell * 0.06, 4, effect.age * 9);
+    drawStar(context, head.x, head.y, cell * (skill ? .2 : .1), cell * .05, 4, progress * 9);
     context.fill();
     context.restore();
   }
 
   #drawEffect(context, layout, effect) {
     const travel = effect.travel ?? 0;
-    if (travel > 0 && effect.age < travel) {
-      if (effect.flies) this.#drawSkillProjectile(context, layout, effect, travel);
-      return;
-    }
     // A laser is one translated ground-plane segment: lift both endpoints
     // equally so its preview, collision corridor and visible direction agree.
-    const kind = ['skill_cast','basic_laser_hit','basic_shotgun_hit'].includes(effect.effectPreset) ? 'hero' : effect.attackArchetype === 'nova' || effect.type === 'starfall' ? 'ground' : effect.targetIsBoss ? 'boss' : 'enemy';
+    const kind = ['skill_cast','basic_laser_hit','basic_shotgun_hit'].includes(effect.effectPreset) ? 'hero' : ['nova','area'].includes(effect.attackArchetype) || effect.type === 'starfall' ? 'ground' : effect.targetIsBoss ? 'boss' : 'enemy';
     const point = combatAnchor(layout, effect.x, effect.y, kind);
     const progress = Math.min(1, (effect.age - travel) / effect.life);
     const fade = 1 - progress;
@@ -172,6 +203,15 @@ export class EffectRenderer {
     const radius = layout.logicalRadiusToCanvas(effect.radius ?? 0.45);
     context.save();
     context.lineCap = 'round';
+    if (effect.vfx === 'clock' && effect.effectPreset === 'skill_area_hit') {
+      drawClock(context, point, radius * (1 - progress * .3), 1, fade);
+      if (!this.reduced) for (let i = 0; i < 12; i++) {
+        const angle = i * Math.PI / 6;
+        drawShard(context, point.x + Math.cos(angle) * radius * progress,
+          point.y + Math.sin(angle) * radius * progress, cell * .25 * fade, angle, '#c5eaff');
+      }
+      context.restore(); return;
+    }
     if (!this.reduced && this.#drawArt(context, layout, effect, point, progress, fade)) { context.restore(); return; }
 
     switch (effect.effectPreset) {
@@ -191,18 +231,9 @@ export class EffectRenderer {
         break;
       }
       case 'basic_ranged_hit': {
-        const source = effectSourcePoint(layout, effect, point);
         const burst = effect.attackArchetype === 'burst';
-        const head = drawAnimatedTrace(
-          context,
-          source,
-          point,
-          progress,
-          color,
-          fade,
-          Math.max(2, cell * (burst ? 0.16 : 0.08)),
-        );
-        drawShard(context,head.x,head.y,cell*(burst?.42:.25),Math.atan2(point.y-source.y,point.x-source.x),color);
+        const head = point;
+        drawRing(context, point.x, point.y, cell * (.12 + progress * (burst ? .7 : .35)), color, fade, burst ? 3 : 2);
         if (burst && !this.reduced) for(let i=0;i<5;i++) { const angle=i*1.256;drawShard(context,point.x+Math.cos(angle)*cell*progress*.65,point.y+Math.sin(angle)*cell*progress*.65,cell*.17*fade,angle,'#ecfaff'); }
         context.globalAlpha = fade;
         context.fillStyle = '#fff';
@@ -212,7 +243,7 @@ export class EffectRenderer {
       }
       case 'basic_shotgun_hit': {
         const source = effectSourcePoint(layout, effect, point);
-        const head = drawAnimatedTrace(context, source, point, progress, color, fade, Math.max(2, cell * 0.065), 0.4);
+        const head = drawAnimatedTrace(context, source, point, 1, color, fade, Math.max(2, cell * 0.065), 1);
         context.fillStyle = color;
         drawStar(context,head.x,head.y,cell*.15,cell*.05,4,progress*3); context.fill();
         break;
@@ -377,6 +408,7 @@ export class EffectRenderer {
   }
   #drawArt(context, layout, effect, point, progress, fade) {
     if (!this.assetManager?.getImage('illustration/combat-fx')) return false;
+    const color = COLORS[effect.element] ?? COLORS.light;
     const cell = layout.logicalRadiusToCanvas(1), row = ({fire:0,water:1,nature:2})[effect.element];
     const impact = row === undefined ? (effect.element === 'dark' ? 15 : 12) : row * 4 + 2;
     const source = effectSourcePoint(layout, effect, point), angle = Math.atan2(point.y-source.y, point.x-source.x);
@@ -384,12 +416,11 @@ export class EffectRenderer {
     switch (effect.effectPreset) {
       case 'basic_ranged_hit':
       case 'basic_shotgun_hit': {
-        const flight = Math.min(1, effect.age / .14);
-        if (flight < 1) {
-          const head = {x:source.x+(point.x-source.x)*flight, y:source.y+(point.y-source.y)*flight};
-          this.#stamp(context, row === undefined ? (effect.element === 'dark' ? 14 : 12) : row*4, head, cell*(effect.attackArchetype==='burst'?1.8:1.25), 1, angle);
-        } else if (!effect.missed) this.#stamp(context, impact, point, cell*(effect.attackArchetype==='burst'?2.3:1.3)*(0.65+scale*.5), fade);
-        if (progress < .3) this.#stamp(context, impact, source, cell*.75, 1-progress/.3);
+        if (effect.effectPreset === 'basic_shotgun_hit') {
+          drawAnimatedTrace(context, source, point, 1, color, fade*.65, Math.max(2,cell*.07), 1);
+          if (progress < .3) this.#stamp(context, impact, source, cell*.75, 1-progress/.3);
+        }
+        if (!effect.missed) this.#stamp(context, impact, point, cell*(effect.attackArchetype==='burst'?2.3:1.3)*(0.65+scale*.5), fade);
         return true;
       }
       case 'basic_melee_hit':

@@ -44,8 +44,9 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run lint:defense
       - run: npm run test:defense
+      - run: npm run prepare:defense-art -- --check --force
       - run: npm run test:defense:local
-      - run: git diff --exit-code -- defense/dist-local/HeroCoreDefense.html
+      - run: git diff --exit-code -- defense/dist-local/HeroCoreDefense.html defense/assets/prepared-manifest.json
       - run: npm run test:defense:browser
       - run: npm run test:defense:experience
       - run: npm run test:defense:resilience

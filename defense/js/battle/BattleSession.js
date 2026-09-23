@@ -7,7 +7,9 @@ import { recomputeAuras } from './systems/AuraSystem.js';
 import { updateStatuses } from './systems/StatusSystem.js';
 import { updateWaveSpawning, completeWave } from './systems/WaveSystem.js';
 import { updateMovement } from './systems/MovementSystem.js';
-import { createBattleActions, resolveBattleActions } from './systems/ActionSystem.js';
+import { updateBossAbilities } from './systems/BossAbilitySystem.js';
+import { createBattleActions } from './systems/ActionSystem.js';
+import { queueBattleActions, advanceAttackTimeline, attackTimelineSnapshot, clearAttackTimeline } from './systems/AttackTimelineSystem.js';
 import { applyPoisonDamage } from './systems/DamageSystem.js';
 import { cleanupEntities } from './systems/CleanupSystem.js';
 import { allHeroesPlaced } from './systems/PlacementSystem.js';
@@ -68,14 +70,16 @@ export class BattleSession {
     for (const command of this.commands.drainThrough(this.state.tick)) executeCommand(this.state, command);
     updateWaveSpawning(this.state, deltaSeconds);
     updateStatuses(this.state, deltaSeconds, (target, amount, statusId) => applyPoisonDamage(this.state, target, amount, statusId));
+    updateBossAbilities(this.state, deltaSeconds);
     updateMovement(this.state, deltaSeconds, landscape);
     if (this.state.phase === BATTLE_PHASE.DEFEAT) this.repository?.clearCheckpoint?.();
     recomputeAuras(this.state);
 
     if (this.state.phase === BATTLE_PHASE.WAVE_RUNNING) {
+      advanceAttackTimeline(this.state, deltaSeconds, { landscape });
       const actions = createBattleActions(this.state, deltaSeconds, { landscape });
-      resolveBattleActions(this.state, actions);
-    }
+      queueBattleActions(this.state, actions);
+    } else clearAttackTimeline(this.state);
     cleanupEntities(this.state);
     const completed = completeWave(this.state);
     if (completed) {
@@ -156,6 +160,7 @@ export class BattleSession {
         buffs: [...hero.buffs.keys()],
         stats: { ...hero.stats },
       })),
+      projectiles: attackTimelineSnapshot(this.state),
       enemies: [...this.state.enemies.values()].map((enemy) => ({
         id: enemy.id,
         enemyId: enemy.enemyId,
@@ -170,6 +175,7 @@ export class BattleSession {
         progress: enemy.progress,
         direction: enemy.direction,
         statuses: plainStatusMap(enemy.statuses),
+        bossState: enemy.bossState ? {...enemy.bossState} : null,
       })),
       result: this.state.result ? { ...this.state.result } : null,
       metrics: {

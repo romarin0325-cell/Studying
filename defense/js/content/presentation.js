@@ -1,10 +1,17 @@
 export const JOURNEYS = Object.freeze({
-  ancient_ruins: { chapter: "01", title: "새벽의 정원", subtitle: "구름 위에 잠든 첫 번째 별", note: "세 번 굽이치는 수로를 따라 첫 여정이 시작됩니다.", counter: "중갑에는 마법 · 공중에는 대공", art: 0, color: "#6c9787" },
-  chaos_rift: { chapter: "02", title: "달그림자 숲", subtitle: "달빛마저 삼켜버린 깊은 틈", note: "서로 등을 맞댄 긴 길 사이로 달그림자가 번집니다.", counter: "악마에는 신성 · 공중에는 대공", art: 1, color: "#837fbd" },
-  crossroads: { chapter: "03", title: "별의 관측소", subtitle: "잊힌 왕국에 남겨진 약속", note: "외곽을 크게 돌아 안쪽으로 파고드는 길입니다.", counter: "중갑에는 마법 · 보스에는 필살", art: 2, color: "#698b9c" },
-  long_boulevard: { chapter: "04", title: "황금빛 귀환로", subtitle: "끝나지 않은 이야기의 다음 장", note: "긴 회랑 끝에서 마지막 별이 귀환을 기다립니다.", counter: "재생에는 화염 · 중갑에는 마법", art: 3, color: "#b39b63" }
+  ancient_ruins:{chapter:'01',title:'마도제국',subtitle:'별을 모방한 마음',note:'푸른 마력으로 움직이던 제국. 잠든 인조마신이 눈을 뜹니다.',art:0,color:'#729eb2'},
+  crossroads:{chapter:'02',title:'빛의 신전',subtitle:'놓아주지 못한 사랑',note:'장미가 지키는 순백의 신전. 영원한 약속의 끝을 찾아갑니다.',art:1,color:'#c597ad'},
+  long_boulevard:{chapter:'03',title:'어둠의 신전',subtitle:'일곱 빛깔의 저주',note:'달빛이 스민 성당. 깨진 무지개 너머로 저주가 번집니다.',art:2,color:'#9282b6'},
+  fairy_forest:{chapter:'04',title:'요정의 숲',subtitle:'다시 피어나는 소원',note:'꽃잎이 이끄는 깊은 숲. 작은 소원들이 하나의 계절을 엽니다.',art:3,color:'#8da880'},
+  sunken_temple:{chapter:'05',title:'해저 신전',subtitle:'깊은 바다의 심판',note:'물결 아래 남겨진 성전. 해신의 창이 고요를 가릅니다.',art:4,color:'#68a7b3'},
+  chaos_rift:{chapter:'06',title:'혼돈의 틈',subtitle:'마지막 밤의 군주',note:'세상의 끝에 열린 틈. 꺼지지 않는 별빛으로 마지막 밤을 건넙니다.',art:5,color:'#9980ac'}
 });
 export const HERO_COPY = Object.freeze({
+  galaxy_whale: ['별바다의 항해자', '신성 관통', '긴 빛의 항로를 열고 초신성으로 무리를 정리합니다. 빛의 동료와 공명합니다.'],
+  silver_rabbit: ['세 번째 달의 토끼', '신성 연사', '암흑에 물든 적을 추격하고, 토끼 동료들과 치명타를 이어갑니다.'],
+  ancient_dragon: ['태고의 숨결', '화염 · 약화', '가까운 적의 갑옷을 부식시키고 브레스로 작열을 남깁니다. 대지의축복과 공명합니다.'],
+  time_ruler: ['마지막 시간을 세는 자', '광역 · 제어', '적의 시간을 늦추고 종언의 예고로 저주를 남겨 동료의 일격을 준비합니다.'],
+  queen: ['장미 왕관의 주인', '정원 · 지원', '대지의축복으로 동료를 강화하고, 가시꽃으로 적의 걸음을 늦춥니다.'],
   red_dragon: ["작은 불꽃의 날개", "화염 산탄", "작열을 남기는 브레스. 태양의축복과 함께 강해집니다."],
   flame_sage: ["태양을 품은 현자", "화염 · 지원", "범위 4 태양의축복. 짧은 공격 사거리 대신 동료를 강화합니다."],
   mushroom_king: ["포자의 작은 왕", "중독 노바", "굽이에서 중독을 쌓고 지친 적을 마무리합니다."],
@@ -28,5 +35,5 @@ export function assetUrl(path) {
   return globalThis.__HERO_DEFENSE_V2_EMBEDDED_ASSETS__?.[path] ?? path;
 }
 export function worldStyle(index = 0) {
-  return `background-image:url('${assetUrl("./assets/moonlit/worlds.webp")}');background-position:${index % 2 ? "100%" : "0%"} ${index > 1 ? "100%" : "0%"}`;
+  return `background-image:url('${assetUrl("./assets/moonlit/worlds.webp")}');background-size:300% 200%;background-position:${index%3*50}% ${index>=3?100:0}%`;
 }

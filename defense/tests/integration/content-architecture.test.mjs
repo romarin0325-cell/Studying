@@ -72,16 +72,16 @@ test('strict content validation covers every required V2 definition and optional
   const withoutAssets = validateContent({ throwOnError: true });
   assert.equal(withoutAssets.valid, true);
   assert.deepEqual(withoutAssets.counts, {
-    heroes: 16,
-    mainHeroes: 4,
-    normalHeroes: 12,
-    level4Traits: 32,
-    level6Traits: 32,
-    enemies: 14,
+    heroes: 21,
+    mainHeroes: 5,
+    normalHeroes: 16,
+    level4Traits: 42,
+    level6Traits: 42,
+    enemies: 16,
     normalEnemies: 10,
-    bosses: 4,
-    stages: 4,
-    waves: 40,
+    bosses: 6,
+    stages: 6,
+    waves: 60,
     buffs: 7,
     statuses: 8,
     debuffs: 7,
@@ -90,9 +90,9 @@ test('strict content validation covers every required V2 definition and optional
   });
 
   const assets = ASSET_MANIFEST;
-  assert.equal(assets.length, 103);
+  assert.equal(assets.length, 142);
   const withAssets = validateContent({ assets, throwOnError: true });
-  assert.equal(withAssets.counts.assets, 103);
+  assert.equal(withAssets.counts.assets, 142);
 
   const missingDirection = validateContent({ assets: assets.slice(0, -1) });
   assert.equal(missingDirection.valid, false);
@@ -165,8 +165,8 @@ test('content creates finite deterministic wave state for every fixed stage', ()
       assert.equal(firstEnemy.speed, 1.2 * 0.95 * 0.9);
     }
     if (stage.id === 'long_boulevard') {
-      assert.equal(firstEnemy.hp, 80 * 0.65 * 0.85);
-      assert.equal(firstEnemy.speed, 1.2 * 0.95);
+      assert.equal(firstEnemy.hp, 95 * 0.65 * 0.85);
+      assert.equal(firstEnemy.speed, 1.25 * 0.95);
     }
   }
 });

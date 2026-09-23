@@ -14,16 +14,10 @@ export const HERO_IDS = deepFreeze([
   'storm_sage',
   'lightning_sage',
   'red_dragon', 'flame_sage', 'mushroom_king', 'great_detective', 'siren', 'phantom',
+  'queen', 'galaxy_whale', 'silver_rabbit', 'ancient_dragon', 'time_ruler',
 ]);
 
-export const BOSS_IDS = deepFreeze(['flora', 'pharaoh', 'reaper', 'demon_god']);
-
-const DIRECTION_COLUMN = deepFreeze({
-  front: 0,
-  back: 1,
-  left: 2,
-  right: 3,
-});
+export const BOSS_IDS = deepFreeze(['artificial_demon','love_iris','curse_iris','flora','poseidon','beelzebub']);
 
 function poseAtlas(id, name, ids) {
   return { id, path: './assets/moonlit/' + name + '.webp', sourcePath: './assets/moonlit/' + name + '.webp',
@@ -36,10 +30,17 @@ export const SOURCE_ATLASES = deepFreeze({
   heroes_companions: poseAtlas('heroes_companions','companions',['snow_rabbit','avalanche_maid','night_rabbit','guardian','storm_sage','lightning_sage']),
   companions_ember: poseAtlas('companions_ember','companions-ember',['red_dragon','flame_sage','mushroom_king']),
   companions_tide: poseAtlas('companions_tide','companions-tide',['great_detective','siren','phantom']),
+  queen: poseAtlas('queen','queen',['queen']),
+  galaxy_whale: poseAtlas('galaxy_whale','galaxy-whale',['galaxy_whale']),
+  silver_rabbit: poseAtlas('silver_rabbit','silver-rabbit',['silver_rabbit']),
+  ancient_dragon: poseAtlas('ancient_dragon','ancient-dragon',['ancient_dragon']),
+  time_ruler: poseAtlas('time_ruler','time-ruler',['time_ruler']),
   bosses: {
-    id:'bosses', path:'./assets/source-atlases/bosses.webp', sourcePath:'./assets/source-atlases/bosses-source.png',
-    width:1254,height:1254,columns:4,rows:4,rowByEntityId:{flora:0,pharaoh:1,reaper:2,demon_god:3},
-    hasAlpha:false,transparencyRequired:true,transparencyStatus:'opaque-generation-source',
+    id:'bosses', path:'./assets/moonlit/realm-bosses.webp', sourcePath:'./assets/moonlit/realm-bosses.webp',
+    width:1536,height:1024,columns:3,rows:2,
+    rowByEntityId:{artificial_demon:0,love_iris:0,curse_iris:0,flora:1,poseidon:1,beelzebub:1},
+    columnByEntityId:{artificial_demon:0,love_iris:1,curse_iris:2,flora:0,poseidon:1,beelzebub:2},
+    hasAlpha:true,transparencyRequired:true,transparencyStatus:'prepared-alpha',
   },
 });
 
@@ -71,7 +72,7 @@ function completeFileFrame() {
 
 function atlasMetadata(atlas, entityId, direction) {
   const row = atlas.rowByEntityId[entityId];
-  const column = atlas.id === 'bosses' ? DIRECTION_COLUMN[direction] : 0;
+  const column = atlas.columnByEntityId?.[entityId] ?? 0;
   return {
     id: atlas.id,
     sourcePath: atlas.path,
@@ -98,7 +99,7 @@ function commonImageMetadata(atlas) {
     hasAlpha: true,
     transparencyStatus: 'prepared-alpha',
     backgroundStatus: 'transparent',
-    sourceBackgroundStatus: atlas.id === 'bosses' ? 'opaque-checkerboard-from-generation' : 'reserved-magenta',
+    sourceBackgroundStatus: 'reserved-magenta',
   };
 }
 
@@ -151,9 +152,9 @@ const bossBattleSprites = BOSS_IDS.flatMap((bossId) => DIRECTIONS.map((direction
 )));
 
 export const ASSET_MANIFEST = deepFreeze([
-  ...['heroes', 'companions', 'companions-ember', 'companions-tide', 'combat-fx', 'creatures', 'worlds'].map((id) => ({
+  ...['heroes', 'queen', 'galaxy-whale', 'silver-rabbit', 'ancient-dragon', 'time-ruler', 'companions', 'companions-ember', 'companions-tide', 'realm-bosses', 'combat-fx', 'creatures', 'worlds'].map((id) => ({
     id: `illustration/${id}`, type: 'image', path: `./assets/moonlit/${id}.webp`,
-    preloadGroup: id === 'worlds' ? ['menu','battle'] : ['creatures','combat-fx'].includes(id) ? 'battle' : ['formation','battle'], releaseRequired: true,
+    preloadGroup: id === 'worlds' ? ['menu','battle'] : ['creatures','combat-fx','realm-bosses'].includes(id) ? 'battle' : ['formation','battle'], releaseRequired: true,
     hasAlpha: !['worlds','combat-fx'].includes(id), sourceBackgroundStatus: id === 'worlds' ? 'painted-scene' : id === 'combat-fx' ? 'screen-black' : id === 'creatures' ? 'generated-white' : 'reserved-magenta',
     pivotX: .5, pivotY: .5,
     backgroundStatus: id === 'worlds' ? 'painted-scene' : id === 'combat-fx' ? 'screen-black' : 'transparent',

@@ -6,7 +6,7 @@ const { pathToFileURL } = require("node:url");
 const APP_ROOT = path.resolve(__dirname, "..", "defense");
 const JS_ROOT = path.join(APP_ROOT, "js");
 const SYSTEM_ROOT = path.join(JS_ROOT, "battle", "systems");
-const EXPECTED_RELEASE_ASSET_COUNT = 103;
+const EXPECTED_RELEASE_ASSET_COUNT = 142;
 const DIRECTIONS = Object.freeze(["front", "back", "left", "right"]);
 
 const REQUIRED_FILES = Object.freeze([
@@ -174,7 +174,7 @@ function verifyReleaseAssets(manifest) {
       else {
         match = entryPath.match(/^\.\/assets\/bosses\/([^/]+)\/(front|back|left|right)\.webp$/);
         if (match) addDirection(bossDirections, match[1], match[2]);
-        else if (!/^\.\/assets\/moonlit\/(heroes|companions|companions-ember|companions-tide|combat-fx|worlds|creatures)\.webp$/.test(entryPath)) throw new Error(`Required release asset does not follow the release contract: ${entryPath}`);
+        else if (!/^\.\/assets\/moonlit\/(heroes|queen|galaxy-whale|silver-rabbit|ancient-dragon|time-ruler|companions|companions-ember|companions-tide|realm-bosses|combat-fx|worlds|creatures)\.webp$/.test(entryPath)) throw new Error(`Required release asset does not follow the release contract: ${entryPath}`);
       }
     }
 
@@ -185,9 +185,9 @@ function verifyReleaseAssets(manifest) {
     if (!fs.existsSync(absolute)) throw new Error(`Required V2 release asset file is missing: ${entryPath}`);
   }
 
-  if (portraits.size !== 16) throw new Error(`V2 requires 16 hero portraits; found ${portraits.size}.`);
-  if (heroDirections.size !== 16) throw new Error(`V2 requires directional art for 16 heroes; found ${heroDirections.size}.`);
-  if (bossDirections.size !== 4) throw new Error(`V2 requires directional art for 4 bosses; found ${bossDirections.size}.`);
+  if (portraits.size !== 21) throw new Error(`V2 requires 21 hero portraits; found ${portraits.size}.`);
+  if (heroDirections.size !== 21) throw new Error(`V2 requires directional art for 21 heroes; found ${heroDirections.size}.`);
+  if (bossDirections.size !== 6) throw new Error(`V2 requires directional art for 6 bosses; found ${bossDirections.size}.`);
   assertSetEqual(new Set(heroDirections.keys()), portraits, "Hero portrait and battle-art roster");
   const expectedDirections = new Set(DIRECTIONS);
   for (const [heroId, directions] of heroDirections) assertSetEqual(directions, expectedDirections, `Hero ${heroId} directions`);

@@ -111,7 +111,7 @@ test('ViewportLayout caps DPR at 2 and keeps the complete board inside portrait 
   let snapshot = layout.resize(390, 844, 3.5);
   assert.equal(snapshot.landscape, false);
   assert.equal(snapshot.viewColumns, 12);
-  assert.equal(snapshot.viewRows, 16);
+  assert.equal(snapshot.viewRows, 12);
   assert.equal(snapshot.dpr, 2);
   assert.equal(canvas.width, 780);
   assert.equal(canvas.height, 1688);
@@ -123,7 +123,7 @@ test('ViewportLayout caps DPR at 2 and keeps the complete board inside portrait 
 
   snapshot = layout.resize(844, 390, 4);
   assert.equal(snapshot.landscape, true);
-  assert.equal(snapshot.viewColumns, 16);
+  assert.equal(snapshot.viewColumns, 12);
   assert.equal(snapshot.viewRows, 12);
   assert.equal(snapshot.dpr, 2);
   assert.equal(canvas.width, 1688);
@@ -158,10 +158,10 @@ test('portrait inverse mapping, outside detection, radii and frame transforms st
   const canvas = { width: 0, height: 0, style: {} };
   const layout = new ViewportLayout({ canvas });
   layout.resize(360, 800, 2);
-  const center = layout.logicalCellCenterToCanvas(11, 15);
+  const center = layout.logicalCellCenterToCanvas(11, 11);
   const mapped = layout.clientToLogical(center.x, center.y, { left: 0, top: 0, width: 360, height: 800 });
   assert.equal(mapped.inside, true);
-  assert.deepEqual([mapped.cellX, mapped.cellY], [11, 15]);
+  assert.deepEqual([mapped.cellX, mapped.cellY], [11, 11]);
 
   const outside = layout.clientToLogical(-100, -100, { left: 0, top: 0, width: 360, height: 800 });
   assert.equal(outside.inside, false);

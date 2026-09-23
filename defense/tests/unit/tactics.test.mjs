@@ -130,7 +130,7 @@ test('placement markers reveal no role, recommended hero, reward or drawback', (
   const renderer=new BattleRenderer({canvas:{getContext:()=>ctx,style:{}},assetManager:{getImage:()=>null}});
   renderer.layout.resize(390,600,1);
   for(const stage of STAGES) renderer.drawPlacements(ctx,{phase:'PREPARATION',stage:{placementCells:stage.map.placementCells},heroes:[]});
-  assert.equal(labels.length,60); assert.deepEqual([...new Set(labels)],['＋']);
+  assert.equal(labels.length,90); assert.deepEqual([...new Set(labels)],['＋']);
   assert.equal(new Set(strokes).size,1,'all five internal roles have the same marker color');
 });
 

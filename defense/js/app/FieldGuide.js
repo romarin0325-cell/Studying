@@ -1,4 +1,4 @@
-import { ATTACK_TYPE_IDS, DEFENSE_TYPE_IDS, MATCHUP_MULTIPLIERS } from '../content/combat.js';
+import { ATTACK_TYPE_IDS, DEFENSE_TYPE_IDS, MATCHUP_MULTIPLIERS, ELEMENT_IDS, ELEMENT_LABELS, getElementMultiplier } from '../content/combat.js';
 import { DEFENSE_LABELS } from '../content/presentation.js';
 export const ATTACK_LABELS = Object.freeze({ normal: '물리', anti_air: '대공', lethal: '필살', magic: '마법', flame: '화염', holy: '신성' });
 export function openFieldGuide(root) {
@@ -9,6 +9,8 @@ export function openFieldGuide(root) {
     <p>행은 적의 방어 유형, 열은 수호자의 공격 유형입니다. 속성과 공격 유형은 별개입니다.</p>
     <div class="matchup-scroll"><table class="matchup-table"><thead><tr><th scope="col">적 / 공격</th>${ATTACK_TYPE_IDS.map(id=>`<th scope="col">${ATTACK_LABELS[id]}</th>`).join('')}</tr></thead>
     <tbody>${DEFENSE_TYPE_IDS.map(defense=>`<tr><th scope="row">${DEFENSE_LABELS[defense]}</th>${ATTACK_TYPE_IDS.map(attack=>{const value=MATCHUP_MULTIPLIERS[defense][attack];return `<td class="${value>1?'strong':value<1?'weak':''}">×${value}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>
+    <h3>속성 상성</h3><p>불 → 자연 → 물 → 불은 피해 +20%, 반대 방향은 −20%입니다. 빛과 어둠은 서로 +20%입니다. 속성 배율과 위의 공격 유형 배율은 함께 적용됩니다.</p>
+    <div class="matchup-scroll"><table class="matchup-table" data-element-table><thead><tr><th scope="col">적 / 수호자</th>${ELEMENT_IDS.map(id=>`<th scope="col">${ELEMENT_LABELS[id]}</th>`).join('')}</tr></thead><tbody>${ELEMENT_IDS.map(target=>`<tr><th scope="row">${ELEMENT_LABELS[target]}</th>${ELEMENT_IDS.map(source=>{const value=getElementMultiplier(source,target);return `<td class="${value>1?'strong':value<1?'weak':''}">×${value}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div>
     <p>공격 범위는 점선, 조준 방향은 실선으로 표시됩니다. 배치 중 동료와 이어지는 선은 오라입니다. 같은 이름의 오라는 중복되지 않습니다.</p>
   </section>`;
   const close = () => { backdrop.remove(); previous?.focus?.(); };

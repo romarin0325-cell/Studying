@@ -1010,3 +1010,20 @@ p {
 @media(orientation:landscape){.result-screen{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto 1fr;gap:9px 22px;padding:18px 25px;align-items:center;overflow-y:auto}.result-heading{grid-column:1;grid-row:1}.result-heading h1{font-size:29px}.result-party{grid-column:1;grid-row:2;height:95px}.result-party canvas{height:110px}.result-summary{grid-column:1;grid-row:3}.result-reward{grid-column:1;grid-row:4;padding:9px}.hero-report{grid-column:2;grid-row:1/4;align-self:center}.result-actions{grid-column:2;grid-row:4;align-self:start}.hero-report-row{margin:13px 0}.result-stars{font-size:27px}}
 
 .swap-roster{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}.swap-roster button{display:grid;justify-items:center;gap:5px;border:1px solid #b5cbdc;border-radius:8px;background:#e4edf5;padding:8px;color:#294864}.swap-roster canvas{width:90px;height:90px}.swap-roster b{font-size:12px}.swap-roster span{font-size:10px;color:#627e95}
+.chapter-tabs { display: flex; gap: 6px; overflow-x: auto; flex: none; padding-bottom: 4px; scroll-snap-type: x proximity; }
+.chapter-tab { flex: 1 0 88px; scroll-snap-align: center; min-height: 56px; }
+.chapter-tab b { white-space: normal; word-break: keep-all; line-height: 1.4; }
+.journey-title > span { display: block; word-break: keep-all; overflow-wrap: break-word; line-height: 1.5; max-width: 100%; }
+.journey-brief { height: 100px; min-height: 100px; }
+.journey-brief p { height: auto; min-height: 54px; max-width: 320px; overflow: visible; }
+.difficulty-options { flex: none; }
+.field-guide h3 { font-size: 14px; margin: 20px 0 7px; }
+.hero-grid--main { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 125px; grid-template-rows: 180px; grid-auto-rows: 180px; overflow-x: auto; flex: none; padding-bottom: 7px; scroll-snap-type: x proximity; }
+.hero-grid--main .hero-card { scroll-snap-align: center; }
+.hero-grid--main .hero-portrait { max-height: 112px; height: 112px; }
+.hero-grid--main .hero-card__copy b { font-size: 12px; }
+.roster-filters { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin: 3px 0 10px; }
+.roster-filters button { min-height: 44px; border: 1px solid #b7cddd; border-radius: 6px; background: #eef4f8; color: #526e84; font-size: 11px; }
+.roster-filters button[aria-pressed="true"] { background: #355b79; color: #fff7de; border-color: #355b79; }
+.hero-grid--normal { grid-template-rows: none; }
+@media (orientation: landscape) { .hero-grid--main { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-columns: auto; grid-template-rows: none; grid-auto-rows: 180px; overflow: visible; } }

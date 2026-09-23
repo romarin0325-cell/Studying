@@ -19,10 +19,24 @@ export function actionPriority(left, right) {
 
 export function createBattleActions(state, deltaSeconds, { landscape = false } = {}) {
   const actions = [];
+  const occupied = new Set([...(state.registry?.projectiles?.values() ?? [])]
+    .filter(action => action.phase === 'windup' || action.actionKind === 'skill').map(action => action.sourceId));
   const heroes = [...state.heroes].sort((left, right) => left.slot - right.slot || left.id.localeCompare(right.id));
   for (const hero of heroes) {
+    if (!hero.placed) continue;
+    if (occupied.has(hero.id)) {
+      hero.attackTimer = Math.max(0, hero.attackTimer - deltaSeconds);
+      hero.skillTimer = Math.max(0, hero.skillTimer - deltaSeconds);
+      continue;
+    }
     const skill = createSkillAction(state, hero, deltaSeconds, landscape);
-    if (skill) actions.push(skill);
+    if (skill) {
+      // Let the signature action land before this hero resumes basics. Both
+      // cooldowns keep ticking, but a basic cannot steal its own skill target.
+      hero.attackTimer = Math.max(0, hero.attackTimer - deltaSeconds);
+      actions.push(skill);
+      continue;
+    }
     const basic = createBasicAttackAction(state, hero, deltaSeconds, landscape);
     if (basic) actions.push(basic);
   }

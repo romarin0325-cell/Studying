@@ -1,16 +1,4 @@
-import {
-  BOARD_RULES,
-  DREAM_CRYSTAL_REWARDS,
-  WAVE_HP_MULTIPLIERS,
-  WAVE_RULES,
-  deepFreeze,
-} from './combat.js';
-
-function spot(x, y, role) { return { x, y, role }; }
-
-function point(x, y) {
-  return { x, y };
-}
+import { BOARD_RULES, DREAM_CRYSTAL_REWARDS, WAVE_HP_MULTIPLIERS, WAVE_RULES, deepFreeze } from './combat.js';
 
 export function expandOrthogonalPath(waypoints) {
   if (!Array.isArray(waypoints) || waypoints.length < 2) {
@@ -45,307 +33,1098 @@ export function expandOrthogonalPath(waypoints) {
   return cells;
 }
 
-function makeWave(number, groups, spawnOrder, { boss = false } = {}) {
-  return {
-    number,
-    kind: boss ? 'boss' : 'normal',
-    groups,
-    spawnOrder,
-    enemyCount: spawnOrder.length,
-    hpMultiplier: WAVE_HP_MULTIPLIERS[number],
-    dreamCrystalReward: DREAM_CRYSTAL_REWARDS[number - 1],
-    spawnIntervalSeconds: WAVE_RULES.baseSpawnIntervalSeconds,
-  };
+
+// Stable legacy stage IDs preserve progress/checkpoints. New chapters use new IDs.
+// Placement role metadata is authoring-only; markers reveal no strategic hints.
+const REALMS = [
+  {
+    "id": "ancient_ruins",
+    "name": "마도제국",
+    "theme": "ruins",
+    "representativeElement": "light",
+    "featuredDefenseTypes": [
+      "normal",
+      "heavy",
+      "air"
+    ],
+    "boss": "artificial_demon",
+    "enemyHpMultiplier": 1.1,
+    "enemySpeedMultiplier": 0.9,
+    "waveEnemies": [
+      "ruin_scarab",
+      "sand_wisp",
+      "stone_guard",
+      "regrowth_idol",
+      "ember_scarab",
+      "sand_wisp",
+      "stone_guard",
+      "regrowth_idol"
+    ],
+    "counts": [
+      30,
+      30,
+      22,
+      26,
+      30,
+      30,
+      24,
+      28
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 9
+        },
+        {
+          "x": 10,
+          "y": 9
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 8
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 11,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "role": "line"
+        },
+        {
+          "x": 10,
+          "y": 6,
+          "role": "line"
+        },
+        {
+          "x": 9,
+          "y": 2,
+          "role": "bend"
+        },
+        {
+          "x": 9,
+          "y": 4,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "role": "support"
+        },
+        {
+          "x": 6,
+          "y": 7,
+          "role": "support"
+        },
+        {
+          "x": 11,
+          "y": 9,
+          "role": "last"
+        },
+        {
+          "x": 9,
+          "y": 10,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 9,
+          "y": 2
+        },
+        "1": {
+          "x": 7,
+          "y": 3
+        },
+        "2": {
+          "x": 11,
+          "y": 1
+        },
+        "3": {
+          "x": 2,
+          "y": 6
+        },
+        "4": {
+          "x": 4,
+          "y": 7
+        }
+      }
+    }
+  },
+  {
+    "id": "crossroads",
+    "name": "빛의 신전",
+    "theme": "ruins",
+    "representativeElement": "light",
+    "featuredDefenseTypes": [
+      "air",
+      "heavy",
+      "demon"
+    ],
+    "boss": "love_iris",
+    "waveEnemies": [
+      "ruin_scarab",
+      "sand_wisp",
+      "stone_guard",
+      "lesser_demon",
+      "ember_scarab",
+      "sand_wisp",
+      "abyss_armor",
+      "lesser_demon"
+    ],
+    "counts": [
+      30,
+      30,
+      20,
+      24,
+      30,
+      30,
+      22,
+      26
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 10
+        },
+        {
+          "x": 1,
+          "y": 10
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 8
+        },
+        {
+          "x": 8,
+          "y": 8
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 7,
+          "y": 0
+        },
+        {
+          "x": 11,
+          "y": 6
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 0,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 1,
+          "y": 11,
+          "role": "line"
+        },
+        {
+          "x": 0,
+          "y": 10,
+          "role": "line"
+        },
+        {
+          "x": 9,
+          "y": 2,
+          "role": "bend"
+        },
+        {
+          "x": 9,
+          "y": 9,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 9,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "role": "bend"
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 8,
+          "y": 4,
+          "role": "crossing"
+        },
+        {
+          "x": 4,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "role": "crossing"
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "role": "support"
+        },
+        {
+          "x": 4,
+          "y": 6,
+          "role": "support"
+        },
+        {
+          "x": 8,
+          "y": 7,
+          "role": "last"
+        },
+        {
+          "x": 7,
+          "y": 9,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 2,
+          "y": 6
+        },
+        "1": {
+          "x": 5,
+          "y": 3
+        },
+        "2": {
+          "x": 0,
+          "y": 1
+        },
+        "3": {
+          "x": 9,
+          "y": 9
+        },
+        "4": {
+          "x": 4,
+          "y": 7
+        }
+      }
+    }
+  },
+  {
+    "id": "long_boulevard",
+    "name": "어둠의 신전",
+    "theme": "chaos",
+    "representativeElement": "dark",
+    "featuredDefenseTypes": [
+      "normal",
+      "air",
+      "demon"
+    ],
+    "boss": "curse_iris",
+    "waveEnemies": [
+      "rift_shade",
+      "rift_wing",
+      "lesser_demon",
+      "chaos_spawn",
+      "rift_shade",
+      "rift_wing",
+      "abyss_armor",
+      "lesser_demon"
+    ],
+    "counts": [
+      30,
+      30,
+      22,
+      24,
+      30,
+      30,
+      22,
+      26
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 10
+        },
+        {
+          "x": 10,
+          "y": 10
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 7,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 7
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 0,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 11,
+          "y": 5,
+          "role": "line"
+        },
+        {
+          "x": 10,
+          "y": 6,
+          "role": "line"
+        },
+        {
+          "x": 9,
+          "y": 2,
+          "role": "bend"
+        },
+        {
+          "x": 9,
+          "y": 4,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "role": "bend"
+        },
+        {
+          "x": 2,
+          "y": 9,
+          "role": "bend"
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 6,
+          "y": 8,
+          "role": "crossing"
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "role": "support"
+        },
+        {
+          "x": 5,
+          "y": 7,
+          "role": "support"
+        },
+        {
+          "x": 11,
+          "y": 10,
+          "role": "last"
+        },
+        {
+          "x": 9,
+          "y": 11,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 9,
+          "y": 2
+        },
+        "1": {
+          "x": 7,
+          "y": 3
+        },
+        "2": {
+          "x": 11,
+          "y": 5
+        },
+        "3": {
+          "x": 2,
+          "y": 6
+        },
+        "4": {
+          "x": 6,
+          "y": 8
+        }
+      }
+    }
+  },
+  {
+    "id": "fairy_forest",
+    "name": "요정의 숲",
+    "theme": "ruins",
+    "representativeElement": "nature",
+    "featuredDefenseTypes": [
+      "regeneration",
+      "air",
+      "heavy"
+    ],
+    "boss": "flora",
+    "waveEnemies": [
+      "ruin_scarab",
+      "sand_wisp",
+      "regrowth_idol",
+      "stone_guard",
+      "ember_scarab",
+      "sand_wisp",
+      "regrowth_idol",
+      "stone_guard"
+    ],
+    "counts": [
+      28,
+      28,
+      24,
+      20,
+      28,
+      28,
+      26,
+      22
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 9,
+          "y": 1
+        },
+        {
+          "x": 9,
+          "y": 5
+        },
+        {
+          "x": 2,
+          "y": 5
+        },
+        {
+          "x": 2,
+          "y": 9
+        },
+        {
+          "x": 8,
+          "y": 9
+        },
+        {
+          "x": 8,
+          "y": 11
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 10,
+          "y": 7
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 10,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "role": "line"
+        },
+        {
+          "x": 2,
+          "y": 10,
+          "role": "line"
+        },
+        {
+          "x": 8,
+          "y": 2,
+          "role": "bend"
+        },
+        {
+          "x": 8,
+          "y": 4,
+          "role": "bend"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "role": "bend"
+        },
+        {
+          "x": 3,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 5,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "role": "support"
+        },
+        {
+          "x": 6,
+          "y": 6,
+          "role": "support"
+        },
+        {
+          "x": 9,
+          "y": 11,
+          "role": "last"
+        },
+        {
+          "x": 7,
+          "y": 11,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 8,
+          "y": 2
+        },
+        "1": {
+          "x": 8,
+          "y": 4
+        },
+        "2": {
+          "x": 3,
+          "y": 6
+        },
+        "3": {
+          "x": 3,
+          "y": 8
+        },
+        "4": {
+          "x": 4,
+          "y": 3
+        }
+      }
+    }
+  },
+  {
+    "id": "sunken_temple",
+    "name": "해저 신전",
+    "theme": "ruins",
+    "representativeElement": "water",
+    "featuredDefenseTypes": [
+      "air",
+      "heavy",
+      "regeneration"
+    ],
+    "boss": "poseidon",
+    "waveEnemies": [
+      "ruin_scarab",
+      "sand_wisp",
+      "stone_guard",
+      "regrowth_idol",
+      "rift_shade",
+      "rift_wing",
+      "stone_guard",
+      "regrowth_idol"
+    ],
+    "counts": [
+      30,
+      28,
+      22,
+      24,
+      30,
+      28,
+      24,
+      26
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 9
+        },
+        {
+          "x": 5,
+          "y": 9
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 10,
+          "y": 2
+        },
+        {
+          "x": 10,
+          "y": 10
+        },
+        {
+          "x": 7,
+          "y": 10
+        },
+        {
+          "x": 7,
+          "y": 6
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 11,
+          "y": 5
+        },
+        {
+          "x": 11,
+          "y": 9
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 1,
+          "y": 10,
+          "role": "line"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 11,
+          "y": 2,
+          "role": "line"
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "role": "bend"
+        },
+        {
+          "x": 9,
+          "y": 3,
+          "role": "bend"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "role": "crossing"
+        },
+        {
+          "x": 8,
+          "y": 4,
+          "role": "crossing"
+        },
+        {
+          "x": 8,
+          "y": 8,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "role": "support"
+        },
+        {
+          "x": 8,
+          "y": 7,
+          "role": "support"
+        },
+        {
+          "x": 7,
+          "y": 5,
+          "role": "last"
+        },
+        {
+          "x": 6,
+          "y": 6,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 2,
+          "y": 8
+        },
+        "1": {
+          "x": 4,
+          "y": 8
+        },
+        "2": {
+          "x": 6,
+          "y": 3
+        },
+        "3": {
+          "x": 9,
+          "y": 3
+        },
+        "4": {
+          "x": 3,
+          "y": 3
+        }
+      }
+    }
+  },
+  {
+    "id": "chaos_rift",
+    "name": "혼돈의 틈",
+    "theme": "chaos",
+    "representativeElement": "dark",
+    "featuredDefenseTypes": [
+      "air",
+      "heavy",
+      "demon"
+    ],
+    "boss": "beelzebub",
+    "waveEnemies": [
+      "rift_shade",
+      "rift_wing",
+      "abyss_armor",
+      "chaos_spawn",
+      "lesser_demon",
+      "rift_wing",
+      "abyss_armor",
+      "rift_shade"
+    ],
+    "counts": [
+      30,
+      30,
+      20,
+      24,
+      30,
+      30,
+      22,
+      30
+    ],
+    "map": {
+      "pathWaypoints": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 9
+        },
+        {
+          "x": 5,
+          "y": 9
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 9,
+          "y": 2
+        },
+        {
+          "x": 9,
+          "y": 10
+        },
+        {
+          "x": 10,
+          "y": 10
+        }
+      ],
+      "obstacles": [
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 0,
+          "y": 6
+        },
+        {
+          "x": 11,
+          "y": 5
+        }
+      ],
+      "placementCells": [
+        {
+          "x": 1,
+          "y": 10,
+          "role": "line"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 9,
+          "y": 1,
+          "role": "line"
+        },
+        {
+          "x": 2,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 4,
+          "y": 8,
+          "role": "bend"
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "role": "bend"
+        },
+        {
+          "x": 8,
+          "y": 3,
+          "role": "bend"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 4,
+          "role": "crossing"
+        },
+        {
+          "x": 7,
+          "y": 7,
+          "role": "crossing"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "role": "support"
+        },
+        {
+          "x": 7,
+          "y": 5,
+          "role": "support"
+        },
+        {
+          "x": 10,
+          "y": 9,
+          "role": "last"
+        },
+        {
+          "x": 11,
+          "y": 10,
+          "role": "last"
+        }
+      ],
+      "recommendedPlacements": {
+        "0": {
+          "x": 3,
+          "y": 3
+        },
+        "1": {
+          "x": 7,
+          "y": 4
+        },
+        "2": {
+          "x": 5,
+          "y": 1
+        },
+        "3": {
+          "x": 4,
+          "y": 8
+        },
+        "4": {
+          "x": 3,
+          "y": 6
+        }
+      }
+    }
+  }
+];
+
+function makeWaves(realm) {
+  let normalIndex = 0;
+  return Array.from({length:10}, (_,index) => {
+    const number=index+1, boss=number===5 || number===10;
+    const enemyId=boss ? realm.boss : realm.waveEnemies[normalIndex];
+    const count=boss ? 1 : realm.counts[normalIndex++];
+    return {number, kind:boss?'boss':'normal', groups:[{enemyId,count}],
+      spawnOrder:Array(count).fill(enemyId), enemyCount:count,
+      hpMultiplier:WAVE_HP_MULTIPLIERS[number] * (number===5 ? .58 : 1),
+      dreamCrystalReward:DREAM_CRYSTAL_REWARDS[index],
+      spawnIntervalSeconds:WAVE_RULES.baseSpawnIntervalSeconds};
+  });
 }
 
-// 전투 영역은 상단 12×12(y 0~11). 하단 y 12~15는 UI 밴드로 사용한다.
-const ANCIENT_RUINS_WAYPOINTS = [
-  point(0, 1),
-  point(10, 1),
-  point(10, 5),
-  point(1, 5),
-  point(1, 9),
-  point(10, 9),
-];
-
-const CHAOS_RIFT_WAYPOINTS = [
-  point(1, 0),
-  point(1, 9),
-  point(5, 9),
-  point(5, 2),
-  point(9, 2),
-  point(9, 10),
-  point(10, 10),
-];
-
-const CROSSROADS_WAYPOINTS = [
-  point(1, 1),
-  point(10, 1),
-  point(10, 10),
-  point(1, 10),
-  point(1, 5),
-  point(6, 5),
-  point(6, 8),
-  point(8, 8),
-];
-
-const LONG_BOULEVARD_WAYPOINTS = [
-  point(1, 1),
-  point(10, 1),
-  point(10, 5),
-  point(1, 5),
-  point(1, 10),
-  point(10, 10),
-];
-
-function singleWave(number, enemyId, count) {
-  return makeWave(number, [{ enemyId, count }], Array(count).fill(enemyId));
-}
-
-// Phase 4: 모든 일반 웨이브는 단일 적 타입(20~30마리)으로 구성한다.
-// 고대유적 게이트 보정은 스테이지 배율(일반 적 HP +10%, speed -10%)로만 적용한다.
-// 같은 로스터를 재사용하는 long_boulevard에는 전하지 않는다.
-const ancientRuinsWaves = [
-  singleWave(1, 'ruin_scarab', 30),
-  singleWave(2, 'sand_wisp', 30),
-  singleWave(3, 'stone_guard', 22),
-  singleWave(4, 'regrowth_idol', 26),
-  makeWave(5, [{ enemyId: 'flora', count: 1 }], ['flora'], { boss: true }),
-  singleWave(6, 'ember_scarab', 30),
-  singleWave(7, 'sand_wisp', 30),
-  singleWave(8, 'stone_guard', 24),
-  singleWave(9, 'regrowth_idol', 28),
-  makeWave(10, [{ enemyId: 'pharaoh', count: 1 }], ['pharaoh'], { boss: true }),
-];
-
-const chaosRiftWaves = [
-  singleWave(1, 'rift_shade', 30),
-  singleWave(2, 'rift_wing', 30),
-  singleWave(3, 'abyss_armor', 20),
-  singleWave(4, 'chaos_spawn', 24),
-  makeWave(5, [{ enemyId: 'reaper', count: 1 }], ['reaper'], { boss: true }),
-  singleWave(6, 'lesser_demon', 30),
-  singleWave(7, 'rift_wing', 30),
-  singleWave(8, 'abyss_armor', 22),
-  singleWave(9, 'rift_shade', 30),
-  makeWave(10, [{ enemyId: 'demon_god', count: 1 }], ['demon_god'], { boss: true }),
-];
-
-const crossroadsWaves = [
-  singleWave(1, 'rift_shade', 30),
-  singleWave(2, 'rift_wing', 30),
-  singleWave(3, 'abyss_armor', 20),
-  singleWave(4, 'chaos_spawn', 24),
-  makeWave(5, [{ enemyId: 'reaper', count: 1 }], ['reaper'], { boss: true }),
-  singleWave(6, 'lesser_demon', 30),
-  singleWave(7, 'rift_wing', 30),
-  singleWave(8, 'abyss_armor', 22),
-  singleWave(9, 'chaos_spawn', 26),
-  makeWave(10, [{ enemyId: 'demon_god', count: 1 }], ['demon_god'], { boss: true }),
-];
-
-const longBoulevardWaves = [
-  singleWave(1, 'ruin_scarab', 30),
-  singleWave(2, 'sand_wisp', 30),
-  singleWave(3, 'stone_guard', 20),
-  singleWave(4, 'regrowth_idol', 24),
-  makeWave(5, [{ enemyId: 'flora', count: 1 }], ['flora'], { boss: true }),
-  singleWave(6, 'ember_scarab', 30),
-  singleWave(7, 'sand_wisp', 30),
-  singleWave(8, 'stone_guard', 22),
-  singleWave(9, 'regrowth_idol', 26),
-  makeWave(10, [{ enemyId: 'pharaoh', count: 1 }], ['pharaoh'], { boss: true }),
-];
-
-export const STAGES = deepFreeze([
-  {
-    id: 'ancient_ruins',
-    name: '고대유적',
-    displayName: '고대유적',
-    theme: 'ruins',
-    enemyHpMultiplier: 1.1,
-    enemySpeedMultiplier: 0.9,
-    representativeElement: 'nature',
-    featuredDefenseTypes: ['normal', 'heavy', 'regeneration'],
-    midBossId: 'flora',
-    finalBossId: 'pharaoh',
-    availableDifficultyIds: ['easy', 'normal'],
-    displayedDifficultyIds: ['easy', 'normal'],
-    map: {
-      columns: BOARD_RULES.columns,
-      rows: BOARD_RULES.rows,
-      spawn: point(0, 1),
-      core: point(10, 9),
-      pathWaypoints: ANCIENT_RUINS_WAYPOINTS,
-      pathCells: expandOrthogonalPath(ANCIENT_RUINS_WAYPOINTS),
-      obstacles: [point(3, 0), point(6, 0), point(0, 8)],
-      placementCells: [
-        spot(11, 1, 'line'),
-        spot(0, 5, 'line'),
-        spot(10, 6, 'line'),
-        spot(9, 2, 'bend'),
-        spot(9, 4, 'bend'),
-        spot(2, 6, 'bend'),
-        spot(2, 8, 'bend'),
-        spot(4, 3, 'crossing'),
-        spot(7, 3, 'crossing'),
-        spot(4, 7, 'crossing'),
-        spot(7, 7, 'crossing'),
-        spot(5, 3, 'support'),
-        spot(6, 7, 'support'),
-        spot(11, 9, 'last'),
-        spot(9, 10, 'last'),
-      ],
-      recommendedPlacements: {
-        0: point(9, 2),
-        1: point(7, 3),
-        2: point(11, 1),
-        3: point(2, 6),
-        4: point(4, 7),
-      },
-    },
-    waves: ancientRuinsWaves,
-  },
-  {
-    id: 'chaos_rift',
-    name: '혼돈의틈',
-    displayName: '혼돈의틈',
-    theme: 'chaos',
-    representativeElement: 'dark',
-    featuredDefenseTypes: ['air', 'heavy', 'demon'],
-    midBossId: 'reaper',
-    finalBossId: 'demon_god',
-    availableDifficultyIds: ['easy', 'normal'],
-    displayedDifficultyIds: ['easy', 'normal'],
-    map: {
-      columns: BOARD_RULES.columns,
-      rows: BOARD_RULES.rows,
-      spawn: point(1, 0),
-      core: point(10, 10),
-      pathWaypoints: CHAOS_RIFT_WAYPOINTS,
-      pathCells: expandOrthogonalPath(CHAOS_RIFT_WAYPOINTS),
-      obstacles: [point(0, 4), point(0, 6), point(11, 5)],
-      placementCells: [
-        spot(1, 10, 'line'),
-        spot(5, 1, 'line'),
-        spot(9, 1, 'line'),
-        spot(2, 8, 'bend'),
-        spot(4, 8, 'bend'),
-        spot(6, 3, 'bend'),
-        spot(8, 3, 'bend'),
-        spot(3, 3, 'crossing'),
-        spot(3, 6, 'crossing'),
-        spot(7, 4, 'crossing'),
-        spot(7, 7, 'crossing'),
-        spot(3, 5, 'support'),
-        spot(7, 5, 'support'),
-        spot(10, 9, 'last'),
-        spot(11, 10, 'last'),
-      ],
-      recommendedPlacements: {
-        0: point(3, 3),
-        1: point(7, 4),
-        2: point(5, 1),
-        3: point(4, 8),
-        4: point(3, 6),
-      },
-    },
-    waves: chaosRiftWaves,
-  },
-  {
-    id: 'crossroads',
-    name: '십자 교차로',
-    displayName: '십자 교차로',
-    theme: 'chaos',
-    representativeElement: 'light',
-    featuredDefenseTypes: ['air', 'heavy', 'demon'],
-    midBossId: 'reaper',
-    finalBossId: 'demon_god',
-    availableDifficultyIds: ['easy', 'normal'],
-    displayedDifficultyIds: ['easy', 'normal'],
-    map: {
-      columns: BOARD_RULES.columns,
-      rows: BOARD_RULES.rows,
-      spawn: point(1, 1),
-      core: point(8, 8),
-      pathWaypoints: CROSSROADS_WAYPOINTS,
-      pathCells: expandOrthogonalPath(CROSSROADS_WAYPOINTS),
-      obstacles: [point(3, 0), point(7, 0), point(11, 6)],
-      placementCells: [
-        spot(0, 1, 'line'),
-        spot(1, 11, 'line'),
-        spot(0, 10, 'line'),
-        spot(9, 2, 'bend'),
-        spot(9, 9, 'bend'),
-        spot(2, 9, 'bend'),
-        spot(2, 6, 'bend'),
-        spot(5, 3, 'crossing'),
-        spot(8, 4, 'crossing'),
-        spot(4, 7, 'crossing'),
-        spot(3, 8, 'crossing'),
-        spot(4, 3, 'support'),
-        spot(4, 6, 'support'),
-        spot(8, 7, 'last'),
-        spot(7, 9, 'last'),
-      ],
-      recommendedPlacements: {
-        0: point(2, 6),
-        1: point(5, 3),
-        2: point(0, 1),
-        3: point(9, 9),
-        4: point(4, 7),
-      },
-    },
-    waves: crossroadsWaves,
-  },
-  {
-    id: 'long_boulevard',
-    name: '긴 직선 대로',
-    displayName: '긴 직선 대로',
-    theme: 'ruins',
-    representativeElement: 'fire',
-    featuredDefenseTypes: ['normal', 'regeneration', 'heavy'],
-    midBossId: 'flora',
-    finalBossId: 'pharaoh',
-    availableDifficultyIds: ['easy', 'normal'],
-    displayedDifficultyIds: ['easy', 'normal'],
-    map: {
-      columns: BOARD_RULES.columns,
-      rows: BOARD_RULES.rows,
-      spawn: point(1, 1),
-      core: point(10, 10),
-      pathWaypoints: LONG_BOULEVARD_WAYPOINTS,
-      pathCells: expandOrthogonalPath(LONG_BOULEVARD_WAYPOINTS),
-      obstacles: [point(4, 0), point(7, 0), point(0, 7)],
-      placementCells: [
-        spot(0, 1, 'line'),
-        spot(11, 5, 'line'),
-        spot(10, 6, 'line'),
-        spot(9, 2, 'bend'),
-        spot(9, 4, 'bend'),
-        spot(2, 6, 'bend'),
-        spot(2, 9, 'bend'),
-        spot(4, 3, 'crossing'),
-        spot(7, 3, 'crossing'),
-        spot(3, 7, 'crossing'),
-        spot(6, 8, 'crossing'),
-        spot(5, 3, 'support'),
-        spot(5, 7, 'support'),
-        spot(11, 10, 'last'),
-        spot(9, 11, 'last'),
-      ],
-      recommendedPlacements: {
-        0: point(9, 2),
-        1: point(7, 3),
-        2: point(11, 5),
-        3: point(2, 6),
-        4: point(6, 8),
-      },
-    },
-    waves: longBoulevardWaves,
-  },
-]);
-
-export const STAGE_BY_ID = deepFreeze(Object.fromEntries(STAGES.map((stage) => [stage.id, stage])));
-
+export const STAGES = deepFreeze(REALMS.map(realm => {
+  const {boss,waveEnemies,counts,map,...identity}=realm;
+  const pathCells=expandOrthogonalPath(map.pathWaypoints);
+  return {...identity,displayName:realm.name,midBossId:boss,finalBossId:boss,
+    availableDifficultyIds:['easy','normal'],displayedDifficultyIds:['easy','normal'],
+    map:{...map,columns:BOARD_RULES.columns,rows:BOARD_RULES.rows,
+      pathCells,spawn:pathCells[0],core:pathCells[pathCells.length-1]},
+    waves:makeWaves(realm)};
+}));
+export const STAGE_BY_ID = deepFreeze(Object.fromEntries(STAGES.map(stage=>[stage.id,stage])));
 export default STAGES;

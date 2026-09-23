@@ -43,7 +43,9 @@ async function run(browser,label,url,mode){
         get(){return descriptor.get.call(image);},
         set(value){
           __requestedImages.push(value);
-          const block=mode==='failed'||mode==='hanging'||mode==='primary' && /moonlit\/(heroes|companions|creatures)/.test(value);
+          // Block every primary character/boss atlas, including newly added
+          // solo sheets. Terrain and effects do not have portrait fallbacks.
+          const block=mode==='failed'||mode==='hanging'||mode==='primary' && /moonlit\/(?!worlds\.webp|combat-fx\.webp)/.test(value);
           if(block){
             if(mode!=='hanging')queueMicrotask(()=>image.onerror?.(new Event('error')));
           }else descriptor.set.call(image,value);

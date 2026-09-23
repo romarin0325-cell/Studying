@@ -66,7 +66,7 @@ export function startWave(state) {
   return true;
 }
 
-function spawnEnemy(state, enemyId) {
+export function spawnEnemy(state, enemyId, {progress=0,hpScale=1}={}) {
   const definition = ENEMY_BY_ID[enemyId];
   if (!definition) throw new RangeError(`Unknown enemy: ${enemyId}`);
   const waveDefinition = state.stage.waves[state.wave.number - 1];
@@ -74,8 +74,9 @@ function spawnEnemy(state, enemyId) {
   const bossMultiplier = definition.isBoss ? Number(state.difficulty.bossHpMultiplier ?? 1) : 1;
   const stageHpMultiplier = definition.isBoss ? 1 : Number(state.stage.enemyHpMultiplier ?? 1);
   const stageSpeedMultiplier = definition.isBoss ? 1 : Number(state.stage.enemySpeedMultiplier ?? 1);
-  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier * stageHpMultiplier;
-  const first = state.stage.path[0];
+  const maxHp = definition.baseHp * waveMultiplier * state.difficulty.hpMultiplier * bossMultiplier * stageHpMultiplier * hpScale;
+  const pathIndex=Math.min(state.stage.path.length-2,Math.max(0,Math.floor(progress)));
+  const first=state.stage.path[pathIndex],next=state.stage.path[pathIndex+1],fraction=progress-pathIndex;
   state.wave.spawnSerial += 1;
   const enemy = state.registry.add('enemies', {
     id: `enemy_${String(state.wave.spawnSerial).padStart(4, '0')}`,
@@ -88,10 +89,10 @@ function spawnEnemy(state, enemyId) {
     hp: maxHp,
     maxHp,
     speed: definition.speed * state.difficulty.speedMultiplier * stageSpeedMultiplier,
-    progress: 0,
+    progress,
     spawnOrder: state.wave.spawnSerial,
-    x: first.x + 0.5,
-    y: first.y + 0.5,
+    x: first.x + 0.5 + (next.x-first.x)*fraction,
+    y: first.y + 0.5 + (next.y-first.y)*fraction,
     statuses: {},
     direction: 'front',
     dead: false,
@@ -120,6 +121,7 @@ export function updateWaveSpawning(state, deltaSeconds) {
 export function isWaveClear(state) {
   return state.phase === BATTLE_PHASE.WAVE_RUNNING
     && state.wave.spawnIndex >= state.wave.spawnQueue.length
+    && state.registry.projectiles.size === 0
     && state.registry.activeEnemyCount() === 0;
 }
 

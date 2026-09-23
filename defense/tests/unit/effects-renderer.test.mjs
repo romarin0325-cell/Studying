@@ -18,7 +18,7 @@ function createContextRecorder() {
     fill() {},
     fillRect() {},
     strokeText() {},
-    fillText() {},
+    fillText(text,x,y) { calls.push(['text',text,x,y]); },
     moveTo(x, y) { calls.push(['moveTo', x, y]); path.push([x,y]); },
     lineTo(x, y) { calls.push(['lineTo', x, y]); path.push([x,y]); },
   };
@@ -128,157 +128,79 @@ test('skill cast sparkle renders on the caster without a damage popup', () => {
   assert.equal(renderer.snapshotCaps().effects, 0, 'cast sparkle expires within its 0.55s life');
 });
 
-test('burst basic hits keep a single trace while drawing ice shards', () => {
-  const renderer = new EffectRenderer();
-  const context = createContextRecorder();
-  renderer.push({
-    effectPreset: 'basic_ranged_hit',
-    attackArchetype: 'burst',
-    element: 'dark',
-    sourceX: 1,
-    sourceY: 1,
-    x: 4,
-    y: 4,
-  });
-  renderer.update(0.1);
-  renderer.render(context, TEST_LAYOUT);
-  assert.equal(context.strokes.filter(path => path.length === 2).length, 1, 'shards must not duplicate the ranged trail');
+test('clock cast keeps a small caster sparkle; the collapsing face belongs only to impact', () => {
+  const cast={type:'attack_prepare',actionKind:'skill',effectPreset:'skill_cast',element:'dark',x:2,y:3,radius:2,visualOnly:true};
+  const traces=[];
+  for(const vfx of [undefined,'clock']) {
+    const renderer=new EffectRenderer(),context=createContextRecorder();
+    renderer.push({...cast,vfx});renderer.update(.1);renderer.render(context,TEST_LAYOUT);
+    traces.push(context.calls);
+  }
+  assert.deepEqual(traces[1],traces[0],'preparation must not draw an early area collapse around the caster');
+  const renderer=new EffectRenderer(),context=createContextRecorder();
+  renderer.push({...cast,type:'hit',effectPreset:'skill_area_hit',vfx:'clock',x:5,y:6});
+  renderer.render(context,TEST_LAYOUT);
+  assert.equal(context.strokes.filter(path=>path.length===2).length,12,'impact has twelve clock marks');
 });
 
-test('skill hits fly from the caster before detonating and their popup waits for impact', () => {
-  const renderer = new EffectRenderer();
-  assert.equal(renderer.push({
-    type: 'hit',
-    actionKind: 'skill',
-    effectPreset: 'skill_area_hit',
-    element: 'fire',
-    sourceX: 1,
-    sourceY: 1,
-    x: 5,
-    y: 5,
-    radius: 3,
-    amount: 120,
-  }), true);
-  assert.deepEqual(renderer.snapshotCaps(), {
-    effects: 1,
-    popups: 1,
-    effectCap: 250,
-    popupCap: 40,
-  });
+test('burst impacts draw shards at the target without replaying the flight', () => {
+  const renderer=new EffectRenderer(), context=createContextRecorder();
+  renderer.push({effectPreset:'basic_ranged_hit',attackArchetype:'burst',element:'dark',sourceX:1,sourceY:1,x:4,y:4});
+  renderer.update(.1); renderer.render(context,TEST_LAYOUT);
+  assert.equal(context.strokes.filter(path=>path.length===2).length,0);
+  assert.ok(context.calls.some(([name])=>name==='moveTo'));
+});
 
-  const midFlight = createContextRecorder();
-  renderer.update(0.13);
-  renderer.render(midFlight, TEST_LAYOUT);
-  assert.deepEqual(
-    midFlight.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [16, 8],
-    'the projectile trail tail stays behind the caster side',
-  );
-  assert.deepEqual(
-    midFlight.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [30, 23],
-    'the glowing projectile head is halfway to the target',
-  );
+test('loaded combat art renders a shotgun impact with a valid colored trace', () => {
+  const context=createContextRecorder();
+  context.translate=()=>{}; context.rotate=()=>{}; context.drawImage=(...args)=>context.calls.push(['image',...args]);
+  const renderer=new EffectRenderer({assetManager:{getImage:()=>({width:1024,height:1024})}});
+  renderer.push({effectPreset:'basic_shotgun_hit',attackArchetype:'shotgun',element:'fire',sourceX:1,sourceY:1,x:4,y:2,amount:9});
+  renderer.render(context,TEST_LAYOUT);
+  assert.ok(context.strokes.length>0,'instant shot trace must render with the atlas loaded');
+  assert.ok(context.calls.some(call=>call[0]==='image'),'impact uses the loaded art');
+});
 
-  renderer.update(0.26);
-  const impact = createContextRecorder();
-  renderer.render(impact, TEST_LAYOUT);
-  assert.equal(renderer.snapshotCaps().effects, 1, 'the explosion keeps playing after arrival');
-  assert.ok(
-    impact.calls.every(([name]) => name === 'moveTo' || name === 'lineTo'),
-    'after arrival the shard and star geometry stays in the impact phase',
-  );
-  assert.equal(
-    impact.strokes.filter(path => path.length === 2).length,
-    0,
-    'the detonation phase draws no projectile trail',
-  );
-
+test('skill flight is drawn from simulation progress; its hit popup appears on the impact frame', () => {
+  const renderer=new EffectRenderer(), flight=createContextRecorder();
+  const projectile={phase:'flight',progress:.5,actionKind:'skill',attackArchetype:'area',
+    element:'fire',sourceX:1,sourceY:1,targetX:5,targetY:5,x:3,y:3,radius:3};
+  renderer.render(flight,TEST_LAYOUT,[projectile]);
+  assert.equal(renderer.snapshotCaps().popups,0,'a flying projectile cannot report damage');
+  const trace=flight.strokes.find(path=>path.length===2);
+  assert.deepEqual(trace[0].map(Math.round),[16,8]);
+  assert.deepEqual(trace[1].map(Math.round),[30,25]);
+  renderer.push({type:'hit',actionKind:'skill',attackArchetype:'area',effectPreset:'skill_area_hit',
+    element:'fire',sourceX:1,sourceY:1,x:5,y:5,radius:3,amount:120});
+  const impact=createContextRecorder(); renderer.render(impact,TEST_LAYOUT,[]);
+  assert.equal(impact.strokes.filter(path=>path.length===2).length,0,'no second fake projectile after HP decreases');
+  assert.equal(impact.calls.filter(([name])=>name==='text').length,1,'damage is visible immediately');
+  assert.equal(renderer.effects[0].travel,0);
   renderer.update(1.2);
-  assert.equal(renderer.snapshotCaps().effects, 0);
-  assert.equal(renderer.snapshotCaps().popups, 0, 'popup lifetime is extended by the travel phase');
+  assert.equal(renderer.snapshotCaps().effects,0); assert.equal(renderer.snapshotCaps().popups,0);
 });
 
-test('skill overlays wait out the travel window without drawing extra projectiles', () => {
-  const renderer = new EffectRenderer();
-  const common = { type: 'hit', actionKind: 'skill', element: 'light', sourceX: 1, sourceY: 1, x: 5, y: 5 };
-  renderer.push({ ...common, effectPreset: 'skill_single_hit', amount: 80 });
-  renderer.push({ ...common, effectPreset: 'critical_hit', amount: 80 });
-  renderer.push({ ...common, effectPreset: 'status_apply', statusId: 'burn' });
-  assert.equal(renderer.snapshotCaps().effects, 3);
-
-  const midFlight = createContextRecorder();
-  renderer.update(0.13);
-  renderer.render(midFlight, TEST_LAYOUT);
-  assert.equal(
-    midFlight.calls.filter(([name]) => name === 'moveTo').length,
-    2,
-    'one trail plus one star polygon: overlays stay hidden during travel',
-  );
-  assert.equal(
-    midFlight.calls.filter(([name]) => name === 'lineTo').length,
-    8,
-    'the single projectile traces one trail edge and seven star edges',
-  );
-
-  renderer.update(0.2);
-  const impact = createContextRecorder();
-  renderer.render(impact, TEST_LAYOUT);
-  const impactPolygons = impact.calls.filter(([name]) => name === 'moveTo');
-  assert.ok(
-    impactPolygons.length > 0 && impactPolygons.every(([, x]) => x >= 40),
-    'after arrival polygons only start at the target, never along the flight path',
-  );
+test('skill status and critical overlays appear at the same impact with one damage number', () => {
+  const renderer=new EffectRenderer();
+  const common={type:'hit',actionKind:'skill',element:'light',sourceX:1,sourceY:1,x:5,y:5};
+  renderer.push({...common,effectPreset:'skill_single_hit',amount:80});
+  renderer.push({...common,effectPreset:'critical_hit',amount:80});
+  renderer.push({...common,effectPreset:'status_apply',statusId:'burn'});
+  const context=createContextRecorder(); renderer.render(context,TEST_LAYOUT);
+  assert.equal(renderer.effects.length,3);
+  assert.ok(renderer.effects.every(effect=>effect.travel===0));
+  assert.equal(context.calls.filter(([name])=>name==='text').length,1);
+  assert.equal(context.strokes.filter(path=>path.length===2).length,0);
 });
 
-test('ranged effects draw from the source while each shotgun hit draws exactly one pellet trail', () => {
-  const ranged = new EffectRenderer();
-  const rangedContext = createContextRecorder();
-  ranged.push({
-    effectPreset: 'basic_ranged_hit',
-    element: 'light',
-    sourceX: 1,
-    sourceY: 2,
-    x: 5,
-    y: 6,
-  });
-  ranged.update(0.2);
-  ranged.render(rangedContext, TEST_LAYOUT);
-  assert.equal(rangedContext.strokes.filter(path => path.length === 2).length, 1);
-  assert.deepEqual(
-    rangedContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [19, 21],
-  );
-  assert.deepEqual(
-    rangedContext.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [30, 33],
-  );
-
-  const shotgun = new EffectRenderer();
-  const shotgunContext = createContextRecorder();
-  shotgun.push({
-    effectPreset: 'basic_shotgun_hit',
-    element: 'water',
-    sourceX: 2,
-    sourceY: 3,
-    x: 6,
-    y: 7,
-    pelletIndex: 1,
-    vectorX: 0.7,
-    vectorY: 0.7,
-  });
-  shotgun.update(0.24);
-  shotgun.render(shotgunContext, TEST_LAYOUT);
-  assert.equal(shotgunContext.strokes.filter(path => path.length === 2).length, 1);
-  assert.ok(shotgunContext.calls.some(([name]) => name === 'lineTo'));
-  assert.deepEqual(
-    shotgunContext.calls.find(([name]) => name === 'moveTo').slice(1).map(Math.round),
-    [24, 25],
-  );
-  assert.deepEqual(
-    shotgunContext.calls.find(([name]) => name === 'lineTo').slice(1).map(Math.round),
-    [40, 41],
-  );
+test('shotgun hits draw one complete instantaneous pellet ray at the impact tick', () => {
+  const renderer=new EffectRenderer(), context=createContextRecorder();
+  renderer.push({effectPreset:'basic_shotgun_hit',element:'water',sourceX:2,sourceY:3,x:6,y:7,pelletIndex:1});
+  renderer.update(.24); renderer.render(context,TEST_LAYOUT);
+  const traces=context.strokes.filter(path=>path.length===2);
+  assert.equal(traces.length,1);
+  assert.deepEqual(traces[0][0].map(Math.round),[20,21]);
+  assert.deepEqual(traces[0][1].map(Math.round),[60,61]);
 });
 
 test('nova draws six jagged lightning spokes from the caster', () => {

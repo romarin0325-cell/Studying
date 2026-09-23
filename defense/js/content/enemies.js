@@ -27,7 +27,7 @@ function enemy({ id, name, element, defenseType, baseHp, speed, stageId, token }
   };
 }
 
-function boss({ id, name, element, baseHp, speed, stageId }) {
+function boss({ id, name, element, baseHp, speed, stageId, ability }) {
   return {
     id,
     name,
@@ -43,6 +43,7 @@ function boss({ id, name, element, baseHp, speed, stageId }) {
     stageId,
     renderMode: 'directional_sprite',
     initialDirection: 'front',
+    ability: { interval: 11, windup: 3.2, breakHpRatio: .07, recovery: 3, ...ability },
     assetIds: bossAssetIds(id),
   };
 }
@@ -100,19 +101,21 @@ export const ENEMIES = deepFreeze([
   }),
   boss({
     id: 'flora',
-    name: '플로라',
+    name: '꽃의 여신 플로라',
     element: 'nature',
     baseHp: 2500,
     speed: 0.70,
-    stageId: 'ancient_ruins',
+    stageId: 'fairy_forest',
+    ability: { kind: 'bloom', name: '만개', description: '시전이 끝나면 재생 우상 둘을 불러냅니다.', enemyId: 'regrowth_idol', count: 2, hpScale: .6 },
   }),
   boss({
-    id: 'pharaoh',
-    name: '파라오',
-    element: 'nature',
+    id: 'artificial_demon',
+    name: '인조마신',
+    element: 'light',
     baseHp: 3200,
     speed: 0.65,
     stageId: 'ancient_ruins',
+    ability: { kind: 'guard', name: '프리즘 장벽', description: '시전이 끝나면 4초간 받는 피해가 35% 감소합니다.', duration: 4, damageTaken: .65 },
   }),
   enemy({
     id: 'rift_shade',
@@ -165,21 +168,27 @@ export const ENEMIES = deepFreeze([
     token: { shape: 'diamond', symbol: '◆' },
   }),
   boss({
-    id: 'reaper',
-    name: '사신',
-    element: 'dark',
+    id: 'love_iris',
+    name: '사랑의 여신 아이리스',
+    element: 'light',
     baseHp: 3200,
     speed: 0.72,
-    stageId: 'chaos_rift',
+    stageId: 'crossroads',
+    ability: { kind: 'heal', name: '장미의 약속', description: '시전이 끝나면 최대 생명력의 6%를 회복합니다.', healRatio: .06 },
   }),
   boss({
-    id: 'demon_god',
-    name: '마신',
+    id: 'beelzebub',
+    name: '마신 벨제뷔트',
     element: 'dark',
-    baseHp: 4400,
+    baseHp: 3800,
     speed: 0.62,
     stageId: 'chaos_rift',
+    ability: { kind: 'doom', name: '검은 태양', description: '시전이 끝나면 코어에 피해 1을 줍니다.', coreDamage: 1, interval: 14 },
   }),
+  boss({ id:'curse_iris',name:'저주의 여신 아이리스',element:'dark',baseHp:3200,speed:.68,stageId:'long_boulevard',
+    ability:{kind:'seal',name:'일곱 번째 저주',description:'가까운 수호자 둘의 다음 스킬을 3초 늦춥니다.',count:2,delay:3} }),
+  boss({ id:'poseidon',name:'해신 포세이돈',element:'water',baseHp:3500,speed:.63,stageId:'sunken_temple',
+    ability:{kind:'tide',name:'대해일',description:'시전이 끝나면 4초간 이동 속도가 70% 증가합니다.',duration:4,speedMultiplier:1.7} }),
 ]);
 
 export const ENEMY_BY_ID = deepFreeze(Object.fromEntries(ENEMIES.map((definition) => [definition.id, definition])));
