@@ -151,6 +151,10 @@ const Astra = {
       const resolved = selected || (filename ? this.portraitPath + filename : '');
       img.dataset.astraSource = filename;
       img._astraEntity = entity;
+      if (ImageAssets.sources.get(img) === resolved && !options.force) {
+        if (img.dataset.fallback === 'true') img.src = this.fallback(entity);
+        return originalLoad(img, resolved, { ...options, alt:options.alt || entity?.name || filename.replace(/\.png$/i, '') });
+      }
       delete img.dataset.fallback;
       originalLoad(img, resolved, { ...options, alt:options.alt || entity?.name || filename.replace(/\.png$/i, '') });
       const originalError = img.onerror;
@@ -279,20 +283,21 @@ const Astra = {
     return button;
   },
   renderBattleStatuses() {
-    const render = (id, buffs) => {
+    const render = (id, actor) => {
+      const buffs = actor?.buffs;
       const box = this.$(id);
       box.replaceChildren();
       for (const [key,value] of Object.entries(buffs || {})) {
         if (!value) continue;
         const negative = StatusRules.isNegative(key);
-        const label = `${negative ? '−' : '+'} ${StatusRules.formatDisplay(key, value, RPG.state.artifacts || [])}`;
+        const label = `${negative ? '−' : '+'} ${StatusRules.formatDisplay(key, value, RPG.state.artifacts || [], actor)}`;
         const badge = this.text('span',label,`status-badge ${negative ? 'status-negative' : 'status-positive'}`);
         badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
         box.append(badge);
       }
     };
-    render('p-buffs',RPG.battle.players[RPG.battle.currentPlayerIdx]?.buffs);
-    render('e-buffs',RPG.battle.enemy?.buffs);
+    render('p-buffs',RPG.battle.players[RPG.battle.currentPlayerIdx]);
+    render('e-buffs',RPG.battle.enemy);
   },
   decorateMissionReward() {
     const rewardId = RPG.missionViewType === 'special' ? RPG.global.specialMission?.rewardCardId : RPG.global.monthlyMission?.rewardCardId;
@@ -456,6 +461,7 @@ const Astra = {
       });
       if (!normalized) throw new Error('불러올 수 없는 여정 기록입니다.');
     }
+    if (hasOwn(Storage.keys.MODE_RECORDS) && !ModeRecords.validate(safe[Storage.keys.MODE_RECORDS])) throw new Error('모드별 최고 기록 형식 또는 버전이 잘못되었습니다.');
     for (const [key,value] of Object.entries(safe)) {
       if ([Storage.keys.VOCAB,Storage.keys.COLLOCATION,Storage.keys.RECORDS].includes(key) && !Array.isArray(value)) throw new Error('학습 또는 전투 기록 형식이 잘못되었습니다.');
       if (key === Storage.keys.FORTUNE_LAST_USED && (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))) throw new Error('포춘쿠키 기록 형식이 잘못되었습니다.');
@@ -467,7 +473,8 @@ const Astra = {
     try {
       if (file.size > 5 * 1024 * 1024) throw new Error('기록 파일은 5MB 이하여야 합니다.');
       const safe = this.validateImport(JSON.parse(await file.text()));
-      RPG.showConfirm('이 파일의 기록을 가져올까요?<br>같은 항목의 현재 저장 기록이 교체됩니다.', () => {
+      const recordNotice = Object.prototype.hasOwnProperty.call(safe, Storage.keys.MODE_RECORDS) ? '' : '<br>파일에 없는 모드별 최고 기록은 현재 기록을 유지합니다.';
+      RPG.showConfirm('이 파일의 기록을 가져올까요?<br>같은 항목의 현재 저장 기록이 교체됩니다.' + recordNotice, () => {
         const previous = new Map();
         try {
           for (const key of this.backupKeys()) previous.set(key,localStorage.getItem(key));

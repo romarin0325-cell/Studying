@@ -1574,8 +1574,8 @@
     <div id="modal-wordbook" class="modal">
         <div class="modal-content" style="width: 90%; max-width: 600px; height: 80vh;">
             <h3>단어장</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 4px; flex-wrap: nowrap;">
-                <span style="font-size: 0.72rem; color: #aaa; white-space: nowrap;">빨간색:틀린단어</span>
+            <div class="wordbook-toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 4px; flex-wrap: nowrap;">
+                <span class="wordbook-help">오답: 복습 대상</span>
                 <label
                     style="font-size: 0.72rem; color: #aaa; display: flex; align-items: center; cursor: pointer; white-space: nowrap;">
                     <input type="checkbox" id="wordbook-filter-wrong" onchange="RPG.openWordbook()"
@@ -3318,7 +3318,7 @@
                             }
                         }
 
-                        desc.innerText = `[${m.name}]\n${descText}`;
+                        desc.innerText = `[${m.name}]\n${descText}` + (this.tempGameType === 'endless' ? '\n\n엔드리스 최고 기록\n' + this.getEndlessRecordText(m.id) : '');
 
                         // Visual Update
                         list.querySelectorAll('.menu-btn').forEach(b => b.style.borderColor = '#555');
@@ -3353,6 +3353,7 @@
                     return this.openPerfectPlanDraft();
                 }
                 this.clearToeicLumiQuestionSession({ abort: true, clearCurrentToeic: true });
+                this.recordCurrentEndlessStage({ entering: true });
                 this.showScreen('screen-menu');
                 document.getElementById('ui-tickets').innerText = this.state.tickets;
                 this.ensureMonthlyMissionState();
@@ -4000,13 +4001,12 @@
                     div.style.borderBottom = "1px solid #444";
                     div.style.paddingBottom = "5px";
 
-                    // Apply red color if wrong
-                    const wordColor = isWrong ? '#ef5350' : '#81d4fa';
-
-                    div.innerHTML = `<b style="color:${wordColor}; font-size:1.1rem;">${v.word}</b><br>
-                             <span style="color:#eee;">${v.meaning}</span>`;
+                    div.className = 'wordbook-entry' + (isWrong ? ' is-wrong' : '');
+                    div.innerHTML = `<b class="wordbook-word">${v.word}</b>${isWrong ? '<span class="wordbook-wrong-badge">오답</span>' : ''}<br>
+                             <span class="wordbook-meaning">${v.meaning}</span>`;
                     list.appendChild(div);
                 });
+                if (!list.childElementCount) list.innerHTML = '<p class="wordbook-empty">표시할 단어가 없습니다.</p>';
                 document.getElementById('modal-wordbook').classList.add('active');
             },
 
@@ -4042,13 +4042,13 @@
                     div.style.borderBottom = "1px solid #444";
                     div.style.paddingBottom = "5px";
 
-                    const color = isWrong ? '#ef5350' : '#81d4fa';
-
-                    div.innerHTML = `<b style="color:${color}; font-size:1.1rem;">${v.expression}</b><br>
-                             <span style="color:#eee;">${v.meaning}</span>`;
+                    div.className = 'wordbook-entry' + (isWrong ? ' is-wrong' : '');
+                    div.innerHTML = `<b class="wordbook-word">${v.expression}</b>${isWrong ? '<span class="wordbook-wrong-badge">오답</span>' : ''}<br>
+                             <span class="wordbook-meaning">${v.meaning}</span>`;
                     list.appendChild(div);
                 });
 
+                if (!list.childElementCount) list.innerHTML = '<p class="wordbook-empty">표시할 단어가 없습니다.</p>';
                 document.querySelector('#modal-wordbook h3').innerText = "숙어/구동사 단어장";
                 document.getElementById('modal-wordbook').classList.add('active');
             },
@@ -4089,7 +4089,7 @@
                 skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
                 data.skills.forEach(s => {
                     let multText = s.val ? ` (x${s.val})` : '';
-                    skills += `<p style="margin:2px 0;">[${s.name}] (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
+                    skills += `<p style="margin:2px 0;">[${s.name}] · ${SkillTypes.label(s.type)} (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
                 });
                 document.getElementById('md-skills').innerHTML = skills;
                 document.getElementById('modal-card').classList.add('active');
@@ -4201,15 +4201,20 @@
             setupControls(p) {
                 const panel = document.getElementById('battle-controls');
                 panel.innerHTML = "";
+                let actionCommitted = false;
                 const executePlayerSkill = skill => {
+                    if (actionCommitted) return;
+                    actionCommitted = true;
                     panel.querySelectorAll('button').forEach(button => { button.disabled = true; });
                     RPG.executeSkill(p, RPG.battle.enemy, skill);
                 };
 
                 // Normal Attack
                 const btn = document.createElement('button');
-                btn.className = 'skill-btn phy';
-                btn.innerHTML = `<span>일반공격</span><span style="color:#aaa">MP 0</span>`;
+                btn.className = `skill-btn ${RPG.NORMAL_ATTACK.type}`;
+                btn.dataset.skillType = RPG.NORMAL_ATTACK.type;
+                btn.setAttribute('aria-label', `${SkillTypes.label(RPG.NORMAL_ATTACK.type)} · 일반공격 · MP 0`);
+                btn.innerHTML = `<span class="skill-name">일반공격</span><span class="skill-cost">MP 0</span>`;
                 btn.onclick = () => executePlayerSkill(RPG.NORMAL_ATTACK);
                 panel.appendChild(btn);
 
@@ -4217,7 +4222,9 @@
                 (p.skills || p.proto.skills).forEach(s => {
                     const btn = document.createElement('button');
                     btn.className = `skill-btn ${s.type}`;
-                    btn.innerHTML = `<span>${s.name}</span><span style="color:#aaa">MP ${s.cost}</span>`;
+                    btn.dataset.skillType = s.type;
+                    btn.setAttribute('aria-label', `${SkillTypes.label(s.type)} · ${s.name} · MP ${s.cost}${p.mp < s.cost ? ' · MP 부족' : ''}`);
+                    btn.innerHTML = `<span class="skill-name">${SkillTypes.names[s.type] ? '' : '타입 미확인 · '}${s.name}</span><span class="skill-cost">MP ${s.cost}</span>`;
                     if (p.mp < s.cost) btn.disabled = true;
                     else btn.onclick = () => {
                         const choice = (s.effects || []).find(effect => effect.type === 'transform_choice');
@@ -4289,7 +4296,7 @@
                     let mpPct = (p.mp / (p.maxMp || GAME_CONSTANTS.MAX_MP)) * 100;
                     document.getElementById('p-mp-bar').style.width = `${Math.max(0, mpPct)}%`;
 
-                    let buffTxt = Object.keys(p.buffs).map(k => BUFF_NAMES[k] || k).join(',');
+                    let buffTxt = Object.keys(p.buffs).filter(k => p.buffs[k]).map(k => StatusRules.formatDisplay(k, p.buffs[k], this.state.artifacts || [], p)).join(',');
                     document.getElementById('p-buffs').innerText = buffTxt;
                     document.getElementById('player-actor-box').style.opacity = 1;
                 } else {
@@ -4303,7 +4310,7 @@
                 const eImg = document.getElementById('e-img');
                 ImageAssets.load(eImg, e);
 
-                let eBuffTxt = Object.keys(e.buffs).filter(k => e.buffs[k]).map(k => StatusRules.formatDisplay(k, e.buffs[k], this.state.artifacts || [])).join(' ');
+                let eBuffTxt = Object.keys(e.buffs).filter(k => e.buffs[k]).map(k => StatusRules.formatDisplay(k, e.buffs[k], this.state.artifacts || [], e)).join(' ');
                 document.getElementById('e-buffs').innerText = eBuffTxt;
 
                 document.getElementById('bt-turn').innerText = this.battle.turn;
@@ -4866,7 +4873,7 @@
                 if (!char) return;
 
                 let buffs = Object.keys(char.buffs).filter(k => char.buffs[k])
-                    .map(k => StatusRules.formatDisplay(k, char.buffs[k], this.state.artifacts || []))
+                    .map(k => StatusRules.formatDisplay(k, char.buffs[k], this.state.artifacts || [], char))
                     .join(', ') || '없음';
 
                 const eff = Logic.calculateStats(char, this.battle.fieldBuffs, this.state.mode, this.state.artifacts || [], this.battle.turn || 1);
@@ -4895,13 +4902,13 @@
                     content += `<b>[스킬]</b><br>`;
                     (char.skills || char.proto.skills).forEach(s => {
                         let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name}: ${s.desc}${multText}<br>`;
+                        content += `- ${s.name} · ${SkillTypes.label(s.type)} · MP ${s.cost}: ${s.desc}${multText}<br>`;
                     });
                 } else {
                     content += `<b>[스킬]</b><br>`;
                     char.skills.forEach(s => {
                         let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name}: ${s.desc}${multText}<br>`;
+                        content += `- ${s.name} · ${SkillTypes.label(s.type)} · MP ${s.cost}: ${s.desc}${multText}<br>`;
                     });
                 }
                 this.openInfoModal(char.name, content);

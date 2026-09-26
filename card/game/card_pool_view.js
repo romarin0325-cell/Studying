@@ -136,7 +136,14 @@
             tools.appendChild(random);
             body.appendChild(tools);
             const grid = el('div', 'card-pool-extra-grid');
+            let previousGrade = null;
             (model.extraCards || []).forEach(card => {
+                if (card.data.grade !== previousGrade) {
+                    previousGrade = card.data.grade;
+                    const heading = el('h4', 'card-pool-grade-heading', DISPLAY_NAMES.grade[previousGrade] || previousGrade);
+                    heading.dataset.grade = previousGrade;
+                    grid.appendChild(heading);
+                }
                 grid.appendChild(this.cardRow(card, {
                     onDetail: () => actions.onCardDetail(card.id),
                     onToggle: !card.inBase ? () => actions.onToggleExtra(card.id) : null,
@@ -151,6 +158,7 @@
         cardRow(card, options) {
             const row = el('div', 'card-pool-card-row' + (options.selected ? ' is-selected' : '') + (card.inBase ? ' is-base' : ''));
             row.dataset.cardId = card.id;
+            row.dataset.grade = card.data?.grade || '';
             if (options.compact) row.classList.add('is-compact');
             if (typeof ImageAssets !== 'undefined' && ImageAssets.createPortrait) {
                 row.appendChild(ImageAssets.createPortrait(card.data || { name: card.name, id: card.id }));

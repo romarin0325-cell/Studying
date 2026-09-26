@@ -170,3 +170,52 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) #modal-fortune-cookie .op
   #screen-menu .lobby-shortcuts { gap:6px; }
   .astra #modal-card-pool .modal-content { padding:16px; }
 }
+
+/* Skill frames carry the type without adding a badge to the control. */
+body.astra { --phy-ink:#ffe0d5; --phy-fill:#44323a; --phy-line:#d39b8c; --mag-ink:#e6dfff; --mag-fill:#33304d; --mag-line:#afa1da; --sup-ink:#ccefe4; --sup-fill:#203e3e; --sup-line:#83bdae; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) { --phy-ink:#793c42; --phy-fill:#fae8e3; --phy-line:#bc7779; --mag-ink:#58417d; --mag-fill:#eee8f9; --mag-line:#9483b8; --sup-ink:#245b51; --sup-fill:#e1f3ed; --sup-line:#6caa98; }
+.astra .skill-btn.phy { --skill-ink:var(--phy-ink); --skill-fill:var(--phy-fill); --skill-line:var(--phy-line); }
+.astra .skill-btn.mag { --skill-ink:var(--mag-ink); --skill-fill:var(--mag-fill); --skill-line:var(--mag-line); }
+.astra .skill-btn.sup { --skill-ink:var(--sup-ink); --skill-fill:var(--sup-fill); --skill-line:var(--sup-line); }
+body.astra #battle-controls .skill-btn { background:var(--skill-fill,var(--panel))!important; border:1px solid var(--skill-line,var(--line))!important; color:var(--skill-ink,var(--paper))!important; box-shadow:inset 0 1px #ffffff26,0 2px 5px #0000000c; padding-inline:12px; }
+body.astra #battle-controls .skill-btn span { color:inherit!important; }
+body.astra #battle-controls .skill-name { font-size:13px; line-height:1.3; font-weight:600; overflow-wrap:anywhere; }
+body.astra #battle-controls .skill-cost { font-size:11px; line-height:1.3; font-variant-numeric:tabular-nums; }
+body.astra #battle-controls .skill-btn:disabled { opacity:1; border-style:dashed!important; box-shadow:none; }
+body.astra #battle-controls .skill-btn:hover:not(:disabled) { box-shadow:inset 0 0 0 1px var(--skill-line),0 2px 6px #00000012; }
+.wordbook-entry { border-bottom-color:var(--line)!important; padding:9px 4px!important; }
+.wordbook-word { color:var(--sky-bright); font-size:1.1rem; }
+.is-wrong .wordbook-word { color:var(--negative-ink); }
+.wordbook-meaning { color:var(--paper); }
+.wordbook-wrong-badge { display:inline-block; margin-left:8px; padding:1px 6px; border-radius:5px; color:var(--negative-ink); background:var(--negative-fill); font-size:11px; vertical-align:middle; }
+.astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { position:relative; width:clamp(108px,30vw,140px)!important; height:auto!important; aspect-ratio:3/5; flex:none; border-radius:18px; }
+.astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait img { width:100%; height:100%; object-fit:contain; }
+.astra :is(#modal-date,#modal-tutoring) { padding:8px; }
+.astra :is(#modal-date,#modal-tutoring) .modal-content { height:calc(100dvh - 16px)!important; max-height:calc(100dvh - 16px)!important; min-height:0; padding:12px; }
+.astra #tutoring-content { flex:1; min-height:0!important; overflow:auto; }
+.astra :is(#modal-date,#modal-tutoring) .modal-content>div:last-of-type:not(.portrait):not(.modal-scroll),.astra :is(#modal-date,#modal-tutoring) .modal-content>button { flex-shrink:0; }
+body[data-theme=strawberry] :is(#modal-date,#modal-tutoring) .lumi-modal-portrait::after { content:''; position:absolute; inset:0; background:url("../assets/magical-lumi-frame.svg") center/100% 100% no-repeat; pointer-events:none; }
+body[data-theme=dreamsky] { --ink:#e8f2f7; --panel:#fdfefe; --panel-soft:#eaf3f8; --paper:#28465b; --muted:#526b7b; --line:#aac5d4; --wash:#c4dce8; --button:#dbeaf3; --button-fill:linear-gradient(#ffffff,#e5f0f6); --primary-fill:linear-gradient(#32698b,#285979); --sky:#2b6589; --sky-bright:#225776; }
+body[data-theme=dreamsky] :is(.modal-content,.departure-panel,.study-grid>button,.title-utilities) { outline:1px solid #c7dce7; outline-offset:-5px; box-shadow:inset 0 0 0 3px #fff,0 6px 20px #50758b18; }
+body[data-theme=dreamsky] .modal-content { border-top-color:#b5cdda!important; }
+body[data-theme=dreamsky] .modal-content h3 { border-color:var(--line); }
+body[data-theme=dreamsky] :is(.lumi-chat-title,.page-heading h1,.section-label b) { letter-spacing:.015em; }
+body.astra :is(.menu-btn:disabled,.modal-content button:disabled,.card-item:disabled) { opacity:1; border-style:dashed!important; }
+body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(#toeic-question,#toeic-result-content,#toeic-explanation-content,#quiz-feedback,.grammar-explanation) { color:var(--paper)!important; }
+@media(max-height:600px) { .astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:clamp(84px,19vh,108px)!important; } }
+@media(orientation:landscape) and (max-height:500px) { .astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:72px!important; } .astra :is(#modal-date,#modal-tutoring) .modal-content { padding:8px 12px; } }
+body[data-theme=astra] .skill-btn.phy { --button-art:url("../assets/astra-skill-phy.svg"); }
+body[data-theme=astra] .skill-btn.mag { --button-art:url("../assets/astra-skill-mag.svg"); }
+body[data-theme=astra] .skill-btn.sup { --button-art:url("../assets/astra-skill-sup.svg"); }
+body[data-theme=strawberry] .skill-btn.phy { --button-art:url("../assets/magical-skill-phy.svg"); }
+body[data-theme=strawberry] .skill-btn.mag { --button-art:url("../assets/magical-skill-mag.svg"); }
+body[data-theme=strawberry] .skill-btn.sup { --button-art:url("../assets/magical-skill-sup.svg"); }
+body[data-theme=dreamsky] .skill-btn.phy { --button-art:url("../assets/dreamsky-skill-phy.svg"); }
+body[data-theme=dreamsky] .skill-btn.mag { --button-art:url("../assets/dreamsky-skill-mag.svg"); }
+body[data-theme=dreamsky] .skill-btn.sup { --button-art:url("../assets/dreamsky-skill-sup.svg"); }
+
+.astra :is(.wordbook-help,.wordbook-empty,#modal-wordbook label) { color:var(--muted)!important; font-size:12px; }
+
+.astra .wordbook-toolbar { flex-wrap:wrap!important; flex-shrink:0; }
+
+.astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { background:var(--panel-soft)!important; border-color:var(--line)!important; }

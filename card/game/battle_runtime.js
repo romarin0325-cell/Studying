@@ -48,11 +48,12 @@ function applyQueuedAction(rpg, target, action) {
     if (action.log) rpg.log(action.log);
 }
 
-const TURN_BUFF_IDS = ['evasion', 'barrier', 'magic_guard', 'guard'];
+const TURN_BUFF_IDS = ['evasion', 'barrier', 'magic_guard', 'guard', 'damage_half'];
 
 function tickTurnBuffs(target, buffIds = TURN_BUFF_IDS) {
     if (!target || !target.buffs) return;
 
+    if (!target.buffs.guard) delete target.guardEnhancedTurns;
     buffIds.forEach(buffId => {
         const duration = target.buffs[buffId];
         if (!duration) return;
@@ -617,13 +618,12 @@ const BattleRuntime = {
 
             const guardSucceeded = !!target.buffs.guard;
             let dmg = val * mult * (100 / (100 + def));
-            if (guardSucceeded) {
-                const guardReduction = target.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
-                    ? target.guardDamageReduction
-                    : 0.5;
+            const reduction = StatusRules.damageReduction(target);
+            if (reduction.rate > 0) {
+                const guardReduction = reduction.rate;
                 dmg *= (1 - guardReduction);
                 const guardPercent = Math.round(guardReduction * 100);
-                rpg.log(`${target.name} 가드 성공! 피해 ${guardPercent}% 감소.`);
+                rpg.log(`${target.name} ${reduction.name} 적용! 피해 ${guardPercent}% 감소.`);
             }
             dmg = Math.floor(dmg);
             target.hp -= dmg;

@@ -95,7 +95,7 @@ try {
    await page.keyboard.press('Escape');await page.keyboard.press('Escape');
    await page.locator('[onclick="RPG.openPrivateTutoring()"]:visible').click();
    const tutoring=await page.locator('#modal-tutoring .lumi-modal-portrait').boundingBox();
-   assert.equal(tutoring.height,lecture.height);assert.ok(tutoring.height>=133);
+   assert.ok(Math.abs(tutoring.width/tutoring.height-.6)<.01);assert.ok(tutoring.height>lecture.height);assert.ok(tutoring.width>lecture.width);
    assert.ok((await page.locator('#tutoring-content').boundingBox()).height>=170);
    await page.screenshot({path:shot(`${theme}-tutoring-${size.width}`)});
    await page.locator('[onclick="RPG.closePrivateTutoring()"]:visible').click();
@@ -105,7 +105,7 @@ try {
     await RPG.startDate();
    });
    const date=await page.locator('#modal-date .lumi-modal-portrait').boundingBox();
-   assert.equal(date.height,lecture.height);
+   assert.equal(date.height,tutoring.height);assert.ok(Math.abs(date.width/date.height-.6)<.01);
    await readable(page.locator('#date-content'));
    await page.screenshot({path:shot(`${theme}-date-${size.width}`)});
    await page.evaluate(()=>document.getElementById('modal-date').classList.remove('active'));
