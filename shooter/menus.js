@@ -1,7 +1,14 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress } from './meta.js';
+import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function economySnapshot(profile) {
+  return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })) };
+}
+function restoreEconomy(profile, snap) {
+  profile.dreamShards = snap.dreamShards; profile.randomResetTickets = snap.randomResetTickets; profile.randomDraws = { ...snap.randomDraws };
+  profile.owned.splice(0, profile.owned.length, ...snap.owned); profile.tickets.splice(0, profile.tickets.length, ...snap.tickets.map(ticket => ({ ...ticket })));
+}
 const $ = id => document.getElementById(id);
 export class CampaignUI {
   constructor(options) { Object.assign(this,options); }
@@ -79,13 +86,60 @@ export class CampaignUI {
       let resolved=false;
       const draw=correct=>{
         if(resolved)return;resolved=true;
-        const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);this.save();const a=result.artifact;
-        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${result.duplicate?'이미 소유한 유물이에요. 다음 주에 새로운 별을 찾아봐요.':'새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.'}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
+        const snap=economySnapshot(p);
+        const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);
+        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 뽑기를 취소했어요.');return this.equipment(refresh);}
+        const a=result.artifact;
+        const shardNote = result.duplicate ? `이미 보유한 유물이에요. 꿈의 조각 ${result.shardsAwarded}개를 받았어요. 재화: 꿈의 조각 ${p.dreamShards}개.` : '새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.';
+        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${shardNote}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
       };
       this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
         ()=>this.quiz(Math.random()<.5?'vocab':'collocation','',draw),()=>draw(false));
       $('quiz-decline').textContent='아니오 · 바로 뽑기';
     };
+  }
+  shop(refresh) {
+    const p=this.profile;
+    let busy=false;
+    const render=()=>{
+      const remaining=randomRemaining(p), resets=p.randomResetTickets, shards=p.dreamShards;
+      const shopTickets=p.tickets.filter(ticket=>ticket.source==='shop' && ticket.kind==='artifact').length;
+      this.setModal(`<span class="small-caps">DREAM SHARDS</span><h2>별빛 상점</h2><p class="shop-balance">재화: 꿈의 조각 ${shards}개</p><p class="tiny-note">레어 유물 꿈의조각과는 다른 재화예요. 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능.</p><div class="shop-goods"><button class="secondary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}><b>아티팩트 뽑기권 1장</b><small>꿈의 조각 5개 · 보유 뽑기권 ${p.tickets.length}장 · 상점 티켓 ${shopTickets}장</small></button><button class="secondary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}><b>랜덤 횟수 리셋권 1장</b><small>꿈의 조각 1개 · 보유 리셋권 ${resets}장</small></button></div><p class="intro-copy">오늘 남은 기본 횟수 ${remaining}/${RANDOM_DAILY_LIMIT}</p><button class="primary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button><p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 남은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
+      document.querySelector('.panel').classList.add('shop-panel');
+      $('shop-back').onclick=()=>{this.closeModal();refresh();};
+      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의 조각 5개로 살까요?');
+      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의 조각 1개로 살까요?');
+      $('use-reset').onclick=()=>confirmReset();
+    };
+    const confirmBuy=(item,copy)=>{
+      if(busy)return;
+      this.setModal(`<h2>구매할까요?</h2><p class="intro-copy">${copy}</p><button class="primary" id="shop-confirm">구매</button><button class="secondary" id="shop-cancel">취소</button>`);
+      let done=false;
+      $('shop-cancel').onclick=()=>{if(!done)render();};
+      $('shop-confirm').onclick=()=>{
+        if(done||busy)return;done=true;busy=true;
+        const snap=economySnapshot(p);
+        const result=purchaseShopItem(p,item);
+        if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의 조각이 부족해요.':'구매하지 못했어요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
+        busy=false;this.toast('구매했어요.');render();
+      };
+    };
+    const confirmReset=()=>{
+      if(busy)return;
+      this.setModal(`<h2>리셋권을 사용할까요?</h2><p class="intro-copy">남은 기본 횟수가 0일 때만 사용할 수 있어요. 사용하면 오늘 기본 ${RANDOM_DAILY_LIMIT}회로 돌아가요.</p><button class="primary" id="shop-confirm">사용</button><button class="secondary" id="shop-cancel">취소</button>`);
+      let done=false;
+      $('shop-cancel').onclick=()=>{if(!done)render();};
+      $('shop-confirm').onclick=()=>{
+        if(done||busy)return;done=true;busy=true;
+        const now=new Date(), snap=economySnapshot(p);
+        const result=useRandomResetTicket(p,now);
+        if(!result.ok){busy=false;this.toast(result.reason==='remaining'?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'사용할 리셋권이 없어요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 사용을 취소했어요.');return render();}
+        busy=false;this.toast(`오늘 기본 횟수가 ${result.remaining}회로 돌아왔어요.`);render();
+      };
+    };
+    render();
   }
   achievements() {
     const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;

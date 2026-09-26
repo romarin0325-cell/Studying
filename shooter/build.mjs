@@ -67,7 +67,7 @@ const embeddedAssetsScript = `globalThis.ASTRAL_EMBEDDED_ASSETS=${JSON.stringify
 // 4. Bundle JavaScript modules.
 const modules = [
   ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'EVENT_DUNGEONS', 'LIMITS', 'clamp']],
-  ['meta.js', ['ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','ACHIEVEMENTS','normalizeDifficulty','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','heroAvailable','unlockHero','claimDungeon','drawArtifact','loadoutStats']],
+  ['meta.js', ['ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','ACHIEVEMENTS','normalizeDifficulty','RANDOM_DAILY_LIMIT','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','heroAvailable','unlockHero','claimDungeon','drawArtifact','purchaseShopItem','useRandomResetTicket','loadoutStats']],
   ['art-manifest.js', ['createArtUrls']],
   ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']], ['menus.js',['CampaignUI']],
   ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt', 'BOSS_PRESENTATION']],

@@ -90,5 +90,13 @@
  .panel.dungeon-panel .dungeon-description{grid-column:2;grid-row:2;margin:0!important}
  .panel.dungeon-panel .difficulty-list{grid-column:2;grid-row:3;margin:0}
  .panel.dungeon-panel .weekly-note{grid-column:2;grid-row:4;margin:0}
- .panel.dungeon-panel #dungeon-done{grid-column:2;grid-row:5}
+  .panel.dungeon-panel #dungeon-done{grid-column:2;grid-row:5}
 }
+.campaign-route{display:grid;grid-template-columns:1fr 1fr}
+.campaign-route button,.campaign-route button:first-child{flex:unset;width:auto}
+#bomb{touch-action:manipulation}
+#hold-note{display:block;margin-top:6px;font-size:11px;letter-spacing:0;color:#ffe2ac;text-shadow:0 1px 3px #000}
+.shop-balance{font-size:16px;color:#f4e7c4;margin:14px 0 8px}
+.shop-goods{display:grid;gap:8px;margin:12px 0}
+.shop-goods button{text-align:left;min-height:64px}
+.shop-goods small{display:block;margin-top:4px;color:#c5d0e0;font-size:11px;line-height:1.45;white-space:normal}

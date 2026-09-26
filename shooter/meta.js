@@ -33,8 +33,8 @@ export const ARTIFACTS = [
   { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 10% 감소 · 봄 공격력 60% 증가', normalAttack: -.10, bomb: .60 },
   { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 20% 감소 · 일반 공격력 30% 증가', normalAttack: .30, bomb: -.20 },
   { id: 'fairycloak', name: '요정의망토', rarity: 'epic', text: '피격 반경 2 감소 · 최대 생명 1 증가', radius: -2, life: 1 },
-  { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
-  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득' },
+  { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복 · 파워 최대' },
+  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득 · 파워 최대' },
   { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' },
   { id: 'steelshield', name: '강철방패', rarity: 'normal', text: '피격 시 파워 감소 방지' },
   { id: 'cursedsword', name: '저주의검', rarity: 'rare', text: '공격력 15% 증가 · 회복 아이템 드랍 제거', attack: .15 },
@@ -44,7 +44,7 @@ export const ARTIFACTS = [
   { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
 ];
 export function artifactText(artifact, challenge = false) {
-  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 5 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
+  return challenge ? ({resurgence:'생명 전부 회복 · 파워 최대',miracle:'봄 5 획득 · 파워 최대',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
 export const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
@@ -61,6 +61,16 @@ export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,
   { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${wName} · 어려움`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 어려움 클리어` }
 ];})));
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
+export const RANDOM_DAILY_LIMIT = 3;
+const SHARD_AWARD = Object.freeze({ normal: 1, rare: 3, epic: 5 });
+const SHOP_COST = Object.freeze({ artifact: 5, reset: 1 });
+const MAX_COUNT = Number.MAX_SAFE_INTEGER;
+function finiteCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(Math.floor(n), MAX_COUNT);
+}
+function isShopTicket(ticket) { return !!ticket && ticket.source === 'shop' && ticket.kind === 'artifact'; }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
 // The local Monday key is the seed: reloads and profile resets never reroll the event.
@@ -78,10 +88,17 @@ export function createProfile(raw = {}) {
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
   const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard):[0-5]$/.test(key)));
-  return { version: 5, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  const tickets = [];
+  if (Array.isArray(raw.tickets)) for (const ticket of raw.tickets) {
+    if (isShopTicket(ticket)) { tickets.push({ source: 'shop', kind: 'artifact' }); continue; }
+    if (!ticket || typeof ticket !== 'object' || ticket.source === 'shop') continue;
+    if (!DIFFICULTIES.some(d => d.id === ticket.difficulty) || !Number.isInteger(ticket.dungeon) || ticket.dungeon < 0 || ticket.dungeon >= (migrate ? 4 : 8)) continue;
+    tickets.push({ ...ticket, dungeon: migrate && ticket.dungeon === 3 ? 5 : ticket.dungeon });
+  }
+  return { version: 6, dreamShards: finiteCount(raw.dreamShards), randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
-    tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(t => t && DIFFICULTIES.some(d => d.id === t.difficulty) && Number.isInteger(t.dungeon) && t.dungeon >= 0 && t.dungeon < (migrate?4:8)).map(t=>({...t,dungeon:migrate&&t.dungeon===3?5:t.dungeon})) : [],
+    tickets,
     unlocks: raw.unlocks && typeof raw.unlocks === 'object' ? raw.unlocks : {},
     clears,
     learning: raw.learning && typeof raw.learning === 'object' ? raw.learning : { correct: 0, total: 0, mistakes: [], read: [] } };
@@ -110,7 +127,7 @@ export function randomHero(profile, random = Math.random, date = new Date()) {
   return Math.min(8, Math.floor(Math.max(0,random()) * 9));
 }
 export function randomRemaining(profile,date=new Date()) {
-  return profile.randomDraws?.date===dayKey(date) ? Math.max(0,10-profile.randomDraws.count) : 10;
+  return profile.randomDraws?.date===dayKey(date) ? Math.max(0,RANDOM_DAILY_LIMIT-profile.randomDraws.count) : RANDOM_DAILY_LIMIT;
 }
 export function consumeRandom(profile,random=Math.random,date=new Date()) {
   if(randomRemaining(profile,date)<=0)return null;
@@ -134,8 +151,35 @@ export function drawArtifact(profile, random = Math.random, quizCorrect = false)
   const roll = random(), epic = quizCorrect ? .02 : .01;
   const rarity = roll < chance ? 'rare' : roll < chance + epic ? 'epic' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
   const artifact = pool[Math.min(pool.length-1, Math.floor(Math.max(0, random()) * pool.length))];
-  const duplicate = profile.owned.includes(artifact.id); if (!duplicate) profile.owned.push(artifact.id);
-  return { artifact, duplicate, ticket };
+  const duplicate = profile.owned.includes(artifact.id);
+  let shardsAwarded = 0;
+  if (!duplicate) profile.owned.push(artifact.id);
+  else {
+    profile.dreamShards = finiteCount(profile.dreamShards);
+    shardsAwarded = Math.min(SHARD_AWARD[artifact.rarity] || 0, MAX_COUNT - profile.dreamShards);
+    profile.dreamShards += shardsAwarded;
+  }
+  return { artifact, duplicate, ticket, shardsAwarded };
+}
+export function purchaseShopItem(profile, item) {
+  const cost = SHOP_COST[item];
+  if (cost == null) return { ok: false, reason: 'unknown' };
+  profile.dreamShards = finiteCount(profile.dreamShards);
+  profile.randomResetTickets = finiteCount(profile.randomResetTickets);
+  if (profile.dreamShards < cost) return { ok: false, reason: 'balance' };
+  if (item === 'reset' && profile.randomResetTickets >= MAX_COUNT) return { ok: false, reason: 'overflow' };
+  profile.dreamShards -= cost;
+  if (item === 'artifact') profile.tickets.push({ source: 'shop', kind: 'artifact' });
+  else profile.randomResetTickets += 1;
+  return { ok: true, item, dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, tickets: profile.tickets.length };
+}
+export function useRandomResetTicket(profile, date = new Date()) {
+  profile.randomResetTickets = finiteCount(profile.randomResetTickets);
+  if (profile.randomResetTickets < 1) return { ok: false, reason: 'no-ticket' };
+  if (randomRemaining(profile, date) > 0) return { ok: false, reason: 'remaining' };
+  profile.randomResetTickets -= 1;
+  profile.randomDraws = { date: dayKey(date), count: 0 };
+  return { ok: true, remaining: RANDOM_DAILY_LIMIT, randomResetTickets: profile.randomResetTickets };
 }
 export function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
   const equipment = [...new Set(ids)].map(id => ARTIFACTS.find(a => a.id === id)).filter(Boolean).slice(0,slots);

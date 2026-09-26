@@ -28,6 +28,7 @@ export class Game {
     if(challenge) {
       if(this.artifacts.has('resurgence'))this.player.lives=this.maxLife;
       if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
+      if(this.artifacts.has('resurgence') || this.artifacts.has('miracle'))this.setMaxPower();
     }
     this.startStage(challenge ? 0 : stage);
   }
@@ -273,7 +274,7 @@ export class Game {
       if (this.artifacts.has('burningcore')) this.powerPoints = 0;
     }
     this.clearBullets(); this.particlesAt(p.x, p.y, '#fff', 30); this.emit('hurt');
-    if (p.lives <= 0) { this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
+    if (p.lives <= 0) { this.dropEventSubpatterns(false); this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
   }
   enemyBullet(x, y, angle, speed, options = {}) {
     const relaxed = this.difficulty.speed;
@@ -348,14 +349,17 @@ export class Game {
   bossAttack(dt) {
     const b = this.boss; if (!b || b.hp <= 0) return;
     const phase = b.hp / b.maxHp > .67 ? 0 : b.hp / b.maxHp > .34 ? 1 : 2;
-    if (phase !== this.bossPattern) {
-      this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2;
+    const entered = phase !== this.bossPattern;
+    if (entered) {
+      this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2; b.subpatternNext = null;
       if (this.stageIndex===6) {
         b.nextLight=this.bossClock+4; b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+3; b.asteaCrossCount=0;
       }
       this.emit('pattern', { phase, name: this.stage.pattern[phase] });
     }
     this.bossClock += dt; b.fire -= dt;
+    if (entered) this.armEventSubpattern(phase);
+    this.tickEventSubpattern(phase);
     const aim = Math.atan2(this.player.y - b.y, this.player.x - b.x);
     const speed = 102 + this.stageIndex * 10 + phase * 12;
     const t = this.bossClock;
@@ -428,6 +432,42 @@ export class Game {
     this.emit('enemyShot', { boss: true });
   }
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
+  eventSubpatternKind() {
+    const asset = this.dungeon?.asset;
+    if (asset === 'behemoth' || asset === 'time-ruler' || asset === 'gold-dragon') return 'blast';
+    if (asset === 'harmonious' || asset === 'ancient-soul') return 'laser';
+    return null;
+  }
+  armEventSubpattern(phase) {
+    const b = this.boss;
+    if (!b) return;
+    b.subpatternNext = this.dungeon?.event && phase >= 1 && this.eventSubpatternKind() ? this.bossClock + 3 : null;
+  }
+  tickEventSubpattern(phase) {
+    const b = this.boss;
+    if (!b || b.subpatternNext == null || phase < 1 || this.bossClock + 1e-9 < b.subpatternNext) return;
+    this.spawnEventSubpattern();
+    b.subpatternNext = this.bossClock + (phase >= 2 ? 5 : 6);
+  }
+  spawnEventSubpattern() {
+    const kind = this.eventSubpatternKind();
+    if (!kind || this.hazards.length >= 6 || this.hazards.some(h => h.source === 'eventSubpattern')) return false;
+    if (kind === 'blast') {
+      const radius = 36, pad = radius + 8;
+      this.hazards.push({ kind: 'targetBlast', source: 'eventSubpattern', x: clamp(this.player.x, pad, this.width - pad), y: clamp(this.player.y, pad, Math.max(pad, this.height - pad)), radius, age: 0, warn: 1, activeDuration: .2, life: 1.2, hit: false });
+    } else this.hazards.push({ source: 'eventSubpattern', x: clamp(this.player.x, 40, 410), width: 24, axis: 'vertical', age: 0, warn: 1.4, life: 2.25 });
+    return true;
+  }
+  dropEventSubpatterns(reschedule = false) {
+    this.hazards = this.hazards.filter(h => h.source !== 'eventSubpattern');
+    if (!reschedule || !this.boss || !this.dungeon?.event || this.bossPattern < 1 || !this.eventSubpatternKind()) return;
+    this.boss.subpatternNext = this.bossClock + (this.bossPattern >= 2 ? 5 : 6);
+  }
+  setMaxPower() {
+    this.powerPoints = 0;
+    if (this.power >= 5) return false;
+    this.power = 5; this.emit('powerup'); return true;
+  }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
     b.fire=[1.25,1.08,.92][phase];
@@ -504,8 +544,8 @@ export class Game {
     this.powerRequirement=([0,7].includes(this.heroIndex)?4:3)-(this.artifacts.has('dew')?1:0);
     if(id==='origin')this.power=Math.min(5,this.power+1);
     while(this.powerPoints>=this.powerRequirement && this.power<5){this.powerPoints-=this.powerRequirement;this.power++;}
-    if(id==='resurgence')this.player.lives=this.maxLife;
-    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
+    if(id==='resurgence'){this.player.lives=this.maxLife;this.setMaxPower();}
+    if(id==='miracle'){this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);this.setMaxPower();}
     if(id==='clover')this.player.barrier=true;
     this.pendingArtifacts=null;
     return this.completeQuiz();
@@ -525,7 +565,10 @@ export class Game {
     if (!correct) return false;
     this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
     if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
-    this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
+    if(!this.challenge && (this.artifacts.has('resurgence') || this.artifacts.has('miracle')))this.setMaxPower();
+    this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0;
+    if(this.boss && this.boss.hp > 0)this.dropEventSubpatterns(true);
+    this.emit('revived'); return true;
   }
   update(dt) {
     if (this.finished || this.phase === 'quiz' || dt <= 0) return;
@@ -543,6 +586,7 @@ export class Game {
       if (this.room === 1 && this.time > this.stage.duration*.55 && !this.sentinelSpawned) this.spawnSentinel();
       if (this.time >= this.stage.duration) {
         if (this.room === 2) this.spawnBoss();
+        else if (this.room === 0) { if (!this.enemies.some(e => e.hp > 0 && !e.boss && (e.elite || e.miniboss))) this.clearRoom(); }
         else if (!this.enemies.some(e=>e.miniboss && e.hp>0)) this.clearRoom();
       } else if (this.spawnTime <= 0) { this.spawnWave(); this.spawnTime = Math.max(2.5,3.8-this.level*.2) * this.difficulty.interval; }
     }
@@ -570,6 +614,10 @@ export class Game {
           e.teleportClock=(e.teleportClock||0)+dt;
           if(e.teleportClock>=2.3&&!e.teleportTarget){e.teleportTarget={x:55+this.random()*340,y:70+this.random()*Math.min(260,this.height*.35)};this.effect('teleport',{...e.teleportTarget,radius:32,life:.75,color:this.stage.color});}
           if(e.teleportClock>=3){e.x=e.ox=e.teleportTarget.x;e.y=e.teleportTarget.y;e.prevX=e.x;e.prevY=e.y;e.teleportClock=0;e.teleportTarget=null;this.effect('burst',{x:e.x,y:e.y,radius:40,life:.35,color:this.stage.color});}
+        }
+        if (this.phase === 'wave' && this.room === 0 && this.time >= this.stage.duration && (e.elite || e.miniboss)) {
+          const holdY = Math.min(280, this.height * .42);
+          if (e.y > holdY) e.y = holdY;
         }
         if (e.special === 2 && e.y > 0) {
           e.countdown -= dt;
@@ -638,7 +686,13 @@ export class Game {
     }
     this.bullets = this.bullets.filter(b => !b.dead && b.age < 14 && b.y < this.height + 25 && b.y > -150 && b.x > -80 && b.x < 530);
     this.stats.maxBullets = Math.max(this.stats.maxBullets, this.bullets.length);
-    for (const h of this.hazards) { h.age += dt; if (h.age > h.warn && Math.abs((h.axis==='horizontal'?p.y:p.x) - h.x) < h.width / 2 + p.radius) this.hitPlayer(); }
+    for (const h of this.hazards) {
+      h.age += dt;
+      if (h.age <= h.warn) continue;
+      if (h.kind === 'targetBlast') {
+        if (!h.hit && h.age <= h.warn + h.activeDuration && distance(h, p) < h.radius + p.radius && this.hitPlayer()) h.hit = true;
+      } else if (Math.abs((h.axis==='horizontal'?p.y:p.x) - h.x) < h.width / 2 + p.radius) this.hitPlayer();
+    }
     if(this.finished)return;
     this.hazards = this.hazards.filter(h => h.age < h.life);
     for (const d of this.pickups) {
