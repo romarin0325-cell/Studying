@@ -13,9 +13,9 @@ These rules apply to everything under `card/`.
 Run from repo root before completion:
 - npm run verify
 
-`npm run verify` only runs the card suite when `card/` or `scripts/verify_card_*` changed. Do not run Defense for card-only work.
+`npm run verify` selects only the Card checks mapped to changed Card behavior. Use `npm run verify:plan` to review the mapping. Do not run Shooter or Defense for Card-only work, and do not run the full Card suite unless the user explicitly requests it.
 
-If game sources change, rebuild `card/dist/DREAMWEAVER.html` with the Card package build so the committed bundle stays in sync.
+If a deployment input changes, build `card/dist/DREAMWEAVER.html` once with the Card package build and run the selected bundle boot check so the committed artifact stays in sync. Documentation-only and test-only changes do not build.
 
 ## Verification note
 If a change cannot be fully verified by `npm run verify`, explicitly list what is still unverified.
