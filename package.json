@@ -14,7 +14,10 @@
     "verify:shooter": "npm run verify --prefix shooter",
     "build:card": "npm run build --prefix card",
     "verify:card": "npm run verify --prefix card",
+    "test:verify-plan": "node --test scripts/verify_plan.test.js",
     "verify": "node scripts/verify.js",
+    "verify:plan": "node scripts/verify.js --plan",
+    "verify:full": "node scripts/verify.js --full",
     "prepare:defense-art": "node scripts/prepare_defense_art.mjs",
     "test:defense:resilience": "node scripts/verify_defense_resilience.js"
   },
