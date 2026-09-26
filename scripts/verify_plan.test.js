@@ -60,6 +60,29 @@ test('non-deployment documentation installs and runs no game tooling', () => {
   assert.match(plan.skipped.join('\n'), /documentation/);
 });
 
+test('Confluence source and art select focused Defense checks and the offline browser dependency', () => {
+  const files=changes('defense/merge/engine.js','defense/merge/render.js','defense/docs/art/ANATOMICAL_LANDMARKS.json','scripts/pack_defense_directions.mjs');
+  const rootPlan=createPlan(files);
+  assert.equal(games(rootPlan).has('defense'),false);
+  assert.deepEqual(rootPlan.blocked,[]);
+  const plan=createPlan(files,{onlyGame:'defense'});
+  assert.deepEqual(plan.blocked,[]);
+  assert.ok(plan.steps.some(s=>s.args.includes('defense/tests/unit/confluence.test.mjs')));
+  assert.ok(plan.steps.some(s=>s.args.includes('defense/tests/integration/confluence-art.test.mjs')));
+  assert.ok(ids(plan).includes('defense:browser-screen'));
+  assert.ok(plan.steps.find(s=>s.id==='defense:bundle-contract').browsers.includes('chromium'));
+  assert.doesNotMatch(plan.steps.map(s=>s.args.join(' ')).join('\n'),/test:defense:experience|test:defense:resilience|simulation-balance/);
+});
+
+test('authoring research stays documentation while active profile JSON is a deployment input', () => {
+  const docs=createPlan(changes('defense/docs/art/HEAD_CONSISTENCY_RESEARCH.md'),{onlyGame:'defense'});
+  assert.equal(docs.steps.length,0);
+  const input=createPlan(changes('defense/docs/art/HEAD_PROFILE.json'),{onlyGame:'defense'});
+  assert.ok(ids(input).includes('defense:build-local'));
+  const toolsOnly=createPlan(changes('scripts/pack_defense_directions.mjs'),{onlyGame:'defense'});
+  assert.equal(toolsOnly.steps.length,0);
+});
+
 test('root package script changes do not select every game', () => {
   const plan = createPlan(changes('package.json'));
   assert.deepEqual(ids(plan), ['verification:selector-fixtures']);

@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { readFile, writeFile, rename, unlink, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { ASSET_MANIFEST } from '../defense/js/content/assets.js';
+import { ASSET_MANIFEST } from '../defense/merge/content.js';
 
 const root=fileURLToPath(new URL('../defense/',import.meta.url));
 const hash=value=>createHash('sha256').update(value).digest('hex');
@@ -10,7 +10,7 @@ const CACHE_VERSION=1;
 
 async function processorFingerprint() {
   // Text normalization permits reuse after Windows/Linux Git checkout.
-  const policyFiles=['prepare_defense_art.mjs','import_defense_sprite.mjs','pack_defense_poses.mjs','pack_defense_bosses.mjs'];
+  const policyFiles=['prepare_defense_art.mjs','import_defense_sprite.mjs','pack_defense_directions.mjs'];
   const sources=await Promise.all(policyFiles.map(async file=>(await readFile(new URL(file,import.meta.url),'utf8')).replace(/\r\n/g,'\n')));
   const lock=JSON.parse(await readFile(new URL('../package-lock.json',import.meta.url),'utf8'));
   const sharpVersion=lock.packages['node_modules/sharp'].version;

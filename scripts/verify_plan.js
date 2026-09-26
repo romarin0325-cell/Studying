@@ -4,6 +4,19 @@ const path = require('path');
 
 const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter']);
 const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense']);
+const DEFENSE_TOOLS = new Set([
+  'scripts/build_defense_local.mjs', 'scripts/prepare_defense_art.mjs',
+  'scripts/verify_defense.js', 'scripts/verify_defense_confluence.mjs',
+  'scripts/verify_defense_browser.js', 'scripts/verify_defense_experience.js',
+  'scripts/verify_defense_local_bundle.js', 'scripts/verify_defense_resilience.js',
+  'scripts/defense_browser_suite.cjs', 'scripts/serve_defense.js',
+  'scripts/pack_defense_directions.mjs', 'scripts/validate_defense_directions.mjs',
+  'scripts/export_defense_directions.mjs', 'scripts/build_defense_head_review.mjs',
+  'scripts/make_defense_geometry_reference.mjs'
+]);
+const DEFENSE_ART_INPUTS = new Set([
+  'defense/docs/art/HEAD_PROFILE.json', 'defense/docs/art/ANATOMICAL_LANDMARKS.json'
+]);
 
 function normalizePath(file) {
   return String(file || '').replace(/\\/g, '/').replace(/^\.\//, '');
@@ -21,6 +34,7 @@ function changePaths(changes) {
 }
 
 function isDocumentation(file) {
+  if (DEFENSE_ART_INPUTS.has(file)) return false;
   const lower = file.toLowerCase();
   return (
     lower.endsWith('.md')
@@ -321,6 +335,8 @@ function planShooter(plan, files) {
 function defenseUnitTestsFor(sourceFiles) {
   const tests = new Set();
   for (const file of sourceFiles) {
+    if (/^defense\/merge\/(?:engine|content|main)\.js$/.test(file)) tests.add('defense/tests/unit/confluence.test.mjs');
+    if (file.startsWith('defense/assets/merge/units/') || DEFENSE_ART_INPUTS.has(file)) tests.add('defense/tests/integration/confluence-art.test.mjs');
     if (file.includes('/persistence/')) tests.add('defense/tests/unit/persistence.test.mjs');
     if (file.includes('/render/')) tests.add('defense/tests/unit/effects-renderer.test.mjs');
     if (file.includes('/content/')) tests.add('defense/tests/integration/content-architecture.test.mjs');
@@ -335,6 +351,11 @@ function defenseUnitTestsFor(sourceFiles) {
 
 function planDefense(plan, files) {
   const defenseFiles = files.filter(file => file.startsWith('defense/'));
+  if (defenseFiles.length === 0) {
+    if (files.some(file => DEFENSE_TOOLS.has(file))) plan.skipped.push('Defense tooling has no changed Defense product file; no game runtime is selected.');
+    return;
+  }
+  for (const file of files.filter(file => DEFENSE_TOOLS.has(file))) addNodeCheck(plan, 'defense', file);
   const productFiles = defenseFiles.filter(file => !isDocumentation(file));
   const directTests = productFiles.filter(file => /^defense\/tests\/.+\.test\.mjs$/.test(file));
   addNodeTest(
@@ -359,7 +380,7 @@ function planDefense(plan, files) {
     'defense',
     'defense:nearby-regressions',
     'Run the closest Defense regression tests',
-    defenseUnitTestsFor(sourceFiles)
+    defenseUnitTestsFor(sourceFiles).filter(file => !directTests.includes(file))
   );
 
   if (sourceFiles.length > 0) {
@@ -405,7 +426,7 @@ function planDefense(plan, files) {
         'Check the built HeroCoreDefense single-file contract',
         'node',
         ['scripts/verify_defense_local_bundle.js'],
-        { needsInstall: true }
+        { needsInstall: true, browsers: ['chromium'] }
       )
     );
   }
@@ -415,6 +436,7 @@ function planDefense(plan, files) {
     || file.startsWith('defense/css/')
     || file.startsWith('defense/js/app/')
     || file.startsWith('defense/js/render/')
+    || /^defense\/merge\/(?:main\.js|render\.js|style\.css)$/.test(file)
   ))) {
     addStep(
       plan,
@@ -495,6 +517,7 @@ function createPlan(changes, options = {}) {
     ...files.filter(file => ALL_GAMES.some(game => file.startsWith(game + '/'))),
     ...files.filter(file => file.startsWith('scripts/verify_card_')),
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),
+    ...files.filter(file => DEFENSE_TOOLS.has(file)),
     ...ordinaryDocs,
     '.gitignore',
     '.gitattributes'

@@ -1,0 +1,21 @@
+{
+  "status": "Not selected for production. Geometry/layout was not exact; first output used painted checkers. Production retains original identity art with anatomical scale correction.",
+  "generator": "Built-in image generation",
+  "geometryAtExperiment": {
+    "headHeight": 160,
+    "frontWidth": 168,
+    "sideWidth": 152
+  },
+  "jobs": [
+    {
+      "id": "zeke",
+      "kind": "tall",
+      "prompt": "Use case: identity-preserve / precise proportion correction. Create a production 2x2 CARDINAL DIRECTION sprite sheet of this SAME character, one neutral ready stance, top-left front/down, top-right back/up, bottom-left true left profile, bottom-right true right profile. Image 1 is the EDIT TARGET and sole source of character identity, clothing and polished cel-painted game art style. Image 2 is ONLY an anatomical geometry and placement guide: dress that geometry as the character, do not copy its gray material, eyes, outline style or background. Keep the exact 2x2 grid and common feet baseline. Do not auto-enlarge to fill unused space. Use a genuinely transparent background, no checkerboard, no floor or shadow, no text or labels or guide marks. The four views must be the same scale, same clothing and same neutral pose rotated, not action poses. No effects. Preserve opaque white materials. Primary change: standardize Zeke to the exact big rounded head and compact two-head anatomy of Image 2. His source head is too small relative to other heroes; grow the anatomical cranium/face to the template, but keep the recognizable fiery red-orange swept hair, golden flame tips and trailing red-gold ponytail, amber-red eyes, confident male face, red coat, black steel armor, gloves, boots and single gold-edged dark sword carried low in his RIGHT hand. His anatomical head (excluding spikes/ponytail) is 160 high and 168 wide in a 512 cell; chin at y304, soles at y480, front head center x256. Body below chin is 176, only slightly taller than standard. Profile skull width 152. The head must look like a round SD head, not a small adult face inside enormous hair. Retain original expressive anime eyes and simple cel shading; simplify tiny armor detail just enough for a small mobile piece. No new ornaments. Keep the weapon handedness consistent through the turn. Sword/hair may extend outside the anatomical template; do not shrink the character to fit them."
+    },
+    {
+      "id": "night_rabbit",
+      "kind": "short",
+      "prompt": "Use case: identity-preserve / precise proportion correction. Create a production 2x2 CARDINAL DIRECTION sprite sheet of this SAME character, one neutral ready stance, top-left front/down, top-right back/up, bottom-left true left profile, bottom-right true right profile. Image 1 is the EDIT TARGET and sole source of character identity, clothing and polished cel-painted game art style. Image 2 is ONLY an anatomical geometry and placement guide: dress that geometry as the character, do not copy its gray material, eyes, outline style or background. Keep the exact 2x2 grid and common feet baseline. Do not auto-enlarge to fill unused space. Use a genuinely transparent background, no checkerboard, no floor or shadow, no text or labels or guide marks. The four views must be the same scale, same clothing and same neutral pose rotated, not action poses. No effects. Preserve opaque white materials. Primary change: standardize Night Rabbit to the exact common rounded head and shorter compact body of Image 2. Keep white hair with pale lilac shadows, purple eyes, the SAME male face, white/pink long rabbit ears and small curled lock, black choker, black hoodie with white heart patches and white drawstrings, black shorts, thick white legwarmers and black chunky shoes. Do not make the head larger to express short stature. Anatomical head excluding ears/hair extensions is 160 high and 168 wide in a 512 cell, chin y336, sole y480, centered x256. Body below chin only 144. Profile skull width152. Thus slightly shorter torso and legs, SAME head scale as the guide; not a stretched body under a giant head. Preserve the relaxed closed mouth and neutral cute face without feminizing or adding makeup. Keep rabbit ears and costume details physically consistent across the four views. No weapon, no added staff, no magic."
+    }
+  ]
+}

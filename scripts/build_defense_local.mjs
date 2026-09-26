@@ -8,14 +8,12 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 export const APP_ROOT = path.join(REPOSITORY_ROOT, "defense");
 export const DEFAULT_OUTPUT = path.join(APP_ROOT, "dist-local", "HeroCoreDefense.html");
-export const EXPECTED_RELEASE_ASSET_COUNT = 142;
+export const EXPECTED_RELEASE_ASSET_COUNT = 24;
 
-const ENTRY_PATH = "./js/main.js";
-const ASSET_MODULE_PATH = path.join(APP_ROOT, "js", "content", "assets.js");
+const ENTRY_PATH = "./merge/main.js";
+const ASSET_MODULE_PATH = path.join(APP_ROOT, "merge", "content.js");
 const STYLESHEET_PATHS = Object.freeze([
-  "./css/tokens.css",
-  "./css/app.css",
-  "./css/battle.css",
+  "./merge/style.css",
 ]);
 const MIME_TYPES = Object.freeze({
   ".avif": "image/avif",
@@ -92,7 +90,7 @@ async function collectEmbeddedAssets({ requireReleaseAssets }) {
   const assetModule = await import(pathToFileURL(ASSET_MODULE_PATH).href);
   const manifest = assetModule.ASSET_MANIFEST;
   if (!Array.isArray(manifest)) {
-    throw new TypeError("defense/js/content/assets.js must export ASSET_MANIFEST as an array.");
+    throw new TypeError("defense/merge/content.js must export ASSET_MANIFEST as an array.");
   }
 
   const releaseEntries = manifest.filter(isReleaseRequired);
@@ -103,6 +101,7 @@ async function collectEmbeddedAssets({ requireReleaseAssets }) {
   }
 
   const embeddedAssets = {};
+  const embeddedPaths = {};
   const missingAssets = [];
   let embeddedBytes = 0;
 
@@ -121,12 +120,14 @@ async function collectEmbeddedAssets({ requireReleaseAssets }) {
     const mimeType = MIME_TYPES[path.extname(sourcePath).toLowerCase()];
     if (!mimeType) throw new Error(`Unsupported V2 asset format: ${entryPath}`);
     const bytes = await readFile(sourcePath);
-    embeddedAssets[entryPath] = `data:${mimeType};base64,${bytes.toString("base64")}`;
+    embeddedAssets[entry.id] = `data:${mimeType};base64,${bytes.toString("base64")}`;
+    embeddedPaths[normalizeResourcePath(entryPath)] = embeddedAssets[entry.id];
     embeddedBytes += bytes.length;
   }
 
   return {
     embeddedAssets,
+    embeddedPaths,
     embeddedBytes,
     manifestCount: manifest.length,
     missingAssets,
@@ -186,7 +187,7 @@ function inlineEntrypoint(html, javascript) {
 }
 
 function injectDistributionMetadata(html) {
-  const meta = '<meta name="hero-defense-v2-distribution" content="single-file-offline" />';
+  const meta = '<meta name="astra-defense-distribution" content="single-file-offline" />';
   const themeMeta = /<meta\b[^>]*name=["']theme-color["'][^>]*>/i;
   if (themeMeta.test(html)) return html.replace(themeMeta, `${meta}\n    $&`);
   return html.replace(/<head\b[^>]*>/i, `$&\n    ${meta}`);
@@ -201,7 +202,9 @@ function assertNoExternalHtmlResources(html) {
     throw new Error("Bundled V2 HTML still has a module script.");
   }
 
-  const resourceTags = html.match(/<(?:img|source|audio|video|track|iframe|object|link)\b[^>]*>/gi) ?? [];
+  // Inspect actual markup, not the HTML templates inside the bundled runtime.
+  const markup=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,'');
+  const resourceTags = markup.match(/<(?:img|source|audio|video|track|iframe|object|link)\b[^>]*>/gi) ?? [];
   for (const tag of resourceTags) {
     for (const attribute of ["src", "srcset", "poster", "data", "href"]) {
       const value = getQuotedAttribute(tag, attribute)?.trim();
@@ -224,15 +227,15 @@ export async function buildHeroDefenseV2Local({
   ]);
 
   const embeddedAssetBanner = [
-    "globalThis.__HERO_DEFENSE_V2_LOCAL_FILE__=true;",
-    `globalThis.__HERO_DEFENSE_V2_EMBEDDED_ASSETS__=Object.freeze(${JSON.stringify(assetData.embeddedAssets)});`,
+    "globalThis.__ASTRA_LOCAL_FILE__=true;",
+    `globalThis.__ASTRA_ASSETS__=Object.freeze(${JSON.stringify(assetData.embeddedAssets)});`,
   ].join("");
-  const entrySource = await readFile(path.join(APP_ROOT, "js", "main.js"), "utf8");
+  const entrySource = await readFile(path.join(APP_ROOT, "merge", "main.js"), "utf8");
   const bundle = await build({
     stdin: {
       contents: entrySource,
       loader: "js",
-      resolveDir: path.join(APP_ROOT, "js"),
+      resolveDir: path.join(APP_ROOT, "merge"),
       sourcefile: "main.js",
     },
     bundle: true,
@@ -250,7 +253,16 @@ export async function buildHeroDefenseV2Local({
   if (!javascript) throw new Error("esbuild produced no V2 JavaScript output.");
 
   const cssInput = cssSources
-    .map((source, index) => `/* ${STYLESHEET_PATHS[index]} */\n${source}`)
+    .map((source, index) => {
+      const embedded=source.replace(/url\(\s*(["']?)(.*?)\1\s*\)/gi,(match,quote,value)=>{
+        if(value.startsWith('data:')||value.startsWith('#'))return match;
+        const relative=path.relative(APP_ROOT,resolveInsideApp(path.join(path.dirname(STYLESHEET_PATHS[index]),value))).replace(/\\/g,'/');
+        const data=assetData.embeddedPaths[relative];
+        if(!data)throw new Error('Stylesheet asset is not embedded: '+relative);
+        return `url("${data}")`;
+      });
+      return `/* ${STYLESHEET_PATHS[index]} */\n${embedded}`;
+    })
     .join("\n");
   const bundledCss = (await transform(cssInput, {
     charset: "utf8",

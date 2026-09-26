@@ -1,1210 +1,202 @@
 {
   "version": 1,
-  "sourceHash": "d076ed435724cd77738a2b8e2598c780c0252e4ad82252ad3778c8d3b8bdc711",
-  "processorHash": "d1ee327fdab8c1e5337fd2c5ec13d0c002b8d9797155fd23b80685501b069628",
-  "fileCount": 142,
+  "sourceHash": "065937626c3bd252dabb6ab936086dd055d33080127a86893e747820eb650fa9",
+  "processorHash": "625cebc7122b18b36028b0a700e5ff287545747d8df4c62974dd129b812fd476",
+  "fileCount": 24,
   "files": {
-    "./assets/bosses/artificial_demon/back.webp": {
-      "sourceHash": "91da86a6d4fa214f3b775fac1c45a79ff4d07738c325e9a93615caf57c9a1d60",
-      "bytes": 18628,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/artificial_demon/front.webp": {
-      "sourceHash": "91da86a6d4fa214f3b775fac1c45a79ff4d07738c325e9a93615caf57c9a1d60",
-      "bytes": 18628,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/artificial_demon/left.webp": {
-      "sourceHash": "91da86a6d4fa214f3b775fac1c45a79ff4d07738c325e9a93615caf57c9a1d60",
-      "bytes": 18628,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/artificial_demon/right.webp": {
-      "sourceHash": "91da86a6d4fa214f3b775fac1c45a79ff4d07738c325e9a93615caf57c9a1d60",
-      "bytes": 18628,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/beelzebub/back.webp": {
-      "sourceHash": "62ec572c4fa057ab977814c3eb925100c00ccfe08b0020a14e5d6094509d4c7f",
-      "bytes": 23596,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/beelzebub/front.webp": {
-      "sourceHash": "62ec572c4fa057ab977814c3eb925100c00ccfe08b0020a14e5d6094509d4c7f",
-      "bytes": 23596,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/beelzebub/left.webp": {
-      "sourceHash": "62ec572c4fa057ab977814c3eb925100c00ccfe08b0020a14e5d6094509d4c7f",
-      "bytes": 23596,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/beelzebub/right.webp": {
-      "sourceHash": "62ec572c4fa057ab977814c3eb925100c00ccfe08b0020a14e5d6094509d4c7f",
-      "bytes": 23596,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/curse_iris/back.webp": {
-      "sourceHash": "9bae8b83f12d7b855214154add89948993ef59cd29a5d3f96ca827c1a2a440de",
-      "bytes": 22114,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/curse_iris/front.webp": {
-      "sourceHash": "9bae8b83f12d7b855214154add89948993ef59cd29a5d3f96ca827c1a2a440de",
-      "bytes": 22114,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/curse_iris/left.webp": {
-      "sourceHash": "9bae8b83f12d7b855214154add89948993ef59cd29a5d3f96ca827c1a2a440de",
-      "bytes": 22114,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/curse_iris/right.webp": {
-      "sourceHash": "9bae8b83f12d7b855214154add89948993ef59cd29a5d3f96ca827c1a2a440de",
-      "bytes": 22114,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/flora/back.webp": {
-      "sourceHash": "105018d8def65d3db4a5b732910d5f8cf2b4d840bbeb0cf4312706ba3e588a0e",
-      "bytes": 23498,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/flora/front.webp": {
-      "sourceHash": "105018d8def65d3db4a5b732910d5f8cf2b4d840bbeb0cf4312706ba3e588a0e",
-      "bytes": 23498,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/flora/left.webp": {
-      "sourceHash": "105018d8def65d3db4a5b732910d5f8cf2b4d840bbeb0cf4312706ba3e588a0e",
-      "bytes": 23498,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/flora/right.webp": {
-      "sourceHash": "105018d8def65d3db4a5b732910d5f8cf2b4d840bbeb0cf4312706ba3e588a0e",
-      "bytes": 23498,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/love_iris/back.webp": {
-      "sourceHash": "4fec2c27b38f926702a42b3c39773ff1a2594bd3e4e66269b91d642cf13b5850",
-      "bytes": 23250,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/love_iris/front.webp": {
-      "sourceHash": "4fec2c27b38f926702a42b3c39773ff1a2594bd3e4e66269b91d642cf13b5850",
-      "bytes": 23250,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/love_iris/left.webp": {
-      "sourceHash": "4fec2c27b38f926702a42b3c39773ff1a2594bd3e4e66269b91d642cf13b5850",
-      "bytes": 23250,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/love_iris/right.webp": {
-      "sourceHash": "4fec2c27b38f926702a42b3c39773ff1a2594bd3e4e66269b91d642cf13b5850",
-      "bytes": 23250,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/poseidon/back.webp": {
-      "sourceHash": "1da02fb03b242a36045ebc14aa239adaa34e1bc7490e6a787599a525741f6e07",
-      "bytes": 27588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/poseidon/front.webp": {
-      "sourceHash": "1da02fb03b242a36045ebc14aa239adaa34e1bc7490e6a787599a525741f6e07",
-      "bytes": 27588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/poseidon/left.webp": {
-      "sourceHash": "1da02fb03b242a36045ebc14aa239adaa34e1bc7490e6a787599a525741f6e07",
-      "bytes": 27588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/bosses/poseidon/right.webp": {
-      "sourceHash": "1da02fb03b242a36045ebc14aa239adaa34e1bc7490e6a787599a525741f6e07",
-      "bytes": 27588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/ancient_dragon/back.webp": {
-      "sourceHash": "c617ed022e36abf8c9b29872f16e543ca2e369afcf099e91b15b08d45f26a49f",
-      "bytes": 23162,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/ancient_dragon/front.webp": {
-      "sourceHash": "c617ed022e36abf8c9b29872f16e543ca2e369afcf099e91b15b08d45f26a49f",
-      "bytes": 23162,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/ancient_dragon/left.webp": {
-      "sourceHash": "c617ed022e36abf8c9b29872f16e543ca2e369afcf099e91b15b08d45f26a49f",
-      "bytes": 23162,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/ancient_dragon/right.webp": {
-      "sourceHash": "c617ed022e36abf8c9b29872f16e543ca2e369afcf099e91b15b08d45f26a49f",
-      "bytes": 23162,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/avalanche_maid/back.webp": {
-      "sourceHash": "8af220478c13c23fa15bf652d5cd3bebaef645bd808f511d171e5589000eb3f9",
-      "bytes": 22062,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/avalanche_maid/front.webp": {
-      "sourceHash": "8af220478c13c23fa15bf652d5cd3bebaef645bd808f511d171e5589000eb3f9",
-      "bytes": 22062,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/avalanche_maid/left.webp": {
-      "sourceHash": "8af220478c13c23fa15bf652d5cd3bebaef645bd808f511d171e5589000eb3f9",
-      "bytes": 22062,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/avalanche_maid/right.webp": {
-      "sourceHash": "8af220478c13c23fa15bf652d5cd3bebaef645bd808f511d171e5589000eb3f9",
-      "bytes": 22062,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/cinderella/back.webp": {
-      "sourceHash": "e3a5b1e76bff8627d584716873c48c7b98d6c306eae5b04f42ad507c63c8440f",
-      "bytes": 24554,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/cinderella/front.webp": {
-      "sourceHash": "e3a5b1e76bff8627d584716873c48c7b98d6c306eae5b04f42ad507c63c8440f",
-      "bytes": 24554,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/cinderella/left.webp": {
-      "sourceHash": "e3a5b1e76bff8627d584716873c48c7b98d6c306eae5b04f42ad507c63c8440f",
-      "bytes": 24554,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/cinderella/right.webp": {
-      "sourceHash": "e3a5b1e76bff8627d584716873c48c7b98d6c306eae5b04f42ad507c63c8440f",
-      "bytes": 24554,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/flame_sage/back.webp": {
-      "sourceHash": "57ffcaa9e37a1aba33fe359f9ffa6ba29bc90f1da6728b1415e50524fcc46aa1",
-      "bytes": 19924,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/flame_sage/front.webp": {
-      "sourceHash": "57ffcaa9e37a1aba33fe359f9ffa6ba29bc90f1da6728b1415e50524fcc46aa1",
-      "bytes": 19924,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/flame_sage/left.webp": {
-      "sourceHash": "57ffcaa9e37a1aba33fe359f9ffa6ba29bc90f1da6728b1415e50524fcc46aa1",
-      "bytes": 19924,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/flame_sage/right.webp": {
-      "sourceHash": "57ffcaa9e37a1aba33fe359f9ffa6ba29bc90f1da6728b1415e50524fcc46aa1",
-      "bytes": 19924,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/galaxy_whale/back.webp": {
-      "sourceHash": "65fb0b7c246e100c772b4a6377490aa9cc4ec084a11584afd3243f2bce78ca71",
-      "bytes": 26236,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/galaxy_whale/front.webp": {
-      "sourceHash": "65fb0b7c246e100c772b4a6377490aa9cc4ec084a11584afd3243f2bce78ca71",
-      "bytes": 26236,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/galaxy_whale/left.webp": {
-      "sourceHash": "65fb0b7c246e100c772b4a6377490aa9cc4ec084a11584afd3243f2bce78ca71",
-      "bytes": 26236,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/galaxy_whale/right.webp": {
-      "sourceHash": "65fb0b7c246e100c772b4a6377490aa9cc4ec084a11584afd3243f2bce78ca71",
-      "bytes": 26236,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/great_detective/back.webp": {
-      "sourceHash": "db3446d7af2550094446fe2ca4e6e18b307d45bce0d55163e5c55d723f37a62b",
-      "bytes": 19168,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/great_detective/front.webp": {
-      "sourceHash": "db3446d7af2550094446fe2ca4e6e18b307d45bce0d55163e5c55d723f37a62b",
-      "bytes": 19168,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/great_detective/left.webp": {
-      "sourceHash": "db3446d7af2550094446fe2ca4e6e18b307d45bce0d55163e5c55d723f37a62b",
-      "bytes": 19168,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/great_detective/right.webp": {
-      "sourceHash": "db3446d7af2550094446fe2ca4e6e18b307d45bce0d55163e5c55d723f37a62b",
-      "bytes": 19168,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/guardian/back.webp": {
-      "sourceHash": "bb16867136af0ffc05f5b0b9931fd45156e4582bb0eb5b3688962a754e55608f",
-      "bytes": 17280,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/guardian/front.webp": {
-      "sourceHash": "bb16867136af0ffc05f5b0b9931fd45156e4582bb0eb5b3688962a754e55608f",
-      "bytes": 17280,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/guardian/left.webp": {
-      "sourceHash": "bb16867136af0ffc05f5b0b9931fd45156e4582bb0eb5b3688962a754e55608f",
-      "bytes": 17280,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/guardian/right.webp": {
-      "sourceHash": "bb16867136af0ffc05f5b0b9931fd45156e4582bb0eb5b3688962a754e55608f",
-      "bytes": 17280,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/lightning_sage/back.webp": {
-      "sourceHash": "be45d1f9903b7015d0f8d6a84c1a0fd641591f51f3d083bacb9eae4b9e470068",
-      "bytes": 16382,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/lightning_sage/front.webp": {
-      "sourceHash": "be45d1f9903b7015d0f8d6a84c1a0fd641591f51f3d083bacb9eae4b9e470068",
-      "bytes": 16382,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/lightning_sage/left.webp": {
-      "sourceHash": "be45d1f9903b7015d0f8d6a84c1a0fd641591f51f3d083bacb9eae4b9e470068",
-      "bytes": 16382,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/lightning_sage/right.webp": {
-      "sourceHash": "be45d1f9903b7015d0f8d6a84c1a0fd641591f51f3d083bacb9eae4b9e470068",
-      "bytes": 16382,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/luna/back.webp": {
-      "sourceHash": "71b64635439951cd6839bcfb8feec15a83e8c3f76c82756fd714ca26b2f5b1e6",
-      "bytes": 16216,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/luna/front.webp": {
-      "sourceHash": "71b64635439951cd6839bcfb8feec15a83e8c3f76c82756fd714ca26b2f5b1e6",
-      "bytes": 16216,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/luna/left.webp": {
-      "sourceHash": "71b64635439951cd6839bcfb8feec15a83e8c3f76c82756fd714ca26b2f5b1e6",
-      "bytes": 16216,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/luna/right.webp": {
-      "sourceHash": "71b64635439951cd6839bcfb8feec15a83e8c3f76c82756fd714ca26b2f5b1e6",
-      "bytes": 16216,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/mushroom_king/back.webp": {
-      "sourceHash": "ff24bfdbe4ba6597346ad55eaf0b42503c170f933ed2dbbf6bd86561dd383b35",
-      "bytes": 19150,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/mushroom_king/front.webp": {
-      "sourceHash": "ff24bfdbe4ba6597346ad55eaf0b42503c170f933ed2dbbf6bd86561dd383b35",
-      "bytes": 19150,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/mushroom_king/left.webp": {
-      "sourceHash": "ff24bfdbe4ba6597346ad55eaf0b42503c170f933ed2dbbf6bd86561dd383b35",
-      "bytes": 19150,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/mushroom_king/right.webp": {
-      "sourceHash": "ff24bfdbe4ba6597346ad55eaf0b42503c170f933ed2dbbf6bd86561dd383b35",
-      "bytes": 19150,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/night_rabbit/back.webp": {
-      "sourceHash": "f218b86f8dfba515e5ca0f02f3442e625b5336ea0b3435f2a5c10e27d49dd9b2",
-      "bytes": 17588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/night_rabbit/front.webp": {
-      "sourceHash": "f218b86f8dfba515e5ca0f02f3442e625b5336ea0b3435f2a5c10e27d49dd9b2",
-      "bytes": 17588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/night_rabbit/left.webp": {
-      "sourceHash": "f218b86f8dfba515e5ca0f02f3442e625b5336ea0b3435f2a5c10e27d49dd9b2",
-      "bytes": 17588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/night_rabbit/right.webp": {
-      "sourceHash": "f218b86f8dfba515e5ca0f02f3442e625b5336ea0b3435f2a5c10e27d49dd9b2",
-      "bytes": 17588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/phantom/back.webp": {
-      "sourceHash": "e717427d09fefdb1f1a066a2d58b1697b1c260931b0bc8f718bc5dbac312d118",
-      "bytes": 21188,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/phantom/front.webp": {
-      "sourceHash": "e717427d09fefdb1f1a066a2d58b1697b1c260931b0bc8f718bc5dbac312d118",
-      "bytes": 21188,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/phantom/left.webp": {
-      "sourceHash": "e717427d09fefdb1f1a066a2d58b1697b1c260931b0bc8f718bc5dbac312d118",
-      "bytes": 21188,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/phantom/right.webp": {
-      "sourceHash": "e717427d09fefdb1f1a066a2d58b1697b1c260931b0bc8f718bc5dbac312d118",
-      "bytes": 21188,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/queen/back.webp": {
-      "sourceHash": "08a3caddb72cbae4b26717031923b94745cbeed3832bae1f9fb551e11372ed02",
-      "bytes": 22534,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/queen/front.webp": {
-      "sourceHash": "08a3caddb72cbae4b26717031923b94745cbeed3832bae1f9fb551e11372ed02",
-      "bytes": 22534,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/queen/left.webp": {
-      "sourceHash": "08a3caddb72cbae4b26717031923b94745cbeed3832bae1f9fb551e11372ed02",
-      "bytes": 22534,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/queen/right.webp": {
-      "sourceHash": "08a3caddb72cbae4b26717031923b94745cbeed3832bae1f9fb551e11372ed02",
-      "bytes": 22534,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/red_dragon/back.webp": {
-      "sourceHash": "6f8be5ff7c82dbbf39be5cc9ba08444d59043a860eb69644a3c82a856dbbed6f",
-      "bytes": 22614,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/red_dragon/front.webp": {
-      "sourceHash": "6f8be5ff7c82dbbf39be5cc9ba08444d59043a860eb69644a3c82a856dbbed6f",
-      "bytes": 22614,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/red_dragon/left.webp": {
-      "sourceHash": "6f8be5ff7c82dbbf39be5cc9ba08444d59043a860eb69644a3c82a856dbbed6f",
-      "bytes": 22614,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/red_dragon/right.webp": {
-      "sourceHash": "6f8be5ff7c82dbbf39be5cc9ba08444d59043a860eb69644a3c82a856dbbed6f",
-      "bytes": 22614,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/rumi/back.webp": {
-      "sourceHash": "080a74ce50f0d7770a415a0425cb5d99bcaec26c956f85e01ed661631a6d4ac6",
-      "bytes": 19638,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/rumi/front.webp": {
-      "sourceHash": "080a74ce50f0d7770a415a0425cb5d99bcaec26c956f85e01ed661631a6d4ac6",
-      "bytes": 19638,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/rumi/left.webp": {
-      "sourceHash": "080a74ce50f0d7770a415a0425cb5d99bcaec26c956f85e01ed661631a6d4ac6",
-      "bytes": 19638,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/rumi/right.webp": {
-      "sourceHash": "080a74ce50f0d7770a415a0425cb5d99bcaec26c956f85e01ed661631a6d4ac6",
-      "bytes": 19638,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/silver_rabbit/back.webp": {
-      "sourceHash": "6ad84a057b3e7e70c6aadd8368b69504a3aad1ff1d7ce45f9b83fa3cf722ec86",
-      "bytes": 21866,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/silver_rabbit/front.webp": {
-      "sourceHash": "6ad84a057b3e7e70c6aadd8368b69504a3aad1ff1d7ce45f9b83fa3cf722ec86",
-      "bytes": 21866,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/silver_rabbit/left.webp": {
-      "sourceHash": "6ad84a057b3e7e70c6aadd8368b69504a3aad1ff1d7ce45f9b83fa3cf722ec86",
-      "bytes": 21866,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/silver_rabbit/right.webp": {
-      "sourceHash": "6ad84a057b3e7e70c6aadd8368b69504a3aad1ff1d7ce45f9b83fa3cf722ec86",
-      "bytes": 21866,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/siren/back.webp": {
-      "sourceHash": "9cced5c46029a8053f21eeb88c0cde5debcf5f2938ccf5707853c25064ef52f6",
-      "bytes": 24336,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/siren/front.webp": {
-      "sourceHash": "9cced5c46029a8053f21eeb88c0cde5debcf5f2938ccf5707853c25064ef52f6",
-      "bytes": 24336,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/siren/left.webp": {
-      "sourceHash": "9cced5c46029a8053f21eeb88c0cde5debcf5f2938ccf5707853c25064ef52f6",
-      "bytes": 24336,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/siren/right.webp": {
-      "sourceHash": "9cced5c46029a8053f21eeb88c0cde5debcf5f2938ccf5707853c25064ef52f6",
-      "bytes": 24336,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/snow_rabbit/back.webp": {
-      "sourceHash": "d3b34128e621ada56ecf93d55dc7452856b45f7b78b9a0ab5d2c217e0549707b",
-      "bytes": 20688,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/snow_rabbit/front.webp": {
-      "sourceHash": "d3b34128e621ada56ecf93d55dc7452856b45f7b78b9a0ab5d2c217e0549707b",
-      "bytes": 20688,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/snow_rabbit/left.webp": {
-      "sourceHash": "d3b34128e621ada56ecf93d55dc7452856b45f7b78b9a0ab5d2c217e0549707b",
-      "bytes": 20688,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/snow_rabbit/right.webp": {
-      "sourceHash": "d3b34128e621ada56ecf93d55dc7452856b45f7b78b9a0ab5d2c217e0549707b",
-      "bytes": 20688,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/storm_sage/back.webp": {
-      "sourceHash": "2f56d440fe05ebd08192aa35b955d99fe053043f695d11ef31a4bdb8c273096c",
-      "bytes": 20094,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/storm_sage/front.webp": {
-      "sourceHash": "2f56d440fe05ebd08192aa35b955d99fe053043f695d11ef31a4bdb8c273096c",
-      "bytes": 20094,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/storm_sage/left.webp": {
-      "sourceHash": "2f56d440fe05ebd08192aa35b955d99fe053043f695d11ef31a4bdb8c273096c",
-      "bytes": 20094,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/storm_sage/right.webp": {
-      "sourceHash": "2f56d440fe05ebd08192aa35b955d99fe053043f695d11ef31a4bdb8c273096c",
-      "bytes": 20094,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/time_ruler/back.webp": {
-      "sourceHash": "046938143ee5d5f03965979519a2cb5d8aa9fc1c4c4b6e8d8e3233657639a905",
-      "bytes": 19942,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/time_ruler/front.webp": {
-      "sourceHash": "046938143ee5d5f03965979519a2cb5d8aa9fc1c4c4b6e8d8e3233657639a905",
-      "bytes": 19942,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/time_ruler/left.webp": {
-      "sourceHash": "046938143ee5d5f03965979519a2cb5d8aa9fc1c4c4b6e8d8e3233657639a905",
-      "bytes": 19942,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/time_ruler/right.webp": {
-      "sourceHash": "046938143ee5d5f03965979519a2cb5d8aa9fc1c4c4b6e8d8e3233657639a905",
-      "bytes": 19942,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/zeke/back.webp": {
-      "sourceHash": "bd325d1c3d9911563d39f884ac55bc8a9c5f1edd1a5dfa2f2e736c7027239c2a",
-      "bytes": 20264,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/zeke/front.webp": {
-      "sourceHash": "bd325d1c3d9911563d39f884ac55bc8a9c5f1edd1a5dfa2f2e736c7027239c2a",
-      "bytes": 20264,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/zeke/left.webp": {
-      "sourceHash": "bd325d1c3d9911563d39f884ac55bc8a9c5f1edd1a5dfa2f2e736c7027239c2a",
-      "bytes": 20264,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/battle/zeke/right.webp": {
-      "sourceHash": "bd325d1c3d9911563d39f884ac55bc8a9c5f1edd1a5dfa2f2e736c7027239c2a",
-      "bytes": 20264,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/ancient_dragon.webp": {
-      "sourceHash": "c617ed022e36abf8c9b29872f16e543ca2e369afcf099e91b15b08d45f26a49f",
-      "bytes": 23162,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/avalanche_maid.webp": {
-      "sourceHash": "8af220478c13c23fa15bf652d5cd3bebaef645bd808f511d171e5589000eb3f9",
-      "bytes": 22062,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/cinderella.webp": {
-      "sourceHash": "e3a5b1e76bff8627d584716873c48c7b98d6c306eae5b04f42ad507c63c8440f",
-      "bytes": 24554,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/flame_sage.webp": {
-      "sourceHash": "57ffcaa9e37a1aba33fe359f9ffa6ba29bc90f1da6728b1415e50524fcc46aa1",
-      "bytes": 19924,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/galaxy_whale.webp": {
-      "sourceHash": "65fb0b7c246e100c772b4a6377490aa9cc4ec084a11584afd3243f2bce78ca71",
-      "bytes": 26236,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/great_detective.webp": {
-      "sourceHash": "db3446d7af2550094446fe2ca4e6e18b307d45bce0d55163e5c55d723f37a62b",
-      "bytes": 19168,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/guardian.webp": {
-      "sourceHash": "bb16867136af0ffc05f5b0b9931fd45156e4582bb0eb5b3688962a754e55608f",
-      "bytes": 17280,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/lightning_sage.webp": {
-      "sourceHash": "be45d1f9903b7015d0f8d6a84c1a0fd641591f51f3d083bacb9eae4b9e470068",
-      "bytes": 16382,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/luna.webp": {
-      "sourceHash": "71b64635439951cd6839bcfb8feec15a83e8c3f76c82756fd714ca26b2f5b1e6",
-      "bytes": 16216,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/mushroom_king.webp": {
-      "sourceHash": "ff24bfdbe4ba6597346ad55eaf0b42503c170f933ed2dbbf6bd86561dd383b35",
-      "bytes": 19150,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/night_rabbit.webp": {
-      "sourceHash": "f218b86f8dfba515e5ca0f02f3442e625b5336ea0b3435f2a5c10e27d49dd9b2",
-      "bytes": 17588,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/phantom.webp": {
-      "sourceHash": "e717427d09fefdb1f1a066a2d58b1697b1c260931b0bc8f718bc5dbac312d118",
-      "bytes": 21188,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/queen.webp": {
-      "sourceHash": "08a3caddb72cbae4b26717031923b94745cbeed3832bae1f9fb551e11372ed02",
-      "bytes": 22534,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/red_dragon.webp": {
-      "sourceHash": "6f8be5ff7c82dbbf39be5cc9ba08444d59043a860eb69644a3c82a856dbbed6f",
-      "bytes": 22614,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/rumi.webp": {
-      "sourceHash": "080a74ce50f0d7770a415a0425cb5d99bcaec26c956f85e01ed661631a6d4ac6",
-      "bytes": 19638,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/silver_rabbit.webp": {
-      "sourceHash": "6ad84a057b3e7e70c6aadd8368b69504a3aad1ff1d7ce45f9b83fa3cf722ec86",
-      "bytes": 21866,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/siren.webp": {
-      "sourceHash": "9cced5c46029a8053f21eeb88c0cde5debcf5f2938ccf5707853c25064ef52f6",
-      "bytes": 24336,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/snow_rabbit.webp": {
-      "sourceHash": "d3b34128e621ada56ecf93d55dc7452856b45f7b78b9a0ab5d2c217e0549707b",
-      "bytes": 20688,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/storm_sage.webp": {
-      "sourceHash": "2f56d440fe05ebd08192aa35b955d99fe053043f695d11ef31a4bdb8c273096c",
-      "bytes": 20094,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/time_ruler.webp": {
-      "sourceHash": "046938143ee5d5f03965979519a2cb5d8aa9fc1c4c4b6e8d8e3233657639a905",
-      "bytes": 19942,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/characters/portraits/zeke.webp": {
-      "sourceHash": "bd325d1c3d9911563d39f884ac55bc8a9c5f1edd1a5dfa2f2e736c7027239c2a",
-      "bytes": 20264,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 256,
-      "height": 256
-    },
-    "./assets/moonlit/ancient-dragon.webp": {
-      "sourceHash": "c4d354387e5bc4413b9a86cde0b2b1b80bb79cc0b02f13d2dce40f66332d9ef4",
-      "bytes": 145244,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 512
-    },
-    "./assets/moonlit/combat-fx.webp": {
-      "sourceHash": "77aafb49da9db288017e71327ab70cd4f405e19d6cc6e1e4c0c87f464ccbb231",
-      "bytes": 422172,
+    "./assets/merge/garden.webp": {
+      "sourceHash": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
+      "bytes": 266242,
       "requiresAlpha": false
     },
-    "./assets/moonlit/companions-ember.webp": {
-      "sourceHash": "8a1d20e3e181890b71dbd44f6c76aeeb74c167b2334002792937df662608739d",
-      "bytes": 436938,
+    "./assets/merge/units/ancient_dragon.webp": {
+      "sourceHash": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "bytes": 245244,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
       "width": 1024,
-      "height": 1536
+      "height": 1024
     },
-    "./assets/moonlit/companions-tide.webp": {
-      "sourceHash": "ed63de03c79a1fbe54c8461bf35acd954f82a025c1720486b83253cf95c77369",
-      "bytes": 450104,
+    "./assets/merge/units/avalanche_maid.webp": {
+      "sourceHash": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "bytes": 219884,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
       "width": 1024,
-      "height": 1536
+      "height": 1024
     },
-    "./assets/moonlit/companions.webp": {
-      "sourceHash": "4cb1db729d1cd77329afe4e12182ee5b4e987e18f1dbc46ab0222147ce721296",
-      "bytes": 674350,
+    "./assets/merge/units/cinderella.webp": {
+      "sourceHash": "bb85ff4dba57076687b7aeecbc50f31325e15bfbe802e79308917b33b1e6d8dd",
+      "bytes": 244336,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
       "width": 1024,
-      "height": 3072
+      "height": 1024
+    },
+    "./assets/merge/units/flame_sage.webp": {
+      "sourceHash": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "bytes": 154210,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/galaxy_whale.webp": {
+      "sourceHash": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "bytes": 250328,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/great_detective.webp": {
+      "sourceHash": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "bytes": 148530,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/guardian.webp": {
+      "sourceHash": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "bytes": 184556,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/lightning_sage.webp": {
+      "sourceHash": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "bytes": 159458,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/luna.webp": {
+      "sourceHash": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "bytes": 170962,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/mushroom_king.webp": {
+      "sourceHash": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "bytes": 145734,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/night_rabbit.webp": {
+      "sourceHash": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "bytes": 145456,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/phantom.webp": {
+      "sourceHash": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "bytes": 117342,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/queen.webp": {
+      "sourceHash": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "bytes": 238544,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/red_dragon.webp": {
+      "sourceHash": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "bytes": 206106,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/rumi.webp": {
+      "sourceHash": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "bytes": 188632,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/silver_rabbit.webp": {
+      "sourceHash": "aec6470ea155986c75ce48b7c3eb97b21f0bae29037ca39257e9cf9658607f8e",
+      "bytes": 162356,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/siren.webp": {
+      "sourceHash": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "bytes": 179986,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/snow_rabbit.webp": {
+      "sourceHash": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "bytes": 155114,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/storm_sage.webp": {
+      "sourceHash": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "bytes": 200144,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/time_ruler.webp": {
+      "sourceHash": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "bytes": 150752,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/zeke.webp": {
+      "sourceHash": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "bytes": 200004,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
     },
     "./assets/moonlit/creatures.webp": {
       "sourceHash": "15a07ee511f0a16ec75b7cef56b6c9fc55468c0d62c0327afc3f117394480490",
@@ -1215,33 +207,6 @@
       "width": 1254,
       "height": 1254
     },
-    "./assets/moonlit/galaxy-whale.webp": {
-      "sourceHash": "ebcf9f859bd79a24652a5519bc87b8b4a0d4609505fecf07cbc33b93b8e77fc6",
-      "bytes": 170782,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 512
-    },
-    "./assets/moonlit/heroes.webp": {
-      "sourceHash": "67d39fedf6fb66b721a939b5f7cddf857c853de670525a808cbc29498a924159",
-      "bytes": 491390,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 2048
-    },
-    "./assets/moonlit/queen.webp": {
-      "sourceHash": "4ed0ad907fdb48a93d8367c2fab1f8fd447d1880aed6e27075d9b9a1115927ba",
-      "bytes": 147510,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 512
-    },
     "./assets/moonlit/realm-bosses.webp": {
       "sourceHash": "d26e27ba3ca5092766316523c151bbedcb68e0c07304b0d6aeadc71fd7ade085",
       "bytes": 471476,
@@ -1250,29 +215,6 @@
       "minimumAlpha": 0,
       "width": 1536,
       "height": 1024
-    },
-    "./assets/moonlit/silver-rabbit.webp": {
-      "sourceHash": "d27993f9f26a168d173c55f5521764824ca1d16afc0b61a31aee95451c8e484d",
-      "bytes": 138242,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 512
-    },
-    "./assets/moonlit/time-ruler.webp": {
-      "sourceHash": "fef68a31e5b822e0f7a642381a0cd0d9fcfbc2b611f7f8f9e254449f0e7fe1b2",
-      "bytes": 133976,
-      "requiresAlpha": true,
-      "hasAlpha": true,
-      "minimumAlpha": 0,
-      "width": 1024,
-      "height": 512
-    },
-    "./assets/moonlit/worlds.webp": {
-      "sourceHash": "f7cfb2a731d0867ea7ec83a954c7857c8fbfa4aceebb6b2a089ea37703d6be8e",
-      "bytes": 789608,
-      "requiresAlpha": false
     }
   }
 }
