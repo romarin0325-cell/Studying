@@ -8,5 +8,8 @@
   tradeoffs; only actual attack range/shape and aura connections are visualized.
 - Keep targeting, collisions and previews on the shared logical attack geometry.
 - Preserve failed/hung-image fallbacks and older Safari API fallbacks.
-- Root verification remains scoped by the root AGENTS.md. Run dedicated Defense
-  checks explicitly when changing this game.
+- Root verification remains scoped by the root AGENTS.md and must not run
+  Defense. The dedicated Defense workflow uses the shared minimal planner with
+  --only defense. It runs only mapped Defense checks when a file under defense/
+  changes; full balance, experience, and resilience suites require an explicit
+  full-Defense request.

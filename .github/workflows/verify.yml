@@ -1,4 +1,4 @@
-name: Defense
+name: PR minimal verification
 on:
   pull_request:
   push:
@@ -6,11 +6,11 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: defense-${{ github.workflow }}-${{ github.ref }}
+  group: minimal-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  checks:
-    name: checks
+  gate:
+    name: PR minimal gate
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -21,8 +21,8 @@ jobs:
         with:
           fetch-depth: 0
       - id: plan
-        name: Select dedicated Defense verification
-        run: node scripts/verify.js --plan --only defense --github-output "$GITHUB_OUTPUT"
+        name: Select minimal verification
+        run: node scripts/verify.js --plan --github-output "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: steps.plan.outputs.needs_install == 'true'
         with:
@@ -37,17 +37,9 @@ jobs:
       - name: Install WebKit
         if: steps.plan.outputs.needs_webkit == 'true'
         run: npx playwright install --with-deps webkit
-      - name: Run selected Defense verification
+      - name: Run selected verification
         if: steps.plan.outputs.has_commands == 'true'
-        run: npm run verify -- --only defense
-      - name: Record intentional non-Defense scope
+        run: npm run verify
+      - name: Record intentional no-runtime scope
         if: steps.plan.outputs.has_commands != 'true'
-        run: echo "No Defense command is relevant to this diff; scope selection passed."
-  gate:
-    name: Defense release gate
-    needs: checks
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Require successful scope and selected checks
-        run: test "${{ needs.checks.result }}" = success
+        run: echo "No runtime command is relevant to this diff; scope selection passed."
