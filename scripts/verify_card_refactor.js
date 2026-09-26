@@ -138,6 +138,7 @@ function run() {
             COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
             API_KEY: 'cardRpgApiKey',
             RECORDS: 'cardRpgRecords',
+            MODE_RECORDS: 'cardRpgModeRecords',
             MUSIC_PREFS: 'cardRpgMusicPrefs',
             FORTUNE_LAST_USED: 'fortuneCookieLastUsedDate',
             FORTUNE_LAST_RESULT: 'fortuneCookieLastResult'

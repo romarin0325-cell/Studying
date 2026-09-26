@@ -22,6 +22,7 @@ const Storage = {
         COLLOCATION_DETAILS: 'cardRpgCollocationDetails',
         API_KEY: 'cardRpgApiKey',
         RECORDS: 'cardRpgRecords',
+        MODE_RECORDS: 'cardRpgModeRecords',
         MUSIC_PREFS: 'cardRpgMusicPrefs',
         FORTUNE_LAST_USED: 'fortuneCookieLastUsedDate',
         FORTUNE_LAST_RESULT: 'fortuneCookieLastResult'
@@ -337,6 +338,47 @@ class SaveDataMigrator {
 }
 
 SaveDataMigrator.CURRENT_VERSION = 1;
+
+// Per-mode records never infer a mode from the old unlabelled Top 5.
+const ModeRecords = {
+    modeNames: Object.freeze({ origin: '오리진', restriction: '제약의 시련', balance: '균형의 도전',
+        suffering: '고난의 여정', puzzle: '퍼즐', archive: '아카이브', curse: '저주의 증폭',
+        flood: '축복의 범람', chaos: '카오스', artifact_chaos: '아티팩트카오스', draft: '드래프트',
+        factory: '팩토리', perfect_plan: '퍼펙트플랜', artifact: '아티팩트', artifact_reserve: '아티팩트리저브',
+        overdrive: '오버드라이브', dream_corridor: '꿈의회랑' }),
+    validStage(value) { return Number.isSafeInteger(value) && value >= 1; },
+    validate(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data) || data.version !== 1
+            || data.metric !== 'max_reached_stage' || !data.modes || typeof data.modes !== 'object' || Array.isArray(data.modes)) return false;
+        return Object.entries(data.modes).every(([id, record]) => Object.prototype.hasOwnProperty.call(this.modeNames, id)
+            && record && typeof record === 'object' && !Array.isArray(record) && this.validStage(record.maxStage));
+    },
+    read() {
+        const result = Storage.loadDetailed(Storage.keys.MODE_RECORDS);
+        if (result.reason === 'missing') return { ok: true, data: { version: 1, metric: 'max_reached_stage', modes: {} } };
+        if (!result.ok || !this.validate(result.data)) return { ok: false,
+            message: '모드별 기록을 읽지 못했습니다. 손상되었거나 지원하지 않는 버전이며 기존 기록은 보존됩니다.' };
+        return result;
+    },
+    update({ modeId, gameType, reachedStage }) {
+        if (gameType !== 'endless') return { ok: true, changed: false };
+        if (!Object.prototype.hasOwnProperty.call(this.modeNames, modeId) || !this.validStage(reachedStage)) {
+            return { ok: false, message: '모드 또는 도달 스테이지가 올바르지 않아 기록을 저장하지 못했습니다.' };
+        }
+        const result = this.read();
+        if (!result.ok) return result;
+        const previous = result.data.modes[modeId]?.maxStage || 0;
+        if (previous >= reachedStage) return { ok: true, changed: false };
+        const data = { ...result.data, modes: { ...result.data.modes, [modeId]: { maxStage: reachedStage } } };
+        if (!Storage.save(Storage.keys.MODE_RECORDS, data)) return { ok: false, message: '모드별 최고 기록 저장에 실패했습니다. 저장 공간을 확인해 주세요.' };
+        return { ok: true, changed: true };
+    }
+};
+
+const SkillTypes = Object.freeze({
+    names: Object.freeze({ phy: '물리', mag: '마법', sup: '보조' }),
+    label(type) { return this.names[type] || '타입 미확인'; }
+});
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
 
@@ -1629,9 +1671,24 @@ const StatusRules = {
         return !!getStackCapInfo(id, artifacts);
     },
 
-    formatDisplay(id, value, artifacts = []) {
+    formatDisplay(id, value, artifacts = [], target = null) {
+        if (id === 'guard' || id === 'damage_half') {
+            const reduction = id === 'guard' ? this.guardReduction(target) : 0.5;
+            return `${getBuffName(id)} · 피해 ${Math.round(reduction * 100)}% 감소 · ${value}턴`;
+        }
         const name = getBuffName(id);
         return this.isStackable(id, artifacts) ? `${name} ${value}스택` : name;
+    },
+
+    guardReduction(target) {
+        return target?.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
+            ? target.guardDamageReduction : 0.5;
+    },
+
+    damageReduction(target) {
+        const guard = target.buffs.guard ? this.guardReduction(target) : 0;
+        const half = target.buffs.damage_half ? 0.5 : 0;
+        return { rate: Math.max(guard, half), name: guard >= half && guard > 0 ? '가드' : '반감' };
     },
 
     countNegativeKinds(buffs) {
@@ -2570,12 +2627,10 @@ const Logic = {
         let finalMult = mult * (1.0 + dmgBonus);
         let finalDmg = Math.floor(val * finalMult * (100 / (100 + def)));
 
-        if (target.buffs.guard) {
-            const guardReduction = target.guardEnhancedTurns > 0 && Number.isFinite(target.guardDamageReduction)
-                ? target.guardDamageReduction
-                : 0.5;
-            finalDmg = Math.floor(finalDmg * (1 - guardReduction));
-            logFn(`${target.name} 가드 성공! 피해 ${Math.round(guardReduction * 100)}% 감소.`);
+        const reduction = StatusRules.damageReduction(target);
+        if (reduction.rate > 0) {
+            finalDmg = Math.floor(finalDmg * (1 - reduction.rate));
+            logFn(`${target.name} ${reduction.name} 적용! 피해 ${Math.round(reduction.rate * 100)}% 감소.`);
         }
 
         return {

@@ -523,7 +523,7 @@
         return [...cards].sort((a, b) => {
             const gradeDiff = this.getGradeSortValue(a.grade) - this.getGradeSortValue(b.grade);
             if (gradeDiff !== 0) return gradeDiff;
-            return a.name.localeCompare(b.name, 'ko');
+            return a.name.localeCompare(b.name, 'ko') || a.id.localeCompare(b.id);
         });
     },
 
@@ -537,7 +537,7 @@
             if (!cardB) return -1;
             const gradeDiff = this.getGradeSortValue(cardA.grade) - this.getGradeSortValue(cardB.grade);
             if (gradeDiff !== 0) return gradeDiff;
-            return cardA.name.localeCompare(cardB.name, 'ko');
+            return cardA.name.localeCompare(cardB.name, 'ko') || a.localeCompare(b);
         });
     },
 
@@ -1177,7 +1177,7 @@
         });
         const extraCandidates = CardPoolRules.getExtraCandidates(set, context.catalogue, context);
         const map = new Map(context.catalogue.map(card => [card.id, card]));
-        const extraCards = extraCandidates.concat(this._cardPoolEditorFilter === 'base' ? baseIds : []).map(id => {
+        const extraCards = this.sortCardIdsByGrade(extraCandidates.concat(this._cardPoolEditorFilter === 'base' ? baseIds : [])).map(id => {
             const card = map.get(id);
             if (!card) return null;
             const selected = extras.indexOf(id) >= 0;
@@ -1209,7 +1209,7 @@
         if (model.detailSet) {
             const detailIds = CardPoolRules.getSetBaseCardIds(model.detailSet, context.catalogue);
             const filter = this._cardPoolEditorFilter;
-            model.detailCards = detailIds.map(id => {
+            model.detailCards = this.sortCardIdsByGrade(detailIds).map(id => {
                 const card = map.get(id);
                 if (!card) return null;
                 const info = CardPoolRules.inspectCardAvailability(card, context);
@@ -1613,6 +1613,7 @@
             }
 
             this.state = migratedState;
+            this.recordCurrentEndlessStage();
             this.loadStudyProgress();
             this.showAlert('불러오기 완료');
             this.toMenu();
@@ -1653,11 +1654,8 @@
             runCardPool = created.snapshot;
         }
 
-        // Origin records are closed when the next run begins; other modes close on defeat.
-        if (['origin', 'perfect_plan'].includes(this.state.mode) && this.state.enemyScale > 0) {
-            this.saveRecord();
-        }
-
+        // Capture the old run before the new mode replaces its state.
+        this.recordCurrentEndlessStage();
         let initTickets = GameUtils.getInitialTickets(mode);
 
         this.state = {
@@ -1668,6 +1666,7 @@
             inventory: [],
             deck: [null, null, null],
             enemyScale: 0,
+            endlessReachedStage: 0,
             chaosBlessingUses: GAME_CONSTANTS.DEFAULT_BLESSING_USES,
             greatSageBlessingUses: GAME_CONSTANTS.DEFAULT_BLESSING_USES,
             chaosBuffs: [],
@@ -1777,30 +1776,56 @@
     },
 
 
-    saveRecord(score = null) {
-        let history = Storage.load(Storage.keys.RECORDS) || [];
-        let currentStage = score !== null ? score : (this.state.enemyScale + 1);
-
-        let stages = history.map(h => {
-            let m = h.match(/최대 스테이지: (\d+)/);
-            return m ? parseInt(m[1]) : 0;
+    recordCurrentEndlessStage({ entering = false } = {}) {
+        if (this.state.gameType !== 'endless') return true;
+        const stage = this.state.enemyScale + 1;
+        const previous = this.state.endlessReachedStage;
+        // Winning advances enemyScale before the result dialog closes. Only entry
+        // into the next stage may count that new index; older saves lack this field.
+        const reachedStage = entering ? stage : (Number.isSafeInteger(previous) && previous >= 0 ? previous : stage);
+        if (reachedStage === 0) return true;
+        if (entering) this.state.endlessReachedStage = reachedStage;
+        const result = ModeRecords.update({
+            modeId: this.state.mode,
+            gameType: this.state.gameType,
+            reachedStage
         });
-
-        stages.push(currentStage);
-        stages.sort((a, b) => b - a);
-        stages = stages.slice(0, GAME_CONSTANTS.MAX_RECORDS);
-
-        history = stages.map(s => `최대 스테이지: ${s}`);
-        Storage.save(Storage.keys.RECORDS, history);
+        if (!result.ok) this.showAlert(result.message);
+        return result.ok;
     },
 
-
-    showRecords() {
-        let history = Storage.load(Storage.keys.RECORDS) || [];
-        if (history.length === 0) return this.showAlert("기록이 없습니다.");
-        let msg = history.map((h, i) => `${i + 1}위. ${h}`).join("<br>");
-        this.openInfoModal("최대 스테이지 기록 (Top 5)", msg);
+    saveRecord(score = null) {
+        if (score === null) return this.recordCurrentEndlessStage();
+        const result = ModeRecords.update({ modeId: this.state.mode, gameType: this.state.gameType,
+            reachedStage: score });
+        if (!result.ok) this.showAlert(result.message);
+        return result.ok;
     },
+
+    getEndlessRecordText(modeId) {
+        const result = ModeRecords.read();
+        if (!result.ok) return result.message;
+        const record = result.data.modes[modeId];
+        return record ? '최고 도달: ' + record.maxStage + ' 스테이지' : '이 모드의 엔드리스 기록이 없습니다.';
+    },
+
+    showRecords(modeId = document.getElementById('screen-title').classList.contains('active') ? null : this.state.mode) {
+        if (!Object.prototype.hasOwnProperty.call(ModeRecords.modeNames, modeId)) {
+            return this.openInfoModal('엔드리스 최고 기록', '현재 모드를 선택한 뒤 기록을 확인해 주세요.'
+                + '<br><button class="menu-btn" onclick="RPG.showLegacyRecords()">이전 공통 기록</button>');
+        }
+        this.openInfoModal(ModeRecords.modeNames[modeId] + ' · 엔드리스 최고 기록',
+            this.getEndlessRecordText(modeId) + '<br><button class="menu-btn" onclick="RPG.showLegacyRecords()">이전 공통 기록</button>');
+    },
+
+    showLegacyRecords() {
+        const history = Storage.load(Storage.keys.RECORDS);
+        const msg = Array.isArray(history) && history.length
+            ? history.map((h, i) => (i + 1) + '위. ' + String(h).replace(/[<>&]/g, '')).join('<br>')
+            : '이전 공통 기록이 없습니다.';
+        this.openInfoModal('이전 공통 기록 (모드 구분 없음)', msg);
+    },
+
 
     // --- Screen Navigation ---
 
@@ -2303,6 +2328,7 @@
 
 
     failDreamCorridorRun(message) {
+        this.recordCurrentEndlessStage();
         this.global.hiddenStudyReady = false;
         this.global.hiddenStudyPracticeCount = 0;
         this.saveStudyProgress();
@@ -2316,12 +2342,10 @@
         if (this.battle && this.battle.isFinished) return;
         if (this.battle) this.battle.isFinished = true;
 
+        this.recordCurrentEndlessStage();
         let transMsg = this.cleanupTranscendenceCards();
-        // Origin records are written by initNewGame so returning to title cannot duplicate them.
+        // Per-mode maxima are idempotent across defeat and reload.
 
-        if (this.isChaosPoolMode() || this.state.mode === 'draft') {
-            this.saveRecord();
-        }
 
         if (this.state.mode === 'origin') {
             this.global.pendingTranscendenceCards = [];

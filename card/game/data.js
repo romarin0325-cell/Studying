@@ -858,7 +858,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 510, atk: 120, matk: 100, def: 90, mdef: 80 },
         trait: { type: 'cure_master_trait', val: 30, desc: '덱에 물 3장 이상 시 마법방어력 50% 증가 / 일반 공격 혹은 피격 시 확률로 스턴 부여' },
         skills: [
-            { name: '레모네이드', type: 'sup', tier: 3, cost: 30, desc: '필드버프 스타파우더 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '레모네이드', type: 'sup', tier: 3, cost: 30, desc: '필드버프 스타파우더 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'star_powder' }, { type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '멜트다운', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 약화 부여, 기절 상태의 적에게 대미지 2배', effects: [{ type: 'debuff', id: 'weak' }, { type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 2.0 }] },
             { name: '굿나잇키스', type: 'mag', tier: 3, cost: 30, val: 2.0, desc: '마법 2배율, 10의 배수 턴에 대미지 5배', effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
         ]
@@ -868,7 +868,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 500, atk: 150, matk: 75, def: 70, mdef: 70 },
         trait: { type: 'burn_stack_phy_pen', val: 0.3, desc: '작열 1스택당 적의 물리방어력 30% 관통' },
         skills: [
-            { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '체리로열가드', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '블러썸피어스', type: 'phy', tier: 2, cost: 20, val: 1.5, desc: '물리 1.5배율, 부식과 저주 부여', effects: [{ type: 'debuff', id: 'corrosion' }, { type: 'debuff', id: 'curse' }] },
             { name: '루비스타카토', type: 'mag', tier: 3, cost: 30, val: 3.0, desc: '마법 3배율, 달의축복 상태에서 대미지 2.5배', effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.5 }] }
         ]
@@ -990,7 +990,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 310, atk: 80, matk: 70, def: 55, mdef: 60 },
         trait: { type: 'cond_same_grade_leader_boost', pos: 2, stat: ['atk', 'matk'], val: 100, desc: '덱 전체가 같은 등급이고 대장 배치 시 공격력/마법공격력 100% 증가 (빈 슬롯은 등급 비교에서 제외)' },
         skills: [
-            { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '퍼펙트머슬', type: 'sup', tier: 3, cost: 30, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '빅쇼', type: 'sup', tier: 2, cost: 20, desc: '필드버프 아레나 부여', effects: [{ type: 'field_buff', id: 'arena' }] },
             { name: '기가크러셔', type: 'mag', tier: 3, cost: 30, val: 4.0, desc: '마법 4배율, 다음 턴 행동 불가', effects: [{ type: 'self_debuff', id: 'stun', duration: 1 }] }
         ]
@@ -1090,7 +1090,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 550, atk: 105, matk: 110, def: 75, mdef: 75 },
         trait: { type: 'death_clear_field_add_buff', buff: 'earth_bless', desc: '사망시 모든 필드버프를 제거하고 대지의축복 부여' },
         skills: [
-            { name: '오지관제', type: 'sup', tier: 1, cost: 10, desc: '가드 부여, 무작위 필드버프 생성', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'random_field_buff' }] },
+            { name: '오지관제', type: 'sup', tier: 1, cost: 10, desc: '피해 반감 부여, 무작위 필드버프 생성', effects: [{ type: 'buff', id: 'damage_half', duration: 1 }, { type: 'random_field_buff' }] },
             { name: '일체지광', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '디바인 부여', effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '파쇄륜', type: 'phy', tier: 3, cost: 30, val: 2.0, desc: '모든 필드버프를 소모하고 제거한 수 x1.5 만큼 위력 증가', effects: [{ type: 'consume_field_all', multPerStack: 1.5 }] }
         ]
@@ -1132,7 +1132,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 540, atk: 100, matk: 95, def: 80, mdef: 75 },
         trait: { type: 'leader_field_stat_double', val: 2.0, desc: '대장 배치 시 아레나를 제외한 필드버프의 능력치 효과를 2배로 받음' },
         skills: [
-            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '에태르랜스', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '마법 2배율, 부식 부여', effects: [{ type: 'debuff', id: 'corrosion' }] },
             { name: '기적의증명', type: 'sup', tier: 3, cost: 30, desc: '3턴 뒤 필드버프 여신강림과 트윙클파티 부여', effects: [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }] }
         ]
@@ -1152,7 +1152,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 400, atk: 105, matk: 75, def: 70, mdef: 70 },
         trait: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100, desc: '중견 배치 시 공격력 100% 증가' },
         skills: [
-            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '디바인아머', type: 'sup', tier: 2, cost: 20, desc: '3턴간 받는 대미지 50% 감소', effects: [{ type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '홀리그라운드', type: 'mag', tier: 3, cost: 30, val: 1.0, desc: '마법 1배율, 필드버프 성역 부여', effects: [{ type: 'field_buff', id: 'sanctuary' }] },
             { name: '듀얼브레이커', type: 'mag', tier: 2, cost: 20, val: 2.0, desc: '아레나 소모 시 대미지 3배', effects: [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3.0 }] }
         ]
@@ -1930,7 +1930,7 @@ const BONUS_TRANSCENDENCE_CARDS = [
             desc: '덱에 불 3장 이상 시 공격력 100% 증가'
         },
         skills: [
-            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }] },
+            { name: '앱솔루트아머', type: 'sup', tier: 3, cost: 30, desc: '필드버프 트윙클파티 부여, 3턴간 받는 대미지 50% 감소', effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'damage_half', duration: 3 }] },
             { name: '테라소드', type: 'phy', tier: 2, cost: 30, val: 2.0, desc: '필드버프 아레나 발동', effects: [{ type: 'field_buff', id: 'arena' }] },
             { name: '마그마이럽션', type: 'mag', tier: 3, cost: 30, val: 2.5, desc: '작열을 전부 소모하고, 소모한 작열 1스택당 배율 2.5 증가', effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.5 }] }
         ]
@@ -1966,7 +1966,7 @@ ENEMIES.push(
         id: 'flora', name: '꽃의 여신 플로라', element: 'nature', hiddenBossFor: 'artificial_demon_god', bonusTranscendenceReward: 'trans_flora',
         stats: { hp: 700, atk: 70, matk: 70, def: 70, mdef: 70 },
         skills: [
-            { name: '제네시스블룸', type: 'sup', rate: 0.0, val: 0, desc: '대미지 반감, 자신에게 걸린 모든 디버프를 해제', effects: [{ type: 'buff', id: 'guard', duration: 1 }, { type: 'clear_self_debuffs' }] },
+            { name: '제네시스블룸', type: 'sup', rate: 0.0, val: 0, desc: '대미지 반감, 자신에게 걸린 모든 디버프를 해제', effects: [{ type: 'buff', id: 'damage_half', duration: 1 }, { type: 'clear_self_debuffs' }] },
             { name: '블러썸템페스트', type: 'mag', rate: 0.3, val: 2.0, desc: '마법공격 2배율', effects: [] }
         ]
     },
@@ -2063,7 +2063,7 @@ ENEMIES.push(
 const BUFF_NAMES = {
     'darkness': '암흑', 'corrosion': '부식', 'silence': '침묵', 'curse': '저주', 'weak': '약화', 'temptation': '유혹',
     'burn': '작열', 'divine': '디바인', 'stun': '기절', 'evasion': '회피', 'barrier': '배리어',
-    'magic_guard': '매직가드', 'guard': '가드',
+    'magic_guard': '매직가드', 'guard': '가드', 'damage_half': '반감',
     'defProtocolPhy': '방어프로토콜(물리)', 'defProtocolMag': '방어프로토콜(마법)',
     'sun_bless': '태양의축복', 'moon_bless': '달의축복', 'sanctuary': '성역',
     'goddess_descent': '여신강림', 'destiny_oath': '운명의서약', 'earth_bless': '대지의축복', 'twinkle_party': '트윙클파티',

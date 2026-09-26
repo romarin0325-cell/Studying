@@ -139,7 +139,7 @@ try {
    RPG.startToeicPractice({ignoreSessionLimit:true,suppressDate:true,countHiddenUnlock:false});
    RPG.showToeicPassage();
   });
-  assert.equal(await page.locator('#toeic-passage-scroll').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(222, 240, 250)','TOEIC passage uses the light theme surface');
+  assert.equal(await page.locator('#toeic-passage-scroll').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(234, 243, 248)','TOEIC passage uses the light theme surface');
   await page.reload();await page.waitForFunction(()=>Astra.ready);
   await page.locator('#btn-title-question').click();
   await page.setViewportSize({width:size.width,height:410});

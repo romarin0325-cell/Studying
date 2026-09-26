@@ -159,12 +159,12 @@ function run() {
       ['supernova', '파이널버스트', 'phy', 3, 30, 6, [{ type: 'suicide' }]],
       ['supernova', '코어멜트다운', 'mag', 3, 30, 2.5, [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2 }]],
       ['shooting_star_boy', '슈팅플레어', 'mag', 2, 20, 1.5, [{ type: 'debuff', id: 'burn', stack: 1 }]],
-      ['victoria', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'guard', duration: 3 }]],
+      ['victoria', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'damage_half', duration: 3 }]],
       ['victoria', '에태르랜스', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'corrosion' }]],
       ['victoria', '기적의증명', 'sup', 3, 30, null, [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }]],
       ['holy_night', '샤이닝팝', 'phy', 2, 20, 2, []],
       ['holy_night', '라스트캐럴', 'phy', 3, 30, 4, [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2 }, { type: 'suicide' }]],
-      ['paladin', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'guard', duration: 3 }]],
+      ['paladin', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'damage_half', duration: 3 }]],
       ['paladin', '홀리그라운드', 'mag', 3, 30, 1, [{ type: 'field_buff', id: 'sanctuary' }]],
       ['paladin', '듀얼브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3 }]],
       ['mad_scientist', '익스페리먼트', 'mag', 2, 20, 2, [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'silence', mult: 2 }]],
@@ -215,7 +215,7 @@ function run() {
     const terraSword = transAres.skills.find(skill => skill.name === '테라소드');
     assert.strictEqual(
       JSON.stringify(absoluteArmor.effects),
-      JSON.stringify([{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'guard', duration: 3 }])
+      JSON.stringify([{ type: 'field_buff', id: 'twinkle_party' }, { type: 'buff', id: 'damage_half', duration: 3 }])
     );
     assert.deepStrictEqual([absoluteArmor.tier, terraSword.tier], [3, 2]);
     assert.strictEqual(JSON.stringify(terraSword.effects), JSON.stringify([{ type: 'field_buff', id: 'arena' }]));
@@ -618,7 +618,7 @@ function run() {
     const divineArmorSource = makeUnit({ buffs: {} });
     SideEffects.apply(
       { source: divineArmorSource, skill: { name: '디바인아머' } },
-      { type: 'buff', id: 'guard', duration: 3 }
+      { type: 'buff', id: 'damage_half', duration: 3 }
     );
     assert.strictEqual(divineArmorSource.guardEnhancedTurns, undefined);
     tickTurnBuffs(longGuardSource);
