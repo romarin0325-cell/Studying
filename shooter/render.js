@@ -115,6 +115,15 @@ export class Renderer {
     for (let i = 0; i < (this.quality ? 35 : 16); i++) { const m = this.motes[i]; c.globalAlpha = .15 + Math.sin(t + i) * .1; c.beginPath(); c.arc(m.x + Math.sin(t * .3 + i) * 12, (m.y + t * m.speed) % h, m.r, 0, TAU); c.fill(); }
     c.globalAlpha = 1;
     for (const hazard of g.hazards) {
+      if (hazard.kind === 'targetBlast') {
+        const active = hazard.age > hazard.warn && hazard.age <= hazard.warn + hazard.activeDuration;
+        const warnT = Math.min(1, hazard.age / Math.max(.001, hazard.warn));
+        c.save(); c.beginPath(); c.arc(hazard.x, hazard.y, hazard.radius, 0, TAU);
+        c.strokeStyle = active ? '#fff' : '#ffb7f1'; c.lineWidth = active ? 3 : 1.5; c.setLineDash(active ? [] : [6, 8]); c.stroke();
+        if (active) { c.fillStyle = '#b7f4ff66'; c.fill(); }
+        else { c.setLineDash([]); c.beginPath(); c.arc(hazard.x, hazard.y, hazard.radius, -Math.PI / 2, -Math.PI / 2 + TAU * warnT); c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke(); }
+        c.restore(); continue;
+      }
       const active=hazard.age>hazard.warn,horizontal=hazard.axis==='horizontal';
       c.save();c.fillStyle=active?'#b7f4ff99':'#ffb7f126';
       if(horizontal)c.fillRect(0,hazard.x-hazard.width/2,450,hazard.width);

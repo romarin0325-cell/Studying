@@ -99,8 +99,16 @@
  .panel.dungeon-panel .dungeon-description{grid-column:2;grid-row:2;margin:0!important}
  .panel.dungeon-panel .difficulty-list{grid-column:2;grid-row:3;margin:0}
  .panel.dungeon-panel .weekly-note{grid-column:2;grid-row:4;margin:0}
- .panel.dungeon-panel #dungeon-done{grid-column:2;grid-row:5}
+  .panel.dungeon-panel #dungeon-done{grid-column:2;grid-row:5}
 }
+.campaign-route{display:grid;grid-template-columns:1fr 1fr}
+.campaign-route button,.campaign-route button:first-child{flex:unset;width:auto}
+#bomb{touch-action:manipulation}
+#hold-note{display:block;margin-top:6px;font-size:11px;letter-spacing:0;color:#ffe2ac;text-shadow:0 1px 3px #000}
+.shop-balance{font-size:16px;color:#f4e7c4;margin:14px 0 8px}
+.shop-goods{display:grid;gap:8px;margin:12px 0}
+.shop-goods button{text-align:left;min-height:64px}
+.shop-goods small{display:block;margin-top:4px;color:#c5d0e0;font-size:11px;line-height:1.45;white-space:normal}
 </style>
 </head>
 <body>
@@ -114,7 +122,7 @@
         <div class="hud-actions"><button class="round-button" id="run-artifacts" aria-label="현재 적용 유물" hidden>◇</button><button class="round-button sound-toggle" aria-label="소리 끄기">♪</button><button class="round-button" id="pause" aria-label="일시정지">Ⅱ</button></div>
       </div>
       <div class="boss-hud" id="boss-hud" hidden><div><span id="boss-name"></span><span id="boss-phase"></span></div><div class="boss-track"><i id="boss-health"></i><b></b><b></b></div><small id="pattern-name"></small></div>
-      <div class="combo-hud" id="combo-hud"><b id="combo"></b><span id="multiplier"></span><i id="combo-meter"></i></div>
+      <div class="combo-hud" id="combo-hud"><b id="combo"></b><span id="multiplier"></span><i id="combo-meter"></i><small id="hold-note" hidden>남은 엘리트를 처치하세요</small></div>
       <div class="bottom-hud"><div class="power-block"><small>SHOT POWER</small><div id="power"></div><span id="weapon-label"></span><span id="barrier-status" hidden></span></div><div class="bomb-wrap"><span id="bomb-label"></span><button id="bomb" aria-label="봄 사용"><span>❖</span><b>BLOOM</b><small id="bomb-count">3</small></button></div></div>
     </div>
     <div id="announcement" aria-live="polite"></div>
@@ -220,7 +228,7 @@ const LIMITS = Object.freeze({ enemies: 40, bullets: 360, shots: 170, particles:
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
 return {HEROES,STAGES,DUNGEONS,EVENT_DUNGEONS,LIMITS,clamp};})();
-const {ARTIFACTS,artifactText,DIFFICULTIES,BASE_HEROES,ACHIEVEMENTS,normalizeDifficulty,randomHero,consumeRandom,randomRemaining,dayKey,weekKey,weeklyEvent,dailyHeroes,createProfile,recordDungeonClear,achievementProgress,heroAvailable,unlockHero,claimDungeon,drawArtifact,loadoutStats} = (() => {
+const {ARTIFACTS,artifactText,DIFFICULTIES,BASE_HEROES,ACHIEVEMENTS,normalizeDifficulty,RANDOM_DAILY_LIMIT,randomHero,consumeRandom,randomRemaining,dayKey,weekKey,weeklyEvent,dailyHeroes,createProfile,recordDungeonClear,achievementProgress,heroAvailable,unlockHero,claimDungeon,drawArtifact,purchaseShopItem,useRandomResetTicket,loadoutStats} = (() => {
 const ARTIFACTS = [
   { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 20% 증가', bomb: .20 },
   { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 25% 증가 · 최대 생명 2 감소', attack: .25, life: -2 },
@@ -255,8 +263,8 @@ const ARTIFACTS = [
   { id: 'bigbang', name: '빅뱅', rarity: 'rare', text: '일반 공격력 10% 감소 · 봄 공격력 60% 증가', normalAttack: -.10, bomb: .60 },
   { id: 'kaleidoscope', name: '만화경', rarity: 'rare', text: '봄 공격력 20% 감소 · 일반 공격력 30% 증가', normalAttack: .30, bomb: -.20 },
   { id: 'fairycloak', name: '요정의망토', rarity: 'epic', text: '피격 반경 2 감소 · 최대 생명 1 증가', radius: -2, life: 1 },
-  { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복' },
-  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득' },
+  { id: 'resurgence', name: '기사회생', rarity: 'rare', text: '부활 시 생명 전부 회복 · 파워 최대' },
+  { id: 'miracle', name: '기적의증명', rarity: 'epic', text: '부활 시 봄 5 획득 · 파워 최대' },
   { id: 'blessing', name: '여신의가호', rarity: 'epic', text: '매 스테이지 시작 시 보호막 생성 · 중첩 불가' },
   { id: 'steelshield', name: '강철방패', rarity: 'normal', text: '피격 시 파워 감소 방지' },
   { id: 'cursedsword', name: '저주의검', rarity: 'rare', text: '공격력 15% 증가 · 회복 아이템 드랍 제거', attack: .15 },
@@ -266,7 +274,7 @@ const ARTIFACTS = [
   { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
 ];
 function artifactText(artifact, challenge = false) {
-  return challenge ? ({resurgence:'생명 전부 회복',miracle:'봄 5 획득',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
+  return challenge ? ({resurgence:'생명 전부 회복 · 파워 최대',miracle:'봄 5 획득 · 파워 최대',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
 const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
@@ -283,6 +291,16 @@ const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,1].flat
   { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${wName} · 어려움`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 어려움 클리어` }
 ];})));
 function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
+const RANDOM_DAILY_LIMIT = 3;
+const SHARD_AWARD = Object.freeze({ normal: 1, rare: 3, epic: 5 });
+const SHOP_COST = Object.freeze({ artifact: 5, reset: 1 });
+const MAX_COUNT = Number.MAX_SAFE_INTEGER;
+function finiteCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(Math.floor(n), MAX_COUNT);
+}
+function isShopTicket(ticket) { return !!ticket && ticket.source === 'shop' && ticket.kind === 'artifact'; }
 function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 function weekKey(date = new Date()) { const d = new Date(date); d.setHours(12,0,0,0); d.setDate(d.getDate() - (d.getDay()+6)%7); return dayKey(d); }
 // The local Monday key is the seed: reloads and profile resets never reroll the event.
@@ -300,10 +318,17 @@ function createProfile(raw = {}) {
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
   const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard):[0-5]$/.test(key)));
-  return { version: 5, randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(10,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  const tickets = [];
+  if (Array.isArray(raw.tickets)) for (const ticket of raw.tickets) {
+    if (isShopTicket(ticket)) { tickets.push({ source: 'shop', kind: 'artifact' }); continue; }
+    if (!ticket || typeof ticket !== 'object' || ticket.source === 'shop') continue;
+    if (!DIFFICULTIES.some(d => d.id === ticket.difficulty) || !Number.isInteger(ticket.dungeon) || ticket.dungeon < 0 || ticket.dungeon >= (migrate ? 4 : 8)) continue;
+    tickets.push({ ...ticket, dungeon: migrate && ticket.dungeon === 3 ? 5 : ticket.dungeon });
+  }
+  return { version: 6, dreamShards: finiteCount(raw.dreamShards), randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
-    tickets: Array.isArray(raw.tickets) ? raw.tickets.filter(t => t && DIFFICULTIES.some(d => d.id === t.difficulty) && Number.isInteger(t.dungeon) && t.dungeon >= 0 && t.dungeon < (migrate?4:8)).map(t=>({...t,dungeon:migrate&&t.dungeon===3?5:t.dungeon})) : [],
+    tickets,
     unlocks: raw.unlocks && typeof raw.unlocks === 'object' ? raw.unlocks : {},
     clears,
     learning: raw.learning && typeof raw.learning === 'object' ? raw.learning : { correct: 0, total: 0, mistakes: [], read: [] } };
@@ -332,7 +357,7 @@ function randomHero(profile, random = Math.random, date = new Date()) {
   return Math.min(8, Math.floor(Math.max(0,random()) * 9));
 }
 function randomRemaining(profile,date=new Date()) {
-  return profile.randomDraws?.date===dayKey(date) ? Math.max(0,10-profile.randomDraws.count) : 10;
+  return profile.randomDraws?.date===dayKey(date) ? Math.max(0,RANDOM_DAILY_LIMIT-profile.randomDraws.count) : RANDOM_DAILY_LIMIT;
 }
 function consumeRandom(profile,random=Math.random,date=new Date()) {
   if(randomRemaining(profile,date)<=0)return null;
@@ -356,8 +381,35 @@ function drawArtifact(profile, random = Math.random, quizCorrect = false) {
   const roll = random(), epic = quizCorrect ? .02 : .01;
   const rarity = roll < chance ? 'rare' : roll < chance + epic ? 'epic' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
   const artifact = pool[Math.min(pool.length-1, Math.floor(Math.max(0, random()) * pool.length))];
-  const duplicate = profile.owned.includes(artifact.id); if (!duplicate) profile.owned.push(artifact.id);
-  return { artifact, duplicate, ticket };
+  const duplicate = profile.owned.includes(artifact.id);
+  let shardsAwarded = 0;
+  if (!duplicate) profile.owned.push(artifact.id);
+  else {
+    profile.dreamShards = finiteCount(profile.dreamShards);
+    shardsAwarded = Math.min(SHARD_AWARD[artifact.rarity] || 0, MAX_COUNT - profile.dreamShards);
+    profile.dreamShards += shardsAwarded;
+  }
+  return { artifact, duplicate, ticket, shardsAwarded };
+}
+function purchaseShopItem(profile, item) {
+  const cost = SHOP_COST[item];
+  if (cost == null) return { ok: false, reason: 'unknown' };
+  profile.dreamShards = finiteCount(profile.dreamShards);
+  profile.randomResetTickets = finiteCount(profile.randomResetTickets);
+  if (profile.dreamShards < cost) return { ok: false, reason: 'balance' };
+  if (item === 'reset' && profile.randomResetTickets >= MAX_COUNT) return { ok: false, reason: 'overflow' };
+  profile.dreamShards -= cost;
+  if (item === 'artifact') profile.tickets.push({ source: 'shop', kind: 'artifact' });
+  else profile.randomResetTickets += 1;
+  return { ok: true, item, dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, tickets: profile.tickets.length };
+}
+function useRandomResetTicket(profile, date = new Date()) {
+  profile.randomResetTickets = finiteCount(profile.randomResetTickets);
+  if (profile.randomResetTickets < 1) return { ok: false, reason: 'no-ticket' };
+  if (randomRemaining(profile, date) > 0) return { ok: false, reason: 'remaining' };
+  profile.randomResetTickets -= 1;
+  profile.randomDraws = { date: dayKey(date), count: 0 };
+  return { ok: true, remaining: RANDOM_DAILY_LIMIT, randomResetTickets: profile.randomResetTickets };
 }
 function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
   const equipment = [...new Set(ids)].map(id => ARTIFACTS.find(a => a.id === id)).filter(Boolean).slice(0,slots);
@@ -367,7 +419,7 @@ function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
     radius: sum('radius'), speed: sum('speed'), attraction: sum('attraction'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: Math.max(0,5+sum('bombs')+sum('bombCapacity')) };
 }
 
-return {ARTIFACTS,artifactText,DIFFICULTIES,BASE_HEROES,ACHIEVEMENTS,normalizeDifficulty,randomHero,consumeRandom,randomRemaining,dayKey,weekKey,weeklyEvent,dailyHeroes,createProfile,recordDungeonClear,achievementProgress,heroAvailable,unlockHero,claimDungeon,drawArtifact,loadoutStats};})();
+return {ARTIFACTS,artifactText,DIFFICULTIES,BASE_HEROES,ACHIEVEMENTS,normalizeDifficulty,RANDOM_DAILY_LIMIT,randomHero,consumeRandom,randomRemaining,dayKey,weekKey,weeklyEvent,dailyHeroes,createProfile,recordDungeonClear,achievementProgress,heroAvailable,unlockHero,claimDungeon,drawArtifact,purchaseShopItem,useRandomResetTicket,loadoutStats};})();
 const {createArtUrls} = (() => {
 const EVENT_ASSETS = ['harmonious', 'gold-dragon', 'ancient-soul', 'behemoth', 'time-ruler'];
 
@@ -474,6 +526,13 @@ function recordAnswer(profile, question, answer) {
 return {LIBRARY,makeQuestion,recordAnswer};})();
 const {CampaignUI} = (() => {
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function economySnapshot(profile) {
+  return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })) };
+}
+function restoreEconomy(profile, snap) {
+  profile.dreamShards = snap.dreamShards; profile.randomResetTickets = snap.randomResetTickets; profile.randomDraws = { ...snap.randomDraws };
+  profile.owned.splice(0, profile.owned.length, ...snap.owned); profile.tickets.splice(0, profile.tickets.length, ...snap.tickets.map(ticket => ({ ...ticket })));
+}
 const $ = id => document.getElementById(id);
 class CampaignUI {
   constructor(options) { Object.assign(this,options); }
@@ -551,13 +610,60 @@ class CampaignUI {
       let resolved=false;
       const draw=correct=>{
         if(resolved)return;resolved=true;
-        const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);this.save();const a=result.artifact;
-        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${result.duplicate?'이미 소유한 유물이에요. 다음 주에 새로운 별을 찾아봐요.':'새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.'}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
+        const snap=economySnapshot(p);
+        const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);
+        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 뽑기를 취소했어요.');return this.equipment(refresh);}
+        const a=result.artifact;
+        const shardNote = result.duplicate ? `이미 보유한 유물이에요. 꿈의 조각 ${result.shardsAwarded}개를 받았어요. 재화: 꿈의 조각 ${p.dreamShards}개.` : '새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.';
+        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${shardNote}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
       };
       this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
         ()=>this.quiz(Math.random()<.5?'vocab':'collocation','',draw),()=>draw(false));
       $('quiz-decline').textContent='아니오 · 바로 뽑기';
     };
+  }
+  shop(refresh) {
+    const p=this.profile;
+    let busy=false;
+    const render=()=>{
+      const remaining=randomRemaining(p), resets=p.randomResetTickets, shards=p.dreamShards;
+      const shopTickets=p.tickets.filter(ticket=>ticket.source==='shop' && ticket.kind==='artifact').length;
+      this.setModal(`<span class="small-caps">DREAM SHARDS</span><h2>별빛 상점</h2><p class="shop-balance">재화: 꿈의 조각 ${shards}개</p><p class="tiny-note">레어 유물 꿈의조각과는 다른 재화예요. 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능.</p><div class="shop-goods"><button class="secondary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}><b>아티팩트 뽑기권 1장</b><small>꿈의 조각 5개 · 보유 뽑기권 ${p.tickets.length}장 · 상점 티켓 ${shopTickets}장</small></button><button class="secondary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}><b>랜덤 횟수 리셋권 1장</b><small>꿈의 조각 1개 · 보유 리셋권 ${resets}장</small></button></div><p class="intro-copy">오늘 남은 기본 횟수 ${remaining}/${RANDOM_DAILY_LIMIT}</p><button class="primary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button><p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 남은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
+      document.querySelector('.panel').classList.add('shop-panel');
+      $('shop-back').onclick=()=>{this.closeModal();refresh();};
+      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의 조각 5개로 살까요?');
+      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의 조각 1개로 살까요?');
+      $('use-reset').onclick=()=>confirmReset();
+    };
+    const confirmBuy=(item,copy)=>{
+      if(busy)return;
+      this.setModal(`<h2>구매할까요?</h2><p class="intro-copy">${copy}</p><button class="primary" id="shop-confirm">구매</button><button class="secondary" id="shop-cancel">취소</button>`);
+      let done=false;
+      $('shop-cancel').onclick=()=>{if(!done)render();};
+      $('shop-confirm').onclick=()=>{
+        if(done||busy)return;done=true;busy=true;
+        const snap=economySnapshot(p);
+        const result=purchaseShopItem(p,item);
+        if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의 조각이 부족해요.':'구매하지 못했어요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
+        busy=false;this.toast('구매했어요.');render();
+      };
+    };
+    const confirmReset=()=>{
+      if(busy)return;
+      this.setModal(`<h2>리셋권을 사용할까요?</h2><p class="intro-copy">남은 기본 횟수가 0일 때만 사용할 수 있어요. 사용하면 오늘 기본 ${RANDOM_DAILY_LIMIT}회로 돌아가요.</p><button class="primary" id="shop-confirm">사용</button><button class="secondary" id="shop-cancel">취소</button>`);
+      let done=false;
+      $('shop-cancel').onclick=()=>{if(!done)render();};
+      $('shop-confirm').onclick=()=>{
+        if(done||busy)return;done=true;busy=true;
+        const now=new Date(), snap=economySnapshot(p);
+        const result=useRandomResetTicket(p,now);
+        if(!result.ok){busy=false;this.toast(result.reason==='remaining'?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'사용할 리셋권이 없어요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 사용을 취소했어요.');return render();}
+        busy=false;this.toast(`오늘 기본 횟수가 ${result.remaining}회로 돌아왔어요.`);render();
+      };
+    };
+    render();
   }
   achievements() {
     const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;
@@ -623,6 +729,7 @@ class Game {
     if(challenge) {
       if(this.artifacts.has('resurgence'))this.player.lives=this.maxLife;
       if(this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
+      if(this.artifacts.has('resurgence') || this.artifacts.has('miracle'))this.setMaxPower();
     }
     this.startStage(challenge ? 0 : stage);
   }
@@ -868,7 +975,7 @@ class Game {
       if (this.artifacts.has('burningcore')) this.powerPoints = 0;
     }
     this.clearBullets(); this.particlesAt(p.x, p.y, '#fff', 30); this.emit('hurt');
-    if (p.lives <= 0) { this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
+    if (p.lives <= 0) { this.dropEventSubpatterns(false); this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
   }
   enemyBullet(x, y, angle, speed, options = {}) {
     const relaxed = this.difficulty.speed;
@@ -943,14 +1050,17 @@ class Game {
   bossAttack(dt) {
     const b = this.boss; if (!b || b.hp <= 0) return;
     const phase = b.hp / b.maxHp > .67 ? 0 : b.hp / b.maxHp > .34 ? 1 : 2;
-    if (phase !== this.bossPattern) {
-      this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2;
+    const entered = phase !== this.bossPattern;
+    if (entered) {
+      this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2; b.subpatternNext = null;
       if (this.stageIndex===6) {
         b.nextLight=this.bossClock+4; b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+3; b.asteaCrossCount=0;
       }
       this.emit('pattern', { phase, name: this.stage.pattern[phase] });
     }
     this.bossClock += dt; b.fire -= dt;
+    if (entered) this.armEventSubpattern(phase);
+    this.tickEventSubpattern(phase);
     const aim = Math.atan2(this.player.y - b.y, this.player.x - b.x);
     const speed = 102 + this.stageIndex * 10 + phase * 12;
     const t = this.bossClock;
@@ -1023,6 +1133,42 @@ class Game {
     this.emit('enemyShot', { boss: true });
   }
   addHazard(x, width, axis='vertical') { if (this.hazards.length < 6) this.hazards.push({ x, width, axis, age: 0, warn: 1.4, life: 2.25 }); }
+  eventSubpatternKind() {
+    const asset = this.dungeon?.asset;
+    if (asset === 'behemoth' || asset === 'time-ruler' || asset === 'gold-dragon') return 'blast';
+    if (asset === 'harmonious' || asset === 'ancient-soul') return 'laser';
+    return null;
+  }
+  armEventSubpattern(phase) {
+    const b = this.boss;
+    if (!b) return;
+    b.subpatternNext = this.dungeon?.event && phase >= 1 && this.eventSubpatternKind() ? this.bossClock + 3 : null;
+  }
+  tickEventSubpattern(phase) {
+    const b = this.boss;
+    if (!b || b.subpatternNext == null || phase < 1 || this.bossClock + 1e-9 < b.subpatternNext) return;
+    this.spawnEventSubpattern();
+    b.subpatternNext = this.bossClock + (phase >= 2 ? 5 : 6);
+  }
+  spawnEventSubpattern() {
+    const kind = this.eventSubpatternKind();
+    if (!kind || this.hazards.length >= 6 || this.hazards.some(h => h.source === 'eventSubpattern')) return false;
+    if (kind === 'blast') {
+      const radius = 36, pad = radius + 8;
+      this.hazards.push({ kind: 'targetBlast', source: 'eventSubpattern', x: clamp(this.player.x, pad, this.width - pad), y: clamp(this.player.y, pad, Math.max(pad, this.height - pad)), radius, age: 0, warn: 1, activeDuration: .2, life: 1.2, hit: false });
+    } else this.hazards.push({ source: 'eventSubpattern', x: clamp(this.player.x, 40, 410), width: 24, axis: 'vertical', age: 0, warn: 1.4, life: 2.25 });
+    return true;
+  }
+  dropEventSubpatterns(reschedule = false) {
+    this.hazards = this.hazards.filter(h => h.source !== 'eventSubpattern');
+    if (!reschedule || !this.boss || !this.dungeon?.event || this.bossPattern < 1 || !this.eventSubpatternKind()) return;
+    this.boss.subpatternNext = this.bossClock + (this.bossPattern >= 2 ? 5 : 6);
+  }
+  setMaxPower() {
+    this.powerPoints = 0;
+    if (this.power >= 5) return false;
+    this.power = 5; this.emit('powerup'); return true;
+  }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
     b.fire=[1.25,1.08,.92][phase];
@@ -1099,8 +1245,8 @@ class Game {
     this.powerRequirement=([0,7].includes(this.heroIndex)?4:3)-(this.artifacts.has('dew')?1:0);
     if(id==='origin')this.power=Math.min(5,this.power+1);
     while(this.powerPoints>=this.powerRequirement && this.power<5){this.powerPoints-=this.powerRequirement;this.power++;}
-    if(id==='resurgence')this.player.lives=this.maxLife;
-    if(id==='miracle')this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
+    if(id==='resurgence'){this.player.lives=this.maxLife;this.setMaxPower();}
+    if(id==='miracle'){this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);this.setMaxPower();}
     if(id==='clover')this.player.barrier=true;
     this.pendingArtifacts=null;
     return this.completeQuiz();
@@ -1120,7 +1266,10 @@ class Game {
     if (!correct) return false;
     this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
     if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
-    this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0; this.emit('revived'); return true;
+    if(!this.challenge && (this.artifacts.has('resurgence') || this.artifacts.has('miracle')))this.setMaxPower();
+    this.phase = this.boss && this.boss.hp > 0 ? 'boss' : 'wave'; this.clearBullets(); this.hazards.length = 0;
+    if(this.boss && this.boss.hp > 0)this.dropEventSubpatterns(true);
+    this.emit('revived'); return true;
   }
   update(dt) {
     if (this.finished || this.phase === 'quiz' || dt <= 0) return;
@@ -1138,6 +1287,7 @@ class Game {
       if (this.room === 1 && this.time > this.stage.duration*.55 && !this.sentinelSpawned) this.spawnSentinel();
       if (this.time >= this.stage.duration) {
         if (this.room === 2) this.spawnBoss();
+        else if (this.room === 0) { if (!this.enemies.some(e => e.hp > 0 && !e.boss && (e.elite || e.miniboss))) this.clearRoom(); }
         else if (!this.enemies.some(e=>e.miniboss && e.hp>0)) this.clearRoom();
       } else if (this.spawnTime <= 0) { this.spawnWave(); this.spawnTime = Math.max(2.5,3.8-this.level*.2) * this.difficulty.interval; }
     }
@@ -1165,6 +1315,10 @@ class Game {
           e.teleportClock=(e.teleportClock||0)+dt;
           if(e.teleportClock>=2.3&&!e.teleportTarget){e.teleportTarget={x:55+this.random()*340,y:70+this.random()*Math.min(260,this.height*.35)};this.effect('teleport',{...e.teleportTarget,radius:32,life:.75,color:this.stage.color});}
           if(e.teleportClock>=3){e.x=e.ox=e.teleportTarget.x;e.y=e.teleportTarget.y;e.prevX=e.x;e.prevY=e.y;e.teleportClock=0;e.teleportTarget=null;this.effect('burst',{x:e.x,y:e.y,radius:40,life:.35,color:this.stage.color});}
+        }
+        if (this.phase === 'wave' && this.room === 0 && this.time >= this.stage.duration && (e.elite || e.miniboss)) {
+          const holdY = Math.min(280, this.height * .42);
+          if (e.y > holdY) e.y = holdY;
         }
         if (e.special === 2 && e.y > 0) {
           e.countdown -= dt;
@@ -1233,7 +1387,13 @@ class Game {
     }
     this.bullets = this.bullets.filter(b => !b.dead && b.age < 14 && b.y < this.height + 25 && b.y > -150 && b.x > -80 && b.x < 530);
     this.stats.maxBullets = Math.max(this.stats.maxBullets, this.bullets.length);
-    for (const h of this.hazards) { h.age += dt; if (h.age > h.warn && Math.abs((h.axis==='horizontal'?p.y:p.x) - h.x) < h.width / 2 + p.radius) this.hitPlayer(); }
+    for (const h of this.hazards) {
+      h.age += dt;
+      if (h.age <= h.warn) continue;
+      if (h.kind === 'targetBlast') {
+        if (!h.hit && h.age <= h.warn + h.activeDuration && distance(h, p) < h.radius + p.radius && this.hitPlayer()) h.hit = true;
+      } else if (Math.abs((h.axis==='horizontal'?p.y:p.x) - h.x) < h.width / 2 + p.radius) this.hitPlayer();
+    }
     if(this.finished)return;
     this.hazards = this.hazards.filter(h => h.age < h.life);
     for (const d of this.pickups) {
@@ -1402,6 +1562,15 @@ class Renderer {
     for (let i = 0; i < (this.quality ? 35 : 16); i++) { const m = this.motes[i]; c.globalAlpha = .15 + Math.sin(t + i) * .1; c.beginPath(); c.arc(m.x + Math.sin(t * .3 + i) * 12, (m.y + t * m.speed) % h, m.r, 0, TAU); c.fill(); }
     c.globalAlpha = 1;
     for (const hazard of g.hazards) {
+      if (hazard.kind === 'targetBlast') {
+        const active = hazard.age > hazard.warn && hazard.age <= hazard.warn + hazard.activeDuration;
+        const warnT = Math.min(1, hazard.age / Math.max(.001, hazard.warn));
+        c.save(); c.beginPath(); c.arc(hazard.x, hazard.y, hazard.radius, 0, TAU);
+        c.strokeStyle = active ? '#fff' : '#ffb7f1'; c.lineWidth = active ? 3 : 1.5; c.setLineDash(active ? [] : [6, 8]); c.stroke();
+        if (active) { c.fillStyle = '#b7f4ff66'; c.fill(); }
+        else { c.setLineDash([]); c.beginPath(); c.arc(hazard.x, hazard.y, hazard.radius, -Math.PI / 2, -Math.PI / 2 + TAU * warnT); c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke(); }
+        c.restore(); continue;
+      }
       const active=hazard.age>hazard.warn,horizontal=hazard.axis==='horizontal';
       c.save();c.fillStyle=active?'#b7f4ff99':'#ffb7f126';
       if(horizontal)c.fillRect(0,hazard.x-hazard.width/2,450,hazard.width);
@@ -1677,7 +1846,8 @@ function powerRequirement(index=chosenHero) { return ([0,7].includes(index)?4:3)
 function save() {
   saved.campaign = profile;
   saved.settings = { hero: chosenHero, random: chosenRandom, mode: difficulty, sound: audio.enabled };
-  try { localStorage.setItem(storeKey, JSON.stringify(saved)); } catch { storageAvailable = false; }
+  if (!storageAvailable) return false;
+  try { localStorage.setItem(storeKey, JSON.stringify(saved)); return true; } catch { storageAvailable = false; return false; }
 }
 function toast(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').classList.add('visible'); toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 1800); }
 function announce(eyebrow, title, copy = '', duration = 2400, bomb = false) {
@@ -1713,7 +1883,7 @@ function showSortie() {
   if(DUNGEONS[chosenStage]?.event)chosenStage=weeklyEvent().id;
   const oldSortie=screen.querySelector('.sortie');
   if(oldSortie&&!screen.hidden){sortieScroll.top=oldSortie.scrollTop;sortieScroll.roster=screen.querySelector('.roster')?.scrollLeft||0;}
-  cancelAnimationFrame(raf); game = null; paused = false; keys.clear(); pointer = null; audio.boss = false;
+  cancelAnimationFrame(raf); game = null; paused = false; keys.clear(); pointer = null; bombPointerId = null; audio.boss = false;
   hideAnnouncement(); closeModal(); hud.hidden = true; world.style.display = 'none'; screen.hidden = false;
   if (!chosenRandom && HEROES[chosenHero].hidden) chosenHero=dailyHeroes()[0];
   const hero = HEROES[chosenHero], stage = STAGES[chosenStage];
@@ -1725,8 +1895,8 @@ function showSortie() {
     <div class="sortie-controls"><p class="rotation-note">${menus.rotationLabel()}</p><nav class="roster" aria-label="캐릭터 선택">${HEROES.flatMap((h, i) => h.hidden ? [] : `<button class="${!chosenRandom && i === chosenHero ? 'active' : ''}" data-hero="${i}" aria-label="${h.name} 선택${heroAvailable(profile,i)?'':' · 문법 해금'}" aria-pressed="${!chosenRandom && i === chosenHero}"><img src="${art.urls.heroes[i]}" alt=""><span>${heroAvailable(profile,i)?'':'◇ '}${h.name}</span></button>`).join('')}<button id="random-hero" class="${chosenRandom?'active':''}" aria-pressed="${chosenRandom}"><span class="random-sigil">✧</span><span>랜덤</span></button></nav>
     <div class="section-heading"><h2>공격 스타일</h2><small>${chosenRandom?'출격 전 만남과 스타일 선택':'두 가지 빛, 서로 다른 궤적'}</small></div>
     <div class="weapons ${chosenRandom?'random-weapons-placeholder':''}" ${chosenRandom?'inert aria-hidden="true"':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>
-    <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/10회 남음 · 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
-         <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons" class="${chosenChallenge?'challenge-route':''}" ${chosenChallenge?`style="--route-art:url('${art.urls.worlds[6]}')"`:''}><small>${chosenChallenge?'챌린지':`던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}`}</small><b>${chosenChallenge?'챌린지':stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
+    <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/${RANDOM_DAILY_LIMIT}회 남음 · 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능. 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
+         <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons" class="${chosenChallenge?'challenge-route':''}" ${chosenChallenge?`style="--route-art:url('${art.urls.worlds[6]}')"`:''}><small>${chosenChallenge?'챌린지':`던전 · ${DIFFICULTIES.find(d=>d.id===difficulty).name}`}</small><b>${chosenChallenge?'챌린지':stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="shop"><small>재화: 꿈의 조각 ${profile.dreamShards}개</small><b>상점</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
     <button class="launch" id="launch">${chosenChallenge?'챌린지':stage.name} 출격<span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'THREE STAGES'}</span><b>→</b></button>
     <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'BEST '+Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
   </section>`;
@@ -1734,7 +1904,7 @@ function showSortie() {
   screen.querySelectorAll('[data-weapon]').forEach(b => b.onclick = () => { chosenWeapon = Number(b.dataset.weapon); showSortie(); });
   screen.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { chosenStage = Number(b.dataset.stage); showSortie(); });
   $('dungeons').onclick=()=>menus.dungeons(chosenChallenge?6:chosenStage,difficulty,(stage,mode,challenge=false)=>{chosenStage=stage;chosenChallenge=challenge;difficulty=mode;save();showSortie();});
-  $('equipment').onclick=()=>menus.equipment(showSortie);$('library').onclick=()=>menus.library();
+  $('equipment').onclick=()=>menus.equipment(showSortie);$('shop').onclick=()=>menus.shop(showSortie);$('library').onclick=()=>menus.library();
   $('help').onclick = () => showHelp(false);$('achievements').onclick=()=>menus.achievements();
   $('random-hero').onclick=()=>{chosenRandom=true;save();showSortie();};
   syncFullscreen();$('fullscreen').onclick=toggleFullscreen;
@@ -1745,7 +1915,7 @@ function showSortie() {
 function showHelp(launchAfter) {
   const hero = bombDetails(chosenHero);
   const bombTitle = chosenRandom ? '랜덤으로 만나는 수호자' : hero.bomb;
-  const bombInfo = chosenRandom ? '수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 하루 10회, 모든 수호자는 같은 확률이에요. 필살기는 캐릭터와 유물에 따라 달라지며, 출격 전에 효과를 확인할 수 있어요.' : hero.bombInfo;
+  const bombInfo = chosenRandom ? `수호자를 만난 뒤 두 공격 형태 중 하나를 선택해요. 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능. 모든 수호자는 같은 확률이에요. 필살기는 캐릭터와 유물에 따라 달라지며, 출격 전에 효과를 확인할 수 있어요.` : hero.bombInfo;
   setModal(`<span class="small-caps">YOUR FIRST FLIGHT</span><h2>별의 잔향</h2><p class="intro-copy">익숙한 하늘과 매주 새로운 만남.<br>손끝으로 작은 빛을 지켜주세요.</p>
     <div class="help-list"><div><em>↔</em><span><b>손가락을 편하게 드래그</b>누른 위치에서 움직인 만큼 이동해요. 공격은 자동이에요.</span></div><div><em><i class="core-dot"></i></em><span><b>중앙의 작은 코어만 조심</b>머리와 망토에는 맞아도 괜찮아요. 가까이 피하면 점수 보너스!</span></div><div><em>❖</em><span><b>${bombTitle}</b>${bombInfo}</span></div><div><em>✦</em><span><b>파워업과 보물 수집</b>P ${['','한','두','세','네'][powerRequirement()]} 개마다 화력이 올라요. 화면 위쪽으로 가면 보물이 모여요.</span></div></div>
     <p class="tiny-note">키보드: 방향키 / WASD 이동 · Shift 정밀 이동 · Space 봄 · Esc 일시정지<br>던전당 3스테이지. 1·2스테이지 뒤 퀴즈는 생명이나 봄 회복, 마지막 퀴즈는 최종 점수 +10%. 퀴즈 도전은 선택이에요. 주간 첫 클리어로 유물 뽑기권을 모아보세요.</p>
@@ -1755,7 +1925,7 @@ function showHelp(launchAfter) {
 async function startGame(stage = chosenStage, randomResolved = false) {
   if(chosenRandom && !randomResolved){
     const draw=consumeRandom(profile);
-    if(draw===null){setModal('<h2>오늘의 만남을 모두 사용했어요</h2><p class="intro-copy">랜덤 출격은 하루 10회예요. 자정 이후 다시 만날 수 있어요. 일반 캐릭터로는 계속 출격할 수 있어요.</p><button class="primary" id="random-limit-return">출격 준비로</button>');$('random-limit-return').onclick=showSortie;return;}
+    if(draw===null){setModal(`<h2>오늘의 만남을 모두 사용했어요</h2><p class="intro-copy">랜덤 출격은 하루 기본 ${RANDOM_DAILY_LIMIT}회예요. 리셋권이 있으면 상점에서 횟수를 되돌릴 수 있어요. 자정 이후 다시 ${RANDOM_DAILY_LIMIT}회를 만나요. 일반 캐릭터로는 계속 출격할 수 있어요.</p><button class="primary" id="random-limit-return">출격 준비로</button>`);$('random-limit-return').onclick=showSortie;return;}
     chosenHero=draw;chosenWeapon=0;save();
     const hero=HEROES[chosenHero];
     setModal(`<span class="small-caps">${hero.hidden?'HIDDEN ENCOUNTER':'YOUR COMPANION'}</span><h2>${hero.name}</h2><img class="result-hero" src="${art.urls.heroes[chosenHero]}" alt="${hero.name}"><p class="intro-copy">${hero.description}</p><div class="random-weapons">${hero.weapons.map((w,i)=>`<button class="secondary ${i===0?'selected':''}" data-random-weapon="${i}" aria-pressed="${i===0}"><b>${w.name}</b><small>${w.description}</small></button>`).join('')}</div><p class="tiny-note">필살기 · ${bombDetails(chosenHero).bomb}<br>${bombDetails(chosenHero).bombInfo}</p><button class="primary" id="random-launch">이 모습으로 출격</button><button class="secondary" id="random-cancel">출격 준비로</button>`);
@@ -1812,6 +1982,8 @@ function renderHud() {
   const power = String(game.power); if ($('power').dataset.value !== power) { $('power').dataset.value = power; $('power').innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < game.power ? 'on' : ''}"></i>`).join(''); }
   $('barrier-status').hidden = !game.player.barrier;
   $('barrier-status').textContent = game.player.barrier ? '◇ 보호막' : '';
+  const holding = game.phase === 'wave' && game.room === 0 && game.time >= game.stage.duration && game.enemies.some(e => e.hp > 0 && !e.boss && (e.elite || e.miniboss));
+  $('hold-note').hidden = !holding;
   $('bomb-count').textContent = String(game.bombs); $('bomb').disabled = game.bombTime > 0 || (game.bombs <= 0 && !(game.artifacts.has('mask')&&game.player.lives>1&&game.maskUses<3)) || !['wave', 'boss', 'warning'].includes(game.phase);
   $('combo-hud').style.opacity = game.combo > 1 ? '1' : '0'; $('combo').textContent = `${game.combo} COMBO`; $('multiplier').textContent = `SCORE ×${game.multiplier}`;
   $('combo-meter').style.transform = `scaleX(${Math.max(0, game.comboTime / game.comboDuration)})`;
@@ -1840,19 +2012,19 @@ function frame(now) {
 }
 function pauseGame() {
   if (!game || game.finished || game.phase === 'quiz' || paused) return;
-  paused = true; cancelAnimationFrame(raf); audio.pause(); keys.clear(); pointer = null; hideAnnouncement();
+  paused = true; cancelAnimationFrame(raf); audio.pause(); keys.clear(); pointer = null; bombPointerId = null; hideAnnouncement();
   setModal(`<span class="small-caps">A MOMENT BETWEEN STARS</span><h2>잠시, 숨 고르기</h2><p class="intro-copy">${game.stage.name}<br>별들은 여기서 기다리고 있어요.</p><button class="primary" id="resume">계속 날아가기</button>${game.challenge?'<button class="secondary" id="pause-artifacts">현재 적용 유물</button>':''}<button class="secondary" id="restart">${game.challenge?'챌린지':'던전'} 처음부터 다시 시작</button><button class="secondary" id="return">출격 화면으로</button><p class="tiny-note">${game.challenge?'다시 시작하면 마도제국부터 시작하며 이번에 얻은 유물은 사라져요.':'다시 시작하면 현재 던전의 1스테이지를 생명·화력·점수 초기 상태로 플레이해요.'}</p>`);
   if($('pause-artifacts'))$('pause-artifacts').onclick=()=>menus.runArtifacts(game,()=>{paused=false;pauseGame();});
   $('resume').onclick = resumeGame; $('restart').onclick = () => startGame(game.stageIndex); $('return').onclick = showSortie;
 }
 function resumeGame() { if (!game || !paused) return; paused = false; closeModal(); audio.start(); last = 0; accumulator = 0; raf = requestAnimationFrame(frame); }
-function continueFlight() {closeModal();audio.start();renderHud();last=0;accumulator=0;keys.clear();pointer=null;raf=requestAnimationFrame(frame);}
+function continueFlight() {closeModal();audio.start();renderHud();last=0;accumulator=0;keys.clear();pointer=null;bombPointerId=null;raf=requestAnimationFrame(frame);}
 async function resolveStageQuiz(reward=null){
   if(game.challenge&&game.room===2&&game.stageIndex<6)await art.ensureStage(game.stageIndex+1);
   game.completeQuiz(reward);if(!game.finished)continueFlight();
 }
 function showStageQuiz(kind) {
-  hideAnnouncement();keys.clear();pointer=null;
+  hideAnnouncement();keys.clear();pointer=null;bombPointerId=null;
   const relicReward=game.challenge && game.room===2 && game.stageIndex<6;
   menus.offerQuiz('퀴즈에 도전하고 보상을 받을까요?', relicReward?'정답을 맞히면 세 유물 중 하나를 골라 이번 챌린지에 추가해요.':game.room===2?'정답을 맞히면 최종 점수가 10% 증가해요.':'정답을 맞히면 생명 1 또는 봄 1을 회복해요. 건너뛰면 바로 다음 스테이지로 이동해요.', ()=>menus.quiz(kind,'퀴즈',correct=>{
     if(!correct){void resolveStageQuiz();return;}
@@ -1864,7 +2036,8 @@ function showStageQuiz(kind) {
 }
 function offerRevive() {
   hideAnnouncement();if(game.reviveUsed)return finish(false);
-  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
+  const revivePower = !game.challenge && (game.artifacts.has('resurgence') || game.artifacts.has('miracle'));
+  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}${revivePower?' 파워는 최대가 돼요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
   $('revive-decline').onclick=()=>{game.revive(false);finish(false);};
   $('revive-quiz').onclick=()=>menus.quiz('grammar','다시 피어나는 별',correct=>{if(game.revive(correct))continueFlight();else finish(false);});
 }
@@ -1894,7 +2067,21 @@ function finish(won) {
 }
 $('pause').onclick = pauseGame;
 $('run-artifacts').onclick=()=>{if(game&&!game.finished&&game.phase!=='quiz'){pauseGame();menus.runArtifacts(game,resumeGame);}};
-$('bomb').onclick = () => { if (!paused) game?.bomb(); };
+let bombPointerId = null, suppressBombClick = false, suppressBombTimer = 0;
+function bombAllowed() { return !!(game && !paused && modal.hidden && !game.finished && ['wave', 'boss', 'warning'].includes(game.phase)); }
+function activateBomb() { return bombAllowed() && game.bomb(); }
+$('bomb').addEventListener('pointerdown', event => {
+  if (event.button !== 0 || (pointer && event.pointerId === pointer.id)) return;
+  event.preventDefault();
+  bombPointerId = event.pointerId; suppressBombClick = true;
+  clearTimeout(suppressBombTimer); suppressBombTimer = setTimeout(() => { suppressBombClick = false; }, 800);
+  activateBomb();
+});
+$('bomb').addEventListener('click', event => {
+  if (event.detail > 0 || suppressBombClick) { suppressBombClick = false; return; }
+  activateBomb();
+});
+for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) $('bomb').addEventListener(name, event => { if (bombPointerId === event.pointerId) bombPointerId = null; });
 world.addEventListener('pointerdown', event => {
   if (!game || paused || game.finished || game.phase === 'quiz' || pointer) return;
   event.preventDefault(); world.setPointerCapture(event.pointerId);
@@ -1912,15 +2099,15 @@ document.addEventListener('keydown', event => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Shift'].includes(event.key)) event.preventDefault();
   if (event.key === 'Escape') { if (paused) resumeGame(); else pauseGame(); return; }
   if (paused || !modal.hidden) return;
-  if (event.key === ' ' && !event.repeat) game.bomb(); keys.add(event.key.length === 1 ? event.key.toLowerCase() : event.key);
+  if (event.key === ' ' && !event.repeat) activateBomb(); keys.add(event.key.length === 1 ? event.key.toLowerCase() : event.key);
 });
 document.addEventListener('keyup', event => keys.delete(event.key.length === 1 ? event.key.toLowerCase() : event.key));
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pauseGame(); audio.pause(); } });
-window.addEventListener('blur', () => { keys.clear(); pointer = null; });
+window.addEventListener('blur', () => { keys.clear(); pointer = null; bombPointerId = null; });
 window.addEventListener('resize', () => {
   if (!renderer || world.style.display === 'none') return;
   const previousHeight = renderer.height; renderer.resize();
-  if (game) { const ratio = renderer.height / previousHeight; game.height = renderer.height; game.player.y *= ratio; game.player.targetY = game.player.y; game.move(game.player.x, game.player.y); }
+  if (game) { const ratio = renderer.height / previousHeight; game.height = renderer.height; game.player.y *= ratio; game.player.targetY = game.player.y; game.move(game.player.x, game.player.y); game.dropEventSubpatterns(true); }
 });
 // Read-only telemetry for diagnostics, including offline/browser regression checks.
 Object.defineProperty(globalThis, 'astralDiagnostics', { get() { return {

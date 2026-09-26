@@ -30,12 +30,12 @@ try{
  // A reveal is charged even when cancelled. Reload cannot restore it.
  await click('#launch');await click('#help-done');await click('#random-cancel');assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
  await page.reload();await page.waitForFunction(()=>astralDiagnostics?.ready);assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
- for(let i=1;i<10;i++){await click('#launch');await click('#random-cancel');}
- await click('#launch');assert.ok(await page.locator('#random-limit-return').isVisible());await shot('random-limit');await click('#random-limit-return');
- await page.clock.setFixedTime(new Date(2026,8,14,12));await click('#launch');await click('#random-cancel');assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
- checks.push('Ten reveals persist across cancellation/reload; exhaustion has a return path; next day resets');
+  for(let i=1;i<3;i++){await click('#launch');await click('#random-cancel');}
+  await click('#launch');assert.ok(await page.locator('#random-limit-return').isVisible());await shot('random-limit');await click('#random-limit-return');
+  await page.clock.setFixedTime(new Date(2026,8,14,12));await click('#launch');await click('#random-cancel');assert.equal(await page.evaluate(()=>__end.profile.randomDraws.count),1);
+  checks.push('Three reveals persist across cancellation/reload; exhaustion has a return path; next day resets');
  // Ordinary departures remain possible after exhaustion, and Corona replaces HUD/help/actual behavior.
- await page.evaluate(()=>{__end.profile.randomDraws.count=10;__end.profile.owned.push('sun');__end.profile.equipped=['sun'];__end.save();});
+  await page.evaluate(()=>{__end.profile.randomDraws.count=3;__end.profile.owned.push('sun');__end.profile.equipped=['sun'];__end.save();});
  await click('[data-hero="0"]');await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('코로나'));await click('#help-done');
  await click('#launch');await page.waitForFunction(()=>__end.game?.phase==='wave');await page.clock.runFor(2800);await click('#bomb');assert.equal(await page.locator('#bomb-label').textContent(),'코로나');await page.clock.runFor(350);await shot('corona');
  await click('#pause');await click('#return');

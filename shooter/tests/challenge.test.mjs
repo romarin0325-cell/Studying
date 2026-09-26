@@ -27,7 +27,7 @@ test('fairy cloak shrinks actual collision radius and revival artifacts respect 
   }
   const miracle=new Game({artifacts:['miracle']});miracle.bombs=0;miracle.phase='defeat';miracle.finished=true;
   assert.ok(miracle.revive(true));assert.equal(miracle.bombs,5);
-  const definition=ARTIFACTS.find(a=>a.id==='miracle');assert.equal(definition.text,'부활 시 봄 5 획득');assert.equal(artifactText(definition,true),'봄 5 획득');
+  const definition=ARTIFACTS.find(a=>a.id==='miracle');assert.equal(definition.text,'부활 시 봄 5 획득 · 파워 최대');assert.equal(artifactText(definition,true),'봄 5 획득 · 파워 최대');
 });
 test('blessing refreshes a single barrier every stage and keeps normal hit immunity',()=>{
   const g=new Game({artifacts:['blessing','clover','cloak']});

@@ -2,16 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../engine.js';
 import {STAGES,DUNGEONS} from '../content.js';
-import {createProfile,consumeRandom,randomRemaining,claimDungeon,drawArtifact,loadoutStats,recordDungeonClear,achievementProgress} from '../meta.js';
+import {createProfile,consumeRandom,randomRemaining,randomHero,RANDOM_DAILY_LIMIT,claimDungeon,drawArtifact,loadoutStats,recordDungeonClear,achievementProgress} from '../meta.js';
 const tick=(g,t,dt=1/60)=>{for(let elapsed=0;elapsed<t-1e-9;elapsed+=dt)g.update(Math.min(dt,t-elapsed));};
 function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=g.player.targetX=225;g.player.y=g.player.targetY=500;g.player.invincible=0;return g;}
 function target(g,x=225,y=150,r=25){g.spawnEnemy(x,y,{hp:1e7,r,speed:0,fire:999,image:0});return g.enemies.at(-1);}
-test('random is uniform over all nine heroes and limited to ten persisted reveals per local day',()=>{
+test('random is uniform over all nine heroes and limited to three persisted reveals per local day',()=>{
+ for(let i=0;i<9;i++)assert.equal(randomHero(createProfile(),()=>(i+.5)/9),i);
  let p=createProfile();const today=new Date(2026,8,14,23,59),tomorrow=new Date(2026,8,15);
- for(let i=0;i<9;i++){assert.equal(consumeRandom(p,()=>(i+.5)/9,today),i);p=createProfile(JSON.parse(JSON.stringify(p)));}
- assert.equal(randomRemaining(p,today),1);assert.equal(consumeRandom(p,()=>0,today),0);
+ for(let i=0;i<RANDOM_DAILY_LIMIT;i++){assert.equal(consumeRandom(p,()=>(i+.5)/9,today),i);p=createProfile(JSON.parse(JSON.stringify(p)));}
+ assert.equal(randomRemaining(p,today),0);
  assert.equal(consumeRandom(p,()=>{throw Error('exhausted draw must not roll')},today),null);
- assert.equal(randomRemaining(p,tomorrow),10);assert.equal(consumeRandom(p,()=>.99,tomorrow),8);assert.equal(randomRemaining(p,tomorrow),9);
+ assert.equal(randomRemaining(p,tomorrow),RANDOM_DAILY_LIMIT);assert.equal(consumeRandom(p,()=>.99,tomorrow),8);assert.equal(randomRemaining(p,tomorrow),RANDOM_DAILY_LIMIT-1);
 });
 test('old Chaos claims and tickets migrate once and all ticket rarities use the same 15 percent base boundary',()=>{
  const date=new Date(2026,8,14),old={version:2,claims:{'2026-09-14:3':'hard'},tickets:[{dungeon:3,difficulty:'hard'}]};
