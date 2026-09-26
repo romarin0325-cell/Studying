@@ -1,103 +1,49 @@
-# Starward character and effects direction
+# ASTRA Confluence 캐릭터·이펙트 방향
 
-## Active Confluence release override (2026-09-27)
+이 문서는 PR #546에서 도입한 현재 Defense의 아트 계약만 설명한다. PR #546 직전의 2.5–3등신 idle/attack 아틀라스, 12×16 전장, STARWARD/V2 제작 지침은 `defense_legacy/`에 보존되어 있으며 현재 게임의 기준이 아니다.
 
-The author's latest instruction replaces the historical 2.5–3-head idle/attack
-system below with approximately two-head SD pieces and four authored directions.
-Read [the current art playbook](docs/CONFLUENCE_ART_PLAYBOOK.md) for the active
-contract. Directional atlases in `assets/merge/units/` are 1024×1024: four 512px
-cells ordered down/front, up/back, left, right. Keep one neutral pose; attacks use
-procedural recoil and separately rendered effects. This is a direction sheet,
-not frame animation. The historical atlas section below describes legacy art
-only and must not override the author's current instruction.
+## 현재 캐릭터 계약
 
-The current head-size definition and packing procedure are in
-[HEAD_CONSISTENCY_RESEARCH.md](docs/art/HEAD_CONSISTENCY_RESEARCH.md).
-Use the anatomical cranium and face, excluding ears, headgear and hair volume.
-Current verification follows root `AGENTS.md`: `npm run verify` and the scoped
-Defense plan, `npm run verify -- --only defense`. Full-game suites require an
-explicit full-Defense request. The old artwork notes below do not override
-these production or verification rules.
+- 21명 모두 약 2등신의 compact SD 게임 피스다.
+- 각 영웅은 정면, 후면, 좌측, 우측의 네 방향을 별도로 그린다. 네 이미지는 연속 공격 애니메이션이 아니라 동일한 중립 대기 자세의 방향도다.
+- 런타임은 적 방향에 맞는 이미지를 선택하고 짧은 anticipation/recoil을 절차적으로 적용한다. 투사체, 이동 궤적, 충돌 이펙트와 사운드가 공격 타이밍을 전달한다.
+- 얼굴, 성별, 헤어, 의상, 액세서리와 손잡이는 원본 사이에서 바뀌지 않는다. 좌우 이미지를 새로 그린 방향이라고 주장하며 단순 반전해서는 안 된다.
+- 해부학적 머리 크기는 얼굴과 두개부로 비교한다. 귀, 모자, 뿔, 헤일로, 머리카락 부피와 무기는 측정에서 제외한다.
+- 캐릭터별 네 방향에는 하나의 배율과 발 기준선을 사용한다. 키 분류는 메타데이터로 보존하되 이번 릴리스에서 전신 확대·축소로 강제하지 않는다.
+- 흰 머리, 흰 의상과 하이라이트는 불투명 재료다. 흰색/휘도 제거를 사용하지 않는다. 실제 알파가 없으면 새 이미지를 요청하거나 지정된 마젠타 키 오프라인 가져오기를 사용한다.
 
-## Historical V2 artwork notes
+세부 제작 절차와 현재 예외는 [Confluence 아트 플레이북](docs/CONFLUENCE_ART_PLAYBOOK.md)을 따른다. 머리 측정 근거와 캐릭터별 좌표는 [교정 조사](docs/art/HEAD_CONSISTENCY_RESEARCH.md), [단일 프로필](docs/art/HEAD_PROFILE.json), [해부 기준점](docs/art/ANATOMICAL_LANDMARKS.json)에 기록되어 있다.
 
-The remaining sections describe the preserved, inactive V2 artwork.
+## 아틀라스 계약
 
-Read this before producing or replacing Defense artwork. The reference is the
-approved in-game cast, not an isolated attractive illustration.
+`assets/merge/units/`에는 캐릭터별 1024×1024 WebP 아틀라스가 있다. 각 512×512 셀의 순서는 정면, 후면, 좌측, 우측이며 공통 발 앵커는 `(256,480)`이다. `manifest.json`은 원본·출력 SHA-256, 네 발 기준점, 정면 얼굴 중심, 파생 배율과 분할 정보를 기록한다. 초상화 crop 메타데이터는 `merge/art-frames.js`에 있다.
 
-## Hard visual constraints
+현재 배포 에셋은 다음 24개다.
 
-- Use the existing painted SD cast: about 2.5–3 heads tall, large expressive eyes,
-  fine dark outlines, soft cel shading, cool daylight and restrained warm highlights.
-  Keep the same head/body ratio, face, age presentation, costume, accessories and
-  lighting between idle and attack. A wider stance is not a larger body.
-- Rumi, Zeke, Flame Sage, Mushroom King, Great Detective and Phantom are male.
-  Red Dragon and Siren are female. The six supplied portrait references establish
-  identity; translate them into the approved SD style without changing gender.
-- Preserve pale blue/white hair, white cuffs and small highlights as painted opaque
-  material. Never use white/luminance deletion or a checkerboard as transparency.
-- Every idle/attack pair uses one uniform scale and one foot baseline. Do not
-  independently auto-fit poses: broad weapons must not shrink the attack body.
-- Calibrate the anatomical head against Rumi before packing. Judge the face/skull,
-  not a halo, rabbit ears, helmet or long hair. Keep that head scale across the
-  entire cast. A slightly shorter character has a modestly shorter torso/legs;
-  never enlarge the head to make up its height. Compare 64px and 96px proofs.
-- Snow Rabbit retains the original icy-blue hair, white/pink ears, teal bunny
-  costume, white opaque legwear and blue shoes. Do not substitute a winter coat.
-- Queen, Ancient Dragon and Time Ruler are female; Galaxy Whale and Silver Rabbit
-  are male. Preserve their supplied or CARD identity references conservatively.
-- Inspect each pair on dark and pale backgrounds, then at the actual game size.
-  Inspect Zeke's head-to-torso/leg proportions and the Maid/Storm Sage hair explicitly.
-  Transparent pixels, dimensions and filenames alone do not prove visual quality.
+- 영웅 방향 아틀라스 21개
+- 정원 배경 `assets/merge/garden.webp`
+- 적 아틀라스 `assets/moonlit/creatures.webp`
+- 보스 아틀라스 `assets/moonlit/realm-bosses.webp`
 
-## Atlas contract
+배포본은 이 파일들을 단일 HTML에 포함한다. 게임 실행 중 이미지 처리, 픽셀 판독 또는 생성 작업을 하지 않는다.
 
-Character atlases have two columns (idle, attack), square 512px cells. Rows:
+## 모션·전투 가독성
 
-| File | Row order |
-| --- | --- |
-| heroes.webp | rumi, luna, cinderella, zeke |
-| queen.webp | queen |
-| galaxy-whale.webp | galaxy_whale |
-| silver-rabbit.webp | silver_rabbit |
-| ancient-dragon.webp | ancient_dragon |
-| time-ruler.webp | time_ruler |
-| companions.webp | snow_rabbit, avalanche_maid, night_rabbit, guardian, storm_sage, lightning_sage |
-| companions-ember.webp | red_dragon, flame_sage, mushroom_king |
-| companions-tide.webp | great_detective, siren, phantom |
+- Idle: 전투를 가리지 않는 아주 작은 호흡 이동만 사용한다.
+- Anticipation: 표적 반대쪽으로 90–140ms 움직이고 작은 charge mark를 표시한다.
+- Release: 표적 방향으로 복귀하면서 동일한 손/중심 앵커에서 효과를 발사한다.
+- Impact: 작은 밝은 중심, 속성 형태와 낮은 밀도의 짧은 파티클을 사용한다.
+- Merge: 안쪽으로 모이는 움직임 뒤 바깥쪽 별 파동을 사용한다.
+- Skill: 일반 공격과 구분되는 고유 효과와 짧은 사운드를 사용한다.
+- Reduced effects: 화면 흔들림·섬광·선택 파티클만 줄이고 위험 경고와 타이밍은 유지한다.
 
-Keep at least 8px transparent padding, with feet near cell y=481. The runtime
-mirrors the paired art for leftward action; fallback direction IDs share the
-reviewed idle pose. Do not describe these fallbacks as four newly authored views.
-The stable hero IDs, portrait IDs and checkpoint identities must not change.
+## 제작·검수
 
-Request real alpha from built-in image generation. Reject painted transparency.
-If an accepted generation uses a reserved magenta background, key that hue
-offline with scripts/import_defense_sprite.mjs; inspect purple and pink details
-afterward. scripts/pack_defense_poses.mjs groups connected silhouettes, scales
-each pair together and exports fallback files. Supply its JSON configuration
-with ids, approximate input boundaries (x,y,w,h for every pose), and optional
-fallbackRoot. Keep the authoring input until visual approval. The release build
-validates alpha and fails on opaque sprites; it does not silently modify art.
+```powershell
+node scripts/pack_defense_directions.mjs --source-dir SOURCE_DIRECTORY --landmarks defense/docs/art/ANATOMICAL_LANDMARKS.json --proof-dir PROOF_DIRECTORY
+node scripts/export_defense_directions.mjs OUTPUT_DIRECTORY
+npm run prepare:defense-art -- --check --force
+npm run verify -- --only defense
+```
 
-Worlds and bosses use separate 3×2 atlases of square cells, in the requested
-chapter order: artificial demon / Love Iris / Curse Iris; Flora / Poseidon /
-Beelzebub. Keep one source-cell scale across the six boss silhouettes, excluding
-horns/crowns/wings when comparing anatomical heads. The core design is unchanged.
-
-The 4×4 combat FX sheet uses screen compositing over black. Keep every frame
-isolated. Fire, water, nature and light/dark families share a crisp bright center
-and soft colored falloff. Normal hits remain smaller than skills. Preserve the
-procedural fallback and reduced-effects mode. Never add runtime getImageData,
-background flood fills or per-hit full-atlas processing.
-
-## Review and tests
-
-For the active game, use the scoped checks described at the top of this file.
-Review the built offline HTML, not only the source page.
-Record physical-device limitations rather than claiming desktop automation is
-iOS/Android performance certification.
-
-Exact prompts for this revision: [TACTICAL_ART_PROMPTS.md](docs/TACTICAL_ART_PROMPTS.md).
-Six-realms additions and revisions: [SIX_REALMS_ART_PROMPTS.md](docs/SIX_REALMS_ART_PROMPTS.md).
+21명을 40px와 64px 크기로 밝고 어두운 배경에서 나란히 보고, 25명 전장에서도 얼굴 인식, 머리 배율, 합성 표시, 공격 소유권, 충돌 타이밍과 시각 혼잡을 확인한다. 크기·알파·해시 검사를 통과했다는 사실은 육안 승인이나 실제 휴대전화 성능 인증을 대신하지 않는다.
