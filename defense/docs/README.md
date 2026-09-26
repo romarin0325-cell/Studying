@@ -1,4 +1,23 @@
-# Hero Core Defense V2 유지보수 Wiki
+# ASTRA Confluence 유지보수 시작점
+
+현재 활성 게임은 21인·6명 편성·5×5 보드의 합성 디펜스이며 `defense/merge/`에서 실행된다. [현재 실행·검증 안내](../README.md), [기획](CONFLUENCE_DESIGN.md), [아트 제작 지침](CONFLUENCE_ART_PLAYBOOK.md), [두개부 크기 교정 절차](art/HEAD_CONSISTENCY_RESEARCH.md)를 먼저 읽는다.
+
+| 영역 | 현재 파일 |
+| --- | --- |
+| 콘텐츠·영웅·유물·출시 에셋 | `merge/content.js` |
+| 결정론적 전투·합성·상점·저장 직렬화 | `merge/engine.js` |
+| UI와 저장·입력·화면 전환 | `merge/main.js` |
+| 캔버스와 이펙트 | `merge/render.js` |
+| 소리 | `merge/audio.js` |
+| 화면 스타일 | `merge/style.css` |
+| 이미지 추정 기준점 | `docs/art/ANATOMICAL_LANDMARKS.json` |
+| 단일 파일 생성 | `../scripts/build_defense_local.mjs` |
+
+아래는 **보존된 이전 V2 게임의 유지보수 문서**다. 12×16 논리 보드, 5인 편성, V2 저장·클래스 계약을 현재 Confluence 게임에 적용하지 않는다. 이전 엔진 테스트는 보존되어 있다.
+
+---
+
+# 이전 Hero Core Defense V2 Wiki
 
 > 현재 Starward 화면·난도·보스 돌파 규칙·70개 에셋 계약은 [최신 릴리스 문서](./STARWARD_RELEASE.md)를 우선합니다. 아래는 기반 V2 구조 설명입니다.
 

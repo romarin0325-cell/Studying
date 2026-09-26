@@ -3,20 +3,56 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-    <meta name="theme-color" content="#f6f5ee">
-    <meta name="description" content="별의 수호자 — 작은 수호대와 함께하는 동화 속 전략 디펜스">
-    <title>별의 수호자 · Starward</title>
-    <link rel="stylesheet" href="./css/tokens.css">
-    <link rel="stylesheet" href="./css/app.css">
-    <link rel="stylesheet" href="./css/battle.css">
+    <meta name="theme-color" content="#132731">
+    <meta name="description" content="21명의 영웅, 6명의 동행. 별빛을 모으고 운명을 합성하는 아스트라 디펜스.">
+    <title>ASTRA · 성좌의 수호자</title>
+    <link rel="stylesheet" href="./merge/style.css">
   </head>
   <body>
     <div id="app">
-      <div id="storage-warning" data-storage-warning hidden>저장 공간을 사용할 수 없어 이번 실행에서만 진행 상황이 유지돼요.</div>
-      <main id="scene-root"></main>
-      <div id="overlay-root"></div>
+      <section id="home" class="screen home-screen" aria-label="성좌의 수호자 시작 화면">
+        <div class="home-backdrop"></div>
+        <header class="home-top"><span class="wordmark">A S T R A</span><button class="icon-button" data-action="settings" aria-label="설정"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14M9 5v4m6 1v4m-5 1v4"/></svg></button></header>
+        <div class="title-lockup"><span class="eyebrow">THE CONSTELLATION KEEPERS</span><h1>성좌의 수호자</h1><div class="title-rule"><i></i><span>✦</span><i></i></div></div>
+        <canvas id="home-art" width="720" height="510" aria-hidden="true"></canvas>
+        <div class="home-bottom">
+          <div class="chapter-selector"><button id="chapter-prev" class="icon-button" aria-label="이전 지역">‹</button><div><span id="chapter-number" class="eyebrow">CHAPTER 01</span><h2 id="chapter-name">달빛 정원</h2><p id="chapter-caption">처음 피어나는 별</p></div><button id="chapter-next" class="icon-button" aria-label="다음 지역">›</button></div>
+          <div class="deck-heading"><span>이번 원정의 동행</span><button class="text-button" data-action="deck">편성 바꾸기 <span>↗</span></button></div>
+          <div id="home-deck" class="deck-strip"></div>
+          <button id="play" class="primary-button"><span>수호를 시작하다</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+          <button id="resume" class="resume-button" hidden>진행하던 원정 이어가기</button>
+          <div class="home-footnote"><span>6명의 동행 · 12번의 물결</span><span id="record">새로운 이야기</span></div>
+        </div>
+      </section>
+      <section id="battle" class="screen battle-screen" aria-label="수호 전투" hidden>
+        <header class="battle-header">
+          <button class="icon-button" data-action="pause" aria-label="일시 정지"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+          <div class="wave-heading"><span id="wave-label">WAVE 01 / 12</span><div id="wave-progress"><i></i></div></div>
+          <div class="health" aria-label="결계 내구도"><svg viewBox="0 0 24 28"><path d="M12 2 21 9 18 21 12 26 6 21 3 9Z"/><path d="m3 9 9 4 9-4M12 13v13M12 2v11"/></svg><strong id="health">20</strong></div>
+          <button id="speed" class="speed-button" aria-label="전투 속도 변경">1×</button>
+        </header>
+        <div class="arena-wrap">
+          <canvas id="arena" width="720" height="780" aria-label="5행 5열 영웅 전장. 영웅을 선택한 뒤 목적지를 누르거나 끌어서 이동과 합성." tabindex="0"></canvas>
+          <div id="cell-access" class="cell-access" aria-label="영웅 배치 칸"></div>
+          <div id="wave-banner" class="wave-banner" aria-live="polite"></div>
+          <div id="boss-warning" class="boss-warning" hidden></div>
+          <div id="skill-cutin" class="skill-cutin" hidden><img alt=""><div><small>CONSTELLATION</small><strong></strong></div></div>
+          <div id="hint" class="battle-hint">같은 영웅을 겹치면 더 강해집니다</div>
+          <div id="unit-panel" class="unit-panel" hidden></div>
+        </div>
+        <div class="battle-controls">
+          <div class="star-meter"><span>✦ <b>별빛</b></span><div><i id="gauge-fill"></i></div><strong id="gauge">75</strong><small>/ 100</small></div>
+          <div id="skills" class="skill-strip"></div>
+          <div class="battle-forecast" aria-label="앞으로의 물결"><div><span id="forecast-kicker">다가오는 보스</span><strong id="forecast-name">인조마신</strong><small id="forecast-detail">4번째 물결 · 마력 봉인</small></div><div id="journey-dots" class="journey-dots" aria-hidden="true"></div></div>
+          <div class="economy-line"><span class="gold"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="9"/><path d="m12 7 3 5-3 5-3-5Z"/></svg><b id="gold">65</b></span><span id="interest" class="interest">다음 이자 +6</span><button id="artifacts-button" class="text-button">유물 <b id="artifact-count">0</b></button></div>
+          <div class="action-row"><button id="summon" class="primary-button summon-button"><span class="summon-star">✧</span><span>영웅 소환</span><strong id="summon-price">10 <small>G</small></strong></button><button id="training" class="secondary-button"><svg viewBox="0 0 24 24"><path d="m12 3 7 7-4 1v10H9V11l-4-1Z"/></svg><span>동행 강화</span></button></div>
+        </div>
+      </section>
+      <div id="toast" class="toast" role="status" hidden></div>
+      <div id="modal-root" class="modal-root" hidden></div>
+      <div id="save-notice" class="save-notice" hidden>이 브라우저에서는 자동 저장을 사용할 수 없습니다.</div>
     </div>
     <noscript>이 게임을 실행하려면 JavaScript가 필요해요.</noscript>
-    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="./merge/main.js"></script>
   </body>
 </html>

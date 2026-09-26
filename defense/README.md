@@ -1,31 +1,40 @@
-# 별의 수호자 · Starward
+# ASTRA · 성좌의 수호자
 
-Portrait-first fantasy tower defense on the deterministic Defense V2 engine: four illustrated journeys, sixteen guardians and ten waves, with Story and Trial difficulties.
+세로 모바일용 5×5 합성 디펜스다. 21명 중 6명을 편성하고, 전투 중 소환·이동·교환·합성과 공유 별빛을 사용하는 스킬로 12번의 물결을 막는다. 활성 코드는 `merge/`다. `js/`, `css/`와 과거 STARWARD/V2 문서는 이전 게임의 보존 자료이며 현재 동작의 기준이 아니다.
 
-## Play
+## 실행과 진행
 
-Open `defense/dist-local/HeroCoreDefense.html` directly. This approximately 7.51 MiB file includes all art, code and styles and makes no network requests. Source development uses `npm run serve:defense` at http://127.0.0.1:4174/.
+`npm run serve:defense`로 http://127.0.0.1:4174/ 를 연다. 한 파일 배포본은 `dist-local/HeroCoreDefense.html`이며 `npm run build:defense-local`로 생성한다. 코드·스타일·출시 이미지 24개를 포함한다. 원본 `index.html`은 ES module이므로 개발 서버를 사용한다.
 
-Choose one protagonist and four companions. Tap a card then a glowing position, or drag the card onto the battlefield. Automatic placement provides a starting formation. Spend crystals between waves; choose traits at Lv4 and Lv6. Aim **별의 기원** once per wave to stop a threatening group. Combat starts at 2× speed; pause, speed, sound and effect controls remain available.
+처음부터 같은 1성 지크 두 명을 합칠 수 있다. 영웅을 선택한 뒤 목적지를 누르거나 끌어서 이동·교환·합성한다. 같은 영웅·같은 성급의 합성은 그 영웅을 보존하고 등급을 올린다. 루미는 같은 성급의 다른 영웅 합성을 보조한다. 합성 특성, 각 영웅의 범위·공격 방식, 적에게 가까운 위치와 보스의 방해를 함께 고려한다.
 
-Final bosses must be defeated: a breach ends the run. Midbosses inflict three core damage. Medals persist separately for each difficulty. Continue restarts an unfinished wave at its saved boundary.
+스킬 여섯 개는 하나의 별빛 자원을 공유한다. 즉시 피해, 동결, 강화, 경제 스킬 중 필요한 것을 고른다. 3·6·9번째 물결 뒤 상점에서 확정 동료나 유물을 구매하고, 4·8번째 보스 뒤 유물을 선택한다. 남긴 골드는 물결 종료 이자를 만든다. 동행 강화는 같은 영웅의 모든 배치 개체에 적용된다. 12번째 보스 뒤 결과와 끝없는 수호를 선택할 수 있다.
 
-## Art and documentation
+진행과 설정은 `astra.confluence.*` 저장 키를 사용하고 과거 V2 저장을 변경하지 않는다. 저장이 차단되면 경고와 메모리 동작을 제공한다. 새 원정을 시작하면 현재 Confluence 이어하기를 대체한다.
 
-Seven atlases in `assets/moonlit/` provide 32 character poses, 16 combat effects, 10 enemies, 4 bosses, 2 props and 4 environments. Sprites are prepared as alpha WebP before release; the browser performs no pixel extraction. The 96 portrait/battle fallback files load on demand, giving 103 embedded release assets. Character direction fallbacks share the reviewed idle pose.
+## 이미지와 확장
 
-Read [current release and balance notes](docs/TACTICAL_RELEASE.md), [art direction](ART_DIRECTION.md), [exact generation prompts](docs/TACTICAL_ART_PROMPTS.md) and the [underlying engine wiki](docs/README.md). Older STARWARD documents describe the prior ten-character release.
+캐릭터 21명은 각각 상·하·좌·우의 별도 그림 네 개를 가진다. `assets/merge/units/`의 1024×1024 아틀라스는 512px 셀 네 개이며 순서는 정면, 후면, 좌측, 우측이다. 네 장은 연속 공격 모션이 아니라 같은 대기 자세의 방향이다. 작은 반동과 별도 투사체·충격 효과가 공격을 표현한다.
 
-## Build and validation
+머리는 두개부와 얼굴을 뜻한다. 귀·모자·뿔·머리카락 부피를 배율 계산에 포함하지 않는다. 기록된 두개부 추정 좌표에서 하나의 배율을 계산해 네 방향에 공유한다. 원본 해시가 달라지거나 두개부 기록이 없으면 재검토를 요구한다. 이는 육안 검수를 대체하는 자동 품질 인증이 아니다.
+
+- [현재 게임 기획과 시스템](docs/CONFLUENCE_DESIGN.md)
+- [현재 아트·모션 제작 지침](docs/CONFLUENCE_ART_PLAYBOOK.md)
+- [머리 크기 통일 조사와 교정 절차](docs/art/HEAD_CONSISTENCY_RESEARCH.md)
+- [두개부·체형 프로필](docs/art/HEAD_PROFILE.json)
+- [캐릭터별 추정 기준점과 원본 해시](docs/art/ANATOMICAL_LANDMARKS.json)
+- [선택된 원본 이미지의 생성 프롬프트](docs/art/FOUR_DIRECTION_PROMPTS.json)
+
+## 검증
 
 ```powershell
-npm run lint:defense
-npm run test:defense
-npm run test:defense:local
-npm run test:defense:browser
-npm run test:defense:experience
-npm run test:defense:resilience
+npm run verify:plan
 npm run verify
+npm run verify -- --only defense
 ```
 
-The local test rebuilds the HTML; run it before the experience test. Experience checks use real UI decisions and accelerated deterministic battle ticks. Root verification deliberately excludes Defense, so the explicit Defense checks above remain necessary.
+루트 검증은 Defense를 자동 실행하지 않는다. 전용 `--only defense` 계획이 바뀐 파일의 가까운 테스트·문법·에셋·배포 검사를 고른다. 기본 브라우저 화면 검사는 대표 세로 화면 두 개와 25명 배치를 다룬다. 전체 회귀·경험·복원력 묶음은 사용자가 전체 Defense 검증을 요청한 경우에만 `npm run verify:full -- --game defense`로 실행한다.
+
+`test:defense:local`은 한 파일 배포본을 재생성하고, 모든 추가 네트워크 요청을 차단한 브라우저에서 합성·스킬·저장·이어하기를 검사한다. `file://` 직접 실행 및 실제 휴대전화 검증과는 구분한다. 경험 검사는 편성·실제 UI 입력·상점·설정을 확인하고, 복원력 검사는 Chromium/WebKit에서 이미지 실패·무응답, 저장 차단, 일부 구형 API 부재를 다룬다. 무응답 이미지를 유지하는 경우 스크린샷 대신 DOM·배치·대체 이미지 상태를 기록한다.
+
+기술 검사는 재미나 그림 비율에 대한 사용자 승인을 뜻하지 않는다. 실제 휴대전화의 메모리·발열·터치 체감은 별도로 검증해야 한다.

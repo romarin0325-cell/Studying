@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "status": "production target; generated drawings still require landmark and visual review",
+  "cell": 512,
+  "foot": [256, 480],
+  "directions": ["down", "up", "left", "right"],
+  "head": {"height": 150, "frontWidth": 160, "sideWidth": 144},
+  "bodyBelowChin": {"short": 144, "medium": 160, "tall": 176},
+  "review": {
+    "headHeightTolerance": 0.05,
+    "headWidthTolerance": 0.06,
+    "directionTolerance": 0.06,
+    "note": "Project-specific review thresholds, not an industry standard. Occluded skull landmarks are estimates and cannot certify anatomy automatically."
+  },
+  "heightClasses": {
+    "zeke": "tall", "rumi": "medium", "luna": "medium", "cinderella": "medium",
+    "snow_rabbit": "short", "avalanche_maid": "medium", "night_rabbit": "short", "guardian": "short",
+    "storm_sage": "tall", "lightning_sage": "tall", "red_dragon": "tall", "flame_sage": "tall",
+    "mushroom_king": "medium", "great_detective": "medium", "siren": "medium", "phantom": "short",
+    "queen": "medium", "galaxy_whale": "medium", "silver_rabbit": "short", "ancient_dragon": "tall", "time_ruler": "medium"
+  }
+}

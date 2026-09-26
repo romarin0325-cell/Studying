@@ -1,5 +1,28 @@
 # Starward character and effects direction
 
+## Active Confluence release override (2026-09-27)
+
+The author's latest instruction replaces the historical 2.5–3-head idle/attack
+system below with approximately two-head SD pieces and four authored directions.
+Read [the current art playbook](docs/CONFLUENCE_ART_PLAYBOOK.md) for the active
+contract. Directional atlases in `assets/merge/units/` are 1024×1024: four 512px
+cells ordered down/front, up/back, left, right. Keep one neutral pose; attacks use
+procedural recoil and separately rendered effects. This is a direction sheet,
+not frame animation. The historical atlas section below describes legacy art
+only and must not override the author's current instruction.
+
+The current head-size definition and packing procedure are in
+[HEAD_CONSISTENCY_RESEARCH.md](docs/art/HEAD_CONSISTENCY_RESEARCH.md).
+Use the anatomical cranium and face, excluding ears, headgear and hair volume.
+Current verification follows root `AGENTS.md`: `npm run verify` and the scoped
+Defense plan, `npm run verify -- --only defense`. Full-game suites require an
+explicit full-Defense request. The old artwork notes below do not override
+these production or verification rules.
+
+## Historical V2 artwork notes
+
+The remaining sections describe the preserved, inactive V2 artwork.
+
 Read this before producing or replacing Defense artwork. The reference is the
 approved in-game cast, not an isolated attractive illustration.
 
@@ -71,10 +94,8 @@ background flood fills or per-hit full-atlas processing.
 
 ## Review and tests
 
-After changing art, run npm run lint:defense, npm run test:defense,
-npm run test:defense:local, npm run test:defense:browser,
-npm run test:defense:experience, npm run test:defense:resilience and the root
-npm run verify. Review the built offline HTML, not only the source page.
+For the active game, use the scoped checks described at the top of this file.
+Review the built offline HTML, not only the source page.
 Record physical-device limitations rather than claiming desktop automation is
 iOS/Android performance certification.
 
