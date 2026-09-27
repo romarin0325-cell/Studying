@@ -23,7 +23,7 @@
           <div class="loadout-row"><div><span>작은 준비, 다른 원정</span><button class="text-button" data-action="loadout">유물 조합 <span>↗</span></button></div><div id="home-relics"></div></div>
           <button id="play" class="primary-button"><span>별빛 원정 시작</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
           <button id="resume" class="resume-button" hidden>진행하던 원정 이어가기</button>
-          <div class="home-footnote"><span>6명의 동행 · 12번의 물결</span><span id="record">새로운 이야기</span></div>
+          <div class="home-footnote"><button class="text-button" data-action="help">조작 연습</button><span id="record">새로운 이야기</span></div>
         </div>
       </section>
       <section id="battle" class="screen battle-screen" aria-label="수호 전투" hidden>
@@ -37,12 +37,12 @@
           <canvas id="arena" width="720" height="780" aria-label="5행 5열 영웅 전장. 탭하면 동료 정보. 드래그로만 이동, 교환, 합성." tabindex="0"></canvas>
           <div id="cell-access" class="cell-access" aria-label="영웅 배치 칸"></div>
           <div id="wave-banner" class="wave-banner" aria-live="polite"></div>
+          <div id="boss-health" class="boss-health" hidden><div><span id="boss-name"></span><b id="boss-percent"></b></div><div class="boss-track" role="progressbar" aria-label="보스 체력" aria-valuemin="0" aria-valuemax="100"><i></i></div></div>
           <div id="boss-warning" class="boss-warning" hidden></div>
           <div id="skill-cutin" class="skill-cutin" hidden><img alt=""><div><small>CONSTELLATION</small><strong></strong></div></div>
-          <div id="hint" class="battle-hint">같은 영웅을 겹치면 더 강해집니다</div>
         </div>
         <div class="inspection-dock">
-          <div id="inspection-empty"><span class="inspect-mark">✧</span><div><strong>어떤 동행을 키워 볼까요?</strong><p>탭으로 능력 확인 · 드래그로 이동과 합성</p></div><button class="text-button" data-action="help" aria-label="플레이 방법">?</button></div>
+          <div id="combat-overview" class="combat-overview"><div><span>남은 적</span><strong id="remaining-enemies">0</strong><small id="enemy-status"></small></div><div><span>전장</span><strong id="deployed-count">3<small> / 25</small></strong><small id="active-buffs">동행 3명</small></div><div><span id="income-label">물결 보상</span><strong id="next-income">+20<small> G</small></strong><small id="income-status">종료 시 지급</small></div></div>
           <div id="unit-panel" class="unit-panel" hidden></div>
         </div>
         <div class="battle-controls">

@@ -22,7 +22,8 @@ export async function validateDirections(){
     assert.ok(entry?.anatomy,h.id+' missing anatomical reference');
     assert.equal(entry.sourceSha256,m.source.sha256,h.id+' anatomical data belongs to a different source');
     assert.deepEqual(entry.anatomy,m.source.anatomy);
-    assert.equal(m.source.scale,anatomicalScale(entry.anatomy.skull,profile),h.id+' must be repacked after profile/landmark changes');
+    assert.equal(m.source.alphaOpaqueThreshold,entry.alphaOpaqueThreshold,h.id+' import alpha policy');
+    assert.equal(m.source.scale,anatomicalScale(entry.anatomy.skull,profile,h.id),h.id+' must be repacked after profile/landmark changes');
     assert.ok(m.anatomy.headWidth>0&&m.anatomy.headHeight>0&&m.anatomy.packedSkull.length===4);
     assert.equal(m.anatomy.heightClassApplied,false,h.id+' height must not change the common head scale');
     assert.match(m.anatomy.uncertainty,/estimates/);

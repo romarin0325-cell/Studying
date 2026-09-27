@@ -1,7 +1,8 @@
 import {HERO,HEROES,DEFAULT_DECK,ARTIFACT,ARTIFACTS,BLESSING,BLESSINGS,validArtifacts,CHAPTERS,BOSSES} from './content.js';
-import {newRun,step,summon,move,sell,cast,upgrade,upgradeCost,summonCost,dividend,cycleTarget,bestUnit,cellAt,cellPoint,chooseReward,continueEndless,serialize,restore,validDeck,trainingBonus} from './engine.js';
+import {newRun,step,summon,move,sell,cast,upgrade,upgradeCost,summonCost,dividend,cycleTarget,bestUnit,cellAt,cellPoint,chooseReward,continueEndless,serialize,restore,validDeck,trainingBonus,trainingPower,unitEconomy,harvestIncome} from './engine.js';
 import {Art,Renderer} from './render.js';
 import {Sound} from './audio.js';
+import {tutorialPage,mountTutorial} from './tutorial.js';
 
 const $=id=>document.getElementById(id),art=new Art(),sound=new Sound(),renderer=new Renderer($('arena'),art);
 const PROFILE_KEY='astra.confluence.profile.v1',RUN_KEY='astra.confluence.run.v1';
@@ -16,7 +17,7 @@ const storedRun=storageGet(RUN_KEY);saved=restore(storedRun);if(saved&&['victory
 try{if(JSON.parse(storedRun)?.version===1)$('rules-update').hidden=false;}catch{}
 function saveProfile(){storageSet(PROFILE_KEY,JSON.stringify(profile));}
 function saveRun(){if(state){storageSet(RUN_KEY,serialize(state));saved=['victory','defeat'].includes(state.phase)?null:restore(serialize(state));}}
-function applySettings(){sound.enabled=profile.sound;sound.music=profile.music;sound.setVolume(profile.volume);renderer.reduced=profile.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}
+function applySettings(){sound.enabled=profile.sound;sound.music=profile.music;sound.setVolume(profile.volume);renderer.reduced=profile.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;$('app').dataset.reduced=String(!!renderer.reduced);}
 applySettings();
 function toast(message){if(!message)return;clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2300);}
 function command(result){if(result?.ok===false&&result.reason)toast(result.reason);updateUI(true);saveRun();return result;}
@@ -46,10 +47,10 @@ function activateCell(index){
   sound.unlock();select(state.board[index]?index:-1);preferred=state.board[index]?-1:index;
 }
 function updateUnit(){
-  const u=state?.board[selected],panel=$('unit-panel');$('inspection-empty').hidden=!!u;if(!u){panel.hidden=true;return;}
-  const hash=`${u.uid}-${u.rank}-${u.priority}-${state.upgrades[u.hero]}`;if(hash===lastUnit)return;lastUnit=hash;
-  const h=HERO[u.hero],label={first:'선두',strong:'강한 적',last:'후미'}[u.priority];panel.hidden=false;
-  panel.innerHTML=`<div class="unit-top">${portrait(u.hero)}<strong>${h.name}</strong><span class="unit-rank">${'✦'.repeat(u.rank)}</span><button class="close-unit" data-unit="close" aria-label="영웅 선택 닫기">×</button></div><small>${h.role} · 사거리 ${h.range}</small><p>${h.trait.text}</p><div class="unit-actions"><button data-unit="target">목표 · ${label}</button><button data-unit="info">필살기 정보</button><button data-unit="sell">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button></div>`;
+  const u=state?.board[selected],panel=$('unit-panel');$('combat-overview').hidden=!!u;if(!u){panel.hidden=true;return;}
+  const hash=`${u.uid}-${u.rank}-${u.priority}-${state.upgrades[u.hero]}-${state.wave}`;if(hash===lastUnit)return;lastUnit=hash;
+  const h=HERO[u.hero],label={first:'선두',boss:'보스',strong:'강한 적',last:'후미'}[u.priority];panel.hidden=false;
+  panel.innerHTML=`<div class="unit-top">${portrait(u.hero)}<strong>${h.name}</strong><span class="unit-rank">${'✦'.repeat(u.rank)}</span><button class="close-unit" data-unit="close" aria-label="영웅 선택 닫기">×</button></div><small>${h.role} · 사거리 ${h.range}</small><p>${unitEconomy(state,u)}</p><div class="unit-actions"><button data-unit="target">목표 · ${label}</button><button data-unit="info">능력 상세</button><button data-unit="sell">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button></div>`;
 }
 function updateUI(force=false){
   if(!state||screen!=='battle')return;
@@ -63,19 +64,32 @@ function updateUI(force=false){
   updateForecast();
   for(let i=0;i<25;i++){const u=state.board[i],b=$('cell-access').children[i];b?.setAttribute('aria-label',`${Math.floor(i/5)+1}행 ${i%5+1}열 ${u?`${HERO[u.hero].name} ${u.rank}성`:'빈칸'}`);}
   $('arena').dataset.wave=state.wave;$('arena').dataset.phase=state.phase;$('arena').dataset.units=state.board.filter(Boolean).length;$('arena').dataset.merges=state.stats.merges;
-  $('boss-warning').hidden=!state.telegraph;if(state.telegraph)$('boss-warning').textContent=state.telegraph.text;
-  const hints=['반짝이는 동료에게 드래그해 합성하세요','무료 소환으로 동행을 늘려 보세요','탭은 정보 · 드래그는 이동과 합성','아래 빛나는 얼굴을 눌러 필살기'];
-  $('hint').textContent=hints[Math.min(3,state.tutorial)];$('hint').style.opacity=state.wave<=2&&selected<0?'1':'0';
+  $('boss-warning').hidden=!state.telegraph;
+  if(state.telegraph){const source=state.enemies.find(e=>e.uid===state.telegraph.uid),warning=BOSSES[source?.boss]?.warning||state.telegraph.pattern;$('boss-warning').textContent=`${warning} · ${Math.max(0,state.telegraph.ends-state.time).toFixed(1)}초`;}
+  updateCombatOverview();
   updateUnit();
-  if(selected<0){$('inspection-empty').querySelector('strong').textContent=state.board.every(Boolean)?'합성으로 새 자리를 만들어 보세요':state.freeSummons?`무료 소환 ${state.freeSummons}회가 남아 있어요`:'어떤 동행을 키워 볼까요?';}
   if(lastPhase!==state.phase){lastPhase=state.phase;saveRun();if(state.phase==='reward')showReward();else if(state.phase==='victory'||state.phase==='defeat')showResult();}
   sound.battle=state.phase==='combat'&&!paused;sound.boss=state.enemies.some(e=>e.boss);
+}
+function updateCombatOverview(){
+  const allies=state.board.filter(Boolean),alive=state.enemies.filter(e=>e.hp>0),boss=alive.find(e=>e.boss);
+  $('remaining-enemies').textContent=alive.length+state.queue.length;
+  $('enemy-status').textContent=`진입 ${alive.length} · 대기 ${state.queue.length}`;
+  $('deployed-count').innerHTML=`${allies.length}<small> / 25</small>`;
+  const buffNames={echo:'메아리',haste:'아리아',awaken:'태고의 약속',march:'은빛 행진'};
+  $('active-buffs').textContent=Object.entries(state.buffs).filter(([,n])=>n>0).map(([id,n])=>`${buffNames[id]||id} ${Math.ceil(n)}초`).join(' · ')||`최고 ${Math.max(...allies.map(u=>u.rank),0)}성`;
+  const mushrooms=allies.filter(u=>u.hero==='mushroom_king'),next=mushrooms.sort((a,b)=>a.harvest-b.harvest)[0],payout=dividend(state);
+  $('income-label').textContent=payout?'물결 보상 + 배당':'물결 보상';
+  $('next-income').innerHTML=`+${20+Math.floor(state.wave/2)+payout}<small> G</small>`;
+  $('income-status').textContent=next?`수확 +${harvestIncome(next.rank,state.upgrades.mushroom_king)}G · ${Math.max(1,Math.ceil(next.harvest))}초`:payout?`배당 ${payout}G 포함`:'종료 시 지급';
+  $('boss-health').hidden=!boss;
+  if(boss){const percent=Math.max(0,Math.min(100,boss.hp/boss.maxHp*100));$('boss-name').textContent=BOSSES[boss.boss].name;$('boss-percent').textContent=`${Math.ceil(percent)}%`;$('boss-health').querySelector('i').style.width=percent+'%';$('boss-health').querySelector('[role=progressbar]').setAttribute('aria-valuenow',String(Math.ceil(percent)));}
 }
 function updateForecast(){
   const bossWave=Math.ceil(state.wave/4)*4,boss=BOSSES[CHAPTERS[state.chapter].bosses[Math.min(2,Math.floor((bossWave-1)/4))]];
   $('forecast-kicker').textContent=state.wave===bossWave?'이번 물결의 보스':'다가오는 보스';
   $('forecast-name').textContent=boss.name;
-  const pattern={seal:'봉인될 칸에서 이동',heal:'집중 공격으로 치유 저지',drain:'침식 전에 별빛 사용',rush:'감속으로 해일 저지'}[boss.pattern];
+  const pattern={seal:'행 봉인',heal:'체력 회복',drain:'별빛 침식',rush:'적 전진'}[boss.pattern];
   $('forecast-detail').textContent=`${bossWave}번째 물결 · ${pattern}`;
   if(!$('journey-dots').children.length)$('journey-dots').innerHTML=Array.from({length:12},(_,i)=>`<i class="${(i+1)%4===0?'boss-mark':''}">${(i+1)%4===0?'✦':''}</i>`).join('');
   for(let i=0;i<12;i++){const dot=$('journey-dots').children[i],w=(state.wave-1)%12+1;dot.classList.toggle('passed',i+1<w);dot.classList.toggle('current',i+1===w);}
@@ -106,14 +120,15 @@ function showModal(kind,body,{close=true}={}){
 }
 function closeModal(){modalKind=null;$('modal-root').hidden=true;$('modal-root').innerHTML='';paused=false;if(lastFocus?.isConnected)lastFocus.focus({preventScroll:true});}
 function modalHeader(eyebrow,title,description=''){return `<div class="modal-header"><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2>${description?`<p>${description}</p>`:''}</div>`;}
-function showPause(){saveRun();showModal('pause',modalHeader('A MOMENT OF STILLNESS','잠시, 숨을 고르다',`${CHAPTERS[state.chapter].name} · ${state.wave}번째 물결`)+`<div class="modal-actions"><button class="secondary-button" data-action="settings">설정</button><button class="secondary-button" data-action="help">플레이 방법</button></div><div class="modal-actions"><button class="primary-button" data-action="close-modal">수호 계속하기</button></div><div class="modal-actions"><button class="text-button" data-action="home">저장하고 나가기</button></div>`);}
+function showPause(){saveRun();showModal('pause',modalHeader('PAUSED','일시정지',`${CHAPTERS[state.chapter].name} · ${state.wave}번째 물결`)+`<div class="modal-actions"><button class="secondary-button" data-action="settings">설정</button><button class="secondary-button" data-action="help">조작 연습</button></div><div class="modal-actions"><button class="primary-button" data-action="close-modal">전투 계속하기</button></div><div class="modal-actions"><button class="text-button" data-action="home">저장하고 나가기</button></div>`);}
 function showSettings(){showModal('settings',modalHeader('SOUND & COMFORT','나에게 맞게')+`<label class="settings-row">소리 사용<input type="checkbox" data-setting="sound" ${profile.sound?'checked':''}></label><label class="settings-row">배경 음악<input type="checkbox" data-setting="music" ${profile.music?'checked':''}></label><label class="settings-row">음량<input type="range" min="0" max="100" value="${Math.round(profile.volume*100)}" data-setting="volume" aria-label="음량"></label><label class="settings-row">화면 흔들림·섬광 줄이기<input type="checkbox" data-setting="reduced" ${profile.reduced?'checked':''}></label><p class="settings-note">전투는 자동으로 저장됩니다. 다른 화면으로 이동하면 전투가 멈춥니다.</p><div class="modal-actions"><button class="primary-button" data-action="close-modal">적용</button></div>`);}
-function showHelp(){showModal('help',modalHeader('A LITTLE MAGIC','작은 선택, 다른 전투')+`<ol class="help-list"><li>처음 <strong>3번은 무료 소환</strong>입니다. 빈칸을 누른 뒤 소환하면 그곳에 합류합니다.</li><li><strong>탭하면 동료 정보</strong>를 봅니다. 위치를 바꾸거나 합성할 때는 동료를 <strong>드래그</strong>하세요.</li><li>같은 영웅·같은 등급을 겹치면 합성합니다. <strong>루미</strong>는 같은 등급의 모든 동료와 합성합니다.</li><li>아래 빛나는 얼굴을 눌러 <strong>필살기</strong>를 사용합니다. 별빛은 여섯 동료가 공유합니다.</li><li>물결마다 <strong>축복 세 개 중 하나</strong>를 고릅니다. 출발 전에는 <strong>유물 3개</strong>를 가져갈 수 있습니다.</li><li>신데렐라는 합성 환급, 여왕은 물결 배당, 머쉬룸킹은 포자 수확으로 경제를 돕습니다.</li></ol><div class="modal-actions"><button class="primary-button" data-action="close-modal">알겠어요</button></div>`);}
+function showHelp(lesson=0){const page=tutorialPage(lesson,portrait);showModal('help',modalHeader('PRACTICE',`조작 연습 · ${lesson+1} / 4`,'연습은 원정의 골드·배치·기록에 영향을 주지 않습니다.')+page.html);mountTutorial($('modal-root'),page,showHelp);}
 function heroSummary(id){const h=HERO[id];return `<span class="role-tag">${h.role}</span><p>${h.trait.text}</p><small>위력 ${h.damage} · ${h.interval}초 · 사거리 ${h.range}</small>`;}
-function showHero(id){const h=HERO[id];showModal('hero',modalHeader('COMPANION',h.name)+`<div class="hero-detail-top">${portrait(id)}<div><h3>${h.title}</h3>${heroSummary(id)}</div></div><div class="detail-rule"><strong>${h.skill.name} · 별빛 ${h.skill.cost}</strong>${h.skill.text}</div><div class="detail-rule"><strong>동행 강화</strong>모든 공격력은 단계마다 +28%.<br>${trainingBonus(id,0)} → ${trainingBonus(id,1)}</div><div class="modal-actions"><button class="primary-button" data-action="close-modal">돌아가기</button></div>`);}
+function trainingDetail(id,level){return `<b>1성 기본 위력 ${trainingPower(id,level)}${level<5?` → ${trainingPower(id,level+1)}`:''}</b>${trainingBonus(id,level)?`<br>${trainingBonus(id,level)}${level<5?`<br>→ ${trainingBonus(id,level+1)}`:''}`:''}${id==='queen'?'<br>여왕 전체 · 물결당 최대 45G':''}`;}
+function showHero(id){const h=HERO[id],level=state?.upgrades[id]||0,u=state?.board[selected];showModal('hero',modalHeader('COMPANION',h.name)+`<div class="hero-detail-top">${portrait(id)}<div><h3>${h.title}</h3>${heroSummary(id)}</div></div>${u?.hero===id?`<div class="detail-rule"><strong>현재 ${u.rank}성 · 강화 ${level}</strong>${unitEconomy(state,u)}</div>`:''}<div class="detail-rule"><strong>${h.skill.name} · 별빛 ${h.skill.cost}</strong>${h.skill.text}</div><div class="detail-rule"><strong>동행 강화 ${level} / 5</strong>${trainingDetail(id,level)}<p>같은 동료 전원에게 적용. 단계마다 원래 위력의 28%를 더하며, 필살기 자체의 별빛 비용·골드 보상은 변하지 않습니다.</p></div><div class="modal-actions"><button class="primary-button" data-action="close-modal">돌아가기</button></div>`);}
 function showDeck(){editingDeck=[...profile.deck];deckFocus=editingDeck[0];renderDeck();}
 function renderDeck(){const h=HERO[deckFocus];showModal('deck',modalHeader('CHOOSE YOUR SIX','이번 원정의 동행','동료를 눌러 능력을 확인하고 6명을 편성하세요.')+`<div class="companion-preview">${portrait(h.id)}<div><strong>${h.name}</strong>${heroSummary(h.id)}<p class="preview-skill"><b>${h.skill.name} · ${h.skill.cost}✦</b> ${h.skill.text}</p></div></div><div class="roster-grid">${HEROES.map(h=>`<div class="roster-card ${editingDeck.includes(h.id)?'picked':''} ${deckFocus===h.id?'inspected':''}"><button class="roster-inspect" data-inspect="${h.id}" aria-label="${h.name} 능력 확인">${portrait(h.id)}<strong>${h.name}</strong><small>${h.role.split(' · ')[0]}</small></button><button class="roster-pick" data-pick="${h.id}" aria-label="${h.name} ${editingDeck.includes(h.id)?'편성 해제':'편성 추가'}" aria-pressed="${editingDeck.includes(h.id)}">${editingDeck.includes(h.id)?'동행 중 ✓':'＋ 동행'}</button></div>`).join('')}</div><div class="roster-toolbar"><p>${editingDeck.length} / 6명 선택</p><button class="primary-button" data-action="save-deck" ${editingDeck.length!==6?'disabled':''}>함께 떠나기</button></div>`);}
-function showTraining(){showModal('training',modalHeader('GROW TOGETHER','동행 강화',`보유 ${Math.floor(state.gold)} G · 공격력 +28% / 단계${state.trainingDiscount?` · 비용 ${Math.round(state.trainingDiscount*100)}% 할인`:''}`)+`<div class="training-list">${state.deck.map(id=>{const h=HERO[id],level=state.upgrades[id];return `<div class="training-item">${portrait(id)}<div><strong>${h.name} <em>${level} / 5</em></strong><span>${h.role}</span><small>${trainingBonus(id,level)}${level<5?`<br>→ ${trainingBonus(id,level+1)}`:''}</small></div><button data-upgrade="${id}" ${level>=5||state.gold<upgradeCost(state,id)?'disabled':''}>${level>=5?'완료':upgradeCost(state,id)+' G'}</button></div>`;}).join('')}</div><div class="modal-actions"><button class="primary-button" data-action="close-modal">전장으로</button></div>`);}
+function showTraining(){showModal('training',modalHeader('TRAINING','동행 강화',`보유 ${Math.floor(state.gold)} G · 같은 동료 전원 적용${state.trainingDiscount?` · 비용 ${Math.round(state.trainingDiscount*100)}% 할인`:''}`)+`<p class="training-note">1성 기본 위력 기준 · 매 단계 원래 위력의 28% 추가<br>합성 등급·유물·일시 강화는 아래 수치에 미포함</p><div class="training-list">${state.deck.map(id=>{const h=HERO[id],level=state.upgrades[id];return `<div class="training-item">${portrait(id)}<div><strong>${h.name} <em>${level} / 5</em></strong><span>${h.role}</span><small>${trainingDetail(id,level)}</small></div><button data-upgrade="${id}" ${level>=5||state.gold<upgradeCost(state,id)?'disabled':''}>${level>=5?'완료':upgradeCost(state,id)+' G'}</button></div>`;}).join('')}</div><div class="modal-actions"><button class="primary-button" data-action="close-modal">전장으로</button></div>`);}
 const rarityName={common:'일반',rare:'레어',epic:'에픽'};
 function artifactCard(id,attrs='',picked=false){const a=ARTIFACT[id];return `<button class="artifact-card rarity-${a.rarity} ${picked?'equipped':''}" ${attrs}>${itemIcon(id)}<div><small class="rarity-label">${rarityName[a.rarity]}${picked?' · 장착 중':''}</small><h3>${a.name}</h3><p>${a.text}</p></div>${picked?'<span class="equip-check">✓</span>':''}</button>`;}
 function settlement(){const p=state.settlement;if(!p)return '';return `<div class="settlement"><span><b>+${p.base} G</b>물결 보상</span>${p.dividend?`<span><b>+${p.dividend} G</b>장미 배당</span>`:''}<span><b>${state.wave} / 12</b>물결 완료</span></div>`;}

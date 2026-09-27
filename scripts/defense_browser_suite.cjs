@@ -8,8 +8,8 @@ const {createHeroDefenseV2Server}=require('./serve_defense.js');
 const RUN_KEY='astra.confluence.run.v1';
 const root=path.resolve(__dirname,'../defense');
 const box={width:390,height:844};
-async function pageFor(browser,url,{viewport=box,fixture=null,mode='healthy',offline=false}={}){
-  const context=await browser.newContext({viewport,deviceScaleFactor:1,hasTouch:true,reducedMotion:'reduce'});
+async function pageFor(browser,url,{viewport=box,fixture=null,mode='healthy',offline=false,reducedMotion='reduce'}={}){
+  const context=await browser.newContext({viewport,deviceScaleFactor:1,hasTouch:true,reducedMotion});
   const errors=[],requests=[];
   if(fixture)await context.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:RUN_KEY,value:fixture});
   if(mode!=='healthy'){
@@ -86,7 +86,7 @@ async function expeditionChecks(browser,url,out){
   const E=await import('../defense/merge/engine.js'),s=E.newRun({seed:4});s.gold=1000;
   const training=await pageFor(browser,url,{fixture:E.serialize(s),viewport:{width:320,height:568}});try{
     const p=training.page;await portraitsReady(p);await start(p,true);await p.locator('#training').click();await p.locator('[data-upgrade="cinderella"]').scrollIntoViewIfNeeded();const header=await p.locator('.modal-header').boundingBox(),before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>0);
-    await p.locator('[data-upgrade="cinderella"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/환급 20G/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
+    await p.locator('[data-upgrade="cinderella"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/환급 22G/);assert.match(await p.locator('.training-list').textContent(),/15.36 → 18.72/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
   }finally{await training.context.close();}
   await blessingChecks(browser,url,out);await effectsProof(browser,url,out);
 }
@@ -102,12 +102,34 @@ async function effectsProof(browser,url,out){
     await t.page.locator('#fx-proof').screenshot({path:path.join(out,'all-21-attacks.png')});assert.deepEqual(t.errors,[]);
     await t.page.evaluate(async()=>{const [{Art},{CombatFX}]=await Promise.all([import('/merge/render.js'),import('/merge/effects.js')]);const art=new Art();await art.ready;const canvas=document.querySelector('#fx-proof');canvas.width=960;canvas.height=720;const ctx=canvas.getContext('2d'),fx=new CombatFX(ctx,art);ctx.fillStyle='#18323e';ctx.fillRect(0,0,960,720);['zeke','luna','night_rabbit','phantom'].forEach((id,row)=>[-Math.PI/2,0,Math.PI/2,Math.PI].forEach((a,col)=>{const x=col*240+120,y=row*180+100;fx.stamp(id,x,y,140,a);ctx.fillStyle='#d8e7de';ctx.font='14px system-ui';ctx.fillText(`${id} / ${['up','right','down','left'][col]}`,col*240+20,row*180+24);}));});
     await t.page.locator('#fx-proof').screenshot({path:path.join(out,'directional-slashes.png')});
+    const fieldCoverage=await t.page.evaluate(async()=>{
+      const [{Art,Renderer},{CombatFX},{HEROES,DEFAULT_DECK},E]=await Promise.all([import('/merge/render.js'),import('/merge/effects.js'),import('/merge/content.js'),import('/merge/engine.js')]);
+      const art=new Art();await art.ready;const sheet=document.querySelector('#fx-proof');sheet.width=1080;sheet.height=2940;const sheetCtx=sheet.getContext('2d'),results=[];
+      for(const [i,h] of HEROES.entries()){
+        const field=document.createElement('canvas');field.width=720;field.height=780;const ctx=field.getContext('2d'),fx=new CombatFX(ctx,art);
+        for(const reduced of [false,true]){ctx.clearRect(0,0,720,780);fx.reduced=reduced;fx.drawSkillField({hero:h.id,life:1.28,total:1.6});const pixels=ctx.getImageData(0,0,720,780).data;let outer=0,hash=2166136261;
+          for(let p=0;p<pixels.length;p+=4){const x=p/4%720,y=Math.floor(p/4/720);if((x<120||x>600||y<170||y>660)&&pixels[p+3]>4)outer++;hash=Math.imul(hash^pixels[p]^pixels[p+1]^pixels[p+2]^pixels[p+3],16777619);}
+          results.push({id:h.id,reduced,outer,hash:hash>>>0});
+        }
+        const canvas=document.createElement('canvas'),renderer=new Renderer(canvas,art),s=E.newRun({deck:[h.id,...DEFAULT_DECK.filter(id=>id!==h.id)].slice(0,6),seed:21});
+        s.board=s.board.map((u,index)=>index===6?u:null);s.wave=4;s.queue=[{kind:'boss',hp:1e7}];s.spawnIn=0;E.step(s,1/60);s.enemies[0].progress=850;s.enemies[0].speed=0;s.queue=[];s.gauge=100;s.events=[];E.cast(s,h.id);
+        renderer.event(s.events.find(e=>e.type==='skill'));renderer.skill.life=1.28;renderer.shake=0;renderer.draw(s,0);
+        const x=i%3*360,y=Math.floor(i/3)*420;sheetCtx.drawImage(canvas,x,y+30,360,390);sheetCtx.fillStyle='#142c3a';sheetCtx.fillRect(x,y,360,30);sheetCtx.fillStyle='#f4deb4';sheetCtx.font='14px system-ui';sheetCtx.fillText(h.name+' · '+h.skill.name,x+12,y+21);
+      }
+      return results;
+    });
+    assert.equal(fieldCoverage.length,42);assert.ok(fieldCoverage.every(r=>r.outer>10000),'skill field disappears with one target or reduced motion');
+    for(const reduced of [false,true])assert.equal(new Set(fieldCoverage.filter(r=>r.reduced===reduced).map(r=>r.hash)).size,21,'skill identities collapsed');
+    await t.page.locator('#fx-proof').screenshot({path:path.join(out,'all-21-single-boss-skills.png')});
+    await fs.writeFile(path.join(out,'skill-field-coverage.json'),JSON.stringify(fieldCoverage,null,2));assert.deepEqual(t.errors,[]);
   }finally{await t.context.close();}
 }
 async function browserChecks(browser,url,out){
   const views=[box,{width:360,height:800},{width:320,height:568},{width:390,height:667}];
   for(const viewport of views){const t=await pageFor(browser,url,{viewport});try{await portraitsReady(t.page);await start(t.page);await geometry(t.page,viewport.width+'x'+viewport.height);await t.page.locator('#summon').scrollIntoViewIfNeeded();await t.page.locator('#summon').click();assert.equal(await t.page.locator('#arena').getAttribute('data-units'),'4');assert.deepEqual(t.errors,[]);}finally{await t.context.close();}}
   await expeditionChecks(browser,url,out);
+  await tutorialChecks(browser,url,out);
+  await bossClarityChecks(browser,url,out);
   const t=await pageFor(browser,url,{fixture:await denseFixture()});try{
     await portraitsReady(t.page);await start(t.page,true);assert.equal(await t.page.locator('#arena').getAttribute('data-units'),'25');await t.page.locator('[data-skill="zeke"].ready').waitFor();
     await t.page.screenshot({path:path.join(out,'mobile-25-units.png')});await t.page.locator('[data-skill="zeke"]').click();await t.page.screenshot({path:path.join(out,'mobile-skill.png')});
@@ -121,7 +143,43 @@ async function offlineChecks(browser,url,out){
   const html=await fs.readFile(path.join(root,'dist-local/HeroCoreDefense.html'),'utf8');
   assert.match(html,/name="astra-defense-distribution" content="single-file-offline"/);assert.doesNotMatch(html,/<script[^>]+src=/i);assert.doesNotMatch(html,/<link[^>]+rel=["']stylesheet/i);assert.doesNotMatch(html,/<script[^>]+type=["']module/i);
   const t=await pageFor(browser,url+'/dist-local/HeroCoreDefense.html',{offline:true});try{await smoke(t.page,{screenshot:path.join(out,'mobile-offline-bundle.png')});assert.deepEqual(t.errors,[]);assert.deepEqual(t.requests,[],'bundle requested a separate resource');}finally{await t.context.close();}
+  await tutorialChecks(browser,url+'/dist-local/HeroCoreDefense.html',out,{offline:true});
+  await bossClarityChecks(browser,url+'/dist-local/HeroCoreDefense.html',out,{offline:true});
   console.log('Single HTML passed with every secondary network request blocked. Literal file:// launch is a separate device/browser check.');
+}
+async function tutorialChecks(browser,url,out,options={}){
+  const t=await pageFor(browser,url,{...options,viewport:{width:320,height:568}}),p=t.page;
+  try{
+    await portraitsReady(p);await p.locator('#home [data-action="help"]').click();
+    await p.locator('[data-practice-cell="6"]').click();assert.match(await p.locator('.practice-result').textContent(),/지크 · 1성/);
+    await p.locator('[data-lesson-nav="1"]').first().click();
+    await p.locator('[data-practice-cell="6"]').click();await p.locator('[data-practice-cell="8"]').click();assert.match(await p.locator('[data-practice-cell="8"]').getAttribute('aria-label'),/1성/);
+    const a=await p.locator('[data-practice-cell="6"]').boundingBox(),b=await p.locator('[data-practice-cell="8"]').boundingBox();
+    await p.mouse.move(a.x+a.width/2,a.y+a.height/2);await p.mouse.down();await p.mouse.move(b.x+b.width/2,b.y+b.height/2,{steps:8});await p.mouse.up();assert.match(await p.locator('.practice-result').textContent(),/합성 완료/);assert.match(await p.locator('[data-practice-cell="8"]').getAttribute('aria-label'),/2성/);
+    await p.screenshot({path:path.join(out,'tutorial-merge-small.png')});
+    await p.locator('[data-lesson-nav="2"]').first().click();await p.locator('[data-practice-cell="8"]').click();await p.locator('[data-practice-summon]').click();assert.match(await p.locator('.practice-result').textContent(),/골드 45G 그대로/);assert.doesNotMatch(await p.locator('[data-practice-cell="8"]').getAttribute('aria-label'),/빈칸/);
+    await p.locator('[data-lesson-nav="3"]').first().click();await p.locator('[data-practice-skill]').click();assert.equal(await p.locator('[data-practice-gauge]').textContent(),'별빛 30 / 100');
+    await p.screenshot({path:path.join(out,'tutorial-skill-small.png')});
+    const bounds=await p.locator('.practice-footer').boundingBox();assert.ok(bounds.y+bounds.height<=568,'tutorial footer off screen');
+    await p.locator('.practice-footer [data-action="close-modal"]').click();assert.equal(await p.evaluate(key=>localStorage.getItem(key),RUN_KEY),null,'practice created a saved run');
+    await start(p);assert.equal(await p.locator('#hint').count(),0);assert.equal(await p.locator('#inspection-empty').count(),0);assert.doesNotMatch(await p.locator('#battle').innerText(),/어떤 동행|드래그|탭으로|소환.*보세요/);
+    await p.locator('[data-action="pause"]').click();const saved=await p.evaluate(key=>localStorage.getItem(key),RUN_KEY);
+    await p.locator('#modal-root [data-action="help"]').click();await p.locator('[data-lesson-nav="3"]').first().click();await p.locator('[data-practice-skill]').click();assert.equal(await p.evaluate(key=>localStorage.getItem(key),RUN_KEY),saved,'practice changed the live run');
+    await p.locator('.practice-footer [data-action="close-modal"]').click();await geometry(p,'after tutorial');assert.deepEqual(t.errors,[]);assert.deepEqual(t.requests,[]);
+  }finally{await t.context.close();}
+}
+async function bossClarityChecks(browser,url,out,options={}){
+  const E=await import('../defense/merge/engine.js');
+  for(const reducedMotion of ['no-preference','reduce']){
+    const s=E.newRun({seed:21});s.wave=4;s.queue=[{kind:'boss',hp:1e7}];s.spawnIn=0;E.step(s,1/60);s.enemies[0].progress=850;s.enemies[0].speed=0;s.enemies[0].skillIn=100;s.queue=[];s.gauge=100;s.events=[];
+    const t=await pageFor(browser,url,{...options,fixture:E.serialize(s),reducedMotion}),p=t.page;
+    try{
+      await portraitsReady(p);await start(p,true);await p.locator('#boss-health').waitFor({state:'visible'});assert.match(await p.locator('#boss-name').textContent(),/인조마신/);assert.equal(await p.locator('#remaining-enemies').textContent(),'1');
+      await p.locator('[data-skill="zeke"]').click();await p.waitForFunction(()=>document.querySelector('#arena').dataset.skillField==='zeke');
+      await p.waitForFunction(()=>!document.querySelector('#skill-cutin').hidden&&Number(getComputedStyle(document.querySelector('#skill-cutin')).opacity)>.85);await p.screenshot({path:path.join(out,`one-boss-skill-${reducedMotion}.png`)});assert.equal(await p.locator('#boss-health').isVisible(),true);
+      await p.waitForFunction(()=>document.querySelector('#arena').dataset.skillField==='');await p.screenshot({path:path.join(out,`battle-overview-${reducedMotion}.png`)});assert.deepEqual(t.errors,[]);assert.deepEqual(t.requests,[]);
+    }finally{await t.context.close();}
+  }
 }
 async function experienceChecks(browser,url,out){
   const t=await pageFor(browser,url);try{

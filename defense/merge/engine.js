@@ -2,6 +2,8 @@ import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, CHAPTERS, DEFAULT_DE
 
 export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
+export const BALANCE_REVISION = 2;
+export const BOSS_HEALTH_SCALE = .8;
 export const BOARD = {x:135,y:212,cell:90};
 export const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
 export function attackDirection(from,to){const dx=to.x-from.x,dy=to.y-from.y;return Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up';}
@@ -22,25 +24,39 @@ export function validDeck(deck){return Array.isArray(deck)&&deck.length===6&&new
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
 export function has(s,id){return s.artifacts.includes(id);}
 export function summonCost(s){return s.freeSummons>0?0:Math.max(8,Math.min(40,10+s.paidSummons*2)-(has(s,'feather')?4:0));}
-export function dividend(s){return Math.min(45,s.board.reduce((n,u)=>n+(u?.hero==='queen'?3+u.rank*2+Math.floor((s.wave-1)/3)+s.upgrades.queen:0),0));}
+export const cinderellaRefund=(rank,level=0)=>(18+level*4)*rank;
+export const queenIncome=(rank,wave,level=0)=>3+rank*2+Math.floor((wave-1)/3)+level*3;
+export const harvestIncome=(rank,level=0)=>rank+2+level*2;
+export const executeThreshold=e=>e.boss ? .4 : .35;
+export function dividend(s){return Math.min(45,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
 export function bestUnit(s,id){return s.board.filter(u=>u?.hero===id).sort((a,b)=>b.rank-a.rank)[0];}
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28)*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1);}
 export function trainingBonus(id,level){
-  const extra={cinderella:`합성 환급 ${18+level*2}G / 등급`,queen:`배당 추가 +${level}G`,mushroom_king:`수확 추가 +${level}G`,siren:`인접 공속 +${22+level*3}%`,ancient_dragon:`인접 공격 +${25+level*3}%`,silver_rabbit:`추가 별빛 ${(0.5+level*.1).toFixed(1)}`,great_detective:`노출 +${18+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`};
-  return extra[id]||`공격력 +${level*28}%`;
+  const extra={cinderella:`1성 재료 환급 ${cinderellaRefund(1,level)}G`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,mushroom_king:`1성 · 전투 12초마다 ${harvestIncome(1,level)}G / 기`,siren:`인접 공속 +${22+level*3}%`,ancient_dragon:`인접 공격 +${25+level*3}%`,silver_rabbit:`명중 추가 별빛 ${(0.5+level*.1).toFixed(1)}`,great_detective:`일반 노출 +${18+level*2}% · 보스 +${30+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`};
+  return extra[id]||'';
+}
+// Base-power comparison excludes rank, relics and temporary buffs; it never
+// claims a compounding +28% increase over the previous upgrade.
+export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*.28)).toFixed(2));
+export function unitEconomy(s,u){
+  const level=s.upgrades[u.hero]||0;
+  if(u.hero==='cinderella')return `재료로 소모 시 ${cinderellaRefund(u.rank,level)}G 즉시 환급 · 루미를 재료로 쓰면 환급 없음`;
+  if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 45G`;
+  if(u.hero==='mushroom_king')return `전투 12초마다 ${harvestIncome(u.rank,level)}G 수확 · 합성 시 수확 대기시간 초기화`;
+  return HERO[u.hero].trait.text;
 }
 function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,100);}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
 function addPoison(s,e,stacks,duration,cap=Infinity){e.poison=Math.min(cap,(e.poison||0)+stacks+(has(s,'seed')?1:0));e.poisonTime=duration;}
-function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:HERO[hero].trait.type==='expose'?'strong':'first'};}
+function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:HERO[hero].bossDamage?'boss':'first'};}
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
 export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]}={}){
   const chosen=validDeck(deck)?[...deck]:[...DEFAULT_DECK];
-  const s={version:VERSION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
+  const s={version:VERSION,balanceRevision:BALANCE_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],zones:[],events:[],gold:45,gauge:75,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),
     buffs:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
@@ -62,7 +78,7 @@ export function move(s,from,to){
     const id=b.hero==='rumi'?a.hero:b.hero,rank=b.rank+1;
     let consumed=a;if(a.hero==='rumi'&&b.hero!=='rumi')consumed=a;
     else if(b.hero==='rumi'&&a.hero!=='rumi')consumed=b;
-    const refund=HERO[consumed.hero].trait.type==='sacrifice'?(18+s.upgrades[consumed.hero]*2)*consumed.rank:0;
+    const refund=HERO[consumed.hero].trait.type==='sacrifice'?cinderellaRefund(consumed.rank,s.upgrades[consumed.hero]):0;
     if(refund)giveGold(s,refund,'합성 환급');
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,rank*2,8);
     const unit=makeUnit(s,id,rank);unit.priority=b.priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;
@@ -83,7 +99,7 @@ export function upgrade(s,id){
   const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`${cost-s.gold}골드가 더 필요합니다.`};
   s.gold-=cost;s.upgrades[id]++;event(s,'upgrade',{hero:id,level:s.upgrades[id]});return {ok:true};
 }
-export function cycleTarget(s,index){const u=s.board[index];if(!u)return;const values=['first','strong','last'];u.priority=values[(values.indexOf(u.priority)+1)%3];}
+export function cycleTarget(s,index){const u=s.board[index];if(!u)return;const values=['first','boss','strong','last'];u.priority=values[(values.indexOf(u.priority)+1)%values.length];}
 
 const enemyWeight={grunt:1,armor:2.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
@@ -93,8 +109,9 @@ export function wavePlan(wave,chapter=0){
   const count=Math.round(oldCount*Math.min(.9,.64+(wave-1)*.025));
   const kinds=Array.from({length:count},(_,i)=>enemyKind(i,wave)),weight=kinds.reduce((sum,k)=>sum+enemyWeight[k],0);let assigned=0;
   const sequence=kinds.map((kind,i)=>{const hp=i===count-1?budget-assigned:Math.round(budget*enemyWeight[kind]/weight);assigned+=hp;return {kind,hp};});
-  if(wave%4===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32)});
-  return {sequence,interval:Math.max(.48,1.4-(wave-1)*.083),healthBudget:budget+(wave%4===0?Math.round(base*32):0)};
+  const bossHp=Math.round(Math.round(base*32)*BOSS_HEALTH_SCALE);
+  if(wave%4===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:bossHp});
+  return {sequence,interval:Math.max(.48,1.4-(wave-1)*.083),healthBudget:budget+(wave%4===0?bossHp:0)};
 }
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?1.5:.8;s.settlement=null;s.telegraph=null;s.zones=[];
@@ -121,11 +138,13 @@ function canTarget(hero,at,p){return Math.hypot(p.x-at.x,p.y-at.y)<=hero.range&&
 function chooseTarget(s,u){
   const at=cellPoint(s.board.indexOf(u));
   const enemies=s.enemies.filter(e=>e.hp>0&&canTarget(HERO[u.hero],at,pathPoint(e.progress)));if(!enemies.length)return null;
-  return enemies.reduce((a,b)=>u.priority==='strong'?(a.hp>b.hp?a:b):u.priority==='last'?(a.progress<b.progress?a:b):(a.progress>b.progress?a:b));
+  const bosses=u.priority==='boss'?enemies.filter(e=>e.boss):[],pool=bosses.length?bosses:enemies;
+  const priority=u.priority==='boss'?(u.hero==='great_detective'?'strong':'first'):u.priority;
+  return pool.reduce((a,b)=>priority==='strong'?(a.hp>b.hp?a:b):priority==='last'?(a.progress<b.progress?a:b):(a.progress>b.progress?a:b));
 }
 function damage(s,e,value,hero,{dot=false,pure=false}={}){
   if(!e||e.hp<=0)return;
-  let amount=value*(1+e.exposed)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
+  let amount=value*(1+e.exposed)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
   if(e.kind==='armor'&&!pure)amount*=.72;
   const actual=Math.min(e.hp,amount);e.hp-=amount;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
   if(!dot)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
@@ -147,7 +166,7 @@ function applyHit(s,shot){
   const e=s.enemies.find(x=>x.uid===shot.target&&x.hp>0);if(!e)return;
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage;
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
-  for(const target of area){let factor=1;if(type==='execute'&&target.hp/target.maxHp<.35)factor*=2;if(type==='shatter'&&target.slowTime>0)factor*=1.75;if(type==='splash'&&target.burnTime>0)factor*=1.4;damage(s,target,amount*factor,hero.id);}
+  for(const target of area){let factor=1;if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;if(type==='shatter'&&target.slowTime>0)factor*=1.75;if(type==='splash'&&target.burnTime>0)factor*=1.4;damage(s,target,amount*factor,hero.id);}
   event(s,'impact',{...point,hero:hero.id,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
   if(['chain','bounce'].includes(hero.shape)||type==='gust'){
     const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0));
@@ -158,7 +177,12 @@ function applyHit(s,shot){
   if(type==='poison')addPoison(s,e,shot.rank,7,40);
   if(type==='stun'&&shot.count%3===0)for(const t of area)t.stun=Math.max(t.stun,.7);
   if(type==='fear'&&shot.count%3===0)e.progress=Math.max(0,e.progress-35);
-  if(type==='expose'){e.exposed=Math.max(e.exposed,.18+s.upgrades[hero.id]*.02);e.exposeTime=4;}
+  if(type==='expose'){
+    const exposure=(e.boss ? .3 : .18)+s.upgrades[hero.id]*.02;
+    // A basic shot must neither shorten nor perpetually renew the stronger
+    // 10-second skill debuff. Its own four-second exposure resumes afterwards.
+    if(e.exposeTime<=0||e.exposed<=exposure){e.exposed=exposure;e.exposeTime=4;}
+  }
   if(type==='battery')addGauge(s,(.5+s.upgrades[hero.id]*.1)*(s.buffs.march>0?2:1));
   if(hero.shape==='zone')makeZone(s,shot,point);
   if(has(s,'orbit')&&shot.rank>=3)makeZone(s,shot,point,true);
@@ -219,7 +243,7 @@ export function cast(s,id){
     for(const e of targets){e.progress=e.progress*.35+point*.65;e.stun=type==='singularity'?2:1.5;e.slow=.6;e.slowTime=4;}
     strike(type==='singularity'?10:5);
   }else if(type==='execute'){
-    const top=[...targets].sort((a,b)=>b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<.35?30:16),id,{pure:true});
+    const top=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<=executeThreshold(e)?30:16),id,{pure:true});
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,9);for(const e of visualTargets)damage(s,e,base*14,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2;}
   else if(type==='fortune'||type==='dividend'){strike(3);giveGold(s,type==='fortune'?25:30,'필살기');}
@@ -302,7 +326,7 @@ export function step(s,dt){
   s.zones=s.zones.filter(z=>z.life>0);
   for(let i=0;i<s.board.length;i++){
     const u=s.board[i];if(!u)continue;u.pose=Math.max(0,u.pose-dt);
-    if(u.hero==='mushroom_king'){u.harvest-=dt;if(u.harvest<=0){u.harvest+=12;const gold=u.rank+2+s.upgrades[u.hero];giveGold(s,gold,'포자 수확');event(s,'income',{...cellPoint(i),gold});}}
+    if(u.hero==='mushroom_king'){u.harvest-=dt;if(u.harvest<=0){u.harvest+=12;const gold=harvestIncome(u.rank,s.upgrades[u.hero]);giveGold(s,gold,'포자 수확');event(s,'income',{...cellPoint(i),gold});}}
     if(u.disabled>0){u.disabled-=dt;continue;}
     if(u.windup>0){u.windup-=dt;if(u.windup<=0)attack(s,u,i);continue;}
     u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=.13;u.cooldown=HERO[u.hero].interval/speedMultiplier(s,u,i);}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
@@ -326,7 +350,7 @@ export function restore(raw){
     if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>100||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
-    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','strong','last'].includes(u.priority))))return null;
+    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','boss','strong','last'].includes(u.priority))))return null;
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
     if(s.shots.some(e=>!id(e?.uid)||!id(e.target)||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
@@ -340,6 +364,17 @@ export function restore(raw){
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
     if(s.settlement&&!numeric(s.settlement,['base','dividend']))return null;
     if(s.phase==='reward'&&(!Array.isArray(s.reward)||s.reward.length!==3||new Set(s.reward).size!==3||s.reward.some(a=>!BLESSING[a])))return null;
+    if(s.balanceRevision!==undefined&&s.balanceRevision!==BALANCE_REVISION)return null;
+    if(s.balanceRevision===undefined){
+      // Keep an in-progress v2 expedition and its boss HP ratio. Mark it so
+      // repeated saves/resumes cannot apply the 20% reduction again.
+      for(const e of s.enemies)if(e.kind==='boss'){
+        const maxHp=Math.max(1,Math.round(e.maxHp*BOSS_HEALTH_SCALE)),ratio=maxHp/e.maxHp;
+        e.maxHp=maxHp;e.hp*=ratio;e.channelHp*=ratio;
+      }
+      for(const e of s.queue)if(e.kind==='boss')e.hp=Math.max(1,Math.round(e.hp*BOSS_HEALTH_SCALE));
+      s.balanceRevision=BALANCE_REVISION;
+    }
     s.events=[];return s;
   }catch{return null;}
 }

@@ -9,13 +9,15 @@ const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 export const DIRECTIONS=['down','up','left','right'];
 
-export function anatomicalScale(skull,profile){
+export function anatomicalScale(skull,profile,id){
   if(!Array.isArray(skull)||skull.length!==4||skull.some(n=>!Number.isFinite(n)))throw new Error('Four anatomical skull coordinates are required');
   const [left,top,right,chin]=skull,w=right-left,h=chin-top;
   if(w<=0||h<=0)throw new Error('Invalid anatomical skull bounds');
   // Equal projected cranial area. One UNIFORM scale preserves the original
   // face aspect ratio; width/height are also reported separately for review.
-  return Math.sqrt(profile.head.frontWidth*profile.head.height/(w*h));
+  const adjustment=profile.headOverrides?.[id]?.scale??1;
+  if(!Number.isFinite(adjustment)||adjustment<=0||adjustment>1.1)throw new Error('Invalid documented head override');
+  return Math.sqrt(profile.head.frontWidth*profile.head.height/(w*h))*adjustment;
 }
 
 // Skull estimates are recorded explicitly, excluding hair volume/headgear.
@@ -28,12 +30,19 @@ export async function packDirections({sourceDir,entries,outputDir,proofDir}){
   const profile=JSON.parse(await readFile(path.join(ROOT,'defense/docs/art/HEAD_PROFILE.json'),'utf8'));
   for(const entry of entries){
     if(!entry.anatomy||!/^[0-9a-f]{64}$/.test(entry.sourceSha256||''))throw new Error(`${entry.id}: anatomical skull landmarks and source SHA-256 are required; arbitrary scale is not accepted`);
-    const e={...entry,scale:anatomicalScale(entry.anatomy.skull,profile)};
+    const e={...entry,scale:anatomicalScale(entry.anatomy.skull,profile,entry.id)};
     if(!/^[a-z_]+$/.test(e.id)||!Number.isFinite(e.scale)||e.scale<=0||!Array.isArray(e.feet)||e.feet.length!==4)throw new Error(`Invalid landmarks: ${e.id}`);
     const source=await readFile(path.join(sourceDir,e.file));
     if(e.sourceSha256&&sha(source)!==e.sourceSha256)throw new Error(`${e.id}: source changed; anatomical landmarks must be reviewed again`);
     const meta=await sharp(source).metadata();
     const {data,info}=await sharp(source).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    if(e.alphaOpaqueThreshold!==undefined){
+      // Explicit per-source import correction for an exporter whose painted
+      // interiors top out at alpha 253. Preserve all RGB and soft edge alpha;
+      // never derive transparency from white hair/clothes or image brightness.
+      if(!Number.isInteger(e.alphaOpaqueThreshold)||e.alphaOpaqueThreshold<250||e.alphaOpaqueThreshold>255)throw new Error(`${e.id}: invalid near-opaque alpha threshold`);
+      for(let i=3;i<data.length;i+=4)if(data[i]>=e.alphaOpaqueThreshold)data[i]=255;
+    }
     if(!meta.hasAlpha){
       const samples=[[0,0],[info.width-1,0],[0,info.height-1],[info.width-1,info.height-1]];
       if(samples.some(([x,y])=>{const i=(y*info.width+x)*4;return data[i]<200||data[i+1]>65||data[i+2]<200;}))throw new Error(`${e.id}: expected native alpha or flat magenta, not a painted checkerboard`);
@@ -66,7 +75,7 @@ export async function packDirections({sourceDir,entries,outputDir,proofDir}){
       bodyBelowChin:Math.round((e.feet[0][1]-e.anatomy.skull[3])*e.scale*10)/10,
       heightClass:profile.heightClasses[e.id],heightClassApplied:false,
       scaleMethod:'uniform scale from estimated front skull area; no height multiplier'}:null;
-    manifest.push({id:e.id,file:`${e.id}.webp`,width:1024,height:1024,cell:512,anchor:[256,480],directions:DIRECTIONS,portrait,sha256:sha(atlas),anatomy,source:{file:e.file,sha256:sha(source),scale:e.scale,feet:e.feet,face:e.face,splitY:split,anatomy:e.anatomy}});
+    manifest.push({id:e.id,file:`${e.id}.webp`,width:1024,height:1024,cell:512,anchor:[256,480],directions:DIRECTIONS,portrait,sha256:sha(atlas),anatomy,source:{file:e.file,sha256:sha(source),scale:e.scale,feet:e.feet,face:e.face,splitY:split,anatomy:e.anatomy,...(e.alphaOpaqueThreshold!==undefined?{alphaOpaqueThreshold:e.alphaOpaqueThreshold}:{})}});
     if(proofDir){
       const proof=[];
       for(let i=0;i<4;i++)for(let row=0;row<2;row++)proof.push({input:await sharp(atlas).extract({left:i%2*512,top:Math.floor(i/2)*512,width:512,height:512}).resize(128,128).png().toBuffer(),left:i*160+16,top:row*160+16});

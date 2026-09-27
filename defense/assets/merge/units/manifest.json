@@ -284,17 +284,17 @@
         "right"
       ],
       "portrait": {
-        "x": 256,
+        "x": 252,
         "y": 190,
         "size": 250
       },
-      "sha256": "bb85ff4dba57076687b7aeecbc50f31325e15bfbe802e79308917b33b1e6d8dd",
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
       "anatomy": {
         "skull": [
-          233.5,
-          114.9,
-          443.2,
-          318.1
+          226,
+          142,
+          408,
+          318
         ],
         "coordinateSpace": "source front quadrant",
         "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
@@ -302,57 +302,58 @@
         "directionReview": "same uniform scale for all four views; separate visual review required",
         "profileVersion": 1,
         "packedSkull": [
-          176,
-          114,
-          333,
-          267
+          177,
+          117,
+          327,
+          262
         ],
-        "headWidth": 157.4,
-        "headHeight": 152.5,
-        "bodyBelowChin": 213.1,
+        "headWidth": 149.7,
+        "headHeight": 144.7,
+        "bodyBelowChin": 217.9,
         "heightClass": "medium",
         "heightClassApplied": false,
         "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
       },
       "source": {
-        "file": "exec-a7fc3b43-78ae-46e4-998a-4f62b81dd211.png",
-        "sha256": "96993743d6f5b6cabbcc4ca4445c3877496dc463cfec1c123b7ddc96b3d6b557",
-        "scale": 0.7504893848286266,
+        "file": "exec-1b761670-9353-40d0-8ede-e6c11e79a4fb.png",
+        "sha256": "abce1b5dc9abc11ccdd31ae738c9027f5affdcf121eb53449d722c197eb1b816",
+        "scale": 0.8223130797930926,
         "feet": [
           [
-            340,
-            602
+            322,
+            583
           ],
           [
-            278,
-            602
+            321,
+            583
           ],
           [
-            300,
-            577
+            321,
+            574
           ],
           [
-            326,
-            577
+            307,
+            574
           ]
         ],
         "face": [
-          340,
-          216
+          317,
+          230
         ],
         "splitY": 627,
         "anatomy": {
           "skull": [
-            233.5,
-            114.9,
-            443.2,
-            318.1
+            226,
+            142,
+            408,
+            318
           ],
           "coordinateSpace": "source front quadrant",
           "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
           "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
           "directionReview": "same uniform scale for all four views; separate visual review required"
-        }
+        },
+        "alphaOpaqueThreshold": 250
       }
     },
     {
