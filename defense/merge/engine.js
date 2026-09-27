@@ -30,6 +30,7 @@ export function bestUnit(s,id){return s.board.filter(u=>u?.hero===id).sort((a,b)
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28);}
 function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,100);}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
+function addPoison(s,e,stacks,duration,cap=Infinity){e.poison=Math.min(cap,(e.poison||0)+stacks+(has(s,'seed')?1:0));e.poisonTime=duration;}
 function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:HERO[hero].trait.type==='expose'?'strong':'first'};}
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=index>=0&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);event(s,'summon',{index:slot,hero:id,rank});return slot;}
@@ -60,7 +61,7 @@ export function move(s,from,to){
     else if(b.hero==='rumi'&&a.hero!=='rumi')consumed=b;
     const refund=HERO[consumed.hero].trait.type==='sacrifice'?18*consumed.rank:0;
     if(refund)giveGold(s,refund,'합성 환급');
-    if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies){e.poison=(e.poison||0)+rank*2;e.poisonTime=8;}
+    if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,rank*2,8);
     const unit=makeUnit(s,id,rank);unit.priority=b.priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;
     s.stats.merges++;addGauge(s,12+(has(s,'hourglass')?8:0));s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
@@ -123,7 +124,7 @@ function applyHit(s,shot){
   }
   if(type==='burn'){for(const t of around(s,e,55)){if(amount*.23>=t.burn){t.burn=amount*.23;t.burnOwner=hero.id;}t.burnTime=3;}}
   if(type==='slow'||type==='chrono'||type==='gravity'){for(const t of type==='gravity'?area:[e]){t.slow=type==='chrono'?.25:.4;t.slowTime=2.4;}}
-  if(type==='poison'){e.poison=Math.min(40,e.poison+shot.rank+(has(s,'seed')?1:0));e.poisonTime=7;}
+  if(type==='poison')addPoison(s,e,shot.rank,7,40);
   if(type==='stun'&&shot.count%3===0)e.stun=Math.max(e.stun,.7);
   if(type==='fear'&&shot.count%3===0)e.progress=Math.max(0,e.progress-35);
   if(type==='expose'){e.exposed=Math.max(e.exposed,.18);e.exposeTime=4;}
@@ -170,7 +171,7 @@ export function cast(s,id){
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);e.slow=.5;e.slowTime=4;}}
   else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
   else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);e.burn=base*.65;e.burnTime=6;e.burnOwner=id;}}
-  else if(type==='plague'){for(const e of targets){e.poison+=u.rank*8;e.poisonTime=12;}strike(3,true);}
+  else if(type==='plague'){for(const e of targets)addPoison(s,e,u.rank*8,12);strike(3,true);}
   else if(type==='expose'){for(const e of targets){e.exposed=.6;e.exposeTime=10;}strike(3);}
   else if(type==='quake'){strike(5);for(const e of targets){e.progress=Math.max(0,e.progress-160);e.stun=2;}}
   else if(type==='nightmare'){strike(4);for(const e of targets){e.progress=Math.max(0,e.progress-220);e.exposed=.25;e.exposeTime=6;}}

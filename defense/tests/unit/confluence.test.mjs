@@ -60,6 +60,25 @@ test('combat selects each authored cardinal view and releases from the matching 
   }
 });
 
+test('seed adds one poison stack per basic hit, merge and plague application, preserving the basic-hit cap',()=>{
+  function setup(seed){
+    const deck=['mushroom_king',...DEFAULT_DECK.filter(id=>id!=='mushroom_king')].slice(0,6),s=newRun({deck,seed:31});
+    if(seed)s.artifacts.push('seed');
+    return {s,e:target(s,60)};
+  }
+  for(const seed of [false,true]){
+    const bonus=seed?1:0;
+    const basic=setup(seed);basic.s.board=basic.s.board.map((u,i)=>i===6?u:null);tick(basic.s,.9);
+    assert.equal(basic.e.poison,1+bonus,'one real projectile impact');
+    const capped=setup(seed);capped.s.board=capped.s.board.map((u,i)=>i===6?u:null);capped.e.poison=40;capped.e.poisonTime=10;tick(capped.s,.9);
+    assert.equal(capped.e.poison,40,'basic attacks retain their existing cap');
+    const merge=setup(seed);merge.e.poison=3;assert.equal(move(merge.s,6,8).merged,true);
+    assert.equal(merge.e.poison,3+4+bonus);assert.equal(merge.e.poisonTime,8);
+    const skill=setup(seed);skill.e.poison=3;skill.s.gauge=100;assert.equal(cast(skill.s,'mushroom_king').ok,true);
+    assert.equal(skill.e.poison,3+8+bonus);assert.equal(skill.e.poisonTime,12);
+  }
+});
+
 test('shop purchases, rerolls and free rewards have one transaction each',()=>{
   const s=newRun({seed:17});s.gold=200;settle(s,3);assert.equal(s.phase,'shop');const item=s.shop.items[0],gold=s.gold,count=s.board.filter(Boolean).length;
   assert.equal(buy(s,0).ok,true);assert.equal(s.gold,gold-item.price);assert.equal(s.board.filter(Boolean).length,count+1);assert.equal(buy(s,0).ok,false);
