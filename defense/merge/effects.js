@@ -50,6 +50,66 @@ export class CombatFX{
       if(!targets.length)this.add({type:'ultimate',hero:e.hero,...e.origin,origin:e.origin,angle:0,life:.65,total:.65,rank:e.rank});
     }
   }
+  drawSkillField(skill){
+    if(!skill||skill.life<=0)return;
+    const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero];
+    const t=Math.max(0,Math.min(1,1-skill.life/skill.total)),fade=Math.min(1,t*12)*(1-t),motion=this.reduced?.28:t;
+    // Field-scale identity is independent of target count. Everything here is
+    // UNDER units, HP bars and danger cells; the centre never flashes white.
+    ctx.save();ctx.globalAlpha=fade*(this.reduced?.48:1);
+    const wash=ctx.createRadialGradient(360,415,155,360,415,520);
+    wash.addColorStop(0,h.color+'00');wash.addColorStop(.58,h.color+'12');wash.addColorStop(1,h.color+'66');
+    ctx.fillStyle=wash;ctx.fillRect(0,0,720,780);
+    ctx.save();ctx.translate(360,415);ctx.globalAlpha*=.5;ctx.strokeStyle=h.color;ctx.lineWidth=3;
+    const arc=(r,start,end,width=3)=>{ctx.lineWidth=width;ctx.beginPath();ctx.arc(0,0,r,start,end);ctx.stroke();};
+    if(['crescent','daggers','leap','claws'].includes(fx.motion)){
+      const sweeps=fx.motion==='daggers'?3:fx.motion==='claws'?3:2;
+      for(let i=0;i<sweeps;i++){
+        ctx.save();ctx.rotate((fx.motion==='leap'?-.75:-.4)+i*.8);
+        ctx.strokeStyle=i%2?'#f8e5ff':h.color;
+        ctx.lineWidth=8-i*2;ctx.beginPath();ctx.ellipse(0,0,300+motion*80,130+i*55,-motion*.25,Math.PI*.1,Math.PI*.9);ctx.stroke();ctx.restore();
+      }
+    }else if(['snow','icicles','glass'].includes(fx.motion)){
+      const count=fx.motion==='snow'?6:fx.motion==='icicles'?8:4;
+      ctx.rotate(fx.motion==='glass'?Math.PI/4:0);
+      for(let i=0;i<count;i++){ctx.rotate(Math.PI*2/count);const r=240+motion*70;stroke(ctx,[[r-35,-12],[r,0],[r-35,12]],h.color,3);if(fx.motion==='snow')stroke(ctx,[[r-20,-25],[r,0],[r-20,25]],h.color,2);else diamond(ctx,r,0,18,'#d8efff');}
+    }else if(['dragon','embers'].includes(fx.motion)){
+      for(let i=0;i<5;i++){const x=-300+i*150,y=160-motion*200+(i%2)*40;ctx.save();ctx.translate(x,y);ctx.rotate(-.4);star(ctx,22+(i%3)*8,i%2?'#ffd8a0':h.color);ctx.restore();}
+      for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*330,220);ctx.bezierCurveTo(side*250,-50,side*380,-140,side*170,-230);ctx.lineWidth=fx.motion==='dragon'?14:5;ctx.stroke();}
+    }else if(fx.motion==='bolt'||fx.motion==='needle'){
+      for(const side of [-1,1]){
+        if(fx.motion==='bolt')stroke(ctx,[[side*300,-285],[side*260,-100],[side*320,-125],[side*265,165],[side*300,280]],h.color,5);
+        else {stroke(ctx,[[side*240,-210],[side*285,-210],[side*285,-155]],h.color,4);stroke(ctx,[[side*240,210],[side*285,210],[side*285,155]],h.color,4);}
+      }
+      if(fx.motion==='needle'){arc(230,0,Math.PI*2,2);stroke(ctx,[[-255,0],[-205,0]],h.color,3);stroke(ctx,[[205,0],[255,0]],h.color,3);}
+    }else if(['ribbon','song','planet','clock'].includes(fx.motion)){
+      ctx.rotate(fx.motion==='clock'?0:motion*.55);
+      for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(0,0,270+i*35,fx.motion==='song'?145+i*30:200+i*22,i*.45,0,Math.PI*1.7);ctx.lineWidth=i?2:4;ctx.stroke();}
+      if(fx.motion==='clock'){for(let i=0;i<12;i++){ctx.save();ctx.rotate(i*Math.PI/6);stroke(ctx,[[0,-278],[0,-300]],h.color,i%3?2:4);ctx.restore();}stroke(ctx,[[0,-180],[0,0],[100,60]],h.color,4);}
+    }else if(fx.motion==='quake'||fx.motion==='cross'){
+      for(const side of [-1,1]){
+        const d=180+motion*80;
+        if(fx.motion==='quake')stroke(ctx,[[side*330,-240],[side*270,-110],[side*300,0],[side*260,170],[side*330,250]],h.color,5);
+        else {stroke(ctx,[[side*d,-300],[side*d,300]],h.color,4);stroke(ctx,[[-320,side*d],[320,side*d]],h.color,4);}
+      }
+    }else{
+      // Stars, rose petals, spores and silver comets keep their authored motif
+      // in the corners instead of filling the board with particle noise.
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4+motion*.22,r=280+(i%2)*35,x=Math.cos(a)*r,y=Math.sin(a)*r;
+        if(fx.motion==='spores')disk(ctx,x,y,7+i%3*3,h.color);
+        else if(fx.motion==='petals'){ctx.save();ctx.translate(x,y);ctx.rotate(a+motion);ctx.fillStyle=h.color;ctx.beginPath();ctx.ellipse(0,0,15,6,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+        else {ctx.save();ctx.translate(x,y);ctx.rotate(a);star(ctx,i%2?8:14,h.color);if(fx.motion==='comets')stroke(ctx,[[-35,0],[-10,0]],h.color,3);ctx.restore();}
+      }
+    }
+    ctx.restore();
+    // One large low-opacity SD emblem plus two clear side seals: unlike a hit
+    // stamp this reads even with one boss on the outer lane, or reduced motion.
+    this.stamp(h.id,360,410,310+motion*30,-.3,.3);
+    this.stamp(h.id,39,350,104,Math.PI/2,.8);
+    this.stamp(h.id,681,485,104,-Math.PI/2,.8);
+    ctx.restore();
+  }
   drawZones(s){
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
       // Edge is the real collision radius. The painted centre is deliberately quieter.

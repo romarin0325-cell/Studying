@@ -16,7 +16,7 @@ export const PORTRAIT_FRAMES = {
     "size": 250
   },
   "cinderella": {
-    "x": 256,
+    "x": 252,
     "y": 190,
     "size": 250
   },

@@ -1,7 +1,27 @@
 {
   "tool": "Built-in image_gen (no CLI/API fallback)",
-  "usage": "Three new project assets; approved character atlases unchanged; no third-party game art included.",
+  "usage": "Three original project atlases plus the author-requested Cinderella head adjustment; the other 20 companions remain unchanged; no third-party game art included.",
   "assets": [
+    {
+      "output": "defense/assets/merge/units/cinderella.webp",
+      "source": "exec-1b761670-9353-40d0-8ede-e6c11e79a4fb.png",
+      "reference": "defense/assets/merge/units/cinderella.webp at d154069717d716e147121f1117fe89f0d1dec9e0",
+      "referenceSha256": "bb85ff4dba57076687b7aeecbc50f31325e15bfbe802e79308917b33b1e6d8dd",
+      "sourceSha256": "abce1b5dc9abc11ccdd31ae738c9027f5affdcf121eb53449d722c197eb1b816",
+      "grid": [
+        2,
+        2
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": true,
+      "conversion": "Recorded anatomical landmarks; documented Cinderella-only 0.95 head target; per-source alpha>=250 restored to opaque; shared foot anchor; WebP quality 95",
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "bytes": 291576,
+      "prompt": "Use case: precise-object-edit. Image 1 is the ORIGINAL approved sprite sheet and the only edit target. Make an almost imperceptible 5 percent reduction of the HEAD ONLY in each of four views. It should still look like the same two-head SD proportions, not a smaller-headed or taller-bodied redesign. IMPORTANT: anchor the transformation at the exact original CHIN/NECK position; the chin MUST NOT move upward. Body, collar, chest bow, dress, arms, skirt hem, knees, shoes, feet, twin-tail ends, color, shadows, line work, eyes and facial expression remain precisely where they are. Do not redraw or lengthen the torso or legs. Compress the skull/face and upper hair to 95 percent of its previous width and height, keeping the chin bottom fixed, producing only a tiny amount of extra transparent space above the head. The collar and face must connect seamlessly. Preserve all original costume details and character identity (male character with flat chest), front/back/left/right views. Keep the same 2x2 layout, same canvas proportions and same margins, no text. Native transparent alpha background; white hair and clothes stay opaque. This is a TINY, subtle proportion correction. Do not make the head 15 or 20 percent smaller. Do not enlarge the body."
+    },
     {
       "output": "defense/assets/merge/relics.webp",
       "source": "exec-80c3bd81-cd5f-4ec9-9c7a-6054b4880382.png",

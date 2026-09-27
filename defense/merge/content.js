@@ -26,7 +26,7 @@ export const HEROES = [
     {name:'꿈의 메아리',cost:60,type:'echo',text:'8초 동안 모든 영웅의 공격에 65% 위력의 추가 공격이 따라갑니다.'}),
   h('luna','루나','달그늘의 암살자','#c5a0ff','heroes',1,32,1.25,'blade',
     {type:'execute',text:'체력이 35% 이하인 적에게 두 배의 피해를 줍니다.'},
-    {name:'제노사이드 스텝',cost:80,type:'execute',text:'가장 강한 적에게 연속 참격. 약해진 적을 처형합니다.'}),
+    {name:'제노사이드 스텝',cost:80,type:'execute',text:'보스 우선 최대 5명에게 위력 16배. 체력 35% 이하(보스 40%)면 30배. 보스 추가 피해도 적용됩니다.'}),
   h('cinderella','신데렐라','한밤의 기적','#f7a5cc','heroes',2,12,1.15,'star',
     {type:'sacrifice',text:'합성 재료가 되면 등급당 18골드를 즉시 얻습니다.'},
     {name:'자정의 선물',cost:60,type:'fortune',text:'별비로 적을 타격하고 25골드를 얻습니다.'}),
@@ -87,8 +87,8 @@ export const HERO = Object.fromEntries(HEROES.map(x=>[x.id,x]));
 const roles = {
   zeke:['선봉 · 부채꼴','cleave',345,90,'전방 90°를 함께 베어 화상을 남깁니다.'],
   rumi:['합성 · 관통 별','beam',440,24,'일직선 관통. 같은 등급의 모든 동료와 합성합니다.'],
-  luna:['처형 · 단일','single',340,0,'짧은 사거리의 처형자. 체력 35% 이하인 적에게 두 배 피해.'],
-  cinderella:['초반 경제 · 별탄','single',440,0,'합성 재료가 되면 등급당 18G. 강화마다 환급 +2G / 등급.'],
+  luna:['보스 처형 · 단일','single',340,0,'보스 우선 · 보스 피해 +35%. 체력 35% 이하(보스 40%)면 기본 공격 두 배.'],
+  cinderella:['합성 경제 · 별탄','single',440,0,'재료로 소모되면 1성 18G · 2성 36G 즉시 환급. 강화마다 등급당 +4G. 루미가 재료면 환급 없음.'],
   snow_rabbit:['감속 · 작은 폭발','splash',450,48,'작은 눈보라가 주변 적을 40% 감속합니다.'],
   avalanche_maid:['빙결 연계 · 포격','splash',560,100,'넓은 얼음 파편. 감속 중인 적에게 피해 +75%.'],
   night_rabbit:['토끼 연계 · 도탄','bounce',390,135,'두 적 사이를 튑니다. 다른 토끼 종류마다 공격속도 +20%.'],
@@ -97,11 +97,11 @@ const roles = {
   lightning_sage:['연쇄 · 번개','chain',470,190,'가까운 세 적에게 번개가 이어집니다.'],
   red_dragon:['화상 연계 · 폭격','splash',590,88,'멀리서 넓게 폭발. 불타는 적에게 피해 +40%.'],
   flame_sage:['지속 화력 · 불바닥','zone',430,64,'명중 지점에 3초의 불바닥. 적이 지나가도 불길은 남습니다.'],
-  mushroom_king:['자리 경제 · 포자밭','zone',370,66,'포자밭으로 중독. 배치 12초마다 등급 +2G 수확. 강화마다 수확 +1G.'],
-  great_detective:['보스 약화 · 저격','single',900,0,'강한 적을 저격, 받는 피해 +18%. 강화마다 노출 +2%p.'],
+  mushroom_king:['시간 경제 · 포자밭','zone',370,66,'포자밭으로 중독. 전투 12초마다 1성 3G · 2성 4G 수확. 강화마다 +2G, 합성하면 12초부터 다시 시작.'],
+  great_detective:['보스 약화 · 저격','single',900,0,'보스 우선 · 보스 피해 +25%. 직격 후 4초간 받는 피해 +18%(보스 +30%). 강화마다 +2%p.'],
   siren:['인접 지원 · 물결','splash',400,58,'상하좌우 동료 공격속도 +22%. 강화마다 오라 +3%p.'],
   phantom:['견제 · 악몽 덫','zone',460,60,'3초의 덫을 남겨 감속. 세 번째 직격은 적을 뒤로 밀칩니다.'],
-  queen:['성장 경제 · 장미','single',440,0,'물결 배당 3 + 등급×2 + 성장. 세 물결마다 성장 +1, 강화마다 배당 +1G.'],
+  queen:['물결 경제 · 장미','single',440,0,'물결 종료 시 1성 5G · 2성 7G 배당. 4·7·10물결부터 +1G씩, 강화마다 +3G. 여왕 전체 합계 최대 45G.'],
   galaxy_whale:['밀집 제어 · 중력장','zone',550,98,'3초의 중력장으로 넓게 피해를 주고 40% 감속합니다.'],
   silver_rabbit:['별빛 지원 · 관통광','beam',500,22,'관통 공격이 별빛을 충전. 강화마다 추가 별빛 +0.1.'],
   ancient_dragon:['인접 지원 · 십자광','cross',620,55,'자신의 행·열을 관통. 상하좌우 동료 공격력 +25%, 강화마다 +3%p.'],
@@ -113,6 +113,8 @@ for(const hero of HEROES){
   Object.assign(hero,{role,shape,range,radius});hero.trait.text=text;
   hero.art={atlas:`unit-${hero.id}`,row:0,columns:2,foot:480/512,scale:1,directional:true,portrait:PORTRAIT_FRAMES[hero.id]};
 }
+HERO.luna.bossDamage=1.35;
+HERO.great_detective.bossDamage=1.25;
 export const ARTIFACTS = [
   ['hourglass','별모래 시계','합성할 때 별빛을 8 더 얻습니다.'],
   ['ember','불씨의 심장','화상 피해 +60%. 불바닥 동행과 함께하세요.'],
@@ -153,12 +155,12 @@ export const CHAPTERS = [
   {id:3,name:'황혼의 왕좌',caption:'마지막 성좌',color:'#c799ba',bosses:['curse_iris','beelzebub','beelzebub'],hp:2.05,world:5},
 ];
 export const BOSSES = {
-  artificial_demon:{name:'인조마신',color:'#8ee8ee',pattern:'seal',warning:'마력 봉인 · 빛나는 칸의 영웅을 옮기세요',frame:0},
-  love_iris:{name:'사랑의 여신 아이리스',color:'#f7b6d4',pattern:'heal',warning:'치유의 기도 · 빠르게 공격해 끊으세요',frame:1},
-  curse_iris:{name:'저주의 여신 아이리스',color:'#bc8be0',pattern:'drain',warning:'별빛 침식 · 필살기를 사용할 때입니다',frame:2},
-  flora:{name:'꽃의 여신 플로라',color:'#c9dd8d',pattern:'heal',warning:'생명의 개화 · 빠르게 공격해 끊으세요',frame:3},
-  poseidon:{name:'해신 포세이돈',color:'#77c9e3',pattern:'rush',warning:'밀려오는 해일 · 감속과 기절로 막으세요',frame:4},
-  beelzebub:{name:'마신 벨제뷔트',color:'#dfa590',pattern:'seal',warning:'붕괴의 문장 · 빛나는 칸의 영웅을 옮기세요',frame:5},
+  artificial_demon:{name:'인조마신',color:'#8ee8ee',pattern:'seal',warning:'마력 봉인 · 한 행 3.2초 봉인',frame:0},
+  love_iris:{name:'사랑의 여신 아이리스',color:'#f7b6d4',pattern:'heal',warning:'치유의 기도 · 체력 14% 회복',frame:1},
+  curse_iris:{name:'저주의 여신 아이리스',color:'#bc8be0',pattern:'drain',warning:'별빛 침식 · 별빛 −25',frame:2},
+  flora:{name:'꽃의 여신 플로라',color:'#c9dd8d',pattern:'heal',warning:'생명의 개화 · 체력 14% 회복',frame:3},
+  poseidon:{name:'해신 포세이돈',color:'#77c9e3',pattern:'rush',warning:'밀려오는 해일 · 적 전진',frame:4},
+  beelzebub:{name:'마신 벨제뷔트',color:'#dfa590',pattern:'seal',warning:'붕괴의 문장 · 한 행 3.2초 봉인',frame:5},
 };
 export const ASSET_PATHS = {
   ...Object.fromEntries(HEROES.map(h=>[`unit-${h.id}`,`./assets/merge/units/${h.id}.webp`])),
