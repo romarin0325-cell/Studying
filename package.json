@@ -19,7 +19,15 @@
     "verify:plan": "node scripts/verify.js --plan",
     "verify:full": "node scripts/verify.js --full",
     "prepare:defense-art": "node scripts/prepare_defense_art.mjs",
-    "test:defense:resilience": "node scripts/verify_defense_resilience.js"
+    "test:defense:resilience": "node scripts/verify_defense_resilience.js",
+    "build:idle": "node idle/scripts/build.mjs",
+    "test:idle:contracts": "node --test idle/tests/contracts.test.mjs",
+    "test:idle:core": "node --test idle/tests/core.test.mjs",
+    "test:idle:rewards": "node --test idle/tests/rewards.test.mjs",
+    "test:idle:combat": "node --test idle/tests/combat.test.mjs",
+    "test:idle:analysis": "node --test idle/tests/analysis.test.mjs",
+    "test:idle:browser": "node idle/tests/browser.mjs",
+    "simulate:idle": "node idle/scripts/simulate.mjs"
   },
   "dependencies": {
     "playwright": "^1.59.1"

@@ -1,0 +1,705 @@
+{
+  "heroes": [
+    {
+      "id": "zeke",
+      "name": "지크",
+      "element": "fire",
+      "weapon": "대검",
+      "identity": "물리 중심",
+      "stats": {
+        "hp": 650,
+        "atk": 120,
+        "matk": 30,
+        "def": 110,
+        "mdef": 95
+      },
+      "normal": {
+        "p": 1,
+        "m": 0,
+        "interval": 1.25
+      },
+      "passive": "전투당 최초 치명상에서 HP 1, 2초 무적, 8초 ATK +30%. 재발동 없음.",
+      "skills": [
+        {
+          "id": "guard",
+          "name": "가드",
+          "mp": 20,
+          "cd": 14,
+          "effect": "최대 HP의 25% 보호막, 6초.",
+          "auto": "HP 70% 이하 또는 보스 큰 기술 착탄까지 3초 이하"
+        },
+        {
+          "id": "ignis_smash",
+          "name": "이그니스스매시",
+          "mp": 25,
+          "cd": 8,
+          "p": 2.6,
+          "m": 0,
+          "effect": "작열 1스택, 8초. 본 게임에서는 물리 기술로 재구성.",
+          "auto": "항상"
+        },
+        {
+          "id": "ragnarok",
+          "name": "라그나로크",
+          "mp": 50,
+          "cd": 25,
+          "p": 6,
+          "m": 0,
+          "effect": "자신 HP 50% 이하이면 피해 1.5배.",
+          "auto": "공격 가능 시"
+        }
+      ]
+    },
+    {
+      "id": "lumi",
+      "name": "루미",
+      "element": "water",
+      "weapon": "원드",
+      "identity": "마공 기반 하이브리드",
+      "stats": {
+        "hp": 600,
+        "atk": 75,
+        "matk": 115,
+        "def": 95,
+        "mdef": 90
+      },
+      "normal": {
+        "p": 0.3,
+        "m": 0.7,
+        "interval": 1.3
+      },
+      "passive": "동료 지원 발동 시 별 1개(최대 3). 별은 전투 종료 시 소멸.",
+      "skills": [
+        {
+          "id": "moonlight_serena",
+          "name": "문라이트세레나",
+          "mp": 20,
+          "cd": 12,
+          "effect": "HP 12% 회복, 8초 MP 회복 +2/초, 별 1개.",
+          "auto": "회복 강화가 꺼져 있음"
+        },
+        {
+          "id": "milkyway_ecstasy",
+          "name": "밀키웨이엑스터시",
+          "mp": 30,
+          "cd": 10,
+          "p": 0.5,
+          "m": 3,
+          "effect": "별 1개.",
+          "auto": "항상"
+        },
+        {
+          "id": "dream_form",
+          "name": "꿈의형태",
+          "mp": 50,
+          "cd": 24,
+          "p": 2,
+          "m": 4,
+          "effect": "별 전부 소모; 소모한 별마다 이 기술 피해 +20%(가산, 최대 +60%).",
+          "auto": "별 3 또는 전투 남은 시간 10초 이하"
+        }
+      ]
+    },
+    {
+      "id": "queen",
+      "name": "여왕",
+      "element": "nature",
+      "weapon": "채찍",
+      "identity": "완전 하이브리드",
+      "stats": {
+        "hp": 550,
+        "atk": 105,
+        "matk": 105,
+        "def": 80,
+        "mdef": 80
+      },
+      "normal": {
+        "p": 0.6,
+        "m": 0.6,
+        "interval": 1.2
+      },
+      "passive": "동료 지원 발동 시 왕관 1개(최대 3). 왕관 1개당 ATK/MATK +5%(가산).",
+      "skills": [
+        {
+          "id": "royal_bloom",
+          "name": "로열블룸",
+          "mp": 20,
+          "cd": 10,
+          "effect": "왕관 1개, HP 8% 회복.",
+          "auto": "왕관 3 미만 또는 HP 80% 이하"
+        },
+        {
+          "id": "royal_lash",
+          "name": "왕실의채찍",
+          "mp": 20,
+          "cd": 8,
+          "p": 1.4,
+          "m": 1.4,
+          "effect": "왕관 1개. 신규 방치형 전용 기술명.",
+          "auto": "항상"
+        },
+        {
+          "id": "finale",
+          "name": "피날레",
+          "mp": 50,
+          "cd": 20,
+          "p": 2,
+          "m": 2,
+          "effect": "왕관 전부 소모; 1개당 물리/마법 계수 각각 +0.8. 소모 직전 공격력으로 피해 계산.",
+          "auto": "왕관 3 또는 남은 시간 10초 이하"
+        }
+      ]
+    },
+    {
+      "id": "jasmine",
+      "name": "자스민",
+      "element": "light",
+      "weapon": "스태프",
+      "identity": "마공 중심, 물공 보조",
+      "stats": {
+        "hp": 520,
+        "atk": 50,
+        "matk": 135,
+        "def": 65,
+        "mdef": 65
+      },
+      "normal": {
+        "p": 0.15,
+        "m": 0.85,
+        "interval": 1.4
+      },
+      "passive": "디바인 3스택 대상에게 주는 직접 피해 1.25배. 디바인은 스택당 다른 기본 효과 없음.",
+      "skills": [
+        {
+          "id": "barrier",
+          "name": "배리어",
+          "mp": 20,
+          "cd": 16,
+          "effect": "최대 HP의 20% 보호막 6초, 자신에게 걸린 가장 오래된 해제 가능 디버프 1종 제거.",
+          "auto": "HP 70% 이하 또는 보스 큰 기술 착탄까지 3초 이하 또는 자신 디버프 존재"
+        },
+        {
+          "id": "the_holy",
+          "name": "더홀리",
+          "mp": 25,
+          "cd": 8,
+          "p": 0.25,
+          "m": 3,
+          "effect": "디바인 1스택, 15초. 현재 타격 피해 처리 후 부여.",
+          "auto": "항상"
+        },
+        {
+          "id": "goddess_descent",
+          "name": "여신강림",
+          "mp": 50,
+          "cd": 25,
+          "effect": "8초 MATK +30%, MP 회복 +2/초. 대상 디바인 3스택 부여(15초).",
+          "auto": "공격 가능 시"
+        }
+      ]
+    },
+    {
+      "id": "luna",
+      "name": "루나",
+      "element": "dark",
+      "weapon": "단검",
+      "identity": "물공 기반 하이브리드",
+      "stats": {
+        "hp": 480,
+        "atk": 125,
+        "matk": 85,
+        "def": 50,
+        "mdef": 55
+      },
+      "normal": {
+        "p": 0.8,
+        "m": 0.2,
+        "interval": 0.95
+      },
+      "passive": "기본 회피율 10%. HP 70% 이상이면 치명타 +10%p. 암흑 대상 직접 피해 +15%.",
+      "skills": [
+        {
+          "id": "evasive_stance",
+          "name": "회피태세",
+          "mp": 20,
+          "cd": 14,
+          "effect": "6초 회피율 +20%p.",
+          "auto": "효과가 없고 HP 80% 이하 또는 보스 큰 기술 착탄까지 3초 이하"
+        },
+        {
+          "id": "eclipse",
+          "name": "이클립스",
+          "mp": 30,
+          "cd": 10,
+          "p": 3,
+          "m": 0.5,
+          "effect": "암흑 4초.",
+          "auto": "항상"
+        },
+        {
+          "id": "dark_meteor",
+          "name": "다크메테오",
+          "mp": 45,
+          "cd": 20,
+          "p": 1,
+          "m": 4.5,
+          "effect": "피해 적용 뒤 자신 행동만 1초 정지. MP 회복/받는 피해/동료 지원은 계속.",
+          "auto": "공격 가능 시"
+        }
+      ]
+    }
+  ],
+  "companions": [
+    {
+      "id": "guardian",
+      "name": "가디언",
+      "passive": "최대 HP +12%",
+      "active": "HP 20% 보호막 6초",
+      "cooldown": 16,
+      "tacticalTag": "guard",
+      "canonicalElement": "nature",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "balancer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "gold_dragon",
+      "name": "골드드래곤",
+      "passive": "HP 80% 이상에서 직접 피해 +12%",
+      "active": "물리 1.8 + 마법 0.6배; HP 80% 이상이면 이 지원 피해 1.5배",
+      "cooldown": 14,
+      "tacticalTag": "burst",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "snow_rabbit",
+      "name": "눈토끼",
+      "passive": "MP 회복 +0.5/초",
+      "active": "마법 1.8배, 둔화 6초",
+      "cooldown": 12,
+      "tacticalTag": "control",
+      "canonicalElement": "water",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "red_dragon",
+      "name": "레드드래곤",
+      "passive": "ATK +10%",
+      "active": "물리 1.6 + 마법 0.4배, 작열 1스택",
+      "cooldown": 12,
+      "tacticalTag": "burn",
+      "canonicalElement": "fire",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "mushroom_king",
+      "name": "머쉬룸킹",
+      "passive": "최대 HP +8%, 받는 지속 피해 -15%",
+      "active": "마법 1.4배, 중독 2스택",
+      "cooldown": 14,
+      "tacticalTag": "poison",
+      "canonicalElement": "nature",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "great_detective",
+      "name": "명탐정",
+      "passive": "노출 상태 대상 직접 피해 +12%",
+      "active": "약점분석 6초: 대상 받는 직접 피해 +10%",
+      "cooldown": 14,
+      "tacticalTag": "expose",
+      "canonicalElement": "water",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "balancer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "night_rabbit",
+      "name": "밤토끼",
+      "passive": "암흑 대상에게 직접 피해 +12%",
+      "active": "물리 2배, 암흑 5초",
+      "cooldown": 12,
+      "tacticalTag": "blind",
+      "canonicalElement": "dark",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "lightning_sage",
+      "name": "번개의현자",
+      "passive": "치명타율 +5%p",
+      "active": "마법 2배, 디바인 1스택(15초)",
+      "cooldown": 12,
+      "tacticalTag": "divine",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "behemoth",
+      "name": "베히모스",
+      "passive": "종류가 다른 디버프 3개 이상인 적에게 직접 피해 +15%",
+      "active": "물리 2.8배, 약화 5초",
+      "cooldown": 18,
+      "tacticalTag": "debuff",
+      "canonicalElement": "nature",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "balancer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "siren",
+      "name": "세이렌",
+      "passive": "받는 회복 +15%",
+      "active": "최대 HP 18% 회복, 디버프 1종 해제",
+      "cooldown": 16,
+      "tacticalTag": "heal",
+      "canonicalElement": "water",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "buffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "time_magician",
+      "name": "시간의마술사",
+      "passive": "스킬 재사용 대기시간 -6%",
+      "active": "현재 대기시간 중인 영웅 기술 1개(남은 시간이 가장 긴 것) 3초 단축",
+      "cooldown": 16,
+      "tacticalTag": "cooldown",
+      "canonicalElement": "dark",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "balancer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "time_ruler",
+      "name": "시간의지배자",
+      "passive": "전투 시작 15초 후 직접 피해 +12%",
+      "active": "시전 3초 후 마법 3배 착탄; 적 노출 구간이면 피해 +30%",
+      "cooldown": 18,
+      "tacticalTag": "delay",
+      "canonicalElement": "dark",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "debuffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "cinderella",
+      "name": "신데렐라",
+      "passive": "보호막 보유 중 직접 피해 +10%",
+      "active": "HP 15% 보호막 6초, 물리 1.6배",
+      "cooldown": 14,
+      "tacticalTag": "shield",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "debuffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "avalanche_maid",
+      "name": "아발란체메이드",
+      "passive": "둔화 대상 직접 피해 +12%",
+      "active": "물리 1.6 + 마법 0.4배, 부식 6초",
+      "cooldown": 12,
+      "tacticalTag": "corrosion",
+      "canonicalElement": "water",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "balancer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "ancient_dragon",
+      "name": "에인션트드래곤",
+      "passive": "ATK/MATK +6%",
+      "active": "물리 1.4 + 마법 1.4배",
+      "cooldown": 16,
+      "tacticalTag": "hybrid",
+      "canonicalElement": "nature",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "debuffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "ancient_soul",
+      "name": "에인션트소울",
+      "passive": "작열 또는 디바인 대상 직접 피해 +10%(둘이어도 한 번)",
+      "active": "마법 2.2배, 작열 1스택 및 디바인 1스택",
+      "cooldown": 16,
+      "tacticalTag": "dual_status",
+      "canonicalElement": "fire",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "silver_rabbit",
+      "name": "은토끼",
+      "passive": "기본 공격 피해 +12%",
+      "active": "물리 1.8배, 6초 기본 공격 주기 -10%",
+      "cooldown": 12,
+      "tacticalTag": "normal",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "galaxy_whale",
+      "name": "은하고래",
+      "passive": "MP 회복 +0.8/초",
+      "active": "MP 15 회복, 가장 오래된 자신 디버프 1종 해제",
+      "cooldown": 16,
+      "tacticalTag": "mana",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "priest_of_end",
+      "name": "종말의사제",
+      "passive": "HP 35% 이하 적에게 직접 피해 +15%",
+      "active": "마법 2.6배; 적 HP 35% 이하이면 1.3배",
+      "cooldown": 18,
+      "tacticalTag": "execute",
+      "canonicalElement": "dark",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "buffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "cherry_prince",
+      "name": "체리프린스",
+      "passive": "회복을 받은 뒤 5초 ATK/MATK +8%(갱신만)",
+      "active": "HP 12% 회복, MP 10 회복",
+      "cooldown": 14,
+      "tacticalTag": "recovery",
+      "canonicalElement": "fire",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "phantom",
+      "name": "팬텀",
+      "passive": "회피율 +5%p",
+      "active": "물리 1.8배, 자신에게 걸린 디버프 1종 해제",
+      "cooldown": 12,
+      "tacticalTag": "dodge",
+      "canonicalElement": "dark",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "storm_sage",
+      "name": "폭풍의현자",
+      "passive": "부식 또는 약화 대상 직접 피해 +10%(둘이어도 한 번)",
+      "active": "마법 1.8배, 약화 6초",
+      "cooldown": 12,
+      "tacticalTag": "weaken",
+      "canonicalElement": "nature",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "debuffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "harmonious",
+      "name": "하모니어스",
+      "passive": "두 지원자가 서로 다른 전술 태그이면 ATK/MATK +7%",
+      "active": "마법 1.6배, 6초 MP 회복 +1/초",
+      "cooldown": 14,
+      "tacticalTag": "harmony",
+      "canonicalElement": "light",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "dealer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    },
+    {
+      "id": "flame_sage",
+      "name": "화염의현자",
+      "passive": "작열 대상에게 직접 피해 +12%",
+      "active": "마법 1.8배, 작열 1스택, 6초 ATK +10%",
+      "cooldown": 12,
+      "tacticalTag": "burn",
+      "canonicalElement": "fire",
+      "effectProvenance": "new_idle_design",
+      "canonicalRole": "buffer",
+      "canonicalSource": "card/game/data.js@d914c2a7"
+    }
+  ],
+  "variants": [
+    {
+      "id": "trauma",
+      "name": "트라우마",
+      "kind": "same_person_variant",
+      "canonicalPersonId": "time_magician",
+      "unlock": "시간의마술사 보유 + 동료 개인기록 3편 열람 + 영웅 중 1명 원정 60단계",
+      "combatEntity": false
+    },
+    {
+      "id": "luna_jasmine",
+      "name": "루나&자스민",
+      "kind": "joint_memory",
+      "canonicalPersonIds": [
+        "luna",
+        "jasmine"
+      ],
+      "unlock": "루나/자스민 관계 각 210 + 두 영웅 원정 단계 합계 120 + 공동 장면 3편 열람",
+      "combatEntity": false
+    }
+  ],
+  "bosses": [
+    {
+      "id": "pharaoh",
+      "name": "고대신 파라오",
+      "element": "nature",
+      "unlockTotalMedals": 20,
+      "pattern": "12초마다 4초간 받는 직접 피해 -60%. 구간 종료 후 4초간 노출. 8초마다 물리 2배 공격.",
+      "counterplay": "방어 구간의 공격형 기술을 늦추거나, 작열/중독으로 대응.",
+      "artifact": {
+        "name": "봉인의 파편",
+        "id": "seal_fragment",
+        "effect": "적 방어 구간의 직접 피해 감소를 25%p 무시한다. 다른 피해 감소에는 미적용."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "flora",
+      "name": "꽃의 여신 플로라",
+      "element": "nature",
+      "unlockTotalMedals": 60,
+      "pattern": "10초마다 최대 HP 8% 회복(2초 예고). 작열 또는 중독이 걸려 있으면 이 회복 50% 감소.",
+      "counterplay": "상태 이상을 유지하거나 회복 직후 노출 3초에 집중 공격.",
+      "artifact": {
+        "name": "신록의 씨앗",
+        "id": "verdant_seed",
+        "effect": "최대 HP +10%. 12초마다 최대 HP 6% 회복."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "thor",
+      "name": "뇌신 토르",
+      "element": "light",
+      "unlockTotalMedals": 80,
+      "pattern": "14초마다 3초 예고 후 마법 3.6배. 예고 중 최대 HP 5% 피해를 받으면 취소되어 노출 4초.",
+      "counterplay": "공격 집중으로 취소하거나 보호막/마방으로 견딘다.",
+      "artifact": {
+        "name": "뇌광의 인장",
+        "id": "thunder_seal",
+        "effect": "보스 예고 구간 중 직접 피해 +20%."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "beelzebub",
+      "name": "마신 벨제뷔트",
+      "element": "dark",
+      "unlockTotalMedals": 100,
+      "pattern": "12초마다 약화/부식/암흑 중 시드에 따라 2종을 6초 부여. 18초마다 마법 2.8배.",
+      "counterplay": "해제 또는 짧은 전투, 서로 다른 동료 조합.",
+      "artifact": {
+        "name": "저주의 거울",
+        "id": "curse_mirror",
+        "effect": "자신 디버프를 해제하면 최대 HP 8% 회복. 내부 대기 6초."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "love_iris",
+      "name": "사랑의 여신 아이리스",
+      "element": "light",
+      "unlockTotalMedals": 30,
+      "pattern": "12초마다 최대 HP 12% 보호막, 6초. 보호막이 먼저 깨지면 노출 4초.",
+      "counterplay": "보호막 파괴와 노출 구간의 집중 공격.",
+      "artifact": {
+        "name": "장미의 서약",
+        "id": "rose_oath",
+        "effect": "자신이 보호막을 받을 때 6초 ATK/MATK +12%; 중복 갱신만."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "artificial_demon",
+      "name": "인조 마신",
+      "element": "water",
+      "unlockTotalMedals": 10,
+      "pattern": "물리 감소 40%와 마법 감소 40% 상태를 8초마다 교대. 처음은 물리 감소.",
+      "counterplay": "여왕의 혼합 공격 또는 기다렸다가 집중 공격.",
+      "artifact": {
+        "name": "쌍극의 핵",
+        "id": "bipolar_core",
+        "effect": "혼합 피해 패킷의 물리/마법 성분 각각 +12%."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "curse_iris",
+      "name": "저주의 여신 아이리스",
+      "element": "fire",
+      "unlockTotalMedals": 40,
+      "pattern": "12초마다 영웅 최대 HP 2%/초의 저주를 6초 부여. 해제 가능, 치명/방어/회피 미적용.",
+      "counterplay": "회복/해제 또는 시전 전 처치.",
+      "artifact": {
+        "name": "잔향의 가시",
+        "id": "echo_thorn",
+        "effect": "받는 지속 피해 -30%. 직접 피해에는 미적용."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "astea",
+      "name": "창조신 아스테아",
+      "element": "neutral",
+      "unlockTotalMedals": 200,
+      "pattern": "다섯 영웅의 독립 45초 시험. 10초마다 다음 영웅을 바꾸는 전투가 아니다. 각 시험에서 15초/30초에 피해 유형 방어 30%를 4초씩 전환.",
+      "counterplay": "영웅별 기록을 별도로 저장하고 합산. 네 명의 좋은 기록으로도 기본 보상 가능.",
+      "artifact": {
+        "name": "기원의 별",
+        "id": "origin_star",
+        "effect": "전투 시작 8초간 ATK/MATK +15%. 최대 HP +8%(항상)."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "ares",
+      "name": "투신 아레스",
+      "element": "fire",
+      "unlockTotalMedals": 150,
+      "pattern": "10초마다 자신의 ATK +10%(가산, 최대 +50%). 15초마다 물리 3배 공격.",
+      "counterplay": "장기 방치가 아니라 공격과 생존의 균형으로 마무리.",
+      "artifact": {
+        "name": "투쟁의 문장",
+        "id": "war_crest",
+        "effect": "전투 시작 20초 후 직접 피해 +18%."
+      },
+      "isNewIdleMechanics": true
+    },
+    {
+      "id": "poseidon",
+      "name": "해신 포세이돈",
+      "element": "water",
+      "unlockTotalMedals": 120,
+      "pattern": "전투 0~5초는 피해 감소 40%, 5~10초는 노출; 이 10초 주기를 반복. 10초마다 마법 2.5배.",
+      "counterplay": "기술 지연 설정 또는 지속 피해.",
+      "artifact": {
+        "name": "조수의 보석",
+        "id": "tide_gem",
+        "effect": "노출 대상 직접 피해 +20%."
+      },
+      "isNewIdleMechanics": true
+    }
+  ]
+}

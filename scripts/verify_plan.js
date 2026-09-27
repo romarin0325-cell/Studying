@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter']);
-const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense']);
+const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle']);
+const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle']);
 const DEFENSE_TOOLS = new Set([
   'scripts/build_defense_local.mjs', 'scripts/prepare_defense_art.mjs',
   'scripts/verify_defense.js', 'scripts/verify_defense_confluence.mjs',
@@ -472,6 +472,35 @@ function planDefense(plan, files, currentFiles) {
   }
 }
 
+function planIdle(plan, files, currentFiles) {
+  const current = new Set(currentFiles);
+  const product = files.filter(file => file.startsWith('idle/') && !isDocumentation(file));
+  const direct = product.filter(file => current.has(file) && /^idle\/tests\/.+\.test\.mjs$/.test(file));
+  const inputs = product.filter(file => /^(?:idle\/src\/|idle\/styles\/|idle\/assets\/|idle\/index\.html$|idle\/package\.json$|idle\/scripts\/(?:build|prepare-thumbnails)\.mjs$)/.test(file));
+  const knownScripts = new Set(['build.mjs', 'import-assets.mjs', 'prepare-memories.mjs', 'prepare-thumbnails.mjs', 'resolve-canon.mjs', 'sync-learning.mjs', 'simulate.mjs', 'review-art.mjs']);
+  const unknown = product.filter(file => !inputs.includes(file)
+    && !file.startsWith('idle/dist/') && !file.startsWith('idle/tests/')
+    && !(file.startsWith('idle/scripts/') && knownScripts.has(path.posix.basename(file)))
+    && /\.(?:js|mjs|cjs|json|ya?ml|html|css)$/.test(file));
+  if (unknown.length) plan.blocked.push('No Idle mapping exists for: ' + unknown.join(', '));
+  for (const file of product.filter(file => current.has(file) && /\.(?:js|mjs|cjs)$/.test(file))) addNodeCheck(plan, 'idle', file);
+  const tests = new Set(direct);
+  const add = name => tests.add('idle/tests/' + name + '.test.mjs');
+  if (inputs.some(file => file.startsWith('idle/assets/') || file.startsWith('idle/src/data/'))) add('contracts');
+  if (inputs.some(file => /idle\/src\/(?:core|systems)\//.test(file))) { add('core'); add('rewards'); }
+  if (inputs.some(file => /idle\/src\/(?:combat|data\/roster|data\/balance|systems\/(?:growth|adventure|expeditions))/.test(file))) { add('combat'); add('analysis'); }
+  if (product.includes('idle/tests/helpers.mjs')) for (const name of ['core','rewards','combat','analysis']) add(name);
+  addNodeTest(plan, 'idle', 'idle:contracts-and-regressions', 'Check only mapped Idle contracts and regressions', [...tests]);
+  if (tests.has('idle/tests/contracts.test.mjs')) plan.steps.find(step => step.id === 'idle:contracts-and-regressions').needsInstall = true;
+  if (inputs.length) {
+    addStep(plan, makeStep('idle:build', 'idle', 'Build the changed AstralCompanions deployment inputs once', 'node', ['idle/scripts/build.mjs'], { needsInstall: true }));
+  }
+  if (inputs.length || product.some(file => file === 'idle/tests/browser.mjs' || file.startsWith('idle/tests/fixtures/'))) {
+    addBrowserScript(plan, 'idle', 'idle:offline-browser', 'Boot the committed single-file game and exercise changed UI/storage', 'idle/tests/browser.mjs');
+  }
+  if (product.some(file => file.startsWith('idle/dist/')) && !inputs.length) plan.blocked.push('Idle distribution changed without a mapped deployment input.');
+}
+
 function createPlan(changes, options = {}) {
   const files = changePaths(changes);
   const currentFiles = currentChangePaths(changes);
@@ -513,6 +542,7 @@ function createPlan(changes, options = {}) {
   if (shouldPlan('card')) planCard(plan, files);
   if (shouldPlan('shooter')) planShooter(plan, files);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
+  if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
 
   if (!onlyGame && plan.detectedGames.includes('defense')) {
     plan.skipped.push('Defense commands are delegated to the dedicated Defense workflow.');
@@ -587,6 +617,8 @@ function fullPlan(game) {
         { needsInstall: true, browsers: ['chromium'] }
       )
     );
+  } else if (game === 'idle') {
+    addStep(plan, makeStep('full:idle', 'idle', 'Explicit full Idle validation', 'npm', ['run', 'verify', '--prefix', 'idle'], { needsInstall: true, browsers: ['chromium'] }));
   } else {
     const scripts = [
       'lint:defense',

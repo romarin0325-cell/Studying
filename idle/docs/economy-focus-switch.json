@@ -1,0 +1,243 @@
+{
+  "method": "Actual reducer, 20Hz combat; up to four 30-stage batches per hero per session; new support/artifact loadouts get one retry in every profile; A seeks first missing artifact without spotlight optimization, B uses spotlight, C adds same-engine analysis and adventure; no level-to-stage assumption",
+  "epoch": 1767225600000,
+  "days": 180,
+  "unluckySeed": 44,
+  "profiles": {
+    "focus-switch": {
+      "7": {
+        "levels": [
+          15,
+          59,
+          15,
+          14,
+          14
+        ],
+        "stages": [
+          69,
+          249,
+          69,
+          59,
+          69
+        ],
+        "totalStage": 515,
+        "gross": {
+          "xp": 78466,
+          "gold": 235446,
+          "forgeOre": 3782,
+          "companionTickets": 58,
+          "memoryTickets": 33
+        },
+        "draws": {
+          "companion": 60,
+          "memory": 30
+        },
+        "ownedCompanions": 11,
+        "memories": 1,
+        "bondLumi": 206,
+        "mastery": [
+          3,
+          4,
+          3,
+          3,
+          3
+        ],
+        "longestAllGrowthStall": 0,
+        "nearLosses": 9,
+        "longestBonusDrought": 0,
+        "bronzeOrBetterPerTen": 4.888888888888889,
+        "nonFullBronzeOrBetterPerTen": {
+          "companion": 4.5,
+          "memory": 4.333333333333333
+        }
+      },
+      "28": {
+        "levels": [
+          51,
+          132,
+          51,
+          51,
+          50
+        ],
+        "stages": [
+          259,
+          669,
+          249,
+          229,
+          259
+        ],
+        "totalStage": 1665,
+        "gross": {
+          "xp": 927077,
+          "gold": 2781395,
+          "forgeOre": 17762,
+          "companionTickets": 222,
+          "memoryTickets": 123
+        },
+        "draws": {
+          "companion": 230,
+          "memory": 120
+        },
+        "ownedCompanions": 24,
+        "memories": 10,
+        "bondLumi": 868,
+        "mastery": [
+          8,
+          10,
+          8,
+          8,
+          8
+        ],
+        "longestAllGrowthStall": 0,
+        "nearLosses": 66,
+        "longestBonusDrought": 1,
+        "bronzeOrBetterPerTen": 5.171428571428572,
+        "nonFullBronzeOrBetterPerTen": {
+          "companion": 4.478260869565218,
+          "memory": 4.75
+        }
+      },
+      "30": {
+        "levels": [
+          63,
+          132,
+          62,
+          62,
+          62
+        ],
+        "stages": [
+          319,
+          679,
+          299,
+          279,
+          319
+        ],
+        "totalStage": 1895,
+        "gross": {
+          "xp": 1041236,
+          "gold": 3123894,
+          "forgeOre": 18962,
+          "companionTickets": 242,
+          "memoryTickets": 132
+        },
+        "draws": {
+          "companion": 250,
+          "memory": 130
+        },
+        "ownedCompanions": 24,
+        "memories": 12,
+        "bondLumi": 930,
+        "mastery": [
+          9,
+          10,
+          9,
+          9,
+          9
+        ],
+        "longestAllGrowthStall": 0,
+        "nearLosses": 79,
+        "longestBonusDrought": 1,
+        "bronzeOrBetterPerTen": 5.184210526315789,
+        "nonFullBronzeOrBetterPerTen": {
+          "companion": 4.4,
+          "memory": 4.769230769230769
+        }
+      },
+      "90": {
+        "levels": [
+          173,
+          172,
+          172,
+          172,
+          172
+        ],
+        "stages": [
+          1039,
+          1089,
+          999,
+          959,
+          969
+        ],
+        "totalStage": 5055,
+        "gross": {
+          "xp": 8361623,
+          "gold": 25085375,
+          "forgeOre": 58352,
+          "companionTickets": 704,
+          "memoryTickets": 390
+        },
+        "draws": {
+          "companion": 710,
+          "memory": 390
+        },
+        "ownedCompanions": 24,
+        "memories": 15,
+        "bondLumi": 2782,
+        "mastery": [
+          18,
+          18,
+          18,
+          18,
+          18
+        ],
+        "longestAllGrowthStall": 0,
+        "nearLosses": 286,
+        "longestBonusDrought": 2,
+        "bronzeOrBetterPerTen": 4.9818181818181815,
+        "nonFullBronzeOrBetterPerTen": {
+          "companion": 4.338028169014085,
+          "memory": 4.230769230769231
+        }
+      },
+      "180": {
+        "levels": [
+          250,
+          249,
+          249,
+          249,
+          249
+        ],
+        "stages": [
+          1200,
+          1200,
+          1200,
+          1200,
+          1200
+        ],
+        "totalStage": 6000,
+        "gross": {
+          "xp": 25893418,
+          "gold": 77680966,
+          "forgeOre": 117722,
+          "companionTickets": 1215,
+          "memoryTickets": 774
+        },
+        "draws": {
+          "companion": 1220,
+          "memory": 770
+        },
+        "ownedCompanions": 24,
+        "memories": 15,
+        "bondLumi": 5494,
+        "mastery": [
+          25,
+          25,
+          25,
+          25,
+          25
+        ],
+        "longestAllGrowthStall": 0,
+        "nearLosses": 358,
+        "longestBonusDrought": 2,
+        "bronzeOrBetterPerTen": 5.050251256281407,
+        "nonFullBronzeOrBetterPerTen": {
+          "companion": 4.491803278688525,
+          "memory": 4.363636363636363
+        }
+      }
+    }
+  },
+  "snapshots": {},
+  "guards": {},
+  "battles": 6939
+}

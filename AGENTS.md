@@ -20,6 +20,7 @@ explicitly requests a full suite for that game.
 Current targets:
 - `card/`: focused Card syntax, contract, build, and browser checks
 - `shooter/`: focused Shooter unit, build, and browser checks
+- `idle/`: focused content, core, rewards, combat, analysis, build, and offline browser checks; long economy simulations are an explicit release check, not a default gate
 
 `card_legacy/` is a preserved snapshot. Do not use it as the active Card source.
 `defense_legacy/` is the preserved Defense snapshot from immediately before PR

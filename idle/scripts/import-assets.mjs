@@ -1,0 +1,31 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import sharp from 'sharp';
+const root = path.resolve(import.meta.dirname,'..');
+const source = process.argv[2];
+if (!source) throw Error('Pass the supplied character folder explicitly. This import is not part of the build.');
+const roster=JSON.parse(await fs.readFile(path.join(root,'src/data/roster.json'),'utf8'));
+const normalize=s=>s.replace(/\s|\(\d+\)/g,'');
+const files=(await fs.readdir(source)).filter(f=>/\.(png|jpg)$/i.test(f));
+const entries=[...roster.heroes,...roster.companions,...roster.bosses,{id:'trauma',name:'트라우마'},{id:'luna_jasmine',name:'루나&자스민'}];
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const manifest={version:1,sourceCommit:'d914c2a7b48f391f2f66146b5448bdb9727a446c',policy:'Original outfit and aspect ratio; no SD mixing; portraits use object-fit, never body distortion.',assets:[]};
+const thumbs=[];
+for(let i=0;i<entries.length;i++){
+ const e=entries[i],matches=files.filter(f=>normalize(path.parse(f).name)===normalize(e.name));
+ if(matches.length!==1)throw Error('Ambiguous or missing original: '+e.name);
+ const file=matches[0],bytes=await fs.readFile(path.join(source,file));
+ const folder=roster.bosses.some(b=>b.id===e.id)?'bosses':['trauma','luna_jasmine'].includes(e.id)?'memories':'portraits';
+ const dest=`assets/${folder}/${e.id}.webp`;
+ const result=await sharp(bytes).rotate().resize({width:900,height:1350,fit:'inside',withoutEnlargement:true}).webp({quality:86,effort:5}).toBuffer();
+ await fs.writeFile(path.join(root,dest),result);
+ const meta=await sharp(result).metadata();
+ manifest.assets.push({id:e.id,name:e.name,path:dest,sourcePath:path.join(source,file),sourceSha256:hash(bytes),sha256:hash(result),width:meta.width,height:meta.height,canonicalPersonId:e.id==='trauma'?'time_magician':e.id==='luna_jasmine'?['luna','jasmine']:e.id,crop:'none',anchor:[.5,.5],reviewed:false});
+ const label=Buffer.from(`<svg width="180" height="30"><rect width="180" height="30" fill="#142139"/><text x="8" y="20" fill="white" font-size="12">${e.id}</text></svg>`);
+ const t=await sharp(result).resize(180,270,{fit:'contain',background:'#edf0f5'}).extend({bottom:30,background:'#142139'}).composite([{input:label,top:270,left:0}]).png().toBuffer();
+ thumbs.push({input:t,left:(i%8)*180,top:Math.floor(i/8)*300});
+}
+await fs.writeFile(path.join(root,'assets/manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+await sharp({create:{width:1440,height:Math.ceil(entries.length/8)*300,channels:3,background:'#142139'}}).composite(thumbs).jpeg({quality:90}).toFile(path.join(root,'docs/review/original-contact-sheet.jpg'));
+console.log('Imported',manifest.assets.length,'verified file matches; visual review pending.');

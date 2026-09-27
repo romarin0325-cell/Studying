@@ -1,0 +1,297 @@
+
+> verify
+> node scripts/verify.js
+
+Basis: merge-base d154069717d716e147121f1117fe89f0d1dec9e0 -> PR/local head 74fe95d976791b0d1bbc3fa21580312b9403a384
+Execution checkout: 74fe95d976791b0d1bbc3fa21580312b9403a384
+Working tree included: yes
+Changed paths: AGENTS.md, idle/AGENTS.md, idle/README.md, idle/assets/bosses/ares.webp, idle/assets/bosses/artificial_demon.webp, idle/assets/bosses/astea.webp, idle/assets/bosses/beelzebub.webp, idle/assets/bosses/curse_iris.webp, idle/assets/bosses/flora.webp, idle/assets/bosses/love_iris.webp, idle/assets/bosses/pharaoh.webp, idle/assets/bosses/poseidon.webp, idle/assets/bosses/thor.webp, idle/assets/generated-sources.json, idle/assets/manifest.json, idle/assets/memories/archive_jasmine_01.webp, idle/assets/memories/archive_lumi_01.webp, idle/assets/memories/archive_luna_01.webp, idle/assets/memories/archive_queen_01.webp, idle/assets/memories/archive_zeke_01.webp, idle/assets/memories/bond_jasmine_01.webp, idle/assets/memories/bond_lumi_01.webp, idle/assets/memories/bond_luna_01.webp, idle/assets/memories/bond_queen_01.webp, idle/assets/memories/bond_zeke_01.webp, idle/assets/memories/luna_jasmine.webp, idle/assets/memories/s01_lumi.webp, idle/assets/memories/s01_lumi_whale.webp, idle/assets/memories/s01_snow_rabbit.webp, idle/assets/memories/trauma.webp, idle/assets/portraits/ancient_dragon.webp, idle/assets/portraits/ancient_soul.webp, idle/assets/portraits/avalanche_maid.webp, idle/assets/portraits/behemoth.webp, idle/assets/portraits/cherry_prince.webp, idle/assets/portraits/cinderella.webp, idle/assets/portraits/flame_sage.webp, idle/assets/portraits/galaxy_whale.webp, idle/assets/portraits/gold_dragon.webp, idle/assets/portraits/great_detective.webp, idle/assets/portraits/guardian.webp, idle/assets/portraits/harmonious.webp, idle/assets/portraits/jasmine.webp, idle/assets/portraits/lightning_sage.webp, idle/assets/portraits/lumi.webp, idle/assets/portraits/luna.webp, idle/assets/portraits/mushroom_king.webp, idle/assets/portraits/night_rabbit.webp, idle/assets/portraits/phantom.webp, idle/assets/portraits/priest_of_end.webp, idle/assets/portraits/queen.webp, idle/assets/portraits/red_dragon.webp, idle/assets/portraits/silver_rabbit.webp, idle/assets/portraits/siren.webp, idle/assets/portraits/snow_rabbit.webp, idle/assets/portraits/storm_sage.webp, idle/assets/portraits/time_magician.webp, idle/assets/portraits/time_ruler.webp, idle/assets/portraits/zeke.webp, idle/assets/thumbnails.json, idle/assets/thumbs/ancient_dragon.webp, idle/assets/thumbs/ancient_soul.webp, idle/assets/thumbs/archive_jasmine_01.webp, idle/assets/thumbs/archive_lumi_01.webp, idle/assets/thumbs/archive_luna_01.webp, idle/assets/thumbs/archive_queen_01.webp, idle/assets/thumbs/archive_zeke_01.webp, idle/assets/thumbs/ares.webp, idle/assets/thumbs/artificial_demon.webp, idle/assets/thumbs/astea.webp, idle/assets/thumbs/avalanche_maid.webp, idle/assets/thumbs/beelzebub.webp, idle/assets/thumbs/behemoth.webp, idle/assets/thumbs/bond_jasmine_01.webp, idle/assets/thumbs/bond_lumi_01.webp, idle/assets/thumbs/bond_luna_01.webp, idle/assets/thumbs/bond_queen_01.webp, idle/assets/thumbs/bond_zeke_01.webp, idle/assets/thumbs/cherry_prince.webp, idle/assets/thumbs/cinderella.webp, idle/assets/thumbs/curse_iris.webp, idle/assets/thumbs/flame_sage.webp, idle/assets/thumbs/flora.webp, idle/assets/thumbs/galaxy_whale.webp, idle/assets/thumbs/gold_dragon.webp, idle/assets/thumbs/great_detective.webp, idle/assets/thumbs/guardian.webp, idle/assets/thumbs/harmonious.webp, idle/assets/thumbs/jasmine.webp, idle/assets/thumbs/lightning_sage.webp, idle/assets/thumbs/love_iris.webp, idle/assets/thumbs/lumi.webp, idle/assets/thumbs/luna.webp, idle/assets/thumbs/luna_jasmine.webp, idle/assets/thumbs/mushroom_king.webp, idle/assets/thumbs/night_rabbit.webp, idle/assets/thumbs/phantom.webp, idle/assets/thumbs/pharaoh.webp, idle/assets/thumbs/poseidon.webp, idle/assets/thumbs/priest_of_end.webp, idle/assets/thumbs/queen.webp, idle/assets/thumbs/red_dragon.webp, idle/assets/thumbs/s01_lumi.webp, idle/assets/thumbs/s01_lumi_whale.webp, idle/assets/thumbs/s01_snow_rabbit.webp, idle/assets/thumbs/silver_rabbit.webp, idle/assets/thumbs/siren.webp, idle/assets/thumbs/snow_rabbit.webp, idle/assets/thumbs/storm_sage.webp, idle/assets/thumbs/thor.webp, idle/assets/thumbs/time_magician.webp, idle/assets/thumbs/time_ruler.webp, idle/assets/thumbs/trauma.webp, idle/assets/thumbs/zeke.webp, idle/dist/AstralCompanions.html, idle/docs/ART_REVIEW.md, idle/docs/CANON.md, idle/docs/CONTENT_MATRIX.md, idle/docs/DECISIONS.md, idle/docs/ECONOMY_REPORT.md, idle/docs/VERIFICATION.md, idle/docs/browser-evidence.json, idle/docs/economy-baseline-v2.json, idle/docs/economy-focus-switch.json, idle/docs/economy-long.json, idle/docs/economy-tuning.json, idle/docs/review/comeback-home.png, idle/docs/review/comparison-jasmine.jpg, idle/docs/review/comparison-lumi.jpg, idle/docs/review/comparison-luna.jpg, idle/docs/review/comparison-queen.jpg, idle/docs/review/comparison-zeke.jpg, idle/docs/review/day30-analysis.png, idle/docs/review/day30-bosses.png, idle/docs/review/day30-close-defeat.png, idle/docs/review/day7-home.png, idle/docs/review/desktop-album.png, idle/docs/review/desktop-home.png, idle/docs/review/home-jasmine.png, idle/docs/review/home-lumi.png, idle/docs/review/home-luna.png, idle/docs/review/home-queen.png, idle/docs/review/home-zeke.png, idle/docs/review/memory-contact-sheet.jpg, idle/docs/review/missed-day-season.png, idle/docs/review/mobile-adventure-finished.png, idle/docs/review/mobile-adventure.png, idle/docs/review/mobile-album.png, idle/docs/review/mobile-battle.png, idle/docs/review/mobile-boss-detail.png, idle/docs/review/mobile-hero.png, idle/docs/review/mobile-home.png, idle/docs/review/mobile-return.png, idle/docs/review/mobile-shared-home.png, idle/docs/review/mobile-shared-viewer.png, idle/docs/review/mobile-storage-fallback.png, idle/docs/review/mobile-story.png, idle/docs/review/mobile-summon.png, idle/docs/review/original-contact-sheet.jpg, idle/docs/review/standing-redraw-comparison.jpg, idle/docs/spec/IDLE_GAME_SPEC_v2.0.md, idle/docs/standing-redraw-prompts.json, idle/docs/verify-run.txt, idle/index.html, idle/package.json, idle/scripts/build.mjs, idle/scripts/import-assets.mjs, idle/scripts/prepare-memories.mjs, idle/scripts/prepare-thumbnails.mjs, idle/scripts/resolve-canon.mjs, idle/scripts/review-art.mjs, idle/scripts/simulate.mjs, idle/scripts/sync-learning.mjs, idle/src/combat/analysis.js, idle/src/combat/damage.js, idle/src/combat/effects.js, idle/src/combat/encounter.js, idle/src/combat/engine.js, idle/src/core/clock.js, idle/src/core/commands.js, idle/src/core/migrations.js, idle/src/core/rng.js, idle/src/core/save.js, idle/src/core/state.js, idle/src/data/adventure.json, idle/src/data/balance.json, idle/src/data/catalog.js, idle/src/data/companion-scenes.js, idle/src/data/extra-scenes.js, idle/src/data/hero-scenes.js, idle/src/data/home-lines.js, idle/src/data/learning-provenance.json, idle/src/data/learning.json, idle/src/data/roster.json, idle/src/data/scenes.js, idle/src/data/season.json, idle/src/main.js, idle/src/systems/adventure.js, idle/src/systems/bond.js, idle/src/systems/expeditions.js, idle/src/systems/gacha.js, idle/src/systems/growth.js, idle/src/systems/learning.js, idle/src/systems/rewards.js, idle/src/systems/seasons.js, idle/src/ui/art.js, idle/src/ui/html.js, idle/src/ui/views.js, idle/styles/accessibility.css, idle/styles/base.css, idle/styles/combat-fx.css, idle/styles/game.css, idle/tests/analysis.test.mjs, idle/tests/browser.mjs, idle/tests/combat.test.mjs, idle/tests/contracts.test.mjs, idle/tests/core.test.mjs, idle/tests/fixtures/comeback.json, idle/tests/fixtures/day30.json, idle/tests/fixtures/day7.json, idle/tests/fixtures/missed.json, idle/tests/fixtures/new.json, idle/tests/helpers.mjs, idle/tests/rewards.test.mjs, package.json, scripts/verify_plan.js, scripts/verify_plan.test.js
+PLAN idle:build: Build the changed AstralCompanions deployment inputs once
+  node idle/scripts/build.mjs
+PLAN idle:contracts-and-regressions: Check only mapped Idle contracts and regressions
+  node --test idle/tests/analysis.test.mjs idle/tests/combat.test.mjs idle/tests/contracts.test.mjs idle/tests/core.test.mjs idle/tests/rewards.test.mjs
+PLAN idle:offline-browser: Boot the committed single-file game and exercise changed UI/storage
+  node idle/tests/browser.mjs
+PLAN idle:syntax:idle/scripts/build.mjs: Parse changed JavaScript: idle/scripts/build.mjs
+  node --check idle/scripts/build.mjs
+PLAN idle:syntax:idle/scripts/import-assets.mjs: Parse changed JavaScript: idle/scripts/import-assets.mjs
+  node --check idle/scripts/import-assets.mjs
+PLAN idle:syntax:idle/scripts/prepare-memories.mjs: Parse changed JavaScript: idle/scripts/prepare-memories.mjs
+  node --check idle/scripts/prepare-memories.mjs
+PLAN idle:syntax:idle/scripts/prepare-thumbnails.mjs: Parse changed JavaScript: idle/scripts/prepare-thumbnails.mjs
+  node --check idle/scripts/prepare-thumbnails.mjs
+PLAN idle:syntax:idle/scripts/resolve-canon.mjs: Parse changed JavaScript: idle/scripts/resolve-canon.mjs
+  node --check idle/scripts/resolve-canon.mjs
+PLAN idle:syntax:idle/scripts/review-art.mjs: Parse changed JavaScript: idle/scripts/review-art.mjs
+  node --check idle/scripts/review-art.mjs
+PLAN idle:syntax:idle/scripts/simulate.mjs: Parse changed JavaScript: idle/scripts/simulate.mjs
+  node --check idle/scripts/simulate.mjs
+PLAN idle:syntax:idle/scripts/sync-learning.mjs: Parse changed JavaScript: idle/scripts/sync-learning.mjs
+  node --check idle/scripts/sync-learning.mjs
+PLAN idle:syntax:idle/src/combat/analysis.js: Parse changed JavaScript: idle/src/combat/analysis.js
+  node --check idle/src/combat/analysis.js
+PLAN idle:syntax:idle/src/combat/damage.js: Parse changed JavaScript: idle/src/combat/damage.js
+  node --check idle/src/combat/damage.js
+PLAN idle:syntax:idle/src/combat/effects.js: Parse changed JavaScript: idle/src/combat/effects.js
+  node --check idle/src/combat/effects.js
+PLAN idle:syntax:idle/src/combat/encounter.js: Parse changed JavaScript: idle/src/combat/encounter.js
+  node --check idle/src/combat/encounter.js
+PLAN idle:syntax:idle/src/combat/engine.js: Parse changed JavaScript: idle/src/combat/engine.js
+  node --check idle/src/combat/engine.js
+PLAN idle:syntax:idle/src/core/clock.js: Parse changed JavaScript: idle/src/core/clock.js
+  node --check idle/src/core/clock.js
+PLAN idle:syntax:idle/src/core/commands.js: Parse changed JavaScript: idle/src/core/commands.js
+  node --check idle/src/core/commands.js
+PLAN idle:syntax:idle/src/core/migrations.js: Parse changed JavaScript: idle/src/core/migrations.js
+  node --check idle/src/core/migrations.js
+PLAN idle:syntax:idle/src/core/rng.js: Parse changed JavaScript: idle/src/core/rng.js
+  node --check idle/src/core/rng.js
+PLAN idle:syntax:idle/src/core/save.js: Parse changed JavaScript: idle/src/core/save.js
+  node --check idle/src/core/save.js
+PLAN idle:syntax:idle/src/core/state.js: Parse changed JavaScript: idle/src/core/state.js
+  node --check idle/src/core/state.js
+PLAN idle:syntax:idle/src/data/catalog.js: Parse changed JavaScript: idle/src/data/catalog.js
+  node --check idle/src/data/catalog.js
+PLAN idle:syntax:idle/src/data/companion-scenes.js: Parse changed JavaScript: idle/src/data/companion-scenes.js
+  node --check idle/src/data/companion-scenes.js
+PLAN idle:syntax:idle/src/data/extra-scenes.js: Parse changed JavaScript: idle/src/data/extra-scenes.js
+  node --check idle/src/data/extra-scenes.js
+PLAN idle:syntax:idle/src/data/hero-scenes.js: Parse changed JavaScript: idle/src/data/hero-scenes.js
+  node --check idle/src/data/hero-scenes.js
+PLAN idle:syntax:idle/src/data/home-lines.js: Parse changed JavaScript: idle/src/data/home-lines.js
+  node --check idle/src/data/home-lines.js
+PLAN idle:syntax:idle/src/data/scenes.js: Parse changed JavaScript: idle/src/data/scenes.js
+  node --check idle/src/data/scenes.js
+PLAN idle:syntax:idle/src/main.js: Parse changed JavaScript: idle/src/main.js
+  node --check idle/src/main.js
+PLAN idle:syntax:idle/src/systems/adventure.js: Parse changed JavaScript: idle/src/systems/adventure.js
+  node --check idle/src/systems/adventure.js
+PLAN idle:syntax:idle/src/systems/bond.js: Parse changed JavaScript: idle/src/systems/bond.js
+  node --check idle/src/systems/bond.js
+PLAN idle:syntax:idle/src/systems/expeditions.js: Parse changed JavaScript: idle/src/systems/expeditions.js
+  node --check idle/src/systems/expeditions.js
+PLAN idle:syntax:idle/src/systems/gacha.js: Parse changed JavaScript: idle/src/systems/gacha.js
+  node --check idle/src/systems/gacha.js
+PLAN idle:syntax:idle/src/systems/growth.js: Parse changed JavaScript: idle/src/systems/growth.js
+  node --check idle/src/systems/growth.js
+PLAN idle:syntax:idle/src/systems/learning.js: Parse changed JavaScript: idle/src/systems/learning.js
+  node --check idle/src/systems/learning.js
+PLAN idle:syntax:idle/src/systems/rewards.js: Parse changed JavaScript: idle/src/systems/rewards.js
+  node --check idle/src/systems/rewards.js
+PLAN idle:syntax:idle/src/systems/seasons.js: Parse changed JavaScript: idle/src/systems/seasons.js
+  node --check idle/src/systems/seasons.js
+PLAN idle:syntax:idle/src/ui/art.js: Parse changed JavaScript: idle/src/ui/art.js
+  node --check idle/src/ui/art.js
+PLAN idle:syntax:idle/src/ui/html.js: Parse changed JavaScript: idle/src/ui/html.js
+  node --check idle/src/ui/html.js
+PLAN idle:syntax:idle/src/ui/views.js: Parse changed JavaScript: idle/src/ui/views.js
+  node --check idle/src/ui/views.js
+PLAN idle:syntax:idle/tests/analysis.test.mjs: Parse changed JavaScript: idle/tests/analysis.test.mjs
+  node --check idle/tests/analysis.test.mjs
+PLAN idle:syntax:idle/tests/browser.mjs: Parse changed JavaScript: idle/tests/browser.mjs
+  node --check idle/tests/browser.mjs
+PLAN idle:syntax:idle/tests/combat.test.mjs: Parse changed JavaScript: idle/tests/combat.test.mjs
+  node --check idle/tests/combat.test.mjs
+PLAN idle:syntax:idle/tests/contracts.test.mjs: Parse changed JavaScript: idle/tests/contracts.test.mjs
+  node --check idle/tests/contracts.test.mjs
+PLAN idle:syntax:idle/tests/core.test.mjs: Parse changed JavaScript: idle/tests/core.test.mjs
+  node --check idle/tests/core.test.mjs
+PLAN idle:syntax:idle/tests/helpers.mjs: Parse changed JavaScript: idle/tests/helpers.mjs
+  node --check idle/tests/helpers.mjs
+PLAN idle:syntax:idle/tests/rewards.test.mjs: Parse changed JavaScript: idle/tests/rewards.test.mjs
+  node --check idle/tests/rewards.test.mjs
+PLAN verification:selector-fixtures: Run range-selection and command-isolation fixtures
+  node --test scripts/verify_plan.test.js
+SKIP: Runtime checks are not selected for non-deployment documentation.
+RUN idle:build: node idle/scripts/build.mjs
+AstralCompanions.html · 13.67 MiB · 54 embedded artworks · 1c60bc5ade11
+PASS idle:build (0.51s)
+RUN idle:contracts-and-regressions: node --test idle/tests/analysis.test.mjs idle/tests/combat.test.mjs idle/tests/contracts.test.mjs idle/tests/core.test.mjs idle/tests/rewards.test.mjs
+✔ ranked support change prediction equals the applied transaction including seed (92.5759ms)
+✔ analysis is after defeat only, at most8actual changes, predictions match applying and rerunning (80.4527ms)
+✔ Astea keeps one highest score per hero, clears at3.5 and decorates5.0 without repeat rewards (13.0535ms)
+✔ mixed damage is added before one elemental/critical multiplication; misses never become1 (0.2192ms)
+✔ watch/fast/1x2x4x frames replay one deterministic engine without touching external RNG (17.4496ms)
+✔ all24supports,10bosses/relics and12temporaryeffects execute without NaN or missing effects (329.0159ms)
+✔ dot ticks once per second through expiration; nonattacks keep0damage (8.3989ms)
+✔ initial boss defenses apply at tickzero and Zeke survives a fatal blow only once (14.7803ms)
+✔ adventure retries preserve seed; no unearned styles; initial companions can complete one representative safe route (10.555ms)
+✔ all authored content and effect registries are complete, unique and specific (2.4461ms)
+✔ 54 assets retain manifest aspect ratios, hashes and actual nonempty files (92.969ms)
+✔ copied learning library contains valid answers and linked mandatory grammar lectures (0.8392ms)
+✔ cap is 24 unclaimed hours online or offline and fixed game day is UTC+9 05:00 (4.7526ms)
+✔ historical rate segments and integer remainder survive claim/level transitions (3.5247ms)
+✔ duplicate commands and stale revisions cannot spend or reward twice (1.9774ms)
+✔ loaded presets and support/artifact swaps never duplicate assignments (3.61ms)
+✔ combat seed ignores relationship, claim, journal, presets and unassigned companion rank (0.834ms)
+✔ imports roundtrip, retain unknown memories, reject future schemas/ranges/unsafe nested keys/oversize (22.9422ms)
+✔ scene skip commits exactly same reward as reading and cannot duplicate it (1.5025ms)
+✔ base resources and per-hero fractions agree across24h/12h/1h claims (5.3648ms)
+✔ both million-draw published distributions and non-full material expectations (346.0713ms)
+✔ chest eligibility, butterfly retention and guaranteed research spark are once-only (4.1385ms)
+✔ season archive and rerun preserve memories and award duplicate dust once per occurrence (14.3125ms)
+✔ return base always precedes quiz; 2/4/12/24h amplification is capped at4h and does not copy ore/tickets (6.9303ms)
+✔ grace accrues only its30m even if collected tomorrow, preserves beyond basecap, updates historical rates (1.3654ms)
+✔ echo only after all ten revealed, uses normal RNG/counters, shared daily and maxone carried opportunity (1.5216ms)
+✔ beginner guarantee/cumulative choices/duplicates and million-draw distribution use actual summon function (198.3283ms)
+✔ 123 memory tickets for28qualifieddays,120 withoneabsence, no summon required; no retroactive login (13.357ms)
+✔ clock rollback and rapid reload cannot reset daily benefits or duplicate comeback (0.5804ms)
+✔ next day keeps pending letter; collecting it cannot reroll snapshot (0.8096ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 811.3936
+PASS idle:contracts-and-regressions (0.89s)
+RUN idle:offline-browser: node idle/tests/browser.mjs
+{
+  "browser": "Chromium 147.0.7727.15",
+  "offlineURL": "file://AstralCompanions.html",
+  "checks": [
+    "new profile, tutorial, growth, battle and durable result",
+    "10-draw reload resumes committed results, wrong echo answer has no cost, normal +1 draw",
+    "12h base first, mandatory grammar lecture, retry without loss, exact4h extra and grace",
+    "day7 progress, five hero portrait composition and scene skip reward",
+    "mixed aspect album, shared home and viewer preserve both characters; zoom/reset",
+    "day30 boss access, unique support assignment, deterministic adventure retry, full eight-node route",
+    "actual day30 close defeat, same-engine analysis, two free loadout changes and deterministic retry",
+    "one missed day still unlocks final seasonal memory; three-day return boost fixture stays active",
+    "360/390/1280 widths: all five tabs have no horizontal overflow",
+    "concurrent IndexedDB tabs commit only one expected-revision purchase; reload persists",
+    "UI rejects future schema, imports valid backup and retains two previous saves",
+    "keyboard artwork viewer and Escape work; one broken image leaves names, controls and app usable",
+    "localStorage fallback with quota failure rolls back spend and RNG",
+    "memory fallback explicitly warns that persistence is unavailable"
+  ],
+  "errors": [],
+  "externalRequests": 0,
+  "viewports": [
+    360,
+    390,
+    1280
+  ],
+  "physicalDevices": false
+}
+PASS idle:offline-browser (16.74s)
+RUN idle:syntax:idle/scripts/build.mjs: node --check idle/scripts/build.mjs
+PASS idle:syntax:idle/scripts/build.mjs (0.07s)
+RUN idle:syntax:idle/scripts/import-assets.mjs: node --check idle/scripts/import-assets.mjs
+PASS idle:syntax:idle/scripts/import-assets.mjs (0.07s)
+RUN idle:syntax:idle/scripts/prepare-memories.mjs: node --check idle/scripts/prepare-memories.mjs
+PASS idle:syntax:idle/scripts/prepare-memories.mjs (0.07s)
+RUN idle:syntax:idle/scripts/prepare-thumbnails.mjs: node --check idle/scripts/prepare-thumbnails.mjs
+PASS idle:syntax:idle/scripts/prepare-thumbnails.mjs (0.07s)
+RUN idle:syntax:idle/scripts/resolve-canon.mjs: node --check idle/scripts/resolve-canon.mjs
+PASS idle:syntax:idle/scripts/resolve-canon.mjs (0.07s)
+RUN idle:syntax:idle/scripts/review-art.mjs: node --check idle/scripts/review-art.mjs
+PASS idle:syntax:idle/scripts/review-art.mjs (0.07s)
+RUN idle:syntax:idle/scripts/simulate.mjs: node --check idle/scripts/simulate.mjs
+PASS idle:syntax:idle/scripts/simulate.mjs (0.07s)
+RUN idle:syntax:idle/scripts/sync-learning.mjs: node --check idle/scripts/sync-learning.mjs
+PASS idle:syntax:idle/scripts/sync-learning.mjs (0.07s)
+RUN idle:syntax:idle/src/combat/analysis.js: node --check idle/src/combat/analysis.js
+PASS idle:syntax:idle/src/combat/analysis.js (0.07s)
+RUN idle:syntax:idle/src/combat/damage.js: node --check idle/src/combat/damage.js
+PASS idle:syntax:idle/src/combat/damage.js (0.07s)
+RUN idle:syntax:idle/src/combat/effects.js: node --check idle/src/combat/effects.js
+PASS idle:syntax:idle/src/combat/effects.js (0.07s)
+RUN idle:syntax:idle/src/combat/encounter.js: node --check idle/src/combat/encounter.js
+PASS idle:syntax:idle/src/combat/encounter.js (0.07s)
+RUN idle:syntax:idle/src/combat/engine.js: node --check idle/src/combat/engine.js
+PASS idle:syntax:idle/src/combat/engine.js (0.07s)
+RUN idle:syntax:idle/src/core/clock.js: node --check idle/src/core/clock.js
+PASS idle:syntax:idle/src/core/clock.js (0.07s)
+RUN idle:syntax:idle/src/core/commands.js: node --check idle/src/core/commands.js
+PASS idle:syntax:idle/src/core/commands.js (0.07s)
+RUN idle:syntax:idle/src/core/migrations.js: node --check idle/src/core/migrations.js
+PASS idle:syntax:idle/src/core/migrations.js (0.07s)
+RUN idle:syntax:idle/src/core/rng.js: node --check idle/src/core/rng.js
+PASS idle:syntax:idle/src/core/rng.js (0.07s)
+RUN idle:syntax:idle/src/core/save.js: node --check idle/src/core/save.js
+PASS idle:syntax:idle/src/core/save.js (0.07s)
+RUN idle:syntax:idle/src/core/state.js: node --check idle/src/core/state.js
+PASS idle:syntax:idle/src/core/state.js (0.07s)
+RUN idle:syntax:idle/src/data/catalog.js: node --check idle/src/data/catalog.js
+PASS idle:syntax:idle/src/data/catalog.js (0.07s)
+RUN idle:syntax:idle/src/data/companion-scenes.js: node --check idle/src/data/companion-scenes.js
+PASS idle:syntax:idle/src/data/companion-scenes.js (0.07s)
+RUN idle:syntax:idle/src/data/extra-scenes.js: node --check idle/src/data/extra-scenes.js
+PASS idle:syntax:idle/src/data/extra-scenes.js (0.07s)
+RUN idle:syntax:idle/src/data/hero-scenes.js: node --check idle/src/data/hero-scenes.js
+PASS idle:syntax:idle/src/data/hero-scenes.js (0.08s)
+RUN idle:syntax:idle/src/data/home-lines.js: node --check idle/src/data/home-lines.js
+PASS idle:syntax:idle/src/data/home-lines.js (0.07s)
+RUN idle:syntax:idle/src/data/scenes.js: node --check idle/src/data/scenes.js
+PASS idle:syntax:idle/src/data/scenes.js (0.07s)
+RUN idle:syntax:idle/src/main.js: node --check idle/src/main.js
+PASS idle:syntax:idle/src/main.js (0.07s)
+RUN idle:syntax:idle/src/systems/adventure.js: node --check idle/src/systems/adventure.js
+PASS idle:syntax:idle/src/systems/adventure.js (0.07s)
+RUN idle:syntax:idle/src/systems/bond.js: node --check idle/src/systems/bond.js
+PASS idle:syntax:idle/src/systems/bond.js (0.07s)
+RUN idle:syntax:idle/src/systems/expeditions.js: node --check idle/src/systems/expeditions.js
+PASS idle:syntax:idle/src/systems/expeditions.js (0.07s)
+RUN idle:syntax:idle/src/systems/gacha.js: node --check idle/src/systems/gacha.js
+PASS idle:syntax:idle/src/systems/gacha.js (0.07s)
+RUN idle:syntax:idle/src/systems/growth.js: node --check idle/src/systems/growth.js
+PASS idle:syntax:idle/src/systems/growth.js (0.07s)
+RUN idle:syntax:idle/src/systems/learning.js: node --check idle/src/systems/learning.js
+PASS idle:syntax:idle/src/systems/learning.js (0.07s)
+RUN idle:syntax:idle/src/systems/rewards.js: node --check idle/src/systems/rewards.js
+PASS idle:syntax:idle/src/systems/rewards.js (0.07s)
+RUN idle:syntax:idle/src/systems/seasons.js: node --check idle/src/systems/seasons.js
+PASS idle:syntax:idle/src/systems/seasons.js (0.07s)
+RUN idle:syntax:idle/src/ui/art.js: node --check idle/src/ui/art.js
+PASS idle:syntax:idle/src/ui/art.js (0.07s)
+RUN idle:syntax:idle/src/ui/html.js: node --check idle/src/ui/html.js
+PASS idle:syntax:idle/src/ui/html.js (0.07s)
+RUN idle:syntax:idle/src/ui/views.js: node --check idle/src/ui/views.js
+PASS idle:syntax:idle/src/ui/views.js (0.07s)
+RUN idle:syntax:idle/tests/analysis.test.mjs: node --check idle/tests/analysis.test.mjs
+PASS idle:syntax:idle/tests/analysis.test.mjs (0.07s)
+RUN idle:syntax:idle/tests/browser.mjs: node --check idle/tests/browser.mjs
+PASS idle:syntax:idle/tests/browser.mjs (0.07s)
+RUN idle:syntax:idle/tests/combat.test.mjs: node --check idle/tests/combat.test.mjs
+PASS idle:syntax:idle/tests/combat.test.mjs (0.07s)
+RUN idle:syntax:idle/tests/contracts.test.mjs: node --check idle/tests/contracts.test.mjs
+PASS idle:syntax:idle/tests/contracts.test.mjs (0.07s)
+RUN idle:syntax:idle/tests/core.test.mjs: node --check idle/tests/core.test.mjs
+PASS idle:syntax:idle/tests/core.test.mjs (0.07s)
+RUN idle:syntax:idle/tests/helpers.mjs: node --check idle/tests/helpers.mjs
+PASS idle:syntax:idle/tests/helpers.mjs (0.07s)
+RUN idle:syntax:idle/tests/rewards.test.mjs: node --check idle/tests/rewards.test.mjs
+PASS idle:syntax:idle/tests/rewards.test.mjs (0.07s)
+RUN verification:selector-fixtures: node --test scripts/verify_plan.test.js
+✔ Idle runtime selects its focused checks and offline artifact only (14.3758ms)
+✔ Idle documentation and test-only changes never rebuild or run unrelated games (0.3144ms)
+✔ Idle unknown executable and dist-only updates block; selector-only updates stay fixtures (0.3084ms)
+✔ Card-only changes never select Shooter or Defense commands (0.4143ms)
+✔ Shooter-only changes select direct build, combat, and boot checks only (0.331ms)
+✔ Defense-only changes are delegated by root and isolated in the dedicated plan (0.6083ms)
+✔ Defense legacy snapshot changes select no runtime and are fully mapped (0.1963ms)
+✔ moving removed Defense files to legacy never syntax-checks missing paths (0.2516ms)
+✔ non-deployment documentation installs and runs no game tooling (0.1586ms)
+✔ Confluence source and art select focused Defense checks and the offline browser dependency (0.4695ms)
+✔ authoring research stays documentation while active profile JSON is a deployment input (0.3462ms)
+✔ root package script changes do not select every game (0.1575ms)
+✔ Gemini verifier changes select the verifier without a duplicated CI regex (0.1164ms)
+✔ Card learning changes add the data contract without selecting Shooter (0.2402ms)
+✔ renames and deletes preserve every path needed for scope selection (0.3251ms)
+✔ distribution-only edits are blocked instead of reported as verified (0.136ms)
+✔ minimal plans never contain full, balance-matrix, or unrelated game commands (0.2648ms)
+✔ changed Shooter tests and their source mappings execute each command once (0.2064ms)
+✔ merge-base scope excludes changes added only to main after the feature fork (1712.3816ms)
+✔ missing refs fail as BLOCKED_SCOPE rather than selecting zero tests (158.4287ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1994.7919
+PASS verification:selector-fixtures (2.07s)
+PASS: selected minimal verification completed in 23.36s.

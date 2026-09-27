@@ -1,0 +1,182 @@
+{
+  "note": "All event mechanics are new idle design. Twelve authored present-day event narratives in ui/views.js; no new canonical locations or past events.",
+  "rewardSlotsPerWeek": 3,
+  "nodes": 8,
+  "battleNodes": [
+    1,
+    3,
+    5
+  ],
+  "bossNode": 8,
+  "rareEventChancePerRewardRun": 0.12,
+  "events": [
+    {
+      "id": "signpost",
+      "name": "길 잃은 안내판",
+      "choices": [
+        {
+          "label": "안전한 길",
+          "effect": "다음 일반 전투 적 HP -15%"
+        },
+        {
+          "label": "지름길",
+          "effect": "현재 HP 10% 소비, 다음 일반 전투 적 ATK -25%"
+        }
+      ]
+    },
+    {
+      "id": "rest",
+      "name": "휴식처",
+      "choices": [
+        {
+          "label": "잠깐 쉰다",
+          "effect": "최대 HP 25% 회복"
+        },
+        {
+          "label": "마력을 정돈한다",
+          "effect": "최대 HP 10% 회복 + 다음 전투 시작 MP +20"
+        }
+      ]
+    },
+    {
+      "id": "maintenance",
+      "name": "장비 점검",
+      "choices": [
+        {
+          "label": "칼날을 다듬는다",
+          "effect": "다음 전투 ATK +15%"
+        },
+        {
+          "label": "마력을 다듬는다",
+          "effect": "다음 전투 MATK +15%"
+        }
+      ]
+    },
+    {
+      "id": "record",
+      "name": "오래된 기록",
+      "choices": [
+        {
+          "label": "천천히 읽는다",
+          "effect": "모험 기록 1개 열람, 최대 HP 10% 회복"
+        },
+        {
+          "label": "실전에 적용한다",
+          "effect": "다음 전투 MP 회복 +1/초"
+        }
+      ]
+    },
+    {
+      "id": "fork",
+      "name": "갈림길",
+      "choices": [
+        {
+          "label": "완만한 길",
+          "effect": "최대 HP 15% 회복"
+        },
+        {
+          "label": "험한 길",
+          "effect": "현재 HP 15% 소비, 추가 임시 유물 선택 1회"
+        }
+      ]
+    },
+    {
+      "id": "chest",
+      "name": "작은 상자",
+      "choices": [
+        {
+          "label": "상자를 연다",
+          "effect": "추가 임시 유물 후보 2개 중 1개 선택"
+        },
+        {
+          "label": "내용을 양보한다",
+          "effect": "최대 HP 20% 회복"
+        }
+      ]
+    },
+    {
+      "id": "spirit",
+      "name": "잠든 정령",
+      "choices": [
+        {
+          "label": "조용히 지나간다",
+          "effect": "최대 HP 15% 회복"
+        },
+        {
+          "label": "기운을 나눈다",
+          "effect": "현재 HP 10% 소비, 다음 전투 시작 보호막 최대 HP 25%"
+        }
+      ]
+    },
+    {
+      "id": "stage",
+      "name": "빛바랜 무대",
+      "choices": [
+        {
+          "label": "기록을 남긴다",
+          "effect": "모험 기록 1개 열람, 다음 전투 시작 MP +10"
+        },
+        {
+          "label": "몸을 풀어 본다",
+          "effect": "다음 전투 기본 공격 피해 +20%"
+        }
+      ]
+    },
+    {
+      "id": "rain",
+      "name": "비 내리는 회랑",
+      "choices": [
+        {
+          "label": "비를 피한다",
+          "effect": "최대 HP 20% 회복"
+        },
+        {
+          "label": "빗속을 지난다",
+          "effect": "현재 HP 10% 소비, 다음 전투 직접 피해 +15%"
+        }
+      ]
+    },
+    {
+      "id": "suggestion",
+      "name": "동료의 제안",
+      "choices": [
+        {
+          "label": "첫 동료의 제안",
+          "effect": "다음 전투 지원 슬롯1 피해 +30%(비공격이면 시작 시 HP 15% 보호막)"
+        },
+        {
+          "label": "둘째 동료의 제안",
+          "effect": "다음 전투 지원 슬롯2 피해 +30%(없거나 비공격이면 시작 MP +15)"
+        }
+      ]
+    },
+    {
+      "id": "trace",
+      "name": "보스의 흔적",
+      "choices": [
+        {
+          "label": "방어를 준비한다",
+          "effect": "최종 보스 ATK -15%"
+        },
+        {
+          "label": "약점을 조사한다",
+          "effect": "최종 보스 HP -10%"
+        }
+      ]
+    },
+    {
+      "id": "vista",
+      "name": "숨겨진 전망대",
+      "choices": [
+        {
+          "label": "잠시 머문다",
+          "effect": "고유 도감 기록 지급, 최대 HP 30% 회복"
+        },
+        {
+          "label": "다음 길을 바라본다",
+          "effect": "같은 고유 도감 기록 지급, 추가 임시 유물 선택 1회"
+        }
+      ]
+    }
+  ]
+}

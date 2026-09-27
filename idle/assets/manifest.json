@@ -1,0 +1,972 @@
+{
+  "version": 1,
+  "sourceCommit": "d914c2a7b48f391f2f66146b5448bdb9727a446c",
+  "policy": "Original outfit and aspect ratio; no SD mixing; portraits use object-fit, never body distortion.",
+  "assets": [
+    {
+      "id": "zeke",
+      "name": "지크",
+      "path": "assets/portraits/zeke.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\지크.png",
+      "sourceSha256": "642e15372ae42c0a892175ae010ec2ca8e7fb363e64a7a1be4a1bec7038229bf",
+      "sha256": "214292709bf5857aec6ac19ced87e197f089617c8f5d72efb5f0c19808b9f0f9",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "zeke",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "lumi",
+      "name": "루미",
+      "path": "assets/portraits/lumi.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\루미 (1).jpg",
+      "sourceSha256": "fb4ebe64f289ef9442dfa2fdc6f9a042a3ad0073b129b34d38e9077210b724ca",
+      "sha256": "f31d232649d9e920d15177367546cf57910d89647394369b676dcb917372491f",
+      "width": 768,
+      "height": 1350,
+      "canonicalPersonId": "lumi",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "queen",
+      "name": "여왕",
+      "path": "assets/portraits/queen.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\여왕.png",
+      "sourceSha256": "e489a07c230bb60518fce3eafecb760997cece68339aa195a149b3404d8894d8",
+      "sha256": "b4407428a82b2e18943ab291a80a77c9de4b71e76643aee0e9b765fbbe0da173",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "queen",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "jasmine",
+      "name": "자스민",
+      "path": "assets/portraits/jasmine.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\자스민.jpg",
+      "sourceSha256": "9e5eb8d48ee63fd38da2ee9e43e838a7428d7c75cad630c814a682b6fea03439",
+      "sha256": "4aae78348a02de4c3713fdf06d64cea6baf26f65123686b286cf3ca2c42dbeca",
+      "width": 598,
+      "height": 1000,
+      "canonicalPersonId": "jasmine",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "luna",
+      "name": "루나",
+      "path": "assets/portraits/luna.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\루나.jpg",
+      "sourceSha256": "2a26290816404d670d22ab3edada415bd948ca72ee36ddd14f82d62a2c9d6132",
+      "sha256": "cc3d5ad25e5aebb041ea12cfe37ed6d4c09ed7e92f3f82028b5fb17475ed54c3",
+      "width": 598,
+      "height": 1000,
+      "canonicalPersonId": "luna",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "guardian",
+      "name": "가디언",
+      "path": "assets/portraits/guardian.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\가디언.png",
+      "sourceSha256": "a063569679c24f98630f8fe64afd624ec40ba75ba43bd7fff963161b8523ab24",
+      "sha256": "ec194a665d6adc46dfc37eb505050384cbf4ccd119526efcc9b019fd26ff8f86",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "guardian",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gold_dragon",
+      "name": "골드드래곤",
+      "path": "assets/portraits/gold_dragon.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\골드드래곤.png",
+      "sourceSha256": "8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3",
+      "sha256": "1bdfda19efed342e67cdb4ce5fda23c6dba8545013c9ab4cf5328431ee04eeb7",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "gold_dragon",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "snow_rabbit",
+      "name": "눈토끼",
+      "path": "assets/portraits/snow_rabbit.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\눈토끼.png",
+      "sourceSha256": "b673c4dc5e7ac71ad2d48a3ceeb6850e9c6ceb9196c4c9d621ff0698c1e456c2",
+      "sha256": "27a25816e384b434f281bab714680dcfb13bcb550f99fe4a5428dd756ce75bb0",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "snow_rabbit",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.12
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "red_dragon",
+      "name": "레드드래곤",
+      "path": "assets/portraits/red_dragon.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\레드드래곤.png",
+      "sourceSha256": "436fabcc03127e43eca7af634918fe07d13efd276515de9104cda8a20fbb919b",
+      "sha256": "b4f4ccb960e52bb895c21fdadbd7806e4019b6e7596ee7316bbe2d2273424b2a",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "red_dragon",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "mushroom_king",
+      "name": "머쉬룸킹",
+      "path": "assets/portraits/mushroom_king.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\머쉬룸킹.png",
+      "sourceSha256": "47d4ee6ed046cb1de53fe6af65bf712f912384acffbf7ced2b2b8caf56e4a713",
+      "sha256": "911b58967437fa1c6dbb6a1aaf7726f160a2dd1b350f40bf21003d92b0a98710",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "mushroom_king",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "great_detective",
+      "name": "명탐정",
+      "path": "assets/portraits/great_detective.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\명탐정.png",
+      "sourceSha256": "0901b0bbc5d4f1d03e24e89160f51675607c516963186d819176329d92b11375",
+      "sha256": "8bf9c6453f04b268a3709b0fc43ce1379f3046f8799defb02c63e71192323f37",
+      "width": 809,
+      "height": 1350,
+      "canonicalPersonId": "great_detective",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "night_rabbit",
+      "name": "밤토끼",
+      "path": "assets/portraits/night_rabbit.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\밤토끼 (2).png",
+      "sourceSha256": "7c6e8af7f4b557610cd45b28af5818ff40a7142d4ebb4cb5c60a36945d77a858",
+      "sha256": "7c3e0051da2f52a62ca76801e439a842678991d7efd005a3db9afdf0b2722da1",
+      "width": 784,
+      "height": 1312,
+      "canonicalPersonId": "night_rabbit",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "lightning_sage",
+      "name": "번개의현자",
+      "path": "assets/portraits/lightning_sage.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\번개의현자.png",
+      "sourceSha256": "799131eb3485a47be98033a2a9ff21dd2c6b0fc44a808d419b4163ba865ec6ce",
+      "sha256": "bcbcfdb4a057c927e28b85fe541d2bde12814440bedc5f871d58fa6ea6ad2ba1",
+      "width": 784,
+      "height": 1312,
+      "canonicalPersonId": "lightning_sage",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "behemoth",
+      "name": "베히모스",
+      "path": "assets/portraits/behemoth.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\베히모스.png",
+      "sourceSha256": "c432505c8acd2448d6feb381b51a37f6ae62f5a58fdbc18cd818f0dde2d5f1b7",
+      "sha256": "c60f1a94cfae648d44b06db50803e670f100808a7187d31b6fe458f26c2cb89e",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "behemoth",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "siren",
+      "name": "세이렌",
+      "path": "assets/portraits/siren.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\세이렌.png",
+      "sourceSha256": "efd51b5190b1b40b889b838848813be247829e4c4d33c21a1ba3307dec169b21",
+      "sha256": "d7d389d04181277dd198093111de5fafd8a43da74b5179d9a35fd2d319a179bc",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "siren",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "time_magician",
+      "name": "시간의마술사",
+      "path": "assets/portraits/time_magician.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\시간의마술사.png",
+      "sourceSha256": "7bc5b6b2cf58ba39a02671eb48a158ecf8c80fe8fa58106c3dbc0e6ba1b41429",
+      "sha256": "c033046e83aa7408eb6f39797ddb1a80df3f503911e556ec29b228ab432a84b8",
+      "width": 760,
+      "height": 1350,
+      "canonicalPersonId": "time_magician",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "time_ruler",
+      "name": "시간의지배자",
+      "path": "assets/portraits/time_ruler.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\시간의지배자.png",
+      "sourceSha256": "c914ec79df8c27eff9bd5131e24dd6b65b049c21eee831fd9f8831776c4e0b99",
+      "sha256": "3251deb7cce26582c6769e839919b9e920f533661357f88dbda94106c8a5e260",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "time_ruler",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "cinderella",
+      "name": "신데렐라",
+      "path": "assets/portraits/cinderella.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\신데렐라 (1).png",
+      "sourceSha256": "b06e60259ce2022ce94cf0ea4b0b0a03b4cf4ad3865c1d0be184d1b28fa7fd37",
+      "sha256": "e342e90d58dd6a294df3fa01c8097aff4570da0761821b2a72e7e9c79f9436b5",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "cinderella",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "avalanche_maid",
+      "name": "아발란체메이드",
+      "path": "assets/portraits/avalanche_maid.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\아발란체메이드 (1).png",
+      "sourceSha256": "af6640930efad328b54115db4616d48111abc8b3d2f788a69b99d4cb98944d35",
+      "sha256": "b40129c5b8fc153033bb7753516aaf6859cbc3d422eb462ae358c12c1ce11199",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "avalanche_maid",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "ancient_dragon",
+      "name": "에인션트드래곤",
+      "path": "assets/portraits/ancient_dragon.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\에인션트드래곤.png",
+      "sourceSha256": "b2af5481fde7747273858fd9619acaaf0f621a92a8b6d965af2216f6964c3e70",
+      "sha256": "806426cbc2bf9da86c641f0fa931fde1c94fa5004f758052c0ab63b09f075527",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "ancient_dragon",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "ancient_soul",
+      "name": "에인션트소울",
+      "path": "assets/portraits/ancient_soul.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\에인션트소울.png",
+      "sourceSha256": "e0ff51fbe23e5ddcbae0cfd32818b269b54189cf6456afe50d50ec51177c5b00",
+      "sha256": "5233e29746e0a4e739526b569a0c03c33c3c2d1da2dd2188cf381da3c11fb1bf",
+      "width": 784,
+      "height": 1312,
+      "canonicalPersonId": "ancient_soul",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "silver_rabbit",
+      "name": "은토끼",
+      "path": "assets/portraits/silver_rabbit.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\은토끼.png",
+      "sourceSha256": "29245c321639ba6954b84e4d195b6ba0e7445dc597f8acdb6dbe10c8f9f5ad88",
+      "sha256": "b162ea70a8fde29392761c4d394de7565e959469d797c534ee8894d95f577019",
+      "width": 784,
+      "height": 1312,
+      "canonicalPersonId": "silver_rabbit",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "galaxy_whale",
+      "name": "은하고래",
+      "path": "assets/portraits/galaxy_whale.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\은하고래.png",
+      "sourceSha256": "37ff55e72208704932ba507544db946b0684bfc6b8e03a998e843ff4f375a4ff",
+      "sha256": "9f708faaa4f7412860ad305e9f6f0ae382f09415ae8784e544b9fe54dadd80cf",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "galaxy_whale",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "priest_of_end",
+      "name": "종말의사제",
+      "path": "assets/portraits/priest_of_end.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\종말의사제.png",
+      "sourceSha256": "137d529cb25da860af785898f1abdbd185e88765117f7d0e6c9c843c8d7fa7d1",
+      "sha256": "afce92220be50357e4cfddac4a8e5bacf421c4900b15470179a75e88cf2a80a9",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "priest_of_end",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "cherry_prince",
+      "name": "체리프린스",
+      "path": "assets/portraits/cherry_prince.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\체리프린스.png",
+      "sourceSha256": "04a79147e51283003683fcbd768815adca9adb81820be8c3ec6fa65ccd78244b",
+      "sha256": "4c550ca359911f7ac6a01604e891d629d9e8d0e2fc563d14ed5dc6e20d76354f",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "cherry_prince",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "phantom",
+      "name": "팬텀",
+      "path": "assets/portraits/phantom.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\팬텀.png",
+      "sourceSha256": "c12dc373eca65c8301bed054247ecd485c9d4cea852bc2299e040580393afd6d",
+      "sha256": "bfbd88a9777ed2d4946116e9d9e93a089236b87e15da43bcac23dd5a47c80582",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "phantom",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "storm_sage",
+      "name": "폭풍의현자",
+      "path": "assets/portraits/storm_sage.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\폭풍의현자.png",
+      "sourceSha256": "5286aeeb48c95358416fcc66eee131f749f496df65cfa20dc5e2d950a269a853",
+      "sha256": "b16caa53f28f4696d7900125b2d2dc14d2be6fd7e3fb3e20635def667baa8ed5",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "storm_sage",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "harmonious",
+      "name": "하모니어스",
+      "path": "assets/portraits/harmonious.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\하모니어스.png",
+      "sourceSha256": "aa7ad45f843242d513aff96ff4f0eb19f8d9d715b121b96f282d933200bf3c60",
+      "sha256": "f56dd92ed395539ae0046738120963f80162cf87e59467153014f2932c319124",
+      "width": 900,
+      "height": 1205,
+      "canonicalPersonId": "harmonious",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "flame_sage",
+      "name": "화염의현자",
+      "path": "assets/portraits/flame_sage.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\화염의현자.png",
+      "sourceSha256": "ef4ed2fa2601cda456e3fa2cd0898c5c098b99db08cad905f18498a1aebcc82f",
+      "sha256": "eab7e1483b656291c20259f91d148a6f42011075f717a37b1a2d1eefac588484",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "flame_sage",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "pharaoh",
+      "name": "고대신 파라오",
+      "path": "assets/bosses/pharaoh.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\고대신 파라오.png",
+      "sourceSha256": "eb0730d7ef917c0d26372c3216bdeca4c13da8f899acb80e74b6465e4cf5a7c2",
+      "sha256": "3ba68d0dcf484fddac036aa3d4eddd65fe527c5d4bbb4ea33717fcaa953fd944",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "pharaoh",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "flora",
+      "name": "꽃의 여신 플로라",
+      "path": "assets/bosses/flora.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\꽃의 여신 플로라.png",
+      "sourceSha256": "e8329337575266a10cc04f18b9d3ffc2a0f7230522e413e07dbaeba9bc0d3570",
+      "sha256": "ad703e04bf97d443caf4f414dd81a04a627288c18c79595ca09d0f1e5fad41d3",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "flora",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "thor",
+      "name": "뇌신 토르",
+      "path": "assets/bosses/thor.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\뇌신 토르.png",
+      "sourceSha256": "11e6d3aebe0588b37d0d650f38b07cb8090e8321b3ea7c2d6e3fbdea56a90329",
+      "sha256": "3c8f43e0fc21471bbf7413405b610e73e81b6ac8794a36b0170587c9a621dab6",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "thor",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "beelzebub",
+      "name": "마신 벨제뷔트",
+      "path": "assets/bosses/beelzebub.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\마신 벨제뷔트.png",
+      "sourceSha256": "671a774db903a78081e04199578a412c5f10dc23274a5f8d9d2ebd4ba87c5373",
+      "sha256": "cf65c55a0f90aaaf04208bb7c249a0fb2da19f5f8ac7be99442306f4b28fe79e",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "beelzebub",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "love_iris",
+      "name": "사랑의 여신 아이리스",
+      "path": "assets/bosses/love_iris.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\사랑의 여신 아이리스.png",
+      "sourceSha256": "e58c581e4c8989f718e248dab51ed8354dc8178fd02c23993584ab4475b96abc",
+      "sha256": "8792a5d0dd362aebf31ea6c718a0b428512e7ef27a4f2f024dd1529b5cd5d874",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "love_iris",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "artificial_demon",
+      "name": "인조 마신",
+      "path": "assets/bosses/artificial_demon.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\인조 마신.png",
+      "sourceSha256": "229e8d375b2e70de3ba206ae80b643e1baf2589ce3e68389a86d5e1b3c9b6606",
+      "sha256": "49b603dd3ae2f710cdc12aee5ffbc81765d58751a007cb32c9fa35aa2566c15d",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "artificial_demon",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "curse_iris",
+      "name": "저주의 여신 아이리스",
+      "path": "assets/bosses/curse_iris.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\저주의 여신 아이리스.png",
+      "sourceSha256": "f29cf4f31eea52be3197ee831be2e22c1e46bee3b2cf41e0cc183dd86e9c9f53",
+      "sha256": "08326d7be21dcc04c52a67c0b44c8e6594aa96f005d42210d7440224807908d7",
+      "width": 768,
+      "height": 1280,
+      "canonicalPersonId": "curse_iris",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "astea",
+      "name": "창조신 아스테아",
+      "path": "assets/bosses/astea.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\창조신아스테아.jpg",
+      "sourceSha256": "d8ecfe062448d9b52d79c62de06e24b4aaf846f9a13417c2228d326537c8988a",
+      "sha256": "1e4e7a1a104832e5f8a35a5c86686de0fd7a9b52bfece4e3bfc05d698aa287c7",
+      "width": 805,
+      "height": 1350,
+      "canonicalPersonId": "astea",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "ares",
+      "name": "투신 아레스",
+      "path": "assets/bosses/ares.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\투신 아레스.png",
+      "sourceSha256": "71d9989dd673665359443a3d8103903e63426aa7d24eecbfe9686208c3fd46ca",
+      "sha256": "9a6e15823ad1bc8e67519c0c6daeebfdb073ddd7548cb4717e7944aacb80fba0",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "ares",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "poseidon",
+      "name": "해신 포세이돈",
+      "path": "assets/bosses/poseidon.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\해신 포세이돈.png",
+      "sourceSha256": "258f7c7ffd7463860db670fca5f15c60c5d915910304db58fef5e0624695ef9b",
+      "sha256": "6a2b7194c4c8fdb688865151d521c9548d02a03973fb370ea251cfeea71e0699",
+      "width": 800,
+      "height": 1333,
+      "canonicalPersonId": "poseidon",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "trauma",
+      "name": "트라우마",
+      "path": "assets/memories/trauma.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\트라우마.png",
+      "sourceSha256": "3f1777d15ecd1934687dc3d73cb8338490cd791d09929bbde9e35b162f0c4303",
+      "sha256": "b63adfe250878a313126c06e6f0fefc4ad558f01605759cde0707cf2eee04188",
+      "width": 760,
+      "height": 1350,
+      "canonicalPersonId": "time_magician",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "luna_jasmine",
+      "name": "루나&자스민",
+      "path": "assets/memories/luna_jasmine.webp",
+      "sourcePath": "C:\\Users\\romar\\Downloads\\캐릭터\\루나&자스민.png",
+      "sourceSha256": "331af35f9cafef477effd6e96a39fe323c4f1a65dbde09c62dd470465a4b609d",
+      "sha256": "c6ac2a0b9fc54d2fb8089a87cef09921125a288c72a88a1090c94f9d2a114897",
+      "width": 804,
+      "height": 1350,
+      "canonicalPersonId": [
+        "luna",
+        "jasmine"
+      ],
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "archive_lumi_01",
+      "name": "루미 · 원정의 한 장면",
+      "path": "assets/memories/archive_lumi_01.webp",
+      "sourceSha256": "94d03d0d02c620c383e8bda59eac400eec190a1dcb5a57820c0d00139cbcab6a",
+      "sha256": "4890d849b055e7d078f3c02365c7c1f2e257de552444d4a3c3dc4f7a06daf563",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "lumi",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "standing"
+    },
+    {
+      "id": "archive_zeke_01",
+      "name": "지크 · 원정의 한 장면",
+      "path": "assets/memories/archive_zeke_01.webp",
+      "sourceSha256": "c727a30d6951e558804a4e45047a6f64440b4579489945dff1e4fddb71072fb2",
+      "sha256": "a020c9f1cccc11b69a1e937e2cea47b89a3894aa192513f2ddffe63da2d4de11",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "zeke",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "standing",
+      "sourcePath": "C:\\Users\\romar\\.codex\\generated_images\\01a0e1d5-c3c1-7492-bcbb-e5d1f189d885\\exec-ad8c1741-719a-4bd2-8d0b-2860db42098c.png"
+    },
+    {
+      "id": "bond_zeke_01",
+      "name": "지크 · 함께한 시간",
+      "path": "assets/memories/bond_zeke_01.webp",
+      "sourceSha256": "8e063bc8fa62f1b9835333bf4485b41f8e7bd87f4fbf3df61455f6324e4d0162",
+      "sha256": "eaa06caccd76ad6850ebf024be886aba70a70d2f141d6444c6814b13e6897f12",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "zeke",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "bond_lumi_01",
+      "name": "루미 · 함께한 시간",
+      "path": "assets/memories/bond_lumi_01.webp",
+      "sourceSha256": "4be6d6c7e792252931e99b15b8383128955154937ec867bb2ad8d2ca51da306f",
+      "sha256": "cb1a090bb4f888a8f6b866568526f749de5b585f3b8b32c5abc869dfa893076d",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "lumi",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "archive_queen_01",
+      "name": "여왕 · 원정의 한 장면",
+      "path": "assets/memories/archive_queen_01.webp",
+      "sourceSha256": "86ca2067c735b12e96a3a4c6033cb8a75d8d372cd4809239d714e47f0450f1cf",
+      "sha256": "a62a011a13a31fcb2159e3751c23a0b24efe327f306b3173e58513fb253cf16b",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "queen",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "standing",
+      "sourcePath": "C:\\Users\\romar\\.codex\\generated_images\\01a0e1d5-c3c1-7492-bcbb-e5d1f189d885\\exec-5094b93a-74a2-40d0-891f-697b7bca3ec6.png"
+    },
+    {
+      "id": "bond_queen_01",
+      "name": "여왕 · 함께한 시간",
+      "path": "assets/memories/bond_queen_01.webp",
+      "sourceSha256": "9bac17e8a82229d2dc7b7606007ba2a050dc3612fa94735c6e48a7f3e9b7044e",
+      "sha256": "836c47604a5669a6fc6e233ec39f728a0eb3d9bd9526cd7d8ab4e0cc11c2c187",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "queen",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "archive_jasmine_01",
+      "name": "자스민 · 원정의 한 장면",
+      "path": "assets/memories/archive_jasmine_01.webp",
+      "sourceSha256": "e9f39d85c202fcf6cd1b313f4c2a1627f7647cef10e7aacba68bc0044cff34f2",
+      "sha256": "a1339b232d7c6dec3b0e39d03435b7f009ccdc464f3961a8d0d757fff09324b2",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "jasmine",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "standing"
+    },
+    {
+      "id": "bond_jasmine_01",
+      "name": "자스민 · 함께한 시간",
+      "path": "assets/memories/bond_jasmine_01.webp",
+      "sourceSha256": "79b310835da0a3eaf1d035fb5db289e374206ebc2a92431477a4ea1184363e49",
+      "sha256": "09881bc29419e2cb9589074b2074f149da1b8dfa90025799b0aa3a5bffba6afe",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "jasmine",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "archive_luna_01",
+      "name": "루나 · 원정의 한 장면",
+      "path": "assets/memories/archive_luna_01.webp",
+      "sourceSha256": "54392797970b0b2a2f2a41431f1fa682801d534b4b9eff06d0588c984de50c6d",
+      "sha256": "a9885ad470cf71897eb9d6667ef61bc8fdf0bad336b9e5abbbacd86863d9cf6c",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "luna",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "standing"
+    },
+    {
+      "id": "bond_luna_01",
+      "name": "루나 · 함께한 시간",
+      "path": "assets/memories/bond_luna_01.webp",
+      "sourceSha256": "e43a1e2647a184bed89edb5c6ca5859ef69f9fe1e5a4d09cac856070ebaa4119",
+      "sha256": "5e0b93794e43aaf9b5c5a7f0f054d48a4ff57081ac3379ae44cf85fec4d055ee",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "luna",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "s01_lumi",
+      "name": "루미 · 별빛 아래의 휴식",
+      "path": "assets/memories/s01_lumi.webp",
+      "sourceSha256": "732edaa8e76ddda0fac1ca386583817f9bd9889fd499055bc93cf8c698f1f210",
+      "sha256": "69f710e7889586264d5c879a5fd840cf0714ea5b2227bf32fba49c2667356ed0",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "lumi",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "s01_snow_rabbit",
+      "name": "눈토끼 · 돌아오는 길",
+      "path": "assets/memories/s01_snow_rabbit.webp",
+      "sourceSha256": "337d7221cdd0d8c5d04c1c55b6fca4142717a21a93f627a1281bf1f4a28b02d3",
+      "sha256": "3b7d7d31aef0c3b2354c1f8fee9781fcc1ef8361a68c202d4aae9cc1071bebe5",
+      "width": 1024,
+      "height": 1536,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536,
+      "canonicalPersonId": "snow_rabbit",
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "story-scene"
+    },
+    {
+      "id": "s01_lumi_whale",
+      "name": "루미와 은하고래 · 저녁의 기록",
+      "path": "assets/memories/s01_lumi_whale.webp",
+      "sourceSha256": "814e9c8d1718979f15e4e61109ebd66563f8c86fd3acf78ed2f70e89406090f8",
+      "sha256": "651e4d4029c385191cc8f71441c83c2e81f0657fecdd69a7ee289bd49cc5cd6a",
+      "width": 1152,
+      "height": 768,
+      "sourceWidth": 1536,
+      "sourceHeight": 1024,
+      "canonicalPersonId": [
+        "lumi",
+        "galaxy_whale"
+      ],
+      "crop": "none",
+      "anchor": [
+        0.5,
+        0.28
+      ],
+      "reviewed": true,
+      "origin": "new illustration, referenced original outfit",
+      "role": "shared-scene"
+    }
+  ]
+}

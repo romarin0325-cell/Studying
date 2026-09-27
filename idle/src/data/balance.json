@@ -1,0 +1,493 @@
+{
+  "specVersion": "2.0.0",
+  "workingTitle": "별의 동행 · ASTRAL COMPANIONS",
+  "implementationStatus": "IMPLEMENTED_LOCAL_GAME",
+  "sourceCommit": "d914c2a7b48f391f2f66146b5448bdb9727a446c",
+  "clock": {
+    "utcOffsetMinutes": 540,
+    "resetHourLocal": 5,
+    "dayMs": 86400000,
+    "offlineCapMs": 86400000,
+    "seasonDays": 28,
+    "weekDays": 7,
+    "scheduleMode": "personal_epoch"
+  },
+  "combat": {
+    "tickMs": 50,
+    "startMP": 50,
+    "maxMP": 100,
+    "baseMPRegenPerSecond": 4,
+    "baseCritChance": 0.1,
+    "critMultiplier": 1.5,
+    "maxCritChance": 0.7,
+    "maxDodgeChance": 0.5,
+    "defenseConstant": 500,
+    "minimumDefenseMultiplier": 0.25,
+    "normalEncounterSeconds": 30,
+    "gateSeconds": 60,
+    "bossSeconds": 60,
+    "asteaTrialSeconds": 45,
+    "normalAttackUsesMP": false,
+    "elementAppliesToEnemyOutgoingDamage": false,
+    "elementMatrix": {
+      "fire": {
+        "fire": 1,
+        "water": 0.65,
+        "nature": 1.8,
+        "light": 1,
+        "dark": 1,
+        "neutral": 1
+      },
+      "water": {
+        "fire": 1.8,
+        "water": 1,
+        "nature": 0.65,
+        "light": 1,
+        "dark": 1,
+        "neutral": 1
+      },
+      "nature": {
+        "fire": 0.65,
+        "water": 1.8,
+        "nature": 1,
+        "light": 1,
+        "dark": 1,
+        "neutral": 1
+      },
+      "light": {
+        "fire": 1,
+        "water": 1,
+        "nature": 1,
+        "light": 1,
+        "dark": 1.8,
+        "neutral": 1
+      },
+      "dark": {
+        "fire": 1,
+        "water": 1,
+        "nature": 1,
+        "light": 1.8,
+        "dark": 1,
+        "neutral": 1
+      },
+      "neutral": {
+        "fire": 1,
+        "water": 1,
+        "nature": 1,
+        "light": 1,
+        "dark": 1,
+        "neutral": 1
+      }
+    },
+    "globalSkillLockSeconds": 0.5,
+    "assistFirstCastSeconds": [
+      3,
+      7
+    ],
+    "maxCooldownReduction": 0.3
+  },
+  "growth": {
+    "heroLevelCap": 400,
+    "stageCapPerHero": 1200,
+    "chapterLength": 20,
+    "gateInterval": 10,
+    "levelCostXP": "20 + 4*L + L^2",
+    "levelCostGold": "ceil(1.5 * discountedXpCost)",
+    "catchupDiscount": "max(0.5, 0.5 + 0.5*L/maxHeroLevel)",
+    "levelStatFactor": "(1 + 0.05*(L-1))^2",
+    "defenseLevelFactor": "1 + 0.015*(L-1)",
+    "xpPerHeroHour": "30 * (1 + clearedStage/25)",
+    "goldPerHeroHour": "90 * (1 + clearedStage/25)",
+    "forgeOrePerHeroHour": 5,
+    "trainingPerHeroHour": 1,
+    "bondPerHeroHour": 0.25,
+    "masteryCost": "36 + 12*n",
+    "masteryNodeCap": 60,
+    "masteryStatBonusPerNode": 0.03,
+    "gearMaxLevel": 100,
+    "gearOreCost": "10 + 4*g",
+    "gearGoldCost": "120 + 40*g + 10*g^2",
+    "weaponAttackMultiplier": "1 + 0.025*g",
+    "armorHPMultiplier": "1 + 0.03*g",
+    "armorDefenseMultiplier": "1 + 0.015*g",
+    "accessoryCritBonus": "0.002*g",
+    "accessoryMPRegen": "0.01*g",
+    "baseRateScale": 1,
+    "stageRateDivisor": 25
+  },
+  "encounters": {
+    "recommendedLevel": "1 + floor((stage-1)/3)",
+    "normalHP": "1000 * F(recommendedLevel)",
+    "normalATK": "24 * F(recommendedLevel)",
+    "gateHP": "10000 * F(recommendedLevel)",
+    "gateATK": "82.5 * F(recommendedLevel)",
+    "enemyDefense": "60 * (1 + 0.015*(recommendedLevel-1))",
+    "basicAttackInterval": 3,
+    "bossTierRecommendedLevel": "5 + 6*(tier-1)",
+    "bossHP": "6000 * F(recommendedLevel)",
+    "bossATK": "60 * F(recommendedLevel)",
+    "bossTierCap": 50,
+    "gateHPBase": 10000,
+    "gateATKBase": 82.5,
+    "tuningReason": "Original gate HP5000/ATK55 allowed stage3155 and Lv101-102 at day28; B/A XP1.1095 exceeded1.10. Tune public gate HP/ATK while preserving all v2 base income and upgrade costs."
+  },
+  "newSave": {
+    "heroLevels": 1,
+    "gold": 6000,
+    "xp": 1000,
+    "forgeOre": 300,
+    "companionTickets": 10,
+    "memoryTickets": 0,
+    "initialCompanions": [
+      "guardian",
+      "snow_rabbit",
+      "flame_sage",
+      "storm_sage",
+      "lightning_sage"
+    ]
+  },
+  "daily": {
+    "companionTickets": 5,
+    "memoryTickets": 3,
+    "researchPermits": 2,
+    "researchPermitCap": 4,
+    "bondGiftCount": 3,
+    "bondPerGift": 4,
+    "interactionCharges": 1,
+    "interactionChargeCap": 2,
+    "bondPerInteraction": 12,
+    "weeklyMemoryTicketsMilestones": {
+      "2": 3,
+      "4": 3,
+      "6": 3
+    },
+    "seasonStartMemoryTickets": 3,
+    "bondGiftCap": 6
+  },
+  "summon": {
+    "companion": {
+      "fullCharacterChance": 0.08,
+      "tokenOnDuplicate": 20,
+      "selectorEveryDraws": 30,
+      "tokenToSelectNewCompanion": 120,
+      "firstTenGuarantee": "At least one non-starter character by draw 10; never reset 30-draw meter.",
+      "rankCosts": [
+        20,
+        40,
+        60,
+        80,
+        100
+      ],
+      "rankMax": 5,
+      "rankDamageBonus": 0.03,
+      "resultTiers": [
+        {
+          "id": "star",
+          "color": "rainbow",
+          "chance": 0.08,
+          "result": "full_companion"
+        },
+        {
+          "id": "gold",
+          "color": "gold",
+          "chance": 0.04,
+          "bondTokens": 10
+        },
+        {
+          "id": "silver",
+          "color": "silver",
+          "chance": 0.1,
+          "bondTokens": 4
+        },
+        {
+          "id": "bronze",
+          "color": "blue",
+          "chance": 0.27,
+          "bondTokens": 2
+        },
+        {
+          "id": "white",
+          "color": "white",
+          "chance": 0.51,
+          "bondTokens": 1
+        }
+      ],
+      "expectedBondTokensFromNonFullPerDraw": 1.85,
+      "revealOrder": "ascending_tier_highest_last",
+      "lastRevealAutoSeconds": 0.8,
+      "selectorGlowAtDraws": 25
+    },
+    "memory": {
+      "fullMemoryChance": 0.03,
+      "dustOnDuplicate": 60,
+      "selectorEveryDraws": 60,
+      "dustToSelectMemory": 200,
+      "randomCurrentSeasonWeight": 0.4,
+      "randomArchiveWeight": 0.6,
+      "selectorResetsOnRandomSuccess": false,
+      "selectorCarryover": true,
+      "ticketCarryover": true,
+      "resultTiers": [
+        {
+          "id": "star",
+          "color": "rainbow",
+          "chance": 0.03,
+          "result": "full_memory"
+        },
+        {
+          "id": "gold",
+          "color": "gold",
+          "chance": 0.05,
+          "memoryDust": 9
+        },
+        {
+          "id": "silver",
+          "color": "silver",
+          "chance": 0.1,
+          "memoryDust": 4
+        },
+        {
+          "id": "bronze",
+          "color": "blue",
+          "chance": 0.27,
+          "memoryDust": 2
+        },
+        {
+          "id": "white",
+          "color": "white",
+          "chance": 0.55,
+          "memoryDust": 1
+        }
+      ],
+      "expectedMemoryDustFromNonFullPerDraw": 1.94,
+      "pinnedTargetRevealStepDust": 40,
+      "pinnedTargetRevealSteps": 5,
+      "revealOrder": "ascending_tier_highest_last",
+      "lastRevealAutoSeconds": 0.8,
+      "selectorGlowAtDraws": 50
+    }
+  },
+  "bond": {
+    "thresholds": [
+      0,
+      20,
+      50,
+      90,
+      140,
+      210,
+      300,
+      420,
+      570,
+      750,
+      960,
+      1200
+    ],
+    "illustrationAtPoints": 210,
+    "collectionNoCombatStats": true
+  },
+  "research": {
+    "firstClearTraces": "6 + 2*tier",
+    "permitRewardTraces": "3 + highestClearedTier",
+    "artifactCraftCost": 12,
+    "artifactUpgradeCosts": [
+      20,
+      35,
+      55,
+      80
+    ],
+    "artifactMaxRank": 5,
+    "upgradeMeaning": "Ranks 2..5 give all hero attack stats +2% per rank while equipped; unique effect stays unchanged."
+  },
+  "season": {
+    "oneDayMissedMemoryTickets": 120,
+    "allDaysMemoryTickets": 123,
+    "trackFinalNeedsDays": 24,
+    "pointsPerQualifiedDay": 10,
+    "finalTrackPoints": 240,
+    "experienceReset": false,
+    "repeatContentRewardPolicy": "Unique card once; repeat reward dust only with occurrence ID; never presented as a new illustration."
+  },
+  "save": {
+    "namespace": "astralIdle:v1",
+    "schemaVersion": 1,
+    "maxImportBytes": 2097152,
+    "currencySafetyLimit": 1000000000000,
+    "keepPreviousGoodSaves": 2,
+    "battleHistoryLimit": 200,
+    "gachaHistoryLimit": 300,
+    "durableBeforeReveal": true,
+    "legacyGamesSaveImport": false,
+    "rewardRngSeparate": true,
+    "dailyRewardEventLedgers": true,
+    "pinnedMemoryTarget": true
+  },
+  "rewardEvents": {
+    "separateRngStream": true,
+    "durableBeforeReveal": true,
+    "dailyReturnChest": {
+      "dailyCap": 1,
+      "minimumEligibleUnclaimedSeconds": 7200,
+      "eligibleResources": [
+        "xp",
+        "gold",
+        "forgeOre"
+      ],
+      "tiers": [
+        {
+          "id": "wood",
+          "chance": 0.7,
+          "bonusMultiplier": 0
+        },
+        {
+          "id": "silver",
+          "chance": 0.22,
+          "bonusMultiplier": 0.15
+        },
+        {
+          "id": "gold",
+          "chance": 0.07,
+          "bonusMultiplier": 0.5
+        },
+        {
+          "id": "star",
+          "chance": 0.01,
+          "bonusMultiplier": 1.5,
+          "companionTickets": 1
+        }
+      ],
+      "expectedBonusOnEligibleClaim": 0.083,
+      "mayReduceBaseRate": false
+    },
+    "gearGreatSuccess": {
+      "chancePerLevel": 0.1,
+      "forgeOreRefundFraction": 0.5,
+      "goldRefundFraction": 0,
+      "failureOrDowngrade": false
+    },
+    "starButterfly": {
+      "dailyCap": 1,
+      "appearsAfterSecondsRange": [
+        30,
+        90
+      ],
+      "floatingSeconds": 60,
+      "dockUntilDayResetIfMissed": true,
+      "rewardBaseMinutes": 15,
+      "rewardResources": [
+        "xp",
+        "gold"
+      ],
+      "goldenChance": 0.05,
+      "goldenCompanionTickets": 1
+    },
+    "researchSpark": {
+      "normalChance": 0.15,
+      "spotlightChance": 0.25,
+      "extraTraces": 1,
+      "guaranteeAfterConsecutiveMisses": 4
+    },
+    "returnLetter": {
+      "delaySeconds": 14400,
+      "pendingCap": 1,
+      "carryToNextGameDay": true,
+      "rewardBaseMinutes": 20,
+      "rewardResources": [
+        "xp",
+        "gold"
+      ],
+      "usesScheduleRateSnapshot": true
+    },
+    "comeback": {
+      "absentGameDays": 3,
+      "oncePerSeasonOccurrence": true,
+      "oneTimeBaseHours": 12,
+      "boostDurationHours": 72,
+      "boostMultiplierXPAndGold": 1.25,
+      "excludedResources": [
+        "forgeOre",
+        "training",
+        "bond",
+        "tickets",
+        "researchPermits",
+        "qualifiedDay",
+        "seasonPoints"
+      ]
+    }
+  },
+  "bossSpotlight": {
+    "rotation": "gameDay_mod_10",
+    "firstResearchSettlementMultiplier": 1.5,
+    "rounding": "ceil",
+    "dailyCap": 1,
+    "bossesAlwaysOpen": true
+  },
+  "battleAnalysis": {
+    "availableAfterFirstDefeat": true,
+    "autoSpoilBeforeFirstAttempt": false,
+    "maxCandidateSimulations": 8,
+    "candidateTypes": [
+      "level_bundle",
+      "weapon",
+      "armor",
+      "accessory",
+      "style",
+      "companion_swap",
+      "artifact_swap",
+      "attack_hold"
+    ],
+    "cacheKey": [
+      "encounterId",
+      "contentVersion",
+      "loadoutHash",
+      "candidateHash"
+    ],
+    "recommendationLabels": [
+      "actionable_now",
+      "fewest_upgrade_steps"
+    ],
+    "externalRetryDamageBuff": false
+  },
+  "milestones": {
+    "gateEveryStages": 10,
+    "chapterEveryStages": 20,
+    "majorExpeditionRecordEveryStages": 100,
+    "extraCompanionTicketEvery50": false
+  },
+  "presentation": {
+    "summonTierStepSeconds": 0.225,
+    "rainbowPauseSeconds": 0.35,
+    "autoModalCapPerFiveMinuteLoop": 2,
+    "damagePopupCap": 24,
+    "screenShakeCritPixels": 2,
+    "screenShakeUltimatePixels": 4,
+    "screenShakeSeconds": 0.15,
+    "vibrationDefaultEnabled": false,
+    "reducedMotionSupported": true
+  },
+  "optionalRewardProvider": {
+    "provider": "local_card_learning_copy",
+    "shipPlayerFacingUI": true,
+    "futureOnly": false,
+    "dailyCapMax": 3,
+    "perGateDailyCap": 1,
+    "chainMilestonesAllowed": false,
+    "mayBlockBaseReward": false,
+    "grammarLectureRequired": true
+  },
+  "economyGuards": {
+    "profileA": "one 5-minute session/day, no optional adventure optimization",
+    "profileB": "two short sessions/day, same-day letter and spotlight boss",
+    "profileC": "profile B plus up to 20-30 minutes optional play and three adventures/week",
+    "maxCoreResourceRatioBtoA": 1.1,
+    "maxCoreResourceRatioCtoA": 1.25,
+    "maxSummonRatioBtoA": 1.1,
+    "maxSummonRatioCtoA": 1.2,
+    "maxStageProgressRatioCtoA": 1.15,
+    "comebackMustNotExceedContinuousPlay": true,
+    "simulationDays": [
+      28,
+      90,
+      180
+    ]
+  }
+}
