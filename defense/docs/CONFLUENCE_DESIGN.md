@@ -1,5 +1,8 @@
 # ASTRA — 성좌의 수호자
 
+> PR #546 당시의 설계 기록이다. 이 문서의 이자·상점·보스 후 유물 선택 규칙은 현재 적용되지 않는다.
+> 현재 게임은 루미의 별빛 원정이며 [소스 설계](../doc/SOURCE_DESIGN.md)와 [밸런스 설계](../doc/BALANCE_DESIGN.md)를 따른다.
+
 ## Product contract
 
 A portrait, offline, single-HTML merge defense. The player chooses six of the existing 21 characters; only those six can be summoned. All 25 cells are available immediately. Every character attacks, including economy and support characters. A normal expedition contains 12 waves, three bosses, and three visits to a merchant; the victory screen can continue into an endless siege. No permanent attack multiplier or mandatory grind precedes the fun.

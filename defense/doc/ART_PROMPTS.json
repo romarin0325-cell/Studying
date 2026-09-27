@@ -1,0 +1,54 @@
+{
+  "tool": "Built-in image_gen (no CLI/API fallback)",
+  "usage": "Three new project assets; approved character atlases unchanged; no third-party game art included.",
+  "assets": [
+    {
+      "output": "defense/assets/merge/relics.webp",
+      "source": "exec-80c3bd81-cd5f-4ec9-9c7a-6054b4880382.png",
+      "grid": [
+        5,
+        4
+      ],
+      "size": [
+        1254,
+        1254
+      ],
+      "alpha": true,
+      "conversion": "WebP quality 92, alphaQuality 100; original size",
+      "sha256": "2bdb414fe0cce6c8369ed91a9f85b4404d276c2334cf441d8842bc21fdbe36a6",
+      "prompt": "Use case: stylized-concept. Asset type: production fantasy mobile game inventory ICON ATLAS, a single spritesheet, 5 columns by 4 rows exactly, square canvas 2048x2048. Primary request: Twenty exquisitely hand-painted magical relic item icons matching a premium anime moonlit-garden RPG with pale gold metal, enamel jewels, decisive silhouettes and rich crafted materials. Not flat vector; detailed painted 2D item illustrations that read at 64px. Each object occupies 65 percent of its cell, perfectly centered, generous empty transparent gutters; no background plaques, no cast shadows extending outside the cell, no text, no labels, no borders. All twenty separate objects entirely visible. Ordered left to right, top to bottom: row1 ornate hourglass filled with star sand, glowing ember heart in copper cage, frozen blue crystal flower, lonely gold-trimmed pennant, twin musical notes in silver. row2 antique gold lantern with bright flame, sharp violet crescent moon shard, green glowing seed with tiny roots, white feather with gold tip, small gold crown with blue gemstone. row3 falling star meteor wrapped in fire, triangular prism bursting tiny rainbow facets, turquoise tidal conch shell, tangled luminous enchanted roots, two clasped gauntlets of silver and gold. row4 radiant phoenix feather, two mirrored crystal stars, astrolabe with three interlinked stars, alchemical flask with golden liquid, little sapphire planet with gold orbit ring. Consistent three-quarter object view, fine gilded edge highlights, luminous but not hazy. True alpha transparent background, isolated icons. Exactly 5 columns and 4 rows in uniform cells, not a scene."
+    },
+    {
+      "output": "defense/assets/merge/blessings.webp",
+      "source": "exec-3b108ef6-809f-4821-aaf8-45ad1da5e9a1.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": [
+        1536,
+        1024
+      ],
+      "alpha": true,
+      "conversion": "WebP quality 90; original alpha and size",
+      "sha256": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
+      "prompt": "Use case: stylized-concept. Asset type: production fantasy mobile RPG reward ICON ATLAS. Exactly three columns and two rows, six icons, square canvas. Six hand-painted high-polish luminous gold-enamel and jewel objects, clear silhouettes at 80px, with generous transparent gutters. Consistent premium anime moonlit-garden item-art style. No text, no labels, no frames or background plaques. Each complete object centered in its uniform cell, no overlap. Ordered row1: glowing cyan summoning door with a small white star emerging; radiant golden sword crossed with a small sunrise; rolled turquoise training scroll sealed with silver ribbon. Row2: a golden constellation of five stars joined by delicate threads; an open velvet pouch spilling chunky golden coins; a pale pink healing blossom enclosing a blue heart crystal. Rich crafted materials, crisp edges, no blur. Genuine alpha transparent background. Exactly 3 columns x 2 rows, six isolated inventory icons."
+    },
+    {
+      "output": "defense/assets/merge/effects.webp",
+      "source": "exec-47e5421d-edb8-4563-8708-c25158e1d060.png",
+      "grid": [
+        7,
+        3
+      ],
+      "size": [
+        1792,
+        768
+      ],
+      "alpha": false,
+      "conversion": "Resize to exact 7 x 3 cells, WebP quality 94; black backdrop used with screen blend, not keyed alpha",
+      "sha256": "4153276d72d2ce2edf37bb7b913f7353a87f3c17e852f7bd4e839d13648a583b",
+      "prompt": "Use case: stylized-concept. Production 2D combat VFX ATLAS for a cute SD anime mobile tower defense. Exactly SEVEN columns and THREE rows, 21 different small effects, wide landscape 2240x960. Each equal square cell contains one centered effect fully within its cell with 20% pure black gutters. Solid PURE BLACK backdrop for additive compositing. CLEAN CEL-SHADED, simple crisp silhouettes with 2-3 colors, bright short white core, soft falloff only near edges; not photorealistic, no smoky detail or noisy particles, no text, no labels, no panels. Precisely ordered row1 left-to-right: 1 orange sweeping SWORD CRESCENT facing RIGHT; 2 cyan fourpoint MAGIC STAR; 3 violet paired DAGGER SLASHES facing RIGHT; 4 pink GLASS SLIPPER sparkle; 5 pale blue SNOWFLAKE impact; 6 blue ICICLE FAN shatter; 7 lilac RABBIT EAR double streak facing RIGHT. Row2: 8 ochre STONE RING with four chunks; 9 mint WIND SPIRAL facing RIGHT; 10 yellow THREE BRANCH LIGHTNING burst; 11 scarlet DRAGON FIRE JAW burst facing RIGHT; 12 orange THREE PETAL FLAME; 13 green THREE MUSHROOM SPORE puffs; 14 ivory DIAMOND CROSSHAIR impact. Row3: 15 skyblue MUSIC NOTE WATER RIPPLE; 16 purple BEAR PAW CLAW scratch facing RIGHT; 17 rose PINK FIVE PETAL BLOSSOM; 18 indigo WHALE TAIL GALAXY ring; 19 silver THREE COMET streaks facing RIGHT; 20 gold FOUR ARM CROSS RUNE; 21 lavender HOURGLASS TIME ring. Distinct silhouette for every cell, cohesive SD game tone, legibility at 48px. No actual characters, no realistic weapons. Pure-black gutters. Exactly 7 by 3 grid. Slash motions face right so engine can rotate them toward target."
+    }
+  ]
+}
