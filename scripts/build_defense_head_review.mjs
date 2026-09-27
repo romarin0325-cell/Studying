@@ -1,22 +1,43 @@
 import sharp from 'sharp';
+import {createHash} from 'node:crypto';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {HEROES} from '../defense/merge/content.js';
 
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+function validBox(box){return Array.isArray(box)&&box.length===4&&box.every(Number.isFinite)&&box[2]>box[0]&&box[3]>box[1];}
+export function previousSkullBox(previous,annotation){
+  const skull=previous.source?.anatomy?.skull;
+  if(skull!==undefined){
+    const feet=previous.source.feet?.[0],anchor=previous.anchor,scale=previous.source.scale;
+    if(!validBox(skull)||!feet?.every(Number.isFinite)||feet.length!==2||!anchor?.every(Number.isFinite)||anchor.length!==2||!Number.isFinite(scale)||scale<=0)throw new Error(`${previous.id}: invalid previous skull transform`);
+    return skull.map((n,i)=>anchor[i%2]+(n-feet[i%2])*scale);
+  }
+  // Legacy snapshots contain no anatomical annotations. Use an explicitly
+  // recorded estimate on that old atlas, never landmarks from the current art.
+  if(annotation?.id!==previous.id||annotation.atlasSha256!==previous.sha256||!validBox(annotation.packedSkull))throw new Error(`${previous.id}: previous skull landmarks missing; supply a hash-bound annotation of the previous atlas`);
+  return [...annotation.packedSkull];
+}
+
+export async function buildHeadReview({beforeDir,out,beforeLandmarksPath}){
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const [beforeDir,out]=process.argv.slice(2);
-if(!beforeDir||!out)throw new Error('Usage: node scripts/build_defense_head_review.mjs BEFORE_ATLAS_DIRECTORY OUTPUT_DIRECTORY');
+if(!beforeDir||!out)throw new Error('Usage: node scripts/build_defense_head_review.mjs BEFORE_ATLAS_DIRECTORY OUTPUT_DIRECTORY [BEFORE_LANDMARKS_JSON]');
 await mkdir(out,{recursive:true});
 const currentDir=path.join(root,'defense/assets/merge/units');
 const now=JSON.parse(await readFile(path.join(currentDir,'manifest.json'),'utf8'));
 const old=JSON.parse(await readFile(path.join(beforeDir,'manifest.json'),'utf8'));
+const annotations=beforeLandmarksPath?JSON.parse(await readFile(beforeLandmarksPath,'utf8')).frames:[];
 const data=[];
 for(const hero of HEROES){
-  const m=now.frames.find(f=>f.id===hero.id),prev=old.frames.find(f=>f.id===hero.id),a=m.anatomy;
-  const before=await readFile(path.join(beforeDir,m.file)),after=await readFile(path.join(currentDir,m.file));
-  const oldBox=m.source.anatomy.skull.map((n,i)=>(i%2?480:256)+(n-prev.source.feet[0][i%2])*prev.source.scale);
-  data.push({id:hero.id,name:hero.name,before:`data:image/webp;base64,${before.toString('base64')}`,after:`data:image/webp;base64,${after.toString('base64')}`,oldBox,box:a.packedSkull,width:a.headWidth,height:a.headHeight,body:a.bodyBelowChin,oldBytes:before,newBytes:after});
+  const m=now.frames.find(f=>f.id===hero.id),prev=old.frames.find(f=>f.id===hero.id);
+  if(!m||!prev)throw new Error(`${hero.id}: missing before/after manifest entry`);
+  const a=m.anatomy;
+  const before=await readFile(path.join(beforeDir,prev.file)),after=await readFile(path.join(currentDir,m.file));
+  if(sha(before)!==prev.sha256||sha(after)!==m.sha256)throw new Error(`${hero.id}: atlas differs from its recorded snapshot hash`);
+  const oldBox=previousSkullBox(prev,annotations.find(e=>e.id===hero.id));
+  const oldBoxProvenance=prev.source.anatomy?.skull!==undefined?'previous source skull landmarks':'manual estimate on hash-bound previous atlas; legacy source had no anatomy record';
+  data.push({id:hero.id,name:hero.name,before:`data:image/webp;base64,${before.toString('base64')}`,after:`data:image/webp;base64,${after.toString('base64')}`,oldBox,oldBoxProvenance,box:a.packedSkull,width:a.headWidth,height:a.headHeight,body:a.bodyBelowChin,oldBytes:before,newBytes:after});
 }
 async function sheet(items,file,{guide=false,both=false,cols=7}={}){
   const cw=256,ch=310,rows=Math.ceil(items.length/cols),half=rows*ch,height=both?half*2+48:half+44;
@@ -51,5 +72,12 @@ function render(){for(const canvas of document.querySelectorAll('canvas')){const
 for(const el of [dir,size,guide])el.addEventListener('change',render);document.getElementById('theme').onclick=()=>document.body.classList.toggle('light');
 </script></html>`;
 await writeFile(path.join(out,'head-review.html'),html);
-await writeFile(path.join(out,'head-measurements.json'),JSON.stringify(now.frames.map(({id,anatomy,source})=>({id,anatomy,sourceSha256:source.sha256})),null,2)+'\n');
+await writeFile(path.join(out,'head-measurements.json'),JSON.stringify(now.frames.map(({id,anatomy,source})=>({id,anatomy,sourceSha256:source.sha256,before:{atlasSha256:old.frames.find(f=>f.id===id).sha256,packedSkull:data.find(f=>f.id===id).oldBox,provenance:data.find(f=>f.id===id).oldBoxProvenance}})),null,2)+'\n');
 console.log(`Head comparison artifacts written to ${out}`);
+return {heroes:data.length};
+}
+
+if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
+  const [beforeDir,out,beforeLandmarksPath]=process.argv.slice(2);
+  await buildHeadReview({beforeDir,out,beforeLandmarksPath});
+}

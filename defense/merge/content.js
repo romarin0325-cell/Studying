@@ -97,7 +97,7 @@ export const ARTIFACTS = [
   {id:'chorus',name:'쌍둥이 음표',icon:'note',color:'#b9def0',text:'같은 영웅이 2명 이상이면 공격속도 15% 증가.',price:48},
   {id:'lantern',name:'꺼지지 않는 등불',icon:'lantern',color:'#f0d399',text:'스킬을 쓰면 별빛을 15 돌려받습니다.',price:62},
   {id:'lens',name:'예리한 달조각',icon:'moon',color:'#c6bdf0',text:'보스에게 주는 피해 30% 증가.',price:52},
-  {id:'seed',name:'숨 쉬는 씨앗',icon:'leaf',color:'#b0c899',text:'독이 중첩될 때 추가로 1중첩을 쌓습니다.',price:45},
+  {id:'seed',name:'숨 쉬는 씨앗',icon:'leaf',color:'#b0c899',text:'일반 공격·합성·필살기로 독을 부여할 때 추가로 1중첩을 쌓습니다.',price:45},
   {id:'feather',name:'첫새벽의 깃털',icon:'feather',color:'#dae8df',text:'소환 비용이 4 감소합니다. 최소 8골드.',price:50},
   {id:'meteor',name:'떨어진 별',icon:'star',color:'#f1c286',text:'영웅의 12번째 공격마다 작은 운석이 떨어집니다.',price:65},
   {id:'crown',name:'작은 왕관',icon:'crown',color:'#e7c57b',text:'3등급 이상 영웅의 공격력 25% 증가.',price:55},

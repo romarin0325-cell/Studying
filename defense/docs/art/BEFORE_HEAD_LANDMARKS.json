@@ -1,0 +1,279 @@
+{
+  "version": 1,
+  "status": "Retrospective annotation of a stored previous atlas; not a historical source anatomy field",
+  "frames": [
+    {
+      "id": "zeke",
+      "atlasSha256": "fda12b2dc1a6d2d5fec9b24fc599cee07bd6f72791d57748f7f73dc3a6b4ccd5",
+      "packedSkull": [
+        190,
+        215,
+        316,
+        332
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "rumi",
+      "atlasSha256": "d81f938929cd1cf9281501faf72e69fea6851e8d32a2e7637a5162f0c638ecad",
+      "packedSkull": [
+        177,
+        164,
+        337,
+        300
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "luna",
+      "atlasSha256": "7498736b4b07bce20c7523fe4e6e6beb1cfa5784047d57c1f2084c9e57462616",
+      "packedSkull": [
+        184,
+        174,
+        323,
+        310
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "cinderella",
+      "atlasSha256": "0455eee21b5b01a5c6f1833db5f02f81937d61933bf3eed9ea7ad34bcbf05ebb",
+      "packedSkull": [
+        190,
+        178,
+        320,
+        304
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "snow_rabbit",
+      "atlasSha256": "e31ca1481b787c54f6f360612170cba06ddba2eaa81523cb8113d92746afc8ef",
+      "packedSkull": [
+        176,
+        190,
+        330,
+        324
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "avalanche_maid",
+      "atlasSha256": "615958d6f0d0576072dd11ad2fcdf9eacde6f70b131cc837c38be0b42de76457",
+      "packedSkull": [
+        180,
+        160,
+        336,
+        299
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "night_rabbit",
+      "atlasSha256": "453e919208057ba351939c500e1ce3bf53f0216489abec47eb90b72082643704",
+      "packedSkull": [
+        176,
+        152,
+        336,
+        294
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "guardian",
+      "atlasSha256": "5bb9f1092d1909ca99a350c5b941fc2fd2c39bbf4fddd760a16396c8be45a5e2",
+      "packedSkull": [
+        181,
+        181,
+        329,
+        310
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "storm_sage",
+      "atlasSha256": "87ea5d1f1d528828edfb5b92d52db1472bd7a0eac9b6f323caa4f084b16859cf",
+      "packedSkull": [
+        190,
+        170,
+        326,
+        300
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "lightning_sage",
+      "atlasSha256": "195afd5fd42a206751ad3aea23c38dff919c8e3f4885d7303324f2f3d0dc2df7",
+      "packedSkull": [
+        192,
+        195,
+        317,
+        317
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "red_dragon",
+      "atlasSha256": "bfa4ae17839950b61605b5f08ab9324758ee6b99df0ffe856a98359d7e2ab4f3",
+      "packedSkull": [
+        188,
+        180,
+        327,
+        309
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "flame_sage",
+      "atlasSha256": "1eceee6f0065269f9716254c45c9ee183d310b9157428f335c7ce48db6691e7f",
+      "packedSkull": [
+        188,
+        194,
+        325,
+        316
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "mushroom_king",
+      "atlasSha256": "abeda8fab4efc90202c7cdb6bb73d3b55b1bc0e0fe87cd5ea77d5e83ebd4b97e",
+      "packedSkull": [
+        176,
+        204,
+        337,
+        342
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "great_detective",
+      "atlasSha256": "c404d70ac21b79dd3d6ef0992aca514e1ad6f40355c53a6a6bc72c96dba168c6",
+      "packedSkull": [
+        181,
+        176,
+        327,
+        310
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "siren",
+      "atlasSha256": "4221320ed2c1ceef4ade1097c48f675892e030d0de1689efaf4e074584836777",
+      "packedSkull": [
+        175,
+        181,
+        326,
+        319
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "phantom",
+      "atlasSha256": "932ef5400b3b4bdd4cb01fce6b6186590a24c3a633354875b1c154c2ab0f0c36",
+      "packedSkull": [
+        180,
+        201,
+        330,
+        329
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "queen",
+      "atlasSha256": "d1dc0d4b621f7d7b64fe4759c252b5e4d82c73290765a676154f71ee05d09017",
+      "packedSkull": [
+        183,
+        189,
+        330,
+        314
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "galaxy_whale",
+      "atlasSha256": "37d4e250153957032dde709517cc77a16f02bc4bae77945f58b6cbc183ba3295",
+      "packedSkull": [
+        185,
+        173,
+        323,
+        307
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "silver_rabbit",
+      "atlasSha256": "12933c744c1ac14d3f31c066f794c35e2ca9a642a019ef05363bbb714e721c63",
+      "packedSkull": [
+        185,
+        224,
+        331,
+        349
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "ancient_dragon",
+      "atlasSha256": "271d8f07de56da6746906af7ac8bef09457615eebac24f3e1ef8fb792db7197d",
+      "packedSkull": [
+        186,
+        181,
+        327,
+        302
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    },
+    {
+      "id": "time_ruler",
+      "atlasSha256": "0787a75ded513504163d9be9cc71a4a6cb3f303c30f179b76b2d57b76523c55d",
+      "packedSkull": [
+        181,
+        173,
+        329,
+        306
+      ],
+      "coordinateSpace": "previous packed front cell",
+      "method": "manual skull estimate annotated directly on the stored pre-correction atlas; archived in front-skull-estimates.json during calibration",
+      "uncertainty": "Partly occluded skull and jaw; manual estimates, not exact detections. The legacy source manifest had no anatomy record."
+    }
+  ]
+}
