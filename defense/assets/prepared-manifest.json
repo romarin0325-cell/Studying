@@ -1,13 +1,36 @@
 {
   "version": 1,
-  "sourceHash": "065937626c3bd252dabb6ab936086dd055d33080127a86893e747820eb650fa9",
+  "sourceHash": "9675e2c6308f408f05ce714acdf795743940749b1c05e89c012939b8243b1a60",
   "processorHash": "625cebc7122b18b36028b0a700e5ff287545747d8df4c62974dd129b812fd476",
-  "fileCount": 24,
+  "fileCount": 27,
   "files": {
+    "./assets/merge/blessings.webp": {
+      "sourceHash": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
+      "bytes": 522808,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1536,
+      "height": 1024
+    },
+    "./assets/merge/effects.webp": {
+      "sourceHash": "4153276d72d2ce2edf37bb7b913f7353a87f3c17e852f7bd4e839d13648a583b",
+      "bytes": 217960,
+      "requiresAlpha": false
+    },
     "./assets/merge/garden.webp": {
       "sourceHash": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
       "bytes": 266242,
       "requiresAlpha": false
+    },
+    "./assets/merge/relics.webp": {
+      "sourceHash": "2bdb414fe0cce6c8369ed91a9f85b4404d276c2334cf441d8842bc21fdbe36a6",
+      "bytes": 753090,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1254,
+      "height": 1254
     },
     "./assets/merge/units/ancient_dragon.webp": {
       "sourceHash": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",

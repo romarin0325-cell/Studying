@@ -12,7 +12,7 @@ export async function validateDirections(){
   const landmarks=JSON.parse(await readFile(new URL('../defense/docs/art/ANATOMICAL_LANDMARKS.json',import.meta.url),'utf8'));
   const profile=JSON.parse(await readFile(new URL('../defense/docs/art/HEAD_PROFILE.json',import.meta.url),'utf8'));
   assert.equal(manifest.version,2);
-  assert.equal(HEROES.length,21);assert.equal(manifest.frames.length,21);assert.equal(ASSET_MANIFEST.length,24);
+  assert.equal(HEROES.length,21);assert.equal(manifest.frames.length,21);assert.equal(ASSET_MANIFEST.length,27);
   assert.deepEqual(new Set(manifest.frames.map(f=>f.id)),new Set(HEROES.map(h=>h.id)));
   let count=0;
   for(const h of HEROES){

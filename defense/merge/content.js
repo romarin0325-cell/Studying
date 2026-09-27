@@ -1,5 +1,5 @@
 import {PORTRAIT_FRAMES} from './art-frames.js';
-export const VERSION = 1;
+export const VERSION = 2;
 export const GRID = 5;
 export const MAX_RANK = 6;
 export const DEFAULT_DECK = ['zeke','snow_rabbit','rumi','siren','queen','cinderella'];
@@ -83,26 +83,69 @@ export const HEROES = [
     {name:'아직 오지 않은 순간',cost:90,type:'rewind',text:'모든 적을 기본 이동 거리 6초분만큼 뒤로 보내고 2초 동안 멈춥니다.'}),
 ];
 export const HERO = Object.fromEntries(HEROES.map(x=>[x.id,x]));
+// Rumi's summoned world: Defense roles and play feel take precedence over source lore.
+const roles = {
+  zeke:['선봉 · 부채꼴','cleave',345,90,'전방 90°를 함께 베어 화상을 남깁니다.'],
+  rumi:['합성 · 관통 별','beam',440,24,'일직선 관통. 같은 등급의 모든 동료와 합성합니다.'],
+  luna:['처형 · 단일','single',340,0,'짧은 사거리의 처형자. 체력 35% 이하인 적에게 두 배 피해.'],
+  cinderella:['초반 경제 · 별탄','single',440,0,'합성 재료가 되면 등급당 18G. 강화마다 환급 +2G / 등급.'],
+  snow_rabbit:['감속 · 작은 폭발','splash',450,48,'작은 눈보라가 주변 적을 40% 감속합니다.'],
+  avalanche_maid:['빙결 연계 · 포격','splash',560,100,'넓은 얼음 파편. 감속 중인 적에게 피해 +75%.'],
+  night_rabbit:['토끼 연계 · 도탄','bounce',390,135,'두 적 사이를 튑니다. 다른 토끼 종류마다 공격속도 +20%.'],
+  guardian:['근접 방벽 · 타일 충격','pulse',230,230,'자신의 칸 주변 230 범위를 전부 타격. 세 번째 공격은 기절.'],
+  storm_sage:['관통 · 바람길','beam',560,42,'긴 바람길을 관통하고 인근 적 하나에 바람을 보냅니다.'],
+  lightning_sage:['연쇄 · 번개','chain',470,190,'가까운 세 적에게 번개가 이어집니다.'],
+  red_dragon:['화상 연계 · 폭격','splash',590,88,'멀리서 넓게 폭발. 불타는 적에게 피해 +40%.'],
+  flame_sage:['지속 화력 · 불바닥','zone',430,64,'명중 지점에 3초의 불바닥. 적이 지나가도 불길은 남습니다.'],
+  mushroom_king:['자리 경제 · 포자밭','zone',370,66,'포자밭으로 중독. 배치 12초마다 등급 +2G 수확. 강화마다 수확 +1G.'],
+  great_detective:['보스 약화 · 저격','single',900,0,'강한 적을 저격, 받는 피해 +18%. 강화마다 노출 +2%p.'],
+  siren:['인접 지원 · 물결','splash',400,58,'상하좌우 동료 공격속도 +22%. 강화마다 오라 +3%p.'],
+  phantom:['견제 · 악몽 덫','zone',460,60,'3초의 덫을 남겨 감속. 세 번째 직격은 적을 뒤로 밀칩니다.'],
+  queen:['성장 경제 · 장미','single',440,0,'물결 배당 3 + 등급×2 + 성장. 세 물결마다 성장 +1, 강화마다 배당 +1G.'],
+  galaxy_whale:['밀집 제어 · 중력장','zone',550,98,'3초의 중력장으로 넓게 피해를 주고 40% 감속합니다.'],
+  silver_rabbit:['별빛 지원 · 관통광','beam',500,22,'관통 공격이 별빛을 충전. 강화마다 추가 별빛 +0.1.'],
+  ancient_dragon:['인접 지원 · 십자광','cross',620,55,'자신의 행·열을 관통. 상하좌우 동료 공격력 +25%, 강화마다 +3%p.'],
+  time_ruler:['시간 제어 · 시계장','zone',490,72,'3초의 시간장을 남겨 25% 감속. 강화마다 감속 +3%p.'],
+};
 for(const hero of HEROES){
   hero.heightGroup=Object.entries(HEIGHT_GROUPS).find(([,ids])=>ids.includes(hero.id))[0];
-  hero.range=hero.attack==='slash'?390:hero.attack==='blade'?360:hero.id==='great_detective'?900:480;
+  const [role,shape,range,radius,text]=roles[hero.id];
+  Object.assign(hero,{role,shape,range,radius});hero.trait.text=text;
   hero.art={atlas:`unit-${hero.id}`,row:0,columns:2,foot:480/512,scale:1,directional:true,portrait:PORTRAIT_FRAMES[hero.id]};
 }
 export const ARTIFACTS = [
-  {id:'hourglass',name:'별모래 시계',icon:'hourglass',color:'#a7cad8',text:'합성할 때 별빛을 8 더 얻습니다.',price:48},
-  {id:'treasury',name:'장미 금고',icon:'coin',color:'#e4bf73',text:'이자 상한이 8에서 16으로 늘어납니다.',price:45},
-  {id:'ember',name:'불씨의 심장',icon:'flame',color:'#ec9372',text:'화상 피해가 60% 증가합니다.',price:50},
-  {id:'frost',name:'녹지 않는 꽃',icon:'snow',color:'#9ed8ef',text:'느려진 적이 받는 피해가 25% 증가합니다.',price:50},
-  {id:'banner',name:'홀로 선 깃발',icon:'banner',color:'#e3ca97',text:'상하좌우에 동료가 없는 영웅의 공격력 40% 증가.',price:48},
-  {id:'chorus',name:'쌍둥이 음표',icon:'note',color:'#b9def0',text:'같은 영웅이 2명 이상이면 공격속도 15% 증가.',price:48},
-  {id:'lantern',name:'꺼지지 않는 등불',icon:'lantern',color:'#f0d399',text:'스킬을 쓰면 별빛을 15 돌려받습니다.',price:62},
-  {id:'lens',name:'예리한 달조각',icon:'moon',color:'#c6bdf0',text:'보스에게 주는 피해 30% 증가.',price:52},
-  {id:'seed',name:'숨 쉬는 씨앗',icon:'leaf',color:'#b0c899',text:'일반 공격·합성·필살기로 독을 부여할 때 추가로 1중첩을 쌓습니다.',price:45},
-  {id:'feather',name:'첫새벽의 깃털',icon:'feather',color:'#dae8df',text:'소환 비용이 4 감소합니다. 최소 8골드.',price:50},
-  {id:'meteor',name:'떨어진 별',icon:'star',color:'#f1c286',text:'영웅의 12번째 공격마다 작은 운석이 떨어집니다.',price:65},
-  {id:'crown',name:'작은 왕관',icon:'crown',color:'#e7c57b',text:'3등급 이상 영웅의 공격력 25% 증가.',price:55},
-];
+  ['hourglass','별모래 시계','합성할 때 별빛을 8 더 얻습니다.'],
+  ['ember','불씨의 심장','화상 피해 +60%. 불바닥 동행과 함께하세요.'],
+  ['frost','녹지 않는 꽃','감속 중인 적이 받는 피해 +25%.'],
+  ['banner','홀로 선 깃발','상하좌우에 동료가 없으면 공격력 +40%.'],
+  ['chorus','쌍둥이 음표','같은 영웅이 2명 이상이면 공격속도 +15%.'],
+  ['lantern','꺼지지 않는 등불','필살기 사용 후 별빛을 15 돌려받습니다.'],
+  ['lens','예리한 달조각','보스에게 주는 피해 +30%.'],
+  ['seed','숨 쉬는 씨앗','공격·장판·합성·필살기의 독 부여량 +1중첩.'],
+  ['feather','첫새벽의 깃털','유료 소환 비용 -4G. 최소 8G.'],
+  ['crown','작은 왕관','3등급 이상 영웅 공격력 +25%.'],
+  ['meteor','떨어진 별','12번째 공격마다 명중 지점에 위력 180%의 운석.'],
+  ['prism','천 갈래 프리즘','연쇄·도탄·관통 바람의 추가 타격 +1명.'],
+  ['tide','파도의 소라','감속을 걸면 주변 80 범위에 위력 25% 물보라. 장판은 0.5초마다 발동.'],
+  ['roots','영원의 뿌리','불·독·악몽·중력·시간 장판 지속시간 +50%.'],
+  ['guild','동행의 악수','지원 오라를 받는 영웅의 공격력 +15%.'],
+  ['phoenix','돌아오는 새벽','원정에서 첫 결계 피해를 막고 체력 3 회복.'],
+  ['twin','쌍성의 거울','모든 영웅의 네 번째 공격에 위력 45%의 메아리.'],
+  ['constellation','삼중 성좌','서로 다른 동료 3종 이상과 인접하면 공격력 +65%.'],
+  ['alchemy','별빛 연금술','합성할 때 합성 결과 영웅 위력 150%로 모든 적 타격.'],
+  ['orbit','별바다의 궤도','3등급 이상 공격마다 명중 지점에 2초 별장판. 0.5초마다 위력 15% 피해.'],
+].map(([id,name,text],icon)=>({id,name,text,icon,rarity:icon<10?'common':icon<16?'rare':'epic',color:icon<10?'#bbd5cc':icon<16?'#86c8ee':'#c9a0f5'}));
 export const ARTIFACT = Object.fromEntries(ARTIFACTS.map(x=>[x.id,x]));
+export const validArtifacts=ids=>Array.isArray(ids)&&ids.length<=3&&new Set(ids).size===ids.length&&ids.every(id=>!!ARTIFACT[id]);
+export const BLESSINGS = [
+  {id:'arrival',name:'빛나는 초대장',category:'즉시',text:'편성 동료 한 명이 2등급으로 합류. 빈칸이 없으면 자리가 날 때 합류합니다.'},
+  {id:'surge',name:'내일의 새벽검',category:'다음 물결',text:'다음 한 물결 동안 모든 공격력 +25%.'},
+  {id:'training',name:'동행의 지혜',category:'성장',text:'이 원정의 동행 강화 비용 -10%p. 최대 50% 할인.'},
+  {id:'oath',name:'별들의 약속',category:'영구',text:'이번 원정의 모든 공격력 +6%p.'},
+  {id:'purse',name:'여행자의 보급',category:'즉시',text:'35골드를 즉시 얻습니다.'},
+  {id:'mend',name:'다시 피는 꽃',category:'회복',text:'결계 체력 3 회복, 별빛 20 충전.'},
+].map((b,icon)=>({...b,icon}));
+export const BLESSING=Object.fromEntries(BLESSINGS.map(b=>[b.id,b]));
 export const CHAPTERS = [
   {id:0,name:'달빛 정원',caption:'처음 피어나는 별',color:'#7dbac1',bosses:['artificial_demon','love_iris','curse_iris'],hp:1,world:0},
   {id:1,name:'잠든 숲의 노래',caption:'독과 생명의 경계',color:'#a9bd80',bosses:['flora','artificial_demon','flora'],hp:1.3,world:3},
@@ -121,5 +164,6 @@ export const ASSET_PATHS = {
   ...Object.fromEntries(HEROES.map(h=>[`unit-${h.id}`,`./assets/merge/units/${h.id}.webp`])),
   garden:'./assets/merge/garden.webp',bosses:'./assets/moonlit/realm-bosses.webp',
   creatures:'./assets/moonlit/creatures.webp',
+  relics:'./assets/merge/relics.webp',blessings:'./assets/merge/blessings.webp',effects:'./assets/merge/effects.webp',
 };
-export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:id!=='garden'}));
+export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:!['garden','effects'].includes(id)}));

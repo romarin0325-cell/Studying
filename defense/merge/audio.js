@@ -1,5 +1,6 @@
 // Original adaptive score. Short scheduled phrases avoid drift and resume only
 // after a gesture. No external audio request, autoplay loop or per-frame nodes.
+import {FX_PROFILES} from './effects.js';
 export class Sound {
   constructor(){this.ctx=null;this.enabled=true;this.music=true;this.volume=.35;this.next=0;this.beat=0;this.timer=null;this.battle=false;this.boss=false;this.lastHit=0;}
   unlock(){
@@ -22,12 +23,14 @@ export class Sound {
     }
   }
   event(e){if(!this.ctx||!this.enabled)return;const t=this.ctx.currentTime;
-    if(e.type==='attack'){if(t-this.lastHit<.08)return;this.lastHit=t;this.tone(e.attackType==='slash'?180:420,t,.08,.025,'triangle',140);}
+    if(e.type==='attack'){if(t-this.lastHit<.08)return;this.lastHit=t;const f=FX_PROFILES[e.hero],index=f?.frame||0,metal=['crescent','daggers','claws','quake','needle'].includes(f?.motion);this.tone(metal?145+index*8:420+index*19,t,.07,metal?.023:.019,'triangle',metal?80:250+index*13);if(metal)this.noise(t,.035,.015,1000+index*110);}
     if(e.type==='hit'){if(t-this.lastHit<.055)return;this.lastHit=t;this.noise(t,.045,.025,1200);}
     if(e.type==='summon'){[440,660,880].forEach((f,i)=>this.tone(f,t+i*.06,.22,.07,'sine'));}
     if(e.type==='merge'){[392,494,587,784,1175].forEach((f,i)=>this.tone(f,t+i*.055,.4,.07,'triangle'));this.noise(t,.17,.035,4000);}
     if(e.type==='skill'){this.tone(75,t,.5,.2,'sine',30);this.noise(t,.42,.1,3000);[523,659,784,1047].forEach((f,i)=>this.tone(f,t+.07*i,.7,.06,'triangle'));}
     if(e.type==='clear'){[523,659,784].forEach((f,i)=>this.tone(f,t+i*.1,.4,.06));}
+    if(e.type==='blessing'){[659,880,1319].forEach((f,i)=>this.tone(f,t+i*.065,.3,.04));}
+    if(e.type==='income'){this.tone(1047,t,.1,.024);this.tone(1568,t+.055,.12,.016);}
     if(e.type==='leak'){this.tone(150,t,.3,.11,'sawtooth',55);}
     if(e.type==='warning'){this.tone(330,t,.2,.06);this.tone(330,t+.3,.2,.06);}
   }

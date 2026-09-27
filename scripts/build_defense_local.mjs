@@ -8,7 +8,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 export const APP_ROOT = path.join(REPOSITORY_ROOT, "defense");
 export const DEFAULT_OUTPUT = path.join(APP_ROOT, "dist-local", "HeroCoreDefense.html");
-export const EXPECTED_RELEASE_ASSET_COUNT = 24;
+export const EXPECTED_RELEASE_ASSET_COUNT = 27;
 
 const ENTRY_PATH = "./merge/main.js";
 const ASSET_MODULE_PATH = path.join(APP_ROOT, "merge", "content.js");

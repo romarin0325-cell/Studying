@@ -4,22 +4,24 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
     <meta name="theme-color" content="#132731">
-    <meta name="description" content="21명의 영웅, 6명의 동행. 별빛을 모으고 운명을 합성하는 아스트라 디펜스.">
-    <title>ASTRA · 성좌의 수호자</title>
+    <meta name="description" content="루미가 소환한 별빛 세계. 21명의 동행, 20개의 유물, 물결마다 새로운 축복으로 나만의 원정을 만드세요.">
+    <title>루미의 별빛 원정 · ASTRA</title>
     <link rel="stylesheet" href="./merge/style.css">
   </head>
   <body>
     <div id="app">
-      <section id="home" class="screen home-screen" aria-label="성좌의 수호자 시작 화면">
+      <section id="home" class="screen home-screen" aria-label="루미의 별빛 원정 시작 화면">
         <div class="home-backdrop"></div>
         <header class="home-top"><span class="wordmark">A S T R A</span><button class="icon-button" data-action="settings" aria-label="설정"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14M9 5v4m6 1v4m-5 1v4"/></svg></button></header>
-        <div class="title-lockup"><span class="eyebrow">THE CONSTELLATION KEEPERS</span><h1>성좌의 수호자</h1><div class="title-rule"><i></i><span>✦</span><i></i></div></div>
+        <div class="title-lockup"><span class="eyebrow">RUMI'S STARLIT EXPEDITION</span><h1><small>루미의</small> 별빛 원정</h1><div class="title-rule"><i></i><span>✦</span><i></i></div></div>
         <canvas id="home-art" width="720" height="510" aria-hidden="true"></canvas>
         <div class="home-bottom">
           <div class="chapter-selector"><button id="chapter-prev" class="icon-button" aria-label="이전 지역">‹</button><div><span id="chapter-number" class="eyebrow">CHAPTER 01</span><h2 id="chapter-name">달빛 정원</h2><p id="chapter-caption">처음 피어나는 별</p></div><button id="chapter-next" class="icon-button" aria-label="다음 지역">›</button></div>
           <div class="deck-heading"><span>이번 원정의 동행</span><button class="text-button" data-action="deck">편성 바꾸기 <span>↗</span></button></div>
           <div id="home-deck" class="deck-strip"></div>
-          <button id="play" class="primary-button"><span>수호를 시작하다</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+          <p id="rules-update" class="rules-update" hidden>새 원정 규칙이 적용되었습니다. 편성·기록은 유지되며, 이전 규칙의 진행 중 전투는 새 원정으로 시작합니다.</p>
+          <div class="loadout-row"><div><span>작은 준비, 다른 원정</span><button class="text-button" data-action="loadout">유물 조합 <span>↗</span></button></div><div id="home-relics"></div></div>
+          <button id="play" class="primary-button"><span>별빛 원정 시작</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
           <button id="resume" class="resume-button" hidden>진행하던 원정 이어가기</button>
           <div class="home-footnote"><span>6명의 동행 · 12번의 물결</span><span id="record">새로운 이야기</span></div>
         </div>
@@ -32,20 +34,23 @@
           <button id="speed" class="speed-button" aria-label="전투 속도 변경">1×</button>
         </header>
         <div class="arena-wrap">
-          <canvas id="arena" width="720" height="780" aria-label="5행 5열 영웅 전장. 영웅을 선택한 뒤 목적지를 누르거나 끌어서 이동과 합성." tabindex="0"></canvas>
+          <canvas id="arena" width="720" height="780" aria-label="5행 5열 영웅 전장. 탭하면 동료 정보. 드래그로만 이동, 교환, 합성." tabindex="0"></canvas>
           <div id="cell-access" class="cell-access" aria-label="영웅 배치 칸"></div>
           <div id="wave-banner" class="wave-banner" aria-live="polite"></div>
           <div id="boss-warning" class="boss-warning" hidden></div>
           <div id="skill-cutin" class="skill-cutin" hidden><img alt=""><div><small>CONSTELLATION</small><strong></strong></div></div>
           <div id="hint" class="battle-hint">같은 영웅을 겹치면 더 강해집니다</div>
+        </div>
+        <div class="inspection-dock">
+          <div id="inspection-empty"><span class="inspect-mark">✧</span><div><strong>어떤 동행을 키워 볼까요?</strong><p>탭으로 능력 확인 · 드래그로 이동과 합성</p></div><button class="text-button" data-action="help" aria-label="플레이 방법">?</button></div>
           <div id="unit-panel" class="unit-panel" hidden></div>
         </div>
         <div class="battle-controls">
           <div class="star-meter"><span>✦ <b>별빛</b></span><div><i id="gauge-fill"></i></div><strong id="gauge">75</strong><small>/ 100</small></div>
           <div id="skills" class="skill-strip"></div>
           <div class="battle-forecast" aria-label="앞으로의 물결"><div><span id="forecast-kicker">다가오는 보스</span><strong id="forecast-name">인조마신</strong><small id="forecast-detail">4번째 물결 · 마력 봉인</small></div><div id="journey-dots" class="journey-dots" aria-hidden="true"></div></div>
-          <div class="economy-line"><span class="gold"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="9"/><path d="m12 7 3 5-3 5-3-5Z"/></svg><b id="gold">65</b></span><span id="interest" class="interest">다음 이자 +6</span><button id="artifacts-button" class="text-button">유물 <b id="artifact-count">0</b></button></div>
-          <div class="action-row"><button id="summon" class="primary-button summon-button"><span class="summon-star">✧</span><span>영웅 소환</span><strong id="summon-price">10 <small>G</small></strong></button><button id="training" class="secondary-button"><svg viewBox="0 0 24 24"><path d="m12 3 7 7-4 1v10H9V11l-4-1Z"/></svg><span>동행 강화</span></button></div>
+          <div class="economy-line"><span class="gold"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="9"/><path d="m12 7 3 5-3 5-3-5Z"/></svg><b id="gold">45</b></span><span id="economy-note" class="economy-note">영구 공격 +0%</span><button id="artifacts-button" class="text-button">유물 <b id="artifact-count">0</b></button></div>
+          <div class="action-row"><button id="summon" class="primary-button summon-button"><span class="summon-star">✧</span><span>동료 소환</span><strong id="summon-price">무료 <small>3회</small></strong></button><button id="training" class="secondary-button"><svg viewBox="0 0 24 24"><path d="m12 3 7 7-4 1v10H9V11l-4-1Z"/></svg><span>동행 강화</span></button></div>
         </div>
       </section>
       <div id="toast" class="toast" role="status" hidden></div>

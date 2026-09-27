@@ -1,4 +1,4 @@
-# ASTRA Confluence 캐릭터·이펙트 방향
+# 루미의 별빛 원정 캐릭터·이펙트 방향
 
 이 문서는 PR #546에서 도입한 현재 Defense의 아트 계약만 설명한다. PR #546 직전의 2.5–3등신 idle/attack 아틀라스, 12×16 전장, STARWARD/V2 제작 지침은 `defense_legacy/`에 보존되어 있으며 현재 게임의 기준이 아니다.
 
@@ -18,14 +18,19 @@
 
 `assets/merge/units/`에는 캐릭터별 1024×1024 WebP 아틀라스가 있다. 각 512×512 셀의 순서는 정면, 후면, 좌측, 우측이며 공통 발 앵커는 `(256,480)`이다. `manifest.json`은 원본·출력 SHA-256, 네 발 기준점, 정면 얼굴 중심, 파생 배율과 분할 정보를 기록한다. 초상화 crop 메타데이터는 `merge/art-frames.js`에 있다.
 
-현재 배포 에셋은 다음 24개다.
+현재 배포 에셋은 다음 27개다.
 
 - 영웅 방향 아틀라스 21개
 - 정원 배경 `assets/merge/garden.webp`
 - 적 아틀라스 `assets/moonlit/creatures.webp`
 - 보스 아틀라스 `assets/moonlit/realm-bosses.webp`
+- 유물 20종 `assets/merge/relics.webp` (5×4, 실제 알파)
+- 축복 6종 `assets/merge/blessings.webp` (3×2, 실제 알파)
+- SD 타격 효과 21종 `assets/merge/effects.webp` (7×3, 검정 배경 screen 합성)
 
 배포본은 이 파일들을 단일 HTML에 포함한다. 게임 실행 중 이미지 처리, 픽셀 판독 또는 생성 작업을 하지 않는다.
+
+추가 에셋의 선택·프롬프트·해시는 [에셋 기록](doc/ART_ASSETS.md)에 있다. 효과는 `merge/effects.js`의 21개 고유 motion/frame을 사용한다. 참격·단검·도약·용염·발톱·혜성은 목표 방향으로 회전하며 원본 기울기를 offset으로 보정한다. 투사체는 짧고, 명중은 0.3초, 스킬은 0.65초로 끝낸다. 지원 스킬 문양은 공격받는 적이 아닌 강화받는 동료에 표시한다. 지나친 입자나 사실적인 연기 대신 명확한 2–3색 핵심과 짧은 잔상을 선택한다.
 
 ## 모션·전투 가독성
 
