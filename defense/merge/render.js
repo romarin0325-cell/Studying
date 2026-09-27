@@ -71,7 +71,8 @@ export class Renderer {
     if(this.shake>0&&!this.reduced){ctx.translate(Math.sin(this.clock*97)*this.shake,Math.cos(this.clock*83)*this.shake*.65);this.shake=Math.max(0,this.shake-dt*40);}else this.shake=0;
     ctx.drawImage(this.background,0,0);
     this.drawDecor(s);
-    this.fx.reduced=this.reduced;this.fx.drawZones(s);
+    this.fx.reduced=this.reduced;this.fx.drawZones(s);this.fx.drawSkillField(this.skill);
+    this.canvas.dataset.skillField=this.skill?.hero||'';
     for(let i=0;i<25;i++)if(s.board[i]&&s.board.some(u=>canMerge(s.board[i],u))){const p=cellPoint(i);ctx.fillStyle='#e2eac912';rounded(ctx,p.x-40,p.y-40,80,80,7);ctx.fill();for(const [dx,dy] of [[-1,-1],[1,1]])line(ctx,[[p.x+dx*27,p.y+dy*40],[p.x+dx*40,p.y+dy*40],[p.x+dx*40,p.y+dy*27]],'#ede4adbb',2.5);star(ctx,p.x+32,p.y-31,5,'#fff1b9',Math.PI/4);}
     if(this.selected>=0&&s.board[this.selected]){
       const a=s.board[this.selected];

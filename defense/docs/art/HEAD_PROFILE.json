@@ -5,6 +5,7 @@
   "foot": [256, 480],
   "directions": ["down", "up", "left", "right"],
   "head": {"height": 150, "frontWidth": 160, "sideWidth": 144},
+  "headOverrides": {"cinderella": {"scale": 0.95, "reason": "Author requested a subtly smaller head after approving the overall SD cast. Only Cinderella is repacked; not a new target for the other 20 companions."}},
   "bodyBelowChin": {"short": 144, "medium": 160, "tall": 176},
   "review": {
     "headHeightTolerance": 0.05,

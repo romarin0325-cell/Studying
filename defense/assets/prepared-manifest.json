@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "sourceHash": "9675e2c6308f408f05ce714acdf795743940749b1c05e89c012939b8243b1a60",
-  "processorHash": "625cebc7122b18b36028b0a700e5ff287545747d8df4c62974dd129b812fd476",
+  "sourceHash": "de835be9cc4485912f77b5eb12bfd3e0f09cb0037c3a3ce3c2ecedceed97ada3",
+  "processorHash": "12f47b2a99e492af9ed69a76f08ebb9b97f73799861f8b736a2ed3d6649a66fc",
   "fileCount": 27,
   "files": {
     "./assets/merge/blessings.webp": {
@@ -51,8 +51,8 @@
       "height": 1024
     },
     "./assets/merge/units/cinderella.webp": {
-      "sourceHash": "bb85ff4dba57076687b7aeecbc50f31325e15bfbe802e79308917b33b1e6d8dd",
-      "bytes": 244336,
+      "sourceHash": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "bytes": 291576,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
