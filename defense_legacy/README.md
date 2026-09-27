@@ -1,0 +1,31 @@
+# 별의 수호자 · Starward
+
+Portrait-first fantasy tower defense on the deterministic Defense V2 engine: four illustrated journeys, sixteen guardians and ten waves, with Story and Trial difficulties.
+
+## Play
+
+Open `defense/dist-local/HeroCoreDefense.html` directly. This approximately 7.51 MiB file includes all art, code and styles and makes no network requests. Source development uses `npm run serve:defense` at http://127.0.0.1:4174/.
+
+Choose one protagonist and four companions. Tap a card then a glowing position, or drag the card onto the battlefield. Automatic placement provides a starting formation. Spend crystals between waves; choose traits at Lv4 and Lv6. Aim **별의 기원** once per wave to stop a threatening group. Combat starts at 2× speed; pause, speed, sound and effect controls remain available.
+
+Final bosses must be defeated: a breach ends the run. Midbosses inflict three core damage. Medals persist separately for each difficulty. Continue restarts an unfinished wave at its saved boundary.
+
+## Art and documentation
+
+Seven atlases in `assets/moonlit/` provide 32 character poses, 16 combat effects, 10 enemies, 4 bosses, 2 props and 4 environments. Sprites are prepared as alpha WebP before release; the browser performs no pixel extraction. The 96 portrait/battle fallback files load on demand, giving 103 embedded release assets. Character direction fallbacks share the reviewed idle pose.
+
+Read [current release and balance notes](docs/TACTICAL_RELEASE.md), [art direction](ART_DIRECTION.md), [exact generation prompts](docs/TACTICAL_ART_PROMPTS.md) and the [underlying engine wiki](docs/README.md). Older STARWARD documents describe the prior ten-character release.
+
+## Build and validation
+
+```powershell
+npm run lint:defense
+npm run test:defense
+npm run test:defense:local
+npm run test:defense:browser
+npm run test:defense:experience
+npm run test:defense:resilience
+npm run verify
+```
+
+The local test rebuilds the HTML; run it before the experience test. Experience checks use real UI decisions and accelerated deterministic battle ticks. Root verification deliberately excludes Defense, so the explicit Defense checks above remain necessary.

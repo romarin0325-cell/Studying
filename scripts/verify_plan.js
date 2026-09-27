@@ -33,6 +33,23 @@ function changePaths(changes) {
   return [...files].sort();
 }
 
+function currentChangePaths(changes) {
+  const files = new Set();
+  for (const change of changes || []) {
+    const status = String(change.status || '').charAt(0);
+    if (status === 'D') continue;
+    const paths = change.paths || [];
+    const currentPaths = status === 'R' || status === 'C'
+      ? paths.slice(-1)
+      : paths;
+    for (const file of currentPaths) {
+      const normalized = normalizePath(file);
+      if (normalized) files.add(normalized);
+    }
+  }
+  return [...files].sort();
+}
+
 function isDocumentation(file) {
   if (DEFENSE_ART_INPUTS.has(file)) return false;
   const lower = file.toLowerCase();
@@ -334,30 +351,26 @@ function planShooter(plan, files) {
 
 function defenseUnitTestsFor(sourceFiles) {
   const tests = new Set();
+  if (sourceFiles.length > 0) tests.add('defense/tests/unit/confluence.test.mjs');
   for (const file of sourceFiles) {
     if (/^defense\/merge\/(?:engine|content|main)\.js$/.test(file)) tests.add('defense/tests/unit/confluence.test.mjs');
-    if (file.startsWith('defense/assets/merge/units/') || DEFENSE_ART_INPUTS.has(file)) tests.add('defense/tests/integration/confluence-art.test.mjs');
-    if (file.includes('/persistence/')) tests.add('defense/tests/unit/persistence.test.mjs');
-    if (file.includes('/render/')) tests.add('defense/tests/unit/effects-renderer.test.mjs');
-    if (file.includes('/content/')) tests.add('defense/tests/integration/content-architecture.test.mjs');
-    if (file.includes('/battle/')) tests.add('defense/tests/unit/combat-rules.test.mjs');
-    if (file.includes('AttackTimeline')) tests.add('defense/tests/unit/attack-timeline.test.mjs');
-    if (file.includes('AuraSystem')) tests.add('defense/tests/unit/aura-status.test.mjs');
-    if (file.includes('BossAbility')) tests.add('defense/tests/unit/boss-abilities.test.mjs');
-    if (file.includes('Direction')) tests.add('defense/tests/unit/direction-viewport.test.mjs');
+    if (file.startsWith('defense/assets/') || DEFENSE_ART_INPUTS.has(file)) tests.add('defense/tests/integration/confluence-art.test.mjs');
   }
   return [...tests];
 }
 
-function planDefense(plan, files) {
+function planDefense(plan, files, currentFiles) {
   const defenseFiles = files.filter(file => file.startsWith('defense/'));
   if (defenseFiles.length === 0) {
     if (files.some(file => DEFENSE_TOOLS.has(file))) plan.skipped.push('Defense tooling has no changed Defense product file; no game runtime is selected.');
     return;
   }
-  for (const file of files.filter(file => DEFENSE_TOOLS.has(file))) addNodeCheck(plan, 'defense', file);
+  const currentSet = new Set(currentFiles);
+  for (const file of files.filter(file => DEFENSE_TOOLS.has(file) && currentSet.has(file))) addNodeCheck(plan, 'defense', file);
   const productFiles = defenseFiles.filter(file => !isDocumentation(file));
-  const directTests = productFiles.filter(file => /^defense\/tests\/.+\.test\.mjs$/.test(file));
+  const directTests = productFiles.filter(file => (
+    currentSet.has(file) && /^defense\/tests\/.+\.test\.mjs$/.test(file)
+  ));
   addNodeTest(
     plan,
     'defense',
@@ -371,7 +384,9 @@ function planDefense(plan, files) {
     && !file.startsWith('defense/dist-local/')
     && file !== 'defense/AGENTS.md'
   ));
-  for (const file of sourceFiles.filter(file => /\.(?:js|mjs|cjs)$/.test(file))) {
+  for (const file of sourceFiles.filter(file => (
+    currentSet.has(file) && /\.(?:js|mjs|cjs)$/.test(file)
+  ))) {
     addNodeCheck(plan, 'defense', file);
   }
 
@@ -459,6 +474,7 @@ function planDefense(plan, files) {
 
 function createPlan(changes, options = {}) {
   const files = changePaths(changes);
+  const currentFiles = currentChangePaths(changes);
   const onlyGame = options.onlyGame || null;
   if (onlyGame && !ALL_GAMES.includes(onlyGame)) {
     throw new Error('Unknown game: ' + onlyGame);
@@ -496,7 +512,7 @@ function createPlan(changes, options = {}) {
   const shouldPlan = game => !onlyGame ? ACTIVE_ROOT_GAMES.includes(game) : onlyGame === game;
   if (shouldPlan('card')) planCard(plan, files);
   if (shouldPlan('shooter')) planShooter(plan, files);
-  if (shouldPlan('defense')) planDefense(plan, files);
+  if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
 
   if (!onlyGame && plan.detectedGames.includes('defense')) {
     plan.skipped.push('Defense commands are delegated to the dedicated Defense workflow.');
@@ -519,6 +535,7 @@ function createPlan(changes, options = {}) {
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),
     ...files.filter(file => DEFENSE_TOOLS.has(file)),
     ...ordinaryDocs,
+    ...files.filter(file => file.startsWith('defense_legacy/')),
     '.gitignore',
     '.gitattributes'
   ]);
@@ -600,6 +617,7 @@ module.exports = {
   ACTIVE_ROOT_GAMES,
   ALL_GAMES,
   changePaths,
+  currentChangePaths,
   createPlan,
   fullPlan,
   isDocumentation,

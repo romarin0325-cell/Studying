@@ -26,7 +26,7 @@ Character identity comes from the user's originals in Downloads/캐릭터 and th
 
 ## Delivery and evidence
 
-The existing Defense remains in Git history. The active index and offline release open this game. Release gates cover deck confinement, merging, income, shared gauge, boss interactions, save/resume, offline execution, touch layout and failed image loads. Human-readable play notes distinguish observed behavior from judgments about fun. Desktop emulation cannot certify physical Android performance.
+The pre-PR #546 Defense is preserved in `defense_legacy/`. The active index and offline release open only this game. Release gates cover deck confinement, merging, income, shared gauge, boss interactions, save/resume, offline execution, touch layout and failed image loads. Human-readable play notes distinguish observed behavior from judgments about fun. Desktop emulation cannot certify physical Android performance.
 
 ## References reviewed
 

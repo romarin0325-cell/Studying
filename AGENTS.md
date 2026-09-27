@@ -22,6 +22,9 @@ Current targets:
 - `shooter/`: focused Shooter unit, build, and browser checks
 
 `card_legacy/` is a preserved snapshot. Do not use it as the active Card source.
+`defense_legacy/` is the preserved Defense snapshot from immediately before PR
+#546. Do not use it as the active Defense source; the PR #546 game lives in
+`defense/`.
 `defense/` is intentionally excluded from automatic verification until it becomes active work again.
 
 ## Hard rules

@@ -52,6 +52,36 @@ test('Defense-only changes are delegated by root and isolated in the dedicated p
   assert.equal(ids(defensePlan).some(id => id.includes('simulation-balance')), false);
 });
 
+test('Defense legacy snapshot changes select no runtime and are fully mapped', () => {
+  const rootPlan = createPlan(changes(
+    'defense_legacy/js/main.js',
+    'defense_legacy/tests/unit/core.test.mjs',
+    'defense_legacy/index.html'
+  ));
+  assert.deepEqual(rootPlan.steps, []);
+  assert.deepEqual(rootPlan.blocked, []);
+  assert.deepEqual(rootPlan.detectedGames, []);
+
+  const defensePlan = createPlan(
+    changes('defense_legacy/js/main.js'),
+    { onlyGame: 'defense' }
+  );
+  assert.deepEqual(defensePlan.steps, []);
+  assert.deepEqual(defensePlan.blocked, []);
+});
+
+test('moving removed Defense files to legacy never syntax-checks missing paths', () => {
+  const plan = createPlan([{
+    status: 'R100',
+    paths: ['defense/js/main.js', 'defense_legacy/js/main.js']
+  }], { onlyGame: 'defense' });
+  const commands = plan.steps.map(step => [step.command, ...step.args].join(' ')).join('\n');
+  assert.doesNotMatch(commands, /node --check defense\/js\/main\.js/);
+  assert.ok(ids(plan).includes('defense:build-local'));
+  assert.match(commands, /defense\/tests\/unit\/confluence\.test\.mjs/);
+  assert.deepEqual(plan.blocked, []);
+});
+
 test('non-deployment documentation installs and runs no game tooling', () => {
   const plan = createPlan(changes('shooter/README.md', 'docs/notes.md'));
   assert.equal(plan.steps.length, 0);
