@@ -21,6 +21,31 @@ function games(plan) {
   return new Set(plan.steps.map(step => step.game));
 }
 
+test('Idle runtime selects its focused checks and offline artifact only', () => {
+  const plan = createPlan(changes('idle/src/core/commands.js', 'idle/src/combat/engine.js', 'idle/assets/memories/bond_lumi_01.webp'));
+  assert.deepEqual([...games(plan)], ['idle']);
+  assert.deepEqual(plan.blocked, []);
+  assert.ok(ids(plan).includes('idle:build'));
+  assert.ok(ids(plan).includes('idle:offline-browser'));
+  const commands = plan.steps.map(s => s.args.join(' ')).join('\n');
+  assert.match(commands, /idle\/tests\/rewards.test.mjs/);
+  assert.doesNotMatch(commands, /defense|shooter|card\/|simulate.mjs/);
+});
+
+test('Idle documentation and test-only changes never rebuild or run unrelated games', () => {
+  assert.deepEqual(createPlan(changes('idle/docs/ART_REVIEW.md')).steps, []);
+  const plan = createPlan(changes('idle/tests/rewards.test.mjs'));
+  assert.deepEqual([...games(plan)], ['idle']);
+  assert.equal(ids(plan).includes('idle:build'), false);
+  assert.equal(plan.needsInstall, false);
+});
+
+test('Idle unknown executable and dist-only updates block; selector-only updates stay fixtures', () => {
+  assert.ok(createPlan(changes('idle/unknown-runtime.js')).blocked.length);
+  assert.ok(createPlan(changes('idle/dist/AstralCompanions.html')).blocked.length);
+  assert.deepEqual([...games(createPlan(changes('scripts/verify_plan.js', 'package.json')))], ['verification']);
+});
+
 test('Card-only changes never select Shooter or Defense commands', () => {
   const plan = createPlan(changes('card/game/logic.js'));
   assert.ok(games(plan).has('card'));

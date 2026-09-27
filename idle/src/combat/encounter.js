@@ -1,0 +1,6 @@
+import {HERO,BOSS,VERSION,balance} from '../data/catalog.js';
+import {F} from '../systems/growth.js';
+import {hash} from '../core/rng.js';
+export function expeditionEncounter(heroId,stage){if(!HERO[heroId]||stage<1||stage>1200)throw Error('Invalid expedition');const r=1+Math.floor((stage-1)/3),gate=stage%10===0;return {id:`expedition:${heroId}:${stage}`,kind:'expedition',heroId,stage,difficulty:stage,name:gate?'별길의 파수꾼':'별길의 정령',element:stage%10===9?'neutral':({zeke:'nature',lumi:'fire',queen:'water',jasmine:'dark',luna:'light'})[heroId],hp:(gate?balance.encounters.gateHPBase:1000)*F(r),atk:(gate?balance.encounters.gateATKBase:24)*F(r),def:60*(1+.015*(r-1)),mdef:60*(1+.015*(r-1)),maxTicks:gate?1200:600,gate,variant:stage>=20&&gate?Math.floor(stage/20)%3:null};}
+export function bossEncounter(id,tier=1){const b=BOSS[id];if(!b||tier<1||tier>50)throw Error('Invalid boss tier');const r=5+6*(tier-1);return {id:`boss:${id}:${tier}`,bossId:id,kind:'boss',difficulty:tier,tier,name:b.name,element:b.element,hp:6000*F(r),atk:60*F(r),def:60*(1+.015*(r-1)),mdef:60*(1+.015*(r-1)),maxTicks:id==='astea'?900:1200};}
+export function battleSeed(loadout,encounter){return hash([VERSION,encounter.id,encounter.difficulty,loadout.heroId,hash(loadout)]);}

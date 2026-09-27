@@ -1,0 +1,17 @@
+import roster from './roster.json' with {type:'json'};
+import balance from './balance.json' with {type:'json'};
+import season from './season.json' with {type:'json'};
+import adventure from './adventure.json' with {type:'json'};
+export {balance,season,adventure};
+export const VERSION='1.0.0';
+export const HEROES=roster.heroes, COMPANIONS=roster.companions, BOSSES=roster.bosses;
+export const HERO=Object.fromEntries(HEROES.map(x=>[x.id,x]));
+export const COMPANION=Object.fromEntries(COMPANIONS.map(x=>[x.id,x]));
+export const BOSS=Object.fromEntries(BOSSES.map(x=>[x.id,x]));
+export const ARTIFACTS=BOSSES.map(x=>({...x.artifact,bossId:x.id}));
+export const MEMORIES=season.memories;
+export const ELEMENTS={fire:'불',water:'물',nature:'자연',light:'빛',dark:'어둠',neutral:'무속성'};
+export const STYLES={zeke:['철벽','결전'],lumi:['순환','유성'],queen:['개화','수확'],jasmine:['성역','강림'],luna:['월영','암살']};
+export const INITIAL=['flame_sage','snow_rabbit','storm_sage','lightning_sage','guardian'];
+export const TITLES={zeke:'꺼지지 않는 의지',lumi:'꿈을 그리는 마법사',queen:'장미의 피날레',jasmine:'빛을 이끄는 손',luna:'달그림자의 발걸음'};
+export const GATES={return:{name:'귀환의 별',kind:'grammar',description:'수령한 기본 EXP·골드 중 최대 4시간분을 한 번 더'},echo:{name:'별빛의 잔향',kind:'collocation',description:'10연 결과를 모두 본 뒤, 같은 확률로 한 번 더'},grace:{name:'원정의 가호',kind:'vocab',description:'다섯 원정의 EXP·골드 수익, 다음 30분 동안 두 배'}};

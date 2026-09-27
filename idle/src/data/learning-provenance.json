@@ -1,0 +1,22 @@
+{
+  "source": "card/game",
+  "sourceCommit": "d914c2a7b48f391f2f66146b5448bdb9727a446c",
+  "normalization": "UTF-8 LF; remove trailing spaces before line breaks in copied text",
+  "files": [
+    {
+      "file": "vocab_data.js",
+      "sha256": "bcc14884759538cc49b37e790d6397ba7168f8bdf0af37d31e82951471ca27ee",
+      "entries": 381
+    },
+    {
+      "file": "collocation_data.js",
+      "sha256": "7e6727f75d5e6fb840c4f5c525d4ced4d84da15ee6b1fa18bd9db6cc0a0f1b22",
+      "entries": 130
+    },
+    {
+      "file": "grammar_data.js",
+      "sha256": "e6871ddef24f66e852216cf4cba97546c0ab333318cf4a703ffeec0660dce1df",
+      "entries": 35
+    }
+  ]
+}

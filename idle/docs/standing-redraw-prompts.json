@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "mode": "new drawings from original identity references",
+  "prompts": [
+    {
+      "id": "archive_zeke_01",
+      "prompt": "Create a brand new full-length standing anime RPG illustration of the SAME adult male knight as this original reference. Use the original image only for identity and exact outfit, not as an edit target. The most important requirement is a MUCH MORE PROMINENT ACTUAL HEAD in balanced 6-to-6.5-head-tall adult anime proportions. Not an 8-head fashion figure. On a 1024x1536 canvas: actual skull crown around y=110, chin around y=325, soles around y=1430; the head excluding flame hair must be approximately 210 pixels high and the face must be visibly broad enough for the armor. These are compositional targets, not text to render. His chest/waist/legs must be compacted to fit this anatomy; specifically do not produce extremely long shins. The whole armored figure should fit naturally around this larger adult face. Short neck and moderate shoulder width, heroic strong adult masculine silhouette and confident smile, NOT childlike or chibi. Preserve exact red-and-gold flame hair, black/silver armor, red cloak and coat, black boots, orange gems, huge fiery sword. Fresh three-quarter relaxed standing pose on a quiet castle terrace at sunset, sword tip rests on the ground. All feet and hair visible, no cropping. Detailed cohesive anime line art and painted background. No words, UI or watermark. Draw all pixels and the pose anew; do not stretch, edit or composite an earlier output. Prioritize the specified large actual head and compact natural limbs over long fashion proportions."
+    },
+    {
+      "id": "archive_queen_01",
+      "prompt": "Create a brand new full-length standing anime RPG illustration of the SAME adult female Queen as this original reference. Reference is only for identity and exact clothing, not an edit target. Make the ACTUAL HEAD AND FACE distinctly larger relative to the figure: balanced elegant adult 6-to-6.5-head proportions. On a 1024x1536 canvas target actual skull crown near y=155 and chin near y=370, dress floor hem near y=1430: actual head about 215 pixels tall, roughly one-sixth of the figure without crown spikes. Do not count the huge halo as the head. Face and skull must genuinely dominate more, with natural short neck and a compact upper body, the dress proportionately shorter. Keep adult elegance and mature facial identity, not chibi, not childlike. Preserve pale ash-silver hair, gold eyes, subtle confident smile, rose circlet and gold halo, white high-neck fitted dress with white rose brooch, white cape and skirt panels with crimson lining over a red floor-length dress, gold/white rose staff with crimson magic circle. Fresh calm standing pose in a softly painted rose courtyard at sunset, staff in one hand and the other relaxed by the body. Her head should remain clearly readable in a small mobile thumbnail. Fine anime line art, rich painterly light, same outfit and identity, no text/watermarks/UI. New drawing from scratch, no inpainting or pasted scaled head. Avoid elongated body, overly long skirt, tiny face and exaggerated huge crown."
+    }
+  ],
+  "selectedSources": {
+    "archive_zeke_01": "C:\\Users\\romar\\.codex\\generated_images\\01a0e1d5-c3c1-7492-bcbb-e5d1f189d885\\exec-ad8c1741-719a-4bd2-8d0b-2860db42098c.png",
+    "archive_queen_01": "C:\\Users\\romar\\.codex\\generated_images\\01a0e1d5-c3c1-7492-bcbb-e5d1f189d885\\exec-5094b93a-74a2-40d0-891f-697b7bca3ec6.png"
+  }
+}

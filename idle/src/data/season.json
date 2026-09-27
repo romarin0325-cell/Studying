@@ -1,0 +1,226 @@
+{
+  "id": "s01",
+  "name": "별빛 아래의 휴식",
+  "durationDays": 28,
+  "startsAt": "profile.personalSeasonStart",
+  "artDirection": "기존 복장과 인물 정체성을 유지한 저녁 거점의 일상. 신규 세계관 사건이나 과거사는 확정하지 않는다.",
+  "paidContent": false,
+  "repeatAfterSeasonOccurrences": 3,
+  "chapters": [
+    {
+      "unlockQualifiedDays": 1,
+      "scenes": 2
+    },
+    {
+      "unlockQualifiedDays": 7,
+      "scenes": 2
+    },
+    {
+      "unlockQualifiedDays": 14,
+      "scenes": 2
+    },
+    {
+      "unlockQualifiedDays": 21,
+      "scenes": 2
+    }
+  ],
+  "memoryPoolCurrent": [
+    "s01_lumi",
+    "s01_snow_rabbit"
+  ],
+  "memoryPoolArchive": [
+    "archive_zeke_01",
+    "archive_lumi_01",
+    "archive_queen_01",
+    "archive_jasmine_01",
+    "archive_luna_01"
+  ],
+  "freeTrackMemory": "s01_lumi_whale",
+  "trackRewardPointThresholds": [
+    10,
+    40,
+    80,
+    120,
+    160,
+    200,
+    240
+  ],
+  "memories": [
+    {
+      "id": "archive_zeke_01",
+      "name": "지크 · 원정의 한 장면",
+      "type": "archive",
+      "heroIds": [
+        "zeke"
+      ],
+      "acquisition": "archive_lottery",
+      "artPath": "assets/memories/archive_zeke_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "bond_zeke_01",
+      "name": "지크 · 함께한 시간",
+      "type": "bond",
+      "heroIds": [
+        "zeke"
+      ],
+      "acquisition": "bond_210_scene",
+      "artPath": "assets/memories/bond_zeke_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "archive_lumi_01",
+      "name": "루미 · 원정의 한 장면",
+      "type": "archive",
+      "heroIds": [
+        "lumi"
+      ],
+      "acquisition": "archive_lottery",
+      "artPath": "assets/memories/archive_lumi_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "bond_lumi_01",
+      "name": "루미 · 함께한 시간",
+      "type": "bond",
+      "heroIds": [
+        "lumi"
+      ],
+      "acquisition": "bond_210_scene",
+      "artPath": "assets/memories/bond_lumi_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "archive_queen_01",
+      "name": "여왕 · 원정의 한 장면",
+      "type": "archive",
+      "heroIds": [
+        "queen"
+      ],
+      "acquisition": "archive_lottery",
+      "artPath": "assets/memories/archive_queen_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "bond_queen_01",
+      "name": "여왕 · 함께한 시간",
+      "type": "bond",
+      "heroIds": [
+        "queen"
+      ],
+      "acquisition": "bond_210_scene",
+      "artPath": "assets/memories/bond_queen_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "archive_jasmine_01",
+      "name": "자스민 · 원정의 한 장면",
+      "type": "archive",
+      "heroIds": [
+        "jasmine"
+      ],
+      "acquisition": "archive_lottery",
+      "artPath": "assets/memories/archive_jasmine_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "bond_jasmine_01",
+      "name": "자스민 · 함께한 시간",
+      "type": "bond",
+      "heroIds": [
+        "jasmine"
+      ],
+      "acquisition": "bond_210_scene",
+      "artPath": "assets/memories/bond_jasmine_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "archive_luna_01",
+      "name": "루나 · 원정의 한 장면",
+      "type": "archive",
+      "heroIds": [
+        "luna"
+      ],
+      "acquisition": "archive_lottery",
+      "artPath": "assets/memories/archive_luna_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "bond_luna_01",
+      "name": "루나 · 함께한 시간",
+      "type": "bond",
+      "heroIds": [
+        "luna"
+      ],
+      "acquisition": "bond_210_scene",
+      "artPath": "assets/memories/bond_luna_01.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "trauma",
+      "name": "트라우마",
+      "type": "special",
+      "acquisition": "시간의마술사 보유 + 동료 개인기록 3편 열람 + 영웅 중 1명 원정 60단계",
+      "artPath": "assets/memories/trauma.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "luna_jasmine",
+      "name": "루나&자스민",
+      "type": "special",
+      "acquisition": "루나/자스민 관계 각 210 + 두 영웅 원정 단계 합계 120 + 공동 장면 3편 열람",
+      "artPath": "assets/memories/luna_jasmine.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "s01_lumi",
+      "name": "루미 · 별빛 아래의 휴식",
+      "type": "season",
+      "heroIds": [
+        "lumi"
+      ],
+      "acquisition": "current_season_lottery",
+      "artPath": "assets/memories/s01_lumi.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "s01_snow_rabbit",
+      "name": "눈토끼 · 돌아오는 길",
+      "type": "season",
+      "heroIds": [
+        "snow_rabbit"
+      ],
+      "acquisition": "current_season_lottery",
+      "artPath": "assets/memories/s01_snow_rabbit.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    },
+    {
+      "id": "s01_lumi_whale",
+      "name": "루미와 은하고래 · 저녁의 기록",
+      "type": "season",
+      "heroIds": [
+        "lumi",
+        "galaxy_whale"
+      ],
+      "acquisition": "season_track_240",
+      "artPath": "assets/memories/s01_lumi_whale.webp",
+      "combatEffect": null,
+      "artState": "produced_reviewed"
+    }
+  ],
+  "seasonDialogueStatus": "8 authored scenes; see src/data/extra-scenes.js"
+}

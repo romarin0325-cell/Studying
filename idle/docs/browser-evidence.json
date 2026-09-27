@@ -1,0 +1,28 @@
+{
+  "browser": "Chromium 147.0.7727.15",
+  "offlineURL": "file://AstralCompanions.html",
+  "checks": [
+    "new profile, tutorial, growth, battle and durable result",
+    "10-draw reload resumes committed results, wrong echo answer has no cost, normal +1 draw",
+    "12h base first, mandatory grammar lecture, retry without loss, exact4h extra and grace",
+    "day7 progress, five hero portrait composition and scene skip reward",
+    "mixed aspect album, shared home and viewer preserve both characters; zoom/reset",
+    "day30 boss access, unique support assignment, deterministic adventure retry, full eight-node route",
+    "actual day30 close defeat, same-engine analysis, two free loadout changes and deterministic retry",
+    "one missed day still unlocks final seasonal memory; three-day return boost fixture stays active",
+    "360/390/1280 widths: all five tabs have no horizontal overflow",
+    "concurrent IndexedDB tabs commit only one expected-revision purchase; reload persists",
+    "UI rejects future schema, imports valid backup and retains two previous saves",
+    "keyboard artwork viewer and Escape work; one broken image leaves names, controls and app usable",
+    "localStorage fallback with quota failure rolls back spend and RNG",
+    "memory fallback explicitly warns that persistence is unavailable"
+  ],
+  "errors": [],
+  "externalRequests": 0,
+  "viewports": [
+    360,
+    390,
+    1280
+  ],
+  "physicalDevices": false
+}
