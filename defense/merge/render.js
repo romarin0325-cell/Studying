@@ -70,8 +70,8 @@ export class Renderer {
     ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,720,780);ctx.save();
     if(this.shake>0&&!this.reduced){ctx.translate(Math.sin(this.clock*97)*this.shake,Math.cos(this.clock*83)*this.shake*.65);this.shake=Math.max(0,this.shake-dt*40);}else this.shake=0;
     ctx.drawImage(this.background,0,0);
+    this.fx.reduced=this.reduced;this.fx.drawGround(s);this.fx.drawSkillField(this.skill);
     this.drawDecor(s);
-    this.fx.reduced=this.reduced;this.fx.drawZones(s);this.fx.drawSkillField(this.skill);
     this.canvas.dataset.skillField=this.skill?.hero||'';
     for(let i=0;i<25;i++)if(s.board[i]&&s.board.some(u=>canMerge(s.board[i],u))){const p=cellPoint(i);ctx.fillStyle='#e2eac912';rounded(ctx,p.x-40,p.y-40,80,80,7);ctx.fill();for(const [dx,dy] of [[-1,-1],[1,1]])line(ctx,[[p.x+dx*27,p.y+dy*40],[p.x+dx*40,p.y+dy*40],[p.x+dx*40,p.y+dy*27]],'#ede4adbb',2.5);star(ctx,p.x+32,p.y-31,5,'#fff1b9',Math.PI/4);}
     if(this.selected>=0&&s.board[this.selected]){
@@ -91,6 +91,8 @@ export class Renderer {
     this.effects=this.effects.filter(e=>e.life>0);
     for(const p of this.particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=110*dt;ctx.globalAlpha=Math.max(0,p.life/p.total);if(p.star)star(ctx,p.x,p.y,p.r*1.7,p.color,this.clock*2);else{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}}ctx.globalAlpha=1;this.particles=this.particles.filter(p=>p.life>0);
     this.fx.draw(dt);
+    // Health stays readable over projectiles, hit stamps and skill decoration.
+    for(const e of s.enemies)this.drawEnemyHealth(e);
     if(this.skill){this.skill.life-=dt;if(this.skill.life<=0)this.skill=null;}
     if(this.drag){this.art.hero(ctx,this.drag.hero,this.drag.x,this.drag.y+35,145,{alpha:.9});}
     for(const f of this.floats){f.life-=dt;f.y-=dt*31;ctx.globalAlpha=Math.min(1,f.life*3);ctx.font=`700 ${f.size}px Georgia,serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#172632';ctx.strokeText(f.text,f.x,f.y);ctx.fillStyle=f.color;ctx.fillText(f.text,f.x,f.y);}ctx.globalAlpha=1;this.floats=this.floats.filter(f=>f.life>0);
@@ -124,7 +126,9 @@ export class Renderer {
     else {const frames=chapter===0?{grunt:0,armor:3,runner:2,wisp:5}:chapter===1?{grunt:4,armor:3,runner:0,wisp:10}:chapter===2?{grunt:5,armor:7,runner:6,wisp:8}:{grunt:6,armor:7,runner:1,wisp:12};if(!this.art.creature(ctx,frames[e.kind]||0,p.x,p.y+bob,size,p.angle>2||p.angle< -2)){ctx.fillStyle='#d194ac';ctx.beginPath();ctx.arc(p.x,p.y-15,19,0,Math.PI*2);ctx.fill();}}
     ctx.restore();
     this.fx.drawStatus(e,p,size);
-    if(e.hp<e.maxHp||boss){const w=boss?83:34;rounded(ctx,p.x-w/2,p.y-size*.82-8,w,5,2);ctx.fillStyle='#15242ddd';ctx.fill();rounded(ctx,p.x-w/2,p.y-size*.82-8,Math.max(1,w*e.hp/e.maxHp),5,2);ctx.fillStyle=boss?'#f2bc83':'#b6d6aa';ctx.fill();}
+  }
+  drawEnemyHealth(e){const ctx=this.ctx,p=pathPoint(e.progress),boss=!!e.boss,size=boss?116:e.kind==='armor'?66:e.kind==='runner'?52:58;
+    if(e.hp<e.maxHp||boss){const w=boss?83:34;rounded(ctx,p.x-w/2,p.y-size*.82-8,w,5,2);ctx.fillStyle='#15242d';ctx.fill();rounded(ctx,p.x-w/2,p.y-size*.82-8,Math.max(1,w*e.hp/e.maxHp),5,2);ctx.fillStyle=boss?'#f2bc83':'#b6d6aa';ctx.fill();}
   }
   drawShot(shot,s){this.fx.drawShot(shot,s);}
   drawEffect(e){const ctx=this.ctx,t=1-e.life/e.total;ctx.save();ctx.globalAlpha=Math.max(0,1-t);
