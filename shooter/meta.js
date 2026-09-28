@@ -1,4 +1,4 @@
-import { HEROES, EVENT_DUNGEONS } from './content.js';
+import { HEROES, DUNGEONS, EVENT_DUNGEONS } from './content.js';
 export const ARTIFACTS = [
   { id: 'spellbook', name: '마도서', icon: '▤', rarity: 'normal', text: '봄 공격력 20% 증가', bomb: .20 },
   { id: 'nail', name: '어쌔신네일', icon: '†', rarity: 'normal', text: '공격력 25% 증가 · 최대 생명 2 감소', attack: .25, life: -2 },
@@ -56,15 +56,33 @@ export const BASE_HEROES = Object.freeze([
   { hero:0, name:'루미' }, { hero:1, name:'루나' }, { hero:2, name:'지크' },
   { hero:3, name:'자스민' }, { hero:4, name:'눈토끼' }, { hero:6, name:'밤토끼' }
 ]);
-const _josa=(name)=>{const c=name.charCodeAt(name.length-1);return(c>=0xAC00&&(c-0xAC00)%28!==0)?'으로':'로';};
-export const ACHIEVEMENTS = Object.freeze(BASE_HEROES.flatMap(({hero,name})=>[0,1].flatMap(weapon=>{const wName=HEROES[hero].weapons[weapon].name;return[
-  { id:`${hero}-${weapon}-all`, hero, weapon, difficulty:null, name:`${name} ${wName} · 여섯 하늘`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 클리어` },
-  { id:`${hero}-${weapon}-hard`, hero, weapon, difficulty:'hard', name:`${name} ${wName} · 어려움`, text:`${name}의 ${wName}${_josa(wName)} 모든 던전 어려움 클리어` }
-];})));
+export const COSTUMES = Object.freeze([
+  { id:'night-pajama', hero:6, name:'파자마', tier:'daily' },
+  { id:'night-longcoat', hero:6, name:'롱패딩', tier:'daily' },
+  { id:'rumi-school', hero:0, name:'교복', tier:'daily' },
+  { id:'rumi-sailor', hero:0, name:'세일러복', tier:'daily' },
+  { id:'zeke-paladin', hero:2, name:'성기사', tier:'fantasy' },
+  { id:'luna-gothic', hero:1, name:'고딕로리타', tier:'fantasy' },
+  { id:'luna-shadowcat', hero:1, name:'섀도우캣', tier:'fantasy' },
+  { id:'snow-snowmaid', hero:4, name:'눈꽃메이드', tier:'fantasy' },
+  { id:'jasmine-idol', hero:3, name:'아이돌', tier:'special' },
+  { id:'jasmine-wedding', hero:3, name:'웨딩', tier:'special' },
+  { id:'zeke-yukata', hero:2, name:'유카타', tier:'special' },
+  { id:'snow-sakurabunny', hero:4, name:'사쿠라바니', tier:'special' }
+]);
+export const COSTUME_TIERS = Object.freeze([
+  { id:'daily', name:'일상', cost:10, lineup:COSTUMES.filter(c=>c.tier==='daily') },
+  { id:'fantasy', name:'판타지', cost:10, lineup:COSTUMES.filter(c=>c.tier==='fantasy') },
+  { id:'special', name:'스페셜', cost:10, lineup:COSTUMES.filter(c=>c.tier==='special') },
+  { id:'miracle', name:'미라클', cost:30, lineup:COSTUMES }
+]);
+export const ACHIEVEMENTS = Object.freeze(DUNGEONS.map(dungeon=>({
+  id:`abyss-${dungeon.id}`, dungeon:dungeon.id, name:`${dungeon.name} · 심연`, text:'심연 모드 클리어 · 꿈의결정 3개'
+})));
 export function normalizeDifficulty(mode) { return mode === 'relaxed' ? 'easy' : DIFFICULTIES.some(d => d.id === mode) ? mode : 'normal'; }
 export const RANDOM_DAILY_LIMIT = 3;
 const SHARD_AWARD = Object.freeze({ normal: 1, rare: 3, epic: 5 });
-const SHOP_COST = Object.freeze({ artifact: 5, reset: 1 });
+const SHOP_COST = Object.freeze({ artifact: 5, reset: 1, daily:10, fantasy:10, special:10, miracle:30 });
 const MAX_COUNT = Number.MAX_SAFE_INTEGER;
 function finiteCount(value) {
   const n = Number(value);
@@ -88,7 +106,21 @@ export function createProfile(raw = {}) {
   const migrate = !Number.isFinite(Number(raw.version)) || Number(raw.version) < 3;
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
-  const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard|abyss):[0-5]$/.test(key)));
+  const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^[0-8]:[01]:(easy|normal|hard|abyss):(0|[1-9]|1[01])$/.test(key)));
+  const costumeIds=new Set(COSTUMES.map(costume=>costume.id));
+  const costumesOwned=[...new Set((Array.isArray(raw.costumesOwned)?raw.costumesOwned:[]).filter(id=>costumeIds.has(id)))];
+  const costumesEquipped={};
+  for(const [hero,id] of Object.entries(raw.costumesEquipped && typeof raw.costumesEquipped==='object'?raw.costumesEquipped:{}))
+    if(costumesOwned.includes(id)&&COSTUMES.some(costume=>costume.id===id&&String(costume.hero)===hero))costumesEquipped[hero]=id;
+  const costumeTickets=Object.fromEntries(COSTUME_TIERS.map(tier=>[tier.id,finiteCount(raw.costumeTickets?.[tier.id]) ]));
+  const achievementClaims=[...new Set((Array.isArray(raw.achievementClaims)?raw.achievementClaims:[]).filter(id=>ACHIEVEMENTS.some(a=>a.id===id)))];
+  let dreamShards=finiteCount(raw.dreamShards);
+  if((Number(raw.version)||0)<8)for(const achievement of ACHIEVEMENTS) {
+    if(achievementClaims.includes(achievement.id))continue;
+    if(Object.keys(clears).some(key=>key.endsWith(`:abyss:${achievement.dungeon}`))) {
+      achievementClaims.push(achievement.id);dreamShards=Math.min(MAX_COUNT,dreamShards+3);
+    }
+  }
   const tickets = [];
   if (Array.isArray(raw.tickets)) for (const ticket of raw.tickets) {
     if (isShopTicket(ticket)) { tickets.push({ source: 'shop', kind: 'artifact' }); continue; }
@@ -96,29 +128,52 @@ export function createProfile(raw = {}) {
     if (!DIFFICULTIES.some(d => d.id === ticket.difficulty) || !Number.isInteger(ticket.dungeon) || ticket.dungeon < 0 || ticket.dungeon >= (migrate ? 4 : 8)) continue;
     tickets.push({ ...ticket, dungeon: migrate && ticket.dungeon === 3 ? 5 : ticket.dungeon });
   }
-  return { version: 7, dreamShards: finiteCount(raw.dreamShards), randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  return { version: 8, dreamShards, randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
     tickets,
     unlocks: raw.unlocks && typeof raw.unlocks === 'object' ? raw.unlocks : {},
-    clears,
+    clears, achievementClaims, costumesOwned, costumesEquipped, costumeTickets,
     learning: raw.learning && typeof raw.learning === 'object' ? raw.learning : { correct: 0, total: 0, mistakes: [], read: [] } };
 }
 export function recordDungeonClear(profile,hero,weapon,dungeon,difficulty) {
-  if(!BASE_HEROES.some(entry=>entry.hero===hero)||![0,1].includes(weapon)||!Number.isInteger(dungeon)||dungeon<0||dungeon>5||!DIFFICULTIES.some(mode=>mode.id===difficulty))return false;
+  if(!HEROES[hero]||![0,1].includes(weapon)||!ACHIEVEMENTS.some(a=>a.dungeon===dungeon)||!DIFFICULTIES.some(mode=>mode.id===difficulty))return false;
   if(!profile.clears||typeof profile.clears!=='object')profile.clears={};
-  profile.clears[`${hero}:${weapon}:${difficulty}:${dungeon}`]=true;return true;
+  profile.clears[`${hero}:${weapon}:${difficulty}:${dungeon}`]=true;
+  const claim=`abyss-${dungeon}`;
+  if(difficulty==='abyss'&&!profile.achievementClaims.includes(claim)) {
+    profile.achievementClaims.push(claim);
+    profile.dreamShards=Math.min(MAX_COUNT,finiteCount(profile.dreamShards)+3);
+  }
+  return true;
 }
 export function achievementProgress(profile) {
-  const clears=profile?.clears&&typeof profile.clears==='object'?profile.clears:{};
-  return ACHIEVEMENTS.map(achievement=>{
-    let progress=0;
-    for(let dungeon=0;dungeon<6;dungeon++) {
-      const modes=achievement.difficulty?[achievement.difficulty]:DIFFICULTIES.map(mode=>mode.id);
-      if(modes.some(mode=>clears[`${achievement.hero}:${achievement.weapon}:${mode}:${dungeon}`]))progress++;
-    }
-    return {...achievement,progress,complete:progress===6};
-  });
+  const claimed=profile?.achievementClaims||[];
+  return ACHIEVEMENTS.map(achievement=>({...achievement,progress:claimed.includes(achievement.id)?1:0,complete:claimed.includes(achievement.id)}));
+}
+export function costumeForHero(profile, hero) {
+  const id=profile.costumesEquipped?.[hero];
+  return profile.costumesOwned?.includes(id)?COSTUMES.find(costume=>costume.id===id&&costume.hero===hero)||null:null;
+}
+export function equipCostume(profile,hero,id=null) {
+  if(!HEROES[hero]||HEROES[hero].hidden)return false;
+  if(id===null){delete profile.costumesEquipped[hero];return true;}
+  if(!profile.costumesOwned.includes(id)||!COSTUMES.some(costume=>costume.id===id&&costume.hero===hero))return false;
+  profile.costumesEquipped[hero]=id;return true;
+}
+export function drawCostumeTicket(profile,tier,random=Math.random,choice=null) {
+  const group=COSTUME_TIERS.find(entry=>entry.id===tier);
+  if(!group)return {ok:false,reason:'unknown'};
+  profile.costumeTickets[tier]=finiteCount(profile.costumeTickets[tier]);
+  if(profile.costumeTickets[tier]<1)return {ok:false,reason:'no-ticket'};
+  const costume=tier==='miracle'?group.lineup.find(item=>item.id===choice):group.lineup[Math.min(group.lineup.length-1,Math.floor(Math.max(0,random())*group.lineup.length))];
+  if(!costume)return {ok:false,reason:'choice'};
+  profile.costumeTickets[tier]--;
+  const duplicate=profile.costumesOwned.includes(costume.id);
+  let shardsAwarded=0;
+  if(duplicate){shardsAwarded=Math.min(3,MAX_COUNT-finiteCount(profile.dreamShards));profile.dreamShards=finiteCount(profile.dreamShards)+shardsAwarded;}
+  else profile.costumesOwned.push(costume.id);
+  return {ok:true,costume,duplicate,shardsAwarded};
 }
 export function heroAvailable(profile, hero, date = new Date()) { return [0,1,2,3,4,6].includes(hero) && (dailyHeroes(date).includes(hero) || profile.unlocks[hero] === dayKey(date)); }
 export function unlockHero(profile, hero, date = new Date()) { if ([0,1,2,3,4,6].includes(hero)) profile.unlocks[hero] = dayKey(date); }
@@ -169,9 +224,11 @@ export function purchaseShopItem(profile, item) {
   profile.randomResetTickets = finiteCount(profile.randomResetTickets);
   if (profile.dreamShards < cost) return { ok: false, reason: 'balance' };
   if (item === 'reset' && profile.randomResetTickets >= MAX_COUNT) return { ok: false, reason: 'overflow' };
+  if (COSTUME_TIERS.some(tier=>tier.id===item) && finiteCount(profile.costumeTickets[item]) >= MAX_COUNT) return {ok:false,reason:'overflow'};
   profile.dreamShards -= cost;
   if (item === 'artifact') profile.tickets.push({ source: 'shop', kind: 'artifact' });
-  else profile.randomResetTickets += 1;
+  else if(item==='reset')profile.randomResetTickets += 1;
+  else profile.costumeTickets[item]=finiteCount(profile.costumeTickets[item])+1;
   return { ok: true, item, dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, tickets: profile.tickets.length };
 }
 export function useRandomResetTicket(profile, date = new Date()) {

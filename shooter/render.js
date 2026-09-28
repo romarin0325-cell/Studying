@@ -17,7 +17,7 @@ const canvas = (w, h) => { const c = document.createElement('canvas'); c.width =
 export async function loadArt() {
   const urls = createArtUrls(globalThis.ASTRAL_ASSET_ROOT || 'dist/assets');
   const result = { ...urls };
-  for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx']) result[key] = Array(urls[key].length);
+  for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx', 'costumes']) result[key] = Array(urls[key].length);
   result['bloom-fx'] = result.bloomFx;
   const pending = new Map();
   const imageFor = url => {
@@ -30,7 +30,7 @@ export async function loadArt() {
   };
   result.getDecodedCount = () => pending.size;
   const assign = (url, image) => {
-    for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx']) urls[key].forEach((value, index) => { if (value === url) result[key][index] = image; });
+    for (const key of ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'astea', 'bloomFx', 'costumes']) urls[key].forEach((value, index) => { if (value === url) result[key][index] = image; });
     if (urls.dark === url) result.dark = image;
     if (urls.sigil === url) result.sigil = image;
     if (urls.darkFairy === url) result.darkFairy = image;
@@ -45,8 +45,8 @@ export async function loadArt() {
     const enemyIndex = event?.specialType ?? stage;
     await loadQueued([urls.worlds[stage], urls.bosses[stage], urls.enemies[enemyIndex], urls.sentinels[enemyIndex]]);
   };
-  result.ensureGameplay = async ({ stage, hero, challenge }) => {
-    await loadQueued([urls.heroes[hero], urls.heroes[1], urls.dark, urls.sigil, urls.companions[3], urls.darkFairy, ...urls.bloomFx]);
+  result.ensureGameplay = async ({ stage, hero, challenge, costumeIndex = -1 }) => {
+    await loadQueued([urls.heroes[hero], urls.heroes[1], urls.costumes[costumeIndex], urls.dark, urls.sigil, urls.companions[3], urls.darkFairy, ...urls.bloomFx]);
     await result.ensureStage(stage);
     if (challenge) void result.ensureStage(stage + 1);
   };
@@ -234,7 +234,7 @@ export class Renderer {
     for (const side of [-1, 1]) { c.beginPath(); c.moveTo(side * 14, 10); c.quadraticCurveTo(side * 23 + Math.sin(t * 4) * 7, 37, side * 9, 59); c.stroke(); }
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
-    this.sprite(g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0?this.art.dark:this.art.heroes[g.heroIndex], p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
+    this.sprite(g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0?this.art.dark:(this.art.costumes[g.costumeIndex]||this.art.heroes[g.heroIndex]), p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
     if(p.barrier)this.sprite(this.art.barrier,p.x,p.y,118+Math.sin(t*3)*3,t*.12,1,.9);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
     // The tiny luminous core is the actual hitbox; the illustration and cape are safe.
@@ -283,7 +283,7 @@ export class Renderer {
     // Reuse one cached sigil and the existing portrait: no full-screen filters or new textures per frame.
     if(auraActive)this.sprite(this.art.sigil,g.player.x,g.player.y,240+Math.min(age,1)*90,t*.35,1,Math.min(.5,remaining*.5));
     if(age<1.1){const q=age/1.1,fade=Math.sin(q*Math.PI)*.85;
-      this.sprite(g.heroIndex===8?this.art.dark:this.art.heroes[g.heroIndex],350-q*80,this.height*.43,300+q*35,-.08,1,fade);
+      this.sprite(g.heroIndex===8?this.art.dark:(this.art.costumes[g.costumeIndex]||this.art.heroes[g.heroIndex]),350-q*80,this.height*.43,300+q*35,-.08,1,fade);
       c.save();c.strokeStyle=g.hero.color;c.globalAlpha=1-q;c.lineWidth=5*(1-q);c.beginPath();c.arc(g.player.x,g.player.y,30+q*500,0,TAU);c.stroke();c.restore();
     }
     if(!auraActive)return;
@@ -293,7 +293,7 @@ export class Renderer {
       for (let i = 0; i < 10; i++) { const x = (i * 67 + t * 30) % 450, y = ((t * 530 + i * 133) % (this.height + 200)) - 100;
         c.beginPath(); c.moveTo(x - 36, y - 95); c.lineTo(x, y); c.stroke(); c.fillStyle = '#fff0b5'; star(c, x, y, 12, 5, t); c.fill(); }
     } else if (g.heroIndex === 1) {
-      for (const side of [-1, 1]) this.sprite(this.art.heroes[1], cx + side * 52, cy - 20 + Math.sin(t * 8) * 14, 70, side * .22, 1, .35);
+      for (const side of [-1, 1]) this.sprite(this.art.costumes[g.costumeIndex]||this.art.heroes[1], cx + side * 52, cy - 20 + Math.sin(t * 8) * 14, 70, side * .22, 1, .35);
     } else if (g.heroIndex === 2) {
       this.sprite(this.art['bloom-fx'][0],cx,cy-145-Math.sin(age*2)*20,390,0,1,.9);
     } else if(g.heroIndex===4) {

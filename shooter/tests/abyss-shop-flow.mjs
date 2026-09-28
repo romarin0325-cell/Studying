@@ -25,7 +25,7 @@ try {
     await page.evaluate(() => { __abyss.profile.dreamShards = 12; });
     await page.locator('#shop').click();
     assert.match(await page.locator('.shop-balance').innerText(), /꿈의결정\s*12/);
-    assert.equal(await page.locator('.shop-product').count(), 2);
+    assert.equal(await page.locator('.shop-product').count(), 6);
     const layout = await page.evaluate(() => {
       const panel = document.querySelector('.shop-panel');
       const images = [...panel.querySelectorAll('img')].map(img => ({ loaded: img.complete && img.naturalWidth === 192 && img.naturalHeight === 192, embedded: img.src.startsWith('data:image/webp;base64,'), fit: getComputedStyle(img).objectFit }));
