@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "sourceHash": "de835be9cc4485912f77b5eb12bfd3e0f09cb0037c3a3ce3c2ecedceed97ada3",
+  "sourceHash": "7f59af96c771dd7b682fa3cdd58a3e36571c3f747f1c44d4a8f7c1c9852eb6ad",
   "processorHash": "12f47b2a99e492af9ed69a76f08ebb9b97f73799861f8b736a2ed3d6649a66fc",
   "fileCount": 27,
   "files": {
@@ -24,13 +24,13 @@
       "requiresAlpha": false
     },
     "./assets/merge/relics.webp": {
-      "sourceHash": "2bdb414fe0cce6c8369ed91a9f85b4404d276c2334cf441d8842bc21fdbe36a6",
-      "bytes": 753090,
+      "sourceHash": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
+      "bytes": 526350,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
-      "width": 1254,
-      "height": 1254
+      "width": 1280,
+      "height": 1024
     },
     "./assets/merge/units/ancient_dragon.webp": {
       "sourceHash": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
@@ -168,8 +168,8 @@
       "height": 1024
     },
     "./assets/merge/units/silver_rabbit.webp": {
-      "sourceHash": "aec6470ea155986c75ce48b7c3eb97b21f0bae29037ca39257e9cf9658607f8e",
-      "bytes": 162356,
+      "sourceHash": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "bytes": 207210,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,

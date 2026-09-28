@@ -1,7 +1,33 @@
 {
   "tool": "Built-in image_gen (no CLI/API fallback)",
-  "usage": "Three original project atlases plus the author-requested Cinderella head adjustment; the other 20 companions remain unchanged; no third-party game art included.",
+  "usage": "Original project atlases and author-requested Cinderella and Silver Rabbit edits; no third-party game art. Relic source is individually repacked offline.",
   "assets": [
+    {
+      "output": "defense/assets/merge/units/silver_rabbit.webp",
+      "source": "exec-7bad6d7a-3de8-45f6-ade6-d1a112a902c5.png",
+      "reference": "Approved Silver Rabbit directional atlas at 889508b and author-supplied 은토끼.png",
+      "referenceSha256": "aec6470ea155986c75ce48b7c3eb97b21f0bae29037ca39257e9cf9658607f8e",
+      "sourceSha256": "bdcf600186d90b8c8a05edce167fe3b738ae6538138f7b4b31b51e6012e907cf",
+      "grid": [
+        2,
+        2
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "size": [
+        1024,
+        1024
+      ],
+      "alpha": true,
+      "conversion": "Manual anatomical skull and foot landmarks; common head profile; alpha>=250 restored to opaque; one shared scale for all four directions; WebP quality 95",
+      "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "bytes": 207210,
+      "prompt": "Edit image 1, the existing four-direction transparent 1024x1024 chibi game sprite atlas. This is a surgical facial-expression revision, not a character redesign. Output one same 1024x1024 atlas, identical 2x2 arrangement: front top-left, back top-right, left-facing bottom-left, right-facing bottom-right. Preserve the exact occupied bounds, foot anchoring, head/skull size, two-head SD body proportions, four poses, hair silhouette, rabbit ears, gold halo and circlet, white/gold veil, sun chest medallion, white high-neck costume, boots, opaque white cloth, outlines, original lighting, palette and rendering style from image 1. Image 2 is ONLY a facial mood and character identity reference: evoke her quiet mysterious serenity, not confident combat readiness. Change the front and two side faces to gently half-lidded luminous golden eyes with relaxed upper lids and delicate soft eyebrows, a calm distant gaze and tiny closed neutral mouth with the slightest enigmatic smile. Remove the fierce inward-downward eyebrows, sharp commanding stare and self-assured smirk. The result should be serene, otherworldly, secretive, softly feminine, alert and alive, not sleepy, sad or angry. Keep eyes clearly identifiable as golden at tiny game scale. No facial enlargement, no head resizing. Do not change the back view. Maintain all four separate figures, fully contained in their original quadrants with clear transparent gutters. No labels, text, grid, background, glow cloud or added effects.",
+      "identityReview": "Canonical male rabbit spirit, flat chest and original costume preserved in the selected result. The generation prompt contains an erroneous female pronoun; future edits must explicitly say male and preserve the supplied gender. Mysterious expression does not change character identity.",
+      "futurePromptConstraint": "Adult male silver rabbit spirit, androgynous serene expression, flat male chest; keep exact original identity, outfit, skull proportions and four-direction foot anchors. Ears, halo and hair are not anatomical skull size."
+    },
     {
       "output": "defense/assets/merge/units/cinderella.webp",
       "source": "exec-1b761670-9353-40d0-8ede-e6c11e79a4fb.png",
@@ -30,13 +56,14 @@
         4
       ],
       "size": [
-        1254,
-        1254
+        1280,
+        1024
       ],
       "alpha": true,
-      "conversion": "WebP quality 92, alphaQuality 100; original size",
-      "sha256": "2bdb414fe0cce6c8369ed91a9f85b4404d276c2334cf441d8842bc21fdbe36a6",
-      "prompt": "Use case: stylized-concept. Asset type: production fantasy mobile game inventory ICON ATLAS, a single spritesheet, 5 columns by 4 rows exactly, square canvas 2048x2048. Primary request: Twenty exquisitely hand-painted magical relic item icons matching a premium anime moonlit-garden RPG with pale gold metal, enamel jewels, decisive silhouettes and rich crafted materials. Not flat vector; detailed painted 2D item illustrations that read at 64px. Each object occupies 65 percent of its cell, perfectly centered, generous empty transparent gutters; no background plaques, no cast shadows extending outside the cell, no text, no labels, no borders. All twenty separate objects entirely visible. Ordered left to right, top to bottom: row1 ornate hourglass filled with star sand, glowing ember heart in copper cage, frozen blue crystal flower, lonely gold-trimmed pennant, twin musical notes in silver. row2 antique gold lantern with bright flame, sharp violet crescent moon shard, green glowing seed with tiny roots, white feather with gold tip, small gold crown with blue gemstone. row3 falling star meteor wrapped in fire, triangular prism bursting tiny rainbow facets, turquoise tidal conch shell, tangled luminous enchanted roots, two clasped gauntlets of silver and gold. row4 radiant phoenix feather, two mirrored crystal stars, astrolabe with three interlinked stars, alchemical flask with golden liquid, little sapphire planet with gold orbit ring. Consistent three-quarter object view, fine gilded edge highlights, luminous but not hazy. True alpha transparent background, isolated icons. Exactly 5 columns and 4 rows in uniform cells, not a scene."
+      "conversion": "Reviewed per-icon crops and neighbor exclusion rectangles; trim each alpha silhouette; fit inside 212px; center in 256px cell with >=22px transparent gutters; WebP quality 92, alphaQuality 100. See RELIC_PACKING.json and tools/pack-relic-icons.mjs.",
+      "sha256": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
+      "prompt": "Use case: stylized-concept. Asset type: production fantasy mobile game inventory ICON ATLAS, a single spritesheet, 5 columns by 4 rows exactly, square canvas 2048x2048. Primary request: Twenty exquisitely hand-painted magical relic item icons matching a premium anime moonlit-garden RPG with pale gold metal, enamel jewels, decisive silhouettes and rich crafted materials. Not flat vector; detailed painted 2D item illustrations that read at 64px. Each object occupies 65 percent of its cell, perfectly centered, generous empty transparent gutters; no background plaques, no cast shadows extending outside the cell, no text, no labels, no borders. All twenty separate objects entirely visible. Ordered left to right, top to bottom: row1 ornate hourglass filled with star sand, glowing ember heart in copper cage, frozen blue crystal flower, lonely gold-trimmed pennant, twin musical notes in silver. row2 antique gold lantern with bright flame, sharp violet crescent moon shard, green glowing seed with tiny roots, white feather with gold tip, small gold crown with blue gemstone. row3 falling star meteor wrapped in fire, triangular prism bursting tiny rainbow facets, turquoise tidal conch shell, tangled luminous enchanted roots, two clasped gauntlets of silver and gold. row4 radiant phoenix feather, two mirrored crystal stars, astrolabe with three interlinked stars, alchemical flask with golden liquid, little sapphire planet with gold orbit ring. Consistent three-quarter object view, fine gilded edge highlights, luminous but not hazy. True alpha transparent background, isolated icons. Exactly 5 columns and 4 rows in uniform cells, not a scene.",
+      "bytes": 526350
     },
     {
       "output": "defense/assets/merge/blessings.webp",

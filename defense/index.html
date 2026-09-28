@@ -12,7 +12,7 @@
     <div id="app">
       <section id="home" class="screen home-screen" aria-label="루미의 별빛 원정 시작 화면">
         <div class="home-backdrop"></div>
-        <header class="home-top"><span class="wordmark">A S T R A</span><button class="icon-button" data-action="settings" aria-label="설정"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14M9 5v4m6 1v4m-5 1v4"/></svg></button></header>
+        <header class="home-top"><span class="wordmark">A S T R A</span><div class="home-tools"><button class="icon-button" data-action="fullscreen" aria-label="전체화면" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button><button class="icon-button" data-action="settings" aria-label="설정"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14M9 5v4m6 1v4m-5 1v4"/></svg></button></div></header>
         <div class="title-lockup"><span class="eyebrow">RUMI'S STARLIT EXPEDITION</span><h1><small>루미의</small> 별빛 원정</h1><div class="title-rule"><i></i><span>✦</span><i></i></div></div>
         <canvas id="home-art" width="720" height="510" aria-hidden="true"></canvas>
         <div class="home-bottom">
@@ -32,6 +32,7 @@
           <div class="wave-heading"><span id="wave-label">WAVE 01 / 12</span><div id="wave-progress"><i></i></div></div>
           <div class="health" aria-label="결계 내구도"><svg viewBox="0 0 24 28"><path d="M12 2 21 9 18 21 12 26 6 21 3 9Z"/><path d="m3 9 9 4 9-4M12 13v13M12 2v11"/></svg><strong id="health">20</strong></div>
           <button id="speed" class="speed-button" aria-label="전투 속도 변경">1×</button>
+          <button class="icon-button" data-action="fullscreen" aria-label="전체화면" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
         </header>
         <div class="arena-wrap">
           <canvas id="arena" width="720" height="780" aria-label="5행 5열 영웅 전장. 탭하면 동료 정보. 드래그로만 이동, 교환, 합성." tabindex="0"></canvas>

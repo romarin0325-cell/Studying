@@ -44,12 +44,23 @@ async function geometry(page,label){
   assert.ok(measured.scrollHeight<=measured.height+1,label+' vertical page overflow');assert.ok(measured.summonBottom<=measured.height+1,label+' summon below viewport');
   return measured;
 }
+async function mergePair(page){
+  // No guaranteed opening pair: exercise the real independent draw until one
+  // exists (at most seven units for a six-hero deck).
+  for(let attempt=0;attempt<5;attempt++){
+    const units=await page.locator('[data-cell]').evaluateAll(nodes=>nodes.flatMap(n=>{const m=n.getAttribute('aria-label').match(/열 (.+) (\d)성/);return m?[{index:Number(n.dataset.cell),name:m[1],rank:Number(m[2])}]:[];}));
+    for(const a of units)for(const b of units)if(a.index!==b.index&&a.name===b.name&&a.rank===b.rank)return {from:a.index,to:b.index,name:b.name,units:units.length};
+    await page.locator('#summon').click();await page.waitForFunction(n=>Number(document.querySelector('#arena').dataset.units)>n,units.length);
+  }
+  throw new Error('Seven units from six heroes should contain a pair');
+}
 async function smoke(page,{screenshot=null}={}){
   await portraitsReady(page);await start(page);await geometry(page,'smoke');
-  await tapCell(page,6);await tapCell(page,8);assert.equal(await page.locator('#arena').getAttribute('data-merges'),'0','taps must not move or merge');assert.match(await page.locator('#unit-panel').textContent(),/지크/);await dragCell(page,6,8);await page.waitForFunction(()=>document.querySelector('#arena').dataset.merges==='1');
-  assert.match(await page.locator('[data-cell="8"]').getAttribute('aria-label'),/지크 2성/);
-  await page.locator('#summon').click();await page.waitForFunction(()=>document.querySelector('#arena').dataset.units==='3');
-  await page.locator('[data-skill="zeke"].ready').waitFor();const before=Number(await page.locator('#gauge').textContent());await page.locator('[data-skill="zeke"]').click();
+  const pair=await mergePair(page);
+  await tapCell(page,pair.from);await tapCell(page,pair.to);assert.equal(await page.locator('#arena').getAttribute('data-merges'),'0','taps must not move or merge');assert.ok((await page.locator('#unit-panel').textContent()).includes(pair.name));await dragCell(page,pair.from,pair.to);await page.waitForFunction(()=>document.querySelector('#arena').dataset.merges==='1');
+  assert.ok((await page.locator(`[data-cell="${pair.to}"]`).getAttribute('aria-label')).includes(pair.name+' 2성'));
+  await page.locator('#summon').click();await page.waitForFunction(n=>Number(document.querySelector('#arena').dataset.units)===n,pair.units);
+  await page.locator('.skill-button.ready').first().waitFor();const before=Number(await page.locator('#gauge').textContent());await page.locator('.skill-button.ready').first().click();
   await page.waitForFunction(n=>Number(document.querySelector('#gauge').textContent)<n,before);assert.ok(Number(await page.locator('#gauge').textContent())<before);
   if(screenshot)await page.screenshot({path:screenshot});
   await page.getByRole('button',{name:'일시 정지',exact:true}).click();await page.getByRole('dialog').waitFor();
@@ -86,7 +97,7 @@ async function expeditionChecks(browser,url,out){
   const E=await import('../defense/merge/engine.js'),s=E.newRun({seed:4});s.gold=1000;
   const training=await pageFor(browser,url,{fixture:E.serialize(s),viewport:{width:320,height:568}});try{
     const p=training.page;await portraitsReady(p);await start(p,true);await p.locator('#training').click();await p.locator('[data-upgrade="cinderella"]').scrollIntoViewIfNeeded();const header=await p.locator('.modal-header').boundingBox(),before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>0);
-    await p.locator('[data-upgrade="cinderella"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/환급 22G/);assert.match(await p.locator('.training-list').textContent(),/15.36 → 18.72/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
+    await p.locator('[data-upgrade="cinderella"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/22G/);assert.match(await p.locator('.training-list').textContent(),/15.4 → 18.7/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
   }finally{await training.context.close();}
   await blessingChecks(browser,url,out);await effectsProof(browser,url,out);
 }
@@ -128,6 +139,7 @@ async function browserChecks(browser,url,out){
   const views=[box,{width:360,height:800},{width:320,height:568},{width:390,height:667}];
   for(const viewport of views){const t=await pageFor(browser,url,{viewport});try{await portraitsReady(t.page);await start(t.page);await geometry(t.page,viewport.width+'x'+viewport.height);await t.page.locator('#summon').scrollIntoViewIfNeeded();await t.page.locator('#summon').click();assert.equal(await t.page.locator('#arena').getAttribute('data-units'),'4');assert.deepEqual(t.errors,[]);}finally{await t.context.close();}}
   await expeditionChecks(browser,url,out);
+  await currentUnitChecks(browser,url,out);
   await tutorialChecks(browser,url,out);
   await bossClarityChecks(browser,url,out);
   const t=await pageFor(browser,url,{fixture:await denseFixture()});try{
@@ -137,6 +149,35 @@ async function browserChecks(browser,url,out){
     const sorted=[...samples].sort((a,b)=>a-b),mean=samples.reduce((a,b)=>a+b,0)/samples.length,p95=sorted[Math.floor(sorted.length*.95)];
     console.log(JSON.stringify({denseBoardFps:Number((1000/mean).toFixed(1)),frameP95ms:Number(p95.toFixed(1)),fixture:'25 units, 18 high-health enemies; rendering stress fixture, not a balance run'}));
     assert.ok(mean<70,'dense board freezes');assert.deepEqual(t.errors,[]);
+  }finally{await t.context.close();}
+}
+async function currentUnitChecks(browser,url,out){
+  const E=await import('../defense/merge/engine.js'),{number}=await import('../defense/merge/unit-info.js');
+  const s=E.newRun({seed:817231,deck:['zeke','ancient_dragon','siren','queen','silver_rabbit','mushroom_king']});
+  const template=s.board.find(Boolean);s.board.fill(null);
+  for(const [i,id] of [[12,'zeke'],[11,'ancient_dragon'],[13,'siren']])s.board[i]={...template,uid:s.nextId++,hero:id,rank:i===12?3:1};
+  s.upgrades.zeke=2;s.upgrades.ancient_dragon=2;s.upgrades.siren=3;
+  const expected=E.combatStats(s,s.board[12]);
+  const t=await pageFor(browser,url,{fixture:E.serialize(s),reducedMotion:'no-preference'}),p=t.page;
+  try{
+    await portraitsReady(p);
+    await p.locator('#home [data-action="fullscreen"]').click();
+    await p.waitForFunction(()=>!!document.fullscreenElement);assert.equal(await p.locator('#home [data-action="fullscreen"]').getAttribute('aria-pressed'),'true');
+    await p.locator('#home [data-action="fullscreen"]').click();await p.waitForFunction(()=>!document.fullscreenElement);
+    await start(p,true);await tapCell(p,12);
+    assert.match(await p.locator('.unit-metrics').textContent(),new RegExp(number(expected.damage).replace('.', '\\.')));
+    assert.ok((await p.locator('.unit-metrics').textContent()).includes(expected.interval.toFixed(2)+'초'));
+    await p.locator('[data-unit="info"]').click();await p.getByRole('heading',{name:'지크',exact:true}).waitFor();
+    assert.ok((await p.locator('.hero-metrics').textContent()).includes(number(expected.damage)));
+    assert.match(await p.locator('.live-bonuses').textContent(),/고대 용의 가호/);assert.doesNotMatch(await p.locator('#modal-root').textContent(),/같은 동료.*적용|기본 위력|성급.*곱/);
+    await p.screenshot({path:path.join(out,'current-unit-stats.png')});
+    await p.locator('[data-action="close-modal"]').first().click();
+    await dragCell(p,11,0);await tapCell(p,12);
+    s.board[0]=s.board[11];s.board[11]=null;
+    const moved=number(E.combatStats(s,s.board[12]).damage);
+    await p.waitForFunction(n=>document.querySelector('.unit-metrics').textContent.includes(n),moved);
+    await p.screenshot({path:path.join(out,'current-unit-dock.png')});
+    assert.deepEqual(t.errors,[]);
   }finally{await t.context.close();}
 }
 async function offlineChecks(browser,url,out){
@@ -193,7 +234,7 @@ async function experienceChecks(browser,url,out){
 }
 async function resilienceChecks(browser,url,out,label){
   for(const mode of ['healthy','missing','hung']){const t=await pageFor(browser,url,{mode});try{
-    await portraitsReady(t.page);await start(t.page);await dragCell(t.page,6,8);await t.page.waitForFunction(()=>document.querySelector('#arena').dataset.merges==='1');await t.page.locator('#summon').click();
+    await portraitsReady(t.page);await start(t.page);const pair=await mergePair(t.page);await dragCell(t.page,pair.from,pair.to);await t.page.waitForFunction(()=>document.querySelector('#arena').dataset.merges==='1');await t.page.locator('#summon').click();
     if(mode!=='healthy')assert.equal(await t.page.locator('#save-notice').isVisible(),true);
     const layout=await geometry(t.page,label+' '+mode);
     // With deliberately never-settling image requests, WebKit's font readiness

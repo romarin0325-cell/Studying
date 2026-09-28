@@ -707,42 +707,44 @@
   },
   {
     "id": "silver_rabbit",
-    "file": "exec-0956e61b-7e14-4a05-a682-d4079edfe19d.png",
+    "file": "exec-7bad6d7a-3de8-45f6-ade6-d1a112a902c5.png",
     "feet": [
       [
-        336,
-        614
+        310,
+        595
       ],
       [
-        297,
-        614
+        314,
+        595
       ],
       [
-        327,
-        597
+        312,
+        569
       ],
       [
-        306,
-        597
+        312,
+        569
       ]
     ],
     "face": [
-      336,
-      269
+      310,
+      318
     ],
-    "sourceSha256": "fb24cec5ad80ba5332c18974714cba2b0ca30f239f1430019add7616c953a8c9",
+    "sourceSha256": "bdcf600186d90b8c8a05edce167fe3b738ae6538138f7b4b31b51e6012e907cf",
     "anatomy": {
       "skull": [
-        215.7,
-        180.1,
-        463.1,
-        392
+        214,
+        226,
+        414,
+        399
       ],
       "coordinateSpace": "source front quadrant",
       "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
       "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
       "directionReview": "same uniform scale for all four views; separate visual review required"
-    }
+    },
+    "splitY": 627,
+    "alphaOpaqueThreshold": 250
   },
   {
     "id": "ancient_dragon",

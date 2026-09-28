@@ -4,7 +4,7 @@ import {newRun,move,summon,cast,step} from './engine.js';
 const lessons=[
   ['동료 확인','동료를 한 번 눌러 능력을 확인하세요. 탭만으로는 이동하거나 합성되지 않습니다.','전장에서도 탭으로 능력과 공격 범위를 확인할 수 있습니다.'],
   ['이동과 합성','왼쪽 지크를 오른쪽 지크 위로 드래그하세요. 같은 동료·같은 등급이면 한 단계 성장합니다.','빈칸으로 드래그하면 이동, 다른 동료 위로 드래그하면 교환합니다. 루미는 같은 등급의 모든 동료와 합성할 수 있습니다.'],
-  ['소환','빈칸을 누른 뒤 소환 버튼을 눌러 보세요. 선택한 칸으로 편성 동료 한 명이 합류합니다.','처음 3회는 무료입니다. 이후 10G부터 2G씩 비싸지고 최대 40G입니다. 빈칸을 선택하지 않으면 자동 배치됩니다.'],
+  ['소환','빈칸을 누른 뒤 소환 버튼을 눌러 보세요. 선택한 칸에 편성한 6명 중 한 명이 무작위로 합류합니다.','처음 3회는 무료입니다. 이후 10G부터 2G씩 계속 비싸집니다. 같은 동료가 연속으로 나올 수 있습니다. 빈칸을 선택하지 않으면 자동 배치됩니다.'],
   ['필살기와 원정','지크의 얼굴을 눌러 필살기를 사용하세요. 별빛은 편성한 여섯 동료가 함께 사용합니다.','물결 종료 후 축복 3개 중 하나를 고릅니다. 유물은 출발 전 최대 3개. 4·8·12물결은 보스전입니다. 행 봉인은 표시된 칸에서 이동해 피하고, 회복 시전 중 최대 체력의 6%를 깎으면 치유를 끊습니다. 해일은 감속·기절로 막습니다.'],
 ];
 const slots=[6,8,12];
@@ -12,6 +12,8 @@ const slots=[6,8,12];
 export function tutorialPage(lesson,portrait){
   const state=newRun({seed:546});state.events=[];
   // A disposable real rules state. Never serialize, step or mutate the live run.
+  // The guided merge lesson needs a declared pair; real opening draws remain random.
+  for(const i of [6,8]){state.board[i].hero='zeke';state.board[i].priority='first';}
   state.board[12]=null;
   if(lesson===2)state.board[8]=null;
   if(lesson===3){state.queue=[{kind:'boss',hp:8000}];state.spawnIn=0;step(state,.01);state.gauge=100;}
