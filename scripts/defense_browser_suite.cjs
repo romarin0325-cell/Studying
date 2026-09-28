@@ -139,7 +139,7 @@ async function browserChecks(browser,url,out){
   const views=[box,{width:360,height:800},{width:320,height:568},{width:390,height:667}];
   for(const viewport of views){const t=await pageFor(browser,url,{viewport});try{await portraitsReady(t.page);await start(t.page);await geometry(t.page,viewport.width+'x'+viewport.height);await t.page.locator('#summon').scrollIntoViewIfNeeded();await t.page.locator('#summon').click();assert.equal(await t.page.locator('#arena').getAttribute('data-units'),'4');assert.deepEqual(t.errors,[]);}finally{await t.context.close();}}
   await expeditionChecks(browser,url,out);
-  await combatClarityChecks(browser,url,out);
+  await currentUnitChecks(browser,url,out);
   await tutorialChecks(browser,url,out);
   await bossClarityChecks(browser,url,out);
   const t=await pageFor(browser,url,{fixture:await denseFixture()});try{
@@ -151,7 +151,7 @@ async function browserChecks(browser,url,out){
     assert.ok(mean<70,'dense board freezes');assert.deepEqual(t.errors,[]);
   }finally{await t.context.close();}
 }
-async function combatClarityChecks(browser,url,out){
+async function currentUnitChecks(browser,url,out){
   const E=await import('../defense/merge/engine.js'),{number}=await import('../defense/merge/unit-info.js');
   const s=E.newRun({seed:817231,deck:['zeke','ancient_dragon','siren','queen','silver_rabbit','mushroom_king']});
   const template=s.board.find(Boolean);s.board.fill(null);
@@ -177,36 +177,6 @@ async function combatClarityChecks(browser,url,out){
     const moved=number(E.combatStats(s,s.board[12]).damage);
     await p.waitForFunction(n=>document.querySelector('.unit-metrics').textContent.includes(n),moved);
     await p.screenshot({path:path.join(out,'current-unit-dock.png')});
-    await p.goto(url+'/tools/combat-review.html');await p.waitForFunction(()=>document.body.dataset.ready==='true');
-    const geometryProof=await p.evaluate(async()=>{
-      const [{attackGeometry,geometryContains},{traceAttackShape},{HERO}]=await Promise.all([import('/merge/engine.js'),import('/merge/attack-shapes.js'),import('/merge/content.js')]);
-      const ctx=document.createElement('canvas').getContext('2d'),mismatches=[];let probes=0;
-      for(const id of ['zeke','mushroom_king','ancient_dragon','red_dragon','silver_rabbit','guardian'])for(const angle of [-2.1,-.7,0,.6,1.9]){
-        const g=attackGeometry(HERO[id],{x:360,y:390},{x:360+Math.cos(angle)*210,y:390+Math.sin(angle)*210});traceAttackShape(ctx,g);
-        for(let y=10.37;y<780;y+=19.3)for(let x=10.23;x<720;x+=19.7){probes++;if(ctx.isPointInPath(x,y)!==geometryContains(g,{x,y}))mismatches.push({id,angle,x,y});}
-      }
-      return {probes,mismatches};
-    });
-    assert.deepEqual(geometryProof.mismatches,[],'rendered contour disagrees with actual hit testing');
-    await fs.writeFile(path.join(out,'attack-geometry.json'),JSON.stringify(geometryProof,null,2));
-    const seek=async frame=>{await p.locator('#scrub').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));},frame);};
-    for(const [id,frame] of [['zeke',43],['mushroom_king',70],['ancient_dragon',43],['red_dragon',49],['silver_rabbit',43]]){
-      await p.locator('#hero').selectOption(id);await seek(frame);
-      assert.ok(Number(await p.locator('#review').getAttribute('data-impacts'))>0,id+' failed to hit');
-      await p.locator('#review').screenshot({path:path.join(out,`attack-${id}.png`)});
-    }
-    // Same real scene at several points: anticipation, contact, hold and clear.
-    await p.locator('#hero').selectOption('zeke');
-    for(const frame of [18,30,39,43,52,63]){await seek(frame);await p.locator('#review').screenshot({path:path.join(out,`zeke-frame-${frame}.png`)});}
-    for(const viewport of [box,{width:320,height:568}]){
-      await p.setViewportSize(viewport);await p.locator('#layout').selectOption('dense');
-      for(const speed of ['1','2'])for(const reduced of [false,true]){
-        await p.locator('#speed').selectOption(speed);await p.locator('#reduced').setChecked(reduced);await seek(120);
-        assert.ok(Number(await p.locator('#review').getAttribute('data-impacts'))>20);
-        assert.ok(Number(await p.locator('#review').getAttribute('data-footprints'))<=25);
-        await p.locator('#review').screenshot({path:path.join(out,`area-dense-${viewport.width}-${speed}x-${reduced?'reduced':'normal'}.png`)});
-      }
-    }
     assert.deepEqual(t.errors,[]);
   }finally{await t.context.close();}
 }
@@ -277,14 +247,13 @@ async function resilienceChecks(browser,url,out,label){
   }finally{await t.context.close();}}
 }
 async function runSuite(mode){
-  const prefix={browser:'hero-defense-v2-browser-',clarity:'combat-clarity-',experience:'starward-experience-',resilience:'defense-resilience-',local:'astra-offline-'}[mode];
+  const prefix={browser:'hero-defense-v2-browser-',experience:'starward-experience-',resilience:'defense-resilience-',local:'astra-offline-'}[mode];
   const out=await fs.mkdtemp(path.join(os.tmpdir(),prefix));const server=createHeroDefenseV2Server();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const url='http://127.0.0.1:'+server.address().port;
   let browser;
   try{
     browser=await chromium.launch({headless:true});
     if(mode==='local')await offlineChecks(browser,url,out);
     if(mode==='browser')await browserChecks(browser,url,out);
-    if(mode==='clarity')await combatClarityChecks(browser,url,out);
     if(mode==='experience')await experienceChecks(browser,url,out);
     if(mode==='resilience'){await resilienceChecks(browser,url,out,'chromium');await browser.close();browser=await webkit.launch({headless:true});await resilienceChecks(browser,url,out,'webkit');}
     console.log('ASTRA '+mode+' passed. Evidence: '+out);

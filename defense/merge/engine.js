@@ -170,7 +170,7 @@ function applyHit(s,shot){
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage;
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
   for(const target of area){let factor=1;if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;if(type==='shatter'&&target.slowTime>0)factor*=1.75;if(type==='splash'&&target.burnTime>0)factor*=1.4;damage(s,target,amount*factor,hero.id);}
-  event(s,'impact',{...point,hero:hero.id,source:shot.source,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin,geometry});
+  event(s,'impact',{...point,hero:hero.id,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
   if(['chain','bounce'].includes(hero.shape)||type==='gust'){
     const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0));
     let from=point;for(const target of others){damage(s,target,amount*.65,hero.id);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}

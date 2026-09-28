@@ -44,7 +44,6 @@
 - [소스 구조와 수정 위치](doc/SOURCE_DESIGN.md)
 - [21명·20유물·6축복·웨이브·보스 밸런스](doc/BALANCE_DESIGN.md)
 - [이번 추가 에셋과 생성 기록](doc/ART_ASSETS.md)
-- [공격 범위 가독성 조사·구현·반복 검토 방법](doc/COMBAT_READABILITY.md)
 - [기존 캐릭터 아트 계약](ART_DIRECTION.md)
 - [방향도 제작 지침](docs/CONFLUENCE_ART_PLAYBOOK.md)
 - [두개부·체형 프로필](docs/art/HEAD_PROFILE.json)

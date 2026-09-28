@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HERO,DEFAULT_DECK} from '../../merge/content.js';
 import * as E from '../../merge/engine.js';
-import {CombatFX} from '../../merge/effects.js';
 import {inspection,attackDescription,skillDescription,trainingPreview} from '../../merge/unit-info.js';
 import {tutorialPage} from '../../merge/tutorial.js';
 
@@ -63,18 +62,4 @@ test('trait and skill descriptions include actual conditional damage and highest
   const skill=E.power(s,s.board[7])*21.6*1.3;assert.ok(skillDescription(s,'luna').includes(Number(skill.toFixed(1)).toLocaleString('ko-KR')));
   const mushroom=arrange('mushroom_king');mushroom.artifacts=['seed'];mushroom.board[12].rank=3;
   assert.match(attackDescription(mushroom,mushroom.board[12]),/독 \+4/);assert.match(skillDescription(mushroom,'mushroom_king'),/독 \+25/);
-});
-test('impact events carry the actual collision snapshot even after the target moves',()=>{
-  const s=arrange();s.board[12].cooldown=0;const e=enemy(s);e.speed=49;
-  let hit;for(let i=0;i<90&&!hit;i++){E.step(s,1/60);hit=s.events.find(event=>event.type==='impact');}
-  assert.ok(hit?.geometry);assert.equal(hit.source,s.board[12].uid);
-  assert.deepEqual(hit.geometry,E.attackGeometry(HERO.zeke,E.cellPoint(12),{...E.pathPoint(e.progress)}));
-  const before=structuredClone(hit.geometry);e.progress+=500;E.move(s,12,18);assert.deepEqual(hit.geometry,before);
-});
-test('echo refreshes one footprint per source, and skill particles cannot evict attack boundaries',()=>{
-  const fx=new CombatFX({},{}),g=E.attackGeometry(HERO.zeke,{x:360,y:350},{x:360,y:142});
-  for(let i=0;i<300;i++)fx.event({type:'impact',hero:'zeke',source:i%25,geometry:g});
-  assert.equal(fx.footprints.length,25);assert.equal(fx.impacts.length,96);
-  for(let i=0;i<100;i++)fx.event({type:'skill',hero:'zeke',origin:{x:360,y:350},targets:[],rank:1});
-  assert.equal(fx.footprints.length,25);assert.equal(fx.impacts.length,96);
 });
