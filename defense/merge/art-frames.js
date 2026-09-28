@@ -92,7 +92,7 @@ export const PORTRAIT_FRAMES = {
   },
   "silver_rabbit": {
     "x": 256,
-    "y": 247,
+    "y": 249,
     "size": 250
   },
   "ancient_dragon": {

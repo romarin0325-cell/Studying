@@ -4,6 +4,7 @@ export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
 export const BALANCE_REVISION = 2;
 export const BOSS_HEALTH_SCALE = .8;
+export const ATTACK_WINDUP = .13;
 export const BOARD = {x:135,y:212,cell:90};
 export const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
 export function attackDirection(from,to){const dx=to.x-from.x,dy=to.y-from.y;return Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up';}
@@ -23,7 +24,7 @@ function shuffle(s,values){const a=[...values];for(let i=a.length-1;i>0;i--){con
 export function validDeck(deck){return Array.isArray(deck)&&deck.length===6&&new Set(deck).size===6&&deck.every(id=>HERO[id]);}
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
 export function has(s,id){return s.artifacts.includes(id);}
-export function summonCost(s){return s.freeSummons>0?0:Math.max(8,Math.min(40,10+s.paidSummons*2)-(has(s,'feather')?4:0));}
+export function summonCost(s){return s.freeSummons>0?0:Math.max(8,10+s.paidSummons*2-(has(s,'feather')?4:0));}
 export const cinderellaRefund=(rank,level=0)=>(18+level*4)*rank;
 export const queenIncome=(rank,wave,level=0)=>3+rank*2+Math.floor((wave-1)/3)+level*3;
 export const harvestIncome=(rank,level=0)=>rank+2+level*2;
@@ -60,10 +61,12 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
     board:Array(25).fill(null),enemies:[],shots:[],zones:[],events:[],gold:45,gauge:75,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),
     buffs:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
-  place(s,chosen[0],1,6);place(s,chosen[0],1,8);place(s,chosen[1],1,12);
+  for(const slot of [6,8,12])place(s,drawHero(s),1,slot);
   beginWave(s,1);return s;
 }
-export function drawHero(s){if(!s.bag.length)s.bag=shuffle(s,s.deck);return s.bag.pop();}
+// Sampling with replacement: every draw is 1/6, including the opening trio.
+// The legacy bag is retained only for save compatibility and is never consumed.
+export function drawHero(s){return s.deck[Math.floor(random(s)*s.deck.length)];}
 export function summon(s,preferred=-1){
   if(!['combat','intermission'].includes(s.phase))return {ok:false,reason:'전투 중에 소환할 수 있습니다.'};
   if(freeCell(s)<0)return {ok:false,reason:'전장이 가득 찼습니다. 합성하거나 영웅을 회수하세요.'};
@@ -193,28 +196,39 @@ function attack(s,u,index){
   const hero=HERO[u.hero],at=cellPoint(index),to=pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
   u.aim=angle;u.facing=attackDirection(at,to);
   const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
-  let multiplier=1;const adjacent=neighbors(index).map(i=>s.board[i]).filter(Boolean);
-  if(adjacent.some(a=>HERO[a.hero].trait.type==='powerAura'))multiplier*=1.25+s.upgrades.ancient_dragon*.03;
-  if(has(s,'guild')&&adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type)))multiplier*=1.15;
-  if(has(s,'constellation')&&new Set(adjacent.map(a=>a.hero)).size>=3)multiplier*=1.65;
-  if(has(s,'banner')&&!adjacent.length)multiplier*=1.4;
-  if(has(s,'crown')&&u.rank>=3)multiplier*=1.25;
-  if(s.buffs.awaken>0)multiplier*=1.7;
   u.attacks++;u.pose=.3;
-  const value=power(s,u)*multiplier;
+  const value=combatStats(s,u,index).damage;
   const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
   const shot={uid:s.nextId++,source:u.uid,target:e.uid,hero:u.hero,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel};
   s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,attackType:hero.attack});
   if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,damage:value*.65,life:shot.life+.14,total:shot.life+.14});}
   if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
 }
-function speedMultiplier(s,u,index){
-  let factor=1;const adjacent=neighbors(index).map(i=>s.board[i]).filter(Boolean);
-  if(adjacent.some(a=>HERO[a.hero].trait.type==='hasteAura'))factor+=.22+s.upgrades.siren*.03;
-  if(s.buffs.haste>0)factor+=.65;if(s.buffs.march>0)factor+=.4;
-  if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=2)factor+=.15;
-  if(u.hero.endsWith('_rabbit'))factor+=(new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero)).size-1)*.2;
-  return factor;
+// One source for outgoing attack power, cadence and the live inspection UI.
+// Enemy armor/exposure and conditional hit bonuses are applied at impact.
+export function combatStats(s,u,index=s.board.indexOf(u)){
+  const h=HERO[u.hero],adjacent=index<0?[]:neighbors(index).map(i=>s.board[i]).filter(Boolean),bonuses=[];
+  let multiplier=1,speed=1;
+  const damageBonus=(name,value)=>{multiplier*=1+value;bonuses.push(`${name} +${Math.round(value*100)}% 위력`);};
+  const speedBonus=(name,value)=>{speed+=value;bonuses.push(`${name} +${Math.round(value*100)}% 공속`);};
+  if(s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 위력`);
+  if(s.surgeWave===s.wave)bonuses.push('새벽검 +25% 위력');
+  if(adjacent.some(a=>HERO[a.hero].trait.type==='powerAura'))damageBonus('고대 용의 가호',.25+(s.upgrades.ancient_dragon||0)*.03);
+  if(has(s,'guild')&&adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type)))damageBonus('연대',.15);
+  if(has(s,'constellation')&&new Set(adjacent.map(a=>a.hero)).size>=3)damageBonus('별자리',.65);
+  if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('고독한 깃발',.4);
+  if(has(s,'crown')&&u.rank>=3)damageBonus('왕관',.25);
+  if(s.buffs.awaken>0)damageBonus('각성',.7);
+  if(adjacent.some(a=>HERO[a.hero].trait.type==='hasteAura'))speedBonus('세이렌의 노래',.22+(s.upgrades.siren||0)*.03);
+  if(s.buffs.haste>0)speedBonus('가속',.65);
+  if(s.buffs.march>0)speedBonus('은빛 행진',.4);
+  if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=2)speedBonus('합창',.15);
+  if(u.hero.endsWith('_rabbit')){
+    const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
+    if(kinds.size)speedBonus('토끼 연계',kinds.size*.2);
+  }
+  const cooldown=h.interval/speed;
+  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,skillPower:power(s,u),range:h.range,radius:h.radius,bonuses};
 }
 
 export function cast(s,id){
@@ -329,7 +343,7 @@ export function step(s,dt){
     if(u.hero==='mushroom_king'){u.harvest-=dt;if(u.harvest<=0){u.harvest+=12;const gold=harvestIncome(u.rank,s.upgrades[u.hero]);giveGold(s,gold,'포자 수확');event(s,'income',{...cellPoint(i),gold});}}
     if(u.disabled>0){u.disabled-=dt;continue;}
     if(u.windup>0){u.windup-=dt;if(u.windup<=0)attack(s,u,i);continue;}
-    u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=.13;u.cooldown=HERO[u.hero].interval/speedMultiplier(s,u,i);}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
+    u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
   }
   for(const shot of s.shots){shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
   s.shots=s.shots.filter(shot=>shot.life>0);s.enemies=s.enemies.filter(e=>e.hp>0);
