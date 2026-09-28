@@ -39,7 +39,7 @@ try {
   const columns = await page.evaluate(() => getComputedStyle(document.querySelector('.campaign-route')).gridTemplateColumns);
   assert.ok(columns.split(' ').filter(Boolean).length >= 2);
   await page.locator('#shop').click();
-  assert.match(await page.locator('.shop-balance').innerText(), /꿈의 조각/);
+  assert.match(await page.locator('.shop-balance').innerText(), /꿈의결정/);
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log('browser pointer path checked; real Android/iOS multitouch was not run');
 } finally {

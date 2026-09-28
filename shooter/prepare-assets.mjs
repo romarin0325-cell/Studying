@@ -10,7 +10,7 @@ const getSharp = async () => sharp ||= (await import('sharp')).default;
 const CACHE_VERSION = 1;
 const GENERATED_ASSETS = path.join(root, 'generated-assets');
 const EVENT_ASSETS = ['harmonious', 'gold-dragon', 'ancient-soul', 'behemoth', 'time-ruler'];
-const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
+const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', 'shop-items', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
 const ART_WEBP = { quality: 88, alphaQuality: 100, effort: 6 };
 const WORLD_WEBP = { quality: 84, alphaQuality: 100, effort: 6 };
 const CHARACTER_KINDS = new Set(['heroes', 'companions', 'secrets']);
@@ -44,7 +44,7 @@ async function readCachedReport(directory, fingerprint) {
     const manifest = JSON.parse(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8'));
     if (manifest.version !== CACHE_VERSION || manifest.sourceHash !== fingerprint.sourceHash || manifest.processorHash !== fingerprint.processorHash) return null;
     const files = manifest.report?.output?.files;
-    if (!Array.isArray(files) || files.length !== 94) return null;
+    if (!Array.isArray(files) || files.length !== 97) return null;
     for (const file of files) {
       const destination = cacheFilePath(directory, file.file);
       if (!destination || !Number.isInteger(file.bytes) || typeof file.sha256 !== 'string') return null;
@@ -271,6 +271,7 @@ export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeR
   await processShieldRelics(cacheDirectory, outputs);
   await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.5],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
   await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs);
+  await processSmallRelics('shop-items', 3, 1, cacheDirectory, outputs);
   const sourceBytes = source.reduce((total, item) => total + item.bytes, 0), outputBytes = outputs.reduce((total, item) => total + item.bytes, 0);
   const report = {
     source: { fileCount: source.length, bytes: sourceBytes, files: source },

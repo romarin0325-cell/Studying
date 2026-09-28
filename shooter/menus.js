@@ -90,7 +90,7 @@ export class CampaignUI {
         const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);
         if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 뽑기를 취소했어요.');return this.equipment(refresh);}
         const a=result.artifact;
-        const shardNote = result.duplicate ? `이미 보유한 유물이에요. 꿈의 조각 ${result.shardsAwarded}개를 받았어요. 재화: 꿈의 조각 ${p.dreamShards}개.` : '새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.';
+        const shardNote = result.duplicate ? `이미 보유한 유물이에요. 꿈의결정 ${result.shardsAwarded}개를 받았어요. 보유 꿈의결정 ${p.dreamShards}개.` : '새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.';
         this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${shardNote}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
       };
       this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
@@ -104,11 +104,18 @@ export class CampaignUI {
     const render=()=>{
       const remaining=randomRemaining(p), resets=p.randomResetTickets, shards=p.dreamShards;
       const shopTickets=p.tickets.filter(ticket=>ticket.source==='shop' && ticket.kind==='artifact').length;
-      this.setModal(`<span class="small-caps">DREAM SHARDS</span><h2>별빛 상점</h2><p class="shop-balance">재화: 꿈의 조각 ${shards}개</p><p class="tiny-note">레어 유물 꿈의조각과는 다른 재화예요. 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능.</p><div class="shop-goods"><button class="secondary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}><b>아티팩트 뽑기권 1장</b><small>꿈의 조각 5개 · 보유 뽑기권 ${p.tickets.length}장 · 상점 티켓 ${shopTickets}장</small></button><button class="secondary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}><b>랜덤 횟수 리셋권 1장</b><small>꿈의 조각 1개 · 보유 리셋권 ${resets}장</small></button></div><p class="intro-copy">오늘 남은 기본 횟수 ${remaining}/${RANDOM_DAILY_LIMIT}</p><button class="primary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button><p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 남은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
+      const crystal=this.art.urls.shopItems[0], ticket=this.art.urls.shopItems[1], reset=this.art.urls.shopItems[2];
+      this.setModal(`<span class="small-caps">DREAM CRYSTAL SHOP</span><h2>별빛 상점</h2>
+        <div class="shop-balance"><img src="${crystal}" alt=""><span><small>보유 꿈의결정</small><strong>${shards}</strong></span></div>
+        <div class="shop-goods">
+          <article class="shop-product"><div class="shop-product-head"><img src="${ticket}" alt=""><div><small>ARTIFACT DRAW</small><h3>아티팩트 뽑기권</h3></div></div><p class="shop-stock">보유 뽑기권 ${p.tickets.length}장 <small>상점 구매 ${shopTickets}장</small></p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>5개</b></span></div><button class="primary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}>뽑기권 구매</button></article>
+          <article class="shop-product"><div class="shop-product-head"><img src="${reset}" alt=""><div><small>RANDOM RESET</small><h3>랜덤 횟수 리셋권</h3></div></div><p class="shop-stock">보유 리셋권 ${resets}장</p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>1개</b></span></div><button class="primary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}>리셋권 구매</button></article>
+        </div><div class="shop-reset"><div><small>오늘 남은 기본 랜덤 횟수</small><strong>${remaining} <span>/ ${RANDOM_DAILY_LIMIT}</span></strong></div><button class="secondary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button></div>
+        <p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
       document.querySelector('.panel').classList.add('shop-panel');
       $('shop-back').onclick=()=>{this.closeModal();refresh();};
-      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의 조각 5개로 살까요?');
-      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의 조각 1개로 살까요?');
+      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의결정 5개로 살까요?');
+      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의결정 1개로 살까요?');
       $('use-reset').onclick=()=>confirmReset();
     };
     const confirmBuy=(item,copy)=>{
@@ -120,7 +127,7 @@ export class CampaignUI {
         if(done||busy)return;done=true;busy=true;
         const snap=economySnapshot(p);
         const result=purchaseShopItem(p,item);
-        if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의 조각이 부족해요.':'구매하지 못했어요.');return render();}
+        if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의결정이 부족해요.':'구매하지 못했어요.');return render();}
         if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
         busy=false;this.toast('구매했어요.');render();
       };
@@ -149,7 +156,7 @@ export class CampaignUI {
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {
     const week=weekKey(), event=weeklyEvent(), choices=[...DUNGEONS.slice(0,7),event];
     if(DUNGEONS[selected]?.event)selected=event.id;
-    this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>새로운 하늘로</h2><div class="dungeon-list">${choices.map(d=>`<button class="dungeon-card ${d.event?'event-card':d.challengeOnly?'challenge-card':''} ${selected===d.id?'selected':''}" ${d.challengeOnly?'id="challenge-mode"':`data-dungeon="${d.id}"`} aria-pressed="${selected===d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>${d.event?'WEEKLY EVENT':d.challengeOnly?'CHALLENGE':`DUNGEON 0${d.id+1}`} · ${d.challengeOnly?21:3} STAGES</small><b>${d.challengeOnly?'챌린지':d.name}</b><span>${d.challengeOnly?'천계의 계단':d.boss||STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.event?7:d.id}`]?'이번 주 보상 수령':`첫 클리어 · 뽑기권 ${mode==='hard'?2:1}장`}</em></button>`).join('')}</div><p class="intro-copy dungeon-description">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note weekly-note">이벤트는 매주 5개 중 하나가 열려요. 월요일 0시 갱신 · 주간 첫 보상은 일반 6던전, 챌린지, 이벤트에서 각각 한 번 받아요. 난이도를 바꿔도 중복 수령할 수 없어요.</p><button class="primary" id="dungeon-done">${selected===6?'챌린지':'이 하늘로'} 출격 준비</button>`);
+    this.setModal(`<span class="small-caps">CHOOSE YOUR EXPEDITION</span><h2>새로운 하늘로</h2><div class="dungeon-list">${choices.map(d=>`<button class="dungeon-card ${d.event?'event-card':d.challengeOnly?'challenge-card':''} ${selected===d.id?'selected':''}" ${d.challengeOnly?'id="challenge-mode"':`data-dungeon="${d.id}"`} aria-pressed="${selected===d.id}" style="--dungeon-art:url('${this.art.urls.worlds[d.id]}')"><small>${d.event?'WEEKLY EVENT':d.challengeOnly?'CHALLENGE':`DUNGEON 0${d.id+1}`} · ${d.challengeOnly?21:3} STAGES</small><b>${d.challengeOnly?'챌린지':d.name}</b><span>${d.challengeOnly?'천계의 계단':d.boss||STAGES[d.id].boss}</span><em>${this.profile.claims[`${week}:${d.event?7:d.id}`]?'이번 주 보상 수령':`첫 클리어 · 뽑기권 ${DIFFICULTIES.find(d=>d.id===mode).tickets}장`}</em></button>`).join('')}</div><p class="intro-copy dungeon-description">${DUNGEONS[selected].mechanic}</p><div class="difficulty-list">${DIFFICULTIES.map(d=>`<button data-difficulty="${d.id}" class="${d.id===mode?'selected':''}" aria-pressed="${d.id===mode}"><b>${d.name}</b><small>뽑기권 ${d.tickets}장</small></button>`).join('')}</div><p class="tiny-note weekly-note">이벤트는 매주 5개 중 하나가 열려요. 월요일 0시 갱신 · 주간 첫 보상은 일반 6던전, 챌린지, 이벤트에서 각각 한 번 받아요. 난이도를 바꿔도 중복 수령할 수 없어요.</p><button class="primary" id="dungeon-done">${selected===6?'챌린지':'이 하늘로'} 출격 준비</button>`);
     document.querySelector('.panel').classList.add('dungeon-panel');
     document.querySelector('.dungeon-list').scrollTop=scroll;document.querySelector('.panel').scrollTop=panelScroll;
     const positions=()=>[document.querySelector('.dungeon-list').scrollTop,document.querySelector('.panel').scrollTop];

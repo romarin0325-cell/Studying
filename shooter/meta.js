@@ -49,7 +49,8 @@ export function artifactText(artifact, challenge = false) {
 export const DIFFICULTIES = [
   { id: 'easy', name: '쉬움', hp: .836, speed: .78, interval: 1.2, lives: 4, maxLife:4, rare: .15, tickets: 1 },
   { id: 'normal', name: '보통', hp: 1.15, speed: 1, interval: 1, lives: 3, maxLife:4, rare: .15, tickets: 1 },
-  { id: 'hard', name: '어려움', hp: 1.56, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .15, tickets: 2 }
+  { id: 'hard', name: '어려움', hp: 1.56, speed: 1.19, interval: .82, lives: 3, maxLife:3, rare: .15, tickets: 2 },
+  { id: 'abyss', name: '심연', hp: 1.56, speed: 1.27, interval: .74, lives: 3, maxLife:3, rare: .15, tickets: 2 }
 ];
 export const BASE_HEROES = Object.freeze([
   { hero:0, name:'루미' }, { hero:1, name:'루나' }, { hero:2, name:'지크' },
@@ -87,7 +88,7 @@ export function createProfile(raw = {}) {
   const migrate = !Number.isFinite(Number(raw.version)) || Number(raw.version) < 3;
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
   const uses=raw.randomDraws;
-  const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard):[0-5]$/.test(key)));
+  const clears=Object.fromEntries(Object.entries(raw.clears && typeof raw.clears==='object' ? raw.clears : {}).filter(([key,value])=>value===true&&/^(0|1|2|3|4|6):[01]:(easy|normal|hard|abyss):[0-5]$/.test(key)));
   const tickets = [];
   if (Array.isArray(raw.tickets)) for (const ticket of raw.tickets) {
     if (isShopTicket(ticket)) { tickets.push({ source: 'shop', kind: 'artifact' }); continue; }
@@ -95,7 +96,7 @@ export function createProfile(raw = {}) {
     if (!DIFFICULTIES.some(d => d.id === ticket.difficulty) || !Number.isInteger(ticket.dungeon) || ticket.dungeon < 0 || ticket.dungeon >= (migrate ? 4 : 8)) continue;
     tickets.push({ ...ticket, dungeon: migrate && ticket.dungeon === 3 ? 5 : ticket.dungeon });
   }
-  return { version: 6, dreamShards: finiteCount(raw.dreamShards), randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
+  return { version: 7, dreamShards: finiteCount(raw.dreamShards), randomResetTickets: finiteCount(raw.randomResetTickets), randomDraws: uses && typeof uses.date==='string' ? {date:uses.date,count:Math.max(0,Math.min(RANDOM_DAILY_LIMIT,Math.floor(Number(uses.count)||0)))} : {date:'',count:0}, owned: [...new Set(['spellbook','frozen','crystal', ...(Array.isArray(raw.owned) ? raw.owned.filter(valid) : [])])],
     equipped: [...new Set((Array.isArray(raw.equipped) ? raw.equipped : ['spellbook','frozen','crystal']).filter(valid))].slice(0,3),
     claims,
     tickets,

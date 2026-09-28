@@ -23,6 +23,7 @@ export function createArtUrls(root = 'assets') {
   const shieldRelics = numbered(root, 'shield-relics', 11);
   const celestialRelics = numbered(root, 'celestial-relics', 4);
   const balanceRelics = numbered(root, 'balance-relics', 6);
+  const shopItems = numbered(root, 'shop-items', 3);
   const worlds = numbered(root, 'worlds', 4);
   const eventBosses = EVENT_ASSETS.map(name => resolveAsset(`${root}/${name}/0.webp`));
   const eventWorlds = EVENT_ASSETS.map(name => resolveAsset(`${root}/${name}-world/0.webp`));
@@ -49,6 +50,7 @@ export function createArtUrls(root = 'assets') {
     sentinels: renderedSentinels,
     relics: renderedRelics,
     baseRelics: relics,
+    shopItems,
     tides,
     bloomFx,
     astea: [asteaUrl],
@@ -60,6 +62,7 @@ export function createArtUrls(root = 'assets') {
       bosses: renderedBosses,
       worlds: renderedWorlds,
       relics: renderedRelics,
+      shopItems,
       dark: secrets[2],
       sigil: secrets[3]
     }
