@@ -5,6 +5,9 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
 const BOMB_INVULNERABILITY = [4,2,3,3,3,3,3,3,2];
 const DUNGEON_ENEMY_SCALE = [1.12,1.16,1.20,1.25,1.30,1.35,1.55];
+const ABYSS_ENEMY_HP_SCALE = [1.30,1.26,1.22,1.18,1.14,1.10];
+const ABYSS_SENTINEL_HP_SCALE = [1.40,1.36,1.32,1.28,1.24,1.20];
+const ABYSS_BOSS_HP_SCALE = [1.60,1.54,1.48,1.42,1.36,1.30];
 const MIRACLE_BOMBS = 5;
 // Events already use a higher base enemy tier, so this reaches above the forest
 // teleporter without applying its full 1.65 multiplier a second time.
@@ -33,6 +36,17 @@ export class Game {
     this.startStage(challenge ? 0 : stage);
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
+  get isAbyss() { return this.mode === 'abyss'; }
+  abyssEnemyHpScale(enemy) {
+    if (!this.isAbyss) return 1;
+    return enemy.miniboss ? (ABYSS_SENTINEL_HP_SCALE[this.stageIndex] ?? 1.20) : (ABYSS_ENEMY_HP_SCALE[this.stageIndex] ?? 1.10);
+  }
+  abyssBossHpScale() { return this.isAbyss ? (ABYSS_BOSS_HP_SCALE[this.stageIndex] ?? 1.30) : 1; }
+  enemyProjectileSpeedScale() {
+    return this.isAbyss && this.stageIndex === 5 && this.bossPattern === 2 && this.phase === 'boss'
+      ? DIFFICULTIES.find(d => d.id === 'hard').speed : this.difficulty.speed;
+  }
+  eventSubpatternInterval(phase) { return this.isAbyss ? (phase >= 2 ? 4.5 : 5.5) : (phase >= 2 ? 5 : 6); }
   emit(type, data = {}) { this.onEvent({ type, ...data }); }
   startStage(index, room = 0) {
     this.stageIndex = index; this.room = room; this.dungeon = DUNGEONS[index];
@@ -277,7 +291,7 @@ export class Game {
     if (p.lives <= 0) { this.dropEventSubpatterns(false); this.phase = 'defeat'; this.finished = true; this.emit('defeat'); } return true;
   }
   enemyBullet(x, y, angle, speed, options = {}) {
-    const relaxed = this.difficulty.speed;
+    const relaxed = this.enemyProjectileSpeedScale();
     this.add('bullets', { x, y, vx: Math.cos(angle) * speed * relaxed, vy: Math.sin(angle) * speed * relaxed, r: 5, age: 0, color: this.stage.color, shape: 'orb', ...options }, LIMITS.bullets);
   }
   fan(x, y, count, speed, spread, aim = Math.PI / 2, opts = {}) {
@@ -304,7 +318,7 @@ export class Game {
       data={...data,elite:true,special:patterns[this.celestialWave++%2]};
     }
     const specialHp = data.special === 3 ? (this.dungeon.event ? EVENT_TELEPORT_HP_MULTIPLIER : this.stageIndex === 3 ? 1.65 : 1) : data.special === 4 && this.stageIndex === 4 ? .9167 : 1;
-    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1) * specialHp;
+    const hp = data.hp * this.difficulty.hp * (this.dungeon.event ? 1.40 : DUNGEON_ENEMY_SCALE[this.stageIndex]) * (1 + this.room*.12) * (data.elite || data.miniboss ? 1.2 : 1) * specialHp * this.abyssEnemyHpScale(data);
     this.add('enemies', { x, y, ox: x, age: 0, flash: 0, ...data, hp, maxHp: hp }, LIMITS.enemies);
   }
   specialDeath(e) {
@@ -342,7 +356,7 @@ export class Game {
   spawnBoss() {
     this.enemies.length = 0; this.clearBullets(); this.hazards.length = 0;
     this.combo = 0; this.comboTime = 0; this.bossElapsed = 0;
-    const hp = this.stage.hp * this.difficulty.hp * 0.936;
+    const hp = this.stage.hp * this.difficulty.hp * 0.936 * this.abyssBossHpScale();
     this.boss = { boss: true, x: 225, y: -100, age: 0, hp, maxHp: hp, r: 42, flash: 0, fire: 1.5, image: this.stageIndex };
     this.enemies.push(this.boss); this.phase = 'warning'; this.phaseTime = 0; this.emit('warning');
   }
@@ -353,7 +367,7 @@ export class Game {
     if (entered) {
       this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2; b.subpatternNext = null;
       if (this.stageIndex===6) {
-        b.nextLight=this.bossClock+4; b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+3; b.asteaCrossCount=0;
+        b.nextLight=this.bossClock+(this.isAbyss?3.6:4); b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+(this.isAbyss?2.5:3); b.asteaCrossCount=0;
       }
       this.emit('pattern', { phase, name: this.stage.pattern[phase] });
     }
@@ -364,7 +378,7 @@ export class Game {
     const speed = 102 + this.stageIndex * 10 + phase * 12;
     const t = this.bossClock;
     if(this.stageIndex===6 && phase===0 && t>=b.nextLight) {
-      b.nextLight=t+4;
+      b.nextLight=t+(this.isAbyss?3.6:4);
       const gap=clamp(this.player.x,85,365);
       this.effect('celestialWarning',{x:gap,y:this.height-28,life:1.5,wait:1.2,gap,bottom:true,color:'#ffe1a3'});
     }
@@ -376,7 +390,7 @@ export class Game {
       this.addHazard(x,28);this.addHazard(y,28,'horizontal');
     }
     if(this.stageIndex===6 && phase===2 && t>=b.nextJudgmentCross) {
-      b.nextJudgmentCross=t+3;
+      b.nextJudgmentCross=t+(this.isAbyss?2.5:3);
       this.addHazard(clamp(this.player.x,70,380),28);
       this.addHazard(clamp(this.player.y,240,this.height-120),28,'horizontal');
     }
@@ -384,47 +398,48 @@ export class Game {
     if (this.dungeon.event) { this.eventBossAttack(phase,b,aim); this.emit('enemyShot',{boss:true}); return; }
     switch (this.stageIndex) {
       case 0:
-        b.fire = phase === 0 ? 1.05 : .8;
-        if (phase === 0) this.fan(b.x, b.y + 25, 5, speed + 12, .18, aim);
-        else if (phase === 1) { for (let i = 0; i < 14; i++) this.enemyBullet(b.x, b.y, i * TAU / 14 + t * .28, speed, { shape: 'diamond' }); }
-        else { this.fan(b.x, b.y, 7, speed, .16, aim); this.addHazard(65 + (Math.floor(t) % 4) * 105, 28); } break;
+        b.fire = this.isAbyss ? (phase === 0 ? .95 : .70) : (phase === 0 ? 1.05 : .8);
+        if (phase === 0) this.fan(b.x, b.y + 25, this.isAbyss ? 7 : 5, speed + 12, .18, aim);
+        else if (phase === 1) { const count=this.isAbyss?16:14; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count + t * .28, speed, { shape: 'diamond' }); }
+        else { this.fan(b.x, b.y, this.isAbyss ? 9 : 7, speed, .16, aim); this.addHazard(65 + (Math.floor(t) % 4) * 105, 28); } break;
       case 1:
-        b.fire = phase === 0 ? .95 : .62;
-        for (const side of [-1, 1]) this.fan(b.x + side * 43, b.y + 15, 3 + phase, speed, .19, Math.PI / 2 + Math.sin(t * .8) * side * .55, { shape: 'heart', color: '#ffa7cf', turn: side * .12 });
-        if (phase === 2) this.fan(b.x, b.y, 3, speed + 35, .13, aim, { color: '#ffe9b4' }); break;
+        b.fire = this.isAbyss ? (phase === 0 ? .86 : .55) : (phase === 0 ? .95 : .62);
+        for (const side of [-1, 1]) this.fan(b.x + side * 43, b.y + 15, this.isAbyss ? [4,5,7][phase] : 3 + phase, speed, .19, Math.PI / 2 + Math.sin(t * .8) * side * .55, { shape: 'heart', color: '#ffa7cf', turn: side * .12 });
+        if (phase === 2) this.fan(b.x, b.y, this.isAbyss ? 4 : 3, speed + 35, .13, aim, { color: '#ffe9b4' }); break;
       case 2:
         b.fire = phase === 0 ? .95 : .72;
-        if (phase === 1) { const gap = 50 + (Math.floor(t * .65) % 4) * 105; for (let x = 25; x < 450; x += 32) if (Math.abs(x - gap) > 43) this.enemyBullet(x, 76, Math.PI / 2, speed, { shape: 'diamond', color: '#d6adff' }); }
-        else { for (let i = 0; i < 12 + phase * 3; i++) this.enemyBullet(b.x, b.y, i * TAU / (12 + phase * 3) - t * .27, speed, { turn: phase === 2 ? .24 : 0, shape: 'diamond', color: ['#e8a9ff', '#93d9ff', '#ffbfcf'][i % 3] }); }
+        if (phase === 1) { const gap = 50 + (Math.floor(t * .65) % 4) * 105; for (let x = 25; x < 450; x += this.isAbyss ? 30 : 32) if (Math.abs(x - gap) > 43) this.enemyBullet(x, 76, Math.PI / 2, speed, { shape: 'diamond', color: '#d6adff' }); }
+        else { const count=this.isAbyss?(phase===0?14:21):12+phase*3; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count - t * .27, speed, { turn: phase === 2 ? .24 : 0, shape: 'diamond', color: ['#e8a9ff', '#93d9ff', '#ffbfcf'][i % 3] }); }
         if (phase === 2 && Math.floor(t) % 3 === 0) this.addHazard(clamp(this.player.x, 40, 410), 30); break;
       case 3:
         b.fire=phase===0?1.05:.8;
-        for(let i=0;i<12+phase*4;i++)this.enemyBullet(b.x,b.y,i*TAU/(12+phase*4)+t*.24,speed,{shape:'petal',turn:(i%2?1:-1)*.16});
-        if(phase===2)this.fan(b.x,b.y,3,speed+30,.15,aim);break;
+        const count=this.isAbyss?[18,24,30][phase]:12+phase*4;
+        for(let i=0;i<count;i++)this.enemyBullet(b.x,b.y,i*TAU/count+t*.24,speed,{shape:'petal',turn:(i%2?1:-1)*.16});
+        if(phase===2)this.fan(b.x,b.y,this.isAbyss?5:3,speed+30,.15,aim);break;
       case 4:
         b.fire=phase===0?1:.85;
-        this.fan(b.x,b.y,5+phase,speed,.20,aim,{r:6,ricochet:phase===2?3:0});
+        this.fan(b.x,b.y,5+phase+(this.isAbyss?1:0),speed,.20,aim,{r:6,ricochet:phase===2?3:0});
         if(phase>0 && t>=(b.nextCross||0)) {
-          b.nextCross=t+4.5;
+          b.nextCross=t+(this.isAbyss?4:4.5);
           this.addHazard(clamp(this.player.x,65,385),30);
           this.addHazard(clamp(this.player.y,200,this.height-100),30,'horizontal');
         }break;
       case 5:
-        b.fire = phase === 0 ? .9 : .6;
-        for (const side of [-1, 1]) this.fan(b.x + side * 55, b.y + 10, 4 + phase, speed, .18, Math.PI / 2 + side * Math.sin(t) * .5, { color: side === 1 ? '#e2a3ff' : '#ffb882', shape: 'diamond' });
+        b.fire = this.isAbyss && phase < 2 ? (phase===0?.81:.54) : (phase === 0 ? .9 : .6);
+        for (const side of [-1, 1]) this.fan(b.x + side * 55, b.y + 10, 4 + phase+(this.isAbyss&&phase<2?1:0), speed, .18, Math.PI / 2 + side * Math.sin(t) * .5, { color: side === 1 ? '#e2a3ff' : '#ffb882', shape: 'diamond' });
         if (phase > 0 && Math.floor(t * 2) % 3 === 0) this.addHazard(60 + Math.floor(this.random() * 4) * 110, phase === 2 ? 34 : 26);
         if (phase === 2) this.fan(b.x, b.y, 3, speed + 35, .16, aim); break;
       case 6:
-        b.fire=phase===2?2.6:1.25;
+        b.fire=this.isAbyss?[1.12,1.12,2.4][phase]:(phase===2?2.6:1.25);
         if(phase===0) {
-          this.fan(b.x,b.y,7,150,.19,aim,{shape:'diamond'});
+          this.fan(b.x,b.y,this.isAbyss?8:7,150,.19,aim,{shape:'diamond'});
         } else if(phase===1) {
-          this.fan(b.x,b.y,7,155,.22,Math.PI/2,{shape:'diamond'});
+          this.fan(b.x,b.y,this.isAbyss?10:7,155,.22,Math.PI/2,{shape:'diamond'});
         } else {
           // A fixed, telegraphed corridor stays open for this entire volley.
           const gap=[90,225,360][(b.judgmentCount||0)%3];b.judgmentCount=(b.judgmentCount||0)+1;
           this.effect('celestialWarning',{x:gap,y:80,life:1.5,wait:1.2,gap,bottom:false,color:'#ffe1a3'});
-          this.fan(b.x,b.y,5,175,.17,aim,{shape:'diamond'});
+          this.fan(b.x,b.y,this.isAbyss?7:5,175,.17,aim,{shape:'diamond'});
         }
         break;
     }
@@ -447,7 +462,7 @@ export class Game {
     const b = this.boss;
     if (!b || b.subpatternNext == null || phase < 1 || this.bossClock + 1e-9 < b.subpatternNext) return;
     this.spawnEventSubpattern();
-    b.subpatternNext = this.bossClock + (phase >= 2 ? 5 : 6);
+    b.subpatternNext = this.bossClock + this.eventSubpatternInterval(phase);
   }
   spawnEventSubpattern() {
     const kind = this.eventSubpatternKind();
@@ -461,7 +476,7 @@ export class Game {
   dropEventSubpatterns(reschedule = false) {
     this.hazards = this.hazards.filter(h => h.source !== 'eventSubpattern');
     if (!reschedule || !this.boss || !this.dungeon?.event || this.bossPattern < 1 || !this.eventSubpatternKind()) return;
-    this.boss.subpatternNext = this.bossClock + (this.bossPattern >= 2 ? 5 : 6);
+    this.boss.subpatternNext = this.bossClock + this.eventSubpatternInterval(this.bossPattern);
   }
   setMaxPower() {
     this.powerPoints = 0;
@@ -470,7 +485,8 @@ export class Game {
   }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
-    b.fire=[1.25,1.08,.92][phase];
+    b.fire=this.isAbyss && ['harmonious','gold-dragon'].includes(this.dungeon.asset)
+      ? [1.15,1.00,.85][phase] : [1.25,1.08,.92][phase];
     // Every event pattern remains telegraphed, but now asks the player to move
     // through a denser field rather than idling inside its central corridor.
     const ring=(count,speed,rotation,shape,extra={})=>{
@@ -483,29 +499,29 @@ export class Game {
     };
     switch(this.dungeon.asset) {
       case 'harmonious':
-        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,5+phase,128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
-        if(phase>0)ring(18,110,t*.1,'petal');
+        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,5+phase+(this.isAbyss?1:0),128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
+        if(phase>0)ring(this.isAbyss?20:18,110,t*.1,'petal');
         break;
       case 'gold-dragon':
-        for(const side of [-1,1])this.fan(b.x+side*55,b.y,6+phase,132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
-        if(phase===2)ring(24,112,t*.14,'diamond');
+        for(const side of [-1,1])this.fan(b.x+side*55,b.y,6+phase+(this.isAbyss?1:0),132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
+        if(phase===2)ring(this.isAbyss?26:24,112,t*.14,'diamond');
         break;
       case 'ancient-soul':
-        ring(20+phase*5,126,t*.19,'petal',{turn:.09});
-        if(phase>0)this.fan(b.x,b.y,4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
+        ring(this.isAbyss?[24,30,35][phase]:20+phase*5,126,t*.19,'petal',{turn:.09});
+        if(phase>0)this.fan(b.x,b.y,this.isAbyss&&phase===2?5:4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
         break;
       case 'behemoth': {
-        b.fire=phase===2?1.2:1.55;
+        b.fire=this.isAbyss?[1.47,1.45,1.12][phase]:(phase===2?1.2:1.55);
         const gap=[100,225,350][(b.earthWave||0)%3]; b.earthWave=(b.earthWave||0)+1;
-        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:26,corridor:72,projectileSpeed:140});
-        if(phase>0)ring(18,118,0,'diamond',{r:7});
+        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:this.isAbyss&&phase===0?25:26,corridor:this.isAbyss&&phase===2?68:72,projectileSpeed:140});
+        if(phase>0)ring(this.isAbyss&&phase===2?20:18,118,0,'diamond',{r:7});
         break;
       }
       case 'time-ruler':
-        b.fire=2.05;
+        b.fire=this.isAbyss?1.90:2.05;
         // An original clock volley inspired by Taisei's stop/release rhythm, not its code.
-        ring(16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
-        if(phase===2)this.fan(b.x,b.y,5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
+        ring(this.isAbyss?18+phase*6:16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
+        if(phase===2)this.fan(b.x,b.y,this.isAbyss?6:5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
         break;
     }
   }

@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sourceHash": "20a740c2b838bd548d4c9c093262d7c7e7fe5eff33e6d9a0efee9dfdfe20b751",
-  "processorHash": "5377c72a45833b37a1b5d89dcc98cdc8ea18b73720f8776235c6b976bbc7b860",
+  "sourceHash": "fd925552fd32513d238355a680cfbf9c93e788ea66ab25d4e7a4ed0123d3ac25",
+  "processorHash": "4d667adb5f65949b5654b1d5698bb318a9c922391ea68b553e7f01864ac40f8c",
   "report": {
     "source": {
-      "fileCount": 27,
-      "bytes": 61495245,
+      "fileCount": 28,
+      "bytes": 63513234,
       "files": [
         {
           "file": "heroes.png",
@@ -93,6 +93,11 @@
           "sha256": "978fdf832fbfd082ecae0550086745262d51d6a3d7786f82f76384fbff70ab31"
         },
         {
+          "file": "shop-items.png",
+          "bytes": 2017989,
+          "sha256": "ebff51d0108ec8f34d6d80e909cecb9e445c855de88646d33c4befe0bb9218c5"
+        },
+        {
           "file": "harmonious.png",
           "bytes": 1642897,
           "sha256": "d2c74dcb0eae0ae14e459984d2618946fc83c85d47b10fb77763b30837b98730"
@@ -145,8 +150,8 @@
       ]
     },
     "output": {
-      "fileCount": 94,
-      "bytes": 5319036,
+      "fileCount": 97,
+      "bytes": 5374576,
       "format": "webp",
       "files": [
         {
@@ -806,12 +811,33 @@
           "width": 192,
           "height": 192,
           "sha256": "ffe73d8f3bb0a91243b44df2c80500f397ab6d4e2700acea8662b177ff50383c"
+        },
+        {
+          "file": "shop-items/0.webp",
+          "bytes": 20730,
+          "width": 192,
+          "height": 192,
+          "sha256": "fa85a90cabb1c28df5a6d1cbc5b8fee4b6d3c60cf175b94d73e97776bfbdcdeb"
+        },
+        {
+          "file": "shop-items/1.webp",
+          "bytes": 17178,
+          "width": 192,
+          "height": 192,
+          "sha256": "c0db6a1ba328e3c81f31baeb4492c579b99942a378750e1e221da7a7a6c12403"
+        },
+        {
+          "file": "shop-items/2.webp",
+          "bytes": 17632,
+          "width": 192,
+          "height": 192,
+          "sha256": "89b2246d6f7eed48d4456257ecdf831eddddbe7bd8e0db77aa0e31fb9427e23d"
         }
       ]
     },
     "reduction": {
-      "bytes": 56176209,
-      "percent": 91.35
+      "bytes": 58138658,
+      "percent": 91.54
     },
     "qualityProbes": [
       {
