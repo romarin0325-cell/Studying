@@ -416,6 +416,7 @@ const BattleRuntime = {
 
             if (battle.isNewTurn) {
                 battle.isNewTurn = false;
+                if (battle.enemy) battle.enemy.lastHitType = null;
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
@@ -447,8 +448,6 @@ const BattleRuntime = {
                     }
                 }
             }
-
-            if (battle.enemy) battle.enemy.lastHitType = null;
 
             const player = battle.players[battle.currentPlayerIdx];
             if (!player || player.isDead) {
