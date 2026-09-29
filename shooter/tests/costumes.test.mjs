@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
-import { COSTUMES, COSTUME_TIERS, ACHIEVEMENTS, createProfile, purchaseShopItem, drawCostumeTicket, equipCostume, costumeForHero, achievementProgress, recordDungeonClear } from '../meta.js';
+import { COSTUMES, COSTUME_TIERS, ACHIEVEMENTS, createProfile, purchaseShopItem, purchaseCostume, drawCostumeTicket, equipCostume, costumeForHero, achievementProgress, recordDungeonClear } from '../meta.js';
+import { COSTUME_REGISTRATION, REFERENCE_EYES } from '../prepare-assets.mjs';
 
 const generated=new URL('../generated-assets/',import.meta.url);
 async function alphaBox(path) {
@@ -16,14 +17,48 @@ async function alphaBox(path) {
   return {canvas:[info.width,info.height],box:[left,top,right-left+1,bottom-top+1]};
 }
 
-test('all twelve costume silhouettes match their original in-game bounds',async()=>{
-  const base={0:'heroes/0.webp',1:'heroes/1.webp',2:'heroes/2.webp',3:'heroes/3.webp',4:'companions/0.webp',6:'companions/2.webp'};
+test('all twelve decoded costumes keep source proportions and the original face-to-hitbox position',async()=>{
   for(const [index,costume] of COSTUMES.entries()){
-    const expected=await alphaBox(base[costume.hero]),actual=await alphaBox(`costumes/${index}.webp`);
-    assert.deepEqual(actual,expected,costume.id);
+    const sourcePath=`../assets/costumes/${costume.id}.png`;
+    const source=await alphaBox(sourcePath),actual=await alphaBox(`costumes/${index}.webp`);
+    const [x,y,w,h]=actual.box,[sx,sy,sw,sh]=source.box;
+    assert.deepEqual(actual.canvas,[512,512]);
+    assert.ok(x>0&&y>0&&x+w<512&&y+h<512,`${costume.id}: no canvas clipping`);
+    const scaleX=w/sw,scaleY=h/sh;
+    assert.ok(Math.abs(scaleX/scaleY-1)<.012,`${costume.id}: nonuniform scale ${scaleX}/${scaleY}`);
+    const eyes=COSTUME_REGISTRATION[costume.id].eyes,baseEyes=REFERENCE_EYES[costume.hero];
+    const mapped=[x+(eyes[0]-sx)*scaleX,y+(eyes[1]-sy)*scaleY,x+(eyes[2]-sx)*scaleX,y+(eyes[3]-sy)*scaleY];
+    const distance=e=>Math.hypot(e[2]-e[0],e[3]-e[1]);
+    assert.ok(Math.abs(distance(mapped)-distance(baseEyes))<1.2,`${costume.id}: eye spacing changed`);
+    assert.ok(Math.abs((mapped[0]+mapped[2]-baseEyes[0]-baseEyes[2])/2)<1.5,`${costume.id}: face x drift`);
+    assert.ok(Math.abs((mapped[1]+mapped[3]-baseEyes[1]-baseEyes[3])/2)<1.5,`${costume.id}: face y drift`);
   }
   assert.deepEqual(await alphaBox('companions/dark-fairy.webp'),{canvas:[512,512],box:[62,70,387,371]});
   assert.deepEqual(await alphaBox('astea/0.webp'),{canvas:[384,384],box:[46,3,291,363]});
+});
+
+test('a purchase immediately owns and equips; a duplicate charges once and returns three crystals',()=>{
+  const p=createProfile({dreamShards:50});
+  const first=purchaseCostume(p,'daily',()=>0);
+  assert.deepEqual([first.ok,first.payment,first.cost,p.dreamShards],[true,'crystals',10,40]);
+  assert.deepEqual(p.costumesOwned,['night-pajama']);assert.equal(p.costumesEquipped[6],'night-pajama');
+  assert.equal(p.costumeTickets.daily,0);
+  const duplicate=purchaseCostume(p,'daily',()=>0);
+  assert.deepEqual([duplicate.duplicate,duplicate.shardsAwarded,p.dreamShards],[true,3,33]);
+  const reload=createProfile(JSON.parse(JSON.stringify(p)));
+  assert.equal(costumeForHero(reload,6).id,'night-pajama');assert.equal(reload.dreamShards,33);
+});
+
+test('miracle payment requires a valid selection and legacy tickets are redeemed without charging crystals',()=>{
+  const p=createProfile({dreamShards:30,costumeTickets:{daily:1}}),before=JSON.stringify(p);
+  for(const choice of [null,'invalid'])assert.equal(purchaseCostume(p,'miracle',()=>0,choice).ok,false);
+  assert.equal(purchaseCostume(p,'daily',()=>NaN).ok,false);assert.equal(JSON.stringify(p),before);
+  const legacy=purchaseCostume(p,'daily',()=>.8);
+  assert.deepEqual([legacy.payment,legacy.cost,p.dreamShards],['ticket',0,30]);
+  assert.equal(p.costumesEquipped[0],'rumi-sailor');assert.equal(p.costumeTickets.daily,0);
+  assert.equal(purchaseCostume(p,'miracle',()=>0,'luna-gothic').ok,true);
+  assert.deepEqual([p.dreamShards,p.costumesEquipped[1]],[0,'luna-gothic']);
+  const empty=JSON.stringify(p);assert.equal(purchaseCostume(p,'fantasy').ok,false);assert.equal(JSON.stringify(p),empty);
 });
 
 test('the three random ticket lineups contain the specified four costumes',()=>{

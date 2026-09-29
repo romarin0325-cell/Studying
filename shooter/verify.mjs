@@ -41,7 +41,7 @@ try {
       for (let w = 0; w < 2; w++) { await page.locator(`[data-weapon="${w}"]`).click(); assert.equal(await page.locator(`[data-weapon="${w}"]`).getAttribute('aria-pressed'), 'true'); }
     }
     report.checks.push('All six normal heroes and twelve weapon choices work on Sunday; hidden heroes absent');
-    await page.locator('#library').click();await page.locator('#library-search').fill('amenities');assert.ok(await page.locator('#library-list').textContent());
+    await page.locator('#library').click();await page.locator('#library-search-toggle').click();await page.locator('#library-search').fill('amenities');assert.ok(await page.locator('#library-list').textContent());
     await page.locator('[data-tab="grammar"]').click();await page.locator('[data-lecture="0"]').click();assert.ok((await page.locator('.lecture-copy').textContent()).length>100);await page.locator('#lecture-back').click();await page.locator('#library-close').click();
     await page.locator('#equipment').click();assert.equal(await page.locator('.artifact.selected').count(),3);await page.locator('[data-artifact="spellbook"]').click();assert.equal(await page.locator('.artifact.selected').count(),2);await page.locator('[data-artifact="spellbook"]').click();await page.locator('#equipment-done').click();
     report.checks.push('Library search, grammar lecture and three-slot artifact selection');

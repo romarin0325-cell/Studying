@@ -92,7 +92,7 @@ export class Renderer {
   }
   sprite(image, x, y, size, angle = 0, squash = 1, opacity = 1) {
     const c = this.c; c.save(); c.translate(x, y); c.rotate(angle); c.globalAlpha = opacity;
-    c.drawImage(image, -size / 2, -size / 2, size, size * squash); c.restore();
+    c.drawImage(image, -size / 2, -size * squash / 2, size, size * squash); c.restore();
   }
   render(g, dt = 1 / 60) {
     const c = this.c, h = this.height, t = g.totalTime;
@@ -234,7 +234,8 @@ export class Renderer {
     for (const side of [-1, 1]) { c.beginPath(); c.moveTo(side * 14, 10); c.quadraticCurveTo(side * 23 + Math.sin(t * 4) * 7, 37, side * 9, 59); c.stroke(); }
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
-    this.sprite(g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0?this.art.dark:(this.art.costumes[g.costumeIndex]||this.art.heroes[g.heroIndex]), p.x, p.y + Math.sin(t * 4) * 3 + p.recoil * 2, g.heroIndex===7?112:82, p.tilt, 1 - p.recoil * .035, opacity);
+    const transformed=g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0;
+    this.sprite(transformed?this.art.dark:(this.art.costumes[g.costumeIndex]||this.art.heroes[g.heroIndex]), p.x, p.y, g.heroIndex===7?112:82, p.tilt, 1, opacity);
     if(p.barrier)this.sprite(this.art.barrier,p.x,p.y,118+Math.sin(t*3)*3,t*.12,1,.9);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
     // The tiny luminous core is the actual hitbox; the illustration and cape are safe.

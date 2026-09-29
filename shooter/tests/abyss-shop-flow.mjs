@@ -52,19 +52,21 @@ try {
     assert.match(await page.locator('#dungeons').innerText(), /심연/);
     if (width === 320) {
       await page.locator('#shop').click();
+      await page.locator('[data-shop-tab="supplies"]').click();
       await page.locator('#buy-ticket').click();
       await page.locator('#shop-cancel').click();
       assert.match(await page.locator('.shop-balance').innerText(), /12/);
       await page.locator('#buy-ticket').click();
       await page.locator('#shop-confirm').click();
       assert.equal(__number(await page.locator('.shop-balance strong').innerText()), 7);
-      assert.match(await page.locator('.shop-product').first().innerText(), /보유 뽑기권 1장/);
+      assert.match(await page.locator('.supply-product').first().innerText(), /보유 뽑기권 1장/);
       await page.locator('#buy-reset').click();
       await page.locator('#shop-confirm').click();
       assert.equal(__number(await page.locator('.shop-balance strong').innerText()), 6);
       await page.evaluate(() => { __abyss.profile.randomDraws = { date: '2026-09-14', count: 3 }; });
       await page.locator('#shop-back').click();
       await page.locator('#shop').click();
+      await page.locator('[data-shop-tab="supplies"]').click();
       assert.equal(await page.locator('#use-reset').isEnabled(), true);
       await page.locator('#use-reset').click();
       await page.locator('#shop-confirm').click();
@@ -73,9 +75,11 @@ try {
       await page.evaluate(() => { __abyss.profile.dreamShards = 0; });
       await page.locator('#shop-back').click();
       await page.locator('#shop').click();
+      await page.locator('[data-shop-tab="supplies"]').click();
       for (const id of ['#buy-ticket','#buy-reset']) assert.equal(await page.locator(id).isEnabled(), false);
-      assert.match(await page.locator('.shop-goods').innerText(), /아티팩트 뽑기권[\s\S]*꿈의결정 5개[\s\S]*랜덤 횟수 리셋권[\s\S]*꿈의결정 1개/);
-      assert.equal(await page.locator('.shop-product').first().evaluate(el => getComputedStyle(el).opacity), '1');
+      assert.match(await page.locator('#buy-ticket').getAttribute('aria-label'), /꿈의결정 5개/);
+      assert.match(await page.locator('#buy-reset').getAttribute('aria-label'), /꿈의결정 1개/);
+      assert.equal(await page.locator('.supply-product').first().evaluate(el => getComputedStyle(el).opacity), '1');
       await page.locator('#shop-back').click();
       await page.locator('#dungeons').click();
       await page.locator('#challenge-mode').click();

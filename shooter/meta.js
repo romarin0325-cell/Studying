@@ -175,6 +175,22 @@ export function drawCostumeTicket(profile,tier,random=Math.random,choice=null) {
   else profile.costumesOwned.push(costume.id);
   return {ok:true,costume,duplicate,shardsAwarded};
 }
+export function purchaseCostume(profile,tier,random=Math.random,choice=null) {
+  const group=COSTUME_TIERS.find(entry=>entry.id===tier);
+  if(!group)return {ok:false,reason:'unknown'};
+  if(tier==='miracle'&&!group.lineup.some(costume=>costume.id===choice))return {ok:false,reason:'choice'};
+  const useTicket=finiteCount(profile.costumeTickets[tier])>0;
+  const cost=useTicket?0:group.cost;
+  if(finiteCount(profile.dreamShards)<cost)return {ok:false,reason:'balance'};
+  // Validate the draw before changing currency; legacy tickets are spent first.
+  const value=Number(random());
+  if(tier!=='miracle'&&!Number.isFinite(value))return {ok:false,reason:'draw'};
+  profile.dreamShards=finiteCount(profile.dreamShards)-cost;
+  if(!useTicket)profile.costumeTickets[tier]=1;
+  const result=drawCostumeTicket(profile,tier,()=>value,choice);
+  equipCostume(profile,result.costume.hero,result.costume.id);
+  return {...result,cost,payment:useTicket?'ticket':'crystals'};
+}
 export function heroAvailable(profile, hero, date = new Date()) { return [0,1,2,3,4,6].includes(hero) && (dailyHeroes(date).includes(hero) || profile.unlocks[hero] === dayKey(date)); }
 export function unlockHero(profile, hero, date = new Date()) { if ([0,1,2,3,4,6].includes(hero)) profile.unlocks[hero] = dayKey(date); }
 // Random departures can discover hidden heroes; a retry rolls again.

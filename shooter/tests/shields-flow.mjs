@@ -47,7 +47,7 @@ try{
  assert.deepEqual(await page.evaluate(()=>__shields.profile.equipped),['clover','slipper','dew']);
  // Exercise skipped, correct vocabulary, and incorrect collocation draws at the same roll.
  await page.evaluate(()=>{__shields.profile.tickets=Array.from({length:3},()=>({difficulty:'normal',dungeon:0}));__shields.save();globalThis.__originalRandom=Math.random;});
- await click('#equipment');assert.ok(!(await page.locator('.equipment-footer').innerText()).includes('%'));
+ await click('#equipment');assert.ok(!(await page.locator('.equipment-panel .menu-footer').innerText()).includes('%'));
  for(const [mode,expectedTickets,rare] of [['skip',2,false],['vocab',1,true],['collocation',0,false]]){
   await click('#draw-ticket');assert.equal(await page.evaluate(()=>__shields.profile.tickets.length),expectedTickets+1);
   const copy=await page.locator('.intro-copy').innerText();assert.ok(!/\d+\s*%|2배/.test(copy));await shot(`quiz-offer-${mode}`);

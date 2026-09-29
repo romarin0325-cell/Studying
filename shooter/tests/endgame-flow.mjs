@@ -7,7 +7,7 @@ const html=original.replace('<head>',`<head><base href="${new URL('dist/',root).
 assert.notEqual(html,original);const file=new URL('artifacts/endgame-offline.html',root);await fs.writeFile(file,html);
 const browser=await chromium.launch({headless:true}),errors=[],network=[],checks=[];
 try{
- const context=await browser.newContext({viewport:{width:390,height:844},offline:true});const page=await context.newPage();
+ const context=await browser.newContext({viewport:{width:390,height:844},offline:true,reducedMotion:'reduce'});const page=await context.newPage();
  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))network.push(r.url());});
  await page.clock.install({time:new Date(2026,8,13,12)});await page.goto(file.href);await page.waitForFunction(()=>astralDiagnostics?.ready);
  const click=s=>page.locator(s).click(),shot=name=>page.screenshot({path:fileURLToPath(new URL(`artifacts/endgame-${name}.png`,root))});
@@ -20,7 +20,7 @@ try{
  await click('#equipment');
  for(const size of [{width:320,height:568},{width:390,height:844},{width:430,height:932},{width:844,height:390}]){
   await page.setViewportSize(size);const draw=await page.locator('#draw-ticket').boundingBox(),done=await page.locator('#equipment-done').boundingBox();assert.ok(done.y>=0&&done.y+done.height<=size.height);assert.ok(draw.x+draw.width+7<=done.x&&Math.abs(draw.y-done.y)<2);
-  assert.deepEqual(await page.locator('.relic-section h3').allTextContents(),['일반 아티팩트','레어 아티팩트','에픽 아티팩트']);await page.locator('.equipment-list').evaluate(el=>el.scrollTop=el.scrollHeight);const next=await page.locator('#equipment-done').boundingBox();assert.equal(done.y,next.y);
+  assert.deepEqual(await page.locator('.relic-section').evaluateAll(sections=>sections.map(section=>section.getAttribute('aria-label'))),['일반 아티팩트','레어 아티팩트','에픽 아티팩트']);await page.locator('.equipment-list').evaluate(el=>el.scrollTop=el.scrollHeight);const next=await page.locator('#equipment-done').boundingBox();assert.equal(done.y,next.y);
  }
  await page.setViewportSize({width:390,height:844});await shot('relics');await click('#equipment-done');
  await click('#dungeons');await page.locator('.dungeon-list').evaluate(el=>el.scrollTop=el.scrollHeight);const dungeonScroll=await page.locator('.dungeon-list').evaluate(el=>el.scrollTop);

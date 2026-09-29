@@ -51,6 +51,6 @@ try{
  checks.push('Reload retains claim and mistakes; exactly one grammar revival');
  await page.clock.setSystemTime(new Date(2026,8,15,12));await click('#again');assert.ok(await page.locator('#quiz-accept').isVisible());await answer(false);
  assert.ok(await page.locator('#launch').isVisible());assert.equal((await state()).phase,'sortie');checks.push('Expired daily unlock and failed retry quiz return safely to sortie');
- await click('#library');await click('[data-tab="mistakes"]');assert.ok((await page.locator('#library-list').textContent()).includes('2개'));await click('#practice');await answer();await click('#practice');await answer();assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),0);
+ await click('#library');await click('[data-tab="mistakes"]');assert.equal(await page.locator('#library-count').textContent(),'2개');await click('#practice');await answer();await click('#practice');await answer();assert.equal(await page.evaluate(()=>__flow.profile.learning.mistakes.length),0);
  assert.deepEqual(errors,[]);console.log(JSON.stringify({checks,errors},null,2));await fs.writeFile(new URL('artifacts/flow.json',root),JSON.stringify({checks,errors},null,2));
 }finally{await browser.close();}

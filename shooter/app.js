@@ -48,8 +48,21 @@ function announce(eyebrow, title, copy = '', duration = 2400, bomb = false) {
   announcementTimer = setTimeout(() => el.classList.remove('visible'), duration);
 }
 function hideAnnouncement() { clearTimeout(announcementTimer); $('announcement').className = ''; }
-function setModal(html) { modal.innerHTML = `<section class="panel" role="dialog" aria-modal="true">${html}</section>`; modal.hidden = false; modal.querySelector('button')?.focus({ preventScroll: true }); }
-function closeModal() { modal.hidden = true; modal.innerHTML = ''; }
+let modalOpener;
+function setModal(html) {
+  if(modal.hidden)modalOpener=document.activeElement;
+  modal.innerHTML = `<section class="panel" role="dialog" aria-modal="true" tabindex="-1">${html}</section>`;
+  modal.hidden = false; modal.querySelector('.panel').focus({preventScroll:true});
+}
+function closeModal() { modal.hidden = true; modal.innerHTML = ''; if(modalOpener?.isConnected)modalOpener.focus({preventScroll:true}); }
+modal.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){const dismiss=modal.querySelector('[data-dismiss]');if(dismiss){event.preventDefault();dismiss.click();}return;}
+  if(event.key!=='Tab')return;
+  const controls=[...modal.querySelectorAll('button:not(:disabled),input:not(:disabled),[tabindex="0"]')].filter(el=>el.getClientRects().length);
+  const first=controls[0],last=controls.at(-1);if(!first)return;
+  if(event.shiftKey&&(document.activeElement===first||document.activeElement===modal.querySelector('.panel'))){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
 function syncSound() { document.querySelectorAll('.sound-toggle').forEach(b => { b.textContent = audio.enabled ? '♪' : '♩'; b.setAttribute('aria-label', audio.enabled ? '소리 끄기' : '소리 켜기'); b.setAttribute('aria-pressed', String(audio.enabled)); }); }
 function soundClick() { audio.setEnabled(!audio.enabled); if (audio.enabled && !paused) audio.start(); save(); syncSound(); }
 function bindSounds() { document.querySelectorAll('.sound-toggle').forEach(b => { b.onclick = soundClick; }); syncSound(); }
@@ -82,7 +95,7 @@ function showSortie() {
   $('ambient').style.backgroundImage = `url("${art.urls.worlds[chosenStage]}")`;
   screen.innerHTML = `<section class="sortie">
     <header class="masthead"><div class="brand"><i>✧</i> ASTRAL BLOOM</div><div class="masthead-actions"><button class="round-button" id="achievements" aria-label="업적">♕</button><button class="round-button" id="fullscreen" aria-label="전체화면">⛶</button><button class="round-button" id="help" aria-label="플레이 방법">?</button><button class="round-button sound-toggle" aria-label="소리 끄기">♪</button></div></header>
-    <div class="sortie-top"><div class="hero-heading"><span class="small-caps">${chosenRandom?'새로운 만남을 향해':hero.title}</span><h1>${chosenRandom?'랜덤':hero.name}</h1><span class="english-name">${chosenRandom?'A CHANCE ENCOUNTER':hero.en}</span></div><span class="hero-index">0${chosenHero + 1}</span><div class="hero-aura"></div><img class="hero-large ${chosenRandom?'random-portrait':''}" src="${heroArtUrl(chosenHero)}" alt="${hero.name}의 SD 일러스트"><button class="wardrobe-hotspot" id="wardrobe-hotspot" aria-label="${hero.name} 초상화로 의상실 열기"><span>✧ 의상실</span></button><p class="hero-quote">“${chosenRandom?'오늘의 수호자, 혹은 숨겨진 이야기와 만나요.':hero.quote}”</p></div>
+    <div class="sortie-top"><div class="hero-heading"><span class="small-caps">${chosenRandom?'새로운 만남을 향해':hero.title}</span><h1>${chosenRandom?'랜덤':hero.name}</h1><span class="english-name">${chosenRandom?'A CHANCE ENCOUNTER':hero.en}</span></div><span class="hero-index">0${chosenHero + 1}</span><div class="hero-aura"></div><button class="hero-portrait" id="wardrobe-hotspot" aria-label="${hero.name} 초상화로 의상실 열기"><img class="hero-large ${chosenRandom?'random-portrait':''}" src="${heroArtUrl(chosenHero)}" alt="${hero.name}의 SD 일러스트"></button><p class="hero-quote">“${chosenRandom?'오늘의 수호자, 혹은 숨겨진 이야기와 만나요.':hero.quote}”</p></div>
     <div class="sortie-controls"><p class="rotation-note">${menus.rotationLabel()}</p><nav class="roster" aria-label="캐릭터 선택">${HEROES.flatMap((h, i) => h.hidden ? [] : `<button class="${!chosenRandom && i === chosenHero ? 'active' : ''}" data-hero="${i}" aria-label="${h.name} 선택${heroAvailable(profile,i)?'':' · 문법 해금'}" aria-pressed="${!chosenRandom && i === chosenHero}"><img src="${heroArtUrl(i)}" alt=""><span>${heroAvailable(profile,i)?'':'◇ '}${h.name}</span></button>`).join('')}<button id="random-hero" class="${chosenRandom?'active':''}" aria-pressed="${chosenRandom}"><span class="random-sigil">✧</span><span>랜덤</span></button></nav>
     <div class="section-heading"><h2>공격 스타일</h2><small>${chosenRandom?'출격 전 만남과 스타일 선택':'두 가지 빛, 서로 다른 궤적'}</small></div>
     <div class="weapons ${chosenRandom?'random-weapons-placeholder':''}" ${chosenRandom?'inert aria-hidden="true"':''}>${hero.weapons.map((w, i) => `<button class="weapon-card ${i === chosenWeapon ? 'selected' : ''}" data-weapon="${i}" aria-pressed="${i === chosenWeapon}"><strong>${w.name}</strong><small>${w.tag}</small></button>`).join('')}</div>

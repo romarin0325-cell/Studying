@@ -1,5 +1,5 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, drawCostumeTicket, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
+import { artifactText, ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function economySnapshot(profile) {
@@ -43,21 +43,38 @@ export class CampaignUI {
     this.setModal(`<span class="small-caps">A PAGE BEFORE THE FLIGHT</span><h2>${esc(title)}</h2><p class="intro-copy">문제에 연결된 강의를 먼저 읽을까요?<br>${esc(lecture.title)}</p><button class="primary" id="read-first">강의 먼저 읽기</button><button class="secondary" id="quiz-now">바로 문제 풀기</button>`);
     $('read-first').onclick=()=>this.lecture(lecture,answerScreen,'문제 풀기');$('quiz-now').onclick=answerScreen;
   }
+  menu({kind, title, subtitle='', closeId, onClose, tools='', body='', footer='', compact=false}) {
+    this.setModal('<header class="menu-header"><div class="menu-heading"><h2 id="menu-title">'+title+'</h2>'+(subtitle?'<p>'+subtitle+'</p>':'')+'</div><div class="menu-header-actions">'+tools+'<button class="menu-close" id="'+closeId+'" data-dismiss aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header>'+body+(footer?'<footer class="menu-footer">'+footer+'</footer>':''));
+    const panel=document.querySelector('.panel');panel.classList.add('menu-panel',kind+'-panel');if(compact)panel.classList.add('compact-panel');
+    panel.setAttribute('aria-labelledby','menu-title');$(closeId).onclick=onClose;
+  }
+  costumeArt(costume) { return this.art.urls.costumes[COSTUMES.findIndex(item=>item.id===costume.id)]; }
   lecture(lecture,back,label='도서관으로') {
     const read=this.profile.learning.read=Array.isArray(this.profile.learning.read)?this.profile.learning.read:[];
     if(!read.includes(lecture.id)){read.push(lecture.id);this.save();}
-    this.setModal(`<span class="small-caps">LECTURE ${lecture.id}</span><h2>${esc(lecture.title)}</h2><div class="lecture-copy">${esc(lecture.content)}</div><button class="primary" id="lecture-back">${label}</button>`);$('lecture-back').onclick=back;
+    this.menu({kind:'lecture',title:'루미의 문법 노트',subtitle:'강의 '+lecture.id,closeId:'lecture-close',onClose:back,
+      body:'<div class="lecture-mentor"><div class="mentor-portrait"><img src="'+this.art.urls.heroes[0]+'" alt="루미"></div><div><small>별을 엮듯, 문장을 엮어요</small><h3>'+esc(lecture.title)+'</h3></div></div><article class="menu-scroll lecture-copy">'+esc(lecture.content)+'</article>',
+      footer:'<button class="primary" id="lecture-back">'+esc(label)+'</button>'});
+    $('lecture-back').onclick=back;
   }
   library(tab='vocab',term='',page=0) {
     const l=this.profile.learning;
-    this.setModal(`<span class="small-caps">LIBRARY</span><h2>도서관</h2><p class="intro-copy">정답 ${Number(l.correct)||0} / ${Number(l.total)||0} · 읽은 강의 ${(l.read||[]).length}/35</p><nav class="library-tabs">${[['vocab','단어'],['collocation','숙어'],['grammar','문법'],['mistakes','오답']].map(([id,name])=>`<button data-tab="${id}" class="${id===tab?'selected':''}" aria-pressed="${id===tab}">${name}</button>`).join('')}</nav><input id="library-search" aria-label="학습 내용 검색" placeholder="단어 · 뜻 · 강의 검색" value="${esc(term)}"><div class="library-tools">${tab==='vocab'?'<button id="library-all">전체 단어 보기</button>':''}${tab==='mistakes'?'<button id="mistakes-reset">오답 전체 초기화</button>':''}</div><div id="library-list"></div><nav class="library-pager" aria-label="목록 페이지"><button id="library-prev">이전</button><span id="library-page" aria-live="polite"></span><button id="library-next">다음</button></nav><button class="primary" id="practice">${tab==='mistakes'?'오답 다시 풀기':'연습 문제 풀기'}</button><button class="secondary" id="library-close">출격 준비로</button>`);
+    this.menu({kind:'library',title:'별빛 도서관',subtitle:'읽은 강의 '+(l.read||[]).length+'/35',closeId:'library-close',onClose:this.closeModal,
+      body:'<nav class="menu-tabs library-tabs" aria-label="학습 분류">'+[['vocab','단어'],['collocation','숙어'],['grammar','문법'],['mistakes','오답']].map(([id,name])=>'<button data-tab="'+id+'" class="'+(id===tab?'selected':'')+'" aria-pressed="'+(id===tab)+'">'+name+'</button>').join('')+'</nav><div class="library-toolbar"><span id="library-count"></span><label class="search-field" '+(term?'':'hidden')+'><input id="library-search" aria-label="학습 내용 검색" placeholder="단어 또는 뜻 검색" value="'+esc(term)+'"></label><button class="icon-button" id="library-search-toggle" aria-label="검색 열기" aria-expanded="'+Boolean(term)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button>'+(tab==='mistakes'?'<button class="text-button" id="mistakes-reset">전체 삭제</button>':'')+'</div><div class="menu-scroll" id="library-list"></div>',
+      footer:'<nav class="library-pager" aria-label="목록 페이지"><button class="icon-button" id="library-prev" aria-label="이전 페이지">‹</button><span id="library-page" aria-live="polite"></span><button class="icon-button" id="library-next" aria-label="다음 페이지">›</button></nav><button class="primary" id="practice">'+(tab==='mistakes'?'오답 다시 풀기':'연습하기')+'</button>'});
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>this.library(b.dataset.tab));
     const render=()=>{
       const query=$('library-search').value.trim().toLowerCase();
-      const rows=(tab==='mistakes'?(l.mistakes||[]):LIBRARY[tab]).map((entry,i)=>({entry,i})).filter(({entry})=>JSON.stringify(entry).toLowerCase().includes(query));
+      const rows=(tab==='mistakes'?(l.mistakes||[]):LIBRARY[tab]).map((entry,i)=>({entry,i})).filter(({entry:e})=>{
+        const fields=tab==='vocab'?[e.w,e.m,e.tw,e.tm]:tab==='collocation'?[e.expression,e.meaning]:tab==='grammar'?[e.title,e.content]:[e.prompt,e.answer];
+        return fields.some(value=>String(value||'').toLowerCase().includes(query));
+      });
       const size=30,pages=Math.max(1,Math.ceil(rows.length/size));page=Math.max(0,Math.min(page,pages-1));
-      const list=$('library-list');list.innerHTML=`<p class="tiny-note">${rows.length.toLocaleString()}개${rows.length?` · ${page*size+1}–${Math.min(rows.length,(page+1)*size)}`:' · 저장된 항목이 없어요'}</p>`+rows.slice(page*size,(page+1)*size).map(({entry:e,i})=>tab==='grammar'?`<button class="library-entry" data-lecture="${i}"><b>${esc(e.title)}</b><small>${(l.read||[]).includes(e.id)?'읽음':'강의 열기'} · ${(e.quizzes||[]).length}문제</small></button>`:`<div class="library-entry"><b>${esc(tab==='vocab'?e.w:tab==='collocation'?e.expression:e.prompt)}</b><small>${esc(tab==='vocab'?e.m:tab==='collocation'?e.meaning:e.answer)}</small>${tab==='vocab'&&e.tw?`<small>비교 · ${esc(e.tw)}: ${esc(e.tm)}</small>`:tab==='collocation'?`<p>${esc(e.question.replace(/_{2,}/g,e.answer))}</p>`:tab==='mistakes'?`<button class="mistake-delete" data-delete="${i}" aria-label="${esc(e.prompt)} 오답 삭제">삭제</button>`:''}</div>`).join('');
-      $('library-page').textContent=`${page+1} / ${pages}`;$('library-prev').disabled=page===0;$('library-next').disabled=page===pages-1;
+      $('library-count').textContent=rows.length.toLocaleString()+'개';
+      const list=$('library-list');list.innerHTML=rows.length?rows.slice(page*size,(page+1)*size).map(({entry:e,i})=>tab==='grammar'
+        ? '<button class="library-entry grammar-entry" data-lecture="'+i+'"><span class="entry-number">'+String(i+1).padStart(2,'0')+'</span><span><b>'+esc(e.title)+'</b><small>'+((l.read||[]).includes(e.id)?'읽음':'강의 열기')+' · '+(e.quizzes||[]).length+'문제</small></span><span class="entry-arrow">›</span></button>'
+        : '<div class="library-entry"><b>'+esc(tab==='vocab'?e.w:tab==='collocation'?e.expression:e.prompt)+'</b><small>'+esc(tab==='vocab'?e.m:tab==='collocation'?e.meaning:e.answer)+'</small>'+(tab==='vocab'&&e.tw?'<small class="word-comparison">'+esc(e.tw)+' — '+esc(e.tm)+'</small>':tab==='mistakes'?'<button class="mistake-delete" data-delete="'+i+'" aria-label="'+esc(e.prompt)+' 오답 삭제">삭제</button>':'')+'</div>').join(''):'<div class="menu-empty"><span>✧</span><b>'+(query?'검색 결과가 없어요':'아직 저장된 항목이 없어요')+'</b><p>'+(query?'다른 단어나 뜻으로 찾아보세요.':'연습하면서 나만의 기록을 채워 보세요.')+'</p></div>';
+      $('library-page').textContent=(page+1)+' / '+pages;$('library-prev').disabled=page===0;$('library-next').disabled=page===pages-1;
       list.scrollTop=0;
       list.querySelectorAll('[data-lecture]').forEach(b=>b.onclick=()=>this.lecture(LIBRARY.grammar[Number(b.dataset.lecture)],()=>this.library('grammar',query,page)));
       list.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{l.mistakes.splice(Number(b.dataset.delete),1);this.save();render();});
@@ -65,149 +82,145 @@ export class CampaignUI {
       if($('mistakes-reset'))$('mistakes-reset').disabled=!(l.mistakes||[]).length;
     };
     render();$('library-search').oninput=()=>{page=0;render();};
+    $('library-search-toggle').onclick=()=>{
+      const field=document.querySelector('.search-field'),open=field.hidden;field.hidden=!open;
+      $('library-count').hidden=open;$('library-search-toggle').setAttribute('aria-expanded',String(open));$('library-search-toggle').setAttribute('aria-label',open?'검색 닫기':'검색 열기');
+      if(open)$('library-search').focus();else{$('library-search').value='';page=0;render();}
+    };
+    if(term)$('library-count').hidden=true;
     $('library-prev').onclick=()=>{page--;render();};$('library-next').onclick=()=>{page++;render();};
-    if($('library-all'))$('library-all').onclick=()=>{$('library-search').value='';page=0;render();};
     if($('mistakes-reset'))$('mistakes-reset').onclick=()=>{
       const query=$('library-search').value;
-      this.setModal(`<h2>오답을 모두 지울까요?</h2><p class="intro-copy">저장된 오답 ${(l.mistakes||[]).length}개를 삭제해요. 정답 기록과 읽은 강의는 유지돼요.</p><button class="primary" id="reset-confirm">오답 모두 삭제</button><button class="secondary" id="reset-cancel">취소</button>`);
-      $('reset-confirm').onclick=()=>{l.mistakes=[];this.save();this.library('mistakes');};$('reset-cancel').onclick=()=>this.library('mistakes',query,page);
+      this.menu({kind:'confirm',title:'오답을 모두 지울까요?',closeId:'reset-cancel',onClose:()=>this.library('mistakes',query,page),compact:true,
+        body:'<div class="confirmation-copy"><p>저장된 오답 '+(l.mistakes||[]).length+'개를 삭제해요.</p><small>정답 기록과 읽은 강의는 유지돼요.</small></div>',footer:'<button class="primary" id="reset-confirm">오답 모두 삭제</button>'});
+      $('reset-confirm').onclick=()=>{l.mistakes=[];this.save();this.library('mistakes');};
     };
-    $('library-close').onclick=this.closeModal;
     $('practice').onclick=()=>{const q=tab==='mistakes'?l.mistakes[0]:null;this.quiz(q?.kind||tab,'연습',()=>this.library(tab),q);};
   }
   equipment(refresh) {
-    const p=this.profile;
-    const scroll=document.querySelector('.equipment-list')?.scrollTop||0;
-    this.setModal(`<div class="equipment-head"><h2>별의 유물함</h2><p class="intro-copy">선택 ${p.equipped.length}/3 · 수집 ${p.owned.length}/${ARTIFACTS.length}</p></div><div class="equipment-list">${['normal','rare','epic'].map(rarity=>`<section class="relic-section" aria-label="${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트"><h3>${rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반'} 아티팩트</h3><div class="artifact-grid">${ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>`<button class="artifact ${p.equipped.includes(a.id)?'selected':''} ${a.rarity}" data-artifact="${a.id}" ${p.owned.includes(a.id)?'':'disabled'} aria-pressed="${p.equipped.includes(a.id)}">${this.relicImage(a.id)}<b>${a.name}</b><small>${a.text}</small><em>${p.owned.includes(a.id)?a.rarity.toUpperCase():'미보유'}</em></button>`).join('')}</div></section>`).join('')}</div><footer class="equipment-footer"><button class="primary" id="draw-ticket" ${p.tickets.length?'':'disabled'}><b>유물 뽑기</b><small>뽑기권 ${p.tickets.length}장</small></button><button class="secondary" id="equipment-done"><b>장착 저장</b><small>출격 준비로</small></button></footer>`);
-    document.querySelector('.panel').classList.add('equipment-panel');document.querySelector('.equipment-list').scrollTop=scroll;
+    const p=this.profile,scroll=document.querySelector('.equipment-list')?.scrollTop||0;
+    const exit=()=>{this.closeModal();refresh();};
+    this.menu({kind:'equipment',title:'별의 유물함',subtitle:'장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+ARTIFACTS.length,closeId:'equipment-close',onClose:exit,
+      body:'<div class="menu-scroll equipment-list">'+['normal','rare','epic'].map(rarity=>'<section class="relic-section" aria-label="'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+' 아티팩트"><h3><span>'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+'</span><i></i></h3><div class="artifact-grid">'+ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>'<button class="artifact '+(p.equipped.includes(a.id)?'selected ':'')+a.rarity+'" data-artifact="'+a.id+'" '+(p.owned.includes(a.id)?'':'disabled')+' aria-pressed="'+p.equipped.includes(a.id)+'">'+this.relicImage(a.id)+'<b>'+a.name+'</b><small>'+a.text+'</small><em>'+(p.equipped.includes(a.id)?'착용 중':p.owned.includes(a.id)?'보유':'미보유')+'</em></button>').join('')+'</div></section>').join('')+'</div>',
+      footer:'<button class="secondary" id="draw-ticket" '+(p.tickets.length?'':'disabled')+'>유물 뽑기 <span>'+p.tickets.length+'장</span></button><button class="primary" id="equipment-done">장착 완료</button>'});
+    document.querySelector('.equipment-list').scrollTop=scroll;
     document.querySelectorAll('[data-artifact]').forEach(b=>b.onclick=()=>{const id=b.dataset.artifact;if(p.equipped.includes(id))p.equipped=p.equipped.filter(a=>a!==id);else if(p.equipped.length<3)p.equipped.push(id);else return this.toast('유물은 세 개까지 장착할 수 있어요');this.save();this.equipment(refresh);});
-    $('equipment-done').onclick=()=>{this.closeModal();refresh();};
+    $('equipment-done').onclick=exit;
     $('draw-ticket').onclick=()=>{
       if(!p.tickets.length)return;
       let resolved=false;
       const draw=correct=>{
         if(resolved)return;resolved=true;
-        const snap=economySnapshot(p);
-        const result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);
+        const snap=economySnapshot(p),result=drawArtifact(p,Math.random,correct);if(!result)return this.equipment(refresh);
         if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 뽑기를 취소했어요.');return this.equipment(refresh);}
-        const a=result.artifact;
-        const shardNote = result.duplicate ? `이미 보유한 유물이에요. 꿈의결정 ${result.shardsAwarded}개를 받았어요. 보유 꿈의결정 ${p.dreamShards}개.` : '새로운 유물을 발견했어요. 유물함에서 장착할 수 있어요.';
-        this.setModal(`<span class="small-caps">${a.rarity==='epic'?'EPIC RELIC':a.rarity==='rare'?'RARE RELIC':'RELIC DISCOVERED'}</span><div class="relic-reveal ${a.rarity}">${this.relicImage(a.id)}</div><h2>${a.name}</h2><p class="intro-copy">${a.text}<br>${shardNote}</p><button class="primary" id="reveal-done">유물함으로</button>`);$('reveal-done').onclick=()=>this.equipment(refresh);
+        const a=result.artifact,done=()=>this.equipment(refresh);
+        this.menu({kind:'reveal',title:result.duplicate?'다시 만난 유물':'새로운 유물',subtitle:a.rarity==='epic'?'에픽':a.rarity==='rare'?'레어':'일반',closeId:'reveal-close',onClose:done,
+          body:'<div class="reveal-body"><div class="reveal-stage relic-reveal '+a.rarity+'">'+this.relicImage(a.id)+'</div><div class="reveal-caption"><h3>'+a.name+'</h3><p>'+a.text+'</p><div class="reward-note">'+(result.duplicate?'꿈의결정 <b>+'+result.shardsAwarded+'</b>':'유물함에서 장착할 수 있어요')+'</div></div></div>',footer:'<button class="primary" id="reveal-done">유물함으로</button>'});
+        $('reveal-done').onclick=done;
       };
-      this.offerQuiz('유물 뽑기', '뽑기 전에 퀴즈에 도전할까요? 단어나 숙어 문제를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
+      this.offerQuiz('유물 뽑기', '단어나 숙어 퀴즈를 맞히면 이번 뽑기에서 레어·에픽 유물을 만날 기회가 높아져요.',
         ()=>this.quiz(Math.random()<.5?'vocab':'collocation','',draw),()=>draw(false));
-      $('quiz-decline').textContent='아니오 · 바로 뽑기';
+      $('quiz-decline').textContent='바로 뽑기';
     };
   }
-  shop(refresh) {
-    const p=this.profile;
+  costumeReveal(result,done) {
+    const c=result.costume;
+    this.menu({kind:'reveal',title:result.duplicate?'이미 만난 의상':'새로운 의상',subtitle:HEROES[c.hero].name,closeId:'costume-reveal-close',onClose:done,
+      body:'<div class="reveal-body"><div class="reveal-stage costume-reveal"><img src="'+this.costumeArt(c)+'" alt="'+esc(c.name)+'"></div><div class="reveal-caption"><h3>'+esc(c.name)+'</h3><p>'+HEROES[c.hero].name+'에게 착용했어요</p><div class="reward-note">'+(result.duplicate?'중복 의상 · 꿈의결정 <b>+'+result.shardsAwarded+'</b>':'메인 화면과 전투에 적용돼요')+'</div></div></div>',
+      footer:'<button class="primary" id="costume-reveal-done">확인</button>'});
+    $('costume-reveal-done').onclick=done;
+  }
+  shop(refresh,tab='costumes') {
+    const p=this.profile,exit=()=>{this.closeModal();refresh();};
     let busy=false;
+    const descriptions={daily:'포근한 하루의 옷장',fantasy:'또 다른 세계의 수호자',special:'특별한 순간을 함께',miracle:'마음에 드는 한 벌을 직접'};
     const render=()=>{
-      const remaining=randomRemaining(p), resets=p.randomResetTickets, shards=p.dreamShards;
-      const shopTickets=p.tickets.filter(ticket=>ticket.source==='shop' && ticket.kind==='artifact').length;
-      const crystal=this.art.urls.shopItems[0], ticket=this.art.urls.shopItems[1], reset=this.art.urls.shopItems[2];
-      this.setModal(`<button class="shop-close" id="shop-close" aria-label="상점 닫기">×</button><span class="small-caps">DREAM CRYSTAL SHOP</span><button class="shop-lineup-trigger" id="shop-lineup" aria-label="코스튬 티켓 상세 라인업">!</button><h2>별빛 상점</h2>
-        <div class="shop-balance"><img src="${crystal}" alt=""><span><small>보유 꿈의결정</small><strong>${shards}</strong></span></div>
-        <div class="shop-goods">
-          <article class="shop-product"><div class="shop-product-head"><img src="${ticket}" alt=""><div><small>ARTIFACT DRAW</small><h3>아티팩트 뽑기권</h3></div></div><p class="shop-stock">보유 뽑기권 ${p.tickets.length}장 <small>상점 구매 ${shopTickets}장</small></p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>5개</b></span></div><button class="primary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}>뽑기권 구매</button></article>
-          <article class="shop-product"><div class="shop-product-head"><img src="${reset}" alt=""><div><small>RANDOM RESET</small><h3>랜덤 횟수 리셋권</h3></div></div><p class="shop-stock">보유 리셋권 ${resets}장</p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>1개</b></span></div><button class="primary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}>리셋권 구매</button></article>
-          ${COSTUME_TIERS.map((tier,index)=>`<article class="shop-product costume-product ${tier.id}"><div class="shop-product-head"><img src="${this.art.urls.costumeTickets[index]}" alt=""><div><small>COSTUME ${tier.id.toUpperCase()}</small><h3>코스튬티켓 (${tier.name})</h3></div></div><p class="shop-stock">보유 티켓 ${p.costumeTickets[tier.id]}장 <small>의상실에서 사용</small></p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>${tier.cost}개</b></span></div><button class="primary" id="buy-costume-${tier.id}" ${shards>=tier.cost&&!busy?'':'disabled'}>티켓 구매</button></article>`).join('')}
-        </div><div class="shop-reset"><div><small>오늘 남은 기본 랜덤 횟수</small><strong>${remaining} <span>/ ${RANDOM_DAILY_LIMIT}</span></strong></div><button class="secondary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button></div>
-        <p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
-      document.querySelector('.panel').classList.add('shop-panel');
-      $('shop-back').onclick=()=>{this.closeModal();refresh();};
-      $('shop-close').onclick=$('shop-back').onclick;
-      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의결정 5개로 살까요?');
-      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의결정 1개로 살까요?');
-      COSTUME_TIERS.forEach(tier=>$(`buy-costume-${tier.id}`).onclick=()=>confirmBuy(tier.id,`코스튬티켓 (${tier.name}) 1장을 꿈의결정 ${tier.cost}개로 살까요?`));
+      const shards=p.dreamShards,remaining=randomRemaining(p),crystal=this.art.urls.shopItems[0];
+      this.menu({kind:'shop',title:'별빛 상점',subtitle:'작은 결정으로 만나는 새로운 모습',closeId:'shop-close',onClose:exit,
+        tools:'<button class="icon-button shop-lineup-trigger" id="shop-lineup" aria-label="코스튬 티켓 상세 라인업">!</button>',
+        body:'<div class="shop-balance"><span><img src="'+crystal+'" alt="">꿈의결정</span><strong>'+shards+'</strong></div><nav class="menu-tabs" aria-label="상점 분류"><button data-shop-tab="costumes" class="'+(tab==='costumes'?'selected':'')+'">코스튬</button><button data-shop-tab="supplies" class="'+(tab==='supplies'?'selected':'')+'">모험 준비</button></nav><div class="menu-scroll shop-content"><div class="shop-goods" '+(tab==='costumes'?'':'hidden')+'>'+COSTUME_TIERS.map((tier,index)=>'<article class="shop-product costume-product '+tier.id+'"><div class="shop-product-art"><img src="'+this.art.urls.costumeTickets[index]+'" alt=""></div><h3>'+tier.name+'</h3><p>'+descriptions[tier.id]+'</p><button class="purchase-button" id="buy-costume-'+tier.id+'" '+(shards>=tier.cost||p.costumeTickets[tier.id]?'':'disabled')+'>'+(p.costumeTickets[tier.id]?'보유 티켓 사용 <b>'+p.costumeTickets[tier.id]+'장</b>':'<img src="'+crystal+'" alt=""><b>'+tier.cost+'</b><span>'+(tier.id==='miracle'?'선택하기':'획득하기')+'</span>')+'</button></article>').join('')+'</div><div class="shop-supplies" '+(tab==='supplies'?'':'hidden')+'>'+[['artifact','아티팩트 뽑기권',5,1,'보유 뽑기권 '+p.tickets.length+'장','buy-ticket'],['reset','랜덤 횟수 리셋권',1,2,'보유 리셋권 '+p.randomResetTickets+'장','buy-reset']].map(([id,name,cost,index,stock,button])=>'<article class="shop-product supply-product"><img src="'+this.art.urls.shopItems[index]+'" alt=""><div><h3>'+name+'</h3><p>'+stock+'</p></div><button class="purchase-button" id="'+button+'" '+(shards>=cost?'':'disabled')+' aria-label="'+name+' 꿈의결정 '+cost+'개로 구매"><img src="'+crystal+'" alt=""><b>'+cost+'</b><span>구매</span></button></article>').join('')+'<div class="shop-reset"><div><small>오늘의 랜덤 출격</small><strong>'+remaining+' <span>/ '+RANDOM_DAILY_LIMIT+'</span></strong></div><button class="secondary" id="use-reset" '+(p.randomResetTickets>0&&remaining===0?'':'disabled')+'>리셋권 사용</button></div><p class="shop-note" id="reset-note">'+(remaining>0?'기본 횟수를 모두 사용한 뒤 리셋할 수 있어요.':'리셋하면 오늘 기본 출격 횟수가 3회로 돌아와요.')+'</p></div></div>',
+        footer:'<p class="shop-note">'+(tab==='costumes'?'획득 즉시 착용 · 중복 의상은 꿈의결정 3개 환급':'유물 뽑기권은 유물함에서 사용할 수 있어요')+'</p><button class="text-button" id="shop-back">출격 준비로</button>'});
+      $('shop-back').onclick=exit;
+      document.querySelectorAll('[data-shop-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.shopTab;render();});
+      COSTUME_TIERS.forEach(tier=>$('buy-costume-'+tier.id).onclick=()=>tier.id==='miracle'?chooseMiracle():settleCostume(tier.id));
+      $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권',5);
+      $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권',1);
+      $('use-reset').onclick=confirmReset;
       $('shop-lineup').onclick=()=>{
-        this.setModal(`<span class="small-caps">COSTUME TICKET LINEUP</span><h2>티켓 상세 라인업</h2><p class="intro-copy">일상·판타지·스페셜은 표시된 네 의상 중 하나를 같은 확률로 얻어요. 미라클은 원하는 의상을 선택해요.</p><div class="ticket-lineup">${COSTUME_TIERS.map((tier,index)=>`<section><img src="${this.art.urls.costumeTickets[index]}" alt=""><div><h3>${tier.name} <small>꿈의결정 ${tier.cost}개</small></h3><p>${tier.id==='miracle'?'전체 12벌 중 원하는 의상 선택':tier.lineup.map(costume=>`${HEROES[costume.hero].name} · ${costume.name}`).join(' / ')}</p></div></section>`).join('')}</div><p class="tiny-note">이미 가진 의상을 다시 얻으면 꿈의결정 3개를 돌려받아요.</p><button class="secondary" id="shop-lineup-back">상점으로</button>`);
-        document.querySelector('.panel').classList.add('lineup-panel');$('shop-lineup-back').onclick=render;
+        this.menu({kind:'lineup',title:'코스튬 컬렉션',subtitle:'일상·판타지·스페셜은 네 의상 중 하나',closeId:'lineup-close',onClose:render,
+          body:'<div class="menu-scroll ticket-lineup">'+COSTUME_TIERS.map((tier,index)=>'<section><header><img src="'+this.art.urls.costumeTickets[index]+'" alt=""><h3>'+tier.name+'</h3><small>'+tier.cost+' 결정</small></header><p>'+(tier.id==='miracle'?'전체 12벌 중 원하는 의상을 선택해요.':tier.lineup.map(c=>'<span><b>'+esc(c.name)+'</b><small>'+HEROES[c.hero].name+'</small></span>').join(''))+'</p></section>').join('')+'</div>',
+          footer:'<button class="primary" id="shop-lineup-back">상점으로</button>'});
+        $('shop-lineup-back').onclick=render;
       };
-      $('use-reset').onclick=()=>confirmReset();
     };
-    const confirmBuy=(item,copy)=>{
-      if(busy)return;
-      this.setModal(`<h2>구매할까요?</h2><p class="intro-copy">${copy}</p><button class="primary" id="shop-confirm">구매</button><button class="secondary" id="shop-cancel">취소</button>`);
+    const settleCostume=(tier,choice=null)=>{
+      if(busy)return;busy=true;
+      const snap=economySnapshot(p),result=purchaseCostume(p,tier,Math.random,choice);
+      if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의결정이 부족해요.':'의상을 선택해 주세요.');return render();}
+      if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
+      this.costumeReveal(result,()=>{busy=false;render();});
+    };
+    const chooseMiracle=()=>{
+      let selected=null;
+      this.menu({kind:'miracle',title:'당신을 위한 한 벌',subtitle:p.costumeTickets.miracle?'보유 미라클 티켓 1장 사용':'미라클 · 꿈의결정 30개',closeId:'miracle-back',onClose:render,
+        body:'<div class="menu-scroll miracle-choice">'+COSTUMES.map(c=>'<button data-miracle="'+c.id+'" aria-pressed="false"><img src="'+this.costumeArt(c)+'" alt=""><b>'+esc(c.name)+'</b><small>'+HEROES[c.hero].name+(p.costumesOwned.includes(c.id)?' · 보유':'')+'</small></button>').join('')+'</div>',
+        footer:'<p class="selection-note" id="miracle-selection">원하는 의상을 선택해 주세요</p><button class="primary" id="miracle-confirm" disabled>선택한 의상 획득</button>'});
+      document.querySelectorAll('[data-miracle]').forEach(b=>b.onclick=()=>{
+        selected=COSTUMES.find(c=>c.id===b.dataset.miracle);
+        document.querySelectorAll('[data-miracle]').forEach(item=>{item.classList.toggle('selected',item===b);item.setAttribute('aria-pressed',String(item===b));});
+        $('miracle-selection').textContent=HEROES[selected.hero].name+' · '+selected.name+(p.costumesOwned.includes(selected.id)?' — 중복 시 3개 환급':'');
+        $('miracle-confirm').disabled=false;
+      });
+      $('miracle-confirm').onclick=()=>{if(selected)settleCostume('miracle',selected.id);};
+    };
+    const confirmBuy=(item,name,cost)=>{
+      this.menu({kind:'confirm',title:name,closeId:'shop-cancel',onClose:render,compact:true,
+        body:'<div class="confirmation-copy"><p>꿈의결정 <b>'+cost+'개</b>로 구매해요.</p><small>보유 꿈의결정 '+p.dreamShards+'개</small></div>',footer:'<button class="primary" id="shop-confirm">구매</button>'});
       let done=false;
-      $('shop-cancel').onclick=()=>{if(!done)render();};
       $('shop-confirm').onclick=()=>{
-        if(done||busy)return;done=true;busy=true;
-        const snap=economySnapshot(p);
-        const result=purchaseShopItem(p,item);
-        if(!result.ok){busy=false;this.toast(result.reason==='balance'?'꿈의결정이 부족해요.':'구매하지 못했어요.');return render();}
-        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
-        busy=false;this.toast('구매했어요.');render();
+        if(done||busy)return;done=true;const snap=economySnapshot(p),result=purchaseShopItem(p,item);
+        if(!result.ok){this.toast('꿈의결정이 부족해요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 구매를 취소했어요.');return render();}
+        this.toast('구매했어요.');render();
       };
     };
     const confirmReset=()=>{
-      if(busy)return;
-      this.setModal(`<h2>리셋권을 사용할까요?</h2><p class="intro-copy">남은 기본 횟수가 0일 때만 사용할 수 있어요. 사용하면 오늘 기본 ${RANDOM_DAILY_LIMIT}회로 돌아가요.</p><button class="primary" id="shop-confirm">사용</button><button class="secondary" id="shop-cancel">취소</button>`);
+      this.menu({kind:'confirm',title:'다시 새로운 만남으로',closeId:'shop-cancel',onClose:render,compact:true,
+        body:'<div class="confirmation-copy"><p>리셋권 1장으로 오늘의 랜덤 출격을<br><b>3회</b>로 되돌려요.</p></div>',footer:'<button class="primary" id="shop-confirm">리셋권 사용</button>'});
       let done=false;
-      $('shop-cancel').onclick=()=>{if(!done)render();};
       $('shop-confirm').onclick=()=>{
-        if(done||busy)return;done=true;busy=true;
-        const now=new Date(), snap=economySnapshot(p);
-        const result=useRandomResetTicket(p,now);
-        if(!result.ok){busy=false;this.toast(result.reason==='remaining'?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'사용할 리셋권이 없어요.');return render();}
-        if(!this.save()){restoreEconomy(p,snap);busy=false;this.toast('저장하지 못해서 사용을 취소했어요.');return render();}
-        busy=false;this.toast(`오늘 기본 횟수가 ${result.remaining}회로 돌아왔어요.`);render();
+        if(done||busy)return;done=true;const snap=economySnapshot(p),result=useRandomResetTicket(p);
+        if(!result.ok){this.toast('지금은 리셋권을 사용할 수 없어요.');return render();}
+        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 사용을 취소했어요.');return render();}
+        this.toast('오늘의 랜덤 출격이 3회로 돌아왔어요.');render();
       };
     };
     render();
   }
-  wardrobe(refresh, selectedHero=0) {
-    const p=this.profile, heroes=[0,1,2,3,4,6];
+  wardrobe(refresh,selectedHero=0) {
+    const p=this.profile,heroes=[0,1,2,3,4,6],exit=()=>{this.closeModal();refresh();};
     if(!heroes.includes(selectedHero))selectedHero=0;
-    const artFor=costume=>this.art.urls.costumes[COSTUMES.findIndex(item=>item.id===costume.id)];
-    const reveal=result=>{
-      const costume=result.costume;
-      this.setModal(`<span class="small-caps">${result.duplicate?'DUPLICATE COSTUME':'NEW COSTUME'}</span><div class="costume-reveal"><img src="${artFor(costume)}" alt="${esc(costume.name)}"></div><h2>${HEROES[costume.hero].name} · ${esc(costume.name)}</h2><p class="intro-copy">${result.duplicate?`이미 보유한 의상이에요. 꿈의결정 ${result.shardsAwarded}개를 돌려받았어요.`:'새로운 의상을 얻었어요. 의상실에서 선택할 수 있어요.'}</p><button class="primary" id="costume-reveal-done">의상실로</button>`);
-      document.querySelector('.panel').classList.add('wardrobe-panel');
-      $('costume-reveal-done').onclick=()=>render(costume.hero);
-    };
-    const draw=(tier,choice=null)=>{
-      const snapshot=economySnapshot(p),result=drawCostumeTicket(p,tier,Math.random,choice);
-      if(!result.ok){this.toast('사용할 티켓이 없어요.');return render(selectedHero);}
-      if(!this.save()){restoreEconomy(p,snapshot);this.toast('저장하지 못해서 티켓 사용을 취소했어요.');return render(selectedHero);}
-      reveal(result);
-    };
-    const miracle=()=>{
-      this.setModal(`<span class="small-caps">MIRACLE TICKET</span><h2>원하는 의상을 골라요</h2><p class="intro-copy">미라클 티켓 1장을 사용해 선택한 의상을 얻어요.</p><div class="miracle-choice">${COSTUMES.map(costume=>`<button data-miracle="${costume.id}"><img src="${artFor(costume)}" alt=""><span><b>${HEROES[costume.hero].name}</b><small>${esc(costume.name)}${p.costumesOwned.includes(costume.id)?' · 보유 중':''}</small></span></button>`).join('')}</div><button class="secondary" id="miracle-back">의상실로</button>`);
-      document.querySelector('.panel').classList.add('wardrobe-panel','miracle-panel');
-      document.querySelectorAll('[data-miracle]').forEach(button=>button.onclick=()=>{
-        const costume=COSTUMES.find(item=>item.id===button.dataset.miracle);
-        this.setModal(`<span class="small-caps">MIRACLE TICKET</span><div class="costume-reveal"><img src="${artFor(costume)}" alt=""></div><h2>${HEROES[costume.hero].name} · ${esc(costume.name)}</h2><p class="intro-copy">${p.costumesOwned.includes(costume.id)?'이미 보유한 의상이에요. 선택하면 꿈의결정 3개를 돌려받아요.':'이 의상을 선택해 미라클 티켓을 사용할까요?'}</p><button class="primary" id="miracle-confirm">이 의상 획득</button><button class="secondary" id="miracle-cancel">다시 선택</button>`);
-        document.querySelector('.panel').classList.add('wardrobe-panel');
-        $('miracle-confirm').onclick=()=>draw('miracle',costume.id);
-        $('miracle-cancel').onclick=miracle;
-      });
-      $('miracle-back').onclick=()=>render(selectedHero);
-    };
+    let previewId=p.costumesEquipped[selectedHero]||null;
     const render=(hero=selectedHero)=>{
-      selectedHero=hero;
-      const heroCostumes=COSTUMES.filter(costume=>costume.hero===hero);
-      const equipped=p.costumesEquipped[hero]||null;
-      const preview=heroCostumes.find(costume=>costume.id===equipped);
-      this.setModal(`<button class="wardrobe-close" id="wardrobe-close" aria-label="의상실 닫기">×</button><span class="small-caps">ASTRAL WARDROBE</span><h2>의상실</h2><p class="intro-copy">수집 ${p.costumesOwned.length}/${COSTUMES.length} · 수호자의 모습을 골라 주세요.</p>
-        <div class="wardrobe-tickets">${COSTUME_TIERS.map((tier,index)=>`<button data-costume-draw="${tier.id}" ${p.costumeTickets[tier.id]?'':'disabled'}><img src="${this.art.urls.costumeTickets[index]}" alt=""><b>${tier.name}</b><small>${p.costumeTickets[tier.id]}장</small></button>`).join('')}</div>
-        <nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">${heroes.map(index=>`<button data-wardrobe-hero="${index}" class="${index===hero?'active':''}" aria-pressed="${index===hero}"><img src="${this.art.urls.heroes[index]}" alt=""><span>${HEROES[index].name}</span></button>`).join('')}</nav>
-        <div class="wardrobe-preview"><img src="${preview?artFor(preview):this.art.urls.heroes[hero]}" alt="${HEROES[hero].name}"><span><small>${HEROES[hero].name}</small><b>${preview?esc(preview.name):'기본 의상'}</b></span></div>
-        <div class="wardrobe-variants"><button data-equip="" class="${equipped?'':'active'}"><img src="${this.art.urls.heroes[hero]}" alt=""><b>기본 의상</b><small>${equipped?'선택하기':'착용 중'}</small></button>${heroCostumes.map(costume=>`<button data-equip="${costume.id}" class="${equipped===costume.id?'active':''}" ${p.costumesOwned.includes(costume.id)?'':'disabled'}><img src="${artFor(costume)}" alt=""><b>${esc(costume.name)}</b><small>${equipped===costume.id?'착용 중':p.costumesOwned.includes(costume.id)?'선택하기':'미보유'}</small></button>`).join('')}</div><button class="secondary" id="wardrobe-back">출격 준비로</button>`);
-      document.querySelector('.panel').classList.add('wardrobe-panel');
-      document.querySelectorAll('[data-wardrobe-hero]').forEach(button=>button.onclick=()=>render(Number(button.dataset.wardrobeHero)));
-      document.querySelectorAll('[data-equip]').forEach(button=>button.onclick=()=>{
-        const snapshot=economySnapshot(p),id=button.dataset.equip||null;
-        if(!equipCostume(p,hero,id))return;
-        if(!this.save()){restoreEconomy(p,snapshot);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
-        render(hero);
-      });
-      document.querySelectorAll('[data-costume-draw]').forEach(button=>button.onclick=()=>button.dataset.costumeDraw==='miracle'?miracle():draw(button.dataset.costumeDraw));
-      $('wardrobe-back').onclick=()=>{this.closeModal();refresh();};
-      $('wardrobe-close').onclick=$('wardrobe-back').onclick;
+      if(hero!==selectedHero){selectedHero=hero;previewId=p.costumesEquipped[hero]||null;}
+      const variants=[{id:null,name:'기본 의상',hero},...COSTUMES.filter(c=>c.hero===hero)];
+      const preview=variants.find(c=>c.id===previewId)||variants[0],owned=!preview.id||p.costumesOwned.includes(preview.id),equipped=(p.costumesEquipped[hero]||null)===preview.id;
+      this.menu({kind:'wardrobe',title:'의상실',subtitle:'컬렉션 '+p.costumesOwned.length+'/'+COSTUMES.length,closeId:'wardrobe-close',onClose:exit,
+        body:'<nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">'+heroes.map(index=>'<button data-wardrobe-hero="'+index+'" class="'+(index===hero?'active':'')+'" aria-pressed="'+(index===hero)+'">'+HEROES[index].name+'</button>').join('')+'</nav><div class="wardrobe-scene"><div class="wardrobe-orbit" aria-hidden="true"></div><div class="wardrobe-preview"><img class="anchored-art" src="'+(preview.id?this.costumeArt(preview):this.art.urls.heroes[hero])+'" alt="'+HEROES[hero].name+' '+esc(preview.name)+'"></div><div class="wardrobe-caption"><small>'+HEROES[hero].name+'</small><h3>'+esc(preview.name)+'</h3><span>'+(equipped?'현재 착용 중':owned?'보유한 의상':'아직 만나지 못한 의상')+'</span></div></div><div class="wardrobe-variants" aria-label="의상 선택">'+variants.map((c,i)=>'<button data-preview="'+(c.id||'')+'" class="'+(preview.id===c.id?'active':'')+'" aria-pressed="'+(preview.id===c.id)+'"><small>0'+(i+1)+'</small><b>'+esc(c.name)+'</b><span>'+((p.costumesEquipped[hero]||null)===c.id?'착용 중':!c.id||p.costumesOwned.includes(c.id)?'보유':'미보유')+'</span></button>').join('')+'</div>',
+        footer:'<button class="secondary" id="wardrobe-back">돌아가기</button><button class="primary" id="wardrobe-equip" '+(equipped?'disabled':'')+'>'+(equipped?'착용 중':owned?'이 의상 착용':'상점에서 만나기')+'</button>'});
+      document.querySelectorAll('[data-wardrobe-hero]').forEach(b=>b.onclick=()=>render(Number(b.dataset.wardrobeHero)));
+      document.querySelectorAll('[data-preview]').forEach(b=>b.onclick=()=>{previewId=b.dataset.preview||null;render();});
+      $('wardrobe-back').onclick=exit;
+      $('wardrobe-equip').onclick=()=>{
+        if(!owned)return this.shop(refresh);
+        const snap=economySnapshot(p);if(!equipCostume(p,hero,preview.id))return;
+        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
+        render();
+      };
     };
-    render(selectedHero);
+    render();
   }
+
   achievements() {
     const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;
     this.setModal(`<span class="small-caps">ABYSS ACHIEVEMENTS</span><h2>심연의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length} · 던전별 첫 심연 클리어에 꿈의결정 3개</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/1</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
