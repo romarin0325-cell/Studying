@@ -476,6 +476,13 @@ const BattleRuntime = {
                 }
             }
 
+            if (battle.isFinished) return;
+            if (player.isDead) {
+                battle.currentPlayerIdx++;
+                BattleRuntime.TurnManager.startPlayerTurn(rpg);
+                return;
+            }
+
             tickTurnBuffs(player);
 
             rpg.renderBattleView();

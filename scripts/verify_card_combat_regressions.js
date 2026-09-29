@@ -1138,6 +1138,39 @@ function run() {
     assert.strictEqual(multiDelayedRpg.battle.enemy.buffs.stun, 1);
     assert.strictEqual(multiDelayedBehemoth.isDead, true);
 
+    // Death Roulette can kill a delayed skill's caster during turn startup.
+    // The next living card must receive controls, or the battle must end.
+    for (const hasNextCard of [true, false]) {
+      const deck = hasNextCard ? ['behemoth', 'marshmallow'] : ['behemoth'];
+      const caster = buildWaveUnit('behemoth', deck, 0);
+      const nextCard = hasNextCard ? buildWaveUnit('marshmallow', deck, 1) : null;
+      const turnRpg = makeRpg(caster, deck);
+      turnRpg.battle.players = hasNextCard ? [caster, nextCard] : [caster];
+      turnRpg.battle.enemy = makeUnit({ id: 'roulette-survivor', hp: 10000, maxHp: 10000, buffs: {} });
+      turnRpg.hasArtifact = id => id === 'death_roulette';
+      const controls = [];
+      const logs = [];
+      let losses = 0;
+      turnRpg.renderBattleControls = player => controls.push(player);
+      turnRpg.log = message => logs.push(message);
+      turnRpg.loseBattle = () => { losses++; turnRpg.battle.isFinished = true; };
+      const originalRandom = Math.random;
+      Math.random = () => 0;
+      try {
+        BattleRuntime.executeSkill(turnRpg, caster, turnRpg.battle.enemy, earthquake);
+        turnRpg.battle.turn = turnRpg.battle.delayedEffects[0].turn;
+        turnRpg.battle.isNewTurn = false;
+        BattleRuntime.TurnManager.startPlayerTurn(turnRpg);
+      } finally {
+        Math.random = originalRandom;
+      }
+      assert(logs.some(message => message.includes('데스룰렛')));
+      assert.strictEqual(caster.isDead, true);
+      assert.strictEqual(turnRpg.battle.currentPlayerIdx, hasNextCard ? 1 : GAME_CONSTANTS.DECK_SIZE);
+      assert.deepStrictEqual(controls, hasNextCard ? [nextCard] : []);
+      assert.strictEqual(losses, hasNextCard ? 0 : 1);
+    }
+
     BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurnForNewCards;
 
     // Dream Form penetration is additive with curse: 20% curse + 30% moon + 50% reaper fully removes 100 MDEF.
