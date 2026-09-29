@@ -1138,6 +1138,86 @@ function run() {
     assert.strictEqual(multiDelayedRpg.battle.enemy.buffs.stun, 1);
     assert.strictEqual(multiDelayedBehemoth.isDead, true);
 
+    // Death Roulette can kill a delayed skill's caster during turn startup.
+    // The next living card must receive controls, or the battle must end.
+    for (const hasNextCard of [true, false]) {
+      const deck = hasNextCard ? ['behemoth', 'marshmallow'] : ['behemoth'];
+      const caster = buildWaveUnit('behemoth', deck, 0);
+      const nextCard = hasNextCard ? buildWaveUnit('marshmallow', deck, 1) : null;
+      const turnRpg = makeRpg(caster, deck);
+      turnRpg.battle.players = hasNextCard ? [caster, nextCard] : [caster];
+      turnRpg.battle.enemy = makeUnit({ id: 'roulette-survivor', hp: 10000, maxHp: 10000, buffs: {} });
+      turnRpg.hasArtifact = id => id === 'death_roulette';
+      const controls = [];
+      const logs = [];
+      let losses = 0;
+      turnRpg.renderBattleControls = player => controls.push(player);
+      turnRpg.log = message => logs.push(message);
+      turnRpg.loseBattle = () => { losses++; turnRpg.battle.isFinished = true; };
+      const originalRandom = Math.random;
+      Math.random = () => 0;
+      try {
+        BattleRuntime.executeSkill(turnRpg, caster, turnRpg.battle.enemy, earthquake);
+        turnRpg.battle.turn = turnRpg.battle.delayedEffects[0].turn;
+        turnRpg.battle.isNewTurn = false;
+        BattleRuntime.TurnManager.startPlayerTurn(turnRpg);
+      } finally {
+        Math.random = originalRandom;
+      }
+      assert(logs.some(message => message.includes('데스룰렛')));
+      assert.strictEqual(caster.isDead, true);
+      assert.strictEqual(turnRpg.battle.currentPlayerIdx, hasNextCard ? 1 : GAME_CONSTANTS.DECK_SIZE);
+      assert.deepStrictEqual(controls, hasNextCard ? [nextCard] : []);
+      assert.strictEqual(losses, hasNextCard ? 0 : 1);
+    }
+
+    // Replacing a dead caster is still the same player turn: the artificial
+    // demon must see the delayed hit even if the next card only uses support.
+    for (const [casterId, skillName, hitType] of [
+      ['luna_swimsuit', '나이트메어비치', 'phy'],
+      ['behemoth', '어스퀘이크', 'mag']
+    ]) {
+      const deck = [casterId, 'marshmallow'];
+      const caster = buildWaveUnit(casterId, deck, 0);
+      const nextCard = buildWaveUnit('marshmallow', deck, 1);
+      const skill = caster.skills.find(candidate => candidate.name === skillName);
+      assert.strictEqual(skill.type, hitType);
+      const turnRpg = makeRpg(caster, deck);
+      turnRpg.battle.players = [caster, nextCard];
+      const enemy = makeUnit({ id: 'artificial_demon_god', hp: 10000, maxHp: 10000,
+        def: 100, mdef: 100, baseDef: 100, baseMdef: 100, buffs: {} });
+      turnRpg.battle.enemy = enemy;
+      turnRpg.hasArtifact = id => id === 'death_roulette';
+      const originalRandom = Math.random;
+      try {
+        Math.random = () => 0;
+        BattleRuntime.executeSkill(turnRpg, caster, enemy, skill);
+        assert.strictEqual(turnRpg.battle.delayedEffects.length, 1);
+        turnRpg.battle.turn = turnRpg.battle.delayedEffects[0].turn;
+        turnRpg.battle.isNewTurn = true;
+        BattleRuntime.TurnManager.startPlayerTurn(turnRpg);
+        assert.strictEqual(caster.isDead, true);
+        assert.strictEqual(turnRpg.battle.currentPlayerIdx, 1);
+        assert.strictEqual(enemy.lastHitType, hitType);
+
+        Math.random = () => 0.99;
+        BattleRuntime.executeSkill(turnRpg, nextCard, enemy,
+          { name: '검증용 보조', type: 'sup', cost: 0, effects: [] });
+        assert.strictEqual(enemy.lastHitType, hitType);
+        enemy.buffs.stun = 1;
+        BattleRuntime.TurnManager.startEnemyTurn(turnRpg);
+        const protocol = hitType === 'phy' ? 'defProtocolPhy' : 'defProtocolMag';
+        const otherProtocol = hitType === 'phy' ? 'defProtocolMag' : 'defProtocolPhy';
+        assert.strictEqual(enemy.buffs[protocol], 1);
+        assert.strictEqual(enemy.buffs[otherProtocol], undefined);
+        assert.strictEqual(enemy.def, hitType === 'phy' ? 150 : 100);
+        assert.strictEqual(enemy.mdef, hitType === 'mag' ? 150 : 100);
+        assert.strictEqual(enemy.lastHitType, null);
+      } finally {
+        Math.random = originalRandom;
+      }
+    }
+
     BattleRuntime.TurnManager.endPlayerTurn = originalEndPlayerTurnForNewCards;
 
     // Dream Form penetration is additive with curse: 20% curse + 30% moon + 50% reaper fully removes 100 MDEF.

@@ -2082,7 +2082,7 @@ body[data-screen=menu] .container { padding-top:12px; }
 .study-grid h3 { font-size:16px; margin:0 0 6px; }
 .study-grid>button>span { font-size:11px; color:var(--muted); }
 #screen-study .page-heading h1 { font-size:23px; }
-.astra .control-panel { max-height:none; overflow:visible; height:auto; grid-auto-rows:minmax(44px,auto); gap:6px; padding:8px; }
+.astra .control-panel { max-height:none; overflow:visible; height:auto; grid-auto-rows:minmax(44px,auto); gap:6px; padding:8px; margin-bottom:36px; }
 .astra .skill-btn { min-height:44px; padding:6px; }
 .astra .actor-buffs { min-height:0; margin-top:3px; font-size:9px; max-height:24px; overflow-y:auto; }
 .battle-actor>strong { margin:2px 0 4px!important; }
@@ -25907,6 +25907,7 @@ const BattleRuntime = {
 
             if (battle.isNewTurn) {
                 battle.isNewTurn = false;
+                if (battle.enemy) battle.enemy.lastHitType = null;
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
@@ -25939,8 +25940,6 @@ const BattleRuntime = {
                 }
             }
 
-            if (battle.enemy) battle.enemy.lastHitType = null;
-
             const player = battle.players[battle.currentPlayerIdx];
             if (!player || player.isDead) {
                 battle.currentPlayerIdx++;
@@ -25965,6 +25964,13 @@ const BattleRuntime = {
                     BattleRuntime.executeSkill(rpg, effect.source, battle.enemy, effect.skill, true);
                     if (battle.enemy && battle.enemy.hp <= 0) return;
                 }
+            }
+
+            if (battle.isFinished) return;
+            if (player.isDead) {
+                battle.currentPlayerIdx++;
+                BattleRuntime.TurnManager.startPlayerTurn(rpg);
+                return;
             }
 
             tickTurnBuffs(player);

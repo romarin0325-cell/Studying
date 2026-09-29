@@ -416,6 +416,7 @@ const BattleRuntime = {
 
             if (battle.isNewTurn) {
                 battle.isNewTurn = false;
+                if (battle.enemy) battle.enemy.lastHitType = null;
                 rpg.log(`=== ${battle.turn}턴 ===`, 'info');
                 BattleRuntime.expireFieldBuffs(rpg, battle.turn);
 
@@ -448,8 +449,6 @@ const BattleRuntime = {
                 }
             }
 
-            if (battle.enemy) battle.enemy.lastHitType = null;
-
             const player = battle.players[battle.currentPlayerIdx];
             if (!player || player.isDead) {
                 battle.currentPlayerIdx++;
@@ -474,6 +473,13 @@ const BattleRuntime = {
                     BattleRuntime.executeSkill(rpg, effect.source, battle.enemy, effect.skill, true);
                     if (battle.enemy && battle.enemy.hp <= 0) return;
                 }
+            }
+
+            if (battle.isFinished) return;
+            if (player.isDead) {
+                battle.currentPlayerIdx++;
+                BattleRuntime.TurnManager.startPlayerTurn(rpg);
+                return;
             }
 
             tickTurnBuffs(player);
