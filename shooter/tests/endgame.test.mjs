@@ -99,15 +99,19 @@ test('lower dungeon health rises in steps while final Chaos stays at its prior h
  assert.equal(DUNGEONS.filter(d=>!d.challengeOnly&&!d.event).length,6);assert.deepEqual(STAGES.slice(0,6).map(stage=>stage.hp),[5500,7200,9400,11900,14500,17000]);
  const g=combat({stage:2});g.player.fire=999;const e=target(g);e.special=2;e.countdown=3;tick(g,2.9);assert.equal(g.bullets.length,0);tick(g,.15);assert.equal(g.bullets.length,20);
 });
-test('base-six A and B weapon achievements track any and hard clears without rewards',()=>{
+test('one abyss achievement per dungeon grants three crystals once',()=>{
  const profile=createProfile();
- for(let dungeon=0;dungeon<6;dungeon++)recordDungeonClear(profile,3,0,dungeon,dungeon===5?'hard':'normal');
- let jasmine=achievementProgress(profile).filter(row=>row.hero===3&&row.weapon===0);
- assert.deepEqual(jasmine.map(row=>[row.progress,row.complete]),[[6,true],[1,false]]);
- for(let dungeon=0;dungeon<6;dungeon++)recordDungeonClear(profile,3,0,dungeon,'hard');
- jasmine=achievementProgress(createProfile(JSON.parse(JSON.stringify(profile)))).filter(row=>row.hero===3&&row.weapon===0);
- assert.ok(jasmine.every(row=>row.complete));assert.equal(achievementProgress(profile).length,24);
- assert.equal(recordDungeonClear(profile,5,0,0,'hard'),false);
+ for(let dungeon=0;dungeon<12;dungeon++){
+   assert.equal(recordDungeonClear(profile,3,0,dungeon,'hard'),true);
+   assert.equal(profile.dreamShards,dungeon*3);
+   assert.equal(recordDungeonClear(profile,3,0,dungeon,'abyss'),true);
+   assert.equal(profile.dreamShards,(dungeon+1)*3);
+   assert.equal(recordDungeonClear(profile,2,1,dungeon,'abyss'),true);
+   assert.equal(profile.dreamShards,(dungeon+1)*3);
+ }
+ assert.equal(achievementProgress(profile).length,12);
+ assert.ok(achievementProgress(createProfile(JSON.parse(JSON.stringify(profile)))).every(row=>row.complete));
+ assert.equal(recordDungeonClear(profile,3,0,12,'abyss'),false);
 });
 test('power pickups keep 90 percent of the prior eligible drops',()=>{
  let eligible=0,dropped=0;const g=combat();g.drop=(_x,_y,type)=>{if(type==='power')dropped++;};

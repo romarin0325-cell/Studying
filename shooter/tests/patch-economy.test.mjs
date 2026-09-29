@@ -72,10 +72,10 @@ test('purchases and reset tickets are atomic and refuse waste', () => {
   assert.equal(consumeRandom(p, () => 0, today), 0);
 });
 
-test('old saves migrate without granting shards or a free random reset', () => {
+test('old saves without abyss clears migrate without granting shards or a free random reset', () => {
   const old = { version: 5, owned: ['spellbook', 'frozen', 'crystal', 'dream'], equipped: ['dream'], tickets: [{ dungeon: 1, difficulty: 'hard', week: '2026-09-14' }], claims: { '2026-09-14:1': 'hard' }, randomDraws: { date: '2026-09-14', count: 1 }, clears: { '0:0:easy:0': true } };
   const p = createProfile(old);
-  assert.equal(p.version, 7);
+  assert.equal(p.version, 8);
   assert.equal(p.dreamShards, 0);
   assert.equal(p.randomResetTickets, 0);
   assert.equal(p.randomDraws.date, '2026-09-14');

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="768" height="768" viewBox="0 0 768 768">
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1bf"/><stop offset=".27" stop-color="#bc8540"/><stop offset=".52" stop-color="#fff2bd"/><stop offset=".78" stop-color="#a9652e"/><stop offset="1" stop-color="#ffe9a2"/></linearGradient>
+    <linearGradient id="daily" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#244268"/><stop offset=".55" stop-color="#21315b"/><stop offset="1" stop-color="#705586"/></linearGradient>
+    <linearGradient id="fantasy" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3e215f"/><stop offset=".5" stop-color="#482767"/><stop offset="1" stop-color="#893d85"/></linearGradient>
+    <linearGradient id="special" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6f2c63"/><stop offset=".52" stop-color="#a74676"/><stop offset="1" stop-color="#dc8b78"/></linearGradient>
+    <linearGradient id="miracle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#194767"/><stop offset=".33" stop-color="#346491"/><stop offset=".7" stop-color="#694d9e"/><stop offset="1" stop-color="#a54f83"/></linearGradient>
+    <linearGradient id="prism" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8de8ff"/><stop offset=".3" stop-color="#fff7c4"/><stop offset=".63" stop-color="#e0a7ff"/><stop offset="1" stop-color="#72d6ff"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-40%" width="160%" height="180%"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="9"/><feComponentTransfer><feFuncA type="linear" slope=".45"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <path id="card" d="M56 76 Q48 76 48 84 V137 Q71 143 71 166 Q71 190 48 195 V270 Q48 280 58 280 H327 Q336 280 336 270 V195 Q313 190 313 166 Q313 143 336 137 V84 Q336 76 327 76 Z"/>
+    <path id="inner" d="M67 91 H318 V129 Q297 140 297 166 Q297 193 318 205 V263 H67 V205 Q87 193 87 166 Q87 140 67 129 Z"/>
+    <g id="ornament" fill="none" stroke="url(#foil)">
+      <path d="M112 107 H272 M112 249 H272" stroke-width="2" opacity=".8"/>
+      <path d="M104 111 Q99 125 91 129 M280 111 Q285 125 293 129 M104 245 Q99 231 91 227 M280 245 Q285 231 293 227" stroke-width="2"/>
+      <circle cx="192" cy="177" r="63" stroke-width="2" opacity=".75"/>
+      <circle cx="192" cy="177" r="57" stroke-width="1" opacity=".7" stroke-dasharray="2 7"/>
+      <path d="M102 170 H120 M264 170 H282 M192 100 V118 M192 236 V254" stroke-width="2"/>
+    </g>
+    <g id="stars" fill="#fff4cb">
+      <path d="M92 101 L95 109 103 112 95 115 92 123 89 115 81 112 89 109 Z"/>
+      <path d="M292 239 L295 247 303 250 295 253 292 261 289 253 281 250 289 247 Z"/>
+      <circle cx="116" cy="234" r="2"/><circle cx="270" cy="116" r="2"/>
+    </g>
+  </defs>
+  <g transform="translate(0 0)" filter="url(#shadow)">
+    <use xlink:href="#card" fill="url(#foil)"/><use xlink:href="#inner" fill="url(#daily)" stroke="#ffe6ac" stroke-width="2"/>
+    <use xlink:href="#ornament"/><use xlink:href="#stars"/>
+    <circle cx="192" cy="177" r="45" fill="#a7e5ff" opacity=".15"/>
+    <path d="M150 166 Q166 148 180 164 Q192 176 204 164 Q218 148 234 166 L234 201 Q213 218 192 203 Q171 218 150 201 Z" fill="#e8f7ff" stroke="#88d5f4" stroke-width="4"/>
+    <path d="M192 174 V208 M166 167 Q176 181 192 174 Q208 181 218 167" fill="none" stroke="#4889bd" stroke-width="5"/>
+    <path d="M192 145 L197 154 207 156 199 163 197 174 192 168 187 174 185 163 177 156 187 154 Z" fill="#ffe49e"/>
+  </g>
+  <g transform="translate(384 0)" filter="url(#shadow)">
+    <use xlink:href="#card" fill="url(#foil)"/><use xlink:href="#inner" fill="url(#fantasy)" stroke="#ffe6ac" stroke-width="2"/>
+    <use xlink:href="#ornament"/><use xlink:href="#stars"/>
+    <circle cx="192" cy="177" r="45" fill="#b678ee" opacity=".19"/>
+    <path d="M206 137 A43 43 0 1 0 233 209 A50 50 0 1 1 206 137 Z" fill="#e9c3ff" stroke="#fff0ca" stroke-width="3"/>
+    <path d="M207 155 L211 166 222 170 211 174 207 185 203 174 192 170 203 166 Z M243 187 L245 193 251 195 245 197 243 203 241 197 235 195 241 193 Z" fill="#fff0ba"/>
+  </g>
+  <g transform="translate(0 384)" filter="url(#shadow)">
+    <use xlink:href="#card" fill="url(#foil)"/><use xlink:href="#inner" fill="url(#special)" stroke="#ffe6ac" stroke-width="2"/>
+    <use xlink:href="#ornament"/><use xlink:href="#stars"/>
+    <circle cx="192" cy="177" r="45" fill="#ffc4b4" opacity=".2"/>
+    <path d="M192 135 Q209 155 192 174 Q175 155 192 135 Z M233 176 Q213 193 194 176 Q213 159 233 176 Z M192 218 Q175 198 192 179 Q209 198 192 218 Z M151 176 Q171 159 190 176 Q171 193 151 176 Z" fill="#fff1d4" stroke="#f4b4ad" stroke-width="3"/>
+    <circle cx="192" cy="177" r="12" fill="#ffe293" stroke="#fff7c9" stroke-width="3"/>
+    <path d="M192 126 V115 M242 177 H253 M192 228 V239 M142 177 H131" stroke="#ffe49d" stroke-width="4"/>
+  </g>
+  <g transform="translate(384 384)" filter="url(#shadow)">
+    <use xlink:href="#card" fill="url(#foil)"/><use xlink:href="#inner" fill="url(#miracle)" stroke="#ffe6ac" stroke-width="2"/>
+    <use xlink:href="#ornament"/><use xlink:href="#stars"/>
+    <circle cx="192" cy="177" r="48" fill="#d5b3ff" opacity=".18"/>
+    <path d="M192 130 L231 174 192 223 153 174 Z" fill="url(#prism)" stroke="#fff3c6" stroke-width="5"/>
+    <path d="M153 174 H231 M192 130 L181 174 192 223 M192 130 L203 174 192 223" fill="none" stroke="#ffffffa8" stroke-width="3"/>
+    <path d="M192 106 L197 117 208 122 197 127 192 138 187 127 176 122 187 117 Z" fill="#fff9cf"/>
+  </g>
+</svg>

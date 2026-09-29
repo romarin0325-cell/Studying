@@ -5,7 +5,7 @@ import { prepareAssets } from '../prepare-assets.mjs';
 test('committed WebP cache matches its sources and processor without invoking image preprocessing', async () => {
   const report = await prepareAssets({ requireCache: true });
   assert.equal(report.cache.hit, true, 'run npm run build --prefix shooter and commit generated-assets after changing source art or preprocessing');
-  assert.equal(report.output.fileCount, 97);
-  assert.equal(report.output.files.length, 97);
+  assert.equal(report.output.fileCount, 113);
+  assert.equal(report.output.files.length, 113);
   assert.ok(report.output.files.every(file => file.file.endsWith('.webp') && typeof file.sha256 === 'string'));
 });

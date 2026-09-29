@@ -1,13 +1,14 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, DIFFICULTIES, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
+import { artifactText, ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, drawCostumeTicket, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function economySnapshot(profile) {
-  return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })) };
+  return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })), costumesOwned:[...profile.costumesOwned], costumesEquipped:{...profile.costumesEquipped}, costumeTickets:{...profile.costumeTickets} };
 }
 function restoreEconomy(profile, snap) {
   profile.dreamShards = snap.dreamShards; profile.randomResetTickets = snap.randomResetTickets; profile.randomDraws = { ...snap.randomDraws };
   profile.owned.splice(0, profile.owned.length, ...snap.owned); profile.tickets.splice(0, profile.tickets.length, ...snap.tickets.map(ticket => ({ ...ticket })));
+  profile.costumesOwned=snap.costumesOwned;profile.costumesEquipped=snap.costumesEquipped;profile.costumeTickets=snap.costumeTickets;
 }
 const $ = id => document.getElementById(id);
 export class CampaignUI {
@@ -105,17 +106,24 @@ export class CampaignUI {
       const remaining=randomRemaining(p), resets=p.randomResetTickets, shards=p.dreamShards;
       const shopTickets=p.tickets.filter(ticket=>ticket.source==='shop' && ticket.kind==='artifact').length;
       const crystal=this.art.urls.shopItems[0], ticket=this.art.urls.shopItems[1], reset=this.art.urls.shopItems[2];
-      this.setModal(`<span class="small-caps">DREAM CRYSTAL SHOP</span><h2>별빛 상점</h2>
+      this.setModal(`<button class="shop-close" id="shop-close" aria-label="상점 닫기">×</button><span class="small-caps">DREAM CRYSTAL SHOP</span><button class="shop-lineup-trigger" id="shop-lineup" aria-label="코스튬 티켓 상세 라인업">!</button><h2>별빛 상점</h2>
         <div class="shop-balance"><img src="${crystal}" alt=""><span><small>보유 꿈의결정</small><strong>${shards}</strong></span></div>
         <div class="shop-goods">
           <article class="shop-product"><div class="shop-product-head"><img src="${ticket}" alt=""><div><small>ARTIFACT DRAW</small><h3>아티팩트 뽑기권</h3></div></div><p class="shop-stock">보유 뽑기권 ${p.tickets.length}장 <small>상점 구매 ${shopTickets}장</small></p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>5개</b></span></div><button class="primary" id="buy-ticket" ${shards>=5&&!busy?'':'disabled'}>뽑기권 구매</button></article>
           <article class="shop-product"><div class="shop-product-head"><img src="${reset}" alt=""><div><small>RANDOM RESET</small><h3>랜덤 횟수 리셋권</h3></div></div><p class="shop-stock">보유 리셋권 ${resets}장</p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>1개</b></span></div><button class="primary" id="buy-reset" ${shards>=1&&!busy?'':'disabled'}>리셋권 구매</button></article>
+          ${COSTUME_TIERS.map((tier,index)=>`<article class="shop-product costume-product ${tier.id}"><div class="shop-product-head"><img src="${this.art.urls.costumeTickets[index]}" alt=""><div><small>COSTUME ${tier.id.toUpperCase()}</small><h3>코스튬티켓 (${tier.name})</h3></div></div><p class="shop-stock">보유 티켓 ${p.costumeTickets[tier.id]}장 <small>의상실에서 사용</small></p><div class="shop-price"><img src="${crystal}" alt=""><span>꿈의결정 <b>${tier.cost}개</b></span></div><button class="primary" id="buy-costume-${tier.id}" ${shards>=tier.cost&&!busy?'':'disabled'}>티켓 구매</button></article>`).join('')}
         </div><div class="shop-reset"><div><small>오늘 남은 기본 랜덤 횟수</small><strong>${remaining} <span>/ ${RANDOM_DAILY_LIMIT}</span></strong></div><button class="secondary" id="use-reset" ${resets>0&&remaining===0&&!busy?'':'disabled'}>리셋권 사용</button></div>
         <p class="tiny-note" id="reset-note">${remaining>0?'기본 횟수를 모두 사용한 뒤 사용할 수 있어요.':'리셋권은 기본 횟수를 3회로 되돌려요. 캐릭터는 바로 뽑지 않아요.'}</p><button class="secondary" id="shop-back">돌아가기</button>`);
       document.querySelector('.panel').classList.add('shop-panel');
       $('shop-back').onclick=()=>{this.closeModal();refresh();};
+      $('shop-close').onclick=$('shop-back').onclick;
       $('buy-ticket').onclick=()=>confirmBuy('artifact','아티팩트 뽑기권 1장을 꿈의결정 5개로 살까요?');
       $('buy-reset').onclick=()=>confirmBuy('reset','랜덤 횟수 리셋권 1장을 꿈의결정 1개로 살까요?');
+      COSTUME_TIERS.forEach(tier=>$(`buy-costume-${tier.id}`).onclick=()=>confirmBuy(tier.id,`코스튬티켓 (${tier.name}) 1장을 꿈의결정 ${tier.cost}개로 살까요?`));
+      $('shop-lineup').onclick=()=>{
+        this.setModal(`<span class="small-caps">COSTUME TICKET LINEUP</span><h2>티켓 상세 라인업</h2><p class="intro-copy">일상·판타지·스페셜은 표시된 네 의상 중 하나를 같은 확률로 얻어요. 미라클은 원하는 의상을 선택해요.</p><div class="ticket-lineup">${COSTUME_TIERS.map((tier,index)=>`<section><img src="${this.art.urls.costumeTickets[index]}" alt=""><div><h3>${tier.name} <small>꿈의결정 ${tier.cost}개</small></h3><p>${tier.id==='miracle'?'전체 12벌 중 원하는 의상 선택':tier.lineup.map(costume=>`${HEROES[costume.hero].name} · ${costume.name}`).join(' / ')}</p></div></section>`).join('')}</div><p class="tiny-note">이미 가진 의상을 다시 얻으면 꿈의결정 3개를 돌려받아요.</p><button class="secondary" id="shop-lineup-back">상점으로</button>`);
+        document.querySelector('.panel').classList.add('lineup-panel');$('shop-lineup-back').onclick=render;
+      };
       $('use-reset').onclick=()=>confirmReset();
     };
     const confirmBuy=(item,copy)=>{
@@ -148,9 +156,61 @@ export class CampaignUI {
     };
     render();
   }
+  wardrobe(refresh, selectedHero=0) {
+    const p=this.profile, heroes=[0,1,2,3,4,6];
+    if(!heroes.includes(selectedHero))selectedHero=0;
+    const artFor=costume=>this.art.urls.costumes[COSTUMES.findIndex(item=>item.id===costume.id)];
+    const reveal=result=>{
+      const costume=result.costume;
+      this.setModal(`<span class="small-caps">${result.duplicate?'DUPLICATE COSTUME':'NEW COSTUME'}</span><div class="costume-reveal"><img src="${artFor(costume)}" alt="${esc(costume.name)}"></div><h2>${HEROES[costume.hero].name} · ${esc(costume.name)}</h2><p class="intro-copy">${result.duplicate?`이미 보유한 의상이에요. 꿈의결정 ${result.shardsAwarded}개를 돌려받았어요.`:'새로운 의상을 얻었어요. 의상실에서 선택할 수 있어요.'}</p><button class="primary" id="costume-reveal-done">의상실로</button>`);
+      document.querySelector('.panel').classList.add('wardrobe-panel');
+      $('costume-reveal-done').onclick=()=>render(costume.hero);
+    };
+    const draw=(tier,choice=null)=>{
+      const snapshot=economySnapshot(p),result=drawCostumeTicket(p,tier,Math.random,choice);
+      if(!result.ok){this.toast('사용할 티켓이 없어요.');return render(selectedHero);}
+      if(!this.save()){restoreEconomy(p,snapshot);this.toast('저장하지 못해서 티켓 사용을 취소했어요.');return render(selectedHero);}
+      reveal(result);
+    };
+    const miracle=()=>{
+      this.setModal(`<span class="small-caps">MIRACLE TICKET</span><h2>원하는 의상을 골라요</h2><p class="intro-copy">미라클 티켓 1장을 사용해 선택한 의상을 얻어요.</p><div class="miracle-choice">${COSTUMES.map(costume=>`<button data-miracle="${costume.id}"><img src="${artFor(costume)}" alt=""><span><b>${HEROES[costume.hero].name}</b><small>${esc(costume.name)}${p.costumesOwned.includes(costume.id)?' · 보유 중':''}</small></span></button>`).join('')}</div><button class="secondary" id="miracle-back">의상실로</button>`);
+      document.querySelector('.panel').classList.add('wardrobe-panel','miracle-panel');
+      document.querySelectorAll('[data-miracle]').forEach(button=>button.onclick=()=>{
+        const costume=COSTUMES.find(item=>item.id===button.dataset.miracle);
+        this.setModal(`<span class="small-caps">MIRACLE TICKET</span><div class="costume-reveal"><img src="${artFor(costume)}" alt=""></div><h2>${HEROES[costume.hero].name} · ${esc(costume.name)}</h2><p class="intro-copy">${p.costumesOwned.includes(costume.id)?'이미 보유한 의상이에요. 선택하면 꿈의결정 3개를 돌려받아요.':'이 의상을 선택해 미라클 티켓을 사용할까요?'}</p><button class="primary" id="miracle-confirm">이 의상 획득</button><button class="secondary" id="miracle-cancel">다시 선택</button>`);
+        document.querySelector('.panel').classList.add('wardrobe-panel');
+        $('miracle-confirm').onclick=()=>draw('miracle',costume.id);
+        $('miracle-cancel').onclick=miracle;
+      });
+      $('miracle-back').onclick=()=>render(selectedHero);
+    };
+    const render=(hero=selectedHero)=>{
+      selectedHero=hero;
+      const heroCostumes=COSTUMES.filter(costume=>costume.hero===hero);
+      const equipped=p.costumesEquipped[hero]||null;
+      const preview=heroCostumes.find(costume=>costume.id===equipped);
+      this.setModal(`<button class="wardrobe-close" id="wardrobe-close" aria-label="의상실 닫기">×</button><span class="small-caps">ASTRAL WARDROBE</span><h2>의상실</h2><p class="intro-copy">수집 ${p.costumesOwned.length}/${COSTUMES.length} · 수호자의 모습을 골라 주세요.</p>
+        <div class="wardrobe-tickets">${COSTUME_TIERS.map((tier,index)=>`<button data-costume-draw="${tier.id}" ${p.costumeTickets[tier.id]?'':'disabled'}><img src="${this.art.urls.costumeTickets[index]}" alt=""><b>${tier.name}</b><small>${p.costumeTickets[tier.id]}장</small></button>`).join('')}</div>
+        <nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">${heroes.map(index=>`<button data-wardrobe-hero="${index}" class="${index===hero?'active':''}" aria-pressed="${index===hero}"><img src="${this.art.urls.heroes[index]}" alt=""><span>${HEROES[index].name}</span></button>`).join('')}</nav>
+        <div class="wardrobe-preview"><img src="${preview?artFor(preview):this.art.urls.heroes[hero]}" alt="${HEROES[hero].name}"><span><small>${HEROES[hero].name}</small><b>${preview?esc(preview.name):'기본 의상'}</b></span></div>
+        <div class="wardrobe-variants"><button data-equip="" class="${equipped?'':'active'}"><img src="${this.art.urls.heroes[hero]}" alt=""><b>기본 의상</b><small>${equipped?'선택하기':'착용 중'}</small></button>${heroCostumes.map(costume=>`<button data-equip="${costume.id}" class="${equipped===costume.id?'active':''}" ${p.costumesOwned.includes(costume.id)?'':'disabled'}><img src="${artFor(costume)}" alt=""><b>${esc(costume.name)}</b><small>${equipped===costume.id?'착용 중':p.costumesOwned.includes(costume.id)?'선택하기':'미보유'}</small></button>`).join('')}</div><button class="secondary" id="wardrobe-back">출격 준비로</button>`);
+      document.querySelector('.panel').classList.add('wardrobe-panel');
+      document.querySelectorAll('[data-wardrobe-hero]').forEach(button=>button.onclick=()=>render(Number(button.dataset.wardrobeHero)));
+      document.querySelectorAll('[data-equip]').forEach(button=>button.onclick=()=>{
+        const snapshot=economySnapshot(p),id=button.dataset.equip||null;
+        if(!equipCostume(p,hero,id))return;
+        if(!this.save()){restoreEconomy(p,snapshot);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
+        render(hero);
+      });
+      document.querySelectorAll('[data-costume-draw]').forEach(button=>button.onclick=()=>button.dataset.costumeDraw==='miracle'?miracle():draw(button.dataset.costumeDraw));
+      $('wardrobe-back').onclick=()=>{this.closeModal();refresh();};
+      $('wardrobe-close').onclick=$('wardrobe-back').onclick;
+    };
+    render(selectedHero);
+  }
   achievements() {
     const rows=achievementProgress(this.profile),complete=rows.filter(row=>row.complete).length;
-    this.setModal(`<span class="small-caps">ACHIEVEMENTS</span><h2>수호자의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length}</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/6</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
+    this.setModal(`<span class="small-caps">ABYSS ACHIEVEMENTS</span><h2>심연의 발자취</h2><p class="intro-copy">달성 ${complete}/${rows.length} · 던전별 첫 심연 클리어에 꿈의결정 3개</p><div class="achievement-list">${rows.map(row=>`<div class="achievement ${row.complete?'complete':''}"><i>${row.complete?'✓':'◇'}</i><span><b>${esc(row.name)}</b><small>${esc(row.text)}</small></span><em>${row.progress}/1</em></div>`).join('')}</div><button class="primary" id="achievements-close">출격 준비로</button>`);
     $('achievements-close').onclick=this.closeModal;
   }
   dungeons(selected,mode,done,scroll=0,panelScroll=0) {

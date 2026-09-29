@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { COSTUMES } from './meta.js';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const root = path.dirname(scriptPath);
@@ -10,7 +11,8 @@ const getSharp = async () => sharp ||= (await import('sharp')).default;
 const CACHE_VERSION = 1;
 const GENERATED_ASSETS = path.join(root, 'generated-assets');
 const EVENT_ASSETS = ['harmonious', 'gold-dragon', 'ancient-soul', 'behemoth', 'time-ruler'];
-const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', 'shop-items', ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
+const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', 'shop-items', 'dark-fairy', 'costume-tickets', ...COSTUMES.map(costume=>`costumes/${costume.id}`), ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
+const OUTPUT_COUNT = 113;
 const ART_WEBP = { quality: 88, alphaQuality: 100, effort: 6 };
 const WORLD_WEBP = { quality: 84, alphaQuality: 100, effort: 6 };
 const CHARACTER_KINDS = new Set(['heroes', 'companions', 'secrets']);
@@ -23,7 +25,7 @@ const FACE_WIDTHS = {
 const SHIELD_BOUNDS = [[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
-const imagePath = name => path.join(root, 'assets', `${name}${name === 'worlds' ? '.jpg' : '.png'}`);
+const imagePath = name => path.join(root, 'assets', `${name}${name === 'worlds' ? '.jpg' : name === 'costume-tickets' ? '.svg' : '.png'}`);
 const webpPath = (destination, group, index) => path.join(destination, group, `${index}.webp`);
 const sha256 = data => createHash('sha256').update(data).digest('hex');
 
@@ -44,7 +46,7 @@ async function readCachedReport(directory, fingerprint) {
     const manifest = JSON.parse(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8'));
     if (manifest.version !== CACHE_VERSION || manifest.sourceHash !== fingerprint.sourceHash || manifest.processorHash !== fingerprint.processorHash) return null;
     const files = manifest.report?.output?.files;
-    if (!Array.isArray(files) || files.length !== 97) return null;
+    if (!Array.isArray(files) || files.length !== OUTPUT_COUNT) return null;
     for (const file of files) {
       const destination = cacheFilePath(directory, file.file);
       if (!destination || !Number.isInteger(file.bytes) || typeof file.sha256 !== 'string') return null;
@@ -179,12 +181,19 @@ async function processSpriteSheet(name, destination, outputs) {
       size = 384;
     }
     await writeRaw(webpPath(destination, name, index), output, size, size, ART_WEBP, outputs);
-    if (name === 'companions' && index === 3) {
-      const sharp = await getSharp();
-      const dark = await sharp(output, { raw: { width: 512, height: 512, channels: 4 } }).negate({ alpha: false }).raw().toBuffer();
-      await writeRaw(path.join(destination, 'companions', 'dark-fairy.webp'), dark, 512, 512, ART_WEBP, outputs);
-    }
   }
+}
+
+async function processCostumes(destination, outputs) {
+  const sharp = await getSharp();
+  for (let index=0; index<COSTUMES.length; index++) {
+    const source=await sharp(imagePath(`costumes/${COSTUMES[index].id}`)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    if(source.info.width!==512||source.info.height!==512)throw new Error(`Costume size mismatch: ${COSTUMES[index].id}`);
+    await writeRaw(webpPath(destination,'costumes',index),source.data,512,512,ART_WEBP,outputs);
+  }
+  const fairy=await sharp(imagePath('dark-fairy')).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  if(fairy.info.width!==512||fairy.info.height!==512)throw new Error('Dark fairy size mismatch');
+  await writeRaw(path.join(destination,'companions','dark-fairy.webp'),fairy.data,512,512,ART_WEBP,outputs);
 }
 
 async function processWorldAtlas(name, columns, destination, outputs) {
@@ -263,6 +272,7 @@ export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeR
   await fs.rm(cacheDirectory, { recursive: true, force: true });
   const outputs = [];
   for (const name of ['heroes', 'bosses', 'enemies', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'astea', ...EVENT_ASSETS]) await processSpriteSheet(name, cacheDirectory, outputs);
+  await processCostumes(cacheDirectory, outputs);
   await processWorldAtlas('worlds', 4, cacheDirectory, outputs);
   await processWorldAtlas('tide-worlds', 2, cacheDirectory, outputs);
   await processWorldAtlas('celestial-world', 1, cacheDirectory, outputs);
@@ -272,6 +282,7 @@ export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeR
   await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.5],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
   await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs);
   await processSmallRelics('shop-items', 3, 1, cacheDirectory, outputs);
+  await processSmallRelics('costume-tickets', 2, 2, cacheDirectory, outputs);
   const sourceBytes = source.reduce((total, item) => total + item.bytes, 0), outputBytes = outputs.reduce((total, item) => total + item.bytes, 0);
   const report = {
     source: { fileCount: source.length, bytes: sourceBytes, files: source },

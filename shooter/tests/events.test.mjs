@@ -25,7 +25,7 @@ test('eight independent weekly rewards persist, exclude inactive events, and can
   assert.equal(p.tickets.length,9);p=createProfile(JSON.parse(JSON.stringify(p)));assert.equal(p.tickets.length,9);
   assert.equal(p.tickets.at(-1).eventDungeon,event.id);assert.equal(p.tickets.at(-1).dungeon,7);
   const next=new Date(2026,8,28);assert.equal(claimDungeon(p,6,'hard',next).count,2);assert.equal(claimDungeon(p,weeklyEvent(next).id,'normal',next).count,1);
-  assert.equal(recordDungeonClear(p,0,0,event.id,'normal'),false);
+  assert.equal(recordDungeonClear(p,0,0,event.id,'normal'),true);
 });
 test('event stages share one mildly harder tier, celestial health rises and base-six health stays fixed',()=>{
   const chaos=combat(5);chaos.spawnWave();const hp=chaos.enemies[0].hp;
