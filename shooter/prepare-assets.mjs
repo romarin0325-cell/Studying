@@ -22,6 +22,133 @@ const FACE_WIDTHS = {
   companions: [.13, .110, .119, .105],
   secrets: [.078, .100, .103, .35]
 };
+// Match eye spacing and face position with uniform scaling. Clothes keep their natural width.
+export const REFERENCE_EYES = Object.freeze({"0":[260,183,307,199],"1":[240,188,285,208],"2":[276,183,321,193],"3":[228,171,277,172],"4":[234,202,273,223],"6":[240,216,283,221]});
+export const COSTUME_REGISTRATION = Object.freeze({
+  "rumi-school": {
+    "hero": 0,
+    "eyes": [
+      278,
+      146,
+      342,
+      174
+    ]
+  },
+  "rumi-sailor": {
+    "hero": 0,
+    "eyes": [
+      260,
+      151,
+      325,
+      176
+    ]
+  },
+  "luna-gothic": {
+    "hero": 1,
+    "eyes": [
+      261,
+      211,
+      325,
+      239
+    ]
+  },
+  "luna-shadowcat": {
+    "hero": 1,
+    "eyes": [
+      229,
+      195,
+      291,
+      224
+    ]
+  },
+  "zeke-paladin": {
+    "hero": 2,
+    "eyes": [
+      306,
+      169,
+      366,
+      179
+    ]
+  },
+  "zeke-yukata": {
+    "hero": 2,
+    "eyes": [
+      306,
+      198,
+      368,
+      211
+    ]
+  },
+  "jasmine-idol": {
+    "hero": 3,
+    "eyes": [
+      275,
+      175,
+      338,
+      175
+    ]
+  },
+  "jasmine-wedding": {
+    "hero": 3,
+    "eyes": [
+      260,
+      159,
+      318,
+      164
+    ]
+  },
+  "snow-snowmaid": {
+    "hero": 4,
+    "eyes": [
+      231,
+      204,
+      294,
+      235
+    ]
+  },
+  "snow-sakurabunny": {
+    "hero": 4,
+    "eyes": [
+      228,
+      203,
+      285,
+      237
+    ]
+  },
+  "night-pajama": {
+    "hero": 6,
+    "eyes": [
+      174,
+      218,
+      245,
+      227
+    ]
+  },
+  "night-longcoat": {
+    "hero": 6,
+    "eyes": [
+      181,
+      227,
+      251,
+      235
+    ]
+  }
+});
+export function costumeLayout(width,height,id) {
+  const entry=COSTUME_REGISTRATION[id];
+  if(!entry)throw new Error('Missing costume registration: '+id);
+  const reference=REFERENCE_EYES[entry.hero],eyes=entry.eyes;
+  const distance=points=>Math.hypot(points[2]-points[0],points[3]-points[1]);
+  const scale=distance(reference)/distance(eyes);
+  const targetWidth=Math.round(width*scale),targetHeight=Math.round(height*targetWidth/width);
+  const scaleX=targetWidth/width,scaleY=targetHeight/height;
+  const left=Math.round((reference[0]+reference[2])/2-(eyes[0]+eyes[2])/2*scaleX);
+  const top=Math.round((reference[1]+reference[3])/2-(eyes[1]+eyes[3])/2*scaleY);
+  if(left<0||top<0||left+targetWidth>512||top+targetHeight>512)throw new Error('Costume would clip: '+id);
+  return {left,top,width:targetWidth,height:targetHeight,scaleX,scaleY,referenceEyes:reference,sourceEyes:eyes};
+}
+
+
 const SHIELD_BOUNDS = [[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
@@ -188,8 +315,11 @@ async function processCostumes(destination, outputs) {
   const sharp = await getSharp();
   for (let index=0; index<COSTUMES.length; index++) {
     const source=await sharp(imagePath(`costumes/${COSTUMES[index].id}`)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
-    if(source.info.width!==512||source.info.height!==512)throw new Error(`Costume size mismatch: ${COSTUMES[index].id}`);
-    await writeRaw(webpPath(destination,'costumes',index),source.data,512,512,ART_WEBP,outputs);
+    const layout=costumeLayout(source.info.width,source.info.height,COSTUMES[index].id);
+    const resized=await sharp(source.data,{raw:{width:source.info.width,height:source.info.height,channels:4}}).resize({width:layout.width,kernel:sharp.kernel.lanczos3}).png().toBuffer();
+    const pixels=await sharp({create:{width:512,height:512,channels:4,background:'#00000000'}}).composite([{input:resized,left:layout.left,top:layout.top}]).raw().toBuffer();
+    await writeRaw(webpPath(destination,'costumes',index),pixels,512,512,ART_WEBP,outputs);
+    outputs.at(-1).registration=layout;
   }
   const fairy=await sharp(imagePath('dark-fairy')).ensureAlpha().raw().toBuffer({resolveWithObject:true});
   if(fairy.info.width!==512||fairy.info.height!==512)throw new Error('Dark fairy size mismatch');
