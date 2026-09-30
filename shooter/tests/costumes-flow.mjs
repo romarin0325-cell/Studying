@@ -113,10 +113,12 @@ try {
           const {game:g,renderer:r,art}=__costumes,image=art.costumes[g.costumeIndex],original=r.c.drawImage;
           let observed;g.player.recoil=.8;g.player.tilt=.1;r.shake=0;
           r.c.drawImage=function(img,x,y,w,h){if(img===image&&w===82){const m=this.getTransform();observed={width:w,height:h,center:[x+w/2,y+h/2],at:[m.e/r.scaleX,m.f/r.scaleY],hit:[g.player.x,g.player.y],canvas:[img.naturalWidth,img.naturalHeight]};}return original.apply(this,arguments);};
-          r.render(g);r.c.drawImage=original;return observed;
+          r.render(g);r.c.drawImage=original;return {...observed,radius:g.player.radius};
         });
         assert.ok(draw,`${costume.id}: actual canvas draw missing`);assert.deepEqual(draw.center,[0,0]);assert.deepEqual(draw.canvas,[512,512]);assert.equal(draw.height,82);
         assert.ok(Math.abs(draw.at[0]-draw.hit[0])<.001&&Math.abs(draw.at[1]-draw.hit[1])<.001,`${costume.id}: body/hitbox drift`);
+        assert.equal(draw.radius,({2:6,4:4,6:4})[costume.hero]||5,`${costume.id}: cosmetic changed the hit radius`);
+        if([1,3,4].includes(costume.hero))await shot('battle-'+costume.id);
         if(index===2)await shot('battle');
         await click('#pause');await click('#return');
       }

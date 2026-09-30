@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sourceHash": "a1657c9bf1bdbe069431727fab900212f732bf3444a343fddae273f6a246561d",
-  "processorHash": "0d2863276fec45e9c3bc7b1014d24098995a92058a7e5053ac8427759c98a58e",
+  "sourceHash": "c6647dc8e29ee697243894469729150d9de22ee6c9e65aa72406e5b87021624a",
+  "processorHash": "1d9609b0bff82c42214e8677c8579a35217d7205800f1579a033d2b2bbc78f9f",
   "report": {
     "source": {
       "fileCount": 42,
-      "bytes": 69374953,
+      "bytes": 72344275,
       "files": [
         {
           "file": "heroes.png",
@@ -134,28 +134,28 @@
         },
         {
           "file": "luna-gothic.png",
-          "bytes": 518357,
-          "sha256": "18a110ef266e42f7eea80a47074b8c200aaa8c61b6b2925adeadaf08fa5386f9"
+          "bytes": 1002009,
+          "sha256": "d6da9e83a861df97cdc992ce0efb70617973e9b586b64cd7024cee48a19485a4"
         },
         {
           "file": "luna-shadowcat.png",
-          "bytes": 407650,
-          "sha256": "bcac2d9626768d198735eed72000a5aed2e61db75f6ca053e0d250e1c379b7fd"
+          "bytes": 930619,
+          "sha256": "5e2bcfc5163f46b27f08f506144bdda3ea05b2594f135e4e285a8793155d37e5"
         },
         {
           "file": "snow-snowmaid.png",
-          "bytes": 425301,
-          "sha256": "1ab77bbf6182286452677d05ec518d719063a57b9c7ec64b6883c652815225cf"
+          "bytes": 951346,
+          "sha256": "a4496a2eee0cebe0be19f9cd7209d34e1c0474eb68532ba2c2153d888af7e2e6"
         },
         {
           "file": "jasmine-idol.png",
-          "bytes": 673358,
-          "sha256": "80548a518028838a3235b823070bc700a9a078c03ce9d1489883328c8d38ebfd"
+          "bytes": 1084603,
+          "sha256": "8d428d1873d3da00e5f820252fdc2b6b0e4db2c692e424afb47a594396c17aee"
         },
         {
           "file": "jasmine-wedding.png",
-          "bytes": 613173,
-          "sha256": "af41716f1b316c35052e69fae271c1cfcd6a33a2c4f0d46578c3f00f932fe42a"
+          "bytes": 1116869,
+          "sha256": "1c51d1c0b63e87cfa97822a2df85f34670dd354f9a1dae2123a5052ce9582ae1"
         },
         {
           "file": "zeke-yukata.png",
@@ -164,8 +164,8 @@
         },
         {
           "file": "snow-sakurabunny.png",
-          "bytes": 358235,
-          "sha256": "75b69fd3f4721aadab125e39137f2d67d8ed88d119e4482f1a7e7c33241f8b8f"
+          "bytes": 879950,
+          "sha256": "7faad60470895b5415c41c0092fc6373c6aaee4e54070205af9d646fc5363b6b"
         },
         {
           "file": "harmonious.png",
@@ -221,7 +221,7 @@
     },
     "output": {
       "fileCount": 113,
-      "bytes": 6094274,
+      "bytes": 6132594,
       "format": "webp",
       "files": [
         {
@@ -739,17 +739,17 @@
         },
         {
           "file": "costumes/5.webp",
-          "bytes": 59584,
+          "bytes": 78072,
           "width": 512,
           "height": 512,
-          "sha256": "c32a46de3a4cd3572ee800bd55a56944428f2bece4ff135bc7b76e910f352325",
+          "sha256": "a144b1aff6dc84f67099792f4b98d5a431190e8a69e6f8a9ce92a141a71eaf22",
           "registration": {
-            "left": 56,
-            "top": 39,
-            "width": 366,
-            "height": 441,
-            "scaleX": 0.7052023121387283,
-            "scaleY": 0.7056,
+            "left": 18,
+            "top": 17,
+            "width": 436,
+            "height": 468,
+            "scaleX": 0.5931972789115646,
+            "scaleY": 0.5931558935361216,
             "referenceEyes": [
               240,
               188,
@@ -757,26 +757,28 @@
               208
             ],
             "sourceEyes": [
-              261,
-              211,
-              325,
-              239
-            ]
+              376,
+              289,
+              449,
+              320
+            ],
+            "sourceFaceWidth": 128,
+            "referenceFaceWidth": 76
           }
         },
         {
           "file": "costumes/6.webp",
-          "bytes": 58004,
+          "bytes": 74850,
           "width": 512,
           "height": 512,
-          "sha256": "8c4049e2c048060acd2aa4abb8eac49c7dbf10b1a29028ccc1f1892731ef9970",
+          "sha256": "fd59336258e0520ccc788d14abac5ae119a58c0c5811f45ef8e1c9e7b4ce14d8",
           "registration": {
-            "left": 76,
-            "top": 47,
-            "width": 302,
-            "height": 436,
-            "scaleX": 0.719047619047619,
-            "scaleY": 0.7194719471947195,
+            "left": 42,
+            "top": 14,
+            "width": 371,
+            "height": 462,
+            "scaleX": 0.5796875,
+            "scaleY": 0.5796737766624843,
             "referenceEyes": [
               240,
               188,
@@ -784,26 +786,28 @@
               208
             ],
             "sourceEyes": [
-              229,
-              195,
-              291,
-              224
-            ]
+              344,
+              301,
+              417,
+              333
+            ],
+            "sourceFaceWidth": 131,
+            "referenceFaceWidth": 76
           }
         },
         {
           "file": "costumes/7.webp",
-          "bytes": 53058,
+          "bytes": 61716,
           "width": 512,
           "height": 512,
-          "sha256": "a8f6d48c6f7bd69da477a4df955cbe0acf4b03ef9302b9ab0f0e3ed5dc6fcff3",
+          "sha256": "39283f1eb884e61543fedd0cb9c3b910b95425e995e014bf609349bfdf230527",
           "registration": {
-            "left": 88,
+            "left": 89,
             "top": 74,
-            "width": 315,
-            "height": 378,
-            "scaleX": 0.63,
-            "scaleY": 0.63,
+            "width": 330,
+            "height": 370,
+            "scaleX": 0.4263565891472868,
+            "scaleY": 0.42675893886966554,
             "referenceEyes": [
               234,
               202,
@@ -811,26 +815,28 @@
               223
             ],
             "sourceEyes": [
-              231,
-              204,
-              294,
-              235
-            ]
+              344,
+              304,
+              429,
+              344
+            ],
+            "sourceFaceWidth": 209,
+            "referenceFaceWidth": 89
           }
         },
         {
           "file": "costumes/8.webp",
-          "bytes": 83758,
+          "bytes": 80960,
           "width": 512,
           "height": 512,
-          "sha256": "822201e1e0093d53282193e51d3aed1f89dbdff9161dc35030077e3186e563a0",
+          "sha256": "13d75546bab5c3d01461c07aa24171053e25e3906a2cda90a77aa677038c4406",
           "registration": {
-            "left": 14,
-            "top": 36,
-            "width": 465,
-            "height": 470,
-            "scaleX": 0.7775919732441472,
-            "scaleY": 0.7768595041322314,
+            "left": 19,
+            "top": 45,
+            "width": 460,
+            "height": 415,
+            "scaleX": 0.5569007263922519,
+            "scaleY": 0.5563002680965148,
             "referenceEyes": [
               228,
               171,
@@ -838,26 +844,28 @@
               172
             ],
             "sourceEyes": [
-              275,
-              175,
-              338,
-              175
-            ]
+              380,
+              228,
+              458,
+              228
+            ],
+            "sourceFaceWidth": 149,
+            "referenceFaceWidth": 83
           }
         },
         {
           "file": "costumes/9.webp",
-          "bytes": 87884,
+          "bytes": 81460,
           "width": 512,
           "height": 512,
-          "sha256": "f3478dbfefdfe4e0963dda40e876e536ffa110342d64e02ea8ad4f44fda4cad7",
+          "sha256": "5f0ecbed0c5749c3b4a6138600da26e9fc8ee9326497aa6738cf608c2f4b414f",
           "registration": {
-            "left": 9,
-            "top": 36,
-            "width": 471,
-            "height": 468,
-            "scaleX": 0.8410714285714286,
-            "scaleY": 0.841726618705036,
+            "left": 32,
+            "top": 52,
+            "width": 433,
+            "height": 403,
+            "scaleX": 0.5537084398976982,
+            "scaleY": 0.5535714285714286,
             "referenceEyes": [
               228,
               171,
@@ -865,11 +873,13 @@
               172
             ],
             "sourceEyes": [
-              260,
-              159,
-              318,
-              164
-            ]
+              359,
+              213,
+              439,
+              217
+            ],
+            "sourceFaceWidth": 150,
+            "referenceFaceWidth": 83
           }
         },
         {
@@ -901,17 +911,17 @@
         },
         {
           "file": "costumes/11.webp",
-          "bytes": 53844,
+          "bytes": 57394,
           "width": 512,
           "height": 512,
-          "sha256": "cf737141522650456ececcdd0178589e2fc4a7002792020611c0806b93ca4cd2",
+          "sha256": "1c0a2755a763b46c345c7484476bd12ddc73b20631608eb009bf034117a498f3",
           "registration": {
-            "left": 82,
-            "top": 66,
-            "width": 331,
-            "height": 388,
-            "scaleX": 0.6673387096774194,
-            "scaleY": 0.6666666666666666,
+            "left": 90,
+            "top": 74,
+            "width": 323,
+            "height": 367,
+            "scaleX": 0.4222222222222222,
+            "scaleY": 0.4223245109321059,
             "referenceEyes": [
               234,
               202,
@@ -919,11 +929,13 @@
               223
             ],
             "sourceEyes": [
-              228,
-              203,
-              285,
-              237
-            ]
+              346,
+              309,
+              430,
+              349
+            ],
+            "sourceFaceWidth": 211,
+            "referenceFaceWidth": 89
           }
         },
         {
@@ -1258,8 +1270,8 @@
       ]
     },
     "reduction": {
-      "bytes": 63280679,
-      "percent": 91.22
+      "bytes": 66211681,
+      "percent": 91.52
     },
     "qualityProbes": [
       {

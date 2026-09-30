@@ -4013,7 +4013,9 @@
             resetWrongWords() {
                 if (['chaos', 'artifact_chaos', 'draft'].includes(this.state.mode)) {
                     this.state.wrongCollocations = [];
+                    this.state.wrongCollocationDetails = {};
                     Storage.remove(Storage.keys.COLLOCATION);
+                    Storage.remove(Storage.keys.COLLOCATION_DETAILS);
                     this.showAlert("숙어/구동사 복습 상태가 초기화되었습니다.");
                     this.openCollocationBook();
                     return;

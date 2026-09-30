@@ -121,7 +121,7 @@ function run() {
           expression,
           exists: item?.expression === expression,
           complete: Boolean(
-            item && item.quizzes.length === 3 &&
+            item && item.quizzes.length === 4 &&
             item.quizzes.every(quiz =>
               quiz.options.length === 4 &&
               new Set(quiz.options).size === quiz.options.length &&
@@ -152,6 +152,17 @@ function run() {
       uniqueVocabWords: new Set(VOCAB_DATA.map(item => item.word.toLowerCase())).size === VOCAB_DATA.length,
       uniqueCollocationIds: new Set(COLLOCATION_DATA.map(item => item.id)).size === COLLOCATION_DATA.length,
       uniqueCollocationExpressions: new Set(COLLOCATION_DATA.map(item => item.expression.trim().toLowerCase())).size === COLLOCATION_DATA.length,
+      collocationEntries: COLLOCATION_DATA.length,
+      collocationQuizCount: COLLOCATION_DATA.reduce((count, item) => count + item.quizzes.length, 0),
+      allCollocationsComplete: COLLOCATION_DATA.every(item =>
+        item.quizzes.length === 4 && item.quizzes.every(quiz =>
+          quiz.options.length === 4 && new Set(quiz.options).size === 4 &&
+          quiz.options.includes(quiz.answer) &&
+          (quiz.question.match(/_______/g) || []).length === 1 &&
+          typeof quiz.translation === 'string' && quiz.translation.length > 0
+        ) && item.quizzes[0].question === item.question && item.quizzes[0].answer === item.answer
+      ),
+      uniqueCollocationPrompts: new Set(COLLOCATION_DATA.flatMap(item => item.quizzes.map(quiz => quiz.question))).size === 520,
       uniqueToeicIds: new Set(TOEIC_DATA.map(item => item.id)).size === TOEIC_DATA.length,
       uniqueToeicQuestionText: new Set(allToeicQuestions).size === allToeicQuestions.length,
       duplicateToeicPairs,
@@ -212,6 +223,10 @@ function run() {
   assert.strictEqual(audit.uniqueVocabWords, true);
   assert.strictEqual(audit.uniqueCollocationIds, true);
   assert.strictEqual(audit.uniqueCollocationExpressions, true);
+  assert.strictEqual(audit.collocationEntries, 130);
+  assert.strictEqual(audit.collocationQuizCount, 520);
+  assert.strictEqual(audit.allCollocationsComplete, true);
+  assert.strictEqual(audit.uniqueCollocationPrompts, true);
   assert.strictEqual(audit.uniqueToeicIds, true);
   assert.strictEqual(audit.uniqueToeicQuestionText, true);
   assert.deepStrictEqual(audit.duplicateToeicPairs, []);
@@ -223,7 +238,41 @@ function run() {
   assert.strictEqual(audit.reviewedToeicExplanationEvidenceMatches, true);
   assert.strictEqual(audit.activeToeicMaxId, 78);
 
-  console.log('Card learning data verification passed (20 vocab pairs, 10 collocations, 9 TOEIC sets / 35 questions).');
+  const indexSource = fs.readFileSync(path.join(cardRoot, 'index.html'), 'utf8');
+  const method = signature => {
+    const start = indexSource.indexOf(signature);
+    assert(start >= 0, `Missing Card method ${signature}`);
+    const end = indexSource.indexOf('\n            },', start);
+    return indexSource.slice(start, end + '\n            }'.length);
+  };
+  const stored = new Map();
+  sandbox.Storage = {
+    keys: { COLLOCATION: 'collocations', COLLOCATION_DETAILS: 'details' },
+    save: (key, value) => stored.set(key, value),
+    remove: key => stored.delete(key)
+  };
+  sandbox.RPG = { state: { wrongCollocations: [], wrongCollocationDetails: {} } };
+  const methods = vm.runInContext(`({${method('buildCollocationQuiz(callback) {')},${method('resetWrongWords() {')}})`, sandbox);
+  let pool;
+  const quiz = methods.buildCollocationQuiz.call({ pickWeighted(items) {
+    pool = items;
+    return items.find(q => q.parentId === 103 && q.question.includes('air-conditioning'));
+  } }, () => {});
+  assert.strictEqual(pool.length, 520, 'Card must offer all four variants');
+  assert.strictEqual(quiz.answer, 'breaks', 'Use the new variant answer, including inflection');
+  quiz.onWrong('brings');
+  assert.deepStrictEqual([...sandbox.RPG.state.wrongCollocations], [103]);
+  assert.strictEqual(sandbox.RPG.state.wrongCollocationDetails[103].answer, 'breaks');
+  for (const mode of ['chaos', 'artifact_chaos', 'draft']) {
+    const state = { mode, wrongCollocations: [103], wrongCollocationDetails: { 103: { answer: 'breaks' } } };
+    stored.set('collocations', [103]); stored.set('details', state.wrongCollocationDetails);
+    methods.resetWrongWords.call({ state, showAlert() {}, openCollocationBook() {} });
+    assert.strictEqual(state.wrongCollocations.length, 0);
+    assert.strictEqual(Object.keys(state.wrongCollocationDetails).length, 0);
+    assert.strictEqual(stored.size, 0, 'Reset must clear both persisted stores');
+  }
+
+  console.log('Card learning data verification passed (130 collocations / 520 quizzes, quiz pool and reset, 20 vocab pairs, 9 TOEIC sets / 35 questions).');
 }
 
 run();

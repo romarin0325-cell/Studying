@@ -22,8 +22,10 @@ const FACE_WIDTHS = {
   companions: [.13, .110, .119, .105],
   secrets: [.078, .100, .103, .35]
 };
-// Match eye spacing and face position with uniform scaling. Clothes keep their natural width.
+// Register to anatomy, never the clothing/weapon alpha box. New art uses bare face width;
+// legacy art retains its approved eye-spacing scale. The eye midpoint is the shared anchor.
 export const REFERENCE_EYES = Object.freeze({"0":[260,183,307,199],"1":[240,188,285,208],"2":[276,183,321,193],"3":[228,171,277,172],"4":[234,202,273,223],"6":[240,216,283,221]});
+export const REFERENCE_FACE_WIDTHS = Object.freeze({1:76,3:83,4:89});
 export const COSTUME_REGISTRATION = Object.freeze({
   "rumi-school": {
     "hero": 0,
@@ -46,20 +48,22 @@ export const COSTUME_REGISTRATION = Object.freeze({
   "luna-gothic": {
     "hero": 1,
     "eyes": [
-      261,
-      211,
-      325,
-      239
-    ]
+      376,
+      289,
+      449,
+      320
+    ],
+    "faceWidth": 128
   },
   "luna-shadowcat": {
     "hero": 1,
     "eyes": [
-      229,
-      195,
-      291,
-      224
-    ]
+      344,
+      301,
+      417,
+      333
+    ],
+    "faceWidth": 131
   },
   "zeke-paladin": {
     "hero": 2,
@@ -82,38 +86,42 @@ export const COSTUME_REGISTRATION = Object.freeze({
   "jasmine-idol": {
     "hero": 3,
     "eyes": [
-      275,
-      175,
-      338,
-      175
-    ]
+      380,
+      228,
+      458,
+      228
+    ],
+    "faceWidth": 149
   },
   "jasmine-wedding": {
     "hero": 3,
     "eyes": [
-      260,
-      159,
-      318,
-      164
-    ]
+      359,
+      213,
+      439,
+      217
+    ],
+    "faceWidth": 150
   },
   "snow-snowmaid": {
     "hero": 4,
     "eyes": [
-      231,
-      204,
-      294,
-      235
-    ]
+      344,
+      304,
+      429,
+      344
+    ],
+    "faceWidth": 209
   },
   "snow-sakurabunny": {
     "hero": 4,
     "eyes": [
-      228,
-      203,
-      285,
-      237
-    ]
+      346,
+      309,
+      430,
+      349
+    ],
+    "faceWidth": 211
   },
   "night-pajama": {
     "hero": 6,
@@ -139,13 +147,13 @@ export function costumeLayout(width,height,id) {
   if(!entry)throw new Error('Missing costume registration: '+id);
   const reference=REFERENCE_EYES[entry.hero],eyes=entry.eyes;
   const distance=points=>Math.hypot(points[2]-points[0],points[3]-points[1]);
-  const scale=distance(reference)/distance(eyes);
+  const scale=entry.faceWidth ? REFERENCE_FACE_WIDTHS[entry.hero]/entry.faceWidth : distance(reference)/distance(eyes);
   const targetWidth=Math.round(width*scale),targetHeight=Math.round(height*targetWidth/width);
   const scaleX=targetWidth/width,scaleY=targetHeight/height;
   const left=Math.round((reference[0]+reference[2])/2-(eyes[0]+eyes[2])/2*scaleX);
   const top=Math.round((reference[1]+reference[3])/2-(eyes[1]+eyes[3])/2*scaleY);
   if(left<0||top<0||left+targetWidth>512||top+targetHeight>512)throw new Error('Costume would clip: '+id);
-  return {left,top,width:targetWidth,height:targetHeight,scaleX,scaleY,referenceEyes:reference,sourceEyes:eyes};
+  return {left,top,width:targetWidth,height:targetHeight,scaleX,scaleY,referenceEyes:reference,sourceEyes:eyes, ...(entry.faceWidth ? {sourceFaceWidth:entry.faceWidth,referenceFaceWidth:REFERENCE_FACE_WIDTHS[entry.hero]} : {})};
 }
 
 

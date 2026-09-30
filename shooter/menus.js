@@ -1,6 +1,7 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
 import { artifactText, ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
+import { MANUAL_TABS, renderManual } from './manual.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function economySnapshot(profile) {
   return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })), costumesOwned:[...profile.costumesOwned], costumesEquipped:{...profile.costumesEquipped}, costumeTickets:{...profile.costumeTickets} };
@@ -44,11 +45,21 @@ export class CampaignUI {
     $('read-first').onclick=()=>this.lecture(lecture,answerScreen,'문제 풀기');$('quiz-now').onclick=answerScreen;
   }
   menu({kind, title, subtitle='', closeId, onClose, tools='', body='', footer='', compact=false}) {
-    this.setModal('<header class="menu-header"><div class="menu-heading"><h2 id="menu-title">'+title+'</h2>'+(subtitle?'<p>'+subtitle+'</p>':'')+'</div><div class="menu-header-actions">'+tools+'<button class="menu-close" id="'+closeId+'" data-dismiss aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header>'+body+(footer?'<footer class="menu-footer">'+footer+'</footer>':''));
-    const panel=document.querySelector('.panel');panel.classList.add('menu-panel',kind+'-panel');if(compact)panel.classList.add('compact-panel');
+    this.setModal('<header class="menu-header"><div class="menu-heading"><h2 id="menu-title">'+title+'</h2>'+(subtitle?'<p>'+subtitle+'</p>':'')+'</div><div class="menu-header-actions">'+tools+'<button class="menu-close" id="'+closeId+'" data-dismiss aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header>'+body+(footer?'<footer class="menu-footer">'+footer+'</footer>':''), {menuKind:kind,compact});
+    const panel=document.querySelector('.panel');
     panel.setAttribute('aria-labelledby','menu-title');$(closeId).onclick=onClose;
   }
   costumeArt(costume) { return this.art.urls.costumes[COSTUMES.findIndex(item=>item.id===costume.id)]; }
+  manual(back=this.closeModal) {
+    this.menu({kind:'manual',title:'비행 매뉴얼',subtitle:'플레이 안내 · 전투 수치 · 밸런스 기준',closeId:'manual-close',onClose:back,
+      body:'<nav class="menu-tabs manual-tabs" aria-label="매뉴얼 분류">'+MANUAL_TABS.map(([id,name])=>'<button data-manual-tab="'+id+'" aria-pressed="'+(id==='guide')+'" class="'+(id==='guide'?'selected':'')+'">'+name+'</button>').join('')+'</nav><article class="menu-scroll manual-content" id="manual-body">'+renderManual()+'</article>',
+      footer:'<button class="primary" id="manual-done">돌아가기</button>'});
+    document.querySelectorAll('[data-manual-tab]').forEach(button=>button.onclick=()=>{
+      document.querySelectorAll('[data-manual-tab]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
+      $('manual-body').innerHTML=renderManual(button.dataset.manualTab);$('manual-body').scrollTop=0;
+    });
+    $('manual-done').onclick=back;
+  }
   lecture(lecture,back,label='도서관으로') {
     const read=this.profile.learning.read=Array.isArray(this.profile.learning.read)?this.profile.learning.read:[];
     if(!read.includes(lecture.id)){read.push(lecture.id);this.save();}
@@ -104,7 +115,17 @@ export class CampaignUI {
       body:'<div class="menu-scroll equipment-list">'+['normal','rare','epic'].map(rarity=>'<section class="relic-section" aria-label="'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+' 아티팩트"><h3><span>'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+'</span><i></i></h3><div class="artifact-grid">'+ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>'<button class="artifact '+(p.equipped.includes(a.id)?'selected ':'')+a.rarity+'" data-artifact="'+a.id+'" '+(p.owned.includes(a.id)?'':'disabled')+' aria-pressed="'+p.equipped.includes(a.id)+'">'+this.relicImage(a.id)+'<b>'+a.name+'</b><small>'+a.text+'</small><em>'+(p.equipped.includes(a.id)?'착용 중':p.owned.includes(a.id)?'보유':'미보유')+'</em></button>').join('')+'</div></section>').join('')+'</div>',
       footer:'<button class="secondary" id="draw-ticket" '+(p.tickets.length?'':'disabled')+'>유물 뽑기 <span>'+p.tickets.length+'장</span></button><button class="primary" id="equipment-done">장착 완료</button>'});
     document.querySelector('.equipment-list').scrollTop=scroll;
-    document.querySelectorAll('[data-artifact]').forEach(b=>b.onclick=()=>{const id=b.dataset.artifact;if(p.equipped.includes(id))p.equipped=p.equipped.filter(a=>a!==id);else if(p.equipped.length<3)p.equipped.push(id);else return this.toast('유물은 세 개까지 장착할 수 있어요');this.save();this.equipment(refresh);});
+    document.querySelectorAll('[data-artifact]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.artifact;
+      if(p.equipped.includes(id))p.equipped=p.equipped.filter(a=>a!==id);
+      else if(p.equipped.length<3)p.equipped.push(id);
+      else return this.toast('유물은 세 개까지 장착할 수 있어요');
+      this.save();
+      const selected=p.equipped.includes(id);
+      b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));
+      b.querySelector('em').textContent=selected?'착용 중':'보유';
+      document.querySelector('.equipment-panel .menu-heading p').textContent='장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+ARTIFACTS.length;
+    });
     $('equipment-done').onclick=exit;
     $('draw-ticket').onclick=()=>{
       if(!p.tickets.length)return;
@@ -201,22 +222,39 @@ export class CampaignUI {
     const p=this.profile,heroes=[0,1,2,3,4,6],exit=()=>{this.closeModal();refresh();};
     if(!heroes.includes(selectedHero))selectedHero=0;
     let previewId=p.costumesEquipped[selectedHero]||null;
+    const variantsFor=hero=>[{id:null,name:'기본 의상',hero},...COSTUMES.filter(c=>c.hero===hero)];
+    const currentPreview=()=>variantsFor(selectedHero).find(c=>c.id===previewId)||variantsFor(selectedHero)[0];
+    this.menu({kind:'wardrobe',title:'의상실',subtitle:'컬렉션 '+p.costumesOwned.length+'/'+COSTUMES.length,closeId:'wardrobe-close',onClose:exit,
+      body:'<nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">'+heroes.map(index=>'<button data-wardrobe-hero="'+index+'">'+HEROES[index].name+'</button>').join('')+'</nav><div class="wardrobe-scene"><div class="wardrobe-orbit" aria-hidden="true"></div><div class="wardrobe-preview"><img class="anchored-art" alt=""></div><div class="wardrobe-caption" aria-live="polite" aria-atomic="true"><small></small><h3></h3><span></span></div></div><div class="wardrobe-variants" aria-label="의상 선택">'+variantsFor(selectedHero).map((c,i)=>'<button data-preview="'+(c.id||'')+'"><small>0'+(i+1)+'</small><b></b><span></span></button>').join('')+'</div>',
+      footer:'<button class="secondary" id="wardrobe-back">돌아가기</button><button class="primary" id="wardrobe-equip"></button>'});
     const render=(hero=selectedHero)=>{
       if(hero!==selectedHero){selectedHero=hero;previewId=p.costumesEquipped[hero]||null;}
-      const variants=[{id:null,name:'기본 의상',hero},...COSTUMES.filter(c=>c.hero===hero)];
-      const preview=variants.find(c=>c.id===previewId)||variants[0],owned=!preview.id||p.costumesOwned.includes(preview.id),equipped=(p.costumesEquipped[hero]||null)===preview.id;
-      this.menu({kind:'wardrobe',title:'의상실',subtitle:'컬렉션 '+p.costumesOwned.length+'/'+COSTUMES.length,closeId:'wardrobe-close',onClose:exit,
-        body:'<nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">'+heroes.map(index=>'<button data-wardrobe-hero="'+index+'" class="'+(index===hero?'active':'')+'" aria-pressed="'+(index===hero)+'">'+HEROES[index].name+'</button>').join('')+'</nav><div class="wardrobe-scene"><div class="wardrobe-orbit" aria-hidden="true"></div><div class="wardrobe-preview"><img class="anchored-art" src="'+(preview.id?this.costumeArt(preview):this.art.urls.heroes[hero])+'" alt="'+HEROES[hero].name+' '+esc(preview.name)+'"></div><div class="wardrobe-caption"><small>'+HEROES[hero].name+'</small><h3>'+esc(preview.name)+'</h3><span>'+(equipped?'현재 착용 중':owned?'보유한 의상':'아직 만나지 못한 의상')+'</span></div></div><div class="wardrobe-variants" aria-label="의상 선택">'+variants.map((c,i)=>'<button data-preview="'+(c.id||'')+'" class="'+(preview.id===c.id?'active':'')+'" aria-pressed="'+(preview.id===c.id)+'"><small>0'+(i+1)+'</small><b>'+esc(c.name)+'</b><span>'+((p.costumesEquipped[hero]||null)===c.id?'착용 중':!c.id||p.costumesOwned.includes(c.id)?'보유':'미보유')+'</span></button>').join('')+'</div>',
-        footer:'<button class="secondary" id="wardrobe-back">돌아가기</button><button class="primary" id="wardrobe-equip" '+(equipped?'disabled':'')+'>'+(equipped?'착용 중':owned?'이 의상 착용':'상점에서 만나기')+'</button>'});
-      document.querySelectorAll('[data-wardrobe-hero]').forEach(b=>b.onclick=()=>render(Number(b.dataset.wardrobeHero)));
-      document.querySelectorAll('[data-preview]').forEach(b=>b.onclick=()=>{previewId=b.dataset.preview||null;render();});
-      $('wardrobe-back').onclick=exit;
-      $('wardrobe-equip').onclick=()=>{
-        if(!owned)return this.shop(refresh);
-        const snap=economySnapshot(p);if(!equipCostume(p,hero,preview.id))return;
-        if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
-        render();
-      };
+      const variants=variantsFor(hero),preview=currentPreview(),owned=!preview.id||p.costumesOwned.includes(preview.id),equipped=(p.costumesEquipped[hero]||null)===preview.id;
+      const image=document.querySelector('.wardrobe-preview img'),src=preview.id?this.costumeArt(preview):this.art.urls.heroes[hero];
+      if(image.getAttribute('src')!==src)image.src=src;
+      image.alt=HEROES[hero].name+' '+preview.name;
+      document.querySelector('.wardrobe-caption small').textContent=HEROES[hero].name;
+      document.querySelector('.wardrobe-caption h3').textContent=preview.name;
+      document.querySelector('.wardrobe-caption span').textContent=equipped?'현재 착용 중':owned?'보유한 의상':'아직 만나지 못한 의상';
+      document.querySelectorAll('[data-wardrobe-hero]').forEach(b=>{const active=Number(b.dataset.wardrobeHero)===hero;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+      document.querySelectorAll('[data-preview]').forEach((b,i)=>{
+        const c=variants[i],active=preview.id===c.id;
+        b.dataset.preview=c.id||'';b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+        b.querySelector('b').textContent=c.name;
+        b.querySelector('span').textContent=(p.costumesEquipped[hero]||null)===c.id?'착용 중':!c.id||p.costumesOwned.includes(c.id)?'보유':'미보유';
+      });
+      $('wardrobe-equip').disabled=equipped;
+      $('wardrobe-equip').textContent=equipped?'착용 중':owned?'이 의상 착용':'상점에서 만나기';
+    };
+    document.querySelectorAll('[data-wardrobe-hero]').forEach(b=>b.onclick=()=>render(Number(b.dataset.wardrobeHero)));
+    document.querySelectorAll('[data-preview]').forEach(b=>b.onclick=()=>{previewId=b.dataset.preview||null;render();});
+    $('wardrobe-back').onclick=exit;
+    $('wardrobe-equip').onclick=()=>{
+      const preview=currentPreview();
+      if(preview.id&&!p.costumesOwned.includes(preview.id))return this.shop(refresh);
+      const snap=economySnapshot(p);if(!equipCostume(p,selectedHero,preview.id))return;
+      if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
+      render();
     };
     render();
   }
