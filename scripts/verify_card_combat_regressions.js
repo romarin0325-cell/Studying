@@ -1041,6 +1041,43 @@ function run() {
     const originalEndPlayerTurnForNewCards = BattleRuntime.TurnManager.endPlayerTurn;
     BattleRuntime.TurnManager.endPlayerTurn = quiet;
 
+    // The two delayed support skills reserve a field only: no damage at either phase.
+    for (const [id,name,field] of [['blessing_tail','홀리블레싱','sanctuary'],['alchemist','은빛마법진','moon_bless']]) {
+      const caster = buildWaveUnit(id, [id], 0);
+      const supportRpg = makeRpg(caster, [id]);
+      const support = caster.skills.find(skill => skill.name === name);
+      BattleRuntime.executeSkill(supportRpg, caster, supportRpg.battle.enemy, support);
+      assert.strictEqual(supportRpg.battle.enemy.hp, 1000);
+      assert.strictEqual(supportRpg.battle.fieldBuffs.length, 0);
+      assert.deepStrictEqual(Array.from(supportRpg.battle.delayedEffects, effect => effect.turn), [2]);
+      supportRpg.battle.turn = 2;
+      supportRpg.battle.isNewTurn = false;
+      BattleRuntime.TurnManager.startPlayerTurn(supportRpg);
+      assert.strictEqual(supportRpg.battle.enemy.hp, 1000);
+      assert.deepStrictEqual(Array.from(supportRpg.battle.fieldBuffs, buff => buff.name), [field]);
+      assert.strictEqual(supportRpg.battle.delayedEffects.length, 0);
+    }
+
+    // Plague applies its random debuff on EACH of five real reserved triggers.
+    const venomCaster = buildWaveUnit('venom', ['venom'], 0);
+    venomCaster.baseCrit = -100;
+    const plagueRpg = makeRpg(venomCaster, ['venom']);
+    plagueRpg.battle.enemy = makeUnit({hp:5000,maxHp:5000,buffs:{}});
+    BattleRuntime.executeSkill(plagueRpg, venomCaster, plagueRpg.battle.enemy, venomCaster.skills.find(skill => skill.name === '플래이그'));
+    assert.strictEqual(plagueRpg.battle.enemy.hp, 5000);
+    assert.deepStrictEqual(Object.keys(plagueRpg.battle.enemy.buffs), []);
+    assert.deepStrictEqual(Array.from(plagueRpg.battle.delayedEffects, effect => effect.turn), [2,3,4,5,6]);
+    for (let turn = 2; turn <= 6; turn++) {
+      // Clear the observed status so a one-time application cannot satisfy later hits.
+      plagueRpg.battle.enemy.buffs = {};
+      plagueRpg.battle.turn = turn;
+      plagueRpg.battle.isNewTurn = false;
+      BattleRuntime.TurnManager.startPlayerTurn(plagueRpg);
+      assert.strictEqual(plagueRpg.battle.enemy.hp, 5000 - (turn - 1) * 100);
+      assert.strictEqual(Object.keys(plagueRpg.battle.enemy.buffs).length, 1);
+      assert.strictEqual(plagueRpg.battle.delayedEffects.length, 6 - turn);
+    }
+
     // Creation Prayer holds both its field and debuff effects until the delayed hit resolves.
     const creationCaster = buildWaveUnit('blue_moon_priest', ['blue_moon_priest'], 0);
     const creationRpg = makeRpg(creationCaster, ['blue_moon_priest']);
@@ -1930,6 +1967,27 @@ function run() {
     assert.strictEqual(Logic.decideEnemyAction(iris, 1).name, '일반 공격');
     assert.strictEqual(randomCalls, 1);
     Math.random = originalRandom;
+
+    // Soul Drain clears current MP (including >100) and deals no HP damage.
+    const soulEndEnemyTurn = BattleRuntime.TurnManager.endEnemyTurn;
+    const soulRandom = Math.random;
+    try {
+      BattleRuntime.TurnManager.endEnemyTurn = quiet;
+      Math.random = () => 0.9;
+      for (const mp of [40,120]) {
+        const victim = makeUnit({mp,maxMp:120});
+        const soulRpg = makeRpg(victim, []);
+        soulRpg.battle.enemy = buildBattleEnemy({state:{mode:'origin',enemyScale:0},getCurrentStageEnemyData:()=>iris});
+        soulRpg.battle.turn = 7;
+        BattleRuntime.TurnManager.startEnemyTurn(soulRpg);
+        assert.strictEqual(victim.mp, 0);
+        assert.strictEqual(victim.maxMp, 120);
+        assert.strictEqual(victim.hp, 1000);
+      }
+    } finally {
+      BattleRuntime.TurnManager.endEnemyTurn = soulEndEnemyTurn;
+      Math.random = soulRandom;
+    }
 
     // Synchronous duplicate commands spend mana and schedule the enemy once.
     scheduledCallbacks.length = 0;

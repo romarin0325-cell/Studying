@@ -33,7 +33,7 @@ vm.runInContext(`
         try { text = SkillDisplay.text(skill,{entity,enemy:ENEMIES.includes(entity)}); }
         finally { Math.random = rng; }
         assert.equal(JSON.stringify(skill),before,'Display mutated '+entity.id+' '+skill.name);
-        assert(!/undefined|NaN|\\[object Object\\]|타입 미확인|\\(x[\\d.]|위력 0배|대미지|생명력|스턴|필드버프/.test(text),entity.id+' '+skill.name+' '+text);
+        assert(!/undefined|NaN|\\[object Object\\]|타입 미확인|\\(x[\\d.]|위력 (?:0)?배|대미지|생명력|스턴|필드버프/.test(text),entity.id+' '+skill.name+' '+text);
         assert(SkillTypes.names[skill.type],entity.id+' '+skill.name);
         assert(SkillDisplay.body(skill,{entity,enemy:ENEMIES.includes(entity)}).length > 0,'Empty body');
         for (const effect of skill.effects || []) effectsSeen.add(effect.type+(effect.condition?':'+effect.condition:''));
@@ -49,6 +49,16 @@ vm.runInContext(`
     assert.equal(SkillDisplay.body(skill('zeke','이그니스스매시')),'위력 2배. 적의 작열을 모두 소모. 소모한 1스택당 배율 +2.');
     assert.equal(SkillDisplay.body(skill('luna','이클립스')),'위력 2.5배. 적이 암흑 상태이면 배율 ×2.');
     assert.equal(SkillDisplay.body(skill('time_ruler','종언의예고')),'3턴 후 위력 5배로 공격 예약. 발동 전에 시전자가 사망하면 예약 취소.');
+    // Literal expectations follow reservation/execution semantics, not formatter output.
+    const cancellation = ' 발동 전에 시전자가 사망하면 예약 취소.';
+    for (const [id,name,field] of [['blessing_tail','홀리블레싱','성역'],['alchemist','은빛마법진','달의축복']]) {
+        const support = skill(id,name);
+        assert.equal(SkillDisplay.body(support),'1턴 후 필드 버프 ‘'+field+'’ 부여 예약.'+cancellation);
+        assert.equal(SkillDisplay.body(buildResolvedDelayedSkill(support,findDelayedSkillEffect(support))),'발동 시 필드 버프 ‘'+field+'’ 부여.');
+    }
+    assert.equal(SkillDisplay.body(skill('venom','플래이그')),'사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancellation);
+    assert.equal(SkillDisplay.body(skill('fireworks_girl','페스티벌나이트')),'사용 후 1·2·3턴에 각각 위력 1.5배로 공격 예약. 각 예약 발동 시 적이 작열 상태이면 배율 ×2.'+cancellation);
+    assert.equal(SkillDisplay.body(skill('blue_moon_priest','창조의기도')),'3턴 후 위력 2배로 공격 예약. 예약 발동 시 필드 버프 ‘성역’ 부여. 예약 발동 시 적에게 디바인 1스택 부여.'+cancellation);
     assert.equal(SkillDisplay.body(skill('grand_merchant','마나콜렉트')),'자신의 MP 30 회복.');
     assert.equal(SkillDisplay.body(skill('gold_dragon','가드')),'자신에게 가드 1턴 부여 (받는 피해 50% 감소).');
     const dream = SkillDisplay.body(skill('trans_lumi','꿈의형태'));
@@ -62,7 +72,7 @@ vm.runInContext(`
     assert.equal(SkillDisplay.body(gray.skills[0],{entity:gray,enemy:true}),'위력 2~4배. 4의 배수 턴에 차원절단과 무작위 선택 (14턴째 제외).');
     const soul = ENEMIES.find(e=>e.id==='iris_love').skills.find(s=>s.name==='소울드레인');
     assert.equal(SkillDisplay.heading(soul,{enemy:true}),'소울드레인 · 마법');
-    assert.equal(SkillDisplay.body(soul,{entity:ENEMIES.find(e=>e.id==='iris_love'),enemy:true}),'적의 MP 100 제거. 7턴째 발동.');
+    assert.equal(SkillDisplay.body(soul,{entity:ENEMIES.find(e=>e.id==='iris_love'),enemy:true}),'적의 현재 MP 전부 제거. 7턴째 발동.');
     const zero = {name:'일반 공격',type:'phy',tier:1,cost:0,val:1,effects:[]};
     assert.equal(SkillDisplay.text(zero),'일반 공격 · 물리 · MP 0 · 1티어\\n위력 1배.');
     assert.equal(SkillDisplay.heading({...zero,cost:undefined,tier:undefined}),'일반 공격 · 물리');
@@ -82,7 +92,10 @@ vm.runInContext(`
     assert.equal(original.cost,30);
     for (const entity of all) for (const skill of entity.skills) {
         const delayed=findDelayedSkillEffect(skill);
-        if (delayed) SkillDisplay.text(buildResolvedDelayedSkill(skill,delayed),{entity});
+        if (delayed) {
+            const resolved=SkillDisplay.text(buildResolvedDelayedSkill(skill,delayed),{entity});
+            assert(!/예약|위력 (?:0)?배|undefined|NaN/.test(resolved),'Resolved trigger must describe execution: '+entity.id+' '+skill.name+' '+resolved);
+        }
     }
     console.log('Card display contract: '+skillsChecked+' skills, '+effectsSeen.size+' effect/condition templates; combat and learning fingerprints unchanged.');
 `,sandbox,{filename:'skill-display-expectations'});

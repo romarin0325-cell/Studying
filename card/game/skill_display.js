@@ -27,7 +27,7 @@ const SkillDisplay = Object.freeze({
         const random = effects.find(e => ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'].includes(e.type));
         const n = v => this.number(v);
         let power = random ? `${n(random.min)}~${n(random.max)}` : (Number.isFinite(skill.val) && skill.val > 0 ? n(skill.val) : '');
-        if (skill.type === 'sup') power = '';
+        if (skill.type === 'sup' || !power) return '';
         if (!delayed) return power ? `위력 ${power}배.` : '';
         if (['delayed_field_buffs', 'delayed_random_unique_field_buffs'].includes(delayed.type)) return '';
         if (['multi_delayed_attack', 'phantom_nightmare'].includes(delayed.type)) {
@@ -63,7 +63,7 @@ const SkillDisplay = Object.freeze({
         const name = id => this.status(id);
         const field = id => this.field(id);
         const pool = (ids, count) => this.pool(ids, count);
-        const trigger = skill.isActualDelayedTrigger ? '발동 시' : '예약 공격 발동 시';
+        const trigger = skill.isActualDelayedTrigger ? '발동 시' : '예약 발동 시';
         switch (effect.type) {
             case 'buff': {
                 const descriptions = {barrier:'물리 피해 무효',magic_guard:'마법 피해 무효',guard:'받는 피해 50% 감소',damage_half:'받는 피해 50% 감소',evasion:'회피율 +50%p'};
@@ -111,17 +111,19 @@ const SkillDisplay = Object.freeze({
             case 'random_mult': return entity && entity.trait && entity.trait.type === 'syn_water_3_ice_age' ? '자신의 특성이 발동 중이면 위력 1~10배' : '';
             case 'random_mult_moon_boost': return `${field('moon_bless')}가 있으면 위력 ${n(effect.min)}~${n(effect.boostMax)}배`;
             case 'delayed_attack': case 'delayed_random_attack': return '';
-            case 'delayed_attack_field': return `${trigger} ${field(effect.field)} 부여`;
+            case 'delayed_attack_field':
+                if (skill.type === 'sup' && !skill.isActualDelayedTrigger) return `${n(effect.turns)}턴 후 ${field(effect.field)} 부여 예약`;
+                return `${trigger} ${field(effect.field)} 부여`;
             case 'delayed_attack_random_field': return `${trigger} 무작위 필드 버프 1종 부여 (${this.list(['sun_bless','moon_bless','sanctuary','goddess_descent','earth_bless','twinkle_party','star_powder','arena'])})`;
             case 'delayed_attack_debuffs': return `${trigger} 적에게 ${this.list(effect.debuffs)} 부여`;
             case 'delayed_attack_debuff_scale': return `${trigger} 적의 디버프 1종당 배율 +${n(effect.multPerDebuff)}`;
             case 'delayed_turn_scale_attack': return `${trigger} 턴 번호 ×${n(effect.scale)}만큼 배율 가산`;
-            case 'phantom_nightmare': return `발동 시 적이 암흑 상태이면 배율 ×${n(effect.darknessMult || 2)}`;
+            case 'phantom_nightmare': return `${skill.isActualDelayedTrigger ? '발동 시' : '각 예약 발동 시'} 적이 암흑 상태이면 배율 ×${n(effect.darknessMult || 2)}`;
             case 'multi_delayed_attack': return '';
-            case 'delayed_field_buffs': return `${skill.isActualDelayedTrigger ? '발동 시' : `${n(effect.turns)}턴 후`} 필드에 ${this.list(effect.buffs)} 부여 예약`;
-            case 'delayed_random_unique_field_buffs': return `${n(effect.turns)}턴 후 현재 없는 필드 버프를 ${pool(effect.pool,effect.count)} 부여 예약 (후보가 부족하면 가능한 수만 부여)`;
+            case 'delayed_field_buffs': return `${skill.isActualDelayedTrigger ? '발동 시' : `${n(effect.turns)}턴 후`} 필드에 ${this.list(effect.buffs)} 부여${skill.isActualDelayedTrigger ? '' : ' 예약'}`;
+            case 'delayed_random_unique_field_buffs': return `${skill.isActualDelayedTrigger ? '발동 시' : `${n(effect.turns)}턴 후`} 현재 없는 필드 버프를 ${pool(effect.pool,effect.count)} 부여${skill.isActualDelayedTrigger ? '' : ' 예약'} (후보가 부족하면 가능한 수만 부여)`;
             case 'mana_restore': return `자신의 MP ${n(effect.val || effect.amount)} 회복`;
-            case 'mana_burn': return `적의 MP ${n(effect.val)} 제거`;
+            case 'mana_burn': return '적의 현재 MP 전부 제거';
             case 'swap_self_stats': return '사용 후 자신의 물리 공격력과 마법 공격력 교환. 물리 방어력과 마법 방어력도 교환';
             case 'remove_random_field_buff': return '필드 버프 무작위 1개 해제';
             case 'random_field_buff': return `필드에 ${pool(effect.pool || ['sun_bless','moon_bless','sanctuary','goddess_descent','earth_bless','twinkle_party','star_powder','arena'],1)} 부여`;
@@ -161,10 +163,16 @@ const SkillDisplay = Object.freeze({
     },
     body(skill, { entity = null, enemy = false } = {}) {
         const parts = [this.power(skill, entity)];
+        const reservation = !skill.isActualDelayedTrigger && findDelayedSkillEffect(skill);
+        const repeated = reservation && ['multi_delayed_attack','phantom_nightmare'].includes(reservation.type);
         if (!skill.isChargeStart) {
             for (const effect of skill.effects || []) {
                 const text = this.effect(effect, skill, entity);
-                if (text) parts.push(text + '.');
+                // Ordinary effects are retained in the resolved skill, so they run
+                // with the reserved hit (and once per hit for repeated reservations).
+                const timing = reservation && !DELAYED_SKILL_EFFECT_TYPES.includes(effect.type)
+                    ? (repeated ? '각 예약 발동 시 ' : '예약 발동 시 ') : '';
+                if (text) parts.push(timing + text + '.');
             }
         }
         if (enemy) {

@@ -90,7 +90,7 @@ try{
   for(const theme of ['strawberry','astra','dreamsky']){
    await page.evaluate(t=>Astra.setTheme(t),theme);
    const prefix=`${theme}-${size.width}x${size.height}`;
-   for(const id of ['night_rabbit_valentine','gold_dragon','rumi','trans_lumi']){
+   for(const id of ['night_rabbit_valentine','gold_dragon','rumi','trans_lumi','blessing_tail','alchemist','venom']){
     await reset(page);await page.evaluate(id=>RPG.showCardInfo(id),id);
     const m=await inspect(page,'#md-skills',prefix+' '+id);
     if(!before)assert(!/\(x[\d.]|MP undefined/.test(m.text));
@@ -155,12 +155,30 @@ try{
    await reset(page);
    const checks=await page.evaluate(()=>{
     const texts=[];RPG.battle.fieldBuffs=[];
+    // Exhaustive formatter comparisons verify wiring; semantic regressions below
+    // use literal expectations independently of SkillDisplay.
     for(const proto of [...GameUtils.getAllCards(),...GameUtils.getBattleOnlyForms()]){
      RPG.showCardInfo(proto.id);
      const expected=[RPG.NORMAL_ATTACK,...proto.skills].map(s=>SkillDisplay.text(s,{entity:proto}));
      const actual=[...document.querySelectorAll('#md-skills .skill-detail')].map(el=>el.innerText);
      if(JSON.stringify(actual)!==JSON.stringify(expected))throw new Error('Card detail renderer '+proto.id);
      RPG.closeModal();
+    }
+    const cancel=' 발동 전에 시전자가 사망하면 예약 취소.';
+    for(const [id,name,expected] of [
+     ['blessing_tail','홀리블레싱','1턴 후 필드 버프 ‘성역’ 부여 예약.'+cancel],
+     ['alchemist','은빛마법진','1턴 후 필드 버프 ‘달의축복’ 부여 예약.'+cancel],
+     ['venom','플래이그','사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancel],
+     ['fireworks_girl','페스티벌나이트','사용 후 1·2·3턴에 각각 위력 1.5배로 공격 예약. 각 예약 발동 시 적이 작열 상태이면 배율 ×2.'+cancel]
+    ]){
+     const body=selector=>[...document.querySelectorAll(selector+' .skill-detail')].find(el=>el.querySelector('b').textContent.startsWith(name+' · '))?.querySelector('.skill-detail-body').textContent;
+     RPG.showCardInfo(id);
+     if(body('#md-skills')!==expected)throw new Error('Card semantic detail '+id);
+     RPG.closeModal();
+     RPG.battle.players=[buildBattlePlayer(RPG,id,0,GameUtils.getAllCards())];
+     RPG.showBattleStat('player',0);
+     if(body('#info-content')!==expected)throw new Error('Player semantic detail '+id);
+     RPG.closeInfoModal();
     }
     for(const mode of ['origin','artifact','puzzle','perfect_plan','dream_corridor'])for(const proto of ENEMIES){
      Object.assign(RPG.state,{mode,enemyScale:35,pendingEnemyStage:35,pendingEnemyId:proto.id});
@@ -169,6 +187,10 @@ try{
      if(/undefined|NaN|\[object Object\]|타입 미확인| · MP |티어|\(x[\d.]/.test(text))throw new Error(mode+' '+enemy.id+' '+text);
      const headings=[...document.querySelectorAll('#info-content .skill-detail-heading')].map(e=>e.textContent);
      enemy.skills.forEach((skill,i)=>{if(headings[i]!==skill.name+' · '+SkillTypes.label(skill.type))throw new Error('Wrong execution type');});
+     if(enemy.id==='iris_love'){
+      const soul=[...document.querySelectorAll('#info-content .skill-detail')].find(el=>el.querySelector('b').textContent==='소울드레인 · 마법');
+      if(soul?.querySelector('.skill-detail-body').textContent!=='적의 현재 MP 전부 제거. 7턴째 발동.')throw new Error('Soul Drain semantic detail '+mode);
+     }
      texts.push({mode,id:enemy.id,text});RPG.closeInfoModal();
     }
     const rng=Math.random;
