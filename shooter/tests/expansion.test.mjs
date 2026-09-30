@@ -11,7 +11,7 @@ function combat(options={}){const g=new Game(options);g.phase='boss';g.player.x=
 test('chain stays silent without targets and reacquires without petal fallback',()=>{const g=combat({hero:3});tick(g,.5);assert.equal(g.shots.length,0);assert.equal(g.stats.shots,0);const e=target(g);tick(g,.06);assert.ok(e.hp<e.maxHp);assert.ok(g.effects.some(f=>f.type==='chain'));});
 test('laser focus resets across a gap and creates no stored beam trails',()=>{const g=combat({weapon:1}),e=target(g);tick(g,2);assert.ok(e.lock>1.8);assert.ok(!g.effects.some(f=>f.type==='beam'));g.move(400,400);tick(g,.5);g.move(225,400);tick(g,.16);assert.ok(e.lock<.3);tick(g,5);assert.equal(e.lock,3.25);});
 test('artifact catalog and legacy effects have live effects and stacking respects three distinct slots',()=>{
-  assert.equal(ARTIFACTS.length,42);assert.deepEqual(['normal','rare','epic'].map(r=>ARTIFACTS.filter(a=>a.rarity===r).length),[22,16,4]);
+  assert.equal(ARTIFACTS.length,50);assert.deepEqual(['normal','rare','epic'].map(r=>ARTIFACTS.filter(a=>a.rarity===r).length),[24,18,6]);
   const base=combat(),e=target(base);base.damage(e,100,0,0);
   for(const [ids,expected] of [[['pendant'],120],[['dragon'],150],[['chocolate'],150]]){const g=combat({artifacts:ids}),t=target(g);if(ids[0]==='pendant')g.power=5;if(ids[0]==='dragon')g.player.lives=1;if(ids[0]==='chocolate')t.miniboss=true;g.damage(t,100,0,0);assert.equal(g.stats.damage,expected);}
   assert.deepEqual(loadoutStats(['frozen','dream','nail']).maxLife,5);assert.equal(loadoutStats(['nail']).maxLife,2);assert.equal(loadoutStats(['nail','crystal']).attack,1.3);

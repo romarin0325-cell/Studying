@@ -11,8 +11,8 @@ const getSharp = async () => sharp ||= (await import('sharp')).default;
 const CACHE_VERSION = 1;
 const GENERATED_ASSETS = path.join(root, 'generated-assets');
 const EVENT_ASSETS = ['harmonious', 'gold-dragon', 'ancient-soul', 'behemoth', 'time-ruler'];
-const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', 'shop-items', 'dark-fairy', 'costume-tickets', ...COSTUMES.map(costume=>`costumes/${costume.id}`), ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
-const OUTPUT_COUNT = 113;
+const ASSET_INPUTS = ['heroes', 'bosses', 'enemies', 'worlds', 'companions', 'secrets', 'sentinels', 'relics', 'tides', 'bloom-fx', 'tide-worlds', 'tide-relics', 'shield-relics', 'astea', 'celestial-relics', 'celestial-world', 'balance-relics', 'astral-relics', 'holy-flame', 'wardrobe-veil', 'shop-items', 'dark-fairy', 'costume-tickets', ...COSTUMES.map(costume=>`costumes/${costume.id}`), ...EVENT_ASSETS.flatMap(name => [name, `${name}-world`])];
+const OUTPUT_COUNT = 121;
 const ART_WEBP = { quality: 88, alphaQuality: 100, effort: 6 };
 const WORLD_WEBP = { quality: 84, alphaQuality: 100, effort: 6 };
 const CHARACTER_KINDS = new Set(['heroes', 'companions', 'secrets']);
@@ -378,8 +378,16 @@ async function processSmallRelics(name, columns, rows, destination, outputs, box
     const left = Math.floor(box[0] * source.width), top = Math.floor(box[1] * source.height);
     const width = Math.floor(box[2] * source.width), height = Math.floor(box[3] * source.height);
     const pixels = cropPixels(source.data, source.width, left, top, width, height);
-    await writeRaw(webpPath(destination, name, index), await resizeRaw(pixels, width, height, 192, 192), 192, 192, ART_WEBP, outputs);
+    const sharp=await getSharp();
+    const resized=await sharp(pixels,{raw:{width,height,channels:4}}).resize(192,192,{fit:'contain',background:'#142036'}).raw().toBuffer();
+    await writeRaw(webpPath(destination, name, index), resized, 192, 192, ART_WEBP, outputs);
   }
+}
+
+async function processEffect(name, destination, outputs) {
+  const sharp=await getSharp();
+  const pixels=await sharp(imagePath(name)).resize(512,512,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).ensureAlpha().raw().toBuffer();
+  await writeRaw(webpPath(destination,name,0),pixels,512,512,ART_WEBP,outputs);
 }
 
 async function qualityProbe() {
@@ -417,10 +425,13 @@ export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeR
   for (const name of EVENT_ASSETS) await processWorldAtlas(`${name}-world`, 1, cacheDirectory, outputs);
   await processTideRelics(cacheDirectory, outputs);
   await processShieldRelics(cacheDirectory, outputs);
-  await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.5],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
+  await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.455],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
   await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs);
   await processSmallRelics('shop-items', 3, 1, cacheDirectory, outputs);
   await processSmallRelics('costume-tickets', 2, 2, cacheDirectory, outputs);
+  await processSmallRelics('astral-relics', 3, 2, cacheDirectory, outputs);
+  await processEffect('holy-flame', cacheDirectory, outputs);
+  await processEffect('wardrobe-veil', cacheDirectory, outputs);
   const sourceBytes = source.reduce((total, item) => total + item.bytes, 0), outputBytes = outputs.reduce((total, item) => total + item.bytes, 0);
   const report = {
     source: { fileCount: source.length, bytes: sourceBytes, files: source },

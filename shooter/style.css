@@ -206,12 +206,4 @@
  .menu-panel .artifact-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.ticket-lineup{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ticket-lineup section{margin:0}
 }
 @media(prefers-reduced-motion:reduce){.panel.menu-panel{animation:none}*{scroll-behavior:auto!important}}
-
-/* The manual uses the same persistent menu shell and scrolls independently. */
-.manual-link{display:block;width:100%;min-height:36px;border:0;background:none;color:#b5c8d8;font-size:11px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-.manual-tabs button{font-size:11px;padding:9px 5px}
-.manual-content{font-size:12px;line-height:1.85;overflow-wrap:anywhere;padding-bottom:22px}
-.manual-section{margin:16px 0 22px}.manual-section h3{font-size:14px;color:#f0d6a7;margin:0 0 9px;text-align:left}.manual-section p{margin:8px 0;color:#c0d1df}.manual-section ol{padding-left:20px}.manual-section li{margin:9px 0}.manual-section b{color:#f3e7d0}
-.manual-detail{border-bottom:1px solid #abc2d32a;padding:10px 0}.manual-detail>summary{cursor:pointer;color:#f1debb;font-size:14px;font-weight:600;padding:8px 0}.manual-detail .manual-section{margin:12px 0 18px}
-.manual-table-wrap{overflow-x:auto;max-width:100%;margin:10px 0}.manual-table-wrap table{width:100%;border-collapse:collapse;font-size:10px;line-height:1.55;font-variant-numeric:tabular-nums}.manual-table-wrap th,.manual-table-wrap td{padding:8px 5px;border-bottom:1px solid #afc4d324;text-align:left;vertical-align:top}.manual-table-wrap th{color:#e0c89e;background:#ffffff05;font-weight:600}.manual-table-wrap td{color:#c8d8e5}.manual-table-wrap tr:last-child td{border-bottom:0}
-.manual-artifact{padding:8px 0;border-bottom:1px solid #ffffff13}.manual-artifact h4{font-size:12px;margin:0;color:#eaddbf}.manual-artifact p{margin:3px 0}.manual-note{font-size:11px;color:#abced1!important}
+.wardrobe-veil{position:absolute;left:-4%;top:-5%;width:108%;height:108%;object-fit:contain;opacity:0;pointer-events:none;z-index:2;filter:drop-shadow(0 5px 12px #7bc1ec33)}

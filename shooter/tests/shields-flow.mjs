@@ -26,8 +26,8 @@ try{
   if(viewport.width===390)assert.ok(geometry.visible>=6,JSON.stringify(geometry));
   await shot(`inventory-${viewport.width}`);checks.push({viewport,...geometry});
  }
- await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.artifact.normal').count(),22);assert.equal(await page.locator('.artifact.rare').count(),16);assert.equal(await page.locator('.artifact.epic').count(),4);
- assert.equal(await page.evaluate(()=>__shields.art.urls.relics.length),42);
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.artifact.normal').count(),24);assert.equal(await page.locator('.artifact.rare').count(),18);assert.equal(await page.locator('.artifact.epic').count(),6);
+ assert.equal(await page.evaluate(()=>__shields.art.urls.relics.length),48);
  for(const id of ['clover','slipper','dew'])await click(`[data-artifact="${id}"]`);
  assert.equal(await page.locator('[data-artifact].selected').count(),3);await shot('selected-relics');await click('#equipment-done');
  await click('#help');assert.ok((await page.locator('.help-list').innerText()).includes('P 세 개'));await click('#help-done');
@@ -56,7 +56,7 @@ try{
   }else{
    await page.evaluate(kind=>Math.random=()=>kind==='vocab'?.2:.8,mode);await click('#quiz-accept');await page.evaluate(()=>Math.random=__originalRandom);
    const prompt=await page.locator('.quiz-prompt').textContent();
-   const answer=mode==='vocab'?LIBRARY.vocab.find(v=>v.w===prompt)?.m:LIBRARY.collocation.find(q=>q.question===prompt)?.answer;assert.ok(answer);
+   const answer=mode==='vocab'?LIBRARY.vocab.find(v=>v.w===prompt)?.m:LIBRARY.collocation.flatMap(entry=>entry.quizzes?.length?entry.quizzes:[entry]).find(q=>q.question===prompt)?.answer;assert.ok(answer);
    const choices=page.locator('[data-answer]'),labels=await choices.allTextContents();const index=labels.findIndex(s=>mode==='vocab'?s===answer:s!==answer);assert.ok(index>=0);
    await choices.nth(index).click();assert.equal(await page.evaluate(()=>__shields.profile.tickets.length),expectedTickets+1);
    await page.evaluate(()=>Math.random=()=>.2);await click('#quiz-continue');

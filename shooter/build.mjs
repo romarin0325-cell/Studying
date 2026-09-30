@@ -23,11 +23,11 @@ for (const [key, val] of Object.entries(manifest)) {
   }
 }
 
-if (assetReport.output.files.length !== 113) {
-  throw new Error(`Asset preprocessing mismatch: expected 113 files, got ${assetReport.output.files.length}`);
+if (assetReport.output.files.length !== 121) {
+  throw new Error(`Asset preprocessing mismatch: expected 121 files, got ${assetReport.output.files.length}`);
 }
-if (requiredUrls.size !== 113) {
-  throw new Error(`Manifest mismatch: expected 113 unique URLs, got ${requiredUrls.size}`);
+if (requiredUrls.size !== 121) {
+  throw new Error(`Manifest mismatch: expected 121 unique URLs, got ${requiredUrls.size}`);
 }
 
 const embeddedMap = {};
@@ -51,8 +51,8 @@ for (const fileInfo of assetReport.output.files) {
   embeddedMap[logicalPath] = dataUrl;
 }
 
-if (Object.keys(embeddedMap).length !== 113) {
-  throw new Error(`Expected exactly 113 embedded assets, but got ${Object.keys(embeddedMap).length}`);
+if (Object.keys(embeddedMap).length !== 121) {
+  throw new Error(`Expected exactly 121 embedded assets, but got ${Object.keys(embeddedMap).length}`);
 }
 
 for (const url of requiredUrls) {
@@ -67,10 +67,10 @@ const embeddedAssetsScript = `globalThis.ASTRAL_EMBEDDED_ASSETS=${JSON.stringify
 // 4. Bundle JavaScript modules.
 const modules = [
   ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'EVENT_DUNGEONS', 'LIMITS', 'clamp']],
-  ['meta.js', ['ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','COSTUMES','COSTUME_TIERS','ACHIEVEMENTS','normalizeDifficulty','RANDOM_DAILY_LIMIT','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','costumeForHero','equipCostume','drawCostumeTicket','purchaseCostume','heroAvailable','unlockHero','claimDungeon','drawArtifact','purchaseShopItem','useRandomResetTicket','loadoutStats']],
+  ['meta.js', ['ARTIFACTS','COLLECTIBLE_ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','COSTUMES','COSTUME_TIERS','ACHIEVEMENTS','normalizeDifficulty','RANDOM_DAILY_LIMIT','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','costumeForHero','equipCostume','drawCostumeTicket','purchaseCostume','heroAvailable','unlockHero','claimDungeon','drawArtifact','purchaseShopItem','useRandomResetTicket','loadoutStats']],
   ['art-manifest.js', ['createArtUrls']],
   ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']],
-  ['manual-data.js',['MANUAL_BALANCE']], ['manual.js',['MANUAL_TABS','renderManual']], ['menus.js',['CampaignUI']],
+  ['menus.js',['CampaignUI']],
   ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt', 'BOSS_PRESENTATION']],
   ['audio.js', ['AudioDirector']], ['app.js', []]
 ];
@@ -109,4 +109,4 @@ await fs.writeFile(destination, html);
 await fs.rm(path.join(dist, 'assets'), { recursive: true, force: true });
 await fs.rm(path.join(dist, 'asset-report.json'), { force: true });
 
-console.log(`Offline single-file game: ${destination} (${(htmlBytes / 1024 / 1024).toFixed(2)} MiB HTML, 113 WebP assets embedded; cache ${assetReport.cache.hit ? 'hit' : 'regenerated'})`);
+console.log(`Offline single-file game: ${destination} (${(htmlBytes / 1024 / 1024).toFixed(2)} MiB HTML, 121 WebP assets embedded; cache ${assetReport.cache.hit ? 'hit' : 'regenerated'})`);

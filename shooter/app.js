@@ -31,7 +31,9 @@ const sortieScroll={top:0,roster:0};
 function costumeIndex(hero) { const costume=costumeForHero(profile,hero);return costume?COSTUMES.findIndex(item=>item.id===costume.id):-1; }
 function heroArtUrl(hero) { const index=costumeIndex(hero);return index<0?art.urls.heroes[hero]:art.urls.costumes[index]; }
 function bombDetails(index,active=false) {
-  return (active && game ? game.artifacts.has('sun') : profile.equipped.includes('sun')&&profile.owned.includes('sun')) ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
+  const has=id=>active&&game?game.artifacts.has(id):profile.equipped.includes(id)&&profile.owned.includes(id);
+  if(has('holyflame'))return {bomb:'홀리플레임',bombInfo:'모든 적에게 기본 피해 5500 · 무적 2초. 남은 봄을 모두 소모하고 파워와 누적 P를 초기화해요.'};
+  return has('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
 }
 function powerRequirement(index=chosenHero) { return ([0,7].includes(index)?4:3)-(profile.equipped.includes('dew')?1:0); }
 function save() {
@@ -106,7 +108,6 @@ function showSortie() {
     <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/${RANDOM_DAILY_LIMIT}회 남음 · 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능. 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
          <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons" class="${chosenChallenge?'challenge-route':''}" ${chosenChallenge?`style="--route-art:url('${art.urls.worlds[6]}')"`:''}><small>${chosenChallenge?'챌린지':'던전'} · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${chosenChallenge?'챌린지':stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="shop"><small>꿈의결정 ${profile.dreamShards}</small><b>상점</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
     <button class="launch" id="launch">${chosenChallenge?'챌린지':stage.name} 출격<span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'THREE STAGES'}</span><b>→</b></button>
-    <button class="manual-link" id="manual">게임 매뉴얼 · 캐릭터와 스테이지 수치</button>
     <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'BEST '+Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
   </section>`;
   screen.querySelectorAll('[data-hero]').forEach(b => b.onclick = () => menus.chooseHero(Number(b.dataset.hero),()=>{ chosenRandom = false; chosenHero = Number(b.dataset.hero); chosenWeapon = 0; save(); showSortie(); }));
@@ -116,7 +117,6 @@ function showSortie() {
   $('equipment').onclick=()=>menus.equipment(showSortie);$('shop').onclick=()=>menus.shop(showSortie);$('library').onclick=()=>menus.library();
   $('wardrobe-hotspot').onclick=()=>menus.wardrobe(showSortie,chosenHero);
   $('help').onclick = () => showHelp(false);$('achievements').onclick=()=>menus.achievements();
-  $('manual').onclick=()=>menus.manual();
   $('random-hero').onclick=()=>{chosenRandom=true;save();showSortie();};
   syncFullscreen();$('fullscreen').onclick=toggleFullscreen;
   $('launch').onclick = () => { audio.start(); if (!saved.tutorial) showHelp(true); else startGame(); };
@@ -176,7 +176,7 @@ function handleEvent(event) {
   }
   if (event.type === 'warning') { audio.boss = true; announce('GUARDIAN APPROACHING', STAGES[game.stageIndex].boss, `“${game.stage.intro}”`, 2900); }
   if (event.type === 'pattern') { $('pattern-name').textContent = event.name; if (event.phase > 0) toast(`✧ ${event.name}`); }
-  if (event.type === 'bomb') announce('ASTRAL BLOOM', event.corona?'코로나':HEROES[event.hero].bomb, '', 1800, true);
+  if (event.type === 'bomb') announce('ASTRAL BLOOM', event.holyflame?'홀리플레임':event.corona?'코로나':HEROES[event.hero].bomb, '', 1800, true);
   if (event.type === 'powerup') toast(`✦ SHOT POWER ${game.power}`);
   if (event.type === 'heal') toast('♡ 생명 회복');
   if (event.type === 'bossDefeated') { audio.boss = false; announce('SKY LIBERATED', '하늘을 되찾았어요', `“${game.stage.outro}”`, 3000); }
@@ -247,9 +247,9 @@ function showStageQuiz(kind) {
   }),()=>void resolveStageQuiz());
 }
 function offerRevive() {
-  hideAnnouncement();if(game.reviveUsed)return finish(false);
+  hideAnnouncement();if(game.reviveRemaining<=0)return finish(false);
   const revivePower = !game.challenge && (game.artifacts.has('resurgence') || game.artifacts.has('miracle'));
-  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 기회는 한 번뿐이에요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}${revivePower?' 파워는 최대가 돼요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
+  setModal(`<span class="small-caps">ONE MORE FLIGHT</span><h2>한 번 더 날아볼까요?</h2><p class="intro-copy">문법 문제를 맞히면 생명 ${!game.challenge&&game.artifacts.has('resurgence')?game.maxLife:Math.min(2,game.maxLife)}으로 부활해요.<br>${game.challenge?'챌린지 전체':'던전 도전'}에서 남은 부활 기회는 ${game.reviveRemaining}회예요.${!game.challenge&&game.artifacts.has('miracle')?' 부활하면 봄 5개도 얻어요.':''}${revivePower?' 파워는 최대가 돼요.':''}</p><button class="primary" id="revive-quiz">문법으로 다시 일어나기</button><button class="secondary" id="revive-decline">이번 비행 마치기</button>`);
   $('revive-decline').onclick=()=>{game.revive(false);finish(false);};
   $('revive-quiz').onclick=()=>menus.quiz('grammar','다시 피어나는 별',correct=>{if(game.revive(correct))continueFlight();else finish(false);});
 }
