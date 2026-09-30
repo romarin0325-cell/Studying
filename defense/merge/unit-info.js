@@ -1,5 +1,5 @@
 import {HERO} from './content.js';
-import {combatStats,bestUnit,has,unitEconomy,trainingBonus} from './engine.js';
+import {combatStats,bestUnit,has,unitEconomy,trainingBonus,skillDuration,unitForm} from './engine.js';
 
 export const number=n=>Number(n.toFixed(1)).toLocaleString('ko-KR');
 export function inspection(s,id,selected){
@@ -15,7 +15,13 @@ export function attackDescription(s,u,stats=combatStats(s,u)){
     zeke:`전방 90° 베기 · 3초간 화상 ${n(.23*burn)}/초`,
     rumi:`폭 ${h.radius} 관통 · 같은 성급의 모든 동료와 합성 가능`,
     luna:`보스 타격 ${n(1.35*boss)} · 처형 시 일반 ${n(2)} / 보스 ${n(2.7*boss)} (체력 35% / 40% 이하)`,
-    cinderella:unitEconomy(s,u),
+    cinderella:`세 번째 공격은 ${n(1.8)} 방어 무시 피해`,
+    doom:unitEconomy(s,u),
+    santa:`반경 ${h.radius} 포격 · 네 번째 명중은 상하좌우 공격 대기 −${number(.6+level*.1)}초`,
+    jasmine:`성광 6초 · 최대 3중첩 · 3중첩 대상 ${n(1.65)} 피해`,
+    star_boy:`다섯 번째 공격은 ${n(2.2)} 피해`,
+    time_magician:`폭 ${h.radius} 관통 · 세 번째 명중은 상하좌우 공격 대기 −${number(.6+level*.1)}초${unitForm(s,u)?` · 트라우마 ${Math.ceil(s.buffs.trauma)}초 · 방어 무시`:''}`,
+    cherry_prince:`보스 ${n(1.25*boss)} 피해 · 화상 / 성광 3중첩: 일반 ${n(1.6)} / 보스 ${n(2*boss)}`,
     snow_rabbit:`반경 ${h.radius} 폭발 · 2.4초간 40% 감속`,
     avalanche_maid:`반경 ${h.radius} 폭발 · 감속 중인 적에게 ${n(1.75)} 피해`,
     night_rabbit:`추가 ${1+extra}명에게 ${n(.65)} 도탄 · 도탄 거리 ${h.radius}`,
@@ -43,10 +49,16 @@ export function skillDescription(s,id){
   const descriptions={
     inferno:`전장 전체 ${n(6)} 피해 · 5초간 화상 ${n(.6*burn)}/초`,
     dragon:`전장 전체 ${n(8)} 피해 · 5초간 화상 ${n(.6*burn)}/초`,
-    echo:'8초 동안 모든 동료가 65% 위력의 추가 공격',
-    haste:'8초 동안 모든 동료 공격속도 +65%',
-    awaken:'10초 동안 모든 동료 타격 위력 +70%',
-    march:'6초 동안 모든 동료 공격속도 +40% · 은토끼 추가 별빛 2배',
+    echo:`${skillDuration(s,8)}초 동안 모든 동료가 65% 위력의 추가 공격`,
+    haste:`${skillDuration(s,8)}초 동안 모든 동료 공격속도 +65%`,
+    awaken:`${skillDuration(s,10)}초 동안 모든 동료 타격 위력 +70%`,
+    march:`${skillDuration(s,6)}초 동안 모든 동료 공격속도 +40% · 은토끼 추가 별빛 2배`,
+    glassfall:`전장 전체 ${n(8)} 방어 무시 피해`,
+    gift:`무작위 동료 1명 2성 합류 · ${skillDuration(s,6)}초 동안 전체 공속 +30%`,
+    goddess:`전장 전체 ${n(5)} 피해 · 성광 3중첩 · ${skillDuration(s,8)}초 동안 전체 위력 +35%`,
+    trauma:`전장 전체 ${n(4)} 피해 · ${skillDuration(s,10)}초 트라우마 변신: 타격 위력 +110% · 공속 +35% · 일반 공격 방어 무시`,
+    starfall:`최대 체력 1위 한 명 · 1.2초 후 ${n(32*(has(s,'royal_seal')?1.25:1))} 피해 · 시전 시 표적 고정`,
+    royal:`최대 체력 1위 한 명 · 1.05초 후 방어 무시: 일반 ${n(34*(has(s,'royal_seal')?1.25:1))} / 보스 ${n(42.5*boss*(has(s,'royal_seal')?1.25:1))} · 화상 / 성광 3중첩이면 +40%`,
     freeze:`전장 전체 ${n(2)} 피해 · 3초 기절 · 6초간 50% 감속`,
     avalanche:`전장 전체 ${n(6)} 피해 (기절 중 ${n(12)}) · 4초간 50% 감속`,
     combust:`전장 전체 ${n(4)} 피해 (화상 중 ${n(10)}) · 6초간 화상 ${n(.65*burn)}/초`,
@@ -69,6 +81,6 @@ export function trainingPreview(s,id){
   const {unit,stats,deployed}=inspection(s,id),level=s.upgrades[id]||0;
   const next=level<5?combatStats({...s,upgrades:{...s.upgrades,[id]:level+1}},unit,s.board.indexOf(unit)):null;
   return {rank:unit.rank,deployed,damage:stats.damage,nextDamage:next?.damage,
-    bonus: ['cinderella','queen','mushroom_king'].includes(id)?unitEconomy(s,unit):trainingBonus(id,level),
-    nextBonus:next?(['cinderella','queen','mushroom_king'].includes(id)?unitEconomy({...s,upgrades:{...s.upgrades,[id]:level+1}},unit):trainingBonus(id,level+1)):''};
+    bonus: ['doom','queen','mushroom_king'].includes(id)?unitEconomy(s,unit):trainingBonus(id,level),
+    nextBonus:next?(['doom','queen','mushroom_king'].includes(id)?unitEconomy({...s,upgrades:{...s.upgrades,[id]:level+1}},unit):trainingBonus(id,level+1)):''};
 }

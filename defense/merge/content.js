@@ -6,8 +6,8 @@ export const DEFAULT_DECK = ['zeke','snow_rabbit','rumi','siren','queen','cinder
 // Supplied by the author in 컨셉.txt, 2026-09-27. Height refers to anatomy;
 // ears, hats, halos, weapons and trailing fabric are excluded.
 export const HEIGHT_GROUPS = {
-  tall:['zeke','lightning_sage','storm_sage','flame_sage','red_dragon','ancient_dragon'],
-  medium:['rumi','luna','cinderella','avalanche_maid','mushroom_king','great_detective','siren','queen','galaxy_whale','time_ruler'],
+  tall:['zeke','lightning_sage','storm_sage','flame_sage','red_dragon','ancient_dragon','cherry_prince'],
+  medium:['rumi','luna','cinderella','avalanche_maid','mushroom_king','great_detective','siren','queen','galaxy_whale','time_ruler','doom','santa','jasmine','star_boy','time_magician'],
   short:['guardian','snow_rabbit','night_rabbit','silver_rabbit','phantom'],
 };
 
@@ -27,9 +27,9 @@ export const HEROES = [
   h('luna','루나','달그늘의 암살자','#c5a0ff','heroes',1,32,1.25,'blade',
     {type:'execute',text:'체력이 35% 이하인 적에게 두 배의 피해를 줍니다.'},
     {name:'제노사이드 스텝',cost:80,type:'execute',text:'보스 우선 최대 5명에게 위력 16배. 체력 35% 이하(보스 40%)면 30배. 보스 추가 피해도 적용됩니다.'}),
-  h('cinderella','신데렐라','한밤의 기적','#f7a5cc','heroes',2,12,1.15,'star',
-    {type:'sacrifice',text:'합성 재료가 되면 등급당 18골드를 즉시 얻습니다.'},
-    {name:'자정의 선물',cost:60,type:'fortune',text:'별비로 적을 타격하고 25골드를 얻습니다.'}),
+  h('cinderella','신데렐라','한밤의 기적','#f7a5cc','heroes',2,23,1.05,'star',
+    {type:'miracle',text:'세 번째 공격은 위력 1.8배의 유리 별탄으로 적의 방어를 무시합니다.'},
+    {name:'자정의 기적',cost:65,type:'glassfall',text:'전장의 적들에게 위력 8배의 방어 무시 유리 별비를 내립니다.'}),
   h('snow_rabbit','눈토끼','겨울의 작은 발자국','#9bdfef','companions',0,10,.95,'ice',
     {type:'slow',text:'눈송이가 적을 느리게 합니다. 토끼 동료와 함께하면 공격이 빨라집니다.'},
     {name:'하얀 숨결',cost:65,type:'freeze',text:'모든 적을 3초 동안 얼리고 얼음 피해를 줍니다.'}),
@@ -81,6 +81,24 @@ export const HEROES = [
   h('time_ruler','시간의지배자','멈춘 시계의 여왕','#c4bcf4','time-ruler',0,15,1.1,'time',
     {type:'chrono',text:'명중한 적의 이동을 짧게 늦춥니다.'},
     {name:'아직 오지 않은 순간',cost:90,type:'rewind',text:'모든 적을 기본 이동 거리 6초분만큼 뒤로 보내고 2초 동안 멈춥니다.'}),
+  h('doom','둠','웃음 뒤의 계약','#ad97da','',0,16,1.2,'shadow',
+    {type:'sacrifice',text:'합성 재료가 되면 등급당 18골드. 훈련마다 등급당 +4골드.'},
+    {name:'왕궁의 암거래',cost:60,type:'fortune',text:'전장 전체에 위력 3배의 암흑검. 즉시 25골드를 얻습니다.'}),
+  h('santa','산타','성야의 배달부','#f7b994','',0,13,1.05,'gift',
+    {type:'gift',text:'네 번째 공격마다 상하좌우 동료의 공격 대기를 0.6초 앞당깁니다.'},
+    {name:'한밤의 선물',cost:75,type:'gift',text:'편성 동료 한 명이 2성으로 합류하고 6초간 모든 동료의 공격속도 +30%.'}),
+  h('jasmine','자스민','빛을 모으는 왕녀','#ffe6a5','',0,20,1.15,'light',
+    {type:'divine',text:'명중마다 성광을 쌓습니다. 성광 3중첩 대상에게 위력 +65%.'},
+    {name:'여신강림',cost:80,type:'goddess',text:'전장 전체 위력 5배 피해와 성광 3중첩. 8초간 모든 동료 위력 +35%.'}),
+  h('star_boy','별똥별소년','소원을 가르는 유성','#7eddfa','',0,17,.65,'comet',
+    {type:'starfall',text:'다섯 번째 유성탄은 위력 2.2배. 멀리 있는 적도 빠르게 타격합니다.'},
+    {name:'소원을 담은 별',cost:75,type:'starfall',text:'최대 체력이 가장 높은 적 한 명을 추적해 위력 32배의 유성을 떨어뜨립니다.'}),
+  h('time_magician','시간의마술사','부서진 동화의 주인','#e093df','',0,18,1.35,'time',
+    {type:'accelerate',text:'세 번째 관통마다 상하좌우 동료의 공격 대기를 0.6초 앞당깁니다.'},
+    {name:'트라우마 · 어둠의 신데렐라',cost:80,type:'trauma',text:'전장 전체 위력 4배 피해. 배치된 시간의마술사들이 10초간 트라우마로 변신: 위력 +110%, 공속 +35%, 방어 무시.'}),
+  h('cherry_prince','체리프린스','붉은 약속의 왕자','#ffacc4','',0,36,1.5,'blade',
+    {type:'regal',text:'보스 피해 +25%. 화상 또는 성광 3중첩 대상에게 위력 +60%.'},
+    {name:'체리 블로섬 · 왕자의 일격',cost:85,type:'royal',text:'최대 체력이 가장 높은 적 한 명에게 위력 34배의 방어 무시 검격. 화상·성광 3중첩이면 1.4배.'}),
 ];
 export const HERO = Object.fromEntries(HEROES.map(x=>[x.id,x]));
 // Rumi's summoned world: Defense roles and play feel take precedence over source lore.
@@ -88,7 +106,7 @@ const roles = {
   zeke:['선봉 · 부채꼴','cleave',345,90,'전방 90°를 함께 베어 화상을 남깁니다.'],
   rumi:['합성 · 관통 별','beam',440,24,'일직선 관통. 같은 등급의 모든 동료와 합성합니다.'],
   luna:['보스 처형 · 단일','single',340,0,'보스 우선 · 보스 피해 +35%. 체력 35% 이하(보스 40%)면 기본 공격 두 배.'],
-  cinderella:['합성 경제 · 별탄','single',440,0,'재료로 소모되면 1성 18G · 2성 36G 즉시 환급. 강화마다 등급당 +4G. 루미가 재료면 환급 없음.'],
+  cinderella:['기적 연타 · 별탄','single',480,0,'세 번째 공격은 위력 1.8배 · 방어 무시.'],
   snow_rabbit:['감속 · 작은 폭발','splash',450,48,'작은 눈보라가 주변 적을 40% 감속합니다.'],
   avalanche_maid:['빙결 연계 · 포격','splash',560,100,'넓은 얼음 파편. 감속 중인 적에게 피해 +75%.'],
   night_rabbit:['토끼 연계 · 도탄','bounce',390,135,'두 적 사이를 튑니다. 다른 토끼 종류마다 공격속도 +20%.'],
@@ -106,6 +124,12 @@ const roles = {
   silver_rabbit:['별빛 지원 · 관통광','beam',500,22,'관통 공격이 별빛을 충전. 강화마다 추가 별빛 +0.1.'],
   ancient_dragon:['인접 지원 · 십자광','cross',620,55,'자신의 행·열을 관통. 상하좌우 동료 공격력 +25%, 강화마다 +3%p.'],
   time_ruler:['시간 제어 · 시계장','zone',490,72,'3초의 시간장을 남겨 25% 감속. 강화마다 감속 +3%p.'],
+  doom:['합성 경제 · 관통검','beam',450,22,'재료로 소모되면 1성 18G · 2성 36G 환급. 강화마다 등급당 +4G. 루미가 재료면 환급 없음.'],
+  santa:['선물 지원 · 포격','splash',510,56,'네 번째 공격마다 상하좌우 동료 공격 대기 −0.6초. 강화마다 −0.1초 추가.'],
+  jasmine:['성광 연계 · 빛의 파동','splash',510,60,'6초 성광 누적. 3중첩 적에게 위력 +65%. 체리프린스와 연계.'],
+  star_boy:['강적 추적 · 유성탄','single',650,0,'빠른 유성 연사. 다섯 번째 공격은 위력 2.2배.'],
+  time_magician:['시간 가속 · 관통침','beam',520,28,'세 번째 관통마다 상하좌우 공격 대기 −0.6초. 강화마다 −0.1초 추가. 필살기 중 트라우마로 변신.'],
+  cherry_prince:['강적 결전 · 검광','single',590,0,'보스 피해 +25%. 화상 또는 성광 3중첩 대상에게 위력 +60%.'],
 };
 for(const hero of HEROES){
   hero.heightGroup=Object.entries(HEIGHT_GROUPS).find(([,ids])=>ids.includes(hero.id))[0];
@@ -115,6 +139,8 @@ for(const hero of HEROES){
 }
 HERO.luna.bossDamage=1.35;
 HERO.great_detective.bossDamage=1.25;
+HERO.cherry_prince.bossDamage=1.25;
+export const TRANSFORM_ART={trauma:{atlas:'unit-trauma',row:0,columns:2,foot:480/512,scale:1,directional:true,portrait:PORTRAIT_FRAMES.trauma}};
 export const ARTIFACTS = [
   ['hourglass','별모래 시계','합성할 때 별빛을 8 더 얻습니다.'],
   ['ember','불씨의 심장','화상 피해 +60%. 불바닥 동행과 함께하세요.'],
@@ -136,7 +162,11 @@ export const ARTIFACTS = [
   ['constellation','삼중 성좌','서로 다른 동료 3종 이상과 인접하면 공격력 +65%.'],
   ['alchemy','별빛 연금술','합성할 때 합성 결과 영웅 위력 150%로 모든 적 타격.'],
   ['orbit','별바다의 궤도','3등급 이상 공격마다 명중 지점에 2초 별장판. 0.5초마다 위력 15% 피해.'],
-].map(([id,name,text],icon)=>({id,name,text,icon,rarity:icon<10?'common':icon<16?'rare':'epic',color:icon<10?'#bbd5cc':icon<16?'#86c8ee':'#c9a0f5'}));
+  ['tempo_bell','첫막의 종','매 물결의 첫 7초 동안 모든 동료 공격속도 +45%.'],
+  ['royal_seal','결전의 인장','최대 체력이 가장 높은 생존 적에게 주는 피해 +25%.'],
+  ['gift_ribbon','기적의 리본','매 4번째 유료 소환은 2성으로 등장. 무료 소환은 횟수에서 제외.'],
+  ['broken_clock','깨진 시간의 보석','필살기의 동료 강화와 트라우마 변신 지속시간 +2초.'],
+].map(([id,name,text],icon)=>({id,name,text,icon:icon<20?icon:icon-20,atlas:icon<20?'relics':'relics-expansion',rarity:icon<10?'common':icon<16||icon===20||icon===21?'rare':'epic',color:icon<10?'#bbd5cc':icon<16||icon===20||icon===21?'#86c8ee':'#c9a0f5'}));
 export const ARTIFACT = Object.fromEntries(ARTIFACTS.map(x=>[x.id,x]));
 export const validArtifacts=ids=>Array.isArray(ids)&&ids.length<=3&&new Set(ids).size===ids.length&&ids.every(id=>!!ARTIFACT[id]);
 export const BLESSINGS = [
@@ -153,6 +183,9 @@ export const CHAPTERS = [
   {id:1,name:'잠든 숲의 노래',caption:'독과 생명의 경계',color:'#a9bd80',bosses:['flora','artificial_demon','flora'],hp:1.3,world:3},
   {id:2,name:'푸른 심연',caption:'폭풍 아래의 약속',color:'#82aec7',bosses:['poseidon','love_iris','poseidon'],hp:1.65,world:4},
   {id:3,name:'황혼의 왕좌',caption:'마지막 성좌',color:'#c799ba',bosses:['curse_iris','beelzebub','beelzebub'],hp:2.05,world:5},
+  {id:4,name:'뇌명의 첨탑',caption:'번개가 고른 자리에서 벗어나세요',color:'#96c9f3',bosses:['thor','poseidon','thor'],hp:2.35,world:6,background:0},
+  {id:5,name:'전쟁신의 성채',caption:'가장 강한 일격으로 도전을 끊으세요',color:'#edab94',bosses:['ares','beelzebub','ares'],hp:2.7,world:7,background:1},
+  {id:6,name:'창세의 성원',caption:'모든 별의 시작을 향하여',color:'#dbc5fc',bosses:['thor','ares','astea'],hp:3.05,world:8,background:2},
 ];
 export const BOSSES = {
   artificial_demon:{name:'인조마신',color:'#8ee8ee',pattern:'seal',warning:'마력 봉인 · 한 행 3.2초 봉인',frame:0},
@@ -161,11 +194,20 @@ export const BOSSES = {
   flora:{name:'꽃의 여신 플로라',color:'#c9dd8d',pattern:'heal',warning:'생명의 개화 · 체력 14% 회복',frame:3},
   poseidon:{name:'해신 포세이돈',color:'#77c9e3',pattern:'rush',warning:'밀려오는 해일 · 적 전진',frame:4},
   beelzebub:{name:'마신 벨제뷔트',color:'#dfa590',pattern:'seal',warning:'붕괴의 문장 · 한 행 3.2초 봉인',frame:5},
+  thor:{name:'뇌신 토르',color:'#a9dcff',pattern:'storm',warning:'신벌의 낙뢰 · 빛나는 3칸에서 이동하세요',atlas:'bosses-expansion',frame:0},
+  ares:{name:'투신 아레스',color:'#ffa88b',pattern:'duel',warning:'투신의 도전 · 2.6초 안에 최대 체력 6% 피해로 저지',atlas:'bosses-expansion',frame:1},
+  astea:{name:'창조신 아스테아',color:'#e8d3ff',pattern:'creation',warning:'창세의 노래 · 2.6초 안에 최대 체력 6% 피해로 창조 저지',atlas:'bosses-expansion',frame:2},
 };
 export const ASSET_PATHS = {
   ...Object.fromEntries(HEROES.map(h=>[`unit-${h.id}`,`./assets/merge/units/${h.id}.webp`])),
   garden:'./assets/merge/garden.webp',bosses:'./assets/moonlit/realm-bosses.webp',
   creatures:'./assets/moonlit/creatures.webp',
   relics:'./assets/merge/relics.webp',blessings:'./assets/merge/blessings.webp',effects:'./assets/merge/effects.webp',
+  'unit-trauma':'./assets/merge/units/trauma.webp',
+  'effects-expansion':'./assets/merge/effects-expansion.webp',
+  'finishers':'./assets/merge/finishers.webp',
+  'relics-expansion':'./assets/merge/relics-expansion.webp',
+  'bosses-expansion':'./assets/merge/bosses-expansion.webp',
+  'realms-expansion':'./assets/merge/realms-expansion.webp',
 };
-export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:!['garden','effects'].includes(id)}));
+export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:!['garden','effects','effects-expansion','finishers','realms-expansion'].includes(id)}));

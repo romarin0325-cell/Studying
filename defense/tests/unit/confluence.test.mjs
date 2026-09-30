@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {HEROES,HERO,DEFAULT_DECK,ARTIFACTS,BLESSINGS,validArtifacts,CHAPTERS} from '../../merge/content.js';
 import {newRun,step,summon,drawHero,move,canMerge,power,cast,upgrade,upgradeCost,summonCost,dividend,chooseReward,continueEndless,serialize,restore,attackDirection,attackGeometry,geometryContains,cellPoint,pathPoint,PATH_LENGTH,wavePlan} from '../../merge/engine.js';
 import {FX_PROFILES,distinctAttackCount} from '../../merge/effects.js';
-import {BALANCE_REVISION,cinderellaRefund,queenIncome,harvestIncome,trainingBonus,trainingPower,unitEconomy,cycleTarget} from '../../merge/engine.js';
+import {BALANCE_REVISION,doomRefund,queenIncome,harvestIncome,trainingBonus,trainingPower,unitEconomy,cycleTarget} from '../../merge/engine.js';
 
 // Combat/economy scenarios declare their roster; production openings are random.
 function arrangedRun(options){const s=newRun(options);for(const [i,id] of [[6,s.deck[0]],[8,s.deck[0]],[12,s.deck[1]]]){s.board[i].hero=id;s.board[i].priority=HERO[id].bossDamage?'boss':'first';}return s;}
@@ -19,15 +19,15 @@ test('opening and subsequent summons sample the chosen six with replacement',()=
   const gold=s.gold;for(let i=0;i<3;i++){assert.equal(summonCost(s),0);assert.equal(summon(s,i).ok,true);}assert.equal(s.gold,gold);assert.equal(s.freeSummons,0);assert.equal(summonCost(s),10);
   summon(s);assert.equal(s.gold,gold-10);assert.equal(summonCost(s),12);s.gold=0;const before=serialize(s);assert.equal(summon(s).ok,false);assert.equal(serialize(s),before);
 });
-test('merging, swaps, wildcard identity and Cinderella refund remain deterministic',()=>{
+test('merging, swaps, wildcard identity and Doom refund remain deterministic',()=>{
   const s=arrangedRun({seed:1}),old=power(s,s.board[6]);assert.equal(move(s,6,8).merged,true);assert.equal(s.board[6],null);assert.equal(s.board[8].rank,2);assert.ok(power(s,s.board[8])>old*2);
   const a=s.board[8].uid,b=s.board[12].uid;move(s,8,12);assert.equal(s.board[8].uid,b);assert.equal(s.board[12].uid,a);
   const w=arrangedRun({deck:['rumi','cinderella','zeke','snow_rabbit','siren','queen'],seed:1});move(w,6,12);assert.equal(w.board[12].hero,'cinderella');assert.equal(w.gold,45);
-  const c=arrangedRun({deck:['cinderella','rumi','zeke','snow_rabbit','siren','queen'],seed:1});c.upgrades.cinderella=2;move(c,6,8);assert.equal(c.stats.income['합성 환급'],26);
+  const c=arrangedRun({deck:['doom','rumi','zeke','snow_rabbit','siren','queen'],seed:1});c.upgrades.doom=2;move(c,6,8);assert.equal(c.stats.income['합성 환급'],26);
   c.board[8].rank=6;c.board[12].rank=6;assert.equal(canMerge(c.board[8],c.board[12]),false);
 });
 test('gold hoarding has no payout; Queen grows and Mushroom spends a slot to harvest',()=>{
-  const a=solo('queen'),b=solo('queen');a.gold=0;b.gold=999;settle(a,7);settle(b,7);assert.deepEqual(a.settlement,b.settlement);assert.deepEqual(a.settlement,{base:23,dividend:7});assert.equal('interest' in a.settlement,false);
+  const a=solo('queen'),b=solo('queen');a.gold=0;b.gold=999;settle(a,7);settle(b,7);assert.deepEqual(a.settlement,b.settlement);assert.deepEqual(a.settlement,{base:27,dividend:7});assert.equal('interest' in a.settlement,false);
   a.upgrades.queen=2;assert.equal(dividend(a),13);const m=solo('mushroom_king');target(m);m.upgrades.mushroom_king=2;tick(m,12.1);assert.equal(m.stats.income['포자 수확'],7);
 });
 test('every wave offers exactly three of six blessings and grants once, including last boss',()=>{
@@ -52,21 +52,21 @@ test('full-board arrival waits safely and resumes from storage',()=>{
   const s=arrangedRun({seed:12});s.gold=10000;while(s.board.some(u=>!u))summon(s);settle(s,1);s.reward=['arrival','mend','purse'];chooseReward(s,'arrival');assert.equal(s.reserves.length,1);
   const restored=restore(serialize(s));assert.ok(restored);const hero=restored.reserves[0];restored.board[0]=null;step(restored,1/60);assert.equal(restored.board[0].hero,hero);assert.equal(restored.board[0].rank,2);assert.equal(restored.reserves.length,0);
 });
-test('twenty pre-run relics have 10/6/4 rarities and a hard three-slot limit',()=>{
-  assert.equal(ARTIFACTS.length,20);assert.deepEqual(['common','rare','epic'].map(r=>ARTIFACTS.filter(a=>a.rarity===r).length),[10,6,4]);assert.equal(validArtifacts(['seed','seed']),false);assert.equal(validArtifacts(['none']),false);
+test('twenty-four pre-run relics have 10/8/6 rarities and a hard three-slot limit',()=>{
+  assert.equal(ARTIFACTS.length,24);assert.deepEqual(['common','rare','epic'].map(r=>ARTIFACTS.filter(a=>a.rarity===r).length),[10,8,6]);assert.equal(validArtifacts(['seed','seed']),false);assert.equal(validArtifacts(['none']),false);
   const ids=['seed','frost','roots'],s=arrangedRun({artifacts:ids});ids.push('crown');assert.deepEqual(s.artifacts,['seed','frost','roots']);assert.equal(arrangedRun({artifacts:ids}).artifacts.length,0);assert.ok(restore(serialize(s)));
 });
-test('ordinary wave health budget is conserved; only boss HP is reduced by 20 percent',()=>{
+test('ordinary wave budget follows the declared base and keeps the boss multiplier',()=>{
   const weight={grunt:1,armor:2.5,runner:.65,wisp:.9},kind=(i,w)=>i%7===6&&w>=3?'armor':i%5===4&&w>=2?'runner':i%9===8&&w>=5?'wisp':'grunt';
-  for(let chapter=0;chapter<CHAPTERS.length;chapter++)for(let w=1;w<=16;w++){const plan=wavePlan(w,chapter),base=88*1.34**(w-1)*CHAPTERS[chapter].hp,ordinary=Array.from({length:12+w*2},(_,i)=>Math.round(base*weight[kind(i,w)])).reduce((a,b)=>a+b,0),boss=plan.sequence.find(e=>e.kind==='boss');assert.equal(plan.sequence.filter(e=>e.kind!=='boss').reduce((a,e)=>a+e.hp,0),ordinary);if(w%4===0)assert.equal(boss.hp,Math.round(Math.round(base*32)*.8));else assert.equal(boss,undefined);assert.equal(plan.healthBudget,ordinary+(boss?.hp||0));assert.ok(plan.sequence.length<12+w*2+(w%4===0?1:0));}
-  assert.equal(wavePlan(1).sequence.length,9);assert.ok(wavePlan(1).interval>1.3);assert.ok(wavePlan(12).interval<wavePlan(1).interval);
+  for(let chapter=0;chapter<CHAPTERS.length;chapter++)for(let w=1;w<=16;w++){const plan=wavePlan(w,chapter),base=76*1.34**(w-1)*CHAPTERS[chapter].hp,ordinary=Array.from({length:12+w*2},(_,i)=>Math.round(base*weight[kind(i,w)])).reduce((a,b)=>a+b,0),boss=plan.sequence.find(e=>e.kind==='boss');assert.equal(plan.sequence.filter(e=>e.kind!=='boss').reduce((a,e)=>a+e.hp,0),ordinary);if(w%4===0)assert.equal(boss.hp,Math.round(Math.round(base*32)*.8));else assert.equal(boss,undefined);assert.equal(plan.healthBudget,ordinary+(boss?.hp||0));assert.ok(plan.sequence.length<12+w*2+(w%4===0?1:0));}
+  assert.equal(wavePlan(1).sequence.length,9);assert.ok(wavePlan(1).interval<=1.05);assert.ok(wavePlan(12).interval<wavePlan(1).interval);
 });
 test('skills share gauge, require live enemies and deployed heroes, never spend on failure',()=>{
-  const s=arrangedRun({seed:7});assert.equal(cast(s,'zeke').ok,false);assert.equal(s.gauge,75);target(s);s.gauge=100;assert.equal(cast(s,'queen').ok,false);assert.equal(s.gauge,100);
+  const s=arrangedRun({seed:7});assert.equal(cast(s,'zeke').ok,false);assert.equal(s.gauge,90);target(s);s.gauge=100;assert.equal(cast(s,'queen').ok,false);assert.equal(s.gauge,100);
   assert.equal(cast(s,'snow_rabbit').ok,true);assert.equal(s.gauge,35);assert.equal(s.enemies[0].stun,3);assert.equal(cast(s,'zeke').ok,false);assert.equal(s.gauge,35);
 });
-test('all 21 heroes have attacks, skills and a unique projectile and impact profile',()=>{
-  assert.equal(HEROES.length,21);assert.equal(distinctAttackCount(),21);assert.equal(new Set(Object.values(FX_PROFILES).map(p=>p.frame)).size,21);
+test('all 27 heroes have attacks, skills and a unique projectile and impact profile',()=>{
+  assert.equal(HEROES.length,27);assert.equal(distinctAttackCount(),27);assert.equal(new Set(Object.values(FX_PROFILES).map(p=>(p.atlas||'effects')+':'+p.frame)).size,27);
   for(const h of HEROES){const s=solo(h.id),e=target(s);tick(s,4);assert.ok(s.stats.byHero[h.id]>0,h.id+' attack');s.gauge=100;assert.equal(cast(s,h.id).ok,true,h.id+' skill');assert.ok(e.hp<e.maxHp);assert.equal(s.stats.skills,1);assert.ok(s.events.some(e=>e.type==='impact'&&e.hero===h.id));}
 });
 test('damage waits for release and impact; burn credit stays with its owner',()=>{
@@ -120,14 +120,14 @@ test('placement relics use real adjacency, rank and distinct neighbor identities
 });
 test('economy and gauge relics retain free opening and explicit limits',()=>{
   const s=arrangedRun({artifacts:['hourglass','feather','lantern']});assert.equal(summonCost(s),0);s.freeSummons=0;assert.equal(summonCost(s),8);s.paidSummons=20;assert.equal(summonCost(s),46);
-  move(s,6,8);assert.equal(s.gauge,95);target(s);s.gauge=100;cast(s,'zeke');assert.equal(s.gauge,45);
+  move(s,6,8);assert.equal(s.gauge,100);target(s);s.gauge=100;cast(s,'zeke');assert.equal(s.gauge,45);
 });
 test('relic hit modifiers, timed meteor and duplicate cadence affect actual attacks',()=>{
   const firstHit=(id,artifacts=[],configure=()=>{})=>{const s=solo(id,artifacts),e=target(s);configure(s,e);for(let i=0;i<180&&e.hp===e.maxHp;i++)step(s,1/60);return e.maxHp-e.hp;};
   const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
-  near(firstHit('cinderella',['lens'],(_,e)=>e.boss='artificial_demon'),12*1.3);
-  near(firstHit('cinderella',['frost'],(_,e)=>{e.slow=.4;e.slowTime=5;}),12*1.25);
-  near(firstHit('cinderella',['meteor'],s=>s.board[6].attacks=11),12*2.8);
+  near(firstHit('cinderella',['lens'],(_,e)=>e.boss='artificial_demon'),23*1.3);
+  near(firstHit('cinderella',['frost'],(_,e)=>{e.slow=.4;e.slowTime=5;}),23*1.25);
+  near(firstHit('cinderella',['meteor'],s=>s.board[6].attacks=11),23*3.6);
   near(firstHit('snow_rabbit',['tide']),10*1.25);
   const burn=artifacts=>{const s=solo('zeke',artifacts),e=target(s);s.board[6].disabled=100;e.burn=10;e.burnTime=2;e.burnOwner='zeke';tick(s,.5);return e.maxHp-e.hp;};
   near(burn(['ember']),burn([])*1.6);
@@ -194,15 +194,15 @@ test('old v2 runs migrate boss HP exactly once, preserve its ratio, gold and pla
 
 test('economic upgrades match their descriptions for every rank and level without changing opening income',()=>{
   for(let level=0;level<=5;level++)for(let rank=1;rank<=6;rank++){
-    const c=solo('cinderella');c.upgrades.cinderella=level;c.board[6].rank=rank;
-    assert.match(unitEconomy(c,c.board[6]),new RegExp(cinderellaRefund(rank,level)+'G'));assert.equal(cinderellaRefund(rank,level),(18+4*level)*rank);
+    const c=solo('doom');c.upgrades.doom=level;c.board[6].rank=rank;
+    assert.match(unitEconomy(c,c.board[6]),new RegExp(doomRefund(rank,level)+'G'));assert.equal(doomRefund(rank,level),(18+4*level)*rank);
     assert.equal(harvestIncome(rank,level),rank+2+2*level);
     for(let wave=1;wave<=12;wave++){const q=solo('queen');q.wave=wave;q.upgrades.queen=level;q.board[6].rank=rank;assert.equal(dividend(q),Math.min(45,queenIncome(rank,wave,level)));assert.equal(queenIncome(rank,wave,level),3+rank*2+Math.floor((wave-1)/3)+level*3);}
-    if(rank<6){c.board[8]={...c.board[6],uid:c.nextId++};const gold=c.gold;assert.equal(move(c,6,8).refund,cinderellaRefund(rank,level));assert.equal(c.gold-gold,cinderellaRefund(rank,level));}
+    if(rank<6){c.board[8]={...c.board[6],uid:c.nextId++};const gold=c.gold;assert.equal(move(c,6,8).refund,doomRefund(rank,level));assert.equal(c.gold-gold,doomRefund(rank,level));}
   }
   for(const h of HEROES)for(let level=0;level<5;level++){const s=solo(h.id);s.upgrades[h.id]=level;s.gold=1000;assert.equal(upgradeCost(s,h.id),28+24*level);assert.equal(trainingPower(h.id,level),Number(power(s,s.board[6]).toFixed(2)));upgrade(s,h.id);assert.equal(trainingPower(h.id,level+1),Number(power(s,s.board[6]).toFixed(2)));}
-  assert.equal(cinderellaRefund(1),18);assert.equal(queenIncome(1,1),5);assert.equal(harvestIncome(1),3);
-  assert.match(trainingBonus('cinderella',1),/22G/);assert.match(trainingBonus('queen',1),/8G/);assert.match(trainingBonus('mushroom_king',1),/5G/);
+  assert.equal(doomRefund(1),18);assert.equal(queenIncome(1,1),5);assert.equal(harvestIncome(1),3);
+  assert.match(trainingBonus('doom',1),/22G/);assert.match(trainingBonus('queen',1),/8G/);assert.match(trainingBonus('mushroom_king',1),/5G/);
 });
 
 test('economy timing has no idle income; Queen cap is aggregate and harvest timer survives ordinary moves',()=>{
@@ -214,7 +214,7 @@ test('economy timing has no idle income; Queen cap is aggregate and harvest time
 
 test('economy tuning recoups a first upgrade earlier without making late upgrades automatic profit',()=>{
   const series=Array.from({length:12},(_,i)=>queenIncome(1,i+1));assert.deepEqual(series,[5,5,5,6,6,6,7,7,7,8,8,8]);assert.equal(series.reduce((a,b)=>a+b),78);
-  const firstCost=28;assert.equal(Math.ceil(firstCost/(queenIncome(1,1,1)-queenIncome(1,1,0))),10);assert.equal(firstCost/(cinderellaRefund(1,1)-cinderellaRefund(1,0)),7);assert.equal(firstCost/(harvestIncome(1,1)-harvestIncome(1,0))*12,168);
+  const firstCost=28;assert.equal(Math.ceil(firstCost/(queenIncome(1,1,1)-queenIncome(1,1,0))),10);assert.equal(firstCost/(doomRefund(1,1)-doomRefund(1,0)),7);assert.equal(firstCost/(harvestIncome(1,1)-harvestIncome(1,0))*12,168);
   // A late single Queen upgrade with only four payouts remaining costs 28G
   // and returns only 12G extra. Damage gains and multiple copies matter.
   assert.ok(4*(queenIncome(1,9,1)-queenIncome(1,9,0))<firstCost);

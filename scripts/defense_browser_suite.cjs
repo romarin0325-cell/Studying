@@ -84,20 +84,21 @@ async function blessingChecks(browser,url,out){
 async function expeditionChecks(browser,url,out){
   const t=await pageFor(browser,url);try{
     const p=t.page;await portraitsReady(p);assert.match(await p.title(),/루미의 별빛 원정/);
-    await p.locator('[data-action="loadout"]').first().click();assert.equal(await p.locator('[data-relic]').count(),20);
+    const chapters=new Set();for(let i=0;i<7;i++){chapters.add(await p.locator('#chapter-name').textContent());await p.locator('#chapter-next').click();}assert.equal(chapters.size,7);await p.locator('#chapter-prev').click();await p.reload();await portraitsReady(p);assert.equal(await p.locator('#chapter-name').textContent(),'창세의 성원');await p.locator('#chapter-next').click();assert.equal(await p.locator('#chapter-name').textContent(),'달빛 정원');
+    await p.locator('[data-action="loadout"]').first().click();assert.equal(await p.locator('[data-relic]').count(),24);
     for(const id of ['ember','frost','seed'])await p.locator(`[data-relic="${id}"]`).click();await p.locator('[data-relic="feather"]').click();assert.equal(await p.locator('[data-relic][aria-pressed="true"]').count(),3);
     await p.screenshot({path:path.join(out,'relics.png')});await p.locator('[data-action="save-loadout"]').click();assert.equal(await p.locator('#home-relics .equipped').count(),3);
     await p.reload();await portraitsReady(p);assert.equal(await p.locator('#home-relics .equipped').count(),3);
-    await p.locator('[data-action="deck"]').click();assert.equal(await p.locator('.roster-card').count(),21);const header=await p.locator('.modal-header').boundingBox();
+    await p.locator('[data-action="deck"]').click();assert.equal(await p.locator('.roster-card').count(),27);const header=await p.locator('.modal-header').boundingBox();
     await p.locator('[data-inspect="time_ruler"]').scrollIntoViewIfNeeded();const before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>200);await p.locator('[data-inspect="time_ruler"]').click();
     assert.ok(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)>before*.85,'inspection reset roster scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'roster header moved');assert.match(await p.locator('.companion-preview').textContent(),/시간의지배자/);
     assert.ok(await p.locator('.companion-preview img').evaluate(i=>i.naturalWidth>=250),'portrait downsampled');await p.screenshot({path:path.join(out,'roster-scrolled.png')});await p.locator('[data-action="close-modal"]').click();
     await smoke(p,{screenshot:path.join(out,'drag-and-skill.png')});assert.deepEqual(t.errors,[]);
   }finally{await t.context.close();}
-  const E=await import('../defense/merge/engine.js'),s=E.newRun({seed:4});s.gold=1000;
+  const E=await import('../defense/merge/engine.js'),s=E.newRun({seed:4,deck:['zeke','snow_rabbit','rumi','siren','queen','doom']});s.gold=1000;
   const training=await pageFor(browser,url,{fixture:E.serialize(s),viewport:{width:320,height:568}});try{
-    const p=training.page;await portraitsReady(p);await start(p,true);await p.locator('#training').click();await p.locator('[data-upgrade="cinderella"]').scrollIntoViewIfNeeded();const header=await p.locator('.modal-header').boundingBox(),before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>0);
-    await p.locator('[data-upgrade="cinderella"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/22G/);assert.match(await p.locator('.training-list').textContent(),/15.4 → 18.7/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
+    const p=training.page;await portraitsReady(p);await start(p,true);await p.locator('#training').click();await p.locator('[data-upgrade="doom"]').scrollIntoViewIfNeeded();const header=await p.locator('.modal-header').boundingBox(),before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>0);
+    await p.locator('[data-upgrade="doom"]').click();assert.ok(Math.abs(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)-before)<2,'upgrade reset scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'training title moved');assert.match(await p.locator('.training-list').textContent(),/22G/);assert.match(await p.locator('.training-list').textContent(),/20.5 → 25/);await p.screenshot({path:path.join(out,'training-small.png')});assert.deepEqual(training.errors,[]);
   }finally{await training.context.close();}
   await blessingChecks(browser,url,out);await effectsProof(browser,url,out);
 }
@@ -107,7 +108,7 @@ async function effectsProof(browser,url,out){
     await t.page.evaluate(async()=>{
       const [{Art},{CombatFX,FX_PROFILES},{HEROES}]=await Promise.all([import('/merge/render.js'),import('/merge/effects.js'),import('/merge/content.js')]);
       const art=new Art();await art.ready;document.body.innerHTML='';const canvas=document.createElement('canvas');canvas.width=1170;canvas.height=1260;canvas.id='fx-proof';document.body.append(canvas);const ctx=canvas.getContext('2d'),fx=new CombatFX(ctx,art);ctx.fillStyle='#132d3b';ctx.fillRect(0,0,1170,1260);
-      HEROES.forEach((h,i)=>{const x=i%3*390,y=Math.floor(i/3)*180;ctx.save();ctx.beginPath();ctx.rect(x,y,390,180);ctx.clip();ctx.translate(x,y);ctx.fillStyle='#dae9de';ctx.font='15px system-ui';ctx.fillText(`${i+1}. ${h.name} · ${FX_PROFILES[h.id].motion}`,18,26);ctx.strokeStyle='#78969b55';ctx.strokeRect(5,5,380,170);art.hero(ctx,h.id,65,150,115,{direction:'right'});
+      HEROES.slice(0,21).forEach((h,i)=>{const x=i%3*390,y=Math.floor(i/3)*180;ctx.save();ctx.beginPath();ctx.rect(x,y,390,180);ctx.clip();ctx.translate(x,y);ctx.fillStyle='#dae9de';ctx.font='15px system-ui';ctx.fillText(`${i+1}. ${h.name} · ${FX_PROFILES[h.id].motion}`,18,26);ctx.strokeStyle='#78969b55';ctx.strokeRect(5,5,380,170);art.hero(ctx,h.id,65,150,115,{direction:'right'});
         const shot={hero:h.id,rank:2,from:{x:115,y:96},origin:{x:70,y:100},to:{x:285,y:112},target:1,life:.15,total:.3};fx.drawShot(shot,{enemies:[]});fx.stamp(h.id,310,105,95,0,1);ctx.restore();});
     });
     await t.page.locator('#fx-proof').screenshot({path:path.join(out,'all-21-attacks.png')});assert.deepEqual(t.errors,[]);
@@ -116,14 +117,14 @@ async function effectsProof(browser,url,out){
     const fieldCoverage=await t.page.evaluate(async()=>{
       const [{Art,Renderer},{CombatFX},{HEROES,DEFAULT_DECK},E]=await Promise.all([import('/merge/render.js'),import('/merge/effects.js'),import('/merge/content.js'),import('/merge/engine.js')]);
       const art=new Art();await art.ready;const sheet=document.querySelector('#fx-proof');sheet.width=1080;sheet.height=2940;const sheetCtx=sheet.getContext('2d'),results=[];
-      for(const [i,h] of HEROES.entries()){
+      for(const [i,h] of HEROES.slice(0,21).entries()){
         const field=document.createElement('canvas');field.width=720;field.height=780;const ctx=field.getContext('2d'),fx=new CombatFX(ctx,art);
         for(const reduced of [false,true]){ctx.clearRect(0,0,720,780);fx.reduced=reduced;fx.drawSkillField({hero:h.id,life:1.28,total:1.6});const pixels=ctx.getImageData(0,0,720,780).data;let outer=0,hash=2166136261;
           for(let p=0;p<pixels.length;p+=4){const x=p/4%720,y=Math.floor(p/4/720);if((x<120||x>600||y<170||y>660)&&pixels[p+3]>4)outer++;hash=Math.imul(hash^pixels[p]^pixels[p+1]^pixels[p+2]^pixels[p+3],16777619);}
           results.push({id:h.id,reduced,outer,hash:hash>>>0});
         }
         const canvas=document.createElement('canvas'),renderer=new Renderer(canvas,art),s=E.newRun({deck:[h.id,...DEFAULT_DECK.filter(id=>id!==h.id)].slice(0,6),seed:21});
-        s.board=s.board.map((u,index)=>index===6?u:null);s.wave=4;s.queue=[{kind:'boss',hp:1e7}];s.spawnIn=0;E.step(s,1/60);s.enemies[0].progress=850;s.enemies[0].speed=0;s.queue=[];s.gauge=100;s.events=[];E.cast(s,h.id);
+        s.board=s.board.map((u,index)=>index===6?{...u,hero:h.id}:null);s.wave=4;s.queue=[{kind:'boss',hp:1e7}];s.spawnIn=0;E.step(s,1/60);s.enemies[0].progress=850;s.enemies[0].speed=0;s.queue=[];s.gauge=100;s.events=[];E.cast(s,h.id);
         renderer.event(s.events.find(e=>e.type==='skill'));renderer.skill.life=1.28;renderer.shake=0;renderer.draw(s,0);
         const x=i%3*360,y=Math.floor(i/3)*420;sheetCtx.drawImage(canvas,x,y+30,360,390);sheetCtx.fillStyle='#142c3a';sheetCtx.fillRect(x,y,360,30);sheetCtx.fillStyle='#f4deb4';sheetCtx.font='14px system-ui';sheetCtx.fillText(h.name+' · '+h.skill.name,x+12,y+21);
       }
@@ -224,7 +225,7 @@ async function bossClarityChecks(browser,url,out,options={}){
 }
 async function experienceChecks(browser,url,out){
   const t=await pageFor(browser,url);try{
-    await portraitsReady(t.page);await t.page.getByRole('button',{name:'편성 바꾸기 ↗'}).click();assert.equal(await t.page.locator('.roster-card').count(),21);
+    await portraitsReady(t.page);await t.page.getByRole('button',{name:'편성 바꾸기 ↗'}).click();assert.equal(await t.page.locator('.roster-card').count(),27);
     await t.page.locator('[data-pick="queen"]').click();assert.equal(await t.page.getByRole('button',{name:'함께 떠나기'}).isEnabled(),false);await t.page.locator('[data-pick="silver_rabbit"]').click();await t.page.getByRole('button',{name:'함께 떠나기'}).click();
     assert.equal(await t.page.locator('#home-deck img[alt="은토끼"]').count(),1);await smoke(t.page,{screenshot:path.join(out,'mobile-play.png')});
     await t.page.getByRole('button',{name:'일시 정지',exact:true}).click();await t.page.getByRole('button',{name:'설정',exact:true}).click();await t.page.locator('[data-setting="reduced"]').check();await t.page.getByRole('button',{name:'적용',exact:true}).click();

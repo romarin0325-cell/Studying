@@ -1,0 +1,402 @@
+{
+  "version": 1,
+  "records": [
+    {
+      "id": "bosses-expansion",
+      "file": "bosses-expansion.webp",
+      "sha256": "562a35ce80ba7f59a55b0d7a312b74edeb035d17c09ca3ac76188bb221e3f3ae",
+      "bytes": 247948,
+      "columns": 3,
+      "rows": 1,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "anatomyPolicy": "Manual skull/face estimates exclude hair, twin tails, flames, halo, wings and costume; common uniform cranial scale, never silhouette fit.",
+      "frames": [
+        {
+          "id": "thor",
+          "skull": [
+            450,
+            284,
+            871,
+            694
+          ],
+          "feet": [
+            660,
+            1230
+          ],
+          "sourceSha256": "d2118dd06fc559fdc365a7f39045bd2da5b26d6486387676846636e6cf9cd1d4",
+          "scale": 0.37288305199514044,
+          "headWidth": 156.98376488995413,
+          "headHeight": 152.88205131800757,
+          "bodyBelowChin": 199.86531586939526
+        },
+        {
+          "id": "ares",
+          "skull": [
+            370,
+            250,
+            825,
+            684
+          ],
+          "feet": [
+            620,
+            1260
+          ],
+          "sourceSha256": "f38ff7234b4537deda5b5eb6bb8d49f4b4dd28e3d459ffd905d893adafd52704",
+          "scale": 0.3486222149066075,
+          "headWidth": 158.62310778250642,
+          "headHeight": 151.30204126946765,
+          "bodyBelowChin": 200.8063957862059
+        },
+        {
+          "id": "astea",
+          "skull": [
+            424,
+            315,
+            854,
+            740
+          ],
+          "feet": [
+            643,
+            1190
+          ],
+          "sourceSha256": "df99b4aff5e57db1776d3110624b03df96f265ca99303795ba86357dde22261a",
+          "scale": 0.3623906033334818,
+          "headWidth": 155.82795943339715,
+          "headHeight": 154.01600641672977,
+          "bodyBelowChin": 163.0757715000668
+        }
+      ]
+    },
+    {
+      "id": "effects-expansion",
+      "file": "effects-expansion.webp",
+      "sha256": "b752df529b96655a1bdb3df7c413394a5cf1a7f6359e17dd3d1a32bbe88f12b0",
+      "bytes": 138096,
+      "sourceSha256": "844420af419c01660bbcf76f32fd336ec4b5c39ffe23f1e571067bd9eafa4f7b",
+      "columns": 4,
+      "rows": 3,
+      "cell": 256,
+      "gutter": 16,
+      "blend": "screen",
+      "frames": [
+        {
+          "frame": 0,
+          "sourceBox": {
+            "left": 18,
+            "top": 73,
+            "width": 338,
+            "height": 245
+          }
+        },
+        {
+          "frame": 1,
+          "sourceBox": {
+            "left": 379,
+            "top": 63,
+            "width": 337,
+            "height": 248
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBox": {
+            "left": 729,
+            "top": 66,
+            "width": 357,
+            "height": 259
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBox": {
+            "left": 1086,
+            "top": 100,
+            "width": 348,
+            "height": 199
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBox": {
+            "left": 6,
+            "top": 413,
+            "width": 350,
+            "height": 236
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBox": {
+            "left": 375,
+            "top": 419,
+            "width": 349,
+            "height": 233
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBox": {
+            "left": 736,
+            "top": 418,
+            "width": 345,
+            "height": 222
+          }
+        },
+        {
+          "frame": 7,
+          "sourceBox": {
+            "left": 1086,
+            "top": 384,
+            "width": 359,
+            "height": 340
+          }
+        },
+        {
+          "frame": 8,
+          "sourceBox": {
+            "left": 13,
+            "top": 729,
+            "width": 349,
+            "height": 268
+          }
+        },
+        {
+          "frame": 9,
+          "sourceBox": {
+            "left": 362,
+            "top": 733,
+            "width": 348,
+            "height": 261
+          }
+        },
+        {
+          "frame": 10,
+          "sourceBox": {
+            "left": 730,
+            "top": 740,
+            "width": 341,
+            "height": 233
+          }
+        },
+        {
+          "frame": 11,
+          "sourceBox": {
+            "left": 1086,
+            "top": 724,
+            "width": 349,
+            "height": 287
+          }
+        }
+      ]
+    },
+    {
+      "id": "finishers",
+      "file": "finishers.webp",
+      "sha256": "9bacb4119fd38a8787e1bd088125ec655153bb8faea6617a92192d8c66a49d1b",
+      "bytes": 157612,
+      "sourceSha256": "1fe52e330df6e85c68ff30d46fde4c743d642ef6b76560704289469a3368498c",
+      "columns": 4,
+      "rows": 3,
+      "cell": 256,
+      "gutter": 16,
+      "blend": "screen",
+      "frames": [
+        {
+          "frame": 0,
+          "sourceBox": {
+            "left": 12,
+            "top": 45,
+            "width": 345,
+            "height": 304
+          }
+        },
+        {
+          "frame": 1,
+          "sourceBox": {
+            "left": 362,
+            "top": 112,
+            "width": 362,
+            "height": 191
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBox": {
+            "left": 724,
+            "top": 57,
+            "width": 344,
+            "height": 282
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBox": {
+            "left": 1107,
+            "top": 58,
+            "width": 324,
+            "height": 281
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBox": {
+            "left": 15,
+            "top": 372,
+            "width": 347,
+            "height": 295
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBox": {
+            "left": 362,
+            "top": 425,
+            "width": 362,
+            "height": 189
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBox": {
+            "left": 724,
+            "top": 386,
+            "width": 345,
+            "height": 271
+          }
+        },
+        {
+          "frame": 7,
+          "sourceBox": {
+            "left": 1109,
+            "top": 374,
+            "width": 317,
+            "height": 282
+          }
+        },
+        {
+          "frame": 8,
+          "sourceBox": {
+            "left": 11,
+            "top": 684,
+            "width": 343,
+            "height": 325
+          }
+        },
+        {
+          "frame": 9,
+          "sourceBox": {
+            "left": 377,
+            "top": 681,
+            "width": 331,
+            "height": 316
+          }
+        },
+        {
+          "frame": 10,
+          "sourceBox": {
+            "left": 728,
+            "top": 674,
+            "width": 358,
+            "height": 349
+          }
+        },
+        {
+          "frame": 11,
+          "sourceBox": {
+            "left": 1102,
+            "top": 698,
+            "width": 333,
+            "height": 311
+          }
+        }
+      ]
+    },
+    {
+      "id": "relics-expansion",
+      "file": "relics-expansion.webp",
+      "sha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "bytes": 102910,
+      "sourceSha256": "ede1e79ad340dc0760ebe73b8b2053937f701e8306b68ad5d2a47bc32002e17d",
+      "columns": 2,
+      "rows": 2,
+      "cell": 256,
+      "gutter": 26,
+      "frames": [
+        {
+          "id": "tempo_bell",
+          "cell": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "sourceBox": [
+            78,
+            21,
+            542,
+            570
+          ]
+        },
+        {
+          "id": "royal_seal",
+          "cell": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "sourceBox": [
+            727,
+            60,
+            477,
+            524
+          ]
+        },
+        {
+          "id": "gift_ribbon",
+          "cell": [
+            0,
+            256,
+            256,
+            256
+          ],
+          "sourceBox": [
+            77,
+            659,
+            540,
+            540
+          ]
+        },
+        {
+          "id": "broken_clock",
+          "cell": [
+            256,
+            256,
+            256,
+            256
+          ],
+          "sourceBox": [
+            716,
+            626,
+            502,
+            566
+          ]
+        }
+      ]
+    },
+    {
+      "id": "realms-expansion",
+      "file": "realms-expansion.webp",
+      "sha256": "5f7e4e9d4d7816f37e8ab62dd4f58f77d987c9ea7cbcb4b762f7e71e2a7bfd64",
+      "bytes": 226696,
+      "sourceSha256": "7ad94a176df1a53810d56cd54da31f497ee15a1dc10204fa0449a7b9c943fe86",
+      "columns": 3,
+      "rows": 1,
+      "cell": 512
+    }
+  ]
+}

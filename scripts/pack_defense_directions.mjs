@@ -47,7 +47,12 @@ export async function packDirections({sourceDir,entries,outputDir,proofDir}){
       const samples=[[0,0],[info.width-1,0],[0,info.height-1],[info.width-1,info.height-1]];
       if(samples.some(([x,y])=>{const i=(y*info.width+x)*4;return data[i]<200||data[i+1]>65||data[i+2]<200;}))throw new Error(`${e.id}: expected native alpha or flat magenta, not a painted checkerboard`);
     }
-    keySpritePixels(data,info.width,info.height);
+    // Native-alpha artwork can contain saturated magenta gems and cloth.
+    // A chroma-key pass would destroy those painted materials.
+    if(e.alphaMode==='native'){
+      if(!meta.hasAlpha)throw new Error(`${e.id}: native alpha source required`);
+    }else if(e.alphaMode===undefined||e.alphaMode==='magenta')keySpritePixels(data,info.width,info.height);
+    else throw new Error(`${e.id}: unknown alpha mode`);
     const png=await sharp(data,{raw:{width:info.width,height:info.height,channels:4}}).png().toBuffer();
     const w=Math.floor(info.width/2),split=e.splitY||Math.floor(info.height/2),layers=[];
     for(let i=0;i<4;i++){
@@ -75,7 +80,7 @@ export async function packDirections({sourceDir,entries,outputDir,proofDir}){
       bodyBelowChin:Math.round((e.feet[0][1]-e.anatomy.skull[3])*e.scale*10)/10,
       heightClass:profile.heightClasses[e.id],heightClassApplied:false,
       scaleMethod:'uniform scale from estimated front skull area; no height multiplier'}:null;
-    manifest.push({id:e.id,file:`${e.id}.webp`,width:1024,height:1024,cell:512,anchor:[256,480],directions:DIRECTIONS,portrait,sha256:sha(atlas),anatomy,source:{file:e.file,sha256:sha(source),scale:e.scale,feet:e.feet,face:e.face,splitY:split,anatomy:e.anatomy,...(e.alphaOpaqueThreshold!==undefined?{alphaOpaqueThreshold:e.alphaOpaqueThreshold}:{})}});
+    manifest.push({id:e.id,file:`${e.id}.webp`,width:1024,height:1024,cell:512,anchor:[256,480],directions:DIRECTIONS,portrait,sha256:sha(atlas),anatomy,source:{file:e.file,sha256:sha(source),scale:e.scale,feet:e.feet,face:e.face,splitY:split,anatomy:e.anatomy,...(e.alphaMode?{alphaMode:e.alphaMode}:{}),...(e.alphaOpaqueThreshold!==undefined?{alphaOpaqueThreshold:e.alphaOpaqueThreshold}:{})}});
     if(proofDir){
       const proof=[];
       for(let i=0;i<4;i++)for(let row=0;row<2;row++)proof.push({input:await sharp(atlas).extract({left:i%2*512,top:Math.floor(i/2)*512,width:512,height:512}).resize(128,128).png().toBuffer(),left:i*160+16,top:row*160+16});

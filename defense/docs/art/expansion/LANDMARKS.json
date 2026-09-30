@@ -1,0 +1,479 @@
+[
+  {
+    "id": "doom",
+    "file": "doom.png",
+    "feet": [
+      [
+        350,
+        583
+      ],
+      [
+        286,
+        583
+      ],
+      [
+        350,
+        517
+      ],
+      [
+        300,
+        521
+      ]
+    ],
+    "face": [
+      343.5,
+      243.5
+    ],
+    "sourceSha256": "c03689b1863748db261a18fcd1689a619bbda314903a6963c97b8746b511baa8",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        236,
+        135,
+        451,
+        352
+      ],
+      "directionSkulls": [
+        [
+          236,
+          135,
+          451,
+          352
+        ],
+        [
+          173,
+          134,
+          400,
+          341
+        ],
+        [
+          249,
+          78,
+          457,
+          285
+        ],
+        [
+          206,
+          76,
+          400,
+          284
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "santa",
+    "file": "santa.png",
+    "feet": [
+      [
+        349,
+        611
+      ],
+      [
+        294,
+        611
+      ],
+      [
+        346,
+        559
+      ],
+      [
+        333,
+        559
+      ]
+    ],
+    "face": [
+      348.5,
+      249
+    ],
+    "sourceSha256": "781cf4dbfdc3bd9954b6b2ea402b30ccae7570ea0da8f0e008dda70518e592a4",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        235,
+        144,
+        462,
+        354
+      ],
+      "directionSkulls": [
+        [
+          235,
+          144,
+          462,
+          354
+        ],
+        [
+          175,
+          141,
+          405,
+          354
+        ],
+        [
+          239,
+          88,
+          444,
+          300
+        ],
+        [
+          215,
+          88,
+          420,
+          300
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "jasmine",
+    "file": "jasmine.png",
+    "feet": [
+      [
+        350,
+        607
+      ],
+      [
+        288,
+        607
+      ],
+      [
+        335,
+        572
+      ],
+      [
+        288,
+        572
+      ]
+    ],
+    "face": [
+      345.5,
+      238
+    ],
+    "sourceSha256": "0a2de6bb7ccd483c229f749ff8e839eb915e0009916386cb7d74a8cc93097073",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        243,
+        138,
+        448,
+        338
+      ],
+      "directionSkulls": [
+        [
+          243,
+          138,
+          448,
+          338
+        ],
+        [
+          178,
+          135,
+          395,
+          338
+        ],
+        [
+          263,
+          98,
+          447,
+          296
+        ],
+        [
+          198,
+          97,
+          381,
+          299
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "star_boy",
+    "file": "star_boy.png",
+    "feet": [
+      [
+        370,
+        587
+      ],
+      [
+        262,
+        587
+      ],
+      [
+        342,
+        541
+      ],
+      [
+        299,
+        541
+      ]
+    ],
+    "face": [
+      359.5,
+      245.5
+    ],
+    "sourceSha256": "738786b3ba3a977a574daae0f303899dfac4267d9d16ae556292050bb758bb64",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        250,
+        144,
+        469,
+        347
+      ],
+      "directionSkulls": [
+        [
+          250,
+          144,
+          469,
+          347
+        ],
+        [
+          160,
+          141,
+          383,
+          345
+        ],
+        [
+          237,
+          107,
+          440,
+          306
+        ],
+        [
+          198,
+          108,
+          398,
+          306
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "time_magician",
+    "file": "time_magician.png",
+    "feet": [
+      [
+        340,
+        590
+      ],
+      [
+        291,
+        590
+      ],
+      [
+        345,
+        557
+      ],
+      [
+        287,
+        555
+      ]
+    ],
+    "face": [
+      338.5,
+      200.5
+    ],
+    "sourceSha256": "862d059a1a97b9ed1d2c81bb49802968d2220c3a02c3efe69738637661c8bcc3",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        231,
+        97,
+        446,
+        304
+      ],
+      "directionSkulls": [
+        [
+          231,
+          97,
+          446,
+          304
+        ],
+        [
+          181,
+          93,
+          401,
+          299
+        ],
+        [
+          256,
+          65,
+          448,
+          269
+        ],
+        [
+          190,
+          68,
+          386,
+          272
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "trauma",
+    "file": "trauma.png",
+    "feet": [
+      [
+        350,
+        574
+      ],
+      [
+        293,
+        574
+      ],
+      [
+        318,
+        571
+      ],
+      [
+        321,
+        571
+      ]
+    ],
+    "face": [
+      341.5,
+      206
+    ],
+    "sourceSha256": "16e5bf3b5a2436788664771ab9eacab9dcb1449b43dcfe649e536318505df7de",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "splitY": 590,
+    "anatomy": {
+      "skull": [
+        235,
+        100,
+        448,
+        312
+      ],
+      "directionSkulls": [
+        [
+          235,
+          100,
+          448,
+          312
+        ],
+        [
+          188,
+          100,
+          401,
+          312
+        ],
+        [
+          207,
+          98,
+          416,
+          306
+        ],
+        [
+          207,
+          95,
+          419,
+          305
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  },
+  {
+    "id": "cherry_prince",
+    "file": "cherry_prince.png",
+    "feet": [
+      [
+        329,
+        599
+      ],
+      [
+        315,
+        599
+      ],
+      [
+        313,
+        575
+      ],
+      [
+        324,
+        575
+      ]
+    ],
+    "face": [
+      330.5,
+      225
+    ],
+    "sourceSha256": "687c5ed7a0dd43e3bafece09fa4d24a59284c0cb64dd667ed0c1ba27df9aede1",
+    "alphaMode": "native",
+    "alphaOpaqueThreshold": 250,
+    "anatomy": {
+      "skull": [
+        216,
+        114,
+        445,
+        336
+      ],
+      "directionSkulls": [
+        [
+          216,
+          114,
+          445,
+          336
+        ],
+        [
+          190,
+          114,
+          423,
+          341
+        ],
+        [
+          216,
+          77,
+          423,
+          294
+        ],
+        [
+          198,
+          78,
+          420,
+          295
+        ]
+      ],
+      "coordinateSpace": "source quadrant-local: down, up, left, right; splitY recorded",
+      "method": "manual reconstruction from temples, cheek, jaw, ear insertion and cranium under hair or hat; NOT silhouette or exposed skin bounding box",
+      "uncertainty": "Occluded skull boundaries are manual estimates (approximately 8-12 source pixels); visual side-by-side review is required.",
+      "excluded": "animal ears, human external ears, hair volume, ponytails, cowlick, hat, crown, costume and weapon",
+      "directionReview": "four separately reviewed skull estimates; one uniform scale, no per-direction resizing"
+    }
+  }
+]
