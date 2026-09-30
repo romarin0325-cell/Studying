@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
 import { COSTUMES, COSTUME_TIERS, ACHIEVEMENTS, createProfile, purchaseShopItem, purchaseCostume, drawCostumeTicket, equipCostume, costumeForHero, achievementProgress, recordDungeonClear } from '../meta.js';
-import { COSTUME_REGISTRATION, REFERENCE_EYES } from '../prepare-assets.mjs';
+import { COSTUME_REGISTRATION, REFERENCE_EYES, REFERENCE_FACE_WIDTHS } from '../prepare-assets.mjs';
 
 const generated=new URL('../generated-assets/',import.meta.url);
 async function alphaBox(path) {
@@ -29,7 +29,16 @@ test('all twelve decoded costumes keep source proportions and the original face-
     const eyes=COSTUME_REGISTRATION[costume.id].eyes,baseEyes=REFERENCE_EYES[costume.hero];
     const mapped=[x+(eyes[0]-sx)*scaleX,y+(eyes[1]-sy)*scaleY,x+(eyes[2]-sx)*scaleX,y+(eyes[3]-sy)*scaleY];
     const distance=e=>Math.hypot(e[2]-e[0],e[3]-e[1]);
-    assert.ok(Math.abs(distance(mapped)-distance(baseEyes))<1.2,`${costume.id}: eye spacing changed`);
+    const registration=COSTUME_REGISTRATION[costume.id];
+    if(registration.faceWidth) {
+      assert.ok(Math.abs(registration.faceWidth*scaleX-REFERENCE_FACE_WIDTHS[costume.hero])<1.2,`${costume.id}: bare face width changed`);
+      // Expressions can change eye spacing inside the same face; do not enlarge the
+      // whole character just to match it. Keep an independent sanity bound as well.
+      assert.ok(Math.abs(distance(mapped)/distance(baseEyes)-1)<.13,`${costume.id}: eye proportions changed`);
+      const baseFile={1:'heroes/1.webp',3:'heroes/3.webp',4:'companions/0.webp'}[costume.hero];
+      const {box:[,by,,bh]}=await alphaBox(baseFile);
+      assert.ok(Math.abs(y+h-by-bh)<=15,`${costume.id}: lower body grew away from the original`);
+    } else assert.ok(Math.abs(distance(mapped)-distance(baseEyes))<1.2,`${costume.id}: eye spacing changed`);
     assert.ok(Math.abs((mapped[0]+mapped[2]-baseEyes[0]-baseEyes[2])/2)<1.5,`${costume.id}: face x drift`);
     assert.ok(Math.abs((mapped[1]+mapped[3]-baseEyes[1]-baseEyes[3])/2)<1.5,`${costume.id}: face y drift`);
   }

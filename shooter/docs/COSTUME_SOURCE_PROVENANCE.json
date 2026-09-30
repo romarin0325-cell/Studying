@@ -1,0 +1,86 @@
+{
+  "date": "2026-09-30",
+  "canvas_policy": "12px padding after alpha crop; uniform import scaling; no nonuniform resampling",
+  "generations": [
+    {
+      "hero": "jasmine",
+      "generation_tool": "image_gen.imagegen",
+      "generated_sheet": "exec-a055716b-4ff4-4395-befc-57c89a12181c.png",
+      "generated_sheet_sha256": "16d5926e104dca6903b4771baf52487f623bbfdaf57341383958d6d19cb74094",
+      "intent": "Keep faces, long lavender hair, happy pose and costume details; restore compact base legs and face/body proportions.",
+      "outputs": [
+        {
+          "path": "assets/costumes/jasmine-idol.png",
+          "sha256": "8d428d1873d3da00e5f820252fdc2b6b0e4db2c692e424afb47a594396c17aee"
+        },
+        {
+          "path": "assets/costumes/jasmine-wedding.png",
+          "sha256": "1c51d1c0b63e87cfa97822a2df85f34670dd354f9a1dae2123a5052ce9582ae1"
+        }
+      ],
+      "design_references": [
+        "base generated WebP at main 56e1ee05",
+        "existing costume PNGs at main 56e1ee05"
+      ]
+    },
+    {
+      "hero": "snow",
+      "generation_tool": "image_gen.imagegen",
+      "generated_sheet": "exec-a334fdd9-817d-43f6-99c2-a4c434d3ec29.png",
+      "generated_sheet_sha256": "a08c197a9c9dfa75be3a81663dc7df35679ed53c53d32325adb1711c7a3cec65",
+      "intent": "Keep both ears, face identity, blue eyes, airy bent-leg pose and maid/sakura outfit details; match base face/body proportions.",
+      "outputs": [
+        {
+          "path": "assets/costumes/snow-snowmaid.png",
+          "sha256": "a4496a2eee0cebe0be19f9cd7209d34e1c0474eb68532ba2c2153d888af7e2e6"
+        },
+        {
+          "path": "assets/costumes/snow-sakurabunny.png",
+          "sha256": "7faad60470895b5415c41c0092fc6373c6aaee4e54070205af9d646fc5363b6b"
+        }
+      ],
+      "design_references": [
+        "base generated WebP at main 56e1ee05",
+        "existing costume PNGs at main 56e1ee05"
+      ]
+    },
+    {
+      "hero": "luna",
+      "generation_tool": "image_gen.imagegen",
+      "generated_sheet": "exec-b5591928-1e0d-4a59-9814-e32f02377b08.png",
+      "generated_sheet_sha256": "93e866f11c59bf8161ff169bc9d287b2205496f5f378035d40ac023ff672653a",
+      "intent": "Keep canonical calm face, head tilt, purple weapon and gothic/cat costume details; iterate compact legs and face/head size independently.",
+      "outputs": [
+        {
+          "path": "assets/costumes/luna-gothic.png",
+          "sha256": "d6da9e83a861df97cdc992ce0efb70617973e9b586b64cd7024cee48a19485a4"
+        },
+        {
+          "path": "assets/costumes/luna-shadowcat.png",
+          "sha256": "5e2bcfc5163f46b27f08f506144bdda3ea05b2594f135e4e285a8793155d37e5"
+        }
+      ],
+      "design_references": [
+        "base generated WebP at main 56e1ee05",
+        "existing costume PNGs at main 56e1ee05"
+      ],
+      "generation_stages": [
+        {
+          "sheet": "exec-54cbbd9c-4d09-4bb0-a852-b587f9d9cd62.png",
+          "sha256": "679b3ead4e0e7d462ccdaa88a9315aa57f9b21615c7cb0b958389f58bcc00d48",
+          "intent": "Base identity and costume pair"
+        },
+        {
+          "sheet": "exec-ecd9ffe8-489f-49b3-af7f-5eb231285f66.png",
+          "sha256": "3cdbae77ecbb890480a3efcf7b29f365c12d6d88508e470fafaeec3a1375042d",
+          "intent": "Compact bent legs, retain upper body"
+        },
+        {
+          "sheet": "exec-b5591928-1e0d-4a59-9814-e32f02377b08.png",
+          "sha256": "93e866f11c59bf8161ff169bc9d287b2205496f5f378035d40ac023ff672653a",
+          "intent": "Face/head proportion correction, retain compact legs"
+        }
+      ]
+    }
+  ]
+}

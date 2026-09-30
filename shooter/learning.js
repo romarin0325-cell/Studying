@@ -8,7 +8,11 @@ export function makeQuestion(kind, random = Math.random) {
   }
   if(kind === 'collocation') {
     const entry=pick(LIBRARY.collocation);
-    return {id:`collocation:${entry.id}`,kind,prompt:entry.question,options:[...entry.options],answer:entry.answer,explanation:`${entry.expression} — ${entry.meaning}\n${entry.translation || ''}`};
+    const quizzes=entry.quizzes?.length?entry.quizzes:[entry];
+    const quizIndex=Math.min(quizzes.length-1,Math.floor(random()*quizzes.length)),quiz=quizzes[quizIndex];
+    // Preserve the representative question's legacy mistake ID.
+    const id=`collocation:${entry.id}${quizIndex?':'+quizIndex:''}`;
+    return {id,kind,prompt:quiz.question,options:[...quiz.options],answer:quiz.answer,explanation:`${entry.expression} — ${entry.meaning}\n${quiz.translation || ''}`};
   }
   const index=Math.floor(random()*LIBRARY.vocab.length),entry=LIBRARY.vocab[index];
   const wrong=[...new Set([entry.tm,...LIBRARY.vocab.map(v=>v.m)].filter(m=>m&&m!==entry.m))];

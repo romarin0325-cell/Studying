@@ -49,12 +49,16 @@ function announce(eyebrow, title, copy = '', duration = 2400, bomb = false) {
 }
 function hideAnnouncement() { clearTimeout(announcementTimer); $('announcement').className = ''; }
 let modalOpener;
-function setModal(html) {
+function setModal(html, { menuKind = '', compact = false } = {}) {
+  const entering = menuKind && (modal.hidden || modal.dataset.menuKind !== menuKind);
   if(modal.hidden)modalOpener=document.activeElement;
-  modal.innerHTML = `<section class="panel" role="dialog" aria-modal="true" tabindex="-1">${html}</section>`;
+  modal.classList.toggle('menu-modal', Boolean(menuKind));
+  modal.dataset.menuKind = menuKind;
+  const classes = menuKind ? ` menu-panel ${menuKind}-panel${compact ? ' compact-panel' : ''}${entering ? ' menu-enter' : ''}` : '';
+  modal.innerHTML = `<section class="panel${classes}" role="dialog" aria-modal="true" tabindex="-1">${html}</section>`;
   modal.hidden = false; modal.querySelector('.panel').focus({preventScroll:true});
 }
-function closeModal() { modal.hidden = true; modal.innerHTML = ''; if(modalOpener?.isConnected)modalOpener.focus({preventScroll:true}); }
+function closeModal() { modal.hidden = true; modal.innerHTML = ''; modal.classList.remove('menu-modal'); delete modal.dataset.menuKind; if(modalOpener?.isConnected)modalOpener.focus({preventScroll:true}); }
 modal.addEventListener('keydown',event=>{
   if(event.key==='Escape'){const dismiss=modal.querySelector('[data-dismiss]');if(dismiss){event.preventDefault();dismiss.click();}return;}
   if(event.key!=='Tab')return;
@@ -102,6 +106,7 @@ function showSortie() {
     <p class="weapon-description">${chosenRandom?`모든 수호자 9명이 같은 확률로 등장해요. 오늘 ${randomRemaining(profile)}/${RANDOM_DAILY_LIMIT}회 남음 · 하루 기본 ${RANDOM_DAILY_LIMIT}회, 리셋권 사용 시 추가 가능. 추첨 결과를 보면 1회 소모해요.`:hero.weapons[chosenWeapon].description}</p>
          <nav class="route campaign-route" aria-label="출격 준비"><button id="dungeons" class="${chosenChallenge?'challenge-route':''}" ${chosenChallenge?`style="--route-art:url('${art.urls.worlds[6]}')"`:''}><small>${chosenChallenge?'챌린지':'던전'} · ${DIFFICULTIES.find(d=>d.id===difficulty).name}</small><b>${chosenChallenge?'챌린지':stage.name} ⌄</b></button><button id="equipment"><small>유물 ${profile.equipped.length}/3 · 뽑기권 ${profile.tickets.length}</small><b>유물함</b></button><button id="shop"><small>꿈의결정 ${profile.dreamShards}</small><b>상점</b></button><button id="library"><small>LEARNING</small><b>도서관</b></button></nav>
     <button class="launch" id="launch">${chosenChallenge?'챌린지':stage.name} 출격<span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'THREE STAGES'}</span><b>→</b></button>
+    <button class="manual-link" id="manual">게임 매뉴얼 · 캐릭터와 스테이지 수치</button>
     <div class="footer-note"><span>◇ 다른 요일 수호자 · 문법으로 오늘 해금</span><span>${chosenChallenge?'SEVEN SKIES · 21 STAGES':'BEST '+Number(saved.best?.[bestKey()] || 0).toLocaleString()}</span></div></div>
   </section>`;
   screen.querySelectorAll('[data-hero]').forEach(b => b.onclick = () => menus.chooseHero(Number(b.dataset.hero),()=>{ chosenRandom = false; chosenHero = Number(b.dataset.hero); chosenWeapon = 0; save(); showSortie(); }));
@@ -111,6 +116,7 @@ function showSortie() {
   $('equipment').onclick=()=>menus.equipment(showSortie);$('shop').onclick=()=>menus.shop(showSortie);$('library').onclick=()=>menus.library();
   $('wardrobe-hotspot').onclick=()=>menus.wardrobe(showSortie,chosenHero);
   $('help').onclick = () => showHelp(false);$('achievements').onclick=()=>menus.achievements();
+  $('manual').onclick=()=>menus.manual();
   $('random-hero').onclick=()=>{chosenRandom=true;save();showSortie();};
   syncFullscreen();$('fullscreen').onclick=toggleFullscreen;
   $('launch').onclick = () => { audio.start(); if (!saved.tutorial) showHelp(true); else startGame(); };
