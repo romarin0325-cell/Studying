@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle']);
-const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle']);
+const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle', 'luna']);
+const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle', 'luna']);
 const DEFENSE_TOOLS = new Set([
   'scripts/build_defense_local.mjs', 'scripts/prepare_defense_art.mjs',
   'scripts/verify_defense.js', 'scripts/verify_defense_confluence.mjs',
@@ -501,6 +501,40 @@ function planIdle(plan, files, currentFiles) {
   if (product.some(file => file.startsWith('idle/dist/')) && !inputs.length) plan.blocked.push('Idle distribution changed without a mapped deployment input.');
 }
 
+function planLuna(plan, files, currentFiles) {
+  const current = new Set(currentFiles);
+  const product = files.filter(file => file.startsWith('luna/') && !isDocumentation(file));
+  const inputs = product.filter(file => (
+    /^luna\/(?:src|styles|assets)\//.test(file)
+    || ['luna/index.html', 'luna/game.css', 'luna/scripts/build.mjs'].includes(file)
+  ));
+  const directTests = product.filter(file => /^luna\/tests\/.+\.test\.mjs$/.test(file));
+  const browserInputs = product.filter(file => (
+    file === 'luna/tests/browser.mjs' || file.startsWith('luna/tests/fixtures/')
+  ));
+  const unknown = product.filter(file => (
+    !inputs.includes(file) && !directTests.includes(file) && !browserInputs.includes(file)
+    && !file.startsWith('luna/dist/')
+    && /\.(?:js|mjs|cjs|json|ya?ml|html|css)$/.test(file)
+  ));
+  if (unknown.length) plan.blocked.push('No Luna mapping exists for: ' + unknown.join(', '));
+  for (const file of product.filter(file => current.has(file) && /\.(?:js|mjs|cjs)$/.test(file))) {
+    addNodeCheck(plan, 'luna', file);
+  }
+  const tests = new Set(directTests.filter(file => current.has(file)));
+  if (inputs.some(file => file.startsWith('luna/src/'))) tests.add('luna/tests/core.test.mjs');
+  addNodeTest(plan, 'luna', 'luna:core', 'Check the changed Luna story and progression contracts', [...tests]);
+  if (inputs.length) {
+    addStep(plan, makeStep('luna:build', 'luna', 'Build the changed LunaRememberedNames deployment inputs once', 'node', ['luna/scripts/build.mjs']));
+  }
+  if (inputs.length || browserInputs.length) {
+    addBrowserScript(plan, 'luna', 'luna:offline-browser', 'Boot the LunaRememberedNames single-file artifact and exercise story/UI/storage', 'luna/tests/browser.mjs');
+  }
+  if (product.some(file => file.startsWith('luna/dist/')) && !inputs.length) {
+    plan.blocked.push('Luna distribution changed without a mapped deployment input.');
+  }
+}
+
 function createPlan(changes, options = {}) {
   const files = changePaths(changes);
   const currentFiles = currentChangePaths(changes);
@@ -543,6 +577,7 @@ function createPlan(changes, options = {}) {
   if (shouldPlan('shooter')) planShooter(plan, files);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
   if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
+  if (shouldPlan('luna')) planLuna(plan, files, currentFiles);
 
   if (!onlyGame && plan.detectedGames.includes('defense')) {
     plan.skipped.push('Defense commands are delegated to the dedicated Defense workflow.');
@@ -617,6 +652,10 @@ function fullPlan(game) {
         { needsInstall: true, browsers: ['chromium'] }
       )
     );
+  } else if (game === 'luna') {
+    addStep(plan, makeStep('full:luna:build', 'luna', 'Build the LunaRememberedNames artifact', 'node', ['luna/scripts/build.mjs']));
+    addNodeTest(plan, 'luna', 'full:luna:core', 'Run the Luna story and progression contracts', ['luna/tests/core.test.mjs']);
+    addBrowserScript(plan, 'luna', 'full:luna:offline-browser', 'Run the Luna offline browser checks', 'luna/tests/browser.mjs');
   } else if (game === 'idle') {
     addStep(plan, makeStep('full:idle', 'idle', 'Explicit full Idle validation', 'npm', ['run', 'verify', '--prefix', 'idle'], { needsInstall: true, browsers: ['chromium'] }));
   } else {

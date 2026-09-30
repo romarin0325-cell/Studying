@@ -1,0 +1,29 @@
+{
+  "browser": "Chromium 153.0.8010.0",
+  "offline": true,
+  "physicalDevices": false,
+  "externalRequests": 0,
+  "checks": [
+    "offline title art, original chapter choice, real keyboard movement/attack/dash/veil, pause/resume and held-input reset",
+    "durable room checkpoint, reload/continue preserves choice/settings, downloadable valid save backup",
+    "ward channel feedback, room upgrade repeated-click safety, next-room autosave and names survive reload",
+    "death uses last room-start checkpoint without farming collected names",
+    "pointer joystick move/release has no stuck movement; cancellation releases an actually held attack",
+    "360×640, 390×844 and 1280×720 responsive portrait stage; settings/action controls reachable without horizontal overflow",
+    "emulated 44px notch/34px home inset at 360×640: stage and buttons within safe area, no overlapping touch buttons or hidden combat sprites",
+    "fixture-driven boss victory reaches all three UI endings, records outcome, clears completed checkpoint",
+    "storage denied is explicit; current-window checkpoint supports title/continue without silently discarding run",
+    "corrupt/future save gives explicit original export and reset recovery",
+    "quota failure at checkpoint warns and retains newer room in memory instead of falling back silently",
+    "failed ending-record write preserves resumable last-room checkpoint and discloses failure",
+    "emulated simultaneous touch joystick+held slash move/attack together and release without stuck inputs"
+  ],
+  "screenshots": [
+    "01-mobile-title.png",
+    "02-mobile-choice.png",
+    "03-mobile-play.png",
+    "04-desktop-play.png",
+    "05-mobile-ending.png",
+    "06-notched-360-play.png"
+  ]
+}

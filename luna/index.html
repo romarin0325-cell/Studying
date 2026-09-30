@@ -1,0 +1,7 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#121424"><title>LUNA · 남겨진 이름</title><link rel="stylesheet" href="./styles/game.css"></head><body>
+<main id="app"><canvas id="scene" width="420" height="680" aria-label="루나의 전투 회랑"></canvas>
+<header id="hud" hidden><div class="eyebrow" id="chapter"></div><div class="hudrow"><div><strong id="roomTitle"></strong><div id="health" aria-label="체력"></div></div><button id="pause" aria-label="일시정지">Ⅱ</button></div><div class="progress"><i id="progress"></i></div><div class="hudrow mini"><span id="objective"></span><span id="counter"></span></div></header>
+<div id="toast" role="status"></div>
+<section id="controls" hidden aria-label="게임 조작"><div id="joystick" aria-label="이동 조이스틱"><div id="stick"></div><span>이동</span></div><div class="skills"><button id="veil" class="smallskill" aria-label="은신 E"><span>◈</span><b>은신</b><small>E</small><i></i></button><button id="dash" class="smallskill" aria-label="질주 Space"><span>⇧</span><b>질주</b><small>SPACE</small><i></i></button><button id="attack" class="attack" aria-label="베기 J"><span>✧</span><b>베기</b><small>J · 길게</small></button></div></section>
+<section id="overlay"></section><div id="desktopHint">WASD / 방향키 이동 · J 베기 · SPACE 질주 · E 은신 · ESC 일시정지</div>
+</main><script src="./src/core.js"></script><script src="./src/story.js"></script><script src="./src/main.js"></script></body></html>

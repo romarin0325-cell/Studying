@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const test = require('node:test');
-const { createPlan } = require('./verify_plan.js');
+const { createPlan, fullPlan } = require('./verify_plan.js');
 const { parseNameStatusZ, resolveChanges } = require('./verify.js');
 
 function changes(...files) {
@@ -20,6 +20,81 @@ function ids(plan) {
 function games(plan) {
   return new Set(plan.steps.map(step => step.game));
 }
+
+test('Luna source selects one dependency-free build, focused contracts, and offline browser only', () => {
+  const plan = createPlan(changes(
+    'luna/src/core.mjs', 'luna/src/main.mjs', 'luna/styles/game.css',
+    'luna/assets/portrait.webp', 'luna/index.html', 'luna/scripts/build.mjs',
+    'luna/tests/core.test.mjs', 'luna/tests/browser.mjs', 'luna/dist/LunaRememberedNames.html'
+  ));
+  assert.deepEqual([...games(plan)], ['luna']);
+  assert.deepEqual(plan.blocked, []);
+  assert.deepEqual(plan.browsers, ['chromium']);
+  assert.deepEqual(plan.steps.find(step => step.id === 'luna:build').args, ['luna/scripts/build.mjs']);
+  assert.equal(plan.steps.find(step => step.id === 'luna:build').needsInstall, false);
+  assert.equal(plan.steps.filter(step => step.id === 'luna:build').length, 1);
+  assert.deepEqual(plan.steps.find(step => step.id === 'luna:core').args, ['--test', 'luna/tests/core.test.mjs']);
+  assert.equal(plan.steps.filter(step => step.args.join(' ') === 'luna/tests/browser.mjs').length, 1);
+  assert.ok(ids(plan).indexOf('luna:build') < ids(plan).indexOf('luna:offline-browser'));
+  assert.doesNotMatch(plan.steps.map(step => step.args.join(' ')).join('\n'), /defense|shooter|card\/|idle\/|simulate/);
+});
+
+test('Luna visual deployment inputs build and boot without unrelated core contracts', () => {
+  for (const file of ['luna/index.html', 'luna/styles/game.css', 'luna/assets/portrait.webp', 'luna/scripts/build.mjs']) {
+    const plan = createPlan(changes(file));
+    assert.deepEqual(plan.blocked, []);
+    assert.ok(ids(plan).includes('luna:build'));
+    assert.ok(ids(plan).includes('luna:offline-browser'));
+    assert.equal(ids(plan).includes('luna:core'), false);
+  }
+});
+
+test('Luna documentation and test-only changes do not build or invoke other games', () => {
+  const docs = createPlan(changes('luna/README.md', 'luna/docs/STORY.md'));
+  assert.deepEqual(docs.steps, []);
+  assert.equal(docs.needsInstall, false);
+  assert.deepEqual(docs.browsers, []);
+  const unit = createPlan(changes('luna/tests/core.test.mjs'));
+  assert.deepEqual([...games(unit)], ['luna']);
+  assert.equal(unit.needsInstall, false);
+  assert.equal(ids(unit).includes('luna:build'), false);
+  assert.ok(ids(unit).includes('luna:core'));
+  const browser = createPlan(changes('luna/tests/browser.mjs'));
+  assert.equal(ids(browser).includes('luna:build'), false);
+  assert.ok(ids(browser).includes('luna:offline-browser'));
+});
+
+test('Luna unknown runtime and generated-only changes block selection', () => {
+  for (const file of ['luna/unknown.mjs', 'luna/config.json', 'luna/tests/helper.mjs']) {
+    assert.match(createPlan(changes(file)).blocked.join('\n'), /No Luna mapping/);
+  }
+  assert.match(createPlan(changes('luna/dist/LunaRememberedNames.html')).blocked.join('\n'), /without a mapped deployment input/);
+});
+
+test('Luna removed or renamed sources are mapped without parsing deleted files', () => {
+  const plan = createPlan([
+    { status: 'D', paths: ['luna/src/old.mjs'] },
+    { status: 'R100', paths: ['luna/src/previous.mjs', 'luna/src/core.mjs'] }
+  ]);
+  assert.deepEqual(plan.blocked, []);
+  assert.ok(ids(plan).includes('luna:build'));
+  const syntax = plan.steps.filter(step => step.args[0] === '--check').flatMap(step => step.args.slice(1));
+  assert.deepEqual(syntax, ['luna/src/core.mjs']);
+});
+
+test('Luna and verification changes preserve Defense exclusion and dedicated game isolation', () => {
+  const files = changes('luna/src/core.mjs', 'scripts/verify_plan.js', 'package.json', 'defense/merge/engine.js');
+  const plan = createPlan(files);
+  assert.deepEqual([...games(plan)], ['luna', 'verification']);
+  assert.deepEqual(plan.blocked, []);
+  assert.equal(games(plan).has('defense'), false);
+  assert.deepEqual([...games(createPlan(files, { onlyGame: 'luna' }))], ['luna']);
+  const full = fullPlan('luna');
+  assert.deepEqual([...games(full)], ['luna']);
+  assert.deepEqual(full.steps.map(step => step.args), [
+    ['luna/scripts/build.mjs'], ['--test', 'luna/tests/core.test.mjs'], ['luna/tests/browser.mjs']
+  ]);
+});
 
 test('Idle runtime selects its focused checks and offline artifact only', () => {
   const plan = createPlan(changes('idle/src/core/commands.js', 'idle/src/combat/engine.js', 'idle/assets/memories/bond_lumi_01.webp'));

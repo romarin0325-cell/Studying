@@ -45,7 +45,7 @@ the changed paths and prints the failure each check is intended to catch.
 - Shared dependency changes report compatibility for untouched games as
   unverified instead of automatically running every game.
 
-Card and Shooter are the active targets of the root verifier. Defense remains
+Card, Shooter, Idle, and Luna are the active targets of the root verifier. Defense remains
 excluded from root verification by repository policy. The dedicated Defense
 workflow calls the same planner with --only defense and is the only automatic
 path allowed to run Defense commands.
@@ -62,6 +62,7 @@ tick.
     npm run verify:full -- --game card
     npm run verify:full -- --game shooter
     npm run verify:full -- --game defense
+    npm run verify:full -- --game luna
 
 verify:plan prints selection without running it. verify:full is manual and
 requires an explicit game. Full verification is not used by the ordinary PR or
@@ -85,6 +86,8 @@ Changing a deployment input selects one build for that game:
 
 - Card: card/dist/DREAMWEAVER.html
 - Shooter: shooter/dist/AstralBloom.html
+- Idle: idle/dist/AstralCompanions.html
+- Luna: luna/dist/LunaRememberedNames.html
 - Defense: defense/dist-local/HeroCoreDefense.html
 
 Test-only and documentation-only changes do not build. Asset cache checks do
