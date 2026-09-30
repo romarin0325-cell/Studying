@@ -1,0 +1,12 @@
+{
+  "name": "astra-nocturne",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser.mjs && node tests/browser-webkit.mjs",
+    "simulate": "node scripts/simulate.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}
