@@ -1,0 +1,11 @@
+{
+  "base": "1c5e3c8c06304eddbfc634c9572575bc5bccde9d",
+  "combatHash": "776ee58a923c87e3bb4572e3ba9cfa1f1b900bf96c5854adc3bfdfdaf45f6c2d",
+  "learningHash": "de96c2d6113c00b9b4b01ce57c9941539fcee8a64c5dd2022d61d40a7ff910fb",
+  "counts": {
+    "cards": 161,
+    "forms": 3,
+    "enemies": 15,
+    "skills": 530
+  }
+}

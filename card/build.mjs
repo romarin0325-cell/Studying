@@ -19,7 +19,7 @@ if (scripts.length !== 2 || !scripts[1][1].includes('const RPG =')) {
   throw new Error('Card controller contract changed; review the DREAMWEAVER builder.');
 }
 const dependencies = ['data.js', 'vocab_data.js', 'collocation_data.js', 'grammar_data.js',
-  'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'card_pool_rules.js', 'battle_runtime.js',
+  'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'skill_display.js', 'card_pool_rules.js', 'battle_runtime.js',
   'rpg_features.js', 'card_pool_view.js', 'listening_data.js', 'fortune_cookie.js', 'music_data.js', 'music_player.js'];
 const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</script>`;
 const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
