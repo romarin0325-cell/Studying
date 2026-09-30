@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sourceHash": "fcae056df37aa900214069f626f6c4e46ca623d3ecd453e5d02f1ae82095cf87",
-  "processorHash": "d87a77bb9f35f30a2a465c2a173a517070bbfc3abace582b05245b634238faee",
+  "sourceHash": "d31533c940b745ce9471ec5cd32bc51c237bc8edfd1d59d3ec8572cb8e77227b",
+  "processorHash": "3655ef36c282ae3da3a946065e43de9c50e63ae8dcd88d38a65f2ecfee373f63",
   "report": {
     "source": {
       "fileCount": 45,
-      "bytes": 79329297,
+      "bytes": 79329241,
       "files": [
         {
           "file": "heroes.png",
@@ -119,8 +119,8 @@
         },
         {
           "file": "costume-tickets.svg",
-          "bytes": 5645,
-          "sha256": "be127704dd00d6e691e6ba73e176c8d68c42a27bfe02ab90c39fc55dee8540cd"
+          "bytes": 5589,
+          "sha256": "ad452c2c6b629722fbba9f76ad12d8f97f2efa7af42af6374122ac08108d403a"
         },
         {
           "file": "night-pajama.png",
@@ -1341,7 +1341,7 @@
       ]
     },
     "reduction": {
-      "bytes": 72826249,
+      "bytes": 72826193,
       "percent": 91.8
     },
     "qualityProbes": [

@@ -166,7 +166,9 @@ const sha256 = data => createHash('sha256').update(data).digest('hex');
 
 async function sourceInventory() {
   return Promise.all(ASSET_INPUTS.map(async name => {
-    const file = imagePath(name), data = await fs.readFile(file);
+    const file = imagePath(name), raw = await fs.readFile(file);
+    // SVG is source text. Git checkout line endings must not invalidate the WebP cache.
+    const data = file.endsWith('.svg') ? Buffer.from(raw.toString('utf8').replace(/\r\n/g, '\n')) : raw;
     return { file: path.basename(file), bytes: data.length, sha256: sha256(data) };
   }));
 }
