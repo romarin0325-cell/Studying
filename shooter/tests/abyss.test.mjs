@@ -29,11 +29,12 @@ test('abyss is the fourth difficulty and version-six currency, tickets and clear
   assert.deepEqual([abyss.hp,abyss.speed,abyss.interval,abyss.lives,abyss.maxLife,abyss.rare,abyss.tickets], [hard.hp,1.27,.74,3,3,hard.rare,2]);
   assert.equal(ARTIFACTS.find(a => a.id === 'dream').name, '꿈의조각');
   const p = createProfile({ version: 6, dreamShards: 9, tickets: [{ dungeon: 0, difficulty: 'hard' }], clears: { '0:0:hard:0': true } });
-  assert.equal(p.version, 7);
+  assert.equal(p.version, 8);
   assert.equal(recordDungeonClear(p, 0, 0, 5, 'abyss'), true);
   p.tickets.push({ dungeon: 5, difficulty: 'abyss' });
   const saved = createProfile(JSON.parse(JSON.stringify(p)));
-  assert.equal(saved.dreamShards, 9);
+  assert.equal(saved.dreamShards, 12);
+  assert.ok(saved.achievementClaims.includes('abyss-5'));
   assert.equal(saved.clears['0:0:hard:0'], true);
   assert.equal(saved.clears['0:0:abyss:5'], true);
   assert.deepEqual(saved.tickets.map(t => t.difficulty), ['hard','abyss']);
@@ -84,8 +85,8 @@ test('celestial and event fallbacks use late-game HP curves and ordinary project
 });
 
 test('ordinary bosses use their specified abyss volleys and fire intervals', () => {
-  const counts = [[7,16,9],[8,10,18],[14,null,21],[18,24,35],[6,7,8],[10,12,17]];
-  const fires = [[.95,.70,.70],[.86,.55,.55],[.95,.72,.72],[1.05,.8,.8],[1,.85,.85],[.81*.943,.54*.943,.6*.943]];
+  const counts = [[9,20,11],[12,14,23],[18,null,24],[20,28,43],[6,7,8],[10,12,17]];
+  const fires = [[.8,.70,.60],[.86,.55,.55],[.95,.72,.72],[.945,.72,.72],[1,.85,.85],[.81*.943,.54*.943,.6*.943]];
   for (let stage = 0; stage < 6; stage++) for (let phase = 0; phase < 3; phase++) {
     const g = volley(stage, 'abyss', phase);
     if (counts[stage][phase] !== null) assert.equal(g.bullets.length, counts[stage][phase], `stage ${stage} phase ${phase}`);
@@ -93,7 +94,7 @@ test('ordinary bosses use their specified abyss volleys and fire intervals', () 
     if (stage === 2 && phase === 1) {
       const xs = g.bullets.map(b => b.x).sort((a,b) => a-b);
       assert.ok(xs.length >= 12);
-      assert.ok(xs.slice(1).some((x,i) => x-xs[i] === 30));
+      assert.ok(xs.slice(1).some((x,i) => x-xs[i] === 24));
     }
     if (stage === 4 && phase > 0) near(g.boss.nextCross - g.bossClock, 4, 'Poseidon cross');
   }
@@ -121,18 +122,18 @@ test('all five event bosses and all phases use their individual abyss timings, v
   for (const d of EVENT_DUNGEONS) for (let phase = 0; phase < 3; phase++) {
     const g = volley(d.id, 'abyss', phase);
     const asset = d.asset;
-    const fire = asset === 'behemoth' ? [1.47,1.45,1.12][phase] : asset === 'time-ruler' ? 1.90 : ['harmonious','gold-dragon'].includes(asset) ? [1.15,1,.85][phase] : [1.25,1.08,.92][phase];
+    const fire = asset === 'behemoth' ? [1.3,1.45,1.02][phase] : asset === 'time-ruler' ? 1.90 : asset === 'harmonious' ? [1.15,1,.85][phase] : asset === 'gold-dragon' ? [1.035,.9,.765][phase] : [1.125,.972,.828][phase];
     near(g.boss.fire, fire, `${asset} fire ${phase}`);
-    if (asset === 'harmonious') assert.equal(g.bullets.filter(b => b.shape === 'heart').length, 2 * [6,7,8][phase]);
-    if (asset === 'gold-dragon') assert.ok(g.bullets.length >= 2 * [7,8,9][phase]);
-    if (asset === 'ancient-soul') assert.ok(g.bullets.length >= [24,30,35][phase] - 3 + (phase === 2 ? 5 : phase === 1 ? 4 : 0));
+    if (asset === 'harmonious') assert.equal(g.bullets.filter(b => b.shape === 'heart').length, 2 * [8,9,10][phase]);
+    if (asset === 'gold-dragon') assert.ok(g.bullets.length >= 2 * [9,10,11][phase]);
+    if (asset === 'ancient-soul') assert.ok(g.bullets.length >= [30,35,40][phase] - 4 + (phase === 2 ? 7 : phase === 1 ? 4 : 0));
     if (asset === 'behemoth') {
       const wave = g.effects.find(e => e.type === 'eventWave');
-      assert.equal(wave.spacing, phase === 0 ? 25 : 26);
-      assert.equal(wave.corridor, phase === 2 ? 68 : 72);
+      assert.equal(wave.spacing, phase < 2 ? 30 : 26);
+      assert.equal(wave.corridor, phase === 2 ? 62 : 72);
     }
     if (asset === 'time-ruler') {
-      assert.ok(g.bullets.length >= [18,24,30][phase] - 3 + (phase === 2 ? 6 : 0));
+      assert.ok(g.bullets.length >= [22,28,34][phase] - 3 + (phase === 2 ? 8 : 0));
       assert.ok(g.bullets.every(b => b.stopAt === undefined || (b.stopAt === .55 && b.releaseAt === 1.65)));
     }
     if (phase > 0) {
@@ -150,12 +151,12 @@ test('Astea abyss challenge keeps warnings and corridors while changing its thre
   for (let phase = 0; phase < 3; phase++) {
     const g = volley(6, 'abyss', phase);
     assert.equal(g.challenge, true);
-    assert.equal(g.bullets.length, [8,10,7][phase]);
-    near(g.boss.fire, [1.12,1.12,2.4][phase], `Astea fire ${phase}`);
-    if (phase === 0) near(g.boss.nextLight, 3.6, 'light interval');
+    assert.equal(g.bullets.length, [10,14,10][phase]);
+    near(g.boss.fire, [1.02,1.02,2.2][phase], `Astea fire ${phase}`);
+    if (phase === 0) near(g.boss.nextLight, 3.2, 'light interval');
     if (phase === 1) near(g.boss.nextBlade, 1.5, 'blade interval');
     if (phase === 2) {
-      near(g.boss.nextJudgmentCross, 2.5, 'judgment cross');
+      near(g.boss.nextJudgmentCross, 2, 'judgment cross');
       assert.equal(g.effects.find(e => e.type === 'celestialWarning').gap, 90);
     }
   }
@@ -163,7 +164,7 @@ test('Astea abyss challenge keeps warnings and corridors while changing its thre
 
 test('dense abyss volleys stay below the 360 bullet cap in representative long phases', () => {
   let highest = 0;
-  for (const stage of [3,5,6,...EVENT_DUNGEONS.map(d => d.id)]) {
+  for (const stage of [0,1,2,3,5,6,...EVENT_DUNGEONS.map(d => d.id)]) {
     const g = game(stage, 'abyss');
     g.spawnBoss(); g.phase = 'boss'; g.boss.y = 150; g.boss.hp = g.boss.maxHp * .3;
     for (let i = 0; i < 20 * 60; i++) g.update(1/60);

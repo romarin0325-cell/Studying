@@ -1,5 +1,13 @@
 /* Shared readability and decorative skins. Art has transparent centers and no hit targets. */
 @font-face { font-family:DreamJua; src:url("../assets/Jua-Regular.ttf") format("truetype"); font-style:normal; font-weight:400; font-display:swap; }
+/* Study content uses the offline body stack; theme chrome keeps its decorative font. */
+body.astra { --study-font:Inter,"Segoe UI","Malgun Gothic",sans-serif; }
+body.astra .study-text,
+body.astra .study-text :is(.menu-btn,button,span,b,strong,p,div) { font-family:var(--study-font); letter-spacing:normal; }
+body.astra .study-text { overflow-wrap:anywhere; }
+body.astra :is(#quiz-question,#toeic-q-text,#quiz-options .menu-btn,#toeic-options .menu-btn) { font-weight:500; }
+.skill-detail { margin:10px 0; line-height:1.6; overflow-wrap:anywhere; }
+.skill-detail-heading,.skill-detail-body { display:block; white-space:normal; }
 body.astra { --stat-up:#9ce1ba; --stat-down:#ffc1d0; --stat-neutral:var(--paper); --positive-ink:#c1efd5; --positive-fill:#173c32; --negative-ink:#ffd1df; --negative-fill:#482a3b; --frame-art:url("../assets/astra-frame.svg"); --button-art:url("../assets/astra-button.svg"); --theme-mark:url("../assets/astra-mark.svg"); --rarity-accent:#bdcedb; }
 body[data-theme=strawberry] { --ink:#fff1fa; --panel:#fffafe; --panel-soft:#f5e5f2; --sky:#9f386d; --sky-bright:#802755; --paper:#492840; --muted:#76536c; --line:#d6acc9; --wash:#ecc5df; --button:#f2d6e8; --button-fill:linear-gradient(#fff9fd,#f2d6e8); --primary-fill:linear-gradient(#ad477e,#913161); --frame-art:url("../assets/magical-frame.svg"); --button-art:url("../assets/magical-button.svg"); --theme-mark:url("../assets/magical-mark.svg"); }
 body[data-theme=dreamsky] { --primary-fill:linear-gradient(#34799f,#276187); --frame-art:url("../assets/dreamsky-frame.svg"); --button-art:url("../assets/dreamsky-button.svg"); --theme-mark:url("../assets/dreamsky-mark.svg"); }

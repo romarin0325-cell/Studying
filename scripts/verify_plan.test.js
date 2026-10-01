@@ -203,6 +203,23 @@ test('renames and deletes preserve every path needed for scope selection', () =>
   assert.equal(games(plan).has('shooter'), true);
 });
 
+test('moving Shooter manual sources into docs preserves deployment scope without invoking removed source paths', () => {
+  const plan = createPlan([
+    { status:'R100', paths:['shooter/manual.js','shooter/docs/manual-content.js'] },
+    { status:'R100', paths:['shooter/manual-data.js','shooter/docs/manual-data.js'] },
+    { status:'D', paths:['shooter/generate-manual.mjs'] },
+    { status:'D', paths:['shooter/tests/old-flow.mjs'] },
+    { status:'D', paths:['shooter/tests/old.test.mjs'] },
+    { status:'M', paths:['shooter/build.mjs'] }
+  ]);
+  assert.ok(ids(plan).includes('shooter:build'));
+  assert.ok(ids(plan).includes('shooter:bundle-smoke'));
+  assert.deepEqual(plan.blocked,[]);
+  const commands=plan.steps.map(step=>step.args.join(' ')).join('\n');
+  assert.doesNotMatch(commands,/shooter\/(?:manual\.js|manual-data\.js|generate-manual\.mjs|tests\/old)/);
+  assert.equal(games(plan).has('defense'),false);
+});
+
 test('distribution-only edits are blocked instead of reported as verified', () => {
   const plan = createPlan(changes('shooter/dist/AstralBloom.html'));
   assert.equal(plan.steps.length, 0);

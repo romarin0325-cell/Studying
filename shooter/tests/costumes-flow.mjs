@@ -68,7 +68,7 @@ try {
     assert.deepEqual([(await profile()).dreamShards,(await profile()).costumesEquipped[6],(await profile()).costumesEquipped[1]],[23,'night-pajama','luna-gothic']);
     assert.equal(await page.locator('#wardrobe-hotspot').innerText(),'');
     await click('#wardrobe-hotspot');await checkFrame();
-    assert.equal(await page.locator('.wardrobe-panel img').count(),1);assert.equal(await page.locator('[data-preview]').count(),3);
+    assert.equal(await page.locator('.wardrobe-panel img').count(),2);assert.equal(await page.locator('[data-preview]').count(),3);
     await click('[data-wardrobe-hero="6"]');assert.equal(await page.locator('[data-preview="night-pajama"]').getAttribute('aria-pressed'),'true');
     await shot('wardrobe');await click('[data-preview="night-longcoat"]');
     assert.equal(await page.locator('#wardrobe-equip').innerText(),'상점에서 만나기');

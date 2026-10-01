@@ -1564,7 +1564,7 @@
                     <img data-image-src="루미.png" alt="Rumi">
                 </div>
             </div>
-            <div id="lecture-content" class="modal-scroll"
+            <div id="lecture-content" class="study-text modal-scroll"
                 style="text-align: left; padding: 8px 10px; font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap;">
             </div>
             <button onclick="RPG.closeLectureView()" style="margin-top:6px; width:100%; padding:8px;">닫기</button>
@@ -1584,7 +1584,7 @@
                 <button class="menu-btn" onclick="RPG.resetWrongWords()"
                     style="width: auto; padding: 4px 8px; font-size: 0.72rem; margin: 0; background: #555; white-space: nowrap;">복습초기화</button>
             </div>
-            <div id="wordbook-list" class="modal-scroll" style="text-align: left; padding: 10px;"></div>
+            <div id="wordbook-list" class="study-text modal-scroll" style="text-align: left; padding: 10px;"></div>
             <button onclick="RPG.closeWordbook()" style="margin-top:10px; width:100%; padding:10px;">닫기</button>
         </div>
     </div>
@@ -1598,7 +1598,7 @@
             <div class="portrait lumi-modal-portrait" style="border-color: #448aff; margin: 0 auto 6px auto;">
                 <img data-image-src="루미.png" alt="Rumi">
             </div>
-            <div id="tutoring-content" class="modal-scroll"
+            <div id="tutoring-content" class="study-text modal-scroll"
                 style="text-align: left; padding: 8px 10px; font-size: 0.9rem; line-height: 1.55; white-space: pre-wrap; background: #222; border: 1px solid #444; min-height: 120px;">
                 수업을 시작하려면 '수업 시작' 버튼을 눌러주세요.
             </div>
@@ -1616,10 +1616,10 @@
     <div id="modal-quiz" class="modal">
         <div class="modal-content" style="width: 320px;">
             <h3>퀴즈</h3>
-            <div id="quiz-question" style="font-size: 1.2rem; margin: 10px 0; font-weight: bold; color: #ffd700;"></div>
-            <div id="quiz-desc" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"></div>
-            <div id="quiz-options" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
-            <div id="quiz-feedback" style="margin-top:10px; font-weight:bold; height:20px;"></div>
+            <div id="quiz-question" class="study-text" style="font-size: 1.2rem; margin: 10px 0; color: #ffd700;"></div>
+            <div id="quiz-desc" class="study-text" style="font-size: 0.9rem; margin-bottom: 10px; color: #aaa; display:none;"></div>
+            <div id="quiz-options" class="study-text" style="display: flex; flex-direction: column; gap: 8px; width: 100%;"></div>
+            <div id="quiz-feedback" class="study-text" style="margin-top:10px; font-weight:bold; height:20px;"></div>
         </div>
     </div>
 
@@ -1811,13 +1811,13 @@
 
             <!-- Passage View: scrollable passage + back button -->
             <div id="toeic-passage-view" class="toeic-passage-view">
-                <div id="toeic-passage-scroll" class="toeic-passage-scroll"></div>
+                <div id="toeic-passage-scroll" class="study-text toeic-passage-scroll"></div>
                 <button class="toeic-back-btn" onclick="RPG.backToToeicHub()">↩ 돌아가기</button>
             </div>
 
             <!-- Explanation View -->
             <div id="toeic-explanation-view" class="toeic-passage-view" style="display:none;">
-                <div id="toeic-explanation-scroll" class="toeic-passage-scroll"></div>
+                <div id="toeic-explanation-scroll" class="study-text toeic-passage-scroll"></div>
                 <div id="toeic-explanation-actions" style="display:none; flex-direction:column; gap:10px;">
                     <button id="toeic-lumi-question-btn" class="menu-btn" onclick="RPG.openToeicLumiQuestion()"
                         style="width:100%; max-width:none;">질문하기</button>
@@ -1827,11 +1827,11 @@
 
             <!-- Question View: question + options + feedback + back button -->
             <div id="toeic-question-view" class="toeic-question-view">
-                <div id="toeic-q-text"
-                    style="font-size:1rem; font-weight:bold; margin-bottom:15px; color:#ffd700; line-height:1.4;">
+                <div id="toeic-q-text" class="study-text"
+                    style="font-size:1rem; margin-bottom:15px; color:#ffd700; line-height:1.4;">
                 </div>
-                <div id="toeic-options" style="display:flex; flex-direction:column; gap:10px;"></div>
-                <div id="toeic-feedback" style="margin-top:15px; font-weight:bold; min-height:24px; text-align:center;">
+                <div id="toeic-options" class="study-text" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <div id="toeic-feedback" class="study-text" style="margin-top:15px; font-weight:bold; min-height:24px; text-align:center;">
                 </div>
                 <button id="toeic-q-back-btn" class="toeic-back-btn" onclick="RPG.backToToeicHub()"
                     style="display:none;">↩ 돌아가기</button>
@@ -1842,7 +1842,7 @@
     <div id="modal-toeic-result" class="modal">
         <div class="modal-content" style="height:auto;">
             <h3 id="toeic-result-title">학습 종료</h3>
-            <div id="toeic-result-content" class="modal-scroll"
+            <div id="toeic-result-content" class="study-text modal-scroll"
                 style="text-align:left; font-size:0.9rem; line-height:1.5;"></div>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="menu-btn" onclick="RPG.openToeicReview()"
@@ -1887,6 +1887,7 @@
                 { src: 'toeic_explanations.js', label: '토익 해설' },
                 { src: 'api.js', label: 'API 모듈' },
                 { src: 'logic.js', label: '게임 로직' },
+                { src: 'skill_display.js', label: '스킬 표시' },
                 { src: 'card_pool_rules.js', label: '카드풀 규칙' },
                 { src: 'battle_runtime.js', label: '전투 런타임' },
                 { src: 'rpg_features.js', label: 'RPG Feature Modules' },
@@ -2610,7 +2611,7 @@
             _featuresInstalled: false,
 
             // Constants
-            NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, desc: '기본 물리 공격', effects: [] },
+            NORMAL_ATTACK: { name: '일반 공격', type: 'phy', tier: 1, cost: 0, val: 1.0, effects: [] },
 
 
             hydrateModules() {
@@ -4086,13 +4087,10 @@
                 ImageAssets.load(document.getElementById('md-img'), data);
                 document.getElementById('md-grade').className = data.grade;
                 document.getElementById('md-grade').innerText = `${data.grade.toUpperCase()} / ${data.role} / ${data.element}`;
-                document.getElementById('md-stats').innerHTML = `HP:${data.stats.hp} ATK:${data.stats.atk} MATK:${data.stats.matk}<br>DEF:${data.stats.def} MDEF:${data.stats.mdef}`;
+                document.getElementById('md-stats').innerHTML = `HP: ${data.stats.hp}<br>물리 공격력: ${data.stats.atk} / 마법 공격력: ${data.stats.matk}<br>물리 방어력: ${data.stats.def} / 마법 방어력: ${data.stats.mdef}`;
                 let skills = `<p style="color:#ffd700; margin:5px 0;">[특성] ${data.trait.desc}</p>`;
-                skills += `<p style="margin:2px 0;">[일반 공격] (Tier 1) 기본 물리 공격</p>`;
-                data.skills.forEach(s => {
-                    let multText = s.val ? ` (x${s.val})` : '';
-                    skills += `<p style="margin:2px 0;">[${s.name}] · ${SkillTypes.label(s.type)} (Tier ${s.tier}, MP:${s.cost}) ${s.desc}${multText}</p>`;
-                });
+                skills += SkillDisplay.html(this.NORMAL_ATTACK, {entity:data});
+                data.skills.forEach(s => { skills += SkillDisplay.html(s, {entity:data}); });
                 document.getElementById('md-skills').innerHTML = skills;
                 document.getElementById('modal-card').classList.add('active');
             },
@@ -4215,7 +4213,7 @@
                 const btn = document.createElement('button');
                 btn.className = `skill-btn ${RPG.NORMAL_ATTACK.type}`;
                 btn.dataset.skillType = RPG.NORMAL_ATTACK.type;
-                btn.setAttribute('aria-label', `${SkillTypes.label(RPG.NORMAL_ATTACK.type)} · 일반공격 · MP 0`);
+                btn.setAttribute('aria-label', SkillDisplay.accessibleName(RPG.NORMAL_ATTACK, p.mp));
                 btn.innerHTML = `<span class="skill-name">일반공격</span><span class="skill-cost">MP 0</span>`;
                 btn.onclick = () => executePlayerSkill(RPG.NORMAL_ATTACK);
                 panel.appendChild(btn);
@@ -4225,7 +4223,7 @@
                     const btn = document.createElement('button');
                     btn.className = `skill-btn ${s.type}`;
                     btn.dataset.skillType = s.type;
-                    btn.setAttribute('aria-label', `${SkillTypes.label(s.type)} · ${s.name} · MP ${s.cost}${p.mp < s.cost ? ' · MP 부족' : ''}`);
+                    btn.setAttribute('aria-label', SkillDisplay.accessibleName(s, p.mp));
                     btn.innerHTML = `<span class="skill-name">${SkillTypes.names[s.type] ? '' : '타입 미확인 · '}${s.name}</span><span class="skill-cost">MP ${s.cost}</span>`;
                     if (p.mp < s.cost) btn.disabled = true;
                     else btn.onclick = () => {
@@ -4894,42 +4892,34 @@
 
                 let content = `<b>[${char.name}]</b><br>HP: ${char.hp}/${char.maxHp}<br>`;
                 if (side === 'player') content += `MP: ${char.mp}/${char.maxMp || GAME_CONSTANTS.MAX_MP}<br>`;
-                content += `ATK: ${colorize(eff.atk, getBase('atk', char.atk))} / MATK: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
-                content += `DEF: ${colorize(eff.def, getBase('def', char.def))} / MDEF: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
+                content += `물리 공격력: ${colorize(eff.atk, getBase('atk', char.atk))} / 마법 공격력: ${colorize(eff.matk, getBase('matk', char.matk))}<br>`;
+                content += `물리 방어력: ${colorize(eff.def, getBase('def', char.def))} / 마법 방어력: ${colorize(eff.mdef, getBase('mdef', char.mdef))}<br>`;
                 // Enemy attacks do not roll critical hits; player attacks do not roll enemy evasion.
                 if (side === 'player') content += `치명타율: ${colorize(eff.crit, (char.baseCrit || 10))}% / 회피율: ${colorize(eff.evasion, (char.baseEva || 0) + 5)}%<br>`;
                 content += `상태: ${buffs}<br><br>`;
 
-                if (side === 'player') {
-                    content += `<b>[스킬]</b><br>`;
-                    (char.skills || char.proto.skills).forEach(s => {
-                        let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name} · ${SkillTypes.label(s.type)} · MP ${s.cost}: ${s.desc}${multText}<br>`;
-                    });
-                } else {
-                    content += `<b>[스킬]</b><br>`;
-                    char.skills.forEach(s => {
-                        let multText = s.val ? ` (x${s.val})` : '';
-                        content += `- ${s.name} · ${SkillTypes.label(s.type)} · MP ${s.cost}: ${s.desc}${multText}<br>`;
-                    });
-                }
+                content += `<b>[스킬]</b>`;
+                const displayOptions = {entity: side === 'player' ? char.proto : char, enemy:side !== 'player'};
+                if (side === 'player') content += SkillDisplay.html(this.NORMAL_ATTACK, displayOptions);
+                (char.skills || char.proto.skills).forEach(s => { content += SkillDisplay.html(s, displayOptions); });
                 this.openInfoModal(char.name, content);
             },
 
             showFieldBuffInfo() {
                 if (this.battle.fieldBuffs.length === 0) return this.showAlert("활성화된 필드 버프가 없습니다.");
                 const buffInfo = {
-                    'sun_bless': '물공/마공 +30%, 치명타대미지 +60%',
-                    'moon_bless': '마공 +30%, 회피율 +15%',
-                    'sanctuary': '마공 +30%, 마방 +30%',
-                    'goddess_descent': '물공/마공 +30%, 방어/마방 +30%',
-                    'destiny_oath': '물공/마공 +30%, 방어/마방 +30%',
-                    'earth_bless': '물공/마공 +25%',
-                    'twinkle_party': '물공 +20%, 치명타율 +15%',
-                    'star_powder': '방어/마방 +40%',
-                    'valentine': '방어/마방 +50%',
+                    'sun_bless': '물리 공격력·마법 공격력 +30%, 치명타 피해 +60%',
+                    'moon_bless': '마법 공격력 +30%, 회피율 +15%',
+                    'sanctuary': '마법 공격력 +30%, 마법 방어력 +30%',
+                    'goddess_descent': '물리 공격력·마법 공격력 +30%, 물리 방어력·마법 방어력 +30%',
+                    'destiny_oath': '물리 공격력·마법 공격력 +30%, 물리 방어력·마법 방어력 +30%',
+                    'earth_bless': '물리 공격력·마법 공격력 +25%',
+                    'twinkle_party': '물리 공격력 +20%, 치명타율 +15%',
+                    'star_powder': '물리 방어력·마법 방어력 +40%',
+                    'valentine': '물리 방어력·마법 방어력 +50%',
+                    'arena': '아군 전체 일반 공격 배율 ×2',
                     'gale': '치명타율 +20%, 회피율 +20%',
-                    'reaper_realm': '치명타율 +40%, 치명타대미지 +40%'
+                    'reaper_realm': '치명타율 +40%, 치명타 피해 +40%'
                 };
                 let msg = "";
                 this.battle.fieldBuffs.forEach(b => {

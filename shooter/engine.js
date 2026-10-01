@@ -1,5 +1,5 @@
 import { HEROES, STAGES, DUNGEONS, LIMITS, clamp } from './content.js';
-import { ARTIFACTS, DIFFICULTIES, loadoutStats } from './meta.js';
+import { COLLECTIBLE_ARTIFACTS, DIFFICULTIES, loadoutStats } from './meta.js';
 const TAU = Math.PI * 2;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const BOMB_DURATIONS = [4,2,3,3,3,3,3,3,10];
@@ -9,6 +9,7 @@ const ABYSS_ENEMY_HP_SCALE = [1.30,1.26,1.22,1.18,1.14,1.10];
 const ABYSS_SENTINEL_HP_SCALE = [1.40,1.36,1.32,1.28,1.24,1.20];
 const ABYSS_BOSS_HP_SCALE = [1.60,1.54,1.48,1.42,1.36,1.30];
 const MIRACLE_BOMBS = 5;
+const RECOVERY_DROP_RATE = .70;
 // Events already use a higher base enemy tier, so this reaches above the forest
 // teleporter without applying its full 1.65 multiplier a second time.
 const EVENT_TELEPORT_HP_MULTIPLIER = 1.25;
@@ -19,7 +20,7 @@ export class Game {
     this.width = 450; this.height = height; this.seed = seed; this.mode = mode; this.onEvent = onEvent;
     this.difficulty = DIFFICULTIES.find(d => d.id === mode) || DIFFICULTIES[1];
     this.loadout = loadoutStats(artifacts, this.difficulty.id); this.artifacts = new Set(this.loadout.ids);
-    this.maxLife = this.loadout.maxLife + (this.hero.lifeBonus || 0); this.maxBombs = this.loadout.maxBombs + (this.hero.bombBonus || 0); this.room = 0; this.reviveUsed = false; this.fairyFire = 0; this.darkFairyFire = 0; this.maskUses = 0;
+    this.maxLife = this.loadout.maxLife + (this.hero.lifeBonus || 0); this.maxBombs = this.loadout.maxBombs + (this.hero.bombBonus || 0); this.room = 0; this.reviveUsed = false; this.reviveAttempts = 0; this.fairyFire = 0; this.darkFairyFire = 0; this.maskUses = 0;
     this.player = { x: 225, y: height * .78, targetX: 225, targetY: height * .78, radius: Math.max(1,(this.hero.radius || 5)+this.loadout.radius), lives: this.loadout.lives + (this.hero.lifeBonus || 0), barrier: this.artifacts.has('clover'), invincible: 2.5, fire: 0, tilt: 0, recoil: 0 };
     this.score = 0; this.bestCombo = 0; this.combo = 0; this.comboTime = 0; this.graze = 0; this.kills = 0;
     this.power = this.artifacts.has('origin') ? 2 : 1; this.powerPoints = 0; this.bombs = Math.min(this.maxBombs,this.loadout.bombs + (this.hero.bombBonus || 0)); this.attackBonus = this.loadout.attack; this.bombTime = 0; this.bombPulse = 0;
@@ -37,6 +38,14 @@ export class Game {
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
   get isAbyss() { return this.mode === 'abyss'; }
+  get usesHeroBomb() { return !this.artifacts.has('sun') && !this.artifacts.has('holyflame'); }
+  get reviveRemaining() { return Math.max(0, this.loadout.revives - Math.max(this.reviveAttempts, this.reviveUsed ? 1 : 0)); }
+  holySwordBonus(enemy) {
+    // Ease out over the viewport diagonal: a normal firing distance still earns
+    // a substantial bonus, while overlapping centers and opposite corners are exact endpoints.
+    const ratio = clamp(distance(this.player, enemy) / Math.hypot(this.width, this.height), 0, 1);
+    return .5 * (1 - ratio * ratio);
+  }
   abyssEnemyHpScale(enemy) {
     if (!this.isAbyss) return 1;
     return enemy.miniboss ? (ABYSS_SENTINEL_HP_SCALE[this.stageIndex] ?? 1.20) : (ABYSS_ENEMY_HP_SCALE[this.stageIndex] ?? 1.10);
@@ -86,10 +95,10 @@ export class Game {
   }
   fire(dt) {
     const p = this.player; p.fire -= dt; if (p.fire > 0) return;
-    const boost = this.heroIndex === 2 && !this.artifacts.has('sun') && this.bombTime > 0 ? 1.75 : 1;
+    const boost = this.heroIndex === 2 && this.usesHeroBomb && this.bombTime > 0 ? 1.75 : 1;
     const damage = (10 + this.power * 2.5) * boost * (this.heroIndex === 2 ? 1.1 : 1);
     p.recoil = 1;
-    if (this.heroIndex === 8 && !this.artifacts.has('sun') && this.bombTime > 0) {
+    if (this.heroIndex === 8 && this.usesHeroBomb && this.bombTime > 0) {
       p.fire = .16;
       for (const side of [-1,1]) this.shot(side*.055, damage*3.8*this.loadout.bomb, 'darkglass', { x:p.x+side*14, r:17, pierce:true, vy:-700, damageKind:'bomb' });
       this.emit('shot', { weapon:'darkglass' }); return;
@@ -172,7 +181,7 @@ export class Game {
     });
   }
   updateOrbit(previous) {
-    if(this.weapon!=='orbit' || !['wave','boss'].includes(this.phase) || (this.bombTime>0&&!this.artifacts.has('sun')))return;
+    if(this.weapon!=='orbit' || !['wave','boss'].includes(this.phase) || (this.bombTime>0&&this.usesHeroBomb))return;
     const centers=this.orbitCenters();
     centers.forEach((orb,i)=>{
       const from=previous[i],hits=this.orbitHits[i];
@@ -210,6 +219,7 @@ export class Game {
       + (this.artifacts.has('eye') && this.bombs === 0 ? .3 : 0)
       + (this.artifacts.has('startboost') && this.power === 1 ? .5 : 0)
       + (this.artifacts.has('starpowder') && this.player.barrier ? .2 : 0)
+      + (this.artifacts.has('holysword') ? this.holySwordBonus(enemy) : 0)
       + (kind === 'attack' ? this.loadout.normalAttack : 0);
     amount *= 1 + artifactAttack;
     enemy.hp -= amount; enemy.flash = .07; this.stats.damage += amount; this.stats.hits++;
@@ -242,7 +252,10 @@ export class Game {
     const bonus = this.bossTimeScore(this.bossClearTime);
     this.timeBonus += bonus; this.score += bonus;
   }
-  drop(x, y, type) { this.add('pickups', { x, y, type, age: 0, vx: (this.random() - .5) * 45 }, LIMITS.pickups); }
+  drop(x, y, type) {
+    if (type === 'life' && (this.artifacts.has('cursedsword') || this.random() >= RECOVERY_DROP_RATE)) return;
+    this.add('pickups', { x, y, type, age: 0, vx: (this.random() - .5) * 45 }, LIMITS.pickups);
+  }
   clearBullets() {
     for (let i = 0; i < this.bullets.length; i += 5) this.particlesAt(this.bullets[i].x, this.bullets[i].y, this.hero.color, 2);
     this.bullets.length = 0;
@@ -255,7 +268,18 @@ export class Game {
       this.player.lives--; this.maskUses++; paidWithLife = true;
     }
     else return false;
+    if (this.artifacts.has('holyflame')) {
+      this.bombs = 0; this.power = 1; this.powerPoints = 0;
+      this.stats.bombs++; this.bombKind = 'holyflame'; this.bombTime = this.bombDuration = 2;
+      this.bombElapsed = this.bombTicks = this.bombDamagePool = 0;
+      this.bombInvincibility = 2; this.bombOrigin = {x:this.player.x,y:this.player.y};
+      this.player.invincible = Math.max(this.player.invincible, 2); this.clearBullets(); this.hazards.length = 0;
+      this.dropEventSubpatterns(true);
+      for (const enemy of [...this.enemies]) this.damage(enemy, 5500 * this.loadout.bomb, enemy.x, enemy.y, 'bomb');
+      this.emit('bomb', {hero:this.heroIndex,holyflame:true}); return true;
+    }
     const corona=this.artifacts.has('sun');
+    this.bombKind = corona ? 'corona' : 'hero';
     this.stats.bombs++; this.bombTime = corona ? 1 : BOMB_DURATIONS[this.heroIndex];
     this.bombDuration=this.bombTime;this.bombElapsed=0;this.bombTicks=0;
     this.bombInvincibility = corona ? 1 : BOMB_INVULNERABILITY[this.heroIndex];
@@ -282,6 +306,7 @@ export class Game {
       this.particlesAt(p.x,p.y,'#a9f5ff',12); this.emit('barrierBreak'); return true;
     }
     if (this.artifacts.has('shield') && this.bombs > 0) this.bombs--; else p.lives--;
+    if (this.artifacts.has('supernova')) this.bombs = Math.max(0, this.bombs - 1);
     this.stats.deaths++; p.invincible = this.artifacts.has('cloak') ? 4 : 2.5; this.combo = 0; this.comboTime = 0;
     if (!this.artifacts.has('steelshield')) {
       this.power = this.artifacts.has('burningcore') ? 1 : Math.max(1, this.power - 1);
@@ -367,7 +392,7 @@ export class Game {
     if (entered) {
       this.bossPattern = phase; this.clearBullets(); this.hazards.length = 0; this.effects=this.effects.filter(f=>!['celestialWarning','eventWave'].includes(f.type)); b.fire = 1.2; b.subpatternNext = null;
       if (this.stageIndex===6) {
-        b.nextLight=this.bossClock+(this.isAbyss?3.6:4); b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+(this.isAbyss?2.5:3); b.asteaCrossCount=0;
+        b.nextLight=this.bossClock+(this.isAbyss?3.2:4); b.nextBlade=this.bossClock+1.5; b.nextJudgmentCross=this.bossClock+(this.isAbyss?2:3); b.asteaCrossCount=0;
       }
       this.emit('pattern', { phase, name: this.stage.pattern[phase] });
     }
@@ -378,9 +403,9 @@ export class Game {
     const speed = 102 + this.stageIndex * 10 + phase * 12;
     const t = this.bossClock;
     if(this.stageIndex===6 && phase===0 && t>=b.nextLight) {
-      b.nextLight=t+(this.isAbyss?3.6:4);
+      b.nextLight=t+(this.isAbyss?3.2:4);
       const gap=clamp(this.player.x,85,365);
-      this.effect('celestialWarning',{x:gap,y:this.height-28,life:1.5,wait:1.2,gap,bottom:true,color:'#ffe1a3'});
+      this.effect('celestialWarning',{x:gap,y:this.height-28,life:1.5,wait:1.2,gap,bottom:true,color:'#ffe1a3',...(this.isAbyss?{corridor:55.8}:{})});
     }
     if(this.stageIndex===6 && phase===1 && t>=b.nextBlade) {
       b.nextBlade=t+1.5;
@@ -390,7 +415,7 @@ export class Game {
       this.addHazard(x,28);this.addHazard(y,28,'horizontal');
     }
     if(this.stageIndex===6 && phase===2 && t>=b.nextJudgmentCross) {
-      b.nextJudgmentCross=t+(this.isAbyss?2.5:3);
+      b.nextJudgmentCross=t+(this.isAbyss?2:3);
       this.addHazard(clamp(this.player.x,70,380),28);
       this.addHazard(clamp(this.player.y,240,this.height-120),28,'horizontal');
     }
@@ -398,24 +423,24 @@ export class Game {
     if (this.dungeon.event) { this.eventBossAttack(phase,b,aim); this.emit('enemyShot',{boss:true}); return; }
     switch (this.stageIndex) {
       case 0:
-        b.fire = this.isAbyss ? (phase === 0 ? .95 : .70) : (phase === 0 ? 1.05 : .8);
-        if (phase === 0) this.fan(b.x, b.y + 25, this.isAbyss ? 7 : 5, speed + 12, .18, aim);
-        else if (phase === 1) { const count=this.isAbyss?16:14; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count + t * .28, speed, { shape: 'diamond' }); }
-        else { this.fan(b.x, b.y, this.isAbyss ? 9 : 7, speed, .16, aim); this.addHazard(65 + (Math.floor(t) % 4) * 105, 28); } break;
+        b.fire = this.isAbyss ? [.8,.70,.60][phase] : (phase === 0 ? 1.05 : .8);
+        if (phase === 0) this.fan(b.x, b.y + 25, this.isAbyss ? 9 : 5, speed + 12, .18, aim);
+        else if (phase === 1) { const count=this.isAbyss?20:14; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count + t * .28, speed, { shape: 'diamond' }); }
+        else { this.fan(b.x, b.y, this.isAbyss ? 11 : 7, speed, .16, aim); this.addHazard(65 + (Math.floor(t) % 4) * 105, 28); } break;
       case 1:
         b.fire = this.isAbyss ? (phase === 0 ? .86 : .55) : (phase === 0 ? .95 : .62);
-        for (const side of [-1, 1]) this.fan(b.x + side * 43, b.y + 15, this.isAbyss ? [4,5,7][phase] : 3 + phase, speed, .19, Math.PI / 2 + Math.sin(t * .8) * side * .55, { shape: 'heart', color: '#ffa7cf', turn: side * .12 });
-        if (phase === 2) this.fan(b.x, b.y, this.isAbyss ? 4 : 3, speed + 35, .13, aim, { color: '#ffe9b4' }); break;
+        for (const side of [-1, 1]) this.fan(b.x + side * 43, b.y + 15, this.isAbyss ? [6,7,9][phase] : 3 + phase, speed, .19, Math.PI / 2 + Math.sin(t * .8) * side * .55, { shape: 'heart', color: '#ffa7cf', turn: side * .12 });
+        if (phase === 2) this.fan(b.x, b.y, this.isAbyss ? 5 : 3, speed + 35, .13, aim, { color: '#ffe9b4' }); break;
       case 2:
         b.fire = phase === 0 ? .95 : .72;
-        if (phase === 1) { const gap = 50 + (Math.floor(t * .65) % 4) * 105; for (let x = 25; x < 450; x += this.isAbyss ? 30 : 32) if (Math.abs(x - gap) > 43) this.enemyBullet(x, 76, Math.PI / 2, speed, { shape: 'diamond', color: '#d6adff' }); }
-        else { const count=this.isAbyss?(phase===0?14:21):12+phase*3; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count - t * .27, speed, { turn: phase === 2 ? .24 : 0, shape: 'diamond', color: ['#e8a9ff', '#93d9ff', '#ffbfcf'][i % 3] }); }
+        if (phase === 1) { const gap = 50 + (Math.floor(t * .65) % 4) * 105; for (let x = 25; x < 450; x += this.isAbyss ? 24 : 32) if (Math.abs(x - gap) > 43) this.enemyBullet(x, 76, Math.PI / 2, speed, { shape: 'diamond', color: '#d6adff' }); }
+        else { const count=this.isAbyss?(phase===0?18:24):12+phase*3; for (let i = 0; i < count; i++) this.enemyBullet(b.x, b.y, i * TAU / count - t * .27, speed, { turn: phase === 2 ? .24 : 0, shape: 'diamond', color: ['#e8a9ff', '#93d9ff', '#ffbfcf'][i % 3] }); }
         if (phase === 2 && Math.floor(t) % 3 === 0) this.addHazard(clamp(this.player.x, 40, 410), 30); break;
       case 3:
-        b.fire=phase===0?1.05:.8;
-        const count=this.isAbyss?[18,24,30][phase]:12+phase*4;
+        b.fire=this.isAbyss?[.945,.72,.72][phase]:(phase===0?1.05:.8);
+        const count=this.isAbyss?[20,28,36][phase]:12+phase*4;
         for(let i=0;i<count;i++)this.enemyBullet(b.x,b.y,i*TAU/count+t*.24,speed,{shape:'petal',turn:(i%2?1:-1)*.16});
-        if(phase===2)this.fan(b.x,b.y,this.isAbyss?5:3,speed+30,.15,aim);break;
+        if(phase===2)this.fan(b.x,b.y,this.isAbyss?7:3,speed+30,.15,aim);break;
       case 4:
         b.fire=phase===0?1:.85;
         this.fan(b.x,b.y,5+phase+(this.isAbyss?1:0),speed,.20,aim,{r:6,ricochet:phase===2?3:0});
@@ -430,16 +455,16 @@ export class Game {
         if (phase > 0 && Math.floor(t * 2) % 3 === 0) this.addHazard(60 + Math.floor(this.random() * 4) * 110, phase === 2 ? 34 : 26);
         if (phase === 2) this.fan(b.x, b.y, 3, speed + 35, .16, aim); break;
       case 6:
-        b.fire=this.isAbyss?[1.12,1.12,2.4][phase]:(phase===2?2.6:1.25);
+        b.fire=this.isAbyss?[1.02,1.02,2.2][phase]:(phase===2?2.6:1.25);
         if(phase===0) {
-          this.fan(b.x,b.y,this.isAbyss?8:7,150,.19,aim,{shape:'diamond'});
+          this.fan(b.x,b.y,this.isAbyss?10:7,150,.19,aim,{shape:'diamond'});
         } else if(phase===1) {
-          this.fan(b.x,b.y,this.isAbyss?10:7,155,.22,Math.PI/2,{shape:'diamond'});
+          this.fan(b.x,b.y,this.isAbyss?14:7,155,.22,Math.PI/2,{shape:'diamond'});
         } else {
           // A fixed, telegraphed corridor stays open for this entire volley.
           const gap=[90,225,360][(b.judgmentCount||0)%3];b.judgmentCount=(b.judgmentCount||0)+1;
-          this.effect('celestialWarning',{x:gap,y:80,life:1.5,wait:1.2,gap,bottom:false,color:'#ffe1a3'});
-          this.fan(b.x,b.y,this.isAbyss?7:5,175,.17,aim,{shape:'diamond'});
+          this.effect('celestialWarning',{x:gap,y:80,life:1.5,wait:1.2,gap,bottom:false,color:'#ffe1a3',...(this.isAbyss?{corridor:55.8}:{})});
+          this.fan(b.x,b.y,this.isAbyss?10:5,175,.17,aim,{shape:'diamond'});
         }
         break;
     }
@@ -485,8 +510,7 @@ export class Game {
   }
   eventBossAttack(phase, b, aim) {
     const t=this.bossClock, color=this.stage.color;
-    b.fire=this.isAbyss && ['harmonious','gold-dragon'].includes(this.dungeon.asset)
-      ? [1.15,1.00,.85][phase] : [1.25,1.08,.92][phase];
+    b.fire=[1.25,1.08,.92][phase];
     // Every event pattern remains telegraphed, but now asks the player to move
     // through a denser field rather than idling inside its central corridor.
     const ring=(count,speed,rotation,shape,extra={})=>{
@@ -499,29 +523,32 @@ export class Game {
     };
     switch(this.dungeon.asset) {
       case 'harmonious':
-        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,5+phase+(this.isAbyss?1:0),128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
-        if(phase>0)ring(this.isAbyss?20:18,110,t*.1,'petal');
+        if(this.isAbyss)b.fire=[1.15,1,.85][phase];
+        for(const side of [-1,1]) this.fan(b.x+side*48,b.y+12,this.isAbyss?[8,9,10][phase]:5+phase,128,.20,Math.PI/2+side*(.62+Math.sin(t*.45)*.2),{shape:'heart',color:side<0?'#ffacd0':'#a7edd4',r:5});
+        if(phase>0)ring(this.isAbyss?22:18,110,t*.1,'petal');
         break;
       case 'gold-dragon':
-        for(const side of [-1,1])this.fan(b.x+side*55,b.y,6+phase+(this.isAbyss?1:0),132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
-        if(phase===2)ring(this.isAbyss?26:24,112,t*.14,'diamond');
+        if(this.isAbyss)b.fire=[1.035,.90,.765][phase];
+        for(const side of [-1,1])this.fan(b.x+side*55,b.y,this.isAbyss?[9,10,11][phase]:6+phase,132,.15,Math.PI/2+side*.72,{shape:'diamond',color:side<0?'#ffe6a1':'#8ee7df',r:5});
+        if(phase===2)ring(this.isAbyss?32:24,112,t*.14,'diamond');
         break;
       case 'ancient-soul':
-        ring(this.isAbyss?[24,30,35][phase]:20+phase*5,126,t*.19,'petal',{turn:.09});
-        if(phase>0)this.fan(b.x,b.y,this.isAbyss&&phase===2?5:4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
+        if(this.isAbyss)b.fire=[1.125,.972,.828][phase];
+        ring(this.isAbyss?[30,35,40][phase]:20+phase*5,126,t*.19,'petal',{turn:.09});
+        if(phase>0)this.fan(b.x,b.y,this.isAbyss&&phase===2?7:4,142,.22,aim,{shape:'diamond',color:'#fff1ba',r:4});
         break;
       case 'behemoth': {
-        b.fire=this.isAbyss?[1.47,1.45,1.12][phase]:(phase===2?1.2:1.55);
+        b.fire=this.isAbyss?[1.3,1.45,1.02][phase]:(phase===2?1.2:1.55);
         const gap=[100,225,350][(b.earthWave||0)%3]; b.earthWave=(b.earthWave||0)+1;
-        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:this.isAbyss&&phase===0?25:26,corridor:this.isAbyss&&phase===2?68:72,projectileSpeed:140});
-        if(phase>0)ring(this.isAbyss&&phase===2?20:18,118,0,'diamond',{r:7});
+        this.effect('eventWave',{x:gap,y:90,gap,wait:1,life:1.3,color,phase,spacing:this.isAbyss&&phase<2?30:26,corridor:this.isAbyss&&phase===2?62:72,projectileSpeed:140});
+        if(phase>0)ring(this.isAbyss?(phase===2?24:22):18,118,0,'diamond',{r:7});
         break;
       }
       case 'time-ruler':
         b.fire=this.isAbyss?1.90:2.05;
         // An original clock volley inspired by Taisei's stop/release rhythm, not its code.
-        ring(this.isAbyss?18+phase*6:16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
-        if(phase===2)this.fan(b.x,b.y,this.isAbyss?6:5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
+        ring(this.isAbyss?22+phase*6:16+phase*6,128,t*.12,'diamond',{stopAt:.55,releaseAt:1.65,stopped:false});
+        if(phase===2)this.fan(b.x,b.y,this.isAbyss?8:5,140,.26,aim,{shape:'diamond',color:'#fff1c2',r:4});
         break;
     }
   }
@@ -540,7 +567,7 @@ export class Game {
   challengeChoices() {
     if(!this.challenge || this.phase!=='quiz' || this.room!==2 || this.stageIndex>=6 || this.artifacts.size>=9)return [];
     if(!this.pendingArtifacts) {
-      const pool=ARTIFACTS.filter(a=>!this.artifacts.has(a.id));
+      const pool=COLLECTIBLE_ARTIFACTS.filter(a=>!this.artifacts.has(a.id));
       this.pendingArtifacts=[];
       while(pool.length && this.pendingArtifacts.length<3)this.pendingArtifacts.push(pool.splice(Math.floor(this.random()*pool.length),1)[0].id);
     }
@@ -576,8 +603,8 @@ export class Game {
     this.score += this.rankBonus; this.bonusesFinalized = true;
   }
   revive(correct) {
-    if (this.phase !== 'defeat' || this.reviveUsed) return false;
-    this.reviveUsed = true;
+    if (this.phase !== 'defeat' || this.reviveRemaining <= 0) return false;
+    this.reviveUsed = true; this.reviveAttempts++;
     if (!correct) return false;
     this.finished = false; this.player.lives = !this.challenge && this.artifacts.has('resurgence') ? this.maxLife : Math.min(2,this.maxLife); this.player.invincible = 4;
     if(!this.challenge && this.artifacts.has('miracle'))this.bombs=Math.min(this.maxBombs,this.bombs+MIRACLE_BOMBS);
@@ -722,13 +749,13 @@ export class Game {
       this.bombElapsed=Math.min(this.bombDuration,this.bombElapsed+dt);
       this.bombTime=Math.max(0,this.bombDuration-this.bombElapsed);
       const ticks=Math.floor((this.bombElapsed+1e-9)/.25),count=ticks-this.bombTicks;
-      if(count>0){this.bombTicks=ticks;if(this.heroIndex!==8||this.artifacts.has('sun'))this.clearBullets(true);
+      if(count>0){this.bombTicks=ticks;if(this.heroIndex!==8||!this.usesHeroBomb)this.clearBullets(true);
         const amount=this.bombDamagePool/(this.bombDuration/.25)*count*this.loadout.bomb;
         if(amount>0)for(const e of [...this.enemies]){this.damage(e,amount,e.x,e.y,'bomb');this.effect('burst',{x:e.x,y:e.y,radius:44,life:.2,color:this.hero.color});}
       }
     }
     for(const [artifact,timer,side] of [['leaf','fairyFire',1],['mirror','darkFairyFire',-1]])if(this.artifacts.has(artifact)&&['wave','boss'].includes(this.phase)) {
-      this[timer]-=dt;if(this[timer]<=0){this[timer]=.3;this.shot(0,15,side===1?'star':'nightstar',{x:p.x+side*44,y:p.y-20,homing:true,r:5});}
+      this[timer]-=dt;if(this[timer]<=0){this[timer]=.3;this.shot(0,this.artifacts.has('forgetmenot')?30:15,side===1?'star':'nightstar',{x:p.x+side*44,y:p.y-20,homing:true,r:5});}
     }
     for (const q of this.particles) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= .97; }
     this.particles = this.particles.filter(q => q.life > 0);
@@ -736,7 +763,7 @@ export class Game {
       f.age += dt;
       if(f.type==='celestialWarning' && !f.fired && f.age>=f.wait && this.phase==='boss') {
         f.fired=true;
-        for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62) {
+        for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>(f.corridor??62)) {
           this.enemyBullet(x,f.bottom?this.height+8:75,f.bottom?-Math.PI/2:Math.PI/2,f.bottom?110:165,{shape:'diamond',color:'#ffe1a3',r:6});
           if(!f.bottom)this.enemyBullet(x,28,Math.PI/2,165,{shape:'diamond',color:'#eacbff',r:6});
         }
@@ -755,7 +782,7 @@ export class Game {
   collect(type) {
     if (type === 'power') { if (this.power < 5 && ++this.powerPoints >= this.powerRequirement) { this.power++; this.powerPoints = 0; this.emit('powerup'); } else if (this.power >= 5) this.score += 250; }
     if (type === 'life') { this.player.lives = Math.min(this.maxLife, this.player.lives + 1); this.emit('heal'); }
-    if (type === 'score') this.score += 50 * this.multiplier;
+    if (type === 'score') this.score += 50 * this.multiplier * (this.artifacts.has('goldcoin') ? 2 : 1);
     this.emit('pickup', { item: type });
   }
 }

@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { MANUAL_BALANCE } from '../manual-data.js';
-import { MANUAL_TABS, renderManual } from '../manual.js';
+import { MANUAL_BALANCE } from '../docs/manual-data.js';
+import { MANUAL_TABS, renderManual } from '../docs/manual-content.js';
 import { HEROES, DUNGEONS } from '../content.js';
-import { ARTIFACTS, DIFFICULTIES } from '../meta.js';
+import { COLLECTIBLE_ARTIFACTS as ARTIFACTS, DIFFICULTIES } from '../meta.js';
 
 test('manual measurements reproduce from current combat sources',()=>{
-  assert.doesNotThrow(()=>execFileSync(process.execPath,[fileURLToPath(new URL('../generate-manual.mjs',import.meta.url)),'--check'],{stdio:'pipe'}));
+  assert.doesNotThrow(()=>execFileSync(process.execPath,[fileURLToPath(new URL('../docs/generate-manual.mjs',import.meta.url)),'--check'],{stdio:'pipe'}));
 });
 test('manual covers every hero, weapon, stage, difficulty and artifact',()=>{
   assert.equal(MANUAL_BALANCE.heroes.length,HEROES.length);
@@ -34,5 +34,7 @@ test('manual covers every hero, weapon, stage, difficulty and artifact',()=>{
   assert.deepEqual(MANUAL_BALANCE.heroes.map(h=>h.bomb.damage),[1058,1300,1248,773,1058,1305,1900,1058,80]);
   assert.equal(MANUAL_BALANCE.heroes[8].bomb.invincibility,2);
   assert.equal(MANUAL_BALANCE.corona.damage,2000);
+  assert.equal(MANUAL_BALANCE.holyflame.damage,5500);
+  assert.equal(MANUAL_BALANCE.holyflame.invincibility,2);
   for(const [id] of MANUAL_TABS)assert.ok(renderManual(id).length>500);
 });

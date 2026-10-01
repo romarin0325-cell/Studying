@@ -63,7 +63,8 @@ try {
   assert.equal(await page.evaluate(()=>__challenge.game.artifacts.size),9);assert.equal(await page.evaluate(()=>__challenge.game.phase),'victory');
   assert.match(await page.locator('.panel').innerText(),/보스 타임어택 총합/);assert.match(await page.locator('.panel').innerText(),/RANK/);
   const profileAfter=await page.evaluate(()=>JSON.stringify({owned:__challenge.profile.owned,equipped:__challenge.profile.equipped,clears:__challenge.profile.clears,best:__challenge.saved.best}));
-  assert.equal(profileAfter,profileBefore);assert.equal(await page.evaluate(()=>__challenge.profile.tickets.length),ticketsBefore+1);await shot('victory');
+  const expectedProfile=JSON.parse(profileBefore);expectedProfile.clears['0:0:normal:6']=true;
+  assert.deepEqual(JSON.parse(profileAfter),expectedProfile);assert.equal(await page.evaluate(()=>__challenge.profile.tickets.length),ticketsBefore+1);await shot('victory');
   await click('#result-artifacts');assert.equal(await page.locator('.run-artifact').count(),9);await click('#run-artifacts-back');assert.equal(await page.evaluate(()=>__challenge.profile.tickets.length),ticketsBefore+1);await click('#again');
   assert.deepEqual(await page.evaluate(()=>{const g=__challenge.game;return [g.stageIndex,g.room,g.artifacts.size,g.maskUses,g.reviveUsed];}),[0,0,3,0,false]);
   checks.push('All 21 clear/quiz screens progress, nine run artifacts stay out of permanent inventory, one weekly ticket is saved and restart resets the run');
@@ -71,7 +72,7 @@ try {
   for(const [phase,hp] of [[0,1],[1,.6],[2,.3]]) {
     await page.evaluate(hp=>{const g=__challenge.game;g.boss.hp=g.boss.maxHp*hp;g.bossPattern=-1;},hp);await page.clock.runFor(1700);await shot(`astea-${phase}`);
   }
-  assert.equal(await page.evaluate(()=>__challenge.art.bosses.length),12);assert.equal(await page.evaluate(()=>__challenge.art.urls.relics.length),42);
+  assert.equal(await page.evaluate(()=>__challenge.art.bosses.length),12);assert.equal(await page.evaluate(()=>__challenge.art.urls.relics.length),48);
   // The release uses preprocessed WebP files; decode their dimensions without a runtime canvas readback.
   const bounds=await page.evaluate(async()=>Promise.all(__challenge.art.urls.bosses.map(async url=>{const image=new Image();image.src=url;await image.decode();return {w:image.naturalWidth,h:image.naturalHeight};})));
   assert.ok(bounds.every(b=>b.w>0&&b.w<=512&&b.h>0&&b.h<=512));
