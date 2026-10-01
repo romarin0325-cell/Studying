@@ -32,7 +32,7 @@ function costumeIndex(hero) { const costume=costumeForHero(profile,hero);return 
 function heroArtUrl(hero) { const index=costumeIndex(hero);return index<0?art.urls.heroes[hero]:art.urls.costumes[index]; }
 function bombDetails(index,active=false) {
   const has=id=>active&&game?game.artifacts.has(id):profile.equipped.includes(id)&&profile.owned.includes(id);
-  if(has('holyflame'))return {bomb:'홀리플레임',bombInfo:'모든 적에게 기본 피해 5500 · 무적 2초. 남은 봄을 모두 소모하고 파워와 누적 P를 초기화해요.'};
+  if(has('holyflame'))return {bomb:'홀리플레임',bombInfo:'모든 적에게 기본 피해 5800 · 무적 2초. 남은 봄을 모두 소모하고 파워와 누적 P를 초기화해요.'};
   return has('sun') ? {bomb:'코로나',bombInfo:'황금의 태양이 모든 적에게 피해를 줘요. 지속시간과 무적시간은 1초예요.'} : HEROES[index];
 }
 function powerRequirement(index=chosenHero) { return ([0,7].includes(index)?4:3)-(profile.equipped.includes('dew')?1:0); }

@@ -93,19 +93,19 @@ test('holy sword uses live centers and viewport diagonal, with a useful ordinary
   g.player.x=enemy.x;g.player.y=enemy.y;g.damage(enemy,100,enemy.x,enemy.y);near(g.stats.damage,130);
 });
 
-test('holy flame replaces every hero ultimate, spends all bombs and power, deals one 5500 hit and grants two seconds',()=>{
+test('holy flame replaces every hero ultimate, spends all bombs and power, deals one 5800 hit and grants two seconds',()=>{
   for(let hero=0;hero<9;hero++) {
     const events=[],g=combat({hero,artifacts:['holyflame'],onEvent:event=>events.push(event)});
     g.bombs=5;g.power=5;g.powerPoints=2;g.player.lives=1;
     g.enemyBullet(100,100,0,0);g.addHazard(225,28);
     assert.ok(g.bomb());assert.equal(g.bombKind,'holyflame');
     assert.deepEqual([g.bombs,g.power,g.powerPoints,g.bullets.length,g.hazards.length],[0,1,0,0,0]);
-    near(g.stats.damage,5500);near(g.player.invincible,2);assert.equal(g.player.lives,1);
+    near(g.stats.damage,5800);near(g.player.invincible,2);assert.equal(g.player.lives,1);
     assert.equal(g.frostTime,0);assert.equal(g.usesHeroBomb,false);assert.equal(g.bomb(),false);
-    tick(g,1.98);assert.ok(g.player.invincible>0);tick(g,.04);near(g.player.invincible,0);near(g.stats.damage,5500);
+    tick(g,1.98);assert.ok(g.player.invincible>0);tick(g,.04);near(g.player.invincible,0);near(g.stats.damage,5800);
     assert.ok(events.some(event=>event.type==='bomb'&&event.holyflame));
   }
-  const combined=combat({artifacts:['holyflame','sun','core']});combined.bomb();near(combined.stats.damage,8250);
+  const combined=combat({artifacts:['holyflame','sun','core']});combined.bomb();near(combined.stats.damage,8700);
   const paid=combat({hero:3,artifacts:['holyflame','mask']});paid.bombs=0;paid.player.lives=2;
   assert.ok(paid.bomb());assert.equal(paid.player.lives,1);assert.equal(paid.maskUses,1);
   const noResource=combat({artifacts:['holyflame']});noResource.bombs=0;assert.equal(noResource.bomb(),false);

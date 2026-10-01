@@ -45,8 +45,8 @@ test('stage recovery triggers once before optional quiz, also on final boss and 
  g.roomRecovered=false;g.player.lives=g.maxLife;g.bombs=g.maxBombs;g.recoverRoom();assert.equal(g.player.lives,g.maxLife);assert.equal(g.bombs,g.maxBombs);
 });
 test('shortened bombs retain damage budgets at different frame steps and Night pays a power level',()=>{
- // Reproduced from origin/main engine at 60 Hz; Night's requested total is the exception.
- const totals=[1058,1300,1248,773,1058,1305,1900,1058,80];
+ // Fixed 60 Hz budgets, including Night's total and Time's requested 3% increase.
+ const totals=[1058,1300,1248,773,1058,1305,1900,1058,82.4];
   const durations=[4,2,3,3,3,3,3,3,10],invincibility=[4,2,3,3,3,3,3,3,2];
   for(const dt of [1/60,.05])for(let hero=0;hero<9;hero++){
   const g=combat({hero});g.player.fire=999;target(g);g.power=3;g.bomb();
@@ -68,7 +68,7 @@ test('Snow slow remains useful for five seconds after bomb immunity ends',()=>{
  g.enemyBullet(20,200,Math.PI/2,100);tick(g,1);assert.ok(Math.abs(g.bullets[0].y-235)<1e-7);tick(g,4.1);assert.equal(g.frostTime,0);
 });
 test('Night large shot retains its size, gains damage and does not track an off-axis enemy',()=>{
- const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.ok(Math.abs(shot.damage-94.248)<1e-8);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
+ const g=combat({hero:6});target(g,400,150);g.fire(.01);const shot=g.shots[0];assert.equal(shot.r,28.8);assert.ok(Math.abs(shot.damage-98.01792)<1e-8);assert.ok(!shot.homing);tick(g,.2);assert.equal(shot.x,225);
 });
 test('orbit sweeps fast movement and each enemy and each orb has its own damage cooldown',()=>{
  const g=combat({hero:8,weapon:1});g.player.x=g.player.targetX=30;

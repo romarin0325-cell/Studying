@@ -88,7 +88,7 @@ test('normal-only modifiers do not leak into bomb impacts, pulses or transformed
  for(const [ids,attack,bomb] of [[['bigbang'],.9,1.6],[['kaleidoscope'],1.3,.8],[['bigbang','kaleidoscope'],1.2,1.4],[['bigbang','kaleidoscope','crystal'],1.25,1.4*1.05]]){
   const g=game({artifacts:ids});const e=target(g);g.damage(e,100,0,0);near(g.stats.damage,100*attack);g.stats.damage=0;g.bomb();tick(g,4.1);near(g.stats.damage,1058*bomb);
   const time=game({hero:8,artifacts:ids});time.bomb();time.player.fire=0;time.fire(.001);assert.ok(time.shots.every(s=>s.damageKind==='bomb'));
-  const t=target(time,{},time.shots[0].x,time.shots[0].y);time.shots=[time.shots[0]];time.shots[0].vx=time.shots[0].vy=0;time.update(.001);near(t.maxHp-t.hp,12.5*3.8*bomb);
+  const t=target(time,{},time.shots[0].x,time.shots[0].y);time.shots=[time.shots[0]];time.shots[0].vx=time.shots[0].vy=0;time.update(.001);near(t.maxHp-t.hp,12.5*3.914*bomb);
  }
   for(const [ids,expected] of [[['sun','bigbang'],3200],[['sun','kaleidoscope'],1600]]){const g=game({artifacts:ids});target(g);g.bomb();near(g.stats.damage,expected);}
 });
@@ -102,19 +102,19 @@ test('verdant dew removes one required P and adds five percent attack for standa
 });
 
 test('requested projectile weapons use direct final coefficients at every power without cadence changes',()=>{
-  for(const [hero,weapon,coefficient,period] of [[1,0,.85833,.095],[2,1,6.067215,.36],[4,0,1.36323,.19],[5,0,2.84427,.23],[6,0,7.53984,.48],[8,0,2.174436,.25]])
+  for(const [hero,weapon,coefficient,period] of [[1,0,.8926632,.095],[2,1,6.3099036,.36],[4,0,1.4041269,.19],[5,0,2.9295981,.23],[6,0,7.8414336,.48],[8,0,2.26141344,.25]])
   for(const power of [1,2,3,4,5]){const g=game({hero,weapon});g.power=power;g.player.fire=0;g.fire(.001);near(g.shots[0].damage,(10+power*2.5)*(hero===2?1.1:1)*coefficient);near(g.player.fire,period);}
 });
 test('all remaining adjusted weapon components use direct final coefficients',()=>{
  const atPowerOne=(hero,weapon)=>{const g=game({hero,weapon});g.power=1;g.player.fire=0;return g;};
- const melee=atPowerOne(1,1);target(melee,{},225,520);melee.fire(.001);near(melee.stats.damage,12.5*13.77);near(melee.shots[0].damage,12.5*.57375);
-  const spread=atPowerOne(2,0);spread.fire(.001);assert.deepEqual(spread.shots.map(s=>Number(s.damage.toFixed(6))),[14.3055,24.31935,14.3055]);
+ const melee=atPowerOne(1,1);target(melee,{},225,520);melee.fire(.001);near(melee.stats.damage,12.5*14.0454);near(melee.shots[0].damage,12.5*.585225);
+  const spread=atPowerOne(2,0);spread.fire(.001);assert.deepEqual(spread.shots.map(s=>Number(s.damage.toFixed(6))),[14.59161,24.805737,14.59161]);
  const chain=atPowerOne(3,0);target(chain);chain.fire(.001);near(chain.stats.damage,12.5*2.646);
-  const petal=atPowerOne(3,1);petal.fire(.001);assert.deepEqual(petal.shots.map(s=>Number(s.damage.toFixed(6))),[11.13075,18.55125,11.13075]);assert.equal(petal.shots.every(s=>s.homing),false);
+  const petal=atPowerOne(3,1);petal.fire(.001);near(petal.shots[0].damage,12.5*.8993646);near(petal.shots[1].damage,12.5*1.498941);near(petal.shots[2].damage,12.5*.8993646);assert.equal(petal.shots.every(s=>s.homing),false);
   const petalMax=game({hero:3,weapon:1});petalMax.power=5;petalMax.player.fire=0;petalMax.fire(.001);assert.equal(petalMax.shots.every(s=>s.homing),true);
  const snow=atPowerOne(4,1);snow.fire(.001);near(snow.shots[0].damage,12.5*2.3814);
  const midnight=atPowerOne(5,1);midnight.fire(.001);near(midnight.shots[0].damage,12.5*1.8326);
- const dream=atPowerOne(6,1);dream.fire(.001);near(dream.shots.find(s=>s.type==='nightstar').damage,12.5*.931);const seed=dream.shots.find(s=>s.type==='seed');near(seed.damage,12.5*.882);near(seed.zoneDamage,12.5*.686);
+ const dream=atPowerOne(6,1);dream.fire(.001);near(dream.shots.find(s=>s.type==='nightstar').damage,12.5*.94031);const seed=dream.shots.find(s=>s.type==='seed');near(seed.damage,12.5*.89082);near(seed.zoneDamage,12.5*.69286);
 });
 
 test('P5 shot geometry and control effects are captured when firing, including visible glass size',()=>{
