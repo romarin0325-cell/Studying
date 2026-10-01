@@ -2,11 +2,11 @@
 export const MANUAL_BALANCE = {
   "schema": 1,
   "sources": {
-    "engine.js": "e1455c9dabd6ccbe10059fcdd6e7095cd653d13e9ee728fc74240bf816d919c1",
+    "engine.js": "a7e62720b87337bf069cc426ae082acbffd0f3f503b5c03f4594f73df917e34e",
     "content.js": "be6e71935cd0a15123597c4c18c33ff7c29498c3e85ffd5d0e32ba676f1ce66e",
-    "meta.js": "c63d3c2626f8841664ff9b7cb7583fd7e219b98ccfd3759a52251a6a176b1fc0",
+    "meta.js": "85072181dbbf3e5074e1d248cab1a9b1cab16ab7797a647778e59249e94d1982",
     "docs/generate-manual.mjs": "f3c9b2f1f836c693e4fda96c3312539f13b47e81ed619b7e343078c349d0b7a2",
-    "docs/manual-content.js": "2c4b4fd506cd3ccbe90573fc15c4fdd9b75fea22a1f6d0ea82385a83924c0011"
+    "docs/manual-content.js": "d96b4ec043713c426dd211618fbc2faa4943044b2cd92874bacc5c2bd0579f2a"
   },
   "fixture": {
     "hz": 60,
@@ -71,11 +71,11 @@ export const MANUAL_BALANCE = {
         {
           "id": "laser",
           "dps": {
-            "1": 272.1,
-            "3": 381,
-            "5": 489.8
+            "1": 283,
+            "3": 396.2,
+            "5": 509.4
           },
-          "closeDps": 381
+          "closeDps": 396.2
         }
       ],
       "bomb": {
@@ -124,20 +124,20 @@ export const MANUAL_BALANCE = {
         {
           "id": "dagger",
           "dps": {
-            "1": 214.6,
-            "3": 300.4,
-            "5": 386.2
+            "1": 223.2,
+            "3": 312.4,
+            "5": 401.7
           },
-          "closeDps": 300.4
+          "closeDps": 312.4
         },
         {
           "id": "melee",
           "dps": {
-            "1": 171.2,
-            "3": 239.6,
-            "5": 308.1
+            "1": 174.6,
+            "3": 244.4,
+            "5": 314.3
           },
-          "closeDps": 351.4
+          "closeDps": 358.5
         }
       ],
       "bomb": {
@@ -186,20 +186,20 @@ export const MANUAL_BALANCE = {
         {
           "id": "spread",
           "dps": {
-            "1": 317.6,
-            "3": 552.8,
-            "5": 710.7
+            "1": 323.9,
+            "3": 563.8,
+            "5": 724.9
           },
-          "closeDps": 606.8
+          "closeDps": 619
         },
         {
           "id": "lance",
           "dps": {
-            "1": 228,
-            "3": 319.2,
-            "5": 410.4
+            "1": 237.1,
+            "3": 332,
+            "5": 426.9
           },
-          "closeDps": 319.2
+          "closeDps": 332
         }
       ],
       "bomb": {
@@ -257,11 +257,11 @@ export const MANUAL_BALANCE = {
         {
           "id": "petal",
           "dps": {
-            "1": 244.9,
-            "3": 342.8,
-            "5": 440.8
+            "1": 247.3,
+            "3": 346.3,
+            "5": 445.2
           },
-          "closeDps": 342.8
+          "closeDps": 346.3
         }
       ],
       "bomb": {
@@ -310,11 +310,11 @@ export const MANUAL_BALANCE = {
         {
           "id": "frost",
           "dps": {
-            "1": 170.4,
-            "3": 238.6,
-            "5": 306.7
+            "1": 175.5,
+            "3": 245.7,
+            "5": 315.9
           },
-          "closeDps": 238.6
+          "closeDps": 245.7
         },
         {
           "id": "snowflake",
@@ -372,11 +372,11 @@ export const MANUAL_BALANCE = {
         {
           "id": "glass",
           "dps": {
-            "1": 303.4,
-            "3": 424.7,
-            "5": 546.1
+            "1": 312.5,
+            "3": 437.5,
+            "5": 562.5
           },
-          "closeDps": 431.4
+          "closeDps": 444.3
         },
         {
           "id": "midnight",
@@ -434,20 +434,20 @@ export const MANUAL_BALANCE = {
         {
           "id": "nightfall",
           "dps": {
-            "1": 194.8,
-            "3": 272.7,
-            "5": 350.6
+            "1": 202.6,
+            "3": 283.6,
+            "5": 364.6
           },
-          "closeDps": 272.7
+          "closeDps": 283.6
         },
         {
           "id": "dreamfield",
           "dps": {
-            "1": 128.9,
-            "3": 180.4,
-            "5": 232
+            "1": 130.2,
+            "3": 182.2,
+            "5": 234.3
           },
-          "closeDps": 181.4
+          "closeDps": 183.3
         }
       ],
       "bomb": {
@@ -558,11 +558,11 @@ export const MANUAL_BALANCE = {
         {
           "id": "rewind",
           "dps": {
-            "1": 202.9,
-            "3": 284.1,
-            "5": 365.3
+            "1": 211.1,
+            "3": 295.5,
+            "5": 379.9
           },
-          "closeDps": 284.1
+          "closeDps": 295.5
         },
         {
           "id": "orbit",
@@ -575,8 +575,8 @@ export const MANUAL_BALANCE = {
         }
       ],
       "bomb": {
-        "damage": 80,
-        "transformedDamage": 7980,
+        "damage": 82.4,
+        "transformedDamage": 8219.4,
         "duration": 10,
         "invincibility": 2
       }
@@ -589,7 +589,7 @@ export const MANUAL_BALANCE = {
     "invincibility": 1
   },
   "holyflame": {
-    "damage": 5500,
+    "damage": 5800,
     "transformedDamage": 0,
     "duration": 2,
     "invincibility": 2

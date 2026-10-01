@@ -100,7 +100,7 @@ export class Game {
     p.recoil = 1;
     if (this.heroIndex === 8 && this.usesHeroBomb && this.bombTime > 0) {
       p.fire = .16;
-      for (const side of [-1,1]) this.shot(side*.055, damage*3.8*this.loadout.bomb, 'darkglass', { x:p.x+side*14, r:17, pierce:true, vy:-700, damageKind:'bomb' });
+      for (const side of [-1,1]) this.shot(side*.055, damage*3.914*this.loadout.bomb, 'darkglass', { x:p.x+side*14, r:17, pierce:true, vy:-700, damageKind:'bomb' });
       this.emit('shot', { weapon:'darkglass' }); return;
     }
     switch (this.weapon) {
@@ -111,23 +111,23 @@ export class Game {
         for (const e of this.enemies) if (e.y < p.y && Math.abs(e.x - p.x) < e.r + width / 2) {
           if (e.lastLaserHit === undefined || this.totalTime - e.lastLaserHit > .15) e.lock = 0;
           e.lastLaserHit = this.totalTime; e.lock = Math.min(3.25, (e.lock || 0) + .075);
-          this.damage(e, damage * .989664 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
+          this.damage(e, damage * 1.02925056 * (1 + Math.min(.65, e.lock * .2)), e.x, e.y);
         } break;
       }
       case 'dagger':
-        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .85833, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
+        p.fire = .095; for (const x of [-10, 10]) this.shot(0, damage * .8926632, 'dagger', { x: p.x + x, pierce: true, vy: -730, r: 8 }); break;
       case 'melee': {
         p.fire = .70; const reach = 156 + this.power * 8;
         this.effect('slash', { x: p.x, y: p.y, radius: reach, life: .3, color: this.hero.color, alternate: this.stats.shots++ % 2 });
-        for (const e of this.enemies) if (e.y < p.y + 20 && distance(e, p) < reach + e.r) this.damage(e, damage * (e.y > p.y - 100 ? 13.77 : 9.18), e.x, e.y);
+        for (const e of this.enemies) if (e.y < p.y + 20 && distance(e, p) < reach + e.r) this.damage(e, damage * (e.y > p.y - 100 ? 14.0454 : 9.3636), e.x, e.y);
         this.bullets = this.bullets.filter(b => { if (b.y < p.y && distance(b, p) < reach * .72) { this.particlesAt(b.x, b.y, '#cdb5ff', 2); return false; } return true; });
         // A narrow moon wave keeps distant enemies reachable; close slash remains the main damage.
-        this.shot(0, damage * .57375, 'moon', { vy: -430, r: 15 }); break;
+        this.shot(0, damage * .585225, 'moon', { vy: -430, r: 15 }); break;
       }
       case 'spread':
-        p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.76868 : 1.0404), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .46818, 'fire', { r: 5 }); } break;
+        p.fire = .15; for (let i = -1; i <= 1; i++) { this.shot(i * .24, damage * (i === 0 ? 1.8040536 : 1.061208), 'fire', { r: 9 }); if (this.power >= 3) this.shot(i * .24 + .065, damage * .4775436, 'fire', { r: 5 }); } break;
       case 'lance':
-        p.fire = .36; this.shot(0, damage * 6.067215, 'lance', { pierce: true, r: 21, vy: -500 }); break;
+        p.fire = .36; this.shot(0, damage * 6.3099036, 'lance', { pierce: true, r: 21, vy: -500 }); break;
       case 'chain': {
         p.fire = .23; const target = this.nearest(p.x, p.y - 70, 530);
         if (target) { const hit = new Set(); let from = { x: p.x, y: p.y - 24 }, next = target;
@@ -139,22 +139,22 @@ export class Game {
         } else { p.fire = .05; p.recoil = 0; return; } break;
       }
       case 'petal':
-        p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.4841 : .89046), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 5, r: 10 }); break;
+        p.fire = .16; for (let i = -1; i <= 1; i++) this.shot(i * .20, damage * (i === 0 ? 1.498941 : .8993646), 'petal', { wave: i * 1.6, baseX: p.x, homing: this.power >= 5, r: 10 }); break;
       case 'frost':
-        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.36323, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
+        p.fire = .19; for (const x of [-12,12]) this.shot(0, damage * 1.4041269, 'ice', { x: p.x+x, vy: -610, pierce: true, slow: this.power===5?2:1.6 }); break;
       case 'snowflake':
         p.fire = .24; this.shot(0, damage * 2.3814, 'snow', { homing: true, bounce: this.power===5?4:3, r: 13 }); break;
       case 'glass':
-        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.84427, 'glass', { x: p.x+i*(this.power===5?16:13), pierce: true, vy: -650, r: 12*(this.power===5?1.1:1) }); break;
+        p.fire = .23; for (const i of [-1,1]) this.shot(i * .07, damage * 2.9295981, 'glass', { x: p.x+i*(this.power===5?16:13), pierce: true, vy: -650, r: 12*(this.power===5?1.1:1) }); break;
       case 'midnight':
         p.fire = .14; this.shot(Math.sin(this.totalTime*5)*.18, damage * 1.8326, 'clock', { homing: true, mark: true, markRadius: this.power===5?120:100, r: 10 }); break;
       case 'nightfall':
-        p.fire = .48; this.shot(0,damage*7.53984,'nightmoon',{r:28.8+(this.power===5?10:0),vy:-360}); break;
+        p.fire = .48; this.shot(0,damage*7.8414336,'nightmoon',{r:28.8+(this.power===5?10:0),vy:-360}); break;
       case 'dreamfield':
-        p.fire = .18; this.shot(0,damage*.931,'nightstar',{r:7,vy:-620});
+        p.fire = .18; this.shot(0,damage*.94031,'nightstar',{r:7,vy:-620});
         if (this.totalTime >= this.areaFire) {
           this.areaFire = this.totalTime + 1.15;
-          this.shot(0,damage*.882,'seed',{r:14,vy:-400,homing:true,zone:true,zoneDamage:damage*.686,zoneRadius:this.power===5?100:90,fuse:1.45});
+          this.shot(0,damage*.89082,'seed',{r:14,vy:-400,homing:true,zone:true,zoneDamage:damage*.69286,zoneRadius:this.power===5?100:90,fuse:1.45});
         } break;
       case 'promise':
         p.fire = .20;
@@ -164,7 +164,7 @@ export class Game {
         p.fire = .42; this.shot(0,damage*1.90512,'promise',{r:16,homing:true,zone:true,zoneDamage:damage*2.22264,zoneRadius:this.power===5?110:100,fuse:1,zoneKind:'haven'}); break;
       case 'rewind':
         p.fire = .25;
-        for (const side of [-1,1]) this.shot(side*.045,damage*2.174436,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
+        for (const side of [-1,1]) this.shot(side*.045,damage*2.26141344,'timehand',{x:p.x+side*12,pierce:true,r:11,vy:-650});
         break;
       case 'orbit': {
         p.fire = .12;
@@ -275,7 +275,7 @@ export class Game {
       this.bombInvincibility = 2; this.bombOrigin = {x:this.player.x,y:this.player.y};
       this.player.invincible = Math.max(this.player.invincible, 2); this.clearBullets(); this.hazards.length = 0;
       this.dropEventSubpatterns(true);
-      for (const enemy of [...this.enemies]) this.damage(enemy, 5500 * this.loadout.bomb, enemy.x, enemy.y, 'bomb');
+      for (const enemy of [...this.enemies]) this.damage(enemy, 5800 * this.loadout.bomb, enemy.x, enemy.y, 'bomb');
       this.emit('bomb', {hero:this.heroIndex,holyflame:true}); return true;
     }
     const corona=this.artifacts.has('sun');
@@ -291,7 +291,7 @@ export class Game {
     if (!corona && this.heroIndex === 3 && !paidWithLife) this.player.lives = Math.min(this.maxLife, this.player.lives + 1);
     if(!corona&&this.heroIndex===4)this.frostTime=this.bombDuration+5;
     if(!corona&&this.heroIndex===6){this.power=Math.max(1,this.power-1);this.powerPoints=0;}
-    for (const e of [...this.enemies]) this.damage(e, (corona?2000:this.heroIndex === 8 ? 80 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
+    for (const e of [...this.enemies]) this.damage(e, (corona?2000:this.heroIndex === 8 ? 82.4 : this.heroIndex === 2 ? 450 : 260) * this.loadout.bomb, e.x, e.y, 'bomb');
     this.emit('bomb', { hero: this.heroIndex, corona }); return true;
   }
   grantBarrier() {

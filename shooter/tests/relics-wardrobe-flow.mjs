@@ -23,11 +23,45 @@ try {
     assert.equal(await page.locator('#manual').count(),0);
     await click('#equipment');assert.equal(await page.locator('[data-artifact]').count(),48);
     assert.equal(await page.locator('[data-artifact="divineiris"],[data-artifact="demonicbelzebuth"]').count(),0);
-    await page.locator('[data-artifact="holyflame"]').scrollIntoViewIfNeeded();await shot('relics');await click('#equipment-close');
+    await page.locator('[data-artifact="holyflame"]').scrollIntoViewIfNeeded();await shot('relics');
+    await page.evaluate(()=>{__patch.profile.equipped=['holyflame'];});await click('#equipment-close');
+    await click('#help');assert.match(await page.locator('.help-list').innerText(),/홀리플레임[\s\S]*기본 피해 5800/);await click('#help-done');
     await click('#wardrobe-hotspot');
     await click('[data-wardrobe-hero="0"]');
     await page.waitForFunction(()=>!document.querySelector('.wardrobe-preview').hasAttribute('aria-busy')&&document.querySelector('.wardrobe-preview .anchored-art').alt.startsWith('루미 '));
     await page.waitForFunction(()=>document.querySelector('.menu-panel').getAnimations().length===0);
+    await page.evaluate(()=>{
+      __patch.profile.costumesEquipped[1]='luna-gothic';globalThis.__wardrobeAnimations=0;
+      const animate=Element.prototype.animate;
+      Element.prototype.animate=function(...args){if(this.matches('.wardrobe-preview img'))__wardrobeAnimations++;return animate.apply(this,args);};
+    });
+    const previewState=(hero,id='')=>page.evaluate(({hero,id,costumeIndex})=>{
+      const portrait=document.querySelector('.wardrobe-preview'),image=portrait.querySelector('.anchored-art'),veil=portrait.querySelector('.wardrobe-veil');
+      return {sourceMatches:image.src===(id?__patch.art.urls.costumes[costumeIndex]:__patch.art.urls.heroes[hero]),
+        alt:image.alt,busy:portrait.getAttribute('aria-busy'),opacity:getComputedStyle(image).opacity,veil:getComputedStyle(veil).opacity,
+        animations:image.getAnimations().length+veil.getAnimations().length,started:__wardrobeAnimations};
+    },{hero,id,costumeIndex:COSTUMES.findIndex(c=>c.id===id)});
+    const checkImmediate=async(hero,id,started)=>{
+      const state=await previewState(hero,id);
+      assert.equal(state.sourceMatches,true);assert.equal(state.busy,null);assert.equal(state.opacity,'1');assert.equal(state.veil,'0');
+      assert.equal(state.animations,0);assert.equal(state.started,started);return state;
+    };
+    // Switching characters (including an equipped costume) must start no effect.
+    await click('[data-wardrobe-hero="1"]');await checkImmediate(1,'luna-gothic',0);
+    await click('[data-wardrobe-hero="0"]');await checkImmediate(0,'',0);
+    await click('[data-preview=""]');await checkImmediate(0,'',0);
+    // A character change cancels a costume swap before its 560 ms source switch.
+    await click('[data-preview="rumi-school"]');await page.waitForFunction(()=>document.querySelector('.wardrobe-preview').hasAttribute('aria-busy'));
+    await click('[data-wardrobe-hero="1"]');await checkImmediate(1,'luna-gothic',2);
+    await page.waitForTimeout(650);await checkImmediate(1,'luna-gothic',2);
+    // It must also cancel after the old source has swapped, without stale work
+    // hiding a new character or clearing the next costume transition's state.
+    await click('[data-wardrobe-hero="0"]');await click('[data-preview="rumi-sailor"]');
+    await page.waitForFunction(()=>document.querySelector('.wardrobe-preview .anchored-art').alt==='루미 세일러복');
+    await click('[data-wardrobe-hero="1"]');await checkImmediate(1,'luna-gothic',4);
+    await click('[data-preview="luna-shadowcat"]');await page.waitForFunction(()=>document.querySelector('.wardrobe-preview').hasAttribute('aria-busy'));
+    await click('[data-wardrobe-hero="2"]');await click('[data-wardrobe-hero="0"]');await checkImmediate(0,'',6);
+    await page.waitForTimeout(650);await checkImmediate(0,'',6);
     await page.evaluate(()=>{
       globalThis.__portrait=document.querySelector('.wardrobe-preview');globalThis.__image=__portrait.querySelector('.anchored-art');
       globalThis.__panel=document.querySelector('.menu-panel');globalThis.__oldSrc=__image.src;globalThis.__swap=[];globalThis.__start=performance.now();
@@ -78,11 +112,11 @@ try {
       const g=__patch.game;g.bomb();g.bombTime=1.35;__patch.renderer.render(g);__patch.renderHud();
       return {damage:g.stats.damage,bombs:g.bombs,power:g.power,points:g.powerPoints,kind:g.bombKind,invincible:g.player.invincible,label:document.querySelector('#bomb-label').textContent};
     });
-    assert.deepEqual(flame,{damage:5500,bombs:0,power:1,points:0,kind:'holyflame',invincible:2,label:'홀리플레임'});
+    assert.deepEqual(flame,{damage:5800,bombs:0,power:1,points:0,kind:'holyflame',invincible:2,label:'홀리플레임'});
     await shot('holyflame');
     assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
-    results.push({width,height,swapMs:Math.round(swap.ms),coverOpacity:cover,flame});
-    await context.close();console.log(`Relics, concealed 1.6s wardrobe swap, rapid selection/close and dedicated holy flame: ${width}×${height} PASS`);
+    results.push({width,height,characterSwitchAnimations:0,cancelBeforeAndAfterSwap:true,swapMs:Math.round(swap.ms),coverOpacity:cover,flame});
+    await context.close();console.log(`Relics, immediate character switch/cancellation, concealed 1.6s costume swap, rapid selection/close and 5800 holy flame: ${width}×${height} PASS`);
   }
 } finally {await browser.close();}
 await fs.writeFile(new URL('results.json',review),JSON.stringify(results,null,2)+'\n');
