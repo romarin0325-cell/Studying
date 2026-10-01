@@ -81,8 +81,9 @@ export class Game {
     if(p.hp<=0){p.hp=0;this.finish(false);this.cleanup();return;}
     this.grid.rebuild(this.enemies);
     for(const w of this.weapons){w.timer-=dt;if(w.timer<=0){const used=this.fire(w);w.timer=used?WEAPON[w.id].cooldown*this.stats.cooldown/(p.haste>0?1.35:1)/( ['frost','dream','sun'].includes(w.id)?this.stats.rabbit:1)*(w.evolved?.72:1):.15;}}
-    this.updateUltimate(dt);this.updateShots(dt);this.updateFields(dt);this.updateHazards(dt);this.cleanup();if(this.mode==='playing')this.updateDrops(dt);
-    if(this.mode==='playing'&&p.hp<=0){p.hp=0;this.finish(false);}
+    this.updateUltimate(dt);this.updateShots(dt);this.updateFields(dt);this.updateHazards(dt);this.cleanup();
+    if(this.mode==='playing'&&p.hp<=0){p.hp=0;this.finish(false);return;}
+    if(this.mode==='playing')this.updateDrops(dt);
   }
   updateEnemies(dt){
     const p=this.player;for(const e of this.enemies){if(e.hp<=0)continue;e.flash=Math.max(0,e.flash-dt);e.slow=Math.max(0,e.slow-dt);e.freeze=Math.max(0,e.freeze-dt);e.burn=Math.max(0,e.burn-dt);e.burnTick-=dt;

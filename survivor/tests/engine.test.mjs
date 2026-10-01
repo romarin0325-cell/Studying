@@ -73,6 +73,11 @@ test('lethal contact cannot be hidden by a same-frame level-up or treasure picku
   g.step(1/60);assert.equal(g.mode,'defeat');assert.equal(g.player.hp,0);assert.equal(g.pending,0);assert.equal(g.xp,0);assert.equal(g.treasure,null);
 });
 
+test('lethal danger resolves before a same-frame level-up pickup',()=>{
+  const g=new Game();g.player.hp=5;g.player.invulnerable=0;g.spawnDrop('xp',800,800,40);g.hazards.push({id:g.uid++,kind:'blast',x:800,y:800,r:50,wait:0,life:1,damage:10,hit:false});
+  g.step(1/60);assert.equal(g.mode,'defeat');assert.equal(g.player.hp,0);assert.equal(g.pending,0);assert.equal(g.xp,0);assert.equal(g.drops.length,1);
+});
+
 test('shrines are single-use and save across restoration',()=>{
   const g=new Game();g.player.x=500;g.player.y=480;g.player.hp=50;assert.equal(g.useShrine(),true);assert.equal(g.useShrine(),false);assert.ok(g.player.hp>50);const copy=Game.restore(g.snapshot());assert.equal(copy.shrines[0].used,true);assert.equal(copy.useShrine(),false);
 });
