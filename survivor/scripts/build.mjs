@@ -9,6 +9,8 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const manifest=JSON.parse(await fs.readFile(path.join(game,'assets/prepared-manifest.json'),'utf8'));
 const processorHash=sha((await fs.readFile(path.join(game,'scripts/prepare-assets.mjs'),'utf8')).replace(/\r\n/g,'\n'));
 if(manifest.version!==1||processorHash!==manifest.processorHash)throw new Error('Asset preparation contract changed; run node survivor/scripts/prepare-assets.mjs');
+if(!manifest.renewal)throw new Error('Missing reviewed renewal art');
+for(const item of [{source:manifest.renewal.source,sha256:manifest.renewal.sha256},...manifest.renewal.references])if(sha(await fs.readFile(path.join(root,item.source)))!==item.sha256)throw new Error('Art review/reference changed: '+item.source);
 const assets={};
 for(const asset of manifest.assets){const source=await fs.readFile(path.join(root,asset.source)),bytes=await fs.readFile(path.join(game,'assets',asset.file));if(sha(source)!==asset.sourceSha256||sha(bytes)!==asset.sha256||bytes.length!==asset.bytes)throw new Error('Asset source/cache mismatch: '+asset.id);if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')throw new Error('Invalid WebP: '+asset.id);assets[asset.id]='data:image/webp;base64,'+bytes.toString('base64');}
 const font=await fs.readFile(path.join(game,'assets/Jua-Nocturne.woff'));

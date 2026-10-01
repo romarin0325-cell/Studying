@@ -1,0 +1,138 @@
+{
+  "reviewedAt": "2026-10-01",
+  "method": "Steam appdetails + all-language/all-purchase appreviews snapshot; official screenshots visually inspected. Review totals are reception evidence, not causal proof of individual mechanics.",
+  "games": [
+    {
+      "name": "Vampire Survivors",
+      "url": "https://store.steampowered.com/app/1794680/",
+      "positive": 261597,
+      "total": 266095,
+      "percent": 98.3,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1794680/ss_6c55afe36be2a7784bf18cb9b3218321ae2d10e5.600x338.jpg?t=1787911678",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1794680/ss_6105ad3d6af52593c31d915bf39e91512611ea8e.600x338.jpg?t=1787911678"
+      ]
+    },
+    {
+      "name": "Brotato",
+      "url": "https://store.steampowered.com/app/1942280/",
+      "positive": 114452,
+      "total": 119340,
+      "percent": 95.9,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1942280/ss_79be0eea0299da76bc50cef160fb669509f74e0b.600x338.jpg?t=1789029155",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1942280/ss_61ad3d242282311207828c1a7d87c1c9d7b4d8bf.600x338.jpg?t=1789029155"
+      ]
+    },
+    {
+      "name": "Boneraiser Minions",
+      "url": "https://store.steampowered.com/app/1944570/",
+      "positive": 5163,
+      "total": 5370,
+      "percent": 96.1,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1944570/ss_08ff1e53a4b84baa09ed745562aa816ab2c48abe.600x338.jpg?t=1733234278",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1944570/ss_fe254df02963df8cd81ad4ce88fc6cf5462afcb3.600x338.jpg?t=1733234278"
+      ]
+    },
+    {
+      "name": "20 Minutes Till Dawn",
+      "url": "https://store.steampowered.com/app/1966900/",
+      "positive": 26322,
+      "total": 29162,
+      "percent": 90.3,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966900/ss_0ee0797519f432d01614ff20027ccbf4568255b7.600x338.jpg?t=1785102761",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1966900/ss_e7709844afbd28c7596f832e396e9af59cb7577b.600x338.jpg?t=1785102761"
+      ]
+    },
+    {
+      "name": "Soulstone Survivors",
+      "url": "https://store.steampowered.com/app/2066020/",
+      "positive": 24537,
+      "total": 26869,
+      "percent": 91.3,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2066020/cb5ddb50488c2444357758cada3e463f32dade2a/ss_cb5ddb50488c2444357758cada3e463f32dade2a.600x338.jpg?t=1789657097",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2066020/3bce869e2d66428ff9eae9082ee29ed94ca24d94/ss_3bce869e2d66428ff9eae9082ee29ed94ca24d94.600x338.jpg?t=1789657097"
+      ]
+    },
+    {
+      "name": "Rogue Genesia",
+      "url": "https://store.steampowered.com/app/2067920/",
+      "positive": 7791,
+      "total": 8588,
+      "percent": 90.7,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2067920/80b8630d97a4b905c8b0206d7404a724495ff273/ss_80b8630d97a4b905c8b0206d7404a724495ff273.600x338.jpg?t=1790143951",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2067920/4f57fa5c64bfc0d71e1a2ab4d4f3bb7779d05e42/ss_4f57fa5c64bfc0d71e1a2ab4d4f3bb7779d05e42.600x338.jpg?t=1790143951"
+      ]
+    },
+    {
+      "name": "Nordic Ashes",
+      "url": "https://store.steampowered.com/app/2068280/",
+      "positive": 5595,
+      "total": 6343,
+      "percent": 88.2,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2068280/ss_c7a95b701b6396e8f546dca1117758c61dd00e2a.600x338.jpg?t=1780908930",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2068280/ss_5d9f14182226f5ced942b38e81c6565814e4eee8.600x338.jpg?t=1780908930"
+      ]
+    },
+    {
+      "name": "Halls of Torment",
+      "url": "https://store.steampowered.com/app/2218750/",
+      "positive": 30407,
+      "total": 31901,
+      "percent": 95.3,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2218750/ss_75fc37b9c2a3b30c01c03d2f3cb86cf6a754ccc2.600x338.jpg?t=1779993327",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2218750/ss_2d104ee2c73776ba9019f3a5050c4d5942a56e93.600x338.jpg?t=1779993327"
+      ]
+    },
+    {
+      "name": "Deep Rock Galactic Survivor",
+      "url": "https://store.steampowered.com/app/2321470/",
+      "positive": 41704,
+      "total": 48364,
+      "percent": 86.2,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2321470/ss_7580f5af5c21da17f7b19b92ca6c6acf8ffb4776.600x338.jpg?t=1790750403",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2321470/8823cd46d53efa2bf15862c35ab511937e5cc1c6/ss_8823cd46d53efa2bf15862c35ab511937e5cc1c6.600x338.jpg?t=1790750403"
+      ]
+    },
+    {
+      "name": "Death Must Die",
+      "url": "https://store.steampowered.com/app/2334730/",
+      "positive": 19625,
+      "total": 21778,
+      "percent": 90.1,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334730/ss_4c5dc0f9dde1a7dd5a73db9df0a7a6cc4f7b3ca9.600x338.jpg?t=1744305567",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334730/ss_d2eec3ed8b34e3b16b9ee97dd47bb5c30ea6c2af.600x338.jpg?t=1744305567"
+      ]
+    },
+    {
+      "name": "HoloCure",
+      "url": "https://store.steampowered.com/app/2420510/",
+      "positive": 40403,
+      "total": 40813,
+      "percent": 99.0,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420510/ss_0b4a50d12f737a522960ba3b3229546f536ff57f.600x338.jpg?t=1740642230",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2420510/ss_a393d743965dc088d53d97c493ee6728d74b384d.600x338.jpg?t=1740642230"
+      ]
+    },
+    {
+      "name": "SNKRX",
+      "url": "https://store.steampowered.com/app/915310/",
+      "positive": 4097,
+      "total": 4335,
+      "percent": 94.5,
+      "screenUrls": [
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/915310/ss_f85afbbbc0e28ebd81363ffd18f50ab56b73d6c2.600x338.jpg?t=1727913300",
+        "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/915310/ss_0389219103a58bb7f13c09e5ff3d58e1a32e1f34.600x338.jpg?t=1727913300"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+[
+  {
+    "id": "walk-rumi",
+    "source": "survivor/assets/renewal/sources/walk-rumi.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/rumi.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually. Source cell 11 faces the wrong way; replaced with left passing pose 9.",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      9,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  {
+    "id": "walk-luna",
+    "source": "survivor/assets/renewal/sources/walk-luna.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/luna.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually. Source cell 3 swaps the dagger hand; replaced with passing pose 1.",
+    "sequence": [
+      0,
+      1,
+      2,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
+  },
+  {
+    "id": "walk-zeke",
+    "source": "survivor/assets/renewal/sources/walk-zeke.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/zeke.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually."
+  },
+  {
+    "id": "weapons",
+    "source": "survivor/assets/renewal/sources/weapons.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "All 16 illustrated inventory objects reviewed; custom column crops preserve the envelope and long weapons.",
+    "xEdges": [
+      0,
+      340,
+      650,
+      987,
+      1254
+    ]
+  },
+  {
+    "id": "walk-jasmine",
+    "source": "survivor/assets/renewal/sources/walk-jasmine.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "survivor/assets/jasmine.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually."
+  },
+  {
+    "id": "walk-snow_rabbit",
+    "source": "survivor/assets/renewal/sources/walk-snow_rabbit.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/snow_rabbit.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually. Row boundaries corrected after packed contact-sheet review: exclude next-row ear tips from left-walking cells.",
+    "yEdges": [
+      0,
+      320,
+      627,
+      926,
+      1254
+    ]
+  },
+  {
+    "id": "walk-night_rabbit",
+    "source": "survivor/assets/renewal/sources/walk-night_rabbit.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/night_rabbit.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually. Source frame 11 faces right, excluded; left passing frame 9 reused. Crops follow actual column gutters.",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      9,
+      12,
+      13,
+      14,
+      15
+    ],
+    "xEdges": [
+      0,
+      352,
+      639,
+      927,
+      1254
+    ]
+  },
+  {
+    "id": "walk-cinderella",
+    "source": "survivor/assets/renewal/sources/walk-cinderella.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/cinderella.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually."
+  },
+  {
+    "id": "walk-silver_rabbit",
+    "source": "survivor/assets/renewal/sources/walk-silver_rabbit.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/silver_rabbit.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually."
+  },
+  {
+    "id": "walk-time_ruler",
+    "source": "survivor/assets/renewal/sources/walk-time_ruler.png",
+    "kind": "walk",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": "defense/assets/merge/units/time_ruler.webp",
+    "review": "Direction, full body, transparent gutters and identity reviewed visually."
+  },
+  {
+    "id": "relics",
+    "source": "survivor/assets/renewal/sources/relics.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "Sixteen painted relic/loot illustrations; individual source rectangles exclude adjacent-row tips in the packed atlas.",
+    "rects": [
+      [
+        0,
+        0,
+        332,
+        320
+      ],
+      [
+        330,
+        0,
+        315,
+        305
+      ],
+      [
+        650,
+        0,
+        320,
+        320
+      ],
+      [
+        975,
+        0,
+        303,
+        300
+      ],
+      [
+        0,
+        320,
+        347,
+        287
+      ],
+      [
+        348,
+        300,
+        296,
+        310
+      ],
+      [
+        646,
+        320,
+        332,
+        315
+      ],
+      [
+        980,
+        295,
+        298,
+        312
+      ],
+      [
+        0,
+        606,
+        314,
+        295
+      ],
+      [
+        313,
+        596,
+        338,
+        317
+      ],
+      [
+        654,
+        634,
+        321,
+        280
+      ],
+      [
+        976,
+        608,
+        302,
+        308
+      ],
+      [
+        0,
+        901,
+        315,
+        329
+      ],
+      [
+        316,
+        918,
+        332,
+        312
+      ],
+      [
+        649,
+        927,
+        327,
+        303
+      ],
+      [
+        977,
+        919,
+        301,
+        311
+      ]
+    ]
+  },
+  {
+    "id": "bosses",
+    "source": "survivor/assets/renewal/sources/bosses.png",
+    "kind": "actors",
+    "columns": 4,
+    "rows": 3,
+    "cell": 224,
+    "reference": null,
+    "review": "Three distinct ground bosses, four breathing/cape poses each, no borrowed shooter silhouettes. Reviewed crowns, weapons and readable colored cores."
+  },
+  {
+    "id": "garden",
+    "source": "survivor/assets/renewal/sources/garden.png",
+    "kind": "background",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "Overhead open walkable plaza, quiet central floor and perimeter landmarks; reviewed against hero silhouette readability."
+  },
+  {
+    "id": "world2",
+    "source": "survivor/assets/renewal/sources/world2.png",
+    "kind": "background",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "Overhead open walkable plaza, quiet central floor and perimeter landmarks; reviewed against hero silhouette readability."
+  },
+  {
+    "id": "world3",
+    "source": "survivor/assets/renewal/sources/world3.png",
+    "kind": "background",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "Overhead open walkable plaza, quiet central floor and perimeter landmarks; reviewed against hero silhouette readability."
+  },
+  {
+    "id": "enemies",
+    "source": "survivor/assets/renewal/sources/enemies.png",
+    "kind": "actors",
+    "columns": 4,
+    "rows": 6,
+    "cell": 128,
+    "reference": null,
+    "review": "Six fantasy ground enemies with four walk/flap phases each. Native alpha reviewed on magenta matte. Horizontal crop boundaries follow irregular source gutters. Per-row column edges exclude neighboring cape/wisp fragments.",
+    "yEdges": [
+      0,
+      199,
+      387,
+      600,
+      817,
+      994,
+      1254
+    ],
+    "rowXEdges": [
+      [
+        0.0,
+        313.5,
+        627.0,
+        940.5,
+        1254.0
+      ],
+      [
+        0.0,
+        313.5,
+        627.0,
+        940.5,
+        1254.0
+      ],
+      [
+        0.0,
+        330.64453125,
+        636.796875,
+        949.072265625,
+        1254.0
+      ],
+      [
+        0.0,
+        317.173828125,
+        649.04296875,
+        961.318359375,
+        1254.0
+      ],
+      [
+        0.0,
+        313.5,
+        627.0,
+        940.5,
+        1254.0
+      ],
+      [
+        0.0,
+        335.54296875,
+        650.267578125,
+        966.216796875,
+        1254.0
+      ]
+    ]
+  },
+  {
+    "id": "effects",
+    "source": "survivor/assets/renewal/sources/effects.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 4,
+    "cell": 160,
+    "reference": null,
+    "review": "All fourteen weapon effects, impact and enemy orb. Per-row crops retain long projectile tips; native alpha checked on a colored matte.",
+    "rowXEdges": [
+      [
+        0.0,
+        335.543,
+        637.613,
+        953.562,
+        1254.0
+      ],
+      [
+        0.0,
+        351.055,
+        629.449,
+        949.48,
+        1254.0
+      ],
+      [
+        0.0,
+        342.891,
+        635.98,
+        963.359,
+        1254.0
+      ],
+      [
+        0.0,
+        345.34,
+        722.52,
+        953.562,
+        1254.0
+      ]
+    ],
+    "yEdges": [
+      0.0,
+      335.543,
+      602.508,
+      931.928,
+      1254.0
+    ]
+  }
+]

@@ -1,7 +1,7 @@
 import { VERSION,HERO,HEROES,STAGE,STAGES,META,ACHIEVEMENTS,clamp } from './content.js';
 export const PROFILE_KEY='astra.nocturne.profile.v1';
 export const RUN_KEY='astra.nocturne.run.v1';
-export function freshProfile(){return {version:VERSION,crystals:0,totalKills:0,runs:0,wins:0,meta:Object.fromEntries(META.map(m=>[m.id,0])),achievements:[],travelers:[],history:[],claimed:[],best:{},settings:{music:true,sound:true,volume:.4,effects:true,numbers:true,joystick:'floating'},selection:{hero:'rumi',stage:'garden',difficulty:'normal'}};}
+export function freshProfile(){return {version:VERSION,crystals:0,totalKills:0,runs:0,wins:0,meta:Object.fromEntries(META.map(m=>[m.id,0])),achievements:[],travelers:[],history:[],claimed:[],best:{},settings:{music:true,sound:true,volume:.4,effects:true,numbers:true,joystick:'floating',quality:'auto',motion:true},selection:{hero:'rumi',stage:'garden',difficulty:'normal'}};}
 export function normalizeProfile(value){
   if(!value||value.version!==VERSION)throw new Error('지원하지 않는 기록 버전입니다.');
   const out=freshProfile();const finite=n=>typeof n==='number'&&Number.isFinite(n);
@@ -12,9 +12,10 @@ export function normalizeProfile(value){
   out.claimed=(Array.isArray(value.claimed)?value.claimed:[]).filter(id=>typeof id==='string'&&id.length<120).slice(-30);
   out.history=(Array.isArray(value.history)?value.history:[]).filter(r=>r&&HERO[r.hero]&&STAGE[r.stage]&&finite(r.time)&&finite(r.kills)&&finite(r.reward)).slice(0,20).map(r=>({hero:r.hero,stage:r.stage,difficulty:['gentle','normal','eclipse'].includes(r.difficulty)?r.difficulty:'normal',won:!!r.won,time:clamp(r.time,0,86400),kills:clamp(r.kills,0,1000000),reward:clamp(r.reward,0,100000),date:typeof r.date==='string'?r.date.slice(0,30):''}));
   for(const st of STAGES){const best=value.best?.[st.id];if(best&&finite(best.kills)&&finite(best.time))out.best[st.id]={kills:clamp(best.kills,0,10000000),time:clamp(best.time,0,86400),won:!!best.won};}
-  for(const key of ['music','sound','effects','numbers'])if(typeof value.settings?.[key]==='boolean')out.settings[key]=value.settings[key];
+  for(const key of ['music','sound','effects','numbers','motion'])if(typeof value.settings?.[key]==='boolean')out.settings[key]=value.settings[key];
   if(finite(value.settings?.volume))out.settings.volume=clamp(value.settings.volume,0,1);
   if(['floating','fixed'].includes(value.settings?.joystick))out.settings.joystick=value.settings.joystick;
+  if(['auto','high','economy'].includes(value.settings?.quality))out.settings.quality=value.settings.quality;
   if(HERO[value.selection?.hero])out.selection.hero=value.selection.hero;if(STAGE[value.selection?.stage])out.selection.stage=value.selection.stage;if(['gentle','normal','eclipse'].includes(value.selection?.difficulty))out.selection.difficulty=value.selection.difficulty;
   return out;
 }

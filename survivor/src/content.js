@@ -36,7 +36,17 @@ export const WEAPONS = [
   weapon('cosmos','별바다의 중심','galaxy_whale','#9fbbf3','✵','gravity',14,3.5,'중력장이 적을 끌어당깁니다.','hourglass','은하의 심장'),
   weapon('light','완벽한 추리','great_detective','#f7e5b5','◇','snipe',90,2.5,'강한 적을 노리는 빛의 저격.','lens','진실의 새벽')
 ];
+const evolvedDescriptions={"star": "추적 유성이 터지며 주변 적에게 파편 피해.", "blade": "더 많은 달빛 칼날이 부채꼴로 대열을 관통합니다.", "ember": "전방 검격이 전방위 불사조 화염으로 펼쳐집니다.", "flower": "꽃빛이 세 명 더 이어지고 공격 간격이 짧아집니다.", "frost": "얼음창이 적을 얼려 돌진을 끊습니다.", "dream": "꿈의 영역이 35% 넓어지고 오래 남습니다.", "glass": "관통하는 유리창이 명중할 때 파편 폭발을 일으킵니다.", "sun": "한 줄기 태양빛이 세 갈래로 갈라져 전장을 가릅니다.", "clock": "시계의 영역 안에서 적이 주기적으로 멈춥니다.", "storm": "두 개의 바람 칼날이 추가되어 주위를 휘감습니다.", "thunder": "연쇄 번개가 세 명 더 전이됩니다.", "rose": "장미 영역이 35% 넓어져 적의 길을 막습니다.", "cosmos": "중력장이 35% 넓어져 적을 한곳으로 끌어당깁니다.", "light": "빛의 저격이 적을 관통하고 뒤의 적까지 공격합니다."};
+for(const w of WEAPONS)w.evolvedText=evolvedDescriptions[w.id];
 export const WEAPON = Object.fromEntries(WEAPONS.map(w=>[w.id,w]));
+export const EVOLUTION = Object.freeze({weapon:5,relic:1});
+export const BONDS = [
+  {id:'aurora',name:'오로라 폭풍',weapons:['star','thunder'],color:'#a1edfa',text:'별빛이 맞힌 적에게 0.8초마다 추가 연쇄 번개. 최대 3명에게 전이됩니다.'},
+  {id:'steam',name:'서리불꽃',weapons:['ember','frost'],color:'#ffc5b4',text:'얼어붙거나 느려진 적에게 화염이 닿으면 폭발. 주변 적에게 추가 피해를 줍니다.'},
+  {id:'bloom',name:'생명의 화원',weapons:['flower','rose'],color:'#f1c6c4',text:'꽃빛 공격이 더 멀리 이어지고, 20회 처치마다 생명을 5 회복합니다.'},
+  {id:'nightfall',name:'꿈꾸는 은하',weapons:['dream','cosmos'],color:'#c7b6ff',text:'꿈과 중력장의 범위 +25%. 끌려온 적을 주기적으로 잠재웁니다.'}
+];
+export const BOND = Object.fromEntries(BONDS.map(b=>[b.id,b]));
 export const RELICS = [
   {id:'prism',name:'천 갈래 프리즘',icon:'✧',color:'#8be6ed',text:'발사체 +1 · 무기 진화',stat:'amount',value:1},
   {id:'lens',name:'예리한 달조각',icon:'☾',color:'#c7a6f8',text:'치명타 +8% · 보스 피해 +12%',stat:'crit',value:.08},
@@ -51,9 +61,9 @@ export const RELICS = [
 ].map(r=>({...r,max:3}));
 export const RELIC = Object.fromEntries(RELICS.map(r=>[r.id,r]));
 export const STAGES = [
-  {id:'garden',name:'별빛 정원',en:'THE STARLIT GARDEN',tag:'첫 번째 밤',description:'달빛이 내려앉은 정원. 흩어진 별들을 모아 새벽까지 살아남으세요.',duration:360,bg:'garden',enemy:0,boss:1,bossName:'장미의 파수꾼',color:'#9bcbbb',floor:'#1d3030',danger:1,chapter:'01',landmarks:['달의 샘','별의 등불','새벽의 기둥']},
-  {id:'cathedral',name:'빛을 잃은 성당',en:'THE HOLLOW CATHEDRAL',tag:'두 번째 밤',description:'부서진 약속이 빛을 삼켰습니다. 저주받은 회랑을 건너세요.',duration:480,bg:'world2',enemy:2,boss:2,bossName:'황혼의 심판관',color:'#baacf1',floor:'#292539',danger:1.15,chapter:'02',landmarks:['유리의 제단','그림자 성좌','멈춘 시계']},
-  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'마지막 밤',description:'검은 태양 아래 마지막 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:600,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']}
+  {id:'garden',name:'별빛 정원',en:'THE STARLIT GARDEN',tag:'첫 번째 밤',description:'달빛이 내려앉은 정원. 흩어진 별들을 모아 새벽까지 살아남으세요.',duration:240,bg:'garden',enemy:0,boss:1,bossName:'장미의 파수꾼',color:'#9bcbbb',floor:'#1d3030',danger:1,chapter:'01',landmarks:['달의 샘','별의 등불','새벽의 기둥']},
+  {id:'cathedral',name:'빛을 잃은 성당',en:'THE HOLLOW CATHEDRAL',tag:'두 번째 밤',description:'부서진 약속이 빛을 삼켰습니다. 저주받은 회랑을 건너세요.',duration:360,bg:'world2',enemy:2,boss:2,bossName:'황혼의 심판관',color:'#baacf1',floor:'#292539',danger:1.15,chapter:'02',landmarks:['유리의 제단','그림자 성좌','멈춘 시계']},
+  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'마지막 밤',description:'검은 태양 아래 마지막 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:480,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']}
 ];
 export const STAGE = Object.fromEntries(STAGES.map(s=>[s.id,s]));
 export const META = [
