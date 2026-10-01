@@ -2756,7 +2756,7 @@ const TOEIC_DATA = [
         "answer": "[2]"
       }
     ],
-    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nSubject: Additional Materials for Your Application\n\nDear Ms. Ahmed,\n\nThank you for applying for the Inventory Planning Specialist position at Westfield Logistics. After an initial review of your résumé, we would like to continue with your application. Before we arrange interviews, please upload a copy of your spreadsheet certification and your most recent reference list through the applicant portal. [1]\n\nAll supporting documents should be submitted by 5:00 p.m. on Thursday, September 10. Files must be in PDF format, and each file name should include your last name and the job title. [2] Once all items have been received, a recruiting coordinator will contact you to schedule a 30-minute online interview.\n\nApplications are being reviewed on a rolling basis, (1) _______ we recommend completing this step as soon as possible. [3] If you have already uploaded the requested materials, you do not need to send them again. Instead, reply to this e-mail so we can confirm that your file is complete.\n\nIf you have trouble using the portal, you may send the documents directly to careers@westfield.example, (2) _______ the message is sent before the deadline above. [4] Candidates selected for interviews may be asked to provide additional (3) _______ , such as writing samples or employment records.\n\nThank you again for your interest in Westfield Logistics.\n\nSincerely,\nHiring Team\nWestfield Logistics"
+    "passage": "Directions: Read the text below and choose the best answer for each blank.\n\nSubject: Additional Materials for Your Application\n\nDear Ms. Ahmed,\n\nThank you for applying for the Inventory Planning Specialist position at Westfield Logistics. After an initial review of your resume, we would like to continue with your application. Before we arrange interviews, please upload a copy of your spreadsheet certification and your most recent reference list through the applicant portal. [1]\n\nAll supporting documents should be submitted by 5:00 p.m. on Thursday, September 10. Files must be in PDF format, and each file name should include your last name and the job title. [2] Once all items have been received, a recruiting coordinator will contact you to schedule a 30-minute online interview.\n\nApplications are being reviewed on a rolling basis, (1) _______ we recommend completing this step as soon as possible. [3] If you have already uploaded the requested materials, you do not need to send them again. Instead, reply to this e-mail so we can confirm that your file is complete.\n\nIf you have trouble using the portal, you may send the documents directly to careers@westfield.example, (2) _______ the message is sent before the deadline above. [4] Candidates selected for interviews may be asked to provide additional (3) _______ , such as writing samples or employment records.\n\nThank you again for your interest in Westfield Logistics.\n\nSincerely,\nHiring Team\nWestfield Logistics"
   },
   {
     "id": 58,
@@ -3261,7 +3261,7 @@ const TOEIC_DATA = [
         "options": [
           "itinerary",
           "contract",
-          "résumé",
+          "resume",
           "inventory"
         ],
         "answer": "itinerary"

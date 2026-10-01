@@ -735,7 +735,7 @@ const GameUtils = {
 
     formatRandomDebuffPhrase(pool, count) {
         const names = (pool || []).map(id => (typeof BUFF_NAMES !== 'undefined' && BUFF_NAMES[id]) || id);
-        return `[${names.join(', ')}] 중 무작위 ${count}종`;
+        return `‘${names.join('·')}’ 중 무작위 ${count}종`;
     },
 
     getDefaultUnlockedBonusCardIds() {

@@ -36,7 +36,7 @@ function run() {
   assert(indexHtml.includes('올스탯 +${Math.round(b.multiplier * 100)}%'));
   assert(rpgFeaturesSource.includes('올스탯 +${Math.round(b.multiplier * 100)}%'));
   assert(/\.lumi-chat-top\s*\{[^}]*flex-direction:\s*column;/s.test(indexHtml));
-  ['data.js', 'logic.js', 'battle_runtime.js', 'rpg_features.js'].forEach(fileName => {
+  ['data.js', 'logic.js', 'skill_display.js', 'battle_runtime.js', 'rpg_features.js'].forEach(fileName => {
     const filePath = path.join(cardRoot, fileName);
     vm.runInContext(fs.readFileSync(filePath, 'utf8'), sandbox, { filename: filePath });
   });
@@ -63,7 +63,7 @@ function run() {
     const cherryPrince = getCard('cherry_prince');
     assert.deepStrictEqual(
       [cherryPrince.trait.type, cherryPrince.trait.val, cherryPrince.trait.desc],
-      ['burn_stack_phy_pen', 0.3, '작열 1스택당 적의 물리방어력 30% 관통']
+      ['burn_stack_phy_pen', 0.3, '작열 1스택당 적의 물리 방어력 30% 관통']
     );
     const cherryPhysicalSkill = cherryPrince.skills.find(skill => skill.type === 'phy');
     const cherryDamageLog = [];
@@ -112,7 +112,7 @@ function run() {
       );
       assert.strictEqual(card.unlockSource, releaseDate ? 'bonus' : 'hidden');
       assert(card.trait.desc && card.trait.desc.trim());
-      assert(card.skills.every(skill => skill.desc && skill.desc.trim()));
+      assert(card.skills.every(skill => SkillDisplay.body(skill) && SkillDisplay.body(skill).trim()));
     });
     assert.strictEqual(
       GameUtils.getBonusCards().filter(card => bonusWaveIds.includes(card.id)).length,
@@ -126,7 +126,7 @@ function run() {
       tier: skill.tier,
       cost: skill.cost,
       val: skill.val,
-      desc: skill.desc,
+      desc: SkillDisplay.body(skill),
       effects: skill.effects
     });
     assert.strictEqual(comparableSkill(starfallDash), comparableSkill(dragonClaw));
@@ -208,7 +208,7 @@ function run() {
 
     const auroraReflection = getCard('aurora').skills.find(skill => skill.name === '리플렉션');
     assert.strictEqual(auroraReflection.effects[0].id, 'silence');
-    assert.strictEqual(auroraReflection.desc.includes('침묵'), true);
+    assert.strictEqual(SkillDisplay.body(auroraReflection).includes('침묵'), true);
 
     const transAres = getCard('trans_ares');
     const absoluteArmor = transAres.skills.find(skill => skill.name === '앱솔루트아머');
@@ -1041,6 +1041,43 @@ function run() {
     const originalEndPlayerTurnForNewCards = BattleRuntime.TurnManager.endPlayerTurn;
     BattleRuntime.TurnManager.endPlayerTurn = quiet;
 
+    // The two delayed support skills reserve a field only: no damage at either phase.
+    for (const [id,name,field] of [['blessing_tail','홀리블레싱','sanctuary'],['alchemist','은빛마법진','moon_bless']]) {
+      const caster = buildWaveUnit(id, [id], 0);
+      const supportRpg = makeRpg(caster, [id]);
+      const support = caster.skills.find(skill => skill.name === name);
+      BattleRuntime.executeSkill(supportRpg, caster, supportRpg.battle.enemy, support);
+      assert.strictEqual(supportRpg.battle.enemy.hp, 1000);
+      assert.strictEqual(supportRpg.battle.fieldBuffs.length, 0);
+      assert.deepStrictEqual(Array.from(supportRpg.battle.delayedEffects, effect => effect.turn), [2]);
+      supportRpg.battle.turn = 2;
+      supportRpg.battle.isNewTurn = false;
+      BattleRuntime.TurnManager.startPlayerTurn(supportRpg);
+      assert.strictEqual(supportRpg.battle.enemy.hp, 1000);
+      assert.deepStrictEqual(Array.from(supportRpg.battle.fieldBuffs, buff => buff.name), [field]);
+      assert.strictEqual(supportRpg.battle.delayedEffects.length, 0);
+    }
+
+    // Plague applies its random debuff on EACH of five real reserved triggers.
+    const venomCaster = buildWaveUnit('venom', ['venom'], 0);
+    venomCaster.baseCrit = -100;
+    const plagueRpg = makeRpg(venomCaster, ['venom']);
+    plagueRpg.battle.enemy = makeUnit({hp:5000,maxHp:5000,buffs:{}});
+    BattleRuntime.executeSkill(plagueRpg, venomCaster, plagueRpg.battle.enemy, venomCaster.skills.find(skill => skill.name === '플래이그'));
+    assert.strictEqual(plagueRpg.battle.enemy.hp, 5000);
+    assert.deepStrictEqual(Object.keys(plagueRpg.battle.enemy.buffs), []);
+    assert.deepStrictEqual(Array.from(plagueRpg.battle.delayedEffects, effect => effect.turn), [2,3,4,5,6]);
+    for (let turn = 2; turn <= 6; turn++) {
+      // Clear the observed status so a one-time application cannot satisfy later hits.
+      plagueRpg.battle.enemy.buffs = {};
+      plagueRpg.battle.turn = turn;
+      plagueRpg.battle.isNewTurn = false;
+      BattleRuntime.TurnManager.startPlayerTurn(plagueRpg);
+      assert.strictEqual(plagueRpg.battle.enemy.hp, 5000 - (turn - 1) * 100);
+      assert.strictEqual(Object.keys(plagueRpg.battle.enemy.buffs).length, 1);
+      assert.strictEqual(plagueRpg.battle.delayedEffects.length, 6 - turn);
+    }
+
     // Creation Prayer holds both its field and debuff effects until the delayed hit resolves.
     const creationCaster = buildWaveUnit('blue_moon_priest', ['blue_moon_priest'], 0);
     const creationRpg = makeRpg(creationCaster, ['blue_moon_priest']);
@@ -1594,15 +1631,15 @@ function run() {
     );
     assert.deepStrictEqual(
       [bruleeWitch.trait.type, bruleeWitch.trait.desc],
-      ['death_twinkle', '사망 시 필드버프 트윙클파티 발동']
+      ['death_twinkle', '사망 시 필드 버프 트윙클파티 발동']
     );
     const burningSyrup = bruleeWitch.skills.find(skill => skill.name === '버닝시럽');
     const holyGlaze = bruleeWitch.skills.find(skill => skill.name === '홀리글레이즈');
     const magicGuard = bruleeWitch.skills.find(skill => skill.name === '매직가드');
     assert.strictEqual(bruleeWitch.skills.length, 3);
     assert.deepStrictEqual(
-      [magicGuard.type, magicGuard.tier, magicGuard.cost, magicGuard.desc],
-      ['sup', 1, 10, '마법공격 무효']
+      [magicGuard.type, magicGuard.tier, magicGuard.cost, SkillDisplay.body(magicGuard)],
+      ['sup', 1, 10, '자신에게 매직가드 1턴 부여 (마법 피해 무효).']
     );
     assert.strictEqual(
       JSON.stringify(magicGuard.effects),
@@ -1759,11 +1796,11 @@ function run() {
     const forgetBlue = getCard('forget_me_not').skills.find(skill => skill.name === '블루메모리');
     const syrupDesc = getCard('brulee_witch').skills.find(skill => skill.name === '버닝시럽');
     const glazeDesc = getCard('brulee_witch').skills.find(skill => skill.name === '홀리글레이즈');
-    assert(sphinxStorm.desc.includes(GameUtils.formatRandomDebuffPhrase(['corrosion', 'curse'], 1)));
-    assert(forgetBlue.desc.includes('디바인 1스택'));
-    assert(forgetBlue.desc.includes(GameUtils.formatRandomDebuffPhrase(['weak', 'silence'], 1)));
-    assert(syrupDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
-    assert(glazeDesc.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
+    assert(SkillDisplay.body(sphinxStorm).includes(GameUtils.formatRandomDebuffPhrase(['corrosion', 'curse'], 1)));
+    assert(SkillDisplay.body(forgetBlue).includes('디바인 1스택'));
+    assert(SkillDisplay.body(forgetBlue).includes(GameUtils.formatRandomDebuffPhrase(['weak', 'silence'], 1)));
+    assert(SkillDisplay.body(syrupDesc).includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
+    assert(SkillDisplay.body(glazeDesc).includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 2)));
     assert.strictEqual(syrupDesc.effects[0].randomCount, 2);
     const collectableAndForms = GameUtils.getAllCards().concat(GameUtils.getBattleOnlyForms());
     collectableAndForms.forEach(card => {
@@ -1771,11 +1808,11 @@ function run() {
         (skill.effects || []).forEach(effect => {
           if (effect.type === 'random_debuff' && Array.isArray(effect.pool)) {
             const phrase = GameUtils.formatRandomDebuffPhrase(effect.pool, effect.count);
-            assert(skill.desc.includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
+            assert(SkillDisplay.body(skill).includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
           }
           if (effect.type === 'consume_debuff_then_random_debuff' && Array.isArray(effect.pool)) {
             const phrase = GameUtils.formatRandomDebuffPhrase(effect.pool, effect.randomCount);
-            assert(skill.desc.includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
+            assert(SkillDisplay.body(skill).includes(phrase), card.id + ' ' + skill.name + ' missing ' + phrase);
           }
         });
       });
@@ -1786,8 +1823,8 @@ function run() {
     });
     const whisper = getCard('fairy_queen').skills.find(skill => skill.name === '이터널위스퍼');
     const wild = getCard('joker').skills.find(skill => skill.name === '와일드카드');
-    assert(whisper.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 1)));
-    assert(wild.desc.includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'], 2)));
+    assert(SkillDisplay.body(whisper).includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion'], 1)));
+    assert(SkillDisplay.body(wild).includes(GameUtils.formatRandomDebuffPhrase(['curse', 'darkness', 'silence', 'weak', 'corrosion', 'burn', 'divine', 'temptation'], 2)));
 
     const larva = getCard('miracle_larva');
     assert.deepStrictEqual([larva.grade, larva.element, larva.role, larva.unlockSource], ['epic', 'nature', 'balancer', 'hidden']);
@@ -1930,6 +1967,27 @@ function run() {
     assert.strictEqual(Logic.decideEnemyAction(iris, 1).name, '일반 공격');
     assert.strictEqual(randomCalls, 1);
     Math.random = originalRandom;
+
+    // Soul Drain clears current MP (including >100) and deals no HP damage.
+    const soulEndEnemyTurn = BattleRuntime.TurnManager.endEnemyTurn;
+    const soulRandom = Math.random;
+    try {
+      BattleRuntime.TurnManager.endEnemyTurn = quiet;
+      Math.random = () => 0.9;
+      for (const mp of [40,120]) {
+        const victim = makeUnit({mp,maxMp:120});
+        const soulRpg = makeRpg(victim, []);
+        soulRpg.battle.enemy = buildBattleEnemy({state:{mode:'origin',enemyScale:0},getCurrentStageEnemyData:()=>iris});
+        soulRpg.battle.turn = 7;
+        BattleRuntime.TurnManager.startEnemyTurn(soulRpg);
+        assert.strictEqual(victim.mp, 0);
+        assert.strictEqual(victim.maxMp, 120);
+        assert.strictEqual(victim.hp, 1000);
+      }
+    } finally {
+      BattleRuntime.TurnManager.endEnemyTurn = soulEndEnemyTurn;
+      Math.random = soulRandom;
+    }
 
     // Synchronous duplicate commands spend mana and schedule the enemy once.
     scheduledCallbacks.length = 0;
