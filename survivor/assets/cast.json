@@ -1,0 +1,781 @@
+{
+  "version": 1,
+  "frames": [
+    {
+      "id": "rumi",
+      "file": "rumi.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 232,
+        "size": 250
+      },
+      "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "anatomy": {
+        "skull": [
+          221.8,
+          128.3,
+          457.1,
+          328.3
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          173,
+          148,
+          341,
+          291
+        ],
+        "headWidth": 168,
+        "headHeight": 142.8,
+        "bodyBelowChin": 189,
+        "heightClass": "medium",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-bec96928-7cc4-43fe-99ea-930417a88903.png",
+        "sha256": "c7d56c37eae8037f74a3cc77344be3a0f00509edf1c6df378400fd315baf3bc1",
+        "scale": 0.7141339162361231,
+        "feet": [
+          [
+            338,
+            593
+          ],
+          [
+            315,
+            593
+          ],
+          [
+            304,
+            594
+          ],
+          [
+            334,
+            594
+          ]
+        ],
+        "face": [
+          338,
+          246
+        ],
+        "splitY": 610,
+        "anatomy": {
+          "skull": [
+            221.8,
+            128.3,
+            457.1,
+            328.3
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/rumi.webp",
+      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb"
+    },
+    {
+      "id": "luna",
+      "file": "luna.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 211,
+        "size": 250
+      },
+      "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "anatomy": {
+        "skull": [
+          222,
+          97.4,
+          449.8,
+          320.3
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          175,
+          135,
+          331,
+          288
+        ],
+        "headWidth": 156.6,
+        "headHeight": 153.2,
+        "bodyBelowChin": 191.6,
+        "heightClass": "medium",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-c0ccf3fb-10b6-4aed-89b3-4755f241edf9.png",
+        "sha256": "d49f4ea80730064b46e1c7fe614ca537e8b23e54c82b12456580339190addecd",
+        "scale": 0.6875016214046616,
+        "feet": [
+          [
+            340,
+            599
+          ],
+          [
+            307,
+            599
+          ],
+          [
+            315,
+            569
+          ],
+          [
+            325,
+            569
+          ]
+        ],
+        "face": [
+          340,
+          208
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            222,
+            97.4,
+            449.8,
+            320.3
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/luna.webp",
+      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843"
+    },
+    {
+      "id": "zeke",
+      "file": "zeke.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 209,
+        "size": 250
+      },
+      "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "anatomy": {
+        "skull": [
+          210.1,
+          120.8,
+          435.1,
+          329.7
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          172,
+          142,
+          333,
+          291
+        ],
+        "headWidth": 160.8,
+        "headHeight": 149.3,
+        "bodyBelowChin": 188.9,
+        "heightClass": "tall",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-6a40561a-bd75-4852-990f-53584578837c.png",
+        "sha256": "5fa3ce18769187956b71e2a6e9c8c27fd915746db842d9fdc4676996c33ba0cb",
+        "scale": 0.7145705967260626,
+        "feet": [
+          [
+            328,
+            594
+          ],
+          [
+            316,
+            594
+          ],
+          [
+            324,
+            583
+          ],
+          [
+            323,
+            583
+          ]
+        ],
+        "face": [
+          328,
+          215
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            210.1,
+            120.8,
+            435.1,
+            329.7
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/zeke.webp",
+      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae"
+    },
+    {
+      "id": "cinderella",
+      "file": "cinderella.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 252,
+        "y": 190,
+        "size": 250
+      },
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "anatomy": {
+        "skull": [
+          226,
+          142,
+          408,
+          318
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          177,
+          117,
+          327,
+          262
+        ],
+        "headWidth": 149.7,
+        "headHeight": 144.7,
+        "bodyBelowChin": 217.9,
+        "heightClass": "medium",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-1b761670-9353-40d0-8ede-e6c11e79a4fb.png",
+        "sha256": "abce1b5dc9abc11ccdd31ae738c9027f5affdcf121eb53449d722c197eb1b816",
+        "scale": 0.8223130797930926,
+        "feet": [
+          [
+            322,
+            583
+          ],
+          [
+            321,
+            583
+          ],
+          [
+            321,
+            574
+          ],
+          [
+            307,
+            574
+          ]
+        ],
+        "face": [
+          317,
+          230
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            226,
+            142,
+            408,
+            318
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        },
+        "alphaOpaqueThreshold": 250
+      },
+      "sourcePath": "defense/assets/merge/units/cinderella.webp",
+      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601"
+    },
+    {
+      "id": "snow_rabbit",
+      "file": "snow_rabbit.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 228,
+        "size": 250
+      },
+      "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "anatomy": {
+        "skull": [
+          216.9,
+          151.8,
+          453.8,
+          358
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          170,
+          167,
+          336,
+          312
+        ],
+        "headWidth": 166.1,
+        "headHeight": 144.5,
+        "bodyBelowChin": 168.2,
+        "heightClass": "short",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-44c8878a-e3b8-4888-bd24-c937c0f0143a.png",
+        "sha256": "530c9881442ab6cc3ba81b2b3ea933c8a77ac929a467954ad5056c22089de980",
+        "scale": 0.7009366361363146,
+        "feet": [
+          [
+            340,
+            598
+          ],
+          [
+            312,
+            598
+          ],
+          [
+            319,
+            579
+          ],
+          [
+            319,
+            579
+          ]
+        ],
+        "face": [
+          340,
+          239
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            216.9,
+            151.8,
+            453.8,
+            358
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/snow_rabbit.webp",
+      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393"
+    },
+    {
+      "id": "night_rabbit",
+      "file": "night_rabbit.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 221,
+        "size": 250
+      },
+      "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "anatomy": {
+        "skull": [
+          204.1,
+          139.6,
+          435.9,
+          345.4
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          174,
+          143,
+          338,
+          289
+        ],
+        "headWidth": 164.4,
+        "headHeight": 146,
+        "bodyBelowChin": 191.2,
+        "heightClass": "short",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-42793b47-313d-4440-a178-66f21404a9a0.png",
+        "sha256": "22b06b35272f0c37d655d67c8bff5df330e7045f423bf4357189cddbf39976a9",
+        "scale": 0.7092938917378002,
+        "feet": [
+          [
+            320,
+            615
+          ],
+          [
+            310,
+            615
+          ],
+          [
+            305,
+            596
+          ],
+          [
+            330,
+            596
+          ]
+        ],
+        "face": [
+          320,
+          250
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            204.1,
+            139.6,
+            435.9,
+            345.4
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/night_rabbit.webp",
+      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f"
+    },
+    {
+      "id": "silver_rabbit",
+      "file": "silver_rabbit.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 249,
+        "size": 250
+      },
+      "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "anatomy": {
+        "skull": [
+          214,
+          226,
+          414,
+          399
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          176,
+          173,
+          343,
+          317
+        ],
+        "headWidth": 166.6,
+        "headHeight": 144.1,
+        "bodyBelowChin": 163.2,
+        "heightClass": "short",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-7bad6d7a-3de8-45f6-ade6-d1a112a902c5.png",
+        "sha256": "bdcf600186d90b8c8a05edce167fe3b738ae6538138f7b4b31b51e6012e907cf",
+        "scale": 0.8328514984660289,
+        "feet": [
+          [
+            310,
+            595
+          ],
+          [
+            314,
+            595
+          ],
+          [
+            312,
+            569
+          ],
+          [
+            312,
+            569
+          ]
+        ],
+        "face": [
+          310,
+          318
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            214,
+            226,
+            414,
+            399
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        },
+        "alphaOpaqueThreshold": 250
+      },
+      "sourcePath": "defense/assets/merge/units/silver_rabbit.webp",
+      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc"
+    },
+    {
+      "id": "time_ruler",
+      "file": "time_ruler.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 208,
+        "size": 250
+      },
+      "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "anatomy": {
+        "skull": [
+          208,
+          90.3,
+          454.7,
+          312
+        ],
+        "coordinateSpace": "source front quadrant",
+        "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+        "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+        "directionReview": "same uniform scale for all four views; separate visual review required",
+        "profileVersion": 1,
+        "packedSkull": [
+          173,
+          141,
+          337,
+          288
+        ],
+        "headWidth": 163.4,
+        "headHeight": 146.9,
+        "bodyBelowChin": 192.1,
+        "heightClass": "medium",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "exec-d4aa4731-09fd-49a5-954d-fa710ed3e568.png",
+        "sha256": "c9103788a98b090b1e7d3951de758b7fde758803d1c8b1922f4dbe9d1cef624f",
+        "scale": 0.6624272652745604,
+        "feet": [
+          [
+            333,
+            602
+          ],
+          [
+            295,
+            602
+          ],
+          [
+            312,
+            580
+          ],
+          [
+            311,
+            580
+          ]
+        ],
+        "face": [
+          333,
+          191
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            208,
+            90.3,
+            454.7,
+            312
+          ],
+          "coordinateSpace": "source front quadrant",
+          "method": "manual anatomical reconstruction from temples, cheeks, jaw and visible forehead; skull top under hair/headgear is estimated",
+          "uncertainty": "Skull boundary is partly occluded. Coordinates are reviewable estimates, not automatic exact detections.",
+          "directionReview": "same uniform scale for all four views; separate visual review required"
+        }
+      },
+      "sourcePath": "defense/assets/merge/units/time_ruler.webp",
+      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f"
+    },
+    {
+      "id": "jasmine",
+      "file": "jasmine.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 242,
+        "size": 250
+      },
+      "sourcePath": "survivor/assets/jasmine.webp",
+      "sourceSha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b",
+      "source": {
+        "file": "exec-c3abb866-ef20-4464-a769-1e8c1c8ac254.png",
+        "sha256": "42dfe0dde53be302aa6ab09aa629efb799149de86a2893b978ad0c87bc72aef8",
+        "scale": 0.66,
+        "feet": [
+          [
+            328,
+            610
+          ],
+          [
+            985,
+            610
+          ],
+          [
+            323,
+            1210
+          ],
+          [
+            940,
+            1210
+          ]
+        ],
+        "path": "survivor/assets/source/jasmine-generated.png",
+        "referencePaths": [
+          "defense/assets/merge/units/rumi.webp",
+          "shooter/generated-assets/heroes/3.webp"
+        ],
+        "landmarkMethod": "Manually estimated sole anchors; one uniform scale for all four directions. Visual scale matching, not an anatomical measurement."
+      },
+      "reviewStatus": "Generated for this game; visual review by implementation author. Not an existing approved Defense frame."
+    }
+  ]
+}
