@@ -21,7 +21,10 @@ body:is([data-theme=strawberry],[data-theme=dreamsky]) { --stat-up:#246549; --st
 .astra .battle-actor .portrait { height:clamp(112px,18vh,150px); width:auto; max-width:100%; aspect-ratio:3/5; align-self:center; border-radius:10px; flex-shrink:0; }
 .astra .battle-header { height:40px; min-height:40px; flex:0 0 40px; }
 .astra .battle-header .battle-artifact-btn { min-height:28px; padding:4px 8px; margin:0; }
-.astra .battle-header .field-buffs { max-height:30px; overflow:auto; }
+/* The 20px text line plus 4px padding fits without creating vertical overflow.
+   Only genuinely crowded rows scroll horizontally; scrollbars consume no line space. */
+.astra .battle-header .field-buffs { height:24px; line-height:20px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; text-overflow:clip; text-align:left; }
+.astra .battle-header .field-buffs::-webkit-scrollbar { display:none; }
 .astra .party-card .portrait { width:auto; max-width:100%; aspect-ratio:3/5; margin:0 auto; border-radius:10px; }
 .astra #gacha-result>.portrait { width:129px!important; height:215px!important; border-radius:10px; }
 .astra #artifact-check-list .reserve-option { padding:12px!important; background:var(--panel-soft)!important; color:var(--paper)!important; border:1px solid var(--line)!important; border-radius:10px; line-height:1.5; }
