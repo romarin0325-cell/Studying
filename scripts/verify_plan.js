@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle']);
-const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle']);
+const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle', 'survivor']);
+const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle', 'survivor']);
 const DEFENSE_TOOLS = new Set([
   'scripts/build_defense_local.mjs', 'scripts/prepare_defense_art.mjs',
   'scripts/verify_defense.js', 'scripts/verify_defense_confluence.mjs',
@@ -51,7 +51,7 @@ function currentChangePaths(changes) {
 }
 
 function isDocumentation(file) {
-  if (DEFENSE_ART_INPUTS.has(file)) return false;
+  if (DEFENSE_ART_INPUTS.has(file) || file === 'survivor/assets/Jua-OFL.txt') return false;
   const lower = file.toLowerCase();
   return (
     lower.endsWith('.md')
@@ -248,13 +248,14 @@ function planCard(plan, files) {
   }
 }
 
-function planShooter(plan, files) {
+function planShooter(plan, files, currentFiles) {
+  const current = new Set(currentFiles);
   const shooterFiles = files.filter(file => file.startsWith('shooter/'));
   const productFiles = shooterFiles.filter(file => !isDocumentation(file));
-  const directUnitTests = productFiles.filter(file => /^shooter\/tests\/.+\.test\.mjs$/.test(file));
+  const directUnitTests = productFiles.filter(file => current.has(file) && /^shooter\/tests\/.+\.test\.mjs$/.test(file));
   const selectedUnitTests = new Set(directUnitTests);
   const directFlowTests = productFiles.filter(file => (
-    /^shooter\/tests\/.+\.mjs$/.test(file) && !file.endsWith('.test.mjs')
+    current.has(file) && /^shooter\/tests\/.+\.mjs$/.test(file) && !file.endsWith('.test.mjs')
   ));
 
   for (const testFile of directFlowTests) {
@@ -272,7 +273,7 @@ function planShooter(plan, files) {
     && !file.startsWith('shooter/dist/')
     && !file.startsWith('shooter/artifacts/')
   ));
-  for (const file of sourceFiles.filter(file => /\.(?:js|mjs|cjs)$/.test(file))) {
+  for (const file of sourceFiles.filter(file => current.has(file) && /\.(?:js|mjs|cjs)$/.test(file))) {
     addNodeCheck(plan, 'shooter', file);
   }
 
@@ -501,6 +502,30 @@ function planIdle(plan, files, currentFiles) {
   if (product.some(file => file.startsWith('idle/dist/')) && !inputs.length) plan.blocked.push('Idle distribution changed without a mapped deployment input.');
 }
 
+function planSurvivor(plan, files, currentFiles) {
+  const product=files.filter(file=>file.startsWith('survivor/')&&!isDocumentation(file));
+  // Reading/repacking canonical art does not run a Defense or Shooter suite.
+  const shared=files.filter(file=>/^defense\/assets\/merge\/(?:garden\.webp|units\/(?:rumi|luna|zeke|cinderella|snow_rabbit|night_rabbit|silver_rabbit|time_ruler|storm_sage|lightning_sage|queen|galaxy_whale|great_detective)\.webp)$/.test(file)
+    || /^shooter\/generated-assets\/(?:enemies|bosses|sentinels)\/[0-3]\.webp$/.test(file)
+    || /^shooter\/generated-assets\/worlds\/[23]\.webp$/.test(file)
+    || file === 'card/assets/Jua-Regular.ttf');
+  if(!product.length&&!shared.length)return;
+  const inputs=product.filter(file=>/^survivor\/(?:src\/|assets\/|scripts\/(?:(?:build|prepare-assets|pack-jasmine)\.mjs|prepare-font\.py)$|index\.html$|package\.json$)/.test(file)).concat(shared);
+  const tests=currentFiles.filter(file=>/^survivor\/tests\/.*\.test\.mjs$/.test(file));
+  const unknown=product.filter(file=>!inputs.includes(file)&&!/^survivor\/(?:tests\/|dist\/|scripts\/(?:serve|simulate)\.mjs$)/.test(file));
+  if(unknown.length)plan.blocked.push('No Survivor mapping exists for: '+unknown.join(', '));
+  const checks=new Set(tests);
+  if(product.includes('survivor/scripts/simulate.mjs'))checks.add('survivor/tests/engine.test.mjs');
+  if(inputs.length)for(const file of ['engine','profile','assets'])checks.add('survivor/tests/'+file+'.test.mjs');
+  addNodeTest(plan,'survivor','survivor:contracts-and-regressions','Check Nocturne combat, persistence and canonical art contracts',[...checks]);
+  if(checks.has('survivor/tests/assets.test.mjs'))plan.steps.find(s=>s.id==='survivor:contracts-and-regressions').needsInstall=true;
+  for(const file of currentFiles.filter(file=>/^survivor\/(?:src\/.*\.js|scripts\/.*\.mjs)$/.test(file)))addNodeCheck(plan,'survivor',file);
+  if(inputs.length)addStep(plan,makeStep('survivor:build','survivor','Build the changed offline Nocturne inputs once','node',['survivor/scripts/build.mjs'],{needsInstall:true}));
+  if(inputs.length||product.some(file=>file==='survivor/tests/browser.mjs'))addBrowserScript(plan,'survivor','survivor:offline-browser','Play the committed standalone HTML offline at mobile and desktop sizes','survivor/tests/browser.mjs');
+  if(inputs.length||product.includes('survivor/tests/browser-webkit.mjs'))addBrowserScript(plan,'survivor','survivor:offline-webkit','Check Nocturne file playback, resume and backup import in WebKit','survivor/tests/browser-webkit.mjs',['webkit']);
+  if(product.some(file=>file.startsWith('survivor/dist/'))&&!inputs.length)plan.blocked.push('Survivor distribution changed without a mapped deployment input.');
+}
+
 function createPlan(changes, options = {}) {
   const files = changePaths(changes);
   const currentFiles = currentChangePaths(changes);
@@ -540,9 +565,10 @@ function createPlan(changes, options = {}) {
 
   const shouldPlan = game => !onlyGame ? ACTIVE_ROOT_GAMES.includes(game) : onlyGame === game;
   if (shouldPlan('card')) planCard(plan, files);
-  if (shouldPlan('shooter')) planShooter(plan, files);
+  if (shouldPlan('shooter')) planShooter(plan, files, currentFiles);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
   if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
+  if (shouldPlan('survivor')) planSurvivor(plan, files, currentFiles);
 
   if (!onlyGame && plan.detectedGames.includes('defense')) {
     plan.skipped.push('Defense commands are delegated to the dedicated Defense workflow.');
@@ -617,6 +643,8 @@ function fullPlan(game) {
         { needsInstall: true, browsers: ['chromium'] }
       )
     );
+  } else if (game === 'survivor') {
+    throw new Error('Use the mapped Nocturne checks; a full-suite alias is not defined.');
   } else if (game === 'idle') {
     addStep(plan, makeStep('full:idle', 'idle', 'Explicit full Idle validation', 'npm', ['run', 'verify', '--prefix', 'idle'], { needsInstall: true, browsers: ['chromium'] }));
   } else {

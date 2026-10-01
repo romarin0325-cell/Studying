@@ -2,10 +2,11 @@
 export const MANUAL_BALANCE = {
   "schema": 1,
   "sources": {
-    "engine.js": "a8010e04c05cc5e131a1857840445e5bb0ceac3115a1209b83fb6a7c3fccdb63",
+    "engine.js": "e1455c9dabd6ccbe10059fcdd6e7095cd653d13e9ee728fc74240bf816d919c1",
     "content.js": "be6e71935cd0a15123597c4c18c33ff7c29498c3e85ffd5d0e32ba676f1ce66e",
-    "meta.js": "abef31ef07b45874d7a1c52c3bec0afd5eba314e1bf86783866c9fca47ee78d0",
-    "generate-manual.mjs": "5fc603b3abe4d7df126e0f7c0649c9b1c777a5014bacc7368ad059603781d1ee"
+    "meta.js": "c63d3c2626f8841664ff9b7cb7583fd7e219b98ccfd3759a52251a6a176b1fc0",
+    "docs/generate-manual.mjs": "f3c9b2f1f836c693e4fda96c3312539f13b47e81ed619b7e343078c349d0b7a2",
+    "docs/manual-content.js": "2c4b4fd506cd3ccbe90573fc15c4fdd9b75fea22a1f6d0ea82385a83924c0011"
   },
   "fixture": {
     "hz": 60,
@@ -586,6 +587,12 @@ export const MANUAL_BALANCE = {
     "transformedDamage": 0,
     "duration": 1,
     "invincibility": 1
+  },
+  "holyflame": {
+    "damage": 5500,
+    "transformedDamage": 0,
+    "duration": 2,
+    "invincibility": 2
   },
   "stages": [
     {

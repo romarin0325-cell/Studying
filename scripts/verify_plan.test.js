@@ -21,6 +21,38 @@ function games(plan) {
   return new Set(plan.steps.map(step => step.game));
 }
 
+test('Nocturne runtime builds once, boots offline and never selects existing game suites', () => {
+  const plan=createPlan(changes('survivor/src/engine.js','survivor/assets/jasmine.webp','scripts/verify_plan.js'));
+  assert.deepEqual(plan.blocked,[]);
+  assert.deepEqual([...games(plan)],['survivor','verification']);
+  assert.equal(plan.steps.filter(s=>s.id==='survivor:build').length,1);
+  assert.ok(ids(plan).includes('survivor:offline-browser'));
+  assert.ok(ids(plan).includes('survivor:offline-webkit'));
+  assert.doesNotMatch(plan.steps.map(s=>s.args.join(' ')).join('\n'),/lint:defense|test:defense|shooter\/|card\/|idle\//);
+});
+
+test('Nocturne documentation and selector-only edits never run a game; dist-only and unknown paths block', () => {
+  assert.equal(createPlan(changes('survivor/README.md')).steps.length,0);
+  assert.deepEqual([...games(createPlan(changes('scripts/verify_plan.js')))],['verification']);
+  assert.ok(createPlan(changes('survivor/dist/AstraNocturne.html')).blocked.length);
+  assert.ok(createPlan(changes('survivor/mystery.js')).blocked.length);
+  const testOnly=createPlan(changes('survivor/tests/profile.test.mjs'));
+  assert.equal(ids(testOnly).includes('survivor:build'),false);
+  assert.equal(testOnly.needsInstall,false);
+  assert.ok(ids(createPlan(changes('survivor/scripts/simulate.mjs'))).includes('survivor:contracts-and-regressions'));
+  assert.ok(ids(createPlan(changes('survivor/assets/Jua-OFL.txt'))).includes('survivor:build'));
+  assert.ok(ids(createPlan(changes('survivor/scripts/prepare-font.py'))).includes('survivor:build'));
+});
+
+test('Nocturne shared-art changes validate the consumer without invoking Defense from root', () => {
+  const plan=createPlan(changes('defense/assets/merge/units/rumi.webp'));
+  assert.ok(ids(plan).includes('survivor:build'));
+  assert.equal(games(plan).has('defense'),false);
+  const dedicated=createPlan(changes('survivor/src/app.js'),{onlyGame:'defense'});
+  assert.equal(dedicated.steps.length,0);
+  assert.deepEqual(dedicated.blocked,[]);
+});
+
 test('Idle runtime selects its focused checks and offline artifact only', () => {
   const plan = createPlan(changes('idle/src/core/commands.js', 'idle/src/combat/engine.js', 'idle/assets/memories/bond_lumi_01.webp'));
   assert.deepEqual([...games(plan)], ['idle']);
@@ -169,6 +201,23 @@ test('renames and deletes preserve every path needed for scope selection', () =>
   const plan = createPlan(parsed);
   assert.equal(games(plan).has('card'), true);
   assert.equal(games(plan).has('shooter'), true);
+});
+
+test('moving Shooter manual sources into docs preserves deployment scope without invoking removed source paths', () => {
+  const plan = createPlan([
+    { status:'R100', paths:['shooter/manual.js','shooter/docs/manual-content.js'] },
+    { status:'R100', paths:['shooter/manual-data.js','shooter/docs/manual-data.js'] },
+    { status:'D', paths:['shooter/generate-manual.mjs'] },
+    { status:'D', paths:['shooter/tests/old-flow.mjs'] },
+    { status:'D', paths:['shooter/tests/old.test.mjs'] },
+    { status:'M', paths:['shooter/build.mjs'] }
+  ]);
+  assert.ok(ids(plan).includes('shooter:build'));
+  assert.ok(ids(plan).includes('shooter:bundle-smoke'));
+  assert.deepEqual(plan.blocked,[]);
+  const commands=plan.steps.map(step=>step.args.join(' ')).join('\n');
+  assert.doesNotMatch(commands,/shooter\/(?:manual\.js|manual-data\.js|generate-manual\.mjs|tests\/old)/);
+  assert.equal(games(plan).has('defense'),false);
 });
 
 test('distribution-only edits are blocked instead of reported as verified', () => {

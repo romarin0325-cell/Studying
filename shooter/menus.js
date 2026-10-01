@@ -1,7 +1,6 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
+import { artifactText, ARTIFACTS, COLLECTIBLE_ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
-import { MANUAL_TABS, renderManual } from './manual.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function economySnapshot(profile) {
   return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })), costumesOwned:[...profile.costumesOwned], costumesEquipped:{...profile.costumesEquipped}, costumeTickets:{...profile.costumeTickets} };
@@ -50,16 +49,6 @@ export class CampaignUI {
     panel.setAttribute('aria-labelledby','menu-title');$(closeId).onclick=onClose;
   }
   costumeArt(costume) { return this.art.urls.costumes[COSTUMES.findIndex(item=>item.id===costume.id)]; }
-  manual(back=this.closeModal) {
-    this.menu({kind:'manual',title:'비행 매뉴얼',subtitle:'플레이 안내 · 전투 수치 · 밸런스 기준',closeId:'manual-close',onClose:back,
-      body:'<nav class="menu-tabs manual-tabs" aria-label="매뉴얼 분류">'+MANUAL_TABS.map(([id,name])=>'<button data-manual-tab="'+id+'" aria-pressed="'+(id==='guide')+'" class="'+(id==='guide'?'selected':'')+'">'+name+'</button>').join('')+'</nav><article class="menu-scroll manual-content" id="manual-body">'+renderManual()+'</article>',
-      footer:'<button class="primary" id="manual-done">돌아가기</button>'});
-    document.querySelectorAll('[data-manual-tab]').forEach(button=>button.onclick=()=>{
-      document.querySelectorAll('[data-manual-tab]').forEach(b=>{const selected=b===button;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
-      $('manual-body').innerHTML=renderManual(button.dataset.manualTab);$('manual-body').scrollTop=0;
-    });
-    $('manual-done').onclick=back;
-  }
   lecture(lecture,back,label='도서관으로') {
     const read=this.profile.learning.read=Array.isArray(this.profile.learning.read)?this.profile.learning.read:[];
     if(!read.includes(lecture.id)){read.push(lecture.id);this.save();}
@@ -111,7 +100,7 @@ export class CampaignUI {
   equipment(refresh) {
     const p=this.profile,scroll=document.querySelector('.equipment-list')?.scrollTop||0;
     const exit=()=>{this.closeModal();refresh();};
-    this.menu({kind:'equipment',title:'별의 유물함',subtitle:'장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+ARTIFACTS.length,closeId:'equipment-close',onClose:exit,
+    this.menu({kind:'equipment',title:'별의 유물함',subtitle:'장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+COLLECTIBLE_ARTIFACTS.length,closeId:'equipment-close',onClose:exit,
       body:'<div class="menu-scroll equipment-list">'+['normal','rare','epic'].map(rarity=>'<section class="relic-section" aria-label="'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+' 아티팩트"><h3><span>'+(rarity==='epic'?'에픽':rarity==='rare'?'레어':'일반')+'</span><i></i></h3><div class="artifact-grid">'+ARTIFACTS.filter(a=>a.rarity===rarity).map(a=>'<button class="artifact '+(p.equipped.includes(a.id)?'selected ':'')+a.rarity+'" data-artifact="'+a.id+'" '+(p.owned.includes(a.id)?'':'disabled')+' aria-pressed="'+p.equipped.includes(a.id)+'">'+this.relicImage(a.id)+'<b>'+a.name+'</b><small>'+a.text+'</small><em>'+(p.equipped.includes(a.id)?'착용 중':p.owned.includes(a.id)?'보유':'미보유')+'</em></button>').join('')+'</div></section>').join('')+'</div>',
       footer:'<button class="secondary" id="draw-ticket" '+(p.tickets.length?'':'disabled')+'>유물 뽑기 <span>'+p.tickets.length+'장</span></button><button class="primary" id="equipment-done">장착 완료</button>'});
     document.querySelector('.equipment-list').scrollTop=scroll;
@@ -124,7 +113,7 @@ export class CampaignUI {
       const selected=p.equipped.includes(id);
       b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));
       b.querySelector('em').textContent=selected?'착용 중':'보유';
-      document.querySelector('.equipment-panel .menu-heading p').textContent='장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+ARTIFACTS.length;
+      document.querySelector('.equipment-panel .menu-heading p').textContent='장착 '+p.equipped.length+'/3 · 수집 '+p.owned.length+'/'+COLLECTIBLE_ARTIFACTS.length;
     });
     $('equipment-done').onclick=exit;
     $('draw-ticket').onclick=()=>{
@@ -219,20 +208,54 @@ export class CampaignUI {
     render();
   }
   wardrobe(refresh,selectedHero=0) {
-    const p=this.profile,heroes=[0,1,2,3,4,6],exit=()=>{this.closeModal();refresh();};
+    let transition=null,requested=null;
+    const cancelTransition=()=>{
+      if(!transition)return;
+      transition.cancelled=true;clearTimeout(transition.timer);transition.wake?.();
+      transition.animations.forEach(animation=>animation.cancel());transition=null;
+    };
+    const p=this.profile,heroes=[0,1,2,3,4,6],exit=()=>{cancelTransition();this.closeModal();refresh();};
     if(!heroes.includes(selectedHero))selectedHero=0;
     let previewId=p.costumesEquipped[selectedHero]||null;
     const variantsFor=hero=>[{id:null,name:'기본 의상',hero},...COSTUMES.filter(c=>c.hero===hero)];
     const currentPreview=()=>variantsFor(selectedHero).find(c=>c.id===previewId)||variantsFor(selectedHero)[0];
     this.menu({kind:'wardrobe',title:'의상실',subtitle:'컬렉션 '+p.costumesOwned.length+'/'+COSTUMES.length,closeId:'wardrobe-close',onClose:exit,
-      body:'<nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">'+heroes.map(index=>'<button data-wardrobe-hero="'+index+'">'+HEROES[index].name+'</button>').join('')+'</nav><div class="wardrobe-scene"><div class="wardrobe-orbit" aria-hidden="true"></div><div class="wardrobe-preview"><img class="anchored-art" alt=""></div><div class="wardrobe-caption" aria-live="polite" aria-atomic="true"><small></small><h3></h3><span></span></div></div><div class="wardrobe-variants" aria-label="의상 선택">'+variantsFor(selectedHero).map((c,i)=>'<button data-preview="'+(c.id||'')+'"><small>0'+(i+1)+'</small><b></b><span></span></button>').join('')+'</div>',
+      body:'<nav class="wardrobe-heroes" aria-label="의상 변경 캐릭터">'+heroes.map(index=>'<button data-wardrobe-hero="'+index+'">'+HEROES[index].name+'</button>').join('')+'</nav><div class="wardrobe-scene"><div class="wardrobe-orbit" aria-hidden="true"></div><div class="wardrobe-preview"><img class="anchored-art" alt=""><img class="wardrobe-veil" src="'+this.art.urls.wardrobeFx+'" alt="" aria-hidden="true"></div><div class="wardrobe-caption" aria-live="polite" aria-atomic="true"><small></small><h3></h3><span></span></div></div><div class="wardrobe-variants" aria-label="의상 선택">'+variantsFor(selectedHero).map((c,i)=>'<button data-preview="'+(c.id||'')+'"><small>0'+(i+1)+'</small><b></b><span></span></button>').join('')+'</div>',
       footer:'<button class="secondary" id="wardrobe-back">돌아가기</button><button class="primary" id="wardrobe-equip"></button>'});
+    const portrait=document.querySelector('.wardrobe-preview'),image=portrait.querySelector('.anchored-art'),veil=portrait.querySelector('.wardrobe-veil');
+    const decode=async src=>{const next=new Image();next.src=src;await next.decode();};
+    const reveal=async()=>{
+      if(transition||!portrait.isConnected||image.getAttribute('src')===requested.src)return;
+      const state={animations:[],cancelled:false};transition=state;
+      try {
+        await Promise.all([decode(requested.src),veil.decode()]);
+        if(state.cancelled||!portrait.isConnected)return;
+        const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+        portrait.setAttribute('aria-busy','true');
+        const timing={duration:1600,easing:'linear'};
+        state.animations=[
+          image.animate([{opacity:1,offset:0},{opacity:0,offset:.25},{opacity:0,offset:.66},{opacity:1,offset:1}],timing),
+          veil.animate([{opacity:0,transform:'translateY(12px) scale(.88)',offset:0},{opacity:.94,transform:'translateY(0) scale(1)',offset:.28},{opacity:1,transform:'translateY(-2px) scale(1.02)',offset:.54},{opacity:0,transform:reduced?'scale(1.02)':'translateY(-20px) scale(1.16)',offset:1}],timing)
+        ];
+        const finished=Promise.allSettled(state.animations.map(animation=>animation.finished));
+        await new Promise(resolve=>{state.wake=resolve;state.timer=setTimeout(resolve,560);});
+        if(state.cancelled||!portrait.isConnected)return;
+        const target=requested;await decode(target.src);
+        if(state.cancelled||!portrait.isConnected)return;
+        image.src=target.src;image.alt=target.alt;
+        await finished;
+      } catch { if(!state.cancelled)this.toast('의상 그림을 불러오지 못했어요. 다시 선택해 주세요.'); return; }
+      finally {
+        if(transition===state){transition=null;portrait.removeAttribute('aria-busy');}
+      }
+      if(!state.cancelled&&portrait.isConnected&&image.getAttribute('src')!==requested.src)void reveal();
+    };
     const render=(hero=selectedHero)=>{
       if(hero!==selectedHero){selectedHero=hero;previewId=p.costumesEquipped[hero]||null;}
       const variants=variantsFor(hero),preview=currentPreview(),owned=!preview.id||p.costumesOwned.includes(preview.id),equipped=(p.costumesEquipped[hero]||null)===preview.id;
-      const image=document.querySelector('.wardrobe-preview img'),src=preview.id?this.costumeArt(preview):this.art.urls.heroes[hero];
-      if(image.getAttribute('src')!==src)image.src=src;
-      image.alt=HEROES[hero].name+' '+preview.name;
+      const src=preview.id?this.costumeArt(preview):this.art.urls.heroes[hero];
+      requested={src,alt:HEROES[hero].name+' '+preview.name};
+      if(!image.hasAttribute('src')){image.src=src;image.alt=requested.alt;}else void reveal();
       document.querySelector('.wardrobe-caption small').textContent=HEROES[hero].name;
       document.querySelector('.wardrobe-caption h3').textContent=preview.name;
       document.querySelector('.wardrobe-caption span').textContent=equipped?'현재 착용 중':owned?'보유한 의상':'아직 만나지 못한 의상';
@@ -251,7 +274,7 @@ export class CampaignUI {
     $('wardrobe-back').onclick=exit;
     $('wardrobe-equip').onclick=()=>{
       const preview=currentPreview();
-      if(preview.id&&!p.costumesOwned.includes(preview.id))return this.shop(refresh);
+      if(preview.id&&!p.costumesOwned.includes(preview.id)){cancelTransition();return this.shop(refresh);}
       const snap=economySnapshot(p);if(!equipCostume(p,selectedHero,preview.id))return;
       if(!this.save()){restoreEconomy(p,snap);this.toast('저장하지 못해서 의상 변경을 취소했어요.');}
       render();

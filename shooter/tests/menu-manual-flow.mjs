@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { ARTIFACTS, COSTUMES } from '../meta.js';
+import { COLLECTIBLE_ARTIFACTS as ARTIFACTS, COSTUMES } from '../meta.js';
 const root=new URL('../',import.meta.url),file=new URL('artifacts/menu-manual-flow.html',root);
 const original=await fs.readFile(new URL('dist/AstralBloom.html',root),'utf8');
 const html=original.replace("Object.defineProperty(globalThis, 'astralDiagnostics'","globalThis.__menuReview={get menus(){return menus},profile,save};\nObject.defineProperty(globalThis, 'astralDiagnostics'");
@@ -39,31 +40,20 @@ try {
       await click(`[data-wardrobe-hero="${hero}"]`);
       for(const costume of [null,...COSTUMES.filter(c=>c.hero===hero)]) {
         await click(`[data-preview="${costume?.id||''}"]`);
+        await page.waitForFunction(()=>!document.querySelector('.wardrobe-preview').hasAttribute('aria-busy') && document.querySelector('.wardrobe-preview .anchored-art').alt.endsWith(document.querySelector('.wardrobe-caption h3').textContent));
         assert.equal(await page.locator(`[data-preview="${costume?.id||''}"]`).getAttribute('aria-pressed'),'true');
         await page.waitForFunction(()=>{const img=document.querySelector('.wardrobe-preview img');return img.complete&&img.naturalWidth===512;});
-        if(width===390)await page.locator('.wardrobe-panel').screenshot({path:new URL(`artifacts/menu-review/wardrobe-${hero}-${costume?.id||'base'}.png`,root).pathname});
+        if(width===390)await page.locator('.wardrobe-panel').screenshot({path:fileURLToPath(new URL(`artifacts/menu-review/wardrobe-${hero}-${costume?.id||'base'}.png`,root))});
         await stable();
       }
       await click('#wardrobe-equip');await stable();
     }
     await page.evaluate(()=>__watch.disconnect());await click('#wardrobe-back');
-    await click('#manual');await page.waitForFunction(()=>document.querySelector('.menu-panel').getAnimations().length===0);await remember();
-    for(const tab of ['guide','heroes','stages','artifacts','content']) {
-      await click(`[data-manual-tab="${tab}"]`);await stable();
-      const overflow=await page.evaluate(()=>({page:document.documentElement.scrollWidth-innerWidth,panel:__panel.scrollWidth-__panel.clientWidth,body:document.querySelector('#manual-body').scrollWidth-document.querySelector('#manual-body').clientWidth}));
-      assert.ok(Object.values(overflow).every(n=>n<=1),`${width}: manual overflow ${JSON.stringify(overflow)}`);
-      if(tab==='heroes')assert.equal(await page.locator('[data-manual-hero]').count(),9);
-      if(tab==='stages')assert.equal(await page.locator('[data-manual-dungeon]').count(),12);
-      if(tab==='artifacts')assert.equal(await page.locator('[data-manual-artifact]').count(),42);
-      if(tab==='content')assert.match(await page.locator('#manual-body').innerText(),/520문항/);
-      if(width===390)await page.locator('.manual-panel').screenshot({path:new URL(`artifacts/menu-review/manual-${tab}.png`,root).pathname});
-    }
-    await page.evaluate(()=>__watch.disconnect());await click('#manual-close');
+    assert.equal(await page.locator('#manual').count(),0);
     assert.equal(await page.locator('#modal').isVisible(),false);
-    assert.equal(await page.evaluate(()=>document.activeElement.id),'manual');
     await page.evaluate(()=>__menuReview.menus.offerQuiz('전환 검사','문제 화면',()=>{},()=>{}));
     assert.equal(await page.locator('#modal').evaluate(m=>m.classList.contains('menu-modal')),false);
     await click('#quiz-decline');assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
-    await context.close();console.log(`Persistent menus, original animation, 18 wardrobe previews and complete manual: ${width}×${height} PASS`);
+    await context.close();console.log(`Persistent menus, original animation, 18 wardrobe previews and documentation-only manual: ${width}×${height} PASS`);
   }
 } finally {await browser.close();}

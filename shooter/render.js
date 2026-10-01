@@ -34,6 +34,7 @@ export async function loadArt() {
     if (urls.dark === url) result.dark = image;
     if (urls.sigil === url) result.sigil = image;
     if (urls.darkFairy === url) result.darkFairy = image;
+    if (urls.holyFlame === url) result.holyFlame = image;
   };
   const loadQueued = async paths => {
     const queue = [...new Set(paths.filter(Boolean))]; let cursor = 0;
@@ -46,7 +47,7 @@ export async function loadArt() {
     await loadQueued([urls.worlds[stage], urls.bosses[stage], urls.enemies[enemyIndex], urls.sentinels[enemyIndex]]);
   };
   result.ensureGameplay = async ({ stage, hero, challenge, costumeIndex = -1 }) => {
-    await loadQueued([urls.heroes[hero], urls.heroes[1], urls.costumes[costumeIndex], urls.dark, urls.sigil, urls.companions[3], urls.darkFairy, ...urls.bloomFx]);
+    await loadQueued([urls.heroes[hero], urls.heroes[1], urls.costumes[costumeIndex], urls.dark, urls.sigil, urls.companions[3], urls.darkFairy, urls.holyFlame, ...urls.bloomFx]);
     await result.ensureStage(stage);
     if (challenge) void result.ensureStage(stage + 1);
   };
@@ -137,7 +138,7 @@ export class Renderer {
       c.strokeStyle=color;c.lineWidth=2;c.beginPath();c.arc(z.x,z.y,z.r,0,TAU);c.stroke();
       for(let i=0;i<5;i++){const a=t*.7+i*TAU/5;c.fillStyle=color;star(c,z.x+Math.cos(a)*z.r*.7,z.y+Math.sin(a)*z.r*.7,5);c.fill();}c.restore();
     }
-    if(g.weapon==='orbit' && (g.bombTime<=0||g.artifacts.has('sun'))) {
+    if(g.weapon==='orbit' && (g.bombTime<=0||!g.usesHeroBomb)) {
       for(const orb of g.orbitCenters()) {this.sprite(this.art.sigil,orb.x,orb.y,100.8,-t*2,1,.8);}
     }
     if(g.weapon==='laser' && ['wave','boss'].includes(g.phase)) this.drawLaser(g);
@@ -234,7 +235,7 @@ export class Renderer {
     for (const side of [-1, 1]) { c.beginPath(); c.moveTo(side * 14, 10); c.quadraticCurveTo(side * 23 + Math.sin(t * 4) * 7, 37, side * 9, 59); c.stroke(); }
     c.globalAlpha = 1; c.restore();
     const opacity = p.invincible > 0 && g.bombTime <= 0 ? .58 + Math.sin(t * 20) * .26 : 1;
-    const transformed=g.heroIndex===8&&!g.artifacts.has('sun')&&g.bombTime>0;
+    const transformed=g.heroIndex===8&&g.usesHeroBomb&&g.bombTime>0;
     this.sprite(transformed?this.art.dark:(this.art.costumes[g.costumeIndex]||this.art.heroes[g.heroIndex]), p.x, p.y, g.heroIndex===7?112:82, p.tilt, 1, opacity);
     if(p.barrier)this.sprite(this.art.barrier,p.x,p.y,118+Math.sin(t*3)*3,t*.12,1,.9);
     if (p.invincible > 0) { c.strokeStyle = g.hero.color + '99'; c.lineWidth = 1; c.beginPath(); c.arc(p.x, p.y, 36 + Math.sin(t * 5) * 2, 0, TAU); c.stroke(); }
@@ -247,7 +248,11 @@ export class Renderer {
     if(f.type==='barrierBreak'){
       c.strokeStyle='#b8f8ff';c.globalAlpha=1-q;c.lineWidth=2;
       for(let i=0;i<6;i++){const a=i*TAU/6+q*.3;c.beginPath();c.arc(f.x,f.y,f.radius*(1+q*.7),a,a+.55);c.stroke();}
-    } else if(f.type==='celestialWarning'||f.type==='eventWave'){c.fillStyle='#ffe1a322';c.fillRect(f.gap-62,78,124,g.height-78);c.strokeStyle=f.color||'#ffe1a3';c.lineWidth=2;c.setLineDash([8,8]);for(const x of [f.gap-62,f.gap+62]){c.beginPath();c.moveTo(x,78);c.lineTo(x,g.height);c.stroke();}c.setLineDash([]);for(let x=25;x<450;x+=32)if(Math.abs(x-f.gap)>62){star(c,x,f.bottom?g.height-24:85,7);c.stroke();}
+    } else if(f.type==='celestialWarning'||f.type==='eventWave'){
+      const corridor=g.isAbyss?(f.corridor??62):62;
+      c.fillStyle='#ffe1a322';c.fillRect(f.gap-corridor,78,corridor*2,g.height-78);c.strokeStyle=f.color||'#ffe1a3';c.lineWidth=2;c.setLineDash([8,8]);
+      for(const x of [f.gap-corridor,f.gap+corridor]){c.beginPath();c.moveTo(x,78);c.lineTo(x,g.height);c.stroke();}
+      c.setLineDash([]);for(let x=g.isAbyss&&f.type==='eventWave'?20:25;x<450;x+=g.isAbyss?(f.spacing??32):32)if(Math.abs(x-f.gap)>corridor){star(c,x,f.bottom?g.height-24:85,7);c.stroke();}
     } else if(f.type==='teleport'){c.strokeStyle=f.color;c.globalAlpha=.5+q*.5;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius*(1.4-q*.4),0,TAU);c.stroke();this.sprite(this.art['bloom-fx'][3],f.x,f.y,60,0,1,.5);
     } else if(f.type==='detonation') {
       c.fillStyle=f.age<(f.wait??.75)?'#ff9f492b':'#ffe6bc88';c.strokeStyle='#ffd199';c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,f.radius,0,TAU);c.fill();c.stroke();
@@ -279,6 +284,18 @@ export class Renderer {
   drawBomb(g) {
     const c = this.c, t = g.totalTime, remaining = g.bombTime;
     const age=(g.bombDuration||5)-remaining;
+    if(g.bombKind==='holyflame') {
+      const q=clamp(age/2,0,1),rise=1-Math.pow(1-Math.min(1,q*3),3);
+      const fade=Math.min(1,q*9)*Math.min(1,(1-q)*3);
+      const origin=g.bombOrigin;
+      // Dedicated painted fire opens upward from the cast point. Enemy blooms
+      // carry the impact without a screen wash or a recycled character cut-in.
+      this.sprite(this.art.holyFlame,origin.x,origin.y-120-rise*100,190+rise*250,0,1,fade*.92);
+      for(const enemy of g.enemies)if(enemy.hp>0&&age<1.35) {
+        this.sprite(this.art.holyFlame,enemy.x,enemy.y-25,80+rise*65,Math.sin(enemy.x)*.08,1,fade*.65);
+      }
+      return;
+    }
     if(g.artifacts.has('sun')){const q=age/g.bombDuration;this.sprite(this.art['bloom-fx'][1],225,this.height*.4,220+q*400,q*.2,1,Math.sin(Math.PI*Math.min(.99,q))*.9);return;}
     const auraActive=g.heroIndex!==8||age<(g.bombInvincibility||0);
     // Reuse one cached sigil and the existing portrait: no full-screen filters or new textures per frame.
