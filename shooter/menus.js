@@ -1,6 +1,8 @@
 import { HEROES, DUNGEONS, STAGES } from './content.js';
-import { artifactText, ARTIFACTS, COLLECTIBLE_ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
+import { artifactText, ARTIFACTS, COLLECTIBLE_ARTIFACTS, DIFFICULTIES, COSTUMES, COSTUME_TIERS, dayKey, weekKey, weeklyEvent, dailyHeroes, heroAvailable, unlockHero, drawArtifact, purchaseCostume, equipCostume, achievementProgress, purchaseShopItem, useRandomResetTicket, randomRemaining, RANDOM_DAILY_LIMIT } from './meta.js';
 import { LIBRARY, makeQuestion, recordAnswer } from './learning.js';
+import { reviewableMistakes, claimReviewReward } from './learning.js';
+import { TutoringUI } from './tutoring-ui.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function economySnapshot(profile) {
   return { dreamShards: profile.dreamShards, randomResetTickets: profile.randomResetTickets, randomDraws: { ...profile.randomDraws }, owned: [...profile.owned], tickets: profile.tickets.map(ticket => ({ ...ticket })), costumesOwned:[...profile.costumesOwned], costumesEquipped:{...profile.costumesEquipped}, costumeTickets:{...profile.costumeTickets} };
@@ -24,7 +26,7 @@ export class CampaignUI {
     this.offerQuiz(`${HEROES[index].name} 선택`, '해당 캐릭터는 현재 잠겨 있어요. 문법 퀴즈를 맞히면 오늘 사용할 수 있어요. 퀴즈에 도전할까요?',
       ()=>this.quiz('grammar','문법 퀴즈', correct=>{if(correct){unlockHero(this.profile,index);this.save();done();}else failed();}),failed);
   }
-  quiz(kind,title,done,provided = null) {
+  quiz(kind,title,done,provided = null,review=false) {
     title=kind==='grammar'?'문법 퀴즈':kind==='vocab'?'단어 퀴즈':'숙어 퀴즈';
     const q=provided || makeQuestion(kind), lecture=q.lecture || LIBRARY.grammar.find(l=>l.id===q.lectureId);
     let resolved=false;
@@ -32,9 +34,11 @@ export class CampaignUI {
       this.setModal(`<span class="small-caps">${kind==='grammar'?'GRAMMAR':kind==='vocab'?'VOCABULARY':'COLLOCATION'}</span><h2>${esc(title)}</h2><p class="quiz-prompt">${esc(q.prompt)}</p><div id="answers">${q.options.map((o,i)=>`<button class="secondary quiz-answer" data-answer="${i}">${esc(o)}</button>`).join('')}</div><p class="tiny-note">한 번 선택하면 정답과 해설을 확인할 수 있어요.</p>`);
       document.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{
         if(resolved)return;resolved=true;
+        const reviewReward=review && claimReviewReward(this.profile,q);
         const correct=recordAnswer(this.profile,q,q.options[Number(b.dataset.answer)]);this.save();
         this.setModal(`<span class="small-caps">${correct?'CORRECT':'KEEP THIS WORD'}</span><h2>${correct?'정답이에요':'다음에는 기억해요'}</h2><p class="quiz-prompt">${esc(q.prompt)}</p><p class="answer-key">${esc(q.answer)}</p><p class="lecture-copy">${esc(q.explanation)}</p>${lecture?'<button class="secondary" id="explain-lecture">관련 강의 읽기</button>':''}<button class="primary" id="quiz-continue">계속</button>`);
         const next=()=>{this.closeModal();done(correct);};
+        if(reviewReward)this.toast('오늘의 오답 복습 · 꿈의결정 +1');
         $('quiz-continue').onclick=next;
         if(lecture)$('explain-lecture').onclick=()=>this.lecture(lecture,next,'계속');
       });
@@ -58,10 +62,13 @@ export class CampaignUI {
     $('lecture-back').onclick=back;
   }
   library(tab='vocab',term='',page=0) {
+    this.tutoring ||= new TutoringUI(this);this.tutoring.cancel();
     const l=this.profile.learning;
-    this.menu({kind:'library',title:'별빛 도서관',subtitle:'읽은 강의 '+(l.read||[]).length+'/35',closeId:'library-close',onClose:this.closeModal,
+    this.menu({kind:'library',title:'별빛 도서관',subtitle:'읽은 강의 '+(l.read||[]).length+'/35',closeId:'library-close',onClose:this.onLibraryClose||this.closeModal,
       body:'<nav class="menu-tabs library-tabs" aria-label="학습 분류">'+[['vocab','단어'],['collocation','숙어'],['grammar','문법'],['mistakes','오답']].map(([id,name])=>'<button data-tab="'+id+'" class="'+(id===tab?'selected':'')+'" aria-pressed="'+(id===tab)+'">'+name+'</button>').join('')+'</nav><div class="library-toolbar"><span id="library-count"></span><label class="search-field" '+(term?'':'hidden')+'><input id="library-search" aria-label="학습 내용 검색" placeholder="단어 또는 뜻 검색" value="'+esc(term)+'"></label><button class="icon-button" id="library-search-toggle" aria-label="검색 열기" aria-expanded="'+Boolean(term)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button>'+(tab==='mistakes'?'<button class="text-button" id="mistakes-reset">전체 삭제</button>':'')+'</div><div class="menu-scroll" id="library-list"></div>',
       footer:'<nav class="library-pager" aria-label="목록 페이지"><button class="icon-button" id="library-prev" aria-label="이전 페이지">‹</button><span id="library-page" aria-live="polite"></span><button class="icon-button" id="library-next" aria-label="다음 페이지">›</button></nav><button class="primary" id="practice">'+(tab==='mistakes'?'오답 다시 풀기':'연습하기')+'</button>'});
+    document.querySelector('.library-tabs').insertAdjacentHTML('beforebegin',`<button class="library-tutor" id="library-tutor"><span class="library-tutor-art"><img src="${this.art.urls.heroes[0]}" alt="루미"></span><span class="library-tutor-copy"><small>PRIVATE LESSON</small><b>루미의 개인과외</b><span id="library-tutor-note"></span></span><span class="library-tutor-arrow" aria-hidden="true">↗</span></button>`);
+    $('library-tutor').onclick=()=>this.tutoring.open();
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>this.library(b.dataset.tab));
     const render=()=>{
       const query=$('library-search').value.trim().toLowerCase();
@@ -80,6 +87,9 @@ export class CampaignUI {
       list.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{l.mistakes.splice(Number(b.dataset.delete),1);this.save();render();});
       $('practice').disabled=tab==='mistakes'&&!(l.mistakes||[]).length;
       if($('mistakes-reset'))$('mistakes-reset').disabled=!(l.mistakes||[]).length;
+      const count=reviewableMistakes(this.profile).length;
+      $('library-tutor').disabled=count===0;
+      $('library-tutor-note').textContent=count?(l.reviewRewardDate===dayKey()?'오답 '+count+'개 · 오늘의 복습 보상 완료':'무작위 오답 · 첫 복습에 꿈의결정 +1'):'저장된 오답이 생기면 함께 복습해요';
     };
     render();$('library-search').oninput=()=>{page=0;render();};
     $('library-search-toggle').onclick=()=>{
@@ -95,7 +105,7 @@ export class CampaignUI {
         body:'<div class="confirmation-copy"><p>저장된 오답 '+(l.mistakes||[]).length+'개를 삭제해요.</p><small>정답 기록과 읽은 강의는 유지돼요.</small></div>',footer:'<button class="primary" id="reset-confirm">오답 모두 삭제</button>'});
       $('reset-confirm').onclick=()=>{l.mistakes=[];this.save();this.library('mistakes');};
     };
-    $('practice').onclick=()=>{const q=tab==='mistakes'?l.mistakes[0]:null;this.quiz(q?.kind||tab,'연습',()=>this.library(tab),q);};
+    $('practice').onclick=()=>{const q=tab==='mistakes'?l.mistakes[0]:null;this.quiz(q?.kind||tab,'연습',()=>this.library(tab),q,tab==='mistakes');};
   }
   equipment(refresh) {
     const p=this.profile,scroll=document.querySelector('.equipment-list')?.scrollTop||0;
