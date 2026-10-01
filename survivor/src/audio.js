@@ -13,6 +13,7 @@ export class AudioDirector {
     if(e.type==='hurt')this.tone(170,t,.22,.1,'triangle',55);
     if(e.type==='dash')this.tone(300,t,.16,.04,'triangle',650);
     if(['level','treasure','evolution','skill','finish'].includes(e.type)){const pitches=e.type==='evolution'?[392,494,587,784,1175]:e.type==='skill'?[261,392,523,784]:[523,659,784];pitches.forEach((f,i)=>this.tone(f,t+i*.065,.5,.065,'triangle'));}
+    if(e.type==='bond'||e.type==='overdrive'){[392,523,659,784].forEach((f,i)=>this.tone(f,t+i*.045,.3,.04,'triangle'));this.tone(98,t,.25,.06,'sine',196);}
     if(e.type==='boss'){this.tone(80,t,.65,.1,'sine',40);this.tone(165,t+.2,.4,.035,'triangle');}
   }
   suspend(){this.paused=true;this.next=0;if(this.ctx?.state==='running')this.ctx.suspend().catch(()=>{});}

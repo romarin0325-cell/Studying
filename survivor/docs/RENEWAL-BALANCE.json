@@ -1,0 +1,677 @@
+[
+  {
+    "hero": "rumi",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 247.92,
+    "kills": 2734,
+    "level": 55,
+    "damageTaken": 0,
+    "evolutions": 4,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 0.8833333333333344,
+      "firstTreasure": 30.21666666666623,
+      "firstEvolution": 23.283333333333292
+    },
+    "peaks": {
+      "enemies": 37,
+      "shots": 97,
+      "drops": 278,
+      "fields": 13,
+      "hazards": 16
+    }
+  },
+  {
+    "hero": "luna",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 242.22,
+    "kills": 2683,
+    "level": 50,
+    "damageTaken": 9.6,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0500000000000012,
+      "firstTreasure": 33.133333333332736,
+      "firstEvolution": 28.183333333333014
+    },
+    "peaks": {
+      "enemies": 48,
+      "shots": 49,
+      "drops": 300,
+      "fields": 8,
+      "hazards": 13
+    }
+  },
+  {
+    "hero": "zeke",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 243.95,
+    "kills": 2679,
+    "level": 51,
+    "damageTaken": 12.6,
+    "evolutions": 6,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.1500000000000008,
+      "firstTreasure": 32.58333333333277,
+      "firstEvolution": 30.96666666666619
+    },
+    "peaks": {
+      "enemies": 34,
+      "shots": 40,
+      "drops": 300,
+      "fields": 29,
+      "hazards": 18
+    }
+  },
+  {
+    "hero": "jasmine",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 256.1,
+    "kills": 2749,
+    "level": 53,
+    "damageTaken": 0,
+    "evolutions": 4,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.100000000000001,
+      "firstTreasure": 32.81666666666609,
+      "firstEvolution": 28.799999999999645
+    },
+    "peaks": {
+      "enemies": 23,
+      "shots": 24,
+      "drops": 290,
+      "fields": 25,
+      "hazards": 14
+    }
+  },
+  {
+    "hero": "snow_rabbit",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 241.95,
+    "kills": 2672,
+    "level": 48,
+    "damageTaken": 12.6,
+    "evolutions": 5,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 34.13333333333268,
+      "firstEvolution": 28.19999999999968
+    },
+    "peaks": {
+      "enemies": 36,
+      "shots": 121,
+      "drops": 300,
+      "fields": 0,
+      "hazards": 10
+    }
+  },
+  {
+    "hero": "night_rabbit",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 248.18,
+    "kills": 2708,
+    "level": 53,
+    "damageTaken": 55.8,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 33.49999999999938,
+      "firstEvolution": 30.26666666666623
+    },
+    "peaks": {
+      "enemies": 39,
+      "shots": 22,
+      "drops": 263,
+      "fields": 23,
+      "hazards": 13
+    }
+  },
+  {
+    "hero": "cinderella",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 244.42,
+    "kills": 2698,
+    "level": 50,
+    "damageTaken": 28.5,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0333333333333345,
+      "firstTreasure": 31.31666666666617,
+      "firstEvolution": 27.683333333333042
+    },
+    "peaks": {
+      "enemies": 70,
+      "shots": 64,
+      "drops": 241,
+      "fields": 4,
+      "hazards": 13
+    }
+  },
+  {
+    "hero": "silver_rabbit",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 243.02,
+    "kills": 2702,
+    "level": 50,
+    "damageTaken": 40.8,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0000000000000013,
+      "firstTreasure": 31.566666666666155,
+      "firstEvolution": 30.166666666666234
+    },
+    "peaks": {
+      "enemies": 51,
+      "shots": 120,
+      "drops": 300,
+      "fields": 8,
+      "hazards": 10
+    }
+  },
+  {
+    "hero": "time_ruler",
+    "seed": 1,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 242.52,
+    "kills": 2667,
+    "level": 48,
+    "damageTaken": 0,
+    "evolutions": 5,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.31666666666666665,
+      "firstLevel": 2.1499999999999972,
+      "firstTreasure": 33.333333333332725,
+      "firstEvolution": 28.966666666666303
+    },
+    "peaks": {
+      "enemies": 63,
+      "shots": 86,
+      "drops": 300,
+      "fields": 10,
+      "hazards": 22
+    }
+  },
+  {
+    "hero": "rumi",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 248.48,
+    "kills": 2713,
+    "level": 52,
+    "damageTaken": 0,
+    "evolutions": 3,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 0.8833333333333344,
+      "firstTreasure": 65.91666666666421,
+      "firstEvolution": 24.11666666666658
+    },
+    "peaks": {
+      "enemies": 39,
+      "shots": 94,
+      "drops": 221,
+      "fields": 3,
+      "hazards": 14
+    }
+  },
+  {
+    "hero": "luna",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 241.65,
+    "kills": 2697,
+    "level": 49,
+    "damageTaken": 15.9,
+    "evolutions": 3,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0833333333333344,
+      "firstTreasure": 27.566666666666382,
+      "firstEvolution": 27.566666666666382
+    },
+    "peaks": {
+      "enemies": 53,
+      "shots": 206,
+      "drops": 246,
+      "fields": 5,
+      "hazards": 11
+    }
+  },
+  {
+    "hero": "zeke",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 244.17,
+    "kills": 2675,
+    "level": 50,
+    "damageTaken": 37.8,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.100000000000001,
+      "firstTreasure": 31.216666666666175,
+      "firstEvolution": 29.39999999999961
+    },
+    "peaks": {
+      "enemies": 125,
+      "shots": 66,
+      "drops": 300,
+      "fields": 3,
+      "hazards": 17
+    }
+  },
+  {
+    "hero": "jasmine",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 247.08,
+    "kills": 2732,
+    "level": 53,
+    "damageTaken": 26.4,
+    "evolutions": 3,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.100000000000001,
+      "firstTreasure": 30.783333333332866,
+      "firstEvolution": 29.94999999999958
+    },
+    "peaks": {
+      "enemies": 31,
+      "shots": 101,
+      "drops": 300,
+      "fields": 9,
+      "hazards": 14
+    }
+  },
+  {
+    "hero": "snow_rabbit",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 252.9,
+    "kills": 2721,
+    "level": 50,
+    "damageTaken": 6.3,
+    "evolutions": 3,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 29.349999999999614,
+      "firstEvolution": 27.399999999999725
+    },
+    "peaks": {
+      "enemies": 74,
+      "shots": 60,
+      "drops": 239,
+      "fields": 9,
+      "hazards": 10
+    }
+  },
+  {
+    "hero": "night_rabbit",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 248.53,
+    "kills": 2707,
+    "level": 54,
+    "damageTaken": 15.9,
+    "evolutions": 2,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 33.86666666666603,
+      "firstEvolution": 30.7666666666662
+    },
+    "peaks": {
+      "enemies": 37,
+      "shots": 0,
+      "drops": 300,
+      "fields": 16,
+      "hazards": 10
+    }
+  },
+  {
+    "hero": "cinderella",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 253.98,
+    "kills": 2723,
+    "level": 53,
+    "damageTaken": 52.5,
+    "evolutions": 3,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0500000000000012,
+      "firstTreasure": 28.19999999999968,
+      "firstEvolution": 28.19999999999968
+    },
+    "peaks": {
+      "enemies": 74,
+      "shots": 39,
+      "drops": 269,
+      "fields": 11,
+      "hazards": 18
+    }
+  },
+  {
+    "hero": "silver_rabbit",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 243.22,
+    "kills": 2692,
+    "level": 50,
+    "damageTaken": 47.8,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.016666666666668,
+      "firstTreasure": 30.233333333332897,
+      "firstEvolution": 27.8499999999997
+    },
+    "peaks": {
+      "enemies": 49,
+      "shots": 82,
+      "drops": 250,
+      "fields": 12,
+      "hazards": 9
+    }
+  },
+  {
+    "hero": "time_ruler",
+    "seed": 78,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 251.53,
+    "kills": 2716,
+    "level": 53,
+    "damageTaken": 0,
+    "evolutions": 3,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.31666666666666665,
+      "firstLevel": 2.1499999999999972,
+      "firstTreasure": 36.51666666666588,
+      "firstEvolution": 30.316666666666226
+    },
+    "peaks": {
+      "enemies": 43,
+      "shots": 64,
+      "drops": 300,
+      "fields": 18,
+      "hazards": 12
+    }
+  },
+  {
+    "hero": "rumi",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 246.2,
+    "kills": 2709,
+    "level": 52,
+    "damageTaken": 0,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 0.8833333333333344,
+      "firstTreasure": 71.08333333333059,
+      "firstEvolution": 25.98333333333314
+    },
+    "peaks": {
+      "enemies": 32,
+      "shots": 101,
+      "drops": 288,
+      "fields": 3,
+      "hazards": 13
+    }
+  },
+  {
+    "hero": "luna",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 251.25,
+    "kills": 2725,
+    "level": 54,
+    "damageTaken": 18.9,
+    "evolutions": 4,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0833333333333344,
+      "firstTreasure": 28.58333333333299,
+      "firstEvolution": 28.58333333333299
+    },
+    "peaks": {
+      "enemies": 40,
+      "shots": 125,
+      "drops": 267,
+      "fields": 6,
+      "hazards": 19
+    }
+  },
+  {
+    "hero": "zeke",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 242.37,
+    "kills": 2673,
+    "level": 47,
+    "damageTaken": 6.3,
+    "evolutions": 4,
+    "overdrives": 12,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.100000000000001,
+      "firstTreasure": 29.86666666666625,
+      "firstEvolution": 28.483333333332997
+    },
+    "peaks": {
+      "enemies": 58,
+      "shots": 89,
+      "drops": 300,
+      "fields": 3,
+      "hazards": 9
+    }
+  },
+  {
+    "hero": "jasmine",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 254.67,
+    "kills": 2716,
+    "level": 52,
+    "damageTaken": 56.7,
+    "evolutions": 3,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.100000000000001,
+      "firstTreasure": 31.89999999999947,
+      "firstEvolution": 31.249999999999506
+    },
+    "peaks": {
+      "enemies": 40,
+      "shots": 28,
+      "drops": 290,
+      "fields": 17,
+      "hazards": 17
+    }
+  },
+  {
+    "hero": "snow_rabbit",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 286.85,
+    "kills": 2906,
+    "level": 54,
+    "damageTaken": 9.6,
+    "evolutions": 2,
+    "overdrives": 15,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 28.66666666666632,
+      "firstEvolution": 27.549999999999716
+    },
+    "peaks": {
+      "enemies": 77,
+      "shots": 51,
+      "drops": 300,
+      "fields": 9,
+      "hazards": 20
+    }
+  },
+  {
+    "hero": "night_rabbit",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 244.23,
+    "kills": 2692,
+    "level": 52,
+    "damageTaken": 43.2,
+    "evolutions": 5,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0666666666666678,
+      "firstTreasure": 28.949999999999637,
+      "firstEvolution": 28.949999999999637
+    },
+    "peaks": {
+      "enemies": 34,
+      "shots": 64,
+      "drops": 300,
+      "fields": 18,
+      "hazards": 15
+    }
+  },
+  {
+    "hero": "cinderella",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 244.7,
+    "kills": 2697,
+    "level": 48,
+    "damageTaken": 26.4,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.0500000000000012,
+      "firstTreasure": 36.03333333333257,
+      "firstEvolution": 26.883333333333088
+    },
+    "peaks": {
+      "enemies": 56,
+      "shots": 77,
+      "drops": 264,
+      "fields": 5,
+      "hazards": 16
+    }
+  },
+  {
+    "hero": "silver_rabbit",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 244.55,
+    "kills": 2698,
+    "level": 50,
+    "damageTaken": 0,
+    "evolutions": 4,
+    "overdrives": 13,
+    "metrics": {
+      "firstHit": 0.016666666666666666,
+      "firstLevel": 1.016666666666668,
+      "firstTreasure": 29.616666666666266,
+      "firstEvolution": 29.583333333332934
+    },
+    "peaks": {
+      "enemies": 45,
+      "shots": 50,
+      "drops": 300,
+      "fields": 16,
+      "hazards": 12
+    }
+  },
+  {
+    "hero": "time_ruler",
+    "seed": 2026,
+    "stage": "garden",
+    "outcome": "victory",
+    "seconds": 257.25,
+    "kills": 2759,
+    "level": 51,
+    "damageTaken": 26.4,
+    "evolutions": 5,
+    "overdrives": 14,
+    "metrics": {
+      "firstHit": 0.31666666666666665,
+      "firstLevel": 2.1499999999999972,
+      "firstTreasure": 30.68333333333287,
+      "firstEvolution": 29.36666666666628
+    },
+    "peaks": {
+      "enemies": 47,
+      "shots": 100,
+      "drops": 300,
+      "fields": 10,
+      "hazards": 14
+    }
+  }
+]

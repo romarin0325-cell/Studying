@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "processor": "Uniform 768px atlas scaling; existing direction layouts and native alpha retained; no runtime image manipulation",
-  "processorHash": "27959bbe409c10275010ac4b2c3a184bb1ea000c71e129ce9594b1a04d7da96b",
+  "processor": "Canonical 768px portraits and reviewed uniformly scaled walking/combat atlases; native alpha; no runtime pixel processing",
+  "processorHash": "dadbdada3232d74b7d83e93d3ba31855e4aba539b17fc396f521b44682593218",
   "assets": [
     {
       "id": "unit-rumi",
@@ -116,124 +116,140 @@
       "bytes": 75652
     },
     {
+      "id": "walk-rumi",
+      "source": "survivor/assets/renewal/sources/walk-rumi.png",
+      "sourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e",
+      "file": "prepared/walk-rumi.webp",
+      "sha256": "5683fdf2c6a4b2ddee0eb98b9f57ed26755b739b044a581a8386502d557d5dcb",
+      "bytes": 140324
+    },
+    {
+      "id": "walk-luna",
+      "source": "survivor/assets/renewal/sources/walk-luna.png",
+      "sourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412",
+      "file": "prepared/walk-luna.webp",
+      "sha256": "2d966cc15b261253f4a8fbdcf3fddd92fa05cc9a5163374a2308cde6250a9d4a",
+      "bytes": 109406
+    },
+    {
+      "id": "walk-zeke",
+      "source": "survivor/assets/renewal/sources/walk-zeke.png",
+      "sourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b",
+      "file": "prepared/walk-zeke.webp",
+      "sha256": "2cd555b97ecf4f4280ee17a1a83582f48ff07331189ef21c3221171b2fe8c9dc",
+      "bytes": 177876
+    },
+    {
+      "id": "weapons",
+      "source": "survivor/assets/renewal/sources/weapons.png",
+      "sourceSha256": "e1a1a2397de4a87c580894cbf837b05ebdcec12d3e1daf5dd9f08f839e39e5bb",
+      "file": "prepared/weapons.webp",
+      "sha256": "8f5704f668e3c63adac7c38e44bb510ea4b5a36577e413731f46d1ef74b8a1ce",
+      "bytes": 223478
+    },
+    {
+      "id": "walk-jasmine",
+      "source": "survivor/assets/renewal/sources/walk-jasmine.png",
+      "sourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d",
+      "file": "prepared/walk-jasmine.webp",
+      "sha256": "fc0be01fee730b3d3e940a3ea79666ff228e108e1ebb90d2a92f484289ec0997",
+      "bytes": 155110
+    },
+    {
+      "id": "walk-snow_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-snow_rabbit.png",
+      "sourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127",
+      "file": "prepared/walk-snow_rabbit.webp",
+      "sha256": "f41292bb6c895dd117b52e96ee6b510bc7ff3560f1eaf3580070e66bdb08cb5e",
+      "bytes": 132400
+    },
+    {
+      "id": "walk-night_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-night_rabbit.png",
+      "sourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6",
+      "file": "prepared/walk-night_rabbit.webp",
+      "sha256": "fc9a5485f84a42ae80be285b6d58c953bb56762d7a1c9e0ba4c9c9ed04e8ac1f",
+      "bytes": 122824
+    },
+    {
+      "id": "walk-cinderella",
+      "source": "survivor/assets/renewal/sources/walk-cinderella.png",
+      "sourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de",
+      "file": "prepared/walk-cinderella.webp",
+      "sha256": "becc5a3903953664f66c8334c84e9d15eadb2727929b75019027014c9681b001",
+      "bytes": 180472
+    },
+    {
+      "id": "walk-silver_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-silver_rabbit.png",
+      "sourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902",
+      "file": "prepared/walk-silver_rabbit.webp",
+      "sha256": "7966d55dec809ba0d79db9869fddccf8d1c42e8b7482555f95b0b971bd4d28fc",
+      "bytes": 136628
+    },
+    {
+      "id": "walk-time_ruler",
+      "source": "survivor/assets/renewal/sources/walk-time_ruler.png",
+      "sourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e",
+      "file": "prepared/walk-time_ruler.webp",
+      "sha256": "6dd5a646c628d4c23c083accd05df2509df00658ce457e30e7dd0d06f295eed9",
+      "bytes": 115328
+    },
+    {
+      "id": "relics",
+      "source": "survivor/assets/renewal/sources/relics.png",
+      "sourceSha256": "1c1cd5eba0509ba61f3d588d181120e9bf0654ac2ebba59c3750a35dab8adf4f",
+      "file": "prepared/relics.webp",
+      "sha256": "fee357fc02df26e139864d5ffb3cf9378ea49dbaefcaf0f9248df461f421c41f",
+      "bytes": 238046
+    },
+    {
+      "id": "bosses",
+      "source": "survivor/assets/renewal/sources/bosses.png",
+      "sourceSha256": "2c3f01495ca886d311f71d1c6c200488c3c1e0bb471a32f993c5eecda1d9362c",
+      "file": "prepared/bosses.webp",
+      "sha256": "654f82b69748bca58ff6fbaf5fc939496f01910404b485b5805a25b1d6401c93",
+      "bytes": 371016
+    },
+    {
       "id": "garden",
-      "source": "defense/assets/merge/garden.webp",
-      "sourceSha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
+      "source": "survivor/assets/renewal/sources/garden.png",
+      "sourceSha256": "139bda3fe5c6a26c1bb67041011f3dd80f256a7f6608ed53a96351b49fd6bbc0",
       "file": "prepared/garden.webp",
-      "sha256": "c0a0c4a228fbc2969c5595fca3a347e033b03930cd7e8b9bb844ca009eaebd12",
-      "bytes": 141462
+      "sha256": "8e5698a211afe87f79047bd8c86169d29a6e887ba76ff13d1ac20f65451b94d9",
+      "bytes": 378916
     },
     {
       "id": "world2",
-      "source": "shooter/generated-assets/worlds/2.webp",
-      "sourceSha256": "a98fef4748a12c6c12467d431c6041b8a8b22be0cb916c31320148f3540d3390",
+      "source": "survivor/assets/renewal/sources/world2.png",
+      "sourceSha256": "9fe1663028adda582ac7c416f716e25b4d3b6a1d4da4299793cdc87884a4cd47",
       "file": "prepared/world2.webp",
-      "sha256": "b336c4ec88ef3a0efa847e239568aa0718fd2d853df5503df939e023d93a725b",
-      "bytes": 85258
+      "sha256": "0a598ebe6b9fcbaccb5c72fdfba0de95f05831bef694353984ad7e2a32de0c7e",
+      "bytes": 295686
     },
     {
       "id": "world3",
-      "source": "shooter/generated-assets/worlds/3.webp",
-      "sourceSha256": "d9b5d9556dba30f9e9c4a283c0a60dd089a12b38895b23133697fa4487585221",
+      "source": "survivor/assets/renewal/sources/world3.png",
+      "sourceSha256": "2c5aedd4b8763a714bc3693318488e0353fa15ef94c0eb91716c01fef250644b",
       "file": "prepared/world3.webp",
-      "sha256": "e0b08d91d9a257c37dc4247984398236fb095a2517a61ad3547ede1c38ecdcc0",
-      "bytes": 104506
+      "sha256": "8f56ba12ce213841fe377c315ecd5310622389bfa3d8d17151014ec2d0e7efa5",
+      "bytes": 258910
     },
     {
-      "id": "enemy-0",
-      "source": "shooter/generated-assets/enemies/0.webp",
-      "sourceSha256": "f5aa5b5b722496654c7432d55d8eff2e61d106b5a39d96826c4f2e07e58940a4",
-      "file": "prepared/enemy-0.webp",
-      "sha256": "66a7401983fbf2840a77871f6ca391de210f1476dca5bde5b2a87b278a5bacd6",
-      "bytes": 47980
+      "id": "enemies",
+      "source": "survivor/assets/renewal/sources/enemies.png",
+      "sourceSha256": "75efad3b3c716d20126d69a1e0b08db0d66834b127f6b2632f9ff7634cff6746",
+      "file": "prepared/enemies.webp",
+      "sha256": "0902c27d4da634e5db13951e5fa7566d57cae7977ea8a9db7aff10deb9071f87",
+      "bytes": 180802
     },
     {
-      "id": "enemy-1",
-      "source": "shooter/generated-assets/enemies/1.webp",
-      "sourceSha256": "b30f6bff7b787aa694f9f1bfaa8c859251bf6d19f6e9496e2b8aa548cda70702",
-      "file": "prepared/enemy-1.webp",
-      "sha256": "6daa2535bca7bd29efc7fd740f8fb946dd4bb031b267945a18861a5515b0bee2",
-      "bytes": 53250
-    },
-    {
-      "id": "enemy-2",
-      "source": "shooter/generated-assets/enemies/2.webp",
-      "sourceSha256": "e70a20cb364ed2c6b3069c255717cf30b50b8296d92e60b1be80c289a417ab5a",
-      "file": "prepared/enemy-2.webp",
-      "sha256": "63c36f8e783c301f9edc0b27039235f045c85fcbcadc99816e5261f2da345cea",
-      "bytes": 45710
-    },
-    {
-      "id": "enemy-3",
-      "source": "shooter/generated-assets/enemies/3.webp",
-      "sourceSha256": "db3bfdaa1f190edcdc7703f4f6722f5cb35346def49c94bd76e7286ab249da0d",
-      "file": "prepared/enemy-3.webp",
-      "sha256": "b18d8907603260ecbf20f3823c55373b8ab04550c2bdfe961042d72f899ebc7d",
-      "bytes": 44408
-    },
-    {
-      "id": "boss-0",
-      "source": "shooter/generated-assets/bosses/0.webp",
-      "sourceSha256": "6343d7d4252e695da5bd7fa6c11f2f1d66c2c815018f502001bdd39ef2024730",
-      "file": "prepared/boss-0.webp",
-      "sha256": "829b804b782ce6d3692aa40182b6d3215d1e19edb37bc41d72dcb2d295b9f462",
-      "bytes": 42148
-    },
-    {
-      "id": "boss-1",
-      "source": "shooter/generated-assets/bosses/1.webp",
-      "sourceSha256": "2bb01806ca1386aa8887474c7902ca61f7f8bb839dfa9412cdb6e6ebde7fb933",
-      "file": "prepared/boss-1.webp",
-      "sha256": "a12ccb51e3d6f84370968a6eecccca8298e77f9bb014c99de0e93d4d863fa9d0",
-      "bytes": 61230
-    },
-    {
-      "id": "boss-2",
-      "source": "shooter/generated-assets/bosses/2.webp",
-      "sourceSha256": "e8c7c19669b841ce57cbc2b703787438a56def5abd6474a3deaf11578b68a6ac",
-      "file": "prepared/boss-2.webp",
-      "sha256": "baeedd9f03be87a66617a74555ae00ca29634995323ac64180f2c827c54b8634",
-      "bytes": 64114
-    },
-    {
-      "id": "boss-3",
-      "source": "shooter/generated-assets/bosses/3.webp",
-      "sourceSha256": "d2eadd864ffc03af1cb4aa003490feb9b549405189940786f01db405bc3c3f60",
-      "file": "prepared/boss-3.webp",
-      "sha256": "077db0625aad2c7faa59c420a6f544cb2fb395c0b7a6c8df5045bf4903e12272",
-      "bytes": 65428
-    },
-    {
-      "id": "sentinel-0",
-      "source": "shooter/generated-assets/sentinels/0.webp",
-      "sourceSha256": "44da3cf4ab1cf40661425c11c788b62aee9c2ea1541b43b0ac3e11979ad71382",
-      "file": "prepared/sentinel-0.webp",
-      "sha256": "5ba62398f1c0853c0eb03af97496519f9b8f6a33cb2b3a783685a46cc0b49d75",
-      "bytes": 71056
-    },
-    {
-      "id": "sentinel-1",
-      "source": "shooter/generated-assets/sentinels/1.webp",
-      "sourceSha256": "b878e899ce59cbd2f76dfa7c0f5ec68723d3195a6ac40f6c4733a3908ccc5a1f",
-      "file": "prepared/sentinel-1.webp",
-      "sha256": "d1e5f4f9d79805ff28952e87cd8b6427352d03fe82b77ca675ce920d77870729",
-      "bytes": 67938
-    },
-    {
-      "id": "sentinel-2",
-      "source": "shooter/generated-assets/sentinels/2.webp",
-      "sourceSha256": "b96688666200ef3450c8e572302565be656f6b948f7b26b80488caa56d4a6155",
-      "file": "prepared/sentinel-2.webp",
-      "sha256": "78162d259ae318f64e9849b33c94ae907625ad010fd03be3aa21bd0ab32aa152",
-      "bytes": 72140
-    },
-    {
-      "id": "sentinel-3",
-      "source": "shooter/generated-assets/sentinels/3.webp",
-      "sourceSha256": "8e856525f3453b09ddc3bf248f2b3a38526042a968425f307a053cb642a95325",
-      "file": "prepared/sentinel-3.webp",
-      "sha256": "5f57d46368bafb5fbeb245fe27e1c63bc68112337503c916b4eeec893927ed8c",
-      "bytes": 73606
+      "id": "effects",
+      "source": "survivor/assets/renewal/sources/effects.png",
+      "sourceSha256": "1be442e10c31c8fa8710876e7e5c5454cdb35554fe0cca059336156decdbeb7c",
+      "file": "prepared/effects.webp",
+      "sha256": "5e2e245c9410a23ae860990b8cbdfe4a60f27ee443e0a25d7afe8c50503ed5cf",
+      "bytes": 166472
     }
   ],
   "frames": {
@@ -252,7 +268,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-rumi",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "luna": {
       "portrait": {
@@ -269,7 +296,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-luna",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "zeke": {
       "portrait": {
@@ -286,7 +324,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-zeke",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "cinderella": {
       "portrait": {
@@ -303,7 +352,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-cinderella",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "snow_rabbit": {
       "portrait": {
@@ -320,7 +380,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-snow_rabbit",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "night_rabbit": {
       "portrait": {
@@ -337,7 +408,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-night_rabbit",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "silver_rabbit": {
       "portrait": {
@@ -354,7 +436,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-silver_rabbit",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "time_ruler": {
       "portrait": {
@@ -371,7 +464,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-time_ruler",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "jasmine": {
       "portrait": {
@@ -388,7 +492,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "walk": {
+        "texture": "walk-jasmine",
+        "columns": 4,
+        "rows": 4,
+        "cell": 160,
+        "anchor": [
+          80,
+          150
+        ],
+        "distancePerFrame": 16
+      }
     },
     "storm_sage": {
       "portrait": {
@@ -475,5 +590,47 @@
         "right"
       ]
     }
+  },
+  "renewal": {
+    "source": "survivor/assets/renewal/sources.json",
+    "sha256": "8f950ee169b16356856fedbb8157edd77f0d53ee0356726325d3b3c2e5fb7a77",
+    "references": [
+      {
+        "source": "defense/assets/merge/units/rumi.webp",
+        "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb"
+      },
+      {
+        "source": "defense/assets/merge/units/luna.webp",
+        "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843"
+      },
+      {
+        "source": "defense/assets/merge/units/zeke.webp",
+        "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae"
+      },
+      {
+        "source": "survivor/assets/jasmine.webp",
+        "sha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b"
+      },
+      {
+        "source": "defense/assets/merge/units/snow_rabbit.webp",
+        "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393"
+      },
+      {
+        "source": "defense/assets/merge/units/night_rabbit.webp",
+        "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f"
+      },
+      {
+        "source": "defense/assets/merge/units/cinderella.webp",
+        "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601"
+      },
+      {
+        "source": "defense/assets/merge/units/silver_rabbit.webp",
+        "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc"
+      },
+      {
+        "source": "defense/assets/merge/units/time_ruler.webp",
+        "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f"
+      }
+    ]
   }
 }

@@ -25,3 +25,24 @@ test('new Jasmine art retains its original generated source and explicitly recor
   assert.match(frame.reviewStatus,/Not an existing approved Defense/);assert.equal(sha(await fs.readFile(path.join(root,frame.source.path))),frame.source.sha256);
   assert.equal(frame.source.feet.length,4);assert.equal(frame.source.referencePaths.length,2);for(const p of frame.source.referencePaths)await fs.access(path.join(root,p));
 });
+test('nine reviewed walking atlases preserve distinct poses, transparent gutters and shared references',async()=>{
+  const manifest=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8'));
+  const specs=JSON.parse(await fs.readFile(path.join(root,manifest.renewal.source),'utf8'));assert.equal(sha(await fs.readFile(path.join(root,manifest.renewal.source))),manifest.renewal.sha256);
+  for(const h of HEROES){const spec=specs.find(s=>s.id==='walk-'+h.id),asset=manifest.assets.find(s=>s.id===spec?.id);assert.ok(asset,h.id);assert.ok(spec.reference);assert.ok(spec.review.length>30);
+    assert.equal(sha(await fs.readFile(path.join(root,spec.source))),asset.sourceSha256);const bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(bytes),asset.sha256);
+    const m=await sharp(bytes).metadata();assert.equal(m.width,640);assert.equal(m.height,640);assert.ok(m.hasAlpha);const meta=manifest.frames[h.id].walk;assert.deepEqual(meta.anchor,[80,150]);
+    for(let row=0;row<4;row++){const hashes=[];for(let col=0;col<4;col++){
+      const frame=await sharp(bytes).extract({left:col*160,top:row*160,width:160,height:160}).ensureAlpha().raw().toBuffer();hashes.push(sha(frame));let filled=0;
+      for(let y=0;y<160;y++)for(let x=0;x<160;x++){const alpha=frame[(y*160+x)*4+3];if(alpha>100)filled++;if(x<3||x>156||y>153)assert.ok(alpha<10,h.id+' safe cell edge');}assert.ok(filled>2000&&filled<22000,h.id+' full body remains visible');
+    }assert.ok(new Set(hashes).size>=3,h.id+' real phases in direction '+row);}
+  }
+});
+test('illustrated combat atlases have every required cell and stay inside a decoded texture budget',async()=>{
+  const m=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8'));let decoded=0;
+  for(const a of m.assets){const info=await sharp(path.join(root,'survivor/assets',a.file)).metadata();decoded+=info.width*info.height*4;}
+  assert.ok(decoded<80*1024*1024,'decoded source textures <80 MiB');
+  for(const [id,columns,rows] of [['weapons',4,4],['relics',4,4],['effects',4,4],['enemies',4,6],['bosses',4,3]]){
+    const a=m.assets.find(a=>a.id===id);assert.ok(a,id);const bytes=await fs.readFile(path.join(root,'survivor/assets',a.file)),info=await sharp(bytes).metadata();assert.ok(info.hasAlpha);const cw=info.width/columns,ch=info.height/rows;
+    for(let y=0;y<rows;y++)for(let x=0;x<columns;x++){const stats=await sharp(bytes).extract({left:x*cw,top:y*ch,width:cw,height:ch}).stats();assert.ok(stats.channels[3].max>200,id+' has visible painted asset');assert.equal(stats.channels[3].min,0,id+' has native alpha');}
+  }
+});

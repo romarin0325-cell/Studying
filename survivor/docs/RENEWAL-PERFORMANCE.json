@@ -1,0 +1,58 @@
+{
+  "method": "300 measured frames after 30 warmup frames, one requestAnimationFrame per simulation/render sample, 390x680 CSS pixels, device DPR 2, 260 stationary high-health enemies, six evolved weapons. Isolated Linux Chromium canvas; not physical phone FPS.",
+  "baselineCommit": "82da18a",
+  "beforeHigh": {
+    "frames": 300,
+    "viewport": [
+      390,
+      680
+    ],
+    "dpr": 2,
+    "mean": 1.93,
+    "p50": 1.8,
+    "p95": 2.8,
+    "max": 4.2,
+    "cadenceP50": 21.5,
+    "cadenceP95": 27.9,
+    "enemies": 260,
+    "shots": 5,
+    "decodedMiB": 45.89
+  },
+  "afterHigh": {
+    "frames": 300,
+    "viewport": [
+      390,
+      680
+    ],
+    "dpr": 2,
+    "mean": 2.48,
+    "p50": 2.3,
+    "p95": 3.9,
+    "max": 12.8,
+    "cadenceP50": 23.6,
+    "cadenceP95": 28.5,
+    "enemies": 260,
+    "shots": 5,
+    "decodedMiB": 66.05
+  },
+  "afterAuto": {
+    "quality": "auto",
+    "effectiveDPR": 1.5,
+    "frames": 300,
+    "viewport": [
+      390,
+      680
+    ],
+    "dpr": 2,
+    "mean": 2.31,
+    "p50": 2.1,
+    "p95": 3.1,
+    "max": 12.7,
+    "cadenceP50": 19,
+    "cadenceP95": 23.8,
+    "enemies": 260,
+    "shots": 5,
+    "cacheMiB": 9.56,
+    "decodedMiB": 66.05
+  }
+}
