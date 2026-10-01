@@ -10,12 +10,12 @@ const output=path.join(repo,'survivor/test-results');await fs.mkdir(output,{recu
 const html=await fs.readFile(repo+'/survivor/dist/AstraNocturne.html','utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 const assets=scripts.find(x=>x[1].includes('globalThis.NOCTURNE_ASSETS='))[1];
-const bundle=await build({stdin:{contents:`import {Game} from '${repo}/survivor/src/engine.js';import {Renderer,loadArt} from '${repo}/survivor/src/render.js';globalThis.BENCH={Game,Renderer,loadArt};`,resolveDir:repo},bundle:true,write:false,format:'iife',target:'es2020'});
+const bundle=await build({stdin:{contents:`import {Game} from '${repo}/survivor/src/engine.js';import {Renderer,loadArt,loadWalking} from '${repo}/survivor/src/render.js';globalThis.BENCH={Game,Renderer,loadArt,loadWalking};`,resolveDir:repo},bundle:true,write:false,format:'iife',target:'es2020'});
 const browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport:{width:390,height:680},deviceScaleFactor:2,offline:true});const page=await context.newPage();
 await page.setContent(`<style>body{margin:0;background:#142123}canvas{width:390px;height:680px}</style><canvas id="canvas"></canvas><script>${assets}</script><script>${bundle.outputFiles[0].text}</script>`);
 const quality=process.argv[3]||'high';if(!['high','auto','economy'].includes(quality))throw new Error('Unknown quality');
 const result=await page.evaluate(async quality=>{
- const {Game,Renderer,loadArt}=BENCH,art=await loadArt(),g=new Game({seed:78});g.enemies=[];
+ const {Game,Renderer,loadArt,loadWalking}=BENCH,art=await loadArt(),g=new Game({seed:78});await loadWalking(art,g.hero);g.enemies=[];
  for(const id of ['blade','ember','flower','frost','storm'])g.applyOption({type:'weapon',id});for(const w of g.weapons){w.level=6;w.evolved=true;}
  for(let i=0;i<260;i++){const angle=i*Math.PI*2/260,r=90+(i%8)*24;g.spawnEnemy(['beetle','moth','stalker','wisp'][i%4],{x:800+Math.cos(angle)*r,y:800+Math.sin(angle)*r,hp:1000000,maxHp:1000000,damage:0,speed:1});}
  const renderer=new Renderer(document.getElementById('canvas'),art,{effects:true,numbers:true,quality});renderer.camera.x=800;renderer.camera.y=800;const samples=[],cadence=[];let lastFrame=performance.now();

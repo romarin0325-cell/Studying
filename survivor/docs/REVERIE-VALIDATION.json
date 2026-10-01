@@ -1,0 +1,183 @@
+{
+  "date": "2026-10-02 Asia/Tokyo",
+  "requiredVerification": {
+    "command": "PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npm run verify",
+    "result": "PASS",
+    "seconds": 61.08,
+    "survivorTests": 44,
+    "selectorTests": 25,
+    "chromiumViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "webkitViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "otherGameSuitesRun": []
+  },
+  "motion": [
+    {
+      "hz": 60,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 60,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.4210854715202004e-11,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 2.2737367544323206e-11,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.3415046851150692e-11,
+      "pure": true
+    }
+  ],
+  "crowdedSynchronousWork": {
+    "frames": 90,
+    "meanWorkMs": 10.52,
+    "enemies": 260,
+    "shots": 15,
+    "fields": 0,
+    "hazards": 0
+  },
+  "rafPerformance": {
+    "high": {
+      "quality": "high",
+      "effectiveDPR": 1.75,
+      "frames": 300,
+      "viewport": [
+        390,
+        680
+      ],
+      "dpr": 2,
+      "mean": 2.65,
+      "p50": 2.4,
+      "p95": 3.9,
+      "max": 25.2,
+      "cadenceP50": 24.3,
+      "cadenceP95": 29.6,
+      "enemies": 260,
+      "shots": 5,
+      "cacheMiB": 10.56,
+      "decodedMiB": 59.07
+    },
+    "economy": {
+      "quality": "economy",
+      "effectiveDPR": 1,
+      "frames": 300,
+      "viewport": [
+        390,
+        680
+      ],
+      "dpr": 2,
+      "mean": 2.43,
+      "p50": 2.1,
+      "p95": 4.3,
+      "max": 11.4,
+      "cadenceP50": 16.7,
+      "cadenceP95": 17.5,
+      "enemies": 260,
+      "shots": 5,
+      "cacheMiB": 8.43,
+      "decodedMiB": 59.07
+    }
+  },
+  "textureRGBAEstimateMiB": {
+    "entireCatalog": 80.193359375,
+    "withoutWalking": 56.427734375,
+    "withTwoWalkingSheets": 61.708984375
+  },
+  "measurementScope": "Headless cloud browser CPU work/cadence; RGBA dimensions only. No physical phone FPS, thermal stability, touch latency or total browser memory claim.",
+  "artifact": {
+    "path": "survivor/dist/AstraNocturne.html",
+    "bytes": 7609791,
+    "sha256": "1c66bc32d2292e99b9a20d22baedfa77b0349b66c8af577875c3d32d6915e582",
+    "embeddedTextures": 33
+  }
+}

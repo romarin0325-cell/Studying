@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "reference": "rumi",
+  "policy": "Fixed anatomical head height, subtle torso/leg height classes, common sole baseline. Face crops use the skull center; ears, crowns, hair and weapons are excluded from scale.",
+  "method": "Canonical skull landmarks reuse the current Defense anatomical review, except Jasmine manually reconstructed from visible forehead, cheeks and chin. Walking front skull/neck samples were measured visually; per-frame neck/sole roots are pixel-derived and reviewed on a contact sheet.",
+  "uncertainty": "Occluded skull boundaries and moving sole contacts are estimates. This is a project art contract, not an anatomical detector or an industry tolerance standard.",
+  "frames": {
+    "rumi": {
+      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "canonical": {
+        "skullTop": 148,
+        "chin": 291,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 190
+      },
+      "walk": {
+        "skullTop": 77,
+        "chin": 175,
+        "rootX": 172,
+        "foot": 308
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e"
+    },
+    "luna": {
+      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "canonical": {
+        "skullTop": 135,
+        "chin": 288,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 190
+      },
+      "walk": {
+        "skullTop": 74,
+        "chin": 165,
+        "rootX": 161,
+        "foot": 309
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412"
+    },
+    "zeke": {
+      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "canonical": {
+        "skullTop": 142,
+        "chin": 291,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 196
+      },
+      "walk": {
+        "skullTop": 58,
+        "chin": 147,
+        "rootX": 154,
+        "foot": 286
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b"
+    },
+    "cinderella": {
+      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "canonical": {
+        "skullTop": 117,
+        "chin": 262,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 194
+      },
+      "walk": {
+        "skullTop": 60,
+        "chin": 149,
+        "rootX": 165,
+        "foot": 309
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de"
+    },
+    "snow_rabbit": {
+      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "canonical": {
+        "skullTop": 167,
+        "chin": 312,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 180
+      },
+      "walk": {
+        "skullTop": 100,
+        "chin": 188,
+        "rootX": 181,
+        "foot": 315
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127"
+    },
+    "night_rabbit": {
+      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "canonical": {
+        "skullTop": 143,
+        "chin": 289,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 180
+      },
+      "walk": {
+        "skullTop": 82,
+        "chin": 176,
+        "rootX": 207,
+        "foot": 308
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6"
+    },
+    "silver_rabbit": {
+      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "canonical": {
+        "skullTop": 173,
+        "chin": 317,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 180
+      },
+      "walk": {
+        "skullTop": 102,
+        "chin": 179,
+        "rootX": 171,
+        "foot": 308
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902"
+    },
+    "time_ruler": {
+      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "canonical": {
+        "skullTop": 141,
+        "chin": 288,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 190
+      },
+      "walk": {
+        "skullTop": 46,
+        "chin": 141,
+        "rootX": 168,
+        "foot": 300
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e"
+    },
+    "jasmine": {
+      "sourceSha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b",
+      "canonical": {
+        "skullTop": 155,
+        "chin": 286,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 194
+      },
+      "walk": {
+        "skullTop": 48,
+        "chin": 151,
+        "rootX": 161,
+        "foot": 309
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d"
+    }
+  }
+}

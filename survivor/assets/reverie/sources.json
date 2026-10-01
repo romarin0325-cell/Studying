@@ -1,0 +1,20 @@
+[
+  {
+    "id": "lobby",
+    "source": "survivor/assets/reverie/sources/lobby.png",
+    "kind": "scene",
+    "columns": 1,
+    "rows": 1,
+    "cell": 1200,
+    "review": "Moonlit conservatory composition inspected; quiet title area and gold pedestal retained. Independent menu texture, not a battlefield."
+  },
+  {
+    "id": "secrets",
+    "source": "survivor/assets/reverie/sources/secrets.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 2,
+    "cell": 160,
+    "review": "Eight separate fantasy props. Hidden rule-changing relics and encounter landmarks; full silhouettes and transparent gutters reviewed on blue and magenta mattes."
+  }
+]

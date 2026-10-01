@@ -139,3 +139,58 @@ test('evolved sun adds two rays and evolved clock holds enemies between ticks',(
   const g=new Game({hero:'silver_rabbit'});enemy(g);g.grid.rebuild(g.enemies);g.fire(g.weapons[0]);assert.equal(g.drainEvents().filter(e=>e.type==='beam').length,1);g.weapons[0].evolved=true;g.fire(g.weapons[0]);assert.equal(g.drainEvents().filter(e=>e.type==='beam').length,3);
   const clock=new Game({hero:'time_ruler'});enemy(clock);clock.grid.rebuild(clock.enemies);clock.weapons[0].evolved=true;clock.fire(clock.weapons[0]);clock.updateFields(.02);assert.equal(clock.enemies[0].freeze,.3);
 });
+
+test('fixed simulation interpolates continuous movement and gait at 60, 90, 120 and 144 Hz',async()=>{
+  const {FIXED_DT,playerPose,followCamera}=await import('../src/motion.js');
+  for(const hz of [60,90,120,144])for(const jitter of [false,true]){
+    const g=new Game();g.introSpawned=true;g.spawnTimer=1000;g.eliteTimer=1000;let accum=0,time=0,camera=800,last=null,lastScreen=null;const speeds=[];
+    for(let frame=0;frame<hz;frame++){
+      const dt=(jitter?[.8,1.25,.95,1][frame%4]:1)/hz;time+=dt;accum+=dt;
+      while(accum+1e-12>=FIXED_DT){g.step(FIXED_DT,{x:1,y:0});accum-=FIXED_DT;}
+      const pose=playerPose(g.player,accum/FIXED_DT,{x:1,y:0});assert.equal(pose.moving,true,'held movement never becomes an idle render frame');
+      camera=followCamera(camera,last??800,pose.x,dt);const screen=pose.x-camera;
+      if(frame>3){assert.ok(Math.abs((pose.x-last)/dt-175)<1e-7,`${hz} Hz: no repeated position or step jump`);assert.ok(screen>lastScreen,`${hz} Hz: camera never pulls the moving player backwards`);speeds.push((screen-lastScreen)/dt);}
+      last=pose.x;lastScreen=screen;
+    }
+    assert.ok(Math.abs(g.player.moveDistance-g.time*175)<1e-7);for(let i=1;i<speeds.length;i++)assert.ok(Math.abs(speeds[i]-speeds[i-1])/speeds[i-1]<.3,'screen velocity changes smoothly');
+    const saved=g.snapshot(),restored=Game.restore(saved);assert.deepEqual(restored.snapshot(),saved,'gait phase survives reload');
+  }
+});
+
+const quiet=g=>{g.introSpawned=true;g.spawnTimer=1000;g.eliteTimer=1000;for(const w of g.weapons)w.timer=1000;return g;};
+test('hidden echo performs a real second cast after its delay and persists the pending attack',()=>{
+  const g=quiet(new Game());g.secrets=['echo'];enemy(g);g.grid.rebuild(g.enemies);g.fire(g.weapons[0]);assert.equal(g.echoes.length,1);
+  const restored=Game.restore(g.snapshot());let casts=0;for(let i=0;i<80;i++){restored.step(1/60);casts+=restored.drainEvents().filter(e=>e.type==='cast').length;}
+  assert.equal(casts,1,'restored run emits only the delayed cast; original cosmetic events are not replayed');assert.equal(restored.echoes.length,0);assert.ok(restored.weapons[0].damage>0);
+});
+test('mirror dash converts actual enemy shots into damaging allied projectiles',()=>{
+  const g=quiet(new Game());g.secrets=['mirror'];enemy(g,1000,800);g.grid.rebuild(g.enemies);g.hazardShot(850,770,Math.PI,100,12);const hostile=g.hazards[0];assert.ok(g.dash());assert.ok(hostile.hit);assert.ok(g.shots.some(s=>s.reflected));advance(g,1.5);assert.ok(g.weapons[0].damage>=60);assert.equal(g.damageTaken,0);
+});
+test('stationary time pocket freezes nearby enemies; moving releases them',()=>{
+  const g=quiet(new Game());g.secrets=['pocket'];const e=g.spawnEnemy('beetle',{x:920,y:800,speed:70,damage:0,hp:10000,maxHp:10000});advance(g,.75);const frozen=e.x;advance(g,.5);assert.equal(e.x,frozen);advance(g,.5,{x:-1,y:0});assert.ok(e.x<frozen);assert.equal(g.stillness,0);
+});
+test('doorway dash returns to its actual origin without interpolating across the teleport',()=>{
+  const g=quiet(new Game());g.secrets=['portal'];g.step(1/60,{x:1,y:0});const origin={x:g.player.x,y:g.player.y};assert.ok(g.dash());advance(g,.8,{x:1,y:0});assert.ok(g.player.x>origin.x+80);const restored=Game.restore(g.snapshot());assert.ok(restored.dash());assert.equal(restored.player.x,origin.x);assert.equal(restored.player.y,origin.y);assert.equal(restored.player.prevX,origin.x);assert.equal(restored.portal,null);
+});
+test('relic awakenings change reflection, skill-time and dash attacks rather than just stats',()=>{
+  const mirror=quiet(new Game({hero:'cinderella'}));mirror.weapons[0].evolved=true;mirror.relics=[{id:'mirror',level:3}];mirror.recompute();assert.ok(mirror.stats.awakened.includes('mirror'));enemy(mirror,1200);mirror.grid.rebuild(mirror.enemies);mirror.fire(mirror.weapons[0]);const shot=mirror.shots[0];shot.x=46;shot.y=780;shot.vx=-200;shot.vy=0;mirror.updateShots(1/60);assert.equal(shot.bounces,1);assert.ok(shot.vx>0);
+  const time=quiet(new Game({hero:'time_ruler'}));time.weapons[0].evolved=true;time.relics=[{id:'hourglass',level:3}];time.recompute();time.hazardShot(800,500,Math.PI/2,120,20);time.castSkill();time.hazards=[];time.hazardShot(800,500,Math.PI/2,120,20);const danger=time.hazards[0];advance(time,1);assert.equal(danger.y,500);assert.ok(time.timeStop>0);
+  const wind=quiet(new Game());equip(wind,'storm',6);wind.weapons.find(w=>w.id==='storm').evolved=true;wind.relics=[{id:'feather',level:3}];wind.recompute();enemy(wind,800,900);wind.grid.rebuild(wind.enemies);wind.dash();assert.ok(wind.totalDamage>0);assert.ok(wind.player.dashCooldown<2);
+});
+test('endless bosses reserve capacity and keep cycling without time-triggered victory',()=>{
+  const g=quiet(new Game({runMode:'endless'}));g.time=g.duration;g.bossesSpawned=2;for(let i=0;i<LIMITS.enemies;i++)g.spawnEnemy();g.director(1/60);const boss=g.enemies.find(e=>e.boss);assert.ok(boss);assert.equal(boss.final,false);g.hit(boss,1e8,'star');assert.equal(g.mode,'playing');g.time=g.duration*1.25;g.director(1/60);assert.equal(g.bossesSpawned,4);assert.ok(g.enemies.some(e=>e.boss));assert.ok(g.enemies.length<=LIMITS.enemies);
+});
+test('seeded night rules, transactional encounter choices and growth history restore exactly',()=>{
+  assert.equal(new Game({seed:122}).omen,new Game({seed:122}).omen);assert.ok(new Set([1,2,3,40000,90000].map(seed=>new Game({seed}).omen)).size>1);
+  const g=quiet(new Game());g.encounters.push({id:g.uid++,kind:'altar',x:800,y:800,life:40,progress:0,used:false,title:'test',secret:'echo'});assert.ok(g.useEncounter());const copy=Game.restore(g.snapshot()),hp=copy.player.maxHp;assert.equal(copy.mode,'anomaly');assert.deepEqual(copy.encounterOffers,g.encounterOffers);assert.ok(copy.chooseEncounter(0));assert.ok(copy.secrets.includes('echo'));assert.ok(copy.player.maxHp<hp);assert.equal(copy.chooseEncounter(0),false);advance(copy,11,{x:.1,y:0});assert.ok(copy.growthHistory.length>=2);assert.deepEqual(Game.restore(copy.snapshot()).snapshot(),copy.snapshot());
+  const saved=copy.snapshot();for(const patch of [{secrets:['bad']},{secrets:['echo','echo']},{runMode:'bad'},{encounters:null},{echoes:[{weapon:'star',wait:10}]},{growthHistory:[{time:1,level:2,dps:'bad',kills:1,evolutions:0}]},{portal:{x:-1,y:800,life:2}},{cycle:1.2},{growthDamage:-1},{encounterOffers:[{type:'gift',id:'gift',price:20}]},{reverieVersion:undefined}])assert.throws(()=>Game.restore({...saved,...patch}));
+  const legacy=new Game().snapshot();for(const key of ['reverieVersion','runMode','omen','secrets','encounters','encounterOffers','encounterIndex','nextEncounter','conditionFlags','stillness','echoes','portal','timeStop','lifePrice','eclipseAt','growthHistory','growthAt','growthDamage','cycle','fieldGiftAt'])delete legacy[key];const migrated=Game.restore(legacy);assert.equal(migrated.omen,'legacy');assert.equal(migrated.runMode,'expedition');assert.deepEqual(Game.restore(migrated.snapshot()).snapshot(),migrated.snapshot());
+  const long=quiet(new Game({runMode:'endless'}));long.level=105;long.need=1200;assert.equal(Game.restore(long.snapshot()).level,105,'endless saves keep levels above the old 99 limit');
+  const bloom=quiet(new Game());bloom.omen='bloom';bloom.player.hp=20;const shrine=bloom.shrines.find(s=>s.id==='dawn');bloom.player.x=shrine.x;bloom.player.y=shrine.y;assert.ok(bloom.useShrine());assert.equal(bloom.player.hp,20+bloom.player.maxHp*.15,'bloom grants the advertised extra shrine healing');
+});
+
+test('endless limit break continues actual weapon growth beyond complete equipment and level 99',()=>{
+  const g=quiet(new Game({runMode:'endless'}));g.weapons=['star','blade','ember','flower','frost','storm'].map(id=>({id,level:6,evolved:true,timer:1000,damage:0}));g.relics=['prism','mirror','hourglass','feather'].map(id=>({id,level:3}));g.recompute();assert.ok(g.candidates().some(o=>o.type==='limit'));
+  enemy(g,900,800);g.grid.rebuild(g.enemies);g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);const base=g.weapons[1].damage;assert.ok(base>0);g.shots=[];g.applyOption({type:'limit',id:'power'});g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);assert.ok(g.weapons[1].damage-base>=base*1.05,'the next attack really deals more damage');
+  g.level=99;g.need=100;g.mode='playing';g.gainXP(100);assert.equal(g.level,100);assert.equal(g.mode,'choice');assert.ok(g.options.some(o=>o.type==='limit'));assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());assert.throws(()=>Game.restore({...g.snapshot(),limitBreak:{power:-1,haste:0,area:0}}));
+});

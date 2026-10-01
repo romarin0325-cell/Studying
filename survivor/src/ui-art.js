@@ -1,6 +1,7 @@
-import {WEAPONS,WEAPON,RELICS,RELIC} from './content.js';
+import {WEAPONS,WEAPON,RELICS,RELIC,SECRET} from './content.js';
 
 export function itemArt(kind,id,extra=''){
+  if(kind==='secret'||kind==='encounter'){const index=kind==='secret'?SECRET[id]?.art:Number(id),label=kind==='secret'?SECRET[id]?.name:'';return `<span class="item-art secrets-art ${extra}" style="--sprite-x:${index%4/3*100}%;--sprite-y:${Math.floor(index/4)*100}%" ${label?`role="img" aria-label="${label}"`:'aria-hidden="true"'}></span>`;}
   const list=kind==='weapon'?WEAPONS:RELICS;
   let index=list.findIndex(item=>item.id===id);
   if(kind==='prop')index={chest:10,open:11,heart:12,magnet:13,coin:14,shrine:15}[id];
@@ -20,6 +21,7 @@ const paths={
   star:'m12 2 2.8 6.4L22 10l-5.2 4.8.8 7.2-5.6-3.8L6.4 22l.8-7.2L2 10l7.2-1.6Z',
   moon:'M20 15A9 9 0 0 1 9 3a9 9 0 1 0 11 12',
   history:'M3 10a9 9 0 1 1 1 7M3 3v7h7M12 7v6l4 2',
+  infinity:'M12 12c-3-5-8-5-9-1-1 6 5 7 9 1 4-6 10-5 9 1-1 4-6 4-9-1',
   leaf:'M4 20C2 9 8 3 21 3c0 13-6 19-17 17Zm0 0L16 8'
 };
 export const uiIcon=name=>`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.star}"/></svg>`;

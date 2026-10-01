@@ -1,0 +1,1463 @@
+{
+  "date": "2026-10-02 Asia/Tokyo",
+  "pilot": "Existing regression pilot: normal difficulty, no meta upgrades, only movement, skill, dash and equipment choices. This does not evaluate human enjoyment or clear rate.",
+  "runs": [
+    {
+      "hero": "rumi",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 120.58,
+      "kills": 1406,
+      "level": 63,
+      "hp": 100,
+      "bosses": 3,
+      "evolutions": 4,
+      "totalDamage": 103405.6,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.5333333333333333,
+        "firstTreasure": 29.21666666666629,
+        "firstEvolution": 9.1166666666667
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 8,
+          "dps": 92.5,
+          "kills": 37,
+          "evolutions": 1
+        },
+        {
+          "time": 20,
+          "level": 13,
+          "dps": 128.5,
+          "kills": 73,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 18,
+          "dps": 210.2,
+          "kills": 114,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 20,
+          "dps": 401.7,
+          "kills": 163,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 28,
+          "dps": 613.2,
+          "kills": 286,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 31,
+          "dps": 496.2,
+          "kills": 374,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 36,
+          "dps": 612.3,
+          "kills": 489,
+          "evolutions": 3
+        },
+        {
+          "time": 80.1,
+          "level": 39,
+          "dps": 1250.8,
+          "kills": 623,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 45,
+          "dps": 996.5,
+          "kills": 774,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 53,
+          "dps": 1336.4,
+          "kills": 977,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 56,
+          "dps": 1870.8,
+          "kills": 1215,
+          "evolutions": 4
+        },
+        {
+          "time": 120.17,
+          "level": 63,
+          "dps": 1286.7,
+          "kills": 1404,
+          "evolutions": 4
+        }
+      ],
+      "peaks": {
+        "enemies": 17,
+        "shots": 166,
+        "drops": 267,
+        "fields": 18,
+        "hazards": 8
+      }
+    },
+    {
+      "hero": "luna",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 124.7,
+      "kills": 1432,
+      "level": 59,
+      "hp": 135,
+      "bosses": 3,
+      "evolutions": 4,
+      "totalDamage": 101350.7,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.7166666666666672,
+        "firstTreasure": 31.416666666666163,
+        "firstEvolution": 10.233333333333421
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 6,
+          "dps": 74.8,
+          "kills": 30,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 12,
+          "dps": 150.2,
+          "kills": 72,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 175.7,
+          "kills": 108,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 432.2,
+          "kills": 164,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 25,
+          "dps": 523.5,
+          "kills": 281,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 28,
+          "dps": 535.4,
+          "kills": 373,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 32,
+          "dps": 693,
+          "kills": 488,
+          "evolutions": 4
+        },
+        {
+          "time": 80.1,
+          "level": 35,
+          "dps": 1125.6,
+          "kills": 631,
+          "evolutions": 4
+        },
+        {
+          "time": 90.12,
+          "level": 42,
+          "dps": 738.5,
+          "kills": 769,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 45,
+          "dps": 1316.3,
+          "kills": 959,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 51,
+          "dps": 1841.2,
+          "kills": 1213,
+          "evolutions": 4
+        },
+        {
+          "time": 120.17,
+          "level": 58,
+          "dps": 1294,
+          "kills": 1407,
+          "evolutions": 4
+        }
+      ],
+      "peaks": {
+        "enemies": 35,
+        "shots": 46,
+        "drops": 276,
+        "fields": 13,
+        "hazards": 10
+      }
+    },
+    {
+      "hero": "zeke",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 125.43,
+      "kills": 1425,
+      "level": 56,
+      "hp": 125,
+      "bosses": 3,
+      "evolutions": 3,
+      "totalDamage": 100791.9,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.733333333333334,
+        "firstTreasure": 33.81666666666603,
+        "firstEvolution": 14.516666666666968
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 5,
+          "dps": 49.1,
+          "kills": 20,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 13,
+          "dps": 154.1,
+          "kills": 64,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 15,
+          "dps": 201.7,
+          "kills": 103,
+          "evolutions": 1
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 422,
+          "kills": 160,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 22,
+          "dps": 481.1,
+          "kills": 263,
+          "evolutions": 2
+        },
+        {
+          "time": 60.07,
+          "level": 28,
+          "dps": 591.7,
+          "kills": 367,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 33,
+          "dps": 721.9,
+          "kills": 492,
+          "evolutions": 3
+        },
+        {
+          "time": 80.1,
+          "level": 35,
+          "dps": 1218.9,
+          "kills": 631,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 41,
+          "dps": 821.9,
+          "kills": 775,
+          "evolutions": 3
+        },
+        {
+          "time": 100.13,
+          "level": 43,
+          "dps": 1206.7,
+          "kills": 951,
+          "evolutions": 3
+        },
+        {
+          "time": 110.15,
+          "level": 51,
+          "dps": 1763.4,
+          "kills": 1214,
+          "evolutions": 3
+        },
+        {
+          "time": 120.17,
+          "level": 53,
+          "dps": 1098.3,
+          "kills": 1378,
+          "evolutions": 3
+        }
+      ],
+      "peaks": {
+        "enemies": 39,
+        "shots": 24,
+        "drops": 285,
+        "fields": 9,
+        "hazards": 14
+      }
+    },
+    {
+      "hero": "jasmine",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 123.37,
+      "kills": 1428,
+      "level": 60,
+      "hp": 155,
+      "bosses": 3,
+      "evolutions": 3,
+      "totalDamage": 99860.7,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.5833333333333335,
+        "firstTreasure": 33.23333333333273,
+        "firstEvolution": 10.383333333333429
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 5,
+          "dps": 74.7,
+          "kills": 30,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 12,
+          "dps": 146.5,
+          "kills": 77,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 198.9,
+          "kills": 112,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 423.8,
+          "kills": 167,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 25,
+          "dps": 557.3,
+          "kills": 282,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 27,
+          "dps": 549.9,
+          "kills": 374,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 34,
+          "dps": 627.7,
+          "kills": 490,
+          "evolutions": 3
+        },
+        {
+          "time": 80.1,
+          "level": 36,
+          "dps": 1245.1,
+          "kills": 632,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 43,
+          "dps": 909.9,
+          "kills": 775,
+          "evolutions": 3
+        },
+        {
+          "time": 100.13,
+          "level": 46,
+          "dps": 1258.1,
+          "kills": 976,
+          "evolutions": 3
+        },
+        {
+          "time": 110.15,
+          "level": 53,
+          "dps": 1603.5,
+          "kills": 1213,
+          "evolutions": 3
+        },
+        {
+          "time": 120.17,
+          "level": 60,
+          "dps": 1312.4,
+          "kills": 1414,
+          "evolutions": 3
+        }
+      ],
+      "peaks": {
+        "enemies": 27,
+        "shots": 64,
+        "drops": 232,
+        "fields": 11,
+        "hazards": 11
+      }
+    },
+    {
+      "hero": "snow_rabbit",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 124.73,
+      "kills": 1429,
+      "level": 57,
+      "hp": 140,
+      "bosses": 3,
+      "evolutions": 2,
+      "totalDamage": 99089.3,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.8666666666666677,
+        "firstTreasure": 26.6833333333331,
+        "firstEvolution": 11.466666666666816
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 6,
+          "dps": 64.6,
+          "kills": 26,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 12,
+          "dps": 165.9,
+          "kills": 74,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 219.6,
+          "kills": 111,
+          "evolutions": 1
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 381.9,
+          "kills": 162,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 25,
+          "dps": 588.6,
+          "kills": 286,
+          "evolutions": 2
+        },
+        {
+          "time": 60.07,
+          "level": 27,
+          "dps": 486.9,
+          "kills": 372,
+          "evolutions": 2
+        },
+        {
+          "time": 70.08,
+          "level": 32,
+          "dps": 654.1,
+          "kills": 492,
+          "evolutions": 2
+        },
+        {
+          "time": 80.1,
+          "level": 34,
+          "dps": 1083.3,
+          "kills": 623,
+          "evolutions": 2
+        },
+        {
+          "time": 90.12,
+          "level": 41,
+          "dps": 882.2,
+          "kills": 774,
+          "evolutions": 2
+        },
+        {
+          "time": 100.13,
+          "level": 42,
+          "dps": 1358.6,
+          "kills": 980,
+          "evolutions": 2
+        },
+        {
+          "time": 110.15,
+          "level": 51,
+          "dps": 1635.8,
+          "kills": 1215,
+          "evolutions": 2
+        },
+        {
+          "time": 120.17,
+          "level": 56,
+          "dps": 1157.2,
+          "kills": 1401,
+          "evolutions": 2
+        }
+      ],
+      "peaks": {
+        "enemies": 30,
+        "shots": 69,
+        "drops": 261,
+        "fields": 9,
+        "hazards": 8
+      }
+    },
+    {
+      "hero": "night_rabbit",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 122.73,
+      "kills": 1413,
+      "level": 60,
+      "hp": 110,
+      "bosses": 3,
+      "evolutions": 4,
+      "totalDamage": 98416.2,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.5666666666666668,
+        "firstTreasure": 51.666666666665016,
+        "firstEvolution": 11.516666666666818
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 6,
+          "dps": 64.3,
+          "kills": 26,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 13,
+          "dps": 159.8,
+          "kills": 72,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 187.7,
+          "kills": 109,
+          "evolutions": 1
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 432.7,
+          "kills": 161,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 26,
+          "dps": 556.7,
+          "kills": 283,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 29,
+          "dps": 480.4,
+          "kills": 372,
+          "evolutions": 4
+        },
+        {
+          "time": 70.08,
+          "level": 35,
+          "dps": 714,
+          "kills": 487,
+          "evolutions": 4
+        },
+        {
+          "time": 80.1,
+          "level": 37,
+          "dps": 1175.3,
+          "kills": 629,
+          "evolutions": 4
+        },
+        {
+          "time": 90.12,
+          "level": 44,
+          "dps": 876.1,
+          "kills": 776,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 46,
+          "dps": 1243.9,
+          "kills": 974,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 54,
+          "dps": 1639.1,
+          "kills": 1217,
+          "evolutions": 4
+        },
+        {
+          "time": 120.17,
+          "level": 58,
+          "dps": 1174,
+          "kills": 1397,
+          "evolutions": 4
+        }
+      ],
+      "peaks": {
+        "enemies": 23,
+        "shots": 99,
+        "drops": 201,
+        "fields": 22,
+        "hazards": 19
+      }
+    },
+    {
+      "hero": "cinderella",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 123.6,
+      "kills": 1419,
+      "level": 56,
+      "hp": 100,
+      "bosses": 3,
+      "evolutions": 4,
+      "totalDamage": 101323.3,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.7000000000000005,
+        "firstTreasure": 31.833333333332806,
+        "firstEvolution": 10.200000000000086
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 6,
+          "dps": 79.8,
+          "kills": 32,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 11,
+          "dps": 124.2,
+          "kills": 69,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 226.4,
+          "kills": 109,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 384.4,
+          "kills": 158,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 24,
+          "dps": 593.1,
+          "kills": 279,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 26,
+          "dps": 530.9,
+          "kills": 365,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 33,
+          "dps": 656.6,
+          "kills": 487,
+          "evolutions": 4
+        },
+        {
+          "time": 80.1,
+          "level": 37,
+          "dps": 1165.8,
+          "kills": 625,
+          "evolutions": 4
+        },
+        {
+          "time": 90.12,
+          "level": 41,
+          "dps": 889.7,
+          "kills": 770,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 46,
+          "dps": 1391.1,
+          "kills": 976,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 50,
+          "dps": 1610.7,
+          "kills": 1204,
+          "evolutions": 4
+        },
+        {
+          "time": 120.17,
+          "level": 56,
+          "dps": 1277.1,
+          "kills": 1393,
+          "evolutions": 4
+        }
+      ],
+      "peaks": {
+        "enemies": 49,
+        "shots": 99,
+        "drops": 179,
+        "fields": 3,
+        "hazards": 6
+      }
+    },
+    {
+      "hero": "silver_rabbit",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 122.12,
+      "kills": 1412,
+      "level": 55,
+      "hp": 105,
+      "bosses": 3,
+      "evolutions": 5,
+      "totalDamage": 97856.8,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.6500000000000004,
+        "firstTreasure": 34.699999999999314,
+        "firstEvolution": 13.70000000000026
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 6,
+          "dps": 61.9,
+          "kills": 25,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 12,
+          "dps": 155.9,
+          "kills": 74,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 15,
+          "dps": 111.5,
+          "kills": 97,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 416.8,
+          "kills": 162,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 22,
+          "dps": 516.6,
+          "kills": 279,
+          "evolutions": 2
+        },
+        {
+          "time": 60.07,
+          "level": 29,
+          "dps": 576,
+          "kills": 376,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 34,
+          "dps": 683.8,
+          "kills": 491,
+          "evolutions": 4
+        },
+        {
+          "time": 80.1,
+          "level": 35,
+          "dps": 1161.9,
+          "kills": 633,
+          "evolutions": 4
+        },
+        {
+          "time": 90.12,
+          "level": 43,
+          "dps": 960.7,
+          "kills": 777,
+          "evolutions": 5
+        },
+        {
+          "time": 100.13,
+          "level": 44,
+          "dps": 1355,
+          "kills": 978,
+          "evolutions": 5
+        },
+        {
+          "time": 110.15,
+          "level": 53,
+          "dps": 1545.3,
+          "kills": 1215,
+          "evolutions": 5
+        },
+        {
+          "time": 120.17,
+          "level": 55,
+          "dps": 1147.3,
+          "kills": 1402,
+          "evolutions": 5
+        }
+      ],
+      "peaks": {
+        "enemies": 28,
+        "shots": 75,
+        "drops": 280,
+        "fields": 31,
+        "hazards": 15
+      }
+    },
+    {
+      "hero": "time_ruler",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 132.28,
+      "kills": 1490,
+      "level": 57,
+      "hp": 88.16,
+      "bosses": 3,
+      "evolutions": 5,
+      "totalDamage": 102849.8,
+      "metrics": {
+        "firstHit": 0.31666666666666665,
+        "firstLevel": 1.9999999999999978,
+        "firstTreasure": 26.24999999999979,
+        "firstEvolution": 10.966666666666791
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 5,
+          "dps": 70.3,
+          "kills": 27,
+          "evolutions": 0
+        },
+        {
+          "time": 20,
+          "level": 12,
+          "dps": 131.2,
+          "kills": 71,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 16,
+          "dps": 195.4,
+          "kills": 111,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 19,
+          "dps": 379.8,
+          "kills": 160,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 25,
+          "dps": 567.6,
+          "kills": 281,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 27,
+          "dps": 488.8,
+          "kills": 366,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 32,
+          "dps": 580.3,
+          "kills": 481,
+          "evolutions": 3
+        },
+        {
+          "time": 80.1,
+          "level": 34,
+          "dps": 1193.4,
+          "kills": 617,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 41,
+          "dps": 879.8,
+          "kills": 769,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 43,
+          "dps": 1233.7,
+          "kills": 957,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 52,
+          "dps": 1656.1,
+          "kills": 1207,
+          "evolutions": 5
+        },
+        {
+          "time": 120.17,
+          "level": 56,
+          "dps": 1324,
+          "kills": 1405,
+          "evolutions": 5
+        },
+        {
+          "time": 130.17,
+          "level": 56,
+          "dps": 1172.1,
+          "kills": 1469,
+          "evolutions": 5
+        }
+      ],
+      "peaks": {
+        "enemies": 38,
+        "shots": 45,
+        "drops": 197,
+        "fields": 10,
+        "hazards": 19
+      }
+    },
+    {
+      "hero": "rumi",
+      "stage": "garden",
+      "seed": 2026,
+      "difficulty": "normal",
+      "runMode": "endless",
+      "omen": "comet",
+      "outcome": "playing",
+      "seconds": 270,
+      "kills": 7359,
+      "level": 143,
+      "hp": 100,
+      "bosses": 6,
+      "cycles": 2,
+      "limitBreak": {
+        "power": 23,
+        "haste": 23,
+        "area": 15
+      },
+      "evolutions": 4,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.5333333333333333,
+        "firstTreasure": 29.21666666666629,
+        "firstEvolution": 9.1166666666667
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 8,
+          "dps": 92.5,
+          "kills": 37,
+          "evolutions": 1
+        },
+        {
+          "time": 20,
+          "level": 13,
+          "dps": 128.5,
+          "kills": 73,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 18,
+          "dps": 210.2,
+          "kills": 114,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 20,
+          "dps": 401.7,
+          "kills": 163,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 28,
+          "dps": 613.2,
+          "kills": 286,
+          "evolutions": 3
+        },
+        {
+          "time": 60.07,
+          "level": 31,
+          "dps": 496.2,
+          "kills": 374,
+          "evolutions": 3
+        },
+        {
+          "time": 70.08,
+          "level": 36,
+          "dps": 612.3,
+          "kills": 489,
+          "evolutions": 3
+        },
+        {
+          "time": 80.1,
+          "level": 39,
+          "dps": 1250.8,
+          "kills": 623,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 45,
+          "dps": 996.5,
+          "kills": 774,
+          "evolutions": 4
+        },
+        {
+          "time": 100.13,
+          "level": 52,
+          "dps": 1154.5,
+          "kills": 971,
+          "evolutions": 4
+        },
+        {
+          "time": 110.15,
+          "level": 55,
+          "dps": 1482,
+          "kills": 1215,
+          "evolutions": 4
+        },
+        {
+          "time": 120.17,
+          "level": 63,
+          "dps": 1477.1,
+          "kills": 1413,
+          "evolutions": 4
+        },
+        {
+          "time": 130.17,
+          "level": 65,
+          "dps": 3350.6,
+          "kills": 1759,
+          "evolutions": 4
+        },
+        {
+          "time": 140.17,
+          "level": 77,
+          "dps": 3283.2,
+          "kills": 2170,
+          "evolutions": 4
+        },
+        {
+          "time": 150.17,
+          "level": 79,
+          "dps": 2042,
+          "kills": 2473,
+          "evolutions": 4
+        },
+        {
+          "time": 160.17,
+          "level": 89,
+          "dps": 3431.5,
+          "kills": 2888,
+          "evolutions": 4
+        },
+        {
+          "time": 170.17,
+          "level": 92,
+          "dps": 4029.6,
+          "kills": 3379,
+          "evolutions": 4
+        },
+        {
+          "time": 180.17,
+          "level": 101,
+          "dps": 2621.9,
+          "kills": 3694,
+          "evolutions": 4
+        },
+        {
+          "time": 190.17,
+          "level": 108,
+          "dps": 3859.1,
+          "kills": 4110,
+          "evolutions": 4
+        },
+        {
+          "time": 200.17,
+          "level": 111,
+          "dps": 4866,
+          "kills": 4585,
+          "evolutions": 4
+        },
+        {
+          "time": 210.17,
+          "level": 118,
+          "dps": 3031.2,
+          "kills": 4912,
+          "evolutions": 4
+        },
+        {
+          "time": 220.17,
+          "level": 119,
+          "dps": 4020.5,
+          "kills": 5348,
+          "evolutions": 4
+        },
+        {
+          "time": 230.17,
+          "level": 127,
+          "dps": 4596.2,
+          "kills": 5820,
+          "evolutions": 4
+        },
+        {
+          "time": 240.17,
+          "level": 128,
+          "dps": 3251.2,
+          "kills": 6139,
+          "evolutions": 4
+        },
+        {
+          "time": 250.17,
+          "level": 134,
+          "dps": 5999.6,
+          "kills": 6568,
+          "evolutions": 4
+        },
+        {
+          "time": 260.17,
+          "level": 137,
+          "dps": 4792.4,
+          "kills": 7041,
+          "evolutions": 4
+        }
+      ],
+      "peaks": {
+        "enemies": 20,
+        "shots": 213,
+        "drops": 300,
+        "fields": 25,
+        "hazards": 14
+      }
+    },
+    {
+      "hero": "rumi",
+      "stage": "garden",
+      "seed": 35,
+      "difficulty": "eclipse",
+      "runMode": "expedition",
+      "omen": "comet",
+      "outcome": "victory",
+      "seconds": 127.35,
+      "kills": 1915,
+      "level": 69,
+      "hp": 145,
+      "bosses": 3,
+      "cycles": 1,
+      "limitBreak": {
+        "power": 0,
+        "haste": 0,
+        "area": 0
+      },
+      "evolutions": 3,
+      "metrics": {
+        "firstHit": 0.016666666666666666,
+        "firstLevel": 0.5333333333333333,
+        "firstTreasure": 25.98333333333314,
+        "firstEvolution": 8.133333333333317
+      },
+      "growthHistory": [
+        {
+          "time": 0,
+          "level": 1,
+          "dps": 0,
+          "kills": 0,
+          "evolutions": 0
+        },
+        {
+          "time": 10,
+          "level": 8,
+          "dps": 146.6,
+          "kills": 44,
+          "evolutions": 1
+        },
+        {
+          "time": 20,
+          "level": 14,
+          "dps": 244.7,
+          "kills": 98,
+          "evolutions": 1
+        },
+        {
+          "time": 30.02,
+          "level": 20,
+          "dps": 359.9,
+          "kills": 150,
+          "evolutions": 2
+        },
+        {
+          "time": 40.03,
+          "level": 21,
+          "dps": 595.6,
+          "kills": 217,
+          "evolutions": 2
+        },
+        {
+          "time": 50.05,
+          "level": 29,
+          "dps": 1114.7,
+          "kills": 376,
+          "evolutions": 2
+        },
+        {
+          "time": 60.07,
+          "level": 36,
+          "dps": 783.1,
+          "kills": 491,
+          "evolutions": 2
+        },
+        {
+          "time": 70.08,
+          "level": 39,
+          "dps": 1131.7,
+          "kills": 645,
+          "evolutions": 2
+        },
+        {
+          "time": 80.1,
+          "level": 43,
+          "dps": 1863.7,
+          "kills": 825,
+          "evolutions": 3
+        },
+        {
+          "time": 90.12,
+          "level": 49,
+          "dps": 1641.7,
+          "kills": 1020,
+          "evolutions": 3
+        },
+        {
+          "time": 100.13,
+          "level": 56,
+          "dps": 2085.2,
+          "kills": 1275,
+          "evolutions": 3
+        },
+        {
+          "time": 110.15,
+          "level": 60,
+          "dps": 2871.9,
+          "kills": 1595,
+          "evolutions": 3
+        },
+        {
+          "time": 120.17,
+          "level": 68,
+          "dps": 2488.4,
+          "kills": 1854,
+          "evolutions": 3
+        }
+      ],
+      "peaks": {
+        "enemies": 30,
+        "shots": 64,
+        "drops": 299,
+        "fields": 3,
+        "hazards": 14
+      }
+    }
+  ]
+}
