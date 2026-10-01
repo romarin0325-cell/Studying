@@ -102,7 +102,7 @@ test('golden magnet attracts items beyond ordinary range and respects pickup bou
   const p=magnet.powerPoints;tick(magnet,1);assert.ok(magnet.powerPoints>p);
 });
 test('Luna slashes less often, leaving a window for incoming bullets',()=>{
-  const g=combat({hero:1,weapon:1});target(g,225,320);g.fire(.001);assert.equal(g.player.fire,.70);const first=g.stats.damage;assert.equal(first,172.125);
+  const g=combat({hero:1,weapon:1});target(g,225,320);g.fire(.001);assert.equal(g.player.fire,.70);const first=g.stats.damage;assert.equal(first,175.5675);
   g.enemyBullet(225,360,0,0);g.fire(.28);assert.equal(g.bullets.length,1);assert.equal(g.stats.damage,first);
   g.fire(.43);assert.equal(g.bullets.length,0);assert.equal(g.stats.damage,first*2);
 });
@@ -113,7 +113,7 @@ test('laser reaches top of viewport in both damage and all rendered layers',()=>
 });
 test('Rumi and Sisters use the requested direct DPS coefficients without cadence changes',()=>{
   const rumi=combat({hero:0});rumi.power=1;rumi.player.fire=0;rumi.fire(.001);assert.ok(Math.abs(rumi.shots[0].damage-12.5*.698544)<1e-9);assert.equal(rumi.player.fire,.14);
-  const laser=combat({hero:0,weapon:1}),laserTarget=target(laser,225,200);laser.power=1;laser.player.fire=0;laser.fire(.001);assert.ok(Math.abs(laserTarget.maxHp-laserTarget.hp-12.5*.989664*1.015)<1e-9);assert.equal(laser.player.fire,.074);
+  const laser=combat({hero:0,weapon:1}),laserTarget=target(laser,225,200);laser.power=1;laser.player.fire=0;laser.fire(.001);assert.ok(Math.abs(laserTarget.maxHp-laserTarget.hp-12.5*1.02925056*1.015)<1e-9);assert.equal(laser.player.fire,.074);
   const promise=combat({hero:7}),haven=combat({hero:7,weapon:1});for(const g of [promise,haven]){g.power=1;g.player.fire=0;g.fire(.001);}
   assert.ok(Math.abs(promise.shots[0].damage-12.5*2.06388)<1e-9);assert.equal(promise.player.fire,.20);
   assert.ok(Math.abs(haven.shots[0].damage-12.5*1.90512)<1e-9);assert.ok(Math.abs(haven.shots[0].zoneDamage-12.5*2.22264)<1e-9);assert.equal(haven.player.fire,.42);

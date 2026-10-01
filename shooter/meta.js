@@ -47,7 +47,7 @@ export const ARTIFACTS = [
   { id: 'phoenixfeather', name: '불사조의깃털', rarity: 'rare', text: '공격력 20% 감소 · 부활 기회 1회 증가', attack: -.20, revives: 1 },
   { id: 'supernova', name: '초신성', rarity: 'rare', text: '봄 공격력 60% 증가 · 피격 시 봄 1 추가 소모', bomb: .60 },
   { id: 'holysword', name: '성검', rarity: 'epic', text: '적과 가까울수록 공격력 증가 · 최대 50%' },
-  { id: 'holyflame', name: '홀리플레임', rarity: 'epic', text: '필살기를 피해 5500의 홀리플레임으로 교체 · 무적 2초 · 남은 봄과 파워 전부 소모' },
+  { id: 'holyflame', name: '홀리플레임', rarity: 'epic', text: '필살기를 피해 5800의 홀리플레임으로 교체 · 무적 2초 · 남은 봄과 파워 전부 소모' },
   { id: 'divineiris', name: '신기 아이리스', appearance: '무지갯빛 왕관', rarity: 'legendary', hidden: true, text: '소지 봄과 최대 봄 3 증가', bombs: 3 },
   { id: 'demonicbelzebuth', name: '마신기 벨제뷔트', appearance: '어둠의 단검', rarity: 'legendary', hidden: true, text: '공격력 50% 증가 · 최대 생명 2 감소', attack: .50, life: -2 }
 ];

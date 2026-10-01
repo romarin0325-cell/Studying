@@ -31,10 +31,10 @@ test('manual covers every hero, weapon, stage, difficulty and artifact',()=>{
   });
   assert.equal(scores.length,144);assert.equal(Math.min(...scores),1);assert.equal(Math.max(...scores),100);
   ARTIFACTS.forEach(a=>assert.ok(artifactHTML.includes(`data-manual-artifact="${a.id}"`)));
-  assert.deepEqual(MANUAL_BALANCE.heroes.map(h=>h.bomb.damage),[1058,1300,1248,773,1058,1305,1900,1058,80]);
+  assert.deepEqual(MANUAL_BALANCE.heroes.map(h=>h.bomb.damage),[1058,1300,1248,773,1058,1305,1900,1058,82.4]);
   assert.equal(MANUAL_BALANCE.heroes[8].bomb.invincibility,2);
   assert.equal(MANUAL_BALANCE.corona.damage,2000);
-  assert.equal(MANUAL_BALANCE.holyflame.damage,5500);
+  assert.equal(MANUAL_BALANCE.holyflame.damage,5800);
   assert.equal(MANUAL_BALANCE.holyflame.invincibility,2);
   for(const [id] of MANUAL_TABS)assert.ok(renderManual(id).length>500);
 });

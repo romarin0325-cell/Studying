@@ -213,6 +213,7 @@ export class CampaignUI {
       if(!transition)return;
       transition.cancelled=true;clearTimeout(transition.timer);transition.wake?.();
       transition.animations.forEach(animation=>animation.cancel());transition=null;
+      portrait.removeAttribute('aria-busy');
     };
     const p=this.profile,heroes=[0,1,2,3,4,6],exit=()=>{cancelTransition();this.closeModal();refresh();};
     if(!heroes.includes(selectedHero))selectedHero=0;
@@ -251,11 +252,12 @@ export class CampaignUI {
       if(!state.cancelled&&portrait.isConnected&&image.getAttribute('src')!==requested.src)void reveal();
     };
     const render=(hero=selectedHero)=>{
-      if(hero!==selectedHero){selectedHero=hero;previewId=p.costumesEquipped[hero]||null;}
+      const changedHero=hero!==selectedHero;
+      if(changedHero){cancelTransition();selectedHero=hero;previewId=p.costumesEquipped[hero]||null;}
       const variants=variantsFor(hero),preview=currentPreview(),owned=!preview.id||p.costumesOwned.includes(preview.id),equipped=(p.costumesEquipped[hero]||null)===preview.id;
       const src=preview.id?this.costumeArt(preview):this.art.urls.heroes[hero];
       requested={src,alt:HEROES[hero].name+' '+preview.name};
-      if(!image.hasAttribute('src')){image.src=src;image.alt=requested.alt;}else void reveal();
+      if(changedHero||!image.hasAttribute('src')){image.src=src;image.alt=requested.alt;}else void reveal();
       document.querySelector('.wardrobe-caption small').textContent=HEROES[hero].name;
       document.querySelector('.wardrobe-caption h3').textContent=preview.name;
       document.querySelector('.wardrobe-caption span').textContent=equipped?'현재 착용 중':owned?'보유한 의상':'아직 만나지 못한 의상';
