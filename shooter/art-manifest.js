@@ -23,6 +23,9 @@ export function createArtUrls(root = 'assets') {
   const shieldRelics = numbered(root, 'shield-relics', 11);
   const celestialRelics = numbered(root, 'celestial-relics', 4);
   const balanceRelics = numbered(root, 'balance-relics', 6);
+  const astralRelics = numbered(root, 'astral-relics', 6);
+  const holyFlameUrl = resolveAsset(`${root}/holy-flame/0.webp`);
+  const wardrobeFxUrl = resolveAsset(`${root}/wardrobe-veil/0.webp`);
   const shopItems = numbered(root, 'shop-items', 3);
   const costumes = numbered(root, 'costumes', 12);
   const costumeTickets = numbered(root, 'costume-tickets', 4);
@@ -40,7 +43,7 @@ export function createArtUrls(root = 'assets') {
   const renderedHeroes = [...heroes, companions[0], companions[1], companions[2], secrets[0], secrets[1]];
   const renderedRelics = [...relics, ...tideRelics];
   for (let index = 0; index < shieldRelics.length; index++) renderedRelics[index === 10 ? 15 : 22 + index] = shieldRelics[index];
-  renderedRelics.push(...celestialRelics, ...balanceRelics);
+  renderedRelics.push(...celestialRelics, ...balanceRelics, ...astralRelics);
 
   return {
     heroes: renderedHeroes,
@@ -61,6 +64,8 @@ export function createArtUrls(root = 'assets') {
     dark: secrets[2],
     sigil: secrets[3],
     darkFairy: darkFairyUrl,
+    holyFlame: holyFlameUrl,
+    wardrobeFx: wardrobeFxUrl,
     urls: {
       heroes: renderedHeroes,
       bosses: renderedBosses,
@@ -69,6 +74,7 @@ export function createArtUrls(root = 'assets') {
       shopItems,
       costumes,
       costumeTickets,
+      wardrobeFx: wardrobeFxUrl,
       dark: secrets[2],
       sigil: secrets[3]
     }

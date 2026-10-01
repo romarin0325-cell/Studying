@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sourceHash": "c6647dc8e29ee697243894469729150d9de22ee6c9e65aa72406e5b87021624a",
-  "processorHash": "1d9609b0bff82c42214e8677c8579a35217d7205800f1579a033d2b2bbc78f9f",
+  "sourceHash": "d31533c940b745ce9471ec5cd32bc51c237bc8edfd1d59d3ec8572cb8e77227b",
+  "processorHash": "3655ef36c282ae3da3a946065e43de9c50e63ae8dcd88d38a65f2ecfee373f63",
   "report": {
     "source": {
-      "fileCount": 42,
-      "bytes": 72344275,
+      "fileCount": 45,
+      "bytes": 79329241,
       "files": [
         {
           "file": "heroes.png",
@@ -91,6 +91,21 @@
           "file": "balance-relics.png",
           "bytes": 2436055,
           "sha256": "978fdf832fbfd082ecae0550086745262d51d6a3d7786f82f76384fbff70ab31"
+        },
+        {
+          "file": "astral-relics.png",
+          "bytes": 2576329,
+          "sha256": "3f2adc102aa36d79965c76e03a0e04c4dbbf864df45a6bed59044e401364aa21"
+        },
+        {
+          "file": "holy-flame.png",
+          "bytes": 2220453,
+          "sha256": "b3a774ec4641a61f2dc5e32225e1a6441c4e1a19e5bfb36a57ba81c0612eb641"
+        },
+        {
+          "file": "wardrobe-veil.png",
+          "bytes": 2188184,
+          "sha256": "ecb457903b967c8c11b80b3bf202ec0df296d371d6643a0454dd5878a46128b6"
         },
         {
           "file": "shop-items.png",
@@ -220,8 +235,8 @@
       ]
     },
     "output": {
-      "fileCount": 113,
-      "bytes": 6132594,
+      "fileCount": 121,
+      "bytes": 6503048,
       "format": "webp",
       "files": [
         {
@@ -1157,10 +1172,10 @@
         },
         {
           "file": "celestial-relics/1.webp",
-          "bytes": 8832,
+          "bytes": 8776,
           "width": 192,
           "height": 192,
-          "sha256": "cc23132a4df8166f96b7065ed25caf44284db58a10499e3c81ca634d35c72cf3"
+          "sha256": "21a4120edcedff13357ac94c40ba5db1cb57da731d072ebcdfe823ceeda71b60"
         },
         {
           "file": "celestial-relics/2.webp",
@@ -1266,12 +1281,68 @@
           "width": 192,
           "height": 192,
           "sha256": "02f42b9613058e04cd7767106a66268223e663f01b06203693fcaad41edd692d"
+        },
+        {
+          "file": "astral-relics/0.webp",
+          "bytes": 15376,
+          "width": 192,
+          "height": 192,
+          "sha256": "ac37926539da5930097b79534d70ca9a6fd37b63e6c7e350287e952899743612"
+        },
+        {
+          "file": "astral-relics/1.webp",
+          "bytes": 20710,
+          "width": 192,
+          "height": 192,
+          "sha256": "2e6b582176e6b94a9aba959bdb48f26d4b3d77d7f466d96fae15f3d6bc3bf043"
+        },
+        {
+          "file": "astral-relics/2.webp",
+          "bytes": 17732,
+          "width": 192,
+          "height": 192,
+          "sha256": "feca3931e082d8dd0fbfdc194a761f4f1f570d75f0fad22b87b7cc9bde11152e"
+        },
+        {
+          "file": "astral-relics/3.webp",
+          "bytes": 27082,
+          "width": 192,
+          "height": 192,
+          "sha256": "e201206a7e064bdf3c5361a06715b5b6b2222f3d99c107627454af69de47d2cb"
+        },
+        {
+          "file": "astral-relics/4.webp",
+          "bytes": 10718,
+          "width": 192,
+          "height": 192,
+          "sha256": "3b191d9f93e1aa226d3810d4b26c00d665227f7a7804bd7a204830674729df02"
+        },
+        {
+          "file": "astral-relics/5.webp",
+          "bytes": 16032,
+          "width": 192,
+          "height": 192,
+          "sha256": "be2ed10dc2c6544af0cc5cd482f8aefc7ad45510591a131924c6e5e50c5fd55b"
+        },
+        {
+          "file": "holy-flame/0.webp",
+          "bytes": 134934,
+          "width": 512,
+          "height": 512,
+          "sha256": "27c0cccbb7d81112ee684b870eaf763997aad6ebd5f0ed66770fcaa88a0b5d7c"
+        },
+        {
+          "file": "wardrobe-veil/0.webp",
+          "bytes": 127926,
+          "width": 512,
+          "height": 512,
+          "sha256": "f5871afe9a06c746d13d5c9010b9c6f026b20c37979a8a0d06103193d649910a"
         }
       ]
     },
     "reduction": {
-      "bytes": 66211681,
-      "percent": 91.52
+      "bytes": 72826193,
+      "percent": 91.8
     },
     "qualityProbes": [
       {

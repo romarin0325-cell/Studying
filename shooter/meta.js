@@ -41,8 +41,18 @@ export const ARTIFACTS = [
   { id: 'burningcore', name: '버닝코어', rarity: 'rare', text: '일반 공격력 30% 증가 · 피격 시 파워 초기화', normalAttack: .30 },
   { id: 'rainbowring', name: '레인보우링', rarity: 'rare', text: '일반 공격력 20% 증가 · 최대 봄 3 감소', normalAttack: .20, bombCapacity: -3 },
   { id: 'starpowder', name: '스타파우더', rarity: 'normal', text: '보호막이 있을 때 공격력 20% 증가' },
-  { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 }
+  { id: 'chaoscarnival', name: '카오스카니발', rarity: 'rare', text: '아이템 흡인 범위 300 감소 · 소지 봄과 최대 봄 2 증가', attraction: -300, bombs: 2 },
+  { id: 'goldcoin', name: '황금동전', rarity: 'normal', text: '점수 아이템 획득 점수 100% 증가' },
+  { id: 'forgetmenot', name: '물망초', rarity: 'normal', text: '페어리와 다크페어리 공격력 100% 증가' },
+  { id: 'phoenixfeather', name: '불사조의깃털', rarity: 'rare', text: '공격력 20% 감소 · 부활 기회 1회 증가', attack: -.20, revives: 1 },
+  { id: 'supernova', name: '초신성', rarity: 'rare', text: '봄 공격력 60% 증가 · 피격 시 봄 1 추가 소모', bomb: .60 },
+  { id: 'holysword', name: '성검', rarity: 'epic', text: '적과 가까울수록 공격력 증가 · 최대 50%' },
+  { id: 'holyflame', name: '홀리플레임', rarity: 'epic', text: '필살기를 피해 5500의 홀리플레임으로 교체 · 무적 2초 · 남은 봄과 파워 전부 소모' },
+  { id: 'divineiris', name: '신기 아이리스', appearance: '무지갯빛 왕관', rarity: 'legendary', hidden: true, text: '소지 봄과 최대 봄 3 증가', bombs: 3 },
+  { id: 'demonicbelzebuth', name: '마신기 벨제뷔트', appearance: '어둠의 단검', rarity: 'legendary', hidden: true, text: '공격력 50% 증가 · 최대 생명 2 감소', attack: .50, life: -2 }
 ];
+// Legendary placeholders are reserved data; every acquisition/display path uses this pool.
+export const COLLECTIBLE_ARTIFACTS = ARTIFACTS.filter(artifact => !artifact.hidden);
 export function artifactText(artifact, challenge = false) {
   return challenge ? ({resurgence:'생명 전부 회복 · 파워 최대',miracle:'봄 5 획득 · 파워 최대',clover:'피격 1회를 막는 보호막 생성 · 중첩 불가',origin:'파워 1 증가'}[artifact.id] || artifact.text) : artifact.text;
 }
@@ -101,7 +111,7 @@ export function weeklyEvent(date = new Date()) {
 export function dailyHeroes(date = new Date()) { const day = date.getDay(); return day === 0 ? [0,1,2,3,4,6] : day <= 2 ? [0,1] : day <= 4 ? [2,3] : [4,6]; }
 export function createProfile(raw = {}) {
   if(!raw || typeof raw !== 'object')raw={};
-  const valid = id => ARTIFACTS.some(a => a.id === id);
+  const valid = id => COLLECTIBLE_ARTIFACTS.some(a => a.id === id);
   // Preserve old Chaos ownership when it moves from index 3 to index 5.
   const migrate = !Number.isFinite(Number(raw.version)) || Number(raw.version) < 3;
   const claims = Object.fromEntries(Object.entries(raw.claims && typeof raw.claims === 'object' ? raw.claims : {}).map(([key,value])=>[migrate ? key.replace(/:3$/,':5') : key,value]));
@@ -221,7 +231,7 @@ export function drawArtifact(profile, random = Math.random, quizCorrect = false)
   const ticket = profile.tickets.shift(); if (!ticket) return null;
   const chance = quizCorrect ? .30 : .15;
   const roll = random(), epic = quizCorrect ? .02 : .01;
-  const rarity = roll < chance ? 'rare' : roll < chance + epic ? 'epic' : 'normal', pool = ARTIFACTS.filter(a => a.rarity === rarity);
+  const rarity = roll < chance ? 'rare' : roll < chance + epic ? 'epic' : 'normal', pool = COLLECTIBLE_ARTIFACTS.filter(a => a.rarity === rarity);
   const artifact = pool[Math.min(pool.length-1, Math.floor(Math.max(0, random()) * pool.length))];
   const duplicate = profile.owned.includes(artifact.id);
   let shardsAwarded = 0;
@@ -256,9 +266,9 @@ export function useRandomResetTicket(profile, date = new Date()) {
   return { ok: true, remaining: RANDOM_DAILY_LIMIT, randomResetTickets: profile.randomResetTickets };
 }
 export function loadoutStats(ids = [], difficulty = 'normal', slots = 3) {
-  const equipment = [...new Set(ids)].map(id => ARTIFACTS.find(a => a.id === id)).filter(Boolean).slice(0,slots);
+  const equipment = [...new Set(ids)].map(id => COLLECTIBLE_ARTIFACTS.find(a => a.id === id)).filter(Boolean).slice(0,slots);
   const sum = field => equipment.reduce((n,a) => n+(a[field] || 0), 0);
   const mode=DIFFICULTIES.find(d=>d.id===difficulty) || DIFFICULTIES[1];
   return { ids: equipment.map(a=>a.id), maxLife: Math.max(1, mode.maxLife + sum('life')), lives:Math.max(1,mode.lives+sum('life')),
-    radius: sum('radius'), speed: sum('speed'), attraction: sum('attraction'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: Math.max(0,5+sum('bombs')+sum('bombCapacity')) };
+    radius: sum('radius'), speed: sum('speed'), attraction: sum('attraction'), attack: 1+sum('attack'), normalAttack: sum('normalAttack'), bomb: 1+sum('bomb'), bombs: 3+sum('bombs'), maxBombs: Math.max(0,5+sum('bombs')+sum('bombCapacity')), revives: 1+sum('revives') };
 }

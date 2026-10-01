@@ -248,13 +248,14 @@ function planCard(plan, files) {
   }
 }
 
-function planShooter(plan, files) {
+function planShooter(plan, files, currentFiles) {
+  const current = new Set(currentFiles);
   const shooterFiles = files.filter(file => file.startsWith('shooter/'));
   const productFiles = shooterFiles.filter(file => !isDocumentation(file));
-  const directUnitTests = productFiles.filter(file => /^shooter\/tests\/.+\.test\.mjs$/.test(file));
+  const directUnitTests = productFiles.filter(file => current.has(file) && /^shooter\/tests\/.+\.test\.mjs$/.test(file));
   const selectedUnitTests = new Set(directUnitTests);
   const directFlowTests = productFiles.filter(file => (
-    /^shooter\/tests\/.+\.mjs$/.test(file) && !file.endsWith('.test.mjs')
+    current.has(file) && /^shooter\/tests\/.+\.mjs$/.test(file) && !file.endsWith('.test.mjs')
   ));
 
   for (const testFile of directFlowTests) {
@@ -272,7 +273,7 @@ function planShooter(plan, files) {
     && !file.startsWith('shooter/dist/')
     && !file.startsWith('shooter/artifacts/')
   ));
-  for (const file of sourceFiles.filter(file => /\.(?:js|mjs|cjs)$/.test(file))) {
+  for (const file of sourceFiles.filter(file => current.has(file) && /\.(?:js|mjs|cjs)$/.test(file))) {
     addNodeCheck(plan, 'shooter', file);
   }
 
@@ -540,7 +541,7 @@ function createPlan(changes, options = {}) {
 
   const shouldPlan = game => !onlyGame ? ACTIVE_ROOT_GAMES.includes(game) : onlyGame === game;
   if (shouldPlan('card')) planCard(plan, files);
-  if (shouldPlan('shooter')) planShooter(plan, files);
+  if (shouldPlan('shooter')) planShooter(plan, files, currentFiles);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
   if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
 
