@@ -3,7 +3,7 @@
   "requiredVerification": {
     "command": "PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npm run verify",
     "result": "PASS",
-    "seconds": 61.08,
+    "seconds": 56.9,
     "survivorTests": 44,
     "selectorTests": 25,
     "chromiumViewports": [
@@ -120,7 +120,7 @@
   ],
   "crowdedSynchronousWork": {
     "frames": 90,
-    "meanWorkMs": 10.52,
+    "meanWorkMs": 10.42,
     "enemies": 260,
     "shots": 15,
     "fields": 0,
@@ -176,8 +176,14 @@
   "measurementScope": "Headless cloud browser CPU work/cadence; RGBA dimensions only. No physical phone FPS, thermal stability, touch latency or total browser memory claim.",
   "artifact": {
     "path": "survivor/dist/AstraNocturne.html",
-    "bytes": 7609791,
-    "sha256": "1c66bc32d2292e99b9a20d22baedfa77b0349b66c8af577875c3d32d6915e582",
+    "bytes": 7610012,
+    "sha256": "2ed67aac27a8141e3dfb78a924b719f79c8414ac3d275b62cb9539b08bd09a85",
     "embeddedTextures": 33
-  }
+  },
+  "followupRegressions": [
+    "Actual WebKit keyboard displacement after mandatory early growth choices",
+    "Legacy run remains resumable after 19 seconds and its first scheduled event",
+    "Legacy damage before migration is excluded from the first new ten-second window"
+  ],
+  "rafPerformanceSourceCommit": "c33226e115051c9a8c1702f2e04f225fcfb18348"
 }

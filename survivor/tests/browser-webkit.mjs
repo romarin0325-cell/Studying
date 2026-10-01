@@ -36,10 +36,19 @@ try{
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
     await page.locator('[data-action="start"]').tap();await page.locator('#battle-canvas').waitFor();
     const initial=await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.nocturne.run.v1')).player.x);
-    await page.keyboard.down('d');await page.waitForTimeout(350);await page.keyboard.up('d');
-    await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.locator('[data-action="unpause"]').waitFor();
-    const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.nocturne.run.v1')));
-    assert.ok(saved.player.x>initial+15,'WebKit keyboard movement');assert.equal(saved.mode,'paused');
+    let saved;
+    // A randomly selected night and the first flower chain can open a level-up
+    // before keydown or while it is held. Resume through the actual reward UI,
+    // then prove displacement; elapsed wall time alone is not a movement proof.
+    for(let attempt=0;attempt<10;attempt++){
+      for(let rewards=0;rewards<8&&await page.locator('[data-action="choice"]').count();rewards++)await page.locator('[data-action="choice"]').first().tap();
+      if(await page.locator('[data-action="unpause"]').count())await page.locator('[data-action="unpause"]').tap();
+      await page.keyboard.down('d');await page.waitForTimeout(120);await page.keyboard.up('d');
+      await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await pauseRun(page);
+      saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.nocturne.run.v1')));
+      if(saved.player.x>initial+15)break;
+    }
+    assert.ok(saved.player.x>initial+15,'WebKit keyboard movement after any mandatory growth choice');assert.equal(saved.mode,'paused');
     await page.waitForTimeout(120);assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.nocturne.run.v1')).time),saved.time);
     await page.locator('[data-action="leave"]').tap();await context.setOffline(false);await page.reload();await context.setOffline(true);await page.locator('[data-action="resume"]').waitFor();await page.locator('[data-action="resume"]').tap();await pauseRun(page);
     const resumed=await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.nocturne.run.v1')));assert.ok(Math.abs(resumed.player.x-saved.player.x)<5);

@@ -26,7 +26,7 @@ export function afterCombat(g,dt){
   }
   g.encounters=g.encounters.filter(e=>e.life>0&&!e.used);
   if(g.time>=g.nextEncounter){
-    const kinds=['comet','chase','lantern','altar'],kind=kinds[(g.encounterIndex+OMENS.findIndex(o=>o.id===g.omen))%kinds.length];g.encounterIndex++;g.nextEncounter+=34;
+    const kinds=['comet','chase','lantern','altar'],omenIndex=Math.max(0,OMENS.findIndex(o=>o.id===g.omen)),kind=kinds[(g.encounterIndex+omenIndex)%kinds.length];g.encounterIndex++;g.nextEncounter+=34;
     const x=clamp(p.x+(g.roll()>.5?95:-95),90,WORLD-90),y=clamp(p.y-65,90,WORLD-90);
     if(kind==='comet'){
       for(let i=0;i<14;i++){const a=g.roll()*Math.PI*2,r=35+g.roll()*140;g.spawnDrop('xp',clamp(p.x+Math.cos(a)*r,45,WORLD-45),clamp(p.y+Math.sin(a)*r,65,WORLD-40),5);}
@@ -77,7 +77,7 @@ export function afterDash(g,origin){
 }
 
 export function validateRunState(data,numeric){
-  if(data.reverieVersion===undefined){if(['runMode','omen','secrets','encounters','echoes','portal','growthHistory'].some(key=>Object.hasOwn(data,key))||data.mode==='anomaly')throw new Error('Missing night version');return;}
+  if(data.reverieVersion===undefined){if(['runMode','omen','limitBreak','secrets','encounters','encounterOffers','encounterIndex','nextEncounter','conditionFlags','stillness','echoes','portal','timeStop','lifePrice','eclipseAt','growthHistory','growthAt','growthDamage','cycle','fieldGiftAt'].some(key=>Object.hasOwn(data,key))||data.mode==='anomaly')throw new Error('Missing night version');return;}
   if(![0,1].includes(data.reverieVersion)||!['expedition','endless'].includes(data.runMode)||!['legacy',...OMENS.map(o=>o.id)].includes(data.omen))throw new Error('Invalid night rules');
   for(const key of ['secrets','conditionFlags'])if(!Array.isArray(data[key])||data[key].length>4||new Set(data[key]).size!==data[key].length||data[key].some(id=>!SECRET[id]))throw new Error('Invalid hidden relics');
   numeric(data,['encounterIndex','nextEncounter','stillness','timeStop','lifePrice','eclipseAt','growthAt','growthDamage','cycle','fieldGiftAt']);
