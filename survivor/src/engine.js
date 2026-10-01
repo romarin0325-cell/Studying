@@ -117,20 +117,20 @@ export class Game {
     }
   }
   bossAttack(e){
-    const angle=Math.atan2(this.player.y-e.y,this.player.x-e.x),phase=e.hp/e.maxHp<.5?2:1;
+    const origin=targetPoint(e),angle=Math.atan2(this.player.y-30-origin.y,this.player.x-origin.x),phase=e.hp/e.maxHp<.5?2:1;
     this.emit('bossTell',{x:e.x,y:e.y});
     this.hazards.push({id:this.uid++,kind:'ring',x:e.x,y:e.y,r:115+e.phase*18,wait:1.35,life:1.6,damage:e.damage*1.25,hit:false});
     const p=this.player,blast=(x,y,r,wait)=>this.hazards.push({id:this.uid++,kind:'blast',x:clamp(x,45,WORLD-45),y:clamp(y,45,WORLD-45),r,wait,life:wait+.35,damage:e.damage,hit:false});
     if(this.stage==='cathedral'){
       // Four seals leave diagonal escape routes, then a rotating cross of shots.
-      for(let i=0;i<4;i++){const a=i*Math.PI/2;blast(p.x+Math.cos(a)*105,p.y+Math.sin(a)*105,48,1.5);this.hazardShot(e.x,targetPoint(e).y,angle+i*Math.PI/2+this.time*.015,90+phase*10,e.damage*.7,1);}
+      for(let i=0;i<4;i++){const a=i*Math.PI/2;blast(p.x+Math.cos(a)*105,p.y+Math.sin(a)*105,48,1.5);this.hazardShot(origin.x,origin.y,angle+i*Math.PI/2+this.time*.015,90+phase*10,e.damage*.7,1);}
     }else if(this.stage==='rift'){
       // Successive meteors follow the last movement line, with a wider fan.
       for(let i=0;i<phase+2;i++)blast(p.x+p.dx*(i-1)*75,p.y+p.dy*(i-1)*75,48,1.2+i*.25);
-      for(let i=-3;i<=3;i++)this.hazardShot(e.x,targetPoint(e).y,angle+i*.28,90+phase*15,e.damage*.7,.9);
+      for(let i=-3;i<=3;i++)this.hazardShot(origin.x,origin.y,angle+i*.28,90+phase*15,e.damage*.7,.9);
     }else{
       for(let i=0;i<phase+1;i++)blast(p.x+(i-1)*100,p.y+(i%2)*50,52,1.45+i*.15);
-      for(let i=-2;i<=2;i++)this.hazardShot(e.x,targetPoint(e).y,angle+i*.25,85+phase*15,e.damage*.7,.8);
+      for(let i=-2;i<=2;i++)this.hazardShot(origin.x,origin.y,angle+i*.25,85+phase*15,e.damage*.7,.8);
     }
     if(this.hazards.length>LIMITS.hazards)this.hazards.splice(0,this.hazards.length-LIMITS.hazards);
   }

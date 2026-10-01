@@ -32,6 +32,21 @@ test('moving fast projectiles use their whole segment; spatial queries match bru
   hash.rebuild([{id:1,x:100,y:100,radius:45,hp:1}]);assert.equal(hash.near(95,95,1).length,1,'an overlapping boss across a hash-cell boundary is still hittable');
 });
 
+test('boss center shots hit the player body in every chapter and phase, but remain dodgeable',()=>{
+  for(const stage of ['garden','cathedral','rift'])for(const lowHealth of [false,true])for(const [dx,dy] of [[200,0],[-200,0],[160,120]])for(const dodge of [false,true]){
+    const g=new Game({stage});g.player.invulnerable=0;
+    const boss=g.spawnEnemy('boss',{x:g.player.x-dx,y:g.player.y-dy,maxHp:1000,hp:lowHealth?400:1000,phase:2});
+    g.bossAttack(boss);
+    const shots=g.hazards.filter(h=>h.kind==='shot'),center=shots[stage==='cathedral'?0:Math.floor(shots.length/2)];
+    assert.ok(center);assert.deepEqual({x:center.x,y:center.y},targetPoint(boss));
+    // Isolate the aimed projectile so rings, blasts and neighboring fan shots cannot hide a miss.
+    g.hazards=[center];const hp=g.player.hp;
+    if(dodge){g.player.x-=dy/Math.hypot(dx,dy)*100;g.player.y+=dx/Math.hypot(dx,dy)*100;}
+    for(let i=0;i<360;i++)g.updateHazards(1/60);
+    assert.equal(g.player.hp,dodge?hp:hp-center.damage,`${stage}, lowHealth=${lowHealth}, offset=${dx},${dy}, dodge=${dodge}`);
+  }
+});
+
 test('evolution requires the actual recipe, and rabbit synergy changes firing speed',()=>{
   const g=new Game({hero:'snow_rabbit'});g.weapons[0].level=6;assert.equal(g.candidates().some(o=>o.type==='evolution'),false);
   g.relics=[{id:WEAPON.frost.relic,level:2}];assert.ok(g.candidates().some(o=>o.id==='frost'&&o.type==='evolution'));g.applyOption({type:'evolution',id:'frost'});assert.equal(g.weapons[0].evolved,true);assert.equal(g.evolutions,1);
