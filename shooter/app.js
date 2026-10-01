@@ -333,7 +333,7 @@ Object.defineProperty(globalThis, 'astralDiagnostics', { get() { return {
   quality: renderer?.quality, stats: game ? { ...game.stats } : null, storageAvailable, audioState: audio.context?.state || 'idle'
 }; } });
 async function boot() { try {
-  art = await loadArt(); renderer = new Renderer(world, art);menus=new CampaignUI({profile,save,setModal,closeModal,toast,art}); $('loading').hidden = true; showSortie();
+  art = await loadArt(); renderer = new Renderer(world, art);menus=new CampaignUI({profile,save,setModal,closeModal,toast,art,onLibraryClose:()=>{closeModal();showSortie();}}); $('loading').hidden = true; showSortie();
 } catch (error) {
   $('loading').innerHTML = `<div class="loading-sigil">✧</div><h1>별빛을 불러오지 못했어요</h1><p>파일을 다시 열어주세요.</p><span id="load-error"></span>`;
   $('load-error').textContent = error.message;

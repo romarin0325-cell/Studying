@@ -69,7 +69,9 @@ const modules = [
   ['content.js', ['HEROES', 'STAGES', 'DUNGEONS', 'EVENT_DUNGEONS', 'LIMITS', 'clamp']],
   ['meta.js', ['ARTIFACTS','COLLECTIBLE_ARTIFACTS','artifactText','DIFFICULTIES','BASE_HEROES','COSTUMES','COSTUME_TIERS','ACHIEVEMENTS','normalizeDifficulty','RANDOM_DAILY_LIMIT','randomHero','consumeRandom','randomRemaining','dayKey','weekKey','weeklyEvent','dailyHeroes','createProfile','recordDungeonClear','achievementProgress','costumeForHero','equipCostume','drawCostumeTicket','purchaseCostume','heroAvailable','unlockHero','claimDungeon','drawArtifact','purchaseShopItem','useRandomResetTicket','loadoutStats']],
   ['art-manifest.js', ['createArtUrls']],
-  ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer']],
+  ['learning/data.js',['LEARNING_DATA']], ['learning.js',['LIBRARY','makeQuestion','recordAnswer','reviewableMistakes','pickReviewMistake','claimReviewReward']],
+  ['tutoring.js',['TUTOR_MODELS','LumiTutorClient','offlineTutorLesson','tutorErrorMessage']],
+  ['tutoring-ui.js',['TutoringUI']],
   ['menus.js',['CampaignUI']],
   ['engine.js', ['Game']], ['render.js', ['Renderer', 'loadArt', 'BOSS_PRESENTATION']],
   ['audio.js', ['AudioDirector']], ['app.js', []]
