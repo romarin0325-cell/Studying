@@ -2,8 +2,9 @@ import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, CHAPTERS, DEFAULT_DE
 
 export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
-export const BALANCE_REVISION = 2;
+export const BALANCE_REVISION = 3;
 export const BOSS_HEALTH_SCALE = .8;
+export const WAVE_BASE_HEALTH = 76;
 export const ATTACK_WINDUP = .13;
 export const BOARD = {x:135,y:212,cell:90};
 export const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
@@ -25,7 +26,11 @@ export function validDeck(deck){return Array.isArray(deck)&&deck.length===6&&new
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
 export function has(s,id){return s.artifacts.includes(id);}
 export function summonCost(s){return s.freeSummons>0?0:Math.max(8,10+s.paidSummons*2-(has(s,'feather')?4:0));}
-export const cinderellaRefund=(rank,level=0)=>(18+level*4)*rank;
+export const doomRefund=(rank,level=0)=>(18+level*4)*rank;
+export const waveIncome=wave=>24+Math.floor(wave/2);
+export const skillDuration=(s,seconds)=>seconds+(has(s,'broken_clock')?2:0);
+export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma':null;
+export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
 export const queenIncome=(rank,wave,level=0)=>3+rank*2+Math.floor((wave-1)/3)+level*3;
 export const harvestIncome=(rank,level=0)=>rank+2+level*2;
 export const executeThreshold=e=>e.boss ? .4 : .35;
@@ -35,7 +40,7 @@ export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x
 export function bestUnit(s,id){return s.board.filter(u=>u?.hero===id).sort((a,b)=>b.rank-a.rank)[0];}
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28)*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1);}
 export function trainingBonus(id,level){
-  const extra={cinderella:`1성 재료 환급 ${cinderellaRefund(1,level)}G`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,mushroom_king:`1성 · 전투 12초마다 ${harvestIncome(1,level)}G / 기`,siren:`인접 공속 +${22+level*3}%`,ancient_dragon:`인접 공격 +${25+level*3}%`,silver_rabbit:`명중 추가 별빛 ${(0.5+level*.1).toFixed(1)}`,great_detective:`일반 노출 +${18+level*2}% · 보스 +${30+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`};
+  const extra={doom:`1성 재료 환급 ${doomRefund(1,level)}G`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,mushroom_king:`1성 · 전투 12초마다 ${harvestIncome(1,level)}G / 기`,siren:`인접 공속 +${22+level*3}%`,ancient_dragon:`인접 공격 +${25+level*3}%`,silver_rabbit:`명중 추가 별빛 ${(0.5+level*.1).toFixed(1)}`,great_detective:`일반 노출 +${18+level*2}% · 보스 +${30+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`인접 공격 대기 −${(.6+level*.1).toFixed(1)}초`,time_magician:`인접 공격 대기 −${(.6+level*.1).toFixed(1)}초`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -43,7 +48,7 @@ export function trainingBonus(id,level){
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*.28)).toFixed(2));
 export function unitEconomy(s,u){
   const level=s.upgrades[u.hero]||0;
-  if(u.hero==='cinderella')return `재료로 소모 시 ${cinderellaRefund(u.rank,level)}G 즉시 환급 · 루미를 재료로 쓰면 환급 없음`;
+  if(u.hero==='doom')return `재료로 소모 시 ${doomRefund(u.rank,level)}G 즉시 환급 · 루미를 재료로 쓰면 환급 없음`;
   if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 45G`;
   if(u.hero==='mushroom_king')return `전투 12초마다 ${harvestIncome(u.rank,level)}G 수확 · 합성 시 수확 대기시간 초기화`;
   return HERO[u.hero].trait.text;
@@ -58,7 +63,7 @@ function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=
 export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]}={}){
   const chosen=validDeck(deck)?[...deck]:[...DEFAULT_DECK];
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],zones:[],events:[],gold:45,gauge:75,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:45,gauge:90,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),
     buffs:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   for(const slot of [6,8,12])place(s,drawHero(s),1,slot);
@@ -71,7 +76,10 @@ export function summon(s,preferred=-1){
   if(!['combat','intermission'].includes(s.phase))return {ok:false,reason:'전투 중에 소환할 수 있습니다.'};
   if(freeCell(s)<0)return {ok:false,reason:'전장이 가득 찼습니다. 합성하거나 영웅을 회수하세요.'};
   const cost=summonCost(s);if(s.gold<cost)return {ok:false,reason:`${cost-s.gold}골드가 더 필요합니다.`};
-  s.gold-=cost;if(s.freeSummons>0)s.freeSummons--;else s.paidSummons++;s.summons++;s.stats.summons++;const id=drawHero(s),index=place(s,id,1,preferred);s.tutorial=Math.max(s.tutorial,1);return {ok:true,index,hero:id};
+  const paid=s.freeSummons===0;
+  s.gold-=cost;if(!paid)s.freeSummons--;else s.paidSummons++;s.summons++;s.stats.summons++;
+  const rank=paid&&has(s,'gift_ribbon')&&s.paidSummons%4===0?2:1,id=drawHero(s),index=place(s,id,rank,preferred);
+  s.tutorial=Math.max(s.tutorial,1);return {ok:true,index,hero:id,rank};
 }
 export function canMerge(a,b){return !!a&&!!b&&a.uid!==b.uid&&a.rank===b.rank&&a.rank<MAX_RANK&&(a.hero===b.hero||a.hero==='rumi'||b.hero==='rumi');}
 export function move(s,from,to){
@@ -81,7 +89,7 @@ export function move(s,from,to){
     const id=b.hero==='rumi'?a.hero:b.hero,rank=b.rank+1;
     let consumed=a;if(a.hero==='rumi'&&b.hero!=='rumi')consumed=a;
     else if(b.hero==='rumi'&&a.hero!=='rumi')consumed=b;
-    const refund=HERO[consumed.hero].trait.type==='sacrifice'?cinderellaRefund(consumed.rank,s.upgrades[consumed.hero]):0;
+    const refund=HERO[consumed.hero].trait.type==='sacrifice'?doomRefund(consumed.rank,s.upgrades[consumed.hero]):0;
     if(refund)giveGold(s,refund,'합성 환급');
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,rank*2,8);
     const unit=makeUnit(s,id,rank);unit.priority=b.priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;
@@ -107,17 +115,17 @@ export function cycleTarget(s,index){const u=s.board[index];if(!u)return;const v
 const enemyWeight={grunt:1,armor:2.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
 export function wavePlan(wave,chapter=0){
-  const base=88*Math.pow(1.34,wave-1)*CHAPTERS[chapter].hp,oldCount=12+wave*2;
+  const base=WAVE_BASE_HEALTH*Math.pow(1.34,wave-1)*CHAPTERS[chapter].hp,oldCount=12+wave*2;
   const budget=Array.from({length:oldCount},(_,i)=>Math.round(base*enemyWeight[enemyKind(i,wave)])).reduce((a,b)=>a+b,0);
   const count=Math.round(oldCount*Math.min(.9,.64+(wave-1)*.025));
   const kinds=Array.from({length:count},(_,i)=>enemyKind(i,wave)),weight=kinds.reduce((sum,k)=>sum+enemyWeight[k],0);let assigned=0;
   const sequence=kinds.map((kind,i)=>{const hp=i===count-1?budget-assigned:Math.round(budget*enemyWeight[kind]/weight);assigned+=hp;return {kind,hp};});
   const bossHp=Math.round(Math.round(base*32)*BOSS_HEALTH_SCALE);
   if(wave%4===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:bossHp});
-  return {sequence,interval:Math.max(.48,1.4-(wave-1)*.083),healthBudget:budget+(wave%4===0?bossHp:0)};
+  return {sequence,interval:Math.max(.46,1.05-(wave-1)*.06),healthBudget:budget+(wave%4===0?bossHp:0)};
 }
 function beginWave(s,wave){
-  s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?1.5:.8;s.settlement=null;s.telegraph=null;s.zones=[];
+  s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
   s.queue=wavePlan(wave,s.chapter).sequence;s.waveTotal=s.queue.length;
   if(wave%4===0)event(s,'bossApproach',{wave});event(s,'wave',{wave});
 }
@@ -125,8 +133,8 @@ function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
   const isBoss=kind==='boss',bossId=isBoss?chapter.bosses[Math.min(2,Math.floor((wave-1)/4))]:null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
-    slow:0,slowTime:0,stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0};
-  s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});
+    slow:0,slowTime:0,stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,rage:0,shield:0};
+  e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
 }
 export function attackGeometry(hero,from,to){return {kind:hero.shape,from,to,range:hero.range,radius:hero.radius,angle:Math.atan2(to.y-from.y,to.x-from.x)};}
 export function geometryContains(g,p){
@@ -148,8 +156,11 @@ function chooseTarget(s,u){
 function damage(s,e,value,hero,{dot=false,pure=false}={}){
   if(!e||e.hp<=0)return;
   let amount=value*(1+e.exposed)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
+  if(has(s,'royal_seal')&&highestMaxHp(s)?.uid===e.uid)amount*=1.25;
   if(e.kind==='armor'&&!pure)amount*=.72;
-  const actual=Math.min(e.hp,amount);e.hp-=amount;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
+  if(e.rage>0&&!pure)amount*=.75;
+  const absorbed=Math.min(e.shield||0,amount);e.shield=Math.max(0,(e.shield||0)-absorbed);
+  const actual=Math.min(e.hp,amount-absorbed)+absorbed;e.hp-=amount-absorbed;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
   if(!dot)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){s.stats.kills++;giveGold(s,e.boss?20:e.kind==='armor'?3:2,'격파');addGauge(s,e.boss?15:1.3);event(s,'kill',{...pathPoint(e.progress),kind:e.kind,boss:e.boss,color:HERO[hero]?.color});}
 }
@@ -169,8 +180,24 @@ function applyHit(s,shot){
   const e=s.enemies.find(x=>x.uid===shot.target&&x.hp>0);if(!e)return;
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage;
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
-  for(const target of area){let factor=1;if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;if(type==='shatter'&&target.slowTime>0)factor*=1.75;if(type==='splash'&&target.burnTime>0)factor*=1.4;damage(s,target,amount*factor,hero.id);}
-  event(s,'impact',{...point,hero:hero.id,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
+  for(const target of area){
+    let factor=1;
+    if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;
+    if(type==='shatter'&&target.slowTime>0)factor*=1.75;
+    if(type==='splash'&&target.burnTime>0)factor*=1.4;
+    if(type==='miracle'&&shot.count%3===0)factor*=1.8;
+    if(type==='starfall'&&shot.count%5===0)factor*=2.2;
+    if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
+    if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
+    damage(s,target,amount*factor,hero.id,{pure:shot.form==='trauma'||type==='miracle'&&shot.count%3===0});
+    if(type==='divine'&&target.hp>0){target.divine=Math.min(3,(target.divineTime>0?target.divine:0)+1);target.divineTime=6;}
+  }
+  event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
+  if(shot.proc!==false&&((type==='gift'&&shot.count%4===0)||(type==='accelerate'&&shot.count%3===0))){
+    const index=s.board.findIndex(u=>u?.uid===shot.source),recipients=[];
+    if(index>=0)for(const n of neighbors(index)){const ally=s.board[n];if(ally){ally.cooldown=Math.max(0,ally.cooldown-.6-(s.upgrades[hero.id]||0)*.1);recipients.push({...cellPoint(n),uid:ally.uid});}}
+    if(recipients.length)event(s,'supportPulse',{hero:hero.id,targets:recipients});
+  }
   if(['chain','bounce'].includes(hero.shape)||type==='gust'){
     const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0));
     let from=point;for(const target of others){damage(s,target,amount*.65,hero.id);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
@@ -199,10 +226,10 @@ function attack(s,u,index){
   u.attacks++;u.pose=.3;
   const value=combatStats(s,u,index).damage;
   const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
-  const shot={uid:s.nextId++,source:u.uid,target:e.uid,hero:u.hero,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel};
+  const shot={uid:s.nextId++,source:u.uid,target:e.uid,hero:u.hero,form:unitForm(s,u),proc:true,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel};
   s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,attackType:hero.attack});
-  if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,damage:value*.65,life:shot.life+.14,total:shot.life+.14});}
-  if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
+  if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.65,life:shot.life+.14,total:shot.life+.14});}
+  if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
 }
 // One source for outgoing attack power, cadence and the live inspection UI.
 // Enemy armor/exposure and conditional hit bonuses are applied at impact.
@@ -219,9 +246,13 @@ export function combatStats(s,u,index=s.board.indexOf(u)){
   if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('고독한 깃발',.4);
   if(has(s,'crown')&&u.rank>=3)damageBonus('왕관',.25);
   if(s.buffs.awaken>0)damageBonus('각성',.7);
+  if(s.buffs.radiance>0)damageBonus('여신강림',.35);
+  if(unitForm(s,u)){damageBonus('트라우마',1.1);speedBonus('트라우마',.35);}
   if(adjacent.some(a=>HERO[a.hero].trait.type==='hasteAura'))speedBonus('세이렌의 노래',.22+(s.upgrades.siren||0)*.03);
   if(s.buffs.haste>0)speedBonus('가속',.65);
   if(s.buffs.march>0)speedBonus('은빛 행진',.4);
+  if(s.buffs.festive>0)speedBonus('성야의 선물',.3);
+  if(has(s,'tempo_bell')&&s.waveTime<7)speedBonus('첫막의 종',.45);
   if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=2)speedBonus('합창',.15);
   if(u.hero.endsWith('_rabbit')){
     const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
@@ -239,10 +270,20 @@ export function cast(s,id){
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0);
   let visualTargets=targets;
   const strike=(factor,pure=false)=>targets.forEach(e=>damage(s,e,base*factor,id,{pure}));
-  if(type==='echo')s.buffs.echo=8;
-  else if(type==='haste')s.buffs.haste=8;
-  else if(type==='awaken')s.buffs.awaken=10;
-  else if(type==='march')s.buffs.march=6;
+  if(type==='echo')s.buffs.echo=skillDuration(s,8);
+  else if(type==='haste')s.buffs.haste=skillDuration(s,8);
+  else if(type==='awaken')s.buffs.awaken=skillDuration(s,10);
+  else if(type==='march')s.buffs.march=skillDuration(s,6);
+  else if(type==='glassfall')strike(8,true);
+  else if(type==='gift'){const hero=drawHero(s);if(place(s,hero,2)<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6);}
+  else if(type==='goddess'){strike(5);for(const e of targets){e.divine=3;e.divineTime=6;}s.buffs.radiance=skillDuration(s,8);}
+  else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10);}
+  else if(type==='royal'||type==='starfall'){
+    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='royal'?1.05:1.2;
+    visualTargets=[target];
+    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:32),rank:u.rank,life:total,total});
+    event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
+  }
   else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3;e.slow=.5;e.slowTime=6;}}
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);e.slow=.5;e.slowTime=4;}}
   else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
@@ -261,9 +302,9 @@ export function cast(s,id){
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,9);for(const e of visualTargets)damage(s,e,base*14,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2;}
   else if(type==='fortune'||type==='dividend'){strike(3);giveGold(s,type==='fortune'?25:30,'필살기');}
-  const support=['echo','haste','awaken','march'].includes(type);
-  const points=support?s.board.flatMap((ally,index)=>ally?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.slice(0,18).map(e=>({...pathPoint(e.progress),uid:e.uid}));
-  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,targets:points});return {ok:true};
+  const support=['echo','haste','awaken','march','gift','trauma'].includes(type);
+  const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.slice(0,18).map(e=>({...pathPoint(e.progress),uid:e.uid}));
+  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,locked:type==='royal'||type==='starfall',targets:points});return {ok:true};
 }
 
 function bossStep(s,e,dt){
@@ -271,7 +312,7 @@ function bossStep(s,e,dt){
   if(e.channel>0){
     e.channel-=dt;
     if(e.channel<=0){
-      const interrupted=e.channelHp-e.hp>=e.maxHp*.06;
+      const interrupted=e.channelHp-e.hp-(e.shield||0)>=e.maxHp*.06;
       if(boss.pattern==='heal'){
         if(interrupted){e.stun=2;event(s,'interrupt',{name:boss.name});}else{e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.14);event(s,'bossHeal',{uid:e.uid});}
       }else if(boss.pattern==='seal'){
@@ -279,20 +320,35 @@ function bossStep(s,e,dt){
         event(s,'seal',{cells:s.telegraph?.cells||[]});
       }else if(boss.pattern==='drain'){s.gauge=Math.max(0,s.gauge-25);event(s,'drain');}
       else if(boss.pattern==='rush'){for(const target of s.enemies)if(target.stun<=0&&target.slowTime<=0)target.progress+=130;event(s,'rush');}
+      else if(boss.pattern==='storm'){
+        const cells=s.telegraph?.cells||[];
+        for(const i of cells)if(s.board[i]){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}
+        event(s,'bossCast',{boss:e.boss,pattern:boss.pattern,cells,...pathPoint(e.progress)});
+      }else if(boss.pattern==='duel'||boss.pattern==='creation'){
+        if(interrupted){e.stun=2;event(s,'interrupt',{name:boss.name});}
+        else if(boss.pattern==='duel'){e.rage=5;event(s,'bossCast',{boss:e.boss,pattern:boss.pattern,...pathPoint(e.progress)});}
+        else{
+          e.shield=Math.max(e.shield||0,e.maxHp*.12);
+          for(let i=0;i<2&&s.enemies.length<50;i++){const wisp=spawnEnemy(s,{kind:'wisp',hp:Math.round(e.maxHp*.06)});wisp.progress=Math.max(0,e.progress-45-i*24);s.waveTotal++;}
+          event(s,'bossCast',{boss:e.boss,pattern:boss.pattern,...pathPoint(e.progress)});
+        }
+      }
       s.telegraph=null;e.skillIn=9;
     }
   }else{
     e.skillIn-=dt;
     if(e.skillIn<=0){
-      e.channel=2.6;e.channelHp=e.hp;
-      const row=Math.floor(random(s)*5),cells=Array.from({length:5},(_,i)=>row*5+i);
+      e.channel=2.6;e.channelHp=e.hp+(e.shield||0);
+      const row=Math.floor(random(s)*5);
+      let cells=Array.from({length:5},(_,i)=>row*5+i);
+      if(boss.pattern==='storm'){const occupied=s.board.flatMap((u,i)=>u?[i]:[]);cells=[...shuffle(s,occupied),...shuffle(s,Array.from({length:25},(_,i)=>i).filter(i=>!occupied.includes(i)))].slice(0,3);}
       s.telegraph={uid:e.uid,pattern:boss.pattern,text:boss.warning,cells,ends:s.time+2.6};event(s,'warning',{text:boss.warning,cells,pattern:boss.pattern});
     }
   }
 }
 function completeWave(s){
-  const payout={base:20+Math.floor(s.wave/2),dividend:dividend(s)};
-  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');s.settlement=payout;addGauge(s,8);s.shots=[];s.zones=[];s.telegraph=null;
+  const payout={base:waveIncome(s.wave),dividend:dividend(s)};
+  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
   event(s,'clear',{wave:s.wave,...payout});
   s.reward=shuffle(s,BLESSINGS.map(b=>b.id)).slice(0,3);s.phase='reward';
 }
@@ -305,7 +361,7 @@ export function chooseReward(s,id){
   if(id==='purse')giveGold(s,35,'축복');
   if(id==='mend'){s.health=Math.min(20,s.health+3);addGauge(s,20);}
   s.blessings.push(id);s.reward=null;event(s,'blessing',{id});
-  if(s.wave===12&&!s.endless){s.phase='victory';s.won=true;}else {s.phase='intermission';s.breakTime=2.5;}
+  if(s.wave===12&&!s.endless){s.phase='victory';s.won=true;}else {s.phase='intermission';s.breakTime=1.4;}
   return {ok:true};
 }
 export function continueEndless(s){if(s.phase!=='victory')return;s.endless=true;beginWave(s,s.wave+1);}
@@ -325,7 +381,9 @@ export function step(s,dt){
     if(e.hp<=0)continue;
     if(e.slowTime>0)e.slowTime-=dt;
     if(e.exposeTime>0)e.exposeTime-=dt;else e.exposed=0;
-    if(e.stun>0){e.stun-=dt;if(s.telegraph?.uid===e.uid)s.telegraph.ends+=dt;}else{e.progress+=e.speed*dt*(e.slowTime>0?1-e.slow:1);if(e.boss)bossStep(s,e,dt);}
+    if(e.divineTime>0)e.divineTime=Math.max(0,e.divineTime-dt);else e.divine=0;
+    if(e.rage>0)e.rage=Math.max(0,e.rage-dt);
+    if(e.stun>0){e.stun-=dt;if(s.telegraph?.uid===e.uid)s.telegraph.ends+=dt;}else{e.progress+=e.speed*dt*(e.slowTime>0?1-e.slow:1)*(e.rage>0?1.4:1);if(e.boss)bossStep(s,e,dt);}
     if(e.progress>=PATH_LENGTH&&e.hp>0){e.hp=0;if(has(s,'phoenix')&&!s.phoenixUsed){s.phoenixUsed=true;s.health=Math.min(20,s.health+3);event(s,'phoenix');}else{s.health-=e.boss?7:e.kind==='armor'?2:1;event(s,'leak',{boss:e.boss,health:s.health});}}
   }
   for(const z of s.zones){
@@ -346,6 +404,17 @@ export function step(s,dt){
     u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
   }
   for(const shot of s.shots){shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
+  for(const f of s.finishers){
+    f.life-=dt;const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);
+    if(!target){event(s,'finisherFizzle',{hero:f.hero,kind:f.kind,...f.to});f.life=0;continue;}
+    f.to=pathPoint(target.progress);
+    if(f.life<=0){
+      const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?1.4:1;
+      damage(s,target,f.damage*factor,f.hero,{pure:f.kind==='royal'});
+      event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank});
+    }
+  }
+  s.finishers=s.finishers.filter(f=>f.life>0);
   s.shots=s.shots.filter(shot=>shot.life>0);s.enemies=s.enemies.filter(e=>e.hp>0);
   if(s.telegraph&&!s.enemies.some(e=>e.uid===s.telegraph.uid))s.telegraph=null;
   if(s.health<=0){s.health=0;s.phase='defeat';event(s,'defeat');}
@@ -361,6 +430,10 @@ export function restore(raw){
     const record=o=>o&&typeof o==='object'&&!Array.isArray(o);
     const id=n=>Number.isSafeInteger(n)&&n>0;
     const kinds=['grunt','armor','runner','wisp','boss'];
+    // Additive migration: an old run keeps its wave, HP, wallet and target
+    // priorities. Only future waves use revision 3's pacing.
+    if(s.finishers===undefined)s.finishers=[];
+    for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
     if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>100||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
@@ -368,17 +441,20 @@ export function restore(raw){
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
     if(s.shots.some(e=>!id(e?.uid)||!id(e.target)||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
+    if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician')||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
+    if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])))return null;
+    if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
     if(!Array.isArray(s.zones)||s.zones.length>75||s.zones.some(z=>!id(z?.uid)||!id(z.source)||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||z.radius<=0||z.total<=0||typeof z.orbit!=='boolean'))return null;
-    const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.zones].map(o=>o.uid);
+    const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
     if(!validArtifacts(s.artifacts)||!Array.isArray(s.reserves)||s.reserves.length>1000||s.reserves.some(h=>!s.deck.includes(h))||!Array.isArray(s.blessings)||s.blessings.length>1000||s.blessings.some(b=>!BLESSING[b]))return null;
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;
     if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
-    if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
+    if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
     if(s.settlement&&!numeric(s.settlement,['base','dividend']))return null;
     if(s.phase==='reward'&&(!Array.isArray(s.reward)||s.reward.length!==3||new Set(s.reward).size!==3||s.reward.some(a=>!BLESSING[a])))return null;
-    if(s.balanceRevision!==undefined&&s.balanceRevision!==BALANCE_REVISION)return null;
+    if(s.balanceRevision!==undefined&&s.balanceRevision!==2&&s.balanceRevision!==BALANCE_REVISION)return null;
     if(s.balanceRevision===undefined){
       // Keep an in-progress v2 expedition and its boss HP ratio. Mark it so
       // repeated saves/resumes cannot apply the 20% reduction again.
@@ -387,8 +463,8 @@ export function restore(raw){
         e.maxHp=maxHp;e.hp*=ratio;e.channelHp*=ratio;
       }
       for(const e of s.queue)if(e.kind==='boss')e.hp=Math.max(1,Math.round(e.hp*BOSS_HEALTH_SCALE));
-      s.balanceRevision=BALANCE_REVISION;
     }
+    s.balanceRevision=BALANCE_REVISION;
     s.events=[];return s;
   }catch{return null;}
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-import {HEROES,ASSET_MANIFEST} from '../defense/merge/content.js';
+import {HEROES,ASSET_MANIFEST,TRANSFORM_ART} from '../defense/merge/content.js';
 import {anatomicalScale} from './pack_defense_directions.mjs';
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -12,16 +12,16 @@ export async function validateDirections(){
   const landmarks=JSON.parse(await readFile(new URL('../defense/docs/art/ANATOMICAL_LANDMARKS.json',import.meta.url),'utf8'));
   const profile=JSON.parse(await readFile(new URL('../defense/docs/art/HEAD_PROFILE.json',import.meta.url),'utf8'));
   assert.equal(manifest.version,2);
-  assert.equal(HEROES.length,21);assert.equal(manifest.frames.length,21);assert.equal(ASSET_MANIFEST.length,27);
-  assert.deepEqual(new Set(manifest.frames.map(f=>f.id)),new Set(HEROES.map(h=>h.id)));
+  assert.equal(HEROES.length,27);assert.equal(manifest.frames.length,28);assert.equal(ASSET_MANIFEST.length,39);
+  assert.deepEqual(new Set(manifest.frames.map(f=>f.id)),new Set([...HEROES.map(h=>h.id),'trauma']));
   let count=0;
-  for(const h of HEROES){
+  for(const h of [...HEROES,{id:'trauma',art:TRANSFORM_ART.trauma}]){
     const m=manifest.frames.find(f=>f.id===h.id),bytes=await readFile(new URL(m.file,root));
     assert.equal(hash(bytes),m.sha256,h.id+' output differs from recorded hash');
     const entry=landmarks.find(e=>e.id===h.id);
     assert.ok(entry?.anatomy,h.id+' missing anatomical reference');
     assert.equal(entry.sourceSha256,m.source.sha256,h.id+' anatomical data belongs to a different source');
-    assert.deepEqual(entry.anatomy,m.source.anatomy);
+    assert.deepEqual(entry.anatomy,m.source.anatomy);assert.equal(entry.alphaMode,m.source.alphaMode);
     assert.equal(m.source.alphaOpaqueThreshold,entry.alphaOpaqueThreshold,h.id+' import alpha policy');
     assert.equal(m.source.scale,anatomicalScale(entry.anatomy.skull,profile,h.id),h.id+' must be repacked after profile/landmark changes');
     assert.ok(m.anatomy.headWidth>0&&m.anatomy.headHeight>0&&m.anatomy.packedSkull.length===4);
@@ -43,5 +43,5 @@ export async function validateDirections(){
     }
     assert.equal(new Set(hashes).size,4,h.id+' needs four distinct authored images');
   }
-  return {heroes:21,directions:count,releaseAssets:ASSET_MANIFEST.length};
+  return {heroes:27,forms:28,directions:count,releaseAssets:ASSET_MANIFEST.length};
 }

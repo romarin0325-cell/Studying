@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sourceHash": "7f59af96c771dd7b682fa3cdd58a3e36571c3f747f1c44d4a8f7c1c9852eb6ad",
-  "processorHash": "12f47b2a99e492af9ed69a76f08ebb9b97f73799861f8b736a2ed3d6649a66fc",
-  "fileCount": 27,
+  "sourceHash": "d6bf3673eab869e60fdcaf3bf8693eae4b3a0b33a65809eb309ce2c284c66d74",
+  "processorHash": "b6ccfebab634454fcc1869bfe72ac2f91b4652205586f360810629088b01194f",
+  "fileCount": 39,
   "files": {
     "./assets/merge/blessings.webp": {
       "sourceHash": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
@@ -13,15 +13,48 @@
       "width": 1536,
       "height": 1024
     },
+    "./assets/merge/bosses-expansion.webp": {
+      "sourceHash": "562a35ce80ba7f59a55b0d7a312b74edeb035d17c09ca3ac76188bb221e3f3ae",
+      "bytes": 247948,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1536,
+      "height": 512
+    },
+    "./assets/merge/effects-expansion.webp": {
+      "sourceHash": "b752df529b96655a1bdb3df7c413394a5cf1a7f6359e17dd3d1a32bbe88f12b0",
+      "bytes": 138096,
+      "requiresAlpha": false
+    },
     "./assets/merge/effects.webp": {
       "sourceHash": "4153276d72d2ce2edf37bb7b913f7353a87f3c17e852f7bd4e839d13648a583b",
       "bytes": 217960,
+      "requiresAlpha": false
+    },
+    "./assets/merge/finishers.webp": {
+      "sourceHash": "9bacb4119fd38a8787e1bd088125ec655153bb8faea6617a92192d8c66a49d1b",
+      "bytes": 157612,
       "requiresAlpha": false
     },
     "./assets/merge/garden.webp": {
       "sourceHash": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
       "bytes": 266242,
       "requiresAlpha": false
+    },
+    "./assets/merge/realms-expansion.webp": {
+      "sourceHash": "5f7e4e9d4d7816f37e8ab62dd4f58f77d987c9ea7cbcb4b762f7e71e2a7bfd64",
+      "bytes": 226696,
+      "requiresAlpha": false
+    },
+    "./assets/merge/relics-expansion.webp": {
+      "sourceHash": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "bytes": 102910,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 512,
+      "height": 512
     },
     "./assets/merge/relics.webp": {
       "sourceHash": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
@@ -50,9 +83,27 @@
       "width": 1024,
       "height": 1024
     },
+    "./assets/merge/units/cherry_prince.webp": {
+      "sourceHash": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "bytes": 185572,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
     "./assets/merge/units/cinderella.webp": {
       "sourceHash": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
       "bytes": 291576,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/doom.webp": {
+      "sourceHash": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "bytes": 159392,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
@@ -89,6 +140,15 @@
     "./assets/merge/units/guardian.webp": {
       "sourceHash": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
       "bytes": 184556,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/jasmine.webp": {
+      "sourceHash": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "bytes": 280370,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
@@ -167,6 +227,15 @@
       "width": 1024,
       "height": 1024
     },
+    "./assets/merge/units/santa.webp": {
+      "sourceHash": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "bytes": 176876,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
     "./assets/merge/units/silver_rabbit.webp": {
       "sourceHash": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
       "bytes": 207210,
@@ -194,6 +263,15 @@
       "width": 1024,
       "height": 1024
     },
+    "./assets/merge/units/star_boy.webp": {
+      "sourceHash": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "bytes": 187298,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
     "./assets/merge/units/storm_sage.webp": {
       "sourceHash": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
       "bytes": 200144,
@@ -203,9 +281,27 @@
       "width": 1024,
       "height": 1024
     },
+    "./assets/merge/units/time_magician.webp": {
+      "sourceHash": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "bytes": 190902,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
     "./assets/merge/units/time_ruler.webp": {
       "sourceHash": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
       "bytes": 150752,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/trauma.webp": {
+      "sourceHash": "a342de6a9b249f3115995392d42c87a03e6b6ec8abcf6a9cf4132ca72a93e3eb",
+      "bytes": 280924,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,

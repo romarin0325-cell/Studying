@@ -1,0 +1,173 @@
+{
+  "offline": true,
+  "scenarios": [
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "cherry_prince",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "star_boy",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "time_magician",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "cherry_prince",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "star_boy",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "time_magician",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "cherry_prince",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "star_boy",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "time_magician",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "cherry_prince",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "star_boy",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "time_magician",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "base": "1c5e3c8c06304eddbfc634c9572575bc5bccde9d",
+  "preserved": [
+    {
+      "id": "zeke",
+      "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "matchesPrior": true
+    },
+    {
+      "id": "rumi",
+      "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "matchesPrior": true
+    },
+    {
+      "id": "luna",
+      "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "matchesPrior": true
+    },
+    {
+      "id": "cinderella",
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "matchesPrior": true
+    },
+    {
+      "id": "snow_rabbit",
+      "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "matchesPrior": true
+    },
+    {
+      "id": "avalanche_maid",
+      "sha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "matchesPrior": true
+    },
+    {
+      "id": "night_rabbit",
+      "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "matchesPrior": true
+    },
+    {
+      "id": "guardian",
+      "sha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "matchesPrior": true
+    },
+    {
+      "id": "storm_sage",
+      "sha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "matchesPrior": true
+    },
+    {
+      "id": "lightning_sage",
+      "sha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "matchesPrior": true
+    },
+    {
+      "id": "red_dragon",
+      "sha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "matchesPrior": true
+    },
+    {
+      "id": "flame_sage",
+      "sha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "matchesPrior": true
+    },
+    {
+      "id": "mushroom_king",
+      "sha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "matchesPrior": true
+    },
+    {
+      "id": "great_detective",
+      "sha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "matchesPrior": true
+    },
+    {
+      "id": "siren",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "matchesPrior": true
+    },
+    {
+      "id": "phantom",
+      "sha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "matchesPrior": true
+    },
+    {
+      "id": "queen",
+      "sha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "matchesPrior": true
+    },
+    {
+      "id": "galaxy_whale",
+      "sha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "matchesPrior": true
+    },
+    {
+      "id": "silver_rabbit",
+      "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "matchesPrior": true
+    },
+    {
+      "id": "ancient_dragon",
+      "sha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "matchesPrior": true
+    },
+    {
+      "id": "time_ruler",
+      "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "matchesPrior": true
+    }
+  ],
+  "originalEffectsUnchanged": true,
+  "sevenUnitSourceBytes": 9206086,
+  "sevenUnitWebpBytes": 1461334,
+  "unitReductionPercent": 84.1,
+  "bundleBytes": 12128825,
+  "bundleSha256": "a5ad3b84593ca82349b112984ed14143d84d1fb35d71f7bc45edd9ca8844faef"
+}
