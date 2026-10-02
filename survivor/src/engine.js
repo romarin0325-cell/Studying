@@ -1,4 +1,4 @@
-import { VERSION,WORLD,LIMITS,HERO,WEAPON,WEAPONS,RELIC,RELICS,STAGE,DIFFICULTY,EVOLUTION,BONDS,AWAKENINGS,clamp,length } from './content.js';
+import { VERSION,WORLD,LIMITS,HERO,WEAPON,WEAPONS,RELIC,RELICS,STAGE,DIFFICULTY,EVOLUTION,BONDS,AWAKENINGS,META,clamp,length } from './content.js';
 
 import {initializeRun,beforeCombat,afterCombat,nearestEncounter,openEncounter,chooseEncounter,afterDash,validateRunState} from './reverie.js';
 
@@ -18,6 +18,17 @@ export function sweptHit(ax,ay,bx,by,x,y,r) {
   const dx=bx-ax,dy=by-ay,t=clamp(((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy||1),0,1);
   return (ax+t*dx-x)**2+(ay+t*dy-y)**2<=r*r;
 }
+export function xpNeed(level) {
+  const base=8+level*3.5+level**1.13;
+  const t=Math.max(0,Math.min(1,(level-5)/35));
+  const smooth=t*t*(3-2*t);
+  let scale=1.05+0.75*smooth;
+  if(level>40)scale+=0.10*Math.log2(1+(level-40)/12);
+  return Math.floor(base*scale);
+}
+export function metaGain(level,base){return base*(1-Math.pow(0.9,level))/0.1;}
+export function enemyHpScale(time){const current=1+time/130,chase=1+Math.pow(time/180,3);return current*chase;}
+export function enemyDamageScale(time){return 1+0.4*Math.pow(time/180,2);}
 export class SpatialHash {
   constructor(size=96){this.size=size;this.cells=new Map();this.maxRadius=0;}
   rebuild(enemies){this.cells.clear();this.maxRadius=0;for(const e of enemies){if(e.hp<=0)continue;this.maxRadius=Math.max(this.maxRadius,e.radius);const key=this.key(e.x,e.y);if(!this.cells.has(key))this.cells.set(key,[]);this.cells.get(key).push(e);}}
@@ -44,8 +55,9 @@ export class Game {
   emit(type,data={}) {if(this.events.length<LIMITS.events)this.events.push({type,...data});}
   drainEvents(){const out=this.events;this.events=[];return out;}
   recompute(){
-    const old=this.player.maxHp,s={damage:1+(this.meta.power||0)*.05,area:1,duration:1,cooldown:1-(this.meta.haste||0)*.03,speed:1+(this.meta.speed||0)*.03,amount:0,crit:.05,magnet:78*(1+(this.meta.magnet||0)*.15),xp:1+(this.meta.growth||0)*.05,charge:1,regen:0,boss:1};
-    this.player.maxHp=HERO[this.hero].hp+(this.meta.heart||0)*10;
+    const gain=id=>metaGain(this.meta[id]||0,META.find(m=>m.id===id).value);
+    const old=this.player.maxHp,s={damage:1+gain('power'),area:1,duration:1,cooldown:1-gain('haste'),speed:1+gain('speed'),amount:0,crit:.05,magnet:78*(1+gain('magnet')),xp:1+gain('growth'),charge:1,regen:0,boss:1};
+    this.player.maxHp=HERO[this.hero].hp+gain('heart');
     if(this.hero==='rumi'){s.xp+=.15;s.magnet*=1.25;}
     if(this.hero==='luna')s.crit+=.15;
     if(this.hero==='jasmine')s.area+=.15;
@@ -59,7 +71,7 @@ export class Game {
     s.rabbit=rabbits>=2?1+(rabbits-1)*.1:1;s.cooldown=clamp(s.cooldown,.4,1);s.magnet*=1.4;
     s.bonds=BONDS.filter(b=>b.weapons.every(id=>this.weapons.some(w=>w.id===id&&w.level>=2))).map(b=>b.id);
     s.awakened=AWAKENINGS.filter(a=>this.relics.some(r=>r.id===a.id&&r.level===3)&&this.weapons.some(w=>w.id===a.weapon&&w.evolved)).map(a=>a.id);
-    if(this.omen==='comet')s.xp*=1.25;if(this.omen==='silver')s.charge*=1.4;s.xp*=1.4;
+    if(this.omen==='comet')s.xp*=1.25;if(this.omen==='silver')s.charge*=1.4;
     s.damage*=1+(this.limitBreak?.power||0)*.06;s.area*=1+Math.min(1.5,(this.limitBreak?.area||0)*.04);s.cooldown*=Math.max(.5,1-(this.limitBreak?.haste||0)*.012);
     this.player.maxHp=Math.max(30,this.player.maxHp-(this.lifePrice||0));this.player.hp=Math.min(this.player.hp,this.player.maxHp);
     this.stats=s;
@@ -70,11 +82,11 @@ export class Game {
   }
   spawnEnemy(kind='wisp',options={}) {
     if(this.enemies.length>=LIMITS.enemies)return null;
-    const p=this.player,side=Math.floor(random(this)*4),along=random(this)*2-1,scale=1+this.time/130;
+    const p=this.player,side=Math.floor(random(this)*4),along=random(this)*2-1,scale=enemyHpScale(this.time),damageScale=enemyDamageScale(this.time);
     const rx=Math.min(550,this.view.w/2+38),ry=Math.min(550,this.view.h/2+38);
     const spawnX=p.x+(side<2?(side===0?-rx:rx):along*rx),spawnY=p.y+(side>=2?(side===2?-ry:ry):along*ry);
     const defaults={wisp:[18,52,12,7],beetle:[60,27,20,12],moth:[32,38,16,9],stalker:[26,62,13,10],ember:[36,40,15,10],elite:[220,38,28,16],boss:[1000,25,45,24]};const [hp,speed,radius,damage]=defaults[kind]||defaults.wisp;
-    const d=DIFFICULTY[this.difficulty],st=STAGE[this.stage],e={id:this.uid++,kind,x:clamp(spawnX,55,WORLD-55),y:clamp(spawnY,55,WORLD-55),hp:hp*scale*d.hp*st.danger,maxHp:hp*scale*d.hp*st.danger,speed:speed*(1+Math.min(this.time/1200,.3)),radius,damage:damage*d.damage,elite:kind==='elite',boss:kind==='boss',phase:0,ai:1.5+random(this)*2,slow:0,freeze:0,burn:0,burnDamage:0,burnTick:.5,flash:0,knockX:0,knockY:0,charge:0,angle:0,final:false,variant:Math.floor(random(this)*3),...options};this.enemies.push(e);return e;
+    const d=DIFFICULTY[this.difficulty],st=STAGE[this.stage],e={id:this.uid++,kind,x:clamp(spawnX,55,WORLD-55),y:clamp(spawnY,55,WORLD-55),hp:hp*scale*d.hp*st.danger,maxHp:hp*scale*d.hp*st.danger,speed:speed*(1+Math.min(this.time/1200,.3)),radius,damage:damage*d.damage*damageScale,elite:kind==='elite',boss:kind==='boss',phase:0,ai:1.5+random(this)*2,slow:0,freeze:0,burn:0,burnDamage:0,burnTick:.5,flash:0,knockX:0,knockY:0,charge:0,angle:0,final:false,variant:Math.floor(random(this)*3),...options};this.enemies.push(e);return e;
   }
   director(dt){
     const st=STAGE[this.stage];if(!this.introSpawned&&this.time<2){this.introSpawned=true;for(let i=0;i<7;i++){const a=i*Math.PI*2/7,r=145+(i%3)*24;this.spawnEnemy('wisp',{x:this.player.x+Math.cos(a)*r,y:this.player.y+Math.sin(a)*r});}}this.spawnTimer-=dt;this.eliteTimer-=dt;this.rush=Math.max(0,this.rush-dt);
@@ -274,7 +286,7 @@ export class Game {
   }
   gainXP(value){
     this.xp+=value*this.stats.xp;
-    while(this.xp>=this.need&&this.level<(this.runMode==='endless'?9999:99)&&this.pending<99){this.xp-=this.need;this.level++;if(this.metrics.firstLevel===null)this.metrics.firstLevel=this.time;this.need=Math.floor(8+this.level*3.5+this.level**1.13);this.pending++;}
+    while(this.xp>=this.need&&this.level<(this.runMode==='endless'?9999:99)&&this.pending<99){this.xp-=this.need;this.level++;if(this.metrics.firstLevel===null)this.metrics.firstLevel=this.time;this.need=xpNeed(this.level);this.pending++;}
     if(this.pending&&this.mode==='playing'){this.mode='choice';this.options=this.offers();this.emit('level',{level:this.level});}
   }
   candidates(){

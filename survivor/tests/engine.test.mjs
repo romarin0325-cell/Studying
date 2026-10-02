@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game,SpatialHash,sweptHit,muzzlePoint,targetPoint} from '../src/engine.js';
+import {Game,SpatialHash,sweptHit,muzzlePoint,targetPoint,xpNeed,enemyHpScale,enemyDamageScale,metaGain} from '../src/engine.js';
 import {HEROES,HERO,WEAPONS,WEAPON,LIMITS,STAGE,EVOLUTION,BONDS} from '../src/content.js';
 import {simulateExpedition} from '../scripts/simulate.mjs';
 const advance=(g,seconds,input={x:0,y:0})=>{for(let i=0;i<seconds*60;i++){g.step(1/60,input);g.drainEvents();}};
@@ -193,4 +193,27 @@ test('endless limit break continues actual weapon growth beyond complete equipme
   const g=quiet(new Game({runMode:'endless'}));g.weapons=['star','blade','ember','flower','frost','storm'].map(id=>({id,level:6,evolved:true,timer:1000,damage:0}));g.relics=['prism','mirror','hourglass','feather'].map(id=>({id,level:3}));g.recompute();assert.ok(g.candidates().some(o=>o.type==='limit'));
   enemy(g,900,800);g.grid.rebuild(g.enemies);g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);const base=g.weapons[1].damage;assert.ok(base>0);g.shots=[];g.applyOption({type:'limit',id:'power'});g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);assert.ok(g.weapons[1].damage-base>=base*1.05,'the next attack really deals more damage');
   g.level=99;g.need=100;g.mode='playing';g.gainXP(100);assert.equal(g.level,100);assert.equal(g.mode,'choice');assert.ok(g.options.some(o=>o.type==='limit'));assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());assert.throws(()=>Game.restore({...g.snapshot(),limitBreak:{power:-1,haste:0,area:0}}));
+});
+
+test('renewal curves slow levels, diminish memories and let enemies catch up',()=>{
+  assert.deepEqual([5,10,20,30,35,40,50,80,100].map(xpNeed),[33,61,144,263,327,382,502,863,1111]);
+  for(const [time,hp,damage] of [[0,1,1],[60,1.52,1.04],[120,2.49,1.18],[150,3.39,null],[180,4.77,1.40],[210,6.78,null],[240,9.59,null]]){
+    assert.ok(Math.abs(enemyHpScale(time)-hp)<.015,time+' hp');
+    if(damage!=null)assert.ok(Math.abs(enemyDamageScale(time)-damage)<.015,time+' damage');
+  }
+  const grown=new Game({hero:'luna',meta:{power:10,heart:10,haste:10,magnet:10,speed:10,growth:10}});grown.omen='hunter';grown.recompute();
+  assert.ok(Math.abs(grown.stats.damage-(1+metaGain(10,.05)))<1e-9);
+  assert.ok(Math.abs(grown.player.maxHp-(HERO.luna.hp+metaGain(10,10)))<1e-6);
+  assert.ok(Math.abs(grown.stats.cooldown-(1-metaGain(10,.03)))<1e-9);
+  assert.ok(Math.abs(grown.stats.speed-(1+metaGain(10,.03)))<1e-9);
+  assert.ok(Math.abs(grown.stats.magnet-(78*(1+metaGain(10,.15))*1.4))<1e-6);
+  assert.ok(Math.abs(grown.stats.xp-(1+metaGain(10,.05)))<1e-9);
+  const plain=new Game({hero:'luna'});plain.omen='hunter';plain.recompute();assert.equal(plain.stats.xp,1,'global experience multiplier is gone');
+  const rumi=new Game();rumi.omen='hunter';rumi.recompute();assert.equal(rumi.stats.xp,1.15);
+  const comet=new Game({hero:'luna'});comet.omen='comet';comet.recompute();assert.equal(comet.stats.xp,1.25);
+  plain.time=180;const foe=plain.spawnEnemy('wisp',{x:plain.player.x+220,y:plain.player.y});
+  assert.ok(Math.abs(foe.maxHp-18*enemyHpScale(180)*1.35)<1e-6);
+  assert.ok(Math.abs(foe.damage-7*1.3*enemyDamageScale(180))<1e-6);
+  plain.level=4;plain.need=1;plain.xp=0;plain.mode='playing';plain.pending=0;plain.gainXP(1);
+  assert.equal(plain.level,5);assert.equal(plain.need,xpNeed(5));
 });

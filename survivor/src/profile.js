@@ -21,7 +21,7 @@ export function normalizeProfile(value){
   if(['expedition','endless'].includes(value.selection?.runMode))out.selection.runMode=value.selection.runMode;
   return out;
 }
-export function metaCost(profile,id){const def=META.find(m=>m.id===id);return def?Math.round(def.cost*(1+(profile.meta[id]||0)*.65)):Infinity;}
+export function metaCost(profile,id){const def=META.find(m=>m.id===id);if(!def)return Infinity;const nextLevel=(profile.meta[id]||0)+1;return Math.round(def.cost*Math.pow(1.45,nextLevel-1)/5)*5;}
 export function buyMeta(profile,id){const def=META.find(m=>m.id===id),cost=metaCost(profile,id);if(!def||profile.meta[id]>=def.max||profile.crystals<cost)return false;profile.crystals-=cost;profile.meta[id]++;return true;}
 export function settle(profile,game,date=new Date().toISOString()){
   if(!['victory','defeat'].includes(game.mode)||profile.claimed.includes(game.runId))return null;
