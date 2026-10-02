@@ -67,12 +67,12 @@ export const STAGES = [
 ];
 export const STAGE = Object.fromEntries(STAGES.map(s=>[s.id,s]));
 export const META = [
-  {id:'power',name:'별의 의지',icon:'✦',text:'모든 공격력 +5%',max:5,cost:35},
-  {id:'heart',name:'새벽의 숨결',icon:'♡',text:'최대 생명 +10',max:5,cost:30},
-  {id:'haste',name:'시간의 실',icon:'◷',text:'공격 대기시간 -3%',max:5,cost:45},
-  {id:'magnet',name:'별을 모으는 손',icon:'✧',text:'획득 범위 +15%',max:5,cost:25},
-  {id:'speed',name:'가벼운 발자국',icon:'➶',text:'이동속도 +3%',max:5,cost:25},
-  {id:'growth',name:'기억의 정원',icon:'❀',text:'경험치 +5%',max:5,cost:40}
+  {id:'power',name:'별의 의지',icon:'✦',text:'모든 공격력 +5%',max:10,cost:60,value:.05},
+  {id:'heart',name:'새벽의 숨결',icon:'♡',text:'최대 생명 +10',max:10,cost:50,value:10},
+  {id:'haste',name:'시간의 실',icon:'◷',text:'공격 대기시간 -3%',max:10,cost:75,value:.03},
+  {id:'magnet',name:'별을 모으는 손',icon:'✧',text:'획득 범위 +15%',max:10,cost:45,value:.15},
+  {id:'speed',name:'가벼운 발자국',icon:'➶',text:'이동속도 +3%',max:10,cost:45,value:.03},
+  {id:'growth',name:'기억의 정원',icon:'❀',text:'경험치 +5%',max:10,cost:65,value:.05}
 ];
 export const DIFFICULTIES = [
   {id:'gentle',name:'산책',text:'처음 만나는 별 · 여유롭게 발견하는 밤',hp:.85,damage:.75,density:1,reward:.8},

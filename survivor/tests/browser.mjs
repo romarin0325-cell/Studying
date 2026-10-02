@@ -46,7 +46,7 @@ try{
   }
   // A temporary copy exposes App only for endgame/rare-state browser fixtures.
   // Assets, CSS, actual engine/UI source and release controls remain identical.
-  const bundled=await build({entryPoints:[path.join(root,'src/app.js')],bundle:true,write:false,format:'iife',target:['es2020'],minify:true,charset:'utf8',plugins:[{name:'test-only-app-reference',setup(b){b.onLoad({filter:/survivor\/src\/app\.js$/},async args=>({contents:(await fs.readFile(args.path,'utf8')).replace('const app=new App();','const app=new App();globalThis.__NOCTURNE_TEST__=app;'),loader:'js'}));}}]});
+  const bundled=await build({entryPoints:[path.join(root,'src/app.js')],bundle:true,write:false,format:'iife',target:['es2020'],minify:true,charset:'utf8',plugins:[{name:'test-only-app-reference',setup(b){b.onLoad({filter:/survivor[\\/]src[\\/]app\.js$/},async args=>({contents:(await fs.readFile(args.path,'utf8')).replace('const app=new App();','const app=new App();globalThis.__NOCTURNE_TEST__=app;'),loader:'js'}));}}]});
   const temp=await fs.mkdtemp(path.join(os.tmpdir(),'nocturne-browser-'));const testFile=path.join(temp,'game.html');const scriptStart=html.lastIndexOf('<script>'),scriptEnd=html.lastIndexOf('</script>');await fs.writeFile(testFile,html.slice(0,scriptStart+8)+bundled.outputFiles[0].text.replace(/<\/script/gi,'<\\/script')+html.slice(scriptEnd));
   const {page,context}=await pageFor({width:390,height:844});await start(page,pathToFileURL(testFile).href);
   await page.locator('[data-action="start"]').click();
