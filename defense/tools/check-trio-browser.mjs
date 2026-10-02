@@ -27,6 +27,8 @@ try{
       await page.mouse.click(canvas.x+canvas.width*at.x/720,canvas.y+canvas.height*at.y/780);await page.clock.runFor(100);
       const panel=await page.locator('#unit-panel').textContent();
       assert.match(panel,{frost_witch:/서리 3중첩/,harmonious:/4종/,aurora:/반사/}[id]);assert.ok(!panel.includes('undefined'));
+      const selectedBounds=await page.evaluate(()=>[...document.querySelectorAll('#arena,.battle-header,#unit-panel,.unit-actions button,#skills button,#summon,#training')].map(el=>{const r=el.getBoundingClientRect();return {element:el.id||el.className,left:r.left,right:r.right,bottom:r.bottom};}));
+      for(const r of selectedBounds){assert.ok(r.left>=-1&&r.right<=width+1,JSON.stringify({id,width,...r}));assert.ok(r.bottom<=(width===320?568:844)+1,JSON.stringify(r));}
       if(width===390&&reducedMotion==='no-preference')await page.screenshot({path:out+id+'-stats.png'});
       await page.locator('[data-skill="'+id+'"]').click();await page.clock.runFor(180);
       const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('astra.confluence.run.v1')));
@@ -43,7 +45,7 @@ try{
       if(id==='aurora'){assert.equal(after.finishers.length,0);assert.ok(after.enemies.find(e=>e.boss).hp<1e7);}
       const geometry=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight,summonBottom:document.querySelector('#summon').getBoundingClientRect().bottom}));
       assert.ok(geometry.scrollWidth<=width+1);assert.ok(geometry.scrollHeight<=geometry.height+1);assert.ok(geometry.summonBottom<=geometry.height+1);
-      assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);results.push({width,reducedMotion,id,geometry,errors,requests});
+      assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);results.push({width,reducedMotion,id,geometry,selectedBounds,errors,requests});
     }finally{await context.close();}
   }
   // New portraits are selectable through the real deck UI, including narrow screens.
