@@ -1,0 +1,176 @@
+{
+  "artifact": "defense/dist-local/HeroCoreDefense.html",
+  "protocol": "file:",
+  "subrequestsAllowed": false,
+  "physicalDevice": false,
+  "scenarios": [
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "harmonious",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "aurora",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "harmonious",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "aurora",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "harmonious",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "aurora",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "harmonious",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "aurora",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "errors": [],
+      "requests": []
+    }
+  ]
+}

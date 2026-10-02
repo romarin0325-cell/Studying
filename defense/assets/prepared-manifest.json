@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sourceHash": "d6bf3673eab869e60fdcaf3bf8693eae4b3a0b33a65809eb309ce2c284c66d74",
+  "sourceHash": "c9c3e37b4e45f5f7a8ecacf2c649132dc969cdbda94628f5bed5a2ef17d30658",
   "processorHash": "b6ccfebab634454fcc1869bfe72ac2f91b4652205586f360810629088b01194f",
-  "fileCount": 39,
+  "fileCount": 43,
   "files": {
     "./assets/merge/blessings.webp": {
       "sourceHash": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
@@ -25,6 +25,11 @@
     "./assets/merge/effects-expansion.webp": {
       "sourceHash": "b752df529b96655a1bdb3df7c413394a5cf1a7f6359e17dd3d1a32bbe88f12b0",
       "bytes": 138096,
+      "requiresAlpha": false
+    },
+    "./assets/merge/effects-trio.webp": {
+      "sourceHash": "66e9b71290e5326bf7b1f26990ed744da49975a926b5e67867ffd7aaa19dda17",
+      "bytes": 49942,
       "requiresAlpha": false
     },
     "./assets/merge/effects.webp": {
@@ -68,6 +73,15 @@
     "./assets/merge/units/ancient_dragon.webp": {
       "sourceHash": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
       "bytes": 245244,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/aurora.webp": {
+      "sourceHash": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "bytes": 204778,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,
@@ -119,6 +133,15 @@
       "width": 1024,
       "height": 1024
     },
+    "./assets/merge/units/frost_witch.webp": {
+      "sourceHash": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "bytes": 230260,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
     "./assets/merge/units/galaxy_whale.webp": {
       "sourceHash": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
       "bytes": 250328,
@@ -140,6 +163,15 @@
     "./assets/merge/units/guardian.webp": {
       "sourceHash": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
       "bytes": 184556,
+      "requiresAlpha": true,
+      "hasAlpha": true,
+      "minimumAlpha": 0,
+      "width": 1024,
+      "height": 1024
+    },
+    "./assets/merge/units/harmonious.webp": {
+      "sourceHash": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "bytes": 307090,
       "requiresAlpha": true,
       "hasAlpha": true,
       "minimumAlpha": 0,

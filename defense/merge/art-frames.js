@@ -139,5 +139,20 @@ export const PORTRAIT_FRAMES = {
     "x": 257,
     "y": 223,
     "size": 250
+  },
+  "frost_witch": {
+    "x": 251,
+    "y": 211,
+    "size": 250
+  },
+  "harmonious": {
+    "x": 254,
+    "y": 225,
+    "size": 250
+  },
+  "aurora": {
+    "x": 256,
+    "y": 219,
+    "size": 250
   }
 };

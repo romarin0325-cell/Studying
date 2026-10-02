@@ -12,7 +12,7 @@ export async function validateDirections(){
   const landmarks=JSON.parse(await readFile(new URL('../defense/docs/art/ANATOMICAL_LANDMARKS.json',import.meta.url),'utf8'));
   const profile=JSON.parse(await readFile(new URL('../defense/docs/art/HEAD_PROFILE.json',import.meta.url),'utf8'));
   assert.equal(manifest.version,2);
-  assert.equal(HEROES.length,27);assert.equal(manifest.frames.length,28);assert.equal(ASSET_MANIFEST.length,39);
+  assert.equal(HEROES.length,30);assert.equal(manifest.frames.length,31);assert.equal(ASSET_MANIFEST.length,43);
   assert.deepEqual(new Set(manifest.frames.map(f=>f.id)),new Set([...HEROES.map(h=>h.id),'trauma']));
   let count=0;
   for(const h of [...HEROES,{id:'trauma',art:TRANSFORM_ART.trauma}]){
@@ -43,5 +43,5 @@ export async function validateDirections(){
     }
     assert.equal(new Set(hashes).size,4,h.id+' needs four distinct authored images');
   }
-  return {heroes:27,forms:28,directions:count,releaseAssets:ASSET_MANIFEST.length};
+  return {heroes:30,forms:31,directions:count,releaseAssets:ASSET_MANIFEST.length};
 }

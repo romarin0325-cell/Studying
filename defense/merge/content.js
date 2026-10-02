@@ -6,9 +6,9 @@ export const DEFAULT_DECK = ['zeke','snow_rabbit','rumi','siren','queen','cinder
 // Supplied by the author in 컨셉.txt, 2026-09-27. Height refers to anatomy;
 // ears, hats, halos, weapons and trailing fabric are excluded.
 export const HEIGHT_GROUPS = {
-  tall:['zeke','lightning_sage','storm_sage','flame_sage','red_dragon','ancient_dragon','cherry_prince'],
-  medium:['rumi','luna','cinderella','avalanche_maid','mushroom_king','great_detective','siren','queen','galaxy_whale','time_ruler','doom','santa','jasmine','star_boy','time_magician'],
-  short:['guardian','snow_rabbit','night_rabbit','silver_rabbit','phantom'],
+  tall:['zeke','lightning_sage','storm_sage','flame_sage','red_dragon','ancient_dragon','cherry_prince','frost_witch'],
+  medium:['rumi','luna','cinderella','avalanche_maid','mushroom_king','great_detective','siren','queen','galaxy_whale','time_ruler','doom','santa','jasmine','star_boy','time_magician','aurora'],
+  short:['guardian','snow_rabbit','night_rabbit','silver_rabbit','phantom','harmonious'],
 };
 
 // Four authored directions share a 512px frame and a (256,480) foot anchor.
@@ -99,6 +99,15 @@ export const HEROES = [
   h('cherry_prince','체리프린스','붉은 약속의 왕자','#ffacc4','',0,36,1.5,'blade',
     {type:'regal',text:'보스 피해 +25%. 화상 또는 성광 3중첩 대상에게 위력 +60%.'},
     {name:'체리 블로섬 · 왕자의 일격',cost:85,type:'royal',text:'최대 체력이 가장 높은 적 한 명에게 위력 34배의 방어 무시 검격. 화상·성광 3중첩이면 1.4배.'}),
+  h('frost_witch','혹한의마녀','영겁의 빙관','#a8e4fa','',0,22,1.5,'ice',
+    {type:'permafrost',text:'관통하는 얼음창이 서리를 쌓습니다. 3중첩은 위력 120% 추가 피해와 짧은 빙결.'},
+    {name:'빙궁의 칙령',cost:80,type:'ice_court',text:'모든 적에게 위력 5배 피해와 서리 2중첩. 6초 동안 50% 감속시켜 다음 얼음창의 빙결을 준비합니다.'}),
+  h('harmonious','하모니어스','달콤한 조화의 수호신','#9ce3c5','',0,10,1.3,'sugar',
+    {type:'harmonyAura',text:'상하좌우의 서로 다른 동료마다 인접 동료 위력 +5%, 공속 +4%. 하모니어스는 종류 수에서 제외.'},
+    {name:'디저트 앙상블',cost:70,type:'harmony',text:'모든 동료의 공격 대기를 1.5초 앞당기고 8초 동안 조화 오라를 두 배로 만듭니다.'}),
+  h('aurora','아우로라','거울 너머의 미소','#d6befa','',0,14,1.3,'mirror',
+    {type:'refraction',text:'직격 후 표적 뒤에 거울을 만들고 약 0.7초 뒤 위력 75%의 환영탄을 되돌립니다.'},
+    {name:'천면경',cost:80,type:'mirror',text:'최대 체력이 가장 높은 적 한 명의 피해를 3초간 기록. 위력 10배와 기록한 피해의 45%(추가 최대 18배)를 되돌립니다.'}),
 ];
 export const HERO = Object.fromEntries(HEROES.map(x=>[x.id,x]));
 // Rumi's summoned world: Defense roles and play feel take precedence over source lore.
@@ -130,6 +139,9 @@ const roles = {
   star_boy:['강적 추적 · 유성탄','single',650,0,'빠른 유성 연사. 다섯 번째 공격은 위력 2.2배.'],
   time_magician:['시간 가속 · 관통침','beam',520,28,'세 번째 관통마다 상하좌우 공격 대기 −0.6초. 강화마다 −0.1초 추가. 필살기 중 트라우마로 변신.'],
   cherry_prince:['강적 결전 · 검광','single',590,0,'보스 피해 +25%. 화상 또는 성광 3중첩 대상에게 위력 +60%.'],
+  frost_witch:['서리 연계 · 얼음창','beam',550,32,'관통 직격은 2.4초간 40% 감속과 서리 1중첩. 서리 3중첩에 추가 피해와 0.9초 빙결(보스 0.45초).'],
+  harmonious:['다양성 지원 · 조화','single',460,0,'상하좌우의 서로 다른 동료마다 인접 동료 위력 +5%, 공속 +4%. 같은 종류는 한 번, 하모니어스는 제외.'],
+  aurora:['지연 반사 · 환영탄','single',540,0,'직격 후 위력 75% 환영탄. 시전 시 정한 표적을 추적하며 다른 적으로 옮기지 않습니다.'],
 };
 for(const hero of HEROES){
   hero.heightGroup=Object.entries(HEIGHT_GROUPS).find(([,ids])=>ids.includes(hero.id))[0];
@@ -209,5 +221,6 @@ export const ASSET_PATHS = {
   'relics-expansion':'./assets/merge/relics-expansion.webp',
   'bosses-expansion':'./assets/merge/bosses-expansion.webp',
   'realms-expansion':'./assets/merge/realms-expansion.webp',
+  'effects-trio':'./assets/merge/effects-trio.webp',
 };
-export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:!['garden','effects','effects-expansion','finishers','realms-expansion'].includes(id)}));
+export const ASSET_MANIFEST = Object.entries(ASSET_PATHS).map(([id,path])=>({id,path,type:'image',releaseRequired:true,hasAlpha:!['garden','effects','effects-expansion','effects-trio','finishers','realms-expansion'].includes(id)}));

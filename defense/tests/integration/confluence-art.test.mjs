@@ -8,8 +8,34 @@ import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {packDirections} from '../../../scripts/pack_defense_directions.mjs';
-test('production art records anatomical estimates, source hashes, 28 alpha atlases and 112 distinct frames; this is not visual approval',async()=>{
-  assert.deepEqual(await validateDirections(),{heroes:27,forms:28,directions:112,releaseAssets:39});
+
+test('trio source hashes, anatomical estimates and isolated effect cells match the reviewed production assets',async()=>{
+  const base=new URL('../../docs/art/trio/',import.meta.url);
+  const entries=JSON.parse(await readFile(new URL('LANDMARKS.json',base),'utf8'));
+  const profile=JSON.parse(await readFile(new URL('../../docs/art/HEAD_PROFILE.json',import.meta.url),'utf8'));
+  const {anatomicalScale}=await import('../../../scripts/pack_defense_directions.mjs');
+  for(const e of entries){
+    const bytes=await readFile(new URL('sources/'+e.file,base));assert.equal(createHash('sha256').update(bytes).digest('hex'),e.sourceSha256,e.id);
+    assert.equal(e.anatomy.directionSkulls.length,4);assert.deepEqual(e.anatomy.directionSkulls[0],e.anatomy.skull);
+    assert.match(e.anatomy.uncertainty,/estimates/);assert.equal(e.alphaMode,'native');
+    const scale=anatomicalScale(e.anatomy.skull,profile,e.id);
+    for(const [i,[l,t,r,b]] of e.anatomy.directionSkulls.entries()){
+      const width=(r-l)*scale,height=(b-t)*scale,referenceWidth=i<2?profile.head.frontWidth:profile.head.sideWidth;
+      assert.ok(Math.abs(width/referenceWidth-1)<=profile.review.directionTolerance,e.id+' skull width '+i);
+      assert.ok(Math.abs(height/profile.head.height-1)<=profile.review.directionTolerance,e.id+' skull height '+i);
+      assert.ok(e.feet[i][1]>b,e.id+' foot anchor below chin');
+    }
+  }
+  const record=JSON.parse(await readFile(new URL('ATLAS_PACKING.json',base),'utf8'));
+  const source=await readFile(new URL('sources/effects-trio.png',base));assert.equal(createHash('sha256').update(source).digest('hex'),record.sourceSha256);
+  const bytes=await readFile(new URL('../../assets/merge/effects-trio.webp',import.meta.url));assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256);
+  const {data,info}=await sharp(bytes).removeAlpha().raw().toBuffer({resolveWithObject:true});
+  assert.deepEqual([info.width,info.height],[768,512]);
+  for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++)if(x%256<16||x%256>=240||y%256<16||y%256>=240){const k=(y*info.width+x)*3;assert.ok(Math.max(data[k],data[k+1],data[k+2])<10,'trio effect bleed');}
+});
+
+test('production art records anatomical estimates, source hashes, 31 alpha atlases and 124 distinct frames; this is not visual approval',async()=>{
+  assert.deepEqual(await validateDirections(),{heroes:30,forms:31,directions:124,releaseAssets:43});
 });
 
 test('native alpha import preserves hot-pink crystal material and opaque whites',async()=>{

@@ -1,0 +1,10 @@
+{
+  "id": "effects-trio",
+  "sourceSha256": "2f9091b31bba4ef878adaecbbb38eda302d639b93d18604a25b630cd7bee0790",
+  "sha256": "66e9b71290e5326bf7b1f26990ed744da49975a926b5e67867ffd7aaa19dda17",
+  "columns": 3,
+  "rows": 2,
+  "cell": 256,
+  "gutter": 20,
+  "bytes": 49942
+}

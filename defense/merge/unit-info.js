@@ -1,5 +1,5 @@
 import {HERO} from './content.js';
-import {combatStats,bestUnit,has,unitEconomy,trainingBonus,skillDuration,unitForm} from './engine.js';
+import {combatStats,bestUnit,has,unitEconomy,trainingBonus,skillDuration,unitForm,harmonyStrength} from './engine.js';
 
 export const number=n=>Number(n.toFixed(1)).toLocaleString('ko-KR');
 export function inspection(s,id,selected){
@@ -11,6 +11,7 @@ export function attackDescription(s,u,stats=combatStats(s,u)){
   const zone=`반경 ${h.radius} · ${has(s,'roots')?4.5:3}초 장판 · 0.5초마다 ${n(.22)} 피해`;
   const extra=has(s,'prism')?1:0;
   const burn=has(s,'ember')?1.6:1,boss=has(s,'lens')?1.3:1;
+  const harmony=harmonyStrength(s,s.board.indexOf(u));
   const text={
     zeke:`전방 90° 베기 · 3초간 화상 ${n(.23*burn)}/초`,
     rumi:`폭 ${h.radius} 관통 · 같은 성급의 모든 동료와 합성 가능`,
@@ -22,6 +23,9 @@ export function attackDescription(s,u,stats=combatStats(s,u)){
     star_boy:`다섯 번째 공격은 ${n(2.2)} 피해`,
     time_magician:`폭 ${h.radius} 관통 · 세 번째 명중은 상하좌우 공격 대기 −${number(.6+level*.1)}초${unitForm(s,u)?` · 트라우마 ${Math.ceil(s.buffs.trauma)}초 · 방어 무시`:''}`,
     cherry_prince:`보스 ${n(1.25*boss)} 피해 · 화상 / 성광 3중첩: 일반 ${n(1.6)} / 보스 ${n(2*boss)}`,
+    frost_witch:`폭 ${h.radius} 관통 · 2.4초간 40% 감속 · 서리 3중첩: 추가 ${n(1.2)} 피해 + ${number(.9+level*.06)}초 빙결 (보스 ${number(.45+level*.03)}초) · 중첩 6초 유지`,
+    harmonious:`인접한 다른 동료 ${harmony.count}종 · 상하좌우 위력 +${number(harmony.damage*100)}% / 공속 +${number(harmony.speed*100)}% · 같은 종류는 한 번만 계산 · 조화 중복 불가`,
+    aurora:`명중 약 0.66초 후 같은 적에게 반사 ${n(.75+level*.03)} 피해 · 표적이 사라지면 소멸`,
     snow_rabbit:`반경 ${h.radius} 폭발 · 2.4초간 40% 감속`,
     avalanche_maid:`반경 ${h.radius} 폭발 · 감속 중인 적에게 ${n(1.75)} 피해`,
     night_rabbit:`추가 ${1+extra}명에게 ${n(.65)} 도탄 · 도탄 거리 ${h.radius}`,
@@ -59,6 +63,9 @@ export function skillDescription(s,id){
     trauma:`전장 전체 ${n(4)} 피해 · ${skillDuration(s,10)}초 트라우마 변신: 타격 위력 +110% · 공속 +35% · 일반 공격 방어 무시`,
     starfall:`최대 체력 1위 한 명 · 1.2초 후 ${n(32*(has(s,'royal_seal')?1.25:1))} 피해 · 시전 시 표적 고정`,
     royal:`최대 체력 1위 한 명 · 1.05초 후 방어 무시: 일반 ${n(34*(has(s,'royal_seal')?1.25:1))} / 보스 ${n(42.5*boss*(has(s,'royal_seal')?1.25:1))} · 화상 / 성광 3중첩이면 +40%`,
+    ice_court:`전장 전체 ${n(5)} 피해 · 서리 2중첩 (6초) · 6초간 50% 감속`,
+    harmony:`전체 공격 대기 −1.5초 · ${skillDuration(s,8)}초 동안 모든 하모니어스의 조화 지원 2배`,
+    mirror:`최대 체력 1위 한 명을 3초 고정 · ${n(10)} + 그동안 받은 피해의 45% (추가 최대 ${n(18)}) · 반사 타격도 방어·피해 증감 적용`,
     freeze:`전장 전체 ${n(2)} 피해 · 3초 기절 · 6초간 50% 감속`,
     avalanche:`전장 전체 ${n(6)} 피해 (기절 중 ${n(12)}) · 4초간 50% 감속`,
     combust:`전장 전체 ${n(4)} 피해 (화상 중 ${n(10)}) · 6초간 화상 ${n(.65*burn)}/초`,

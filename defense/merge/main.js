@@ -81,7 +81,7 @@ function updateCombatOverview(){
   $('remaining-enemies').textContent=alive.length+state.queue.length;
   $('enemy-status').textContent=`진입 ${alive.length} · 대기 ${state.queue.length}`;
   $('deployed-count').innerHTML=`${allies.length}<small> / 25</small>`;
-  const buffNames={echo:'메아리',haste:'아리아',awaken:'태고의 약속',march:'은빛 행진',festive:'성야의 선물',radiance:'여신강림',trauma:'트라우마'};
+  const buffNames={echo:'메아리',haste:'아리아',awaken:'태고의 약속',march:'은빛 행진',festive:'성야의 선물',radiance:'여신강림',trauma:'트라우마',harmony:'디저트 앙상블'};
   $('active-buffs').textContent=Object.entries(state.buffs).filter(([,n])=>n>0).map(([id,n])=>`${buffNames[id]||id} ${Math.ceil(n)}초`).join(' · ')||`최고 ${Math.max(...allies.map(u=>u.rank),0)}성`;
   const mushrooms=allies.filter(u=>u.hero==='mushroom_king'),next=mushrooms.sort((a,b)=>a.harvest-b.harvest)[0],payout=dividend(state);
   $('income-label').textContent=payout?'물결 보상 + 배당':'물결 보상';

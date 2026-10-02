@@ -89,7 +89,7 @@ async function expeditionChecks(browser,url,out){
     for(const id of ['ember','frost','seed'])await p.locator(`[data-relic="${id}"]`).click();await p.locator('[data-relic="feather"]').click();assert.equal(await p.locator('[data-relic][aria-pressed="true"]').count(),3);
     await p.screenshot({path:path.join(out,'relics.png')});await p.locator('[data-action="save-loadout"]').click();assert.equal(await p.locator('#home-relics .equipped').count(),3);
     await p.reload();await portraitsReady(p);assert.equal(await p.locator('#home-relics .equipped').count(),3);
-    await p.locator('[data-action="deck"]').click();assert.equal(await p.locator('.roster-card').count(),27);const header=await p.locator('.modal-header').boundingBox();
+    await p.locator('[data-action="deck"]').click();assert.equal(await p.locator('.roster-card').count(),30);const header=await p.locator('.modal-header').boundingBox();
     await p.locator('[data-inspect="time_ruler"]').scrollIntoViewIfNeeded();const before=await p.locator('.modal-scroll').evaluate(el=>el.scrollTop);assert.ok(before>200);await p.locator('[data-inspect="time_ruler"]').click();
     assert.ok(await p.locator('.modal-scroll').evaluate(el=>el.scrollTop)>before*.85,'inspection reset roster scroll');assert.ok(Math.abs((await p.locator('.modal-header').boundingBox()).y-header.y)<1,'roster header moved');assert.match(await p.locator('.companion-preview').textContent(),/시간의지배자/);
     assert.ok(await p.locator('.companion-preview img').evaluate(i=>i.naturalWidth>=250),'portrait downsampled');await p.screenshot({path:path.join(out,'roster-scrolled.png')});await p.locator('[data-action="close-modal"]').click();
@@ -225,7 +225,7 @@ async function bossClarityChecks(browser,url,out,options={}){
 }
 async function experienceChecks(browser,url,out){
   const t=await pageFor(browser,url);try{
-    await portraitsReady(t.page);await t.page.getByRole('button',{name:'편성 바꾸기 ↗'}).click();assert.equal(await t.page.locator('.roster-card').count(),27);
+    await portraitsReady(t.page);await t.page.getByRole('button',{name:'편성 바꾸기 ↗'}).click();assert.equal(await t.page.locator('.roster-card').count(),30);
     await t.page.locator('[data-pick="queen"]').click();assert.equal(await t.page.getByRole('button',{name:'함께 떠나기'}).isEnabled(),false);await t.page.locator('[data-pick="silver_rabbit"]').click();await t.page.getByRole('button',{name:'함께 떠나기'}).click();
     assert.equal(await t.page.locator('#home-deck img[alt="은토끼"]').count(),1);await smoke(t.page,{screenshot:path.join(out,'mobile-play.png')});
     await t.page.getByRole('button',{name:'일시 정지',exact:true}).click();await t.page.getByRole('button',{name:'설정',exact:true}).click();await t.page.locator('[data-setting="reduced"]').check();await t.page.getByRole('button',{name:'적용',exact:true}).click();

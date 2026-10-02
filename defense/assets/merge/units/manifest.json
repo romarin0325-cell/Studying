@@ -2860,6 +2860,438 @@
         "alphaMode": "native",
         "alphaOpaqueThreshold": 250
       }
+    },
+    {
+      "id": "frost_witch",
+      "file": "frost_witch.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 251,
+        "y": 211,
+        "size": 250
+      },
+      "sha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "anatomy": {
+        "skull": [
+          232,
+          154,
+          445,
+          355
+        ],
+        "directionSkulls": [
+          [
+            232,
+            154,
+            445,
+            355
+          ],
+          [
+            176,
+            154,
+            389,
+            355
+          ],
+          [
+            246,
+            111,
+            437,
+            305
+          ],
+          [
+            186,
+            111,
+            375,
+            305
+          ]
+        ],
+        "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+        "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+        "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+        "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+        "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented.",
+        "profileVersion": 1,
+        "packedSkull": [
+          172,
+          135,
+          332,
+          285
+        ],
+        "headWidth": 159.5,
+        "headHeight": 150.5,
+        "bodyBelowChin": 194.7,
+        "heightClass": "tall",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "frost_witch.png",
+        "sha256": "e8c71861ac24b795d5dd1ec84e8406dc2730a8e92e7e2c4de54edb114d561ba8",
+        "scale": 0.7487171660357188,
+        "feet": [
+          [
+            344,
+            615
+          ],
+          [
+            286,
+            615
+          ],
+          [
+            331,
+            555
+          ],
+          [
+            291,
+            555
+          ]
+        ],
+        "face": [
+          337,
+          256
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            232,
+            154,
+            445,
+            355
+          ],
+          "directionSkulls": [
+            [
+              232,
+              154,
+              445,
+              355
+            ],
+            [
+              176,
+              154,
+              389,
+              355
+            ],
+            [
+              246,
+              111,
+              437,
+              305
+            ],
+            [
+              186,
+              111,
+              375,
+              305
+            ]
+          ],
+          "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+          "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+          "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+          "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+          "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented."
+        },
+        "alphaMode": "native",
+        "alphaOpaqueThreshold": 250
+      }
+    },
+    {
+      "id": "harmonious",
+      "file": "harmonious.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 254,
+        "y": 225,
+        "size": 250
+      },
+      "sha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "anatomy": {
+        "skull": [
+          235,
+          182,
+          445,
+          367
+        ],
+        "directionSkulls": [
+          [
+            235,
+            182,
+            445,
+            367
+          ],
+          [
+            174,
+            182,
+            387,
+            365
+          ],
+          [
+            262,
+            116,
+            447,
+            296
+          ],
+          [
+            211,
+            114,
+            394,
+            296
+          ]
+        ],
+        "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+        "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+        "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+        "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+        "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented.",
+        "profileVersion": 1,
+        "packedSkull": [
+          173,
+          152,
+          339,
+          298
+        ],
+        "headWidth": 165.1,
+        "headHeight": 145.4,
+        "bodyBelowChin": 182.3,
+        "heightClass": "short",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "harmonious.png",
+        "sha256": "e1c2e871c40b69fe0b610f0d5426fc160f8598d81f33d42e40ab0027ab642f99",
+        "scale": 0.7859774918918593,
+        "feet": [
+          [
+            340,
+            599
+          ],
+          [
+            287,
+            601
+          ],
+          [
+            340,
+            515
+          ],
+          [
+            281,
+            515
+          ]
+        ],
+        "face": [
+          337,
+          275
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            235,
+            182,
+            445,
+            367
+          ],
+          "directionSkulls": [
+            [
+              235,
+              182,
+              445,
+              367
+            ],
+            [
+              174,
+              182,
+              387,
+              365
+            ],
+            [
+              262,
+              116,
+              447,
+              296
+            ],
+            [
+              211,
+              114,
+              394,
+              296
+            ]
+          ],
+          "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+          "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+          "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+          "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+          "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented."
+        },
+        "alphaMode": "native",
+        "alphaOpaqueThreshold": 250
+      }
+    },
+    {
+      "id": "aurora",
+      "file": "aurora.webp",
+      "width": 1024,
+      "height": 1024,
+      "cell": 512,
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "portrait": {
+        "x": 256,
+        "y": 219,
+        "size": 250
+      },
+      "sha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "anatomy": {
+        "skull": [
+          242,
+          153,
+          447,
+          351
+        ],
+        "directionSkulls": [
+          [
+            242,
+            153,
+            447,
+            351
+          ],
+          [
+            178,
+            153,
+            386,
+            350
+          ],
+          [
+            235,
+            102,
+            415,
+            296
+          ],
+          [
+            245,
+            102,
+            426,
+            298
+          ]
+        ],
+        "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+        "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+        "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+        "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+        "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented.",
+        "profileVersion": 1,
+        "packedSkull": [
+          178,
+          142,
+          335,
+          295
+        ],
+        "headWidth": 157.6,
+        "headHeight": 152.3,
+        "bodyBelowChin": 185.3,
+        "heightClass": "medium",
+        "heightClassApplied": false,
+        "scaleMethod": "uniform scale from estimated front skull area; no height multiplier"
+      },
+      "source": {
+        "file": "aurora.png",
+        "sha256": "44de3ae5b898d9aa33a8f850a2d325763b7bbe49ed7b5a9023d2d7ed5baa9a7a",
+        "scale": 0.7689464481087925,
+        "feet": [
+          [
+            344,
+            592
+          ],
+          [
+            292,
+            592
+          ],
+          [
+            324,
+            534
+          ],
+          [
+            313,
+            534
+          ]
+        ],
+        "face": [
+          344,
+          252
+        ],
+        "splitY": 627,
+        "anatomy": {
+          "skull": [
+            242,
+            153,
+            447,
+            351
+          ],
+          "directionSkulls": [
+            [
+              242,
+              153,
+              447,
+              351
+            ],
+            [
+              178,
+              153,
+              386,
+              350
+            ],
+            [
+              235,
+              102,
+              415,
+              296
+            ],
+            [
+              245,
+              102,
+              426,
+              298
+            ]
+          ],
+          "coordinateSpace": "source quadrant-local down up left right, 627 x 627 quadrants",
+          "method": "manual reconstructed cranium from temples, cheeks, jaw, ear insertion and hair part; not exposed skin or silhouette",
+          "uncertainty": "Occluded skull boundaries are manual estimates, approximately +/- 8-12 source pixels (back +/- 12); differences smaller than this are not certifiable height measurements.",
+          "excluded": "external ears, ponytails, hair volume, cowlick, crown, side coil, ribbons, jewels, cotton candy, trailing fabric",
+          "directionReview": "One uniform scale for all four views; no separate direction scaling; front/back clothing inference is documented."
+        },
+        "alphaMode": "native",
+        "alphaOpaqueThreshold": 250
+      }
     }
   ]
 }
