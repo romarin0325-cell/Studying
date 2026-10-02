@@ -1,0 +1,46 @@
+✔ fixed-step combat restores RNG, entities and pending choices exactly (185.476313ms)
+✔ all nine starting weapons actually damage and each skill consumes charge once (21.98343ms)
+✔ all fourteen weapon behaviors deal real damage at base rank and after recipe evolution (52.548561ms)
+✔ moving fast projectiles use their whole segment; spatial queries match brute force (0.771823ms)
+✔ boss center shots hit the player body in every chapter and phase, but remain dodgeable (2.978098ms)
+✔ evolution requires the actual recipe, and rabbit synergy changes firing speed (0.288603ms)
+✔ pickup saturation conserves experience, entity budgets remain bounded (4.698223ms)
+✔ stacked chests at the pickup cap retain every upgrade and coin reward (0.773825ms)
+✔ final boss is reserved even in a full horde; time alone is never victory (1.128545ms)
+✔ level, treasure and pause freeze the clock; choices cannot overfill slots (0.627491ms)
+✔ dash invulnerability and cancellation of skill when paused are real combat rules (0.337205ms)
+✔ lethal contact cannot be hidden by a same-frame level-up or treasure pickup (0.194425ms)
+✔ lethal danger resolves before a same-frame level-up pickup (0.281072ms)
+✔ shrines are single-use and save across restoration (0.376362ms)
+✔ corrupt saves reject incompatible versions, nonfinite data, unknown equipment and duplicate entities (1.70382ms)
+✔ all nine guardians can finish a gentle first expedition; later chapters reach their own final bosses (5902.17881ms)
+✔ every guardian casts from upper-body height; fast shots sweep the target body (1.600808ms)
+✔ rank five + one relic evolves; discovery guarantees progress without erasing other choices (0.597397ms)
+✔ all four resonances activate at two ranks and produce their advertised combat effects (0.798481ms)
+✔ thirty chained kills trigger a bounded overdrive; inactivity breaks a chain (0.423041ms)
+✔ renewal state survives reload; old saves keep original expedition length; malformed new state fails closed (2.043127ms)
+✔ evolved sun adds two rays and evolved clock holds enemies between ticks (0.231199ms)
+✔ fixed simulation interpolates continuous movement and gait at 60, 90, 120 and 144 Hz (5.874208ms)
+✔ hidden echo performs a real second cast after its delay and persists the pending attack (1.610453ms)
+✔ mirror dash converts actual enemy shots into damaging allied projectiles (0.684505ms)
+✔ stationary time pocket freezes nearby enemies; moving releases them (0.504611ms)
+✔ doorway dash returns to its actual origin without interpolating across the teleport (0.473915ms)
+✔ relic awakenings change reflection, skill-time and dash attacks rather than just stats (0.4636ms)
+✔ endless bosses reserve capacity and keep cycling without time-triggered victory (0.285038ms)
+✔ seeded night rules, transactional encounter choices and growth history restore exactly (22.486569ms)
+✔ endless limit break continues actual weapon growth beyond complete equipment and level 99 (1.362319ms)
+✔ renewal curves slow levels, diminish memories and let enemies catch up (0.468447ms)
+✔ rank ten memories and capped late elites restore (1.025775ms)
+✔ initial chapter milestones stay intact; post-clear bosses arrive every sixty seconds (4.152001ms)
+✔ boss pressure increases without exceeding persisted finite HP and movement bounds (8.537305ms)
+✔ line lanes and annulus holes agree with their visible geometry; dash awards once per danger (2.105429ms)
+✔ all six concepts produce bounded, restorable dangers; malformed shapes fail closed (15.392692ms)
+✔ overtime guardians resist permanent stillness but active time skills remain useful (0.81143ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6320.685788

@@ -28,7 +28,7 @@ export const WEAPONS = [
   weapon('frost','실버 스톰','snow_rabbit','#a6e5fa','❄','frost',23,1.1,'관통 얼음창. 적의 걸음을 늦춥니다.','frost','프로즌 월드'),
   weapon('dream','슬립리스 나이트','night_rabbit','#d0b0f4','☽','field',16,2.4,'꿈의 씨앗이 지속 피해 장판을 만듭니다.','roots','깨어나지 않는 밤'),
   weapon('glass','크리스탈 킥','cinderella','#f5b5d0','♢','glass',25,1.05,'엇갈리는 유리창과 파편 폭발.','mirror','미드나잇 미라클'),
-  weapon('sun','헤븐리 루어','silver_rabbit','#eee2a7','☀','sun',28,1.6,'태양 광선이 적의 대열을 가릅니다.','lantern','새벽의 행진'),
+  weapon('sun','헤븐리 루어','silver_rabbit','#eee2a7','☀','sun',42,1.25,'태양 광선이 적의 대열을 가릅니다.','lantern','새벽의 행진'),
   weapon('clock','시계의 정원','time_ruler','#bfc0f7','◷','clock',16,2.5,'멈춘 시계가 적을 늦추며 공격합니다.','hourglass','스톱 더 월드'),
   weapon('storm','태풍의 눈','storm_sage','#94d6c4','≋','orbit',18,.65,'몸을 도는 바람의 칼날이 길을 엽니다.','feather','끝없는 바람'),
   weapon('thunder','천둥의 연쇄','lightning_sage','#f3db89','ϟ','chain',33,1.9,'가장 강한 적부터 이어지는 번개.','prism','천 갈래 벼락'),
@@ -92,7 +92,7 @@ export const ACHIEVEMENTS = [
   {id:'travelers',name:'아홉 개의 이야기',text:'수호자 아홉 명으로 원정 마치기',reward:100}
 ];
 
-export const RUN_MODES=[{id:'expedition',name:'짧은 원정',text:'2·3·4분 · 마지막 보스와 새벽',mark:'moon'},{id:'endless',name:'끝없는 밤',text:'시간 제한 없이 · 더 거세지는 순환',mark:'infinity'}];
+export const RUN_MODES=[{id:'expedition',name:'짧은 원정',text:'2·3·4분 · 마지막 보스와 새벽',mark:'moon'},{id:'endless',name:'끝없는 밤',text:'새벽 이후 매분 · 더 강한 파수꾼',mark:'infinity'}];
 export const OMENS=[
   {id:'comet',name:'유성이 내리는 밤',text:'경험치 +25% · 군세 사이로 별비가 내려요.',color:'#a1e2ee'},
   {id:'hunter',name:'보물을 좇는 밤',text:'정예가 자주 출현 · 도망치는 보물을 추적하세요.',color:'#eccd92'},
@@ -103,7 +103,7 @@ export const OMEN=Object.fromEntries(OMENS.map(o=>[o.id,o]));
 export const SECRETS=[
   {id:'echo',name:'두 번째 심장',text:'모든 무기가 0.3초 뒤 한 번 더 공격해요. 같은 공격이 별개의 순간에 겹칩니다.',hint:'별의 제단을 두 번 방문하거나, 낯선 거래를 받아들이세요.',color:'#8ce3df',art:0},
   {id:'mirror',name:'달의 반대편',text:'회피하면 주변의 보스탄이 적을 추적하는 아군 탄환으로 뒤집혀요.',hint:'필살기를 세 번 사용한 밤에는 달의 뒷면이 열려요.',color:'#efbad8',art:1},
-  {id:'pocket',name:'멈춘 방',text:'0.5초 멈춰 서면 가까운 적의 시간이 멎어요. 움직이면 시간이 다시 흐릅니다.',hint:'위험한 전장에서 다섯 초 동안 자리를 지켜보세요.',color:'#b6cdfb',art:2},
+  {id:'pocket',name:'멈춘 방',text:'0.5초 멈춰 서면 가까운 적의 시간이 멎어요. 움직이면 시간이 다시 흐릅니다. 보스는 정지에 저항하며, 새벽 이후의 보스는 이 시간장에 멎지 않아요.',hint:'위험한 전장에서 다섯 초 동안 자리를 지켜보세요.',color:'#b6cdfb',art:2},
   {id:'portal',name:'새벽의 문',text:'회피한 자리에 왕복 문을 남겨요. 6초 안에 다시 회피하면 그 자리로 돌아옵니다.',hint:'한 원정에서 여섯 번 회피하면 돌아가는 길을 만나요.',color:'#edda9e',art:3}
 ];
 export const SECRET=Object.fromEntries(SECRETS.map(s=>[s.id,s]));

@@ -1,0 +1,25 @@
+exec(open('/workspace/review/ordeal/research.py').read().split('with concurrent.futures.ThreadPoolExecutor')[0])
+SOURCES=[
+('godot-weapon-smooth','en','community','https://forum.godotengine.org/t/weapon-flipping-horizontally-not-smooth/82460.json'),
+('godot-weapon-pivot','en','community','https://forum.godotengine.org/t/flipping-across-an-axis-for-a-weapon-under-a-player-node/81207.json'),
+('godot-scale-body','en','community','https://forum.godotengine.org/t/scaling-character-body-2d-not-working-properly/72899.json'),
+('pokero-ui-current','en','community','https://raw.githubusercontent.com/pagefaultgames/pokerogue/main/src/ui/handlers/menu-ui-handler.ts'),
+('qiita-animation','ja','community','https://qiita.com/api/v2/items?query=Godot%20AnimatedSprite2D&per_page=8'),
+('qiita-sprite','ja','community','https://qiita.com/api/v2/items?query=%E3%82%B9%E3%83%97%E3%83%A9%E3%82%A4%E3%83%88%20%E5%B7%A6%E5%8F%B3&per_page=8'),
+('zenn-animation','ja','community','https://zenn.dev/api/articles?topicname=godot&count=8'),
+('egret-bones','zh','community','https://raw.githubusercontent.com/egret-labs/egret-core/master/README_CN.md'),
+('cocos-guide','zh','community','https://raw.githubusercontent.com/cocos/cocos-docs/master/zh/asset-workflow/sprite.md'),
+('cocos-animation','zh','community','https://raw.githubusercontent.com/cocos/cocos-docs/master/zh/animation/animation-clip.md'),
+('godotkr','ko','community','https://raw.githubusercontent.com/Happyryu/Godot3D/main/README.md'),
+('brotato-steam','en','game','https://store.steampowered.com/app/1942280/Brotato/'),
+('deathmustdie-steam','en','game','https://store.steampowered.com/app/2334730/Death_Must_Die/'),
+('boneraiser-steam','en','game','https://store.steampowered.com/app/1944570/Boneraiser_Minions/'),
+('halls-torment','en','game','https://store.steampowered.com/app/2218750/Halls_of_Torment/'),
+('soulstone','en','game','https://store.steampowered.com/app/2066020/Soulstone_Survivors/'),
+('magic-survival','ko','game','https://play.google.com/store/apps/details?id=com.vkslrzm.Zombie'),
+('survivorio','en','game','https://play.google.com/store/apps/details?id=com.dxx.firenow'),
+('spellbook','en','game','https://azazeal.itch.io/spellbook-demonslayers'),
+]
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool: result=list(pool.map(fetch,SOURCES))
+(ROOT/'extra-sources.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+for r in result:print(r['id'],r.get('status'),r.get('bytes',0),r.get('error',''))

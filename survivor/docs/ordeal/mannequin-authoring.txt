@@ -1,0 +1,24 @@
+import {createRequire} from 'node:module';
+const sharp=createRequire('/workspace/Studying/package.json')('sharp');
+import fs from 'node:fs/promises';
+const dir='/workspace/Studying/survivor/assets/ordeal/sources';await fs.mkdir(dir,{recursive:true});
+for(const [name,body] of [['short',140],['adult',212]]){
+ const cell=512,ground=474,chin=ground-body,top=chin-144,pelvis=chin+body*.46;
+ let shapes='';
+ for(let row=0;row<4;row++)for(let phase=0;phase<4;phase++){
+  const x=phase*cell,y=row*cell,side=row>1,flip=row===3?-1:1,stride=[28,0,-28,0][phase];
+  const leg=(sx,dx)=>`<path d="M ${sx} ${pelvis} Q ${sx+dx*.4} ${pelvis+(ground-pelvis)*.52} ${sx+dx} ${ground-10}" fill="none" stroke="#a9afb8" stroke-width="32" stroke-linecap="round"/><path d="M ${sx+dx-10} ${ground-8} h 24" stroke="#a9afb8" stroke-width="20" stroke-linecap="round"/>`;
+  shapes+=`<g transform="translate(${x},${y})"><path d="M100 ${ground+1}H412" stroke="#6ecabb" stroke-width="2"/>`;
+  shapes+=leg(side?252:236,side?stride:-stride)+leg(side?259:276,side?-stride:stride);
+  shapes+=`<path d="M${side?234:216} ${chin+13} Q256 ${chin-2} ${side?276:296} ${chin+13} L${side?280:292} ${pelvis} Q256 ${pelvis+15} ${side?232:220} ${pelvis}Z" fill="#bdc3cb" stroke="#939ba8" stroke-width="3"/>`;
+  shapes+=`<path d="M${side?247:216} ${chin+23} L${side?247+stride*.4:195} ${pelvis-2}" stroke="#bdc3cb" stroke-width="25" stroke-linecap="round"/>`;
+  if(!side)shapes+=`<path d="M296 ${chin+23}L317 ${pelvis-2}" stroke="#bdc3cb" stroke-width="25" stroke-linecap="round"/>`;
+  shapes+=`<ellipse cx="${side?252:256}" cy="${top+72}" rx="${side?67:80}" ry="72" fill="#dce0e6" stroke="#939ba8" stroke-width="3"/>`;
+  if(side)shapes+=`<path d="M${252-flip*66} ${top+81} l ${-flip*9} 5 l ${flip*9} 8" fill="#c7cdd6" stroke="#939ba8" stroke-width="2"/>`;
+  else if(row===0)shapes+=`<circle cx="232" cy="${top+90}" r="5" fill="#949ca9"/><circle cx="280" cy="${top+90}" r="5" fill="#949ca9"/>`;
+  shapes+='</g>';
+ }
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="2048" viewBox="0 0 2048 2048">${shapes}</svg>`;
+ await sharp(Buffer.from(svg)).png().toFile(dir+`/mannequin-${name}.png`);
+}
+console.log('Two fixed head-unit geometry/pose references saved; face identity is deliberately absent.');

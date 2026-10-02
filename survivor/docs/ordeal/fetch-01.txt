@@ -1,0 +1,73 @@
+import concurrent.futures, hashlib, json, re, urllib.request, urllib.parse
+from html.parser import HTMLParser
+from pathlib import Path
+ROOT=Path('/workspace/review/ordeal/research');ROOT.mkdir(parents=True,exist_ok=True)
+SOURCES=[
+('godot-sprite','en','engine','https://docs.godotengine.org/en/stable/classes/class_sprite2d.html'),
+('godot-animated','en','engine','https://docs.godotengine.org/en/stable/classes/class_animatedsprite2d.html'),
+('godot-skeleton','en','engine','https://docs.godotengine.org/en/stable/tutorials/animation/2d_skeletons.html'),
+('spine-mesh','en','rig','https://esotericsoftware.com/spine-meshes'),
+('spine-weights','en','rig','https://esotericsoftware.com/spine-weights'),
+('spine-animation','en','rig','https://esotericsoftware.com/spine-animating'),
+('spine-skins','en','rig','https://esotericsoftware.com/spine-skins'),
+('krita-mask','en','art','https://docs.krita.org/en/reference_manual/layers_and_masks/transformation_masks.html'),
+('krita-animation','en','art','https://docs.krita.org/en/user_manual/animation.html'),
+('blender-ortho','en','art','https://docs.blender.org/manual/en/latest/render/cameras.html'),
+('texturepack','en','atlas','https://www.codeandweb.com/texturepacker/documentation/texture-settings'),
+('hf-ipadapter','en','generation','https://huggingface.co/docs/diffusers/using-diffusers/ip_adapter'),
+('hf-controlnet','en','generation','https://huggingface.co/docs/diffusers/using-diffusers/controlnet'),
+('vnccs','en','community','https://raw.githubusercontent.com/AHEKOT/ComfyUI_VNCCS/main/README.md'),
+('dragonbones','en','community','https://raw.githubusercontent.com/DragonBones/DragonBonesJS/master/README.md'),
+('aseprite-tags','en','art','https://www.aseprite.org/docs/tags/'),
+('aseprite-onion','en','art','https://www.aseprite.org/docs/onion-skinning/'),
+('phaser-animation','en','engine','https://docs.phaser.io/phaser/concepts/animations'),
+('phaser-atlas','en','engine','https://docs.phaser.io/phaser/concepts/textures'),
+('pixi-performance','en','engine','https://pixijs.com/8.x/guides/concepts/performance-tips'),
+('canvas-performance','en','engine','https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas'),
+('pointer-capture','en','input','https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events'),
+('pokero','en','game','https://pokerogue.net/'),
+('pokero-ui','en','community','https://raw.githubusercontent.com/pagefaultgames/pokerogue/main/src/ui/menu-ui-handler.ts'),
+('holocure','en','game','https://kay-yu.itch.io/holocure'),
+('20min','en','game','https://flanne.itch.io/10-minutes-till-dawn'),
+('brotato','en','game','https://blobfish.itch.io/brotato'),
+('boneraiser','en','game','https://caiys.itch.io/boneraiser-minions'),
+('vampire','en','game','https://poncle.itch.io/vampire-survivors'),
+('deathmustdie','en','game','https://realm-archive.itch.io/death-must-die'),
+('jsgame','en','community','https://raw.githubusercontent.com/kittykatattack/learningPixi/master/README.md'),
+('chibi-jp','ja','community','https://tips.clip-studio.com/ja-jp/articles/1861'),
+('chibi-cn','zh','community','https://tips.clip-studio.com/zh-cn/articles/1861'),
+('godot-ja','ja','engine','https://docs.godotengine.org/ja/stable/tutorials/2d/2d_sprite_animation.html'),
+('godot-ko','ko','engine','https://docs.godotengine.org/ko/stable/tutorials/2d/2d_sprite_animation.html'),
+('spine-cn','zh','rig','https://zh.esotericsoftware.com/spine-meshes'),
+('spine-ja','ja','rig','https://ja.esotericsoftware.com/spine-weights'),
+('godot-community','en','community','https://forum.godotengine.org/search.json?q=flip_h%20weapon'),
+('reddit-art','en','community','https://www.reddit.com/r/gamedev/search.json?q=consistent%20sprite%20animation&restrict_sr=on&limit=5'),
+('search-ja','ja','search','https://www.google.com/search?q='+urllib.parse.quote('スプライト 左右反転 武器 歩行 アニメーション ピボット')),
+('search-ko','ko','search','https://www.google.com/search?q='+urllib.parse.quote('게임 스프라이트 캐릭터 일관성 좌우 걷기 애니메이션')),
+('search-cn','zh','search','https://www.google.com/search?q='+urllib.parse.quote('2D 骨骼动画 角色 一致性 左右 镜像 武器')),
+]
+class Text(HTMLParser):
+    def __init__(self):super().__init__();self.parts=[];self.skip=0
+    def handle_starttag(self,t,a):
+        if t in ('style','script'):self.skip+=1
+    def handle_endtag(self,t):
+        if t in ('style','script') and self.skip:self.skip-=1
+    def handle_data(self,s):
+        if not self.skip and s.strip():self.parts.append(s.strip())
+def fetch(spec):
+    id,language,kind,url=spec;result={'id':id,'language':language,'kind':kind,'url':url}
+    try:
+        req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+        with urllib.request.urlopen(req,timeout=24) as r:
+            raw=r.read(3000000);result.update(status=r.status,final_url=r.url,content_type=r.headers.get('Content-Type',''))
+        text=raw.decode('utf-8','replace')
+        if '<html' in text[:2000].lower() or '<!doctype' in text[:200].lower():
+            p=Text();p.feed(text);text='\n'.join(p.parts)
+        (ROOT/(id+'.txt')).write_text(text)
+        result.update(bytes=len(raw),text_sha256=hashlib.sha256(text.encode()).hexdigest(),text_file=id+'.txt')
+    except Exception as e:result.update(status=getattr(e,'code',None),error=str(e))
+    return result
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+    result=list(pool.map(fetch,SOURCES))
+(ROOT/'sources.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+for r in result:print(r['id'],r.get('status'),r.get('bytes',0),r.get('error',''))

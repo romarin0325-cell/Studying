@@ -1,0 +1,44 @@
+[
+  {
+    "path": "survivor/assets/ordeal/sources/mannequin-short.png",
+    "bytes": 82924,
+    "sha256": "1974edb003563b3b882cae753f2bc0e4b8ca4abb1aa7a3d9936a0cb248449eba",
+    "status": "geometry reference, not cast art"
+  },
+  {
+    "path": "survivor/assets/ordeal/sources/menu.png",
+    "bytes": 2459224,
+    "sha256": "f833d8d468ce7016b231469f960c8a2905c012c6aca662a0e47b92372c385723",
+    "status": "adopted original"
+  },
+  {
+    "path": "survivor/assets/ordeal/sources/bosses.png",
+    "bytes": 3397606,
+    "sha256": "60db2d84d2c3cfeca0e79c5a7589155b2f7921863e9df2a42bf9e421d6e5abbe",
+    "status": "adopted original"
+  },
+  {
+    "path": "survivor/assets/ordeal/sources/mannequin-adult.png",
+    "bytes": 95845,
+    "sha256": "50018066e84e245209026dea91a85f51c12aa513e3affd0a64b6a523939059da",
+    "status": "geometry reference, not cast art"
+  },
+  {
+    "path": "survivor/assets/ordeal/trials/jasmine.png",
+    "bytes": 2557921,
+    "sha256": "4754941232139d6dd20072d94836eeb98f73ef24d3458ef2e009c1738a4d1048",
+    "status": "rejected generation trial"
+  },
+  {
+    "path": "survivor/assets/ordeal/trials/silver.png",
+    "bytes": 1755582,
+    "sha256": "2e27477ad039c804deeb27768a5ff21ea0b8e801bf1c3bc21646750b4bf5bab7",
+    "status": "rejected generation trial"
+  },
+  {
+    "path": "survivor/assets/ordeal/trials/time.png",
+    "bytes": 2089841,
+    "sha256": "fdb15699251d5ace9dd42e6b61668fb809b9d3d161f947e00627f85036b635e6",
+    "status": "rejected generation trial"
+  }
+]

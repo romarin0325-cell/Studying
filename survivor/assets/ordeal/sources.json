@@ -1,0 +1,22 @@
+[
+  {
+    "id": "menu",
+    "source": "survivor/assets/ordeal/sources/menu.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "reference": null,
+    "review": "Eight illustrated fantasy menu objects; native alpha reviewed on dark and light mattes. Home, codex, memory, records / resume, save, settings, finish."
+  },
+  {
+    "id": "ordeal-bosses",
+    "source": "survivor/assets/ordeal/sources/bosses.png",
+    "kind": "actors",
+    "columns": 2,
+    "rows": 3,
+    "cell": 224,
+    "reference": null,
+    "review": "Thorn deer / clock seraph / eclipse manta. Two genuinely distinct poses per boss. Native alpha and row seams checked separately."
+  }
+]
