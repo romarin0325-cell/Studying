@@ -1,0 +1,3 @@
+cocos-flip-zh 200
+bing-ko 200
+bing-ja 200

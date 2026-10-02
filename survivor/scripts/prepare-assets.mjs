@@ -33,6 +33,7 @@ manifest.renewal={source:specsPath,sha256:sha(specsBytes),references:[]};
 const specs=JSON.parse(specsBytes);
 const bounds=alphaBounds;
 const reverieSource='survivor/assets/reverie/sources.json',reverieBytes=await fs.readFile(path.join(root,reverieSource));manifest.reverie={source:reverieSource,sha256:sha(reverieBytes)};specs.push(...JSON.parse(reverieBytes));
+const ordealSource='survivor/assets/ordeal/sources.json',ordealBytes=await fs.readFile(path.join(root,ordealSource));manifest.ordeal={source:ordealSource,sha256:sha(ordealBytes)};specs.push(...JSON.parse(ordealBytes));
 for(const spec of specs){
   const raw=await fs.readFile(path.join(root,spec.source));const meta=await sharp(raw).metadata();let bytes;
   if(spec.reference){const reference=await fs.readFile(path.join(root,spec.reference));manifest.renewal.references.push({source:spec.reference,sha256:sha(reference)});}
@@ -52,15 +53,30 @@ for(const spec of specs){
     }
     const cell=spec.cell,walking=spec.kind==='walk',actor=spec.kind==='actors';
     if(walking&&profile.frames[spec.id.slice(5)].walkSourceSha256!==sha(raw))throw new Error('Walking anatomical profile source changed: '+spec.id);
-    const composites=[];
+    const composites=[],normalizedWalk=[];
     for(let i=0;i<frames.length;i++){
       const {frame,bounds:b}=frames[i];
-      if(walking){const body=profile.frames[spec.id.slice(5)],sample=await walkLandmarks(frame,body.walk);let normalized;try{normalized=await anatomicalFrame(frame,{...sample,targetHead:body.targetHead/512*160,targetBody:body.canonical.targetBody/512*160,cell,baseline:cell*.9375});}catch(error){throw new Error(spec.id+' frame '+i+': '+error.message);}composites.push({input:normalized.bytes,left:i%spec.columns*cell,top:Math.floor(i/spec.columns)*cell});proofs.push({id:spec.id,frame:i,removed:frames[i].removed,landmarks:sample,headScale:normalized.headScale,bodyScale:normalized.bodyScale,root:normalized.root});continue;}
-      const group=frames.slice(Math.floor(i/4)*4,Math.floor(i/4)*4+4);const scale=actor?Math.min((cell-20)/Math.max(...group.map(f=>f.bounds.width)),(cell-24)/Math.max(...group.map(f=>f.bounds.height))):Math.min((cell-20)/b.width,(cell-20)/b.height),width=Math.max(1,Math.round(b.width*scale)),height=Math.max(1,Math.round(b.height*scale));
+      if(walking){
+        const body=profile.frames[spec.id.slice(5)],view=Math.floor(i/4),sample=await walkLandmarks(frame,{...body.walk.views[view],rootX:body.walk.phaseRoots?.[view]?.[i%4]??body.walk.views[view].rootX}).catch(error=>{throw new Error(spec.id+' frame '+i+': '+error.message);});let normalized;
+        if(view===3&&body.mirrorRight){
+          // Raster flip reflects about (cell-1)/2. Translate one pixel to keep
+          // the exact anatomical pivot at cell/2; transparent gutters permit it.
+          const reflected=await sharp(normalizedWalk[i-4]).flop().extend({left:1,right:0,top:0,bottom:0,background:'#00000000'}).extract({left:0,top:0,width:cell,height:cell}).png().toBuffer();
+          const original=proofs.find(p=>p.id===spec.id&&p.frame===i-4);normalized={...original,bytes:reflected};
+        }else try{normalized=await anatomicalFrame(frame,{...sample,referenceFoot:body.walk.views[view].foot,targetTorso:body.targetTorso/512*160,targetHead:body.targetHead/512*160,targetBody:body.canonical.targetBody/512*160,cell,baseline:cell*.9375});}catch(error){throw new Error(spec.id+' frame '+i+': '+error.message);}
+        normalizedWalk.push(normalized.bytes);composites.push({input:normalized.bytes,left:i%spec.columns*cell,top:view*cell});proofs.push({id:spec.id,frame:i,removed:frames[i].removed,landmarks:view===3&&body.mirrorRight?normalized.landmarks:sample,sourceFrame:spec.sequence?.[view===3&&body.mirrorRight?i-4:i]??(view===3&&body.mirrorRight?i-4:i),headScale:normalized.headScale,bodyScale:normalized.bodyScale,torsoScale:normalized.torsoScale,legScale:normalized.legScale,root:normalized.root,mirroredFrom:view===3&&body.mirrorRight?i-4:undefined});continue;
+      }
+      const group=frames.slice(Math.floor(i/spec.columns)*spec.columns,Math.floor(i/spec.columns)*spec.columns+spec.columns);const scale=actor?Math.min((cell-20)/Math.max(...group.map(f=>f.bounds.width)),(cell-24)/Math.max(...group.map(f=>f.bounds.height))):Math.min((cell-20)/b.width,(cell-20)/b.height),width=Math.max(1,Math.round(b.width*scale)),height=Math.max(1,Math.round(b.height*scale));
       const input=await sharp(frame).extract(b).resize(width,height).png().toBuffer();
       composites.push({input,left:i%spec.columns*cell+Math.round((cell-width)/2),top:Math.floor(i/spec.columns)*cell+((walking||actor)?Math.round(cell*.9375)-height:Math.round((cell-height)/2))});
     }
     bytes=await sharp({create:{width:cell*spec.columns,height:cell*spec.rows,channels:4,background:'#00000000'}}).composite(composites).webp({quality:90,alphaQuality:100}).toBuffer();
+    if(walking){
+      const id=spec.id.slice(5),body=profile.frames[id],sample=await walkLandmarks(frames[1].frame,{...body.walk.views[0],rootX:body.walk.phaseRoots?.[0]?.[1]??body.walk.views[0].rootX});
+      const full=await anatomicalFrame(frames[1].frame,{...sample,referenceFoot:body.walk.views[0].foot,targetHead:body.targetHead,targetBody:body.canonical.targetBody,targetTorso:body.targetTorso,cell:512,baseline:480});
+      const preview=await sharp(full.bytes).resize(384,384).webp({quality:93,alphaQuality:100}).toBuffer(),file='full-'+id+'.webp';await fs.writeFile(path.join(out,file),preview);
+      manifest.assets.push({id:'full-'+id,source:spec.source,sourceSha256:sha(raw),file:'prepared/'+file,sha256:sha(preview),bytes:preview.length});
+    }
     if(walking)manifest.frames[spec.id.slice(5)].walk={texture:spec.id,columns:4,rows:4,cell,anchor:[cell/2,cell*.9375],distancePerFrame:16,displayScale:cell/160};
   }
   const file=spec.id+'.webp';await fs.writeFile(path.join(out,file),bytes);

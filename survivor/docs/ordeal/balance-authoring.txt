@@ -1,0 +1,6 @@
+import {simulateExpedition} from '/workspace/Studying/survivor/scripts/simulate.mjs';
+import {HEROES} from '/workspace/Studying/survivor/src/content.js';
+for(const h of HEROES)for(const runMode of ['expedition','endless']){
+ const {game:g,peaks}=simulateExpedition({hero:h.id,stage:'garden',difficulty:'normal',runMode,seed:2026,maxSeconds:600});
+ console.log(JSON.stringify({hero:h.id,runMode,outcome:g.mode,seconds:+g.time.toFixed(2),level:g.level,bossesKilled:g.bossesKilled,bossesSpawned:g.bossesSpawned,dashes:g.dashes,damageTaken:+g.damageTaken.toFixed(1),peaks}));
+}

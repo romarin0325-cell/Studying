@@ -26,6 +26,11 @@ const paths={
 };
 export const uiIcon=name=>`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.star}"/></svg>`;
 
+export function menuArt(name){
+  const index={home:0,book:1,memory:2,records:3,resume:4,save:5,settings:6,finish:7}[name]??0;
+  return `<span class="menu-art" style="--sprite-x:${index%4/3*100}%;--sprite-y:${Math.floor(index/4)*100}%" aria-hidden="true"></span>`;
+}
+
 export function bindFullscreen(toast,onChange){
   const root=document.documentElement;
   const active=()=>document.fullscreenElement||document.webkitFullscreenElement;

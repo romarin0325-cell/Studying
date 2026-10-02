@@ -1,0 +1,32 @@
+✔ every playable hero and weapon owner has traceable, intact, alpha-bearing four-direction art (258.253358ms)
+✔ recipes refer to real relics, all nine shared identities remain distinct (0.45737ms)
+✔ new Jasmine art retains its original generated source and explicitly records review status (3.316058ms)
+✔ nine reviewed walking atlases preserve distinct poses, transparent gutters and shared references (2458.196152ms)
+✔ illustrated combat atlases have every required cell and stay inside a decoded texture budget (4717.360442ms)
+✔ anatomical profile and all frame pivots are pinned to measured source versions (2.620988ms)
+✔ atlas cleanup removes neighboring cut fragments while preserving opaque white materials (20.398183ms)
+✖ unarmed side cycles are disclosed reflections; armed views retain their authored hands (45.880571ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7602.352055
+
+✖ failing tests:
+
+test at survivor/tests/assets.test.mjs:64:1
+✖ unarmed side cycles are disclosed reflections; armed views retain their authored hands (45.880571ms)
+  AssertionError [ERR_ASSERTION]: reflected alpha survives atlas compression: rumi
+      at TestContext.<anonymous> (file:///workspace/Studying/survivor/tests/assets.test.mjs:75:182)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

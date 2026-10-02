@@ -1,0 +1,71 @@
+✔ fixed-step combat restores RNG, entities and pending choices exactly (135.088591ms)
+✔ all nine starting weapons actually damage and each skill consumes charge once (15.407965ms)
+✔ all fourteen weapon behaviors deal real damage at base rank and after recipe evolution (42.357254ms)
+✔ moving fast projectiles use their whole segment; spatial queries match brute force (0.686187ms)
+✔ boss center shots hit the player body in every chapter and phase, but remain dodgeable (2.615036ms)
+✔ evolution requires the actual recipe, and rabbit synergy changes firing speed (0.343855ms)
+✔ pickup saturation conserves experience, entity budgets remain bounded (4.291076ms)
+✔ stacked chests at the pickup cap retain every upgrade and coin reward (0.615113ms)
+✖ final boss is reserved even in a full horde; time alone is never victory (1.531437ms)
+✔ level, treasure and pause freeze the clock; choices cannot overfill slots (0.577797ms)
+✔ dash invulnerability and cancellation of skill when paused are real combat rules (0.402641ms)
+✔ lethal contact cannot be hidden by a same-frame level-up or treasure pickup (0.242296ms)
+✔ lethal danger resolves before a same-frame level-up pickup (0.222947ms)
+✔ shrines are single-use and save across restoration (0.394939ms)
+✔ corrupt saves reject incompatible versions, nonfinite data, unknown equipment and duplicate entities (1.429227ms)
+✔ all nine guardians can finish a gentle first expedition; later chapters reach their own final bosses (5209.69305ms)
+✔ every guardian casts from upper-body height; fast shots sweep the target body (1.034878ms)
+✔ rank five + one relic evolves; discovery guarantees progress without erasing other choices (0.489558ms)
+✔ all four resonances activate at two ranks and produce their advertised combat effects (0.514896ms)
+✔ thirty chained kills trigger a bounded overdrive; inactivity breaks a chain (0.614751ms)
+✔ renewal state survives reload; old saves keep original expedition length; malformed new state fails closed (2.337409ms)
+✔ evolved sun adds two rays and evolved clock holds enemies between ticks (0.218571ms)
+✔ fixed simulation interpolates continuous movement and gait at 60, 90, 120 and 144 Hz (4.841272ms)
+✔ hidden echo performs a real second cast after its delay and persists the pending attack (1.579868ms)
+✔ mirror dash converts actual enemy shots into damaging allied projectiles (0.766454ms)
+✔ stationary time pocket freezes nearby enemies; moving releases them (0.522777ms)
+✔ doorway dash returns to its actual origin without interpolating across the teleport (0.641941ms)
+✔ relic awakenings change reflection, skill-time and dash attacks rather than just stats (0.488517ms)
+✔ endless bosses reserve capacity and keep cycling without time-triggered victory (0.406336ms)
+✔ seeded night rules, transactional encounter choices and growth history restore exactly (10.603054ms)
+✔ endless limit break continues actual weapon growth beyond complete equipment and level 99 (1.200641ms)
+✔ renewal curves slow levels, diminish memories and let enemies catch up (0.393547ms)
+✔ rank ten memories and capped late elites restore (2.178035ms)
+✔ initial chapter milestones stay intact; post-clear bosses arrive every sixty seconds (2.71295ms)
+✔ boss pressure increases without exceeding persisted finite HP and movement bounds (3.340371ms)
+✔ line lanes and annulus holes agree with their visible geometry; dash awards once per danger (1.254471ms)
+✔ all six concepts produce bounded, restorable dangers; malformed shapes fail closed (7.727247ms)
+✔ overtime guardians resist permanent stillness but active time skills remain useful (0.773495ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 37
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5528.04479
+
+✖ failing tests:
+
+test at survivor/tests/engine.test.mjs:70:1
+✖ final boss is reserved even in a full horde; time alone is never victory (1.531437ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'playing'
+  - 'victory'
+
+      at TestContext.<anonymous> (file:///workspace/Studying/survivor/tests/engine.test.mjs:72:36)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'playing',
+    expected: 'victory',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

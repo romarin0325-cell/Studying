@@ -1,0 +1,66 @@
+✔ fixed-step combat restores RNG, entities and pending choices exactly (160.948088ms)
+✔ all nine starting weapons actually damage and each skill consumes charge once (21.070561ms)
+✔ all fourteen weapon behaviors deal real damage at base rank and after recipe evolution (41.450568ms)
+✔ moving fast projectiles use their whole segment; spatial queries match brute force (0.812121ms)
+✔ boss center shots hit the player body in every chapter and phase, but remain dodgeable (3.167886ms)
+✔ evolution requires the actual recipe, and rabbit synergy changes firing speed (0.484541ms)
+✔ pickup saturation conserves experience, entity budgets remain bounded (5.119358ms)
+✔ stacked chests at the pickup cap retain every upgrade and coin reward (0.7496ms)
+✔ final boss is reserved even in a full horde; time alone is never victory (0.664745ms)
+✔ level, treasure and pause freeze the clock; choices cannot overfill slots (0.876145ms)
+✔ dash invulnerability and cancellation of skill when paused are real combat rules (0.607261ms)
+✔ lethal contact cannot be hidden by a same-frame level-up or treasure pickup (0.331937ms)
+✔ lethal danger resolves before a same-frame level-up pickup (0.365006ms)
+✔ shrines are single-use and save across restoration (0.533452ms)
+✔ corrupt saves reject incompatible versions, nonfinite data, unknown equipment and duplicate entities (1.833509ms)
+✖ all nine guardians finish a real first expedition; later chapters reach their own final bosses (941.866167ms)
+✔ every guardian casts from upper-body height; fast shots sweep the target body (1.164067ms)
+✔ rank five + one relic evolves; discovery guarantees progress without erasing other choices (0.468347ms)
+✔ all four resonances activate at two ranks and produce their advertised combat effects (0.513463ms)
+✔ thirty chained kills trigger a bounded overdrive; inactivity breaks a chain (0.362882ms)
+✔ renewal state survives reload; old saves keep original expedition length; malformed new state fails closed (1.410087ms)
+✔ evolved sun adds two rays and evolved clock holds enemies between ticks (0.251539ms)
+✔ fixed simulation interpolates continuous movement and gait at 60, 90, 120 and 144 Hz (4.358542ms)
+✔ hidden echo performs a real second cast after its delay and persists the pending attack (1.181954ms)
+✔ mirror dash converts actual enemy shots into damaging allied projectiles (1.414795ms)
+✔ stationary time pocket freezes nearby enemies; moving releases them (1.085422ms)
+✔ doorway dash returns to its actual origin without interpolating across the teleport (0.546141ms)
+✔ relic awakenings change reflection, skill-time and dash attacks rather than just stats (1.135125ms)
+✔ endless bosses reserve capacity and keep cycling without time-triggered victory (1.038613ms)
+✔ seeded night rules, transactional encounter choices and growth history restore exactly (11.300742ms)
+✔ endless limit break continues actual weapon growth beyond complete equipment and level 99 (1.090519ms)
+✔ renewal curves slow levels, diminish memories and let enemies catch up (0.449078ms)
+✔ rank ten memories and capped late elites restore (0.724262ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 32
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1291.306261
+
+✖ failing tests:
+
+test at survivor/tests/engine.test.mjs:105:1
+✖ all nine guardians finish a real first expedition; later chapters reach their own final bosses (941.866167ms)
+  AssertionError [ERR_ASSERTION]: zeke / garden
+  + actual - expected
+
+  + 'defeat'
+  - 'victory'
+
+      at TestContext.<anonymous> (file:///workspace/Studying/survivor/tests/engine.test.mjs:107:102)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'defeat',
+    expected: 'victory',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
