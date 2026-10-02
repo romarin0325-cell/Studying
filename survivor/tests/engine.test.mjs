@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game,SpatialHash,sweptHit,muzzlePoint,targetPoint,xpNeed,enemyHpScale,enemyDamageScale,metaGain} from '../src/engine.js';
-import {HEROES,HERO,WEAPONS,WEAPON,LIMITS,STAGE,EVOLUTION,BONDS} from '../src/content.js';
+import {Game,SpatialHash,sweptHit,muzzlePoint,targetPoint,xpNeed,enemyHpScale,enemyDamageScale,metaGain,ENEMY_HP_SCALE_CAP} from '../src/engine.js';
+import {HEROES,HERO,WEAPONS,WEAPON,LIMITS,STAGE,EVOLUTION,BONDS,META} from '../src/content.js';
 import {simulateExpedition} from '../scripts/simulate.mjs';
 const advance=(g,seconds,input={x:0,y:0})=>{for(let i=0;i<seconds*60;i++){g.step(1/60,input);g.drainEvents();}};
 
@@ -216,4 +216,19 @@ test('renewal curves slow levels, diminish memories and let enemies catch up',()
   assert.ok(Math.abs(foe.damage-7*1.3*enemyDamageScale(180))<1e-6);
   plain.level=4;plain.need=1;plain.xp=0;plain.mode='playing';plain.pending=0;plain.gainXP(1);
   assert.equal(plain.level,5);assert.equal(plain.need,xpNeed(5));
+  const opener=new Game({hero:'luna'});assert.equal(opener.need,8,'opening growth stays on the existing fast threshold');opener.omen='hunter';opener.recompute();opener.gainXP(8);assert.equal(opener.level,2);assert.equal(opener.need,xpNeed(2));
+  assert.ok(enemyHpScale(240)<ENEMY_HP_SCALE_CAP);assert.equal(enemyHpScale(1e7),ENEMY_HP_SCALE_CAP);
+});
+
+test('rank ten memories and capped late elites restore',()=>{
+  const meta=Object.fromEntries(META.map(m=>[m.id,m.max]));
+  const saved=new Game({hero:'luna',meta});
+  assert.equal(saved.meta.power,10);assert.deepEqual(Game.restore(saved.snapshot()).snapshot(),saved.snapshot());
+  const over=saved.snapshot();over.meta.heart=11;assert.throws(()=>Game.restore(over));
+  const late=new Game({hero:'luna',stage:'rift',difficulty:'eclipse',runMode:'endless'});late.time=2250;late.introSpawned=true;late.spawnTimer=1000;late.eliteTimer=1000;
+  const elite=late.spawnEnemy('elite',{x:late.player.x+220,y:late.player.y});
+  assert.ok(elite.hp<10000000);assert.ok(elite.maxHp<10000000);assert.equal(elite.maxHp,220*enemyHpScale(2250)*1.8*1.3);
+  assert.doesNotThrow(()=>Game.restore(late.snapshot()));
+  const ember=new Game({hero:'luna'});ember.time=180;ember.introSpawned=true;const dying=ember.spawnEnemy('ember',{x:ember.player.x+180,y:ember.player.y,hp:1,maxHp:1});ember.hit(dying,10,'star');
+  assert.ok(Math.abs(ember.hazards.at(-1).damage-10*enemyDamageScale(180))<1e-9);
 });

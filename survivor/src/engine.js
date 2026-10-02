@@ -27,7 +27,9 @@ export function xpNeed(level) {
   return Math.floor(base*scale);
 }
 export function metaGain(level,base){return base*(1-Math.pow(0.9,level))/0.1;}
-export function enemyHpScale(time){const current=1+time/130,chase=1+Math.pow(time/180,3);return current*chase;}
+const ELITE_BASE_HP=220,ENEMY_HP_SAVE_LIMIT=10000000;
+export const ENEMY_HP_SCALE_CAP=(ENEMY_HP_SAVE_LIMIT-1)/(ELITE_BASE_HP*Math.max(...Object.values(DIFFICULTY).map(d=>d.hp))*Math.max(...Object.values(STAGE).map(s=>s.danger)));
+export function enemyHpScale(time){const current=1+time/130,chase=1+Math.pow(time/180,3);return Math.min(current*chase,ENEMY_HP_SCALE_CAP);}
 export function enemyDamageScale(time){return 1+0.4*Math.pow(time/180,2);}
 export class SpatialHash {
   constructor(size=96){this.size=size;this.cells=new Map();this.maxRadius=0;}
@@ -85,7 +87,7 @@ export class Game {
     const p=this.player,side=Math.floor(random(this)*4),along=random(this)*2-1,scale=enemyHpScale(this.time),damageScale=enemyDamageScale(this.time);
     const rx=Math.min(550,this.view.w/2+38),ry=Math.min(550,this.view.h/2+38);
     const spawnX=p.x+(side<2?(side===0?-rx:rx):along*rx),spawnY=p.y+(side>=2?(side===2?-ry:ry):along*ry);
-    const defaults={wisp:[18,52,12,7],beetle:[60,27,20,12],moth:[32,38,16,9],stalker:[26,62,13,10],ember:[36,40,15,10],elite:[220,38,28,16],boss:[1000,25,45,24]};const [hp,speed,radius,damage]=defaults[kind]||defaults.wisp;
+    const defaults={wisp:[18,52,12,7],beetle:[60,27,20,12],moth:[32,38,16,9],stalker:[26,62,13,10],ember:[36,40,15,10],elite:[ELITE_BASE_HP,38,28,16],boss:[1000,25,45,24]};const [hp,speed,radius,damage]=defaults[kind]||defaults.wisp;
     const d=DIFFICULTY[this.difficulty],st=STAGE[this.stage],e={id:this.uid++,kind,x:clamp(spawnX,55,WORLD-55),y:clamp(spawnY,55,WORLD-55),hp:hp*scale*d.hp*st.danger,maxHp:hp*scale*d.hp*st.danger,speed:speed*(1+Math.min(this.time/1200,.3)),radius,damage:damage*d.damage*damageScale,elite:kind==='elite',boss:kind==='boss',phase:0,ai:1.5+random(this)*2,slow:0,freeze:0,burn:0,burnDamage:0,burnTick:.5,flash:0,knockX:0,knockY:0,charge:0,angle:0,final:false,variant:Math.floor(random(this)*3),...options};this.enemies.push(e);return e;
   }
   director(dt){
@@ -227,7 +229,7 @@ export class Game {
       if(!enemy.boss&&random(this)<.055)this.spawnDrop('coin',enemy.x-8,enemy.y,1);
       if(!enemy.boss&&random(this)<.015)this.spawnDrop('heart',enemy.x,enemy.y+8,18);
       if(!enemy.boss&&random(this)<.0015)this.spawnDrop('magnet',enemy.x,enemy.y,1);
-      if(enemy.kind==='ember'&&this.hazards.length<LIMITS.hazards)this.hazards.push({kind:'blast',id:this.uid++,x:enemy.x,y:enemy.y,r:45,wait:.9,life:1.2,damage:10,hit:false});
+      if(enemy.kind==='ember'&&this.hazards.length<LIMITS.hazards)this.hazards.push({kind:'blast',id:this.uid++,x:enemy.x,y:enemy.y,r:45,wait:.9,life:1.2,damage:10*enemyDamageScale(this.time),hit:false});
       this.player.charge=Math.min(100,this.player.charge+(1+(enemy.elite?8:0)+(enemy.boss?20:0))*this.stats.charge);this.emit('death',{x:enemy.x,y:enemy.y,color:WEAPON[weapon]?.color||'#abcad1',elite:enemy.elite});
     }if(!periodic&&weapon==='star'&&this.stats.bonds.includes('aurora'))this.triggerBond('aurora',enemy,base*.6);return actual;
   }
@@ -344,7 +346,7 @@ export class Game {
     if(Object.hasOwn(data.player||{},'moving')&&typeof data.player.moving!=='boolean')throw new Error('Invalid movement state');
     numeric(data,['time','uid','kills','gold','level','xp','need','pending','rerolls','banishes','bossesSpawned','bossesKilled','eliteTimer','spawnTimer','nextRush','rush','rushes','ultimate','ultimateTimer','totalDamage','damageTaken','dashes','skilled','evolutions']);
     if(data.pending<0||data.pending>99||data.rerolls<0||data.rerolls>3||data.banishes<0||data.banishes>2||data.kills<0||data.gold<0)throw new Error('Invalid progression');
-    if(!data.meta||Object.values(data.meta).some(v=>!Number.isInteger(v)||v<0||v>5))throw new Error('Invalid memories');
+    if(!data.meta||typeof data.meta!=='object'||Array.isArray(data.meta)||Object.entries(data.meta).some(([id,v])=>{const def=META.find(m=>m.id===id);return !def||!Number.isInteger(v)||v<0||v>def.max;}))throw new Error('Invalid memories');
     numeric(data.view,['w','h']);if(data.view.w<100||data.view.h<100||data.view.w>3000||data.view.h>3000)throw new Error('Invalid viewport');
     const p=data.player;numeric(p,['x','y','hp','maxHp','invulnerable','dash','dashCooldown','dx','dy','facing','charge','boost','haste','recentDamage','recentTimer','healTimer']);if(p.x<0||p.y<0||p.x>WORLD||p.y>WORLD||p.hp<=0||p.hp>10000||p.maxHp<=0||p.maxHp>10000||p.charge<0||p.charge>100||!Number.isInteger(p.facing)||p.facing<0||p.facing>3)throw new Error('Invalid traveler');
     for(const [key,max] of [['enemies',LIMITS.enemies],['shots',LIMITS.shots],['drops',LIMITS.drops],['fields',LIMITS.fields],['hazards',LIMITS.hazards],['weapons',6],['relics',4],['shrines',3],['options',3],['banned',24]])if(!Array.isArray(data[key])||data[key].length>max)throw new Error('Invalid '+key);
