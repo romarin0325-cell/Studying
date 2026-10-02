@@ -141,7 +141,7 @@ function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
   const isBoss=kind==='boss',bossId=isBoss?chapter.bosses[Math.min(2,Math.floor((wave-1)/4))]:null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
-    slow:0,slowTime:0,stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0};
+    slow:0,slowTime:0,slowEffects:[],stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0};
   e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
 }
 export function attackGeometry(hero,from,to){return {kind:hero.shape,from,to,range:hero.range,radius:hero.radius,angle:Math.atan2(to.y-from.y,to.x-from.x)};}
@@ -183,8 +183,25 @@ function makeZone(s,shot,p,orbit=false){
   s.zones.push({uid:s.nextId++,source:shot.source,hero:shot.hero,rank:shot.rank,damage:shot.damage,x:p.x,y:p.y,radius,life,total:life,tick:0,orbit});
   if(s.zones.length>75)s.zones.shift();
 }
+function syncSlows(s,e){
+  e.slowEffects=e.slowEffects.filter(effect=>effect.until-s.time>1e-9);
+  e.slow=0;e.slowTime=0;
+  for(const effect of e.slowEffects){
+    if(effect.amount>e.slow){e.slow=effect.amount;e.slowTime=effect.until-s.time;}
+    else if(effect.amount===e.slow)e.slowTime=Math.max(e.slowTime,effect.until-s.time);
+  }
+}
+function addSlow(s,e,source,amount,duration){
+  // Refresh only this source. A weaker hit never borrows another effect's
+  // strength or changes its deadline; equal-strength skills also expire alone.
+  const effect=e.slowEffects.find(effect=>effect.source===source),until=s.time+duration;
+  if(effect){effect.amount=amount;effect.until=until;}
+  else e.slowEffects.push({source,amount,until});
+  syncSlows(s,e);
+}
 function slowTargets(s,targets,hero,amount,point){
-  for(const t of targets){t.slow=Math.max(t.slowTime>0?t.slow:0,hero.trait.type==='chrono'?.25+s.upgrades[hero.id]*.03:hero.id==='phantom'?.25:.4);t.slowTime=hero.trait.type==='permafrost'?Math.max(t.slowTime,2.4):2.4;}
+  const slow=hero.trait.type==='chrono'?.25+s.upgrades[hero.id]*.03:hero.id==='phantom'?.25:.4;
+  for(const t of targets)addSlow(s,t,`attack:${hero.id}`,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
 function applyHit(s,shot){
@@ -307,7 +324,7 @@ export function cast(s,id){
   else if(type==='gift'){const hero=drawHero(s);if(place(s,hero,2)<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6);}
   else if(type==='goddess'){strike(5);for(const e of targets){e.divine=3;e.divineTime=6;}s.buffs.radiance=skillDuration(s,8);}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10);}
-  else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){e.frostStacks=2;e.frostTime=6;e.slow=Math.max(e.slowTime>0?e.slow:0,.5);e.slowTime=Math.max(e.slowTime,6);}}}
+  else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){e.frostStacks=2;e.frostTime=6;addSlow(s,e,`skill:${id}`,.5,6);}}}
   else if(type==='harmony'){s.buffs.harmony=skillDuration(s,8);for(const ally of s.board)if(ally)ally.cooldown=Math.max(0,ally.cooldown-1.5);}
   else if(type==='royal'||type==='starfall'||type==='mirror'){
     const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='royal'?1.05:type==='mirror'?3:1.2;
@@ -315,8 +332,8 @@ export function cast(s,id){
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:type==='mirror'?10:32),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,cap:base*18}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
-  else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3;e.slow=.5;e.slowTime=6;}}
-  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);e.slow=.5;e.slowTime=4;}}
+  else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3;addSlow(s,e,`skill:${id}`,.5,6);}}
+  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);addSlow(s,e,`skill:${id}`,.5,4);}}
   else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
   else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);e.burn=base*.65;e.burnTime=6;e.burnOwner=id;}}
   else if(type==='plague'){for(const e of targets)addPoison(s,e,u.rank*8,12);strike(3,true);}
@@ -326,7 +343,7 @@ export function cast(s,id){
   else if(type==='rewind'){for(const e of targets){e.progress=Math.max(0,e.progress-e.speed*6);e.stun=2;}strike(3);}
   else if(type==='vortex'||type==='singularity'){
     const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80);
-    for(const e of targets){e.progress=e.progress*.35+point*.65;e.stun=type==='singularity'?2:1.5;e.slow=.6;e.slowTime=4;}
+    for(const e of targets){e.progress=e.progress*.35+point*.65;e.stun=type==='singularity'?2:1.5;addSlow(s,e,`skill:${id}`,.6,4);}
     strike(type==='singularity'?10:5);
   }else if(type==='execute'){
     const top=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<=executeThreshold(e)?30:16),id,{pure:true});
@@ -407,10 +424,10 @@ export function step(s,dt){
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;
+    syncSlows(s,e);
     if(e.burnTime>0){damage(s,e,e.burn*dt*(has(s,'ember')?1.6:1),e.burnOwner||'flame_sage',{dot:true});e.burnTime-=dt;}
     if(e.poisonTime>0){damage(s,e,e.poison*dt*3,'mushroom_king',{dot:true,pure:true});e.poisonTime-=dt;}else e.poison=0;
     if(e.hp<=0)continue;
-    if(e.slowTime>0)e.slowTime-=dt;
     if(e.exposeTime>0)e.exposeTime-=dt;else e.exposed=0;
     if(e.divineTime>0)e.divineTime=Math.max(0,e.divineTime-dt);else e.divine=0;
     if(e.frostTime>0)e.frostTime=Math.max(0,e.frostTime-dt);else e.frostStacks=0;
@@ -472,6 +489,14 @@ export function restore(raw){
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','boss','strong','last'].includes(u.priority))))return null;
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
+    const slowSources=new Set(['legacy',...Object.keys(HERO).flatMap(hero=>[`attack:${hero}`,`skill:${hero}`])]);
+    for(const e of s.enemies){
+      // Old saves have no source attribution. Preserve the remaining slow as
+      // one legacy effect whose deadline cannot be refreshed by new attacks.
+      if(e.slowEffects===undefined)e.slowEffects=e.slowTime>0&&e.slow>0?[{source:'legacy',amount:e.slow,until:s.time+e.slowTime}]:[];
+      if(!Array.isArray(e.slowEffects)||e.slowEffects.length>slowSources.size||new Set(e.slowEffects.map(effect=>effect?.source)).size!==e.slowEffects.length||e.slowEffects.some(effect=>!slowSources.has(effect?.source)||!numeric(effect,['amount','until'])||effect.amount<=0||effect.amount>=1||effect.until<0))return null;
+      syncSlows(s,e);
+    }
     if(s.shots.some(e=>!id(e?.uid)||!id(e.target)||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
     if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician')||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
     if(s.shots.some(e=>e.delay!==undefined&&e.reflected!==true||e.reflected!==undefined&&(e.reflected!==true||e.hero!=='aurora'||e.proc!==false||!numeric(e,['delay'])||e.delay<0||e.delay>.42)))return null;

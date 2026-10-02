@@ -126,7 +126,7 @@ test('relic hit modifiers, timed meteor and duplicate cadence affect actual atta
   const firstHit=(id,artifacts=[],configure=()=>{})=>{const s=solo(id,artifacts),e=target(s);configure(s,e);for(let i=0;i<180&&e.hp===e.maxHp;i++)step(s,1/60);return e.maxHp-e.hp;};
   const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
   near(firstHit('cinderella',['lens'],(_,e)=>e.boss='artificial_demon'),23*1.3);
-  near(firstHit('cinderella',['frost'],(_,e)=>{e.slow=.4;e.slowTime=5;}),23*1.25);
+  near(firstHit('cinderella',['frost'],(s,e)=>{e.slow=.4;e.slowTime=5;e.slowEffects=[{source:'attack:snow_rabbit',amount:.4,until:s.time+5}];}),23*1.25);
   near(firstHit('cinderella',['meteor'],s=>s.board[6].attacks=11),23*3.6);
   near(firstHit('snow_rabbit',['tide']),10*1.25);
   const burn=artifacts=>{const s=solo('zeke',artifacts),e=target(s);s.board[6].disabled=100;e.burn=10;e.burnTime=2;e.burnOwner='zeke';tick(s,.5);return e.maxHp-e.hp;};
