@@ -61,9 +61,9 @@ export const RELICS = [
 ].map(r=>({...r,max:3}));
 export const RELIC = Object.fromEntries(RELICS.map(r=>[r.id,r]));
 export const STAGES = [
-  {id:'garden',name:'별빛 정원',en:'THE STARLIT GARDEN',tag:'첫 번째 밤',description:'달빛이 내려앉은 정원. 흩어진 별들을 모아 새벽까지 살아남으세요.',duration:240,bg:'garden',enemy:0,boss:1,bossName:'장미의 파수꾼',color:'#9bcbbb',floor:'#1d3030',danger:1,chapter:'01',landmarks:['달의 샘','별의 등불','새벽의 기둥']},
-  {id:'cathedral',name:'빛을 잃은 성당',en:'THE HOLLOW CATHEDRAL',tag:'두 번째 밤',description:'부서진 약속이 빛을 삼켰습니다. 저주받은 회랑을 건너세요.',duration:360,bg:'world2',enemy:2,boss:2,bossName:'황혼의 심판관',color:'#baacf1',floor:'#292539',danger:1.15,chapter:'02',landmarks:['유리의 제단','그림자 성좌','멈춘 시계']},
-  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'마지막 밤',description:'검은 태양 아래 마지막 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:480,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']}
+  {id:'garden',name:'별빛 정원',en:'THE STARLIT GARDEN',tag:'첫 번째 밤',description:'달빛이 내려앉은 정원. 흩어진 별들을 모아 새벽까지 살아남으세요.',duration:120,bg:'garden',enemy:0,boss:1,bossName:'장미의 파수꾼',color:'#9bcbbb',floor:'#1d3030',danger:1,chapter:'01',landmarks:['달의 샘','별의 등불','새벽의 기둥']},
+  {id:'cathedral',name:'빛을 잃은 성당',en:'THE HOLLOW CATHEDRAL',tag:'두 번째 밤',description:'부서진 약속이 빛을 삼켰습니다. 저주받은 회랑을 건너세요.',duration:180,bg:'world2',enemy:2,boss:2,bossName:'황혼의 심판관',color:'#baacf1',floor:'#292539',danger:1.15,chapter:'02',landmarks:['유리의 제단','그림자 성좌','멈춘 시계']},
+  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'마지막 밤',description:'검은 태양 아래 마지막 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:240,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']}
 ];
 export const STAGE = Object.fromEntries(STAGES.map(s=>[s.id,s]));
 export const META = [
@@ -75,9 +75,9 @@ export const META = [
   {id:'growth',name:'기억의 정원',icon:'❀',text:'경험치 +5%',max:5,cost:40}
 ];
 export const DIFFICULTIES = [
-  {id:'gentle',name:'산책',text:'조금 더 여유로운 밤',hp:.75,damage:.7,density:.85,reward:.8},
-  {id:'normal',name:'원정',text:'별빛을 지키는 도전',hp:1,damage:1,density:1,reward:1},
-  {id:'eclipse',name:'일식',text:'더 거센 군세, 더 많은 보상',hp:1.35,damage:1.3,density:1.25,reward:1.5}
+  {id:'gentle',name:'산책',text:'처음 만나는 별 · 여유롭게 발견하는 밤',hp:.85,damage:.75,density:1,reward:.8},
+  {id:'normal',name:'원정',text:'빽빽한 군세 · 빠르게 완성하는 별자리',hp:1.35,damage:1.3,density:1.25,reward:1.2},
+  {id:'eclipse',name:'일식',text:'움직이는 저주 · 검은 태양의 유성우',hp:1.8,damage:1.65,density:1.65,reward:2}
 ];
 export const DIFFICULTY = Object.fromEntries(DIFFICULTIES.map(d=>[d.id,d]));
 export const ACHIEVEMENTS = [
@@ -90,4 +90,25 @@ export const ACHIEVEMENTS = [
   {id:'rift',name:'마지막 밤의 끝',text:'혼돈의 틈 승리',reward:120},
   {id:'eclipse',name:'검은 태양을 넘어서',text:'일식 난이도 승리',reward:100},
   {id:'travelers',name:'아홉 개의 이야기',text:'수호자 아홉 명으로 원정 마치기',reward:100}
+];
+
+export const RUN_MODES=[{id:'expedition',name:'짧은 원정',text:'2·3·4분 · 마지막 보스와 새벽',mark:'moon'},{id:'endless',name:'끝없는 밤',text:'시간 제한 없이 · 더 거세지는 순환',mark:'infinity'}];
+export const OMENS=[
+  {id:'comet',name:'유성이 내리는 밤',text:'경험치 +25% · 군세 사이로 별비가 내려요.',color:'#a1e2ee'},
+  {id:'hunter',name:'보물을 좇는 밤',text:'정예가 자주 출현 · 도망치는 보물을 추적하세요.',color:'#eccd92'},
+  {id:'silver',name:'은빛 달의 밤',text:'필살기 충전 +40% · 회피할 때 작은 별을 남겨요.',color:'#d4c4fb'},
+  {id:'bloom',name:'꽃피는 밤',text:'이동 중 꽃의 선물 · 제단이 생명을 더 나눠요.',color:'#f0bbd0'}
+];
+export const OMEN=Object.fromEntries(OMENS.map(o=>[o.id,o]));
+export const SECRETS=[
+  {id:'echo',name:'두 번째 심장',text:'모든 무기가 0.3초 뒤 한 번 더 공격해요. 같은 공격이 별개의 순간에 겹칩니다.',hint:'별의 제단을 두 번 방문하거나, 낯선 거래를 받아들이세요.',color:'#8ce3df',art:0},
+  {id:'mirror',name:'달의 반대편',text:'회피하면 주변의 보스탄이 적을 추적하는 아군 탄환으로 뒤집혀요.',hint:'필살기를 세 번 사용한 밤에는 달의 뒷면이 열려요.',color:'#efbad8',art:1},
+  {id:'pocket',name:'멈춘 방',text:'0.5초 멈춰 서면 가까운 적의 시간이 멎어요. 움직이면 시간이 다시 흐릅니다.',hint:'위험한 전장에서 다섯 초 동안 자리를 지켜보세요.',color:'#b6cdfb',art:2},
+  {id:'portal',name:'새벽의 문',text:'회피한 자리에 왕복 문을 남겨요. 6초 안에 다시 회피하면 그 자리로 돌아옵니다.',hint:'한 원정에서 여섯 번 회피하면 돌아가는 길을 만나요.',color:'#edda9e',art:3}
+];
+export const SECRET=Object.fromEntries(SECRETS.map(s=>[s.id,s]));
+export const AWAKENINGS=[
+  {id:'mirror',weapon:'glass',name:'유리의 회랑',text:'쌍성의 거울 3단계 + 미드나잇 미라클: 탄환이 전장 경계에서 두 번 튕겨 돌아와요.'},
+  {id:'hourglass',weapon:'clock',name:'시간의 주인',text:'별모래 시계 3단계 + 스톱 더 월드: 어떤 수호자의 필살기도 적과 보스탄의 시간을 2초 멈춰요.'},
+  {id:'feather',weapon:'storm',name:'바람의 발자국',text:'첫새벽의 깃털 3단계 + 끝없는 바람: 회피가 전방을 가르는 공격으로 바뀌고 더 자주 쓸 수 있어요.'}
 ];

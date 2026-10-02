@@ -510,12 +510,13 @@ function planSurvivor(plan, files, currentFiles) {
     || /^shooter\/generated-assets\/worlds\/[23]\.webp$/.test(file)
     || file === 'card/assets/Jua-Regular.ttf');
   if(!product.length&&!shared.length)return;
-  const inputs=product.filter(file=>/^survivor\/(?:src\/|assets\/|scripts\/(?:(?:build|prepare-assets|pack-jasmine)\.mjs|prepare-font\.py)$|index\.html$|package\.json$)/.test(file)).concat(shared);
+  const inputs=product.filter(file=>/^survivor\/(?:src\/|assets\/|scripts\/(?:(?:build|prepare-assets|pack-jasmine|art-normalization)\.mjs|prepare-font\.py)$|index\.html$|package\.json$)/.test(file)).concat(shared);
   const tests=currentFiles.filter(file=>/^survivor\/tests\/.*\.test\.mjs$/.test(file));
-  const unknown=product.filter(file=>!inputs.includes(file)&&!/^survivor\/(?:tests\/|dist\/|scripts\/(?:serve|simulate)\.mjs$)/.test(file));
+  const unknown=product.filter(file=>!inputs.includes(file)&&!/^survivor\/(?:tests\/|dist\/|scripts\/(?:serve|simulate|review-art)\.mjs$)/.test(file));
   if(unknown.length)plan.blocked.push('No Survivor mapping exists for: '+unknown.join(', '));
   const checks=new Set(tests);
   if(product.includes('survivor/scripts/simulate.mjs'))checks.add('survivor/tests/engine.test.mjs');
+  if(product.includes('survivor/scripts/review-art.mjs'))checks.add('survivor/tests/assets.test.mjs');
   if(inputs.length)for(const file of ['engine','profile','assets'])checks.add('survivor/tests/'+file+'.test.mjs');
   addNodeTest(plan,'survivor','survivor:contracts-and-regressions','Check Nocturne combat, persistence and canonical art contracts',[...checks]);
   if(checks.has('survivor/tests/assets.test.mjs'))plan.steps.find(s=>s.id==='survivor:contracts-and-regressions').needsInstall=true;

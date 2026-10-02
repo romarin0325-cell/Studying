@@ -5,7 +5,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/rumi.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually. Source cell 11 faces the wrong way; replaced with left passing pose 9.",
     "sequence": [
@@ -33,7 +33,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/luna.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually. Source cell 3 swaps the dagger hand; replaced with passing pose 1.",
     "sequence": [
@@ -61,7 +61,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/zeke.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually."
   },
@@ -88,7 +88,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "survivor/assets/jasmine.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually."
   },
@@ -98,7 +98,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/snow_rabbit.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually. Row boundaries corrected after packed contact-sheet review: exclude next-row ear tips from left-walking cells.",
     "yEdges": [
@@ -115,7 +115,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/night_rabbit.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually. Source frame 11 faces right, excluded; left passing frame 9 reused. Crops follow actual column gutters.",
     "sequence": [
@@ -150,7 +150,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/cinderella.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually."
   },
@@ -160,7 +160,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/silver_rabbit.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually."
   },
@@ -170,7 +170,7 @@
     "kind": "walk",
     "columns": 4,
     "rows": 4,
-    "cell": 160,
+    "cell": 208,
     "reference": "defense/assets/merge/units/time_ruler.webp",
     "review": "Direction, full body, transparent gutters and identity reviewed visually."
   },

@@ -53,6 +53,19 @@ test('Nocturne shared-art changes validate the consumer without invoking Defense
   assert.deepEqual(dedicated.blocked,[]);
 });
 
+test('Nocturne anatomical processor is a build input; review viewer checks art without releasing', () => {
+  const processor=createPlan(changes('survivor/scripts/art-normalization.mjs'));
+  assert.deepEqual(processor.blocked,[]);assert.deepEqual([...games(processor)],['survivor']);
+  assert.equal(processor.steps.filter(s=>s.id==='survivor:build').length,1);
+  assert.ok(ids(processor).includes('survivor:offline-browser'));
+  const viewer=createPlan(changes('survivor/scripts/review-art.mjs'));
+  assert.deepEqual(viewer.blocked,[]);assert.deepEqual([...games(viewer)],['survivor']);
+  assert.ok(ids(viewer).includes('survivor:contracts-and-regressions'));
+  assert.ok(ids(viewer).includes('survivor:syntax:survivor/scripts/review-art.mjs'));
+  assert.equal(ids(viewer).includes('survivor:build'),false);
+  assert.equal(ids(viewer).includes('survivor:offline-browser'),false);
+});
+
 test('Idle runtime selects its focused checks and offline artifact only', () => {
   const plan = createPlan(changes('idle/src/core/commands.js', 'idle/src/combat/engine.js', 'idle/assets/memories/bond_lumi_01.webp'));
   assert.deepEqual([...games(plan)], ['idle']);

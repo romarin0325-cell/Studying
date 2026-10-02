@@ -1,79 +1,79 @@
 {
   "version": 1,
-  "processor": "Canonical 768px portraits and reviewed uniformly scaled walking/combat atlases; native alpha; no runtime pixel processing",
-  "processorHash": "dadbdada3232d74b7d83e93d3ba31855e4aba539b17fc396f521b44682593218",
+  "processor": "Anatomically normalized cast and sole-aligned walking atlases; cleaned illustrated combat cells; native alpha; no runtime pixel processing",
+  "processorHash": "9b63b1447f800ac28bdaea0e8c84f796b8018020733766393220e00961ec87d7",
   "assets": [
     {
       "id": "unit-rumi",
       "source": "defense/assets/merge/units/rumi.webp",
       "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
       "file": "prepared/unit-rumi.webp",
-      "sha256": "8129d4aabacccf8aaf0f3648b052a9f1099094b1914af673911e66fc67de5748",
-      "bytes": 95670
+      "sha256": "ca431de5ec3cce7ddece626db8f5b0f3ed0765fd2bc0c15fce63cb55316c600b",
+      "bytes": 100472
     },
     {
       "id": "unit-luna",
       "source": "defense/assets/merge/units/luna.webp",
       "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
       "file": "prepared/unit-luna.webp",
-      "sha256": "9711417d969e9b2434b14cd2edb98595a3704fe19fd07d42b5b961861d8f2ea0",
-      "bytes": 84324
+      "sha256": "b32c295b402b2ff610f49f5ba0f7cd03d29b1f641cacb4d6f4fde6467243e097",
+      "bytes": 86050
     },
     {
       "id": "unit-zeke",
       "source": "defense/assets/merge/units/zeke.webp",
       "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
       "file": "prepared/unit-zeke.webp",
-      "sha256": "acaf5f4c9cfcc8d43bceac529d1d4f5aa4a1af2957b722d08f4f6af22c6d51d2",
-      "bytes": 104826
+      "sha256": "bf40adb254bf0ad35501f03120e7f1e3ab30fd0b0fa3524ef5d613117833101d",
+      "bytes": 111956
     },
     {
       "id": "unit-cinderella",
       "source": "defense/assets/merge/units/cinderella.webp",
       "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
       "file": "prepared/unit-cinderella.webp",
-      "sha256": "c3249b8d13f92f63ba2dcd18870fa5b1f05c7b3934e3fab6567713d7c4356f12",
-      "bytes": 150336
+      "sha256": "a9353d1181ea571d423b50d91240c7f3fe03cc7265e3ff23e8250869c7fad8dd",
+      "bytes": 142102
     },
     {
       "id": "unit-snow_rabbit",
       "source": "defense/assets/merge/units/snow_rabbit.webp",
       "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
       "file": "prepared/unit-snow_rabbit.webp",
-      "sha256": "4d9695d8d6a7e028905d02ce3ce116aef97f30599e96a18c6f455c039af0cb05",
-      "bytes": 82790
+      "sha256": "e9a15c9d73ae5d66a4661483312962911e2f95d7903de871cd3bd1c7fb32f114",
+      "bytes": 88724
     },
     {
       "id": "unit-night_rabbit",
       "source": "defense/assets/merge/units/night_rabbit.webp",
       "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
       "file": "prepared/unit-night_rabbit.webp",
-      "sha256": "bccce227e80c733db20c3cea26086da377cdd6bd641b2b6e9b362dba85ba8128",
-      "bytes": 77578
+      "sha256": "8aa08d04f9072504f19b3306e8e053ead08b562ba85b95388ff9a50a44c196e2",
+      "bytes": 81554
     },
     {
       "id": "unit-silver_rabbit",
       "source": "defense/assets/merge/units/silver_rabbit.webp",
       "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
       "file": "prepared/unit-silver_rabbit.webp",
-      "sha256": "2d7014cd8bc16a5763f467a70826f119683c6ad3ecda97814a4fff992f7bc3c0",
-      "bytes": 109376
+      "sha256": "2cb8512474064efd7631933f038c2bbbc5a49e6f6352b70b6ac5db29fdd6e878",
+      "bytes": 111162
     },
     {
       "id": "unit-time_ruler",
       "source": "defense/assets/merge/units/time_ruler.webp",
       "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
       "file": "prepared/unit-time_ruler.webp",
-      "sha256": "0d48ad57c593a417b99ea16de35ae34c5c3b59dc024a7f5f94995bf975e08c7a",
-      "bytes": 78290
+      "sha256": "8720886afb32011c559de61244728c0eb78b05274e50697aed65cae5fe80adf4",
+      "bytes": 82854
     },
     {
       "id": "unit-jasmine",
       "source": "survivor/assets/jasmine.webp",
       "sourceSha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b",
       "file": "prepared/unit-jasmine.webp",
-      "sha256": "442e921de012516d41c9d0d1bb5dbc7c692c5ce686b27b04bbaa42a40c746ec6",
-      "bytes": 131060
+      "sha256": "8d7025b0696d1a8a95b81090d6d7936f079f12ff13e46431fbb48c3d3d131a22",
+      "bytes": 148382
     },
     {
       "id": "unit-storm_sage",
@@ -120,96 +120,96 @@
       "source": "survivor/assets/renewal/sources/walk-rumi.png",
       "sourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e",
       "file": "prepared/walk-rumi.webp",
-      "sha256": "5683fdf2c6a4b2ddee0eb98b9f57ed26755b739b044a581a8386502d557d5dcb",
-      "bytes": 140324
+      "sha256": "58fbf113a7ea4afcf892788e53fea7d0ea899b46f6c1c248dc52322cc932b0e7",
+      "bytes": 160086
     },
     {
       "id": "walk-luna",
       "source": "survivor/assets/renewal/sources/walk-luna.png",
       "sourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412",
       "file": "prepared/walk-luna.webp",
-      "sha256": "2d966cc15b261253f4a8fbdcf3fddd92fa05cc9a5163374a2308cde6250a9d4a",
-      "bytes": 109406
+      "sha256": "0335899b862d7f2ead3c3565759ba2f8d35795dfe63a320cea27ed32cf20d323",
+      "bytes": 144752
     },
     {
       "id": "walk-zeke",
       "source": "survivor/assets/renewal/sources/walk-zeke.png",
       "sourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b",
       "file": "prepared/walk-zeke.webp",
-      "sha256": "2cd555b97ecf4f4280ee17a1a83582f48ff07331189ef21c3221171b2fe8c9dc",
-      "bytes": 177876
+      "sha256": "83c33307c3abb5e7580e430d90f921c114cba8a07130b660e6af491129281c6f",
+      "bytes": 178104
     },
     {
       "id": "weapons",
       "source": "survivor/assets/renewal/sources/weapons.png",
       "sourceSha256": "e1a1a2397de4a87c580894cbf837b05ebdcec12d3e1daf5dd9f08f839e39e5bb",
       "file": "prepared/weapons.webp",
-      "sha256": "8f5704f668e3c63adac7c38e44bb510ea4b5a36577e413731f46d1ef74b8a1ce",
-      "bytes": 223478
+      "sha256": "f7a592cd31afc27d65484dc446ce99d74316a7f9869a4115071635b7b465133d",
+      "bytes": 197724
     },
     {
       "id": "walk-jasmine",
       "source": "survivor/assets/renewal/sources/walk-jasmine.png",
       "sourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d",
       "file": "prepared/walk-jasmine.webp",
-      "sha256": "fc0be01fee730b3d3e940a3ea79666ff228e108e1ebb90d2a92f484289ec0997",
-      "bytes": 155110
+      "sha256": "bf4ac4e9e1ebd5af1119d4c1751a087ff14eb245d59870acfa23c73a6e0a931c",
+      "bytes": 178216
     },
     {
       "id": "walk-snow_rabbit",
       "source": "survivor/assets/renewal/sources/walk-snow_rabbit.png",
       "sourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127",
       "file": "prepared/walk-snow_rabbit.webp",
-      "sha256": "f41292bb6c895dd117b52e96ee6b510bc7ff3560f1eaf3580070e66bdb08cb5e",
-      "bytes": 132400
+      "sha256": "873cb00c00e8445e9064273368772ba6296c799a7bc905d78a1b99543a21af81",
+      "bytes": 154358
     },
     {
       "id": "walk-night_rabbit",
       "source": "survivor/assets/renewal/sources/walk-night_rabbit.png",
       "sourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6",
       "file": "prepared/walk-night_rabbit.webp",
-      "sha256": "fc9a5485f84a42ae80be285b6d58c953bb56762d7a1c9e0ba4c9c9ed04e8ac1f",
-      "bytes": 122824
+      "sha256": "9ce12dc5ae04576d00f0d6e6854ee7401dddcf2530dc503ab12f9e4973769d3f",
+      "bytes": 126912
     },
     {
       "id": "walk-cinderella",
       "source": "survivor/assets/renewal/sources/walk-cinderella.png",
       "sourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de",
       "file": "prepared/walk-cinderella.webp",
-      "sha256": "becc5a3903953664f66c8334c84e9d15eadb2727929b75019027014c9681b001",
-      "bytes": 180472
+      "sha256": "89f2ab569c9a500041c4f638392ebf35c8dea808bfc432dab18dad8a0f39374c",
+      "bytes": 204274
     },
     {
       "id": "walk-silver_rabbit",
       "source": "survivor/assets/renewal/sources/walk-silver_rabbit.png",
       "sourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902",
       "file": "prepared/walk-silver_rabbit.webp",
-      "sha256": "7966d55dec809ba0d79db9869fddccf8d1c42e8b7482555f95b0b971bd4d28fc",
-      "bytes": 136628
+      "sha256": "c71e66650b64bb65fd56c20dfd282eea54910c8013af7c502dbb3224a3772e23",
+      "bytes": 194094
     },
     {
       "id": "walk-time_ruler",
       "source": "survivor/assets/renewal/sources/walk-time_ruler.png",
       "sourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e",
       "file": "prepared/walk-time_ruler.webp",
-      "sha256": "6dd5a646c628d4c23c083accd05df2509df00658ce457e30e7dd0d06f295eed9",
-      "bytes": 115328
+      "sha256": "93e17b78047a23a19b84ef09d988bcbe72a68d91a5ce0d8312d4f59ba2d25e72",
+      "bytes": 134836
     },
     {
       "id": "relics",
       "source": "survivor/assets/renewal/sources/relics.png",
       "sourceSha256": "1c1cd5eba0509ba61f3d588d181120e9bf0654ac2ebba59c3750a35dab8adf4f",
       "file": "prepared/relics.webp",
-      "sha256": "fee357fc02df26e139864d5ffb3cf9378ea49dbaefcaf0f9248df461f421c41f",
-      "bytes": 238046
+      "sha256": "a920bea20fbd17c6f817ab79a06053eebbc9f1747d54960ea142ef2253a0ccb1",
+      "bytes": 221888
     },
     {
       "id": "bosses",
       "source": "survivor/assets/renewal/sources/bosses.png",
       "sourceSha256": "2c3f01495ca886d311f71d1c6c200488c3c1e0bb471a32f993c5eecda1d9362c",
       "file": "prepared/bosses.webp",
-      "sha256": "654f82b69748bca58ff6fbaf5fc939496f01910404b485b5805a25b1d6401c93",
-      "bytes": 371016
+      "sha256": "34fbb7279833b554815480beb0dddf744ab50db2a213cc8f9a7bbfc43255c750",
+      "bytes": 341942
     },
     {
       "id": "garden",
@@ -240,8 +240,8 @@
       "source": "survivor/assets/renewal/sources/enemies.png",
       "sourceSha256": "75efad3b3c716d20126d69a1e0b08db0d66834b127f6b2632f9ff7634cff6746",
       "file": "prepared/enemies.webp",
-      "sha256": "0902c27d4da634e5db13951e5fa7566d57cae7977ea8a9db7aff10deb9071f87",
-      "bytes": 180802
+      "sha256": "2d8fea3736921c25d5cd42c3b2d2922005216c69e23e5d410726d4e24eaf7cb0",
+      "bytes": 178298
     },
     {
       "id": "effects",
@@ -250,14 +250,30 @@
       "file": "prepared/effects.webp",
       "sha256": "5e2e245c9410a23ae860990b8cbdfe4a60f27ee443e0a25d7afe8c50503ed5cf",
       "bytes": 166472
+    },
+    {
+      "id": "lobby",
+      "source": "survivor/assets/reverie/sources/lobby.png",
+      "sourceSha256": "2ffd6e3cb6bfa3f1b500b63d9b7aa86a565ee73cab479e136cd384451f0246bb",
+      "file": "prepared/lobby.webp",
+      "sha256": "af4d1a17e4ad34d312664a4f6b7bce7df3b16cf993ca92d86ea187fa8f7c21b7",
+      "bytes": 278356
+    },
+    {
+      "id": "secrets",
+      "source": "survivor/assets/reverie/sources/secrets.png",
+      "sourceSha256": "945493352d2e12a5340eec4114e1761b64b5bba4b12b1e91bbbbd94bfdb60480",
+      "file": "prepared/secrets.webp",
+      "sha256": "bc439eb4903c85b857a13588638a095fac79d938444df6d0db663e4ad21b4bfa",
+      "bytes": 100500
     }
   ],
   "frames": {
     "rumi": {
       "portrait": {
         "x": 256,
-        "y": 232,
-        "size": 250
+        "y": 218,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -269,23 +285,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 190,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-rumi",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "luna": {
       "portrait": {
         "x": 256,
-        "y": 211,
-        "size": 250
+        "y": 218,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -297,23 +319,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 190,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-luna",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "zeke": {
       "portrait": {
         "x": 256,
-        "y": 209,
-        "size": 250
+        "y": 212,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -325,23 +353,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 196,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-zeke",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "cinderella": {
       "portrait": {
-        "x": 252,
-        "y": 190,
-        "size": 250
+        "x": 256,
+        "y": 214,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -353,23 +387,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 194,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-cinderella",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "snow_rabbit": {
       "portrait": {
         "x": 256,
         "y": 228,
-        "size": 250
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -381,23 +421,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 180,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-snow_rabbit",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "night_rabbit": {
       "portrait": {
         "x": 256,
-        "y": 221,
-        "size": 250
+        "y": 228,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -409,23 +455,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 180,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-night_rabbit",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "silver_rabbit": {
       "portrait": {
         "x": 256,
-        "y": 249,
-        "size": 250
+        "y": 228,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -437,23 +489,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 180,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-silver_rabbit",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "time_ruler": {
       "portrait": {
         "x": 256,
-        "y": 208,
-        "size": 250
+        "y": 218,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -465,23 +523,29 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 190,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-time_ruler",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "jasmine": {
       "portrait": {
         "x": 256,
-        "y": 242,
-        "size": 250
+        "y": 214,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -493,16 +557,22 @@
         "left",
         "right"
       ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 194,
+        "sole": 480
+      },
       "walk": {
         "texture": "walk-jasmine",
         "columns": 4,
         "rows": 4,
-        "cell": 160,
+        "cell": 208,
         "anchor": [
-          80,
-          150
+          104,
+          195
         ],
-        "distancePerFrame": 16
+        "distancePerFrame": 16,
+        "displayScale": 1.3
       }
     },
     "storm_sage": {
@@ -591,9 +661,2861 @@
       ]
     }
   },
+  "normalization": {
+    "source": "survivor/assets/body-profile.json",
+    "sha256": "42e6d9b7812a8a79a32001ebbdd02b6094d1ba995881667a17287a2780fa7ed4",
+    "processor": "survivor/scripts/art-normalization.mjs",
+    "processorSha256": "42777cf5e4521ae0befcaac30f3934bde770dbddc1f571901dfa465314489cf2",
+    "frames": [
+      {
+        "id": "unit-rumi",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.0052910052910053,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-rumi",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.0052910052910053,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-rumi",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.0052910052910053,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-rumi",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.0052910052910053,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-luna",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-luna",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-luna",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-luna",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-zeke",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.037037037037037,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-zeke",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.037037037037037,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-zeke",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.037037037037037,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-zeke",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.037037037037037,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-cinderella",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 0.8899082568807339,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-cinderella",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 0.8899082568807339,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-cinderella",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 0.8899082568807339,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-cinderella",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 0.8899082568807339,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-snow_rabbit",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 1.0714285714285714,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-snow_rabbit",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 1.0714285714285714,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-snow_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 1.0714285714285714,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-snow_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.993103448275862,
+        "bodyScale": 1.0714285714285714,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-night_rabbit",
+        "frame": 0,
+        "removed": 6,
+        "headScale": 0.9863013698630136,
+        "bodyScale": 0.9424083769633508,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-night_rabbit",
+        "frame": 1,
+        "removed": 6,
+        "headScale": 0.9863013698630136,
+        "bodyScale": 0.9424083769633508,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-night_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9863013698630136,
+        "bodyScale": 0.9424083769633508,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-night_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9863013698630136,
+        "bodyScale": 0.9424083769633508,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-silver_rabbit",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 1,
+        "bodyScale": 1.1042944785276074,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-silver_rabbit",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 1,
+        "bodyScale": 1.1042944785276074,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-silver_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 1,
+        "bodyScale": 1.1042944785276074,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-silver_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 1,
+        "bodyScale": 1.1042944785276074,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-time_ruler",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9795918367346939,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-time_ruler",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9795918367346939,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-time_ruler",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9795918367346939,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-time_ruler",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9795918367346939,
+        "bodyScale": 0.9895833333333334,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-jasmine",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 1.099236641221374,
+        "bodyScale": 1,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-jasmine",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 1.099236641221374,
+        "bodyScale": 1,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-jasmine",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 1.099236641221374,
+        "bodyScale": 1,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-jasmine",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 1.099236641221374,
+        "bodyScale": 1,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 81,
+          "chin": 179,
+          "rootX": 182.5,
+          "foot": 312
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 81,
+          "chin": 179,
+          "rootX": 156,
+          "foot": 312
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 80,
+          "chin": 178,
+          "rootX": 155,
+          "foot": 311
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 81,
+          "chin": 179,
+          "rootX": 132,
+          "foot": 312
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 75,
+          "chin": 173,
+          "rootX": 181,
+          "foot": 306
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 5,
+        "removed": 40,
+        "landmarks": {
+          "skullTop": 74,
+          "chin": 172,
+          "rootX": 159,
+          "foot": 305
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 74,
+          "chin": 172,
+          "rootX": 156,
+          "foot": 305
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 7,
+        "removed": 31,
+        "landmarks": {
+          "skullTop": 74,
+          "chin": 172,
+          "rootX": 133.5,
+          "foot": 305
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 8,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 76,
+          "chin": 174,
+          "rootX": 185.5,
+          "foot": 307
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 9,
+        "removed": 61,
+        "landmarks": {
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 191,
+          "foot": 300
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 10,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 75,
+          "chin": 173,
+          "rootX": 183.5,
+          "foot": 306
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 11,
+        "removed": 61,
+        "landmarks": {
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 191,
+          "foot": 300
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 68,
+          "chin": 166,
+          "rootX": 158.5,
+          "foot": 299
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 63,
+          "chin": 161,
+          "rootX": 142.5,
+          "foot": 294
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 67,
+          "chin": 165,
+          "rootX": 144.5,
+          "foot": 298
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-rumi",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 137.5,
+          "foot": 300
+        },
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.44642857142857145,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 190.5,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 164.5,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 145,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 164.5,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 4,
+        "removed": 207,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 189,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 5,
+        "removed": 200,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 169,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 6,
+        "removed": 204,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 141.5,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 7,
+        "removed": 204,
+        "landmarks": {
+          "skullTop": 77,
+          "chin": 168,
+          "rootX": 127.5,
+          "foot": 312
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 8,
+        "removed": 212,
+        "landmarks": {
+          "skullTop": 60,
+          "chin": 151,
+          "rootX": 174,
+          "foot": 295
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 9,
+        "removed": 131,
+        "landmarks": {
+          "skullTop": 60,
+          "chin": 151,
+          "rootX": 164.5,
+          "foot": 295
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 10,
+        "removed": 58,
+        "landmarks": {
+          "skullTop": 61,
+          "chin": 152,
+          "rootX": 163,
+          "foot": 296
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 11,
+        "removed": 20,
+        "landmarks": {
+          "skullTop": 61,
+          "chin": 152,
+          "rootX": 148.5,
+          "foot": 296
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 138,
+          "rootX": 168,
+          "foot": 282
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 139,
+          "rootX": 159.5,
+          "foot": 283
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 139,
+          "rootX": 150,
+          "foot": 283
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-luna",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 139,
+          "rootX": 140,
+          "foot": 283
+        },
+        "headScale": 0.4945054945054945,
+        "bodyScale": 0.4123263888888889,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 57,
+          "chin": 146,
+          "rootX": 226.5,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 205.5,
+          "foot": 284
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 57,
+          "chin": 146,
+          "rootX": 199,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 176.5,
+          "foot": 284
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 57,
+          "chin": 146,
+          "rootX": 158.5,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 5,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 57,
+          "chin": 146,
+          "rootX": 144,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 58,
+          "chin": 147,
+          "rootX": 130,
+          "foot": 286
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 57,
+          "chin": 146,
+          "rootX": 121.5,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 8,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 52,
+          "chin": 141,
+          "rootX": 226.5,
+          "foot": 280
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 50,
+          "chin": 139,
+          "rootX": 213,
+          "foot": 278
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 10,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 158.5,
+          "foot": 284
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 11,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 49,
+          "chin": 138,
+          "rootX": 204.5,
+          "foot": 277
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 135,
+          "rootX": 186.5,
+          "foot": 274
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 45,
+          "chin": 134,
+          "rootX": 174,
+          "foot": 273
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 44,
+          "chin": 133,
+          "rootX": 166.5,
+          "foot": 272
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-zeke",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 135,
+          "rootX": 165,
+          "foot": 274
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.44064748201438847,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 151,
+          "rootX": 164.5,
+          "foot": 309
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 1,
+        "removed": 19,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 151,
+          "rootX": 149,
+          "foot": 309
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 151,
+          "rootX": 163,
+          "foot": 309
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 3,
+        "removed": 8,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 150,
+          "rootX": 160.5,
+          "foot": 308
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 150,
+          "rootX": 177.5,
+          "foot": 308
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 5,
+        "removed": 58,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 150,
+          "rootX": 170.5,
+          "foot": 308
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 150,
+          "rootX": 169.5,
+          "foot": 308
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 150,
+          "rootX": 156,
+          "foot": 308
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 8,
+        "removed": 22,
+        "landmarks": {
+          "skullTop": 37,
+          "chin": 140,
+          "rootX": 182.5,
+          "foot": 298
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 9,
+        "removed": 475,
+        "landmarks": {
+          "skullTop": 36,
+          "chin": 139,
+          "rootX": 182.5,
+          "foot": 297
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 10,
+        "removed": 165,
+        "landmarks": {
+          "skullTop": 36,
+          "chin": 139,
+          "rootX": 181,
+          "foot": 297
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 11,
+        "removed": 218,
+        "landmarks": {
+          "skullTop": 36,
+          "chin": 139,
+          "rootX": 194,
+          "foot": 297
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 31,
+          "chin": 134,
+          "rootX": 144.5,
+          "foot": 292
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 13,
+        "removed": 107,
+        "landmarks": {
+          "skullTop": 31,
+          "chin": 134,
+          "rootX": 141,
+          "foot": 292
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 28,
+          "chin": 131,
+          "rootX": 116.5,
+          "foot": 289
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-jasmine",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 32,
+          "chin": 135,
+          "rootX": 132.5,
+          "foot": 293
+        },
+        "headScale": 0.4368932038834951,
+        "bodyScale": 0.3837025316455696,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 93,
+          "chin": 181,
+          "rootX": 182,
+          "foot": 308
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 93,
+          "chin": 181,
+          "rootX": 157.5,
+          "foot": 308
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 93,
+          "chin": 181,
+          "rootX": 156.5,
+          "foot": 308
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 93,
+          "chin": 181,
+          "rootX": 147.5,
+          "foot": 308
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 80,
+          "chin": 168,
+          "rootX": 183,
+          "foot": 295
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 5,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 79,
+          "chin": 167,
+          "rootX": 156,
+          "foot": 294
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 79,
+          "chin": 167,
+          "rootX": 153,
+          "foot": 294
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 78,
+          "chin": 166,
+          "rootX": 142.5,
+          "foot": 293
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 8,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 69,
+          "chin": 157,
+          "rootX": 193.5,
+          "foot": 284
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 71,
+          "chin": 159,
+          "rootX": 173.5,
+          "foot": 286
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 10,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 71,
+          "chin": 159,
+          "rootX": 173.5,
+          "foot": 286
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 11,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 71,
+          "chin": 159,
+          "rootX": 167,
+          "foot": 286
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 70,
+          "chin": 158,
+          "rootX": 164.5,
+          "foot": 285
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 73,
+          "chin": 161,
+          "rootX": 150.5,
+          "foot": 288
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 71,
+          "chin": 159,
+          "rootX": 150,
+          "foot": 286
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-snow_rabbit",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 73,
+          "chin": 161,
+          "rootX": 148,
+          "foot": 288
+        },
+        "headScale": 0.5113636363636364,
+        "bodyScale": 0.44291338582677164,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 239,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 146,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 122.5,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 91.5,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 232.5,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 5,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 85,
+          "chin": 179,
+          "rootX": 146,
+          "foot": 311
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 123.5,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 96,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 8,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 231.5,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 152.5,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 10,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 139.5,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 11,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 86,
+          "chin": 180,
+          "rootX": 152.5,
+          "foot": 312
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 79,
+          "chin": 173,
+          "rootX": 223,
+          "foot": 305
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 13,
+        "removed": 13,
+        "landmarks": {
+          "skullTop": 79,
+          "chin": 173,
+          "rootX": 134.5,
+          "foot": 305
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 14,
+        "removed": 14,
+        "landmarks": {
+          "skullTop": 80,
+          "chin": 174,
+          "rootX": 117.5,
+          "foot": 306
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-night_rabbit",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 79,
+          "chin": 173,
+          "rootX": 89,
+          "foot": 305
+        },
+        "headScale": 0.4787234042553192,
+        "bodyScale": 0.42613636363636365,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 60,
+          "chin": 149,
+          "rootX": 170.5,
+          "foot": 309
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 59,
+          "chin": 148,
+          "rootX": 150,
+          "foot": 308
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 60,
+          "chin": 149,
+          "rootX": 161.5,
+          "foot": 309
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 59,
+          "chin": 148,
+          "rootX": 144.5,
+          "foot": 308
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 165,
+          "foot": 305
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 5,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 160,
+          "foot": 305
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 154.5,
+          "foot": 305
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 56,
+          "chin": 145,
+          "rootX": 149,
+          "foot": 305
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 8,
+        "removed": 81,
+        "landmarks": {
+          "skullTop": 50,
+          "chin": 139,
+          "rootX": 131,
+          "foot": 299
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 50,
+          "chin": 139,
+          "rootX": 130,
+          "foot": 299
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 10,
+        "removed": 63,
+        "landmarks": {
+          "skullTop": 50,
+          "chin": 139,
+          "rootX": 127.5,
+          "foot": 299
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 11,
+        "removed": 24,
+        "landmarks": {
+          "skullTop": 48,
+          "chin": 137,
+          "rootX": 123.5,
+          "foot": 297
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 38,
+          "chin": 127,
+          "rootX": 184,
+          "foot": 287
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 39,
+          "chin": 128,
+          "rootX": 195.5,
+          "foot": 288
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 39,
+          "chin": 128,
+          "rootX": 183,
+          "foot": 288
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-cinderella",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 36,
+          "chin": 125,
+          "rootX": 189,
+          "foot": 285
+        },
+        "headScale": 0.5056179775280899,
+        "bodyScale": 0.37890625,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 98,
+          "chin": 175,
+          "rootX": 183.5,
+          "foot": 304
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 99,
+          "chin": 176,
+          "rootX": 168.5,
+          "foot": 305
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 95,
+          "chin": 172,
+          "rootX": 154.5,
+          "foot": 301
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 97,
+          "chin": 174,
+          "rootX": 146.5,
+          "foot": 303
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 4,
+        "removed": 18,
+        "landmarks": {
+          "skullTop": 96,
+          "chin": 173,
+          "rootX": 176,
+          "foot": 302
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 5,
+        "removed": 13,
+        "landmarks": {
+          "skullTop": 96,
+          "chin": 173,
+          "rootX": 165.5,
+          "foot": 302
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 6,
+        "removed": 4,
+        "landmarks": {
+          "skullTop": 96,
+          "chin": 173,
+          "rootX": 146.5,
+          "foot": 302
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 7,
+        "removed": 3,
+        "landmarks": {
+          "skullTop": 95,
+          "chin": 172,
+          "rootX": 147,
+          "foot": 301
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 8,
+        "removed": 13,
+        "landmarks": {
+          "skullTop": 93,
+          "chin": 170,
+          "rootX": 217.5,
+          "foot": 299
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 94,
+          "chin": 171,
+          "rootX": 201.5,
+          "foot": 300
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 10,
+        "removed": 21,
+        "landmarks": {
+          "skullTop": 91,
+          "chin": 168,
+          "rootX": 183,
+          "foot": 297
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 11,
+        "removed": 5,
+        "landmarks": {
+          "skullTop": 92,
+          "chin": 169,
+          "rootX": 182,
+          "foot": 298
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 88,
+          "chin": 165,
+          "rootX": 139,
+          "foot": 294
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 90,
+          "chin": 167,
+          "rootX": 136.5,
+          "foot": 296
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 91,
+          "chin": 168,
+          "rootX": 160,
+          "foot": 297
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-silver_rabbit",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 89,
+          "chin": 166,
+          "rootX": 127.5,
+          "foot": 295
+        },
+        "headScale": 0.5844155844155844,
+        "bodyScale": 0.436046511627907,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 0,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 142,
+          "rootX": 159.5,
+          "foot": 301
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 1,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 142,
+          "rootX": 164,
+          "foot": 301
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 2,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 141,
+          "rootX": 165,
+          "foot": 300
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 3,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 47,
+          "chin": 142,
+          "rootX": 159.5,
+          "foot": 301
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 4,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 141,
+          "rootX": 174,
+          "foot": 300
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 5,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 141,
+          "rootX": 160,
+          "foot": 300
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 6,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 141,
+          "rootX": 161,
+          "foot": 300
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 7,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 46,
+          "chin": 141,
+          "rootX": 156.5,
+          "foot": 300
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 8,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 38,
+          "chin": 133,
+          "rootX": 206.5,
+          "foot": 292
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 9,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 40,
+          "chin": 135,
+          "rootX": 212,
+          "foot": 294
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 10,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 32,
+          "chin": 127,
+          "rootX": 218,
+          "foot": 286
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 11,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 37,
+          "chin": 132,
+          "rootX": 221.5,
+          "foot": 291
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 12,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 40,
+          "chin": 135,
+          "rootX": 121,
+          "foot": 294
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 13,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 35,
+          "chin": 130,
+          "rootX": 116.5,
+          "foot": 289
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 14,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 40,
+          "chin": 135,
+          "rootX": 118.5,
+          "foot": 294
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      },
+      {
+        "id": "walk-time_ruler",
+        "frame": 15,
+        "removed": 0,
+        "landmarks": {
+          "skullTop": 40,
+          "chin": 135,
+          "rootX": 124,
+          "foot": 294
+        },
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.37342767295597484,
+        "root": [
+          104,
+          195
+        ]
+      }
+    ]
+  },
   "renewal": {
     "source": "survivor/assets/renewal/sources.json",
-    "sha256": "8f950ee169b16356856fedbb8157edd77f0d53ee0356726325d3b3c2e5fb7a77",
+    "sha256": "da7ffdbaa070021ce2ec3fdfab232da8ad454bb83c86efd62162466457b0feb9",
     "references": [
       {
         "source": "defense/assets/merge/units/rumi.webp",
@@ -632,5 +3554,9 @@
         "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f"
       }
     ]
+  },
+  "reverie": {
+    "source": "survivor/assets/reverie/sources.json",
+    "sha256": "aaa5b6c20536fc94e8a18f7eb5005d3c8acac30fd945a1ad43e9369967163f7f"
   }
 }

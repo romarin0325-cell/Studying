@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import {cleanFrame,anatomicalFrame,walkLandmarks,alphaBounds} from './art-normalization.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const out=path.join(root,'survivor/assets/prepared');
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
@@ -12,28 +13,31 @@ const extras=['storm_sage','lightning_sage','queen','galaxy_whale','great_detect
 const sources=cast.frames.map(f=>({id:'unit-'+f.id,source:f.sourcePath,frame:f}));
 for(const id of extras){const frame=defense.frames.find(f=>f.id===id);sources.push({id:'unit-'+id,source:'defense/assets/merge/units/'+id+'.webp',frame});}
 
-await fs.mkdir(out,{recursive:true});const manifest={version:1,processor:'Canonical 768px portraits and reviewed uniformly scaled walking/combat atlases; native alpha; no runtime pixel processing',processorHash:sha((await fs.readFile(fileURLToPath(import.meta.url),'utf8')).replace(/\r\n/g,'\n')),assets:[],frames:{}};
+const profileSource='survivor/assets/body-profile.json',profileBytes=await fs.readFile(path.join(root,profileSource)),profile=JSON.parse(profileBytes),proofs=[];
+await fs.mkdir(out,{recursive:true});const manifest={version:1,processor:'Anatomically normalized cast and sole-aligned walking atlases; cleaned illustrated combat cells; native alpha; no runtime pixel processing',processorHash:sha((await fs.readFile(fileURLToPath(import.meta.url),'utf8')).replace(/\r\n/g,'\n')),assets:[],frames:{}};
+manifest.normalization={source:profileSource,sha256:sha(profileBytes),processor:'survivor/scripts/art-normalization.mjs',processorSha256:sha((await fs.readFile(path.join(root,'survivor/scripts/art-normalization.mjs'),'utf8')).replace(/\r\n/g,'\n'))};
 for(const item of sources){const raw=await fs.readFile(path.join(root,item.source));const sourceSha256=sha(raw);
   if(item.frame?.sourceSha256&&item.frame.sourceSha256!==sourceSha256)throw new Error('Canonical character source changed: '+item.source);
-  const unit=item.id.startsWith('unit-');const bytes=await sharp(raw).resize({width:unit?768:item.id==='garden'?960:undefined,withoutEnlargement:true}).webp({quality:unit?90:85,alphaQuality:100}).toBuffer();
+  const unit=item.id.startsWith('unit-'),id=item.id.slice(5),body=profile.frames[id];let normalized=raw;
+  if(body){if(body.sourceSha256!==sourceSha256)throw new Error('Anatomical profile source changed: '+item.id);const layers=[],side=512;for(let view=0;view<4;view++){const cleaned=await cleanFrame(await sharp(raw).extract({left:view%2*side,top:Math.floor(view/2)*side,width:side,height:side}).png().toBuffer());let frame;try{frame=await anatomicalFrame(cleaned.bytes,{...body.canonical,targetHead:body.targetHead,targetBody:body.canonical.targetBody,cell:512,baseline:480});}catch(error){throw new Error(item.id+' view '+view+': '+error.message);}layers.push({input:frame.bytes,left:view%2*512,top:Math.floor(view/2)*512});proofs.push({id:item.id,frame:view,removed:cleaned.removed,headScale:frame.headScale,bodyScale:frame.bodyScale,root:frame.root});}
+    normalized=await sharp({create:{width:1024,height:1024,channels:4,background:'#00000000'}}).composite(layers).png().toBuffer();
+  }
+  const bytes=await sharp(normalized).resize({width:unit?768:item.id==='garden'?960:undefined,withoutEnlargement:true}).webp({quality:unit?90:85,alphaQuality:100}).toBuffer();
   const file=item.id+'.webp';await fs.writeFile(path.join(out,file),bytes);manifest.assets.push({id:item.id,source:item.source,sourceSha256,file:'prepared/'+file,sha256:sha(bytes),bytes:bytes.length});
-  if(item.frame)manifest.frames[item.id.slice(5)]={portrait:item.frame.portrait,anchor:item.frame.anchor,directions:item.frame.directions};
+  if(item.frame)manifest.frames[id]={portrait:body?{x:256,y:480-body.canonical.targetBody-body.targetHead/2,size:body.targetHead*1.65}:item.frame.portrait,anchor:item.frame.anchor,directions:item.frame.directions,anatomy:body?{headHeight:body.targetHead,bodyHeight:body.canonical.targetBody,sole:480}:undefined};
 }
 // Generated originals and reviewed frame substitutions are explicit build inputs.
 const specsPath='survivor/assets/renewal/sources.json';
 const specsBytes=await fs.readFile(path.join(root,specsPath));
 manifest.renewal={source:specsPath,sha256:sha(specsBytes),references:[]};
 const specs=JSON.parse(specsBytes);
-async function bounds(bytes){
-  const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
-  let left=info.width,top=info.height,right=0,bottom=0;
-  for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++)if(data[(y*info.width+x)*4+3]>80){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);}
-  if(right<left)throw new Error('Empty animation frame');return {left,top,width:right-left+1,height:bottom-top+1};
-}
+const bounds=alphaBounds;
+const reverieSource='survivor/assets/reverie/sources.json',reverieBytes=await fs.readFile(path.join(root,reverieSource));manifest.reverie={source:reverieSource,sha256:sha(reverieBytes)};specs.push(...JSON.parse(reverieBytes));
 for(const spec of specs){
   const raw=await fs.readFile(path.join(root,spec.source));const meta=await sharp(raw).metadata();let bytes;
   if(spec.reference){const reference=await fs.readFile(path.join(root,spec.reference));manifest.renewal.references.push({source:spec.reference,sha256:sha(reference)});}
-  if(spec.kind==='background')bytes=await sharp(raw).resize(1024,1024).webp({quality:87}).toBuffer();
+  if(spec.kind==='scene')bytes=await sharp(raw).resize(1200,800).webp({quality:87}).toBuffer();
+  else if(spec.kind==='background')bytes=await sharp(raw).resize(1024,1024).webp({quality:87}).toBuffer();
   else{
     const frames=[];
     for(let i=0;i<spec.columns*spec.rows;i++){
@@ -43,25 +47,26 @@ for(const spec of specs){
       const right=edges?Math.round(edges[col+1]/1254*meta.width):Math.floor((col+1)*meta.width/spec.columns);
       const top=spec.yEdges?Math.round(spec.yEdges[row]/1254*meta.height):Math.floor(row*meta.height/spec.rows),bottom=spec.yEdges?Math.round(spec.yEdges[row+1]/1254*meta.height):Math.floor((row+1)*meta.height/spec.rows);
       const rect=spec.rects?.[index],region=rect?{left:rect[0],top:rect[1],width:rect[2],height:rect[3]}:{left,top,width:right-left,height:bottom-top};
-      const frame=await sharp(raw).extract(region).png().toBuffer();
-      frames.push({frame,bounds:await bounds(frame)});
+      const extracted=await sharp(raw).extract(region).png().toBuffer(),cleaned=['walk','icons','actors'].includes(spec.kind)&&spec.id!=='effects'?await cleanFrame(extracted):{bytes:extracted,removed:0};
+      frames.push({frame:cleaned.bytes,bounds:await bounds(cleaned.bytes),removed:cleaned.removed});
     }
-    const cell=spec.cell,walking=spec.kind==='walk';let targetHeight=cell*.82;
-    if(walking&&spec.reference){const ref=await fs.readFile(path.join(root,spec.reference)),m=await sharp(ref).metadata(),side=Math.floor(m.width/2),b=await bounds(await sharp(ref).extract({left:0,top:0,width:side,height:side}).png().toBuffer());targetHeight=cell*Math.max(.74,Math.min(.87,b.height/side));}
-    const actor=spec.kind==='actors';
-    const factor=walking?Math.min((cell-18)/Math.max(...frames.map(f=>f.bounds.width)),targetHeight/Math.max(...frames.map(f=>f.bounds.height))):null;
+    const cell=spec.cell,walking=spec.kind==='walk',actor=spec.kind==='actors';
+    if(walking&&profile.frames[spec.id.slice(5)].walkSourceSha256!==sha(raw))throw new Error('Walking anatomical profile source changed: '+spec.id);
     const composites=[];
     for(let i=0;i<frames.length;i++){
-      const {frame,bounds:b}=frames[i];const group=frames.slice(Math.floor(i/4)*4,Math.floor(i/4)*4+4);const scale=factor||(actor?Math.min((cell-20)/Math.max(...group.map(f=>f.bounds.width)),(cell-24)/Math.max(...group.map(f=>f.bounds.height))):Math.min((cell-20)/b.width,(cell-20)/b.height)),width=Math.max(1,Math.round(b.width*scale)),height=Math.max(1,Math.round(b.height*scale));
+      const {frame,bounds:b}=frames[i];
+      if(walking){const body=profile.frames[spec.id.slice(5)],sample=await walkLandmarks(frame,body.walk);let normalized;try{normalized=await anatomicalFrame(frame,{...sample,targetHead:body.targetHead/512*160,targetBody:body.canonical.targetBody/512*160,cell,baseline:cell*.9375});}catch(error){throw new Error(spec.id+' frame '+i+': '+error.message);}composites.push({input:normalized.bytes,left:i%spec.columns*cell,top:Math.floor(i/spec.columns)*cell});proofs.push({id:spec.id,frame:i,removed:frames[i].removed,landmarks:sample,headScale:normalized.headScale,bodyScale:normalized.bodyScale,root:normalized.root});continue;}
+      const group=frames.slice(Math.floor(i/4)*4,Math.floor(i/4)*4+4);const scale=actor?Math.min((cell-20)/Math.max(...group.map(f=>f.bounds.width)),(cell-24)/Math.max(...group.map(f=>f.bounds.height))):Math.min((cell-20)/b.width,(cell-20)/b.height),width=Math.max(1,Math.round(b.width*scale)),height=Math.max(1,Math.round(b.height*scale));
       const input=await sharp(frame).extract(b).resize(width,height).png().toBuffer();
       composites.push({input,left:i%spec.columns*cell+Math.round((cell-width)/2),top:Math.floor(i/spec.columns)*cell+((walking||actor)?Math.round(cell*.9375)-height:Math.round((cell-height)/2))});
     }
     bytes=await sharp({create:{width:cell*spec.columns,height:cell*spec.rows,channels:4,background:'#00000000'}}).composite(composites).webp({quality:90,alphaQuality:100}).toBuffer();
-    if(walking)manifest.frames[spec.id.slice(5)].walk={texture:spec.id,columns:4,rows:4,cell,anchor:[cell/2,cell*.9375],distancePerFrame:16};
+    if(walking)manifest.frames[spec.id.slice(5)].walk={texture:spec.id,columns:4,rows:4,cell,anchor:[cell/2,cell*.9375],distancePerFrame:16,displayScale:cell/160};
   }
   const file=spec.id+'.webp';await fs.writeFile(path.join(out,file),bytes);
   const old=manifest.assets.findIndex(a=>a.id===spec.id);if(old>=0)manifest.assets.splice(old,1);
   manifest.assets.push({id:spec.id,source:spec.source,sourceSha256:sha(raw),file:'prepared/'+file,sha256:sha(bytes),bytes:bytes.length});
 }
+manifest.normalization.frames=proofs;
 await fs.writeFile(path.join(root,'survivor/assets/prepared-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log(`Prepared ${manifest.assets.length} consistent offline textures (${Math.round(manifest.assets.reduce((n,a)=>n+a.bytes,0)/1024)} KiB)`);

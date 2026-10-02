@@ -1,0 +1,138 @@
+{
+  "reviewDate": "2026-10-02 Asia/Tokyo",
+  "baseline": "RENEWAL-RESEARCH.md and RESEARCH-SOURCES.json retain the previous 15-game/demo review. This update adds movement, consistency, hurry/endless and system-changing relic sources.",
+  "scope": "Read applicable sections of successful documents. HTTP failures are search attempts, not evidence that their content was read. Model/one-shot authorship claims remain creator attribution, not independently reproduced benchmarks.",
+  "sources": [
+    {
+      "id": "fixed-step",
+      "url": "https://gafferongames.com/post/fix_your_timestep/",
+      "status": 200,
+      "characters": 12065,
+      "textSha256": "75ace8294e3b3931aef7bce9e2edfed7df890c734c64c67f18be8bb959c5cd6d"
+    },
+    {
+      "id": "atlas-padding",
+      "url": "https://www.codeandweb.com/texturepacker/documentation",
+      "status": 200,
+      "characters": 3248,
+      "textSha256": "0aa10fd5f789453a6709fb0985d4972a5e4f41b6f617563dc62cc534d2e3e71a"
+    },
+    {
+      "id": "sprite-pivot",
+      "url": "https://docs.godotengine.org/en/stable/classes/class_sprite2d.html",
+      "status": 200,
+      "characters": 191632,
+      "textSha256": "d26f341e8e0a3d641656ed4e874dcda40667d22b708099e8ef0798dc3e314854"
+    },
+    {
+      "id": "structure-control",
+      "url": "https://runware.ai/docs/models/flux-1-dev/guides/game-assets-canny",
+      "status": 200,
+      "characters": 24805,
+      "textSha256": "86323e2c477eed91fcab0450418bfd239ff706493e475894cb56e186acd5e6ff"
+    },
+    {
+      "id": "ip-adapter",
+      "url": "https://huggingface.co/docs/diffusers/using-diffusers/ip_adapter",
+      "status": 200,
+      "characters": 18517,
+      "textSha256": "7cc86618ebf9c7f657be07cdf19b389f840a0f7d2a844e2411a4b4491389ae5a"
+    },
+    {
+      "id": "sprite-community",
+      "url": "https://forum.gamemaker.io/index.php?threads/tips-on-keeping-sprites-consistent.62628/",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "pivot-review",
+      "url": "https://www.framesprite.com/guides/fix-sprite-animation-jitter",
+      "status": 200,
+      "characters": 7410,
+      "textSha256": "010ef10ef6438e85ab84d4e64475d7df31a96b2f191ebdcdd72090002cb30009"
+    },
+    {
+      "id": "imagegen-guidelines",
+      "url": "https://raw.githubusercontent.com/openai/skills/main/skills/.curated/imagegen/SKILL.md",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "art-direction-guidelines",
+      "url": "https://raw.githubusercontent.com/roohe/agentic-super-skills/master/skills_library/game-art-director/SKILL.md",
+      "status": 200,
+      "characters": 29366,
+      "textSha256": "0f3356509cba36eaa8deb7d57788eb8a6e30be53d6297bde1e90e338d26c0dfc"
+    },
+    {
+      "id": "vs-endless",
+      "url": "https://vampire-survivors.fandom.com/wiki/Endless_Mode",
+      "error": "HTTP Error 402: Payment Required"
+    },
+    {
+      "id": "vs-hurry",
+      "url": "https://vampire-survivors.fandom.com/wiki/Hurry_Mode",
+      "error": "HTTP Error 402: Payment Required"
+    },
+    {
+      "id": "vs-darkanas",
+      "url": "https://vampire-survivors.fandom.com/wiki/Darkanas",
+      "error": "HTTP Error 402: Payment Required"
+    },
+    {
+      "id": "community-proportions",
+      "url": "https://www.reddit.com/r/gamedev/comments/z4jmv0/how_do_i_fix_my_characters_proportions/.json",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "official-imagegen",
+      "url": "https://raw.githubusercontent.com/openai/skills/main/skills/.system/imagegen/SKILL.md",
+      "status": 200,
+      "characters": 16157,
+      "textSha256": "60c2d906196d5a1dab9eb01fcdd51b493214a15362ef1995d51a16ef3e1ed5d2"
+    },
+    {
+      "id": "endless-guide",
+      "url": "https://rogueranker.com/how-to-unlock-endless-mode-vampire-survivors/",
+      "status": 200,
+      "characters": 20413,
+      "textSha256": "551069912d38dc0fc853f861ffc5ec2259e461b84233ff87fae8315e452fbe30"
+    },
+    {
+      "id": "hurry-guide",
+      "url": "https://vampire.survivors.wiki/w/Hurry_Mode",
+      "status": 200,
+      "characters": 46321,
+      "textSha256": "d0c927bce9ed42bbd39a88cf23e5cef4745c0163a067481fa2293d3ffb398a47"
+    },
+    {
+      "id": "darkanas-guide",
+      "url": "https://vampire.survivors.wiki/w/Darkanas",
+      "status": 200,
+      "characters": 19072,
+      "textSha256": "6aa641c5046c61c8e1639a59476f1368dc7fe2dcc2fa901a5f35e9bf369fc2d5"
+    },
+    {
+      "id": "consistency-community",
+      "url": "https://www.redditmedia.com/r/StableDiffusion/comments/1jz24r7/guide_how_to_create_consistent_game_assets_with/",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "sprite-extrude",
+      "url": "https://www.codeandweb.com/texturepacker/tutorials/sprite-sheet-artifacts",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "evolution-guide",
+      "url": "https://vampire.survivors.wiki/w/Evolution",
+      "status": 200,
+      "characters": 26684,
+      "textSha256": "4b517111feb8a0c38a12de8dd87957f126524037ef041e77d84a9a88f384d6d0"
+    },
+    {
+      "id": "extrusion-guide",
+      "url": "https://www.codeandweb.com/texturepacker/documentation/texture-settings",
+      "status": 200,
+      "characters": 30907,
+      "textSha256": "1b715831435a849d5e254d6abb95d157951d223159913eeb3c06f3670118a7ad"
+    }
+  ]
+}
