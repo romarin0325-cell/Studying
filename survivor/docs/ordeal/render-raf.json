@@ -1,0 +1,48 @@
+[
+  {
+    "quality": "high",
+    "viewport": [
+      390,
+      844
+    ],
+    "deviceScaleFactor": 2,
+    "warmup": 30,
+    "frames": 300,
+    "sampling": "sum callbacks at each unique rAF timestamp; retain completed frames after 30-frame warmup",
+    "meanWorkMs": 2.85,
+    "p95WorkMs": 4.6,
+    "maxWorkMs": 7,
+    "rafP50Ms": 16.7,
+    "rafP95Ms": 33.4,
+    "externalRequests": 0,
+    "initialEntities": {
+      "enemies": 260,
+      "bossKind": "clock",
+      "hazards": 7
+    },
+    "scope": "actual release file, controlled persisted stress fixture; cloud CPU, not physical phone FPS"
+  },
+  {
+    "quality": "economy",
+    "viewport": [
+      390,
+      844
+    ],
+    "deviceScaleFactor": 2,
+    "warmup": 30,
+    "frames": 300,
+    "sampling": "sum callbacks at each unique rAF timestamp; retain completed frames after 30-frame warmup",
+    "meanWorkMs": 2.13,
+    "p95WorkMs": 2.9,
+    "maxWorkMs": 4.2,
+    "rafP50Ms": 16.7,
+    "rafP95Ms": 16.8,
+    "externalRequests": 0,
+    "initialEntities": {
+      "enemies": 260,
+      "bossKind": "clock",
+      "hazards": 7
+    },
+    "scope": "actual release file, controlled persisted stress fixture; cloud CPU, not physical phone FPS"
+  }
+]

@@ -1,5 +1,7 @@
 import { VERSION,WORLD,LIMITS,HERO,WEAPON,WEAPONS,RELIC,RELICS,STAGE,DIFFICULTY,EVOLUTION,BONDS,AWAKENINGS,META,clamp,length } from './content.js';
 
+import {BOSSES,bossKind,bossMilestone,bossArrival,bossCadence,bossPattern,groundDanger} from './ordeal.js';
+
 import {initializeRun,beforeCombat,afterCombat,nearestEncounter,openEncounter,chooseEncounter,afterDash,validateRunState} from './reverie.js';
 
 // Ground positions drive movement, shadows and melee. Ranged combat uses body
@@ -88,7 +90,7 @@ export class Game {
     const rx=Math.min(550,this.view.w/2+38),ry=Math.min(550,this.view.h/2+38);
     const spawnX=p.x+(side<2?(side===0?-rx:rx):along*rx),spawnY=p.y+(side>=2?(side===2?-ry:ry):along*ry);
     const defaults={wisp:[18,52,12,7],beetle:[60,27,20,12],moth:[32,38,16,9],stalker:[26,62,13,10],ember:[36,40,15,10],elite:[ELITE_BASE_HP,38,28,16],boss:[1000,25,45,24]};const [hp,speed,radius,damage]=defaults[kind]||defaults.wisp;
-    const d=DIFFICULTY[this.difficulty],st=STAGE[this.stage],e={id:this.uid++,kind,x:clamp(spawnX,55,WORLD-55),y:clamp(spawnY,55,WORLD-55),hp:hp*scale*d.hp*st.danger,maxHp:hp*scale*d.hp*st.danger,speed:speed*(1+Math.min(this.time/1200,.3)),radius,damage:damage*d.damage*damageScale,elite:kind==='elite',boss:kind==='boss',phase:0,ai:1.5+random(this)*2,slow:0,freeze:0,burn:0,burnDamage:0,burnTick:.5,flash:0,knockX:0,knockY:0,charge:0,angle:0,final:false,variant:Math.floor(random(this)*3),...options};this.enemies.push(e);return e;
+    const d=DIFFICULTY[this.difficulty],st=STAGE[this.stage],e={id:this.uid++,kind,x:clamp(spawnX,55,WORLD-55),y:clamp(spawnY,55,WORLD-55),hp:hp*scale*d.hp*st.danger,maxHp:hp*scale*d.hp*st.danger,speed:speed*(1+Math.min(this.time/1200,.3)),radius,damage:damage*d.damage*damageScale,elite:kind==='elite',boss:kind==='boss',phase:0,controlLock:0,spawnGuard:0,ai:1.5+random(this)*2,slow:0,freeze:0,burn:0,burnDamage:0,burnTick:.5,flash:0,knockX:0,knockY:0,charge:0,angle:0,final:false,variant:Math.floor(random(this)*3),...options};this.enemies.push(e);return e;
   }
   director(dt){
     const st=STAGE[this.stage];if(!this.introSpawned&&this.time<2){this.introSpawned=true;for(let i=0;i<7;i++){const a=i*Math.PI*2/7,r=145+(i%3)*24;this.spawnEnemy('wisp',{x:this.player.x+Math.cos(a)*r,y:this.player.y+Math.sin(a)*r});}}this.spawnTimer-=dt;this.eliteTimer-=dt;this.rush=Math.max(0,this.rush-dt);
@@ -96,13 +98,14 @@ export class Game {
     const density=DIFFICULTY[this.difficulty].density,interval=Math.max(.17,.36-this.time*.0012)/(density*(this.rush>0?1.8:1));
     if(this.spawnTimer<=0){this.spawnTimer+=interval*(this.runMode!=='endless'&&this.bossesSpawned>=3?3:1);const roll=random(this);let kind='wisp';if(this.time>14&&roll>.72)kind='beetle';if(this.time>32&&roll>.86)kind='moth';if(this.time>58&&roll<.17)kind='stalker';if(this.time>92&&roll>.93)kind='ember';const pack=this.runMode!=='endless'&&this.bossesSpawned>=3?2:1+Math.floor(Math.min(3,this.time/40));for(let i=0;i<pack;i++)this.spawnEnemy(kind);if(this.time>110&&random(this)<.4)this.spawnEnemy('wisp');}
     if(this.eliteTimer<=0&&(this.bossesSpawned<3||this.runMode==='endless')){this.eliteTimer+=this.omen==='hunter'?18:27;this.spawnEnemy('elite');this.emit('elite',{title:'빛을 삼킨 파수꾼'});}
-    const cycle=Math.floor(this.bossesSpawned/3),index=this.bossesSpawned%3,milestone=cycle*this.duration+[this.duration*.25,this.duration*.6,this.duration][index];
-    if((this.bossesSpawned<3||this.runMode==='endless')&&this.time>=milestone){
-      const chapterBoss=index===2,final=chapterBoss&&this.runMode!=='endless';this.bossesSpawned++;
-      const hp=(chapterBoss?7800:1300+index*1300)*DIFFICULTY[this.difficulty].hp*st.danger*Math.min(20,1+cycle*.65);
-      // Reserve capacity so a full horde cannot skip the final boss.
+    const index=this.bossesSpawned,milestone=bossMilestone(index,this.duration);
+    if((index<3||this.runMode==='endless')&&this.time>=milestone){
+      const final=index===2&&this.runMode!=='endless',arrival=bossArrival(index,this.stage,this.difficulty);
+      // A full horde cannot silently skip a scheduled boss.
       if(this.enemies.length>=LIMITS.enemies){const ordinary=this.enemies.find(e=>!e.boss);if(ordinary)ordinary.hp=0;this.cleanup();}
-      this.spawnEnemy('boss',{hp,maxHp:hp,final,phase:index,name:chapterBoss?st.bossName:['별을 삼킨 자','달그림자 집행관'][index],x:clamp(this.player.x+180,100,WORLD-100),y:clamp(this.player.y-270,100,WORLD-100)});this.emit('boss',{title:final?st.bossName:'밤의 파수꾼',final});
+      const wide=this.view.w>this.view.h*1.4,offsetX=Math.min(wide?175:120,this.view.w*.26),offsetY=wide?0:Math.min(100,this.view.h*.13);
+      const spawned=this.spawnEnemy('boss',{...arrival,final,spawnGuard:1.35,x:clamp(this.player.x+(this.player.x>WORLD/2?-offsetX:offsetX),100,WORLD-100),y:clamp(this.player.y-offsetY,160,WORLD-100)});
+      if(spawned){this.bossesSpawned++;this.emit('boss',{title:arrival.overrun?'새벽 이후 '+arrival.overrun+' · '+arrival.name:arrival.name,text:BOSSES[arrival.bossKind].concept,final});}
     }
   }
   step(dt,input={x:0,y:0}) {
@@ -125,46 +128,49 @@ export class Game {
     if(this.mode==='playing'){afterCombat(this,dt);this.updateDrops(dt);}
   }
   updateEnemies(dt){
-    const p=this.player;for(const e of this.enemies){if(e.hp<=0)continue;e.prevX=e.x;e.prevY=e.y;e.flash=Math.max(0,e.flash-dt);e.slow=Math.max(0,e.slow-dt);e.freeze=Math.max(0,e.freeze-dt);e.burn=Math.max(0,e.burn-dt);e.burnTick-=dt;
+    const p=this.player;for(const e of this.enemies){if(e.hp<=0)continue;e.prevX=e.x;e.prevY=e.y;e.flash=Math.max(0,e.flash-dt);e.slow=Math.max(0,e.slow-dt);e.freeze=Math.max(0,e.freeze-dt);e.controlLock=Math.max(0,(e.controlLock||0)-dt);e.spawnGuard=Math.max(0,(e.spawnGuard||0)-dt);e.burn=Math.max(0,e.burn-dt);e.burnTick-=dt;
       if(e.burn>0&&e.burnTick<=0){e.burnTick=.5;this.hit(e,e.burnDamage,'ember',true);if(e.hp<=0)continue;}
       let dx=p.x-e.x,dy=p.y-e.y,d=length(dx,dy)||1;e.ai-=dt;
       if(e.kind==='stalker'&&!e.charge&&e.ai<=0&&d<420){e.ai=4.5;e.charge=1.1;e.angle=Math.atan2(dy,dx);this.emit('tell',{x:e.x,y:e.y,angle:e.angle,length:180});}
       if(e.elite&&e.ai<=0&&e.freeze<=0){e.ai=3.2;const a=Math.atan2(p.y-30-targetPoint(e).y,p.x-e.x);for(let i=-1;i<=1;i++)this.hazardShot(e.x,targetPoint(e).y,a+i*.23,115,e.damage*.6,.65);this.emit('bossTell',{x:e.x,y:e.y});}
-      if(e.boss&&e.ai<=0&&e.freeze<=0){e.ai=Math.max(2.1,4.5-e.phase*.7);this.bossAttack(e);}
+      if(e.boss&&e.ai<=0&&e.freeze<=0){e.ai=bossCadence(e);this.bossAttack(e);}
       if(e.kind==='moth'&&e.ai<=0&&e.freeze<=0){e.ai=3.2;this.hazardShot(e.x,targetPoint(e).y,Math.atan2(dy,dx),110,e.damage*.7);}
       if(e.runner){dx=-dx;dy=-dy;}
-      let speed=e.freeze>0?0:e.speed*(e.slow>0?.5:1);e.charge=Math.max(0,e.charge-dt);
-      if(e.charge>0){if(e.charge<.55){speed*=3;dx=Math.cos(e.angle);dy=Math.sin(e.angle);d=1;}else speed=0;}
+      let speed=e.freeze>0||e.spawnGuard>0?0:e.speed*(e.slow>0?.5:1);e.charge=Math.max(0,e.charge-dt);
+      if(e.charge>0){if(e.charge<.55){speed*=e.boss?6:3;dx=Math.cos(e.angle);dy=Math.sin(e.angle);d=1;}else speed=0;}
       if(e.kind==='moth'&&d<210)speed*=.1;
       let rx=0,ry=0;
       if(speed>0&&!e.boss)for(const other of this.grid.near(e.x,e.y,e.radius+20)){if(other.id===e.id)continue;const sx=e.x-other.x,sy=e.y-other.y,sl=length(sx,sy)||1,overlap=e.radius+other.radius-sl;if(overlap>0){rx+=sx/sl*overlap*1.8;ry+=sy/sl*overlap*1.8;}}
       e.x=clamp(e.x+(dx/d*speed+rx+e.knockX)*dt,25,WORLD-25);e.y=clamp(e.y+(dy/d*speed+ry+e.knockY)*dt,25,WORLD-25);e.knockX*=Math.max(0,1-dt*8);e.knockY*=Math.max(0,1-dt*8);
-      if(length(e.x-p.x,e.y-p.y)<e.radius+11&&e.freeze<=0)this.hurt(e.damage);
+      if(length(e.x-p.x,e.y-p.y)<e.radius+11&&e.freeze<=0&&e.spawnGuard<=0)this.hurt(e.damage);
     }
   }
   bossAttack(e){
-    const origin=targetPoint(e),angle=Math.atan2(this.player.y-30-origin.y,this.player.x-origin.x),phase=e.hp/e.maxHp<.5?2:1;
+    const origin=targetPoint(e),angle=Math.atan2(this.player.y-30-origin.y,this.player.x-origin.x),kind=bossKind(e,this.stage),enraged=e.hp/e.maxHp<.5;
     this.emit('bossTell',{x:e.x,y:e.y});
-    this.hazards.push({id:this.uid++,kind:'ring',x:e.x,y:e.y,r:115+e.phase*18,wait:1.35,life:1.6,damage:e.damage*1.25,hit:false});
-    const p=this.player,blast=(x,y,r,wait)=>this.hazards.push({id:this.uid++,kind:'blast',x:clamp(x,45,WORLD-45),y:clamp(y,45,WORLD-45),r,wait,life:wait+.35,damage:e.damage,hit:false});
-    if(this.stage==='cathedral'){
-      // Four seals leave diagonal escape routes, then a rotating cross of shots.
-      for(let i=0;i<4;i++){const a=i*Math.PI/2;blast(p.x+Math.cos(a)*105,p.y+Math.sin(a)*105,48,1.5);this.hazardShot(origin.x,origin.y,angle+i*Math.PI/2+this.time*.015,90+phase*10,e.damage*.7,1);}
-    }else if(this.stage==='rift'){
-      // Successive meteors follow the last movement line, with a wider fan.
-      for(let i=0;i<phase+2;i++)blast(p.x+p.dx*(i-1)*75,p.y+p.dy*(i-1)*75,48,1.2+i*.25);
-      for(let i=-3;i<=3;i++)this.hazardShot(origin.x,origin.y,angle+i*.28,90+phase*15,e.damage*.7,.9);
-    }else{
-      for(let i=0;i<phase+1;i++)blast(p.x+(i-1)*100,p.y+(i%2)*50,52,1.45+i*.15);
-      for(let i=-2;i<=2;i++)this.hazardShot(origin.x,origin.y,angle+i*.25,85+phase*15,e.damage*.7,.8);
-    }
-    if(this.hazards.length>LIMITS.hazards)this.hazards.splice(0,this.hazards.length-LIMITS.hazards);
+    const pattern=bossPattern(e,this.player,this.stage);
+    // Prune cosmetic/non-active shots before adding essential telegraphs.
+    if(this.hazards.length+pattern.length>LIMITS.hazards)this.hazards=this.hazards.filter(h=>h.kind!=='shot').slice(-(LIMITS.hazards-pattern.length));
+    for(const shape of pattern)this.hazards.push({id:this.uid++,...shape,hit:false,grazed:false});
+    if(kind==='thorn'&&(e.patternStep||0)%2===0){e.charge=1.8;e.angle=Math.atan2(this.player.y-e.y,this.player.x-e.x);}
+    const count=kind==='sovereign'||kind==='eclipse'?3:2,speed=120+(enraged?25:0)+Math.min(100,(e.overrun||0)*12);
+    // The fan's center is always aimed from the illustrated boss torso to the
+    // player's actual body hit center, including a horizontal ground alignment.
+    for(let i=-count;i<=count;i++)this.hazardShot(origin.x,origin.y,angle+i*.24,speed,e.damage*.75,.75);
+    e.patternStep=((e.patternStep||0)+1)%24;
   }
   hazardShot(x,y,a,speed,damage,wait=0){if(this.hazards.length<LIMITS.hazards)this.hazards.push({id:this.uid++,kind:'shot',x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,wait,life:7,damage,r:7,hit:false});}
+  graze(h){if(h.grazed||this.player.dash<=0)return;h.grazed=true;this.player.charge=Math.min(100,this.player.charge+6);this.emit('dodge',{x:this.player.x,y:this.player.y,title:'빛 사이로'});}
   updateHazards(dt){
-    const p=this.player;for(const h of this.hazards){h.prevX=h.x;h.prevY=h.y;h.life-=dt;h.wait-=dt;if(h.wait>0||h.hit)continue;
-      if(h.kind==='shot'){const ox=h.x,oy=h.y;h.x+=h.vx*dt;h.y+=h.vy*dt;if(sweptHit(ox,oy,h.x,h.y,p.x,p.y-30,h.r+10)){this.hurt(h.damage);h.hit=true;}}
-      else {if(length(p.x-h.x,p.y-h.y)<h.r)this.hurt(h.damage);h.hit=true;this.emit('blast',{x:h.x,y:h.y,r:h.r,color:'#ff897d'});}
+    if(dt<=0)return;
+    const p=this.player;for(const h of this.hazards){h.prevX=h.x;h.prevY=h.y;h.life-=dt;h.wait-=dt;if(h.wait>0||h.hit||h.life<=0)continue;
+      if(h.kind==='shot'){
+        const ox=h.x,oy=h.y;h.x+=h.vx*dt;h.y+=h.vy*dt;
+        if(sweptHit(ox,oy,h.x,h.y,p.x,p.y-30,h.r+10)){this.graze(h);this.hurt(h.damage);h.hit=true;}
+      }else if(['zone','line','annulus'].includes(h.kind)){
+        h.tick=Math.max(0,(h.tick||0)-dt);
+        if(groundDanger(h,p.x,p.y,8)){this.graze(h);if(h.tick<=0){this.hurt(h.damage);h.tick=.45;}}
+      }else {if(length(p.x-h.x,p.y-h.y)<h.r){this.graze(h);this.hurt(h.damage);}h.hit=true;this.emit('blast',{x:h.x,y:h.y,r:h.r,color:'#ff897d'});}
     }this.hazards=this.hazards.filter(h=>h.life>0&&!h.hit);
   }
   fire(w,echo=false){
@@ -187,7 +193,7 @@ export class Game {
       for(const offset of e&&def.kind==='sun'?[-.38,0,.38]:[0]){
         const bx=origin.x+Math.cos(angle+offset)*range,by=origin.y+Math.sin(angle+offset)*range;
         this.emit('beam',{weapon:w.id,x:origin.x,y:origin.y,tx:bx,ty:by,width:8+level*2,color:def.color});
-        for(const enemy of this.enemies)if(enemy.hp>0&&sweptHit(origin.x,origin.y,bx,by,enemy.x,targetPoint(enemy).y,enemy.radius+9+level)){this.hit(enemy,damage,w.id);if(def.kind==='snipe'&&!e)break;}
+        for(const enemy of this.enemies)if(enemy.hp>0&&sweptHit(origin.x,origin.y,bx,by,enemy.x,targetPoint(enemy).y,enemy.radius+9+level)){this.hit(enemy,def.kind==='sun'?damage*(1+Math.floor(level/2)*.35+this.stats.amount*.25):damage,w.id);if(def.kind==='snipe'&&!e)break;}
       }
     }else {
       for(let i=0;i<amount&&this.shots.length<LIMITS.shots;i++){
@@ -202,7 +208,7 @@ export class Game {
       s.x+=s.vx*dt;s.y+=s.vy*dt;
       for(const e of this.grid.near((s.x+s.ox)/2,(s.y+s.oy)/2,length(s.x-s.ox,s.y-s.oy)/2+80)){
         if(s.hits.includes(e.id)||!sweptHit(s.ox,s.oy,s.x,s.y,e.x,targetPoint(e).y,s.radius+e.radius))continue;
-        s.hits.push(e.id);this.hit(e,s.damage,s.weapon);if(s.weapon==='frost'){const chill=(this.hero==='snow_rabbit'?1.4:1)*(1+(this.relics.find(r=>r.id==='frost')?.level||0)*.15);e.slow=2*chill;if(s.evolved)e.freeze=.7*chill;if(e.burn>0&&this.stats.bonds.includes('steam'))this.triggerBond('steam',e,s.damage*.8);}
+        s.hits.push(e.id);this.hit(e,s.damage,s.weapon);if(s.weapon==='frost'){const chill=(this.hero==='snow_rabbit'?1.4:1)*(1+(this.relics.find(r=>r.id==='frost')?.level||0)*.15);e.slow=2*chill;if(s.evolved)this.freezeEnemy(e,.7*chill);if(e.burn>0&&this.stats.bonds.includes('steam'))this.triggerBond('steam',e,s.damage*.8);}
         if(s.weapon==='star'&&s.evolved){this.emit('blast',{x:e.x,y:targetPoint(e).y,r:46,color:s.color,weapon:'star'});for(const other of this.grid.near(e.x,e.y,46))if(other.id!==e.id)this.hit(other,s.damage*.35,'star',true);}
         if(s.weapon==='glass'&&s.evolved)for(const other of this.grid.near(e.x,e.y,48))if(other.id!==e.id)this.hit(other,s.damage*.4,s.weapon);
         if(s.pierce--<=0){s.life=0;break;}
@@ -212,7 +218,7 @@ export class Game {
   }
   updateFields(dt){
     for(const f of this.fields){f.life-=dt;f.tick-=dt;if(f.tick>0)continue;f.tick=.4;
-      for(const e of this.grid.near(f.x,f.y,f.r)){this.hit(e,f.damage*.5,f.weapon,true);if(f.slow)e.slow=.7;if(f.weapon==='clock'&&f.evolved)e.freeze=Math.max(e.freeze,.3);if(this.stats.bonds.includes('nightfall')&&['dream','cosmos'].includes(f.weapon))e.freeze=Math.max(e.freeze,.18);if(f.gravity){const d=length(f.x-e.x,f.y-e.y)||1;e.knockX+=(f.x-e.x)/d*70;e.knockY+=(f.y-e.y)/d*70;}}
+      for(const e of this.grid.near(f.x,f.y,f.r)){this.hit(e,f.damage*.5,f.weapon,true);if(f.slow)e.slow=.7;if(f.weapon==='clock'&&f.evolved)this.freezeEnemy(e,.3);if(this.stats.bonds.includes('nightfall')&&['dream','cosmos'].includes(f.weapon))this.freezeEnemy(e,.18);if(f.gravity){const d=length(f.x-e.x,f.y-e.y)||1;e.knockX+=(f.x-e.x)/d*70;e.knockY+=(f.y-e.y)/d*70;}}
     }this.fields=this.fields.filter(f=>f.life>0);
   }
   hit(enemy,base,weapon,periodic=false){
@@ -233,6 +239,10 @@ export class Game {
       this.player.charge=Math.min(100,this.player.charge+(1+(enemy.elite?8:0)+(enemy.boss?20:0))*this.stats.charge);this.emit('death',{x:enemy.x,y:enemy.y,color:WEAPON[weapon]?.color||'#abcad1',elite:enemy.elite});
     }if(!periodic&&weapon==='star'&&this.stats.bonds.includes('aurora'))this.triggerBond('aurora',enemy,base*.6);return actual;
   }
+  freezeEnemy(e,seconds,skill=false){
+    if(!e.boss){e.freeze=Math.max(e.freeze,seconds);return;}
+    if(skill||(e.controlLock||0)<=0){e.freeze=Math.max(e.freeze,Math.min(seconds,skill?2.2:.3));e.controlLock=skill?2.6:2.2;}
+  }
   hurt(damage){const p=this.player;if(p.invulnerable>0||this.mode!=='playing')return false;p.hp-=damage;p.invulnerable=.8;p.recentDamage+=damage;p.recentTimer=8;this.damageTaken+=damage;this.emit('hurt',{damage,x:p.x,y:p.y});return true;}
   triggerBond(id,source,damage){
     if(this.bondTimers[id]>0)return;
@@ -247,14 +257,14 @@ export class Game {
     }
   }
   heal(value){const before=this.player.hp;this.player.hp=Math.min(this.player.maxHp,this.player.hp+value);if(this.player.hp>before)this.emit('heal',{x:this.player.x,y:this.player.y,value:Math.round(this.player.hp-before)});}
-  dash(){if(this.mode!=='playing'||this.player.dashCooldown>0)return false;const origin={x:this.player.x,y:this.player.y};this.player.dash=.18;this.player.invulnerable=Math.max(this.player.invulnerable,.35);this.player.dashCooldown=4*(this.stats.dash||1);this.dashes++;afterDash(this,origin);this.emit('dash',{x:this.player.x,y:this.player.y,dx:this.player.dx,dy:this.player.dy});return true;}
+  dash(){if(this.mode!=='playing'||this.player.dashCooldown>0)return false;const origin={x:this.player.x,y:this.player.y};this.player.dash=.18;this.player.invulnerable=Math.max(this.player.invulnerable,.35);this.player.dashCooldown=3*(this.stats.dash||1);this.dashes++;afterDash(this,origin);this.emit('dash',{x:this.player.x,y:this.player.y,dx:this.player.dx,dy:this.player.dy});return true;}
   castSkill(){
     if(this.mode!=='playing'||this.player.charge<100)return false;const p=this.player;p.charge=0;this.skilled++;p.invulnerable=Math.max(p.invulnerable,this.hero==='luna'?2:.65);this.ultimate=4;this.ultimateTimer=0;if(this.stats.awakened.includes('hourglass'))this.timeStop=2;
     this.emit('skill',{hero:this.hero,title:HERO[this.hero].skill,x:p.x,y:p.y,color:HERO[this.hero].color});
     for(const h of this.hazards)if(h.kind==='shot')h.hit=true;
     if(this.hero==='jasmine')this.heal(p.maxHp*.25);if(this.hero==='night_rabbit')this.heal(15);if(this.hero==='time_ruler')this.heal(Math.min(p.maxHp*.2,p.recentDamage*.6));
     if(this.hero==='zeke')p.boost=5;if(this.hero==='silver_rabbit')p.haste=6;
-    for(const e of this.enemies){if(e.hp<=0)continue;if(this.hero==='snow_rabbit'||this.hero==='time_ruler')e.freeze=this.hero==='snow_rabbit'?5.6:4;
+    for(const e of this.enemies){if(e.hp<=0)continue;if(this.hero==='snow_rabbit'||this.hero==='time_ruler')this.freezeEnemy(e,this.hero==='snow_rabbit'?5.6:4,true);
       const d=length(e.x-p.x,e.y-p.y);if(d<360){this.hit(e,55,HERO[this.hero].weapon);e.knockX+=(e.x-p.x)/(d||1)*130;e.knockY+=(e.y-p.y)/(d||1)*130;}}
     const origin=muzzlePoint(p,this.hero);if(this.hero==='cinderella')for(let i=0;i<6&&this.shots.length<LIMITS.shots;i++){const a=i*Math.PI/3;this.shots.push({id:this.uid++,weapon:'glass',kind:'glass',x:origin.x,y:origin.y,ox:origin.x,oy:origin.y,vx:Math.cos(a)*420,vy:Math.sin(a)*420,speed:420,target:0,life:2.8,damage:65,pierce:4,radius:8,evolved:true,hits:[],color:HERO[this.hero].color});}
     if(['jasmine','night_rabbit'].includes(this.hero)){if(this.fields.length>=LIMITS.fields)this.fields.shift();this.fields.push({id:this.uid++,weapon:HERO[this.hero].weapon,x:p.x,y:p.y,r:195*this.stats.area,life:5*this.stats.duration,tick:0,damage:65,slow:true,color:HERO[this.hero].color});}
@@ -352,11 +362,11 @@ export class Game {
     for(const [key,max] of [['enemies',LIMITS.enemies],['shots',LIMITS.shots],['drops',LIMITS.drops],['fields',LIMITS.fields],['hazards',LIMITS.hazards],['weapons',6],['relics',4],['shrines',3],['options',3],['banned',24]])if(!Array.isArray(data[key])||data[key].length>max)throw new Error('Invalid '+key);
     if(!data.weapons.length||new Set(data.weapons.map(w=>w.id)).size!==data.weapons.length||data.weapons.some(w=>!WEAPON[w.id]||!Number.isInteger(w.level)||w.level<1||w.level>6)||new Set(data.relics.map(r=>r.id)).size!==data.relics.length||data.relics.some(r=>!RELIC[r.id]||!Number.isInteger(r.level)||r.level<1||r.level>3))throw new Error('Invalid constellation');
     const ids=new Set();for(const key of ['enemies','shots','drops','fields','hazards',...(data.reverieVersion===undefined?[]:['encounters'])])for(const v of data[key]){if(!Number.isInteger(v.id)||v.id<1||ids.has(v.id)||v.id>=data.uid||!Number.isFinite(v.x)||!Number.isFinite(v.y)||Math.abs(v.x)>WORLD+700||Math.abs(v.y)>WORLD+700)throw new Error('Invalid entities');ids.add(v.id);for(const coordinate of ['prevX','prevY'])if(Object.hasOwn(v,coordinate)&&!Number.isFinite(v[coordinate]))throw new Error('Invalid visual position');}
-    for(const e of data.enemies){numeric(e,['hp','maxHp','speed','radius','damage','ai','slow','freeze','burn','burnDamage','burnTick','flash','knockX','knockY','charge','angle','variant']);if(!['wisp','beetle','moth','stalker','ember','elite','boss'].includes(e.kind)||e.radius<1||e.radius>120||e.hp>10000000||e.speed<0||e.speed>1000)throw new Error('Invalid enemy');}
+    for(const e of data.enemies){numeric(e,['hp','maxHp','speed','radius','damage','ai','slow','freeze','burn','burnDamage','burnTick','flash','knockX','knockY','charge','angle','variant']);if(!['wisp','beetle','moth','stalker','ember','elite','boss'].includes(e.kind)||e.radius<1||e.radius>120||e.hp>10000000||e.speed<0||e.speed>1000)throw new Error('Invalid enemy');if(e.spawnGuard!==undefined&&(!Number.isFinite(e.spawnGuard)||e.spawnGuard<0||e.spawnGuard>1.35))throw new Error('Invalid arrival guard');if(e.controlLock!==undefined&&(!Number.isFinite(e.controlLock)||e.controlLock<0||e.controlLock>5))throw new Error('Invalid control resistance');if(e.bossKind!==undefined&&!BOSSES[e.bossKind]||e.overrun!==undefined&&(!Number.isInteger(e.overrun)||e.overrun<0||e.overrun>1440)||e.patternStep!==undefined&&(!Number.isInteger(e.patternStep)||e.patternStep<0||e.patternStep>=24))throw new Error('Invalid boss state');}
     for(const s of data.shots){numeric(s,['vx','vy','speed','ox','oy','life','damage','pierce','radius']);if(!WEAPON[s.weapon]||!Array.isArray(s.hits)||s.hits.length>LIMITS.enemies)throw new Error('Invalid projectile');}
     for(const f of data.fields){numeric(f,['r','life','tick','damage']);if(!WEAPON[f.weapon]||f.r<1||f.r>1000)throw new Error('Invalid field');}
     for(const d of data.drops){numeric(d,['value']);if(!['xp','coin','heart','magnet','chest'].includes(d.kind)||d.value<1||d.value>10000000)throw new Error('Invalid pickup');}
-    for(const h of data.hazards){numeric(h,['r','wait','life','damage']);if(!['ring','blast','shot'].includes(h.kind)||h.r<1||h.r>500)throw new Error('Invalid danger');if(h.kind==='shot')numeric(h,['vx','vy']);}
+    for(const h of data.hazards){numeric(h,['r','wait','life','damage']);if(!['ring','blast','shot','zone','line','annulus'].includes(h.kind)||h.r<1||h.r>500)throw new Error('Invalid danger');if(h.kind==='shot')numeric(h,['vx','vy']);if(['zone','line','annulus'].includes(h.kind)){numeric(h,['tick','telegraph']);if(h.tick<0||h.tick>.45||h.telegraph<.1||h.telegraph>10)throw new Error('Invalid danger timing');}if(h.kind==='line'){numeric(h,['ax','ay','bx','by']);if(['ax','ay','bx','by'].some(k=>Math.abs(h[k])>WORLD+700))throw new Error('Invalid danger line');}if(h.kind==='annulus'&&(!Number.isFinite(h.inner)||h.inner<=0||h.inner>=h.r))throw new Error('Invalid danger hole');if(h.grazed!==undefined&&typeof h.grazed!=='boolean')throw new Error('Invalid danger graze');}
     if(data.shrines.length!==3||data.shrines.some(s=>!['moon','star','dawn'].includes(s.id)||!Number.isFinite(s.x)||!Number.isFinite(s.y)||typeof s.used!=='boolean'))throw new Error('Invalid shrines');
     for(const w of data.weapons){numeric(w,['timer','damage']);if(typeof w.evolved!=='boolean')throw new Error('Invalid weapon state');}
     for(const o of [...data.options,...(data.treasure?[data.treasure]:[])])if(!['weapon','relic','evolution','heal','gold','limit'].includes(o.type)||(['weapon','evolution'].includes(o.type)&&!WEAPON[o.id])||(o.type==='relic'&&!RELIC[o.id])||(o.type==='limit'&&(data.runMode!=='endless'||!['power','haste','area'].includes(o.id))))throw new Error('Invalid reward');

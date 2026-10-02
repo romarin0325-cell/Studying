@@ -1,143 +1,167 @@
 {
   "version": 1,
   "processor": "Anatomically normalized cast and sole-aligned walking atlases; cleaned illustrated combat cells; native alpha; no runtime pixel processing",
-  "processorHash": "9b63b1447f800ac28bdaea0e8c84f796b8018020733766393220e00961ec87d7",
+  "processorHash": "46e2207ffbac91babab0ada19bf1ca69a4f33c59b50a6ff518dc9e5427d64eeb",
   "assets": [
     {
       "id": "unit-rumi",
       "source": "defense/assets/merge/units/rumi.webp",
       "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
       "file": "prepared/unit-rumi.webp",
-      "sha256": "ca431de5ec3cce7ddece626db8f5b0f3ed0765fd2bc0c15fce63cb55316c600b",
-      "bytes": 100472
+      "sha256": "06db32235bcc4c4a28002d24950ac84c964591b510bc0243a805b691d718ef17",
+      "bytes": 102514
     },
     {
       "id": "unit-luna",
       "source": "defense/assets/merge/units/luna.webp",
       "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
       "file": "prepared/unit-luna.webp",
-      "sha256": "b32c295b402b2ff610f49f5ba0f7cd03d29b1f641cacb4d6f4fde6467243e097",
-      "bytes": 86050
+      "sha256": "1c52d5659e18fccc6fdf947eeb9e6a8a7142dfd7b71c4934c94aa88d372d832f",
+      "bytes": 89726
     },
     {
       "id": "unit-zeke",
       "source": "defense/assets/merge/units/zeke.webp",
       "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
       "file": "prepared/unit-zeke.webp",
-      "sha256": "bf40adb254bf0ad35501f03120e7f1e3ab30fd0b0fa3524ef5d613117833101d",
-      "bytes": 111956
+      "sha256": "31ab59d024c08f626943ff729e0f5858964a639d1e0df78538feb0bb29ba2778",
+      "bytes": 116646
     },
     {
       "id": "unit-cinderella",
       "source": "defense/assets/merge/units/cinderella.webp",
       "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
       "file": "prepared/unit-cinderella.webp",
-      "sha256": "a9353d1181ea571d423b50d91240c7f3fe03cc7265e3ff23e8250869c7fad8dd",
-      "bytes": 142102
+      "sha256": "75eb3c32a63a61c4389022c6358f131593fa36d79a62bd3e06ad053555fa935d",
+      "bytes": 140548
     },
     {
       "id": "unit-snow_rabbit",
       "source": "defense/assets/merge/units/snow_rabbit.webp",
       "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
       "file": "prepared/unit-snow_rabbit.webp",
-      "sha256": "e9a15c9d73ae5d66a4661483312962911e2f95d7903de871cd3bd1c7fb32f114",
-      "bytes": 88724
+      "sha256": "dc531a96fb0b80d4028360f6a2768c5ab99d9f7dfb66f9695d4a37c73134f85f",
+      "bytes": 84128
     },
     {
       "id": "unit-night_rabbit",
       "source": "defense/assets/merge/units/night_rabbit.webp",
       "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
       "file": "prepared/unit-night_rabbit.webp",
-      "sha256": "8aa08d04f9072504f19b3306e8e053ead08b562ba85b95388ff9a50a44c196e2",
-      "bytes": 81554
+      "sha256": "945dfcaf680092665571eda0c732616ce4b8fceefa828bd40d6c4af7dea9e964",
+      "bytes": 77540
     },
     {
       "id": "unit-silver_rabbit",
       "source": "defense/assets/merge/units/silver_rabbit.webp",
       "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
       "file": "prepared/unit-silver_rabbit.webp",
-      "sha256": "2cb8512474064efd7631933f038c2bbbc5a49e6f6352b70b6ac5db29fdd6e878",
-      "bytes": 111162
+      "sha256": "310d77ebb3bb47af36b4da1b70e4ca72d10a9bfb846d57a80721117fb76ae418",
+      "bytes": 101488
     },
     {
       "id": "unit-time_ruler",
       "source": "defense/assets/merge/units/time_ruler.webp",
       "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
       "file": "prepared/unit-time_ruler.webp",
-      "sha256": "8720886afb32011c559de61244728c0eb78b05274e50697aed65cae5fe80adf4",
-      "bytes": 82854
+      "sha256": "c94f381536f2d0264c402d51961164fb8c69eadae36067975ff5eaf6ae844a35",
+      "bytes": 89078
     },
     {
       "id": "unit-jasmine",
       "source": "survivor/assets/jasmine.webp",
       "sourceSha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b",
       "file": "prepared/unit-jasmine.webp",
-      "sha256": "8d7025b0696d1a8a95b81090d6d7936f079f12ff13e46431fbb48c3d3d131a22",
-      "bytes": 148382
+      "sha256": "2c24d6c67d8e755d945fb24f8743482348fb3ddb230a19151ca2d8922e7d8fe0",
+      "bytes": 152432
     },
     {
       "id": "unit-storm_sage",
       "source": "defense/assets/merge/units/storm_sage.webp",
       "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
       "file": "prepared/unit-storm_sage.webp",
-      "sha256": "2ddc764d0a4aab4f24800f5e6d0debed1f10d812a7fc03cbb4f017146d4831a1",
-      "bytes": 105012
+      "sha256": "a95e390afd47b7fca023e316e2bd4ac0d1104ff0cb3e7c396f8554d376f60e02",
+      "bytes": 109618
     },
     {
       "id": "unit-lightning_sage",
       "source": "defense/assets/merge/units/lightning_sage.webp",
       "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
       "file": "prepared/unit-lightning_sage.webp",
-      "sha256": "557e3a694568c831794c83ac84587560eb4d2aabc6c1c6e343fd7d624f0f608f",
-      "bytes": 87096
+      "sha256": "8347f30cd2e098c89feba1de8c86122661f29404fddf5b55e804bb8f648d3801",
+      "bytes": 91740
     },
     {
       "id": "unit-queen",
       "source": "defense/assets/merge/units/queen.webp",
       "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
       "file": "prepared/unit-queen.webp",
-      "sha256": "a2ff15f2cb7b019a828a3b3d92635197f9d4b753ff4929cfea4959e8db8e102a",
-      "bytes": 124208
+      "sha256": "8bb1e9340c1a95e55966d37d924a16631a3ba439715bf197b278f94503b81fc6",
+      "bytes": 140044
     },
     {
       "id": "unit-galaxy_whale",
       "source": "defense/assets/merge/units/galaxy_whale.webp",
       "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
       "file": "prepared/unit-galaxy_whale.webp",
-      "sha256": "e20ad64d2c059e4993e51ccb99674e454c75112fd54fed4e1f0dc42823431d8f",
-      "bytes": 128118
+      "sha256": "aee6637a412109ed8fb6e3c7492b258b4638f53d83c5850dd7e3cb3e3a9a2dcb",
+      "bytes": 138048
     },
     {
       "id": "unit-great_detective",
       "source": "defense/assets/merge/units/great_detective.webp",
       "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
       "file": "prepared/unit-great_detective.webp",
-      "sha256": "e9bf724f47c346fc7727589ec601965ef94cfe00efb752fb2fe70e8a0bf31909",
-      "bytes": 75652
+      "sha256": "fbd0cb694ec438ccdd24291d4c1bb162b1fec42f650e073720c518883f33b32c",
+      "bytes": 80554
+    },
+    {
+      "id": "full-rumi",
+      "source": "survivor/assets/renewal/sources/walk-rumi.png",
+      "sourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e",
+      "file": "prepared/full-rumi.webp",
+      "sha256": "ad158f149f81617f55aacff096d7a5d82623c503c41c7a122bc006315475de48",
+      "bytes": 38460
     },
     {
       "id": "walk-rumi",
       "source": "survivor/assets/renewal/sources/walk-rumi.png",
       "sourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e",
       "file": "prepared/walk-rumi.webp",
-      "sha256": "58fbf113a7ea4afcf892788e53fea7d0ea899b46f6c1c248dc52322cc932b0e7",
-      "bytes": 160086
+      "sha256": "d83a169213ef523dea1f07eaecc80314243bf2cf1694493ffb3768a8afefb7e7",
+      "bytes": 147704
+    },
+    {
+      "id": "full-luna",
+      "source": "survivor/assets/renewal/sources/walk-luna.png",
+      "sourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412",
+      "file": "prepared/full-luna.webp",
+      "sha256": "4f701466024c8c1164666b52a57bd161645f1b8aac1850b3bf75981f6bbcd6cd",
+      "bytes": 33194
     },
     {
       "id": "walk-luna",
       "source": "survivor/assets/renewal/sources/walk-luna.png",
       "sourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412",
       "file": "prepared/walk-luna.webp",
-      "sha256": "0335899b862d7f2ead3c3565759ba2f8d35795dfe63a320cea27ed32cf20d323",
-      "bytes": 144752
+      "sha256": "344db929b52bb60f0b498ae8b40a341d9628fb0109efe4c22891bc7ccbaa0dcb",
+      "bytes": 131666
+    },
+    {
+      "id": "full-zeke",
+      "source": "survivor/assets/renewal/sources/walk-zeke.png",
+      "sourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b",
+      "file": "prepared/full-zeke.webp",
+      "sha256": "d2d22fa7b0310c525ee2069fa998a4b8ae60951eda01d7ad406ba083a859f6ff",
+      "bytes": 40380
     },
     {
       "id": "walk-zeke",
       "source": "survivor/assets/renewal/sources/walk-zeke.png",
       "sourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b",
       "file": "prepared/walk-zeke.webp",
-      "sha256": "83c33307c3abb5e7580e430d90f921c114cba8a07130b660e6af491129281c6f",
-      "bytes": 178104
+      "sha256": "72cb6b25cd9768d5d8c0f2a15befe6ccc3d8a6d31fa329925412944b242e00a2",
+      "bytes": 163950
     },
     {
       "id": "weapons",
@@ -148,52 +172,100 @@
       "bytes": 197724
     },
     {
+      "id": "full-jasmine",
+      "source": "survivor/assets/renewal/sources/walk-jasmine.png",
+      "sourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d",
+      "file": "prepared/full-jasmine.webp",
+      "sha256": "898aefff231b9fe667664ac1d72fa4d8571d7c0cb24031b3e432bc042759d207",
+      "bytes": 57022
+    },
+    {
       "id": "walk-jasmine",
       "source": "survivor/assets/renewal/sources/walk-jasmine.png",
       "sourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d",
       "file": "prepared/walk-jasmine.webp",
-      "sha256": "bf4ac4e9e1ebd5af1119d4c1751a087ff14eb245d59870acfa23c73a6e0a931c",
-      "bytes": 178216
+      "sha256": "e8b3434aa3b28bd22713462fcc8d39ae14472bf29059c66affba994b85aeb24f",
+      "bytes": 197350
+    },
+    {
+      "id": "full-snow_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-snow_rabbit.png",
+      "sourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127",
+      "file": "prepared/full-snow_rabbit.webp",
+      "sha256": "4fb32d19d4c40490252040c2d8a475943ffb18449d89a1d47f790302dafea20e",
+      "bytes": 31616
     },
     {
       "id": "walk-snow_rabbit",
       "source": "survivor/assets/renewal/sources/walk-snow_rabbit.png",
       "sourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127",
       "file": "prepared/walk-snow_rabbit.webp",
-      "sha256": "873cb00c00e8445e9064273368772ba6296c799a7bc905d78a1b99543a21af81",
-      "bytes": 154358
+      "sha256": "a1eca44e284da214d692a2bc220cd9fd9b1f2ce79c80ba2e383816d1107b251f",
+      "bytes": 130932
+    },
+    {
+      "id": "full-night_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-night_rabbit.png",
+      "sourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6",
+      "file": "prepared/full-night_rabbit.webp",
+      "sha256": "413a2a33d4dda62da736c4c83d539375a7a1a88148d13c4200a046e5de1c7307",
+      "bytes": 28370
     },
     {
       "id": "walk-night_rabbit",
       "source": "survivor/assets/renewal/sources/walk-night_rabbit.png",
       "sourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6",
       "file": "prepared/walk-night_rabbit.webp",
-      "sha256": "9ce12dc5ae04576d00f0d6e6854ee7401dddcf2530dc503ab12f9e4973769d3f",
-      "bytes": 126912
+      "sha256": "7c24c0969c524a07a54bbda46af920b9b47a9ba5884ed540ee9e92e9b0fde474",
+      "bytes": 106138
+    },
+    {
+      "id": "full-cinderella",
+      "source": "survivor/assets/renewal/sources/walk-cinderella.png",
+      "sourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de",
+      "file": "prepared/full-cinderella.webp",
+      "sha256": "b3d1fae0d0508c797c8ecf957d4388c106c122ec27f653a975b76c5134b60a71",
+      "bytes": 42366
     },
     {
       "id": "walk-cinderella",
       "source": "survivor/assets/renewal/sources/walk-cinderella.png",
       "sourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de",
       "file": "prepared/walk-cinderella.webp",
-      "sha256": "89f2ab569c9a500041c4f638392ebf35c8dea808bfc432dab18dad8a0f39374c",
-      "bytes": 204274
+      "sha256": "e500fbed899d45ccfcb512b04d94a7bbde1e4016fc11e9cf22c07b5ca64e7e49",
+      "bytes": 171656
+    },
+    {
+      "id": "full-silver_rabbit",
+      "source": "survivor/assets/renewal/sources/walk-silver_rabbit.png",
+      "sourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902",
+      "file": "prepared/full-silver_rabbit.webp",
+      "sha256": "ca8835a8f43c996ba2dfea1f43d9d8895bc8a48b33f7bfeed89404c2d70a8c0c",
+      "bytes": 31662
     },
     {
       "id": "walk-silver_rabbit",
       "source": "survivor/assets/renewal/sources/walk-silver_rabbit.png",
       "sourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902",
       "file": "prepared/walk-silver_rabbit.webp",
-      "sha256": "c71e66650b64bb65fd56c20dfd282eea54910c8013af7c502dbb3224a3772e23",
-      "bytes": 194094
+      "sha256": "73392a70db5920b45e46b91a1a910360e8f8895a63e21e066b2ce2217e493fbb",
+      "bytes": 131074
+    },
+    {
+      "id": "full-time_ruler",
+      "source": "survivor/assets/renewal/sources/walk-time_ruler.png",
+      "sourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e",
+      "file": "prepared/full-time_ruler.webp",
+      "sha256": "d9ee74a0dd64bb70f94d54c575e29ffd879d18b7fbcde2b9f29ec1b1622300e3",
+      "bytes": 32972
     },
     {
       "id": "walk-time_ruler",
       "source": "survivor/assets/renewal/sources/walk-time_ruler.png",
       "sourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e",
       "file": "prepared/walk-time_ruler.webp",
-      "sha256": "93e17b78047a23a19b84ef09d988bcbe72a68d91a5ce0d8312d4f59ba2d25e72",
-      "bytes": 134836
+      "sha256": "a2e77af298d5f8f4c34a530fb8091b38345b5baa2bb28a6204dc2d0052429f19",
+      "bytes": 122552
     },
     {
       "id": "relics",
@@ -266,78 +338,26 @@
       "file": "prepared/secrets.webp",
       "sha256": "bc439eb4903c85b857a13588638a095fac79d938444df6d0db663e4ad21b4bfa",
       "bytes": 100500
+    },
+    {
+      "id": "menu",
+      "source": "survivor/assets/ordeal/sources/menu.png",
+      "sourceSha256": "f833d8d468ce7016b231469f960c8a2905c012c6aca662a0e47b92372c385723",
+      "file": "prepared/menu.webp",
+      "sha256": "ae7a1f6cccac6cafdb72d9b3d2327d3acc97833d37958e4fd00b7a38b81ee621",
+      "bytes": 70360
+    },
+    {
+      "id": "ordeal-bosses",
+      "source": "survivor/assets/ordeal/sources/bosses.png",
+      "sourceSha256": "60db2d84d2c3cfeca0e79c5a7589155b2f7921863e9df2a42bf9e421d6e5abbe",
+      "file": "prepared/ordeal-bosses.webp",
+      "sha256": "f2cdfeb11d6d9010ca9f73ac4eb5cba8461263123d57f2b3a942f3497c84d5dd",
+      "bytes": 203176
     }
   ],
   "frames": {
     "rumi": {
-      "portrait": {
-        "x": 256,
-        "y": 218,
-        "size": 237.6
-      },
-      "anchor": [
-        256,
-        480
-      ],
-      "directions": [
-        "down",
-        "up",
-        "left",
-        "right"
-      ],
-      "anatomy": {
-        "headHeight": 144,
-        "bodyHeight": 190,
-        "sole": 480
-      },
-      "walk": {
-        "texture": "walk-rumi",
-        "columns": 4,
-        "rows": 4,
-        "cell": 208,
-        "anchor": [
-          104,
-          195
-        ],
-        "distancePerFrame": 16,
-        "displayScale": 1.3
-      }
-    },
-    "luna": {
-      "portrait": {
-        "x": 256,
-        "y": 218,
-        "size": 237.6
-      },
-      "anchor": [
-        256,
-        480
-      ],
-      "directions": [
-        "down",
-        "up",
-        "left",
-        "right"
-      ],
-      "anatomy": {
-        "headHeight": 144,
-        "bodyHeight": 190,
-        "sole": 480
-      },
-      "walk": {
-        "texture": "walk-luna",
-        "columns": 4,
-        "rows": 4,
-        "cell": 208,
-        "anchor": [
-          104,
-          195
-        ],
-        "distancePerFrame": 16,
-        "displayScale": 1.3
-      }
-    },
-    "zeke": {
       "portrait": {
         "x": 256,
         "y": 212,
@@ -359,6 +379,74 @@
         "sole": 480
       },
       "walk": {
+        "texture": "walk-rumi",
+        "columns": 4,
+        "rows": 4,
+        "cell": 208,
+        "anchor": [
+          104,
+          195
+        ],
+        "distancePerFrame": 16,
+        "displayScale": 1.3
+      }
+    },
+    "luna": {
+      "portrait": {
+        "x": 256,
+        "y": 204,
+        "size": 237.6
+      },
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 204,
+        "sole": 480
+      },
+      "walk": {
+        "texture": "walk-luna",
+        "columns": 4,
+        "rows": 4,
+        "cell": 208,
+        "anchor": [
+          104,
+          195
+        ],
+        "distancePerFrame": 16,
+        "displayScale": 1.3
+      }
+    },
+    "zeke": {
+      "portrait": {
+        "x": 256,
+        "y": 196,
+        "size": 237.6
+      },
+      "anchor": [
+        256,
+        480
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 212,
+        "sole": 480
+      },
+      "walk": {
         "texture": "walk-zeke",
         "columns": 4,
         "rows": 4,
@@ -374,7 +462,7 @@
     "cinderella": {
       "portrait": {
         "x": 256,
-        "y": 214,
+        "y": 212,
         "size": 237.6
       },
       "anchor": [
@@ -389,7 +477,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 194,
+        "bodyHeight": 196,
         "sole": 480
       },
       "walk": {
@@ -408,7 +496,7 @@
     "snow_rabbit": {
       "portrait": {
         "x": 256,
-        "y": 228,
+        "y": 268,
         "size": 237.6
       },
       "anchor": [
@@ -423,7 +511,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 180,
+        "bodyHeight": 140,
         "sole": 480
       },
       "walk": {
@@ -442,7 +530,7 @@
     "night_rabbit": {
       "portrait": {
         "x": 256,
-        "y": 228,
+        "y": 268,
         "size": 237.6
       },
       "anchor": [
@@ -457,7 +545,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 180,
+        "bodyHeight": 140,
         "sole": 480
       },
       "walk": {
@@ -476,7 +564,7 @@
     "silver_rabbit": {
       "portrait": {
         "x": 256,
-        "y": 228,
+        "y": 268,
         "size": 237.6
       },
       "anchor": [
@@ -491,7 +579,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 180,
+        "bodyHeight": 140,
         "sole": 480
       },
       "walk": {
@@ -510,7 +598,7 @@
     "time_ruler": {
       "portrait": {
         "x": 256,
-        "y": 218,
+        "y": 196,
         "size": 237.6
       },
       "anchor": [
@@ -525,7 +613,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 190,
+        "bodyHeight": 212,
         "sole": 480
       },
       "walk": {
@@ -544,7 +632,7 @@
     "jasmine": {
       "portrait": {
         "x": 256,
-        "y": 214,
+        "y": 196,
         "size": 237.6
       },
       "anchor": [
@@ -559,7 +647,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 194,
+        "bodyHeight": 212,
         "sole": 480
       },
       "walk": {
@@ -578,8 +666,8 @@
     "storm_sage": {
       "portrait": {
         "x": 256,
-        "y": 195,
-        "size": 250
+        "y": 196,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -590,13 +678,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 212,
+        "sole": 480
+      }
     },
     "lightning_sage": {
       "portrait": {
         "x": 256,
-        "y": 204,
-        "size": 250
+        "y": 196,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -607,13 +700,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 212,
+        "sole": 480
+      }
     },
     "queen": {
       "portrait": {
         "x": 256,
-        "y": 211,
-        "size": 250
+        "y": 196,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -624,13 +722,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 212,
+        "sole": 480
+      }
     },
     "galaxy_whale": {
       "portrait": {
         "x": 256,
-        "y": 203,
-        "size": 250
+        "y": 196,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -641,13 +744,18 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 212,
+        "sole": 480
+      }
     },
     "great_detective": {
       "portrait": {
         "x": 256,
-        "y": 214,
-        "size": 250
+        "y": 212,
+        "size": 237.6
       },
       "anchor": [
         256,
@@ -658,21 +766,26 @@
         "up",
         "left",
         "right"
-      ]
+      ],
+      "anatomy": {
+        "headHeight": 144,
+        "bodyHeight": 196,
+        "sole": 480
+      }
     }
   },
   "normalization": {
     "source": "survivor/assets/body-profile.json",
-    "sha256": "42e6d9b7812a8a79a32001ebbdd02b6094d1ba995881667a17287a2780fa7ed4",
+    "sha256": "cf453bec673c4686a0018f23241e2c190c91315e62225cc7e041ce989b51092f",
     "processor": "survivor/scripts/art-normalization.mjs",
-    "processorSha256": "42777cf5e4521ae0befcaac30f3934bde770dbddc1f571901dfa465314489cf2",
+    "processorSha256": "4ac26fa0bf9127fc6f5774e932a2d5274c65972fd70ead733f56d06ba8022bc2",
     "frames": [
       {
         "id": "unit-rumi",
         "frame": 0,
         "removed": 0,
         "headScale": 1.006993006993007,
-        "bodyScale": 1.0052910052910053,
+        "bodyScale": 1.037037037037037,
         "root": [
           256,
           480
@@ -683,7 +796,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 1.006993006993007,
-        "bodyScale": 1.0052910052910053,
+        "bodyScale": 1.037037037037037,
         "root": [
           256,
           480
@@ -694,7 +807,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 1.006993006993007,
-        "bodyScale": 1.0052910052910053,
+        "bodyScale": 1.037037037037037,
         "root": [
           256,
           480
@@ -705,7 +818,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 1.006993006993007,
-        "bodyScale": 1.0052910052910053,
+        "bodyScale": 1.037037037037037,
         "root": [
           256,
           480
@@ -716,7 +829,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 0.9411764705882353,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.0625,
         "root": [
           256,
           480
@@ -727,7 +840,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 0.9411764705882353,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.0625,
         "root": [
           256,
           480
@@ -738,7 +851,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.9411764705882353,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.0625,
         "root": [
           256,
           480
@@ -749,7 +862,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.9411764705882353,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.0625,
         "root": [
           256,
           480
@@ -760,7 +873,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 0.9664429530201343,
-        "bodyScale": 1.037037037037037,
+        "bodyScale": 1.1216931216931216,
         "root": [
           256,
           480
@@ -771,7 +884,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 0.9664429530201343,
-        "bodyScale": 1.037037037037037,
+        "bodyScale": 1.1216931216931216,
         "root": [
           256,
           480
@@ -782,7 +895,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.9664429530201343,
-        "bodyScale": 1.037037037037037,
+        "bodyScale": 1.1216931216931216,
         "root": [
           256,
           480
@@ -793,7 +906,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.9664429530201343,
-        "bodyScale": 1.037037037037037,
+        "bodyScale": 1.1216931216931216,
         "root": [
           256,
           480
@@ -804,7 +917,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 0.8899082568807339,
+        "bodyScale": 0.8990825688073395,
         "root": [
           256,
           480
@@ -815,7 +928,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 0.8899082568807339,
+        "bodyScale": 0.8990825688073395,
         "root": [
           256,
           480
@@ -826,7 +939,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 0.8899082568807339,
+        "bodyScale": 0.8990825688073395,
         "root": [
           256,
           480
@@ -837,7 +950,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 0.8899082568807339,
+        "bodyScale": 0.8990825688073395,
         "root": [
           256,
           480
@@ -848,7 +961,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 1.0714285714285714,
+        "bodyScale": 0.8333333333333334,
         "root": [
           256,
           480
@@ -859,7 +972,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 1.0714285714285714,
+        "bodyScale": 0.8333333333333334,
         "root": [
           256,
           480
@@ -870,7 +983,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 1.0714285714285714,
+        "bodyScale": 0.8333333333333334,
         "root": [
           256,
           480
@@ -881,7 +994,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.993103448275862,
-        "bodyScale": 1.0714285714285714,
+        "bodyScale": 0.8333333333333334,
         "root": [
           256,
           480
@@ -892,7 +1005,7 @@
         "frame": 0,
         "removed": 6,
         "headScale": 0.9863013698630136,
-        "bodyScale": 0.9424083769633508,
+        "bodyScale": 0.7329842931937173,
         "root": [
           256,
           480
@@ -903,7 +1016,7 @@
         "frame": 1,
         "removed": 6,
         "headScale": 0.9863013698630136,
-        "bodyScale": 0.9424083769633508,
+        "bodyScale": 0.7329842931937173,
         "root": [
           256,
           480
@@ -914,7 +1027,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.9863013698630136,
-        "bodyScale": 0.9424083769633508,
+        "bodyScale": 0.7329842931937173,
         "root": [
           256,
           480
@@ -925,7 +1038,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.9863013698630136,
-        "bodyScale": 0.9424083769633508,
+        "bodyScale": 0.7329842931937173,
         "root": [
           256,
           480
@@ -936,7 +1049,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 1,
-        "bodyScale": 1.1042944785276074,
+        "bodyScale": 0.8588957055214724,
         "root": [
           256,
           480
@@ -947,7 +1060,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 1,
-        "bodyScale": 1.1042944785276074,
+        "bodyScale": 0.8588957055214724,
         "root": [
           256,
           480
@@ -958,7 +1071,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 1,
-        "bodyScale": 1.1042944785276074,
+        "bodyScale": 0.8588957055214724,
         "root": [
           256,
           480
@@ -969,7 +1082,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 1,
-        "bodyScale": 1.1042944785276074,
+        "bodyScale": 0.8588957055214724,
         "root": [
           256,
           480
@@ -980,7 +1093,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 0.9795918367346939,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.1041666666666667,
         "root": [
           256,
           480
@@ -991,7 +1104,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 0.9795918367346939,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.1041666666666667,
         "root": [
           256,
           480
@@ -1002,7 +1115,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 0.9795918367346939,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.1041666666666667,
         "root": [
           256,
           480
@@ -1013,7 +1126,7 @@
         "frame": 3,
         "removed": 0,
         "headScale": 0.9795918367346939,
-        "bodyScale": 0.9895833333333334,
+        "bodyScale": 1.1041666666666667,
         "root": [
           256,
           480
@@ -1024,7 +1137,7 @@
         "frame": 0,
         "removed": 0,
         "headScale": 1.099236641221374,
-        "bodyScale": 1,
+        "bodyScale": 1.092783505154639,
         "root": [
           256,
           480
@@ -1035,7 +1148,7 @@
         "frame": 1,
         "removed": 0,
         "headScale": 1.099236641221374,
-        "bodyScale": 1,
+        "bodyScale": 1.092783505154639,
         "root": [
           256,
           480
@@ -1046,7 +1159,7 @@
         "frame": 2,
         "removed": 0,
         "headScale": 1.099236641221374,
-        "bodyScale": 1,
+        "bodyScale": 1.092783505154639,
         "root": [
           256,
           480
@@ -1057,7 +1170,227 @@
         "frame": 3,
         "removed": 0,
         "headScale": 1.099236641221374,
-        "bodyScale": 1,
+        "bodyScale": 1.092783505154639,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-storm_sage",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9536423841059603,
+        "bodyScale": 1.0095238095238095,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-storm_sage",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9536423841059603,
+        "bodyScale": 1.0095238095238095,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-storm_sage",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9536423841059603,
+        "bodyScale": 1.0095238095238095,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-storm_sage",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9536423841059603,
+        "bodyScale": 1.0095238095238095,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-lightning_sage",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0341463414634147,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-lightning_sage",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0341463414634147,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-lightning_sage",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0341463414634147,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-lightning_sage",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0341463414634147,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-queen",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.1157894736842104,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-queen",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.1157894736842104,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-queen",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.1157894736842104,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-queen",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 1.006993006993007,
+        "bodyScale": 1.1157894736842104,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-galaxy_whale",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0761421319796953,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-galaxy_whale",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0761421319796953,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-galaxy_whale",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0761421319796953,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-galaxy_whale",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9411764705882353,
+        "bodyScale": 1.0761421319796953,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-great_detective",
+        "frame": 0,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.0425531914893618,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-great_detective",
+        "frame": 1,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.0425531914893618,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-great_detective",
+        "frame": 2,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.0425531914893618,
+        "root": [
+          256,
+          480
+        ]
+      },
+      {
+        "id": "unit-great_detective",
+        "frame": 3,
+        "removed": 0,
+        "headScale": 0.9664429530201343,
+        "bodyScale": 1.0425531914893618,
         "root": [
           256,
           480
@@ -1068,13 +1401,17 @@
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 81,
-          "chin": 179,
-          "rootX": 182.5,
+          "skullTop": 61,
+          "chin": 175,
+          "rootX": 173,
+          "pelvis": 247,
           "foot": 312
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 0,
+        "headScale": 0.39473684210526316,
+        "bodyScale": 0.4537037037037037,
+        "torsoScale": 0.390625,
+        "legScale": 0.5257936507936508,
         "root": [
           104,
           195
@@ -1085,13 +1422,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 81,
-          "chin": 179,
-          "rootX": 156,
+          "skullTop": 61,
+          "chin": 175,
+          "rootX": 173,
+          "pelvis": 247,
           "foot": 312
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 1,
+        "headScale": 0.39473684210526316,
+        "bodyScale": 0.4537037037037037,
+        "torsoScale": 0.390625,
+        "legScale": 0.5257936507936508,
         "root": [
           104,
           195
@@ -1102,13 +1443,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 80,
-          "chin": 178,
-          "rootX": 155,
+          "skullTop": 61,
+          "chin": 175,
+          "rootX": 173,
+          "pelvis": 247,
           "foot": 311
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 2,
+        "headScale": 0.39473684210526316,
+        "bodyScale": 0.4537037037037037,
+        "torsoScale": 0.390625,
+        "legScale": 0.5257936507936508,
         "root": [
           104,
           195
@@ -1119,13 +1464,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 81,
-          "chin": 179,
-          "rootX": 132,
+          "skullTop": 61,
+          "chin": 175,
+          "rootX": 173,
+          "pelvis": 247,
           "foot": 312
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 3,
+        "headScale": 0.39473684210526316,
+        "bodyScale": 0.4537037037037037,
+        "torsoScale": 0.390625,
+        "legScale": 0.5257936507936508,
         "root": [
           104,
           195
@@ -1136,13 +1485,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 75,
-          "chin": 173,
-          "rootX": 181,
+          "skullTop": 58,
+          "chin": 174,
+          "rootX": 174,
+          "pelvis": 248,
           "foot": 306
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 4,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.4640151515151515,
+        "torsoScale": 0.38006756756756754,
+        "legScale": 0.5711206896551724,
         "root": [
           104,
           195
@@ -1153,13 +1506,17 @@
         "frame": 5,
         "removed": 40,
         "landmarks": {
-          "skullTop": 74,
-          "chin": 172,
-          "rootX": 159,
+          "skullTop": 58,
+          "chin": 174,
+          "rootX": 174,
+          "pelvis": 248,
           "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 5,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.4640151515151515,
+        "torsoScale": 0.38006756756756754,
+        "legScale": 0.5711206896551724,
         "root": [
           104,
           195
@@ -1170,13 +1527,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 74,
-          "chin": 172,
-          "rootX": 156,
+          "skullTop": 58,
+          "chin": 174,
+          "rootX": 174,
+          "pelvis": 248,
           "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 6,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.4640151515151515,
+        "torsoScale": 0.38006756756756754,
+        "legScale": 0.5711206896551724,
         "root": [
           104,
           195
@@ -1187,13 +1548,17 @@
         "frame": 7,
         "removed": 31,
         "landmarks": {
-          "skullTop": 74,
-          "chin": 172,
-          "rootX": 133.5,
+          "skullTop": 58,
+          "chin": 174,
+          "rootX": 174,
+          "pelvis": 248,
           "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 7,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.4640151515151515,
+        "torsoScale": 0.38006756756756754,
+        "legScale": 0.5711206896551724,
         "root": [
           104,
           195
@@ -1204,13 +1569,17 @@
         "frame": 8,
         "removed": 0,
         "landmarks": {
-          "skullTop": 76,
-          "chin": 174,
-          "rootX": 185.5,
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
           "foot": 307
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 8,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
@@ -1221,13 +1590,17 @@
         "frame": 9,
         "removed": 61,
         "landmarks": {
-          "skullTop": 69,
-          "chin": 167,
-          "rootX": 191,
-          "foot": 300
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 9,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
@@ -1238,13 +1611,17 @@
         "frame": 10,
         "removed": 0,
         "landmarks": {
-          "skullTop": 75,
-          "chin": 173,
-          "rootX": 183.5,
-          "foot": 306
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 307
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 10,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
@@ -1255,13 +1632,17 @@
         "frame": 11,
         "removed": 61,
         "landmarks": {
-          "skullTop": 69,
-          "chin": 167,
-          "rootX": 191,
-          "foot": 300
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 9,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
@@ -1272,81 +1653,105 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 68,
-          "chin": 166,
-          "rootX": 158.5,
-          "foot": 299
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 307
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 8,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-rumi",
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 63,
-          "chin": 161,
-          "rootX": 142.5,
-          "foot": 294
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 9,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-rumi",
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 67,
-          "chin": 165,
-          "rootX": 144.5,
-          "foot": 298
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 307
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 10,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-rumi",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 69,
-          "chin": 167,
-          "rootX": 137.5,
-          "foot": 300
+          "skullTop": 55,
+          "chin": 163,
+          "rootX": 145,
+          "pelvis": 246,
+          "foot": 305
         },
-        "headScale": 0.45918367346938777,
-        "bodyScale": 0.44642857142857145,
+        "sourceFrame": 9,
+        "headScale": 0.4166666666666667,
+        "bodyScale": 0.44064748201438847,
+        "torsoScale": 0.338855421686747,
+        "legScale": 0.5915178571428571,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       },
       {
         "id": "walk-luna",
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 190.5,
+          "skullTop": 64,
+          "chin": 165,
+          "rootX": 175,
+          "pelvis": 239,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 0,
+        "headScale": 0.44554455445544555,
+        "bodyScale": 0.4336734693877551,
+        "torsoScale": 0.3969594594594595,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1357,13 +1762,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 164.5,
+          "skullTop": 64,
+          "chin": 165,
+          "rootX": 175,
+          "pelvis": 239,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 1,
+        "headScale": 0.44554455445544555,
+        "bodyScale": 0.4336734693877551,
+        "torsoScale": 0.3969594594594595,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1374,13 +1783,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 145,
+          "skullTop": 64,
+          "chin": 165,
+          "rootX": 175,
+          "pelvis": 239,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 2,
+        "headScale": 0.44554455445544555,
+        "bodyScale": 0.4336734693877551,
+        "torsoScale": 0.3969594594594595,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1391,13 +1804,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 164.5,
+          "skullTop": 64,
+          "chin": 165,
+          "rootX": 175,
+          "pelvis": 239,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 1,
+        "headScale": 0.44554455445544555,
+        "bodyScale": 0.4336734693877551,
+        "torsoScale": 0.3969594594594595,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1408,13 +1825,17 @@
         "frame": 4,
         "removed": 207,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 189,
+          "skullTop": 56,
+          "chin": 161,
+          "rootX": 163,
+          "pelvis": 230,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 4,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.448943661971831,
+        "torsoScale": 0.4257246376811594,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1425,13 +1846,17 @@
         "frame": 5,
         "removed": 200,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 169,
+          "skullTop": 56,
+          "chin": 161,
+          "rootX": 163,
+          "pelvis": 230,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 5,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.448943661971831,
+        "torsoScale": 0.4257246376811594,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1442,13 +1867,17 @@
         "frame": 6,
         "removed": 204,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 141.5,
+          "skullTop": 56,
+          "chin": 161,
+          "rootX": 163,
+          "pelvis": 230,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 6,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.448943661971831,
+        "torsoScale": 0.4257246376811594,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1459,13 +1888,17 @@
         "frame": 7,
         "removed": 204,
         "landmarks": {
-          "skullTop": 77,
-          "chin": 168,
-          "rootX": 127.5,
+          "skullTop": 56,
+          "chin": 161,
+          "rootX": 163,
+          "pelvis": 230,
           "foot": 312
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 7,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.448943661971831,
+        "torsoScale": 0.4257246376811594,
+        "legScale": 0.4708904109589041,
         "root": [
           104,
           195
@@ -1476,13 +1909,17 @@
         "frame": 8,
         "removed": 212,
         "landmarks": {
-          "skullTop": 60,
-          "chin": 151,
-          "rootX": 174,
+          "skullTop": 46,
+          "chin": 150,
+          "rootX": 137,
+          "pelvis": 222,
           "foot": 295
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 8,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.45863309352517984,
+        "torsoScale": 0.4079861111111111,
+        "legScale": 0.5130597014925373,
         "root": [
           104,
           195
@@ -1493,13 +1930,17 @@
         "frame": 9,
         "removed": 131,
         "landmarks": {
-          "skullTop": 60,
-          "chin": 151,
-          "rootX": 164.5,
+          "skullTop": 46,
+          "chin": 150,
+          "rootX": 137,
+          "pelvis": 222,
           "foot": 295
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 9,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.45863309352517984,
+        "torsoScale": 0.4079861111111111,
+        "legScale": 0.5130597014925373,
         "root": [
           104,
           195
@@ -1510,13 +1951,17 @@
         "frame": 10,
         "removed": 58,
         "landmarks": {
-          "skullTop": 61,
-          "chin": 152,
-          "rootX": 163,
+          "skullTop": 46,
+          "chin": 150,
+          "rootX": 137,
+          "pelvis": 222,
           "foot": 296
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 10,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.45863309352517984,
+        "torsoScale": 0.4079861111111111,
+        "legScale": 0.5130597014925373,
         "root": [
           104,
           195
@@ -1527,13 +1972,17 @@
         "frame": 11,
         "removed": 20,
         "landmarks": {
-          "skullTop": 61,
-          "chin": 152,
-          "rootX": 148.5,
+          "skullTop": 46,
+          "chin": 150,
+          "rootX": 137,
+          "pelvis": 222,
           "foot": 296
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 11,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.45863309352517984,
+        "torsoScale": 0.4079861111111111,
+        "legScale": 0.5130597014925373,
         "root": [
           104,
           195
@@ -1544,13 +1993,17 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 138,
-          "rootX": 168,
+          "skullTop": 35,
+          "chin": 140,
+          "rootX": 175,
+          "pelvis": 203,
           "foot": 282
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 12,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.4653284671532847,
+        "torsoScale": 0.4662698412698413,
+        "legScale": 0.46452702702702703,
         "root": [
           104,
           195
@@ -1561,13 +2014,17 @@
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 139,
-          "rootX": 159.5,
+          "skullTop": 35,
+          "chin": 140,
+          "rootX": 175,
+          "pelvis": 203,
           "foot": 283
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 13,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.4653284671532847,
+        "torsoScale": 0.4662698412698413,
+        "legScale": 0.46452702702702703,
         "root": [
           104,
           195
@@ -1578,13 +2035,17 @@
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 139,
-          "rootX": 150,
+          "skullTop": 35,
+          "chin": 140,
+          "rootX": 175,
+          "pelvis": 203,
           "foot": 283
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 14,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.4653284671532847,
+        "torsoScale": 0.4662698412698413,
+        "legScale": 0.46452702702702703,
         "root": [
           104,
           195
@@ -1595,13 +2056,17 @@
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 139,
-          "rootX": 140,
+          "skullTop": 35,
+          "chin": 140,
+          "rootX": 175,
+          "pelvis": 203,
           "foot": 283
         },
-        "headScale": 0.4945054945054945,
-        "bodyScale": 0.4123263888888889,
+        "sourceFrame": 15,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.4653284671532847,
+        "torsoScale": 0.4662698412698413,
+        "legScale": 0.46452702702702703,
         "root": [
           104,
           195
@@ -1612,13 +2077,17 @@
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 57,
-          "chin": 146,
-          "rootX": 226.5,
+          "skullTop": 46,
+          "chin": 148,
+          "rootX": 182,
+          "pelvis": 221,
           "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 0,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.48713235294117646,
+        "torsoScale": 0.4195205479452055,
+        "legScale": 0.5654761904761905,
         "root": [
           104,
           195
@@ -1629,13 +2098,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 205.5,
+          "skullTop": 46,
+          "chin": 148,
+          "rootX": 182,
+          "pelvis": 221,
           "foot": 284
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 1,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.48713235294117646,
+        "torsoScale": 0.4195205479452055,
+        "legScale": 0.5654761904761905,
         "root": [
           104,
           195
@@ -1646,13 +2119,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 57,
-          "chin": 146,
-          "rootX": 199,
+          "skullTop": 46,
+          "chin": 148,
+          "rootX": 182,
+          "pelvis": 221,
           "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 2,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.48713235294117646,
+        "torsoScale": 0.4195205479452055,
+        "legScale": 0.5654761904761905,
         "root": [
           104,
           195
@@ -1663,13 +2140,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 176.5,
+          "skullTop": 46,
+          "chin": 148,
+          "rootX": 182,
+          "pelvis": 221,
           "foot": 284
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 3,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.48713235294117646,
+        "torsoScale": 0.4195205479452055,
+        "legScale": 0.5654761904761905,
         "root": [
           104,
           195
@@ -1680,13 +2161,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 57,
-          "chin": 146,
-          "rootX": 158.5,
+          "skullTop": 37,
+          "chin": 143,
+          "rootX": 163,
+          "pelvis": 220,
           "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 4,
+        "headScale": 0.42452830188679247,
+        "bodyScale": 0.4698581560283688,
+        "torsoScale": 0.3977272727272727,
+        "legScale": 0.556640625,
         "root": [
           104,
           195
@@ -1697,13 +2182,17 @@
         "frame": 5,
         "removed": 0,
         "landmarks": {
-          "skullTop": 57,
-          "chin": 146,
-          "rootX": 144,
+          "skullTop": 37,
+          "chin": 143,
+          "rootX": 163,
+          "pelvis": 220,
           "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 5,
+        "headScale": 0.42452830188679247,
+        "bodyScale": 0.4698581560283688,
+        "torsoScale": 0.3977272727272727,
+        "legScale": 0.556640625,
         "root": [
           104,
           195
@@ -1714,13 +2203,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 58,
-          "chin": 147,
-          "rootX": 130,
+          "skullTop": 37,
+          "chin": 143,
+          "rootX": 163,
+          "pelvis": 220,
           "foot": 286
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 6,
+        "headScale": 0.42452830188679247,
+        "bodyScale": 0.4698581560283688,
+        "torsoScale": 0.3977272727272727,
+        "legScale": 0.556640625,
         "root": [
           104,
           195
@@ -1731,13 +2224,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 57,
-          "chin": 146,
-          "rootX": 121.5,
+          "skullTop": 37,
+          "chin": 143,
+          "rootX": 163,
+          "pelvis": 220,
           "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 7,
+        "headScale": 0.42452830188679247,
+        "bodyScale": 0.4698581560283688,
+        "torsoScale": 0.3977272727272727,
+        "legScale": 0.556640625,
         "root": [
           104,
           195
@@ -1748,13 +2245,17 @@
         "frame": 8,
         "removed": 0,
         "landmarks": {
-          "skullTop": 52,
-          "chin": 141,
-          "rootX": 226.5,
-          "foot": 280
+          "skullTop": 41,
+          "chin": 139,
+          "rootX": 151,
+          "pelvis": 220,
+          "foot": 286
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 8,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.4632867132867133,
+        "torsoScale": 0.37808641975308643,
+        "legScale": 0.5745967741935484,
         "root": [
           104,
           195
@@ -1765,13 +2266,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 50,
+          "skullTop": 41,
           "chin": 139,
-          "rootX": 213,
-          "foot": 278
+          "rootX": 151,
+          "pelvis": 220,
+          "foot": 285
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 9,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.4632867132867133,
+        "torsoScale": 0.37808641975308643,
+        "legScale": 0.5745967741935484,
         "root": [
           104,
           195
@@ -1782,13 +2287,17 @@
         "frame": 10,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 158.5,
+          "skullTop": 41,
+          "chin": 139,
+          "rootX": 151,
+          "pelvis": 220,
           "foot": 284
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 10,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.4632867132867133,
+        "torsoScale": 0.37808641975308643,
+        "legScale": 0.5745967741935484,
         "root": [
           104,
           195
@@ -1799,13 +2308,17 @@
         "frame": 11,
         "removed": 0,
         "landmarks": {
-          "skullTop": 49,
-          "chin": 138,
-          "rootX": 204.5,
-          "foot": 277
+          "skullTop": 41,
+          "chin": 139,
+          "rootX": 151,
+          "pelvis": 220,
+          "foot": 284
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 11,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.4632867132867133,
+        "torsoScale": 0.37808641975308643,
+        "legScale": 0.5745967741935484,
         "root": [
           104,
           195
@@ -1816,13 +2329,17 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 135,
-          "rootX": 186.5,
+          "skullTop": 33,
+          "chin": 128,
+          "rootX": 177,
+          "pelvis": 206,
           "foot": 274
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 12,
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.45068027210884354,
+        "torsoScale": 0.3926282051282051,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -1833,13 +2350,17 @@
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 45,
-          "chin": 134,
-          "rootX": 174,
+          "skullTop": 33,
+          "chin": 128,
+          "rootX": 177,
+          "pelvis": 206,
           "foot": 273
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 13,
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.45068027210884354,
+        "torsoScale": 0.3926282051282051,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -1850,13 +2371,17 @@
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 44,
-          "chin": 133,
-          "rootX": 166.5,
+          "skullTop": 33,
+          "chin": 128,
+          "rootX": 177,
+          "pelvis": 206,
           "foot": 272
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 14,
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.45068027210884354,
+        "torsoScale": 0.3926282051282051,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -1867,13 +2392,17 @@
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 135,
-          "rootX": 165,
+          "skullTop": 33,
+          "chin": 128,
+          "rootX": 177,
+          "pelvis": 206,
           "foot": 274
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.44064748201438847,
+        "sourceFrame": 15,
+        "headScale": 0.47368421052631576,
+        "bodyScale": 0.45068027210884354,
+        "torsoScale": 0.3926282051282051,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -1884,13 +2413,17 @@
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 151,
-          "rootX": 164.5,
-          "foot": 309
+          "skullTop": 52,
+          "chin": 154,
+          "rootX": 157,
+          "pelvis": 212,
+          "foot": 307
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 0,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.4766187050359712,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -1901,13 +2434,17 @@
         "frame": 1,
         "removed": 19,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 151,
-          "rootX": 149,
-          "foot": 309
+          "skullTop": 52,
+          "chin": 154,
+          "rootX": 157,
+          "pelvis": 212,
+          "foot": 307
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 1,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.4766187050359712,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -1918,13 +2455,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 151,
-          "rootX": 163,
-          "foot": 309
+          "skullTop": 52,
+          "chin": 154,
+          "rootX": 157,
+          "pelvis": 212,
+          "foot": 307
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 2,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.4766187050359712,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -1935,13 +2476,17 @@
         "frame": 3,
         "removed": 8,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 150,
-          "rootX": 160.5,
-          "foot": 308
+          "skullTop": 52,
+          "chin": 154,
+          "rootX": 157,
+          "pelvis": 212,
+          "foot": 307
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 3,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.4766187050359712,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -1952,13 +2497,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 150,
-          "rootX": 177.5,
-          "foot": 308
+          "skullTop": 52,
+          "chin": 151,
+          "rootX": 159,
+          "pelvis": 211,
+          "foot": 305
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 4,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.4732142857142857,
+        "torsoScale": 0.5104166666666666,
+        "legScale": 0.4453125,
         "root": [
           104,
           195
@@ -1969,13 +2518,17 @@
         "frame": 5,
         "removed": 58,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 150,
-          "rootX": 170.5,
-          "foot": 308
+          "skullTop": 52,
+          "chin": 151,
+          "rootX": 159,
+          "pelvis": 211,
+          "foot": 305
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 5,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.4732142857142857,
+        "torsoScale": 0.5104166666666666,
+        "legScale": 0.4453125,
         "root": [
           104,
           195
@@ -1986,13 +2539,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 150,
-          "rootX": 169.5,
-          "foot": 308
+          "skullTop": 52,
+          "chin": 151,
+          "rootX": 159,
+          "pelvis": 211,
+          "foot": 305
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 6,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.4732142857142857,
+        "torsoScale": 0.5104166666666666,
+        "legScale": 0.4453125,
         "root": [
           104,
           195
@@ -2003,13 +2560,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 150,
-          "rootX": 156,
-          "foot": 308
+          "skullTop": 52,
+          "chin": 151,
+          "rootX": 159,
+          "pelvis": 211,
+          "foot": 305
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 7,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.4732142857142857,
+        "torsoScale": 0.5104166666666666,
+        "legScale": 0.4453125,
         "root": [
           104,
           195
@@ -2021,12 +2582,16 @@
         "removed": 22,
         "landmarks": {
           "skullTop": 37,
-          "chin": 140,
-          "rootX": 182.5,
+          "chin": 146,
+          "rootX": 131,
+          "pelvis": 215,
           "foot": 298
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 8,
+        "headScale": 0.41284403669724773,
+        "bodyScale": 0.4665492957746479,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.488013698630137,
         "root": [
           104,
           195
@@ -2037,13 +2602,17 @@
         "frame": 9,
         "removed": 475,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 139,
-          "rootX": 182.5,
-          "foot": 297
+          "skullTop": 37,
+          "chin": 146,
+          "rootX": 131,
+          "pelvis": 215,
+          "foot": 298
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 9,
+        "headScale": 0.41284403669724773,
+        "bodyScale": 0.4665492957746479,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.488013698630137,
         "root": [
           104,
           195
@@ -2054,13 +2623,17 @@
         "frame": 10,
         "removed": 165,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 139,
-          "rootX": 181,
-          "foot": 297
+          "skullTop": 37,
+          "chin": 146,
+          "rootX": 131,
+          "pelvis": 215,
+          "foot": 298
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 10,
+        "headScale": 0.41284403669724773,
+        "bodyScale": 0.4665492957746479,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.488013698630137,
         "root": [
           104,
           195
@@ -2071,13 +2644,17 @@
         "frame": 11,
         "removed": 218,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 139,
-          "rootX": 194,
+          "skullTop": 37,
+          "chin": 146,
+          "rootX": 131,
+          "pelvis": 215,
           "foot": 297
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 11,
+        "headScale": 0.41284403669724773,
+        "bodyScale": 0.4665492957746479,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.488013698630137,
         "root": [
           104,
           195
@@ -2088,13 +2665,17 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 31,
-          "chin": 134,
-          "rootX": 144.5,
-          "foot": 292
+          "skullTop": 52,
+          "chin": 157,
+          "rootX": 203,
+          "pelvis": 215,
+          "foot": 293
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 12,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.5216535433070866,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -2105,13 +2686,17 @@
         "frame": 13,
         "removed": 107,
         "landmarks": {
-          "skullTop": 31,
-          "chin": 134,
-          "rootX": 141,
-          "foot": 292
+          "skullTop": 52,
+          "chin": 157,
+          "rootX": 203,
+          "pelvis": 215,
+          "foot": 293
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 13,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.5216535433070866,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -2122,13 +2707,17 @@
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 28,
-          "chin": 131,
-          "rootX": 116.5,
-          "foot": 289
+          "skullTop": 52,
+          "chin": 157,
+          "rootX": 203,
+          "pelvis": 215,
+          "foot": 293
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 14,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.5216535433070866,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -2139,13 +2728,17 @@
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 32,
-          "chin": 135,
-          "rootX": 132.5,
+          "skullTop": 52,
+          "chin": 157,
+          "rootX": 203,
+          "pelvis": 215,
           "foot": 293
         },
-        "headScale": 0.4368932038834951,
-        "bodyScale": 0.3837025316455696,
+        "sourceFrame": 15,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.5216535433070866,
+        "torsoScale": 0.5280172413793104,
+        "legScale": 0.5163043478260869,
         "root": [
           104,
           195
@@ -2156,13 +2749,17 @@
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 93,
-          "chin": 181,
-          "rootX": 182,
+          "skullTop": 90,
+          "chin": 189,
+          "rootX": 171,
+          "pelvis": 248,
           "foot": 308
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 0,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.36764705882352944,
+        "torsoScale": 0.3389830508474576,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2173,13 +2770,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 93,
-          "chin": 181,
-          "rootX": 157.5,
+          "skullTop": 90,
+          "chin": 189,
+          "rootX": 171,
+          "pelvis": 248,
           "foot": 308
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 1,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.36764705882352944,
+        "torsoScale": 0.3389830508474576,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2190,13 +2791,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 93,
-          "chin": 181,
-          "rootX": 156.5,
+          "skullTop": 90,
+          "chin": 189,
+          "rootX": 171,
+          "pelvis": 248,
           "foot": 308
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 2,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.36764705882352944,
+        "torsoScale": 0.3389830508474576,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2207,13 +2812,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 93,
-          "chin": 181,
-          "rootX": 147.5,
+          "skullTop": 90,
+          "chin": 189,
+          "rootX": 171,
+          "pelvis": 248,
           "foot": 308
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 3,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.36764705882352944,
+        "torsoScale": 0.3389830508474576,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2225,12 +2834,16 @@
         "removed": 0,
         "landmarks": {
           "skullTop": 80,
-          "chin": 168,
-          "rootX": 183,
+          "chin": 179,
+          "rootX": 163,
+          "pelvis": 234,
           "foot": 295
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 4,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.390625,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.4166666666666667,
         "root": [
           104,
           195
@@ -2241,13 +2854,17 @@
         "frame": 5,
         "removed": 0,
         "landmarks": {
-          "skullTop": 79,
-          "chin": 167,
-          "rootX": 156,
+          "skullTop": 80,
+          "chin": 179,
+          "rootX": 163,
+          "pelvis": 234,
           "foot": 294
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 5,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.390625,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.4166666666666667,
         "root": [
           104,
           195
@@ -2258,13 +2875,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 79,
-          "chin": 167,
-          "rootX": 153,
+          "skullTop": 80,
+          "chin": 179,
+          "rootX": 163,
+          "pelvis": 234,
           "foot": 294
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 6,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.390625,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.4166666666666667,
         "root": [
           104,
           195
@@ -2275,13 +2896,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 78,
-          "chin": 166,
-          "rootX": 142.5,
+          "skullTop": 80,
+          "chin": 179,
+          "rootX": 163,
+          "pelvis": 234,
           "foot": 293
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 7,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.390625,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.4166666666666667,
         "root": [
           104,
           195
@@ -2292,13 +2917,17 @@
         "frame": 8,
         "removed": 0,
         "landmarks": {
-          "skullTop": 69,
-          "chin": 157,
-          "rootX": 193.5,
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
           "foot": 284
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 8,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
@@ -2309,13 +2938,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 71,
-          "chin": 159,
-          "rootX": 173.5,
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
           "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 9,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
@@ -2326,13 +2959,17 @@
         "frame": 10,
         "removed": 0,
         "landmarks": {
-          "skullTop": 71,
-          "chin": 159,
-          "rootX": 173.5,
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
           "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 10,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
@@ -2343,13 +2980,17 @@
         "frame": 11,
         "removed": 0,
         "landmarks": {
-          "skullTop": 71,
-          "chin": 159,
-          "rootX": 167,
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
           "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 11,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
@@ -2360,81 +3001,105 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 70,
-          "chin": 158,
-          "rootX": 164.5,
-          "foot": 285
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
+          "foot": 284
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 8,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-snow_rabbit",
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 73,
+          "skullTop": 65,
           "chin": 161,
-          "rootX": 150.5,
-          "foot": 288
+          "rootX": 157,
+          "pelvis": 214,
+          "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 9,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-snow_rabbit",
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 71,
-          "chin": 159,
-          "rootX": 150,
+          "skullTop": 65,
+          "chin": 161,
+          "rootX": 157,
+          "pelvis": 214,
           "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 10,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-snow_rabbit",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 73,
+          "skullTop": 65,
           "chin": 161,
-          "rootX": 148,
-          "foot": 288
+          "rootX": 157,
+          "pelvis": 214,
+          "foot": 286
         },
-        "headScale": 0.5113636363636364,
-        "bodyScale": 0.44291338582677164,
+        "sourceFrame": 11,
+        "headScale": 0.46875,
+        "bodyScale": 0.39414414414414417,
+        "torsoScale": 0.37735849056603776,
+        "legScale": 0.40948275862068967,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       },
       {
         "id": "walk-night_rabbit",
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 239,
+          "skullTop": 77,
+          "chin": 177,
+          "rootX": 237,
+          "pelvis": 254,
           "foot": 311
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 0,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.2597402597402597,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -2445,13 +3110,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 146,
+          "skullTop": 77,
+          "chin": 177,
+          "rootX": 150,
+          "pelvis": 254,
           "foot": 311
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 1,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.2597402597402597,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -2462,13 +3131,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 122.5,
+          "skullTop": 77,
+          "chin": 177,
+          "rootX": 128,
+          "pelvis": 254,
           "foot": 311
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 2,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.2597402597402597,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -2479,13 +3152,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 91.5,
+          "skullTop": 77,
+          "chin": 177,
+          "rootX": 105,
+          "pelvis": 254,
           "foot": 311
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 3,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.2597402597402597,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -2496,13 +3173,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 232.5,
-          "foot": 311
+          "skullTop": 61,
+          "chin": 161,
+          "rootX": 232,
+          "pelvis": 240,
+          "foot": 306
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 4,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.25316455696202533,
+        "legScale": 0.4567307692307692,
         "root": [
           104,
           195
@@ -2513,13 +3194,17 @@
         "frame": 5,
         "removed": 0,
         "landmarks": {
-          "skullTop": 85,
-          "chin": 179,
-          "rootX": 146,
-          "foot": 311
+          "skullTop": 61,
+          "chin": 161,
+          "rootX": 150,
+          "pelvis": 240,
+          "foot": 306
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 5,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.25316455696202533,
+        "legScale": 0.4567307692307692,
         "root": [
           104,
           195
@@ -2530,13 +3215,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 123.5,
-          "foot": 312
+          "skullTop": 61,
+          "chin": 161,
+          "rootX": 127,
+          "pelvis": 240,
+          "foot": 306
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 6,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.25316455696202533,
+        "legScale": 0.4567307692307692,
         "root": [
           104,
           195
@@ -2547,13 +3236,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 96,
-          "foot": 312
+          "skullTop": 61,
+          "chin": 161,
+          "rootX": 107,
+          "pelvis": 240,
+          "foot": 306
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 7,
+        "headScale": 0.45,
+        "bodyScale": 0.33396946564885494,
+        "torsoScale": 0.25316455696202533,
+        "legScale": 0.4567307692307692,
         "root": [
           104,
           195
@@ -2564,13 +3257,17 @@
         "frame": 8,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 231.5,
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 211,
+          "pelvis": 238,
           "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 8,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2581,13 +3278,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 152.5,
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 148,
+          "pelvis": 238,
           "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 9,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2598,13 +3299,17 @@
         "frame": 10,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 139.5,
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 128,
+          "pelvis": 238,
           "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 10,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2615,13 +3320,17 @@
         "frame": 11,
         "removed": 0,
         "landmarks": {
-          "skullTop": 86,
-          "chin": 180,
-          "rootX": 152.5,
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 148,
+          "pelvis": 238,
           "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 9,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2632,81 +3341,105 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 79,
-          "chin": 173,
-          "rootX": 223,
-          "foot": 305
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 211,
+          "pelvis": 238,
+          "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 8,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-night_rabbit",
         "frame": 13,
         "removed": 13,
         "landmarks": {
-          "skullTop": 79,
-          "chin": 173,
-          "rootX": 134.5,
-          "foot": 305
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 148,
+          "pelvis": 238,
+          "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 9,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-night_rabbit",
         "frame": 14,
         "removed": 14,
         "landmarks": {
-          "skullTop": 80,
-          "chin": 174,
-          "rootX": 117.5,
-          "foot": 306
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 128,
+          "pelvis": 238,
+          "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 10,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-night_rabbit",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 79,
-          "chin": 173,
-          "rootX": 89,
-          "foot": 305
+          "skullTop": 61,
+          "chin": 165,
+          "rootX": 148,
+          "pelvis": 238,
+          "foot": 312
         },
-        "headScale": 0.4787234042553192,
-        "bodyScale": 0.42613636363636365,
+        "sourceFrame": 9,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.32894736842105265,
+        "torsoScale": 0.273972602739726,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       },
       {
         "id": "walk-cinderella",
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 60,
-          "chin": 149,
-          "rootX": 170.5,
+          "skullTop": 38,
+          "chin": 143,
+          "rootX": 165,
+          "pelvis": 235,
           "foot": 309
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 0,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.36676646706586824,
+        "torsoScale": 0.30570652173913043,
+        "legScale": 0.44166666666666665,
         "root": [
           104,
           195
@@ -2717,13 +3450,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 59,
-          "chin": 148,
-          "rootX": 150,
+          "skullTop": 38,
+          "chin": 143,
+          "rootX": 165,
+          "pelvis": 235,
           "foot": 308
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 1,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.36676646706586824,
+        "torsoScale": 0.30570652173913043,
+        "legScale": 0.44166666666666665,
         "root": [
           104,
           195
@@ -2734,13 +3471,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 60,
-          "chin": 149,
-          "rootX": 161.5,
+          "skullTop": 38,
+          "chin": 143,
+          "rootX": 165,
+          "pelvis": 235,
           "foot": 309
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 2,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.36676646706586824,
+        "torsoScale": 0.30570652173913043,
+        "legScale": 0.44166666666666665,
         "root": [
           104,
           195
@@ -2751,13 +3492,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 59,
-          "chin": 148,
-          "rootX": 144.5,
+          "skullTop": 38,
+          "chin": 143,
+          "rootX": 165,
+          "pelvis": 235,
           "foot": 308
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 3,
+        "headScale": 0.42857142857142855,
+        "bodyScale": 0.36676646706586824,
+        "torsoScale": 0.30570652173913043,
+        "legScale": 0.44166666666666665,
         "root": [
           104,
           195
@@ -2768,13 +3513,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
+          "skullTop": 38,
+          "chin": 140,
           "rootX": 165,
+          "pelvis": 227,
           "foot": 305
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 4,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.3876582278481013,
+        "torsoScale": 0.3232758620689655,
+        "legScale": 0.4665492957746479,
         "root": [
           104,
           195
@@ -2785,13 +3534,17 @@
         "frame": 5,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 160,
+          "skullTop": 38,
+          "chin": 140,
+          "rootX": 165,
+          "pelvis": 227,
           "foot": 305
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 5,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.3876582278481013,
+        "torsoScale": 0.3232758620689655,
+        "legScale": 0.4665492957746479,
         "root": [
           104,
           195
@@ -2802,13 +3555,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 154.5,
+          "skullTop": 38,
+          "chin": 140,
+          "rootX": 165,
+          "pelvis": 227,
           "foot": 305
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 6,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.3876582278481013,
+        "torsoScale": 0.3232758620689655,
+        "legScale": 0.4665492957746479,
         "root": [
           104,
           195
@@ -2819,13 +3576,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 56,
-          "chin": 145,
-          "rootX": 149,
+          "skullTop": 38,
+          "chin": 140,
+          "rootX": 165,
+          "pelvis": 227,
           "foot": 305
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 7,
+        "headScale": 0.4411764705882353,
+        "bodyScale": 0.3876582278481013,
+        "torsoScale": 0.3232758620689655,
+        "legScale": 0.4665492957746479,
         "root": [
           104,
           195
@@ -2836,13 +3597,17 @@
         "frame": 8,
         "removed": 81,
         "landmarks": {
-          "skullTop": 50,
-          "chin": 139,
-          "rootX": 131,
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
           "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 8,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
@@ -2853,13 +3618,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 50,
-          "chin": 139,
-          "rootX": 130,
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
           "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 9,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
@@ -2870,13 +3639,17 @@
         "frame": 10,
         "removed": 63,
         "landmarks": {
-          "skullTop": 50,
-          "chin": 139,
-          "rootX": 127.5,
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
           "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 10,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
@@ -2887,13 +3660,17 @@
         "frame": 11,
         "removed": 24,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 137,
-          "rootX": 123.5,
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
           "foot": 297
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 11,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
@@ -2904,81 +3681,105 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 38,
-          "chin": 127,
-          "rootX": 184,
-          "foot": 287
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
+          "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 8,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-cinderella",
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 128,
-          "rootX": 195.5,
-          "foot": 288
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
+          "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 9,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-cinderella",
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 128,
-          "rootX": 183,
-          "foot": 288
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
+          "foot": 299
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 10,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-cinderella",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 125,
-          "rootX": 189,
-          "foot": 285
+          "skullTop": 33,
+          "chin": 140,
+          "rootX": 134,
+          "pelvis": 224,
+          "foot": 297
         },
-        "headScale": 0.5056179775280899,
-        "bodyScale": 0.37890625,
+        "sourceFrame": 11,
+        "headScale": 0.4205607476635514,
+        "bodyScale": 0.41385135135135137,
+        "torsoScale": 0.33482142857142855,
+        "legScale": 0.517578125,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       },
       {
         "id": "walk-silver_rabbit",
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 98,
-          "chin": 175,
-          "rootX": 183.5,
+          "skullTop": 76,
+          "chin": 180,
+          "rootX": 155,
+          "pelvis": 242,
           "foot": 304
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 0,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.3225806451612903,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -2989,13 +3790,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 99,
-          "chin": 176,
-          "rootX": 168.5,
+          "skullTop": 76,
+          "chin": 180,
+          "rootX": 155,
+          "pelvis": 242,
           "foot": 305
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 1,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.3225806451612903,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -3006,13 +3811,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 95,
-          "chin": 172,
-          "rootX": 154.5,
+          "skullTop": 76,
+          "chin": 180,
+          "rootX": 155,
+          "pelvis": 242,
           "foot": 301
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 2,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.3225806451612903,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -3023,13 +3832,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 97,
-          "chin": 174,
-          "rootX": 146.5,
+          "skullTop": 76,
+          "chin": 180,
+          "rootX": 155,
+          "pelvis": 242,
           "foot": 303
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 3,
+        "headScale": 0.4326923076923077,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.3225806451612903,
+        "legScale": 0.3958333333333333,
         "root": [
           104,
           195
@@ -3040,13 +3853,17 @@
         "frame": 4,
         "removed": 18,
         "landmarks": {
-          "skullTop": 96,
-          "chin": 173,
-          "rootX": 176,
+          "skullTop": 66,
+          "chin": 165,
+          "rootX": 150,
+          "pelvis": 228,
           "foot": 302
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 4,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.3528225806451613,
+        "torsoScale": 0.31746031746031744,
+        "legScale": 0.38934426229508196,
         "root": [
           104,
           195
@@ -3057,13 +3874,17 @@
         "frame": 5,
         "removed": 13,
         "landmarks": {
-          "skullTop": 96,
-          "chin": 173,
-          "rootX": 165.5,
+          "skullTop": 66,
+          "chin": 165,
+          "rootX": 150,
+          "pelvis": 228,
           "foot": 302
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 5,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.3528225806451613,
+        "torsoScale": 0.31746031746031744,
+        "legScale": 0.38934426229508196,
         "root": [
           104,
           195
@@ -3074,13 +3895,17 @@
         "frame": 6,
         "removed": 4,
         "landmarks": {
-          "skullTop": 96,
-          "chin": 173,
-          "rootX": 146.5,
+          "skullTop": 66,
+          "chin": 165,
+          "rootX": 150,
+          "pelvis": 228,
           "foot": 302
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 6,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.3528225806451613,
+        "torsoScale": 0.31746031746031744,
+        "legScale": 0.38934426229508196,
         "root": [
           104,
           195
@@ -3091,13 +3916,17 @@
         "frame": 7,
         "removed": 3,
         "landmarks": {
-          "skullTop": 95,
-          "chin": 172,
-          "rootX": 147,
+          "skullTop": 66,
+          "chin": 165,
+          "rootX": 150,
+          "pelvis": 228,
           "foot": 301
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 7,
+        "headScale": 0.45454545454545453,
+        "bodyScale": 0.3528225806451613,
+        "torsoScale": 0.31746031746031744,
+        "legScale": 0.38934426229508196,
         "root": [
           104,
           195
@@ -3108,13 +3937,17 @@
         "frame": 8,
         "removed": 13,
         "landmarks": {
-          "skullTop": 93,
-          "chin": 170,
-          "rootX": 217.5,
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
           "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 8,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
@@ -3125,13 +3958,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 94,
-          "chin": 171,
-          "rootX": 201.5,
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
           "foot": 300
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 9,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
@@ -3142,13 +3979,17 @@
         "frame": 10,
         "removed": 21,
         "landmarks": {
-          "skullTop": 91,
-          "chin": 168,
-          "rootX": 183,
-          "foot": 297
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 10,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
@@ -3159,13 +4000,17 @@
         "frame": 11,
         "removed": 5,
         "landmarks": {
-          "skullTop": 92,
-          "chin": 169,
-          "rootX": 182,
-          "foot": 298
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 11,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
@@ -3176,81 +4021,105 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 88,
-          "chin": 165,
-          "rootX": 139,
-          "foot": 294
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 8,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-silver_rabbit",
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 90,
+          "skullTop": 69,
           "chin": 167,
-          "rootX": 136.5,
-          "foot": 296
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 300
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 9,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-silver_rabbit",
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 91,
-          "chin": 168,
-          "rootX": 160,
-          "foot": 297
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 10,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-silver_rabbit",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 89,
-          "chin": 166,
-          "rootX": 127.5,
-          "foot": 295
+          "skullTop": 69,
+          "chin": 167,
+          "rootX": 167,
+          "pelvis": 222,
+          "foot": 299
         },
-        "headScale": 0.5844155844155844,
-        "bodyScale": 0.436046511627907,
+        "sourceFrame": 11,
+        "headScale": 0.45918367346938777,
+        "bodyScale": 0.35860655737704916,
+        "torsoScale": 0.36363636363636365,
+        "legScale": 0.35447761194029853,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       },
       {
         "id": "walk-time_ruler",
         "frame": 0,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 142,
-          "rootX": 159.5,
+          "skullTop": 24,
+          "chin": 145,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 301
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 0,
+        "headScale": 0.371900826446281,
+        "bodyScale": 0.44763513513513514,
+        "torsoScale": 0.4253472222222222,
+        "legScale": 0.46875,
         "root": [
           104,
           195
@@ -3261,13 +4130,17 @@
         "frame": 1,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 142,
-          "rootX": 164,
+          "skullTop": 24,
+          "chin": 145,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 301
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 1,
+        "headScale": 0.371900826446281,
+        "bodyScale": 0.44763513513513514,
+        "torsoScale": 0.4253472222222222,
+        "legScale": 0.46875,
         "root": [
           104,
           195
@@ -3278,13 +4151,17 @@
         "frame": 2,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 141,
-          "rootX": 165,
+          "skullTop": 24,
+          "chin": 145,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 300
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 2,
+        "headScale": 0.371900826446281,
+        "bodyScale": 0.44763513513513514,
+        "torsoScale": 0.4253472222222222,
+        "legScale": 0.46875,
         "root": [
           104,
           195
@@ -3295,13 +4172,17 @@
         "frame": 3,
         "removed": 0,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 142,
-          "rootX": 159.5,
+          "skullTop": 24,
+          "chin": 145,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 301
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 3,
+        "headScale": 0.371900826446281,
+        "bodyScale": 0.44763513513513514,
+        "torsoScale": 0.4253472222222222,
+        "legScale": 0.46875,
         "root": [
           104,
           195
@@ -3312,13 +4193,17 @@
         "frame": 4,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 141,
-          "rootX": 174,
+          "skullTop": 24,
+          "chin": 143,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 300
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 4,
+        "headScale": 0.37815126050420167,
+        "bodyScale": 0.43874172185430466,
+        "torsoScale": 0.41385135135135137,
+        "legScale": 0.46266233766233766,
         "root": [
           104,
           195
@@ -3329,13 +4214,17 @@
         "frame": 5,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 141,
-          "rootX": 160,
+          "skullTop": 24,
+          "chin": 143,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 300
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 5,
+        "headScale": 0.37815126050420167,
+        "bodyScale": 0.43874172185430466,
+        "torsoScale": 0.41385135135135137,
+        "legScale": 0.46266233766233766,
         "root": [
           104,
           195
@@ -3346,13 +4235,17 @@
         "frame": 6,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 141,
-          "rootX": 161,
+          "skullTop": 24,
+          "chin": 143,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 300
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 6,
+        "headScale": 0.37815126050420167,
+        "bodyScale": 0.43874172185430466,
+        "torsoScale": 0.41385135135135137,
+        "legScale": 0.46266233766233766,
         "root": [
           104,
           195
@@ -3363,13 +4256,17 @@
         "frame": 7,
         "removed": 0,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 141,
-          "rootX": 156.5,
+          "skullTop": 24,
+          "chin": 143,
+          "rootX": 158,
+          "pelvis": 217,
           "foot": 300
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 7,
+        "headScale": 0.37815126050420167,
+        "bodyScale": 0.43874172185430466,
+        "torsoScale": 0.41385135135135137,
+        "legScale": 0.46266233766233766,
         "root": [
           104,
           195
@@ -3380,13 +4277,17 @@
         "frame": 8,
         "removed": 0,
         "landmarks": {
-          "skullTop": 38,
-          "chin": 133,
-          "rootX": 206.5,
-          "foot": 292
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 8,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -3397,13 +4298,17 @@
         "frame": 9,
         "removed": 0,
         "landmarks": {
-          "skullTop": 40,
-          "chin": 135,
-          "rootX": 212,
-          "foot": 294
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 9,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -3414,13 +4319,17 @@
         "frame": 10,
         "removed": 0,
         "landmarks": {
-          "skullTop": 32,
-          "chin": 127,
-          "rootX": 218,
-          "foot": 286
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 297
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 10,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -3431,13 +4340,17 @@
         "frame": 11,
         "removed": 0,
         "landmarks": {
-          "skullTop": 37,
-          "chin": 132,
-          "rootX": 221.5,
-          "foot": 291
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 11,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
@@ -3448,68 +4361,88 @@
         "frame": 12,
         "removed": 0,
         "landmarks": {
-          "skullTop": 40,
-          "chin": 135,
-          "rootX": 121,
-          "foot": 294
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 8,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 8
       },
       {
         "id": "walk-time_ruler",
         "frame": 13,
         "removed": 0,
         "landmarks": {
-          "skullTop": 35,
-          "chin": 130,
-          "rootX": 116.5,
-          "foot": 289
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 9,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 9
       },
       {
         "id": "walk-time_ruler",
         "frame": 14,
         "removed": 0,
         "landmarks": {
-          "skullTop": 40,
-          "chin": 135,
-          "rootX": 118.5,
-          "foot": 294
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 297
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 10,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 10
       },
       {
         "id": "walk-time_ruler",
         "frame": 15,
         "removed": 0,
         "landmarks": {
-          "skullTop": 40,
-          "chin": 135,
-          "rootX": 124,
-          "foot": 294
+          "skullTop": 25,
+          "chin": 141,
+          "rootX": 128,
+          "pelvis": 210,
+          "foot": 296
         },
-        "headScale": 0.47368421052631576,
-        "bodyScale": 0.37342767295597484,
+        "sourceFrame": 11,
+        "headScale": 0.3879310344827586,
+        "bodyScale": 0.44166666666666665,
+        "torsoScale": 0.4438405797101449,
+        "legScale": 0.4398148148148148,
         "root": [
           104,
           195
-        ]
+        ],
+        "mirroredFrom": 11
       }
     ]
   },
@@ -3558,5 +4491,9 @@
   "reverie": {
     "source": "survivor/assets/reverie/sources.json",
     "sha256": "aaa5b6c20536fc94e8a18f7eb5005d3c8acac30fd945a1ad43e9369967163f7f"
+  },
+  "ordeal": {
+    "source": "survivor/assets/ordeal/sources.json",
+    "sha256": "476f5d1955bcc09cfd8b707b251bd4962f06f9845711b54ae6afaed329cbc6c9"
   }
 }

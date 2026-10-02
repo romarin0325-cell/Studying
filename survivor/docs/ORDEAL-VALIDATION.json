@@ -1,0 +1,443 @@
+{
+  "dateUTC": "2026-10-02",
+  "baseMain": "614e09914f40eb5ae66e98bff184cbd45a3e031f",
+  "priorPR": {
+    "number": 568,
+    "merged": true,
+    "mergeCommit": "4a46a3ae132dbf9833f9a786593b6a3e86c4f25b"
+  },
+  "preservedFollowingPR": 569,
+  "artifact": {
+    "path": "survivor/dist/AstraNocturne.html",
+    "bytes": 8271137,
+    "MiB": 7.89,
+    "sha256": "7692fd469c4fb5122b70f66ccaccbcef320d63e3f20f16eb7e93953629e0e8f6",
+    "textures": 44
+  },
+  "verify": {
+    "command": "LD_LIBRARY_PATH=/workspace/review/webkit-libs/root/usr/lib/x86_64-linux-gnu PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npm run verify",
+    "passed": true,
+    "seconds": 59.13,
+    "contracts": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "skipped": 0
+    },
+    "singleFileBuildsInFinalInvocation": 1,
+    "chromiumViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "webkitViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "externalHttpRequests": 0,
+    "pageErrors": 0,
+    "hostInventoryNote": "Initial plain verify failed to locate libGLESv2 in system inventory. Actual Debian13 library supplied from user directory. Only inventory check skipped; actual WebKit suite ran."
+  },
+  "art": {
+    "bodyProfileVersion": 2,
+    "playable": 9,
+    "weaponCompanions": 5,
+    "mirroredUnarmedHeroes": 6,
+    "distinctWeaponHandHeroes": 3,
+    "generatedWalkingCandidates": 3,
+    "adoptedWalkingCandidates": 0,
+    "newMenuIllustrations": 8,
+    "newBossConcepts": 3,
+    "newBossPosesEach": 2,
+    "fullCatalogLogicalRgbaMiB": 86.9043,
+    "walkingDecodeLimit": 2,
+    "residentCatalogLogicalRgbaAtTwoWalksMiB": 68.4199,
+    "scope": "Logical texture dimensions, not browser/GPU memory; manual anatomical landmarks, not automatic SD pose accuracy"
+  },
+  "research": {
+    "requests": 66,
+    "http200": 57,
+    "methods": 48,
+    "gamesReviewed": 11,
+    "someResponsesExcludedAsIrrelevant": true,
+    "Opus55AttributionVerified": false
+  },
+  "balance": {
+    "stage": "garden",
+    "seed": 2026,
+    "difficulty": "normal",
+    "meta": "none",
+    "runs": 18,
+    "inputOnly": true,
+    "expedition": {
+      "victories": 3,
+      "total": 9
+    },
+    "endless": {
+      "defeats": 9,
+      "total": 9,
+      "minSeconds": 132.28,
+      "maxSeconds": 358.18,
+      "minLevel": 44,
+      "maxLevel": 94
+    },
+    "scope": "One deterministic input pilot/seed, not human win rates or every build lifetime"
+  },
+  "movement": [
+    {
+      "hz": 60,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 60,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.4210854715202004e-11,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 2.2737367544323206e-11,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.3415046851150692e-11,
+      "pure": true
+    }
+  ],
+  "crowdedSynchronousSample": {
+    "frames": 90,
+    "meanWorkMs": 8.76,
+    "enemies": 260,
+    "shots": 15,
+    "fields": 0,
+    "hazards": 0
+  },
+  "supplementaryReleaseRaf": [
+    {
+      "quality": "high",
+      "viewport": [
+        390,
+        844
+      ],
+      "deviceScaleFactor": 2,
+      "warmup": 30,
+      "frames": 300,
+      "sampling": "sum callbacks at each unique rAF timestamp; retain completed frames after 30-frame warmup",
+      "meanWorkMs": 2.85,
+      "p95WorkMs": 4.6,
+      "maxWorkMs": 7,
+      "rafP50Ms": 16.7,
+      "rafP95Ms": 33.4,
+      "externalRequests": 0,
+      "initialEntities": {
+        "enemies": 260,
+        "bossKind": "clock",
+        "hazards": 7
+      },
+      "scope": "actual release file, controlled persisted stress fixture; cloud CPU, not physical phone FPS"
+    },
+    {
+      "quality": "economy",
+      "viewport": [
+        390,
+        844
+      ],
+      "deviceScaleFactor": 2,
+      "warmup": 30,
+      "frames": 300,
+      "sampling": "sum callbacks at each unique rAF timestamp; retain completed frames after 30-frame warmup",
+      "meanWorkMs": 2.13,
+      "p95WorkMs": 2.9,
+      "maxWorkMs": 4.2,
+      "rafP50Ms": 16.7,
+      "rafP95Ms": 16.8,
+      "externalRequests": 0,
+      "initialEntities": {
+        "enemies": 260,
+        "bossKind": "clock",
+        "hazards": 7
+      },
+      "scope": "actual release file, controlled persisted stress fixture; cloud CPU, not physical phone FPS"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "ordeal/before-after.png",
+      "width": 2520,
+      "height": 540,
+      "sha256": "19c2137d693cda514aa60bdc13ad9adb2a7b1ab75e74a939fc815307c5465c10"
+    },
+    {
+      "file": "ordeal/before-home-390.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "8f0923d0845981a1b558d74cff6ee27e28180a5aa6d46b84815bea224ec8f098"
+    },
+    {
+      "file": "ordeal/before-pause-390.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "c75cc31feec755972144b2a12e546b2f5128b68f7854dd4ae02196da3377e0ca"
+    },
+    {
+      "file": "ordeal/bosses-dark.png",
+      "width": 448,
+      "height": 672,
+      "sha256": "1aa12124fe026c616bfa47a9267c349a7daec231908ebbd70a5c6ee31134b056"
+    },
+    {
+      "file": "ordeal/cast-100.png",
+      "width": 1800,
+      "height": 240,
+      "sha256": "44b7dfba923f2bf4093fcf1cac6cbb2cc7c10d052775d839cf9e37ae450c9ef0"
+    },
+    {
+      "file": "ordeal/cast-150.png",
+      "width": 1800,
+      "height": 240,
+      "sha256": "26888ee6e1056abad402e4672c20e026bc9b9c1782f5daa011d87493d7a6b729"
+    },
+    {
+      "file": "ordeal/cast-64-dark-left.png",
+      "width": 2100,
+      "height": 1284,
+      "sha256": "33f0783187bdba0da38168cb718da7d9f9569acf7121f343965dab38bb44d85c"
+    },
+    {
+      "file": "ordeal/cast-64-light-right.png",
+      "width": 2100,
+      "height": 1284,
+      "sha256": "62ad9fdc1029688af5b828b30efb22cc53654a9b6a31a2c546b1d9048f7d2a39"
+    },
+    {
+      "file": "ordeal/cast-96-dark-left.png",
+      "width": 2100,
+      "height": 1284,
+      "sha256": "87c27e687f67d748fc06b67091e277de8371ac8bc5318322695d52301546dcda"
+    },
+    {
+      "file": "ordeal/cast-96-light-right.png",
+      "width": 2100,
+      "height": 1284,
+      "sha256": "8b8d3c5baeb4809f81aea876ed21a2d06307b4d1d9a9994813451f96ba7e19b2"
+    },
+    {
+      "file": "ordeal/cast-all.png",
+      "width": 1540,
+      "height": 580,
+      "sha256": "40aeed5c9ed946edf827134cc3a24006cee51d0421ea2a17e9d504ff24d10441"
+    },
+    {
+      "file": "ordeal/home-1280-initial.png",
+      "width": 1280,
+      "height": 900,
+      "sha256": "16af3fed6991db38e75c63e66dd9abba87cf2756750246426d8f6c2cee1cf916"
+    },
+    {
+      "file": "ordeal/home-1280x900.png",
+      "width": 1280,
+      "height": 900,
+      "sha256": "85caf2ce0bae0afd5b1d29a7aa86f8245d130e4ac9db7286694dda662b8afd94"
+    },
+    {
+      "file": "ordeal/home-320x568.png",
+      "width": 320,
+      "height": 568,
+      "sha256": "4a522b0746bb2d01dc2139fba7d81d904372136767a436a6e86cba6f4da689ab"
+    },
+    {
+      "file": "ordeal/home-390-initial.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "2cc7795a1863e6cb369596a1fbb9c4d2108fbe9906f2728fd32c5dc48baf7cc8"
+    },
+    {
+      "file": "ordeal/home-844x390.png",
+      "width": 844,
+      "height": 390,
+      "sha256": "5049d553ea081085ba964a54e8c0ee5f583663bfec7a9d97bb9d008a69a4829c"
+    },
+    {
+      "file": "ordeal/onion-96.png",
+      "width": 2100,
+      "height": 1284,
+      "sha256": "4cba2e22d1e8ddb7ab5203d0d37acc34f7639ba36aebe1b6b326175bb92d1b88"
+    },
+    {
+      "file": "ordeal/ordeal-clock.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "4e7aa303da119f7ce02c75e01b231607fbd71c9168f7933291eeb3837bd238c2"
+    },
+    {
+      "file": "ordeal/ordeal-eclipse.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "f7c4acf56a5fb67210f8a1252512a259ecd8bc62b72ac2e36955eb9d4e7d4e31"
+    },
+    {
+      "file": "ordeal/ordeal-judge.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "51c4a3de46728b83b1c2c36632f4fb982726b0211b38a09690ae1e2f8806f4e2"
+    },
+    {
+      "file": "ordeal/ordeal-rose.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "c82b689b7a06255c670cf32a7ef1d15d5f9332d4808640171ee7850d41e91ccd"
+    },
+    {
+      "file": "ordeal/ordeal-sovereign.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "9aae25eb1cc70fa34d6eae9cd69f509d7d1ff92f43bf1dcbf409752437c5c00c"
+    },
+    {
+      "file": "ordeal/ordeal-thorn.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "fd55665c0706de8beb6c9ff75b12183276ebc2936e1368f02305de023dcf46f7"
+    },
+    {
+      "file": "ordeal/pause-1280x900.png",
+      "width": 1280,
+      "height": 900,
+      "sha256": "37eed18b92bf9829340e1ad16fdf895c3383f9eb42ad159a0cee722cf867167b"
+    },
+    {
+      "file": "ordeal/pause-320x568.png",
+      "width": 320,
+      "height": 568,
+      "sha256": "ef12301349ea04a1c5eeab907d5cc93162ec1b3063cb4e75c24bb09e41cd8545"
+    },
+    {
+      "file": "ordeal/pause-360x640.png",
+      "width": 360,
+      "height": 640,
+      "sha256": "9b537351d8cc64e308f85e2cbfac66f63c3a6b5b4118d78d805ebc8b57e06aa9"
+    },
+    {
+      "file": "ordeal/pause-390-input-play.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "2f935db96db2ef14a5913fc8355f8ca303c938d8b1728bdeb640f307d80d4460"
+    },
+    {
+      "file": "ordeal/pause-390x844.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "1e7acfcd0f3196b9be4d45ed965ea46f01b99d7348803e060a1a5246149a8a12"
+    },
+    {
+      "file": "ordeal/pause-844x390.png",
+      "width": 844,
+      "height": 390,
+      "sha256": "2b01d308812e1b1d7649049f6cb5fc6201381ca10af545ca724c55f53d03846b"
+    },
+    {
+      "file": "ordeal/performance-economy.png",
+      "width": 780,
+      "height": 1688,
+      "sha256": "7d1fad6e9df0e73708f7f78f6b2f69b82ef90e801699b876d55eb9ee22f87d2f"
+    },
+    {
+      "file": "ordeal/performance-high.png",
+      "width": 780,
+      "height": 1688,
+      "sha256": "b98b16cf9f67b6bec3d636ef1f0987c44302f2b5ce9fef486def76e651fab97a"
+    },
+    {
+      "file": "ordeal/walking-dark.png",
+      "width": 1920,
+      "height": 1170,
+      "sha256": "a69ee7c6954df16b5f592b42749e46bbe0cb76d1a83313adba816a2bc4e23c98"
+    },
+    {
+      "file": "ordeal/walking-light.png",
+      "width": 1920,
+      "height": 1170,
+      "sha256": "add1e764b30b2b6c32e5e938920a9de0a05869a9a3fb7bd43493e4847a08cd5c"
+    }
+  ]
+}

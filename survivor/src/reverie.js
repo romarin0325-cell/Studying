@@ -13,7 +13,7 @@ export function beforeCombat(g,dt){
   const p=g.player;g.stillness=p.moving?0:g.stillness+dt;g.timeStop=Math.max(0,g.timeStop-dt);
   if(g.portal){g.portal.life-=dt;if(g.portal.life<=0)g.portal=null;}
   if(g.timeStop>0||g.secrets.includes('pocket')&&g.stillness>.5){
-    for(const e of g.enemies)if(g.timeStop>0||Math.hypot(e.x-p.x,e.y-p.y)<155)e.freeze=Math.max(e.freeze,dt+.08);
+    for(const e of g.enemies)if(g.timeStop>0||!(e.boss&&e.overrun>0)&&Math.hypot(e.x-p.x,e.y-p.y)<155){if(g.timeStop>0)e.freeze=Math.max(e.freeze,dt+.08);else g.freezeEnemy(e,dt+.08);}
   }
   const pending=g.echoes;g.echoes=[];
   for(const echo of pending){echo.wait-=dt;if(echo.wait>0)g.echoes.push(echo);else{const w=g.weapons.find(w=>w.id===echo.weapon);if(w)g.fire(w,true);}}

@@ -1,0 +1,15 @@
+✔ every playable hero and weapon owner has traceable, intact, alpha-bearing four-direction art (257.375884ms)
+✔ recipes refer to real relics, all nine shared identities remain distinct (0.454187ms)
+✔ new Jasmine art retains its original generated source and explicitly records review status (4.759861ms)
+✔ nine reviewed walking atlases preserve distinct poses, transparent gutters and shared references (2331.889205ms)
+✔ illustrated combat atlases have every required cell and stay inside a decoded texture budget (4312.803651ms)
+✔ anatomical profile and all frame pivots are pinned to measured source versions (3.284397ms)
+✔ atlas cleanup removes neighboring cut fragments while preserving opaque white materials (27.11271ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7030.064015

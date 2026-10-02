@@ -41,7 +41,7 @@ test('illustrated combat atlases have every required cell and stay inside a deco
   const m=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8'));let decoded=0;
   for(const a of m.assets){const info=await sharp(path.join(root,'survivor/assets',a.file)).metadata();decoded+=info.width*info.height*4;}
   assert.ok(decoded<88*1024*1024,'decoded full catalog <88 MiB; walking decode is bounded separately');
-  for(const [id,columns,rows] of [['secrets',4,2],['weapons',4,4],['relics',4,4],['effects',4,4],['enemies',4,6],['bosses',4,3]]){
+  for(const [id,columns,rows] of [['menu',4,2],['ordeal-bosses',2,3],['secrets',4,2],['weapons',4,4],['relics',4,4],['effects',4,4],['enemies',4,6],['bosses',4,3]]){
     const a=m.assets.find(a=>a.id===id);assert.ok(a,id);const bytes=await fs.readFile(path.join(root,'survivor/assets',a.file)),info=await sharp(bytes).metadata();assert.ok(info.hasAlpha);const cw=info.width/columns,ch=info.height/rows;
     for(let y=0;y<rows;y++)for(let x=0;x<columns;x++){const stats=await sharp(bytes).extract({left:x*cw,top:y*ch,width:cw,height:ch}).stats();assert.ok(stats.channels[3].max>200,id+' has visible painted asset');assert.equal(stats.channels[3].min,0,id+' has native alpha');}
   }
@@ -58,4 +58,27 @@ test('atlas cleanup removes neighboring cut fragments while preserving opaque wh
   const {cleanFrame,alphaBounds}=await import('../scripts/art-normalization.mjs');
   const main=await sharp({create:{width:32,height:32,channels:4,background:'#ffffffff'}}).png().toBuffer(),foreign=await sharp({create:{width:3,height:20,channels:4,background:'#ffac00ff'}}).png().toBuffer();
   const bytes=await sharp({create:{width:80,height:80,channels:4,background:'#00000000'}}).composite([{input:main,left:24,top:24},{input:foreign,left:77,top:30}]).png().toBuffer();const clean=await cleanFrame(bytes);assert.equal(clean.removed,60);assert.deepEqual(await alphaBounds(clean.bytes),{left:24,top:24,width:32,height:32});const stats=await sharp(clean.bytes).stats();assert.equal(stats.channels[0].max,255);assert.equal(stats.channels[3].max,255);
+});
+
+
+test('unarmed side cycles are disclosed reflections; armed views retain their authored hands',async()=>{
+  const m=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8')),profile=JSON.parse(await fs.readFile(path.join(root,m.normalization.source),'utf8'));
+  assert.equal(sha(await fs.readFile(path.join(root,m.ordeal.source))),m.ordeal.sha256);
+  for(const h of HEROES){
+    const body=profile.frames[h.id],records=m.normalization.frames.filter(f=>f.id==='walk-'+h.id);
+    const asset=m.assets.find(a=>a.id==='walk-'+h.id),bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));
+    for(let phase=0;phase<4;phase++){
+      const left=records[8+phase],right=records[12+phase];
+      if(body.mirrorRight){
+        assert.equal(right.mirroredFrom,8+phase);assert.equal(left.headScale,right.headScale);assert.equal(left.legScale,right.legScale);
+        const raw=await sharp(bytes).ensureAlpha().raw().toBuffer();
+        for(let y=0;y<208;y++)for(let x=0;x<208;x++){
+          const sourceX=208-x,leftAlpha=sourceX===208?0:raw[((416+y)*832+phase*208+sourceX)*4+3];
+          assert.equal(raw[((624+y)*832+phase*208+x)*4+3],leftAlpha,'the actual packed side alpha is reflected about its foot pivot: '+h.id);
+        }
+      }else{assert.equal(right.mirroredFrom,undefined);assert.ok(body.weaponHand);}
+    }
+    const full=m.assets.find(a=>a.id==='full-'+h.id);assert.ok(full);assert.equal((await sharp(path.join(root,'survivor/assets',full.file)).metadata()).width,384);
+  }
+  assert.ok(profile.frames.silver_rabbit.canonical.targetBody<profile.frames.time_ruler.canonical.targetBody*.7);
 });

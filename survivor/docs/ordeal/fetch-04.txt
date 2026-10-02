@@ -1,0 +1,5 @@
+exec(open('/workspace/review/ordeal/research.py').read().split('with concurrent.futures.ThreadPoolExecutor')[0])
+SOURCES=[('cocos-flip-thread','zh','community','https://forum.cocos.org/t/topic/7240.json'),('cocos-flip-skins','zh','community','https://forum.cocos.org/t/topic/14659.json')]
+result=[fetch(s)for s in SOURCES]
+(ROOT/'zh-sources.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+for r in result:print(r['id'],r.get('status'))

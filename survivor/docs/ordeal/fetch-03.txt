@@ -1,0 +1,5 @@
+exec(open('/workspace/review/ordeal/research.py').read().split('with concurrent.futures.ThreadPoolExecutor')[0])
+SOURCES=[('cocos-flip-zh','zh','community','https://forum.cocos.org/search.json?q='+urllib.parse.quote('左右 翻转 骨骼')),('bing-ko','ko','search','https://www.bing.com/search?q='+urllib.parse.quote('스프라이트 좌우 반전 애니메이션 무기 게임')),('bing-ja','ja','search','https://www.bing.com/search?q='+urllib.parse.quote('スプライト 歩行 左右 反転 武器 アニメーション'))]
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:result=list(pool.map(fetch,SOURCES))
+(ROOT/'community-more-sources.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+for r in result:print(r['id'],r.get('status'),r.get('error',''))
