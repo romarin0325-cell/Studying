@@ -1,0 +1,1208 @@
+{
+  "artifact": "defense/dist-local/HeroCoreDefense.html",
+  "protocol": "file:",
+  "subrequestsAllowed": false,
+  "physicalDevice": false,
+  "scenarios": [
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "harmonious",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "no-preference",
+      "id": "aurora",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "harmonious",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 320,
+      "reducedMotion": "reduce",
+      "id": "aurora",
+      "geometry": {
+        "width": 320,
+        "height": 568,
+        "scrollWidth": 320,
+        "scrollHeight": 568,
+        "summonBottom": 560
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 320,
+          "bottom": 46
+        },
+        {
+          "element": "arena",
+          "left": 10.921875,
+          "right": 309.0625,
+          "bottom": 369
+        },
+        {
+          "element": "unit-panel",
+          "left": 8,
+          "right": 312,
+          "bottom": 364.03125
+        },
+        {
+          "element": "",
+          "left": 19,
+          "right": 123.21875,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 130.21875,
+          "right": 234.453125,
+          "bottom": 358.53125
+        },
+        {
+          "element": "",
+          "left": 241.453125,
+          "right": 301,
+          "bottom": 358.53125
+        },
+        {
+          "element": "skill-button ready",
+          "left": 9,
+          "right": 55.15625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 60.15625,
+          "right": 106.328125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 111.328125,
+          "right": 157.5,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 162.5,
+          "right": 208.65625,
+          "bottom": 440.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 213.65625,
+          "right": 259.828125,
+          "bottom": 441
+        },
+        {
+          "element": "skill-button ready",
+          "left": 264.828125,
+          "right": 311,
+          "bottom": 441
+        },
+        {
+          "element": "summon",
+          "left": 9,
+          "right": 216,
+          "bottom": 560
+        },
+        {
+          "element": "training",
+          "left": 223,
+          "right": 311,
+          "bottom": 560
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "harmonious",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "no-preference",
+      "id": "aurora",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "frost_witch",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "harmonious",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    },
+    {
+      "width": 390,
+      "reducedMotion": "reduce",
+      "id": "aurora",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "scrollHeight": 844,
+        "summonBottom": 833
+      },
+      "selectedBounds": [
+        {
+          "element": "battle-header",
+          "left": 0,
+          "right": 390,
+          "bottom": 53
+        },
+        {
+          "element": "arena",
+          "left": 0,
+          "right": 390,
+          "bottom": 490.234375
+        },
+        {
+          "element": "unit-panel",
+          "left": 13,
+          "right": 377,
+          "bottom": 611.984375
+        },
+        {
+          "element": "",
+          "left": 24,
+          "right": 158.21875,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 165.21875,
+          "right": 299.453125,
+          "bottom": 606.484375
+        },
+        {
+          "element": "",
+          "left": 306.453125,
+          "right": 366,
+          "bottom": 606.484375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 13,
+          "right": 68.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 74.65625,
+          "right": 130.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 136.328125,
+          "right": 192,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 198,
+          "right": 253.65625,
+          "bottom": 704.984375
+        },
+        {
+          "element": "skill-button ready",
+          "left": 259.65625,
+          "right": 315.328125,
+          "bottom": 705
+        },
+        {
+          "element": "skill-button ready",
+          "left": 321.328125,
+          "right": 377,
+          "bottom": 705
+        },
+        {
+          "element": "summon",
+          "left": 13,
+          "right": 271,
+          "bottom": 833
+        },
+        {
+          "element": "training",
+          "left": 280,
+          "right": 377,
+          "bottom": 833
+        }
+      ],
+      "errors": [],
+      "requests": []
+    }
+  ]
+}

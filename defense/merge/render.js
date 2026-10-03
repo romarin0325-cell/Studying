@@ -80,7 +80,7 @@ export class Renderer {
       const a=s.board[this.selected];
       const at=cellPoint(this.selected);drawAttackRange(ctx,HERO[a.hero],at,a.aim);
       for(let i=0;i<25;i++)if(i===this.selected||canMerge(a,s.board[i])){const p=cellPoint(i);rounded(ctx,p.x-42,p.y-42,84,82,8);ctx.strokeStyle=i===this.selected?'#fff1b9':'#baf6df';ctx.lineWidth=i===this.selected?3:4;ctx.stroke();if(i!==this.selected){ctx.fillStyle=`rgba(164,246,208,${.1+Math.sin(this.clock*5)*.035})`;ctx.fill();star(ctx,p.x,p.y-30,9,'#daffe4',Math.PI/4);}}
-      if(['hasteAura','powerAura'].includes(HERO[a.hero].trait.type)){
+      if(['hasteAura','powerAura','harmonyAura'].includes(HERO[a.hero].trait.type)){
         const i=this.selected,p=cellPoint(i);for(const j of [i%5>0?i-1:-1,i%5<4?i+1:-1,i>=5?i-5:-1,i<20?i+5:-1])if(j>=0&&s.board[j]){const b=cellPoint(j);line(ctx,[[p.x,p.y],[b.x,b.y]],HERO[a.hero].color+'aa',3);}
       }
     }

@@ -37,9 +37,17 @@ export const executeThreshold=e=>e.boss ? .4 : .35;
 export function dividend(s){return Math.min(45,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
+export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
+export function harmonyStrength(s,index){
+  const count=harmonyAt(s,index),level=s.upgrades.harmonious||0,multiplier=s.buffs.harmony>0?2:1;
+  return {count,damage:count*(.05+level*.005)*multiplier,speed:count*(.04+level*.002)*multiplier};
+}
 export function bestUnit(s,id){return s.board.filter(u=>u?.hero===id).sort((a,b)=>b.rank-a.rank)[0];}
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28)*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1);}
 export function trainingBonus(id,level){
+  if(id==='frost_witch')return `서리 빙결 ${(.9+level*.06).toFixed(2)}초 · 보스 ${(.45+level*.03).toFixed(2)}초`;
+  if(id==='harmonious')return `조화 1종당 위력 +${5+level*.5}% · 공속 +${Number((4+level*.2).toFixed(1))}%`;
+  if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
   const extra={doom:`1성 재료 환급 ${doomRefund(1,level)}G`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,mushroom_king:`1성 · 전투 12초마다 ${harvestIncome(1,level)}G / 기`,siren:`인접 공속 +${22+level*3}%`,ancient_dragon:`인접 공격 +${25+level*3}%`,silver_rabbit:`명중 추가 별빛 ${(0.5+level*.1).toFixed(1)}`,great_detective:`일반 노출 +${18+level*2}% · 보스 +${30+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`인접 공격 대기 −${(.6+level*.1).toFixed(1)}초`,time_magician:`인접 공격 대기 −${(.6+level*.1).toFixed(1)}초`};
   return extra[id]||'';
 }
@@ -133,7 +141,7 @@ function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
   const isBoss=kind==='boss',bossId=isBoss?chapter.bosses[Math.min(2,Math.floor((wave-1)/4))]:null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
-    slow:0,slowTime:0,stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,rage:0,shield:0};
+    slow:0,slowTime:0,slowEffects:[],stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0};
   e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
 }
 export function attackGeometry(hero,from,to){return {kind:hero.shape,from,to,range:hero.range,radius:hero.radius,angle:Math.atan2(to.y-from.y,to.x-from.x)};}
@@ -161,6 +169,9 @@ function damage(s,e,value,hero,{dot=false,pure=false}={}){
   if(e.rage>0&&!pure)amount*=.75;
   const absorbed=Math.min(e.shield||0,amount);e.shield=Math.max(0,(e.shield||0)-absorbed);
   const actual=Math.min(e.hp,amount-absorbed)+absorbed;e.hp-=amount-absorbed;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
+  // Record resolved damage once, including absorbed shield damage. A resolving
+  // mirror (life <= 0) cannot record its own detonation or recursively echo it.
+  for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=Math.min(f.cap/.45,f.stored+actual);
   if(!dot)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){s.stats.kills++;giveGold(s,e.boss?20:e.kind==='armor'?3:2,'격파');addGauge(s,e.boss?15:1.3);event(s,'kill',{...pathPoint(e.progress),kind:e.kind,boss:e.boss,color:HERO[hero]?.color});}
 }
@@ -172,12 +183,30 @@ function makeZone(s,shot,p,orbit=false){
   s.zones.push({uid:s.nextId++,source:shot.source,hero:shot.hero,rank:shot.rank,damage:shot.damage,x:p.x,y:p.y,radius,life,total:life,tick:0,orbit});
   if(s.zones.length>75)s.zones.shift();
 }
+function syncSlows(s,e){
+  e.slowEffects=e.slowEffects.filter(effect=>effect.until-s.time>1e-9);
+  e.slow=0;e.slowTime=0;
+  for(const effect of e.slowEffects){
+    if(effect.amount>e.slow){e.slow=effect.amount;e.slowTime=effect.until-s.time;}
+    else if(effect.amount===e.slow)e.slowTime=Math.max(e.slowTime,effect.until-s.time);
+  }
+}
+function addSlow(s,e,source,amount,duration){
+  // Refresh only this source. A weaker hit never borrows another effect's
+  // strength or changes its deadline; equal-strength skills also expire alone.
+  const effect=e.slowEffects.find(effect=>effect.source===source),until=s.time+duration;
+  if(effect){effect.amount=amount;effect.until=until;}
+  else e.slowEffects.push({source,amount,until});
+  syncSlows(s,e);
+}
 function slowTargets(s,targets,hero,amount,point){
-  for(const t of targets){t.slow=Math.max(t.slowTime>0?t.slow:0,hero.trait.type==='chrono'?.25+s.upgrades[hero.id]*.03:hero.id==='phantom'?.25:.4);t.slowTime=2.4;}
+  const slow=hero.trait.type==='chrono'?.25+s.upgrades[hero.id]*.03:hero.id==='phantom'?.25:.4;
+  for(const t of targets)addSlow(s,t,`attack:${hero.id}`,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
 function applyHit(s,shot){
   const e=s.enemies.find(x=>x.uid===shot.target&&x.hp>0);if(!e)return;
+  if(shot.reflected){const p=pathPoint(e.progress);damage(s,e,shot.damage,shot.hero);event(s,'impact',{...p,hero:shot.hero,rank:shot.rank,angle:Math.atan2(p.y-shot.from.y,p.x-shot.from.x),reflected:true});return;}
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage;
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
   for(const target of area){
@@ -191,6 +220,20 @@ function applyHit(s,shot){
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
     damage(s,target,amount*factor,hero.id,{pure:shot.form==='trauma'||type==='miracle'&&shot.count%3===0});
     if(type==='divine'&&target.hp>0){target.divine=Math.min(3,(target.divineTime>0?target.divine:0)+1);target.divineTime=6;}
+    if(type==='permafrost'&&shot.proc!==false&&target.hp>0){
+      target.frostStacks=(target.frostTime>0?target.frostStacks:0)+1;target.frostTime=6;
+      if(target.frostStacks>=3){
+        target.frostStacks=0;target.frostTime=0;
+        damage(s,target,amount*1.2,hero.id);
+        target.stun=Math.max(target.stun,(target.boss?.45:.9)+(s.upgrades[hero.id]||0)*(target.boss?.03:.06));
+        event(s,'frostBreak',{...pathPoint(target.progress),hero:hero.id,rank:shot.rank});
+      }
+    }
+  }
+  if(type==='refraction'&&shot.proc!==false&&e.hp>0){
+    const dx=point.x-shot.origin.x,dy=point.y-shot.origin.y,k=46/(Math.hypot(dx,dy)||1);
+    const from={x:clamp(point.x+dx*k,24,696),y:clamp(point.y+dy*k,72,734)};
+    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.42,life:.24,total:.24});
   }
   event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
   if(shot.proc!==false&&((type==='gift'&&shot.count%4===0)||(type==='accelerate'&&shot.count%3===0))){
@@ -203,7 +246,7 @@ function applyHit(s,shot){
     let from=point;for(const target of others){damage(s,target,amount*.65,hero.id);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
   if(type==='burn'){for(const t of area){if(amount*.23>=t.burn){t.burn=amount*.23;t.burnOwner=hero.id;}t.burnTime=3;}}
-  if(['slow','chrono','gravity'].includes(type))slowTargets(s,area,hero,amount,point);
+  if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point);
   if(type==='poison')addPoison(s,e,shot.rank,7,40);
   if(type==='stun'&&shot.count%3===0)for(const t of area)t.stun=Math.max(t.stun,.7);
   if(type==='fear'&&shot.count%3===0)e.progress=Math.max(0,e.progress-35);
@@ -241,7 +284,10 @@ export function combatStats(s,u,index=s.board.indexOf(u)){
   if(s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 위력`);
   if(s.surgeWave===s.wave)bonuses.push('새벽검 +25% 위력');
   if(adjacent.some(a=>HERO[a.hero].trait.type==='powerAura'))damageBonus('고대 용의 가호',.25+(s.upgrades.ancient_dragon||0)*.03);
-  if(has(s,'guild')&&adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type)))damageBonus('연대',.15);
+  const harmonySources=index<0?[]:neighbors(index).filter(i=>s.board[i]?.hero==='harmonious').map(i=>harmonyStrength(s,i));
+  const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
+  if(harmony.count){damageBonus(`조화 ${harmony.count}종`,harmony.damage);speedBonus(`조화 ${harmony.count}종`,harmony.speed);}
+  if(has(s,'guild')&&(harmony.count||adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type))))damageBonus('연대',.15);
   if(has(s,'constellation')&&new Set(adjacent.map(a=>a.hero)).size>=3)damageBonus('별자리',.65);
   if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('고독한 깃발',.4);
   if(has(s,'crown')&&u.rank>=3)damageBonus('왕관',.25);
@@ -278,14 +324,16 @@ export function cast(s,id){
   else if(type==='gift'){const hero=drawHero(s);if(place(s,hero,2)<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6);}
   else if(type==='goddess'){strike(5);for(const e of targets){e.divine=3;e.divineTime=6;}s.buffs.radiance=skillDuration(s,8);}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10);}
-  else if(type==='royal'||type==='starfall'){
-    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='royal'?1.05:1.2;
+  else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){e.frostStacks=2;e.frostTime=6;addSlow(s,e,`skill:${id}`,.5,6);}}}
+  else if(type==='harmony'){s.buffs.harmony=skillDuration(s,8);for(const ally of s.board)if(ally)ally.cooldown=Math.max(0,ally.cooldown-1.5);}
+  else if(type==='royal'||type==='starfall'||type==='mirror'){
+    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='royal'?1.05:type==='mirror'?3:1.2;
     visualTargets=[target];
-    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:32),rank:u.rank,life:total,total});
+    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:type==='mirror'?10:32),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,cap:base*18}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
-  else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3;e.slow=.5;e.slowTime=6;}}
-  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);e.slow=.5;e.slowTime=4;}}
+  else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3;addSlow(s,e,`skill:${id}`,.5,6);}}
+  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);addSlow(s,e,`skill:${id}`,.5,4);}}
   else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
   else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);e.burn=base*.65;e.burnTime=6;e.burnOwner=id;}}
   else if(type==='plague'){for(const e of targets)addPoison(s,e,u.rank*8,12);strike(3,true);}
@@ -295,16 +343,16 @@ export function cast(s,id){
   else if(type==='rewind'){for(const e of targets){e.progress=Math.max(0,e.progress-e.speed*6);e.stun=2;}strike(3);}
   else if(type==='vortex'||type==='singularity'){
     const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80);
-    for(const e of targets){e.progress=e.progress*.35+point*.65;e.stun=type==='singularity'?2:1.5;e.slow=.6;e.slowTime=4;}
+    for(const e of targets){e.progress=e.progress*.35+point*.65;e.stun=type==='singularity'?2:1.5;addSlow(s,e,`skill:${id}`,.6,4);}
     strike(type==='singularity'?10:5);
   }else if(type==='execute'){
     const top=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<=executeThreshold(e)?30:16),id,{pure:true});
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,9);for(const e of visualTargets)damage(s,e,base*14,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2;}
   else if(type==='fortune'||type==='dividend'){strike(3);giveGold(s,type==='fortune'?25:30,'필살기');}
-  const support=['echo','haste','awaken','march','gift','trauma'].includes(type);
+  const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.slice(0,18).map(e=>({...pathPoint(e.progress),uid:e.uid}));
-  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,locked:type==='royal'||type==='starfall',targets:points});return {ok:true};
+  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
 }
 
 function bossStep(s,e,dt){
@@ -376,12 +424,13 @@ export function step(s,dt){
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;
+    syncSlows(s,e);
     if(e.burnTime>0){damage(s,e,e.burn*dt*(has(s,'ember')?1.6:1),e.burnOwner||'flame_sage',{dot:true});e.burnTime-=dt;}
     if(e.poisonTime>0){damage(s,e,e.poison*dt*3,'mushroom_king',{dot:true,pure:true});e.poisonTime-=dt;}else e.poison=0;
     if(e.hp<=0)continue;
-    if(e.slowTime>0)e.slowTime-=dt;
     if(e.exposeTime>0)e.exposeTime-=dt;else e.exposed=0;
     if(e.divineTime>0)e.divineTime=Math.max(0,e.divineTime-dt);else e.divine=0;
+    if(e.frostTime>0)e.frostTime=Math.max(0,e.frostTime-dt);else e.frostStacks=0;
     if(e.rage>0)e.rage=Math.max(0,e.rage-dt);
     if(e.stun>0){e.stun-=dt;if(s.telegraph?.uid===e.uid)s.telegraph.ends+=dt;}else{e.progress+=e.speed*dt*(e.slowTime>0?1-e.slow:1)*(e.rage>0?1.4:1);if(e.boss)bossStep(s,e,dt);}
     if(e.progress>=PATH_LENGTH&&e.hp>0){e.hp=0;if(has(s,'phoenix')&&!s.phoenixUsed){s.phoenixUsed=true;s.health=Math.min(20,s.health+3);event(s,'phoenix');}else{s.health-=e.boss?7:e.kind==='armor'?2:1;event(s,'leak',{boss:e.boss,health:s.health});}}
@@ -403,14 +452,14 @@ export function step(s,dt){
     if(u.windup>0){u.windup-=dt;if(u.windup<=0)attack(s,u,i);continue;}
     u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
   }
-  for(const shot of s.shots){shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
+  for(const shot of s.shots){if(shot.delay>0){shot.delay=Math.max(0,shot.delay-dt);continue;}shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
   for(const f of s.finishers){
     f.life-=dt;const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);
     if(!target){event(s,'finisherFizzle',{hero:f.hero,kind:f.kind,...f.to});f.life=0;continue;}
     f.to=pathPoint(target.progress);
     if(f.life<=0){
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?1.4:1;
-      damage(s,target,f.damage*factor,f.hero,{pure:f.kind==='royal'});
+      damage(s,target,f.damage*factor+(f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0),f.hero,{pure:f.kind==='royal'});
       event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank});
     }
   }
@@ -433,17 +482,27 @@ export function restore(raw){
     // Additive migration: an old run keeps its wave, HP, wallet and target
     // priorities. Only future waves use revision 3's pacing.
     if(s.finishers===undefined)s.finishers=[];
-    for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
+    for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
     if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>100||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','boss','strong','last'].includes(u.priority))))return null;
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
+    const slowSources=new Set(['legacy',...Object.keys(HERO).flatMap(hero=>[`attack:${hero}`,`skill:${hero}`])]);
+    for(const e of s.enemies){
+      // Old saves have no source attribution. Preserve the remaining slow as
+      // one legacy effect whose deadline cannot be refreshed by new attacks.
+      if(e.slowEffects===undefined)e.slowEffects=e.slowTime>0&&e.slow>0?[{source:'legacy',amount:e.slow,until:s.time+e.slowTime}]:[];
+      if(!Array.isArray(e.slowEffects)||e.slowEffects.length>slowSources.size||new Set(e.slowEffects.map(effect=>effect?.source)).size!==e.slowEffects.length||e.slowEffects.some(effect=>!slowSources.has(effect?.source)||!numeric(effect,['amount','until'])||effect.amount<=0||effect.amount>=1||effect.until<0))return null;
+      syncSlows(s,e);
+    }
     if(s.shots.some(e=>!id(e?.uid)||!id(e.target)||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
     if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician')||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
-    if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])))return null;
+    if(s.shots.some(e=>e.delay!==undefined&&e.reflected!==true||e.reflected!==undefined&&(e.reflected!==true||e.hero!=='aurora'||e.proc!==false||!numeric(e,['delay'])||e.delay<0||e.delay>.42)))return null;
+    if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall','mirror'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored','cap'])||f.stored<0||f.cap<0||f.stored>f.cap/.45+1e-6)))return null;
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
+    if(s.enemies.some(e=>!numeric(e,['frostStacks','frostTime'])||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.frostTime<0))return null;
     if(!Array.isArray(s.zones)||s.zones.length>75||s.zones.some(z=>!id(z?.uid)||!id(z.source)||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||z.radius<=0||z.total<=0||typeof z.orbit!=='boolean'))return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;

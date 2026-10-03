@@ -1,0 +1,17 @@
+[
+  {
+    "id": "frost_witch",
+    "file": "혹한의마녀.png",
+    "sha256": "a3f72e41915c0358614c551b559ca2c11db961d699e4af178e587b0279f06e65"
+  },
+  {
+    "id": "harmonious",
+    "file": "하모니어스.png",
+    "sha256": "aa7ad45f843242d513aff96ff4f0eb19f8d9d715b121b96f282d933200bf3c60"
+  },
+  {
+    "id": "aurora",
+    "file": "퍼펙트아우로라.png",
+    "sha256": "1ee737ea0c35fcc26514c55d13f3a352d5f18a40fe4eb9d1208bbcc99cdccbf9"
+  }
+]

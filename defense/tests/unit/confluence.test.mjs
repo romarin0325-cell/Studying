@@ -65,8 +65,8 @@ test('skills share gauge, require live enemies and deployed heroes, never spend 
   const s=arrangedRun({seed:7});assert.equal(cast(s,'zeke').ok,false);assert.equal(s.gauge,90);target(s);s.gauge=100;assert.equal(cast(s,'queen').ok,false);assert.equal(s.gauge,100);
   assert.equal(cast(s,'snow_rabbit').ok,true);assert.equal(s.gauge,35);assert.equal(s.enemies[0].stun,3);assert.equal(cast(s,'zeke').ok,false);assert.equal(s.gauge,35);
 });
-test('all 27 heroes have attacks, skills and a unique projectile and impact profile',()=>{
-  assert.equal(HEROES.length,27);assert.equal(distinctAttackCount(),27);assert.equal(new Set(Object.values(FX_PROFILES).map(p=>(p.atlas||'effects')+':'+p.frame)).size,27);
+test('all 30 heroes have attacks, skills and a unique projectile and impact profile',()=>{
+  assert.equal(HEROES.length,30);assert.equal(distinctAttackCount(),30);assert.equal(new Set(Object.values(FX_PROFILES).map(p=>(p.atlas||'effects')+':'+p.frame)).size,30);
   for(const h of HEROES){const s=solo(h.id),e=target(s);tick(s,4);assert.ok(s.stats.byHero[h.id]>0,h.id+' attack');s.gauge=100;assert.equal(cast(s,h.id).ok,true,h.id+' skill');assert.ok(e.hp<e.maxHp);assert.equal(s.stats.skills,1);assert.ok(s.events.some(e=>e.type==='impact'&&e.hero===h.id));}
 });
 test('damage waits for release and impact; burn credit stays with its owner',()=>{
@@ -126,7 +126,7 @@ test('relic hit modifiers, timed meteor and duplicate cadence affect actual atta
   const firstHit=(id,artifacts=[],configure=()=>{})=>{const s=solo(id,artifacts),e=target(s);configure(s,e);for(let i=0;i<180&&e.hp===e.maxHp;i++)step(s,1/60);return e.maxHp-e.hp;};
   const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
   near(firstHit('cinderella',['lens'],(_,e)=>e.boss='artificial_demon'),23*1.3);
-  near(firstHit('cinderella',['frost'],(_,e)=>{e.slow=.4;e.slowTime=5;}),23*1.25);
+  near(firstHit('cinderella',['frost'],(s,e)=>{e.slow=.4;e.slowTime=5;e.slowEffects=[{source:'attack:snow_rabbit',amount:.4,until:s.time+5}];}),23*1.25);
   near(firstHit('cinderella',['meteor'],s=>s.board[6].attacks=11),23*3.6);
   near(firstHit('snow_rabbit',['tide']),10*1.25);
   const burn=artifacts=>{const s=solo('zeke',artifacts),e=target(s);s.board[6].disabled=100;e.burn=10;e.burnTime=2;e.burnOwner='zeke';tick(s,.5);return e.maxHp-e.hp;};
