@@ -1,6 +1,7 @@
 import { VERSION,HERO,HEROES,STAGE,STAGES,META,ACHIEVEMENTS,SECRET,DIFFICULTY,clamp } from './content.js';
 export const PROFILE_KEY='astra.nocturne.profile.v1';
 export const RUN_KEY='astra.nocturne.run.v1';
+export function memoryEffect(def,level){return {total:def.value*(1-.9**level)/.1,next:level>=def.max?0:def.value*.9**level};}
 export function freshProfile(){return {version:VERSION,crystals:0,totalKills:0,runs:0,wins:0,meta:Object.fromEntries(META.map(m=>[m.id,0])),achievements:[],travelers:[],discoveries:[],history:[],claimed:[],best:{},settings:{music:true,sound:true,volume:.4,effects:true,numbers:true,joystick:'floating',quality:'auto',motion:true},selection:{hero:'rumi',stage:'garden',difficulty:'normal',runMode:'expedition'}};}
 export function normalizeProfile(value){
   if(!value||value.version!==VERSION)throw new Error('지원하지 않는 기록 버전입니다.');
@@ -30,7 +31,7 @@ export function settle(profile,game,date=new Date().toISOString()){
   profile.crystals+=reward;profile.totalKills+=game.kills;profile.runs++;if(won)profile.wins++;if(!profile.travelers.includes(game.hero))profile.travelers.push(game.hero);
   profile.discoveries=[...new Set([...(profile.discoveries||[]),...(game.secrets||[])])];
   const old=profile.best[game.stage];profile.best[game.stage]={won:won||!!old?.won,kills:Math.max(game.kills,old?.kills||0),time:Math.max(game.time,old?.time||0)};
-  const earned=[];const checks={first:true,hundred:game.kills>=100,evolved:game.evolutions>0,six:game.weapons.length===6,dawn:won&&game.stage==='garden',chapel:won&&game.stage==='cathedral',rift:won&&game.stage==='rift',eclipse:won&&game.difficulty==='eclipse',travelers:profile.travelers.length===HEROES.length};
+  const earned=[];const checks={first:true,hundred:game.kills>=100,evolved:game.evolutions>0,six:(game.peakWeapons||game.weapons.length)===6,dawn:won&&game.stage==='garden',chapel:won&&game.stage==='cathedral',rift:won&&game.stage==='rift',eclipse:won&&game.difficulty==='eclipse',travelers:profile.travelers.length===HEROES.length};
   for(const a of ACHIEVEMENTS)if(checks[a.id]&&!profile.achievements.includes(a.id)){profile.achievements.push(a.id);profile.crystals+=a.reward;earned.push(a);}
   profile.claimed.push(game.runId);profile.claimed=profile.claimed.slice(-30);
   profile.history.unshift({hero:game.hero,stage:game.stage,difficulty:game.difficulty,won,runMode:game.runMode||'expedition',cycles:game.cycle||0,time:game.time,kills:game.kills,reward,date});profile.history=profile.history.slice(0,20);

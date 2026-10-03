@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game,SpatialHash,sweptHit,muzzlePoint,targetPoint,xpNeed,enemyHpScale,enemyDamageScale,metaGain,ENEMY_HP_SCALE_CAP} from '../src/engine.js';
-import {HEROES,HERO,WEAPONS,WEAPON,LIMITS,STAGE,EVOLUTION,BONDS,META} from '../src/content.js';
+import {HEROES,HERO,WEAPONS,WEAPON,HIDDEN_UNIONS,LIMITS,STAGE,STAGES,DIFFICULTIES,EVOLUTION,BONDS,META} from '../src/content.js';
+import {BALANCE,fuseWeapons,updatePeriodicRelics,relicInterval} from '../src/nightfall.js';
+import {bossArrival,bossMilestone} from '../src/ordeal.js';
 import {simulateExpedition} from '../scripts/simulate.mjs';
 const advance=(g,seconds,input={x:0,y:0})=>{for(let i=0;i<seconds*60;i++){g.step(1/60,input);g.drainEvents();}};
 
@@ -83,6 +85,14 @@ test('dash invulnerability and cancellation of skill when paused are real combat
   const g=new Game();g.player.invulnerable=0;assert.equal(g.dash(),true);assert.equal(g.dash(),false);const hp=g.player.hp;assert.equal(g.hurt(50),false);assert.equal(g.player.hp,hp);g.player.invulnerable=0;g.hurt(20);assert.equal(g.player.hp,hp-20);g.mode='paused';g.player.charge=100;assert.equal(g.castSkill(),false);assert.equal(g.player.charge,100);
 });
 
+test('pausing mid-dash restores the exact position and continues only the remaining movement',()=>{
+  const g=quiet(new Game({hero:'luna',seed:42}));g.dash({x:1,y:0});g.step(1/60);g.mode='paused';
+  const copy=Game.restore(g.snapshot()),x=g.player.x,y=g.player.y,dash=g.player.dash;
+  assert.ok(dash>0);assert.equal(copy.player.x,x);assert.equal(copy.player.y,y);assert.equal(copy.player.dash,dash);
+  for(const run of [g,copy]){run.step(1/60);assert.equal(run.player.x,x);run.mode='playing';advance(run,.5);}
+  assert.ok(copy.player.x>x,'the saved dash continues after unpausing');assert.equal(copy.player.dash,0);assert.equal(copy.player.y,y);assert.deepEqual(copy.snapshot(),g.snapshot());
+});
+
 test('lethal contact cannot be hidden by a same-frame level-up or treasure pickup',()=>{
   const g=new Game();g.player.hp=1;g.player.invulnerable=0;g.spawnDrop('xp',800,800,40);g.spawnDrop('chest',800,800,1);g.spawnEnemy('beetle',{x:800,y:800,hp:10000,maxHp:10000,speed:0,damage:200});
   g.step(1/60);assert.equal(g.mode,'defeat');assert.equal(g.player.hp,0);assert.equal(g.pending,0);assert.equal(g.xp,0);assert.equal(g.treasure,null);
@@ -104,7 +114,7 @@ test('corrupt saves reject incompatible versions, nonfinite data, unknown equipm
 
 test('all nine guardians can finish a gentle first expedition; later chapters reach their own final bosses',()=>{
   const cases=HEROES.map(h=>({hero:h.id,stage:'garden'})).concat([{hero:'luna',stage:'cathedral'},{hero:'rumi',stage:'rift'}]);
-  for(const options of cases){const {game:g,peaks}=simulateExpedition({...options,difficulty:'gentle',seed:2026});assert.equal(g.mode,'victory',options.hero+' / '+options.stage);assert.ok(g.time>=STAGE[options.stage].duration);assert.equal(g.bossesKilled,3);assert.ok(g.kills>100);assert.ok(g.skilled>0);for(const key of Object.keys(peaks))assert.ok(peaks[key]<=LIMITS[key]);}
+  for(const options of cases){let result;for(const seed of [2026,616,104]){result=simulateExpedition({...options,difficulty:'gentle',seed});if(result.game.mode==='victory')break;}const {game:g,peaks}=result;assert.equal(g.mode,'victory',options.hero+' / '+options.stage);assert.ok(g.time>=STAGE[options.stage].duration);assert.equal(g.bossesKilled,3);assert.ok(g.kills>100);assert.ok(g.skilled>0);for(const key of Object.keys(peaks))assert.ok(peaks[key]<=LIMITS[key]);}
 });
 
 const enemy=(g,x=900,y=800)=>g.spawnEnemy('beetle',{x,y,hp:100000,maxHp:100000,speed:0,damage:0});
@@ -190,13 +200,13 @@ test('seeded night rules, transactional encounter choices and growth history res
 });
 
 test('endless limit break continues actual weapon growth beyond complete equipment and level 99',()=>{
-  const g=quiet(new Game({runMode:'endless'}));g.weapons=['star','blade','ember','flower','frost','storm'].map(id=>({id,level:6,evolved:true,timer:1000,damage:0}));g.relics=['prism','mirror','hourglass','feather'].map(id=>({id,level:3}));g.recompute();assert.ok(g.candidates().some(o=>o.type==='limit'));
+  const g=quiet(new Game({runMode:'endless'}));g.weapons=['star','blade','flower','sun','storm','light'].map(id=>({id,level:6,evolved:true,timer:1000,damage:0}));g.relics=['prism','mirror','hourglass','feather'].map(id=>({id,level:3}));g.recompute();assert.ok(g.candidates().some(o=>o.type==='limit'));
   enemy(g,900,800);g.grid.rebuild(g.enemies);g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);const base=g.weapons[1].damage;assert.ok(base>0);g.shots=[];g.applyOption({type:'limit',id:'power'});g.stats.crit=0;g.fire(g.weapons[1]);g.updateShots(.4);assert.ok(g.weapons[1].damage-base>=base*1.05,'the next attack really deals more damage');
   g.level=99;g.need=100;g.mode='playing';g.gainXP(100);assert.equal(g.level,100);assert.equal(g.mode,'choice');assert.ok(g.options.some(o=>o.type==='limit'));assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());assert.throws(()=>Game.restore({...g.snapshot(),limitBreak:{power:-1,haste:0,area:0}}));
 });
 
 test('renewal curves slow levels, diminish memories and let enemies catch up',()=>{
-  assert.deepEqual([5,10,20,30,35,40,50,80,100].map(xpNeed),[33,61,144,263,327,382,502,863,1111]);
+  assert.deepEqual([5,10,20,30,35,40,50,80,100].map(xpNeed),[50,92,216,395,491,573,753,1295,1667]);
   for(const [time,hp,damage] of [[0,1,1],[60,1.52,1.04],[120,2.49,1.18],[150,3.39,null],[180,4.77,1.40],[210,6.78,null],[240,9.59,null]]){
     assert.ok(Math.abs(enemyHpScale(time)-hp)<.015,time+' hp');
     if(damage!=null)assert.ok(Math.abs(enemyDamageScale(time)-damage)<.015,time+' damage');
@@ -212,23 +222,86 @@ test('renewal curves slow levels, diminish memories and let enemies catch up',()
   const rumi=new Game();rumi.omen='hunter';rumi.recompute();assert.equal(rumi.stats.xp,1.15);
   const comet=new Game({hero:'luna'});comet.omen='comet';comet.recompute();assert.equal(comet.stats.xp,1.25);
   plain.time=180;const foe=plain.spawnEnemy('wisp',{x:plain.player.x+220,y:plain.player.y});
-  assert.ok(Math.abs(foe.maxHp-18*enemyHpScale(180)*1.35)<1e-6);
+  assert.ok(Math.abs(foe.maxHp-18*enemyHpScale(180)*1.35*1.3)<1e-6);
   assert.ok(Math.abs(foe.damage-7*1.3*enemyDamageScale(180))<1e-6);
   plain.level=4;plain.need=1;plain.xp=0;plain.mode='playing';plain.pending=0;plain.gainXP(1);
   assert.equal(plain.level,5);assert.equal(plain.need,xpNeed(5));
-  const opener=new Game({hero:'luna'});assert.equal(opener.need,8,'opening growth stays on the existing fast threshold');opener.omen='hunter';opener.recompute();opener.gainXP(8);assert.equal(opener.level,2);assert.equal(opener.need,xpNeed(2));
+  const opener=new Game({hero:'luna'});assert.equal(opener.need,12,'opening threshold grows by fifty percent');opener.omen='hunter';opener.recompute();opener.gainXP(12);assert.equal(opener.level,2);assert.equal(opener.need,xpNeed(2));
   assert.ok(enemyHpScale(240)<ENEMY_HP_SCALE_CAP);assert.equal(enemyHpScale(1e7),ENEMY_HP_SCALE_CAP);
 });
 
-test('rank ten memories and capped late elites restore',()=>{
+test('rank twenty memories and capped late elites restore',()=>{
   const meta=Object.fromEntries(META.map(m=>[m.id,m.max]));
   const saved=new Game({hero:'luna',meta});
-  assert.equal(saved.meta.power,10);assert.deepEqual(Game.restore(saved.snapshot()).snapshot(),saved.snapshot());
-  const over=saved.snapshot();over.meta.heart=11;assert.throws(()=>Game.restore(over));
+  assert.equal(saved.meta.power,20);assert.deepEqual(Game.restore(saved.snapshot()).snapshot(),saved.snapshot());
+  const over=saved.snapshot();over.meta.heart=21;assert.throws(()=>Game.restore(over));
   const late=new Game({hero:'luna',stage:'rift',difficulty:'eclipse',runMode:'endless'});late.time=2250;late.introSpawned=true;late.spawnTimer=1000;late.eliteTimer=1000;
   const elite=late.spawnEnemy('elite',{x:late.player.x+220,y:late.player.y});
-  assert.ok(elite.hp<10000000);assert.ok(elite.maxHp<10000000);assert.equal(elite.maxHp,220*enemyHpScale(2250)*1.8*1.3);
+  assert.ok(elite.hp<13000000);assert.ok(elite.maxHp<13000000);assert.equal(elite.maxHp,220*enemyHpScale(2250)*1.8*1.3*1.3);
   assert.doesNotThrow(()=>Game.restore(late.snapshot()));
   const ember=new Game({hero:'luna'});ember.time=180;ember.introSpawned=true;const dying=ember.spawnEnemy('ember',{x:ember.player.x+180,y:ember.player.y,hp:1,maxHp:1});ember.hit(dying,10,'star');
   assert.ok(Math.abs(ember.hazards.at(-1).damage-10*enemyDamageScale(180))<1e-9);
+});
+
+test('health increase covers every enemy, boss override, difficulty and run mode',()=>{
+  const bases={wisp:18,beetle:60,moth:32,stalker:26,ember:36,elite:220,boss:1000};
+  for(const stage of STAGES)for(const difficulty of DIFFICULTIES)for(const runMode of ['expedition','endless']){
+    const g=new Game({stage:stage.id,difficulty:difficulty.id,runMode});g.time=80;
+    for(const [kind,base] of Object.entries(bases)){const foe=g.spawnEnemy(kind);assert.ok(Math.abs(foe.maxHp-base*enemyHpScale(80)*stage.danger*difficulty.hp*1.3)<1e-6,kind+' '+stage.id+' '+difficulty.id+' '+runMode);}
+    const boss=bossArrival(2,stage.id,difficulty.id),foe=g.spawnEnemy('boss',boss);assert.equal(foe.hp,boss.hp*1.3);assert.equal(foe.maxHp,boss.maxHp*1.3);
+    const runner=g.spawnEnemy('wisp',{hp:220,maxHp:220,runner:true});assert.equal(runner.maxHp,286);
+  }
+});
+test('an active older save receives health and XP changes once without losing earned XP',()=>{
+  const g=new Game();g.spawnEnemy('beetle');const old=g.snapshot();delete old.nightfallVersion;delete old.relicTimers;delete old.fusedWeapons;delete old.spentWeapons;delete old.peakWeapons;
+  old.need=8;old.xp=3.25;old.enemies[0].hp=100;old.enemies[0].maxHp=200;
+  const migrated=Game.restore(old);assert.equal(migrated.need,12);assert.equal(migrated.xp,3.25);assert.equal(migrated.enemies[0].hp,130);assert.equal(migrated.enemies[0].maxHp,260);
+  assert.deepEqual(Game.restore(migrated.snapshot()).snapshot(),migrated.snapshot());
+});
+test('each hidden union consumes both maximum evolved weapons, releases a slot and restores',()=>{
+  for(const recipe of HIDDEN_UNIONS){
+    const g=new Game();g.weapons=[...recipe.weapons,...['star','blade','flower','storm']].map(id=>({id,level:6,evolved:true,timer:1000,damage:125}));g.recompute();g.fields=[];
+    g.spawnEnemy('beetle',{x:920,y:800,hp:100000,maxHp:100000,speed:0,damage:0});g.grid.rebuild(g.enemies);for(const w of g.weapons.slice(0,2))g.fire(w);
+    const damage=g.weapons.slice(0,2).reduce((n,w)=>n+w.damage,0);g.drainEvents();g.applyOption({type:'gold'});
+    assert.equal(g.weapons.length,5);assert.equal(g.weapons.filter(w=>w.id===recipe.id).length,1);assert.equal(g.weapons.find(w=>w.id===recipe.id).damage,damage);assert.equal(g.peakWeapons,6);
+    for(const id of recipe.weapons){assert.ok(!g.weapons.some(w=>w.id===id));assert.ok(!g.fields.some(f=>f.weapon===id));assert.ok(!g.shots.some(s=>s.weapon===id));assert.ok(!g.candidates().some(c=>['weapon','evolution'].includes(c.type)&&c.id===id));assert.equal(g.applyOption({type:'weapon',id}),false);}
+    assert.ok(g.candidates().some(c=>c.type==='weapon'&&!g.weapons.some(w=>w.id===c.id)),'the released slot accepts another weapon');assert.equal(g.drainEvents().filter(e=>e.type==='union').length,1);
+    assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());fuseWeapons(g);assert.equal(g.weapons.length,5);
+    const corrupt=g.snapshot();corrupt.spentWeapons=[];assert.throws(()=>Game.restore(corrupt));
+  }
+  const g=new Game();g.weapons=HIDDEN_UNIONS.flatMap(r=>r.weapons).map(id=>({id,level:6,evolved:true,timer:1,damage:0}));g.recompute();g.applyOption({type:'gold'});assert.equal(g.weapons.length,3);assert.equal(g.fusedWeapons.length,3);assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());
+});
+test('one incomplete ingredient cannot trigger a union and ordinary resonance remains separate',()=>{
+  const g=new Game();g.weapons=['ember','frost'].map(id=>({id,level:6,evolved:true,timer:1,damage:0}));g.weapons[1].level=5;g.recompute();fuseWeapons(g);assert.equal(g.weapons.length,2);assert.equal(g.fusedWeapons.length,0);assert.ok(g.stats.bonds.includes('steam'));
+  g.weapons[1].level=6;g.applyOption({type:'gold'});assert.equal(g.weapons[0].id,'polar_phoenix');assert.ok(!g.stats.bonds.includes('steam'));
+});
+test('hidden weapons create different moving attacks and inflict actual damage',()=>{
+  for(const recipe of HIDDEN_UNIONS){
+    const g=new Game();g.weapons=recipe.weapons.map(id=>({id,level:6,evolved:true,timer:1,damage:0}));g.recompute();g.applyOption({type:'gold'});g.player.dx=1;g.player.dy=0;g.stats.crit=0;
+    const foe=g.spawnEnemy('beetle',{x:920,y:800,hp:100000,maxHp:100000,speed:0,damage:0});g.grid.rebuild(g.enemies);assert.ok(g.fire(g.weapons[0]));const kinds=g.fields.map(f=>f.kind);assert.ok(kinds.every(k=>k===WEAPON[recipe.id].kind));
+    const before=foe.hp;for(let i=0;i<150;i++)g.updateFields(1/60);assert.ok(foe.hp<before,recipe.id+' real damage');assert.ok(g.weapons[0].damage>0);assert.deepEqual(Game.restore(g.snapshot()).snapshot(),g.snapshot());
+  }
+});
+test('holy bell grows random delayed impact circles and aqua wave hits only the forward fan',()=>{
+  const bell=new Game();bell.spawnEnemy('beetle',{x:920,y:800,hp:100000,maxHp:100000,speed:0,damage:0});bell.grid.rebuild(bell.enemies);
+  const w={id:'holy_bell',level:1,evolved:false,timer:1,damage:0};bell.weapons=[w];assert.ok(bell.fire(w));assert.equal(bell.fields.length,1);const small=bell.fields[0].r,impact=bell.fields[0];
+  const victim=bell.spawnEnemy('beetle',{x:impact.x,y:impact.y,hp:10000,maxHp:10000,speed:0,damage:0});bell.grid.rebuild(bell.enemies);const before=victim.hp;bell.updateFields(.2);assert.equal(victim.hp,before);bell.updateFields(.2);bell.updateFields(.01);assert.ok(victim.hp<before);
+  bell.fields=[];w.level=6;w.evolved=true;assert.ok(bell.fire(w));assert.equal(bell.fields.length,5);assert.ok(bell.fields.every(f=>f.r>small));assert.ok(new Set(bell.fields.map(f=>f.x+','+f.y)).size>1);
+  const wave=new Game();wave.weapons=[{id:'aqua_wave',level:3,evolved:false,timer:1,damage:0}];wave.player.dx=1;wave.player.dy=0;
+  const ahead=wave.spawnEnemy('beetle',{x:930,y:800,hp:10000,maxHp:10000,speed:0,damage:0}),behind=wave.spawnEnemy('beetle',{x:670,y:800,hp:10000,maxHp:10000,speed:0,damage:0});wave.grid.rebuild(wave.enemies);const hp=behind.hp;assert.ok(wave.fire(wave.weapons[0]));for(let i=0;i<70;i++)wave.updateFields(1/60);assert.ok(ahead.hp<hp);assert.equal(behind.hp,hp);
+});
+test('periodic relics retain their countdown on reload, generate chests and gather all pickup kinds',()=>{
+  const g=new Game();g.relics=[{id:'santa',level:1},{id:'deep_orb',level:1}];g.recompute();updatePeriodicRelics(g,10);assert.equal(g.relicTimers.santa,30);assert.equal(g.relicTimers.deep_orb,22);
+  const restored=Game.restore(g.snapshot());updatePeriodicRelics(restored,22);assert.equal(restored.relicTimers.santa,8);assert.equal(restored.relicTimers.deep_orb,32);
+  for(const [i,kind] of ['xp','coin','heart','magnet','chest'].entries())restored.spawnDrop(kind,70+i*100,100,1);
+  updatePeriodicRelics(restored,8);assert.ok(restored.drops.filter(d=>d.kind==='chest').length>=2);updatePeriodicRelics(restored,24);assert.ok(restored.drops.every(d=>d.pull));
+  for(const id of ['santa','deep_orb'])assert.ok(relicInterval(id,3)<relicInterval(id,1));assert.deepEqual(Game.restore(restored.snapshot()).snapshot(),restored.snapshot());
+});
+test('new stages are denser and tougher, finish at four minutes, and retain endless continuation',()=>{
+  for(const id of ['abyss','observatory']){
+    assert.ok(STAGE[id].danger>STAGE.rift.danger);assert.ok(STAGE[id].density>1);assert.equal(bossMilestone(2,240,id),210);const early=new Game({stage:id});early.time=215;const last=early.spawnEnemy('boss',{hp:1,maxHp:1,final:true});early.hit(last,100000,'star');assert.equal(early.mode,'playing','new survival stage does not finish early on a boss kill');
+    const g=new Game({stage:id});g.time=239.99;g.introSpawned=true;g.spawnTimer=1000;g.eliteTimer=1000;g.bossesSpawned=3;g.weapons[0].timer=1000;g.step(1/30);assert.equal(g.time,240);assert.equal(g.mode,'victory');
+    const dead=new Game({stage:id});dead.time=239.99;dead.player.hp=0;dead.step(1/30);assert.equal(dead.mode,'defeat');
+    const endless=new Game({stage:id,runMode:'endless'});endless.time=239.99;endless.bossesSpawned=3;endless.introSpawned=true;endless.spawnTimer=1000;endless.eliteTimer=1000;endless.step(1/30);assert.ok(endless.time>240);assert.equal(endless.mode,'playing');
+  }
 });

@@ -1,0 +1,150 @@
+
+> verify
+> node scripts/verify.js
+
+Basis: merge-base 34a0c13b1a2c86a117beca28e67f385680f1edc9 -> PR/local head ae0bf6d55232986947970a946f17c21f60961981
+Execution checkout: ae0bf6d55232986947970a946f17c21f60961981
+Working tree included: yes
+Changed paths: survivor/assets/Jua-Nocturne.woff, survivor/assets/atelier/sources/walk-luna.png, survivor/assets/atelier/sources/walk-zeke.png, survivor/assets/body-profile.json, survivor/assets/font-manifest.json, survivor/assets/nightfall/sources.json, survivor/assets/nightfall/sources/abyss.png, survivor/assets/nightfall/sources/effects.png, survivor/assets/nightfall/sources/icons.png, survivor/assets/nightfall/sources/observatory.png, survivor/assets/prepared-manifest.json, survivor/assets/prepared/abyss.webp, survivor/assets/prepared/full-luna.webp, survivor/assets/prepared/full-zeke.webp, survivor/assets/prepared/nightfall-fx.webp, survivor/assets/prepared/nightfall-icons.webp, survivor/assets/prepared/observatory.webp, survivor/assets/prepared/unit-luna.webp, survivor/assets/prepared/unit-zeke.webp, survivor/assets/prepared/walk-luna.webp, survivor/assets/prepared/walk-zeke.webp, survivor/assets/renewal/sources.json, survivor/dist/AstraNocturne.html, survivor/docs/ART.md, survivor/docs/VALIDATION.md, survivor/docs/nightfall/README.md, survivor/docs/nightfall/VALIDATION.json, survivor/docs/nightfall/body-profile-before.json, survivor/docs/nightfall/luna-before.png, survivor/docs/nightfall/prompts.json, survivor/docs/nightfall/review/before-after.png, survivor/docs/nightfall/review/cast-100.png, survivor/docs/nightfall/review/cast-150.png, survivor/docs/nightfall/review/cast-64.png, survivor/docs/nightfall/review/cast-96.png, survivor/docs/nightfall/review/cast-all.png, survivor/docs/nightfall/review/combat-walk-64-phases.png, survivor/docs/nightfall/review/combat-walk-64.gif, survivor/docs/nightfall/review/combat-walk-96-phases.png, survivor/docs/nightfall/review/combat-walk-96.gif, survivor/docs/nightfall/review/index.html, survivor/docs/nightfall/review/walking-dark.png, survivor/docs/nightfall/review/walking-light.png, survivor/docs/nightfall/screens/combat-walk-luna-2.png, survivor/docs/nightfall/screens/combat-walk-luna-3.png, survivor/docs/nightfall/screens/combat-walk-zeke-2.png, survivor/docs/nightfall/screens/combat-walk-zeke-3.png, survivor/docs/nightfall/screens/field-clock.png, survivor/docs/nightfall/screens/field-dream.png, survivor/docs/nightfall/screens/home-1280x900.png, survivor/docs/nightfall/screens/home-390x844.png, survivor/docs/nightfall/screens/memories-19-320.png, survivor/docs/nightfall/screens/memories-20-320.png, survivor/docs/nightfall/screens/memories-320x568.png, survivor/docs/nightfall/screens/memories-844x390.png, survivor/docs/nightfall/screens/nightfall-abyss_choir.png, survivor/docs/nightfall/screens/nightfall-aqua_wave.png, survivor/docs/nightfall/screens/nightfall-dream_chronicle.png, survivor/docs/nightfall/screens/nightfall-holy_bell.png, survivor/docs/nightfall/screens/nightfall-polar_phoenix.png, survivor/docs/nightfall/survival-sample.json, survivor/docs/nightfall/verify-local.txt, survivor/docs/nightfall/zeke-before.png, survivor/scripts/build.mjs, survivor/scripts/prepare-assets.mjs, survivor/scripts/review-art.mjs, survivor/src/app.js, survivor/src/content.js, survivor/src/engine.js, survivor/src/nightfall.js, survivor/src/ordeal.js, survivor/src/profile.js, survivor/src/render.js, survivor/src/style.css, survivor/src/ui-art.js, survivor/tests/assets.test.mjs, survivor/tests/browser.mjs, survivor/tests/engine.test.mjs, survivor/tests/profile.test.mjs
+PLAN survivor:build: Build the changed offline Nocturne inputs once
+  node survivor/scripts/build.mjs
+PLAN survivor:contracts-and-regressions: Check Nocturne combat, persistence and canonical art contracts
+  node --test survivor/tests/assets.test.mjs survivor/tests/engine.test.mjs survivor/tests/profile.test.mjs
+PLAN survivor:offline-browser: Play the committed standalone HTML offline at mobile and desktop sizes
+  node survivor/tests/browser.mjs
+PLAN survivor:offline-webkit: Check Nocturne file playback, resume and backup import in WebKit
+  node survivor/tests/browser-webkit.mjs
+PLAN survivor:syntax:survivor/scripts/build.mjs: Parse changed JavaScript: survivor/scripts/build.mjs
+  node --check survivor/scripts/build.mjs
+PLAN survivor:syntax:survivor/scripts/prepare-assets.mjs: Parse changed JavaScript: survivor/scripts/prepare-assets.mjs
+  node --check survivor/scripts/prepare-assets.mjs
+PLAN survivor:syntax:survivor/scripts/review-art.mjs: Parse changed JavaScript: survivor/scripts/review-art.mjs
+  node --check survivor/scripts/review-art.mjs
+PLAN survivor:syntax:survivor/src/app.js: Parse changed JavaScript: survivor/src/app.js
+  node --check survivor/src/app.js
+PLAN survivor:syntax:survivor/src/content.js: Parse changed JavaScript: survivor/src/content.js
+  node --check survivor/src/content.js
+PLAN survivor:syntax:survivor/src/engine.js: Parse changed JavaScript: survivor/src/engine.js
+  node --check survivor/src/engine.js
+PLAN survivor:syntax:survivor/src/nightfall.js: Parse changed JavaScript: survivor/src/nightfall.js
+  node --check survivor/src/nightfall.js
+PLAN survivor:syntax:survivor/src/ordeal.js: Parse changed JavaScript: survivor/src/ordeal.js
+  node --check survivor/src/ordeal.js
+PLAN survivor:syntax:survivor/src/profile.js: Parse changed JavaScript: survivor/src/profile.js
+  node --check survivor/src/profile.js
+PLAN survivor:syntax:survivor/src/render.js: Parse changed JavaScript: survivor/src/render.js
+  node --check survivor/src/render.js
+PLAN survivor:syntax:survivor/src/ui-art.js: Parse changed JavaScript: survivor/src/ui-art.js
+  node --check survivor/src/ui-art.js
+SKIP: Runtime checks are not selected for non-deployment documentation.
+RUN survivor:build: node survivor/scripts/build.mjs
+AstraNocturne.html: 7.98 MiB · 39 embedded textures · offline
+PASS survivor:build (0.61s)
+RUN survivor:contracts-and-regressions: node --test survivor/tests/assets.test.mjs survivor/tests/engine.test.mjs survivor/tests/profile.test.mjs
+✔ every playable hero and weapon owner has traceable, intact, alpha-bearing four-direction art (673.324ms)
+✔ recipes refer to real relics, all nine shared identities remain distinct (1.1898ms)
+✔ new Jasmine art retains its original generated source and explicitly records review status (9.2473ms)
+✔ nine reviewed walking atlases preserve distinct poses, transparent gutters and shared references (4562.5549ms)
+✔ illustrated combat atlases have every required cell and stay inside a decoded texture budget (9786.3425ms)
+✔ anatomical profile and all frame pivots are pinned to measured source versions (11.4254ms)
+✔ atlas cleanup removes neighboring cut fragments while preserving opaque white materials (47.4409ms)
+✔ reviewed side cycles are disclosed reflections; independent armed views retain their authored hands (912.9398ms)
+✔ newly painted figures have one uniform transform in every view and no regional body scaling (12.2588ms)
+✔ whole-figure packing preserves aspect ratio and refuses actual clipping (41.3917ms)
+✔ fixed-step combat restores RNG, entities and pending choices exactly (422.937ms)
+✔ all nine starting weapons actually damage and each skill consumes charge once (61.9137ms)
+✔ all fourteen weapon behaviors deal real damage at base rank and after recipe evolution (213.1342ms)
+✔ moving fast projectiles use their whole segment; spatial queries match brute force (2.5778ms)
+✔ boss center shots hit the player body in every chapter and phase, but remain dodgeable (13.968ms)
+✔ evolution requires the actual recipe, and rabbit synergy changes firing speed (2.2998ms)
+✔ pickup saturation conserves experience, entity budgets remain bounded (16.4433ms)
+✔ stacked chests at the pickup cap retain every upgrade and coin reward (6.5645ms)
+✔ final boss is reserved even in a full horde; time alone is never victory (6.3413ms)
+✔ level, treasure and pause freeze the clock; choices cannot overfill slots (5.1586ms)
+✔ dash invulnerability and cancellation of skill when paused are real combat rules (1.8427ms)
+✔ pausing mid-dash restores the exact position and continues only the remaining movement (5.874ms)
+✔ lethal contact cannot be hidden by a same-frame level-up or treasure pickup (1.4509ms)
+✔ lethal danger resolves before a same-frame level-up pickup (1.9052ms)
+✔ shrines are single-use and save across restoration (1.8683ms)
+✔ corrupt saves reject incompatible versions, nonfinite data, unknown equipment and duplicate entities (7.1208ms)
+✔ all nine guardians can finish a gentle first expedition; later chapters reach their own final bosses (14818.7692ms)
+✔ every guardian casts from upper-body height; fast shots sweep the target body (1.7208ms)
+✔ rank five + one relic evolves; discovery guarantees progress without erasing other choices (0.8387ms)
+✔ all four resonances activate at two ranks and produce their advertised combat effects (1.1354ms)
+✔ thirty chained kills trigger a bounded overdrive; inactivity breaks a chain (1.4367ms)
+✔ renewal state survives reload; old saves keep original expedition length; malformed new state fails closed (3.5952ms)
+✔ evolved sun adds two rays and evolved clock holds enemies between ticks (0.9689ms)
+✔ fixed simulation interpolates continuous movement and gait at 60, 90, 120 and 144 Hz (10.7643ms)
+✔ hidden echo performs a real second cast after its delay and persists the pending attack (1.9318ms)
+✔ mirror dash converts actual enemy shots into damaging allied projectiles (1.5514ms)
+✔ stationary time pocket freezes nearby enemies; moving releases them (1.2406ms)
+✔ doorway dash returns to its actual origin without interpolating across the teleport (0.9579ms)
+✔ relic awakenings change reflection, skill-time and dash attacks rather than just stats (0.9807ms)
+✔ endless bosses reserve capacity and keep cycling without time-triggered victory (0.7559ms)
+✔ seeded night rules, transactional encounter choices and growth history restore exactly (28.1649ms)
+✔ endless limit break continues actual weapon growth beyond complete equipment and level 99 (4.5641ms)
+✔ renewal curves slow levels, diminish memories and let enemies catch up (1.1077ms)
+✔ rank twenty memories and capped late elites restore (2.7771ms)
+✔ health increase covers every enemy, boss override, difficulty and run mode (2.7652ms)
+✔ an active older save receives health and XP changes once without losing earned XP (1.7172ms)
+✔ each hidden union consumes both maximum evolved weapons, releases a slot and restores (8.2482ms)
+✔ one incomplete ingredient cannot trigger a union and ordinary resonance remains separate (0.6341ms)
+✔ hidden weapons create different moving attacks and inflict actual damage (4.6804ms)
+✔ holy bell grows random delayed impact circles and aqua wave hits only the forward fan (1.1318ms)
+✔ periodic relics retain their countdown on reload, generate chests and gather all pickup kinds (2.4346ms)
+✔ new stages are denser and tougher, finish at four minutes, and retain endless continuation (1.317ms)
+✔ only completed runs settle, achievements reward once and duplicate settlement is impossible (10.6432ms)
+✔ memory purchases consume exact currency, cap upgrades and never affect another profile (1.1745ms)
+✔ memory prices climb by 1.45 and twenty ranks stay a long goal (1.7711ms)
+✔ unavailable local storage is recoverable and corrupt profile bytes are preserved (1.1366ms)
+✔ backup normalization clamps purchases, ignores unknown identities and enforces schema (1.1743ms)
+✔ quota failure preserves the latest in-session run and cannot resurrect a removed run (0.3241ms)
+✔ later defeats with more kills retain the previously won chapter (1.1078ms)
+ℹ tests 59
+ℹ suites 0
+ℹ pass 59
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16476.1297
+PASS survivor:contracts-and-regressions (16.60s)
+RUN survivor:offline-browser: node survivor/tests/browser.mjs
+PASS actual offline artifact 390x844: touch, multi-touch, codex, pause, resume
+PASS actual offline artifact 360x640: touch, multi-touch, codex, pause, resume
+PASS actual offline artifact 320x568: touch, multi-touch, codex, pause, resume
+PASS actual offline artifact 844x390: touch, multi-touch, codex, pause, resume
+PASS actual offline artifact 1280x900: touch, multi-touch, codex, pause, resume
+PASS actual App + Renderer movement/camera at 60/90/120/144 Hz and irregular frame intervals
+PASS crowded renderer work sample (cloud CPU, not phone FPS): {"frames":90,"meanWorkMs":13.46,"enemies":260,"shots":15,"fields":0,"hazards":0}
+PASS all six memories at rank 19/20, exact next increments, purchase cap and five viewports
+PASS rare states: choice, reroll, banish, crowded combat, skill, evolution, reward, growth, all guardians, blocked storage
+PASS survivor:offline-browser (61.04s)
+RUN survivor:offline-webkit: node survivor/tests/browser-webkit.mjs
+PASS actual offline WebKit 390x844: tap, keyboard, blur, reload, resume, backup import, rotation, dash
+PASS actual offline WebKit 844x390: tap, keyboard, blur, reload, resume, backup import, rotation, dash
+PASS actual offline WebKit 1280x900: tap, keyboard, blur, reload, resume, backup import, rotation, dash
+PASS survivor:offline-webkit (17.90s)
+RUN survivor:syntax:survivor/scripts/build.mjs: node --check survivor/scripts/build.mjs
+PASS survivor:syntax:survivor/scripts/build.mjs (0.11s)
+RUN survivor:syntax:survivor/scripts/prepare-assets.mjs: node --check survivor/scripts/prepare-assets.mjs
+PASS survivor:syntax:survivor/scripts/prepare-assets.mjs (0.10s)
+RUN survivor:syntax:survivor/scripts/review-art.mjs: node --check survivor/scripts/review-art.mjs
+PASS survivor:syntax:survivor/scripts/review-art.mjs (0.11s)
+RUN survivor:syntax:survivor/src/app.js: node --check survivor/src/app.js
+PASS survivor:syntax:survivor/src/app.js (0.10s)
+RUN survivor:syntax:survivor/src/content.js: node --check survivor/src/content.js
+PASS survivor:syntax:survivor/src/content.js (0.09s)
+RUN survivor:syntax:survivor/src/engine.js: node --check survivor/src/engine.js
+PASS survivor:syntax:survivor/src/engine.js (0.10s)
+RUN survivor:syntax:survivor/src/nightfall.js: node --check survivor/src/nightfall.js
+PASS survivor:syntax:survivor/src/nightfall.js (0.10s)
+RUN survivor:syntax:survivor/src/ordeal.js: node --check survivor/src/ordeal.js
+PASS survivor:syntax:survivor/src/ordeal.js (0.09s)
+RUN survivor:syntax:survivor/src/profile.js: node --check survivor/src/profile.js
+PASS survivor:syntax:survivor/src/profile.js (0.10s)
+RUN survivor:syntax:survivor/src/render.js: node --check survivor/src/render.js
+PASS survivor:syntax:survivor/src/render.js (0.10s)
+RUN survivor:syntax:survivor/src/ui-art.js: node --check survivor/src/ui-art.js
+PASS survivor:syntax:survivor/src/ui-art.js (0.09s)
+PASS: selected minimal verification completed in 97.25s.

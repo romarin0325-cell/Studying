@@ -50,7 +50,7 @@ export class Renderer{
   events(events){for(const e of events){
     if(e.type==='hit'&&this.settings.numbers&&(!e.periodic||e.damage>50&&this.drawCount%5===0))this.add(this.floaters,{x:e.x,y:e.y-18,text:e.damage,color:e.crit?'#ffe0a0':e.color,life:.58,total:.58,crit:e.crit},this.detail?32:16);
     if(e.type==='heal')this.add(this.floaters,{x:e.x,y:e.y-50,text:'+'+e.value,color:'#bcf0c3',life:.8,total:.8},32);
-    const duration={cast:.14,slash:.3,chain:.24,beam:.24,blast:.4,skill:1.25,dash:.3,bossTell:.7,orbitHit:.22,tell:.9,bond:.9,overdrive:1,reflection:.5,dodge:.5,portal:.6,secretFound:.8,encounter:.8};
+    const duration={cast:.14,slash:.3,chain:.24,beam:.24,blast:.4,skill:1.25,dash:.3,bossTell:.7,orbitHit:.22,tell:.9,bond:.9,overdrive:1,reflection:.5,dodge:.5,portal:.6,secretFound:.8,encounter:.8,pillar:.46,gather:.8,union:1.1,giftChest:.7};
     if(duration[e.type])this.add(this.fx,{...e,life:duration[e.type],total:duration[e.type]},this.detail?72:36);
     if(e.type==='hurt'){if(this.detail&&this.settings.motion!==false)this.shake=5;this.flash=.14;}
     if(e.type==='skill'&&this.detail&&this.settings.motion!==false)this.shake=3;
@@ -120,7 +120,37 @@ export class Renderer{
     for(let i=0;i<12;i++){c.save();c.rotate(i*Math.PI/6);c.beginPath();c.moveTo(0,-103);c.lineTo(0,-112);c.stroke();if(i%3===0){c.strokeRect(-4,-123,8,8);}c.restore();}
     c.lineWidth=1;for(let i=0;i<6;i++){c.save();c.rotate(i*Math.PI/3);c.beginPath();c.ellipse(0,-38,29,59,0,0,Math.PI*2);c.stroke();c.restore();}this.cache.set(key,img);return img;
   }
-  drawField(f){if(!this.visible(f.x,f.y,f.r))return;const c=this.ctx,a=Math.min(1,f.life);c.save();c.translate(f.x,f.y);c.rotate(this.settings.motion===false?0:this.time*(f.gravity?-.2:.08));c.globalAlpha=a*.42;const seal=this.seal(f.weapon,f.color);c.drawImage(seal,-f.r,-f.r,f.r*2,f.r*2);c.restore();this.image('effects',weaponIndex[f.weapon],f.x,f.y,f.r*.8,this.time*.1,a*.22);}
+  drawField(f){
+    if(!this.visible(f.x,f.y,f.maxR||f.r))return;
+    if(f.kind){this.drawNightfallField(f);return;}
+    if(['dream','clock'].includes(f.weapon)){
+      const a=Math.min(1,f.life),clock=f.weapon==='clock';this.image('nightfall-fx',clock?7:6,f.x,f.y,f.r*2,clock?0:this.time*.07,a*.4,4,2);
+      const c=this.ctx;c.save();c.strokeStyle=clock?'#eee0ac75':'#d5b4f05c';c.lineWidth=1.3;c.beginPath();c.arc(f.x,f.y,f.r,0,Math.PI*2);c.stroke();
+      if(clock){c.translate(f.x,f.y);for(let i=0;i<12;i++){c.save();c.rotate(i*Math.PI/6);c.beginPath();c.moveTo(0,-f.r*.87);c.lineTo(0,-f.r*(i%3?.93:.99));c.stroke();c.restore();}}
+      c.restore();return;
+    }
+    const c=this.ctx,a=Math.min(1,f.life);c.save();c.translate(f.x,f.y);c.rotate(this.settings.motion===false?0:this.time*(f.gravity?-.2:.08));c.globalAlpha=a*.42;const seal=this.seal(f.weapon,f.color);c.drawImage(seal,-f.r,-f.r,f.r*2,f.r*2);c.restore();this.image('effects',weaponIndex[f.weapon],f.x,f.y,f.r*.8,this.time*.1,a*.22);
+  }
+  drawNightfallField(f){
+    const c=this.ctx,fade=Math.min(1,f.life*3);
+    if(f.kind==='pillar'){
+      if(f.wait<=0)return;c.save();c.strokeStyle='#fff0b581';c.lineWidth=1.5;c.setLineDash([3,5]);c.beginPath();c.arc(f.x,f.y,f.r,0,Math.PI*2);c.stroke();c.setLineDash([]);c.restore();
+      this.image('nightfall-fx',0,f.x,f.y-f.r*.55,f.r*1.1,0,.15,4,2);
+    }else if(f.kind==='wave'){
+      if(f.wait>0)return;const a=f.angle,r=f.r;c.save();c.strokeStyle='#bceef5a6';c.globalAlpha=fade*.65;c.lineWidth=2;c.beginPath();c.arc(f.x,f.y,r,a-f.halfAngle,a+f.halfAngle);c.stroke();c.restore();
+      this.image('nightfall-fx',1,f.x+Math.cos(a)*r*.72,f.y+Math.sin(a)*r*.72,r*1.38,a,fade*.48,4,2);
+    }else if(f.kind==='ripple'){
+      this.image('nightfall-fx',4,f.x,f.y,f.r*2.1,0,fade*.36,4,2);
+    }else if(f.kind==='phoenix'){
+      this.image('nightfall-fx',2,f.x,f.y-18,96,f.angle,fade*.8,4,2);
+    }else if(f.kind==='chronicle'){
+      const img=this.sprite('nightfall-fx',3,4,2);c.save();c.translate(f.x,f.y);c.globalAlpha=fade*.55;
+      for(let i=0;i<3;i++){c.save();c.rotate(f.angle+i*Math.PI*2/3);if(img)c.drawImage(img,0,-14,f.r,28);c.restore();}c.restore();
+      this.image('nightfall-fx',7,f.x,f.y,64,0,fade*.55,4,2);
+    }else if(f.kind==='choir'){
+      for(let i=0;i<3;i++){const a=f.angle+i*Math.PI*2/3;this.image('nightfall-fx',5,f.x+Math.cos(a)*f.r,f.y+Math.sin(a)*f.r,48,0,fade*.65,4,2);}
+    }
+  }
   drawWarning(h){
     const line=h.kind==='line',reach=line?Math.hypot(h.bx-h.ax,h.by-h.ay)/2+h.r:h.r;
     if(!this.visible(h.x,h.y,reach))return;
@@ -162,7 +192,11 @@ export class Renderer{
   }
   drawOrbits(game){const p=this.pose||game.player;for(const w of game.weapons)if(WEAPON[w.id].kind==='orbit'){const r=(70+w.level*6)*game.stats.area,n=2+Math.floor(w.level/2)+(w.evolved?2:0);for(let i=0;i<n;i++){const a=game.time*2.4+i*Math.PI*2/n;this.image('effects',weaponIndex[w.id],p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,w.evolved?50:37,a);}}}
   drawFX(dt){const c=this.ctx;for(const e of this.fx){e.life-=dt;const t=1-e.life/e.total,alpha=clamp((1-t)*1.4,0,1);c.save();c.globalAlpha=alpha;c.strokeStyle=e.color||'#e7d5b0';
-    if(e.type==='reflection')this.image('secrets',1,e.x,e.y-25,92,0,alpha*.8,4,2);
+    if(e.type==='pillar')this.image('nightfall-fx',0,e.x,e.y-e.r*.6,e.r*2.05,0,alpha*.68,4,2);
+    else if(e.type==='gather')this.image('nightfall-fx',5,e.x,e.y,70+t*200,0,alpha*.3,4,2);
+    else if(e.type==='union')this.image('nightfall-fx',4,e.x,e.y,80+t*130,0,alpha*.35,4,2);
+    else if(e.type==='giftChest')this.image('nightfall-fx',0,e.x,e.y-12,80,0,alpha*.5,4,2);
+    else if(e.type==='reflection')this.image('secrets',1,e.x,e.y-25,92,0,alpha*.8,4,2);
     else if(e.type==='portal')this.image('secrets',3,e.x,e.y-25,92,0,alpha*.8,4,2);
     else if(e.type==='secretFound'||e.type==='encounter')this.image('secrets',e.art??7,e.x,e.y-42,65+t*25,0,alpha*.8,4,2);
     else if(e.type==='cast')this.image('effects',14,e.x,e.y,28,0,alpha);

@@ -7,6 +7,8 @@ import {cleanFrame,wholeFrame,alphaBounds} from './art-normalization.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const out=path.join(root,'survivor/assets/prepared');
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+// Text fingerprints survive Git CRLF/LF checkout; binary pixels retain byte identity.
+const sourceHash=(source,bytes)=>sha(/\.(json|mjs)$/.test(source)?bytes.toString('utf8').replace(/\r\n/g,'\n'):bytes);
 const read=p=>fs.readFile(path.join(root,p));
 const cast=JSON.parse(await read('survivor/assets/cast.json'));
 const defense=JSON.parse(await read('defense/assets/merge/units/manifest.json'));
@@ -14,8 +16,8 @@ const sources=cast.frames.map(f=>({id:'unit-'+f.id,source:f.sourcePath,frame:f})
 for(const id of ['storm_sage','lightning_sage','queen','galaxy_whale','great_detective'])sources.push({id:'unit-'+id,source:'defense/assets/merge/units/'+id+'.webp',frame:defense.frames.find(f=>f.id===id)});
 const profileSource='survivor/assets/body-profile.json',profileBytes=await read(profileSource),profile=JSON.parse(profileBytes),proofs=[];
 await fs.mkdir(out,{recursive:true});
-const manifest={version:1,processor:'Whole painted figures: uniform aspect-preserving scale and sole translation; exact unarmed side reflections; native alpha; no body-region splicing or runtime pixel processing',processorHash:sha((await read('survivor/scripts/prepare-assets.mjs')).toString().replace(/\r\n/g,'\n')),assets:[],frames:{}};
-manifest.normalization={source:profileSource,sha256:sha(profileBytes),processor:'survivor/scripts/art-normalization.mjs',processorSha256:sha((await read('survivor/scripts/art-normalization.mjs')).toString().replace(/\r\n/g,'\n'))};
+const manifest={version:1,processor:'Whole painted figures: uniform aspect-preserving scale and sole translation; disclosed complete side-cycle reflections; native alpha; no body-region splicing or runtime pixel processing',processorHash:sha((await read('survivor/scripts/prepare-assets.mjs')).toString().replace(/\r\n/g,'\n')),assets:[],frames:{}};
+manifest.normalization={source:profileSource,sha256:sourceHash(profileSource,profileBytes),processor:'survivor/scripts/art-normalization.mjs',processorSha256:sha((await read('survivor/scripts/art-normalization.mjs')).toString().replace(/\r\n/g,'\n'))};
 async function save(id,bytes,source,sourceSha256){const file=id+'.webp';await fs.writeFile(path.join(out,file),bytes);const previous=manifest.assets.findIndex(a=>a.id===id);if(previous>=0)manifest.assets.splice(previous,1);manifest.assets.push({id,source,sourceSha256,file:'prepared/'+file,sha256:sha(bytes),bytes:bytes.length});}
 const reflect=async(bytes,cell)=>sharp(bytes).flop().extend({left:1,right:0,top:0,bottom:0,background:'#00000000'}).extract({left:0,top:0,width:cell,height:cell}).png().toBuffer();
 function record(id,i,frame,sample,removed,sourceFrame=i,mirroredFrom){proofs.push({id,frame:i,removed,landmarks:sample,sourceFrame,headScale:frame.headScale,bodyScale:frame.bodyScale,torsoScale:frame.torsoScale,legScale:frame.legScale,root:frame.root,method:frame.method,mirroredFrom});}
@@ -36,12 +38,12 @@ for(const item of sources){
   manifest.frames[id]={portrait:{x:256,y:(front.chin+front.skullTop)/2,size:body.targetHead*1.65},anchor:[256,480],directions:['down','up','left','right'],anatomy:{headHeight:body.targetHead,bodyHeight:480-front.chin,sole:480,method:front.method}};
 }
 const specs=[];manifest.renewal={references:[]};
-for(const name of ['renewal','reverie','ordeal']){const source='survivor/assets/'+name+'/sources.json',bytes=await read(source);manifest[name]={...manifest[name],source,sha256:sha(bytes)};specs.push(...JSON.parse(bytes));}
+for(const name of ['renewal','reverie','ordeal','nightfall']){const source='survivor/assets/'+name+'/sources.json',bytes=await read(source);manifest[name]={...manifest[name],source,sha256:sourceHash(source,bytes)};specs.push(...JSON.parse(bytes));}
 for(const spec of specs){
   const raw=await read(spec.source),sourceSha256=sha(raw),meta=await sharp(raw).metadata();let bytes;
   if(spec.reference)manifest.renewal.references.push({source:spec.reference,sha256:sha(await read(spec.reference))});
   if(spec.kind==='scene')bytes=await sharp(raw).resize(1200,800).webp({quality:87}).toBuffer();
-  else if(spec.kind==='background')bytes=await sharp(raw).resize(1024,1024).webp({quality:87}).toBuffer();
+  else if(spec.kind==='background')bytes=await sharp(raw).resize(spec.size||1024,spec.size||1024).webp({quality:spec.quality||87}).toBuffer();
   else{
     const frames=[];
     for(let i=0;i<spec.columns*spec.rows;i++){

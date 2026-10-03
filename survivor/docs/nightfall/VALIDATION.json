@@ -1,0 +1,265 @@
+{
+  "dateUTC": "2026-10-03T19:09:25.770Z",
+  "baseline": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
+  "game": "ASTRA NOCTURNE survivor/",
+  "artifact": {
+    "path": "survivor/dist/AstraNocturne.html",
+    "bytes": 8367880,
+    "MiB": 7.9802,
+    "sha256": "f325e2cbb92348c965a03fb36cd57106f18a51242c0e1e8fea733305125d6735",
+    "embeddedTextures": 39,
+    "reviewCacheTextures": 48,
+    "decodedEmbeddedCatalogMiB": 86.4785,
+    "canonicalGit": {
+      "bytes": 8367648,
+      "sha256": "f652bc33d1232075ca9b9f9b812b0be94c421a57ad25d6040ea982367f5e8385"
+    },
+    "lineEndings": "Primary bytes/SHA describe the tested Windows saved file. Canonical Git LF bytes differ only in CRLF/LF; normalized content matches."
+  },
+  "validation": {
+    "command": "npm run verify",
+    "passed": true,
+    "seconds": 97.25,
+    "tests": 59,
+    "pass": 59,
+    "fail": 0,
+    "chromiumViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "webkitViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "horizontalOverflow": false,
+    "memoriesRanks": [
+      0,
+      19,
+      20
+    ],
+    "secondFingerDashCount": 1,
+    "externalHTTPRequests": 0,
+    "pageErrors": 0,
+    "host": "win32",
+    "physicalPhoneTest": false,
+    "fullWalletMaximum": 100000000,
+    "fullWalletViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "exactResumePositionBeforeNextFrame": true,
+    "unfinishedDashRestoreAndContinuation": true
+  },
+  "art": {
+    "generatedOutputs": 7,
+    "selected": 6,
+    "rejected": 1,
+    "nominalAnatomicalHeadAt512": 144,
+    "exclude": [
+      "hair volume",
+      "ears",
+      "hat",
+      "horns",
+      "halo",
+      "weapons"
+    ],
+    "normalizedSole": [
+      104,
+      195
+    ],
+    "spriteCell": 208,
+    "uniformWholeFigureTransformsOnly": true,
+    "combatWalking": {
+      "zeke": {
+        "baselineCommit": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
+        "identityAndStyle": "Latest Nocturne accepted whole figure, not Defense render style",
+        "skull": "Anatomical cranium-to-chin; ears, hairstyle, hood and weapon excluded",
+        "uncertainty": {
+          "skullTopPx": 4,
+          "chinPx": 2,
+          "solePx": 1
+        },
+        "stance": "Two-handed greatsword combat walk; complete left cycle reflected for right",
+        "method": "Preserved reviewed source-view skull/chin anchors within stated manual uncertainty; image registration follows whole-pose phase translation only"
+      },
+      "luna": {
+        "baselineCommit": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
+        "identityAndStyle": "Latest Nocturne accepted whole figure, not Defense render style",
+        "skull": "Anatomical cranium-to-chin; ears, hairstyle, hood and weapon excluded",
+        "uncertainty": {
+          "skullTopPx": 4,
+          "chinPx": 2,
+          "solePx": 1
+        },
+        "stance": "Raised dagger combat guard; complete left cycle reflected for right",
+        "method": "Preserved reviewed source-view skull/chin anchors within stated manual uncertainty; image registration follows whole-pose phase translation only",
+        "sideCycle": "Complete left cycle reflected for right; the independent right artwork had a different torso lean. User-prioritized bilateral motion consistency over independently authored handedness. No regional transforms."
+      }
+    },
+    "leftToRightMirrorBoth": true,
+    "handedness": "Side presentation is reflected, including Luna dagger hand; authored front/back remain independent",
+    "exactPackedSideAlphaContract": true,
+    "manualUncertaintySourcePixels": {
+      "skullTop": 4,
+      "chin": 2,
+      "sole": 1
+    }
+  },
+  "balance": {
+    "xpMultiplier": 1.5,
+    "enemyHealthMultiplier": 1.3,
+    "memoriesMax": 20,
+    "perLevelGain": 0.9,
+    "perLevelPrice": 1.45,
+    "newStages": [
+      {
+        "id": "abyss",
+        "seconds": 240,
+        "danger": 1.55,
+        "density": 1.18
+      },
+      {
+        "id": "observatory",
+        "seconds": 240,
+        "danger": 1.8,
+        "density": 1.3
+      }
+    ],
+    "unions": 3,
+    "oldSaveMigratesOnce": true
+  },
+  "motion": [
+    {
+      "hz": 60,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 60,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 90,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.4210854715202004e-11,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 120,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.9127810446661897e-11,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": false,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 9.094947017729282e-12,
+      "pure": true
+    },
+    {
+      "hz": 144,
+      "jitter": true,
+      "stalls": 0,
+      "reversals": 0,
+      "idle": 0,
+      "maxError": 1.3415046851150692e-11,
+      "pure": true
+    }
+  ],
+  "rendererWork": {
+    "frames": 90,
+    "meanWorkMs": 13.46,
+    "enemies": 260,
+    "shots": 15,
+    "fields": 0,
+    "hazards": 0
+  },
+  "limits": [
+    "Manual skull/face landmarks are estimates, not automated anatomy measurements",
+    "Fixture attack screenshots are marked separately from ordinary offline input tests",
+    "No Android/iOS physical-device, long-term retention, thermal or enjoyment certification"
+  ],
+  "github": "PR #573: https://github.com/romarin0325-cell/Studying/pull/573 . Final-head CI and merge status are recorded by GitHub checks; local results are recorded above."
+}
