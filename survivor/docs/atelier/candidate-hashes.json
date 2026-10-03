@@ -1,0 +1,151 @@
+{
+  "records": [
+    {
+      "path": "survivor/assets/atelier/guides/adult.png",
+      "sha256": "9a53aebc566870ea2b5ac436d56c6005b94b4db8c0de51e523bedaab694df6f5",
+      "bytes": 80863,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/guides/adult.svg",
+      "sha256": "a1b4ac0b0f45cb52817e3a1aa386727c75499954afeeb52f927e316fbcb61cc8",
+      "bytes": 17486,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/guides/medium.png",
+      "sha256": "24c4d19da66a6a21a75ce3d719c100b440ccf8ab658e3d552de0e774c3a582f6",
+      "bytes": 76553,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/guides/medium.svg",
+      "sha256": "b0b3e35a1458e27a1ae9414c1cca4c3a5290b0af460955849936f1aa531dbff3",
+      "bytes": 15966,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/guides/short.png",
+      "sha256": "762322c8d44c1a3383cfe50ec19f1581488e47f2fc9e4b980cb78fa9c9c2a384",
+      "bytes": 68244,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/guides/short.svg",
+      "sha256": "57efc35d3b1688b27b102e2fc15426ba08694be6a688456e9a7eabf31b56d14f",
+      "bytes": 14274,
+      "role": "guide (not image-generated)"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/cast-style-experiment.png",
+      "sha256": "4258df3ea873922ce684af872718b75576846e7c5172f2c12644fd874ed13acf",
+      "bytes": 2331963,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-cinderella.png",
+      "sha256": "a6c3000541d318e83ee9ce6fa227c83d55acbf6ce60e1d37636a37f13469ccd5",
+      "bytes": 2170161,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-jasmine.png",
+      "sha256": "f9e181cd8a6b86a2f6234b419fd99a9038fd18f3cb7d801a29abbfb8b7e2f96e",
+      "bytes": 2341221,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-luna.png",
+      "sha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "bytes": 1963075,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-night_rabbit.png",
+      "sha256": "245f212d5ecb585c344cff83c7de9f17f6c0466f759cb000e81b148dd84a59f7",
+      "bytes": 1669044,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-rumi.png",
+      "sha256": "316c25c3c7392c1ccc4385dc8a6b7a621bca200ba32e8ab6eddd775f54c3d592",
+      "bytes": 1830532,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-silver_rabbit.png",
+      "sha256": "c5991f1a6ca14f3c855cd901fddbb71fc112a72354e4e563970a37289171bed2",
+      "bytes": 1626295,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-snow_rabbit.png",
+      "sha256": "582ad048abf44a4d66c0f567710a7e7f741bfbb54367a76eedeb9ecb7b46db46",
+      "bytes": 1718328,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-time_ruler.png",
+      "sha256": "64b1a08a1ea950c8f143c7f08d482aeb41f1c8f9746f37411fa9b2af560a2e03",
+      "bytes": 2136129,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/sources/walk-zeke.png",
+      "sha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "bytes": 1960975,
+      "role": "selected"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-cinderella.png",
+      "sha256": "1da235d292a961c47ed4cf968e625344a13b845267674fbcb9de4e250bca7f43",
+      "bytes": 2353406,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-jasmine.png",
+      "sha256": "a11e4f0a896a0720e0f5d74453b15f75c76ec9125bdce4705670f7079634c3da",
+      "bytes": 2296261,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-night_rabbit.png",
+      "sha256": "7e2fb8a9444e0a92d4ff52272380fe08063e13375706bd7354b17f9fbf86b25f",
+      "bytes": 1698565,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-silver_rabbit.png",
+      "sha256": "551e56e34ce3f93e1258285e429cecda49c173aae34e0c396a62cee7c46812f0",
+      "bytes": 1967569,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-snow_rabbit.png",
+      "sha256": "bf7ae190c4c5d581300f02bd889895d4e1c7073e75728f769896ff3932cf62ac",
+      "bytes": 1665180,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-time_ruler.png",
+      "sha256": "38c9d55c0b1693ba1aa554d2729e42d23271992e7d91ac9f61e52e62d065dea9",
+      "bytes": 2016591,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/direct-zeke.png",
+      "sha256": "156138b037257c3589ddf63ad82c544d83d71c946d73b22b3c6c13b0abecff90",
+      "bytes": 1871313,
+      "role": "rejected/partial-failure candidate"
+    },
+    {
+      "path": "survivor/assets/atelier/trials/repair-night_rabbit.png",
+      "sha256": "1780ce24404599761ffed3254bb01cdd424c8a4c7ae1c70a7ddda288b4d60a90",
+      "bytes": 1752303,
+      "role": "rejected/partial-failure candidate"
+    }
+  ],
+  "uncertainty": "Manual hidden skull/chin/pelvis estimates; no industry tolerance or automatic pose accuracy.",
+  "artBaseline": "c958f64b211b3ac8e3bc27745b3ea7510c5d3685",
+  "finalMain": "b674af6d4e944afb828046d260a82f4823ca705d"
+}

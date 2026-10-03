@@ -1,0 +1,22 @@
+from PIL import Image,ImageDraw
+from pathlib import Path
+ids=['rumi','luna','zeke','jasmine','snow_rabbit','night_rabbit','cinderella','silver_rabbit','time_ruler']
+out=Path('survivor/docs/atelier')
+for bg,name in [('#1b2940','dark'),('#e3e6e6','light')]:
+ frames=[]
+ for phase in range(4):
+  im=Image.new('RGB',(1152,510),bg);d=ImageDraw.Draw(im);color='#f0dec5' if name=='dark' else '#24354b'
+  for n,id in enumerate(ids):
+   x=(n%3)*384;y=(n//3)*170
+   label='authored weapon hands' if id in ['luna','zeke','jasmine'] else 'matching whole-figure side reflections'
+   d.text((x+12,y+9),id+' / '+label,fill=color)
+   atlas=Image.open('survivor/assets/prepared/walk-'+id+'.webp').convert('RGBA')
+   for direction,cx in [(2,126),(3,264)]:
+    tile=atlas.crop((phase*208,direction*208,(phase+1)*208,(direction+1)*208)).resize((125,125),Image.Resampling.LANCZOS)
+    im.paste(tile,(x+cx-62,y+29),tile)
+   d.line((x+20,y+146,x+364,y+146),fill=color)
+  frames.append(im)
+ frames[0].save(out/('walking-'+name+'.gif'),save_all=True,append_images=frames[1:],duration=160,loop=0,optimize=True,disposal=2)
+source=Image.open(out/'before-after.png');im=Image.new('RGB',(840,1620),'#202c44')
+for i in range(9):im.paste(source.crop((i*280,0,(i+1)*280,540)),((i%3)*280,(i//3)*540))
+im.save(out/'comparison.png')

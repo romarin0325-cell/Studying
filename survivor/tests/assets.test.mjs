@@ -13,7 +13,7 @@ test('every playable hero and weapon owner has traceable, intact, alpha-bearing 
   for(const id of new Set([...HEROES.map(h=>h.id),...WEAPONS.map(w=>w.owner)])){
     const asset=manifest.assets.find(a=>a.id==='unit-'+id);assert.ok(asset,id);const source=await fs.readFile(path.join(root,asset.source)),bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(source),asset.sourceSha256);assert.equal(sha(bytes),asset.sha256);
     const metadata=await sharp(bytes).metadata();assert.equal(metadata.width,768);assert.equal(metadata.height,768);assert.equal(metadata.hasAlpha,true);const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
-    for(let view=0;view<4;view++){let opaque=0,empty=0,white=0;for(let y=0;y<384;y+=3)for(let x=0;x<384;x+=3){const p=((y+Math.floor(view/2)*384)*info.width+x+(view%2)*384)*4;if(data[p+3]>249){opaque++;if(data[p]>210&&data[p+1]>210&&data[p+2]>210)white++;}if(data[p+3]===0)empty++;}assert.ok(opaque>300,id+' direction '+view);assert.ok(empty>1000,id+' native empty alpha');if(['rumi','snow_rabbit','night_rabbit','silver_rabbit','cinderella','jasmine'].includes(id))assert.ok(white>50,id+' white remains opaque');}
+    for(let view=0;view<4;view++){let opaque=0,empty=0,white=0;for(let y=0;y<384;y+=3)for(let x=0;x<384;x+=3){const p=((y+Math.floor(view/2)*384)*info.width+x+(view%2)*384)*4;if(data[p+3]>249){opaque++;if(data[p]>210&&data[p+1]>210&&data[p+2]>210)white++;}if(data[p+3]===0)empty++;if(x===0||x===381||y===0||y===381)assert.ok(data[p+3]<10,id+' complete canonical cell has clear gutters');}assert.ok(opaque>300,id+' direction '+view);assert.ok(empty>1000,id+' native empty alpha');if(['rumi','snow_rabbit','night_rabbit','silver_rabbit','cinderella','jasmine'].includes(id))assert.ok(white>50,id+' white remains opaque');}
     assert.deepEqual(manifest.frames[id].directions,['down','up','left','right']);assert.deepEqual(manifest.frames[id].anchor,[256,480]);
   }
 });
@@ -81,4 +81,23 @@ test('unarmed side cycles are disclosed reflections; armed views retain their au
     const full=m.assets.find(a=>a.id==='full-'+h.id);assert.ok(full);assert.equal((await sharp(path.join(root,'survivor/assets',full.file)).metadata()).width,384);
   }
   assert.ok(profile.frames.silver_rabbit.canonical.targetBody<profile.frames.time_ruler.canonical.targetBody*.7);
+});
+
+test('newly painted figures have one uniform transform in every view and no regional body scaling',async()=>{
+  const m=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'))),p=JSON.parse(await fs.readFile(path.join(root,m.normalization.source)));
+  assert.equal(p.version,3);
+  for(const record of m.normalization.frames){assert.equal(record.headScale,record.bodyScale);assert.equal(record.headScale,record.torsoScale);assert.equal(record.headScale,record.legScale);assert.match(record.method,/whole-figure uniform/);}
+  for(const h of HEROES){const b=p.frames[h.id];assert.ok(b.nativeWalk);assert.equal(sha(await fs.readFile(path.join(root,b.identityReference.path))),b.identityReference.sha256);assert.equal(b.walk.frames.length,16);for(const f of b.walk.frames)assert.equal(f.registration.atSearchBoundary,false,'review registration bound: '+h.id);}
+  // Natural source proportions survive packing. Art targets are not the output
+  // measurements; this compares the measured standing body below the chin.
+  assert.ok(m.frames.silver_rabbit.anatomy.bodyHeight<m.frames.time_ruler.anatomy.bodyHeight*.75,'short rabbit below-chin body stays smaller than the adult');
+});
+
+test('whole-figure packing preserves aspect ratio and refuses actual clipping',async()=>{
+  const {wholeFrame}=await import('../scripts/art-normalization.mjs');
+  const square=await sharp({create:{width:12,height:12,channels:4,background:'#ffffffff'}}).png().toBuffer();
+  const source=await sharp({create:{width:80,height:80,channels:4,background:'#00000000'}}).composite([{input:square,left:30,top:30}]).png().toBuffer();
+  const result=await wholeFrame(source,{scale:2,rootX:36,foot:42,cell:128,baseline:100,headHeight:12,chin:42});
+  const box=(await import('../scripts/art-normalization.mjs')).alphaBounds;const bounds=await box(result.bytes);assert.equal(bounds.width,bounds.height);assert.equal(result.headScale,result.legScale);
+  await assert.rejects(wholeFrame(source,{scale:6,rootX:36,foot:42,cell:64,baseline:60,headHeight:12,chin:42}),/would clip/);
 });

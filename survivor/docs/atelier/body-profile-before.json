@@ -1,0 +1,610 @@
+{
+  "version": 2,
+  "reference": "rumi",
+  "policy": "One anatomical head height; short rabbit bodies and adult torso/leg profiles; one sole pivot. Ears, hair, cape and weapons do not determine scale. Six unarmed heroes use the exact reflected left walk cycle; weapon holders preserve their separate authored views.",
+  "method": "Reviewed skull/chin/torso center/pelvis/sole landmarks per direction. Fixed per-direction head/torso/leg transforms across all four phases; actual sole pixels supply translation only. No alpha-run estimate of neck or per-frame chin displacement. Native alpha bounds only reject clipping.",
+  "uncertainty": "Skull and pelvis hidden by hair/skirt are manual estimates. These project targets express art direction, not a pose detector or industry tolerance. Mirrored cycles are explicitly disclosed.",
+  "frames": {
+    "rumi": {
+      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "canonical": {
+        "skullTop": 148,
+        "chin": 291,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 196,
+        "pelvis": 378
+      },
+      "walk": {
+        "skullTop": 61,
+        "chin": 175,
+        "rootX": 173,
+        "pelvis": 247,
+        "foot": 310,
+        "views": [
+          {
+            "skullTop": 61,
+            "chin": 175,
+            "rootX": 173,
+            "pelvis": 247,
+            "foot": 310
+          },
+          {
+            "skullTop": 58,
+            "chin": 174,
+            "rootX": 174,
+            "pelvis": 248,
+            "foot": 306
+          },
+          {
+            "skullTop": 55,
+            "chin": 163,
+            "rootX": 145,
+            "pelvis": 246,
+            "foot": 302
+          },
+          {
+            "skullTop": 55,
+            "chin": 163,
+            "rootX": 145,
+            "pelvis": 246,
+            "foot": 302
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "504d2d55f2937d186311fe2d0556aa56b02108b4c11cbea267378d0940ee108e",
+      "bodyClass": "standard",
+      "targetTorso": 90,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "luna": {
+      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "canonical": {
+        "skullTop": 135,
+        "chin": 288,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 204,
+        "pelvis": 376
+      },
+      "walk": {
+        "skullTop": 64,
+        "chin": 165,
+        "rootX": 175,
+        "pelvis": 239,
+        "foot": 312,
+        "views": [
+          {
+            "skullTop": 64,
+            "chin": 165,
+            "rootX": 175,
+            "pelvis": 239,
+            "foot": 312
+          },
+          {
+            "skullTop": 56,
+            "chin": 161,
+            "rootX": 163,
+            "pelvis": 230,
+            "foot": 303
+          },
+          {
+            "skullTop": 46,
+            "chin": 150,
+            "rootX": 137,
+            "pelvis": 222,
+            "foot": 289
+          },
+          {
+            "skullTop": 35,
+            "chin": 140,
+            "rootX": 175,
+            "pelvis": 203,
+            "foot": 277
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "1bbd819c94d0c45280ec9e99556500f7afd70c0920f14964e1d3d871837ac412",
+      "bodyClass": "standard",
+      "targetTorso": 94,
+      "weaponHand": "right dagger",
+      "mirrorRight": false
+    },
+    "zeke": {
+      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "canonical": {
+        "skullTop": 142,
+        "chin": 291,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 212,
+        "pelvis": 378
+      },
+      "walk": {
+        "skullTop": 46,
+        "chin": 148,
+        "rootX": 182,
+        "pelvis": 221,
+        "foot": 284,
+        "views": [
+          {
+            "skullTop": 46,
+            "chin": 148,
+            "rootX": 182,
+            "pelvis": 221,
+            "foot": 284
+          },
+          {
+            "skullTop": 37,
+            "chin": 143,
+            "rootX": 163,
+            "pelvis": 220,
+            "foot": 284
+          },
+          {
+            "skullTop": 41,
+            "chin": 139,
+            "rootX": 151,
+            "pelvis": 220,
+            "foot": 282
+          },
+          {
+            "skullTop": 33,
+            "chin": 128,
+            "rootX": 177,
+            "pelvis": 206,
+            "foot": 275
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "481b2b8795d472c33661fe6b08b378608a56fb6495ffc872a7502c58203feb4b",
+      "bodyClass": "adult",
+      "targetTorso": 98,
+      "weaponHand": "right sword",
+      "mirrorRight": false
+    },
+    "cinderella": {
+      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "canonical": {
+        "skullTop": 117,
+        "chin": 262,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 196,
+        "pelvis": 362
+      },
+      "walk": {
+        "skullTop": 38,
+        "chin": 143,
+        "rootX": 165,
+        "pelvis": 235,
+        "foot": 310,
+        "views": [
+          {
+            "skullTop": 38,
+            "chin": 143,
+            "rootX": 165,
+            "pelvis": 235,
+            "foot": 310
+          },
+          {
+            "skullTop": 38,
+            "chin": 140,
+            "rootX": 165,
+            "pelvis": 227,
+            "foot": 298
+          },
+          {
+            "skullTop": 33,
+            "chin": 140,
+            "rootX": 134,
+            "pelvis": 224,
+            "foot": 288
+          },
+          {
+            "skullTop": 33,
+            "chin": 140,
+            "rootX": 134,
+            "pelvis": 224,
+            "foot": 288
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "2fd8542163c6a8310ff44bcac5a7b424e90aeb825a67c06ae769784cbc7976de",
+      "bodyClass": "standard",
+      "targetTorso": 90,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "snow_rabbit": {
+      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "canonical": {
+        "skullTop": 167,
+        "chin": 312,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 140,
+        "pelvis": 389
+      },
+      "walk": {
+        "skullTop": 90,
+        "chin": 189,
+        "rootX": 171,
+        "pelvis": 248,
+        "foot": 308,
+        "views": [
+          {
+            "skullTop": 90,
+            "chin": 189,
+            "rootX": 171,
+            "pelvis": 248,
+            "foot": 308
+          },
+          {
+            "skullTop": 80,
+            "chin": 179,
+            "rootX": 163,
+            "pelvis": 234,
+            "foot": 291
+          },
+          {
+            "skullTop": 65,
+            "chin": 161,
+            "rootX": 157,
+            "pelvis": 214,
+            "foot": 272
+          },
+          {
+            "skullTop": 65,
+            "chin": 161,
+            "rootX": 157,
+            "pelvis": 214,
+            "foot": 272
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "e995324359285e3a69e38b21c01bb0902e9000ae2fd4759fd553b0bb34883127",
+      "bodyClass": "short",
+      "targetTorso": 64,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "night_rabbit": {
+      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "canonical": {
+        "skullTop": 143,
+        "chin": 289,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 140,
+        "pelvis": 377
+      },
+      "walk": {
+        "skullTop": 77,
+        "chin": 177,
+        "rootX": 211,
+        "pelvis": 254,
+        "foot": 308,
+        "views": [
+          {
+            "skullTop": 77,
+            "chin": 177,
+            "rootX": 237,
+            "pelvis": 254,
+            "foot": 308
+          },
+          {
+            "skullTop": 61,
+            "chin": 161,
+            "rootX": 232,
+            "pelvis": 240,
+            "foot": 292
+          },
+          {
+            "skullTop": 61,
+            "chin": 165,
+            "rootX": 211,
+            "pelvis": 238,
+            "foot": 298
+          },
+          {
+            "skullTop": 61,
+            "chin": 165,
+            "rootX": 211,
+            "pelvis": 238,
+            "foot": 298
+          }
+        ],
+        "soleBand": 55,
+        "phaseRoots": [
+          [
+            237,
+            150,
+            128,
+            105
+          ],
+          [
+            232,
+            150,
+            127,
+            107
+          ],
+          [
+            211,
+            148,
+            128,
+            148
+          ],
+          [
+            211,
+            148,
+            128,
+            148
+          ]
+        ]
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "76a487f74acf3fe11a597e799a6360bda066e446c31e714d63c039f6cd81b7e6",
+      "bodyClass": "short",
+      "targetTorso": 64,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "silver_rabbit": {
+      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "canonical": {
+        "skullTop": 173,
+        "chin": 317,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 140,
+        "pelvis": 392
+      },
+      "walk": {
+        "skullTop": 76,
+        "chin": 180,
+        "rootX": 155,
+        "pelvis": 242,
+        "foot": 302,
+        "views": [
+          {
+            "skullTop": 76,
+            "chin": 180,
+            "rootX": 155,
+            "pelvis": 242,
+            "foot": 302
+          },
+          {
+            "skullTop": 66,
+            "chin": 165,
+            "rootX": 150,
+            "pelvis": 228,
+            "foot": 289
+          },
+          {
+            "skullTop": 69,
+            "chin": 167,
+            "rootX": 167,
+            "pelvis": 222,
+            "foot": 289
+          },
+          {
+            "skullTop": 69,
+            "chin": 167,
+            "rootX": 167,
+            "pelvis": 222,
+            "foot": 289
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "b04465654ade0a43208329021e64b67494c0897aa3ff885c2e558a358a85d902",
+      "bodyClass": "short",
+      "targetTorso": 64,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "time_ruler": {
+      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "canonical": {
+        "skullTop": 141,
+        "chin": 288,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 212,
+        "pelvis": 376
+      },
+      "walk": {
+        "skullTop": 24,
+        "chin": 145,
+        "rootX": 158,
+        "pelvis": 217,
+        "foot": 293,
+        "views": [
+          {
+            "skullTop": 24,
+            "chin": 145,
+            "rootX": 158,
+            "pelvis": 217,
+            "foot": 293
+          },
+          {
+            "skullTop": 24,
+            "chin": 143,
+            "rootX": 158,
+            "pelvis": 217,
+            "foot": 294
+          },
+          {
+            "skullTop": 25,
+            "chin": 141,
+            "rootX": 128,
+            "pelvis": 210,
+            "foot": 291
+          },
+          {
+            "skullTop": 25,
+            "chin": 141,
+            "rootX": 128,
+            "pelvis": 210,
+            "foot": 291
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "af804bd1f70a5ec15654ba7bde2a4ff8c5eb16975fa3fb632a14ff7bbbf2f03e",
+      "bodyClass": "adult",
+      "targetTorso": 98,
+      "weaponHand": null,
+      "mirrorRight": true
+    },
+    "jasmine": {
+      "sourceSha256": "fd4c704cda318d7c40cf51b0f4b51b2c14c72b346b1a8fd73298aa6e4da8107b",
+      "canonical": {
+        "skullTop": 155,
+        "chin": 286,
+        "rootX": 256,
+        "foot": 480,
+        "targetBody": 212,
+        "pelvis": 375
+      },
+      "walk": {
+        "skullTop": 52,
+        "chin": 154,
+        "rootX": 157,
+        "pelvis": 212,
+        "foot": 293,
+        "views": [
+          {
+            "skullTop": 52,
+            "chin": 154,
+            "rootX": 157,
+            "pelvis": 212,
+            "foot": 293
+          },
+          {
+            "skullTop": 52,
+            "chin": 151,
+            "rootX": 159,
+            "pelvis": 211,
+            "foot": 291
+          },
+          {
+            "skullTop": 37,
+            "chin": 146,
+            "rootX": 131,
+            "pelvis": 215,
+            "foot": 288
+          },
+          {
+            "skullTop": 52,
+            "chin": 157,
+            "rootX": 203,
+            "pelvis": 215,
+            "foot": 284
+          }
+        ],
+        "soleBand": 55
+      },
+      "targetHead": 144,
+      "walkSourceSha256": "ea9896b896e8fb607100ac13a66f1ca5f2e781038cd90fdc3e311d8776373d1d",
+      "bodyClass": "adult",
+      "targetTorso": 98,
+      "weaponHand": "left staff",
+      "mirrorRight": false
+    },
+    "storm_sage": {
+      "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "canonical": {
+        "skullTop": 119,
+        "chin": 270,
+        "rootX": 256,
+        "foot": 480,
+        "pelvis": 367,
+        "targetBody": 212
+      },
+      "targetHead": 144,
+      "targetTorso": 98,
+      "bodyClass": "adult",
+      "role": "weapon companion",
+      "landmarkSource": "defense/assets/merge/units/manifest.json anatomy.packedSkull; approved original unchanged"
+    },
+    "lightning_sage": {
+      "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "canonical": {
+        "skullTop": 122,
+        "chin": 275,
+        "rootX": 256,
+        "foot": 480,
+        "pelvis": 369,
+        "targetBody": 212
+      },
+      "targetHead": 144,
+      "targetTorso": 98,
+      "bodyClass": "adult",
+      "role": "weapon companion",
+      "landmarkSource": "defense/assets/merge/units/manifest.json anatomy.packedSkull; approved original unchanged"
+    },
+    "great_detective": {
+      "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "canonical": {
+        "skullTop": 143,
+        "chin": 292,
+        "rootX": 256,
+        "foot": 480,
+        "pelvis": 378,
+        "targetBody": 196
+      },
+      "targetHead": 144,
+      "targetTorso": 90,
+      "bodyClass": "standard",
+      "role": "weapon companion",
+      "landmarkSource": "defense/assets/merge/units/manifest.json anatomy.packedSkull; approved original unchanged"
+    },
+    "queen": {
+      "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "canonical": {
+        "skullTop": 147,
+        "chin": 290,
+        "rootX": 256,
+        "foot": 480,
+        "pelvis": 377,
+        "targetBody": 212
+      },
+      "targetHead": 144,
+      "targetTorso": 98,
+      "bodyClass": "adult",
+      "role": "weapon companion",
+      "landmarkSource": "defense/assets/merge/units/manifest.json anatomy.packedSkull; approved original unchanged"
+    },
+    "galaxy_whale": {
+      "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "canonical": {
+        "skullTop": 130,
+        "chin": 283,
+        "rootX": 256,
+        "foot": 480,
+        "pelvis": 374,
+        "targetBody": 212
+      },
+      "targetHead": 144,
+      "targetTorso": 98,
+      "bodyClass": "adult",
+      "role": "weapon companion",
+      "landmarkSource": "defense/assets/merge/units/manifest.json anatomy.packedSkull; approved original unchanged"
+    }
+  }
+}

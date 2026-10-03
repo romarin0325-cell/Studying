@@ -9,7 +9,7 @@ export async function alphaBounds(bytes){
 
 // Keep the main illustrated object and nearby intentional fragments. Components
 // cut by a neighboring cell are rejected; RGB/white are never transparency keys.
-export async function cleanFrame(bytes){
+export async function cleanFrame(bytes,{minArea=8,maxGap=18,keepSecondary=true}={}){
   const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true}),{width:w,height:h}=info;
   const labels=new Int32Array(w*h),queue=new Int32Array(w*h),parts=[];let label=0;
   for(let start=0;start<w*h;start++){
@@ -22,45 +22,26 @@ export async function cleanFrame(bytes){
   }
   parts.sort((a,b)=>b.area-a.area);const main=parts[0];if(!main)throw new Error('Empty illustration');
   const keep=new Set([main.label]);
-  for(const part of parts.slice(1)){
+  for(const part of keepSecondary?parts.slice(1):[]){
     const gap=Math.hypot(Math.max(0,main.left-part.right,part.left-main.right),Math.max(0,main.top-part.bottom,part.top-main.bottom));
     const cut=part.left<3||part.top<3||part.right>w-4||part.bottom>h-4;
-    if(!cut&&part.area>=8&&gap<=18)keep.add(part.label);
+    if(!cut&&part.area>=minArea&&gap<=maxGap)keep.add(part.label);
   }
   let removed=0;for(let i=0;i<labels.length;i++)if(!keep.has(labels[i])){if(data[i*4+3]>80)removed++;data[i*4+3]=0;}
   return {bytes:await sharp(data,{raw:info}).png().toBuffer(),removed};
 }
 
-export async function anatomicalFrame(bytes,{chin,skullTop,rootX,foot,pelvis,targetTorso,targetHead,targetBody,cell,baseline,referenceFoot=foot}){
-  const m=await sharp(bytes).metadata(),headScale=targetHead/(chin-skullTop),bodyScale=targetBody/(referenceFoot-chin);
-  if(headScale<=0||bodyScale<=0)throw new Error('Invalid anatomical landmarks');
-  const waist=Math.round(pelvis||chin+(referenceFoot-chin)*.46),torso=targetTorso||targetBody*.46;
-  const torsoScale=torso/(waist-chin),legScale=(targetBody-torso)/(referenceFoot-waist);
-  if(torsoScale<=0||legScale<=0)throw new Error('Invalid torso/leg landmarks');
-  const neck=Math.round(chin),targetNeck=Math.round(baseline-torso-(foot-waist)*legScale),width=Math.round(m.width*headScale);
-  const topHeight=Math.max(1,Math.round(neck*headScale)),torsoHeight=Math.max(1,Math.round((waist-neck)*torsoScale)),legHeight=Math.max(1,Math.round((m.height-waist)*legScale));
-  const left=Math.round(cell/2-rootX*headScale),top=targetNeck-topHeight;
-  const upper=await sharp(bytes).extract({left:0,top:0,width:m.width,height:neck}).resize(width,topHeight).png().toBuffer();
-  const middle=await sharp(bytes).extract({left:0,top:neck,width:m.width,height:waist-neck}).resize(width,torsoHeight).png().toBuffer();
-  const lower=await sharp(bytes).extract({left:0,top:waist,width:m.width,height:m.height-waist}).resize(width,legHeight).png().toBuffer();
-  // Crop transparent canvas outside the cell, then fail if any actual art would
-  // be clipped. Extents are a safety check; they never determine the body scale.
-  const layers=[];
-  for(const [input,y] of [[upper,top],[middle,targetNeck],[lower,targetNeck+torsoHeight]]){
-    const meta=await sharp(input).metadata(),bounds=await alphaBounds(input);
-    if(left+bounds.left<3||left+bounds.left+bounds.width>cell-3||y+bounds.top<3||y+bounds.top+bounds.height>cell-3)throw new Error(`Anatomical art overflow: x=${left+bounds.left} y=${y+bounds.top} width=${bounds.width} height=${bounds.height}`);
-    const trim={left:Math.max(0,-left),top:Math.max(0,-y),width:Math.min(meta.width,cell-left)-Math.max(0,-left),height:Math.min(meta.height,cell-y)-Math.max(0,-y)};
-    if(trim.width>0&&trim.height>0)layers.push({input:await sharp(input).extract(trim).png().toBuffer(),left:Math.max(0,left),top:Math.max(0,y)});
-  }
-  return {bytes:await sharp({create:{width:cell,height:cell,channels:4,background:'#00000000'}}).composite(layers).png().toBuffer(),headScale,bodyScale,torsoScale,legScale,chin:targetNeck,skullTop:targetNeck-targetHead,root:[cell/2,baseline]};
-}
-
-export async function walkLandmarks(bytes,sample){
-  const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true}),b=await alphaBounds(bytes);
-  const rootX=sample.rootX;
-  // The reviewed boot band excludes cape tails, ears and weapon tips. Moving
-  // sole pixels change translation; they never move or resize the skull.
-  let foot=0;for(let yy=Math.max(sample.pelvis+15,sample.foot-45);yy<Math.min(info.height,sample.foot+15);yy++)for(let xx=Math.max(0,Math.floor(rootX-55));xx<Math.min(info.width,Math.ceil(rootX+55));xx++)if(data[(yy*info.width+xx)*4+3]>100)foot=yy;
-  if(!foot)throw new Error('No sole pixels in the reviewed foot band');
-  return {...sample,rootX,foot};
+// A coherent newly painted figure is one image. Packing may change its overall
+// scale and position, but never its internal head/torso/leg proportions.
+export async function wholeFrame(bytes,{scale,rootX,foot,cell,baseline,headHeight,chin}){
+  if(!Number.isFinite(scale)||scale<=0||!Number.isFinite(rootX)||!Number.isFinite(foot))throw new Error('Invalid whole-figure landmarks');
+  const source=await sharp(bytes).metadata(),width=Math.max(1,Math.round(source.width*scale));
+  // One dimension fixes the aspect ratio; no independent vertical transform.
+  const input=await sharp(bytes).resize({width}).png().toBuffer(),meta=await sharp(input).metadata(),height=meta.height,bounds=await alphaBounds(input);
+  scale=width/source.width;
+  const left=Math.round(cell/2-rootX*scale),top=Math.round(baseline-foot*scale);
+  if(left+bounds.left<3||left+bounds.left+bounds.width>cell-3||top+bounds.top<3||top+bounds.top+bounds.height>cell-3)throw new Error('Whole figure would clip; correct source art or landmarks instead of squeezing its body');
+  const trim={left:Math.max(0,-left),top:Math.max(0,-top),width:Math.min(width,cell-left)-Math.max(0,-left),height:Math.min(height,cell-top)-Math.max(0,-top)};
+  const placed=await sharp(input).extract(trim).png().toBuffer();
+  return {bytes:await sharp({create:{width:cell,height:cell,channels:4,background:'#00000000'}}).composite([{input:placed,left:Math.max(0,left),top:Math.max(0,top)}]).png().toBuffer(),headScale:scale,bodyScale:scale,torsoScale:scale,legScale:scale,root:[cell/2,baseline],chin:baseline-(foot-chin)*scale,skullTop:baseline-(foot-chin+headHeight)*scale,method:'whole-figure uniform scale and translation'};
 }
