@@ -1,0 +1,82 @@
+[
+  {
+    "stage": "abyss",
+    "difficulty": "gentle",
+    "seed": 616,
+    "hero": "zeke",
+    "memories": 10,
+    "result": "victory",
+    "seconds": 240,
+    "level": 62,
+    "kills": 4871,
+    "bossesKilled": 3,
+    "hp": 190.13,
+    "peaks": {
+      "enemies": 123,
+      "shots": 49,
+      "drops": 228,
+      "fields": 12,
+      "hazards": 41
+    }
+  },
+  {
+    "stage": "abyss",
+    "difficulty": "normal",
+    "seed": 616,
+    "hero": "zeke",
+    "memories": 10,
+    "result": "victory",
+    "seconds": 240,
+    "level": 69,
+    "kills": 6079,
+    "bossesKilled": 2,
+    "hp": 154.02,
+    "peaks": {
+      "enemies": 212,
+      "shots": 28,
+      "drops": 257,
+      "fields": 10,
+      "hazards": 27
+    }
+  },
+  {
+    "stage": "observatory",
+    "difficulty": "gentle",
+    "seed": 616,
+    "hero": "zeke",
+    "memories": 10,
+    "result": "victory",
+    "seconds": 240,
+    "level": 65,
+    "kills": 5345,
+    "bossesKilled": 3,
+    "hp": 190.13,
+    "peaks": {
+      "enemies": 121,
+      "shots": 28,
+      "drops": 205,
+      "fields": 4,
+      "hazards": 17
+    }
+  },
+  {
+    "stage": "observatory",
+    "difficulty": "normal",
+    "seed": 616,
+    "hero": "zeke",
+    "memories": 10,
+    "result": "victory",
+    "seconds": 240,
+    "level": 71,
+    "kills": 6691,
+    "bossesKilled": 2,
+    "hp": 205.79,
+    "peaks": {
+      "enemies": 161,
+      "shots": 113,
+      "drops": 236,
+      "fields": 4,
+      "hazards": 26
+    }
+  }
+]

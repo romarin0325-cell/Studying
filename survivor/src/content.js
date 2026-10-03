@@ -34,11 +34,26 @@ export const WEAPONS = [
   weapon('thunder','천둥의 연쇄','lightning_sage','#f3db89','ϟ','chain',33,1.9,'가장 강한 적부터 이어지는 번개.','prism','천 갈래 벼락'),
   weapon('rose','로열 블룸','queen','#eeadbc','❁','field',20,2.8,'장미의 영역이 적을 묶어둡니다.','roots','영원한 장미'),
   weapon('cosmos','별바다의 중심','galaxy_whale','#9fbbf3','✵','gravity',14,3.5,'중력장이 적을 끌어당깁니다.','hourglass','은하의 심장'),
-  weapon('light','완벽한 추리','great_detective','#f7e5b5','◇','snipe',90,2.5,'강한 적을 노리는 빛의 저격.','lens','진실의 새벽')
+  weapon('light','완벽한 추리','great_detective','#f7e5b5','◇','snipe',90,2.5,'강한 적을 노리는 빛의 저격.','lens','진실의 새벽'),
+  weapon('holy_bell','홀리벨','silver_rabbit','#ffe5a3','♧','pillar',58,2.8,'주변의 무작위 지점에 빛의 기둥. 성장할수록 개수와 범위가 커집니다.','santa','새벽을 깨우는 종'),
+  weapon('aqua_wave','아쿠아웨이브','jasmine','#8cdcec','≋','wave',48,1.9,'바라보는 방향으로 퍼지는 부채꼴 파동. 적을 밀어냅니다.','deep_orb','해일의 문')
 ];
 const evolvedDescriptions={"star": "추적 유성이 터지며 주변 적에게 파편 피해.", "blade": "더 많은 달빛 칼날이 부채꼴로 대열을 관통합니다.", "ember": "전방 검격이 전방위 불사조 화염으로 펼쳐집니다.", "flower": "꽃빛이 세 명 더 이어지고 공격 간격이 짧아집니다.", "frost": "얼음창이 적을 얼려 돌진을 끊습니다.", "dream": "꿈의 영역이 35% 넓어지고 오래 남습니다.", "glass": "관통하는 유리창이 명중할 때 파편 폭발을 일으킵니다.", "sun": "한 줄기 태양빛이 세 갈래로 갈라져 전장을 가릅니다.", "clock": "시계의 영역 안에서 적이 주기적으로 멈춥니다.", "storm": "두 개의 바람 칼날이 추가되어 주위를 휘감습니다.", "thunder": "연쇄 번개가 세 명 더 전이됩니다.", "rose": "장미 영역이 35% 넓어져 적의 길을 막습니다.", "cosmos": "중력장이 35% 넓어져 적을 한곳으로 끌어당깁니다.", "light": "빛의 저격이 적을 관통하고 뒤의 적까지 공격합니다."};
+evolvedDescriptions.holy_bell='빛의 기둥 두 개가 더 내려오고, 넓은 성광이 폭발합니다.';
+evolvedDescriptions.aqua_wave='더 넓은 전방으로 두 겹의 해일이 밀려갑니다.';
 for(const w of WEAPONS)w.evolvedText=evolvedDescriptions[w.id];
-export const WEAPON = Object.fromEntries(WEAPONS.map(w=>[w.id,w]));
+export const HIDDEN_WEAPONS = [
+  {id:'polar_phoenix',name:'극야의 불사조',owner:'zeke',color:'#ffc9a0',kind:'phoenix',damage:118,cooldown:2.8,max:1,text:'세 불사조가 전장을 날아가며 적을 얼리고 서리불꽃을 남깁니다.'},
+  {id:'dream_chronicle',name:'몽환의 시계탑',owner:'time_ruler',color:'#d1c5ff',kind:'chronicle',damage:108,cooldown:5.5,max:1,text:'회전하는 세 시침이 대열을 가르고, 매 세 번째 박동에 시간을 멈춥니다.'},
+  {id:'abyss_choir',name:'심해의 성가',owner:'silver_rabbit',color:'#a5eddf',kind:'choir',damage:104,cooldown:5.8,max:1,text:'세 성가의 눈이 주변을 돌며 바깥으로 퍼지는 물결을 노래합니다.'}
+];
+export const HIDDEN_UNIONS = [
+  {id:'polar_phoenix',weapons:['ember','frost'],text:'불사조의 맹세 + 프로즌 월드'},
+  {id:'dream_chronicle',weapons:['dream','clock'],text:'깨어나지 않는 밤 + 스톱 더 월드'},
+  {id:'abyss_choir',weapons:['holy_bell','aqua_wave'],text:'새벽을 깨우는 종 + 해일의 문'}
+];
+for(const w of HIDDEN_WEAPONS){w.hidden=true;w.evolution=w.name;w.evolvedText=w.text;}
+export const WEAPON = Object.fromEntries([...WEAPONS,...HIDDEN_WEAPONS].map(w=>[w.id,w]));
 export const EVOLUTION = Object.freeze({weapon:5,relic:1});
 export const BONDS = [
   {id:'aurora',name:'오로라 폭풍',weapons:['star','thunder'],color:'#a1edfa',text:'별빛이 맞힌 적에게 0.8초마다 추가 연쇄 번개. 최대 3명에게 전이됩니다.'},
@@ -57,22 +72,26 @@ export const RELICS = [
   {id:'mirror',name:'쌍성의 거울',icon:'♢',color:'#f5b5d0',text:'공격력 +10% · 파편 폭발 강화',stat:'damage',value:.10},
   {id:'lantern',name:'꺼지지 않는 등불',icon:'☀',color:'#eee2a7',text:'필살기 충전 +15%',stat:'charge',value:.15},
   {id:'hourglass',name:'별모래 시계',icon:'◷',color:'#bfc0f7',text:'공격 대기시간 -6%',stat:'cooldown',value:.06},
-  {id:'feather',name:'첫새벽의 깃털',icon:'➶',color:'#94d6c4',text:'이동속도 +10% · 회피 대기 -5%',stat:'speed',value:.1}
+  {id:'feather',name:'첫새벽의 깃털',icon:'➶',color:'#94d6c4',text:'이동속도 +10% · 회피 대기 -5%',stat:'speed',value:.1},
+  {id:'santa',name:'산타보따리',icon:'♧',color:'#eab9bd',text:'40 / 32 / 24초마다 보물상자 생성',stat:'periodic',value:0},
+  {id:'deep_orb',name:'심해의구슬',icon:'◉',color:'#a5eddf',text:'32 / 24 / 16초마다 전장의 모든 경험치·아이템 흡인',stat:'periodic',value:0}
 ].map(r=>({...r,max:3}));
 export const RELIC = Object.fromEntries(RELICS.map(r=>[r.id,r]));
 export const STAGES = [
   {id:'garden',name:'별빛 정원',en:'THE STARLIT GARDEN',tag:'첫 번째 밤',description:'달빛이 내려앉은 정원. 흩어진 별들을 모아 새벽까지 살아남으세요.',duration:120,bg:'garden',enemy:0,boss:1,bossName:'장미의 파수꾼',color:'#9bcbbb',floor:'#1d3030',danger:1,chapter:'01',landmarks:['달의 샘','별의 등불','새벽의 기둥']},
   {id:'cathedral',name:'빛을 잃은 성당',en:'THE HOLLOW CATHEDRAL',tag:'두 번째 밤',description:'부서진 약속이 빛을 삼켰습니다. 저주받은 회랑을 건너세요.',duration:180,bg:'world2',enemy:2,boss:2,bossName:'황혼의 심판관',color:'#baacf1',floor:'#292539',danger:1.15,chapter:'02',landmarks:['유리의 제단','그림자 성좌','멈춘 시계']},
-  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'마지막 밤',description:'검은 태양 아래 마지막 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:240,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']}
+  {id:'rift',name:'혼돈의 틈',en:'THE EDGE OF NIGHT',tag:'세 번째 밤',description:'검은 태양 아래 군세가 모입니다. 밤의 군주를 쓰러뜨리세요.',duration:240,bg:'world3',enemy:3,boss:3,bossName:'밤의 군주',color:'#eca891',floor:'#302128',danger:1.3,chapter:'03',landmarks:['불씨의 봉인','심연의 균열','잊힌 별']},
+  {id:'abyss',name:'침묵의 심해',en:'THE SUNKEN HYMN',tag:'네 번째 밤',description:'물든 달빛 아래 더 빽빽한 군세. 3분 30초의 밤고래를 넘어 4분 동안 살아남으세요.',duration:240,deadline:240,goal:'survive',finalAt:210,density:1.18,bg:'abyss',enemy:2,boss:3,bossName:'새벽을 삼키는 고래',color:'#92d7dc',floor:'#102d38',danger:1.55,chapter:'04',landmarks:['침묵의 산호','가라앉은 종','별바다의 샘']},
+  {id:'observatory',name:'깨진 별의 관측소',en:'THE SHATTERED ORRERY',tag:'다섯 번째 밤',description:'쏟아지는 군세와 교차하는 시침. 3분 30초의 마지막 종을 피해 4분 동안 살아남으세요.',duration:240,deadline:240,goal:'survive',finalAt:210,density:1.3,bg:'observatory',enemy:3,boss:2,bossName:'열두 번째 종',color:'#c4b6f5',floor:'#25243d',danger:1.8,chapter:'05',landmarks:['달의 관측대','부서진 성좌','새벽의 렌즈']}
 ];
 export const STAGE = Object.fromEntries(STAGES.map(s=>[s.id,s]));
 export const META = [
-  {id:'power',name:'별의 의지',icon:'✦',text:'모든 공격력 +5%',max:10,cost:60,value:.05},
-  {id:'heart',name:'새벽의 숨결',icon:'♡',text:'최대 생명 +10',max:10,cost:50,value:10},
-  {id:'haste',name:'시간의 실',icon:'◷',text:'공격 대기시간 -3%',max:10,cost:75,value:.03},
-  {id:'magnet',name:'별을 모으는 손',icon:'✧',text:'획득 범위 +15%',max:10,cost:45,value:.15},
-  {id:'speed',name:'가벼운 발자국',icon:'➶',text:'이동속도 +3%',max:10,cost:45,value:.03},
-  {id:'growth',name:'기억의 정원',icon:'❀',text:'경험치 +5%',max:10,cost:65,value:.05}
+  {id:'power',name:'별의 의지',icon:'✦',text:'모든 공격력',max:20,cost:60,value:.05},
+  {id:'heart',name:'새벽의 숨결',icon:'♡',text:'최대 생명',max:20,cost:50,value:10},
+  {id:'haste',name:'시간의 실',icon:'◷',text:'공격 대기시간',max:20,cost:75,value:.03},
+  {id:'magnet',name:'별을 모으는 손',icon:'✧',text:'획득 범위',max:20,cost:45,value:.15},
+  {id:'speed',name:'가벼운 발자국',icon:'➶',text:'이동속도',max:20,cost:45,value:.03},
+  {id:'growth',name:'기억의 정원',icon:'❀',text:'경험치',max:20,cost:65,value:.05}
 ];
 export const DIFFICULTIES = [
   {id:'gentle',name:'산책',text:'처음 만나는 별 · 여유롭게 발견하는 밤',hp:.85,damage:.75,density:1,reward:.8},

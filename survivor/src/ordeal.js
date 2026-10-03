@@ -8,10 +8,10 @@ export const BOSSES={
   clock:{name:'열두 번째 종',concept:'교차하는 시침 · 고요한 원의 안쪽',atlas:'ordeal-bosses',row:1,columns:2},
   eclipse:{name:'새벽을 삼키는 고래',concept:'갈라지는 어둠 · 좁아지는 안전지대',atlas:'ordeal-bosses',row:2,columns:2}
 };
-const guardians={garden:'rose',cathedral:'judge',rift:'sovereign'};
-const sentries={garden:['thorn','clock'],cathedral:['clock','eclipse'],rift:['eclipse','thorn']};
+const guardians={garden:'rose',cathedral:'judge',rift:'sovereign',abyss:'eclipse',observatory:'clock'};
+const sentries={garden:['thorn','clock'],cathedral:['clock','eclipse'],rift:['eclipse','thorn'],abyss:['thorn','sovereign'],observatory:['judge','eclipse']};
 export const bossKind=(enemy,stage)=>enemy.bossKind||guardians[stage]||'rose';
-export const bossMilestone=(spawned,duration)=>spawned<3?[duration*.25,duration*.6,duration][spawned]:duration+(spawned-2)*60;
+export const bossMilestone=(spawned,duration,stage)=>spawned<3?[duration*.25,duration*.6,STAGE[stage]?.finalAt||duration][spawned]:duration+(spawned-2)*60;
 export function bossArrival(spawned,stage,difficulty){
   const overrun=Math.max(0,spawned-2),index=spawned%3,kind=overrun?Object.keys(BOSSES)[(overrun+2)%6]:index===2?guardians[stage]:sentries[stage][index];
   const hp=Math.min(9999999,(overrun?220000*2.8**Math.min(18,overrun-1):[14000,32000,85000][index])*(difficulty==='gentle'?.55:1)*STAGE[stage].danger*DIFFICULTY[difficulty].hp);

@@ -1,0 +1,40 @@
+[
+  {
+    "id": "nightfall-icons",
+    "source": "survivor/assets/nightfall/sources/icons.png",
+    "kind": "icons",
+    "columns": 3,
+    "rows": 3,
+    "cell": 160,
+    "reference": "survivor/assets/prepared/weapons.webp",
+    "review": "Nine painted companion item icons; original Nocturne gemstone and antique metal palette."
+  },
+  {
+    "id": "nightfall-fx",
+    "source": "survivor/assets/nightfall/sources/effects.png",
+    "kind": "icons",
+    "columns": 4,
+    "rows": 2,
+    "cell": 144,
+    "reference": null,
+    "review": "Eight native-alpha sparse combat effects. Dream crescent and precise clock hands remain distinct at small game sizes."
+  },
+  {
+    "id": "abyss",
+    "source": "survivor/assets/nightfall/sources/abyss.png",
+    "kind": "background",
+    "reference": null,
+    "review": "Open overhead sunken temple floor; coral and bell silhouette at the edges.",
+    "size": 640,
+    "quality": 80
+  },
+  {
+    "id": "observatory",
+    "source": "survivor/assets/nightfall/sources/observatory.png",
+    "kind": "background",
+    "reference": null,
+    "review": "Open overhead celestial observatory floor; brass astronomy instruments around edges.",
+    "size": 640,
+    "quality": 80
+  }
+]

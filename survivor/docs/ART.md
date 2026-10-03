@@ -1,5 +1,7 @@
 # 공유 수호자와 이미지 근거
 
+현재 Nightfall 후속 변경의 지크/루나는 최신 Nocturne 보행 그림을 직접 수정했습니다. 지크는 양손 대검 가드, 루나는 단검 가드이며 두 인물의 온전한 측면 주기를 반전해 좌우 단계가 대응합니다. [현재 작업 규칙·비교 자료·반전과 수동 계측의 한계](nightfall/README.md)를 먼저 확인하세요. 아래 기존 제작 기록의 독립 측면 지크/루나 설명은 후속 변경 이전의 상태입니다.
+
 검토한 활성 원본은 `defense/merge/content.js`, `shooter/content.js`, `card/game/data.js`입니다. Defense의 방향도와 `CONFLUENCE_ART_PLAYBOOK.md`, `FOUR_DIRECTION_PROMPTS.json`, `HEAD_PROFILE.json`, `ART_ASSETS.md`의 발 위치·투명도·신체 비율 기준을 따릅니다. `defense_legacy/`나 `card_legacy/`를 활성 원본으로 사용하지 않습니다.
 
 ## 캐릭터 대응

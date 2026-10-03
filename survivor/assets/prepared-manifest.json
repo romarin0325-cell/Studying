@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "processor": "Whole painted figures: uniform aspect-preserving scale and sole translation; exact unarmed side reflections; native alpha; no body-region splicing or runtime pixel processing",
-  "processorHash": "a628072617834c1d086d407b50bb7d086913b563377e4255f8cf5e6e875d61ba",
+  "processor": "Whole painted figures: uniform aspect-preserving scale and sole translation; disclosed complete side-cycle reflections; native alpha; no body-region splicing or runtime pixel processing",
+  "processorHash": "b66597039e0f1468b3178a72c87fcae35ac187c4a475f4a4ff8e9c9edc586c50",
   "assets": [
     {
       "id": "unit-storm_sage",
@@ -70,50 +70,50 @@
     {
       "id": "unit-luna",
       "source": "survivor/assets/atelier/sources/walk-luna.png",
-      "sourceSha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "sourceSha256": "d429d9524e7e6bfd1948d46704b739036c99dc99e12af8ee7342af5378b62da5",
       "file": "prepared/unit-luna.webp",
-      "sha256": "f8cc73d9b183cbe9c319edacc380336b66abed501773c75af1a69bdc98c31e29",
-      "bytes": 103530
+      "sha256": "502fb7f692ca3998985020ca5a67eea9cf868a23492517078180197b8153e830",
+      "bytes": 97472
     },
     {
       "id": "full-luna",
       "source": "survivor/assets/atelier/sources/walk-luna.png",
-      "sourceSha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "sourceSha256": "d429d9524e7e6bfd1948d46704b739036c99dc99e12af8ee7342af5378b62da5",
       "file": "prepared/full-luna.webp",
-      "sha256": "8207485167cc03ca50142769316ba657c5f0d8dd6b7e1adbb955cc115b82f30c",
-      "bytes": 28594
+      "sha256": "e7a285659a2d162f1ec09724c409aa8126e773421e660a31884f8d21e9bdf028",
+      "bytes": 27274
     },
     {
       "id": "walk-luna",
       "source": "survivor/assets/atelier/sources/walk-luna.png",
-      "sourceSha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "sourceSha256": "d429d9524e7e6bfd1948d46704b739036c99dc99e12af8ee7342af5378b62da5",
       "file": "prepared/walk-luna.webp",
-      "sha256": "25fed5ca4a78ad4b925cb03d3ef1a387622145478983358b97a01f59fa6ff013",
-      "bytes": 110698
+      "sha256": "a9f2c209cabdf3571eced591c3d616ee9aa7d75fc76b4f4c32a53f0fa57976b1",
+      "bytes": 108270
     },
     {
       "id": "unit-zeke",
       "source": "survivor/assets/atelier/sources/walk-zeke.png",
-      "sourceSha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "sourceSha256": "8f2fd7392fba0b7b2c67ddf80f42e24dc3f05ae758a597d11ddedfe425bda92c",
       "file": "prepared/unit-zeke.webp",
-      "sha256": "cf33b5f464764a788ca6cca62d20b1a9a8c7cfe60b9cef7420d3025349e6ef62",
-      "bytes": 147542
+      "sha256": "8fb264fbb942cb628f79300530fb426fd02bbbedb32a07814f85bbf6e25dbf83",
+      "bytes": 150812
     },
     {
       "id": "full-zeke",
       "source": "survivor/assets/atelier/sources/walk-zeke.png",
-      "sourceSha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "sourceSha256": "8f2fd7392fba0b7b2c67ddf80f42e24dc3f05ae758a597d11ddedfe425bda92c",
       "file": "prepared/full-zeke.webp",
-      "sha256": "ebe3a9085a9535eb181b5883e44e377a2619d6011bef15f4645455b8ae54be0c",
-      "bytes": 39074
+      "sha256": "d690b7de9d4e9e1a38defff0120d0650f0115d96dcdbc546dee526abe478e215",
+      "bytes": 41162
     },
     {
       "id": "walk-zeke",
       "source": "survivor/assets/atelier/sources/walk-zeke.png",
-      "sourceSha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "sourceSha256": "8f2fd7392fba0b7b2c67ddf80f42e24dc3f05ae758a597d11ddedfe425bda92c",
       "file": "prepared/walk-zeke.webp",
-      "sha256": "044524c3431b9d75d72c41a42ad7d97b9fafd64c545c14e0496ffba91f29fce6",
-      "bytes": 163506
+      "sha256": "cabc9ef959e397cf2d2ba46c9ed8cedbea2b35efe68ff8a782933eb6e748729d",
+      "bytes": 169582
     },
     {
       "id": "weapons",
@@ -354,6 +354,38 @@
       "file": "prepared/ordeal-bosses.webp",
       "sha256": "f2cdfeb11d6d9010ca9f73ac4eb5cba8461263123d57f2b3a942f3497c84d5dd",
       "bytes": 203176
+    },
+    {
+      "id": "nightfall-icons",
+      "source": "survivor/assets/nightfall/sources/icons.png",
+      "sourceSha256": "d3cd836839f13879517d536d12a79ef2fed4381b6bdbe7b42440102ea8da8e1e",
+      "file": "prepared/nightfall-icons.webp",
+      "sha256": "9db66ef6d3a1d38d37284e5624a54bc9d28d521fc9e55b9575f0ea391ee752e4",
+      "bytes": 138028
+    },
+    {
+      "id": "nightfall-fx",
+      "source": "survivor/assets/nightfall/sources/effects.png",
+      "sourceSha256": "ba3eebd0314972100058280898dcca19a710f2ce63abd9c5c304d00e50627ef6",
+      "file": "prepared/nightfall-fx.webp",
+      "sha256": "20771a699e2992b31eca83b00c37cd4113dbae4fb43d988890b7900b87a7caae",
+      "bytes": 88140
+    },
+    {
+      "id": "abyss",
+      "source": "survivor/assets/nightfall/sources/abyss.png",
+      "sourceSha256": "9458dbe636c9c0dafdb3c20f9f37f375c40c3ef2357b73a2056a8040345eb6a3",
+      "file": "prepared/abyss.webp",
+      "sha256": "76bbca458e3f24ef2ada9c432f21546a13a06235f080cbf5aeae1ddd36d9f061",
+      "bytes": 118778
+    },
+    {
+      "id": "observatory",
+      "source": "survivor/assets/nightfall/sources/observatory.png",
+      "sourceSha256": "19522b2436ee897ed6920f69a64e675cbdb23df6b3f42025e7075a7cef402537",
+      "file": "prepared/observatory.webp",
+      "sha256": "12da5e486ad1078617322ae10f66e392c780b95ae87352b5d55926407bbd5cc0",
+      "bytes": 90472
     }
   ],
   "frames": {
@@ -510,7 +542,7 @@
     "luna": {
       "portrait": {
         "x": 256,
-        "y": 211.6763005780347,
+        "y": 208.0173410404624,
         "size": 237.6
       },
       "anchor": [
@@ -525,7 +557,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 196.36416184971097,
+        "bodyHeight": 200.02312138728325,
         "sole": 480,
         "method": "whole-figure uniform scale and translation"
       },
@@ -545,7 +577,7 @@
     "zeke": {
       "portrait": {
         "x": 256,
-        "y": 190.6994219653179,
+        "y": 182.0635838150289,
         "size": 237.6
       },
       "anchor": [
@@ -560,7 +592,7 @@
       ],
       "anatomy": {
         "headHeight": 144,
-        "bodyHeight": 217.33526011560696,
+        "bodyHeight": 225.97109826589596,
         "sole": 480,
         "method": "whole-figure uniform scale and translation"
       },
@@ -790,7 +822,7 @@
   },
   "normalization": {
     "source": "survivor/assets/body-profile.json",
-    "sha256": "e5e319bf1ea33fb569ca91b7c6d1b249aeb3a5dd2198a387439f2b267e92ff8d",
+    "sha256": "d247bfb4dd0acb46c5c30b8c46ee6633db188ab52db80ead7a97a9f14bfcb61d",
     "processor": "survivor/scripts/art-normalization.mjs",
     "processorSha256": "3d3a3e4e4bfee059d559b7a547a29d7025f5ad81bf37cc184641465081bf347f",
     "frames": [
@@ -1922,12 +1954,12 @@
       {
         "id": "walk-luna",
         "frame": 0,
-        "removed": 256,
+        "removed": 160,
         "landmarks": {
           "skullTop": 35,
           "chin": 153,
           "rootX": 166,
-          "foot": 312,
+          "foot": 315,
           "pelvis": 229,
           "bodyCenter": [
             166,
@@ -1937,7 +1969,7 @@
             "referenceFrame": 1,
             "dx": -9,
             "dy": 2,
-            "meanSquaredRGBA": 3629,
+            "meanSquaredRGBA": 3408,
             "atSearchBoundary": false
           }
         },
@@ -1955,12 +1987,12 @@
       {
         "id": "walk-luna",
         "frame": 1,
-        "removed": 259,
+        "removed": 271,
         "landmarks": {
           "skullTop": 33,
           "chin": 151,
           "rootX": 175,
-          "foot": 312,
+          "foot": 315,
           "pelvis": 227,
           "bodyCenter": [
             175,
@@ -1988,22 +2020,22 @@
       {
         "id": "walk-luna",
         "frame": 2,
-        "removed": 250,
+        "removed": 183,
         "landmarks": {
-          "skullTop": 33,
-          "chin": 151,
-          "rootX": 172,
-          "foot": 313,
-          "pelvis": 227,
+          "skullTop": 34,
+          "chin": 152,
+          "rootX": 171,
+          "foot": 315,
+          "pelvis": 228,
           "bodyCenter": [
-            172,
-            189
+            171,
+            190
           ],
           "registration": {
             "referenceFrame": 1,
-            "dx": -3,
-            "dy": 0,
-            "meanSquaredRGBA": 6636,
+            "dx": -4,
+            "dy": 1,
+            "meanSquaredRGBA": 5967,
             "atSearchBoundary": false
           }
         },
@@ -2021,12 +2053,12 @@
       {
         "id": "walk-luna",
         "frame": 3,
-        "removed": 184,
+        "removed": 218,
         "landmarks": {
           "skullTop": 34,
           "chin": 152,
           "rootX": 169,
-          "foot": 312,
+          "foot": 314,
           "pelvis": 228,
           "bodyCenter": [
             169,
@@ -2036,7 +2068,7 @@
             "referenceFrame": 1,
             "dx": -6,
             "dy": 1,
-            "meanSquaredRGBA": 4994,
+            "meanSquaredRGBA": 3954,
             "atSearchBoundary": false
           }
         },
@@ -2054,22 +2086,22 @@
       {
         "id": "walk-luna",
         "frame": 4,
-        "removed": 1045,
+        "removed": 1265,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 167,
+          "skullTop": 47,
+          "chin": 168,
           "rootX": 167,
-          "foot": 326,
-          "pelvis": 241,
+          "foot": 327,
+          "pelvis": 242,
           "bodyCenter": [
             167,
-            204
+            205
           ],
           "registration": {
             "referenceFrame": 5,
             "dx": -14,
-            "dy": -1,
-            "meanSquaredRGBA": 1628,
+            "dy": 0,
+            "meanSquaredRGBA": 1532,
             "atSearchBoundary": false
           }
         },
@@ -2087,12 +2119,12 @@
       {
         "id": "walk-luna",
         "frame": 5,
-        "removed": 1230,
+        "removed": 1417,
         "landmarks": {
           "skullTop": 47,
           "chin": 168,
           "rootX": 181,
-          "foot": 326,
+          "foot": 330,
           "pelvis": 242,
           "bodyCenter": [
             181,
@@ -2120,22 +2152,22 @@
       {
         "id": "walk-luna",
         "frame": 6,
-        "removed": 1103,
+        "removed": 1316,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 168,
-          "rootX": 176,
-          "foot": 326,
-          "pelvis": 242,
+          "skullTop": 48,
+          "chin": 169,
+          "rootX": 177,
+          "foot": 329,
+          "pelvis": 243,
           "bodyCenter": [
-            176,
-            205
+            177,
+            206
           ],
           "registration": {
             "referenceFrame": 5,
-            "dx": -5,
-            "dy": 0,
-            "meanSquaredRGBA": 1212,
+            "dx": -4,
+            "dy": 1,
+            "meanSquaredRGBA": 800,
             "atSearchBoundary": false
           }
         },
@@ -2153,22 +2185,22 @@
       {
         "id": "walk-luna",
         "frame": 7,
-        "removed": 1079,
+        "removed": 1246,
         "landmarks": {
           "skullTop": 48,
           "chin": 169,
-          "rootX": 173,
-          "foot": 326,
+          "rootX": 172,
+          "foot": 329,
           "pelvis": 243,
           "bodyCenter": [
-            173,
+            172,
             206
           ],
           "registration": {
             "referenceFrame": 5,
-            "dx": -8,
+            "dx": -9,
             "dy": 1,
-            "meanSquaredRGBA": 1193,
+            "meanSquaredRGBA": 903,
             "atSearchBoundary": false
           }
         },
@@ -2186,22 +2218,22 @@
       {
         "id": "walk-luna",
         "frame": 8,
-        "removed": 1922,
+        "removed": 2057,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 160,
-          "rootX": 170,
-          "foot": 316,
-          "pelvis": 236,
+          "skullTop": 47,
+          "chin": 159,
+          "rootX": 169,
+          "foot": 320,
+          "pelvis": 235,
           "bodyCenter": [
-            170,
-            198
+            169,
+            197
           ],
           "registration": {
             "referenceFrame": 9,
-            "dx": -11,
-            "dy": 2,
-            "meanSquaredRGBA": 3129,
+            "dx": -12,
+            "dy": 1,
+            "meanSquaredRGBA": 3791,
             "atSearchBoundary": false
           }
         },
@@ -2219,12 +2251,12 @@
       {
         "id": "walk-luna",
         "frame": 9,
-        "removed": 1838,
+        "removed": 2084,
         "landmarks": {
           "skullTop": 46,
           "chin": 158,
           "rootX": 181,
-          "foot": 316,
+          "foot": 319,
           "pelvis": 234,
           "bodyCenter": [
             181,
@@ -2252,22 +2284,22 @@
       {
         "id": "walk-luna",
         "frame": 10,
-        "removed": 1844,
+        "removed": 2005,
         "landmarks": {
           "skullTop": 47,
           "chin": 159,
-          "rootX": 179,
-          "foot": 312,
+          "rootX": 178,
+          "foot": 315,
           "pelvis": 235,
           "bodyCenter": [
-            179,
+            178,
             197
           ],
           "registration": {
             "referenceFrame": 9,
-            "dx": -2,
+            "dx": -3,
             "dy": 1,
-            "meanSquaredRGBA": 2017,
+            "meanSquaredRGBA": 1886,
             "atSearchBoundary": false
           }
         },
@@ -2285,22 +2317,22 @@
       {
         "id": "walk-luna",
         "frame": 11,
-        "removed": 1771,
+        "removed": 1993,
         "landmarks": {
-          "skullTop": 47,
-          "chin": 159,
+          "skullTop": 48,
+          "chin": 160,
           "rootX": 186,
-          "foot": 317,
-          "pelvis": 235,
+          "foot": 319,
+          "pelvis": 236,
           "bodyCenter": [
             186,
-            197
+            198
           ],
           "registration": {
             "referenceFrame": 9,
             "dx": 5,
-            "dy": 1,
-            "meanSquaredRGBA": 2530,
+            "dy": 2,
+            "meanSquaredRGBA": 2341,
             "atSearchBoundary": false
           }
         },
@@ -2318,144 +2350,148 @@
       {
         "id": "walk-luna",
         "frame": 12,
-        "removed": 68,
+        "removed": 2057,
         "landmarks": {
-          "skullTop": 34,
-          "chin": 148,
-          "rootX": 176,
-          "foot": 311,
-          "pelvis": 222,
+          "skullTop": 47,
+          "chin": 159,
+          "rootX": 169,
+          "foot": 320,
+          "pelvis": 235,
           "bodyCenter": [
-            176,
-            185
+            169,
+            197
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": -11,
-            "dy": -1,
-            "meanSquaredRGBA": 6123,
+            "referenceFrame": 9,
+            "dx": -12,
+            "dy": 1,
+            "meanSquaredRGBA": 3791,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 12,
-        "headScale": 0.3951367781155015,
-        "bodyScale": 0.3951367781155015,
-        "torsoScale": 0.3951367781155015,
-        "legScale": 0.3951367781155015,
+        "sourceFrame": 8,
+        "headScale": 0.4012158054711246,
+        "bodyScale": 0.4012158054711246,
+        "torsoScale": 0.4012158054711246,
+        "legScale": 0.4012158054711246,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 8
       },
       {
         "id": "walk-luna",
         "frame": 13,
-        "removed": 83,
+        "removed": 2084,
         "landmarks": {
-          "skullTop": 35,
-          "chin": 149,
-          "rootX": 187,
-          "foot": 309,
-          "pelvis": 223,
+          "skullTop": 46,
+          "chin": 158,
+          "rootX": 181,
+          "foot": 319,
+          "pelvis": 234,
           "bodyCenter": [
-            187,
-            186
+            181,
+            196
           ],
           "registration": {
-            "referenceFrame": 13,
+            "referenceFrame": 9,
             "dx": 0,
             "dy": 0,
             "meanSquaredRGBA": 0,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 13,
-        "headScale": 0.3959537572254335,
-        "bodyScale": 0.3959537572254335,
-        "torsoScale": 0.3959537572254335,
-        "legScale": 0.3959537572254335,
+        "sourceFrame": 9,
+        "headScale": 0.40173410404624277,
+        "bodyScale": 0.40173410404624277,
+        "torsoScale": 0.40173410404624277,
+        "legScale": 0.40173410404624277,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 9
       },
       {
         "id": "walk-luna",
         "frame": 14,
-        "removed": 58,
+        "removed": 2005,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 150,
-          "rootX": 180,
-          "foot": 311,
-          "pelvis": 224,
+          "skullTop": 47,
+          "chin": 159,
+          "rootX": 178,
+          "foot": 315,
+          "pelvis": 235,
           "bodyCenter": [
-            180,
-            187
+            178,
+            197
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": -7,
+            "referenceFrame": 9,
+            "dx": -3,
             "dy": 1,
-            "meanSquaredRGBA": 6519,
+            "meanSquaredRGBA": 1886,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 14,
-        "headScale": 0.39420289855072466,
-        "bodyScale": 0.39420289855072466,
-        "torsoScale": 0.39420289855072466,
-        "legScale": 0.39420289855072466,
+        "sourceFrame": 10,
+        "headScale": 0.4028985507246377,
+        "bodyScale": 0.4028985507246377,
+        "torsoScale": 0.4028985507246377,
+        "legScale": 0.4028985507246377,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 10
       },
       {
         "id": "walk-luna",
         "frame": 15,
-        "removed": 82,
+        "removed": 1993,
         "landmarks": {
-          "skullTop": 36,
-          "chin": 150,
-          "rootX": 188,
-          "foot": 310,
-          "pelvis": 224,
+          "skullTop": 48,
+          "chin": 160,
+          "rootX": 186,
+          "foot": 319,
+          "pelvis": 236,
           "bodyCenter": [
-            188,
-            187
+            186,
+            198
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": 1,
-            "dy": 1,
-            "meanSquaredRGBA": 5521,
+            "referenceFrame": 9,
+            "dx": 5,
+            "dy": 2,
+            "meanSquaredRGBA": 2341,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 15,
-        "headScale": 0.3939393939393939,
-        "bodyScale": 0.3939393939393939,
-        "torsoScale": 0.3939393939393939,
-        "legScale": 0.3939393939393939,
+        "sourceFrame": 11,
+        "headScale": 0.403030303030303,
+        "bodyScale": 0.403030303030303,
+        "torsoScale": 0.403030303030303,
+        "legScale": 0.403030303030303,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 11
       },
       {
         "id": "unit-luna",
         "frame": 0,
-        "removed": 259,
+        "removed": 271,
         "landmarks": {
           "skullTop": 33,
           "chin": 151,
           "rootX": 175,
-          "foot": 312,
+          "foot": 315,
           "pelvis": 227,
           "bodyCenter": [
             175,
@@ -2483,12 +2519,12 @@
       {
         "id": "unit-luna",
         "frame": 1,
-        "removed": 1230,
+        "removed": 1417,
         "landmarks": {
           "skullTop": 47,
           "chin": 168,
           "rootX": 181,
-          "foot": 326,
+          "foot": 330,
           "pelvis": 242,
           "bodyCenter": [
             181,
@@ -2516,12 +2552,12 @@
       {
         "id": "unit-luna",
         "frame": 2,
-        "removed": 1838,
+        "removed": 2084,
         "landmarks": {
           "skullTop": 46,
           "chin": 158,
           "rootX": 181,
-          "foot": 316,
+          "foot": 319,
           "pelvis": 234,
           "bodyCenter": [
             181,
@@ -2549,55 +2585,56 @@
       {
         "id": "unit-luna",
         "frame": 3,
-        "removed": 83,
+        "removed": 166,
         "landmarks": {
-          "skullTop": 35,
-          "chin": 149,
-          "rootX": 187,
-          "foot": 309,
-          "pelvis": 223,
+          "skullTop": 46,
+          "chin": 158,
+          "rootX": 181,
+          "foot": 319,
+          "pelvis": 234,
           "bodyCenter": [
-            187,
-            186
+            181,
+            196
           ],
           "registration": {
-            "referenceFrame": 13,
+            "referenceFrame": 9,
             "dx": 0,
             "dy": 0,
             "meanSquaredRGBA": 0,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 13,
-        "headScale": 1.2630057803468209,
-        "bodyScale": 1.2630057803468209,
-        "torsoScale": 1.2630057803468209,
-        "legScale": 1.2630057803468209,
+        "sourceFrame": 9,
+        "headScale": 1.2861271676300579,
+        "bodyScale": 1.2861271676300579,
+        "torsoScale": 1.2861271676300579,
+        "legScale": 1.2861271676300579,
         "root": [
           256,
           480
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 2
       },
       {
         "id": "walk-zeke",
         "frame": 0,
-        "removed": 519,
+        "removed": 364,
         "landmarks": {
-          "skullTop": 48,
-          "chin": 148,
-          "rootX": 166,
-          "foot": 298,
-          "pelvis": 222,
+          "skullTop": 47,
+          "chin": 147,
+          "rootX": 176,
+          "foot": 304,
+          "pelvis": 221,
           "bodyCenter": [
-            166,
-            185
+            176,
+            184
           ],
           "registration": {
             "referenceFrame": 1,
-            "dx": -4,
-            "dy": 1,
-            "meanSquaredRGBA": 2688,
+            "dx": 6,
+            "dy": 0,
+            "meanSquaredRGBA": 3979,
             "atSearchBoundary": false
           }
         },
@@ -2615,12 +2652,12 @@
       {
         "id": "walk-zeke",
         "frame": 1,
-        "removed": 643,
+        "removed": 654,
         "landmarks": {
           "skullTop": 47,
           "chin": 147,
           "rootX": 170,
-          "foot": 298,
+          "foot": 304,
           "pelvis": 221,
           "bodyCenter": [
             170,
@@ -2648,22 +2685,22 @@
       {
         "id": "walk-zeke",
         "frame": 2,
-        "removed": 811,
+        "removed": 436,
         "landmarks": {
-          "skullTop": 45,
-          "chin": 145,
-          "rootX": 166,
-          "foot": 298,
-          "pelvis": 219,
+          "skullTop": 47,
+          "chin": 147,
+          "rootX": 171,
+          "foot": 304,
+          "pelvis": 221,
           "bodyCenter": [
-            166,
-            182
+            171,
+            184
           ],
           "registration": {
             "referenceFrame": 1,
-            "dx": -4,
-            "dy": -2,
-            "meanSquaredRGBA": 5046,
+            "dx": 1,
+            "dy": 0,
+            "meanSquaredRGBA": 4115,
             "atSearchBoundary": false
           }
         },
@@ -2681,22 +2718,22 @@
       {
         "id": "walk-zeke",
         "frame": 3,
-        "removed": 590,
+        "removed": 373,
         "landmarks": {
-          "skullTop": 46,
-          "chin": 146,
-          "rootX": 165,
-          "foot": 298,
-          "pelvis": 220,
+          "skullTop": 47,
+          "chin": 147,
+          "rootX": 171,
+          "foot": 303,
+          "pelvis": 221,
           "bodyCenter": [
-            165,
-            183
+            171,
+            184
           ],
           "registration": {
             "referenceFrame": 1,
-            "dx": -5,
-            "dy": -1,
-            "meanSquaredRGBA": 3227,
+            "dx": 1,
+            "dy": 0,
+            "meanSquaredRGBA": 2711,
             "atSearchBoundary": false
           }
         },
@@ -2714,22 +2751,22 @@
       {
         "id": "walk-zeke",
         "frame": 4,
-        "removed": 923,
+        "removed": 1106,
         "landmarks": {
-          "skullTop": 66,
-          "chin": 168,
-          "rootX": 168,
-          "foot": 319,
-          "pelvis": 242,
+          "skullTop": 63,
+          "chin": 165,
+          "rootX": 173,
+          "foot": 321,
+          "pelvis": 239,
           "bodyCenter": [
-            168,
-            205
+            173,
+            202
           ],
           "registration": {
             "referenceFrame": 5,
-            "dx": -13,
-            "dy": 4,
-            "meanSquaredRGBA": 4657,
+            "dx": -8,
+            "dy": 1,
+            "meanSquaredRGBA": 3072,
             "atSearchBoundary": false
           }
         },
@@ -2747,12 +2784,12 @@
       {
         "id": "walk-zeke",
         "frame": 5,
-        "removed": 921,
+        "removed": 1147,
         "landmarks": {
           "skullTop": 62,
           "chin": 164,
           "rootX": 181,
-          "foot": 318,
+          "foot": 321,
           "pelvis": 238,
           "bodyCenter": [
             181,
@@ -2780,22 +2817,22 @@
       {
         "id": "walk-zeke",
         "frame": 6,
-        "removed": 1049,
+        "removed": 1241,
         "landmarks": {
-          "skullTop": 63,
-          "chin": 165,
-          "rootX": 175,
-          "foot": 319,
-          "pelvis": 239,
+          "skullTop": 61,
+          "chin": 163,
+          "rootX": 185,
+          "foot": 322,
+          "pelvis": 237,
           "bodyCenter": [
-            175,
-            202
+            185,
+            200
           ],
           "registration": {
             "referenceFrame": 5,
-            "dx": -6,
-            "dy": 1,
-            "meanSquaredRGBA": 5431,
+            "dx": 4,
+            "dy": -1,
+            "meanSquaredRGBA": 2361,
             "atSearchBoundary": false
           }
         },
@@ -2813,22 +2850,22 @@
       {
         "id": "walk-zeke",
         "frame": 7,
-        "removed": 1040,
+        "removed": 814,
         "landmarks": {
-          "skullTop": 63,
-          "chin": 165,
+          "skullTop": 62,
+          "chin": 164,
           "rootX": 181,
-          "foot": 319,
-          "pelvis": 239,
+          "foot": 323,
+          "pelvis": 238,
           "bodyCenter": [
             181,
-            202
+            201
           ],
           "registration": {
             "referenceFrame": 5,
             "dx": 0,
-            "dy": 1,
-            "meanSquaredRGBA": 4941,
+            "dy": 0,
+            "meanSquaredRGBA": 2049,
             "atSearchBoundary": false
           }
         },
@@ -2846,22 +2883,22 @@
       {
         "id": "walk-zeke",
         "frame": 8,
-        "removed": 1776,
+        "removed": 2351,
         "landmarks": {
-          "skullTop": 52,
-          "chin": 152,
-          "rootX": 172,
+          "skullTop": 54,
+          "chin": 154,
+          "rootX": 170,
           "foot": 310,
-          "pelvis": 227,
+          "pelvis": 229,
           "bodyCenter": [
-            172,
-            189.5
+            170,
+            191.5
           ],
           "registration": {
             "referenceFrame": 9,
-            "dx": -5,
-            "dy": -2,
-            "meanSquaredRGBA": 6603,
+            "dx": -7,
+            "dy": 0,
+            "meanSquaredRGBA": 2218,
             "atSearchBoundary": false
           }
         },
@@ -2879,12 +2916,12 @@
       {
         "id": "walk-zeke",
         "frame": 9,
-        "removed": 1772,
+        "removed": 2711,
         "landmarks": {
           "skullTop": 54,
           "chin": 154,
           "rootX": 177,
-          "foot": 308,
+          "foot": 310,
           "pelvis": 229,
           "bodyCenter": [
             177,
@@ -2912,22 +2949,22 @@
       {
         "id": "walk-zeke",
         "frame": 10,
-        "removed": 1902,
+        "removed": 2614,
         "landmarks": {
           "skullTop": 53,
           "chin": 153,
-          "rootX": 181,
-          "foot": 308,
+          "rootX": 175,
+          "foot": 310,
           "pelvis": 228,
           "bodyCenter": [
-            181,
+            175,
             190.5
           ],
           "registration": {
             "referenceFrame": 9,
-            "dx": 4,
+            "dx": -2,
             "dy": -1,
-            "meanSquaredRGBA": 5867,
+            "meanSquaredRGBA": 2725,
             "atSearchBoundary": false
           }
         },
@@ -2945,22 +2982,22 @@
       {
         "id": "walk-zeke",
         "frame": 11,
-        "removed": 1867,
+        "removed": 1818,
         "landmarks": {
           "skullTop": 53,
           "chin": 153,
-          "rootX": 177,
-          "foot": 309,
+          "rootX": 173,
+          "foot": 310,
           "pelvis": 228,
           "bodyCenter": [
-            177,
+            173,
             190.5
           ],
           "registration": {
             "referenceFrame": 9,
-            "dx": 0,
+            "dx": -4,
             "dy": -1,
-            "meanSquaredRGBA": 6640,
+            "meanSquaredRGBA": 4226,
             "atSearchBoundary": false
           }
         },
@@ -2978,144 +3015,148 @@
       {
         "id": "walk-zeke",
         "frame": 12,
-        "removed": 0,
+        "removed": 2351,
         "landmarks": {
-          "skullTop": 38,
-          "chin": 136,
-          "rootX": 172,
-          "foot": 302,
-          "pelvis": 214,
+          "skullTop": 54,
+          "chin": 154,
+          "rootX": 170,
+          "foot": 310,
+          "pelvis": 229,
           "bodyCenter": [
-            172,
-            175
+            170,
+            191.5
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": -16,
-            "dy": -1,
-            "meanSquaredRGBA": 4265,
+            "referenceFrame": 9,
+            "dx": -7,
+            "dy": 0,
+            "meanSquaredRGBA": 2218,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 12,
-        "headScale": 0.45896656534954405,
-        "bodyScale": 0.45896656534954405,
-        "torsoScale": 0.45896656534954405,
-        "legScale": 0.45896656534954405,
+        "sourceFrame": 8,
+        "headScale": 0.44984802431610943,
+        "bodyScale": 0.44984802431610943,
+        "torsoScale": 0.44984802431610943,
+        "legScale": 0.44984802431610943,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 8
       },
       {
         "id": "walk-zeke",
         "frame": 13,
-        "removed": 0,
+        "removed": 2711,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 137,
-          "rootX": 188,
-          "foot": 302,
-          "pelvis": 215,
+          "skullTop": 54,
+          "chin": 154,
+          "rootX": 177,
+          "foot": 310,
+          "pelvis": 229,
           "bodyCenter": [
-            188,
-            176
+            177,
+            191.5
           ],
           "registration": {
-            "referenceFrame": 13,
+            "referenceFrame": 9,
             "dx": 0,
             "dy": 0,
             "meanSquaredRGBA": 0,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 13,
-        "headScale": 0.4595375722543353,
-        "bodyScale": 0.4595375722543353,
-        "torsoScale": 0.4595375722543353,
-        "legScale": 0.4595375722543353,
+        "sourceFrame": 9,
+        "headScale": 0.4508670520231214,
+        "bodyScale": 0.4508670520231214,
+        "torsoScale": 0.4508670520231214,
+        "legScale": 0.4508670520231214,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 9
       },
       {
         "id": "walk-zeke",
         "frame": 14,
-        "removed": 0,
+        "removed": 2614,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 137,
-          "rootX": 183,
-          "foot": 302,
-          "pelvis": 215,
+          "skullTop": 53,
+          "chin": 153,
+          "rootX": 175,
+          "foot": 310,
+          "pelvis": 228,
           "bodyCenter": [
-            183,
-            176
+            175,
+            190.5
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": -5,
-            "dy": 0,
-            "meanSquaredRGBA": 4178,
+            "referenceFrame": 9,
+            "dx": -2,
+            "dy": -1,
+            "meanSquaredRGBA": 2725,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 14,
-        "headScale": 0.4579710144927536,
-        "bodyScale": 0.4579710144927536,
-        "torsoScale": 0.4579710144927536,
-        "legScale": 0.4579710144927536,
+        "sourceFrame": 10,
+        "headScale": 0.4492753623188406,
+        "bodyScale": 0.4492753623188406,
+        "torsoScale": 0.4492753623188406,
+        "legScale": 0.4492753623188406,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 10
       },
       {
         "id": "walk-zeke",
         "frame": 15,
-        "removed": 0,
+        "removed": 1818,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 137,
-          "rootX": 190,
-          "foot": 304,
-          "pelvis": 215,
+          "skullTop": 53,
+          "chin": 153,
+          "rootX": 173,
+          "foot": 310,
+          "pelvis": 228,
           "bodyCenter": [
-            190,
-            176
+            173,
+            190.5
           ],
           "registration": {
-            "referenceFrame": 13,
-            "dx": 2,
-            "dy": 0,
-            "meanSquaredRGBA": 4564,
+            "referenceFrame": 9,
+            "dx": -4,
+            "dy": -1,
+            "meanSquaredRGBA": 4226,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 15,
-        "headScale": 0.46060606060606063,
-        "bodyScale": 0.46060606060606063,
-        "torsoScale": 0.46060606060606063,
-        "legScale": 0.46060606060606063,
+        "sourceFrame": 11,
+        "headScale": 0.45151515151515154,
+        "bodyScale": 0.45151515151515154,
+        "torsoScale": 0.45151515151515154,
+        "legScale": 0.45151515151515154,
         "root": [
           104,
           195
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 11
       },
       {
         "id": "unit-zeke",
         "frame": 0,
-        "removed": 643,
+        "removed": 654,
         "landmarks": {
           "skullTop": 47,
           "chin": 147,
           "rootX": 170,
-          "foot": 298,
+          "foot": 304,
           "pelvis": 221,
           "bodyCenter": [
             170,
@@ -3143,12 +3184,12 @@
       {
         "id": "unit-zeke",
         "frame": 1,
-        "removed": 921,
+        "removed": 1147,
         "landmarks": {
           "skullTop": 62,
           "chin": 164,
           "rootX": 181,
-          "foot": 318,
+          "foot": 321,
           "pelvis": 238,
           "bodyCenter": [
             181,
@@ -3176,12 +3217,12 @@
       {
         "id": "unit-zeke",
         "frame": 2,
-        "removed": 1772,
+        "removed": 2711,
         "landmarks": {
           "skullTop": 54,
           "chin": 154,
           "rootX": 177,
-          "foot": 308,
+          "foot": 310,
           "pelvis": 229,
           "bodyCenter": [
             177,
@@ -3209,35 +3250,36 @@
       {
         "id": "unit-zeke",
         "frame": 3,
-        "removed": 0,
+        "removed": 890,
         "landmarks": {
-          "skullTop": 39,
-          "chin": 137,
-          "rootX": 188,
-          "foot": 302,
-          "pelvis": 215,
+          "skullTop": 54,
+          "chin": 154,
+          "rootX": 177,
+          "foot": 310,
+          "pelvis": 229,
           "bodyCenter": [
-            188,
-            176
+            177,
+            191.5
           ],
           "registration": {
-            "referenceFrame": 13,
+            "referenceFrame": 9,
             "dx": 0,
             "dy": 0,
             "meanSquaredRGBA": 0,
             "atSearchBoundary": false
           }
         },
-        "sourceFrame": 13,
-        "headScale": 1.4682080924855492,
-        "bodyScale": 1.4682080924855492,
-        "torsoScale": 1.4682080924855492,
-        "legScale": 1.4682080924855492,
+        "sourceFrame": 9,
+        "headScale": 1.439306358381503,
+        "bodyScale": 1.439306358381503,
+        "torsoScale": 1.439306358381503,
+        "legScale": 1.439306358381503,
         "root": [
           256,
           480
         ],
-        "method": "whole-figure uniform scale and translation"
+        "method": "whole-figure uniform scale and translation",
+        "mirroredFrom": 2
       },
       {
         "id": "walk-jasmine",
@@ -7233,12 +7275,12 @@
         "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb"
       },
       {
-        "source": "defense/assets/merge/units/luna.webp",
-        "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843"
+        "source": "survivor/docs/nightfall/luna-before.png",
+        "sha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4"
       },
       {
-        "source": "defense/assets/merge/units/zeke.webp",
-        "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae"
+        "source": "survivor/docs/nightfall/zeke-before.png",
+        "sha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093"
       },
       {
         "source": "survivor/assets/jasmine.webp",
@@ -7263,10 +7305,14 @@
       {
         "source": "defense/assets/merge/units/time_ruler.webp",
         "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f"
+      },
+      {
+        "source": "survivor/assets/prepared/weapons.webp",
+        "sha256": "f7a592cd31afc27d65484dc446ce99d74316a7f9869a4115071635b7b465133d"
       }
     ],
     "source": "survivor/assets/renewal/sources.json",
-    "sha256": "1f6e5b8ef26f159b0a2f1e704751f666dd58308bbb04e7188644114d3f65ca00"
+    "sha256": "6dfdd722c0d870b30c789ec24a2cf4729e6e0a26dfc03b81644da9b644027bf6"
   },
   "reverie": {
     "source": "survivor/assets/reverie/sources.json",
@@ -7275,5 +7321,9 @@
   "ordeal": {
     "source": "survivor/assets/ordeal/sources.json",
     "sha256": "476f5d1955bcc09cfd8b707b251bd4962f06f9845711b54ae6afaed329cbc6c9"
+  },
+  "nightfall": {
+    "source": "survivor/assets/nightfall/sources.json",
+    "sha256": "a7fea41625d1bdabd941f46a5304526f432cf8265b0d10c3dc90068daa8825d1"
   }
 }

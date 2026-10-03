@@ -1,7 +1,7 @@
 {
   "version": 3,
   "reference": "rumi",
-  "policy": "Nominal anatomical head height 144/512; short rabbit, medium and adult figures originate from separately guided whole-figure artwork. Six unarmed heroes use exact side reflections. Three weapon holders keep independently drawn left/right views and anatomical hand ownership.",
+  "policy": "Nominal anatomical head height 144/512 excludes hair, ears, horns and equipment. Eight playable heroes use disclosed complete side reflections, including Zeke and Luna to preserve combat-walk phase equivalence. Jasmine retains authored sides and left-hand staff ownership.",
   "method": "Complete newly painted figures retain their internal anatomical proportions. Only one uniform aspect-preserving scale per direction and whole-figure translation are applied; no independent head, torso or leg transforms. Actual body heights are recorded separately from art targets.",
   "uncertainty": "Skull and pelvis hidden by hair/skirt are manual estimates. Head-region registration estimates phase translations, not anatomy. Generation guides are project direction rather than a pose detector or industry tolerance. Nominal targets never guarantee a generated pose; actual source and output remain available for visual inspection.",
   "frames": {
@@ -361,7 +361,7 @@
       "landmarkSource": "Manual estimates on 20px-grid front/back/left/right passing poses. Hidden skull, chin under hair, pelvis and phase registration remain uncertain; no pose detector or industry error tolerance."
     },
     "luna": {
-      "sourceSha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "sourceSha256": "d429d9524e7e6bfd1948d46704b739036c99dc99e12af8ee7342af5378b62da5",
       "canonical": {
         "skullTop": 33,
         "chin": 151,
@@ -408,7 +408,7 @@
             "skullTop": 35,
             "chin": 153,
             "rootX": 166,
-            "foot": 312,
+            "foot": 315,
             "pelvis": 229,
             "bodyCenter": [
               166,
@@ -418,7 +418,7 @@
               "referenceFrame": 1,
               "dx": -9,
               "dy": 2,
-              "meanSquaredRGBA": 3629,
+              "meanSquaredRGBA": 3408,
               "atSearchBoundary": false
             }
           },
@@ -426,7 +426,7 @@
             "skullTop": 33,
             "chin": 151,
             "rootX": 175,
-            "foot": 312,
+            "foot": 315,
             "pelvis": 227,
             "bodyCenter": [
               175,
@@ -441,20 +441,20 @@
             }
           },
           {
-            "skullTop": 33,
-            "chin": 151,
-            "rootX": 172,
-            "foot": 313,
-            "pelvis": 227,
+            "skullTop": 34,
+            "chin": 152,
+            "rootX": 171,
+            "foot": 315,
+            "pelvis": 228,
             "bodyCenter": [
-              172,
-              189
+              171,
+              190
             ],
             "registration": {
               "referenceFrame": 1,
-              "dx": -3,
-              "dy": 0,
-              "meanSquaredRGBA": 6636,
+              "dx": -4,
+              "dy": 1,
+              "meanSquaredRGBA": 5967,
               "atSearchBoundary": false
             }
           },
@@ -462,7 +462,7 @@
             "skullTop": 34,
             "chin": 152,
             "rootX": 169,
-            "foot": 312,
+            "foot": 314,
             "pelvis": 228,
             "bodyCenter": [
               169,
@@ -472,25 +472,25 @@
               "referenceFrame": 1,
               "dx": -6,
               "dy": 1,
-              "meanSquaredRGBA": 4994,
+              "meanSquaredRGBA": 3954,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 46,
-            "chin": 167,
+            "skullTop": 47,
+            "chin": 168,
             "rootX": 167,
-            "foot": 326,
-            "pelvis": 241,
+            "foot": 327,
+            "pelvis": 242,
             "bodyCenter": [
               167,
-              204
+              205
             ],
             "registration": {
               "referenceFrame": 5,
               "dx": -14,
-              "dy": -1,
-              "meanSquaredRGBA": 1628,
+              "dy": 0,
+              "meanSquaredRGBA": 1532,
               "atSearchBoundary": false
             }
           },
@@ -498,7 +498,7 @@
             "skullTop": 47,
             "chin": 168,
             "rootX": 181,
-            "foot": 326,
+            "foot": 330,
             "pelvis": 242,
             "bodyCenter": [
               181,
@@ -513,56 +513,56 @@
             }
           },
           {
-            "skullTop": 47,
-            "chin": 168,
-            "rootX": 176,
-            "foot": 326,
-            "pelvis": 242,
+            "skullTop": 48,
+            "chin": 169,
+            "rootX": 177,
+            "foot": 329,
+            "pelvis": 243,
             "bodyCenter": [
-              176,
-              205
+              177,
+              206
             ],
             "registration": {
               "referenceFrame": 5,
-              "dx": -5,
-              "dy": 0,
-              "meanSquaredRGBA": 1212,
+              "dx": -4,
+              "dy": 1,
+              "meanSquaredRGBA": 800,
               "atSearchBoundary": false
             }
           },
           {
             "skullTop": 48,
             "chin": 169,
-            "rootX": 173,
-            "foot": 326,
+            "rootX": 172,
+            "foot": 329,
             "pelvis": 243,
             "bodyCenter": [
-              173,
+              172,
               206
             ],
             "registration": {
               "referenceFrame": 5,
-              "dx": -8,
+              "dx": -9,
               "dy": 1,
-              "meanSquaredRGBA": 1193,
+              "meanSquaredRGBA": 903,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 48,
-            "chin": 160,
-            "rootX": 170,
-            "foot": 316,
-            "pelvis": 236,
+            "skullTop": 47,
+            "chin": 159,
+            "rootX": 169,
+            "foot": 320,
+            "pelvis": 235,
             "bodyCenter": [
-              170,
-              198
+              169,
+              197
             ],
             "registration": {
               "referenceFrame": 9,
-              "dx": -11,
-              "dy": 2,
-              "meanSquaredRGBA": 3129,
+              "dx": -12,
+              "dy": 1,
+              "meanSquaredRGBA": 3791,
               "atSearchBoundary": false
             }
           },
@@ -570,7 +570,7 @@
             "skullTop": 46,
             "chin": 158,
             "rootX": 181,
-            "foot": 316,
+            "foot": 319,
             "pelvis": 234,
             "bodyCenter": [
               181,
@@ -587,54 +587,54 @@
           {
             "skullTop": 47,
             "chin": 159,
-            "rootX": 179,
-            "foot": 312,
+            "rootX": 178,
+            "foot": 315,
             "pelvis": 235,
             "bodyCenter": [
-              179,
+              178,
               197
             ],
             "registration": {
               "referenceFrame": 9,
-              "dx": -2,
+              "dx": -3,
               "dy": 1,
-              "meanSquaredRGBA": 2017,
+              "meanSquaredRGBA": 1886,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 47,
-            "chin": 159,
+            "skullTop": 48,
+            "chin": 160,
             "rootX": 186,
-            "foot": 317,
-            "pelvis": 235,
+            "foot": 319,
+            "pelvis": 236,
             "bodyCenter": [
               186,
-              197
+              198
             ],
             "registration": {
               "referenceFrame": 9,
               "dx": 5,
-              "dy": 1,
-              "meanSquaredRGBA": 2530,
+              "dy": 2,
+              "meanSquaredRGBA": 2341,
               "atSearchBoundary": false
             }
           },
           {
             "skullTop": 34,
             "chin": 148,
-            "rootX": 176,
+            "rootX": 175,
             "foot": 311,
             "pelvis": 222,
             "bodyCenter": [
-              176,
+              175,
               185
             ],
             "registration": {
               "referenceFrame": 13,
-              "dx": -11,
+              "dx": -12,
               "dy": -1,
-              "meanSquaredRGBA": 6123,
+              "meanSquaredRGBA": 5090,
               "atSearchBoundary": false
             }
           },
@@ -642,7 +642,7 @@
             "skullTop": 35,
             "chin": 149,
             "rootX": 187,
-            "foot": 309,
+            "foot": 311,
             "pelvis": 223,
             "bodyCenter": [
               187,
@@ -659,47 +659,47 @@
           {
             "skullTop": 36,
             "chin": 150,
-            "rootX": 180,
+            "rootX": 177,
             "foot": 311,
             "pelvis": 224,
             "bodyCenter": [
-              180,
+              177,
               187
             ],
             "registration": {
               "referenceFrame": 13,
-              "dx": -7,
+              "dx": -10,
               "dy": 1,
-              "meanSquaredRGBA": 6519,
+              "meanSquaredRGBA": 6357,
               "atSearchBoundary": false
             }
           },
           {
             "skullTop": 36,
             "chin": 150,
-            "rootX": 188,
-            "foot": 310,
+            "rootX": 187,
+            "foot": 311,
             "pelvis": 224,
             "bodyCenter": [
-              188,
+              187,
               187
             ],
             "registration": {
               "referenceFrame": 13,
-              "dx": 1,
+              "dx": 0,
               "dy": 1,
-              "meanSquaredRGBA": 5521,
+              "meanSquaredRGBA": 5192,
               "atSearchBoundary": false
             }
           }
         ]
       },
       "targetHead": 144,
-      "walkSourceSha256": "a330b260f68b18b71568ac418f26ef4b8483dd997b7979907fa07c4955fc68c4",
+      "walkSourceSha256": "d429d9524e7e6bfd1948d46704b739036c99dc99e12af8ee7342af5378b62da5",
       "bodyClass": "standard",
       "targetTorso": 94,
-      "weaponHand": "right dagger",
-      "mirrorRight": false,
+      "weaponHand": "Right hand in authored front/back; the entire authored left cycle is reflected for the right side, including dagger hand presentation.",
+      "mirrorRight": true,
       "identityReference": {
         "path": "defense/assets/merge/units/luna.webp",
         "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
@@ -713,10 +713,23 @@
         }
       },
       "nativeWalk": true,
-      "landmarkSource": "Manual estimates on 20px-grid front/back/left/right passing poses. Hidden skull, chin under hair, pelvis and phase registration remain uncertain; no pose detector or industry error tolerance."
+      "landmarkSource": "Manual estimates on 20px-grid front/back/left/right passing poses. Hidden skull, chin under hair, pelvis and phase registration remain uncertain; no pose detector or industry error tolerance.",
+      "combatPoseReview": {
+        "baselineCommit": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
+        "identityAndStyle": "Latest Nocturne accepted whole figure, not Defense render style",
+        "skull": "Anatomical cranium-to-chin; ears, hairstyle, hood and weapon excluded",
+        "uncertainty": {
+          "skullTopPx": 4,
+          "chinPx": 2,
+          "solePx": 1
+        },
+        "stance": "Raised dagger guard with restrained original walk, anatomical right hand in independent side views",
+        "method": "Preserved reviewed source-view skull/chin anchors within stated manual uncertainty; image registration follows whole-pose phase translation only",
+        "sideCycle": "Complete left cycle reflected for right; the independent right artwork had a different torso lean. User-prioritized bilateral motion consistency over independently authored handedness. No regional transforms."
+      }
     },
     "zeke": {
-      "sourceSha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "sourceSha256": "8f2fd7392fba0b7b2c67ddf80f42e24dc3f05ae758a597d11ddedfe425bda92c",
       "canonical": {
         "skullTop": 47,
         "chin": 147,
@@ -760,20 +773,20 @@
         "soleBand": 18,
         "frames": [
           {
-            "skullTop": 48,
-            "chin": 148,
-            "rootX": 166,
-            "foot": 298,
-            "pelvis": 222,
+            "skullTop": 47,
+            "chin": 147,
+            "rootX": 176,
+            "foot": 304,
+            "pelvis": 221,
             "bodyCenter": [
-              166,
-              185
+              176,
+              184
             ],
             "registration": {
               "referenceFrame": 1,
-              "dx": -4,
-              "dy": 1,
-              "meanSquaredRGBA": 2688,
+              "dx": 6,
+              "dy": 0,
+              "meanSquaredRGBA": 3979,
               "atSearchBoundary": false
             }
           },
@@ -781,7 +794,7 @@
             "skullTop": 47,
             "chin": 147,
             "rootX": 170,
-            "foot": 298,
+            "foot": 304,
             "pelvis": 221,
             "bodyCenter": [
               170,
@@ -796,56 +809,56 @@
             }
           },
           {
-            "skullTop": 45,
-            "chin": 145,
-            "rootX": 166,
-            "foot": 298,
-            "pelvis": 219,
+            "skullTop": 47,
+            "chin": 147,
+            "rootX": 171,
+            "foot": 304,
+            "pelvis": 221,
             "bodyCenter": [
-              166,
-              182
+              171,
+              184
             ],
             "registration": {
               "referenceFrame": 1,
-              "dx": -4,
-              "dy": -2,
-              "meanSquaredRGBA": 5046,
+              "dx": 1,
+              "dy": 0,
+              "meanSquaredRGBA": 4115,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 46,
-            "chin": 146,
-            "rootX": 165,
-            "foot": 298,
-            "pelvis": 220,
+            "skullTop": 47,
+            "chin": 147,
+            "rootX": 171,
+            "foot": 303,
+            "pelvis": 221,
             "bodyCenter": [
-              165,
-              183
+              171,
+              184
             ],
             "registration": {
               "referenceFrame": 1,
-              "dx": -5,
-              "dy": -1,
-              "meanSquaredRGBA": 3227,
+              "dx": 1,
+              "dy": 0,
+              "meanSquaredRGBA": 2711,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 66,
-            "chin": 168,
-            "rootX": 168,
-            "foot": 319,
-            "pelvis": 242,
+            "skullTop": 63,
+            "chin": 165,
+            "rootX": 173,
+            "foot": 321,
+            "pelvis": 239,
             "bodyCenter": [
-              168,
-              205
+              173,
+              202
             ],
             "registration": {
               "referenceFrame": 5,
-              "dx": -13,
-              "dy": 4,
-              "meanSquaredRGBA": 4657,
+              "dx": -8,
+              "dy": 1,
+              "meanSquaredRGBA": 3072,
               "atSearchBoundary": false
             }
           },
@@ -853,7 +866,7 @@
             "skullTop": 62,
             "chin": 164,
             "rootX": 181,
-            "foot": 318,
+            "foot": 321,
             "pelvis": 238,
             "bodyCenter": [
               181,
@@ -868,56 +881,56 @@
             }
           },
           {
-            "skullTop": 63,
-            "chin": 165,
-            "rootX": 175,
-            "foot": 319,
-            "pelvis": 239,
+            "skullTop": 61,
+            "chin": 163,
+            "rootX": 185,
+            "foot": 322,
+            "pelvis": 237,
             "bodyCenter": [
-              175,
-              202
+              185,
+              200
             ],
             "registration": {
               "referenceFrame": 5,
-              "dx": -6,
-              "dy": 1,
-              "meanSquaredRGBA": 5431,
+              "dx": 4,
+              "dy": -1,
+              "meanSquaredRGBA": 2361,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 63,
-            "chin": 165,
+            "skullTop": 62,
+            "chin": 164,
             "rootX": 181,
-            "foot": 319,
-            "pelvis": 239,
+            "foot": 323,
+            "pelvis": 238,
             "bodyCenter": [
               181,
-              202
+              201
             ],
             "registration": {
               "referenceFrame": 5,
               "dx": 0,
-              "dy": 1,
-              "meanSquaredRGBA": 4941,
+              "dy": 0,
+              "meanSquaredRGBA": 2049,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 52,
-            "chin": 152,
-            "rootX": 172,
+            "skullTop": 54,
+            "chin": 154,
+            "rootX": 170,
             "foot": 310,
-            "pelvis": 227,
+            "pelvis": 229,
             "bodyCenter": [
-              172,
-              189.5
+              170,
+              191.5
             ],
             "registration": {
               "referenceFrame": 9,
-              "dx": -5,
-              "dy": -2,
-              "meanSquaredRGBA": 6603,
+              "dx": -7,
+              "dy": 0,
+              "meanSquaredRGBA": 2218,
               "atSearchBoundary": false
             }
           },
@@ -925,7 +938,7 @@
             "skullTop": 54,
             "chin": 154,
             "rootX": 177,
-            "foot": 308,
+            "foot": 310,
             "pelvis": 229,
             "bodyCenter": [
               177,
@@ -942,54 +955,54 @@
           {
             "skullTop": 53,
             "chin": 153,
-            "rootX": 181,
-            "foot": 308,
+            "rootX": 175,
+            "foot": 310,
             "pelvis": 228,
             "bodyCenter": [
-              181,
+              175,
               190.5
             ],
             "registration": {
               "referenceFrame": 9,
-              "dx": 4,
+              "dx": -2,
               "dy": -1,
-              "meanSquaredRGBA": 5867,
+              "meanSquaredRGBA": 2725,
               "atSearchBoundary": false
             }
           },
           {
             "skullTop": 53,
             "chin": 153,
-            "rootX": 177,
-            "foot": 309,
+            "rootX": 173,
+            "foot": 310,
             "pelvis": 228,
             "bodyCenter": [
-              177,
+              173,
               190.5
             ],
             "registration": {
               "referenceFrame": 9,
-              "dx": 0,
+              "dx": -4,
               "dy": -1,
-              "meanSquaredRGBA": 6640,
+              "meanSquaredRGBA": 4226,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 38,
-            "chin": 136,
-            "rootX": 172,
+            "skullTop": 40,
+            "chin": 138,
+            "rootX": 193,
             "foot": 302,
-            "pelvis": 214,
+            "pelvis": 216,
             "bodyCenter": [
-              172,
-              175
+              193,
+              177
             ],
             "registration": {
               "referenceFrame": 13,
-              "dx": -16,
-              "dy": -1,
-              "meanSquaredRGBA": 4265,
+              "dx": 5,
+              "dy": 1,
+              "meanSquaredRGBA": 4284,
               "atSearchBoundary": false
             }
           },
@@ -997,7 +1010,7 @@
             "skullTop": 39,
             "chin": 137,
             "rootX": 188,
-            "foot": 302,
+            "foot": 306,
             "pelvis": 215,
             "bodyCenter": [
               188,
@@ -1012,49 +1025,49 @@
             }
           },
           {
-            "skullTop": 39,
-            "chin": 137,
-            "rootX": 183,
-            "foot": 302,
-            "pelvis": 215,
+            "skullTop": 41,
+            "chin": 139,
+            "rootX": 199,
+            "foot": 306,
+            "pelvis": 217,
             "bodyCenter": [
-              183,
-              176
+              199,
+              178
             ],
             "registration": {
               "referenceFrame": 13,
-              "dx": -5,
-              "dy": 0,
-              "meanSquaredRGBA": 4178,
+              "dx": 11,
+              "dy": 2,
+              "meanSquaredRGBA": 3646,
               "atSearchBoundary": false
             }
           },
           {
-            "skullTop": 39,
-            "chin": 137,
+            "skullTop": 41,
+            "chin": 139,
             "rootX": 190,
-            "foot": 304,
-            "pelvis": 215,
+            "foot": 306,
+            "pelvis": 217,
             "bodyCenter": [
               190,
-              176
+              178
             ],
             "registration": {
               "referenceFrame": 13,
               "dx": 2,
-              "dy": 0,
-              "meanSquaredRGBA": 4564,
+              "dy": 2,
+              "meanSquaredRGBA": 3625,
               "atSearchBoundary": false
             }
           }
         ]
       },
       "targetHead": 144,
-      "walkSourceSha256": "6cac7606528c58acc22eb0643ebe814de2fdead1df7a6c0af875b3e56ef91093",
+      "walkSourceSha256": "8f2fd7392fba0b7b2c67ddf80f42e24dc3f05ae758a597d11ddedfe425bda92c",
       "bodyClass": "adult",
       "targetTorso": 98,
       "weaponHand": "right sword",
-      "mirrorRight": false,
+      "mirrorRight": true,
       "identityReference": {
         "path": "defense/assets/merge/units/zeke.webp",
         "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
@@ -1068,7 +1081,19 @@
         }
       },
       "nativeWalk": true,
-      "landmarkSource": "Manual estimates on 20px-grid front/back/left/right passing poses. Hidden skull, chin under hair, pelvis and phase registration remain uncertain; no pose detector or industry error tolerance."
+      "landmarkSource": "Manual estimates on 20px-grid front/back/left/right passing poses. Hidden skull, chin under hair, pelvis and phase registration remain uncertain; no pose detector or industry error tolerance.",
+      "combatPoseReview": {
+        "baselineCommit": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
+        "identityAndStyle": "Latest Nocturne accepted whole figure, not Defense render style",
+        "skull": "Anatomical cranium-to-chin; ears, hairstyle, hood and weapon excluded",
+        "uncertainty": {
+          "skullTopPx": 4,
+          "chinPx": 2,
+          "solePx": 1
+        },
+        "stance": "Two-handed greatsword combat walk; complete left cycle reflected for right",
+        "method": "Preserved reviewed source-view skull/chin anchors within stated manual uncertainty; image registration follows whole-pose phase translation only"
+      }
     },
     "cinderella": {
       "sourceSha256": "a6c3000541d318e83ee9ce6fa227c83d55acbf6ce60e1d37636a37f13469ccd5",

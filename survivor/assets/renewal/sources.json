@@ -20,8 +20,8 @@
     "columns": 4,
     "rows": 4,
     "cell": 208,
-    "reference": "defense/assets/merge/units/luna.webp",
-    "review": "Whole figure newly painted from canonical identity and Rumi style. Adult/short figures were regenerated with a separate proportion guide. Shared standing, portrait and walking poses use uniform whole-image scale only. Manual anatomical landmarks and phase registration reviewed on bright/dark mattes; unarmed cycles use exact full-figure reflections.",
+    "reference": "survivor/docs/nightfall/luna-before.png",
+    "review": "Current Nocturne combat walk: dagger in a close guard, original lace, face and body retained. Complete left cycle reflected for right to match every stride, torso lean and weapon phase; side handedness is reflected as a disclosed presentation choice. Uniform whole-figure packing only.",
     "extractionPadding": [
       16,
       18
@@ -34,8 +34,8 @@
     "columns": 4,
     "rows": 4,
     "cell": 208,
-    "reference": "defense/assets/merge/units/zeke.webp",
-    "review": "Whole figure newly painted from canonical identity and Rumi style. Adult/short figures were regenerated with a separate proportion guide. Shared standing, portrait and walking poses use uniform whole-image scale only. Manual anatomical landmarks and phase registration reviewed on bright/dark mattes; unarmed cycles use exact full-figure reflections.",
+    "reference": "survivor/docs/nightfall/zeke-before.png",
+    "review": "Latest Nocturne whole-figure edit: both hands support the greatsword in a combat walk. The complete left cycle is reflected for right so all phases, stride and weight shift agree; opaque armor and original head/body scale retained.",
     "extractionPadding": [
       16,
       18
@@ -335,46 +335,46 @@
     ],
     "rowXEdges": [
       [
-        0.0,
+        0,
         313.5,
-        627.0,
+        627,
         940.5,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         313.5,
-        627.0,
+        627,
         940.5,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         330.64453125,
         636.796875,
         949.072265625,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         317.173828125,
         649.04296875,
         961.318359375,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         313.5,
-        627.0,
+        627,
         940.5,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         335.54296875,
         650.267578125,
         966.216796875,
-        1254.0
+        1254
       ]
     ]
   },
@@ -389,40 +389,40 @@
     "review": "All fourteen weapon effects, impact and enemy orb. Per-row crops retain long projectile tips; native alpha checked on a colored matte.",
     "rowXEdges": [
       [
-        0.0,
+        0,
         335.543,
         637.613,
         953.562,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         351.055,
         629.449,
         949.48,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         342.891,
         635.98,
         963.359,
-        1254.0
+        1254
       ],
       [
-        0.0,
+        0,
         345.34,
         722.52,
         953.562,
-        1254.0
+        1254
       ]
     ],
     "yEdges": [
-      0.0,
+      0,
       335.543,
       602.508,
       931.928,
-      1254.0
+      1254
     ]
   }
 ]

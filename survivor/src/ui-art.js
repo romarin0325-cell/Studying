@@ -2,6 +2,11 @@ import {WEAPONS,WEAPON,RELICS,RELIC,SECRET} from './content.js';
 
 export function itemArt(kind,id,extra=''){
   if(kind==='secret'||kind==='encounter'){const index=kind==='secret'?SECRET[id]?.art:Number(id),label=kind==='secret'?SECRET[id]?.name:'';return `<span class="item-art secrets-art ${extra}" style="--sprite-x:${index%4/3*100}%;--sprite-y:${Math.floor(index/4)*100}%" ${label?`role="img" aria-label="${label}"`:'aria-hidden="true"'}></span>`;}
+  const additions={holy_bell:0,aqua_wave:1,polar_phoenix:2,dream_chronicle:3,abyss_choir:4,santa:5,deep_orb:6};
+  if(Object.hasOwn(additions,id)){
+    const evolved=extra.includes('evolved-item'),index=evolved&&id==='holy_bell'?7:evolved&&id==='aqua_wave'?8:additions[id],label=kind==='weapon'?WEAPON[id]?.name:RELIC[id]?.name;
+    return `<span class="item-art nightfall-art ${extra}" style="--sprite-x:${index%3/2*100}%;--sprite-y:${Math.floor(index/3)/2*100}%" role="img" aria-label="${label}"></span>`;
+  }
   const list=kind==='weapon'?WEAPONS:RELICS;
   let index=list.findIndex(item=>item.id===id);
   if(kind==='prop')index={chest:10,open:11,heart:12,magnet:13,coin:14,shrine:15}[id];
