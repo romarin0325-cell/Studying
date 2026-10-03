@@ -1,0 +1,92 @@
+[
+  {
+    "id": "whole_cast",
+    "kind": "master-rejected",
+    "outputFile": "/workspace/generated_images/exec-6beafae7-378e-4563-a070-11958272d767.png"
+  },
+  {
+    "id": "time_ruler",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-896cef6a-4417-43fd-8e3d-9c3e3ff33819.png"
+  },
+  {
+    "id": "time_ruler",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-17a34dc7-95ce-4dc8-b5f7-4154e48cbd52.png"
+  },
+  {
+    "id": "jasmine",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-880bd1ac-87d6-48a4-98c1-d8611373d791.png"
+  },
+  {
+    "id": "jasmine",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-a54fc51f-a7f1-4442-b197-49abb8478d2c.png"
+  },
+  {
+    "id": "silver_rabbit",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-e26a183e-e370-4e2c-8e26-3b76441f3015.png"
+  },
+  {
+    "id": "silver_rabbit",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-fceaa40b-5ba2-4ceb-84e9-251d57798cb6.png"
+  },
+  {
+    "id": "rumi",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-48bd8436-8f0a-4803-903b-9029625c9a4a.png"
+  },
+  {
+    "id": "luna",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-adda553d-86ac-4ff2-a57c-d76e1bdb36d9.png"
+  },
+  {
+    "id": "zeke",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-c788beb7-ba15-4e03-878f-37ccddfc5c42.png"
+  },
+  {
+    "id": "zeke",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-25f755dd-12ac-4322-8c32-21dc8aa9928a.png"
+  },
+  {
+    "id": "snow_rabbit",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-1ed37894-fe5d-4860-a9ec-1a0395cde1e0.png"
+  },
+  {
+    "id": "snow_rabbit",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-705d2567-7945-43fb-8bd4-9bca51683060.png"
+  },
+  {
+    "id": "night_rabbit",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-ec316ddd-8c9b-4218-b5af-07620347a2fc.png"
+  },
+  {
+    "id": "night_rabbit",
+    "kind": "guided",
+    "outputFile": "/workspace/generated_images/exec-af225742-79b6-471d-a472-96e3c597fae4.png"
+  },
+  {
+    "id": "night_rabbit",
+    "kind": "repair",
+    "outputFile": "/workspace/generated_images/exec-d82eb73d-64f5-4800-b736-2b23bcf70490.png"
+  },
+  {
+    "id": "cinderella",
+    "kind": "direct",
+    "outputFile": "/workspace/generated_images/exec-d2f74185-ec3e-43d5-82d8-50e8ad46275b.png"
+  },
+  {
+    "id": "cinderella",
+    "kind": "repair",
+    "outputFile": "/workspace/generated_images/exec-c183c1af-eed1-46e6-b164-bae357171422.png"
+  }
+]

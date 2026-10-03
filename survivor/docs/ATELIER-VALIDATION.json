@@ -1,0 +1,108 @@
+{
+  "dateUTC": "2026-10-03",
+  "baseMain": "b674af6d4e944afb828046d260a82f4823ca705d",
+  "priorPR": {
+    "number": 570,
+    "merged": true
+  },
+  "artifact": {
+    "path": "survivor/dist/AstraNocturne.html",
+    "bytes": 8171951,
+    "MiB": 7.7934,
+    "sha256": "e12270bc6e6625ef5882c368b756eb6b682fb978f923d40fc816ffb125e1ea08",
+    "textures": 44
+  },
+  "verify": {
+    "command": "LD_LIBRARY_PATH=/workspace/review/webkit-libs/root/usr/lib/x86_64-linux-gnu PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npm run verify",
+    "passed": true,
+    "seconds": 57.62,
+    "contracts": {
+      "tests": 50,
+      "pass": 50,
+      "fail": 0,
+      "skip": 0
+    },
+    "actualSingleFileBuilds": 1,
+    "chromiumViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "webkitViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "externalHttpRequests": 0,
+    "pageErrors": 0,
+    "hostInventory": "Existing Debian13 user-directory libGLESv2 supplied; only Playwright host inventory validation skipped, actual WebKit suite executed."
+  },
+  "art": {
+    "profileVersion": 3,
+    "imageGeneratedOutputs": 18,
+    "selectedWalkingSources": 9,
+    "rejectedSources": 9,
+    "bodyProcessing": "one uniform aspect-preserving whole-figure scale plus sole translation; no regional transforms",
+    "nominalHeadHeightAt512": 144,
+    "measuredStandingBodyHeightsAt512": {
+      "storm_sage": 200.15625,
+      "lightning_sage": 192.98828125,
+      "queen": 191.484375,
+      "galaxy_whale": 185.45703125,
+      "great_detective": 181.7578125,
+      "rumi": 189.46242774566474,
+      "luna": 196.36416184971097,
+      "zeke": 217.33526011560696,
+      "jasmine": 200.27745664739882,
+      "snow_rabbit": 163.7514450867052,
+      "night_rabbit": 171.971098265896,
+      "cinderella": 207.84971098265896,
+      "silver_rabbit": 141.0835509138381,
+      "time_ruler": 225.14450867052022
+    },
+    "sameStandingAndWalkPose": true,
+    "mirroredUnarmed": 6,
+    "authoredWeaponHandViews": 3,
+    "fullCastWithCompanions": 14,
+    "wholeCatalogLogicalRgbaMiB": 86.9043,
+    "walkDecodeLimit": 2,
+    "uncertainty": "Manual skull/chin/pelvis estimates and image registration; no semantic detector, industry tolerance or exact guide enforcement"
+  },
+  "crowdedRendererWorkSample": {
+    "frames": 90,
+    "meanWorkMs": 9.36,
+    "enemies": 260,
+    "shots": 15,
+    "fields": 0,
+    "hazards": 0
+  },
+  "scope": "Survivor files only. Verification policy and Card/Shooter/Defense source and suites unchanged. Browser mobile viewports and WebKit are not a physical handset performance test.",
+  "artBaseline": "c958f64b211b3ac8e3bc27745b3ea7510c5d3685",
+  "preservedFollowingPR": 571
+}
