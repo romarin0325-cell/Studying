@@ -133,3 +133,7 @@
 @media(orientation:landscape) and (max-height:550px) and (min-width:740px){.growth-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}.growth-card{padding:9px 8px}.main:has(.growth-grid) .page-intro{margin-bottom:14px}}
 
 @media(max-height:700px){.main:has(.growth-grid) .page-intro .eyebrow{display:none}}
+
+/* Keep the full wallet readable even with wider system fonts and nine digits. */
+@media(max-width:800px){.currency .num{font-family:Nocturne,system-ui;font-weight:400;letter-spacing:0}}
+@media(max-width:360px){.topbar{column-gap:8px}.wordmark{gap:5px}.wordmark .brand-star{font-size:20px}.wordmark>div>span{font-size:10px}.top-actions{gap:4px}.currency{padding:4px 5px;gap:4px}.currency span{font-size:14px}}

@@ -1,8 +1,8 @@
 # Nightfall 현재 검증
 
-2026-10-04 JST / 2026-10-03 UTC, 최신 main `34a0c13`을 기준으로 전투 보행·신규 지역·무기·유물·융합을 통합했습니다. `npm run verify`가 97.88초에 통과했습니다: 계약/회귀 58개, 실제 통합 HTML 빌드, Chromium 5화면, WebKit 3화면, 변경 JavaScript 문법 검사입니다.
+2026-10-04 JST / 2026-10-03 UTC, 최신 main `34a0c13`을 기준으로 전투 보행·신규 지역·무기·유물·융합을 통합했습니다. `npm run verify`가 97.25초에 통과했습니다: 계약/회귀 59개, 실제 통합 HTML 빌드, Chromium 5화면, WebKit 3화면, 변경 JavaScript 문법 검사입니다.
 
-배포 HTML은 **8,367,469 bytes / 7.9798 MiB / 39 embedded textures** 입니다. 위 용량·SHA는 실제 검사한 Windows 저장 파일 기준입니다. Git의 LF 파일은 8,367,237bytes / SHA-256 `3f705c2fb8711f4539242b622227a0307c8085c7cccc75da65286ea3f2f14b9d`이며 줄바꿈을 정규화한 내용은 동일합니다. 작성 검수용 캐시 48개와 배포의 39개는 구분합니다. 논리 RGBA 카탈로그는 86.4785 MiB이며 8 MiB 파일/88 MiB 카탈로그 계약을 유지합니다.
+배포 HTML은 **8,367,880 bytes / 7.9802 MiB / 39 embedded textures** 입니다. 위 용량·SHA는 실제 검사한 Windows 저장 파일 기준입니다. Git의 LF 파일은 8,367,648bytes / SHA-256 `f652bc33d1232075ca9b9f9b812b0be94c421a57ad25d6040ea982367f5e8385`이며 줄바꿈을 정규화한 내용은 동일합니다. 작성 검수용 캐시 48개와 배포의 39개는 구분합니다. 논리 RGBA 카탈로그는 86.4785 MiB이며 8 MiB 파일/88 MiB 카탈로그 계약을 유지합니다.
 
 [현재 상세 검증](nightfall/VALIDATION.json) · [실제 명령 출력](nightfall/verify-local.txt) · [현재 아트/기획/저장 규칙](nightfall/README.md) · [지크·루나 좌우 보행](nightfall/review/combat-walk-96.gif) · [수치 19/20단계와 게임 화면](nightfall/screens/). 머리의 의미는 두개골·턱 기준이며 귀·머리카락·무기를 제외합니다. 양손 대검과 단검의 보행은 전체 측면 주기를 반전해 단계가 대응하며, 반전된 손 표현과 수동 계측의 불확실성을 문서화했습니다.
 

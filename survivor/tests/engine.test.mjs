@@ -85,6 +85,14 @@ test('dash invulnerability and cancellation of skill when paused are real combat
   const g=new Game();g.player.invulnerable=0;assert.equal(g.dash(),true);assert.equal(g.dash(),false);const hp=g.player.hp;assert.equal(g.hurt(50),false);assert.equal(g.player.hp,hp);g.player.invulnerable=0;g.hurt(20);assert.equal(g.player.hp,hp-20);g.mode='paused';g.player.charge=100;assert.equal(g.castSkill(),false);assert.equal(g.player.charge,100);
 });
 
+test('pausing mid-dash restores the exact position and continues only the remaining movement',()=>{
+  const g=quiet(new Game({hero:'luna',seed:42}));g.dash({x:1,y:0});g.step(1/60);g.mode='paused';
+  const copy=Game.restore(g.snapshot()),x=g.player.x,y=g.player.y,dash=g.player.dash;
+  assert.ok(dash>0);assert.equal(copy.player.x,x);assert.equal(copy.player.y,y);assert.equal(copy.player.dash,dash);
+  for(const run of [g,copy]){run.step(1/60);assert.equal(run.player.x,x);run.mode='playing';advance(run,.5);}
+  assert.ok(copy.player.x>x,'the saved dash continues after unpausing');assert.equal(copy.player.dash,0);assert.equal(copy.player.y,y);assert.deepEqual(copy.snapshot(),g.snapshot());
+});
+
 test('lethal contact cannot be hidden by a same-frame level-up or treasure pickup',()=>{
   const g=new Game();g.player.hp=1;g.player.invulnerable=0;g.spawnDrop('xp',800,800,40);g.spawnDrop('chest',800,800,1);g.spawnEnemy('beetle',{x:800,y:800,hp:10000,maxHp:10000,speed:0,damage:200});
   g.step(1/60);assert.equal(g.mode,'defeat');assert.equal(g.player.hp,0);assert.equal(g.pending,0);assert.equal(g.xp,0);assert.equal(g.treasure,null);

@@ -1,27 +1,27 @@
 {
-  "dateUTC": "2026-10-03T18:44:59.264Z",
+  "dateUTC": "2026-10-03T19:09:25.770Z",
   "baseline": "34a0c13b1a2c86a117beca28e67f385680f1edc9",
   "game": "ASTRA NOCTURNE survivor/",
   "artifact": {
     "path": "survivor/dist/AstraNocturne.html",
-    "bytes": 8367469,
-    "MiB": 7.9798,
-    "sha256": "ee630ac8872bd71cba6a902557782670ac253bad0aee12105f2728b96634cc4a",
+    "bytes": 8367880,
+    "MiB": 7.9802,
+    "sha256": "f325e2cbb92348c965a03fb36cd57106f18a51242c0e1e8fea733305125d6735",
     "embeddedTextures": 39,
     "reviewCacheTextures": 48,
     "decodedEmbeddedCatalogMiB": 86.4785,
     "canonicalGit": {
-      "bytes": 8367237,
-      "sha256": "3f705c2fb8711f4539242b622227a0307c8085c7cccc75da65286ea3f2f14b9d"
+      "bytes": 8367648,
+      "sha256": "f652bc33d1232075ca9b9f9b812b0be94c421a57ad25d6040ea982367f5e8385"
     },
     "lineEndings": "Primary bytes/SHA describe the tested Windows saved file. Canonical Git LF bytes differ only in CRLF/LF; normalized content matches."
   },
   "validation": {
     "command": "npm run verify",
     "passed": true,
-    "seconds": 97.88,
-    "tests": 58,
-    "pass": 58,
+    "seconds": 97.25,
+    "tests": 59,
+    "pass": 59,
     "fail": 0,
     "chromiumViewports": [
       [
@@ -69,7 +69,32 @@
     "externalHTTPRequests": 0,
     "pageErrors": 0,
     "host": "win32",
-    "physicalPhoneTest": false
+    "physicalPhoneTest": false,
+    "fullWalletMaximum": 100000000,
+    "fullWalletViewports": [
+      [
+        390,
+        844
+      ],
+      [
+        360,
+        640
+      ],
+      [
+        320,
+        568
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "exactResumePositionBeforeNextFrame": true,
+    "unfinishedDashRestoreAndContinuation": true
   },
   "art": {
     "generatedOutputs": 7,
@@ -112,7 +137,7 @@
           "chinPx": 2,
           "solePx": 1
         },
-        "stance": "Raised dagger guard with restrained original walk, anatomical right hand in independent side views",
+        "stance": "Raised dagger combat guard; complete left cycle reflected for right",
         "method": "Preserved reviewed source-view skull/chin anchors within stated manual uncertainty; image registration follows whole-pose phase translation only",
         "sideCycle": "Complete left cycle reflected for right; the independent right artwork had a different torso lean. User-prioritized bilateral motion consistency over independently authored handedness. No regional transforms."
       }
@@ -225,7 +250,7 @@
   ],
   "rendererWork": {
     "frames": 90,
-    "meanWorkMs": 13.76,
+    "meanWorkMs": 13.46,
     "enemies": 260,
     "shots": 15,
     "fields": 0,
@@ -236,5 +261,5 @@
     "Fixture attack screenshots are marked separately from ordinary offline input tests",
     "No Android/iOS physical-device, long-term retention, thermal or enjoyment certification"
   ],
-  "github": "Final-head CI and Ready/MERGEABLE/CLEAN verified on the PR after push; see current PR checks"
+  "github": "PR #573: https://github.com/romarin0325-cell/Studying/pull/573 . Final-head CI and merge status are recorded by GitHub checks; local results are recorded above."
 }
