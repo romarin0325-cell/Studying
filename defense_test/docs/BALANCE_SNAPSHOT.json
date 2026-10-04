@@ -1,0 +1,644 @@
+{
+  "tuning": {
+    "heroDrawCost": 100,
+    "relicDrawCost": 80,
+    "heroRates": [
+      0.7,
+      0.25,
+      0.048,
+      0.002
+    ],
+    "duplicateGrowth": 1.58,
+    "enhanceStep": 0.1,
+    "levelStep": 0.04,
+    "levelCostBase": 18,
+    "levelCostGrowth": 1.14,
+    "specialCap": 0.15,
+    "specialHalf": 8,
+    "dispatchHours": 20,
+    "dispatchStageStep": 0.05,
+    "idleHours": 20,
+    "idleDustPerHour": 14,
+    "firstClearBase": 160,
+    "firstClearStep": 10,
+    "relicThresholdBase": 30,
+    "relicThresholdGrowth": 2.2,
+    "relicProbabilityHalf": 3
+  },
+  "probability": [
+    {
+      "name": "any SR",
+      "perDraw": 0.048,
+      "meanDraws": 20.833333333333332,
+      "medianDraws": 15,
+      "p90Draws": 47,
+      "at20": 0.6261142030008744,
+      "at50": 0.9145233645126967,
+      "at100": 0.9926937447857707
+    },
+    {
+      "name": "specific SR",
+      "perDraw": 0.008,
+      "meanDraws": 125,
+      "medianDraws": 87,
+      "p90Draws": 287,
+      "at20": 0.14840433291485078,
+      "at50": 0.3307573538670161,
+      "at100": 0.5521142805969217
+    },
+    {
+      "name": "any normal UR",
+      "perDraw": 0.002,
+      "meanDraws": 500,
+      "medianDraws": 347,
+      "p90Draws": 1151,
+      "at20": 0.03924904297365728,
+      "at50": 0.09525318199596433,
+      "at100": 0.18143319531157232
+    },
+    {
+      "name": "current season guardian",
+      "perDraw": 0.001,
+      "meanDraws": 1000,
+      "medianDraws": 693,
+      "p90Draws": 2302,
+      "at20": 0.01981113517046529,
+      "at50": 0.04879437180296864,
+      "at100": 0.09520785288629108
+    }
+  ],
+  "enhancement": [
+    {
+      "current": 0,
+      "nextCopies": 1,
+      "spentCopies": 0,
+      "power": 1,
+      "special": 1,
+      "gainPerCopy": 0.1
+    },
+    {
+      "current": 1,
+      "nextCopies": 2,
+      "spentCopies": 1,
+      "power": 1.1,
+      "special": 1.0166666666666666,
+      "gainPerCopy": 0.05
+    },
+    {
+      "current": 2,
+      "nextCopies": 3,
+      "spentCopies": 3,
+      "power": 1.2,
+      "special": 1.03,
+      "gainPerCopy": 0.03333333333333333
+    },
+    {
+      "current": 3,
+      "nextCopies": 4,
+      "spentCopies": 6,
+      "power": 1.3,
+      "special": 1.040909090909091,
+      "gainPerCopy": 0.025
+    },
+    {
+      "current": 4,
+      "nextCopies": 7,
+      "spentCopies": 10,
+      "power": 1.4,
+      "special": 1.05,
+      "gainPerCopy": 0.014285714285714287
+    },
+    {
+      "current": 5,
+      "nextCopies": 10,
+      "spentCopies": 17,
+      "power": 1.5,
+      "special": 1.0576923076923077,
+      "gainPerCopy": 0.01
+    },
+    {
+      "current": 6,
+      "nextCopies": 16,
+      "spentCopies": 27,
+      "power": 1.6,
+      "special": 1.0642857142857143,
+      "gainPerCopy": 0.00625
+    },
+    {
+      "current": 7,
+      "nextCopies": 25,
+      "spentCopies": 43,
+      "power": 1.7000000000000002,
+      "special": 1.07,
+      "gainPerCopy": 0.004
+    },
+    {
+      "current": 8,
+      "nextCopies": 39,
+      "spentCopies": 68,
+      "power": 1.8,
+      "special": 1.075,
+      "gainPerCopy": 0.002564102564102564
+    },
+    {
+      "current": 9,
+      "nextCopies": 62,
+      "spentCopies": 107,
+      "power": 1.9,
+      "special": 1.0794117647058823,
+      "gainPerCopy": 0.0016129032258064516
+    },
+    {
+      "current": 10,
+      "nextCopies": 97,
+      "spentCopies": 169,
+      "power": 2,
+      "special": 1.0833333333333333,
+      "gainPerCopy": 0.0010309278350515464
+    },
+    {
+      "current": 11,
+      "nextCopies": 154,
+      "spentCopies": 266,
+      "power": 2.1,
+      "special": 1.0868421052631578,
+      "gainPerCopy": 0.0006493506493506494
+    },
+    {
+      "current": 12,
+      "nextCopies": 243,
+      "spentCopies": 420,
+      "power": 2.2,
+      "special": 1.09,
+      "gainPerCopy": 0.000411522633744856
+    },
+    {
+      "current": 13,
+      "nextCopies": 383,
+      "spentCopies": 663,
+      "power": 2.3,
+      "special": 1.092857142857143,
+      "gainPerCopy": 0.0002610966057441253
+    },
+    {
+      "current": 14,
+      "nextCopies": 605,
+      "spentCopies": 1046,
+      "power": 2.4000000000000004,
+      "special": 1.0954545454545455,
+      "gainPerCopy": 0.00016528925619834712
+    },
+    {
+      "current": 15,
+      "nextCopies": 955,
+      "spentCopies": 1651,
+      "power": 2.5,
+      "special": 1.0978260869565217,
+      "gainPerCopy": 0.00010471204188481676
+    },
+    {
+      "current": 16,
+      "nextCopies": 1509,
+      "spentCopies": 2606,
+      "power": 2.6,
+      "special": 1.1,
+      "gainPerCopy": 0.00006626905235255136
+    },
+    {
+      "current": 17,
+      "nextCopies": 2384,
+      "spentCopies": 4115,
+      "power": 2.7,
+      "special": 1.102,
+      "gainPerCopy": 0.00004194630872483222
+    },
+    {
+      "current": 18,
+      "nextCopies": 3766,
+      "spentCopies": 6499,
+      "power": 2.8,
+      "special": 1.103846153846154,
+      "gainPerCopy": 0.00002655337227827934
+    },
+    {
+      "current": 19,
+      "nextCopies": 5950,
+      "spentCopies": 10265,
+      "power": 2.9000000000000004,
+      "special": 1.1055555555555556,
+      "gainPerCopy": 0.00001680672268907563
+    },
+    {
+      "current": 20,
+      "nextCopies": 9401,
+      "spentCopies": 16215,
+      "power": 3,
+      "special": 1.1071428571428572,
+      "gainPerCopy": 0.000010637166258908628
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "nextDust": 18,
+      "basePower": 1,
+      "cumulativeDust": 0
+    },
+    {
+      "level": 5,
+      "nextDust": 31,
+      "basePower": 1.16,
+      "cumulativeDust": 90
+    },
+    {
+      "level": 10,
+      "nextDust": 59,
+      "basePower": 1.3599999999999999,
+      "cumulativeDust": 294
+    },
+    {
+      "level": 15,
+      "nextDust": 113,
+      "basePower": 1.56,
+      "cumulativeDust": 683
+    },
+    {
+      "level": 20,
+      "nextDust": 218,
+      "basePower": 1.76,
+      "cumulativeDust": 1430
+    },
+    {
+      "level": 30,
+      "nextDust": 805,
+      "basePower": 2.16,
+      "cumulativeDust": 5632
+    },
+    {
+      "level": 40,
+      "nextDust": 2983,
+      "basePower": 2.56,
+      "cumulativeDust": 21193
+    }
+  ],
+  "relics": [
+    {
+      "tier": 0,
+      "threshold": 0,
+      "nextThreshold": 30,
+      "rates": [
+        0.9600000000000001,
+        0.035,
+        0.0045,
+        0.0005
+      ]
+    },
+    {
+      "tier": 1,
+      "threshold": 30,
+      "nextThreshold": 96,
+      "rates": [
+        0.8574999999999999,
+        0.09875,
+        0.038375,
+        0.005375
+      ]
+    },
+    {
+      "tier": 2,
+      "threshold": 96,
+      "nextThreshold": 242,
+      "rates": [
+        0.796,
+        0.137,
+        0.0587,
+        0.0083
+      ]
+    },
+    {
+      "tier": 3,
+      "threshold": 242,
+      "nextThreshold": 561,
+      "rates": [
+        0.755,
+        0.1625,
+        0.07225000000000001,
+        0.01025
+      ]
+    },
+    {
+      "tier": 4,
+      "threshold": 561,
+      "nextThreshold": 1264,
+      "rates": [
+        0.7257142857142856,
+        0.18071428571428572,
+        0.08192857142857143,
+        0.011642857142857142
+      ]
+    },
+    {
+      "tier": 5,
+      "threshold": 1264,
+      "nextThreshold": 2810,
+      "rates": [
+        0.7037500000000001,
+        0.194375,
+        0.0891875,
+        0.0126875
+      ]
+    },
+    {
+      "tier": 6,
+      "threshold": 2810,
+      "nextThreshold": 6211,
+      "rates": [
+        0.6866666666666668,
+        0.205,
+        0.09483333333333334,
+        0.0135
+      ]
+    },
+    {
+      "tier": 7,
+      "threshold": 6211,
+      "nextThreshold": 13694,
+      "rates": [
+        0.6729999999999999,
+        0.2135,
+        0.09935000000000001,
+        0.01415
+      ]
+    },
+    {
+      "tier": 8,
+      "threshold": 13694,
+      "nextThreshold": 30157,
+      "rates": [
+        0.6618181818181819,
+        0.22045454545454546,
+        0.10304545454545457,
+        0.014681818181818183
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "hp": 1,
+      "slots": 0,
+      "dispatchMultiplier": 1.05,
+      "firstClear": 170,
+      "totalFirstClear": 170
+    },
+    {
+      "stage": 9,
+      "hp": 3.05,
+      "slots": 1,
+      "dispatchMultiplier": 1.45,
+      "firstClear": 250,
+      "totalFirstClear": 1890
+    },
+    {
+      "stage": 18,
+      "hp": 5.356249999999999,
+      "slots": 2,
+      "dispatchMultiplier": 1.9,
+      "firstClear": 340,
+      "totalFirstClear": 4590
+    },
+    {
+      "stage": 27,
+      "hp": 7.6625,
+      "slots": 3,
+      "dispatchMultiplier": 2.35,
+      "firstClear": 430,
+      "totalFirstClear": 8100
+    },
+    {
+      "stage": 36,
+      "hp": 9.96875,
+      "slots": 4,
+      "dispatchMultiplier": 2.8,
+      "firstClear": 520,
+      "totalFirstClear": 12420
+    },
+    {
+      "stage": 45,
+      "hp": 12.274999999999999,
+      "slots": 4,
+      "dispatchMultiplier": 3.25,
+      "firstClear": 610,
+      "totalFirstClear": 17550
+    }
+  ],
+  "starter": [
+    {
+      "id": "star_boy",
+      "power": 470,
+      "dispatchAt9": 74
+    },
+    {
+      "id": "snow_rabbit",
+      "power": 241,
+      "dispatchAt9": 62
+    },
+    {
+      "id": "night_rabbit",
+      "power": 460,
+      "dispatchAt9": 73
+    },
+    {
+      "id": "siren",
+      "power": 208,
+      "dispatchAt9": 60
+    },
+    {
+      "id": "great_detective",
+      "power": 420,
+      "dispatchAt9": 71
+    }
+  ],
+  "roster": [
+    {
+      "id": "star_boy",
+      "name": "별똥별소년",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "snow_rabbit",
+      "name": "눈토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "silver_rabbit",
+      "name": "은토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "night_rabbit",
+      "name": "밤토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "siren",
+      "name": "세이렌",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "mushroom_king",
+      "name": "머쉬룸킹",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "great_detective",
+      "name": "명탐정",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "guardian",
+      "name": "가디언",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "avalanche_maid",
+      "name": "메이드",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "santa",
+      "name": "산타",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "red_dragon",
+      "name": "레드드래곤",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "aurora",
+      "name": "아우로라",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "storm_sage",
+      "name": "폭풍의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "flame_sage",
+      "name": "화염의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "lightning_sage",
+      "name": "번개의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "time_magician",
+      "name": "시간의마술사",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "ancient_dragon",
+      "name": "에인션트드래곤",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "phantom",
+      "name": "팬텀",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "zeke",
+      "name": "지크",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "luna",
+      "name": "루나",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "jasmine",
+      "name": "자스민",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "queen",
+      "name": "여왕",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "rumi",
+      "name": "루미",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "cherry_prince",
+      "name": "체리프린스",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "time_ruler",
+      "name": "시간의지배자",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "galaxy_whale",
+      "name": "은하고래",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "doom",
+      "name": "둠",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "cinderella",
+      "name": "신데렐라",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "harmonious",
+      "name": "하모니어스",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "frost_witch",
+      "name": "혹한의마녀",
+      "rarity": "UR",
+      "hidden": true
+    }
+  ]
+}

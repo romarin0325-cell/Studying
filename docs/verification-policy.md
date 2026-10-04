@@ -45,7 +45,7 @@ the changed paths and prints the failure each check is intended to catch.
 - Shared dependency changes report compatibility for untouched games as
   unverified instead of automatically running every game.
 
-Card and Shooter are the active targets of the root verifier. Defense remains
+Card, Shooter, Idle, Survivor and the isolated defense_test prototype are active targets of the root verifier. Defense remains
 excluded from root verification by repository policy. The dedicated Defense
 workflow calls the same planner with --only defense and is the only automatic
 path allowed to run Defense commands.
@@ -86,6 +86,7 @@ Changing a deployment input selects one build for that game:
 - Card: card/dist/DREAMWEAVER.html
 - Shooter: shooter/dist/AstralBloom.html
 - Defense: defense/dist-local/HeroCoreDefense.html
+- Star Garden test: defense_test/dist/StarGardenDefense.html
 
 Test-only and documentation-only changes do not build. Asset cache checks do
 not force regeneration when the source and cache contract still match.
@@ -99,6 +100,12 @@ of the changed state.
 Browser emulation does not certify physical Android/iOS multi-touch, thermal
 behavior, memory pressure, or browser-specific fullscreen performance. Those
 boundaries must be reported when relevant.
+
+Star Garden is a separate scoped target. Its file-based storage, backup import,
+WebP art and responsive viewport behavior select a focused WebKit scenario as
+well as Chromium. A defense_test-only PR never selects active Defense commands.
+Research reports and generated asset provenance under defense_test/docs are
+non-deployment documentation.
 
 ## Time and transition
 

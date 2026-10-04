@@ -1,0 +1,40 @@
+# ASTRA · 별빛 정원 — Defense collection test
+
+기존 Defense의 30명 캐릭터, 9종 보스, 공격 형태, 배치·합성 전투와 원본 에셋을 활용한 독립 수집/성장 테스트 게임입니다. 활성 Defense의 게임 데이터와 저장 키를 수정하지 않습니다.
+
+## 바로 실행
+
+- `dist/StarGardenDefense.html`을 브라우저로 엽니다. 그림·음악 생성 코드·폰트·게임 코드가 포함된 오프라인 단일 파일입니다.
+- 초기 동료는 별똥별소년·눈토끼·밤토끼·세이렌·명탐정 각 1명이며 항상 5명을 편성합니다.
+- 하단 메뉴: 정원 / 수집 / 모험 / 소환 / 파견.
+- 정원에서 파트너를 바꾸고 인사·별가루를 받습니다. 수집에서 성장·중복 강화·유물 장착을 합니다.
+- 전투 자동 보조는 처음에 켜져 있습니다. 소환·합성·훈련·보스 스킬을 보조하며 직접 배치, 합성, 타깃 우선순위와 스킬을 조작할 수 있습니다. 전투는 일시정지·2배속·저장 후 귀환·중도 정산을 지원합니다.
+- 주간·월간 도전은 메인 3스테이지, 파견 슬롯은 9·18·27·36스테이지 클리어에서 열립니다.
+- 주간·월간 입장은 확정 시 소모됩니다. 저장된 동일 원정은 이어갈 수 있습니다.
+- 설정에서 JSON 백업을 저장하고 가져올 수 있습니다. 파일을 다른 기기나 다른 브라우저로 옮길 때 백업도 옮깁니다.
+
+## 개발
+
+저장소 루트의 잠긴 의존성을 설치한 뒤 실행합니다.
+
+```powershell
+npm ci
+node defense_test/scripts/build.mjs
+node defense_test/scripts/serve.mjs
+npm run verify:plan
+npm run verify
+```
+
+빌드 서버: http://127.0.0.1:4178/ . 폴더의 원본 `index.html`은 빌드 템플릿이므로 완성된 HTML로 실행합니다.
+
+루트 검증은 이 신규 게임의 관련 계약·브라우저 검증만 선택합니다. 활성 Defense나 다른 게임의 런타임 검증을 호출하지 않습니다. 원본 아트는 `defense/assets/merge`, 기준 데이터는 `defense/merge/content.js`, 폰트는 `card/assets/Jua-Regular.ttf`에 있습니다. 캐릭터별/등급별 기본 능력치 배율은 추가하지 않았습니다.
+
+## 설계와 검증 자료
+
+- [UI·에셋 조사와 화면별 설계](docs/UI_ASSET_RESEARCH.md)
+- [성장·확률·경제 공식과 설정 이유](docs/GROWTH_BALANCE.md)
+- [기능별 합격 기준과 실제 검증](docs/ACCEPTANCE.md)
+- [실제 구현에서 재생성한 수치](docs/BALANCE_SNAPSHOT.json): `node defense_test/scripts/analyze.mjs`
+- [원본 에셋 경로·크기·SHA-256](docs/ASSET_PROVENANCE.json)
+
+수치 조정의 출발점은 `src/content.js`의 `TUNING`, `src/economy.js`, `src/combat/engine.js`의 `wavePlan`입니다. 저장 키는 `astra.star-garden.test.v1`입니다. 서버가 없는 테스트라 기간과 파견은 기기 시계를 사용하며, 실제 단말 성능과 장기 잔존율은 별도 플레이테스트 대상입니다.

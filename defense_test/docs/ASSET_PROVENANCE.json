@@ -1,0 +1,313 @@
+{
+  "canonicalCommit": "d4c32cf",
+  "policy": "unchanged canonical atlases; build-time authored portrait crops; no runtime pixel processing",
+  "assets": [
+    {
+      "id": "unit-zeke",
+      "source": "defense/assets/merge/units/zeke.webp",
+      "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-rumi",
+      "source": "defense/assets/merge/units/rumi.webp",
+      "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-luna",
+      "source": "defense/assets/merge/units/luna.webp",
+      "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-cinderella",
+      "source": "defense/assets/merge/units/cinderella.webp",
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-snow_rabbit",
+      "source": "defense/assets/merge/units/snow_rabbit.webp",
+      "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-avalanche_maid",
+      "source": "defense/assets/merge/units/avalanche_maid.webp",
+      "sha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-night_rabbit",
+      "source": "defense/assets/merge/units/night_rabbit.webp",
+      "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-guardian",
+      "source": "defense/assets/merge/units/guardian.webp",
+      "sha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-storm_sage",
+      "source": "defense/assets/merge/units/storm_sage.webp",
+      "sha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-lightning_sage",
+      "source": "defense/assets/merge/units/lightning_sage.webp",
+      "sha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-red_dragon",
+      "source": "defense/assets/merge/units/red_dragon.webp",
+      "sha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-flame_sage",
+      "source": "defense/assets/merge/units/flame_sage.webp",
+      "sha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-mushroom_king",
+      "source": "defense/assets/merge/units/mushroom_king.webp",
+      "sha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-great_detective",
+      "source": "defense/assets/merge/units/great_detective.webp",
+      "sha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-siren",
+      "source": "defense/assets/merge/units/siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-phantom",
+      "source": "defense/assets/merge/units/phantom.webp",
+      "sha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-queen",
+      "source": "defense/assets/merge/units/queen.webp",
+      "sha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-galaxy_whale",
+      "source": "defense/assets/merge/units/galaxy_whale.webp",
+      "sha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-silver_rabbit",
+      "source": "defense/assets/merge/units/silver_rabbit.webp",
+      "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-ancient_dragon",
+      "source": "defense/assets/merge/units/ancient_dragon.webp",
+      "sha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-time_ruler",
+      "source": "defense/assets/merge/units/time_ruler.webp",
+      "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-doom",
+      "source": "defense/assets/merge/units/doom.webp",
+      "sha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-santa",
+      "source": "defense/assets/merge/units/santa.webp",
+      "sha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-jasmine",
+      "source": "defense/assets/merge/units/jasmine.webp",
+      "sha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-star_boy",
+      "source": "defense/assets/merge/units/star_boy.webp",
+      "sha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-time_magician",
+      "source": "defense/assets/merge/units/time_magician.webp",
+      "sha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-cherry_prince",
+      "source": "defense/assets/merge/units/cherry_prince.webp",
+      "sha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-frost_witch",
+      "source": "defense/assets/merge/units/frost_witch.webp",
+      "sha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-harmonious",
+      "source": "defense/assets/merge/units/harmonious.webp",
+      "sha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-aurora",
+      "source": "defense/assets/merge/units/aurora.webp",
+      "sha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "garden",
+      "source": "defense/assets/merge/garden.webp",
+      "sha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
+      "width": 1100,
+      "height": 1100
+    },
+    {
+      "id": "bosses",
+      "source": "defense/assets/moonlit/realm-bosses.webp",
+      "sha256": "d26e27ba3ca5092766316523c151bbedcb68e0c07304b0d6aeadc71fd7ade085",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "creatures",
+      "source": "defense/assets/moonlit/creatures.webp",
+      "sha256": "15a07ee511f0a16ec75b7cef56b6c9fc55468c0d62c0327afc3f117394480490",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "id": "relics",
+      "source": "defense/assets/merge/relics.webp",
+      "sha256": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
+      "width": 1280,
+      "height": 1024
+    },
+    {
+      "id": "blessings",
+      "source": "defense/assets/merge/blessings.webp",
+      "sha256": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "effects",
+      "source": "defense/assets/merge/effects.webp",
+      "sha256": "4153276d72d2ce2edf37bb7b913f7353a87f3c17e852f7bd4e839d13648a583b",
+      "width": 1792,
+      "height": 768
+    },
+    {
+      "id": "unit-trauma",
+      "source": "defense/assets/merge/units/trauma.webp",
+      "sha256": "a342de6a9b249f3115995392d42c87a03e6b6ec8abcf6a9cf4132ca72a93e3eb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "effects-expansion",
+      "source": "defense/assets/merge/effects-expansion.webp",
+      "sha256": "b752df529b96655a1bdb3df7c413394a5cf1a7f6359e17dd3d1a32bbe88f12b0",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "finishers",
+      "source": "defense/assets/merge/finishers.webp",
+      "sha256": "9bacb4119fd38a8787e1bd088125ec655153bb8faea6617a92192d8c66a49d1b",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "relics-expansion",
+      "source": "defense/assets/merge/relics-expansion.webp",
+      "sha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "id": "bosses-expansion",
+      "source": "defense/assets/merge/bosses-expansion.webp",
+      "sha256": "562a35ce80ba7f59a55b0d7a312b74edeb035d17c09ca3ac76188bb221e3f3ae",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "realms-expansion",
+      "source": "defense/assets/merge/realms-expansion.webp",
+      "sha256": "5f7e4e9d4d7816f37e8ab62dd4f58f77d987c9ea7cbcb4b762f7e71e2a7bfd64",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "effects-trio",
+      "source": "defense/assets/merge/effects-trio.webp",
+      "sha256": "66e9b71290e5326bf7b1f26990ed744da49975a926b5e67867ffd7aaa19dda17",
+      "width": 768,
+      "height": 512
+    }
+  ],
+  "font": {
+    "source": "card/assets/Jua-Regular.ttf",
+    "sha256": "769677aef240bfc3b9965f2b50748075bff885e6c6992fc591a3fb268279f898"
+  },
+  "portraits": 30,
+  "relics": 24
+}
