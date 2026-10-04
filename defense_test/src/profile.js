@@ -58,8 +58,8 @@ export function command(p,action,args={},now=Date.now()){
   now=safeNow(p,now);rollDay(p,now);
   const no=message=>({ok:false,message});
   if(action==='draw'){
-    const banner=args.banner,count=args.count;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인해 주세요.');
-    const cost=(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정 ${cost-p.dreams}개가 더 필요해요.`);
+    const banner=args.banner,count=args.count;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
+    const cost=(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);
     p.dreams-=cost;const items=[];
     for(let i=0;i<count;i++){
       const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',calendar(now).guardian);
@@ -68,80 +68,80 @@ export function command(p,action,args={},now=Date.now()){
     }p.history=p.history.slice(0,50);p.daily.draw=true;return {ok:true,items,cost};
   }
   if(action==='level'){
-    const e=p.heroes[args.id];if(!e?.owned||p.active)return no('원정을 마친 뒤 성장시켜 주세요.');const cost=levelCost(e.level);if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족해요. 정원 보상을 모아 주세요.');
-    p.dust-=cost;e.level++;return {ok:true,message:`${HERO[args.id].name}이 Lv.${e.level}로 성장했어요.`};
+    const e=p.heroes[args.id];if(!e?.owned||p.active)return no('원정 종료 후 성장할 수 있습니다.');const cost=levelCost(e.level);if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');
+    p.dust-=cost;e.level++;return {ok:true,message:`${HERO[args.id].name} Lv.${e.level} 달성`};
   }
   if(action==='enhance'){
-    const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정을 마친 뒤 강화해 주세요.');const cost=duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`같은 ${args.kind==='relic'?'유물':'동료'} ${cost}개가 필요해요.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 완료`};
+    const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정 종료 후 강화할 수 있습니다.');const cost=duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
   }
-  if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 만나지 못한 동료예요.');p.partner=args.id;return {ok:true};}
-  if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘의 인사는 이미 나눴어요. 내일 또 만나요.');p.petDay=day;p.heroes[p.partner].bond++;p.dreams+=40;return {ok:true,message:'마음이 한 걸음 가까워졌어요. 꿈의결정 +40'};}
+  if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');p.partner=args.id;return {ok:true};}
+  if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;p.heroes[p.partner].bond++;p.dreams+=40;return {ok:true,message:'인사 완료 · 꿈의결정 +40'};}
   if(action==='deck'){
-    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 서로 다른 동료 5명을 선택해 주세요.');p.deck=[...ids];return {ok:true,message:'다섯 동료의 준비가 끝났어요.'};
+    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 서로 다른 동료 5명을 선택하세요.');p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
   }
   if(action==='equip'){
-    if(p.active||!p.relics[args.id]?.owned)return no('보유한 유물을 원정 전에 선택해 주세요.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 3개까지 함께 가져가요.');return {ok:true};
+    if(p.active||!p.relics[args.id]?.owned)return no('보유한 유물만 장착할 수 있습니다.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 최대 3개까지 장착할 수 있습니다.');return {ok:true};
   }
   if(action==='dispatch'){
-    if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택해 주세요.');
-    if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=5)return no('전투에 남을 동료 5명이 필요해요. 새로운 동료를 먼저 만나 주세요.');
+    if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
+    if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=5)return no('전투에 남을 동료 5명이 필요합니다. 먼저 동료를 더 모으세요.');
     const reward=dispatchReward(combatPower(args.id,p.heroes[args.id]),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward});
-    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<5&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'20시간의 별길 파견을 떠났어요.'};
+    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<5&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
   }
   if(action==='claimDispatch'){
-    if(p.active)return no('원정을 마친 뒤 파견 보상을 받아 주세요.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('동료가 아직 별길을 여행하고 있어요.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);p.daily.dispatch=true;return {ok:true,reward:d.reward,message:`동료가 돌아왔어요. 꿈의결정 +${d.reward}`};
+    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);p.daily.dispatch=true;return {ok:true,reward:d.reward,message:`파견 보상 수령 · 꿈의결정 +${d.reward}`};
   }
-  if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('별가루가 자라는 중이에요. 조금 뒤에 만나요.');p.dust+=reward;p.idleAt=now;return {ok:true,reward,message:`정원에서 별가루 ${reward}개를 모았어요.`};}
+  if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 수령할 방치 보상이 없습니다.');p.dust+=reward;p.idleAt=now;return {ok:true,reward,message:`방치 보상 수령 · 별가루 +${reward}`};}
   if(action==='daily'){
-    const id=args.id;if(!['combat','draw','dispatch'].includes(id)||!p.daily[id]||p.daily.claimed.includes(id))return no('아직 받지 못한 보상이에요.');p.daily.claimed.push(id);const reward=id==='combat'?60:30;p.dreams+=reward;return {ok:true,message:`오늘의 발자국 · 꿈의결정 +${reward}`};
+    const id=args.id;if(!['combat','draw','dispatch'].includes(id)||!p.daily[id]||p.daily.claimed.includes(id))return no('아직 받을 수 없는 보상입니다.');p.daily.claimed.push(id);const reward=id==='combat'?60:30;p.dreams+=reward;return {ok:true,message:`일일 임무 보상 · 꿈의결정 +${reward}`};
   }
   if(action==='begin'){
-    if(p.active)return no('진행 중인 원정을 이어가 주세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인해 주세요.');
-    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 동료 5명을 준비해 주세요.');
-    const c=calendar(now),stage=args.stage||Math.min(45,p.cleared+1);if(!integer(stage,45)||stage<1||stage>p.cleared+1)return no('앞선 별길을 먼저 클리어해 주세요.');
-    if(mode!=='main'&&p.cleared<3)return no('메인 3스테이지에서 두 도전의 문이 열려요.');
-    if(mode==='weekly'&&p.weekly===c.week||mode==='monthly'&&p.monthly===c.month)return no('이번 기간의 입장을 이미 사용했어요.');
+    if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
+    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 동료 5명이 필요합니다.');
+    const c=calendar(now),stage=args.stage||Math.min(45,p.cleared+1);if(!integer(stage,45)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
+    if(mode!=='main'&&p.cleared<3)return no('스테이지 3 클리어 시 해금됩니다.');
+    if(mode==='weekly'&&p.weekly===c.week||mode==='monthly'&&p.monthly===c.month)return no('이번 기간의 입장 횟수를 모두 사용했습니다.');
     if(mode==='weekly')p.weekly=c.week;if(mode==='monthly')p.monthly=c.month;
     p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null};
     if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
   }
   if(action==='draft'){
-    const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=5||!integer(args.index,1))return no('현재의 두 선택지에서 골라 주세요.');
-    const choice=a.offers?.[args.index];if(!choice||a.draft.includes(choice.id)||away(p,choice.id))return no('선택할 수 없는 동료예요.');
+    const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=5||!integer(args.index,1))return no('제시된 두 후보 중에서 선택하세요.');
+    const choice=a.offers?.[args.index];if(!choice||a.draft.includes(choice.id)||away(p,choice.id))return no('선택할 수 없는 동료입니다.');
     a.draft.push(choice.id);if(choice.boon==='focus')a.boon++;
     if(a.draft.length===5){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
   }
   if(action==='settle'){
-    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정이에요.');let reward=0;
+    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0;
     if(a.mode==='main'){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;reward=stageReward(a.stage);}
       p.dust+=args.won?40+a.stage*8:12;
     }else reward=(a.mode==='weekly'?120:150)+args.round*(a.mode==='weekly'?60:50);
     p.dreams+=reward;p.daily.combat=true;p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward};
   }
-  if(action==='setting'){if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인해 주세요.');p.settings[args.id]=args.value;return {ok:true};}
-  return no('사용할 수 없는 동작이에요.');
+  if(action==='setting'){if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
+  return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.
 // A failed storage write never commits a draw, an entry ticket or a reward.
 export class ProfileStore{
   constructor(storage,now=Date.now()){
     this.storage=storage;this.broken=false;this.conflict=false;this.warning='';let raw=null;
-    try{raw=storage.getItem(SAVE_KEY);this.value=raw?parseProfile(raw):createProfile(now);if(!this.value){this.broken=true;this.warning='저장 데이터가 손상되었습니다. 백업을 불러와 주세요.';this.value=createProfile(now);}}catch{this.broken=true;this.warning='저장 공간을 사용할 수 없습니다. 브라우저 저장 권한을 확인해 주세요.';this.value=createProfile(now);}
+    try{raw=storage.getItem(SAVE_KEY);this.value=raw?parseProfile(raw):createProfile(now);if(!this.value){this.broken=true;this.warning='저장 데이터가 손상되었습니다. 백업을 불러오세요.';this.value=createProfile(now);}}catch{this.broken=true;this.warning='저장 공간을 사용할 수 없습니다. 브라우저 저장 권한을 확인하세요.';this.value=createProfile(now);}
     this.raw=raw;
   }
   transact(action,args={},now=Date.now()){
-    if(this.broken||this.conflict)return {ok:false,message:this.warning||'다른 창에서 저장이 바뀌었어요. 이 창을 새로고침해 주세요.'};
+    if(this.broken||this.conflict)return {ok:false,message:this.warning||'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.'};
     try{
-      const disk=this.storage.getItem(SAVE_KEY);if(disk!==this.raw){this.conflict=true;return {ok:false,message:'다른 창에서 저장이 바뀌었어요. 이 창을 새로고침해 주세요.'};}
+      const disk=this.storage.getItem(SAVE_KEY);if(disk!==this.raw){this.conflict=true;return {ok:false,message:'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.'};}
       const next=JSON.parse(JSON.stringify(this.value)),result=command(next,action,args,now);if(!result.ok)return result;
       next.revision++;next.clockAt=safeNow(next,now);if(!validateProfile(next))throw new Error('invalid transaction');
       const raw=JSON.stringify(next);this.storage.setItem(SAVE_KEY,raw);this.raw=raw;this.value=next;return result;
-    }catch{return {ok:false,message:'저장하지 못했습니다. 동작을 취소했어요. 저장 공간을 확인해 주세요.'};}
+    }catch{return {ok:false,message:'저장하지 못해 동작을 취소했습니다. 저장 공간을 확인하세요.'};}
   }
   saveRun(run){
     if(!this.value.active)return true;
     try{if(this.storage.getItem(SAVE_KEY)!==this.raw){this.conflict=true;return false;}const next=JSON.parse(JSON.stringify(this.value));next.active.run=run;next.revision++;if(!validateProfile(next))return false;const raw=JSON.stringify(next);this.storage.setItem(SAVE_KEY,raw);this.raw=raw;this.value=next;return true;}catch{return false;}
   }
-  import(raw){const p=parseProfile(raw);if(!p)return {ok:false,message:'별빛 정원의 올바른 백업 파일이 아니에요.'};try{const text=JSON.stringify(p);this.storage.setItem(SAVE_KEY,text);this.raw=text;this.value=p;this.broken=false;this.conflict=false;this.warning='';return {ok:true};}catch{return {ok:false,message:'백업을 저장할 공간이 부족해요.'};}}
+  import(raw){const p=parseProfile(raw);if(!p)return {ok:false,message:'올바른 백업 파일이 아닙니다.'};try{const text=JSON.stringify(p);this.storage.setItem(SAVE_KEY,text);this.raw=text;this.value=p;this.broken=false;this.conflict=false;this.warning='';return {ok:true};}catch{return {ok:false,message:'백업을 저장할 공간이 부족합니다.'};}}
 }

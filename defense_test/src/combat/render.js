@@ -98,7 +98,7 @@ export class Renderer {
     if(this.skill){this.skill.life-=dt;if(this.skill.life<=0)this.skill=null;}
     if(this.drag){this.art.hero(ctx,this.drag.hero,this.drag.x,this.drag.y+35,145,{alpha:.9,form:this.drag.form});}
     for(const f of this.floats){f.life-=dt;f.y-=dt*31;ctx.globalAlpha=Math.min(1,f.life*3);ctx.font=`700 ${f.size}px Georgia,serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#172632';ctx.strokeText(f.text,f.x,f.y);ctx.fillStyle=f.color;ctx.fillText(f.text,f.x,f.y);}ctx.globalAlpha=1;this.floats=this.floats.filter(f=>f.life>0);
-    if(s.phase==='intermission'){ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.fillStyle='#f4e5c0';ctx.fillText(`다음 무리까지 ${Math.max(1,Math.ceil(s.breakTime))}초`,360,737);}
+    if(s.phase==='intermission'){ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.fillStyle='#f4e5c0';ctx.fillText(`다음 웨이브까지 ${Math.max(1,Math.ceil(s.breakTime))}초`,360,737);}
     ctx.restore();
   }
   drawDecor(s){const ctx=this.ctx,t=this.clock;

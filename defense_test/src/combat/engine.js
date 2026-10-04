@@ -88,7 +88,7 @@ export function drawHero(s){return s.deck[Math.floor(random(s)*s.deck.length)];}
 export function summon(s,preferred=-1){
   if(!['combat','intermission'].includes(s.phase))return {ok:false,reason:'전투 중에 소환할 수 있습니다.'};
   if(freeCell(s)<0)return {ok:false,reason:'전장이 가득 찼습니다. 합성하거나 영웅을 회수하세요.'};
-  const cost=summonCost(s);if(s.gold<cost)return {ok:false,reason:`${cost-s.gold}골드가 더 필요합니다.`};
+  const cost=summonCost(s);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   const paid=s.freeSummons===0;
   s.gold-=cost;if(!paid)s.freeSummons--;else s.paidSummons++;s.summons++;s.stats.summons++;
   const rank=paid&&has(s,'gift_ribbon')&&s.paidSummons%4===0?2:1,id=drawHero(s),index=place(s,id,rank,preferred);
@@ -120,7 +120,7 @@ export function sell(s,index){
 export function upgrade(s,id){
   if(!s.deck.includes(id)||!['combat','intermission'].includes(s.phase))return {ok:false};
   if(s.upgrades[id]>=5)return {ok:false,reason:'훈련을 모두 마쳤습니다.'};
-  const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`${cost-s.gold}골드가 더 필요합니다.`};
+  const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   s.gold-=cost;s.upgrades[id]++;event(s,'upgrade',{hero:id,level:s.upgrades[id]});return {ok:true};
 }
 export function cycleTarget(s,index){const u=s.board[index];if(!u)return;const values=['first','boss','strong','last'];u.priority=values[(values.indexOf(u.priority)+1)%values.length];}
@@ -327,7 +327,7 @@ export function combatStats(s,u,index=s.board.indexOf(u)){
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
   const u=bestUnit(s,id),hero=HERO[id];if(!u||!s.deck.includes(id))return {ok:false,reason:'전장에 이 영웅이 있어야 합니다.'};
-  if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛 ${hero.skill.cost}이 필요합니다.`};
+  if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛이 부족합니다. (${hero.skill.cost} 필요)`};
   s.gauge-=hero.skill.cost;if(has(s,'lantern'))addGauge(s,15);s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id);
   let visualTargets=targets;
