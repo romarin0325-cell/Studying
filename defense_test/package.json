@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "reports": "node scripts/generated-reports.mjs",
+    "check:reports": "node scripts/generated-reports.mjs --check",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node tests/browser.mjs",
     "serve": "node scripts/serve.mjs"

@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from '../src/battle.js';
 import {HEROES,HERO,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
-import {HERO as CANON,CHAPTERS as ORIGINAL} from '../../defense/merge/content.js';
 import {createProfile,command,validateProfile} from '../src/profile.js';
 import {heroMultiplier} from '../src/economy.js';
 const NOW=1791082800000;
@@ -22,12 +21,12 @@ function play(s,max=500){
   return s;
 }
 
-test('the exact rarity roster retains canonical base stats and all 45 stages rotate the nine guardians',()=>{
+test('the exact rarity roster has independent valid stats and all 45 stages rotate the nine guardians',()=>{
   assert.equal(HEROES.length,30);assert.equal(new Set(HEROES.map(h=>h.id)).size,30);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹']);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라']);
-  for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.equal(h[key],CANON[h.id][key]);
-  assert.equal(CHAPTERS.length,45);assert.equal(CHAPTERS[8].hp,ORIGINAL[6].hp);
+  for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
+  assert.equal(CHAPTERS.length,45);assert.equal(CHAPTERS[8].hp,3.05);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
   const step=CHAPTERS[1].hp-CHAPTERS[0].hp;
   for(let i=1;i<45;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
@@ -42,7 +41,7 @@ test('six main waves contain exactly two copies of one boss and stage nine keeps
       const n=plan.sequence.filter(e=>e.kind==='boss').length;assert.equal(n,wave===3||wave===6?1:0);bosses+=n;
     }assert.equal(bosses,2);
   }
-  const old=Math.round(Math.round(76*1.34**11*ORIGINAL[6].hp*32)*.8);
+  const old=Math.round(Math.round(76*1.34**11*3.05*32)*.8);
   assert.equal(E.wavePlan(6,8).sequence.find(e=>e.kind==='boss').hp,old);
 });
 
@@ -72,7 +71,6 @@ test('persistent growth reaches actual direct, skill and poison damage without c
     for(let i=0;i<100;i++){E.step(base,.05);E.step(grown,.05);}
     assert.ok(base.stats.damage>0,id);assert.ok(grown.stats.damage>base.stats.damage*1.7,id);
     assert.ok(grown.stats.damage<base.stats.damage*2.7,id);
-    assert.equal(HERO[id].damage,CANON[id].damage);
   }
 });
 

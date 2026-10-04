@@ -1,6 +1,6 @@
-import * as source from '../../defense/merge/content.js';
+import * as source from './data.js';
 
-// Canonical art, base statistics and abilities belong to the active Defense.
+// This game's copied definitions and art are maintained independently.
 // Rarity deliberately carries no stat multiplier; the author will balance it.
 export const RARITIES = ['C','R','SR','UR'];
 export const RARITY = {
@@ -28,13 +28,13 @@ export const BOSS_ORDER = ['artificial_demon','flora','love_iris','curse_iris','
 export const BOSSES=source.BOSSES;
 const worlds=[0,1,0,3,4,2,5,3,6];
 export const CHAPTERS=Array.from({length:45},(_,id)=>{
-  const cycle=Math.floor(id/9)+1,boss=BOSS_ORDER[id%9],base=source.CHAPTERS[worlds[id%9]];
+  const cycle=Math.floor(id/9)+1,boss=BOSS_ORDER[id%9],base=source.STAGE_THEMES[worlds[id%9]];
   return {...base,id,name:`${base.name}`,caption:`${cycle}번째 별길 · ${BOSSES[boss].name}`,bosses:[boss,boss,boss],
-    hp:1+(source.CHAPTERS[6].hp-1)*id/8,cycle,stage:id+1};
+    hp:1+(3.05-1)*id/8,cycle,stage:id+1};
 });
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
 export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=source.TRANSFORM_ART;
-export const ASSET_PATHS=Object.fromEntries(Object.entries(source.ASSET_PATHS).map(([id,p])=>[id,p.replace('./assets/','../defense/assets/')]));
+export const ASSET_PATHS=source.ASSET_PATHS;
 export const TUNING=Object.freeze({
   heroDrawCost:100,relicDrawCost:80,heroRates:[.70,.25,.048,.002],
   duplicateGrowth:1.58,enhanceStep:.10,levelStep:.04,levelCostBase:18,levelCostGrowth:1.14,

@@ -104,8 +104,18 @@ boundaries must be reported when relevant.
 Star Garden is a separate scoped target. Its file-based storage, backup import,
 WebP art and responsive viewport behavior select a focused WebKit scenario as
 well as Chromium. A defense_test-only PR never selects active Defense commands.
-Research reports and generated asset provenance under defense_test/docs are
-non-deployment documentation.
+Star Garden owns its copied content definitions, images, font and license inside
+defense_test; active Defense/Card resource changes are no longer its inputs.
+Local data, assets and font-license changes select its contracts, generated
+report comparison, one build and offline browsers.
+
+Research prose under defense_test/docs is non-deployment documentation.
+BALANCE_SNAPSHOT.json and ASSET_PROVENANCE.json are generated evidence, not
+ordinary documentation: changing, deleting or renaming either selects a read-only
+regeneration/comparison check even without a runtime input change. Report
+generator changes also run tamper/missing-file regressions; neither case builds
+the game or installs browsers. Deployment builds never rewrite those reports,
+so a build cannot hide a stale or manually modified JSON from the integrity check.
 
 ## Time and transition
 

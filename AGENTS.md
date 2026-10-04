@@ -21,7 +21,7 @@ Current targets:
 - `card/`: focused Card syntax, contract, build, and browser checks
 - `shooter/`: focused Shooter unit, build, and browser checks
 - `idle/`: focused content, core, rewards, combat, analysis, build, and offline browser checks; long economy simulations are an explicit release check, not a default gate
-- `defense_test/`: standalone Star Garden collection/growth/combat contracts, one offline build, and portrait Chromium/WebKit checks; canonical Defense art is reused without invoking active Defense commands
+- `defense_test/`: independent Star Garden data/assets, collection/growth/combat contracts, generated-report integrity, one offline build, and portrait Chromium/WebKit checks; it has no live dependency on other game trees
 - `survivor/`: Nocturne combat/persistence/art contracts, one single-file build, and offline mobile/desktop play checks; reuses canonical Defense/Shooter art without invoking their suites
 
 `card_legacy/` is a preserved snapshot. Do not use it as the active Card source.
