@@ -1,6 +1,6 @@
 # 루미의 별빛 원정 유지보수 시작점
 
-현재 활성 Defense는 PR #546에서 도입한 21인·6명 편성·5×5 보드의 합성 디펜스다. 실행 코드는 `defense/merge/`에 있고, PR #546 직전의 STARWARD/V2 구현과 문서는 `defense_legacy/`에 보존되어 있다. 레거시 규칙이나 테스트를 현재 게임의 계약으로 사용하지 않는다.
+현재 활성 Defense는 PR #546의 합성 디펜스를 확장한 30인·6명 편성·5×5 보드의 게임이다. 실행 코드는 `defense/merge/`에 있고, 진행·기능 의도·현재 수치·전체 능력은 [doc 문서 시작점](../doc/README.md)에서 읽는다. PR #546 직전의 STARWARD/V2 구현과 문서는 `defense_legacy/`에 보존되어 있다. 레거시 규칙이나 테스트를 현재 게임의 계약으로 사용하지 않는다.
 
 | 영역 | 현재 파일 |
 | --- | --- |
@@ -8,7 +8,7 @@
 | 결정론적 전투·합성·축복·장판·저장 직렬화 | `merge/engine.js` |
 | UI와 저장·입력·화면 전환 | `merge/main.js` |
 | 캔버스와 전장 | `merge/render.js` |
-| 21명 고유 투사체·명중·상태 효과 | `merge/effects.js` |
+| 동료별 투사체·명중·상태 효과 | `merge/effects.js` |
 | 소리 | `merge/audio.js` |
 | 화면 스타일 | `merge/style.css` |
 | 이미지 추정 기준점 | `docs/art/ANATOMICAL_LANDMARKS.json` |
@@ -17,7 +17,9 @@
 ## 먼저 읽을 문서
 
 - [현재 소스 구조와 수정 위치](../doc/SOURCE_DESIGN.md)
-- [현재 역할·스킬·유물·축복·웨이브·보스](../doc/BALANCE_DESIGN.md)
+- [현재 역할·유물·축복·웨이브·보스 밸런스](../doc/BALANCE.md)
+- [동료·변신·보스 능력과 컨셉](../doc/CHARACTERS.md)
+- [첫 출시 역할 설계 배경](../doc/BALANCE_DESIGN.md)
 - [추가 에셋·생성 프롬프트](../doc/ART_ASSETS.md)
 - [PR #546 당시 기획 기록](CONFLUENCE_DESIGN.md)
 - [현재 아트·모션 제작 지침](CONFLUENCE_ART_PLAYBOOK.md)
