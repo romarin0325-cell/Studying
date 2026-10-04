@@ -41,8 +41,11 @@
 
 ## 설계·아트
 
+- [게임 진행·기능 의도·밸런스·전체 동료 능력 문서 시작점](doc/README.md)
 - [소스 구조와 수정 위치](doc/SOURCE_DESIGN.md)
-- [21명·20유물·6축복·웨이브·보스 밸런스](doc/BALANCE_DESIGN.md)
+- [30명·24유물·6축복·7지역·보스의 현재 밸런스](doc/BALANCE.md)
+- [동료 30명·트라우마 변신·보스 9종 능력과 컨셉](doc/CHARACTERS.md)
+- [초기 역할·밸런스 설계 배경](doc/BALANCE_DESIGN.md)
 - [이번 추가 에셋과 생성 기록](doc/ART_ASSETS.md)
 - [기존 캐릭터 아트 계약](ART_DIRECTION.md)
 - [방향도 제작 지침](docs/CONFLUENCE_ART_PLAYBOOK.md)
