@@ -17,6 +17,9 @@ const DEFENSE_TOOLS = new Set([
 const DEFENSE_ART_INPUTS = new Set([
   'defense/docs/art/HEAD_PROFILE.json', 'defense/docs/art/ANATOMICAL_LANDMARKS.json'
 ]);
+const DEFENSE_TEST_REPORTS = new Set([
+  'defense_test/docs/BALANCE_SNAPSHOT.json', 'defense_test/docs/ASSET_PROVENANCE.json'
+]);
 
 function normalizePath(file) {
   return String(file || '').replace(/\\/g, '/').replace(/^\.\//, '');
@@ -51,7 +54,8 @@ function currentChangePaths(changes) {
 }
 
 function isDocumentation(file) {
-  if (DEFENSE_ART_INPUTS.has(file) || file === 'survivor/assets/Jua-OFL.txt') return false;
+  if (DEFENSE_ART_INPUTS.has(file) || DEFENSE_TEST_REPORTS.has(file)
+    || file === 'survivor/assets/Jua-OFL.txt' || file === 'defense_test/assets/Jua-OFL.txt') return false;
   const lower = file.toLowerCase();
   return (
     lower.endsWith('.md')
@@ -530,18 +534,21 @@ function planSurvivor(plan, files, currentFiles) {
 function planDefenseTest(plan, files, currentFiles) {
   const product=files.filter(file=>file.startsWith('defense_test/')&&!isDocumentation(file));
   if(!product.length)return;
-  const inputs=product.filter(file=>/^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|scripts\/build\.mjs$)/.test(file));
+  const inputs=product.filter(file=>/^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|scripts\/(?:build|local-inputs)\.mjs$)/.test(file));
   const current=new Set(currentFiles),checks=new Set(product.filter(file=>current.has(file)&&/^defense_test\/tests\/.*\.test\.mjs$/.test(file)));
-  const unknown=product.filter(file=>!inputs.includes(file)&&!/^defense_test\/(?:tests\/(?:[a-z-]+\.test\.mjs|browser\.mjs)$|dist\/|scripts\/(?:serve|analyze)\.mjs$)/.test(file));
+  const reportScripts=product.some(file=>/^defense_test\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));
+  const unknown=product.filter(file=>!inputs.includes(file)&&!DEFENSE_TEST_REPORTS.has(file)&&!/^defense_test\/(?:tests\/(?:[a-z-]+\.test\.mjs|browser\.mjs)$|dist\/|scripts\/(?:serve|analyze|report-data|generated-reports)\.mjs$)/.test(file));
   if(unknown.length)plan.blocked.push('No Defense test mapping exists for: '+unknown.join(', '));
   for(const file of product.filter(file=>current.has(file)&&/\.(?:js|mjs|cjs)$/.test(file)))addNodeCheck(plan,'defense_test',file);
   const add=name=>checks.add('defense_test/tests/'+name+'.test.mjs');
-  if(inputs.some(file=>/(?:src\/content\.js|scripts\/build\.mjs|assets\/)/.test(file))){add('assets');add('combat');add('economy');add('profile');}
-  if(inputs.some(file=>file.endsWith('/economy.js'))||product.includes('defense_test/scripts/analyze.mjs')){add('economy');add('profile');add('combat');}
+  if(inputs.some(file=>/(?:src\/(?:content|data)\.js|scripts\/(?:build|local-inputs)\.mjs|assets\/)/.test(file))){add('assets');add('combat');add('economy');add('profile');add('independence');}
+  if(inputs.some(file=>file.endsWith('/economy.js'))){add('economy');add('profile');add('combat');}
   if(inputs.some(file=>/(?:src\/battle\.js|src\/combat\/engine\.js)$/.test(file))){add('combat');add('profile');}
   if(inputs.includes('defense_test/src/profile.js'))add('profile');
+  if(reportScripts)add('generated-reports');
   addNodeTest(plan,'defense_test','defense_test:contracts-and-regressions','Check Star Garden collection, growth, tickets and actual combat regressions',[...checks]);
-  if(checks.has('defense_test/tests/assets.test.mjs'))plan.steps.find(s=>s.id==='defense_test:contracts-and-regressions').needsInstall=true;
+  if(['assets','generated-reports'].some(name=>checks.has('defense_test/tests/'+name+'.test.mjs')))plan.steps.find(s=>s.id==='defense_test:contracts-and-regressions').needsInstall=true;
+  if(inputs.length||reportScripts||product.some(file=>DEFENSE_TEST_REPORTS.has(file)))addStep(plan,makeStep('defense_test:generated-reports','defense_test','Regenerate and compare both JSON reports without overwriting the committed evidence','node',['defense_test/scripts/generated-reports.mjs','--check'],{needsInstall:true}));
   if(inputs.length)addStep(plan,makeStep('defense_test:build','defense_test','Build Star Garden from its deployment inputs once','node',['defense_test/scripts/build.mjs'],{needsInstall:true}));
   if(inputs.length||product.includes('defense_test/tests/browser.mjs')){
     addBrowserScript(plan,'defense_test','defense_test:offline-browser','Exercise the standalone portrait UI, draft and resume offline','defense_test/tests/browser.mjs');

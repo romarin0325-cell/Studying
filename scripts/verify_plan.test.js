@@ -34,7 +34,7 @@ test('Star Garden is an isolated target with one build and no existing Defense c
 });
 
 test('Star Garden docs, test-only and unknown paths keep the smallest safe boundary',()=>{
-  const docs=createPlan(changes('defense_test/README.md','defense_test/docs/UI_RESEARCH.md','defense_test/docs/ASSET_PROVENANCE.json'));
+  const docs=createPlan(changes('defense_test/README.md','defense_test/docs/UI_ASSET_RESEARCH.md'));
   assert.deepEqual(docs.steps,[]);assert.equal(docs.needsInstall,false);
   const tests=createPlan(changes('defense_test/tests/profile.test.mjs'));
   assert.ok(tests.steps.some(s=>s.args.includes('--test')));
@@ -53,6 +53,46 @@ test('Star Garden presentation-only changes select browser checks without econom
   assert.deepEqual(plan.blocked,[]);
   assert.ok(ids(plan).includes('defense_test:build'));
   assert.ok(!plan.steps.some(s=>s.args.includes('--test')));
+});
+
+test('Star Garden local data, copied images, font and font license each validate their own consumer',()=>{
+  for(const file of ['defense_test/src/data.js','defense_test/assets/merge/units/luna.webp','defense_test/assets/moonlit/realm-bosses.webp','defense_test/assets/Jua-Regular.ttf','defense_test/assets/Jua-OFL.txt','defense_test/scripts/local-inputs.mjs']){
+    const plan=createPlan(changes(file));
+    assert.deepEqual(plan.blocked,[],file);assert.deepEqual([...games(plan)],['defense_test'],file);
+    for(const id of ['contracts-and-regressions','generated-reports','build','offline-browser','offline-webkit'])assert.ok(ids(plan).includes('defense_test:'+id),file+' '+id);
+    assert.equal(plan.steps.filter(s=>s.id==='defense_test:build').length,1);
+    assert.ok(plan.steps.find(s=>s.id==='defense_test:contracts-and-regressions').args.includes('defense_test/tests/independence.test.mjs'));
+  }
+});
+
+test('Star Garden no longer consumes active Defense content, art or Card fonts',()=>{
+  for(const file of ['defense/merge/content.js','defense/assets/merge/units/luna.webp','card/assets/Jua-Regular.ttf']){
+    const plan=createPlan(changes(file));
+    assert.ok(!games(plan).has('defense_test'),file);
+    assert.ok(!games(plan).has('defense'),file);
+  }
+});
+
+test('Star Garden generated JSON alone selects read-only regeneration without a build or browser',()=>{
+  for(const file of ['defense_test/docs/BALANCE_SNAPSHOT.json','defense_test/docs/ASSET_PROVENANCE.json']){
+    const plan=createPlan(changes(file));
+    assert.deepEqual(plan.blocked,[]);assert.deepEqual(ids(plan),['defense_test:generated-reports']);
+    assert.deepEqual(plan.steps[0].args,['defense_test/scripts/generated-reports.mjs','--check']);
+    assert.deepEqual(plan.browsers,[]);
+    assert.equal(plan.steps.some(s=>s.id.includes(':build')),false);
+    const deleted=createPlan([{status:'D',paths:[file]}]);assert.deepEqual(ids(deleted),['defense_test:generated-reports']);
+    const renamed=createPlan([{status:'R100',paths:[file,'defense_test/docs/moved.json']}]);assert.deepEqual(ids(renamed),['defense_test:generated-reports']);
+  }
+});
+
+test('Star Garden report generator changes run tamper regressions and comparison only',()=>{
+  for(const file of ['defense_test/scripts/generated-reports.mjs','defense_test/scripts/report-data.mjs','defense_test/scripts/analyze.mjs']){
+    const plan=createPlan(changes(file));
+    assert.deepEqual(plan.blocked,[]);assert.deepEqual(plan.browsers,[]);
+    assert.ok(ids(plan).includes('defense_test:generated-reports'));
+    assert.ok(plan.steps.some(s=>s.args.includes('defense_test/tests/generated-reports.test.mjs')));
+    assert.equal(ids(plan).includes('defense_test:build'),false);
+  }
 });
 
 test('Nocturne runtime builds once, boots offline and never selects existing game suites', () => {

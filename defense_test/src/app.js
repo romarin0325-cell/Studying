@@ -123,7 +123,7 @@ function frame(time){const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;las
 setInterval(()=>{if(screen==='dispatch'&&!modal){const ended=p().dispatches.some(d=>d.end<=now()&&document.querySelector(`[data-claim-dispatch="${d.slot}"]`)?.disabled);if(ended)render();else for(const node of document.querySelectorAll('[data-timer]'))node.textContent=Number(node.dataset.timer)<=now()?'귀환 완료 · 수령 대기':duration(Number(node.dataset.timer)-now())+' 남음';}if(screen==='home'&&!modal&&$('idle-total')){$('idle-total').textContent=fmt(idleReward(p(),now()));$('idle-progress').style.width=Math.min(100,(now()-p().idleAt)/(20*HOUR)*100)+'%';const button=document.querySelector('[data-action="idle"]');if(button)button.disabled=idleReward(p(),now())<1;}},1000);
 for(const img of document.querySelectorAll('img'))img.onerror=()=>{img.src=fallback('star_boy');};
 document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
-document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'../defense/assets/merge/garden.webp'}")`);
+document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'./assets/merge/garden.webp'}")`);
 art.ready.then(()=>{if(art.failed.length)toast('일부 그림은 별빛 표식으로 표시합니다.');});
 render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
