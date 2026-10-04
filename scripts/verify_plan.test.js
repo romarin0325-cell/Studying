@@ -21,6 +21,40 @@ function games(plan) {
   return new Set(plan.steps.map(step => step.game));
 }
 
+test('Star Garden is an isolated target with one build and no existing Defense commands',()=>{
+  const plan=createPlan(changes('defense_test/src/content.js','defense_test/src/app.js','defense_test/src/combat/engine.js','defense_test/dist/StarGardenDefense.html','scripts/verify_plan.js'));
+  assert.deepEqual(plan.blocked,[]);
+  assert.deepEqual([...games(plan)],['defense_test','verification']);
+  assert.equal(plan.steps.filter(s=>s.id==='defense_test:build').length,1);
+  assert.ok(ids(plan).includes('defense_test:offline-browser'));
+  assert.ok(ids(plan).includes('defense_test:offline-webkit'));
+  assert.doesNotMatch(plan.steps.map(s=>s.args.join(' ')).join('\n'),/lint:defense|test:defense|defense\/tests|shooter\/|card\/tests|survivor\/|idle\//);
+  const dedicated=createPlan(changes('defense_test/src/app.js','scripts/verify_plan.js'),{onlyGame:'defense'});
+  assert.deepEqual(dedicated.steps,[]);assert.deepEqual(dedicated.blocked,[]);
+});
+
+test('Star Garden docs, test-only and unknown paths keep the smallest safe boundary',()=>{
+  const docs=createPlan(changes('defense_test/README.md','defense_test/docs/UI_RESEARCH.md','defense_test/docs/ASSET_PROVENANCE.json'));
+  assert.deepEqual(docs.steps,[]);assert.equal(docs.needsInstall,false);
+  const tests=createPlan(changes('defense_test/tests/profile.test.mjs'));
+  assert.ok(tests.steps.some(s=>s.args.includes('--test')));
+  assert.ok(!ids(tests).some(id=>id.includes(':build')));
+  assert.deepEqual(tests.browsers,[]);
+  const browser=createPlan(changes('defense_test/tests/browser.mjs'));
+  assert.ok(ids(browser).includes('defense_test:offline-browser'));
+  assert.ok(!ids(browser).includes('defense_test:build'));
+  assert.match(createPlan(changes('defense_test/dist/StarGardenDefense.html')).blocked.join('\n'),/without a mapped/);
+  assert.match(createPlan(changes('defense_test/scripts/unknown.mjs')).blocked.join('\n'),/No Defense test mapping/);
+  assert.match(createPlan(changes('defense_test/tests/unmapped-helper.mjs')).blocked.join('\n'),/No Defense test mapping/);
+});
+
+test('Star Garden presentation-only changes select browser checks without economy or combat tests',()=>{
+  const plan=createPlan(changes('defense_test/src/style.css'));
+  assert.deepEqual(plan.blocked,[]);
+  assert.ok(ids(plan).includes('defense_test:build'));
+  assert.ok(!plan.steps.some(s=>s.args.includes('--test')));
+});
+
 test('Nocturne runtime builds once, boots offline and never selects existing game suites', () => {
   const plan=createPlan(changes('survivor/src/engine.js','survivor/assets/jasmine.webp','scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked,[]);
