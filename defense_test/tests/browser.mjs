@@ -63,7 +63,7 @@ try{
     const navRect=await page.locator('#navigation').boundingBox();
     assert.ok(navRect.y>height-100,'navigation remains at the bottom');
     await page.locator('[data-action="pet"]').click();assert.equal((await profile(page)).dreams,640);
-    await nav(page,'수집');assert.equal(await page.locator('.collection-grid .hero-card').count(),30);
+    await nav(page,'동료');assert.equal(await page.locator('.collection-grid .hero-card').count(),30);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.collection-grid .hero-card').count(),12);
     await page.locator('[data-action="owned"]').click();assert.equal(await page.locator('.collection-grid .hero-card').count(),0);
@@ -135,7 +135,7 @@ try{
   assert.equal(await page.locator('[data-action="save-team"]').isEnabled(),false);
   await page.locator('[data-action="focus-team"]').click();await page.locator('.choose-list [data-team-pick="queen"]').click();
   await page.locator('[data-action="save-team"]').click();assert.ok((await profile(page)).deck.includes('queen'));
-  await nav(page,'수집');await page.locator('[data-filter="UR"]').click();await shot(page,'ur-collection',390,844);
+  await nav(page,'동료');await page.locator('[data-filter="UR"]').click();await shot(page,'ur-collection',390,844);
   await page.locator('[data-collection="relic"]').click();await page.locator('.collection-grid [data-relic="hourglass"]').click();
   await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
   await nav(page,'소환');await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
