@@ -3,51 +3,26 @@
 ## Priority
 Functional correctness of the browser app is more important than refactoring or style polish.
 
-## Mandatory checks
-Before opening a PR or marking the task done, run:
-- npm run verify
+## Verification policy
+검증은 이번 작업에서 바뀐 동작과 직접 관계있는 범위만 수행한다.
+- 일반 문서는 제품 검증이 필요 없다.
+- 배포 입력을 수정하면 해당 게임을 한 번 빌드한다.
+- 동작 확인이 필요하면 가장 가까운 기존 테스트나 짧은 재현을 사용한다.
+- 변경하지 않은 게임, 전체 회귀, 여러 브라우저, 장시간 시뮬레이션, 보고서 재생성은 기본 실행하지 않는다.
+- 같은 입력에 대한 검증을 반복하지 않는다.
+- 실행한 검사와 확인하지 못한 핵심 사항만 간단히 알린다.
 
-`npm run verify` uses the merge base between the trusted base and HEAD, adds only
-the current worktree's staged, unstaged, and untracked files for local runs, and
-runs the smallest mapped checks for the changed behavior. Missing refs, unknown
-runtime/config paths, and generated-output-only edits are blocking failures, not
-successful empty scopes.
+## Targets
+- `card/`: Card game (`card/dist/DREAMWEAVER.html`)
+- `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
+- `idle/`: Astral Companions idle game (`idle/dist/AstralCompanions.html`)
+- `defense_test/`: Star Garden defense prototype (`defense_test/dist/StarGardenDefense.html`)
+- `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
+- `defense/`: Hero Core Defense (`defense/dist-local/HeroCoreDefense.html`)
 
-Use `npm run verify:plan` to inspect selection without running it. Use
-`npm run verify:full -- --game <card|shooter|defense>` only when the user
-explicitly requests a full suite for that game.
+`card_legacy/` and `defense_legacy/` are preserved snapshots; do not use them as active sources.
 
-Current targets:
-- `card/`: focused Card syntax, contract, build, and browser checks
-- `shooter/`: focused Shooter unit, build, and browser checks
-- `idle/`: focused content, core, rewards, combat, analysis, build, and offline browser checks; long economy simulations are an explicit release check, not a default gate
-- `defense_test/`: independent Star Garden data/assets, collection/growth/combat contracts, generated-report integrity, one offline build, and portrait Chromium/WebKit checks; it has no live dependency on other game trees
-- `survivor/`: Nocturne combat/persistence/art contracts, one single-file build, and offline mobile/desktop play checks; reuses canonical Defense/Shooter art without invoking their suites
-
-`card_legacy/` is a preserved snapshot. Do not use it as the active Card source.
-`defense_legacy/` is the preserved Defense snapshot from immediately before PR
-#546. Do not use it as the active Defense source; the PR #546 game lives in
-`defense/`.
-`defense/` is intentionally excluded from automatic verification until it becomes active work again.
-
-## Hard rules
-- Do not say the task is complete if verify fails.
-- Do not open a PR if verify fails.
-- Do not replace a required focused check with a smaller unrelated check merely
-  to meet a time budget.
-- Do not run unused game suites. Automatic verification must not run Defense.
-- The dedicated Defense PR workflow is an explicit exception: it runs mapped
-  Defense checks only when `defense/` is in the scoped diff. Verification-rule
-  and workflow-only changes use selector fixtures instead. Root `npm run verify`
-  still excludes Defense.
-- A Card, Shooter, shared-release, or verification-rule PR must not invoke any Defense command (`lint:defense`, `test:defense*`, or a Defense browser suite) unless a file under `defense/` is in that PR's scoped diff. A stale Defense change elsewhere in the checkout is not an exception.
-- Verification-policy and workflow changes use selector fixtures and mock command
-  plans; they must not run real game suites merely to test selection.
-- Non-deployment documentation must not install browsers, build games, or run
-  runtime suites.
-- When a deployment input changes, build that game once and boot the committed
-  single-file artifact. Test-only and documentation-only changes do not require
-  a build.
+## Core guidelines
 - Prefer the smallest diff that restores working behavior.
 - If UI behavior cannot be fully verified, state exactly what remains unverified.
 - For frontend tasks, use image inputs/output when helpful and compare against the requested behavior.

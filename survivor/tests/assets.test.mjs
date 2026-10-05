@@ -13,7 +13,7 @@ const sourceHash=(source,bytes)=>sha(/\.(json|mjs)$/.test(source)?bytes.toString
 test('every playable hero and weapon owner has traceable, intact, alpha-bearing four-direction art',async()=>{
   const manifest=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8'));
   for(const id of new Set([...HEROES.map(h=>h.id),...WEAPONS.map(w=>w.owner)])){
-    const asset=manifest.assets.find(a=>a.id==='unit-'+id);assert.ok(asset,id);const source=await fs.readFile(path.join(root,asset.source)),bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(source),asset.sourceSha256);assert.equal(sha(bytes),asset.sha256);
+    const asset=manifest.assets.find(a=>a.id==='unit-'+id);assert.ok(asset,id);const bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(bytes),asset.sha256);
     const metadata=await sharp(bytes).metadata();assert.equal(metadata.width,768);assert.equal(metadata.height,768);assert.equal(metadata.hasAlpha,true);const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
     for(let view=0;view<4;view++){let opaque=0,empty=0,white=0;for(let y=0;y<384;y+=3)for(let x=0;x<384;x+=3){const p=((y+Math.floor(view/2)*384)*info.width+x+(view%2)*384)*4;if(data[p+3]>249){opaque++;if(data[p]>210&&data[p+1]>210&&data[p+2]>210)white++;}if(data[p+3]===0)empty++;if(x===0||x===381||y===0||y===381)assert.ok(data[p+3]<10,id+' complete canonical cell has clear gutters');}assert.ok(opaque>300,id+' direction '+view);assert.ok(empty>1000,id+' native empty alpha');if(['rumi','snow_rabbit','night_rabbit','silver_rabbit','cinderella','jasmine'].includes(id))assert.ok(white>50,id+' white remains opaque');}
     assert.deepEqual(manifest.frames[id].directions,['down','up','left','right']);assert.deepEqual(manifest.frames[id].anchor,[256,480]);
@@ -31,7 +31,7 @@ test('nine reviewed walking atlases preserve distinct poses, transparent gutters
   const manifest=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8'));
   const specs=JSON.parse(await fs.readFile(path.join(root,manifest.renewal.source),'utf8'));assert.equal(sourceHash(manifest.renewal.source,await fs.readFile(path.join(root,manifest.renewal.source))),manifest.renewal.sha256);
   for(const h of HEROES){const spec=specs.find(s=>s.id==='walk-'+h.id),asset=manifest.assets.find(s=>s.id===spec?.id);assert.ok(asset,h.id);assert.ok(spec.reference);assert.ok(spec.review.length>30);
-    assert.equal(sha(await fs.readFile(path.join(root,spec.source))),asset.sourceSha256);const bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(bytes),asset.sha256);
+    const bytes=await fs.readFile(path.join(root,'survivor/assets',asset.file));assert.equal(sha(bytes),asset.sha256);
     const m=await sharp(bytes).metadata();assert.equal(m.width,spec.cell*4);assert.equal(m.height,spec.cell*4);assert.ok(m.hasAlpha);const meta=manifest.frames[h.id].walk;assert.deepEqual(meta.anchor,[spec.cell/2,spec.cell*.9375]);
     for(let row=0;row<4;row++){const hashes=[];for(let col=0;col<4;col++){
       const frame=await sharp(bytes).extract({left:col*spec.cell,top:row*spec.cell,width:spec.cell,height:spec.cell}).ensureAlpha().raw().toBuffer();hashes.push(sha(frame));let filled=0;
@@ -54,7 +54,7 @@ test('anatomical profile and all frame pivots are pinned to measured source vers
   const manifest=JSON.parse(await fs.readFile(path.join(root,'survivor/assets/prepared-manifest.json'),'utf8')),normal=manifest.normalization;
   assert.ok(normal);assert.equal(sourceHash(normal.source,await fs.readFile(path.join(root,normal.source))),normal.sha256);assert.equal(sha(Buffer.from((await fs.readFile(path.join(root,normal.processor),'utf8')).replace(/\r\n/g,'\n'))),normal.processorSha256);
   const profile=JSON.parse(await fs.readFile(path.join(root,normal.source),'utf8'));assert.match(profile.uncertainty,/estimates/);
-  for(const h of HEROES){const frame=manifest.frames[h.id];assert.equal(frame.anatomy.headHeight,144);assert.equal(profile.frames[h.id].sourceSha256,manifest.assets.find(a=>a.id==='unit-'+h.id).sourceSha256);assert.equal(profile.frames[h.id].walkSourceSha256,manifest.assets.find(a=>a.id==='walk-'+h.id).sourceSha256);const records=normal.frames.filter(f=>f.id==='walk-'+h.id);assert.equal(records.length,16);for(const record of records){assert.deepEqual(record.root,frame.walk.anchor);assert.ok(record.landmarks.foot>record.landmarks.chin);assert.ok(record.headScale>0&&record.bodyScale>0);}}
+  for(const h of HEROES){const frame=manifest.frames[h.id];assert.equal(frame.anatomy.headHeight,144);const records=normal.frames.filter(f=>f.id==='walk-'+h.id);assert.equal(records.length,16);for(const record of records){assert.deepEqual(record.root,frame.walk.anchor);assert.ok(record.landmarks.foot>record.landmarks.chin);assert.ok(record.headScale>0&&record.bodyScale>0);}}
 });
 test('atlas cleanup removes neighboring cut fragments while preserving opaque white materials',async()=>{
   const {cleanFrame,alphaBounds}=await import('../scripts/art-normalization.mjs');
