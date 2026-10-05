@@ -1,8 +1,6 @@
 name: PR minimal verification
 on:
   pull_request:
-  push:
-    branches: [main]
 permissions:
   contents: read
 concurrency:
@@ -10,12 +8,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   gate:
-    name: PR minimal gate
+    name: Defense release gate
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-      VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,12 +29,6 @@ jobs:
       - name: Install locked dependencies
         if: steps.plan.outputs.needs_install == 'true'
         run: npm ci
-      - name: Install Chromium
-        if: steps.plan.outputs.needs_chromium == 'true'
-        run: npx playwright install --with-deps chromium
-      - name: Install WebKit
-        if: steps.plan.outputs.needs_webkit == 'true'
-        run: npx playwright install --with-deps webkit
       - name: Run selected verification
         if: steps.plan.outputs.has_commands == 'true'
         run: npm run verify
