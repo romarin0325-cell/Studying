@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
 import {HEROES} from '../src/content.js';
-import {createBattle} from '../src/battle.js';
+import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
