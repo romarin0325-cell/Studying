@@ -1515,7 +1515,8 @@ export const ASSET_PATHS = {
   "bosses-expansion": "./assets/merge/bosses-expansion.webp",
   "realms-expansion": "./assets/merge/realms-expansion.webp",
   "effects-trio": "./assets/merge/effects-trio.webp",
-  "ultimates": "./assets/merge/ultimates.webp"
+  "ultimates": "./assets/merge/ultimates.webp",
+  "ancient-cross": "./assets/merge/ancient-cross.webp"
 };
 
 export const STAGE_THEMES = [

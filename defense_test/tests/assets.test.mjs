@@ -9,7 +9,7 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,44);
+  assert.equal(Object.keys(ASSET_PATHS).length,45);
   for(const h of HEROES){
     const file=assetFile(ASSET_PATHS[h.art.atlas]),meta=await sharp(file).metadata();
     assert.equal(meta.width,1024);assert.equal(meta.height,1024);assert.equal(meta.hasAlpha,true);
