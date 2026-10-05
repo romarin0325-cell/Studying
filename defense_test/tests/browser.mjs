@@ -130,7 +130,7 @@ try{
     await t.page.locator('[data-action="resume"]').click();
     await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait').innerText(),/4연결.*30%.*80%.*대상 \+1/);
     await shot(t.page,'trait-lightning',width,height);
-    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*30%/);
+    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*50%/);
     await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait').innerText(),/등장 웨이브.*150%/);
     await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait').innerText(),/50%/);
     await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait').innerText(),/대기|활성|수혜/);
@@ -140,7 +140,7 @@ try{
     const f=await boot(width,height,traitFixture(other,[[6,other[0]],[8,other[1]],[12,other[2]],[16,other[3],1,1],[18,other[4]]]));
     await f.page.locator('[data-action="resume"]').click();
     await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
-    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 위치/);await shot(f.page,'trait-fixed-target',width,height);
+    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/경로 위/);await shot(f.page,'trait-fixed-target',width,height);
     await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait').innerText(),/이후 웨이브.*125%/);
     const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.isEnabled(),false);assert.match(await doom.getAttribute('aria-label'),/25골드.*골드 부족/);assert.match(await doom.innerText(),/25G/);await f.context.close();
   }
