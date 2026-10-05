@@ -297,6 +297,58 @@ test('ordinary moves retain birth age while same-hero and both Rumi merge direct
   }
 });
 
+test('arrival rewards enter the next actual combat wave with fresh Star Boy and Whale bonuses',()=>{
+  for(const [hero,factor] of [['star_boy',1.5],['galaxy_whale',.75]]){
+    const s=traitArena([{hero,index:0,birthWave:1}],{wave:3}),old=s.board[0];
+    s.queue=[];E.step(s,.001);assert.equal(s.phase,'reward');
+    s.reward=['arrival','purse','mend'];s.rng=1;
+    assert.ok(E.chooseReward(s,'arrival').ok);assert.equal(s.phase,'intermission');
+    const newcomer=s.board.find(u=>u&&u.uid!==old.uid);
+    assert.equal(newcomer.hero,hero);assert.equal(newcomer.rank,2);
+    assert.equal(newcomer.birthWave,4);assert.equal(old.birthWave,1);
+    const restored=E.restore(E.serialize(s));assert.ok(restored,'next-wave arrival checkpoint restores');
+    assert.equal(E.serialize(restored),E.serialize(s));
+    for(let i=0;i<32&&s.phase==='intermission';i++){E.step(s,.05);E.step(restored,.05);}
+    assert.equal(s.phase,'combat');assert.equal(s.wave,4);
+    assert.equal(E.personalTrait(s,newcomer).age,0);close(E.personalTrait(s,newcomer).damageMultiplier,factor);
+    assert.equal(E.serialize(restored),E.serialize(s));
+    enemiesFor(s,[{progress:1200}]);const shot=launchNormal(s,newcomer);
+    close(shot.damage,HERO[hero].damage*2.35*factor,'arrival first-wave normal attack');
+  }
+});
+
+test('intermission summons and merges retain a next-wave birth through save and the first combat transition',()=>{
+  for(const [hero,factor] of [['star_boy',1.5],['galaxy_whale',.75]]){
+    const s=traitArena([{hero,index:0,birthWave:1}],{wave:3});s.phase='intermission';s.breakTime=.1;s.rng=1;
+    const summoned=E.summon(s,12);assert.ok(summoned.ok);assert.equal(summoned.hero,hero);
+    assert.equal(s.board[12].birthWave,4);assert.ok(E.restore(E.serialize(s)),'intermission summon checkpoint restores');
+    const merged=E.move(s,0,12);assert.ok(merged.ok&&merged.merged);
+    const u=s.board[12];assert.equal(u.rank,2);assert.equal(u.birthWave,4);
+    const restored=E.restore(E.serialize(s));assert.ok(restored,'intermission merge checkpoint restores');
+    assert.equal(restored.board[12].birthWave,4);
+    for(let i=0;i<4&&s.phase==='intermission';i++){E.step(s,.05);E.step(restored,.05);}
+    assert.equal(s.phase,'combat');assert.equal(s.wave,4);assert.equal(E.personalTrait(s,u).age,0);
+    close(E.power(s,u),HERO[hero].damage*2.35*factor);assert.equal(E.serialize(restored),E.serialize(s));
+    enemiesFor(s,[{progress:1200}]);const shot=launchNormal(s,u);
+    close(shot.damage,HERO[hero].damage*2.35*factor,'intermission merge first-wave normal attack');
+  }
+});
+
+test('restore permits exactly the pending next birth only in reward or intermission and rejects future combat births',()=>{
+  for(const phase of ['reward','intermission','combat','victory','defeat']){
+    const s=traitArena([{hero:'star_boy',index:12}],{wave:3});s.phase=phase;
+    if(phase==='reward')s.reward=['arrival','purse','mend'];
+    const pending=JSON.parse(E.serialize(s));pending.board[12].birthWave=4;
+    const allowed=phase==='reward'||phase==='intermission',restored=E.restore(pending);
+    assert.equal(Boolean(restored),allowed,phase+' next-wave birth validation');
+    if(allowed){assert.equal(restored.board[12].birthWave,4);assert.ok(E.restore(E.serialize(restored)));}
+    for(const invalidBirth of [5,0,3.5]){
+      const invalid=JSON.parse(E.serialize(s));invalid.board[12].birthWave=invalidBirth;
+      assert.equal(E.restore(invalid),null,phase+' invalid birth '+invalidBirth);
+    }
+  }
+});
+
 test('Doom refunds once in either Rumi merge direction and the ordinary alchemy merge hit still resolves',()=>{
   for(const [fromHero,toHero] of [['doom','rumi'],['rumi','doom'],['doom','doom']]){
     const s=traitArena([{hero:fromHero,index:0,rank:2},{hero:toHero,index:1,rank:2}],{artifacts:['alchemy']});

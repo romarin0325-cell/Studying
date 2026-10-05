@@ -216,14 +216,14 @@ export class CombatFX{
       if(!['lightning_sage','star_boy','galaxy_whale','aurora','zeke','time_ruler'].includes(u.hero))continue;
       const state=personalTrait(s,u,i),aged=['star_boy','galaxy_whale'].includes(u.hero);
       if(!state.active&&!aged)continue;
-      const strong=state.active&&state.damageMultiplier>=1,p=cellPoint(i),alpha=strong?.32:.17,pulse=this.reduced?1:1+Math.sin(this.clock*2+u.uid)*.06;
+      const strong=state.active&&state.damageMultiplier>=1,p=cellPoint(i),alpha=strong?.48:.17,pulse=this.reduced?1:1+Math.sin(this.clock*2+u.uid)*.06;
       ctx.save();ctx.globalAlpha=alpha*pulse;ctx.strokeStyle=HERO[u.hero].color;ctx.lineWidth=2.5;
       ctx.beginPath();ctx.ellipse(p.x,p.y+31,28,9,0,Math.PI*.13,Math.PI*1.87);ctx.stroke();ctx.restore();
       if(u.hero==='aurora'){
-        this.atlasStamp('effects-trio',5,3,2,p.x+28,p.y+19,23,30,0,.68);
+        this.atlasStamp('effects-trio',5,3,2,p.x+28,p.y+19,30,38,0,.85);
       }else{
         this.stamp(u.hero,p.x,p.y+31,56,0,alpha);
-        this.stamp(u.hero,p.x+28,p.y+21,24,0,strong?.75:.4);
+        this.stamp(u.hero,p.x+28,p.y+21,strong?30:24,0,strong?.85:.4);
       }
       if(aged){
         const phase=Math.min(2,state.age||0);ctx.save();
