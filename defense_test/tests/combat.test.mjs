@@ -35,7 +35,7 @@ function traitArena(placements,{artifacts=[],seed=1234,wave=1}={}){
   for(const p of placements)s.board[p.index]={
     ...template,uid:s.nextId++,hero:p.hero,rank:p.rank||1,birthWave:p.birthWave||wave,
     born:p.born||0,cooldown:100,windup:0,target:null,attacks:0,harvest:12,disabled:0,
-    priority:HERO[p.hero].bossDamage?'boss':'first',
+    priority:E.targetingLocked(p.hero)?'random':HERO[p.hero].bossDamage?'boss':'first',
   };
   return s;
 }
@@ -60,6 +60,13 @@ function launchNormal(s,u){
 function resolveNormal(s,shot){
   shot.life=.001;E.step(s,.001);return shot;
 }
+function advanceTo(s,until){
+  for(let i=0;s.time<until-1e-9&&i<20000;i++)E.step(s,Math.min(.05,until-s.time));
+  close(s.time,until,'requested absolute combat time');
+}
+function quiet(s){for(const u of s.board)if(u){u.cooldown=100;u.windup=0;u.disabled=100;}s.shots=[];s.zones=[];}
+function readyCast(s,id){s.gauge=120;assert.ok(E.cast(s,id).ok,id+' ultimate');}
+function landZone(s,u,e){const shot=launchNormal(s,u);if(shot.ground)shot.to=E.pathPoint(e.progress);resolveNormal(s,shot);return shot;}
 function rulerWinner(s){
   const rulers=s.board.filter(u=>u?.hero==='time_ruler');
   const boosted=rulers.filter(u=>E.personalTrait(s,u).damageMultiplier===1.5);
@@ -496,7 +503,7 @@ test('Storm instant kill never triggers on bosses, damage over time, ultimate at
   }
   {
     const s=traitArena([{hero:'storm_sage',index:12}]),[enemy]=enemiesFor(s,[{progress:1200}]);
-    enemy.burn=100;enemy.burnTime=1;enemy.burnOwner='storm_sage';s.rng=1;E.step(s,.05);
+    enemy.statusEffects.push({type:'burn',source:'legacy:burn',owner:'storm_sage',amount:100,until:s.time+1});s.rng=1;E.step(s,.05);
     close(enemy.maxHp-enemy.hp,5);assert.equal(s.events.some(e=>e.type==='instantKill'),false);assert.equal(s.rng,1);
     s.gauge=120;assert.ok(E.cast(s,'storm_sage').ok);
     assert.ok(enemy.hp>0);assert.equal(s.events.some(e=>e.type==='instantKill'),false);assert.equal(s.rng,1);
@@ -580,7 +587,7 @@ test('Zeke ultimate deals five times power and doubles only below ten health',()
 test('Detective ultimate resolves its own hit with only the old exposure before installing its stronger debuff',()=>{
   for(const previousExposure of [0,.18]){
     const s=traitArena([{hero:'great_detective',index:12}]),enemies=enemiesFor(s,[{progress:1200},{kind:'boss',progress:1280}]);
-    for(const e of enemies){e.exposed=previousExposure;e.exposeTime=previousExposure?4:0;}
+    for(const e of enemies)if(previousExposure)e.statusEffects.push({type:'exposure',source:'legacy:exposure',owner:null,amount:previousExposure,until:s.time+4});
     s.gauge=120;const before=enemies.map(e=>e.hp);assert.ok(E.cast(s,'great_detective').ok);
     for(const [i,e] of enemies.entries()){
       close(before[i]-e.hp,HERO.great_detective.damage*3*(1+previousExposure)*(e.boss?1.25:1));
@@ -619,4 +626,226 @@ test('autoPlay skips unaffordable Doom and still casts another ready ultimate ag
   assert.equal(s.finishers.length,1);assert.equal(s.finishers[0].source,s.board[12].uid);
   for(let i=0;i<6;i++)E.step(s,.05);
   close(hp-boss.hp,E.power(s,s.board[12])*32);assert.equal(s.stats.byHero.doom,undefined);
+});
+
+test('poison uses one 40-stack cap and an ordinary shot or overlapping field cannot truncate the ultimate contribution',()=>{
+  const s=traitArena([{hero:'mushroom_king',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12],base=E.power(s,u);
+  e.statusEffects.push({type:'poison',source:'legacy:poison',owner:'mushroom_king',amount:40,power:base,until:s.time+7});
+  E.statusState(s,e);assert.equal(e.poison,40);const castAt=s.time;readyCast(s,'mushroom_king');
+  const ultimate=e.statusEffects.find(effect=>effect.type==='poison'&&effect.source.startsWith('skill:'));
+  assert.equal(e.poison,40);assert.equal(ultimate.amount,24);close(ultimate.until,castAt+12);close(e.poisonTime,12);
+  landZone(s,u,e);assert.equal(e.poison,40);close(ultimate.until,castAt+12);
+  E.step(s,.05);assert.equal(e.poison,40);close(ultimate.until,castAt+12);
+  quiet(s);const restored=E.restore(E.serialize(s));assert.ok(restored);
+  advanceTo(s,castAt+11);advanceTo(restored,castAt+11);
+  assert.equal(e.poison,24);close(e.poisonTime,1);assert.equal(E.serialize(restored),E.serialize(s));
+  advanceTo(s,castAt+12);assert.equal(e.poison,0);assert.equal(e.poisonTime,0);
+});
+
+test('Phantom poisons all live enemies without requiring Mushroom and snapshots its own rank, growth and training power once',()=>{
+  const s=traitArena([{hero:'phantom',index:12,rank:2}]),enemies=enemiesFor(s,[{},{kind:'armor'},{kind:'boss'}]),u=s.board[12];
+  assert.equal(s.deck.includes('mushroom_king'),false);
+  s.meta.phantom={power:2,special:1};s.relicAttack=.1;s.globalAttack=.06;s.upgrades.phantom=2;
+  const base=E.power(s,u);readyCast(s,'phantom');
+  for(const e of enemies){assert.equal(e.poison,8);close(e.poisonTime,12);const effect=e.statusEffects.find(effect=>effect.type==='poison');assert.equal(effect.owner,'phantom');close(effect.power,base);}
+  quiet(s);const before=s.stats.byHero.phantom,restored=E.restore(E.serialize(s));assert.ok(restored);
+  E.step(s,.05);E.step(restored,.05);
+  close(s.stats.byHero.phantom-before,enemies.length*8*base*E.POISON_POWER_RATIO*.05*1.25,'Phantom pure poison DPS');
+  assert.equal(s.stats.byHero.mushroom_king,undefined);assert.equal(E.serialize(restored),E.serialize(s));
+});
+
+test('shared poison attributes actual shield and HP damage to each caster while high-power stacks survive lower-power additions',()=>{
+  const s=traitArena([{hero:'mushroom_king',index:0},{hero:'phantom',index:12}]),[e]=enemiesFor(s,[{shield:1000}]);
+  readyCast(s,'mushroom_king');readyCast(s,'phantom');quiet(s);
+  const old={...s.stats.byHero},shield=e.shield,hp=e.hp;
+  E.step(s,.05);
+  const mushroom=8*HERO.mushroom_king.damage*E.POISON_POWER_RATIO*.05*1.25,phantom=4*HERO.phantom.damage*E.POISON_POWER_RATIO*.05*1.25;
+  close(s.stats.byHero.mushroom_king-old.mushroom_king,mushroom);close(s.stats.byHero.phantom-old.phantom,phantom);
+  close(shield-e.shield,mushroom+phantom);assert.equal(e.hp,hp);
+  e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='poison');
+  e.statusEffects.push({type:'poison',source:'legacy:poison',owner:'mushroom_king',amount:40,power:1000,until:s.time+10});
+  E.statusState(s,e);readyCast(s,'phantom');assert.equal(e.poison,40);
+  assert.equal(e.statusEffects.filter(effect=>effect.type==='poison').length,2,'suppressed weak poison retains its independent expiry');
+  close(E.statusState(s,e).poisonDps,40*1000*E.POISON_POWER_RATIO);
+  const strongUntil=e.statusEffects.find(effect=>effect.type==='poison'&&effect.power===1000).until;
+  advanceTo(s,strongUntil);assert.equal(e.poison,4);close(E.statusState(s,e).poisonDps,4*HERO.phantom.damage*E.POISON_POWER_RATIO);
+});
+
+test('exposure independently expires from Detective ultimate to Phantom to Detective basic without borrowing a deadline',()=>{
+  const s=traitArena([{hero:'great_detective',index:12},{hero:'phantom',index:0}]),[e]=enemiesFor(s,[{}]),start=s.time;
+  readyCast(s,'great_detective');const strong=e.statusEffects.find(effect=>effect.type==='exposure');quiet(s);
+  advanceTo(s,start+5);readyCast(s,'phantom');assert.equal(e.exposed,.6);close(strong.until,start+10);
+  const phantom=e.statusEffects.find(effect=>effect.type==='exposure'&&effect.owner==='phantom');close(phantom.until,start+11);
+  quiet(s);advanceTo(s,start+9.5);const shot=launchNormal(s,s.board[12]);resolveNormal(s,shot);
+  const weak=e.statusEffects.find(effect=>effect.type==='exposure'&&effect.source.startsWith('attack:'));assert.ok(weak);close(strong.until,start+10);
+  quiet(s);const restored=E.restore(E.serialize(s));assert.ok(restored);
+  advanceTo(s,start+10);advanceTo(restored,start+10);close(e.exposed,.25);assert.equal(E.serialize(restored),E.serialize(s));
+  advanceTo(s,start+11);close(e.exposed,.18);
+  advanceTo(s,weak.until);assert.equal(e.exposed,0);assert.equal(e.exposeTime,0);
+});
+
+test('burn selects the strongest live owner, reveals a weaker live skill on expiry and cannot resurrect stale strong fire',()=>{
+  const s=traitArena([{hero:'zeke',index:0,rank:3},{hero:'red_dragon',index:4},{hero:'flame_sage',index:12}]),[e]=enemiesFor(s,[{}]),start=s.time;
+  const strong=E.power(s,s.board[0])*.6,weak=E.power(s,s.board[4])*.6;
+  assert.ok(strong>weak);readyCast(s,'zeke');quiet(s);advanceTo(s,start+1);readyCast(s,'red_dragon');
+  close(e.burn,strong);assert.equal(e.burnOwner,'zeke');quiet(s);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);
+  advanceTo(s,start+5);advanceTo(restored,start+5);close(e.burn,weak);assert.equal(e.burnOwner,'red_dragon');assert.equal(E.serialize(restored),E.serialize(s));
+  advanceTo(s,start+6);assert.equal(e.burn,0);assert.equal(e.burnOwner,null);
+  const shot=landZone(s,s.board[12],e);E.step(s,.001);
+  close(e.burn,shot.damage*1.3*.23);assert.equal(e.burnOwner,'flame_sage');assert.ok(e.burn<strong);
+  assert.ok(e.statusEffects.filter(effect=>effect.type==='burn').every(effect=>effect.owner==='flame_sage'));
+});
+
+test('DOT integrates exact intra-frame expirations with additive taken damage and original owner accounting',()=>{
+  const s=traitArena([{hero:'zeke',index:0},{hero:'flame_sage',index:4},{hero:'mushroom_king',index:12}]),[e]=enemiesFor(s,[{shield:5}]),start=s.time;
+  e.statusEffects=[
+    {type:'burn',source:`skill:zeke:${s.board[0].uid}`,owner:'zeke',amount:100,until:start+.025},
+    {type:'burn',source:`skill:flame_sage:${s.board[4].uid}`,owner:'flame_sage',amount:20,until:start+.08},
+    {type:'poison',source:`skill:mushroom_king:${s.board[12].uid}`,owner:'mushroom_king',amount:10,power:11,until:start+.03},
+    {type:'exposure',source:'legacy:exposure',owner:null,amount:.6,until:start+.025},
+    {type:'divine',source:'legacy:divine',owner:null,amount:3,until:start+.04},
+  ];
+  E.statusState(s,e);close(e.takenBonus,.66);const hp=e.hp;E.step(s,.05);
+  const zeke=100*.025*1.66,flame=20*.015*1.06+20*.01,poison=30*.025*1.66+30*.005*1.06;
+  close(s.stats.byHero.zeke,zeke);close(s.stats.byHero.flame_sage,flame);close(s.stats.byHero.mushroom_king,poison);
+  close(s.stats.damage,zeke+flame+poison);assert.equal(e.shield,0);close(hp-e.hp,zeke+flame+poison-5);
+  assert.equal(e.poison,0);assert.equal(e.exposed,0);assert.equal(e.divine,0);close(e.burn,20);assert.equal(e.burnOwner,'flame_sage');
+  advanceTo(s,start+.08);assert.equal(e.burn,0);assert.equal(e.burnOwner,null);
+});
+
+test('freeze and stun keep separate latest deadlines and a shorter skill cannot shorten the actual stop or freeze bonus',()=>{
+  const s=traitArena([{hero:'snow_rabbit',index:0},{hero:'lightning_sage',index:4},{hero:'avalanche_maid',index:12}]),[e]=enemiesFor(s,[{}]),start=s.time;
+  e.speed=100;readyCast(s,'snow_rabbit');quiet(s);advanceTo(s,start+.5);readyCast(s,'lightning_sage');
+  close(e.freeze,2.5);close(e.stun,1.2);close(e.controlTime,2.5);
+  const before=s.stats.byHero.avalanche_maid||0;readyCast(s,'avalanche_maid');close((s.stats.byHero.avalanche_maid||0)-before,HERO.avalanche_maid.damage*12);
+  const saved=E.restore(E.serialize(s));assert.ok(saved);const position=e.progress;
+  advanceTo(s,start+1.7);advanceTo(saved,start+1.7);assert.equal(e.stun,0);close(e.freeze,1.3);assert.equal(e.progress,position);assert.equal(E.serialize(saved),E.serialize(s));
+  advanceTo(s,start+3);assert.equal(e.freeze,0);assert.equal(e.controlTime,0);assert.equal(e.progress,position);
+  E.step(s,.05);close(e.progress-position,2.5,'movement resumes for only the unfrozen frame');
+});
+
+test('divine is three independently timed stacks, adds 2% per stack to exposure and never duplicates a conditional bonus',()=>{
+  const s=traitArena([{hero:'great_detective',index:0},{hero:'jasmine',index:4},{hero:'night_rabbit',index:12},{hero:'cherry_prince',index:24}]),[e]=enemiesFor(s,[{}]);
+  readyCast(s,'great_detective');readyCast(s,'jasmine');const divine=e.statusEffects.find(effect=>effect.type==='divine'),until=divine.until;
+  assert.equal(e.divine,3);close(divine.until-s.time,6);close(e.takenBonus,.66);
+  const night=launchNormal(s,s.board[12]),beforeNight=s.stats.byHero.night_rabbit||0;resolveNormal(s,night);
+  close(s.stats.byHero.night_rabbit-beforeNight,night.damage*1.66,'ally generic taken bonuses add rather than multiply');
+  e.statusEffects.push({type:'burn',source:'legacy:burn',owner:'flame_sage',amount:1,until:s.time+1});
+  const prince=launchNormal(s,s.board[24]),beforePrince=s.stats.byHero.cherry_prince||0;resolveNormal(s,prince);
+  close(s.stats.byHero.cherry_prince-beforePrince,prince.damage*1.6*1.66,'burn OR three-divine conditional triggers once');
+  const jasmine=launchNormal(s,s.board[4]),beforeJasmine=s.stats.byHero.jasmine;resolveNormal(s,jasmine);
+  close(s.stats.byHero.jasmine-beforeJasmine,jasmine.damage*1.65*1.66,'Jasmine outgoing conditional stays separate');
+  assert.equal(e.divine,3);assert.equal(divine.amount,2);const fresh=e.statusEffects.find(effect=>effect.type==='divine'&&effect!==divine);quiet(s);
+  advanceTo(s,until);assert.equal(e.divine,1);close(e.takenBonus,.62);
+  advanceTo(s,fresh.until);assert.equal(e.divine,0);close(e.takenBonus,.6);
+  e.statusEffects.push({type:'exposure',source:'legacy:exposure',owner:null,amount:.79,until:s.time+1},{type:'divine',source:'legacy:divine',owner:null,amount:3,until:s.time+1});
+  E.statusState(s,e);close(e.takenBonus,.8);
+  const capped=launchNormal(s,s.board[12]),beforeCap=s.stats.byHero.night_rabbit;resolveNormal(s,capped);close(s.stats.byHero.night_rabbit-beforeCap,capped.damage*1.8);
+});
+
+test('frost buildup expires per application, shatters only on the third live stack and its short freeze preserves an existing long freeze',()=>{
+  const s=traitArena([{hero:'frost_witch',index:12},{hero:'snow_rabbit',index:0}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
+  resolveNormal(s,launchNormal(s,u));assert.equal(e.frostStacks,1);const first=e.statusEffects.find(effect=>effect.type==='frost');quiet(s);
+  advanceTo(s,first.until-.5);resolveNormal(s,launchNormal(s,u));assert.equal(e.frostStacks,2);quiet(s);
+  advanceTo(s,first.until);assert.equal(e.frostStacks,1);resolveNormal(s,launchNormal(s,u));assert.equal(e.frostStacks,2);
+  readyCast(s,'snow_rabbit');const long=e.statusEffects.find(effect=>effect.type==='freeze'),third=launchNormal(s,u),before=s.stats.byHero.frost_witch;
+  resolveNormal(s,third);assert.equal(e.frostStacks,0);assert.equal(e.frostTime,0);assert.equal(s.events.filter(event=>event.type==='frostBreak').length,1);
+  close(s.stats.byHero.frost_witch-before,third.damage*2.2);close(e.freeze,long.until-s.time);assert.equal(e.stun,0);assert.ok(E.restore(E.serialize(s)));
+});
+
+test('each ground hit creates an independently ticking field even for the same caster and preserves the earlier field power and lifetime',()=>{
+  for(const hero of ['mushroom_king','flame_sage','phantom','time_ruler','galaxy_whale']){
+    const s=traitArena([{hero,index:12}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
+    landZone(s,u,e);const first=s.zones[0],firstDamage=first.damage,firstUntil=s.time+first.life;
+    s.upgrades[hero]=1;landZone(s,u,e);assert.equal(s.zones.length,2,hero);const second=s.zones[1];
+    assert.equal(first.source,second.source);assert.notEqual(first.uid,second.uid);close(first.damage,firstDamage);close(first.life,firstUntil-s.time);assert.ok(second.damage>firstDamage);
+    for(const zone of s.zones)zone.tick=0;u.disabled=100;
+    const dps=e.burn+e.statusEffects.filter(effect=>effect.type==='poison').reduce((sum,effect)=>sum+effect.amount*effect.power*E.POISON_POWER_RATIO,0),hp=e.hp;
+    E.step(s,.001);close(hp-e.hp,dps*.001+(first.damage+second.damage)*.22,hero+' two independent ground ticks');
+    const restored=E.restore(E.serialize(s));assert.ok(restored);assert.deepEqual(restored.zones,s.zones);
+    close(E.combatStats(s,u).cooldown,HERO[hero].interval*(hero==='flame_sage'?1:1.15));
+  }
+});
+
+test('orbit fields also overlap independently and the 75-field quota deterministically removes the oldest field',()=>{
+  {
+    const s=traitArena([{hero:'mushroom_king',index:12,rank:3}],{artifacts:['orbit']}),[e]=enemiesFor(s,[{}]),u=s.board[12];
+    landZone(s,u,e);landZone(s,u,e);assert.equal(s.zones.length,4);assert.equal(s.zones.filter(zone=>zone.orbit).length,2);
+    assert.equal(new Set(s.zones.map(zone=>zone.uid)).size,4);assert.ok(E.restore(E.serialize(s)));
+  }
+  const s=traitArena([{hero:'mushroom_king',index:12}]),[e]=enemiesFor(s,[{}]),u=s.board[12],created=[];
+  for(let i=0;i<76;i++){
+    u.windup=.001;u.target=e.uid;u.cooldown=100;E.step(s,.001);
+    const shot=s.shots.find(shot=>shot.source===u.uid);assert.ok(shot);resolveNormal(s,shot);created.push(s.zones.at(-1).uid);
+  }
+  assert.equal(s.zones.length,75);assert.equal(s.zones[0].uid,created[1]);assert.equal(s.zones.at(-1).uid,created.at(-1));
+  assert.equal(s.zones.some(zone=>zone.uid===created[0]),false);assert.ok(E.restore(E.serialize(s)));
+  const tooMany=JSON.parse(E.serialize(s));tooMany.zones.push({...tooMany.zones[0],uid:tooMany.nextId++});assert.equal(E.restore(tooMany),null);
+});
+
+test('Night Rabbit ultimate selects 9 plus two targets per distinct other rabbit species, excluding duplicate rabbits and unrelated allies',()=>{
+  for(const [others,count] of [[[],9],[['snow_rabbit'],11],[['snow_rabbit','snow_rabbit','night_rabbit'],11],[['silver_rabbit'],11],[['snow_rabbit','silver_rabbit','siren'],13]]){
+    const s=traitArena([{hero:'night_rabbit',index:12},...others.map((hero,index)=>({hero,index}))]),enemies=enemiesFor(s,Array.from({length:16},(_,i)=>({progress:900+i*10}))),before=enemies.map(e=>e.hp);
+    assert.equal(E.nightRabbitTargetCount(s),count);readyCast(s,'night_rabbit');
+    assert.equal(enemies.filter((e,index)=>e.hp<before[index]).length,count);
+    assert.equal(s.events.findLast(event=>event.type==='skill').targets.length,count);
+    for(let i=0;i<16;i++)close(before[i]-enemies[i].hp,i>=16-count?HERO.night_rabbit.damage*14:0,'furthest-progress flurry target '+i);
+  }
+});
+
+test('legacy status migration preserves deadlines and old poison attribution once, clamps old excess to 40 and clears stale burn immediately',()=>{
+  const s=traitArena([{hero:'phantom',index:12}]),[e]=enemiesFor(s,[{}]),raw=JSON.parse(E.serialize(s));delete raw.statusRevision;
+  const old=raw.enemies[0];delete old.statusEffects;Object.assign(old,{poison:64,poisonTime:12,burn:100,burnTime:.025,burnOwner:'zeke',exposed:.6,exposeTime:10,stun:3,divine:3,divineTime:6,frostStacks:1,frostTime:6,slow:.5,slowTime:6,slowEffects:[{source:'attack:phantom',amount:.25,until:s.time+2},{source:'skill:phantom',amount:.5,until:s.time+6}]});
+  const migrated=E.restore(raw);assert.ok(migrated);const now=migrated.enemies[0];assert.equal(migrated.statusRevision,1);assert.equal(now.poison,40);close(now.poisonTime,12);close(now.takenBonus,.66);
+  assert.equal(now.statusEffects.find(effect=>effect.type==='poison').owner,'mushroom_king');assert.equal(now.burnOwner,'zeke');assert.equal(now.slowEffects.length,2);
+  const again=E.restore(E.serialize(migrated));assert.ok(again);assert.equal(E.serialize(again),E.serialize(migrated));
+  E.step(migrated,.05);E.step(again,.05);assert.equal(E.serialize(again),E.serialize(migrated));assert.equal(now.burn,0);assert.equal(now.burnOwner,null);assert.ok(migrated.stats.byHero.mushroom_king>0);
+  const stale=structuredClone(raw);stale.enemies[0].burnTime=0;stale.enemies[0].burn=999;const cleared=E.restore(stale);assert.ok(cleared);assert.equal(cleared.enemies[0].burn,0);assert.equal(cleared.enemies[0].burnOwner,null);
+});
+
+test('restore rejects malformed status ownership, unknown revisions, uncapped stacks, impossible deadlines and invalid zone state',()=>{
+  const s=traitArena([{hero:'mushroom_king',index:12},{hero:'phantom',index:0},{hero:'snow_rabbit',index:4},{hero:'jasmine',index:20}]);enemiesFor(s,[{}]);
+  readyCast(s,'phantom');readyCast(s,'snow_rabbit');readyCast(s,'jasmine');landZone(s,s.board[12],s.enemies[0]);quiet(s);
+  // Keep one real field to validate its complete save schema too.
+  s.board[12].disabled=0;landZone(s,s.board[12],s.enemies[0]);s.board[12].disabled=100;assert.ok(E.restore(E.serialize(s)));
+  const mutations=[
+    bad=>{bad.statusRevision=2;},bad=>{delete bad.enemies[0].statusEffects;},bad=>{bad.enemies[0].statusEffects='bad';},
+    bad=>{bad.enemies[0].statusEffects[0].type='unknown';},bad=>{bad.enemies[0].statusEffects[0].owner='not_a_hero';},
+    bad=>{bad.enemies[0].statusEffects[0].source='skill:phantom:'+bad.nextId;},bad=>{bad.enemies[0].statusEffects[0].owner='siren';},
+    bad=>{bad.enemies[0].statusEffects[0].until=-1;},bad=>{bad.enemies[0].statusEffects[0].until=bad.time+30.001;},
+    bad=>{bad.enemies[0].statusEffects.push({...bad.enemies[0].statusEffects[0]});},
+    bad=>{bad.enemies[0].statusEffects.find(effect=>effect.type==='poison').amount=41;},
+    bad=>{bad.enemies[0].statusEffects.find(effect=>effect.type==='poison').amount=.5;},
+    bad=>{bad.enemies[0].statusEffects.find(effect=>effect.type==='poison').power=0;},
+    bad=>{bad.enemies[0].statusEffects.find(effect=>effect.type==='divine').amount=4;},
+    bad=>{bad.enemies[0].statusEffects.find(effect=>effect.type==='freeze').amount=2;},
+    bad=>{bad.enemies[0].slowEffects[0].amount=.81;},bad=>{bad.enemies[0].slowEffects[0].owner='doom';},
+    bad=>{bad.enemies[0].slowEffects.push({...bad.enemies[0].slowEffects[0]});},
+    bad=>{bad.zones[0].life=bad.zones[0].total+.01;},bad=>{bad.zones[0].radius=0;},bad=>{bad.zones[0].tick=.51;},bad=>{bad.zones[0].damage=-1;},bad=>{bad.zones[0].source=bad.nextId;},
+  ];
+  for(const mutate of mutations){const bad=JSON.parse(E.serialize(s));mutate(bad);assert.equal(E.restore(bad),null,mutate.toString());}
+});
+
+test('a stronger short poison cannot erase the remaining lifetime of a suppressed long ultimate poison',()=>{
+  const s=traitArena([{hero:'mushroom_king',index:12,rank:5}]),[e]=enemiesFor(s,[{}]),u=s.board[12],start=s.time;
+  readyCast(s,'mushroom_king');const ultimate=e.statusEffects.find(effect=>effect.type==='poison'),base=ultimate.power;
+  assert.equal(ultimate.amount,40);s.upgrades.mushroom_king=5;
+  for(let i=0;i<8;i++)resolveNormal(s,launchNormal(s,u));quiet(s);
+  assert.equal(e.poison,40);assert.ok(E.statusState(s,e).poisonDps>40*base*E.POISON_POWER_RATIO);
+  assert.equal(ultimate.amount,40);close(ultimate.until,start+12);
+  const saved=E.restore(E.serialize(s));assert.ok(saved);
+  advanceTo(s,start+11);advanceTo(saved,start+11);assert.equal(E.serialize(saved),E.serialize(s));
+  assert.equal(e.poison,40);close(E.statusState(s,e).poisonDps,40*base*E.POISON_POWER_RATIO);
+  advanceTo(s,start+12);assert.equal(e.poison,0);
+});
+
+test('an earlier Poseidon rush cannot delete a later enemy mid-frame DOT and freeze segment',()=>{
+  const s=traitArena([{hero:'flame_sage',index:12}]);s.chapter=5;
+  const [boss,e]=enemiesFor(s,[{kind:'boss',progress:50},{progress:100}]);quiet(s);
+  assert.equal(boss.boss,'poseidon');boss.channel=.001;boss.channelHp=boss.hp;boss.skillIn=1000;
+  s.telegraph={uid:boss.uid,pattern:'rush',text:'test',cells:[],ends:s.time+.001};e.speed=100;
+  e.statusEffects=[{type:'burn',source:'legacy:burn',owner:'flame_sage',amount:100,until:s.time+.025},{type:'freeze',source:'legacy:freeze',owner:null,amount:1,until:s.time+.025}];
+  const before=e.hp;E.step(s,.05);close(before-e.hp,2.5,'last partial burn segment');close(e.progress,232.5,'push plus only unfrozen movement');
+  assert.equal(e.burn,0);assert.equal(e.freeze,0);assert.equal(s.events.filter(event=>event.type==='rush').length,1);
 });

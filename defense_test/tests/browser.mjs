@@ -8,6 +8,7 @@ import {createProfile,command,SAVE_KEY} from '../src/profile.js';
 import {HEROES} from '../src/content.js';
 import {createBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
+import {MEMORIAL_STORIES} from '../src/memorial.js';
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results'),url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
@@ -23,14 +24,16 @@ if(committed!==null){
 }
 const browser=await (isWebkit?webkit:chromium).launch({headless:true});
 const errors=[],requests=[],geometry=[],contexts=[];
-async function boot(width,height,profile=createProfile(NOW),fault=false){
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
-  await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
-  if(fault)await page.addInitScript(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(window.__testQuotaFailure)throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};});
-  await page.goto(url);await context.setOffline(true);await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
+  if(profile)await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
+  if(fault)await page.addInitScript(rewardOnly=>{window.__failRewardCheckpoint=rewardOnly;const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){let phase='';try{const saved=JSON.parse(v);phase=saved.active?.run?JSON.parse(saved.active.run).phase:'';}catch{}if(window.__testQuotaFailure||window.__failRewardCheckpoint&&phase==='reward')throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};},fault==='reward');
+  if(fault==='avif')await page.addInitScript(()=>{const decode=HTMLImageElement.prototype.decode;HTMLImageElement.prototype.decode=function(){return /\.avif$/.test(this.src)?Promise.reject(new DOMException('Unsupported codec','EncodingError')):decode.call(this);};});
+  await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(String(value).startsWith('data:image/avif')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
+  await page.goto(location);await context.setOffline(true);await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
   return {context,page,width,height};
 }
 const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
@@ -73,7 +76,40 @@ async function inspectCell(page,index){
   await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
 }
 try{
+  for(const [width,height] of [[320,568],[390,844],[1280,900]]){
+    const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
+    const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
+    await m.page.locator('.bond-button').click();assert.match(await m.page.locator('.memory-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);
+    await m.page.locator('[data-action="memorial-album"]').click();assert.equal(await m.page.locator('.memory-list [data-memorial]').count(),30);await shot(m.page,'memorial-album',width,height);
+    await m.page.locator('.memory-list [data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.match(await m.page.locator('.memory-title h3').innerText(),new RegExp(MEMORIAL_STORIES.zeke.title));await shot(m.page,'memorial-reader',width,height);
+    await m.page.locator('[data-memory-step="1"]').click();assert.equal((await profile(m.page)).memories.zeke.page,1);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);await nav(m.page,'동료');await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.memory-entry').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('#memory-progress').innerText(),`${Math.round(2/MEMORIAL_STORIES.zeke.paragraphs.length*100)}% 읽음`);
+    await m.page.locator('[data-action="memorial-art"]').click();assert.equal(await m.page.locator('#memory-narrative').isVisible(),false);await shot(m.page,'memorial-art',width,height);await close(m.page);
+    if(width===390){
+      // Open and close all thirty real pictures through buttons, never hidden preload.
+      const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
+      await chain.page.locator('.bond-button').click();await chain.page.locator('#memory-art img').waitFor();await chain.page.locator('[data-action="memorial-album"]').click();
+      for(const h of HEROES){await chain.page.locator(`.memory-list [data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await chain.page.locator('[data-action="memorial-album"]').click();assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
+      await chain.page.locator('.memory-list [data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
+    }
+    await m.context.close();
+  }
+  const ready=createProfile(NOW);ready.settings.auto=false;command(ready,'begin',{mode:'main',stage:1},NOW);const completed=createBattle(ready);
+  let finalTick=null;for(let i=0;i<5000&&completed.phase==='combat';i++){const before=E.serialize(completed);E.step(completed,.05);if(completed.phase==='reward')finalTick=E.restore(before);if(i%6===0&&completed.phase==='combat')autoPlay(completed);}assert.equal(completed.phase,'reward');assert.ok(finalTick);ready.active.run=E.serialize(completed);
+  const transition=structuredClone(ready);transition.active.run=E.serialize(finalTick);
+  const blocked=await boot(390,844,transition,'reward');await blocked.page.locator('[data-action="resume"]').click();await blocked.page.waitForFunction(()=>window.STAR_GARDEN.performance.saveFailures>0);assert.equal(await blocked.page.locator('[data-reward]').count(),0);assert.equal(await blocked.page.evaluate(()=>window.STAR_GARDEN.battle.phase),'reward');
+  await blocked.page.evaluate(()=>window.__failRewardCheckpoint=false);await blocked.page.locator('[data-action="pause"]').click();await blocked.page.locator('[data-reward]').first().waitFor();await shot(blocked.page,'reward-restored',390,844);await blocked.page.locator('[data-reward]').first().click();await blocked.page.waitForFunction(()=>window.STAR_GARDEN.battle.phase!=='reward');await blocked.context.close();
+  const automated=structuredClone(ready);automated.settings.auto=true;const manual=await boot(390,844,automated);await manual.page.locator('[data-action="resume"]').click();await manual.page.locator('[data-action="auto"]').click();await manual.page.locator('[data-reward]').first().waitFor();assert.equal((await profile(manual.page)).settings.auto,false);await shot(manual.page,'reward-auto-to-manual',390,844);await manual.page.locator('[data-reward]').first().click();await manual.context.close();
+
+  execFileSync(process.execPath,['defense_test/scripts/build.mjs','--solo'],{cwd:path.dirname(game),stdio:'pipe'});
+  execFileSync(process.execPath,['defense_test/scripts/build.mjs','--web'],{cwd:path.dirname(game),stdio:'pipe'});
+  const single=await boot(390,844,null,false,pathToFileURL(path.join(game,'test-results/solo/StarGardenDefenseSolo.html')).href);
+  assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
+  await single.page.locator('[data-action="prepare"]').click();await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
+  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('.bond-button').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
   for(const [width,height] of [[320,568],[390,844]]){
+    const fire=traitFixture(['zeke','ancient_dragon','siren','snow_rabbit','great_detective'],[[12,'zeke'],[11,'ancient_dragon']],{wave:1}),fireRun=E.restore(fire.active.run);
+    fireRun.enemies[0].progress=863;for(const u of fireRun.board)if(u)u.cooldown=.01;fire.active.run=E.serialize(fireRun);
+    const painted=await boot(width,height,fire);await painted.page.locator('[data-action="resume"]').click();await painted.page.waitForFunction(()=>window.STAR_GARDEN.battle.stats.damage>0);await shot(painted.page,'fire-basic-attacks',width,height);await painted.context.close();
     const deck=['lightning_sage','aurora','star_boy','time_ruler','zeke'];
     const t=await boot(width,height,traitFixture(deck,[[6,deck[0]],[7,deck[0]],[11,deck[0]],[12,deck[0]],[8,deck[1]],[13,deck[1]],[16,deck[2]],[17,deck[3],2],[18,deck[3],2],[21,deck[4]]]));
     await t.page.locator('[data-action="resume"]').click();

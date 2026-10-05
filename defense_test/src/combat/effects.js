@@ -244,8 +244,9 @@ export class CombatFX{
     if(e.shield>0)this.atlasStamp('effects-expansion',11,4,3,p.x,p.y-25,size,size,0,.4);
     if(e.burnTime>0){this.stamp('flame_sage',p.x-9,p.y-13,35+Math.sin(t*10+e.uid)*3,-Math.PI/2,.62);if(!this.reduced){disk(ctx,p.x+Math.sin(t*7+e.uid)*11,p.y-26-(t*19+e.uid*3)%17,1.7,'#ffd590');}}
     if(e.poisonTime>0){this.stamp('mushroom_king',p.x+size*.22,p.y-15,28,0,.55);}
-    if(e.stun>0){this.stamp('snow_rabbit',p.x,p.y-22,size*.63,t*.3,.75);}
-    else if(e.slowTime>0){ctx.save();ctx.strokeStyle='#a7e7f2aa';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y+4,size*.36,size*.12,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+    if(e.freeze>0){this.stamp('snow_rabbit',p.x,p.y-22,size*.63,t*.3,.75);}
+    if(e.stun>0){ctx.save();ctx.globalAlpha=.85;for(let i=0;i<3;i++){const a=t*2+i*Math.PI*2/3;ctx.save();ctx.translate(p.x+Math.cos(a)*size*.28,p.y-size*.7+Math.sin(a)*3);star(ctx,3.5,'#ffe09a');ctx.restore();}ctx.restore();}
+    if(e.stun<=0&&!(e.freeze>0)&&e.slowTime>0){ctx.save();ctx.strokeStyle='#a7e7f2aa';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y+4,size*.36,size*.12,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
     if(e.exposeTime>0){ctx.save();ctx.strokeStyle='#fff0b2';ctx.lineWidth=1.5;for(const side of [-1,1])stroke(ctx,[[p.x+side*size*.36,p.y-24],[p.x+side*size*.36,p.y-34],[p.x+side*size*.24,p.y-34]],'#fff0b2',1.5);ctx.restore();}
   }
   drawShot(shot,s){
@@ -320,12 +321,18 @@ export class CombatFX{
       const t=Math.max(0,1-e.life/e.total);
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
         if(e.hero==='zeke'){
-          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.closePath();ctx.clip();this.ultimate('zeke',h.range*.53,0,h.range*1.45,h.range*1.25,Math.PI*.75,fade*.72);ctx.restore();
+          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);
+          ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.closePath();ctx.clip();
+          // Authored cone vertex is at (12%,50%), radius 64% of its square.
+          // Clip every flame to the engine's exact 90-degree collision sector.
+          const size=h.range/.64;
+          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.52,'source-over');
+          ctx.globalAlpha=fade*.28;ctx.strokeStyle='#ffbc6a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.stroke();ctx.restore();
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
           ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.beginPath();ctx.arc(0,0,h.range,0,Math.PI*2);ctx.clip();
-          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*2,h.range*2,0,fade*.58,'source-over');ctx.restore();
+          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.72,h.range*1.72,0,fade*.44,'source-over');ctx.restore();
         }
     }
   }

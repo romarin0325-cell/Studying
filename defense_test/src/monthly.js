@@ -1,5 +1,6 @@
 import {HERO} from './content.js';
 import {calendar} from './economy.js';
+import {TEAM_SIZE} from './team-config.js';
 
 export const monthlyReward=record=>150+record.round*50;
 export const betterRecord=(a,b)=>!b||a.round>b.round||a.round===b.round&&a.damage>b.damage;
@@ -8,7 +9,7 @@ export function validRecord(r){
   return r===null||!!r&&/^\d{4}-\d{2}$/.test(r.period)&&typeof r.token==='string'&&r.token.length<=100&&
     Number.isSafeInteger(r.round)&&r.round>=0&&r.round<=1000&&Number.isFinite(r.damage)&&r.damage>=0&&r.damage<1e100&&
     Number.isFinite(r.seconds)&&r.seconds>=0&&r.seconds<1e100&&Number.isSafeInteger(r.at)&&r.at>=0&&
-    calendar(r.at).month===r.period&&Array.isArray(r.deck)&&r.deck.length===5&&new Set(r.deck).size===5&&r.deck.every(id=>HERO[id]);
+    calendar(r.at).month===r.period&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===TEAM_SIZE&&r.deck.every(id=>HERO[id]);
 }
 export function migrateMonthly(p){
   if(Object.hasOwn(p,'monthlyBest'))return;

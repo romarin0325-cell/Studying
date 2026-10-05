@@ -2,14 +2,16 @@ import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING} from './content.js';
 import {calendar,duplicateCost,levelCost,dispatchSlots,dispatchReward,combatPower,stageReward,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward} from './monthly.js';
+import {TEAM_SIZE,SAVE_KEY} from './team-config.js';
+import {MEMORIAL_STORIES} from './memorial.js';
 
-export const SAVE_KEY='astra.star-garden.test.v1';
+export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0});
 export function createProfile(now=Date.now()){
-  return {version:1,revision:0,dreams:600,dust:180,cleared:0,deck:[...DEFAULT_DECK],partner:'star_boy',
+  return {version:1,revision:0,dreams:600,dust:180,cleared:0,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
-    draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',weekly:null,monthly:null,
+    draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
     daily:{day:calendar(now).day,combat:false,draw:false,dispatch:false,claimed:[]},settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]};
 }
@@ -18,7 +20,8 @@ export function validateProfile(p){
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond);}))return false;
   if(ARTIFACTS.some(a=>{const e=p.relics[a.id];return !e||typeof e.owned!=='boolean'||!integer(e.enhance)||!integer(e.copies);}))return false;
-  if(!Array.isArray(p.deck)||p.deck.length!==5||new Set(p.deck).size!==5||p.deck.some(id=>!p.heroes[id]?.owned)||!p.heroes[p.partner]?.owned)return false;
+  if(!p.memories||typeof p.memories!=='object'||Array.isArray(p.memories)||Object.entries(p.memories).some(([id,m])=>!MEMORIAL_STORIES[id]||!p.heroes[id]?.owned||p.heroes[id].bond<10||!m||!integer(m.page,MEMORIAL_STORIES[id].paragraphs.length-1)||typeof m.read!=='boolean'))return false;
+  if(!Array.isArray(p.deck)||p.deck.length!==TEAM_SIZE||new Set(p.deck).size!==TEAM_SIZE||p.deck.some(id=>!p.heroes[id]?.owned)||!p.heroes[p.partner]?.owned)return false;
   if(!Array.isArray(p.equipped)||p.equipped.length>3||new Set(p.equipped).size!==p.equipped.length||p.equipped.some(id=>!p.relics[id]?.owned))return false;
   if(!Array.isArray(p.dispatches)||p.dispatches.length>dispatchSlots(p.cleared)||new Set(p.dispatches.map(d=>d.hero)).size!==p.dispatches.length||new Set(p.dispatches.map(d=>d.slot)).size!==p.dispatches.length)return false;
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)))return false;
@@ -30,22 +33,22 @@ export function validateProfile(p){
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
   if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly'].includes(r.mode)||!integer(r.stage,45)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
-  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==5||new Set(p.active.deck).size!==5||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,45)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,5)))return false;
+  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,45)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
     if(a.stage>p.cleared+1||!integer(a.seed,0xffffffff)||!a.seed||a.token.length>100||a.run!==null&&(typeof a.run!=='string'||a.run.length>2*1024*1024))return false;
     if(a.mode==='weekly'){
-      if(!Array.isArray(a.draftPool)||a.draftPool.length<5||a.draftPool.length>HEROES.length||new Set(a.draftPool).size!==a.draftPool.length||a.draftPool.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id)))return false;
-      if(!Array.isArray(a.draft)||a.draft.length>5||new Set(a.draft).size!==a.draft.length||a.draft.some(id=>!a.draftPool.includes(id))||a.boon>a.draft.length)return false;
-      if(!Array.isArray(a.offers)||a.offers.length!==(a.draft.length===5?0:2)||a.offers.some(o=>!o||!a.draftPool.includes(o.id)||a.draft.includes(o.id)||!['focus','spark'].includes(o.boon)))return false;
-      if(a.draft.length<5&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
-      if(a.draft.length===5&&a.deck.join()!==a.draft.join()||a.draft.length<5&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
+      if(!Array.isArray(a.draftPool)||a.draftPool.length<TEAM_SIZE||a.draftPool.length>HEROES.length||new Set(a.draftPool).size!==a.draftPool.length||a.draftPool.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id)))return false;
+      if(!Array.isArray(a.draft)||a.draft.length>TEAM_SIZE||new Set(a.draft).size!==a.draft.length||a.draft.some(id=>!a.draftPool.includes(id))||a.boon>a.draft.length)return false;
+      if(!Array.isArray(a.offers)||a.offers.length!==(a.draft.length===TEAM_SIZE?0:2)||a.offers.some(o=>!o||!a.draftPool.includes(o.id)||a.draft.includes(o.id)||!['focus','spark'].includes(o.boon)))return false;
+      if(a.draft.length<TEAM_SIZE&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
+      if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
     }else if(a.boon!==0)return false;
     if(a.run!==null&&!resumeBattle(p))return false;
   }
   return true;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
@@ -61,6 +64,10 @@ function receive(table,id){const e=table[id],fresh=!e.owned;if(fresh)e.owned=tru
 export function command(p,action,args={},now=Date.now()){
   now=safeNow(p,now);rollDay(p,now);
   const no=message=>({ok:false,message});
+  if(action==='memory'){
+    const story=MEMORIAL_STORIES[args.id],e=p.heroes[args.id];if(!story||!e?.owned||e.bond<story.unlockBond||!integer(args.page,story.paragraphs.length-1))return no('호감도 10에서 인연 이야기가 열립니다.');
+    p.memories[args.id]={page:args.page,read:!!p.memories[args.id]?.read||args.page===story.paragraphs.length-1};return {ok:true};
+  }
   if(action==='draw'){
     const banner=args.banner,count=args.count;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
     const cost=(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);
@@ -81,16 +88,16 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');p.partner=args.id;return {ok:true};}
   if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;p.heroes[p.partner].bond++;p.dreams+=40;return {ok:true,message:'인사 완료 · 꿈의결정 +40'};}
   if(action==='deck'){
-    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 서로 다른 동료 5명을 선택하세요.');p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
+    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 서로 다른 동료 ${TEAM_SIZE}명을 선택하세요.`);p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
   }
   if(action==='equip'){
     if(p.active||!p.relics[args.id]?.owned)return no('보유한 유물만 장착할 수 있습니다.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 최대 3개까지 장착할 수 있습니다.');return {ok:true};
   }
   if(action==='dispatch'){
     if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
-    if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=5)return no('전투에 남을 동료 5명이 필요합니다. 먼저 동료를 더 모으세요.');
+    if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
     const reward=dispatchReward(combatPower(args.id,p.heroes[args.id]),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward});
-    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<5&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
+    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
   }
   if(action==='claimDispatch'){
     if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);p.daily.dispatch=true;return {ok:true,reward:d.reward,message:`파견 보상 수령 · 꿈의결정 +${d.reward}`};
@@ -101,7 +108,7 @@ export function command(p,action,args={},now=Date.now()){
   }
   if(action==='begin'){
     if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
-    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 동료 5명이 필요합니다.');
+    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`);
     const c=calendar(now),stage=args.stage||Math.min(45,p.cleared+1);if(!integer(stage,45)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<3)return no('스테이지 3 클리어 시 해금됩니다.');
     if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
@@ -111,10 +118,10 @@ export function command(p,action,args={},now=Date.now()){
     if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
   }
   if(action==='draft'){
-    const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=5||!integer(args.index,1))return no('제시된 두 후보 중에서 선택하세요.');
+    const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=TEAM_SIZE||!integer(args.index,1))return no('제시된 두 후보 중에서 선택하세요.');
     const choice=a.offers?.[args.index];if(!choice||a.draft.includes(choice.id)||away(p,choice.id))return no('선택할 수 없는 동료입니다.');
     a.draft.push(choice.id);if(choice.boon==='focus')a.boon++;
-    if(a.draft.length===5){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
+    if(a.draft.length===TEAM_SIZE){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
   }
   if(action==='settle'){
     const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0;

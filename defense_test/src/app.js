@@ -8,6 +8,8 @@ import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
 import {currentRecord,monthlyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
+import {TEAM_SIZE,SOLO,SAVE_KEY} from './team-config.js';
+import {MEMORIAL_STORIES} from './memorial.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
 const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
@@ -22,6 +24,8 @@ const saves=new RunSaveQueue(()=>!run||store.saveRun(E.serialize(run)),{
   cancel:id=>window.cancelIdleCallback?window.cancelIdleCallback(id):clearTimeout(id),failed:storagePause,
 });
 const media=window.__GARDEN_MEDIA__||{};
+let memorialImage=null,memorialGeneration=0,memorialHero=null,memorialPage=0;
+const escapeText=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fallback=id=>'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><circle cx="64" cy="64" r="40" fill="${HERO[id]?.color||'#abc8b4'}"/><text x="64" y="80" text-anchor="middle" fill="#fff" font-size="38">✦</text></svg>`);
 const picture=(id,full=false)=>media[(full?'figure:':'portrait:')+id]||media['relic:'+id]||fallback(id);
 const image=(id,full=false,cls='')=>`<img class="${cls}" src="${picture(id,full)}" alt="${HERO[id]?.name||ARTIFACT[id]?.name||'별빛'}" draggable="false">`;
@@ -46,7 +50,7 @@ function nav(){
 function render(){$('app').dataset.screen=screen;document.body.dataset.battle=String(screen==='battle');wallet();nav();$('content').scrollTop=0;if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();const templates={home:home,collection:renderCollection,adventure:adventure,summon:renderSummon,dispatch:renderDispatch};$('content').innerHTML=(templates[screen]||home)();}
 const heading=(title,right='',sub='')=>`<div class="page-heading"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${right}</div>`;
 function five(ids,edit=false){
-  return `<div class="five-line">${Array.from({length:5},(_,i)=>ids[i]
+  return `<div class="five-line" style="--team-size:${TEAM_SIZE}">${Array.from({length:TEAM_SIZE},(_,i)=>ids[i]
     ?`<button class="team-slot" ${edit?'data-team-pick':'data-hero'}="${ids[i]}" aria-label="${HERO[ids[i]].name} ${edit?'편성 해제':'정보'}"><span class="portrait" data-rarity="${HERO[ids[i]].rarity}">${image(ids[i])}${badge(HERO[ids[i]].rarity)}</span><small>${HERO[ids[i]].name}</small></button>`
     :`<button class="team-slot" data-action="${edit?'focus-team':'team'}" aria-label="${i+1}번째 동료 선택"><span class="portrait empty-slot">${icon('plus')}</span><small>비어 있음</small></button>`).join('')}</div>`;
 }
@@ -59,7 +63,7 @@ function home(){
   return `<section class="scene" aria-label="${hero.name} 파트너 화면">
     <button class="season-chip" data-action="season">${icon('crown')}<span><small>${monthNo(c)} 이달의 수호자</small><b>${HERO[c.guardian].name}</b></span>${badge('UR')}</button>
     ${image(hero.id,true,'scene-partner')}
-    <div class="nameplate"><div class="np-top">${badge(hero.rarity)}<strong>${hero.name}</strong></div><small>${hero.title}</small><span class="bond">${icon('heart')}호감도 ${bond}</span><p class="quote">${quote}</p></div>
+    <div class="nameplate"><div class="np-top">${badge(hero.rarity)}<strong>${hero.name}</strong></div><small>${hero.title}</small><button class="bond bond-button" data-memorial="${hero.id}" aria-label="${hero.name}의 인연 이야기">${icon('heart')}호감도 ${bond}<span>기억 ${icon('chevron')}</span></button><p class="quote">${quote}</p></div>
     <div class="scene-actions">
       <button class="round ${petDone?'done':''}" data-action="pet">${icon('heart')}<span>인사</span><em>${petDone?'완료':'+40'}</em></button>
       <button class="round" data-action="partner" aria-label="파트너 변경">${icon('swap')}<span>변경</span></button>
@@ -95,6 +99,7 @@ function heroDetail(id){
   const mult=heroMultiplier(e),enh=duplicateCost(e.enhance),lvl=levelCost(e.level),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
   show(h.name,'동료',`<div class="detail-hero" data-rarity="${h.rarity}"><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
     <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>레벨</small><b>${e.owned?e.level:'—'}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
+    <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong></span>${icon('chevron')}</button>
     <div class="ability"><span class="ability-tag">기본 공격 · 특성</span><h3>${roles[1]||roles[0]} · 위력 ${e.owned?(h.damage*mult).toFixed(1):h.damage}</h3><p>${h.trait.text}</p></div>
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
     ${e.owned?`<div class="growth"><div><strong>레벨업</strong><small>Lv.${e.level} → ${e.level+1} · 기본 위력 +4%</small></div><button class="primary" data-level="${id}" ${p().dust<lvl||p().active?'disabled':''}><b>레벨업</b><small>${icon('dust')}${fmt(lvl)}</small></button></div>
@@ -128,7 +133,7 @@ function modeCard(kind,withAction=true){
   if(kind==='monthly')return monthlyCard(withAction);
   const weekly=true,profile=p(),used=profile.weekly===calendar(now()).week,unlocked=profile.cleared>=3;
   const label=!unlocked?'스테이지 3 클리어 시 해금':used?'이번 기간 입장 완료':weekly?'드래프트 준비':'도전 준비';
-  return `<div class="mode-card ${kind}"><div><span class="tag">${weekly?'주 1회 · 월요일 00:00 초기화':'월 1회 · 매월 1일 00:00 초기화'}</span><h2>${weekly?'주간 드래프트':'월간 보스전'}</h2><p>${weekly?'보유한 모든 동료 중 2택 1을 5번 반복해 팀을 꾸리고, 점점 강해지는 적을 돌파합니다.':'매 웨이브 보스 1체만 등장합니다. 단일 대상 화력과 약화 효과가 핵심입니다.'}</p></div>
+  return `<div class="mode-card ${kind}"><div><span class="tag">${weekly?'주 1회 · 월요일 00:00 초기화':'월 1회 · 매월 1일 00:00 초기화'}</span><h2>${weekly?'주간 드래프트':'월간 보스전'}</h2><p>${weekly?'보유한 모든 동료 중 2택 1을 ${TEAM_SIZE}번 반복해 팀을 꾸리고, 점점 강해지는 적을 돌파합니다.':'매 웨이브 보스 1체만 등장합니다. 단일 대상 화력과 약화 효과가 핵심입니다.'}</p></div>
     <div class="stat-chips"><div><small>입장</small><b>${used?'소진':'1회 가능'}</b></div><div><small>적 HP / 라운드</small><b>×${weekly?'1.85':'1.72'}</b></div><div><small>라운드 보상</small>${gem(weekly?60:50)}</div></div>
     <ul class="notes"><li>제한 시간 ${weekly?35:30}초 / 라운드</li><li>기본 보상 ${weekly?120:150} + ${weekly?'클리어 라운드':'격파 보스'}당 ${weekly?60:50}</li><li>파견 중인 동료는 참여할 수 없습니다.</li><li>중단해도 같은 입장으로 이어할 수 있습니다.</li></ul>
     ${withAction?`<button class="primary wide" data-action="prepare-mode" ${!unlocked||used||profile.active?'disabled':''}>${label}</button>`:''}
@@ -200,13 +205,13 @@ function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${Str
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
 function chooseDispatch(slot){
   const free=available(p());
-  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=5?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${gem(dispatchReward(combatPower(id,p().heroes[id]),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=5?'<p class="fineprint">전투 가능한 동료가 5명뿐입니다. 소환으로 동료를 더 모으세요.</p>':''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
+  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=TEAM_SIZE?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${gem(dispatchReward(combatPower(id,p().heroes[id]),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=TEAM_SIZE?`<p class="fineprint">전투 가능한 동료가 ${TEAM_SIZE}명뿐입니다. 소환으로 동료를 더 모으세요.</p>`:''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
 }
 let editingDeck=[],teamReturn=null;
 function team(edit=false){
   if(!edit){teamReturn=modal==='prepare'?modalInfo:null;editingDeck=[...p().deck];}
-  show('팀 편성',`출전 ${editingDeck.length}/5`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 5명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
-    `<button class="primary wide" data-action="save-team" ${editingDeck.length!==5||p().active?'disabled':''}>편성 확정 (${editingDeck.length}/5)</button>`,'team');
+  show('팀 편성',`출전 ${editingDeck.length}/${TEAM_SIZE}`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 ${TEAM_SIZE}명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
+    `<button class="primary wide" data-action="save-team" ${editingDeck.length!==TEAM_SIZE||p().active?'disabled':''}>편성 확정 (${editingDeck.length}/${TEAM_SIZE})</button>`,'team');
 }
 function partners(){
   show('파트너 변경','홈 화면',`<div class="collection-grid">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="hero-card ${p().partner===h.id?'current':''}" data-set-partner="${h.id}" data-rarity="${h.rarity}">${badge(h.rarity)}<span class="art">${image(h.id)}</span><strong>${h.name}</strong><small>${p().partner===h.id?'현재 파트너':'지정'}</small></button>`).join('')}</div>`,`<button class="secondary wide" data-action="close">취소</button>`,'partners');
@@ -216,18 +221,18 @@ function prepare(stage=Math.min(45,p().cleared+1),kind='main'){
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]];
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${kind==='main'?`<div class="boss-banner"><small>${c.name}</small><h2>${boss.name}</h2><p>6웨이브 · 3·6웨이브에 보스 등장</p><span class="reward-chip">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루 보상'}</span></div>`:`<div style="margin-bottom:12px">${modeCard(kind,false)}</div>`}
     <div class="panel-head"><h3>${kind==='weekly'?'드래프트: 보유 동료 전체':'출전 팀'}</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}
-    <p class="fineprint">장착 유물: ${p().equipped.map(id=>ARTIFACT[id].name).join(', ')||'없음'}</p>${kind==='weekly'?'<p class="fineprint" style="margin-top:4px">2택 1을 총 5번 선택합니다. 보유 동료가 5명뿐이면 마지막 선택은 같은 동료의 전술 2종 중에서 고릅니다.</p>':''}`,
-    `<div class="dialog-buttons"><button class="secondary" data-action="team">편성 변경</button><button class="primary" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==5?'disabled':''}>${kind==='main'?'출격':'입장하기'}</button></div>`,'prepare',{stage,kind});
+    <p class="fineprint">장착 유물: ${p().equipped.map(id=>ARTIFACT[id].name).join(', ')||'없음'}</p>${kind==='weekly'?`<p class="fineprint" style="margin-top:4px">2택 1을 총 ${TEAM_SIZE}번 선택합니다. 남은 후보가 한 명이면 같은 동료의 전술 2종 중에서 고릅니다.</p>`:''}`,
+    `<div class="dialog-buttons"><button class="secondary" data-action="team">편성 변경</button><button class="primary" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장하기'}</button></div>`,'prepare',{stage,kind});
 }
 function begin(kind,stage){const result=act('begin',{mode:kind,stage},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
 function renderDraft(){
-  const a=p().active;if(a?.mode!=='weekly'){screen='home';render();return;}if(a.draft.length===5){startBattle();return;}
-  $('content').innerHTML=`<section class="page">${heading('주간 드래프트',`<span class="count"><b>${a.draft.length+1}</b> / 5</span>`,'둘 중 한 명을 선택하세요.')}
-    <div class="draft-selected">${Array.from({length:5},(_,i)=>a.draft[i]?image(a.draft[i]):`<span class="draft-dot">${i+1}</span>`).join('')}</div>
+  const a=p().active;if(a?.mode!=='weekly'){screen='home';render();return;}if(a.draft.length===TEAM_SIZE){startBattle();return;}
+  $('content').innerHTML=`<section class="page">${heading('주간 드래프트',`<span class="count"><b>${a.draft.length+1}</b> / ${TEAM_SIZE}</span>`,'둘 중 한 명을 선택하세요.')}
+    <div class="draft-selected">${Array.from({length:TEAM_SIZE},(_,i)=>a.draft[i]?image(a.draft[i]):`<span class="draft-dot">${i+1}</span>`).join('')}</div>
     <div class="draft-options">${a.offers.map((o,i)=>`<button class="draft-card" data-draft="${i}" data-rarity="${HERO[o.id].rarity}">${badge(HERO[o.id].rarity)}<span class="art">${image(o.id,true)}</span><h3>${HERO[o.id].name}</h3><small>${HERO[o.id].role}</small><span class="cpline">전투력 ${cpOf(o.id)}</span><span class="boon">${o.boon==='focus'?'집중 전술 · 위력 +5%':'별빛 전술 · 시작 별빛 +4'}</span></button>`).join('')}</div>
     <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.<br>후보가 한 명뿐이면 같은 동료의 전술 2종 중에서 고릅니다.</p></section>`;
 }
-function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<5){screen='draft';render();}else startBattle(true);}
+function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE){screen='draft';render();}else startBattle(true);}
 function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
 function renderBattle(){
   if(!run)return;
@@ -236,7 +241,7 @@ function renderBattle(){
     <div class="battle-top"><div class="battle-title"><strong>${title}</strong><small id="wave-label"></small></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
     <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.GAUGE_MAX}</small></span><span id="battle-time" class="hud-time"></span></div>
     <div class="arena-wrap"><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
-    <div class="skills">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span></button>`).join('')}</div>
+    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     <div id="unit-panel" class="unit-panel" hidden></div>
     <p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보</p></section>`;
@@ -291,7 +296,54 @@ function showResult(r){
     `<div class="dialog-buttons"><button class="secondary" data-action="${r.mode==='monthly'?'close':'go-collection'}">${r.mode==='monthly'?'기록 확인':'동료 강화'}</button><button class="primary" data-action="${r.mode==='monthly'?'monthly-retry':'close'}">${r.mode==='monthly'?'다시 도전':'확인'}</button></div>`,'result');
 }
 function storagePause(){paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
-function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;updateBattle();}
+function syncBattlePhase(){
+  if(!run)return false;
+  if(run.phase!==previousPhase){
+    saves.mark();if(!saves.flush())return false;
+    // A failed checkpoint leaves this transition pending for resume.
+    previousPhase=run.phase;
+    if(run.phase==='reward')autoIn=-.5;
+  }
+  if(!saveBlocked&&!modal&&run.phase==='reward'&&run.reward.length&&!p().settings.auto)reward();
+  return true;
+}
+function releaseMemorial(){
+  memorialGeneration++;if(memorialImage){memorialImage.removeAttribute('src');memorialImage.remove();memorialImage=null;}
+  memorialHero=null;memorialPage=0;$('sheet')?.classList.remove('memory-art-only');
+}
+function memorialAlbum(){
+  const sorted=[...HEROES].sort((a,b)=>Number(p().heroes[b.id].owned&&p().heroes[b.id].bond>=10)-Number(p().heroes[a.id].owned&&p().heroes[a.id].bond>=10));
+  const unlocked=HEROES.filter(h=>p().heroes[h.id].owned&&p().heroes[h.id].bond>=10).length;
+  show('함께한 기억','인연 이야기',`<div class="memory-intro"><span>${icon('heart')}</span><div><h3>당신과 동료의 작은 순간들</h3><p>호감도 10에서 특별한 그림과 이야기가 열립니다.</p></div></div><p class="memory-count">열린 기억 <b>${unlocked}</b> / ${HEROES.length}</p><div class="choose-list memory-list">${sorted.map(h=>{const e=p().heroes[h.id],open=e.owned&&e.bond>=10;return `<button class="choose-row ${open?'memory-open':''}" data-memorial="${h.id}">${portrait(h.id)}<div><strong>${h.name}</strong><small>${escapeText(MEMORIAL_STORIES[h.id].title)}</small><span class="memory-condition">${open?'이야기 감상':e.owned?`호감도 ${e.bond}/10`:'동료 획득 후 호감도 10'}</span></div>${icon(open?'chevron':'lock')}</button>`;}).join('')}</div>`,`<button class="secondary wide" data-action="close">돌아가기</button>`,'memorial-album');
+}
+function openMemorial(id){
+  const story=MEMORIAL_STORIES[id],e=p().heroes[id],h=HERO[id];if(!story||!e||!h)return;
+  if(!e.owned||e.bond<story.unlockBond){
+    show(h.name,'아직 펼치지 않은 기억',`<div class="memory-locked">${image(id,true)}<span class="memory-seal">${icon('lock')}</span><h3>${escapeText(story.title)}</h3><p>호감도 ${story.unlockBond}에서<br>함께한 순간을 다시 만날 수 있습니다.</p><div class="memory-bond"><span>${icon('heart')}현재 호감도 <b>${e.bond}</b></span><div class="progress"><span style="width:${e.owned?Math.min(100,e.bond/story.unlockBond*100):0}%"></span></div></div>${!e.owned?'<small>먼저 이 동료를 만나 주세요.</small>':''}</div>`,`<button class="secondary wide" data-action="memorial-album">기억 목록</button>`,'memorial-locked',id);return;
+  }
+  show(h.name,'인연 이야기',`<div class="memory-reader"><div class="memory-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">함께한 순간을 펼치는 중…</div></div><div class="memory-title"><span>${icon('heart')}호감도 ${e.bond}</span><h3>${escapeText(story.title)}</h3><button class="link" data-action="memorial-art" aria-pressed="false">그림만 보기</button></div><div class="memory-narrative" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress"></span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0"></div><details class="memory-log"><summary>이야기 전체 보기</summary>${story.paragraphs.map(t=>`<p>${escapeText(t)}</p>`).join('')}</details></div></div>`,`<div class="memory-controls"><button class="secondary" data-action="memorial-album" aria-label="기억 목록">${icon('book')}</button><button class="secondary" id="memory-prev" data-memory-step="-1">이전</button><button class="primary" id="memory-next" data-memory-step="1">다음 ${icon('chevron')}</button></div>`,'memorial',id);
+  memorialHero=id;memorialPage=p().memories[id]?.page||0;updateMemorialPage();
+  const generation=memorialGeneration,img=new Image();memorialImage=img;img.dataset.memorial='1';img.decoding='async';img.width=720;img.height=1080;img.alt=`${h.name} · ${story.title}`;
+  const src=window.__MEMORIAL_MEDIA__?.[id];if(!src){$('memory-loading').textContent='그림을 불러올 수 없습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');return;}
+  img.src=src;
+  (async()=>{
+    try{try{await img.decode();}catch(error){
+      if(generation!==memorialGeneration||modal!=='memorial')return;
+      const fallback=window.__MEMORIAL_FALLBACK__?.[id];if(!fallback)throw error;img.src=fallback;await img.decode();
+    }
+    if(generation!==memorialGeneration||modal!=='memorial'||memorialHero!==id)return;$('memory-art').replaceChildren(img);$('memory-art').setAttribute('aria-busy','false');
+    }catch{if(generation!==memorialGeneration||modal!=='memorial')return;$('memory-loading').textContent='그림을 불러오지 못했습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');}
+  })();
+}
+function updateMemorialPage(delta=0){
+  const story=MEMORIAL_STORIES[memorialHero];if(!story||modal!=='memorial')return;
+  memorialPage=delta>0&&memorialPage===story.paragraphs.length-1?0:Math.max(0,Math.min(story.paragraphs.length-1,memorialPage+delta));
+  if(p().memories[memorialHero]?.page!==memorialPage)act('memory',{id:memorialHero,page:memorialPage},false);
+  const text=$('memory-text');text.textContent=story.paragraphs[memorialPage];text.scrollTop=0;text.dataset.dialogue=String(/^["“]/.test(text.textContent));
+  $('memory-progress').textContent=`${Math.round((memorialPage+1)/story.paragraphs.length*100)}% 읽음`;$('memory-progress-fill').style.width=`${(memorialPage+1)/story.paragraphs.length*100}%`;
+  $('memory-prev').disabled=memorialPage===0;$('memory-next').innerHTML=memorialPage===story.paragraphs.length-1?'처음부터 읽기':`다음 ${icon('chevron')}`;
+}
+function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;syncBattlePhase();updateBattle();}
 function leave(){
   paused=true;show('전투를 중단할까요?','일시정지',`<p class="subtext">현재 배치와 웨이브를 저장하고 홈으로 나갑니다. 주간·월간 원정은 같은 입장으로 이어할 수 있습니다.</p><button class="danger-link" data-action="retire">이번 원정 포기</button>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="save-leave">저장 후 나가기</button></div>`,'leave');
 }
@@ -309,8 +361,8 @@ function daily(){
   const c=calendar(now()),d=p().daily.day===c.day?p().daily:{claimed:[],combat:false,draw:false,dispatch:false};
   show('일일 임무','매일 00:00 초기화 (UTC+9)',[['combat','원정 1회 완료',60],['draw','동료 또는 유물 소환 1회',30],['dispatch','파견 보상 수령',30]].map(([id,name,value])=>`<div class="daily-row"><div><strong>${name}</strong>${gem(value)}</div><button class="${d[id]&&!d.claimed.includes(id)?'primary':'secondary'}" data-daily="${id}" ${!d[id]||d.claimed.includes(id)?'disabled':''}>${d.claimed.includes(id)?'완료':d[id]?'수령':'진행 중'}</button></div>`).join(''),`<button class="secondary wide" data-action="close">확인</button>`,'daily');
 }
-function show(title,kicker,body,footer='',kind='generic',info=null){if(run){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;modal=kind;modalInfo=info;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
-function close(){if(!modal)return;const wasLeave=modal==='leave';modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();}
+function show(title,kicker,body,footer='',kind='generic',info=null){if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
+function close(){if(!modal)return;const wasLeave=modal==='leave';releaseMemorial();modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -322,6 +374,7 @@ document.addEventListener('click',e=>{
   const button=e.target.closest('button');if(!button||button.disabled)return;const d=button.dataset;sound.click();
   if(d.nav){if(screen==='battle'){leave();return;}close();screen=d.nav;render();return;}
   if(d.hero){heroDetail(d.hero);return;}if(d.relic){relicDetail(d.relic);return;}
+  if(d.memorial){openMemorial(d.memorial);return;}if(d.memoryStep){updateMemorialPage(Number(d.memoryStep));return;}
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
@@ -329,20 +382,21 @@ document.addEventListener('click',e=>{
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok)(d.enhance?heroDetail:relicDetail)(id);return;}
   if(d.equip){if(act('equip',{id:d.equip}).ok)relicDetail(d.equip);return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 변경 · ${HERO[d.setPartner].name}`);}return;}
-  if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<5)editingDeck.push(d.teamPick);else{toast('편성은 5명입니다. 먼저 한 명을 해제하세요.');return;}team(true);return;}
+  if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명입니다. 먼저 한 명을 해제하세요.`);return;}team(true);return;}
   if(d.dispatchSlot){chooseDispatch(Number(d.dispatchSlot));return;}if(d.send){if(act('dispatch',{id:d.send,slot:Number(d.slot)}).ok){close();render();}return;}
   if(d.claimDispatch){if(act('claimDispatch',{slot:Number(d.claimDispatch)}).ok)render();return;}if(d.draft){if(act('draft',{index:Number(d.draft)},false).ok)render();return;}
   if(d.skill){battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){if(act('daily',{id:d.daily}).ok)daily();return;}
   if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
   const actions={close:()=>{if(modal==='reward')return;close();},settings:showSettings,partner:partners,team:()=>team(),'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
+    'memorial-album':memorialAlbum,'memorial-art':()=>{const artOnly=$('sheet').classList.toggle('memory-art-only');button.setAttribute('aria-pressed',String(artOnly));button.textContent=artOnly?'이야기 보기':'그림만 보기';},
     owned:()=>{ownedOnly=!ownedOnly;render();},pet:()=>{if(act('pet').ok)render();},idle:()=>{if(act('idle').ok)render();},
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),
     'prepare-mode':()=>prepare(Math.min(45,p().cleared+1),mode),resume,
     'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';render();},'monthly-claim':confirmMonthlyClaim,'monthly-retry':()=>{close();prepare(Math.min(45,p().cleared+1),'monthly');},speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},
-    'summon-battle':()=>battleCommand(E.summon(run)),training,auto:()=>{if(act('setting',{id:'auto',value:!p().settings.auto},false).ok){button.querySelector('b').textContent=p().settings.auto?'ON':'OFF';button.setAttribute('aria-pressed',p().settings.auto);}},
+    'summon-battle':()=>battleCommand(E.summon(run)),training,auto:()=>{if(act('setting',{id:'auto',value:!p().settings.auto},false).ok){button.querySelector('b').textContent=p().settings.auto?'ON':'OFF';button.setAttribute('aria-pressed',p().settings.auto);syncBattlePhase();}},
     target:()=>{E.cycleTarget(run,selected);battleCommand({ok:true});},deselect:()=>{selected=-1;updateUnit();},leave,
     retire:retireSheet,'confirm-retire':()=>settle(true),'return-battle':()=>{close();resumeCombat();},'save-leave':()=>{saves.mark();if(saves.flush()){saves.reset();close();screen='home';run=null;renderer=null;render();}},
     export:exportBackup,import:()=>{if(run&&p().active){toast('진행 중인 전투를 저장하고 홈에서 불러오세요.');return;}$('backup-input').click();},
@@ -353,19 +407,17 @@ $('backup-input').addEventListener('change',async e=>{const file=e.target.files?
 document.addEventListener('keydown',e=>{if(!modal)return;if(e.key==='Escape'){if(modal!=='reward'){close();}e.preventDefault();}if(e.key==='Tab'){const buttons=Array.from($('sheet').querySelectorAll('button:not(:disabled),summary,[tabindex="0"]')).filter(b=>b.offsetParent!==null),first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('sheet'))){e.preventDefault();last?.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('sheet'))){e.preventDefault();first?.focus();}}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(run){saves.mark();saves.flush();}sound.suspend();lastFrame=0;accumulator=0;renderClock.reset();}else{lastFrame=0;renderClock.reset();if(!paused)sound.unlock();}});
 window.addEventListener('pagehide',()=>{if(run){saves.mark();saves.flush();}});
-window.addEventListener('storage',e=>{if(e.key==='astra.star-garden.test.v1'&&e.newValue!==store.raw){store.conflict=true;paused=true;wallet();}});
+window.addEventListener('storage',e=>{if(e.key===SAVE_KEY&&e.newValue!==store.raw){store.conflict=true;paused=true;wallet();}});
 function frame(time){
   const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;
   if(run&&screen==='battle'&&!document.hidden){
     if(!paused&&!modal){
       accumulator+=dt*speed;let ticks=0;
-      while(accumulator>=.05&&ticks++<5){E.step(run,.05);performanceStats.steps++;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
+      while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
       if(ticks)saves.mark();uiIn+=dt;
       for(const e of run.events.splice(0)){renderer.event(e);sound.event(e);}
       saves.schedule();if(uiIn>.18){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
-      if(run.phase!==previousPhase){previousPhase=run.phase;saves.mark();if(saves.flush()){
-        if(run.phase==='reward'&&!p().settings.auto)reward();
-      }}
+      syncBattlePhase();
       if(run&&!paused&&['victory','defeat'].includes(run.phase))settle();
     }
     const renderDt=renderClock.next(time,paused||!!modal);if(run&&renderDt!==null){renderer.draw(run,renderDt);performanceStats.renders++;}
@@ -374,10 +426,10 @@ function frame(time){
 }
 setInterval(()=>{if(screen==='dispatch'&&!modal){const ended=p().dispatches.some(d=>d.end<=now()&&document.querySelector(`[data-claim-dispatch="${d.slot}"]`)?.disabled);if(ended)render();else for(const node of document.querySelectorAll('[data-timer]'))node.textContent=timerText(Number(node.dataset.timer));}if(screen==='home'&&!modal&&$('idle-total')){$('idle-total').textContent=fmt(idleReward(p(),now()));$('idle-progress').style.width=Math.min(100,(now()-p().idleAt)/(20*HOUR)*100)+'%';const button=document.querySelector('[data-action="idle"]');if(button)button.disabled=idleReward(p(),now())<1;}},1000);
 for(const img of document.querySelectorAll('img'))img.onerror=()=>{img.src=fallback('star_boy');};
-document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
+document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.memorial&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
 document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'./assets/merge/garden.webp'}")`);
 art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');});
-render();requestAnimationFrame(frame);
+$('app').dataset.solo=String(SOLO);render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
 window.STAR_GARDEN={get profile(){return p();},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};
