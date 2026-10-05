@@ -316,6 +316,10 @@ export class CombatFX{
   // Age them once in draw(), regardless of how many layers use the same event.
   drawAttackShapes(){
     const ctx=this.ctx;
+    // Twenty simultaneous basic attacks must not paint the entire grid red.
+    // Keep a two-attack brightness budget; every real strike still has a shape.
+    const flames=this.impacts.filter(e=>e.type==='attackShape'&&e.life>0&&['zeke','ancient_dragon'].includes(e.hero)).length;
+    const fireClarity=Math.min(1,2/Math.max(1,flames));
     for(const e of this.impacts){
       if(e.type!=='attackShape'||e.life<=0)continue;
       const t=Math.max(0,1-e.life/e.total);
@@ -326,18 +330,22 @@ export class CombatFX{
           // Authored cone vertex is at (12%,50%), radius 64% of its square.
           // Clip every flame to the engine's exact 90-degree collision sector.
           const size=h.range/.64;
-          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.42,'source-over');
-          ctx.globalAlpha=fade*.28;ctx.strokeStyle='#ffbc6a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.stroke();ctx.restore();
+          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.42*fireClarity,'source-over');
+          ctx.globalAlpha=fade*.28*fireClarity;ctx.strokeStyle='#ffbc6a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.stroke();ctx.restore();
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
           ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.beginPath();ctx.arc(0,0,h.range,0,Math.PI*2);ctx.clip();
-          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.6,h.range*1.6,0,fade*.26,'source-over');ctx.restore();
+          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.6,h.range*1.6,0,fade*.26*fireClarity,'source-over');ctx.restore();
         }
     }
   }
   draw(dt){
     this.clock+=dt;const ctx=this.ctx;
+    // Several ordinary strikes on one enemy share a local glow budget. Skills,
+    // boss tells and execution receipts keep their own independent emphasis.
+    const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
+    for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
       if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
       if(e.type==='instantKill'){
@@ -361,7 +369,8 @@ export class CombatFX{
         this.ultimate(e.hero,e.x+24,e.y-22-t*28,58+10*t,58+10*t,0,(1-t)*.75);
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
-      const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),alpha=Math.max(0,(1-t)*(large?.83:.9));
+      const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),hitClarity=e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1,alpha=Math.max(0,(1-t)*(large?.83:.9)*hitClarity);
+      if(e.type==='impact'&&e.hero==='ancient_dragon'){this.atlasStamp('ancient-cross',0,1,1,e.x,e.y-18,size*.58,size*.58,0,alpha*.7,'source-over');continue;}
       if(large&&dedicated(e.hero)){this.ultimate(e.hero,e.x,e.y-22,size*(1+t*.35),size*(1+t*.35),0,alpha);continue;}
       if(FX_PROFILES[e.hero]?.atlas==='effects-trio'){
         const frame=FX_PROFILES[e.hero].frame+3,burst=e.type==='frostBreak';

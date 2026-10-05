@@ -48,7 +48,7 @@ for(const h of HEROES){
   }else memorial[h.id]='data:image/avif;base64,'+bytes.toString('base64');
 }
 if(Object.keys(memorial).length!==30||memorialBytes>=2.5*1024*1024||(!web&&!compat&&Buffer.byteLength(JSON.stringify(memorial))>=3*1024*1024))throw new Error('Memorial count or aggregate budget exceeded.');
-if(compat&&(compatBytes>=3*1024*1024||compatMax>=120*1024||Buffer.byteLength(JSON.stringify(memorial))>=4*1024*1024))throw new Error('WebP compatibility media budget exceeded.');
+if(compat&&(compatBytes>=2.5*1024*1024||compatMax>=100*1024||Buffer.byteLength(JSON.stringify(memorial))>=3*1024*1024))throw new Error('WebP compatibility media budget exceeded.');
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.ttf')),license=await fs.readFile(assetFile('./assets/Jua-OFL.txt'),'utf8');
 const css=(await fs.readFile(path.join(game,'src/style.css'),'utf8')).replace('__FONT__','data:font/ttf;base64,'+font.toString('base64'));
 const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo)}});
