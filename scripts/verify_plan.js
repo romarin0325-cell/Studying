@@ -545,6 +545,8 @@ function planDefenseTest(plan, files, currentFiles) {
   if(inputs.some(file=>file.endsWith('/economy.js'))){add('economy');add('profile');add('combat');}
   if(inputs.some(file=>/(?:src\/battle\.js|src\/combat\/engine\.js)$/.test(file))){add('combat');add('profile');}
   if(inputs.includes('defense_test/src/profile.js'))add('profile');
+  if(inputs.includes('defense_test/src/monthly.js')){add('monthly');add('profile');}
+  if(inputs.includes('defense_test/src/runtime.js'))add('runtime');
   if(reportScripts)add('generated-reports');
   addNodeTest(plan,'defense_test','defense_test:contracts-and-regressions','Check Star Garden collection, growth, tickets and actual combat regressions',[...checks]);
   if(['assets','generated-reports'].some(name=>checks.has('defense_test/tests/'+name+'.test.mjs')))plan.steps.find(s=>s.id==='defense_test:contracts-and-regressions').needsInstall=true;

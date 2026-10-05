@@ -1,5 +1,9 @@
 import {HERO,HEROES} from '../content.js';
-import {cellPoint,pathPoint,attackGeometry} from './engine.js';
+import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors} from './engine.js';
+export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
+const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
+export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field';
+export function impactSize(hero,rank=1){const h=HERO[hero],area=['cleave','pulse','beam','cross','splash','zone'].includes(h.shape);return (area?82:62)+Math.min(5,rank)*4+(hero==='red_dragon'?22:hero==='santa'?10:0);}
 
 // Frame order is the authored 7 x 3 SD atlas. Every companion owns a silhouette.
 export const FX_PROFILES=Object.fromEntries([
@@ -34,11 +38,13 @@ export function drawAttackRange(ctx,hero,from,aim){
 }
 
 export class CombatFX{
-  constructor(ctx,art){this.ctx=ctx;this.art=art;this.impacts=[];this.clock=0;this.reduced=false;}
-  atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1){
+  constructor(ctx,art){this.ctx=ctx;this.art=art;this.impacts=[];this.clock=0;this.reduced=false;this.budget=64;this.enemies=new Map();}
+  point(uid,fallback){return this.enemies.get(uid)?.point||fallback;}
+  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
+  atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1,blend='screen'){
     const ctx=this.ctx,img=this.art.images[atlas];if(!img||alpha<=0)return;
     const w=img.naturalWidth/columns,h=img.naturalHeight/rows;
-    ctx.save();ctx.globalAlpha*=alpha;ctx.globalCompositeOperation='screen';ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(img,frame%columns*w,Math.floor(frame/columns)*h,w,h,-width/2,-height/2,width,height);ctx.restore();
+    ctx.save();ctx.globalAlpha*=alpha;ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(img,frame%columns*w,Math.floor(frame/columns)*h,w,h,-width/2,-height/2,width,height);ctx.restore();
   }
   stamp(hero,x,y,size,angle=0,alpha=1,form=null){
     const ctx=this.ctx,fx=FX_PROFILES[hero];if(!fx||alpha<=0)return;
@@ -49,19 +55,25 @@ export class CombatFX{
     else{ctx.rotate(fx.frame*Math.PI/11);star(ctx,size*.24,HERO[hero].color);ctx.lineWidth=2;ctx.strokeStyle=HERO[hero].color;for(let i=0;i<fx.frame%4;i++){ctx.beginPath();ctx.arc(0,0,size*(.25+i*.05),0,Math.PI*1.4);ctx.stroke();}}
     ctx.restore();
   }
-  add(effect){this.impacts.push(effect);if(this.impacts.length>96)this.impacts.splice(0,this.impacts.length-96);}
+  add(effect){
+    // Spend the decoration budget on ordinary hit stamps first. Boss magic and
+    // finisher receipts keep their target marks even during a dense burst.
+    if(this.impacts.length>=this.budget){const index=this.impacts.findIndex(e=>e.type==='impact');if(index>=0)this.impacts.splice(index,1);else if(effect.type==='impact')return;}
+    this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
+  }
   event(e){
+    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero))this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life:e.hero==='guardian'?.44:.36,total:e.hero==='guardian'?.44:.36});
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',life:.45,total:.45});
-    if(e.type==='impact')this.add({...e,life:.3,total:.3});
+    if(e.type==='impact')this.add({...e,life:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3,total:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3});
     if(e.type==='chain')this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life:.24,total:.24,rank:1});
     if(e.type==='skill'){
       if(e.locked)return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
-      for(const p of targets)this.add({type:e.support?'support':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65,total:.65,rank:e.rank,skill:h.skill.type});
+      for(const p of targets)this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65,total:.65,rank:e.rank,skill:h.skill.type});
       if(!targets.length)this.add({type:'ultimate',hero:e.hero,...e.origin,origin:e.origin,angle:0,life:.65,total:.65,rank:e.rank});
     }
   }
@@ -69,6 +81,20 @@ export class CombatFX{
     if(!skill||skill.life<=0||skill.locked||skill.kind==='trauma')return;
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero];
     const t=Math.max(0,Math.min(1,1-skill.life/skill.total)),fade=Math.min(1,t*12)*(1-t),motion=this.reduced?.28:t;
+    const layout=ultimateLayout(skill.kind);
+    if(layout==='target'||layout==='pull'){this.drawDirectedSkill(skill,t,fade,layout);return;}
+    if(dedicated(skill.hero)){
+      if(layout==='support'){
+        this.ultimate(skill.hero,skill.origin.x,skill.origin.y-18,154,154,0,fade*.78);
+        for(const p of (skill.targets||[]).slice(0,8))this.ultimate(skill.hero,p.x,p.y+18,62,30,0,fade*.35);
+      }else if(skill.hero==='zeke'){
+        for(let i=0;i<4;i++){const local=(t*3.5-i*.24)%1;if(local<0)continue;this.ultimate('zeke',210+i*100,245+i*113,370,220,i%2?.12:-.4,Math.sin(local*Math.PI)*.52);}
+      }else{
+        this.ultimate(skill.hero,360,405,skill.hero==='frost_witch'?380:310,skill.hero==='frost_witch'?310:310,skill.hero==='time_ruler'?motion*.15:0,fade*.45);
+        for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112,112,0,fade*.72);
+      }
+      return;
+    }
     if(fx.atlas==='effects-trio'){
       // Authored seals sit outside the board; never cover faces or enemy HP.
       for(const [x,y] of [[38,345],[682,485]])this.atlasStamp('effects-trio',fx.frame+3,3,2,x,y,80,80,0,fade*(this.reduced?.45:.75));
@@ -130,6 +156,41 @@ export class CombatFX{
     this.stamp(h.id,681,485,104,-Math.PI/2,.8);
     ctx.restore();
   }
+  drawDirectedSkill(skill,t,fade,layout){
+    const ctx=this.ctx,points=skill.targets||[],h=HERO[skill.hero];
+    if(layout==='pull'){
+      if(!points.length)return;const centre=points.reduce((a,p)=>({x:a.x+p.x/points.length,y:a.y+p.y/points.length}),{x:0,y:0});
+      this.ultimate(skill.hero,centre.x,centre.y-18,230,210,t*.45,fade*.8);
+      for(const p of points){const from=p.from||p,to=this.point(p.uid,p),travel=Math.min(1,t*3),x=from.x+(to.x-from.x)*travel,y=from.y+(to.y-from.y)*travel;
+        ctx.save();ctx.globalAlpha=fade*.6;ctx.strokeStyle=h.color;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(from.x,from.y-20);ctx.quadraticCurveTo((from.x+to.x)/2+25,(from.y+to.y)/2-45,to.x,to.y-20);ctx.stroke();ctx.restore();
+        this.stamp(skill.hero,x,y-20,42,Math.atan2(to.y-from.y,to.x-from.x),fade*.8);
+      }return;
+    }
+    let from=skill.origin;
+    for(let i=0;i<points.length;i++){
+      const p=this.point(points[i].uid,points[i]),angle=Math.atan2(p.y-from.y,p.x-from.x);
+      if(skill.kind==='thunder'){
+        ctx.save();ctx.globalAlpha=fade*.9;const mid={x:(from.x+p.x)/2+12,y:(from.y+p.y)/2-24};stroke(ctx,[[from.x,from.y-20],[mid.x,mid.y],[p.x,p.y-20]],h.color,5);stroke(ctx,[[from.x,from.y-20],[mid.x,mid.y],[p.x,p.y-20]],'#fff8cf',1.6);ctx.restore();
+        this.stamp(skill.hero,p.x,p.y-20,96,Math.PI/2,fade);from=p;
+      }else if(skill.kind==='flurry'){
+        const phase=Math.min(1,Math.max(0,t*2.4-i*.055)),x=from.x+(p.x-from.x)*phase,y=from.y+(p.y-from.y)*phase-Math.sin(phase*Math.PI)*50;
+        ctx.save();ctx.globalAlpha=fade*.48;ctx.strokeStyle=h.color;ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(from.x,from.y-18);ctx.quadraticCurveTo((from.x+p.x)/2,(from.y+p.y)/2-70,p.x,p.y-18);ctx.stroke();ctx.restore();
+        this.stamp('night_rabbit',x,y-18,100,angle,fade);from=p;
+      }else this.ultimate(skill.hero,p.x,p.y-28,165,165,angle,fade*.8);
+      ctx.save();ctx.globalAlpha=fade*.65;ctx.strokeStyle=h.color;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(p.x,p.y+8,27,10,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
+  }
+  drawPersistent(s){
+    for(let i=0;i<s.board.length;i++){
+      const u=s.board[i];if(!u)continue;const own=activeSkill(s,u.hero),p=cellPoint(i);
+      let active=own,owner=u.hero;
+      if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>id!=='time_magician'&&s.buffs[ACTIVE_SKILLS[id]]>0&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
+      if(!active)continue;
+      const pulse=.27+Math.sin(this.clock*4+u.uid)*.06,ctx=this.ctx;
+      this.ultimate(owner,p.x,p.y+20,76,30,0,pulse);
+      if(own){ctx.save();ctx.strokeStyle=HERO[owner].color;ctx.lineWidth=2.5;ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(p.x,p.y+21,32,11,0,-Math.PI/2,-Math.PI/2+Math.PI*2*active.remaining/active.total);ctx.stroke();ctx.restore();this.ultimate(owner,p.x+29,p.y-36,31,31,0,.58);}
+    }
+  }
   drawZones(s){
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
       // Edge is the real collision radius. The painted centre is deliberately quieter.
@@ -152,12 +213,19 @@ export class CombatFX{
     if(e.exposeTime>0){ctx.save();ctx.strokeStyle='#fff0b2';ctx.lineWidth=1.5;for(const side of [-1,1])stroke(ctx,[[p.x+side*size*.36,p.y-24],[p.x+side*size*.36,p.y-34],[p.x+side*size*.24,p.y-34]],'#fff0b2',1.5);ctx.restore();}
   }
   drawShot(shot,s){
-    const ctx=this.ctx,h=HERO[shot.hero],f=FX_PROFILES[h.id],target=s.enemies.find(e=>e.uid===shot.target),p=target?pathPoint(target.progress):shot.to;
+    const ctx=this.ctx,h=HERO[shot.hero],f=FX_PROFILES[h.id],target=this.enemies.get(shot.target)?.enemy,p=this.point(shot.target,shot.to);
     if(shot.reflected&&shot.delay>0){if(target)this.atlasStamp('effects-trio',5,3,2,shot.from.x,shot.from.y-18,36,44,0,.35+.35*(1-shot.delay/.42));return;}
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
-    if(f.atlas){this.stamp(h.id,x,y,36+Math.min(5,shot.rank)*3,angle,.95,shot.form);return;}
+    if(['zeke','guardian','ancient_dragon'].includes(h.id))return;
+    if(h.shape==='beam'){
+      const atlas=f.atlas||'effects',frame=shot.form==='trauma'?15:f.frame;
+      if(shot.form==='trauma')this.ultimate('time_magician',x,y,122,48,angle+.65,.9);
+      else this.atlasStamp(atlas,frame,f.columns||7,f.rows||3,x,y,116+shot.rank*3,48,angle+(f.offset||0),.86);
+      return;
+    }
+    if(f.atlas){this.stamp(h.id,x,y,48+Math.min(5,shot.rank)*3,angle,.95,shot.form);return;}
     if(f.motion==='quake'){ctx.save();ctx.strokeStyle=h.color+'b0';ctx.lineWidth=4*(1-t);ctx.beginPath();ctx.arc(shot.origin.x,shot.origin.y,h.range*t,0,Math.PI*2);ctx.stroke();ctx.restore();return;}
     if(f.motion==='cross'){ctx.save();ctx.globalAlpha=(1-t)*.55;stroke(ctx,[[shot.origin.x-h.range,shot.origin.y],[shot.origin.x+h.range,shot.origin.y]],h.color,7);stroke(ctx,[[shot.origin.x,shot.origin.y-h.range],[shot.origin.x,shot.origin.y+h.range]],h.color,7);ctx.restore();return;}
     if(['crescent','daggers','claws'].includes(f.motion)){this.stamp(h.id,shot.origin.x+(p.x-shot.origin.x)*(.45+t*.55),shot.origin.y+(p.y-shot.origin.y)*(.45+t*.55)-18,50+shot.rank*6,angle,.7);return;}
@@ -203,34 +271,48 @@ export class CombatFX{
       const from=f.kind==='royal'?{x:f.origin.x,y:f.origin.y-18}:{x:Math.max(30,to.x-100),y:Math.max(30,to.y-190)},end={x:to.x,y:to.y-(target.boss?35:18)},angle=Math.atan2(end.y-from.y,end.x-from.x);
       if(p<.58){this.atlasStamp('finishers',row+1,4,3,from.x,from.y,38+p*28,undefined,angle,.35+p*.65);continue;}
       const t=Math.pow(Math.min(1,(p-.58)/.42),.8),x=from.x+(end.x-from.x)*t,y=from.y+(end.y-from.y)*t;
-      this.atlasStamp('finishers',row+1,4,3,x,y,f.kind==='royal'?110:120,undefined,angle,.95);
+      if(f.kind==='royal')this.ultimate('cherry_prince',x,y,170,142,angle,.95);
+      else this.atlasStamp('finishers',row+1,4,3,x,y,175,undefined,angle,.95);
     }
   }
   draw(dt){
     this.clock+=dt;const ctx=this.ctx;
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1)continue;
+      if(e.type==='attackShape'){
+        const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
+        if(e.hero==='zeke'){
+          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.closePath();ctx.clip();this.ultimate('zeke',h.range*.53,0,h.range*1.45,h.range*1.25,Math.PI*.75,fade*.72);ctx.restore();
+        }else if(e.hero==='guardian'){
+          ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
+        }else{
+          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.beginPath();ctx.arc(0,0,h.range,0,Math.PI*2);ctx.clip();
+          const width=Math.max(20,h.radius*1.25);ctx.beginPath();ctx.rect(-h.range,-width/2,h.range*2,width);ctx.rect(-width/2,-h.range,width,h.range*2);ctx.clip();
+          this.ultimate('ancient_dragon',0,0,h.range*2.3,h.range*2.3,0,fade*.8);ctx.restore();
+        }continue;
+      }
+      if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
       if(e.type==='finisherImpact'||e.type==='finisherFizzle'){
-        if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),74+t*35,92+t*25,0,(1-t)*(e.type==='finisherImpact'?.9:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*32,e.y-18,42,side<0?Math.PI:0,(1-t)*.7);continue;}
+        if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),118+t*45,140+t*30,0,(1-t)*(e.type==='finisherImpact'?.95:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*58,e.y-18,64,side<0?Math.PI:0,(1-t)*.85);continue;}
         const row=e.kind==='royal'?0:4,hit=e.type==='finisherImpact',angle=Math.atan2(e.y-(e.origin?.y||e.y),e.x-(e.origin?.x||e.x));
-        if(hit&&t<.55)this.atlasStamp('finishers',row+2,4,3,e.x,e.y-(e.targetBoss?35:18),125+t*24,undefined,angle,(1-t)*(this.reduced?.65:.95));
-        this.atlasStamp('finishers',row+3,4,3,e.x,e.y-(e.targetBoss?35:18),100+t*48,undefined,0,(1-t)*.55);continue;
+        if(hit&&e.kind==='royal')this.ultimate('cherry_prince',e.x,e.y-(e.targetBoss?35:18),210+t*44,180+t*35,angle,(1-t)*.94);
+        else if(hit&&t<.75)this.atlasStamp('finishers',row+2,4,3,e.x,e.y-(e.targetBoss?35:18),220+t*35,undefined,angle,(1-t)*(this.reduced?.65:.95));
+        this.atlasStamp('finishers',row+3,4,3,e.x,e.y-(e.targetBoss?35:18),190+t*65,undefined,0,(1-t)*.55);continue;
       }
       if(e.type==='transform'){this.atlasStamp('finishers',8+Math.min(3,Math.floor(t*4)),4,3,e.x,e.y-8,100,undefined,0,(1-t)*.85);continue;}
       if(e.type==='bossMagic'){this.atlasStamp('effects-expansion',{storm:7,duel:8,creation:9}[e.pattern],4,3,e.x,e.y-20,112+t*18,undefined,0,(1-t)*.85);continue;}
       if(e.type==='support'){
         // Support magic rises beside the recipient, never as a false enemy hit.
-        if(e.hero==='harmonious')this.atlasStamp('effects-trio',4,3,2,e.x+24,e.y-22-t*28,42+10*t,undefined,0,(1-t)*.75);
-        else this.stamp(e.hero,e.x+24,e.y-22-t*28,46+10*t,0,(1-t)*.75);
+        this.ultimate(e.hero,e.x+24,e.y-22-t*28,58+10*t,58+10*t,0,(1-t)*.75);
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
-      const large=e.type==='ultimate',size=(large?102:48)+Math.min(5,e.rank||1)*(large?8:5),alpha=Math.max(0,(1-t)*(large?.83:.9));
+      const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),alpha=Math.max(0,(1-t)*(large?.83:.9));
+      if(large&&dedicated(e.hero)){this.ultimate(e.hero,e.x,e.y-22,size*(1+t*.35),size*(1+t*.35),0,alpha);continue;}
       if(FX_PROFILES[e.hero]?.atlas==='effects-trio'){
         const frame=FX_PROFILES[e.hero].frame+3,burst=e.type==='frostBreak';
-        this.atlasStamp('effects-trio',frame,3,2,e.x,e.y-18,(large?80:burst?70:42)*(1+t*.35),undefined,0,alpha*(this.reduced?.7:1));
+        this.atlasStamp('effects-trio',frame,3,2,e.x,e.y-18,(large?118:burst?88:size)*(1+t*.35),undefined,0,alpha*(this.reduced?.7:1));
         continue;
       }
       this.stamp(e.hero,e.x,e.y-18,size*(.75+Math.sin(t*Math.PI/2)*.5),e.angle,alpha,e.form);
-      if(e.origin&&['beam','cleave'].includes(e.shape)){ctx.save();const h=HERO[e.hero],end=e.shape==='beam'?{x:e.origin.x+Math.cos(e.angle)*h.range,y:e.origin.y+Math.sin(e.angle)*h.range}:e;ctx.globalAlpha=(1-t)*.15;stroke(ctx,[[e.origin.x,e.origin.y],[end.x,end.y]],h.color,e.shape==='beam'?h.radius:3);ctx.globalAlpha=(1-t)*.7;stroke(ctx,[[e.origin.x,e.origin.y],[end.x,end.y]],h.color,2);ctx.restore();}
       if(large&&!this.reduced){ctx.save();ctx.globalAlpha=(1-t)*.32;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y,size*(.3+t*.25),size*(.12+t*.1),0,0,Math.PI*2);ctx.stroke();ctx.restore();}
     }
     this.impacts=this.impacts.filter(e=>e.life>0);

@@ -96,17 +96,24 @@ try{
     assert.ok(skills.y+skills.height<=height+1,'all five skills fit the portrait viewport');
     assert.ok(controls.y+controls.height<=height+1,'primary battle controls fit the portrait viewport');
     await page.locator('[data-action="auto"]').click();await page.locator('[data-action="pause"]').click();
-    const move=await page.evaluate(()=>({uid:window.STAR_GARDEN.battle.board[12].uid,to:window.STAR_GARDEN.battle.board.findIndex(u=>!u)}));
+    const move=await page.evaluate(()=>{const s=window.STAR_GARDEN.battle,from=s.board.findIndex(Boolean),other=s.board.findIndex((u,i)=>u&&i!==from);return {from,other,hero:s.board[from].hero,priority:s.board[from].priority,otherHero:s.board[other].hero,uid:s.board[from].uid,to:s.board.findIndex(u=>!u),board:s.board.map(u=>u?.uid||null)};});
     const arena=await page.locator('#arena').boundingBox(),clickCell=async i=>{
       const point=E.cellPoint(i);await page.mouse.click(arena.x+point.x/720*arena.width,arena.y+point.y/780*arena.height);
     };
-    await clickCell(12);await clickCell(move.to);
-    assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i]?.uid,move.to),move.uid,'real tap selection and movement');
+    await clickCell(move.from);await clickCell(move.other);
+    assert.equal(await page.locator('#unit-panel strong').innerText(),HEROES.find(h=>h.id===move.otherHero).name,'tapping a second unit inspects it');
+    assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),move.board,'tap cannot move, swap or merge');
+    await clickCell(move.to);assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),move.board,'tap on empty cell cannot move');
+    const from=E.cellPoint(move.from),to=E.cellPoint(move.to);
+    await page.mouse.move(arena.x+from.x/720*arena.width,arena.y+from.y/780*arena.height);await page.mouse.down();await page.mouse.move(arena.x+to.x/720*arena.width,arena.y+to.y/780*arena.height,{steps:8});await page.mouse.up();
+    assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i]?.uid,move.to),move.uid,'real drag moves the captured unit');
     await page.locator('[data-action="target"]').click();
-    assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i].priority,move.to),'boss');
+    const priorities=['first','boss','strong','last'];assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i].priority,move.to),priorities[(priorities.indexOf(move.priority)+1)%4]);
     await page.locator('[data-action="deselect"]').click();
+    const beforeKeys=await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null));await page.locator('#arena').focus();await page.keyboard.press('Enter');await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');
+    assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),beforeKeys,'keyboard inspection cannot move a unit');
     await page.waitForFunction(()=>window.STAR_GARDEN.battle.enemies.length>0);
-    await page.locator('[data-skill="star_boy"]').click();
+    await page.locator(`[data-skill="${move.hero}"]`).click();
     assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1,'real manual skill');
     await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
     const saved=await profile(page);assert.ok(saved.active.run);await reload(test);
@@ -167,8 +174,27 @@ try{
   const bosses=await monthly.page.evaluate(()=>window.STAR_GARDEN.battle.enemies.map(e=>e.boss));
   assert.deepEqual(bosses,['artificial_demon']);await shot(monthly.page,'monthly-battle',390,844);
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.equal((await profile(monthly.page)).dreams,750);
-  assert.ok((await profile(monthly.page)).monthly);await monthly.context.close();
+  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.equal((await profile(monthly.page)).dreams,600);
+  assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
+  await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
+  assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);await monthly.page.locator('[data-confirm-monthly]').click();
+  assert.equal((await profile(monthly.page)).dreams,750);assert.ok((await profile(monthly.page)).monthly);
+  await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
+  await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
+  assert.equal((await profile(monthly.page)).dreams,750,'a second attempt cannot pay again');await monthly.context.close();
+
+  // Live duration UI uses restored engine state, then a real cast and pause.
+  const sustained=createProfile(NOW);sustained.settings.auto=false;sustained.settings.sound=false;command(sustained,'begin',{mode:'main',stage:1},NOW);const buffRun=createBattle(sustained);
+  for(let i=0;i<20&&!E.bestUnit(buffRun,'siren');i++){buffRun.gold+=1000;E.summon(buffRun);}assert.ok(E.bestUnit(buffRun,'siren'));
+  buffRun.queue=[{kind:'boss',hp:1e8}];buffRun.spawnIn=0;E.step(buffRun,.05);buffRun.enemies[0].speed=0;buffRun.enemies[0].skillIn=99;buffRun.gauge=120;sustained.active.run=E.serialize(buffRun);
+  const timer=await boot(390,844,sustained);await timer.page.locator('[data-action="resume"]').click();await timer.page.locator('[data-skill="siren"]').click();
+  await timer.page.waitForFunction(()=>document.querySelector('[data-skill="siren"] .skill-duration')?.hidden===false);await timer.page.waitForTimeout(1250);await shot(timer.page,'sustained-siren',390,844);
+  await timer.page.locator('[data-action="pause"]').click();const remaining=await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste);await timer.page.waitForTimeout(250);assert.equal(await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste),remaining);
+  assert.match(await timer.page.locator('[data-skill="siren"]').getAttribute('aria-label'),/발동 중/);await timer.context.close();
+
+  const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
+  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('[data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1050);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.

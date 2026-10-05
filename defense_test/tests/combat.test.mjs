@@ -20,6 +20,7 @@ function play(s,max=500){
   }
   return s;
 }
+function ensureHero(s,id){for(let i=0;i<20&&!E.bestUnit(s,id);i++){s.gold+=1000;E.summon(s);}assert.ok(E.bestUnit(s,id),id);return s;}
 
 test('the exact rarity roster has independent valid stats and all 45 stages rotate the nine guardians',()=>{
   assert.equal(HEROES.length,30);assert.equal(new Set(HEROES.map(h=>h.id)).size,30);
@@ -61,7 +62,7 @@ test('persistent growth reaches actual direct, skill and poison damage without c
   const runFor=(id,enhance)=>{
     const p=active();p.heroes[id].owned=true;p.heroes[id].enhance=enhance;
     p.active.deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5);
-    const s=createBattle(p);s.board=s.board.map(u=>u?.hero===id?u:null);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;
+    const s=ensureHero(createBattle(p),id);s.board=s.board.map(u=>u?.hero===id?u:null);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;
     E.step(s,.05);s.enemies[0].progress=300;s.enemies[0].speed=0;s.enemies[0].skillIn=1e9;
     return s;
   };
@@ -76,10 +77,10 @@ test('persistent growth reaches actual direct, skill and poison damage without c
 
 test('support/control growth stays below its conservative bound while equipped relics apply once',()=>{
   const p=active();p.heroes.siren.enhance=100;p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;p.equipped=['hourglass'];
-  const s=createBattle(p),u=s.board.find(u=>u?.hero==='star_boy');
+  const s=ensureHero(ensureHero(createBattle(p),'star_boy'),'siren'),u=s.board.find(u=>u?.hero==='star_boy');
   assert.ok(Math.abs(E.power(s,u)/HERO.star_boy.damage-1.1)<1e-12);
   assert.ok(E.special(s,'siren')<1.15);
-  const base=E.newRun();base.queue=[{kind:'grunt',hp:10000}];base.spawnIn=0;E.step(base,.05);
+  const base=ensureHero(E.newRun({seed:1234}),'siren');base.queue=[{kind:'grunt',hp:10000}];base.spawnIn=0;E.step(base,.05);
   s.queue=[{kind:'grunt',hp:10000}];s.spawnIn=0;E.step(s,.05);
   assert.equal(E.cast(base,'siren').ok,true);assert.equal(E.cast(s,'siren').ok,true);
   assert.ok(s.buffs.haste>base.buffs.haste&&s.buffs.haste/base.buffs.haste<1.15);
@@ -114,4 +115,29 @@ test('move, merge, target priority and saved growth survive a real mid-combat re
   assert.equal(E.serialize(restored),E.serialize(s));
   const tampered=JSON.parse(p.active.run);tampered.deck.push('queen');p.active.run=JSON.stringify(tampered);
   assert.equal(resumeBattle(p),null);
+});
+
+test('a new battle draws three distinct seeded companions from a five-person deck and entry advances the seed',()=>{
+  const seen=new Set();for(let i=1;i<=80;i++){const seed=i*0x9e3779b1>>>0,a=E.newRun({seed}),b=E.newRun({seed});assert.equal(a.board.filter(Boolean).length,3);assert.equal(new Set(a.board.filter(Boolean).map(u=>u.hero)).size,3);assert.equal(E.serialize(a),E.serialize(b));a.board.filter(Boolean).forEach(u=>{assert.ok(DEFAULT_DECK.includes(u.hero));seen.add(u.hero);});}
+  assert.equal(seen.size,5);const p=active();const seed=p.active.seed;command(p,'settle',{token:p.active.token,round:0},NOW);command(p,'begin',{mode:'main',stage:1},NOW);assert.notEqual(p.active.seed,seed);
+});
+
+test('gauge caps and restores at 120, both delayed strikes hit at 0.3 seconds, and mirror keeps its recording window',()=>{
+  for(const id of ['star_boy','cherry_prince','aurora']){
+    const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5),s=ensureHero(E.newRun({deck,seed:1234}),id);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;E.step(s,.05);
+    for(const u of s.board)if(u)u.disabled=20;s.enemies[0].speed=0;s.enemies[0].skillIn=99;s.gauge=120;
+    assert.ok(E.restore(E.serialize(s)));assert.ok(E.cast(s,id).ok);const f=s.finishers[0];assert.equal(f.total,id==='aurora'?3:.3);
+    const before=s.stats.damage;for(let i=0;i<5;i++)E.step(s,.05);assert.equal(s.stats.damage,before);
+    E.step(s,.05);if(id==='aurora'){assert.equal(s.stats.damage,before);for(let i=6;i<60;i++)E.step(s,.05);}assert.ok(s.stats.damage>before);assert.equal(s.finishers.length,0);
+  }
+  const s=E.newRun({seed:1234});s.gauge=119.99;E.step(s,.05);assert.equal(s.gauge,120);const bad=JSON.parse(E.serialize(s));bad.gauge=120.01;assert.equal(E.restore(bad),null);
+});
+
+test('sustained skill timers, total durations and numeric attack stats survive resume without a cosmetic damage change',()=>{
+  for(const id of Object.keys(E.ACTIVE_SKILLS)){
+    const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5),s=ensureHero(E.newRun({deck,seed:1234}),id);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;E.step(s,.05);s.gauge=120;assert.ok(E.cast(s,id).ok);
+    const active=E.activeSkill(s,id);assert.ok(active);E.step(s,.05);const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(E.activeSkill(saved,id).total,active.total);assert.ok(E.activeSkill(saved,id).remaining<active.remaining);
+    const u=E.bestUnit(s,id),fast=E.combatStats(s,u),detail=E.combatStats(s,u,undefined,true);assert.equal(fast.damage,detail.damage);assert.equal(fast.interval,detail.interval);assert.deepEqual(fast.bonuses,[]);
+    for(let i=0;i<260;i++)E.step(s,.05);assert.equal(E.activeSkill(s,id),null,id);
+  }
 });

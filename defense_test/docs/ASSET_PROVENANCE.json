@@ -302,6 +302,13 @@
       "sha256": "66e9b71290e5326bf7b1f26990ed744da49975a926b5e67867ffd7aaa19dda17",
       "width": 768,
       "height": 512
+    },
+    {
+      "id": "ultimates",
+      "source": "defense_test/assets/merge/ultimates.webp",
+      "sha256": "3e8f54fd40b53dec39d3fd16207452f4a9afcb52c9d9022005679a6f1f672cc7",
+      "width": 1024,
+      "height": 1024
     }
   ],
   "font": {

@@ -1,6 +1,7 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING} from './content.js';
 import {calendar,duplicateCost,levelCost,dispatchSlots,dispatchReward,combatPower,stageReward,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle} from './battle.js';
+import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward} from './monthly.js';
 
 export const SAVE_KEY='astra.star-garden.test.v1';
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0});
@@ -9,7 +10,8 @@ export function createProfile(now=Date.now()){
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',weekly:null,monthly:null,
-    daily:{day:calendar(now).day,combat:false,draw:false,dispatch:false,claimed:[]},settings:{sound:true,auto:true,reduced:false},active:null,results:[]};
+    monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
+    daily:{day:calendar(now).day,combat:false,draw:false,dispatch:false,claimed:[]},settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]};
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
 export function validateProfile(p){
@@ -23,6 +25,8 @@ export function validateProfile(p){
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!['combat','draw','dispatch'].includes(id)))return false;
   if(['combat','draw','dispatch'].some(k=>typeof p.daily[k]!=='boolean')||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
+  if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
   if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly'].includes(r.mode)||!integer(r.stage,45)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
@@ -36,12 +40,12 @@ export function validateProfile(p){
       if(!Array.isArray(a.offers)||a.offers.length!==(a.draft.length===5?0:2)||a.offers.some(o=>!o||!a.draftPool.includes(o.id)||a.draft.includes(o.id)||!['focus','spark'].includes(o.boon)))return false;
       if(a.draft.length<5&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
       if(a.draft.length===5&&a.deck.join()!==a.draft.join()||a.draft.length<5&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
-    }else if(a.boon!==0||a.mode==='monthly'&&p.monthly!==calendar(a.started).month)return false;
+    }else if(a.boon!==0)return false;
     if(a.run!==null&&!resumeBattle(p))return false;
   }
   return true;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):raw;return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
@@ -100,8 +104,9 @@ export function command(p,action,args={},now=Date.now()){
     const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no('파견 중이 아닌 동료 5명이 필요합니다.');
     const c=calendar(now),stage=args.stage||Math.min(45,p.cleared+1);if(!integer(stage,45)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<3)return no('스테이지 3 클리어 시 해금됩니다.');
-    if(mode==='weekly'&&p.weekly===c.week||mode==='monthly'&&p.monthly===c.month)return no('이번 기간의 입장 횟수를 모두 사용했습니다.');
-    if(mode==='weekly')p.weekly=c.week;if(mode==='monthly')p.monthly=c.month;
+    if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
+    if(mode==='weekly')p.weekly=c.week;
+    random(p);
     p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null};
     if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
   }
@@ -116,10 +121,23 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='main'){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;reward=stageReward(a.stage);}
       p.dust+=args.won?40+a.stage*8:12;
-    }else reward=(a.mode==='weekly'?120:150)+args.round*(a.mode==='weekly'?60:50);
-    p.dreams+=reward;p.daily.combat=true;p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward};
+    }else if(a.mode==='weekly')reward=120+args.round*60;
+    let record=null,newBest=false;
+    if(a.mode==='monthly'){
+      record={period:calendar(now).month,token:a.token,round:args.round,damage:args.damage??0,seconds:args.seconds??0,at:now,deck:[...a.deck]};
+      if(!validRecord(record))return no('전투 기록을 확인하세요.');
+      newBest=betterRecord(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
+      if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
+    }
+    p.dreams+=reward;p.daily.combat=true;p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest};
   }
-  if(action==='setting'){if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
+  if(action==='claimMonthly'){
+    const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 월간 최고 기록을 확인하세요.');
+    if(p.monthly===record.period)return no('이번 달 기록 보상은 이미 확정했습니다.');
+    const reward=monthlyReward(record);p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
+    return {ok:true,reward,message:`월간 기록 보상 확정 · 꿈의결정 +${reward}`};
+  }
+  if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
   return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.
