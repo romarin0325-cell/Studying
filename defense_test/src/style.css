@@ -411,6 +411,7 @@ em{font-style:normal}
 .monthly-record>p{font-size:12px;color:var(--text3);margin:0 0 12px;line-height:1.6}
 .record-payout{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding:12px 0;font-size:12px;color:var(--text2)}
 .record-note{color:var(--teal)!important;margin-bottom:0!important}
+.record-team{display:flex;gap:6px;align-items:center;margin:10px 0}.record-team>small{font-size:10px;color:var(--text3);margin-right:auto}.record-team .portrait{width:28px;height:28px;min-width:0;border-radius:6px}.record-team img{width:100%;height:100%;object-fit:contain}
 .lifetime-record{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:12px;padding-top:12px;font-size:11px;color:var(--text3)}
 .lifetime-record strong{color:var(--text2);font-size:13px}.lifetime-record small{margin-left:auto}
 .record-result{text-align:center;color:var(--gold);font-size:12px}.claim-score{text-align:center;padding:10px}.claim-score span{display:block;color:var(--text2);font-size:13px}

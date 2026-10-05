@@ -23,12 +23,13 @@ if(committed!==null){
 }
 const browser=await (isWebkit?webkit:chromium).launch({headless:true});
 const errors=[],requests=[],geometry=[],contexts=[];
-async function boot(width,height,profile=createProfile(NOW)){
+async function boot(width,height,profile=createProfile(NOW),fault=false){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
   await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
+  if(fault)await page.addInitScript(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(window.__testQuotaFailure)throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};});
   await page.goto(url);await context.setOffline(true);await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
   return {context,page,width,height};
 }
@@ -192,9 +193,18 @@ try{
   await timer.page.locator('[data-action="pause"]').click();const remaining=await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste);await timer.page.waitForTimeout(250);assert.equal(await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste),remaining);
   assert.match(await timer.page.locator('[data-skill="siren"]').getAttribute('aria-label'),/발동 중/);await timer.context.close();
 
+  const faultProfile=createProfile(NOW);faultProfile.settings.auto=false;const quota=await boot(390,844,faultProfile,true);
+  await quota.page.locator('[data-action="prepare"]').click();await quota.page.locator('[data-begin="main"]').click();await quota.page.locator('#arena').waitFor();
+  await quota.page.evaluate(()=>window.__testQuotaFailure=true);await quota.page.locator('[data-action="pause"]').click();
+  assert.equal(await quota.page.locator('#pause-button').getAttribute('aria-label'),'전투 재개');const frozen=await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time);
+  await quota.page.locator('[data-action="pause"]').click();await quota.page.waitForTimeout(180);assert.equal(await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time),frozen,'failed retry stays paused');
+  await quota.page.locator('[data-action="leave"]').click();await quota.page.getByRole('button',{name:'닫기',exact:true}).click();await quota.page.waitForTimeout(180);assert.equal(await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time),frozen,'dismissing a sheet cannot resume a failed checkpoint');
+  await quota.page.evaluate(()=>window.__testQuotaFailure=false);await quota.page.locator('[data-action="pause"]').click();await quota.page.waitForTimeout(180);assert.ok(await quota.page.evaluate(t=>window.STAR_GARDEN.battle.time>t,frozen));
+  await quota.page.locator('[data-action="leave"]').click();await quota.page.locator('[data-action="save-leave"]').click();assert.ok((await profile(quota.page)).active.run);await quota.context.close();
+
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
   const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('[data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1050);await record.context.close();
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1050);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.
