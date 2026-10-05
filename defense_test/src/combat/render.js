@@ -75,7 +75,7 @@ export class Renderer {
     ctx.drawImage(this.background,0,0);
     this.drawDecor(s);
     this.fx.enemies.clear();for(const e of s.enemies)this.fx.enemies.set(e.uid,{enemy:e,point:pathPoint(e.progress)});
-    this.fx.reduced=this.reduced;this.fx.drawZones(s);for(const skill of this.skills)this.fx.drawSkillField(skill);this.fx.drawPersistent(s);this.fx.drawAttackShapes();
+    this.fx.reduced=this.reduced;this.fx.drawZones(s);for(const skill of this.skills)this.fx.drawSkillField(skill);this.fx.drawPersistent(s);this.fx.drawPersonalTraits(s);this.fx.drawAttackShapes();
     const field=this.skill?.life>0?this.skill.hero:'';if(this.canvas.dataset.skillField!==field)this.canvas.dataset.skillField=field;
     const signature=s.board.map(u=>u?`${u.uid}:${u.hero}:${u.rank}`:'').join('|');if(signature!==this.boardSignature){this.boardSignature=signature;this.mergeable=s.board.flatMap((u,i)=>u&&s.board.some(b=>canMerge(u,b))?[i]:[]);}
     for(const i of this.mergeable){const p=cellPoint(i);ctx.fillStyle='#e2eac912';rounded(ctx,p.x-40,p.y-40,80,80,7);ctx.fill();for(const [dx,dy] of [[-1,-1],[1,1]])line(ctx,[[p.x+dx*27,p.y+dy*40],[p.x+dx*40,p.y+dy*40],[p.x+dx*40,p.y+dy*27]],'#ede4adbb',2.5);star(ctx,p.x+32,p.y-31,5,'#fff1b9',Math.PI/4);}
@@ -91,6 +91,7 @@ export class Renderer {
     if(['seal','storm'].includes(s.telegraph?.pattern)){const storm=s.telegraph.pattern==='storm';ctx.fillStyle=storm?'#8dccfa20':`rgba(194,99,224,${.14+Math.sin(this.clock*12)*.1})`;ctx.strokeStyle=storm?'#ffe8aa':'#e3a2fb';ctx.lineWidth=2;for(const i of s.telegraph.cells){const p=cellPoint(i);rounded(ctx,p.x-43,p.y-43,86,86,5);ctx.fill();ctx.stroke();}}
     const entities=this.entities;entities.length=0;for(let i=0;i<25;i++)if(s.board[i])entities.push({kind:'hero',i,y:cellPoint(i).y+20});for(const e of s.enemies)entities.push({kind:'enemy',e,y:this.fx.point(e.uid).y});entities.sort((a,b)=>a.y-b.y);
     for(const ent of entities)ent.kind==='hero'?this.drawHero(s,ent.i):this.drawEnemy(ent.e,s.chapter);
+    this.fx.drawPersonalTraits(s,true);
     this.fx.drawFinisherLocks(s);
     for(const shot of s.shots)this.drawShot(shot,s);
     this.fx.drawFinishers(s);

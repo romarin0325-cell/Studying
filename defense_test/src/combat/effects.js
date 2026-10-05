@@ -1,5 +1,5 @@
 import {HERO,HEROES} from '../content.js';
-import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors} from './engine.js';
+import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,GROUND_BOUNDS} from './engine.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field';
@@ -26,6 +26,12 @@ const directional=new Set(['crescent','daggers','leap','ribbon','dragon','claws'
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
 export function drawAttackRange(ctx,hero,from,aim){
+  if(hero.id==='flame_sage'){
+    const {left:l,right:r,top:t,bottom:b}=GROUND_BOUNDS;
+    ctx.save();ctx.globalAlpha=.55;
+    for(const [x,y,sx,sy] of [[l,t,1,1],[r,t,-1,1],[l,b,1,-1],[r,b,-1,-1]])stroke(ctx,[[x+sx*22,y],[x,y],[x,y+sy*22]],hero.color,2);
+    ctx.restore();return;
+  }
   const g=attackGeometry(hero,from,{x:from.x+Math.cos(aim)*hero.range,y:from.y+Math.sin(aim)*hero.range});
   ctx.save();ctx.translate(from.x,from.y);ctx.strokeStyle='#d5f1e8aa';ctx.fillStyle='#a5ddeb12';ctx.lineWidth=2;ctx.setLineDash([5,7]);ctx.beginPath();
   if(g.kind==='cross'){
@@ -64,6 +70,7 @@ export class CombatFX{
   event(e){
     if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero))this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life:e.hero==='guardian'?.44:.36,total:e.hero==='guardian'?.44:.36});
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
+    if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',life:.45,total:.45});
@@ -200,6 +207,35 @@ export class CombatFX{
       ctx.restore();
     }
   }
+  drawPersonalTraits(s,foreground=false){
+    // Reuse each companion's painted combat emblem. The foot seal conveys a
+    // live condition without painting over faces, ranks, enemies or HP bars.
+    const ctx=this.ctx;
+    for(let i=0;i<s.board.length;i++){
+      const u=s.board[i];if(!u)continue;
+      if(!['lightning_sage','star_boy','galaxy_whale','aurora','zeke','time_ruler'].includes(u.hero))continue;
+      const state=personalTrait(s,u,i),aged=['star_boy','galaxy_whale'].includes(u.hero);
+      if(!state.active&&!aged)continue;
+      const strong=state.active&&state.damageMultiplier>=1,p=cellPoint(i),alpha=strong?.48:.17,pulse=this.reduced?1:1+Math.sin(this.clock*2+u.uid)*.06;
+      if(foreground){
+        // A small, dark status backing separates the painted emblem from
+        // tile trim and rank stars. It sits beside the feet, above shadows.
+        ctx.save();ctx.globalAlpha=strong?.8:.5;disk(ctx,p.x+28,p.y+21,16,'#0b1e2b');
+        ctx.strokeStyle=HERO[u.hero].color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x+28,p.y+21,16,0,Math.PI*2);ctx.stroke();ctx.restore();
+        if(u.hero==='aurora')this.atlasStamp('effects-trio',5,3,2,p.x+28,p.y+21,30,38,0,.85);
+        else this.stamp(u.hero,p.x+28,p.y+21,strong?30:24,0,strong?.85:.4);
+        continue;
+      }
+      ctx.save();ctx.globalAlpha=alpha*pulse;ctx.strokeStyle=HERO[u.hero].color;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.ellipse(p.x,p.y+31,28,9,0,Math.PI*.13,Math.PI*1.87);ctx.stroke();ctx.restore();
+      this.stamp(u.hero,p.x,p.y+31,56,0,alpha);
+      if(aged){
+        const phase=Math.min(2,state.age||0);ctx.save();
+        for(let j=0;j<3;j++)disk(ctx,p.x-7+j*7,p.y+39,3,j===phase?HERO[u.hero].color:'#d4dfdf44');
+        ctx.restore();
+      }
+    }
+  }
   drawStatus(e,p,size){
     const ctx=this.ctx,t=this.clock;
     if(e.frostTime>0)for(let i=0;i<e.frostStacks;i++)diamond(ctx,p.x-size*.3+i*7,p.y+10,3,'#b0f1ff');
@@ -297,6 +333,13 @@ export class CombatFX{
     this.clock+=dt;const ctx=this.ctx;
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
       if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
+      if(e.type==='instantKill'){
+        // A brief, inward wind seal on the actual executed enemy. No screen
+        // wash or additional burst competes with the boss danger indicators.
+        this.stamp('storm_sage',e.x,e.y-18,84-t*48,-t*1.2,(1-t)*.88);
+        ctx.save();ctx.globalAlpha=(1-t)*.6;ctx.strokeStyle='#c0ffe9';ctx.lineWidth=2;
+        ctx.beginPath();ctx.ellipse(e.x,e.y+5,23*(1-t),8*(1-t),0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
+      }
       if(e.type==='finisherImpact'||e.type==='finisherFizzle'){
         if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),118+t*45,140+t*30,0,(1-t)*(e.type==='finisherImpact'?.95:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*58,e.y-18,64,side<0?Math.PI:0,(1-t)*.85);continue;}
         const row=e.kind==='royal'?0:4,hit=e.type==='finisherImpact',angle=Math.atan2(e.y-(e.origin?.y||e.y),e.x-(e.origin?.x||e.x));

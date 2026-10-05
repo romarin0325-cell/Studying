@@ -45,13 +45,48 @@ export const executeThreshold=e=>e.boss ? .4 : .35;
 export function dividend(s){return Math.min(45,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
+export const targetingLocked=id=>id==='avalanche_maid'||id==='flame_sage';
+export const GROUND_BOUNDS=Object.freeze({left:24,right:696,top:72,bottom:734});
+export const skillGoldCost=id=>HERO[id]?.skill.goldCost||0;
+function syncTimeRuler(s){
+  const rulers=s.board.filter(u=>u?.hero==='time_ruler');
+  if(!rulers.length){s.timeRulerUid=null;return null;}
+  const rank=Math.max(...rulers.map(u=>u.rank)),top=rulers.filter(u=>u.rank===rank);
+  const unit=top.find(u=>u.uid===s.timeRulerUid)||top.reduce((a,b)=>a.uid<b.uid?a:b);
+  s.timeRulerUid=unit.uid;return unit;
+}
+export function personalTrait(s,u,index=s.board.indexOf(u)){
+  const trait={damageMultiplier:1,speedBonus:0,chainRatio:.65,extraChain:0,key:null,active:false,label:''};
+  if(u.hero==='lightning_sage'){
+    const seen=new Set(),pending=index>=0&&s.board[index]?.uid===u.uid?[index]:[];
+    while(pending.length){const cell=pending.pop();if(seen.has(cell)||s.board[cell]?.hero!=='lightning_sage')continue;seen.add(cell);for(const n of neighbors(cell))if(!seen.has(n)&&s.board[n]?.hero==='lightning_sage')pending.push(n);}
+    const size=seen.size;Object.assign(trait,{key:'lightning',size,active:size>=2,label:size>=2?`번개 연결 ${size}기 · 위력 +${size===2?10:size===3?18:30}%`:'번개 연결 대기'});
+    if(size>=2){trait.damageMultiplier=size===2?1.10:size===3?1.18:1.30;trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
+  }else if(u.hero==='star_boy'||u.hero==='galaxy_whale'){
+    const age=Math.max(0,s.wave-(u.birthWave??s.wave)),star=u.hero==='star_boy';
+    trait.damageMultiplier=star?(age===0?1.5:age===1?1:.75):(age===0?.75:age===1?1:1.25);
+    Object.assign(trait,{key:'wave-age',age,active:age!==1,label:`${star?'별의 주기':'은하 성장'} · ${age===0?'등장':age===1?'다음':'이후'} 웨이브 ${Math.round(trait.damageMultiplier*100)}%`});
+  }else if(u.hero==='aurora'){
+    const count=s.board.filter(unit=>unit?.hero==='aurora').length,active=count>=2&&count%2===0;
+    Object.assign(trait,{key:'even-formation',count,active,damageMultiplier:active?1.3:1,label:active?`아우로라 ${count}기 · 위력 +30%`:`아우로라 ${count}기 · 짝수 보너스 대기`});
+  }else if(u.hero==='time_ruler'){
+    const ruler=syncTimeRuler(s),active=ruler?.uid===u.uid;
+    Object.assign(trait,{key:'time-ruler',uid:ruler?.uid??null,active,damageMultiplier:active?1.5:1,label:active?`최고 ${u.rank}성 1기 · 위력 +50%`:'시간의 정점 보너스 대기'});
+  }else if(u.hero==='zeke'){
+    const active=s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
+    Object.assign(trait,{key:'last-quarter',active,speedBonus:active?.4:0,label:active?'마지막 구간 · 공속 +40%':'마지막 구간 대기'});
+  }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'무작위 지면 고정 · 화염장 +30%'});
+  else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 위력 +50%'});
+  else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,label:'일반 적 명중마다 즉사 1%'});
+  return trait;
+}
 export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
 export function harmonyStrength(s,index){
   const count=harmonyAt(s,index),level=s.upgrades.harmonious||0,multiplier=s.buffs.harmony>0?2:1;
   return {count,damage:count*(.05+level*.005)*multiplier*special(s,'harmonious'),speed:count*(.04+level*.002)*multiplier*special(s,'harmonious')};
 }
-export function bestUnit(s,id){return s.board.filter(u=>u?.hero===id).sort((a,b)=>b.rank-a.rank)[0];}
-export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1);}
+export function bestUnit(s,id){return id==='time_ruler'?syncTimeRuler(s):s.board.filter(u=>u?.hero===id).sort((a,b)=>b.rank-a.rank)[0];}
+export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*.28)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
   if(id==='frost_witch')return `서리 빙결 ${(.9+level*.06).toFixed(2)}초 · 보스 ${(.45+level*.03).toFixed(2)}초`;
   if(id==='harmonious')return `조화 1종당 위력 +${5+level*.5}% · 공속 +${Number((4+level*.2).toFixed(1))}%`;
@@ -64,7 +99,7 @@ export function trainingBonus(id,level){
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*.28)).toFixed(2));
 export function unitEconomy(s,u){
   const level=s.upgrades[u.hero]||0;
-  if(u.hero==='doom')return `재료로 소모 시 ${doomRefund(u.rank,level)}G 즉시 환급 · 루미를 재료로 쓰면 환급 없음`;
+  if(u.hero==='doom')return `합성 시 ${doomRefund(u.rank,level)}G 즉시 환급 · 루미와 합성해도 발동`;
   if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 45G`;
   if(u.hero==='mushroom_king')return `전투 12초마다 ${harvestIncome(u.rank,level)}G 수확 · 합성 시 수확 대기시간 초기화`;
   return HERO[u.hero].trait.text;
@@ -72,15 +107,15 @@ export function unitEconomy(s,u){
 function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,GAUGE_MAX);}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
 function addPoison(s,e,stacks,duration,cap=Infinity){e.poison=Math.min(cap,(e.poison||0)+stacks+(has(s,'seed')?1:0));e.poisonTime=duration;}
-function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:HERO[hero].bossDamage?'boss':'first'};}
+function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,birthWave:s.wave+(['reward','intermission'].includes(s.phase)?1:0),harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:targetingLocked(hero)?'random':HERO[hero].bossDamage?'boss':'first'};}
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
-function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);event(s,'summon',{index:slot,hero:id,rank});return slot;}
+function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
 export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0}={}){
   const chosen=validDeck(deck)?[...deck]:[...DEFAULT_DECK];
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70,gauge:90,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
-    buffs:{},buffTotals:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
+    buffs:{},buffTotals:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
   for(const [i,slot] of [7,16,18].entries())place(s,opening[i],1,slot);
@@ -105,22 +140,20 @@ export function move(s,from,to){
   const a=s.board[from],b=s.board[to];
   if(canMerge(a,b)){
     const id=b.hero==='rumi'?a.hero:b.hero,rank=b.rank+1;
-    let consumed=a;if(a.hero==='rumi'&&b.hero!=='rumi')consumed=a;
-    else if(b.hero==='rumi'&&a.hero!=='rumi')consumed=b;
-    const refund=HERO[consumed.hero].trait.type==='sacrifice'?doomRefund(consumed.rank,s.upgrades[consumed.hero]):0;
+    const refund=HERO[id].trait.type==='sacrifice'?doomRefund(a.rank,s.upgrades[id]):0;
     if(refund)giveGold(s,refund,'합성 환급');
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,rank*2,8);
-    const unit=makeUnit(s,id,rank);unit.priority=b.priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;
+    const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(has(s,'alchemy'))for(const e of s.enemies)damage(s,e,power(s,unit)*1.5,id);
     s.stats.merges++;addGauge(s,12+(has(s,'hourglass')?8:0));s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
   }
-  s.board[to]=a;s.board[from]=b;event(s,'move',{from,to});return {ok:true,index:to};
+  s.board[to]=a;s.board[from]=b;syncTimeRuler(s);event(s,'move',{from,to});return {ok:true,index:to};
 }
 export function sell(s,index){
   const u=s.board[index];if(!u||!['combat','intermission'].includes(s.phase))return {ok:false};
   if(s.board.filter(Boolean).length<=1)return {ok:false,reason:'마지막 영웅은 회수할 수 없습니다.'};
-  const gold=Math.round(6*Math.pow(1.7,u.rank-1));s.board[index]=null;giveGold(s,gold,'회수');event(s,'sell',{index,gold});return {ok:true,gold};
+  const gold=Math.round(6*Math.pow(1.7,u.rank-1));s.board[index]=null;syncTimeRuler(s);giveGold(s,gold,'회수');event(s,'sell',{index,gold});return {ok:true,gold};
 }
 export function upgrade(s,id){
   if(!s.deck.includes(id)||!['combat','intermission'].includes(s.phase))return {ok:false};
@@ -128,7 +161,7 @@ export function upgrade(s,id){
   const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   s.gold-=cost;s.upgrades[id]++;event(s,'upgrade',{hero:id,level:s.upgrades[id]});return {ok:true};
 }
-export function cycleTarget(s,index){const u=s.board[index];if(!u)return;const values=['first','boss','strong','last'];u.priority=values[(values.indexOf(u.priority)+1)%values.length];}
+export function cycleTarget(s,index){const u=s.board[index];if(!u||targetingLocked(u.hero))return;const values=['first','boss','strong','last'];u.priority=values[(values.indexOf(u.priority)+1)%values.length];}
 
 const enemyWeight={grunt:1,armor:2.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
@@ -174,33 +207,49 @@ export function geometryContains(g,p){
   return Math.hypot(p.x-g.to.x,p.y-g.to.y)<=g.radius;
 }
 function canTarget(hero,at,p){return Math.hypot(p.x-at.x,p.y-at.y)<=hero.range&&(hero.shape!=='cross'||geometryContains(attackGeometry(hero,at,p),p));}
-function chooseTarget(s,u){
+function chooseTarget(s,u,randomTarget=true){
   const at=cellPoint(s.board.indexOf(u));
+  if(u.hero==='flame_sage')return s.enemies.find(e=>e.hp>0)||null;
   const enemies=s.enemies.filter(e=>e.hp>0&&canTarget(HERO[u.hero],at,pathPoint(e.progress)));if(!enemies.length)return null;
+  if(u.hero==='avalanche_maid')return enemies[randomTarget?Math.floor(random(s)*enemies.length):0];
   const bosses=u.priority==='boss'?enemies.filter(e=>e.boss):[],pool=bosses.length?bosses:enemies;
   const priority=u.priority==='boss'?(u.hero==='great_detective'?'strong':'first'):u.priority;
   return pool.reduce((a,b)=>priority==='strong'?(a.hp>b.hp?a:b):priority==='last'?(a.progress<b.progress?a:b):(a.progress>b.progress?a:b));
 }
-function damage(s,e,value,hero,{dot=false,pure=false}={}){
-  if(!e||e.hp<=0)return;
-  let amount=value*(1+e.exposed)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
-  if(has(s,'royal_seal')&&highestMaxHp(s)?.uid===e.uid)amount*=1.25;
-  if(e.kind==='armor'&&!pure)amount*=.72;
-  if(e.rage>0&&!pure)amount*=.75;
+function damage(s,e,value,hero,{dot=false,pure=false,recordMirror=true,instant=false}={}){
+  if(!e||e.hp<=0)return 0;
+  let amount=instant?e.hp+(e.shield||0):value*(1+e.exposed)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
+  if(!instant){
+    if(has(s,'royal_seal')&&highestMaxHp(s)?.uid===e.uid)amount*=1.25;
+    if(e.kind==='armor'&&!pure)amount*=.72;
+    if(e.rage>0&&!pure)amount*=.75;
+  }
   const absorbed=Math.min(e.shield||0,amount);e.shield=Math.max(0,(e.shield||0)-absorbed);
   const actual=Math.min(e.hp,amount-absorbed)+absorbed;e.hp-=amount-absorbed;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
-  // Record resolved damage once, including absorbed shield damage. A resolving
-  // mirror (life <= 0) cannot record its own detonation or recursively echo it.
-  for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=Math.min(f.cap/.45,f.stored+actual);
-  if(!dot)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
+  // No mirror detonation can feed another recording, even when several marks
+  // resolve in this frame. Ordinary resolved damage includes shield absorption.
+  if(recordMirror)for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=Math.min(f.cap/.45,f.stored+actual);
+  if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){s.stats.kills++;giveGold(s,e.boss?20:e.kind==='armor'?3:2,'격파');addGauge(s,e.boss?15:1.3);event(s,'kill',{...pathPoint(e.progress),kind:e.kind,boss:e.boss,color:HERO[hero]?.color});}
+  return actual;
+}
+function normalHit(s,e,value,shot,options={},seen){
+  if(shot.hero==='storm_sage'&&shot.proc!==false&&e.hp>0&&!e.boss&&e.kind!=='boss'&&!seen.has(e.uid)){
+    seen.add(e.uid);
+    if(random(s)<.01){
+      const shieldDamage=e.shield||0,actual=damage(s,e,0,shot.hero,{instant:true});
+      event(s,'instantKill',{uid:e.uid,hero:shot.hero,...pathPoint(e.progress),damage:actual,shieldDamage});return actual;
+    }
+  }
+  return damage(s,e,value,shot.hero,options);
 }
 function around(s,e,radius){const p=pathPoint(e.progress);return s.enemies.filter(x=>x.hp>0&&Math.hypot(pathPoint(x.progress).x-p.x,pathPoint(x.progress).y-p.y)<=radius);}
 function makeZone(s,shot,p,orbit=false){
-  const h=HERO[shot.hero],life=orbit?2:3*(has(s,'roots')?1.5:1),radius=orbit?60:h.radius;
+  const h=HERO[shot.hero],flame=shot.hero==='flame_sage'&&!orbit,boost=flame?1.3:1;
+  const life=orbit?2:3*boost*(has(s,'roots')?1.5:1),radius=orbit?60:h.radius*boost,zoneDamage=shot.damage*boost;
   const existing=s.zones.find(z=>z.source===shot.source&&z.orbit===orbit&&Math.hypot(z.x-p.x,z.y-p.y)<radius*.6);
-  if(existing){existing.life=life;existing.damage=shot.damage;return;}
-  s.zones.push({uid:s.nextId++,source:shot.source,hero:shot.hero,rank:shot.rank,damage:shot.damage,x:p.x,y:p.y,radius,life,total:life,tick:0,orbit});
+  if(existing){existing.life=life;existing.total=life;existing.radius=radius;existing.damage=zoneDamage;return;}
+  s.zones.push({uid:s.nextId++,source:shot.source,hero:shot.hero,rank:shot.rank,damage:zoneDamage,x:p.x,y:p.y,radius,life,total:life,tick:0,orbit});
   if(s.zones.length>75)s.zones.shift();
 }
 function syncSlows(s,e){
@@ -226,9 +275,15 @@ function slowTargets(s,targets,hero,amount,point){
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
 function applyHit(s,shot){
+  if(shot.ground){
+    const point=shot.to,hero=HERO[shot.hero];makeZone(s,shot,point);
+    if(has(s,'orbit')&&shot.rank>=3)makeZone(s,shot,point,true);
+    if(has(s,'meteor')&&shot.count%12===0){for(const target of s.enemies)if(target.hp>0&&Math.hypot(pathPoint(target.progress).x-point.x,pathPoint(target.progress).y-point.y)<=100)damage(s,target,shot.damage*1.8,shot.hero);event(s,'meteor',{...point,color:'#f6c888'});}
+    event(s,'impact',{...point,hero:shot.hero,form:shot.form,angle:Math.atan2(point.y-shot.origin.y,point.x-shot.origin.x),rank:shot.rank,shape:hero.shape,origin:shot.origin,ground:true});return;
+  }
   const e=s.enemies.find(x=>x.uid===shot.target&&x.hp>0);if(!e)return;
   if(shot.reflected){const p=pathPoint(e.progress);damage(s,e,shot.damage,shot.hero);event(s,'impact',{...p,hero:shot.hero,rank:shot.rank,angle:Math.atan2(p.y-shot.from.y,p.x-shot.from.x),reflected:true});return;}
-  const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage;
+  const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage,procTargets=new Set();
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
   for(const target of area){
     let factor=1;
@@ -239,7 +294,7 @@ function applyHit(s,shot){
     if(type==='starfall'&&shot.count%5===0)factor*=2.2;
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
-    damage(s,target,amount*factor,hero.id,{pure:shot.form==='trauma'||type==='miracle'&&shot.count%3===0});
+    normalHit(s,target,amount*factor,shot,{pure:shot.form==='trauma'||type==='miracle'&&shot.count%3===0},procTargets);
     if(type==='divine'&&target.hp>0){target.divine=Math.min(3,(target.divineTime>0?target.divine:0)+1);target.divineTime=6;}
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0){
       target.frostStacks=(target.frostTime>0?target.frostStacks:0)+1;target.frostTime=6;
@@ -263,8 +318,9 @@ function applyHit(s,shot){
     if(recipients.length)event(s,'supportPulse',{hero:hero.id,targets:recipients});
   }
   if(['chain','bounce'].includes(hero.shape)||type==='gust'){
-    const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0));
-    let from=point;for(const target of others){damage(s,target,amount*.65,hero.id);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
+    const ratio=shot.chainRatio??.65,extra=shot.extraChain||0;
+    const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0)+extra);
+    let from=point;for(const target of others){normalHit(s,target,amount*ratio,shot,{},procTargets);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
   if(type==='burn'){for(const t of area){if(amount*.23>=t.burn){t.burn=amount*.23;t.burnOwner=hero.id;}t.burnTime=3;}}
   if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point);
@@ -283,14 +339,16 @@ function applyHit(s,shot){
   if(has(s,'meteor')&&shot.count%12===0){for(const t of around(s,e,100))damage(s,t,amount*1.8,hero.id);event(s,'meteor',{...pathPoint(e.progress),color:'#f6c888'});}
 }
 function attack(s,u,index){
-  const e=s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(HERO[u.hero],cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!e)return;
-  const hero=HERO[u.hero],at=cellPoint(index),to=pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
+  const hero=HERO[u.hero],ground=u.hero==='flame_sage';
+  if(ground&&!s.enemies.some(e=>e.hp>0))return;
+  const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(hero,cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return;
+  const at=cellPoint(index),to=ground?{x:GROUND_BOUNDS.left+random(s)*(GROUND_BOUNDS.right-GROUND_BOUNDS.left),y:GROUND_BOUNDS.top+random(s)*(GROUND_BOUNDS.bottom-GROUND_BOUNDS.top)}:pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
   u.aim=angle;u.facing=attackDirection(at,to);
   const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
   u.attacks++;u.pose=.3;
-  const value=combatStats(s,u,index).damage;
+  const stats=combatStats(s,u,index),value=stats.damage;
   const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
-  const shot={uid:s.nextId++,source:u.uid,target:e.uid,hero:u.hero,form:unitForm(s,u),proc:true,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel};
+  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:true,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{})};
   s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,origin:at,shape:hero.shape,form:shot.form,attackType:hero.attack});
   if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.65,life:shot.life+.14,total:shot.life+.14});}
   if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
@@ -298,10 +356,11 @@ function attack(s,u,index){
 // One source for outgoing attack power, cadence and the live inspection UI.
 // Enemy armor/exposure and conditional hit bonuses are applied at impact.
 export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
-  const h=HERO[u.hero],adjacent=index<0?[]:neighbors(index).map(i=>s.board[i]).filter(Boolean),bonuses=[];
-  let multiplier=1,speed=1;
+  const h=HERO[u.hero],trait=personalTrait(s,u,index),adjacent=index<0?[]:neighbors(index).map(i=>s.board[i]).filter(Boolean),bonuses=[];
+  let multiplier=1,speed=1+trait.speedBonus;
   const damageBonus=(name,value)=>{multiplier*=1+value;if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 위력`);};
   const speedBonus=(name,value)=>{speed+=value;if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 공속`);};
+  if(detail&&trait.label)bonuses.push(trait.label);
   if(detail&&s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 위력`);
   if(detail&&s.surgeWave===s.wave)bonuses.push('새벽검 +25% 위력');
   if(adjacent.some(a=>HERO[a.hero].trait.type==='powerAura'))damageBonus('고대 용의 가호',(.25+(s.upgrades.ancient_dragon||0)*.03)*special(s,'ancient_dragon'));
@@ -326,14 +385,15 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
     if(kinds.size)speedBonus('토끼 연계',kinds.size*.2);
   }
   const cooldown=h.interval/speed;
-  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,skillPower:power(s,u),range:h.range,radius:h.radius,bonuses};
+  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,skillPower:power(s,u),range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
 }
 
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
   const u=bestUnit(s,id),hero=HERO[id];if(!u||!s.deck.includes(id))return {ok:false,reason:'전장에 이 영웅이 있어야 합니다.'};
+  const goldCost=skillGoldCost(id);if(s.gold<goldCost)return {ok:false,reason:`골드가 부족합니다. (${goldCost} 필요)`};
   if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛이 부족합니다. (${hero.skill.cost} 필요)`};
-  s.gauge-=hero.skill.cost;if(has(s,'lantern'))addGauge(s,15);s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
+  s.gold-=goldCost;s.gauge-=hero.skill.cost;if(has(s,'lantern'))addGauge(s,15);s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id);
   let visualTargets=targets;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
@@ -356,10 +416,10 @@ export function cast(s,id){
   }
   else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3*control;addSlow(s,e,`skill:${id}`,.5,6);}}
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);addSlow(s,e,`skill:${id}`,.5,4);}}
-  else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
+  else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:id==='zeke'?5*(s.health<10?2:1):6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
   else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);e.burn=base*.65;e.burnTime=6;e.burnOwner=id;}}
   else if(type==='plague'){for(const e of targets)addPoison(s,e,u.rank*8,12);strike(3,true);}
-  else if(type==='expose'){for(const e of targets){e.exposed=.6*control;e.exposeTime=10;}strike(3);}
+  else if(type==='expose'){strike(3);for(const e of targets){e.exposed=.6*control;e.exposeTime=10;}}
   else if(type==='quake'){strike(5);for(const e of targets){e.progress=Math.max(0,e.progress-160*control);e.stun=2*control;}}
   else if(type==='nightmare'){strike(4);for(const e of targets){e.progress=Math.max(0,e.progress-220*control);e.exposed=.25*control;e.exposeTime=6;}}
   else if(type==='rewind'){for(const e of targets){e.progress=Math.max(0,e.progress-e.speed*6*control);e.stun=2*control;}strike(3);}
@@ -371,11 +431,11 @@ export function cast(s,id){
     const top=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<=executeThreshold(e)?30:16),id,{pure:true});
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,9);for(const e of visualTargets)damage(s,e,base*14,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2*control;}
-  else if(type==='fortune'||type==='dividend'){strike(3);giveGold(s,type==='fortune'?25:30,'필살기');}
+  else if(type==='fortune'||type==='dividend'){strike(type==='fortune'?10:3);if(type==='dividend')giveGold(s,30,'필살기');}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key)s.buffTotals[key]=s.buffs[key];
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
-  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
+  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
 }
 
 function bossStep(s,e,dt){
@@ -479,7 +539,7 @@ export function step(s,dt){
     if(u.hero==='mushroom_king'){u.harvest-=dt;if(u.harvest<=0){u.harvest+=12;const gold=harvestIncome(u.rank,s.upgrades[u.hero]);giveGold(s,gold,'포자 수확');event(s,'income',{...cellPoint(i),gold});}}
     if(u.disabled>0){u.disabled-=dt;continue;}
     if(u.windup>0){u.windup-=dt;if(u.windup<=0)attack(s,u,i);continue;}
-    u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
+    u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u,false);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
   }
   for(const shot of s.shots){if(shot.delay>0){shot.delay=Math.max(0,shot.delay-dt);continue;}shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
   for(const f of s.finishers){
@@ -490,7 +550,7 @@ export function step(s,dt){
       f.life=0;
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?1.4:1;
       const echoDamage=f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0,before=s.stats.damage;
-      damage(s,target,f.damage*factor+echoDamage,f.hero,{pure:f.kind==='royal'});
+      damage(s,target,f.damage*factor+echoDamage,f.hero,{pure:f.kind==='royal',recordMirror:f.kind!=='mirror'});
       event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage});
     }
   }
@@ -515,10 +575,23 @@ export function restore(raw){
     if(s.finishers===undefined)s.finishers=[];
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
-    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
+    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
-    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','boss','strong','last'].includes(u.priority))))return null;
+    for(const u of s.board)if(u){
+      // An old checkpoint cannot reveal its birth wave. Start its new age
+      // effect here once, rather than inventing past waves or changing rank.
+      if(u.birthWave===undefined)u.birthWave=s.wave;
+      if(targetingLocked(u.hero)){
+        if(!['first','boss','strong','last','random'].includes(u.priority))return null;
+        u.priority='random';
+      }
+    }
+    const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
+    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
+    if(s.timeRulerUid===undefined)s.timeRulerUid=null;
+    if(s.timeRulerUid!==null&&(!id(s.timeRulerUid)||!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid)||s.board.some(u=>u?.hero==='time_ruler'&&u.rank>s.board.find(v=>v?.uid===s.timeRulerUid).rank)))return null;
+    syncTimeRuler(s);
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
     const slowSources=new Set(['legacy',...Object.keys(HERO).flatMap(hero=>[`attack:${hero}`,`skill:${hero}`])]);
@@ -529,7 +602,9 @@ export function restore(raw){
       if(!Array.isArray(e.slowEffects)||e.slowEffects.length>slowSources.size||new Set(e.slowEffects.map(effect=>effect?.source)).size!==e.slowEffects.length||e.slowEffects.some(effect=>!slowSources.has(effect?.source)||!numeric(effect,['amount','until'])||effect.amount<=0||effect.amount>=1||effect.until<0))return null;
       syncSlows(s,e);
     }
-    if(s.shots.some(e=>!id(e?.uid)||!id(e.target)||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
+    for(const shot of s.shots)if(shot?.hero==='flame_sage'&&shot.ground===undefined){shot.ground=true;shot.target=null;}
+    if(s.shots.some(e=>!id(e?.uid)||!(e.ground===true&&e.hero==='flame_sage'&&e.target===null||e.ground===undefined&&id(e.target))||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
+    if(s.shots.some(e=>e.ground&&(e.to.x<GROUND_BOUNDS.left||e.to.x>GROUND_BOUNDS.right||e.to.y<GROUND_BOUNDS.top||e.to.y>GROUND_BOUNDS.bottom)||((e.chainRatio!==undefined||e.extraChain!==undefined)&&!(e.hero==='lightning_sage'&&[.65,.7,.75,.8].includes(e.chainRatio)&&Number.isInteger(e.extraChain)&&e.extraChain>=0&&e.extraChain<=1))))return null;
     if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician')||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
     if(s.shots.some(e=>e.delay!==undefined&&e.reflected!==true||e.reflected!==undefined&&(e.reflected!==true||e.hero!=='aurora'||e.proc!==false||!numeric(e,['delay'])||e.delay<0||e.delay>.42)))return null;
     if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall','mirror'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored','cap'])||f.stored<0||f.cap<0||f.stored>f.cap/.45+1e-6)))return null;
