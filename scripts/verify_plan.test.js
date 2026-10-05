@@ -378,6 +378,14 @@ test('merge-base scope excludes changes added only to main after the feature for
   assert.deepEqual(files, ['shooter/app.js']);
 });
 
+test('the PR workflow installs only the browsers the selector requests', () => {
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/verify.yml'), 'utf8');
+  assert.match(workflow, /needs_chromium == 'true'[\s\S]*npx playwright install --with-deps chromium/);
+  assert.match(workflow, /needs_webkit == 'true'[\s\S]*npx playwright install --with-deps webkit/);
+  assert.equal(createPlan(changes('defense_test/tests/browser.mjs')).browsers.includes('chromium'), true);
+  assert.equal(createPlan(changes('defense_test/docs/MEMORIAL_MEDIA.md')).browsers.includes('chromium'), false);
+});
+
 test('missing refs fail as BLOCKED_SCOPE rather than selecting zero tests', () => {
   assert.throws(
     () => resolveChanges({
