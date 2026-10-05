@@ -45,7 +45,13 @@
     "fontTTFBytes": 2119352,
     "fontWOFF2Bytes": 368996,
     "reviewRemovedFiles": 19,
-    "reviewRemovedBytes": 5413237
+    "reviewRemovedBytes": 5413237,
+    "trackedDefenseTestTree": {
+      "baselineBytes": 78757992,
+      "implementationBytes": 73686256,
+      "savedBytes": 5071736,
+      "scope": "current tree only; excludes later documentation updates, not Git history"
+    }
   },
   "manualValidation": {
     "allExistingUnitTests": {
@@ -79,12 +85,34 @@
       "meanImprovementPercent": 7.1647,
       "oneSeedRegressionPercent": 3.51,
       "matchingSerializedRuns": 27
+    },
+    "sourceAvifReproduction": 30,
+    "webpFullPixelDecodes": 30,
+    "inputAndAlphaCases": {
+      "passed": 6,
+      "failed": 0
     }
   },
   "releaseValidation": {
-    "npmVerify": "pending final committed-artifact run",
-    "chromium": "pending",
-    "webkit": "pending",
+    "implementationCommit": "fad1965",
+    "npmVerify": "PASS",
+    "seconds": 240.71,
+    "selectedRegressionTests": 77,
+    "chromium": {
+      "pass": true,
+      "captures": 62,
+      "errors": 0,
+      "externalRequests": 0
+    },
+    "webkit": {
+      "pass": true,
+      "captures": 63,
+      "errors": 0,
+      "externalRequests": 0,
+      "windowsAvifCodec": false,
+      "webpCompatibility": true
+    },
+    "committedArtifactMatchesBuild": true,
     "physicalAndroid": "not tested",
     "physicalIOS": "not tested",
     "physicalDeviceEvidence": "No accessible physical test device confirmed"

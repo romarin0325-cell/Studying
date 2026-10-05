@@ -1,6 +1,6 @@
 # 메모리얼 원문·이미지 매핑 및 인코딩 기록
 
-사용자가 제공한 pasted-text-1.txt의 전체 이야기와 images 폴더의 PNG 32장을 확인했다. 현재 HEROES 30명에 이야기 한 편과 AVIF 한 장씩을 연결한다. 원본 PNG와 첨부 원문은 Git에 복사하지 않는다. 이 문서는 미디어·원문 데이터 검증을 기록하며, 호감도 잠금·한 장씩 디코딩·화면 복귀의 런타임 검증은 메모리얼 UI 검사에서 별도로 수행한다.
+사용자가 제공한 pasted-text-1.txt의 전체 이야기와 images 폴더의 PNG 32장을 확인했다. 현재 HEROES 30명에 이야기 한 편과 AVIF·직접 원본 WebP 한 장씩을 연결한다. 원본 PNG와 첨부 원문은 Git에 복사하지 않는다. 이 문서는 미디어·원문 데이터 검증을 기록하며, 호감도 잠금·한 장씩 디코딩·화면 복귀의 런타임 검증은 메모리얼 UI 검사에서 별도로 수행한다.
 
 ## 원문 보존과 선택 근거
 
@@ -111,46 +111,139 @@ Sharp의 AVIF metadata는 chromaSubsampling 값을 제공하지 않으므로, �
 | harmonious | d6afd7300137281012382a60a59998372d57e16d1929e2709a6800f76d804c81 | 034355d2f6b300eb9b6a381a1a147a766a7e278eec784144be63ddaf99087570 | 1f2c0abd41972a394151cbc5e5be8cccb655d57649bbdefc9589439b6ed729e5 |
 | frost_witch | 2f1232f7525d1883b6067159a768e6b87cbfce0c03bc297a5fb7a0bf04866d7f | 81beb61c359894092ad2731e2919886c240c5573537c0612287c50430a681f8b | d81312a8c528fd5ade39b8cf5b4bd6d03dc568ee84141eab6244c0e4e2a220db |
 
-source filename, 해상도, alpha, 원본/출력 SHA-256, bytes, Base64 bytes, 원문 줄 범위와 본문 SHA-256은 src/memorial.js의 MEMORIAL_MEDIA_MANIFEST에도 리터럴로 기록했다. 본문 해시는 paragraphs.join("\n")의 UTF-8 바이트를 대상으로 계산한다.
+source filename, 해상도, alpha, 원본/출력 SHA-256, bytes, Base64 bytes, 원문 줄 범위와 본문 SHA-256은 src/memorial-media.js의 MEMORIAL_MEDIA_MANIFEST에 한 번만 기록한다. src/memorial.js는 이야기를 보관하고 기존 AVIF 경로·manifest 인터페이스를 re-export한다. MEMORIAL_MEDIA_PATHS와 MEMORIAL_WEBP_PATHS는 canonical manifest에서 파생하며 별도 원본 선택표를 만들지 않는다. 본문 해시는 paragraphs.join("\n")의 UTF-8 바이트를 대상으로 계산한다.
 
-## 동일 원본에서 재인코딩하는 절차
+## 원본 선택과 수동 준비 도구
 
-원본 images 폴더는 저장소 밖에 보관한다. 아래 핵심 코드를 Node ESM 파일로 임시 폴더에 저장하고, 프로젝트에 설치된 Sharp를 사용한다. 예: node <임시 encode-memorial.mjs> "<외부 images 폴더>" "<defense_test 폴더>". sourceDirectory, gameDirectory는 path.resolve(process.argv[2/3])로 받는다. 새 저장소 스크립트나 원본 PNG를 빌드 입력에 추가하지 않는다. Sharp 0.35.4, libvips 8.18.6, AOM 3.14.1, libheif 1.23.2에서 생성했다.
+제공된 images 폴더의 PNG는 32장이고, canonical catalog가 현재 동료 30명에 정확히 30장을 선택한다. 추가 후보 두 장이 존재하는 것은 오류가 아니다. 선택하지 않는 파일은 다음 두 개다.
 
-```js
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import crypto from 'node:crypto';
-import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
-const sourceDirectory = path.resolve(process.argv[2]);
-const gameDirectory = path.resolve(process.argv[3]);
-const require = createRequire(path.join(gameDirectory, 'package.json'));
-const sharp = require('sharp');
-const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-const {MEMORIAL_MEDIA_MANIFEST} = await import(pathToFileURL(path.join(gameDirectory, 'src/memorial.js')).href);
-for (const [heroId, record] of Object.entries(MEMORIAL_MEDIA_MANIFEST)) {
-  const input = await fs.readFile(path.join(sourceDirectory, record.sourceFilename));
-  if (sha256(input) !== record.sourceSha256) throw new Error('Original image changed: ' + heroId);
-  const stats = await sharp(input).stats();
-  let pipeline = sharp(input).rotate().toColourspace('srgb').resize({
-    width: 720, height: 1080, fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3',
-  });
-  if (stats.isOpaque) pipeline = pipeline.removeAlpha();
-  const encoded = await pipeline.avif({quality: 52, effort: 4, chromaSubsampling: '4:4:4'}).toBuffer();
-  if (sha256(encoded) !== record.outputSha256) throw new Error('Encoder output changed: ' + heroId);
-  await fs.writeFile(path.join(gameDirectory, 'assets/memorial', heroId + '.avif'), encoded);
-}
+- 16B_번개의현자_오차를 고친 새벽.png: 선택은 이야기와 바닥의 세 줄이 대응하는 16A다.
+- 24A_신데렐라_보도 틈새의 유리구두.png: 선택은 제공된 구두 수정본 24B다.
+
+원본 폴더를 저장소 밖에 보관하고 MEMORIAL_SOURCE_DIR 환경 변수로 수동 도구에 전달한다. 정상 빌드는 이 변수나 원본 PNG를 요구하지 않으며 준비 도구를 실행하지 않는다. Sharp 0.35.4, libvips 8.18.6, WebP 1.6.0, AOM 3.14.1, libheif 1.23.2로 현재 파일을 만들고 재현했다.
+
+```powershell
+$env:MEMORIAL_SOURCE_DIR = 'C:\Users\romar\Downloads\캐릭터_시나리오_62종_20261005\캐릭터_시나리오_62종_20261005\images'
+node defense_test/scripts/prepare-memorial-media.mjs
+# 추가로 기존 AVIF 30개의 원본 재현 결과가 같은 바이트인지 확인
+node defense_test/scripts/prepare-memorial-media.mjs --check-avif
+# 특정 AVIF만 재현할 때
+node defense_test/scripts/prepare-memorial-media.mjs --check-avif=zeke
+# 원본이나 설정 변경을 검토할 때: 배포 assets를 덮어쓰지 않음
+node defense_test/scripts/prepare-memorial-media.mjs --candidate
 ```
 
-실제 재생성 전에는 입력 SHA-256이 기록과 일치하는지 확인하고, 이후 출력 SHA-256·해상도·알파·용량을 검사한다. 같은 인코더 버전을 사용하면 기록된 출력과 대조할 수 있다. AVIF와 WebP를 중복 내장하거나 메모리얼 전용 썸네일을 추가로 만들지 않았다.
+기본 모드는 선택 원본 30개의 파일명·SHA-256·bytes·해상도·알파를 현재 catalog와 대조한다. 기존 AVIF는 해시가 일치하면 그대로 유지하며, 누락됐을 때만 원본 재현 결과가 기존 SHA-256과 같은지 확인한 후 복구한다. --check-avif는 다시 인코딩한 결과의 바이트 동일성을 검사하지만 기존 파일을 덮어쓰지 않는다. WebP는 항상 선택한 PNG에서 직접 생성하고 현재 catalog에 기록된 품질·bytes·SHA-256과 대조한다. 승인된 출력과 달라지면 실패한다.
+
+--candidate는 동일한 30개 파일명 선택을 유지하되 바뀐 원본 해시와 실제 새 AVIF·WebP 결과를 기록한다. 두 형식 모두 test-results/.media-review/candidate-assets 안에만 생성하며, 실제 source/output 해시·해상도·알파·품질·용량을 담은 candidate-catalog.json을 같은 검토 폴더에 남긴다. 배포 assets나 canonical catalog를 자동 변경하지 않는다. 검토 자료는 Git에서 제외한다.
+
+두 형식은 아래 공통 파이프라인을 사용한다. EXIF 방향을 적용한 후 전체 구도가 2:3인지, 최소 720×1080 해상도인지 확인한다. fit:inside는 올바른 2:3 입력 전체를 보존하며 확대하지 않는다. 원본의 인물·의상·내용·구도를 바꾸는 편집이나 크롭은 없다.
+
+```js
+const stats = await sharp(input, {failOn:'error'}).stats();
+const pipeline = () => {
+  let image = sharp(input, {failOn:'error'}).rotate().toColourspace('srgb').resize({
+    width:720, height:1080, fit:'inside', withoutEnlargement:true, kernel:'lanczos3',
+  });
+  if (stats.isOpaque) image = image.removeAlpha();
+  return image;
+};
+const avif = await pipeline().avif({quality:52, effort:4, chromaSubsampling:'4:4:4'}).toBuffer();
+const webp = await pipeline().webp({quality:82, effort:6, smartSubsample:true}).toBuffer();
+```
+
+WebP의 수동 준비 목표는 개별 96 KiB다. 82에서 시작해 2씩 낮추며, 74에서도 목표를 넘으면 실패해 용량·화질을 다시 검토하도록 한다. 목표를 맞추기 위해 품질을 무제한 낮추지 않는다. 현재 선택은 28장 q82, 은하고래 q80, 혹한의마녀 q78이다. 이 목표와 하한은 수동 생성 절차이며 CI에 새 품질·시각 검증 게이트를 추가하지 않는다. 기존 개별 100 KiB·형식별 전체 2.5 MiB·단일 내장 객체 3 MiB 기준을 유지한다.
+
+입력은 단일 프레임 PNG이며 failOn:error로 읽는다. 단발 부정 입력 검증에서 유효한 APNG를 Chromium ImageDecoder가 2프레임으로 디코딩했지만 같은 파일의 Sharp metadata.pages는 없었다. 따라서 PNG의 acTL num_frames 및 fcTL 개수도 검사해 여러 프레임을 첫 장으로 조용히 평탄화하지 않는다. acTL 필드는 [W3C PNG 제3판의 애니메이션 제어 정의](https://www.w3.org/TR/png-3/#acTL-chunk)를 따른다. 출력 알파는 원본 hasAlpha와 isOpaque에 따라 검사한다.
 
 ## 빌드와 런타임 연결 계약
 
-- MEMORIAL_MEDIA_PATHS만 순회하여 생성된 AVIF를 읽고 window.__MEMORIAL_MEDIA__에 별도 내장한다.
+- 일반·1인 단일 HTML은 AVIF만, 호환 HTML은 직접 원본 WebP만 window.__MEMORIAL_MEDIA__에 별도 내장한다. 웹 폴더 버전은 외부 AVIF와 직접 원본 WebP fallback 파일을 복사하고 경로만 연결한다. 한 단일 HTML에 두 형식을 중복 내장하지 않으며 빌드는 메모리얼을 다시 인코딩하지 않는다.
 - 기존 ASSET_PATHS, window.__ASTRA_ASSETS__, Art.load의 전투용 선로딩 목록에는 메모리얼을 합치지 않는다.
 - 초기 화면 및 잠금 목록은 기존 동료 초상화를 사용한다. 독서 화면을 열 때 현재 이미지 한 장에만 src를 지정한다.
 - bond<10은 잠금이며 bond>=10에서 원문과 그림을 열 수 있다. 소유 조건과 잠금 표현은 UI 계약에서 검증한다.
 - 독서 화면을 닫거나 다른 화면으로 이동하면 큰 이미지 DOM과 참조를 제거한다. Base64를 localStorage에 쓰지 않는다.
 - 미디어 데이터만으로 30명 coverage, source/output 해시, 본문 해시, 최대 해상도, 불필요한 alpha 부재, 개별/전체 bytes budget을 자동 검증할 수 있다.
 - 최종 npm run verify, 단일 HTML의 별도 __MEMORIAL_MEDIA__ 내장과 Chromium/WebKit 실제 디코딩·잠금·복귀 검사는 통합 담당이 수행한다. 이 미디어 작업에서는 게임 빌드나 커밋을 실행하지 않았다.
+
+## 직접 원본 WebP 측정과 채택 이유
+
+기존 웹 fallback의 실제 AVIF→WebP 파일과 같은 선택 PNG에서 직접 만든 WebP를 비교했다. 두 번째 손실 압축을 없애면서 얼굴·머리카락·의상 선의 선명도가 개선됐다. 새 파일을 저장소에 포함하므로 정상 빌드는 원본이나 수동 생성 환경 없이 재현 가능하다. 기존 AVIF의 품질·effort·파일 바이트는 바꾸지 않는다.
+
+| 항목 | 실제 결과 |
+|---|---|
+| WebP 개수·픽셀·색·알파 | 30장, 전부 720×1080, sRGB, 불투명 RGB 3채널 |
+| 직접 원본 WebP 합계 | 2,232,062 B · 2.129 MiB |
+| 기존 AVIF→WebP 실제 파일 합계 | 2,031,414 B · 1.937 MiB |
+| 화질 개선의 추가 용량 | 200,648 B · 195.95 KiB · 9.88% |
+| 직접 WebP Base64 합계 | 2,976,128 B · 2.838 MiB |
+| data URI·heroId JSON 포함 객체 | 2,977,281 B · 2.839 MiB |
+| 직접 WebP 최대·평균 | 95,642 B · 93.40 KiB / 74,402.07 B · 72.66 KiB |
+| q82 30장 그대로의 합계 | 2,255,470 B |
+| 은하고래 q82 → 채택 q80 | 102,328 B → 95,642 B |
+| 혹한의마녀 q82 → 채택 q78 | 112,170 B → 95,448 B |
+| 기존 AVIF 합계 | 1,239,023 B · 1.182 MiB, 변경 0장 |
+
+제안된 더 작은 총량 2.1 MiB 및 내장 2.8 MiB를 맞추려고 나머지 28장의 품질을 낮추지 않았다. 실제 총량은 기존 허용 범위 안이고, 주요 선·눈·머리카락을 보존하는 이득이 있다. AVIF effort를 높이는 추가 시도도 채택 근거가 없으므로 수행하지 않았다.
+
+100% 검토는 원본 1024×1536 전체와, 공통 Lanczos3로 720×1080에 줄인 뒤 무손실 PNG로 저장한 기준 이미지의 세부 영역을 함께 사용했다. 후자는 출력 한 픽셀이 검토 한 픽셀에 대응한다. 기존 실제 WebP·직접 q82·최종 q80/q78을 같은 영역·동일 배율로 나란히 확인했다. 검토용 PNG와 JSON은 test-results/.media-review에만 남기며 배포·Git 입력에 넣지 않는다.
+
+| 직접 관찰한 대상 | 채택 품질 | 100% 세부 관찰 |
+|---|---|---|
+| 지크 | 82 | 붉은 머리 윤곽, 눈·얼굴, 검은 갑옷의 밝은 경계가 기존 재압축본보다 깨끗하게 유지됨 |
+| 신데렐라 | 82 | 밝은 머리의 가는 선, 붉은 눈, 유리구두 하이라이트, 손가락·프릴 윤곽 유지 |
+| 번개의현자 | 82 | 흰 머리·안경·얼굴과 파란 번개·옷의 선이 기존 재압축본보다 명료함 |
+| 은하고래 | 80 | q82 대비 머리·눈·금색 의상 무늬에 새로 눈에 띄는 손실을 관찰하지 못했고 기존 재압축본보다 깨끗함 |
+| 혹한의마녀 | 78 | q82보다 약간 부드럽지만 눈·청색 머리·얼음 면의 윤곽과 긴 가닥을 유지하며 새로 거슬리는 경계 손실을 관찰하지 못함 |
+| 하모니어스 | 82 | 민트·노랑 머리, 눈의 꽃빛, 리본, 딸기·마카롱의 윤곽이 기존 재압축본보다 명료함 |
+
+보조 수치로 손실 없는 720×1080 RGB 기준과의 PSNR을 계산했다. 30장 전부 직접 WebP가 기존 재압축본보다 높았고 차이는 2.23–3.71 dB, 평균 3.01 dB였다. PSNR은 화질 판정 전체를 대신하지 않으며 여섯 주요 대상의 실제 관찰과 함께 사용했다. 전체 30장의 모든 미세 요소를 사람이 원본 100%와 대조한 것은 아니다. libvips 전체 픽셀 디코딩은 파일 무결성과 출력 형식을 확인하며 실제 휴대전화의 성능·색 표시·메모리 동작까지 보증하지 않는다. 30장 측정의 벽시계 약 11.25초에는 파일 읽기·인코딩·PSNR 계산이 함께 포함되어 순수 인코딩 또는 빌드 시간으로 해석하지 않는다.
+
+## WebP 실제 출력 기록
+
+AVIF 및 원본 해시는 위 표와 canonical catalog를 유지한다. 다음 WebP는 선택 PNG에서 직접 만들었으며, 파일명은 heroId.webp다. 각 파일의 실제 해시와 bytes를 기록했다.
+
+| heroId | 품질 | bytes | 직접 WebP SHA-256 |
+|---|---|---|---|
+| star_boy | 82 | 80208 | 6c41dffb11c60b363ae594e5dee5155f91ba6386382016e9770872d540c1dadd |
+| snow_rabbit | 82 | 53166 | dbe385fdf0495d28d35fc8e9bace7db17190a828b2cdf5ac0aaff64d998b8ca3 |
+| silver_rabbit | 82 | 50996 | 81e3d74230c042d38987feecc21709bb7d4003ae29c6e8aa4c5ad969d15d39d6 |
+| night_rabbit | 82 | 57602 | b3e61b61d4a4c464cb09fd36c001745048f6406af552a4d1059d002bb9500709 |
+| siren | 82 | 60352 | 8a9707ce0628a7dda79ffe5c8bec10ff7ff4118561a5566904668ee8217c994c |
+| mushroom_king | 82 | 80110 | 13378ad2613ced6340beebb75169d05b917ce5c32978c0ae522621db65337161 |
+| great_detective | 82 | 76428 | 7958dd96b1bc706a2057c54b7bc7fb4b5a1cd12e26fc5ee9988ddad4f5e21614 |
+| guardian | 82 | 71160 | 923afd6d716fca0f3d7ff02147332578c5f2642efa426dfb755665fe8a7496ad |
+| avalanche_maid | 82 | 63696 | a64c281f668e40e035791565ea7679cc31b05cc8920d12d0f8c12010c8a95cf3 |
+| santa | 82 | 83368 | 4f1bca17d5378cfec36d483bc588416b2222b3f72bf208c4284d59dd69e60feb |
+| red_dragon | 82 | 87830 | 9e80fa15178db815f1755fd4273876e9dddf18176f0f4940d35ab4c1fd0c47af |
+| aurora | 82 | 86200 | 0f327ba639993bd87a813fb6d1d0cb306626aa9aac68cdbd69ae5612c23c7cc0 |
+| storm_sage | 82 | 72664 | f0faa6e0589e608a01dba3e36356eea01607c2ab01723b43d8587305f1fb85cf |
+| flame_sage | 82 | 75208 | f83e7dd252226ec1bda701235af7e51d2a9417d9fd8a05b01d2ce558c27281eb |
+| lightning_sage | 82 | 68560 | d516b62567545f82364886027cf2f96ede5c86bb9c2e8638d1adb0b6fbcd94b8 |
+| time_magician | 82 | 79582 | b42a90ab7f06a304d01c818d39ab046c9015a5df8fab8b8532e42a4c612847f8 |
+| ancient_dragon | 82 | 75008 | 52030a12be7335f8981e332d4cd0ffd9b8045058f886012af92eb8fb884b6ed9 |
+| phantom | 82 | 45138 | b1ef0d414d0f5637a111af608e04f6f830a355ae7bb03e3f6c513b98af60d1c0 |
+| zeke | 82 | 83926 | 4e86b97b3414ab4d20a59381d315471b60c38222831c290ddb70dfa5c9dd4752 |
+| luna | 82 | 68404 | dd35e79940115a2d9011ab73c5c3c9aa948a9159b012adb237034062a3fa54b2 |
+| jasmine | 82 | 60290 | 5ad029a6b5ac78aa5b5561f2522542413200143bc2d9d01c951e533ed4d7455f |
+| queen | 82 | 80772 | 9fd6f23c9feac602caf9b8319ac42426913eb0df9034127c4e08ca97941e387e |
+| rumi | 82 | 64782 | 809f741137f6b46400f8b6d9d16775d3081d82cea937891f648e48eaef6eac8c |
+| cherry_prince | 82 | 76322 | aab03fde6bdf95a5bb37d504d120880f32f2b94f5dbdfc061a7f614697e142b8 |
+| time_ruler | 82 | 79496 | 8bf0b229aedb4b8bddce9948d55ee67f2a946d2b87ae0cdfe5b864f29c0fea2a |
+| galaxy_whale | 80 | 95642 | 247a91145c3efa696b68f13229966a25f2c92f8a4d6d00969763a23a8bb9f0ee |
+| doom | 82 | 87196 | 995906b5a9c88dad17c52cc5f7bd785875289938a5c47eab3c254b6752a2bac5 |
+| cinderella | 82 | 80764 | c22a63016e64196da000e33cf46e8c92a1a85608dccbb90bcda02105c27b7d70 |
+| harmonious | 82 | 91744 | 2b44a4b65e1b180e22da6330fd43e249ef29cd491ef571fc7938b487aa6859a5 |
+| frost_witch | 78 | 95448 | be82b01f1e5cd48cfe34e92fe603d468fb5393be9d2fede5139295ced86afa8b |
+
+## 이번 변경의 단발 검증 기록
+
+- 수동 기본 모드와 --candidate 실행에서 배포 AVIF/WebP 60개 SHA-256이 바뀌지 않았다. candidate AVIF 30개와 직접 WebP 30개는 각각 검토된 canonical 출력의 SHA-256과 모두 동일했다.
+- --check-avif로 선택 원본 30개를 실제 재인코딩해 기존 AVIF 30개와 바이트 동일성을 확인했다. 기존 파일은 모두 그대로 보존됐다.
+- 직접 WebP 30개를 raw RGB 전체 픽셀로 디코딩했다. 각 720×1080·3채널·2,332,800 pixel bytes와 출력 SHA-256이 일치했고 디코딩 실패가 없었다.
+- 선택 원본 누락, 손상 PNG, 잘못된 2:3, Chromium에서 2프레임 확인된 APNG를 candidate 입력으로 넣어 모두 거부됨을 확인했다.
+- 용량 목표를 달성할 수 없는 별도 fixture에서 품질 74 아래로 내려가기 전 실패함을 확인했다.
+- 반투명 단색 RGBA PNG 한 장의 임시 candidate catalog로 실제 AVIF/WebP를 생성했다. 두 출력 모두 720×1080 RGBA·hasAlpha=true이며 전체 alpha=128을 유지했다. sourceIsOpaque=false, alphaRemoved=false였다.
+- 위 fixture는 준비 스크립트의 imports와 catalog cardinality만 임시 검토 파일로 치환했다. 인코딩·입력 검사 로직은 동일하며, 품질 하한 사례만 목표 bytes를 1로 낮췄다. 이 단발 검증을 새 상시 테스트나 필수 게이트로 추가하지 않았다.
+
+positive 결과는 .media-review/preparation-integrity.json·prepare-report.json·candidate-report.json, 부정 입력·알파·전체 픽셀 결과는 negative-validation.json, APNG 메타데이터 확인은 negative-cases/apng-metadata-proof.json에 기록했다. 모두 로컬 검토 자료다. 통합 빌드·브라우저·npm run verify의 결과는 별도 출시 기록을 따른다.
