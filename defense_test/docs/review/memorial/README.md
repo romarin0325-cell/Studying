@@ -23,4 +23,3 @@ npm run verify
 CDP의 `HeapProfiler.collectGarbage`, `Memory.getDOMCounters`, `Performance.getMetrics`로 같은 홈 상태의 전후 DOM/JS heap을 측정했다. GC후 수치는 브라우저의 압축 이미지 캐시나 GPU 메모리를 포함하지 않는다. 앱 참조·DOM이 누적되는지의 보조 지표이며 전체 메모리의 즉시 해제나 물리적 휴대폰 성능을 인증하지 않는다.
 
 이 PC에서 실제 Galaxy·iPhone 검증 장비를 확인하지 못했다. Windows Chromium147/WebKit26.4 통과를 실제 Android/iOS 인증으로 대체하지 않는다. 기기명·OS·브라우저·판본·30장순회·백그라운드복귀·강제종료·화질·전투복귀를 추후 실제 기기에서 기록할 수 있으나 새 반복 게이트로 추가하지 않았다.
-
