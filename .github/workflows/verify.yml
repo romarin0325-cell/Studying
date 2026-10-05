@@ -10,7 +10,7 @@ jobs:
   gate:
     name: Defense release gate
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     env:
       VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
       VERIFY_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -29,6 +29,12 @@ jobs:
       - name: Install locked dependencies
         if: steps.plan.outputs.needs_install == 'true'
         run: npm ci
+      - name: Install Chromium
+        if: steps.plan.outputs.needs_chromium == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install WebKit
+        if: steps.plan.outputs.needs_webkit == 'true'
+        run: npx playwright install --with-deps webkit
       - name: Run selected verification
         if: steps.plan.outputs.has_commands == 'true'
         run: npm run verify
