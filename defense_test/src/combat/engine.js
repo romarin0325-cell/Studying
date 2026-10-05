@@ -1,4 +1,5 @@
 import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK } from '../content.js';
+import { TEAM_SIZE } from '../team-config.js';
 // Forked from active Confluence at d4c32cf. Its geometry and authored attacks
 // remain shared in meaning; Star Garden owns pacing and persistent growth.
 export const MAIN_WAVES=6;
@@ -12,6 +13,16 @@ export const WAVE_BASE_HEALTH = 76;
 export const ATTACK_WINDUP = .13;
 export const GAUGE_MAX = 120;
 export const FINISHER_DELAY = .3;
+export const STATUS_REVISION=1;
+export const POISON_CAP=40;
+export const DIVINE_CAP=3;
+export const DAMAGE_TAKEN_CAP=.8;
+export const ZONE_CAP=75;
+export const POISON_POWER_RATIO=3/HERO.mushroom_king.damage;
+// Independent ground fields retain their authored ticks. A small cadence
+// correction limits the increase from replacing refreshes with overlapping hits.
+export const ZONE_CADENCE=1.15;
+export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CADENCE:1;
 export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony'});
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 export const BOARD = {x:135,y:212,cell:90};
@@ -30,7 +41,7 @@ export function pathPoint(distance){
 }
 export function random(s){let x=s.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;s.rng=x>>>0;return s.rng/4294967296;}
 function shuffle(s,values){const a=[...values];for(let i=a.length-1;i>0;i--){const j=Math.floor(random(s)*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-export function validDeck(deck){return Array.isArray(deck)&&deck.length===5&&new Set(deck).size===5&&deck.every(id=>HERO[id]);}
+export function validDeck(deck){return Array.isArray(deck)&&deck.length===TEAM_SIZE&&new Set(deck).size===TEAM_SIZE&&deck.every(id=>HERO[id]);}
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
 export function has(s,id){return s.artifacts.includes(id);}
 export function summonCost(s){return s.freeSummons>0?0:Math.max(8,10+s.paidSummons*2-(has(s,'feather')?4:0));}
@@ -81,6 +92,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   return trait;
 }
 export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
+export function nightRabbitTargetCount(s){return 9+2*new Set(s.board.filter(u=>u&&['snow_rabbit','silver_rabbit'].includes(u.hero)).map(u=>u.hero)).size;}
 export function harmonyStrength(s,index){
   const count=harmonyAt(s,index),level=s.upgrades.harmonious||0,multiplier=s.buffs.harmony>0?2:1;
   return {count,damage:count*(.05+level*.005)*multiplier*special(s,'harmonious'),speed:count*(.04+level*.002)*multiplier*special(s,'harmonious')};
@@ -106,19 +118,81 @@ export function unitEconomy(s,u){
 }
 function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,GAUGE_MAX);}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
-function addPoison(s,e,stacks,duration,cap=Infinity){e.poison=Math.min(cap,(e.poison||0)+stacks+(has(s,'seed')?1:0));e.poisonTime=duration;}
+const statusTypes=['poison','burn','exposure','stun','freeze','divine','frost'];
+const sourceKey=(kind,hero,uid)=>`${kind}:${hero}:${uid}`;
+function legacyStatuses(s,e){
+  const effects=[];
+  const legacy=(type,amount,duration,owner=null,power)=>{
+    if(amount>0&&duration>0)effects.push({type,source:`legacy:${type}`,owner,amount,until:s.time+duration,...(power===undefined?{}:{power})});
+  };
+  legacy('exposure',Math.min(DAMAGE_TAKEN_CAP,e.exposed||0),e.exposeTime);
+  legacy('burn',e.burn,e.burnTime,e.burnOwner||'flame_sage');
+  // Old poison was a Mushroom-only effect. Preserve that remaining DPS once;
+  // future applications use the actual caster's complete attack snapshot.
+  legacy('poison',Math.min(POISON_CAP,e.poison||0),e.poisonTime,'mushroom_king',HERO.mushroom_king.damage*(s.meta?.mushroom_king?.power||1)*(1+(s.relicAttack||0)));
+  legacy('stun',1,e.stun);legacy('freeze',1,e.freeze||0);
+  legacy('divine',Math.min(DIVINE_CAP,e.divine||0),e.divineTime);legacy('frost',Math.min(2,e.frostStacks||0),e.frostTime);
+  return effects;
+}
+function syncStatuses(s,e,at=s.time){
+  if(e.statusEffects===undefined)e.statusEffects=legacyStatuses(s,e);
+  e.statusEffects=e.statusEffects.filter(effect=>effect.until-at>1e-9);
+  e.exposed=0;e.exposeTime=0;e.burn=0;e.burnTime=0;e.burnOwner=null;
+  e.poison=0;e.poisonTime=0;e.divine=0;e.divineTime=0;e.frostStacks=0;e.frostTime=0;e.stun=0;e.freeze=0;
+  for(const effect of e.statusEffects){
+    const remaining=effect.until-at;
+    if(effect.type==='exposure'){
+      if(effect.amount>e.exposed){e.exposed=effect.amount;e.exposeTime=remaining;}
+      else if(effect.amount===e.exposed)e.exposeTime=Math.max(e.exposeTime,remaining);
+    }else if(effect.type==='burn'){
+      if(effect.amount>e.burn||effect.amount===e.burn&&remaining>e.burnTime){e.burn=effect.amount;e.burnTime=remaining;e.burnOwner=effect.owner;}
+    }else if(effect.type==='poison'){e.poison=Math.min(POISON_CAP,e.poison+effect.amount);e.poisonTime=Math.max(e.poisonTime,remaining);}
+    else if(effect.type==='divine'){e.divine+=effect.amount;e.divineTime=Math.max(e.divineTime,remaining);}
+    else if(effect.type==='frost'){e.frostStacks+=effect.amount;e.frostTime=Math.max(e.frostTime,remaining);}
+    else e[effect.type]=Math.max(e[effect.type],remaining);
+  }
+  e.controlTime=Math.max(e.stun,e.freeze);
+  e.takenBonus=Math.min(DAMAGE_TAKEN_CAP,e.exposed+e.divine*.02);
+  return e;
+}
+function activePoison(e){
+  let remaining=POISON_CAP;
+  return e.statusEffects.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{
+    const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];
+  });
+}
+export function statusState(s,e){syncStatuses(s,e);syncSlows(s,e);return {exposure:e.exposed,divine:e.divine,damageTakenBonus:e.takenBonus,burn:e.burn,burnOwner:e.burnOwner,poison:e.poison,poisonDps:activePoison(e).reduce((dps,{effect,stacks})=>dps+stacks*effect.power*POISON_POWER_RATIO,0),stun:e.stun,freeze:e.freeze,controlTime:e.controlTime,slow:e.slow};}
+function capStacks(e,type,cap){
+  const effects=e.statusEffects.filter(effect=>effect.type===type).sort((a,b)=>b.until-a.until||a.source.localeCompare(b.source));
+  let remaining=cap;
+  for(const effect of effects){effect.amount=Math.min(remaining,effect.amount);remaining-=effect.amount;}
+  e.statusEffects=e.statusEffects.filter(effect=>effect.amount>0);
+}
+function addStatus(s,e,type,source,owner,amount,duration,power){
+  if(e.hp<=0||amount<=0||duration<=0)return;
+  syncStatuses(s,e);
+  const existing=e.statusEffects.find(effect=>effect.type===type&&effect.source===source),until=s.time+duration;
+  if(existing){existing.amount=['poison','divine','frost'].includes(type)?existing.amount+amount:amount;if(type==='poison')existing.amount=Math.min(POISON_CAP,existing.amount);existing.until=until;if(power!==undefined)existing.power=power;}
+  else e.statusEffects.push({type,source,owner,amount:type==='poison'?Math.min(POISON_CAP,amount):amount,until,...(power===undefined?{}:{power})});
+  if(type==='divine')capStacks(e,type,DIVINE_CAP);
+  if(type==='frost')capStacks(e,type,2);
+  syncStatuses(s,e);
+}
+function addPoison(s,e,source,owner,stacks,duration,attackPower){addStatus(s,e,'poison',source,owner,stacks+(has(s,'seed')?1:0),duration,attackPower);}
+function addControl(s,e,type,source,owner,duration){addStatus(s,e,type,source,owner,1,duration);}
 function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,birthWave:s.wave+(['reward','intermission'].includes(s.phase)?1:0),harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:targetingLocked(hero)?'random':HERO[hero].bossDamage?'boss':'first'};}
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
 export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0}={}){
-  const chosen=validDeck(deck)?[...deck]:[...DEFAULT_DECK];
-  const s={version:VERSION,balanceRevision:BALANCE_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
+  const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE);
+  const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70,gauge:90,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
     buffs:{},buffTotals:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
-  for(const [i,slot] of [7,16,18].entries())place(s,opening[i],1,slot);
+  const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
+  for(const [i,hero] of opening.entries())place(s,hero,1,openingCells[i]);
   beginWave(s,1);return s;
 }
 // The opening is three distinct random companions from the selected five.
@@ -142,8 +216,8 @@ export function move(s,from,to){
     const id=b.hero==='rumi'?a.hero:b.hero,rank=b.rank+1;
     const refund=HERO[id].trait.type==='sacrifice'?doomRefund(a.rank,s.upgrades[id]):0;
     if(refund)giveGold(s,refund,'합성 환급');
-    if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,rank*2,8);
     const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
+    if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,rank*2,8,power(s,unit));
     if(has(s,'alchemy'))for(const e of s.enemies)damage(s,e,power(s,unit)*1.5,id);
     s.stats.merges++;addGauge(s,12+(has(s,'hourglass')?8:0));s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
@@ -194,7 +268,7 @@ function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
   const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?BOSS_ORDER[(wave-1)%BOSS_ORDER.length]:chapter.bosses[0]):null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
-    slow:0,slowTime:0,slowEffects:[],stun:0,burn:0,burnTime:0,poison:0,poisonTime:0,exposed:0,exposeTime:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0};
+    slow:0,slowTime:0,slowEffects:[],statusEffects:[],stun:0,freeze:0,controlTime:0,burn:0,burnTime:0,burnOwner:null,poison:0,poisonTime:0,exposed:0,exposeTime:0,takenBonus:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0};
   e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
 }
 export function attackGeometry(hero,from,to){return {kind:hero.shape,from,to,range:hero.range,radius:hero.radius,angle:Math.atan2(to.y-from.y,to.x-from.x)};}
@@ -216,9 +290,10 @@ function chooseTarget(s,u,randomTarget=true){
   const priority=u.priority==='boss'?(u.hero==='great_detective'?'strong':'first'):u.priority;
   return pool.reduce((a,b)=>priority==='strong'?(a.hp>b.hp?a:b):priority==='last'?(a.progress<b.progress?a:b):(a.progress>b.progress?a:b));
 }
-function damage(s,e,value,hero,{dot=false,pure=false,recordMirror=true,instant=false}={}){
+function damage(s,e,value,hero,{dot=false,pure=false,recordMirror=true,instant=false,statusAt=s.time}={}){
   if(!e||e.hp<=0)return 0;
-  let amount=instant?e.hp+(e.shield||0):value*(1+e.exposed)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
+  syncStatuses(s,e,statusAt);syncSlows(s,e,statusAt);
+  let amount=instant?e.hp+(e.shield||0):value*(1+e.takenBonus)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1.3:1)*(e.slowTime>0&&has(s,'frost')?1.25:1);
   if(!instant){
     if(has(s,'royal_seal')&&highestMaxHp(s)?.uid===e.uid)amount*=1.25;
     if(e.kind==='armor'&&!pure)amount*=.72;
@@ -247,31 +322,30 @@ function around(s,e,radius){const p=pathPoint(e.progress);return s.enemies.filte
 function makeZone(s,shot,p,orbit=false){
   const h=HERO[shot.hero],flame=shot.hero==='flame_sage'&&!orbit,boost=flame?1.3:1;
   const life=orbit?2:3*boost*(has(s,'roots')?1.5:1),radius=orbit?60:h.radius*boost,zoneDamage=shot.damage*boost;
-  const existing=s.zones.find(z=>z.source===shot.source&&z.orbit===orbit&&Math.hypot(z.x-p.x,z.y-p.y)<radius*.6);
-  if(existing){existing.life=life;existing.total=life;existing.radius=radius;existing.damage=zoneDamage;return;}
   s.zones.push({uid:s.nextId++,source:shot.source,hero:shot.hero,rank:shot.rank,damage:zoneDamage,x:p.x,y:p.y,radius,life,total:life,tick:0,orbit});
-  if(s.zones.length>75)s.zones.shift();
+  if(s.zones.length>ZONE_CAP)s.zones.shift();
 }
-function syncSlows(s,e){
-  e.slowEffects=e.slowEffects.filter(effect=>effect.until-s.time>1e-9);
+function syncSlows(s,e,at=s.time){
+  e.slowEffects=(e.slowEffects||[]).filter(effect=>effect.until-at>1e-9);
   e.slow=0;e.slowTime=0;
   for(const effect of e.slowEffects){
-    if(effect.amount>e.slow){e.slow=effect.amount;e.slowTime=effect.until-s.time;}
-    else if(effect.amount===e.slow)e.slowTime=Math.max(e.slowTime,effect.until-s.time);
+    if(effect.amount>e.slow){e.slow=effect.amount;e.slowTime=effect.until-at;}
+    else if(effect.amount===e.slow)e.slowTime=Math.max(e.slowTime,effect.until-at);
   }
 }
 function addSlow(s,e,source,amount,duration){
   const owner=source.split(':')[1];amount=Math.min(.8,amount*special(s,owner));
   // Refresh only this source. A weaker hit never borrows another effect's
   // strength or changes its deadline; equal-strength skills also expire alone.
+  syncSlows(s,e);
   const effect=e.slowEffects.find(effect=>effect.source===source),until=s.time+duration;
   if(effect){effect.amount=amount;effect.until=until;}
-  else e.slowEffects.push({source,amount,until});
+  else e.slowEffects.push({source,owner,amount,until});
   syncSlows(s,e);
 }
-function slowTargets(s,targets,hero,amount,point){
+function slowTargets(s,targets,hero,amount,point,source){
   const slow=hero.trait.type==='chrono'?.25+s.upgrades[hero.id]*.03:hero.id==='phantom'?.25:.4;
-  for(const t of targets)addSlow(s,t,`attack:${hero.id}`,slow,2.4);
+  for(const t of targets)addSlow(s,t,source,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
 function applyHit(s,shot){
@@ -286,6 +360,7 @@ function applyHit(s,shot){
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),geometry=attackGeometry(hero,shot.origin,point),amount=shot.damage,procTargets=new Set();
   const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):[e];
   for(const target of area){
+    syncStatuses(s,target);syncSlows(s,target);
     let factor=1;
     if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;
     if(type==='shatter'&&target.slowTime>0)factor*=1.75;
@@ -295,15 +370,14 @@ function applyHit(s,shot){
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
     normalHit(s,target,amount*factor,shot,{pure:shot.form==='trauma'||type==='miracle'&&shot.count%3===0},procTargets);
-    if(type==='divine'&&target.hp>0){target.divine=Math.min(3,(target.divineTime>0?target.divine:0)+1);target.divineTime=6;}
+    if(type==='divine'&&target.hp>0)addStatus(s,target,'divine',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0){
-      target.frostStacks=(target.frostTime>0?target.frostStacks:0)+1;target.frostTime=6;
-      if(target.frostStacks>=3){
-        target.frostStacks=0;target.frostTime=0;
+      if(target.frostStacks>=2){
+        target.statusEffects=target.statusEffects.filter(effect=>effect.type!=='frost');syncStatuses(s,target);
         damage(s,target,amount*1.2,hero.id);
-        target.stun=Math.max(target.stun,((target.boss?.45:.9)+(s.upgrades[hero.id]||0)*(target.boss?.03:.06))*special(s,hero.id));
+        addControl(s,target,'freeze',sourceKey('attack',hero.id,shot.uid),hero.id,((target.boss?.45:.9)+(s.upgrades[hero.id]||0)*(target.boss?.03:.06))*special(s,hero.id));
         event(s,'frostBreak',{...pathPoint(target.progress),hero:hero.id,rank:shot.rank});
-      }
+      }else addStatus(s,target,'frost',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     }
   }
   if(type==='refraction'&&shot.proc!==false&&e.hp>0){
@@ -322,16 +396,14 @@ function applyHit(s,shot){
     const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0)+extra);
     let from=point;for(const target of others){normalHit(s,target,amount*ratio,shot,{},procTargets);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
-  if(type==='burn'){for(const t of area){if(amount*.23>=t.burn){t.burn=amount*.23;t.burnOwner=hero.id;}t.burnTime=3;}}
-  if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point);
-  if(type==='poison')addPoison(s,e,shot.rank,7,40);
-  if(type==='stun'&&shot.count%3===0)for(const t of area)t.stun=Math.max(t.stun,.7*special(s,hero.id));
+  if(type==='burn')for(const t of area)addStatus(s,t,'burn',sourceKey('attack',hero.id,shot.uid),hero.id,amount*.23,3);
+  if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point,sourceKey('attack',hero.id,shot.uid));
+  if(type==='poison')addPoison(s,e,sourceKey('attack',hero.id,shot.uid),hero.id,shot.rank,7,amount);
+  if(type==='stun'&&shot.count%3===0)for(const t of area)addControl(s,t,'stun',sourceKey('attack',hero.id,shot.uid),hero.id,.7*special(s,hero.id));
   if(type==='fear'&&shot.count%3===0)e.progress=Math.max(0,e.progress-35);
   if(type==='expose'){
     const exposure=((e.boss ? .3 : .18)+s.upgrades[hero.id]*.02)*special(s,hero.id);
-    // A basic shot must neither shorten nor perpetually renew the stronger
-    // 10-second skill debuff. Its own four-second exposure resumes afterwards.
-    if(e.exposeTime<=0||e.exposed<=exposure){e.exposed=exposure;e.exposeTime=4;}
+    addStatus(s,e,'exposure',sourceKey('attack',hero.id,shot.uid),hero.id,Math.min(DAMAGE_TAKEN_CAP,exposure),4);
   }
   if(type==='battery')addGauge(s,(.5+s.upgrades[hero.id]*.1)*(s.buffs.march>0?2:1)*special(s,hero.id));
   if(hero.shape==='zone')makeZone(s,shot,point);
@@ -384,7 +456,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
     const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
     if(kinds.size)speedBonus('토끼 연계',kinds.size*.2);
   }
-  const cooldown=h.interval/speed;
+  const cooldown=h.interval*zoneCadence(u.hero)/speed;
   return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,skillPower:power(s,u),range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
 }
 
@@ -395,6 +467,8 @@ export function cast(s,id){
   if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛이 부족합니다. (${hero.skill.cost} 필요)`};
   s.gold-=goldCost;s.gauge-=hero.skill.cost;if(has(s,'lantern'))addGauge(s,15);s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id);
+  const source=sourceKey('skill',id,s.nextId++);
+  for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
   let visualTargets=targets;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=(factor,pure=false)=>targets.forEach(e=>damage(s,e,base*factor,id,{pure}));
@@ -404,9 +478,9 @@ export function cast(s,id){
   else if(type==='march')s.buffs.march=skillDuration(s,6*control);
   else if(type==='glassfall')strike(8,true);
   else if(type==='gift'){const hero=drawHero(s);if(place(s,hero,2)<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
-  else if(type==='goddess'){strike(5);for(const e of targets){e.divine=3;e.divineTime=6*control;}s.buffs.radiance=skillDuration(s,8*control);}
+  else if(type==='goddess'){strike(5);for(const e of targets)addStatus(s,e,'divine',source,id,3,6);s.buffs.radiance=skillDuration(s,8*control);}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control);}
-  else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){e.frostStacks=2;e.frostTime=6*control;addSlow(s,e,`skill:${id}`,.5,6);}}}
+  else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){addStatus(s,e,'frost',source,id,2,6*control);addSlow(s,e,source,.5,6);}}}
   else if(type==='harmony'){s.buffs.harmony=skillDuration(s,8*control);for(const ally of s.board)if(ally)ally.cooldown=Math.max(0,ally.cooldown-1.5*control);}
   else if(type==='royal'||type==='starfall'||type==='mirror'){
     const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?3:FINISHER_DELAY;
@@ -414,23 +488,23 @@ export function cast(s,id){
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:type==='mirror'?10:32),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,cap:base*18}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
-  else if(type==='freeze'){strike(2);for(const e of targets){e.stun=3*control;addSlow(s,e,`skill:${id}`,.5,6);}}
-  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.stun>0?12:6),id);addSlow(s,e,`skill:${id}`,.5,4);}}
-  else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:id==='zeke'?5*(s.health<10?2:1):6);for(const e of targets){e.burn=base*.6;e.burnTime=5;e.burnOwner=id;}}
-  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);e.burn=base*.65;e.burnTime=6;e.burnOwner=id;}}
-  else if(type==='plague'){for(const e of targets)addPoison(s,e,u.rank*8,12);strike(3,true);}
-  else if(type==='expose'){strike(3);for(const e of targets){e.exposed=.6*control;e.exposeTime=10;}}
-  else if(type==='quake'){strike(5);for(const e of targets){e.progress=Math.max(0,e.progress-160*control);e.stun=2*control;}}
-  else if(type==='nightmare'){strike(4);for(const e of targets){e.progress=Math.max(0,e.progress-220*control);e.exposed=.25*control;e.exposeTime=6;}}
-  else if(type==='rewind'){for(const e of targets){e.progress=Math.max(0,e.progress-e.speed*6*control);e.stun=2*control;}strike(3);}
+  else if(type==='freeze'){strike(2);for(const e of targets){addControl(s,e,'freeze',source,id,3*control);addSlow(s,e,source,.5,6);}}
+  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:6),id);addSlow(s,e,source,.5,4);}}
+  else if(type==='inferno'||type==='dragon'){strike(type==='dragon'?8:id==='zeke'?5*(s.health<10?2:1):6);for(const e of targets)addStatus(s,e,'burn',source,id,base*.6,5);}
+  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*.65,6);}}
+  else if(type==='plague'){for(const e of targets)addPoison(s,e,source,id,u.rank*8,12,base);strike(3,true);}
+  else if(type==='expose'){strike(3);for(const e of targets)addStatus(s,e,'exposure',source,id,Math.min(DAMAGE_TAKEN_CAP,.6*control),10);}
+  else if(type==='quake'){strike(5);for(const e of targets){e.progress=Math.max(0,e.progress-160*control);addControl(s,e,'stun',source,id,2*control);}}
+  else if(type==='nightmare'){strike(4);for(const e of targets){e.progress=Math.max(0,e.progress-220*control);addStatus(s,e,'exposure',source,id,Math.min(DAMAGE_TAKEN_CAP,.25*control),6);addPoison(s,e,source,id,u.rank*4,12,base);}}
+  else if(type==='rewind'){for(const e of targets){e.progress=Math.max(0,e.progress-e.speed*6*control);addControl(s,e,'stun',source,id,2*control);}strike(3);}
   else if(type==='vortex'||type==='singularity'){
     const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80);
-    for(const e of targets){const pull=Math.min(.9,.65*control);e.progress=e.progress*(1-pull)+point*pull;e.stun=(type==='singularity'?2:1.5)*control;addSlow(s,e,`skill:${id}`,.6,4);}
+    for(const e of targets){const pull=Math.min(.9,.65*control);e.progress=e.progress*(1-pull)+point*pull;addControl(s,e,'stun',source,id,(type==='singularity'?2:1.5)*control);addSlow(s,e,source,.6,4);}
     strike(type==='singularity'?10:5);
   }else if(type==='execute'){
     const top=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);visualTargets=top;for(const e of top)damage(s,e,base*(e.hp/e.maxHp<=executeThreshold(e)?30:16),id,{pure:true});
-  }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,9);for(const e of visualTargets)damage(s,e,base*14,id);}
-  else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2*control;}
+  }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*14,id);}
+  else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control);}
   else if(type==='fortune'||type==='dividend'){strike(type==='fortune'?10:3);if(type==='dividend')giveGold(s,30,'필살기');}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key)s.buffTotals[key]=s.buffs[key];
@@ -445,18 +519,26 @@ function bossStep(s,e,dt){
     if(e.channel<=0){
       const interrupted=e.channelHp-e.hp-(e.shield||0)>=e.maxHp*.06;
       if(boss.pattern==='heal'){
-        if(interrupted){e.stun=2;event(s,'interrupt',{name:boss.name});}else{e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.14);event(s,'bossHeal',{uid:e.uid});}
+        if(interrupted){addControl(s,e,'stun',`interrupt:${e.boss}:${e.uid}`,null,2);event(s,'interrupt',{name:boss.name});}else{e.hp=Math.min(e.maxHp,e.hp+e.maxHp*.14);event(s,'bossHeal',{uid:e.uid});}
       }else if(boss.pattern==='seal'){
         for(const i of s.telegraph?.cells||[])if(s.board[i])s.board[i].disabled=3.2;
         event(s,'seal',{cells:s.telegraph?.cells||[]});
       }else if(boss.pattern==='drain'){s.gauge=Math.max(0,s.gauge-25);event(s,'drain');}
-      else if(boss.pattern==='rush'){for(const target of s.enemies)if(target.stun<=0&&target.slowTime<=0)target.progress+=130;event(s,'rush');}
+      else if(boss.pattern==='rush'){
+        // Later enemies have not integrated this frame yet. Inspect the end
+        // time without deleting the effects needed by their final DOT segment.
+        for(const target of s.enemies){
+          const controlled=target.statusEffects.some(effect=>['stun','freeze'].includes(effect.type)&&effect.until-s.time>1e-9),slowed=target.slowEffects.some(effect=>effect.until-s.time>1e-9);
+          if(!controlled&&!slowed)target.progress+=130;
+        }
+        event(s,'rush');
+      }
       else if(boss.pattern==='storm'){
         const cells=s.telegraph?.cells||[];
         for(const i of cells)if(s.board[i]){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}
         event(s,'bossCast',{boss:e.boss,pattern:boss.pattern,cells,...pathPoint(e.progress)});
       }else if(boss.pattern==='duel'||boss.pattern==='creation'){
-        if(interrupted){e.stun=2;event(s,'interrupt',{name:boss.name});}
+        if(interrupted){addControl(s,e,'stun',`interrupt:${e.boss}:${e.uid}`,null,2);event(s,'interrupt',{name:boss.name});}
         else if(boss.pattern==='duel'){e.rage=5;event(s,'bossCast',{boss:e.boss,pattern:boss.pattern,...pathPoint(e.progress)});}
         else{
           e.shield=Math.max(e.shield||0,e.maxHp*.12);
@@ -498,9 +580,28 @@ export function chooseReward(s,id){
 }
 export function continueEndless(s){if(s.phase!=='victory')return;s.endless=true;beginWave(s,s.wave+1);}
 
+function tickEnemyStatuses(s,e,start,end){
+  syncStatuses(s,e,start);syncSlows(s,e,start);
+  // Split a frame at actual deadlines: a strong DOT cannot deal one extra
+  // frame after expiry, and an expired exposure cannot amplify the next DOT.
+  const boundaries=[...new Set([...e.statusEffects,...e.slowEffects].map(effect=>effect.until).filter(until=>until>start+1e-9&&until<end-1e-9))].sort((a,b)=>a-b);
+  let at=start;
+  for(const until of [...boundaries,end]){
+    const dt=until-at;syncStatuses(s,e,at);syncSlows(s,e,at);
+    if(e.burn>0)damage(s,e,e.burn*dt*(has(s,'ember')?1.6:1),e.burnOwner,{dot:true,statusAt:at});
+    const poisonByOwner=new Map();
+    for(const {effect,stacks} of activePoison(e))poisonByOwner.set(effect.owner,(poisonByOwner.get(effect.owner)||0)+stacks*effect.power*POISON_POWER_RATIO);
+    for(const [owner,dps] of poisonByOwner)damage(s,e,dps*dt,owner,{dot:true,pure:true,statusAt:at});
+    if(e.hp<=0)break;
+    if(e.controlTime>0){if(s.telegraph?.uid===e.uid)s.telegraph.ends+=dt;}
+    else {e.progress+=e.speed*dt*(e.slowTime>0?1-e.slow:1)*(e.rage>0?1.4:1);if(e.boss)bossStep(s,e,dt);}
+    at=until;
+  }
+  syncStatuses(s,e,end);syncSlows(s,e,end);
+}
 export function step(s,dt){
   if(!['combat','intermission'].includes(s.phase))return;
-  dt=clamp(dt,0,.05);s.time+=dt;
+  dt=clamp(dt,0,.05);const start=s.time;s.time+=dt;
   // A short challenge measures how far this collection can push, without
   // waiting for a nearly invulnerable late-round enemy to circle the arena.
   if(s.mode!=='main'&&s.waveTime>=(s.mode==='monthly'?30:35)){
@@ -513,25 +614,19 @@ export function step(s,dt){
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;
-    syncSlows(s,e);
-    if(e.burnTime>0){damage(s,e,e.burn*dt*(has(s,'ember')?1.6:1),e.burnOwner||'flame_sage',{dot:true});e.burnTime-=dt;}
-    if(e.poisonTime>0){damage(s,e,e.poison*dt*3*(s.meta?.mushroom_king?.power||1)*(1+(s.relicAttack||0)),'mushroom_king',{dot:true,pure:true});e.poisonTime-=dt;}else e.poison=0;
+    tickEnemyStatuses(s,e,start,s.time);
     if(e.hp<=0)continue;
-    if(e.exposeTime>0)e.exposeTime-=dt;else e.exposed=0;
-    if(e.divineTime>0)e.divineTime=Math.max(0,e.divineTime-dt);else e.divine=0;
-    if(e.frostTime>0)e.frostTime=Math.max(0,e.frostTime-dt);else e.frostStacks=0;
     if(e.rage>0)e.rage=Math.max(0,e.rage-dt);
-    if(e.stun>0){e.stun-=dt;if(s.telegraph?.uid===e.uid)s.telegraph.ends+=dt;}else{e.progress+=e.speed*dt*(e.slowTime>0?1-e.slow:1)*(e.rage>0?1.4:1);if(e.boss)bossStep(s,e,dt);}
     if(e.progress>=PATH_LENGTH&&e.hp>0){e.hp=0;if(has(s,'phoenix')&&!s.phoenixUsed){s.phoenixUsed=true;s.health=Math.min(20,s.health+3);event(s,'phoenix');}else{s.health-=e.boss?7:e.kind==='armor'?2:1;event(s,'leak',{boss:e.boss,health:s.health});}}
   }
   for(const z of s.zones){
     z.life-=dt;z.tick-=dt;if(z.life<=0||z.tick>0)continue;z.tick+=.5;
     const targets=s.enemies.filter(e=>e.hp>0&&Math.hypot(pathPoint(e.progress).x-z.x,pathPoint(e.progress).y-z.y)<=z.radius),h=HERO[z.hero];
     for(const e of targets){damage(s,e,z.damage*(z.orbit?.15:.22),z.hero,{dot:true});if(z.orbit)continue;
-      if(z.hero==='flame_sage'){if(z.damage*.23>=e.burn){e.burn=z.damage*.23;e.burnOwner=z.hero;}e.burnTime=3;}
-      if(z.hero==='mushroom_king')addPoison(s,e,z.rank,7,40);
+      if(z.hero==='flame_sage')addStatus(s,e,'burn',sourceKey('zone',z.hero,z.uid),z.hero,z.damage*.23,3);
+      if(z.hero==='mushroom_king')addPoison(s,e,sourceKey('zone',z.hero,z.uid),z.hero,z.rank,7,z.damage);
     }
-    if(!z.orbit&&['phantom','galaxy_whale','time_ruler'].includes(z.hero))slowTargets(s,targets,h,z.damage,z);
+    if(!z.orbit&&['phantom','galaxy_whale','time_ruler'].includes(z.hero))slowTargets(s,targets,h,z.damage,z,sourceKey('zone',z.hero,z.uid));
   }
   s.zones=s.zones.filter(z=>z.life>0);
   for(let i=0;i<s.board.length;i++){
@@ -548,6 +643,7 @@ export function step(s,dt){
     f.to=pathPoint(target.progress);
     if(f.life<=1e-9){
       f.life=0;
+      syncStatuses(s,target);syncSlows(s,target);
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?1.4:1;
       const echoDamage=f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0,before=s.stats.damage;
       damage(s,target,f.damage*factor+echoDamage,f.hero,{pure:f.kind==='royal',recordMirror:f.kind!=='mirror'});
@@ -570,12 +666,14 @@ export function restore(raw){
     const record=o=>o&&typeof o==='object'&&!Array.isArray(o);
     const id=n=>Number.isSafeInteger(n)&&n>0;
     const kinds=['grunt','armor','runner','wisp','boss'];
+    if(s.statusRevision!==undefined&&s.statusRevision!==STATUS_REVISION)return null;
+    const legacyStatus=s.statusRevision===undefined;
     // Additive migration: an old run keeps its wave, HP, wallet and target
     // priorities. Only future waves use revision 3's pacing.
     if(s.finishers===undefined)s.finishers=[];
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
-    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
+    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.time<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
     for(const u of s.board)if(u){
@@ -593,14 +691,40 @@ export function restore(raw){
     if(s.timeRulerUid!==null&&(!id(s.timeRulerUid)||!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid)||s.board.some(u=>u?.hero==='time_ruler'&&u.rank>s.board.find(v=>v?.uid===s.timeRulerUid).rank)))return null;
     syncTimeRuler(s);
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
-    if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
-    const slowSources=new Set(['legacy',...Object.keys(HERO).flatMap(hero=>[`attack:${hero}`,`skill:${hero}`])]);
+    if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.burn<0||e.exposed<0||!Number.isInteger(e.poison)||e.poison<0||!Number.isInteger(e.divine)||e.divine<0||e.divine>DIVINE_CAP||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
+    const sourceValid=(effect,type,e)=>{
+      if(typeof effect?.source!=='string'||!(effect.owner===null||HERO[effect.owner]))return false;
+      if(effect.source===`legacy:${type}`)return type==='poison'?effect.owner==='mushroom_king':type==='burn'?!!HERO[effect.owner]:effect.owner===null;
+      if(type==='slow'&&/^legacy:slow:(attack|skill):[a-z_]+$/.test(effect.source))return !!HERO[effect.source.split(':')[3]]&&effect.owner===effect.source.split(':')[3];
+      const [kind,hero,rawUid,...extra]=effect.source.split(':'),uid=Number(rawUid);
+      if(extra.length||!id(uid)||String(uid)!==rawUid||uid>=s.nextId)return false;
+      if(kind==='interrupt')return type==='stun'&&effect.owner===null&&e.boss===hero&&e.uid===uid;
+      return ['attack','skill','zone','merge'].includes(kind)&&HERO[hero]&&s.deck.includes(hero)&&effect.owner===hero&&(kind!=='merge'||type==='poison'&&hero==='mushroom_king');
+    };
+    const deadlineValid=effect=>numeric(effect,['amount','until'])&&effect.until>=0&&effect.until<=s.time+30&&effect.amount>0;
     for(const e of s.enemies){
-      // Old saves have no source attribution. Preserve the remaining slow as
-      // one legacy effect whose deadline cannot be refreshed by new attacks.
-      if(e.slowEffects===undefined)e.slowEffects=e.slowTime>0&&e.slow>0?[{source:'legacy',amount:e.slow,until:s.time+e.slowTime}]:[];
-      if(!Array.isArray(e.slowEffects)||e.slowEffects.length>slowSources.size||new Set(e.slowEffects.map(effect=>effect?.source)).size!==e.slowEffects.length||e.slowEffects.some(effect=>!slowSources.has(effect?.source)||!numeric(effect,['amount','until'])||effect.amount<=0||effect.amount>=1||effect.until<0))return null;
-      syncSlows(s,e);
+      if(legacyStatus){
+        if(e.statusEffects===undefined)e.statusEffects=legacyStatuses(s,e);
+        if(e.slowEffects===undefined)e.slowEffects=e.slowTime>0&&e.slow>0?[{source:'legacy',amount:e.slow,until:s.time+e.slowTime}]:[];
+        if(!Array.isArray(e.slowEffects))return null;
+        for(const effect of e.slowEffects){
+          if(effect?.source==='legacy'){effect.source='legacy:slow';effect.owner=null;}
+          else if(/^(attack|skill):[a-z_]+$/.test(effect?.source)){effect.owner=effect.source.split(':')[1];effect.source=`legacy:slow:${effect.source}`;}
+        }
+      }
+      if(!Array.isArray(e.statusEffects)||e.statusEffects.length>2048||new Set(e.statusEffects.map(effect=>`${effect?.type}:${effect?.source}`)).size!==e.statusEffects.length)return null;
+      if(e.statusEffects.some(effect=>!statusTypes.includes(effect?.type)||!sourceValid(effect,effect.type,e)||!deadlineValid(effect)||
+        effect.type==='poison'&&(!Number.isInteger(effect.amount)||effect.amount>POISON_CAP||!numeric(effect,['power'])||effect.power<=0)||
+        effect.type==='exposure'&&effect.amount>DAMAGE_TAKEN_CAP||
+        ['stun','freeze'].includes(effect.type)&&effect.amount!==1||
+        effect.type==='divine'&&(!Number.isInteger(effect.amount)||effect.amount>DIVINE_CAP)||
+        effect.type==='frost'&&(!Number.isInteger(effect.amount)||effect.amount>2)||effect.type!=='poison'&&effect.power!==undefined))return null;
+      // Poison retains independently expiring suppressed sources. Its active
+      // selection is capped at 40 at every integration segment, not on storage.
+      for(const [type,cap] of [['divine',DIVINE_CAP],['frost',2]])if(e.statusEffects.filter(effect=>effect.type===type).reduce((sum,effect)=>sum+effect.amount,0)>cap)return null;
+      if(!Array.isArray(e.slowEffects)||e.slowEffects.length>2048||new Set(e.slowEffects.map(effect=>effect?.source)).size!==e.slowEffects.length||e.slowEffects.some(effect=>!sourceValid(effect,'slow',e)||!deadlineValid(effect)||effect.amount>.8))return null;
+      if(!legacyStatus&&(['poison','poisonTime','burn','burnTime','exposed','exposeTime','stun','divine','divineTime'].some(key=>e[key]<0)||!Number.isInteger(e.poison)||e.poison>POISON_CAP||e.exposed>DAMAGE_TAKEN_CAP))return null;
+      syncStatuses(s,e);syncSlows(s,e);
     }
     for(const shot of s.shots)if(shot?.hero==='flame_sage'&&shot.ground===undefined){shot.ground=true;shot.target=null;}
     if(s.shots.some(e=>!id(e?.uid)||!(e.ground===true&&e.hero==='flame_sage'&&e.target===null||e.ground===undefined&&id(e.target))||!id(e.source)||!s.deck.includes(e.hero)||!numeric(e,['damage','rank','count','life','total'])||e.total<=0||!numeric(e.from,['x','y'])||!numeric(e.to,['x','y'])||!numeric(e.origin,['x','y'])))return null;
@@ -610,7 +734,7 @@ export function restore(raw){
     if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall','mirror'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored','cap'])||f.stored<0||f.cap<0||f.stored>f.cap/.45+1e-6)))return null;
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
     if(s.enemies.some(e=>!numeric(e,['frostStacks','frostTime'])||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.frostTime<0))return null;
-    if(!Array.isArray(s.zones)||s.zones.length>75||s.zones.some(z=>!id(z?.uid)||!id(z.source)||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||z.radius<=0||z.total<=0||typeof z.orbit!=='boolean'))return null;
+    if(!Array.isArray(s.zones)||s.zones.length>ZONE_CAP||s.zones.some(z=>!id(z?.uid)||!id(z.source)||z.source>=s.nextId||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||!Number.isInteger(z.rank)||z.rank<1||z.rank>MAX_RANK||z.damage<0||z.x<GROUND_BOUNDS.left||z.x>GROUND_BOUNDS.right||z.y<GROUND_BOUNDS.top||z.y>GROUND_BOUNDS.bottom||z.radius<=0||z.radius>720||z.total<=0||z.total>30||z.life<=0||z.life>z.total||z.tick<-.05||z.tick>.5+1e-9||typeof z.orbit!=='boolean'))return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
@@ -632,6 +756,7 @@ export function restore(raw){
       for(const e of s.queue)if(e.kind==='boss')e.hp=Math.max(1,Math.round(e.hp*BOSS_HEALTH_SCALE));
     }
     s.balanceRevision=BALANCE_REVISION;
+    s.statusRevision=STATUS_REVISION;
     s.events=[];return s;
   }catch{return null;}
 }

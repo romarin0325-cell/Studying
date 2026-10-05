@@ -1,0 +1,163 @@
+{
+  "head": "cf8ea85",
+  "createdAt": "2026-10-05T11:52:28.691Z",
+  "method": "Synchronous arena.toDataURL inside requestAnimationFrame when all20 actual units have pose0.12..0.20; no runtime mutation or game pause; context screenshots/stats are in prior20sec captures",
+  "results": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "time": 0.35,
+      "posed": 20,
+      "minPose": 0.2,
+      "maxPose": 0.2,
+      "totalAttacks": 20,
+      "performance": {
+        "renders": 11,
+        "steps": 6,
+        "saveWrites": 2,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1,
+        "particles": 180,
+        "impacts": 40
+      },
+      "enemyHp": [
+        {
+          "uid": 25,
+          "hp": 999999771.5,
+          "maxHp": 1000000000,
+          "progress": 2015
+        },
+        {
+          "uid": 26,
+          "hp": 999999944,
+          "maxHp": 1000000000,
+          "progress": 773
+        },
+        {
+          "uid": 27,
+          "hp": 999999743.5,
+          "maxHp": 1000000000,
+          "progress": 1925
+        },
+        {
+          "uid": 28,
+          "hp": 999999829.75,
+          "maxHp": 1000000000,
+          "progress": 863
+        },
+        {
+          "uid": 29,
+          "hp": 999999857.75,
+          "maxHp": 1000000000,
+          "progress": 1835
+        },
+        {
+          "uid": 30,
+          "hp": 999999829,
+          "maxHp": 1000000000,
+          "progress": 953
+        },
+        {
+          "uid": 31,
+          "hp": 999999916,
+          "maxHp": 1000000000,
+          "progress": 1745
+        },
+        {
+          "uid": 32,
+          "hp": 999999801,
+          "maxHp": 1000000000,
+          "progress": 1043
+        }
+      ],
+      "canvasWidth": 720,
+      "canvasHeight": 780,
+      "cssWidth": 308,
+      "cssHeight": 333.65625,
+      "errors": [],
+      "file": "C:\\Users\\romar\\git\\Studying\\.codex-worktrees\\star-garden-memorial\\defense_test\\test-results\\chromium-dense-fire-after-cf8ea85-truepeak-canvas-320x568.png"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "time": 0.35,
+      "posed": 20,
+      "minPose": 0.2,
+      "maxPose": 0.2,
+      "totalAttacks": 20,
+      "performance": {
+        "renders": 11,
+        "steps": 6,
+        "saveWrites": 2,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1,
+        "particles": 180,
+        "impacts": 40
+      },
+      "enemyHp": [
+        {
+          "uid": 25,
+          "hp": 999999771.5,
+          "maxHp": 1000000000,
+          "progress": 2015
+        },
+        {
+          "uid": 26,
+          "hp": 999999944,
+          "maxHp": 1000000000,
+          "progress": 773
+        },
+        {
+          "uid": 27,
+          "hp": 999999743.5,
+          "maxHp": 1000000000,
+          "progress": 1925
+        },
+        {
+          "uid": 28,
+          "hp": 999999829.75,
+          "maxHp": 1000000000,
+          "progress": 863
+        },
+        {
+          "uid": 29,
+          "hp": 999999857.75,
+          "maxHp": 1000000000,
+          "progress": 1835
+        },
+        {
+          "uid": 30,
+          "hp": 999999829,
+          "maxHp": 1000000000,
+          "progress": 953
+        },
+        {
+          "uid": 31,
+          "hp": 999999916,
+          "maxHp": 1000000000,
+          "progress": 1745
+        },
+        {
+          "uid": 32,
+          "hp": 999999801,
+          "maxHp": 1000000000,
+          "progress": 1043
+        }
+      ],
+      "canvasWidth": 720,
+      "canvasHeight": 780,
+      "cssWidth": 372,
+      "cssHeight": 403,
+      "errors": [],
+      "file": "C:\\Users\\romar\\git\\Studying\\.codex-worktrees\\star-garden-memorial\\defense_test\\test-results\\chromium-dense-fire-after-cf8ea85-truepeak-canvas-390x844.png"
+    }
+  ]
+}

@@ -259,7 +259,7 @@ export const HEROES = [
       "name": "달그림자 도약",
       "cost": 65,
       "type": "flurry",
-      "text": "선두의 적들을 빠르게 연속 타격합니다."
+      "text": "선두 9체에 위력 14배 연속 타격. 밤토끼 이외의 토끼 종류당 표적 +2(눈·은토끼 모두 편성 시 13체). 같은 종류의 여러 기는 한 번만 셉니다."
     },
     "heightGroup": "short",
     "role": "토끼 연계 · 도탄",
@@ -481,7 +481,7 @@ export const HEROES = [
       "name": "왕의 마지막 포자",
       "cost": 70,
       "type": "plague",
-      "text": "모든 적을 중독시킵니다. 독은 방어력을 무시합니다."
+      "text": "모든 적에게 성급당 독 8중첩을 12초간 부여합니다. 독은 최대 40중첩이며, 출처별 시전자 공격력에 비례해 방어 무시 지속 피해를 줍니다."
     },
     "heightGroup": "medium",
     "role": "시간 경제 · 포자밭",
@@ -593,7 +593,7 @@ export const HEROES = [
       "name": "깨어나지 않는 밤",
       "cost": 75,
       "type": "nightmare",
-      "text": "적을 뒤로 돌려보내고 받는 피해를 늘립니다."
+      "text": "모든 적에게 위력 4배 피해와 밀치기, 6초간 받는 피해 +25% 노출, 성급당 독 4중첩을 12초간 부여합니다. 더 강한 노출은 출처별 만료 시각까지 유지됩니다."
     },
     "heightGroup": "short",
     "role": "견제 · 악몽 덫",
@@ -744,7 +744,7 @@ export const HEROES = [
       "text": "10초 동안 모든 영웅의 공격력을 70% 높입니다."
     },
     "heightGroup": "tall",
-    "role": "인접 지원 · 십자광",
+    "role": "인접 지원 · 십자화염",
     "shape": "cross",
     "range": 620,
     "radius": 55
@@ -884,7 +884,7 @@ export const HEROES = [
     "attack": "light",
     "trait": {
       "type": "divine",
-      "text": "6초 성광 누적. 3중첩 적에게 위력 +65%. 체리프린스와 연계."
+      "text": "6초 성광을 최대 3중첩 누적. 중첩당 적이 받는 피해 +2%(최대 +6%). 성광 3중첩 대상에게 주는 피해 +65%. 체리프린스와 연계."
     },
     "skill": {
       "name": "여신강림",
@@ -1145,7 +1145,7 @@ export const ARTIFACTS = [
   {
     "id": "frost",
     "name": "녹지 않는 꽃",
-    "text": "감속 중인 적이 받는 피해 +25%.",
+    "text": "감속 중인 적에게 주는 피해 +25%.",
     "icon": 2,
     "atlas": "relics",
     "rarity": "common",
@@ -1517,7 +1517,8 @@ export const ASSET_PATHS = {
   "realms-expansion": "./assets/merge/realms-expansion.webp",
   "effects-trio": "./assets/merge/effects-trio.webp",
   "ultimates": "./assets/merge/ultimates.webp",
-  "ancient-cross": "./assets/merge/ancient-cross.webp"
+  "ancient-cross": "./assets/merge/ancient-cross.webp",
+  "zeke-cone": "./assets/merge/zeke-cone.webp"
 };
 
 export const STAGE_THEMES = [

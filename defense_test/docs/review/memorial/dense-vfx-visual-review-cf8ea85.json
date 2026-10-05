@@ -1,0 +1,113 @@
+{
+  "head": "cf8ea85",
+  "verdict": "PASS",
+  "reviewedAt": "2026-10-05T11:54:07.785Z",
+  "baseline": {
+    "head": "587649d",
+    "verdict": "FAIL",
+    "evidence": [
+      "chromium-dense-fire-before-587649d-peak-320x568.png",
+      "chromium-dense-fire-before-587649d-peak-390x844.png",
+      "dense-vfx-before-587649d-audit.json"
+    ],
+    "finding": "20 overlaid basicfire fields tint most grid red/gold; same-target ordinaryimpact glow masks smallleft targets"
+  },
+  "afterScreenshots": [
+    "chromium-dense-fire-after-cf8ea85-peak-320x568.png",
+    "chromium-dense-fire-after-cf8ea85-peak-390x844.png"
+  ],
+  "truePeakScreenshots": [
+    "C:\\Users\\romar\\git\\Studying\\.codex-worktrees\\star-garden-memorial\\defense_test\\test-results\\chromium-dense-fire-after-cf8ea85-truepeak-canvas-320x568.png",
+    "C:\\Users\\romar\\git\\Studying\\.codex-worktrees\\star-garden-memorial\\defense_test\\test-results\\chromium-dense-fire-after-cf8ea85-truepeak-canvas-390x844.png"
+  ],
+  "truePeakMethod": "Synchronous arena.toDataURL inside requestAnimationFrame when all20 actual units have pose0.12..0.20; no runtime mutation or game pause; context screenshots/stats are in prior20sec captures",
+  "truePeakPoses": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "time": 0.35,
+      "posed": 20,
+      "minPose": 0.2,
+      "maxPose": 0.2,
+      "activeImpacts": 40,
+      "canvasWidth": 720,
+      "canvasHeight": 780,
+      "cssWidth": 308,
+      "cssHeight": 333.65625
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "time": 0.35,
+      "posed": 20,
+      "minPose": 0.2,
+      "maxPose": 0.2,
+      "activeImpacts": 40,
+      "canvasWidth": 720,
+      "canvasHeight": 780,
+      "cssWidth": 372,
+      "cssHeight": 403
+    }
+  ],
+  "observations": {
+    "allyFaces": "PASS:20 Zeke/Ancient silhouettes and faces remain distinct at actual320/390 UI and synchronouspeak canvas",
+    "enemyIdentity": "PASS:7smallgreen grunt figures and1large boss stay distinct; reduced ordinaryhit glow no longer forms maskingwhite/gold orbs",
+    "enemyHpBars": "PASS:all8 bars readable; boss100% panel clear",
+    "grid": "PASS:tileboundaries remain visible through concurrentfire tint",
+    "geometry": "PASS: no documentclipping",
+    "errors": "PASS:0pageerrors,0consoleerrors,0externalrequests,0savefailures each20second run"
+  },
+  "performanceObservations": [
+    {
+      "viewport": [
+        320,
+        568
+      ],
+      "elapsedWallMs": 20017.5,
+      "elapsedBattleSeconds": 20.000000000000153,
+      "totalAttacks": 310,
+      "rafCount": 1094,
+      "rafMeanMs": 18.29049360150629,
+      "rafP95Ms": 33.30000000000109,
+      "rafMaxMs": 66.70000000000005,
+      "over50ms": 5,
+      "longTasks": [
+        {
+          "start": 1152.5999999046326,
+          "duration": 68
+        }
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "elapsedWallMs": 20013.200000047684,
+      "elapsedBattleSeconds": 20.000000000000153,
+      "totalAttacks": 310,
+      "rafCount": 1087,
+      "rafMeanMs": 18.40423183077081,
+      "rafP95Ms": 33.30000000000109,
+      "rafMaxMs": 66.70000000000005,
+      "over50ms": 2,
+      "longTasks": [
+        {
+          "start": 1049.9000000953674,
+          "duration": 70
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Both20second performance/context runs and additional synchronoustruepeak captures use samevalid fixture",
+    "Truepeak PNG saves exactrendered canvas synchronously inside rAF at20 simultaneousattackposes; context screenshots alone are delayed ~300ms",
+    "20 alternating2-archetype units and8stationaryhighHPtargets; not all30archetypes or ultimate/boss-pattern combinations",
+    "Desktop headless Chromium standardqualityDPR1; no physicaldevice,thermal,battery certification",
+    "No performanceimprovementclaim: meanframeintervals vary slightly and p95unchanged"
+  ]
+}
