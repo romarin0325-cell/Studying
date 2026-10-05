@@ -6,14 +6,21 @@ import * as E from './combat/engine.js';
 import {Art,Renderer} from './combat/render.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
+import {currentRecord,monthlyReward} from './monthly.js';
+import {RenderClock,RunSaveQueue} from './runtime.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
 const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
 const p=()=>store.value,now=()=>Math.max(Date.now(),p().clockAt),fmt=n=>Number.isFinite(n)?n>=100000?new Intl.NumberFormat('ko-KR',{notation:'compact',maximumFractionDigits:1}).format(n):Math.floor(n).toLocaleString('ko-KR'):'—';
 const pct=n=>(n*100).toFixed(n<.001?3:2)+'%';
 let screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=Math.floor(p().cleared/9),
-  modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,selected=-1,pointer=null,
-  lastFrame=0,accumulator=0,autoIn=0,saveIn=0,uiIn=0,previousPhase='',lastResult=null;
+  modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,saveBlocked=false,selected=-1,pointer=null,
+  lastFrame=0,accumulator=0,autoIn=0,uiIn=0,previousPhase='',lastResult=null,hud=null;
+const renderClock=new RenderClock(),performanceStats={renders:0,steps:0};
+const saves=new RunSaveQueue(()=>!run||store.saveRun(E.serialize(run)),{
+  request:cb=>window.requestIdleCallback?window.requestIdleCallback(cb,{timeout:1200}):setTimeout(cb,80),
+  cancel:id=>window.cancelIdleCallback?window.cancelIdleCallback(id):clearTimeout(id),failed:storagePause,
+});
 const media=window.__GARDEN_MEDIA__||{};
 const fallback=id=>'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><circle cx="64" cy="64" r="40" fill="${HERO[id]?.color||'#abc8b4'}"/><text x="64" y="80" text-anchor="middle" fill="#fff" font-size="38">✦</text></svg>`);
 const picture=(id,full=false)=>media[(full?'figure:':'portrait:')+id]||media['relic:'+id]||fallback(id);
@@ -27,7 +34,7 @@ const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
 const bossOf=stage=>BOSSES[CHAPTERS[stage-1].bosses[0]];
 const portrait=(id,extra='')=>`<span class="portrait ${extra}" data-rarity="${HERO[id].rarity}">${image(id)}</span>`;
 function toast(text){if(!text)return;clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2800);}
-function settings(){sound.enabled=p().settings.sound;sound.music=p().settings.sound;sound.setVolume(.2);$('app').dataset.reduced=String(p().settings.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);if(renderer)renderer.reduced=$('app').dataset.reduced==='true';}
+function settings(){sound.enabled=p().settings.sound;sound.music=p().settings.sound;sound.setVolume(.2);$('app').dataset.reduced=String(p().settings.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);if(renderer){renderer.reduced=$('app').dataset.reduced==='true';renderer.setQuality(p().settings.quality);}}
 function wallet(){const profile=p();$('dreams').textContent=fmt(profile.dreams);$('dust').textContent=fmt(profile.dust);$('save-warning').hidden=!store.broken&&!store.conflict;$('save-warning').textContent=store.warning||'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.';settings();}
 function act(action,args={},showToast=true){const result=store.transact(action,args,now());wallet();if(!result.ok||showToast)toast(result.message);return result;}
 function nav(){
@@ -36,7 +43,7 @@ function nav(){
   $('navigation').innerHTML=[['home','홈'],['collection','동료'],['adventure','모험'],['summon','소환'],['dispatch','파견']].map(([id,name])=>`<button class="nav-item" data-nav="${id}" ${screen===id?'aria-current="page"':''}>${icon(id)}<span>${name}</span>${dots[id]?'<i class="dot"></i>':''}</button>`).join('');
   $('navigation').hidden=screen==='battle'||screen==='draft';
 }
-function render(){$('app').dataset.screen=screen;wallet();nav();$('content').scrollTop=0;if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();const templates={home:home,collection:renderCollection,adventure:adventure,summon:renderSummon,dispatch:renderDispatch};$('content').innerHTML=(templates[screen]||home)();}
+function render(){$('app').dataset.screen=screen;document.body.dataset.battle=String(screen==='battle');wallet();nav();$('content').scrollTop=0;if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();const templates={home:home,collection:renderCollection,adventure:adventure,summon:renderSummon,dispatch:renderDispatch};$('content').innerHTML=(templates[screen]||home)();}
 const heading=(title,right='',sub='')=>`<div class="page-heading"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${right}</div>`;
 function five(ids,edit=false){
   return `<div class="five-line">${Array.from({length:5},(_,i)=>ids[i]
@@ -118,13 +125,34 @@ function adventure(){
     <div class="stage-list">${rows}</div>`:modeCard(mode)}</section>`;
 }
 function modeCard(kind,withAction=true){
-  const weekly=kind==='weekly',profile=p(),used=profile[kind]===calendar(now())[weekly?'week':'month'],unlocked=profile.cleared>=3;
+  if(kind==='monthly')return monthlyCard(withAction);
+  const weekly=true,profile=p(),used=profile.weekly===calendar(now()).week,unlocked=profile.cleared>=3;
   const label=!unlocked?'스테이지 3 클리어 시 해금':used?'이번 기간 입장 완료':weekly?'드래프트 준비':'도전 준비';
   return `<div class="mode-card ${kind}"><div><span class="tag">${weekly?'주 1회 · 월요일 00:00 초기화':'월 1회 · 매월 1일 00:00 초기화'}</span><h2>${weekly?'주간 드래프트':'월간 보스전'}</h2><p>${weekly?'보유한 모든 동료 중 2택 1을 5번 반복해 팀을 꾸리고, 점점 강해지는 적을 돌파합니다.':'매 웨이브 보스 1체만 등장합니다. 단일 대상 화력과 약화 효과가 핵심입니다.'}</p></div>
     <div class="stat-chips"><div><small>입장</small><b>${used?'소진':'1회 가능'}</b></div><div><small>적 HP / 라운드</small><b>×${weekly?'1.85':'1.72'}</b></div><div><small>라운드 보상</small>${gem(weekly?60:50)}</div></div>
     <ul class="notes"><li>제한 시간 ${weekly?35:30}초 / 라운드</li><li>기본 보상 ${weekly?120:150} + ${weekly?'클리어 라운드':'격파 보스'}당 ${weekly?60:50}</li><li>파견 중인 동료는 참여할 수 없습니다.</li><li>중단해도 같은 입장으로 이어할 수 있습니다.</li></ul>
     ${withAction?`<button class="primary wide" data-action="prepare-mode" ${!unlocked||used||profile.active?'disabled':''}>${label}</button>`:''}
     <details class="more"><summary>운영 규칙</summary><p>기간은 한국·일본 시간(UTC+9) 기준입니다. 입장하면 이번 기간의 1회가 소진됩니다.</p></details></div>`;
+}
+function monthlyRecordPanel(){
+  const record=currentRecord(p(),now()),claimed=p().monthly===calendar(now()).month,all=p().monthlyLifetime;
+  return `<div class="monthly-record"><span class="eyebrow">${monthNo(calendar(now()))} 최고 기록</span><div class="record-score"><b>${record?record.round:'—'}</b><span>보스 격파</span>${record?'<span class="record-stamp">BEST</span>':''}</div><p>${record?`${record.token.startsWith('legacy-')?'피해 기록 없음':`총 피해 ${fmt(record.damage)}`} · ${calendar(record.at).day}`:'도전을 마치면 최고 기록이 이곳에 남습니다.'}</p>
+    ${record?`<div class="record-team"><small>기록 당시 편성</small>${record.deck.map(id=>portrait(id)).join('')}</div>`:''}
+    <div class="record-payout"><span>${claimed?'이번 달 확정 보상':'이 기록으로 받을 보상'}</span>${claimed?p().monthlyClaim?gem(monthlyReward(p().monthlyClaim)):'<b>수령 완료</b>':record?gem(monthlyReward(record)):'<b>기록 대기</b>'}</div>
+    ${claimed?'<p class="record-note">보상 확정 완료 · 기록 갱신과 재도전은 계속 가능합니다.</p>':record?'<button class="secondary wide" data-action="monthly-claim">이 기록으로 보상 받기</button>':''}
+    ${all?`<div class="lifetime-record">역대 최고 <strong>${all.round}보스</strong><small>${all.period} · 총 피해 ${fmt(all.damage)}</small></div>`:''}</div>`;
+}
+function monthlyCard(withAction=true){
+  return `<div class="mode-card monthly"><span class="tag">입장 무제한 · 보상은 월 1회 확정</span><h2>월간 보스전</h2><p>최적의 편성을 찾아 보스 연전을 돌파하세요. 더 좋은 기록을 세운 뒤 이번 달 보상을 확정할 수 있습니다.</p>
+    ${monthlyRecordPanel()}<div class="stat-chips"><div><small>입장</small><b>무제한</b></div><div><small>적 HP / 라운드</small><b>×1.72</b></div><div><small>제한 시간</small><b>30초</b></div></div>
+    <ul class="notes"><li>보스 격파 수 우선, 같은 격파 수에서는 총 피해로 최고 기록을 판정합니다.</li><li>꿈의결정 150 + 격파 보스당 50. 수령 후 더 높은 기록을 세워도 추가 지급되지 않습니다.</li><li>파견 중인 동료는 참여할 수 없습니다.</li></ul>
+    ${withAction?`<button class="primary wide" data-action="prepare-mode" ${p().cleared<3||p().active?'disabled':''}>${p().cleared<3?'스테이지 3 클리어 시 해금':'보스전 도전'}</button>`:''}
+    <details class="more"><summary>월간 기록 규칙</summary><p>UTC+9 기준 매월 1일 초기화됩니다. 월을 넘겨 마친 도전은 종료한 달의 기록이 됩니다. 역대 최고 기록은 유지됩니다. 보상 수령 전 확인 화면의 기록과 금액을 확정합니다.</p></details></div>`;
+}
+function confirmMonthlyClaim(){
+  const record=currentRecord(p(),now());if(!record||p().monthly===record.period){toast('이번 달 보상 상태를 확인하세요.');return;}
+  show('이 기록으로 보상을 확정할까요?',`${record.period} 월간 보스전`,`<div class="claim-score"><b>${record.round}</b><span>보스 격파</span></div><div class="reward-box"><span>확정할 보상</span>${gem(monthlyReward(record))}</div><p class="subtext">이번 달 보상은 한 번만 받을 수 있습니다. 기록을 더 올리고 싶다면 재도전한 뒤 수령하세요. 확정 후에도 최고 기록은 계속 갱신됩니다.</p>`,
+    `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
 }
 function renderSummon(){
   const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':'snow_rabbit',tier=relicTier(p().relicDraws),remaining=relicThreshold(tier+1)-p().relicDraws,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,rateList=banner==='relic'?relicRates(p().relicDraws):T.heroRates,dreams=p().dreams;
@@ -200,28 +228,32 @@ function renderDraft(){
     <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.<br>후보가 한 명뿐이면 같은 동료의 전술 2종 중에서 고릅니다.</p></section>`;
 }
 function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<5){screen='draft';render();}else startBattle(true);}
-function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;selected=-1;accumulator=0;autoIn=0;saveIn=0;previousPhase='';close();render();if(!store.saveRun(E.serialize(run)))storagePause();sound.unlock();}
+function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
 function renderBattle(){
   if(!run)return;
   const title=run.mode==='main'?`스테이지 ${stageLabel(run.chapter+1)} · ${CHAPTERS[run.chapter].name}`:run.mode==='weekly'?'주간 드래프트':'월간 보스전';
   $('content').innerHTML=`<section class="battle">
     <div class="battle-top"><div class="battle-title"><strong>${title}</strong><small id="wave-label"></small></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
-    <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/100</small></span><span id="battle-time" class="hud-time"></span></div>
-    <div class="arena-wrap"><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 방향키로 칸을 고르고 Enter로 선택 또는 이동하세요."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
-    <div class="skills">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}</small></button>`).join('')}</div>
+    <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.GAUGE_MAX}</small></span><span id="battle-time" class="hud-time"></span></div>
+    <div class="arena-wrap"><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
+    <div class="skills">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}</small><span class="skill-duration" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     <div id="unit-panel" class="unit-panel" hidden></div>
-    <p class="battle-hint">드래그: 이동·합성 · 탭: 선택</p></section>`;
+    <p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보</p></section>`;
+  hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice'].map(id=>[id,$(id)]));
+  hud.skills=[...document.querySelectorAll('[data-skill]')].map(node=>({node,id:node.dataset.skill,timer:node.querySelector('.skill-duration')}));
   renderer=new Renderer($('arena'),art);settings();bindArena();updateBattle();
 }
+const changedText=(node,value)=>{value=String(value);if(node.textContent!==value)node.textContent=value;};
 function updateBattle(){
   if(screen!=='battle'||!run)return;
-  $('health').textContent=run.health;$('gold').textContent=fmt(run.gold);$('gauge').textContent=Math.floor(run.gauge);$('gauge-fill').style.width=Math.min(100,run.gauge)+'%';$('battle-time').textContent=duration(run.time*1000);
-  $('wave-label').textContent=run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:`라운드 ${run.wave} · 클리어 ${clearedRounds(run)} · 남은 ${Math.max(0,Math.ceil((run.mode==='monthly'?30:35)-run.waveTime))}초`;
-  $('summon-cost').textContent=E.summonCost(run)?E.summonCost(run)+' G':'무료';
+  changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
+  const fill=`scaleX(${Math.min(1,run.gauge/E.GAUGE_MAX).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
+  changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:`라운드 ${run.wave} · 클리어 ${clearedRounds(run)} · 남은 ${Math.max(0,Math.ceil((run.mode==='monthly'?30:35)-run.waveTime))}초`);
+  changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
-  for(const b of document.querySelectorAll('[data-skill]')){const cost=HERO[b.dataset.skill].skill.cost,ready=run.gauge>=cost&&!!E.bestUnit(run,b.dataset.skill);b.disabled=!ready||paused||!['combat','intermission'].includes(run.phase);b.classList.toggle('ready',ready);b.style.setProperty('--fill',Math.min(1,run.gauge/cost).toFixed(2));}
-  const notice=$('battle-notice'),boss=run.enemies.find(e=>e.boss&&e.hp>0);notice.hidden=!run.telegraph&&!boss;notice.textContent=run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:'');updateUnit();
+  for(const {node:b,id,timer} of hud.skills){const cost=HERO[id].skill.cost,ready=run.gauge>=cost&&!!E.bestUnit(run,id),active=E.activeSkill(run,id);b.disabled=!ready||paused||run.phase!=='combat';b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
+  const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0);notice.hidden=!run.telegraph&&!boss;changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));updateUnit();
 }
 function updateUnit(){
   const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;renderer.selected=u?selected:-1;
@@ -231,34 +263,44 @@ function updateUnit(){
   panel.dataset.sig=sig;
   panel.innerHTML=`<div class="unit-panel-top"><div><strong>${h.name}</strong><small>위력 ${fmt(stat.damage)} · 공격 주기 ${stat.interval.toFixed(2)}초</small></div><span class="rank">${icon('star')}${u.rank}</span></div><div class="unit-actions"><button data-action="target">목표: ${({first:'선두',boss:'보스',strong:'강적',last:'후미'})[u.priority]}</button><button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
 }
-function battleCommand(result){if(!result?.ok)toast(result?.reason);if(!store.saveRun(E.serialize(run)))storagePause();updateBattle();}
-function bindArena(){const canvas=$('arena');const point=e=>{const b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)*720/b.width,y:(e.clientY-b.top)*780/b.height};};canvas.addEventListener('pointerdown',e=>{if(paused||modal||pointer||e.button!==0)return;const at=point(e);pointer={id:e.pointerId,at,index:E.cellAt(at.x,at.y),drag:false};try{canvas.setPointerCapture(e.pointerId);}catch{}e.preventDefault();sound.unlock();});canvas.addEventListener('pointermove',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),u=run.board[pointer.index];if(u&&(pointer.drag||Math.hypot(at.x-pointer.at.x,at.y-pointer.at.y)>12)){pointer.drag=true;renderer.drag={hero:u.hero,uid:u.uid,x:at.x,y:at.y};renderer.hover=E.cellAt(at.x,at.y);}});canvas.addEventListener('pointerup',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),index=E.cellAt(at.x,at.y);if(!paused&&!modal&&index>=0){if(pointer.drag){battleCommand(E.move(run,pointer.index,index));selected=index;}else activate(index);}pointer=null;renderer.drag=null;renderer.hover=-1;updateUnit();});canvas.addEventListener('pointercancel',()=>{pointer=null;renderer.drag=null;renderer.hover=-1;});let keyboard=12;canvas.addEventListener('keydown',e=>{if(paused||modal)return;const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-5,ArrowDown:5}[e.key];if(delta){e.preventDefault();keyboard=Math.max(0,Math.min(24,keyboard+delta));renderer.selected=keyboard;toast(`${Math.floor(keyboard/5)+1}행 ${keyboard%5+1}열 · ${run.board[keyboard]?HERO[run.board[keyboard].hero].name:'빈칸'}`);}if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(keyboard);}});}
-function activate(index){if(selected>=0&&selected!==index&&run.board[selected]){battleCommand(E.move(run,selected,index));selected=index;}else selected=selected===index?-1:index;updateUnit();}
+function battleCommand(result){if(!result?.ok)toast(result?.reason);else saves.mark();updateBattle();}
+function bindArena(){
+  const canvas=$('arena'),point=e=>{const b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)*720/b.width,y:(e.clientY-b.top)*780/b.height};};
+  const release=()=>{pointer=null;renderer.drag=null;renderer.hover=-1;};
+  canvas.addEventListener('pointerdown',e=>{if(paused||modal||pointer||e.button!==0)return;const at=point(e),index=E.cellAt(at.x,at.y);pointer={id:e.pointerId,at,index,uid:run.board[index]?.uid,drag:false};try{canvas.setPointerCapture(e.pointerId);}catch{}e.preventDefault();sound.unlock();});
+  canvas.addEventListener('pointermove',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),u=run.board[pointer.index];if(u?.uid===pointer.uid&&(pointer.drag||Math.hypot(at.x-pointer.at.x,at.y-pointer.at.y)>12)){pointer.drag=true;renderer.drag={hero:u.hero,uid:u.uid,x:at.x,y:at.y,form:E.unitForm(run,u)};renderer.hover=E.cellAt(at.x,at.y);}});
+  canvas.addEventListener('pointerup',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),index=E.cellAt(at.x,at.y);if(!paused&&!modal&&index>=0){if(pointer.drag&&run.board[pointer.index]?.uid===pointer.uid){const result=E.move(run,pointer.index,index);battleCommand(result);if(result.ok)selected=index;}else if(!pointer.drag)activate(index);}release();updateUnit();});
+  canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',()=>{if(pointer)release();});
+  let keyboard=12;canvas.addEventListener('keydown',e=>{if(paused||modal)return;const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-5,ArrowDown:5}[e.key];if(delta){e.preventDefault();keyboard=Math.max(0,Math.min(24,keyboard+delta));renderer.selected=keyboard;toast(`${Math.floor(keyboard/5)+1}행 ${keyboard%5+1}열 · ${run.board[keyboard]?HERO[run.board[keyboard].hero].name:'빈칸'}`);}if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(keyboard);}});
+}
+function activate(index){selected=selected===index?-1:index;updateUnit();}
 function training(){
   show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 위력 +28%, 최대 5회.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(id=>`<button class="choose-row" data-train="${id}" ${run.upgrades[id]>=5||run.gold<E.upgradeCost(run,id)?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}</strong><small>훈련 ${run.upgrades[id]}/5</small></div><b>${run.upgrades[id]>=5?'최대':E.upgradeCost(run,id)+' G'}</b></button>`).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
 }
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round},false);if(!result.ok){storagePause();return;}lastResult={...snapshot,reward:result.reward};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds},false);if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
 function showResult(r){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:r.mode==='weekly'?'주간 드래프트':'월간 보스전';
   show(r.won?'스테이지 클리어':r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?'승리':r.mode==='main'?'패배':`${r.round}라운드`}</b></div>
-    <div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b>+${fmt(r.reward)}</b></span></div>
+    ${r.mode==='monthly'?`<p class="record-result">${r.newBest?'이번 달 최고 기록 갱신':'도전 기록 저장'} · 이번 도전 ${r.round}보스</p>${monthlyRecordPanel()}`:`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b>+${fmt(r.reward)}</b></span></div>`}
     <div class="result-stat"><span>처치</span><b>${fmt(r.kills)}</b></div><div class="result-stat"><span>총 피해</span><b>${fmt(r.damage)}</b></div><div class="result-stat"><span>전투 시간</span><b>${duration(r.seconds*1000)}</b></div>
     ${mvp?`<div class="result-mvp">${image(mvp[0],true)}<div><p class="mvp-tag">MVP</p><strong>${HERO[mvp[0]].name}</strong><small>기여 피해 ${fmt(mvp[1])} (${Math.round(mvp[1]/Math.max(1,r.damage)*100)}%)</small></div></div>`:''}
     <p class="subtext">${r.won?`파견 보상 +${p().cleared*5}%${p().cleared%9===0&&p().cleared<=36?' · 파견 슬롯이 해금되었습니다.':''}`:r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 라운드에 도전하세요.'}</p>`,
-    `<div class="dialog-buttons"><button class="secondary" data-action="go-collection">동료 강화</button><button class="primary" data-action="close">확인</button></div>`,'result');
+    `<div class="dialog-buttons"><button class="secondary" data-action="${r.mode==='monthly'?'close':'go-collection'}">${r.mode==='monthly'?'기록 확인':'동료 강화'}</button><button class="primary" data-action="${r.mode==='monthly'?'monthly-retry':'close'}">${r.mode==='monthly'?'다시 도전':'확인'}</button></div>`,'result');
 }
-function storagePause(){paused=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인하세요.');wallet();}
+function storagePause(){paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
+function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;updateBattle();}
 function leave(){
   paused=true;show('전투를 중단할까요?','일시정지',`<p class="subtext">현재 배치와 웨이브를 저장하고 홈으로 나갑니다. 주간·월간 원정은 같은 입장으로 이어할 수 있습니다.</p><button class="danger-link" data-action="retire">이번 원정 포기</button>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="save-leave">저장 후 나가기</button></div>`,'leave');
 }
 function retireSheet(){
-  show('원정을 포기할까요?','확인',`<p class="subtext">완료한 ${clearedRounds(run)}라운드까지 정산합니다. 메인 스테이지의 첫 클리어 보상은 받을 수 없고, 주간·월간 입장 횟수는 돌아오지 않습니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="confirm-retire">포기하고 정산</button></div>`,'retire');
+  show('도전을 종료할까요?','확인',`<p class="subtext">완료한 ${clearedRounds(run)}라운드까지 ${run.mode==='monthly'?'기록합니다. 월간 보상은 기록 화면에서 직접 확정하며, 언제든 다시 도전할 수 있습니다.':run.mode==='weekly'?'정산합니다. 이번 주 입장 횟수는 돌아오지 않습니다.':'정산합니다. 첫 클리어 보상은 받을 수 없습니다.'}</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="confirm-retire">종료하고 ${run.mode==='monthly'?'기록':'정산'}</button></div>`,'retire');
 }
 function showSettings(){
   show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
+    <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
     <div class="settings-actions"><button class="secondary" data-action="export">백업 저장</button><button class="secondary" data-action="import">백업 불러오기</button></div>
     <p class="fineprint">진행 데이터는 이 기기의 브라우저에 저장됩니다. 기기를 옮길 때는 백업 파일을 사용하세요.</p>
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
@@ -267,13 +309,13 @@ function daily(){
   const c=calendar(now()),d=p().daily.day===c.day?p().daily:{claimed:[],combat:false,draw:false,dispatch:false};
   show('일일 임무','매일 00:00 초기화 (UTC+9)',[['combat','원정 1회 완료',60],['draw','동료 또는 유물 소환 1회',30],['dispatch','파견 보상 수령',30]].map(([id,name,value])=>`<div class="daily-row"><div><strong>${name}</strong>${gem(value)}</div><button class="${d[id]&&!d.claimed.includes(id)?'primary':'secondary'}" data-daily="${id}" ${!d[id]||d.claimed.includes(id)?'disabled':''}>${d.claimed.includes(id)?'완료':d[id]?'수령':'진행 중'}</button></div>`).join(''),`<button class="secondary wide" data-action="close">확인</button>`,'daily');
 }
-function show(title,kicker,body,footer='',kind='generic',info=null){const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;modal=kind;modalInfo=info;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
-function close(){if(!modal)return;const wasLeave=modal==='leave';modal=null;modalInfo=null;if(wasLeave)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();}
+function show(title,kicker,body,footer='',kind='generic',info=null){if(run){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;modal=kind;modalInfo=info;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
+function close(){if(!modal)return;const wasLeave=modal==='leave';modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
 function records(){
-  show('모험 기록','최근 결과',p().results.map(r=>`<div class="rate-row"><span style="display:block">${r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:r.mode==='weekly'?'주간 드래프트':'월간 보스전'}<br><small>${calendar(r.at).day} · ${r.won?'클리어':r.round+'라운드'}</small></span>${gem(r.reward)}</div>`).join('')||'<p class="empty">아직 모험 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'records');
+  show('모험 기록','최근 결과',monthlyRecordPanel()+(p().results.map(r=>`<div class="rate-row"><span style="display:block">${r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:r.mode==='weekly'?'주간 드래프트':'월간 보스전'}<br><small>${calendar(r.at).day} · ${r.won?'클리어':r.round+'라운드'}</small></span>${r.mode==='monthly'?'<span class="chip">기록 저장</span>':gem(r.reward)}</div>`).join('')||'<p class="empty">아직 모험 기록이 없습니다.</p>'),`<button class="secondary wide" data-action="close">확인</button>`,'records');
 }
 function exportBackup(){const blob=new Blob([JSON.stringify(p(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`StarGarden-${calendar(now()).day}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);toast('백업 파일을 저장했습니다.');}
 document.addEventListener('click',e=>{
@@ -292,27 +334,44 @@ document.addEventListener('click',e=>{
   if(d.claimDispatch){if(act('claimDispatch',{slot:Number(d.claimDispatch)}).ok)render();return;}if(d.draft){if(act('draft',{index:Number(d.draft)},false).ok)render();return;}
   if(d.skill){battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){if(act('daily',{id:d.daily}).ok)daily();return;}
+  if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
   const actions={close:()=>{if(modal==='reward')return;close();},settings:showSettings,partner:partners,team:()=>team(),'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
     owned:()=>{ownedOnly=!ownedOnly;render();},pet:()=>{if(act('pet').ok)render();},idle:()=>{if(act('idle').ok)render();},
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),
     'prepare-mode':()=>prepare(Math.min(45,p().cleared+1),mode),resume,
     'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
-    'go-collection':()=>{close();screen='collection';render();},speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{paused=!paused;updateBattle();},
+    'go-collection':()=>{close();screen='collection';render();},'monthly-claim':confirmMonthlyClaim,'monthly-retry':()=>{close();prepare(Math.min(45,p().cleared+1),'monthly');},speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},
     'summon-battle':()=>battleCommand(E.summon(run)),training,auto:()=>{if(act('setting',{id:'auto',value:!p().settings.auto},false).ok){button.querySelector('b').textContent=p().settings.auto?'ON':'OFF';button.setAttribute('aria-pressed',p().settings.auto);}},
     target:()=>{E.cycleTarget(run,selected);battleCommand({ok:true});},deselect:()=>{selected=-1;updateUnit();},leave,
-    retire:retireSheet,'confirm-retire':()=>settle(true),'return-battle':()=>{close();paused=false;},'save-leave':()=>{if(store.saveRun(E.serialize(run))){close();screen='home';run=null;renderer=null;render();}else storagePause();},
+    retire:retireSheet,'confirm-retire':()=>settle(true),'return-battle':()=>{close();resumeCombat();},'save-leave':()=>{saves.mark();if(saves.flush()){saves.reset();close();screen='home';run=null;renderer=null;render();}},
     export:exportBackup,import:()=>{if(run&&p().active){toast('진행 중인 전투를 저장하고 홈에서 불러오세요.');return;}$('backup-input').click();},
   };actions[d.action]?.();
 });
+document.addEventListener('change',e=>{if(e.target.id==='quality-select')act('setting',{id:'quality',value:e.target.value},false);});
 $('backup-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024){toast('백업 파일은 2MB 이하만 가능합니다.');return;}try{const raw=await file.text();if(!JSON.parse(raw)){toast('올바른 백업 파일이 아닙니다.');return;}show('백업을 복원할까요?','데이터',`<p class="subtext">현재 진행 데이터가 선택한 백업으로 교체됩니다. 필요하면 먼저 현재 데이터를 백업하세요.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="export">현재 데이터 백업</button><button id="confirm-import" class="primary">복원</button></div>`,'import');$('confirm-import').onclick=()=>{const result=store.import(raw);toast(result.ok?'백업을 복원했습니다.':result.message);if(result.ok){close();screen='home';run=null;render();}};}catch{toast('백업 파일을 읽을 수 없습니다.');}});
 document.addEventListener('keydown',e=>{if(!modal)return;if(e.key==='Escape'){if(modal!=='reward'){close();}e.preventDefault();}if(e.key==='Tab'){const buttons=Array.from($('sheet').querySelectorAll('button:not(:disabled),summary,[tabindex="0"]')).filter(b=>b.offsetParent!==null),first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('sheet'))){e.preventDefault();last?.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('sheet'))){e.preventDefault();first?.focus();}}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(run&&!store.saveRun(E.serialize(run)))storagePause();sound.suspend();lastFrame=0;accumulator=0;}else{lastFrame=0;if(!paused)sound.unlock();}});
-window.addEventListener('pagehide',()=>{if(run)store.saveRun(E.serialize(run));});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(run){saves.mark();saves.flush();}sound.suspend();lastFrame=0;accumulator=0;renderClock.reset();}else{lastFrame=0;renderClock.reset();if(!paused)sound.unlock();}});
+window.addEventListener('pagehide',()=>{if(run){saves.mark();saves.flush();}});
 window.addEventListener('storage',e=>{if(e.key==='astra.star-garden.test.v1'&&e.newValue!==store.raw){store.conflict=true;paused=true;wallet();}});
-function frame(time){const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;if(run&&screen==='battle'&&!document.hidden){if(!paused&&!modal){accumulator+=dt*speed;let ticks=0;while(accumulator>=.05&&ticks++<5){E.step(run,.05);autoIn+=.05;if(p().settings.auto&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}saveIn+=dt;uiIn+=dt;for(const e of run.events.splice(0)){renderer.event(e);sound.event(e);}if(saveIn>2){saveIn=0;if(!store.saveRun(E.serialize(run)))storagePause();}if(uiIn>.18){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);if(run.phase!==previousPhase){previousPhase=run.phase;if(run.phase==='reward'&&!p().settings.auto){if(!store.saveRun(E.serialize(run)))storagePause();reward();}if(['victory','defeat'].includes(run.phase))settle();}}
-    if(run)renderer.draw(run,dt);
-  }else sound.battle=false;requestAnimationFrame(frame);}
+function frame(time){
+  const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;
+  if(run&&screen==='battle'&&!document.hidden){
+    if(!paused&&!modal){
+      accumulator+=dt*speed;let ticks=0;
+      while(accumulator>=.05&&ticks++<5){E.step(run,.05);performanceStats.steps++;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
+      if(ticks)saves.mark();uiIn+=dt;
+      for(const e of run.events.splice(0)){renderer.event(e);sound.event(e);}
+      saves.schedule();if(uiIn>.18){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
+      if(run.phase!==previousPhase){previousPhase=run.phase;saves.mark();if(saves.flush()){
+        if(run.phase==='reward'&&!p().settings.auto)reward();
+      }}
+      if(run&&!paused&&['victory','defeat'].includes(run.phase))settle();
+    }
+    const renderDt=renderClock.next(time,paused||!!modal);if(run&&renderDt!==null){renderer.draw(run,renderDt);performanceStats.renders++;}
+  }else sound.battle=false;
+  requestAnimationFrame(frame);
+}
 setInterval(()=>{if(screen==='dispatch'&&!modal){const ended=p().dispatches.some(d=>d.end<=now()&&document.querySelector(`[data-claim-dispatch="${d.slot}"]`)?.disabled);if(ended)render();else for(const node of document.querySelectorAll('[data-timer]'))node.textContent=timerText(Number(node.dataset.timer));}if(screen==='home'&&!modal&&$('idle-total')){$('idle-total').textContent=fmt(idleReward(p(),now()));$('idle-progress').style.width=Math.min(100,(now()-p().idleAt)/(20*HOUR)*100)+'%';const button=document.querySelector('[data-action="idle"]');if(button)button.disabled=idleReward(p(),now())<1;}},1000);
 for(const img of document.querySelectorAll('img'))img.onerror=()=>{img.src=fallback('star_boy');};
 document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
@@ -321,4 +380,4 @@ art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 �
 render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
-window.STAR_GARDEN={get profile(){return p();},get battle(){return run;},get screen(){return screen;}};
+window.STAR_GARDEN={get profile(){return p();},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};

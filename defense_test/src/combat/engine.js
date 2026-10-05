@@ -10,6 +10,10 @@ export const BALANCE_REVISION = 3;
 export const BOSS_HEALTH_SCALE = .8;
 export const WAVE_BASE_HEALTH = 76;
 export const ATTACK_WINDUP = .13;
+export const GAUGE_MAX = 120;
+export const FINISHER_DELAY = .3;
+export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony'});
+export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 export const BOARD = {x:135,y:212,cell:90};
 export const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
 export function attackDirection(from,to){const dx=to.x-from.x,dy=to.y-from.y;return Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up';}
@@ -65,7 +69,7 @@ export function unitEconomy(s,u){
   if(u.hero==='mushroom_king')return `전투 12초마다 ${harvestIncome(u.rank,level)}G 수확 · 합성 시 수확 대기시간 초기화`;
   return HERO[u.hero].trait.text;
 }
-function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,100);}
+function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,GAUGE_MAX);}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
 function addPoison(s,e,stacks,duration,cap=Infinity){e.poison=Math.min(cap,(e.poison||0)+stacks+(has(s,'seed')?1:0));e.poisonTime=duration;}
 function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:HERO[hero].bossDamage?'boss':'first'};}
@@ -76,13 +80,14 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const chosen=validDeck(deck)?[...deck]:[...DEFAULT_DECK];
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70,gauge:90,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
-    buffs:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
+    buffs:{},buffTotals:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
-  for(const [i,slot] of [6,8,12,16,18].entries())place(s,chosen[i],1,slot);
+  const opening=shuffle(s,chosen).slice(0,3);
+  for(const [i,slot] of [7,16,18].entries())place(s,opening[i],1,slot);
   beginWave(s,1);return s;
 }
-// Sampling with replacement: every combat summon is 1/5. The opening five
-// guarantee that each selected companion participates before random summoning.
+// The opening is three distinct random companions from the selected five.
+// Later summons sample with replacement: every companion remains 1/5.
 // The legacy bag is retained only for save compatibility and is never consumed.
 export function drawHero(s){return s.deck[Math.floor(random(s)*s.deck.length)];}
 export function summon(s,preferred=-1){
@@ -249,7 +254,7 @@ function applyHit(s,shot){
   if(type==='refraction'&&shot.proc!==false&&e.hp>0){
     const dx=point.x-shot.origin.x,dy=point.y-shot.origin.y,k=46/(Math.hypot(dx,dy)||1);
     const from={x:clamp(point.x+dx*k,24,696),y:clamp(point.y+dy*k,72,734)};
-    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.42,life:.24,total:.24});
+    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.06,life:.24,total:.24});
   }
   event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
   if(shot.proc!==false&&((type==='gift'&&shot.count%4===0)||(type==='accelerate'&&shot.count%3===0))){
@@ -286,19 +291,19 @@ function attack(s,u,index){
   const value=combatStats(s,u,index).damage;
   const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
   const shot={uid:s.nextId++,source:u.uid,target:e.uid,hero:u.hero,form:unitForm(s,u),proc:true,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel};
-  s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,attackType:hero.attack});
+  s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,origin:at,shape:hero.shape,form:shot.form,attackType:hero.attack});
   if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.65,life:shot.life+.14,total:shot.life+.14});}
   if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,proc:false,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
 }
 // One source for outgoing attack power, cadence and the live inspection UI.
 // Enemy armor/exposure and conditional hit bonuses are applied at impact.
-export function combatStats(s,u,index=s.board.indexOf(u)){
+export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   const h=HERO[u.hero],adjacent=index<0?[]:neighbors(index).map(i=>s.board[i]).filter(Boolean),bonuses=[];
   let multiplier=1,speed=1;
-  const damageBonus=(name,value)=>{multiplier*=1+value;bonuses.push(`${name} +${Math.round(value*100)}% 위력`);};
-  const speedBonus=(name,value)=>{speed+=value;bonuses.push(`${name} +${Math.round(value*100)}% 공속`);};
-  if(s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 위력`);
-  if(s.surgeWave===s.wave)bonuses.push('새벽검 +25% 위력');
+  const damageBonus=(name,value)=>{multiplier*=1+value;if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 위력`);};
+  const speedBonus=(name,value)=>{speed+=value;if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 공속`);};
+  if(detail&&s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 위력`);
+  if(detail&&s.surgeWave===s.wave)bonuses.push('새벽검 +25% 위력');
   if(adjacent.some(a=>HERO[a.hero].trait.type==='powerAura'))damageBonus('고대 용의 가호',(.25+(s.upgrades.ancient_dragon||0)*.03)*special(s,'ancient_dragon'));
   const harmonySources=index<0?[]:neighbors(index).filter(i=>s.board[i]?.hero==='harmonious').map(i=>harmonyStrength(s,i));
   const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
@@ -331,6 +336,7 @@ export function cast(s,id){
   s.gauge-=hero.skill.cost;if(has(s,'lantern'))addGauge(s,15);s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id);
   let visualTargets=targets;
+  const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=(factor,pure=false)=>targets.forEach(e=>damage(s,e,base*factor,id,{pure}));
   if(type==='echo')s.buffs.echo=skillDuration(s,8*control);
   else if(type==='haste')s.buffs.haste=skillDuration(s,8*control);
@@ -343,7 +349,7 @@ export function cast(s,id){
   else if(type==='ice_court'){strike(5);for(const e of targets){if(e.hp>0){e.frostStacks=2;e.frostTime=6*control;addSlow(s,e,`skill:${id}`,.5,6);}}}
   else if(type==='harmony'){s.buffs.harmony=skillDuration(s,8*control);for(const ally of s.board)if(ally)ally.cooldown=Math.max(0,ally.cooldown-1.5*control);}
   else if(type==='royal'||type==='starfall'||type==='mirror'){
-    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='royal'?1.05:type==='mirror'?3:1.2;
+    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?3:FINISHER_DELAY;
     visualTargets=[target];
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?34:type==='mirror'?10:32),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,cap:base*18}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
@@ -367,7 +373,8 @@ export function cast(s,id){
   else if(type==='thunder'){strike(7);for(const e of targets)e.stun=1.2*control;}
   else if(type==='fortune'||type==='dividend'){strike(3);giveGold(s,type==='fortune'?25:30,'필살기');}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
-  const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.slice(0,18).map(e=>({...pathPoint(e.progress),uid:e.uid}));
+  const key=ACTIVE_SKILLS[id];if(key)s.buffTotals[key]=s.buffs[key];
+  const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
   event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
 }
 
@@ -479,10 +486,12 @@ export function step(s,dt){
     f.life-=dt;const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);
     if(!target){event(s,'finisherFizzle',{hero:f.hero,kind:f.kind,...f.to});f.life=0;continue;}
     f.to=pathPoint(target.progress);
-    if(f.life<=0){
+    if(f.life<=1e-9){
+      f.life=0;
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?1.4:1;
-      damage(s,target,f.damage*factor+(f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0),f.hero,{pure:f.kind==='royal'});
-      event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank});
+      const echoDamage=f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0,before=s.stats.damage;
+      damage(s,target,f.damage*factor+echoDamage,f.hero,{pure:f.kind==='royal'});
+      event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage});
     }
   }
   s.finishers=s.finishers.filter(f=>f.life>0);
@@ -504,8 +513,9 @@ export function restore(raw){
     // Additive migration: an old run keeps its wave, HP, wallet and target
     // priorities. Only future waves use revision 3's pacing.
     if(s.finishers===undefined)s.finishers=[];
+    if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield'])if(e[key]===undefined)e[key]=0;}
-    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>100||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
+    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!['first','boss','strong','last'].includes(u.priority))))return null;
@@ -531,6 +541,7 @@ export function restore(raw){
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
     if(!validArtifacts(s.artifacts)||!Array.isArray(s.reserves)||s.reserves.length>1000||s.reserves.some(h=>!s.deck.includes(h))||!Array.isArray(s.blessings)||s.blessings.length>1000||s.blessings.some(b=>!BLESSING[b]))return null;
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;
+    if(!record(s.buffTotals)||Object.entries(s.buffTotals).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<0||n>60))return null;
     if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
     if(s.settlement&&!numeric(s.settlement,['base','dividend']))return null;

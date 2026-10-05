@@ -55,6 +55,16 @@ test('Star Garden presentation-only changes select browser checks without econom
   assert.ok(!plan.steps.some(s=>s.args.includes('--test')));
 });
 
+test('Star Garden monthly and render/save helpers select their own contracts without unrelated game commands',()=>{
+  for(const [file,required]of [['monthly',['monthly','profile']],['runtime',['runtime']]]){
+    const plan=createPlan(changes('defense_test/src/'+file+'.js'));
+    assert.deepEqual(plan.blocked,[]);assert.deepEqual([...games(plan)],['defense_test']);
+    const units=plan.steps.find(s=>s.id==='defense_test:contracts-and-regressions');
+    for(const name of required)assert.ok(units.args.includes('defense_test/tests/'+name+'.test.mjs'));
+    assert.doesNotMatch(plan.steps.map(s=>s.args.join(' ')).join('\n'),/lint:defense|test:defense|defense\/tests|shooter\/|card\/tests|survivor\/|idle\//);
+  }
+});
+
 test('Star Garden local data, copied images, font and font license each validate their own consumer',()=>{
   for(const file of ['defense_test/src/data.js','defense_test/assets/merge/units/luna.webp','defense_test/assets/moonlit/realm-bosses.webp','defense_test/assets/Jua-Regular.ttf','defense_test/assets/Jua-OFL.txt','defense_test/scripts/local-inputs.mjs']){
     const plan=createPlan(changes(file));

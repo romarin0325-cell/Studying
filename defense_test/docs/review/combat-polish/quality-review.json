@@ -1,0 +1,23 @@
+{
+  "records": [
+    {
+      "setting": "high",
+      "dpr": 1.75,
+      "width": 1260,
+      "height": 1365
+    },
+    {
+      "setting": "standard",
+      "dpr": 1.5,
+      "width": 1080,
+      "height": 1170
+    },
+    {
+      "setting": "low",
+      "dpr": 1.25,
+      "width": 900,
+      "height": 975
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,1030 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "errors": [],
+  "data": [
+    {
+      "hero": "star_boy",
+      "skill": "starfall",
+      "diagnostic": {
+        "gauge": 45.78000000000003,
+        "time": 2.25,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1471.1000000000001,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "star_boy": 1358.3000000000002,
+            "siren": 42.300000000000004,
+            "snow_rabbit": 23.5
+          }
+        },
+        "active": {
+          "renders": 94,
+          "steps": 36,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 13,
+          "impacts": 2
+        }
+      }
+    },
+    {
+      "hero": "snow_rabbit",
+      "skill": "freeze",
+      "diagnostic": {
+        "gauge": 55.900000000000034,
+        "time": 2.549999999999999,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 810.7499999999999,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "snow_rabbit": 470,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 112,
+          "steps": 42,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 12,
+          "impacts": 4
+        }
+      }
+    },
+    {
+      "hero": "silver_rabbit",
+      "skill": "march",
+      "diagnostic": {
+        "gauge": 72.2800000000002,
+        "time": 3.999999999999994,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 734.1399999999999,
+          "income": {},
+          "byHero": {
+            "silver_rabbit": 131.6,
+            "rumi": 94,
+            "ancient_dragon": 197.39999999999998,
+            "siren": 63.45,
+            "star_boy": 247.69000000000003
+          }
+        },
+        "active": {
+          "renders": 200,
+          "steps": 71,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 15,
+          "impacts": 4
+        }
+      }
+    },
+    {
+      "hero": "night_rabbit",
+      "skill": "flurry",
+      "diagnostic": {
+        "gauge": 55.660000000000025,
+        "time": 2.1500000000000004,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 5353.417500000001,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 65.8,
+            "night_rabbit": 5139.567500000001,
+            "siren": 21.150000000000002,
+            "star_boy": 79.9
+          }
+        },
+        "active": {
+          "renders": 95,
+          "steps": 34,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 38,
+          "impacts": 9
+        }
+      }
+    },
+    {
+      "hero": "siren",
+      "skill": "haste",
+      "diagnostic": {
+        "gauge": 57.5800000000001,
+        "time": 4.299999999999993,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 499.14,
+          "income": {},
+          "byHero": {
+            "rumi": 94,
+            "siren": 63.45,
+            "star_boy": 247.69000000000003,
+            "snow_rabbit": 94
+          }
+        },
+        "active": {
+          "renders": 218,
+          "steps": 77,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 8,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "mushroom_king",
+      "skill": "plague",
+      "diagnostic": {
+        "gauge": 50.84000000000003,
+        "time": 2.549999999999999,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1467.7220000000073,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "mushroom_king": 1126.9720000000011,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 111,
+          "steps": 42,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 12,
+          "impacts": 4
+        }
+      }
+    },
+    {
+      "hero": "great_detective",
+      "skill": "expose",
+      "diagnostic": {
+        "gauge": 60.900000000000034,
+        "time": 3.2499999999999964,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3735.2075000000004,
+          "income": {},
+          "byHero": {
+            "great_detective": 3332.8875000000007,
+            "rumi": 84.6,
+            "ancient_dragon": 131.6,
+            "siren": 42.300000000000004,
+            "star_boy": 143.82000000000002
+          }
+        },
+        "active": {
+          "renders": 150,
+          "steps": 56,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 4,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "guardian",
+      "skill": "quake",
+      "diagnostic": {
+        "gauge": 45.72000000000003,
+        "time": 1.800000000000001,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3799.95,
+          "income": {},
+          "byHero": {
+            "rumi": 23.5,
+            "guardian": 3609.6,
+            "ancient_dragon": 65.8,
+            "siren": 21.150000000000002,
+            "star_boy": 79.9
+          }
+        },
+        "active": {
+          "renders": 66,
+          "steps": 27,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 24,
+          "impacts": 10
+        }
+      }
+    },
+    {
+      "hero": "avalanche_maid",
+      "skill": "avalanche",
+      "diagnostic": {
+        "gauge": 35.78000000000003,
+        "time": 3.2499999999999964,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3522.6500000000005,
+          "income": {},
+          "byHero": {
+            "rumi": 70.5,
+            "ancient_dragon": 131.6,
+            "avalanche_maid": 3158.4000000000005,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 153,
+          "steps": 56,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 6,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "santa",
+      "skill": "gift",
+      "diagnostic": {
+        "gauge": 47.82000000000011,
+        "time": 4.399999999999992,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 801.1149999999999,
+          "income": {},
+          "byHero": {
+            "rumi": 94,
+            "ancient_dragon": 197.39999999999998,
+            "santa": 198.57500000000002,
+            "siren": 63.45,
+            "star_boy": 247.69000000000003
+          }
+        },
+        "active": {
+          "renders": 213,
+          "steps": 79,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 12,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "red_dragon",
+      "skill": "dragon",
+      "diagnostic": {
+        "gauge": 30.719999999999985,
+        "time": 3.2499999999999964,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 5809.669999999976,
+          "income": {},
+          "byHero": {
+            "rumi": 70.5,
+            "ancient_dragon": 131.6,
+            "red_dragon": 5445.419999999976,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 151,
+          "steps": 56,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 21,
+          "impacts": 10
+        }
+      }
+    },
+    {
+      "hero": "aurora",
+      "skill": "mirror",
+      "diagnostic": {
+        "gauge": 44.20000000000016,
+        "time": 5.699999999999988,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1246.4399999999998,
+          "income": {},
+          "byHero": {
+            "rumi": 117.5,
+            "ancient_dragon": 197.39999999999998,
+            "aurora": 559.3,
+            "siren": 84.60000000000001,
+            "star_boy": 287.64000000000004
+          }
+        },
+        "active": {
+          "renders": 304,
+          "steps": 105,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 12,
+          "impacts": 2
+        }
+      }
+    },
+    {
+      "hero": "storm_sage",
+      "skill": "vortex",
+      "diagnostic": {
+        "gauge": 45.60000000000002,
+        "time": 2.25,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1781.535,
+          "income": {},
+          "byHero": {
+            "storm_sage": 1567.685,
+            "rumi": 47,
+            "ancient_dragon": 65.8,
+            "siren": 21.150000000000002,
+            "star_boy": 79.9
+          }
+        },
+        "active": {
+          "renders": 99,
+          "steps": 36,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 37,
+          "impacts": 9
+        }
+      }
+    },
+    {
+      "hero": "flame_sage",
+      "skill": "combust",
+      "diagnostic": {
+        "gauge": 45.72000000000003,
+        "time": 2.5999999999999988,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 2541.7752749999845,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "flame_sage": 2201.0252749999863,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 114,
+          "steps": 43,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 27,
+          "impacts": 12
+        }
+      }
+    },
+    {
+      "hero": "lightning_sage",
+      "skill": "thunder",
+      "diagnostic": {
+        "gauge": 40.660000000000025,
+        "time": 2.6499999999999986,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3426.3,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "lightning_sage": 3085.55,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 124,
+          "steps": 44,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 36,
+          "impacts": 12
+        }
+      }
+    },
+    {
+      "hero": "time_magician",
+      "skill": "trauma",
+      "diagnostic": {
+        "gauge": 42.760000000000105,
+        "time": 4.549999999999992,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 2298.770000000001,
+          "income": {},
+          "byHero": {
+            "time_magician": 1696.2300000000002,
+            "rumi": 94,
+            "ancient_dragon": 197.39999999999998,
+            "siren": 63.45,
+            "star_boy": 247.69000000000003
+          }
+        },
+        "active": {
+          "renders": 231,
+          "steps": 82,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 7,
+          "impacts": 0
+        }
+      }
+    },
+    {
+      "hero": "ancient_dragon",
+      "skill": "awaken",
+      "diagnostic": {
+        "gauge": 37.760000000000105,
+        "time": 3.4499999999999957,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 685.26,
+          "income": {},
+          "byHero": {
+            "rumi": 103.39999999999999,
+            "ancient_dragon": 177.65999999999997,
+            "siren": 57.105000000000004,
+            "star_boy": 243.69500000000005,
+            "snow_rabbit": 103.39999999999999
+          }
+        },
+        "active": {
+          "renders": 162,
+          "steps": 60,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 10,
+          "impacts": 2
+        }
+      }
+    },
+    {
+      "hero": "phantom",
+      "skill": "nightmare",
+      "diagnostic": {
+        "gauge": 45.900000000000034,
+        "time": 2.9499999999999975,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 2205.4514999999997,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 230.3,
+            "phantom": 1750.7264999999998,
+            "siren": 47.587500000000006,
+            "star_boy": 129.8375
+          }
+        },
+        "active": {
+          "renders": 127,
+          "steps": 50,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 7,
+          "impacts": 0
+        }
+      }
+    },
+    {
+      "hero": "zeke",
+      "skill": "inferno",
+      "diagnostic": {
+        "gauge": 50.84000000000003,
+        "time": 2.849999999999998,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3668.7976750000257,
+          "income": {},
+          "byHero": {
+            "zeke": 3328.0476750000257,
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 126,
+          "steps": 48,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 8,
+          "impacts": 0
+        }
+      }
+    },
+    {
+      "hero": "luna",
+      "skill": "execute",
+      "diagnostic": {
+        "gauge": 40.78000000000003,
+        "time": 2.799999999999998,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 6980.91,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "luna": 6640.16,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 133,
+          "steps": 47,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 11,
+          "impacts": 0
+        }
+      }
+    },
+    {
+      "hero": "jasmine",
+      "skill": "goddess",
+      "diagnostic": {
+        "gauge": 42.82000000000011,
+        "time": 4.399999999999992,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3044.8714999999993,
+          "income": {},
+          "byHero": {
+            "rumi": 110.44999999999999,
+            "ancient_dragon": 243.45999999999998,
+            "jasmine": 2313.6925,
+            "siren": 70.8525,
+            "star_boy": 306.41650000000004
+          }
+        },
+        "active": {
+          "renders": 219,
+          "steps": 79,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 17,
+          "impacts": 4
+        }
+      }
+    },
+    {
+      "hero": "queen",
+      "skill": "dividend",
+      "diagnostic": {
+        "gauge": 60.660000000000025,
+        "time": 2.799999999999998,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1022.2499999999999,
+          "income": {
+            "필살기": 30
+          },
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "queen": 681.5,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 132,
+          "steps": 47,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 28,
+          "impacts": 10
+        }
+      }
+    },
+    {
+      "hero": "rumi",
+      "skill": "echo",
+      "diagnostic": {
+        "gauge": 62.6400000000001,
+        "time": 4.149999999999993,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 460.4825,
+          "income": {},
+          "byHero": {
+            "rumi": 85.775,
+            "siren": 77.1975,
+            "star_boy": 211.73499999999999,
+            "snow_rabbit": 85.775
+          }
+        },
+        "active": {
+          "renders": 212,
+          "steps": 74,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 3,
+          "impacts": 0
+        }
+      }
+    },
+    {
+      "hero": "cherry_prince",
+      "skill": "royal",
+      "diagnostic": {
+        "gauge": 35.72000000000003,
+        "time": 2.9999999999999973,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 3428.65,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "cherry_prince": 3087.9,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 144,
+          "steps": 51,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 9,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "time_ruler",
+      "skill": "rewind",
+      "diagnostic": {
+        "gauge": 30.779999999999983,
+        "time": 2.6499999999999986,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1409.5300000000004,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "time_ruler": 1068.7800000000002,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 118,
+          "steps": 44,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 19,
+          "impacts": 3
+        }
+      }
+    },
+    {
+      "hero": "galaxy_whale",
+      "skill": "singularity",
+      "diagnostic": {
+        "gauge": 20.719999999999985,
+        "time": 3.5499999999999954,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 8097.865,
+          "income": {},
+          "byHero": {
+            "rumi": 70.5,
+            "ancient_dragon": 131.6,
+            "galaxy_whale": 7693.665,
+            "siren": 42.300000000000004,
+            "star_boy": 159.8
+          }
+        },
+        "active": {
+          "renders": 179,
+          "steps": 62,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 17,
+          "impacts": 10
+        }
+      }
+    },
+    {
+      "hero": "doom",
+      "skill": "fortune",
+      "diagnostic": {
+        "gauge": 60.660000000000025,
+        "time": 2.6499999999999986,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 1431.1499999999999,
+          "income": {
+            "필살기": 25
+          },
+          "byHero": {
+            "doom": 1090.3999999999999,
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 123,
+          "steps": 44,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 42,
+          "impacts": 12
+        }
+      }
+    },
+    {
+      "hero": "cinderella",
+      "skill": "glassfall",
+      "diagnostic": {
+        "gauge": 55.660000000000025,
+        "time": 2.499999999999999,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 4300.5,
+          "income": {},
+          "byHero": {
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "cinderella": 3999.7000000000007,
+            "siren": 42.300000000000004,
+            "star_boy": 79.9
+          }
+        },
+        "active": {
+          "renders": 111,
+          "steps": 41,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 31,
+          "impacts": 12
+        }
+      }
+    },
+    {
+      "hero": "harmonious",
+      "skill": "harmony",
+      "diagnostic": {
+        "gauge": 52.94000000000011,
+        "time": 4.6499999999999915,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 757.6399999999999,
+          "income": {},
+          "byHero": {
+            "rumi": 94,
+            "ancient_dragon": 197.39999999999998,
+            "harmonious": 94,
+            "siren": 84.60000000000001,
+            "star_boy": 287.64000000000004
+          }
+        },
+        "active": {
+          "renders": 233,
+          "steps": 84,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 11,
+          "impacts": 1
+        }
+      }
+    },
+    {
+      "hero": "frost_witch",
+      "skill": "ice_court",
+      "diagnostic": {
+        "gauge": 40.72000000000003,
+        "time": 2.9999999999999973,
+        "stats": {
+          "kills": 0,
+          "merges": 0,
+          "summons": 5,
+          "skills": 1,
+          "damage": 2770.65,
+          "income": {},
+          "byHero": {
+            "frost_witch": 2429.9,
+            "rumi": 47,
+            "ancient_dragon": 131.6,
+            "siren": 42.300000000000004,
+            "star_boy": 119.85000000000001
+          }
+        },
+        "active": {
+          "renders": 138,
+          "steps": 51,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1.5,
+          "particles": 25,
+          "impacts": 9
+        }
+      }
+    }
+  ]
+}
