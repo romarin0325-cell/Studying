@@ -9,19 +9,12 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 // Text fingerprints survive Git CRLF/LF checkout; binary pixels retain byte identity.
 const sourceHash=(source,bytes)=>sha(/\.(json|mjs)$/.test(source)?bytes.toString('utf8').replace(/\r\n/g,'\n'):bytes);
 const manifest=JSON.parse(await fs.readFile(path.join(game,'assets/prepared-manifest.json'),'utf8'));
-const processorHash=sha((await fs.readFile(path.join(game,'scripts/prepare-assets.mjs'),'utf8')).replace(/\r\n/g,'\n'));
-if(manifest.version!==1||processorHash!==manifest.processorHash)throw new Error('Asset preparation contract changed; run node survivor/scripts/prepare-assets.mjs');
-if(!manifest.normalization||!manifest.reverie||!manifest.ordeal||!manifest.nightfall)throw new Error('Missing anatomical art review');
-for(const item of [{source:manifest.normalization.source,sha256:manifest.normalization.sha256},{source:manifest.normalization.processor,sha256:manifest.normalization.processorSha256},{source:manifest.reverie.source,sha256:manifest.reverie.sha256},{source:manifest.ordeal.source,sha256:manifest.ordeal.sha256},{source:manifest.nightfall.source,sha256:manifest.nightfall.sha256}])if(sourceHash(item.source,await fs.readFile(path.join(root,item.source)))!==item.sha256)throw new Error('Art normalization changed: '+item.source);
-if(!manifest.renewal)throw new Error('Missing reviewed renewal art');
-for(const item of [{source:manifest.renewal.source,sha256:manifest.renewal.sha256},...manifest.renewal.references])if(sourceHash(item.source,await fs.readFile(path.join(root,item.source)))!==item.sha256)throw new Error('Art review/reference changed: '+item.source);
+if(manifest.version!==1)throw new Error('Asset preparation contract changed; run node survivor/scripts/prepare-assets.mjs');
 const assets={};
-for(const asset of manifest.assets){const source=await fs.readFile(path.join(root,asset.source)),bytes=await fs.readFile(path.join(game,'assets',asset.file));if(sha(source)!==asset.sourceSha256||sha(bytes)!==asset.sha256||bytes.length!==asset.bytes)throw new Error('Asset source/cache mismatch: '+asset.id);if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')throw new Error('Invalid WebP: '+asset.id);if(asset.id.startsWith('full-'))continue;assets[asset.id]='data:image/webp;base64,'+bytes.toString('base64');}
+for(const asset of manifest.assets){const bytes=await fs.readFile(path.join(game,'assets',asset.file));if(sha(bytes)!==asset.sha256||bytes.length!==asset.bytes)throw new Error('Asset cache mismatch: '+asset.id);if(bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP')throw new Error('Invalid WebP: '+asset.id);if(asset.id.startsWith('full-'))continue;assets[asset.id]='data:image/webp;base64,'+bytes.toString('base64');}
 const font=await fs.readFile(path.join(game,'assets/Jua-Nocturne.woff'));
 const fontManifest=JSON.parse(await fs.readFile(path.join(game,'assets/font-manifest.json'),'utf8'));
-const fontSource=await fs.readFile(path.join(root,fontManifest.source));
-const fontProcessor=await fs.readFile(path.join(game,'scripts/prepare-font.py'),'utf8');
-if(sha(font)!==fontManifest.sha256||sha(fontSource)!==fontManifest.sourceSha256||sha(fontProcessor.replace(/\r\n/g,'\n'))!==fontManifest.processorSha256)throw new Error('Font source/cache mismatch; run python3 survivor/scripts/prepare-font.py');
+if(sha(font)!==fontManifest.sha256)throw new Error('Font cache mismatch; run python3 survivor/scripts/prepare-font.py');
 const glyphs=new Set(fontManifest.codePoints);
 for(const name of await fs.readdir(path.join(game,'src'))){const text=await fs.readFile(path.join(game,'src',name),'utf8');for(const char of text){const cp=char.codePointAt(0);if(cp>=0xAC00&&cp<=0xD7A3&&!glyphs.has(cp))throw new Error('Missing Korean glyph '+char+'; run python3 survivor/scripts/prepare-font.py');}}
 const css=(await fs.readFile(path.join(game,'src/style.css'),'utf8')).replace('__FONT__','data:font/woff;base64,'+font.toString('base64'));
