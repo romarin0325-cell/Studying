@@ -27,7 +27,7 @@ export function autoPlay(s){
   for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i]));if(to!==undefined){engine.move(s,from,to);return;}}
   if(s.board.filter(Boolean).length<23&&s.gold>=engine.summonCost(s)){engine.summon(s);return;}
   if(s.enemies.some(e=>e.boss)&&s.gauge>=60){
-    const best=s.deck.filter(id=>engine.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
+    const best=s.deck.filter(id=>engine.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
     if(best.length){engine.cast(s,best[0]);return;}
   }
   const id=s.deck.find(id=>s.upgrades[id]<5&&s.gold>=engine.upgradeCost(s,id));if(id)engine.upgrade(s,id);

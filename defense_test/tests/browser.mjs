@@ -56,7 +56,54 @@ async function reload({page,context}){
   if(isWebkit)await context.setOffline(false);
   await page.reload();if(isWebkit)await context.setOffline(true);await page.locator('.scene-partner').waitFor();
 }
+function traitFixture(deck,placements,{wave=3,gold=24}={}){
+  const p=createProfile(NOW);p.settings.auto=false;
+  for(const h of HEROES)p.heroes[h.id].owned=true;
+  p.deck=[...deck];assert.ok(command(p,'begin',{mode:'main',stage:1},NOW).ok);
+  const s=createBattle(p),template={...s.board.find(Boolean)};s.board.fill(null);s.wave=wave;s.gold=gold;
+  for(const [i,hero,rank=1,birthWave=wave] of placements)s.board[i]={...template,uid:s.nextId++,hero,rank,birthWave,priority:E.targetingLocked(hero)?'random':'first',cooldown:99};
+  s.queue=[{kind:'boss',hp:1e8}];s.spawnIn=0;E.step(s,.05);
+  s.enemies[0].progress=E.PATH_LENGTH*.76;s.enemies[0].speed=0;s.enemies[0].skillIn=99;s.gauge=120;
+  E.personalTrait(s,s.board.find(u=>u?.hero==='time_ruler')||s.board.find(Boolean));
+  p.active.run=E.serialize(s);assert.ok(E.restore(p.active.run),'trait fixture is a valid saved battle');return p;
+}
+async function inspectCell(page,index){
+  await page.locator('#arena').scrollIntoViewIfNeeded();const rect=await page.locator('#arena').boundingBox(),at=E.cellPoint(index);
+  await page.mouse.click(rect.x+at.x/720*rect.width,rect.y+at.y/780*rect.height);
+  await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
+}
 try{
+  for(const [width,height] of [[320,568],[390,844]]){
+    const deck=['lightning_sage','aurora','star_boy','time_ruler','zeke'];
+    const t=await boot(width,height,traitFixture(deck,[[6,deck[0]],[7,deck[0]],[11,deck[0]],[12,deck[0]],[8,deck[1]],[13,deck[1]],[16,deck[2]],[17,deck[3],2],[18,deck[3],2],[21,deck[4]]]));
+    await t.page.locator('[data-action="resume"]').click();
+    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait').innerText(),/4연결.*30%.*80%.*대상 \+1/);
+    await shot(t.page,'trait-lightning',width,height);
+    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*30%/);
+    await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait').innerText(),/등장 웨이브.*150%/);
+    await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait').innerText(),/50%/);
+    await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait').innerText(),/대기|활성|수혜/);
+    await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait').innerText(),/40%/);
+    await t.page.locator('[data-action="deselect"]').click();await t.page.locator('#arena').scrollIntoViewIfNeeded();await shot(t.page,'trait-auras',width,height);await t.context.close();
+    const other=['avalanche_maid','flame_sage','storm_sage','galaxy_whale','doom'];
+    const f=await boot(width,height,traitFixture(other,[[6,other[0]],[8,other[1]],[12,other[2]],[16,other[3],1,1],[18,other[4]]]));
+    await f.page.locator('[data-action="resume"]').click();
+    await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
+    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 위치/);await shot(f.page,'trait-fixed-target',width,height);
+    await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait').innerText(),/이후 웨이브.*125%/);
+    const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.isEnabled(),false);assert.match(await doom.getAttribute('aria-label'),/25골드.*골드 부족/);assert.match(await doom.innerText(),/25G/);await f.context.close();
+  }
+  const paid=await boot(390,844,traitFixture(['doom','flame_sage','storm_sage','galaxy_whale','avalanche_maid'],[[6,'doom']],{gold:25}));
+  await paid.page.locator('[data-action="resume"]').click();await paid.page.locator('[data-skill="doom"]').click();
+  assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.gold),0);assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1);await paid.context.close();
+  const wind=traitFixture(['storm_sage','flame_sage','doom','galaxy_whale','avalanche_maid'],[[12,'storm_sage']]);
+  const windRun=E.restore(wind.active.run),boss=windRun.enemies[0],victim={...boss,uid:windRun.nextId++,kind:'grunt',boss:null,progress:900,hp:123456,maxHp:123456,shield:200};
+  windRun.enemies=[victim,boss];windRun.rng=16;
+  const origin=E.cellPoint(12);windRun.shots=[{uid:windRun.nextId++,source:windRun.board[12].uid,target:victim.uid,hero:'storm_sage',proc:true,damage:14,rank:1,count:1,origin,from:origin,to:E.pathPoint(900),life:.2,total:.2}];
+  wind.active.run=E.serialize(windRun);assert.ok(E.restore(wind.active.run));
+  const executed=await boot(390,844,wind);await executed.page.locator('[data-action="resume"]').click();
+  await executed.page.waitForFunction(()=>window.STAR_GARDEN.battle.stats.kills===1,{},{polling:16});
+  await shot(executed.page,'storm-instant-kill',390,844);await executed.context.close();
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const test=await boot(width,height),{page,context}=test;
     assert.equal((await profile(page)).deck.length,5);

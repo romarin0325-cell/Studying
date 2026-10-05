@@ -30,13 +30,13 @@ export const HEROES = [
     "attack": "slash",
     "trait": {
       "type": "burn",
-      "text": "전방 90°를 함께 베어 화상을 남깁니다."
+      "text": "전방 90°를 베어 화상. 선두가 경로의 마지막 25%에 들어오면 공격 속도 +40%."
     },
     "skill": {
       "name": "용의 맹세",
       "cost": 70,
       "type": "inferno",
-      "text": "전장의 적을 베고 큰 화염 피해를 줍니다."
+      "text": "전장 전체에 위력 5배의 화염검. 코어 생명력이 절반 미만이면 직접 피해가 두 배."
     },
     "heightGroup": "tall",
     "role": "선봉 · 부채꼴",
@@ -211,12 +211,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 24,
+    "damage": 36,
     "interval": 1.65,
     "attack": "ice",
     "trait": {
       "type": "shatter",
-      "text": "넓은 얼음 파편. 감속 중인 적에게 피해 +75%."
+      "text": "무작위 적에게 넓은 얼음 파편. 감속 중인 적에게 피해 +75%. 목표 변경 불가."
     },
     "skill": {
       "name": "백야의 눈사태",
@@ -327,7 +327,7 @@ export const HEROES = [
     "attack": "wind",
     "trait": {
       "type": "gust",
-      "text": "긴 바람길을 관통하고 인근 적 하나에 바람을 보냅니다."
+      "text": "바람길을 관통하고 인근 적에 연쇄. 일반 공격에 맞은 일반 적마다 1% 확률로 즉사."
     },
     "skill": {
       "name": "태풍의 눈",
@@ -364,7 +364,7 @@ export const HEROES = [
     "attack": "lightning",
     "trait": {
       "type": "chain",
-      "text": "가까운 세 적에게 번개가 이어집니다."
+      "text": "가까운 적에게 번개가 이어집니다. 같은 동료가 상하좌우로 연결될수록 위력·체인 강화."
     },
     "skill": {
       "name": "천둥의 연쇄",
@@ -438,7 +438,7 @@ export const HEROES = [
     "attack": "fire",
     "trait": {
       "type": "burn",
-      "text": "명중 지점에 3초의 불바닥. 적이 지나가도 불길은 남습니다."
+      "text": "맵의 무작위 위치에 강화된 불바닥을 3.9초 남깁니다. 목표 변경 불가."
     },
     "skill": {
       "name": "작열의 문장",
@@ -518,7 +518,7 @@ export const HEROES = [
       "name": "완벽한 추리",
       "cost": 60,
       "type": "expose",
-      "text": "보스를 포함한 모든 적을 노출시켜 10초간 받는 피해를 60% 늘립니다."
+      "text": "전장 전체에 위력 3배 피해를 준 뒤, 10초간 받는 피해 +60%의 노출을 적용합니다."
     },
     "heightGroup": "medium",
     "role": "보스 약화 · 저격",
@@ -661,7 +661,7 @@ export const HEROES = [
     "attack": "cosmos",
     "trait": {
       "type": "gravity",
-      "text": "3초의 중력장으로 넓게 피해를 주고 40% 감속합니다."
+      "text": "중력장으로 피해·40% 감속. 등장 웨이브 75%, 다음 100%, 이후 125% 위력. 합성 시 초기화."
     },
     "skill": {
       "name": "별바다의 중심",
@@ -767,12 +767,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 15,
+    "damage": 13.5,
     "interval": 1.1,
     "attack": "time",
     "trait": {
       "type": "chrono",
-      "text": "3초의 시간장을 남겨 25% 감속. 강화마다 감속 +3%p."
+      "text": "시간장으로 25% 감속. 가장 높은 성급 중 한 명만 위력 +50%. 동률이면 기존 수혜자 유지."
     },
     "skill": {
       "name": "아직 오지 않은 순간",
@@ -809,13 +809,14 @@ export const HEROES = [
     "attack": "shadow",
     "trait": {
       "type": "sacrifice",
-      "text": "재료로 소모되면 1성 18G · 2성 36G 환급. 강화마다 등급당 +4G. 루미가 재료면 환급 없음."
+      "text": "둠 합성 시 재료 성급 × 18G 환급. 강화마다 등급당 +4G. 루미와 어느 방향으로 합성해도 발동."
     },
     "skill": {
       "name": "왕궁의 암거래",
       "cost": 60,
+      "goldCost": 25,
       "type": "fortune",
-      "text": "전장 전체에 위력 3배의 암흑검. 즉시 25골드를 얻습니다."
+      "text": "25골드를 소모해 전장 전체에 위력 10배의 암흑검."
     },
     "heightGroup": "medium",
     "role": "합성 경제 · 관통검",
@@ -920,7 +921,7 @@ export const HEROES = [
     "attack": "comet",
     "trait": {
       "type": "starfall",
-      "text": "빠른 유성 연사. 다섯 번째 공격은 위력 2.2배."
+      "text": "등장 웨이브 150%, 다음 100%, 이후 75% 위력. 합성 시 초기화. 다섯 번째 공격은 2.2배."
     },
     "skill": {
       "name": "소원을 담은 별",
@@ -1101,18 +1102,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 14,
+    "damage": 11.9,
     "interval": 1.3,
     "attack": "mirror",
     "trait": {
       "type": "refraction",
-      "text": "직격 후 위력 75% 환영탄. 시전 시 정한 표적을 추적하며 다른 적으로 옮기지 않습니다."
+      "text": "직격 후 위력 75% 환영탄. 필드의 아우로라가 짝수이면 위력 +30%."
     },
     "skill": {
       "name": "천면경",
       "cost": 80,
       "type": "mirror",
-      "text": "최대 체력이 가장 높은 적 한 명의 피해를 3초간 기록. 위력 10배와 기록한 피해의 45%(추가 최대 18배)를 되돌립니다."
+      "text": "강적의 피해를 3초 기록해 위력 10배 + 기록 피해 45%(추가 최대 18배) 반사. 천면경 폭발은 기록에서 제외."
     },
     "heightGroup": "medium",
     "role": "지연 반사 · 환영탄",
