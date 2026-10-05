@@ -91,6 +91,7 @@ export class Renderer {
     if(['seal','storm'].includes(s.telegraph?.pattern)){const storm=s.telegraph.pattern==='storm';ctx.fillStyle=storm?'#8dccfa20':`rgba(194,99,224,${.14+Math.sin(this.clock*12)*.1})`;ctx.strokeStyle=storm?'#ffe8aa':'#e3a2fb';ctx.lineWidth=2;for(const i of s.telegraph.cells){const p=cellPoint(i);rounded(ctx,p.x-43,p.y-43,86,86,5);ctx.fill();ctx.stroke();}}
     const entities=this.entities;entities.length=0;for(let i=0;i<25;i++)if(s.board[i])entities.push({kind:'hero',i,y:cellPoint(i).y+20});for(const e of s.enemies)entities.push({kind:'enemy',e,y:this.fx.point(e.uid).y});entities.sort((a,b)=>a.y-b.y);
     for(const ent of entities)ent.kind==='hero'?this.drawHero(s,ent.i):this.drawEnemy(ent.e,s.chapter);
+    this.fx.drawPersonalTraits(s,true);
     this.fx.drawFinisherLocks(s);
     for(const shot of s.shots)this.drawShot(shot,s);
     this.fx.drawFinishers(s);

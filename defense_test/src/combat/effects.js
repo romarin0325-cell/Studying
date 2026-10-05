@@ -207,7 +207,7 @@ export class CombatFX{
       ctx.restore();
     }
   }
-  drawPersonalTraits(s){
+  drawPersonalTraits(s,foreground=false){
     // Reuse each companion's painted combat emblem. The foot seal conveys a
     // live condition without painting over faces, ranks, enemies or HP bars.
     const ctx=this.ctx;
@@ -217,17 +217,21 @@ export class CombatFX{
       const state=personalTrait(s,u,i),aged=['star_boy','galaxy_whale'].includes(u.hero);
       if(!state.active&&!aged)continue;
       const strong=state.active&&state.damageMultiplier>=1,p=cellPoint(i),alpha=strong?.48:.17,pulse=this.reduced?1:1+Math.sin(this.clock*2+u.uid)*.06;
+      if(foreground){
+        // A small, dark status backing separates the painted emblem from
+        // tile trim and rank stars. It sits beside the feet, above shadows.
+        ctx.save();ctx.globalAlpha=strong?.8:.5;disk(ctx,p.x+28,p.y+21,16,'#0b1e2b');
+        ctx.strokeStyle=HERO[u.hero].color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x+28,p.y+21,16,0,Math.PI*2);ctx.stroke();ctx.restore();
+        if(u.hero==='aurora')this.atlasStamp('effects-trio',5,3,2,p.x+28,p.y+21,30,38,0,.85);
+        else this.stamp(u.hero,p.x+28,p.y+21,strong?30:24,0,strong?.85:.4);
+        continue;
+      }
       ctx.save();ctx.globalAlpha=alpha*pulse;ctx.strokeStyle=HERO[u.hero].color;ctx.lineWidth=2.5;
       ctx.beginPath();ctx.ellipse(p.x,p.y+31,28,9,0,Math.PI*.13,Math.PI*1.87);ctx.stroke();ctx.restore();
-      if(u.hero==='aurora'){
-        this.atlasStamp('effects-trio',5,3,2,p.x+28,p.y+19,30,38,0,.85);
-      }else{
-        this.stamp(u.hero,p.x,p.y+31,56,0,alpha);
-        this.stamp(u.hero,p.x+28,p.y+21,strong?30:24,0,strong?.85:.4);
-      }
+      this.stamp(u.hero,p.x,p.y+31,56,0,alpha);
       if(aged){
         const phase=Math.min(2,state.age||0);ctx.save();
-        for(let j=0;j<3;j++)disk(ctx,p.x-7+j*7,p.y+39,2,j===phase?HERO[u.hero].color:'#d4dfdf44');
+        for(let j=0;j<3;j++)disk(ctx,p.x-7+j*7,p.y+39,3,j===phase?HERO[u.hero].color:'#d4dfdf44');
         ctx.restore();
       }
     }
