@@ -1,3 +1,4 @@
 node_modules/
 survivor/test-results/
 defense_test/test-results/
+defense_test/.media-review/

@@ -326,8 +326,8 @@
     }
   ],
   "font": {
-    "source": "defense_test/assets/Jua-Regular.ttf",
-    "sha256": "769677aef240bfc3b9965f2b50748075bff885e6c6992fc591a3fb268279f898",
+    "source": "defense_test/assets/Jua-Regular.woff2",
+    "sha256": "cb995145eb03afc3ca5d714471d2183f58d56ed571001321e109170b421abcda",
     "license": {
       "source": "defense_test/assets/Jua-OFL.txt",
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
@@ -343,7 +343,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 41460,
-      "sourceSha256": "215c78af955b7378bd61f4524f4396c56e189dc488c1ed0f2365f8c91568e8a1"
+      "sourceSha256": "215c78af955b7378bd61f4524f4396c56e189dc488c1ed0f2365f8c91568e8a1",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/star_boy.webp",
+        "sha256": "6c41dffb11c60b363ae594e5dee5155f91ba6386382016e9770872d540c1dadd",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80208,
+        "quality": 82
+      }
     },
     {
       "id": "snow_rabbit",
@@ -352,7 +360,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 30513,
-      "sourceSha256": "30aad3b317c52b25de38877d33256ee039f2644b7b8dee0e2305bfa2f78b8eb2"
+      "sourceSha256": "30aad3b317c52b25de38877d33256ee039f2644b7b8dee0e2305bfa2f78b8eb2",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/snow_rabbit.webp",
+        "sha256": "dbe385fdf0495d28d35fc8e9bace7db17190a828b2cdf5ac0aaff64d998b8ca3",
+        "width": 720,
+        "height": 1080,
+        "bytes": 53166,
+        "quality": 82
+      }
     },
     {
       "id": "silver_rabbit",
@@ -361,7 +377,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 28768,
-      "sourceSha256": "bbdf5872b3b73495f87e208b454ae9ec3f671e48edbc3095e26d9a596de9f342"
+      "sourceSha256": "bbdf5872b3b73495f87e208b454ae9ec3f671e48edbc3095e26d9a596de9f342",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/silver_rabbit.webp",
+        "sha256": "81e3d74230c042d38987feecc21709bb7d4003ae29c6e8aa4c5ad969d15d39d6",
+        "width": 720,
+        "height": 1080,
+        "bytes": 50996,
+        "quality": 82
+      }
     },
     {
       "id": "night_rabbit",
@@ -370,7 +394,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 35333,
-      "sourceSha256": "40f70d1cb9ab69b6384d15175846399b796e7af584e08d55923a8708b93d5ecc"
+      "sourceSha256": "40f70d1cb9ab69b6384d15175846399b796e7af584e08d55923a8708b93d5ecc",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/night_rabbit.webp",
+        "sha256": "b3e61b61d4a4c464cb09fd36c001745048f6406af552a4d1059d002bb9500709",
+        "width": 720,
+        "height": 1080,
+        "bytes": 57602,
+        "quality": 82
+      }
     },
     {
       "id": "siren",
@@ -379,7 +411,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 33631,
-      "sourceSha256": "531d4cfa807887ade7a560a1f738fbab86e95ebdda5dbcbd231d946b53faba7a"
+      "sourceSha256": "531d4cfa807887ade7a560a1f738fbab86e95ebdda5dbcbd231d946b53faba7a",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/siren.webp",
+        "sha256": "8a9707ce0628a7dda79ffe5c8bec10ff7ff4118561a5566904668ee8217c994c",
+        "width": 720,
+        "height": 1080,
+        "bytes": 60352,
+        "quality": 82
+      }
     },
     {
       "id": "mushroom_king",
@@ -388,7 +428,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 46868,
-      "sourceSha256": "472a82f550dbaacdc90eb7ee40ebcfadd8b8eb5235fb3d5c8b803b31b2785a96"
+      "sourceSha256": "472a82f550dbaacdc90eb7ee40ebcfadd8b8eb5235fb3d5c8b803b31b2785a96",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/mushroom_king.webp",
+        "sha256": "13378ad2613ced6340beebb75169d05b917ce5c32978c0ae522621db65337161",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80110,
+        "quality": 82
+      }
     },
     {
       "id": "great_detective",
@@ -397,7 +445,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 42578,
-      "sourceSha256": "a7d71c968d9d5dfe1ecac2088cd39a24fba13759e9b6007b3a8a1e6e105d5dc9"
+      "sourceSha256": "a7d71c968d9d5dfe1ecac2088cd39a24fba13759e9b6007b3a8a1e6e105d5dc9",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/great_detective.webp",
+        "sha256": "7958dd96b1bc706a2057c54b7bc7fb4b5a1cd12e26fc5ee9988ddad4f5e21614",
+        "width": 720,
+        "height": 1080,
+        "bytes": 76428,
+        "quality": 82
+      }
     },
     {
       "id": "guardian",
@@ -406,7 +462,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 41283,
-      "sourceSha256": "287416cdae8a9cd848ba9389d50c0f2dea1788b56d0d8f7974a77a3defda1667"
+      "sourceSha256": "287416cdae8a9cd848ba9389d50c0f2dea1788b56d0d8f7974a77a3defda1667",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/guardian.webp",
+        "sha256": "923afd6d716fca0f3d7ff02147332578c5f2642efa426dfb755665fe8a7496ad",
+        "width": 720,
+        "height": 1080,
+        "bytes": 71160,
+        "quality": 82
+      }
     },
     {
       "id": "avalanche_maid",
@@ -415,7 +479,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 35417,
-      "sourceSha256": "fce05681606823da67f8193e6cfe62912f73cec88ea0e4c3e664dccc4c952c3d"
+      "sourceSha256": "fce05681606823da67f8193e6cfe62912f73cec88ea0e4c3e664dccc4c952c3d",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/avalanche_maid.webp",
+        "sha256": "a64c281f668e40e035791565ea7679cc31b05cc8920d12d0f8c12010c8a95cf3",
+        "width": 720,
+        "height": 1080,
+        "bytes": 63696,
+        "quality": 82
+      }
     },
     {
       "id": "santa",
@@ -424,7 +496,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 48559,
-      "sourceSha256": "5014c9169f0854c712c6e95e609c48e82b0335abe5153f85747f2b7f99444820"
+      "sourceSha256": "5014c9169f0854c712c6e95e609c48e82b0335abe5153f85747f2b7f99444820",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/santa.webp",
+        "sha256": "4f1bca17d5378cfec36d483bc588416b2222b3f72bf208c4284d59dd69e60feb",
+        "width": 720,
+        "height": 1080,
+        "bytes": 83368,
+        "quality": 82
+      }
     },
     {
       "id": "red_dragon",
@@ -433,7 +513,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 46661,
-      "sourceSha256": "308bbdbc8371d4c2fd430d2a67ab284929be9e727d0d1823468d65ef2eab8631"
+      "sourceSha256": "308bbdbc8371d4c2fd430d2a67ab284929be9e727d0d1823468d65ef2eab8631",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/red_dragon.webp",
+        "sha256": "9e80fa15178db815f1755fd4273876e9dddf18176f0f4940d35ab4c1fd0c47af",
+        "width": 720,
+        "height": 1080,
+        "bytes": 87830,
+        "quality": 82
+      }
     },
     {
       "id": "aurora",
@@ -442,7 +530,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 45903,
-      "sourceSha256": "971b79f4b540399cd5891c560ea19c15251755671072ae22aadb080b1999b9c4"
+      "sourceSha256": "971b79f4b540399cd5891c560ea19c15251755671072ae22aadb080b1999b9c4",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/aurora.webp",
+        "sha256": "0f327ba639993bd87a813fb6d1d0cb306626aa9aac68cdbd69ae5612c23c7cc0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 86200,
+        "quality": 82
+      }
     },
     {
       "id": "storm_sage",
@@ -451,7 +547,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 40804,
-      "sourceSha256": "cfb5b45b3fa7ff4189fbe175773ce1d847c500c6dcc69fc5fb5cfbe729d485ab"
+      "sourceSha256": "cfb5b45b3fa7ff4189fbe175773ce1d847c500c6dcc69fc5fb5cfbe729d485ab",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/storm_sage.webp",
+        "sha256": "f0faa6e0589e608a01dba3e36356eea01607c2ab01723b43d8587305f1fb85cf",
+        "width": 720,
+        "height": 1080,
+        "bytes": 72664,
+        "quality": 82
+      }
     },
     {
       "id": "flame_sage",
@@ -460,7 +564,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 41668,
-      "sourceSha256": "5d533310879e454c1c8aecf28d648ac291948c707b047ed7577e84266aaf9728"
+      "sourceSha256": "5d533310879e454c1c8aecf28d648ac291948c707b047ed7577e84266aaf9728",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/flame_sage.webp",
+        "sha256": "f83e7dd252226ec1bda701235af7e51d2a9417d9fd8a05b01d2ce558c27281eb",
+        "width": 720,
+        "height": 1080,
+        "bytes": 75208,
+        "quality": 82
+      }
     },
     {
       "id": "lightning_sage",
@@ -469,7 +581,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 37052,
-      "sourceSha256": "c85784de85321bbd1c81fc959999dd9e137f0d7d402f74c65558ff19bdba9d9f"
+      "sourceSha256": "c85784de85321bbd1c81fc959999dd9e137f0d7d402f74c65558ff19bdba9d9f",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/lightning_sage.webp",
+        "sha256": "d516b62567545f82364886027cf2f96ede5c86bb9c2e8638d1adb0b6fbcd94b8",
+        "width": 720,
+        "height": 1080,
+        "bytes": 68560,
+        "quality": 82
+      }
     },
     {
       "id": "time_magician",
@@ -478,7 +598,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 43432,
-      "sourceSha256": "fb0a15a674c30d2ba40692634e2883fc7ac4c99b65b3832ad9e3343e96808c3e"
+      "sourceSha256": "fb0a15a674c30d2ba40692634e2883fc7ac4c99b65b3832ad9e3343e96808c3e",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/time_magician.webp",
+        "sha256": "b42a90ab7f06a304d01c818d39ab046c9015a5df8fab8b8532e42a4c612847f8",
+        "width": 720,
+        "height": 1080,
+        "bytes": 79582,
+        "quality": 82
+      }
     },
     {
       "id": "ancient_dragon",
@@ -487,7 +615,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 39973,
-      "sourceSha256": "868589fb42ba63bdf95de3e442194ab1c23d66e9a01e6f5de5fcbec6c4a7a154"
+      "sourceSha256": "868589fb42ba63bdf95de3e442194ab1c23d66e9a01e6f5de5fcbec6c4a7a154",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/ancient_dragon.webp",
+        "sha256": "52030a12be7335f8981e332d4cd0ffd9b8045058f886012af92eb8fb884b6ed9",
+        "width": 720,
+        "height": 1080,
+        "bytes": 75008,
+        "quality": 82
+      }
     },
     {
       "id": "phantom",
@@ -496,7 +632,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 25605,
-      "sourceSha256": "dc22decf55171087470a15963cf7a2896c86e1c6cf8b1043fd7f578aa0882eee"
+      "sourceSha256": "dc22decf55171087470a15963cf7a2896c86e1c6cf8b1043fd7f578aa0882eee",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/phantom.webp",
+        "sha256": "b1ef0d414d0f5637a111af608e04f6f830a355ae7bb03e3f6c513b98af60d1c0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 45138,
+        "quality": 82
+      }
     },
     {
       "id": "zeke",
@@ -505,7 +649,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 44866,
-      "sourceSha256": "09f3dea4cf4ae7aae4b29676984540008da085a3d3d792fe458ee9849b43a3e8"
+      "sourceSha256": "09f3dea4cf4ae7aae4b29676984540008da085a3d3d792fe458ee9849b43a3e8",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/zeke.webp",
+        "sha256": "4e86b97b3414ab4d20a59381d315471b60c38222831c290ddb70dfa5c9dd4752",
+        "width": 720,
+        "height": 1080,
+        "bytes": 83926,
+        "quality": 82
+      }
     },
     {
       "id": "luna",
@@ -514,7 +666,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 40024,
-      "sourceSha256": "e0e6ddde7f62aedd4b13c443e6f553b10b7f8f81b517d6c5c5373f5bae667331"
+      "sourceSha256": "e0e6ddde7f62aedd4b13c443e6f553b10b7f8f81b517d6c5c5373f5bae667331",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/luna.webp",
+        "sha256": "dd35e79940115a2d9011ab73c5c3c9aa948a9159b012adb237034062a3fa54b2",
+        "width": 720,
+        "height": 1080,
+        "bytes": 68404,
+        "quality": 82
+      }
     },
     {
       "id": "jasmine",
@@ -523,7 +683,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 34799,
-      "sourceSha256": "816db584a8f225ae21e9ade7b6cb66179df2088dbd5df0ee3333fa967d389cd1"
+      "sourceSha256": "816db584a8f225ae21e9ade7b6cb66179df2088dbd5df0ee3333fa967d389cd1",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/jasmine.webp",
+        "sha256": "5ad029a6b5ac78aa5b5561f2522542413200143bc2d9d01c951e533ed4d7455f",
+        "width": 720,
+        "height": 1080,
+        "bytes": 60290,
+        "quality": 82
+      }
     },
     {
       "id": "queen",
@@ -532,7 +700,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 42846,
-      "sourceSha256": "3a441d6e25adbea2ceed7ea817878c80bf0280804842f81d718440637430ea1e"
+      "sourceSha256": "3a441d6e25adbea2ceed7ea817878c80bf0280804842f81d718440637430ea1e",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/queen.webp",
+        "sha256": "9fd6f23c9feac602caf9b8319ac42426913eb0df9034127c4e08ca97941e387e",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80772,
+        "quality": 82
+      }
     },
     {
       "id": "rumi",
@@ -541,7 +717,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 36347,
-      "sourceSha256": "b6f052645b5d8dd302abc0a46bd668b34d1f96a496015b42be92a97d9fa39001"
+      "sourceSha256": "b6f052645b5d8dd302abc0a46bd668b34d1f96a496015b42be92a97d9fa39001",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/rumi.webp",
+        "sha256": "809f741137f6b46400f8b6d9d16775d3081d82cea937891f648e48eaef6eac8c",
+        "width": 720,
+        "height": 1080,
+        "bytes": 64782,
+        "quality": 82
+      }
     },
     {
       "id": "cherry_prince",
@@ -550,7 +734,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 42814,
-      "sourceSha256": "d545d56a1998e228d3721e93bb3abb194eb9dff8b45a5488ba81c097295c1ef3"
+      "sourceSha256": "d545d56a1998e228d3721e93bb3abb194eb9dff8b45a5488ba81c097295c1ef3",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/cherry_prince.webp",
+        "sha256": "aab03fde6bdf95a5bb37d504d120880f32f2b94f5dbdfc061a7f614697e142b8",
+        "width": 720,
+        "height": 1080,
+        "bytes": 76322,
+        "quality": 82
+      }
     },
     {
       "id": "time_ruler",
@@ -559,7 +751,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 41522,
-      "sourceSha256": "c8356cbd5d0c1871f90d9429a8d8916a08a8df2a1290999d816fe9d90660e734"
+      "sourceSha256": "c8356cbd5d0c1871f90d9429a8d8916a08a8df2a1290999d816fe9d90660e734",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/time_ruler.webp",
+        "sha256": "8bf0b229aedb4b8bddce9948d55ee67f2a946d2b87ae0cdfe5b864f29c0fea2a",
+        "width": 720,
+        "height": 1080,
+        "bytes": 79496,
+        "quality": 82
+      }
     },
     {
       "id": "galaxy_whale",
@@ -568,7 +768,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 51223,
-      "sourceSha256": "d55a5147287a97d182091f683d55ee97c9a349030879950cf78166988e613ca8"
+      "sourceSha256": "d55a5147287a97d182091f683d55ee97c9a349030879950cf78166988e613ca8",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/galaxy_whale.webp",
+        "sha256": "247a91145c3efa696b68f13229966a25f2c92f8a4d6d00969763a23a8bb9f0ee",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95642,
+        "quality": 80
+      }
     },
     {
       "id": "doom",
@@ -577,7 +785,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 47475,
-      "sourceSha256": "b314320f6fdcf0f850838e542408181c22c10534401e6b7da19531578f30759e"
+      "sourceSha256": "b314320f6fdcf0f850838e542408181c22c10534401e6b7da19531578f30759e",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/doom.webp",
+        "sha256": "995906b5a9c88dad17c52cc5f7bd785875289938a5c47eab3c254b6752a2bac5",
+        "width": 720,
+        "height": 1080,
+        "bytes": 87196,
+        "quality": 82
+      }
     },
     {
       "id": "cinderella",
@@ -586,7 +802,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 46472,
-      "sourceSha256": "43b8814323f762ed80454a6ae3967a34ce11b23c6bd6bbf40d123253512470c5"
+      "sourceSha256": "43b8814323f762ed80454a6ae3967a34ce11b23c6bd6bbf40d123253512470c5",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/cinderella.webp",
+        "sha256": "c22a63016e64196da000e33cf46e8c92a1a85608dccbb90bcda02105c27b7d70",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80764,
+        "quality": 82
+      }
     },
     {
       "id": "harmonious",
@@ -595,7 +819,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 49488,
-      "sourceSha256": "d6afd7300137281012382a60a59998372d57e16d1929e2709a6800f76d804c81"
+      "sourceSha256": "d6afd7300137281012382a60a59998372d57e16d1929e2709a6800f76d804c81",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/harmonious.webp",
+        "sha256": "2b44a4b65e1b180e22da6330fd43e249ef29cd491ef571fc7938b487aa6859a5",
+        "width": 720,
+        "height": 1080,
+        "bytes": 91744,
+        "quality": 82
+      }
     },
     {
       "id": "frost_witch",
@@ -604,7 +836,15 @@
       "width": 720,
       "height": 1080,
       "bytes": 55639,
-      "sourceSha256": "2f1232f7525d1883b6067159a768e6b87cbfce0c03bc297a5fb7a0bf04866d7f"
+      "sourceSha256": "2f1232f7525d1883b6067159a768e6b87cbfce0c03bc297a5fb7a0bf04866d7f",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/frost_witch.webp",
+        "sha256": "be82b01f1e5cd48cfe34e92fe603d468fb5393be9d2fede5139295ced86afa8b",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95448,
+        "quality": 78
+      }
     }
   ]
 }

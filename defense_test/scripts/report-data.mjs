@@ -6,7 +6,7 @@ import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER} from '
 import {duplicateCost,enhanceMultiplier,specialMultiplier,levelCost,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward} from '../src/economy.js';
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
-import {MEMORIAL_MEDIA_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial.js';
+import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourcePath=file=>'defense_test/'+path.relative(gameRoot,file).replaceAll('\\','/');
@@ -33,10 +33,15 @@ export async function assetProvenance(){
     if(!metadata.width||!metadata.height)throw new Error('Invalid Star Garden asset: '+id);
     assets.push({id,source:sourcePath(file),sha256:hash(bytes),width:metadata.width,height:metadata.height});
   }
-  const fontFile=assetFile('./assets/Jua-Regular.ttf'),licenseFile=assetFile('./assets/Jua-OFL.txt');
+  const fontFile=assetFile('./assets/Jua-Regular.woff2'),licenseFile=assetFile('./assets/Jua-OFL.txt');
   const font=await fs.readFile(fontFile),license=(await fs.readFile(licenseFile,'utf8')).replace(/\r\n/g,'\n');
   const memorial=[];
-  for(const h of HEROES){const file=assetFile(MEMORIAL_MEDIA_PATHS[h.id]),bytes=await fs.readFile(file),m=await sharp(bytes).metadata();memorial.push({id:h.id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length,sourceSha256:MEMORIAL_MEDIA_MANIFEST[h.id].sourceSha256});}
+  for(const h of HEROES){
+    const file=assetFile(MEMORIAL_MEDIA_PATHS[h.id]),bytes=await fs.readFile(file),m=await sharp(bytes).metadata();
+    const webpFile=assetFile(MEMORIAL_WEBP_PATHS[h.id]),webp=await fs.readFile(webpFile),wm=await sharp(webp).metadata();
+    memorial.push({id:h.id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length,sourceSha256:MEMORIAL_MEDIA_MANIFEST[h.id].sourceSha256,
+      webp:{source:sourcePath(webpFile),sha256:hash(webp),width:wm.width,height:wm.height,bytes:webp.length,quality:MEMORIAL_MEDIA_MANIFEST[h.id].webp.quality}});
+  }
   return {
     initialArtCommit:'d4c32cf',
     policy:'independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing',

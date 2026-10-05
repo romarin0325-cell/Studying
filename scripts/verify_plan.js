@@ -537,7 +537,7 @@ function planDefenseTest(plan, files, currentFiles) {
   const inputs=product.filter(file=>/^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|scripts\/(?:build|local-inputs)\.mjs$)/.test(file));
   const current=new Set(currentFiles),checks=new Set(product.filter(file=>current.has(file)&&/^defense_test\/tests\/.*\.test\.mjs$/.test(file)));
   const reportScripts=product.some(file=>/^defense_test\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));
-  const unknown=product.filter(file=>!inputs.includes(file)&&!DEFENSE_TEST_REPORTS.has(file)&&!/^defense_test\/(?:tests\/(?:[a-z-]+\.test\.mjs|browser\.mjs)$|dist\/|scripts\/(?:serve|analyze|report-data|generated-reports)\.mjs$)/.test(file));
+  const unknown=product.filter(file=>!inputs.includes(file)&&!DEFENSE_TEST_REPORTS.has(file)&&!/^defense_test\/(?:tests\/(?:[a-z-]+\.test\.mjs|browser\.mjs)$|dist\/|scripts\/(?:serve|analyze|report-data|generated-reports|prepare-memorial-media)\.mjs$)/.test(file));
   if(unknown.length)plan.blocked.push('No Defense test mapping exists for: '+unknown.join(', '));
   for(const file of product.filter(file=>current.has(file)&&/\.(?:js|mjs|cjs)$/.test(file)))addNodeCheck(plan,'defense_test',file);
   const add=name=>checks.add('defense_test/tests/'+name+'.test.mjs');

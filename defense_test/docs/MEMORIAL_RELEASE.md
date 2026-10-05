@@ -1,5 +1,7 @@
 # 별빛 정원: 상태 효과·인연 이야기·1인 편성 검증 기록
 
+PR #580 merge 이후 미디어 파이프라인과 전체 글리프 WOFF2를 개선했다. 현재 배포 수치·채택/보류 근거·일회성 계측은 [메모리얼·배포 효율 개선](MEDIA_EFFICIENCY.md)에 있다. 아래 최초 버전의 전투/화면 검증은 역사 기록이며 현재 이미지·배포 절에는 후속 변경을 반영했다.
+
 작성일: 2026-10-05. 대상은 독립 테스트 게임 `defense_test/`다. 기존 디펜스와 다른 게임의 실행 코드는 변경하지 않았다. 이 보고서는 제공된 후속 요청의 수정, 화면별 판단, 실패 후 재작업, 실제 검증 범위를 기록한다. 최초 수집·성장 설계는 [UI·에셋 조사](UI_ASSET_RESEARCH.md), [성장식과 수치 근거](GROWTH_BALANCE.md), [독립성 검증](INDEPENDENCE_VERIFICATION.md)에 남아 있다.
 
 ## 이번 버전에서 달라진 경험
@@ -52,13 +54,13 @@
 | 최대 / 평균 | 54.33KiB /40.33KiB |
 | Base64 합계 | 1,652,076B ·1.576MiB |
 | data URI·ID를 포함한 내장 객체 | 1,653,229B ·1.577MiB |
-| 기본 단일 HTML | 22.30MiB |
+| 기본 단일 HTML | 약20.07MiB · 전체 글리프 WOFF2 적용 |
 
 개별100KiB·전체2.5MiB·내장 객체3MiB 기준을 모두 통과한다. 메모리얼은 `__MEMORIAL_MEDIA__`에 한 번만 들어가며 ASSET_PATHS에 없다. 기존 전투 텍스처는 지크 일반 공격 한 장 추가로46개다. 원본 PNG는 저장소 밖에 보존하고, 초상화·아틀라스·LocalStorage에 CG를 중복 저장하지 않는다. RGBA 픽셀만 계산하면 한 장은약2.97MiB이며 브라우저·GPU 부가 메모리를 포함한 실기기 메모리를 측정한 값은 아니다.
 
 현재 Windows Playwright WebKit은8×8 AVIF의420/444·8/10/12bit 조합과 원본 AVIF 모두 디코딩하지 못했다. 같은 입력의 Chromium은 성공한다. [Playwright 문서](https://playwright.dev/docs/browsers#webkit)도 플랫폼별 미디어 코덱 차이를 설명한다. 기본판에서 실패 안내와 계속 읽기·닫기를 확인하고, 첨부가 허용한 별도 WebP 전용 호환판을 제공한다. 한 HTML에 두 형식을 중복 삽입하지 않는다.
 
-호환판은 같은30장을720×1080 WebP q82·effort6·smartSubsample로 변환한다. 바이너리2,031,414B·1.937MiB, 평균66.13KiB, 최대102,164B·99.77KiB로 개별100KiB 미만이다. Base64 합계는약2.583MiB이며 기본판과 같은 엄격한 전체 기준 안에 있다. 실제30장 WebP data URL을 WebKit 오프라인에서 모두 디코딩했다.
+호환판은 원본 PNG에서 직접 생성한720×1080 WebP만 읽는다. AVIF에서 다시 변환하지 않는다. 28장 q82, 은하고래 q80, 혹한의마녀 q78이며 effort6·smartSubsample를 유지한다. 바이너리2,232,062B·2.129MiB, 최대95,642B·93.40KiB, 내장 객체약2.839MiB다. 실제 품질 향상과 기존 예산 통과를 확인했으며 자세한 원본/이중 손실/직접 인코딩 비교는 [미디어 기록](MEMORIAL_MEDIA.md)에 있다.
 
 로컬 산출물은 다음 명령으로 재생성한다.
 
@@ -76,7 +78,7 @@ node defense_test/scripts/build.mjs --web
 - WebP1종 호환판: `test-results/compat/StarGardenDefenseSoloCompat.html`.
 - 폴더 배포판: `test-results/web/StarGardenDefense.html`과 같은 폴더의 `memorial/`. 개별 AVIF·WebP 파일명은 각 내용의 해시를 포함한다. 처음에는 아무 CG도 읽지 않고 현재 그림의 AVIF 오류에만 같은 img의 WebP URL로 재시도한다. HTML과 폴더를 함께 옮겨야 한다.
 
-## 최종 검증 증거
+## PR #580 최초 검증 증거
 
 필수 `npm run verify`는 최종 재실행258.41초에 **PASS**했다. 선택은 defense_test의 빌드·87개 계약/회귀·생성 보고서 대조·Chromium·WebKit·변경 JS 구문검사이며 다른 게임의 런타임 명령을 실행하지 않았다. 배포 HTML과 HEAD의 HTML을 줄 끝 정규화 후 대조해 일치함을 확인했다. 아래 주요 증거는 최종 실행 코드 `cf8ea85` 기준이며 이후 보고서 커밋은 실행 입력을 바꾸지 않는다.
 
@@ -97,7 +99,7 @@ node defense_test/scripts/build.mjs --web
 
 브라우저 검증은320×568·390×844·1280×900에서 실제 버튼으로 진행한다. 호감도9/10 경계,30개 기억 연속 열기·닫기, 닫는 중 decode 완료 무시, 읽던 위치 복구, 고정 조작과 본문 경계, 그림 모드 제목 좌표, 보상 저장 실패, 자동→수동,1종 소환/저장/재개, 폴더 WebP 오류 복구를 포함한다. WebKit의 로컬 파일 지연 로드는 offline 플래그가 file://까지 차단하므로 폴더 배포만 로컬 파일 읽기를 허용하고 HTTP 경로는 계속 차단한다. 단일 내장판과 호환판은 offline 상태에서 조작한다.
 
-검토 캡처와 브라우저의 화면 좌표·오류·외부 요청 JSON은 `review/memorial/`에 보존한다. 기존 테스트 산출물 전체는 `test-results/`에 남아 있다.
+반복 캡처와 화면 좌표·오류·외부 요청 dump는 후속 정리에서 Git 제외 `test-results/archived-pr580-review/`로 이동했다. `review/memorial/`에는 대표320·390 각1장, 간결한 요약JSON과 검증 방법만 남긴다. 새 검증 산출물은 `test-results/`에 있고 기존 PR 검증 workflow에서 PNG·요약 JSON만 7일 artifact로 보관한다.
 
 ## 남은 검증 범위
 
