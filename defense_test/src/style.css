@@ -1,4 +1,4 @@
-@font-face{font-family:Garden;src:url('__FONT__') format('truetype');font-display:swap}
+@font-face{font-family:Garden;src:url('__FONT__') format('woff2');font-display:swap}
 
 /* ───────── Tokens ───────── */
 :root{

@@ -1,0 +1,130 @@
+{
+  "baseline": {
+    "commit": "71f3d4c",
+    "standaloneLFBytes": 23379683,
+    "reviewFiles": 21,
+    "reviewBytes": 5689264
+  },
+  "implementation": {
+    "cgCount": 30,
+    "bondUnlock": 10,
+    "storyLines": 242,
+    "avifPreserved": 30,
+    "webpSource": "original PNG via normalized 720x1080",
+    "font": "full glyph WOFF2",
+    "combatChanged": false,
+    "saveRulesChanged": false,
+    "newRecurringTestCases": 0,
+    "newRequiredChecks": 0
+  },
+  "media": {
+    "avif": {
+      "binaryBytes": 1239023,
+      "maxBytes": 55639,
+      "width": 720,
+      "height": 1080,
+      "chroma": "4:4:4"
+    },
+    "webp": {
+      "binaryBytes": 2232062,
+      "maxBytes": 95642,
+      "width": 720,
+      "height": 1080,
+      "qualities": {
+        "78": 1,
+        "80": 1,
+        "82": 28
+      },
+      "advisoryAggregateBudgetExceededForQuality": true
+    }
+  },
+  "size": {
+    "standaloneLFBytes": 21045874,
+    "savedBytes": 2333809,
+    "savedPercent": 9.982209767343718,
+    "fontTTFBytes": 2119352,
+    "fontWOFF2Bytes": 368996,
+    "reviewRemovedFiles": 19,
+    "reviewRemovedBytes": 5413237,
+    "trackedDefenseTestTree": {
+      "baselineBytes": 78757992,
+      "implementationBytes": 73686256,
+      "savedBytes": 5071736,
+      "scope": "current tree only; excludes later documentation updates, not Git history"
+    }
+  },
+  "manualValidation": {
+    "allExistingUnitTests": {
+      "passed": 90,
+      "failed": 0
+    },
+    "selectorFixtures": {
+      "passed": 33,
+      "failed": 0
+    },
+    "fontBrowserComparisons": 20,
+    "fontPixelDifferences": 0,
+    "webpOnlyReadAudit": {
+      "webp": 30,
+      "avif": 0,
+      "png": 0
+    },
+    "memorialBuildPhase": {
+      "oldMeanMs": 6078.2886,
+      "newMeanMs": 31.6294666667
+    },
+    "memorialDOM": {
+      "maxImages": 1,
+      "closedImages": 0,
+      "deltaNodes": 2,
+      "deltaHeapBytes": -1273420,
+      "delayedDecodeDidNotReappear": true
+    },
+    "engineCandidate": {
+      "adopted": false,
+      "meanImprovementPercent": 7.1647,
+      "oneSeedRegressionPercent": 3.51,
+      "matchingSerializedRuns": 27
+    },
+    "sourceAvifReproduction": 30,
+    "webpFullPixelDecodes": 30,
+    "inputAndAlphaCases": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "releaseValidation": {
+    "implementationCommit": "fad1965",
+    "npmVerify": "PASS",
+    "seconds": 240.71,
+    "selectedRegressionTests": 77,
+    "chromium": {
+      "pass": true,
+      "captures": 62,
+      "errors": 0,
+      "externalRequests": 0
+    },
+    "webkit": {
+      "pass": true,
+      "captures": 63,
+      "errors": 0,
+      "externalRequests": 0,
+      "windowsAvifCodec": false,
+      "webpCompatibility": true
+    },
+    "committedArtifactMatchesBuild": true,
+    "physicalAndroid": "not tested",
+    "physicalIOS": "not tested",
+    "physicalDeviceEvidence": "No accessible physical test device confirmed"
+  },
+  "evidence": {
+    "representativeScreens": [
+      "chromium-memorial-reader-320x568.png",
+      "chromium-memorial-reader-390x844.png"
+    ],
+    "details": "../../MEDIA_EFFICIENCY.md",
+    "method": "README.md",
+    "largeLocalEvidence": "defense_test/test-results/ (Git ignored)",
+    "ciArtifact": "defense-memorial-review, retention 7 days"
+  }
+}
