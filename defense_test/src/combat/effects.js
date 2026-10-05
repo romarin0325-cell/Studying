@@ -326,13 +326,13 @@ export class CombatFX{
           // Authored cone vertex is at (12%,50%), radius 64% of its square.
           // Clip every flame to the engine's exact 90-degree collision sector.
           const size=h.range/.64;
-          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.52,'source-over');
+          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.42,'source-over');
           ctx.globalAlpha=fade*.28;ctx.strokeStyle='#ffbc6a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.stroke();ctx.restore();
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
           ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.beginPath();ctx.arc(0,0,h.range,0,Math.PI*2);ctx.clip();
-          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.72,h.range*1.72,0,fade*.44,'source-over');ctx.restore();
+          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.6,h.range*1.6,0,fade*.26,'source-over');ctx.restore();
         }
     }
   }

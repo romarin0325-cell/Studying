@@ -10,7 +10,7 @@ import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const output=path.join(game,'test-results'),url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
+const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
 await fs.mkdir(output,{recursive:true});
 // Verify the release file in Git as well as the freshly built file. The first
@@ -32,8 +32,8 @@ async function boot(width,height,profile=createProfile(NOW),fault=false,location
   if(profile)await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
   if(fault)await page.addInitScript(rewardOnly=>{window.__failRewardCheckpoint=rewardOnly;const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){let phase='';try{const saved=JSON.parse(v);phase=saved.active?.run?JSON.parse(saved.active.run).phase:'';}catch{}if(window.__testQuotaFailure||window.__failRewardCheckpoint&&phase==='reward')throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};},fault==='reward');
   if(fault==='avif')await page.addInitScript(()=>{const decode=HTMLImageElement.prototype.decode;HTMLImageElement.prototype.decode=function(){return /\.avif$/.test(this.src)?Promise.reject(new DOMException('Unsupported codec','EncodingError')):decode.call(this);};});
-  await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(String(value).startsWith('data:image/avif')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
-  await page.goto(location);await context.setOffline(true);await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
+  await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(this.dataset.memorial&&String(value).startsWith('data:image/')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
+  await page.goto(location);await context.setOffline(!(isWebkit&&location.includes('/test-results/web/')));await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
   return {context,page,width,height};
 }
 const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
@@ -76,14 +76,29 @@ async function inspectCell(page,index){
   await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
 }
 try{
+  if(isWebkit){
+    const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
+    const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();
+    if(!supportsAvif){
+      const p=createProfile(NOW);p.heroes.star_boy.bond=10;const unsupported=await boot(390,844,p);
+      await unsupported.page.locator('.bond-button').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
+      assert.match(await unsupported.page.locator('#memory-loading').innerText(),/그림을 불러오지 못했습니다/);assert.equal(await unsupported.page.locator('img[data-memorial]').count(),0);
+      await unsupported.page.locator('[data-memory-step="1"]').click();assert.equal((await profile(unsupported.page)).memories.star_boy.page,1);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
+      execFileSync(process.execPath,['defense_test/scripts/build.mjs','--compat'],{cwd:path.dirname(game),stdio:'pipe'});
+      url=pathToFileURL(path.join(game,'test-results/compat/StarGardenDefenseCompat.html')).href;
+      console.log('WebKit AVIF codec unavailable: verified graceful reader and using separate WebP-only compatibility artifact.');
+    }
+  }
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('.bond-button').click();assert.match(await m.page.locator('.memory-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);
     await m.page.locator('[data-action="memorial-album"]').click();assert.equal(await m.page.locator('.memory-list [data-memorial]').count(),30);await shot(m.page,'memorial-album',width,height);
-    await m.page.locator('.memory-list [data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.match(await m.page.locator('.memory-title h3').innerText(),new RegExp(MEMORIAL_STORIES.zeke.title));await shot(m.page,'memorial-reader',width,height);
+    await m.page.locator('.memory-list [data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.match(await m.page.locator('.memory-title h3').innerText(),new RegExp(MEMORIAL_STORIES.zeke.title));
+    const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1&&reading.height>=90,'initial paragraph panel visible above fixed controls');await shot(m.page,'memorial-reader',width,height);
     await m.page.locator('[data-memory-step="1"]').click();assert.equal((await profile(m.page)).memories.zeke.page,1);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);await nav(m.page,'동료');await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.memory-entry').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('#memory-progress').innerText(),`${Math.round(2/MEMORIAL_STORIES.zeke.paragraphs.length*100)}% 읽음`);
-    await m.page.locator('[data-action="memorial-art"]').click();assert.equal(await m.page.locator('#memory-narrative').isVisible(),false);await shot(m.page,'memorial-art',width,height);await close(m.page);
+    await m.page.locator('[data-action="memorial-art"]').click();assert.equal(await m.page.locator('#memory-narrative').isVisible(),false);
+    assert.ok(await m.page.evaluate(()=>Math.max(document.querySelector('.memory-title h3').getBoundingClientRect().bottom,document.querySelector('[data-action="memorial-art"]').getBoundingClientRect().bottom)<=document.querySelector('.sheet-body').getBoundingClientRect().bottom+1),'art title and toggle remain visible above controls');await shot(m.page,'memorial-art',width,height);await close(m.page);
     if(width===390){
       // Open and close all thirty real pictures through buttons, never hidden preload.
       const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);

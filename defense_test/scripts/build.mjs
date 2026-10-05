@@ -6,12 +6,12 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {gameRoot as game,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS} from '../src/memorial.js';
 
-const solo=process.argv.includes('--solo'),web=process.argv.includes('--web');
-if(solo&&web)throw new Error('Choose one local test variant at a time.');
-const output=path.join(game,solo?'test-results/solo':web?'test-results/web':'dist');
-const filename=solo?'StarGardenDefenseSolo.html':'StarGardenDefense.html';
+const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat');
+if(web&&(solo||compat))throw new Error('Choose folder or standalone distribution.');
+const output=path.join(game,compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
+const filename=solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
 
-const assets={},media={},memorial={},memorialFallback={};let memorialBytes=0,memorialMax=0;
+const assets={},media={},memorial={},memorialFallback={};let memorialBytes=0,memorialMax=0,compatBytes=0,compatMax=0;
 for(const [id,relative] of Object.entries(ASSET_PATHS)){
   const source=assetFile(relative),bytes=await fs.readFile(source);
   const metadata=await sharp(bytes).metadata();if(!metadata.width||!metadata.height)throw new Error('Invalid canonical art: '+id);
@@ -41,9 +41,14 @@ for(const h of HEROES){
     const fallback=await sharp(bytes).webp({quality:82,effort:6,smartSubsample:true}).toBuffer(),fallbackHash=createHash('sha256').update(fallback).digest('hex').slice(0,12),fallbackName=`${h.id}.${fallbackHash}.webp`;
     await fs.writeFile(path.join(output,'memorial',fallbackName),fallback);
     memorial[h.id]=`./memorial/${stem}.avif`;memorialFallback[h.id]=`./memorial/${fallbackName}`;
+  }else if(compat){
+    const converted=await sharp(bytes).webp({quality:82,effort:6,smartSubsample:true}).toBuffer();
+    compatBytes+=converted.length;compatMax=Math.max(compatMax,converted.length);
+    memorial[h.id]='data:image/webp;base64,'+converted.toString('base64');
   }else memorial[h.id]='data:image/avif;base64,'+bytes.toString('base64');
 }
-if(Object.keys(memorial).length!==30||memorialBytes>=2.5*1024*1024||(!web&&Buffer.byteLength(JSON.stringify(memorial))>=3*1024*1024))throw new Error('Memorial count or aggregate budget exceeded.');
+if(Object.keys(memorial).length!==30||memorialBytes>=2.5*1024*1024||(!web&&!compat&&Buffer.byteLength(JSON.stringify(memorial))>=3*1024*1024))throw new Error('Memorial count or aggregate budget exceeded.');
+if(compat&&(compatBytes>=3*1024*1024||compatMax>=120*1024||Buffer.byteLength(JSON.stringify(memorial))>=4*1024*1024))throw new Error('WebP compatibility media budget exceeded.');
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.ttf')),license=await fs.readFile(assetFile('./assets/Jua-OFL.txt'),'utf8');
 const css=(await fs.readFile(path.join(game,'src/style.css'),'utf8')).replace('__FONT__','data:font/ttf;base64,'+font.toString('base64'));
 const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo)}});
@@ -56,5 +61,6 @@ for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source
 const html=source.replace('/*__STYLE__*/',()=>css).replace('/*__ASSETS__*/',()=>`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`).replace('/*__SCRIPT__*/',()=>js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script')).replace('</head>',()=>`<!-- Jua font, SIL OFL 1.1\n${license.replaceAll('--','—')}\n-->\n</head>`);
 if(/__FONT__|\/\*__\w+__\*\//.test(html)||/<(?:script|link)[^>]*(?:src|href)=["'](?:\.\/|https?:)/i.test(html))throw new Error('Non-offline build');
 await fs.mkdir(output,{recursive:true});await fs.writeFile(path.join(output,filename),html);
-console.log(`${filename} · ${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB · ${Object.keys(assets).length} battle textures · ${HEROES.length} companions · ${solo?'isolated one-person deck':web?'folder distribution':'standalone offline'}`);
+console.log(`${filename} · ${(Buffer.byteLength(html)/1024/1024).toFixed(2)} MiB · ${Object.keys(assets).length} battle textures · ${HEROES.length} companions · ${solo?'isolated one-person deck':web?'folder distribution':compat?'WebP-only compatibility':'standalone offline'}`);
 console.log(`Memorial: 30 AVIF · total ${(memorialBytes/1024/1024).toFixed(3)} MiB · mean ${(memorialBytes/30/1024).toFixed(2)} KiB · max ${(memorialMax/1024).toFixed(2)} KiB · current image only`);
+if(compat)console.log(`Compatibility: 30 WebP only · total ${(compatBytes/1024/1024).toFixed(3)} MiB · mean ${(compatBytes/30/1024).toFixed(2)} KiB · max ${(compatMax/1024).toFixed(2)} KiB · one format embedded`);
