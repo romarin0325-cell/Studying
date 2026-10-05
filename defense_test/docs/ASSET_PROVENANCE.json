@@ -577,17 +577,17 @@
     {
       "id": "lightning_sage",
       "source": "defense_test/assets/memorial/lightning_sage.avif",
-      "sha256": "5bd78990b3133ae6172366b547032600b0f2b6df9630ef9c10e19fde55178f6b",
+      "sha256": "336914bb73634f7371dc4ade3f2cd81fa6dd4201a446cf8c47b108b6aafcb63e",
       "width": 720,
       "height": 1080,
-      "bytes": 37052,
-      "sourceSha256": "c85784de85321bbd1c81fc959999dd9e137f0d7d402f74c65558ff19bdba9d9f",
+      "bytes": 38682,
+      "sourceSha256": "6a87f0e8c4884bd5105cc3f461d847aed162cd3052df6267b37f5b994955f6a1",
       "webp": {
         "source": "defense_test/assets/memorial-webp/lightning_sage.webp",
-        "sha256": "d516b62567545f82364886027cf2f96ede5c86bb9c2e8638d1adb0b6fbcd94b8",
+        "sha256": "9238b74fed639ce7f232838094f95f29528d3239f0ea666b33917ac71b24e723",
         "width": 720,
         "height": 1080,
-        "bytes": 68560,
+        "bytes": 71038,
         "quality": 82
       }
     },

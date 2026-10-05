@@ -25,6 +25,14 @@ function ensureHero(s,id){for(let i=0;i<20&&!E.bestUnit(s,id);i++){s.gold+=1000;
 function close(actual,expected,label='numeric contract'){
   assert.ok(Math.abs(actual-expected)<=1e-8*Math.max(1,Math.abs(expected)),label+': '+actual+' != '+expected);
 }
+function distanceToPath(point){
+  let best=Infinity;
+  for(let i=1;i<E.PATH.length;i++){
+    const [ax,ay]=E.PATH[i-1],[bx,by]=E.PATH[i],dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((point.x-ax)*dx+(point.y-ay)*dy)/l2));
+    best=Math.min(best,Math.hypot(point.x-(ax+dx*t),point.y-(ay+dy*t)));
+  }
+  return best;
+}
 // Start with the real run schema, then place isolated, valid pre-battle units.
 // All behavior under assertion is exercised through engine commands and step.
 function traitArena(placements,{artifacts=[],seed=1234,wave=1}={}){
@@ -385,11 +393,11 @@ test('Mushroom merges keep poison, seed and alchemy effects in either Rumi direc
   }
 });
 
-test('Aurora base damage is reduced once and only an even count of at least two gains 30%',()=>{
+test('Aurora base damage is reduced once and only an even count of at least two gains 50%',()=>{
   close(HERO.aurora.damage,14*.85,'Aurora authored base damage');
   for(const count of [1,2,3,4,5]){
     const s=traitArena([12,0,4,20,24].slice(0,count).map(index=>({hero:'aurora',index})));
-    const multiplier=count>=2&&count%2===0?1.3:1;
+    const multiplier=count>=2&&count%2===0?1.5:1;
     for(const u of s.board.filter(Boolean)){
       close(E.personalTrait(s,u).damageMultiplier,multiplier);
       close(E.power(s,u),14*.85*multiplier);
@@ -402,7 +410,7 @@ test('Aurora counts only Auroras when other companions change the whole-board pa
   for(const count of [1,2,3,4]){
     const placements=[12,0,4,20].slice(0,count).map(index=>({hero:'aurora',index}));
     const s=traitArena([...placements,{hero:'night_rabbit',index:24}]);
-    const [enemy]=enemiesFor(s,[{progress:1200}]),multiplier=count%2===0?1.3:1;
+    const [enemy]=enemiesFor(s,[{progress:1200}]),multiplier=count%2===0?1.5:1;
     assert.equal(s.board.filter(Boolean).length,count+1);
     for(const u of s.board.filter(u=>u?.hero==='aurora')){
       assert.equal(E.personalTrait(s,u).count,count);
@@ -430,24 +438,25 @@ test('overlapping mirrors from different cast sources never record each other bu
   close(second.stored,actual+s.stats.damage-before,'later ordinary attacks still record');
   const recorded=second.stored;second.life=.001;E.step(s,.001);
   const impacts=s.events.filter(e=>e.type==='finisherImpact'&&e.kind==='mirror');
-  assert.equal(impacts.length,2);close(impacts[0].echoDamage,Math.min(first.cap,actual*.45));
-  close(impacts[1].echoDamage,Math.min(second.cap,recorded*.45));
+  assert.equal(impacts.length,2);close(impacts[0].echoDamage,actual*.45);
+  close(impacts[1].echoDamage,recorded*.45);
   assert.equal(s.finishers.length,0);
 });
 
-test('mirror recording caps real shield and HP damage, preserves its bound on resume and rejects tampered records',()=>{
+test('mirror recording keeps the full resolved damage without an echo ceiling and rejects tampered records',()=>{
   const s=traitArena([{hero:'aurora',index:0},{hero:'star_boy',index:12,rank:5}]);
-  enemiesFor(s,[{progress:1200,shield:50}]);s.gauge=120;assert.ok(E.cast(s,'aurora').ok);
-  const mark=s.finishers[0],shot=launchNormal(s,s.board[12]);resolveNormal(s,shot);
-  assert.ok(shot.damage>mark.cap/.45);close(mark.stored,mark.cap/.45);
-  const restored=E.restore(E.serialize(s));assert.ok(restored);close(restored.finishers[0].stored,mark.cap/.45);
-  for(const change of [{stored:mark.cap/.45+1},{stored:-1},{cap:-1},{life:mark.total+.001}]){
+  const [enemy]=enemiesFor(s,[{progress:1200,shield:50}]);s.gauge=120;assert.ok(E.cast(s,'aurora').ok);
+  const mark=s.finishers[0],shot=launchNormal(s,s.board[12]),hp=enemy.hp,shield=enemy.shield;resolveNormal(s,shot);
+  const actual=hp-enemy.hp+shield-enemy.shield;
+  assert.equal(mark.cap,undefined);close(mark.stored,actual);assert.ok(actual>shot.damage*.45||actual>0);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);close(restored.finishers[0].stored,actual);
+  for(const change of [{stored:-1},{cap:-1},{life:mark.total+.001}]){
     const bad=JSON.parse(E.serialize(s));Object.assign(bad.finishers[0],change);assert.equal(E.restore(bad),null);
   }
   for(let i=0;i<65;i++){E.step(s,.05);E.step(restored,.05);}
   assert.equal(E.serialize(restored),E.serialize(s));
   const impact=s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror');assert.ok(impact);
-  close(impact.echoDamage,mark.cap);
+  close(impact.echoDamage,actual*.45);
 });
 
 test('Storm rolls separately for each actual ordinary recipient including the off-axis gust chain',()=>{
@@ -521,7 +530,7 @@ test('Storm instant kill never triggers on bosses, damage over time, ultimate at
   }
 });
 
-test('Flame fires at seeded map ground independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
+test('Flame fires at a seeded path point independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
   const locations=[];
   for(const [progress,artifacts] of [[0,[]],[1110,[]],[1110,['roots']]]){
     const s=traitArena([{hero:'flame_sage',index:0}],{artifacts}),[enemy]=enemiesFor(s,[{progress}]),u=s.board[0];
@@ -529,6 +538,7 @@ test('Flame fires at seeded map ground independently of enemy position, locks ta
     E.cycleTarget(s,0);assert.equal(u.priority,priority);close(E.power(s,u),HERO.flame_sage.damage);
     s.rng=1;const shot=launchNormal(s,u);
     assert.equal(shot.ground,true);assert.equal(shot.target,null);locations.push(shot.to);
+    assert.ok(distanceToPath(shot.to)<1,'flame zone lands on the path');
     assert.ok(shot.to.x>=E.GROUND_BOUNDS.left&&shot.to.x<=E.GROUND_BOUNDS.right);
     assert.ok(shot.to.y>=E.GROUND_BOUNDS.top&&shot.to.y<=E.GROUND_BOUNDS.bottom);
     assert.ok(E.restore(E.serialize(s)),'ground-target shot is resumable');
@@ -541,6 +551,19 @@ test('Flame fires at seeded map ground independently of enemy position, locks ta
     if(progress===0){E.step(s,.001);close(hp-enemy.hp,zone.damage*.22,'boosted ground tick resolves against a nearby path enemy');}
   }
   assert.deepEqual(locations[0],locations[1]);assert.deepEqual(locations[1],locations[2]);
+});
+
+test('Mushroom fields add one poison stack per spore tick and skill detail uses the highest field rank',()=>{
+  const s=traitArena([{hero:'mushroom_king',index:0,rank:1},{hero:'mushroom_king',index:12,rank:5},{hero:'aurora',index:4,rank:2},{hero:'aurora',index:5,rank:4}]);
+  const [enemy]=enemiesFor(s,[{progress:1200}]);
+  landZone(s,s.board[12],enemy);
+  enemy.statusEffects=enemy.statusEffects.filter(effect=>effect.type!=='poison');E.statusState(s,enemy);
+  E.step(s,.001);
+  assert.equal(enemy.statusEffects.find(effect=>effect.source.startsWith('zone:')).amount,1);
+  const preview=E.castPreview(s,'aurora');
+  assert.equal(preview.rank,4);
+  assert.match(preview.lines[0],/4성/);
+  assert.match(preview.lines.join('\n'),/상한은 없습니다/);
 });
 
 test('Time Ruler keeps its highest-rank incumbent when a merge creates a tie or either tied unit moves',()=>{

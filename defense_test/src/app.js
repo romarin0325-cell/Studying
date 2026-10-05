@@ -263,10 +263,10 @@ function updateBattle(){
 function updateUnit(){
   const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;renderer.selected=u?selected:-1;
   if(!u){delete panel.dataset.sig;return;}
-  const stat=E.combatStats(run,u,selected),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`무작위 화염장 · 0.5초당 ${(stat.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${stat.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label,sig=`${u.uid}:${u.rank}:${u.priority}:${stat.damage.toFixed(1)}:${stat.interval.toFixed(2)}:${selected}:${traitText}`;
+  const stat=E.combatStats(run,u,selected),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(stat.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${stat.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label,sig=`${u.uid}:${u.rank}:${u.priority}:${stat.damage.toFixed(1)}:${stat.interval.toFixed(2)}:${selected}:${traitText}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;
-  panel.innerHTML=`<div class="unit-panel-top"><div><strong>${h.name}</strong><small>${flame?`장판 위력 ${(stat.damage*trait.zoneDamageMultiplier).toFixed(1)}`:`위력 ${fmt(stat.damage)}`} · 공격 주기 ${stat.interval.toFixed(2)}초</small></div><span class="rank">${icon('star')}${u.rank}</span></div>${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성 상태'}</span>${traitText}</p>`:''}<div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'무작위 위치':'무작위 적'}</span>`:`<button data-action="target">목표: ${({first:'선두',boss:'보스',strong:'강적',last:'후미'})[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
+  panel.innerHTML=`<div class="unit-panel-top"><div><strong>${h.name}</strong><small>${flame?`장판 위력 ${(stat.damage*trait.zoneDamageMultiplier).toFixed(1)}`:`위력 ${fmt(stat.damage)}`} · 공격 주기 ${stat.interval.toFixed(2)}초</small></div><span class="rank">${icon('star')}${u.rank}</span></div>${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성 상태'}</span>${traitText}</p>`:''}<div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${({first:'선두',boss:'보스',strong:'강적',last:'후미'})[u.priority]}</button>`}<button data-skill-detail="${u.hero}">스킬 상세</button><button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
 }
 function battleCommand(result){if(!result?.ok)toast(result?.reason);else saves.mark();updateBattle();}
 function bindArena(){
@@ -321,8 +321,8 @@ function openMemorial(id){
   if(!e.owned||e.bond<story.unlockBond){
     show(h.name,'아직 펼치지 않은 기억',`<div class="memory-locked">${image(id,true)}<span class="memory-seal">${icon('lock')}</span><h3>${escapeText(story.title)}</h3><p>호감도 ${story.unlockBond}에서<br>함께한 순간을 다시 만날 수 있습니다.</p><div class="memory-bond"><span>${icon('heart')}현재 호감도 <b>${e.bond}</b></span><div class="progress"><span style="width:${e.owned?Math.min(100,e.bond/story.unlockBond*100):0}%"></span></div></div>${!e.owned?'<small>먼저 이 동료를 만나 주세요.</small>':''}</div>`,`<button class="secondary wide" data-action="memorial-album">기억 목록</button>`,'memorial-locked',id);return;
   }
-  show(h.name,'인연 이야기',`<div class="memory-reader"><div class="memory-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">함께한 순간을 펼치는 중…</div></div><div class="memory-title"><span>${icon('heart')}호감도 ${e.bond}</span><h3>${escapeText(story.title)}</h3><button class="link" data-action="memorial-art" aria-pressed="false">그림만 보기</button></div><div class="memory-narrative" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress"></span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0"></div><details class="memory-log"><summary>이야기 전체 보기</summary>${story.paragraphs.map(t=>`<p>${escapeText(t)}</p>`).join('')}</details></div></div>`,`<div class="memory-controls"><button class="secondary" data-action="memorial-album" aria-label="기억 목록">${icon('book')}</button><button class="secondary" id="memory-prev" data-memory-step="-1">이전</button><button class="primary" id="memory-next" data-memory-step="1">다음 ${icon('chevron')}</button></div>`,'memorial',id);
-  memorialHero=id;memorialPage=p().memories[id]?.page||0;updateMemorialPage();
+  show(h.name,'인연 이야기',`<div class="memory-reader"><div class="memory-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">함께한 순간을 펼치는 중…</div></div><div class="memory-title"><span>${icon('heart')}호감도 ${e.bond}</span><h3>${escapeText(story.title)}</h3><button class="link" data-action="memorial-art" aria-pressed="false">그림만 보기</button></div><div class="memory-narrative" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress">0% 읽음</span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0">${story.paragraphs.map(t=>`<p class="${/^["“]/.test(t)?'dialogue':''}">${escapeText(t)}</p>`).join('')}</div></div></div>`,`<div class="memory-controls"><button class="secondary wide" data-action="memorial-album" aria-label="기억 목록">${icon('book')} 목록</button></div>`,'memorial',id);
+  memorialHero=id;memorialPage=p().memories[id]?.page||0;bindMemorialScroll();
   const generation=memorialGeneration,img=new Image();memorialImage=img;img.dataset.memorial='1';img.decoding='async';img.width=720;img.height=1080;img.alt=`${h.name} · ${story.title}`;
   const src=window.__MEMORIAL_MEDIA__?.[id];if(!src){$('memory-loading').textContent='그림을 불러올 수 없습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');return;}
   img.src=src;
@@ -335,13 +335,22 @@ function openMemorial(id){
     }catch{if(generation!==memorialGeneration||modal!=='memorial')return;$('memory-loading').textContent='그림을 불러오지 못했습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');}
   })();
 }
-function updateMemorialPage(delta=0){
-  const story=MEMORIAL_STORIES[memorialHero];if(!story||modal!=='memorial')return;
-  memorialPage=delta>0&&memorialPage===story.paragraphs.length-1?0:Math.max(0,Math.min(story.paragraphs.length-1,memorialPage+delta));
-  if(p().memories[memorialHero]?.page!==memorialPage)act('memory',{id:memorialHero,page:memorialPage},false);
-  const text=$('memory-text');text.textContent=story.paragraphs[memorialPage];text.scrollTop=0;text.dataset.dialogue=String(/^["“]/.test(text.textContent));
-  $('memory-progress').textContent=`${Math.round((memorialPage+1)/story.paragraphs.length*100)}% 읽음`;$('memory-progress-fill').style.width=`${(memorialPage+1)/story.paragraphs.length*100}%`;
-  $('memory-prev').disabled=memorialPage===0;$('memory-next').innerHTML=memorialPage===story.paragraphs.length-1?'처음부터 읽기':`다음 ${icon('chevron')}`;
+function bindMemorialScroll(){
+  const story=MEMORIAL_STORIES[memorialHero],text=$('memory-text');if(!story||!text||modal!=='memorial')return;
+  const update=()=>{
+    const max=text.scrollHeight-text.clientHeight,ratio=max<=1?1:Math.min(1,text.scrollTop/max),page=Math.min(story.paragraphs.length-1,Math.round(ratio*(story.paragraphs.length-1)));
+    memorialPage=page;$('memory-progress').textContent=`${Math.round(ratio*100)}% 읽음`;$('memory-progress-fill').style.width=`${ratio*100}%`;
+    if(p().memories[memorialHero]?.page!==page)act('memory',{id:memorialHero,page},false);
+  };
+  text.addEventListener('scroll',update,{passive:true});
+  const saved=p().memories[memorialHero]?.page||0;
+  if(saved>0){const max=text.scrollHeight-text.clientHeight;text.scrollTop=max*saved/(story.paragraphs.length-1);}
+  update();
+}
+function skillDetail(id){
+  const preview=E.castPreview(run,id),h=HERO[id];if(!preview||!h){toast('전장에 이 동료가 있어야 합니다.');return;}
+  const selectedUnit=run.board[selected],lower=selectedUnit&&selectedUnit.hero===id&&selectedUnit.rank<preview.rank;
+  show(h.skill.name,`${preview.rank}성 발동`,`${lower?`<p class="fineprint">선택한 ${selectedUnit.rank}성이 아니라, 전장에서 가장 높은 ${preview.rank}성이 스킬을 사용합니다.</p>`:''}<div class="ability"><span class="ability-tag skill">지금 누르면</span>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}</div><details class="more"><summary>스킬 설명</summary><p>${escapeText(preview.text)}</p></details>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'skill-detail',id);
 }
 function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;syncBattlePhase();updateBattle();}
 function leave(){
@@ -378,14 +387,14 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
-  if(d.draw){draw(Number(d.draw));return;}if(d.level){if(act('level',{id:d.level}).ok)heroDetail(d.level);return;}
-  if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok)(d.enhance?heroDetail:relicDetail)(id);return;}
+  if(d.draw){draw(Number(d.draw));return;}if(d.level){if(act('level',{id:d.level}).ok){render();heroDetail(d.level);}return;}
+  if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok){render();(d.enhance?heroDetail:relicDetail)(id);}return;}
   if(d.equip){if(act('equip',{id:d.equip}).ok)relicDetail(d.equip);return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 변경 · ${HERO[d.setPartner].name}`);}return;}
   if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명입니다. 먼저 한 명을 해제하세요.`);return;}team(true);return;}
   if(d.dispatchSlot){chooseDispatch(Number(d.dispatchSlot));return;}if(d.send){if(act('dispatch',{id:d.send,slot:Number(d.slot)}).ok){close();render();}return;}
   if(d.claimDispatch){if(act('claimDispatch',{slot:Number(d.claimDispatch)}).ok)render();return;}if(d.draft){if(act('draft',{index:Number(d.draft)},false).ok)render();return;}
-  if(d.skill){battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
+  if(d.skill){battleCommand(E.cast(run,d.skill));return;}if(d.skillDetail){skillDetail(d.skillDetail);return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){if(act('daily',{id:d.daily}).ok)daily();return;}
   if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
   const actions={close:()=>{if(modal==='reward')return;close();},settings:showSettings,partner:partners,team:()=>team(),'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
