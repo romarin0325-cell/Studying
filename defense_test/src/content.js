@@ -30,15 +30,17 @@ const worlds=[0,1,0,3,4,2,5,3,6];
 export const CHAPTERS=Array.from({length:45},(_,id)=>{
   const cycle=Math.floor(id/9)+1,boss=BOSS_ORDER[id%9],base=source.STAGE_THEMES[worlds[id%9]];
   return {...base,id,name:`${base.name}`,caption:`${cycle}번째 별길 · ${BOSSES[boss].name}`,bosses:[boss,boss,boss],
-    hp:1+(3.05-1)*id/8,cycle,stage:id+1};
+    hp:1+2.5*id/8,cycle,stage:id+1};
 });
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
 export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=source.TRANSFORM_ART;
 export const ASSET_PATHS=source.ASSET_PATHS;
 export const TUNING=Object.freeze({
   heroDrawCost:100,relicDrawCost:80,heroRates:[.70,.25,.048,.002],
-  duplicateGrowth:1.58,enhanceStep:.10,levelStep:.04,levelCostBase:18,levelCostGrowth:1.14,
-  specialCap:.15,specialHalf:8,dispatchHours:20,dispatchStageStep:.05,
+  // Stat renewal v1: duplicates +5% each with a support milestone every 5;
+  // the garden level (shared by every companion) costs 90×1.12^(L-1) dust.
+  duplicateGrowth:1.58,enhanceStep:.05,levelStep:.04,levelCostBase:90,levelCostGrowth:1.12,
+  specialStep:.10,specialEvery:5,dispatchHours:20,dispatchStageStep:.05,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });

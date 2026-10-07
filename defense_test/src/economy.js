@@ -8,12 +8,13 @@ export function calendar(now=Date.now()){
 }
 export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;
-export const specialMultiplier=e=>1+T.specialCap*e/(e+T.specialHalf);
+export const specialMultiplier=e=>1+T.specialStep*Math.floor(e/T.specialEvery);
 export const levelCost=level=>Math.ceil(T.levelCostBase*T.levelCostGrowth**(level-1));
-export const heroMultiplier=entry=>(1+T.levelStep*(entry.level-1))*enhanceMultiplier(entry.enhance);
-export function combatPower(id,entry){
+// The garden level is shared by every companion; duplicates stay personal.
+export const heroMultiplier=(entry,garden=1)=>(1+T.levelStep*(garden-1))*enhanceMultiplier(entry.enhance);
+export function combatPower(id,entry,garden=1){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
-  const damage=h.damage/(h.interval+.13)*heroMultiplier(entry);
+  const damage=h.damage/(h.interval+.13)*heroMultiplier(entry,garden);
   const role=h.shape==='single'?1:1.12;
   const support=['hasteAura','powerAura','harmonyAura'].includes(h.trait.type)?1.22:1;
   return Math.round((damage*18*role*support+h.range*.12)*specialMultiplier(entry.enhance));

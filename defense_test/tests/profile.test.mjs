@@ -2,13 +2,38 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,DEFAULT_DECK} from '../src/content.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away} from '../src/profile.js';
-import {duplicateCost,HOUR,calendar} from '../src/economy.js';
+import {duplicateCost,HOUR,calendar,levelCost,heroMultiplier,combatPower} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
 function memory(p=null){let raw=p?JSON.stringify(p):null;return {fail:false,getItem:()=>raw,setItem(k,v){if(this.fail)throw Error('quota');raw=v;}};}
 const storeFor=p=>new ProfileStore(memory(p),NOW);
 const call=(s,a,args={},now=NOW)=>{const r=s.transact(a,args,now);assert.ok(r.ok,r.message);return r;};
+
+test('the garden level is shared by every companion and old companion levels migrate exactly once',()=>{
+  const p=createProfile(NOW);assert.equal(p.garden,1);p.dust=1000;const s=storeFor(p);
+  call(s,'level');assert.equal(s.value.garden,2);assert.equal(s.value.dust,1000-levelCost(1));assert.equal(levelCost(1),90);
+  for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.garden)-1.04)<1e-12);
+  assert.ok(combatPower('star_boy',s.value.heroes.star_boy,2)>combatPower('star_boy',s.value.heroes.star_boy,1));
+  s.value.dust=0;assert.equal(s.transact('level',{},NOW).ok,false);
+  // Old saves: 18×1.14^(L-1) spent on star_boy Lv.5 and snow_rabbit Lv.3 is 129 dust → garden 2 + 39 refund.
+  const old=createProfile(NOW);delete old.garden;old.dust=0;old.heroes.star_boy.level=5;old.heroes.snow_rabbit.level=3;
+  const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
+  assert.equal(migrated.garden,2);assert.equal(migrated.dust,39);assert.ok(HEROES.every(h=>migrated.heroes[h.id].level===1));
+  assert.deepEqual(parseProfile(JSON.stringify(migrated)),migrated);
+  const bad=structuredClone(migrated);bad.garden=0;assert.equal(validateProfile(bad),false);
+});
+
+test('a pre-renewal active run resumes with the renewed permanent multipliers',()=>{
+  const p=createProfile(NOW);p.heroes.star_boy.enhance=10;p.heroes.star_boy.level=4;
+  const s=storeFor(p);call(s,'begin',{mode:'main',stage:1});
+  const run=createBattle(s.value);const raw=JSON.parse(E.serialize(run));raw.meta.star_boy={power:2.4,special:1.08};
+  const old=structuredClone(s.value);delete old.garden;old.heroes.star_boy.level=4;old.active.run=JSON.stringify(raw);
+  const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated,'old checkpoint stays resumable');
+  const resumed=resumeBattle(migrated);assert.ok(resumed);
+  assert.ok(Math.abs(resumed.meta.star_boy.power-heroMultiplier(migrated.heroes.star_boy,migrated.garden))<1e-12);
+  assert.ok(Math.abs(resumed.meta.star_boy.special-1.2)<1e-12);
+});
 
 test('a new garden owns one of exactly the requested five heroes and starts with a valid deck',()=>{
   const p=createProfile(NOW);assert.ok(validateProfile(p));

@@ -3,9 +3,10 @@ import {heroMultiplier,specialMultiplier} from './economy.js';
 import * as engine from './combat/engine.js';
 import {TEAM_SIZE} from './team-config.js';
 
+export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>[id,{power:heroMultiplier(profile.heroes[id],profile.garden),special:specialMultiplier(profile.heroes[id].enhance)}]));
 export function createBattle(profile){
   const a=profile.active;if(!a||a.mode==='weekly'&&a.draft?.length!==TEAM_SIZE)return null;
-  const meta=Object.fromEntries(a.deck.map(id=>[id,{power:heroMultiplier(profile.heroes[id]),special:specialMultiplier(profile.heroes[id].enhance)}]));
+  const meta=battleMeta(profile,a.deck);
   const run=engine.newRun({deck:a.deck,chapter:a.stage-1,seed:a.seed,artifacts:profile.equipped,meta,
     relicAttack:profile.equipped.reduce((n,id)=>n+.02*profile.relics[id].enhance,0),mode:a.mode,boon:a.boon});
   if(a.mode==='weekly'){run.globalAttack=.05*a.boon;run.gauge=Math.min(engine.GAUGE_MAX,run.gauge+(TEAM_SIZE-a.boon)*4);}

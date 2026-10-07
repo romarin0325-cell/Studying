@@ -25,7 +25,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 23,
+    "damage": 25,
     "interval": 1.2,
     "attack": "slash",
     "trait": {
@@ -36,7 +36,7 @@ export const HEROES = [
       "name": "용의 맹세",
       "cost": 70,
       "type": "inferno",
-      "text": "전장 전체에 위력 5배의 화염검. 코어 생명력이 절반 미만이면 직접 피해가 두 배."
+      "text": "전장 전체에 위력 7배의 화염검과 화상. 코어 생명력이 절반 미만이면 14배."
     },
     "heightGroup": "tall",
     "role": "선봉 · 부채꼴",
@@ -99,7 +99,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 32,
+    "damage": 55,
     "interval": 1.25,
     "attack": "blade",
     "trait": {
@@ -110,7 +110,7 @@ export const HEROES = [
       "name": "제노사이드 스텝",
       "cost": 80,
       "type": "execute",
-      "text": "보스 우선 최대 5명에게 위력 16배. 체력 35% 이하(보스 40%)면 30배. 보스 추가 피해도 적용됩니다."
+      "text": "보스 우선 최대 5명에게 위력 16배. 체력 35% 이하(보스 40%)면 30배. 처형으로 쓰러뜨리면 다음 적에게 이어집니다(최대 5회)."
     },
     "heightGroup": "medium",
     "role": "보스 처형 · 단일",
@@ -137,18 +137,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 23,
+    "damage": 26,
     "interval": 1.05,
     "attack": "star",
     "trait": {
       "type": "miracle",
-      "text": "세 번째 공격은 위력 1.8배 · 방어 무시."
+      "text": "세 번째 공격은 위력 1.8배. 가장 높은 성급의 신데렐라 한 명만 위력 +50%."
     },
     "skill": {
       "name": "자정의 기적",
       "cost": 65,
       "type": "glassfall",
-      "text": "전장의 적들에게 위력 8배의 방어 무시 유리 별비를 내립니다."
+      "text": "전장 전체에 위력 6배의 유리 별비. 10초 동안 수혜 신데렐라의 기본 공격이 주변 적까지 맞힙니다."
     },
     "heightGroup": "medium",
     "role": "기적 연타 · 별탄",
@@ -185,7 +185,7 @@ export const HEROES = [
       "name": "하얀 숨결",
       "cost": 65,
       "type": "freeze",
-      "text": "모든 적을 3초 동안 얼리고 얼음 피해를 줍니다."
+      "text": "모든 적에게 위력 3배 피해와 2초 빙결, 6초 동안 50% 감속."
     },
     "heightGroup": "short",
     "role": "감속 · 작은 폭발",
@@ -211,7 +211,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 36,
+    "damage": 32,
     "interval": 1.65,
     "attack": "ice",
     "trait": {
@@ -222,7 +222,7 @@ export const HEROES = [
       "name": "백야의 눈사태",
       "cost": 85,
       "type": "avalanche",
-      "text": "넓은 범위에 거대한 얼음 폭발. 얼어 있는 적에게 두 배 피해."
+      "text": "넓은 범위에 위력 4배 얼음 폭발. 기절·빙결 중인 적에게는 12배."
     },
     "heightGroup": "medium",
     "role": "빙결 연계 · 포격",
@@ -248,18 +248,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 17,
+    "damage": 29,
     "interval": 0.7,
     "attack": "blade",
     "trait": {
       "type": "rabbit",
-      "text": "두 적 사이를 튑니다. 다른 토끼 종류마다 공격속도 +20%."
+      "text": "두 적 사이를 튑니다. 전장의 다른 토끼 종류마다 밤토끼 공격속도 +20%."
     },
     "skill": {
       "name": "달그림자 도약",
       "cost": 65,
       "type": "flurry",
-      "text": "선두 9체에 위력 14배 연속 타격. 밤토끼 이외의 토끼 종류당 표적 +2(눈·은토끼 모두 편성 시 13체). 같은 종류의 여러 기는 한 번만 셉니다."
+      "text": "선두 9체에 위력 9배 연속 타격. 밤토끼 이외의 토끼 종류당 표적 +2(눈·은토끼 모두 편성 시 13체). 같은 종류의 여러 기는 한 번만 셉니다."
     },
     "heightGroup": "short",
     "role": "토끼 연계 · 도탄",
@@ -285,7 +285,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 32,
+    "damage": 58,
     "interval": 1.8,
     "attack": "stone",
     "trait": {
@@ -296,7 +296,7 @@ export const HEROES = [
       "name": "대륙의 맥동",
       "cost": 75,
       "type": "quake",
-      "text": "지진으로 모든 적을 뒤로 밀고 기절시킵니다."
+      "text": "모든 적에게 위력 3배 피해, 뒤로 밀치고 1.5초 기절. 경로 마지막 3분의 1에 있는 적은 두 배로 밀리고 3초 기절."
     },
     "heightGroup": "short",
     "role": "근접 방벽 · 타일 충격",
@@ -322,7 +322,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 14,
+    "damage": 30,
     "interval": 0.85,
     "attack": "wind",
     "trait": {
@@ -359,18 +359,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 20,
+    "damage": 39,
     "interval": 1.2,
     "attack": "lightning",
     "trait": {
       "type": "chain",
-      "text": "가까운 적에게 번개가 이어집니다. 같은 동료가 상하좌우로 연결될수록 위력·체인 강화."
+      "text": "가까운 적에게 번개가 이어집니다. 같은 동료가 상하좌우로 연결될수록 위력·체인 강화(필살기에도 적용)."
     },
     "skill": {
       "name": "천둥의 연쇄",
       "cost": 80,
       "type": "thunder",
-      "text": "모든 적을 연쇄 타격하고 짧게 기절시킵니다."
+      "text": "모든 적에게 위력 7배 연쇄 타격과 1.2초 기절."
     },
     "heightGroup": "tall",
     "role": "연쇄 · 번개",
@@ -396,7 +396,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 30,
+    "damage": 36,
     "interval": 1.75,
     "attack": "fire",
     "trait": {
@@ -407,7 +407,7 @@ export const HEROES = [
       "name": "용의 숨결",
       "cost": 90,
       "type": "dragon",
-      "text": "넓은 화염으로 전장을 휩쓸고 강하게 불태웁니다."
+      "text": "적이 가장 밀집한 곳(반경 180)에 위력 14배 화염 폭발과 강한 화상."
     },
     "heightGroup": "tall",
     "role": "화상 연계 · 폭격",
@@ -433,7 +433,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 17,
+    "damage": 38,
     "interval": 1.1,
     "attack": "fire",
     "trait": {
@@ -444,7 +444,7 @@ export const HEROES = [
       "name": "작열의 문장",
       "cost": 75,
       "type": "combust",
-      "text": "적을 태웁니다. 이미 불타는 적에게 큰 폭발을 일으킵니다."
+      "text": "모든 적에게 위력 4배. 이미 불타는 적에게는 10배 폭발. 이후 강한 화상."
     },
     "heightGroup": "tall",
     "role": "지속 화력 · 불바닥",
@@ -470,21 +470,21 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 11,
+    "damage": 6,
     "interval": 0.95,
     "attack": "spore",
     "trait": {
       "type": "poison",
-      "text": "포자밭으로 중독. 전투 12초마다 1성 3G · 2성 4G 수확. 강화마다 +2G, 합성하면 12초부터 다시 시작."
+      "text": "포자밭으로 독 1중첩(7초). 합성하면 모든 적에게 독 2중첩."
     },
     "skill": {
       "name": "왕의 마지막 포자",
       "cost": 70,
       "type": "plague",
-      "text": "모든 적에게 성급당 독 8중첩을 12초간 부여합니다. 독은 최대 40중첩이며, 출처별 시전자 공격력에 비례해 방어 무시 지속 피해를 줍니다."
+      "text": "모든 적에게 독 8중첩(12초)과 위력 3배. 이미 독 20중첩 이상인 적은 남은 독 피해의 30%를 즉시 받습니다. 독은 최대 40중첩입니다."
     },
     "heightGroup": "medium",
-    "role": "시간 경제 · 포자밭",
+    "role": "독 · 포자밭",
     "shape": "zone",
     "range": 370,
     "radius": 66
@@ -507,12 +507,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 30,
+    "damage": 20,
     "interval": 1.6,
     "attack": "light",
     "trait": {
       "type": "expose",
-      "text": "보스 우선 · 보스 피해 +25%. 직격 후 4초간 받는 피해 +18%(보스 +30%). 강화마다 +2%p."
+      "text": "보스 우선. 직격 후 4초간 받는 피해 +20%(보스 +30%). 훈련마다 +2%p, 성급이 오를수록 강화."
     },
     "skill": {
       "name": "완벽한 추리",
@@ -525,7 +525,7 @@ export const HEROES = [
     "shape": "single",
     "range": 900,
     "radius": 0,
-    "bossDamage": 1.25
+    "bossPriority": true
   },
   {
     "id": "siren",
@@ -545,12 +545,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 9,
+    "damage": 7,
     "interval": 1.25,
     "attack": "water",
     "trait": {
       "type": "hasteAura",
-      "text": "상하좌우 동료 공격속도 +22%. 강화마다 오라 +3%p."
+      "text": "상하좌우 동료 공격속도 +22%. 훈련마다 +3%p, 성급이 오를수록 강화."
     },
     "skill": {
       "name": "공명의 아리아",
@@ -593,7 +593,7 @@ export const HEROES = [
       "name": "깨어나지 않는 밤",
       "cost": 75,
       "type": "nightmare",
-      "text": "모든 적에게 위력 4배 피해와 밀치기, 6초간 받는 피해 +25% 노출, 성급당 독 4중첩을 12초간 부여합니다. 더 강한 노출은 출처별 만료 시각까지 유지됩니다."
+      "text": "모든 적에게 위력 4배 피해와 밀치기, 6초간 받는 피해 +25% 노출, 독 4중첩을 12초간 부여합니다. 더 강한 노출은 출처별 만료 시각까지 유지됩니다."
     },
     "heightGroup": "short",
     "role": "견제 · 악몽 덫",
@@ -630,7 +630,7 @@ export const HEROES = [
       "name": "장미의 세금",
       "cost": 60,
       "type": "dividend",
-      "text": "장미가 적을 타격하고 30골드를 얻습니다."
+      "text": "장미가 전장 전체에 위력 3배. 즉시 20골드를 얻고 8초 동안 처치 골드 3배."
     },
     "heightGroup": "medium",
     "role": "물결 경제 · 장미",
@@ -656,21 +656,21 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 35,
+    "damage": 18,
     "interval": 2,
     "attack": "cosmos",
     "trait": {
       "type": "gravity",
-      "text": "중력장으로 피해·40% 감속. 등장 웨이브 75%, 다음 100%, 이후 125% 위력. 합성 시 초기화."
+      "text": "중력장으로 피해·40% 감속. 중력장 피해는 성광 중첩당 +30%."
     },
     "skill": {
       "name": "별바다의 중심",
       "cost": 100,
       "type": "singularity",
-      "text": "거대한 중력장이 적을 끌어당긴 뒤 폭발합니다."
+      "text": "적을 끌어당긴 뒤 위력 8배 폭발. 성광을 모두 거둬 중첩당 피해 +50%."
     },
     "heightGroup": "medium",
-    "role": "밀집 제어 · 중력장",
+    "role": "성광 수확 · 중력장",
     "shape": "zone",
     "range": 550,
     "radius": 98
@@ -693,21 +693,21 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 14,
+    "damage": 24,
     "interval": 0.9,
     "attack": "light",
     "trait": {
       "type": "battery",
-      "text": "관통 공격이 별빛을 충전. 강화마다 추가 별빛 +0.1."
+      "text": "관통 공격에 맞은 적 모두에게 성광 1중첩."
     },
     "skill": {
       "name": "은빛 행진",
       "cost": 55,
       "type": "march",
-      "text": "6초 동안 공격속도와 별빛 획득량이 증가합니다."
+      "text": "6초 동안 모든 동료의 공격이 성광을 1중첩 부여하고 공격속도 +20%."
     },
     "heightGroup": "short",
-    "role": "별빛 지원 · 관통광",
+    "role": "성광 부여 · 관통광",
     "shape": "beam",
     "range": 500,
     "radius": 22
@@ -730,12 +730,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 28,
+    "damage": 22,
     "interval": 1.6,
     "attack": "light",
     "trait": {
       "type": "powerAura",
-      "text": "자신의 행·열을 관통. 상하좌우 동료 공격력 +25%, 강화마다 +3%p."
+      "text": "자신의 행·열을 관통. 상하좌우 동료 공격력 +25%. 훈련마다 +3%p, 성급이 오를수록 강화."
     },
     "skill": {
       "name": "태고의 약속",
@@ -767,18 +767,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 13.5,
+    "damage": 26,
     "interval": 1.1,
     "attack": "time",
     "trait": {
       "type": "chrono",
-      "text": "시간장으로 25% 감속. 가장 높은 성급 중 한 명만 위력 +50%. 동률이면 기존 수혜자 유지."
+      "text": "시간장으로 25% 감속. 등장 웨이브 75%, 다음 100%, 이후 125% 위력. 합성 시 초기화."
     },
     "skill": {
       "name": "아직 오지 않은 순간",
       "cost": 90,
       "type": "rewind",
-      "text": "모든 적을 기본 이동 거리 6초분만큼 뒤로 보내고 2초 동안 멈춥니다."
+      "text": "모든 적을 이동 거리 6초분만큼 되감고(빠른 적일수록 멀리) 2초 동안 멈춥니다. 위력 3배."
     },
     "heightGroup": "medium",
     "role": "시간 제어 · 시계장",
@@ -847,7 +847,7 @@ export const HEROES = [
     "attack": "gift",
     "trait": {
       "type": "gift",
-      "text": "네 번째 공격마다 상하좌우 동료 공격 대기 −0.6초. 강화마다 −0.1초 추가."
+      "text": "네 번째 공격은 선물 폭탄: 범위·위력 2배. 선물 폭탄으로 쓰러뜨리면 골드 +1."
     },
     "skill": {
       "name": "한밤의 선물",
@@ -856,7 +856,7 @@ export const HEROES = [
       "text": "편성 동료 한 명이 2성으로 합류하고 6초간 모든 동료의 공격속도 +30%."
     },
     "heightGroup": "medium",
-    "role": "선물 지원 · 포격",
+    "role": "선물 · 포격",
     "shape": "splash",
     "range": 510,
     "radius": 56
@@ -884,13 +884,13 @@ export const HEROES = [
     "attack": "light",
     "trait": {
       "type": "divine",
-      "text": "6초 성광을 최대 3중첩 누적. 중첩당 적이 받는 피해 +2%(최대 +6%). 성광 3중첩 대상에게 주는 피해 +65%. 체리프린스와 연계."
+      "text": "공격마다 성광 1중첩(6초, 최대 3). 성광 3중첩 대상에게 주는 피해 +65%. 체리프린스와 연계."
     },
     "skill": {
       "name": "여신강림",
       "cost": 80,
       "type": "goddess",
-      "text": "전장 전체 위력 5배 피해와 성광 3중첩. 8초간 모든 동료 위력 +35%."
+      "text": "전장 전체 위력 5배. 8초간 모든 동료 위력 +50%, 봉인·행동불능을 풀고 막아 줍니다."
     },
     "heightGroup": "medium",
     "role": "성광 연계 · 빛의 파동",
@@ -916,7 +916,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 17,
+    "damage": 25,
     "interval": 0.65,
     "attack": "comet",
     "trait": {
@@ -925,9 +925,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "소원을 담은 별",
-      "cost": 75,
+      "cost": 60,
       "type": "starfall",
-      "text": "최대 체력이 가장 높은 적 한 명을 추적해 위력 32배의 유성을 떨어뜨립니다."
+      "text": "별빛을 전부 담아 최대 체력이 가장 높은 적에게 유성을 떨어뜨립니다. 별빛 1당 위력 0.4배(60이면 24배, 120이면 48배)."
     },
     "heightGroup": "medium",
     "role": "강적 추적 · 유성탄",
@@ -953,21 +953,21 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 18,
+    "damage": 26,
     "interval": 1.35,
     "attack": "time",
     "trait": {
       "type": "accelerate",
-      "text": "세 번째 관통마다 상하좌우 공격 대기 −0.6초. 강화마다 −0.1초 추가. 필살기 중 트라우마로 변신."
+      "text": "세 번째 관통마다 상하좌우 동료가 즉시 한 번 더 공격(위력 60%). 필살기 중 트라우마로 변신."
     },
     "skill": {
       "name": "트라우마 · 어둠의 신데렐라",
       "cost": 80,
       "type": "trauma",
-      "text": "전장 전체 위력 4배 피해. 배치된 시간의마술사들이 10초간 트라우마로 변신: 위력 +110%, 공속 +35%, 방어 무시."
+      "text": "전장 전체 위력 4배 피해. 배치된 시간의마술사들이 10초간 트라우마로 변신: 위력 +110%, 공속 +35%."
     },
     "heightGroup": "medium",
-    "role": "시간 가속 · 관통침",
+    "role": "시간 연계 · 관통침",
     "shape": "beam",
     "range": 520,
     "radius": 28
@@ -990,7 +990,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 36,
+    "damage": 54,
     "interval": 1.5,
     "attack": "blade",
     "trait": {
@@ -1001,7 +1001,7 @@ export const HEROES = [
       "name": "체리 블로섬 · 왕자의 일격",
       "cost": 85,
       "type": "royal",
-      "text": "최대 체력이 가장 높은 적 한 명에게 위력 34배의 방어 무시 검격. 화상·성광 3중첩이면 1.4배."
+      "text": "최대 체력이 가장 높은 적 한 명에게 위력 24배 검격. 화상·성광 3중첩이면 두 배."
     },
     "heightGroup": "tall",
     "role": "강적 결전 · 검광",
@@ -1028,21 +1028,21 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 22,
+    "damage": 38,
     "interval": 1.5,
     "attack": "ice",
     "trait": {
       "type": "permafrost",
-      "text": "관통 직격은 2.4초간 40% 감속과 서리 1중첩. 서리 3중첩에 추가 피해와 0.9초 빙결(보스 0.45초)."
+      "text": "관통 직격은 40% 감속. 이미 감속 중인 적은 0.6초 빙결(같은 적은 3초 뒤 다시). 빙결된 적이 쓰러지면 주변에 감속이 퍼집니다."
     },
     "skill": {
       "name": "빙궁의 칙령",
       "cost": 80,
       "type": "ice_court",
-      "text": "모든 적에게 위력 5배 피해와 서리 2중첩. 6초 동안 50% 감속시켜 다음 얼음창의 빙결을 준비합니다."
+      "text": "전장 전체 위력 6배. 6초 동안 겨울 왕국: 모든 적 50% 감속, 쓰러진 적이 주변 적을 0.8초 빙결합니다."
     },
     "heightGroup": "tall",
-    "role": "서리 연계 · 얼음창",
+    "role": "냉기 확산 · 얼음창",
     "shape": "beam",
     "range": 550,
     "radius": 32
@@ -1076,7 +1076,7 @@ export const HEROES = [
       "name": "디저트 앙상블",
       "cost": 70,
       "type": "harmony",
-      "text": "모든 동료의 공격 대기를 1.5초 앞당기고 8초 동안 조화 오라를 두 배로 만듭니다."
+      "text": "8초 동안 조화 오라가 전장 전체로 퍼집니다. 전장의 서로 다른 동료마다 모든 동료 위력 +5%·공속 +4%."
     },
     "heightGroup": "short",
     "role": "다양성 지원 · 조화",
@@ -1102,18 +1102,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 11.9,
+    "damage": 30,
     "interval": 1.3,
     "attack": "mirror",
     "trait": {
       "type": "refraction",
-      "text": "직격 후 위력 75% 환영탄. 필드의 아우로라가 짝수이면 위력 +30%."
+      "text": "직격 후 위력 75% 환영탄. 환영탄은 성광 1중첩. 필드의 아우로라가 짝수이면 위력 +50%."
     },
     "skill": {
       "name": "천면경",
       "cost": 80,
       "type": "mirror",
-      "text": "강적의 피해를 3초 기록해 위력 10배 + 기록 피해 45%(추가 최대 18배) 반사. 천면경 폭발은 기록에서 제외."
+      "text": "강적의 피해를 3초 기록해 위력 10배 + 기록 피해 45%(추가 최대 30배) 반사. 천면경 폭발은 기록에서 제외."
     },
     "heightGroup": "medium",
     "role": "지연 반사 · 환영탄",
