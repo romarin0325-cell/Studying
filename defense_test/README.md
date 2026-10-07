@@ -36,6 +36,8 @@ npm run verify
 ## 설계와 검증 자료
 
 - [UI·에셋 조사와 화면별 설계](docs/UI_ASSET_RESEARCH.md)
+- [능력치 리뉴얼 v1: 등급 예산·성장 경로·전체 캐릭터 시트](docs/STAT_RENEWAL.md)
+- [기여도 시뮬레이션: 측정 방법과 리뉴얼 전후 결과](docs/STAT_SIMULATION.md) · `node defense_test/scripts/simulate.mjs`
 - [성장·확률·경제 공식과 설정 이유](docs/GROWTH_BALANCE.md)
 - [기능별 합격 기준과 실제 검증](docs/ACCEPTANCE.md)
 - [독립 소스 트리와 생성물 검증 보완](docs/INDEPENDENCE_VERIFICATION.md)
