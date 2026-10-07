@@ -756,7 +756,9 @@ export function restore(raw){
     const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;
-    if(s.timeRulerUid!==null&&(!id(s.timeRulerUid)||!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid)||s.board.some(u=>u?.hero==='time_ruler'&&u.rank>s.board.find(v=>v?.uid===s.timeRulerUid).rank)))return null;
+    // Time Ruler no longer has a solo bonus; its cached top unit only orders casts.
+    if(s.timeRulerUid!==null&&!id(s.timeRulerUid))return null;
+    if(s.timeRulerUid!==null&&!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid))s.timeRulerUid=null;
     syncTimeRuler(s);
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
     if(s.enemies.some(e=>!id(e?.uid)||!kinds.includes(e.kind)||!numeric(e,['hp','maxHp','progress','speed','slow','slowTime','stun','burn','burnTime','poison','poisonTime','exposed','exposeTime','hit','skillIn','channel','channelHp','dotFlash'])||e.maxHp<=0||e.burn<0||e.exposed<0||!Number.isInteger(e.poison)||e.poison<0||!Number.isInteger(e.divine)||e.divine<0||e.divine>DIVINE_CAP||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.progress<0||e.progress>PATH_LENGTH||e.boss&&!BOSSES[e.boss]||e.burnOwner&&!HERO[e.burnOwner]))return null;
