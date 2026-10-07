@@ -9,12 +9,12 @@
       0.002
     ],
     "duplicateGrowth": 1.58,
-    "enhanceStep": 0.1,
+    "enhanceStep": 0.05,
     "levelStep": 0.04,
-    "levelCostBase": 18,
-    "levelCostGrowth": 1.14,
-    "specialCap": 0.15,
-    "specialHalf": 8,
+    "levelCostBase": 90,
+    "levelCostGrowth": 1.12,
+    "specialStep": 0.1,
+    "specialEvery": 5,
     "dispatchHours": 20,
     "dispatchStageStep": 0.05,
     "idleHours": 20,
@@ -74,211 +74,211 @@
       "spentCopies": 0,
       "power": 1,
       "special": 1,
-      "gainPerCopy": 0.1
+      "gainPerCopy": 0.05
     },
     {
       "current": 1,
       "nextCopies": 2,
       "spentCopies": 1,
-      "power": 1.1,
-      "special": 1.0166666666666666,
-      "gainPerCopy": 0.05
+      "power": 1.05,
+      "special": 1,
+      "gainPerCopy": 0.025
     },
     {
       "current": 2,
       "nextCopies": 3,
       "spentCopies": 3,
-      "power": 1.2,
-      "special": 1.03,
-      "gainPerCopy": 0.03333333333333333
+      "power": 1.1,
+      "special": 1,
+      "gainPerCopy": 0.016666666666666666
     },
     {
       "current": 3,
       "nextCopies": 4,
       "spentCopies": 6,
-      "power": 1.3,
-      "special": 1.040909090909091,
-      "gainPerCopy": 0.025
+      "power": 1.15,
+      "special": 1,
+      "gainPerCopy": 0.0125
     },
     {
       "current": 4,
       "nextCopies": 7,
       "spentCopies": 10,
-      "power": 1.4,
-      "special": 1.05,
-      "gainPerCopy": 0.014285714285714287
+      "power": 1.2,
+      "special": 1,
+      "gainPerCopy": 0.0071428571428571435
     },
     {
       "current": 5,
       "nextCopies": 10,
       "spentCopies": 17,
-      "power": 1.5,
-      "special": 1.0576923076923077,
-      "gainPerCopy": 0.01
+      "power": 1.25,
+      "special": 1.1,
+      "gainPerCopy": 0.005
     },
     {
       "current": 6,
       "nextCopies": 16,
       "spentCopies": 27,
-      "power": 1.6,
-      "special": 1.0642857142857143,
-      "gainPerCopy": 0.00625
+      "power": 1.3,
+      "special": 1.1,
+      "gainPerCopy": 0.003125
     },
     {
       "current": 7,
       "nextCopies": 25,
       "spentCopies": 43,
-      "power": 1.7000000000000002,
-      "special": 1.07,
-      "gainPerCopy": 0.004
+      "power": 1.35,
+      "special": 1.1,
+      "gainPerCopy": 0.002
     },
     {
       "current": 8,
       "nextCopies": 39,
       "spentCopies": 68,
-      "power": 1.8,
-      "special": 1.075,
-      "gainPerCopy": 0.002564102564102564
+      "power": 1.4,
+      "special": 1.1,
+      "gainPerCopy": 0.001282051282051282
     },
     {
       "current": 9,
       "nextCopies": 62,
       "spentCopies": 107,
-      "power": 1.9,
-      "special": 1.0794117647058823,
-      "gainPerCopy": 0.0016129032258064516
+      "power": 1.45,
+      "special": 1.1,
+      "gainPerCopy": 0.0008064516129032258
     },
     {
       "current": 10,
       "nextCopies": 97,
       "spentCopies": 169,
-      "power": 2,
-      "special": 1.0833333333333333,
-      "gainPerCopy": 0.0010309278350515464
+      "power": 1.5,
+      "special": 1.2,
+      "gainPerCopy": 0.0005154639175257732
     },
     {
       "current": 11,
       "nextCopies": 154,
       "spentCopies": 266,
-      "power": 2.1,
-      "special": 1.0868421052631578,
-      "gainPerCopy": 0.0006493506493506494
+      "power": 1.55,
+      "special": 1.2,
+      "gainPerCopy": 0.0003246753246753247
     },
     {
       "current": 12,
       "nextCopies": 243,
       "spentCopies": 420,
-      "power": 2.2,
-      "special": 1.09,
-      "gainPerCopy": 0.000411522633744856
+      "power": 1.6,
+      "special": 1.2,
+      "gainPerCopy": 0.000205761316872428
     },
     {
       "current": 13,
       "nextCopies": 383,
       "spentCopies": 663,
-      "power": 2.3,
-      "special": 1.092857142857143,
-      "gainPerCopy": 0.0002610966057441253
+      "power": 1.65,
+      "special": 1.2,
+      "gainPerCopy": 0.00013054830287206266
     },
     {
       "current": 14,
       "nextCopies": 605,
       "spentCopies": 1046,
-      "power": 2.4000000000000004,
-      "special": 1.0954545454545455,
-      "gainPerCopy": 0.00016528925619834712
+      "power": 1.7000000000000002,
+      "special": 1.2,
+      "gainPerCopy": 0.00008264462809917356
     },
     {
       "current": 15,
       "nextCopies": 955,
       "spentCopies": 1651,
-      "power": 2.5,
-      "special": 1.0978260869565217,
-      "gainPerCopy": 0.00010471204188481676
+      "power": 1.75,
+      "special": 1.3,
+      "gainPerCopy": 0.00005235602094240838
     },
     {
       "current": 16,
       "nextCopies": 1509,
       "spentCopies": 2606,
-      "power": 2.6,
-      "special": 1.1,
-      "gainPerCopy": 0.00006626905235255136
+      "power": 1.8,
+      "special": 1.3,
+      "gainPerCopy": 0.00003313452617627568
     },
     {
       "current": 17,
       "nextCopies": 2384,
       "spentCopies": 4115,
-      "power": 2.7,
-      "special": 1.102,
-      "gainPerCopy": 0.00004194630872483222
+      "power": 1.85,
+      "special": 1.3,
+      "gainPerCopy": 0.00002097315436241611
     },
     {
       "current": 18,
       "nextCopies": 3766,
       "spentCopies": 6499,
-      "power": 2.8,
-      "special": 1.103846153846154,
-      "gainPerCopy": 0.00002655337227827934
+      "power": 1.9,
+      "special": 1.3,
+      "gainPerCopy": 0.00001327668613913967
     },
     {
       "current": 19,
       "nextCopies": 5950,
       "spentCopies": 10265,
-      "power": 2.9000000000000004,
-      "special": 1.1055555555555556,
-      "gainPerCopy": 0.00001680672268907563
+      "power": 1.9500000000000002,
+      "special": 1.3,
+      "gainPerCopy": 0.000008403361344537815
     },
     {
       "current": 20,
       "nextCopies": 9401,
       "spentCopies": 16215,
-      "power": 3,
-      "special": 1.1071428571428572,
-      "gainPerCopy": 0.000010637166258908628
+      "power": 2,
+      "special": 1.4,
+      "gainPerCopy": 0.000005318583129454314
     }
   ],
   "levels": [
     {
       "level": 1,
-      "nextDust": 18,
+      "nextDust": 90,
       "basePower": 1,
       "cumulativeDust": 0
     },
     {
       "level": 5,
-      "nextDust": 31,
+      "nextDust": 142,
       "basePower": 1.16,
-      "cumulativeDust": 90
+      "cumulativeDust": 431
     },
     {
       "level": 10,
-      "nextDust": 59,
+      "nextDust": 250,
       "basePower": 1.3599999999999999,
-      "cumulativeDust": 294
+      "cumulativeDust": 1332
     },
     {
       "level": 15,
-      "nextDust": 113,
+      "nextDust": 440,
       "basePower": 1.56,
-      "cumulativeDust": 683
+      "cumulativeDust": 2920
     },
     {
       "level": 20,
-      "nextDust": 218,
+      "nextDust": 776,
       "basePower": 1.76,
-      "cumulativeDust": 1430
+      "cumulativeDust": 5716
     },
     {
       "level": 30,
-      "nextDust": 805,
+      "nextDust": 2408,
       "basePower": 2.16,
-      "cumulativeDust": 5632
+      "cumulativeDust": 19326
     },
     {
       "level": 40,
-      "nextDust": 2983,
+      "nextDust": 7478,
       "basePower": 2.56,
-      "cumulativeDust": 21193
+      "cumulativeDust": 61579
     }
   ],
   "relics": [
@@ -393,7 +393,7 @@
     },
     {
       "stage": 9,
-      "hp": 3.05,
+      "hp": 3.5,
       "slots": 1,
       "dispatchMultiplier": 1.45,
       "firstClear": 250,
@@ -401,7 +401,7 @@
     },
     {
       "stage": 18,
-      "hp": 5.356249999999999,
+      "hp": 6.3125,
       "slots": 2,
       "dispatchMultiplier": 1.9,
       "firstClear": 340,
@@ -409,7 +409,7 @@
     },
     {
       "stage": 27,
-      "hp": 7.6625,
+      "hp": 9.125,
       "slots": 3,
       "dispatchMultiplier": 2.35,
       "firstClear": 430,
@@ -417,7 +417,7 @@
     },
     {
       "stage": 36,
-      "hp": 9.96875,
+      "hp": 11.9375,
       "slots": 4,
       "dispatchMultiplier": 2.8,
       "firstClear": 520,
@@ -425,7 +425,7 @@
     },
     {
       "stage": 45,
-      "hp": 12.274999999999999,
+      "hp": 14.75,
       "slots": 4,
       "dispatchMultiplier": 3.25,
       "firstClear": 610,
@@ -435,8 +435,8 @@
   "starter": [
     {
       "id": "star_boy",
-      "power": 470,
-      "dispatchAt9": 74
+      "power": 655,
+      "dispatchAt9": 81
     },
     {
       "id": "snow_rabbit",
@@ -445,18 +445,18 @@
     },
     {
       "id": "night_rabbit",
-      "power": 460,
-      "dispatchAt9": 73
+      "power": 751,
+      "dispatchAt9": 84
     },
     {
       "id": "siren",
-      "power": 208,
-      "dispatchAt9": 60
+      "power": 173,
+      "dispatchAt9": 58
     },
     {
       "id": "great_detective",
-      "power": 420,
-      "dispatchAt9": 71
+      "power": 316,
+      "dispatchAt9": 66
     }
   ],
   "roster": [

@@ -52,15 +52,15 @@ test('relic progression is normalized, increasingly expensive and bounded at eve
   }
 });
 
-test('duplicate investment loses efficiency without a game cap or exponential stat gain',()=>{
+test('duplicate investment adds 5% each without a cap, loses efficiency, and lifts support every five steps',()=>{
   assert.equal(duplicateCost(0),1);
   for(let e=0;e<40;e++){
     assert.ok(duplicateCost(e+1)>duplicateCost(e));
-    assert.ok(Math.abs(enhanceMultiplier(e+1)-enhanceMultiplier(e)-.1)<1e-12);
-    assert.ok(specialMultiplier(e)>=1&&specialMultiplier(e)<1.15);
-    if(e)assert.ok(.1/duplicateCost(e)<.1/duplicateCost(e-1));
+    assert.ok(Math.abs(enhanceMultiplier(e+1)-enhanceMultiplier(e)-.05)<1e-12);
+    assert.ok(Math.abs(specialMultiplier(e)-(1+.1*Math.floor(e/5)))<1e-12);
+    if(e)assert.ok(.05/duplicateCost(e)<.05/duplicateCost(e-1));
   }
-  assert.ok(specialMultiplier(100000)<1.15);
+  assert.equal(specialMultiplier(4),1);assert.ok(Math.abs(specialMultiplier(5)-1.1)<1e-12);assert.ok(Math.abs(specialMultiplier(10)-1.2)<1e-12);
 });
 
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{

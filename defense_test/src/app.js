@@ -31,7 +31,7 @@ const picture=(id,full=false)=>media[(full?'figure:':'portrait:')+id]||media['re
 const image=(id,full=false,cls='')=>`<img class="${cls}" src="${picture(id,full)}" alt="${HERO[id]?.name||ARTIFACT[id]?.name||'별빛'}" draggable="false">`;
 const badge=(r,cls='')=>`<span class="badge ${cls}" data-rarity="${r}">${r}</span>`;
 const gem=(n,short=false)=>`<span class="cost ${short?'short':''}">${icon('gem')}<b>${fmt(n)}</b></span>`;
-const cpOf=id=>fmt(combatPower(id,p().heroes[id]));
+const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().garden));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
 const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
@@ -82,7 +82,7 @@ function home(){
 function card(id,kind='hero',receipt=null){
   const h=kind==='hero'?HERO[id]:ARTIFACT[id],e=kind==='hero'?p().heroes[id]:p().relics[id],need=duplicateCost(e.enhance),ready=e.owned&&e.copies>=need,gone=kind==='hero'&&away(p(),id);
   const tag=receipt?(receipt.fresh?'NEW':'중복 +1'):e.owned&&e.enhance>0?`+${e.enhance}`:'';
-  const sub=receipt?(receipt.fresh?'신규 획득':'강화 재료'):!e.owned?(h.hidden?'시즌 한정':'미획득'):gone?'파견 중':kind==='hero'?`Lv.${e.level} · ${cpOf(id)}`:`중복 ${e.copies}/${need}`;
+  const sub=receipt?(receipt.fresh?'신규 획득':'강화 재료'):!e.owned?(h.hidden?'시즌 한정':'미획득'):gone?'파견 중':kind==='hero'?`전투력 ${cpOf(id)}`:`중복 ${e.copies}/${need}`;
   return `<button class="hero-card ${!e.owned?'locked':''} ${ready?'can-enhance':''} ${gone?'is-away':''}" data-${kind==='hero'?'hero':'relic'}="${id}" data-rarity="${h.rarity}" aria-label="${h.name}, ${h.rarity}, ${e.owned?'보유':'미보유'}${ready?', 강화 가능':''}">${badge(h.rarity)}${tag?`<span class="tag ${receipt?.fresh?'new':''}">${tag}</span>`:''}<span class="art">${image(id)}${!e.owned?icon('lock','lock'):''}</span><strong>${h.name}</strong><small>${sub}</small>${e.owned&&!receipt?`<span class="dup" aria-hidden="true"><i style="width:${Math.min(100,e.copies/need*100)}%"></i>${ready?icon('up'):''}</span>`:''}</button>`;
 }
 function renderCollection(){
@@ -96,15 +96,15 @@ function renderCollection(){
 }
 function heroDetail(id){
   const h=HERO[id],e=p().heroes[id];if(!h)return;
-  const mult=heroMultiplier(e),enh=duplicateCost(e.enhance),lvl=levelCost(e.level),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
+  const garden=p().garden,mult=heroMultiplier(e,garden),enh=duplicateCost(e.enhance),lvl=levelCost(garden),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
   show(h.name,'동료',`<div class="detail-hero" data-rarity="${h.rarity}"><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
-    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>레벨</small><b>${e.owned?e.level:'—'}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
+    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>정원 레벨</small><b>${garden}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
     <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong></span>${icon('chevron')}</button>
     <div class="ability"><span class="ability-tag">기본 공격 · 특성</span><h3>${roles[1]||roles[0]} · 위력 ${e.owned?(h.damage*mult).toFixed(1):h.damage}</h3><p>${h.trait.text}</p></div>
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
-    ${e.owned?`<div class="growth"><div><strong>레벨업</strong><small>Lv.${e.level} → ${e.level+1} · 기본 위력 +4%</small></div><button class="primary" data-level="${id}" ${p().dust<lvl||p().active?'disabled':''}><b>레벨업</b><small>${icon('dust')}${fmt(lvl)}</small></button></div>
-    <div class="growth"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +10%</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="secondary" data-enhance="${id}" ${e.copies<enh||p().active?'disabled':''}>강화</button></div>
-    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배. 강화 1회마다 기본 위력이 10% 증가합니다. 제어·지원 효과는 별도로 +${special}%(최대 15%) 보정을 받으며, 범위와 발동 조건은 변하지 않습니다.</p></details>
+    ${e.owned?`<div class="growth"><div><strong>정원 레벨업</strong><small>Lv.${garden} → ${garden+1} · 모든 동료 기본 위력 +4%</small></div><button class="primary" data-level="${id}" ${p().dust<lvl||p().active?'disabled':''}><b>정원 성장</b><small>${icon('dust')}${fmt(lvl)}</small></button></div>
+    <div class="growth"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="secondary" data-enhance="${id}" ${e.copies<enh||p().active?'disabled':''}>강화</button></div>
+    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (정원 레벨 ${garden} · 강화 +${e.enhance}). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
     ${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}`
     :`<p class="empty">${h.hidden?`${monthNo(calendar(now()))} 시즌 소환에서만 획득할 수 있습니다.<br>이달의 수호자: ${HERO[calendar(now()).guardian].name}`:`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);

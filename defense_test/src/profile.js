@@ -1,6 +1,6 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING} from './content.js';
 import {calendar,duplicateCost,levelCost,dispatchSlots,dispatchReward,combatPower,stageReward,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
-import {resumeBattle} from './battle.js';
+import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY} from './team-config.js';
 import {MEMORIAL_STORIES} from './memorial.js';
@@ -8,7 +8,7 @@ import {MEMORIAL_STORIES} from './memorial.js';
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0});
 export function createProfile(now=Date.now()){
-  return {version:1,revision:0,dreams:600,dust:180,cleared:0,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return {version:1,revision:0,dreams:600,dust:180,cleared:0,garden:1,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,
@@ -17,7 +17,7 @@ export function createProfile(now=Date.now()){
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
 export function validateProfile(p){
-  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
+  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!integer(p.garden)||p.garden<1||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond);}))return false;
   if(ARTIFACTS.some(a=>{const e=p.relics[a.id];return !e||typeof e.owned!=='boolean'||!integer(e.enhance)||!integer(e.copies);}))return false;
   if(!p.memories||typeof p.memories!=='object'||Array.isArray(p.memories)||Object.entries(p.memories).some(([id,m])=>!MEMORIAL_STORIES[id]||!p.heroes[id]?.owned||p.heroes[id].bond<10||!m||!integer(m.page,MEMORIAL_STORIES[id].paragraphs.length-1)||typeof m.read!=='boolean'))return false;
@@ -48,11 +48,26 @@ export function validateProfile(p){
   }
   return true;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+// Stat renewal: per-companion levels become one shared garden level. Dust
+// already spent on companion levels is re-spent on garden levels (old cost
+// 18×1.14^(L-1)); the remainder is refunded. An in-progress run keeps going
+// with the renewed permanent multipliers.
+const legacyLevelCost=level=>Math.ceil(18*1.14**(level-1));
+export function migrateGarden(p){
+  if(p.garden!==undefined||!p.heroes||typeof p.heroes!=='object')return;
+  let spent=0;
+  for(const e of Object.values(p.heroes))if(e&&Number.isSafeInteger(e.level))for(let l=1;l<e.level;l++)spent+=legacyLevelCost(l);
+  p.garden=1;while(spent>=levelCost(p.garden)){spent-=levelCost(p.garden);p.garden++;}
+  if(Number.isSafeInteger(p.dust))p.dust+=spent;
+  for(const e of Object.values(p.heroes))if(e&&Number.isSafeInteger(e.level))e.level=1;
+  const a=p.active;
+  if(a?.run&&typeof a.run==='string'&&Array.isArray(a.deck)&&a.deck.every(id=>p.heroes[id])){try{const run=JSON.parse(a.run);run.meta=battleMeta(p,a.deck);a.run=JSON.stringify(run);}catch{}}
+}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
-export const teamPower=p=>p.deck.reduce((sum,id)=>sum+combatPower(id,p.heroes[id]),0);
+export const teamPower=p=>p.deck.reduce((sum,id)=>sum+combatPower(id,p.heroes[id],p.garden),0);
 function draftOffers(p){
   const a=p.active,pool=a.draftPool.filter(id=>!a.draft.includes(id));
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(random(p)*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
@@ -79,8 +94,8 @@ export function command(p,action,args={},now=Date.now()){
     }p.history=p.history.slice(0,50);p.daily.draw=true;return {ok:true,items,cost};
   }
   if(action==='level'){
-    const e=p.heroes[args.id];if(!e?.owned||p.active)return no('원정 종료 후 성장할 수 있습니다.');const cost=levelCost(e.level);if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');
-    p.dust-=cost;e.level++;return {ok:true,message:`${HERO[args.id].name} Lv.${e.level} 달성`};
+    if(p.active)return no('원정 종료 후 성장할 수 있습니다.');const cost=levelCost(p.garden);if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');
+    p.dust-=cost;p.garden++;return {ok:true,message:`정원 Lv.${p.garden} 달성 · 모든 동료 위력 +4%`};
   }
   if(action==='enhance'){
     const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정 종료 후 강화할 수 있습니다.');const cost=duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
@@ -96,7 +111,7 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='dispatch'){
     if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
     if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
-    const reward=dispatchReward(combatPower(args.id,p.heroes[args.id]),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward});
+    const reward=dispatchReward(combatPower(args.id,p.heroes[args.id],p.garden),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward});
     p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
   }
   if(action==='claimDispatch'){
