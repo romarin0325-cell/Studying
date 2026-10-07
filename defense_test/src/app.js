@@ -497,7 +497,8 @@ document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASS
 document.documentElement.style.setProperty('--altar',`url("${window.__ASTRA_ASSETS__?.['summon-altar']||'./assets/merge/summon-altar.webp'}")`);
 art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');});
 // The splash is decorative only (no pointer input) and leaves once art is ready.
-{const splash=$('splash'),hide=()=>{if(splash&&!splash.classList.contains('out')){splash.classList.add('out');setTimeout(()=>splash.remove(),700);}};Promise.race([art.ready,new Promise(r=>setTimeout(r,1600))]).then(()=>setTimeout(hide,250));}
+// Automated browsers (screenshots, QA) skip the intro entirely.
+{const splash=$('splash'),hide=()=>{if(splash&&!splash.classList.contains('out')){splash.classList.add('out');setTimeout(()=>splash.remove(),500);}};if(navigator.webdriver)splash?.remove();else Promise.race([art.ready,new Promise(r=>setTimeout(r,900))]).then(()=>setTimeout(hide,150));}
 $('app').dataset.solo=String(SOLO);render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
