@@ -13,9 +13,15 @@ export function createProfile(now=Date.now()){
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
-    daily:{day:calendar(now).day,combat:false,draw:false,dispatch:false,claimed:[]},settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]};
+    daily:freshDaily(now),settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]};
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
+// Daily missions are things any player does just by playing (UI part 2):
+// finish an expedition, merge five times, collect the shooting stars. A free
+// single summon replaces the old "spend gems to earn gems" mission.
+export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료',reward:60},{id:'merge',name:'전투에서 합성 5회',reward:30,goal:5},{id:'idle',name:'별똥별 수집',reward:30}]);
+export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,claimed:[]};}
+export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!integer(p.garden)||p.garden<1||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond);}))return false;
@@ -26,8 +32,8 @@ export function validateProfile(p){
   if(!Array.isArray(p.dispatches)||p.dispatches.length>dispatchSlots(p.cleared)||new Set(p.dispatches.map(d=>d.hero)).size!==p.dispatches.length||new Set(p.dispatches.map(d=>d.slot)).size!==p.dispatches.length)return false;
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)))return false;
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
-  if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!['combat','draw','dispatch'].includes(id)))return false;
-  if(['combat','draw','dispatch'].some(k=>typeof p.daily[k]!=='boolean')||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
+  if(['combat','idle','free'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
@@ -63,7 +69,7 @@ export function migrateGarden(p){
   const a=p.active;
   if(a?.run&&typeof a.run==='string'&&Array.isArray(a.deck)&&a.deck.every(id=>p.heroes[id])){try{const run=JSON.parse(a.run);run.meta=battleMeta(p,a.deck);a.run=JSON.stringify(run);}catch{}}
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateDaily(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
@@ -74,7 +80,12 @@ function draftOffers(p){
   return pool.length===1?[{id:pool[0],boon:'focus'},{id:pool[0],boon:'spark'}]:pool.slice(0,2).map(id=>({id,boon:random(p)<.5?'focus':'spark'}));
 }
 export function safeNow(p,now){return Math.max(p.clockAt,Math.floor(now));}
-function rollDay(p,now){if(p.daily.day!==calendar(now).day)p.daily={day:calendar(now).day,combat:false,draw:false,dispatch:false,claimed:[]};}
+function rollDay(p,now){if(p.daily.day!==calendar(now).day)p.daily=freshDaily(now);}
+// Old saves kept draw/dispatch missions; keep today's finished expedition only.
+export function migrateDaily(p){
+  const d=p.daily;if(!d||typeof d!=='object'||d.merges!==undefined)return;
+  p.daily={day:typeof d.day==='string'?d.day:'',combat:d.combat===true,merges:0,idle:false,free:false,claimed:Array.isArray(d.claimed)?d.claimed.filter(id=>id==='combat'):[]};
+}
 function receive(table,id){const e=table[id],fresh=!e.owned;if(fresh)e.owned=true;else e.copies++;return fresh;}
 export function command(p,action,args={},now=Date.now()){
   now=safeNow(p,now);rollDay(p,now);
@@ -84,14 +95,15 @@ export function command(p,action,args={},now=Date.now()){
     p.memories[args.id]={page:args.page,read:!!p.memories[args.id]?.read||args.page===story.paragraphs.length-1};return {ok:true};
   }
   if(action==='draw'){
-    const banner=args.banner,count=args.count;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
-    const cost=(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);
+    const banner=args.banner,count=args.count,free=args.free===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
+    if(free&&(banner!=='normal'||count!==1||p.daily.free))return no('오늘의 무료 소환은 이미 사용했습니다.');
+    const cost=free?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily.free=true;
     p.dreams-=cost;const items=[];
     for(let i=0;i<count;i++){
       const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',calendar(now).guardian);
       const fresh=receive(banner==='relic'?p.relics:p.heroes,id),item={id,fresh,banner,at:now};items.push(item);p.history.unshift(item);
       if(banner==='relic')p.relicDraws++;else p.draws++;
-    }p.history=p.history.slice(0,50);p.daily.draw=true;return {ok:true,items,cost};
+    }p.history=p.history.slice(0,50);return {ok:true,items,cost,free};
   }
   if(action==='level'){
     if(p.active)return no('원정 종료 후 성장할 수 있습니다.');const cost=levelCost(p.garden);if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');
@@ -115,11 +127,11 @@ export function command(p,action,args={},now=Date.now()){
     p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
   }
   if(action==='claimDispatch'){
-    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);p.daily.dispatch=true;return {ok:true,reward:d.reward,message:`파견 보상 수령 · 꿈의결정 +${d.reward}`};
+    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,message:`파견 보상 수령 · 꿈의결정 +${d.reward}`};
   }
-  if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 수령할 방치 보상이 없습니다.');p.dust+=reward;p.idleAt=now;return {ok:true,reward,message:`방치 보상 수령 · 별가루 +${reward}`};}
+  if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 모인 별똥별이 없습니다.');p.dust+=reward;p.idleAt=now;p.daily.idle=true;return {ok:true,reward,message:`별똥별 수집 · 별가루 +${reward}`};}
   if(action==='daily'){
-    const id=args.id;if(!['combat','draw','dispatch'].includes(id)||!p.daily[id]||p.daily.claimed.includes(id))return no('아직 받을 수 없는 보상입니다.');p.daily.claimed.push(id);const reward=id==='combat'?60:30;p.dreams+=reward;return {ok:true,message:`일일 임무 보상 · 꿈의결정 +${reward}`};
+    const mission=DAILY_MISSIONS.find(m=>m.id===args.id);if(!mission||!missionDone(p.daily,mission.id)||p.daily.claimed.includes(mission.id))return no('아직 받을 수 없는 보상입니다.');p.daily.claimed.push(mission.id);const reward=mission.reward;p.dreams+=reward;return {ok:true,message:`일일 임무 보상 · 꿈의결정 +${reward}`};
   }
   if(action==='begin'){
     if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
@@ -151,7 +163,7 @@ export function command(p,action,args={},now=Date.now()){
       newBest=betterRecord(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
     }
-    p.dreams+=reward;p.daily.combat=true;p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest};
+    p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 월간 최고 기록을 확인하세요.');

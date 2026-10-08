@@ -269,7 +269,8 @@ const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
 export function wavePlan(wave,chapter=0,mode='main'){
   if(mode==='monthly'){
-    const hp=Math.round(1225*Math.pow(1.72,wave-1));
+    // Monthly bosses walk the path: no round timer, so each round steps up 2× to keep runs short.
+    const hp=Math.round(1225*Math.pow(2,wave-1));
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
   }
   if(mode==='weekly'){
@@ -330,7 +331,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   const actual=Math.min(e.hp,amount-absorbed)+absorbed;e.hp-=amount-absorbed;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
   // No mirror detonation can feed another recording, even when several marks
   // resolve in this frame. Ordinary resolved damage includes shield absorption.
-  if(recordMirror)for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=Math.min(f.cap/.45,f.stored+actual);
+  if(recordMirror)for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=f.cap!==undefined?Math.min(f.cap/.45,f.stored+actual):f.stored+actual;
   if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){
     s.stats.kills++;const gold=e.boss?20:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
@@ -532,7 +533,7 @@ export function cast(s,id){
   else if(type==='royal'||type==='starfall'||type==='mirror'){
     const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?3:FINISHER_DELAY;
     visualTargets=[target];
-    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?10:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,cap:base*30}:{})});
+    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?10:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,2*control*scale);addSlow(s,e,source,.5,6);}}
@@ -667,9 +668,6 @@ export function step(s,dt){
   dt=clamp(dt,0,.05);const start=s.time;s.time+=dt;
   // A short challenge measures how far this collection can push, without
   // waiting for a nearly invulnerable late-round enemy to circle the arena.
-  if(s.mode!=='main'&&s.waveTime>=(s.mode==='monthly'?30:35)){
-    s.health=0;s.phase='defeat';event(s,'challengeTimeout');return;
-  }
   for(const key of Object.keys(s.buffs))s.buffs[key]=Math.max(0,s.buffs[key]-dt);
   while(s.reserves.length&&freeCell(s)>=0)place(s,s.reserves.shift(),2);
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
@@ -710,7 +708,8 @@ export function step(s,dt){
       f.life=0;
       syncStatuses(s,target);syncSlows(s,target);
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?2:1;
-      const echoDamage=f.kind==='mirror'?Math.min(f.cap,f.stored*.45):0,before=s.stats.damage;
+      // Thousand Mirrors has no ceiling; only checkpoints from before the change keep one.
+      const echoDamage=f.kind==='mirror'?(f.cap!==undefined?Math.min(f.cap,f.stored*.45):f.stored*.45):0,before=s.stats.damage;
       damage(s,target,f.damage*factor+echoDamage,f.hero,{recordMirror:f.kind!=='mirror'});
       event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage});
     }
@@ -800,7 +799,7 @@ export function restore(raw){
     if(s.shots.some(e=>e.ground&&(e.to.x<GROUND_BOUNDS.left||e.to.x>GROUND_BOUNDS.right||e.to.y<GROUND_BOUNDS.top||e.to.y>GROUND_BOUNDS.bottom)||((e.chainRatio!==undefined||e.extraChain!==undefined)&&!(e.hero==='lightning_sage'&&[.65,.7,.75,.8].includes(e.chainRatio)&&Number.isInteger(e.extraChain)&&e.extraChain>=0&&e.extraChain<=1))))return null;
     if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician')||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
     if(s.shots.some(e=>e.delay!==undefined&&e.reflected!==true||e.reflected!==undefined&&(e.reflected!==true||e.hero!=='aurora'||e.proc!==false||!numeric(e,['delay'])||e.delay<0||e.delay>.42)))return null;
-    if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall','mirror'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored','cap'])||f.stored<0||f.cap<0||f.stored>f.cap/.45+1e-6)))return null;
+    if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!['royal','starfall','mirror'].includes(f.kind)||HERO[f.hero]?.skill.type!==f.kind||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored'])||f.stored<0||f.cap!==undefined&&(!numeric(f,['cap'])||f.cap<0||f.stored>f.cap/.45+1e-6))))return null;
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
     if(s.enemies.some(e=>!numeric(e,['frostStacks','frostTime','ccImmune','frostLock'])||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.frostTime<0||e.ccImmune<0||e.frostLock<0||e.ccImmune>s.time+30||e.frostLock>s.time+30))return null;
     if(!Array.isArray(s.zones)||s.zones.length>ZONE_CAP||s.zones.some(z=>!id(z?.uid)||!id(z.source)||z.source>=s.nextId||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||!Number.isInteger(z.rank)||z.rank<1||z.rank>MAX_RANK||z.damage<0||z.x<GROUND_BOUNDS.left||z.x>GROUND_BOUNDS.right||z.y<GROUND_BOUNDS.top||z.y>GROUND_BOUNDS.bottom||z.radius<=0||z.radius>720||z.total<=0||z.total>30||z.life<=0||z.life>z.total||z.tick<-.05||z.tick>.5+1e-9||typeof z.orbit!=='boolean'))return null;

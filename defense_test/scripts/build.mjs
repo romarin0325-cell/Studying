@@ -72,7 +72,7 @@ for(const input of Object.keys(js.metafile.inputs)){
   const relative=path.relative(game,path.resolve(input));
   if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw new Error('External game source in Star Garden bundle: '+input);
 }
-const source=(await readText(path.join(game,'index.html'))).replace('<title>ASTRA · 별빛 정원</title>',solo?'<title>ASTRA · 별빛 정원 · 1인 편성 테스트</title>':'<title>ASTRA · 별빛 정원</title>');
+const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',solo?'<title>드림위버: 별빛 정원 · 1인 편성 테스트</title>':'<title>드림위버: 별빛 정원</title>');
 for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source.split(token).length!==2)throw new Error('Build token mismatch: '+token);
 const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
 const bundle=js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
