@@ -86,11 +86,20 @@ test('a dispatch cannot consume the last five battle heroes and has a fixed 20-h
   assert.equal(extra.transact('deck',{ids:DEFAULT_DECK},NOW).ok,false);
   assert.equal(extra.transact('begin',{mode:'main',stage:10,deck:DEFAULT_DECK},NOW).ok,false);
   const d=extra.value.dispatches[0];assert.equal(d.end-d.start,20*HOUR);
-  call(extra,'level',{id:'star_boy'});assert.equal(extra.value.dispatches[0].reward,d.reward);
+  assert.ok(d.dust>d.reward&&d.reward>=1,'dust is the main dispatch reward');
+  call(extra,'level',{id:'star_boy'});assert.equal(extra.value.dispatches[0].reward,d.reward);assert.equal(extra.value.dispatches[0].dust,d.dust);
   assert.equal(extra.transact('claimDispatch',{slot:0},d.end-1).ok,false);
-  const before=extra.value.dreams;call(extra,'claimDispatch',{slot:0},d.end);
-  assert.equal(extra.value.dreams,before+d.reward);assert.ok(available(extra.value).includes('star_boy'));
+  const before=extra.value.dreams,dust=extra.value.dust;call(extra,'claimDispatch',{slot:0},d.end);
+  assert.equal(extra.value.dreams,before+d.reward);assert.equal(extra.value.dust,dust+d.dust);assert.ok(available(extra.value).includes('star_boy'));
   assert.equal(extra.transact('claimDispatch',{slot:0},d.end).ok,false);
+});
+
+test('a dispatch sent before dust rewards still validates and pays its promised crystals',()=>{
+  const p=createProfile(NOW);p.cleared=9;p.heroes.queen.owned=true;
+  p.dispatches=[{slot:0,hero:'star_boy',start:NOW,end:NOW+20*HOUR,reward:77}];p.deck=p.deck.filter(id=>id!=='star_boy');p.deck.push('queen');
+  assert.ok(validateProfile(p));const s=storeFor(p),dreams=s.value.dreams,dust=s.value.dust;
+  call(s,'claimDispatch',{slot:0},NOW+20*HOUR);assert.equal(s.value.dreams,dreams+77);assert.equal(s.value.dust,dust);
+  const bad=structuredClone(p);bad.dispatches[0].dust=-1;assert.equal(validateProfile(bad),false);
 });
 
 test('weekly draft survives reload, excludes dispatched heroes and produces five distinct choices',()=>{

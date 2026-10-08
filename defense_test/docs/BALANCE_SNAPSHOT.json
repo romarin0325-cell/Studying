@@ -17,6 +17,8 @@
     "specialEvery": 5,
     "dispatchHours": 20,
     "dispatchStageStep": 0.05,
+    "dispatchDust": 1.25,
+    "dispatchDreams": 0.25,
     "idleHours": 20,
     "idleDustPerHour": 14,
     "firstClearBase": 160,
@@ -436,27 +438,42 @@
     {
       "id": "star_boy",
       "power": 655,
-      "dispatchAt9": 81
+      "dispatchAt9": {
+        "dust": 101,
+        "dreams": 20
+      }
     },
     {
       "id": "snow_rabbit",
       "power": 241,
-      "dispatchAt9": 62
+      "dispatchAt9": {
+        "dust": 78,
+        "dreams": 15
+      }
     },
     {
       "id": "night_rabbit",
       "power": 751,
-      "dispatchAt9": 84
+      "dispatchAt9": {
+        "dust": 105,
+        "dreams": 21
+      }
     },
     {
       "id": "siren",
       "power": 173,
-      "dispatchAt9": 58
+      "dispatchAt9": {
+        "dust": 73,
+        "dreams": 14
+      }
     },
     {
       "id": "great_detective",
       "power": 316,
-      "dispatchAt9": 66
+      "dispatchAt9": {
+        "dust": 83,
+        "dreams": 16
+      }
     }
   ],
   "roster": [

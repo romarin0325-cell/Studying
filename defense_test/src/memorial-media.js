@@ -666,20 +666,20 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     }
   },
   "lightning_sage": {
-    "sourceFilename": "16A_번개의현자_세 줄의 검은 흔적.png",
-    "sourceSha256": "c85784de85321bbd1c81fc959999dd9e137f0d7d402f74c65558ff19bdba9d9f",
-    "sourceBytes": 1793938,
+    "sourceFilename": "번개의현자수정.png",
+    "sourceSha256": "6a87f0e8c4884bd5105cc3f461d847aed162cd3052df6267b37f5b994955f6a1",
+    "sourceBytes": 1848880,
     "sourceWidth": 1024,
     "sourceHeight": 1536,
     "sourceHasAlpha": false,
     "sourceIsOpaque": true,
     "alphaRemoved": false,
-    "outputSha256": "5bd78990b3133ae6172366b547032600b0f2b6df9630ef9c10e19fde55178f6b",
+    "outputSha256": "336914bb73634f7371dc4ade3f2cd81fa6dd4201a446cf8c47b108b6aafcb63e",
     "width": 720,
     "height": 1080,
     "hasAlpha": false,
-    "bytes": 37052,
-    "base64Bytes": 49404,
+    "bytes": 38682,
+    "base64Bytes": 51576,
     "codec": "avif",
     "quality": 52,
     "effort": 4,
@@ -693,7 +693,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 625,
     "bodyStartLine": 626,
     "bodyEndLine": 633,
-    "bodySha256": "a8265037797ed8e508910c75b6c68c066d7aa19119a035b1924846d800d3072e",
+    "bodySha256": "3f3e305f3c0ca3e373edaf45e65628815e0f7a57ca3ce6bb59e2508335c58794",
     "avifPath": "./assets/memorial/lightning_sage.avif",
     "webp": {
       "path": "./assets/memorial-webp/lightning_sage.webp",
@@ -705,9 +705,9 @@ export const MEMORIAL_MEDIA_MANIFEST = {
       "width": 720,
       "height": 1080,
       "hasAlpha": false,
-      "bytes": 68560,
-      "base64Bytes": 91416,
-      "outputSha256": "d516b62567545f82364886027cf2f96ede5c86bb9c2e8638d1adb0b6fbcd94b8"
+      "bytes": 71038,
+      "base64Bytes": 94720,
+      "outputSha256": "9238b74fed639ce7f232838094f95f29528d3239f0ea666b33917ac71b24e723"
     }
   },
   "time_magician": {

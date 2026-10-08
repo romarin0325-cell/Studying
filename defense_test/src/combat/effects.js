@@ -1,5 +1,5 @@
 import {HERO,HEROES} from '../content.js';
-import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,GROUND_BOUNDS} from './engine.js';
+import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH} from './engine.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field';
@@ -27,10 +27,8 @@ const directional=new Set(['crescent','daggers','leap','ribbon','dragon','claws'
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
 export function drawAttackRange(ctx,hero,from,aim){
   if(hero.id==='flame_sage'){
-    const {left:l,right:r,top:t,bottom:b}=GROUND_BOUNDS;
-    ctx.save();ctx.globalAlpha=.55;
-    for(const [x,y,sx,sy] of [[l,t,1,1],[r,t,-1,1],[l,b,1,-1],[r,b,-1,-1]])stroke(ctx,[[x+sx*22,y],[x,y],[x,y+sy*22]],hero.color,2);
-    ctx.restore();return;
+    ctx.save();ctx.globalAlpha=.7;ctx.strokeStyle=hero.color;ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.beginPath();
+    PATH.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.restore();return;
   }
   const g=attackGeometry(hero,from,{x:from.x+Math.cos(aim)*hero.range,y:from.y+Math.sin(aim)*hero.range});
   ctx.save();ctx.translate(from.x,from.y);ctx.strokeStyle='#d5f1e8aa';ctx.fillStyle='#a5ddeb12';ctx.lineWidth=2;ctx.setLineDash([5,7]);ctx.beginPath();
@@ -92,12 +90,14 @@ export class CombatFX{
     if(layout==='target'||layout==='pull'){this.drawDirectedSkill(skill,t,fade,layout);return;}
     if(dedicated(skill.hero)){
       if(layout==='support'){
-        this.ultimate(skill.hero,skill.origin.x,skill.origin.y-18,154,154,0,fade*.78);
+        const burst=skill.hero==='santa'?460:420;
+        this.ultimate(skill.hero,skill.origin.x,skill.origin.y-18,burst,burst,0,fade*.9);
         for(const p of (skill.targets||[]).slice(0,8))this.ultimate(skill.hero,p.x,p.y+18,62,30,0,fade*.35);
       }else if(skill.hero==='zeke'){
         for(let i=0;i<4;i++){const local=(t*3.5-i*.24)%1;if(local<0)continue;this.ultimate('zeke',210+i*100,245+i*113,370,220,i%2?.12:-.4,Math.sin(local*Math.PI)*.52);}
       }else{
-        this.ultimate(skill.hero,360,405,skill.hero==='frost_witch'?380:310,skill.hero==='frost_witch'?310:310,skill.hero==='time_ruler'?motion*.15:0,fade*.45);
+        const center=skill.hero==='cinderella'?640:skill.hero==='frost_witch'?480:460;
+        this.ultimate(skill.hero,360,405,center,center,skill.hero==='time_ruler'?motion*.15:0,fade*.55);
         for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112,112,0,fade*.72);
       }
       return;
@@ -183,7 +183,7 @@ export class CombatFX{
         const phase=Math.min(1,Math.max(0,t*2.4-i*.055)),x=from.x+(p.x-from.x)*phase,y=from.y+(p.y-from.y)*phase-Math.sin(phase*Math.PI)*50;
         ctx.save();ctx.globalAlpha=fade*.48;ctx.strokeStyle=h.color;ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(from.x,from.y-18);ctx.quadraticCurveTo((from.x+p.x)/2,(from.y+p.y)/2-70,p.x,p.y-18);ctx.stroke();ctx.restore();
         this.stamp('night_rabbit',x,y-18,100,angle,fade);from=p;
-      }else this.ultimate(skill.hero,p.x,p.y-28,165,165,angle,fade*.8);
+      }else this.ultimate(skill.hero,p.x,p.y-28,skill.hero==='aurora'?420:165,skill.hero==='aurora'?420:165,angle,fade*.8);
       ctx.save();ctx.globalAlpha=fade*.65;ctx.strokeStyle=h.color;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(p.x,p.y+8,27,10,0,0,Math.PI*2);ctx.stroke();ctx.restore();
     }
   }
@@ -356,7 +356,7 @@ export class CombatFX{
         ctx.beginPath();ctx.ellipse(e.x,e.y+5,23*(1-t),8*(1-t),0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
       if(e.type==='finisherImpact'||e.type==='finisherFizzle'){
-        if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),118+t*45,140+t*30,0,(1-t)*(e.type==='finisherImpact'?.95:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*58,e.y-18,64,side<0?Math.PI:0,(1-t)*.85);continue;}
+        if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),280+t*70,320+t*50,0,(1-t)*(e.type==='finisherImpact'?.95:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*90,e.y-18,88,side<0?Math.PI:0,(1-t)*.85);continue;}
         const row=e.kind==='royal'?0:4,hit=e.type==='finisherImpact',angle=Math.atan2(e.y-(e.origin?.y||e.y),e.x-(e.origin?.x||e.x));
         if(hit&&e.kind==='royal')this.ultimate('cherry_prince',e.x,e.y-(e.targetBoss?35:18),210+t*44,180+t*35,angle,(1-t)*.94);
         else if(hit&&t<.75)this.atlasStamp('finishers',row+2,4,3,e.x,e.y-(e.targetBoss?35:18),220+t*35,undefined,angle,(1-t)*(this.reduced?.65:.95));
@@ -366,7 +366,8 @@ export class CombatFX{
       if(e.type==='bossMagic'){this.atlasStamp('effects-expansion',{storm:7,duel:8,creation:9}[e.pattern],4,3,e.x,e.y-20,112+t*18,undefined,0,(1-t)*.85);continue;}
       if(e.type==='support'){
         // Support magic rises beside the recipient, never as a false enemy hit.
-        this.ultimate(e.hero,e.x+24,e.y-22-t*28,58+10*t,58+10*t,0,(1-t)*.75);
+        const burst=e.hero==='santa'?168:150;
+        this.ultimate(e.hero,e.x+24,e.y-22-t*28,burst+24*t,burst+24*t,0,(1-t)*.9);
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
       const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),hitClarity=e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1,alpha=Math.max(0,(1-t)*(large?.83:.9)*hitClarity);

@@ -20,7 +20,8 @@ export function combatPower(id,entry,garden=1){
   return Math.round((damage*18*role*support+h.range*.12)*specialMultiplier(entry.enhance));
 }
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
-export const dispatchReward=(power,cleared)=>Math.floor((32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep));
+const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
+export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
 export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));

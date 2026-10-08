@@ -25,6 +25,14 @@ function ensureHero(s,id){for(let i=0;i<20&&!E.bestUnit(s,id);i++){s.gold+=1000;
 function close(actual,expected,label='numeric contract'){
   assert.ok(Math.abs(actual-expected)<=1e-8*Math.max(1,Math.abs(expected)),label+': '+actual+' != '+expected);
 }
+function distanceToPath(point){
+  let best=Infinity;
+  for(let i=1;i<E.PATH.length;i++){
+    const [ax,ay]=E.PATH[i-1],[bx,by]=E.PATH[i],dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((point.x-ax)*dx+(point.y-ay)*dy)/l2));
+    best=Math.min(best,Math.hypot(point.x-(ax+dx*t),point.y-(ay+dy*t)));
+  }
+  return best;
+}
 // Start with the real run schema, then place isolated, valid pre-battle units.
 // All behavior under assertion is exercised through engine commands and step.
 function traitArena(placements,{artifacts=[],seed=1234,wave=1}={}){
@@ -532,7 +540,7 @@ test('Storm instant kill never triggers on bosses, damage over time, ultimate at
   }
 });
 
-test('Flame fires at seeded map ground independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
+test('Flame fires at a seeded path point independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
   const locations=[];
   for(const [progress,artifacts] of [[0,[]],[1110,[]],[1110,['roots']]]){
     const s=traitArena([{hero:'flame_sage',index:0}],{artifacts}),[enemy]=enemiesFor(s,[{progress}]),u=s.board[0];
@@ -540,6 +548,7 @@ test('Flame fires at seeded map ground independently of enemy position, locks ta
     E.cycleTarget(s,0);assert.equal(u.priority,priority);close(E.power(s,u),HERO.flame_sage.damage);
     s.rng=1;const shot=launchNormal(s,u);
     assert.equal(shot.ground,true);assert.equal(shot.target,null);locations.push(shot.to);
+    assert.ok(distanceToPath(shot.to)<1,'flame zone lands on the path');
     assert.ok(shot.to.x>=E.GROUND_BOUNDS.left&&shot.to.x<=E.GROUND_BOUNDS.right);
     assert.ok(shot.to.y>=E.GROUND_BOUNDS.top&&shot.to.y<=E.GROUND_BOUNDS.bottom);
     assert.ok(E.restore(E.serialize(s)),'ground-target shot is resumable');

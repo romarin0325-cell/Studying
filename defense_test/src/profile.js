@@ -30,7 +30,7 @@ export function validateProfile(p){
   if(!Array.isArray(p.deck)||p.deck.length!==TEAM_SIZE||new Set(p.deck).size!==TEAM_SIZE||p.deck.some(id=>!p.heroes[id]?.owned)||!p.heroes[p.partner]?.owned)return false;
   if(!Array.isArray(p.equipped)||p.equipped.length>3||new Set(p.equipped).size!==p.equipped.length||p.equipped.some(id=>!p.relics[id]?.owned))return false;
   if(!Array.isArray(p.dispatches)||p.dispatches.length>dispatchSlots(p.cleared)||new Set(p.dispatches.map(d=>d.hero)).size!==p.dispatches.length||new Set(p.dispatches.map(d=>d.slot)).size!==p.dispatches.length)return false;
-  if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)))return false;
+  if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)||d.dust!==undefined&&!integer(d.dust)))return false;
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
   if(['combat','idle','free'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
@@ -123,11 +123,12 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='dispatch'){
     if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
     if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
-    const reward=dispatchReward(combatPower(args.id,p.heroes[args.id],p.garden),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward});
+    const {dust,dreams}=dispatchReward(combatPower(args.id,p.heroes[args.id],p.garden),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward:dreams,dust});
     p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
   }
   if(action==='claimDispatch'){
-    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');p.dreams+=d.reward;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,message:`파견 보상 수령 · 꿈의결정 +${d.reward}`};
+    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
+    const dust=d.dust||0;p.dreams+=d.reward;p.dust+=dust;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,message:`파견 보상 수령 · ${dust?`별가루 +${dust} · `:''}꿈의결정 +${d.reward}`};
   }
   if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 모인 별똥별이 없습니다.');p.dust+=reward;p.idleAt=now;p.daily.idle=true;return {ok:true,reward,message:`별똥별 수집 · 별가루 +${reward}`};}
   if(action==='daily'){
