@@ -23,6 +23,17 @@ function disk(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r
 function diamond(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x,y+r*.4);ctx.lineTo(x-r,y);ctx.lineTo(x,y-r*.4);ctx.closePath();ctx.fill();}
 function star(ctx,r,color){ctx.fillStyle=color;ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,rad=i%2?r*.27:r;i?ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad):ctx.moveTo(Math.cos(a)*rad,Math.sin(a)*rad);}ctx.closePath();ctx.fill();}
 const directional=new Set(['crescent','daggers','leap','ribbon','dragon','claws','comets']);
+const easeOut=t=>1-Math.pow(1-Math.min(1,Math.max(0,t)),3);
+const easeBack=t=>{t=Math.min(1,Math.max(0,t));const c=1.9;return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2);};
+const window01=(age,start,end)=>Math.min(1,Math.max(0,(age-start)/(end-start)));
+// Stable pseudo-random numbers per effect, so a replayed frame draws the same shards.
+const hash=(seed,i)=>{const x=Math.sin(seed*12.9898+i*78.233)*43758.5453;return x-Math.floor(x);};
+export const isUR=hero=>!!HERO[hero]&&(HERO[hero].hidden||HERO[hero].rarity==='UR');
+// Large signature emblems painted for this patch (fx-emblems atlas, black background, screen blend).
+const EMBLEM={phantom:0,cinderella:1,zeke:2};
+// Field-wide ultimates whose aura is global get a board-edge glow; partial ones mark their units.
+export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','tax','winter']);
+export const PARTIAL_AURAS=Object.freeze(['trauma','midnight']);
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
 export function drawAttackRange(ctx,hero,from,aim){
@@ -42,7 +53,22 @@ export function drawAttackRange(ctx,hero,from,aim){
 }
 
 export class CombatFX{
-  constructor(ctx,art){this.ctx=ctx;this.art=art;this.impacts=[];this.clock=0;this.reduced=false;this.budget=64;this.enemies=new Map();}
+  constructor(ctx,art){this.ctx=ctx;this.art=art;this.impacts=[];this.clock=0;this.reduced=false;this.budget=64;this.enemies=new Map();this.sprites=new Map();}
+  // Cached soft glow and ray-burst sprites per colour: one offscreen draw, then cheap stamps.
+  sprite(kind,color){
+    const key=kind+color;let c=this.sprites.get(key);if(c)return c;
+    c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
+    if(kind==='glow'){const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,color+'ee');r.addColorStop(.32,color+'77');r.addColorStop(1,color+'00');g.fillStyle=r;g.fillRect(0,0,256,256);}
+    else{g.translate(128,128);for(let i=0;i<18;i++){g.rotate(Math.PI*2/18);const len=i%2?92:126,w=i%2?4:7,grad=g.createLinearGradient(0,0,0,-len);grad.addColorStop(0,color+'dd');grad.addColorStop(.6,color+'55');grad.addColorStop(1,color+'00');g.fillStyle=grad;g.beginPath();g.moveTo(-w,0);g.lineTo(0,-len);g.lineTo(w,0);g.closePath();g.fill();}}
+    this.sprites.set(key,c);return c;
+  }
+  glow(kind,color,x,y,size,alpha=1,angle=0){
+    if(alpha<=0||size<=0)return;const ctx=this.ctx,c=this.sprite(kind,color);
+    ctx.save();ctx.globalAlpha*=alpha;ctx.globalCompositeOperation='lighter';ctx.translate(x,y);if(angle)ctx.rotate(angle);ctx.drawImage(c,-size/2,-size/2,size,size);ctx.restore();
+  }
+  emblem(hero,x,y,size,angle=0,alpha=1){const frame=EMBLEM[hero];if(frame===undefined)return false;this.atlasStamp('fx-emblems',frame,3,1,x,y,size,size,angle,alpha);return true;}
+  // Big signature art for a field ultimate: dedicated emblem when one exists, else the ultimate frame.
+  centerArt(hero,x,y,size,angle,alpha){if(!this.emblem(hero,x,y,size,angle,alpha))this.ultimate(hero,x,y,size,size,angle,alpha);}
   point(uid,fallback){return this.enemies.get(uid)?.point||fallback;}
   ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
   atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1,blend='screen'){
@@ -66,39 +92,70 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
-    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero))this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life:e.hero==='guardian'?.44:.36,total:e.hero==='guardian'?.44:.36});
+    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
-    if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',life:.45,total:.45});
+    if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
     if(e.type==='impact')this.add({...e,life:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3,total:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3});
     if(e.type==='chain')this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life:.24,total:.24,rank:1});
     if(e.type==='skill'){
       if(e.locked)return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
-      for(const p of targets)this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65,total:.65,rank:e.rank,skill:h.skill.type});
+      for(const [i,p] of targets.entries())this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65+(e.support?i*.04:0),total:.65+(e.support?i*.04:0),rank:e.rank,skill:h.skill.type});
       if(!targets.length)this.add({type:'ultimate',hero:e.hero,...e.origin,origin:e.origin,angle:0,life:.65,total:.65,rank:e.rank});
     }
   }
+  // Every cast: light pillar, two shock rings and a ray burst at the caster. UR casts are larger
+  // and add a gold flash; this is the "the ultimate fired" beat, independent of the field art.
+  drawCast(skill){
+    const age=skill.total-skill.life;if(age<0||age>1.1||!skill.origin)return;
+    const ctx=this.ctx,h=HERO[skill.hero],o=skill.origin,ur=isUR(skill.hero),k=ur?1.3:1,fade=1-window01(age,.55,1.1),reduced=this.reduced?.55:1;
+    // Screen-edge flash in the hero colour (UR: brighter and gold-tinted).
+    if(age<.4){ctx.save();ctx.globalAlpha=(1-age/.4)*(ur?.38:.22)*reduced;ctx.globalCompositeOperation='lighter';ctx.fillStyle=(ur?'#ffd36a':h.color)+'55';ctx.fillRect(0,0,720,780);ctx.restore();}
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    // Pillar of light from the caster.
+    const pillar=(1-window01(age,.05,.75))*reduced;
+    if(pillar>0){const w=(56+age*70)*k,g=ctx.createLinearGradient(0,o.y-320,0,o.y+30);g.addColorStop(0,h.color+'00');g.addColorStop(.6,h.color+'66');g.addColorStop(1,'#ffffffaa');ctx.globalAlpha=pillar;ctx.fillStyle=g;ctx.fillRect(o.x-w/2,o.y-320,w,350);}
+    // Two shock rings on the floor.
+    for(const [delay,max,width] of [[0,250,10],[.14,340,5]]){const a=age-delay;if(a<0||a>.6)continue;const r=easeOut(a/.6)*max*k;ctx.globalAlpha=(1-a/.6)*reduced;ctx.strokeStyle=h.color;ctx.lineWidth=width*(1-a/.6)+1.5;ctx.beginPath();ctx.ellipse(o.x,o.y+18,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
+    ctx.restore();
+    const pop=easeBack(window01(age,0,.32));
+    this.glow('rays',ur?'#ffe08a':h.color,o.x,o.y-24,(250*k)*pop,fade*.7*reduced,age*.9);
+    this.glow('glow',h.color,o.x,o.y+8,(170*k)*pop,fade*.55);
+    if(ur)this.glow('rays',h.color,o.x,o.y-24,(330*k)*pop,fade*.5*reduced,-age*.6);
+  }
+  // Rising gold sparkles over the board for a UR ultimate.
+  drawStarRain(skill,age){
+    const ctx=this.ctx;if(this.reduced)return;ctx.save();ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<22;i++){const t=window01(age,hash(skill.uid||1,i)*.5,hash(skill.uid||1,i)*.5+.9);if(t<=0||t>=1)continue;
+      const x=40+hash(skill.uid||3,i+40)*640,y=760-t*(420+hash(skill.uid||5,i+80)*260);ctx.globalAlpha=Math.sin(t*Math.PI);ctx.save();ctx.translate(x,y);ctx.rotate(t*3);star(ctx,5+hash(skill.uid||7,i)*7,i%3?'#ffe9a8':'#fffaf0');ctx.restore();}
+    ctx.restore();
+  }
   drawSkillField(skill){
-    if(!skill||skill.life<=0||skill.locked||skill.kind==='trauma')return;
-    const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero];
+    if(!skill||skill.life<=0)return;
+    this.drawCast(skill);
+    const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
     const t=Math.max(0,Math.min(1,1-skill.life/skill.total)),fade=Math.min(1,t*12)*(1-t),motion=this.reduced?.28:t;
-    const layout=ultimateLayout(skill.kind);
+    const layout=ultimateLayout(skill.kind),ur=isUR(skill.hero);
+    if(ur&&dedicated(skill.hero)&&(skill.locked||layout==='target'||layout==='pull')){const pop=easeBack(window01(age,.04,.38)),a=1-window01(age,.7,1.3);this.glow('rays',h.color,skill.origin.x,skill.origin.y-40,380*pop,a*.6,age*.6);this.ultimate(skill.hero,skill.origin.x,skill.origin.y-44,300*pop,300*pop,0,a*.95);}
+    if(skill.locked||skill.kind==='trauma')return;
+    if(ur&&layout!=='support')this.drawStarRain(skill,age);
     if(layout==='target'||layout==='pull'){this.drawDirectedSkill(skill,t,fade,layout);return;}
+    if(this.signature(skill,age,fade))return;
     if(dedicated(skill.hero)){
       if(layout==='support'){
-        const burst=skill.hero==='santa'?460:420;
-        this.ultimate(skill.hero,skill.origin.x,skill.origin.y-18,burst,burst,0,fade*.9);
-        for(const p of (skill.targets||[]).slice(0,8))this.ultimate(skill.hero,p.x,p.y+18,62,30,0,fade*.35);
-      }else if(skill.hero==='zeke'){
-        for(let i=0;i<4;i++){const local=(t*3.5-i*.24)%1;if(local<0)continue;this.ultimate('zeke',210+i*100,245+i*113,370,220,i%2?.12:-.4,Math.sin(local*Math.PI)*.52);}
+        // Support: the emblem bursts out of the caster, then a soft wave rolls over the allies.
+        const pop=easeBack(window01(age,.05,.4)),a=1-window01(age,.75,1.5),size=(ur?380:320)*pop;
+        this.ultimate(skill.hero,skill.origin.x,skill.origin.y-40,size,size,0,a);
+        for(const p of (skill.targets||[]).slice(0,10))this.ultimate(skill.hero,p.x,p.y+18,70,32,0,a*.4);
       }else{
-        const center=skill.hero==='cinderella'?640:skill.hero==='frost_witch'?480:460;
-        this.ultimate(skill.hero,360,405,center,center,skill.hero==='time_ruler'?motion*.15:0,fade*.55);
-        for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112,112,0,fade*.72);
+        const pop=easeBack(window01(age,.08,.45)),a=1-window01(age,.85,1.5),size=(skill.hero==='frost_witch'?500:470)*(ur?1.08:1)*pop;
+        this.glow('rays',h.color,360,405,size*1.25,a*.55,age*.4);
+        this.ultimate(skill.hero,360,405,size,size,skill.hero==='time_ruler'?motion*.3:(1-pop)*-.25,a*.75);
+        for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112,112,0,a*.72);
       }
       return;
     }
@@ -156,18 +213,98 @@ export class CombatFX{
       }
     }
     ctx.restore();
-    // One large low-opacity SD emblem plus two clear side seals: unlike a hit
+    // One large SD emblem that pops in, plus two clear side seals: unlike a hit
     // stamp this reads even with one boss on the outer lane, or reduced motion.
-    this.stamp(h.id,360,410,310+motion*30,-.3,.3);
+    const pop=easeBack(window01(age,.05,.4));
+    this.glow('rays',h.color,360,410,360*pop,fade*.5,age*.4);
+    this.stamp(h.id,360,410,(330+motion*30)*pop,-.3,.42);
     this.stamp(h.id,39,350,104,Math.PI/2,.8);
     this.stamp(h.id,681,485,104,-Math.PI/2,.8);
+    ctx.restore();
+  }
+  // Signature sequences for ultimates that need more than an emblem. Returns true when drawn.
+  signature(skill,age,fade){
+    const ctx=this.ctx,h=HERO[skill.hero],targets=skill.targets||[],seed=skill.uid||skill.rank||1;
+    if(skill.hero==='cinderella'){
+      // Midnight: a huge glass clock swings in, chimes twelve, then shatters into falling glass.
+      const pop=easeBack(window01(age,0,.38)),chime=window01(age,.5,.75),shatter=window01(age,.72,1.45);
+      const size=600*pop,whole=1-shatter;
+      this.glow('rays','#ff9ad8',360,400,size*1.3,(1-shatter)*.6,age*.5);
+      this.centerArt('cinderella',360,400,size*(1+chime*.06),(1-pop)*-.5,whole*.85);
+      if(chime>0&&chime<1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1-chime;ctx.strokeStyle='#ffe3f5';ctx.lineWidth=8*(1-chime)+2;ctx.beginPath();ctx.arc(360,400,200+chime*240,0,Math.PI*2);ctx.stroke();
+        for(let i=0;i<12;i++){const a=i*Math.PI/6-Math.PI/2;diamond(ctx,360+Math.cos(a)*(250+chime*60),400+Math.sin(a)*(250+chime*60),12*(1-chime)+4,'#fff2fb');}ctx.restore();}
+      if(shatter>0){ctx.save();ctx.globalCompositeOperation='lighter';
+        for(let i=0;i<30;i++){const a=hash(seed,i)*Math.PI*2,v=160+hash(seed,i+31)*280,x=360+Math.cos(a)*v*shatter,y=400+Math.sin(a)*v*shatter+shatter*shatter*260;
+          ctx.globalAlpha=(1-shatter)*.95;ctx.save();ctx.translate(x,y);ctx.rotate(a+shatter*4);diamond(ctx,0,0,10+hash(seed,i+62)*14,i%3?'#ffc8ec':'#ffffff');ctx.restore();}
+        ctx.restore();}
+      return true;
+    }
+    if(skill.hero==='zeke'){
+      // Dragon oath: the crest rises, one giant flame slash crosses the board, then pillars erupt under enemies.
+      const rise=easeBack(window01(age,0,.35)),out=1-window01(age,.95,1.5),slash=window01(age,.18,.62);
+      ctx.save();ctx.globalAlpha=out*.5*(this.reduced?.5:1);const tint=this.zekeWash||(this.zekeWash=(()=>{const g=ctx.createRadialGradient(360,400,120,360,400,560);g.addColorStop(0,'#ff6a2000');g.addColorStop(1,'#ff3a1a88');return g;})());ctx.fillStyle=tint;ctx.fillRect(0,0,720,780);ctx.restore();
+      this.glow('rays','#ff8a3a',360,380,640*rise,out*.6,age*.5);
+      this.centerArt('zeke',360,380-30*rise,560*rise,0,out*.88);
+      if(slash>0&&slash<1){const x=-120+slash*960,y=120+slash*560;this.ultimate('zeke',x,y,620,330,.62,Math.sin(slash*Math.PI)*.95);this.glow('glow','#ff7a2a',x,y,420,Math.sin(slash*Math.PI)*.7);}
+      for(const [i,p] of targets.slice(0,14).entries()){const b=window01(age,.42+i*.035,.95+i*.035);if(b<=0||b>=1)continue;const tall=Math.sin(b*Math.PI);
+        ctx.save();ctx.translate(p.x,p.y+6);ctx.rotate(-Math.PI/2);this.atlasStamp('zeke-cone',0,1,1,70*tall,0,170*tall,120,0,tall*.9,'lighter');ctx.restore();this.glow('glow','#ffb24a',p.x,p.y-10,120*tall,tall*.8);}
+      return true;
+    }
+    if(skill.hero==='phantom'){
+      // Endless night: the mask looms at the centre, the board darkens and claws rake across.
+      const pop=easeBack(window01(age,0,.4)),out=1-window01(age,.9,1.5);
+      ctx.save();ctx.globalAlpha=out*.55;const dark=this.phantomWash||(this.phantomWash=(()=>{const g=ctx.createRadialGradient(360,400,90,360,400,540);g.addColorStop(0,'#2a0a4a00');g.addColorStop(1,'#1a0630ee');return g;})());ctx.fillStyle=dark;ctx.fillRect(0,0,720,780);ctx.restore();
+      this.glow('rays','#b77bff',360,400,620*pop,out*.5,-age*.5);
+      this.centerArt('phantom',360,400,560*pop,(1-pop)*.4,out*.88);
+      // Three claw rakes sweep across the board, each a short trail of the phantom's own claw stamp.
+      for(let i=0;i<3;i++){const c=window01(age,.22+i*.12,.62+i*.12);if(c<=0||c>=1)continue;const y0=170+i*200,dir=i%2?-1:1;
+        for(let j=0;j<5;j++){const k=Math.max(0,c-j*.06),x=dir>0?40+k*640:680-k*640,y=y0+Math.sin(k*Math.PI)*70*dir;this.stamp('phantom',x,y,150-j*18,dir>0?0:Math.PI,Math.sin(c*Math.PI)*(1-j*.18));}
+        this.glow('glow',i%2?'#7df0d8':'#b77bff',dir>0?40+c*640:680-c*640,y0+Math.sin(c*Math.PI)*70*dir,200,Math.sin(c*Math.PI)*.6);}
+      for(const [i,p] of targets.slice(0,14).entries()){const b=window01(age,.45+i*.03,1+i*.03);if(b<=0||b>=1)continue;this.stamp('phantom',p.x,p.y-20,90+b*30,0,Math.sin(b*Math.PI)*.85);}
+      return true;
+    }
+    if(skill.hero==='santa'){
+      // A present falls onto the cell where the new companion appears and bursts into ribbons.
+      const pop=easeBack(window01(age,0,.35)),out=1-window01(age,.95,1.6);
+      this.ultimate('santa',skill.origin.x,skill.origin.y-50,320*pop,320*pop,0,out*.95);
+      const cell=skill.gift>=0?cellPoint(skill.gift):null;
+      if(cell){const fall=window01(age,.08,.42),land=window01(age,.42,1.2);
+        if(fall<1){const y=-80+(cell.y-10+80)*fall*fall;this.ultimate('santa',cell.x,y,140,140,Math.sin(age*14)*.12,1);this.glow('glow','#ffd36a',cell.x,y,180,.6);}
+        else{this.glow('rays','#ffd36a',cell.x,cell.y-20,420*easeOut(land),(1-land)*.9,land);this.glow('glow','#fff1c2',cell.x,cell.y-20,260*(1-land*.5),(1-land)*.9);this.ultimate('santa',cell.x,cell.y-26-land*40,150*(1+land*.4),150*(1+land*.4),0,(1-land)*.9);ctx.save();
+          for(let i=0;i<26;i++){const a=hash(seed,i)*Math.PI*2,v=90+hash(seed,i+30)*170,x=cell.x+Math.cos(a)*v*land,y=cell.y-20+Math.sin(a)*v*land+land*land*140;ctx.globalAlpha=1-land;ctx.fillStyle=['#ff4a5a','#3fbf6a','#ffd36a','#ffffff'][i%4];ctx.save();ctx.translate(x,y);ctx.rotate(a+land*8);ctx.fillRect(-9,-4,18,8);ctx.restore();}
+          ctx.restore();ctx.save();ctx.globalAlpha=1-land;ctx.strokeStyle='#ffe7a6';ctx.lineWidth=5*(1-land)+1;ctx.beginPath();ctx.ellipse(cell.x,cell.y+22,40+land*70,14+land*24,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+      }
+      return true;
+    }
+    if(skill.hero==='silver_rabbit'){
+      // Silver march: the emblem bursts from the caster and six comets streak across the board.
+      const o=skill.origin,pop=easeBack(window01(age,0,.35)),out=1-window01(age,.9,1.5);
+      this.ultimate('silver_rabbit',o.x,o.y-40,330*pop,330*pop,0,out);
+      ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+      for(let i=0;i<6;i++){const c=window01(age,.12+i*.05,.75+i*.05);if(c<=0||c>=1)continue;const a=-Math.PI/2+(i-2.5)*.42,len=560*easeOut(c),x=o.x+Math.cos(a)*len,y=o.y-30+Math.sin(a)*len*.9;
+        const g=ctx.createLinearGradient(o.x,o.y-30,x,y);g.addColorStop(0,'#bfe8ff00');g.addColorStop(1,'#f2fbffcc');ctx.globalAlpha=1-c;ctx.strokeStyle=g;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(o.x+Math.cos(a)*len*.45,o.y-30+Math.sin(a)*len*.4);ctx.lineTo(x,y);ctx.stroke();ctx.save();ctx.translate(x,y);star(ctx,12,'#ffffff');ctx.restore();}
+      ctx.restore();
+      for(const p of targets.slice(0,10))this.ultimate('silver_rabbit',p.x,p.y+18,70,32,0,out*.45);
+      return true;
+    }
+    return false;
+  }
+  // Board edge glow for global auras (one ring per active aura, newest outside) and a
+  // strong mark on units that hold a partial aura. Durations are on the HUD chips.
+  drawAuraFrame(s){
+    const ctx=this.ctx,auras=Object.entries(ACTIVE_SKILLS).filter(([id,key])=>GLOBAL_AURAS.includes(key)&&s.buffs[key]>0).slice(0,3);if(!auras.length)return;
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    auras.forEach(([id,key],i)=>{const h=HERO[id],active=activeSkill(s,id),ending=active&&active.remaining<2?.5+Math.sin(this.clock*14)*.5:1,pulse=(.55+Math.sin(this.clock*3+i)*.15)*ending,inset=4+i*9;
+      ctx.globalAlpha=pulse*.35;ctx.strokeStyle=h.color;ctx.lineWidth=14;ctx.strokeRect(inset,inset,720-inset*2,780-inset*2);
+      ctx.globalAlpha=pulse*.9;ctx.lineWidth=2.5;ctx.strokeRect(inset,inset,720-inset*2,780-inset*2);});
     ctx.restore();
   }
   drawDirectedSkill(skill,t,fade,layout){
     const ctx=this.ctx,points=skill.targets||[],h=HERO[skill.hero];
     if(layout==='pull'){
       if(!points.length)return;const centre=points.reduce((a,p)=>({x:a.x+p.x/points.length,y:a.y+p.y/points.length}),{x:0,y:0});
-      this.ultimate(skill.hero,centre.x,centre.y-18,230,210,t*.45,fade*.8);
+      const big=isUR(skill.hero)?1.7:1;if(big>1)this.glow('rays',h.color,centre.x,centre.y-18,420,fade*.55,t);
+      this.ultimate(skill.hero,centre.x,centre.y-18,230*big,210*big,t*.45,fade*.8);
       for(const p of points){const from=p.from||p,to=this.point(p.uid,p),travel=Math.min(1,t*3),x=from.x+(to.x-from.x)*travel,y=from.y+(to.y-from.y)*travel;
         ctx.save();ctx.globalAlpha=fade*.6;ctx.strokeStyle=h.color;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(from.x,from.y-20);ctx.quadraticCurveTo((from.x+to.x)/2+25,(from.y+to.y)/2-45,to.x,to.y-20);ctx.stroke();ctx.restore();
         this.stamp(skill.hero,x,y-20,42,Math.atan2(to.y-from.y,to.x-from.x),fade*.8);
@@ -189,13 +326,19 @@ export class CombatFX{
   }
   drawPersistent(s){
     for(let i=0;i<s.board.length;i++){
-      const u=s.board[i];if(!u)continue;const own=activeSkill(s,u.hero),p=cellPoint(i);
-      let active=own,owner=u.hero;
-      if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>id!=='time_magician'&&s.buffs[ACTIVE_SKILLS[id]]>0&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
-      if(!active)continue;
-      const pulse=.27+Math.sin(this.clock*4+u.uid)*.06,ctx=this.ctx;
-      this.ultimate(owner,p.x,p.y+20,76,30,0,pulse);
-      if(own){ctx.save();ctx.strokeStyle=HERO[owner].color;ctx.lineWidth=2.5;ctx.globalAlpha=.7;ctx.beginPath();ctx.ellipse(p.x,p.y+21,32,11,0,-Math.PI/2,-Math.PI/2+Math.PI*2*active.remaining/active.total);ctx.stroke();ctx.restore();this.ultimate(owner,p.x+29,p.y-36,31,31,0,.58);}
+      const u=s.board[i];if(!u)continue;const own=activeSkill(s,u.hero),p=cellPoint(i),ctx=this.ctx;
+      const partial=own&&PARTIAL_AURAS.includes(own.key)&&(own.key!=='midnight'||!s.board.some((b,j)=>b?.hero==='cinderella'&&b.rank>u.rank));
+      if(partial){
+        const h=HERO[u.hero],pulse=.75+Math.sin(this.clock*5+u.uid)*.2;
+        this.glow('glow',h.color,p.x,p.y-6,150*pulse,.55);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=h.color;ctx.lineWidth=4;ctx.globalAlpha=.9;ctx.beginPath();ctx.ellipse(p.x,p.y+24,36,12,0,-Math.PI/2,-Math.PI/2+Math.PI*2*own.remaining/own.total);ctx.stroke();ctx.restore();
+        if(!this.reduced)for(let j=0;j<3;j++){const k=(this.clock*.8+j/3+u.uid*.13)%1;ctx.save();ctx.globalAlpha=(1-k)*.8;ctx.translate(p.x+Math.sin(j*2.1+u.uid)*22,p.y+20-k*70);star(ctx,4,h.color);ctx.restore();}
+        continue;
+      }
+      let owner=own?u.hero:null,active=own;
+      if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>!PARTIAL_AURAS.includes(ACTIVE_SKILLS[id])&&s.buffs[ACTIVE_SKILLS[id]]>0&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
+      if(!active||PARTIAL_AURAS.includes(active.key))continue;
+      this.ultimate(owner,p.x,p.y+22,70,26,0,.16+Math.sin(this.clock*4+u.uid)*.05);
     }
   }
   drawZones(s){
@@ -258,7 +401,7 @@ export class CombatFX{
     if(['zeke','guardian','ancient_dragon'].includes(h.id))return;
     if(h.shape==='beam'){
       const atlas=f.atlas||'effects',frame=shot.form==='trauma'?15:f.frame;
-      if(shot.form==='trauma')this.ultimate('time_magician',x,y,122,48,angle+.65,.9);
+      if(shot.form==='trauma'){this.glow('glow','#ff5c8a',x,y,70,.55);this.atlasStamp('ultimates',15,4,4,x,y,88,88,angle+Math.PI/4,.95,'source-over');}
       else this.atlasStamp(atlas,frame,f.columns||7,f.rows||3,x,y,116+shot.rank*3,48,angle+(f.offset||0),.86);
       return;
     }
@@ -335,8 +478,11 @@ export class CombatFX{
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
-          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.beginPath();ctx.arc(0,0,h.range,0,Math.PI*2);ctx.clip();
-          this.atlasStamp('ancient-cross',0,1,1,0,0,h.range*1.6,h.range*1.6,0,fade*.26*fireClarity,'source-over');ctx.restore();
+          // Basic attack, not an ultimate: a small cross at the dragon and four thin flame arms.
+          const reach=h.range*Math.min(1,t*2.4),a=fade*fireClarity;
+          ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const g=ctx.createLinearGradient(e.origin.x,e.origin.y,e.origin.x+dx*reach,e.origin.y+dy*reach);g.addColorStop(0,'#ffb35acc');g.addColorStop(1,'#ff6a3000');ctx.strokeStyle=g;ctx.globalAlpha=a*.55;ctx.lineWidth=10*(1-t)+2;ctx.beginPath();ctx.moveTo(e.origin.x,e.origin.y);ctx.lineTo(e.origin.x+dx*reach,e.origin.y+dy*reach);ctx.stroke();}
+          ctx.restore();this.atlasStamp('ancient-cross',0,1,1,e.origin.x,e.origin.y-8,150,150,0,a*.5,'source-over');
         }
     }
   }
@@ -366,12 +512,12 @@ export class CombatFX{
       if(e.type==='bossMagic'){this.atlasStamp('effects-expansion',{storm:7,duel:8,creation:9}[e.pattern],4,3,e.x,e.y-20,112+t*18,undefined,0,(1-t)*.85);continue;}
       if(e.type==='support'){
         // Support magic rises beside the recipient, never as a false enemy hit.
-        const burst=e.hero==='santa'?168:150;
-        this.ultimate(e.hero,e.x+24,e.y-22-t*28,burst+24*t,burst+24*t,0,(1-t)*.9);
+        const burst=e.pulse?58:96;
+        this.ultimate(e.hero,e.x+24,e.y-22-t*28,burst+16*t,burst+16*t,0,(1-t)*(e.pulse?.7:.85));
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
       const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),hitClarity=e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1,alpha=Math.max(0,(1-t)*(large?.83:.9)*hitClarity);
-      if(e.type==='impact'&&e.hero==='ancient_dragon'){this.atlasStamp('ancient-cross',0,1,1,e.x,e.y-18,size*.58,size*.58,0,alpha*.7,'source-over');continue;}
+      if(e.type==='impact'&&e.hero==='ancient_dragon'){this.atlasStamp('ancient-cross',0,1,1,e.x,e.y-18,size*.46,size*.46,0,alpha*.6,'source-over');continue;}
       if(large&&dedicated(e.hero)){this.ultimate(e.hero,e.x,e.y-22,size*(1+t*.35),size*(1+t*.35),0,alpha);continue;}
       if(FX_PROFILES[e.hero]?.atlas==='effects-trio'){
         const frame=FX_PROFILES[e.hero].frame+3,burst=e.type==='frostBreak';

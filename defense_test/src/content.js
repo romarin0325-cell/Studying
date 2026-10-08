@@ -37,13 +37,15 @@ export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=s
 export const ASSET_PATHS=source.ASSET_PATHS;
 export const TUNING=Object.freeze({
   heroDrawCost:100,relicDrawCost:80,heroRates:[.70,.25,.048,.002],
-  // Stat renewal v1: duplicates +5% each with a support milestone every 5;
-  // the garden level (shared by every companion) costs 90×1.12^(L-1) dust.
+  // Stat renewal v1: duplicates +5% each with a support milestone every 5.
+  // levelCost* only converts old garden-level saves into greenhouse beds.
   duplicateGrowth:1.58,enhanceStep:.05,levelStep:.04,levelCostBase:90,levelCostGrowth:1.12,
   specialStep:.10,specialEvery:5,dispatchHours:20,dispatchStageStep:.05,
   // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
   dispatchDust:1.25,dispatchDreams:.25,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
+  // Dream greenhouse beds: fast early levels, then a cost knee as a soft cap (no hard cap).
+  beds:{rose:{unlock:0,base:60,growth:1.13,knee:20,steep:1.28},spring:{unlock:15,base:120,growth:1.22,knee:10,steep:1.45},seed:{unlock:30,base:200,growth:1.2,knee:10,steep:1.4}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });
 export const QUOTES={

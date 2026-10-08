@@ -163,7 +163,7 @@ try{
     const navRect=await page.locator('#navigation').boundingBox();
     assert.ok(navRect.y>height-100,'navigation remains at the bottom');
     await page.locator('[data-action="pet"]').click();assert.equal((await profile(page)).dreams,640);
-    await page.locator('#content [data-action="garden"]').click();await page.locator('[data-action="garden-level"]').click();assert.equal((await profile(page)).garden,2);await shot(page,'garden',width,height);await close(page);
+    await page.locator('#content [data-action="garden"]').click();await page.locator('.greenhouse').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.match(await page.locator('.bed-panel h3').innerText(),/Lv.1/);await shot(page,'greenhouse',width,height);
     await nav(page,'동료');assert.equal(await page.locator('.collection-grid .hero-card').count(),30);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.collection-grid .hero-card').count(),12);

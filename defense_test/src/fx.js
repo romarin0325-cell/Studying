@@ -23,4 +23,11 @@ export function burst(x,y,{count=8,color='#ffe39a',spread=46,size=10,duration=62
 }
 export const tapSpark=(x,y,color)=>burst(x,y,{count:5,spread:28,size:8,duration:460,color});
 export const hearts=(x,y)=>burst(x,y,{count:7,spread:54,size:15,duration:1000,shape:'heart',color:'#ff9fc0',rise:40});
+// A short rising label (level up, gains) over the DOM, e.g. "Lv.12".
+export function floatText(x,y,text,color='#fff3c4'){
+  if(reduced()||!Number.isFinite(x)||!Number.isFinite(y))return;
+  const el=document.createElement('b');el.className='fx-float';el.textContent=text;el.style.cssText=`left:${x}px;top:${y}px;--c:${color}`;host().appendChild(el);
+  const animation=el.animate([{transform:'translate(-50%,-30%) scale(.6)',opacity:0},{transform:'translate(-50%,-90%) scale(1.08)',opacity:1,offset:.25},{transform:'translate(-50%,-170%) scale(1)',opacity:0}],{duration:900,easing:'cubic-bezier(.2,.7,.3,1)'});
+  animation.onfinish=()=>el.remove();animation.oncancel=()=>el.remove();
+}
 export function centerOf(element){const r=element.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};}

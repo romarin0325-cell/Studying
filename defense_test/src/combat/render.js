@@ -1,6 +1,6 @@
 import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
 import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm} from './engine.js';
-import {CombatFX,drawAttackRange} from './effects.js';
+import {CombatFX,drawAttackRange,isUR} from './effects.js';
 
 export class Art {
   constructor(){this.images={};this.failed=[];this.ready=this.load();}
@@ -26,7 +26,7 @@ function star(ctx,x,y,r,color,rotation=0){ctx.save();ctx.translate(x,y);ctx.rota
 function shadow(ctx,x,y,r,alpha=.28){ctx.fillStyle=`rgba(9,21,24,${alpha})`;ctx.beginPath();ctx.ellipse(x,y,r,r*.28,0,0,Math.PI*2);ctx.fill();}
 
 export class Renderer {
-  constructor(canvas,art){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.art=art;this.fx=new CombatFX(this.ctx,art);this.effects=[];this.particles=[];this.floats=[];this.skills=[];this.entities=[];this.mergeable=[];this.boardSignature='';this.clock=0;this.shake=0;this.skill=null;this.selected=-1;this.hover=-1;this.drag=null;this.reduced=false;this.background=null;this.bgReady=false;this.setQuality('standard');}
+  constructor(canvas,art){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.art=art;this.fx=new CombatFX(this.ctx,art);this.effects=[];this.particles=[];this.floats=[];this.skills=[];this.entities=[];this.mergeable=[];this.boardSignature='';this.clock=0;this.shake=0;this.skill=null;this.skillSeq=0;this.selected=-1;this.hover=-1;this.drag=null;this.reduced=false;this.background=null;this.bgReady=false;this.setQuality('standard');}
   setQuality(quality){if(this.quality===quality)return;this.quality=quality;const q={high:{dpr:1.75,particles:240,impacts:80,effects:76},standard:{dpr:1.5,particles:180,impacts:64,effects:64},low:{dpr:1.25,particles:100,impacts:40,effects:44}}[quality];this.budget=q;this.fx.budget=q.impacts;this.resize();}
   resize(){const dpr=Math.min(window.devicePixelRatio||1,this.budget.dpr);this.canvas.width=Math.round(720*dpr);this.canvas.height=Math.round(780*dpr);this.dpr=dpr;}
   bursts(x,y,color,n=12,power=1){if(this.reduced)n=Math.min(5,n);n=Math.min(n,this.budget.particles-this.particles.length);for(let i=0;i<n;i++){const angle=Math.random()*Math.PI*2,speed=(35+Math.random()*130)*power;this.particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-40,life:.25+Math.random()*.45,total:.7,r:1.5+Math.random()*3,color,star:i%4===0});}}
@@ -37,7 +37,7 @@ export class Renderer {
     if(e.type==='kill'){this.bursts(e.x,e.y-15,e.color||'#ebd8a5',e.boss?32:8,e.boss?1.5:.6);if(e.boss)this.shake=9;}
     if(e.type==='summon'){const p=cellPoint(e.index);this.effects.push({type:'summon',...p,color:HERO[e.hero].color,life:.65,total:.65});this.bursts(p.x,p.y,HERO[e.hero].color,12);}
     if(e.type==='merge'){const p=cellPoint(e.to);this.effects.push({type:'merge',...p,color:HERO[e.hero].color,life:1,total:1});this.bursts(p.x,p.y-25,'#ffe4a0',28,1.1);this.float(`${e.rank}성`,p.x,p.y-72,'#ffe5aa',31);if(e.refund)this.float(`+${e.refund} G`,p.x,p.y-35,'#ffe5aa');this.shake=3;}
-    if(e.type==='skill'){this.skill={...e,life:1.2,total:1.2};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=4;}
+    if(e.type==='skill'){this.skill={...e,uid:++this.skillSeq,life:1.6,total:1.6};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}
     if(e.type==='income')this.float(`+${e.gold} G`,e.x,e.y-40,'#f2d596',17);
     if(e.type==='chain')this.effects.push({...e,life:.24,total:.24});
@@ -101,6 +101,7 @@ export class Renderer {
     this.fx.draw(dt);
     for(const skill of this.skills)skill.life-=dt;this.skills=this.skills.filter(skill=>skill.life>0);this.skill=this.skills.at(-1)||null;
     if(this.drag){this.art.hero(ctx,this.drag.hero,this.drag.x,this.drag.y+35,145,{alpha:.9,form:this.drag.form});}
+    this.fx.drawAuraFrame(s);
     for(const f of this.floats){f.life-=dt;f.y-=dt*31;ctx.globalAlpha=Math.min(1,f.life*3);ctx.font=`700 ${f.size}px Georgia,serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#172632';ctx.strokeText(f.text,f.x,f.y);ctx.fillStyle=f.color;ctx.fillText(f.text,f.x,f.y);}ctx.globalAlpha=1;this.floats=this.floats.filter(f=>f.life>0);
     if(s.phase==='intermission'){ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.fillStyle='#f4e5c0';ctx.fillText(`다음 웨이브까지 ${Math.max(1,Math.ceil(s.breakTime))}초`,360,737);}
     ctx.restore();

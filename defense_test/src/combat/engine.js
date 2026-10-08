@@ -137,7 +137,9 @@ export function unitEconomy(s,u){
   if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 45G`;
   return HERO[u.hero].trait.text;
 }
-function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,GAUGE_MAX);}
+// The Stardew Spring raises a run's starlight ceiling; older saves keep 120.
+export const gaugeCap=s=>s.gaugeMax||GAUGE_MAX;
+function addGauge(s,value){s.gauge=clamp(s.gauge+value,0,gaugeCap(s));}
 function giveGold(s,value,source){s.gold+=value;s.stats.income[source]=(s.stats.income[source]||0)+value;}
 const statusTypes=['poison','burn','exposure','stun','freeze','divine'];
 const sourceKey=(kind,hero,uid)=>`${kind}:${hero}:${uid}`;
@@ -211,10 +213,10 @@ function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,w
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE);
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70,gauge:90,health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
     buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
@@ -517,7 +519,7 @@ export function cast(s,id){
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank);
   const source=sourceKey('skill',id,s.nextId++);
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
-  let visualTargets=targets;
+  let visualTargets=targets,gift;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
   if(type==='echo')s.buffs.echo=skillDuration(s,8*control);
@@ -525,7 +527,7 @@ export function cast(s,id){
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,10*control);
   else if(type==='march')s.buffs.march=skillDuration(s,6*control);
   else if(type==='glassfall'){strike(6);s.buffs.midnight=skillDuration(s,10*control);}
-  else if(type==='gift'){const hero=drawHero(s);if(place(s,hero,2)<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
+  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,2);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control);for(const ally of s.board)if(ally)ally.disabled=0;}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control);}
   else if(type==='ice_court'){strike(6);for(const e of targets)if(e.hp>0)addSlow(s,e,source,.5,6);s.buffs.winter=skillDuration(s,6*control);}
@@ -573,7 +575,7 @@ export function cast(s,id){
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
-  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
+  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
 }
 // Describes what pressing the ultimate would do right now, with the numbers cast() uses. No side effects.
 export function castPreview(s,id){
@@ -926,7 +928,7 @@ export function restore(raw){
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.
     for(const e of s.enemies)if(e){if(Array.isArray(e.statusEffects))e.statusEffects=e.statusEffects.filter(effect=>effect?.type!=='frost');e.frostStacks=0;e.frostTime=0;}
-    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.time<0||s.health<0||s.health>20||s.gauge<0||s.gauge>GAUGE_MAX||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
+    if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.time<0||s.health<0||s.health>20||s.gaugeMax!==undefined&&(!Number.isInteger(s.gaugeMax)||s.gaugeMax<GAUGE_MAX||s.gaugeMax>GAUGE_MAX+400)||s.gauge<0||s.gauge>gaugeCap(s)||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
     for(const u of s.board)if(u){

@@ -23,6 +23,29 @@
     "idleDustPerHour": 14,
     "firstClearBase": 160,
     "firstClearStep": 10,
+    "beds": {
+      "rose": {
+        "unlock": 0,
+        "base": 60,
+        "growth": 1.13,
+        "knee": 20,
+        "steep": 1.28
+      },
+      "spring": {
+        "unlock": 15,
+        "base": 120,
+        "growth": 1.22,
+        "knee": 10,
+        "steep": 1.45
+      },
+      "seed": {
+        "unlock": 30,
+        "base": 200,
+        "growth": 1.2,
+        "knee": 10,
+        "steep": 1.4
+      }
+    },
     "relicThresholdBase": 30,
     "relicThresholdGrowth": 2.2,
     "relicProbabilityHalf": 3
@@ -239,50 +262,149 @@
       "gainPerCopy": 0.000005318583129454314
     }
   ],
-  "levels": [
-    {
-      "level": 1,
-      "nextDust": 90,
-      "basePower": 1,
-      "cumulativeDust": 0
+  "beds": {
+    "rose": {
+      "unlockStage": 0,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 60,
+          "value": 1,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 111,
+          "value": 1.1,
+          "cumulativeDust": 390
+        },
+        {
+          "level": 10,
+          "nextDust": 204,
+          "value": 1.2,
+          "cumulativeDust": 1109
+        },
+        {
+          "level": 15,
+          "nextDust": 376,
+          "value": 1.3,
+          "cumulativeDust": 2432
+        },
+        {
+          "level": 20,
+          "nextDust": 692,
+          "value": 1.4,
+          "cumulativeDust": 4867
+        },
+        {
+          "level": 25,
+          "nextDust": 2376,
+          "value": 1.5,
+          "cumulativeDust": 10883
+        },
+        {
+          "level": 30,
+          "nextDust": 8163,
+          "value": 1.6,
+          "cumulativeDust": 31552
+        }
+      ]
     },
-    {
-      "level": 5,
-      "nextDust": 142,
-      "basePower": 1.16,
-      "cumulativeDust": 431
+    "spring": {
+      "unlockStage": 15,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 120,
+          "value": 120,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 325,
+          "value": 135,
+          "cumulativeDust": 930
+        },
+        {
+          "level": 10,
+          "nextDust": 877,
+          "value": 150,
+          "cumulativeDust": 3442
+        },
+        {
+          "level": 15,
+          "nextDust": 5619,
+          "value": 155,
+          "cumulativeDust": 13982
+        },
+        {
+          "level": 20,
+          "nextDust": 36014,
+          "value": 160,
+          "cumulativeDust": 81527
+        },
+        {
+          "level": 25,
+          "nextDust": 230834,
+          "value": 165,
+          "cumulativeDust": 514465
+        },
+        {
+          "level": 30,
+          "nextDust": 1479584,
+          "value": 170,
+          "cumulativeDust": 3289467
+        }
+      ]
     },
-    {
-      "level": 10,
-      "nextDust": 250,
-      "basePower": 1.3599999999999999,
-      "cumulativeDust": 1332
-    },
-    {
-      "level": 15,
-      "nextDust": 440,
-      "basePower": 1.56,
-      "cumulativeDust": 2920
-    },
-    {
-      "level": 20,
-      "nextDust": 776,
-      "basePower": 1.76,
-      "cumulativeDust": 5716
-    },
-    {
-      "level": 30,
-      "nextDust": 2408,
-      "basePower": 2.16,
-      "cumulativeDust": 19326
-    },
-    {
-      "level": 40,
-      "nextDust": 7478,
-      "basePower": 2.56,
-      "cumulativeDust": 61579
+    "seed": {
+      "unlockStage": 30,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 200,
+          "value": 0,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 498,
+          "value": 20,
+          "cumulativeDust": 1489
+        },
+        {
+          "level": 10,
+          "nextDust": 1239,
+          "value": 40,
+          "cumulativeDust": 5194
+        },
+        {
+          "level": 15,
+          "nextDust": 6661,
+          "value": 50,
+          "cumulativeDust": 18752
+        },
+        {
+          "level": 20,
+          "nextDust": 35820,
+          "value": 60,
+          "cumulativeDust": 91654
+        },
+        {
+          "level": 25,
+          "nextDust": 192648,
+          "value": 70,
+          "cumulativeDust": 483725
+        },
+        {
+          "level": 30,
+          "nextDust": 1036104,
+          "value": 80,
+          "cumulativeDust": 2592368
+        }
+      ]
     }
-  ],
+  },
   "relics": [
     {
       "tier": 0,

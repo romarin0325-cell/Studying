@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER} from '../src/content.js';
-import {duplicateCost,enhanceMultiplier,specialMultiplier,levelCost,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward} from '../src/economy.js';
+import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward} from '../src/economy.js';
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
@@ -18,7 +18,7 @@ export function balanceSnapshot(){
     tuning:TUNING,
     probability:[probability('any SR',TUNING.heroRates[2]),probability('specific SR',TUNING.heroRates[2]/ROSTER.SR.length),probability('any normal UR',TUNING.heroRates[3]),probability('current season guardian',TUNING.heroRates[3]/2)],
     enhancement:Array.from({length:21},(_,e)=>{const cost=duplicateCost(e);const row={current:e,nextCopies:cost,spentCopies:total,power:enhanceMultiplier(e),special:specialMultiplier(e),gainPerCopy:TUNING.enhanceStep/cost};total+=cost;return row;}),
-    levels:[1,5,10,15,20,30,40].map(level=>({level,nextDust:levelCost(level),basePower:1+TUNING.levelStep*(level-1),cumulativeDust:Array.from({length:level-1},(_,i)=>levelCost(i+1)).reduce((a,b)=>a+b,0)})),
+    beds:Object.fromEntries(BED_IDS.map(id=>[id,{unlockStage:TUNING.beds[id].unlock,levels:[0,5,10,15,20,25,30].map(level=>({level,nextDust:bedCost(id,level),value:id==='rose'?1+roseAttack(level):id==='spring'?springGauge(level):seedGold(level),cumulativeDust:Array.from({length:level},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0)}))}])),
     relics:Array.from({length:9},(_,tier)=>({tier,threshold:relicThreshold(tier),nextThreshold:relicThreshold(tier+1),rates:relicRates(relicThreshold(tier))})),
     stages:[1,9,18,27,36,45].map(stage=>({stage,hp:CHAPTERS[stage-1].hp,slots:dispatchSlots(stage),dispatchMultiplier:1+TUNING.dispatchStageStep*stage,firstClear:stageReward(stage),totalFirstClear:Array.from({length:stage},(_,i)=>stageReward(i+1)).reduce((a,b)=>a+b,0)})),
     starter:DEFAULT_DECK.map(id=>({id,power:combatPower(id,p.heroes[id]),dispatchAt9:dispatchReward(combatPower(id,p.heroes[id]),9)})),
