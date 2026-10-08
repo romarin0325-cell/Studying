@@ -220,6 +220,13 @@
       "height": 1100
     },
     {
+      "id": "summon-altar",
+      "source": "defense_test/assets/merge/summon-altar.webp",
+      "sha256": "b8923879377378b2391eb683c4280e0102f49cb5d42f53c973049df0105c5c93",
+      "width": 720,
+      "height": 1290
+    },
+    {
       "id": "bosses",
       "source": "defense_test/assets/moonlit/realm-bosses.webp",
       "sha256": "d26e27ba3ca5092766316523c151bbedcb68e0c07304b0d6aeadc71fd7ade085",

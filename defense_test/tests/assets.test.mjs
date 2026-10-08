@@ -9,7 +9,10 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,46);
+  assert.equal(Object.keys(ASSET_PATHS).length,47);
+  // The summon altar (UI part 1) is a single portrait stage painting.
+  const altar=await sharp(assetFile(ASSET_PATHS['summon-altar'])).metadata();
+  assert.equal(altar.format,'webp');assert.equal(altar.width,720);assert.equal(altar.height,1290);
   for(const h of HEROES){
     const file=assetFile(ASSET_PATHS[h.art.atlas]),meta=await sharp(file).metadata();
     assert.equal(meta.width,1024);assert.equal(meta.height,1024);assert.equal(meta.hasAlpha,true);

@@ -35,6 +35,11 @@ export class Sound {
     if(e.type==='leak'){this.tone(150,t,.3,.11,'sawtooth',55);}
     if(e.type==='warning'){this.tone(330,t,.2,.06);this.tone(330,t+.3,.2,.06);}
   }
+  // Summon reveal: a rising sweep, the impact, then an arpeggio that grows with rarity.
+  reveal(top){this.unlock();if(!this.ctx||!this.enabled)return;const t=this.ctx.currentTime,rank=Math.max(0,['C','R','SR','UR'].indexOf(top));
+    this.tone(220,t,.55,.045,'sine',880);this.noise(t+.55,.32,.05,3200);
+    [523,659,784,1047,1319,1568].slice(0,3+rank).forEach((f,i)=>this.tone(f,t+.62+i*.07,.6,.05,'triangle'));
+    if(rank>=2)[1047,1319,1568,2093].forEach((f,i)=>this.tone(f,t+1.05+i*.05,.9,.024,'sine'));}
   click(){this.unlock();if(this.ctx)this.tone(740,this.ctx.currentTime,.07,.05,'sine',600);}
   setVolume(n){this.volume=n;if(this.master)this.master.gain.setTargetAtTime(n,this.ctx.currentTime,.04);}
   suspend(){this.next=0;if(this.ctx?.state==='running')this.ctx.suspend().catch(()=>{});}
