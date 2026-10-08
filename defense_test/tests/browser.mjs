@@ -133,7 +133,7 @@ try{
     await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*50%/);
     await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait').innerText(),/등장 웨이브.*150%/);
     await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait').innerText(),/50%/);
-    await t.page.locator('.unit-skill').click();await t.page.locator('#sheet[data-kind="skill-info"]').waitFor();assert.match(await t.page.locator('.skill-sheet').innerText(),/2성/);await shot(t.page,'skill-info-from-unit',width,height);await t.page.locator('.dialog-buttons [data-action="close"]').click();
+    await t.page.locator('.unit-skill').click();await t.page.locator('#sheet[data-kind="skill-info"]').waitFor();assert.match(await t.page.locator('.skill-sheet').innerText(),/2성/);assert.match(await t.page.locator('.skill-now').innerText(),/지금 누르면[\s\S]*피해/);await shot(t.page,'skill-info-from-unit',width,height);await t.page.locator('.dialog-buttons [data-action="close"]').click();
     await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait').innerText(),/대기|활성|수혜/);
     await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait').innerText(),/40%/);
     await t.page.locator('[data-action="deselect"]').click();await t.page.locator('#arena').scrollIntoViewIfNeeded();await shot(t.page,'trait-auras',width,height);await t.context.close();

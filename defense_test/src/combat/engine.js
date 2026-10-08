@@ -575,6 +575,192 @@ export function cast(s,id){
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
   event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points});return {ok:true};
 }
+// Describes what pressing the ultimate would do right now, with the numbers cast() uses. No side effects.
+export function castPreview(s,id){
+  const u=bestUnit(s,id);if(!u)return null;
+  const hero=HERO[id],type=hero.skill.type,base=power(s,u),control=special(s,id),scale=rankControl(u.rank);
+  const targets=s.enemies.filter(e=>e.hp>0),lines=[];
+  const num=v=>Math.round(v).toLocaleString('ko-KR');
+  const sec=v=>Number(v.toFixed(1))+'초';
+  const pct=v=>Math.round(v*100).toLocaleString('ko-KR');
+  const dur=seconds=>sec(skillDuration(s,seconds*control));
+  const hit=factor=>`${num(base*factor)} 피해`;
+  const slowOf=amount=>Math.min(.8,amount*control);
+  // Same fields cast() sees after syncStatuses, read from a copy of the effects.
+  const snapshot=e=>{
+    if(!Array.isArray(e.statusEffects))return {burnTime:e.burnTime||0,controlTime:Math.max(e.controlTime||0,e.stun||0,e.freeze||0),divine:e.divine||0,divineTime:e.divineTime||0};
+    let burnTime=0,burn=0,stun=0,freeze=0,divine=0,divineTime=0;
+    for(const effect of e.statusEffects){
+      const remaining=effect.until-s.time;if(remaining<=1e-9)continue;
+      if(effect.type==='burn'){if(effect.amount>burn||effect.amount===burn&&remaining>burnTime){burn=effect.amount;burnTime=remaining;}}
+      else if(effect.type==='stun')stun=Math.max(stun,remaining);
+      else if(effect.type==='freeze')freeze=Math.max(freeze,remaining);
+      else if(effect.type==='divine'){divine+=effect.amount;divineTime=Math.max(divineTime,remaining);}
+    }
+    return {burnTime,controlTime:Math.max(stun,freeze),divine,divineTime};
+  };
+  // activePoison after expired effects are dropped. Legacy saves keep the mushroom snapshot.
+  const poisonNow=e=>{
+    const select=list=>{let remaining=POISON_CAP;return list.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];});};
+    if(!Array.isArray(e.statusEffects)){
+      if(!(e.poison>0)||!(e.poisonTime>0))return [];
+      const power=HERO.mushroom_king.damage*(s.meta?.mushroom_king?.power||1)*(1+(s.relicAttack||0));
+      return select([{type:'poison',source:'legacy:poison',amount:Math.min(POISON_CAP,e.poison),until:s.time+e.poisonTime,power}]);
+    }
+    return select(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
+  };
+  const burnPerSecond=num(base*.6*(has(s,'ember')?1.6:1));
+  const immune=e=>!!e.boss&&(e.ccImmune||0)-s.time>1e-9;
+
+  if(type==='echo')lines.push(`${dur(8)} 동안 모든 동료의 공격마다 위력 ${pct(.65*scale)}%의 추가 공격이 한 번 더 나갑니다.`);
+  else if(type==='haste')lines.push(`${dur(8)} 동안 모든 동료의 공격 속도가 ${pct(.5*scale)}% 오릅니다.`);
+  else if(type==='awaken')lines.push(`${dur(10)} 동안 모든 동료의 위력이 ${pct(.6*scale)}% 오릅니다.`);
+  else if(type==='march')lines.push(`${dur(6)} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
+  else if(type==='glassfall'){
+    lines.push(`적 전체에게 위력 6배, ${hit(6)}를 줍니다.`);
+    // Midnight's splash radius stays 100. cast() stores buffScale but never reads it back.
+    lines.push(`${dur(10)} 동안 가장 높은 성급 신데렐라의 공격이 반경 100 안의 적에게도 맞습니다.`);
+  }else if(type==='gift'){
+    lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 2성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 2성으로 전장에 합류합니다.');
+    lines.push(`${dur(6)} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
+  }else if(type==='goddess'){
+    lines.push(`적 전체에게 위력 5배, ${hit(5)}를 줍니다.`);
+    lines.push(`${dur(8)} 동안 모든 동료의 위력이 ${pct(.5*scale)}% 오릅니다.`);
+    lines.push('행동 불능을 모두 풀고, 지속 동안 봉인과 폭풍의 행동 불능과 별빛 감소를 막습니다.');
+  }else if(type==='trauma'){
+    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 줍니다.`);
+    // +110% damage and +35% speed are fixed. buffScale is stored and not applied.
+    lines.push(`${dur(10)} 동안 시간의마술사가 변신해 위력 110%, 공격 속도 35%가 오릅니다.`);
+  }else if(type==='ice_court'){
+    lines.push(`적 전체에게 위력 6배, ${hit(6)}를 줍니다.`);
+    lines.push(`적은 6초 동안 ${pct(slowOf(.5))}% 느려집니다.`);
+    lines.push(`겨울은 ${dur(6)} 동안 이어지고, 쓰러진 적 주변 120 안의 일반 적이 ${sec(.8*scale)} 동안 얼어붙습니다.`);
+  }else if(type==='harmony'){
+    const count=new Set(s.board.filter(unit=>unit&&unit.hero!=='harmonious').map(unit=>unit.hero)).size,level=s.upgrades.harmonious||0,field=control*scale;
+    const damage=count*(.06+level*.005)*field,speed=count*(.05+level*.002)*field;
+    lines.push(`${dur(8)} 동안 조화가 전장 전체로 퍼집니다.`);
+    lines.push(count?`하모니어스를 뺀 동료 ${count}종 기준으로 위력 ${pct(damage)}%, 공격 속도 ${pct(speed)}%가 오릅니다.`:`다른 종류의 동료가 없어 위력 ${pct(damage)}%, 공격 속도 ${pct(speed)}%가 오릅니다.`);
+  }else if(type==='royal'||type==='starfall'||type==='mirror'){
+    if(type==='starfall')lines.push(`별빛 ${Math.floor(s.gauge)}을 모두 써 체력이 가장 높은 적에게 ${hit(.4*s.gauge)}를 줍니다.`);
+    else if(type==='mirror'){
+      lines.push(`체력이 가장 높은 적에게 3초 동안 거울을 걸고, 끝날 때 위력 10배인 ${hit(10)}를 줍니다.`);
+      lines.push('그 사이 그 적이 받은 피해의 45%가 더해지며, 모은 양은 전부 반영됩니다.');
+    }else{
+      const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
+      lines.push(`체력이 가장 높은 적에게 위력 24배, ${hit(24)}를 줍니다.`);
+      lines.push(hot?`지금 대상이 불타거나 성광 3중첩이라 맞는 순간 ${hit(48)}가 됩니다.`:`불타거나 성광이 3중첩이면 맞는 순간 ${hit(48)}가 됩니다.`);
+    }
+  }else if(type==='freeze'){
+    const freeze=2*control*scale;
+    lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
+    lines.push(`일반 적은 ${sec(freeze)} 동안 얼고 6초간 ${pct(slowOf(.5))}% 느려집니다. 보스는 ${sec(freeze*BOSS_CONTROL_SCALE)} 동안 얼습니다.`);
+  }else if(type==='avalanche'){
+    const on=targets.filter(e=>snapshot(e).controlTime>0).length;
+    if(!targets.length||on===0)lines.push(`적에게 위력 4배, ${hit(4)}를 줍니다. 기절하거나 얼어 있으면 ${hit(12)}입니다.`);
+    else if(on===targets.length)lines.push(`지금 기절·빙결 중인 적에게 위력 12배, ${hit(12)}를 줍니다.`);
+    else lines.push(`기절·빙결 ${on}명에게 ${hit(12)}, 나머지에게 ${hit(4)}를 줍니다.`);
+    lines.push(`4초 동안 ${pct(slowOf(.5))}% 느려집니다.`);
+  }else if(type==='dragon'){
+    const near=e=>targets.filter(t=>Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
+    const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
+    const pack=centre?near(centre):[];
+    lines.push(pack.length?`가장 밀집한 반경 180 안의 적 ${pack.length}명에게 위력 14배, ${hit(14)}를 줍니다.`:`반경 180 안에서 가장 밀집한 적에게 위력 14배, ${hit(14)}를 줍니다.`);
+    lines.push(`맞은 적은 5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+  }else if(type==='inferno'){
+    const factor=7*(s.health<10?2:1);
+    lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);
+    lines.push(`5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+    if(s.health<10)lines.push('코어 생명력이 10 미만이라 피해가 두 배입니다.');
+  }else if(type==='combust'){
+    const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
+    if(!targets.length||burning===0)lines.push(`적에게 위력 4배, ${hit(4)}를 줍니다. 이미 불타면 ${hit(10)}입니다.`);
+    else if(burning===targets.length)lines.push(`지금 불타는 적에게 위력 10배, ${hit(10)}를 줍니다.`);
+    else lines.push(`불타는 적 ${burning}명에게 ${hit(10)}, 나머지에게 ${hit(4)}를 줍니다.`);
+    lines.push(`6초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+  }else if(type==='plague'){
+    const stacks=8+(has(s,'seed')?1:0),ready=targets.filter(e=>poisonNow(e).reduce((n,a)=>n+a.stacks,0)>=20);
+    lines.push(`적 전체에게 위력 3배, ${hit(3)}와 12초 동안 독 ${stacks}중첩을 줍니다.`);
+    lines.push(`이 독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해입니다.`);
+    if(!ready.length)lines.push('이미 독이 20중첩 이상인 적은 남은 독 피해의 30%를 먼저 받습니다.');
+    else{
+      const burst=e=>.3*poisonNow(e).reduce((n,{effect,stacks:count})=>n+count*effect.power*POISON_POWER_RATIO*Math.max(0,effect.until-s.time),0);
+      const amounts=ready.map(burst),same=amounts.every(v=>Math.round(v)===Math.round(amounts[0]));
+      lines.push(same?`독이 20중첩 이상인 적 ${ready.length}명은 먼저 남은 독의 30%인 ${num(amounts[0])} 피해를 받습니다.`:`독이 20중첩 이상인 적 ${ready.length}명은 각자 남은 독 피해의 30%를 먼저 받습니다.`);
+    }
+  }else if(type==='expose'){
+    const raw=.35*control*scale,expose=Math.min(DAMAGE_TAKEN_CAP,raw);
+    lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
+    lines.push(`10초 동안 받는 피해가 ${pct(expose)}% 늘어납니다.`+(raw>DAMAGE_TAKEN_CAP?' 상한까지 늘어납니다.':''));
+  }else if(type==='quake'){
+    const late=e=>e.progress>=PATH_LENGTH*2/3,earlyN=targets.filter(e=>!late(e)).length,lateN=targets.length-earlyN;
+    const push=crisis=>num((crisis?320:160)*control),stun=crisis=>sec((crisis?3:1.5)*control*scale);
+    lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
+    if(targets.length&&lateN&&!earlyN)lines.push(`지금 적은 경로의 마지막 3분의 1이라 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
+    else if(targets.length&&earlyN&&!lateN)lines.push(`지금 적은 마지막 3분의 1 전이라 ${push(false)}만큼 밀리고 ${stun(false)} 기절합니다. 그 구간에 들면 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
+    else lines.push(`마지막 3분의 1 전은 ${push(false)}만큼 밀리고 ${stun(false)} 기절하며, 그 안은 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
+    lines.push('보스는 밀쳐내기와 기절이 절반입니다. 제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
+  }else if(type==='nightmare'){
+    const expose=Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),stacks=4+(has(s,'seed')?1:0);
+    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 ${num(220*control)}만큼 밀어냅니다.`);
+    lines.push(`6초 동안 받는 피해가 ${pct(expose)}% 늘고, 12초 동안 독 ${stacks}중첩이 걸립니다.`);
+    lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해이고, 보스는 절반만 밀립니다.`);
+  }else if(type==='rewind'){
+    const stun=2*control*scale;
+    if(targets.length===1){
+      const e=targets[0],boss=!!e.boss,held=immune(e)?0:stun*(boss?BOSS_CONTROL_SCALE:1),dist=e.speed*6*control*(boss?BOSS_PUSH_SCALE:1);
+      lines.push(held?`적을 ${num(dist)}만큼 되돌리고 ${sec(held)} 동안 멈춘 뒤 위력 3배, ${hit(3)}를 줍니다.`:`적을 ${num(dist)}만큼 되돌린 뒤 위력 3배, ${hit(3)}를 줍니다. 지금은 제어 면역입니다.`);
+      if(!boss)lines.push('보스는 되돌아가는 거리와 멈춤이 절반입니다.');
+    }else{
+      lines.push(`각 적을 이동 속도로 ${sec(6*control)} 동안 간 거리만큼 되돌리고 위력 3배, ${hit(3)}를 줍니다.`);
+      lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 멈춥니다.`);
+    }
+  }else if(type==='vortex'||type==='singularity'){
+    const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80),pull=Math.min(.9,.65*control);
+    const stunSec=(type==='singularity'?2:1.5)*control*scale,slow=pct(slowOf(.6));
+    lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다. 보스의 끌어당김은 절반입니다.`);
+    if(type==='vortex')lines.push(`위력 5배, ${hit(5)}를 주고 4초 동안 ${slow}% 느려집니다.`);
+    else{
+      const marks=targets.map(e=>snapshot(e).divine);
+      if(!marks.length||marks.every(m=>m===0))lines.push(`성광이 없으면 위력 8배, ${hit(8)}를 줍니다. 중첩 하나당 50%가 더해집니다.`);
+      else if(marks.every(m=>m===marks[0]))lines.push(`성광 ${marks[0]}중첩을 모두 거둬 위력 ${num(8*(1+.5*marks[0]))}배, ${hit(8*(1+.5*marks[0]))}를 줍니다.`);
+      else lines.push(`적마다 성광을 모두 거둬 위력 8배, ${hit(8)}에 중첩당 50%를 더합니다.`);
+    }
+    lines.push(`일반 적은 ${sec(stunSec)}, 보스는 ${sec(stunSec*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
+  }else if(type==='execute'){
+    const order=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp),first=order.slice(0,5);
+    const low=first.filter(e=>e.hp/e.maxHp<=executeThreshold(e)),high=first.length-low.length;
+    const normalRate=pct(executeThreshold({boss:null})),bossRate=pct(executeThreshold({boss:true}));
+    if(!first.length){
+      lines.push(`보스부터 최대 5명에게 위력 16배, ${hit(16)}를 줍니다.`);
+      lines.push(`일반 ${normalRate}%, 보스 ${bossRate}% 이하면 ${hit(30)}이고, 처치하면 최대 5명에게 더 이어집니다.`);
+    }else if(low.length&&!high){
+      lines.push(`지금 대상 ${first.length}명은 처형 기준 이하라 위력 30배, ${hit(30)}를 받습니다.`);
+      lines.push('처치하면 다음 대상에게 이어지며, 추가 대상은 최대 5명입니다.');
+    }else if(!low.length){
+      lines.push(`지금 대상 ${Math.min(5,first.length)}명에게 위력 16배, ${hit(16)}를 줍니다.`);
+      lines.push(`일반 ${normalRate}%, 보스 ${bossRate}% 이하면 ${hit(30)}이고, 처치하면 최대 5명에게 더 이어집니다.`);
+    }else{
+      lines.push(`처형 기준 이하 ${low.length}명에게 ${hit(30)}, 나머지 ${high}명에게 ${hit(16)}를 줍니다.`);
+      lines.push('처치하면 다음 대상에게 이어지며, 추가 대상은 최대 5명입니다.');
+    }
+  }else if(type==='flurry'){
+    const count=nightRabbitTargetCount(s),aimed=Math.min(count,targets.length);
+    lines.push(targets.length?`가장 앞선 적 ${aimed}명에게 위력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`:`가장 앞선 적에게 위력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`);
+  }else if(type==='thunder'){
+    const stun=1.2*control*scale;
+    lines.push(`적 전체에게 위력 7배, ${hit(7)}를 줍니다.`);
+    lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
+  }else if(type==='fortune')lines.push(`적 전체에게 위력 10배, ${hit(10)}를 줍니다.`);
+  else if(type==='dividend'){
+    lines.push(`적 전체에게 위력 3배, ${hit(3)}를 주고 골드 20을 받습니다.`);
+    // The extra payout is 2× kill gold, so the total is 3×. buffScale does not change it.
+    lines.push(`${dur(8)} 동안 처치 골드가 3배가 되어 일반 6, 장갑 9, 보스 60골드를 줍니다.`);
+  }else lines.push(hero.skill.text);
+
+  const gold=skillGoldCost(id);
+  if(gold>0)lines.push(`골드 ${num(gold)}을 사용합니다.`);
+  return {rank:u.rank,lines};
+}
 
 function bossStep(s,e,dt){
   const boss=BOSSES[e.boss];
