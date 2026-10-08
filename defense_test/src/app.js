@@ -1,5 +1,5 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
-import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,levelCost,heroMultiplier,combatPower,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
+import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone} from './profile.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from './battle.js';
 import * as E from './combat/engine.js';
@@ -10,7 +10,7 @@ import {currentRecord,monthlyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY} from './team-config.js';
 import {MEMORIAL_STORIES} from './memorial.js';
-import {burst,tapSpark,hearts,centerOf} from './fx.js';
+import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
 const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
@@ -33,7 +33,7 @@ const image=(id,full=false,cls='')=>`<img class="${cls}" src="${picture(id,full)
 const badge=(r,cls='')=>`<span class="badge ${cls}" data-rarity="${r}">${r}</span>`;
 const gem=(n,short=false)=>`<span class="cost ${short?'short':''}">${icon('gem')}<b>${fmt(n)}</b></span>`;
 const dispatchGain=({dust=0,dreams})=>`<span class="dispatch-gain">${dust?`<span class="cost dust">${icon('dust')}<b>${fmt(dust)}</b></span>`:''}${gem(dreams)}</span>`;
-const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().garden));
+const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().beds));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
 const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
@@ -47,7 +47,17 @@ const partnerLines=hero=>[...(QUOTES[hero.id]||[]),...LOBBY_LINES];
 let talkIndex=0,skillHold=null,skillHeld=false,unitDetailsOpen=false,revealTimers=[];
 const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,claimed:[]};};
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
-const gardenBonus=level=>Math.round(T.levelStep*(level-1)*100);
+const roseBonus=level=>Math.round(roseAttack(level)*100);
+// Dream greenhouse: each bed is a plant whose art grows through four stages.
+// "만개" (bloom) marks the soft cap: after it the cost climbs much faster.
+const BED_UI={
+  rose:{name:'용기의 장미',effect:'모든 동료 위력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,stages:['새싹','꽃봉오리','만개','별꽃'],line:'모든 동료의 위력이 오릅니다. 새로 만난 동료도 바로 같은 보너스를 받아요.'},
+  spring:{name:'별이슬 샘',effect:'최대 별빛',row:1,order:1,color:'#8fdcff',value:l=>String(springGauge(l)),stages:['물방울','연꽃 싹','만개','별빛 샘'],line:'전투에서 모을 수 있는 별빛의 최대치가 늘어납니다. 별똥별소년의 소원도 그만큼 커져요.'},
+  seed:{name:'황금 씨앗',effect:'시작 골드',row:2,order:3,color:'#ffd36a',value:l=>`+${seedGold(l)}`,stages:['씨앗','동전 새싹','만개','황금 나무'],line:'모든 원정을 더 많은 골드로 시작합니다. 첫 소환이 빨라져요.'},
+};
+const bedStage=(id,level)=>{const k=T.beds[id].knee;return level>=k+5?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
+const bedReady=(profile,id)=>bedOpen(id,profile.cleared)&&!profile.active&&profile.dust>=bedCost(id,profile.beds[id]);
+let bedFocus='rose';
 // Shooting stars pile up on the lobby floor with the idle reward (max 9 shards).
 const SHARD_SPOTS=[[62,74],[80,68],[44,58],[88,56],[70,60],[26,54],[56,66],[14,47],[86,44]];
 function shardsMarkup(){
@@ -61,13 +71,13 @@ function act(action,args={},showToast=true){const result=store.transact(action,a
 function nav(){
   const profile=p(),c=calendar(now()),daily=profile.daily.day===c.day?profile.daily:{claimed:[]};
   const dots={dispatch:profile.dispatches.some(d=>d.end<=now()),home:profile.daily.day===c.day&&dailyClaimable(daily),summon:!todayDaily().free};
-  $('navigation').innerHTML=[['home','홈'],['collection','동료'],['adventure','모험'],['summon','소환'],['dispatch','파견']].map(([id,name])=>`<button class="nav-item" data-nav="${id}" ${screen===id?'aria-current="page"':''}>${icon(id)}<span>${name}</span>${dots[id]?'<i class="dot"></i>':''}</button>`).join('');
+  $('navigation').innerHTML=[['home','홈'],['collection','동료'],['adventure','모험'],['summon','소환'],['dispatch','파견']].map(([id,name])=>`<button class="nav-item" data-nav="${id}" ${screen===id||screen==='greenhouse'&&id==='home'?'aria-current="page"':''}>${icon(id)}<span>${name}</span>${dots[id]?'<i class="dot"></i>':''}</button>`).join('');
   $('navigation').hidden=screen==='battle'||screen==='draft';
 }
 function render(){
   const entering=$('app').dataset.screen!==screen;$('app').dataset.screen=screen;document.body.dataset.battle=String(screen==='battle');wallet();nav();$('content').scrollTop=0;
   if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();
-  const templates={home:home,collection:renderCollection,adventure:adventure,summon:renderSummon,dispatch:renderDispatch};$('content').innerHTML=(templates[screen]||home)();
+  const templates={home:home,collection:renderCollection,adventure:adventure,summon:renderSummon,dispatch:renderDispatch,greenhouse:renderGreenhouse};$('content').innerHTML=(templates[screen]||home)();
   // Only a change of screen plays the entrance; in-place refreshes stay still.
   if(entering){const c=$('content');c.classList.remove('enter');void c.offsetWidth;c.classList.add('enter');}
 }
@@ -111,7 +121,7 @@ function home(){
     <div class="dock-grid">
       <button class="team-strip" data-action="team" aria-label="출전 팀 편성 변경"><span class="strip-faces">${profile.deck.map(id=>portrait(id)).join('')}</span><span class="strip-meta"><small>출전 팀 · 편성</small><b>${icon('star')}${fmt(teamPower(profile))}</b></span></button>
       <div class="dock-row">
-        <button class="garden-card" data-action="garden" aria-label="정원 성장 · 레벨 ${profile.garden}"><span class="garden-medal"><small>정원</small><b>${profile.garden}</b></span><span class="garden-info"><small>전체 위력</small><b>+${gardenBonus(profile.garden)}%</b></span>${profile.dust>=levelCost(profile.garden)&&!profile.active?'<i class="dot"></i>':''}</button>
+        <button class="garden-card" data-action="garden" aria-label="꿈의 온실 · 모든 동료 위력 +${roseBonus(profile.beds.rose)}%"><span class="garden-medal" style="--bed-row:0;--bed-stage:${bedStage('rose',profile.beds.rose)}"></span><span class="garden-info"><small>꿈의 온실</small><b>위력 +${roseBonus(profile.beds.rose)}%</b></span>${BED_IDS.some(id=>bedReady(profile,id))?'<i class="dot"></i>':''}</button>
         <div class="idle-card"><span class="idle-icon">${icon('star')}</span><div class="idle-info"><div class="idle-line"><strong>별똥별</strong><b class="idle-amount" id="idle-total">${fmt(idle)}</b></div><div class="progress"><span id="idle-progress" style="width:${Math.min(100,(now()-profile.idleAt)/(20*HOUR)*100)}%"></span></div></div><button class="secondary" id="idle-claim" data-action="idle" ${idle<1?'disabled':''}>수집</button></div>
       </div>
     </div>
@@ -134,28 +144,59 @@ function renderCollection(){
 }
 function heroDetail(id){
   const h=HERO[id],e=p().heroes[id];if(!h)return;
-  const garden=p().garden,mult=heroMultiplier(e,garden),enh=duplicateCost(e.enhance),lvl=levelCost(garden),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
+  const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
   show(h.name,'동료',`<div class="detail-stage" data-rarity="${h.rarity}"><span class="detail-rays" aria-hidden="true"></span><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<small>${RARITY[h.rarity].name}</small><h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
-    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>정원 보너스</small><b>+${gardenBonus(garden)}%</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
+    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>온실 보너스</small><b>+${roseBonus(beds.rose)}%</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
     <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong></span>${icon('chevron')}</button>
     <div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격 방식</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>
     <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div>
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
-    ${e.owned?`<button class="garden-note" data-action="garden"><span>정원 Lv.${garden} · 모든 동료 위력 +${gardenBonus(garden)}% 적용 중</span><b>정원 성장 ${icon('chevron')}</b></button>
+    ${e.owned?`<button class="garden-note" data-action="garden"><span>꿈의 온실 · 모든 동료 위력 +${roseBonus(beds.rose)}% 적용 중</span><b>온실 가기 ${icon('chevron')}</b></button>
     <div class="growth"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="secondary" data-enhance="${id}" ${e.copies<enh||p().active?'disabled':''}>강화</button></div>
-    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (정원 레벨 ${garden} · 강화 +${e.enhance}). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
+    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (용기의 장미 Lv.${beds.rose} · 강화 +${e.enhance}). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
     ${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}`
     :`<p class="empty">${h.hidden?`${monthNo(calendar(now()))} 시즌 소환에서만 획득할 수 있습니다.<br>이달의 수호자: ${HERO[calendar(now()).guardian].name}`:`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
-// Garden level: one shared growth for every companion, shown as level + total bonus.
-function showGarden(){
-  const g=p().garden,cost=levelCost(g),ready=p().dust>=cost&&!p().active;
-  show('정원 성장',`모든 동료 공통`,`<div class="garden-sheet"><div class="garden-orb"><small>정원</small><b>Lv.${g}</b></div><div class="garden-now"><small>지금 모든 동료 위력</small><b>+${gardenBonus(g)}%</b></div>
-    <div class="garden-next"><span>Lv.${g} → Lv.${g+1}</span><b>+${gardenBonus(g)}% → +${gardenBonus(g+1)}%</b></div>
-    <p class="subtext">정원 레벨은 보유한 모든 동료에게 똑같이 적용됩니다. 새로 만난 동료도 바로 같은 보너스를 받습니다. 별가루는 별똥별 수집과 원정 보상으로 모입니다.</p></div>`,
-    `<button class="primary wide shine" data-action="garden-level" ${ready?'':'disabled'}><b>정원 성장</b>${icon('dust')}<b>${fmt(cost)}</b></button>`,'garden');
+// Dream greenhouse screen: three beds over the greenhouse painting, one detail panel.
+function renderGreenhouse(){
+  const profile=p(),open=BED_IDS.filter(id=>bedOpen(id,profile.cleared)).length;
+  const beds=BED_IDS.map(id=>{const u=BED_UI[id],unlocked=bedOpen(id,profile.cleared),lv=profile.beds[id];
+    return `<button class="bed ${bedFocus===id?'focus':''} ${unlocked?'':'locked'}" data-bed="${id}" style="--bed-row:${u.row};--bed-stage:${bedStage(id,lv)};--bed-color:${u.color};order:${u.order}" aria-pressed="${bedFocus===id}"><span class="bed-art"></span>${unlocked?`<span class="bed-level">Lv.${lv}</span>`:`<span class="bed-lock">${icon('lock')}</span>`}${bedReady(profile,id)?'<i class="dot"></i>':''}<b class="bed-name">${u.name}</b><small class="bed-sub">${unlocked?`${u.effect} ${u.value(lv)}`:`스테이지 ${T.beds[id].unlock} 클리어`}</small></button>`;}).join('');
+  return `<section class="greenhouse"><div class="greenhouse-head"><button class="icon-button" data-nav="home" aria-label="홈으로">${icon('chevron')}</button><div><h1>꿈의 온실</h1><p>화단 ${open}/3 · 모든 동료에게 함께 적용</p></div></div>
+    <div class="bed-row">${beds}</div>${bedPanel(bedFocus)}</section>`;
 }
+function bedPanel(id){
+  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),cost=bedCost(id,lv),stage=bedStage(id,lv),knee=T.beds[id].knee;
+  const note=!unlocked?`스테이지 ${T.beds[id].unlock}을 클리어하면 화단이 열립니다.`:stage>=2?'만개했어요. 이제부터는 아주 천천히 자랍니다.':`Lv.${knee}에 만개합니다. 그 전까지는 빠르게 자라요.`;
+  return `<div class="bed-panel" style="--bed-color:${u.color};--bed-row:${u.row};--bed-stage:${stage}">
+    <div class="bed-panel-top"><span class="bed-thumb"></span><div class="bed-info"><small>${u.effect}</small><h3>${u.name} <em>${unlocked?`Lv.${lv}`:'잠김'}</em></h3><span class="bed-stage-tag">${u.stages[stage]}</span></div>
+      <div class="bed-value"><span>${u.value(lv)}</span>${icon('chevron')}<b>${u.value(lv+1)}</b></div></div>
+    <div class="bed-steps" aria-label="성장 단계 ${stage+1}/4">${u.stages.map((name,i)=>`<span class="${i<=stage&&unlocked?'on':''}"><i></i><small>${name}</small></span>`).join('')}</div>
+    <p class="bed-line">${u.line} ${note}</p>
+    <button class="primary wide shine bed-grow" data-bed-grow="${id}" ${bedReady(profile,id)?'':'disabled'}>${unlocked?`${icon('drop')}<b>물 주기</b>${icon('dust')}<b>${fmt(cost)}</b>`:`${icon('lock')}<b>스테이지 ${T.beds[id].unlock} 클리어 시 열림</b>`}</button>
+    ${profile.active&&unlocked?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}</div>`;
+}
+// One watering step. Returns false when it cannot continue (hold-to-repeat stops).
+function growBed(id){
+  const before=bedStage(id,p().beds[id]),result=act('bed',{id},false);if(!result.ok){toast(result.message);return false;}
+  const y=$('content').scrollTop;render();$('content').scrollTop=y;
+  const art=document.querySelector(`.bed[data-bed="${id}"] .bed-art`);if(!art)return true;
+  const c=centerOf(art),stage=bedStage(id,result.level),u=BED_UI[id];art.classList.add('grow');
+  floatText(c.x,c.y-30,`Lv.${result.level}`,u.color);
+  if(stage>before){burst(c.x,c.y,{count:22,spread:120,size:14,color:u.color});burst(c.x,c.y,{count:10,spread:70,size:10,color:'#fff4c8'});toast(`${u.name} · ${u.stages[stage]}!`);sound.reveal?.(stage>=2);}
+  else burst(c.x,c.y-10,{count:8,spread:56,size:9,color:u.color});
+  return true;
+}
+let bedHold=null;
+function stopBedHold(){if(bedHold){clearTimeout(bedHold.timer);clearInterval(bedHold.repeat);bedHold.done=true;}}
+document.addEventListener('pointerdown',e=>{
+  const button=e.target.closest('[data-bed-grow]');if(!button||button.disabled)return;stopBedHold();
+  const id=button.dataset.bedGrow,hold={held:false,done:false};bedHold=hold;
+  hold.timer=setTimeout(()=>{hold.held=true;if(!growBed(id))return stopBedHold();hold.repeat=setInterval(()=>{if(hold.done||!growBed(id))stopBedHold();},150);},420);
+});
+for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{if(bedHold&&!bedHold.held)clearTimeout(bedHold.timer);if(bedHold?.held)stopBedHold();});
+
 function relicDetail(id){
   const a=ARTIFACT[id],e=p().relics[id],cost=duplicateCost(e.enhance),equipped=p().equipped.includes(id);
   show(a.name,'유물',`<div class="detail-hero" data-rarity="${a.rarity}"><div class="detail-art">${image(id)}</div><div class="detail-meta">${badge(a.rarity)}<h3>${a.name}</h3><div class="chips">${chips([equipped?'장착 중':'',`강화 +${e.enhance}`])}</div></div></div>
@@ -276,7 +317,7 @@ function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${Str
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
 function chooseDispatch(slot){
   const free=available(p());
-  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=TEAM_SIZE?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${dispatchGain(dispatchReward(combatPower(id,p().heroes[id],p().garden),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=TEAM_SIZE?`<p class="fineprint">전투 가능한 동료가 ${TEAM_SIZE}명뿐입니다. 소환으로 동료를 더 모으세요.</p>`:''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
+  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=TEAM_SIZE?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${dispatchGain(dispatchReward(combatPower(id,p().heroes[id],p().beds),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=TEAM_SIZE?`<p class="fineprint">전투 가능한 동료가 ${TEAM_SIZE}명뿐입니다. 소환으로 동료를 더 모으세요.</p>`:''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
 }
 let editingDeck=[],teamReturn=null;
 function team(edit=false){
@@ -310,8 +351,8 @@ function renderBattle(){
   const title=run.mode==='main'?`스테이지 ${stageLabel(run.chapter+1)} · ${CHAPTERS[run.chapter].name}`:run.mode==='weekly'?'주간 드래프트':'월간 보스전';
   $('content').innerHTML=`<section class="battle">
     <div class="battle-top"><div class="battle-title"><strong>${title}</strong><small id="wave-label"></small></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
-    <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.GAUGE_MAX}</small></span><span id="battle-time" class="hud-time"></span></div>
-    <div class="arena-wrap"><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
+    <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.gaugeCap(run)}</small></span><span id="battle-time" class="hud-time"></span></div>
+    <div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
     <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     <div id="unit-panel" class="unit-panel" hidden></div>
@@ -319,8 +360,8 @@ function renderBattle(){
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice'].map(id=>[id,$(id)]));
   hud.skills=[...document.querySelectorAll('[data-skill]')].map(node=>({node,id:node.dataset.skill,timer:node.querySelector('.skill-duration')}));
   for(const {node,id} of hud.skills){
-    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillInfo(id);},480);});
-    for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');});
+    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillTip(node,id);},380);});
+    for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');hideSkillTip();});
     node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
   }
   renderer=new Renderer($('arena'),art);settings();bindArena();updateBattle();
@@ -329,10 +370,11 @@ const changedText=(node,value)=>{value=String(value);if(node.textContent!==value
 function updateBattle(){
   if(screen!=='battle'||!run)return;
   changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
-  const fill=`scaleX(${Math.min(1,run.gauge/E.GAUGE_MAX).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
+  const fill=`scaleX(${Math.min(1,run.gauge/E.gaugeCap(run)).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
   changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:run.mode==='monthly'?`라운드 ${run.wave} · 격파 ${clearedRounds(run)} · 보스가 코어에 닿으면 종료`:`라운드 ${run.wave} · 클리어 ${clearedRounds(run)} · 생명력이 0이 되면 종료`);
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
+  updateAuraChips();
   for(const {node:b,id,timer} of hud.skills){const {cost,goldCost=0}=HERO[id].skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id),active=E.activeSkill(run,id);b.disabled=!ready||paused||run.phase!=='combat';b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
   const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0);notice.hidden=!run.telegraph&&!boss;changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));updateUnit();
 }
@@ -354,11 +396,45 @@ function updateUnit(){
     <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
   panel.querySelector('.unit-more')?.addEventListener('toggle',e=>{unitDetailsOpen=e.target.open;});
 }
-// Long-pressing an ultimate button shows what it does without casting it.
+// Holding an ultimate button peeks at it: a small card above the button with the live numbers.
+// Releasing closes it and does not cast. The full sheet stays one tap away in the unit panel.
+function skillTip(node,id){
+  hideSkillTip();if(!run)return;
+  const h=HERO[id],caster=E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ur=h.hidden||h.rarity==='UR';
+  const tip=document.createElement('div');tip.className='skill-tip';tip.id='skill-tip';tip.dataset.rarity=ur?'UR':h.rarity;tip.style.setProperty('--c',h.color);tip.setAttribute('role','tooltip');
+  tip.innerHTML=`<div class="skill-tip-head"><b>${h.skill.name}</b><span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}<small>${caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
+  document.body.appendChild(tip);
+  const r=node.getBoundingClientRect(),w=tip.offsetWidth,hgt=tip.offsetHeight,left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2));
+  tip.style.left=left+'px';tip.style.top=Math.max(8,r.top-hgt-12)+'px';tip.style.setProperty('--ax',(r.left+r.width/2-left)+'px');
+}
+function hideSkillTip(){document.getElementById('skill-tip')?.remove();}
+// The unit panel's ultimate row opens the full detail sheet.
 function skillInfo(id){
   const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat';
   show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">돌아가기</button><button class="primary" data-cast-now="${id}" ${ready?'':'disabled'}>바로 사용</button></div>`,'skill-info',id);
+}
+// Ultimate cut-in: a slanted band with the companion and the skill name over the top of the
+// board. UR casts get a gold frame, a longer hold and a short slow-motion beat (real time only;
+// the simulation itself is unchanged). Transform and opacity animations only.
+let cutinTimer=0,slowmo=0;
+function cutIn(e){
+  const wrap=document.querySelector('.arena-wrap'),h=HERO[e.hero];if(!wrap||!h)return;
+  const ur=h.hidden||h.rarity==='UR',reduced=p().settings.reduced;
+  wrap.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);
+  const el=document.createElement('div');el.className='cutin';el.dataset.rarity=ur?'UR':h.rarity;el.dataset.reduced=String(reduced);el.style.setProperty('--c',h.color);el.setAttribute('aria-hidden','true');
+  el.innerHTML=`<div class="cutin-band"><span class="cutin-lines"></span><span class="cutin-art">${image(e.hero,true)}</span><span class="cutin-text"><small>${ur?'ULTIMATE':'필살기'} · ${h.name}</small><b>${h.skill.name}</b></span></div>`;
+  wrap.appendChild(el);cutinTimer=setTimeout(()=>el.remove(),reduced?700:ur?1600:1100);
+  if(ur&&!reduced)slowmo=.5;
+}
+// Buff chips: every running ultimate aura with its companion and a countdown ring.
+function updateAuraChips(){
+  const box=$('aura-chips');if(!box)return;
+  const live=Object.entries(E.ACTIVE_SKILLS).flatMap(([id])=>{const a=run.deck.includes(id)&&E.activeSkill(run,id);return a?[[id,a]]:[];});
+  for(const node of [...box.children])if(!live.some(([id])=>id===node.dataset.aura))node.remove();
+  for(const [id,a] of live){let node=box.querySelector(`[data-aura="${id}"]`);
+    if(!node){node=document.createElement('span');node.className='aura-chip';node.dataset.aura=id;node.style.setProperty('--c',HERO[id].color);node.innerHTML=`${image(id)}<b></b>`;box.appendChild(node);}
+    node.style.setProperty('--p',(a.remaining/a.total).toFixed(3));node.classList.toggle('ending',a.remaining<2);changedText(node.querySelector('b'),Math.ceil(a.remaining));}
 }
 function battleCommand(result){if(!result?.ok)toast(result?.reason);else saves.mark();updateBattle();}
 function bindArena(){
@@ -479,8 +555,9 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
+  if(d.bed){bedFocus=d.bed;const y=$('content').scrollTop;render();$('content').scrollTop=y;return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.draw){draw(Number(d.draw));return;}if(d.drawAgain){draw(Number(d.drawAgain));return;}if(d.drawFree){banner='normal';draw(1,true);return;}
-  if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.skillInfo){skillInfo(d.skillInfo);return;}if(d.level){if(act('level',{id:d.level}).ok)heroDetail(d.level);return;}
+  if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.skillInfo){skillInfo(d.skillInfo);return;}
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);}return;}
   if(d.equip){if(act('equip',{id:d.equip}).ok)relicDetail(d.equip);return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 변경 · ${HERO[d.setPartner].name}`);}return;}
@@ -496,8 +573,7 @@ document.addEventListener('click',e=>{
     talk:()=>{talkIndex++;const hero=HERO[p().partner],lines=partnerLines(hero),bubble=$('partner-speech'),art=button.querySelector('img');
       if(bubble){bubble.textContent=lines[(p().heroes[hero.id].bond+talkIndex)%lines.length];bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');}
       if(art){art.classList.remove('hop');void art.offsetWidth;art.classList.add('hop');}const c=centerOf(button);hearts(c.x,c.y-30);},
-    'reveal-skip':skipReveal,garden:()=>{close();showGarden();},
-    'garden-level':()=>{const c=centerOf(button);if(act('level').ok){refreshBehind();showGarden();burst(c.x,c.y-40,{count:14,spread:90,size:12,color:'#ffe08a'});}},
+    'reveal-skip':skipReveal,garden:()=>{close();screen='greenhouse';render();},
     'idle-shard':()=>collectStars(),
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),
     'prepare-mode':()=>prepare(Math.min(45,p().cleared+1),mode),resume,
@@ -526,10 +602,10 @@ function frame(time){
   const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;
   if(run&&screen==='battle'&&!document.hidden){
     if(!paused&&!modal){
-      accumulator+=dt*speed;let ticks=0;
+      accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
       while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
       if(ticks)saves.mark();uiIn+=dt;
-      for(const e of run.events.splice(0)){renderer.event(e);sound.event(e);}
+      for(const e of run.events.splice(0)){renderer.event(e);sound.event(e);if(e.type==='skill')cutIn(e);}
       saves.schedule();if(uiIn>.18){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
       syncBattlePhase();
       if(run&&!paused&&['victory','defeat'].includes(run.phase))settle();
@@ -542,6 +618,7 @@ setInterval(()=>{if(screen==='dispatch'&&!modal){const ended=p().dispatches.some
 for(const img of document.querySelectorAll('img'))img.onerror=()=>{img.src=fallback('star_boy');};
 document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.memorial&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
 document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'./assets/merge/garden.webp'}")`);
+for(const [name,id,path] of [['--greenhouse','greenhouse','./assets/merge/greenhouse.webp'],['--beds','greenhouse-beds','./assets/merge/greenhouse-beds.webp']])document.documentElement.style.setProperty(name,`url("${window.__ASTRA_ASSETS__?.[id]||path}")`);
 document.documentElement.style.setProperty('--altar',`url("${window.__ASTRA_ASSETS__?.['summon-altar']||'./assets/merge/summon-altar.webp'}")`);
 art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');});
 // The splash is decorative only (no pointer input) and leaves once art is ready.

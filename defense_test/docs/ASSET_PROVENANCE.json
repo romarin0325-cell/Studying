@@ -227,6 +227,27 @@
       "height": 1290
     },
     {
+      "id": "greenhouse",
+      "source": "defense_test/assets/merge/greenhouse.webp",
+      "sha256": "15176cc961a0935db67a9afbe75ecaef7339d3cbb1f190ac266a0220dabedcbc",
+      "width": 720,
+      "height": 1290
+    },
+    {
+      "id": "greenhouse-beds",
+      "source": "defense_test/assets/merge/greenhouse-beds.webp",
+      "sha256": "708d2dc9e9c2c4928ed87cbe557580c8b0e008d0db412f1a2ab3c58a5be41ef5",
+      "width": 768,
+      "height": 576
+    },
+    {
+      "id": "fx-emblems",
+      "source": "defense_test/assets/merge/fx-emblems.webp",
+      "sha256": "d9ec70d8fb8a555051177b657ed93762e403013e8cea71eb1d2d484d33536450",
+      "width": 1536,
+      "height": 512
+    },
+    {
       "id": "bosses",
       "source": "defense_test/assets/moonlit/realm-bosses.webp",
       "sha256": "d26e27ba3ca5092766316523c151bbedcb68e0c07304b0d6aeadc71fd7ade085",

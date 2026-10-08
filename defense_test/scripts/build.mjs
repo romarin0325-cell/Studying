@@ -7,10 +7,11 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {gameRoot as game,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
 
-const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat');
+const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked');
+if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
 if(web&&(solo||compat))throw new Error('Choose folder or standalone distribution.');
-const output=path.join(game,compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
-const filename=solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
+const output=path.join(game,unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
+const filename=unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
 const mode=web?'web':compat?'compat':'standalone',hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const byteLength=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 const readText=async file=>(await fs.readFile(file,'utf8')).replace(/\r\n/g,'\n');
@@ -67,12 +68,12 @@ if(sizes.avif>=2.5*1024*1024||sizes.webp>=2.5*1024*1024||(!web&&byteLength(memor
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.woff2')),license=await readText(assetFile('./assets/Jua-OFL.txt'));
 const fontUri='data:font/woff2;base64,'+font.toString('base64');
 const css=(await readText(path.join(game,'src/style.css'))).replace('__FONT__',fontUri);
-const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo)}});
+const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked)}});
 for(const input of Object.keys(js.metafile.inputs)){
   const relative=path.relative(game,path.resolve(input));
   if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw new Error('External game source in Star Garden bundle: '+input);
 }
-const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',solo?'<title>드림위버: 별빛 정원 · 1인 편성 테스트</title>':'<title>드림위버: 별빛 정원</title>');
+const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',unlocked?'<title>드림위버: 별빛 정원 · 전체 해금 테스트</title>':solo?'<title>드림위버: 별빛 정원 · 1인 편성 테스트</title>':'<title>드림위버: 별빛 정원</title>');
 for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source.split(token).length!==2)throw new Error('Build token mismatch: '+token);
 const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
 const bundle=js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
@@ -90,11 +91,11 @@ const categories={
   memorial:{format:web?'external AVIF + WebP':compat?'WebP':'AVIF',avifBinaryBytes:sizes.avif,webpBinaryBytes:sizes.webp,avifMaxBytes:sizes.avifMax,webpMaxBytes:sizes.webpMax,embeddedBytes:byteLength(memorial)+(web?byteLength(memorialFallback):0)}
 };
 const categorized=categories.css+categories.javascript+Object.values(categories).filter(v=>typeof v==='object').reduce((sum,v)=>sum+v.embeddedBytes,0);
-const report={mode,solo,filename,htmlBytes:byteLength(html),categories,htmlAndObjectGlueBytes:byteLength(html)-categorized};
+const report={mode,solo,unlocked,filename,htmlBytes:byteLength(html),categories,htmlAndObjectGlueBytes:byteLength(html)-categorized};
 await fs.mkdir(path.join(game,'test-results'),{recursive:true});
-await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}.json`),JSON.stringify(report,null,2)+'\n');
+await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}${unlocked?'-unlocked':''}.json`),JSON.stringify(report,null,2)+'\n');
 const mib=n=>(n/1024/1024).toFixed(3)+' MiB';
-console.log(`${filename} · ${mib(report.htmlBytes)} · ${mode} · ${solo?'one-person':'five-person'} deck`);
+console.log(`${filename} · ${mib(report.htmlBytes)} · ${mode} · ${solo?'one-person':'five-person'} deck${unlocked?' · unlocked':''}`);
 for(const [name,value] of Object.entries(categories)){
   if(typeof value==='number')console.log(`${name}: ${mib(value)}`);
   else if(name==='memorial')console.log(`Memorial ${value.format}: AVIF ${mib(sizes.avif)} / WebP ${mib(sizes.webp)} binary · ${mib(value.embeddedBytes)} embedded paths/data`);
