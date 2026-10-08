@@ -41,6 +41,8 @@ export const TUNING=Object.freeze({
   // the garden level (shared by every companion) costs 90×1.12^(L-1) dust.
   duplicateGrowth:1.58,enhanceStep:.05,levelStep:.04,levelCostBase:90,levelCostGrowth:1.12,
   specialStep:.10,specialEvery:5,dispatchHours:20,dispatchStageStep:.05,
+  // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
+  dispatchDust:1.25,dispatchDreams:.25,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });

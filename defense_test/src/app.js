@@ -32,6 +32,7 @@ const picture=(id,full=false)=>media[(full?'figure:':'portrait:')+id]||media['re
 const image=(id,full=false,cls='')=>`<img class="${cls}" src="${picture(id,full)}" alt="${HERO[id]?.name||ARTIFACT[id]?.name||'별빛'}" draggable="false">`;
 const badge=(r,cls='')=>`<span class="badge ${cls}" data-rarity="${r}">${r}</span>`;
 const gem=(n,short=false)=>`<span class="cost ${short?'short':''}">${icon('gem')}<b>${fmt(n)}</b></span>`;
+const dispatchGain=({dust=0,dreams})=>`<span class="dispatch-gain">${dust?`<span class="cost dust">${icon('dust')}<b>${fmt(dust)}</b></span>`:''}${gem(dreams)}</span>`;
 const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().garden));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
@@ -264,10 +265,10 @@ function renderDispatch(){
     if(slot>=count)return `<div class="dispatch-card locked"><span class="slot-no">${n}</span><div class="slot-body"><strong>슬롯 ${n}</strong><small>스테이지 ${9*(slot+1)} 클리어 시 해금</small></div>${icon('lock')}</div>`;
     if(!d)return `<div class="dispatch-card"><div class="slot-head"><span class="slot-no">${n}</span><div class="slot-body"><strong>슬롯 ${n} · 대기 중</strong><small>동료 1명 · 20시간 · 전투 참여 불가</small></div></div><button class="secondary wide" data-dispatch-slot="${slot}" ${profile.active?'disabled':''}>${icon('plus')}동료 선택</button></div>`;
     const done=d.end<=now();
-    return `<div class="dispatch-card ${done?'ready':'running'}"><div class="slot-head"><span class="slot-no">${n}</span>${portrait(d.hero)}<div class="slot-body"><strong>${HERO[d.hero].name}</strong>${gem(d.reward)}</div><span class="timer" data-timer="${d.end}">${timerText(d.end)}</span></div><div class="progress"><span style="width:${Math.min(100,(now()-d.start)/(d.end-d.start)*100)}%"></span></div><button class="${done?'primary':'secondary'} wide" data-claim-dispatch="${slot}" ${!done||profile.active?'disabled':''}>${done?'보상 수령':'파견 중'}</button></div>`;}).join('');
+    return `<div class="dispatch-card ${done?'ready':'running'}"><div class="slot-head"><span class="slot-no">${n}</span>${portrait(d.hero)}<div class="slot-body"><strong>${HERO[d.hero].name}</strong>${dispatchGain({dust:d.dust,dreams:d.reward})}</div><span class="timer" data-timer="${d.end}">${timerText(d.end)}</span></div><div class="progress"><span style="width:${Math.min(100,(now()-d.start)/(d.end-d.start)*100)}%"></span></div><button class="${done?'primary':'secondary'} wide" data-claim-dispatch="${slot}" ${!done||profile.active?'disabled':''}>${done?'보상 수령':'파견 중'}</button></div>`;}).join('');
   return `<section class="page">${heading('파견')}
     <div class="chips"><span class="chip">${icon('dispatch')}슬롯 ${count}/4</span><span class="chip">보상 보너스 +${profile.cleared*5}%</span></div>
-    <p class="subtext" style="margin-top:10px">동료를 20시간 파견해 꿈의결정을 획득합니다. 앱을 닫아도 시간이 흐르며, 파견 중에는 전투에 참여할 수 없습니다.</p>
+    <p class="subtext" style="margin-top:10px">동료를 20시간 파견해 별가루를 모으고 꿈의결정도 조금 얻습니다. 앱을 닫아도 시간이 흐르며, 파견 중에는 전투에 참여할 수 없습니다.</p>
     <div class="dispatch-list">${cards}</div>
     <p class="fineprint">스테이지 9·18·27·36 클리어 시 슬롯이 하나씩 열립니다. 보상은 출발 시점의 전투력과 클리어 수로 확정됩니다.</p></section>`;
 }
@@ -275,7 +276,7 @@ function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${Str
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
 function chooseDispatch(slot){
   const free=available(p());
-  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=TEAM_SIZE?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${gem(dispatchReward(combatPower(id,p().heroes[id]),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=TEAM_SIZE?`<p class="fineprint">전투 가능한 동료가 ${TEAM_SIZE}명뿐입니다. 소환으로 동료를 더 모으세요.</p>`:''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
+  show('파견 동료 선택','20시간 파견',`<p class="subtext">파견 중인 동료는 전투에 참여할 수 없습니다. 편성된 동료는 남은 동료로 자동 교체됩니다.</p><div class="choose-list" style="margin-top:14px">${free.map(id=>`<button class="choose-row" data-send="${id}" data-slot="${slot}" ${free.length<=TEAM_SIZE?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${badge(HERO[id].rarity)}</strong><small>전투력 ${cpOf(id)}</small></div>${dispatchGain(dispatchReward(combatPower(id,p().heroes[id],p().garden),p().cleared))}${icon('chevron')}</button>`).join('')}</div>${free.length<=TEAM_SIZE?`<p class="fineprint">전투 가능한 동료가 ${TEAM_SIZE}명뿐입니다. 소환으로 동료를 더 모으세요.</p>`:''}`,`<button class="secondary wide" data-action="close">취소</button>`,'dispatch',slot);
 }
 let editingDeck=[],teamReturn=null;
 function team(edit=false){

@@ -65,10 +65,20 @@ test('duplicate investment adds 5% each without a cap, loses efficiency, and lif
 
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{
   for(const [clear,count] of [[0,0],[8,0],[9,1],[18,2],[27,3],[36,4],[45,4]])assert.equal(dispatchSlots(clear),count);
-  const a=dispatchReward(1000,0),b=dispatchReward(1000,20);
-  assert.ok(Math.abs(b-2*a)<=1);
-  assert.ok(dispatchReward(1000000,9)>dispatchReward(10000,9));
-  assert.ok(dispatchReward(1000000,9)<dispatchReward(10000,9)*3);
+  for(const kind of ['dust','dreams']){
+    const a=dispatchReward(1000,0)[kind],b=dispatchReward(1000,20)[kind];
+    assert.ok(Math.abs(b-2*a)<=1);
+    assert.ok(dispatchReward(1000000,9)[kind]>dispatchReward(10000,9)[kind]);
+    assert.ok(dispatchReward(1000000,9)[kind]<dispatchReward(10000,9)[kind]*3);
+  }
+});
+
+test('dispatch pays mostly dust with a small crystal share',()=>{
+  for(const [power,clear] of [[0,0],[500,9],[1500,36],[3000,45]]){
+    const {dust,dreams}=dispatchReward(power,clear);
+    assert.ok(Number.isSafeInteger(dust)&&Number.isSafeInteger(dreams)&&dreams>=1);
+    assert.ok(dust>=4*dreams&&dust<=6*dreams,'dust stays about five times the crystals');
+  }
 });
 
 test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{

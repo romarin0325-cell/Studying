@@ -132,6 +132,8 @@ em{font-style:normal}
 .cost .ic{width:16px;height:16px}
 .cost b{font-size:12px}
 .cost.short b{color:var(--danger)}
+.dispatch-gain{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cost.dust .ic{color:#ffe39a;fill:#ffe39a}
 .progress{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
 .progress span{display:block;height:100%;background:linear-gradient(90deg,#e2a94a,#ffe7a0);border-radius:3px;transition:width .3s;box-shadow:0 0 8px rgba(246,210,122,.6)}
 .badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:1px 6px;border-radius:6px;font-size:11px;font-weight:900;letter-spacing:.03em;color:#0e1220;background:linear-gradient(180deg,#fff 0%,var(--r) 35%,var(--r2) 100%);line-height:1.5;box-shadow:inset 0 -1px 0 rgba(0,0,0,.25),0 0 0 1px rgba(0,0,0,.35)}
