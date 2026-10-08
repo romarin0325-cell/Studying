@@ -83,7 +83,7 @@ try{
       const p=createProfile(NOW);p.heroes.star_boy.bond=10;const unsupported=await boot(390,844,p);
       await unsupported.page.locator('.bond-button').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
       assert.match(await unsupported.page.locator('#memory-loading').innerText(),/그림을 불러오지 못했습니다/);assert.equal(await unsupported.page.locator('img[data-memorial]').count(),0);
-      await unsupported.page.locator('[data-memory-step="1"]').click();assert.equal((await profile(unsupported.page)).memories.star_boy.page,1);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
+      await unsupported.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(unsupported.page)).memories.star_boy.read,true);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
       execFileSync(process.execPath,['defense_test/scripts/build.mjs','--compat'],{cwd:path.dirname(game),stdio:'pipe'});
       url=pathToFileURL(path.join(game,'test-results/compat/StarGardenDefenseCompat.html')).href;
       console.log('WebKit AVIF codec unavailable: verified graceful reader and using separate WebP-only compatibility artifact.');
@@ -96,7 +96,7 @@ try{
     await m.page.locator('[data-action="memorial-album"]').click();assert.equal(await m.page.locator('.memory-list [data-memorial]').count(),30);await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.memory-list [data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.match(await m.page.locator('.memory-title h3').innerText(),new RegExp(MEMORIAL_STORIES.zeke.title));
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1&&reading.height>=90,'initial paragraph panel visible above fixed controls');await shot(m.page,'memorial-reader',width,height);
-    await m.page.locator('[data-memory-step="1"]').click();assert.equal((await profile(m.page)).memories.zeke.page,1);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);await nav(m.page,'동료');await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.memory-entry').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('#memory-progress').innerText(),`${Math.round(2/MEMORIAL_STORIES.zeke.paragraphs.length*100)}% 읽음`);
+    await m.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(m.page)).memories.zeke.read,true);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);await nav(m.page,'동료');await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.memory-entry').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('#memory-progress').innerText(),'100% 읽음');
     await m.page.locator('[data-action="memorial-art"]').click();assert.equal(await m.page.locator('#memory-narrative').isVisible(),false);
     assert.ok(await m.page.evaluate(()=>Math.max(document.querySelector('.memory-title h3').getBoundingClientRect().bottom,document.querySelector('[data-action="memorial-art"]').getBoundingClientRect().bottom)<=document.querySelector('.sheet-body').getBoundingClientRect().bottom+1),'art title and toggle remain visible above controls');await shot(m.page,'memorial-art',width,height);await close(m.page);
     if(width===390){
@@ -133,6 +133,7 @@ try{
     await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*50%/);
     await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait').innerText(),/등장 웨이브.*150%/);
     await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait').innerText(),/50%/);
+    await t.page.locator('.unit-skill').click();await t.page.locator('#sheet[data-kind="skill-info"]').waitFor();assert.match(await t.page.locator('.skill-sheet').innerText(),/2성/);await shot(t.page,'skill-info-from-unit',width,height);await t.page.locator('.dialog-buttons [data-action="close"]').click();
     await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait').innerText(),/대기|활성|수혜/);
     await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait').innerText(),/40%/);
     await t.page.locator('[data-action="deselect"]').click();await t.page.locator('#arena').scrollIntoViewIfNeeded();await shot(t.page,'trait-auras',width,height);await t.context.close();
@@ -140,7 +141,7 @@ try{
     const f=await boot(width,height,traitFixture(other,[[6,other[0]],[8,other[1]],[12,other[2]],[16,other[3],1,1],[18,other[4]]]));
     await f.page.locator('[data-action="resume"]').click();
     await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
-    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 위치/);await shot(f.page,'trait-fixed-target',width,height);
+    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/경로 위/);await shot(f.page,'trait-fixed-target',width,height);
     await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait').innerText(),/이후 웨이브.*125%/);
     const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.isEnabled(),false);assert.match(await doom.getAttribute('aria-label'),/25골드.*골드 부족/);assert.match(await doom.innerText(),/25G/);await f.context.close();
   }

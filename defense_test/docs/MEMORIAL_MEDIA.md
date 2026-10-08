@@ -9,7 +9,7 @@
 - 시나리오 번호, 캐릭터 외모·보이스 설정 헤더, 이야기 외의 구현 지시는 독서 화면 데이터에 넣지 않는다.
 - unlockBond는 기존 호감도 bond의 기준 10이다. 새로운 호감도 획득 방법이나 별도 affection 필드를 추가하지 않는다.
 - 아발란체메이드는 현재 메이드의 heroId avalanche_maid에, 퍼펙트아우로라는 현재 아우로라의 heroId aurora에 연결한다. 둘은 별도 신규 캐릭터로 만들지 않는다.
-- 번개의현자 16A는 실제 바닥의 검은 세 줄이 제공된 이야기 검은 흔적의 순서와 대응한다. 16B는 책상에서 계산하는 다른 장면이어서 선택하지 않는다.
+- 번개의현자 16A는 처음 연결한 장면이다. 현재 원고와 그림은 `번개의현자수정.png`와 이야기 「가장 자주 펼치는 책」으로 교체했다. 16B는 쓰지 않는다.
 - 신데렐라 24B 구두 미세수정은 같은 유리구두 장면의 제공된 수정본이다. 벗은 한쪽 발과 남은 유리구두를 확인했으며, 구두의 불편함을 다루는 원문과 대응하여 24A 대신 선택했다.
 - 첨부의 에인션트소울 이야기는 현재 30명 명단에 없는 캐릭터이므로 추가하지 않는다. 누락된 이야기를 창작한 항목은 없다.
 - 32장의 원본을 4개 contact sheet로 실물 관찰했다. 선택한 30장의 인물·장면과 두 중복 후보를 확인했다. 인물, 의상, 구도, 성별 표현, 문구에 의미적 이미지 편집을 수행하지 않았다.
@@ -59,7 +59,7 @@ Sharp의 AVIF metadata는 chromaSubsampling 값을 제공하지 않으므로, �
 | aurora / 아우로라 | 맨발의 착지 | 961–961 | 46B_퍼펙트아우로라_맨발의 착지.png | 45903 |
 | storm_sage / 폭풍의현자 | 돌지 않는 풍향계 | 898–905 | 41A_폭풍의현자_바람 없는 낮잠.png | 40804 |
 | flame_sage / 화염의현자 | 읽을 수 있는 이름 | 932–939 | 44A_화염의현자_읽을 수 있는 이름.png | 41668 |
-| lightning_sage / 번개의현자 | 검은 흔적의 순서 | 626–633 | 16A_번개의현자_세 줄의 검은 흔적.png | 37052 |
+| lightning_sage / 번개의현자 | 가장 자주 펼치는 책 | 교체 원고 | 번개의현자수정.png | 38682 |
 | time_magician / 시간의마술사 | 초침을 빌려 주는 일 | 701–708 | 22B_시간의마술사_다시 움직이는 새벽.png | 43432 |
 | ancient_dragon / 에인션트드래곤 | 지도에 아직 남은 호수 | 768–774 | 26A_에인션트드래곤_바위 아래 다시 흐르는 샘.png | 39973 |
 | phantom / 팬텀 | 다섯 번째 문은 열지 않는다 | 880–889 | 40A_팬텀_다섯 번째 문 앞의 허세.png | 25605 |
@@ -94,7 +94,7 @@ Sharp의 AVIF metadata는 chromaSubsampling 값을 제공하지 않으므로, �
 | aurora | 971b79f4b540399cd5891c560ea19c15251755671072ae22aadb080b1999b9c4 | 99116c6ee542692f615a74ccae0c54a7d67f8f94b9c9d57cbefb61f920168445 | 3ab573c18361d3418e977a952a97eb9c9053064d32963858e6092a29bfadaa1b |
 | storm_sage | cfb5b45b3fa7ff4189fbe175773ce1d847c500c6dcc69fc5fb5cfbe729d485ab | f60dffacb1e12b4234c48088d306e346896e1f3500abdf421a0ba19b92a8d004 | f730a9b90719d41f30181796d076683e5e41ee345a86f5b1a801d44939fa4d86 |
 | flame_sage | 5d533310879e454c1c8aecf28d648ac291948c707b047ed7577e84266aaf9728 | e0f19769aea4e501dc20a307ce183af4a16a78cfa80b8949604726ad2e2a8266 | 021fa43336c0424c52f15b432883f3ce99dc318e7c608a50e395bfd71d5754a0 |
-| lightning_sage | c85784de85321bbd1c81fc959999dd9e137f0d7d402f74c65558ff19bdba9d9f | 5bd78990b3133ae6172366b547032600b0f2b6df9630ef9c10e19fde55178f6b | a8265037797ed8e508910c75b6c68c066d7aa19119a035b1924846d800d3072e |
+| lightning_sage | 6a87f0e8c4884bd5105cc3f461d847aed162cd3052df6267b37f5b994955f6a1 | 336914bb73634f7371dc4ade3f2cd81fa6dd4201a446cf8c47b108b6aafcb63e | 3f3e305f3c0ca3e373edaf45e65628815e0f7a57ca3ce6bb59e2508335c58794 |
 | time_magician | fb0a15a674c30d2ba40692634e2883fc7ac4c99b65b3832ad9e3343e96808c3e | dd1221c02f1ddca41891609f7662ac5062b88b16c6cfc0c4cd6ab241bcbf265c | 40d19ed7e595a4a7497b571535c6864c90de7868e1b24b3b5ea2e56cdf98511d |
 | ancient_dragon | 868589fb42ba63bdf95de3e442194ab1c23d66e9a01e6f5de5fcbec6c4a7a154 | aa83e8a8902ee1617b35830c17b6d102f53acd6a384279ad18893db1ad688688 | 57c0b21d45ac04453217db8b821ccc63ce19af5727dbfe2df93bfdc3d790324c |
 | phantom | dc22decf55171087470a15963cf7a2896c86e1c6cf8b1043fd7f578aa0882eee | 407991a42dd8c71737d6a314f7c7fd81d949c2972bad67bd31ef2de79973d672 | 9e3623e8b25f27bd457dcd15c4b730d1c49ba7412e462af24b5198bb97485c42 |

@@ -70,6 +70,8 @@ function render(){
   // Only a change of screen plays the entrance; in-place refreshes stay still.
   if(entering){const c=$('content');c.classList.remove('enter');void c.offsetWidth;c.classList.add('enter');}
 }
+// Growth changes numbers on the screen under a sheet; redraw it without losing the scroll position.
+function refreshBehind(){const c=$('content'),y=c.scrollTop;render();c.scrollTop=y;}
 const heading=(title,right='',sub='')=>`<div class="page-heading"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${right}</div>`;
 function five(ids,edit=false){
   return `<div class="five-line" style="--team-size:${TEAM_SIZE}">${Array.from({length:TEAM_SIZE},(_,i)=>ids[i]
@@ -338,7 +340,7 @@ function updateBattle(){
 function updateUnit(){
   const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;renderer.selected=u?selected:-1;
   if(!u){delete panel.dataset.sig;return;}
-  const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`무작위 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
+  const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
   const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,{cost,goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost,bonuses=detail.bonuses.filter(b=>b!==trait.label);
   const sig=`${u.uid}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
@@ -346,9 +348,9 @@ function updateUnit(){
   panel.innerHTML=`<div class="unit-panel-top"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><strong>${h.name}</strong><small>${badge(h.rarity)} ${h.role} · 훈련 ${run.upgrades[u.hero]}/5</small></div><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></div>
     <div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${(SHAPE_TEXT[h.shape]||'').split(' · ')[0]}</b></span></div>
     ${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성 상태'}</span>${traitText}</p>`:''}
-    <div class="unit-skill ${casts?'casts':''} ${ready?'ready':''}"><span class="unit-skill-tag">필살기 · 별빛 ${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 필살기를 씁니다':`필살기는 가장 높은 ${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></div>
+    <button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">필살기 · 별빛 ${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 필살기를 씁니다':`필살기는 가장 높은 ${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small><span class="unit-skill-more">${icon('chevron')}</span></button>
     <details class="unit-more" ${unitDetailsOpen?'open':''}><summary>능력 자세히</summary><p><em>특성</em>${h.trait.text}</p><p><em>필살기</em>${h.skill.text}</p>${bonuses.length?`<div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.map(b=>`<span class="chip">${b}</span>`).join('')}</div>`:'<p class="unit-none">지금 받는 추가 효과가 없습니다.</p>'}</details>
-    <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'무작위 위치':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
+    <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
   panel.querySelector('.unit-more')?.addEventListener('toggle',e=>{unitDetailsOpen=e.target.open;});
 }
 // Long-pressing an ultimate button shows what it does without casting it.
@@ -414,8 +416,8 @@ function openMemorial(id){
   if(!e.owned||e.bond<story.unlockBond){
     show(h.name,'아직 펼치지 않은 기억',`<div class="memory-locked">${image(id,true)}<span class="memory-seal">${icon('lock')}</span><h3>${escapeText(story.title)}</h3><p>호감도 ${story.unlockBond}에서<br>함께한 순간을 다시 만날 수 있습니다.</p><div class="memory-bond"><span>${icon('heart')}현재 호감도 <b>${e.bond}</b></span><div class="progress"><span style="width:${e.owned?Math.min(100,e.bond/story.unlockBond*100):0}%"></span></div></div>${!e.owned?'<small>먼저 이 동료를 만나 주세요.</small>':''}</div>`,`<button class="secondary wide" data-action="memorial-album">기억 목록</button>`,'memorial-locked',id);return;
   }
-  show(h.name,'인연 이야기',`<div class="memory-reader"><div class="memory-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">함께한 순간을 펼치는 중…</div></div><div class="memory-title"><span>${icon('heart')}호감도 ${e.bond}</span><h3>${escapeText(story.title)}</h3><button class="link" data-action="memorial-art" aria-pressed="false">그림만 보기</button></div><div class="memory-narrative" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress"></span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0"></div><details class="memory-log"><summary>이야기 전체 보기</summary>${story.paragraphs.map(t=>`<p>${escapeText(t)}</p>`).join('')}</details></div></div>`,`<div class="memory-controls"><button class="secondary" data-action="memorial-album" aria-label="기억 목록">${icon('book')}</button><button class="secondary" id="memory-prev" data-memory-step="-1">이전</button><button class="primary" id="memory-next" data-memory-step="1">다음 ${icon('chevron')}</button></div>`,'memorial',id);
-  memorialHero=id;memorialPage=p().memories[id]?.page||0;updateMemorialPage();
+  show(h.name,'인연 이야기',`<div class="memory-reader"><div class="memory-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">함께한 순간을 펼치는 중…</div></div><div class="memory-title"><span>${icon('heart')}호감도 ${e.bond}</span><h3>${escapeText(story.title)}</h3><button class="link" data-action="memorial-art" aria-pressed="false">그림만 보기</button></div><div class="memory-narrative" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress">0% 읽음</span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0">${story.paragraphs.map(t=>`<p${/^["“]/.test(t)?' class="dialogue"':''}>${escapeText(t)}</p>`).join('')}</div></div></div>`,`<div class="memory-controls"><button class="secondary wide" data-action="memorial-album">${icon('book')} 기억 목록</button></div>`,'memorial',id);
+  memorialHero=id;memorialPage=p().memories[id]?.page||0;bindMemorialScroll();
   const generation=memorialGeneration,img=new Image();memorialImage=img;img.dataset.memorial='1';img.decoding='async';img.width=720;img.height=1080;img.alt=`${h.name} · ${story.title}`;
   const src=window.__MEMORIAL_MEDIA__?.[id];if(!src){$('memory-loading').textContent='그림을 불러올 수 없습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');return;}
   img.src=src;
@@ -428,13 +430,16 @@ function openMemorial(id){
     }catch{if(generation!==memorialGeneration||modal!=='memorial')return;$('memory-loading').textContent='그림을 불러오지 못했습니다. 기억을 다시 열어 주세요.';$('memory-art').setAttribute('aria-busy','false');}
   })();
 }
-function updateMemorialPage(delta=0){
-  const story=MEMORIAL_STORIES[memorialHero];if(!story||modal!=='memorial')return;
-  memorialPage=delta>0&&memorialPage===story.paragraphs.length-1?0:Math.max(0,Math.min(story.paragraphs.length-1,memorialPage+delta));
-  if(p().memories[memorialHero]?.page!==memorialPage)act('memory',{id:memorialHero,page:memorialPage},false);
-  const text=$('memory-text');text.textContent=story.paragraphs[memorialPage];text.scrollTop=0;text.dataset.dialogue=String(/^["“]/.test(text.textContent));
-  $('memory-progress').textContent=`${Math.round((memorialPage+1)/story.paragraphs.length*100)}% 읽음`;$('memory-progress-fill').style.width=`${(memorialPage+1)/story.paragraphs.length*100}%`;
-  $('memory-prev').disabled=memorialPage===0;$('memory-next').innerHTML=memorialPage===story.paragraphs.length-1?'처음부터 읽기':`다음 ${icon('chevron')}`;
+// The story reads as one scroll; the paragraph at the reading position is saved.
+function bindMemorialScroll(){
+  const story=MEMORIAL_STORIES[memorialHero],text=$('memory-text');if(!story||!text||modal!=='memorial')return;
+  const last=story.paragraphs.length-1,update=()=>{
+    const max=text.scrollHeight-text.clientHeight,ratio=max<=1?1:Math.min(1,text.scrollTop/max),page=Math.round(ratio*last);
+    memorialPage=page;$('memory-progress').textContent=`${Math.round(ratio*100)}% 읽음`;$('memory-progress-fill').style.width=`${ratio*100}%`;
+    if(p().memories[memorialHero]?.page!==page)act('memory',{id:memorialHero,page},false);
+  };
+  if(memorialPage>0&&last>0)text.scrollTop=(text.scrollHeight-text.clientHeight)*memorialPage/last;
+  text.addEventListener('scroll',update,{passive:true});update();
 }
 function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;syncBattlePhase();updateBattle();}
 function leave(){
@@ -469,13 +474,13 @@ document.addEventListener('click',e=>{
   const button=e.target.closest('button');if(!button||button.disabled)return;const d=button.dataset;sound.click();
   if(d.nav){if(screen==='battle'){leave();return;}close();screen=d.nav;render();return;}
   if(d.hero){heroDetail(d.hero);return;}if(d.relic){relicDetail(d.relic);return;}
-  if(d.memorial){openMemorial(d.memorial);return;}if(d.memoryStep){updateMemorialPage(Number(d.memoryStep));return;}
+  if(d.memorial){openMemorial(d.memorial);return;}
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.draw){draw(Number(d.draw));return;}if(d.drawAgain){draw(Number(d.drawAgain));return;}if(d.drawFree){banner='normal';draw(1,true);return;}
-  if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.level){if(act('level',{id:d.level}).ok)heroDetail(d.level);return;}
-  if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok)(d.enhance?heroDetail:relicDetail)(id);return;}
+  if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.skillInfo){skillInfo(d.skillInfo);return;}if(d.level){if(act('level',{id:d.level}).ok)heroDetail(d.level);return;}
+  if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);}return;}
   if(d.equip){if(act('equip',{id:d.equip}).ok)relicDetail(d.equip);return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 변경 · ${HERO[d.setPartner].name}`);}return;}
   if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명입니다. 먼저 한 명을 해제하세요.`);return;}team(true);return;}
@@ -491,7 +496,7 @@ document.addEventListener('click',e=>{
       if(bubble){bubble.textContent=lines[(p().heroes[hero.id].bond+talkIndex)%lines.length];bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');}
       if(art){art.classList.remove('hop');void art.offsetWidth;art.classList.add('hop');}const c=centerOf(button);hearts(c.x,c.y-30);},
     'reveal-skip':skipReveal,garden:()=>{close();showGarden();},
-    'garden-level':()=>{const c=centerOf(button);if(act('level').ok){showGarden();burst(c.x,c.y-40,{count:14,spread:90,size:12,color:'#ffe08a'});if(screen==='home'&&!modal)render();}},
+    'garden-level':()=>{const c=centerOf(button);if(act('level').ok){refreshBehind();showGarden();burst(c.x,c.y-40,{count:14,spread:90,size:12,color:'#ffe08a'});}},
     'idle-shard':()=>collectStars(),
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),
     'prepare-mode':()=>prepare(Math.min(45,p().cleared+1),mode),resume,

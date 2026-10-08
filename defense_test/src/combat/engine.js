@@ -102,7 +102,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   }else if(u.hero==='zeke'){
     const active=s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
     Object.assign(trait,{key:'last-quarter',active,speedBonus:active?.4:0,label:active?'마지막 구간 · 공속 +40%':'마지막 구간 대기'});
-  }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'무작위 지면 고정 · 화염장 +30%'});
+  }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'경로 위 무작위 · 화염장 +30%'});
   else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 위력 +50%'});
   else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,label:'일반 적 명중마다 즉사 1%'});
   return trait;
@@ -455,7 +455,7 @@ function attack(s,u,index,extra=0){
   const hero=HERO[u.hero],ground=u.hero==='flame_sage';
   if(ground&&!s.enemies.some(e=>e.hp>0))return false;
   const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(hero,cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
-  const at=cellPoint(index),to=ground?{x:GROUND_BOUNDS.left+random(s)*(GROUND_BOUNDS.right-GROUND_BOUNDS.left),y:GROUND_BOUNDS.top+random(s)*(GROUND_BOUNDS.bottom-GROUND_BOUNDS.top)}:pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
+  const at=cellPoint(index),to=ground?pathPoint(random(s)*PATH_LENGTH):pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
   u.aim=angle;u.facing=attackDirection(at,to);
   const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
   if(!extra){u.attacks++;u.pose=.3;}

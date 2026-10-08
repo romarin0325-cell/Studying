@@ -609,9 +609,11 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .unit-trait span{font-size:10px;color:var(--text3);margin-right:7px;font-weight:700}
 .unit-trait.active{color:var(--text);background:rgba(127,230,211,.1);box-shadow:inset 0 0 0 1px rgba(127,230,211,.25)}
 .unit-trait.active span{color:var(--teal)}
-.unit-skill{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:1px 8px;margin-top:7px;padding:6px 9px;border-radius:10px;background:rgba(246,210,122,.07);border:1px solid rgba(246,210,122,.18)}
+.unit-skill{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1px 8px;width:100%;min-height:0;text-align:left;margin-top:7px;padding:6px 9px;border-radius:10px;background:rgba(246,210,122,.07);border:1px solid rgba(246,210,122,.18)}
 .unit-skill-tag{grid-row:span 2;font-size:10px;font-weight:800;color:var(--gold);padding:2px 6px;border-radius:6px;background:rgba(246,210,122,.12);white-space:nowrap}
 .unit-skill b{font-size:12px}
+.unit-skill-more{grid-row:1/span 2;grid-column:3;display:flex;color:var(--gold);opacity:.8}
+.unit-skill-more .ic{width:14px;height:14px}
 .unit-skill small{font-size:10px;color:var(--text3);display:inline-flex;align-items:center;gap:2px}
 .unit-skill small .ic{width:10px;height:10px;fill:currentColor}
 .unit-skill.casts{background:rgba(246,210,122,.13);border-color:rgba(246,210,122,.4)}
@@ -835,10 +837,10 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .memory-bond .ic{width:15px;height:15px}
 .memory-bond .progress>span{background:#e8a7bf}
 .sheet[data-kind=memorial]{height:96dvh;max-height:96dvh;background:#0d1426}
-.sheet[data-kind=memorial] .sheet-body{padding:0}
+.sheet[data-kind=memorial] .sheet-body{padding:0;display:flex;flex-direction:column;overflow:hidden}
 .sheet[data-kind=memorial] .sheet-top{padding:10px 16px;flex-shrink:0}
-.memory-reader{min-height:100%;background:linear-gradient(#0c1324,#192136)}
-.memory-art{height:min(43dvh,400px);position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;background:radial-gradient(ellipse at center,#34405666,#0c1428 85%)}
+.memory-reader{flex:1;min-height:0;display:flex;flex-direction:column;background:linear-gradient(#0c1324,#192136)}
+.memory-art{flex:0 1 min(38dvh,360px);height:auto;min-height:140px;position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;background:radial-gradient(ellipse at center,#34405666,#0c1428 85%)}
 .memory-art img{display:block;width:100%;height:100%;object-fit:contain;animation:memory-reveal .3s ease-out}
 .memory-loading{font-size:13px;color:#e4becb;text-align:center;padding:24px;line-height:1.7}
 .memory-title{padding:13px 18px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:linear-gradient(100deg,#34253b88,#192136);border-bottom:1px solid #e6b3c026}
@@ -846,20 +848,17 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .memory-title .ic{width:12px;height:12px}
 .memory-title h3{font-size:19px;line-height:1.4;margin:0;flex:1;min-width:0}
 .memory-title .link{font-size:11px;min-height:32px;flex-shrink:0;color:#e1b9c8}
-.memory-narrative{padding:0 18px 14px}
+.memory-narrative{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 18px 14px;overflow:hidden}
 .memory-reading-progress{height:25px;position:relative;border-bottom:2px solid #d6a6bc22;display:flex;justify-content:flex-end;align-items:center}
 .memory-reading-progress span{font:10px system-ui,sans-serif;color:#b7a8b5}
 .memory-reading-progress i{position:absolute;left:0;bottom:-2px;height:2px;background:#e8acc2;transition:width .2s}
-.memory-text{font:15px/1.95 system-ui,-apple-system,sans-serif;white-space:pre-wrap;color:#ece7ec;max-height:24dvh;min-height:90px;overflow-y:auto;padding:13px 0 6px;overscroll-behavior:contain;word-break:keep-all;overflow-wrap:anywhere}
-.memory-text[data-dialogue=true]{color:#ffe5ed}
-.memory-log{font:12px/1.85 system-ui,sans-serif;color:#c4c2d0;margin:12px 0 0}
-.memory-log summary{min-height:32px;cursor:pointer;color:#d4aec2}
-.memory-log p{white-space:pre-wrap;margin:12px 0}
-.memory-controls{display:grid;grid-template-columns:44px 1fr 1.7fr;gap:8px}
+.memory-text{flex:1;min-height:90px;font:15px/1.95 system-ui,-apple-system,sans-serif;color:#ece7ec;overflow-y:auto;padding:16px 2px 8px;overscroll-behavior:contain;word-break:keep-all;overflow-wrap:anywhere}
+.memory-text p{margin:0 0 16px;white-space:pre-wrap}
+.memory-text p.dialogue{color:#ffe5ed;padding-left:10px;border-left:2px solid #e8acc255}
+.memory-controls{display:grid;grid-template-columns:1fr;gap:8px}
 .memory-controls button{min-height:44px}
-.memory-art-only .memory-art{height:calc(96dvh - 240px)}
-.memory-art-only .memory-narrative,.memory-art-only [data-memory-step]{display:none}
-.memory-art-only .memory-controls{grid-template-columns:44px}
+.memory-art-only .memory-art{flex:1;height:auto;min-height:180px}
+.memory-art-only .memory-narrative{display:none}
 .app[data-solo=true] .five-line{max-width:150px;margin:auto}
 .app[data-solo=true] .skills{grid-template-columns:minmax(0,150px);justify-content:center}
 .app[data-solo=true] .skill-button{min-height:60px}
@@ -867,7 +866,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 @keyframes memory-reveal{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.memory-art img{animation:none}.memory-reading-progress i{transition:none}}
 @media(max-height:700px){
-  .memory-art{height:32dvh}
+  .memory-art{flex-basis:28dvh;min-height:110px}
   .memory-title{padding:9px 16px 8px;gap:4px}
   .memory-title h3{font-size:17px}
   .memory-title .link{min-height:28px}
