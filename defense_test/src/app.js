@@ -282,9 +282,9 @@ function renderBattle(){
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice'].map(id=>[id,$(id)]));
   hud.skills=[...document.querySelectorAll('[data-skill]')].map(node=>({node,id:node.dataset.skill,timer:node.querySelector('.skill-duration')}));
   for(const {node,id} of hud.skills){
-    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;skillHold=setTimeout(()=>{skillHeld=true;skillInfo(id);},480);});
-    for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>clearTimeout(skillHold));
-    node.addEventListener('contextmenu',e=>e.preventDefault());
+    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillInfo(id);},480);});
+    for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');});
+    node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
   }
   renderer=new Renderer($('arena'),art);settings();bindArena();updateBattle();
 }
