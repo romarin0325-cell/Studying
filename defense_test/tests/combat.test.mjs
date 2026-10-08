@@ -540,6 +540,21 @@ test('Storm instant kill never triggers on bosses, damage over time, ultimate at
   }
 });
 
+test('skill preview names the highest-rank caster, matches cast() factors and never changes the run',()=>{
+  const s=traitArena([{hero:'aurora',index:0,rank:1},{hero:'aurora',index:4,rank:3},{hero:'doom',index:12,rank:2},{hero:'lightning_sage',index:20},{hero:'cherry_prince',index:24}]);
+  enemiesFor(s,[{progress:600}]);
+  for(const u of s.board.filter(Boolean)){
+    const before=E.serialize(s),preview=E.castPreview(s,u.hero);assert.equal(E.serialize(s),before,u.hero+' preview is read-only');
+    assert.equal(preview.rank,E.bestUnit(s,u.hero).rank);assert.ok(preview.lines.length>=1);
+  }
+  assert.equal(E.castPreview(s,'aurora').rank,3);assert.match(E.castPreview(s,'aurora').lines.join(' '),/45%/);
+  const amount=(id,factor)=>Math.round(E.power(s,E.bestUnit(s,id))*factor).toLocaleString('ko-KR');
+  assert.ok(E.castPreview(s,'doom').lines[0].includes(amount('doom',10)));
+  assert.ok(E.castPreview(s,'lightning_sage').lines[0].includes(amount('lightning_sage',7)));
+  assert.ok(E.castPreview(s,'cherry_prince').lines[0].includes(amount('cherry_prince',24)));
+  assert.equal(E.castPreview(s,'star_boy'),null,'absent companions have no preview');
+});
+
 test('Flame fires at a seeded path point independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
   const locations=[];
   for(const [progress,artifacts] of [[0,[]],[1110,[]],[1110,['roots']]]){

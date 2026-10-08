@@ -356,8 +356,8 @@ function updateUnit(){
 }
 // Long-pressing an ultimate button shows what it does without casting it.
 function skillInfo(id){
-  const h=HERO[id],caster=run&&E.bestUnit(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat';
-  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>`,
+  const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat';
+  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">돌아가기</button><button class="primary" data-cast-now="${id}" ${ready?'':'disabled'}>바로 사용</button></div>`,'skill-info',id);
 }
 function battleCommand(result){if(!result?.ok)toast(result?.reason);else saves.mark();updateBattle();}

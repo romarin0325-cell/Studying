@@ -640,6 +640,10 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .skill-sheet .portrait img{width:100%;height:100%;object-fit:cover;transform:scale(1.25) translateY(6%)}
 .skill-sheet p{font-size:14px;line-height:1.7;margin:6px 0}
 .skill-sheet small{color:var(--text3);font-size:12px}
+.skill-now{margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(246,210,122,.07);border:1px solid rgba(246,210,122,.25)}
+.skill-now .ability-tag{display:inline-flex;align-items:center;gap:2px}
+.skill-now .ability-tag .ic{width:11px;height:11px}
+.skill-now p{font-size:13px;line-height:1.65;margin:6px 0 0;color:var(--text2);word-break:keep-all}
 
 /* ───────── Splash & effects ───────── */
 .splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 50% 42%,#1e2a66,#070a1e 70%);transition:opacity .45s ease,visibility .45s}
