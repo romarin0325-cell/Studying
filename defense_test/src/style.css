@@ -29,7 +29,11 @@
 /* ───────── Base ───────── */
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overscroll-behavior:none}
-body{font-family:var(--body);background:#05071a;color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--body);background:#05071a;color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+  /* A game screen: long presses never select text or open the image callout. */
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,select,textarea{-webkit-user-select:text;user-select:text}
+img{-webkit-touch-callout:none}
 body::before{content:'';position:fixed;inset:0;background:var(--garden) center/cover;filter:blur(28px) brightness(.28) saturate(1.25);transform:scale(1.12);z-index:-1}
 button,input{font:inherit}
 button{cursor:pointer;border:0;touch-action:manipulation;color:inherit;background:none;min-height:40px;-webkit-user-select:none;user-select:none}
@@ -513,7 +517,10 @@ em{font-style:normal}
 .skills{display:grid;grid-template-columns:repeat(var(--team-size,5),minmax(0,1fr));gap:5px;margin:6px 0}
 .skill-button{--fill:0;border:1.5px solid var(--line2);background:var(--panel);border-radius:12px;padding:5px 1px 8px;display:flex;flex-direction:column;align-items:center;min-width:0;min-height:60px;position:relative;overflow:hidden}
 .skill-button:before{content:'';position:absolute;left:0;bottom:0;height:4px;width:calc(var(--fill)*100%);background:var(--gem);opacity:.7}
-.skill-button img{width:36px;height:34px}
+.skill-button img{width:36px;height:34px;pointer-events:none}
+/* Holding an ultimate fills a gold ring; at 0.48s the description opens instead of casting. */
+.skill-button.holding{animation:hold .48s linear forwards}
+@keyframes hold{to{transform:scale(1.05);box-shadow:0 0 0 2px var(--gold),0 0 20px rgba(246,210,122,.85)}}
 .skill-button small{display:inline-flex;align-items:center;gap:2px;font-size:10px;margin-top:2px;color:var(--text2);font-weight:700}
 .skill-button small .ic{width:10px;height:10px}
 .skill-button:disabled{opacity:.6}
