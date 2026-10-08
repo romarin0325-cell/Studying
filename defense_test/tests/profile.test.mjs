@@ -35,6 +35,20 @@ test('a pre-renewal active run resumes with the renewed permanent multipliers',(
   assert.ok(Math.abs(resumed.meta.star_boy.special-1.2)<1e-12);
 });
 
+test('daily missions come from playing, the free summon is once a day, and old missions migrate',()=>{
+  const s=storeFor(createProfile(NOW));assert.equal(s.transact('daily',{id:'idle'},NOW).ok,false);
+  s.value.idleAt=NOW-3*HOUR;call(s,'idle');assert.equal(s.value.daily.idle,true);const d0=s.value.dreams;call(s,'daily',{id:'idle'});assert.equal(s.value.dreams,d0+30);
+  const d1=s.value.dreams;call(s,'draw',{banner:'normal',count:1,free:true});assert.equal(s.value.dreams,d1);assert.equal(s.value.daily.free,true);assert.equal(s.value.history.length,1);
+  assert.equal(s.transact('draw',{banner:'normal',count:1,free:true},NOW).ok,false,'one free summon a day');
+  assert.equal(storeFor(createProfile(NOW)).transact('draw',{banner:'relic',count:1,free:true},NOW).ok,false,'free summon is the normal banner only');
+  call(s,'begin',{mode:'main',stage:1});call(s,'settle',{token:s.value.active.token,won:false,round:0,merges:5});assert.equal(s.value.daily.merges,5);
+  call(s,'daily',{id:'merge'});call(s,'daily',{id:'combat'});assert.equal(s.transact('daily',{id:'merge'},NOW).ok,false);
+  const old=createProfile(NOW);old.daily={day:old.daily.day,combat:true,draw:true,dispatch:false,claimed:['draw']};
+  const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
+  assert.deepEqual(migrated.daily,{day:old.daily.day,combat:true,merges:0,idle:false,free:false,claimed:[]});
+  const bad=structuredClone(migrated);bad.daily.claimed=['draw'];assert.equal(validateProfile(bad),false);
+});
+
 test('a new garden owns one of exactly the requested five heroes and starts with a valid deck',()=>{
   const p=createProfile(NOW);assert.ok(validateProfile(p));
   assert.deepEqual(HEROES.filter(h=>p.heroes[h.id].owned).map(h=>h.id).sort(),[...DEFAULT_DECK].sort());

@@ -1,4 +1,4 @@
-# ASTRA · 별빛 정원 — Defense collection test
+# 드림위버: 별빛 정원 — DREAMWEAVER 외전 디펜스 (Defense collection test)
 
 기존 Defense에서 필요한 30명 캐릭터, 9종 보스, 공격 형태, 배치·합성 전투와 그림을 한 번 복사해 시작한 독립 수집/성장 테스트 게임입니다. 데이터·에셋·폰트·전투 코드가 모두 이 폴더에 있으며, 향후 밸런스와 방향은 이 소스 트리에서 별도로 관리합니다.
 

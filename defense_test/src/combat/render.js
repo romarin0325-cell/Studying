@@ -108,7 +108,7 @@ export class Renderer {
   drawDecor(s){const ctx=this.ctx,t=this.clock;
     shadow(ctx,76,144,42,.35);if(!this.art.creature(ctx,15,76,156,112)){star(ctx,76,126,32,'#b597e5',t*.1);}
     if(!this.decorGlow){this.decorGlow=ctx.createRadialGradient(76,136,4,76,136,55);this.decorGlow.addColorStop(0,'#bcd0ff44');this.decorGlow.addColorStop(1,'#bcd0ff00');}ctx.fillStyle=this.decorGlow;ctx.fillRect(21,81,110,110);
-    ctx.textAlign='center';ctx.fillStyle='#f0e3c5';ctx.font='600 18px system-ui';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle='#b8d0d5';ctx.font='13px Georgia,serif';ctx.fillText('✦  A S T R A  ✦',360,59);
+    ctx.textAlign='center';ctx.fillStyle='#f0e3c5';ctx.font='600 18px system-ui';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle='#b8d0d5';ctx.font='13px Georgia,serif';ctx.fillText('✦  D R E A M W E A V E R  ✦',360,59);
     for(let i=0;i<9;i++){const x=(i*103+Math.sin(t*.2+i)*20)%720,y=(i*83-t*7+7800)%780;star(ctx,x,y,1.8+Math.sin(t+i),i%2?'#c7dfc580':'#e5d7a380',t*.2);}
   }
   drawHero(s,index){const ctx=this.ctx,u=s.board[index],p=cellPoint(index);if(this.drag?.uid===u.uid){shadow(ctx,p.x,p.y+24,20,.2);return;}

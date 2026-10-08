@@ -142,23 +142,24 @@ test('support/control growth follows the five-step duplicate milestones while eq
   close(s.buffs.haste/base.buffs.haste,1.2,'support duration milestone');
 });
 
-test('weekly and monthly challenges use distinct plans and stop promptly when late-round damage is insufficient',()=>{
+test('weekly and monthly challenges have no round timer and a monthly boss reaching the core ends the run',()=>{
   const weekly=E.wavePlan(1,0,'weekly'),monthly=E.wavePlan(1,0,'monthly');
   assert.ok(weekly.sequence.length>=9);assert.ok(weekly.sequence.every(e=>e.hp===34));
-  assert.deepEqual(monthly.sequence,[{kind:'boss',hp:1225}]);
+  assert.deepEqual(monthly.sequence,[{kind:'boss',hp:1225}]);assert.equal(E.wavePlan(2,0,'monthly').sequence[0].hp,2450,'monthly bosses step up 2x');
   assert.ok(E.wavePlan(8,0,'weekly').sequence[0].hp>34*60);
-  assert.ok(E.wavePlan(8,0,'monthly').sequence[0].hp>1225*40);
   const armoured=E.wavePlan(3,0,'weekly').sequence,plain=armoured.find(e=>e.kind==='grunt').hp;
   assert.equal(armoured.find(e=>e.kind==='armor').hp,Math.round(plain*1.4),'armour is tougher instead of reducing damage');
   for(const mode of ['weekly','monthly']){
-    const p=active(mode,4),s=createBattle(p);
-    s.wave=12;s.waveTime=mode==='monthly'?30:35;E.step(s,.05);
-    assert.equal(s.phase,'defeat');assert.equal(clearedRounds(s),11);
-    assert.equal(s.stats.kills,0);
+    const s=createBattle(active(mode,4));s.wave=12;s.waveTime=300;E.step(s,.05);
+    assert.equal(s.phase,'combat',mode+' has no round timer');
   }
+  const s=createBattle(active('monthly',4));assert.equal(s.health,7);
+  s.queue=E.wavePlan(1,0,'monthly').sequence;s.spawnIn=0;E.step(s,.05);
+  const boss=s.enemies[0];boss.skillIn=1e9;boss.progress=E.PATH_LENGTH-.1;E.step(s,.05);
+  assert.equal(s.phase,'defeat','one boss at the core ends the monthly run');assert.equal(clearedRounds(s),0);
   for(let i=0;i<9;i++){
-    const s=createBattle(active('monthly',4));s.wave=i+1;s.queue=E.wavePlan(i+1,0,'monthly').sequence;s.spawnIn=0;E.step(s,.05);
-    assert.equal(s.enemies[0].boss,BOSS_ORDER[i]);
+    const run=createBattle(active('monthly',4));run.wave=i+1;run.queue=E.wavePlan(i+1,0,'monthly').sequence;run.spawnIn=0;E.step(run,.05);
+    assert.equal(run.enemies[0].boss,BOSS_ORDER[i]);
   }
 });
 
@@ -438,24 +439,26 @@ test('overlapping mirrors from different cast sources never record each other bu
   close(second.stored,actual+s.stats.damage-before,'later ordinary attacks still record');
   const recorded=second.stored;second.life=.001;E.step(s,.001);
   const impacts=s.events.filter(e=>e.type==='finisherImpact'&&e.kind==='mirror');
-  assert.equal(impacts.length,2);close(impacts[0].echoDamage,Math.min(first.cap,actual*.45));
-  close(impacts[1].echoDamage,Math.min(second.cap,recorded*.45));
+  assert.equal(impacts.length,2);close(impacts[0].echoDamage,actual*.45);
+  close(impacts[1].echoDamage,recorded*.45);
   assert.equal(s.finishers.length,0);
 });
 
-test('mirror recording caps real shield and HP damage, preserves its bound on resume and rejects tampered records',()=>{
+test('mirror recording has no ceiling, survives resume, honours a legacy cap and rejects tampered records',()=>{
   const s=traitArena([{hero:'aurora',index:0},{hero:'star_boy',index:12,rank:6}]);
-  enemiesFor(s,[{progress:1200,shield:50}]);s.gauge=120;assert.ok(E.cast(s,'aurora').ok);
-  const mark=s.finishers[0],shot=launchNormal(s,s.board[12]);resolveNormal(s,shot);
-  assert.ok(shot.damage>mark.cap/.45);close(mark.stored,mark.cap/.45);
-  const restored=E.restore(E.serialize(s));assert.ok(restored);close(restored.finishers[0].stored,mark.cap/.45);
-  for(const change of [{stored:mark.cap/.45+1},{stored:-1},{cap:-1},{life:mark.total+.001}]){
-    const bad=JSON.parse(E.serialize(s));Object.assign(bad.finishers[0],change);assert.equal(E.restore(bad),null);
+  const [enemy]=enemiesFor(s,[{progress:1200,shield:50}]);s.gauge=120;assert.ok(E.cast(s,'aurora').ok);
+  const mark=s.finishers[0];assert.equal(mark.cap,undefined,'Thousand Mirrors stores without a ceiling');
+  const shot=launchNormal(s,s.board[12]),hp=enemy.hp,shield=enemy.shield;resolveNormal(s,shot);
+  const actual=hp-enemy.hp+shield-enemy.shield;assert.ok(actual>HERO.aurora.damage*30/.45,'more than the old 30x ceiling');close(mark.stored,actual);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);close(restored.finishers[0].stored,actual);
+  for(const change of [{stored:-1},{cap:-1},{cap:1,stored:10},{life:mark.total+.001}]){
+    const bad=JSON.parse(E.serialize(s));Object.assign(bad.finishers[0],change);assert.equal(E.restore(bad),null,JSON.stringify(change));
   }
-  for(let i=0;i<65;i++){E.step(s,.05);E.step(restored,.05);}
+  const legacy=JSON.parse(E.serialize(s));Object.assign(legacy.finishers[0],{cap:actual*.45/2,stored:actual/2});const old=E.restore(legacy);assert.ok(old,'a checkpoint from before the change keeps its cap');
+  for(let i=0;i<65;i++){E.step(s,.05);E.step(restored,.05);E.step(old,.05);}
   assert.equal(E.serialize(restored),E.serialize(s));
-  const impact=s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror');assert.ok(impact);
-  close(impact.echoDamage,mark.cap);
+  close(s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*.45);
+  close(old.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*.45/2);
 });
 
 test('Storm rolls separately for each actual ordinary recipient including the off-axis gust chain',()=>{
