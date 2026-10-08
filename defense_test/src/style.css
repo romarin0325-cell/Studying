@@ -179,7 +179,7 @@ em{font-style:normal}
 .partner-touch{position:relative;height:100%;padding:0;min-height:0;display:flex;align-items:flex-end;pointer-events:auto}
 .scene-partner{height:100%;width:auto;max-width:82vw;object-fit:contain;transform-origin:50% 100%;filter:drop-shadow(0 16px 18px rgba(0,0,0,.55)) drop-shadow(0 0 22px rgba(190,210,255,.18));animation:breathe 4.2s ease-in-out infinite}
 .scene-partner.hop{animation:hop .62s cubic-bezier(.3,1.5,.5,1),breathe 4.2s .62s ease-in-out infinite}
-.speech{position:absolute;top:-2%;left:38%;transform:translate(-50%,-30%);max-width:min(78%,300px);width:max-content;padding:9px 15px;border-radius:18px;background:linear-gradient(180deg,#fffdf6,#f1ecff);color:#2c2f55;font-size:13px;font-weight:700;line-height:1.5;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.4),inset 0 -2px 0 rgba(120,110,190,.18);pointer-events:none;word-break:keep-all}
+.speech{--ty:-30%;position:absolute;top:-2%;left:38%;transform:translate(-50%,var(--ty));max-width:min(78%,300px);width:max-content;padding:9px 15px;border-radius:18px;background:linear-gradient(180deg,#fffdf6,#f1ecff);color:#2c2f55;font-size:13px;font-weight:700;line-height:1.5;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.4),inset 0 -2px 0 rgba(120,110,190,.18);pointer-events:none;word-break:keep-all}
 .speech::after{content:'';position:absolute;left:50%;bottom:-7px;width:14px;height:14px;transform:translateX(-50%) rotate(45deg);background:#f1ecff;border-radius:0 0 4px 0}
 .speech.pop{animation:pop .38s cubic-bezier(.3,1.6,.5,1)}
 .nameplate{position:absolute;left:10px;bottom:124px;z-index:3;max-width:56%;padding:8px 12px 6px 8px;border-radius:16px;background:radial-gradient(ellipse at 20% 60%,rgba(6,9,28,.72),rgba(6,9,28,0) 75%);text-shadow:0 2px 10px #000d}
@@ -655,7 +655,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 /* ───────── Motion ───────── */
 @keyframes breathe{50%{transform:translateY(-4px) scaleY(1.012)}}
 @keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-22px) scale(1.03,.98)}62%{transform:translateY(0) scale(1.04,.95)}80%{transform:translateY(-5px)}100%{transform:translateY(0)}}
-@keyframes pop{0%{transform:translate(-50%,-30%) scale(.7);opacity:.2}70%{transform:translate(-50%,-30%) scale(1.06)}100%{transform:translate(-50%,-30%) scale(1);opacity:1}}
+@keyframes pop{0%{transform:translate(-50%,var(--ty)) scale(.7);opacity:.2}70%{transform:translate(-50%,var(--ty)) scale(1.06)}100%{transform:translate(-50%,var(--ty)) scale(1);opacity:1}}
 @keyframes float{50%{transform:translateY(-8px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{50%{transform:scale(1.12);opacity:.7}}
@@ -761,7 +761,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
   .side-btn{width:48px;min-height:48px;padding:4px 2px;font-size:10px;border-radius:14px}
   .side-btn small{display:none}
   .side-btn .ic{width:19px;height:19px}
-  .speech{top:12%;max-width:58%;font-size:11px;padding:6px 10px}
+  .speech{--ty:0%;top:16%;max-width:58%;font-size:11px;padding:6px 10px}
   .nameplate{max-width:62%;bottom:120px}
   .np-top strong{font-size:21px}
 }
