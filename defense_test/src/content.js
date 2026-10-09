@@ -44,8 +44,9 @@ export const TUNING=Object.freeze({
   // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
   dispatchDust:1.25,dispatchDreams:.25,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
-  // Dream greenhouse beds: fast early levels, then a cost knee as a soft cap (no hard cap).
-  beds:{rose:{unlock:0,base:60,growth:1.13,knee:20,steep:1.28},spring:{unlock:15,base:120,growth:1.22,knee:10,steep:1.45},seed:{unlock:30,base:200,growth:1.2,knee:10,steep:1.4}},
+  // Dream greenhouse beds: fast early levels, then cost knees as a soft cap (no hard cap).
+  // Rose: gentle to Lv.30, steeper to Lv.40, then each level climbs sharply.
+  beds:{rose:{unlock:0,base:40,growth:1.065,knee:30,steep:1.15,knee2:40,steep2:1.35},spring:{unlock:15,base:120,growth:1.22,knee:10,steep:1.45},seed:{unlock:30,base:200,growth:1.2,knee:10,steep:1.4}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });
 export const QUOTES={

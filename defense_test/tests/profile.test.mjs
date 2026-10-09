@@ -12,31 +12,35 @@ const storeFor=p=>new ProfileStore(memory(p),NOW);
 const call=(s,a,args={},now=NOW)=>{const r=s.transact(a,args,now);assert.ok(r.ok,r.message);return r;};
 
 test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by cost',()=>{
-  const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0});p.dust=100000;const s=storeFor(p);
-  call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),60);
-  for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.beds)-1.02)<1e-12);
+  const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0});assert.equal(p.bedRev,2);p.dust=100000;const s=storeFor(p);
+  call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),40);
+  for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.beds)-1.01)<1e-12);
   assert.ok(combatPower('star_boy',s.value.heroes.star_boy,{rose:2})>combatPower('star_boy',s.value.heroes.star_boy,{rose:1}));
   assert.equal(s.transact('bed',{id:'spring'},NOW).ok,false,'spring is closed before stage 15');
   s.value.cleared=15;call(s,'bed',{id:'spring'});assert.equal(s.transact('bed',{id:'seed'},NOW).ok,false,'seed is closed before stage 30');
   s.value.cleared=30;call(s,'bed',{id:'seed'});assert.deepEqual(s.value.beds,{rose:1,spring:1,seed:1});
   assert.equal(s.transact('bed',{id:'moon'},NOW).ok,false);
   // Soft caps: the cost step jumps after each knee, and no level is refused for being high.
-  for(const [id,knee] of [['rose',20],['spring',10],['seed',10]]){
-    const before=bedCost(id,knee-1)/bedCost(id,knee-2),after=bedCost(id,knee+1)/bedCost(id,knee);assert.ok(after>before+.1,id);
+  for(const [id,knee] of [['rose',30],['rose',40],['spring',10],['seed',10]]){
+    const before=bedCost(id,knee-1)/bedCost(id,knee-2),after=bedCost(id,knee+1)/bedCost(id,knee);assert.ok(after>before+.05,id);
     assert.ok(Number.isSafeInteger(bedCost(id,60)),id);
   }
   assert.equal(springGauge(0),120);assert.equal(springGauge(10),150);assert.equal(springGauge(15),155);
   assert.equal(seedGold(10),40);assert.equal(seedGold(15),50);
   s.value.dust=0;assert.equal(s.transact('bed',{id:'rose'},NOW).ok,false);
-  // Old saves: 18×1.14^(L-1) spent on star_boy Lv.5 and snow_rabbit Lv.3 is 129 dust → garden 2 + 39 refund → rose 2.
-  const old=createProfile(NOW);delete old.beds;old.dust=0;old.heroes.star_boy.level=5;old.heroes.snow_rabbit.level=3;
+  // Rose pacing: Lv.30 stays affordable, Lv.40 is a goal, beyond that each level climbs sharply.
+  const cum=n=>Array.from({length:n},(_,i)=>bedCost('rose',i)).reduce((a,b)=>a+b,0);assert.ok(cum(30)<4000&&cum(40)<10000&&cum(45)>18000);
+  // Old saves: 18×1.14^(L-1) spent on star_boy Lv.5 and snow_rabbit Lv.3 is 129 dust → garden 2 + 39 refund → rose 4.
+  const old=createProfile(NOW);delete old.beds;delete old.bedRev;old.dust=0;old.heroes.star_boy.level=5;old.heroes.snow_rabbit.level=3;
   const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
-  assert.deepEqual(migrated.beds,{rose:2,spring:0,seed:0});assert.equal(migrated.garden,undefined);assert.equal(migrated.dust,39);assert.ok(HEROES.every(h=>migrated.heroes[h.id].level===1));
+  assert.deepEqual(migrated.beds,{rose:4,spring:0,seed:0});assert.equal(migrated.bedRev,2);assert.equal(migrated.garden,undefined);assert.equal(migrated.dust,39);assert.ok(HEROES.every(h=>migrated.heroes[h.id].level===1));
   assert.equal(levelCost(1),90);
   assert.deepEqual(parseProfile(JSON.stringify(migrated)),migrated);
-  // A garden-level save keeps its exact power: garden L (+4% each) becomes rose 2(L-1) (+2% each).
-  const garden=createProfile(NOW);delete garden.beds;garden.garden=11;const moved=parseProfile(JSON.stringify(garden));
-  assert.equal(moved.beds.rose,20);assert.ok(Math.abs(heroMultiplier(moved.heroes.star_boy,moved.beds)-1.4)<1e-12);
+  // Saves keep their exact power: garden L (+4% each) becomes rose 4(L-1); a revision-1 rose (+2%) doubles.
+  const garden=createProfile(NOW);delete garden.beds;delete garden.bedRev;garden.garden=11;const moved=parseProfile(JSON.stringify(garden));
+  assert.equal(moved.beds.rose,40);assert.ok(Math.abs(heroMultiplier(moved.heroes.star_boy,moved.beds)-1.4)<1e-12);
+  const rev1=createProfile(NOW);delete rev1.bedRev;rev1.beds={rose:20,spring:3,seed:0};const doubled=parseProfile(JSON.stringify(rev1));
+  assert.deepEqual(doubled.beds,{rose:40,spring:3,seed:0});assert.ok(Math.abs(heroMultiplier(doubled.heroes.star_boy,doubled.beds)-1.4)<1e-12);
   for(const bad of [{rose:-1,spring:0,seed:0},{rose:0,spring:0},{rose:0,spring:0,seed:0,moon:1},null]){const b=structuredClone(migrated);b.beds=bad;assert.equal(validateProfile(b),false);}
 });
 

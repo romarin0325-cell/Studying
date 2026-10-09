@@ -44,18 +44,19 @@ const SHAPE_TEXT={single:'단일 · 적 1명',splash:'범위 · 맞은 곳 주�
 const RANK_TEXT={first:'선두',boss:'보스',strong:'강적',last:'후미'};
 const LOBBY_LINES=['오늘도 와 줘서 고마워.','정원의 별들이 너를 기다렸어.','같이 다음 스테이지로 가 볼까?','조금 쉬었다 가도 괜찮아.','네가 고른 동료들, 다들 든든해.'];
 const partnerLines=hero=>[...(QUOTES[hero.id]||[]),...LOBBY_LINES];
-let talkIndex=0,skillHold=null,skillHeld=false,unitDetailsOpen=false,revealTimers=[];
+let talkIndex=0,skillHold=null,skillHeld=false,revealTimers=[];
 const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,claimed:[]};};
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
 const roseBonus=level=>Math.round(roseAttack(level)*100);
 // Dream greenhouse: each bed is a plant whose art grows through four stages.
 // "만개" (bloom) marks the soft cap: after it the cost climbs much faster.
 const BED_UI={
-  rose:{name:'용기의 장미',effect:'모든 동료 위력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,stages:['새싹','꽃봉오리','만개','별꽃'],line:'모든 동료의 위력이 오릅니다. 새로 만난 동료도 바로 같은 보너스를 받아요.'},
-  spring:{name:'별이슬 샘',effect:'최대 별빛',row:1,order:1,color:'#8fdcff',value:l=>String(springGauge(l)),stages:['물방울','연꽃 싹','만개','별빛 샘'],line:'전투에서 모을 수 있는 별빛의 최대치가 늘어납니다. 별똥별소년의 소원도 그만큼 커져요.'},
-  seed:{name:'황금 씨앗',effect:'시작 골드',row:2,order:3,color:'#ffd36a',value:l=>`+${seedGold(l)}`,stages:['씨앗','동전 새싹','만개','황금 나무'],line:'모든 원정을 더 많은 골드로 시작합니다. 첫 소환이 빨라져요.'},
+  rose:{name:'용기의 장미',effect:'모든 동료 위력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,line:'보유한 모든 동료의 위력이 오릅니다.'},
+  spring:{name:'별이슬 샘',effect:'최대 별빛',row:1,order:1,color:'#8fdcff',value:l=>String(springGauge(l)),line:'전투에서 모을 수 있는 별빛이 늘어납니다.'},
+  seed:{name:'황금 씨앗',effect:'시작 골드',row:2,order:3,color:'#ffd36a',value:l=>`+${seedGold(l)}`,line:'모든 원정을 더 많은 골드로 시작합니다.'},
 };
-const bedStage=(id,level)=>{const k=T.beds[id].knee;return level>=k+5?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
+// Art stage only (sprout → bud → bloom → starlit); it follows the cost knees without saying so.
+const bedStage=(id,level)=>{const b=T.beds[id],k=b.knee;return level>=(b.knee2??k+5)?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
 const bedReady=(profile,id)=>bedOpen(id,profile.cleared)&&!profile.active&&profile.dust>=bedCost(id,profile.beds[id]);
 let bedFocus='rose';
 // Shooting stars pile up on the lobby floor with the idle reward (max 9 shards).
@@ -144,19 +145,17 @@ function renderCollection(){
 }
 function heroDetail(id){
   const h=HERO[id],e=p().heroes[id];if(!h)return;
-  const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
+  const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),canEnhance=e.owned&&e.copies>=enh&&!p().active,isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
   show(h.name,'동료',`<div class="detail-stage" data-rarity="${h.rarity}"><span class="detail-rays" aria-hidden="true"></span><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<small>${RARITY[h.rarity].name}</small><h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
-    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>온실 보너스</small><b>+${roseBonus(beds.rose)}%</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
+    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>영구 위력</small><b>×${mult.toFixed(2)}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
     <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong></span>${icon('chevron')}</button>
     <div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격 방식</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>
     <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div>
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
-    ${e.owned?`<button class="garden-note" data-action="garden"><span>꿈의 온실 · 모든 동료 위력 +${roseBonus(beds.rose)}% 적용 중</span><b>온실 가기 ${icon('chevron')}</b></button>
-    <div class="growth"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="secondary" data-enhance="${id}" ${e.copies<enh||p().active?'disabled':''}>강화</button></div>
-    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (용기의 장미 Lv.${beds.rose} · 강화 +${e.enhance}). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
-    ${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}`
+    ${e.owned?`    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (꿈의 온실 · 강화 +${e.enhance} 포함). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
+    `
     :`<p class="empty">${h.hidden?`${monthNo(calendar(now()))} 시즌 소환에서만 획득할 수 있습니다.<br>이달의 수호자: ${HERO[calendar(now()).guardian].name}`:`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
-    e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
+    e.owned?`<div class="growth growth-dock ${canEnhance?'ready':''}"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="${canEnhance?'primary shine':'secondary'}" data-enhance="${id}" ${canEnhance?'':'disabled'}>강화</button></div>${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 // Dream greenhouse screen: three beds over the greenhouse painting, one detail panel.
 function renderGreenhouse(){
@@ -167,25 +166,34 @@ function renderGreenhouse(){
     <div class="bed-row">${beds}</div>${bedPanel(bedFocus)}</section>`;
 }
 function bedPanel(id){
-  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),cost=bedCost(id,lv),stage=bedStage(id,lv),knee=T.beds[id].knee;
-  const note=!unlocked?`스테이지 ${T.beds[id].unlock}을 클리어하면 화단이 열립니다.`:stage>=2?'만개했어요. 이제부터는 아주 천천히 자랍니다.':`Lv.${knee}에 만개합니다. 그 전까지는 빠르게 자라요.`;
+  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),cost=bedCost(id,lv),stage=bedStage(id,lv);
   return `<div class="bed-panel" style="--bed-color:${u.color};--bed-row:${u.row};--bed-stage:${stage}">
-    <div class="bed-panel-top"><span class="bed-thumb"></span><div class="bed-info"><small>${u.effect}</small><h3>${u.name} <em>${unlocked?`Lv.${lv}`:'잠김'}</em></h3><span class="bed-stage-tag">${u.stages[stage]}</span></div>
-      <div class="bed-value"><span>${u.value(lv)}</span>${icon('chevron')}<b>${u.value(lv+1)}</b></div></div>
-    <div class="bed-steps" aria-label="성장 단계 ${stage+1}/4">${u.stages.map((name,i)=>`<span class="${i<=stage&&unlocked?'on':''}"><i></i><small>${name}</small></span>`).join('')}</div>
-    <p class="bed-line">${u.line} ${note}</p>
+    <div class="bed-panel-top"><span class="bed-thumb"></span><div class="bed-info"><small>${u.effect}</small><h3>${u.name} <em>${unlocked?`Lv.${lv}`:'잠김'}</em></h3></div>
+      ${unlocked?`<div class="bed-value"><span>${u.value(lv)}</span>${icon('chevron')}<b>${u.value(lv+1)}</b></div>`:''}</div>
+    <p class="bed-line">${u.line}</p>
     <button class="primary wide shine bed-grow" data-bed-grow="${id}" ${bedReady(profile,id)?'':'disabled'}>${unlocked?`${icon('drop')}<b>물 주기</b>${icon('dust')}<b>${fmt(cost)}</b>`:`${icon('lock')}<b>스테이지 ${T.beds[id].unlock} 클리어 시 열림</b>`}</button>
     ${profile.active&&unlocked?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}</div>`;
+}
+// Refresh the greenhouse in place (labels, art stage, dots, panel) so nothing jumps or restarts.
+function refreshGreenhouse(){
+  const profile=p();
+  for(const node of document.querySelectorAll('.bed[data-bed]')){const id=node.dataset.bed,u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared);
+    node.style.setProperty('--bed-stage',bedStage(id,lv));const level=node.querySelector('.bed-level');if(level)level.textContent=`Lv.${lv}`;
+    const sub=node.querySelector('.bed-sub');if(sub&&unlocked)sub.textContent=`${u.effect} ${u.value(lv)}`;
+    const ready=bedReady(profile,id),dot=node.querySelector('.dot');if(ready&&!dot)node.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!ready&&dot)dot.remove();}
+  const panel=document.querySelector('.bed-panel');if(panel)panel.outerHTML=bedPanel(bedFocus);
+  for(const node of document.querySelectorAll('.bed[data-bed]')){const on=node.dataset.bed===bedFocus;node.classList.toggle('focus',on);node.setAttribute('aria-pressed',String(on));}
 }
 // One watering step. Returns false when it cannot continue (hold-to-repeat stops).
 function growBed(id){
   const before=bedStage(id,p().beds[id]),result=act('bed',{id},false);if(!result.ok){toast(result.message);return false;}
-  const y=$('content').scrollTop;render();$('content').scrollTop=y;
+  refreshGreenhouse();
   const art=document.querySelector(`.bed[data-bed="${id}"] .bed-art`);if(!art)return true;
-  const c=centerOf(art),stage=bedStage(id,result.level),u=BED_UI[id];art.classList.add('grow');
+  const c=centerOf(art),stage=bedStage(id,result.level),u=BED_UI[id];
+  art.classList.remove('grow');void art.offsetWidth;art.classList.add('grow');
   floatText(c.x,c.y-30,`Lv.${result.level}`,u.color);
-  if(stage>before){burst(c.x,c.y,{count:22,spread:120,size:14,color:u.color});burst(c.x,c.y,{count:10,spread:70,size:10,color:'#fff4c8'});toast(`${u.name} · ${u.stages[stage]}!`);sound.reveal?.(stage>=2);}
-  else burst(c.x,c.y-10,{count:8,spread:56,size:9,color:u.color});
+  if(stage>before){burst(c.x,c.y,{count:18,spread:100,size:12,color:u.color});sound.reveal?.(stage>=2);}
+  else burst(c.x,c.y-10,{count:5,spread:40,size:8,color:u.color});
   return true;
 }
 let bedHold=null;
@@ -248,9 +256,9 @@ function confirmMonthlyClaim(){
     `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
 }
 function renderSummon(){
-  const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':'snow_rabbit',tier=relicTier(p().relicDraws),remaining=relicThreshold(tier+1)-p().relicDraws,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,rateList=banner==='relic'?relicRates(p().relicDraws):T.heroRates,dreams=p().dreams;
+  const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':c.pickup,tier=relicTier(p().relicDraws),remaining=relicThreshold(tier+1)-p().relicDraws,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,rateList=banner==='relic'?relicRates(p().relicDraws):T.heroRates,dreams=p().dreams;
   const copy={
-    normal:{tag:'상시',title:'동료 소환',desc:'C~UR 동료 24명 중 한 명을 만납니다. 중복은 강화 재료가 됩니다.'},
+    normal:{tag:'이번 주 픽업 · UR',title:HERO[c.pickup].name,desc:`UR이 나오면 절반의 확률로 ${HERO[c.pickup].name}을(를) 만납니다. 픽업은 매주 월요일에 바뀝니다.`},
     season:{tag:`시즌 한정 · ${monthNo(c)}`,title:HERO[c.guardian].name,desc:'이달의 수호자는 이 소환에서만 만날 수 있습니다.'},
     relic:{tag:'유물',title:'유물 소환',desc:`누적 ${fmt(p().relicDraws)}회 · ${tier}단계. 단계가 오를수록 높은 등급 확률이 상승합니다.`}}[banner];
   return `<section class="summon-stage" data-banner="${banner}">
@@ -266,9 +274,10 @@ function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates;
   let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
   if(banner==='season')rows+=`<div class="rate-row"><span>일반 UR 6종 합계</span><b>0.100%</b></div><div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>0.100%</b></div>`;
+  if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/6)}</b></div><div class="rate-row"><span>UR · 나머지 5종 각각</span><b>${pct(T.heroRates[3]*.5/6)}</b></div>`;
   const price=banner==='relic'?T.relicDrawCost:T.heroDrawCost;
   show('소환 확률',banner==='relic'?'유물':banner==='season'?'시즌':'일반',`<p class="subtext">${banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계 · 누적 ${fmt(p().relicDraws)}회`:'1회 소환 기준 · 같은 등급 안에서는 동일 확률'}</p>${rows}
-    <ul class="notes" style="margin-top:14px"><li>${banner==='season'?'UR 총 0.2% = 일반 UR 0.1% + 이달의 수호자 0.1%. 다른 달 수호자는 등장하지 않습니다.':'일반 소환에는 시즌 수호자가 등장하지 않습니다.'}</li><li>1회와 10회의 확률은 같습니다. 확정·천장은 없습니다.</li>${banner==='relic'?'<li>10회 소환 중 단계가 오르면 다음 1회부터 새 확률이 적용됩니다.</li>':''}<li>1회 ${price} 꿈의결정. 중복은 강화 재료로 저장됩니다.</li></ul>
+    <ul class="notes" style="margin-top:14px"><li>${banner==='season'?'UR 총 0.2% = 일반 UR 0.1% + 이달의 수호자 0.1%. 다른 달 수호자는 등장하지 않습니다.':`UR이 나오면 50%는 이번 주 픽업, 50%는 일반 UR 6종(픽업 포함) 중 하나입니다. 시즌 수호자는 등장하지 않습니다.`}</li><li>1회와 10회의 확률은 같습니다. 확정·천장은 없습니다.</li>${banner==='relic'?'<li>10회 소환 중 단계가 오르면 다음 1회부터 새 확률이 적용됩니다.</li>':''}<li>1회 ${price} 꿈의결정. 중복은 강화 재료로 저장됩니다.</li></ul>
     <details class="more"><summary>등급별 획득 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>!h.hidden||banner==='season'&&h.id===c.guardian)).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
 }
 // Summon reveal: a falling star in the best rarity's colour, a burst, then the
@@ -388,13 +397,12 @@ function updateUnit(){
   const sig=`${u.uid}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;panel.dataset.rarity=h.rarity;
-  panel.innerHTML=`<div class="unit-panel-top"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><strong>${h.name}</strong><small>${badge(h.rarity)} ${h.role} · 훈련 ${run.upgrades[u.hero]}/5</small></div><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></div>
-    <div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${(SHAPE_TEXT[h.shape]||'').split(' · ')[0]}</b></span></div>
-    ${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성 상태'}</span>${traitText}</p>`:''}
-    <button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">필살기 · 별빛 ${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 필살기를 씁니다':`필살기는 가장 높은 ${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small><span class="unit-skill-more">${icon('chevron')}</span></button>
-    <details class="unit-more" ${unitDetailsOpen?'open':''}><summary>능력 자세히</summary><p><em>특성</em>${h.trait.text}</p><p><em>필살기</em>${h.skill.text}</p>${bonuses.length?`<div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.map(b=>`<span class="chip">${b}</span>`).join('')}</div>`:'<p class="unit-none">지금 받는 추가 효과가 없습니다.</p>'}</details>
-    <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button><button data-action="deselect">선택 해제</button></div>`;
-  panel.querySelector('.unit-more')?.addEventListener('toggle',e=>{unitDetailsOpen=e.target.open;});
+  // A compact card over the controls: who, how strong, the live trait, the ultimate and the two
+  // actions. Everything else lives behind the ⓘ sheet, so the board never scrolls away.
+  panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><strong>${h.name}<span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></strong><small>${flame?'장판 위력':'위력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b> · 주기 <b>${detail.interval.toFixed(2)}초</b>${run.upgrades[u.hero]?` · 훈련 ${run.upgrades[u.hero]}`:''}</small></div><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div>
+    ${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성'}</span>${traitText}</p>`:''}
+    <div class="unit-card-row"><button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">${icon('star')}${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 씁니다':`${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></button>
+    <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button></div></div>`;
 }
 // Holding an ultimate button peeks at it: a small card above the button with the live numbers.
 // Releasing closes it and does not cast. The full sheet stays one tap away in the unit panel.
@@ -408,7 +416,15 @@ function skillTip(node,id){
   tip.style.left=left+'px';tip.style.top=Math.max(8,r.top-hgt-12)+'px';tip.style.setProperty('--ax',(r.left+r.width/2-left)+'px');
 }
 function hideSkillTip(){document.getElementById('skill-tip')?.remove();}
-// The unit panel's ultimate row opens the full detail sheet.
+// ⓘ on the unit card: every number and text for the selected companion.
+function unitInfo(){
+  const u=run?.board[selected];if(!u)return;const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
+  show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${(SHAPE_TEXT[h.shape]||'').split(' · ')[0]}</b></span></div>
+    <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}</span><p>${h.skill.text}</p></div>
+    <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
+    `<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'unit-info',u.uid);
+}
+// The unit card's ultimate row opens the full detail sheet.
 function skillInfo(id){
   const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat';
   show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>`:''}`,
@@ -436,12 +452,23 @@ function updateAuraChips(){
     if(!node){node=document.createElement('span');node.className='aura-chip';node.dataset.aura=id;node.style.setProperty('--c',HERO[id].color);node.innerHTML=`${image(id)}<b></b>`;box.appendChild(node);}
     node.style.setProperty('--p',(a.remaining/a.total).toFixed(3));node.classList.toggle('ending',a.remaining<2);changedText(node.querySelector('b'),Math.ceil(a.remaining));}
 }
+// Fullscreen for quick phone testing in Chrome. iOS Safari has no page fullscreen API.
+function syncFullscreen(){
+  const button=$('fullscreen-button');if(!button)return;const supported=!!document.documentElement.requestFullscreen,active=!!document.fullscreenElement;
+  button.hidden=!supported;button.setAttribute('aria-label',active?'전체화면 나가기':'전체화면');button.setAttribute('aria-pressed',String(active));button.querySelector('use')?.setAttribute('href',active?'#i-shrink':'#i-expand');
+}
+async function toggleFullscreen(){
+  try{if(document.fullscreenElement)await document.exitFullscreen();else{try{await document.documentElement.requestFullscreen({navigationUI:'hide'});}catch{await document.documentElement.requestFullscreen();}}}
+  catch{toast('전체화면을 열지 못했어요. 브라우저에서 다시 시도해 주세요.');}
+  syncFullscreen();
+}
+document.addEventListener('fullscreenchange',syncFullscreen);
 function battleCommand(result){if(!result?.ok)toast(result?.reason);else saves.mark();updateBattle();}
 function bindArena(){
   const canvas=$('arena'),point=e=>{const b=canvas.getBoundingClientRect();return {x:(e.clientX-b.left)*720/b.width,y:(e.clientY-b.top)*780/b.height};};
-  const release=()=>{pointer=null;renderer.drag=null;renderer.hover=-1;};
-  canvas.addEventListener('pointerdown',e=>{if(paused||modal||pointer||e.button!==0)return;const at=point(e),index=E.cellAt(at.x,at.y);pointer={id:e.pointerId,at,index,uid:run.board[index]?.uid,drag:false};try{canvas.setPointerCapture(e.pointerId);}catch{}e.preventDefault();sound.unlock();});
-  canvas.addEventListener('pointermove',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),u=run.board[pointer.index];if(u?.uid===pointer.uid&&(pointer.drag||Math.hypot(at.x-pointer.at.x,at.y-pointer.at.y)>12)){pointer.drag=true;renderer.drag={hero:u.hero,uid:u.uid,x:at.x,y:at.y,form:E.unitForm(run,u)};renderer.hover=E.cellAt(at.x,at.y);}});
+  const release=()=>{pointer=null;renderer.drag=null;renderer.hover=-1;renderer.press=-1;};
+  canvas.addEventListener('pointerdown',e=>{if(paused||modal||pointer||e.button!==0)return;const at=point(e),index=E.cellAt(at.x,at.y);pointer={id:e.pointerId,at,index,uid:run.board[index]?.uid,drag:false};renderer.press=run.board[index]?index:-1;try{canvas.setPointerCapture(e.pointerId);}catch{}e.preventDefault();sound.unlock();});
+  canvas.addEventListener('pointermove',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),u=run.board[pointer.index];if(u&&u.uid===pointer.uid&&(pointer.drag||Math.hypot(at.x-pointer.at.x,at.y-pointer.at.y)>9)){pointer.drag=true;renderer.drag={hero:u.hero,uid:u.uid,x:at.x,y:at.y,form:E.unitForm(run,u)};renderer.hover=E.cellAt(at.x,at.y);}});
   canvas.addEventListener('pointerup',e=>{if(pointer?.id!==e.pointerId)return;const at=point(e),index=E.cellAt(at.x,at.y);if(!paused&&!modal&&index>=0){if(pointer.drag&&run.board[pointer.index]?.uid===pointer.uid){const result=E.move(run,pointer.index,index);battleCommand(result);if(result.ok)selected=index;}else if(!pointer.drag)activate(index);}release();updateUnit();});
   canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',()=>{if(pointer)release();});
   let keyboard=12;canvas.addEventListener('keydown',e=>{if(paused||modal)return;const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-5,ArrowDown:5}[e.key];if(delta){e.preventDefault();keyboard=Math.max(0,Math.min(24,keyboard+delta));renderer.selected=keyboard;toast(`${Math.floor(keyboard/5)+1}행 ${keyboard%5+1}열 · ${run.board[keyboard]?HERO[run.board[keyboard].hero].name:'빈칸'}`);}if(e.key==='Enter'||e.key===' '){e.preventDefault();activate(keyboard);}});
@@ -555,7 +582,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
-  if(d.bed){bedFocus=d.bed;const y=$('content').scrollTop;render();$('content').scrollTop=y;return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
+  if(d.bed){bedFocus=d.bed;refreshGreenhouse();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.draw){draw(Number(d.draw));return;}if(d.drawAgain){draw(Number(d.drawAgain));return;}if(d.drawFree){banner='normal';draw(1,true);return;}
   if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.skillInfo){skillInfo(d.skillInfo);return;}
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic;if(act('enhance',{id,kind:d.enhance?'hero':'relic'}).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);}return;}
@@ -573,6 +600,7 @@ document.addEventListener('click',e=>{
     talk:()=>{talkIndex++;const hero=HERO[p().partner],lines=partnerLines(hero),bubble=$('partner-speech'),art=button.querySelector('img');
       if(bubble){bubble.textContent=lines[(p().heroes[hero.id].bond+talkIndex)%lines.length];bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');}
       if(art){art.classList.remove('hop');void art.offsetWidth;art.classList.add('hop');}const c=centerOf(button);hearts(c.x,c.y-30);},
+    fullscreen:toggleFullscreen,'unit-info':unitInfo,
     'reveal-skip':skipReveal,garden:()=>{close();screen='greenhouse';render();},
     'idle-shard':()=>collectStars(),
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),
@@ -624,7 +652,7 @@ art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 �
 // The splash is decorative only (no pointer input) and leaves once art is ready.
 // Automated browsers (screenshots, QA) skip the intro entirely.
 {const splash=$('splash'),hide=()=>{if(splash&&!splash.classList.contains('out')){splash.classList.add('out');setTimeout(()=>splash.remove(),500);}};if(navigator.webdriver)splash?.remove();else Promise.race([art.ready,new Promise(r=>setTimeout(r,900))]).then(()=>setTimeout(hide,150));}
-$('app').dataset.solo=String(SOLO);render();requestAnimationFrame(frame);
+$('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
 window.STAR_GARDEN={get profile(){return p();},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};
