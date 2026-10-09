@@ -707,7 +707,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .garden-medal b{font-family:var(--display);font-weight:400;font-size:18px;color:#fff}
 .garden-info{display:flex;flex-direction:column;gap:1px;min-width:0}
 .garden-info small{font-size:10px;color:var(--text3);font-weight:700;white-space:nowrap}
-.garden-info b{font-size:16px;color:#ffc3cf;text-shadow:0 0 10px rgba(255,154,174,.4);white-space:nowrap}
+.garden-info b{font-size:clamp(14px,4.4vw,18px);color:#ffc3cf;text-shadow:0 0 10px rgba(255,154,174,.4);white-space:nowrap}
+.garden-info small{overflow:hidden;text-overflow:ellipsis}
 .garden-card .dot{top:6px;right:8px}
 .dock-row .idle-card{gap:9px;padding:8px 10px}
 .dock-row .idle-icon{width:36px;height:36px;border-radius:12px}
@@ -995,3 +996,5 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .growth-dock.ready{border-color:rgba(246,210,122,.55);box-shadow:0 0 14px rgba(246,210,122,.25)}
 .growth-dock .primary,.growth-dock .secondary{min-width:72px}
 @media (max-width:350px){.unit-card-row .unit-actions button,.unit-card-row .fixed-target{font-size:10px;white-space:nowrap;padding:2px}.unit-card-row{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+.boss-trait{margin-top:6px;font-size:12px;font-weight:700;color:#ffd6a8;padding:4px 10px;border-radius:999px;display:inline-block;background:rgba(255,160,100,.12);border:1px solid rgba(255,170,120,.35)}
+.garden-info b.long{font-size:14px;letter-spacing:-.02em}

@@ -36,7 +36,8 @@ const SCENARIOS={
 };
 
 function bench(deck,candidateCell,rank,scenario,castId,seed){
-  const s=engine.newRun({deck,chapter:0,seed});
+  // Chapter 3 (love Iris): its boss has no damage passive, so every companion is measured neutrally.
+  const s=engine.newRun({deck,chapter:2,seed});
   // Wave 2 with birth wave 1: wave-age companions sit at their neutral 100% step.
   s.wave=2;
   s.board=Array(25).fill(null);s.nextId+=1000;
