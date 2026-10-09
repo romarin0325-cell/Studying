@@ -973,7 +973,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .unit-panel{position:absolute;left:8px;right:8px;bottom:6px;z-index:6;margin:0;padding:9px 10px;box-shadow:0 -6px 24px rgba(0,0,0,.45),var(--shadow);animation:card-up .18s cubic-bezier(.2,.9,.3,1)}
 .battle:has(.unit-panel:not([hidden])) .battle-hint{visibility:hidden}
 .unit-card-head{display:flex;align-items:center;gap:9px}
-.unit-card-head .unit-id strong{display:flex;align-items:center;gap:6px;font-size:17px}
+.unit-card-head .unit-name{display:flex;align-items:center;gap:6px}
+.unit-card-head .unit-id strong{font-size:17px}
 .unit-card-head .unit-id small{font-size:11px;color:var(--text2)}
 .unit-card-head .unit-id small b{color:var(--text);font-size:12px}
 .unit-icon{width:32px;height:32px;min-height:0;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font:700 14px/1 Georgia,serif;color:var(--text2);background:rgba(14,19,48,.7);border:1px solid var(--line2)}
