@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING} from '../src/content.js';
+import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER} from '../src/content.js';
 import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR} from '../src/economy.js';
 import {createProfile,random} from '../src/profile.js';
 
@@ -81,10 +81,20 @@ test('dispatch pays mostly dust with a small crystal share',()=>{
   }
 });
 
+test('a normal-banner UR is the weekly pickup half the time',()=>{
+  // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/6.
+  let n=0,pick=0;
+  for(let i=0;i<20000;i++){const r=[.9999,Math.random(),Math.random()];let k=0;const id=drawCharacter(()=>r[k++]??Math.random(),false,'doom','luna');n++;if(id==='luna')pick++;assert.ok(ROSTER.UR.includes(id));}
+  assert.ok(pick/n>.55&&pick/n<.62,'pickup share '+pick/n);
+});
+
 test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
   const sunday=Date.parse('2026-10-04T14:59:59Z'),monday=sunday+1000;
-  assert.deepEqual(calendar(sunday),{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});
+  const {pickup,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});
   assert.equal(calendar(monday).week,'2026-10-05');
+  // The normal-banner pickup turns over exactly at Monday 00:00 (UTC+9) and cycles all six standard URs.
+  assert.ok(ROSTER.UR.includes(pickup));assert.notEqual(calendar(monday).pickup,pickup);assert.equal(calendar(monday+6*24*HOUR).pickup,calendar(monday).pickup);
+  assert.equal(new Set(Array.from({length:6},(_,i)=>calendar(monday+i*7*24*HOUR).pickup)).size,6);
   assert.equal(calendar(Date.parse('2026-10-31T15:00:00Z')).guardian,HIDDEN[4]);
   assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,HIDDEN[0]);
   assert.equal(calendar(monday-HOUR).day,'2026-10-04');
