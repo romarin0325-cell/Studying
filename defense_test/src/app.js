@@ -122,7 +122,7 @@ function home(){
     <div class="dock-grid">
       <button class="team-strip" data-action="team" aria-label="출전 팀 편성 변경"><span class="strip-faces">${profile.deck.map(id=>portrait(id)).join('')}</span><span class="strip-meta"><small>출전 팀 · 편성</small><b>${icon('star')}${fmt(teamPower(profile))}</b></span></button>
       <div class="dock-row">
-        <button class="garden-card" data-action="garden" aria-label="꿈의 온실 · 모든 동료 위력 +${roseBonus(profile.beds.rose)}%"><span class="garden-medal" style="--bed-row:0;--bed-stage:${bedStage('rose',profile.beds.rose)}"></span><span class="garden-info"><small>꿈의 온실</small><b>위력 +${roseBonus(profile.beds.rose)}%</b></span>${BED_IDS.some(id=>bedReady(profile,id))?'<i class="dot"></i>':''}</button>
+        <button class="garden-card" data-action="garden" aria-label="꿈의 온실 · 모든 동료 위력 +${roseBonus(profile.beds.rose)}%"><span class="garden-medal" style="--bed-row:0;--bed-stage:${bedStage('rose',profile.beds.rose)}"></span><span class="garden-info"><small>꿈의 온실 · 위력</small><b class="${roseBonus(profile.beds.rose)>=100?'long':''}">+${roseBonus(profile.beds.rose)}%</b></span>${BED_IDS.some(id=>bedReady(profile,id))?'<i class="dot"></i>':''}</button>
         <div class="idle-card"><span class="idle-icon">${icon('star')}</span><div class="idle-info"><div class="idle-line"><strong>별똥별</strong><b class="idle-amount" id="idle-total">${fmt(idle)}</b></div><div class="progress"><span id="idle-progress" style="width:${Math.min(100,(now()-profile.idleAt)/(20*HOUR)*100)}%"></span></div></div><button class="secondary" id="idle-claim" data-action="idle" ${idle<1?'disabled':''}>수집</button></div>
       </div>
     </div>
@@ -340,7 +340,7 @@ function partners(){
 function prepare(stage=Math.min(45,p().cleared+1),kind='main'){
   if(p().active){toast('진행 중인 원정이 있습니다. 먼저 이어하세요.');return;}
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]];
-  show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${kind==='main'?`<div class="boss-banner"><small>${c.name}</small><h2>${boss.name}</h2><p>6웨이브 · 3·6웨이브에 보스 등장</p><span class="reward-chip">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루 보상'}</span></div>`:`<div style="margin-bottom:12px">${modeCard(kind,false)}</div>`}
+  show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${kind==='main'?`<div class="boss-banner"><small>${c.name}</small><h2>${boss.name}</h2><p>6웨이브 · 3·6웨이브에 보스 등장</p>${boss.trait?`<p class="boss-trait">${boss.trait}</p>`:''}<span class="reward-chip">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루 보상'}</span></div>`:`<div style="margin-bottom:12px">${modeCard(kind,false)}</div>`}
     <div class="panel-head"><h3>${kind==='weekly'?'드래프트: 보유 동료 전체':'출전 팀'}</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}
     <p class="fineprint">장착 유물: ${p().equipped.map(id=>ARTIFACT[id].name).join(', ')||'없음'}</p>${kind==='weekly'?`<p class="fineprint" style="margin-top:4px">2택 1을 총 ${TEAM_SIZE}번 선택합니다. 남은 후보가 한 명이면 같은 동료의 전술 2종 중에서 고릅니다.</p>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성 변경</button><button class="primary" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장하기'}</button></div>`,'prepare',{stage,kind});

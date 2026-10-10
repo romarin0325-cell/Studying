@@ -94,6 +94,8 @@ export class CombatFX{
   event(e){
     if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
+    if(e.type==='judgement')this.add({...e,life:.9,total:.9});
+    if(e.type==='bossCast'&&e.pattern==='thunder')for(const i of e.cells||[])this.add({type:'thunderStrike',...cellPoint(i),seed:i,life:.6,total:.6});
     if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
@@ -493,6 +495,13 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+      if(e.type==='judgement'){
+        // Divine punishment: a column of light falls on the cell, then a ring and rays.
+        const fall=Math.min(1,t*4),fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,0,0,e.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,'#fff6d8ee');ctx.globalAlpha=fade;ctx.fillStyle=g;const w=36+t*50;ctx.fillRect(e.x-w/2,0,w,e.y*fall);ctx.restore();
+        this.glow('rays','#ffe9a8',e.x,e.y-10,260*Math.min(1,t*3),fade*.9,t);this.glow('glow','#fff6d8',e.x,e.y-10,200,fade);
+        ctx.save();ctx.globalAlpha=fade;ctx.strokeStyle='#fff2c0';ctx.lineWidth=6*fade+1;ctx.beginPath();ctx.ellipse(e.x,e.y+20,30+t*90,12+t*30,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
+      }
+      if(e.type==='thunderStrike'){const fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.strokeStyle='#fff6b0';ctx.lineWidth=4;ctx.beginPath();let x=e.x+((e.seed*37)%30-15),y=0;ctx.moveTo(x,y);while(y<e.y-10){y+=40;x+=((e.seed*13+y)%40)-20;ctx.lineTo(x,y);}ctx.stroke();ctx.restore();this.glow('glow','#ffe27a',e.x,e.y-10,140,fade*.8);continue;}
       if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
       if(e.type==='instantKill'){
         // A brief, inward wind seal on the actual executed enemy. No screen

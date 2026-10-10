@@ -518,7 +518,7 @@ export const HEROES = [
       "name": "완벽한 추리",
       "cost": 60,
       "type": "expose",
-      "text": "적 전체에게 위력 3배 피해를 준 뒤, 10초간 모든 적이 받는 피해를 35% 늘립니다. 큰 필살기 직전에 쓰면 좋습니다."
+      "text": "적 전체에게 위력 3배 피해를 준 뒤, 10초간 모든 적이 받는 피해를 35%부터 늘립니다(성급·훈련으로 증가, 최대 80%). 큰 필살기 직전에 쓰면 좋습니다."
     },
     "heightGroup": "medium",
     "role": "보스 약화 · 저격",
@@ -619,18 +619,18 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 10,
+    "damage": 26,
     "interval": 1.35,
     "attack": "rose",
     "trait": {
       "type": "dividend",
-      "text": "웨이브가 끝날 때마다 골드를 받습니다. 1성은 5G이고 성급이 오를 때마다 +2G, 4·7·10웨이브부터 1G씩 늘어납니다. 여왕 전체 합계는 웨이브당 최대 45G입니다."
+      "text": "웨이브가 끝날 때마다 골드를 받습니다. 1성은 7G이고 성급이 오를 때마다 +3G, 4·7·10웨이브부터 1G씩 늘어납니다. 여왕 전체 합계는 웨이브당 최대 60G입니다."
     },
     "skill": {
       "name": "장미의 세금",
       "cost": 60,
       "type": "dividend",
-      "text": "적 전체에게 위력 3배 피해를 주고 즉시 20G를 받습니다. 8초 동안 적을 쓰러뜨려 얻는 골드가 3배가 됩니다."
+      "text": "적 전체에게 위력 4배 피해를 주고 즉시 30G를 받습니다. 8초 동안 적을 쓰러뜨려 얻는 골드가 3배가 됩니다."
     },
     "heightGroup": "medium",
     "role": "물결 경제 · 장미",
@@ -804,7 +804,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 16,
+    "damage": 20,
     "interval": 1.2,
     "attack": "shadow",
     "trait": {
@@ -816,7 +816,7 @@ export const HEROES = [
       "cost": 60,
       "goldCost": 25,
       "type": "fortune",
-      "text": "골드 25를 내고 적 전체에게 위력 10배 피해를 줍니다. 남는 골드를 화력으로 바꾸는 필살기입니다."
+      "text": "골드 25를 내고 적 전체에게 위력 10배 피해를 줍니다. 내고 남은 골드 20마다 +1배, 최대 15배까지 오릅니다."
     },
     "heightGroup": "medium",
     "role": "합성 경제 · 관통검",
@@ -1113,7 +1113,7 @@ export const HEROES = [
       "name": "천면경",
       "cost": 80,
       "type": "mirror",
-      "text": "가장 강한 적에게 3초 동안 거울을 겁니다. 그동안 그 적이 받은 피해의 45%를 모아 위력 10배와 함께 터뜨립니다. 모으는 양에는 상한이 없어, 다른 필살기와 함께 쓸수록 강해집니다."
+      "text": "가장 강한 적에게 4초 동안 거울을 겁니다. 그동안 그 적이 받은 피해의 50%(성급·강화로 최대 100%)를 모아 위력 10배와 함께 터뜨립니다. 모으는 양에는 상한이 없어, 다른 필살기와 함께 쓸수록 강해집니다."
     },
     "heightGroup": "medium",
     "role": "지연 반사 · 환영탄",
@@ -1392,42 +1392,54 @@ export const BOSSES = {
     "name": "인조마신",
     "color": "#8ee8ee",
     "pattern": "seal",
-    "warning": "마력 봉인 · 한 행 3.2초 봉인",
+    "warning": "마력 봉인 · 빛나는 한 행 2.4초 기절",
+    "exposeScale": 2,
+    "trait": "받는 노출 효과 2배",
     "frame": 0
   },
   "love_iris": {
     "name": "사랑의 여신 아이리스",
     "color": "#f7b6d4",
-    "pattern": "heal",
-    "warning": "치유의 기도 · 체력 14% 회복",
+    "pattern": "starlust",
+    "warning": "사랑의 시험 · 별빛이 가득 차 있으면 별빛 −60",
+    "trait": "별빛을 가득 채워 두면 빼앗습니다",
     "frame": 1
   },
   "curse_iris": {
     "name": "저주의 여신 아이리스",
     "color": "#bc8be0",
-    "pattern": "drain",
-    "warning": "별빛 침식 · 별빛 −25",
+    "pattern": "curse",
+    "warning": "저주 · 동료 한 명이 합성 전까지 봉인됩니다",
+    "trait": "예고 없는 저주 (등장마다 최대 2회) · 합성·회수·자스민으로 해제",
     "frame": 2
   },
   "flora": {
     "name": "꽃의 여신 플로라",
     "color": "#c9dd8d",
-    "pattern": "heal",
-    "warning": "생명의 개화 · 체력 14% 회복",
+    "pattern": "stun1",
+    "warning": "꽃가루 폭풍 · 빛나는 1칸 2초 기절",
+    "immune": "poison",
+    "dotScale": {"burn":2},
+    "trait": "중독 무효 · 화상 피해 2배",
     "frame": 3
   },
   "poseidon": {
     "name": "해신 포세이돈",
     "color": "#77c9e3",
-    "pattern": "rush",
-    "warning": "밀려오는 해일 · 적 전진",
+    "pattern": "stun1",
+    "warning": "해일의 일격 · 빛나는 1칸 2초 기절",
+    "immune": "burn",
+    "dotScale": {"poison":2},
+    "trait": "화상 무효 · 중독 피해 2배",
     "frame": 4
   },
   "beelzebub": {
     "name": "마신 벨제뷔트",
     "color": "#dfa590",
-    "pattern": "seal",
-    "warning": "붕괴의 문장 · 한 행 3.2초 봉인",
+    "pattern": ["warp","seal"],
+    "warning": "공간 붕괴 · 감속·기절·빙결이 아닌 적이 앞으로 순간이동",
+    "warnings": {"warp":"공간 붕괴 · 감속·기절·빙결이 아닌 적이 앞으로 순간이동","seal":"붕괴의 문장 · 빛나는 한 행 2.4초 기절"},
+    "trait": "제어되지 않은 적을 앞당김 · 행 기절",
     "frame": 5
   },
   "thor": {
@@ -1435,22 +1447,27 @@ export const BOSSES = {
     "color": "#a9dcff",
     "pattern": "storm",
     "warning": "신벌의 낙뢰 · 빛나는 3칸에서 이동하세요",
+    "judgement": "천둥 심판 · 3초 안에 토르를 기절시키지 못하면 전원 4초 기절",
+    "trait": "길 중간에서 천둥 심판 · 기절로 취소",
     "atlas": "bosses-expansion",
     "frame": 0
   },
   "ares": {
     "name": "투신 아레스",
     "color": "#ffa88b",
-    "pattern": "duel",
-    "warning": "투신의 도전 · 2.6초 안에 최대 체력 6% 피해로 저지",
+    "pattern": "shuffle",
+    "warning": "투신의 난무 · 2.6초 뒤 모든 동료의 자리가 뒤섞입니다",
+    "trait": "등장마다 최대 2회 전체 재배치",
     "atlas": "bosses-expansion",
     "frame": 1
   },
   "astea": {
     "name": "창조신 아스테아",
     "color": "#e8d3ff",
-    "pattern": "creation",
-    "warning": "창세의 노래 · 2.6초 안에 최대 체력 6% 피해로 창조 저지",
+    "pattern": "judgement",
+    "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
+    "basicScale": 0.5,
+    "trait": "일반 공격 피해 절반 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }

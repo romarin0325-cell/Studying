@@ -193,9 +193,9 @@ test('gauge caps and restores at 120, both delayed strikes hit at 0.3 seconds, a
   for(const id of ['star_boy','cherry_prince','aurora']){
     const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5),s=ensureHero(E.newRun({deck,seed:1234}),id);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;E.step(s,.05);
     for(const u of s.board)if(u)u.disabled=20;s.enemies[0].speed=0;s.enemies[0].skillIn=99;s.gauge=120;
-    assert.ok(E.restore(E.serialize(s)));assert.ok(E.cast(s,id).ok);const f=s.finishers[0];assert.equal(f.total,id==='aurora'?3:.3);
+    assert.ok(E.restore(E.serialize(s)));assert.ok(E.cast(s,id).ok);const f=s.finishers[0];assert.equal(f.total,id==='aurora'?4:.3);
     const before=s.stats.damage;for(let i=0;i<5;i++)E.step(s,.05);assert.equal(s.stats.damage,before);
-    E.step(s,.05);if(id==='aurora'){assert.equal(s.stats.damage,before);for(let i=6;i<60;i++)E.step(s,.05);}assert.ok(s.stats.damage>before);assert.equal(s.finishers.length,0);
+    E.step(s,.05);if(id==='aurora'){assert.equal(s.stats.damage,before);for(let i=6;i<85;i++)E.step(s,.05);}assert.ok(s.stats.damage>before);assert.equal(s.finishers.length,0);
   }
   const s=E.newRun({seed:1234});s.gauge=119.99;E.step(s,.05);assert.equal(s.gauge,120);const bad=JSON.parse(E.serialize(s));bad.gauge=120.01;assert.equal(E.restore(bad),null);
 });
@@ -447,8 +447,8 @@ test('overlapping mirrors from different cast sources never record each other bu
   close(second.stored,actual+s.stats.damage-before,'later ordinary attacks still record');
   const recorded=second.stored;second.life=.001;E.step(s,.001);
   const impacts=s.events.filter(e=>e.type==='finisherImpact'&&e.kind==='mirror');
-  assert.equal(impacts.length,2);close(impacts[0].echoDamage,actual*.45);
-  close(impacts[1].echoDamage,recorded*.45);
+  assert.equal(impacts.length,2);close(first.ratio,.5);close(second.ratio,.6,'the merged 2★ mirror echoes more');close(impacts[0].echoDamage,actual*first.ratio);
+  close(impacts[1].echoDamage,recorded*second.ratio);
   assert.equal(s.finishers.length,0);
 });
 
@@ -463,9 +463,9 @@ test('mirror recording has no ceiling, survives resume, honours a legacy cap and
     const bad=JSON.parse(E.serialize(s));Object.assign(bad.finishers[0],change);assert.equal(E.restore(bad),null,JSON.stringify(change));
   }
   const legacy=JSON.parse(E.serialize(s));Object.assign(legacy.finishers[0],{cap:actual*.45/2,stored:actual/2});const old=E.restore(legacy);assert.ok(old,'a checkpoint from before the change keeps its cap');
-  for(let i=0;i<65;i++){E.step(s,.05);E.step(restored,.05);E.step(old,.05);}
+  for(let i=0;i<85;i++){E.step(s,.05);E.step(restored,.05);E.step(old,.05);}
   assert.equal(E.serialize(restored),E.serialize(s));
-  close(s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*.45);
+  close(s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*mark.ratio);
   close(old.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*.45/2);
 });
 
@@ -547,12 +547,95 @@ test('skill preview names the highest-rank caster, matches cast() factors and ne
     const before=E.serialize(s),preview=E.castPreview(s,u.hero);assert.equal(E.serialize(s),before,u.hero+' preview is read-only');
     assert.equal(preview.rank,E.bestUnit(s,u.hero).rank);assert.ok(preview.lines.length>=1);
   }
-  assert.equal(E.castPreview(s,'aurora').rank,3);assert.match(E.castPreview(s,'aurora').lines.join(' '),/45%/);
+  assert.equal(E.castPreview(s,'aurora').rank,3);assert.match(E.castPreview(s,'aurora').lines.join(' '),/70%/);
   const amount=(id,factor)=>Math.round(E.power(s,E.bestUnit(s,id))*factor).toLocaleString('ko-KR');
-  assert.ok(E.castPreview(s,'doom').lines[0].includes(amount('doom',10)));
+  assert.ok(E.castPreview(s,'doom').lines[0].includes(amount('doom',E.fortuneFactor(s.gold-E.skillGoldCost('doom')))));
   assert.ok(E.castPreview(s,'lightning_sage').lines[0].includes(amount('lightning_sage',7)));
   assert.ok(E.castPreview(s,'cherry_prince').lines[0].includes(amount('cherry_prince',24)));
   assert.equal(E.castPreview(s,'star_boy'),null,'absent companions have no preview');
+});
+
+test('buffs: the strongest per family applies and families multiply',()=>{
+  const s=traitArena([{hero:'star_boy',index:12},{hero:'ancient_dragon',index:7},{hero:'siren',index:11}]),u=s.board[12];
+  const plain=E.combatStats(s,u,12);
+  s.buffs.awaken=5;s.buffScale.awaken=1;s.buffs.radiance=5;s.buffScale.radiance=1;
+  const both=E.combatStats(s,u,12),dragon=1+.2;
+  close(both.damage/plain.damage,1.6,'awaken and radiance do not stack: only awaken (+60%) counts');
+  s.board[7]=null;const noAura=E.combatStats(s,u,12);close(both.damage/noAura.damage,dragon,'the aura family multiplies on top');
+  s.buffs.haste=5;s.buffScale.haste=1;s.buffs.march=5;s.buffScale.march=1;
+  const fast=E.combatStats(s,u,12);close(plain.cooldown/fast.cooldown,1.5,'only haste counts in the ultimate family (march does not add); the siren aura was already in plain');
+});
+
+test('Detective: the ultimate exposure never falls behind his basic attack at any rank or training',()=>{
+  for(let rank=1;rank<=6;rank++)for(let training=0;training<=5;training++){
+    const s=traitArena([{hero:'great_detective',index:12,rank}]);s.upgrades.great_detective=training;const u=s.board[12];
+    const basic=Math.min(E.DAMAGE_TAKEN_CAP,(.18+training*.02)*E.rankControl(rank)),ult=E.detectiveExposure(s,u);
+    assert.ok(ult>=basic*1.3||ult===E.DAMAGE_TAKEN_CAP,`rank ${rank} training ${training}: ${ult} vs ${basic}`);
+  }
+});
+
+test('Aurora mirror echo starts at 50% and is capped at 100%',()=>{
+  const s=traitArena([{hero:'aurora',index:12,rank:1}]);close(E.mirrorRatio(s,s.board[12]),.5);
+  s.board[12].rank=6;s.meta.aurora={power:1,special:1.3};close(E.mirrorRatio(s,s.board[12]),1);
+});
+
+test('boss passives: immunities, doubled DoT, doubled exposure and halved basic attacks',()=>{
+  const arena=chapter=>{const s=traitArena([{hero:'star_boy',index:12},{hero:'phantom',index:6}]);s.chapter=chapter;const [e]=enemiesFor(s,[{kind:'boss',progress:600}]);e.speed=0;e.skillIn=99;for(const u of s.board)if(u)u.cooldown=99;return [s,e];};
+  const burnTick=chapter=>{const [s,e]=arena(chapter);e.statusEffects.push({type:'burn',source:'t:burn',owner:'star_boy',amount:10,until:s.time+5});const hp=e.hp;E.step(s,.05);return hp-e.hp;};
+  close(burnTick(1)/burnTick(2),2,'Flora takes double burn');assert.ok(burnTick(5)>0,'existing burn still ticks on Poseidon');
+  for(const [chapter,poisoned] of [[1,false],[5,true],[2,true]]){const [s,e]=arena(chapter);s.gauge=120;assert.ok(E.cast(s,'phantom').ok);assert.equal(e.poison>0,poisoned,'chapter '+chapter);}
+  const hit=(chapter,exposure)=>{const [s,e]=arena(chapter);if(exposure)e.statusEffects.push({type:'exposure',source:'t:x',owner:null,amount:exposure,until:s.time+5});const shot=launchNormal(s,s.board[12]);shot.target=e.uid;const hp=e.hp;resolveNormal(s,shot);return hp-e.hp;};
+  close(hit(0,.2)/hit(2,.2),1.4/1.2,'the artificial demon doubles exposure');close(hit(8,0)/hit(2,0),.5,'Astea halves basic attacks');
+});
+
+test('curse seals a random unit at most twice per boss; merging, selling or Jasmine clears it',()=>{
+  const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'jasmine',index:12}]);s.chapter=3;
+  const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);assert.equal(boss.boss,'curse_iris');boss.speed=0;
+  for(let i=0;i<4;i++){boss.skillIn=0;E.step(s,.05);}
+  assert.equal(s.board.filter(u=>u?.cursed).length,2,'two curses per appearance');assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
+  const cursed=s.board.findIndex(u=>u?.cursed);assert.ok(E.restore(E.serialize(s)),'cursed units save and restore');
+  if(s.board[0]?.hero==='star_boy'&&s.board[1]?.hero==='star_boy'&&(s.board[0].cursed||s.board[1].cursed)){assert.ok(E.move(s,0,1).merged);assert.equal(s.board[1].cursed,undefined,'a merge makes a fresh unit');}
+  for(const u of s.board)if(u)u.cursed=true;s.board[12].cursed=false;s.gauge=120;assert.ok(E.cast(s,'jasmine').ok);assert.ok(s.board.every(u=>!u?.cursed),'Jasmine cleanses');
+  void cursed;
+});
+
+test('Astea judgement removes the unit left on the marked cell; moving away dodges it',()=>{
+  for(const dodge of [false,true]){
+    const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0}]);s.chapter=8;const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);boss.speed=0;boss.skillIn=0;
+    E.step(s,.05);assert.equal(s.telegraph.pattern,'judgement');const cell=s.telegraph.cells[0];assert.ok(s.board[cell]);
+    if(dodge)assert.ok(E.move(s,cell,cell===24?23:24).ok);
+    for(let i=0;i<60&&s.telegraph;i++)E.step(s,.05);
+    assert.equal(!!s.board[cell],false);assert.equal(s.board.filter(Boolean).length,dodge?2:1);
+  }
+});
+
+test('Thor judgement at mid-path is cancelled by a stun, otherwise stuns the whole board',()=>{
+  for(const stun of [false,true]){
+    const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0}]);s.chapter=4;const [boss]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH*.5+1}]);boss.speed=0;boss.skillIn=99;
+    E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');
+    if(stun){boss.statusEffects.push({type:'stun',source:'t:stun',owner:null,amount:1,until:s.time+1});}
+    for(let i=0;i<70&&s.telegraph;i++)E.step(s,.05);
+    assert.equal(boss.judged,true);assert.equal(s.board.filter(Boolean).every(u=>u.disabled>0),!stun);
+  }
+});
+
+test('Ares reshuffles the board at most twice; love Iris drains only a full gauge',()=>{
+  const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0},{hero:'snow_rabbit',index:6}]);s.chapter=6;const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);boss.speed=0;
+  let casts=0;for(let k=0;k<4;k++){boss.skillIn=0;E.step(s,.05);if(s.telegraph?.pattern==='shuffle')casts++;for(let i=0;i<60&&s.telegraph;i++)E.step(s,.05);}
+  assert.equal(casts,2);assert.equal(s.board.filter(Boolean).length,3);
+  for(const full of [true,false]){
+    const r=traitArena([{hero:'star_boy',index:12}]);r.chapter=2;const [iris]=enemiesFor(r,[{kind:'boss',progress:400}]);iris.speed=0;iris.skillIn=0;r.board[12].cooldown=99;
+    E.step(r,.05);assert.equal(r.telegraph?.pattern,'starlust');r.gauge=full?120:100;
+    for(let k=0;k<70&&r.telegraph;k++){r.board[12].cooldown=99;E.step(r,.05);}
+    assert.ok(full?r.gauge<70:r.gauge>=100,'full='+full+' gauge '+r.gauge);
+  }
+});
+
+test('Queen pays more per wave (cap 60) and Doom turns leftover gold into a bigger fortune',()=>{
+  assert.equal(E.queenIncome(1,1),7);assert.equal(E.queenIncome(2,1),10);assert.equal(E.QUEEN_CAP,60);
+  assert.equal(E.fortuneFactor(0),10);assert.equal(E.fortuneFactor(39),11);assert.equal(E.fortuneFactor(500),15);
+  const s=traitArena([{hero:'doom',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.gauge=120;s.gold=25+60;const hp=e.hp,base=E.power(s,s.board[12]);
+  assert.ok(E.cast(s,'doom').ok);close(hp-e.hp,base*13,'60 gold left after paying gives 13x');assert.equal(s.gold,60);
 });
 
 test('Flame fires at a seeded path point independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{
@@ -631,7 +714,7 @@ test('Zeke ultimate deals seven times power and doubles only below ten health',(
 
 test('Detective ultimate resolves its own hit with only the old exposure before installing its stronger debuff',()=>{
   for(const previousExposure of [0,.18]){
-    const s=traitArena([{hero:'great_detective',index:12}]),enemies=enemiesFor(s,[{progress:1200},{kind:'boss',progress:1280}]);
+    const s=traitArena([{hero:'great_detective',index:12}]);s.chapter=2;const enemies=enemiesFor(s,[{progress:1200},{kind:'boss',progress:1280}]);
     for(const e of enemies)if(previousExposure)e.statusEffects.push({type:'exposure',source:'legacy:exposure',owner:null,amount:previousExposure,until:s.time+4});
     s.gauge=120;const before=enemies.map(e=>e.hp);assert.ok(E.cast(s,'great_detective').ok);
     for(const [i,e] of enemies.entries()){
@@ -688,7 +771,7 @@ test('poison uses one 40-stack cap and an ordinary shot or overlapping field can
 });
 
 test('Phantom poisons all live enemies without requiring Mushroom and snapshots its own rank, growth and training power once',()=>{
-  const s=traitArena([{hero:'phantom',index:12,rank:2}]),enemies=enemiesFor(s,[{},{kind:'armor'},{kind:'boss'}]),u=s.board[12];
+  const s=traitArena([{hero:'phantom',index:12,rank:2}]);s.chapter=2;const enemies=enemiesFor(s,[{},{kind:'armor'},{kind:'boss'}]),u=s.board[12];
   assert.equal(s.deck.includes('mushroom_king'),false);
   s.meta.phantom={power:2,special:1};s.relicAttack=.1;s.globalAttack=.06;s.upgrades.phantom=2;
   const base=E.power(s,u);readyCast(s,'phantom');
@@ -903,12 +986,12 @@ test('a stronger short poison cannot erase the remaining lifetime of a suppresse
   advanceTo(s,start+12);assert.equal(e.poison,0);
 });
 
-test('an earlier Poseidon rush cannot delete a later enemy mid-frame DOT and freeze segment',()=>{
-  const s=traitArena([{hero:'flame_sage',index:12}]);s.chapter=5;
+test('an earlier Beelzebub warp cannot delete a later enemy mid-frame DOT segment',()=>{
+  const s=traitArena([{hero:'flame_sage',index:12}]);s.chapter=7;
   const [boss,e]=enemiesFor(s,[{kind:'boss',progress:50},{progress:100}]);quiet(s);
-  assert.equal(boss.boss,'poseidon');boss.channel=.001;boss.channelHp=boss.hp;boss.skillIn=1000;
-  s.telegraph={uid:boss.uid,pattern:'rush',text:'test',cells:[],ends:s.time+.001};e.speed=100;
+  assert.equal(boss.boss,'beelzebub');boss.channel=.001;boss.channelHp=boss.hp;boss.skillIn=1000;
+  s.telegraph={uid:boss.uid,pattern:'warp',text:'test',cells:[],ends:s.time+.001};e.speed=100;
   e.statusEffects=[{type:'burn',source:'legacy:burn',owner:'flame_sage',amount:100,until:s.time+.025},{type:'freeze',source:'legacy:freeze',owner:null,amount:1,until:s.time+.025}];
-  const before=e.hp;E.step(s,.05);close(before-e.hp,2.5,'last partial burn segment');close(e.progress,232.5,'push plus only unfrozen movement');
+  const before=e.hp;E.step(s,.05);close(before-e.hp,2.5,'last partial burn segment');close(e.progress,100+E.PATH_LENGTH*.15+2.5,'the freeze has ended by the time the warp lands, then the enemy moves for the unfrozen part');
   assert.equal(e.burn,0);assert.equal(e.freeze,0);assert.equal(s.events.filter(event=>event.type==='rush').length,1);
 });
