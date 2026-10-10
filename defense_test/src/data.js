@@ -104,13 +104,13 @@ export const HEROES = [
     "attack": "blade",
     "trait": {
       "type": "execute",
-      "text": "보스를 먼저 노리고, 보스에게 피해 +35%. 체력이 35% 이하(보스는 40%)인 적에게는 피해가 두 배입니다."
+      "text": "보스를 먼저 노리고, 보스에게 피해 +35%. 체력이 40% 이하인 적에게는 피해가 두 배입니다(강화 5단계마다 +2%p, 최대 50%)."
     },
     "skill": {
       "name": "제노사이드 스텝",
       "cost": 80,
       "type": "execute",
-      "text": "보스부터 최대 5명에게 위력 16배 피해를 줍니다. 체력 35% 이하(보스 40%)인 적은 30배로 처형하고, 처형으로 쓰러뜨릴 때마다 다음 적에게 이어집니다(최대 5회)."
+      "text": "보스부터 최대 5명에게 위력 16배 피해를 줍니다. 체력 40% 이하인 적은 30배로 처형하고, 처형으로 쓰러뜨릴 때마다 다음 적에게 이어집니다(최대 5회)."
     },
     "heightGroup": "medium",
     "role": "보스 처형 · 단일",
@@ -285,7 +285,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 58,
+    "damage": 67,
     "interval": 1.8,
     "attack": "stone",
     "trait": {
@@ -322,7 +322,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 30,
+    "damage": 34,
     "interval": 0.85,
     "attack": "wind",
     "trait": {
@@ -364,7 +364,7 @@ export const HEROES = [
     "attack": "lightning",
     "trait": {
       "type": "chain",
-      "text": "가까운 적 2명에게 번개가 이어집니다. 상하좌우로 붙어 있는 번개의현자가 많을수록 강해집니다(2기 +10%, 3기 +18%, 4기 이상 +30%)."
+      "text": "가까운 적 2명에게 번개가 이어집니다. 상하좌우로 붙어 있는 번개의현자가 많을수록 강해집니다(2기 +15%, 3기 +30%, 4기 이상 +50%)."
     },
     "skill": {
       "name": "천둥의 연쇄",
@@ -512,11 +512,11 @@ export const HEROES = [
     "attack": "light",
     "trait": {
       "type": "expose",
-      "text": "보스를 먼저 저격합니다. 맞은 적은 4초간 받는 피해가 10% 늘어납니다(보스 18%). 성급이 오를수록 더 커집니다."
+      "text": "보스를 먼저 저격합니다. 맞은 적은 4초간 받는 피해가 8% 늘어납니다(보스 15%). 성급이 오를수록 더 커집니다."
     },
     "skill": {
       "name": "완벽한 추리",
-      "cost": 60,
+      "cost": 70,
       "type": "expose",
       "text": "적 전체에게 위력 3배 피해를 준 뒤, 10초간 모든 적이 받는 피해를 35%부터 늘립니다(성급·훈련으로 증가, 최대 80%). 큰 필살기 직전에 쓰면 좋습니다."
     },
@@ -556,7 +556,7 @@ export const HEROES = [
       "name": "공명의 아리아",
       "cost": 65,
       "type": "haste",
-      "text": "8초 동안 모든 동료의 공격 속도를 50% 올립니다."
+      "text": "8초 동안 모든 동료의 공격 속도를 30% 올립니다."
     },
     "heightGroup": "medium",
     "role": "인접 지원 · 물결",
@@ -587,7 +587,7 @@ export const HEROES = [
     "attack": "shadow",
     "trait": {
       "type": "fear",
-      "text": "적이 지나가는 바닥에 덫을 깔아 느리게 합니다. 세 번째 공격은 적을 뒤로 밀칩니다."
+      "text": "적이 지나가는 바닥에 덫을 깔아 느리게 합니다."
     },
     "skill": {
       "name": "깨어나지 않는 밤",
@@ -693,7 +693,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 24,
+    "damage": 26,
     "interval": 0.9,
     "attack": "light",
     "trait": {
@@ -704,7 +704,7 @@ export const HEROES = [
       "name": "은빛 행진",
       "cost": 55,
       "type": "march",
-      "text": "6초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 20% 오릅니다."
+      "text": "8초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 25% 오릅니다."
     },
     "heightGroup": "short",
     "role": "성광 부여 · 관통광",
@@ -741,7 +741,7 @@ export const HEROES = [
       "name": "태고의 약속",
       "cost": 85,
       "type": "awaken",
-      "text": "10초 동안 모든 동료의 위력을 60% 올립니다."
+      "text": "8초 동안 모든 동료의 위력을 35% 올립니다."
     },
     "heightGroup": "tall",
     "role": "인접 지원 · 십자화염",
@@ -816,7 +816,7 @@ export const HEROES = [
       "cost": 60,
       "goldCost": 25,
       "type": "fortune",
-      "text": "골드 25를 내고 적 전체에게 위력 12배 피해를 줍니다. 내고 남은 골드 20마다 +1배(최대 +5배). 훈련할 때마다 기본 배율이 1배씩 오릅니다."
+      "text": "골드 25를 내고 적 전체에게 위력 7배 피해를 줍니다. 내고 남은 골드 20마다 +1배(최대 +5배). 훈련할 때마다 기본 배율이 1배씩 오릅니다."
     },
     "heightGroup": "medium",
     "role": "합성 경제 · 관통검",
@@ -1076,7 +1076,7 @@ export const HEROES = [
       "name": "디저트 앙상블",
       "cost": 70,
       "type": "harmony",
-      "text": "8초 동안 조화 효과가 전장 전체로 퍼집니다. 전장의 서로 다른 동료 종류마다 모든 동료의 위력 +6%, 공격 속도 +5%."
+      "text": "8초 동안 모든 동료의 위력과 공격 속도가 20% 오릅니다. 배치 오라와 함께 적용됩니다."
     },
     "heightGroup": "short",
     "role": "다양성 지원 · 조화",
@@ -1410,7 +1410,7 @@ export const BOSSES = {
     "color": "#bc8be0",
     "pattern": "curse",
     "warning": "저주 · 동료 한 명이 합성 전까지 봉인됩니다",
-    "trait": "예고 없는 저주 (등장마다 최대 2회) · 합성·회수·자스민으로 해제",
+    "trait": "예고 없는 저주 (등장마다 1회) · 합성·회수·자스민으로 해제",
     "frame": 2
   },
   "flora": {
@@ -1447,8 +1447,8 @@ export const BOSSES = {
     "color": "#a9dcff",
     "pattern": "storm",
     "warning": "신벌의 낙뢰 · 빛나는 3칸에서 이동하세요",
-    "judgement": "천둥 심판 · 3초 안에 토르를 기절시키지 못하면 전원 4초 기절",
-    "trait": "길 중간에서 천둥 심판 · 기절로 취소",
+    "judgement": "천둥 기둥 · 빛나는 세로 3줄이 3초 기절합니다. 주력을 옮기세요",
+    "trait": "낙뢰 3칸 · 길 중간에서 세로 3줄 기절 1회",
     "atlas": "bosses-expansion",
     "frame": 0
   },

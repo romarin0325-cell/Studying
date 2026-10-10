@@ -1,10 +1,11 @@
 // Boss-difficulty audit. Plays whole main stages with the built-in auto-play.
-//   node defense_test/scripts/boss-audit.mjs [--cycles 0,1] [--seeds 6] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--json out.json]
+//   node defense_test/scripts/boss-audit.mjs [--ai smart|basic] [--cycles 0,1] [--seeds 6] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--json out.json]
 import fs from 'node:fs/promises';
 import {HERO,BOSSES,BOSS_ORDER} from '../src/content.js';
 import {heroMultiplier,specialMultiplier,springGauge,seedGold} from '../src/economy.js';
 import * as engine from '../src/combat/engine.js';
-import {autoPlay,clearedRounds} from '../src/battle.js';
+import {autoPlay as basicAuto,clearedRounds} from '../src/battle.js';
+import {smartAutoPlay} from '../src/smart-auto.js';
 
 const DT=.05,AUTO=.32,LIMIT=900,LIMIT_TICKS=LIMIT/DT;
 const ALL_WAVES=[1,2,3,4,5,6],BOSS_WAVES=[3,6],NORMAL_WAVES=[1,2,4,5];
@@ -20,6 +21,9 @@ const CYCLES=opt('cycles','0,1').split(',').map(s=>Number(s.trim()));
 const SEEDS=Number(opt('seeds',6));
 const ROSE=opt('rose','auto');
 const JSON_OUT=opt('json',null);
+// --ai smart (default): the reasonable player model. --ai basic: the in-game auto helper.
+const AI=opt('ai','smart');if(!['smart','basic'].includes(AI))throw new Error('--ai must be smart or basic');
+const autoPlay=AI==='smart'?smartAutoPlay:basicAuto;
 const DEFAULT_DECKS=[
   ['star_boy','snow_rabbit','night_rabbit','siren','santa'],
   ['zeke','luna','jasmine','ancient_dragon','great_detective'],
