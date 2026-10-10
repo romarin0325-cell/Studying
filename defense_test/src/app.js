@@ -1,4 +1,4 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
+import {HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
 import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone} from './profile.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from './battle.js';
@@ -37,6 +37,11 @@ const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().beds));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
 const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
+// Hidden heroes rotate as the season guardian (one per month, six-month cycle).
+function guardianNote(id){
+  const c=calendar(now()),month=Number(String(c.month).slice(-2))-1,slot=HIDDEN.indexOf(id),wait=(slot-month%6+6)%6,next=(month+wait)%12+1;
+  return wait===0?`지금 시즌 소환에서 획득할 수 있습니다.<br>${monthNo(c)} 이달의 수호자입니다.`:`이달의 수호자로 등장하는 달에만 시즌 소환에서 획득할 수 있습니다.<br>다음 등장: ${next}월 (${next>6?next-6:next+6}월에도 등장)`;
+}
 const bossOf=stage=>BOSSES[CHAPTERS[stage-1].bosses[0]];
 const portrait=(id,extra='')=>`<span class="portrait ${extra}" data-rarity="${HERO[id].rarity}">${image(id)}</span>`;
 // How each attack shape reads to a player (battle info and ability panels).
@@ -122,7 +127,7 @@ function home(){
     <div class="dock-grid">
       <button class="team-strip" data-action="team" aria-label="출전 팀 편성 변경"><span class="strip-faces">${profile.deck.map(id=>portrait(id)).join('')}</span><span class="strip-meta"><small>출전 팀 · 편성</small><b>${icon('star')}${fmt(teamPower(profile))}</b></span></button>
       <div class="dock-row">
-        <button class="garden-card" data-action="garden" aria-label="꿈의 온실 · 모든 동료 위력 +${roseBonus(profile.beds.rose)}%"><span class="garden-medal" style="--bed-row:0;--bed-stage:${bedStage('rose',profile.beds.rose)}"></span><span class="garden-info"><small>꿈의 온실 · 위력</small><b class="${roseBonus(profile.beds.rose)>=100?'long':''}">+${roseBonus(profile.beds.rose)}%</b></span>${BED_IDS.some(id=>bedReady(profile,id))?'<i class="dot"></i>':''}</button>
+        <button class="garden-card" data-action="garden" aria-label="꿈의 온실 · 모든 동료 위력 +${roseBonus(profile.beds.rose)}%"><span class="garden-medal" style="--bed-row:0;--bed-stage:${bedStage('rose',profile.beds.rose)}"></span><span class="garden-info"><small>꿈의 온실</small><b class="${roseBonus(profile.beds.rose)>=100?'long':''}">+${roseBonus(profile.beds.rose)}%<i>위력</i></b></span>${BED_IDS.some(id=>bedReady(profile,id))?'<i class="dot"></i>':''}</button>
         <div class="idle-card"><span class="idle-icon">${icon('star')}</span><div class="idle-info"><div class="idle-line"><strong>별똥별</strong><b class="idle-amount" id="idle-total">${fmt(idle)}</b></div><div class="progress"><span id="idle-progress" style="width:${Math.min(100,(now()-profile.idleAt)/(20*HOUR)*100)}%"></span></div></div><button class="secondary" id="idle-claim" data-action="idle" ${idle<1?'disabled':''}>수집</button></div>
       </div>
     </div>
@@ -154,7 +159,7 @@ function heroDetail(id){
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
     ${e.owned?`    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (꿈의 온실 · 강화 +${e.enhance} 포함). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
     `
-    :`<p class="empty">${h.hidden?`${monthNo(calendar(now()))} 시즌 소환에서만 획득할 수 있습니다.<br>이달의 수호자: ${HERO[calendar(now()).guardian].name}`:`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
+    :`<p class="empty">${h.hidden?guardianNote(h.id):`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
     e.owned?`<div class="growth growth-dock ${canEnhance?'ready':''}"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="${canEnhance?'primary shine':'secondary'}" data-enhance="${id}" ${canEnhance?'':'disabled'}>강화</button></div>${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 // Dream greenhouse screen: three beds over the greenhouse painting, one detail panel.
@@ -320,7 +325,7 @@ function renderDispatch(){
     <div class="chips"><span class="chip">${icon('dispatch')}슬롯 ${count}/4</span><span class="chip">보상 보너스 +${profile.cleared*5}%</span></div>
     <p class="subtext" style="margin-top:10px">동료를 20시간 파견해 별가루를 모으고 꿈의결정도 조금 얻습니다. 앱을 닫아도 시간이 흐르며, 파견 중에는 전투에 참여할 수 없습니다.</p>
     <div class="dispatch-list">${cards}</div>
-    <p class="fineprint">스테이지 9·18·27·36 클리어 시 슬롯이 하나씩 열립니다. 보상은 출발 시점의 전투력과 클리어 수로 확정됩니다.</p></section>`;
+    <p class="fineprint">보상은 출발 시점의 전투력과 클리어 수로 확정됩니다.</p></section>`;
 }
 function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${String(Math.floor(seconds/3600)).padStart(2,'0')}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;}
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
@@ -357,24 +362,32 @@ function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&
 function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
 function renderBattle(){
   if(!run)return;
-  const title=run.mode==='main'?`스테이지 ${stageLabel(run.chapter+1)} · ${CHAPTERS[run.chapter].name}`:run.mode==='weekly'?'주간 드래프트':'월간 보스전';
-  $('content').innerHTML=`<section class="battle">
-    <div class="battle-top"><div class="battle-title"><strong>${title}</strong><small id="wave-label"></small></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
+  const name=run.mode==='main'?CHAPTERS[run.chapter].name:run.mode==='weekly'?'주간 드래프트':'월간 보스전',tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${run.mode==='weekly'?'주간':'월간'}</b>`;
+  $('content').innerHTML=`<section class="battle" id="battle">
+    <div class="battle-top"><div class="battle-title"><span class="stage-tag" data-mode="${run.mode}">${tag}</span><div class="battle-name"><strong>${name}</strong><small id="wave-label"></small></div></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
     <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.gaugeCap(run)}</small></span><span id="battle-time" class="hud-time"></span></div>
-    <div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div>
+    <div class="battle-stage"><div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div></div>
+    <div class="battle-dock">
+    <div class="battle-slot" id="battle-slot"><div class="wave-strip"><div class="wave-row"><span class="wave-pips" id="wave-pips"></span><span class="wave-left" id="wave-left"></span></div><div class="boss-line" id="boss-line" hidden><span class="boss-mark">${icon('crown')}</span><div class="boss-main"><div class="boss-head"><b id="boss-name"></b><em id="boss-state"></em></div><span class="boss-bar"><i id="boss-fill"></i></span><small id="boss-trait"></small></div></div><p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보 · 필살기 길게: 설명</p></div><div id="unit-panel" class="unit-panel" hidden></div></div>
     <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
-    <div id="unit-panel" class="unit-panel" hidden></div>
-    <p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보 · 필살기 길게: 설명</p></section>`;
-  hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice'].map(id=>[id,$(id)]));
+    </div></section>`;
+  hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice','battle','battle-slot','wave-pips','wave-left','boss-line','boss-name','boss-state','boss-fill','boss-trait'].map(id=>[id,$(id)]));
   hud.skills=[...document.querySelectorAll('[data-skill]')].map(node=>({node,id:node.dataset.skill,timer:node.querySelector('.skill-duration')}));
   for(const {node,id} of hud.skills){
     node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillTip(node,id);},380);});
     for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');hideSkillTip();});
     node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
   }
-  renderer=new Renderer($('arena'),art);settings();bindArena();updateBattle();
+  renderer=new Renderer($('arena'),art);settings();bindArena();fitBattle();updateBattle();
 }
+// Tall phones keep a slot under the arena for the wave strip and the unit card, so neither covers
+// the board. When that slot would shrink the arena below 90% width, the card overlays the dock instead.
+function fitBattle(){
+  const el=hud?.battle;if(!el||!el.isConnected)return;el.classList.remove('compact');
+  const stage=el.querySelector('.battle-stage'),w=stage.clientWidth,h=stage.clientHeight;el.classList.toggle('compact',h*720/780<w*.9);
+}
+let fitFrame=0;window.addEventListener('resize',()=>{if(screen!=='battle')return;cancelAnimationFrame(fitFrame);fitFrame=requestAnimationFrame(()=>{fitBattle();updateBattle();});});
 const changedText=(node,value)=>{value=String(value);if(node.textContent!==value)node.textContent=value;};
 function updateBattle(){
   if(screen!=='battle'||!run)return;
@@ -385,20 +398,31 @@ function updateBattle(){
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
   updateAuraChips();
   for(const {node:b,id,timer} of hud.skills){const {cost,goldCost=0}=HERO[id].skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id),active=E.activeSkill(run,id);b.disabled=!ready||paused||run.phase!=='combat';b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
-  const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0);notice.hidden=!run.telegraph&&!boss;changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));updateUnit();
+  const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0),compact=hud.battle.classList.contains('compact');notice.hidden=!run.telegraph&&!(compact&&boss);notice.classList.toggle('warn',!!run.telegraph);changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));
+  if(!compact)updateStrip(boss);updateUnit();
+}
+function updateStrip(boss){
+  const done=w=>w<run.wave||w===run.wave&&['reward','intermission','victory'].includes(run.phase),key=run.mode==='main'?`${run.wave}:${done(run.wave)}`:`r${run.wave}`;
+  if(hud['wave-pips'].dataset.key!==key){hud['wave-pips'].dataset.key=key;hud['wave-pips'].innerHTML=run.mode==='main'?`<small>WAVE</small>${Array.from({length:6},(_,i)=>{const w=i+1;return `<i class="${w%3===0?'boss':''} ${done(w)?'done':w===run.wave?'current':''}">${w%3===0?icon('crown'):''}</i>`;}).join('')}`:`<small>ROUND</small><b>${run.wave}</b>`;}
+  const left=run.enemies.filter(e=>e.hp>0).length+run.queue.length;
+  changedText(hud['wave-left'],run.phase==='intermission'?`다음 웨이브 ${Math.max(0,run.breakTime).toFixed(1)}초`:run.phase==='reward'?'축복 선택':`남은 적 ${left}`);
+  const queued=run.queue.some(q=>q.kind==='boss'),next=boss?run.wave:queued?run.wave:run.mode==='main'?(run.wave<3?3:run.wave<6?6:0):0,id=boss?.boss||(next&&(run.mode==='main'?CHAPTERS[run.chapter].bosses[0]:null));
+  const line=hud['boss-line'];line.hidden=!id;if(!id)return;line.classList.toggle('live',!!boss);
+  changedText(hud['boss-name'],BOSSES[id].name);changedText(hud['boss-state'],boss?`${Math.ceil(boss.hp/boss.maxHp*100)}%`:next===run.wave?'곧 등장':`${next}웨이브 등장`);changedText(hud['boss-trait'],BOSSES[id].trait||BOSSES[id].warning||'');
+  const fill=`scaleX(${boss?Math.max(0,boss.hp/boss.maxHp).toFixed(3):1})`;if(hud['boss-fill'].style.transform!==fill)hud['boss-fill'].style.transform=fill;
 }
 // Tapping a unit opens its live sheet: current numbers, trait state, the
 // ultimate (and which copy actually casts it) and every bonus applied now.
 function updateUnit(){
-  const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;renderer.selected=u?selected:-1;
+  const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;hud['battle-slot']?.classList.toggle('inspecting',!!u);renderer.selected=u?selected:-1;
   if(!u){delete panel.dataset.sig;return;}
   const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
   const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,{cost,goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost,bonuses=detail.bonuses.filter(b=>b!==trait.label);
   const sig=`${u.uid}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;panel.dataset.rarity=h.rarity;
-  // A compact card over the controls: who, how strong, the live trait, the ultimate and the two
-  // actions. Everything else lives behind the ⓘ sheet, so the board never scrolls away.
+  // A compact card in the slot under the arena (over the dock on short screens): who, how strong,
+  // the live trait, the ultimate and the two actions. Everything else lives behind the ⓘ sheet.
   panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><span class="unit-name"><strong>${h.name}</strong><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></span><small>${flame?'장판 위력':'위력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b> · 주기 <b>${detail.interval.toFixed(2)}초</b>${run.upgrades[u.hero]?` · 훈련 ${run.upgrades[u.hero]}`:''}</small></div><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div>
     ${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성'}</span>${traitText}</p>`:''}
     <div class="unit-card-row"><button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">${icon('star')}${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 씁니다':`${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></button>
