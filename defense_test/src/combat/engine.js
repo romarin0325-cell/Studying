@@ -60,15 +60,18 @@ export function validDeck(deck){return Array.isArray(deck)&&deck.length===TEAM_S
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
 export function has(s,id){return s.artifacts.includes(id);}
 export function summonCost(s){return s.freeSummons>0?0:Math.max(8,10+s.paidSummons*2-(has(s,'feather')?4:0));}
-export const doomRefund=(rank,level=0)=>(18+level*4)*rank;
+// Doom's merge refund is flat per material rank, so merging never waits on training.
+export const DOOM_REFUND=50;
+export const doomRefund=rank=>DOOM_REFUND*rank;
 export const waveIncome=wave=>48+Math.floor(wave);
 export const skillDuration=(s,seconds)=>seconds+(has(s,'broken_clock')?2:0);
 export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma':null;
 export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
-export const queenIncome=(rank,wave,level=0)=>4+rank*3+Math.floor((wave-1)/3)+level*3;
-export const QUEEN_CAP=60;
+export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+level*3;
+export const QUEEN_CAP=90;
+export const QUEEN_TAX=40;
 // Doom's black market: 10x, +1x for every 20 gold left after paying, up to 15x.
-export const fortuneFactor=goldAfter=>10+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
+export const fortuneFactor=(goldAfter,level=0)=>12+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
 export const executeThreshold=e=>e.boss ? .4 : .35;
 export function dividend(s){return Math.min(QUEEN_CAP,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
@@ -77,7 +80,10 @@ export const targetingLocked=id=>id==='avalanche_maid'||id==='flame_sage';
 export const GROUND_BOUNDS=Object.freeze({left:24,right:696,top:72,bottom:734});
 export const skillGoldCost=id=>HERO[id]?.skill.goldCost||0;
 // The highest-rank Cinderella carries the solo bonus; ties keep the oldest.
-export function topCinderella(s){return s.board.filter(u=>u?.hero==='cinderella').reduce((a,b)=>!a||b.rank>a.rank||b.rank===a.rank&&b.uid<a.uid?b:a,null);}
+// The true Cinderella (highest rank, then oldest) carries the clock. Every attack moves it one hour
+// (three during the ultimate); the twelfth strikes the midnight bell on the boss, or on the target.
+export const CINDERELLA=Object.freeze({top:1.5,bell:10,splash:3,radius:150,ult:3,haste:.5});
+export function topCinderella(s){return s.board.filter(u=>u?.hero==='cinderella'&&!u.cursed).reduce((a,b)=>!a||b.rank>a.rank||b.rank===a.rank&&b.uid<a.uid?b:a,null);}
 function syncTimeRuler(s){
   const rulers=s.board.filter(u=>u?.hero==='time_ruler');
   if(!rulers.length){s.timeRulerUid=null;return null;}
@@ -100,8 +106,8 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
     const count=s.board.filter(unit=>unit?.hero==='aurora').length,active=count>=2&&count%2===0;
     Object.assign(trait,{key:'even-formation',count,active,damageMultiplier:active?1.5:1,label:active?`아우로라 ${count}기 · 위력 +50%`:`아우로라 ${count}기 · 짝수 보너스 대기`});
   }else if(u.hero==='cinderella'){
-    const top=topCinderella(s),active=top?.uid===u.uid;
-    Object.assign(trait,{key:'cinderella',uid:top?.uid??null,active,damageMultiplier:active?1.5:1,label:active?`최고 ${u.rank}성 1기 · 위력 +50%`:'단 한 명의 기적 대기'});
+    const top=topCinderella(s),active=top?.uid===u.uid,clock=u.clock||0,step=s.buffs.midnight>0?3:1;
+    Object.assign(trait,{key:'cinderella',uid:top?.uid??null,active,clock,damageMultiplier:active?CINDERELLA.top:1,label:active?`진짜 신데렐라 · 위력 +50% · 자정의 종까지 ${Math.ceil((12-clock)/step)}회`:`진짜 신데렐라 ${top?.rank??''}성이 따로 있어요`});
   }else if(u.hero==='zeke'){
     const active=s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
     Object.assign(trait,{key:'last-quarter',active,speedBonus:active?.4:0,label:active?'마지막 구간 · 공속 +40%':'마지막 구간 대기'});
@@ -122,13 +128,13 @@ export function harmonyField(s){
   const count=new Set(s.board.filter(u=>u&&u.hero!=='harmonious').map(u=>u.hero)).size,level=s.upgrades.harmonious||0,scale=special(s,'harmonious')*buffScale(s,'harmony');
   return {count,damage:count*(.06+level*.005)*scale,speed:count*(.05+level*.002)*scale};
 }
-export function bestUnit(s,id){return id==='time_ruler'?syncTimeRuler(s):s.board.filter(u=>u?.hero===id&&!u.cursed).sort((a,b)=>b.rank-a.rank)[0];}
+export function bestUnit(s,id){return id==='time_ruler'?syncTimeRuler(s):id==='cinderella'?topCinderella(s)||undefined:s.board.filter(u=>u?.hero===id&&!u.cursed).sort((a,b)=>b.rank-a.rank)[0];}
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*TRAINING_STEP)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`1성 재료 환급 ${doomRefund(1,level)}G`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${10+level*2}% · 보스 +${18+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
+  const extra={doom:`필살기 기본 ${12+level}배`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${10+level*2}% · 보스 +${18+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -136,7 +142,7 @@ export function trainingBonus(id,level){
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*TRAINING_STEP)).toFixed(2));
 export function unitEconomy(s,u){
   const level=s.upgrades[u.hero]||0;
-  if(u.hero==='doom')return `합성 시 ${doomRefund(u.rank,level)}G 즉시 환급 · 루미와 합성해도 발동`;
+  if(u.hero==='doom')return `합성 시 ${doomRefund(u.rank)}G 즉시 환급`;
   if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 ${QUEEN_CAP}G`;
   return HERO[u.hero].trait.text;
 }
@@ -247,7 +253,7 @@ export function move(s,from,to){
   const a=s.board[from],b=s.board[to];
   if(canMerge(a,b)){
     const id=b.hero==='rumi'?a.hero:b.hero,rank=b.rank+1;
-    const refund=HERO[id].trait.type==='sacrifice'?doomRefund(a.rank,s.upgrades[id]):0;
+    const refund=HERO[id].trait.type==='sacrifice'?doomRefund(a.rank):0;
     if(refund)giveGold(s,refund,'합성 환급');
     const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,2,8,power(s,unit));
@@ -403,7 +409,7 @@ function applyHit(s,shot){
   if(shot.reflected){const p=pathPoint(e.progress);damage(s,e,shot.damage,shot.hero,{basic:true});if(e.hp>0)addStatus(s,e,'divine',sourceKey('attack',shot.hero,shot.uid),shot.hero,1,6);event(s,'impact',{...p,hero:shot.hero,rank:shot.rank,angle:Math.atan2(p.y-shot.from.y,p.x-shot.from.x),reflected:true});return;}
   const hero=HERO[shot.hero],type=hero.trait.type,point=pathPoint(e.progress),amount=shot.damage,procTargets=new Set();
   const geometry={...attackGeometry(hero,shot.origin,point),...(shot.gift?{radius:hero.radius*2}:{})};
-  const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):shot.midnight?s.enemies.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=100):[e];
+  const area=['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):shot.bell?[e,...around(s,e,CINDERELLA.radius).filter(t=>t.uid!==e.uid)]:[e];
   const divineMark=type==='divine'||type==='battery'||s.buffs.march>0&&shot.proc!==false;
   for(const target of area){
     syncStatuses(s,target);syncSlows(s,target);
@@ -411,7 +417,7 @@ function applyHit(s,shot){
     if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target))factor*=2;
     if(type==='shatter'&&target.slowTime>0)factor*=1.75;
     if(type==='splash'&&target.burnTime>0)factor*=1.4;
-    if(type==='miracle'&&shot.count%3===0)factor*=1.8;
+    if(type==='miracle'&&shot.bell)factor*=target===e?CINDERELLA.bell:CINDERELLA.splash;
     if(type==='starfall'&&shot.count%5===0)factor*=2.2;
     if(shot.gift)factor*=2+(s.upgrades[hero.id]||0)*.2;
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
@@ -431,6 +437,7 @@ function applyHit(s,shot){
     s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.06,life:.24,total:.24});
   }
   event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin});
+  if(shot.bell)event(s,'bell',{...point,rank:shot.rank,boss:!!e.boss,radius:CINDERELLA.radius});
   // Time Magician: every third pierce lets each neighbour fire one extra shot.
   if(type==='accelerate'&&shot.proc!==false&&shot.count%3===0){
     const index=s.board.findIndex(u=>u?.uid===shot.source),recipients=[];
@@ -461,19 +468,22 @@ function applyHit(s,shot){
 function attack(s,u,index,extra=0){
   const hero=HERO[u.hero],ground=u.hero==='flame_sage';
   if(ground&&!s.enemies.some(e=>e.hp>0))return false;
-  const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(hero,cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
+  let e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(hero,cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
+  const clockStep=u.hero==='cinderella'&&!extra&&topCinderella(s)?.uid===u.uid?(s.buffs.midnight>0?3:1):0,bell=clockStep>0&&(u.clock||0)+clockStep>=12;
+  if(bell)e=s.enemies.find(x=>x.boss&&x.hp>0)||e;
   const at=cellPoint(index),to=ground?pathPoint(random(s)*PATH_LENGTH):pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
   u.aim=angle;u.facing=attackDirection(at,to);
   const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
   if(!extra){u.attacks++;u.pose=.3;}
+  if(clockStep)u.clock=((u.clock||0)+clockStep)%12;
   const stats=combatStats(s,u,index),value=stats.damage*(extra||1);
   const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
-  const gift=!extra&&u.hero==='santa'&&u.attacks%4===0,midnight=u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid;
-  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:!extra,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(midnight?{midnight:true}:{})};
+  const gift=!extra&&u.hero==='santa'&&u.attacks%4===0;
+  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:!extra,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(bell?{bell:true}:{})};
   s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,origin:at,shape:hero.shape,form:shot.form,attackType:hero.attack,...(gift?{gift:true}:{}),...(extra?{extra:true}:{})});
   if(extra)return true;
-  if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,gift:undefined,damage:value*.65*buffScale(s,'echo'),life:shot.life+.14,total:shot.life+.14});}
-  if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,proc:false,gift:undefined,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
+  if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,gift:undefined,bell:undefined,damage:value*.65*buffScale(s,'echo'),life:shot.life+.14,total:shot.life+.14});}
+  if(has(s,'twin')&&u.attacks%4===0)s.shots.push({...shot,uid:s.nextId++,proc:false,gift:undefined,bell:undefined,damage:value*.45,life:shot.life+.2,total:shot.life+.2});
   return true;
 }
 // One source for outgoing attack power, cadence and the live inspection UI.
@@ -501,6 +511,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.awaken>0)damageBonus('ult','각성',.6*buffScale(s,'awaken'));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
   if(unitForm(s,u)){damageBonus('ult','트라우마',1.1);speedBonus('ult','트라우마',.35);}
+  if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
   if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
   if(s.buffs.haste>0)speedBonus('ult','가속',.5*buffScale(s,'haste'));
   if(s.buffs.march>0)speedBonus('ult','은빛 행진',.2*buffScale(s,'march'));
@@ -534,7 +545,7 @@ export function cast(s,id){
   else if(type==='haste')s.buffs.haste=skillDuration(s,8*control);
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,10*control);
   else if(type==='march')s.buffs.march=skillDuration(s,6*control);
-  else if(type==='glassfall'){strike(6);s.buffs.midnight=skillDuration(s,10*control);}
+  else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
   else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,2);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control);for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control);}
@@ -578,8 +589,8 @@ export function cast(s,id){
     for(const e of order){if(strikes<=0)break;strikes--;visualTargets.push(e);const execute=e.hp/e.maxHp<=executeThreshold(e);damage(s,e,base*(execute?30:16),id);if(execute&&e.hp<=0&&extra<5){extra++;strikes++;}}
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*9,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
-  else if(type==='fortune')strike(fortuneFactor(s.gold));
-  else if(type==='dividend'){strike(4);giveGold(s,30,'필살기');s.buffs.tax=skillDuration(s,8*control);}
+  else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
+  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.buffs.tax=skillDuration(s,8*control);}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
@@ -631,9 +642,9 @@ export function castPreview(s,id){
   else if(type==='awaken')lines.push(`${dur(10)} 동안 모든 동료의 위력이 ${pct(.6*scale)}% 오릅니다.`);
   else if(type==='march')lines.push(`${dur(6)} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
   else if(type==='glassfall'){
-    lines.push(`적 전체에게 위력 6배, ${hit(6)}를 줍니다.`);
-    // Midnight's splash radius stays 100. cast() stores buffScale but never reads it back.
-    lines.push(`${dur(10)} 동안 가장 높은 성급 신데렐라의 공격이 반경 100 안의 적에게도 맞습니다.`);
+    lines.push(`적 전체에게 위력 ${CINDERELLA.ult}배, ${hit(CINDERELLA.ult)}를 줍니다.`);
+    // The haste and the three-hour step are fixed. cast() stores buffScale but never reads it back.
+    lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
     lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 2성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 2성으로 전장에 합류합니다.');
     lines.push(`${dur(6)} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
@@ -764,9 +775,9 @@ export function castPreview(s,id){
     const stun=1.2*control*scale;
     lines.push(`적 전체에게 위력 7배, ${hit(7)}를 줍니다.`);
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
-  }else if(type==='fortune'){const factor=fortuneFactor(s.gold-skillGoldCost(id));lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<15)lines.push(`내고 남은 골드 20마다 +1배 (최대 15배).`);}
+  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<17+level)lines.push(`내고 남은 골드 20마다 +1배 (최대 ${17+level}배).`);}
   else if(type==='dividend'){
-    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 골드 30을 받습니다.`);
+    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 골드 ${QUEEN_TAX}을 받습니다.`);
     // The extra payout is 2× kill gold, so the total is 3×. buffScale does not change it.
     lines.push(`${dur(8)} 동안 처치 골드가 3배가 되어 일반 6, 장갑 9, 보스 60골드를 줍니다.`);
   }else lines.push(hero.skill.text);
@@ -776,9 +787,12 @@ export function castPreview(s,id){
   return {rank:u.rank,lines};
 }
 
-// Boss patterns. Every action is telegraphed (2.6 s) except the curse, which the user wants unannounced.
+// Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
+// Targets are random: a random row, random occupied cells, or a random companion for the curse.
 // Repeat-limited patterns (curse, shuffle) count per boss so one appearance never spams them.
 const BOSS_LIMIT={curse:2,shuffle:2,judgement:2};
+// Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
+export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
 function bossCells(s,pattern){
   const occupied=s.board.flatMap((u,i)=>u?[i]:[]),all=Array.from({length:25},(_,i)=>i);
   if(pattern==='seal'){const row=Math.floor(random(s)*5);return Array.from({length:5},(_,i)=>row*5+i);}
@@ -817,7 +831,7 @@ function bossStep(s,e,dt){
   // Thor: once he reaches the middle of the path, a board-wide judgement that stunning him cancels.
   if(boss.judgement&&!e.judged&&e.progress>=PATH_LENGTH*.5){
     e.channel=3;e.judging=true;e.channelHp=e.hp+(e.shield||0);
-    s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
+    s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3,total:3};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
   }
   e.skillIn-=dt;if(e.skillIn>0)return;
   const casts=e.casts||0,pattern=Array.isArray(boss.pattern)?boss.pattern[casts%boss.pattern.length]:boss.pattern;
@@ -829,9 +843,9 @@ function bossStep(s,e,dt){
     if(!pool.length||s.buffs.radiance>0)return;
     const i=pool[Math.floor(random(s)*pool.length)];s.board[i].cursed=true;event(s,'curse',{index:i,hero:s.board[i].hero,...cellPoint(i)});return;
   }
-  e.channel=2.6;e.channelHp=e.hp+(e.shield||0);
+  const time=TELEGRAPH_TIME[pattern]||2.6;e.channel=time;e.channelHp=e.hp+(e.shield||0);
   const text=boss.warnings?.[pattern]||boss.warning,cells=bossCells(s,pattern);
-  s.telegraph={uid:e.uid,pattern,text,cells,ends:s.time+2.6};event(s,'warning',{text,cells,pattern});
+  s.telegraph={uid:e.uid,pattern,text,cells,ends:s.time+time,total:time};event(s,'warning',{text,cells,pattern});
 }
 
 function completeWave(s){
@@ -965,7 +979,7 @@ export function restore(raw){
       }
     }
     const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
-    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
+    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||u.clock!==undefined&&(!Number.isInteger(u.clock)||u.clock<0||u.clock>11)||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;
     // Time Ruler no longer has a solo bonus; its cached top unit only orders casts.
     if(s.timeRulerUid!==null&&!id(s.timeRulerUid))return null;

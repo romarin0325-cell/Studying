@@ -1,5 +1,5 @@
 import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
-import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm} from './engine.js';
+import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,topCinderella} from './engine.js';
 import {CombatFX,drawAttackRange,isUR} from './effects.js';
 
 export class Art {
@@ -45,6 +45,7 @@ export class Renderer {
     if(e.type==='leak'){this.shake=6;this.effects.push({type:'leak',x:76,y:142,color:'#ef8c80',life:.8,total:.8});}
     if(e.type==='seal')for(const i of e.cells){const p=cellPoint(i);this.effects.push({type:'seal',...p,color:'#d09bfd',life:.8,total:.8});}
     if(e.type==='interrupt')this.float('시전 저지',360,175,'#c8f4ee',30);
+    if(e.type==='bell'){this.shake=Math.max(this.shake||0,e.boss?6:4);this.float('자정의 종',e.x,Math.max(132,e.y-78),'#ffe3f5',e.boss?26:22);this.bursts(e.x,e.y-18,'#ffd6ef',e.boss?26:16,1.2);}
     if(e.type==='curse'){this.float('저주',e.x,e.y-70,'#d8a8ff',26);this.bursts(e.x,e.y-20,'#b77bff',16,.8);}
     if(e.type==='shuffle'){this.float('투신의 난무!',360,390,'#ffb08a',30);this.shake=6;}
     if(e.type==='judgement'){this.shake=e.hit?9:4;this.bursts(e.x,e.y-10,'#fff2c0',e.hit?30:12,1.3);if(e.hit)this.float('천벌',e.x,e.y-70,'#fff2c0',28);}
@@ -97,7 +98,7 @@ export class Renderer {
     const tele=s.telegraph,look={seal:['rgba(194,99,224,A)','#e3a2fb'],stun1:['rgba(194,99,224,A)','#e3a2fb'],storm:['rgba(141,204,250,A)','#ffe8aa'],judgement:['rgba(255,226,140,A)','#fff2c0'],thunder:['rgba(255,230,120,A)','#ffe27a'],shuffle:['rgba(255,150,110,A)','#ffb08a']}[tele?.pattern];
     if(look){const left=Math.max(0,tele.ends-s.time),urgent=left<1?18:9,a=(tele.pattern==='thunder'||tele.pattern==='shuffle'?.08:.16)+Math.sin(this.clock*urgent)*.08;ctx.fillStyle=look[0].replace('A',a.toFixed(3));ctx.strokeStyle=look[1];ctx.lineWidth=tele.pattern==='judgement'?3.5:2;
       for(const i of tele.cells){const p=cellPoint(i);rounded(ctx,p.x-43,p.y-43,86,86,5);ctx.fill();if(tele.pattern!=='thunder'&&tele.pattern!=='shuffle')ctx.stroke();}
-      if(tele.pattern==='judgement'){const p=cellPoint(tele.cells[0]),g=ctx.createLinearGradient(0,0,0,p.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,`rgba(255,236,170,${.25+(1-left/2.6)*.35})`);ctx.fillStyle=g;ctx.fillRect(p.x-14-(1-left/2.6)*10,0,28+(1-left/2.6)*20,p.y);}}
+      if(tele.pattern==='judgement'){const p=cellPoint(tele.cells[0]),g=ctx.createLinearGradient(0,0,0,p.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,`rgba(255,236,170,${.25+(1-left/(tele.total||2.6))*.35})`);ctx.fillStyle=g;ctx.fillRect(p.x-14-(1-left/(tele.total||2.6))*10,0,28+(1-left/(tele.total||2.6))*20,p.y);}}
     const entities=this.entities;entities.length=0;for(let i=0;i<25;i++)if(s.board[i])entities.push({kind:'hero',i,y:cellPoint(i).y+20});for(const e of s.enemies)entities.push({kind:'enemy',e,y:this.fx.point(e.uid).y});entities.sort((a,b)=>a.y-b.y);
     for(const ent of entities)ent.kind==='hero'?this.drawHero(s,ent.i):this.drawEnemy(ent.e,s.chapter);
     this.fx.drawPersonalTraits(s,true);
@@ -123,6 +124,7 @@ export class Renderer {
   }
   drawHero(s,index){const ctx=this.ctx,u=s.board[index],p=cellPoint(index);if(this.drag?.uid===u.uid){shadow(ctx,p.x,p.y+24,20,.2);return;}
     shadow(ctx,p.x,p.y+29,26);
+    if(u.hero==='cinderella'&&!u.cursed&&topCinderella(s)?.uid===u.uid)this.drawClock(s,u,p);
     const born=Math.min(1,(s.time-u.born)/.32),ease=1-Math.pow(1-born,3),idle=Math.sin(this.clock*2.5+u.uid)*1.6;
     const aim=u.aim??-Math.PI/2;
     let dx=0,dy=idle,angle=0,squash=1;const pressed=this.press===index&&!this.drag;if(pressed)dy-=6;
@@ -134,6 +136,20 @@ export class Renderer {
     for(let i=0;i<u.rank;i++)star(ctx,start+i*12,p.y+36,4.8,u.rank>=4?'#fff3c7':'#efd295');
     if(u.cursed){ctx.save();ctx.globalAlpha=.85;ctx.strokeStyle='#b77bff';ctx.lineWidth=3;for(const k of [-1,1]){ctx.beginPath();ctx.moveTo(p.x-30,p.y-50+k*8);ctx.quadraticCurveTo(p.x,p.y-30+k*16,p.x+30,p.y-10+k*8);ctx.stroke();}ctx.fillStyle='rgba(60,20,90,.35)';rounded(ctx,p.x-40,p.y-40,80,80,8);ctx.fill();star(ctx,p.x,p.y-56,8,'#d8a8ff',this.clock);ctx.restore();}
     if(u.disabled>0){ctx.strokeStyle='#c9a5ef';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y-16,20,-Math.PI/2,-Math.PI/2+Math.PI*2*u.disabled/3.2);ctx.stroke();star(ctx,p.x,p.y-16,9,'#e2cbff');}
+  }
+  drawClock(s,u,p){
+    const ctx=this.ctx,hour=u.clock||0,midnight=s.buffs.midnight>0,ready=hour>=(midnight?9:11),pulse=ready?.6+Math.sin(this.clock*10)*.4:1,cx=p.x,cy=p.y+28,rx=42,ry=16;
+    ctx.save();ctx.fillStyle=midnight?'rgba(255,120,200,.16)':'rgba(255,200,235,.10)';ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=midnight?.8:.55;ctx.strokeStyle=midnight?'#ff9ad8':'#ffd6ef';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.stroke();
+    // Lit arc from twelve to the current hour.
+    if(hour>0){ctx.globalAlpha=ready?pulse:.9;ctx.strokeStyle=ready?'#ffe9a8':midnight?'#ff9ad8':'#ffb3e2';ctx.lineWidth=3.5;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,-Math.PI/2,-Math.PI/2+hour*Math.PI/6);ctx.stroke();}
+    for(let i=0;i<12;i++){const a=-Math.PI/2+i*Math.PI/6,x=cx+Math.cos(a)*rx,y=cy+Math.sin(a)*ry,lit=i>0&&i<=hour;
+      if(i===0){ctx.globalAlpha=ready?pulse:.8;star(ctx,x,y-1,ready?7:5,ready?'#fff2b0':'#ffd6ef',this.clock*(ready?3:.5));continue;}
+      ctx.globalAlpha=lit?(ready?pulse:1):.4;ctx.fillStyle=lit?(midnight?'#ffc2e8':ready?'#fff2c0':'#ffe3f5'):'#d9c8e6';ctx.beginPath();ctx.arc(x,y,lit?3.4:2.2,0,Math.PI*2);ctx.fill();}
+    // Clock hand pointing at the current hour.
+    const a=-Math.PI/2+hour*Math.PI/6;ctx.globalAlpha=.8;ctx.strokeStyle=midnight?'#ffb3e2':'#ffe3f5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*rx*.72,cy+Math.sin(a)*ry*.72);ctx.stroke();
+    ctx.restore();
   }
   drawEnemy(e,chapter){const ctx=this.ctx,p=this.fx.point(e.uid),boss=e.boss?BOSSES[e.boss]:null,bob=Math.sin(this.clock*(e.kind==='runner'?15:8)+e.uid)*2;
     const size=boss?116:e.kind==='armor'?66:e.kind==='runner'?52:58;shadow(ctx,p.x,p.y+7,size*.31,.32);
