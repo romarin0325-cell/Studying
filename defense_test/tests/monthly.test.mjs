@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProfile,command,parseProfile,ProfileStore} from '../src/profile.js';
 import {calendar} from '../src/economy.js';
-import {currentRecord} from '../src/monthly.js';
+import {currentRecord,monthlyReward} from '../src/monthly.js';
 const NOW=Date.parse('2026-10-05T03:00:00Z'),NEXT=Date.parse('2026-11-01T00:00:00Z');
 const ready=()=>{const p=createProfile(NOW);p.cleared=3;return p;};
 const act=(p,id,args={},time=NOW)=>{const r=command(p,id,args,time);assert.ok(r.ok,r.message);return r;};
@@ -12,9 +12,9 @@ test('monthly entries are unlimited, only confirmed rewards pay, and the best re
   const p=ready();attempt(p,3,300);const first=p.monthlyBest.token;attempt(p,3,500);attempt(p,2,9000);
   assert.equal(p.dreams,600);assert.equal(p.monthlyBest.round,3);assert.equal(p.monthlyBest.damage,500);
   assert.equal(command(p,'claimMonthly',{token:first},NOW).ok,false,'stale confirmation cannot pay a different record');
-  act(p,'claimMonthly',{token:p.monthlyBest.token});assert.equal(p.dreams,900);
+  act(p,'claimMonthly',{token:p.monthlyBest.token});assert.equal(p.dreams,600+monthlyReward({round:3}));
   const confirmed=structuredClone(p.monthlyClaim);attempt(p,6,1000);assert.equal(p.monthlyBest.round,6);assert.deepEqual(p.monthlyClaim,confirmed);
-  assert.equal(command(p,'claimMonthly',{token:p.monthlyBest.token},NOW).ok,false);assert.equal(p.dreams,900);
+  assert.equal(command(p,'claimMonthly',{token:p.monthlyBest.token},NOW).ok,false);assert.equal(p.dreams,600+monthlyReward({round:3}));
   assert.ok(parseProfile(JSON.stringify(p)));
 });
 
@@ -23,7 +23,7 @@ test('monthly rollover starts a new maximum and reward while retaining a lifetim
   for(let i=0;i<35;i++)attempt(p,1,10);assert.equal(p.results.length,30);assert.equal(p.monthlyLifetime.round,50);
   assert.equal(currentRecord(p,NEXT),null);assert.equal(command(p,'claimMonthly',{token:p.monthlyBest.token},NEXT).ok,false);
   attempt(p,2,50,NEXT);assert.equal(p.monthlyBest.round,2);assert.equal(p.monthlyLifetime.round,50);
-  const before=p.dreams;act(p,'claimMonthly',{token:p.monthlyBest.token},NEXT);assert.equal(p.dreams,before+250);
+  const before=p.dreams;act(p,'claimMonthly',{token:p.monthlyBest.token},NEXT);assert.equal(p.dreams,before+monthlyReward({round:2}));
   act(p,'begin',{mode:'monthly'},NEXT);const token=p.active.token;act(p,'settle',{token,round:4,damage:100},Date.parse('2026-12-01T00:00:00Z'));
   assert.equal(p.monthlyBest.period,'2026-12','a crossing attempt belongs to its completion month');
 });
@@ -35,7 +35,7 @@ test('legacy paid attempts cannot be paid again, but a legacy ongoing entry is a
   act(paid,'begin',{mode:'monthly'});assert.ok(paid.active);
   const oldActive=ready();act(oldActive,'begin',{mode:'monthly'});oldActive.monthly='2026-10';delete oldActive.monthlyBest;delete oldActive.monthlyLifetime;delete oldActive.monthlyClaim;
   const ongoing=parseProfile(oldActive);assert.ok(ongoing);assert.equal(ongoing.monthly,null);
-  act(ongoing,'settle',{token:ongoing.active.token,round:2});act(ongoing,'claimMonthly',{token:ongoing.monthlyBest.token});assert.equal(ongoing.dreams,850);
+  act(ongoing,'settle',{token:ongoing.active.token,round:2});act(ongoing,'claimMonthly',{token:ongoing.monthlyBest.token});assert.equal(ongoing.dreams,600+monthlyReward({round:2}));
 });
 
 test('reward confirmation is an atomic cross-window receipt and malformed records are rejected',()=>{

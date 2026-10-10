@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {HEROES,DEFAULT_DECK} from '../src/content.js';
 import {unlockProfile} from '../src/test-unlock.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away} from '../src/profile.js';
+import {monthlyReward,weeklyReward} from '../src/monthly.js';
 import {duplicateCost,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
@@ -139,7 +140,7 @@ test('weekly draft survives reload, excludes dispatched heroes and produces five
   for(let i=1;i<5;i++)call(reload,'draft',{index:i%2});
   assert.equal(new Set(reload.value.active.deck).size,5);assert.ok(validateProfile(reload.value));
   assert.ok(createBattle(reload.value));assert.equal(reload.transact('begin',{mode:'weekly'},NOW).ok,false);
-  const token=reload.value.active.token;call(reload,'settle',{token,round:3,won:false});assert.equal(reload.value.dreams,900);
+  const token=reload.value.active.token;call(reload,'settle',{token,round:3,won:false});assert.equal(reload.value.dreams,600+weeklyReward('easy',3,false));
   assert.equal(reload.transact('settle',{token,round:3,won:false},NOW).ok,false);
   assert.equal(reload.transact('begin',{mode:'weekly'},NOW).ok,false);
   call(reload,'begin',{mode:'weekly'},NOW+7*24*HOUR);
@@ -160,9 +161,9 @@ test('failed monthly entry, record save and reward confirmation preserve the wal
   disk.fail=true;assert.equal(s.transact('settle',{token:s.value.active.token,round:2},NOW).ok,false);assert.deepEqual(s.value,before);
   disk.fail=false;call(s,'settle',{token:s.value.active.token,round:2,damage:1200,seconds:32});assert.equal(s.value.dreams,600);
   const token=s.value.monthlyBest.token;disk.fail=true;assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);assert.equal(s.value.monthly,null);assert.equal(s.value.dreams,600);
-  disk.fail=false;call(s,'claimMonthly',{token});assert.equal(s.value.dreams,850);
+  disk.fail=false;call(s,'claimMonthly',{token});assert.equal(s.value.dreams,600+monthlyReward({round:2}));
   assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);
-  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,850);assert.equal(s.value.monthlyBest.round,4);
+  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,600+monthlyReward({round:2}));assert.equal(s.value.monthlyBest.round,4);
   assert.equal(s.transact('claimMonthly',{token:s.value.monthlyBest.token},NOW).ok,false);
   call(s,'begin',{mode:'monthly'},Date.parse('2026-11-01T00:00:00Z'));
 });
@@ -197,12 +198,13 @@ test('concurrent windows, clock rollback, daily rewards and first-clear rewards 
   assert.equal(s.transact('idle',{},NOW).ok,false);assert.equal(s.value.dust,dust);
 });
 
-test('unlockProfile owns every companion at bond 10 and clears main stages through 45',()=>{
+test('unlockProfile owns every companion at bond 10, every relic, and clears main stages through 45',()=>{
   const fresh=createProfile(NOW),deck=[...fresh.deck],partner=fresh.partner,relics=structuredClone(fresh.relics);
   const p=unlockProfile(fresh);
   assert.equal(p,fresh);
   assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===10&&e.level===1&&e.enhance===0&&e.copies===0;}));
   assert.equal(p.cleared,45);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
-  assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);assert.deepEqual(p.relics,relics);
+  assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
+  assert.deepEqual(p.relics,Object.fromEntries(Object.entries(relics).map(([id,r])=>[id,{...r,owned:true}])),'every relic owned, enhancement untouched');
   assert.equal(validateProfile(p),true);
 });

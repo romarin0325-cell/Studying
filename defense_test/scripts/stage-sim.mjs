@@ -1,10 +1,11 @@
 // Real-stage difficulty bench. Plays whole main stages with the built-in auto-play.
-//   node defense_test/scripts/stage-sim.mjs [--stages 3,9,15,21,27,33,39,45] [--seeds 10] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--json out.json]
+//   node defense_test/scripts/stage-sim.mjs [--ai smart|basic] [--stages 3,9,15,21,27,33,39,45] [--seeds 10] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--json out.json]
 import fs from 'node:fs/promises';
 import {HERO} from '../src/content.js';
 import {heroMultiplier,specialMultiplier,springGauge,seedGold} from '../src/economy.js';
 import * as engine from '../src/combat/engine.js';
-import {autoPlay,clearedRounds} from '../src/battle.js';
+import {autoPlay as basicAuto,clearedRounds} from '../src/battle.js';
+import {smartAutoPlay} from '../src/smart-auto.js';
 
 const DT=.05,AUTO=.32,LIMIT=900,LIMIT_TICKS=LIMIT/DT;
 const args=process.argv.slice(2);
@@ -14,6 +15,9 @@ const STAGES=opt('stages','3,9,15,21,27,33,39,45').split(',').map(s=>Number(s.tr
 const SEEDS=Number(opt('seeds',10));
 const ROSE=opt('rose','auto');
 const JSON_OUT=opt('json',null);
+// --ai smart (default): the reasonable player model. --ai basic: the in-game auto helper.
+const AI=opt('ai','smart');if(!['smart','basic'].includes(AI))throw new Error('--ai must be smart or basic');
+const autoPlay=AI==='smart'?smartAutoPlay:basicAuto;
 const DEFAULT_DECKS=[
   ['star_boy','snow_rabbit','night_rabbit','siren','great_detective'],
   ['star_boy','snow_rabbit','night_rabbit','siren','queen'],
@@ -90,7 +94,7 @@ function printTable(deck,rows,overall){
 }
 
 const started=process.hrtime.bigint();
-console.log(`스테이지 ${STAGES.join(',')} · 시드 1..${SEEDS} · 장미 ${roseMode} · 강화 0 · 자동 ${AUTO}s · 제한 ${LIMIT}s`);
+console.log(`${AI==="smart"?"합리 오토":"기본 오토"} · 스테이지 ${STAGES.join(',')} · 시드 1..${SEEDS} · 장미 ${roseMode} · 강화 0 · 자동 ${AUTO}s · 제한 ${LIMIT}s`);
 const results=[];
 for(const deck of decks){
   const rows=[],overall=tally();

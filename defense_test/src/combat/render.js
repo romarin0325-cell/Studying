@@ -49,7 +49,7 @@ export class Renderer {
     if(e.type==='curse'){this.float('저주',e.x,e.y-70,'#d8a8ff',26);this.bursts(e.x,e.y-20,'#b77bff',16,.8);}
     if(e.type==='shuffle'){this.float('투신의 난무!',360,390,'#ffb08a',30);this.shake=6;}
     if(e.type==='judgement'){this.shake=e.hit?9:4;this.bursts(e.x,e.y-10,'#fff2c0',e.hit?30:12,1.3);if(e.hit)this.float('천벌',e.x,e.y-70,'#fff2c0',28);}
-    if(e.type==='bossCast'&&e.pattern==='thunder'){this.shake=10;this.float('천둥 심판',360,390,'#ffe27a',32);}
+    if(e.type==='bossCast'&&e.pattern==='thunder'){this.shake=10;this.float('천둥 기둥',360,390,'#ffe27a',32);}
     if(e.type==='upgrade')this.float('훈련 완료',360,390,'#f6dc9c',28);
     if(this.effects.length>this.budget.effects)this.effects.splice(0,this.effects.length-this.budget.effects);
   }
@@ -96,8 +96,8 @@ export class Renderer {
     if(dragged)for(let i=0;i<25;i++)if(s.board[i]&&s.board[i].uid!==dragged.uid&&canMerge(dragged,s.board[i])){const p=cellPoint(i);rounded(ctx,p.x-42,p.y-42,84,82,8);ctx.fillStyle=`rgba(164,246,208,${.16+Math.sin(this.clock*6)*.05})`;ctx.fill();ctx.strokeStyle='#baf6df';ctx.lineWidth=3;ctx.stroke();star(ctx,p.x,p.y-30,9,'#daffe4',Math.PI/4);}
     if(this.hover>=0&&this.drag){const p=cellPoint(this.hover);rounded(ctx,p.x-42,p.y-42,84,82,6);ctx.fillStyle='#ffe9a433';ctx.fill();}
     const tele=s.telegraph,look={seal:['rgba(194,99,224,A)','#e3a2fb'],stun1:['rgba(194,99,224,A)','#e3a2fb'],storm:['rgba(141,204,250,A)','#ffe8aa'],judgement:['rgba(255,226,140,A)','#fff2c0'],thunder:['rgba(255,230,120,A)','#ffe27a'],shuffle:['rgba(255,150,110,A)','#ffb08a']}[tele?.pattern];
-    if(look){const left=Math.max(0,tele.ends-s.time),urgent=left<1?18:9,a=(tele.pattern==='thunder'||tele.pattern==='shuffle'?.08:.16)+Math.sin(this.clock*urgent)*.08;ctx.fillStyle=look[0].replace('A',a.toFixed(3));ctx.strokeStyle=look[1];ctx.lineWidth=tele.pattern==='judgement'?3.5:2;
-      for(const i of tele.cells){const p=cellPoint(i);rounded(ctx,p.x-43,p.y-43,86,86,5);ctx.fill();if(tele.pattern!=='thunder'&&tele.pattern!=='shuffle')ctx.stroke();}
+    if(look){const left=Math.max(0,tele.ends-s.time),urgent=left<1?18:9,a=(tele.pattern==='shuffle'?.08:.16)+Math.sin(this.clock*urgent)*.08;ctx.fillStyle=look[0].replace('A',a.toFixed(3));ctx.strokeStyle=look[1];ctx.lineWidth=tele.pattern==='judgement'?3.5:2;
+      for(const i of tele.cells){const p=cellPoint(i);rounded(ctx,p.x-43,p.y-43,86,86,5);ctx.fill();if(tele.pattern!=='shuffle')ctx.stroke();}
       if(tele.pattern==='judgement'){const p=cellPoint(tele.cells[0]),g=ctx.createLinearGradient(0,0,0,p.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,`rgba(255,236,170,${.25+(1-left/(tele.total||2.6))*.35})`);ctx.fillStyle=g;ctx.fillRect(p.x-14-(1-left/(tele.total||2.6))*10,0,28+(1-left/(tele.total||2.6))*20,p.y);}}
     const entities=this.entities;entities.length=0;for(let i=0;i<25;i++)if(s.board[i])entities.push({kind:'hero',i,y:cellPoint(i).y+20});for(const e of s.enemies)entities.push({kind:'enemy',e,y:this.fx.point(e.uid).y});entities.sort((a,b)=>a.y-b.y);
     for(const ent of entities)ent.kind==='hero'?this.drawHero(s,ent.i):this.drawEnemy(ent.e,s.chapter);

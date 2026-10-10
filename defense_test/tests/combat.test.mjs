@@ -151,13 +151,19 @@ test('support/control growth follows the five-step duplicate milestones while eq
   close(s.buffs.haste/base.buffs.haste,1.2,'support duration milestone');
 });
 
-test('weekly and monthly challenges have no round timer and a monthly boss reaching the core ends the run',()=>{
+test('weekly and monthly challenges run 18 tiered waves with no round timer; a monthly boss reaching the core ends the run',()=>{
   const weekly=E.wavePlan(1,0,'weekly'),monthly=E.wavePlan(1,0,'monthly');
-  assert.ok(weekly.sequence.length>=9);assert.ok(weekly.sequence.every(e=>e.hp===34));
-  assert.deepEqual(monthly.sequence,[{kind:'boss',hp:1225}]);assert.equal(E.wavePlan(2,0,'monthly').sequence[0].hp,2450,'monthly bosses step up 2x');
-  assert.ok(E.wavePlan(8,0,'weekly').sequence[0].hp>34*60);
-  const armoured=E.wavePlan(3,0,'weekly').sequence,plain=armoured.find(e=>e.kind==='grunt').hp;
-  assert.equal(armoured.find(e=>e.kind==='armor').hp,Math.round(plain*1.4),'armour is tougher instead of reducing damage');
+  assert.ok(weekly.sequence.length>=10);assert.equal(weekly.sequence.some(e=>e.kind==='boss'),false);
+  assert.equal(E.wavePlan(3,0,'weekly').sequence.filter(e=>e.kind==='boss').length,1,'a boss every third wave');
+  assert.equal(monthly.sequence.length,1);assert.equal(monthly.sequence[0].kind,'boss');
+  for(const mode of ['weekly','monthly'])for(let w=1;w<18;w++){
+    const hp=x=>Math.max(...E.wavePlan(x,0,mode).sequence.filter(e=>mode==='monthly'||e.kind==='grunt').map(e=>e.hp));assert.ok(hp(w+1)>hp(w),mode+' climbs at '+w);
+    for(const [low,high] of [['easy','hard'],['hard','abyss']])assert.ok(E.wavePlan(w,0,mode,high).healthBudget>E.wavePlan(w,0,mode,low).healthBudget,mode+' tiers rise');
+  }
+  const armoured=E.wavePlan(6,0,'weekly').sequence,plain=armoured.find(e=>e.kind==='grunt').hp;
+  assert.ok(armoured.find(e=>e.kind==='armor').hp>plain*3,'armour is tougher instead of reducing damage');
+  // Clearing wave 18 wins the challenge.
+  const done=createBattle(active('weekly',4));done.wave=18;done.queue=[];done.enemies=[];done.spawnIn=1e9;E.step(done,.05);assert.equal(done.phase,'victory');assert.equal(clearedRounds(done),18);
   for(const mode of ['weekly','monthly']){
     const s=createBattle(active(mode,4));s.wave=12;s.waveTime=300;E.step(s,.05);
     assert.equal(s.phase,'combat',mode+' has no round timer');
@@ -212,8 +218,8 @@ test('sustained skill timers, total durations and numeric attack stats survive r
 
 test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain thresholds',()=>{
   for(const [cells,multiplier,ratio,extra] of [
-    [[6],1,.65,0],[[6,7],1.10,.70,0],[[6,7,12],1.18,.75,0],
-    [[6,7,12,11],1.30,.80,1],[[6,7,12,11,16],1.30,.80,1],
+    [[6],1,.65,0],[[6,7],1.15,.70,0],[[6,7,12],1.30,.75,0],
+    [[6,7,12,11],1.50,.80,1],[[6,7,12,11,16],1.50,.80,1],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     for(const index of cells){
@@ -235,7 +241,7 @@ test('Lightning adjacency rejects diagonal and row-wrap links and immediately fo
   const moved=s.board[13],uid=moved.uid;
   assert.equal(E.personalTrait(s,s.board[6]).size,4);
   assert.ok(E.move(s,13,24).ok);assert.equal(s.board[24].uid,uid);
-  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.18);}
+  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.30);}
   assert.equal(E.personalTrait(s,s.board[24]).size,1);
   assert.ok(E.move(s,24,13).ok);
   for(const index of [6,7,12,13])assert.equal(E.personalTrait(s,s.board[index]).size,4);
@@ -245,7 +251,7 @@ test('Lightning adjacency rejects diagonal and row-wrap links and immediately fo
 
 test('Lightning normal hits apply the enhanced chain ratio and only the 4+ component gets another recipient',()=>{
   for(const [cells,ratio,extra,multiplier] of [
-    [[12,13],.70,0,1.10],[[12,13,18],.75,0,1.18],[[12,13,18,17],.80,1,1.30],
+    [[12,13],.70,0,1.15],[[12,13,18],.75,0,1.30],[[12,13,18,17],.80,1,1.50],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     const enemies=enemiesFor(s,[1200,1220,1240,1260,1280].map(progress=>({progress})));
@@ -561,16 +567,19 @@ test('buffs: the strongest per family applies and families multiply',()=>{
   const plain=E.combatStats(s,u,12);
   s.buffs.awaken=5;s.buffScale.awaken=1;s.buffs.radiance=5;s.buffScale.radiance=1;
   const both=E.combatStats(s,u,12),dragon=1+.2;
-  close(both.damage/plain.damage,1.6,'awaken and radiance do not stack: only awaken (+60%) counts');
+  close(both.damage/plain.damage,1.5,'awaken (+35%) and radiance (+50%) do not stack: only the stronger radiance counts');
   s.board[7]=null;const noAura=E.combatStats(s,u,12);close(both.damage/noAura.damage,dragon,'the aura family multiplies on top');
   s.buffs.haste=5;s.buffScale.haste=1;s.buffs.march=5;s.buffScale.march=1;
-  const fast=E.combatStats(s,u,12);close(plain.cooldown/fast.cooldown,1.5,'only haste counts in the ultimate family (march does not add); the siren aura was already in plain');
+  const fast=E.combatStats(s,u,12);close(plain.cooldown/fast.cooldown,1+E.ULT_BUFF.haste.speed,'only haste counts in the ultimate family (march does not add); the siren aura was already in plain');
+  // The harmony ensemble is an ultimate buff: it adds to auras but competes with haste and awaken.
+  s.buffs.haste=0;s.buffs.march=0;s.buffs.awaken=0;s.buffs.radiance=0;const bare=E.combatStats(s,u,12);s.buffs.harmony=5;s.buffScale.harmony=1;
+  const ensemble=E.combatStats(s,u,12);close(ensemble.damage/bare.damage,1+E.ULT_BUFF.harmony.power,'ensemble power');close(bare.cooldown/ensemble.cooldown,1+E.ULT_BUFF.harmony.speed,'ensemble speed on top of the siren aura');
 });
 
 test('Detective: the ultimate exposure never falls behind his basic attack at any rank or training',()=>{
   for(let rank=1;rank<=6;rank++)for(let training=0;training<=5;training++){
     const s=traitArena([{hero:'great_detective',index:12,rank}]);s.upgrades.great_detective=training;const u=s.board[12];
-    const basic=Math.min(E.DAMAGE_TAKEN_CAP,(.18+training*.02)*E.rankControl(rank)),ult=E.detectiveExposure(s,u);
+    const basic=Math.min(E.DAMAGE_TAKEN_CAP,(.15+training*.02)*E.rankControl(rank)),ult=E.detectiveExposure(s,u);
     assert.ok(ult>=basic*1.3||ult===E.DAMAGE_TAKEN_CAP,`rank ${rank} training ${training}: ${ult} vs ${basic}`);
   }
 });
@@ -589,11 +598,11 @@ test('boss passives: immunities, doubled DoT, doubled exposure and halved basic 
   close(hit(0,.2)/hit(2,.2),1.4/1.2,'the artificial demon doubles exposure');close(hit(8,0)/hit(2,0),.5,'Astea halves basic attacks');
 });
 
-test('curse seals a random unit at most twice per boss; merging, selling or Jasmine clears it',()=>{
+test('curse seals a random unit once per boss appearance; merging, selling or Jasmine clears it',()=>{
   const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'jasmine',index:12}]);s.chapter=3;
   const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);assert.equal(boss.boss,'curse_iris');boss.speed=0;
   for(let i=0;i<4;i++){boss.skillIn=0;E.step(s,.05);}
-  assert.equal(s.board.filter(u=>u?.cursed).length,2,'two curses per appearance');assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
+  assert.equal(s.board.filter(u=>u?.cursed).length,1,'one curse per appearance');assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
   const cursed=s.board.findIndex(u=>u?.cursed);assert.ok(E.restore(E.serialize(s)),'cursed units save and restore');
   if(s.board[0]?.hero==='star_boy'&&s.board[1]?.hero==='star_boy'&&(s.board[0].cursed||s.board[1].cursed)){assert.ok(E.move(s,0,1).merged);assert.equal(s.board[1].cursed,undefined,'a merge makes a fresh unit');}
   for(const u of s.board)if(u)u.cursed=true;s.board[12].cursed=false;s.gauge=120;assert.ok(E.cast(s,'jasmine').ok);assert.ok(s.board.every(u=>!u?.cursed),'Jasmine cleanses');
@@ -611,13 +620,15 @@ test('Astea judgement removes the unit left on the marked cell; moving away dodg
   }
 });
 
-test('Thor judgement at mid-path is cancelled by a stun, otherwise stuns the whole board',()=>{
-  for(const stun of [false,true]){
+test('Thor lights three random columns once at mid-path; units moved out of them are not stunned',()=>{
+  for(const dodge of [false,true]){
     const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0}]);s.chapter=4;const [boss]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH*.5+1}]);boss.speed=0;boss.skillIn=99;
-    E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');
-    if(stun){boss.statusEffects.push({type:'stun',source:'t:stun',owner:null,amount:1,until:s.time+1});}
-    for(let i=0;i<70&&s.telegraph;i++)E.step(s,.05);
-    assert.equal(boss.judged,true);assert.equal(s.board.filter(Boolean).every(u=>u.disabled>0),!stun);
+    E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');const cells=s.telegraph.cells;
+    assert.equal(cells.length,15);assert.equal(new Set(cells.map(c=>c%5)).size,3,'three whole columns');close(s.telegraph.ends-s.time,3.5,'telegraph');
+    let at=12;if(cells.includes(12)&&dodge){const safe=[...Array(25).keys()].find(c=>!cells.includes(c)&&!s.board[c]);assert.ok(E.move(s,12,safe).ok);at=safe;}
+    for(let k=0;k<80&&s.telegraph;k++)E.step(s,.05);
+    assert.equal(boss.judged,true);assert.equal(s.board[at].disabled>0,cells.includes(at),'only lit cells are stunned');
+    boss.progress=E.PATH_LENGTH*.6;boss.skillIn=99;E.step(s,.05);assert.notEqual(s.telegraph?.pattern,'thunder','once per appearance');
   }
 });
 
@@ -635,10 +646,10 @@ test('Ares reshuffles the board at most twice; love Iris drains only a full gaug
 
 test('Queen pays 12G (+6G per rank, cap 90); Doom refunds without training and training raises the fortune',()=>{
   assert.equal(E.queenIncome(1,1),12);assert.equal(E.queenIncome(2,1),18);assert.equal(E.QUEEN_CAP,90);assert.equal(E.QUEEN_TAX,40);
-  assert.equal(E.fortuneFactor(0),12);assert.equal(E.fortuneFactor(39),13);assert.equal(E.fortuneFactor(500),17);assert.equal(E.fortuneFactor(500,3),20);
+  assert.equal(E.fortuneFactor(0),7);assert.equal(E.fortuneFactor(39),8);assert.equal(E.fortuneFactor(500),12);assert.equal(E.fortuneFactor(500,3),15);
   assert.equal(E.doomRefund(1),50);assert.equal(E.doomRefund(3),150);
   const s=traitArena([{hero:'doom',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.gauge=120;s.gold=25+60;const hp=e.hp,base=E.power(s,s.board[12]);
-  assert.ok(E.cast(s,'doom').ok);close(hp-e.hp,base*15,'60 gold left after paying gives 12+3 = 15x');assert.equal(s.gold,60);
+  assert.ok(E.cast(s,'doom').ok);close(hp-e.hp,base*10,'60 gold left after paying gives 7+3 = 10x');assert.equal(s.gold,60);
   // The merge refund is the same before and after training.
   for(const level of [0,5]){
     const r=traitArena([{hero:'doom',index:0,rank:2},{hero:'doom',index:1,rank:2}]);r.upgrades.doom=level;const gold=r.gold;
@@ -829,7 +840,7 @@ test('exposure independently expires from Detective ultimate to Phantom to Detec
   const weak=e.statusEffects.find(effect=>effect.type==='exposure'&&effect.source.startsWith('attack:'));assert.ok(weak);close(strong.until,start+10);
   quiet(s);const restored=E.restore(E.serialize(s));assert.ok(restored);
   advanceTo(s,start+10);advanceTo(restored,start+10);close(e.exposed,.25);assert.equal(E.serialize(restored),E.serialize(s));
-  advanceTo(s,start+11);close(e.exposed,.1);
+  advanceTo(s,start+11);close(e.exposed,.08);
   advanceTo(s,weak.until);assert.equal(e.exposed,0);assert.equal(e.exposeTime,0);
 });
 

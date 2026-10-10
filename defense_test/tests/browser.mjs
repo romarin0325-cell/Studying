@@ -128,21 +128,21 @@ try{
     const deck=['lightning_sage','aurora','star_boy','cinderella','zeke'];
     const t=await boot(width,height,traitFixture(deck,[[6,deck[0]],[7,deck[0]],[11,deck[0]],[12,deck[0]],[8,deck[1]],[13,deck[1]],[16,deck[2]],[17,deck[3],2],[18,deck[3],2],[21,deck[4]]]));
     await t.page.locator('[data-action="resume"]').click();
-    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait').innerText(),/4연결.*30%.*80%.*대상 \+1/);
+    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait-line').innerText(),/4연결.*50%.*80%.*대상 \+1/);
     await shot(t.page,'trait-lightning',width,height);
-    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait').innerText(),/아우로라 2기.*50%/);
-    await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait').innerText(),/등장 웨이브.*150%/);
-    await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait').innerText(),/50%/);
+    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait-line').innerText(),/아우로라 2기.*50%/);
+    await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait-line').innerText(),/등장 웨이브.*150%/);
+    await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait-line').innerText(),/50%/);
     await t.page.locator('.unit-skill').click();await t.page.locator('#sheet[data-kind="skill-info"]').waitFor();assert.match(await t.page.locator('.skill-sheet').innerText(),/2성/);assert.match(await t.page.locator('.skill-now').innerText(),/지금 누르면[\s\S]*피해/);await shot(t.page,'skill-info-from-unit',width,height);await t.page.locator('.dialog-buttons [data-action="close"]').click();
-    await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait').innerText(),/진짜 신데렐라.*따로/);
-    await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait').innerText(),/40%/);
+    await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait-line').innerText(),/진짜 신데렐라.*따로/);
+    await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait-line').innerText(),/40%/);
     await t.page.locator('[data-action="deselect"]').click();await t.page.locator('#arena').scrollIntoViewIfNeeded();await shot(t.page,'trait-auras',width,height);await t.context.close();
     const other=['avalanche_maid','flame_sage','storm_sage','time_ruler','doom'];
     const f=await boot(width,height,traitFixture(other,[[6,other[0]],[8,other[1]],[12,other[2]],[16,other[3],1,1],[18,other[4]]]));
     await f.page.locator('[data-action="resume"]').click();
     await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
     await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/경로 위/);await shot(f.page,'trait-fixed-target',width,height);
-    await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait').innerText(),/이후 웨이브.*125%/);
+    await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait-line').innerText(),/이후 웨이브.*125%/);
     const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.isEnabled(),false);assert.match(await doom.getAttribute('aria-label'),/25골드.*골드 부족/);assert.match(await doom.innerText(),/25G/);await f.context.close();
   }
   const paid=await boot(390,844,traitFixture(['doom','flame_sage','storm_sage','galaxy_whale','avalanche_maid'],[[6,'doom']],{gold:25}));
@@ -278,10 +278,10 @@ try{
   assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
   await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
   assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);await monthly.page.locator('[data-confirm-monthly]').click();
-  assert.equal((await profile(monthly.page)).dreams,750);assert.ok((await profile(monthly.page)).monthly);
+  assert.equal((await profile(monthly.page)).dreams,700);assert.ok((await profile(monthly.page)).monthly);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).dreams,750,'a second attempt cannot pay again');await monthly.context.close();
+  assert.equal((await profile(monthly.page)).dreams,700,'a second attempt cannot pay again');await monthly.context.close();
 
   // Live duration UI uses restored engine state, then a real cast and pause.
   const sustained=createProfile(NOW);sustained.settings.auto=false;sustained.settings.sound=false;command(sustained,'begin',{mode:'main',stage:1},NOW);const buffRun=createBattle(sustained);
@@ -303,7 +303,7 @@ try{
 
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
   const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1050);await record.context.close();
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,910);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.

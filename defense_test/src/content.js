@@ -32,6 +32,16 @@ export const CHAPTERS=Array.from({length:45},(_,id)=>{
   return {...base,id,name:`${base.name}`,caption:`${cycle}번째 별길 · ${BOSSES[boss].name}`,bosses:[boss,boss,boss],
     hp:1+2.5*id/8,cycle,stage:id+1};
 });
+// Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
+// from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
+// late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
+export const CHALLENGE_WAVES=18;
+export const TIERS=Object.freeze({
+  easy:{name:'쉬움',unlock:3,from:4,to:14,late:1.2,boss:1,monthly:1,reward:1},
+  hard:{name:'어려움',unlock:18,from:15,to:30,late:2,boss:1.15,monthly:.44,reward:1.5},
+  abyss:{name:'심연',unlock:36,from:28,to:48,late:3.4,boss:1.3,monthly:.3,reward:2.2},
+});
+export const TIER_IDS=Object.keys(TIERS);
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
 export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=source.TRANSFORM_ART;
 export const ASSET_PATHS=source.ASSET_PATHS;
