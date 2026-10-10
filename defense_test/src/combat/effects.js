@@ -1,5 +1,5 @@
 import {HERO,HEROES} from '../content.js';
-import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH} from './engine.js';
+import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field';
@@ -95,6 +95,7 @@ export class CombatFX{
     if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
+    if(e.type==='bell')this.add({...e,life:.85,total:.85});
     if(e.type==='bossCast'&&e.pattern==='thunder')for(const i of e.cells||[])this.add({type:'thunderStrike',...cellPoint(i),seed:i,life:.6,total:.6});
     if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
@@ -329,7 +330,7 @@ export class CombatFX{
   drawPersistent(s){
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;const own=activeSkill(s,u.hero),p=cellPoint(i),ctx=this.ctx;
-      const partial=own&&PARTIAL_AURAS.includes(own.key)&&(own.key!=='midnight'||!s.board.some((b,j)=>b?.hero==='cinderella'&&b.rank>u.rank));
+      const partial=own&&PARTIAL_AURAS.includes(own.key)&&(own.key!=='midnight'||topCinderella(s)?.uid===u.uid);
       if(partial){
         const h=HERO[u.hero],pulse=.75+Math.sin(this.clock*5+u.uid)*.2;
         this.glow('glow',h.color,p.x,p.y-6,150*pulse,.55);
@@ -495,6 +496,21 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+      if(e.type==='bell'){
+        // Midnight bell: a glass star drops on the target, a clock face rings out to the splash radius, glass flies.
+        const drop=Math.min(1,t/.18),ring=window01(t,.14,.8),fade=1-window01(t,.45,1),r=(e.radius||150)*easeOut(ring);
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        if(drop<1){ctx.globalAlpha=.9;ctx.translate(e.x,e.y-20-(1-drop)*220);ctx.rotate(drop*3);star(ctx,22,'#fff2fb');ctx.restore();ctx.save();ctx.globalCompositeOperation='lighter';}
+        if(t>.14){
+          ctx.globalAlpha=fade*.9;ctx.strokeStyle='#ff9ad8';ctx.lineWidth=9*fade+2;ctx.beginPath();ctx.ellipse(e.x,e.y+6,r,r*.42,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#fff2fb';ctx.lineWidth=3*fade+1;ctx.stroke();
+          for(let i=0;i<12;i++){const a=-Math.PI/2+i*Math.PI/6;diamond(ctx,e.x+Math.cos(a)*r,e.y+6+Math.sin(a)*r*.42,(i===0?11:6)*fade+2,i===0?'#fff2b0':'#ffe3f5');}
+          for(let i=0;i<14;i++){const a=hash(e.x+e.y,i)*Math.PI*2,v=60+hash(e.x,i+20)*120,k=easeOut(ring);ctx.globalAlpha=fade*.85;ctx.save();ctx.translate(e.x+Math.cos(a)*v*k,e.y-14+Math.sin(a)*v*k*.6+k*k*30);ctx.rotate(a+k*5);diamond(ctx,0,0,5+hash(e.y,i)*6,i%3?'#ffc8ec':'#ffffff');ctx.restore();}
+        }
+        ctx.restore();
+        this.glow('rays','#ffd6ef',e.x,e.y-16,(e.boss?260:200)*Math.min(1,t*4),fade*.8,t*.8);this.glow('glow','#fff2fb',e.x,e.y-10,170,fade*.7);
+        if(t>.1)this.emblem('cinderella',e.x,e.y-14,(e.boss?190:150)*easeBack(window01(t,.1,.4)),t*.6,fade*.75);
+        continue;
+      }
       if(e.type==='judgement'){
         // Divine punishment: a column of light falls on the cell, then a ring and rays.
         const fall=Math.min(1,t*4),fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,0,0,e.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,'#fff6d8ee');ctx.globalAlpha=fade;ctx.fillStyle=g;const w=36+t*50;ctx.fillRect(e.x-w/2,0,w,e.y*fall);ctx.restore();

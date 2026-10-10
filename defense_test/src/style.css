@@ -495,11 +495,16 @@ em{font-style:normal}
 .reward-option small{display:block;font-size:12px;line-height:1.6;color:var(--text2);margin-top:5px}
 
 /* ───────── Battle ───────── */
-.battle{padding:8px 8px 0}
-.battle-top{display:flex;align-items:center;gap:6px;margin:0 2px 6px}
-.battle-title{flex:1;min-width:0}
-.battle-title strong{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.battle-title small{color:var(--text3);font-size:11px}
+.battle{padding:max(12px,calc(env(safe-area-inset-top) + 6px)) 8px 0}
+.battle-top{display:flex;align-items:center;gap:6px;margin:0 2px 8px}
+.battle-title{flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.battle-name{min-width:0;display:flex;flex-direction:column;gap:1px}
+.battle-name strong{font-family:var(--display);font-weight:400;font-size:18px;line-height:1.15;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em;text-shadow:0 1px 0 rgba(0,0,0,.5)}
+.battle-name small{color:var(--text3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage-tag{flex-shrink:0;width:42px;height:42px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;background:linear-gradient(180deg,#2a2f62,#151a40) padding-box,linear-gradient(160deg,#ffe7a3,#c99a46 60%,#7c5c2b) border-box;border:1.5px solid transparent;box-shadow:0 3px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+.stage-tag small{font-size:7px;font-weight:800;letter-spacing:.16em;color:#d9c08a;margin-bottom:2px}
+.stage-tag b{font-family:var(--display);font-weight:400;font-size:19px;background:linear-gradient(180deg,#fff6d6,#f3cd73);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stage-tag:not([data-mode=main]) b{font-family:var(--body);font-weight:800;font-size:12px}
 .chip-btn,.icon-btn{min-height:36px;height:36px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--text)}
 .chip-btn{padding:0 10px}
 .chip-btn .ic{width:14px;height:14px}
@@ -517,7 +522,7 @@ em{font-style:normal}
 .hud-time{color:var(--text3);font-size:12px;font-variant-numeric:tabular-nums}
 .arena-wrap{position:relative;width:100%;border-radius:14px;overflow:hidden;background:#0c1830;border:1px solid var(--line2)}
 .arena-wrap canvas{display:block;width:100%;height:auto;aspect-ratio:720/780;touch-action:none}
-.battle-notice{position:absolute;left:10px;right:10px;bottom:8px;color:var(--text);background:#0a1020dd;border:1px solid #ff7d6e66;backdrop-filter:blur(5px);border-radius:8px;padding:6px 10px;font-size:12px;text-align:center;pointer-events:none}
+.battle-notice{position:absolute;left:10px;right:10px;bottom:8px;color:var(--text);background:#0a1020dd;border:1px solid rgba(160,184,230,.3);backdrop-filter:blur(5px);border-radius:8px;padding:6px 10px;font-size:12px;text-align:center;pointer-events:none}
 .skills{display:grid;grid-template-columns:repeat(var(--team-size,5),minmax(0,1fr));gap:5px;margin:6px 0}
 .skill-button{--fill:0;border:1.5px solid var(--line2);background:var(--panel);border-radius:12px;padding:5px 1px 8px;display:flex;flex-direction:column;align-items:center;min-width:0;min-height:60px;position:relative;overflow:hidden}
 .skill-button:before{content:'';position:absolute;left:0;bottom:0;height:4px;width:calc(var(--fill)*100%);background:var(--gem);opacity:.7}
@@ -796,7 +801,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
   .sheet-footer{padding:10px 14px 14px}
   .draft-card{min-height:262px}
   .draft-card .art img{height:108px}
-  .battle{padding:6px 5px 0}
+  .battle{padding-left:5px;padding-right:5px}
   .skill-button small{font-size:9px}
   .stat-chips b{font-size:12px}
   .settings-actions{grid-template-columns:1fr}
@@ -807,12 +812,10 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
   .sheet{border-radius:24px;border-bottom:1px solid var(--line2);max-height:87vh}
 }
 @media(max-height:700px){
-  .app[data-screen=battle] .battle-hint{display:none}
   .lobby{min-height:440px}
   .speech{font-size:12px;padding:7px 12px}
   .lobby-side{top:112px;gap:7px}
   .side-btn{min-height:54px}
-  .app[data-screen=battle] .arena-wrap{max-width:min(100%,calc((100vh - 232px)*.923));margin:auto}
 }
 
 /* Relationship stories reuse collection portraits until one memory is opened. */
@@ -968,11 +971,51 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .skill-tip[data-rarity=UR] .skill-tip-head b{background:linear-gradient(180deg,#fffaf0,#ffd36a);-webkit-background-clip:text;background-clip:text;color:transparent}
 @keyframes tip-in{from{transform:translateY(6px) scale(.94);opacity:0}}
 
-/* Battle: the screen fits without scrolling; the unit card overlays the controls. */
-.battle{position:relative}
-.app[data-screen=battle] .arena-wrap{max-width:min(100%,calc((100dvh - 262px)*.923));margin-inline:auto}
-.unit-panel{position:absolute;left:8px;right:8px;bottom:6px;z-index:6;margin:0;padding:9px 10px;box-shadow:0 -6px 24px rgba(0,0,0,.45),var(--shadow);animation:card-up .18s cubic-bezier(.2,.9,.3,1)}
-.battle:has(.unit-panel:not([hidden])) .battle-hint{visibility:hidden}
+/* Battle: a full-height column. Title and HUD on top, the arena centred in the free space,
+   and a dock pinned to the bottom: a slot (wave strip or unit card), ultimates, then controls. */
+.app[data-screen=battle] #content{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+.battle{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.battle-top,.hud,.battle-dock{flex-shrink:0}
+.battle-stage{flex:1;min-height:0;display:grid;place-items:center;container-type:size;margin:2px 0}
+.app[data-screen=battle] .arena-wrap{width:min(100%,calc((100dvh - 400px)*.923));max-width:none;margin:0}
+@supports (width:1cqh){.app[data-screen=battle] .arena-wrap{width:min(100cqw,100cqh*.923)}}
+.battle-dock{position:relative;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.battle-slot{position:relative;height:132px;margin:4px 0 0}
+.battle-dock .skills{margin:6px 0}
+.wave-strip{height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:9px 12px;border-radius:16px;background:linear-gradient(180deg,rgba(18,24,58,.72),rgba(10,14,36,.72));border:1px solid var(--line);transition:opacity .15s}
+.battle-slot.inspecting .wave-strip{opacity:0;pointer-events:none}
+.wave-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.wave-pips{display:flex;align-items:center;gap:5px}
+.wave-pips small{font-size:9px;font-weight:800;letter-spacing:.18em;color:var(--text3);margin-right:4px}
+.wave-pips>b{font-family:var(--display);font-weight:400;font-size:17px;color:var(--gold)}
+.wave-pips i{width:18px;height:8px;border-radius:4px;background:rgba(255,255,255,.12);display:grid;place-items:center}
+.wave-pips i.boss{width:20px;height:20px;border-radius:50%;background:rgba(255,120,150,.12);border:1px solid rgba(255,140,170,.35);color:#ff9fb8}
+.wave-pips i .ic{width:11px;height:11px}
+.wave-pips i.done{background:linear-gradient(90deg,#f3cd73,#ffe9a8)}
+.wave-pips i.boss.done{background:rgba(246,210,122,.2);border-color:var(--gold);color:var(--gold)}
+.wave-pips i.current{background:linear-gradient(90deg,#7fe6d3,#bafcef);box-shadow:0 0 8px rgba(127,230,211,.6)}
+.wave-pips i.boss.current{background:rgba(255,120,150,.28);border-color:#ff9fb8;color:#fff;box-shadow:0 0 10px rgba(255,120,150,.6)}
+.wave-left{font-size:11px;font-weight:700;color:var(--text2);padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+.boss-line{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:12px;background:rgba(255,110,140,.07);border:1px solid rgba(255,140,170,.2)}
+.boss-line.live{background:rgba(255,110,140,.12);border-color:rgba(255,140,170,.45)}
+.boss-mark{width:30px;height:30px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;color:#ffd0dc;background:radial-gradient(circle at 50% 35%,#6a2a52,#2a1030);border:1px solid rgba(255,150,180,.5)}
+.boss-mark .ic{width:15px;height:15px}
+.boss-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.boss-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.boss-head b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-head em{font-style:normal;font-size:11px;font-weight:800;color:#ffb3c6;white-space:nowrap;font-variant-numeric:tabular-nums}
+.boss-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;display:none}
+.boss-line.live .boss-bar{display:block}
+.boss-bar i{display:block;height:100%;transform-origin:left;background:linear-gradient(90deg,#ff5f86,#ffb36b);transition:transform .2s}
+.boss-main small{font-size:10.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wave-strip .battle-hint{margin:0;font-size:10.5px;text-align:left;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unit-panel{position:absolute;inset:0;z-index:6;margin:0;padding:9px 10px;box-sizing:border-box;box-shadow:0 -6px 24px rgba(0,0,0,.45),var(--shadow);animation:card-up .18s cubic-bezier(.2,.9,.3,1)}
+.battle.compact .battle-slot{height:0;margin:0;position:static}
+.battle.compact .wave-strip{display:none}
+.battle.compact .unit-panel{inset:auto 0 max(8px,env(safe-area-inset-bottom)) 0}
+.unit-panel{display:flex;flex-direction:column;justify-content:space-between}
+.battle.compact .unit-panel{--glass:linear-gradient(180deg,rgba(30,38,86,.98),rgba(13,17,44,.99));justify-content:flex-start}
+.battle-notice.warn{border-color:#ff7d6e88;color:#ffe2dc;font-weight:700}
 .unit-card-head{display:flex;align-items:center;gap:9px}
 .unit-card-head .unit-name{display:flex;align-items:center;gap:6px}
 .unit-card-head .unit-id strong{font-size:17px}
@@ -980,7 +1023,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .unit-card-head .unit-id small b{color:var(--text);font-size:12px}
 .unit-icon{width:32px;height:32px;min-height:0;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font:700 14px/1 Georgia,serif;color:var(--text2);background:rgba(14,19,48,.7);border:1px solid var(--line2)}
 .unit-icon .ic{width:14px;height:14px}
-.unit-panel .unit-trait{margin-top:6px;padding:4px 8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.unit-panel .unit-trait{margin-top:6px;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .unit-card-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:6px;margin-top:6px;align-items:stretch}
 .unit-card-row .unit-skill{margin:0;grid-template-columns:auto minmax(0,1fr);padding:5px 8px}
 .unit-card-row .unit-skill b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -998,3 +1041,22 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 @media (max-width:350px){.unit-card-row .unit-actions button,.unit-card-row .fixed-target{font-size:10px;white-space:nowrap;padding:2px}.unit-card-row{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
 .boss-trait{margin-top:6px;font-size:12px;font-weight:700;color:#ffd6a8;padding:4px 10px;border-radius:999px;display:inline-block;background:rgba(255,160,100,.12);border:1px solid rgba(255,170,120,.35)}
 .garden-info b.long{font-size:14px;letter-spacing:-.02em}
+/* Top bar on narrow phones: everything shrinks a step; the brand clips rather than sliding under the wallet. */
+.brand{flex:0 1 auto;min-width:0;overflow:hidden}
+.wallet{flex:0 1 auto;margin-left:auto}
+.pill b{white-space:nowrap}
+@media (max-width:400px){
+  .topbar{gap:5px;padding:8px 8px 8px 10px}
+  .brand{gap:5px}
+  .brand .ic{width:20px;height:20px}
+  .brand b{font-size:17px}
+  .brand-text small{font-size:7px;letter-spacing:.16em}
+  .wallet{gap:5px}
+  .pill{height:28px;padding:0 9px 0 5px;gap:4px}
+  .pill .ic{width:17px;height:17px}
+  .pill b{font-size:12px}
+  .topbar .icon-button{width:34px;height:34px;border-radius:10px}
+  .topbar .icon-button .ic{width:18px;height:18px}
+}
+@media (max-width:340px){.brand-text{display:none}}
+.garden-info b i{font-style:normal;font-size:10px;font-weight:700;color:var(--text3);text-shadow:none;margin-left:3px}
