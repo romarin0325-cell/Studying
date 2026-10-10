@@ -151,13 +151,19 @@ test('support/control growth follows the five-step duplicate milestones while eq
   close(s.buffs.haste/base.buffs.haste,1.2,'support duration milestone');
 });
 
-test('weekly and monthly challenges have no round timer and a monthly boss reaching the core ends the run',()=>{
+test('weekly and monthly challenges run 18 tiered waves with no round timer; a monthly boss reaching the core ends the run',()=>{
   const weekly=E.wavePlan(1,0,'weekly'),monthly=E.wavePlan(1,0,'monthly');
-  assert.ok(weekly.sequence.length>=9);assert.ok(weekly.sequence.every(e=>e.hp===34));
-  assert.deepEqual(monthly.sequence,[{kind:'boss',hp:1225}]);assert.equal(E.wavePlan(2,0,'monthly').sequence[0].hp,2450,'monthly bosses step up 2x');
-  assert.ok(E.wavePlan(8,0,'weekly').sequence[0].hp>34*60);
-  const armoured=E.wavePlan(3,0,'weekly').sequence,plain=armoured.find(e=>e.kind==='grunt').hp;
-  assert.equal(armoured.find(e=>e.kind==='armor').hp,Math.round(plain*1.4),'armour is tougher instead of reducing damage');
+  assert.ok(weekly.sequence.length>=10);assert.equal(weekly.sequence.some(e=>e.kind==='boss'),false);
+  assert.equal(E.wavePlan(3,0,'weekly').sequence.filter(e=>e.kind==='boss').length,1,'a boss every third wave');
+  assert.equal(monthly.sequence.length,1);assert.equal(monthly.sequence[0].kind,'boss');
+  for(const mode of ['weekly','monthly'])for(let w=1;w<18;w++){
+    const hp=x=>Math.max(...E.wavePlan(x,0,mode).sequence.filter(e=>mode==='monthly'||e.kind==='grunt').map(e=>e.hp));assert.ok(hp(w+1)>hp(w),mode+' climbs at '+w);
+    for(const [low,high] of [['easy','hard'],['hard','abyss']])assert.ok(E.wavePlan(w,0,mode,high).healthBudget>E.wavePlan(w,0,mode,low).healthBudget,mode+' tiers rise');
+  }
+  const armoured=E.wavePlan(6,0,'weekly').sequence,plain=armoured.find(e=>e.kind==='grunt').hp;
+  assert.ok(armoured.find(e=>e.kind==='armor').hp>plain*3,'armour is tougher instead of reducing damage');
+  // Clearing wave 18 wins the challenge.
+  const done=createBattle(active('weekly',4));done.wave=18;done.queue=[];done.enemies=[];done.spawnIn=1e9;E.step(done,.05);assert.equal(done.phase,'victory');assert.equal(clearedRounds(done),18);
   for(const mode of ['weekly','monthly']){
     const s=createBattle(active(mode,4));s.wave=12;s.waveTime=300;E.step(s,.05);
     assert.equal(s.phase,'combat',mode+' has no round timer');

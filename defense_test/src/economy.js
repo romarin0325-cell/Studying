@@ -6,7 +6,7 @@ export function calendar(now=Date.now()){
   const monday=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-(d.getUTCDay()+6)%7));
   // Normal-banner pickup: the six standard URs rotate every Monday (UTC+9).
   const weekNo=Math.round((monday.getTime()-Date.UTC(1970,0,5))/(7*24*HOUR));
-  return {day,month,week:monday.toISOString().slice(0,10),guardian:HIDDEN[d.getUTCMonth()%6],pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
+  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:HIDDEN[d.getUTCMonth()%6],pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
 }
 export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;

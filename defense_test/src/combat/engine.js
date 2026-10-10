@@ -1,4 +1,4 @@
-import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK } from '../content.js';
+import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
 import { TEAM_SIZE } from '../team-config.js';
 // Forked from active Confluence at d4c32cf. Its geometry and authored attacks
 // remain shared in meaning; Star Garden owns pacing and persistent growth.
@@ -26,7 +26,7 @@ export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
 // Field-wide ultimate buffs. They multiply with placement auras, so they stay modest.
-export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:8},awaken:{power:.35,seconds:8},march:{speed:.25,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.2,speed:.2,seconds:8},echo:{ratio:.65,seconds:8}});
+export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:8},awaken:{power:.35,seconds:8},march:{speed:.25,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.15,speed:.15,seconds:8},echo:{ratio:.65,seconds:8}});
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
 // Bosses take half control and push, then resist new control briefly.
@@ -134,7 +134,7 @@ export function bestUnit(s,id){return id==='time_ruler'?syncTimeRuler(s):id==='c
 export function power(s,u){return HERO[u.hero].damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*TRAINING_STEP)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
-  if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${20+level*2}%`;
+  if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${15+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
   const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
   return extra[id]||'';
@@ -142,6 +142,36 @@ export function trainingBonus(id,level){
 // Base-power comparison excludes rank, relics and temporary buffs; it never
 // claims a compounding +25% increase over the previous upgrade.
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*TRAINING_STEP)).toFixed(2));
+const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed(1))}초`;
+// Numbers that grow with enhancement milestones (special), for the hero sheet: "(현재 …)".
+// Base values are for a 1-star unit without training, the same as the description text.
+export function enhancedNotes(id,specialValue){
+  const k=specialValue,trait=[],skill=[],slow=v=>pctText(Math.min(.8,v*k));
+  const t={siren:()=>trait.push(`인접 공속 +${pctText(.15*k)}`),ancient_dragon:()=>trait.push(`인접 위력 +${pctText(.2*k)}`),
+    harmonious:()=>trait.push(`1종당 위력 +${pctText(.06*k)} · 공속 +${pctText(.05*k)}`),snow_rabbit:()=>trait.push(`감속 ${slow(.4)}`),time_ruler:()=>trait.push(`감속 ${slow(.25)}`),
+    phantom:()=>trait.push(`감속 ${slow(.25)}`),galaxy_whale:()=>trait.push(`감속 ${slow(.4)}`),frost_witch:()=>trait.push(`감속 ${slow(.4)} · 빙결 ${secText(.6*k)}`),
+    guardian:()=>trait.push(`기절 ${secText(.7*k)}`),great_detective:()=>{trait.push(`노출 ${pctText(.08*k)} · 보스 ${pctText(.15*k)}`);skill.push(`노출 ${pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))}`);},
+    aurora:()=>skill.push(`반사율 ${pctText(Math.min(1,.5*k))}`),time_magician:()=>trait.push(`추가 공격 ${pctText(.6*k)}`),luna:()=>trait.push(`처형 기준 ${pctText(Math.min(.5,.4+(k-1)*.2))}`)};
+  t[id]?.();
+  const seconds={echo:8,haste:ULT_BUFF.haste.seconds,awaken:ULT_BUFF.awaken.seconds,march:ULT_BUFF.march.seconds,glassfall:10,gift:6,goddess:8,trauma:10,ice_court:6,harmony:ULT_BUFF.harmony.seconds,dividend:8,freeze:2,thunder:1.2,quake:1.5,vortex:1.5,singularity:2,rewind:2}[HERO[id].skill.type];
+  if(seconds)skill.push(`${['freeze','thunder','quake','vortex','singularity','rewind'].includes(HERO[id].skill.type)?'제어':'지속'} ${secText(seconds*k)}`);
+  return {trait,skill};
+}
+// What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
+export function givenEffects(s,u,index){
+  const level=s.upgrades[u.hero]||0,k=special(s,u.hero),near=neighbors(index).filter(i=>s.board[i]&&!s.board[i].cursed).length,out=[];if(u.cursed)return ['저주받아 효과 없음'];
+  if(u.hero==='siren')out.push(`인접 ${near}명 공속 +${pctText((.15+level*.03)*k*rankSupport(u.rank))}`);
+  else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 위력 +${pctText((.2+level*.03)*k*rankSupport(u.rank))}`);
+  else if(u.hero==='harmonious'){const h=harmonyStrength(s,index);out.push(`인접 ${near}명 · 조화 ${h.count}종 · 위력 +${pctText(h.damage)} · 공속 +${pctText(h.speed)}`);}
+  else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
+  else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
+  else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
+  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankSupport(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
+  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankSupport(u.rank)*k))}`);}
+  else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
+  else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
+  return out;
+}
 export function unitEconomy(s,u){
   const level=s.upgrades[u.hero]||0;
   if(u.hero==='doom')return `합성 시 ${doomRefund(u.rank)}G 즉시 환급`;
@@ -225,10 +255,10 @@ function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,w
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy'}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE);
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,tier:TIERS[tier]?tier:'easy',
     buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
@@ -281,15 +311,24 @@ export function cycleTarget(s,index){const u=s.board[index];if(!u||targetingLock
 // Armour carries 1.4× health instead of a hidden 28% damage reduction.
 const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
-export function wavePlan(wave,chapter=0,mode='main'){
+// Challenge curve: wave w of 18 maps onto the main twelve-wave curve (old waves 2..12) at a stage that
+// climbs through the tier band, plus extra health late in the run for the bigger board.
+export function challengeBase(wave,tier='easy'){
+  const t=TIERS[tier]||TIERS.easy,k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),over=Math.max(0,wave-CHALLENGE_WAVES);
+  const stage=t.from+(t.to-t.from)*k,oldWave=2+10*k;
+  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*k*k)*Math.pow(1.25,over),oldWave};
+}
+export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(mode==='monthly'){
-    // Monthly bosses walk the path: no round timer, so each round steps up 2× to keep runs short.
-    const hp=Math.round(1225*Math.pow(2,wave-1));
+    // Monthly: one boss per round. A boss alone carries about a whole wave of the same point on the curve.
+    const {base}=challengeBase(wave,tier),hp=Math.round(base*30*(TIERS[tier]||TIERS.easy).monthly);
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
   }
   if(mode==='weekly'){
-    const hp=Math.round(34*Math.pow(1.85,wave-1)),sequence=Array.from({length:9},(_,i)=>({kind:enemyKind(i,wave),hp:enemyKind(i,wave)==='armor'?Math.round(hp*1.4):hp}));
-    if(wave%3===0)sequence.push({kind:'boss',hp:hp*16});return {sequence,interval:.5,healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
+    const {base,oldWave}=challengeBase(wave,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
+    const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
+    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*(TIERS[tier]||TIERS.easy).boss)});
+    return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
   }
   // Six waves sample the original twelve-wave curve at 2,4,...,12.
   // Stage nine has the canonical seventh chapter's final enemy statistics.
@@ -302,14 +341,16 @@ export function wavePlan(wave,chapter=0,mode='main'){
   if(wave===3||wave===6)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:bossHp});
   return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:budget+(wave===3||wave===6?bossHp:0)};
 }
+export const weeklyBoss=(chapter,wave)=>BOSS_ORDER[(chapter+Math.floor(wave/3)-1+BOSS_ORDER.length)%BOSS_ORDER.length];
+export const lastWave=s=>s.mode==='main'?MAIN_WAVES:CHALLENGE_WAVES;
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
-  s.queue=wavePlan(wave,s.chapter,s.mode).sequence;s.waveTotal=s.queue.length;
+  s.queue=wavePlan(wave,s.chapter,s.mode,s.tier).sequence;s.waveTotal=s.queue.length;
   if(s.queue.some(e=>e.kind==='boss'))event(s,'bossApproach',{wave});event(s,'wave',{wave});
 }
 function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
-  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?BOSS_ORDER[(wave-1)%BOSS_ORDER.length]:chapter.bosses[0]):null;
+  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?BOSS_ORDER[(wave-1)%BOSS_ORDER.length]:s.mode==='weekly'?weeklyBoss(s.chapter,wave):chapter.bosses[0]):null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
     slow:0,slowTime:0,slowEffects:[],statusEffects:[],stun:0,freeze:0,controlTime:0,burn:0,burnTime:0,burnOwner:null,poison:0,poisonTime:0,exposed:0,exposeTime:0,takenBonus:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0,ccImmune:0,frostLock:0};
   e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
@@ -854,7 +895,7 @@ function completeWave(s){
   const payout={base:waveIncome(s.wave),dividend:dividend(s)};
   giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
   event(s,'clear',{wave:s.wave,...payout});
-  if(s.mode==='main'&&s.wave===MAIN_WAVES&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
+  if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
   s.reward=shuffle(s,BLESSINGS.map(b=>b.id)).slice(0,3);s.phase='reward';
 }
 export function chooseReward(s,id){
@@ -866,7 +907,7 @@ export function chooseReward(s,id){
   if(id==='purse')giveGold(s,35,'축복');
   if(id==='mend'){s.health=Math.min(20,s.health+3);addGauge(s,20);}
   s.blessings.push(id);s.reward=null;event(s,'blessing',{id});
-  if(s.mode==='main'&&s.wave===MAIN_WAVES&&!s.endless){s.phase='victory';s.won=true;}else {s.phase='intermission';s.breakTime=1.4;}
+  if(s.wave===lastWave(s)&&!s.endless){s.phase='victory';s.won=true;}else {s.phase='intermission';s.breakTime=1.4;}
   return {ok:true};
 }
 export function continueEndless(s){if(s.phase!=='victory')return;s.endless=true;beginWave(s,s.wave+1);}
@@ -982,6 +1023,7 @@ export function restore(raw){
     }
     const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||u.clock!==undefined&&(!Number.isInteger(u.clock)||u.clock<0||u.clock>11)||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
+    if(s.tier===undefined)s.tier='easy';if(!TIERS[s.tier])return null;
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;
     // Time Ruler no longer has a solo bonus; its cached top unit only orders casts.
     if(s.timeRulerUid!==null&&!id(s.timeRulerUid))return null;

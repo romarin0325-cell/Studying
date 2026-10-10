@@ -1,14 +1,17 @@
-import {HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
 import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone} from './profile.js';
-import {createBattle,resumeBattle,autoPlay,clearedRounds} from './battle.js';
+import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
+import {smartAutoPlay} from './smart-auto.js';
 import * as E from './combat/engine.js';
 import {Art,Renderer} from './combat/render.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
-import {currentRecord,monthlyReward} from './monthly.js';
+import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
-import {TEAM_SIZE,SOLO,SAVE_KEY} from './team-config.js';
+import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
+// The unlocked test build plays auto with the simulation player model; the release keeps the light helper.
+const autoPlay=UNLOCKED?smartAutoPlay:helperAuto;
 import {MEMORIAL_STORIES} from './memorial.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
@@ -16,7 +19,7 @@ const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.
 const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
 const p=()=>store.value,now=()=>Math.max(Date.now(),p().clockAt),fmt=n=>Number.isFinite(n)?n>=100000?new Intl.NumberFormat('ko-KR',{notation:'compact',maximumFractionDigits:1}).format(n):Math.floor(n).toLocaleString('ko-KR'):'—';
 const pct=n=>(n*100).toFixed(n<.001?3:2)+'%';
-let screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=Math.floor(p().cleared/9),
+let challengeTier='easy',screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=Math.floor(p().cleared/9),
   modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,saveBlocked=false,selected=-1,pointer=null,
   lastFrame=0,accumulator=0,autoIn=0,uiIn=0,previousPhase='',lastResult=null,hud=null;
 const renderClock=new RenderClock(),performanceStats={renders:0,steps:0};
@@ -150,13 +153,13 @@ function renderCollection(){
 }
 function heroDetail(id){
   const h=HERO[id],e=p().heroes[id];if(!h)return;
-  const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),canEnhance=e.owned&&e.copies>=enh&&!p().active,isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1);
+  const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),canEnhance=e.owned&&e.copies>=enh&&!p().active,isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1),live=e.owned&&specialMultiplier(e.enhance)>1?E.enhancedNotes(id,specialMultiplier(e.enhance)):{trait:[],skill:[]};
   show(h.name,'동료',`<div class="detail-stage" data-rarity="${h.rarity}"><span class="detail-rays" aria-hidden="true"></span><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<small>${RARITY[h.rarity].name}</small><h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
     <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>영구 위력</small><b>×${mult.toFixed(2)}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
     <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong></span>${icon('chevron')}</button>
     <div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격 방식</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>
-    <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div>
-    <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p></div>
+    <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p>${live.trait.length?`<small class="live-note">현재 강화 기준 · ${live.trait.join(' · ')}</small>`:''}</div>
+    <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${h.skill.text}</p>${live.skill.length?`<small class="live-note">현재 강화 기준 · ${live.skill.join(' · ')}</small>`:''}</div>
     ${e.owned?`    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (꿈의 온실 · 강화 +${e.enhance} 포함). 강화 1회마다 기본 위력이 5% 증가하고, 5단계마다 제어·지원 효과가 10%씩 오릅니다(현재 +${special}%). 범위와 발동 조건은 변하지 않습니다.</p></details>
     `
     :`<p class="empty">${h.hidden?guardianNote(h.id):`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
@@ -230,34 +233,46 @@ function adventure(){
     <div class="cycle-tabs">${Array.from({length:5},(_,i)=>`<button data-cycle="${i}" aria-pressed="${cycle===i}">${i*9+1}–${i*9+9}</button>`).join('')}</div>
     <div class="stage-list">${rows}</div>`:modeCard(mode)}</section>`;
 }
+// Tier picker shared by both challenges: locked tiers show their stage requirement.
+function tierPicker(kind,withAction){
+  const cleared=p().cleared;if(!TIERS[challengeTier]||cleared<TIERS[challengeTier].unlock)challengeTier='easy';
+  return `<div class="tier-picker" role="radiogroup" aria-label="난이도">${TIER_IDS.map(id=>{const t=TIERS[id],open=cleared>=t.unlock,on=challengeTier===id;return `<button class="tier ${id}" ${withAction?`data-tier="${id}"`:''} role="radio" aria-checked="${on}" ${open?'':'disabled'}><b>${t.name}</b><small>${open?`보상 ×${t.reward}`:`${icon('lock')}스테이지 ${t.unlock}`}</small></button>`;}).join('')}</div>`;
+}
+const weeklyChapter=()=>calendar(now()).weekNo%9;
+function weeklyBosses(){return Array.from({length:CHALLENGE_WAVES/3},(_,i)=>E.weeklyBoss(weeklyChapter(),(i+1)*3));}
 function modeCard(kind,withAction=true){
   if(kind==='monthly')return monthlyCard(withAction);
-  const weekly=true,profile=p(),used=profile.weekly===calendar(now()).week,unlocked=profile.cleared>=3;
-  const label=!unlocked?'스테이지 3 클리어 시 해금':used?'이번 기간 입장 완료':weekly?'드래프트 준비':'도전 준비';
-  return `<div class="mode-card ${kind}"><div><span class="tag">${weekly?'주 1회 · 월요일 00:00 초기화':'월 1회 · 매월 1일 00:00 초기화'}</span><h2>${weekly?'주간 드래프트':'월간 보스전'}</h2><p>${weekly?'보유한 모든 동료 중 2택 1을 ${TEAM_SIZE}번 반복해 팀을 꾸리고, 점점 강해지는 적을 돌파합니다.':'매 웨이브 보스 1체만 등장합니다. 단일 대상 화력과 약화 효과가 핵심입니다.'}</p></div>
-    <div class="stat-chips"><div><small>입장</small><b>${used?'소진':'1회 가능'}</b></div><div><small>적 HP / 라운드</small><b>×1.85</b></div><div><small>라운드 보상</small>${gem(weekly?60:50)}</div></div>
-    <ul class="notes"><li>생명력이 0이 되면 종료됩니다. 제한 시간은 없습니다.</li><li>기본 보상 ${weekly?120:150} + ${weekly?'클리어 라운드':'격파 보스'}당 ${weekly?60:50}</li><li>파견 중인 동료는 참여할 수 없습니다.</li><li>중단해도 같은 입장으로 이어할 수 있습니다.</li></ul>
+  const profile=p(),used=profile.weekly===calendar(now()).week,unlocked=profile.cleared>=3,t=TIERS[challengeTier]||TIERS.easy;
+  const label=!unlocked?'스테이지 3 클리어 시 해금':used?'이번 주 입장 완료':`${t.name} 드래프트 준비`;
+  return `<div class="mode-card weekly"><div><span class="tag">주 1회 · 월요일 00:00 초기화</span><h2>주간 드래프트</h2><p>보유한 동료 중 2택 1을 ${TEAM_SIZE}번 골라 팀을 꾸리고 ${CHALLENGE_WAVES}웨이브를 돌파합니다. 3웨이브마다 이번 주의 보스가 나옵니다.</p></div>
+    ${tierPicker('weekly',withAction)}
+    <div class="boss-route"><small>이번 주 보스</small>${weeklyBosses().map((id,i)=>`<span title="${BOSSES[id].trait||''}"><em>${(i+1)*3}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>
+    <div class="stat-chips"><div><small>입장</small><b>${used?'소진':'1회 가능'}</b></div><div><small>클리어 보상</small>${gem(weeklyReward(challengeTier,CHALLENGE_WAVES,true))}</div><div><small>웨이브당</small>${gem(Math.round(25*t.reward))}</div></div>
+    <ul class="notes"><li>생명력이 0이 되면 끝나고, 넘긴 웨이브만큼 보상을 받습니다. 제한 시간은 없습니다.</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열립니다.</li><li>파견 중인 동료는 참여할 수 없습니다. 중단해도 같은 입장으로 이어할 수 있습니다.</li></ul>
     ${withAction?`<button class="primary wide" data-action="prepare-mode" ${!unlocked||used||profile.active?'disabled':''}>${label}</button>`:''}
     <details class="more"><summary>운영 규칙</summary><p>기간은 한국·일본 시간(UTC+9) 기준입니다. 입장하면 이번 기간의 1회가 소진됩니다.</p></details></div>`;
 }
+const tierName=r=>(TIERS[r?.tier||'easy']||TIERS.easy).name;
 function monthlyRecordPanel(){
   const record=currentRecord(p(),now()),claimed=p().monthly===calendar(now()).month,all=p().monthlyLifetime;
-  return `<div class="monthly-record"><span class="eyebrow">${monthNo(calendar(now()))} 최고 기록</span><div class="record-score"><b>${record?record.round:'—'}</b><span>보스 격파</span>${record?'<span class="record-stamp">BEST</span>':''}</div><p>${record?`${record.token.startsWith('legacy-')?'피해 기록 없음':`총 피해 ${fmt(record.damage)}`} · ${calendar(record.at).day}`:'도전을 마치면 최고 기록이 이곳에 남습니다.'}</p>
+  return `<div class="monthly-record"><span class="eyebrow">${monthNo(calendar(now()))} 최고 기록${record?` · ${tierName(record)}`:''}</span><div class="record-score"><b>${record?record.round:'—'}</b><span>/ ${CHALLENGE_WAVES} 보스 격파</span>${record?'<span class="record-stamp">BEST</span>':''}</div><p>${record?`${record.token.startsWith('legacy-')?'피해 기록 없음':`총 피해 ${fmt(record.damage)}`} · ${calendar(record.at).day}`:'도전을 마치면 최고 기록이 이곳에 남습니다.'}</p>
     ${record?`<div class="record-team"><small>기록 당시 편성</small>${record.deck.map(id=>portrait(id)).join('')}</div>`:''}
     <div class="record-payout"><span>${claimed?'이번 달 확정 보상':'이 기록으로 받을 보상'}</span>${claimed?p().monthlyClaim?gem(monthlyReward(p().monthlyClaim)):'<b>수령 완료</b>':record?gem(monthlyReward(record)):'<b>기록 대기</b>'}</div>
     ${claimed?'<p class="record-note">보상 확정 완료 · 기록 갱신과 재도전은 계속 가능합니다.</p>':record?'<button class="secondary wide" data-action="monthly-claim">이 기록으로 보상 받기</button>':''}
-    ${all?`<div class="lifetime-record">역대 최고 <strong>${all.round}보스</strong><small>${all.period} · 총 피해 ${fmt(all.damage)}</small></div>`:''}</div>`;
+    ${all?`<div class="lifetime-record">역대 최고 <strong>${tierName(all)} ${all.round}보스</strong><small>${all.period} · 총 피해 ${fmt(all.damage)}</small></div>`:''}</div>`;
 }
 function monthlyCard(withAction=true){
-  return `<div class="mode-card monthly"><span class="tag">입장 무제한 · 보상은 월 1회 확정</span><h2>월간 보스전</h2><p>최적의 편성을 찾아 보스 연전을 돌파하세요. 더 좋은 기록을 세운 뒤 이번 달 보상을 확정할 수 있습니다.</p>
-    ${monthlyRecordPanel()}<div class="stat-chips"><div><small>입장</small><b>무제한</b></div><div><small>보스 HP / 라운드</small><b>×2</b></div><div><small>종료 조건</small><b>코어 도달</b></div></div>
-    <ul class="notes"><li>제한 시간은 없습니다. 보스가 코어에 닿으면 도전이 끝납니다.</li><li>보스 격파 수 우선, 같은 격파 수에서는 총 피해로 최고 기록을 판정합니다.</li><li>꿈의결정 150 + 격파 보스당 50. 수령 후 더 높은 기록을 세워도 추가 지급되지 않습니다.</li><li>파견 중인 동료는 참여할 수 없습니다.</li></ul>
-    ${withAction?`<button class="primary wide" data-action="prepare-mode" ${p().cleared<3||p().active?'disabled':''}>${p().cleared<3?'스테이지 3 클리어 시 해금':'보스전 도전'}</button>`:''}
+  const t=TIERS[challengeTier]||TIERS.easy;
+  return `<div class="mode-card monthly"><span class="tag">입장 무제한 · 보상은 월 1회 확정</span><h2>월간 보스전</h2><p>아홉 보스가 차례로 두 바퀴, ${CHALLENGE_WAVES}연전을 펼칩니다. 더 좋은 기록을 세운 뒤 이번 달 보상을 확정할 수 있습니다.</p>
+    ${tierPicker('monthly',withAction)}
+    ${monthlyRecordPanel()}<div class="stat-chips"><div><small>입장</small><b>무제한</b></div><div><small>완주 보상</small>${gem(monthlyReward({round:CHALLENGE_WAVES,tier:challengeTier}))}</div><div><small>종료 조건</small><b>코어 도달</b></div></div>
+    <ul class="notes"><li>제한 시간은 없습니다. 보스가 코어에 닿으면 도전이 끝납니다.</li><li>높은 난이도가 우선이고, 같은 난이도에서는 격파 수, 그다음 총 피해로 최고 기록을 판정합니다.</li><li>보상은 꿈의결정 100 + 격파 보스당 35, 완주 시 +150에 난이도 배율(×${t.reward})을 곱합니다. 수령 후 더 높은 기록을 세워도 추가 지급되지 않습니다.</li><li>파견 중인 동료는 참여할 수 없습니다.</li></ul>
+    ${withAction?`<button class="primary wide" data-action="prepare-mode" ${p().cleared<3||p().active?'disabled':''}>${p().cleared<3?'스테이지 3 클리어 시 해금':`${t.name} 보스전 도전`}</button>`:''}
     <details class="more"><summary>월간 기록 규칙</summary><p>UTC+9 기준 매월 1일 초기화됩니다. 월을 넘겨 마친 도전은 종료한 달의 기록이 됩니다. 역대 최고 기록은 유지됩니다. 보상 수령 전 확인 화면의 기록과 금액을 확정합니다.</p></details></div>`;
 }
 function confirmMonthlyClaim(){
   const record=currentRecord(p(),now());if(!record||p().monthly===record.period){toast('이번 달 보상 상태를 확인하세요.');return;}
-  show('이 기록으로 보상을 확정할까요?',`${record.period} 월간 보스전`,`<div class="claim-score"><b>${record.round}</b><span>보스 격파</span></div><div class="reward-box"><span>확정할 보상</span>${gem(monthlyReward(record))}</div><p class="subtext">이번 달 보상은 한 번만 받을 수 있습니다. 기록을 더 올리고 싶다면 재도전한 뒤 수령하세요. 확정 후에도 최고 기록은 계속 갱신됩니다.</p>`,
+  show('이 기록으로 보상을 확정할까요?',`${record.period} 월간 보스전`,`<div class="claim-score"><b>${record.round}</b><span>${tierName(record)} · 보스 격파</span></div><div class="reward-box"><span>확정할 보상</span>${gem(monthlyReward(record))}</div><p class="subtext">이번 달 보상은 한 번만 받을 수 있습니다. 기록을 더 올리고 싶다면 재도전한 뒤 수령하세요. 확정 후에도 최고 기록은 계속 갱신됩니다.</p>`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
 }
 function renderSummon(){
@@ -350,7 +365,7 @@ function prepare(stage=Math.min(45,p().cleared+1),kind='main'){
     <p class="fineprint">장착 유물: ${p().equipped.map(id=>ARTIFACT[id].name).join(', ')||'없음'}</p>${kind==='weekly'?`<p class="fineprint" style="margin-top:4px">2택 1을 총 ${TEAM_SIZE}번 선택합니다. 남은 후보가 한 명이면 같은 동료의 전술 2종 중에서 고릅니다.</p>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성 변경</button><button class="primary" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장하기'}</button></div>`,'prepare',{stage,kind});
 }
-function begin(kind,stage){const result=act('begin',{mode:kind,stage},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
+function begin(kind,stage){const result=act('begin',{mode:kind,stage:kind==='weekly'?weeklyChapter()+1:stage,...(kind==='main'?{}:{tier:challengeTier})},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
 function renderDraft(){
   const a=p().active;if(a?.mode!=='weekly'){screen='home';render();return;}if(a.draft.length===TEAM_SIZE){startBattle();return;}
   $('content').innerHTML=`<section class="page">${heading('주간 드래프트',`<span class="count"><b>${a.draft.length+1}</b> / ${TEAM_SIZE}</span>`,'둘 중 한 명을 선택하세요.')}
@@ -362,7 +377,7 @@ function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&
 function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
 function renderBattle(){
   if(!run)return;
-  const name=run.mode==='main'?CHAPTERS[run.chapter].name:run.mode==='weekly'?'주간 드래프트':'월간 보스전',tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${run.mode==='weekly'?'주간':'월간'}</b>`;
+  const name=run.mode==='main'?CHAPTERS[run.chapter].name:`${run.mode==='weekly'?'주간 드래프트':'월간 보스전'} · ${(TIERS[run.tier]||TIERS.easy).name}`,tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${run.mode==='weekly'?'주간':'월간'}</b>`;
   $('content').innerHTML=`<section class="battle" id="battle">
     <div class="battle-top"><div class="battle-title"><span class="stage-tag" data-mode="${run.mode}">${tag}</span><div class="battle-name"><strong>${name}</strong><small id="wave-label"></small></div></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
     <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.gaugeCap(run)}</small></span><span id="battle-time" class="hud-time"></span></div>
@@ -393,7 +408,7 @@ function updateBattle(){
   if(screen!=='battle'||!run)return;
   changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
   const fill=`scaleX(${Math.min(1,run.gauge/E.gaugeCap(run)).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
-  changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:run.mode==='monthly'?`라운드 ${run.wave} · 격파 ${clearedRounds(run)} · 보스가 코어에 닿으면 종료`:`라운드 ${run.wave} · 클리어 ${clearedRounds(run)} · 생명력이 0이 되면 종료`);
+  changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:run.mode==='monthly'?`보스 ${Math.min(run.wave,CHALLENGE_WAVES)}/${CHALLENGE_WAVES} · 코어에 닿으면 종료`:`웨이브 ${Math.min(run.wave,CHALLENGE_WAVES)}/${CHALLENGE_WAVES}${run.wave%3===0?' · 보스 웨이브':''}`);
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
   updateAuraChips();
@@ -403,7 +418,7 @@ function updateBattle(){
 }
 function updateStrip(boss){
   const done=w=>w<run.wave||w===run.wave&&['reward','intermission','victory'].includes(run.phase),key=run.mode==='main'?`${run.wave}:${done(run.wave)}`:`r${run.wave}`;
-  if(hud['wave-pips'].dataset.key!==key){hud['wave-pips'].dataset.key=key;hud['wave-pips'].innerHTML=run.mode==='main'?`<small>WAVE</small>${Array.from({length:6},(_,i)=>{const w=i+1;return `<i class="${w%3===0?'boss':''} ${done(w)?'done':w===run.wave?'current':''}">${w%3===0?icon('crown'):''}</i>`;}).join('')}`:`<small>ROUND</small><b>${run.wave}</b>`;}
+  if(hud['wave-pips'].dataset.key!==key){hud['wave-pips'].dataset.key=key;hud['wave-pips'].innerHTML=run.mode==='main'?`<small>WAVE</small>${Array.from({length:6},(_,i)=>{const w=i+1;return `<i class="${w%3===0?'boss':''} ${done(w)?'done':w===run.wave?'current':''}">${w%3===0?icon('crown'):''}</i>`;}).join('')}`:`<small>${run.mode==='monthly'?'BOSS':'WAVE'}</small><b>${Math.min(run.wave,CHALLENGE_WAVES)}</b><span class="round-of">/ ${CHALLENGE_WAVES}</span><span class="round-bar"><i style="width:${Math.min(1,(run.wave-1)/CHALLENGE_WAVES)*100}%"></i></span>`;}
   const left=run.enemies.filter(e=>e.hp>0).length+run.queue.length;
   changedText(hud['wave-left'],run.phase==='intermission'?`다음 웨이브 ${Math.max(0,run.breakTime).toFixed(1)}초`:run.phase==='reward'?'축복 선택':`남은 적 ${left}`);
   const queued=run.queue.some(q=>q.kind==='boss'),next=boss?run.wave:queued?run.wave:run.mode==='main'?(run.wave<3?3:run.wave<6?6:0):0,id=boss?.boss||(next&&(run.mode==='main'?CHAPTERS[run.chapter].bosses[0]:null));
@@ -421,10 +436,11 @@ function updateUnit(){
   const sig=`${u.uid}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;panel.dataset.rarity=h.rarity;
-  // A compact card in the slot under the arena (over the dock on short screens): who, how strong,
-  // the live trait, the ultimate and the two actions. Everything else lives behind the ⓘ sheet.
-  panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><span class="unit-name"><strong>${h.name}</strong><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></span><small>${flame?'장판 위력':'위력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b> · 주기 <b>${detail.interval.toFixed(2)}초</b>${run.upgrades[u.hero]?` · 훈련 ${run.upgrades[u.hero]}`:''}</small></div><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div>
-    ${traitText?`<p class="unit-trait ${trait.active?'active':''}"><span>${trait.active?'특성 발동':'특성'}</span>${traitText}</p>`:''}
+  // A compact card in the slot under the arena (over the dock on short screens). Two blocks only:
+  // who (name, stats and the live trait as three short lines beside the portrait) and what to do
+  // (ultimate, target, sell). Everything else lives behind the ⓘ sheet.
+  const line=traitText||h.role;
+  panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(u.hero)}</span><div class="unit-id"><span class="unit-name"><strong>${h.name}</strong><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></span><small class="unit-stats-line">${flame?'장판':'위력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b><i></i><b>${detail.interval.toFixed(2)}</b>초${run.upgrades[u.hero]?`<i></i>훈련 <b>${run.upgrades[u.hero]}</b>`:''}</small><small class="unit-trait-line ${trait.active?'active':''}" title="${escapeText(line)}">${escapeText(line)}</small></div><div class="unit-head-actions"><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div></div>
     <div class="unit-card-row"><button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">${icon('star')}${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${casts?'이 동료가 씁니다':`${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></button>
     <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button></div></div>`;
 }
@@ -442,9 +458,10 @@ function skillTip(node,id){
 function hideSkillTip(){document.getElementById('skill-tip')?.remove();}
 // ⓘ on the unit card: every number and text for the selected companion.
 function unitInfo(){
-  const u=run?.board[selected];if(!u)return;const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
+  const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
   show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${(SHAPE_TEXT[h.shape]||'').split(' · ')[0]}</b></span></div>
     <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}</span><p>${h.skill.text}</p></div>
+    ${given.length?`<div class="unit-buffs given"><em>이 동료가 주는 효과</em>${given.map(b=>`<span class="chip">${b}</span>`).join('')}</div>`:''}
     <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
     `<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'unit-info',u.uid);
 }
@@ -504,10 +521,10 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges)},false);if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges)},false);if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
 function showResult(r){
-  const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:r.mode==='weekly'?'주간 드래프트':'월간 보스전';
-  show(r.won?'스테이지 클리어':r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?'승리':r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}라운드`}</b>${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
+  const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${r.mode==='weekly'?'주간 드래프트':'월간 보스전'} · ${(TIERS[r.tier]||TIERS.easy).name}`;
+  show(r.won?'스테이지 클리어':r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?(r.mode==='main'?'승리':'완주'):r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}웨이브`}</b>${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
     ${r.mode==='monthly'?`<p class="record-result">${r.newBest?'이번 달 최고 기록 갱신':'도전 기록 저장'} · 이번 도전 ${r.round}보스</p>${monthlyRecordPanel()}`:`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>`}
     <div class="result-stat"><span>처치</span><b>${fmt(r.kills)}</b></div><div class="result-stat"><span>총 피해</span><b>${fmt(r.damage)}</b></div><div class="result-stat"><span>전투 시간</span><b>${duration(r.seconds*1000)}</b></div>
     ${mvp?`<div class="result-mvp">${image(mvp[0],true)}<div><p class="mvp-tag">MVP</p><strong>${HERO[mvp[0]].name}</strong><small>기여 피해 ${fmt(mvp[1])} (${Math.round(mvp[1]/Math.max(1,r.damage)*100)}%)</small></div></div>`:''}
@@ -595,7 +612,7 @@ function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
 function records(){
-  show('모험 기록','최근 결과',monthlyRecordPanel()+(p().results.map(r=>`<div class="rate-row"><span style="display:block">${r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:r.mode==='weekly'?'주간 드래프트':'월간 보스전'}<br><small>${calendar(r.at).day} · ${r.won?'클리어':r.round+'라운드'}</small></span>${r.mode==='monthly'?'<span class="chip">기록 저장</span>':gem(r.reward)}</div>`).join('')||'<p class="empty">아직 모험 기록이 없습니다.</p>'),`<button class="secondary wide" data-action="close">확인</button>`,'records');
+  show('모험 기록','최근 결과',monthlyRecordPanel()+(p().results.map(r=>`<div class="rate-row"><span style="display:block">${r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${r.mode==='weekly'?'주간 드래프트':'월간 보스전'}${r.tier?` · ${TIERS[r.tier].name}`:''}`}<br><small>${calendar(r.at).day} · ${r.won?(r.mode==='main'?'클리어':'완주'):r.round+(r.mode==='main'?'라운드':'웨이브')}</small></span>${r.mode==='monthly'?'<span class="chip">기록 저장</span>':gem(r.reward)}</div>`).join('')||'<p class="empty">아직 모험 기록이 없습니다.</p>'),`<button class="secondary wide" data-action="close">확인</button>`,'records');
 }
 function exportBackup(){const blob=new Blob([JSON.stringify(p(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`StarGarden-${calendar(now()).day}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);toast('백업 파일을 저장했습니다.');}
 document.addEventListener('click',e=>{
@@ -604,7 +621,7 @@ document.addEventListener('click',e=>{
   if(d.hero){heroDetail(d.hero);return;}if(d.relic){relicDetail(d.relic);return;}
   if(d.memorial){openMemorial(d.memorial);return;}
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=d.filter;render();return;}
-  if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
+  if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.bed){bedFocus=d.bed;refreshGreenhouse();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.draw){draw(Number(d.draw));return;}if(d.drawAgain){draw(Number(d.drawAgain));return;}if(d.drawFree){banner='normal';draw(1,true);return;}

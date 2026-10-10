@@ -1060,3 +1060,41 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 }
 @media (max-width:340px){.brand-text{display:none}}
 .garden-info b i{font-style:normal;font-size:10px;font-weight:700;color:var(--text3);text-shadow:none;margin-left:3px}
+/* Thumb-safe edges: menus start a little below the top edge, the battle dock ends above the bottom edge. */
+.topbar{height:auto;min-height:56px;padding-top:max(14px,calc(env(safe-area-inset-top) + 8px))}
+.battle-dock{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px))}
+.battle.compact .unit-panel{inset:auto 0 max(18px,calc(env(safe-area-inset-bottom) + 10px)) 0}
+/* Unit card: portrait + three short lines, then one action row. Fits the 132px slot with room. */
+.unit-panel{justify-content:center;gap:8px;padding:9px 10px}
+.unit-card-head{align-items:center;gap:10px}
+.unit-card-head .unit-face{width:48px;height:48px}
+.unit-card-head .unit-id{gap:1px}
+.unit-card-head .unit-id strong{font-size:16px;line-height:1.2}
+.unit-stats-line{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+.unit-stats-line b{color:var(--text);font-size:12px}
+.unit-stats-line i{width:3px;height:3px;border-radius:50%;background:var(--text3);margin:0 2px}
+.unit-trait-line{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.unit-trait-line.active{color:#9ff0e0}
+.unit-trait-line.active::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);margin-right:5px;vertical-align:1px}
+.unit-head-actions{display:flex;gap:6px;align-self:flex-start}
+.unit-card-row{margin-top:0}
+.unit-card-row .unit-skill,.unit-card-row .unit-actions button,.unit-card-row .fixed-target{min-height:42px}
+.live-note{display:block;margin-top:5px;font-size:11px;font-weight:700;color:#9ff0e0}
+.unit-buffs.given em{color:var(--gold)}
+/* Challenge tiers */
+.tier-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 10px}
+.tier-picker .tier{min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:12px;background:rgba(14,19,48,.6);border:1px solid var(--line2);color:var(--text2)}
+.tier-picker .tier b{font-family:var(--display);font-weight:400;font-size:16px}
+.tier-picker .tier small{display:inline-flex;align-items:center;gap:2px;font-size:10px;color:var(--text3)}
+.tier-picker .tier small .ic{width:10px;height:10px}
+.tier-picker .tier[aria-checked=true]{color:#fff;box-shadow:0 0 0 1.5px var(--tc) inset,0 0 14px color-mix(in srgb,var(--tc) 45%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 22%,transparent),rgba(14,19,48,.7))}
+.tier-picker .tier[aria-checked=true] small{color:var(--text2)}
+.tier-picker .tier.easy{--tc:#7fe6d3}.tier-picker .tier.hard{--tc:#f6d27a}.tier-picker .tier.abyss{--tc:#c58bff}
+.tier-picker .tier:disabled{opacity:.55}
+.boss-route{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:0 0 10px;font-size:11px;color:var(--text2)}
+.boss-route small{font-size:10px;font-weight:800;color:var(--text3);margin-right:2px}
+.boss-route span{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:999px;background:rgba(255,120,150,.08);border:1px solid rgba(255,140,170,.25)}
+.boss-route em{font-style:normal;font-size:9px;font-weight:800;color:#ff9fb8}
+.wave-pips .round-of{font-size:11px;color:var(--text3);margin-left:2px}
+.wave-pips .round-bar{width:90px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-left:8px}
+.wave-pips .round-bar i{display:block;height:100%;background:linear-gradient(90deg,#7fe6d3,#bafcef)}

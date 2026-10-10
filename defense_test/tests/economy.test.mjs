@@ -90,7 +90,7 @@ test('a normal-banner UR is the weekly pickup half the time',()=>{
 
 test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
   const sunday=Date.parse('2026-10-04T14:59:59Z'),monday=sunday+1000;
-  const {pickup,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});
+  const {pickup,weekNo,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});assert.equal(calendar(monday).weekNo,weekNo+1,'weekly chapter turns with the week');
   assert.equal(calendar(monday).week,'2026-10-05');
   // The normal-banner pickup turns over exactly at Monday 00:00 (UTC+9) and cycles all six standard URs.
   assert.ok(ROSTER.UR.includes(pickup));assert.notEqual(calendar(monday).pickup,pickup);assert.equal(calendar(monday+6*24*HOUR).pickup,calendar(monday).pickup);
