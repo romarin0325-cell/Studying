@@ -172,10 +172,12 @@ test('weekly and monthly challenges run 18 tiered waves with no round timer; a m
   s.queue=E.wavePlan(1,0,'monthly').sequence;s.spawnIn=0;E.step(s,.05);
   const boss=s.enemies[0];boss.skillIn=1e9;boss.progress=E.PATH_LENGTH-.1;E.step(s,.05);
   assert.equal(s.phase,'defeat','one boss at the core ends the monthly run');assert.equal(clearedRounds(s),0);
-  for(let i=0;i<9;i++){
-    const run=createBattle(active('monthly',4));run.wave=i+1;run.queue=E.wavePlan(i+1,0,'monthly').sequence;run.spawnIn=0;E.step(run,.05);
-    assert.equal(run.enemies[0].boss,BOSS_ORDER[i]);
+  // Only bosses the player has met appear: three cleared stages cycle the first three bosses, nine cycle all.
+  for(const stage of [4,10])for(let i=0;i<9;i++){
+    const run=createBattle(active('monthly',stage));run.wave=i+1;run.queue=E.wavePlan(i+1,0,'monthly').sequence;run.spawnIn=0;E.step(run,.05);
+    assert.equal(run.enemies[0].boss,BOSS_ORDER[i%Math.min(9,stage-1)]);
   }
+  for(let w=3;w<=18;w+=3){assert.ok(BOSS_ORDER.indexOf(E.weeklyBoss(2,w,3))<3,'weekly lineup stays among met bosses');assert.equal(E.weeklyBoss(5,w,9),E.weeklyBoss(5,w));}
 });
 
 test('move, merge, target priority and saved growth survive a real mid-combat resume',()=>{

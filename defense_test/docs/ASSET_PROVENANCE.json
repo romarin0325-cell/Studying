@@ -241,6 +241,13 @@
       "height": 576
     },
     {
+      "id": "gifts",
+      "source": "defense_test/assets/merge/gifts.webp",
+      "sha256": "c0a3e57c8aa7f7a8a0d97e1dbea448839091a875740aa924ffbce241ffeeafaf",
+      "width": 768,
+      "height": 256
+    },
+    {
       "id": "fx-emblems",
       "source": "defense_test/assets/merge/fx-emblems.webp",
       "sha256": "d9ec70d8fb8a555051177b657ed93762e403013e8cea71eb1d2d484d33536450",
