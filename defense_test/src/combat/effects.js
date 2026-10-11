@@ -32,7 +32,7 @@ export const isUR=hero=>!!HERO[hero]&&(HERO[hero].hidden||HERO[hero].rarity==='U
 // Large signature emblems painted for this patch (fx-emblems atlas, black background, screen blend).
 const EMBLEM={phantom:0,cinderella:1,zeke:2};
 // Field-wide ultimates whose aura is global get a board-edge glow; partial ones mark their units.
-export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','tax','winter']);
+export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','winter']);
 export const PARTIAL_AURAS=Object.freeze(['trauma','midnight']);
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.

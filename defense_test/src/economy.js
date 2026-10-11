@@ -14,12 +14,12 @@ export const specialMultiplier=e=>1+T.specialStep*Math.floor(e/T.specialEvery);
 export const levelCost=level=>Math.ceil(T.levelCostBase*T.levelCostGrowth**(level-1));
 // Dream greenhouse. Every bed is shared by all companions; duplicates stay personal.
 export const BED_IDS=Object.freeze(['rose','spring','seed']);
-export const bedCost=(id,level)=>{const b=T.beds[id],k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,b.knee)*b.steep**Math.max(0,Math.min(level,k2)-b.knee)*(b.steep2??b.steep)**Math.max(0,level-k2));};
+export const bedCost=(id,level)=>{const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
 export const bedOpen=(id,cleared)=>cleared>=T.beds[id].unlock;
-// Rose: +1% power per level. Spring: +3 max starlight to 150, then +1. Seed: +4 starting gold to +40, then +2.
+// Rose: +1% power per level. Spring: +1 max starlight per level. Seed: +2 starting gold per level.
 export const roseAttack=level=>.01*level;
-export const springGauge=level=>120+3*Math.min(level,10)+Math.max(0,level-10);
-export const seedGold=level=>4*Math.min(level,10)+2*Math.max(0,level-10);
+export const springGauge=level=>120+level;
+export const seedGold=level=>2*level;
 export const heroMultiplier=(entry,beds)=>(1+roseAttack(beds?.rose||0))*enhanceMultiplier(entry.enhance);
 export function combatPower(id,entry,beds){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
