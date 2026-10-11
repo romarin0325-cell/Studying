@@ -55,8 +55,8 @@ export const TUNING=Object.freeze({
   dispatchDust:1.25,dispatchDreams:.25,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
   // Dream greenhouse beds: fast early levels, then cost knees as a soft cap (no hard cap).
-  // Rose: gentle to Lv.30, steeper to Lv.40, then each level climbs sharply.
-  beds:{rose:{unlock:0,base:40,growth:1.065,knee:30,steep:1.15,knee2:40,steep2:1.35},spring:{unlock:15,base:120,growth:1.22,knee:10,steep:1.45},seed:{unlock:30,base:200,growth:1.2,knee:10,steep:1.4}},
+  // Rose: gentle to Lv.30, steeper to Lv.40, then each level climbs sharply. Spring: gentle to 25, moderate to 33. Seed: gentle to 15, moderate to 23. knee is the bloom (만개) stage.
+  beds:{rose:{unlock:0,base:40,growth:1.065,knee:30,steep:1.15,knee2:40,steep2:1.35},spring:{unlock:15,base:42,growth:1.06,rise:25,knee:30,steep:1.10,knee2:33,steep2:1.35},seed:{unlock:30,base:110,growth:1.08,rise:15,knee:20,steep:1.12,knee2:23,steep2:1.35}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });
 export const QUOTES={

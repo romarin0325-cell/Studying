@@ -13,7 +13,7 @@ const storeFor=p=>new ProfileStore(memory(p),NOW);
 const call=(s,a,args={},now=NOW)=>{const r=s.transact(a,args,now);assert.ok(r.ok,r.message);return r;};
 
 test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by cost',()=>{
-  const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0});assert.equal(p.bedRev,2);p.dust=100000;const s=storeFor(p);
+  const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0});assert.equal(p.bedRev,3);p.dust=100000;const s=storeFor(p);
   call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),40);
   for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.beds)-1.01)<1e-12);
   assert.ok(combatPower('star_boy',s.value.heroes.star_boy,{rose:2})>combatPower('star_boy',s.value.heroes.star_boy,{rose:1}));
@@ -21,35 +21,47 @@ test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by co
   s.value.cleared=15;call(s,'bed',{id:'spring'});assert.equal(s.transact('bed',{id:'seed'},NOW).ok,false,'seed is closed before stage 30');
   s.value.cleared=30;call(s,'bed',{id:'seed'});assert.deepEqual(s.value.beds,{rose:1,spring:1,seed:1});
   assert.equal(s.transact('bed',{id:'moon'},NOW).ok,false);
-  // Soft caps: the cost step jumps after each knee, and no level is refused for being high.
-  for(const [id,knee] of [['rose',30],['rose',40],['spring',10],['seed',10]]){
-    const before=bedCost(id,knee-1)/bedCost(id,knee-2),after=bedCost(id,knee+1)/bedCost(id,knee);assert.ok(after>before+.05,id);
+  // Soft caps: the cost step jumps after rise and knee2, and no level is refused for being high.
+  for(const [id,at] of [['rose',30],['rose',40],['spring',25],['spring',33],['seed',15],['seed',23]]){
+    const before=bedCost(id,at-1)/bedCost(id,at-2),after=bedCost(id,at+1)/bedCost(id,at);assert.ok(after>before+.02,id+'@'+at);
     assert.ok(Number.isSafeInteger(bedCost(id,60)),id);
   }
-  assert.equal(springGauge(0),120);assert.equal(springGauge(10),150);assert.equal(springGauge(15),155);
-  assert.equal(seedGold(10),40);assert.equal(seedGold(15),50);
+  assert.equal(springGauge(0),120);assert.equal(springGauge(10),130);assert.equal(springGauge(15),135);
+  assert.equal(seedGold(10),20);assert.equal(seedGold(15),30);
   s.value.dust=0;assert.equal(s.transact('bed',{id:'rose'},NOW).ok,false);
   // Rose pacing: Lv.30 stays affordable, Lv.40 is a goal, beyond that each level climbs sharply.
-  const cum=n=>Array.from({length:n},(_,i)=>bedCost('rose',i)).reduce((a,b)=>a+b,0);assert.ok(cum(30)<4000&&cum(40)<10000&&cum(45)>18000);
+  const cum=(id,n)=>Array.from({length:n},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0);assert.ok(cum('rose',30)<4000&&cum('rose',40)<10000&&cum('rose',45)>18000);
+  assert.ok(cum('spring',30)>3000&&cum('spring',30)<3800,'spring to 30 ~3400');assert.ok(cum('seed',20)>4500&&cum('seed',20)<6000,'seed to 20 ~5200');
   // Old saves: 18×1.14^(L-1) spent on star_boy Lv.5 and snow_rabbit Lv.3 is 129 dust → garden 2 + 39 refund → rose 4.
   const old=createProfile(NOW);delete old.beds;delete old.bedRev;old.dust=0;old.heroes.star_boy.level=5;old.heroes.snow_rabbit.level=3;
   const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
-  assert.deepEqual(migrated.beds,{rose:4,spring:0,seed:0});assert.equal(migrated.bedRev,2);assert.equal(migrated.garden,undefined);assert.equal(migrated.dust,39);assert.ok(HEROES.every(h=>migrated.heroes[h.id].level===1));
+  assert.deepEqual(migrated.beds,{rose:4,spring:0,seed:0});assert.equal(migrated.bedRev,3);assert.equal(migrated.garden,undefined);assert.equal(migrated.dust,39);assert.ok(HEROES.every(h=>migrated.heroes[h.id].level===1));
   assert.equal(levelCost(1),90);
   assert.deepEqual(parseProfile(JSON.stringify(migrated)),migrated);
   // Saves keep their exact power: garden L (+4% each) becomes rose 4(L-1); a revision-1 rose (+2%) doubles.
   const garden=createProfile(NOW);delete garden.beds;delete garden.bedRev;garden.garden=11;const moved=parseProfile(JSON.stringify(garden));
-  assert.equal(moved.beds.rose,40);assert.ok(Math.abs(heroMultiplier(moved.heroes.star_boy,moved.beds)-1.4)<1e-12);
+  assert.equal(moved.beds.rose,40);assert.equal(moved.bedRev,3);assert.ok(Math.abs(heroMultiplier(moved.heroes.star_boy,moved.beds)-1.4)<1e-12);
   const rev1=createProfile(NOW);delete rev1.bedRev;rev1.beds={rose:20,spring:3,seed:0};const doubled=parseProfile(JSON.stringify(rev1));
-  assert.deepEqual(doubled.beds,{rose:40,spring:3,seed:0});assert.ok(Math.abs(heroMultiplier(doubled.heroes.star_boy,doubled.beds)-1.4)<1e-12);
+  assert.deepEqual(doubled.beds,{rose:40,spring:9,seed:0});assert.equal(doubled.bedRev,3);assert.ok(Math.abs(heroMultiplier(doubled.heroes.star_boy,doubled.beds)-1.4)<1e-12);
   for(const bad of [{rose:-1,spring:0,seed:0},{rose:0,spring:0},{rose:0,spring:0,seed:0,moon:1},null]){const b=structuredClone(migrated);b.beds=bad;assert.equal(validateProfile(b),false);}
+});
+
+test('bed revision 3 preserves spring and seed effect from older greenhouse saves',()=>{
+  const rev2=createProfile(NOW);rev2.bedRev=2;rev2.beds={rose:5,spring:10,seed:10};
+  const moved=parseProfile(JSON.stringify(rev2));assert.ok(moved);assert.equal(moved.bedRev,3);
+  assert.deepEqual(moved.beds,{rose:5,spring:30,seed:20});assert.equal(springGauge(30),150);assert.equal(seedGold(20),40);
+  const late=createProfile(NOW);late.bedRev=2;late.beds={rose:8,spring:15,seed:12};
+  const grown=parseProfile(JSON.stringify(late));assert.deepEqual(grown.beds,{rose:8,spring:35,seed:22});
+  assert.equal(springGauge(35),155);assert.equal(seedGold(22),44);
+  const already=createProfile(NOW);already.bedRev=3;already.beds={rose:2,spring:6,seed:4};
+  assert.deepEqual(parseProfile(JSON.stringify(already)).beds,{rose:2,spring:6,seed:4});
 });
 
 test('spring and seed shape a new run: starlight ceiling and starting gold',()=>{
   const p=createProfile(NOW);p.beds={rose:0,spring:12,seed:12};const s=storeFor(p);call(s,'begin',{mode:'main',stage:1});
   const run=createBattle(s.value);assert.equal(run.gaugeMax,springGauge(12));assert.equal(run.gold,70+seedGold(12));
   run.gauge=run.gaugeMax-1;E.step(run,.05);assert.ok(run.gauge<=run.gaugeMax);
-  const restored=E.restore(E.serialize(run));assert.ok(restored);assert.equal(restored.gaugeMax,152);
+  const restored=E.restore(E.serialize(run));assert.ok(restored);assert.equal(restored.gaugeMax,springGauge(12));
   const legacy=JSON.parse(E.serialize(run));delete legacy.gaugeMax;legacy.gauge=Math.min(legacy.gauge,120);assert.ok(E.restore(legacy),'older runs keep the 120 ceiling');
   const over=JSON.parse(E.serialize(run));over.gauge=over.gaugeMax+1;assert.equal(E.restore(over),null);
 });
@@ -198,11 +210,11 @@ test('concurrent windows, clock rollback, daily rewards and first-clear rewards 
   assert.equal(s.transact('idle',{},NOW).ok,false);assert.equal(s.value.dust,dust);
 });
 
-test('unlockProfile owns every companion at bond 10, every relic, and clears main stages through 45',()=>{
+test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears main stages through 45',()=>{
   const fresh=createProfile(NOW),deck=[...fresh.deck],partner=fresh.partner,relics=structuredClone(fresh.relics);
   const p=unlockProfile(fresh);
   assert.equal(p,fresh);
-  assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===10&&e.level===1&&e.enhance===0&&e.copies===0;}));
+  assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===({star_boy:6,siren:3,snow_rabbit:8}[h.id]??10)&&e.level===1&&e.enhance===0&&e.copies===0;}));
   assert.equal(p.cleared,45);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
   assert.deepEqual(p.relics,Object.fromEntries(Object.entries(relics).map(([id,r])=>[id,{...r,owned:true}])),'every relic owned, enhancement untouched');

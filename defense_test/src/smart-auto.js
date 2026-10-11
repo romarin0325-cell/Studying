@@ -88,6 +88,7 @@ function ultValue(s,m,id,gv){
     return (1+Math.max(x,cur))/(1+cur)-1;};
   const buff=(gain,sec)=>dps*gain*Math.min(sec,rem);
   const scale=E.rankControl(u.rank),boss=list.find(e=>e.boss),strongest=list.reduce((a,b)=>!a||b.maxHp>a.maxHp?b:a,null);
+  const thunderCancel=()=>s.telegraph?.pattern==='thunder'&&list.some(e=>e.judging)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
   const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
@@ -101,28 +102,28 @@ function ultValue(s,m,id,gv){
       return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+blocked+freed;}
     case 'trauma':{const mags=CELLS.filter(c=>s.board[c]?.hero==='time_magician');return strike(4)+mags.reduce((n,c)=>n+unitValue(s,s.board[c],c)*m.scale*(2.1*1.35-1)*Math.min(10,rem),0);}
     case 'glassfall':{const top=E.topCinderella(s),i=top?s.board.indexOf(top):-1;return strike(E.CINDERELLA.ult)+(top?unitValue(s,top,i)*m.scale*1.9*Math.min(10,rem):0);}
-    case 'gift':return (summonValue(s)*2.35*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),6);
-    case 'dividend':{const kills=Math.min(list.length+s.queue.length,dps*8/Math.max(1,list.reduce((n,e)=>n+e.maxHp,0)/Math.max(1,list.length)));return strike(4)+(E.QUEEN_TAX+kills*2*2.2)*gv;}
+    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),6);
+    case 'dividend':return strike(4)+(E.QUEEN_TAX+(s.edictWave!==s.wave?E.waveIncome(s.wave)*.5:0))*gv;
     case 'fortune':return strike(E.fortuneFactor(s.gold-E.skillGoldCost(id),s.upgrades[id]||0))-E.skillGoldCost(id)*gv;
     case 'expose':{const ex=E.detectiveExposure(s,u),lasting=list.reduce((n,e)=>n+e.hp,0)>dps*4;return strike(3)+(lasting?dps*ex*Math.min(10,rem):0)+follow()*ex;}
-    case 'mirror':{if(!strongest)return 0;const share=strongest.boss?.75:1/Math.max(1,list.length);return Math.min(strongest.hp,10*P+E.mirrorRatio(s,u)*(dps*4*share+follow()*share));}
+    case 'mirror':{if(!strongest)return 0;const share=strongest.boss?.75:1/Math.max(1,list.length);return Math.min(strongest.hp,12*P+E.mirrorRatio(s,u)*(dps*5*share+follow()*share));}
     case 'royal':return strongest?hit(24*(strongest.burnTime>0||strongest.divine>=3&&strongest.divineTime>0?2:1),strongest):0;
     case 'starfall':return s.gauge>=cap-2&&strongest?hit(.4*s.gauge,strongest):0;
     case 'execute':{const order=[...list].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);return order.reduce((n,e)=>n+hit(e.hp/e.maxHp<=E.executeThreshold(e,s)?30:16,e),0);}
     case 'inferno':return strike(7*(health<10?2:1))+strike(.6)*1.5;
     case 'combust':return list.reduce((n,e)=>n+hit(e.burnTime>0?10:4,e),0)+strike(.6)*1.5;
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
-    case 'thunder':return strike(7)+control(1.2*scale);
+    case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
     case 'ice_court':return strike(6)+control(3);
-    case 'freeze':return strike(3)+control(2*scale+3);
+    case 'freeze':return strike(3)+control(2*scale+3)+thunderCancel();
     case 'avalanche':return list.reduce((n,e)=>n+hit(e.controlTime>0?12:4,e),0)+control(2);
     case 'dragon':{let best=[];for(const e of list){const p=E.pathPoint(e.progress),near=list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=180;});if(near.length>best.length)best=near;}return best.reduce((n,e)=>n+hit(14,e)+hit(.6*5*.5,e),0);}
     case 'flurry':return [...list].sort((a,b)=>b.progress-a.progress).slice(0,9+2*new Set(s.board.filter(a=>a&&a.hero!=='night_rabbit'&&a.hero.endsWith('_rabbit')).map(a=>a.hero)).size).reduce((n,e)=>n+hit(9,e),0);
-    case 'vortex':return strike(5)+control(1.5*scale+2.4)*1.2;
-    case 'singularity':return list.reduce((n,e)=>n+hit(8*(1+.5*(e.divine||0)),e),0)+control(2*scale+2.4);
-    case 'quake':return strike(3)+control(2.5*scale);
+    case 'vortex':return strike(5)+control(1.5*scale+2.4)*1.2+thunderCancel();
+    case 'singularity':return list.reduce((n,e)=>n+hit(8*(1+.5*(e.divine||0)),e),0)+control(2*scale+2.4)+thunderCancel();
+    case 'quake':return strike(3)+control(2.5*scale)+thunderCancel();
     case 'nightmare':return strike(4)+control(2)+dps*.25*Math.min(6,rem)*.6;
-    case 'rewind':return strike(3)+control(6);
+    case 'rewind':return strike(3)+control(6)+thunderCancel();
     default:return strike(3);
   }
 }

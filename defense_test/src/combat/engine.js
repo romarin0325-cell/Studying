@@ -8,7 +8,7 @@ export const special=(s,id)=>(s.meta?.[id]?.special||1);
 export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
 export const BALANCE_REVISION = 3;
-export const BOSS_HEALTH_SCALE = .8;
+export const BOSS_HEALTH_SCALE = .65;
 // Renewal v1 raised average roster damage by about 36%. Enemy health follows
 // (base 76 → 100, stage slope 2.05 → 2.5, monthly 900 → 1225, weekly 25 → 34)
 // so a no-growth starter deck keeps its stage 1–3 pace (docs/STAT_SIMULATION.md).
@@ -39,7 +39,7 @@ export const POISON_POWER_RATIO=1.5/11;
 // correction limits the increase from replacing refreshes with overlapping hits.
 export const ZONE_CADENCE=1.15;
 export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CADENCE:1;
-export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',queen:'tax',cinderella:'midnight',frost_witch:'winter'});
+export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter'});
 const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 export const BOARD = {x:135,y:212,cell:90};
@@ -71,7 +71,7 @@ export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma'
 export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
 export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+level*3;
 export const QUEEN_CAP=90;
-export const QUEEN_TAX=40;
+export const QUEEN_TAX=20;
 // Doom's black market: 10x, +1x for every 20 gold left after paying, up to 15x.
 export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
 export const executeThreshold=(e,s=null)=>Math.min(.5,.4+((s?special(s,'luna'):1)-1)*.2);
@@ -153,7 +153,7 @@ export function enhancedNotes(id,specialValue){
     guardian:()=>trait.push(`기절 ${secText(.7*k)}`),great_detective:()=>{trait.push(`노출 ${pctText(.08*k)} · 보스 ${pctText(.15*k)}`);skill.push(`노출 ${pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))}`);},
     aurora:()=>skill.push(`반사율 ${pctText(Math.min(1,.5*k))}`),time_magician:()=>trait.push(`추가 공격 ${pctText(.6*k)}`),luna:()=>trait.push(`처형 기준 ${pctText(Math.min(.5,.4+(k-1)*.2))}`)};
   t[id]?.();
-  const seconds={echo:8,haste:ULT_BUFF.haste.seconds,awaken:ULT_BUFF.awaken.seconds,march:ULT_BUFF.march.seconds,glassfall:10,gift:6,goddess:8,trauma:10,ice_court:6,harmony:ULT_BUFF.harmony.seconds,dividend:8,freeze:2,thunder:1.2,quake:1.5,vortex:1.5,singularity:2,rewind:2}[HERO[id].skill.type];
+  const seconds={echo:8,haste:ULT_BUFF.haste.seconds,awaken:ULT_BUFF.awaken.seconds,march:ULT_BUFF.march.seconds,glassfall:10,gift:6,goddess:8,trauma:10,ice_court:6,harmony:ULT_BUFF.harmony.seconds,freeze:2,thunder:1.2,quake:1.5,vortex:1.5,singularity:2,rewind:2}[HERO[id].skill.type];
   if(seconds)skill.push(`${['freeze','thunder','quake','vortex','singularity','rewind'].includes(HERO[id].skill.type)?'제어':'지속'} ${secText(seconds*k)}`);
   return {trait,skill};
 }
@@ -166,8 +166,8 @@ export function givenEffects(s,u,index){
   else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
-  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankSupport(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
-  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankSupport(u.rank)*k))}`);}
+  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
+  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
   else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
   return out;
@@ -259,7 +259,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE);
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
-    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
+    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
@@ -393,7 +393,6 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){
     s.stats.kills++;const gold=e.boss?20:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
-    if(s.buffs.tax>0)giveGold(s,gold*2,'장미의 세금');
     if(gift)giveGold(s,1,'선물');
     addGauge(s,(e.boss?15:1.3)+e.divine*(e.boss?DIVINE_BOSS_GAUGE:DIVINE_GAUGE));
     // A frozen enemy that falls spreads the witch's cold; Winter Court freezes nearby foes.
@@ -439,7 +438,7 @@ function addSlow(s,e,source,amount,duration){
   syncSlows(s,e);
 }
 function slowTargets(s,targets,hero,amount,point,source,rank=1){
-  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankSupport(rank);
+  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankControl(rank);
   for(const t of targets)addSlow(s,t,source,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
@@ -591,15 +590,15 @@ export function cast(s,id){
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control);
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control);
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
-  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,2);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
+  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control);for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control);}
   else if(type==='ice_court'){strike(6);for(const e of targets)if(e.hp>0)addSlow(s,e,source,.5,6);s.buffs.winter=skillDuration(s,6*control);}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control);
   else if(type==='royal'||type==='starfall'||type==='mirror'){
-    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?4:FINISHER_DELAY;
+    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
     visualTargets=[target];
-    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?10:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
+    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?12:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,2*control*scale);addSlow(s,e,source,.5,6);}}
@@ -635,7 +634,7 @@ export function cast(s,id){
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*9,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
   else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
-  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.buffs.tax=skillDuration(s,8*control);}
+  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
@@ -691,7 +690,7 @@ export function castPreview(s,id){
     // The haste and the three-hour step are fixed. cast() stores buffScale but never reads it back.
     lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
-    lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 2성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 2성으로 전장에 합류합니다.');
+    lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 1성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 1성으로 전장에 합류합니다.');
     lines.push(`${dur(6)} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
   }else if(type==='goddess'){
     lines.push(`적 전체에게 위력 5배, ${hit(5)}를 줍니다.`);
@@ -712,7 +711,7 @@ export function castPreview(s,id){
   }else if(type==='royal'||type==='starfall'||type==='mirror'){
     if(type==='starfall')lines.push(`별빛 ${Math.floor(s.gauge)}을 모두 써 체력이 가장 높은 적에게 ${hit(.4*s.gauge)}를 줍니다.`);
     else if(type==='mirror'){
-      lines.push(`체력이 가장 높은 적에게 4초 동안 거울을 걸고, 끝날 때 위력 10배인 ${hit(10)}를 줍니다.`);
+      lines.push(`체력이 가장 높은 적에게 5초 동안 거울을 걸고, 끝날 때 위력 12배인 ${hit(12)}를 줍니다.`);
       lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해지며, 모은 양에는 상한이 없습니다.`);
     }else{
       const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
@@ -821,9 +820,8 @@ export function castPreview(s,id){
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
   }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 20마다 +1배 (최대 ${12+level}배).`);}
   else if(type==='dividend'){
-    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 골드 ${QUEEN_TAX}을 받습니다.`);
-    // The extra payout is 2× kill gold, so the total is 3×. buffScale does not change it.
-    lines.push(`${dur(8)} 동안 처치 골드가 3배가 되어 일반 6, 장갑 9, 보스 60골드를 줍니다.`);
+    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
+    lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
   }else lines.push(hero.skill.text);
 
   const gold=skillGoldCost(id);
@@ -852,7 +850,7 @@ function bossResolve(s,e,boss,pattern){
   else if(pattern==='storm'){if(!shielded)for(const i of cells)if(s.board[i]){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='stun1'){if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
   else if(pattern==='starlust'){if(s.gauge>=gaugeCap(s)-1e-6){s.gauge=Math.max(0,s.gauge-60);event(s,'drain');}event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});}
-  else if(pattern==='thunder'){e.judged=true;if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='thunder'){e.judged=true;e.judging=false;if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='shuffle'){
     const units=s.board.filter(Boolean),slots=shuffle(s,Array.from({length:25},(_,i)=>i));s.board=Array(25).fill(null);units.forEach((u,i)=>{s.board[slots[i]]=u;});syncTimeRuler(s);
     event(s,'shuffle',{});event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
@@ -875,7 +873,7 @@ function bossStep(s,e,dt){
   }
   // Thor: once he reaches the middle of the path, three random columns are lit, then stunned for 3 s.
   if(boss.judgement&&!e.judged&&e.progress>=PATH_LENGTH*.5){
-    e.channel=3.5;e.judged=true;e.channelHp=e.hp+(e.shield||0);
+    e.channel=3.5;e.judging=true;e.channelHp=e.hp+(e.shield||0);
     s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3.5,total:3.5};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
   }
   e.skillIn-=dt;if(e.skillIn>0)return;
@@ -894,8 +892,8 @@ function bossStep(s,e,dt){
 }
 
 function completeWave(s){
-  const payout={base:waveIncome(s.wave),dividend:dividend(s)};
-  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
+  const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
+  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
   event(s,'clear',{wave:s.wave,...payout});
   if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
   s.reward=shuffle(s,BLESSINGS.map(b=>b.id)).slice(0,3);s.phase='reward';
@@ -1008,6 +1006,10 @@ export function restore(raw){
     if(s.finishers===undefined)s.finishers=[];
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     if(s.buffScale===undefined)s.buffScale={};
+    if(s.buffs&&s.buffs.tax!==undefined)delete s.buffs.tax;
+    if(s.buffTotals&&s.buffTotals.tax!==undefined)delete s.buffTotals.tax;
+    if(s.buffScale&&s.buffScale.tax!==undefined)delete s.buffScale.tax;
+    if(s.edictWave===undefined)s.edictWave=0;
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.
     for(const e of s.enemies)if(e){if(Array.isArray(e.statusEffects))e.statusEffects=e.statusEffects.filter(effect=>effect?.type!=='frost');e.frostStacks=0;e.frostTime=0;}
@@ -1030,6 +1032,7 @@ export function restore(raw){
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;
     // Time Ruler no longer has a solo bonus; its cached top unit only orders casts.
     if(s.timeRulerUid!==null&&!id(s.timeRulerUid))return null;
+    if(!Number.isInteger(s.edictWave)||s.edictWave<0||s.edictWave>1000)return null;
     if(s.timeRulerUid!==null&&!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid))s.timeRulerUid=null;
     syncTimeRuler(s);
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
@@ -1085,7 +1088,7 @@ export function restore(raw){
     if(!record(s.buffScale)||Object.entries(s.buffScale).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<1||n>rankControl(MAX_RANK)+1e-9))return null;
     if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation','stun1','starlust','thunder','shuffle','warp','judgement'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
-    if(s.settlement&&!numeric(s.settlement,['base','dividend']))return null;
+    if(s.settlement){if(s.settlement.edict===undefined)s.settlement.edict=0;if(!numeric(s.settlement,['base','dividend','edict']))return null;}
     if(s.phase==='reward'&&(!Array.isArray(s.reward)||s.reward.length!==3||new Set(s.reward).size!==3||s.reward.some(a=>!BLESSING[a])))return null;
     if(s.balanceRevision!==undefined&&s.balanceRevision!==2&&s.balanceRevision!==BALANCE_REVISION)return null;
     if(s.balanceRevision===undefined){

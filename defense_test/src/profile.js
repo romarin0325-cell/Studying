@@ -10,7 +10,7 @@ import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFTS,addBond,
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
 export function createProfile(now=Date.now()){
-  return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0},bedRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0},bedRev:3,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},lobby:null,
@@ -25,7 +25,7 @@ export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료
 export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,bouquet:false,claimed:[]};}
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
-  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!=='rose,seed,spring'||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==2||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
+  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!=='rose,seed,spring'||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==3||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond,BOND_MAX)||!integer(e.bondXp)||e.bondXp>=Math.max(1,bondNeed(e.bond));}))return false;
   if(!p.gifts||typeof p.gifts!=='object'||Object.keys(p.gifts).sort().join()!=='bouquet,candy,letter'||!GIFT_IDS.every(id=>integer(p.gifts[id],999)))return false;
   if(p.lobby!==null&&!(MEMORIAL_STORIES[p.lobby]&&p.heroes[p.lobby]?.owned&&p.heroes[p.lobby].bond>=BOND_MAX))return false;
@@ -80,9 +80,11 @@ export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
 // Greenhouse saves keep their exact power. Rose is +1% per level (bed revision 2): one old
 // garden level (+4%) is four rose levels, one revision-1 rose level (+2%) is two.
+// Revision 3 keeps spring/seed effect: spring 3*min(L,10)+max(0,L-10), seed 2*min(L,10)+max(0,L-10).
 export function migrateBeds(p){
-  if(p.beds===undefined&&integer(p.garden)&&p.garden>=1){p.beds={rose:4*(p.garden-1),spring:0,seed:0};delete p.garden;p.bedRev=2;return;}
+  if(p.beds===undefined&&integer(p.garden)&&p.garden>=1){p.beds={rose:4*(p.garden-1),spring:0,seed:0};delete p.garden;p.bedRev=2;}
   if(p.beds&&typeof p.beds==='object'&&p.bedRev===undefined&&integer(p.beds.rose)){p.beds.rose*=2;p.bedRev=2;}
+  if(p.beds&&typeof p.beds==='object'&&p.bedRev===2&&integer(p.beds.spring)&&integer(p.beds.seed)){p.beds.spring=3*Math.min(p.beds.spring,10)+Math.max(0,p.beds.spring-10);p.beds.seed=2*Math.min(p.beds.seed,10)+Math.max(0,p.beds.seed-10);p.bedRev=3;}
 }
 export const teamPower=p=>p.deck.reduce((sum,id)=>sum+combatPower(id,p.heroes[id],p.beds),0);
 function draftOffers(p){
