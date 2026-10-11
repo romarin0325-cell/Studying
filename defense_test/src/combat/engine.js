@@ -9,9 +9,10 @@ export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
 export const BALANCE_REVISION = 3;
 export const BOSS_HEALTH_SCALE = .65;
-// Renewal v1 raised average roster damage by about 36%. Enemy health follows
-// (base 76 → 100, stage slope 2.05 → 2.5, monthly 900 → 1225, weekly 25 → 34)
-// so a no-growth starter deck keeps its stage 1–3 pace (docs/STAT_SIMULATION.md).
+// Renewal v1 raised average roster damage by about 36%. Main-stage health uses
+// base 100 and stage slope 2.5 (was 76 and 2.05) so a no-growth starter deck
+// keeps its stage 1–3 pace (docs/STAT_SIMULATION.md). Weekly and monthly health
+// use challengeBase and TIERS; boss health is then scaled by BOSS_HEALTH_SCALE.
 export const WAVE_BASE_HEALTH = 100;
 export const ATTACK_WINDUP = .13;
 export const GAUGE_MAX = 120;
@@ -20,8 +21,9 @@ export const STATUS_REVISION=1;
 export const POISON_CAP=40;
 export const DIVINE_CAP=3;
 export const DAMAGE_TAKEN_CAP=.8;
-// Merge growth (docs/STAT_RENEWAL.md §2): attack ×2.35 per rank, support
-// values +20% per rank, control seconds and skill buff values +10% per rank.
+// Merge growth (docs/STAT_RENEWAL.md §2): attack ×2.35 per rank. Support auras
+// are +20% per rank. Control seconds, skill buffs, and basic-attack slow amounts
+// are +10% per rank (rankControl). Slows still cap at 80% for every enemy.
 export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
@@ -29,7 +31,7 @@ export const TRAINING_STEP=.25;
 export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:8},awaken:{power:.35,seconds:8},march:{speed:.25,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.15,speed:.15,seconds:8},echo:{ratio:.65,seconds:8}});
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
-// Bosses take half control and push, then resist new control briefly.
+// Bosses take half stun/freeze duration and half knockback/pull, then 2 s of control immunity.
 export const BOSS_CONTROL_SCALE=.5,BOSS_CONTROL_IMMUNITY=2,BOSS_PUSH_SCALE=.5;
 export const FROST_RELOCK=3;
 export const ZONE_CAP=75;
@@ -71,8 +73,9 @@ export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma'
 export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
 export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+level*3;
 export const QUEEN_CAP=90;
+// Immediate gold from the Queen's ultimate. +50% of this wave's base income is edictWave, once per wave.
 export const QUEEN_TAX=20;
-// Doom's black market: 10x, +1x for every 20 gold left after paying, up to 15x.
+// Doom's black market: 7x base (+1x per training level), +1x for every 20 gold left after paying, up to +5x.
 export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
 export const executeThresholdFor=k=>Math.min(.5,.4+(k-1)*.2);
 export const executeThreshold=(e,s=null)=>executeThresholdFor(s?special(s,'luna'):1);
@@ -426,6 +429,7 @@ function syncSlows(s,e,at=s.time){
   }
 }
 function addSlow(s,e,source,amount,duration){
+  // Cap is 80% for every enemy, including bosses. Control immunity does not block slows.
   const owner=source.split(':')[1];amount=Math.min(.8,amount*special(s,owner));
   // Refresh only this source. A weaker hit never borrows another effect's
   // strength or changes its deadline; equal-strength skills also expire alone.
@@ -829,6 +833,7 @@ export function castPreview(s,id){
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
 // Targets are random: a random row, random occupied cells, or a random companion for the curse.
 // Repeat-limited patterns (curse, shuffle) count per boss so one appearance never spams them.
+// BOSS_LIMIT.judgement is Astea's judgement (max 2), not Thor's column stun.
 const BOSS_LIMIT={curse:1,shuffle:2,judgement:2};
 // Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
 export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
@@ -868,7 +873,8 @@ function bossStep(s,e,dt){
     if(e.channel<=0){const pattern=s.telegraph?.pattern||boss.pattern;bossResolve(s,e,boss,pattern);s.telegraph=null;e.skillIn=boss.every||9;}
     return;
   }
-  // Thor: once he reaches the middle of the path, three random columns are lit, then stunned for 3 s.
+  // Thor, once per appearance at the path midpoint: three random columns, telegraphed 3.5 s, lit cells stunned 3 s.
+  // A stun on Thor during that channel cancels it (tickEnemyStatuses).
   if(boss.judgement&&!e.judged&&e.progress>=PATH_LENGTH*.5){
     e.channel=3.5;e.judging=true;e.channelHp=e.hp+(e.shield||0);
     s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3.5,total:3.5};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
@@ -878,7 +884,7 @@ function bossStep(s,e,dt){
   if(BOSS_LIMIT[pattern]!==undefined&&casts>=BOSS_LIMIT[pattern]){e.skillIn=99;return;}
   e.casts=casts+1;
   if(pattern==='curse'){
-    // Unannounced: one random active companion is sealed until it is merged, sold or cleansed.
+    // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
     const pool=s.board.flatMap((u,i)=>u&&!u.cursed?[i]:[]);e.skillIn=boss.every||9;
     if(!pool.length||s.buffs.radiance>0)return;
     const i=pool[Math.floor(random(s)*pool.length)];s.board[i].cursed=true;event(s,'curse',{index:i,hero:s.board[i].hero,...cellPoint(i)});return;
