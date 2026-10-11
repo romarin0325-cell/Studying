@@ -1079,7 +1079,6 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .unit-head-actions{display:flex;gap:6px;align-self:flex-start}
 .unit-card-row{margin-top:0}
 .unit-card-row .unit-skill,.unit-card-row .unit-actions button,.unit-card-row .fixed-target{min-height:42px}
-.live-note{display:block;margin-top:5px;font-size:11px;font-weight:700;color:#9ff0e0}
 .unit-buffs.given em{color:var(--gold)}
 /* Challenge tiers */
 .tier-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 10px}
@@ -1197,3 +1196,15 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .battle.compact .unit-panel{inset:auto 0 max(30px,calc(env(safe-area-inset-bottom) + 18px)) 0}
 .skill-rank{position:absolute;top:3px;left:3px;z-index:1;min-width:22px;padding:0 4px;border-radius:7px;font-size:9.5px;font-weight:800;line-height:15px;color:#fff;background:rgba(10,14,36,.85);border:1px solid var(--rk,#8a93b8)}
 .skill-rank[data-rank="2"]{--rk:#7fe6a0}.skill-rank[data-rank="3"]{--rk:#7fc4ff}.skill-rank[data-rank="4"]{--rk:#c58bff}.skill-rank[data-rank="5"]{--rk:#ffd36a;color:#ffe9a8}
+/* Numbers that grow with enhancement, shown at their current value. */
+.ability p em.scaled,.more em.scaled{font-style:normal;font-weight:800;color:#9ff0e0;text-shadow:0 0 8px rgba(127,230,211,.35)}
+/* Greenhouse fits the screen without scrolling: the painting fills the space above the beds. */
+.greenhouse{height:100%;min-height:0;padding:14px 16px 14px;overflow:hidden}
+.bed-row{padding-top:0}
+@media (max-height:640px),(max-width:350px){.greenhouse{padding-top:10px}.bed-row{padding-top:0}}
+/* Every banner keeps one sub-row of the same height (free pull, guardian note or relic tier), so the featured art sits in the same place. */
+.summon-sub{height:60px;margin:0 0 10px}
+.summon-sub>*{height:100%;margin:0;box-sizing:border-box}
+.summon-sub .relic-tier{align-content:center}
+.free-pull.info{opacity:.85;cursor:default}
+.free-pull.info>.ic:first-child{color:var(--gold)}

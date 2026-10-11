@@ -74,7 +74,8 @@ export const QUEEN_CAP=90;
 export const QUEEN_TAX=20;
 // Doom's black market: 10x, +1x for every 20 gold left after paying, up to 15x.
 export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
-export const executeThreshold=(e,s=null)=>Math.min(.5,.4+((s?special(s,'luna'):1)-1)*.2);
+export const executeThresholdFor=k=>Math.min(.5,.4+(k-1)*.2);
+export const executeThreshold=(e,s=null)=>executeThresholdFor(s?special(s,'luna'):1);
 export function dividend(s){return Math.min(QUEEN_CAP,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
@@ -143,18 +144,15 @@ export function trainingBonus(id,level){
 // claims a compounding +25% increase over the previous upgrade.
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*TRAINING_STEP)).toFixed(2));
 const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed(1))}초`;
-// Numbers that grow with enhancement milestones (special), for the hero sheet: "(현재 …)".
-// Base values are for a 1-star unit without training, the same as the description text.
-export function enhancedNotes(id,specialValue){
-  const k=specialValue,trait=[],skill=[],slow=v=>pctText(Math.min(.8,v*k));
-  const t={siren:()=>trait.push(`인접 공속 +${pctText(.15*k)}`),ancient_dragon:()=>trait.push(`인접 위력 +${pctText(.2*k)}`),
-    harmonious:()=>trait.push(`1종당 위력 +${pctText(.06*k)} · 공속 +${pctText(.05*k)}`),snow_rabbit:()=>trait.push(`감속 ${slow(.4)}`),time_ruler:()=>trait.push(`감속 ${slow(.25)}`),
-    phantom:()=>trait.push(`감속 ${slow(.25)}`),galaxy_whale:()=>trait.push(`감속 ${slow(.4)}`),frost_witch:()=>trait.push(`감속 ${slow(.4)} · 빙결 ${secText(.6*k)}`),
-    guardian:()=>trait.push(`기절 ${secText(.7*k)}`),great_detective:()=>{trait.push(`노출 ${pctText(.08*k)} · 보스 ${pctText(.15*k)}`);skill.push(`노출 ${pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))}`);},
-    aurora:()=>skill.push(`반사율 ${pctText(Math.min(1,.5*k))}`),time_magician:()=>trait.push(`추가 공격 ${pctText(.6*k)}`),luna:()=>trait.push(`처형 기준 ${pctText(Math.min(.5,.4+(k-1)*.2))}`)};
-  t[id]?.();
-  const seconds={echo:8,haste:ULT_BUFF.haste.seconds,awaken:ULT_BUFF.awaken.seconds,march:ULT_BUFF.march.seconds,glassfall:10,gift:6,goddess:8,trauma:10,ice_court:6,harmony:ULT_BUFF.harmony.seconds,freeze:2,thunder:1.2,quake:1.5,vortex:1.5,singularity:2,rewind:2}[HERO[id].skill.type];
-  if(seconds)skill.push(`${['freeze','thunder','quake','vortex','singularity','rewind'].includes(HERO[id].skill.type)?'제어':'지속'} ${secText(seconds*k)}`);
+// Numbers in the hero sheet text that grow with enhancement milestones (special): [as written for a 1-star unit, current value].
+// Ultimate durations, control times and ultimate slows grow too.
+export function scaledTokens(id,k){
+  const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
+  const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
+  const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
+    storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
+    siren:[['8초',sec(8)]],ancient_dragon:[['8초',sec(8)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['8초',sec(8)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
@@ -707,12 +705,12 @@ export function castPreview(s,id){
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
     lines.push(`${dur(ULT_BUFF.harmony.seconds)} 동안 모든 동료의 위력 ${pct((ULT_BUFF.harmony.power+level*.02)*field)}%, 공격 속도 ${pct((ULT_BUFF.harmony.speed+level*.02)*field)}%가 오릅니다.`);
-    lines.push('배치 오라와 함께 적용되고, 각성·가속 같은 다른 필살기 버프와는 큰 쪽만 적용됩니다.');
+    lines.push('각성·가속 같은 다른 필살기 버프와 겹치면 큰 쪽만 적용됩니다.');
   }else if(type==='royal'||type==='starfall'||type==='mirror'){
     if(type==='starfall')lines.push(`별빛 ${Math.floor(s.gauge)}을 모두 써 체력이 가장 높은 적에게 ${hit(.4*s.gauge)}를 줍니다.`);
     else if(type==='mirror'){
       lines.push(`체력이 가장 높은 적에게 5초 동안 거울을 걸고, 끝날 때 위력 12배인 ${hit(12)}를 줍니다.`);
-      lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해지며, 모은 양에는 상한이 없습니다.`);
+      lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해집니다.`);
     }else{
       const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
       lines.push(`체력이 가장 높은 적에게 위력 24배, ${hit(24)}를 줍니다.`);
@@ -766,18 +764,17 @@ export function castPreview(s,id){
     if(targets.length&&lateN&&!earlyN)lines.push(`지금 적은 경로의 마지막 3분의 1이라 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
     else if(targets.length&&earlyN&&!lateN)lines.push(`지금 적은 마지막 3분의 1 전이라 ${push(false)}만큼 밀리고 ${stun(false)} 기절합니다. 그 구간에 들면 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
     else lines.push(`마지막 3분의 1 전은 ${push(false)}만큼 밀리고 ${stun(false)} 기절하며, 그 안은 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
-    lines.push('보스는 밀쳐내기와 기절이 절반입니다. 제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
+    lines.push('제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
   }else if(type==='nightmare'){
     const expose=Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),stacks=4+(has(s,'seed')?1:0);
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 ${num(220*control)}만큼 밀어냅니다.`);
     lines.push(`6초 동안 받는 피해가 ${pct(expose)}% 늘고, 12초 동안 독 ${stacks}중첩이 걸립니다.`);
-    lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해이고, 보스는 절반만 밀립니다.`);
+    lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해입니다.`);
   }else if(type==='rewind'){
     const stun=2*control*scale;
     if(targets.length===1){
       const e=targets[0],boss=!!e.boss,held=immune(e)?0:stun*(boss?BOSS_CONTROL_SCALE:1),dist=e.speed*6*control*(boss?BOSS_PUSH_SCALE:1);
       lines.push(held?`적을 ${num(dist)}만큼 되돌리고 ${sec(held)} 동안 멈춘 뒤 위력 3배, ${hit(3)}를 줍니다.`:`적을 ${num(dist)}만큼 되돌린 뒤 위력 3배, ${hit(3)}를 줍니다. 지금은 제어 면역입니다.`);
-      if(!boss)lines.push('보스는 되돌아가는 거리와 멈춤이 절반입니다.');
     }else{
       lines.push(`각 적을 이동 속도로 ${sec(6*control)} 동안 간 거리만큼 되돌리고 위력 3배, ${hit(3)}를 줍니다.`);
       lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 멈춥니다.`);
@@ -785,7 +782,7 @@ export function castPreview(s,id){
   }else if(type==='vortex'||type==='singularity'){
     const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80),pull=Math.min(.9,.65*control);
     const stunSec=(type==='singularity'?2:1.5)*control*scale,slow=pct(slowOf(.6));
-    lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다. 보스의 끌어당김은 절반입니다.`);
+    lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다.`);
     if(type==='vortex')lines.push(`위력 5배, ${hit(5)}를 주고 4초 동안 ${slow}% 느려집니다.`);
     else{
       const marks=targets.map(e=>snapshot(e).divine);
