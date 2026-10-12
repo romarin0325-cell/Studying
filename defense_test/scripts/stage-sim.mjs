@@ -40,8 +40,8 @@ if(roseMode!=='auto'&&(!Number.isInteger(roseMode)||roseMode<0))throw new Error(
 // Greenhouse a player would plausibly have on the way to stage S. Enhance stays 0.
 const bedsFor=stage=>({
   rose:roseMode==='auto'?Math.min(45,3+stage):roseMode,
-  spring:stage>=15?Math.min(10,stage-14):0,
-  seed:stage>=30?Math.min(10,stage-29):0,
+  spring:stage>=15?Math.min(30,3*(stage-14)):0,
+  seed:stage>=30?Math.min(20,2*(stage-29)):0,
 });
 const metaFor=(deck,beds)=>{
   const entry={enhance:0};

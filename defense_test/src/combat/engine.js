@@ -8,10 +8,11 @@ export const special=(s,id)=>(s.meta?.[id]?.special||1);
 export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
 export const BALANCE_REVISION = 3;
-export const BOSS_HEALTH_SCALE = .8;
-// Renewal v1 raised average roster damage by about 36%. Enemy health follows
-// (base 76 → 100, stage slope 2.05 → 2.5, monthly 900 → 1225, weekly 25 → 34)
-// so a no-growth starter deck keeps its stage 1–3 pace (docs/STAT_SIMULATION.md).
+export const BOSS_HEALTH_SCALE = .65;
+// Renewal v1 raised average roster damage by about 36%. Main-stage health uses
+// base 100 and stage slope 2.5 (was 76 and 2.05) so a no-growth starter deck
+// keeps its stage 1–3 pace (docs/STAT_SIMULATION.md). Weekly and monthly health
+// use challengeBase and TIERS; boss health is then scaled by BOSS_HEALTH_SCALE.
 export const WAVE_BASE_HEALTH = 100;
 export const ATTACK_WINDUP = .13;
 export const GAUGE_MAX = 120;
@@ -20,8 +21,9 @@ export const STATUS_REVISION=1;
 export const POISON_CAP=40;
 export const DIVINE_CAP=3;
 export const DAMAGE_TAKEN_CAP=.8;
-// Merge growth (docs/STAT_RENEWAL.md §2): attack ×2.35 per rank, support
-// values +20% per rank, control seconds and skill buff values +10% per rank.
+// Merge growth (docs/STAT_RENEWAL.md §2): attack ×2.35 per rank. Support auras
+// are +20% per rank. Control seconds, skill buffs, and basic-attack slow amounts
+// are +10% per rank (rankControl). Slows still cap at 80% for every enemy.
 export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
@@ -29,7 +31,7 @@ export const TRAINING_STEP=.25;
 export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:8},awaken:{power:.35,seconds:8},march:{speed:.25,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.15,speed:.15,seconds:8},echo:{ratio:.65,seconds:8}});
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
-// Bosses take half control and push, then resist new control briefly.
+// Bosses take half stun/freeze duration and half knockback/pull, then 2 s of control immunity.
 export const BOSS_CONTROL_SCALE=.5,BOSS_CONTROL_IMMUNITY=2,BOSS_PUSH_SCALE=.5;
 export const FROST_RELOCK=3;
 export const ZONE_CAP=75;
@@ -39,7 +41,7 @@ export const POISON_POWER_RATIO=1.5/11;
 // correction limits the increase from replacing refreshes with overlapping hits.
 export const ZONE_CADENCE=1.15;
 export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CADENCE:1;
-export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',queen:'tax',cinderella:'midnight',frost_witch:'winter'});
+export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter'});
 const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 export const BOARD = {x:135,y:212,cell:90};
@@ -71,10 +73,12 @@ export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma'
 export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
 export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+level*3;
 export const QUEEN_CAP=90;
-export const QUEEN_TAX=40;
-// Doom's black market: 10x, +1x for every 20 gold left after paying, up to 15x.
+// Immediate gold from the Queen's ultimate. +50% of this wave's base income is edictWave, once per wave.
+export const QUEEN_TAX=20;
+// Doom's black market: 7x base (+1x per training level), +1x for every 20 gold left after paying, up to +5x.
 export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
-export const executeThreshold=(e,s=null)=>Math.min(.5,.4+((s?special(s,'luna'):1)-1)*.2);
+export const executeThresholdFor=k=>Math.min(.5,.4+(k-1)*.2);
+export const executeThreshold=(e,s=null)=>executeThresholdFor(s?special(s,'luna'):1);
 export function dividend(s){return Math.min(QUEEN_CAP,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
@@ -143,18 +147,15 @@ export function trainingBonus(id,level){
 // claims a compounding +25% increase over the previous upgrade.
 export const trainingPower=(id,level)=>Number((HERO[id].damage*(1+level*TRAINING_STEP)).toFixed(2));
 const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed(1))}초`;
-// Numbers that grow with enhancement milestones (special), for the hero sheet: "(현재 …)".
-// Base values are for a 1-star unit without training, the same as the description text.
-export function enhancedNotes(id,specialValue){
-  const k=specialValue,trait=[],skill=[],slow=v=>pctText(Math.min(.8,v*k));
-  const t={siren:()=>trait.push(`인접 공속 +${pctText(.15*k)}`),ancient_dragon:()=>trait.push(`인접 위력 +${pctText(.2*k)}`),
-    harmonious:()=>trait.push(`1종당 위력 +${pctText(.06*k)} · 공속 +${pctText(.05*k)}`),snow_rabbit:()=>trait.push(`감속 ${slow(.4)}`),time_ruler:()=>trait.push(`감속 ${slow(.25)}`),
-    phantom:()=>trait.push(`감속 ${slow(.25)}`),galaxy_whale:()=>trait.push(`감속 ${slow(.4)}`),frost_witch:()=>trait.push(`감속 ${slow(.4)} · 빙결 ${secText(.6*k)}`),
-    guardian:()=>trait.push(`기절 ${secText(.7*k)}`),great_detective:()=>{trait.push(`노출 ${pctText(.08*k)} · 보스 ${pctText(.15*k)}`);skill.push(`노출 ${pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))}`);},
-    aurora:()=>skill.push(`반사율 ${pctText(Math.min(1,.5*k))}`),time_magician:()=>trait.push(`추가 공격 ${pctText(.6*k)}`),luna:()=>trait.push(`처형 기준 ${pctText(Math.min(.5,.4+(k-1)*.2))}`)};
-  t[id]?.();
-  const seconds={echo:8,haste:ULT_BUFF.haste.seconds,awaken:ULT_BUFF.awaken.seconds,march:ULT_BUFF.march.seconds,glassfall:10,gift:6,goddess:8,trauma:10,ice_court:6,harmony:ULT_BUFF.harmony.seconds,dividend:8,freeze:2,thunder:1.2,quake:1.5,vortex:1.5,singularity:2,rewind:2}[HERO[id].skill.type];
-  if(seconds)skill.push(`${['freeze','thunder','quake','vortex','singularity','rewind'].includes(HERO[id].skill.type)?'제어':'지속'} ${secText(seconds*k)}`);
+// Numbers in the hero sheet text that grow with enhancement milestones (special): [as written for a 1-star unit, current value].
+// Ultimate durations, control times and ultimate slows grow too.
+export function scaledTokens(id,k){
+  const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
+  const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
+  const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
+    storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
+    siren:[['8초',sec(8)]],ancient_dragon:[['8초',sec(8)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['8초',sec(8)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
@@ -166,8 +167,8 @@ export function givenEffects(s,u,index){
   else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
-  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankSupport(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
-  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankSupport(u.rank)*k))}`);}
+  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
+  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
   else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
   return out;
@@ -255,11 +256,11 @@ function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,w
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy'}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE);
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,tier:TIERS[tier]?tier:'easy',
-    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:validArtifacts(artifacts)?[...artifacts]:[],upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
+    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
@@ -341,7 +342,9 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(wave===3||wave===6)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:bossHp});
   return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:budget+(wave===3||wave===6?bossHp:0)};
 }
-export const weeklyBoss=(chapter,wave)=>BOSS_ORDER[(chapter+Math.floor(wave/3)-1+BOSS_ORDER.length)%BOSS_ORDER.length];
+// Challenge lineups only use bosses the player has met (`met` = first N of BOSS_ORDER).
+export const weeklyBoss=(chapter,wave,met=BOSS_ORDER.length)=>BOSS_ORDER[(chapter+Math.floor(wave/3)-1+BOSS_ORDER.length*9)%Math.max(1,Math.min(met,BOSS_ORDER.length))];
+export const monthlyBoss=(wave,met=BOSS_ORDER.length)=>BOSS_ORDER[(wave-1)%Math.max(1,Math.min(met,BOSS_ORDER.length))];
 export const lastWave=s=>s.mode==='main'?MAIN_WAVES:CHALLENGE_WAVES;
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
@@ -350,7 +353,7 @@ function beginWave(s,wave){
 }
 function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
-  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?BOSS_ORDER[(wave-1)%BOSS_ORDER.length]:s.mode==='weekly'?weeklyBoss(s.chapter,wave):chapter.bosses[0]):null;
+  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?monthlyBoss(wave,s.met):s.mode==='weekly'?weeklyBoss(s.chapter,wave,s.met):chapter.bosses[0]):null;
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
     slow:0,slowTime:0,slowEffects:[],statusEffects:[],stun:0,freeze:0,controlTime:0,burn:0,burnTime:0,burnOwner:null,poison:0,poisonTime:0,exposed:0,exposeTime:0,takenBonus:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0,ccImmune:0,frostLock:0};
   e.speed*=1.1;s.enemies.push(e);if(isBoss)event(s,'boss',{id:bossId,name:BOSSES[bossId].name});return e;
@@ -391,7 +394,6 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
   if(e.hp<=0){
     s.stats.kills++;const gold=e.boss?20:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
-    if(s.buffs.tax>0)giveGold(s,gold*2,'장미의 세금');
     if(gift)giveGold(s,1,'선물');
     addGauge(s,(e.boss?15:1.3)+e.divine*(e.boss?DIVINE_BOSS_GAUGE:DIVINE_GAUGE));
     // A frozen enemy that falls spreads the witch's cold; Winter Court freezes nearby foes.
@@ -427,6 +429,7 @@ function syncSlows(s,e,at=s.time){
   }
 }
 function addSlow(s,e,source,amount,duration){
+  // Cap is 80% for every enemy, including bosses. Control immunity does not block slows.
   const owner=source.split(':')[1];amount=Math.min(.8,amount*special(s,owner));
   // Refresh only this source. A weaker hit never borrows another effect's
   // strength or changes its deadline; equal-strength skills also expire alone.
@@ -437,7 +440,7 @@ function addSlow(s,e,source,amount,duration){
   syncSlows(s,e);
 }
 function slowTargets(s,targets,hero,amount,point,source,rank=1){
-  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankSupport(rank);
+  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankControl(rank);
   for(const t of targets)addSlow(s,t,source,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*.25,hero.id);event(s,'tide',{...point});}
 }
@@ -589,15 +592,15 @@ export function cast(s,id){
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control);
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control);
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
-  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,2);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
+  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control);}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control);for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control);}
   else if(type==='ice_court'){strike(6);for(const e of targets)if(e.hp>0)addSlow(s,e,source,.5,6);s.buffs.winter=skillDuration(s,6*control);}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control);
   else if(type==='royal'||type==='starfall'||type==='mirror'){
-    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?4:FINISHER_DELAY;
+    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
     visualTargets=[target];
-    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?10:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
+    s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?12:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,2*control*scale);addSlow(s,e,source,.5,6);}}
@@ -633,7 +636,7 @@ export function cast(s,id){
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*9,id);}
   else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
   else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
-  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.buffs.tax=skillDuration(s,8*control);}
+  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;}
   const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
@@ -689,7 +692,7 @@ export function castPreview(s,id){
     // The haste and the three-hour step are fixed. cast() stores buffScale but never reads it back.
     lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
-    lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 2성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 2성으로 전장에 합류합니다.');
+    lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 1성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 1성으로 전장에 합류합니다.');
     lines.push(`${dur(6)} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
   }else if(type==='goddess'){
     lines.push(`적 전체에게 위력 5배, ${hit(5)}를 줍니다.`);
@@ -706,12 +709,12 @@ export function castPreview(s,id){
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
     lines.push(`${dur(ULT_BUFF.harmony.seconds)} 동안 모든 동료의 위력 ${pct((ULT_BUFF.harmony.power+level*.02)*field)}%, 공격 속도 ${pct((ULT_BUFF.harmony.speed+level*.02)*field)}%가 오릅니다.`);
-    lines.push('배치 오라와 함께 적용되고, 각성·가속 같은 다른 필살기 버프와는 큰 쪽만 적용됩니다.');
+    lines.push('각성·가속 같은 다른 필살기 버프와 겹치면 큰 쪽만 적용됩니다.');
   }else if(type==='royal'||type==='starfall'||type==='mirror'){
     if(type==='starfall')lines.push(`별빛 ${Math.floor(s.gauge)}을 모두 써 체력이 가장 높은 적에게 ${hit(.4*s.gauge)}를 줍니다.`);
     else if(type==='mirror'){
-      lines.push(`체력이 가장 높은 적에게 4초 동안 거울을 걸고, 끝날 때 위력 10배인 ${hit(10)}를 줍니다.`);
-      lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해지며, 모은 양에는 상한이 없습니다.`);
+      lines.push(`체력이 가장 높은 적에게 5초 동안 거울을 걸고, 끝날 때 위력 12배인 ${hit(12)}를 줍니다.`);
+      lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해집니다.`);
     }else{
       const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
       lines.push(`체력이 가장 높은 적에게 위력 24배, ${hit(24)}를 줍니다.`);
@@ -765,18 +768,17 @@ export function castPreview(s,id){
     if(targets.length&&lateN&&!earlyN)lines.push(`지금 적은 경로의 마지막 3분의 1이라 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
     else if(targets.length&&earlyN&&!lateN)lines.push(`지금 적은 마지막 3분의 1 전이라 ${push(false)}만큼 밀리고 ${stun(false)} 기절합니다. 그 구간에 들면 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
     else lines.push(`마지막 3분의 1 전은 ${push(false)}만큼 밀리고 ${stun(false)} 기절하며, 그 안은 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
-    lines.push('보스는 밀쳐내기와 기절이 절반입니다. 제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
+    lines.push('제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
   }else if(type==='nightmare'){
     const expose=Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),stacks=4+(has(s,'seed')?1:0);
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 ${num(220*control)}만큼 밀어냅니다.`);
     lines.push(`6초 동안 받는 피해가 ${pct(expose)}% 늘고, 12초 동안 독 ${stacks}중첩이 걸립니다.`);
-    lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해이고, 보스는 절반만 밀립니다.`);
+    lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO)} 피해입니다.`);
   }else if(type==='rewind'){
     const stun=2*control*scale;
     if(targets.length===1){
       const e=targets[0],boss=!!e.boss,held=immune(e)?0:stun*(boss?BOSS_CONTROL_SCALE:1),dist=e.speed*6*control*(boss?BOSS_PUSH_SCALE:1);
       lines.push(held?`적을 ${num(dist)}만큼 되돌리고 ${sec(held)} 동안 멈춘 뒤 위력 3배, ${hit(3)}를 줍니다.`:`적을 ${num(dist)}만큼 되돌린 뒤 위력 3배, ${hit(3)}를 줍니다. 지금은 제어 면역입니다.`);
-      if(!boss)lines.push('보스는 되돌아가는 거리와 멈춤이 절반입니다.');
     }else{
       lines.push(`각 적을 이동 속도로 ${sec(6*control)} 동안 간 거리만큼 되돌리고 위력 3배, ${hit(3)}를 줍니다.`);
       lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 멈춥니다.`);
@@ -784,7 +786,7 @@ export function castPreview(s,id){
   }else if(type==='vortex'||type==='singularity'){
     const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80),pull=Math.min(.9,.65*control);
     const stunSec=(type==='singularity'?2:1.5)*control*scale,slow=pct(slowOf(.6));
-    lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다. 보스의 끌어당김은 절반입니다.`);
+    lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다.`);
     if(type==='vortex')lines.push(`위력 5배, ${hit(5)}를 주고 4초 동안 ${slow}% 느려집니다.`);
     else{
       const marks=targets.map(e=>snapshot(e).divine);
@@ -819,9 +821,8 @@ export function castPreview(s,id){
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
   }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 20마다 +1배 (최대 ${12+level}배).`);}
   else if(type==='dividend'){
-    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 골드 ${QUEEN_TAX}을 받습니다.`);
-    // The extra payout is 2× kill gold, so the total is 3×. buffScale does not change it.
-    lines.push(`${dur(8)} 동안 처치 골드가 3배가 되어 일반 6, 장갑 9, 보스 60골드를 줍니다.`);
+    lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
+    lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
   }else lines.push(hero.skill.text);
 
   const gold=skillGoldCost(id);
@@ -832,6 +833,7 @@ export function castPreview(s,id){
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
 // Targets are random: a random row, random occupied cells, or a random companion for the curse.
 // Repeat-limited patterns (curse, shuffle) count per boss so one appearance never spams them.
+// BOSS_LIMIT.judgement is Astea's judgement (max 2), not Thor's column stun.
 const BOSS_LIMIT={curse:1,shuffle:2,judgement:2};
 // Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
 export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
@@ -850,7 +852,7 @@ function bossResolve(s,e,boss,pattern){
   else if(pattern==='storm'){if(!shielded)for(const i of cells)if(s.board[i]){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='stun1'){if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
   else if(pattern==='starlust'){if(s.gauge>=gaugeCap(s)-1e-6){s.gauge=Math.max(0,s.gauge-60);event(s,'drain');}event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});}
-  else if(pattern==='thunder'){e.judged=true;if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='thunder'){e.judged=true;e.judging=false;if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='shuffle'){
     const units=s.board.filter(Boolean),slots=shuffle(s,Array.from({length:25},(_,i)=>i));s.board=Array(25).fill(null);units.forEach((u,i)=>{s.board[slots[i]]=u;});syncTimeRuler(s);
     event(s,'shuffle',{});event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
@@ -871,9 +873,10 @@ function bossStep(s,e,dt){
     if(e.channel<=0){const pattern=s.telegraph?.pattern||boss.pattern;bossResolve(s,e,boss,pattern);s.telegraph=null;e.skillIn=boss.every||9;}
     return;
   }
-  // Thor: once he reaches the middle of the path, three random columns are lit, then stunned for 3 s.
+  // Thor, once per appearance at the path midpoint: three random columns, telegraphed 3.5 s, lit cells stunned 3 s.
+  // A stun on Thor during that channel cancels it (tickEnemyStatuses).
   if(boss.judgement&&!e.judged&&e.progress>=PATH_LENGTH*.5){
-    e.channel=3.5;e.judged=true;e.channelHp=e.hp+(e.shield||0);
+    e.channel=3.5;e.judging=true;e.channelHp=e.hp+(e.shield||0);
     s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3.5,total:3.5};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
   }
   e.skillIn-=dt;if(e.skillIn>0)return;
@@ -881,7 +884,7 @@ function bossStep(s,e,dt){
   if(BOSS_LIMIT[pattern]!==undefined&&casts>=BOSS_LIMIT[pattern]){e.skillIn=99;return;}
   e.casts=casts+1;
   if(pattern==='curse'){
-    // Unannounced: one random active companion is sealed until it is merged, sold or cleansed.
+    // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
     const pool=s.board.flatMap((u,i)=>u&&!u.cursed?[i]:[]);e.skillIn=boss.every||9;
     if(!pool.length||s.buffs.radiance>0)return;
     const i=pool[Math.floor(random(s)*pool.length)];s.board[i].cursed=true;event(s,'curse',{index:i,hero:s.board[i].hero,...cellPoint(i)});return;
@@ -892,8 +895,8 @@ function bossStep(s,e,dt){
 }
 
 function completeWave(s){
-  const payout={base:waveIncome(s.wave),dividend:dividend(s)};
-  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
+  const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
+  giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
   event(s,'clear',{wave:s.wave,...payout});
   if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
   s.reward=shuffle(s,BLESSINGS.map(b=>b.id)).slice(0,3);s.phase='reward';
@@ -1006,6 +1009,10 @@ export function restore(raw){
     if(s.finishers===undefined)s.finishers=[];
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     if(s.buffScale===undefined)s.buffScale={};
+    if(s.buffs&&s.buffs.tax!==undefined)delete s.buffs.tax;
+    if(s.buffTotals&&s.buffTotals.tax!==undefined)delete s.buffTotals.tax;
+    if(s.buffScale&&s.buffScale.tax!==undefined)delete s.buffScale.tax;
+    if(s.edictWave===undefined)s.edictWave=0;
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.
     for(const e of s.enemies)if(e){if(Array.isArray(e.statusEffects))e.statusEffects=e.statusEffects.filter(effect=>effect?.type!=='frost');e.frostStacks=0;e.frostTime=0;}
@@ -1024,9 +1031,11 @@ export function restore(raw){
     const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
     if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||u.clock!==undefined&&(!Number.isInteger(u.clock)||u.clock<0||u.clock>11)||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
     if(s.tier===undefined)s.tier='easy';if(!TIERS[s.tier])return null;
+    if(s.met===undefined)s.met=BOSS_ORDER.length;if(!Number.isInteger(s.met)||s.met<1||s.met>BOSS_ORDER.length)return null;
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;
     // Time Ruler no longer has a solo bonus; its cached top unit only orders casts.
     if(s.timeRulerUid!==null&&!id(s.timeRulerUid))return null;
+    if(!Number.isInteger(s.edictWave)||s.edictWave<0||s.edictWave>1000)return null;
     if(s.timeRulerUid!==null&&!s.board.some(u=>u?.hero==='time_ruler'&&u.uid===s.timeRulerUid))s.timeRulerUid=null;
     syncTimeRuler(s);
     if(s.enemies.length>1000||s.queue.length>2048||s.shots.length>1000||s.queue.some(k=>!kinds.includes(k?.kind)||!numeric(k,['hp'])||k.hp<=0))return null;
@@ -1082,7 +1091,7 @@ export function restore(raw){
     if(!record(s.buffScale)||Object.entries(s.buffScale).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<1||n>rankControl(MAX_RANK)+1e-9))return null;
     if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation','stun1','starlust','thunder','shuffle','warp','judgement'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
-    if(s.settlement&&!numeric(s.settlement,['base','dividend']))return null;
+    if(s.settlement){if(s.settlement.edict===undefined)s.settlement.edict=0;if(!numeric(s.settlement,['base','dividend','edict']))return null;}
     if(s.phase==='reward'&&(!Array.isArray(s.reward)||s.reward.length!==3||new Set(s.reward).size!==3||s.reward.some(a=>!BLESSING[a])))return null;
     if(s.balanceRevision!==undefined&&s.balanceRevision!==2&&s.balanceRevision!==BALANCE_REVISION)return null;
     if(s.balanceRevision===undefined){

@@ -106,8 +106,9 @@ test('six main waves contain exactly two copies of one boss and stage nine follo
     }assert.equal(bosses,2);
   }
   assert.equal(E.WAVE_BASE_HEALTH,100);
-  const expected=Math.round(Math.round(100*1.34**11*3.5*32)*.8);
+  const expected=Math.round(Math.round(100*1.34**11*3.5*32)*E.BOSS_HEALTH_SCALE);
   assert.equal(E.wavePlan(6,8).sequence.find(e=>e.kind==='boss').hp,expected);
+  assert.equal(E.BOSS_HEALTH_SCALE,.65);
 });
 
 test('five starter heroes finish a real opening expedition with no growth or rare equipment',()=>{
@@ -172,10 +173,12 @@ test('weekly and monthly challenges run 18 tiered waves with no round timer; a m
   s.queue=E.wavePlan(1,0,'monthly').sequence;s.spawnIn=0;E.step(s,.05);
   const boss=s.enemies[0];boss.skillIn=1e9;boss.progress=E.PATH_LENGTH-.1;E.step(s,.05);
   assert.equal(s.phase,'defeat','one boss at the core ends the monthly run');assert.equal(clearedRounds(s),0);
-  for(let i=0;i<9;i++){
-    const run=createBattle(active('monthly',4));run.wave=i+1;run.queue=E.wavePlan(i+1,0,'monthly').sequence;run.spawnIn=0;E.step(run,.05);
-    assert.equal(run.enemies[0].boss,BOSS_ORDER[i]);
+  // Only bosses the player has met appear: three cleared stages cycle the first three bosses, nine cycle all.
+  for(const stage of [4,10])for(let i=0;i<9;i++){
+    const run=createBattle(active('monthly',stage));run.wave=i+1;run.queue=E.wavePlan(i+1,0,'monthly').sequence;run.spawnIn=0;E.step(run,.05);
+    assert.equal(run.enemies[0].boss,BOSS_ORDER[i%Math.min(9,stage-1)]);
   }
+  for(let w=3;w<=18;w+=3){assert.ok(BOSS_ORDER.indexOf(E.weeklyBoss(2,w,3))<3,'weekly lineup stays among met bosses');assert.equal(E.weeklyBoss(5,w,9),E.weeklyBoss(5,w));}
 });
 
 test('move, merge, target priority and saved growth survive a real mid-combat resume',()=>{
@@ -200,9 +203,9 @@ test('gauge caps and restores at 120, both delayed strikes hit at 0.3 seconds, a
   for(const id of ['star_boy','cherry_prince','aurora']){
     const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5),s=ensureHero(E.newRun({deck,seed:1234}),id);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;E.step(s,.05);
     for(const u of s.board)if(u)u.disabled=20;s.enemies[0].speed=0;s.enemies[0].skillIn=99;s.gauge=120;
-    assert.ok(E.restore(E.serialize(s)));assert.ok(E.cast(s,id).ok);const f=s.finishers[0];assert.equal(f.total,id==='aurora'?4:.3);
+    assert.ok(E.restore(E.serialize(s)));assert.ok(E.cast(s,id).ok);const f=s.finishers[0];assert.equal(f.total,id==='aurora'?5:.3);
     const before=s.stats.damage;for(let i=0;i<5;i++)E.step(s,.05);assert.equal(s.stats.damage,before);
-    E.step(s,.05);if(id==='aurora'){assert.equal(s.stats.damage,before);for(let i=6;i<85;i++)E.step(s,.05);}assert.ok(s.stats.damage>before);assert.equal(s.finishers.length,0);
+    E.step(s,.05);if(id==='aurora'){assert.equal(s.stats.damage,before);for(let i=6;i<110;i++)E.step(s,.05);}assert.ok(s.stats.damage>before);assert.equal(s.finishers.length,0);
   }
   const s=E.newRun({seed:1234});s.gauge=119.99;E.step(s,.05);assert.equal(s.gauge,120);const bad=JSON.parse(E.serialize(s));bad.gauge=120.01;assert.equal(E.restore(bad),null);
 });
@@ -470,7 +473,7 @@ test('mirror recording has no ceiling, survives resume, honours a legacy cap and
     const bad=JSON.parse(E.serialize(s));Object.assign(bad.finishers[0],change);assert.equal(E.restore(bad),null,JSON.stringify(change));
   }
   const legacy=JSON.parse(E.serialize(s));Object.assign(legacy.finishers[0],{cap:actual*.45/2,stored:actual/2});const old=E.restore(legacy);assert.ok(old,'a checkpoint from before the change keeps its cap');
-  for(let i=0;i<85;i++){E.step(s,.05);E.step(restored,.05);E.step(old,.05);}
+  for(let i=0;i<110;i++){E.step(s,.05);E.step(restored,.05);E.step(old,.05);}
   assert.equal(E.serialize(restored),E.serialize(s));
   close(s.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*mark.ratio);
   close(old.events.find(e=>e.type==='finisherImpact'&&e.kind==='mirror').echoDamage,actual*.45/2);
@@ -623,13 +626,26 @@ test('Astea judgement removes the unit left on the marked cell; moving away dodg
 test('Thor lights three random columns once at mid-path; units moved out of them are not stunned',()=>{
   for(const dodge of [false,true]){
     const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0}]);s.chapter=4;const [boss]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH*.5+1}]);boss.speed=0;boss.skillIn=99;
-    E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');const cells=s.telegraph.cells;
+    E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');assert.equal(boss.judging,true);assert.equal(!!boss.judged,false);const cells=s.telegraph.cells;
     assert.equal(cells.length,15);assert.equal(new Set(cells.map(c=>c%5)).size,3,'three whole columns');close(s.telegraph.ends-s.time,3.5,'telegraph');
     let at=12;if(cells.includes(12)&&dodge){const safe=[...Array(25).keys()].find(c=>!cells.includes(c)&&!s.board[c]);assert.ok(E.move(s,12,safe).ok);at=safe;}
     for(let k=0;k<80&&s.telegraph;k++)E.step(s,.05);
-    assert.equal(boss.judged,true);assert.equal(s.board[at].disabled>0,cells.includes(at),'only lit cells are stunned');
+    assert.equal(boss.judged,true);assert.equal(boss.judging,false);assert.equal(s.board[at].disabled>0,cells.includes(at),'only lit cells are stunned');
     boss.progress=E.PATH_LENGTH*.6;boss.skillIn=99;E.step(s,.05);assert.notEqual(s.telegraph?.pattern,'thunder','once per appearance');
   }
+});
+
+test('stunning Thor during the thunder channel cancels the judgement; resolving without a stun stuns the three lit columns',()=>{
+  const s=traitArena([{hero:'lightning_sage',index:12},{hero:'siren',index:0}]);s.chapter=4;const [boss]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH*.5+1}]);boss.speed=0;boss.skillIn=99;
+  E.step(s,.05);assert.equal(s.telegraph.pattern,'thunder');assert.equal(boss.judging,true);const cells=s.telegraph.cells;
+  readyCast(s,'lightning_sage');E.step(s,.05);assert.equal(s.telegraph,null);assert.equal(boss.judging,false);assert.equal(boss.judged,true);
+  assert.ok(s.events.some(e=>e.type==='interrupt'));assert.ok(s.board.every(u=>!u||u.disabled<=0),'cancelled thunder does not stun');
+  boss.progress=E.PATH_LENGTH*.6;boss.skillIn=99;E.step(s,.05);assert.notEqual(s.telegraph?.pattern,'thunder','cancelled judgement stays spent');
+  const r=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0}]);r.chapter=4;const [thor]=enemiesFor(r,[{kind:'boss',progress:E.PATH_LENGTH*.5+1}]);thor.speed=0;thor.skillIn=99;
+  E.step(r,.05);const lit=r.telegraph.cells;for(let k=0;k<80&&r.telegraph;k++)E.step(r,.05);
+  assert.equal(thor.judged,true);assert.equal(thor.judging,false);
+  for(const i of [0,12])assert.equal(r.board[i].disabled>0,lit.includes(i),'resolved thunder stuns only lit columns');
+  void cells;
 });
 
 test('Ares reshuffles the board at most twice; love Iris drains only a full gauge',()=>{
@@ -645,7 +661,7 @@ test('Ares reshuffles the board at most twice; love Iris drains only a full gaug
 });
 
 test('Queen pays 12G (+6G per rank, cap 90); Doom refunds without training and training raises the fortune',()=>{
-  assert.equal(E.queenIncome(1,1),12);assert.equal(E.queenIncome(2,1),18);assert.equal(E.QUEEN_CAP,90);assert.equal(E.QUEEN_TAX,40);
+  assert.equal(E.queenIncome(1,1),12);assert.equal(E.queenIncome(2,1),18);assert.equal(E.QUEEN_CAP,90);assert.equal(E.QUEEN_TAX,20);
   assert.equal(E.fortuneFactor(0),7);assert.equal(E.fortuneFactor(39),8);assert.equal(E.fortuneFactor(500),12);assert.equal(E.fortuneFactor(500,3),15);
   assert.equal(E.doomRefund(1),50);assert.equal(E.doomRefund(3),150);
   const s=traitArena([{hero:'doom',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.gauge=120;s.gold=25+60;const hp=e.hp,base=E.power(s,s.board[12]);
@@ -655,6 +671,16 @@ test('Queen pays 12G (+6G per rank, cap 90); Doom refunds without training and t
     const r=traitArena([{hero:'doom',index:0,rank:2},{hero:'doom',index:1,rank:2}]);r.upgrades.doom=level;const gold=r.gold;
     assert.ok(E.move(r,0,1).merged);assert.equal(r.gold-gold,E.doomRefund(2),'training '+level);
   }
+});
+
+test('Queen edict strikes for 4x, pays 20G, and raises wave income 50% once per wave',()=>{
+  const s=traitArena([{hero:'queen',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.queue=[];s.spawnIn=1e6;s.gauge=120;
+  const gold=s.gold,wave=s.wave,base=E.power(s,s.board[12]),hp=e.hp;
+  assert.ok(E.cast(s,'queen').ok);close(hp-e.hp,base*4);assert.equal(s.gold,gold+E.QUEEN_TAX);assert.equal(s.edictWave,wave);assert.equal(s.buffs.tax,undefined);
+  const gold2=s.gold;assert.ok(E.cast(s,'queen').ok);assert.equal(s.gold,gold2+E.QUEEN_TAX);assert.equal(s.edictWave,wave);
+  e.hp=0;E.step(s,.05);assert.equal(s.phase,'reward');assert.equal(s.settlement.edict,Math.round(E.waveIncome(wave)*.5));assert.equal(s.stats.income['여왕의 칙령'],s.settlement.edict);
+  const raw=JSON.parse(E.serialize(s));raw.buffs.tax=4;raw.buffTotals={...raw.buffTotals,tax:8};raw.buffScale={...raw.buffScale,tax:1.1};
+  const restored=E.restore(raw);assert.ok(restored);assert.equal(restored.buffs.tax,undefined);assert.equal(restored.buffTotals.tax,undefined);assert.equal(restored.edictWave,wave);
 });
 
 test('Flame fires at a seeded path point independently of enemy position, locks targeting and boosts only its ground zone by 30%',()=>{

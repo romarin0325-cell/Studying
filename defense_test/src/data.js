@@ -104,7 +104,7 @@ export const HEROES = [
     "attack": "blade",
     "trait": {
       "type": "execute",
-      "text": "보스를 먼저 노리고, 보스에게 피해 +35%. 체력이 40% 이하인 적에게는 피해가 두 배입니다(강화 5단계마다 +2%p, 최대 50%)."
+      "text": "보스를 먼저 노리고, 보스에게 피해 +35%. 체력이 40% 이하인 적에게는 피해가 두 배입니다."
     },
     "skill": {
       "name": "제노사이드 스텝",
@@ -179,13 +179,13 @@ export const HEROES = [
     "attack": "ice",
     "trait": {
       "type": "slow",
-      "text": "작은 눈보라로 맞은 적들을 40% 느리게 합니다. 성급이 오를수록 더 느려집니다(최대 80%)."
+      "text": "작은 눈보라로 맞은 적들을 40% 느리게 합니다."
     },
     "skill": {
       "name": "하얀 숨결",
       "cost": 65,
       "type": "freeze",
-      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼립니다(보스는 1초). 이어서 6초간 50% 느리게 합니다."
+      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼립니다. 이어서 6초간 50% 느리게 합니다."
     },
     "heightGroup": "short",
     "role": "감속 · 작은 폭발",
@@ -370,7 +370,7 @@ export const HEROES = [
       "name": "천둥의 연쇄",
       "cost": 80,
       "type": "thunder",
-      "text": "적 전체에게 위력 7배 번개를 떨어뜨리고 1.2초 기절시킵니다. 붙어 있는 번개의현자 보너스도 그대로 적용됩니다."
+      "text": "적 전체에게 위력 7배 번개를 떨어뜨리고 1.2초 기절시킵니다."
     },
     "heightGroup": "tall",
     "role": "연쇄 · 번개",
@@ -512,13 +512,13 @@ export const HEROES = [
     "attack": "light",
     "trait": {
       "type": "expose",
-      "text": "보스를 먼저 저격합니다. 맞은 적은 4초간 받는 피해가 8% 늘어납니다(보스 15%). 성급이 오를수록 더 커집니다."
+      "text": "보스를 먼저 저격합니다. 맞은 적은 4초간 받는 피해가 8% 늘어납니다(보스 15%)."
     },
     "skill": {
       "name": "완벽한 추리",
       "cost": 70,
       "type": "expose",
-      "text": "적 전체에게 위력 3배 피해를 준 뒤, 10초간 모든 적이 받는 피해를 35%부터 늘립니다(성급·훈련으로 증가, 최대 80%). 큰 필살기 직전에 쓰면 좋습니다."
+      "text": "적 전체에게 위력 3배 피해를 준 뒤, 10초간 모든 적이 받는 피해를 35% 늘립니다. 큰 필살기 직전에 쓰면 좋습니다."
     },
     "heightGroup": "medium",
     "role": "보스 약화 · 저격",
@@ -550,7 +550,7 @@ export const HEROES = [
     "attack": "water",
     "trait": {
       "type": "hasteAura",
-      "text": "상하좌우에 있는 동료의 공격 속도를 15% 올립니다. 성급이 오를수록 더 올라갑니다."
+      "text": "상하좌우에 있는 동료의 공격 속도를 15% 올립니다."
     },
     "skill": {
       "name": "공명의 아리아",
@@ -587,7 +587,7 @@ export const HEROES = [
     "attack": "shadow",
     "trait": {
       "type": "fear",
-      "text": "적이 지나가는 바닥에 덫을 깔아 느리게 합니다."
+      "text": "적이 지나가는 바닥에 덫을 깔아 25% 느리게 합니다."
     },
     "skill": {
       "name": "깨어나지 않는 밤",
@@ -630,7 +630,7 @@ export const HEROES = [
       "name": "장미의 세금",
       "cost": 60,
       "type": "dividend",
-      "text": "적 전체에게 위력 4배 피해를 주고 즉시 40G를 받습니다. 8초 동안 적을 쓰러뜨려 얻는 골드가 3배가 됩니다."
+      "text": "적 전체에 위력 4배 피해를 주고 즉시 20G를 받습니다. 이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다."
     },
     "heightGroup": "medium",
     "role": "물결 경제 · 장미",
@@ -735,7 +735,7 @@ export const HEROES = [
     "attack": "light",
     "trait": {
       "type": "powerAura",
-      "text": "자기 행과 열 전체를 관통합니다. 상하좌우 동료의 위력을 20% 올립니다. 성급이 오를수록 더 올라갑니다."
+      "text": "자기 행과 열 전체를 관통합니다. 상하좌우 동료의 위력을 20% 올립니다."
     },
     "skill": {
       "name": "태고의 약속",
@@ -851,9 +851,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "한밤의 선물",
-      "cost": 75,
+      "cost": 65,
       "type": "gift",
-      "text": "편성된 동료 한 명이 2성으로 합류하고, 6초 동안 모든 동료의 공격 속도가 20% 오릅니다."
+      "text": "편성된 동료 한 명이 1성으로 합류하고, 6초 동안 모든 동료의 공격 속도가 20% 오릅니다."
     },
     "heightGroup": "medium",
     "role": "선물 · 포격",
@@ -1076,7 +1076,7 @@ export const HEROES = [
       "name": "디저트 앙상블",
       "cost": 70,
       "type": "harmony",
-      "text": "8초 동안 모든 동료의 위력과 공격 속도가 15% 오릅니다. 배치 오라와 함께 적용됩니다."
+      "text": "8초 동안 모든 동료의 위력과 공격 속도가 15% 오릅니다."
     },
     "heightGroup": "short",
     "role": "다양성 지원 · 조화",
@@ -1111,9 +1111,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "천면경",
-      "cost": 80,
+      "cost": 75,
       "type": "mirror",
-      "text": "가장 강한 적에게 4초 동안 거울을 겁니다. 그동안 그 적이 받은 피해의 50%(성급·강화로 최대 100%)를 모아 위력 10배와 함께 터뜨립니다. 모으는 양에는 상한이 없어, 다른 필살기와 함께 쓸수록 강해집니다."
+      "text": "가장 강한 적에게 5초 동안 거울을 겁니다. 그동안 그 적이 받은 피해의 50%를 모아 위력 12배와 함께 터뜨립니다. 다른 필살기와 함께 쓰면 더 많이 모입니다."
     },
     "heightGroup": "medium",
     "role": "지연 반사 · 환영탄",
@@ -1447,8 +1447,8 @@ export const BOSSES = {
     "color": "#a9dcff",
     "pattern": "storm",
     "warning": "신벌의 낙뢰 · 빛나는 3칸에서 이동하세요",
-    "judgement": "천둥 기둥 · 빛나는 세로 3줄이 3초 기절합니다. 주력을 옮기세요",
-    "trait": "낙뢰 3칸 · 길 중간에서 세로 3줄 기절 1회",
+    "judgement": "천둥 기둥 · 빛나는 세로 3줄이 3초 기절합니다. 토르를 기절시키면 취소됩니다",
+    "trait": "낙뢰 3칸 · 길 중간에서 세로 3줄 기절 1회 · 기절로 취소",
     "atlas": "bosses-expansion",
     "frame": 0
   },
@@ -1524,6 +1524,7 @@ export const ASSET_PATHS = {
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
   "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
+  "gifts": "./assets/merge/gifts.webp",
   "fx-emblems": "./assets/merge/fx-emblems.webp",
   "bosses": "./assets/moonlit/realm-bosses.webp",
   "creatures": "./assets/moonlit/creatures.webp",

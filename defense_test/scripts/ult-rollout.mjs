@@ -57,8 +57,8 @@ if(opts.has('json')&&!JSON_OUT)throw new Error('--json needs a file path');
 // Same curves as stage-sim with --rose auto.
 const bedsFor=stage=>({
   rose:Math.min(45,3+stage),
-  spring:stage>=15?Math.min(10,stage-14):0,
-  seed:stage>=30?Math.min(10,stage-29):0,
+  spring:stage>=15?Math.min(30,3*(stage-14)):0,
+  seed:stage>=30?Math.min(20,2*(stage-29)):0,
 });
 const metaFor=(deck,beds)=>{
   const entry={enhance:0};

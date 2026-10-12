@@ -2,6 +2,8 @@
 
 작성일: 2026-10-08. 설계 근거는 [STAT_RENEWAL.md](STAT_RENEWAL.md) 1장이다.
 
+> **2026-10-12 변경:** 아래 결과는 2026-10-08 측정이다. 산타는 지금 2성이 아니라 1성으로 합류한다(비용 65). 합성 성급이 감속을 올리는 규칙은 지원(+20%/성)이 아니라 제어(+10%/성)다. 감속 상한은 80%다.
+
 ```powershell
 node defense_test/scripts/simulate.mjs --teams 12 --ranks 1,3,5 --json result.json
 ```

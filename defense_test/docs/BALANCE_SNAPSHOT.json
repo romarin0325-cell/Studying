@@ -35,17 +35,23 @@
       },
       "spring": {
         "unlock": 15,
-        "base": 120,
-        "growth": 1.22,
-        "knee": 10,
-        "steep": 1.45
+        "base": 42,
+        "growth": 1.06,
+        "rise": 25,
+        "knee": 30,
+        "steep": 1.1,
+        "knee2": 33,
+        "steep2": 1.35
       },
       "seed": {
         "unlock": 30,
-        "base": 200,
-        "growth": 1.2,
-        "knee": 10,
-        "steep": 1.4
+        "base": 110,
+        "growth": 1.08,
+        "rise": 15,
+        "knee": 20,
+        "steep": 1.12,
+        "knee2": 23,
+        "steep2": 1.35
       }
     },
     "relicThresholdBase": 30,
@@ -317,45 +323,45 @@
       "levels": [
         {
           "level": 0,
-          "nextDust": 120,
+          "nextDust": 42,
           "value": 120,
           "cumulativeDust": 0
         },
         {
           "level": 5,
-          "nextDust": 325,
-          "value": 135,
-          "cumulativeDust": 930
+          "nextDust": 57,
+          "value": 125,
+          "cumulativeDust": 240
         },
         {
           "level": 10,
-          "nextDust": 877,
-          "value": 150,
-          "cumulativeDust": 3442
+          "nextDust": 76,
+          "value": 130,
+          "cumulativeDust": 559
         },
         {
           "level": 15,
-          "nextDust": 5619,
-          "value": 155,
-          "cumulativeDust": 13982
+          "nextDust": 101,
+          "value": 135,
+          "cumulativeDust": 985
         },
         {
           "level": 20,
-          "nextDust": 36014,
-          "value": 160,
-          "cumulativeDust": 81527
+          "nextDust": 135,
+          "value": 140,
+          "cumulativeDust": 1555
         },
         {
           "level": 25,
-          "nextDust": 230834,
-          "value": 165,
-          "cumulativeDust": 514465
+          "nextDust": 181,
+          "value": 145,
+          "cumulativeDust": 2317
         },
         {
           "level": 30,
-          "nextDust": 1479584,
-          "value": 170,
-          "cumulativeDust": 3289467
+          "nextDust": 291,
+          "value": 150,
+          "cumulativeDust": 3420
         }
       ]
     },
@@ -364,45 +370,45 @@
       "levels": [
         {
           "level": 0,
-          "nextDust": 200,
+          "nextDust": 110,
           "value": 0,
           "cumulativeDust": 0
         },
         {
           "level": 5,
-          "nextDust": 498,
-          "value": 20,
-          "cumulativeDust": 1489
+          "nextDust": 162,
+          "value": 10,
+          "cumulativeDust": 647
         },
         {
           "level": 10,
-          "nextDust": 1239,
-          "value": 40,
-          "cumulativeDust": 5194
+          "nextDust": 238,
+          "value": 20,
+          "cumulativeDust": 1597
         },
         {
           "level": 15,
-          "nextDust": 6661,
-          "value": 50,
-          "cumulativeDust": 18752
+          "nextDust": 349,
+          "value": 30,
+          "cumulativeDust": 2993
         },
         {
           "level": 20,
-          "nextDust": 35820,
-          "value": 60,
-          "cumulativeDust": 91654
+          "nextDust": 615,
+          "value": 40,
+          "cumulativeDust": 5212
         },
         {
           "level": 25,
-          "nextDust": 192648,
-          "value": 70,
-          "cumulativeDust": 483725
+          "nextDust": 1575,
+          "value": 50,
+          "cumulativeDust": 9319
         },
         {
           "level": 30,
-          "nextDust": 1036104,
-          "value": 80,
-          "cumulativeDust": 2592368
+          "nextDust": 7061,
+          "value": 60,
+          "cumulativeDust": 24995
         }
       ]
     }
