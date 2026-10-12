@@ -1127,7 +1127,7 @@ export const ARTIFACTS = [
   {
     "id": "hourglass",
     "name": "별모래 시계",
-    "text": "합성할 때 별빛을 8 더 얻습니다.",
+    "text": "합성할 때마다 별빛을 8 더 얻습니다.",
     "icon": 0,
     "atlas": "relics",
     "rarity": "common",
@@ -1136,7 +1136,7 @@ export const ARTIFACTS = [
   {
     "id": "ember",
     "name": "불씨의 심장",
-    "text": "화상 피해 +60%. 불바닥 동행과 함께하세요.",
+    "text": "화상 피해가 60% 늘어납니다.",
     "icon": 1,
     "atlas": "relics",
     "rarity": "common",
@@ -1145,7 +1145,7 @@ export const ARTIFACTS = [
   {
     "id": "frost",
     "name": "녹지 않는 꽃",
-    "text": "감속 중인 적에게 주는 피해 +25%.",
+    "text": "감속 중인 적에게 주는 피해가 25% 늘어납니다.",
     "icon": 2,
     "atlas": "relics",
     "rarity": "common",
@@ -1154,7 +1154,7 @@ export const ARTIFACTS = [
   {
     "id": "banner",
     "name": "홀로 선 깃발",
-    "text": "상하좌우에 동료가 없으면 공격력 +40%.",
+    "text": "상하좌우에 다른 동료가 없는 동료의 위력이 40% 오릅니다.",
     "icon": 3,
     "atlas": "relics",
     "rarity": "common",
@@ -1163,7 +1163,7 @@ export const ARTIFACTS = [
   {
     "id": "chorus",
     "name": "쌍둥이 음표",
-    "text": "같은 영웅이 2명 이상이면 공격속도 +15%.",
+    "text": "같은 동료가 전장에 2명 이상이면 그 동료들의 공격 속도가 15% 오릅니다.",
     "icon": 4,
     "atlas": "relics",
     "rarity": "common",
@@ -1172,7 +1172,7 @@ export const ARTIFACTS = [
   {
     "id": "lantern",
     "name": "꺼지지 않는 등불",
-    "text": "필살기 사용 후 별빛을 15 돌려받습니다.",
+    "text": "필살기를 쓰면 별빛을 15 돌려받습니다.",
     "icon": 5,
     "atlas": "relics",
     "rarity": "common",
@@ -1181,7 +1181,7 @@ export const ARTIFACTS = [
   {
     "id": "lens",
     "name": "예리한 달조각",
-    "text": "보스에게 주는 피해 +30%.",
+    "text": "보스에게 주는 피해가 30% 늘어납니다.",
     "icon": 6,
     "atlas": "relics",
     "rarity": "common",
@@ -1190,7 +1190,7 @@ export const ARTIFACTS = [
   {
     "id": "seed",
     "name": "숨 쉬는 씨앗",
-    "text": "공격·장판·합성·필살기의 독 부여량 +1중첩.",
+    "text": "독을 걸 때마다 1중첩 더 쌓이고, 독 피해가 10% 늘어납니다.",
     "icon": 7,
     "atlas": "relics",
     "rarity": "common",
@@ -1199,7 +1199,7 @@ export const ARTIFACTS = [
   {
     "id": "feather",
     "name": "첫새벽의 깃털",
-    "text": "유료 소환 비용 -4G. 최소 8G.",
+    "text": "유료 소환 비용이 4G 줄어듭니다(최소 8G).",
     "icon": 8,
     "atlas": "relics",
     "rarity": "common",
@@ -1208,7 +1208,7 @@ export const ARTIFACTS = [
   {
     "id": "crown",
     "name": "작은 왕관",
-    "text": "3등급 이상 영웅 공격력 +25%.",
+    "text": "3성 이상 동료의 위력이 25% 오릅니다.",
     "icon": 9,
     "atlas": "relics",
     "rarity": "common",
@@ -1217,7 +1217,7 @@ export const ARTIFACTS = [
   {
     "id": "meteor",
     "name": "떨어진 별",
-    "text": "12번째 공격마다 명중 지점에 위력 180%의 운석.",
+    "text": "동료가 12번째 공격마다 명중 지점에 위력 180%의 운석을 떨어뜨립니다.",
     "icon": 10,
     "atlas": "relics",
     "rarity": "rare",
@@ -1226,7 +1226,7 @@ export const ARTIFACTS = [
   {
     "id": "prism",
     "name": "천 갈래 프리즘",
-    "text": "연쇄·도탄·관통 바람의 추가 타격 +1명.",
+    "text": "연쇄·도탄 공격이 1명 더 맞히고, 연쇄·도탄 피해가 10% 늘어납니다.",
     "icon": 11,
     "atlas": "relics",
     "rarity": "rare",
@@ -1235,7 +1235,7 @@ export const ARTIFACTS = [
   {
     "id": "tide",
     "name": "파도의 소라",
-    "text": "감속을 걸면 주변 80 범위에 위력 25% 물보라. 장판은 0.5초마다 발동.",
+    "text": "감속을 걸 때 주변 80 범위에 위력 25%의 물보라가 일어납니다. 장판은 0.5초마다 일어납니다.",
     "icon": 12,
     "atlas": "relics",
     "rarity": "rare",
@@ -1244,7 +1244,7 @@ export const ARTIFACTS = [
   {
     "id": "roots",
     "name": "영원의 뿌리",
-    "text": "불·독·악몽·중력·시간 장판 지속시간 +50%.",
+    "text": "불·독·악몽·중력·시간 장판의 지속 시간이 50% 늘어납니다.",
     "icon": 13,
     "atlas": "relics",
     "rarity": "rare",
@@ -1253,7 +1253,7 @@ export const ARTIFACTS = [
   {
     "id": "guild",
     "name": "동행의 악수",
-    "text": "지원 오라를 받는 영웅의 공격력 +15%.",
+    "text": "지원 오라를 받는 동료의 위력이 15% 오릅니다.",
     "icon": 14,
     "atlas": "relics",
     "rarity": "rare",
@@ -1262,7 +1262,7 @@ export const ARTIFACTS = [
   {
     "id": "phoenix",
     "name": "돌아오는 새벽",
-    "text": "원정에서 첫 결계 피해를 막고 체력 3 회복.",
+    "text": "원정에서 처음 코어에 닿은 적의 피해를 막고 생명력을 3 회복합니다.",
     "icon": 15,
     "atlas": "relics",
     "rarity": "rare",
@@ -1271,7 +1271,7 @@ export const ARTIFACTS = [
   {
     "id": "twin",
     "name": "쌍성의 거울",
-    "text": "모든 영웅의 네 번째 공격에 위력 45%의 메아리.",
+    "text": "모든 동료의 네 번째 공격마다 위력 45%의 메아리가 한 번 더 나갑니다.",
     "icon": 16,
     "atlas": "relics",
     "rarity": "epic",
@@ -1280,7 +1280,7 @@ export const ARTIFACTS = [
   {
     "id": "constellation",
     "name": "삼중 성좌",
-    "text": "서로 다른 동료 3종 이상과 인접하면 공격력 +65%.",
+    "text": "상하좌우에 서로 다른 동료가 3종 이상 있으면 위력이 65% 오릅니다.",
     "icon": 17,
     "atlas": "relics",
     "rarity": "epic",
@@ -1289,7 +1289,7 @@ export const ARTIFACTS = [
   {
     "id": "alchemy",
     "name": "별빛 연금술",
-    "text": "합성할 때 합성 결과 영웅 위력 150%로 모든 적 타격.",
+    "text": "합성할 때 합성 결과 동료 위력의 150%로 모든 적을 칩니다.",
     "icon": 18,
     "atlas": "relics",
     "rarity": "epic",
@@ -1298,7 +1298,7 @@ export const ARTIFACTS = [
   {
     "id": "orbit",
     "name": "별바다의 궤도",
-    "text": "3등급 이상 공격마다 명중 지점에 2초 별장판. 0.5초마다 위력 15% 피해.",
+    "text": "3성 이상 동료의 공격이 명중 지점에 2초 동안 별장판을 남깁니다. 별장판은 0.5초마다 위력 15% 피해를 줍니다.",
     "icon": 19,
     "atlas": "relics",
     "rarity": "epic",
@@ -1307,7 +1307,7 @@ export const ARTIFACTS = [
   {
     "id": "tempo_bell",
     "name": "첫막의 종",
-    "text": "매 물결의 첫 7초 동안 모든 동료 공격속도 +45%.",
+    "text": "웨이브가 시작되고 7초 동안 모든 동료의 공격 속도가 45% 오릅니다.",
     "icon": 0,
     "atlas": "relics-expansion",
     "rarity": "rare",
@@ -1316,7 +1316,7 @@ export const ARTIFACTS = [
   {
     "id": "royal_seal",
     "name": "결전의 인장",
-    "text": "최대 체력이 가장 높은 생존 적에게 주는 피해 +25%.",
+    "text": "최대 체력이 가장 높은 적에게 주는 피해가 25% 늘어납니다.",
     "icon": 1,
     "atlas": "relics-expansion",
     "rarity": "rare",
@@ -1325,7 +1325,7 @@ export const ARTIFACTS = [
   {
     "id": "gift_ribbon",
     "name": "기적의 리본",
-    "text": "매 4번째 유료 소환은 2성으로 등장. 무료 소환은 횟수에서 제외.",
+    "text": "유료 소환이 25% 확률로 2성으로 나옵니다.",
     "icon": 2,
     "atlas": "relics-expansion",
     "rarity": "epic",
@@ -1334,7 +1334,7 @@ export const ARTIFACTS = [
   {
     "id": "broken_clock",
     "name": "깨진 시간의 보석",
-    "text": "필살기의 동료 강화와 트라우마 변신 지속시간 +2초.",
+    "text": "버프 필살기와 트라우마 변신의 지속 시간이 2초 늘어납니다.",
     "icon": 3,
     "atlas": "relics-expansion",
     "rarity": "epic",
