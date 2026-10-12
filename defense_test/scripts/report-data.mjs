@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER} from '../src/content.js';
-import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward} from '../src/economy.js';
+import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward,relicCost,relicScale,relicPhase,RELIC_LEVEL_STEP,RELIC_COST_STEP,RELIC_COST_MULT,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from '../src/economy.js';
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
@@ -20,6 +20,15 @@ export function balanceSnapshot(){
     enhancement:Array.from({length:21},(_,e)=>{const cost=duplicateCost(e);const row={current:e,nextCopies:cost,spentCopies:total,power:enhanceMultiplier(e),special:specialMultiplier(e),gainPerCopy:TUNING.enhanceStep/cost};total+=cost;return row;}),
     beds:Object.fromEntries(BED_IDS.map(id=>[id,{unlockStage:TUNING.beds[id].unlock,levels:[0,5,10,15,20,25,30].map(level=>({level,nextDust:bedCost(id,level),value:id==='rose'?1+roseAttack(level):id==='spring'?springGauge(level):seedGold(level),cumulativeDust:Array.from({length:level},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0)}))}])),
     relics:Array.from({length:9},(_,tier)=>({tier,threshold:relicThreshold(tier),nextThreshold:relicThreshold(tier+1),rates:relicRates(relicThreshold(tier))})),
+    relicEnhancement:{
+      levelStep:RELIC_LEVEL_STEP,costStep:[...RELIC_COST_STEP],costMult:RELIC_COST_MULT,
+      collection:{weight:COLLECTION_WEIGHT,ownBonus:COLLECTION_OWN_BONUS,pointsPerPercent:COLLECTION_POINTS_PER_PERCENT},
+      rarities:['C','R','SR','UR'].map(rarity=>{
+        let spent=0;const rows=[];
+        for(let e=0;e<20;e++){const cost=relicCost(rarity,e),level=e+1;rows.push({enhance:e,level,nextCopies:cost,spentCopies:spent,scale:relicScale(level),phase:relicPhase(e)});spent+=cost;}
+        return {rarity,rows};
+      })
+    },
     stages:[1,9,18,27,36,45].map(stage=>({stage,hp:CHAPTERS[stage-1].hp,slots:dispatchSlots(stage),dispatchMultiplier:1+TUNING.dispatchStageStep*stage,firstClear:stageReward(stage),totalFirstClear:Array.from({length:stage},(_,i)=>stageReward(i+1)).reduce((a,b)=>a+b,0)})),
     starter:DEFAULT_DECK.map(id=>({id,power:combatPower(id,p.heroes[id]),dispatchAt9:dispatchReward(combatPower(id,p.heroes[id]),9)})),
     roster:HEROES.map(h=>({id:h.id,name:h.name,rarity:h.rarity,hidden:h.hidden}))

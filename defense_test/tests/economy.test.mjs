@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER} from '../src/content.js';
-import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR} from '../src/economy.js';
+import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP} from '../src/economy.js';
 import {createProfile,random} from '../src/profile.js';
 
 test('normal and seasonal draws enforce the hidden guardian boundary',()=>{
@@ -61,6 +61,28 @@ test('duplicate investment adds 5% each without a cap, loses efficiency, and lif
     if(e)assert.ok(.05/duplicateCost(e)<.05/duplicateCost(e-1));
   }
   assert.equal(specialMultiplier(4),1);assert.ok(Math.abs(specialMultiplier(5)-1.1)<1e-12);assert.ok(Math.abs(specialMultiplier(10)-1.2)<1e-12);
+});
+
+test('relic unique effects scale by a constant per level while duplicate cost carries the phases',()=>{
+  const spent=(rarity,level)=>{let n=0;for(let e=0;e<level-1;e++)n+=relicCost(rarity,e);return n;};
+  assert.equal(spent('C',5),6);assert.equal(spent('C',10),31);assert.equal(spent('C',15),141);
+  assert.equal(relicPhase(0),'early');assert.equal(relicPhase(3),'early');assert.equal(relicPhase(4),'mid');assert.equal(relicPhase(8),'mid');assert.equal(relicPhase(9),'late');
+  assert.equal(relicCost('C',0),1);assert.equal(relicCost('C',4),3);assert.equal(relicCost('C',9),12);assert.equal(relicCost('C',19),98);
+  for(let e=0;e<9;e++)assert.equal(relicCost('UR',e),1,'UR early steps stay at the 1-copy floor');
+  assert.equal(relicCost('UR',10),Math.max(1,Math.round(16*.12)));
+  assert.equal(relicScale(1),1);assert.ok(Math.abs(relicScale(5)-1.2)<1e-12);assert.ok(Math.abs(relicScale(3)-(1+RELIC_LEVEL_STEP*2))<1e-12);
+  assert.equal(relicLevel({owned:true,enhance:4}),5);assert.equal(relicLevel({owned:false,enhance:9}),0);assert.equal(relicLevel(null),0);
+});
+
+test('collection bonus sums every owned relic and is a power fraction',()=>{
+  assert.equal(relicPoints('hourglass',{owned:true,enhance:0}),3);
+  assert.equal(relicPoints('hourglass',{owned:false,enhance:9}),0);
+  assert.equal(collectionPoints({hourglass:{owned:true,enhance:0}}),3);
+  assert.ok(Math.abs(collectionBonus({hourglass:{owned:true,enhance:0}})-.001)<1e-12);
+  assert.ok(Math.abs(collectionBonus({hourglass:{owned:true,enhance:5}})-8/30/100)<1e-12);
+  assert.equal(relicPoints('gift_ribbon',{owned:true,enhance:4}),3*(5+2));
+  const allC=Object.fromEntries(ARTIFACTS.filter(a=>a.rarity==='C').map(a=>[a.id,{owned:true,enhance:0}]));
+  assert.ok(Math.abs(collectionBonus(allC)-.01)<1e-12);
 });
 
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{

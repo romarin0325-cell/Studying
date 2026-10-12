@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,DEFAULT_DECK} from '../src/content.js';
+import {HEROES,DEFAULT_DECK,ARTIFACT} from '../src/content.js';
 import {unlockProfile} from '../src/test-unlock.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
-import {duplicateCost,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold} from '../src/economy.js';
+import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -115,8 +115,31 @@ test('duplicate growth consumes the correct hero only and relic enhancement requ
   const s=storeFor(p);call(s,'enhance',{id:'star_boy'});call(s,'enhance',{id:'star_boy'});
   assert.equal(s.value.heroes.star_boy.enhance,2);assert.equal(s.value.heroes.star_boy.copies,10-duplicateCost(0)-duplicateCost(1));
   assert.equal(s.value.heroes.snow_rabbit.enhance,0);
-  call(s,'enhance',{kind:'relic',id:'hourglass'});assert.equal(s.value.relics.hourglass.copies,2);
+  call(s,'enhance',{kind:'relic',id:'hourglass'});assert.equal(s.value.relics.hourglass.copies,3-relicCost('C',0));
   assert.equal(s.value.equipped.length,0);call(s,'equip',{id:'hourglass'});assert.deepEqual(s.value.equipped,['hourglass']);
+});
+
+test('relic enhance spends relicCost copies by rarity, not hero duplicateCost',()=>{
+  const p=createProfile(NOW);p.relics.hourglass.owned=true;p.relics.hourglass.copies=6;p.relics.gift_ribbon.owned=true;p.relics.gift_ribbon.copies=2;
+  const s=storeFor(p);
+  for(let i=0;i<4;i++)call(s,'enhance',{kind:'relic',id:'hourglass'});
+  assert.equal(s.value.relics.hourglass.enhance,4);assert.equal(s.value.relics.hourglass.copies,0);
+  assert.equal(s.transact('enhance',{kind:'relic',id:'hourglass'},NOW).ok,false,'Lv5→6 needs 3 C copies');
+  call(s,'enhance',{kind:'relic',id:'gift_ribbon'});assert.equal(s.value.relics.gift_ribbon.enhance,1);assert.equal(s.value.relics.gift_ribbon.copies,2-relicCost('UR',0));
+});
+
+test('older saves gain relicRev 2 and an in-progress run still resumes',()=>{
+  const p=createProfile(NOW);p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;p.equipped=['hourglass'];
+  const s=storeFor(p);call(s,'begin',{mode:'main',stage:1});
+  const run=createBattle(s.value),raw=JSON.parse(E.serialize(run));
+  raw.relicAttack=.02*5;delete raw.relicLevels;
+  const old=structuredClone(s.value);delete old.relicRev;old.active.run=JSON.stringify(raw);
+  const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated,'old checkpoint stays resumable');assert.equal(migrated.relicRev,2);
+  const resumed=resumeBattle(migrated);assert.ok(resumed);
+  assert.ok(Math.abs(resumed.relicAttack-collectionBonus(migrated.relics))<1e-12);
+  assert.deepEqual(resumed.relicLevels,{hourglass:6});
+  assert.equal(createProfile(NOW).relicRev,2);
+  const bad=structuredClone(createProfile(NOW));bad.relicRev=1;assert.equal(validateProfile(bad),false);
 });
 
 test('a dispatch cannot consume the last five battle heroes and has a fixed 20-hour receipt',()=>{
@@ -217,6 +240,6 @@ test('unlockProfile owns every companion (three below ten hearts to try gifts), 
   assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===({star_boy:6,siren:3,snow_rabbit:8}[h.id]??10)&&e.level===1&&e.enhance===0&&e.copies===0;}));
   assert.equal(p.cleared,45);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
-  assert.deepEqual(p.relics,Object.fromEntries(Object.entries(relics).map(([id,r])=>[id,{...r,owned:true}])),'every relic owned, enhancement untouched');
+  assert.ok(Object.entries(p.relics).every(([id,r])=>r.owned&&r.enhance==={C:6,R:4,SR:3,UR:1}[ARTIFACT[id].rarity]&&r.copies>0),'every relic owned at a mid-game level with spare duplicates');
   assert.equal(validateProfile(p),true);
 });

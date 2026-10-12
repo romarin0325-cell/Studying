@@ -1,5 +1,6 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T} from './content.js';
 import {talkLines,greetLine} from './lines.js';
+import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,GIFT_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
@@ -38,7 +39,13 @@ const image=(id,full=false,cls='')=>`<img class="${cls}" src="${picture(id,full)
 const badge=(r,cls='')=>`<span class="badge ${cls}" data-rarity="${r}">${r}</span>`;
 const gem=(n,short=false)=>`<span class="cost ${short?'short':''}">${icon('gem')}<b>${fmt(n)}</b></span>`;
 const dispatchGain=({dust=0,dreams})=>`<span class="dispatch-gain">${dust?`<span class="cost dust">${icon('dust')}<b>${fmt(dust)}</b></span>`:''}${gem(dreams)}</span>`;
-const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().beds));
+const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)));
+// Relic growth view: the level scales the numbers listed in ARTIFACT[id].scale (strings, or {t,int}).
+const RELIC_PHASE={early:'체감 구간',mid:'둔화 구간',late:'상한 구간'};
+const pctPts=points=>`+${(points/COLLECTION_POINTS_PER_PERCENT).toFixed(2)}%`;
+const scaleToken=(token,level)=>{const t=typeof token==='string'?token:token.t,int=typeof token==='object'&&token.int,m=t.match(/^(\d+(?:\.\d+)?)(.*)$/);if(!m)return [t,t];const v=Number(m[1])*relicScale(level);return [t,`${int?Math.round(v):Number(v.toFixed(1))}${m[2]}`];};
+const relicTokens=(id,level)=>(ARTIFACT[id].scale||[]).map(t=>scaleToken(t,level));
+const relicText=(id,level)=>liveText(ARTIFACT[id].text,relicTokens(id,level));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
 const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
@@ -147,9 +154,9 @@ function home(){
   </section>`;
 }
 function card(id,kind='hero',receipt=null,full=false){
-  const h=kind==='hero'?HERO[id]:ARTIFACT[id],e=kind==='hero'?p().heroes[id]:p().relics[id],need=duplicateCost(e.enhance),ready=e.owned&&e.copies>=need,gone=kind==='hero'&&away(p(),id);
-  const worn=kind==='relic'&&!receipt&&p().equipped.includes(id),tag=receipt?(receipt.fresh?'NEW':'중복 +1'):e.owned&&e.enhance>0?`+${e.enhance}`:'';
-  const sub=receipt?(receipt.fresh?'신규 획득':'강화 재료'):!e.owned?(h.hidden?'시즌 한정':'미획득'):gone?'파견 중':kind==='hero'?`전투력 ${cpOf(id)}`:worn?'장착 중':`중복 ${e.copies}/${need}`;
+  const h=kind==='hero'?HERO[id]:ARTIFACT[id],e=kind==='hero'?p().heroes[id]:p().relics[id],need=kind==='hero'?duplicateCost(e.enhance):relicCost(h.rarity,e.enhance),ready=e.owned&&e.copies>=need,gone=kind==='hero'&&away(p(),id);
+  const worn=kind==='relic'&&!receipt&&p().equipped.includes(id),tag=receipt?(receipt.fresh?'NEW':'중복 +1'):kind==='relic'&&e.owned?`Lv.${relicLevel(e)}`:e.owned&&e.enhance>0?`+${e.enhance}`:'';
+  const sub=receipt?(receipt.fresh?'신규 획득':'강화 재료'):!e.owned?(h.hidden?'시즌 한정':'미획득'):gone?'파견 중':kind==='hero'?`전투력 ${cpOf(id)}`:`수집 ${pctPts(relicPoints(id,e))}`;
   return `<button class="hero-card ${!e.owned?'locked':''} ${ready?'can-enhance':''} ${gone?'is-away':''} ${worn?'equipped':''}" data-${kind==='hero'?'hero':'relic'}="${id}" data-rarity="${h.rarity}" aria-label="${h.name}, ${h.rarity}, ${e.owned?'보유':'미보유'}${ready?', 강화 가능':''}">${badge(h.rarity)}${tag?`<span class="tag ${receipt?.fresh?'new':''}">${tag}</span>`:''}${worn?`<span class="worn-mark">${icon('check')}장착</span>`:''}<span class="art">${image(id,full)}${!e.owned?icon('lock','lock'):''}</span><strong>${h.name}</strong><small>${sub}</small>${e.owned&&!receipt?`<span class="dup" aria-hidden="true"><i style="width:${Math.min(100,e.copies/need*100)}%"></i>${ready?icon('up'):''}</span>`:''}</button>`;
 }
 function renderCollection(){
@@ -158,13 +165,21 @@ function renderCollection(){
   return `<section class="page">${heading(collection==='hero'?'동료':'유물',`<span class="count"><b>${count}</b> / ${list.length}</span>`)}
     <div class="segmented"><button data-collection="hero" aria-pressed="${collection==='hero'}">동료 ${total('hero',HEROES,p().heroes)}</button><button data-collection="relic" aria-pressed="${collection==='relic'}">유물 ${total('relic',ARTIFACTS,p().relics)} · 장착 ${p().equipped.length}/3</button></div>
     <div class="filters">${['all',...RARITIES].map(r=>`<button data-filter="${r}" data-rarity="${r==='all'?'':r}" aria-pressed="${rarity===r}">${r==='all'?'전체':r}</button>`).join('')}<button class="owned-toggle" data-action="owned" aria-pressed="${ownedOnly}">보유만</button></div>
-    ${collection==='relic'?relicSlots():''}<div class="collection-grid">${filtered.map(h=>card(h.id,collection)).join('')||'<p class="empty">조건에 맞는 항목이 없습니다.</p>'}</div>
+    ${collection==='relic'?collectionCard()+relicSlots():''}<div class="collection-grid">${filtered.map(h=>card(h.id,collection)).join('')||'<p class="empty">조건에 맞는 항목이 없습니다.</p>'}</div>
     <p class="fineprint" style="text-align:center">중복으로 얻은 동료·유물은 강화 재료로 자동 저장됩니다.</p></section>`;
+}
+// Collection bonus: every owned relic adds points whether equipped or not; 30 points = +1% power for all companions.
+function collectionCard(){
+  const relics=p().relics,points=collectionPoints(relics),bonus=collectionBonus(relics),by=Object.fromEntries(RARITIES.map(r=>[r,ARTIFACTS.filter(a=>a.rarity===r).reduce((n,a)=>n+relicPoints(a.id,relics[a.id]),0)]));
+  return `<div class="collection-card"><div class="cc-main"><small>유물 수집 보너스</small><b>+${(bonus*100).toFixed(1)}%</b><span>모든 동료 위력 · 장착과 관계없음</span></div><div class="cc-side"><small>수집 점수</small><b>${fmt(points)}</b><span>${COLLECTION_POINTS_PER_PERCENT}점마다 +1%</span></div>
+    <div class="cc-bar" aria-hidden="true">${RARITIES.map(r=>`<i data-rarity="${r}" style="flex:${by[r]||0}"></i>`).join('')}</div>
+    <div class="cc-legend">${RARITIES.map(r=>`<span data-rarity="${r}"><i></i>${r} ${fmt(by[r])}점 · ${pctPts(by[r])}</span>`).join('')}</div>
+    <p class="cc-rule">유물 1개의 점수 = 등급 가중(C ${COLLECTION_WEIGHT.C} · R ${COLLECTION_WEIGHT.R} · SR ${COLLECTION_WEIGHT.SR} · UR ${COLLECTION_WEIGHT.UR}) × (레벨 + ${COLLECTION_OWN_BONUS})</p></div>`;
 }
 // The three relic slots: what is equipped now, tap to open it.
 function relicSlots(compact=false){
   const worn=p().equipped;
-  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물만 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>강화 +${p().relics[id].enhance}</small>`}</span></button>`:`<span class="relic-slot empty">${icon('plus')}<small>빈 칸</small></span>`;}).join('')}</div></div>`;
+  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물의 효과가 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>Lv.${relicLevel(p().relics[id])}</small>`}</span></button>`:`<span class="relic-slot empty">${icon('plus')}<small>빈 칸</small></span>`;}).join('')}</div></div>`;
 }
 // Puts the current value of each enhancement-scaled number into the (escaped) description, coloured.
 const liveText=(text,tokens)=>{let out=escapeText(text),pos=0;for(const [from,to] of tokens){const f=escapeText(from),at=out.indexOf(f,pos);if(at<0)continue;const mark=`<em class="scaled">${escapeText(to)}</em>`;out=out.slice(0,at)+mark+out.slice(at+f.length);pos=at+mark.length;}return out;};
@@ -172,13 +187,14 @@ function heroDetail(id){
   const h=HERO[id],e=p().heroes[id];if(!h)return;
   const beds=p().beds,mult=heroMultiplier(e,beds),enh=duplicateCost(e.enhance),canEnhance=e.owned&&e.copies>=enh&&!p().active,isAway=away(p(),id),roles=h.role.split(' · '),special=((specialMultiplier(e.enhance)-1)*100).toFixed(1),scaled=E.scaledTokens(id,e.owned?specialMultiplier(e.enhance):1);
   show(h.name,'동료',`<div class="detail-stage" data-rarity="${h.rarity}"><span class="detail-rays" aria-hidden="true"></span><div class="detail-art">${image(id,true)}</div><div class="detail-meta">${badge(h.rarity)}<small>${RARITY[h.rarity].name}</small><h3>${h.title}</h3><div class="chips">${chips([...roles,h.hidden?'시즌 한정':'',isAway?'파견 중':''])}</div></div></div>
-    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>영구 위력</small><b>×${mult.toFixed(2)}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
+    <div class="metrics"><div class="metric"><small>전투력</small><b>${e.owned?cpOf(id):'—'}</b></div><div class="metric"><small>영구 위력</small><b>×${(mult*(1+collectionBonus(p().relics))).toFixed(2)}</b></div><div class="metric"><small>강화</small><b>+${e.enhance}</b></div></div>
     <button class="memory-entry" data-memorial="${id}"><span class="memory-seal">${icon(e.owned&&e.bond>=10?'heart':'lock')}</span><span><small>인연 이야기 · 호감도 ${e.bond}/10</small><strong>${escapeText(MEMORIAL_STORIES[id].title)}</strong><i class="bond-xp" aria-hidden="true"><b style="width:${Math.round((e.bond>=BOND_MAX?1:e.bond/BOND_MAX)*100)}%"></b></i></span>${icon('chevron')}</button>
     ${e.owned?`<button class="gift-entry" data-gift-to="${id}">${giftArt(FAVORITE[id])}<span><small>좋아하는 선물</small><strong>${GIFTS[FAVORITE[id]].name}</strong></span><span class="gift-cta">선물하기${icon('chevron')}</span></button>`:''}
-    <div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격 방식</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>
+    <div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격 방식</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>
+    ${e.owned?powerBreakdown(id):''}
     <div class="ability"><span class="ability-tag">특성</span><p>${liveText(h.trait.text,scaled.trait)}</p></div>
     <div class="ability"><span class="ability-tag skill">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost} 이상`:h.skill.cost}${h.skill.goldCost?` · ${h.skill.goldCost} G`:''}</span><h3>${h.skill.name}</h3><p>${liveText(h.skill.text,scaled.skill)}</p></div>
-    ${e.owned?`    <details class="more"><summary>수치 상세</summary><p>현재 위력 배율 ${mult.toFixed(2)}배 (꿈의 온실 · 강화 +${e.enhance} 포함). 강화 1회마다 기본 위력이 5% 오르고, 5단계마다 <em class="scaled">색으로 표시된 수치</em>가 10%씩 오릅니다(현재 +${special}%, 감속 최대 80%). 설명의 수치는 1성 기준이며, 성급이 오르면 지원 효과는 성급당 20%, 제어 효과는 10%씩 더 오릅니다. 보스에게는 기절·빙결·밀쳐내기가 절반입니다.</p></details>
+    ${e.owned?`    <details class="more"><summary>수치 상세</summary><p>현재 영구 위력 배율 ${(mult*(1+collectionBonus(p().relics))).toFixed(2)}배 (동료 강화 · 꿈의 온실 · 유물 수집 보너스 포함). 강화 1회마다 기본 위력이 5% 오르고, 5단계마다 <em class="scaled">색으로 표시된 수치</em>가 10%씩 오릅니다(현재 +${special}%, 감속 최대 80%). 설명의 수치는 1성 기준이며, 성급이 오르면 지원 효과는 성급당 20%, 제어 효과는 10%씩 더 오릅니다. 보스에게는 기절·빙결·밀쳐내기가 절반입니다.</p></details>
     `
     :`<p class="empty">${h.hidden?guardianNote(h.id):`${h.rarity} 등급 · 일반 소환에서 획득할 수 있습니다.`}</p>`}`,
     e.owned?`<div class="growth growth-dock ${canEnhance?'ready':''}"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${fmt(e.copies)} / ${fmt(enh)} · 기본 위력 +5%${(e.enhance+1)%5===0?' · 지원·제어 +10%':''}</small><div class="progress"><span style="width:${Math.min(100,e.copies/enh*100)}%"></span></div></div><button class="${canEnhance?'primary shine':'secondary'}" data-enhance="${id}" ${canEnhance?'':'disabled'}>강화</button></div>${p().active?'<p class="note">원정 진행 중에는 성장할 수 없습니다.</p>':''}<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}">${p().partner===id?'현재 파트너':'파트너 지정'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>편성 확인</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
@@ -232,13 +248,30 @@ document.addEventListener('pointerdown',e=>{
 for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{if(bedHold&&!bedHold.held)clearTimeout(bedHold.timer);if(bedHold?.held)stopBedHold();});
 
 function relicDetail(id){
-  const a=ARTIFACT[id],e=p().relics[id],cost=duplicateCost(e.enhance),equipped=p().equipped.includes(id);
-  show(a.name,'유물',`<div class="detail-hero" data-rarity="${a.rarity}"><div class="detail-art">${image(id)}</div><div class="detail-meta">${badge(a.rarity)}<h3>${a.name}</h3><div class="chips">${chips([equipped?'장착 중':'',`강화 +${e.enhance}`])}</div></div></div>
-    <div class="ability"><span class="ability-tag skill">원정 효과</span><p>${a.text}</p></div>
-    ${e.owned?`<div class="growth"><div><strong>강화 +${e.enhance} → +${e.enhance+1}</strong><small>중복 ${e.copies} / ${cost} · 원정 위력 +${(e.enhance*2).toFixed(0)}% → +${((e.enhance+1)*2).toFixed(0)}%</small><div class="progress"><span style="width:${Math.min(100,e.copies/cost*100)}%"></span></div></div><button class="secondary" data-enhance-relic="${id}" ${e.copies<cost||p().active?'disabled':''}>강화</button></div>
-    <details class="more"><summary>수치 상세</summary><p>장착한 유물만 강화 보정을 줍니다. 고유 효과는 유지되며, 강화 1회마다 원정 전체 위력이 2% 증가합니다. 등급별 수치는 추후 조정될 수 있습니다.</p></details>`
-    :'<p class="empty">유물 소환에서 획득할 수 있습니다.<br>소환 횟수가 쌓이면 높은 등급 확률이 올라갑니다.</p>'}`,
-    e.owned?`<button class="primary wide" data-equip="${id}" ${p().active?'disabled':''}>${equipped?'장착 해제':'장착'} (${p().equipped.length}/3)</button>`:`<button class="primary wide" data-action="go-relic-summon">유물 소환하러 가기</button>`,'relic',id);
+  const a=ARTIFACT[id],e=p().relics[id];
+  if(e.owned)return relicGrowthDetail(id);
+  show(a.name,'유물',`<div class="detail-hero" data-rarity="${a.rarity}"><div class="detail-art">${image(id)}</div><div class="detail-meta">${badge(a.rarity)}<h3>${a.name}</h3><div class="chips">${chips(['미보유'])}</div></div></div>
+    <div class="ability"><span class="ability-tag skill">장착 효과 · Lv.1</span><p>${relicText(id,1)}</p></div>
+    <p class="empty">유물 소환에서 획득할 수 있습니다. 얻으면 장착하지 않아도 수집 보너스 ${pctPts(COLLECTION_WEIGHT[a.rarity]*(1+COLLECTION_OWN_BONUS))}를 줍니다.<br>소환 횟수가 쌓이면 높은 등급 확률이 올라갑니다.</p>`,`<button class="primary wide" data-action="go-relic-summon">유물 소환하러 가기</button>`,'relic',id);
+}
+function relicGrowthDetail(id){
+  const a=ARTIFACT[id],e=p().relics[id],equipped=p().equipped.includes(id),L=relicLevel(e),cost=relicCost(a.rarity,e.enhance),phase=relicPhase(e.enhance),pts=relicPoints(id,e),nextPts=COLLECTION_WEIGHT[a.rarity]*(L+1+COLLECTION_OWN_BONUS);
+  const now=relicTokens(id,L),next=relicTokens(id,L+1),bonus=collectionBonus(p().relics);
+  const track=[['early','체감','Lv.1–5'],['mid','둔화','Lv.5–10'],['late','상한','Lv.10~']].map(([k,name,range])=>`<span class="${k===phase?'on':''}"><b>${name}</b><small>${range}</small></span>`).join('');
+  show(a.name,'유물',`<div class="detail-hero" data-rarity="${a.rarity}"><div class="detail-art">${image(id)}</div><div class="detail-meta">${badge(a.rarity)}<h3>${a.name}</h3><div class="chips">${chips([`Lv.${L}`,RELIC_PHASE[phase],equipped?'장착 중':''])}</div></div></div>
+    <div class="ability"><span class="ability-tag skill">장착 효과 · Lv.${L}</span><p>${relicText(id,L)}</p>${now.length?`<small class="next-line">Lv.${L+1}: ${now.map(([,v],i)=>`${escapeText(v)} → <em class="scaled">${escapeText(next[i][1])}</em>`).join(' · ')}</small>`:''}</div>
+    <div class="relic-contrib"><div><small>수집 보너스 기여</small><b>${pctPts(pts)}</b></div><div><small>점수</small><b>${pts}</b><em>${COLLECTION_WEIGHT[a.rarity]} × (Lv.${L} + ${COLLECTION_OWN_BONUS})</em></div><div><small>다음 레벨</small><b>${pctPts(nextPts)}</b></div></div>
+    <p class="fineprint">유물 전체 수집 보너스 +${(bonus*100).toFixed(1)}% · 장착하지 않아도 적용됩니다.</p>
+    <div class="phase-track">${track}</div>
+    <div class="growth"><div><strong>Lv.${L} → Lv.${L+1}</strong><small>중복 ${e.copies} / ${cost} · 효과 수치 +5% · 수집 ${pctPts(nextPts-pts)}</small><div class="progress"><span style="width:${Math.min(100,e.copies/cost*100)}%"></span></div></div><button class="${e.copies>=cost&&!p().active?'primary shine':'secondary'}" data-enhance-relic="${id}" ${e.copies<cost||p().active?'disabled':''}>강화</button></div>
+    <details class="more"><summary>수치 상세</summary><p>장착한 유물의 효과는 레벨마다 Lv.1 수치의 5%씩 오릅니다. 레벨업에 필요한 중복은 Lv.5까지 적고(체감), Lv.10까지 점점 늘어나며(둔화), 그 뒤로 크게 늘어납니다(상한). 등급이 높을수록 필요한 중복이 적습니다(R 0.4배 · SR 0.25배 · UR 0.12배).</p><p>보유한 모든 유물은 장착과 관계없이 수집 점수를 줍니다. 점수 = 등급 가중 × (레벨 + ${COLLECTION_OWN_BONUS})이고, 전체 점수 ${COLLECTION_POINTS_PER_PERCENT}점마다 모든 동료 위력이 1% 오릅니다.</p></details>`,
+    `<button class="primary wide" data-equip="${id}" ${p().active?'disabled':''}>${equipped?'장착 해제':'장착'} (${p().equipped.length}/3)</button>`,'relic',id);
+}
+// Hero sheet: how the permanent power is built up, then what multiplies it in battle.
+function powerBreakdown(id){
+  const h=HERO[id],e=p().heroes[id],beds=p().beds,bonus=collectionBonus(p().relics),enh=enhanceMultiplier(e.enhance),rose=1+roseAttack(beds.rose),total=h.damage*enh*rose*(1+bonus);
+  const row=(label,value,note='')=>`<div class="pb-row"><span>${label}${note?`<small>${note}</small>`:''}</span><em>${value}</em></div>`;
+  return `<div class="power-break"><div class="pb-row base"><span>기본 위력</span><b>${h.damage}</b></div>${row(`동료 강화 +${e.enhance}`,`×${enh.toFixed(2)}`,'강화마다 +5%')}${row('꿈의 온실',`×${rose.toFixed(2)}`,`용기의 장미 Lv.${beds.rose}`)}${row('유물 수집 보너스',`×${(1+bonus).toFixed(3)}`,`수집 점수 ${fmt(collectionPoints(p().relics))}`)}<div class="pb-row total"><span>원정 시작 위력 <small>1성 · 훈련 전</small></span><b>${total.toFixed(1)}</b></div><p class="pb-note">전투 중에는 성급마다 ×2.35, 훈련 1회마다 +25%가 곱해지고, 오라·필살기·장착 유물의 효과가 더해집니다.</p></div>`;
 }
 function adventure(){
   const profile=p(),next=Math.min(45,profile.cleared+1);cycle=Math.min(4,Math.max(0,cycle));
@@ -381,7 +414,7 @@ function prepare(stage=Math.min(45,p().cleared+1),kind='main'){
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]];
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${kind==='main'?`<div class="boss-banner"><small>${c.name}</small><h2>${boss.name}</h2><p>6웨이브 · 3·6웨이브에 보스 등장</p>${boss.trait?`<p class="boss-trait">${boss.trait}</p>`:''}<span class="reward-chip">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루 보상'}</span></div>`:`<div style="margin-bottom:12px">${modeCard(kind,false)}</div>`}
     <div class="panel-head"><h3>${kind==='weekly'?'드래프트: 보유 동료 전체':'출전 팀'}</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}
-    <div class="panel-head prep-relic-head"><h3>장착 유물</h3><button class="link" data-action="go-relics">변경</button></div>${relicSlots(true)}${kind==='weekly'?`<p class="fineprint" style="margin-top:4px">2택 1을 총 ${TEAM_SIZE}번 선택합니다. 남은 후보가 한 명이면 같은 동료의 전술 2종 중에서 고릅니다.</p>`:''}`,
+    <div class="panel-head prep-relic-head"><h3>장착 유물</h3><small class="prep-bonus">수집 보너스 +${(collectionBonus(p().relics)*100).toFixed(1)}%</small><button class="link" data-action="go-relics">변경</button></div>${relicSlots(true)}${kind==='weekly'?`<p class="fineprint" style="margin-top:4px">2택 1을 총 ${TEAM_SIZE}번 선택합니다. 남은 후보가 한 명이면 같은 동료의 전술 2종 중에서 고릅니다.</p>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성 변경</button><button class="primary" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장하기'}</button></div>`,'prepare',{stage,kind});
 }
 function begin(kind,stage){const result=act('begin',{mode:kind,stage:kind==='weekly'?weeklyChapter()+1:stage,...(kind==='main'?{}:{tier:challengeTier})},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
