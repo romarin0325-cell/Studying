@@ -1,4 +1,5 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T,QUOTES} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,TUNING as T} from './content.js';
+import {talkLines,greetLine} from './lines.js';
 import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,GIFT_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
@@ -56,8 +57,8 @@ const portrait=(id,extra='')=>`<span class="portrait ${extra}" data-rarity="${HE
 // How each attack shape reads to a player (battle info and ability panels).
 const SHAPE_TEXT={single:'단일 · 적 1명',splash:'범위 · 맞은 곳 주변',beam:'관통 · 일직선',chain:'연쇄 · 주변 적에게 튐',bounce:'도탄 · 두 적 사이',cleave:'부채꼴 · 앞쪽',pulse:'원형 · 자기 주변',cross:'십자 · 행과 열',zone:'장판 · 바닥에 남음'};
 const RANK_TEXT={first:'선두',boss:'보스',strong:'강적',last:'후미'};
-const LOBBY_LINES=['오늘도 와 줘서 고마워.','정원의 별들이 너를 기다렸어.','같이 다음 스테이지로 가 볼까?','조금 쉬었다 가도 괜찮아.','네가 고른 동료들, 다들 든든해.'];
-const partnerLines=hero=>[...(QUOTES[hero.id]||[]),...LOBBY_LINES];
+// Each companion has its own lobby lines (src/lines.js); the close line joins from six hearts.
+const partnerLines=hero=>talkLines(hero.id,p().heroes[hero.id].bond);
 let talkIndex=0,skillHold=null,skillHeld=false,revealTimers=[];
 const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,claimed:[]};};
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
@@ -682,7 +683,7 @@ document.addEventListener('click',e=>{
   if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
   const actions={close:()=>{if(modal==='reward')return;close();},settings:showSettings,partner:partners,team:()=>team(),'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
     'memorial-album':memorialAlbum,'memorial-art':()=>{const artOnly=$('sheet').classList.toggle('memory-art-only');button.setAttribute('aria-pressed',String(artOnly));button.textContent=artOnly?'이야기 보기':'그림만 보기';},
-    owned:()=>{ownedOnly=!ownedOnly;render();},gifts:()=>giftSheet(p().partner),'gift-pick':giftPicker,'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},idle:()=>collectStars(),pet:()=>{const c=centerOf(button);if(act('pet').ok){render();hearts(c.x,c.y);}},
+    owned:()=>{ownedOnly=!ownedOnly;render();},gifts:()=>giftSheet(p().partner),'gift-pick':giftPicker,'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},idle:()=>collectStars(),pet:()=>{const c=centerOf(button);if(act('pet').ok){render();hearts(c.x,c.y);const bubble=$('partner-speech');if(bubble){bubble.textContent=greetLine(p().partner,calendar(now()).day);bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');}}},
     talk:()=>{talkIndex++;const hero=HERO[p().partner],lines=partnerLines(hero),bubble=$('partner-speech'),art=button.querySelector('img');
       if(bubble){bubble.textContent=lines[(p().heroes[hero.id].bond+talkIndex)%lines.length];bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');}
       if(art){art.classList.remove('hop');void art.offsetWidth;art.classList.add('hop');}const c=centerOf(button);hearts(c.x,c.y-30);},
