@@ -1210,3 +1210,36 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .free-pull.info>.ic:first-child{color:var(--gold)}
 /* Lobby speech stays between the side buttons (58px + gutters on each side); longer lines wrap. */
 .speech{max-width:min(calc(113.6% - 160px),300px);text-align:center;word-break:keep-all}
+/* ───────── Relic growth: collection bonus, level phases, power breakdown ───────── */
+.collection-card{display:grid;grid-template-columns:1fr auto;gap:8px 12px;margin:0 0 10px;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(64,48,18,.55),rgba(20,24,58,.8));border:1px solid rgba(246,210,122,.35)}
+.cc-main,.cc-side{display:flex;flex-direction:column;gap:1px}
+.cc-main small,.cc-side small{font-size:11px;font-weight:700;color:#e6d3a6}
+.cc-main b{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.05;color:#ffe39a;text-shadow:0 0 12px rgba(255,214,120,.45)}
+.cc-main span,.cc-side span{font-size:11px;color:var(--text3)}
+.cc-side{text-align:right}.cc-side b{font-size:20px;color:var(--text)}
+.cc-bar{grid-column:1/-1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08)}
+.cc-bar i{display:block;background:var(--r,#8a93b8);min-width:0}
+.cc-legend{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:var(--text2)}
+.cc-legend span{display:inline-flex;align-items:center;gap:4px}
+.cc-legend i{width:8px;height:8px;border-radius:2px;background:var(--r,#8a93b8)}
+.cc-rule{grid-column:1/-1;margin:0;font-size:10.5px;color:var(--text3)}
+.next-line{display:block;margin-top:6px;font-size:11.5px;color:var(--text3)}
+.next-line em.scaled,.ability p em.scaled{font-style:normal;font-weight:800;color:#9ff0e0}
+.relic-contrib{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 4px}
+.relic-contrib>div{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:12px;background:rgba(14,19,48,.6);border:1px solid var(--line2);text-align:center}
+.relic-contrib small{font-size:10.5px;color:var(--text3);font-weight:700}
+.relic-contrib b{font-size:16px;color:#ffe39a}
+.relic-contrib em{font-style:normal;font-size:10px;color:var(--text3)}
+.phase-track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:10px 0}
+.phase-track span{display:flex;flex-direction:column;align-items:center;padding:6px 2px;border-radius:10px;background:rgba(255,255,255,.05);color:var(--text3);border:1px solid transparent}
+.phase-track span b{font-size:12px}.phase-track span small{font-size:10px}
+.phase-track span.on{color:#fff;background:linear-gradient(180deg,rgba(127,230,211,.22),rgba(14,19,48,.7));border-color:rgba(127,230,211,.55)}
+.power-break{margin:12px 0 4px;padding:10px 12px;border-radius:14px;background:rgba(14,19,48,.6);border:1px solid var(--line2);display:grid;gap:4px}
+.pb-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--text2)}
+.pb-row span small{margin-left:6px;font-size:10.5px;color:var(--text3)}
+.pb-row em{font-style:normal;font-weight:800;color:#9ff0e0}
+.pb-row b{font-size:15px;color:var(--text)}
+.pb-row.total{margin-top:4px;padding-top:6px;border-top:1px solid var(--line2)}
+.pb-row.total b{font-size:18px;color:#ffe39a}
+.pb-note{margin:4px 0 0;font-size:10.5px;color:var(--text3);line-height:1.5}
+.prep-relic-head{gap:8px}.prep-bonus{margin-left:auto;font-size:11px;color:#e6d3a6;font-weight:700}
