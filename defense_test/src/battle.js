@@ -7,8 +7,9 @@ export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>[id,{pow
 export function createBattle(profile){
   const a=profile.active;if(!a||a.mode==='weekly'&&a.draft?.length!==TEAM_SIZE)return null;
   const meta=battleMeta(profile,a.deck);
+  const relicAttack=a.relicAttack??collectionBonus(profile.relics),relicLevels=a.relicLevels??Object.fromEntries(profile.equipped.map(id=>[id,relicLevel(profile.relics[id])]));
   const run=engine.newRun({deck:a.deck,chapter:a.stage-1,seed:a.seed,artifacts:profile.equipped,meta,
-    relicAttack:collectionBonus(profile.relics),relicLevels:Object.fromEntries(profile.equipped.map(id=>[id,relicLevel(profile.relics[id])])),mode:a.mode,boon:a.boon,tier:a.tier||'easy',met:Math.min(9,profile.cleared),
+    relicAttack,relicLevels,mode:a.mode,boon:a.boon,tier:a.tier||'easy',met:Math.min(9,profile.cleared),
     gaugeMax:springGauge(profile.beds.spring),startGold:seedGold(profile.beds.seed)});
   if(a.mode==='weekly'){run.globalAttack=.05*a.boon;run.gauge=Math.min(run.gaugeMax,run.gauge+(TEAM_SIZE-a.boon)*4);}
   // Monthly: a boss that reaches the core (7 damage) ends the challenge.

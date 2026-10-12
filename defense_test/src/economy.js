@@ -56,8 +56,9 @@ export function rollIndex(rates,value){let sum=0;for(let i=0;i<rates.length;i++)
 export function heroPool(rarity){return ROSTER[rarity]||[];}
 // A UR from the season banner is the monthly guardian half the time; from the normal
 // banner it is this week's pickup half the time.
-export function drawCharacter(random,season,guardian,pickup=null){
-  const rarity=['C','R','SR','UR'][rollIndex(T.heroRates,random())];
+export function drawCharacter(random,season,guardian,pickup=null,urMult=1){
+  const base=T.heroRates,ur=base[3]*urMult,rates=[base[0]-(ur-base[3]),base[1],base[2],ur];
+  const rarity=['C','R','SR','UR'][rollIndex(rates,random())];
   if(rarity==='UR'&&season&&random()<.5)return guardian;
   if(rarity==='UR'&&!season&&pickup&&random()<.5)return pickup;
   const pool=ROSTER[rarity];return pool[Math.floor(random()*pool.length)];

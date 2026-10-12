@@ -26,9 +26,9 @@ test('gifts come from shooting stars, the daily missions and dispatch, and favou
   p.daily.combat=true;p.daily.merges=5;p.daily.idle=true;
   assert.equal(act(p,'daily',{id:'combat'}).letter,false);act(p,'daily',{id:'merge'});assert.equal(act(p,'daily',{id:'idle'}).letter,true);assert.equal(p.gifts.letter,1);
   // Bouquet: once a day from dispatch.
-  p.cleared=9;p.dispatches=[{slot:0,hero:'storm_sage',start:NOW-20*HOUR,end:NOW,reward:5,dust:5}];p.heroes.storm_sage.owned=true;
+  p.cleared=9;p.dispatches=[{slot:0,hero:'storm_sage',start:NOW-24*HOUR,end:NOW,reward:5,dust:5}];p.heroes.storm_sage.owned=true;
   assert.equal(act(p,'claimDispatch',{slot:0}).bouquet,true);
-  p.dispatches=[{slot:0,hero:'storm_sage',start:NOW-20*HOUR,end:NOW,reward:5,dust:5}];assert.equal(act(p,'claimDispatch',{slot:0}).bouquet,false);assert.equal(p.gifts.bouquet,1);
+  p.dispatches=[{slot:0,hero:'storm_sage',start:NOW-24*HOUR,end:NOW,reward:5,dust:5}];assert.equal(act(p,'claimDispatch',{slot:0}).bouquet,false);assert.equal(p.gifts.bouquet,1);
   // Candy: about one a day of collected shooting stars.
   let candies=0;p.idleAt=NOW;for(let d=1;d<=200;d++){const r=act(p,'idle',{},NOW+d*DAY);if(r.candy)candies++;}
   assert.ok(candies>120&&candies<200,`${candies} candies in 200 daily collections`);assert.equal(candyChance(6*HOUR),.25);

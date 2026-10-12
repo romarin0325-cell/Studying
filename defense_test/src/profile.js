@@ -13,7 +13,7 @@ export function createProfile(now=Date.now()){
   return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0},bedRev:3,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
-    draws:0,relicDraws:0,rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},lobby:null,
+    draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},lobby:null,
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
     daily:freshDaily(now),settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]});
 }
@@ -22,10 +22,11 @@ const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<
 // finish an expedition, merge five times, collect the shooting stars. A free
 // single summon replaces the old "spend gems to earn gems" mission.
 export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료',reward:60},{id:'merge',name:'전투에서 합성 5회',reward:30,goal:5},{id:'idle',name:'별똥별 수집',reward:30}]);
-export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,bouquet:false,claimed:[]};}
+export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:[]};}
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!=='rose,seed,spring'||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==3||p.relicRev!==2||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
+  if(!p.pity||!integer(p.pity.normal)||!integer(p.pity.season))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond,BOND_MAX)||!integer(e.bondXp)||e.bondXp>=Math.max(1,bondNeed(e.bond));}))return false;
   if(!p.gifts||typeof p.gifts!=='object'||Object.keys(p.gifts).sort().join()!=='bouquet,candy,letter'||!GIFT_IDS.every(id=>integer(p.gifts[id],999)))return false;
   if(p.lobby!==null&&!(MEMORIAL_STORIES[p.lobby]&&p.heroes[p.lobby]?.owned&&p.heroes[p.lobby].bond>=BOND_MAX))return false;
@@ -37,7 +38,7 @@ export function validateProfile(p){
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)||d.dust!==undefined&&!integer(d.dust)))return false;
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
-  if(['combat','idle','free','bouquet'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
@@ -55,6 +56,8 @@ export function validateProfile(p){
       if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
     }else if(a.boon!==0)return false;
     if(a.mode!=='main'&&a.tier!==undefined&&!TIERS[a.tier])return false;
+    if(a.relicAttack!==undefined&&!(Number.isFinite(a.relicAttack)&&a.relicAttack>=0&&a.relicAttack<=10))return false;
+    if(a.relicLevels!==undefined&&(!a.relicLevels||typeof a.relicLevels!=='object'||Array.isArray(a.relicLevels)||Object.keys(a.relicLevels).length!==p.equipped.length||Object.keys(a.relicLevels).some(id=>!p.equipped.includes(id)||!integer(a.relicLevels[id])||a.relicLevels[id]<1)))return false;
     if(a.run!==null&&!resumeBattle(p))return false;
   }
   return true;
@@ -79,7 +82,22 @@ export function migrateRelics(p){
   p.relicRev=2;const a=p.active;
   if(a?.run&&typeof a.run==='string'){try{const run=JSON.parse(a.run);run.relicAttack=collectionBonus(p.relics);run.relicLevels=Object.fromEntries((Array.isArray(p.equipped)?p.equipped:[]).map(id=>[id,relicLevel(p.relics?.[id])]));a.run=JSON.stringify(run);}catch{}}
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function migrateDispatch(p){
+  if(!Array.isArray(p.dispatches))return;
+  for(const d of p.dispatches)if(d&&integer(d.start)&&integer(d.end)&&d.end-d.start===20*HOUR)d.start=d.end-TUNING.dispatchHours*HOUR;
+}
+export function migratePity(p){
+  if(p.pity===undefined)p.pity={normal:0,season:0};
+  else if(p.pity&&typeof p.pity==='object'&&!Array.isArray(p.pity)){if(p.pity.normal===undefined)p.pity.normal=0;if(p.pity.season===undefined)p.pity.season=0;}
+}
+export function migrateRelicSnapshot(p){
+  const a=p.active;if(!a||typeof a!=='object'||a.relicAttack!==undefined&&a.relicLevels!==undefined)return;
+  let run=null;if(typeof a.run==='string'){try{run=JSON.parse(a.run);}catch{}}
+  const equipped=Array.isArray(p.equipped)?p.equipped:[];
+  if(a.relicAttack===undefined)a.relicAttack=Number.isFinite(run?.relicAttack)?run.relicAttack:collectionBonus(p.relics);
+  if(a.relicLevels===undefined){const from=run?.relicLevels&&typeof run.relicLevels==='object'&&!Array.isArray(run.relicLevels)?run.relicLevels:null;a.relicLevels=Object.fromEntries(equipped.map(id=>[id,from&&Number.isInteger(from[id])?from[id]:relicLevel(p.relics?.[id])]));}
+}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
@@ -101,8 +119,9 @@ export function safeNow(p,now){return Math.max(p.clockAt,Math.floor(now));}
 function rollDay(p,now){if(p.daily.day!==calendar(now).day)p.daily=freshDaily(now);}
 // Old saves kept draw/dispatch missions; keep today's finished expedition only.
 export function migrateDaily(p){
-  const d=p.daily;if(!d||typeof d!=='object'||d.merges!==undefined)return;
-  p.daily={day:typeof d.day==='string'?d.day:'',combat:d.combat===true,merges:0,idle:false,free:false,bouquet:false,claimed:Array.isArray(d.claimed)?d.claimed.filter(id=>id==='combat'):[]};
+  const d=p.daily;if(!d||typeof d!=='object')return;
+  if(d.merges===undefined){p.daily={day:typeof d.day==='string'?d.day:'',combat:d.combat===true,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:Array.isArray(d.claimed)?d.claimed.filter(id=>id==='combat'):[]};return;}
+  if(d.accel===undefined)d.accel=false;
 }
 // Bond v2: hearts are filled by points. Old saves keep their hearts (old greetings had no cap).
 export function migrateBond(p){
@@ -122,15 +141,19 @@ export function command(p,action,args={},now=Date.now()){
     p.memories[args.id]={page:args.page,read:!!p.memories[args.id]?.read||args.page===story.paragraphs.length-1};return {ok:true};
   }
   if(action==='draw'){
-    const banner=args.banner,count=args.count,free=args.free===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
+    const banner=args.banner,count=args.count,free=args.free===true,boost=args.boost===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
     if(free&&(banner!=='normal'||count!==1||p.daily.free))return no('오늘의 무료 소환은 이미 사용했습니다.');
+    if(boost&&(free||count!==10||banner==='relic'))return no('부스트는 일반·시즌 10회 소환에서만 사용할 수 있습니다.');
     const cost=free?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily.free=true;
-    p.dreams-=cost;const items=[];
-    for(let i=0;i<count;i++){
-      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',calendar(now).guardian,calendar(now).pickup);
-      const fresh=receive(banner==='relic'?p.relics:p.heroes,id),item={id,fresh,banner,at:now};items.push(item);p.history.unshift(item);
-      if(banner==='relic')p.relicDraws++;else p.draws++;
-    }p.history=p.history.slice(0,50);return {ok:true,items,cost,free};
+    p.dreams-=cost;const c=calendar(now),urMult=boost?2:1,paidHero=banner!=='relic'&&!free;
+    const pull=bonus=>{
+      let pityHit=false;if(paidHero&&!bonus){p.pity[banner]++;if(p.pity[banner]>=TUNING.pity[banner]){p.pity[banner]-=TUNING.pity[banner];pityHit=true;}}
+      let id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,urMult);if(pityHit)id=banner==='season'?c.guardian:c.pickup;
+      const item={id,fresh:receive(banner==='relic'?p.relics:p.heroes,id),banner,at:now};if(pityHit)item.pity=true;if(bonus)item.bonus=true;
+      p.history.unshift(item);if(banner==='relic')p.relicDraws++;else p.draws++;return item;
+    };
+    const items=Array.from({length:count},()=>pull(false)),bonus=boost&&random(p)<.1?Array.from({length:10},()=>pull(true)):[];
+    p.history=p.history.slice(0,50);return {ok:true,items,bonus,cost,free,pity:{normal:p.pity.normal,season:p.pity.season}};
   }
   if(action==='bed'){
     const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');if(p.active)return no('원정 종료 후 성장할 수 있습니다.');
@@ -157,11 +180,18 @@ export function command(p,action,args={},now=Date.now()){
     if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
     if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
     const {dust,dreams}=dispatchReward(combatPower(args.id,p.heroes[args.id],p.beds,collectionBonus(p.relics)),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward:dreams,dust});
-    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 20시간 후 귀환'};
+    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 24시간 후 귀환'};
   }
   if(action==='claimDispatch'){
     if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
     const dust=d.dust||0,bouquet=!p.daily.bouquet;p.dreams+=d.reward;p.dust+=dust;if(bouquet){p.daily.bouquet=true;p.gifts.bouquet=Math.min(999,p.gifts.bouquet+1);}p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,bouquet,message:`파견 보상 수령 · ${dust?`별가루 +${dust} · `:''}꿈의결정 +${d.reward}${bouquet?' · 꽃다발 +1':''}`};
+  }
+  if(action==='accelerate'){
+    if(p.daily.accel)return no('오늘의 가속은 이미 사용했습니다.');
+    const running=p.dispatches.filter(d=>d.end>now);if(!running.length)return no('진행 중인 파견이 없습니다.');
+    p.daily.accel=true;if(args.correct!==true)return {ok:true,shifted:0,message:'오늘의 가속은 내일 다시 할 수 있습니다.'};
+    for(const d of running){const delta=Math.min(4*HOUR,d.end-now);d.start-=delta;d.end-=delta;}
+    return {ok:true,shifted:running.length,hours:4,message:`정답입니다. 진행 중인 파견 ${running.length}건을 최대 4시간 앞당겼습니다.`};
   }
   if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 모인 별똥별이 없습니다.');const candy=random(p)<candyChance(Math.min(TUNING.idleHours*HOUR,now-p.idleAt));p.dust+=reward;p.idleAt=now;p.daily.idle=true;if(candy)p.gifts.candy=Math.min(999,p.gifts.candy+1);return {ok:true,reward,candy,message:`별똥별 수집 · 별가루 +${reward}${candy?' · 별사탕 +1':''}`};}
   if(action==='daily'){
@@ -176,7 +206,7 @@ export function command(p,action,args={},now=Date.now()){
     if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
     if(mode==='weekly')p.weekly=c.week;
     random(p);
-    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,...(tier?{tier}:{})};
+    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),...(tier?{tier}:{})};
     if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
   }
   if(action==='draft'){
