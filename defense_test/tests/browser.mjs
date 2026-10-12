@@ -5,7 +5,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
-import {HEROES} from '../src/content.js';
+import {HEROES,TUNING} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
@@ -168,7 +168,7 @@ try{
     const rich=createProfile(NOW);rich.dreams=5000;const t=await boot(390,844,rich),{page}=t;
     await nav(page,'소환');await page.locator('[data-draw="10"]').click();
     assert.equal(await page.locator('#sheet[data-kind="quiz"] .quiz-choice').count(),4,'a 10-pull asks a concept question first');
-    const asked=COURSE.concepts.find(c=>c.prompt===(await page.locator('.quiz-prompt').innerText()).trim());assert.ok(asked);
+    const prompt=(await page.locator('.quiz-prompt').innerText()).trim(),asked=COURSE.concepts.find(c=>c.prompt===prompt);assert.ok(asked);
     await page.locator(`[data-quiz-choice="${(asked.answer+1)%asked.choices.length}"]`).click();await page.locator('[data-action="quiz-go"]').click();
     assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);assert.equal((await profile(page)).dreams,4000);
     assert.deepEqual((await profile(page)).study.wrong.map(w=>w.id),[asked.id]);await close(page);
@@ -334,8 +334,8 @@ try{
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
   assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,770);await shot(result.page,'result',390,844);
   await result.context.close();
-  const returned=createProfile(NOW-20*3600000);returned.cleared=9;returned.heroes.queen.owned=true;
-  command(returned,'dispatch',{slot:0,id:'queen'},NOW-20*3600000);returned.clockAt=NOW;
+  const sent=NOW-TUNING.dispatchHours*3600000,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
+  command(returned,'dispatch',{slot:0,id:'queen'},sent);returned.clockAt=NOW;
   const claim=await boot(390,844,returned);await nav(claim.page,'파견');
   await claim.page.locator('[data-claim-dispatch="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
   assert.ok((await profile(claim.page)).dreams>600);await claim.context.close();
