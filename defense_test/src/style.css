@@ -1208,3 +1208,5 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .summon-sub .relic-tier{align-content:center}
 .free-pull.info{opacity:.85;cursor:default}
 .free-pull.info>.ic:first-child{color:var(--gold)}
+/* Lobby speech stays between the side buttons (58px + gutters on each side); longer lines wrap. */
+.speech{max-width:min(calc(113.6% - 160px),300px);text-align:center;word-break:keep-all}

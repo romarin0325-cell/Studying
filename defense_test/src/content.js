@@ -59,10 +59,3 @@ export const TUNING=Object.freeze({
   beds:{rose:{unlock:0,base:40,growth:1.065,knee:30,steep:1.15,knee2:40,steep2:1.35},spring:{unlock:15,base:42,growth:1.06,rise:25,knee:30,steep:1.10,knee2:33,steep2:1.35},seed:{unlock:30,base:110,growth:1.08,rise:15,knee:20,steep:1.12,knee2:23,steep2:1.35}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });
-export const QUOTES={
-  star_boy:['오늘은 어떤 별을 만나게 될까?','떨어진 별도, 여기선 다시 빛날 수 있어.'],
-  snow_rabbit:['천천히 자라도 괜찮아. 같이 기다릴게.','작은 발자국이 모이면 길이 되니까.'],
-  night_rabbit:['밤이 깊을수록 우리 별은 더 밝아져.','오늘도 이 정원을 지켜 줄게.'],
-  siren:['당신이 돌아오면 정원에 노래가 흘러.','파견을 떠난 동료에게도 이 노래가 닿을까?'],
-  great_detective:['새로운 별길의 단서가 보이는군요.','좋은 팀은 다섯 가지 답을 함께 찾죠.'],
-};
