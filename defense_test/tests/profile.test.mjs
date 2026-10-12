@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,DEFAULT_DECK,ARTIFACT} from '../src/content.js';
+import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING} from '../src/content.js';
 import {unlockProfile} from '../src/test-unlock.js';
-import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away} from '../src/profile.js';
+import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
-import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold} from '../src/economy.js';
+import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -87,7 +87,7 @@ test('daily missions come from playing, the free summon is once a day, and old m
   call(s,'daily',{id:'merge'});call(s,'daily',{id:'combat'});assert.equal(s.transact('daily',{id:'merge'},NOW).ok,false);
   const old=createProfile(NOW);old.daily={day:old.daily.day,combat:true,draw:true,dispatch:false,claimed:['draw']};
   const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
-  assert.deepEqual(migrated.daily,{day:old.daily.day,combat:true,merges:0,idle:false,free:false,bouquet:false,claimed:[]});
+  assert.deepEqual(migrated.daily,{day:old.daily.day,combat:true,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:[]});
   const bad=structuredClone(migrated);bad.daily.claimed=['draw'];assert.equal(validateProfile(bad),false);
 });
 
@@ -142,7 +142,7 @@ test('older saves gain relicRev 2 and an in-progress run still resumes',()=>{
   const bad=structuredClone(createProfile(NOW));bad.relicRev=1;assert.equal(validateProfile(bad),false);
 });
 
-test('a dispatch cannot consume the last five battle heroes and has a fixed 20-hour receipt',()=>{
+test('a dispatch cannot consume the last five battle heroes and has a fixed 24-hour receipt',()=>{
   const p=createProfile(NOW);p.cleared=9;const s=storeFor(p);
   assert.equal(s.transact('dispatch',{slot:0,id:'star_boy'},NOW).ok,false);
   const q=createProfile(NOW);q.cleared=9;q.heroes.queen.owned=true;const extra=storeFor(q);
@@ -150,7 +150,7 @@ test('a dispatch cannot consume the last five battle heroes and has a fixed 20-h
   assert.ok(away(extra.value,'star_boy'));assert.equal(extra.value.deck.length,5);assert.ok(!extra.value.deck.includes('star_boy'));
   assert.equal(extra.transact('deck',{ids:DEFAULT_DECK},NOW).ok,false);
   assert.equal(extra.transact('begin',{mode:'main',stage:10,deck:DEFAULT_DECK},NOW).ok,false);
-  const d=extra.value.dispatches[0];assert.equal(d.end-d.start,20*HOUR);
+  const d=extra.value.dispatches[0];assert.equal(d.end-d.start,TUNING.dispatchHours*HOUR);
   assert.ok(d.dust>d.reward&&d.reward>=1,'dust is the main dispatch reward');
   call(extra,'bed',{id:'rose'});assert.equal(extra.value.dispatches[0].reward,d.reward);assert.equal(extra.value.dispatches[0].dust,d.dust);
   assert.equal(extra.transact('claimDispatch',{slot:0},d.end-1).ok,false);
@@ -161,9 +161,9 @@ test('a dispatch cannot consume the last five battle heroes and has a fixed 20-h
 
 test('a dispatch sent before dust rewards still validates and pays its promised crystals',()=>{
   const p=createProfile(NOW);p.cleared=9;p.heroes.queen.owned=true;
-  p.dispatches=[{slot:0,hero:'star_boy',start:NOW,end:NOW+20*HOUR,reward:77}];p.deck=p.deck.filter(id=>id!=='star_boy');p.deck.push('queen');
+  p.dispatches=[{slot:0,hero:'star_boy',start:NOW,end:NOW+TUNING.dispatchHours*HOUR,reward:77}];p.deck=p.deck.filter(id=>id!=='star_boy');p.deck.push('queen');
   assert.ok(validateProfile(p));const s=storeFor(p),dreams=s.value.dreams,dust=s.value.dust;
-  call(s,'claimDispatch',{slot:0},NOW+20*HOUR);assert.equal(s.value.dreams,dreams+77);assert.equal(s.value.dust,dust);
+  call(s,'claimDispatch',{slot:0},NOW+TUNING.dispatchHours*HOUR);assert.equal(s.value.dreams,dreams+77);assert.equal(s.value.dust,dust);
   const bad=structuredClone(p);bad.dispatches[0].dust=-1;assert.equal(validateProfile(bad),false);
 });
 
@@ -242,4 +242,143 @@ test('unlockProfile owns every companion (three below ten hearts to try gifts), 
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
   assert.ok(Object.entries(p.relics).every(([id,r])=>r.owned&&r.enhance==={C:6,R:4,SR:3,UR:1}[ARTIFACT[id].rarity]&&r.copies>0),'every relic owned at a mid-game level with spare duplicates');
   assert.equal(validateProfile(p),true);
+});
+
+test('a 20-hour dispatch migrates onto 24 hours and old dailies gain accel',()=>{
+  const raw=createProfile(NOW);raw.cleared=9;raw.heroes.queen.owned=true;
+  raw.dispatches=[{slot:0,hero:'star_boy',start:NOW,end:NOW+20*HOUR,reward:77,dust:3}];
+  raw.deck=raw.deck.filter(id=>id!=='star_boy');raw.deck.push('queen');
+  assert.equal(validateProfile(raw),false);
+  const migrated=parseProfile(JSON.stringify(raw));assert.ok(migrated);
+  assert.equal(migrated.dispatches[0].end,NOW+20*HOUR);
+  assert.equal(migrated.dispatches[0].start,migrated.dispatches[0].end-TUNING.dispatchHours*HOUR);
+  assert.equal(migrated.dispatches[0].reward,77);assert.equal(migrated.dispatches[0].dust,3);
+  const kept=createProfile(NOW);kept.cleared=9;kept.heroes.queen.owned=true;
+  kept.dispatches=[{slot:0,hero:'star_boy',start:NOW+HOUR,end:NOW+HOUR+TUNING.dispatchHours*HOUR,reward:5,dust:1}];
+  kept.deck=kept.deck.filter(id=>id!=='star_boy');kept.deck.push('queen');
+  assert.equal(parseProfile(JSON.stringify(kept)).dispatches[0].start,NOW+HOUR);
+  const legacy=createProfile(NOW);delete legacy.pity;delete legacy.daily.accel;legacy.pity={season:4};
+  const filled=parseProfile(JSON.stringify(legacy));assert.ok(filled);
+  assert.equal(filled.daily.accel,false);assert.deepEqual(filled.pity,{normal:0,season:4});
+});
+
+test('daily acceleration shifts every running dispatch once and a wrong answer still spends the day',()=>{
+  const idle=storeFor(createProfile(NOW));
+  assert.equal(idle.transact('accelerate',{correct:true},NOW).ok,false);assert.equal(idle.value.daily.accel,false);
+  const late=createProfile(NOW);late.cleared=9;late.heroes.queen.owned=true;const done=storeFor(late);
+  call(done,'dispatch',{slot:0,id:'star_boy'});
+  assert.equal(done.transact('accelerate',{correct:true},done.value.dispatches[0].end).ok,false);
+  assert.equal(done.value.daily.accel,false);
+  const wrong=createProfile(NOW);wrong.cleared=9;wrong.heroes.queen.owned=true;const w=storeFor(wrong);
+  call(w,'dispatch',{slot:0,id:'star_boy'});const end=w.value.dispatches[0].end,reward=w.value.dispatches[0].reward;
+  const miss=call(w,'accelerate',{correct:false});
+  assert.equal(miss.shifted,0);assert.equal(miss.hours,undefined);assert.equal(miss.message,'오늘의 가속은 내일 다시 할 수 있습니다.');
+  assert.equal(w.value.dispatches[0].end,end);assert.equal(w.value.daily.accel,true);
+  assert.equal(w.transact('accelerate',{correct:true},NOW).ok,false);
+  const next=call(w,'accelerate',{correct:true},NOW+23*HOUR);
+  assert.equal(next.shifted,1);assert.equal(next.hours,4);assert.equal(w.value.dispatches[0].reward,reward);
+  assert.equal(w.value.dispatches[0].end,end-HOUR);assert.equal(w.value.dispatches[0].end-w.value.dispatches[0].start,TUNING.dispatchHours*HOUR);
+  const p=createProfile(NOW);p.cleared=27;p.heroes.queen.owned=true;p.heroes.luna.owned=true;const s=storeFor(p);
+  call(s,'dispatch',{slot:0,id:'star_boy'});
+  call(s,'dispatch',{slot:1,id:'queen'},NOW+20*HOUR);
+  const [a,b]=s.value.dispatches.map(d=>({end:d.end,reward:d.reward})),when=NOW+22*HOUR;
+  const hit=call(s,'accelerate',{correct:true},when);
+  assert.equal(hit.shifted,2);assert.equal(hit.hours,4);
+  assert.equal(hit.message,'정답입니다. 진행 중인 파견 2건을 최대 4시간 앞당겼습니다.');
+  assert.equal(s.value.dispatches[0].end,a.end-Math.min(4*HOUR,a.end-when));
+  assert.equal(s.value.dispatches[1].end,b.end-Math.min(4*HOUR,b.end-when));
+  assert.equal(s.value.dispatches[0].reward,a.reward);assert.equal(s.value.dispatches[1].reward,b.reward);
+  for(const d of s.value.dispatches)assert.equal(d.end-d.start,TUNING.dispatchHours*HOUR);
+  assert.equal(s.transact('accelerate',{correct:true},when).ok,false);
+});
+
+test('pity pays the banner pickup at the threshold and is not cleared by a natural UR',()=>{
+  const step=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return x>>>0||1;};
+  const urStart=TUNING.heroRates[0]+TUNING.heroRates[1]+TUNING.heroRates[2];
+  let state=1,urSeed=0;for(let i=0;i<5000000&&!urSeed;i++){const n=step(state);if(n/4294967296>=urStart)urSeed=state;else state=n;}
+  assert.ok(urSeed);
+  const natural=createProfile(NOW);natural.rng=urSeed;natural.pity.normal=12;natural.dreams=1000;
+  const hit=command(natural,'draw',{banner:'normal',count:1},NOW);
+  assert.equal(hit.ok,true);assert.equal(HERO[hit.items[0].id].rarity,'UR');assert.equal(hit.items[0].pity,undefined);assert.equal(natural.pity.normal,13);
+  const p=createProfile(NOW);p.dreams=100000;p.pity.normal=TUNING.pity.normal-1;
+  const one=command(p,'draw',{banner:'normal',count:1},NOW);
+  assert.equal(one.items[0].id,calendar(NOW).pickup);assert.equal(one.items[0].pity,true);assert.equal(one.pity.normal,0);assert.equal(p.history[0].pity,true);
+  p.pity.season=TUNING.pity.season-1;
+  const season=command(p,'draw',{banner:'season',count:1},NOW);
+  assert.equal(season.items[0].id,calendar(NOW).guardian);assert.equal(season.items[0].pity,true);assert.equal(p.pity.season,0);
+  const later=NOW+8*24*HOUR;p.pity.normal=TUNING.pity.normal-2;
+  const ten=command(p,'draw',{banner:'normal',count:10},later);
+  assert.equal(ten.items.filter(item=>item.pity).length,1);assert.equal(ten.items[1].id,calendar(later).pickup);assert.equal(ten.items[1].pity,true);
+  assert.equal(p.pity.normal,8);assert.deepEqual(ten.pity,{normal:8,season:0});
+});
+
+test('boost is a doubled-UR 10-pull and may add ten free bonus draws',()=>{
+  const [c,r,sr,ur]=TUNING.heroRates,start=c-(ur*2-ur)+r+sr,end=c+r+sr;
+  const step=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return x>>>0||1;};
+  let state=1,found=0;for(let i=0;i<5000000&&!found;i++){const n=step(state),value=n/4294967296;if(value>=start&&value<end)found=state;else state=n;}
+  assert.ok(found);
+  const make=()=>{const q=createProfile(NOW);q.rng=found;q.dreams=100000;q.pity.normal=3;return q;};
+  const boosted=make(),plain=make();
+  const rb=command(boosted,'draw',{banner:'normal',count:10,boost:true},NOW);
+  const rp=command(plain,'draw',{banner:'normal',count:10},NOW);
+  assert.equal(rb.ok,true);assert.equal(HERO[rb.items[0].id].rarity,'UR');assert.equal(rb.items[0].pity,undefined);
+  assert.equal(HERO[rp.items[0].id].rarity,'SR');assert.deepEqual(rp.bonus,[]);
+  assert.equal(boosted.dreams,100000-TUNING.heroDrawCost*10);assert.equal(boosted.pity.normal,13);assert.equal(rb.pity.normal,13);
+  assert.equal(boosted.daily.free,false);
+  let sawBonus=false,sawNone=false;
+  for(let i=0;i<120&&!(sawBonus&&sawNone);i++){
+    const q=createProfile(NOW);q.dreams=100000;q.rng=(0x13579bdf+i*997)>>>0||1;q.pity.normal=4;
+    const dreams=q.dreams,result=command(q,'draw',{banner:'season',count:10,boost:true},NOW);
+    assert.equal(result.ok,true,result.message);assert.equal(result.items.length,10);assert.equal(q.dreams,dreams-TUNING.heroDrawCost*10);
+    assert.equal(q.daily.free,false);assert.equal(q.pity.season,10);assert.equal(q.pity.normal,4);assert.equal(result.items.some(item=>item.bonus),false);
+    if(result.bonus.length){sawBonus=true;assert.equal(result.bonus.length,10);assert.ok(result.bonus.every(item=>item.bonus===true&&item.banner==='season'&&item.pity===undefined&&q.history.includes(item)));assert.equal(q.pity.season,10);}
+    else{sawNone=true;assert.deepEqual(result.bonus,[]);}
+  }
+  assert.ok(sawBonus&&sawNone);
+  const refused=createProfile(NOW);refused.dreams=100000;
+  assert.equal(command(refused,'draw',{banner:'normal',count:1,boost:true},NOW).ok,false);
+  assert.equal(command(refused,'draw',{banner:'relic',count:10,boost:true},NOW).ok,false);
+  assert.equal(command(refused,'draw',{banner:'normal',count:1,free:true,boost:true},NOW).ok,false);
+  assert.equal(refused.daily.free,false);assert.equal(refused.dreams,100000);assert.equal(refused.pity.normal,0);
+  const relic=command(refused,'draw',{banner:'relic',count:1},NOW);assert.equal(relic.pity.normal,0);assert.deepEqual(relic.bonus,[]);
+  const free=command(refused,'draw',{banner:'normal',count:1,free:true},NOW);assert.equal(free.ok,true);assert.equal(refused.pity.normal,0);assert.equal(refused.daily.free,true);
+});
+
+test('drawing relics during a saved run keeps the snapshotted collection bonus',()=>{
+  const s=storeFor(createProfile(NOW));call(s,'begin',{mode:'main',stage:1});
+  const run=createBattle(s.value),bonus=run.relicAttack;
+  assert.equal(bonus,0);assert.equal(s.value.active.relicAttack,bonus);assert.deepEqual(s.value.active.relicLevels,{});
+  E.step(run,.05);assert.equal(s.saveRun(E.serialize(run)),true);
+  call(s,'draw',{banner:'relic',count:1});
+  assert.ok(collectionBonus(s.value.relics)>bonus);
+  const restored=resumeBattle(s.value);assert.ok(restored);
+  assert.equal(restored.relicAttack,bonus);assert.deepEqual(restored.relicLevels,run.relicLevels);
+});
+
+test('an old active run without a relic snapshot copies the saved run, and bad snapshots are rejected',()=>{
+  const p=createProfile(NOW);p.relics.hourglass.owned=true;p.equipped=['hourglass'];
+  const s=storeFor(p);call(s,'begin',{mode:'main',stage:1});
+  const run=createBattle(s.value);E.step(run,.05);
+  const raw=JSON.parse(E.serialize(run));raw.relicAttack=.02;raw.relicLevels={hourglass:4};
+  const old=structuredClone(s.value);delete old.active.relicAttack;delete old.active.relicLevels;old.active.run=JSON.stringify(raw);
+  old.relics.lens.owned=true;
+  const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
+  assert.notEqual(migrated.active.relicAttack,collectionBonus(migrated.relics));
+  assert.equal(migrated.active.relicAttack,.02);assert.deepEqual(migrated.active.relicLevels,{hourglass:4});
+  const resumed=resumeBattle(migrated);assert.ok(resumed);assert.equal(resumed.relicAttack,.02);assert.deepEqual(resumed.relicLevels,{hourglass:4});
+  const bare=structuredClone(s.value);delete bare.active.relicAttack;delete bare.active.relicLevels;bare.active.run=null;bare.relics.hourglass.enhance=8;
+  const filled=parseProfile(JSON.stringify(bare));
+  assert.equal(filled.active.relicAttack,collectionBonus(filled.relics));
+  assert.deepEqual(filled.active.relicLevels,{hourglass:relicLevel(filled.relics.hourglass)});
+  const check=createProfile(NOW);check.relics.hourglass.owned=true;check.equipped=['hourglass'];
+  assert.ok(command(check,'begin',{mode:'main',stage:1},NOW).ok);
+  check.active.relicAttack=10;assert.equal(validateProfile(check),true);
+  check.active.relicAttack=10.1;assert.equal(validateProfile(check),false);
+  check.active.relicAttack=-.01;assert.equal(validateProfile(check),false);
+  check.active.relicAttack=0;
+  check.active.relicLevels={hourglass:0};assert.equal(validateProfile(check),false);
+  check.active.relicLevels={hourglass:1.5};assert.equal(validateProfile(check),false);
+  check.active.relicLevels={};assert.equal(validateProfile(check),false);
+  check.active.relicLevels={hourglass:2,lens:1};assert.equal(validateProfile(check),false);
+  check.active.relicLevels={hourglass:2};assert.equal(validateProfile(check),true);
 });

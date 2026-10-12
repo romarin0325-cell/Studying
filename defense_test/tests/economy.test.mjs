@@ -103,6 +103,21 @@ test('dispatch pays mostly dust with a small crystal share',()=>{
   }
 });
 
+test('drawCharacter urMult doubles the UR rate and takes that share from C',()=>{
+  const base=TUNING.heroRates;
+  const ratesFor=mult=>{const ur=base[3]*mult;return [base[0]-(ur-base[3]),base[1],base[2],ur];};
+  const band=(mult,value)=>{const rates=ratesFor(mult);let sum=0;for(let i=0;i<rates.length;i++){sum+=rates[i];if(value<sum)return ['C','R','SR','UR'][i];}return 'UR';};
+  const boosted=ratesFor(2);
+  assert.ok(Math.abs(boosted.reduce((a,b)=>a+b)-1)<1e-12);
+  assert.equal(boosted[3],base[3]*2);assert.equal(boosted[0],base[0]-base[3]);assert.equal(boosted[1],base[1]);assert.equal(boosted[2],base[2]);
+  const rolls=a=>()=>a.shift();
+  const rarity=(mult,value)=>HERO[drawCharacter(()=>value,false,'doom',null,mult)].rarity;
+  for(const mult of [1,2])for(let i=0;i<1000;i++){const value=i/1000;assert.equal(rarity(mult,value),band(mult,value),`${mult}@${value}`);}
+  const urAt=boosted[0]+boosted[1]+boosted[2];
+  assert.equal(drawCharacter(rolls([urAt,.4]),false,'doom','luna',2),'luna');
+  assert.equal(HERO[drawCharacter(rolls([urAt,.4]),false,'doom','luna',1)].rarity,'SR');
+});
+
 test('a normal-banner UR is the weekly pickup half the time',()=>{
   // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/6.
   let n=0,pick=0;

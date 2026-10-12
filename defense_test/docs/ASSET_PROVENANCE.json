@@ -881,5 +881,63 @@
         "quality": 78
       }
     }
+  ],
+  "library": [
+    {
+      "id": "boat",
+      "source": "defense_test/assets/library/boat.webp",
+      "sha256": "ed2a624c5edbf18481437960c854e670c97190b13bf3f214dbd4f41d9182a3da",
+      "width": 720,
+      "height": 540,
+      "bytes": 32722
+    },
+    {
+      "id": "hat",
+      "source": "defense_test/assets/library/hat.webp",
+      "sha256": "bdadaafeb5a5eb25560e86177d2359d3e29d79cfeb6317e44026bd356ee690a6",
+      "width": 608,
+      "height": 1080,
+      "bytes": 55280
+    },
+    {
+      "id": "door",
+      "source": "defense_test/assets/library/door.webp",
+      "sha256": "9ee71f3972bb10670a0d28d7eba61bd1f6c1a93b1c521d1a9bf61d0d92024fe1",
+      "width": 720,
+      "height": 900,
+      "bytes": 50984
+    },
+    {
+      "id": "window",
+      "source": "defense_test/assets/library/window.webp",
+      "sha256": "53b308e6cdb80d41309e760818b436552852e57d6ac184234830ebab8519cb35",
+      "width": 720,
+      "height": 720,
+      "bytes": 43054
+    },
+    {
+      "id": "letter",
+      "source": "defense_test/assets/library/letter.webp",
+      "sha256": "6e6cf7de5bdc3fc6d305ca42afbed250dd068b24741bf800d707c6a4797f12d2",
+      "width": 614,
+      "height": 1080,
+      "bytes": 75114
+    },
+    {
+      "id": "rabbit",
+      "source": "defense_test/assets/library/rabbit.webp",
+      "sha256": "37e5d7afe154ed92b4a7982e9d59dd7e1278379f19f84f3be5d254214ef03172",
+      "width": 720,
+      "height": 900,
+      "bytes": 62010
+    },
+    {
+      "id": "moon",
+      "source": "defense_test/assets/library/moon.webp",
+      "sha256": "1634e2cff682062f1cbd1352b28838903ae023c77e027a0d6a24bde65da3f89c",
+      "width": 720,
+      "height": 720,
+      "bytes": 62542
+    }
   ]
 }

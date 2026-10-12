@@ -8,6 +8,10 @@
       0.048,
       0.002
     ],
+    "pity": {
+      "normal": 200,
+      "season": 200
+    },
     "duplicateGrowth": 1.58,
     "enhanceStep": 0.05,
     "levelStep": 0.04,
@@ -15,10 +19,10 @@
     "levelCostGrowth": 1.12,
     "specialStep": 0.1,
     "specialEvery": 5,
-    "dispatchHours": 20,
+    "dispatchHours": 24,
     "dispatchStageStep": 0.05,
-    "dispatchDust": 1.25,
-    "dispatchDreams": 0.25,
+    "dispatchDust": 1.5,
+    "dispatchDreams": 0.3,
     "idleHours": 20,
     "idleDustPerHour": 14,
     "firstClearBase": 160,
@@ -1271,40 +1275,40 @@
       "id": "star_boy",
       "power": 655,
       "dispatchAt9": {
-        "dust": 101,
-        "dreams": 20
+        "dust": 122,
+        "dreams": 24
       }
     },
     {
       "id": "snow_rabbit",
       "power": 241,
       "dispatchAt9": {
-        "dust": 78,
-        "dreams": 15
+        "dust": 94,
+        "dreams": 18
       }
     },
     {
       "id": "night_rabbit",
       "power": 751,
       "dispatchAt9": {
-        "dust": 105,
-        "dreams": 21
+        "dust": 127,
+        "dreams": 25
       }
     },
     {
       "id": "siren",
       "power": 173,
       "dispatchAt9": {
-        "dust": 73,
-        "dreams": 14
+        "dust": 88,
+        "dreams": 17
       }
     },
     {
       "id": "great_detective",
       "power": 316,
       "dispatchAt9": {
-        "dust": 83,
-        "dreams": 16
+        "dust": 100,
+        "dreams": 20
       }
     }
   ],

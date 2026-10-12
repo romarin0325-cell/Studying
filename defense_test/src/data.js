@@ -1287,7 +1287,7 @@ export const ARTIFACTS = [
   {
     "id": "twin",
     "name": "쌍성의 거울",
-    "text": "필살기의 직접 피해가 1.5초 뒤 한 번 더 100%로 들어갑니다. 버프와 소환은 반복되지 않습니다.",
+    "text": "필살기 피해가 적중하고 1.5초 뒤 100%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다.",
     "scale": ["100%"],
     "icon": 16,
     "atlas": "relics",
@@ -1347,8 +1347,8 @@ export const ARTIFACTS = [
   {
     "id": "gift_ribbon",
     "name": "기적의 리본",
-    "text": "유료 소환이 26% 확률로 2성으로 나옵니다.",
-    "scale": ["26%"],
+    "text": "동료를 소환하면 25% 확률로 리본을 단 2성으로 나옵니다.",
+    "scale": ["25%"],
     "icon": 2,
     "atlas": "relics-expansion",
     "rarity": "epic",

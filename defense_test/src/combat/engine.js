@@ -68,7 +68,7 @@ export function has(s,id){return s.artifacts.includes(id);}
 export const RELIC_VALUES=Object.freeze({
   hourglass:{starlight:40,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
   feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.31,radius:.11},guild:{power:.25},phoenix:{cut:.4,uses:2},
-  twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.05,cap:.6},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.26},broken_clock:{duration:.8,starlight:2.7},
+  twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.05,cap:.6},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.25},broken_clock:{duration:.8,starlight:2.7},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -289,7 +289,9 @@ export function summon(s,preferred=-1){
   const cost=summonCost(s);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   const paid=s.freeSummons===0;
   s.gold-=cost;if(!paid)s.freeSummons--;else s.paidSummons++;s.summons++;s.stats.summons++;
-  const rank=paid&&has(s,'gift_ribbon')&&random(s)<Math.min(1,RV.gift_ribbon.chance*relicScaleIn(s,'gift_ribbon'))?2:1,id=drawHero(s),index=place(s,id,rank,preferred);
+  const ribbon=has(s,'gift_ribbon')&&random(s)<Math.min(1,RV.gift_ribbon.chance*relicScaleIn(s,'gift_ribbon'));
+  const rank=ribbon?2:1,id=drawHero(s),index=place(s,id,rank,preferred);
+  if(ribbon&&index>=0)event(s,'ribbon',{index,...cellPoint(index)});
   s.tutorial=Math.max(s.tutorial,1);return {ok:true,index,hero:id,rank};
 }
 export function canMerge(a,b){return !!a&&!!b&&a.uid!==b.uid&&a.rank===b.rank&&a.rank<MAX_RANK&&(a.hero===b.hero||a.hero==='rumi'||b.hero==='rumi');}
@@ -1014,6 +1016,7 @@ export function step(s,dt){
     u.cooldown-=dt;if(u.cooldown<=0){const target=chooseTarget(s,u,false);if(target){u.idleFor=0;u.target=target.uid;const p=cellPoint(i),t=pathPoint(target.progress);u.aim=Math.atan2(t.y-p.y,t.x-p.x);u.facing=attackDirection(p,t);u.windup=ATTACK_WINDUP;u.cooldown=combatStats(s,u,i).cooldown;}else{u.cooldown=.1;u.idleFor=(u.idleFor||0)+.1;if(u.idleFor>1)u.facing='down';}}
   }
   for(const shot of s.shots){if(shot.delay>0){shot.delay=Math.max(0,shot.delay-dt);continue;}shot.life-=dt;if(shot.life<=0)applyHit(s,shot);}
+  const twinEchoes=[];
   for(const f of s.finishers){
     f.life-=dt;const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);
     if(!target){event(s,'finisherFizzle',{hero:f.hero,kind:f.kind,...f.to});f.life=0;continue;}
@@ -1024,11 +1027,12 @@ export function step(s,dt){
       const factor=f.kind==='royal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0)?2:1;
       // Thousand Mirrors has no ceiling; only checkpoints from before the change keep one.
       const echoDamage=f.kind==='mirror'?(f.cap!==undefined?Math.min(f.cap,f.stored*(f.ratio??.45)):f.stored*(f.ratio??.45)):0,before=s.stats.damage;
-      if(f.kind==='echo')damage(s,target,f.damage,f.hero,{flat:true});
-      else damage(s,target,f.damage*factor+echoDamage,f.hero,{recordMirror:f.kind!=='mirror'});
+      const dealt=f.kind==='echo'?damage(s,target,f.damage,f.hero,{flat:true}):damage(s,target,f.damage*factor+echoDamage,f.hero,{recordMirror:f.kind!=='mirror'});
       event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage});
+      if(dealt>0&&target.hp>0&&has(s,'twin')&&(f.kind==='royal'||f.kind==='starfall'||f.kind==='mirror'))twinEchoes.push({uid:s.nextId++,source:f.source,hero:f.hero,kind:'echo',target:target.uid,origin:f.origin,to:pathPoint(target.progress),damage:dealt*RV.twin.echo*relicScaleIn(s,'twin'),rank:f.rank,life:1.5,total:1.5});
     }
   }
+  if(twinEchoes.length)s.finishers.push(...twinEchoes);
   s.finishers=s.finishers.filter(f=>f.life>0);
   s.shots=s.shots.filter(shot=>shot.life>0);s.enemies=s.enemies.filter(e=>e.hp>0);
   if(s.telegraph&&!s.enemies.some(e=>e.uid===s.telegraph.uid))s.telegraph=null;

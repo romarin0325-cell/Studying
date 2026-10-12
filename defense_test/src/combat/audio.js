@@ -26,6 +26,7 @@ export class Sound {
     if(e.type==='attack'){if(t-this.lastHit<.08)return;this.lastHit=t;const f=FX_PROFILES[e.hero],index=f?.frame||0,metal=['crescent','daggers','claws','quake','needle'].includes(f?.motion);this.tone(metal?145+index*8:420+index*19,t,.07,metal?.023:.019,'triangle',metal?80:250+index*13);if(metal)this.noise(t,.035,.015,1000+index*110);}
     if(e.type==='hit'){if(t-this.lastHit<.055)return;this.lastHit=t;this.noise(t,.045,.025,1200);}
     if(e.type==='summon'){[440,660,880].forEach((f,i)=>this.tone(f,t+i*.06,.22,.07,'sine'));}
+    if(e.type==='ribbon'){[988,1319,1760].forEach((f,i)=>this.tone(f,t+.1+i*.07,.18,.05,'triangle'));}
     if(e.type==='merge'){[392,494,587,784,1175].forEach((f,i)=>this.tone(f,t+i*.055,.4,.07,'triangle'));this.noise(t,.17,.035,4000);}
     if(e.type==='skill'){if(e.locked){[440,660,880].forEach((f,i)=>this.tone(f,t+i*.12,.28,.035,'sine'));}else{this.tone(75,t,.5,.2,'sine',30);this.noise(t,.42,.1,3000);[523,659,784,1047].forEach((f,i)=>this.tone(f,t+.07*i,.7,.06,'triangle'));}}
     if(e.type==='finisherImpact'){this.tone(e.kind==='royal'?110:65,t,.35,.14,'sine',30);this.noise(t,e.kind==='royal'?.12:.24,.08,e.kind==='royal'?4500:1700);this.tone(e.kind==='royal'?1320:880,t,.28,.035,'triangle',440);}

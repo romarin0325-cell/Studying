@@ -5,10 +5,11 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
-import {HEROES} from '../src/content.js';
+import {HEROES,TUNING} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
+import {COURSE} from '../src/course.js';
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
@@ -156,6 +157,26 @@ try{
   const executed=await boot(390,844,wind);await executed.page.locator('[data-action="resume"]').click();
   await executed.page.waitForFunction(()=>window.STAR_GARDEN.battle.stats.kills===1,{},{polling:16});
   await shot(executed.page,'storm-instant-kill',390,844);await executed.context.close();
+  // Lobby chrome never overlaps on phone sizes, including tall full-screen viewports and a simulated notch (--top-shift).
+  for(const [width,height] of [[360,640],[390,844],[412,780],[412,915],[430,932]])for(const shift of [6,40]){
+    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});
+    const geo=await t.page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),sp=r('#partner-speech'),g=document.querySelector('.garden-info');return {chip:hit(sp,r('.season-chip')),left:hit(sp,r('.lobby-side.left')),right:hit(sp,r('.lobby-side.right')),garden:!!g&&g.scrollWidth>g.clientWidth+1};});
+    assert.deepEqual(geo,{chip:false,left:false,right:false,garden:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
+  }
+  // Study loop: a wrong answer in the 10-pull quiz lands in the notebook and becomes today's star (no API key: the built-in explanation).
+  {
+    const rich=createProfile(NOW);rich.dreams=5000;const t=await boot(390,844,rich),{page}=t;
+    await nav(page,'소환');await page.locator('[data-draw="10"]').click();
+    assert.equal(await page.locator('#sheet[data-kind="quiz"] .quiz-choice').count(),4,'a 10-pull asks a concept question first');
+    const prompt=(await page.locator('.quiz-prompt').innerText()).trim(),asked=COURSE.concepts.find(c=>c.prompt===prompt);assert.ok(asked);
+    await page.locator(`[data-quiz-choice="${(asked.answer+1)%asked.choices.length}"]`).click();await page.locator('[data-action="quiz-go"]').click();
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);assert.equal((await profile(page)).dreams,4000);
+    assert.deepEqual((await profile(page)).study.wrong.map(w=>w.id),[asked.id]);await close(page);
+    await nav(page,'홈');await page.locator('[data-action="library"]').click();await page.locator('.wrong-row').click();
+    await page.locator('[data-light-star]:not([disabled])').click();await page.locator('.sky .star-dot.on').waitFor();
+    assert.deepEqual([(await profile(page)).study.library.stars,(await profile(page)).study.wrong.length],[1,0]);
+    await shot(page,'library',390,844);await t.context.close();
+  }
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const test=await boot(width,height),{page,context}=test;
     assert.equal((await profile(page)).deck.length,5);
@@ -313,8 +334,8 @@ try{
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
   assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,770);await shot(result.page,'result',390,844);
   await result.context.close();
-  const returned=createProfile(NOW-20*3600000);returned.cleared=9;returned.heroes.queen.owned=true;
-  command(returned,'dispatch',{slot:0,id:'queen'},NOW-20*3600000);returned.clockAt=NOW;
+  const sent=NOW-TUNING.dispatchHours*3600000,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
+  command(returned,'dispatch',{slot:0,id:'queen'},sent);returned.clockAt=NOW;
   const claim=await boot(390,844,returned);await nav(claim.page,'파견');
   await claim.page.locator('[data-claim-dispatch="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
   assert.ok((await profile(claim.page)).dreams>600);await claim.context.close();

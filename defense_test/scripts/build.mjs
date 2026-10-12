@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {gameRoot as game,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
+import {LIBRARY_ART} from '../src/library.js';
 
 const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked');
 if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
@@ -65,6 +66,13 @@ for(const h of HEROES){
   }
 }
 if(sizes.avif>=2.5*1024*1024||sizes.webp>=2.5*1024*1024||(!web&&byteLength(memorial)>=3*1024*1024))throw new Error('Memorial aggregate budget exceeded.');
+// Star library illustrations: small WebP files embedded in every build (shown only after a constellation is finished).
+const library={};let libraryBytes=0;
+for(const [id,relative] of Object.entries(LIBRARY_ART)){
+  const bytes=await fs.readFile(assetFile(relative)),meta=await sharp(bytes).metadata();
+  if(meta.format!=='webp'||!meta.width||meta.width>720||meta.height>1080||bytes.length>=150*1024)throw new Error('Library art contract: '+id);
+  libraryBytes+=bytes.length;library[id]='data:image/webp;base64,'+bytes.toString('base64');
+}
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.woff2')),license=await readText(assetFile('./assets/Jua-OFL.txt'));
 const fontUri='data:font/woff2;base64,'+font.toString('base64');
 const css=(await readText(path.join(game,'src/style.css'))).replace('__FONT__',fontUri);
@@ -75,7 +83,7 @@ for(const input of Object.keys(js.metafile.inputs)){
 }
 const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',unlocked?'<title>드림위버: 별빛 정원 · 전체 해금 테스트</title>':solo?'<title>드림위버: 별빛 정원 · 1인 편성 테스트</title>':'<title>드림위버: 별빛 정원</title>');
 for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source.split(token).length!==2)throw new Error('Build token mismatch: '+token);
-const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
+const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};window.__LIBRARY_MEDIA__=${JSON.stringify(library)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
 const bundle=js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
 const html=source.replace('/*__STYLE__*/',()=>css).replace('/*__ASSETS__*/',()=>injected).replace('/*__SCRIPT__*/',()=>bundle).replace('</head>',()=>`<!-- Jua font, SIL OFL 1.1\n${license.replaceAll('--','—')}\n-->\n</head>`);
 if(/__FONT__|\/\*__\w+__\*\//.test(html)||/<(?:script|link)[^>]*(?:src|href)=["'](?:\.\/|https?:)/i.test(html))throw new Error('Non-offline build');
@@ -88,6 +96,7 @@ const categories={
   companionPortraits:{binaryBytes:sizes.portraits,embeddedBytes:objects('portrait:')},
   companionFigures:{binaryBytes:sizes.figures,embeddedBytes:objects('figure:')},
   relicIcons:{binaryBytes:sizes.relics,embeddedBytes:objects('relic:')},
+  libraryArt:{binaryBytes:libraryBytes,embeddedBytes:byteLength(library)},
   memorial:{format:web?'external AVIF + WebP':compat?'WebP':'AVIF',avifBinaryBytes:sizes.avif,webpBinaryBytes:sizes.webp,avifMaxBytes:sizes.avifMax,webpMaxBytes:sizes.webpMax,embeddedBytes:byteLength(memorial)+(web?byteLength(memorialFallback):0)}
 };
 const categorized=categories.css+categories.javascript+Object.values(categories).filter(v=>typeof v==='object').reduce((sum,v)=>sum+v.embeddedBytes,0);

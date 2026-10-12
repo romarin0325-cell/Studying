@@ -142,7 +142,8 @@ test('persistent growth reaches actual direct, skill and poison damage without c
 });
 
 test('support/control growth follows the five-step duplicate milestones while the collection bonus covers unequipped relics',()=>{
-  const p=active();p.heroes.siren.enhance=10;p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;
+  const p=createProfile(NOW);p.heroes.siren.enhance=10;p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;
+  assert.ok(command(p,'begin',{mode:'main',stage:1},NOW).ok);
   const s=ensureHero(ensureHero(createBattle(p),'star_boy'),'siren'),u=s.board.find(u=>u?.hero==='star_boy');
   const bonus=collectionBonus(p.relics);
   assert.ok(Math.abs(E.power(s,u)/(HERO.star_boy.damage*1.5)-(1+bonus))<1e-12);
@@ -1067,19 +1068,25 @@ test('relic unique effects scale with relicLevels and missing levels stay at 1',
   close(glass.gauge,12+RV.hourglass.starlight*relicScale(5),'hourglass adds its starlight to the merge grant');
 });
 
-test('gift_ribbon rolls its scaled chance on paid summons only, using the run rng',()=>{
+test('gift_ribbon rolls its scaled chance on every summon-button hero, free or paid, and flashes the cell',()=>{
   const peek=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;};
-  const chance=E.RELIC_VALUES.gift_ribbon.chance;
+  const chance=E.RELIC_VALUES.gift_ribbon.chance,flash=s=>{const e=s.events.find(event=>event.type==='ribbon');return e?{index:e.index,x:e.x,y:e.y}:null;};
   const paid=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7});paid.freeSummons=0;paid.gold=1000;
   const scaled=Math.min(1,chance*E.relicScaleIn(paid,'gift_ribbon')),roll=peek(paid.rng),r=E.summon(paid);
   assert.equal(r.rank,roll<scaled?2:1);
+  if(r.rank===2)assert.deepEqual(flash(paid),{index:r.index,...E.cellPoint(r.index)});else assert.equal(flash(paid),null);
   const free=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7}),plain=E.newRun({seed:7});
-  assert.ok(E.summon(free).ok);assert.ok(E.summon(plain).ok);assert.equal(free.rng,plain.rng,'free summons never roll');
-  assert.equal(free.board.filter(Boolean).length,plain.board.filter(Boolean).length);
+  const freeRoll=peek(free.rng),fr=E.summon(free);assert.ok(fr.ok);assert.ok(E.summon(plain).ok);
+  assert.equal(fr.rank,freeRoll<Math.min(1,chance*E.relicScaleIn(free,'gift_ribbon'))?2:1);
+  assert.notEqual(free.rng,plain.rng,'a free summon rolls the ribbon before the hero');
   let sure=1;while(sure<999&&chance*relicScale(sure)<1)sure++;
   assert.ok(chance*relicScale(sure)>=1);
-  const cap=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:sure},seed:3});cap.freeSummons=0;cap.gold=1000;
-  assert.equal(E.summon(cap).rank,2);
+  const cap=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:sure},seed:3});assert.ok(cap.freeSummons>0);
+  const cr=E.summon(cap);assert.equal(cr.rank,2);assert.deepEqual(flash(cap),{index:cr.index,...E.cellPoint(cr.index)});
+  const santa=traitArena([{hero:'santa',index:12}],{artifacts:['gift_ribbon']});santa.relicLevels={gift_ribbon:sure};
+  enemiesFor(santa,[{}]);quiet(santa);santa.gauge=120;santa.events=[];
+  assert.ok(E.cast(santa,'santa').ok);assert.equal(santa.events.some(event=>event.type==='ribbon'),false);
+  const gift=santa.board.find(u=>u&&u.uid!==santa.board[12].uid);assert.ok(gift);assert.equal(gift.rank,1);
 });
 
 test('relicLevels restore defaults missing maps to {} and rejects invalid levels',()=>{
@@ -1200,6 +1207,30 @@ test('twin echoes ultimate direct damage after 1.5s, including save and restore,
   const [victim]=enemiesFor(mag,[{hp:1e8}]);quiet(mag);mag.gauge=120;const before=victim.hp;
   assert.ok(E.cast(mag,'time_magician').ok);
   close(mag.finishers.find(f=>f.kind==='echo').damage,(before-victim.hp)*E.RELIC_VALUES.twin.echo);assert.ok(mag.buffs.trauma>0);
+});
+
+test('twin echoes royal, starfall and mirror finishers 1.5s after they land, and an echo never echoes',()=>{
+  const ratio=E.RELIC_VALUES.twin.echo,level=3,m=relicScale(level);
+  const land=(hero,kind,wait)=>{
+    const s=traitArena([{hero,index:12}],{artifacts:['twin']});s.relicLevels={twin:level};
+    const [e]=enemiesFor(s,[{kind:'boss',hp:1e9,progress:600}]);quiet(s);s.gauge=200;
+    assert.ok(E.cast(s,hero).ok);assert.equal(s.finishers.some(f=>f.kind==='echo'),false,hero+' does not echo at cast');
+    assert.ok(s.finishers.some(f=>f.kind===kind));
+    const t=s.time;advanceTo(s,t+wait-.02);assert.equal(s.finishers.some(f=>f.kind==='echo'),false);
+    const before=s.stats.damage;advanceTo(s,t+wait);const dealt=s.stats.damage-before;assert.ok(dealt>0,hero);
+    const echo=s.finishers.find(f=>f.kind==='echo');assert.ok(echo);assert.equal(echo.target,e.uid);assert.equal(echo.hero,hero);
+    close(echo.life,1.5);close(echo.total,1.5);close(echo.damage,dealt*ratio*m);
+    const saved=E.restore(E.serialize(s));assert.ok(saved);const hp=e.hp;advanceTo(s,s.time+1.5);advanceTo(saved,saved.time+1.5);
+    close(hp-e.hp,echo.damage,hero+' echo is flat');assert.equal(s.finishers.some(f=>f.kind==='echo'),false,'an echo does not queue another echo');
+    assert.equal(E.serialize(saved),E.serialize(s));
+  };
+  land('cherry_prince','royal',E.FINISHER_DELAY);
+  land('star_boy','starfall',E.FINISHER_DELAY);
+  land('aurora','mirror',5);
+  const dead=traitArena([{hero:'cherry_prince',index:12}],{artifacts:['twin']});
+  const [victim]=enemiesFor(dead,[{hp:1,progress:600}]);quiet(dead);dead.gauge=120;
+  assert.ok(E.cast(dead,'cherry_prince').ok);advanceTo(dead,dead.time+E.FINISHER_DELAY);
+  assert.ok(victim.hp<=0);assert.equal(dead.finishers.some(f=>f.kind==='echo'),false);
 });
 
 test('alchemy bonuses a merged unit for its wave window starting on the merge wave, and older saves have no bonus',()=>{
