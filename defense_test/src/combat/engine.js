@@ -66,9 +66,9 @@ export function event(s,type,data={}){s.events.push({type,time:s.time,...data});
 export function has(s,id){return s.artifacts.includes(id);}
 // Relic numbers at level 1 (relicScaleIn multiplies them per level). One place for tuning; texts live in data.js.
 export const RELIC_VALUES=Object.freeze({
-  hourglass:{starlight:16},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.25,count:3},lantern:{refund:35},lens:{boss:.28},seed:{poison:.08},
-  feather:{base:4,perWave:2,cap:40},crown:{power:.2},meteor:{hit:1.3},prism:{chain:.05},tide:{splash:.22},roots:{life:.25,radius:.1},guild:{power:.25},phoenix:{cut:.4},
-  twin:{echo:.9},constellation:{power:.21},alchemy:{power:.7,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.03,cap:.45},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.17},broken_clock:{duration:.7,starlight:2.5},
+  hourglass:{starlight:16,haste:.3,seconds:3},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
+  feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.28,radius:.1},guild:{power:.25},phoenix:{cut:.4,uses:2},
+  twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.5},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.3},broken_clock:{duration:.75,starlight:2.6},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -302,7 +302,7 @@ export function move(s,from,to){
     if(refund)giveGold(s,refund,'합성 환급');
     const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;unit.mergedWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,2,8,power(s,unit));
-    s.stats.merges++;addGauge(s,12+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0));s.tutorial=Math.max(s.tutorial,2);
+    s.stats.merges++;if(has(s,'hourglass')&&s.gauge>=gaugeCap(s)-1e-6)s.sandglassUntil=s.time+RV.hourglass.seconds;addGauge(s,12+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0));s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
   }
   s.board[to]=a;s.board[from]=b;syncTimeRuler(s);event(s,'move',{from,to});return {ok:true,index:to};
@@ -518,7 +518,7 @@ function applyHit(s,shot){
   }
   if(['chain','bounce'].includes(hero.shape)||type==='gust'){
     const ratio=shot.chainRatio??.65,extra=shot.extraChain||0;
-    const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+(has(s,'prism')?1:0)+extra);
+    const others=around(s,e,type==='gust'?180:hero.radius).filter(x=>x.uid!==e.uid).sort((a,b)=>Math.abs(a.progress-e.progress)-Math.abs(b.progress-e.progress)).slice(0,(type==='chain'?2:1)+extra);
     const prismHit=has(s,'prism')?1+RV.prism.chain*relicScaleIn(s,'prism'):1;
     let from=point;for(const target of others){normalHit(s,target,amount*ratio*prismHit,shot,{},procTargets);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
@@ -590,6 +590,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',.2*buffScale(s,'festive'));
   const tempo=has(s,'tempo_bell')?Math.min(RV.tempo_bell.cap,RV.tempo_bell.perWave*(s.wave-1))*relicScaleIn(s,'tempo_bell'):0;
   if(tempo)speedBonus('other','이어지는 종',tempo);
+  if(has(s,'hourglass')&&(s.sandglassUntil||0)>s.time)speedBonus('other','별모래',RV.hourglass.haste*relicScaleIn(s,'hourglass'));
   if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=RV.chorus.count)speedBonus('other','합창',RV.chorus.speed*relicScaleIn(s,'chorus'));
   if(u.hero==='night_rabbit'){
     const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
@@ -989,7 +990,7 @@ export function step(s,dt){
     if(e.hp<=0)continue;
     if(e.rage>0)e.rage=Math.max(0,e.rage-dt);
     if(e.progress>=PATH_LENGTH&&e.hp>0){
-      if((e.boss||e.kind==='boss')&&has(s,'phoenix')&&!s.phoenixUsed){s.phoenixUsed=true;e.hp=Math.max(1,e.hp-e.maxHp*RV.phoenix.cut*relicScaleIn(s,'phoenix'));e.progress=0;event(s,'phoenix');}
+      if((e.boss||e.kind==='boss')&&has(s,'phoenix')&&(s.phoenixUses||0)<RV.phoenix.uses){s.phoenixUses=(s.phoenixUses||0)+1;s.phoenixUsed=true;e.hp=Math.max(1,e.hp-e.maxHp*RV.phoenix.cut*relicScaleIn(s,'phoenix'));e.progress=0;event(s,'phoenix');}
       else{e.hp=0;s.health-=e.boss?7:e.kind==='armor'?2:1;event(s,'leak',{boss:e.boss,health:s.health});}
     }
   }
@@ -1056,11 +1057,13 @@ export function restore(raw){
     if(s.buffTotals&&s.buffTotals.tax!==undefined)delete s.buffTotals.tax;
     if(s.buffScale&&s.buffScale.tax!==undefined)delete s.buffScale.tax;
     if(s.edictWave===undefined)s.edictWave=0;
+    if(s.sandglassUntil===undefined)s.sandglassUntil=0;if(!Number.isFinite(s.sandglassUntil)||s.sandglassUntil<0)return null;
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.
     for(const e of s.enemies)if(e){if(Array.isArray(e.statusEffects))e.statusEffects=e.statusEffects.filter(effect=>effect?.type!=='frost');e.frostStacks=0;e.frostTime=0;}
     if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.time<0||s.health<0||s.health>20||s.gaugeMax!==undefined&&(!Number.isInteger(s.gaugeMax)||s.gaugeMax<GAUGE_MAX||s.gaugeMax>GAUGE_MAX+400)||s.gauge<0||s.gauge>gaugeCap(s)||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
+    if(s.phoenixUses===undefined)s.phoenixUses=s.phoenixUsed?1:0;if(!Number.isInteger(s.phoenixUses)||s.phoenixUses<0||s.phoenixUses>9)return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
     for(const u of s.board)if(u){
       // An old checkpoint cannot reveal its birth wave. Start its new age
