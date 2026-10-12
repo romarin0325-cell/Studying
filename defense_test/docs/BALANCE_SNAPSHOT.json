@@ -514,6 +514,708 @@
       ]
     }
   ],
+  "relicEnhancement": {
+    "levelStep": 0.05,
+    "costStep": [
+      1,
+      1,
+      2,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      12,
+      16,
+      21,
+      27,
+      34,
+      42,
+      51,
+      61,
+      72,
+      84
+    ],
+    "costMult": {
+      "C": 1,
+      "R": 0.4,
+      "SR": 0.25,
+      "UR": 0.12
+    },
+    "collection": {
+      "weight": {
+        "C": 1,
+        "R": 1.5,
+        "SR": 2,
+        "UR": 3
+      },
+      "ownBonus": 2,
+      "pointsPerPercent": 30
+    },
+    "rarities": [
+      {
+        "rarity": "C",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 2,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 2,
+            "spentCopies": 4,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 3,
+            "spentCopies": 6,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 4,
+            "spentCopies": 9,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 5,
+            "spentCopies": 13,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 6,
+            "spentCopies": 18,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 7,
+            "spentCopies": 24,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 12,
+            "spentCopies": 31,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 16,
+            "spentCopies": 43,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 21,
+            "spentCopies": 59,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 27,
+            "spentCopies": 80,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 34,
+            "spentCopies": 107,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 42,
+            "spentCopies": 141,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 51,
+            "spentCopies": 183,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 61,
+            "spentCopies": 234,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 72,
+            "spentCopies": 295,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 84,
+            "spentCopies": 367,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 98,
+            "spentCopies": 451,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "R",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 2,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 2,
+            "spentCopies": 7,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 2,
+            "spentCopies": 9,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 3,
+            "spentCopies": 11,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 5,
+            "spentCopies": 14,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 6,
+            "spentCopies": 19,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 8,
+            "spentCopies": 25,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 11,
+            "spentCopies": 33,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 14,
+            "spentCopies": 44,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 17,
+            "spentCopies": 58,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 20,
+            "spentCopies": 75,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 24,
+            "spentCopies": 95,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 29,
+            "spentCopies": 119,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 34,
+            "spentCopies": 148,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 39,
+            "spentCopies": 182,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "SR",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 1,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 1,
+            "spentCopies": 6,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 2,
+            "spentCopies": 7,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 2,
+            "spentCopies": 9,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 3,
+            "spentCopies": 11,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 4,
+            "spentCopies": 14,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 5,
+            "spentCopies": 18,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 7,
+            "spentCopies": 23,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 9,
+            "spentCopies": 30,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 11,
+            "spentCopies": 39,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 13,
+            "spentCopies": 50,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 15,
+            "spentCopies": 63,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 18,
+            "spentCopies": 78,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 21,
+            "spentCopies": 96,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 25,
+            "spentCopies": 117,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "UR",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 1,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 1,
+            "spentCopies": 6,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 1,
+            "spentCopies": 7,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 1,
+            "spentCopies": 8,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 1,
+            "spentCopies": 9,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 2,
+            "spentCopies": 10,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 3,
+            "spentCopies": 12,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 3,
+            "spentCopies": 15,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 4,
+            "spentCopies": 18,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 5,
+            "spentCopies": 22,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 6,
+            "spentCopies": 27,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 7,
+            "spentCopies": 33,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 9,
+            "spentCopies": 40,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 10,
+            "spentCopies": 49,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 12,
+            "spentCopies": 59,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      }
+    ]
+  },
   "stages": [
     {
       "stage": 1,

@@ -4,7 +4,7 @@ import * as E from '../src/combat/engine.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from '../src/battle.js';
 import {HEROES,HERO,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
 import {createProfile,command,validateProfile} from '../src/profile.js';
-import {heroMultiplier} from '../src/economy.js';
+import {heroMultiplier,collectionBonus,relicScale} from '../src/economy.js';
 const NOW=1791082800000;
 function active(mode='main',stage=1){
   const p=createProfile(NOW);p.cleared=stage-1;
@@ -141,10 +141,12 @@ test('persistent growth reaches actual direct, skill and poison damage without c
   }
 });
 
-test('support/control growth follows the five-step duplicate milestones while equipped relics apply once',()=>{
-  const p=active();p.heroes.siren.enhance=10;p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;p.equipped=['hourglass'];
+test('support/control growth follows the five-step duplicate milestones while the collection bonus covers unequipped relics',()=>{
+  const p=active();p.heroes.siren.enhance=10;p.relics.hourglass.owned=true;p.relics.hourglass.enhance=5;
   const s=ensureHero(ensureHero(createBattle(p),'star_boy'),'siren'),u=s.board.find(u=>u?.hero==='star_boy');
-  assert.ok(Math.abs(E.power(s,u)/(HERO.star_boy.damage*1.5)-1.1)<1e-12);
+  const bonus=collectionBonus(p.relics);
+  assert.ok(Math.abs(E.power(s,u)/(HERO.star_boy.damage*1.5)-(1+bonus))<1e-12);
+  assert.deepEqual(s.relicLevels,{});
   close(E.special(s,'siren'),1.2,'+10 duplicates give two +10% support milestones');
   const base=ensureHero(E.newRun({seed:1234}),'siren');base.queue=[{kind:'grunt',hp:10000}];base.spawnIn=0;E.step(base,.05);
   s.queue=[{kind:'grunt',hp:10000}];s.spawnIn=0;E.step(s,.05);
@@ -1051,4 +1053,39 @@ test('an earlier Beelzebub warp cannot delete a later enemy mid-frame DOT segmen
   e.statusEffects=[{type:'burn',source:'legacy:burn',owner:'flame_sage',amount:100,until:s.time+.025},{type:'freeze',source:'legacy:freeze',owner:null,amount:1,until:s.time+.025}];
   const before=e.hp;E.step(s,.05);close(before-e.hp,2.5,'last partial burn segment');close(e.progress,100+E.PATH_LENGTH*.15+2.5,'the freeze has ended by the time the warp lands, then the enemy moves for the unfrozen part');
   assert.equal(e.burn,0);assert.equal(e.freeze,0);assert.equal(s.events.filter(event=>event.type==='rush').length,1);
+});
+
+test('relic unique effects scale with relicLevels and missing levels stay at 1',()=>{
+  const lens=traitArena([{hero:'star_boy',index:12}],{artifacts:['lens']});lens.relicLevels={lens:5};
+  const [boss]=enemiesFor(lens,[{kind:'boss',progress:1200}]),u=lens.board[12];
+  const shot=launchNormal(lens,u),hp=boss.hp;resolveNormal(lens,shot);
+  close(hp-boss.hp,shot.damage*(HERO.star_boy.bossDamage||1)*(1+.3*relicScale(5)),'lens Lv5 is 1+.3*1.2');
+  const crown=traitArena([{hero:'star_boy',index:12,rank:3}],{artifacts:['crown']});crown.relicLevels={crown:3};
+  close(E.combatStats(crown,crown.board[12]).damage/E.power(crown,crown.board[12]),1+.25*relicScale(3),'crown Lv3');
+  const glass=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['hourglass']});
+  glass.relicLevels={hourglass:5};glass.gauge=0;assert.ok(E.move(glass,0,1).merged);
+  close(glass.gauge,12+8*relicScale(5),'hourglass Lv5 starlight');
+});
+
+test('gift_ribbon rolls 25% * scale on paid summons only, using the run rng',()=>{
+  const peek=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;};
+  const paid=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7});paid.freeSummons=0;paid.gold=1000;
+  const chance=.25*E.relicScaleIn(paid,'gift_ribbon'),roll=peek(paid.rng),r=E.summon(paid);
+  assert.equal(r.rank,roll<chance?2:1);
+  const free=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7}),plain=E.newRun({seed:7});
+  assert.ok(E.summon(free).ok);assert.ok(E.summon(plain).ok);assert.equal(free.rng,plain.rng,'free summons never roll');
+  assert.equal(free.board.filter(Boolean).length,plain.board.filter(Boolean).length);
+  const cap=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:61},seed:3});cap.freeSummons=0;cap.gold=1000;
+  assert.ok(Math.min(1,.25*E.relicScaleIn(cap,'gift_ribbon'))>=1);assert.equal(E.summon(cap).rank,2);
+});
+
+test('relicLevels restore defaults missing maps to {} and rejects invalid levels',()=>{
+  const s=E.newRun({artifacts:['lens'],relicLevels:{lens:5,ember:3,bad:1}});
+  assert.deepEqual(s.relicLevels,{lens:5});
+  const raw=JSON.parse(E.serialize(s));assert.ok(E.restore(raw));assert.deepEqual(E.restore(raw).relicLevels,{lens:5});
+  const missing=JSON.parse(E.serialize(s));delete missing.relicLevels;const restored=E.restore(missing);assert.ok(restored);assert.deepEqual(restored.relicLevels,{});
+  close(E.relicScaleIn(restored,'lens'),1,'missing level is 1');
+  for(const levels of [{lens:0},{lens:1000},{lens:1.5},{hourglass:1},{lens:5,ember:2},[],null]){
+    const bad=JSON.parse(E.serialize(s));bad.relicLevels=levels;assert.equal(E.restore(bad),null,JSON.stringify(levels));
+  }
 });

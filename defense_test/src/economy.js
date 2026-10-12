@@ -1,4 +1,4 @@
-import {HERO,ARTIFACT,ROSTER,HIDDEN,TUNING as T} from './content.js';
+import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
 export function calendar(now=Date.now()){
@@ -12,6 +12,23 @@ export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;
 export const specialMultiplier=e=>1+T.specialStep*Math.floor(e/T.specialEvery);
 export const levelCost=level=>Math.ceil(T.levelCostBase*T.levelCostGrowth**(level-1));
+// Relic unique effects grow by a constant per level; duplicate cost is what phases.
+export const RELIC_LEVEL_STEP=.05;
+export const relicLevel=entry=>entry?.owned?entry.enhance+1:0;
+export const relicScale=level=>1+RELIC_LEVEL_STEP*Math.max(0,level-1);
+export const RELIC_COST_STEP=Object.freeze([1,1,2,2,3,4,5,6,7,12,16,21,27,34,42,51,61,72,84]);
+export const RELIC_COST_MULT=Object.freeze({C:1,R:.4,SR:.25,UR:.12});
+export function relicCost(rarity,enhance){
+  const e=Math.max(0,enhance|0),last=RELIC_COST_STEP.length-1,step=e<=last?RELIC_COST_STEP[e]:RELIC_COST_STEP[last]+14*(e-last);
+  return Math.max(1,Math.round(step*(RELIC_COST_MULT[rarity]??1)));
+}
+export const relicPhase=enhance=>enhance<4?'early':enhance<9?'mid':'late';
+export const COLLECTION_WEIGHT=Object.freeze({C:1,R:1.5,SR:2,UR:3});
+export const COLLECTION_OWN_BONUS=2;
+export const COLLECTION_POINTS_PER_PERCENT=30;
+export function relicPoints(id,entry){return entry?.owned?COLLECTION_WEIGHT[ARTIFACT[id].rarity]*(relicLevel(entry)+COLLECTION_OWN_BONUS):0;}
+export const collectionPoints=relics=>ARTIFACTS.reduce((n,a)=>n+relicPoints(a.id,relics?.[a.id]),0);
+export const collectionBonus=relics=>collectionPoints(relics)/COLLECTION_POINTS_PER_PERCENT/100;
 // Dream greenhouse. Every bed is shared by all companions; duplicates stay personal.
 export const BED_IDS=Object.freeze(['rose','spring','seed']);
 export const bedCost=(id,level)=>{const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
@@ -21,9 +38,9 @@ export const roseAttack=level=>.01*level;
 export const springGauge=level=>120+level;
 export const seedGold=level=>2*level;
 export const heroMultiplier=(entry,beds)=>(1+roseAttack(beds?.rose||0))*enhanceMultiplier(entry.enhance);
-export function combatPower(id,entry,beds){
+export function combatPower(id,entry,beds,relicBonus=0){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
-  const damage=h.damage/(h.interval+.13)*heroMultiplier(entry,beds);
+  const damage=h.damage/(h.interval+.13)*heroMultiplier(entry,beds)*(1+relicBonus);
   const role=h.shape==='single'?1:1.12;
   const support=['hasteAura','powerAura','harmonyAura'].includes(h.trait.type)?1.22:1;
   return Math.round((damage*18*role*support+h.range*.12)*specialMultiplier(entry.enhance));
