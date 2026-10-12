@@ -1150,7 +1150,7 @@ test('feather pays scaled wave gold and no longer discounts summons',()=>{
   assert.equal(E.summonCost(priced),E.summonCost(open));assert.equal(E.summonCost(priced),18);
 });
 
-test('phoenix returns the first boss that touches the core and leaves other leaks alone',()=>{
+test('phoenix returns bosses that touch the core, a limited number of times per run, and leaves other leaks alone',()=>{
   const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['phoenix']});s.relicLevels={phoenix:5};const m=relicScale(5);
   quiet(s);s.enemies=[];
   const [grunt]=enemiesFor(s,[{progress:E.PATH_LENGTH,hp:100}]);const health=s.health;E.step(s,.05);
@@ -1162,9 +1162,11 @@ test('phoenix returns the first boss that touches the core and leaves other leak
   assert.equal(s.health,health2);assert.equal(s.phoenixUsed,true);assert.equal(boss.progress,0);assert.equal(boss.shield,shield);
   close(boss.hp,Math.max(1,hp-max*E.RELIC_VALUES.phoenix.cut*m));close(boss.frostLock,lock);close(boss.channel,channel-.05);
   assert.equal(s.enemies.includes(boss),true);assert.equal(s.events.filter(event=>event.type==='phoenix').length,1);assert.equal(s.events.some(event=>event.type==='leak'),false);
+  // Further boss touches are returned too until the uses run out; the next one leaks.
+  for(let use=1;use<E.RELIC_VALUES.phoenix.uses;use++){boss.progress=E.PATH_LENGTH;s.events=[];const before=s.health;quiet(s);E.step(s,.05);assert.equal(s.health,before);assert.equal(boss.progress,0);}
   boss.progress=E.PATH_LENGTH;s.events=[];const health3=s.health;E.step(s,.05);
   assert.equal(s.health,health3-7);assert.equal(s.enemies.includes(boss),false);assert.equal(s.events.some(event=>event.type==='leak'),true);
-  s.phoenixUsed=false;s.enemies=[];
+  s.phoenixUsed=false;s.phoenixUses=0;s.enemies=[];
   const [tiny]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH,hp:10}]);tiny.hp=10;tiny.maxHp=1000;quiet(s);const health4=s.health;E.step(s,.05);
   assert.equal(tiny.hp,1);assert.equal(tiny.progress,0);assert.equal(s.health,health4);
 });
@@ -1316,4 +1318,12 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   const night=traitArena([{hero:'phantom',index:12}],{artifacts:['seed']});enemiesFor(night,[{}]);
   const nightBase=E.power(night,night.board[12]);
   assert.ok(E.castPreview(night,'phantom').lines.join(' ').includes(Math.round(nightBase*E.POISON_POWER_RATIO*(1+E.RELIC_VALUES.seed.poison)).toLocaleString('ko-KR')));
+});
+
+test('hourglass banks merge starlight that would overflow and returns it after the next ultimate',()=>{
+  const s=traitArena([{hero:'star_boy',index:12},{hero:'star_boy',index:13}],{artifacts:['hourglass']});s.relicLevels={hourglass:1};
+  const cap=E.gaugeCap(s),gain=12+E.RELIC_VALUES.hourglass.starlight;s.gauge=cap-10;
+  assert.ok(E.move(s,12,13).ok);assert.equal(s.gauge,cap);close(s.sandStore,gain-10);
+  enemiesFor(s,[{progress:100,hp:1e9}]);const banked=s.sandStore;assert.ok(E.cast(s,'star_boy').ok);close(s.gauge,banked);assert.equal(s.sandStore,0);
+  const plain=traitArena([{hero:'star_boy',index:12},{hero:'star_boy',index:13}]);plain.gauge=E.gaugeCap(plain)-10;E.move(plain,12,13);assert.equal(plain.sandStore||0,0);
 });

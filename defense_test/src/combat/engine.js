@@ -66,9 +66,9 @@ export function event(s,type,data={}){s.events.push({type,time:s.time,...data});
 export function has(s,id){return s.artifacts.includes(id);}
 // Relic numbers at level 1 (relicScaleIn multiplies them per level). One place for tuning; texts live in data.js.
 export const RELIC_VALUES=Object.freeze({
-  hourglass:{starlight:16,haste:.3,seconds:3},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
-  feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.28,radius:.1},guild:{power:.25},phoenix:{cut:.4,uses:2},
-  twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.5},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.3},broken_clock:{duration:.75,starlight:2.6},
+  hourglass:{starlight:55,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
+  feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.31,radius:.11},guild:{power:.25},phoenix:{cut:.4,uses:2},
+  twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.05,cap:.6},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.26},broken_clock:{duration:.8,starlight:2.7},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -272,7 +272,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
-    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,
+    buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
@@ -302,7 +302,7 @@ export function move(s,from,to){
     if(refund)giveGold(s,refund,'합성 환급');
     const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;unit.mergedWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,2,8,power(s,unit));
-    s.stats.merges++;if(has(s,'hourglass')&&s.gauge>=gaugeCap(s)-1e-6)s.sandglassUntil=s.time+RV.hourglass.seconds;addGauge(s,12+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0));s.tutorial=Math.max(s.tutorial,2);
+    s.stats.merges++;{const gain=12+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0);if(has(s,'hourglass'))s.sandStore=Math.min(RV.hourglass.store,(s.sandStore||0)+Math.max(0,s.gauge+gain-gaugeCap(s)));addGauge(s,gain);}s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
   }
   s.board[to]=a;s.board[from]=b;syncTimeRuler(s);event(s,'move',{from,to});return {ok:true,index:to};
@@ -590,7 +590,6 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',.2*buffScale(s,'festive'));
   const tempo=has(s,'tempo_bell')?Math.min(RV.tempo_bell.cap,RV.tempo_bell.perWave*(s.wave-1))*relicScaleIn(s,'tempo_bell'):0;
   if(tempo)speedBonus('other','이어지는 종',tempo);
-  if(has(s,'hourglass')&&(s.sandglassUntil||0)>s.time)speedBonus('other','별모래',RV.hourglass.haste*relicScaleIn(s,'hourglass'));
   if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=RV.chorus.count)speedBonus('other','합창',RV.chorus.speed*relicScaleIn(s,'chorus'));
   if(u.hero==='night_rabbit'){
     const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
@@ -608,7 +607,7 @@ export function cast(s,id){
   if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛이 부족합니다. (${hero.skill.cost} 필요)`};
   // Wish upon a Star spends the whole gauge; every other skill pays its cost.
   const spent=hero.skill.type==='starfall'?s.gauge:hero.skill.cost;
-  s.gold-=goldCost;s.gauge-=spent;if(has(s,'lantern'))addGauge(s,RV.lantern.refund*relicScaleIn(s,'lantern'));s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
+  s.gold-=goldCost;s.gauge-=spent;if(has(s,'lantern'))addGauge(s,RV.lantern.refund*relicScaleIn(s,'lantern'));if(s.sandStore>0){addGauge(s,s.sandStore);s.sandStore=0;}s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const echoes=has(s,'twin')?new Map():null;if(echoes)echoMaps.set(s,echoes);beginEmberFrame(s);
   const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank);
   const source=sourceKey('skill',id,s.nextId++);
@@ -1057,7 +1056,7 @@ export function restore(raw){
     if(s.buffTotals&&s.buffTotals.tax!==undefined)delete s.buffTotals.tax;
     if(s.buffScale&&s.buffScale.tax!==undefined)delete s.buffScale.tax;
     if(s.edictWave===undefined)s.edictWave=0;
-    if(s.sandglassUntil===undefined)s.sandglassUntil=0;if(!Number.isFinite(s.sandglassUntil)||s.sandglassUntil<0)return null;
+    if(s.sandStore===undefined)s.sandStore=0;if(!Number.isFinite(s.sandStore)||s.sandStore<0||s.sandStore>1000)return null;
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.
     for(const e of s.enemies)if(e){if(Array.isArray(e.statusEffects))e.statusEffects=e.statusEffects.filter(effect=>effect?.type!=='frost');e.frostStacks=0;e.frostTime=0;}
