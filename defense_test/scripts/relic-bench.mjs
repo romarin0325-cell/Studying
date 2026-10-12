@@ -22,7 +22,8 @@ const DECKS={
 const TAGS={ember:['burn'],frost:['slow'],tide:['slow'],seed:['poison'],roots:['zone','poison'],prism:['chain'],guild:['aura'],broken_clock:['buff'],chorus:['chain','mixed1'],twin:['strike','burn'],lens:['strike'],royal_seal:['strike']};
 const G=22,beds={rose:3+G,spring:Math.min(30,3*(G-14)),seed:0};
 const metaFor=deck=>Object.fromEntries(deck.map(id=>[id,{power:heroMultiplier({enhance:0},beds),special:specialMultiplier(0)}]));
-const withRelic=(s,relic)=>{s.artifacts=relic?[relic]:[];s.relicLevels=relic?{[relic]:LEVEL}:{};return s;};
+// 'power10' is the yardstick: no relic, every companion +10% power.
+const withRelic=(s,relic)=>{if(relic==='power10'){for(const m of Object.values(s.meta))m.power*=1.1;relic=null;}s.artifacts=relic?[relic]:[];s.relicLevels=relic?{[relic]:LEVEL}:{};return s;};
 function drive(s,seconds,stopAt){
   let autoIn=0,pick=false,t=0;const limit=seconds/.05;
   while(s.phase!=='victory'&&s.phase!=='defeat'&&t<limit){const before=s.phase;E.step(s,.05);t++;s.events.length=0;if(stopAt&&stopAt(s))return true;
@@ -53,10 +54,10 @@ if(MODE==='dps'){
   for(const relic of RELICS){
     const gains=snaps.map((x,i)=>({tag:x.tag,g:dpsSample(x.raw,relic)/base.get(i)-1}));
     const avg=list=>list.length?list.reduce((n,x)=>n+x.g,0)/list.length*100:NaN,tagged=gains.filter(x=>(TAGS[relic]||[]).includes(x.tag));
-    console.log(`${relic.padEnd(13)} ${ARTIFACT[relic].rarity.padEnd(2)} all ${fmt(avg(gains)).padStart(7)} (V ${(avg(gains)/10).toFixed(2)})${tagged.length?`  tagged ${fmt(avg(tagged)).padStart(7)} (V ${(avg(tagged)/10).toFixed(2)})`:''}`);
+    console.log(`${relic.padEnd(13)} ${(ARTIFACT[relic]?.rarity||'-').padEnd(2)} all ${fmt(avg(gains)).padStart(7)} (V ${(avg(gains)/10).toFixed(2)})${tagged.length?`  tagged ${fmt(avg(tagged)).padStart(7)} (V ${(avg(tagged)/10).toFixed(2)})`:''}`);
   }
 }else{
   const decks=Object.entries(DECKS),score=(relic,list)=>list.reduce((n,[,d])=>n+Array.from({length:SEEDS},(_,k)=>runSample(d.split(','),k+1,relic)).reduce((a,b)=>a+b,0)/SEEDS,0)/list.length;
   const base=score(null,decks);console.log(`run bench · ${RUN_MODE} · level ${LEVEL} · base ${base.toFixed(2)}`);
-  for(const relic of RELICS){const d=score(relic,decks)-base;console.log(`${relic.padEnd(13)} ${ARTIFACT[relic].rarity.padEnd(2)} ${d>=0?'+':''}${d.toFixed(2)}`);}
+  for(const relic of RELICS){const d=score(relic,decks)-base;console.log(`${relic.padEnd(13)} ${(ARTIFACT[relic]?.rarity||'-').padEnd(2)} ${d>=0?'+':''}${d.toFixed(2)}`);}
 }

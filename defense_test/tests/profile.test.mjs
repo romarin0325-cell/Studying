@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,DEFAULT_DECK} from '../src/content.js';
+import {HEROES,DEFAULT_DECK,ARTIFACT} from '../src/content.js';
 import {unlockProfile} from '../src/test-unlock.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
@@ -240,6 +240,6 @@ test('unlockProfile owns every companion (three below ten hearts to try gifts), 
   assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===({star_boy:6,siren:3,snow_rabbit:8}[h.id]??10)&&e.level===1&&e.enhance===0&&e.copies===0;}));
   assert.equal(p.cleared,45);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
-  assert.deepEqual(p.relics,Object.fromEntries(Object.entries(relics).map(([id,r])=>[id,{...r,owned:true}])),'every relic owned, enhancement untouched');
+  assert.ok(Object.entries(p.relics).every(([id,r])=>r.owned&&r.enhance==={C:6,R:4,SR:3,UR:1}[ARTIFACT[id].rarity]&&r.copies>0),'every relic owned at a mid-game level with spare duplicates');
   assert.equal(validateProfile(p),true);
 });
