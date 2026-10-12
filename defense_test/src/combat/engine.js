@@ -66,7 +66,7 @@ export function event(s,type,data={}){s.events.push({type,time:s.time,...data});
 export function has(s,id){return s.artifacts.includes(id);}
 // Relic numbers at level 1 (relicScaleIn multiplies them per level). One place for tuning; texts live in data.js.
 export const RELIC_VALUES=Object.freeze({
-  hourglass:{starlight:55,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
+  hourglass:{starlight:40,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
   feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.31,radius:.11},guild:{power:.25},phoenix:{cut:.4,uses:2},
   twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.05,cap:.6},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.26},broken_clock:{duration:.8,starlight:2.7},
 });

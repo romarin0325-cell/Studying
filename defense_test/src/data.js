@@ -1127,8 +1127,8 @@ export const ARTIFACTS = [
   {
     "id": "hourglass",
     "name": "별모래 시계",
-    "text": "합성할 때마다 별빛을 55 더 얻습니다. 최대치를 넘친 별빛은 모아 두었다가 다음 필살기를 쓰면 돌려받습니다.",
-    "scale": ["55"],
+    "text": "합성할 때마다 별빛을 40 더 얻습니다. 최대치를 넘친 별빛은 모아 두었다가 다음 필살기를 쓰면 돌려받습니다.",
+    "scale": ["40"],
     "icon": 0,
     "atlas": "relics",
     "rarity": "common",
