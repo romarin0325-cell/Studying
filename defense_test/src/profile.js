@@ -6,6 +6,8 @@ import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {unlockProfile,topUpUnlocked} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFTS,addBond,bondNeed,giftPoints,candyChance} from './bond.js';
+import {questionOf} from './quiz.js';
+import {CONSTELLATIONS} from './library.js';
 
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
@@ -15,7 +17,7 @@ export function createProfile(now=Date.now()){
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},lobby:null,
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
-    daily:freshDaily(now),settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]});
+    daily:freshDaily(now),study:freshStudy(),settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]});
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
 // Daily missions are things any player does just by playing (UI part 2):
@@ -23,6 +25,23 @@ const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<
 // single summon replaces the old "spend gems to earn gems" mission.
 export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료',reward:60},{id:'merge',name:'전투에서 합성 5회',reward:30,goal:5},{id:'idle',name:'별똥별 수집',reward:30}]);
 export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:[]};}
+// Study (루미의 별의 서재): wrong answers wait in a notebook (latest pick kept); one a day becomes a star.
+// Finishing a constellation unlocks its illustration and opens the next one.
+export const WRONG_MAX=60;
+export const freshStudy=()=>({wrong:[],library:{index:0,stars:0,unlocked:[],day:''}});
+function validStudy(s){
+  if(!s||typeof s!=='object'||!Array.isArray(s.wrong)||s.wrong.length>WRONG_MAX||!s.library||typeof s.library!=='object')return false;
+  const keys=new Set();
+  for(const w of s.wrong){if(!w||!['concept','term'].includes(w.kind)||typeof w.id!=='string'||w.id.length>40||!(w.choice===-1||integer(w.choice,9))||!integer(w.at))return false;const key=w.kind+':'+w.id;if(keys.has(key))return false;keys.add(key);}
+  const l=s.library;if(!integer(l.index,CONSTELLATIONS.length)||!integer(l.stars)||typeof l.day!=='string'||!Array.isArray(l.unlocked))return false;
+  if(l.index<CONSTELLATIONS.length?l.stars>=CONSTELLATIONS[l.index].stars.length:l.stars!==0)return false;
+  return l.unlocked.length===l.index&&l.unlocked.every((id,i)=>CONSTELLATIONS[i].id===id);
+}
+// Saves from before the library get an empty one; entries whose question left the course (a new subject) are dropped.
+export function migrateStudy(p){
+  if(p.study===undefined)p.study=freshStudy();
+  if(Array.isArray(p.study?.wrong))p.study.wrong=p.study.wrong.filter(w=>w&&questionOf(w.kind,w.id));
+}
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!=='rose,seed,spring'||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==3||p.relicRev!==2||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
@@ -39,6 +58,7 @@ export function validateProfile(p){
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
   if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(!validStudy(p.study))return false;
   if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
@@ -97,7 +117,7 @@ export function migrateRelicSnapshot(p){
   if(a.relicAttack===undefined)a.relicAttack=Number.isFinite(run?.relicAttack)?run.relicAttack:collectionBonus(p.relics);
   if(a.relicLevels===undefined){const from=run?.relicLevels&&typeof run.relicLevels==='object'&&!Array.isArray(run.relicLevels)?run.relicLevels:null;a.relicLevels=Object.fromEntries(equipped.map(id=>[id,from&&Number.isInteger(from[id])?from[id]:relicLevel(p.relics?.[id])]));}
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
@@ -235,6 +255,20 @@ export function command(p,action,args={},now=Date.now()){
     if(p.monthly===record.period)return no('이번 달 기록 보상은 이미 확정했습니다.');
     const reward=monthlyReward(record);p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
     return {ok:true,reward,message:`월간 기록 보상 확정 · 꿈의결정 +${reward}`};
+  }
+  if(action==='answer'){
+    const q=questionOf(args.kind,args.id);if(!q||!integer(args.choice,q.choices.length-1))return no('문제를 확인하세요.');
+    const correct=args.choice===q.answer,s=p.study;
+    if(!correct){const at=s.wrong.findIndex(w=>w.kind===q.kind&&w.id===q.id);if(at>=0)s.wrong.splice(at,1);s.wrong.push({kind:q.kind,id:q.id,choice:args.choice,at:now});if(s.wrong.length>WRONG_MAX)s.wrong.shift();}
+    return {ok:true,correct};
+  }
+  if(action==='libraryStar'){
+    const s=p.study,l=s.library,day=calendar(now).day,at=s.wrong.findIndex(w=>w.kind===args.kind&&w.id===args.id);
+    if(l.index>=CONSTELLATIONS.length)return no('일곱 별자리를 모두 완성했어요.');if(l.day===day)return no('오늘의 별은 이미 밝혔어요. 내일 다시 만나요.');
+    if(at<0)return no('오답 노트에 있는 문제만 복습할 수 있어요.');
+    s.wrong.splice(at,1);l.day=day;l.stars++;const c=CONSTELLATIONS[l.index];let completed=null;
+    if(l.stars>=c.stars.length){l.unlocked.push(c.id);l.index++;l.stars=0;completed=c.id;}
+    return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
   return no('사용할 수 없는 동작입니다.');

@@ -7,6 +7,7 @@ import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,BED_IDS,roseAt
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
+import {LIBRARY_ART} from '../src/library.js';
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourcePath=file=>'defense_test/'+path.relative(gameRoot,file).replaceAll('\\','/');
@@ -51,10 +52,15 @@ export async function assetProvenance(){
     memorial.push({id:h.id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length,sourceSha256:MEMORIAL_MEDIA_MANIFEST[h.id].sourceSha256,
       webp:{source:sourcePath(webpFile),sha256:hash(webp),width:wm.width,height:wm.height,bytes:webp.length,quality:MEMORIAL_MEDIA_MANIFEST[h.id].webp.quality}});
   }
+  const library=[];
+  for(const [id,relative] of Object.entries(LIBRARY_ART)){
+    const file=assetFile(relative),bytes=await fs.readFile(file),m=await sharp(bytes).metadata();
+    library.push({id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length});
+  }
   return {
     initialArtCommit:'d4c32cf',
     policy:'independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing',
     assets,font:{source:sourcePath(fontFile),sha256:hash(font),license:{source:sourcePath(licenseFile),sha256:hash(license)}},
-    portraits:HEROES.length,relics:ARTIFACTS.length,memorial
+    portraits:HEROES.length,relics:ARTIFACTS.length,memorial,library
   };
 }

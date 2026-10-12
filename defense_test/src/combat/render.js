@@ -36,6 +36,8 @@ export class Renderer {
     if(e.type==='hit'){this.bursts(e.x,e.y-20,HERO[e.hero]?.color||'#fff1c9',e.big?9:4,.6);if(e.big&&this.floats.length<10)this.float(String(e.damage),e.x,e.y-30,'#fff3d1',e.damage>300?24:18);}
     if(e.type==='kill'){this.bursts(e.x,e.y-15,e.color||'#ebd8a5',e.boss?32:8,e.boss?1.5:.6);if(e.boss)this.shake=9;}
     if(e.type==='summon'){const p=cellPoint(e.index);this.effects.push({type:'summon',...p,color:HERO[e.hero].color,life:.65,total:.65});this.bursts(p.x,p.y,HERO[e.hero].color,12);}
+    // Gift ribbon: the summon arrived as a 2-star wearing a ribbon (pink bow, sparkles, a short label).
+    if(e.type==='ribbon'){const p=cellPoint(e.index);this.effects.push({type:'ribbon',...p,color:'#ff9ecf',life:1.1,total:1.1});this.bursts(p.x,p.y-34,'#ffc6e3',16,.9);this.float('리본 2성!',p.x,p.y-88,'#ffd3ec',22);}
     if(e.type==='merge'){const p=cellPoint(e.to);this.effects.push({type:'merge',...p,color:HERO[e.hero].color,life:1,total:1});this.bursts(p.x,p.y-25,'#ffe4a0',28,1.1);this.float(`${e.rank}성`,p.x,p.y-72,'#ffe5aa',31);if(e.refund)this.float(`+${e.refund} G`,p.x,p.y-35,'#ffe5aa');this.shake=3;}
     if(e.type==='skill'){this.skill={...e,uid:++this.skillSeq,life:1.6,total:1.6};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}
@@ -168,6 +170,10 @@ export class Renderer {
       else if(e.hero==='storm_sage'){const dx=e.to.x-e.from.x,dy=e.to.y-e.from.y,len=Math.max(1,Math.hypot(dx,dy));line(ctx,Array.from({length:9},(_,i)=>{const f=i/8,w=Math.sin(f*Math.PI*3)*7;return [e.from.x+dx*f-dy/len*w,e.from.y-20+dy*f+dx/len*w];}),e.color,2.5);}
       else{line(ctx,[[e.from.x,e.from.y-20],[(e.from.x+e.to.x)/2+12,(e.from.y+e.to.y)/2-29],[e.to.x,e.to.y-20]],e.color,5);line(ctx,[[e.from.x,e.from.y-20],[e.to.x,e.to.y-20]],'#fff5d6',1);}
     }
+    else if(e.type==='ribbon'){const s=Math.min(1,t*5)*(1.15-t*.15);ctx.translate(e.x,e.y-62-t*12);ctx.scale(s,s);ctx.fillStyle=e.color;ctx.strokeStyle='#fff3fa';ctx.lineWidth=2;
+      for(const d of [-1,1]){ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(d*30,-24,d*36,14,0,0);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(0,3);ctx.lineTo(d*15,28);ctx.lineTo(d*5,25);ctx.closePath();ctx.fill();}
+      ctx.beginPath();ctx.arc(0,0,5.5,0,Math.PI*2);ctx.fillStyle='#fff3fa';ctx.fill();
+      for(let i=0;i<5;i++){const a=i/5*Math.PI*2+t*4,r=34+t*22;star(ctx,Math.cos(a)*r,Math.sin(a)*r*.7,7*(1-t),'#ffe1f0',t*3);}}
     else if(e.type==='meteor'){line(ctx,[[e.x-60*(1-t),e.y-170*(1-t)],[e.x,e.y]],'#ffd596',6);star(ctx,e.x,e.y,18+t*40,'#ffe9b0',t);}
     else{const r=(e.type==='merge'?20+t*90:e.type==='nova'?20+t*140:10+t*60);ctx.strokeStyle=e.color;ctx.lineWidth=(1-t)*(e.type==='nova'?10:4);ctx.beginPath();ctx.ellipse(e.x,e.y,r,r*(e.type==='summon'?.38:1),0,0,Math.PI*2);ctx.stroke();
       if(e.type==='merge'||e.type==='summon'){line(ctx,[[e.x,e.y-80*(1-t)],[e.x,e.y]],e.color+'88',10*(1-t));star(ctx,e.x,e.y-20,25*(1-t),e.color,t*Math.PI);}
