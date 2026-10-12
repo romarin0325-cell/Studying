@@ -698,8 +698,9 @@ test('Flame fires at a seeded path point independently of enemy position, locks 
     const hp=enemy.hp;resolveNormal(s,shot);assert.equal(enemy.hp,hp,'landing does not invent a direct enemy hit');
     assert.equal(s.zones.length,1);const zone=s.zones[0];
     close(zone.x,shot.to.x);close(zone.y,shot.to.y);close(zone.damage,shot.damage*1.3);
-    close(zone.radius,HERO.flame_sage.radius*1.3*(artifacts.includes('roots')?1.2:1));
-    close(zone.life,3*1.3*(artifacts.includes('roots')?1.5:1));close(zone.total,zone.life);
+    const roots=artifacts.includes('roots')?E.RELIC_VALUES.roots:null;
+    close(zone.radius,HERO.flame_sage.radius*1.3*(roots?1+roots.radius:1));
+    close(zone.life,3*1.3*(roots?1+roots.life:1));close(zone.total,zone.life);
     const restored=E.restore(E.serialize(s));assert.ok(restored);assert.deepEqual(restored.zones,s.zones);
     if(progress===0){E.step(s,.001);close(hp-enemy.hp,zone.damage*.22,'boosted ground tick resolves against a nearby path enemy');}
   }
@@ -1054,27 +1055,31 @@ test('an earlier Beelzebub warp cannot delete a later enemy mid-frame DOT segmen
 });
 
 test('relic unique effects scale with relicLevels and missing levels stay at 1',()=>{
+  const RV=E.RELIC_VALUES;
   const lens=traitArena([{hero:'star_boy',index:12}],{artifacts:['lens']});lens.relicLevels={lens:5};
   const [boss]=enemiesFor(lens,[{kind:'boss',progress:1200}]),u=lens.board[12];
   const shot=launchNormal(lens,u),hp=boss.hp;resolveNormal(lens,shot);
-  close(hp-boss.hp,shot.damage*(HERO.star_boy.bossDamage||1)*(1+.4*relicScale(5)),'lens Lv5 is 1+.4*1.2');
+  close(hp-boss.hp,shot.damage*(HERO.star_boy.bossDamage||1)*(1+RV.lens.boss*relicScale(5)),'lens scales boss damage');
   const crown=traitArena([{hero:'star_boy',index:12,rank:3}],{artifacts:['crown']});crown.relicLevels={crown:3};
-  close(E.combatStats(crown,crown.board[12]).damage/E.power(crown,crown.board[12]),1+.2*relicScale(3),'crown Lv3');
+  close(E.combatStats(crown,crown.board[12]).damage/E.power(crown,crown.board[12]),1+RV.crown.power*relicScale(3),'crown scales ranked damage');
   const glass=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['hourglass']});
   glass.relicLevels={hourglass:5};glass.gauge=0;assert.ok(E.move(glass,0,1).merged);
-  close(glass.gauge,16*relicScale(5),'hourglass Lv5 starlight replaces the base 12');
+  close(glass.gauge,12+RV.hourglass.starlight*relicScale(5),'hourglass adds its starlight to the merge grant');
 });
 
-test('gift_ribbon rolls 33% * scale on paid summons only, using the run rng',()=>{
+test('gift_ribbon rolls its scaled chance on paid summons only, using the run rng',()=>{
   const peek=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296;};
+  const chance=E.RELIC_VALUES.gift_ribbon.chance;
   const paid=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7});paid.freeSummons=0;paid.gold=1000;
-  const chance=.33*E.relicScaleIn(paid,'gift_ribbon'),roll=peek(paid.rng),r=E.summon(paid);
-  assert.equal(r.rank,roll<chance?2:1);
+  const scaled=Math.min(1,chance*E.relicScaleIn(paid,'gift_ribbon')),roll=peek(paid.rng),r=E.summon(paid);
+  assert.equal(r.rank,roll<scaled?2:1);
   const free=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:1},seed:7}),plain=E.newRun({seed:7});
   assert.ok(E.summon(free).ok);assert.ok(E.summon(plain).ok);assert.equal(free.rng,plain.rng,'free summons never roll');
   assert.equal(free.board.filter(Boolean).length,plain.board.filter(Boolean).length);
-  const cap=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:61},seed:3});cap.freeSummons=0;cap.gold=1000;
-  assert.ok(Math.min(1,.33*E.relicScaleIn(cap,'gift_ribbon'))>=1);assert.equal(E.summon(cap).rank,2);
+  let sure=1;while(sure<999&&chance*relicScale(sure)<1)sure++;
+  assert.ok(chance*relicScale(sure)>=1);
+  const cap=E.newRun({artifacts:['gift_ribbon'],relicLevels:{gift_ribbon:sure},seed:3});cap.freeSummons=0;cap.gold=1000;
+  assert.equal(E.summon(cap).rank,2);
 });
 
 test('relicLevels restore defaults missing maps to {} and rejects invalid levels',()=>{
@@ -1110,29 +1115,36 @@ test('ember amplifies burn and spreads it within 90 when a burning enemy dies, w
   quiet(plain);burn(plain,victim,40);victim.hp=1;E.step(plain,.05);assert.equal(near.burn,0);
   const tick=traitArena([{hero:'zeke',index:12}],{artifacts:['ember']});tick.relicLevels={ember:5};
   const [e]=enemiesFor(tick,[{hp:1e7}]);quiet(tick);burn(tick,e,100);const hp=e.hp;E.step(tick,.05);
-  close(hp-e.hp,100*.05*(1+.8*relicScale(5)),'ember burn tick');
+  close(hp-e.hp,100*.05*(1+E.RELIC_VALUES.ember.burn*relicScale(5)),'ember burn tick');
 });
 
-test('chorus raises attack speed only at 3 or more copies',()=>{
+test('chorus raises attack speed only once its copy count is met',()=>{
   const cool=s=>E.combatStats(s,s.board[0]).cooldown;
-  const two=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['chorus']});
-  const plain=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}]);
-  close(cool(two),cool(plain));
-  const three=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'star_boy',index:2}],{artifacts:['chorus']});
-  three.relicLevels={chorus:5};
-  const base=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'star_boy',index:2}]);
-  close(cool(base)/cool(three),1+.2*relicScale(5));
+  const {count,speed}=E.RELIC_VALUES.chorus;
+  const place=n=>Array.from({length:n},(_,i)=>({hero:'star_boy',index:i}));
+  const below=count-1;
+  const short=traitArena(place(below),{artifacts:['chorus']});
+  const plain=traitArena(place(below));
+  close(cool(short),cool(plain));
+  const met=traitArena(place(count),{artifacts:['chorus']});
+  met.relicLevels={chorus:5};
+  const base=traitArena(place(count));
+  close(cool(base)/cool(met),1+speed*relicScale(5));
 });
 
 test('feather pays scaled wave gold and no longer discounts summons',()=>{
+  const f=E.RELIC_VALUES.feather;
+  const featherGold=(wave,level)=>Math.round(Math.min(f.cap,f.base+f.perWave*wave)*relicScale(level));
   const settle=(wave,level)=>{
     const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['feather'],wave});
     s.relicLevels={feather:level};s.enemies=[];s.queue=[];E.step(s,.05);return s;
   };
-  assert.equal(settle(1,1).stats.income['첫새벽의 깃털'],3);assert.equal(settle(1,1).phase,'reward');
-  assert.equal(settle(13,1).stats.income['첫새벽의 깃털'],15);
-  assert.equal(settle(1,5).stats.income['첫새벽의 깃털'],Math.round(3*relicScale(5)));
-  const last=settle(6,1);assert.equal(last.stats.income['첫새벽의 깃털'],8);assert.equal(last.phase,'victory');
+  assert.equal(settle(1,1).stats.income['첫새벽의 깃털'],featherGold(1,1));assert.equal(settle(1,1).phase,'reward');
+  let over=1;while(over<10000&&f.base+f.perWave*over<f.cap)over++;
+  assert.equal(settle(over,1).stats.income['첫새벽의 깃털'],featherGold(over,1));
+  assert.equal(settle(over+4,1).stats.income['첫새벽의 깃털'],featherGold(over+4,1));
+  assert.equal(settle(1,5).stats.income['첫새벽의 깃털'],featherGold(1,5));
+  const last=settle(6,1);assert.equal(last.stats.income['첫새벽의 깃털'],featherGold(6,1));assert.equal(last.phase,'victory');
   const priced=E.newRun({artifacts:['feather'],relicLevels:{feather:9}}),open=E.newRun({});
   priced.freeSummons=open.freeSummons=0;priced.paidSummons=open.paidSummons=4;
   assert.equal(E.summonCost(priced),E.summonCost(open));assert.equal(E.summonCost(priced),18);
@@ -1148,7 +1160,7 @@ test('phoenix returns the first boss that touches the core and leaves other leak
   boss.frostLock=s.time+9;boss.channel=3;const lock=boss.frostLock,channel=boss.channel,shield=boss.shield,hp=boss.hp,max=boss.maxHp,health2=s.health;
   quiet(s);E.step(s,.05);
   assert.equal(s.health,health2);assert.equal(s.phoenixUsed,true);assert.equal(boss.progress,0);assert.equal(boss.shield,shield);
-  close(boss.hp,Math.max(1,hp-max*.25*m));close(boss.frostLock,lock);close(boss.channel,channel-.05);
+  close(boss.hp,Math.max(1,hp-max*E.RELIC_VALUES.phoenix.cut*m));close(boss.frostLock,lock);close(boss.channel,channel-.05);
   assert.equal(s.enemies.includes(boss),true);assert.equal(s.events.filter(event=>event.type==='phoenix').length,1);assert.equal(s.events.some(event=>event.type==='leak'),false);
   boss.progress=E.PATH_LENGTH;s.events=[];const health3=s.health;E.step(s,.05);
   assert.equal(s.health,health3-7);assert.equal(s.enemies.includes(boss),false);assert.equal(s.events.some(event=>event.type==='leak'),true);
@@ -1159,12 +1171,12 @@ test('phoenix returns the first boss that touches the core and leaves other leak
 
 test('twin echoes ultimate direct damage after 1.5s, including save and restore, and skips buffs, summons and later finishers',()=>{
   const s=traitArena([{hero:'queen',index:12}],{artifacts:['twin','lens']});s.relicLevels={twin:3,lens:5};
-  const m=relicScale(3),lens=1+.4*relicScale(5);
+  const m=relicScale(3),lens=1+E.RELIC_VALUES.lens.boss*relicScale(5);
   const [e]=enemiesFor(s,[{kind:'boss',hp:1e8,progress:600}]);quiet(s);s.gauge=120;const hp=e.hp,mark=s.stats.damage;
   assert.ok(E.cast(s,'queen').ok);
   const dealt=s.stats.damage-mark,echo=s.finishers.find(f=>f.kind==='echo');
   close(dealt,E.power(s,s.board[12])*4*(HERO.queen.bossDamage||1)*lens);
-  assert.ok(echo);close(echo.life,1.5);close(echo.total,1.5);close(echo.damage,dealt*.4*m);assert.equal(echo.hero,'queen');
+  assert.ok(echo);close(echo.life,1.5);close(echo.total,1.5);close(echo.damage,dealt*E.RELIC_VALUES.twin.echo*m);assert.equal(echo.hero,'queen');
   const t0=s.time;advanceTo(s,t0+1.49);assert.equal(e.hp,hp-dealt);
   const snap=E.serialize(s),saved=E.restore(snap);assert.ok(saved,'an echo from a non-echo skill restores');
   for(const change of [{damage:0},{damage:-1},{life:2},{kind:'starfall'}]){
@@ -1185,15 +1197,17 @@ test('twin echoes ultimate direct damage after 1.5s, including save and restore,
   const mag=traitArena([{hero:'time_magician',index:12}],{artifacts:['twin']});
   const [victim]=enemiesFor(mag,[{hp:1e8}]);quiet(mag);mag.gauge=120;const before=victim.hp;
   assert.ok(E.cast(mag,'time_magician').ok);
-  close(mag.finishers.find(f=>f.kind==='echo').damage,(before-victim.hp)*.4);assert.ok(mag.buffs.trauma>0);
+  close(mag.finishers.find(f=>f.kind==='echo').damage,(before-victim.hp)*E.RELIC_VALUES.twin.echo);assert.ok(mag.buffs.trauma>0);
 });
 
-test('alchemy bonuses a merged unit on its wave and the next, and older saves have no bonus',()=>{
+test('alchemy bonuses a merged unit for its wave window starting on the merge wave, and older saves have no bonus',()=>{
   const ratio=(s,u)=>E.combatStats(s,u).damage/E.power(s,u);
+  const {power,waves}=E.RELIC_VALUES.alchemy;
   const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['alchemy'],wave:2});
-  s.relicLevels={alchemy:5};const m=relicScale(5);
+  s.relicLevels={alchemy:5};const bonus=1+power*relicScale(5);
   assert.ok(E.move(s,0,1).merged);const u=s.board[1];assert.equal(u.mergedWave,2);
-  close(ratio(s,u),1+.4*m);s.wave=3;close(ratio(s,u),1+.4*m);s.wave=4;close(ratio(s,u),1);
+  for(let wave=2;wave<2+waves;wave++){s.wave=wave;close(ratio(s,u),bonus);}
+  s.wave=2+waves;close(ratio(s,u),1);
   const bare=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{wave:2});
   assert.ok(E.move(bare,0,1).merged);assert.equal(bare.board[1].mergedWave,2);close(ratio(bare,bare.board[1]),1);
   s.wave=2;const raw=JSON.parse(E.serialize(s));delete raw.board[1].mergedWave;
@@ -1201,42 +1215,52 @@ test('alchemy bonuses a merged unit on its wave and the next, and older saves ha
   for(const bad of [0,1.5,4]){const copy=JSON.parse(E.serialize(s));copy.board[1].mergedWave=bad;assert.equal(E.restore(copy),null,'mergedWave '+bad);}
   const inter=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['alchemy'],wave:3});
   inter.phase='intermission';assert.ok(E.move(inter,0,1).merged);assert.equal(inter.board[1].mergedWave,4);assert.ok(E.restore(E.serialize(inter)));
+  const level1=1+power;
   inter.phase='combat';inter.wave=3;close(ratio(inter,inter.board[1]),1);
-  inter.wave=4;close(ratio(inter,inter.board[1]),1.4);inter.wave=5;close(ratio(inter,inter.board[1]),1.4);inter.wave=6;close(ratio(inter,inter.board[1]),1);
+  for(let wave=4;wave<4+waves;wave++){inter.wave=wave;close(ratio(inter,inter.board[1]),level1);}
+  inter.wave=4+waves;close(ratio(inter,inter.board[1]),1);
 });
 
-test('tempo bell raises every unit attack speed by 2.5% per wave after the first, capped at 45%',()=>{
+test('tempo bell raises attack speed per wave after the first, up to its cap',()=>{
   const cool=s=>E.combatStats(s,s.board[12]).cooldown;
+  const {perWave,cap}=E.RELIC_VALUES.tempo_bell;
   const make=(wave,level)=>{const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['tempo_bell'],wave});s.relicLevels={tempo_bell:level};s.waveTime=wave===1?0:30;return s;};
+  const bonus=(wave,level)=>Math.min(cap,perWave*(wave-1))*relicScale(level);
   const plain=traitArena([{hero:'star_boy',index:12}]);
   const first=make(1,1);close(cool(first),cool(plain));
   assert.equal(E.combatStats(first,first.board[12],12,true).bonuses.some(line=>line.includes('이어지는 종')),false);
-  const second=make(2,1);close(cool(plain)/cool(second),1+.025);
+  const second=make(2,1);close(cool(plain)/cool(second),1+bonus(2,1));
   assert.ok(E.combatStats(second,second.board[12],12,true).bonuses.some(line=>line.includes('이어지는 종')));
-  close(cool(plain)/cool(make(19,1)),1+.45);close(cool(plain)/cool(make(40,1)),1+.45);
-  close(cool(plain)/cool(make(40,5)),1+.45*relicScale(5));
+  let capped=2;while(Math.min(cap,perWave*(capped-1))<cap)capped++;
+  close(cool(plain)/cool(make(capped,1)),1+bonus(capped,1));
+  close(cool(plain)/cool(make(capped+20,1)),1+bonus(capped+20,1));
+  close(cool(plain)/cool(make(capped+20,5)),1+bonus(capped+20,5));
 });
 
 test('royal seal grants starlight once per boss spawn and amplifies boss damage only',()=>{
   const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_seal']});s.relicLevels={royal_seal:5};const m=relicScale(5);
+  const star=E.RELIC_VALUES.royal_seal.starlight;
+  const total=star*2*m+.15*1.2;
+  if(total>E.gaugeCap(s))s.gaugeMax=Math.min(E.GAUGE_MAX+400,Math.max(E.GAUGE_MAX,Math.ceil(total)));
   quiet(s);s.enemies=[];s.queue=[{kind:'boss',hp:1e6},{kind:'boss',hp:1e6},{kind:'grunt',hp:1e6}];s.spawnIn=0;s.gauge=0;
-  E.step(s,.05);close(s.gauge,40*m+.05*1.2);s.spawnIn=0;
-  E.step(s,.05);close(s.gauge,80*m+.1*1.2);s.spawnIn=0;
-  E.step(s,.05);close(s.gauge,80*m+.15*1.2);
+  E.step(s,.05);close(s.gauge,star*m+.05*1.2);s.spawnIn=0;
+  E.step(s,.05);close(s.gauge,star*2*m+.1*1.2);s.spawnIn=0;
+  E.step(s,.05);close(s.gauge,star*2*m+.15*1.2);
   const hit=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_seal']});hit.relicLevels={royal_seal:5};hit.enemies=[];
   const [boss,grunt]=enemiesFor(hit,[{kind:'boss',hp:500,progress:1200},{hp:1e7,progress:400}]);quiet(hit);
   const shot=launchNormal(hit,hit.board[12]);assert.equal(shot.target,boss.uid);const hp=boss.hp;resolveNormal(hit,shot);
-  close(hp-boss.hp,shot.damage*(HERO.star_boy.bossDamage||1)*(1+.15*m));
+  close(hp-boss.hp,shot.damage*(HERO.star_boy.bossDamage||1)*(1+E.RELIC_VALUES.royal_seal.boss*m));
   boss.hp=0;grunt.progress=1200;const shot2=launchNormal(hit,hit.board[12]);assert.equal(shot2.target,grunt.uid);const ghp=grunt.hp;resolveNormal(hit,shot2);
   close(ghp-grunt.hp,shot2.damage,'a higher-max-hp grunt is not the old royal target');
 });
 
-test('broken clock stretches buff ultimates by half and grants 2 starlight per second while any one is active',()=>{
+test('broken clock stretches buff ultimates and grants starlight per second while any one is active',()=>{
   const s=traitArena([{hero:'siren',index:12},{hero:'frost_witch',index:0}],{artifacts:['broken_clock']});
   s.relicLevels={broken_clock:5};const m=relicScale(5);
+  const stretch=1+E.RELIC_VALUES.broken_clock.duration*m,star=E.RELIC_VALUES.broken_clock.starlight;
   enemiesFor(s,[{hp:1e7}]);quiet(s);s.gauge=120;
-  assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,8*(1+.5*m));
-  assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((8*(1+.5*m)).toFixed(1))+'초'));
+  assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,8*stretch);
+  assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((8*stretch).toFixed(1))+'초'));
   s.gauge=120;assert.ok(E.cast(s,'frost_witch').ok);close(s.buffs.winter,6);
   assert.ok(E.castPreview(s,'frost_witch').lines.some(line=>line.startsWith('겨울은 6초')));
   const glass=traitArena([{hero:'cinderella',index:12}],{artifacts:['broken_clock']});glass.relicLevels={broken_clock:5};
@@ -1244,10 +1268,10 @@ test('broken clock stretches buff ultimates by half and grants 2 starlight per s
   assert.ok(E.castPreview(glass,'cinderella').lines.join(' ').includes('10초 동안 진짜'));
   const trauma=traitArena([{hero:'time_magician',index:12}],{artifacts:['broken_clock']});trauma.relicLevels={broken_clock:5};
   enemiesFor(trauma,[{hp:1e8}]);quiet(trauma);trauma.gauge=120;assert.ok(E.cast(trauma,'time_magician').ok);
-  close(trauma.buffs.trauma,10*(1+.5*m));
-  s.buffs={haste:5,awaken:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+2*m);
-  s.buffs={haste:.2};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+2*m*.2);
-  s.phase='intermission';s.breakTime=10;s.buffs={haste:1};s.gauge=0;E.step(s,.05);close(s.gauge,2*m*.05);
+  close(trauma.buffs.trauma,10*stretch);
+  s.buffs={haste:5,awaken:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+star*m);
+  s.buffs={haste:.2};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+star*m*.2);
+  s.phase='intermission';s.breakTime=10;s.buffs={haste:1};s.gauge=0;E.step(s,.05);close(s.gauge,star*m*.05);
 });
 
 test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, prism, orbit, lantern and seed',()=>{
@@ -1255,41 +1279,41 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   const frost=traitArena([{hero:'star_boy',index:12}],{artifacts:['frost']});frost.relicLevels={frost:5};
   const [slowed]=enemiesFor(frost,[{progress:1200}]);slowed.slowEffects=[{source:'legacy:slow',owner:null,amount:.4,until:frost.time+5}];
   const frostShot=launchNormal(frost,frost.board[12]),frostHp=slowed.hp;resolveNormal(frost,frostShot);
-  close(frostHp-slowed.hp,frostShot.damage*(1+.3*relicScale(5)));
+  close(frostHp-slowed.hp,frostShot.damage*(1+E.RELIC_VALUES.frost.slowed*relicScale(5)));
   const banner=traitArena([{hero:'star_boy',index:12}],{artifacts:['banner']});banner.relicLevels={banner:5};
-  close(ratio(banner),1+.28*relicScale(5));
+  close(ratio(banner),1+E.RELIC_VALUES.banner.power*relicScale(5));
   const crowded=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:13}],{artifacts:['banner']});close(ratio(crowded),1);
   const guild=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:13}],{artifacts:['guild']});guild.relicLevels={guild:5};
-  close(ratio(guild),1+.2*relicScale(5));
+  close(ratio(guild),1+E.RELIC_VALUES.guild.power*relicScale(5));
   const alone=traitArena([{hero:'star_boy',index:12}],{artifacts:['guild']});close(ratio(alone),1);
   const stars=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:7},{hero:'snow_rabbit',index:11},{hero:'luna',index:13}],{artifacts:['constellation']});
-  stars.relicLevels={constellation:5};close(ratio(stars),1+.25*relicScale(5));
+  stars.relicLevels={constellation:5};close(ratio(stars),1+E.RELIC_VALUES.constellation.power*relicScale(5));
   const pair=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:7},{hero:'luna',index:13}],{artifacts:['constellation']});close(ratio(pair),1);
   const meteor=traitArena([{hero:'star_boy',index:12}],{artifacts:['meteor']});meteor.relicLevels={meteor:5};const meteorM=relicScale(5);
   const [far,near,hit]=enemiesFor(meteor,[{progress:1200},{progress:1360},{progress:1400}]);meteor.board[12].attacks=11;
   const meteorShot=launchNormal(meteor,meteor.board[12]);assert.equal(meteorShot.count,12);assert.equal(meteorShot.target,hit.uid);
   const before=[hit.hp,near.hp,far.hp];resolveNormal(meteor,meteorShot);
-  close(before[0]-hit.hp,meteorShot.damage*(1+2*meteorM));close(before[1]-near.hp,meteorShot.damage*2*meteorM);assert.equal(far.hp,before[2]);
+  close(before[0]-hit.hp,meteorShot.damage*(1+E.RELIC_VALUES.meteor.hit*meteorM));close(before[1]-near.hp,meteorShot.damage*E.RELIC_VALUES.meteor.hit*meteorM);assert.equal(far.hp,before[2]);
   const tide=traitArena([{hero:'snow_rabbit',index:12}],{artifacts:['tide']});tide.relicLevels={tide:3};
   const [wet]=enemiesFor(tide,[{progress:1200}]);const tideShot=launchNormal(tide,tide.board[12]),wetHp=wet.hp;resolveNormal(tide,tideShot);
-  close(wetHp-wet.hp,tideShot.damage*(1+.3*relicScale(3)));assert.ok(tide.events.some(event=>event.type==='tide'));
+  close(wetHp-wet.hp,tideShot.damage*(1+E.RELIC_VALUES.tide.splash*relicScale(3)));assert.ok(tide.events.some(event=>event.type==='tide'));
   const prism=traitArena([{hero:'storm_sage',index:12}],{artifacts:['prism']});prism.relicLevels={prism:5};
   const gust=enemiesFor(prism,[{progress:1200},{progress:1201}]);const prismShot=launchNormal(prism,prism.board[12]);
   assert.equal(prismShot.target,gust[1].uid);const gustHp=gust.map(e=>e.hp);prism.rng=160;resolveNormal(prism,prismShot);
-  close(gustHp[1]-gust[1].hp,prismShot.damage);close(gustHp[0]-gust[0].hp,prismShot.damage*(1+.65*(1+.2*relicScale(5))));
+  close(gustHp[1]-gust[1].hp,prismShot.damage);close(gustHp[0]-gust[0].hp,prismShot.damage*(1+.65*(1+E.RELIC_VALUES.prism.chain*relicScale(5))));
   const orbit=traitArena([{hero:'star_boy',index:12,rank:3}],{artifacts:['orbit']});orbit.relicLevels={orbit:5};
   const [field]=enemiesFor(orbit,[{progress:1200}]);const orbitShot=launchNormal(orbit,orbit.board[12]);resolveNormal(orbit,orbitShot);
   const zone=orbit.zones.find(item=>item.orbit);assert.ok(zone);close(zone.life,2);close(zone.radius,60);
   orbit.board[12].disabled=100;orbit.shots=[];const fieldHp=field.hp;E.step(orbit,.05);
-  close(fieldHp-field.hp,zone.damage*.1*relicScale(5));
+  close(fieldHp-field.hp,zone.damage*E.RELIC_VALUES.orbit.tick*relicScale(5));
   const lantern=traitArena([{hero:'siren',index:12}],{artifacts:['lantern']});lantern.relicLevels={lantern:5};
   enemiesFor(lantern,[{}]);quiet(lantern);lantern.gauge=100;assert.ok(E.cast(lantern,'siren').ok);
-  close(lantern.gauge,100-HERO.siren.skill.cost+20*relicScale(5));
+  close(lantern.gauge,100-HERO.siren.skill.cost+E.RELIC_VALUES.lantern.refund*relicScale(5));
   const seed=traitArena([{hero:'mushroom_king',index:12}],{artifacts:['seed']});seed.relicLevels={seed:5};
   const [spore]=enemiesFor(seed,[{hp:1e7}]);quiet(seed);
   spore.statusEffects=[{type:'poison',source:`attack:mushroom_king:${seed.board[12].uid}`,owner:'mushroom_king',amount:2,until:seed.time+7,power:100}];
-  const sporeHp=spore.hp;E.step(seed,.05);close(sporeHp-spore.hp,2*100*E.POISON_POWER_RATIO*(1+.3*relicScale(5))*.05);
+  const sporeHp=spore.hp;E.step(seed,.05);close(sporeHp-spore.hp,2*100*E.POISON_POWER_RATIO*(1+E.RELIC_VALUES.seed.poison*relicScale(5))*.05);
   const night=traitArena([{hero:'phantom',index:12}],{artifacts:['seed']});enemiesFor(night,[{}]);
   const nightBase=E.power(night,night.board[12]);
-  assert.ok(E.castPreview(night,'phantom').lines.join(' ').includes(Math.round(nightBase*E.POISON_POWER_RATIO*(1+.3)).toLocaleString('ko-KR')));
+  assert.ok(E.castPreview(night,'phantom').lines.join(' ').includes(Math.round(nightBase*E.POISON_POWER_RATIO*(1+E.RELIC_VALUES.seed.poison)).toLocaleString('ko-KR')));
 });
