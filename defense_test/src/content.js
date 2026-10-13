@@ -47,6 +47,8 @@ export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=s
 export const ASSET_PATHS=source.ASSET_PATHS;
 export const TUNING=Object.freeze({
   heroDrawCost:100,relicDrawCost:80,heroRates:[.70,.25,.048,.002],pity:{normal:200,season:200},
+  // Gift basket: one gift every 8 hours (candy → letter → bouquet), up to three waiting.
+  basketHours:8,basketMax:3,dailyBonus:30,
   // Stat renewal v1: duplicates +5% each with a support milestone every 5.
   // levelCost* only converts old garden-level saves into greenhouse beds.
   duplicateGrowth:1.58,enhanceStep:.05,levelStep:.04,levelCostBase:90,levelCostGrowth:1.12,

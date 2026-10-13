@@ -292,24 +292,28 @@ test('daily acceleration shifts every running dispatch once and a wrong answer s
   assert.equal(s.transact('accelerate',{correct:true},when).ok,false);
 });
 
-test('pity pays the banner pickup at the threshold and is not cleared by a natural UR',()=>{
+test('paid summons fill the exchange gauge; at the threshold the player picks the companion, and a natural UR never empties it',()=>{
   const step=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return x>>>0||1;};
   const urStart=TUNING.heroRates[0]+TUNING.heroRates[1]+TUNING.heroRates[2];
   let state=1,urSeed=0;for(let i=0;i<5000000&&!urSeed;i++){const n=step(state);if(n/4294967296>=urStart)urSeed=state;else state=n;}
   assert.ok(urSeed);
   const natural=createProfile(NOW);natural.rng=urSeed;natural.pity.normal=12;natural.dreams=1000;
   const hit=command(natural,'draw',{banner:'normal',count:1},NOW);
-  assert.equal(hit.ok,true);assert.equal(HERO[hit.items[0].id].rarity,'UR');assert.equal(hit.items[0].pity,undefined);assert.equal(natural.pity.normal,13);
+  assert.equal(hit.ok,true);assert.equal(HERO[hit.items[0].id].rarity,'UR');assert.equal(natural.pity.normal,13);
+  // The gauge only fills: the 200th pull is an ordinary pull.
   const p=createProfile(NOW);p.dreams=100000;p.pity.normal=TUNING.pity.normal-1;
-  const one=command(p,'draw',{banner:'normal',count:1},NOW);
-  assert.equal(one.items[0].id,calendar(NOW).pickup);assert.equal(one.items[0].pity,true);assert.equal(one.pity.normal,0);assert.equal(p.history[0].pity,true);
-  p.pity.season=TUNING.pity.season-1;
-  const season=command(p,'draw',{banner:'season',count:1},NOW);
-  assert.equal(season.items[0].id,calendar(NOW).guardian);assert.equal(season.items[0].pity,true);assert.equal(p.pity.season,0);
-  const later=NOW+8*24*HOUR;p.pity.normal=TUNING.pity.normal-2;
-  const ten=command(p,'draw',{banner:'normal',count:10},later);
-  assert.equal(ten.items.filter(item=>item.pity).length,1);assert.equal(ten.items[1].id,calendar(later).pickup);assert.equal(ten.items[1].pity,true);
-  assert.equal(p.pity.normal,8);assert.deepEqual(ten.pity,{normal:8,season:0});
+  const one=command(p,'draw',{banner:'normal',count:1},NOW);assert.equal(one.items[0].pity,undefined);assert.equal(p.pity.normal,TUNING.pity.normal);
+  assert.equal(command(p,'draw',{banner:'normal',count:1,free:true},NOW).ok,true);assert.equal(p.pity.normal,TUNING.pity.normal,'free pulls do not count');
+  // Exchange: any of the six normal URs; the season gauge takes only this month's guardian.
+  assert.equal(command(p,'pityClaim',{banner:'normal',id:'doom'},NOW).ok,false,'a season guardian is not in the normal pool');
+  const pick=command(p,'pityClaim',{banner:'normal',id:'queen'},NOW);
+  assert.equal(pick.ok,true);assert.equal(pick.item.id,'queen');assert.equal(pick.item.pity,true);assert.equal(p.heroes.queen.owned,true);assert.equal(p.pity.normal,0);assert.equal(p.history[0].pity,true);
+  assert.equal(command(p,'pityClaim',{banner:'normal',id:'queen'},NOW).ok,false,'needs a full gauge again');
+  p.pity.season=TUNING.pity.season;const guardian=calendar(NOW).guardian,other=HEROES.find(h=>h.hidden&&h.id!==guardian).id;
+  assert.equal(command(p,'pityClaim',{banner:'season',id:other},NOW).ok,false);
+  assert.equal(command(p,'pityClaim',{banner:'season',id:guardian},NOW).ok,true);assert.equal(p.pity.season,0);assert.ok(validateProfile(p));
+  // The season gauge carries across months.
+  p.pity.season=37;command(p,'draw',{banner:'season',count:1},NOW+40*24*HOUR);assert.equal(p.pity.season,38);
 });
 
 test('boost is a doubled-UR 10-pull and may add ten free bonus draws',()=>{

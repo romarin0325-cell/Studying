@@ -22,7 +22,7 @@ export function burst(x,y,{count=8,color='#ffe39a',spread=46,size=10,duration=62
   }
 }
 export const tapSpark=(x,y,color)=>burst(x,y,{count:5,spread:28,size:8,duration:460,color});
-export const hearts=(x,y)=>burst(x,y,{count:7,spread:54,size:15,duration:1000,shape:'heart',color:'#ff9fc0',rise:40});
+export const hearts=(x,y,count=7)=>burst(x,y,{count,spread:54,size:15,duration:1000,shape:'heart',color:'#ff9fc0',rise:40});
 // A short rising label (level up, gains) over the DOM, e.g. "Lv.12".
 export function floatText(x,y,text,color='#fff3c4'){
   if(reduced()||!Number.isFinite(x)||!Number.isFinite(y))return;
