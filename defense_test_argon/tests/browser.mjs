@@ -196,7 +196,9 @@ try{
     await nav(page,'소환');await shot(page,'summon',width,height);
     await page.locator('[data-action="rates"]').click();assert.match(await page.locator('#sheet-body').innerText(),/70.00%/);await close(page);
     await page.locator('[data-draw="1"]').click();
-    assert.equal((await profile(page)).dreams,540);assert.equal((await profile(page)).history.length,1);
+    assert.equal((await profile(page)).dreams,640);assert.equal((await profile(page)).daily.free,true);assert.equal((await profile(page)).history.length,1);
+    await close(page);await page.locator('[data-draw="1"]').click();
+    assert.equal((await profile(page)).dreams,540);assert.equal((await profile(page)).history.length,2);
     assert.equal(await page.locator('.reveal-grid .hero-card').count(),1);await shot(page,'reveal',width,height);await close(page);
     await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
     assert.match(await page.locator('#sheet-body').innerText(),/0.100%/);await close(page);
