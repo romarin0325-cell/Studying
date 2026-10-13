@@ -38,7 +38,7 @@ async function boot(width,height,profile=createProfile(NOW),fault=false,location
   return {context,page,width,height};
 }
 const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
-const close=page=>page.getByRole('button',{name:'닫기',exact:true}).click();
+const close=page=>page.locator('#sheet .sheet-top [data-action="close"]').click();
 const nav=(page,label)=>page.getByRole('button',{name:label,exact:true}).click();
 async function shot(page,label,width,height){
   await page.screenshot({path:path.join(output,`${name}-${label}-${width}x${height}.png`),animations:'disabled'});
