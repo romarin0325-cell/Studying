@@ -177,9 +177,9 @@ try{
     assert.deepEqual([(await profile(page)).study.library.stars,(await profile(page)).study.wrong.length],[1,0]);
     await page.locator('[data-library-tab="lecture"]').click();await page.locator('[data-lecture="L01"]').click();
     assert.match(await page.locator('#sheet-footer').innerText(),/3문항/);await page.locator('[data-practice]').click();
-    assert.match(await page.locator('#sheet-kicker').innerText(),/1\/3/);await close(page);
+    assert.match(await page.locator('#sheet-kicker').innerText(),/1\/3/);await page.keyboard.press('Escape');
     await page.locator('[data-library-tab="term"]').click();await page.locator('.term-row summary').first().click();
-    await page.locator('[data-practice="term:T001"]').click();assert.match(await page.locator('#sheet-kicker').innerText(),/1\/2/);await close(page);
+    await page.locator('[data-practice="term:T001"]').click();assert.match(await page.locator('#sheet-kicker').innerText(),/1\/2/);await page.keyboard.press('Escape');
     await page.locator('[data-library-tab="sky"]').click();
     await shot(page,'library',390,844);await t.context.close();
   }
