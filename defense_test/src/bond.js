@@ -1,14 +1,14 @@
 // Bond (호감도): ten hearts per companion, filled by points from greetings and gifts.
-// Gifts come from three daily loops (shooting stars, daily missions, dispatch), about one each per day.
+// Gifts come from one place, the gift basket in the garden: one every 8 hours (candy, letter, bouquet in turn).
 // One companion fed every gift and greeting reaches ten hearts in about two to three weeks.
 export const BOND_MAX=10;
 export const BOND_STEPS=Object.freeze([40,50,60,70,75,80,85,90,95,105]);
 export const GREETING_POINTS=10,GIFT_POINTS=10,FAVORITE_POINTS=20;
 export const GIFT_IDS=Object.freeze(['candy','letter','bouquet']);
 export const GIFTS=Object.freeze({
-  candy:{name:'별사탕',source:'별똥별을 수집하면 가끔 주워요',color:'#ffd36a'},
-  letter:{name:'손편지',source:'일일 임무를 모두 마치면 받아요',color:'#ffb3c7'},
-  bouquet:{name:'꽃다발',source:'파견에서 돌아오면 받아요 (하루 1회)',color:'#9fe0b0'},
+  candy:{name:'별사탕',color:'#ffd36a'},
+  letter:{name:'손편지',color:'#ffb3c7'},
+  bouquet:{name:'꽃다발',color:'#9fe0b0'},
 });
 const group=(gift,ids)=>ids.map(id=>[id,gift]);
 export const FAVORITE=Object.freeze(Object.fromEntries([
@@ -59,5 +59,3 @@ export function addBond(entry,points){
   if(entry.bond>=BOND_MAX){entry.bond=BOND_MAX;entry.bondXp=0;}
   return entry.bond-before;
 }
-// Chance of a star candy when collecting: the hours of shooting stars collected over a day.
-export const candyChance=elapsedMs=>Math.min(1,Math.max(0,elapsedMs)/(24*3600000));

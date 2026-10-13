@@ -12,6 +12,9 @@
       "normal": 200,
       "season": 200
     },
+    "basketHours": 8,
+    "basketMax": 3,
+    "dailyBonus": 30,
     "duplicateGrowth": 1.58,
     "enhanceStep": 0.05,
     "levelStep": 0.04,

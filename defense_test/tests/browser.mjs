@@ -9,7 +9,7 @@ import {HEROES,TUNING} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
-import {COURSE} from '../src/course.js';
+import {allQuestions} from '../src/quiz.js';
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
@@ -38,7 +38,7 @@ async function boot(width,height,profile=createProfile(NOW),fault=false,location
   return {context,page,width,height};
 }
 const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
-const close=page=>page.getByRole('button',{name:'닫기',exact:true}).click();
+const close=page=>page.locator('#sheet .sheet-top [data-action="close"]').click();
 const nav=(page,label)=>page.getByRole('button',{name:label,exact:true}).click();
 async function shot(page,label,width,height){
   await page.screenshot({path:path.join(output,`${name}-${label}-${width}x${height}.png`),animations:'disabled'});
@@ -82,7 +82,7 @@ try{
     const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();
     if(!supportsAvif){
       const p=createProfile(NOW);p.heroes.star_boy.bond=10;const unsupported=await boot(390,844,p);
-      await unsupported.page.locator('.bond-button').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
+      await unsupported.page.locator('[data-action="bond"]').click();await unsupported.page.locator('.bond-memory').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
       assert.match(await unsupported.page.locator('#memory-loading').innerText(),/그림을 불러오지 못했습니다/);assert.equal(await unsupported.page.locator('img[data-memorial]').count(),0);
       await unsupported.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(unsupported.page)).memories.star_boy.read,true);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
       execFileSync(process.execPath,['defense_test/scripts/build.mjs','--compat'],{cwd:path.dirname(game),stdio:'pipe'});
@@ -93,19 +93,22 @@ try{
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
-    await m.page.locator('.bond-button').click();assert.match(await m.page.locator('.memory-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);
-    await m.page.locator('[data-action="memorial-album"]').click();assert.equal(await m.page.locator('.memory-list [data-memorial]').count(),30);await shot(m.page,'memorial-album',width,height);
-    await m.page.locator('.memory-list [data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.match(await m.page.locator('.memory-title h3').innerText(),new RegExp(MEMORIAL_STORIES.zeke.title));
-    const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1&&reading.height>=90,'initial paragraph panel visible above fixed controls');await shot(m.page,'memorial-reader',width,height);
-    await m.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(m.page)).memories.zeke.read,true);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);await nav(m.page,'동료');await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.memory-entry').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('#memory-progress').innerText(),'100% 읽음');
-    await m.page.locator('[data-action="memorial-art"]').click();assert.equal(await m.page.locator('#memory-narrative').isVisible(),false);
-    assert.ok(await m.page.evaluate(()=>Math.max(document.querySelector('.memory-title h3').getBoundingClientRect().bottom,document.querySelector('[data-action="memorial-art"]').getBoundingClientRect().bottom)<=document.querySelector('.sheet-body').getBoundingClientRect().bottom+1),'art title and toggle remain visible above controls');await shot(m.page,'memorial-art',width,height);await close(m.page);
+    await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),30);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
+    await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
+    const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
+    await m.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(m.page)).memories.zeke.read,true);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);
+    await m.page.locator('[data-collection="hero"]').click();await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.bond-row').click();await m.page.locator('.bond-memory').click();await m.page.locator('#memory-art img').waitFor();
+    await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>document.getElementById('memory-progress').textContent==='100%');
+    await m.page.locator('[data-action="memorial-story"]').click();assert.ok(!(await m.page.locator('#sheet').getAttribute('class')).includes('mv-reading'),'the story steps aside for the painting');
+    assert.ok(await m.page.evaluate(()=>[...document.querySelectorAll('.mv-controls button')].every(b=>b.getBoundingClientRect().bottom<=innerHeight+1)),'viewer controls stay on screen');await shot(m.page,'memorial-art',width,height);await close(m.page);
     if(width===390){
       // Open and close all thirty real pictures through buttons, never hidden preload.
       const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
-      await chain.page.locator('.bond-button').click();await chain.page.locator('#memory-art img').waitFor();await chain.page.locator('[data-action="memorial-album"]').click();
-      for(const h of HEROES){await chain.page.locator(`.memory-list [data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await chain.page.locator('[data-action="memorial-album"]').click();assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
-      await chain.page.locator('.memory-list [data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
+      await nav(chain.page,'동료');await chain.page.locator('[data-collection="album"]').click();
+      for(const h of HEROES){await chain.page.locator(`.mem-tile[data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
+      await chain.page.locator('.mem-tile[data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
     }
     await m.context.close();
   }
@@ -119,9 +122,9 @@ try{
   execFileSync(process.execPath,['defense_test/scripts/build.mjs','--solo'],{cwd:path.dirname(game),stdio:'pipe'});
   execFileSync(process.execPath,['defense_test/scripts/build.mjs','--web'],{cwd:path.dirname(game),stdio:'pipe'});
   const single=await boot(390,844,null,false,pathToFileURL(path.join(game,'test-results/solo/StarGardenDefenseSolo.html')).href);
-  assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
-  await single.page.locator('[data-action="prepare"]').click();await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
-  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('.bond-button').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
+  assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="prepare"]').click();await single.page.locator('#sheet-footer [data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
+  await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
+  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('[data-action="bond"]').click();await folder.page.locator('.bond-memory').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
   for(const [width,height] of [[320,568],[390,844]]){
     const fire=traitFixture(['zeke','ancient_dragon','siren','snow_rabbit','great_detective'],[[12,'zeke'],[11,'ancient_dragon']],{wave:1}),fireRun=E.restore(fire.active.run);
     fireRun.enemies[0].progress=863;for(const u of fireRun.board)if(u)u.cooldown=.01;fire.active.run=E.serialize(fireRun);
@@ -159,20 +162,21 @@ try{
   await shot(executed.page,'storm-instant-kill',390,844);await executed.context.close();
   // Lobby chrome never overlaps on phone sizes, including tall full-screen viewports and a simulated notch (--top-shift).
   for(const [width,height] of [[360,640],[390,844],[412,780],[412,915],[430,932]])for(const shift of [6,40]){
-    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});
-    const geo=await t.page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),sp=r('#partner-speech'),g=document.querySelector('.garden-info');return {chip:hit(sp,r('.season-chip')),left:hit(sp,r('.lobby-side.left')),right:hit(sp,r('.lobby-side.right')),garden:!!g&&g.scrollWidth>g.clientWidth+1};});
-    assert.deepEqual(geo,{chip:false,left:false,right:false,garden:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
+    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});await t.page.locator('.lb-touch').click();await t.page.locator('#subtitle.show').waitFor();await t.page.waitForTimeout(450);
+    const geo=await t.page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),top=r('.topbar'),sub=r('#subtitle'),side=r('.lb-side'),season=r('.lb-season'),view=r('.lb-view'),bar=r('.lb-bar'),dock=r('.lb-dock');
+      return {topbar:hit(top,season)||hit(top,view),side:hit(sub,side)||hit(side,bar),subtitle:hit(sub,bar),season:hit(season,side),dock:hit(bar,dock),overflow:document.documentElement.scrollWidth>innerWidth};});
+    assert.deepEqual(geo,{topbar:false,side:false,subtitle:false,season:false,dock:false,overflow:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
   }
   // Study loop: a wrong answer in the 10-pull quiz lands in the notebook and becomes today's star (no API key: the built-in explanation).
   {
     const rich=createProfile(NOW);rich.dreams=5000;const t=await boot(390,844,rich),{page}=t;
     await nav(page,'소환');await page.locator('[data-draw="10"]').click();
     assert.equal(await page.locator('#sheet[data-kind="quiz"] .quiz-choice').count(),4,'a 10-pull asks a concept question first');
-    const prompt=(await page.locator('.quiz-prompt').innerText()).trim(),asked=COURSE.concepts.find(c=>c.prompt===prompt);assert.ok(asked);
+    const prompt=(await page.locator('.quiz-prompt').innerText()).trim(),asked=allQuestions('concept').find(c=>c.prompt===prompt);assert.ok(asked);
     await page.locator(`[data-quiz-choice="${(asked.answer+1)%asked.choices.length}"]`).click();await page.locator('[data-action="quiz-go"]').click();
     assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);assert.equal((await profile(page)).dreams,4000);
     assert.deepEqual((await profile(page)).study.wrong.map(w=>w.id),[asked.id]);await close(page);
-    await nav(page,'홈');await page.locator('[data-action="library"]').click();await page.locator('.wrong-row').click();
+    await nav(page,'홈');await page.locator('[data-action="library"]').click();await page.locator('.lib-cta [data-action="today-star"]').click();await page.locator('.wrong-row').click();
     await page.locator('[data-light-star]:not([disabled])').click();await page.locator('.sky .star-dot.on').waitFor();
     assert.deepEqual([(await profile(page)).study.library.stars,(await profile(page)).study.wrong.length],[1,0]);
     await shot(page,'library',390,844);await t.context.close();
@@ -183,27 +187,26 @@ try{
     assert.equal(await page.locator('.nav-item').count(),5);await shot(page,'home',width,height);
     const navRect=await page.locator('#navigation').boundingBox();
     assert.ok(navRect.y>height-100,'navigation remains at the bottom');
-    await page.locator('[data-action="pet"]').click();assert.equal((await profile(page)).dreams,640);
-    await page.locator('#content [data-action="garden"]').click();await page.locator('.greenhouse').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.match(await page.locator('.bed-panel h3').innerText(),/Lv.1/);await shot(page,'greenhouse',width,height);
-    await nav(page,'동료');assert.equal(await page.locator('.collection-grid .hero-card').count(),30);
+    await page.locator('.lb-touch').click();assert.equal((await profile(page)).dreams,640);assert.equal(await page.locator('#greet-cue').count(),0);
+    await nav(page,'정원');await page.locator('.gd').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.equal(await page.locator('.bed[data-bed="rose"] .bed-level').innerText(),'Lv.1');
+    assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
+    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
-    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.collection-grid .hero-card').count(),12);
-    await page.locator('[data-action="owned"]').click();assert.equal(await page.locator('.collection-grid .hero-card').count(),0);
-    await page.locator('[data-action="owned"]').click();await page.locator('[data-filter="all"]').click();
-    await page.locator('.collection-grid [data-hero="star_boy"]').click();
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
+    await page.locator('.cards [data-hero="star_boy"]').click();
     assert.equal(await page.locator('#app').getAttribute('aria-hidden'),'true');
     await shot(page,'detail',width,height);await page.keyboard.press('Escape');assert.equal(await page.locator('#overlay').isVisible(),false);
     await nav(page,'소환');await shot(page,'summon',width,height);
     await page.locator('[data-action="rates"]').click();assert.match(await page.locator('#sheet-body').innerText(),/70.00%/);await close(page);
-    await page.locator('[data-draw="1"]').click();
-    assert.equal((await profile(page)).dreams,540);assert.equal((await profile(page)).history.length,1);
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/무료/);await page.locator('[data-draw="1"]').click();
+    assert.equal((await profile(page)).dreams,640);assert.equal((await profile(page)).daily.free,true);assert.equal((await profile(page)).history.length,1);
     assert.equal(await page.locator('.reveal-grid .hero-card').count(),1);await shot(page,'reveal',width,height);await close(page);
     await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
     assert.match(await page.locator('#sheet-body').innerText(),/0.100%/);await close(page);
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
-    await nav(page,'파견');assert.equal(await page.locator('.dispatch-card.locked').count(),4);await shot(page,'dispatch-locked',width,height);
-    await nav(page,'모험');assert.equal(await page.locator('.stage-row').count(),9);
-    await page.locator('[data-cycle="4"]').click();assert.match(await page.locator('.stage-list').innerText(),/45/);await page.locator('[data-cycle="0"]').click();
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/1회 소환/);
+    await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
     await page.locator('[data-prepare-stage="1"]').click();await page.locator('#sheet-footer [data-action="team"]').click();
     await page.locator('[data-action="save-team"]').click();
     assert.equal(await page.locator('[data-begin="main"]').count(),1,'team confirmation returns to preparation');
@@ -257,18 +260,19 @@ try{
   for(const h of HEROES){grown.heroes[h.id].owned=true;grown.heroes[h.id].copies=3;}
   grown.relics.hourglass={owned:true,enhance:2,copies:3};grown.equipped=['hourglass'];
   const test=await boot(390,844,grown),{page}=test;
-  await page.locator('[data-action="partner"]').click();await page.locator('[data-set-partner="luna"]').click();
+  await page.locator('[data-action="bond"]').click();await page.locator('#sheet-footer [data-action="partner"]').click();await page.locator('[data-set-partner="luna"]').click();
   assert.equal((await profile(page)).partner,'luna');await shot(page,'partner-luna',390,844);
-  await page.locator('[data-action="team"]').click();await page.locator('#sheet-body .five-line [data-team-pick="star_boy"]').click();
+  await page.locator('[data-action="prepare"]').click();await page.locator('#sheet-footer [data-action="team"]').click();await page.locator('#sheet-body .five-line [data-team-pick="star_boy"]').click();
   assert.equal(await page.locator('[data-action="save-team"]').isEnabled(),false);
   await page.locator('[data-action="focus-team"]').click();await page.locator('.choose-list [data-team-pick="queen"]').click();
-  await page.locator('[data-action="save-team"]').click();assert.ok((await profile(page)).deck.includes('queen'));
+  await page.locator('[data-action="save-team"]').click();assert.ok((await profile(page)).deck.includes('queen'));await close(page);
   await nav(page,'동료');await page.locator('[data-filter="UR"]').click();await shot(page,'ur-collection',390,844);
-  await page.locator('[data-collection="relic"]').click();await page.locator('.collection-grid [data-relic="hourglass"]').click();
+  await page.locator('[data-collection="relic"]').click();await page.locator('.cards [data-relic="hourglass"]').click();
   await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
-  await nav(page,'소환');await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
+  await nav(page,'소환');const fill=await profile(page);assert.equal(fill.pity.normal,0);
+  await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
   assert.equal((await profile(page)).relicDraws,10);assert.equal((await profile(page)).dreams,4200);await shot(page,'ten-relics',390,844);await close(page);
-  await nav(page,'파견');assert.equal(await page.locator('.dispatch-card.locked').count(),0);
+  await nav(page,'정원');assert.equal(await page.locator('.slot.locked').count(),0);
   await page.locator('[data-dispatch-slot="0"]').click();await page.locator('[data-send="queen"]').click();
   assert.equal((await profile(page)).dispatches[0].hero,'queen');assert.ok(!(await profile(page)).deck.includes('queen'));
   await shot(page,'dispatch-active',390,844);
@@ -334,10 +338,13 @@ try{
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
   assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,770);await shot(result.page,'result',390,844);
   await result.context.close();
+  const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
+  await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();
+  assert.equal((await profile(pity.page)).heroes.queen.owned,true);assert.equal((await profile(pity.page)).pity.normal,0);assert.equal(await pity.page.locator('.reveal-grid .hero-card').count(),1);await shot(pity.page,'pity-exchange',390,844);await pity.context.close();
   const sent=NOW-TUNING.dispatchHours*3600000,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
   command(returned,'dispatch',{slot:0,id:'queen'},sent);returned.clockAt=NOW;
-  const claim=await boot(390,844,returned);await nav(claim.page,'파견');
-  await claim.page.locator('[data-claim-dispatch="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
+  const claim=await boot(390,844,returned);await nav(claim.page,'정원');
+  await claim.page.locator('.slot.ready[data-dispatch-slot="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
   assert.ok((await profile(claim.page)).dreams>600);await claim.context.close();
   assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
   await fs.writeFile(path.join(output,name+'-verification.json'),JSON.stringify({browser:name,errors,externalRequests:requests,geometry},null,2));

@@ -16,7 +16,7 @@ export function topUpUnlocked(p){
   if(p.gifts)for(const id of Object.keys(p.gifts))p.gifts[id]=Math.max(p.gifts[id],30);
   // Study: a few wrong answers to try the star library; today's star and acceleration reopen on every load.
   const s=p.study;
-  if(s&&!s.wrong.length&&!s.library.index&&!s.library.stars)s.wrong=[...COURSE.concepts.map(c=>['concept',c.id]),...COURSE.terms.slice(0,3).map(t=>['term',t.id])].map(([kind,id])=>{const q=questionOf(kind,id);return {kind,id,choice:(q.answer+1)%q.choices.length,at:0};});
+  if(s&&!s.wrong.length&&!s.library.index&&!s.library.stars)s.wrong=[...COURSE.lectures.slice(0,3).map(l=>['concept',l.quizzes[0].id]),...COURSE.terms.slice(0,3).map(t=>['term',t.quizzes[0].id])].map(([kind,id])=>{const q=questionOf(kind,id);return {kind,id,choice:(q.answer+1)%q.choices.length,at:0};});
   if(s)s.library.day='';if(p.daily&&typeof p.daily.accel==='boolean')p.daily.accel=false;
   return p;
 }

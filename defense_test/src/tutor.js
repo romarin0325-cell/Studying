@@ -1,11 +1,11 @@
 // Rumi's explanation of a wrong answer through the Gemini API (the player's own key, entered in Settings).
 // The key lives only in this browser's localStorage (never in the save profile or its backups).
 import {COURSE} from './course.js';
-import {lectureById} from './quiz.js';
+import {lectureById,termById} from './quiz.js';
 
 const STORE='star-garden-tutor';
 const ROOT='https://generativelanguage.googleapis.com/v1beta/models';
-export const TUTOR_MODELS=Object.freeze([{id:'gemini-3.8-flash',label:'Flash (권장)'},{id:'gemini-3.5-flash-lite',label:'Flash Lite (빠름)'},{id:'gemini-2.5-pro',label:'Pro (깊이)'}]);
+export const TUTOR_MODELS=Object.freeze([{id:'gemini-3.8-flash',label:'Gemini 3.8 Flash · 빠름'},{id:'gemini-4-argon',label:'Gemini 4 Argon · 깊이'},{id:'gemini-3.5-flash-lite',label:'Gemini 3.5 Flash Lite · 가벼움'}]);
 export function tutorSettings(){try{const s=JSON.parse(localStorage.getItem(STORE)||'{}');return {key:typeof s.key==='string'?s.key:'',model:TUTOR_MODELS.some(m=>m.id===s.model)?s.model:TUTOR_MODELS[0].id};}catch{return {key:'',model:TUTOR_MODELS[0].id};}}
 export function saveTutorSettings({key,model}){try{localStorage.setItem(STORE,JSON.stringify({key:String(key||'').trim(),model}));return true;}catch{return false;}}
 export const hasTutor=()=>!!tutorSettings().key;
@@ -26,10 +26,12 @@ const PERSONA=`너는 별빛 정원의 대현자 '루미'야. 사용자를 "형�
   마지막에 루미의 짧은 응원 한마디.`;
 
 export function tutorPrompt(question,chosen){
-  const lecture=question.lecture?lectureById(question.lecture):null,letters='①②③④⑤⑥';
+  const lecture=question.lecture?lectureById(question.lecture):null,term=question.term?termById(question.term):null,letters='①②③④⑤⑥';
   return [`[문제] ${question.prompt}`,...question.choices.map((c,i)=>`${letters[i]} ${c}`),`[정답] ${letters[question.answer]} ${question.choices[question.answer]}`,
     chosen>=0&&chosen!==question.answer?`[형아가 고른 답] ${letters[chosen]} ${question.choices[chosen]}`:'',`[교재 해설] ${question.explain}`,
-    lecture?`[관련 강의] 제${lecture.no}강 ${lecture.title} — ${lecture.summary}\n${lecture.body.join('\n')}\n시험 포인트: ${lecture.point}`:''].filter(Boolean).join('\n');
+    question.source?`[출전] ${question.source}`:'',
+    lecture?`[관련 강의] 제${lecture.no}강 ${lecture.title}(${lecture.titleJa}) — ${lecture.core}\n${lecture.body.join('\n')}\n원칙: ${lecture.principles.join(' / ')}\n헷갈리기 쉬운 점: ${lecture.confusion}\n시험 포인트: ${lecture.point}`:'',
+    term?`[관련 용어] ${term.termJa} = ${term.termKo}\n${term.explain}\n시험 힌트: ${term.hint}`:''].filter(Boolean).join('\n');
 }
 // Returns the explanation text, or throws an Error with a Korean message.
 export async function explainWithRumi(question,chosen,{signal}={}){
