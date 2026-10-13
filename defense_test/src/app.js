@@ -361,7 +361,7 @@ function syncBattlePhase(){
 }
 function releaseMemorial(){
   memorialGeneration++;if(memorialImage){memorialImage.removeAttribute('src');memorialImage.remove();memorialImage=null;}
-  memorialHero=null;memorialPage=0;$('sheet')?.classList.remove('memory-art-only');
+  memorialHero=null;memorialPage=0;$('sheet')?.classList.remove('memory-art-only','mv-reading');
 }
 function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;syncBattlePhase();updateBattle();}
 function leave(){
