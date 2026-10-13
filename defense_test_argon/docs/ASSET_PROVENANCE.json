@@ -1,0 +1,943 @@
+{
+  "initialArtCommit": "d4c32cf",
+  "policy": "independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing",
+  "assets": [
+    {
+      "id": "unit-zeke",
+      "source": "defense_test_argon/assets/merge/units/zeke.webp",
+      "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-rumi",
+      "source": "defense_test_argon/assets/merge/units/rumi.webp",
+      "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-luna",
+      "source": "defense_test_argon/assets/merge/units/luna.webp",
+      "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-cinderella",
+      "source": "defense_test_argon/assets/merge/units/cinderella.webp",
+      "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-snow_rabbit",
+      "source": "defense_test_argon/assets/merge/units/snow_rabbit.webp",
+      "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-avalanche_maid",
+      "source": "defense_test_argon/assets/merge/units/avalanche_maid.webp",
+      "sha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-night_rabbit",
+      "source": "defense_test_argon/assets/merge/units/night_rabbit.webp",
+      "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-guardian",
+      "source": "defense_test_argon/assets/merge/units/guardian.webp",
+      "sha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-storm_sage",
+      "source": "defense_test_argon/assets/merge/units/storm_sage.webp",
+      "sha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-lightning_sage",
+      "source": "defense_test_argon/assets/merge/units/lightning_sage.webp",
+      "sha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-red_dragon",
+      "source": "defense_test_argon/assets/merge/units/red_dragon.webp",
+      "sha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-flame_sage",
+      "source": "defense_test_argon/assets/merge/units/flame_sage.webp",
+      "sha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-mushroom_king",
+      "source": "defense_test_argon/assets/merge/units/mushroom_king.webp",
+      "sha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-great_detective",
+      "source": "defense_test_argon/assets/merge/units/great_detective.webp",
+      "sha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-siren",
+      "source": "defense_test_argon/assets/merge/units/siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-phantom",
+      "source": "defense_test_argon/assets/merge/units/phantom.webp",
+      "sha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-queen",
+      "source": "defense_test_argon/assets/merge/units/queen.webp",
+      "sha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-galaxy_whale",
+      "source": "defense_test_argon/assets/merge/units/galaxy_whale.webp",
+      "sha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-silver_rabbit",
+      "source": "defense_test_argon/assets/merge/units/silver_rabbit.webp",
+      "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-ancient_dragon",
+      "source": "defense_test_argon/assets/merge/units/ancient_dragon.webp",
+      "sha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-time_ruler",
+      "source": "defense_test_argon/assets/merge/units/time_ruler.webp",
+      "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-doom",
+      "source": "defense_test_argon/assets/merge/units/doom.webp",
+      "sha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-santa",
+      "source": "defense_test_argon/assets/merge/units/santa.webp",
+      "sha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-jasmine",
+      "source": "defense_test_argon/assets/merge/units/jasmine.webp",
+      "sha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-star_boy",
+      "source": "defense_test_argon/assets/merge/units/star_boy.webp",
+      "sha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-time_magician",
+      "source": "defense_test_argon/assets/merge/units/time_magician.webp",
+      "sha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-cherry_prince",
+      "source": "defense_test_argon/assets/merge/units/cherry_prince.webp",
+      "sha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-frost_witch",
+      "source": "defense_test_argon/assets/merge/units/frost_witch.webp",
+      "sha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-harmonious",
+      "source": "defense_test_argon/assets/merge/units/harmonious.webp",
+      "sha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-aurora",
+      "source": "defense_test_argon/assets/merge/units/aurora.webp",
+      "sha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "garden",
+      "source": "defense_test_argon/assets/merge/garden.webp",
+      "sha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
+      "width": 1100,
+      "height": 1100
+    },
+    {
+      "id": "summon-altar",
+      "source": "defense_test_argon/assets/merge/summon-altar.webp",
+      "sha256": "b8923879377378b2391eb683c4280e0102f49cb5d42f53c973049df0105c5c93",
+      "width": 720,
+      "height": 1290
+    },
+    {
+      "id": "greenhouse",
+      "source": "defense_test_argon/assets/merge/greenhouse.webp",
+      "sha256": "15176cc961a0935db67a9afbe75ecaef7339d3cbb1f190ac266a0220dabedcbc",
+      "width": 720,
+      "height": 1290
+    },
+    {
+      "id": "greenhouse-beds",
+      "source": "defense_test_argon/assets/merge/greenhouse-beds.webp",
+      "sha256": "708d2dc9e9c2c4928ed87cbe557580c8b0e008d0db412f1a2ab3c58a5be41ef5",
+      "width": 768,
+      "height": 576
+    },
+    {
+      "id": "gifts",
+      "source": "defense_test_argon/assets/merge/gifts.webp",
+      "sha256": "c0a3e57c8aa7f7a8a0d97e1dbea448839091a875740aa924ffbce241ffeeafaf",
+      "width": 768,
+      "height": 256
+    },
+    {
+      "id": "fx-emblems",
+      "source": "defense_test_argon/assets/merge/fx-emblems.webp",
+      "sha256": "d9ec70d8fb8a555051177b657ed93762e403013e8cea71eb1d2d484d33536450",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "bosses",
+      "source": "defense_test_argon/assets/moonlit/realm-bosses.webp",
+      "sha256": "d26e27ba3ca5092766316523c151bbedcb68e0c07304b0d6aeadc71fd7ade085",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "creatures",
+      "source": "defense_test_argon/assets/moonlit/creatures.webp",
+      "sha256": "15a07ee511f0a16ec75b7cef56b6c9fc55468c0d62c0327afc3f117394480490",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "id": "relics",
+      "source": "defense_test_argon/assets/merge/relics.webp",
+      "sha256": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
+      "width": 1280,
+      "height": 1024
+    },
+    {
+      "id": "blessings",
+      "source": "defense_test_argon/assets/merge/blessings.webp",
+      "sha256": "8b06bb14d3b00896c374e3af44baa5c27474408c52f8d23f0c753af91c233b30",
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "id": "effects",
+      "source": "defense_test_argon/assets/merge/effects.webp",
+      "sha256": "4153276d72d2ce2edf37bb7b913f7353a87f3c17e852f7bd4e839d13648a583b",
+      "width": 1792,
+      "height": 768
+    },
+    {
+      "id": "unit-trauma",
+      "source": "defense_test_argon/assets/merge/units/trauma.webp",
+      "sha256": "a342de6a9b249f3115995392d42c87a03e6b6ec8abcf6a9cf4132ca72a93e3eb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "effects-expansion",
+      "source": "defense_test_argon/assets/merge/effects-expansion.webp",
+      "sha256": "b752df529b96655a1bdb3df7c413394a5cf1a7f6359e17dd3d1a32bbe88f12b0",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "finishers",
+      "source": "defense_test_argon/assets/merge/finishers.webp",
+      "sha256": "9bacb4119fd38a8787e1bd088125ec655153bb8faea6617a92192d8c66a49d1b",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "relics-expansion",
+      "source": "defense_test_argon/assets/merge/relics-expansion.webp",
+      "sha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "id": "bosses-expansion",
+      "source": "defense_test_argon/assets/merge/bosses-expansion.webp",
+      "sha256": "562a35ce80ba7f59a55b0d7a312b74edeb035d17c09ca3ac76188bb221e3f3ae",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "realms-expansion",
+      "source": "defense_test_argon/assets/merge/realms-expansion.webp",
+      "sha256": "5f7e4e9d4d7816f37e8ab62dd4f58f77d987c9ea7cbcb4b762f7e71e2a7bfd64",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "effects-trio",
+      "source": "defense_test_argon/assets/merge/effects-trio.webp",
+      "sha256": "66e9b71290e5326bf7b1f26990ed744da49975a926b5e67867ffd7aaa19dda17",
+      "width": 768,
+      "height": 512
+    },
+    {
+      "id": "ultimates",
+      "source": "defense_test_argon/assets/merge/ultimates.webp",
+      "sha256": "3e8f54fd40b53dec39d3fd16207452f4a9afcb52c9d9022005679a6f1f672cc7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "ancient-cross",
+      "source": "defense_test_argon/assets/merge/ancient-cross.webp",
+      "sha256": "3ade30167b6bf2ab88ebc7f07a2a0b4e22cd03ed9e2e9e194d1e130fee101239",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "zeke-cone",
+      "source": "defense_test_argon/assets/merge/zeke-cone.webp",
+      "sha256": "d40f2030646e9030f06e9dcb16d893bf9914a2a7bf17c1fe36216b4f6d82c7c0",
+      "width": 1024,
+      "height": 1024
+    }
+  ],
+  "font": {
+    "source": "defense_test_argon/assets/Jua-Regular.woff2",
+    "sha256": "cb995145eb03afc3ca5d714471d2183f58d56ed571001321e109170b421abcda",
+    "license": {
+      "source": "defense_test_argon/assets/Jua-OFL.txt",
+      "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
+    }
+  },
+  "portraits": 30,
+  "relics": 24,
+  "memorial": [
+    {
+      "id": "star_boy",
+      "source": "defense_test_argon/assets/memorial/star_boy.avif",
+      "sha256": "1800a06fdd3da1c5ae7ad8576d51f27ff28f575472adf43eb1d66c9ed8be68f5",
+      "width": 720,
+      "height": 1080,
+      "bytes": 41460,
+      "sourceSha256": "215c78af955b7378bd61f4524f4396c56e189dc488c1ed0f2365f8c91568e8a1",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/star_boy.webp",
+        "sha256": "6c41dffb11c60b363ae594e5dee5155f91ba6386382016e9770872d540c1dadd",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80208,
+        "quality": 82
+      }
+    },
+    {
+      "id": "snow_rabbit",
+      "source": "defense_test_argon/assets/memorial/snow_rabbit.avif",
+      "sha256": "cb7be0c00c14018897539c586e7d3e80ea2b1a17051d4979d17aa3dfe536f24e",
+      "width": 720,
+      "height": 1080,
+      "bytes": 30513,
+      "sourceSha256": "30aad3b317c52b25de38877d33256ee039f2644b7b8dee0e2305bfa2f78b8eb2",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/snow_rabbit.webp",
+        "sha256": "dbe385fdf0495d28d35fc8e9bace7db17190a828b2cdf5ac0aaff64d998b8ca3",
+        "width": 720,
+        "height": 1080,
+        "bytes": 53166,
+        "quality": 82
+      }
+    },
+    {
+      "id": "silver_rabbit",
+      "source": "defense_test_argon/assets/memorial/silver_rabbit.avif",
+      "sha256": "311d1b32df01496ca947accd0349c603278b2df129c9a65a48a1f9644bf7cfcf",
+      "width": 720,
+      "height": 1080,
+      "bytes": 28768,
+      "sourceSha256": "bbdf5872b3b73495f87e208b454ae9ec3f671e48edbc3095e26d9a596de9f342",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/silver_rabbit.webp",
+        "sha256": "81e3d74230c042d38987feecc21709bb7d4003ae29c6e8aa4c5ad969d15d39d6",
+        "width": 720,
+        "height": 1080,
+        "bytes": 50996,
+        "quality": 82
+      }
+    },
+    {
+      "id": "night_rabbit",
+      "source": "defense_test_argon/assets/memorial/night_rabbit.avif",
+      "sha256": "9f3850ffaee53557ed4fe0c2f6122eb87f5d34d0b186da8464ea271becd9a403",
+      "width": 720,
+      "height": 1080,
+      "bytes": 35333,
+      "sourceSha256": "40f70d1cb9ab69b6384d15175846399b796e7af584e08d55923a8708b93d5ecc",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/night_rabbit.webp",
+        "sha256": "b3e61b61d4a4c464cb09fd36c001745048f6406af552a4d1059d002bb9500709",
+        "width": 720,
+        "height": 1080,
+        "bytes": 57602,
+        "quality": 82
+      }
+    },
+    {
+      "id": "siren",
+      "source": "defense_test_argon/assets/memorial/siren.avif",
+      "sha256": "7fa8310f9dad7e5af3a9e87767be1bd2bf7d63fbcfdabf8faf158b924ce5867b",
+      "width": 720,
+      "height": 1080,
+      "bytes": 33631,
+      "sourceSha256": "531d4cfa807887ade7a560a1f738fbab86e95ebdda5dbcbd231d946b53faba7a",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/siren.webp",
+        "sha256": "8a9707ce0628a7dda79ffe5c8bec10ff7ff4118561a5566904668ee8217c994c",
+        "width": 720,
+        "height": 1080,
+        "bytes": 60352,
+        "quality": 82
+      }
+    },
+    {
+      "id": "mushroom_king",
+      "source": "defense_test_argon/assets/memorial/mushroom_king.avif",
+      "sha256": "73ea358e33e64d5ec0ecd9192e73464874c41a5041610a6cc932bbe38b7bca87",
+      "width": 720,
+      "height": 1080,
+      "bytes": 46868,
+      "sourceSha256": "472a82f550dbaacdc90eb7ee40ebcfadd8b8eb5235fb3d5c8b803b31b2785a96",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/mushroom_king.webp",
+        "sha256": "13378ad2613ced6340beebb75169d05b917ce5c32978c0ae522621db65337161",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80110,
+        "quality": 82
+      }
+    },
+    {
+      "id": "great_detective",
+      "source": "defense_test_argon/assets/memorial/great_detective.avif",
+      "sha256": "05f879a26fae3fed9c20be4e9af8a881913e21f41c875e56ce2ff943b3e45118",
+      "width": 720,
+      "height": 1080,
+      "bytes": 42578,
+      "sourceSha256": "a7d71c968d9d5dfe1ecac2088cd39a24fba13759e9b6007b3a8a1e6e105d5dc9",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/great_detective.webp",
+        "sha256": "7958dd96b1bc706a2057c54b7bc7fb4b5a1cd12e26fc5ee9988ddad4f5e21614",
+        "width": 720,
+        "height": 1080,
+        "bytes": 76428,
+        "quality": 82
+      }
+    },
+    {
+      "id": "guardian",
+      "source": "defense_test_argon/assets/memorial/guardian.avif",
+      "sha256": "4befe6503713210f33f09abdd8fdb5efccb98dbee37d991116cb51dbb6672897",
+      "width": 720,
+      "height": 1080,
+      "bytes": 41283,
+      "sourceSha256": "287416cdae8a9cd848ba9389d50c0f2dea1788b56d0d8f7974a77a3defda1667",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/guardian.webp",
+        "sha256": "923afd6d716fca0f3d7ff02147332578c5f2642efa426dfb755665fe8a7496ad",
+        "width": 720,
+        "height": 1080,
+        "bytes": 71160,
+        "quality": 82
+      }
+    },
+    {
+      "id": "avalanche_maid",
+      "source": "defense_test_argon/assets/memorial/avalanche_maid.avif",
+      "sha256": "c35949d91c9f79a838afdeb1602ebb0839d6b69a786264c410437856f687ee0f",
+      "width": 720,
+      "height": 1080,
+      "bytes": 35417,
+      "sourceSha256": "fce05681606823da67f8193e6cfe62912f73cec88ea0e4c3e664dccc4c952c3d",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/avalanche_maid.webp",
+        "sha256": "a64c281f668e40e035791565ea7679cc31b05cc8920d12d0f8c12010c8a95cf3",
+        "width": 720,
+        "height": 1080,
+        "bytes": 63696,
+        "quality": 82
+      }
+    },
+    {
+      "id": "santa",
+      "source": "defense_test_argon/assets/memorial/santa.avif",
+      "sha256": "9a069964ba7f75e732a1031f06c10b69e49f9c92dd3aade368038ff4e5ecfa25",
+      "width": 720,
+      "height": 1080,
+      "bytes": 48559,
+      "sourceSha256": "5014c9169f0854c712c6e95e609c48e82b0335abe5153f85747f2b7f99444820",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/santa.webp",
+        "sha256": "4f1bca17d5378cfec36d483bc588416b2222b3f72bf208c4284d59dd69e60feb",
+        "width": 720,
+        "height": 1080,
+        "bytes": 83368,
+        "quality": 82
+      }
+    },
+    {
+      "id": "red_dragon",
+      "source": "defense_test_argon/assets/memorial/red_dragon.avif",
+      "sha256": "38403a482ba4986349a4f4a7b7a001f4bb94bda08f4dc945732114b3bee2659e",
+      "width": 720,
+      "height": 1080,
+      "bytes": 46661,
+      "sourceSha256": "308bbdbc8371d4c2fd430d2a67ab284929be9e727d0d1823468d65ef2eab8631",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/red_dragon.webp",
+        "sha256": "9e80fa15178db815f1755fd4273876e9dddf18176f0f4940d35ab4c1fd0c47af",
+        "width": 720,
+        "height": 1080,
+        "bytes": 87830,
+        "quality": 82
+      }
+    },
+    {
+      "id": "aurora",
+      "source": "defense_test_argon/assets/memorial/aurora.avif",
+      "sha256": "99116c6ee542692f615a74ccae0c54a7d67f8f94b9c9d57cbefb61f920168445",
+      "width": 720,
+      "height": 1080,
+      "bytes": 45903,
+      "sourceSha256": "971b79f4b540399cd5891c560ea19c15251755671072ae22aadb080b1999b9c4",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/aurora.webp",
+        "sha256": "0f327ba639993bd87a813fb6d1d0cb306626aa9aac68cdbd69ae5612c23c7cc0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 86200,
+        "quality": 82
+      }
+    },
+    {
+      "id": "storm_sage",
+      "source": "defense_test_argon/assets/memorial/storm_sage.avif",
+      "sha256": "f60dffacb1e12b4234c48088d306e346896e1f3500abdf421a0ba19b92a8d004",
+      "width": 720,
+      "height": 1080,
+      "bytes": 40804,
+      "sourceSha256": "cfb5b45b3fa7ff4189fbe175773ce1d847c500c6dcc69fc5fb5cfbe729d485ab",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/storm_sage.webp",
+        "sha256": "f0faa6e0589e608a01dba3e36356eea01607c2ab01723b43d8587305f1fb85cf",
+        "width": 720,
+        "height": 1080,
+        "bytes": 72664,
+        "quality": 82
+      }
+    },
+    {
+      "id": "flame_sage",
+      "source": "defense_test_argon/assets/memorial/flame_sage.avif",
+      "sha256": "e0f19769aea4e501dc20a307ce183af4a16a78cfa80b8949604726ad2e2a8266",
+      "width": 720,
+      "height": 1080,
+      "bytes": 41668,
+      "sourceSha256": "5d533310879e454c1c8aecf28d648ac291948c707b047ed7577e84266aaf9728",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/flame_sage.webp",
+        "sha256": "f83e7dd252226ec1bda701235af7e51d2a9417d9fd8a05b01d2ce558c27281eb",
+        "width": 720,
+        "height": 1080,
+        "bytes": 75208,
+        "quality": 82
+      }
+    },
+    {
+      "id": "lightning_sage",
+      "source": "defense_test_argon/assets/memorial/lightning_sage.avif",
+      "sha256": "336914bb73634f7371dc4ade3f2cd81fa6dd4201a446cf8c47b108b6aafcb63e",
+      "width": 720,
+      "height": 1080,
+      "bytes": 38682,
+      "sourceSha256": "6a87f0e8c4884bd5105cc3f461d847aed162cd3052df6267b37f5b994955f6a1",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/lightning_sage.webp",
+        "sha256": "9238b74fed639ce7f232838094f95f29528d3239f0ea666b33917ac71b24e723",
+        "width": 720,
+        "height": 1080,
+        "bytes": 71038,
+        "quality": 82
+      }
+    },
+    {
+      "id": "time_magician",
+      "source": "defense_test_argon/assets/memorial/time_magician.avif",
+      "sha256": "dd1221c02f1ddca41891609f7662ac5062b88b16c6cfc0c4cd6ab241bcbf265c",
+      "width": 720,
+      "height": 1080,
+      "bytes": 43432,
+      "sourceSha256": "fb0a15a674c30d2ba40692634e2883fc7ac4c99b65b3832ad9e3343e96808c3e",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/time_magician.webp",
+        "sha256": "b42a90ab7f06a304d01c818d39ab046c9015a5df8fab8b8532e42a4c612847f8",
+        "width": 720,
+        "height": 1080,
+        "bytes": 79582,
+        "quality": 82
+      }
+    },
+    {
+      "id": "ancient_dragon",
+      "source": "defense_test_argon/assets/memorial/ancient_dragon.avif",
+      "sha256": "aa83e8a8902ee1617b35830c17b6d102f53acd6a384279ad18893db1ad688688",
+      "width": 720,
+      "height": 1080,
+      "bytes": 39973,
+      "sourceSha256": "868589fb42ba63bdf95de3e442194ab1c23d66e9a01e6f5de5fcbec6c4a7a154",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/ancient_dragon.webp",
+        "sha256": "52030a12be7335f8981e332d4cd0ffd9b8045058f886012af92eb8fb884b6ed9",
+        "width": 720,
+        "height": 1080,
+        "bytes": 75008,
+        "quality": 82
+      }
+    },
+    {
+      "id": "phantom",
+      "source": "defense_test_argon/assets/memorial/phantom.avif",
+      "sha256": "407991a42dd8c71737d6a314f7c7fd81d949c2972bad67bd31ef2de79973d672",
+      "width": 720,
+      "height": 1080,
+      "bytes": 25605,
+      "sourceSha256": "dc22decf55171087470a15963cf7a2896c86e1c6cf8b1043fd7f578aa0882eee",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/phantom.webp",
+        "sha256": "b1ef0d414d0f5637a111af608e04f6f830a355ae7bb03e3f6c513b98af60d1c0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 45138,
+        "quality": 82
+      }
+    },
+    {
+      "id": "zeke",
+      "source": "defense_test_argon/assets/memorial/zeke.avif",
+      "sha256": "49d42a711712ce66ca4227d9e12464c30b7fd310a7a77c112355b094317cf9ca",
+      "width": 720,
+      "height": 1080,
+      "bytes": 44866,
+      "sourceSha256": "09f3dea4cf4ae7aae4b29676984540008da085a3d3d792fe458ee9849b43a3e8",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/zeke.webp",
+        "sha256": "4e86b97b3414ab4d20a59381d315471b60c38222831c290ddb70dfa5c9dd4752",
+        "width": 720,
+        "height": 1080,
+        "bytes": 83926,
+        "quality": 82
+      }
+    },
+    {
+      "id": "luna",
+      "source": "defense_test_argon/assets/memorial/luna.avif",
+      "sha256": "1bb311e12b3ee48e41221ddde8444205e0a3d056ec9164b7e89224efe4f09946",
+      "width": 720,
+      "height": 1080,
+      "bytes": 40024,
+      "sourceSha256": "e0e6ddde7f62aedd4b13c443e6f553b10b7f8f81b517d6c5c5373f5bae667331",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/luna.webp",
+        "sha256": "dd35e79940115a2d9011ab73c5c3c9aa948a9159b012adb237034062a3fa54b2",
+        "width": 720,
+        "height": 1080,
+        "bytes": 68404,
+        "quality": 82
+      }
+    },
+    {
+      "id": "jasmine",
+      "source": "defense_test_argon/assets/memorial/jasmine.avif",
+      "sha256": "c16dafd982a15063c12851786c7ff66195a21353ef560acade7158ae478f1000",
+      "width": 720,
+      "height": 1080,
+      "bytes": 34799,
+      "sourceSha256": "816db584a8f225ae21e9ade7b6cb66179df2088dbd5df0ee3333fa967d389cd1",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/jasmine.webp",
+        "sha256": "5ad029a6b5ac78aa5b5561f2522542413200143bc2d9d01c951e533ed4d7455f",
+        "width": 720,
+        "height": 1080,
+        "bytes": 60290,
+        "quality": 82
+      }
+    },
+    {
+      "id": "queen",
+      "source": "defense_test_argon/assets/memorial/queen.avif",
+      "sha256": "65a95d0043bccbd14ea5d17cac4932a47b8a1ac59f62bab444c6aac58f629a73",
+      "width": 720,
+      "height": 1080,
+      "bytes": 42846,
+      "sourceSha256": "3a441d6e25adbea2ceed7ea817878c80bf0280804842f81d718440637430ea1e",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/queen.webp",
+        "sha256": "9fd6f23c9feac602caf9b8319ac42426913eb0df9034127c4e08ca97941e387e",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80772,
+        "quality": 82
+      }
+    },
+    {
+      "id": "rumi",
+      "source": "defense_test_argon/assets/memorial/rumi.avif",
+      "sha256": "f9f57c92b204ba4319642c945981317b6645b1c2066b0d83cbaf82232dd3b58a",
+      "width": 720,
+      "height": 1080,
+      "bytes": 36347,
+      "sourceSha256": "b6f052645b5d8dd302abc0a46bd668b34d1f96a496015b42be92a97d9fa39001",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/rumi.webp",
+        "sha256": "809f741137f6b46400f8b6d9d16775d3081d82cea937891f648e48eaef6eac8c",
+        "width": 720,
+        "height": 1080,
+        "bytes": 64782,
+        "quality": 82
+      }
+    },
+    {
+      "id": "cherry_prince",
+      "source": "defense_test_argon/assets/memorial/cherry_prince.avif",
+      "sha256": "b7a96447d4f60365c452e2f0eafa585d60d06c85f00e5dee8149dc09766157aa",
+      "width": 720,
+      "height": 1080,
+      "bytes": 42814,
+      "sourceSha256": "d545d56a1998e228d3721e93bb3abb194eb9dff8b45a5488ba81c097295c1ef3",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/cherry_prince.webp",
+        "sha256": "aab03fde6bdf95a5bb37d504d120880f32f2b94f5dbdfc061a7f614697e142b8",
+        "width": 720,
+        "height": 1080,
+        "bytes": 76322,
+        "quality": 82
+      }
+    },
+    {
+      "id": "time_ruler",
+      "source": "defense_test_argon/assets/memorial/time_ruler.avif",
+      "sha256": "e07725d08765d6267143901ac94953e22d562824b04a76bfd3fa6e64a2ff9de6",
+      "width": 720,
+      "height": 1080,
+      "bytes": 41522,
+      "sourceSha256": "c8356cbd5d0c1871f90d9429a8d8916a08a8df2a1290999d816fe9d90660e734",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/time_ruler.webp",
+        "sha256": "8bf0b229aedb4b8bddce9948d55ee67f2a946d2b87ae0cdfe5b864f29c0fea2a",
+        "width": 720,
+        "height": 1080,
+        "bytes": 79496,
+        "quality": 82
+      }
+    },
+    {
+      "id": "galaxy_whale",
+      "source": "defense_test_argon/assets/memorial/galaxy_whale.avif",
+      "sha256": "c03acecbb8421b6de612be0e95a48a59101b3967a464f0c4ae89a77c2279d9d1",
+      "width": 720,
+      "height": 1080,
+      "bytes": 51223,
+      "sourceSha256": "d55a5147287a97d182091f683d55ee97c9a349030879950cf78166988e613ca8",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/galaxy_whale.webp",
+        "sha256": "247a91145c3efa696b68f13229966a25f2c92f8a4d6d00969763a23a8bb9f0ee",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95642,
+        "quality": 80
+      }
+    },
+    {
+      "id": "doom",
+      "source": "defense_test_argon/assets/memorial/doom.avif",
+      "sha256": "eaa2c2c0cd8bf0e0614d661299f6d5edec43c05526431f3d91bdda7037155e55",
+      "width": 720,
+      "height": 1080,
+      "bytes": 47475,
+      "sourceSha256": "b314320f6fdcf0f850838e542408181c22c10534401e6b7da19531578f30759e",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/doom.webp",
+        "sha256": "995906b5a9c88dad17c52cc5f7bd785875289938a5c47eab3c254b6752a2bac5",
+        "width": 720,
+        "height": 1080,
+        "bytes": 87196,
+        "quality": 82
+      }
+    },
+    {
+      "id": "cinderella",
+      "source": "defense_test_argon/assets/memorial/cinderella.avif",
+      "sha256": "a75efd967ed5cf4da0fc1f875bdfac280e26ebf00102350bbb3db7855e3d7649",
+      "width": 720,
+      "height": 1080,
+      "bytes": 46472,
+      "sourceSha256": "43b8814323f762ed80454a6ae3967a34ce11b23c6bd6bbf40d123253512470c5",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/cinderella.webp",
+        "sha256": "c22a63016e64196da000e33cf46e8c92a1a85608dccbb90bcda02105c27b7d70",
+        "width": 720,
+        "height": 1080,
+        "bytes": 80764,
+        "quality": 82
+      }
+    },
+    {
+      "id": "harmonious",
+      "source": "defense_test_argon/assets/memorial/harmonious.avif",
+      "sha256": "034355d2f6b300eb9b6a381a1a147a766a7e278eec784144be63ddaf99087570",
+      "width": 720,
+      "height": 1080,
+      "bytes": 49488,
+      "sourceSha256": "d6afd7300137281012382a60a59998372d57e16d1929e2709a6800f76d804c81",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/harmonious.webp",
+        "sha256": "2b44a4b65e1b180e22da6330fd43e249ef29cd491ef571fc7938b487aa6859a5",
+        "width": 720,
+        "height": 1080,
+        "bytes": 91744,
+        "quality": 82
+      }
+    },
+    {
+      "id": "frost_witch",
+      "source": "defense_test_argon/assets/memorial/frost_witch.avif",
+      "sha256": "81beb61c359894092ad2731e2919886c240c5573537c0612287c50430a681f8b",
+      "width": 720,
+      "height": 1080,
+      "bytes": 55639,
+      "sourceSha256": "2f1232f7525d1883b6067159a768e6b87cbfce0c03bc297a5fb7a0bf04866d7f",
+      "webp": {
+        "source": "defense_test_argon/assets/memorial-webp/frost_witch.webp",
+        "sha256": "be82b01f1e5cd48cfe34e92fe603d468fb5393be9d2fede5139295ced86afa8b",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95448,
+        "quality": 78
+      }
+    }
+  ],
+  "library": [
+    {
+      "id": "boat",
+      "source": "defense_test_argon/assets/library/boat.webp",
+      "sha256": "ed2a624c5edbf18481437960c854e670c97190b13bf3f214dbd4f41d9182a3da",
+      "width": 720,
+      "height": 540,
+      "bytes": 32722
+    },
+    {
+      "id": "hat",
+      "source": "defense_test_argon/assets/library/hat.webp",
+      "sha256": "bdadaafeb5a5eb25560e86177d2359d3e29d79cfeb6317e44026bd356ee690a6",
+      "width": 608,
+      "height": 1080,
+      "bytes": 55280
+    },
+    {
+      "id": "door",
+      "source": "defense_test_argon/assets/library/door.webp",
+      "sha256": "9ee71f3972bb10670a0d28d7eba61bd1f6c1a93b1c521d1a9bf61d0d92024fe1",
+      "width": 720,
+      "height": 900,
+      "bytes": 50984
+    },
+    {
+      "id": "window",
+      "source": "defense_test_argon/assets/library/window.webp",
+      "sha256": "53b308e6cdb80d41309e760818b436552852e57d6ac184234830ebab8519cb35",
+      "width": 720,
+      "height": 720,
+      "bytes": 43054
+    },
+    {
+      "id": "letter",
+      "source": "defense_test_argon/assets/library/letter.webp",
+      "sha256": "6e6cf7de5bdc3fc6d305ca42afbed250dd068b24741bf800d707c6a4797f12d2",
+      "width": 614,
+      "height": 1080,
+      "bytes": 75114
+    },
+    {
+      "id": "rabbit",
+      "source": "defense_test_argon/assets/library/rabbit.webp",
+      "sha256": "37e5d7afe154ed92b4a7982e9d59dd7e1278379f19f84f3be5d254214ef03172",
+      "width": 720,
+      "height": 900,
+      "bytes": 62010
+    },
+    {
+      "id": "moon",
+      "source": "defense_test_argon/assets/library/moon.webp",
+      "sha256": "1634e2cff682062f1cbd1352b28838903ae023c77e027a0d6a24bde65da3f89c",
+      "width": 720,
+      "height": 720,
+      "bytes": 62542
+    }
+  ]
+}

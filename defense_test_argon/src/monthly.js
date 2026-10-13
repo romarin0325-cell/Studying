@@ -1,0 +1,27 @@
+import {HERO,TIERS,TIER_IDS,CHALLENGE_WAVES} from './content.js';
+import {calendar} from './economy.js';
+import {TEAM_SIZE} from './team-config.js';
+
+const tierOf=r=>r?.tier||'easy',rankOf=r=>TIER_IDS.indexOf(tierOf(r));
+// Rewards: base plus a share per wave/boss and a full-clear bonus, scaled by tier.
+export const weeklyReward=(tier,round,won)=>Math.round((100+25*Math.min(round,CHALLENGE_WAVES)+(won?100:0))*(TIERS[tier]||TIERS.easy).reward);
+export const monthlyReward=record=>Math.round((100+35*Math.min(record.round,CHALLENGE_WAVES)+(record.round>=CHALLENGE_WAVES?150:0))*(TIERS[tierOf(record)]||TIERS.easy).reward);
+// Higher tier first, then more bosses, then more damage.
+export const betterRecord=(a,b)=>!b||rankOf(a)>rankOf(b)||rankOf(a)===rankOf(b)&&(a.round>b.round||a.round===b.round&&a.damage>b.damage);
+export const currentRecord=(p,now)=>p.monthlyBest?.period===calendar(now).month?p.monthlyBest:null;
+export function validRecord(r){
+  return r===null||!!r&&/^\d{4}-\d{2}$/.test(r.period)&&typeof r.token==='string'&&r.token.length<=100&&
+    Number.isSafeInteger(r.round)&&r.round>=0&&r.round<=1000&&Number.isFinite(r.damage)&&r.damage>=0&&r.damage<1e100&&
+    Number.isFinite(r.seconds)&&r.seconds>=0&&r.seconds<1e100&&Number.isSafeInteger(r.at)&&r.at>=0&&
+    calendar(r.at).month===r.period&&(r.tier===undefined||!!TIERS[r.tier])&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===TEAM_SIZE&&r.deck.every(id=>HERO[id]);
+}
+export function migrateMonthly(p){
+  if(Object.hasOwn(p,'monthlyBest'))return;
+  // The old marker meant entry consumed, and finished attempts paid instantly.
+  // Preserve those paid months. A still-active old attempt has not paid yet.
+  const records=(p.results||[]).filter(r=>r.mode==='monthly').map(r=>({period:calendar(r.at).month,token:`legacy-${r.at}`,round:r.round,damage:0,seconds:0,at:r.at,deck:[...p.deck]}));
+  p.monthlyBest=records.find(r=>r.period===p.monthly)||null;
+  p.monthlyLifetime=records.reduce((best,r)=>betterRecord(r,best)?r:best,null);
+  p.monthlyClaim=p.monthlyBest;
+  if(p.active?.mode==='monthly'&&!p.monthlyBest)p.monthly=null;
+}

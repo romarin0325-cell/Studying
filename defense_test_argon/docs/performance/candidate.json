@@ -1,0 +1,138 @@
+{
+  "label": "candidate",
+  "baselineSha": "415e2b5c6d6bca69cf9c902b8943f754a0dd5058",
+  "sourceHead": "753d6a06ee0bbb36e9938903ffd6ee9bde553ad5",
+  "artifactSha256": "92a641c58ccfa8927a0a25fb4ded8eecb77b719c04b4b84199ca61b0c721e303",
+  "fixtureSha256": "105ea68229edfabded8b444713b7f10f046cd979b68b12c7635714a3278b66e0",
+  "seed": 324508639,
+  "visualSeed": 610839777,
+  "browser": "147.0.7727.15",
+  "viewport": [
+    390,
+    844
+  ],
+  "deviceScaleFactor": 2,
+  "rafDelivery": "synthetic 120 callback Hz over native headless RAF",
+  "records": [
+    {
+      "scenario": "opening",
+      "elapsedMs": 8014,
+      "renderFps": 59.89518342899925,
+      "renderCallbacks": 480,
+      "callbackCpuMs": {
+        "median": 8.299999952316284,
+        "p95": 12.5,
+        "max": 18.799999952316284
+      },
+      "saveCount": 1,
+      "saveBytes": [
+        10266
+      ],
+      "saveWriteMs": [
+        0.10000014305114746
+      ],
+      "canvasDpr": 1.5,
+      "simulationTime": 9.650000000000002,
+      "metrics": {
+        "renders": 575,
+        "steps": 193,
+        "saveWrites": 3,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1.5,
+        "particles": 8,
+        "impacts": 2
+      },
+      "errors": []
+    },
+    {
+      "scenario": "paused",
+      "elapsedMs": 2510,
+      "renderFps": 11.952191235059763,
+      "renderCallbacks": 30,
+      "callbackCpuMs": {
+        "median": 0.39999985694885254,
+        "p95": 0.7000000476837158,
+        "max": 0.7000000476837158
+      },
+      "saveCount": 0,
+      "saveBytes": [],
+      "saveWriteMs": [],
+      "canvasDpr": 1.5,
+      "simulationTime": 9.700000000000003,
+      "metrics": {
+        "renders": 609,
+        "steps": 194,
+        "saveWrites": 4,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1.5,
+        "particles": 0,
+        "impacts": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "stress",
+      "elapsedMs": 8015,
+      "renderFps": 41.048034934497814,
+      "renderCallbacks": 329,
+      "callbackCpuMs": {
+        "median": 20,
+        "p95": 24.90000009536743,
+        "max": 39.200000047683716
+      },
+      "saveCount": 1,
+      "saveBytes": [
+        44826
+      ],
+      "saveWriteMs": [
+        0.40000009536743164
+      ],
+      "canvasDpr": 1.5,
+      "simulationTime": 12.000000000000036,
+      "metrics": {
+        "renders": 392,
+        "steps": 195,
+        "saveWrites": 3,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1.5,
+        "particles": 169,
+        "impacts": 7
+      },
+      "errors": []
+    },
+    {
+      "scenario": "ultimate-stress",
+      "elapsedMs": 4031,
+      "renderFps": 38.203919622922356,
+      "renderCallbacks": 154,
+      "callbackCpuMs": {
+        "median": 19.5,
+        "p95": 26.299999952316284,
+        "max": 38.30000019073486
+      },
+      "saveCount": 0,
+      "saveBytes": [],
+      "saveWriteMs": [],
+      "canvasDpr": 1.5,
+      "simulationTime": 16.400000000000098,
+      "metrics": {
+        "renders": 560,
+        "steps": 283,
+        "saveWrites": 3,
+        "saveFailures": 0,
+        "savePending": false,
+        "quality": "standard",
+        "dpr": 1.5,
+        "particles": 134,
+        "impacts": 5
+      },
+      "errors": []
+    }
+  ]
+}

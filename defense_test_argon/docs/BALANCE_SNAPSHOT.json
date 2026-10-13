@@ -1,0 +1,1497 @@
+{
+  "tuning": {
+    "heroDrawCost": 100,
+    "relicDrawCost": 80,
+    "heroRates": [
+      0.7,
+      0.25,
+      0.048,
+      0.002
+    ],
+    "pity": {
+      "normal": 200,
+      "season": 200
+    },
+    "duplicateGrowth": 1.58,
+    "enhanceStep": 0.05,
+    "levelStep": 0.04,
+    "levelCostBase": 90,
+    "levelCostGrowth": 1.12,
+    "specialStep": 0.1,
+    "specialEvery": 5,
+    "dispatchHours": 24,
+    "dispatchStageStep": 0.05,
+    "dispatchDust": 1.5,
+    "dispatchDreams": 0.3,
+    "idleHours": 20,
+    "idleDustPerHour": 14,
+    "firstClearBase": 160,
+    "firstClearStep": 10,
+    "beds": {
+      "rose": {
+        "unlock": 0,
+        "base": 40,
+        "growth": 1.065,
+        "knee": 30,
+        "steep": 1.15,
+        "knee2": 40,
+        "steep2": 1.35
+      },
+      "spring": {
+        "unlock": 15,
+        "base": 42,
+        "growth": 1.06,
+        "rise": 25,
+        "knee": 30,
+        "steep": 1.1,
+        "knee2": 33,
+        "steep2": 1.35
+      },
+      "seed": {
+        "unlock": 30,
+        "base": 110,
+        "growth": 1.08,
+        "rise": 15,
+        "knee": 20,
+        "steep": 1.12,
+        "knee2": 23,
+        "steep2": 1.35
+      }
+    },
+    "relicThresholdBase": 30,
+    "relicThresholdGrowth": 2.2,
+    "relicProbabilityHalf": 3
+  },
+  "probability": [
+    {
+      "name": "any SR",
+      "perDraw": 0.048,
+      "meanDraws": 20.833333333333332,
+      "medianDraws": 15,
+      "p90Draws": 47,
+      "at20": 0.6261142030008744,
+      "at50": 0.9145233645126967,
+      "at100": 0.9926937447857707
+    },
+    {
+      "name": "specific SR",
+      "perDraw": 0.008,
+      "meanDraws": 125,
+      "medianDraws": 87,
+      "p90Draws": 287,
+      "at20": 0.14840433291485078,
+      "at50": 0.3307573538670161,
+      "at100": 0.5521142805969217
+    },
+    {
+      "name": "any normal UR",
+      "perDraw": 0.002,
+      "meanDraws": 500,
+      "medianDraws": 347,
+      "p90Draws": 1151,
+      "at20": 0.03924904297365728,
+      "at50": 0.09525318199596433,
+      "at100": 0.18143319531157232
+    },
+    {
+      "name": "current season guardian",
+      "perDraw": 0.001,
+      "meanDraws": 1000,
+      "medianDraws": 693,
+      "p90Draws": 2302,
+      "at20": 0.01981113517046529,
+      "at50": 0.04879437180296864,
+      "at100": 0.09520785288629108
+    }
+  ],
+  "enhancement": [
+    {
+      "current": 0,
+      "nextCopies": 1,
+      "spentCopies": 0,
+      "power": 1,
+      "special": 1,
+      "gainPerCopy": 0.05
+    },
+    {
+      "current": 1,
+      "nextCopies": 2,
+      "spentCopies": 1,
+      "power": 1.05,
+      "special": 1,
+      "gainPerCopy": 0.025
+    },
+    {
+      "current": 2,
+      "nextCopies": 3,
+      "spentCopies": 3,
+      "power": 1.1,
+      "special": 1,
+      "gainPerCopy": 0.016666666666666666
+    },
+    {
+      "current": 3,
+      "nextCopies": 4,
+      "spentCopies": 6,
+      "power": 1.15,
+      "special": 1,
+      "gainPerCopy": 0.0125
+    },
+    {
+      "current": 4,
+      "nextCopies": 7,
+      "spentCopies": 10,
+      "power": 1.2,
+      "special": 1,
+      "gainPerCopy": 0.0071428571428571435
+    },
+    {
+      "current": 5,
+      "nextCopies": 10,
+      "spentCopies": 17,
+      "power": 1.25,
+      "special": 1.1,
+      "gainPerCopy": 0.005
+    },
+    {
+      "current": 6,
+      "nextCopies": 16,
+      "spentCopies": 27,
+      "power": 1.3,
+      "special": 1.1,
+      "gainPerCopy": 0.003125
+    },
+    {
+      "current": 7,
+      "nextCopies": 25,
+      "spentCopies": 43,
+      "power": 1.35,
+      "special": 1.1,
+      "gainPerCopy": 0.002
+    },
+    {
+      "current": 8,
+      "nextCopies": 39,
+      "spentCopies": 68,
+      "power": 1.4,
+      "special": 1.1,
+      "gainPerCopy": 0.001282051282051282
+    },
+    {
+      "current": 9,
+      "nextCopies": 62,
+      "spentCopies": 107,
+      "power": 1.45,
+      "special": 1.1,
+      "gainPerCopy": 0.0008064516129032258
+    },
+    {
+      "current": 10,
+      "nextCopies": 97,
+      "spentCopies": 169,
+      "power": 1.5,
+      "special": 1.2,
+      "gainPerCopy": 0.0005154639175257732
+    },
+    {
+      "current": 11,
+      "nextCopies": 154,
+      "spentCopies": 266,
+      "power": 1.55,
+      "special": 1.2,
+      "gainPerCopy": 0.0003246753246753247
+    },
+    {
+      "current": 12,
+      "nextCopies": 243,
+      "spentCopies": 420,
+      "power": 1.6,
+      "special": 1.2,
+      "gainPerCopy": 0.000205761316872428
+    },
+    {
+      "current": 13,
+      "nextCopies": 383,
+      "spentCopies": 663,
+      "power": 1.65,
+      "special": 1.2,
+      "gainPerCopy": 0.00013054830287206266
+    },
+    {
+      "current": 14,
+      "nextCopies": 605,
+      "spentCopies": 1046,
+      "power": 1.7000000000000002,
+      "special": 1.2,
+      "gainPerCopy": 0.00008264462809917356
+    },
+    {
+      "current": 15,
+      "nextCopies": 955,
+      "spentCopies": 1651,
+      "power": 1.75,
+      "special": 1.3,
+      "gainPerCopy": 0.00005235602094240838
+    },
+    {
+      "current": 16,
+      "nextCopies": 1509,
+      "spentCopies": 2606,
+      "power": 1.8,
+      "special": 1.3,
+      "gainPerCopy": 0.00003313452617627568
+    },
+    {
+      "current": 17,
+      "nextCopies": 2384,
+      "spentCopies": 4115,
+      "power": 1.85,
+      "special": 1.3,
+      "gainPerCopy": 0.00002097315436241611
+    },
+    {
+      "current": 18,
+      "nextCopies": 3766,
+      "spentCopies": 6499,
+      "power": 1.9,
+      "special": 1.3,
+      "gainPerCopy": 0.00001327668613913967
+    },
+    {
+      "current": 19,
+      "nextCopies": 5950,
+      "spentCopies": 10265,
+      "power": 1.9500000000000002,
+      "special": 1.3,
+      "gainPerCopy": 0.000008403361344537815
+    },
+    {
+      "current": 20,
+      "nextCopies": 9401,
+      "spentCopies": 16215,
+      "power": 2,
+      "special": 1.4,
+      "gainPerCopy": 0.000005318583129454314
+    }
+  ],
+  "beds": {
+    "rose": {
+      "unlockStage": 0,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 40,
+          "value": 1,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 55,
+          "value": 1.05,
+          "cumulativeDust": 230
+        },
+        {
+          "level": 10,
+          "nextDust": 76,
+          "value": 1.1,
+          "cumulativeDust": 545
+        },
+        {
+          "level": 15,
+          "nextDust": 103,
+          "value": 1.15,
+          "cumulativeDust": 975
+        },
+        {
+          "level": 20,
+          "nextDust": 141,
+          "value": 1.2,
+          "cumulativeDust": 1563
+        },
+        {
+          "level": 25,
+          "nextDust": 194,
+          "value": 1.25,
+          "cumulativeDust": 2368
+        },
+        {
+          "level": 30,
+          "nextDust": 265,
+          "value": 1.3,
+          "cumulativeDust": 3471
+        }
+      ]
+    },
+    "spring": {
+      "unlockStage": 15,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 42,
+          "value": 120,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 57,
+          "value": 125,
+          "cumulativeDust": 240
+        },
+        {
+          "level": 10,
+          "nextDust": 76,
+          "value": 130,
+          "cumulativeDust": 559
+        },
+        {
+          "level": 15,
+          "nextDust": 101,
+          "value": 135,
+          "cumulativeDust": 985
+        },
+        {
+          "level": 20,
+          "nextDust": 135,
+          "value": 140,
+          "cumulativeDust": 1555
+        },
+        {
+          "level": 25,
+          "nextDust": 181,
+          "value": 145,
+          "cumulativeDust": 2317
+        },
+        {
+          "level": 30,
+          "nextDust": 291,
+          "value": 150,
+          "cumulativeDust": 3420
+        }
+      ]
+    },
+    "seed": {
+      "unlockStage": 30,
+      "levels": [
+        {
+          "level": 0,
+          "nextDust": 110,
+          "value": 0,
+          "cumulativeDust": 0
+        },
+        {
+          "level": 5,
+          "nextDust": 162,
+          "value": 10,
+          "cumulativeDust": 647
+        },
+        {
+          "level": 10,
+          "nextDust": 238,
+          "value": 20,
+          "cumulativeDust": 1597
+        },
+        {
+          "level": 15,
+          "nextDust": 349,
+          "value": 30,
+          "cumulativeDust": 2993
+        },
+        {
+          "level": 20,
+          "nextDust": 615,
+          "value": 40,
+          "cumulativeDust": 5212
+        },
+        {
+          "level": 25,
+          "nextDust": 1575,
+          "value": 50,
+          "cumulativeDust": 9319
+        },
+        {
+          "level": 30,
+          "nextDust": 7061,
+          "value": 60,
+          "cumulativeDust": 24995
+        }
+      ]
+    }
+  },
+  "relics": [
+    {
+      "tier": 0,
+      "threshold": 0,
+      "nextThreshold": 30,
+      "rates": [
+        0.9600000000000001,
+        0.035,
+        0.0045,
+        0.0005
+      ]
+    },
+    {
+      "tier": 1,
+      "threshold": 30,
+      "nextThreshold": 96,
+      "rates": [
+        0.8574999999999999,
+        0.09875,
+        0.038375,
+        0.005375
+      ]
+    },
+    {
+      "tier": 2,
+      "threshold": 96,
+      "nextThreshold": 242,
+      "rates": [
+        0.796,
+        0.137,
+        0.0587,
+        0.0083
+      ]
+    },
+    {
+      "tier": 3,
+      "threshold": 242,
+      "nextThreshold": 561,
+      "rates": [
+        0.755,
+        0.1625,
+        0.07225000000000001,
+        0.01025
+      ]
+    },
+    {
+      "tier": 4,
+      "threshold": 561,
+      "nextThreshold": 1264,
+      "rates": [
+        0.7257142857142856,
+        0.18071428571428572,
+        0.08192857142857143,
+        0.011642857142857142
+      ]
+    },
+    {
+      "tier": 5,
+      "threshold": 1264,
+      "nextThreshold": 2810,
+      "rates": [
+        0.7037500000000001,
+        0.194375,
+        0.0891875,
+        0.0126875
+      ]
+    },
+    {
+      "tier": 6,
+      "threshold": 2810,
+      "nextThreshold": 6211,
+      "rates": [
+        0.6866666666666668,
+        0.205,
+        0.09483333333333334,
+        0.0135
+      ]
+    },
+    {
+      "tier": 7,
+      "threshold": 6211,
+      "nextThreshold": 13694,
+      "rates": [
+        0.6729999999999999,
+        0.2135,
+        0.09935000000000001,
+        0.01415
+      ]
+    },
+    {
+      "tier": 8,
+      "threshold": 13694,
+      "nextThreshold": 30157,
+      "rates": [
+        0.6618181818181819,
+        0.22045454545454546,
+        0.10304545454545457,
+        0.014681818181818183
+      ]
+    }
+  ],
+  "relicEnhancement": {
+    "levelStep": 0.05,
+    "costStep": [
+      1,
+      1,
+      2,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      12,
+      16,
+      21,
+      27,
+      34,
+      42,
+      51,
+      61,
+      72,
+      84
+    ],
+    "costMult": {
+      "C": 1,
+      "R": 0.4,
+      "SR": 0.25,
+      "UR": 0.12
+    },
+    "collection": {
+      "weight": {
+        "C": 1,
+        "R": 1.5,
+        "SR": 2,
+        "UR": 3
+      },
+      "ownBonus": 2,
+      "pointsPerPercent": 30
+    },
+    "rarities": [
+      {
+        "rarity": "C",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 2,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 2,
+            "spentCopies": 4,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 3,
+            "spentCopies": 6,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 4,
+            "spentCopies": 9,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 5,
+            "spentCopies": 13,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 6,
+            "spentCopies": 18,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 7,
+            "spentCopies": 24,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 12,
+            "spentCopies": 31,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 16,
+            "spentCopies": 43,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 21,
+            "spentCopies": 59,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 27,
+            "spentCopies": 80,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 34,
+            "spentCopies": 107,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 42,
+            "spentCopies": 141,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 51,
+            "spentCopies": 183,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 61,
+            "spentCopies": 234,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 72,
+            "spentCopies": 295,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 84,
+            "spentCopies": 367,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 98,
+            "spentCopies": 451,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "R",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 2,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 2,
+            "spentCopies": 7,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 2,
+            "spentCopies": 9,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 3,
+            "spentCopies": 11,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 5,
+            "spentCopies": 14,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 6,
+            "spentCopies": 19,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 8,
+            "spentCopies": 25,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 11,
+            "spentCopies": 33,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 14,
+            "spentCopies": 44,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 17,
+            "spentCopies": 58,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 20,
+            "spentCopies": 75,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 24,
+            "spentCopies": 95,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 29,
+            "spentCopies": 119,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 34,
+            "spentCopies": 148,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 39,
+            "spentCopies": 182,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "SR",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 1,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 1,
+            "spentCopies": 6,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 2,
+            "spentCopies": 7,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 2,
+            "spentCopies": 9,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 3,
+            "spentCopies": 11,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 4,
+            "spentCopies": 14,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 5,
+            "spentCopies": 18,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 7,
+            "spentCopies": 23,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 9,
+            "spentCopies": 30,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 11,
+            "spentCopies": 39,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 13,
+            "spentCopies": 50,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 15,
+            "spentCopies": 63,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 18,
+            "spentCopies": 78,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 21,
+            "spentCopies": 96,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 25,
+            "spentCopies": 117,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      },
+      {
+        "rarity": "UR",
+        "rows": [
+          {
+            "enhance": 0,
+            "level": 1,
+            "nextCopies": 1,
+            "spentCopies": 0,
+            "scale": 1,
+            "phase": "early"
+          },
+          {
+            "enhance": 1,
+            "level": 2,
+            "nextCopies": 1,
+            "spentCopies": 1,
+            "scale": 1.05,
+            "phase": "early"
+          },
+          {
+            "enhance": 2,
+            "level": 3,
+            "nextCopies": 1,
+            "spentCopies": 2,
+            "scale": 1.1,
+            "phase": "early"
+          },
+          {
+            "enhance": 3,
+            "level": 4,
+            "nextCopies": 1,
+            "spentCopies": 3,
+            "scale": 1.15,
+            "phase": "early"
+          },
+          {
+            "enhance": 4,
+            "level": 5,
+            "nextCopies": 1,
+            "spentCopies": 4,
+            "scale": 1.2,
+            "phase": "mid"
+          },
+          {
+            "enhance": 5,
+            "level": 6,
+            "nextCopies": 1,
+            "spentCopies": 5,
+            "scale": 1.25,
+            "phase": "mid"
+          },
+          {
+            "enhance": 6,
+            "level": 7,
+            "nextCopies": 1,
+            "spentCopies": 6,
+            "scale": 1.3,
+            "phase": "mid"
+          },
+          {
+            "enhance": 7,
+            "level": 8,
+            "nextCopies": 1,
+            "spentCopies": 7,
+            "scale": 1.35,
+            "phase": "mid"
+          },
+          {
+            "enhance": 8,
+            "level": 9,
+            "nextCopies": 1,
+            "spentCopies": 8,
+            "scale": 1.4,
+            "phase": "mid"
+          },
+          {
+            "enhance": 9,
+            "level": 10,
+            "nextCopies": 1,
+            "spentCopies": 9,
+            "scale": 1.45,
+            "phase": "late"
+          },
+          {
+            "enhance": 10,
+            "level": 11,
+            "nextCopies": 2,
+            "spentCopies": 10,
+            "scale": 1.5,
+            "phase": "late"
+          },
+          {
+            "enhance": 11,
+            "level": 12,
+            "nextCopies": 3,
+            "spentCopies": 12,
+            "scale": 1.55,
+            "phase": "late"
+          },
+          {
+            "enhance": 12,
+            "level": 13,
+            "nextCopies": 3,
+            "spentCopies": 15,
+            "scale": 1.6,
+            "phase": "late"
+          },
+          {
+            "enhance": 13,
+            "level": 14,
+            "nextCopies": 4,
+            "spentCopies": 18,
+            "scale": 1.65,
+            "phase": "late"
+          },
+          {
+            "enhance": 14,
+            "level": 15,
+            "nextCopies": 5,
+            "spentCopies": 22,
+            "scale": 1.7000000000000002,
+            "phase": "late"
+          },
+          {
+            "enhance": 15,
+            "level": 16,
+            "nextCopies": 6,
+            "spentCopies": 27,
+            "scale": 1.75,
+            "phase": "late"
+          },
+          {
+            "enhance": 16,
+            "level": 17,
+            "nextCopies": 7,
+            "spentCopies": 33,
+            "scale": 1.8,
+            "phase": "late"
+          },
+          {
+            "enhance": 17,
+            "level": 18,
+            "nextCopies": 9,
+            "spentCopies": 40,
+            "scale": 1.85,
+            "phase": "late"
+          },
+          {
+            "enhance": 18,
+            "level": 19,
+            "nextCopies": 10,
+            "spentCopies": 49,
+            "scale": 1.9,
+            "phase": "late"
+          },
+          {
+            "enhance": 19,
+            "level": 20,
+            "nextCopies": 12,
+            "spentCopies": 59,
+            "scale": 1.9500000000000002,
+            "phase": "late"
+          }
+        ]
+      }
+    ]
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "hp": 1,
+      "slots": 0,
+      "dispatchMultiplier": 1.05,
+      "firstClear": 170,
+      "totalFirstClear": 170
+    },
+    {
+      "stage": 9,
+      "hp": 3.5,
+      "slots": 1,
+      "dispatchMultiplier": 1.45,
+      "firstClear": 250,
+      "totalFirstClear": 1890
+    },
+    {
+      "stage": 18,
+      "hp": 6.3125,
+      "slots": 2,
+      "dispatchMultiplier": 1.9,
+      "firstClear": 340,
+      "totalFirstClear": 4590
+    },
+    {
+      "stage": 27,
+      "hp": 9.125,
+      "slots": 3,
+      "dispatchMultiplier": 2.35,
+      "firstClear": 430,
+      "totalFirstClear": 8100
+    },
+    {
+      "stage": 36,
+      "hp": 11.9375,
+      "slots": 4,
+      "dispatchMultiplier": 2.8,
+      "firstClear": 520,
+      "totalFirstClear": 12420
+    },
+    {
+      "stage": 45,
+      "hp": 14.75,
+      "slots": 4,
+      "dispatchMultiplier": 3.25,
+      "firstClear": 610,
+      "totalFirstClear": 17550
+    }
+  ],
+  "starter": [
+    {
+      "id": "star_boy",
+      "power": 655,
+      "dispatchAt9": {
+        "dust": 122,
+        "dreams": 24
+      }
+    },
+    {
+      "id": "snow_rabbit",
+      "power": 241,
+      "dispatchAt9": {
+        "dust": 94,
+        "dreams": 18
+      }
+    },
+    {
+      "id": "night_rabbit",
+      "power": 751,
+      "dispatchAt9": {
+        "dust": 127,
+        "dreams": 25
+      }
+    },
+    {
+      "id": "siren",
+      "power": 173,
+      "dispatchAt9": {
+        "dust": 88,
+        "dreams": 17
+      }
+    },
+    {
+      "id": "great_detective",
+      "power": 316,
+      "dispatchAt9": {
+        "dust": 100,
+        "dreams": 20
+      }
+    }
+  ],
+  "roster": [
+    {
+      "id": "star_boy",
+      "name": "별똥별소년",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "snow_rabbit",
+      "name": "눈토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "silver_rabbit",
+      "name": "은토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "night_rabbit",
+      "name": "밤토끼",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "siren",
+      "name": "세이렌",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "mushroom_king",
+      "name": "머쉬룸킹",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "great_detective",
+      "name": "명탐정",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "guardian",
+      "name": "가디언",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "avalanche_maid",
+      "name": "메이드",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "santa",
+      "name": "산타",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "red_dragon",
+      "name": "레드드래곤",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "aurora",
+      "name": "아우로라",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "storm_sage",
+      "name": "폭풍의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "flame_sage",
+      "name": "화염의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "lightning_sage",
+      "name": "번개의현자",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "time_magician",
+      "name": "시간의마술사",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "ancient_dragon",
+      "name": "에인션트드래곤",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "phantom",
+      "name": "팬텀",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "zeke",
+      "name": "지크",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "luna",
+      "name": "루나",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "jasmine",
+      "name": "자스민",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "queen",
+      "name": "여왕",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "rumi",
+      "name": "루미",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "cherry_prince",
+      "name": "체리프린스",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "time_ruler",
+      "name": "시간의지배자",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "galaxy_whale",
+      "name": "은하고래",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "doom",
+      "name": "둠",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "cinderella",
+      "name": "신데렐라",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "harmonious",
+      "name": "하모니어스",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "frost_witch",
+      "name": "혹한의마녀",
+      "rarity": "UR",
+      "hidden": true
+    }
+  ]
+}

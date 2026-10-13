@@ -1,4 +1,5 @@
 node_modules/
 survivor/test-results/
 defense_test/test-results/
+defense_test_argon/test-results/
 defense_test/.media-review/

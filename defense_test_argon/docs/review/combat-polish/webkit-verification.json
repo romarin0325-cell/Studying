@@ -1,0 +1,1006 @@
+{
+  "browser": "webkit",
+  "errors": [],
+  "externalRequests": [],
+  "geometry": [
+    {
+      "label": "home",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "collection",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "detail",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 51.125,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 516.875
+      },
+      "loaded": true
+    },
+    {
+      "label": "summon",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "reveal",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 175.609375,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 392.390625
+      },
+      "loaded": true
+    },
+    {
+      "label": "relic-summon",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "dispatch-locked",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 503,
+        "right": 320,
+        "bottom": 568,
+        "width": 320,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "battle",
+      "viewport": [
+        320,
+        568
+      ],
+      "documentWidth": 320,
+      "contentWidth": 320,
+      "contentScrollWidth": 320,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "home",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "collection",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "detail",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 75.96875,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 768.03125
+      },
+      "loaded": true
+    },
+    {
+      "label": "summon",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "reveal",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 443.609375,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 400.390625
+      },
+      "loaded": true
+    },
+    {
+      "label": "relic-summon",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "dispatch-locked",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "battle",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "home",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "collection",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "detail",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 400,
+        "y": 58.5,
+        "right": 880,
+        "bottom": 841.5,
+        "width": 480,
+        "height": 783
+      },
+      "loaded": true
+    },
+    {
+      "label": "summon",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "reveal",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 400,
+        "y": 249.296875,
+        "right": 880,
+        "bottom": 650.6875,
+        "width": 480,
+        "height": 401.390625
+      },
+      "loaded": true
+    },
+    {
+      "label": "relic-summon",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "dispatch-locked",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 401,
+        "y": 835,
+        "right": 879,
+        "bottom": 900,
+        "width": 478,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "battle",
+      "viewport": [
+        1280,
+        900
+      ],
+      "documentWidth": 1280,
+      "contentWidth": 478,
+      "contentScrollWidth": 478,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "partner-luna",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "ur-collection",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "ten-relics",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 75.96875,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 768.03125
+      },
+      "loaded": true
+    },
+    {
+      "label": "dispatch-active",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "draft",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-card",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-battle",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-record",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 75.96875,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 768.03125
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-claimed",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "sustained-siren",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "sheet": {
+        "x": 0,
+        "y": 0,
+        "right": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-best-result",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 75.96875,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 768.03125
+      },
+      "loaded": true
+    },
+    {
+      "label": "monthly-confirm",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 440.828125,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 403.171875
+      },
+      "loaded": true
+    },
+    {
+      "label": "result",
+      "viewport": [
+        390,
+        844
+      ],
+      "documentWidth": 390,
+      "contentWidth": 390,
+      "contentScrollWidth": 390,
+      "nav": {
+        "x": 0,
+        "y": 778.984375,
+        "right": 390,
+        "bottom": 843.984375,
+        "width": 390,
+        "height": 65
+      },
+      "sheet": {
+        "x": 0,
+        "y": 204.609375,
+        "right": 390,
+        "bottom": 844,
+        "width": 390,
+        "height": 639.390625
+      },
+      "loaded": true
+    }
+  ]
+}
