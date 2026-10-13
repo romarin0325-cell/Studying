@@ -837,13 +837,19 @@ function renderLibrary(){
   return `<section class="library"><div class="library-head"><button class="icon-button" data-nav="home" aria-label="홈으로">${icon('chevron')}</button><div><h1>루미의 별의 서재</h1><p>${escapeText(COURSE.title)} · 별 ${litStars()}/${LIBRARY_STARS} · 화랑 ${p().study.library.unlocked.length}/${CONSTELLATIONS.length}</p></div></div>
     <div class="segmented library-tabs">${tabs}</div>${body}</section>`;
 }
+function miniSkyMarkup(c,lit){
+  const on=i=>i<lit;
+  return `<svg class="sky-mini" viewBox="0 0 100 100" aria-hidden="true">
+    ${c.lines.map(([a,b])=>`<line x1="${c.stars[a][0]}" y1="${c.stars[a][1]}" x2="${c.stars[b][0]}" y2="${c.stars[b][1]}" class="${on(a)&&on(b)?'on':''}"/>`).join('')}
+    ${c.stars.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${on(i)?2.4:1.5}" class="mini-dot ${on(i)?'on':''}"/>`).join('')}</svg>`;
+}
 function galleryTileMarkup(k,i,l,lit){
   const open=l.unlocked.includes(k.id),cur=i===l.index&&!libraryDone();
   const ratioLabel=k.w===k.h?'1:1 정사각':k.w>k.h?'4:3 와이드':k.h>1000?'9:16 세로':'4:5 클래식';
   return `<button class="gallery-tile ${open?'open':''} ${cur?'current':''}" style="--ratio:${k.ratio}" ${open?`data-library-art="${k.id}"`:'disabled'} aria-label="${open?k.title:cur?`${k.name} 진행 중`:'잠긴 그림'}">
     <span class="frame-canvas" style="aspect-ratio:${k.ratio}">
       ${open?`<img src="${libraryArt(k.id)}" alt="${k.title}" draggable="false"><span class="frame-badge">${ratioLabel}</span>`
-        :`<span class="tile-lock">${cur?skyMarkup(k,lit):icon('lock')}<b>${cur?`★ ${lit}/${k.stars.length} 진행 중`:`별 ${k.stars.length}개 보상`}</b><small>${ratioLabel} 액자</small></span>`}
+        :`<span class="tile-lock">${cur?miniSkyMarkup(k,lit):icon('lock')}<b>${cur?`★ ${lit}/${k.stars.length} 진행 중`:`별 ${k.stars.length}개 보상`}</b><small>${ratioLabel} 액자</small></span>`}
     </span>
     <span class="frame-caption"><strong>${open?k.title:cur?k.name:'잠긴 별자리 화폭'}</strong><small>${open||cur?`${k.name} · ${k.w}×${k.h}`:`${i+1}번째 별자리 보상`}</small></span>
   </button>`;

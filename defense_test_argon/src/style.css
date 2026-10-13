@@ -1557,7 +1557,11 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .frame-canvas img{width:100%;height:100%;aspect-ratio:auto;object-fit:contain;display:block}
 .frame-badge{position:absolute;top:6px;right:6px;padding:2px 7px;border-radius:999px;font-size:9.5px;font-weight:800;color:#fff2c6;background:rgba(8,12,32,.78);border:1px solid rgba(246,210,122,.45);backdrop-filter:blur(4px)}
 .frame-canvas .tile-lock{width:100%;height:100%;aspect-ratio:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px;text-align:center}
-.frame-canvas .tile-lock .sky{width:min(68%,110px);height:auto;margin:0}
+.frame-canvas .tile-lock .sky-mini{width:min(68%,110px);height:auto;margin:0;overflow:visible}
+.sky-mini line{stroke:rgba(190,205,255,.22);stroke-width:.7;stroke-dasharray:1.4 1.6}
+.sky-mini line.on{stroke:#ffe7a6;stroke-width:.9;stroke-dasharray:none}
+.sky-mini .mini-dot{fill:rgba(200,212,255,.38)}
+.sky-mini .mini-dot.on{fill:#fff6d6;filter:drop-shadow(0 0 2px #ffd36a)}
 .frame-canvas .tile-lock b{font-size:11.5px;color:var(--gold-hi)}
 .frame-canvas .tile-lock small{font-size:10px;color:var(--text3);padding:0}
 .frame-caption{display:flex;flex-direction:column;gap:1px;padding:0 3px 2px}
