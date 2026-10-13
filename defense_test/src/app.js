@@ -730,7 +730,7 @@ function claimPity(){
 function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates;
   let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
-  if(banner==='season')rows+=`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${pct(T.heroRates[3]/2)}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${pct(T.heroRates[3]/2)}</b></div>`;
+  if(banner==='season')const half=(T.heroRates[3]/2*100).toFixed(3)+"%";rows+=`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/6)}</b></div><div class="rate-row"><span>UR · 나머지 5종 각각</span><b>${pct(T.heroRates[3]*.5/6)}</b></div>`;
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
