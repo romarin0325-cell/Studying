@@ -162,7 +162,7 @@ try{
   await shot(executed.page,'storm-instant-kill',390,844);await executed.context.close();
   // Lobby chrome never overlaps on phone sizes, including tall full-screen viewports and a simulated notch (--top-shift).
   for(const [width,height] of [[360,640],[390,844],[412,780],[412,915],[430,932]])for(const shift of [6,40]){
-    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});await t.page.locator('.lb-touch').click();await t.page.locator('#subtitle.show').waitFor();
+    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});await t.page.locator('.lb-touch').click();await t.page.locator('#subtitle.show').waitFor();await t.page.waitForTimeout(450);
     const geo=await t.page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),top=r('.topbar'),sub=r('#subtitle'),side=r('.lb-side'),season=r('.lb-season'),view=r('.lb-view'),bar=r('.lb-bar'),dock=r('.lb-dock');
       return {topbar:hit(top,season)||hit(top,view),side:hit(sub,side)||hit(side,bar),subtitle:hit(sub,bar),season:hit(season,side),dock:hit(bar,dock),overflow:document.documentElement.scrollWidth>innerWidth};});
     assert.deepEqual(geo,{topbar:false,side:false,subtitle:false,season:false,dock:false,overflow:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
