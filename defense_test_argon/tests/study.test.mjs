@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {COURSE} from '../src/course.js';
-import {conceptQuestion,termQuestion,questionOf,pickQuestion,lectureById} from '../src/quiz.js';
+import {conceptQuestion,termQuestion,lectureQuestions,termQuestions,questionOf,pickQuestion,lectureById} from '../src/quiz.js';
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS,constellationAt} from '../src/library.js';
 import {tutorPrompt,tutorHtml} from '../src/tutor.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
@@ -13,7 +13,10 @@ test('course data has the swappable shape: lectures, concept questions tied to l
   assert.ok(COURSE.id&&COURSE.title&&COURSE.subject);
   const ids=[...COURSE.lectures,...COURSE.concepts,...COURSE.terms].map(x=>x.id);
   assert.equal(new Set(ids).size,ids.length);
-  for(const l of COURSE.lectures)for(const k of ['title','original','summary','analogy','point','oneLine'])assert.ok(l[k],l.id+' '+k);
+  for(const l of COURSE.lectures){
+    for(const k of ['title','original','summary','analogy','point','oneLine'])assert.ok(l[k],l.id+' '+k);
+    assert.equal(lectureQuestions(l.id).length,3,l.id+' has 3 linked lecture questions');
+  }
   for(const c of COURSE.concepts){
     assert.ok(lectureById(c.lecture),c.id);
     assert.ok(Number.isInteger(c.answer)&&c.answer>=0&&c.answer<c.choices.length,c.id);
@@ -21,6 +24,15 @@ test('course data has the swappable shape: lectures, concept questions tied to l
     assert.ok(c.explain,c.id);
   }
   assert.equal(new Set(COURSE.terms.map(t=>t.meaning)).size,COURSE.terms.length);
+  for(const t of COURSE.terms){
+    const qs=termQuestions(t.id);
+    assert.equal(qs.length,2,t.id+' has 2 linked term questions');
+    for(const q of qs){
+      assert.equal(q.kind,'term');assert.equal(q.termId,t.id);
+      assert.ok(Number.isInteger(q.answer)&&q.answer>=0&&q.answer<q.choices.length,q.id);
+      assert.ok(q.explain,q.id);
+    }
+  }
 });
 
 test('term questions offer the meaning among three others in a fixed order per term',()=>{

@@ -9,7 +9,7 @@ export const special=(s,id)=>(s.meta?.[id]?.special||1);
 export const PATH = [[76,142],[644,142],[644,684],[76,684],[76,142]];
 export const PATH_LENGTH = 2220;
 export const BALANCE_REVISION = 3;
-export const BOSS_HEALTH_SCALE = .65;
+export const BOSS_HEALTH_SCALE = .6;
 // Renewal v1 raised average roster damage by about 36%. Main-stage health uses
 // base 100 and stage slope 2.5 (was 76 and 2.05) so a no-growth starter deck
 // keeps its stage 1–3 pace (docs/STAT_SIMULATION.md). Weekly and monthly health
@@ -66,7 +66,7 @@ export function event(s,type,data={}){s.events.push({type,time:s.time,...data});
 export function has(s,id){return s.artifacts.includes(id);}
 // Relic numbers at level 1 (relicScaleIn multiplies them per level). One place for tuning; texts live in data.js.
 export const RELIC_VALUES=Object.freeze({
-  hourglass:{starlight:40,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
+  hourglass:{starlight:50,store:120},ember:{burn:.7},frost:{slowed:.27},banner:{power:.21},chorus:{speed:.45,count:3},lantern:{refund:35},lens:{boss:.3},seed:{poison:.03},
   feather:{base:6,perWave:3,cap:60},crown:{power:.2},meteor:{hit:1.3},prism:{chain:1.1},tide:{splash:.22},roots:{life:.31,radius:.11},guild:{power:.25},phoenix:{cut:.4,uses:2},
   twin:{echo:1},constellation:{power:.21},alchemy:{power:.55,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.05,cap:.6},royal_seal:{starlight:60,boss:.35},gift_ribbon:{chance:.25},broken_clock:{duration:.8,starlight:2.7},
 });
@@ -150,7 +150,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${15+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 · 1~3물결 배당 ${queenIncome(1,1,level)}G / 기`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${30+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -161,8 +161,8 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 // Ultimate durations, control times and ultimate slows grow too.
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
-  const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
+  const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['30%',slow(.3)]],
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['30%',slow(.3)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
     siren:[['8초',sec(8)]],ancient_dragon:[['8초',sec(8)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['8초',sec(8)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
@@ -178,7 +178,7 @@ export function givenEffects(s,u,index){
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
   else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
-  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
+  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.3+level*.03:u.hero==='phantom'?.3:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
   else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
   return out;
@@ -467,7 +467,7 @@ function addSlow(s,e,source,amount,duration){
   syncSlows(s,e);
 }
 function slowTargets(s,targets,hero,amount,point,source,rank=1){
-  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankControl(rank);
+  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.3+level*.03:hero.id==='phantom'?.3:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankControl(rank);
   for(const t of targets)addSlow(s,t,source,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*RV.tide.splash*relicScaleIn(s,'tide'),hero.id);event(s,'tide',{...point});}
 }

@@ -108,7 +108,7 @@ test('six main waves contain exactly two copies of one boss and stage nine follo
   assert.equal(E.WAVE_BASE_HEALTH,100);
   const expected=Math.round(Math.round(100*1.34**11*3.5*32)*E.BOSS_HEALTH_SCALE);
   assert.equal(E.wavePlan(6,8).sequence.find(e=>e.kind==='boss').hp,expected);
-  assert.equal(E.BOSS_HEALTH_SCALE,.65);
+  assert.equal(E.BOSS_HEALTH_SCALE,.6);
 });
 
 test('five starter heroes finish a real opening expedition with no growth or rare equipment',()=>{
