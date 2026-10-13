@@ -175,7 +175,23 @@ try{
     await nav(page,'홈');await page.locator('[data-action="library"]').click();await page.locator('.wrong-row').click();
     await page.locator('[data-light-star]:not([disabled])').click();await page.locator('.sky .star-dot.on').waitFor();
     assert.deepEqual([(await profile(page)).study.library.stars,(await profile(page)).study.wrong.length],[1,0]);
+    await page.locator('[data-library-tab="lecture"]').click();await page.locator('[data-lecture="L01"]').click();
+    assert.match(await page.locator('#sheet-footer').innerText(),/3문항/);await page.locator('[data-practice]').click();
+    assert.match(await page.locator('#sheet-kicker').innerText(),/1\/3/);await close(page);
+    await page.locator('[data-library-tab="term"]').click();await page.locator('.term-row summary').first().click();
+    await page.locator('[data-practice="term:T001"]').click();assert.match(await page.locator('#sheet-kicker').innerText(),/1\/2/);await close(page);
+    await page.locator('[data-library-tab="sky"]').click();
     await shot(page,'library',390,844);await t.context.close();
+  }
+  // Memorial lobby swap, appreciation mode and lower-third subtitle geometry (never covers the upper face area or nameplate).
+  {
+    const mem=createProfile(NOW);mem.heroes.star_boy.bond=10;const t=await boot(390,844,mem),{page}=t;
+    await page.locator('[data-action="lobby-swap"]').click();assert.equal((await profile(page)).lobby,'star_boy');
+    const subGeo=await page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),sp=r('#partner-speech'),np=r('.nameplate');return {faceClear:sp.top>innerHeight*.38,noNameOverlap:!hit(sp,np),noSideOverlap:!hit(sp,r('.lobby-side.left'))&&!hit(sp,r('.lobby-side.right'))};});
+    assert.deepEqual(subGeo,{faceClear:true,noNameOverlap:true,noSideOverlap:true});
+    await page.locator('[data-action="appreciate"]').click();assert.equal(await page.locator('#app').getAttribute('data-appreciate'),'true');
+    await page.locator('[data-action="appreciate"]').click();assert.equal(await page.locator('#app').getAttribute('data-appreciate'),'false');
+    await t.context.close();
   }
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const test=await boot(width,height),{page,context}=test;
