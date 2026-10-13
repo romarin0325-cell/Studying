@@ -844,9 +844,9 @@ function questionBlock(q,chosen=-1,answered=true){
   return `<div class="quiz-q"><div class="quiz-meta"><span class="kind-chip ${q.kind}">${KIND_NAME[q.kind]}</span>${q.source?`<small>${escapeText(q.source)}</small>`:''}</div><p class="quiz-prompt" lang="ja">${escapeText(q.prompt)}</p><div class="quiz-choices">${q.choices.map((c,i)=>{const state=!answered?'':i===q.answer?'right':i===chosen?'wrong':'';
     return `<button class="quiz-choice ${state}" ${answered?'disabled':`data-quiz-choice="${i}"`}><span class="mark">${LETTERS[i]}</span><span class="text" lang="ja">${escapeText(c)}</span>${state==='right'?icon('check'):state==='wrong'?icon('close'):''}</button>`;}).join('')}</div></div>`;
 }
-const lectureBody=l=>`<p class="lec-core">${escapeText(l.core)}</p><p class="lec-analogy"><b>비유</b> ${escapeText(l.analogy)}</p>${l.body.map(t=>`<p>${escapeText(t)}</p>`).join('')}
-  ${l.principles.length?`<div class="lec-box"><b>변하지 않는 원칙</b><ol>${l.principles.map(t=>`<li>${escapeText(t)}</li>`).join('')}</ol></div>`:''}${l.confusion?`<div class="lec-box warn"><b>헷갈리기 쉬운 점</b><p>${escapeText(l.confusion)}</p></div>`:''}
-  ${l.point?`<div class="lec-box point"><b>시험 포인트</b><p>${escapeText(l.point)}</p></div>`:''}<p class="lec-one"><b>한 줄 정리</b> ${escapeText(l.oneLine)}</p>`;
+const lectureBody=l=>`<p class="lec-core">${escapeText(l.core)}</p><p class="lec-analogy"><b>오늘의 이야기</b> ${escapeText(l.analogy)}</p>${l.body.map(t=>t.startsWith('## ')?`<h4 class="lec-h">${escapeText(t.slice(3))}</h4>`:`<p>${escapeText(t)}</p>`).join('')}
+  ${l.principles.length?`<div class="lec-box"><b>루미의 핵심 정리</b><ol>${l.principles.map(t=>`<li>${escapeText(t)}</li>`).join('')}</ol></div>`:''}${l.confusion?`<div class="lec-box warn"><b>헷갈림 주의</b><p>${escapeText(l.confusion)}</p></div>`:''}
+  ${l.point?`<div class="lec-box point"><b>시험에선 이렇게 나와</b><p>${escapeText(l.point)}</p></div>`:''}<p class="lec-one"><b>출근길 한 줄</b> ${escapeText(l.oneLine)}</p>`;
 const termBody=t=>`<p class="term-ja" lang="ja">${escapeText(t.termJa)}</p>${t.explain.split('\n').map(x=>`<p>${escapeText(x)}</p>`).join('')}${t.hint?`<div class="lec-box point"><b>시험 힌트</b><p>${escapeText(t.hint)}</p></div>`:''}`;
 function studyPeek(q){
   if(q.kind==='concept'){const l=lectureById(q.lecture);return l?`<details class="lecture-peek"><summary>관련 강의 · 제${l.no}강 ${escapeText(l.title)}</summary><div class="lecture">${lectureBody(l)}</div></details>`:'';}
@@ -923,7 +923,7 @@ function termList(){
 }
 function lectureSheet(id){
   const l=lectureById(id);if(!l)return;const done=l.quizzes.filter(q=>solved('concept',q.id)).length;
-  show(`제${l.no}강 ${l.title}`,`${l.category} · ${l.minutes}분`,`<article class="lecture"><p class="lec-ja" lang="ja">${escapeText(l.titleJa)}</p>${lectureBody(l)}</article>`,`<button class="primary wide" data-practice="concept:${id}">강의 문제 풀기 <small>${done}/${l.quizzes.length}</small></button>`,'lecture',id);
+  show(`제${l.no}강 ${l.title}`,`${l.category} · ${l.minutes}분`,`<article class="lecture"><p class="lec-ja" lang="ja">${escapeText(l.titleJa)}</p>${l.subtitle?`<p class="lec-sub">${escapeText(l.subtitle)}</p>`:''}${lectureBody(l)}</article>`,`<button class="primary wide" data-practice="concept:${id}">강의 문제 풀기 <small>${done}/${l.quizzes.length}</small></button>`,'lecture',id);
 }
 function termSheet(id){
   const t=termById(id);if(!t)return;const done=t.quizzes.filter(q=>solved('term',q.id)).length;
