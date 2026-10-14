@@ -1,5 +1,4 @@
 /* Shared readability and decorative skins. Art has transparent centers and no hit targets. */
-@font-face { font-family:DreamJua; src:url("../assets/Jua-Regular.ttf") format("truetype"); font-style:normal; font-weight:400; font-display:swap; }
 /* Study content uses the offline body stack; theme chrome keeps its decorative font. */
 body.astra { --study-font:Inter,"Segoe UI","Malgun Gothic",sans-serif; }
 body.astra .study-text,
@@ -72,7 +71,6 @@ body.astra .card-item[data-grade] { border:2px solid var(--rarity-accent)!import
 @media(prefers-reduced-motion:reduce) { .summon-particles { display:none; }.summon-seal { opacity:.2; } }
 
 /* Magical Girl illustration skin: independent of the shared screen geometry. */
-body[data-theme=strawberry] .world-backdrop { background:url("../assets/magical-sanctuary.png") center top/cover no-repeat,#ffe4ed; }
 body[data-theme=strawberry] :is(.page-heading h1,.section-label b,.menu-btn,.primary,.secondary,.astra-nav button,.modal-content h3,.study-grid h3,.party-card strong) { font-family:DreamJua,"Malgun Gothic",sans-serif; font-weight:400; letter-spacing:0; }
 
 /* Compact lobby. The screen owns its scrolling, just like the catalog. */
@@ -149,15 +147,6 @@ body.astra :is(.menu-btn:disabled,.modal-content button:disabled,.card-item:disa
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(#toeic-question,#toeic-result-content,#toeic-explanation-content,#quiz-feedback,.grammar-explanation) { color:var(--paper)!important; }
 @media(max-height:600px) { .astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:clamp(84px,19vh,108px)!important; } }
 @media(orientation:landscape) and (max-height:500px) { .astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:72px!important; } .astra :is(#modal-date,#modal-tutoring) .modal-content { padding:8px 12px; } }
-body[data-theme=astra] .skill-btn.phy { --button-art:url("../assets/astra-skill-phy.svg"); }
-body[data-theme=astra] .skill-btn.mag { --button-art:url("../assets/astra-skill-mag.svg"); }
-body[data-theme=astra] .skill-btn.sup { --button-art:url("../assets/astra-skill-sup.svg"); }
-body[data-theme=strawberry] .skill-btn.phy { --button-art:url("../assets/magical-skill-phy.svg"); }
-body[data-theme=strawberry] .skill-btn.mag { --button-art:url("../assets/magical-skill-mag.svg"); }
-body[data-theme=strawberry] .skill-btn.sup { --button-art:url("../assets/magical-skill-sup.svg"); }
-body[data-theme=dreamsky] .skill-btn.phy { --button-art:url("../assets/dreamsky-skill-phy.svg"); }
-body[data-theme=dreamsky] .skill-btn.mag { --button-art:url("../assets/dreamsky-skill-mag.svg"); }
-body[data-theme=dreamsky] .skill-btn.sup { --button-art:url("../assets/dreamsky-skill-sup.svg"); }
 
 .astra :is(.wordbook-help,.wordbook-empty,#modal-wordbook label) { color:var(--muted)!important; font-size:12px; }
 

@@ -1,5 +1,5 @@
-/* Presentation adapter. Game rules and learning content are owned by card/game/.
-   Every hook calls the original method unless this file owns its entire view. */
+/* DREAMWEAVER · Claude Edition presentation layer. Game rules and learning content are
+   owned by card/game/. Hooks call the original method unless this file owns that view. */
 'use strict';
 
 const Astra = {
@@ -10,16 +10,20 @@ const Astra = {
   portraitPath: '',
   deckFilter: 'all',
   lastScreen: null,
-  summonBatch: false,
   battleSnapshot: null,
   pendingBonus: null,
   hpMemory: new Map(),
+  viewer: { ids: [], index: -1 },
+  battleCue: { side: null, type: 'phy', crit: 0, enemyTurn: -1 },
   GRADE_ORDER: ['transcendence','legend','epic','rare','special','event','normal'],
   GRADE_LABELS: { all:'전체', transcendence:'초월', legend:'전설', epic:'에픽', rare:'레어', special:'스페셜', event:'이벤트', normal:'노멀' },
+  SUMMON_NAMES: { astra:'성좌 소환', strawberry:'하트 소환', dreamsky:'구름 소환' },
+  revealTimers: [],
   get elementNames() { return DISPLAY_NAMES.element; },
   get roleNames() { return DISPLAY_NAMES.role; },
   get gradeNames() { return DISPLAY_NAMES.grade; },
   get modeNames() { return DISPLAY_NAMES.mode; },
+  get motion() { return !document.body.classList.contains('dw-lite'); },
 
   $(id) { return document.getElementById(id); },
   icon(name) {
@@ -81,23 +85,64 @@ const Astra = {
   portrait(entity, className = '') {
     return ImageAssets.createPortrait(entity || '', { wrapperClass:`dw-art${className ? ` ${className}` : ''}` });
   },
+  // A 3:5 portrait in its grade frame, with the element badge.
+  framed(card, className = '') {
+    const frame = this.text('span', '', `dw-frame${className ? ` ${className}` : ''}`);
+    if (card?.grade) frame.dataset.grade = card.grade;
+    frame.append(this.portrait(card));
+    if (card?.element) {
+      const badge = this.text('span', '', 'dw-el');
+      badge.dataset.el = card.element;
+      badge.append(this.icon(`el-${['fire','water','nature','wind','light','dark','earth'].includes(card.element) ? card.element : 'normal'}`));
+      badge.title = this.elementNames[card.element] || card.element;
+      frame.append(badge);
+    }
+    return frame;
+  },
   cardLine(card) {
     return [this.elementNames[card.element] || card.element, this.roleNames[card.role] || card.role].filter(Boolean).join(' · ');
   },
   inRun() { return !!(RPG.state && RPG.state.mode && RPG.state.deck); },
+  sfx(name) { if (typeof DreamSfx !== 'undefined') DreamSfx.play(name); },
 
-  // ---------- Theme, header and app chrome ----------
+  // ---------- Theme, motion, sound ----------
   setTheme(name) {
-    const themes = {astra:'#0d2235',strawberry:'#fff2f6',dreamsky:'#eff9ff'};
+    const themes = {astra:'#0d2235',strawberry:'#fde8f1',dreamsky:'#eaf5fb'};
     if (!Object.prototype.hasOwnProperty.call(themes,name)) name = 'astra';
     document.body.dataset.theme = name;
     document.querySelector('meta[name="theme-color"]').content = themes[name];
     document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.themeChoice === name)));
+    const back = window.DREAMWEAVER_THEME_CARDS?.[name];
+    if (back) document.body.style.setProperty('--card-back', `url("${back}")`);
+    else document.body.style.removeProperty('--card-back');
     document.querySelectorAll('img[data-fallback=true]').forEach(img => {
       // Never replace a real portrait or interrupt an in-flight local image load.
       if (img.src.startsWith('data:image/')) img.src = this.fallback(img._astraEntity);
     });
     try { localStorage.setItem('dreamweaverTheme',name); } catch { /* Theme remains usable for this session. */ }
+    if (this.ready && document.body.dataset.screen === 'summon') this.renderSummon();
+  },
+  installMotion() {
+    let stored = null;
+    try { stored = localStorage.getItem('dwMotion'); } catch { /* Default below. */ }
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.toggle('dw-lite', stored ? stored === 'off' : !!reduce);
+    this.syncToggles();
+  },
+  toggleMotion() {
+    document.body.classList.toggle('dw-lite');
+    try { localStorage.setItem('dwMotion', this.motion ? 'on' : 'off'); } catch { /* Session only. */ }
+    this.syncToggles();
+  },
+  toggleSfx() {
+    if (typeof DreamSfx === 'undefined') return;
+    DreamSfx.setEnabled(!DreamSfx.enabled);
+    this.syncToggles();
+    this.sfx('tap');
+  },
+  syncToggles() {
+    this.$('dw-motion-toggle')?.setAttribute('aria-checked', String(this.motion));
+    this.$('dw-sfx-toggle')?.setAttribute('aria-checked', String(typeof DreamSfx !== 'undefined' && DreamSfx.enabled));
   },
   syncFullscreenShortcut() {
     const button = this.$('btn-game-fullscreen');
@@ -121,7 +166,7 @@ const Astra = {
     update();
   },
   home() {
-    if (!this.ready || !['collection','deck','study'].includes(document.body.dataset.screen)) return;
+    if (!this.ready || !['collection','deck','study','summon'].includes(document.body.dataset.screen)) return;
     RPG.toMenu();
   },
   learn() {
@@ -133,13 +178,19 @@ const Astra = {
     RPG.openSystemMenu();
   },
   showSummon() {
-    if (document.body.dataset.screen !== 'menu') RPG.toMenu();
-    document.querySelector('.dw-summon')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    if (!this.ready || !this.inRun()) return;
+    // toMenu() prepares the mode-specific summon controls (draft, chaos, puzzle).
+    if (!['menu','summon','deck','collection','study'].includes(document.body.dataset.screen)) return;
+    if (document.body.dataset.screen === 'summon') return this.renderSummon();
+    RPG.toMenu();
+    RPG.showScreen('screen-summon');
+    this.renderSummon();
   },
   settings() {
     if (!this.ready) return;
     this.$('asset-path').value = this.portraitPath;
     this.$('modal-menu').classList.remove('active');
+    this.syncToggles();
     this.$('modal-astra-settings').classList.add('active');
   },
   closeSettings() { this.$('modal-astra-settings').classList.remove('active'); },
@@ -148,7 +199,7 @@ const Astra = {
     toast.textContent = message;
     toast.classList.add('visible');
     clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => toast.classList.remove('visible'), 2600);
+    this.toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
   },
   // Plain confirmations become non-blocking toasts. Messages that ask the player
   // to read or decide something keep the original dialog.
@@ -210,7 +261,10 @@ const Astra = {
     document.querySelectorAll('img[data-astra-source]').forEach(img => {
       ImageAssets.load(img, img._astraEntity || img.dataset.astraSource, { force:true, alt:img.alt });
     });
-    if (this.inRun()) this.renderParty();
+    if (this.inRun()) {
+      this.$('astra-party').replaceChildren();
+      this.renderParty();
+    }
   },
   setPortraitPath(value) {
     const clean = value.trim().replaceAll('\\', '/');
@@ -243,7 +297,7 @@ const Astra = {
       this.collectionContext = 'library';
       delete document.body.dataset.collectionContext;
     }
-    const screen = ['title','menu','collection','deck','study','battle'].includes(kind) ? kind : 'draft';
+    const screen = ['title','menu','collection','deck','study','battle','summon'].includes(kind) ? kind : 'draft';
     document.body.dataset.screen = screen;
     // Re-entering the current screen (for example after a dialog) must not replay motion.
     const element = this.$(id);
@@ -265,9 +319,8 @@ const Astra = {
   },
   updateHeader() {
     const screen = document.body.dataset.screen;
-    const names = { title:'', menu:'로비', deck:'파티 편성', collection:this.collectionContext === 'factory' ? '드래프트 덱' : '카드 도감', study:'배움의 기록실', battle:'전투', draft:'여정 준비' };
-    const status = document.querySelector('.header-status');
-    status.textContent = names[screen] ?? '';
+    const names = { title:'', menu:'로비', deck:'파티 편성', collection:this.collectionContext === 'factory' ? '드래프트 덱' : '카드 도감', study:'배움의 기록실', battle:'전투', draft:'여정 준비', summon:'소환' };
+    document.querySelector('.header-status').textContent = names[screen] ?? '';
     let kicker = '';
     if (this.inRun() && screen !== 'title') {
       const state = RPG.state;
@@ -276,7 +329,7 @@ const Astra = {
         : [this.modeNames[state.mode] || state.mode, state.gameType === 'endless' ? '엔드리스' : '도전', state.hardMode ? '하드' : ''].filter(Boolean).join(' · ');
     }
     this.$('dw-top-kicker').textContent = kicker;
-    this.$('dw-nav-mission-dot').hidden = !this.missionClaimable();
+    this.$('dw-mission-dot').hidden = !this.missionClaimable();
   },
   saveSummary() {
     const result = Storage.loadDetailed(Storage.keys.SAVE);
@@ -291,12 +344,11 @@ const Astra = {
     const start = this.$('btn-start-load');
     start.replaceChildren();
     const label = this.text('span', summary ? '여정 이어가기' : '여정 시작하기');
-    label.append(this.text('small', summary ? (summary.text || 'CONTINUE') : 'BEGIN YOUR JOURNEY'));
+    label.append(this.text('small', summary ? (summary.text || '저장된 여정') : '첫 여정을 떠나요'));
     start.append(label, this.icon('arrow'));
-    start.onclick = () => RPG.startGame(summary ? 'load' : 'new');
+    start.onclick = () => { this.sfx('open'); RPG.startGame(summary ? 'load' : 'new'); };
     this.$('btn-start-new').hidden = !summary;
-    const fortune = this.$('btn-fortune-cookie');
-    fortune.classList.toggle('has-dot', typeof FortuneCookie !== 'undefined' && FortuneCookie.canUse());
+    this.$('btn-fortune-cookie').classList.toggle('has-dot', typeof FortuneCookie !== 'undefined' && FortuneCookie.canUse());
     this.$('btn-title-mission').classList.toggle('has-dot', this.missionClaimable());
   },
   missionClaimable() {
@@ -316,41 +368,44 @@ const Astra = {
     [0,1,2].forEach(index => {
       const id = state.deck[index] || null;
       const card = id ? RPG.getCardData(id) : null;
-      const current = box.children[index];
+      const current = box.querySelector(`[data-slot="${index}"]`);
       // Unchanged members keep their loaded portrait element: no blank frame on return.
       if (current && current.dataset.cardKey === String(card?.id || '')) return;
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `party-card${card ? '' : ' empty'}`;
+      button.dataset.slot = String(index);
       button.dataset.cardKey = card?.id || '';
       if (card) button.dataset.grade = card.grade;
       button.setAttribute('aria-label', `${slots[index]}: ${card?.name || '비어 있음'}, 편성하기`);
-      button.onclick = () => { RPG.openDeck(); RPG.selectDeckSlot(index); };
+      button.onclick = () => { this.sfx('tap'); RPG.openDeck(); RPG.selectDeckSlot(index); };
       button.append(this.text('span', slots[index], 'party-position'));
-      if (card) button.append(this.portrait(card));
+      let art;
+      if (card) art = this.framed(card);
       else {
-        const empty = this.text('span', '', 'dw-art dw-art--empty');
-        empty.append(this.icon('plus'));
-        button.append(empty);
+        art = this.text('span', '', 'dw-art dw-art--empty');
+        art.append(this.icon('plus'));
       }
-      button.append(this.text('strong', card?.name || '빈 자리'));
-      button.append(this.text('small', card ? this.cardLine(card) : '눌러서 배치'));
+      const plate = this.text('span', '', 'dw-plate');
+      plate.append(this.text('strong', card?.name || '빈 자리'), this.text('small', card ? this.cardLine(card) : '눌러서 배치'));
+      art.append(plate);
+      button.append(art);
       if (current) current.replaceWith(button);
       else box.append(button);
     });
     const filled = state.deck.filter(id => id && RPG.getCardData(id)).length;
     const owned = state.inventory.length;
     let note = '';
-    if (!filled) note = owned ? '동료를 배치하면 출전할 수 있어요.' : '먼저 소환으로 동료를 모으세요.';
-    else if (filled < 3 && owned > filled) note = `빈 자리 ${3 - filled}곳 · 자동 편성으로 바로 채울 수 있어요.`;
+    if (!filled) note = owned ? '동료를 배치하면 출전할 수 있어요.' : '먼저 소환에서 동료를 모으세요.';
+    else if (filled < 3 && owned > filled) note = `빈 자리 ${3 - filled}곳 · 편성에서 자동 편성으로 채울 수 있어요.`;
     this.$('astra-party-note').textContent = note;
     this.$('astra-party-note').hidden = !note;
     this.$('astra-depart').disabled = !filled;
     this.$('astra-depart-help').textContent = filled ? `STAGE ${state.enemyScale + 1} 도전` : '파티를 먼저 편성하세요';
     this.renderStage();
-    this.renderSummonControls();
     this.renderBlessBadge();
     this.updateHeader();
+    if (document.body.dataset.screen === 'summon') this.renderSummon();
   },
   renderStage() {
     const state = RPG.state;
@@ -359,15 +414,26 @@ const Astra = {
     this.$('astra-mode').textContent = this.modeNames[state.mode] || state.mode;
     this.$('dw-stage-type').textContent = [state.gameType === 'endless' ? '엔드리스' : '도전', state.hardMode ? '하드' : ''].filter(Boolean).join(' · ');
     const clear = GameUtils.getClearStage(state.mode, state.gameType);
-    const goal = this.$('dw-stage-goal');
-    const meter = this.$('dw-stage-meter');
+    const route = this.$('dw-route');
+    route.replaceChildren();
     if (Number.isFinite(clear)) {
-      goal.textContent = `/ ${clear}`;
-      meter.hidden = false;
-      meter.firstElementChild.style.width = `${Math.min(100, (state.enemyScale / clear) * 100)}%`;
+      this.$('dw-stage-goal').textContent = `/ ${clear}`;
+      // Six-stage chapters: the run reads as a short path with the next step lit.
+      const chapter = Math.floor(state.enemyScale / 6);
+      for (let i = 0; i < 6; i++) {
+        const index = chapter * 6 + i;
+        if (index >= clear) break;
+        const step = this.text('i', '');
+        if (index < state.enemyScale) step.className = 'is-done';
+        else if (index === state.enemyScale) step.className = 'is-now';
+        if (i === 5) step.classList.add('is-boss');
+        route.append(step);
+      }
     } else {
-      goal.textContent = '';
-      meter.hidden = true;
+      this.$('dw-stage-goal').textContent = '';
+      const record = typeof ModeRecords !== 'undefined' ? ModeRecords.read() : {ok:false};
+      const best = record.ok ? record.data.modes[state.mode]?.maxStage : 0;
+      if (best) route.append(this.text('span', `최고 기록 STAGE ${best}`, 'dw-route-text'));
     }
     const enemy = RPG.getCurrentStageEnemyData();
     const name = this.$('next-enemy-text');
@@ -383,34 +449,6 @@ const Astra = {
     const source = ImageAssets.getEntitySource(enemy);
     if (img.dataset.astraSource === source && img.getAttribute('src')) img.style.display = 'block';
     else ImageAssets.load(img, enemy, { force:true, alt:enemy.name });
-  },
-  renderSummonControls() {
-    const state = RPG.state;
-    const cost = GAME_CONSTANTS.COSTS.GACHA_SINGLE;
-    const normal = this.$('btn-normal-gacha');
-    const multi = this.$('dw-multi-gacha');
-    const challenge = this.$('btn-challenge-gacha');
-    const label = (button, title, sub, price) => {
-      button.replaceChildren(this.text('strong', title), this.text('small', sub));
-      if (price !== null) {
-        const tag = this.text('span', '', 'dw-price');
-        tag.append(this.icon('ticket'), this.text('b', String(price)));
-        button.append(tag);
-      }
-    };
-    if (state.mode === 'puzzle') {
-      label(normal, '퍼즐 조각', '단어 퀴즈로 36장 확보', null);
-      multi.hidden = true;
-    } else {
-      label(normal, '1회 소환', '동료 1명', cost);
-      const count = Math.min(10, Math.floor(state.tickets / cost));
-      multi.hidden = false;
-      multi.disabled = count < 2;
-      label(multi, `${count >= 2 ? count : 10}회 소환`, '연속으로 한 번에', (count >= 2 ? count : 10) * cost);
-    }
-    label(challenge, '도전 소환', '퀴즈 정답 시 확률 UP', cost);
-    normal.disabled = state.mode !== 'puzzle' && state.tickets < cost;
-    challenge.disabled = state.tickets < cost;
   },
   renderBlessBadge() {
     const state = RPG.state;
@@ -434,65 +472,152 @@ const Astra = {
       rows.push(`<tr><th>${this.GRADE_LABELS.normal}</th><td>${Math.round((1 - previous) * 100)}%</td></tr>`);
       return rows.join('');
     };
-    RPG.openInfoModal('소환 확률', `<div class="dw-rates"><section><h4>1회 소환</h4><table>${describe(table.normal)}</table></section><section><h4>도전 소환</h4><table>${describe(table.challenge)}</table></section></div><p class="dw-note">도전 소환은 단어 퀴즈에 정답일 때 진행되며, 오답이면 티켓만 소모됩니다.</p>`);
+    RPG.openInfoModal('소환 확률', `<div class="dw-rates"><section><h4>일반 소환</h4><table>${describe(table.normal)}</table></section><section><h4>도전 소환</h4><table>${describe(table.challenge)}</table></section></div><p class="dw-note">도전 소환은 단어 퀴즈에 정답일 때 진행되며, 오답이면 티켓만 소모됩니다.</p>`);
   },
 
-  // ---------- Summon ----------
-  summonMany() {
+  // ---------- Summon screen ----------
+  summonPool() {
+    try { return GameUtils.buildCardPool(RPG.global, RPG.getRunCardPoolBuildOptions()); } catch { return []; }
+  },
+  renderSummon() {
+    if (!this.inRun()) return;
     const state = RPG.state;
-    if (state.mode === 'puzzle') return RPG.openPuzzlePieces();
-    const cost = GAME_CONSTANTS.COSTS.GACHA_SINGLE;
-    const count = Math.min(10, Math.floor(state.tickets / cost));
-    if (count < 1) return RPG.showAlert('티켓이 부족합니다.');
-    const picks = [];
-    this.summonBatch = true;
-    try {
-      for (let i = 0; i < count; i++) {
-        state.tickets -= cost;
-        RPG.runGacha(false);
-        picks.push(state.inventory[state.inventory.length - 1]);
-      }
-    } finally { this.summonBatch = false; }
-    this.renderSummonResults(picks);
-  },
-  summonAgain() {
-    RPG.openGacha();
-  },
-  revealCard(card, options = {}) {
-    const wrap = this.text('div', '', `dw-reveal${options.compact ? ' dw-reveal--compact' : ''}`);
-    wrap.dataset.grade = card.grade;
-    if (!options.compact) {
-      const seal = this.text('div', '', 'summon-seal');
-      seal.setAttribute('aria-hidden', 'true');
-      wrap.append(seal);
+    const special = state.mode === 'draft' ? '드래프트' : ['chaos','artifact_chaos'].includes(state.mode) ? '카오스 풀' : state.mode === 'puzzle' ? '퍼즐 조각' : null;
+    this.$('dw-banner-kicker').textContent = `${this.modeNames[state.mode] || state.mode} 카드풀`;
+    this.$('dw-banner-title').textContent = special || this.SUMMON_NAMES[document.body.dataset.theme] || this.SUMMON_NAMES.astra;
+    this.$('dw-nav-summon-label').textContent = state.mode === 'draft' ? '드래프트' : '소환';
+    const pool = this.summonPool();
+    const legends = pool.filter(card => card.grade === 'legend');
+    this.$('dw-banner-pool').textContent = special ? `${this.modeNames[state.mode] || state.mode} 모드 전용 진행` : `${new Set(pool.map(card => card.id)).size}종 중 전설 ${legends.length}종`;
+    const feature = this.$('dw-banner-feature');
+    const key = `${state.mode}:${legends.length}`;
+    if (feature.dataset.key !== key) {
+      feature.dataset.key = key;
+      feature.replaceChildren();
+      // A stable showcase per run: the first three legends by grade order and name.
+      RPG.sortCardDataByGrade(legends).slice(0, 3).forEach(card => feature.append(this.framed(card)));
     }
-    const art = this.portrait(card);
-    wrap.append(art);
-    wrap.append(this.text('span', this.GRADE_LABELS[card.grade] || this.gradeNames[card.grade] || card.grade, 'dw-grade-tag'));
-    wrap.append(this.text('strong', card.name, 'dw-reveal-name'));
-    if (!options.compact) wrap.append(this.text('small', this.cardLine(card), 'dw-reveal-meta'));
-    return wrap;
+    this.renderSummonControls();
   },
-  decorateSummon(isChallenge) {
-    if (this.summonBatch) return;
+  // Probability of one grade in a rate table (thresholds are cumulative).
+  rateOf(rates, grade) {
+    let previous = 0;
+    for (const entry of rates) {
+      if (entry.grade === grade) return entry.threshold - previous;
+      previous = entry.threshold;
+    }
+    return 0;
+  },
+  // The learning summon is the headline: the quiz path is bigger, first, and shows what it is worth.
+  renderSummonControls() {
+    const state = RPG.state;
+    const cost = GAME_CONSTANTS.COSTS.GACHA_SINGLE;
+    const normal = this.$('btn-normal-gacha');
+    const challenge = this.$('btn-challenge-gacha');
+    const label = (button, title, sub, price) => {
+      const copy = this.text('span', '');
+      copy.append(this.text('strong', title));
+      if (sub) copy.append(sub);
+      button.replaceChildren(copy);
+      if (price !== null) button.append(this.priceTag(price));
+    };
+    const table = GACHA_RATES[state.mode] || GACHA_RATES.default;
+    const top = ['legend','epic','rare'].find(grade => this.rateOf(table.challenge, grade) > 0) || 'rare';
+    const pct = rates => `${Math.round(this.rateOf(rates, top) * 100)}%`;
+    const odds = this.text('small', '', 'dw-odds');
+    odds.append(this.text('span', `단어 퀴즈 정답 시 ${this.GRADE_LABELS[top]} `), this.text('s', pct(table.normal)), this.text('span', ' → '), this.text('b', pct(table.challenge)));
+    label(challenge, '도전 소환', odds, cost);
+    challenge.prepend(this.icon('cap'));
+    if (state.mode === 'puzzle') label(normal, '퍼즐 조각', this.text('small', '단어 퀴즈로 36장 확보'), null);
+    else label(normal, '일반 소환', this.text('small', `${this.GRADE_LABELS[top]} ${pct(table.normal)}`), cost);
+    normal.disabled = state.mode !== 'puzzle' && state.tickets < cost;
+    challenge.disabled = state.tickets < cost;
+  },
+  afterGacha(isChallenge) {
     const modal = this.$('modal-gacha');
     if (!modal.classList.contains('active')) return;
     const roulette = this.$('screen-chaos-roulette').classList.contains('active') && isChallenge === undefined;
     const id = roulette ? RPG.global.pendingTranscendenceCards?.at(-1) : RPG.state.inventory.at(-1);
     const card = RPG.getCardData(id);
     if (!card) return;
-    const result = this.$('gacha-result');
-    result.dataset.grade = card.grade;
-    result.replaceChildren(this.revealCard(card));
-    if (roulette) result.append(this.text('p', '다음 오리진 게임 전설 풀에 추가되었습니다.', 'dw-note'));
-    this.$('gacha-title').textContent = roulette ? '초월 소환' : isChallenge ? '도전 소환' : '소환';
-    modal.dataset.layout = 'single';
-    const again = this.$('dw-gacha-again');
+    modal.classList.remove('active');
+    this.openReveal(card, { title: roulette ? '초월 소환' : isChallenge ? '도전 소환 성공' : '일반 소환', kind: roulette ? 'roulette' : isChallenge ? 'challenge' : 'normal', note: roulette ? '다음 오리진 게임 전설 풀에 추가되었습니다.' : '' });
+  },
+  openReveal(card, options) {
+    const stage = this.$('dw-reveal');
+    this.clearRevealTimers();
+    stage.dataset.best = card.grade;
+    stage.classList.remove('is-done');
+    stage.replaceChildren();
+    stage.append(this.text('i', '', 'dw-reveal-rays'), this.text('i', '', 'dw-reveal-circle'));
+    const heading = this.text('h2', options.title, 'dw-reveal-title');
+    heading.id = 'dw-reveal-title';
+    const flip = this.button('', 'dw-flip');
+    flip.dataset.grade = card.grade;
+    flip.setAttribute('aria-label', '카드 공개');
+    const inner = this.text('span', '', 'dw-flip-inner');
+    const front = this.text('span', '', 'dw-flip-face dw-flip-front');
+    front.append(this.framed(card));
+    inner.append(this.text('span', '', 'dw-flip-face dw-flip-back'), front);
+    const caption = this.text('span', '', 'dw-flip-caption');
+    caption.dataset.grade = card.grade;
+    caption.append(this.text('span', this.GRADE_LABELS[card.grade] || card.grade, 'dw-grade-tag'), this.text('strong', card.name), this.text('small', this.cardLine(card)));
+    flip.append(inner, caption);
+    flip.onclick = () => this.flipCard();
+    const note = this.text('p', options.note || '', 'dw-reveal-summary');
+    note.setAttribute('aria-live', 'polite');
+    const actions = this.text('div', '', 'dw-reveal-actions');
+    actions.append(this.button('확인', 'dw-btn', () => this.closeReveal()));
     const cost = GAME_CONSTANTS.COSTS.GACHA_SINGLE;
-    again.hidden = roulette || !!isChallenge || RPG.state.mode === 'puzzle';
-    again.disabled = RPG.state.tickets < cost;
-    again.replaceChildren(this.text('span', '한 번 더'), this.priceTag(cost));
+    // Every follow-up leads into another quiz; the plain summon never offers a faster repeat.
+    if (options.kind !== 'roulette' && RPG.state.tickets >= cost) {
+      const next = this.button('', 'dw-btn dw-btn--primary', () => { this.closeReveal(); RPG.openChallengeGacha(); });
+      next.id = 'dw-gacha-again';
+      next.append(this.text('span', options.kind === 'challenge' ? '한 번 더 도전' : '도전 소환'), this.priceTag(cost));
+      actions.append(next);
+    }
+    stage.append(heading, flip, note, this.text('p', '카드를 눌러 공개', 'dw-reveal-hint'), actions);
+    stage.setAttribute('role','dialog');
+    stage.setAttribute('aria-modal','true');
+    stage.setAttribute('aria-labelledby','dw-reveal-title');
+    stage.setAttribute('aria-hidden','false');
+    stage.classList.add('is-open');
+    this.revealState = { flip, card, opener:document.activeElement };
+    for (const el of document.querySelectorAll('.dw-top,main,.astra-nav')) el.inert = true;
     this.renderTicketCount();
+    this.sfx('summon');
+    flip.focus({preventScroll:true});
+    if (!this.motion) return this.flipCard();
+    this.revealTimers.push(setTimeout(() => this.flipCard(), 650));
+  },
+  flipCard() {
+    const state = this.revealState;
+    if (!state || state.flip.classList.contains('is-flipped')) return;
+    const { flip, card } = state;
+    flip.classList.add('is-flipped');
+    flip.setAttribute('aria-label', `${card.name}, ${this.GRADE_LABELS[card.grade] || card.grade}`);
+    this.sfx(['legend','transcendence','special'].includes(card.grade) ? 'legend' : card.grade === 'epic' ? 'epic' : card.grade === 'rare' ? 'rare' : 'flip');
+    const stage = this.$('dw-reveal');
+    stage.classList.add('is-done');
+    this.revealTimers.push(setTimeout(() => stage.querySelector('.dw-reveal-actions .dw-btn:last-child')?.focus({preventScroll:true}), 60));
+  },
+  clearRevealTimers() {
+    this.revealTimers.forEach(clearTimeout);
+    this.revealTimers = [];
+  },
+  closeReveal() {
+    const stage = this.$('dw-reveal');
+    if (!stage.classList.contains('is-open')) return;
+    this.clearRevealTimers();
+    stage.classList.remove('is-open','is-done');
+    stage.setAttribute('aria-hidden','true');
+    stage.replaceChildren();
+    for (const el of document.querySelectorAll('.dw-top,main,.astra-nav')) el.inert = !!document.querySelector('.modal.active');
+    const opener = this.revealState?.opener;
+    this.revealState = null;
+    this.renderTicketCount();
+    if (this.inRun()) { this.renderSummonControls(); this.renderParty(); }
+    if (opener?.isConnected && opener.getClientRects().length) opener.focus({preventScroll:true});
   },
   priceTag(value) {
     const tag = this.text('span', '', 'dw-price');
@@ -502,48 +627,25 @@ const Astra = {
   renderTicketCount() {
     if (this.inRun()) this.$('ui-tickets').textContent = RPG.state.tickets;
   },
-  renderSummonResults(ids) {
-    const modal = this.$('modal-gacha');
-    const result = this.$('gacha-result');
-    const cards = ids.map(id => RPG.getCardData(id)).filter(Boolean);
-    const best = cards.reduce((top, card) => this.GRADE_ORDER.indexOf(card.grade) < this.GRADE_ORDER.indexOf(top.grade) ? card : top, cards[0]);
-    result.dataset.grade = best?.grade || 'normal';
-    const grid = this.text('div', '', 'dw-summon-grid');
-    cards.forEach((card, index) => {
-      const item = this.revealCard(card, {compact:true});
-      item.style.setProperty('--i', index);
-      grid.append(item);
-    });
-    const counts = {};
-    cards.forEach(card => { counts[card.grade] = (counts[card.grade] || 0) + 1; });
-    const summary = this.text('p', this.GRADE_ORDER.filter(grade => counts[grade]).map(grade => `${this.GRADE_LABELS[grade] || grade} ${counts[grade]}`).join(' · '), 'dw-summon-summary');
-    result.replaceChildren(grid, summary);
-    this.$('gacha-title').textContent = `${cards.length}회 소환`;
-    modal.dataset.layout = 'multi';
-    const again = this.$('dw-gacha-again');
-    again.hidden = true;
-    modal.classList.add('active');
-    this.renderTicketCount();
-  },
 
   // ---------- Cards, collection and formation ----------
   cardTile(card, options = {}) {
     const tile = document.createElement('button');
     tile.type = 'button';
-    tile.className = `dw-card${options.count === 0 ? ' is-unowned' : ''}${options.deployed ? ' is-deployed' : ''}${options.selected ? ' is-selected' : ''}`;
+    tile.className = `dw-card${options.count === 0 ? ' is-unowned' : ''}${options.selected ? ' is-selected' : ''}`;
     tile.dataset.cardId = card.id;
     tile.dataset.grade = card.grade;
     const availability = options.count === null || options.count === undefined ? '' : options.count ? `${options.count}장 보유` : '미보유';
-    tile.setAttribute('aria-label', [card.name, this.gradeNames[card.grade] || card.grade, availability, options.deployed ? '출전 중' : ''].filter(Boolean).join(', '));
-    tile.append(this.portrait(card));
-    if (options.count > 1) tile.append(this.text('span', `×${options.count}`, 'dw-card-count'));
-    if (options.deployed) tile.append(this.text('span', options.deployed, 'dw-card-badge'));
+    tile.setAttribute('aria-label', [card.name, this.gradeNames[card.grade] || card.grade, availability].filter(Boolean).join(', '));
+    const frame = this.framed(card);
+    if (options.count > 1) frame.append(this.text('span', `×${options.count}`, 'dw-card-count'));
+    tile.append(frame);
     tile.append(this.text('span', card.name, 'dw-card-name'));
     tile.append(this.text('span', options.count === 0 ? '미보유' : this.cardLine(card), 'dw-card-meta'));
     tile.onclick = options.onClick;
     if (!options.info) return tile;
     const wrap = this.text('div', '', 'dw-card-wrap');
-    const info = this.button('', 'dw-card-info', event => { event.stopPropagation(); RPG.showCardInfo(card.id); });
+    const info = this.button('', 'dw-card-info', event => { event.stopPropagation(); this.showCard(card.id, options.list); });
     info.append(this.icon('info'));
     info.setAttribute('aria-label', `${card.name} 상세 정보`);
     wrap.append(tile, info);
@@ -572,7 +674,8 @@ const Astra = {
   renderCollection() {
     const counts = new Map();
     for (const id of RPG.state.inventory) counts.set(id,(counts.get(id)||0)+1);
-    const source = this.allCards ? GameUtils.getAllCards() : [...counts.keys()].map(id => RPG.getCardData(id)).filter(Boolean);
+    const all = GameUtils.getAllCards();
+    const source = this.allCards ? all : [...counts.keys()].map(id => RPG.getCardData(id)).filter(Boolean);
     const cards = new Map(source.map(card => [card.id,card]));
     const query = this.$('card-search').value.trim().toLocaleLowerCase();
     const grade = this.$('card-grade').value;
@@ -581,13 +684,17 @@ const Astra = {
     const box = this.$('collection-grid');
     box.replaceChildren();
     const byId = new Map(filtered.map(card => [card.id,card]));
-    for (const id of RPG.sortCardIdsByGrade([...byId.keys()])) box.append(this.cardTile(byId.get(id), { count:counts.get(id)||0, onClick:() => RPG.showCardInfo(id) }));
+    const ordered = RPG.sortCardIdsByGrade([...byId.keys()]);
+    for (const id of ordered) box.append(this.cardTile(byId.get(id), { count:counts.get(id)||0, onClick:() => this.showCard(id, ordered) }));
     this.$('collection-empty').hidden = filtered.length !== 0;
     const ownedKinds = counts.size;
+    const totalKinds = new Set(all.map(card => card.id)).size;
     this.$('collection-count').textContent = this.allCards ? `${filtered.length}종 · 보유 ${ownedKinds}종` : `${filtered.length}종`;
     this.$('collection-scope').textContent = this.allCards ? `전체 ${cards.size}종` : `보유 ${ownedKinds}종`;
     this.$('collection-scope').title = this.allCards ? '눌러서 보유 카드만 보기' : '눌러서 전체 도감 보기';
-    this.$('collection-scope').setAttribute('aria-pressed',String(this.allCards));
+    const ratio = totalKinds ? ownedKinds / totalKinds : 0;
+    this.$('dw-completion-value').textContent = `${ownedKinds} / ${totalKinds}`;
+    this.$('dw-completion-bar').style.width = `${Math.round(ratio * 100)}%`;
     const grades = ['all', ...[...this.$('card-grade').options].map(option => option.value).filter(value => value !== 'all')];
     this.gradeChips(this.$('grade-options'), grades, grade, picked => {
       this.$('card-grade').value = picked;
@@ -624,6 +731,18 @@ const Astra = {
     this.$('collection-count').textContent = `${pool.length}장`;
     this.$('collection-empty').hidden = pool.length !== 0;
   },
+  showCard(id, list) {
+    this.viewer = { ids: Array.isArray(list) ? list : [], index: Array.isArray(list) ? list.indexOf(id) : -1 };
+    RPG.showCardInfo(id);
+  },
+  stepViewer(delta) {
+    const { ids, index } = this.viewer;
+    if (index < 0 || ids.length < 2) return;
+    const next = (index + delta + ids.length) % ids.length;
+    this.viewer.index = next;
+    this.sfx('tap');
+    RPG.showCardInfo(ids[next]);
+  },
   deckUse(id) {
     const owned = RPG.state.inventory.filter(item => item === id).length;
     const used = RPG.state.deck.filter(item => item === id).length;
@@ -632,9 +751,8 @@ const Astra = {
   renderDeckCards(assign) {
     if (assign) this.deckAssign = assign;
     const box = this.$('deck-card-list');
-    const inventory = RPG.state.inventory;
     const counts = new Map();
-    for (const id of inventory) counts.set(id,(counts.get(id)||0)+1);
+    for (const id of RPG.state.inventory) counts.set(id,(counts.get(id)||0)+1);
     const ids = RPG.sortCardIdsByGrade([...counts.keys()]).filter(id => RPG.getCardData(id));
     const present = this.GRADE_ORDER.filter(grade => ids.some(id => RPG.getCardData(id).grade === grade));
     if (this.deckFilter !== 'all' && !present.includes(this.deckFilter)) this.deckFilter = 'all';
@@ -643,11 +761,8 @@ const Astra = {
     else chips.replaceChildren();
     const scroll = box.scrollTop;
     box.replaceChildren();
-    for (const id of ids) {
-      const card = RPG.getCardData(id);
-      if (this.deckFilter !== 'all' && card.grade !== this.deckFilter) continue;
-      box.append(this.cardTile(card, { count:counts.get(id), info:true, onClick:() => this.pickDeckCard(id) }));
-    }
+    const shown = ids.filter(id => this.deckFilter === 'all' || RPG.getCardData(id).grade === this.deckFilter);
+    for (const id of shown) box.append(this.cardTile(RPG.getCardData(id), { count:counts.get(id), info:true, list:shown, onClick:() => this.pickDeckCard(id) }));
     box.scrollTop = scroll;
     this.$('dw-deck-empty').hidden = ids.length !== 0;
     this.refreshDeckStates();
@@ -661,10 +776,11 @@ const Astra = {
       const selected = RPG.selectedSlot >= 0 && RPG.state.deck[RPG.selectedSlot] === id;
       tile.classList.toggle('is-deployed', !!deployed);
       tile.classList.toggle('is-selected', selected);
-      let badge = tile.querySelector('.dw-card-badge');
+      const frame = tile.querySelector('.dw-frame');
+      let badge = frame.querySelector('.dw-card-badge');
       if (deployed && !badge) {
         badge = this.text('span', '', 'dw-card-badge');
-        tile.querySelector('.dw-art').after(badge);
+        frame.append(badge);
       }
       if (badge) {
         if (deployed) badge.textContent = deployed;
@@ -682,6 +798,7 @@ const Astra = {
       RPG.selectDeckSlot(empty);
     }
     const slot = RPG.selectedSlot;
+    this.sfx('tap');
     if (deck[slot] === id) {
       // Tapping the card already in the selected slot takes it out.
       deck[slot] = null;
@@ -719,6 +836,7 @@ const Astra = {
     const empty = deck.indexOf(null);
     RPG.updateDeckSlots();
     RPG.selectDeckSlot(empty >= 0 ? empty : Math.max(0, RPG.selectedSlot));
+    this.sfx('open');
     this.toast(`${placed}명을 등급 순으로 배치했어요.`);
   },
   renderDeckSlots() {
@@ -730,7 +848,7 @@ const Astra = {
         slot.replaceChildren(this.text('small', role, 'dw-slot-role'));
         if (card) {
           slot.dataset.grade = card.grade;
-          slot.append(this.portrait(card));
+          slot.append(this.framed(card));
         } else {
           delete slot.dataset.grade;
           const empty = this.text('span','', 'dw-art dw-art--empty');
@@ -756,36 +874,80 @@ const Astra = {
     if (!card) return;
     const modal = this.$('modal-card');
     modal.dataset.grade = card.grade;
+    const frame = modal.querySelector('.dw-card-hero > .dw-frame');
+    frame.dataset.grade = card.grade;
+    const badge = frame.querySelector('.dw-el');
+    badge.dataset.el = card.element;
+    badge.replaceChildren(this.icon(`el-${['fire','water','nature','wind','light','dark','earth'].includes(card.element) ? card.element : 'normal'}`));
     const meta = this.$('md-grade');
     meta.className = 'dw-card-chips';
+    meta.dataset.grade = card.grade;
     meta.replaceChildren(
       this.text('span', this.GRADE_LABELS[card.grade] || this.gradeNames[card.grade] || card.grade, 'dw-grade-tag'),
       this.text('span', this.roleNames[card.role] || card.role, 'dw-chip-static'),
       this.text('span', this.elementNames[card.element] || card.element, 'dw-chip-static'));
     const stats = this.$('md-stats');
     stats.className = 'dw-stats';
+    stats.dataset.grade = card.grade;
     stats.replaceChildren();
-    for (const [label, value] of [['HP',card.stats.hp],['물리 공격',card.stats.atk],['마법 공격',card.stats.matk],['물리 방어',card.stats.def],['마법 방어',card.stats.mdef]]) {
+    // Bars compare against the strongest value of that stat across all cards.
+    if (!this.statMax) {
+      this.statMax = {};
+      for (const item of GameUtils.getAllCards()) for (const key of ['hp','atk','matk','def','mdef']) this.statMax[key] = Math.max(this.statMax[key] || 1, item.stats?.[key] || 0);
+    }
+    for (const [key, label] of [['hp','HP'],['atk','물리 공격'],['matk','마법 공격'],['def','물리 방어'],['mdef','마법 방어']]) {
       const row = this.text('div','', 'dw-stat');
-      row.append(this.text('span', label), this.text('b', Number(value).toLocaleString('ko-KR')));
+      const bar = this.text('i','');
+      const fill = this.text('i','');
+      fill.style.width = `${Math.round(Math.min(1, (card.stats[key] || 0) / this.statMax[key]) * 100)}%`;
+      bar.append(fill);
+      row.append(this.text('span', label), bar, this.text('b', Number(card.stats[key] || 0).toLocaleString('ko-KR')));
       stats.append(row);
     }
     const owned = RPG.state?.inventory ? RPG.state.inventory.filter(item => item === id).length : 0;
     if (owned) stats.append(this.text('p', `${owned}장 보유`, 'dw-owned'));
+    const { ids, index } = this.viewer;
+    const inList = ids[index] === id && ids.length > 1;
+    modal.querySelectorAll('.dw-viewer-nav,.dw-viewer-count').forEach(el => { el.hidden = !inList; });
+    if (inList) modal.querySelector('.dw-viewer-count').textContent = `${index + 1} / ${ids.length}`;
+    else this.viewer = { ids: [], index: -1 };
   },
   setupCardModal() {
     const content = this.$('modal-card').querySelector('.modal-content');
     content.classList.add('dw-card-sheet');
     const scroll = content.querySelector('.modal-scroll');
     const art = this.$('md-img').parentElement;
-    art.className = 'dw-art dw-card-art';
+    art.className = 'dw-art';
     art.removeAttribute('style');
+    const frame = this.text('span','', 'dw-frame dw-card-art');
+    const badge = this.text('span','', 'dw-el');
+    frame.append(art, badge);
+    const prev = this.button('', 'dw-viewer-nav', () => this.stepViewer(-1));
+    prev.dataset.dir = 'prev';
+    prev.setAttribute('aria-label','이전 카드');
+    prev.append(this.icon('left'));
+    const next = this.button('', 'dw-viewer-nav', () => this.stepViewer(1));
+    next.dataset.dir = 'next';
+    next.setAttribute('aria-label','다음 카드');
+    next.append(this.icon('right'));
+    const count = this.text('span', '', 'dw-viewer-count');
     const hero = this.text('div','', 'dw-card-hero');
     const side = this.text('div','', 'dw-card-side');
     side.append(this.$('md-grade'), this.$('md-name'), this.$('md-stats'));
-    hero.append(art, side);
+    hero.append(frame, side, prev, next, count);
     scroll.prepend(hero);
     this.$('md-name').removeAttribute('style');
+    // Swipe between cards in the current list.
+    let startX = null;
+    hero.addEventListener('touchstart', event => { startX = event.touches[0].clientX; }, {passive:true});
+    hero.addEventListener('touchend', event => {
+      if (startX === null) return;
+      const dx = event.changedTouches[0].clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 50) this.stepViewer(dx < 0 ? 1 : -1);
+    });
+    const closeModal = RPG.closeModal.bind(RPG);
+    RPG.closeModal = () => { this.viewer = { ids: [], index: -1 }; return closeModal(); };
   },
 
   // ---------- Study ----------
@@ -828,9 +990,14 @@ const Astra = {
     if (player) {
       this.$('dw-p-hp').textContent = `${format(player.hp)} / ${format(player.maxHp)}`;
       this.$('dw-p-mp').textContent = `MP ${format(player.mp)} / ${format(player.maxMp || GAME_CONSTANTS.MAX_MP)}`;
+      const frame = this.$('dw-p-frame');
+      const grade = player.proto?.grade || RPG.getCardData(player.id)?.grade;
+      if (grade) frame.dataset.grade = grade;
     }
     this.$('dw-e-hp').textContent = `${format(battle.enemy.hp)} / ${format(battle.enemy.maxHp)}`;
     this.$('dw-enemy-tag').textContent = `STAGE ${RPG.state.enemyScale + 1}`;
+    const pill = this.$('dw-turn-pill');
+    pill.dataset.side = /enemy/.test(battle.phase || '') ? 'enemy' : 'player';
     const bench = this.$('dw-bench');
     bench.replaceChildren();
     battle.players.forEach((member, index) => {
@@ -842,28 +1009,100 @@ const Astra = {
     bench.setAttribute('aria-label', `파티 ${battle.players.filter(member => member && !member.isDead).length}명 생존`);
     const field = this.$('field-buff-box');
     field.replaceChildren(...battle.fieldBuffs.map(buff => this.text('span', BUFF_NAMES[buff.name] || buff.name, 'dw-field-chip')));
-    this.floatDamage('p', player, battle);
-    this.floatDamage('e', battle.enemy, battle);
+    this.reactToHp('p', player, battle);
+    this.reactToHp('e', battle.enemy, battle);
   },
-  floatDamage(side, actor, battle) {
+  // HP changes drive the feedback: numbers, a sprite matching the attacker's skill type, and recoil.
+  reactToHp(side, actor, battle) {
     if (!actor) return;
-    const key = `${side}`;
-    const memory = this.hpMemory.get(key);
+    const memory = this.hpMemory.get(side);
     const identity = `${actor.id}:${side === 'p' ? battle.currentPlayerIdx : 'enemy'}`;
-    this.hpMemory.set(key, {battle, identity, hp:actor.hp});
+    this.hpMemory.set(side, {battle, identity, hp:actor.hp});
     if (!memory || memory.battle !== battle || memory.identity !== identity) return;
     const delta = Math.round(actor.hp - memory.hp);
     if (!delta) return;
+    // Only the player's attacks can be critical; the flag belongs to the hit that logged it.
+    const crit = side === 'e' && delta < 0 && Date.now() - this.battleCue.crit < 1500;
     const layer = this.$(`dw-${side}-float`);
-    const mark = this.text('span', delta > 0 ? `+${delta.toLocaleString('ko-KR')}` : delta.toLocaleString('ko-KR'), delta > 0 ? 'is-heal' : 'is-hit');
+    const mark = this.text('span', delta > 0 ? `+${delta.toLocaleString('ko-KR')}` : delta.toLocaleString('ko-KR'), delta > 0 ? 'is-heal' : crit ? 'is-crit' : 'is-hit');
     layer.append(mark);
     setTimeout(() => mark.remove(), 1100);
+    let fx = 'heal';
     if (delta < 0) {
+      const fromPlayer = side === 'e';
+      fx = crit ? 'crit' : fromPlayer && this.battleCue.type === 'mag' ? 'magic' : fromPlayer ? 'slash' : 'hit';
       const box = layer.closest('.battle-actor');
       box.classList.remove('dw-hit');
       void box.offsetWidth;
       box.classList.add('dw-hit');
+      this.sfx(crit ? 'crit' : fx === 'magic' ? 'magic' : 'hit');
+      if (crit) this.battleCue.crit = 0;
+    } else this.sfx('heal');
+    this.spawnFx(side, fx);
+  },
+  spawnFx(side, name) {
+    if (!this.motion) return;
+    const layer = this.$(`dw-${side}-fx`);
+    const sprite = this.text('i', '');
+    sprite.dataset.fx = name;
+    layer.append(sprite);
+    setTimeout(() => sprite.remove(), 900);
+  },
+  lunge(side) {
+    if (!this.motion) return;
+    const box = this.$(side === 'p' ? 'player-actor-box' : 'enemy-actor-box');
+    box.classList.remove('dw-lunge');
+    void box.offsetWidth;
+    box.classList.add('dw-lunge');
+  },
+  onPlayerSkill(source, target, skill) {
+    const battle = RPG.battle;
+    if (!battle || !battle.players.includes(source)) return;
+    this.battleCue.type = skill?.type || 'phy';
+    if (skill?.type === 'sup') { this.spawnFx('p', skill.effects?.some(effect => /barrier|guard/.test(effect.type || '')) ? 'guard' : 'heal'); }
+    else this.lunge('p');
+    if (this.motion && skill && skill !== RPG.NORMAL_ATTACK && (skill.cost || 0) >= 30) this.cutIn(source, skill);
+  },
+  cutIn(source, skill) {
+    const band = this.$('dw-cutin');
+    const img = this.$('p-img');
+    band.replaceChildren();
+    const art = this.text('span','', 'dw-cutin-art');
+    if (img?.src) art.style.setProperty('--cut-art', `url("${img.src}")`);
+    const copy = this.text('span','', 'dw-cutin-text');
+    copy.append(this.text('small', source.name), this.text('strong', skill.name));
+    band.dataset.grade = source.proto?.grade || '';
+    band.append(art, copy);
+    band.classList.remove('is-on');
+    void band.offsetWidth;
+    band.classList.add('is-on');
+    clearTimeout(this.cutTimer);
+    this.cutTimer = setTimeout(() => band.classList.remove('is-on'), 1000);
+  },
+  onBattleLog(message) {
+    if (typeof message !== 'string' || !RPG.battle) return;
+    const battle = RPG.battle;
+    if (/Critical/.test(message) && battle.phase === 'player-resolving') this.battleCue.crit = Date.now();
+    if (battle.phase === 'enemy-resolving' && battle.turn !== this.battleCue.enemyTurn && /피해|회피|방어|!/.test(message) && message.includes(battle.enemy?.name || '\u0000')) {
+      this.battleCue.enemyTurn = battle.turn;
+      this.lunge('e');
     }
+    if (/배리어로 방어|매직가드로 방어/.test(message)) this.spawnFx('p', 'guard');
+    if (/회피 성공/.test(message)) {
+      const side = battle.phase === 'enemy-resolving' ? 'p' : 'e';
+      const mark = this.text('span', 'MISS', 'is-heal');
+      this.$(`dw-${side}-float`).append(mark);
+      setTimeout(() => mark.remove(), 1100);
+    }
+  },
+  markShortSkills(player) {
+    // Disabled-for-the-enemy-turn differs from not having enough MP.
+    for (const button of this.$('battle-controls').querySelectorAll('.skill-btn')) {
+      const cost = Number((button.querySelector('.skill-cost')?.textContent || '').replace(/\D/g, '')) || 0;
+      button.classList.toggle('is-short', !!player && player.mp < cost);
+      if (!button.querySelector(':scope > svg')) button.prepend(this.icon(`sk-${['phy','mag','sup'].includes(button.dataset.skillType) ? button.dataset.skillType : 'phy'}`));
+    }
+    if (RPG.battle) this.$('dw-turn-pill').dataset.side = 'player';
   },
 
   // ---------- Results ----------
@@ -896,11 +1135,29 @@ const Astra = {
     modal.classList.remove('dw-result','is-win','is-lose','has-actions');
     modal.querySelector('.dw-result-actions')?.remove();
   },
+  miniCard(card, index) {
+    const item = this.text('div','', 'dw-mini');
+    item.style.setProperty('--i', index);
+    item.append(this.framed(card), this.text('strong', card.name));
+    return item;
+  },
+  countUp(el, to) {
+    if (!this.motion) { el.textContent = `+${to}`; return; }
+    const start = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - start) / 600);
+      el.textContent = `+${Math.round(to * (1 - Math.pow(1 - t, 3)))}`;
+      if (t < 1) requestAnimationFrame(step);
+    };
+    el.textContent = '+0';
+    setTimeout(() => requestAnimationFrame(step), 350);
+  },
   decorateInfo(title) {
     this.resetInfoModal();
     const snap = this.battleSnapshot;
     const kinds = {'전투 결과':'battle','게임 클리어':'clear','Game Over':'over'};
-    if (!kinds[title] || !snap || Date.now() - snap.time > 120000) return;
+    // The snapshot lives until this result is shown or the next battle starts (archive quizzes may take a while).
+    if (!kinds[title] || !snap) return;
     this.battleSnapshot = null;
     const modal = this.$('modal-info');
     const content = this.$('info-content');
@@ -910,41 +1167,47 @@ const Astra = {
     content.innerHTML = content.innerHTML
       .replace('승리!<br>보상을 획득했습니다.', '')
       .replace(/전사자 발생: [^<]*<br>\(카드가 소멸했습니다\)/, '')
+      .replace(/사용 카드 소멸: [^<]*<br>\(전투에 사용한 카드가 모두 소멸했습니다\)/, '')
       .replace(/^패배\.\.\.(<br>)*/, '')
       .replace(/^(<br>)+|(<br>)+$/g, '');
     const notes = content.innerHTML.trim();
-    const head = this.text('div','', 'dw-result-head');
-    head.append(this.text('b', kinds[title] === 'clear' ? 'CLEAR' : win ? 'VICTORY' : 'DEFEAT'));
-    head.append(this.text('span', kinds[title] === 'clear' ? `${this.modeNames[snap.mode] || snap.mode} 모드 클리어` : `STAGE ${snap.stage} · ${snap.enemy?.name || ''}${win ? ' 격파' : ''}`));
+    const banner = this.text('div','', 'dw-result-banner');
+    banner.dataset.kind = kinds[title] === 'clear' ? 'clear' : win ? 'battle' : 'lose';
+    banner.setAttribute('role','img');
+    banner.setAttribute('aria-label', kinds[title] === 'clear' ? 'STAGE CLEAR' : win ? 'VICTORY' : 'DEFEAT');
+    const sub = this.text('p', kinds[title] === 'clear' ? `${this.modeNames[snap.mode] || snap.mode} 모드 클리어` : `STAGE ${snap.stage} · ${snap.enemy?.name || ''}${win ? ' 격파' : ''}`, 'dw-result-sub');
     const panel = this.text('div','', 'dw-result-body');
     if (win) {
       const gained = RPG.state.tickets - snap.tickets;
       if (gained > 0) {
         const reward = this.text('div','', 'dw-reward');
-        reward.append(this.icon('ticket'), this.text('span', '소환 티켓'), this.text('b', `+${gained}`));
+        const value = this.text('b', `+${gained}`);
+        reward.append(this.icon('ticket'), this.text('span', '소환 티켓'), value);
         panel.append(reward);
+        this.countUp(value, gained);
       }
     }
     const unlocked = (RPG.global?.unlocked_bonus_cards || []).filter(id => !snap.unlocked.includes(id)).map(id => RPG.getCardData(id)).filter(Boolean);
     if (unlocked.length) {
       const row = this.text('div','', 'dw-result-cards is-new');
       row.append(this.text('h4','새 동료 해금'));
-      unlocked.forEach(card => row.append(this.revealCard(card, {compact:true})));
+      unlocked.forEach((card, index) => row.append(this.miniCard(card, index)));
       panel.append(row);
     }
     const fallen = snap.fallen.map(id => RPG.getCardData(id)).filter(Boolean);
     if (fallen.length) {
       const row = this.text('div','', 'dw-result-cards is-lost');
       row.append(this.text('h4', snap.mode === 'puzzle' ? '사용 후 소멸' : '전투 불능 · 카드 소멸'));
-      fallen.forEach(card => row.append(this.revealCard(card, {compact:true})));
+      fallen.forEach((card, index) => row.append(this.miniCard(card, index)));
       panel.append(row);
     }
-    content.replaceChildren(head, panel);
+    content.replaceChildren(banner, sub, panel);
     if (notes) {
       const note = this.text('div','', 'dw-result-notes');
       note.innerHTML = notes;
       content.append(note);
     }
+    this.sfx(win ? 'victory' : 'defeat');
     if (title !== '전투 결과') return;
     const offer = win ? this.bonusOffer() : null;
     const actions = this.text('div','', 'dw-result-actions');
@@ -1021,16 +1284,23 @@ const Astra = {
       button.append(copy, this.text('span', mission.claimed ? '수령 완료' : ready ? '보상 받기' : `${complete} / ${items.length}`, 'dw-mission-state'));
     });
   },
-  setupSystemMenu() {
-    const content = this.$('modal-menu').querySelector('.modal-content');
-    content.classList.add('dw-sheet','dw-menu-sheet');
+  setupSheetHead(modalId, title, onClose) {
+    const content = this.$(modalId).querySelector('.modal-content');
+    content.classList.add('dw-sheet');
+    content.removeAttribute('style');
     const heading = content.querySelector('h3');
+    heading.textContent = title;
     const head = this.text('div','', 'dw-sheet-head');
-    const close = this.button('', 'dw-icon', () => this.$('modal-menu').classList.remove('active'));
+    const close = this.button('', 'dw-icon', onClose);
     close.setAttribute('aria-label','닫기');
     close.append(this.icon('close'));
     heading.replaceWith(head);
     head.append(heading, close);
+    return content;
+  },
+  setupSystemMenu() {
+    const content = this.setupSheetHead('modal-menu', '메뉴', () => this.$('modal-menu').classList.remove('active'));
+    content.classList.add('dw-menu-sheet');
     const list = this.text('div','', 'dw-menu-list');
     const icons = {'저장하기':'save','기록 확인':'trophy','카드풀 확인':'cards','타이틀로':'door','음악재생':'music'};
     const buttons = [...content.querySelectorAll('button.menu-btn')];
@@ -1043,10 +1313,13 @@ const Astra = {
       if (label === '타이틀로') button.classList.add('is-danger');
       list.append(button);
     }
+    const mission = this.button('', 'dw-menu-item', () => { this.$('modal-menu').classList.remove('active'); RPG.openMissionHub(); });
+    mission.append(this.icon('mission'), this.text('span','미션'));
+    list.prepend(mission);
     const settings = this.button('', 'dw-menu-item', () => this.settings());
-    settings.append(this.icon('settings'), this.text('span','설정 · 테마 · 백업'));
+    settings.append(this.icon('settings'), this.text('span','설정 · 테마 · 연출'));
     list.insertBefore(settings, list.querySelector('.is-danger'));
-    head.after(list);
+    content.querySelector('.dw-sheet-head').after(list);
     content.querySelector(':scope > button:not(.dw-menu-item):not(.dw-icon)')?.remove();
   },
   syncSystemMenu() {
@@ -1156,29 +1429,9 @@ const Astra = {
         }
         this.$('modal-mode-select').dataset.selected = RPG.selectedModeId || '';
         this.$('mode-desc').scrollTop = 0;
+        this.sfx('tap');
       });
     }
-  },
-  markShortSkills(player) {
-    // Disabled-for-the-enemy-turn differs from not having enough MP.
-    for (const button of this.$('battle-controls').querySelectorAll('.skill-btn')) {
-      const cost = Number((button.querySelector('.skill-cost')?.textContent || '').replace(/\D/g, '')) || 0;
-      button.classList.toggle('is-short', !!player && player.mp < cost);
-    }
-  },
-  setupMissionHub() {
-    const content = this.$('modal-mission-hub').querySelector('.modal-content');
-    content.classList.add('dw-sheet');
-    content.removeAttribute('style');
-    const heading = content.querySelector('h3');
-    heading.textContent = '미션';
-    const head = this.text('div','', 'dw-sheet-head');
-    const close = this.button('', 'dw-icon', () => RPG.closeMissionHub());
-    close.setAttribute('aria-label','닫기');
-    close.append(this.icon('close'));
-    heading.replaceWith(head);
-    head.append(heading, close);
-    content.querySelector(':scope > button[onclick="RPG.closeMissionHub()"]')?.remove();
   },
   setupBlessing() {
     const content = this.$('modal-chaos').querySelector('.modal-content');
@@ -1200,20 +1453,6 @@ const Astra = {
       sub?.removeAttribute('style');
       button.replaceChildren(this.icon(icons[index] || 'spark'), this.text('strong', title), sub || this.text('span',''));
     });
-  },
-  setupGachaModal() {
-    const content = this.$('modal-gacha').querySelector('.modal-content');
-    content.classList.add('dw-gacha-sheet');
-    content.removeAttribute('style');
-    const confirm = content.querySelector('button');
-    confirm.removeAttribute('style');
-    confirm.className = 'dw-btn';
-    const again = this.button('', 'dw-btn dw-btn--primary', () => this.summonAgain());
-    again.id = 'dw-gacha-again';
-    again.hidden = true;
-    const row = this.text('div','', 'dw-gacha-actions');
-    confirm.replaceWith(row);
-    row.append(confirm, again);
   },
   installAlerts() {
     const showAlert = RPG.showAlert;
@@ -1334,7 +1573,8 @@ const Astra = {
           if (heading) modal.setAttribute('aria-labelledby',heading.id);
         }
       }
-      for (const el of document.querySelectorAll('.dw-top,main,.astra-nav')) el.inert = !!next;
+      const revealOpen = this.$('dw-reveal').classList.contains('is-open');
+      for (const el of document.querySelectorAll('.dw-top,main,.astra-nav')) el.inert = !!next || revealOpen;
       if (next !== top) {
         if (next) {
           const opener = top && returns.get(top);
@@ -1353,13 +1593,35 @@ const Astra = {
       }
       previousActive = new Set(active);
       // Lobby badges follow the result of any dialog (claims, blessings, quizzes).
-      if (!next && this.inRun() && document.body.dataset.screen === 'menu') { this.renderBlessBadge(); this.renderTicketCount(); this.renderSummonControls(); this.updateHeader(); }
+      if (!next && this.inRun() && ['menu','summon'].includes(document.body.dataset.screen)) {
+        this.renderBlessBadge(); this.renderTicketCount(); this.updateHeader();
+        if (document.body.dataset.screen === 'summon') this.renderSummonControls();
+        else this.renderParty();
+      }
     };
     const observer = new MutationObserver(records => {
       if (records.some(record => record.target.classList?.contains('modal'))) sync();
     });
     observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
     document.addEventListener('keydown',event => {
+      const reveal = this.$('dw-reveal');
+      if (reveal.classList.contains('is-open')) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          if (reveal.classList.contains('is-done')) this.closeReveal();
+          else this.flipCard();
+        }
+        if (event.key === 'Tab') {
+          // Focus stays on the overlay; actions join the cycle once the card is revealed.
+          const items = [...reveal.querySelectorAll('button')].filter(el => !el.disabled && el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden');
+          if (items.length) {
+            event.preventDefault();
+            const index = items.indexOf(document.activeElement);
+            items[(index + (event.shiftKey ? -1 : 1) + items.length) % items.length].focus();
+          }
+        }
+        return;
+      }
       if (!top) return;
       const buttons = focusable(top);
       if (event.key === 'Tab' && buttons.length) {
@@ -1379,6 +1641,7 @@ const Astra = {
     let theme = 'astra';
     try { theme = localStorage.getItem('dreamweaverTheme') || theme; } catch { /* Use default. */ }
     this.setTheme(theme);
+    this.installMotion();
     this.installChatViewport();
     this.hook('syncGameFullscreenButton',this.syncFullscreenShortcut);
     RPG.syncGameFullscreenButton();
@@ -1388,10 +1651,9 @@ const Astra = {
     this.setupTypeSelect();
     this.setupModeSelect();
     this.setupBlessing();
-    this.setupMissionHub();
-    this.setupGachaModal();
-    this.hook('setupControls',this.markShortSkills);
+    this.setupSheetHead('modal-mission-hub', '미션', () => RPG.closeMissionHub()).querySelector(':scope > button[onclick="RPG.closeMissionHub()"]')?.remove();
     this.installAlerts();
+    this.hook('setupControls',this.markShortSkills);
     this.hook('showScreen',this.screenChanged);
     this.hook('showCardInfo',this.decorateCardInfo);
     this.hook('toMenu',this.renderParty);
@@ -1399,15 +1661,17 @@ const Astra = {
     this.hook('renderMissionHub',this.decorateMissionHub);
     this.hook('updateSystemMenuUI',this.syncSystemMenu);
     this.hook('renderBattlefield',() => { this.renderBattleStatuses(); this.renderBattleHud(); });
-    this.hook('runGacha',this.decorateSummon);
-    this.hook('spinChaosRoulette',() => this.decorateSummon());
+    this.hook('runGacha',this.afterGacha);
+    this.hook('spinChaosRoulette',() => this.afterGacha());
+    this.hook('log',this.onBattleLog);
+    this.hookBefore('executeSkill',this.onPlayerSkill);
     // Slot views are owned here so placing a card never rebuilds unchanged portraits.
     RPG.updateDeckSlots = () => this.renderDeckSlots();
     RPG.selectDeckSlot = index => { RPG.selectedSlot = index; this.updateSlotSelection(index); };
     this.hook('openInfoModal',this.decorateInfo);
     this.hookBefore('winBattle',() => this.snapshotBattle(true));
     this.hookBefore('loseBattle',() => this.snapshotBattle(false));
-    this.hookBefore('startBattleInit',() => this.hpMemory.clear());
+    this.hookBefore('startBattleInit',() => { this.hpMemory.clear(); this.battleSnapshot = null; this.battleCue = { side:null, type:'phy', crit:0, enemyTurn:-1 }; });
     this.hook('openDeck',() => {
       const empty = RPG.state.deck.indexOf(null);
       RPG.selectDeckSlot(empty >= 0 ? empty : 0);
@@ -1444,6 +1708,8 @@ const Astra = {
     importLabel.addEventListener('keydown',event => {
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.$('astra-import').click(); }
     });
+    // Navigation taps get a soft click; game dialogs keep their own sounds silent.
+    document.querySelector('.astra-nav').addEventListener('click', () => this.sfx('tap'));
     this.installDialogs();
     this.ready = true;
     this.screenChanged('screen-title');
