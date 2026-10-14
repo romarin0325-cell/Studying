@@ -14,7 +14,7 @@ const call=(s,a,args={},now=NOW)=>{const r=s.transact(a,args,now);assert.ok(r.ok
 
 test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by cost',()=>{
   const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0});assert.equal(p.bedRev,3);p.dust=100000;const s=storeFor(p);
-  call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),40);
+  call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),120);
   for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.beds)-1.01)<1e-12);
   assert.ok(combatPower('star_boy',s.value.heroes.star_boy,{rose:2})>combatPower('star_boy',s.value.heroes.star_boy,{rose:1}));
   assert.equal(s.transact('bed',{id:'spring'},NOW).ok,false,'spring is closed before stage 15');
@@ -22,16 +22,18 @@ test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by co
   s.value.cleared=30;call(s,'bed',{id:'seed'});assert.deepEqual(s.value.beds,{rose:1,spring:1,seed:1});
   assert.equal(s.transact('bed',{id:'moon'},NOW).ok,false);
   // Soft caps: the cost step jumps after rise and knee2, and no level is refused for being high.
-  for(const [id,at] of [['rose',30],['rose',40],['spring',25],['spring',33],['seed',15],['seed',23]]){
+  for(const [id,at] of [['rose',25],['rose',42],['spring',18],['spring',28],['seed',12],['seed',20]]){
     const before=bedCost(id,at-1)/bedCost(id,at-2),after=bedCost(id,at+1)/bedCost(id,at);assert.ok(after>before+.02,id+'@'+at);
     assert.ok(Number.isSafeInteger(bedCost(id,60)),id);
   }
   assert.equal(springGauge(0),120);assert.equal(springGauge(10),130);assert.equal(springGauge(15),135);
   assert.equal(seedGold(10),20);assert.equal(seedGold(15),30);
   s.value.dust=0;assert.equal(s.transact('bed',{id:'rose'},NOW).ok,false);
-  // Rose pacing: Lv.30 stays affordable, Lv.40 is a goal, beyond that each level climbs sharply.
-  const cum=(id,n)=>Array.from({length:n},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0);assert.ok(cum('rose',30)<4000&&cum('rose',40)<10000&&cum('rose',45)>18000);
-  assert.ok(cum('spring',30)>3000&&cum('spring',30)<3800,'spring to 30 ~3400');assert.ok(cum('seed',20)>4500&&cum('seed',20)<6000,'seed to 20 ~5200');
+  // Pacing (docs/GARDEN_BALANCE.md): rose to its knee ~5.7k, later beds open at the price of their stage's income,
+  // and the three prices meet in the soft cap (all near 3k at rose 45 · spring 30 · seed 20).
+  const cum=(id,n)=>Array.from({length:n},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0);assert.ok(cum('rose',25)>5000&&cum('rose',25)<6500&&cum('rose',42)>18000&&cum('rose',42)<24000);
+  assert.ok(bedCost('spring',0)>bedCost('rose',15)&&bedCost('seed',0)>bedCost('spring',10),'later beds open dearer');
+  for(const [id,at] of [['spring',30],['seed',20]])assert.ok(Math.abs(bedCost(id,at)/bedCost('rose',45)-1)<.1,id+' meets rose in the soft cap');
   // Old saves: 18×1.14^(L-1) spent on star_boy Lv.5 and snow_rabbit Lv.3 is 129 dust → garden 2 + 39 refund → rose 4.
   const old=createProfile(NOW);delete old.beds;delete old.bedRev;old.dust=0;old.heroes.star_boy.level=5;old.heroes.snow_rabbit.level=3;
   const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);

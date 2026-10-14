@@ -59,6 +59,7 @@ export class CombatFX{
     const key=kind+color;let c=this.sprites.get(key);if(c)return c;
     c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
     if(kind==='glow'){const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,color+'ee');r.addColorStop(.32,color+'77');r.addColorStop(1,color+'00');g.fillStyle=r;g.fillRect(0,0,256,256);}
+    else if(kind==='crescent'){const r=g.createLinearGradient(24,24,232,232);r.addColorStop(0,'#ffffff');r.addColorStop(1,color);g.fillStyle=r;g.beginPath();g.arc(128,128,108,0,Math.PI*2);g.fill();g.globalCompositeOperation='destination-out';g.beginPath();g.arc(172,104,96,0,Math.PI*2);g.fill();g.globalCompositeOperation='source-over';}
     else{g.translate(128,128);for(let i=0;i<18;i++){g.rotate(Math.PI*2/18);const len=i%2?92:126,w=i%2?4:7,grad=g.createLinearGradient(0,0,0,-len);grad.addColorStop(0,color+'dd');grad.addColorStop(.6,color+'55');grad.addColorStop(1,color+'00');g.fillStyle=grad;g.beginPath();g.moveTo(-w,0);g.lineTo(0,-len);g.lineTo(w,0);g.closePath();g.fill();}}
     this.sprites.set(key,c);return c;
   }
@@ -103,8 +104,9 @@ export class CombatFX{
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
     if(e.type==='impact')this.add({...e,life:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3,total:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3});
     if(e.type==='chain')this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life:.24,total:.24,rank:1});
+    if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
     if(e.type==='skill'){
-      if(e.locked)return;
+      if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
       for(const [i,p] of targets.entries())this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65+(e.support?i*.04:0),total:.65+(e.support?i*.04:0),rank:e.rank,skill:h.skill.type});
@@ -121,7 +123,7 @@ export class CombatFX{
     ctx.save();ctx.globalCompositeOperation='lighter';
     // Pillar of light from the caster.
     const pillar=(1-window01(age,.05,.75))*reduced;
-    if(pillar>0){const w=(56+age*70)*k,g=ctx.createLinearGradient(0,o.y-320,0,o.y+30);g.addColorStop(0,h.color+'00');g.addColorStop(.6,h.color+'66');g.addColorStop(1,'#ffffffaa');ctx.globalAlpha=pillar;ctx.fillStyle=g;ctx.fillRect(o.x-w/2,o.y-320,w,350);}
+    if(pillar>0){const w=(56+age*70)*k,key=h.color+o.y;if(!this.pillars)this.pillars=new Map();let g=this.pillars.get(key);if(!g){g=ctx.createLinearGradient(0,o.y-320,0,o.y+30);g.addColorStop(0,h.color+'00');g.addColorStop(.6,h.color+'66');g.addColorStop(1,'#ffffffaa');this.pillars.set(key,g);}ctx.globalAlpha=pillar;ctx.fillStyle=g;ctx.fillRect(o.x-w/2,o.y-320,w,350);}
     // Two shock rings on the floor.
     for(const [delay,max,width] of [[0,250,10],[.14,340,5]]){const a=age-delay;if(a<0||a>.6)continue;const r=easeOut(a/.6)*max*k;ctx.globalAlpha=(1-a/.6)*reduced;ctx.strokeStyle=h.color;ctx.lineWidth=width*(1-a/.6)+1.5;ctx.beginPath();ctx.ellipse(o.x,o.y+18,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
     ctx.restore();
@@ -170,8 +172,9 @@ export class CombatFX{
     // Field-scale identity is independent of target count. Everything here is
     // UNDER units, HP bars and danger cells; the centre never flashes white.
     ctx.save();ctx.globalAlpha=fade*(this.reduced?.48:1);
-    const wash=ctx.createRadialGradient(360,415,155,360,415,520);
-    wash.addColorStop(0,h.color+'00');wash.addColorStop(.58,h.color+'12');wash.addColorStop(1,h.color+'66');
+    // The same gradient every frame for a hero colour: build it once and reuse it.
+    if(!this.washes)this.washes=new Map();let wash=this.washes.get(h.color);
+    if(!wash){wash=ctx.createRadialGradient(360,415,155,360,415,520);wash.addColorStop(0,h.color+'00');wash.addColorStop(.58,h.color+'12');wash.addColorStop(1,h.color+'66');this.washes.set(h.color,wash);}
     ctx.fillStyle=wash;ctx.fillRect(0,0,720,780);
     ctx.save();ctx.translate(360,415);ctx.globalAlpha*=.5;ctx.strokeStyle=h.color;ctx.lineWidth=3;
     const arc=(r,start,end,width=3)=>{ctx.lineWidth=width;ctx.beginPath();ctx.arc(0,0,r,start,end);ctx.stroke();};
@@ -226,8 +229,38 @@ export class CombatFX{
     ctx.restore();
   }
   // Signature sequences for ultimates that need more than an emblem. Returns true when drawn.
+  // Rumi's dream form (5★): sun, moon and star rise in turn over the board (below the cut-in band) and strike at 0.45 / 1 / 1.55 s,
+  // then the three fold into one and imagination becomes real at 2.3 s. Hits come from the dreamPhase events.
+  drawDream(skill,age){
+    const ctx=this.ctx,r=this.reduced?.55:1,seed=skill.uid||1,X=360,Y=330;
+    const show=(start,peak,end)=>Math.min(window01(age,start,peak),1-window01(age,end,end+.3));
+    const flash=(at,color,strength)=>{const a=1-window01(age,at,at+.35);if(age<at||a<=0)return;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a*strength*r;ctx.fillStyle=color;ctx.fillRect(0,0,720,780);ctx.restore();};
+    // Sun: a golden disc with turning rays.
+    const sun=show(0,.25,.55);
+    if(sun>0){const pop=easeBack(window01(age,0,.3));this.glow('rays','#ffd36a',X,Y,320*pop,sun*.85*r,age*.9);this.glow('glow','#ffb347',X,Y,210*pop,sun*.9);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=sun;disk(ctx,X,Y,44*pop,'#fff2bf');ctx.restore();}
+    flash(.45,'#ffcf6a',.22);
+    // Moon: a pale crescent glides up into the same sky.
+    const moon=show(.4,.65,1.1);
+    if(moon>0){const rise=easeOut(window01(age,.4,.7));this.glow('glow','#9fc4ff',X,Y,220,moon*.8);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=moon;ctx.translate(X-40*(1-rise),Y+30*(1-rise));ctx.rotate(-.35+rise*.2);ctx.drawImage(this.sprite('crescent','#bcd6ff'),-96,-96,192,192);ctx.restore();}
+    if(age>=1&&age<1.4){const s=window01(age,1,1.4);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-s)*.8*r;ctx.strokeStyle='#dbe8ff';ctx.lineWidth=14*(1-s)+2;ctx.beginPath();ctx.ellipse(X,430,120+s*420,60+s*220,0,Math.PI*1.05,Math.PI*1.95);ctx.stroke();ctx.restore();}
+    flash(1,'#a9c8ff',.16);
+    // Star: a great star turns overhead while small stars fall onto the field.
+    const big=show(.95,1.2,1.65);
+    if(big>0){const pop=easeBack(window01(age,.95,1.25));this.glow('glow','#fff1c4',X,Y,200*pop,big*.8);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=big;ctx.translate(X,Y);ctx.rotate(age*1.6);star(ctx,70*pop,'#fff8e0');ctx.restore();}
+    if(age>1.05&&age<1.75&&!this.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<12;i++){const t=window01(age,1.05+hash(seed,i)*.25,1.4+hash(seed,i)*.25);if(t<=0||t>=1)continue;const x=80+hash(seed,i+20)*560,y=Y+t*(260+hash(seed,i+40)*300);ctx.globalAlpha=1-t*.6;stroke(ctx,[[x-26*t,y-60],[x,y]],'#fff4c8',3);ctx.save();ctx.translate(x,y);ctx.rotate(t*4);star(ctx,9,'#ffffff');ctx.restore();}ctx.restore();}
+    flash(1.55,'#fff1c4',.18);
+    // Dream: the three symbols circle in and fold into one, then a pastel bloom makes the imagined real.
+    const fold=window01(age,1.55,2.3);
+    if(fold>0&&fold<1){const radius=230*(1-easeOut(fold)),a=Math.min(1,fold*4);[['#ffd36a',0],['#bcd6ff',2.09],['#fff4c8',4.19]].forEach(([c,o],i)=>{const ang=o+fold*5,x=X+Math.cos(ang)*radius,y=400+Math.sin(ang)*radius*.6;this.glow('glow',c,x,y,110,a*.9);ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;ctx.translate(x,y);if(i===1)ctx.drawImage(this.sprite('crescent',c),-28,-28,56,56);else if(i===2)star(ctx,22,'#ffffff');else disk(ctx,0,0,16,'#fff2bf');ctx.restore();});}
+    const bloom=window01(age,2.3,2.9);
+    if(bloom>0&&bloom<1){const pop=easeBack(window01(age,2.3,2.55)),fade=1-bloom;this.glow('rays','#ffc4ec',X,400,560*pop,fade*.6*r,age*.4);this.ultimate('rumi',X,400,420*pop,420*pop,0,fade*.85);
+      ctx.save();ctx.globalCompositeOperation='lighter';['#ffb8e6','#c9b8ff','#b8f0e6','#ffe9a8'].forEach((c,i)=>{const s=Math.max(0,bloom-i*.08);if(s<=0)return;ctx.globalAlpha=(1-s)*.75*r;ctx.strokeStyle=c;ctx.lineWidth=10*(1-s)+2;ctx.beginPath();ctx.ellipse(X,410,40+s*520,20+s*300,0,0,Math.PI*2);ctx.stroke();});
+      if(!this.reduced)for(let i=0;i<18;i++){const x=60+hash(seed,i+60)*600,y=700-bloom*(260+hash(seed,i+80)*240);ctx.globalAlpha=Math.sin(bloom*Math.PI)*.9;disk(ctx,x,y,3+hash(seed,i)*4,i%2?'#ffe6f6':'#e6f4ff');}ctx.restore();}
+    flash(2.3,'#ffd6f0',.24);
+  }
   signature(skill,age,fade){
     const ctx=this.ctx,h=HERO[skill.hero],targets=skill.targets||[],seed=skill.uid||skill.rank||1;
+    if(skill.kind==='dream'){this.drawDream(skill,age);return true;}
     if(skill.hero==='cinderella'){
       // Midnight: a huge glass clock swings in, chimes twelve, then shatters into falling glass.
       const pop=easeBack(window01(age,0,.38)),chime=window01(age,.5,.75),shatter=window01(age,.72,1.45);
@@ -517,6 +550,10 @@ export class CombatFX{
         this.glow('rays','#ffe9a8',e.x,e.y-10,260*Math.min(1,t*3),fade*.9,t);this.glow('glow','#fff6d8',e.x,e.y-10,200,fade);
         ctx.save();ctx.globalAlpha=fade;ctx.strokeStyle='#fff2c0';ctx.lineWidth=6*fade+1;ctx.beginPath();ctx.ellipse(e.x,e.y+20,30+t*90,12+t*30,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
+      if(e.type==='dreamHit'){const c=['#ffd36a','#cfe3ff','#fff4c8','#ffc4ec'][e.phase]||'#ffffff',fade=1-t,size=(e.phase===3?100:74)*(1+t*.4);this.glow('glow',c,e.x,e.y-18,size,fade*.85);
+        if(e.phase===1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.85;ctx.drawImage(this.sprite('crescent','#e6f0ff'),e.x-size*.3,e.y-18-size*.3,size*.6,size*.6);ctx.restore();}
+        else if(e.phase===2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.translate(e.x,e.y-18);ctx.rotate(t*2);star(ctx,18*(1-t*.3),'#fffaf0');ctx.restore();}
+        else this.glow('rays',c,e.x,e.y-18,size*1.3,fade*.6,t*2);continue;}
       if(e.type==='thunderStrike'){const fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.strokeStyle='#fff6b0';ctx.lineWidth=4;ctx.beginPath();let x=e.x+((e.seed*37)%30-15),y=0;ctx.moveTo(x,y);while(y<e.y-10){y+=40;x+=((e.seed*13+y)%40)-20;ctx.lineTo(x,y);}ctx.stroke();ctx.restore();this.glow('glow','#ffe27a',e.x,e.y-10,140,fade*.8);continue;}
       if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
       if(e.type==='instantKill'){

@@ -29,7 +29,7 @@ export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
 // Field-wide ultimate buffs. They multiply with placement auras, so they stay modest.
-export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:8},awaken:{power:.35,seconds:8},march:{speed:.25,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.15,speed:.15,seconds:8},echo:{ratio:.65,seconds:8}});
+export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:10},awaken:{power:.35,seconds:10},march:{speed:.2,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.15,speed:.15,seconds:8},echo:{ratio:.65,seconds:8}});
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
 // Bosses take half stun/freeze duration and half knockback/pull, then 2 s of control immunity.
@@ -42,6 +42,10 @@ export const POISON_POWER_RATIO=1.5/11;
 // correction limits the increase from replacing refreshes with overlapping hits.
 export const ZONE_CADENCE=1.15;
 export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CADENCE:1;
+// Rumi's hidden dream form: a 5★ Rumi casts it instead of the echo (same starlight). Sun, moon and star
+// strike the whole field in turn, then imagination becomes real. Not in the hero sheet; the battle peek shows it.
+export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});
+export const rumiDream=(s,u=bestUnit(s,'rumi'))=>!!u&&u.hero==='rumi'&&u.rank>=RUMI_DREAM.rank;
 export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter'});
 const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
@@ -165,7 +169,7 @@ export function scaledTokens(id,k){
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
-    siren:[['8초',sec(8)]],ancient_dragon:[['8초',sec(8)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['8초',sec(8)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
+    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['8초',sec(8)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
@@ -271,7 +275,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE),arts=validArtifacts(artifacts)?[...artifacts]:[];
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
     buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
@@ -611,13 +615,14 @@ export function cast(s,id){
   const spent=hero.skill.type==='starfall'?s.gauge:hero.skill.cost;
   s.gold-=goldCost;s.gauge-=spent;if(has(s,'lantern'))addGauge(s,RV.lantern.refund*relicScaleIn(s,'lantern'));if(s.sandStore>0){addGauge(s,s.sandStore);s.sandStore=0;}s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const echoes=has(s,'twin')?new Map():null;if(echoes)echoMaps.set(s,echoes);beginEmberFrame(s);
-  const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank);
+  const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const source=sourceKey('skill',id,s.nextId++);
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
   let visualTargets=targets,gift;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
-  if(type==='echo')s.buffs.echo=skillDuration(s,ULT_BUFF.echo.seconds*control,'echo');
+  if(dream)s.volleys.push(...RUMI_DREAM.phases.map((p,phase)=>({uid:s.nextId++,source:u.uid,hero:id,kind:'dream',phase,rank:u.rank,damage:base*p.factor,life:p.at,total:p.at,...(phase===RUMI_DREAM.phases.length-1?{echo:{}}:{})})));
+  else if(type==='echo')s.buffs.echo=skillDuration(s,ULT_BUFF.echo.seconds*control,'echo');
   else if(type==='haste')s.buffs.haste=skillDuration(s,ULT_BUFF.haste.seconds*control,'haste');
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control,'awaken');
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control,'march');
@@ -675,10 +680,10 @@ export function cast(s,id){
     }
     echoMaps.delete(s);
   }
-  const support=['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
-  const key=ACTIVE_SKILLS[id];if(key){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
+  const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
+  const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
-  event(s,'skill',{hero:id,name:hero.skill.name,kind:type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
+  event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:hero.skill.name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
 }
 // Describes what pressing the ultimate would do right now, with the numbers cast() uses. No side effects.
 // The detective's ultimate scales with training and rank like his basic attack, so it never falls behind it.
@@ -687,7 +692,7 @@ export const detectiveExposure=(s,u)=>Math.min(DAMAGE_TAKEN_CAP,(.35+(s.upgrades
 export const mirrorRatio=(s,u)=>Math.min(1,.5*rankSupport(u.rank)*special(s,'aurora'));
 export function castPreview(s,id){
   const u=bestUnit(s,id);if(!u)return null;
-  const hero=HERO[id],type=hero.skill.type,base=power(s,u),control=special(s,id),scale=rankControl(u.rank);
+  const hero=HERO[id],type=hero.skill.type,base=power(s,u),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const targets=s.enemies.filter(e=>e.hp>0),lines=[];
   const num=v=>Math.round(v).toLocaleString('ko-KR');
   const sec=v=>Number(v.toFixed(1))+'초';
@@ -721,7 +726,8 @@ export function castPreview(s,id){
   const burnPerSecond=num(base*.6*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
   const immune=e=>!!e.boss&&(e.ccImmune||0)-s.time>1e-9;
 
-  if(type==='echo')lines.push(`${dur(8,'echo')} 동안 모든 동료의 공격마다 위력 ${pct(.65*scale)}%의 추가 공격이 한 번 더 나갑니다.`);
+  if(dream){const [sun,,,last]=RUMI_DREAM.phases;lines.push(`해·달·별의 마법이 차례로 적 전체를 칩니다. 한 번에 위력 ${sun.factor}배, ${hit(sun.factor)}입니다.`);lines.push(`마지막에 상상이 현실이 되어 위력 ${last.factor}배, ${hit(last.factor)}를 줍니다. 모두 합쳐 위력 ${RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)}배입니다.`);}
+  else if(type==='echo')lines.push(`${dur(8,'echo')} 동안 모든 동료의 공격마다 위력 ${pct(.65*scale)}%의 추가 공격이 한 번 더 나갑니다.`);
   else if(type==='haste')lines.push(`${dur(ULT_BUFF.haste.seconds,'haste')} 동안 모든 동료의 공격 속도가 ${pct(ULT_BUFF.haste.speed*scale)}% 오릅니다.`);
   else if(type==='awaken')lines.push(`${dur(ULT_BUFF.awaken.seconds,'awaken')} 동안 모든 동료의 위력이 ${pct(ULT_BUFF.awaken.power*scale)}% 오릅니다.`);
   else if(type==='march')lines.push(`${dur(ULT_BUFF.march.seconds,'march')} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${pct(ULT_BUFF.march.speed*scale)}% 오릅니다.`);
@@ -865,7 +871,7 @@ export function castPreview(s,id){
 
   const gold=skillGoldCost(id);
   if(gold>0)lines.push(`골드 ${num(gold)}을 사용합니다.`);
-  return {rank:u.rank,lines};
+  return {rank:u.rank,lines,...(dream?{name:RUMI_DREAM.name}:{})};
 }
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
@@ -936,7 +942,7 @@ function completeWave(s){
   const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
   giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');
   if(has(s,'feather'))giveGold(s,Math.round(Math.min(RV.feather.cap,RV.feather.base+RV.feather.perWave*s.wave)*relicScaleIn(s,'feather')),'첫새벽의 깃털');
-  s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.zones=[];s.telegraph=null;
+  s.settlement=payout;addGauge(s,8);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;
   event(s,'clear',{wave:s.wave,...payout});
   if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
   s.reward=shuffle(s,BLESSINGS.map(b=>b.id)).slice(0,3);s.phase='reward';
@@ -1034,6 +1040,16 @@ export function step(s,dt){
   }
   if(twinEchoes.length)s.finishers.push(...twinEchoes);
   s.finishers=s.finishers.filter(f=>f.life>0);
+  // Dream form phases: each one strikes every enemy alive at that moment. The twin relic echoes the
+  // summed damage once, after the last phase, like any other field ultimate.
+  for(const v of s.volleys){
+    v.life-=dt;if(v.life>1e-9)continue;v.life=0;
+    const hit=s.enemies.filter(e=>e.hp>0),last=s.volleys.find(x=>x.source===v.source&&x.echo),points=[];
+    for(const e of hit){const dealt=damage(s,e,v.damage,v.hero);points.push({...pathPoint(e.progress),uid:e.uid});if(last&&dealt>0)last.echo[e.uid]=(last.echo[e.uid]||0)+dealt;}
+    event(s,'dreamPhase',{hero:v.hero,phase:v.phase,rank:v.rank,targets:points});
+    if(v.echo&&has(s,'twin'))for(const [uid,dealt] of Object.entries(v.echo)){const target=s.enemies.find(e=>e.uid===Number(uid)&&e.hp>0);if(target&&dealt>0)s.finishers.push({uid:s.nextId++,source:v.source,hero:v.hero,kind:'echo',target:target.uid,origin:pathPoint(target.progress),to:pathPoint(target.progress),damage:dealt*RV.twin.echo*relicScaleIn(s,'twin'),rank:v.rank,life:1.5,total:1.5});}
+  }
+  s.volleys=s.volleys.filter(v=>v.life>0);
   s.shots=s.shots.filter(shot=>shot.life>0);s.enemies=s.enemies.filter(e=>e.hp>0);
   if(s.telegraph&&!s.enemies.some(e=>e.uid===s.telegraph.uid))s.telegraph=null;
   if(s.health<=0){s.health=0;s.phase='defeat';event(s,'defeat');}
@@ -1054,6 +1070,7 @@ export function restore(raw){
     // Additive migration: an old run keeps its wave, HP, wallet and target
     // priorities. Only future waves use revision 3's pacing.
     if(s.finishers===undefined)s.finishers=[];
+    if(s.volleys===undefined)s.volleys=[];
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     if(s.buffScale===undefined)s.buffScale={};
     if(s.buffs&&s.buffs.tax!==undefined)delete s.buffs.tax;
@@ -1132,7 +1149,8 @@ export function restore(raw){
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
     if(s.enemies.some(e=>!numeric(e,['frostStacks','frostTime','ccImmune','frostLock'])||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.frostTime<0||e.ccImmune<0||e.frostLock<0||e.ccImmune>s.time+30||e.frostLock>s.time+30))return null;
     if(!Array.isArray(s.zones)||s.zones.length>ZONE_CAP||s.zones.some(z=>!id(z?.uid)||!id(z.source)||z.source>=s.nextId||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||!Number.isInteger(z.rank)||z.rank<1||z.rank>MAX_RANK||z.damage<0||z.x<GROUND_BOUNDS.left||z.x>GROUND_BOUNDS.right||z.y<GROUND_BOUNDS.top||z.y>GROUND_BOUNDS.bottom||z.radius<=0||z.radius>720||z.total<=0||z.total>30||z.life<=0||z.life>z.total||z.tick<-.05||z.tick>.5+1e-9||typeof z.orbit!=='boolean'))return null;
-    const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.zones].map(o=>o.uid);
+    if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||v.hero!=='rumi'||v.kind!=='dream'||!Number.isInteger(v.phase)||v.phase<0||v.phase>=RUMI_DREAM.phases.length||!Number.isInteger(v.rank)||v.rank<RUMI_DREAM.rank||v.rank>MAX_RANK||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.total>3||v.life<=0||v.life>v.total||v.echo!==undefined&&(!v.echo||typeof v.echo!=='object'||Array.isArray(v.echo)||Object.keys(v.echo).length>200||Object.entries(v.echo).some(([k,d])=>!id(Number(k))||!Number.isFinite(d)||d<0))))return null;
+    const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
     if(!validArtifacts(s.artifacts)||!Array.isArray(s.reserves)||s.reserves.length>1000||s.reserves.some(h=>!s.deck.includes(h))||!Array.isArray(s.blessings)||s.blessings.length>1000||s.blessings.some(b=>!BLESSING[b]))return null;

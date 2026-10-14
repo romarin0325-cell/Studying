@@ -56,8 +56,9 @@ export const TUNING=Object.freeze({
   // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
   dispatchDust:1.5,dispatchDreams:.3,
   idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
-  // Dream greenhouse beds: fast early levels, then cost knees as a soft cap (no hard cap).
-  // Rose: gentle to Lv.30, steeper to Lv.40, then each level climbs sharply. Spring: gentle to 25, moderate to 33. Seed: gentle to 15, moderate to 23. knee is the bloom (만개) stage.
-  beds:{rose:{unlock:0,base:40,growth:1.065,knee:30,steep:1.15,knee2:40,steep2:1.35},spring:{unlock:15,base:42,growth:1.06,rise:25,knee:30,steep:1.10,knee2:33,steep2:1.35},seed:{unlock:30,base:110,growth:1.08,rise:15,knee:20,steep:1.12,knee2:23,steep2:1.35}},
+  // Dream greenhouse beds (docs/GARDEN_BALANCE.md): a steady slope to the knee, a firmer one to knee2, then a soft cap.
+  // Each bed's knee meets the next bed's opening (rose 25 ≈ stage 15, spring 18 ≈ stage 30). Later beds start at the
+  // price of that stage's income and meet the earlier beds' prices in the soft cap. knee is the bloom (만개) stage.
+  beds:{rose:{unlock:0,base:120,growth:1.05,knee:25,steep:1.09,knee2:42,steep2:1.2},spring:{unlock:15,base:300,growth:1.06,knee:18,steep:1.09,knee2:28,steep2:1.2},seed:{unlock:30,base:700,growth:1.06,knee:12,steep:1.09,knee2:20,steep2:1.2}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });

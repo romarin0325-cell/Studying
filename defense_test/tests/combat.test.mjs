@@ -1292,8 +1292,8 @@ test('broken clock stretches buff ultimates and grants starlight per second whil
   s.relicLevels={broken_clock:5};const m=relicScale(5);
   const stretch=1+E.RELIC_VALUES.broken_clock.duration*m,star=E.RELIC_VALUES.broken_clock.starlight;
   enemiesFor(s,[{hp:1e7}]);quiet(s);s.gauge=120;
-  assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,8*stretch);
-  assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((8*stretch).toFixed(1))+'초'));
+  const haste=E.ULT_BUFF.haste.seconds;assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,haste*stretch);
+  assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((haste*stretch).toFixed(1))+'초'));
   s.gauge=120;assert.ok(E.cast(s,'frost_witch').ok);close(s.buffs.winter,6);
   assert.ok(E.castPreview(s,'frost_witch').lines.some(line=>line.startsWith('겨울은 6초')));
   const glass=traitArena([{hero:'cinderella',index:12}],{artifacts:['broken_clock']});glass.relicLevels={broken_clock:5};
@@ -1357,4 +1357,15 @@ test('hourglass banks merge starlight that would overflow and returns it after t
   assert.ok(E.move(s,12,13).ok);assert.equal(s.gauge,cap);close(s.sandStore,gain-10);
   enemiesFor(s,[{progress:100,hp:1e9}]);const banked=s.sandStore;assert.ok(E.cast(s,'star_boy').ok);close(s.gauge,banked);assert.equal(s.sandStore,0);
   const plain=traitArena([{hero:'star_boy',index:12},{hero:'star_boy',index:13}]);plain.gauge=E.gaugeCap(plain)-10;E.move(plain,12,13);assert.equal(plain.sandStore||0,0);
+});
+test('a 5★ Rumi casts the hidden dream form: sun, moon and star, then the dream, 50x in all, and it survives save and restore',()=>{
+  const four=traitArena([{hero:'rumi',index:12,rank:4}]);enemiesFor(four,[{hp:1e9}]);quiet(four);
+  assert.equal(E.castPreview(four,'rumi').name,undefined);readyCast(four,'rumi');assert.ok(four.buffs.echo>0);assert.equal(four.volleys.length,0);
+  const s=traitArena([{hero:'rumi',index:12,rank:5}]);const [a,b]=enemiesFor(s,[{hp:1e9,progress:900},{hp:1e9,progress:1100}]);quiet(s);
+  const preview=E.castPreview(s,'rumi');assert.equal(preview.name,'꿈의 형태');assert.equal(preview.lines.length,2);
+  const start=a.hp,t0=s.time;readyCast(s,'rumi');assert.equal(s.buffs.echo||0,0);assert.equal(s.volleys.length,4);assert.equal(a.hp,start,'nothing lands at the cast');
+  advanceTo(s,t0+.5);const first=start-a.hp;assert.ok(first>0);close(start-b.hp,first,'every enemy takes the sun');
+  advanceTo(s,t0+1.2);const saved=E.restore(E.serialize(s));assert.ok(saved,'mid-sequence save restores');assert.equal(saved.volleys.length,2);
+  advanceTo(s,t0+2.5);advanceTo(saved,t0+2.5);assert.equal(s.volleys.length,0);
+  close((start-a.hp)/first,50/12,'12 + 12 + 12 + 14 = 50x');close(saved.enemies[0].hp,a.hp,'restored run lands the same phases');
 });
