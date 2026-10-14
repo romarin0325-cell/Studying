@@ -12,7 +12,6 @@ button { transition:background .18s,border-color .18s,transform .18s; }
 button:active:not(:disabled) { transform:translateY(1px); }
 svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
 .icon-defs { position:absolute; width:0; height:0; overflow:hidden; }
-.world-backdrop { position:fixed; inset:0; z-index:-1; background:linear-gradient(90deg,#092238d9,#09223832 65%),linear-gradient(0deg,#0d2235 2%,#0d223524 65%),url("../assets/observatory.png") center/cover; }
 /* Shared dialogs keep their established callbacks and state ownership. */
 .astra .menu-btn,.astra .skill-btn { background:var(--panel-soft)!important; border:1px solid #a5dfff36!important; color:var(--paper)!important; border-radius:12px; min-height:46px; padding:12px 14px; font-size:13px; line-height:1.5; margin-bottom:8px; box-shadow:none; }
 .astra .menu-btn:hover:not(:disabled),.astra .skill-btn:hover:not(:disabled) { background:#2b5068!important; border-color:#a5dfff8c!important; }

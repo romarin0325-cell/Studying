@@ -41,17 +41,36 @@ try {
   assert.match(await page.locator('#astra-toast').textContent(), /저장/);
   assert.equal(await page.locator('#astra-depart').isEnabled(), false);
 
+  await page.locator('[data-nav=summon]').click();
+  assert.equal(await page.evaluate(() => document.body.dataset.screen), 'summon');
+  // The quiz summon leads: it comes first and is the only repeat offered after a reveal.
+  assert.deepEqual(await page.locator('#menu-gacha-area button').evaluateAll(buttons => buttons.map(button => button.id)), ['btn-challenge-gacha','btn-normal-gacha']);
+  assert.match(await page.locator('#btn-challenge-gacha').innerText(), /퀴즈 정답 시 전설\s*10%\s*→\s*20%/);
   const tickets = await page.evaluate(() => RPG.state.tickets);
-  await page.locator('#dw-multi-gacha').click();
-  assert.equal(await page.locator('#gacha-result .dw-reveal').count(), 10);
-  assert.equal(await page.evaluate(() => RPG.state.inventory.length), 10);
-  assert.equal(await page.evaluate(() => RPG.state.tickets), tickets - 10);
-  await page.locator('#modal-gacha .dw-btn', {hasText:'확인'}).click();
   await page.locator('#btn-normal-gacha').click();
-  assert.equal(await page.locator('#dw-gacha-again').isVisible(), true);
+  await page.locator('#dw-reveal.is-done').waitFor();
+  assert.equal(await page.locator('#modal-gacha.active').count(), 0, 'The legacy result dialog stays closed behind the reveal');
+  assert.equal(await page.evaluate(() => RPG.state.tickets), tickets - 1);
+  assert.match(await page.locator('#dw-gacha-again').innerText(), /도전 소환/);
+  await page.evaluate(() => {
+    const show = QuizEngine.show.bind(QuizEngine);
+    QuizEngine.show = config => { window.testAnswer = config.answer; return show(config); };
+  });
   await page.locator('#dw-gacha-again').click();
-  assert.equal(await page.evaluate(() => RPG.state.inventory.length), 12);
-  await page.locator('#modal-gacha .dw-btn', {hasText:'확인'}).click();
+  assert.equal(await page.locator('#dw-reveal.is-open').count(), 0);
+  const answer = await page.evaluate(() => window.testAnswer);
+  await page.locator('#modal-quiz').getByRole('button',{name:answer,exact:true}).click();
+  await page.locator('#dw-reveal.is-done').waitFor();
+  assert.match(await page.locator('#dw-reveal .dw-reveal-title').textContent(), /도전 소환/);
+  assert.match(await page.locator('#dw-gacha-again').innerText(), /한 번 더 도전/);
+  assert.equal(await page.evaluate(() => RPG.state.inventory.length), 2);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#dw-reveal.is-open').count(), 0);
+  assert.equal(await page.evaluate(() => document.querySelector('main').inert), false, 'Closing the reveal releases the page');
+  for (let i = 0; i < 6; i++) {
+    await page.locator('#btn-normal-gacha').click();
+    await page.locator('#dw-reveal .dw-btn', {hasText:'확인'}).click();
+  }
 
   await page.locator('[data-nav=deck]').click();
   await page.locator('.dw-formation-head .dw-btn', {hasText:'자동 편성'}).click();
@@ -72,7 +91,8 @@ try {
     await page.locator(`[data-nav=${nav}]`).click();
     assert.equal(await page.evaluate(() => document.body.dataset.screen), nav);
   }
-  await page.locator('[data-nav=mission]').click();
+  await page.locator('[data-nav=menu]').click();
+  await page.locator('#dw-quick-mission').click();
   assert.equal(await page.locator('#mission-hub-list .dw-mission-row').count() >= 2, true);
   await page.keyboard.press('Escape');
   await page.locator('#dw-top-menu').click();
@@ -86,7 +106,7 @@ try {
   await page.evaluate(() => { RPG.battle.enemy.hp = 1; RPG.renderBattlefield(); });
   await page.locator('#battle-controls .skill-btn').first().click();
   await page.waitForFunction(() => document.querySelector('#modal-info.active.dw-result'), null, {timeout:15000});
-  assert.match(await page.locator('.dw-result-head b').textContent(), /VICTORY/);
+  assert.equal(await page.locator('.dw-result-banner').getAttribute('aria-label'), 'VICTORY');
   await page.locator('.dw-result-actions .dw-btn', {hasText:'건너뛰기'}).click();
   await page.waitForFunction(() => document.body.dataset.screen === 'menu' && !document.querySelector('.modal.active'));
   assert.equal(await page.evaluate(() => RPG.state.enemyScale), 1);
@@ -109,9 +129,11 @@ try {
       Object.assign(RPG.state,{mode:'origin',gameType:'endless',tickets:20,enemyScale:0,deck:['marshmallow','kobold','golem'],inventory:['marshmallow','kobold','golem','luna']});
       RPG.toMenu();
     });
-    for (const selector of ['#astra-depart','.astra-nav','#menu-gacha-area']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
+    for (const selector of ['#astra-depart','.astra-nav','#dw-bless','#astra-party']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
+    await small.locator('[data-nav=summon]').click();
+    for (const selector of ['#btn-challenge-gacha','#btn-normal-gacha']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
     await small.context().close();
   }
   assert.deepEqual(errors, [], 'Uncaught browser errors');
-  console.log('PASS card_claude: offline boot, legacy ids, journey start, x10/again summon, formation, battle HUD/result, single overwrite confirmation, 360/390x667/desktop lobby');
+  console.log('PASS card_claude: offline boot, legacy ids, journey start, challenge-first summon with flip reveal (quiz repeat, Escape), formation, battle HUD/result, single overwrite confirmation, 360/390x667/desktop lobby');
 } finally { await browser.close(); }
