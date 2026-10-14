@@ -1,0 +1,126 @@
+/* ASTRA materials shared by every theme. The DREAMWEAVER shell, lobby, formation,
+   collection, study and battle surfaces live in dream.css; this file keeps tokens,
+   dialog materials and the secondary game flows. */
+:root { --ink:#0d2235; --panel:#142d42; --panel-soft:#1b384f; --sky:#a5dfff; --sky-bright:#cceeff; --paper:#f2f8fb; --muted:#a9becd; --line:#a5dfff29; --gold:#e7ca94; --radius:18px; color-scheme:dark; }
+* { box-sizing:border-box; }
+body.astra { background:var(--ink); color:var(--paper); font-family:Inter,"Segoe UI","Malgun Gothic",sans-serif; font-size:14px; height:100vh; height:100dvh; min-width:320px; overflow:hidden; line-height:1.5; user-select:auto; }
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; touch-action:manipulation; }
+button:disabled { cursor:not-allowed; opacity:.43; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible { outline:3px solid var(--sky); outline-offset:4px; }
+button { transition:background .18s,border-color .18s,transform .18s; }
+button:active:not(:disabled) { transform:translateY(1px); }
+svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+.icon-defs { position:absolute; width:0; height:0; overflow:hidden; }
+.world-backdrop { position:fixed; inset:0; z-index:-1; background:linear-gradient(90deg,#092238d9,#09223832 65%),linear-gradient(0deg,#0d2235 2%,#0d223524 65%),url("../assets/observatory.png") center/cover; }
+/* Shared dialogs keep their established callbacks and state ownership. */
+.astra .menu-btn,.astra .skill-btn { background:var(--panel-soft)!important; border:1px solid #a5dfff36!important; color:var(--paper)!important; border-radius:12px; min-height:46px; padding:12px 14px; font-size:13px; line-height:1.5; margin-bottom:8px; box-shadow:none; }
+.astra .menu-btn:hover:not(:disabled),.astra .skill-btn:hover:not(:disabled) { background:#2b5068!important; border-color:#a5dfff8c!important; }
+.astra .menu-btn.correct { background:#215a49!important; border-color:#77d9b7!important; }
+.astra .menu-btn.wrong { background:#733e4d!important; border-color:#eda8b6!important; }
+.astra .modal { background:#061423b8; backdrop-filter:blur(8px); padding:22px; align-items:center; }
+.astra .modal-content { color:var(--paper); background:var(--ink); border:1px solid #a5dfff40; border-radius:24px; padding:25px; width:560px; max-width:min(760px,100%); max-height:calc(100dvh - 44px)!important; box-shadow:0 28px 100px #02091285; overflow-y:auto; text-align:left; }
+.astra .modal-content h2,.astra .modal-content h3 { color:var(--sky-bright)!important; font-weight:500; margin-top:4px; line-height:1.45; }
+.astra .modal-content>h3 { padding-bottom:15px; border-bottom:1px solid var(--line); margin-bottom:18px; font-size:21px; }
+.astra .modal-content button:not(.menu-btn):not(.primary):not(.secondary):not(.card-item):not(.music-track-button) { background:var(--panel-soft); color:var(--paper); border:1px solid var(--line); border-radius:10px; min-height:42px; }
+.astra .modal-scroll { min-height:0; line-height:1.8!important; scrollbar-width:thin; scrollbar-color:#63899d #112a3f; }
+.astra .modal-content input,.astra .modal-content textarea,.astra select { border:1px solid #a5dfff4a; background:#16344c; color:var(--paper); border-radius:10px; padding:11px; max-width:100%; }
+.astra .modal-content input[type=checkbox] { accent-color:var(--sky); }
+.astra #mode-list { gap:9px!important; }
+.astra #mode-list button[aria-pressed=true] { background:#365b72!important; border-color:var(--sky)!important; box-shadow:inset 3px 0 var(--sky); }
+.astra #mode-desc { background:var(--panel-soft)!important; color:#dcebf4!important; border-radius:12px!important; min-height:100px; line-height:1.7; }
+.astra #btn-enter-mode,.astra #confirm-yes { background:var(--sky)!important; color:var(--ink)!important; border-color:var(--sky)!important; }
+.astra .portrait { border-color:#a5dfff50; background:#17364c; box-shadow:none; }
+.astra #btn-chaos-roulette { border-color:#a5dfff55!important; background:#1b384f!important; color:var(--sky)!important; }
+.astra #btn-hard-mode { border-color:#dfb5c055!important; background:#1b384f!important; color:#dfb5c0!important; }
+.astra #md-stats { background:var(--panel-soft)!important; padding:14px!important; border-radius:12px; line-height:1.9; font-variant-numeric:tabular-nums; }
+.astra #md-skills p { padding:10px 0; border-bottom:1px solid var(--line); }
+.astra #modal-card .modal-content { width:580px; }
+.astra #md-grade { padding:10px 0; letter-spacing:.1em; color:var(--sky); }
+/* Legacy catalog tiles used by draft and editor screens. */
+.astra .card-grid { grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); grid-auto-rows:max-content; gap:14px; padding:4px 2px 24px; min-height:0; scrollbar-width:thin; scrollbar-color:#63899d transparent; }
+.astra .card-item { position:relative; background:#132f46ed; border:1px solid #a5dfff3b; border-radius:16px; padding:9px; font-size:12px; color:var(--paper); min-width:0; text-align:left; overflow:hidden; animation:none; }
+.astra .card-item:hover { border-color:var(--sky); background:#20435b; }
+.astra .card-item .portrait { width:100%; height:150px; margin:0 0 8px; border:0; border-radius:10px; background:linear-gradient(155deg,#a5dfff15,transparent); }
+.astra .card-item .portrait img { height:100%; width:100%; object-fit:contain; }
+.card-item .card-name { display:block; font-weight:500; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-item .card-meta { display:flex; justify-content:space-between; font-size:9px; color:var(--muted); margin-top:7px; }
+.card-item .card-grade { position:absolute; top:14px; left:14px; border-radius:5px; background:#0b2136de; color:var(--sky); font-size:9px; padding:3px 6px; }
+.card-item.legend { border-top:2px solid var(--gold); }
+.card-item.epic { border-top:2px solid #c5b2e8; }
+.card-item.rare { border-top:2px solid var(--sky); }
+.card-item.unowned { opacity:.55; }
+.empty-message { color:var(--muted); padding:30px; text-align:center; }
+/* Secondary flows use the same materials; retain success/failure text and callbacks. */
+.astra #modal-toeic-practice .modal-content { background:var(--ink)!important; }
+.astra #toeic-q-text { color:var(--sky-bright)!important; font-weight:500!important; line-height:1.65!important; }
+.astra #toeic-passage-scroll,.astra #toeic-explanation-scroll,.astra #fortune-explanation-scroll { background:#17364c!important; color:var(--paper)!important; border-color:var(--line)!important; border-radius:14px; padding:17px; }
+.astra .toeic-hub-btn { background:var(--panel-soft)!important; border:1px solid var(--line)!important; color:var(--sky)!important; font-size:15px; min-height:54px; }
+.astra #toeic-exit-btn { color:#e4bcc7!important; background:var(--panel-soft)!important; border-color:#dfb5c044!important; }
+.astra #modal-lecture-view .portrait { border-color:var(--line)!important; border-radius:24px 24px 10px 10px; }
+.astra #weekly-mission-section>div:nth-child(2),.astra #monthly-mission-section>div:nth-child(2),.astra #special-mission-section>div:nth-child(2) { background:var(--panel)!important; border-color:var(--line)!important; border-radius:16px!important; }
+.astra #weekly-mission-status,.astra #monthly-mission-status,.astra #special-mission-status { color:var(--muted)!important; font-size:12px!important; }
+.astra #weekly-mission-list>div,.astra #monthly-mission-list>div,.astra #special-mission-list>div { background:var(--panel-soft)!important; border-color:var(--line)!important; border-radius:12px!important; padding:13px!important; }
+.astra .music-player-kicker,.astra .music-status,.astra .music-track-row-index,.astra .music-track-count { color:var(--sky); }
+.astra .music-player-disc { background:repeating-radial-gradient(circle,#17364c 0 3px,#0c253a 4px 8px); border-color:var(--line); box-shadow:0 0 0 9px #a5dfff06; }
+.astra .music-player-disc span { background:var(--sky); color:var(--ink); }
+.astra .music-progress { accent-color:var(--sky); }
+.astra .music-track-list-panel { background:var(--panel); border-color:var(--line); }
+.astra .music-track-row.is-current { background:#a5dfff16; border-color:var(--sky); box-shadow:inset 3px 0 var(--sky); }
+.astra .music-rate-toggle[aria-pressed=true],.astra .music-playlist-tab[aria-pressed=true] { color:var(--ink)!important; background:var(--sky)!important; }
+.astra #draft-grid { align-content:start; grid-auto-rows:max-content; gap:12px!important; padding:10px 2px!important; }
+.astra #draft-grid .card-item { height:auto!important; border-color:#a5dfff48!important; border-radius:18px; padding:12px; }
+.astra #draft-grid .card-item>div:first-child { color:var(--paper)!important; font-size:13px!important; font-weight:500!important; padding:2px 0 8px; }
+.astra #draft-grid .portrait { flex:0 0 auto!important; height:140px; }
+.astra #draft-grid button { min-height:44px; padding:8px!important; border:1px solid var(--line)!important; border-radius:9px; background:var(--panel-soft)!important; color:var(--paper)!important; }
+.astra #draft-grid button:last-child { background:var(--sky)!important; color:var(--ink)!important; }
+.astra #screen-draft>h3,.astra #screen-factory-draft>h3,.astra #screen-artifact-reserve-draft>h3,.astra #screen-perfect-plan-draft>h3 { font-size:21px; font-weight:500; letter-spacing:-.04em; padding-bottom:10px; }
+.astra #draft-reroll-cnt { color:var(--sky)!important; }
+.astra #factory-bundle-0,.astra #factory-bundle-1,.astra #artifact-reserve-bundle-0,.astra #artifact-reserve-bundle-1 { border-color:var(--line)!important; background:var(--panel)!important; border-radius:18px!important; padding:12px!important; }
+.astra .factory-card-row { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); }
+.astra .factory-select-btn,.astra .factory-aux-btn { border:1px solid var(--line); background:var(--panel-soft); color:var(--paper); border-radius:12px; }
+.astra #factory-select-0,.astra #factory-select-1 { background:var(--sky); color:var(--ink); border-color:var(--sky); font-weight:700; }
+.astra .bonus-pool-item { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
+.settings-note { color:var(--muted); font-size:12px; line-height:1.8; }
+#astra-toast { position:fixed; left:50%; bottom:35px; transform:translate(-50%,20px); z-index:400; border:1px solid var(--line); border-radius:16px; padding:14px 22px; background:#16354d; color:var(--paper); opacity:0; pointer-events:none; max-width:90vw; transition:opacity .2s,transform .2s; box-shadow:0 10px 30px #0004; }
+#astra-toast.visible { transform:translate(-50%,0); opacity:1; }
+[hidden] { display:none!important; }
+.world-backdrop::after { content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 25%,#bba7ed22,transparent 55%),linear-gradient(150deg,transparent 35%,#a5dfff0c 50%,transparent 65%); pointer-events:none; }
+.lumi-chat-controls { display:flex!important; flex-wrap:nowrap!important; gap:4px!important; width:100%; }
+.astra #modal-lumi-question .lumi-chat-controls button { flex:1 1 0; min-width:0; min-height:36px; padding:6px 3px!important; font-size:10px!important; white-space:nowrap; letter-spacing:-.04em; }
+/* A compact now-playing strip leaves the remaining height to the library. */
+.astra #modal-music-player .music-player-panel { width:560px; height:min(820px,calc(100dvh - 28px)); max-height:calc(100dvh - 28px)!important; display:flex; overflow:hidden; padding:20px; background:radial-gradient(ellipse at 100% 0,#bca0ed1e,transparent 45%),#102638!important; text-align:left; }
+.music-player-kicker { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; color:var(--sky); font-size:10px; }
+.music-player-kicker span { letter-spacing:0; font-size:11px; color:var(--muted); }
+.astra .music-player-disc { display:none; }
+.astra .music-track-title { font-size:18px; line-height:1.4; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.astra .music-track-meta { font-size:10px; margin-top:3px; }
+.astra .music-status { font-size:10px; margin:8px 0 2px; min-height:16px; }
+.astra .music-control-row { margin:10px 0 8px; gap:8px; }
+.astra #music-play-toggle { background:var(--sky); color:var(--ink); border-radius:50%; width:44px; justify-self:center; }
+.astra .music-option-row { gap:5px; }
+.astra .music-option-row button { font-size:10px; min-height:34px!important; border-radius:9px!important; }
+.astra .music-track-library { flex:1 1 auto; min-height:100px; margin-top:14px; border-color:var(--line); border-radius:14px; background:#0a2033; }
+.astra .music-track-list { flex:1 1 auto; max-height:none; min-height:44px; scrollbar-width:thin; scrollbar-color:#63899d transparent; }
+.astra .music-track-row { min-height:44px; grid-template-columns:40px minmax(0,1fr); }
+.astra .music-track-row button { border:0!important; border-radius:0!important; background:transparent!important; min-height:44px; }
+.astra .music-track-select { grid-template-rows:1fr; padding:6px 9px; }
+.astra .music-track-row-title { font-size:12px; }
+.astra .music-track-row-artist { display:none; }
+.astra .music-track-row-index { grid-row:1; }
+.astra .music-track-row.is-current { background:#a5dfff12; box-shadow:inset 2px 0 var(--sky); }
+.astra .music-track-row.is-current .music-track-row-index { color:var(--sky); }
+.astra .music-playlist-mode-row { padding:6px; }
+.astra .music-playlist-mode-row button { min-height:34px!important; }
+.astra .music-playlist-mode-row button[aria-pressed=true] { background:#a5dfff20!important; color:var(--sky)!important; border-color:#a5dfff60!important; }
+.astra .music-close-button { min-height:40px; padding:8px; margin:10px 0 0; background:transparent; }
+@media(max-width:760px) {
+  .astra #draft-grid .portrait { height:110px; }
+  .astra .card-grid { grid-template-columns:repeat(auto-fill,minmax(94px,1fr)); gap:9px; }
+  .astra .card-item { border-radius:12px; padding:6px; }.astra .card-item .portrait { height:122px; }.card-item .card-name { font-size:11px; }.card-item .card-meta { font-size:8px; }
+  .astra .modal { padding:14px; }.astra .modal-content { padding:21px; border-radius:21px; max-height:calc(100dvh - 28px)!important; max-width:100%!important; }.astra .modal-content>h3 { font-size:20px; }.astra .menu-btn { font-size:12px; }.astra .modal-scroll { font-size:13px!important; }#modal-toeic-practice .modal-content { padding:15px; }
+  .settings-note { font-size:11px; }
+  .astra #modal-music-player .music-player-panel { padding:16px; }.music-player-kicker { margin-bottom:12px; }
+}
+@media(max-height:680px) and (max-width:760px) { .astra #modal-music-player .music-player-panel { padding:12px; }.music-player-kicker { margin-bottom:8px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }

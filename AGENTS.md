@@ -14,6 +14,7 @@ Functional correctness of the browser app is more important than refactoring or 
 
 ## Targets
 - `card/`: Card game (`card/dist/DREAMWEAVER.html`)
+- `card_claude/`: Claude UI comparison build of the card game; reads `card/game` and `card/assets` (`card_claude/dist/DREAMWEAVER-Claude.html`)
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `idle/`: Astral Companions idle game (`idle/dist/AstralCompanions.html`)
 - `defense_test/`: Star Garden defense prototype (`defense_test/dist/StarGardenDefense.html`)
