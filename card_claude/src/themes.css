@@ -1,8 +1,6 @@
 /* Paint only. Theme switches must preserve every screen's geometry. */
 body[data-theme=strawberry] { --ink:#fff2f6; --panel:#fffafd; --panel-soft:#fbe0e9; --sky:#a43f66; --sky-bright:#822b50; --paper:#4c2939; --muted:#805466; --line:#d6a4b6; --gold:#9c6813; --wash:#f4bcd2; --button:#f9d6e4; --button-fill:linear-gradient(#fffaf7,#f9d6e4); --primary-fill:linear-gradient(#b5557b,#96395e); --theme-mark:url("../assets/magical-mark.svg"); color-scheme:light; }
 body[data-theme=dreamsky] { --ink:#eff9ff; --panel:#fff; --panel-soft:#def0fa; --sky:#21668c; --sky-bright:#164f70; --paper:#24465e; --muted:#536e81; --line:#a9cedf; --gold:#936318; --wash:#b3e1f5; --button:#d5effc; --button-fill:linear-gradient(#fff,#e1f3fd); --primary-fill:linear-gradient(#387fa7,#276187); --theme-mark:url("../assets/dreamsky-mark.svg"); color-scheme:light; }
-body[data-theme=strawberry] .world-backdrop { background:url("../assets/magical-backdrop.svg") center top/cover no-repeat,#fff1fb; }
-body[data-theme=dreamsky] .world-backdrop { background:url("../assets/dreamsky-backdrop.svg") center top/cover no-repeat,#e8f7ff; }
 body[data-theme=strawberry] .world-backdrop::after,body[data-theme=dreamsky] .world-backdrop::after { background:none; }
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.modal-content,.card-item,.music-track-library) { background:var(--panel)!important; border-color:var(--line)!important; color:var(--paper)!important; box-shadow:0 6px 20px color-mix(in srgb,var(--wash) 28%,transparent); }
 body:is([data-theme=strawberry],[data-theme=dreamsky]) :is(.primary,.secondary,.menu-btn,.icon-button,.text-button,.modal-content button) { background:var(--button-fill)!important; border-color:var(--line)!important; color:var(--paper)!important; }
