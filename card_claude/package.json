@@ -1,0 +1,9 @@
+{
+  "name": "card-rpg-claude",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "verify": "node --check src/astra.js && node build.mjs && node tests/smoke.mjs"
+  }
+}
