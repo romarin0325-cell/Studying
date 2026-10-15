@@ -110,7 +110,7 @@ function ultValue(s,m,id,gv){
     case 'royal':return strongest?hit(24*(strongest.burnTime>0||strongest.divine>=3&&strongest.divineTime>0?2:1),strongest):0;
     case 'starfall':return s.gauge>=cap-2&&strongest?hit(.4*s.gauge,strongest):0;
     case 'execute':{const order=[...list].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);return order.reduce((n,e)=>n+hit(e.hp/e.maxHp<=E.executeThreshold(e,s)?30:16,e),0);}
-    case 'inferno':return strike(7*(health<10?2:1))+strike(.6)*1.5;
+    case 'inferno':return strike(7*(E.coreCrisis(s)?2:1))+strike(.6)*1.5;
     case 'combust':return list.reduce((n,e)=>n+hit(e.burnTime>0?10:4,e),0)+strike(.6)*1.5;
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
     case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
@@ -120,7 +120,7 @@ function ultValue(s,m,id,gv){
     case 'dragon':{let best=[];for(const e of list){const p=E.pathPoint(e.progress),near=list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=180;});if(near.length>best.length)best=near;}return best.reduce((n,e)=>n+hit(14,e)+hit(.6*5*.5,e),0);}
     case 'flurry':return [...list].sort((a,b)=>b.progress-a.progress).slice(0,9+2*new Set(s.board.filter(a=>a&&a.hero!=='night_rabbit'&&a.hero.endsWith('_rabbit')).map(a=>a.hero)).size).reduce((n,e)=>n+hit(9,e),0);
     case 'vortex':return strike(5)+control(1.5*scale+2.4)*1.2+thunderCancel();
-    case 'singularity':return list.reduce((n,e)=>n+hit(8*(1+.5*(e.divine||0)),e),0)+control(2*scale+2.4)+thunderCancel();
+    case 'singularity':return list.reduce((n,e)=>n+hit(E.WHALE.factor*(1+E.WHALE.perMark*(e.divine||0)),e),0)+control(2*scale+2.4)+thunderCancel();
     case 'quake':return strike(3)+control(2.5*scale)+thunderCancel();
     case 'nightmare':return strike(4)+control(2)+dps*.25*Math.min(6,rem)*.6;
     case 'rewind':return strike(3)+control(6)+thunderCancel();

@@ -124,7 +124,7 @@ export function migrateRelicSnapshot(p){
   if(a.relicAttack===undefined)a.relicAttack=Number.isFinite(run?.relicAttack)?run.relicAttack:collectionBonus(p.relics);
   if(a.relicLevels===undefined){const from=run?.relicLevels&&typeof run.relicLevels==='object'&&!Array.isArray(run.relicLevels)?run.relicLevels:null;a.relicLevels=Object.fromEntries(equipped.map(id=>[id,from&&Number.isInteger(from[id])?from[id]:relicLevel(p.relics?.[id])]));}
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);

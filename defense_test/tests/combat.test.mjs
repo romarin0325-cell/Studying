@@ -1164,18 +1164,70 @@ test('phoenix returns bosses that touch the core, a limited number of times per 
   assert.equal(s.health,health-1);assert.equal(s.phoenixUsed,false);assert.equal(s.events.some(event=>event.type==='phoenix'),false);assert.equal(s.enemies.includes(grunt),false);
   s.enemies=[];s.events=[];
   const [boss]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH,hp:800,shield:40}]);
-  boss.frostLock=s.time+9;boss.channel=3;const lock=boss.frostLock,channel=boss.channel,shield=boss.shield,hp=boss.hp,max=boss.maxHp,health2=s.health;
+  boss.frostLock=s.time+9;boss.channel=3;const lock=boss.frostLock,channel=boss.channel,shield=boss.shield,hp=boss.hp,health2=s.health;
   quiet(s);E.step(s,.05);
-  assert.equal(s.health,health2);assert.equal(s.phoenixUsed,true);assert.equal(boss.progress,0);assert.equal(boss.shield,shield);
-  close(boss.hp,Math.max(1,hp-max*E.RELIC_VALUES.phoenix.cut*m));close(boss.frostLock,lock);close(boss.channel,channel-.05);
+  assert.equal(s.health,health2);assert.equal(s.phoenixUsed,true);close(boss.progress,E.PATH_LENGTH/2);assert.equal(boss.shield,shield);
+  close(boss.hp,hp,'no health cut');close(boss.dawn,E.RELIC_VALUES.phoenix.taken*m);close(boss.frostLock,lock);close(boss.channel,channel-.05);
+  assert.ok(E.restore(E.serialize(s)),'the dawn mark saves');
   assert.equal(s.enemies.includes(boss),true);assert.equal(s.events.filter(event=>event.type==='phoenix').length,1);assert.equal(s.events.some(event=>event.type==='leak'),false);
   // Further boss touches are returned too until the uses run out; the next one leaks.
-  for(let use=1;use<E.RELIC_VALUES.phoenix.uses;use++){boss.progress=E.PATH_LENGTH;s.events=[];const before=s.health;quiet(s);E.step(s,.05);assert.equal(s.health,before);assert.equal(boss.progress,0);}
+  for(let use=1;use<E.RELIC_VALUES.phoenix.uses;use++){boss.progress=E.PATH_LENGTH;s.events=[];const before=s.health;quiet(s);E.step(s,.05);assert.equal(s.health,before);close(boss.progress,E.PATH_LENGTH/2);}
   boss.progress=E.PATH_LENGTH;s.events=[];const health3=s.health;E.step(s,.05);
   assert.equal(s.health,health3-7);assert.equal(s.enemies.includes(boss),false);assert.equal(s.events.some(event=>event.type==='leak'),true);
-  s.phoenixUsed=false;s.phoenixUses=0;s.enemies=[];
-  const [tiny]=enemiesFor(s,[{kind:'boss',progress:E.PATH_LENGTH,hp:10}]);tiny.hp=10;tiny.maxHp=1000;quiet(s);const health4=s.health;E.step(s,.05);
-  assert.equal(tiny.hp,1);assert.equal(tiny.progress,0);assert.equal(s.health,health4);
+});
+
+test('Zeke core crisis is half of the mode core: never at a full monthly core (7), as the text reads',()=>{
+  const s=traitArena([{hero:'zeke',index:12,rank:1}]);enemiesFor(s,[{hp:1e9}]);quiet(s);
+  s.mode='monthly';s.health=E.MONTHLY_HEALTH;assert.equal(E.coreCrisis(s),false);assert.equal(E.castPreview(s,'zeke').boost.on,false);
+  s.health=3;assert.equal(E.coreCrisis(s),true);s.mode='main';s.health=10;assert.equal(E.coreCrisis(s),false);s.health=9;assert.equal(E.coreCrisis(s),true);
+});
+
+test('starsea heart reads divine marks without removing them, then engraves a full set',()=>{
+  const s=traitArena([{hero:'galaxy_whale',index:12,rank:1}]);const [marked,plain]=enemiesFor(s,[{hp:1e9,progress:900},{hp:1e9,progress:1000}]);quiet(s);
+  marked.statusEffects=[{type:'divine',source:'attack:jasmine:1',owner:'jasmine',amount:3,until:s.time+5}];E.statusState(s,marked);
+  const base=E.power(s,s.board[12]),m0=marked.hp,p0=plain.hp;readyCast(s,'galaxy_whale');
+  close((m0-marked.hp)/(p0-plain.hp),1+3*E.WHALE.perMark,'marks raise the blast');close(p0-plain.hp,base*E.WHALE.factor);
+  for(const e of [marked,plain])assert.equal(E.statusState(s,e).divine,E.WHALE.marks,'every enemy hit carries a full set');
+  assert.equal(HERO.galaxy_whale.skill.cost,80);
+});
+
+test('ultimate control ignores a boss\'s control immunity; a second ultimate control right after lasts half',()=>{
+  const s=traitArena([{hero:'guardian',index:12,rank:1},{hero:'lightning_sage',index:13,rank:1}]);const [boss]=enemiesFor(s,[{kind:'boss',hp:1e9,progress:300}]);quiet(s);
+  boss.ccImmune=s.time+5;readyCast(s,'guardian');
+  close(E.statusState(s,boss).stun,1.5*E.BOSS_CONTROL_SCALE,'lands through the basic-attack immunity');
+  readyCast(s,'lightning_sage');close(E.statusState(s,boss).stun,Math.max(1.5,1.2*E.ULT_CONTROL_REPEAT)*E.BOSS_CONTROL_SCALE,'the longer stun still holds');
+  const t=traitArena([{hero:'lightning_sage',index:13,rank:1}]);const [b2]=enemiesFor(t,[{kind:'boss',hp:1e9,progress:300}]);quiet(t);
+  readyCast(t,'lightning_sage');const first=E.statusState(t,b2).stun;advanceTo(t,t.time+first+.1);readyCast(t,'lightning_sage');
+  close(E.statusState(t,b2).stun,first*E.ULT_CONTROL_REPEAT,'a chained ultimate control lasts half');assert.ok(E.restore(E.serialize(t)));
+});
+
+test('relic pass 7: no ultimate or merge loop, and the three new relics',()=>{
+  // Lantern + hourglass + Santa: two gifts and their merge cost more starlight than they give back, even at level 10.
+  const scale=relicScale(10),santa=HERO.santa.skill.cost,refund=santa*E.RELIC_VALUES.lantern.refund*scale,merge=12+E.RELIC_VALUES.hourglass.starlight*scale;
+  assert.ok(2*(santa-refund)>merge+20,`cycle nets ${(merge-2*(santa-refund)).toFixed(1)}`);
+  // Broken clock repays a share of a PURE buff only (Santa's gift is not one), and never more than that share.
+  const clock=traitArena([{hero:'siren',index:12},{hero:'santa',index:13}],{artifacts:['broken_clock']});clock.relicLevels={broken_clock:10};enemiesFor(clock,[{hp:1e9}]);quiet(clock);
+  clock.gauge=120;assert.ok(E.cast(clock,'santa').ok);assert.equal(clock.clockBank,0,'no repayment for the gift');
+  clock.gauge=100;const t0=clock.time;assert.ok(E.cast(clock,'siren').ok);const after=clock.gauge,share=HERO.siren.skill.cost*E.RELIC_VALUES.broken_clock.share*scale;close(clock.clockBank,share);
+  advanceTo(clock,t0+30);assert.equal(clock.clockBank,0);assert.ok(E.restore(E.serialize(clock)));
+  // Sprout medal: 1-2 star companions hit harder and summons are cheaper.
+  const sprout=traitArena([{hero:'star_boy',index:12,rank:2},{hero:'siren',index:6,rank:3}],{artifacts:['sprout']});sprout.relicLevels={sprout:1};
+  close(E.combatStats(sprout,sprout.board[12]).damage/E.power(sprout,sprout.board[12]),1+E.RELIC_VALUES.sprout.power);
+  sprout.freeSummons=0;sprout.paidSummons=3;assert.equal(E.summonCost(sprout),10+6-E.RELIC_VALUES.sprout.discount);
+  // Guardian amulet: +25% near the core; a leak refunds starlight twice per wave.
+  const amulet=traitArena([{hero:'star_boy',index:12}],{artifacts:['amulet']});amulet.relicLevels={amulet:1};quiet(amulet);
+  const [close1,far1]=enemiesFor(amulet,[{progress:E.PATH_LENGTH*.8,hp:1e6},{progress:300,hp:1e6}]);
+  const shotNear=launchNormal(amulet,amulet.board[12]);shotNear.target=close1.uid;const a0=close1.hp;resolveNormal(amulet,shotNear);assert.ok(Math.abs((a0-close1.hp)/(shotNear.damage*(1+E.RELIC_VALUES.amulet.near))-1)<1e-3,'near-core bonus');
+  amulet.enemies=[];amulet.gauge=0;for(let i=0;i<3;i++){enemiesFor(amulet,[{progress:E.PATH_LENGTH,hp:10}]);E.step(amulet,.05);}
+  assert.ok(Math.abs(amulet.gauge-E.RELIC_VALUES.amulet.uses*E.RELIC_VALUES.amulet.starlight)<4,`one refund per wave, gauge ${amulet.gauge}`);assert.ok(E.restore(E.serialize(amulet)));
+  // Venomfire chalice: burning AND at least 5 poison stacks.
+  const cup=traitArena([{hero:'star_boy',index:12}],{artifacts:['chalice']});cup.relicLevels={chalice:1};quiet(cup);
+  const [both,burnOnly]=enemiesFor(cup,[{hp:1e7},{hp:1e7}]);
+  both.statusEffects=[{type:'burn',source:'attack:zeke:1',owner:'zeke',amount:1,until:cup.time+9},{type:'poison',source:'attack:mushroom_king:2',owner:'mushroom_king',amount:5,until:cup.time+9,power:1}];
+  burnOnly.statusEffects=[{type:'burn',source:'attack:zeke:3',owner:'zeke',amount:1,until:cup.time+9}];
+  for(const e of [both,burnOnly])E.statusState(cup,e);
+  const sb=launchNormal(cup,cup.board[12]);sb.target=both.uid;const b0=both.hp;resolveNormal(cup,sb);assert.ok(Math.abs((b0-both.hp)/(sb.damage*(1+E.RELIC_VALUES.chalice.taken))-1)<1e-3,'burning and poisoned');
+  const so=launchNormal(cup,cup.board[12]);so.target=burnOnly.uid;const o0=burnOnly.hp;resolveNormal(cup,so);assert.ok(Math.abs((o0-burnOnly.hp)/so.damage-1)<1e-3,'burning only');
 });
 
 test('twin echoes ultimate direct damage after 1.5s, including save and restore, and skips buffs, summons and later finishers',()=>{
@@ -1258,7 +1310,8 @@ test('tempo bell raises attack speed per wave after the first, up to its cap',()
   const cool=s=>E.combatStats(s,s.board[12]).cooldown;
   const {perWave,cap}=E.RELIC_VALUES.tempo_bell;
   const make=(wave,level)=>{const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['tempo_bell'],wave});s.relicLevels={tempo_bell:level};s.waveTime=wave===1?0:30;return s;};
-  const bonus=(wave,level)=>Math.min(cap,perWave*(wave-1))*relicScale(level);
+  // The cap holds after the level multiplier (relic pass 7).
+  const bonus=(wave,level)=>Math.min(cap,perWave*(wave-1)*relicScale(level));
   const plain=traitArena([{hero:'star_boy',index:12}]);
   const first=make(1,1);close(cool(first),cool(plain));
   assert.equal(E.combatStats(first,first.board[12],12,true).bonuses.some(line=>line.includes('이어지는 종')),false);
@@ -1290,7 +1343,7 @@ test('royal seal grants starlight once per boss spawn and amplifies boss damage 
 test('broken clock stretches buff ultimates and grants starlight per second while any one is active',()=>{
   const s=traitArena([{hero:'siren',index:12},{hero:'frost_witch',index:0}],{artifacts:['broken_clock']});
   s.relicLevels={broken_clock:5};const m=relicScale(5);
-  const stretch=1+E.RELIC_VALUES.broken_clock.duration*m,star=E.RELIC_VALUES.broken_clock.starlight;
+  const stretch=1+E.RELIC_VALUES.broken_clock.duration*m,{share,rate}=E.RELIC_VALUES.broken_clock;
   enemiesFor(s,[{hp:1e7}]);quiet(s);s.gauge=120;
   const haste=E.ULT_BUFF.haste.seconds;assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,haste*stretch);
   assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((haste*stretch).toFixed(1))+'초'));
@@ -1302,9 +1355,9 @@ test('broken clock stretches buff ultimates and grants starlight per second whil
   const trauma=traitArena([{hero:'time_magician',index:12}],{artifacts:['broken_clock']});trauma.relicLevels={broken_clock:5};
   enemiesFor(trauma,[{hp:1e8}]);quiet(trauma);trauma.gauge=120;assert.ok(E.cast(trauma,'time_magician').ok);
   close(trauma.buffs.trauma,10*stretch);
-  s.buffs={haste:5,awaken:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+star*m);
-  s.buffs={haste:.2};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+star*m*.2);
-  s.phase='intermission';s.breakTime=10;s.buffs={haste:1};s.gauge=0;E.step(s,.05);close(s.gauge,star*m*.05);
+  // Repayment: the bank (share of the cost) drains at the rate while a pure buff runs, and is dropped when none does.
+  s.buffs={haste:5};s.clockBank=HERO.siren.skill.cost*share*m;s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+rate*m);
+  s.buffs={winter:5};s.clockBank=10;s.gauge=0;E.step(s,.05);assert.equal(s.clockBank,0,'a non-pure buff keeps nothing');
 });
 
 test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, prism, orbit, lantern and seed',()=>{
@@ -1320,7 +1373,9 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   close(ratio(guild),1+E.RELIC_VALUES.guild.power*relicScale(5));
   const alone=traitArena([{hero:'star_boy',index:12}],{artifacts:['guild']});close(ratio(alone),1);
   const stars=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:7},{hero:'snow_rabbit',index:11},{hero:'luna',index:13}],{artifacts:['constellation']});
-  stars.relicLevels={constellation:5};close(ratio(stars),1+E.RELIC_VALUES.constellation.power*relicScale(5));
+  stars.relicLevels={constellation:5};close(ratio(stars),1+E.RELIC_VALUES.constellation.three*relicScale(5));
+  const mosaic=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:7},{hero:'snow_rabbit',index:11},{hero:'luna',index:13},{hero:'zeke',index:17}],{artifacts:['constellation']});
+  mosaic.relicLevels={constellation:5};close(ratio(mosaic),1+E.RELIC_VALUES.constellation.four*relicScale(5));
   const pair=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:7},{hero:'luna',index:13}],{artifacts:['constellation']});close(ratio(pair),1);
   const meteor=traitArena([{hero:'star_boy',index:12}],{artifacts:['meteor']});meteor.relicLevels={meteor:5};const meteorM=relicScale(5);
   const [far,near,hit]=enemiesFor(meteor,[{progress:1200},{progress:1360},{progress:1400}]);meteor.board[12].attacks=11;
@@ -1341,7 +1396,7 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   close(fieldHp-field.hp,zone.damage*E.RELIC_VALUES.orbit.tick*relicScale(5));
   const lantern=traitArena([{hero:'siren',index:12}],{artifacts:['lantern']});lantern.relicLevels={lantern:5};
   enemiesFor(lantern,[{}]);quiet(lantern);lantern.gauge=100;assert.ok(E.cast(lantern,'siren').ok);
-  close(lantern.gauge,100-HERO.siren.skill.cost+E.RELIC_VALUES.lantern.refund*relicScale(5));
+  close(lantern.gauge,100-HERO.siren.skill.cost*(1-E.RELIC_VALUES.lantern.refund*relicScale(5)));
   const seed=traitArena([{hero:'mushroom_king',index:12}],{artifacts:['seed']});seed.relicLevels={seed:5};
   const [spore]=enemiesFor(seed,[{hp:1e7}]);quiet(seed);
   spore.statusEffects=[{type:'poison',source:`attack:mushroom_king:${seed.board[12].uid}`,owner:'mushroom_king',amount:2,until:seed.time+7,power:100}];

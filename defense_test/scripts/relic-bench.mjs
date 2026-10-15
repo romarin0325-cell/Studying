@@ -16,10 +16,10 @@ const DECKS={
   mixed1:'star_boy,snow_rabbit,night_rabbit,siren,santa',strike:'zeke,luna,jasmine,ancient_dragon,great_detective',burn:'flame_sage,red_dragon,zeke,cherry_prince,siren',
   marks:'silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora',slow:'snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage',aura:'siren,ancient_dragon,harmonious,time_magician,zeke',
   chain:'lightning_sage,night_rabbit,storm_sage,snow_rabbit,silver_rabbit',poison:'mushroom_king,phantom,time_ruler,galaxy_whale,siren',zone:'flame_sage,mushroom_king,phantom,galaxy_whale,time_ruler',
-  buff:'siren,ancient_dragon,harmonious,rumi,jasmine',
+  buff:'siren,ancient_dragon,harmonious,rumi,jasmine',hybrid:'zeke,red_dragon,flame_sage,mushroom_king,phantom',
 };
 // Decks where a synergy relic's condition is built in.
-const TAGS={ember:['burn'],frost:['slow'],tide:['slow'],seed:['poison'],roots:['zone','poison'],prism:['chain'],guild:['aura'],broken_clock:['buff'],chorus:['chain','mixed1'],twin:['strike','burn'],lens:['strike'],royal_seal:['strike']};
+const TAGS={ember:['burn'],frost:['slow'],tide:['slow'],seed:['poison'],roots:['zone','poison'],prism:['chain'],guild:['aura'],broken_clock:['buff'],chorus:['chain','mixed1'],twin:['strike','burn'],lens:['strike'],royal_seal:['strike'],chalice:['hybrid']};
 const G=22,beds={rose:3+G,spring:Math.min(30,3*(G-14)),seed:0};
 const metaFor=deck=>Object.fromEntries(deck.map(id=>[id,{power:heroMultiplier({enhance:0},beds),special:specialMultiplier(0)}]));
 // 'power10' is the yardstick: no relic, every companion +10% power.

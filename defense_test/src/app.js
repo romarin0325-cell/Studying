@@ -333,8 +333,14 @@ function bindArena(){
 function activate(index){selected=selected===index?-1:index;updateUnit();}
 // Best star of a companion on the board (time ruler and cinderella included as they stand).
 const topRank=id=>run?run.board.reduce((n,u)=>u?.hero===id?Math.max(n,u.rank):n,0):0;
+// One training row: name with the field's top rank, five pips for the training count, and the trained values
+// on their own line (wraps to two lines; never cut off).
+function trainRow(id){
+  const lv=run.upgrades[id],max=lv>=5,cost=E.upgradeCost(run,id),top=topRank(id),role=E.trainingBonus(id,lv);
+  return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/5">${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`위력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
+}
 function training(){
-  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 위력 +25%, 최대 5회. 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(id=>`<button class="choose-row" data-train="${id}" ${run.upgrades[id]>=5||run.gold<E.upgradeCost(run,id)?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}</strong><small>${topRank(id)?`최고 ${topRank(id)}성 · `:'전장에 없음 · '}훈련 ${run.upgrades[id]}/5${E.trainingBonus(id,run.upgrades[id])?` · ${E.trainingBonus(id,run.upgrades[id])}`:''}</small></div><b>${run.upgrades[id]>=5?'최대':E.upgradeCost(run,id)+' G'}</b></button>`).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
+  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 위력 +25%, 최대 5회. 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
 }
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
