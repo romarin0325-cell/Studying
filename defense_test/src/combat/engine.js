@@ -49,6 +49,15 @@ export const rumiDream=(s,u=bestUnit(s,'rumi'))=>!!u&&u.hero==='rumi'&&u.rank>=R
 export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter'});
 const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
+// Running ultimates that refuse a second press: a pure buff would only restart its timer, and the
+// dream form keeps one sequence of phases (the save holds at most one). Damage-and-buff hybrids
+// (glassfall, gift, goddess, trauma, ice court) stay recastable because the hit is the point.
+const PURE_BUFFS=new Set(['echo','haste','awaken','march','harmony']);
+export function castLock(s,id){
+  const u=bestUnit(s,id);if(!u)return null;
+  if(rumiDream(s,u)){const remaining=(s.volleys||[]).reduce((m,v)=>Math.max(m,v.life),0);return remaining>0?{kind:'dream',remaining,total:RUMI_DREAM.phases.at(-1).at}:null;}
+  const active=PURE_BUFFS.has(HERO[id].skill.type)&&activeSkill(s,id);return active?{kind:'buff',...active}:null;
+}
 export const BOARD = {x:135,y:212,cell:90};
 export const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
 export function attackDirection(from,to){const dx=to.x-from.x,dy=to.y-from.y;return Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up';}
@@ -380,7 +389,8 @@ export function geometryContains(g,p){
   const dx=p.x-g.from.x,dy=p.y-g.from.y,d=Math.hypot(dx,dy),forward=dx*Math.cos(g.angle)+dy*Math.sin(g.angle),side=-dx*Math.sin(g.angle)+dy*Math.cos(g.angle);
   if(g.kind==='cross')return d<=g.range&&Math.min(Math.abs(dx),Math.abs(dy))<=g.radius/2;
   if(g.kind==='beam')return forward>=0&&forward<=g.range&&Math.abs(side)<=g.radius/2;
-  if(g.kind==='cleave')return d<=g.range&&forward>=0&&Math.abs(side)<=forward;
+  // Zeke's sweep: a 90-degree arc band, radius deep, centred on the target's distance (not the whole cone).
+  if(g.kind==='cleave')return d<=g.range&&forward>=0&&Math.abs(side)<=forward&&Math.abs(d-Math.hypot(g.to.x-g.from.x,g.to.y-g.from.y))<=g.radius/2;
   if(g.kind==='pulse')return d<=g.range;
   return Math.hypot(p.x-g.to.x,p.y-g.to.y)<=g.radius;
 }
@@ -609,6 +619,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
   const u=bestUnit(s,id),hero=HERO[id];if(!u||!s.deck.includes(id))return {ok:false,reason:'전장에 이 영웅이 있어야 합니다.'};
+  const lock=castLock(s,id);if(lock)return {ok:false,reason:lock.kind==='dream'?'꿈의 형태가 아직 이어지고 있습니다.':`${hero.skill.name}이(가) 지속 중입니다. (${Math.ceil(lock.remaining)}초 남음)`};
   const goldCost=skillGoldCost(id);if(s.gold<goldCost)return {ok:false,reason:`골드가 부족합니다. (${goldCost} 필요)`};
   if(s.gauge<hero.skill.cost)return {ok:false,reason:`별빛이 부족합니다. (${hero.skill.cost} 필요)`};
   // Wish upon a Star spends the whole gauge; every other skill pays its cost.
@@ -694,6 +705,9 @@ export function castPreview(s,id){
   const u=bestUnit(s,id);if(!u)return null;
   const hero=HERO[id],type=hero.skill.type,base=power(s,u),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const targets=s.enemies.filter(e=>e.hp>0),lines=[];
+  // Boost: an ultimate that grows under a condition reports whether it is boosted right now, and its
+  // lines carry the boosted numbers; the hint names the condition only while it is not met.
+  let boost=null;
   const num=v=>Math.round(v).toLocaleString('ko-KR');
   const sec=v=>Number(v.toFixed(1))+'초';
   const pct=v=>Math.round(v*100).toLocaleString('ko-KR');
@@ -761,8 +775,9 @@ export function castPreview(s,id){
       lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해집니다.`);
     }else{
       const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
-      lines.push(`체력이 가장 높은 적에게 위력 24배, ${hit(24)}를 줍니다.`);
-      lines.push(hot?`지금 대상이 불타거나 성광 3중첩이라 맞는 순간 ${hit(48)}가 됩니다.`:`불타거나 성광이 3중첩이면 맞는 순간 ${hit(48)}가 됩니다.`);
+      const factor=hot?48:24;boost={on:hot,label:hot?'강화':'강화 대기',hint:hot?'':`대상이 불타거나 성광 3중첩이면 강화되어 ${hit(48)}가 됩니다.`};
+      lines.push(`체력이 가장 높은 적에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);
+      if(hot)lines.push('불이 꺼지거나 성광이 흩어지기 전에 맞아야 강화가 유지됩니다.');
     }
   }else if(type==='freeze'){
     const freeze=2*control*scale;
@@ -781,10 +796,9 @@ export function castPreview(s,id){
     lines.push(pack.length?`가장 밀집한 반경 180 안의 적 ${pack.length}명에게 위력 14배, ${hit(14)}를 줍니다.`:`반경 180 안에서 가장 밀집한 적에게 위력 14배, ${hit(14)}를 줍니다.`);
     lines.push(`맞은 적은 5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='inferno'){
-    const factor=7*(s.health<10?2:1);
+    const crisis=s.health<10,factor=7*(crisis?2:1);boost={on:crisis,label:crisis?'강화 · 코어 위기':'강화 대기',hint:crisis?'':`코어 생명력이 10 아래로 내려가면 강화되어 ${hit(14)}가 됩니다.`};
     lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);
     lines.push(`5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
-    if(s.health<10)lines.push('코어 생명력이 10 미만이라 피해가 두 배입니다.');
   }else if(type==='combust'){
     const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
     if(!targets.length||burning===0)lines.push(`적에게 위력 4배, ${hit(4)}를 줍니다. 이미 불타면 ${hit(10)}입니다.`);
@@ -806,12 +820,11 @@ export function castPreview(s,id){
     lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
     lines.push(`10초 동안 받는 피해가 ${pct(expose)}% 늘어납니다.`+(raw>DAMAGE_TAKEN_CAP?' 상한까지 늘어납니다.':''));
   }else if(type==='quake'){
-    const late=e=>e.progress>=PATH_LENGTH*2/3,earlyN=targets.filter(e=>!late(e)).length,lateN=targets.length-earlyN;
-    const push=crisis=>num((crisis?320:160)*control),stun=crisis=>sec((crisis?3:1.5)*control*scale);
-    lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
-    if(targets.length&&lateN&&!earlyN)lines.push(`지금 적은 경로의 마지막 3분의 1이라 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
-    else if(targets.length&&earlyN&&!lateN)lines.push(`지금 적은 마지막 3분의 1 전이라 ${push(false)}만큼 밀리고 ${stun(false)} 기절합니다. 그 구간에 들면 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
-    else lines.push(`마지막 3분의 1 전은 ${push(false)}만큼 밀리고 ${stun(false)} 기절하며, 그 안은 ${push(true)}만큼 밀리고 ${stun(true)} 기절합니다.`);
+    const late=e=>e.progress>=PATH_LENGTH*2/3,lateN=targets.filter(late).length,all=lateN>0&&lateN===targets.length;
+    const push=crisis=>num((crisis?320:160)*control)+'만큼',stun=crisis=>sec((crisis?3:1.5)*control*scale);
+    boost={on:lateN>0,label:all?'강화':lateN?`강화 ${lateN}명`:'강화 대기',hint:lateN?'':`코어 가까이(경로 마지막 3분의 1) 온 적은 강화되어 ${push(true)} 밀려나고 ${stun(true)} 기절합니다.`};
+    if(lateN&&!all){lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);lines.push(`강화된 ${lateN}명은 ${push(true)} 밀려나고 ${stun(true)}, 나머지는 ${push(false)} 밀려나고 ${stun(false)} 기절합니다.`);}
+    else lines.push(`적 전체에게 위력 3배, ${hit(3)}를 주고 ${push(all)} 밀어내며 ${stun(all)} 기절시킵니다.`);
     lines.push('제어 면역인 보스에게는 밀쳐내기만 들어갑니다.');
   }else if(type==='nightmare'){
     const expose=Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),stacks=4+(has(s,'seed')?1:0);
@@ -871,7 +884,7 @@ export function castPreview(s,id){
 
   const gold=skillGoldCost(id);
   if(gold>0)lines.push(`골드 ${num(gold)}을 사용합니다.`);
-  return {rank:u.rank,lines,...(dream?{name:RUMI_DREAM.name}:{})};
+  return {rank:u.rank,lines,...(boost?{boost}:{}),...(dream?{name:RUMI_DREAM.name}:{})};
 }
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.

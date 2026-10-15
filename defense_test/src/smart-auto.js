@@ -130,7 +130,7 @@ function ultValue(s,m,id,gv){
 function pickUltimate(s,m){
   if(s.phase!=='combat')return null;const list=alive(s);if(!list.length)return null;
   const gv=goldValue(s,m),cap=E.gaugeCap(s),dps=Math.max(1,m.dps);
-  const ready=s.deck.filter(id=>E.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=E.skillGoldCost(id));if(!ready.length)return null;
+  const ready=s.deck.filter(id=>E.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=E.skillGoldCost(id)&&!E.castLock(s,id));if(!ready.length)return null;
   const options=ready.map(id=>({id,value:ultValue(s,m,id,gv),cost:HERO[id].skill.type==='starfall'?s.gauge:HERO[id].skill.cost})).filter(o=>o.value>0);
   if(!options.length)return null;
   const byRate=[...options].sort((a,b)=>b.value/b.cost-a.value/a.cost),byValue=[...options].sort((a,b)=>b.value-a.value);

@@ -5,7 +5,7 @@ import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,week
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {unlockProfile,topUpUnlocked} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
-import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
+import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
 import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
 
@@ -195,7 +195,7 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;const hearts=addBond(p.heroes[p.partner],GREETING_POINTS);p.dreams+=40;return {ok:true,hearts,message:`인사 완료 · 꿈의결정 +40${hearts?' · 호감도 상승!':''}`};}
   if(action==='gift'){
     const e=p.heroes[args.id],gift=args.gift;if(!e?.owned||!GIFT_IDS.includes(gift))return no('선물할 수 없습니다.');if(p.gifts[gift]<1)return no(`${GIFTS[gift].name}이(가) 없습니다.`);if(e.bond>=BOND_MAX)return no('호감도가 이미 최고예요.');
-    p.gifts[gift]--;const points=giftPoints(args.id,gift),hearts=addBond(e,points),favorite=FAVORITE[args.id]===gift;return {ok:true,points,hearts,favorite,line:favorite?FAVORITE_LINES[args.id]:null};
+    p.gifts[gift]--;const points=giftPoints(args.id,gift),hearts=addBond(e,points),favorite=FAVORITE[args.id]===gift;return {ok:true,points,hearts,favorite,line:favorite?FAVORITE_LINES[args.id]:GIFT_LINES[args.id]||null};
   }
   if(action==='lobby'){if(args.id===null){p.lobby=null;return {ok:true};}const e=p.heroes[args.id];if(!MEMORIAL_STORIES[args.id]||!e?.owned||e.bond<BOND_MAX)return no('호감도 10에서 메모리얼을 메인 화면으로 쓸 수 있습니다.');p.lobby=args.id;p.partner=args.id;return {ok:true};}
   if(action==='deck'){

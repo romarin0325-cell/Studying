@@ -2,14 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,TUNING} from '../src/content.js';
 import {createProfile,parseProfile,validateProfile,command,weeklyStage} from '../src/profile.js';
-import {BOND_MAX,BOND_STEPS,FAVORITE,FAVORITE_LINES,GIFT_IDS,addBond} from '../src/bond.js';
+import {BOND_MAX,BOND_STEPS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFT_IDS,addBond} from '../src/bond.js';
 import {HOUR,calendar} from '../src/economy.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z'),DAY=24*HOUR;
 const act=(p,action,args={},now=NOW)=>{const r=command(p,action,args,now);assert.ok(validateProfile(p),action+' keeps the profile valid');return r;};
 
-test('every companion has one favourite gift and a line for it; ten of each gift',()=>{
+test('every companion has one favourite gift with its line, its own line for the other gifts; ten of each gift',()=>{
   assert.equal(Object.keys(FAVORITE).length,HEROES.length);
-  for(const h of HEROES){assert.ok(GIFT_IDS.includes(FAVORITE[h.id]),h.id);assert.ok(FAVORITE_LINES[h.id],h.id);}
+  for(const h of HEROES){assert.ok(GIFT_IDS.includes(FAVORITE[h.id]),h.id);assert.ok(FAVORITE_LINES[h.id],h.id);assert.ok(GIFT_LINES[h.id],h.id);}
+  assert.equal(new Set(Object.values(GIFT_LINES)).size,HEROES.length,'no shared gift line');
   for(const gift of GIFT_IDS)assert.equal(Object.values(FAVORITE).filter(g=>g===gift).length,10,gift);
 });
 
@@ -35,7 +36,7 @@ test('gifts grow in the basket (one every 8 hours, candy → letter → bouquet,
   // Giving: favourite 20 points with its line, others 10.
   p.gifts={candy:3,letter:3,bouquet:3};
   const a=act(p,'gift',{id,gift:fav});assert.equal(a.points,20);assert.equal(a.line,FAVORITE_LINES[id]);
-  const b=act(p,'gift',{id,gift:other});assert.equal(b.points,10);assert.equal(b.line,null);assert.equal(p.heroes[id].bondXp,30);
+  const b=act(p,'gift',{id,gift:other});assert.equal(b.points,10);assert.equal(b.line,GIFT_LINES[id]);assert.equal(p.heroes[id].bondXp,30);
   p.gifts.candy=0;assert.equal(command(p,'gift',{id,gift:'candy'},NOW).ok,false);
   assert.equal(command(p,'gift',{id:'queen',gift:'letter'},NOW).ok,false,'only owned companions');
   // The greeting adds points instead of a heart.
