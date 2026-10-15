@@ -64,7 +64,7 @@ const giftTotal=()=>GIFT_IDS.reduce((n,g)=>n+p().gifts[g],0);
 const lobbyMemorial=profile=>profile.lobby&&profile.lobby===profile.partner&&profile.heroes[profile.lobby]?.bond>=BOND_MAX&&window.__MEMORIAL_MEDIA__?.[profile.lobby]?profile.lobby:null;
 const portrait=(id,extra='')=>`<span class="portrait ${extra}" data-rarity="${HERO[id].rarity}">${image(id)}</span>`;
 // How each attack shape reads to a player (battle info and ability panels).
-const SHAPE_TEXT={single:'단일 · 적 1명',splash:'범위 · 맞은 곳 주변',beam:'관통 · 일직선',chain:'연쇄 · 주변 적에게 튐',bounce:'도탄 · 두 적 사이',cleave:'부채꼴 · 앞쪽',pulse:'원형 · 자기 주변',cross:'십자 · 행과 열',zone:'장판 · 바닥에 남음'};
+const SHAPE_TEXT={single:'단일',splash:'범위',beam:'관통',chain:'연쇄',bounce:'도탄',cleave:'부채꼴',pulse:'원형',cross:'십자',zone:'장판'};
 const RANK_TEXT={first:'선두',boss:'보스',strong:'강적',last:'후미'};
 // Each companion has its own lobby lines (src/lines.js); the close line joins from six hearts.
 const partnerLines=hero=>talkLines(hero.id,p().heroes[hero.id].bond);
@@ -260,7 +260,7 @@ function skillTip(node,id){
   hideSkillTip();if(!run)return;
   const h=HERO[id],caster=E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ur=h.hidden||h.rarity==='UR';
   const tip=document.createElement('div');tip.className='skill-tip';tip.id='skill-tip';tip.dataset.rarity=ur?'UR':h.rarity;tip.style.setProperty('--c',h.color);tip.setAttribute('role','tooltip');
-  tip.innerHTML=`<div class="skill-tip-head"><b>${h.skill.name}</b><span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}<small>${caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
+  tip.innerHTML=`<div class="skill-tip-head"><b>${preview?.name||h.skill.name}</b><span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}<small>${caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
   document.body.appendChild(tip);
   const r=node.getBoundingClientRect(),w=tip.offsetWidth,hgt=tip.offsetHeight,left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2));
   tip.style.left=left+'px';tip.style.top=Math.max(8,r.top-hgt-12)+'px';tip.style.setProperty('--ax',(r.left+r.width/2-left)+'px');
@@ -269,7 +269,7 @@ function hideSkillTip(){document.getElementById('skill-tip')?.remove();}
 // ⓘ on the unit card: every number and text for the selected companion.
 function unitInfo(){
   const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
-  show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${(SHAPE_TEXT[h.shape]||'').split(' · ')[0]}</b></span></div>
+  show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${SHAPE_TEXT[h.shape]||''}</b></span></div>
     <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}</span><p>${h.skill.text}</p></div>
     ${given.length?`<div class="unit-buffs given"><em>이 동료가 주는 효과</em>${given.map(b=>`<span class="chip">${b}</span>`).join('')}</div>`:''}
     <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
@@ -290,7 +290,7 @@ function cutIn(e){
   const ur=h.hidden||h.rarity==='UR',reduced=p().settings.reduced;
   wrap.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);
   const el=document.createElement('div');el.className='cutin';el.dataset.rarity=ur?'UR':h.rarity;el.dataset.reduced=String(reduced);el.style.setProperty('--c',h.color);el.setAttribute('aria-hidden','true');
-  el.innerHTML=`<div class="cutin-band"><span class="cutin-lines"></span><span class="cutin-art">${image(e.hero,true)}</span><span class="cutin-text"><small>${ur?'ULTIMATE':'필살기'} · ${h.name}</small><b>${h.skill.name}</b></span></div>`;
+  el.innerHTML=`<div class="cutin-band"><span class="cutin-lines"></span><span class="cutin-art">${image(e.hero,true)}</span><span class="cutin-text"><small>${ur?'ULTIMATE':'필살기'} · ${h.name}</small><b>${e.name||h.skill.name}</b></span></div>`;
   wrap.appendChild(el);cutinTimer=setTimeout(()=>el.remove(),reduced?700:ur?1600:1100);
   if(ur&&!reduced)slowmo=.5;
 }
@@ -841,8 +841,8 @@ function tutorPanel(){
 }
 // Shared question markup: choices are buttons until answered, then ✓ marks the answer and ✗ the pick.
 function questionBlock(q,chosen=-1,answered=true){
-  return `<div class="quiz-q"><div class="quiz-meta"><span class="kind-chip ${q.kind}">${KIND_NAME[q.kind]}</span>${q.source?`<small>${escapeText(q.source)}</small>`:''}</div><p class="quiz-prompt" lang="ja">${escapeText(q.prompt)}</p><div class="quiz-choices">${q.choices.map((c,i)=>{const state=!answered?'':i===q.answer?'right':i===chosen?'wrong':'';
-    return `<button class="quiz-choice ${state}" ${answered?'disabled':`data-quiz-choice="${i}"`}><span class="mark">${LETTERS[i]}</span><span class="text" lang="ja">${escapeText(c)}</span>${state==='right'?icon('check'):state==='wrong'?icon('close'):''}</button>`;}).join('')}</div></div>`;
+  return `<div class="quiz-q"><div class="quiz-meta"><span class="kind-chip ${q.kind}">${KIND_NAME[q.kind]}</span>${q.source?`<small>${escapeText(q.source)}</small>`:''}</div><p class="quiz-prompt">${escapeText(q.prompt)}</p><div class="quiz-choices">${q.choices.map((c,i)=>{const state=!answered?'':i===q.answer?'right':i===chosen?'wrong':'';
+    return `<button class="quiz-choice ${state}" ${answered?'disabled':`data-quiz-choice="${i}"`}><span class="mark">${LETTERS[i]}</span><span class="text">${escapeText(c)}</span>${state==='right'?icon('check'):state==='wrong'?icon('close'):''}</button>`;}).join('')}</div></div>`;
 }
 const lectureBody=l=>`<p class="lec-core">${escapeText(l.core)}</p><p class="lec-analogy"><b>오늘의 이야기</b> ${escapeText(l.analogy)}</p>${l.body.map(t=>t.startsWith('## ')?`<h4 class="lec-h">${escapeText(t.slice(3))}</h4>`:`<p>${escapeText(t)}</p>`).join('')}
   ${l.principles.length?`<div class="lec-box"><b>루미의 핵심 정리</b><ol>${l.principles.map(t=>`<li>${escapeText(t)}</li>`).join('')}</ol></div>`:''}${l.confusion?`<div class="lec-box warn"><b>헷갈림 주의</b><p>${escapeText(l.confusion)}</p></div>`:''}
@@ -933,7 +933,7 @@ function termSheet(id){
 function todayStar(){
   const s=p().study;if(libraryDone()||libraryToday())return;
   if(!s.wrong.length){show('오늘의 별','루미의 별의 서재','<p class="empty">아직 오답이 없어요. 강의 문제나 별빛 퀴즈에서 틀린 문제가 여기로 모여요.</p>','<button class="primary wide" data-library-tab="lecture">강의 문제 풀기</button>','info');return;}
-  show('오늘의 별','어떤 문제를 다시 볼까요?',`<div class="wrong-list">${s.wrong.slice().reverse().map(w=>{const q=questionOf(w.kind,w.id);return q?`<button class="wrong-row" data-review="${w.kind}:${w.id}"><span class="kind-chip ${w.kind}">${KIND_NAME[w.kind]}</span><span class="wrong-text" lang="ja">${escapeText(q.prompt)}</span>${icon('chevron')}</button>`:'';}).join('')}</div>`,'','wrong');
+  show('오늘의 별','어떤 문제를 다시 볼까요?',`<div class="wrong-list">${s.wrong.slice().reverse().map(w=>{const q=questionOf(w.kind,w.id);return q?`<button class="wrong-row" data-review="${w.kind}:${w.id}"><span class="kind-chip ${w.kind}">${KIND_NAME[w.kind]}</span><span class="wrong-text">${escapeText(q.prompt)}</span>${icon('chevron')}</button>`:'';}).join('')}</div>`,'','wrong');
 }
 const starReady=key=>!!tutorSettings().key?heard.has(key):true;
 function reviewSheet(kind,id){

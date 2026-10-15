@@ -92,10 +92,10 @@ function ultValue(s,m,id,gv){
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
   const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
-    case 'echo':return buff(E.ULT_BUFF.echo.ratio*scale,8);
-    case 'haste':return buff(fam('haste','speed',E.ULT_BUFF.haste.speed*scale),8);
-    case 'march':return buff(fam('march','speed',E.ULT_BUFF.march.speed*scale),8)+dps*.04*Math.min(8,rem);
-    case 'awaken':return buff(fam('awaken','power',E.ULT_BUFF.awaken.power*scale),8);
+    case 'echo':return E.rumiDream(s,u)?strike(E.RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)):buff(E.ULT_BUFF.echo.ratio*scale,8);
+    case 'haste':return buff(fam('haste','speed',E.ULT_BUFF.haste.speed*scale),E.ULT_BUFF.haste.seconds);
+    case 'march':return buff(fam('march','speed',E.ULT_BUFF.march.speed*scale),E.ULT_BUFF.march.seconds)+dps*.04*Math.min(8,rem);
+    case 'awaken':return buff(fam('awaken','power',E.ULT_BUFF.awaken.power*scale),E.ULT_BUFF.awaken.seconds);
     case 'harmony':{const p=fam('harmony','power',E.ULT_BUFF.harmony.power),q=fam('harmony','speed',E.ULT_BUFF.harmony.speed);return buff((1+p)*(1+q)-1,8);}
     case 'goddess':{const blocked=litCells(s).size&&['seal','storm','stun1','thunder','judgement'].includes(s.telegraph?.pattern)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
       const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);

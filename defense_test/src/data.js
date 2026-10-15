@@ -556,7 +556,7 @@ export const HEROES = [
       "name": "공명의 아리아",
       "cost": 65,
       "type": "haste",
-      "text": "8초 동안 모든 동료의 공격 속도를 30% 올립니다."
+      "text": "10초 동안 모든 동료의 공격 속도를 30% 올립니다."
     },
     "heightGroup": "medium",
     "role": "인접 지원 · 물결",
@@ -702,9 +702,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "은빛 행진",
-      "cost": 55,
+      "cost": 60,
       "type": "march",
-      "text": "8초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 25% 오릅니다."
+      "text": "8초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 20% 오릅니다."
     },
     "heightGroup": "short",
     "role": "성광 부여 · 관통광",
@@ -739,9 +739,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "태고의 약속",
-      "cost": 85,
+      "cost": 75,
       "type": "awaken",
-      "text": "8초 동안 모든 동료의 위력을 35% 올립니다."
+      "text": "10초 동안 모든 동료의 위력을 35% 올립니다."
     },
     "heightGroup": "tall",
     "role": "인접 지원 · 십자화염",
