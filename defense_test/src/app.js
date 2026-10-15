@@ -3,7 +3,7 @@ import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
-import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,GIFT_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
+import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
 import {questionOf,pickQuestion,lectureById,termById,lectureQuestions,termQuestions,KIND_NAME} from './quiz.js';
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS} from './library.js';
@@ -68,7 +68,7 @@ const SHAPE_TEXT={single:'단일',splash:'범위',beam:'관통',chain:'연쇄',b
 const RANK_TEXT={first:'선두',boss:'보스',strong:'강적',last:'후미'};
 // Each companion has its own lobby lines (src/lines.js); the close line joins from six hearts.
 const partnerLines=hero=>talkLines(hero.id,p().heroes[hero.id].bond);
-let talkIndex=0,skillHold=null,skillHeld=false,revealTimers=[];
+let talkIndex=0,skillHold=null,skillHeld=false,tipFor=null,revealTimers=[];
 const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,accel:false,claimed:[]};};
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
 const roseBonus=level=>Math.round(roseAttack(level)*100);
@@ -200,7 +200,7 @@ function renderBattle(){
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice','battle','battle-slot','wave-pips','wave-left','boss-line','boss-name','boss-state','boss-fill','boss-trait'].map(id=>[id,$(id)]));
   hud.skills=[...document.querySelectorAll('[data-skill]')].map(node=>({node,id:node.dataset.skill,timer:node.querySelector('.skill-duration'),rank:node.querySelector('.skill-rank')}));
   for(const {node,id} of hud.skills){
-    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillTip(node,id);},380);});
+    node.addEventListener('pointerdown',()=>{clearTimeout(skillHold);skillHeld=false;node.classList.add('holding');skillHold=setTimeout(()=>{if(node.disabled||!node.isConnected)return;skillHeld=true;node.classList.remove('holding');window.getSelection?.()?.removeAllRanges();navigator.vibrate?.(12);skillTip(node,id);},380);});
     for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');hideSkillTip();});
     node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
   }
@@ -222,7 +222,7 @@ function updateBattle(){
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
   updateAuraChips();
-  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const {cost,goldCost=0}=HERO[id].skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id),active=E.activeSkill(run,id);b.disabled=!ready||paused||run.phase!=='combat';b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
+  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const {cost,goldCost=0}=HERO[id].skill,lock=E.castLock(run,id),active=lock||E.activeSkill(run,id),ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id)&&!lock;b.disabled=!ready||paused||run.phase!=='combat';if(b.disabled&&tipFor===id)hideSkillTip();b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
   const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0),compact=hud.battle.classList.contains('compact');notice.hidden=!run.telegraph&&!(compact&&boss);notice.classList.toggle('warn',!!run.telegraph);changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));
   if(!compact)updateStrip(boss);updateUnit();
 }
@@ -242,7 +242,7 @@ function updateUnit(){
   const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;hud['battle-slot']?.classList.toggle('inspecting',!!u);renderer.selected=u?selected:-1;
   if(!u){delete panel.dataset.sig;return;}
   const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
-  const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,{cost,goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost,bonuses=detail.bonuses.filter(b=>b!==trait.label);
+  const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,{cost,goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!E.castLock(run,u.hero),bonuses=detail.bonuses.filter(b=>b!==trait.label);
   const sig=`${u.uid}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;panel.dataset.rarity=h.rarity;
@@ -257,15 +257,21 @@ function updateUnit(){
 // Holding an ultimate button peeks at it: a small card above the button with the live numbers.
 // Releasing closes it and does not cast. The full sheet stays one tap away in the unit panel.
 function skillTip(node,id){
-  hideSkillTip();if(!run)return;
+  hideSkillTip();if(!run)return;tipFor=id;
   const h=HERO[id],caster=E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ur=h.hidden||h.rarity==='UR';
   const tip=document.createElement('div');tip.className='skill-tip';tip.id='skill-tip';tip.dataset.rarity=ur?'UR':h.rarity;tip.style.setProperty('--c',h.color);tip.setAttribute('role','tooltip');
-  tip.innerHTML=`<div class="skill-tip-head"><b>${preview?.name||h.skill.name}</b><span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}<small>${caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
+  tip.innerHTML=`<div class="skill-tip-head"><b>${preview?.name||h.skill.name}</b>${boostChip(preview?.boost)}<span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview?.boost)}<small>${caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
   document.body.appendChild(tip);
   const r=node.getBoundingClientRect(),w=tip.offsetWidth,hgt=tip.offsetHeight,left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2));
   tip.style.left=left+'px';tip.style.top=Math.max(8,r.top-hgt-12)+'px';tip.style.setProperty('--ax',(r.left+r.width/2-left)+'px');
 }
-function hideSkillTip(){document.getElementById('skill-tip')?.remove();}
+// Live boost state of a conditional ultimate (castPreview().boost): a lit chip when boosted now.
+const boostChip=b=>b?`<em class="skill-boost" data-on="${b.on}">${escapeText(b.label)}</em>`:'';
+const boostHint=b=>b?.hint?`<p class="skill-hint">${escapeText(b.hint)}</p>`:'';
+function hideSkillTip(){tipFor=null;document.getElementById('skill-tip')?.remove();}
+// A button that turns disabled or is re-rendered mid-hold (the stage clears, the gauge drops) never
+// sees its own pointerup, so a release anywhere closes the peek too.
+for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{clearTimeout(skillHold);document.querySelector('.skill-button.holding')?.classList.remove('holding');hideSkillTip();},true);
 // ⓘ on the unit card: every number and text for the selected companion.
 function unitInfo(){
   const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
@@ -277,8 +283,8 @@ function unitInfo(){
 }
 // The unit card's ultimate row opens the full detail sheet.
 function skillInfo(id){
-  const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat';
-  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>`:''}`,
+  const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat'&&!E.castLock(run,id);
+  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><div class="skill-now-head"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${boostChip(preview.boost)}</div>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview.boost)}</div>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">돌아가기</button><button class="primary" data-cast-now="${id}" ${ready?'':'disabled'}>바로 사용</button></div>`,'skill-info',id);
 }
 // Ultimate cut-in: a slanted band with the companion and the skill name over the top of the
@@ -378,7 +384,7 @@ function showSettings(){
     <p class="fineprint">진행 데이터는 이 기기의 브라우저에 저장됩니다. 기기를 옮길 때는 백업 파일을 사용하세요.</p>
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
-function show(title,kicker,body,footer='',kind='generic',info=null){if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
+function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
 function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave';releaseMemorial();modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
@@ -492,7 +498,7 @@ function toggleTray(button){
 // Gifts: from the lobby tray (the partner) or a companion's bond sheet. A heart level shows a small celebration.
 function giveGift(id,gift,button){
   const before=p().heroes[id].bond,result=act('gift',{id,gift},false);if(!result.ok){toast(result.message);return;}
-  const reply=result.line||GIFT_LINES[p().revision%GIFT_LINES.length],c=button?centerOf(button):partnerPoint();
+  const reply=result.line||'고마워요.',c=button?centerOf(button):partnerPoint();
   floatText(c.x,c.y-24,`호감 +${result.points}`,result.favorite?'#ff9ec0':'#ffe39a');
   if(modal==='bond'&&modalInfo===id){bondSheet(id,reply);}
   else if(screen==='home'&&id===p().partner){const pc=partnerPoint();hearts(pc.x,pc.y,result.favorite?9:5);say(reply);hopPartner();refreshLobby();}

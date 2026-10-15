@@ -93,8 +93,9 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
-    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life});}
+    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
+    if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
     if(e.type==='bell')this.add({...e,life:.85,total:.85});
     if(e.type==='bossCast'&&e.pattern==='thunder')for(const i of e.cells||[])this.add({type:'thunderStrike',...cellPoint(i),seed:i,life:.6,total:.6});
@@ -392,8 +393,8 @@ export class CombatFX{
     const ctx=this.ctx;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;
-      if(!['lightning_sage','star_boy','galaxy_whale','aurora','zeke','time_ruler'].includes(u.hero))continue;
-      const state=personalTrait(s,u,i),aged=['star_boy','galaxy_whale'].includes(u.hero);
+      if(!['lightning_sage','star_boy','aurora','zeke','time_ruler'].includes(u.hero))continue;
+      const state=personalTrait(s,u,i),aged=state.key==='wave-age';
       if(!state.active&&!aged)continue;
       const strong=state.active&&state.damageMultiplier>=1,p=cellPoint(i),alpha=strong?.48:.17,pulse=this.reduced?1:1+Math.sin(this.clock*2+u.uid)*.06;
       if(foreground){
@@ -504,13 +505,21 @@ export class CombatFX{
       const t=Math.max(0,1-e.life/e.total);
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
         if(e.hero==='zeke'){
-          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);
-          ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.closePath();ctx.clip();
-          // Authored cone vertex is at (12%,50%), radius 64% of its square.
-          // Clip every flame to the engine's exact 90-degree collision sector.
-          const size=h.range/.64;
-          this.atlasStamp('zeke-cone',0,1,1,size*.38,0,size,size,0,fade*.42*fireClarity,'source-over');
-          ctx.globalAlpha=fade*.28*fireClarity;ctx.strokeStyle='#ffbc6a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,h.range,-Math.PI/4,Math.PI/4);ctx.stroke();ctx.restore();
+          // Sweep slash: only the engine's hit band (90 degrees wide, radius deep, centred on the
+          // target's distance) is painted, and the blade crosses it from one side like a swing.
+          // The flaming crescent of the authored cone sits at about 67% of its square from the
+          // vertex (13.7%,50%); the streaks nearer the vertex are clipped away.
+          const reach=Math.min(h.range,Math.hypot(e.to.x-e.origin.x,e.to.y-e.origin.y)),half=h.radius/2,inner=Math.max(8,reach-half),outer=Math.min(h.range,reach+half);
+          const side=e.swing?-1:1,lead=-Math.PI/4+Math.PI/2*easeOut(t/.42),tail=Math.max(-Math.PI/4,lead-Math.PI*.42-t*.6),a=fireClarity*(t<.42?1:1-window01(t,.42,1));
+          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);ctx.scale(1,side);
+          ctx.beginPath();ctx.arc(0,0,outer,tail,lead);ctx.arc(0,0,inner,lead,tail,true);ctx.closePath();
+          ctx.globalAlpha=a*.07;ctx.fillStyle='#ff9a4a';ctx.fill();ctx.clip();ctx.globalAlpha=1;
+          const size=reach/.67;this.atlasStamp('zeke-cone',0,1,1,size*.363,0,size,size,0,a*.75,'source-over');
+          // Hot leading edge: a warm wide glow under a thin bright core, only near the blade.
+          ctx.globalCompositeOperation='lighter';ctx.lineCap='round';const edge=Math.max(tail,lead-.45);
+          for(const [color,alpha,width] of [['#ff8a3a',.35,12*(1-t)+4],['#fff0c8',.8,2.2]]){ctx.globalAlpha=a*alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.arc(0,0,reach,edge,lead);ctx.stroke();}
+          ctx.restore();
+          if(t<.5){const tip=e.angle+side*lead;this.glow('glow','#ffb35a',e.origin.x+Math.cos(tip)*reach,e.origin.y+Math.sin(tip)*reach,64,(1-t*2)*.8*fireClarity);}
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
@@ -554,6 +563,23 @@ export class CombatFX{
         if(e.phase===1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.85;ctx.drawImage(this.sprite('crescent','#e6f0ff'),e.x-size*.3,e.y-18-size*.3,size*.6,size*.6);ctx.restore();}
         else if(e.phase===2){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.translate(e.x,e.y-18);ctx.rotate(t*2);star(ctx,18*(1-t*.3),'#fffaf0');ctx.restore();}
         else this.glow('rays',c,e.x,e.y-18,size*1.3,fade*.6,t*2);continue;}
+      if(e.type==='meteor'){
+        // Fallen Star relic: a gold star streaks down onto the hit point, then floor rings open to
+        // the real 100 hit radius and star shards scatter. Same glow, ray and ring language as casts.
+        const fall=Math.min(1,t/.26),land=window01(t,.26,1),fade=1-land;
+        if(fall<1){
+          const k=fall*fall,x=e.x+70*(1-k),y=e.y-20-230*(1-k);
+          ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(x+42,y-138,x,y);g.addColorStop(0,'#ffd59600');g.addColorStop(1,'#fff3c8ee');
+          ctx.strokeStyle=g;ctx.lineCap='round';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x+42,y-138);ctx.lineTo(x,y);ctx.stroke();
+          ctx.translate(x,y);ctx.rotate(t*8);star(ctx,13,'#fffbe8');ctx.restore();this.glow('glow','#ffd596',x,y,74,.9);continue;
+        }
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        for(const [delay,scale,width,color] of [[0,1,8,'#ffd596'],[.08,.68,3,'#fff3c8']]){const k=easeOut(window01(t,.26+delay,1)),r=100*scale*k;ctx.globalAlpha=fade;ctx.strokeStyle=color;ctx.lineWidth=width*fade+1.5;ctx.beginPath();ctx.ellipse(e.x,e.y+6,r,r*.42,0,0,Math.PI*2);ctx.stroke();}
+        if(!this.reduced)for(let i=0;i<8;i++){const a=i*Math.PI/4+hash(e.seed,i)*.6,v=38+hash(e.seed,i+9)*52,k=easeOut(land);ctx.globalAlpha=fade*.9;diamond(ctx,e.x+Math.cos(a)*v*k,e.y-12+Math.sin(a)*v*k*.55-Math.sin(k*Math.PI)*18,5*fade+1.5,i%2?'#ffe9b0':'#ffffff');}
+        ctx.restore();
+        this.glow('rays','#ffe9b0',e.x,e.y-14,190*easeBack(window01(t,.26,.5)),fade*.85,t*1.5);this.glow('glow','#fff3c8',e.x,e.y-12,150*(1-land*.3),fade*.8);
+        continue;
+      }
       if(e.type==='thunderStrike'){const fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.strokeStyle='#fff6b0';ctx.lineWidth=4;ctx.beginPath();let x=e.x+((e.seed*37)%30-15),y=0;ctx.moveTo(x,y);while(y<e.y-10){y+=40;x+=((e.seed*13+y)%40)-20;ctx.lineTo(x,y);}ctx.stroke();ctx.restore();this.glow('glow','#ffe27a',e.x,e.y-10,140,fade*.8);continue;}
       if(e.type==='pullImpact'){this.stamp(e.hero,e.x,e.y-18,72+t*22,0,(1-t)*.58);continue;}
       if(e.type==='instantKill'){

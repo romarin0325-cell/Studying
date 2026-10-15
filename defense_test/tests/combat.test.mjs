@@ -1369,3 +1369,27 @@ test('a 5★ Rumi casts the hidden dream form: sun, moon and star, then the drea
   advanceTo(s,t0+2.5);advanceTo(saved,t0+2.5);assert.equal(s.volleys.length,0);
   close((start-a.hp)/first,50/12,'12 + 12 + 12 + 14 = 50x');close(saved.enemies[0].hp,a.hp,'restored run lands the same phases');
 });
+
+test('the dream form and pure buff ultimates cannot be recast while they run, so the run always saves',()=>{
+  const s=traitArena([{hero:'rumi',index:12,rank:5}]);enemiesFor(s,[{hp:1e9}]);quiet(s);const t0=s.time;
+  readyCast(s,'rumi');s.gauge=120;const again=E.cast(s,'rumi');assert.equal(again.ok,false);assert.match(again.reason,/꿈의 형태/);
+  assert.equal(s.gauge,120,'a refused cast spends nothing');assert.equal(s.volleys.length,4);assert.ok(E.castLock(s,'rumi'));
+  advanceTo(s,t0+.5);assert.ok(E.restore(E.serialize(s)),'saves mid-sequence');
+  advanceTo(s,t0+2.4);assert.equal(E.castLock(s,'rumi'),null);assert.equal(E.cast(s,'rumi').ok,true,'free again after the dream lands');
+  const siren=traitArena([{hero:'siren',index:12,rank:1}]);enemiesFor(siren,[{hp:1e9}]);quiet(siren);
+  readyCast(siren,'siren');siren.gauge=120;const lock=E.cast(siren,'siren');assert.equal(lock.ok,false);assert.match(lock.reason,/초 남음/);
+  siren.buffs.haste=0;assert.equal(E.cast(siren,'siren').ok,true);
+  // Damage-and-buff hybrids keep their recast: the hit is the point.
+  const hybrid=traitArena([{hero:'time_magician',index:12,rank:1}]);enemiesFor(hybrid,[{hp:1e9}]);quiet(hybrid);
+  readyCast(hybrid,'time_magician');assert.equal(E.castLock(hybrid,'time_magician'),null);readyCast(hybrid,'time_magician');
+});
+
+test('conditional ultimates report their live boost: lit with the boosted numbers, a hint while waiting',()=>{
+  const s=traitArena([{hero:'guardian',index:12,rank:1},{hero:'zeke',index:13,rank:1}]);const [e]=enemiesFor(s,[{hp:1e9,progress:300}]);quiet(s);
+  let g=E.castPreview(s,'guardian');assert.equal(g.boost.on,false);assert.equal(g.boost.label,'강화 대기');assert.match(g.boost.hint,/320/);assert.match(g.lines[0],/160만큼 밀어내며/);
+  e.progress=E.PATH_LENGTH*.9;g=E.castPreview(s,'guardian');assert.equal(g.boost.on,true);assert.equal(g.boost.label,'강화');assert.equal(g.boost.hint,'');assert.match(g.lines[0],/320만큼 밀어내며 3초/);
+  const mixed=traitArena([{hero:'guardian',index:12,rank:1}]);enemiesFor(mixed,[{hp:1e9,progress:300},{hp:1e9,progress:E.PATH_LENGTH*.9}]);quiet(mixed);
+  g=E.castPreview(mixed,'guardian');assert.equal(g.boost.label,'강화 1명');assert.match(g.lines[1],/강화된 1명/);
+  const calm=E.castPreview(s,'zeke');assert.equal(calm.boost.on,false);s.health=9;const crisis=E.castPreview(s,'zeke');assert.equal(crisis.boost.on,true);
+  const n=line=>Number(line.match(/([\d,]+) 피해/)[1].replace(/,/g,''));close(n(crisis.lines[0])/n(calm.lines[0]),2,'boosted Zeke shows the doubled hit');
+});

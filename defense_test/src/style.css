@@ -331,7 +331,9 @@ em{font-style:normal}
 
 .timer{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--teal);text-align:right}
 
-.choose-list{display:grid;gap:8px}
+.choose-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+/* A cost column of fixed width: 28 G → 124 G must not move the name column. */
+.choose-row>b{flex-shrink:0;min-width:3.8em;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .choose-row{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--line2);border-radius:14px;padding:8px 12px;text-align:left;background:linear-gradient(180deg,rgba(40,52,108,.6),rgba(18,24,58,.8))}
 .choose-row .portrait{width:46px;height:46px;border-radius:12px;background:var(--panel);border:1.5px solid var(--r);overflow:hidden;flex-shrink:0}
 .choose-row .portrait img{width:100%;height:100%}
@@ -508,6 +510,11 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .skill-now .ability-tag{display:inline-flex;align-items:center;gap:2px}
 .skill-now .ability-tag .ic{width:11px;height:11px}
 .skill-now p{font-size:13px;line-height:1.65;margin:6px 0 0;color:var(--text2);word-break:keep-all}
+.skill-now-head{display:flex;align-items:center;gap:6px}
+/* Boost chip: lit gold while the condition holds, a quiet outline while it waits. */
+.skill-boost{display:inline-flex;align-items:center;flex-shrink:0;margin-right:auto;padding:2px 8px;border-radius:999px;font-style:normal;font-size:11px;font-weight:800;line-height:1.4;color:var(--text3);border:1px solid var(--line2)}
+.skill-boost[data-on=true]{color:#2b1a00;border-color:#ffe39a;background:linear-gradient(180deg,#fff1b8,#f4c95d);box-shadow:0 0 10px #f4c95d88}
+.skill-now p.skill-hint,.skill-tip p.skill-hint{color:var(--text3);font-size:11px;line-height:1.5}
 
 /* ───────── Splash & effects ───────── */
 .splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 50% 42%,#1e2a66,#070a1e 70%);transition:opacity .45s ease,visibility .45s}

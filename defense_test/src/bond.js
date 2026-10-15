@@ -49,7 +49,39 @@ export const FAVORITE_LINES=Object.freeze({
   cinderella:'무도회 날보다 설레요… 유리구두 옆에 꽂아 둘게요.',
   frost_witch:'…짐의 궁전에선 피지 않는 것이로군. 녹지 않게 소중히 두겠다.',
 });
-export const GIFT_LINES=Object.freeze(['고마워. 소중히 할게.','이걸 나한테? 기뻐!','마음이 따뜻해지는 선물이야.']);
+// What each companion says to the other two gifts, in that companion's own voice.
+export const GIFT_LINES=Object.freeze({
+  star_boy:'헤헤, 선물 배달받았다! 형아한테 받으니까 날아갈 것 같아!',
+  siren:'와아, 선물이다! 고마운 마음은 노래로 꼭 갚을게요, 라-♪',
+  guardian:'우웅… 고마워, 여행자. 바위 틈에 잘 넣어 둘게.',
+  red_dragon:'흥, 이런 걸로 기뻐할 줄 알았어? …둥지에 둘 거야. 둘 데가 없어서야!',
+  storm_sage:'오, 나한테? …고맙다. 낮잠 잘 때 머리맡에 둬야겠어.',
+  phantom:'크하하! 공물을 바치다니 기특하구나! …진짜 받아도 되는 거지?',
+  rumi:'우와, 형아가 루미한테 준 거야? 에헤헤, 보물 상자에 넣어 둘래!',
+  galaxy_whale:'고맙습니다. 별바다를 건너는 동안 소중히 품고 가겠습니다.',
+  harmonious:'스위트-! 마음이 담긴 선물은 디저트처럼 달콤해요!',
+  time_ruler:'필멸자의 선물이라… 영겁 속에서도 오늘만은 기억해 두마.',
+  snow_rabbit:'어머, 저한테요? 감사합니다. 찻잔 옆에 소중히 놓아 둘게요.',
+  night_rabbit:'…나 주는 거야? 이제 내 거야. 돌려 달라고 하면 안 돼.',
+  great_detective:'뜻밖의 증거물이군요. 동기는… 호의라고 기록해 두겠습니다.',
+  santa:'에헤헤, 선물을 받는 쪽도 이렇게 설레는 거였네요!',
+  flame_sage:'…꼬맹이가 별걸 다 챙기는군. 불 옆엔 두지 않으마.',
+  lightning_sage:'예정에 없던 입력이군. …긍정적인 변수로 분류해 두지.',
+  zeke:'오, 나한테 주는 거야? 하하, 고맙다! 힘이 펄펄 나는걸!',
+  luna:'…뭐야, 나 주는 거야? 흥, 받아는 줄게. …고마워.',
+  jasmine:'성녀가 아니라 저에게 주는 선물이라니… 정말 기뻐요.',
+  doom:'…함정은 아니군. 받아 두지. 빚으로 달아 두진 않겠다.',
+  silver_rabbit:'선물이요…? 오늘 기도에는 감사 한 줄을 더 적어야겠어요.',
+  mushroom_king:'흥, 인간 주제에 기특하구나. …받아 두마.',
+  avalanche_maid:'주인님이 주신 선물…! 얼리지 않게 조심조심 둘게요!',
+  aurora:'후훗, 천재한테 바치는 선물이군요? 이번엔 받아 줄게요!',
+  time_magician:'선물이라… 이 순간은 되감지 않고 그대로 둘게.',
+  ancient_dragon:'고맙구나, 어린 나그네여. 정성은 크기와 상관없이 오래 남는 법이지.',
+  queen:'짐에게 바치는 것이로군. 갸륵하다. 곁에 두도록 하지.',
+  cherry_prince:'나의 친우여, 이 마음 감사히 받겠습니다.',
+  cinderella:'선물이라니, 작은 기적이 찾아왔네요! 고마워요!',
+  frost_witch:'…짐에게 주는 것이냐? 흥, 거절할 이유는 없군. 고맙다.',
+});
 export const giftPoints=(id,gift)=>FAVORITE[id]===gift?FAVORITE_POINTS:GIFT_POINTS;
 export const bondNeed=level=>level>=BOND_MAX?0:BOND_STEPS[level];
 // Adds points to a hero entry ({bond,bondXp}); returns how many hearts were gained.
