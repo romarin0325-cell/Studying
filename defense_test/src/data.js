@@ -1277,8 +1277,8 @@ export const ARTIFACTS = [
   {
     "id": "roots",
     "name": "영원의 뿌리",
-    "text": "장판의 지속 시간이 20%, 범위가 8% 늘어납니다.",
-    "scale": ["20%", "8%"],
+    "text": "장판의 지속 시간이 15%, 범위가 6% 늘어납니다.",
+    "scale": ["15%", "6%"],
     "icon": 13,
     "atlas": "relics",
     "rarity": "rare",
@@ -1387,8 +1387,8 @@ export const ARTIFACTS = [
   {
     "id": "broken_clock",
     "name": "깨진 시간의 보석",
-    "text": "버프 필살기와 트라우마 변신의 지속 시간이 80% 늘어납니다. 피해가 없는 버프 필살기는 이어지는 동안 쓴 별빛의 60%를 돌려받습니다.",
-    "scale": ["80%", "60%"],
+    "text": "버프 필살기와 트라우마 변신의 지속 시간이 100% 늘어납니다. 피해가 없는 버프 필살기는 이어지는 동안 쓴 별빛의 60%를 돌려받습니다.",
+    "scale": ["100%", "60%"],
     "icon": 3,
     "atlas": "relics-expansion",
     "rarity": "epic",
