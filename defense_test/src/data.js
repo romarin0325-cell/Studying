@@ -1197,8 +1197,8 @@ export const ARTIFACTS = [
   {
     "id": "seed",
     "name": "숨 쉬는 씨앗",
-    "text": "독 피해가 35% 늘어납니다.",
-    "scale": ["35%"],
+    "text": "독 피해가 40% 늘어납니다.",
+    "scale": ["40%"],
     "icon": 7,
     "atlas": "relics",
     "rarity": "common",
