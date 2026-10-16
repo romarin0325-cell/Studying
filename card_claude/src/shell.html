@@ -3,114 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0d2235">
+  <meta name="theme-color" content="#edf2f7">
   <title>DREAMWEAVER — Card RPG</title>
   {{STYLES}}
 </head>
 <body class="astra" data-screen="title">
   <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
-    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="m12 7 2 5-2 5-2-5Z"/></symbol>
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9"/></symbol>
-    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="8" y="3" width="12" height="18" rx="2"/><path d="M5 6H3v15M12 8h4m-4 4h4m-4 4h2"/></symbol>
-    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
-    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 4 3 2 4v15c4-2 7-1 10 1 3-2 6-3 10-1V4c-4-2-7-1-10 1Zm0 0v15"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
-    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
-    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
-    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13M9 8l11-2"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9 7 7m10 10 2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
-    <symbol id="i-mission" viewBox="0 0 24 24"><path d="M7 3h10v4H7zM7 5H4v16h16V5h-3M8 13l2.5 2.5L16 10"/></symbol>
-    <symbol id="i-sword" viewBox="0 0 24 24"><path d="m5 19 3-3M3 17l4 4M7 13l4 4M9 15 20 4V1h-3L6 12"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.2 12 3.5l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-5v6H5A1.5 1.5 0 0 1 3.5 19Z"/></symbol>
+    <symbol id="i-party" viewBox="0 0 24 24"><path d="M15.5 20v-1.6a3.4 3.4 0 0 0-3.4-3.4H6.9a3.4 3.4 0 0 0-3.4 3.4V20"/><circle cx="9.5" cy="8" r="3.5"/><path d="M20.5 20v-1.6a3.4 3.4 0 0 0-2.5-3.3M15 4.7a3.5 3.5 0 0 1 0 6.6"/></symbol>
+    <symbol id="i-summon" viewBox="0 0 24 24"><path d="M12 3.5 13.9 8.6 19 10.5 13.9 12.4 12 17.5 10.1 12.4 5 10.5 10.1 8.6Z"/><path d="M18.5 15.5 19.3 17.2 21 18 19.3 18.8 18.5 20.5 17.7 18.8 16 18 17.7 17.2Z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><rect x="7" y="3.5" width="12.5" height="17" rx="1.6"/><path d="M4.5 6.5v12.4A1.6 1.6 0 0 0 6.1 20.5"/><path d="M10.5 8.5h5.5M10.5 12h5.5"/></symbol>
+    <symbol id="i-study" viewBox="0 0 24 24"><path d="M21.5 9 12 4.5 2.5 9 12 13.5Z"/><path d="M6.5 11.2V16c3 2.6 8 2.6 11 0v-4.8M21.5 9v5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 17.5V5.5l10.5-2v12"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17" cy="15.5" r="2.5"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8.5 3.5h-5v5M15.5 3.5h5v5M20.5 15.5v5h-5M3.5 15.5v5h5"/></symbol>
+    <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M3.5 8.5h5v-5M20.5 8.5h-5v-5M15.5 20.5v-5h5M8.5 20.5v-5h-5"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
-    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></symbol>
-    <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M9 4v5H4m16 0h-5V4m0 16v-5h5M4 15h5v5"/></symbol>
-    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7h18v3.2a1.8 1.8 0 0 0 0 3.6V17H3v-3.2a1.8 1.8 0 0 0 0-3.6Z"/><path d="M15 7v10" stroke-dasharray="2 2"/></symbol>
-    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-9.5v.5"/></symbol>
-    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 11-11m2.5-5.5.8 1.7 1.7.8-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8Zm-11 1 .5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5Z"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
-    <symbol id="i-cookie" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-3-3Z"/><path d="M8.5 10.5h0m3 4.5h0m-4 1h0m8.5-1h0"/></symbol>
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4Z"/><path d="M8 10h8"/></symbol>
-    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7Zm7 11c.2 1.6 1 2.4 2.5 2.5-1.5.2-2.3 1-2.5 2.5-.2-1.5-1-2.3-2.5-2.5 1.5-.1 2.3-.9 2.5-2.5Z"/></symbol>
-    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5Z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></symbol>
-    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0ZM8 6H5a3 3 0 0 0 3 4m8-4h3a3 3 0 0 1-3 4m-4 3v4m-3 3h6"/></symbol>
-    <symbol id="i-door" viewBox="0 0 24 24"><path d="M14 4h5v16h-5M10 8l-4 4 4 4m-4-4h9"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16Zm9-13 4 4"/></symbol>
-    <symbol id="i-cap" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5Zm4 2v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></symbol>
-    <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 4h12l4 5-10 12L2 9Z"/><path d="M2 9h20M9 4l3 17 3-17"/></symbol>
-    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></symbol>
-    <symbol id="i-el-fire" viewBox="0 0 24 24"><path d="M12 21c-4 0-7-2.7-7-6.5C5 10 9 8 9 3c3 2 4.5 4.5 4.5 7 1-1 1.5-2 1.5-3.5 2.5 2 4 5 4 8 0 3.8-3 6.5-7 6.5Z"/></symbol>
-    <symbol id="i-el-water" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></symbol>
-    <symbol id="i-el-nature" viewBox="0 0 24 24"><path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15Z"/><path d="M5 19 14 10"/></symbol>
-    <symbol id="i-el-wind" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/></symbol>
-    <symbol id="i-el-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></symbol>
-    <symbol id="i-el-dark" viewBox="0 0 24 24"><path d="M20 15A8 8 0 0 1 9 4a8 8 0 1 0 11 11Z"/></symbol>
-    <symbol id="i-el-earth" viewBox="0 0 24 24"><path d="m3 19 6-10 4 6 2-3 6 7Z"/></symbol>
-    <symbol id="i-el-normal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></symbol>
-    <symbol id="i-sk-phy" viewBox="0 0 24 24"><path d="M20 4v4L9 19l-4-4L16 4Zm-15 11-2 2m3 3 2-2m-5-1 4 4"/></symbol>
-    <symbol id="i-sk-mag" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></symbol>
-    <symbol id="i-sk-sup" viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 6-8 11-8 11Z"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h8M16 7h4M4 12h3M11 12h9M4 17h10M18 17h2"/><path d="M14 5v4M9 10v4M16 15v4"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3.5 7.5a1 1 0 0 1 1-1h15a1 1 0 0 1 1 1v2.5a2 2 0 0 0 0 4v2.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V14a2 2 0 0 0 0-4Z"/><path d="M15 6.5v11" stroke-dasharray="1.5 2"/></symbol>
+    <symbol id="i-mission" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="1.6"/><path d="M9 3.5h6v2.5H9ZM8.8 12.5l2.2 2.2 4.2-4.2"/></symbol>
+    <symbol id="i-bless" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></symbol>
+    <symbol id="i-sword" viewBox="0 0 24 24"><path d="M14.5 17.5 4 7V4h3l10.5 10.5"/><path d="M13 19.5 19.5 13M16.5 16.5l3.5 3.5M19 21l2-2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 10.5-10.5M13 6l1.5-1.5M18 11l1.5-1.5"/><path d="M17.5 3.5v3M16 5h3M20.5 13v2.5M19.3 14.3h2.5M8.5 4v2M7.5 5h2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9.5 6 6 6-6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4.5h11l3 3V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19Z"/><path d="M8.5 4.5V9h6V4.5M8 20.5v-6h8v6"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4.5h8V10a4 4 0 0 1-8 0Z"/><path d="M8 6H5.5a2.5 2.5 0 0 0 2.6 3.5M16 6h2.5a2.5 2.5 0 0 1-2.6 3.5M12 14v3.5M9 20.5h6"/></symbol>
+    <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9.5 20.5H5.5a1.5 1.5 0 0 1-1.5-1.5V5a1.5 1.5 0 0 1 1.5-1.5h4"/><path d="m15.5 16.5 4.5-4.5-4.5-4.5M20 12H9.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 4.5h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-8L6 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6A1.5 1.5 0 0 1 5 4.5Z"/></symbol>
+    <symbol id="i-cookie" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-2.5-2.5Z"/><path d="M8.5 10.5v.01M12 15.5v.01M15.5 13.5v.01M8 15v.01"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17Z"/><path d="m14.5 7.5 3 3"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-motion" viewBox="0 0 24 24"><path d="M4 16c3-6 6-9 9-9s5 2 7 5"/><path d="M4 20h16"/><circle cx="13" cy="7" r="1.5"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3c.5 4.5 2.5 6.5 9 9-6.5 2.5-8.5 4.5-9 9-.5-4.5-2.5-6.5-9-9 6.5-2.5 8.5-4.5 9-9Z"/></symbol>
+    <symbol id="i-el-fire" viewBox="0 0 24 24"><path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-4 3.8-5.7 3.8-10.3 2.9 1.7 4.3 4.1 4.3 6.4.9-.8 1.4-1.8 1.4-3 2.3 1.9 3.5 4.4 3.5 6.9 0 3.6-2.6 6.2-6.5 6.2Z"/></symbol>
+    <symbol id="i-el-water" viewBox="0 0 24 24"><path d="M12 3.5s6 6.4 6 10.9a6 6 0 0 1-12 0C6 9.9 12 3.5 12 3.5Z"/></symbol>
+    <symbol id="i-el-nature" viewBox="0 0 24 24"><path d="M5.5 18.5C5.5 10.5 10 5.5 19.5 4.5c0 9.5-5 14-13 14Z"/><path d="m5.5 18.5 7.5-7.5"/></symbol>
+    <symbol id="i-el-wind" viewBox="0 0 24 24"><path d="M3.5 9h10a2.5 2.5 0 1 0-2.5-2.5M3.5 13h14a2.5 2.5 0 1 1-2.5 2.5M3.5 17h6"/></symbol>
+    <symbol id="i-el-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+    <symbol id="i-el-dark" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z"/></symbol>
+    <symbol id="i-el-earth" viewBox="0 0 24 24"><path d="m3 19.5 6.5-11 4 6.5 2.5-3.5 5 8Z"/></symbol>
+    <symbol id="i-el-normal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5"/></symbol>
+    <symbol id="i-sk-phy" viewBox="0 0 24 24"><path d="M14.5 17.5 4 7V4h3l10.5 10.5"/><path d="M13 19.5 19.5 13M16.5 16.5l3.5 3.5"/></symbol>
+    <symbol id="i-sk-mag" viewBox="0 0 24 24"><path d="M12 3.5 13.9 8.6 19 10.5 13.9 12.4 12 17.5 10.1 12.4 5 10.5 10.1 8.6Z"/><path d="M18.5 16v4M16.5 18h4"/></symbol>
+    <symbol id="i-sk-sup" viewBox="0 0 24 24"><path d="M12 20.5s-7-3.6-7-9.5V6l7-2.5L19 6v5c0 5.9-7 9.5-7 9.5Z"/><path d="M12 8.5v6M9 11.5h6"/></symbol>
   </defs></svg>
-  <div class="dw-scenes" aria-hidden="true"><i data-scene="title"></i><i data-scene="lobby"></i><i data-scene="summon"></i><i data-scene="battle"></i><b class="dw-motes"></b></div>
-  <div class="world-backdrop" aria-hidden="true"></div>
+  <div class="dw-backdrop" aria-hidden="true"><div class="dw-hero" id="dw-hero"><img id="dw-hero-img" alt=""></div></div>
   <header class="dw-top">
-    <a class="dw-brand" href="#" onclick="Astra.home(); return false" aria-label="DREAMWEAVER 로비"><svg><use href="#i-star"/></svg><span>DREAMWEAVER</span></a>
-    <div class="dw-top-title"><small id="dw-top-kicker"></small><strong class="header-status" aria-live="polite">타이틀</strong></div>
+    <button id="dw-back" class="dw-iconbtn dw-back" type="button" onclick="Astra.back()" aria-label="뒤로"><svg><use href="#i-left"/></svg></button>
+    <div class="dw-top-title"><strong class="header-status" aria-live="polite"></strong><small id="dw-top-kicker"></small></div>
     <div class="dw-top-tools">
+      <button id="dw-top-action" class="dw-btn dw-btn--primary dw-btn--small" type="button" hidden></button>
       <button id="dw-ticket-pill" class="dw-currency" type="button" onclick="Astra.showSummon()" aria-label="소환 티켓"><svg><use href="#i-ticket"/></svg><span id="ui-tickets">0</span></button>
-      <button id="dw-top-music" class="dw-icon" type="button" onclick="MusicPlayer.open()" aria-label="음악"><svg><use href="#i-music"/></svg></button>
-      <button id="btn-game-fullscreen" class="dw-icon fullscreen-shortcut" type="button" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false">⛶</button>
-      <button id="dw-top-menu" class="dw-icon" type="button" onclick="Astra.menu()" aria-label="메뉴"><svg><use href="#i-menu"/></svg></button>
-      <button id="dw-top-settings" class="dw-icon" type="button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
+      <button id="dw-top-music" class="dw-iconbtn" type="button" onclick="MusicPlayer.open()" aria-label="음악"><svg><use href="#i-music"/></svg></button>
+      <button id="btn-game-fullscreen" class="dw-iconbtn fullscreen-shortcut" type="button" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false">⛶</button>
+      <button id="dw-top-menu" class="dw-iconbtn" type="button" onclick="Astra.menu()" aria-label="메뉴"><svg><use href="#i-menu"/></svg></button>
+      <button id="dw-top-settings" class="dw-iconbtn" type="button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-sliders"/></svg></button>
     </div>
   </header>
   <main class="container" id="main-content">
     <section id="screen-title" class="screen active" aria-label="타이틀">
-      <div class="dw-title-logo"><h1 class="dw-logo"><span>DREAMWEAVER</span></h1><p id="dw-title-tagline">꿈을 엮는 카드 여정</p></div>
+      <h1 class="dw-wordmark"><span class="dw-wordmark-kicker">CARD RPG</span><span class="dw-wordmark-main">DREAMWEAVER</span><span class="dw-wordmark-sub">드림위버 · 꿈을 엮는 카드 여정</span></h1>
       <div class="dw-title-bottom">
         <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
         <div class="title-screen-actions dw-title-actions">
-          <button id="btn-start-load" class="dw-btn dw-btn--hero" onclick="RPG.startGame('load')" disabled><span>여정 이어가기<small>저장된 여정</small></span><svg><use href="#i-arrow"/></svg></button>
-          <button id="btn-start-new" class="dw-btn dw-btn--ghost" onclick="RPG.startGame('new')" disabled>새 여정 시작</button>
+          <button id="btn-start-load" class="dw-btn dw-btn--hero" onclick="RPG.startGame('load')" disabled><span>여정 이어가기<small>저장된 여정</small></span><svg><use href="#i-right"/></svg></button>
+          <button id="btn-start-new" class="dw-btn" onclick="RPG.startGame('new')" disabled>새 여정 시작</button>
         </div>
-        <nav class="dw-dock" aria-label="타이틀 메뉴">
-          <button id="btn-fortune-cookie" type="button" disabled><span class="dw-dock-icon"><svg><use href="#i-cookie"/></svg></span><span>포춘쿠키</span></button>
-          <button id="btn-title-question" type="button" onclick="RPG.openLumiQuestion()" disabled><span class="dw-dock-icon"><svg><use href="#i-chat"/></svg></span><span>루미에게 질문</span></button>
-          <button id="btn-title-mission" type="button" onclick="RPG.openMissionHub()" disabled><span class="dw-dock-icon"><svg><use href="#i-mission"/></svg></span><span>미션</span></button>
-          <button id="btn-title-music" type="button" onclick="MusicPlayer.open()" disabled><span class="dw-dock-icon"><svg><use href="#i-music"/></svg></span><span>음악</span></button>
+        <nav class="dw-titledock" aria-label="타이틀 메뉴">
+          <button id="btn-fortune-cookie" type="button" disabled><svg><use href="#i-cookie"/></svg><span>포춘쿠키</span></button>
+          <button id="btn-title-question" type="button" onclick="RPG.openLumiQuestion()" disabled><svg><use href="#i-chat"/></svg><span>질문하기</span></button>
+          <button id="btn-title-mission" type="button" onclick="RPG.openMissionHub()" disabled><svg><use href="#i-mission"/></svg><span>미션</span></button>
+          <button id="btn-title-music" type="button" onclick="MusicPlayer.open()" disabled><svg><use href="#i-music"/></svg><span>음악</span></button>
         </nav>
-        <p class="dw-credit">DREAMWEAVER · Claude Edition</p>
       </div>
     </section>
     <section id="screen-menu" class="screen" aria-label="로비">
-      <div id="next-enemy-preview" class="dw-stage">
-        <div class="dw-stage-number"><small>STAGE</small><b id="astra-stage">01</b><span id="dw-stage-goal"></span></div>
-        <div class="dw-stage-copy">
-          <span class="dw-stage-mode"><span id="astra-mode">오리진</span><span id="dw-stage-type"></span></span>
-          <strong id="next-enemy-text">다음 상대</strong>
+      <aside class="dw-rail" aria-label="바로가기">
+        <button id="dw-quick-mission" type="button" onclick="RPG.openMissionHub()"><svg><use href="#i-mission"/></svg><span>미션</span><i class="dw-dot" id="dw-mission-dot" hidden></i></button>
+        <button id="dw-bless" type="button" onclick="RPG.openChaosBlessing()" aria-label="축복의 제단"><svg><use href="#i-bless"/></svg><span>축복</span><b id="dw-bless-count" hidden></b></button>
+      </aside>
+      <div class="dw-lead" id="dw-lead"><span class="dw-lead-role" id="dw-lead-role"></span><strong id="dw-lead-name"></strong><small id="dw-lead-meta"></small></div>
+      <section class="dw-lobby-panel" aria-label="출전 준비">
+        <div id="next-enemy-preview" class="dw-next">
+          <span class="dw-medal"><img id="next-enemy-img" alt="다음 상대"></span>
+          <div class="dw-next-copy"><small>STAGE <b id="astra-stage">01</b><span id="dw-stage-goal"></span> · <span id="astra-mode">오리진</span><span id="dw-stage-type"></span></small><strong id="next-enemy-text">다음 상대</strong></div>
           <span class="dw-route" id="dw-route" aria-hidden="true"></span>
         </div>
-        <div class="dw-stage-enemy"><span class="dw-medal"><img id="next-enemy-img" alt="다음 상대"></span><small>다음 상대</small></div>
-      </div>
-      <section class="dw-party" aria-label="출전 파티">
-        <div id="astra-party" class="party-lineup"></div>
-        <p id="astra-party-note" class="dw-party-note"></p>
+        <div class="dw-party-row">
+          <div id="astra-party" class="party-lineup" aria-label="출전 파티"></div>
+          <button id="astra-depart" class="dw-btn dw-btn--go depart" onclick="RPG.startBattleInit()"><svg><use href="#i-sword"/></svg><span>출격<small id="astra-depart-help"></small></span></button>
+        </div>
+        <p id="astra-party-note" class="dw-party-note" hidden></p>
       </section>
-      <div class="dw-quick">
-        <button id="dw-quick-mission" type="button" onclick="RPG.openMissionHub()"><svg><use href="#i-mission"/></svg><span>미션</span><i class="dw-dot" id="dw-mission-dot" hidden></i></button>
-        <button id="dw-bless" type="button" onclick="RPG.openChaosBlessing()" aria-label="축복의 제단"><svg><use href="#i-spark"/></svg><span>축복</span><b id="dw-bless-count" hidden></b></button>
-      </div>
-      <div class="dw-launch">
-        <button id="astra-depart" class="dw-btn dw-btn--hero depart" onclick="RPG.startBattleInit()"><span>전투 출전<small id="astra-depart-help">BEGIN ENCOUNTER</small></span><svg><use href="#i-sword"/></svg></button>
-      </div>
     </section>
     <section id="screen-summon" class="screen" aria-label="소환">
       <div class="dw-banner">
-        <div class="dw-banner-copy"><small id="dw-banner-kicker"></small><h2 id="dw-banner-title">별빛 소환</h2><p id="dw-banner-pool">현재 카드풀</p><button class="dw-link" type="button" onclick="Astra.showRates()"><svg><use href="#i-info"/></svg>확률 정보</button></div>
+        <div class="dw-banner-copy"><small id="dw-banner-kicker"></small><h2 id="dw-banner-title">소환</h2><p id="dw-banner-pool"></p><button class="dw-link" type="button" onclick="Astra.showRates()"><svg><use href="#i-info"/></svg>확률 정보</button></div>
         <div class="dw-banner-feature" id="dw-banner-feature" aria-label="이 카드풀의 전설"></div>
       </div>
-      <div class="dw-summon-stage" aria-hidden="true"></div>
       <section class="dw-summon recruit-block" aria-label="소환하기">
         <div id="menu-gacha-area" class="dw-summon-row"><button id="btn-challenge-gacha" type="button" onclick="RPG.openChallengeGacha()">도전 뽑기</button><button id="btn-normal-gacha" type="button" onclick="RPG.openGacha()">일반 뽑기 (1장)</button></div>
         <div id="menu-draft-area" class="dw-summon-row" style="display:none"><button type="button" onclick="RPG.startDraft()">드래프트 시작</button></div>
@@ -119,65 +117,62 @@
     </section>
     <section id="screen-collection" class="screen" aria-label="카드 도감">
       <div class="dw-pagebar"><h1><span id="collection-title">카드 도감</span><small id="collection-count"></small></h1><button id="collection-back" class="dw-btn dw-btn--small" type="button">로비로</button></div>
+      <div class="dw-tabs" role="tablist" aria-label="도감 범위"><button id="dw-tab-run" type="button" role="tab" aria-selected="true" onclick="Astra.setCollectionTab('run')">이번 여정</button><button id="dw-tab-book" type="button" role="tab" aria-selected="false" onclick="Astra.setCollectionTab('book')">도감</button></div>
       <div id="collection-toolbar" class="dw-toolbar">
-        <div class="dw-completion" id="dw-completion"><span>수집률</span><b id="dw-completion-value">0%</b><i class="dw-meter"><i id="dw-completion-bar"></i></i></div>
-        <label class="dw-search"><svg><use href="#i-search"/></svg><input id="card-search" type="search" placeholder="이름 · 속성 · 역할 검색" aria-label="카드 검색"></label>
-        <div class="dw-chips" role="group" aria-label="도감 범위와 등급">
-          <button id="collection-scope" class="dw-chip dw-chip--scope" type="button" aria-pressed="false">보유 카드</button>
-          <div id="grade-options" class="dw-chip-row"></div>
+        <div id="dw-tracks" class="dw-tracks" hidden></div>
+        <div class="dw-filterbar">
+          <button id="grade-picker-open" class="dw-select" type="button" onclick="Astra.openGradeMenu(this,'collection')" aria-haspopup="menu">등급 · 전체<svg><use href="#i-down"/></svg></button>
+          <label class="dw-search"><svg><use href="#i-search"/></svg><input id="card-search" type="search" placeholder="이름 · 속성 · 역할" aria-label="카드 검색"></label>
         </div>
         <select id="card-grade" aria-label="카드 등급" hidden><option value="all">전체</option><option value="legend">전설</option><option value="epic">에픽</option><option value="rare">레어</option><option value="normal">노멀</option><option value="transcendence">초월</option><option value="event">이벤트</option><option value="special">스페셜</option></select>
       </div>
       <div id="collection-grid" class="dw-grid"></div><p id="collection-empty" class="dw-empty" hidden>조건에 맞는 카드가 없습니다.</p>
     </section>
     <section id="screen-deck" class="screen" aria-label="파티 편성">
-      <div class="dw-formation-head"><p id="deck-hint" class="dw-hint">자리를 선택하세요</p><button class="dw-btn dw-btn--small" type="button" onclick="Astra.autoFormation()"><svg><use href="#i-wand"/></svg>자동 편성</button><button class="dw-btn dw-btn--small dw-btn--primary" type="button" onclick="RPG.confirmDeck()">완료</button></div>
       <div class="dw-slots deck-formation"><button id="slot-0" class="dw-slot" type="button" onclick="RPG.selectDeckSlot(0)">선봉</button><button id="slot-1" class="dw-slot" type="button" onclick="RPG.selectDeckSlot(1)">중견</button><button id="slot-2" class="dw-slot" type="button" onclick="RPG.selectDeckSlot(2)">대장</button></div>
-      <div id="dw-deck-filter" class="dw-chip-row dw-chip-row--deck" role="group" aria-label="등급 필터"></div>
-      <div id="deck-card-list" class="dw-grid"></div>
+      <div class="dw-formation-bar"><p id="deck-hint" class="dw-hint">자리를 선택하세요</p><button id="dw-deck-grade" class="dw-select" type="button" onclick="Astra.openGradeMenu(this,'deck')" aria-haspopup="menu">전체<svg><use href="#i-down"/></svg></button><button class="dw-btn dw-btn--small" type="button" onclick="Astra.autoFormation()"><svg><use href="#i-wand"/></svg>자동</button></div>
+      <div id="deck-card-list" class="dw-grid dw-grid--dense"></div>
       <p id="dw-deck-empty" class="dw-empty" hidden>보유한 카드가 없습니다. 소환에서 동료를 모으세요.</p>
     </section>
     <section id="screen-study" class="screen" aria-label="배움의 기록실">
-      <button class="dw-study-hero" type="button" onclick="RPG.openToeicMenu()">
-        <span class="dw-study-hero-copy"><small>실전 마법연습 · TOEIC</small><strong>오늘의 실전 연습</strong><span id="dw-study-toeic">Part 5 · 6 · 7 실전 문제</span><em>연습 시작<svg><use href="#i-arrow"/></svg></em></span>
-        <span class="dw-study-hero-art dw-art"><img data-image-src="루미.png" alt=""></span>
-      </button>
-      <div class="dw-study-grid">
-        <button type="button" onclick="RPG.openMagicClass()"><svg><use href="#i-cap"/></svg><strong>루미의 마법교실</strong><span id="dw-study-grammar">문법 강의</span></button>
-        <button type="button" onclick="RPG.openWordbook()"><svg><use href="#i-book"/></svg><strong>나의 단어장</strong><span id="dw-study-words">단어 · 연어</span></button>
-        <button type="button" onclick="RPG.openPrivateTutoring()"><svg><use href="#i-pen"/></svg><strong>루미의 개인과외</strong><span>오답으로 맞춤 수업</span></button>
-        <button type="button" onclick="RPG.openLumiQuestion()"><svg><use href="#i-chat"/></svg><strong>루미에게 질문</strong><span>무엇이든 영어 질문</span></button>
-        <button type="button" onclick="FortuneCookie.open()" class="dw-study-wide"><svg><use href="#i-cookie"/></svg><strong>포춘쿠키</strong><span id="dw-study-fortune">하루 한 번 리스닝</span></button>
+      <button class="dw-study-hero" type="button" onclick="RPG.openToeicMenu()"><span class="dw-study-hero-copy"><small>실전 마법연습 · TOEIC</small><strong>오늘의 실전 연습</strong><span id="dw-study-toeic">Part 5 · 6 · 7 실전 문제</span></span><span class="dw-study-go">연습 시작<svg><use href="#i-right"/></svg></span></button>
+      <div class="dw-study-list">
+        <button type="button" onclick="RPG.openMagicClass()"><span class="dw-study-icon"><svg><use href="#i-study"/></svg></span><span><strong>루미의 마법교실</strong><small id="dw-study-grammar">문법 강의</small></span><svg><use href="#i-right"/></svg></button>
+        <button type="button" onclick="RPG.openWordbook()"><span class="dw-study-icon"><svg><use href="#i-book"/></svg></span><span><strong>나의 단어장</strong><small id="dw-study-words">단어 · 연어</small></span><svg><use href="#i-right"/></svg></button>
+        <button type="button" onclick="RPG.openPrivateTutoring()"><span class="dw-study-icon"><svg><use href="#i-pen"/></svg></span><span><strong>루미의 개인과외</strong><small>오답으로 맞춤 수업</small></span><svg><use href="#i-right"/></svg></button>
+        <button type="button" onclick="RPG.openLumiQuestion()"><span class="dw-study-icon"><svg><use href="#i-chat"/></svg></span><span><strong>루미에게 질문</strong><small>무엇이든 영어 질문</small></span><svg><use href="#i-right"/></svg></button>
+        <button type="button" onclick="FortuneCookie.open()" id="dw-study-fortune-btn"><span class="dw-study-icon"><svg><use href="#i-cookie"/></svg></span><span><strong>포춘쿠키</strong><small id="dw-study-fortune">하루 한 번 리스닝</small></span><svg><use href="#i-right"/></svg></button>
       </div>
     </section>
     <section id="screen-battle" class="screen" aria-label="전투">
       <div class="battle-header dw-battle-top"><span class="dw-turn" id="dw-turn-pill">TURN <b id="bt-turn">1</b></span><div id="field-buff-box" class="field-buffs" onclick="RPG.showFieldBuffInfo()"></div><button id="btn-battle-artifact-check" class="battle-artifact-btn" type="button" onclick="RPG.openArtifactCheck()">아티팩트</button></div>
-      <div class="visual-stage dw-arena">
-        <button id="player-actor-box" class="battle-actor player" type="button" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"><span class="dw-actor-head"><span id="dw-bench" class="dw-bench"></span><strong id="p-name">Player</strong></span><span class="dw-frame dw-actor-frame" id="dw-p-frame"><span class="dw-art"><img id="p-img" alt="출전 카드"></span><span class="dw-fx" id="dw-p-fx"></span><span class="dw-float" id="dw-p-float"></span></span><span class="actor-hp-bar dw-bar"><span id="p-hp-bar" class="actor-hp-fill"></span><em id="dw-p-hp">HP</em></span><span class="actor-mp-bar dw-bar dw-bar--mp"><span id="p-mp-bar" class="actor-mp-fill"></span><em id="dw-p-mp">MP</em></span><span id="p-buffs" class="actor-buffs"></span></button>
-        <div class="battle-versus" aria-hidden="true">VS</div>
-        <button id="enemy-actor-box" class="battle-actor enemy" type="button" onclick="RPG.showBattleStat('enemy', 0)"><span class="dw-actor-head"><span class="dw-enemy-tag" id="dw-enemy-tag">STAGE</span><strong id="e-name">Enemy</strong></span><span class="dw-frame dw-actor-frame dw-frame--enemy" id="dw-e-frame"><span class="dw-art"><img id="e-img" alt="상대"></span><span class="dw-fx" id="dw-e-fx"></span><span class="dw-float" id="dw-e-float"></span></span><span class="actor-hp-bar dw-bar"><span id="e-hp-bar" class="actor-hp-fill"></span><em id="dw-e-hp">HP</em></span><span class="dw-bar-spacer"></span><span id="e-buffs" class="actor-buffs"></span></button>
-        <div class="dw-cutin" id="dw-cutin" aria-hidden="true"></div>
+      <div class="visual-stage dw-arena" id="dw-arena">
+        <button id="player-actor-box" class="battle-actor player" type="button" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)"><span class="dw-actor-card" id="dw-p-card"><span class="dw-art"><img id="p-img" alt="출전 카드"></span><span class="dw-actor-plate"><span id="dw-bench" class="dw-bench"></span><strong id="p-name">Player</strong></span></span><span class="actor-hp-bar dw-bar"><span id="p-hp-bar" class="actor-hp-fill"></span><em id="dw-p-hp">HP</em></span><span class="actor-mp-bar dw-bar dw-bar--mp"><span id="p-mp-bar" class="actor-mp-fill"></span><em id="dw-p-mp">MP</em></span><span id="p-buffs" class="actor-buffs"></span></button>
+        <div class="dw-vs" aria-hidden="true"><span id="dw-turn-side">VS</span></div>
+        <button id="enemy-actor-box" class="battle-actor enemy" type="button" onclick="RPG.showBattleStat('enemy', 0)"><span class="dw-actor-card" id="dw-e-card"><span class="dw-art"><img id="e-img" alt="상대"></span><span class="dw-actor-plate"><span class="dw-enemy-tag" id="dw-enemy-tag">STAGE</span><strong id="e-name">Enemy</strong></span></span><span class="actor-hp-bar dw-bar"><span id="e-hp-bar" class="actor-hp-fill"></span><em id="dw-e-hp">HP</em></span><span class="dw-bar-spacer"></span><span id="e-buffs" class="actor-buffs"></span></button>
+        <div class="dw-fxlayer" id="dw-fxlayer" aria-hidden="true"></div>
       </div>
+      <div class="dw-callouts" id="dw-callouts" aria-live="polite"></div>
       <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div><div id="battle-controls" class="control-panel"></div>
     </section>
     {{OTHER_SCREENS}}
   </main>
   <nav class="astra-nav" aria-label="주 메뉴">
     <button data-nav="menu" type="button" onclick="RPG.toMenu()"><svg><use href="#i-home"/></svg><span>로비</span></button>
-    <button data-nav="deck" type="button" onclick="RPG.openDeck()"><svg><use href="#i-cards"/></svg><span>편성</span></button>
-    <button data-nav="summon" type="button" onclick="Astra.showSummon()" class="dw-nav-summon"><svg><use href="#i-gem"/></svg><span id="dw-nav-summon-label">소환</span></button>
-    <button data-nav="collection" type="button" onclick="RPG.openCollection()"><svg><use href="#i-grid"/></svg><span>도감</span></button>
-    <button data-nav="study" type="button" onclick="Astra.learn()"><svg><use href="#i-book"/></svg><span>학습</span></button>
+    <button data-nav="deck" type="button" onclick="RPG.openDeck()"><svg><use href="#i-party"/></svg><span>편성</span></button>
+    <button data-nav="summon" type="button" onclick="Astra.showSummon()"><svg><use href="#i-summon"/></svg><span id="dw-nav-summon-label">소환</span></button>
+    <button data-nav="collection" type="button" onclick="RPG.openCollection()"><svg><use href="#i-book"/></svg><span>도감</span></button>
+    <button data-nav="study" type="button" onclick="Astra.learn()"><svg><use href="#i-study"/></svg><span>학습</span></button>
   </nav>
   {{MODALS}}
   <div id="modal-astra-settings" class="modal" role="dialog" aria-modal="true" aria-labelledby="astra-settings-title"><div class="modal-content settings-panel dw-sheet">
-    <div class="dw-sheet-head"><h2 id="astra-settings-title">설정</h2><button class="dw-icon" type="button" onclick="Astra.closeSettings()" aria-label="닫기"><svg><use href="#i-close"/></svg></button></div>
-    <section class="dw-settings-group"><h3>테마</h3><div class="theme-choices" role="group" aria-label="화면 테마"><button data-theme-choice="astra" type="button" onclick="Astra.setTheme('astra')"><i class="dw-swatch dw-swatch--astra"></i>아스트라</button><button data-theme-choice="strawberry" type="button" onclick="Astra.setTheme('strawberry')"><i class="dw-swatch dw-swatch--strawberry"></i>마법소녀</button><button data-theme-choice="dreamsky" type="button" onclick="Astra.setTheme('dreamsky')"><i class="dw-swatch dw-swatch--dreamsky"></i>드림스카이</button></div></section>
-    <section class="dw-settings-group"><h3>연출</h3><button id="dw-sfx-toggle" class="dw-menu-item dw-toggle" type="button" role="switch" onclick="Astra.toggleSfx()"><svg><use href="#i-volume"/></svg><span>효과음</span><i class="dw-switch"></i></button><button id="dw-motion-toggle" class="dw-menu-item dw-toggle" type="button" role="switch" onclick="Astra.toggleMotion()"><svg><use href="#i-spark"/></svg><span>소환 · 전투 연출</span><i class="dw-switch"></i></button></section>
+    <div class="dw-sheet-head"><h2 id="astra-settings-title">설정</h2><button class="dw-iconbtn" type="button" onclick="Astra.closeSettings()" aria-label="닫기"><svg><use href="#i-close"/></svg></button></div>
+    <section class="dw-settings-group"><h3>테마</h3><div class="theme-choices" role="group" aria-label="화면 테마"><button data-theme-choice="dreamsky" type="button" onclick="Astra.setTheme('dreamsky')"><i class="dw-swatch dw-swatch--dreamsky"></i>드림스카이</button><button data-theme-choice="strawberry" type="button" onclick="Astra.setTheme('strawberry')"><i class="dw-swatch dw-swatch--strawberry"></i>마법소녀</button><button data-theme-choice="astra" type="button" onclick="Astra.setTheme('astra')"><i class="dw-swatch dw-swatch--astra"></i>아스트라</button></div></section>
+    <section class="dw-settings-group"><h3>연출</h3><button id="dw-sfx-toggle" class="dw-menu-item dw-toggle" type="button" role="switch" onclick="Astra.toggleSfx()"><svg><use href="#i-volume"/></svg><span>효과음</span><i class="dw-switch"></i></button><button id="dw-motion-toggle" class="dw-menu-item dw-toggle" type="button" role="switch" onclick="Astra.toggleMotion()"><svg><use href="#i-motion"/></svg><span>소환 · 전투 연출</span><i class="dw-switch"></i></button></section>
     <section class="dw-settings-group"><h3>기록 백업</h3><div class="settings-grid"><button class="dw-btn" type="button" onclick="Astra.exportSave()">기록 내보내기</button><label class="dw-btn file-label">기록 가져오기<input id="astra-import" type="file" accept="application/json,.json"></label></div><p class="settings-note">진행 중인 여정은 메뉴에서 먼저 저장한 뒤 내보내세요. API 키는 내보내지 않습니다.</p></section>
     <section class="dw-settings-group"><h3>로컬 초상화</h3><p class="settings-note">초상화 PNG와 음원은 HTML 옆에 두세요. 폴더가 따로 있다면 경로를 지정하거나 폴더를 선택할 수 있습니다.</p><form id="asset-path-form"><label for="asset-path">초상화 폴더 경로</label><div class="path-row"><input id="asset-path" placeholder="예: portraits/ 또는 ../card/" autocomplete="off"><button class="dw-btn dw-btn--primary" type="submit">적용</button></div></form><button class="dw-btn dw-btn--block" type="button" onclick="document.getElementById('portrait-files').click()">기기에서 초상화 폴더 선택</button><input id="portrait-files" type="file" accept="image/*" multiple webkitdirectory hidden><p id="asset-status" class="settings-note" role="status">폴더 선택은 현재 실행 중에만 유지됩니다.</p></section>
-    <button class="dw-btn dw-btn--block" type="button" onclick="Astra.closeSettings()">닫기</button>
   </div></div>
+  <div id="dw-grade-menu" class="dw-popover" role="menu" hidden></div>
   <div id="dw-reveal" class="dw-reveal-stage" aria-hidden="true"></div>
   <div id="astra-toast" role="status" aria-live="polite"></div>
   {{SCRIPTS}}

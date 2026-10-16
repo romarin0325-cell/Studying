@@ -72,6 +72,8 @@ const DreamSfx = {
       hit: () => { this.noise(t, 0.16, { gain: 0.5, filter: 1200 }); this.tone(160, t, 0.12, { type: 'square', gain: 0.12, slide: -80 }); },
       crit: () => { this.noise(t, 0.25, { gain: 0.6, filter: 2400 }); this.tone(1200, t, 0.18, { type: 'sawtooth', gain: 0.1, slide: -600 }); },
       magic: () => { this.tone(520, t, 0.3, { gain: 0.2, slide: 700 }); this.noise(t + 0.05, 0.25, { gain: 0.2, filter: 4200 }); },
+      cutin: () => { this.noise(t, 0.35, { gain: 0.3, filter: 5200 }); this.tone(330, t, 0.3, { type: 'sawtooth', gain: 0.08, slide: 660 }); },
+      charge: () => { this.tone(110, t, 0.7, { type: 'sawtooth', gain: 0.1, slide: 220 }); this.noise(t, 0.7, { gain: 0.12, filter: 600 }); },
       heal: () => [660, 880, 1100].forEach((f, i) => this.tone(f, t + 0.07 * i, 0.3, { gain: 0.14 })),
       victory: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => this.tone(f, t + [0, .12, .24, .36, .56, .68][i], i > 3 ? 0.5 : 0.18, { type: 'triangle', gain: 0.24 })),
       defeat: () => [392, 349, 311, 262].forEach((f, i) => this.tone(f, t + 0.2 * i, 0.4, { gain: 0.16 }))

@@ -1,0 +1,54 @@
+/* DREAMWEAVER design tokens. Flat surfaces, one accent per theme, one typeface.
+   Every other stylesheet reads these; nothing else hard-codes theme colours. */
+body.astra {
+  --font:DreamSans,"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --app-width:520px; --edge:14px; --top-h:52px; --nav-h:62px;
+  --t-fast:.14s; --t-med:.24s; --ease:cubic-bezier(.2,.8,.2,1);
+  /* Grade colours are shared by every theme. */
+  --g-normal:#9aa6b2; --g-rare:#3d8bfd; --g-epic:#9b5de5; --g-legend:#f2a71b; --g-trans:#14b8a6; --g-special:#ec4899; --g-event:#65a30d;
+  /* Element colours for small badges. */
+  --el-fire:#ef6a3a; --el-water:#2f8fe0; --el-nature:#3fa25a; --el-wind:#25a99a; --el-light:#e3a21a; --el-dark:#7154c4; --el-earth:#a0743f; --el-normal:#8b95a1;
+  --success:#22a06b; --danger:#e5484d; --warning:#f59f00;
+}
+/* Dream Sky: cool white with a clear sky-blue accent. */
+body.astra[data-theme=dreamsky] {
+  --bg:#edf2f7; --surface:#ffffff; --surface-2:#f6f9fc; --sunken:#e7edf3; --scrim:#edf2f7;
+  --ink:#16222f; --ink-2:#45556a; --muted:#7a8898; --line:#dbe3eb; --line-strong:#c4cfda;
+  --accent:#1a8cf0; --accent-strong:#0f74cf; --accent-ink:#ffffff; --accent-soft:#e2f0fd; --highlight:#ffd43b;
+  --shadow-1:0 1px 2px #1c3a5a14,0 2px 8px #1c3a5a0f; --shadow-2:0 6px 24px #1c3a5a24;
+  color-scheme:light;
+}
+/* Magical Girl (strawberry key kept for saves): warm white with a rose accent. */
+body.astra[data-theme=strawberry] {
+  --bg:#f7f0f2; --surface:#ffffff; --surface-2:#fcf7f8; --sunken:#f2e7eb; --scrim:#f7f0f2;
+  --ink:#2a1e24; --ink-2:#5d4a54; --muted:#8f7a85; --line:#ecdde3; --line-strong:#dcc8d1;
+  --accent:#e0457a; --accent-strong:#c42f63; --accent-ink:#ffffff; --accent-soft:#fde6ee; --highlight:#ffcf5c;
+  --shadow-1:0 1px 2px #5a1c3414,0 2px 8px #5a1c340f; --shadow-2:0 6px 24px #5a1c3424;
+  color-scheme:light;
+}
+/* Astra: night navy with a cyan accent. */
+body.astra[data-theme=astra] {
+  --bg:#0b141e; --surface:#142030; --surface-2:#192737; --sunken:#0f1a26; --scrim:#0b141e;
+  --ink:#e9f0f7; --ink-2:#b4c2cf; --muted:#7f92a5; --line:#233346; --line-strong:#2e4359;
+  --accent:#4fb3ff; --accent-strong:#2f9cf0; --accent-ink:#04121f; --accent-soft:#143049; --highlight:#f2c46b;
+  --shadow-1:0 1px 2px #0006,0 2px 8px #0004; --shadow-2:0 8px 28px #0008;
+  --g-normal:#aab5c0; --g-rare:#5ea1ff; --g-epic:#b48af0; --g-legend:#f5b83d; --g-trans:#2dd4bf; --g-special:#f472b6; --g-event:#84cc16;
+  color-scheme:dark;
+}
+/* Names used by the legacy game dialogs and the card-pool editor. */
+body.astra {
+  --paper:var(--ink); --panel:var(--surface); --panel-soft:var(--sunken); --sky:var(--accent); --sky-bright:var(--accent-strong);
+  --gold:var(--g-legend); --wash:var(--accent-soft);
+  --stat-up:var(--success); --stat-down:var(--danger); --stat-neutral:var(--ink);
+  --positive-ink:var(--success); --positive-fill:color-mix(in srgb,var(--success) 14%,var(--surface));
+  --negative-ink:var(--danger); --negative-fill:color-mix(in srgb,var(--danger) 12%,var(--surface));
+  --phy-line:#e0704a; --mag-line:#8b6ae6; --sup-line:#2fa58a;
+}
+.astra [data-grade=normal] { --tier:var(--g-normal); }
+.astra [data-grade=rare] { --tier:var(--g-rare); }
+.astra [data-grade=epic] { --tier:var(--g-epic); }
+.astra [data-grade=legend] { --tier:var(--g-legend); }
+.astra [data-grade=transcendence] { --tier:var(--g-trans); }
+.astra [data-grade=special] { --tier:var(--g-special); }
+.astra [data-grade=event] { --tier:var(--g-event); }

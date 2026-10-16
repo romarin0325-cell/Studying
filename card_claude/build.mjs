@@ -65,40 +65,19 @@ const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(ga
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
 const cardPoolCSS = await fs.readFile(path.join(game, 'card_pool_editor.css'), 'utf8');
+// tokens.css defines the themes, legacy.css skins the game's own dialogs, ui.css owns the primary screens.
 let theme = '';
-for (const file of ['astra.css', 'mobile.css', 'themes.css', 'polish.css', 'dream.css']) theme += await read(`src/${file}`) + '\n';
-const themeCards = {};
-const assetTypes = {'.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2'};
-// card_claude/assets holds the prepared art kit; small theme SVGs are read from card/assets.
-const encodeAsset = async file => {
-  const mime = assetTypes[path.extname(file)];
-  if (!mime || path.basename(file) !== file) throw new Error(`Unsupported inline asset: ${file}`);
-  const own = path.join(root, 'assets', file);
-  const bytes = await fs.readFile(await fs.access(own).then(() => own, () => path.join(card, 'assets', file)));
-  const stableBytes = mime === 'image/svg+xml' ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n')) : bytes;
-  return `data:${mime};base64,${stableBytes.toString('base64')}`;
-};
-for (const [key,file] of [['strawberry','card-back-strawberry.webp'],['dreamsky','dreamsky-card.svg']]) themeCards[key] = await encodeAsset(file);
-for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
-  theme = theme.replaceAll(reference, `url("${await encodeAsset(file)}")`);
-}
-// Each image is embedded once, as a custom property the stylesheet refers to.
-let art = `@font-face { font-family:DreamJua; src:url("${await encodeAsset('jua-subset.woff2')}") format("woff2"); font-style:normal; font-weight:400; font-display:swap; }\n:root {`;
-for (const name of ['fx', 'banner-victory', 'banner-defeat', 'banner-clear']) art += ` --art-${name}:url("${await encodeAsset(`${name}.webp`)}");`;
-art += ' }\n';
-for (const themeName of ['astra', 'strawberry', 'dreamsky']) {
-  art += `body[data-theme=${themeName}] { --art-logo:url("${await encodeAsset(`logo-${themeName}.webp`)}");`;
-  for (const scene of ['title', 'lobby', 'battle', 'summon']) art += ` --scene-${scene}:url("${await encodeAsset(`${themeName}-${scene}.webp`)}");`;
-  art += ' }\n';
-}
-theme = art + theme;
+for (const file of ['tokens.css', 'legacy.css', 'ui.css']) theme += await read(`src/${file}`) + '\n';
+// The only embedded asset is the typeface. Card art stays in the player's own portrait files.
+const font = (await fs.readFile(path.join(root, 'assets/dreamsans-subset.woff2'))).toString('base64');
+theme = `@font-face { font-family:DreamSans; src:url("data:font/woff2;base64,${font}") format("woff2"); font-style:normal; font-weight:400 900; font-display:swap; }\n` + theme;
 const parts = {
-  STYLES: `<style>/* Bundled Jua font license:\n${await fs.readFile(path.join(card, 'assets/Jua-OFL.txt'), 'utf8')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
+  STYLES: `<style>/* Bundled Noto Sans KR subset (DreamSans) license:\n${await fs.readFile(path.join(root, 'assets/NotoSansKR-OFL.txt'), 'utf8')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
   MODALS: between('<div id="modal-mode-select"', '<script>')
     + between('<!-- Fortune Cookie Modal -->', '</body>'),
-  SCRIPTS: inline(`window._scriptLoadErrors=[];window._scriptLoadComplete=true;window.DREAMWEAVER_THEME_CARDS=${JSON.stringify(themeCards)};`)
+  SCRIPTS: inline('window._scriptLoadErrors=[];window._scriptLoadComplete=true;')
     + code.map(inline).join('\n') + inline(scripts[1][1]) + inline(await read('src/sfx.js')) + inline(await read('src/astra.js'))
 };
 let html = await read('src/shell.html');
