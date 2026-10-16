@@ -402,10 +402,10 @@ test('Mushroom merges keep poison, seed and alchemy effects in either Rumi direc
     assert.ok(result.ok&&result.merged);assert.equal(result.refund,0);assert.equal(s.gold,gold);
     assert.equal(s.board[1].hero,'mushroom_king');assert.equal(s.board[1].mergedWave,s.wave);
     for(const [i,e] of enemies.entries()){
-      // Two merge stacks plus the seed relic, independent of the new rank.
-      assert.equal(e.poison,3);assert.equal(e.poisonTime,8);assert.equal(e.hp,before[i]);
+      // Two merge stacks. The seed relic no longer adds one.
+      assert.equal(e.poison,2);assert.equal(e.poisonTime,8);assert.equal(e.hp,before[i]);
     }
-    const restored=E.restore(E.serialize(s));assert.ok(restored);assert.equal(restored.enemies[0].poison,3);
+    const restored=E.restore(E.serialize(s));assert.ok(restored);assert.equal(restored.enemies[0].poison,2);
     for(let i=0;i<300;i++)E.step(s,.05);
     assert.equal(s.stats.income['포자 수확'],undefined,'the spore harvest economy was retired');
   }
@@ -938,6 +938,14 @@ test('divine is three independently timed stacks that feed starlight on a kill a
   assert.ok(fresh.until>until);
 });
 
+test('winter makes every enemy take 15% more damage',()=>{
+  const s=traitArena([{hero:'star_boy',index:12}]);const [e]=enemiesFor(s,[{hp:1e9}]);quiet(s);
+  s.buffs.winter=6;const shot=launchNormal(s,s.board[12]);const hp=e.hp;resolveNormal(s,shot);close(hp-e.hp,shot.damage*(1+E.WINTER_TAKEN));
+  s.buffs.winter=0;const again=launchNormal(s,s.board[12]);const hp2=e.hp;resolveNormal(s,again);close(hp2-e.hp,again.damage);
+  const w=traitArena([{hero:'frost_witch',index:12}]);enemiesFor(w,[{}]);
+  assert.ok(E.castPreview(w,'frost_witch').lines.some(line=>line===`겨울 동안 적이 받는 피해가 ${Math.round(E.WINTER_TAKEN*100)}% 늘어납니다.`));
+});
+
 test('Frost Witch freezes only already-slowed enemies, relocks each for three seconds and a frozen death spreads slow',()=>{
   const s=traitArena([{hero:'frost_witch',index:12}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
   resolveNormal(s,launchNormal(s,u));assert.equal(e.freeze,0,'the first hit only slows');close(e.slow,.4);
@@ -1182,12 +1190,13 @@ test('Zeke core crisis is half of the mode core: never at a full monthly core (7
   s.health=3;assert.equal(E.coreCrisis(s),true);s.mode='main';s.health=10;assert.equal(E.coreCrisis(s),false);s.health=9;assert.equal(E.coreCrisis(s),true);
 });
 
-test('starsea heart reads divine marks without removing them, then engraves a full set',()=>{
+test('galaxy whale harvests divine marks for factor*(1+marks) and does not stun a normal enemy',()=>{
   const s=traitArena([{hero:'galaxy_whale',index:12,rank:1}]);const [marked,plain]=enemiesFor(s,[{hp:1e9,progress:900},{hp:1e9,progress:1000}]);quiet(s);
   marked.statusEffects=[{type:'divine',source:'attack:jasmine:1',owner:'jasmine',amount:3,until:s.time+5}];E.statusState(s,marked);
   const base=E.power(s,s.board[12]),m0=marked.hp,p0=plain.hp;readyCast(s,'galaxy_whale');
-  close((m0-marked.hp)/(p0-plain.hp),1+3*E.WHALE.perMark,'marks raise the blast');close(p0-plain.hp,base*E.WHALE.factor);
-  for(const e of [marked,plain])assert.equal(E.statusState(s,e).divine,E.WHALE.marks,'every enemy hit carries a full set');
+  close(m0-marked.hp,base*E.WHALE.factor*(1+3*E.WHALE.perMark),'marks are spent on the blast');close(p0-plain.hp,base*E.WHALE.factor,'no marks stays at the base factor');
+  assert.equal(E.statusState(s,marked).divine,0);assert.equal(E.statusState(s,plain).divine,0);
+  assert.equal(marked.stun,0);assert.equal(plain.stun,0);close(marked.slow,.6);close(plain.slowTime,4);
   assert.equal(HERO.galaxy_whale.skill.cost,80);
 });
 
@@ -1205,11 +1214,11 @@ test('relic pass 7: no ultimate or merge loop, and the three new relics',()=>{
   // Lantern + hourglass + Santa: two gifts and their merge cost more starlight than they give back, even at level 10.
   const scale=relicScale(10),santa=HERO.santa.skill.cost,refund=santa*E.RELIC_VALUES.lantern.refund*scale,merge=12+E.RELIC_VALUES.hourglass.starlight*scale;
   assert.ok(2*(santa-refund)>merge+20,`cycle nets ${(merge-2*(santa-refund)).toFixed(1)}`);
-  // Broken clock repays a share of a PURE buff only (Santa's gift is not one), and never more than that share.
+  // Broken clock no longer repays starlight, for a gift or for a pure buff.
   const clock=traitArena([{hero:'siren',index:12},{hero:'santa',index:13}],{artifacts:['broken_clock']});clock.relicLevels={broken_clock:10};enemiesFor(clock,[{hp:1e9}]);quiet(clock);
-  clock.gauge=120;assert.ok(E.cast(clock,'santa').ok);assert.equal(clock.clockBank,0,'no repayment for the gift');
-  clock.gauge=100;const t0=clock.time;assert.ok(E.cast(clock,'siren').ok);const after=clock.gauge,share=HERO.siren.skill.cost*E.RELIC_VALUES.broken_clock.share*scale;close(clock.clockBank,share);
-  advanceTo(clock,t0+30);assert.equal(clock.clockBank,0);assert.ok(E.restore(E.serialize(clock)));
+  clock.gauge=120;assert.ok(E.cast(clock,'santa').ok);assert.equal(clock.clockBank,undefined);
+  const beforeGauge=clock.gauge;clock.buffs={haste:5};for(let i=0;i<20;i++)E.step(clock,.05);close(clock.gauge,beforeGauge+1.2,'only the 1.2/s trickle');
+  assert.ok(E.restore(E.serialize(clock)));
   // Sprout medal: 1-2 star companions hit harder and summons are cheaper.
   const sprout=traitArena([{hero:'star_boy',index:12,rank:2},{hero:'siren',index:6,rank:3}],{artifacts:['sprout']});sprout.relicLevels={sprout:1};
   close(E.combatStats(sprout,sprout.board[12]).damage/E.power(sprout,sprout.board[12]),1+E.RELIC_VALUES.sprout.power);
@@ -1340,10 +1349,10 @@ test('royal seal grants starlight once per boss spawn and amplifies boss damage 
   close(ghp-grunt.hp,shot2.damage,'a higher-max-hp grunt is not the old royal target');
 });
 
-test('broken clock stretches buff ultimates and grants starlight per second while any one is active',()=>{
+test('broken clock doubles buff and trauma duration and grants no starlight',()=>{
   const s=traitArena([{hero:'siren',index:12},{hero:'frost_witch',index:0}],{artifacts:['broken_clock']});
   s.relicLevels={broken_clock:5};const m=relicScale(5);
-  const stretch=1+E.RELIC_VALUES.broken_clock.duration*m,{share,rate}=E.RELIC_VALUES.broken_clock;
+  const stretch=1+E.RELIC_VALUES.broken_clock.duration*m;
   enemiesFor(s,[{hp:1e7}]);quiet(s);s.gauge=120;
   const haste=E.ULT_BUFF.haste.seconds;assert.ok(E.cast(s,'siren').ok);close(s.buffs.haste,haste*stretch);
   assert.ok(E.castPreview(s,'siren').lines.join(' ').includes(Number((haste*stretch).toFixed(1))+'초'));
@@ -1355,9 +1364,9 @@ test('broken clock stretches buff ultimates and grants starlight per second whil
   const trauma=traitArena([{hero:'time_magician',index:12}],{artifacts:['broken_clock']});trauma.relicLevels={broken_clock:5};
   enemiesFor(trauma,[{hp:1e8}]);quiet(trauma);trauma.gauge=120;assert.ok(E.cast(trauma,'time_magician').ok);
   close(trauma.buffs.trauma,10*stretch);
-  // Repayment: the bank (share of the cost) drains at the rate while a pure buff runs, and is dropped when none does.
-  s.buffs={haste:5};s.clockBank=HERO.siren.skill.cost*share*m;s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2+rate*m);
-  s.buffs={winter:5};s.clockBank=10;s.gauge=0;E.step(s,.05);assert.equal(s.clockBank,0,'a non-pure buff keeps nothing');
+  // No repayment: a haste buff leaves only the normal 1.2/s trickle. An old save drops clockBank.
+  s.buffs={haste:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2);
+  const old=JSON.parse(E.serialize(s));old.clockBank=40;const back=E.restore(old);assert.ok(back);assert.equal(back.clockBank,undefined);
 });
 
 test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, prism, orbit, lantern and seed',()=>{
@@ -1404,6 +1413,7 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   const night=traitArena([{hero:'phantom',index:12}],{artifacts:['seed']});enemiesFor(night,[{}]);
   const nightBase=E.power(night,night.board[12]);
   assert.ok(E.castPreview(night,'phantom').lines.join(' ').includes(Math.round(nightBase*E.POISON_POWER_RATIO*(1+E.RELIC_VALUES.seed.poison)).toLocaleString('ko-KR')));
+  readyCast(night,'phantom');assert.equal(night.enemies[0].poison,4,'seed adds no stack');
 });
 
 test('hourglass banks merge starlight that would overflow and returns it after the next ultimate',()=>{
@@ -1442,6 +1452,7 @@ test('the dream form and pure buff ultimates cannot be recast while they run, so
 test('conditional ultimates report their live boost: lit with the boosted numbers, a hint while waiting',()=>{
   const s=traitArena([{hero:'guardian',index:12,rank:1},{hero:'zeke',index:13,rank:1}]);const [e]=enemiesFor(s,[{hp:1e9,progress:300}]);quiet(s);
   let g=E.castPreview(s,'guardian');assert.equal(g.boost.on,false);assert.equal(g.boost.label,'강화 대기');assert.match(g.boost.hint,/320/);assert.match(g.lines[0],/160만큼 밀어내며/);
+  assert.ok(g.lines[0].includes(`위력 ${E.QUAKE_FACTOR}배`)&&g.lines[0].includes(Math.round(E.power(s,s.board[12])*E.QUAKE_FACTOR).toLocaleString('ko-KR')+' 피해'),g.lines[0]);
   e.progress=E.PATH_LENGTH*.9;g=E.castPreview(s,'guardian');assert.equal(g.boost.on,true);assert.equal(g.boost.label,'강화');assert.equal(g.boost.hint,'');assert.match(g.lines[0],/320만큼 밀어내며 3초/);
   const mixed=traitArena([{hero:'guardian',index:12,rank:1}]);enemiesFor(mixed,[{hp:1e9,progress:300},{hp:1e9,progress:E.PATH_LENGTH*.9}]);quiet(mixed);
   g=E.castPreview(mixed,'guardian');assert.equal(g.boost.label,'강화 1명');assert.match(g.lines[1],/강화된 1명/);

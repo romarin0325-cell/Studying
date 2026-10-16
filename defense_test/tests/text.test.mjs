@@ -47,7 +47,7 @@ test('every relic scale token is written in that relic text',()=>{
     chalice:[pct(RV.chalice.taken)],
     royal_seal:[num(RV.royal_seal.starlight),pct(RV.royal_seal.boss)],
     gift_ribbon:[pct(RV.gift_ribbon.chance)],
-    broken_clock:[pct(RV.broken_clock.duration),pct(RV.broken_clock.share)],
+    broken_clock:[pct(RV.broken_clock.duration)],
   };
   assert.equal(ARTIFACTS.length,27);
   assert.deepEqual(ARTIFACTS.map(relic=>relic.id).sort(),Object.keys(expected).sort());
