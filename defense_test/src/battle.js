@@ -13,7 +13,7 @@ export function createBattle(profile){
     gaugeMax:springGauge(profile.beds.spring),startGold:seedGold(profile.beds.seed)});
   if(a.mode==='weekly'){run.globalAttack=.05*a.boon;run.gauge=Math.min(run.gaugeMax,run.gauge+(TEAM_SIZE-a.boon)*4);}
   // Monthly: a boss that reaches the core (7 damage) ends the challenge.
-  if(a.mode==='monthly')run.health=7;
+  if(a.mode==='monthly')run.health=engine.MONTHLY_HEALTH;
   return run;
 }
 export function resumeBattle(profile){

@@ -26,27 +26,30 @@ test('every relic scale token is written in that relic text',()=>{
     frost:[pct(RV.frost.slowed)],
     banner:[pct(RV.banner.power)],
     chorus:[pct(RV.chorus.speed)],
-    lantern:[num(RV.lantern.refund)],
+    lantern:[pct(RV.lantern.refund)],
     lens:[pct(RV.lens.boss)],
     seed:[pct(RV.seed.poison)],
     feather:[gold(RV.feather.base+RV.feather.perWave),gold(RV.feather.perWave),gold(RV.feather.cap)],
     crown:[pct(RV.crown.power)],
+    sprout:[pct(RV.sprout.power)],
+    amulet:[pct(RV.amulet.near),num(RV.amulet.starlight)],
     meteor:[pct(RV.meteor.hit)],
     prism:[pct(RV.prism.chain)],
     tide:[pct(RV.tide.splash)],
     roots:[pct(RV.roots.life),pct(RV.roots.radius)],
     guild:[pct(RV.guild.power)],
-    phoenix:[pct(RV.phoenix.cut)],
+    phoenix:[pct(RV.phoenix.taken)],
     twin:[pct(RV.twin.echo)],
-    constellation:[pct(RV.constellation.power)],
+    constellation:[pct(RV.constellation.three),pct(RV.constellation.four)],
     alchemy:[pct(RV.alchemy.power)],
     orbit:[pct(RV.orbit.tick)],
     tempo_bell:[pct(RV.tempo_bell.perWave),pct(RV.tempo_bell.cap)],
+    chalice:[pct(RV.chalice.taken)],
     royal_seal:[num(RV.royal_seal.starlight),pct(RV.royal_seal.boss)],
     gift_ribbon:[pct(RV.gift_ribbon.chance)],
-    broken_clock:[pct(RV.broken_clock.duration),num(RV.broken_clock.starlight)],
+    broken_clock:[pct(RV.broken_clock.duration),pct(RV.broken_clock.share)],
   };
-  assert.equal(ARTIFACTS.length,24);
+  assert.equal(ARTIFACTS.length,27);
   assert.deepEqual(ARTIFACTS.map(relic=>relic.id).sort(),Object.keys(expected).sort());
   for(const relic of ARTIFACTS){
     assert.deepEqual(relic.scale,expected[relic.id],relic.id);

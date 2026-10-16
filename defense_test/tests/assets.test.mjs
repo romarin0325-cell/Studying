@@ -9,7 +9,7 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,51);
+  assert.equal(Object.keys(ASSET_PATHS).length,54);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['fx-emblems',1536,512],['gifts',768,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
@@ -25,6 +25,7 @@ test('all collection, boss and battle textures resolve to local art with valid a
     const bytes=await fs.readFile(path.join(root,a.source));
     assert.equal(createHash('sha256').update(bytes).digest('hex'),a.sha256,a.id);
   }
-  assert.equal(ARTIFACTS.length,24);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,24);
-  for(const rarity of ['C','R','SR','UR'])assert.ok(ARTIFACTS.some(a=>a.rarity===rarity));
+  assert.equal(ARTIFACTS.length,27);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,27);
+  // Rows of three in the collection: 12 C, 6 R, 6 SR, 3 UR.
+  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,3]);
 });

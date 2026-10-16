@@ -21,7 +21,8 @@ export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,
 }))),...HIDDEN.map(id=>({...source.HERO[id],rarity:'UR',hidden:true}))];
 export const HERO = Object.fromEntries(HEROES.map(h=>[h.id,h]));
-export const ARTIFACTS = source.ARTIFACTS.map((a,i)=>({...a,rarity:i<10?'C':i<16?'R':i<21?'SR':'UR'}));
+// Relic rarity follows the data order: 12 C, 6 R, 6 SR, 3 UR (rows of three in the collection).
+export const ARTIFACTS = source.ARTIFACTS.map((a,i)=>({...a,rarity:i<12?'C':i<18?'R':i<24?'SR':'UR'}));
 export const ARTIFACT = Object.fromEntries(ARTIFACTS.map(a=>[a.id,a]));
 export const validArtifacts = ids=>Array.isArray(ids)&&ids.length<=3&&new Set(ids).size===ids.length&&ids.every(id=>ARTIFACT[id]);
 export const BOSS_ORDER = ['artificial_demon','flora','love_iris','curse_iris','thor','poseidon','ares','beelzebub','astea'];

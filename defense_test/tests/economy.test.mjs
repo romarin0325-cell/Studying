@@ -82,7 +82,7 @@ test('collection bonus sums every owned relic and is a power fraction',()=>{
   assert.ok(Math.abs(collectionBonus({hourglass:{owned:true,enhance:5}})-8/30/100)<1e-12);
   assert.equal(relicPoints('gift_ribbon',{owned:true,enhance:4}),3*(5+2));
   const allC=Object.fromEntries(ARTIFACTS.filter(a=>a.rarity==='C').map(a=>[a.id,{owned:true,enhance:0}]));
-  assert.ok(Math.abs(collectionBonus(allC)-.01)<1e-12);
+  assert.ok(Math.abs(collectionBonus(allC)-12*3/30/100)<1e-12);
 });
 
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{

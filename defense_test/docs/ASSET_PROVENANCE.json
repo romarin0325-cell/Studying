@@ -271,7 +271,7 @@
     {
       "id": "relics",
       "source": "defense_test/assets/merge/relics.webp",
-      "sha256": "4d0ffc0660fc3eda2601c6bdedadf02b24a48eb5d7ffc142026bd43daba52b1c",
+      "sha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
       "width": 1280,
       "height": 1024
     },
@@ -358,6 +358,27 @@
       "sha256": "d40f2030646e9030f06e9dcb16d893bf9914a2a7bf17c1fe36216b4f6d82c7c0",
       "width": 1024,
       "height": 1024
+    },
+    {
+      "id": "zeke-slash",
+      "source": "defense_test/assets/merge/zeke-slash.webp",
+      "sha256": "8304ec5a32aae89a03f7fa8893c5dac6dbe09a103935da1a73af555a3774b348",
+      "width": 960,
+      "height": 320
+    },
+    {
+      "id": "orbit-zone",
+      "source": "defense_test/assets/merge/orbit-zone.webp",
+      "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "relics-new",
+      "source": "defense_test/assets/merge/relics-new.webp",
+      "sha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "width": 512,
+      "height": 512
     }
   ],
   "font": {
@@ -369,7 +390,7 @@
     }
   },
   "portraits": 30,
-  "relics": 24,
+  "relics": 27,
   "memorial": [
     {
       "id": "star_boy",

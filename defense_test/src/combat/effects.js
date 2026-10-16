@@ -380,9 +380,11 @@ export class CombatFX{
   }
   drawZones(s){
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
+      // Star Orbit relic: its own small star-ring decal (the ring is the real radius), nothing else.
+      if(z.orbit){this.atlasStamp('orbit-zone',0,1,1,z.x,z.y,z.radius*2.3,z.radius*2.3,0,fade*(.55+pulse*.3),'screen');ctx.restore();continue;}
       // Edge is the real collision radius. The painted centre is deliberately quieter.
       ctx.fillStyle=HERO[z.hero].color+'12';ctx.strokeStyle=HERO[z.hero].color+'77';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(z.x,z.y,z.radius,0,Math.PI*2);ctx.fill();ctx.stroke();
-      this.stamp(z.orbit?'galaxy_whale':z.hero,z.x,z.y,z.radius*1.45,0,pulse*.35);
+      this.stamp(z.hero,z.x,z.y,z.radius*1.45,0,pulse*.35);
       if(!this.reduced){ctx.translate(z.x,z.y);ctx.rotate(this.clock*.7);for(let i=0;i<3;i++){const a=i*Math.PI*2/3;diamond(ctx,Math.cos(a)*z.radius*.8,Math.sin(a)*z.radius*.8,3,HERO[z.hero].color);}}
       ctx.restore();
     }
@@ -505,21 +507,20 @@ export class CombatFX{
       const t=Math.max(0,1-e.life/e.total);
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
         if(e.hero==='zeke'){
-          // Sweep slash: only the engine's hit band (90 degrees wide, radius deep, centred on the
-          // target's distance) is painted, and the blade crosses it from one side like a swing.
-          // The flaming crescent of the authored cone sits at about 67% of its square from the
-          // vertex (13.7%,50%); the streaks nearer the vertex are clipped away.
-          const reach=Math.min(h.range,Math.hypot(e.to.x-e.origin.x,e.to.y-e.origin.y)),half=h.radius/2,inner=Math.max(8,reach-half),outer=Math.min(h.range,reach+half);
-          const side=e.swing?-1:1,lead=-Math.PI/4+Math.PI/2*easeOut(t/.42),tail=Math.max(-Math.PI/4,lead-Math.PI*.42-t*.6),a=fireClarity*(t<.42?1:1-window01(t,.42,1));
+          // Basic attack as a sword-beam slash (zeke-slash atlas: 0 peak crescent, 1 breaking apart, 2 embers).
+          // (1) At Zeke the blade passes: the peak crescent is revealed tip to tip, then breaks apart.
+          // (2) The same crescent flies out as a sword beam and lands on the engine's hit band (90 degrees at the
+          //     target's distance, radius deep) in the shot's 0.12 s travel, then scatters into embers there.
+          // (3) Every enemy actually hit shows its own spark (impact events). Nothing paints the area itself.
+          const reach=Math.min(h.range,Math.hypot(e.to.x-e.origin.x,e.to.y-e.origin.y)),side=e.swing?-1:1,a=fireClarity;
+          const slash=(frame,x,w,hgt,alpha)=>this.atlasStamp('zeke-slash',frame,3,1,x,0,w,hgt,0,alpha,'screen');
           ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);ctx.scale(1,side);
-          ctx.beginPath();ctx.arc(0,0,outer,tail,lead);ctx.arc(0,0,inner,lead,tail,true);ctx.closePath();
-          ctx.globalAlpha=a*.07;ctx.fillStyle='#ff9a4a';ctx.fill();ctx.clip();ctx.globalAlpha=1;
-          const size=reach/.67;this.atlasStamp('zeke-cone',0,1,1,size*.363,0,size,size,0,a*.75,'source-over');
-          // Hot leading edge: a warm wide glow under a thin bright core, only near the blade.
-          ctx.globalCompositeOperation='lighter';ctx.lineCap='round';const edge=Math.max(tail,lead-.45);
-          for(const [color,alpha,width] of [['#ff8a3a',.35,12*(1-t)+4],['#fff0c8',.8,2.2]]){ctx.globalAlpha=a*alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.arc(0,0,reach,edge,lead);ctx.stroke();}
+          const pass=window01(t,0,.28),broke=window01(t,.24,.62),near=1-window01(t,.5,.9);
+          if(near>0){ctx.save();ctx.beginPath();ctx.rect(-80,60-150*easeOut(pass),160,160);ctx.clip();slash(0,30,92,92,a*(1-broke)*near);ctx.restore();slash(1,30,92,92,a*broke*near);}
+          // Beam: tile height spans the 90-degree chord (crescent fills ~82% of the tile), width stays slim.
+          const run=easeOut(window01(t,.1,.36)),r=40+(reach-40)*run,hgt=Math.min(1.45*reach,300)/.82*(.55+.45*run),w=Math.max(70,Math.min(130,reach*.42)),land=window01(t,.36,1);
+          if(t>.1){const cx=r-w*.44;slash(0,cx,w,hgt,a*(1-land)*Math.min(1,run*3));slash(land<.5?1:2,cx,w,hgt,a*Math.sin(Math.PI*land)*.9);}
           ctx.restore();
-          if(t<.5){const tip=e.angle+side*lead;this.glow('glow','#ffb35a',e.origin.x+Math.cos(tip)*reach,e.origin.y+Math.sin(tip)*reach,64,(1-t*2)*.8*fireClarity);}
         }else if(e.hero==='guardian'){
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
