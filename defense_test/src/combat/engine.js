@@ -90,9 +90,9 @@ export const RELIC_VALUES=Object.freeze({
   // or merge loop can feed itself; outliers above ~1.3x of their budget came down; constellation rewards a real mosaic.
   hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.25},lens:{boss:.3},seed:{poison:.3},
   feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.25,discount:2},amulet:{near:.35,starlight:15,uses:1},
-  meteor:{hit:1.1},prism:{chain:.7},tide:{splash:.22},roots:{life:.2,radius:.08},guild:{power:.25},phoenix:{taken:.2,uses:1},
+  meteor:{hit:1.1},prism:{chain:.7},tide:{splash:.22},roots:{life:.15,radius:.06},guild:{power:.25},phoenix:{taken:.2,uses:1},
   twin:{echo:1},constellation:{three:.32,four:.5},alchemy:{power:.5,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.35,poison:5},
-  royal_seal:{starlight:30,boss:.35},gift_ribbon:{chance:.25},broken_clock:{duration:.8,share:.6,rate:2.7},
+  royal_seal:{starlight:30,boss:.35},gift_ribbon:{chance:.25},broken_clock:{duration:1,share:.6,rate:2.7},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
