@@ -17,14 +17,16 @@ const DECKS=[
   ['time_magician','ancient_dragon','phantom','zeke','luna'],
   ['jasmine','queen','rumi','cherry_prince','time_ruler'],
   ['galaxy_whale','doom','cinderella','harmonious','frost_witch'],
+  // Behemoth is measured in the aura deck he is built for (his partners keep their first deck above).
+  ['behemoth','ancient_dragon','siren','harmonious','great_detective'],
 ];
 
 const covered=DECKS.flat();
 const roster=HEROES.map(hero=>hero.id);
-if(roster.length!==30||new Set(covered).size!==30||roster.some(id=>!covered.includes(id))||DECKS.some(deck=>!engine.validDeck(deck))){
-  throw new Error('Decks must be six valid teams that partition the 30 heroes');
+if(roster.some(id=>!covered.includes(id))||DECKS.some(deck=>!engine.validDeck(deck))){
+  throw new Error('Decks must be valid teams that cover every hero');
 }
-const deckOf=new Map(DECKS.flatMap(deck=>deck.map(id=>[id,deck])));
+const deckOf=new Map();for(const deck of DECKS)for(const id of deck)if(!deckOf.has(id))deckOf.set(id,deck);
 
 const args=process.argv.slice(2);
 const opts=new Map();

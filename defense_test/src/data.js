@@ -1134,12 +1134,12 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 205,
+        "x": 245,
+        "y": 191,
         "size": 250
       }
     },
-    "damage": 95,
+    "damage": 42,
     "interval": 2,
     "attack": "stone",
     "trait": {
@@ -1150,7 +1150,7 @@ export const HEROES = [
       "name": "대지분쇄",
       "cost": 70,
       "type": "crush",
-      "text": "무작위 적을 노려 주변(반경 150)에 위력 8배 충격을 0.5초 간격으로 3번 줍니다."
+      "text": "무작위 적을 노려 주변(반경 150)에 위력 6배 충격을 0.5초 간격으로 3번 줍니다."
     },
     "heightGroup": "tall",
     "role": "오라 증폭 · 대지 분쇄",

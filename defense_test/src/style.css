@@ -1370,7 +1370,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .prep-reward.perfect .ic{width:14px;height:14px;color:var(--gold)}
 .prep-reward.perfect.done{background:var(--gold);color:var(--gold-ink);border-color:transparent}
 .prep-reward.perfect.done .ic{color:var(--gold-ink)}
-.perfect-rule{display:block;margin-top:6px;font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perfect-rule{display:block;margin-top:6px;font-size:11px;color:var(--text3);line-height:1.4}
 
 /* ───────── Summon ───────── */
 .sm{position:relative;min-height:100%;display:flex;flex-direction:column;gap:10px;padding:calc(62px + var(--top-shift)) 14px 14px;isolation:isolate;background:var(--altar) 50% 62%/cover}

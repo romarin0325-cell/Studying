@@ -46,8 +46,8 @@ export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CA
 // strike the whole field in turn, then imagination becomes real. Not in the hero sheet; the battle peek shows it.
 export const QUAKE_FACTOR=2.4;
 export const WINTER_EXPOSURE=.15;
-// Behemoth: three 8x shocks, half a second apart, around one random enemy.
-export const CRUSH=Object.freeze({factor:8,radius:150,hits:3,first:.25,gap:.5});
+// Behemoth: three 6x shocks, half a second apart, around one random enemy.
+export const CRUSH=Object.freeze({factor:6,radius:150,hits:3,first:.25,gap:.5});
 // Galaxy whale harvests divine marks into the blast (8x, +100% per mark, 3 marks = 32x) and does not stun.
 export const WHALE=Object.freeze({factor:8,perMark:1});
 export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});

@@ -213,6 +213,13 @@
       "height": 1024
     },
     {
+      "id": "unit-behemoth",
+      "source": "defense_test/assets/merge/units/behemoth.webp",
+      "sha256": "c18688ee9f39aae60b868f00abcf863f36d1e9836dfdb13f9bb0d3fab36ba9ce",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "garden",
       "source": "defense_test/assets/merge/garden.webp",
       "sha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
@@ -339,6 +346,13 @@
       "height": 512
     },
     {
+      "id": "effects-behemoth",
+      "source": "defense_test/assets/merge/effects-behemoth.webp",
+      "sha256": "9757a945334ba05b54066bb188c58867b41221938bd88ecc4d1ba17e69f83f18",
+      "width": 768,
+      "height": 256
+    },
+    {
       "id": "ultimates",
       "source": "defense_test/assets/merge/ultimates.webp",
       "sha256": "3e8f54fd40b53dec39d3fd16207452f4a9afcb52c9d9022005679a6f1f672cc7",
@@ -389,7 +403,7 @@
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
     }
   },
-  "portraits": 30,
+  "portraits": 31,
   "relics": 27,
   "memorial": [
     {
@@ -798,6 +812,23 @@
         "height": 1080,
         "bytes": 76322,
         "quality": 82
+      }
+    },
+    {
+      "id": "behemoth",
+      "source": "defense_test/assets/memorial/behemoth.avif",
+      "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+      "width": 720,
+      "height": 1080,
+      "bytes": 65110,
+      "sourceSha256": "8fd07b182c3432d04ffda78e5f49bcfad76bf38e227bcd7271d98eb801499526",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/behemoth.webp",
+        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95826,
+        "quality": 76
       }
     },
     {

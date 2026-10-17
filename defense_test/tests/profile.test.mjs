@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING} from '../src/content.js';
-import {unlockProfile,topUpUnlocked} from '../src/test-unlock.js';
+import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel} from '../src/economy.js';
@@ -249,10 +249,9 @@ test('topUpUnlocked owns companions and relics added after the save, and testGra
   assert.equal(validateProfile(p),true);
   const dreams=p.dreams,dust=p.dust;
   const denied=command(p,'testGrant',{},NOW);assert.equal(denied.ok,false);assert.equal(p.dreams,dreams);assert.equal(p.dust,dust);
-  const granted=command(p,'testGrant',{unlocked:true},NOW);
-  assert.equal(granted.ok,true);assert.equal(granted.message,'테스트 지급: 꿈의결정·별가루 +10,000');
-  assert.equal(p.dreams,dreams+10000);assert.equal(p.dust,dust+10000);
-  p.dreams=9999990;p.dust=9999999;assert.equal(command(p,'testGrant',{unlocked:true},NOW).ok,true);
+  assert.equal(command(p,'testGrant',{unlocked:true},NOW).ok,false,'no argument opens it outside the unlocked build');
+  testGrant(p);assert.equal(p.dreams,dreams+10000);assert.equal(p.dust,dust+10000);
+  p.dreams=9999990;p.dust=9999999;testGrant(p);
   assert.equal(p.dreams,9999999);assert.equal(p.dust,9999999);assert.equal(validateProfile(p),true);
 });
 

@@ -100,7 +100,7 @@ function bindTestGrant(){
   }
 }
 function wallet(){const profile=p();$('dreams').textContent=fmt(profile.dreams);$('dust').textContent=fmt(profile.dust);$('save-warning').hidden=!store.broken&&!store.conflict;$('save-warning').textContent=store.warning||'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.';settings();bindTestGrant();}
-function act(action,args={},showToast=true){const result=store.transact(action,args,now());wallet();if(!result.ok||showToast)toast(result.message);return result;}
+function act(action,args={},showToast=true){const result=store.transact(action,args,now());wallet();if(!result.ok||showToast)toast(result.message);if(result.ok)sound.action(action,result);return result;}
 // Growth changes numbers on the screen under a sheet; redraw it without losing the scroll position.
 function refreshBehind(){const c=$('content'),y=c.scrollTop;render();c.scrollTop=y;}
 const heading=(title,right='',sub='')=>`<div class="page-heading"><div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${right}</div>`;
@@ -1107,4 +1107,4 @@ art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 �
 $('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
-window.STAR_GARDEN={get profile(){return p();},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};
+window.STAR_GARDEN={get profile(){return p();},get audio(){return {scene:sound.scene(),music:sound.playing?.id||null,loading:sound.loading||null,fallback:sound.failed,voices:sound.voices};},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};

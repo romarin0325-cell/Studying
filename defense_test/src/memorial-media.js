@@ -1384,6 +1384,51 @@ export const MEMORIAL_MEDIA_MANIFEST = {
       "base64Bytes": 127264,
       "outputSha256": "be82b01f1e5cd48cfe34e92fe603d468fb5393be9d2fede5139295ced86afa8b"
     }
+  },
+  "behemoth": {
+    "sourceFilename": "32A_베히모스_살살, 아주 살살.png",
+    "sourceSha256": "8fd07b182c3432d04ffda78e5f49bcfad76bf38e227bcd7271d98eb801499526",
+    "sourceBytes": 8085223,
+    "sourceWidth": 1684,
+    "sourceHeight": 2526,
+    "sourceHasAlpha": false,
+    "sourceIsOpaque": true,
+    "alphaRemoved": false,
+    "outputSha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+    "width": 720,
+    "height": 1080,
+    "hasAlpha": false,
+    "bytes": 65110,
+    "base64Bytes": 86816,
+    "codec": "avif",
+    "quality": 52,
+    "effort": 4,
+    "chromaSubsampling": "4:4:4",
+    "av1Config": {
+      "profile": 1,
+      "monochrome": false,
+      "subsamplingX": 0,
+      "subsamplingY": 0
+    },
+    "titleLine": null,
+    "bodyStartLine": null,
+    "bodyEndLine": null,
+    "bodySha256": "dc91a3866165821d082bead6487519703a0ce0b32539ee2b054706d44d1eafad",
+    "avifPath": "./assets/memorial/behemoth.avif",
+    "webp": {
+      "path": "./assets/memorial-webp/behemoth.webp",
+      "codec": "webp",
+      "sourceCodec": "png",
+      "quality": 76,
+      "effort": 6,
+      "smartSubsample": true,
+      "width": 720,
+      "height": 1080,
+      "hasAlpha": false,
+      "bytes": 95826,
+      "base64Bytes": 127768,
+      "outputSha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0"
+    }
   }
 };
 

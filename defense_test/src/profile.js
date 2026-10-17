@@ -3,7 +3,7 @@ import {calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,be
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
-import {unlockProfile,topUpUnlocked} from './test-unlock.js';
+import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
 import {questionOf} from './quiz.js';
@@ -296,7 +296,7 @@ export function command(p,action,args={},now=Date.now()){
     return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
-  if(action==='testGrant'){if(!(UNLOCKED||args.unlocked===true))return no('사용할 수 없는 동작입니다.');const cap=9999999;p.dreams=Math.min(cap,p.dreams+10000);p.dust=Math.min(cap,p.dust+10000);return {ok:true,message:'테스트 지급: 꿈의결정·별가루 +10,000'};}
+  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');testGrant(p);return {ok:true,message:'테스트 지급: 꿈의결정·별가루 +10,000'};}
   return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.

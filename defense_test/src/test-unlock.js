@@ -11,6 +11,9 @@ export function unlockProfile(p){
   p.cleared=45;p.dreams=99999;p.dust=99999;
   return topUpUnlocked(p);
 }
+// Wallet tap in the unlocked build: 10,000 dreams and dust, capped like every other currency.
+export const TEST_GRANT=10000;
+export function testGrant(p){const cap=9999999;p.dreams=Math.min(cap,p.dreams+TEST_GRANT);p.dust=Math.min(cap,p.dust+TEST_GRANT);return p;}
 // Saves from earlier test builds keep their progress but always have gifts to try.
 export function topUpUnlocked(p){
   // Companions and relics added after this save was made show up owned, like a fresh unlock.
