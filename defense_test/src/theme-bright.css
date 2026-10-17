@@ -1,0 +1,69 @@
+/* 맑은 정원 (bright skin). Applied after the mapped night stylesheet in the --bright build only.
+   Direction: a daylight dream garden for a light collection/idle audience. White glass panels on sky,
+   navy ink, one azure accent for selection and links, amber for values, sunny yellow kept for the one
+   main action per screen. */
+:root{
+  color-scheme:light;
+  --bg:#eaf4ff;--bg2:#f6faff;--panel:#ffffff;--panel2:#f2f7ff;--raise:#e3eeff;
+  --line:rgba(58,96,168,.13);--line2:rgba(58,96,168,.24);
+  --hair:rgba(47,134,246,.28);--hair2:rgba(47,134,246,.55);
+  --text:#1d2a47;--text2:#44557a;--text3:#66748f;
+  --gold:#b8780a;--gold2:#9a6206;--gold-ink:#3a2306;--gold-hi:#1f6fd6;
+  --sky:#2f86f6;--sky2:#62b4ff;--sky-ink:#1559c4;
+  --teal:#0b8a75;--danger:#d9472f;--gem:#1b82d9;--dust:#b8780a;--rose:#d94a80;--moon:#4a76c8;
+  --glass:linear-gradient(180deg,rgba(255,255,255,.92),rgba(244,249,255,.86));
+  --glass-strong:linear-gradient(180deg,#ffffff,#f3f8ff);
+  --frame:linear-gradient(155deg,rgba(98,180,255,.85),rgba(98,180,255,.18) 32%,rgba(255,214,120,.24) 62%,rgba(98,180,255,.6));
+  --shadow:0 8px 22px rgba(46,78,140,.14);
+  --r:#7d8fa6;
+}
+html,body{background:var(--bg)}
+body{color:var(--text)}
+
+/* Titles that were cream gradient text on night panels: azure to navy ink. */
+.brand b,.page-heading h1,.sheet-top h2,.stage-tag b{background:linear-gradient(180deg,#2f86f6,#1b3a7a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:none}
+.brand small{color:#5d7bb3}
+.skill-tip[data-rarity=UR] .skill-tip-head b{background:linear-gradient(180deg,#e39b14,#a86200);-webkit-background-clip:text;background-clip:text}
+/* Text that floats over daylight art keeps a navy face with a white rim. */
+.sm-copy h2{background:linear-gradient(180deg,#2f86f6,#16336e);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 1px 0 #fff) drop-shadow(0 0 10px rgba(255,255,255,.9))}
+.sm-copy p,.sm-copy small{color:#1d2a47;text-shadow:0 0 6px rgba(255,255,255,.95),0 0 2px #fff}
+#sheet-kicker{color:var(--sky-ink)}
+
+/* Selection: azure pill with white text (tabs, chapters). */
+.tabbar button[aria-pressed=true],.chap[aria-pressed=true]{color:#fff;background:linear-gradient(180deg,#5cb0ff,#2f86f6);border-color:transparent;box-shadow:0 4px 12px rgba(47,134,246,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.chap[aria-pressed=true] small{color:#e4f1ff}
+.button.link,button.link{color:var(--sky-ink)}
+
+/* Bottom navigation: white bar, azure active state, the centre adventure button stays golden. */
+.bottom-nav{background:rgba(255,255,255,.94);box-shadow:0 -6px 20px rgba(46,78,140,.10);border-top:1px solid var(--line)}
+.nav-item .ic{background:#f1f6ff;border-color:var(--line2);stroke:#5a6b8f}
+.nav-item[aria-current=page]{color:var(--sky-ink)}
+.nav-item[aria-current=page] .ic{border-color:#7cc0ff;background:linear-gradient(180deg,#62b4ff,#2f86f6);stroke:#fff;box-shadow:0 6px 14px rgba(47,134,246,.35)}
+.nav-item:nth-child(3) .ic{box-shadow:0 0 0 4px #fff,0 0 18px rgba(255,200,90,.45),0 6px 14px rgba(150,100,20,.25)}
+
+/* Amber and teal values need a little more weight on white. */
+.hd-power b,.power b{color:#b06f00}
+.stage.done .stage-no{color:#0a4d42}
+
+/* Page backdrop for list screens: morning sky with a faint field of four-point stars. */
+.app{background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cg fill='%237fb8ff' fill-opacity='.16'%3E%3Cpath d='M30 18l2.2 7.8L40 28l-7.8 2.2L30 38l-2.2-7.8L20 28l7.8-2.2z'/%3E%3Cpath d='M128 70l1.4 4.6L134 76l-4.6 1.4L128 82l-1.4-4.6L122 76l4.6-1.4z'/%3E%3Cpath d='M70 132l1.8 6.2L78 140l-6.2 1.8L70 148l-1.8-6.2L62 140l6.2-1.8z'/%3E%3C/g%3E%3C/svg%3E"),
+  radial-gradient(120% 46% at 50% -12%,rgba(255,255,255,.96),rgba(255,255,255,0) 62%),
+  radial-gradient(55% 26% at 92% 10%,rgba(255,214,120,.20),transparent 70%),
+  radial-gradient(70% 40% at 0% 42%,rgba(120,190,255,.20),transparent 70%),
+  linear-gradient(180deg,#d9edff 0%,#edf6ff 38%,#f7faff 100%)}
+.topbar{background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(12px) saturate(1.2);backdrop-filter:blur(12px) saturate(1.2);box-shadow:0 1px 0 rgba(58,96,168,.10)}
+.nav-item:nth-child(3)[aria-current=page] .ic{border-color:#ffe7a0;background:radial-gradient(circle at 50% 28%,#fff1c0,#efc25c 50%,#b97a22);stroke:#3a2306}
+
+/* Title: the daylight garden stays bright; a white haze carries a navy logo with a warm star. */
+.splash{background:radial-gradient(ellipse 80% 46% at 50% 44%,rgba(255,255,255,.9),rgba(255,255,255,.35) 62%,rgba(220,238,255,.2))}
+.splash::before{filter:brightness(1.04) saturate(1.05) blur(1.5px)}
+.splash-glow{background:radial-gradient(closest-side,rgba(255,214,120,.45),transparent)}
+.splash-mark .ic{filter:drop-shadow(0 0 14px rgba(255,190,70,.75))}
+.splash-over{color:#c58a10}
+.splash b{background:linear-gradient(180deg,#3a95ff,#163a86);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 0 #fff)}
+.splash small{color:#4a6fb5}
+.splash-bar{background:rgba(47,134,246,.15)}
+.splash-bar i{background:linear-gradient(90deg,transparent,#2f86f6,transparent)}
+.splash-start{color:#1d3f86;text-shadow:0 0 10px #fff,0 0 2px #fff}
+.splash-version{color:rgba(29,42,71,.5)}
