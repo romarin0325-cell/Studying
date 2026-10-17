@@ -1157,6 +1157,265 @@ export const HEROES = [
     "shape": "pulse",
     "range": 210,
     "radius": 210
+  },
+  {
+    "id": "joker",
+    "name": "조커",
+    "title": "색이 바뀌는 광대",
+    "color": "#f06aa8",
+    "art": {
+      "atlas": "unit-siren",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 229,
+        "size": 250
+      }
+    },
+    "damage": 12,
+    "interval": 1.0,
+    "attack": "water",
+    "trait": {
+      "type": "joker",
+      "text": "필살기마다 색이 바뀌고, 색에 따라 일반 공격이 상태 이상을 겁니다."
+    },
+    "skill": {
+      "name": "레인보우 룰렛",
+      "cost": 50,
+      "type": "roulette",
+      "text": "적 전체에게 위력 3배 피해를 주고 다음 색으로 바꿉니다."
+    },
+    "heightGroup": "medium",
+    "role": "상태 부여 · 범위",
+    "shape": "splash",
+    "range": 430,
+    "radius": 56
+  },
+  {
+    "id": "underdog",
+    "name": "언더독",
+    "title": "노멀의 반격",
+    "color": "#7eb7e8",
+    "art": {
+      "atlas": "unit-star_boy",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 248,
+        "y": 229,
+        "size": 250
+      }
+    },
+    "damage": 20,
+    "interval": 0.9,
+    "attack": "light",
+    "trait": {
+      "type": "underdog",
+      "text": "덱이 전부 노멀이면 위력이 80% 오릅니다."
+    },
+    "skill": {
+      "name": "빅쇼",
+      "cost": 80,
+      "type": "bigshow",
+      "text": "적 전체에게 위력 10배 피해를 주고, 아군 전체가 3초 기절합니다."
+    },
+    "heightGroup": "medium",
+    "role": "노멀 덱 · 단일",
+    "shape": "single",
+    "range": 560,
+    "radius": 0
+  },
+  {
+    "id": "toffee_apple",
+    "name": "토피애플",
+    "title": "달콤한 함정",
+    "color": "#d4894a",
+    "art": {
+      "atlas": "unit-silver_rabbit",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 249,
+        "size": 250
+      }
+    },
+    "damage": 24,
+    "interval": 1.4,
+    "attack": "sugar",
+    "trait": {
+      "type": "toffee",
+      "text": "필살기를 쓰면 가장 높은 성급의 토피애플이 3초 기절합니다."
+    },
+    "skill": {
+      "name": "애플봄",
+      "cost": 90,
+      "type": "applebomb",
+      "text": "경로에 폭탄을 설치합니다. 적이 다가오면 전체 9배 폭발, 최대 3개."
+    },
+    "heightGroup": "short",
+    "role": "저축 폭탄 · 관통",
+    "shape": "beam",
+    "range": 520,
+    "radius": 24
+  },
+  {
+    "id": "antropy",
+    "name": "앤트로피",
+    "title": "디버프를 삼키는 빛",
+    "color": "#c9b4f0",
+    "art": {
+      "atlas": "unit-avalanche_maid",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 217,
+        "size": 250
+      }
+    },
+    "damage": 24,
+    "interval": 1.4,
+    "attack": "light",
+    "trait": {
+      "type": "antropy",
+      "text": "자신에게 걸리는 적의 디버프를 무효화합니다."
+    },
+    "skill": {
+      "name": "노바레퀴엠",
+      "cost": 50,
+      "type": "requiem",
+      "text": "적의 모든 디버프를 지우고 전체 7배 피해를 줍니다."
+    },
+    "heightGroup": "medium",
+    "role": "오라 덱 · 범위",
+    "shape": "splash",
+    "range": 480,
+    "radius": 70
+  },
+  {
+    "id": "ash",
+    "name": "애쉬",
+    "title": "환원하는 불꽃",
+    "color": "#ff7048",
+    "art": {
+      "atlas": "unit-red_dragon",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 199,
+        "size": 250
+      }
+    },
+    "damage": 30,
+    "interval": 1.4,
+    "attack": "fire",
+    "trait": {
+      "type": "burn",
+      "text": "일반 공격에 화상을 겁니다."
+    },
+    "skill": {
+      "name": "아마겟돈",
+      "cost": 70,
+      "type": "armageddon",
+      "text": "가장 성급이 낮은 동료를 환원하고, 밀집한 반경에 위력 17배 피해를 줍니다."
+    },
+    "heightGroup": "tall",
+    "role": "화상 · 환원",
+    "shape": "splash",
+    "range": 470,
+    "radius": 64
+  },
+  {
+    "id": "cure_master",
+    "name": "큐어마스터",
+    "title": "무적의 레몬",
+    "color": "#e6de6a",
+    "art": {
+      "atlas": "unit-phantom",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 231,
+        "size": 250
+      }
+    },
+    "damage": 14,
+    "interval": 1.3,
+    "attack": "light",
+    "trait": {
+      "type": "cure",
+      "text": "상하좌우 아군에게 무적 오라를 줍니다."
+    },
+    "skill": {
+      "name": "레모네이드",
+      "cost": 50,
+      "type": "lemonade",
+      "text": "아군 전체의 디버프를 해제하고 3초 무적을 줍니다."
+    },
+    "heightGroup": "short",
+    "role": "보호 · 장판",
+    "shape": "zone",
+    "range": 460,
+    "radius": 60
+  },
+  {
+    "id": "venom",
+    "name": "베놈",
+    "title": "독과 불의 암살자",
+    "color": "#6bc45a",
+    "art": {
+      "atlas": "unit-luna",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 211,
+        "size": 250
+      }
+    },
+    "damage": 34,
+    "interval": 1.2,
+    "attack": "poison",
+    "trait": {
+      "type": "venom",
+      "text": "일반 공격에 중독과 화상을 함께 겁니다."
+    },
+    "skill": {
+      "name": "플래이그",
+      "cost": 80,
+      "type": "venomplague",
+      "text": "적 전체에 위력 3배와 중독 3중첩을 주고, 10초간 화상·중독 피해가 2배가 됩니다."
+    },
+    "heightGroup": "medium",
+    "role": "지속 단일",
+    "shape": "single",
+    "range": 520,
+    "radius": 0
   }
 ];
 

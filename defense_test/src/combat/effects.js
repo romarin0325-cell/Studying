@@ -18,6 +18,7 @@ export const FX_PROFILES=Object.fromEntries([
 for(const [frame,[id,motion]] of [['doom','contract'],['santa','present'],['jasmine','halo'],['star_boy','falling_star'],['time_magician','time_needle'],['cherry_prince','royal_blade']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-expansion',columns:4,rows:3};
 for(const [frame,[id,motion]] of [['frost_witch','ice_lance'],['harmonious','harmony_bell'],['aurora','mirror_shard']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-trio',columns:3,rows:2};
 FX_PROFILES.behemoth={motion:'quake',frame:0,offset:0,atlas:'effects-behemoth',columns:3,rows:1};
+FX_PROFILES.joker=FX_PROFILES.siren;FX_PROFILES.underdog=FX_PROFILES.star_boy;FX_PROFILES.toffee_apple=FX_PROFILES.silver_rabbit;FX_PROFILES.antropy=FX_PROFILES.avalanche_maid;FX_PROFILES.ash=FX_PROFILES.red_dragon;FX_PROFILES.cure_master=FX_PROFILES.phantom;FX_PROFILES.venom=FX_PROFILES.luna;
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
 function disk(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}

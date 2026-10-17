@@ -20,7 +20,7 @@ function coverage(id,cell){
 // Average enemies one attack reaches, by attack shape.
 const aoe=h=>({single:1,beam:1.5,cleave:1.9,pulse:2.4,chain:2.2,bounce:1.8,cross:1.6}[h.shape]??(h.shape==='zone'?1+h.radius/45:h.shape==='splash'?1+h.radius/70:1));
 // Control and team amplification are not in raw damage.
-const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1};
+const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,joker:1,underdog:1,toffee_apple:1,antropy:1,ash:1,cure_master:1,venom:1};
 
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
@@ -128,6 +128,15 @@ function ultValue(s,m,id,gv){
     case 'quake':return strike(E.QUAKE_FACTOR)+control(2.5*scale)+thunderCancel();
     case 'nightmare':return strike(4)+control(2)+dps*.25*Math.min(6,rem)*.6;
     case 'rewind':return strike(3)+control(6)+thunderCancel();
+    case 'roulette':return strike(E.UPCOMING.joker.roulette);
+    case 'bigshow':return Math.max(0,strike(E.UPCOMING.underdog.factor)-dps*E.UPCOMING.underdog.stun);
+    case 'applebomb':return (s.bombs||[]).length>=E.UPCOMING.toffee.max?0:strike(E.UPCOMING.toffee.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.UPCOMING.toffee.stun;
+    case 'requiem':{const share=list.length?list.filter(e=>(e.statusEffects||[]).length||(e.slowEffects||[]).length||e.burn||e.poison||e.slowTime||e.stun||e.freeze).length/list.length:0;return strike(E.UPCOMING.antropy.factor)-dps*2*share;}
+    case 'armageddon':{const r=E.UPCOMING.ash.radius;let best=[];for(const e of list){const p=E.pathPoint(e.progress),near=list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=r;});if(near.length>best.length)best=near;}
+      const others=CELLS.map(i=>s.board[i]&&s.board[i].uid!==u.uid?{i,ally:s.board[i]}:null).filter(Boolean).sort((a,b)=>a.ally.rank-b.ally.rank||a.ally.uid-b.ally.uid),vic=others[0];
+      return best.reduce((n,e)=>n+hit(E.UPCOMING.ash.factor,e),0)-(vic?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(30,timeLeft(s)):0);}
+    case 'lemonade':{const sec=E.UPCOMING.cure.seconds,soon=s.telegraph&&s.telegraph.ends-s.time<=sec?litCells(s):new Set();let v=0;for(const c of CELLS){const a=s.board[c];if(!a)continue;const wait=a.disabled>0?Math.min(sec,a.disabled):soon.has(c)?sec:0;if(wait)v+=unitValue(s,a,c)*m.scale*wait;}return v;}
+    case 'venomplague':return strike(E.UPCOMING.venom.factor)+list.reduce((n,e)=>n+((e.burn||0)+E.statusState(s,e).poisonDps)*E.UPCOMING.venom.seconds*E.UPCOMING.venom.amp,0);
     default:return strike(3);
   }
 }
@@ -213,7 +222,7 @@ function placeNew(s,index){
 function optimize(s,m){
   const lit=litCells(s),total=Math.max(1e-9,boardValue(s));let best=null;
   const units=CELLS.filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
-  const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth']);
+  const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth','cure_master']);
   const pick=[...new Set([...units.slice(0,10),...units.filter(c=>support.has(s.board[c].hero))])];
   for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
   if(best&&best.d>total*.03){E.move(s,best.a,best.b);return true;}
