@@ -9,7 +9,7 @@ const midi=n=>440*Math.pow(2,(n-69)/12),RANK=['C','R','SR','UR'],MAX_VOICES=28;
 // Attack families by motion: blades swish, impacts thud, everything else is a light magic chime.
 const BLADE=new Set(['crescent','daggers','claws','needle','royal_blade','leap','ice_lance']),IMPACT=new Set(['quake','dragon','planet','cross','present','contract']);
 export class Sound {
-  constructor(){this.ctx=null;this.enabled=true;this.music=true;this.volume=.35;this.next=0;this.beat=0;this.timer=null;this.battle=false;this.boss=false;this.lastHit=0;this.lastAttack=0;this.lastKill=0;this.voices=0;this.tracks={};this.playing=null;this.failed=false;}
+  constructor(){this.ctx=null;this.enabled=true;this.music=true;this.volume=.35;this.next=0;this.beat=0;this.timer=null;this.battle=false;this.boss=false;this.lastHit=-1;this.lastAttack=-1;this.lastKill=-1;this.voices=0;this.tracks={};this.playing=null;this.failed=false;}
   unlock(){
     if(!this.ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;try{this.build(new Audio());this.timer=setInterval(()=>this.schedule(),120);}catch{this.ctx=null;return;}}
     if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
@@ -19,7 +19,7 @@ export class Sound {
     const comp=c.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=12;comp.ratio.value=3.5;comp.attack.value=.004;comp.release.value=.18;
     this.master.connect(comp);comp.connect(c.destination);
     this.sfx=c.createGain();this.sfx.gain.value=1;this.sfx.connect(this.master);
-    this.musicBus=c.createGain();this.musicBus.gain.value=.5;this.musicBus.connect(this.master);
+    this.musicBus=c.createGain();this.musicBus.gain.value=.4;this.musicBus.connect(this.master);
     // 1.4 s stereo room: decaying filtered noise, built once.
     const len=Math.floor(c.sampleRate*1.4),ir=c.createBuffer(2,len,c.sampleRate);
     for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let lp=0;for(let i=0;i<len;i++){lp=lp*.55+(Math.random()*2-1)*.45;d[i]=lp*Math.pow(1-i/len,3.2);}}
@@ -86,12 +86,12 @@ export class Sound {
   event(e){if(!this.ctx||!this.enabled)return;const t=this.ctx.currentTime,j=1+(Math.random()-.5)*.08;
     switch(e.type){
       case 'attack':{if(t-this.lastAttack<.07)return;this.lastAttack=t;const f=FX_PROFILES[e.hero],m=f?.motion,k=(f?.frame||0)%8;
-        if(BLADE.has(m)){this.noise(t,.09,.05,2600*j,'bandpass',6500,1.2);this.tone(900*j+k*30,t+.01,.06,.012,'triangle',600);}
-        else if(IMPACT.has(m)){this.tone(120*j,t,.12,.06,'sine',55);this.noise(t,.07,.035,900,'lowpass');}
-        else{this.tone((700+k*60)*j,t,.12,.022,'triangle',(1000+k*70)*j,.25);this.tone((1400+k*90)*j,t+.03,.09,.008,'sine',null,.3);}
+        if(BLADE.has(m)){this.noise(t,.09,.15,2600*j,'bandpass',6500,1.2);this.tone(900*j+k*30,t+.01,.06,.03,'triangle',600);}
+        else if(IMPACT.has(m)){this.tone(120*j,t,.12,.11,'sine',55);this.noise(t,.07,.06,900,'lowpass');}
+        else{this.tone((700+k*60)*j,t,.12,.05,'triangle',(1000+k*70)*j,.25);this.tone((1400+k*90)*j,t+.03,.09,.016,'sine',null,.3);}
         return;}
-      case 'hit':if(t-this.lastHit<.06)return;this.lastHit=t;this.noise(t,.04,.03,1800*j,'bandpass',900,1.4);return;
-      case 'kill':if(t-this.lastKill<.09)return;this.lastKill=t;this.tone(1250*j,t,.08,.016,'triangle',1900);this.noise(t,.05,.015,5200,'highpass');return;
+      case 'hit':if(t-this.lastHit<.06)return;this.lastHit=t;this.noise(t,.045,.1,1800*j,'bandpass',900,1.2);return;
+      case 'kill':if(t-this.lastKill<.09)return;this.lastKill=t;this.tone(1250*j,t,.08,.026,'triangle',1900);this.noise(t,.05,.025,5200,'highpass');return;
       case 'summon':[72,76,79,84].forEach((n,i)=>this.tone(midi(n),t+i*.045,.32,.05,'triangle',null,.35));this.noise(t,.3,.025,1800,'bandpass',7000,.9,.3);return;
       case 'merge':{this.noise(t,.22,.04,500,'bandpass',5000,1.1);[67,71,74,79,83,86].forEach((n,i)=>this.tone(midi(n),t+.05+i*.04,.45,.055,'triangle',null,.4));this.tone(midi(91),t+.32,.6,.02,'sine',null,.6);return;}
       case 'upgrade':[76,79,83].forEach((n,i)=>this.tone(midi(n),t+i*.05,.28,.05,'square',null,.2));this.noise(t,.12,.02,6000,'highpass');return;
@@ -102,9 +102,9 @@ export class Sound {
         // Wind-up, impact, then a bright chord: every ultimate lands like a moment.
         this.noise(t,.3,.05,300,'bandpass',4200,1.2);this.tone(70,t+.26,.6,.22,'sine',32);this.noise(t+.26,.45,.12,2800,'lowpass',400,.7,.25);
         this.chord(e.support?[72,76,79,84]:[69,73,76,81],t+.3,.9,.045,'sawtooth',.012,.45);this.chord([84,88,91],t+.34,.7,.02,'triangle',.02,.5);return;}
-      case 'crushPhase':this.tone(58*j,t,.55,.26,'sine',30);this.noise(t,.5,.16,1400,'lowpass',180,.9,.2);for(let i=0;i<4;i++)this.noise(t+.04+i*.05,.06,.05,3000+i*600,'bandpass',null,2);return;
+      case 'crushPhase':this.tone(58*j,t,.6,.4,'sine',30);this.tone(116*j,t,.25,.12,'triangle',50);this.noise(t,.55,.24,1400,'lowpass',180,.9,.2);for(let i=0;i<4;i++)this.noise(t+.04+i*.05,.07,.08,3000+i*600,'bandpass',null,2);return;
       case 'dreamPhase':this.chord([e.phase%2?74:72,79,86],t,.5,.03,'sine',.03,.6);this.noise(t,.35,.03,2000,'bandpass',8000,.8,.5);return;
-      case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.45,.2,'sine',30);this.noise(t,e.kind==='royal'?.16:.3,.11,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.4,.04,'triangle',440,.5);return;
+      case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;
       case 'finisherFizzle':this.tone(440,t,.3,.03,'sine',220);return;
       case 'meteor':this.noise(t,.4,.06,600,'bandpass',3000,1);this.tone(90,t+.35,.4,.16,'sine',40);return;
       case 'impact':this.tone(95,t,.25,.1,'sine',45);this.noise(t,.18,.05,1500,'lowpass');return;
@@ -113,12 +113,12 @@ export class Sound {
       case 'phoenix':this.chord([69,76,81,88],t,1.1,.04,'triangle',.06,.6);this.noise(t,.8,.04,900,'bandpass',6000,.8,.4);return;
       case 'blessing':[76,81,88].forEach((n,i)=>this.tone(midi(n),t+i*.06,.4,.04,'triangle',null,.5));return;
       case 'ribbon':[83,88,93].forEach((n,i)=>this.tone(midi(n),t+.1+i*.07,.2,.04,'triangle',null,.4));return;
-      case 'wave':this.chord([64,71,76],t,.5,.035,'triangle',.06,.4);this.noise(t,.4,.02,1200,'bandpass',4000,.8);return;
+      case 'wave':this.chord([64,71,76],t,.5,.05,'triangle',.06,.4);this.noise(t,.4,.02,1200,'bandpass',4000,.8);return;
       case 'warning':case 'bossApproach':this.tone(330,t,.22,.07,'square');this.tone(330,t+.3,.22,.07,'square');this.tone(80,t,.5,.06,'sawtooth',60);return;
       case 'boss':this.tone(55,t,1.2,.2,'sawtooth',41);this.noise(t,1,.06,300,'lowpass',90);this.chord([50,53,57],t+.1,1.2,.05,'sawtooth',.0,.5);return;
-      case 'bossCast':case 'judgement':case 'seal':case 'curse':case 'drain':this.tone(165,t,.45,.07,'sawtooth',110);this.noise(t,.4,.04,700,'bandpass',200,1.5,.3);return;
+      case 'bossCast':case 'judgement':case 'seal':case 'curse':case 'drain':this.tone(165,t,.5,.12,'sawtooth',110);this.tone(82,t,.5,.1,'sine',55);this.noise(t,.45,.08,700,'bandpass',200,1.5,.3);return;
       case 'interrupt':this.tone(980,t,.12,.05,'square',1470);this.noise(t,.1,.04,6000,'highpass');return;
-      case 'leak':this.tone(150,t,.32,.12,'sawtooth',55);this.noise(t,.2,.06,500,'lowpass');return;
+      case 'leak':this.tone(150,t,.34,.2,'sawtooth',55);this.tone(75,t,.3,.14,'sine',40);this.noise(t,.22,.1,500,'lowpass');return;
       case 'clear':this.fanfare(t);return;
       case 'perfect':this.perfect();return;
       case 'defeat':[64,60,57,52].forEach((n,i)=>this.tone(midi(n),t+i*.22,.6,.05,'triangle',null,.4));return;

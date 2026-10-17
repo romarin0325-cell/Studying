@@ -67,3 +67,13 @@ body{color:var(--text)}
 .splash-bar i{background:linear-gradient(90deg,transparent,#2f86f6,transparent)}
 .splash-start{color:#1d3f86;text-shadow:0 0 10px #fff,0 0 2px #fff}
 .splash-version{color:rgba(29,42,71,.5)}
+
+/* Perfect clear marks and reward chips. */
+.result-perfect{background:linear-gradient(180deg,#ffe58f,#f3b62b);color:#4a2c00;box-shadow:0 3px 10px rgba(220,150,20,.3)}
+.prep-reward{background:rgba(255,255,255,.88);color:#1d2a47;box-shadow:inset 0 0 0 1px rgba(58,96,168,.14)}
+.prep-reward.perfect{background:rgba(255,255,255,.7);color:#a86c00;border-color:rgba(214,150,30,.55)}
+.prep-reward.perfect .ic{color:#c98a12}
+.prep-reward.perfect.done{background:linear-gradient(180deg,#ffe58f,#f3b62b);color:#4a2c00}
+.stage-state.perfect,.stage-state.perfect .ic,.stage.done .stage-state.perfect .ic{color:#e0a114}
+.chap.all-perfect small{color:#c98a12}
+.chap.all-perfect[aria-pressed=true] small{color:#fff3c0}

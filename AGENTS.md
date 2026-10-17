@@ -18,6 +18,7 @@ Functional correctness of the browser app is more important than refactoring or 
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `idle/`: Astral Companions idle game (`idle/dist/AstralCompanions.html`)
 - `defense_test/`: Star Garden defense prototype (`defense_test/dist/StarGardenDefense.html`)
+- `defense_test/` bright skin: comparison build of the same game (`node scripts/build.mjs --bright` → `defense_test/dist/StarGardenDefenseBright.html`; `--bright --unlocked` for the local test build)
 - `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
 - `defense/`: Hero Core Defense (`defense/dist-local/HeroCoreDefense.html`)
 
