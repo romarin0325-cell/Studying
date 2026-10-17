@@ -2,7 +2,7 @@ import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
-export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field';
+export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field'; // crush is a field ultimate
 export function impactSize(hero,rank=1){const h=HERO[hero],area=['cleave','pulse','beam','cross','splash','zone'].includes(h.shape);return (area?82:62)+Math.min(5,rank)*4+(hero==='red_dragon'?22:hero==='santa'?10:0);}
 
 // Frame order is the authored 7 x 3 SD atlas. Every companion owns a silhouette.
@@ -17,6 +17,7 @@ export const FX_PROFILES=Object.fromEntries([
 ].map(([id,motion,frame,offset])=>[id,{motion,frame,offset}]));
 for(const [frame,[id,motion]] of [['doom','contract'],['santa','present'],['jasmine','halo'],['star_boy','falling_star'],['time_magician','time_needle'],['cherry_prince','royal_blade']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-expansion',columns:4,rows:3};
 for(const [frame,[id,motion]] of [['frost_witch','ice_lance'],['harmonious','harmony_bell'],['aurora','mirror_shard']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-trio',columns:3,rows:2};
+FX_PROFILES.behemoth={motion:'quake',frame:0,offset:0,atlas:'effects-behemoth',columns:3,rows:1};
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
 function disk(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
@@ -93,7 +94,7 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
-    if(e.type==='attack'&&['zeke','guardian','ancient_dragon'].includes(e.hero)){const life=e.hero==='guardian'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
+    if(e.type==='attack'&&['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero)){const life=e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
@@ -106,6 +107,7 @@ export class CombatFX{
     if(e.type==='impact')this.add({...e,life:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3,total:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3});
     if(e.type==='chain')this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life:.24,total:.24,rank:1});
     if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
+    if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
     if(e.type==='skill'){
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
@@ -437,7 +439,7 @@ export class CombatFX{
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
-    if(['zeke','guardian','ancient_dragon'].includes(h.id))return;
+    if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'){
       const atlas=f.atlas||'effects',frame=shot.form==='trauma'?15:f.frame;
       if(shot.form==='trauma'){this.glow('glow','#ff5c8a',x,y,70,.55);this.atlasStamp('ultimates',15,4,4,x,y,88,88,angle+Math.PI/4,.95,'source-over');}
@@ -521,8 +523,8 @@ export class CombatFX{
           const run=easeOut(window01(t,.1,.36)),r=40+(reach-40)*run,hgt=Math.min(1.45*reach,300)/.82*(.55+.45*run),w=Math.max(70,Math.min(130,reach*.42)),land=window01(t,.36,1);
           if(t>.1){const cx=r-w*.44;slash(0,cx,w,hgt,a*(1-land)*Math.min(1,run*3));slash(land<.5?1:2,cx,w,hgt,a*Math.sin(Math.PI*land)*.9);}
           ctx.restore();
-        }else if(e.hero==='guardian'){
-          ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp('guardian',e.origin.x,e.origin.y,90+t*30,0,fade*.46);
+        }else if(e.hero==='guardian'||e.hero==='behemoth'){
+          ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp(e.hero,e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
           // Basic attack, not an ultimate: a small cross at the dragon and four thin flame arms.
           const reach=h.range*Math.min(1,t*2.4),a=fade*fireClarity;
@@ -559,6 +561,14 @@ export class CombatFX{
         const fall=Math.min(1,t*4),fade=1-t;ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createLinearGradient(0,0,0,e.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,'#fff6d8ee');ctx.globalAlpha=fade;ctx.fillStyle=g;const w=36+t*50;ctx.fillRect(e.x-w/2,0,w,e.y*fall);ctx.restore();
         this.glow('rays','#ffe9a8',e.x,e.y-10,260*Math.min(1,t*3),fade*.9,t);this.glow('glow','#fff6d8',e.x,e.y-10,200,fade);
         ctx.save();ctx.globalAlpha=fade;ctx.strokeStyle='#fff2c0';ctx.lineWidth=6*fade+1;ctx.beginPath();ctx.ellipse(e.x,e.y+20,30+t*90,12+t*30,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
+      }
+      if(e.type==='crushPhase'){
+        const fade=1-window01(t,.35,.9),radius=e.radius||150,color=HERO.behemoth.color,pop=t<.4?.6+easeBack(t/.4)*.55:1.15,emblem=1-window01(t,.45,.9),ring=easeOut(window01(t,0,.7));
+        this.atlasStamp('effects-behemoth',2,3,1,e.x,e.y,2*radius*1.1,2*radius*1.1,0,fade,'source-over');
+        this.atlasStamp('effects-behemoth',1,3,1,e.x,e.y-8,210*pop,210*pop,0,emblem,'screen');
+        ctx.save();ctx.globalAlpha=(1-ring)*.85*(this.reduced?.55:1);ctx.strokeStyle=color;ctx.lineWidth=6*(1-ring)+2;ctx.beginPath();ctx.ellipse(e.x,e.y+6,Math.max(8,radius*ring),Math.max(4,radius*ring*.42),0,0,Math.PI*2);ctx.stroke();ctx.restore();
+        if(!this.reduced)for(let i=0;i<6;i++){const a=hash(e.x+e.phase,i)*Math.PI*2,v=40+hash(e.y,i+3)*70,k=easeOut(t);ctx.save();ctx.globalAlpha=fade;ctx.translate(e.x+Math.cos(a)*v*k,e.y+Math.sin(a)*v*k*.5);diamond(ctx,0,0,4+hash(e.phase,i)*4,i%2?color:'#fff6d0');ctx.restore();}
+        continue;
       }
       if(e.type==='dreamHit'){const c=['#ffd36a','#cfe3ff','#fff4c8','#ffc4ec'][e.phase]||'#ffffff',fade=1-t,size=(e.phase===3?100:74)*(1+t*.4);this.glow('glow',c,e.x,e.y-18,size,fade*.85);
         if(e.phase===1){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.85;ctx.drawImage(this.sprite('crescent','#e6f0ff'),e.x-size*.3,e.y-18-size*.3,size*.6,size*.6);ctx.restore();}

@@ -9,7 +9,7 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,54);
+  assert.equal(Object.keys(ASSET_PATHS).length,56);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['fx-emblems',1536,512],['gifts',768,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.

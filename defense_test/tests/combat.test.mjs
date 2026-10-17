@@ -86,7 +86,7 @@ function soloWinner(s){
 }
 
 test('the exact rarity roster has independent valid stats and all 45 stages rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,30);assert.equal(new Set(HEROES.map(h=>h.id)).size,30);
+  assert.equal(HEROES.length,31);assert.equal(new Set(HEROES.map(h=>h.id)).size,31);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹']);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
@@ -233,7 +233,7 @@ test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain th
       assert.equal(trait.size,cells.length);close(trait.damageMultiplier,multiplier);
       close(E.power(s,u),HERO.lightning_sage.damage*multiplier);
       close(stats.damage,HERO.lightning_sage.damage*multiplier);
-      close(stats.skillPower,E.power(s,u));close(stats.chainRatio,ratio);assert.equal(stats.extraChain,extra);
+      close(stats.damage,E.power(s,u));close(stats.chainRatio,ratio);assert.equal(stats.extraChain,extra);
     }
   }
 });
@@ -300,7 +300,6 @@ test('Star Boy and Time Ruler use birth-wave age for exact power, displayed powe
       close(E.personalTrait(s,u).damageMultiplier,factor);
       close(E.power(s,u),HERO[id].damage*factor);
       close(E.combatStats(s,u).damage,HERO[id].damage*factor);
-      close(E.combatStats(s,u).skillPower,HERO[id].damage*factor);
       s.gauge=120;const before=enemy.hp;assert.ok(E.cast(s,id).ok);
       if(id==='star_boy'){
         // A full 120 gauge is spent at 0.4× power per point.
@@ -938,12 +937,20 @@ test('divine is three independently timed stacks that feed starlight on a kill a
   assert.ok(fresh.until>until);
 });
 
-test('winter makes every enemy take 15% more damage',()=>{
-  const s=traitArena([{hero:'star_boy',index:12}]);const [e]=enemiesFor(s,[{hp:1e9}]);quiet(s);
-  s.buffs.winter=6;const shot=launchNormal(s,s.board[12]);const hp=e.hp;resolveNormal(s,shot);close(hp-e.hp,shot.damage*(1+E.WINTER_TAKEN));
-  s.buffs.winter=0;const again=launchNormal(s,s.board[12]);const hp2=e.hp;resolveNormal(s,again);close(hp2-e.hp,again.damage);
-  const w=traitArena([{hero:'frost_witch',index:12}]);enemiesFor(w,[{}]);
-  assert.ok(E.castPreview(w,'frost_witch').lines.some(line=>line===`겨울 동안 적이 받는 피해가 ${Math.round(E.WINTER_TAKEN*100)}% 늘어납니다.`));
+test('winter exposure is a normal exposure and only the strongest one counts',()=>{
+  const s=traitArena([{hero:'frost_witch',index:12},{hero:'great_detective',index:11},{hero:'star_boy',index:13}]);
+  const [e]=enemiesFor(s,[{hp:1e9}]);quiet(s);readyCast(s,'frost_witch');
+  const winter=E.statusState(s,e);close(winter.exposure,E.WINTER_EXPOSURE);close(e.exposeTime,6);close(s.buffs.winter,6);
+  const shot=launchNormal(s,s.board[13]);const hp=e.hp;resolveNormal(s,shot);close(hp-e.hp,shot.damage*(1+E.WINTER_EXPOSURE));
+  readyCast(s,'great_detective');
+  const layers=e.statusEffects.filter(effect=>effect.type==='exposure');
+  assert.equal(layers.length,2);assert.ok(layers.some(effect=>effect.amount===E.WINTER_EXPOSURE)&&layers.some(effect=>effect.amount===.35));
+  const won=E.statusState(s,e);close(won.exposure,.35);close(e.takenBonus,.35);
+  const det=launchNormal(s,s.board[13]);const hp2=e.hp;resolveNormal(s,det);close(hp2-e.hp,det.damage*1.35);
+  e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='exposure');assert.ok(s.buffs.winter>0);
+  const cleared=E.statusState(s,e);close(cleared.exposure,0);close(e.takenBonus,0);
+  const plain=launchNormal(s,s.board[13]);const hp3=e.hp;resolveNormal(s,plain);close(hp3-e.hp,plain.damage);
+  assert.ok(E.castPreview(s,'frost_witch').lines.some(line=>line===`겨울 동안 적이 받는 피해가 ${Math.round(E.WINTER_EXPOSURE*100)}% 늘어납니다.`));
 });
 
 test('Frost Witch freezes only already-slowed enemies, relocks each for three seconds and a frozen death spreads slow',()=>{
@@ -1458,4 +1465,113 @@ test('conditional ultimates report their live boost: lit with the boosted number
   g=E.castPreview(mixed,'guardian');assert.equal(g.boost.label,'강화 1명');assert.match(g.lines[1],/강화된 1명/);
   const calm=E.castPreview(s,'zeke');assert.equal(calm.boost.on,false);s.health=9;const crisis=E.castPreview(s,'zeke');assert.equal(crisis.boost.on,true);
   const n=line=>Number(line.match(/([\d,]+) 피해/)[1].replace(/,/g,''));close(n(crisis.lines[0])/n(calm.lines[0]),2,'boosted Zeke shows the doubled hit');
+});
+
+test('a leak counts once and an older save defaults leaks from remaining core health',()=>{
+  const s=E.newRun({seed:1234});assert.equal(s.stats.leaks,0);
+  s.queue=[{kind:'grunt',hp:1e9}];s.spawnIn=0;E.step(s,.05);
+  const enemy=s.enemies[0];enemy.progress=E.PATH_LENGTH;enemy.speed=0;enemy.skillIn=1e9;const health=s.health;
+  E.step(s,.05);assert.equal(s.health,health-1);assert.equal(s.stats.leaks,1);
+  const raw=JSON.parse(E.serialize(s));delete raw.stats.leaks;raw.health=19;
+  const hurt=E.restore(raw);assert.ok(hurt);assert.equal(hurt.stats.leaks,1);
+  const full=JSON.parse(E.serialize(s));delete full.stats.leaks;full.health=20;
+  const intact=E.restore(full);assert.ok(intact);assert.equal(intact.stats.leaks,0);
+  const kept=JSON.parse(E.serialize(s));kept.stats.leaks=2;kept.health=20;assert.equal(E.restore(kept).stats.leaks,2);
+  for(const bad of [-1,1.5]){const broken=JSON.parse(E.serialize(s));broken.stats.leaks=bad;assert.equal(E.restore(broken),null);}
+  const month=JSON.parse(E.serialize(s));delete month.stats.leaks;month.mode='monthly';month.health=6;
+  assert.equal(E.restore(month).stats.leaks,1);
+  const monthFull=JSON.parse(E.serialize(s));delete monthFull.stats.leaks;monthFull.mode='monthly';monthFull.health=7;
+  assert.equal(E.restore(monthFull).stats.leaks,0);
+});
+
+test('behemoth doubles placement auras and not ultimate buffs',()=>{
+  const plain=traitArena([{hero:'ancient_dragon',index:7},{hero:'siren',index:11},{hero:'luna',index:12}]);
+  const beast=traitArena([{hero:'ancient_dragon',index:7},{hero:'siren',index:11},{hero:'behemoth',index:12}]);
+  const luna=plain.board[12],beh=beast.board[12];
+  close(E.combatStats(plain,luna).damage/E.power(plain,luna),1.2);
+  close(HERO.luna.interval/E.combatStats(plain,luna).cooldown,1.15);
+  close(E.combatStats(beast,beh).damage/E.power(beast,beh),1.4);
+  close(HERO.behemoth.interval/E.combatStats(beast,beh).cooldown,1.3);
+  assert.ok(E.combatStats(beast,beh,12,true).bonuses.includes('오라 2배'));
+  plain.buffs.awaken=8;beast.buffs.awaken=8;
+  close(E.combatStats(plain,luna).damage/E.power(plain,luna),1.2*1.35);
+  close(E.combatStats(beast,beh).damage/E.power(beast,beh),1.4*1.35);
+});
+
+test('crush hits three times around a seeded enemy, echoes on the last hit, and stays recastable across a save',()=>{
+  const inside=(centre,e)=>Math.hypot(E.pathPoint(e.progress).x-centre.x,E.pathPoint(e.progress).y-centre.y)<=E.CRUSH.radius;
+  const s=traitArena([{hero:'behemoth',index:12}]);
+  const pack=enemiesFor(s,[{hp:1e9,progress:1200},{hp:1e9,progress:1280},{hp:1e9,progress:1800}]);quiet(s);
+  const startHp=pack.map(e=>e.hp),t0=s.time;readyCast(s,'behemoth');
+  assert.equal(s.volleys.length,3);assert.deepEqual(pack.map(e=>e.hp),startHp,'nothing lands at the cast');
+  assert.deepEqual(s.volleys.map(v=>v.total),[E.CRUSH.first,E.CRUSH.first+E.CRUSH.gap,E.CRUSH.first+2*E.CRUSH.gap]);
+  const hit=E.power(s,s.board[12])*E.CRUSH.factor;
+  for(const at of [t0+E.CRUSH.first,t0+E.CRUSH.first+E.CRUSH.gap,t0+E.CRUSH.first+2*E.CRUSH.gap]){
+    const before=pack.map(e=>e.hp);advanceTo(s,at);
+    const phase=s.events.filter(event=>event.type==='crushPhase').at(-1);
+    close(phase.time,at);assert.equal(phase.radius,E.CRUSH.radius);
+    pack.forEach((e,i)=>{const drop=before[i]-e.hp;if(inside(phase,e))close(drop,hit);else assert.equal(drop,0);});
+  }
+  const bossRun=traitArena([{hero:'behemoth',index:12}]);
+  const [boss]=enemiesFor(bossRun,[{kind:'boss',hp:1e9,progress:1200}]);quiet(bossRun);
+  const bossHp=boss.hp,b0=bossRun.time;readyCast(bossRun,'behemoth');
+  const alone=E.castPreview(bossRun,'behemoth');
+  assert.match(alone.lines[0],/반경 150/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
+  assert.ok(alone.lines.some(line=>line.includes('하나뿐')&&line.includes(Math.round(E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits).toLocaleString('ko-KR'))));
+  advanceTo(bossRun,b0+1.3);close(bossHp-boss.hp,E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits);
+  const crowd=traitArena([{hero:'behemoth',index:12}]);enemiesFor(crowd,[{hp:1e9,progress:1200},{hp:1e9,progress:1800}]);quiet(crowd);
+  assert.equal(E.castPreview(crowd,'behemoth').lines.some(line=>line.includes('하나뿐')),false);
+  const twin=traitArena([{hero:'behemoth',index:12}],{artifacts:['twin']});
+  enemiesFor(twin,[{hp:1e9,progress:1200}]);quiet(twin);const tw0=twin.time;readyCast(twin,'behemoth');
+  advanceTo(twin,tw0+E.CRUSH.first);assert.equal(twin.finishers.filter(f=>f.kind==='echo').length,0);
+  advanceTo(twin,tw0+E.CRUSH.first+2*E.CRUSH.gap);
+  const echoes=twin.finishers.filter(f=>f.kind==='echo');assert.equal(echoes.length,1);
+  close(echoes[0].damage,E.power(twin,twin.board[12])*E.CRUSH.factor*E.CRUSH.hits*E.RELIC_VALUES.twin.echo);
+  const mid=traitArena([{hero:'behemoth',index:12}]);
+  const trio=enemiesFor(mid,[{hp:1e9,progress:1200},{hp:1e9,progress:1280},{hp:1e9,progress:1800}]);quiet(mid);
+  const m0=mid.time;readyCast(mid,'behemoth');advanceTo(mid,m0+E.CRUSH.first);
+  const saved=E.restore(E.serialize(mid));assert.ok(saved);assert.equal(saved.volleys.length,2);
+  advanceTo(mid,m0+1.3);advanceTo(saved,m0+1.3);
+  trio.forEach((e,i)=>close(saved.enemies[i].hp,e.hp));
+  const lock=traitArena([{hero:'behemoth',index:12}]);enemiesFor(lock,[{hp:1e9}]);quiet(lock);
+  readyCast(lock,'behemoth');assert.equal(E.castLock(lock,'behemoth'),null);
+  lock.gauge=120;assert.equal(E.cast(lock,'behemoth').ok,true);assert.equal(lock.gauge,50);
+});
+test('an ultimate hits for the power shown on the unit: auras, running ultimate buffs and relic power all count',()=>{
+  // The rule players read from the texts (a "power +N%" effect makes the unit hit harder, ultimate included), taken at the moment of the cast.
+  const hitOf=(s,id,e)=>{const before=e.hp;quiet(s);readyCast(s,id);return before-e.hp;};
+  const plain=traitArena([{hero:'zeke',index:12}]),[pe]=enemiesFor(plain,[{hp:1e9,progress:1200}]);
+  const base=hitOf(plain,'zeke',pe);close(base,E.power(plain,plain.board[12])*7,'no bonus: unchanged');
+  // Placement aura (Ancient Dragon next to Zeke: +20%).
+  const aura=traitArena([{hero:'zeke',index:12},{hero:'ancient_dragon',index:13}]),[ae]=enemiesFor(aura,[{hp:1e9,progress:1200}]);
+  const stats=E.combatStats(aura,aura.board[12]);assert.ok(stats.damage>E.power(aura,aura.board[12])*1.19);
+  close(hitOf(aura,'zeke',ae),stats.damage*7,'aura counts');
+  // The preview shows the same number the cast deals.
+  const prev=traitArena([{hero:'zeke',index:12},{hero:'ancient_dragon',index:13}]);enemiesFor(prev,[{hp:1e9,progress:1200}]);quiet(prev);prev.gauge=120;
+  const shown=E.castPreview(prev,'zeke').lines.join(' ');assert.ok(shown.includes(Math.round(E.combatStats(prev,prev.board[12]).damage*7).toLocaleString('ko-KR')),'preview uses the live power');
+  // A running ultimate buff (awaken: +35%) and a relic power bonus (crown on a 3-star: +16%) multiply as separate families.
+  const buffed=traitArena([{hero:'zeke',index:12,rank:3}],{artifacts:['crown']}),[be]=enemiesFor(buffed,[{hp:1e9,progress:1200}]);
+  buffed.buffs.awaken=8;buffed.buffTotals.awaken=8;
+  const live=E.combatStats(buffed,buffed.board[12]).damage;close(live/E.power(buffed,buffed.board[12]),1.35*(1+E.RELIC_VALUES.crown.power*E.relicScaleIn(buffed,'crown')));
+  close(hitOf(buffed,'zeke',be),live*7,'buff and relic count');
+  // The cast does not amplify itself: a buff cast (goddess radiance +50%) deals its own hit at the pre-cast power.
+  const self=traitArena([{hero:'jasmine',index:12}]),[se]=enemiesFor(self,[{hp:1e9,progress:1200}]);const pre=E.combatStats(self,self.board[12]).damage;
+  close(hitOf(self,'jasmine',se),pre*5,'goddess hit is taken before radiance');
+  // Behemoth takes placement auras twice, and so do his shocks.
+  const beast=traitArena([{hero:'behemoth',index:12},{hero:'ancient_dragon',index:13}]),[de]=enemiesFor(beast,[{hp:1e9,progress:1200}]);
+  quiet(beast);beast.board[12].disabled=0; // quiet() parks every unit; Behemoth must stay enabled to double auras
+  const bs=E.combatStats(beast,beast.board[12]);close(bs.damage/E.power(beast,beast.board[12]),1.4);
+  const b0=beast.time;readyCast(beast,'behemoth');advanceTo(beast,b0+1.3);close(1e9-de.hp,bs.damage*E.CRUSH.factor*E.CRUSH.hits,'crush uses the doubled aura');
+});
+
+test('stacked crush casts (and a dream form on top) still save and resume with every pending shock',()=>{
+  // Casting is not locked: with enough starlight several crushes queue inside 1.25 s. Each queues three shocks.
+  for(const plan of [['behemoth','behemoth','behemoth','behemoth'],['rumi','behemoth','behemoth','behemoth'],Array(8).fill('behemoth')]){
+    const s=traitArena([{hero:'behemoth',index:12},{hero:'rumi',index:13,rank:5}]);
+    const pack=enemiesFor(s,[{hp:1e12,progress:1200},{hp:1e12,progress:1260},{hp:1e12,progress:1800}]);quiet(s);s.gold=1e6;
+    for(const id of plan){s.gauge=s.gaugeMax;assert.equal(E.cast(s,id).ok,true,id);}
+    const pending=s.volleys.length;assert.equal(pending,plan.filter(id=>id==='behemoth').length*E.CRUSH.hits+(plan.includes('rumi')?E.RUMI_DREAM.phases.length:0));
+    const saved=E.restore(E.serialize(s));assert.ok(saved,plan.join('+')+' must restore');assert.equal(saved.volleys.length,pending);
+    const t=s.time+3;advanceTo(s,t);advanceTo(saved,t);pack.forEach((e,i)=>close(saved.enemies[i].hp,e.hp));assert.equal(saved.volleys.length,0);
+  }
 });

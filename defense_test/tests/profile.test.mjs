@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING} from '../src/content.js';
-import {unlockProfile} from '../src/test-unlock.js';
+import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel} from '../src/economy.js';
@@ -233,6 +233,50 @@ test('concurrent windows, clock rollback, daily rewards and first-clear rewards 
   assert.equal(s.value.dreams,dreams+60);
   call(s,'idle',{},NOW+21*HOUR);const dust=s.value.dust;
   assert.equal(s.transact('idle',{},NOW).ok,false);assert.equal(s.value.dust,dust);
+});
+
+test('topUpUnlocked owns companions and relics added after the save, and testGrant is unlocked-only',()=>{
+  const raw=createProfile(NOW);delete raw.heroes.behemoth;delete raw.relics.hourglass;
+  raw.heroes.star_boy.bond=6;raw.heroes.star_boy.bondXp=3;
+  raw.relics.lens.owned=true;raw.relics.lens.enhance=2;raw.relics.lens.copies=1;
+  const p=parseProfile(JSON.stringify(raw));
+  assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.relics.hourglass.owned,false);
+  topUpUnlocked(p);
+  assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.heroes.behemoth.bond,10);assert.equal(p.heroes.behemoth.bondXp,0);
+  assert.equal(p.heroes.star_boy.bond,6);assert.equal(p.heroes.star_boy.bondXp,3);
+  assert.equal(p.relics.hourglass.owned,true);assert.equal(p.relics.hourglass.enhance,6);assert.equal(p.relics.hourglass.copies,20);
+  assert.equal(p.relics.lens.enhance,2);assert.equal(p.relics.lens.copies,1);
+  assert.equal(validateProfile(p),true);
+  const dreams=p.dreams,dust=p.dust;
+  const denied=command(p,'testGrant',{},NOW);assert.equal(denied.ok,false);assert.equal(p.dreams,dreams);assert.equal(p.dust,dust);
+  assert.equal(command(p,'testGrant',{unlocked:true},NOW).ok,false,'no argument opens it outside the unlocked build');
+  testGrant(p);assert.equal(p.dreams,dreams+10000);assert.equal(p.dust,dust+10000);
+  p.dreams=9999990;p.dust=9999999;testGrant(p);
+  assert.equal(p.dreams,9999999);assert.equal(p.dust,9999999);assert.equal(validateProfile(p),true);
+});
+
+test('perfect clears pay 100 dreams once on main stages',()=>{
+  const old=createProfile(NOW);delete old.perfect;const loaded=parseProfile(JSON.stringify(old));assert.deepEqual(loaded.perfect,[]);
+  const s=storeFor(loaded),start=s.value.dreams;
+  call(s,'begin',{mode:'main',stage:1});
+  const first=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
+  assert.equal(first.reward,270);assert.equal(first.clearReward,170);assert.equal(first.firstPerfect,true);assert.equal(first.perfect,true);
+  assert.equal(s.value.dreams,start+270);assert.deepEqual(s.value.perfect,[1]);assert.equal(s.value.results[0].perfect,true);
+  call(s,'begin',{mode:'main',stage:1});
+  const again=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
+  assert.equal(again.reward,0);assert.equal(again.clearReward,0);assert.equal(again.firstPerfect,false);assert.equal(again.perfect,true);
+  assert.equal(s.value.dreams,start+270);assert.deepEqual(s.value.perfect,[1]);
+  call(s,'begin',{mode:'main',stage:2});
+  const plain=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:false});
+  assert.equal(plain.reward,180);assert.equal(plain.clearReward,180);assert.equal(plain.perfect,false);
+  assert.deepEqual(s.value.perfect,[1]);assert.equal(s.value.results[0].perfect,undefined);
+  call(s,'begin',{mode:'main',stage:3});
+  const both=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
+  assert.equal(both.clearReward,190);assert.equal(both.reward,290);assert.equal(both.firstPerfect,true);
+  assert.deepEqual(s.value.perfect,[1,3]);
+  const bad=structuredClone(s.value);
+  for(const perfect of [[3,1],[1,1],[0],[4],[1.5]]){bad.perfect=perfect;assert.equal(validateProfile(bad),false,JSON.stringify(perfect));}
+  bad.perfect=[1,3];assert.equal(validateProfile(bad),true);
 });
 
 test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears main stages through 45',()=>{

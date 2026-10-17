@@ -1493,6 +1493,12 @@
       "name": "혹한의마녀",
       "rarity": "UR",
       "hidden": true
+    },
+    {
+      "id": "behemoth",
+      "name": "베히모스",
+      "rarity": "UR",
+      "hidden": true
     }
   ]
 }

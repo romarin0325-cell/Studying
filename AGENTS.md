@@ -18,6 +18,7 @@ Functional correctness of the browser app is more important than refactoring or 
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `idle/`: Astral Companions idle game (`idle/dist/AstralCompanions.html`)
 - `defense_test/`: Star Garden defense prototype (`defense_test/dist/StarGardenDefense.html`)
+- `defense_test/` bright skin: comparison build of the same game (`node scripts/build.mjs --bright` → `defense_test/dist/StarGardenDefenseBright.html`; `--bright --unlocked` for the local test build)
 - `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
 - `defense/`: Hero Core Defense (`defense/dist-local/HeroCoreDefense.html`)
 
@@ -56,6 +57,8 @@ Functional correctness of the browser app is more important than refactoring or 
 - 캐릭터 밸런스 변경은 사용자가 의도와 수치를 검증한 뒤 지시한다. 지시가 없으면 제안서로만 낸다.
 
 ### 도구
+- 수치·규칙을 바꾸면 같은 변경에서 `node defense_test/scripts/generated-reports.mjs`로 `docs/CURRENT_VALUES.md` 등을 다시 만들고(테스트가 검사한다), 규칙 문서를 고친다. 문서 분류와 순서는 `defense_test/docs/README.md`를 따른다. 날짜 기록 문서는 맨 위 변경 블록에만 적는다.
 - 코딩·시뮬레이터 같은 반복 작업은 Grok을 적극적으로 쓴다. 판단과 최종 품질은 Claude가 책임진다.
+- 에셋·사운드 제작은 `defense_test/docs/ASSET_PIPELINE.md`의 절차·합격 기준·도구(`scripts/art`, `scripts/sound`)를 따른다. 캐릭터의 표정·질감·분위기가 먼저이고, 세트와 맞추는 수정은 머리 배율·장식 높이·테두리 같은 기하로 한정한다.
 - Gemini API는 에셋 생성(나노바나나)에만 쓴다. Gemini 4 Argon은 사용자가 그 턴에 허락했을 때만 의견 수렴에 쓴다. API 키는 커밋하지 않는다.
 - 완료하면 PR을 준비 상태로 열고, 필요하면 모든 동료·유물이 열린 로컬 테스트 빌드(`node scripts/build.mjs --unlocked`)를 함께 만든다.

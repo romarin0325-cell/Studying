@@ -7,19 +7,24 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {gameRoot as game,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
 import {LIBRARY_ART} from '../src/library.js';
+import {brightCss} from './theme-bright.mjs';
+import {MUSIC} from '../src/audio-tracks.js';
 
-const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked');
+const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked'),bright=process.argv.includes('--bright');
 if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
 if(web&&(solo||compat))throw new Error('Choose folder or standalone distribution.');
+if(bright&&(solo||web||compat))throw new Error('--bright combines only with --unlocked.');
 const output=path.join(game,unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
-const filename=unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
+const filename=bright?unlocked?'StarGardenDefenseUnlockedBright.html':'StarGardenDefenseBright.html':unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
 const mode=web?'web':compat?'compat':'standalone',hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const byteLength=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 const readText=async file=>(await fs.readFile(file,'utf8')).replace(/\r\n/g,'\n');
 const assets={},media={},memorial={},memorialFallback={};
 const sizes={battle:0,portraits:0,figures:0,relics:0,avif:0,webp:0,avifMax:0,webpMax:0};
+// The bright skin swaps the three painted backdrops for their daylight versions (same composition).
+const BRIGHT_ART={garden:'./assets/bright/garden.webp','summon-altar':'./assets/bright/summon-altar.webp',greenhouse:'./assets/bright/greenhouse.webp'};
 for(const [id,relative] of Object.entries(ASSET_PATHS)){
-  const bytes=await fs.readFile(assetFile(relative)),metadata=await sharp(bytes).metadata();
+  const bytes=await fs.readFile(assetFile(bright&&BRIGHT_ART[id]||relative)),metadata=await sharp(bytes).metadata();
   if(!metadata.width||!metadata.height)throw new Error('Invalid canonical art: '+id);
   sizes.battle+=bytes.length;assets[id]='data:image/webp;base64,'+bytes.toString('base64');
 }
@@ -40,7 +45,7 @@ for(const a of ARTIFACTS){
 }
 const expectedIds=HEROES.map(h=>h.id).sort().join(',');
 for(const map of [MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST]){
-  if(Object.keys(map).sort().join(',')!==expectedIds||HEROES.length!==30)throw new Error('Memorial roster mismatch.');
+  if(Object.keys(map).sort().join(',')!==expectedIds||HEROES.length!==31)throw new Error('Memorial roster mismatch.');
 }
 async function readMemorial(id,format){
   const entry=MEMORIAL_MEDIA_MANIFEST[id],record=format==='avif'?entry:entry.webp;
@@ -76,17 +81,21 @@ for(const [id,relative] of Object.entries(LIBRARY_ART)){
   if(meta.format!=='webp'||!meta.width||meta.width>720||meta.height>1080||bytes.length>=150*1024)throw new Error('Library art contract: '+id);
   libraryBytes+=bytes.length;library[id]='data:image/webp;base64,'+bytes.toString('base64');
 }
+// Music loops: Ogg Opus, embedded as data URLs and decoded lazily by the sound module.
+const audio={};let audioBytes=0;
+for(const [id,track] of Object.entries(MUSIC)){const bytes=await fs.readFile(assetFile(track.path));if(bytes.subarray(0,4).toString()!=='OggS'||bytes.length>320*1024)throw new Error('Music contract: '+id);audioBytes+=bytes.length;audio[id]='data:audio/ogg;base64,'+bytes.toString('base64');}
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.woff2')),license=await readText(assetFile('./assets/Jua-OFL.txt'));
 const fontUri='data:font/woff2;base64,'+font.toString('base64');
-const css=(await readText(path.join(game,'src/style.css'))).replace('__FONT__',fontUri);
+const night=await readText(path.join(game,'src/style.css'));
+const css=(bright?brightCss(night,await readText(path.join(game,'src/theme-bright.css'))):night).replace('__FONT__',fontUri);
 const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked)}});
 for(const input of Object.keys(js.metafile.inputs)){
   const relative=path.relative(game,path.resolve(input));
   if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw new Error('External game source in Star Garden bundle: '+input);
 }
-const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',unlocked?'<title>드림위버: 별빛 정원 · 전체 해금 테스트</title>':solo?'<title>드림위버: 별빛 정원 · 1인 편성 테스트</title>':'<title>드림위버: 별빛 정원</title>');
+const source=(await readText(path.join(game,'index.html'))).replace('<title>드림위버: 별빛 정원</title>',`<title>드림위버: 별빛 정원${bright?' · 맑음':''}${unlocked?' · 전체 해금 테스트':solo?' · 1인 편성 테스트':''}</title>`).replace('content="#0a1020"',bright?'content="#eaf4ff"':'content="#0a1020"');
 for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source.split(token).length!==2)throw new Error('Build token mismatch: '+token);
-const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};window.__LIBRARY_MEDIA__=${JSON.stringify(library)};window.__MEMORIAL_THUMBS__=${JSON.stringify(memorialThumbs)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
+const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(assets)};window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};window.__LIBRARY_MEDIA__=${JSON.stringify(library)};window.__MEMORIAL_THUMBS__=${JSON.stringify(memorialThumbs)};window.__GARDEN_AUDIO__=${JSON.stringify(audio)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
 const bundle=js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
 const html=source.replace('/*__STYLE__*/',()=>css).replace('/*__ASSETS__*/',()=>injected).replace('/*__SCRIPT__*/',()=>bundle).replace('</head>',()=>`<!-- Jua font, SIL OFL 1.1\n${license.replaceAll('--','—')}\n-->\n</head>`);
 if(/__FONT__|\/\*__\w+__\*\//.test(html)||/<(?:script|link)[^>]*(?:src|href)=["'](?:\.\/|https?:)/i.test(html))throw new Error('Non-offline build');
@@ -101,12 +110,13 @@ const categories={
   relicIcons:{binaryBytes:sizes.relics,embeddedBytes:objects('relic:')},
   libraryArt:{binaryBytes:libraryBytes,embeddedBytes:byteLength(library)},
   memorialThumbs:{binaryBytes:thumbBytes,embeddedBytes:byteLength(memorialThumbs)},
+  music:{binaryBytes:audioBytes,embeddedBytes:byteLength(audio)},
   memorial:{format:web?'external AVIF + WebP':compat?'WebP':'AVIF',avifBinaryBytes:sizes.avif,webpBinaryBytes:sizes.webp,avifMaxBytes:sizes.avifMax,webpMaxBytes:sizes.webpMax,embeddedBytes:byteLength(memorial)+(web?byteLength(memorialFallback):0)}
 };
 const categorized=categories.css+categories.javascript+Object.values(categories).filter(v=>typeof v==='object').reduce((sum,v)=>sum+v.embeddedBytes,0);
-const report={mode,solo,unlocked,filename,htmlBytes:byteLength(html),categories,htmlAndObjectGlueBytes:byteLength(html)-categorized};
+const report={mode,solo,unlocked,bright,filename,htmlBytes:byteLength(html),categories,htmlAndObjectGlueBytes:byteLength(html)-categorized};
 await fs.mkdir(path.join(game,'test-results'),{recursive:true});
-await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}${unlocked?'-unlocked':''}.json`),JSON.stringify(report,null,2)+'\n');
+await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}${unlocked?'-unlocked':''}${bright?'-bright':''}.json`),JSON.stringify(report,null,2)+'\n');
 const mib=n=>(n/1024/1024).toFixed(3)+' MiB';
 console.log(`${filename} · ${mib(report.htmlBytes)} · ${mode} · ${solo?'one-person':'five-person'} deck${unlocked?' · unlocked':''}`);
 for(const [name,value] of Object.entries(categories)){

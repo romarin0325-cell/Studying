@@ -1,12 +1,22 @@
 import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
+// Season guardian of a calendar month (UTC+9). Counted from year 0 so that, with seven guardians, October to
+// December 2026 keep the guardians the six-month cycle gave them (cinderella, harmonious, frost witch) and
+// Behemoth first guards January 2027; from then on the seven rotate in HIDDEN order.
+export const guardianOf=(year,month)=>HIDDEN[((year*12+month)%HIDDEN.length+HIDDEN.length)%HIDDEN.length];
+// The next months (as {year,month}) in which a hidden hero is the guardian, starting with this month.
+export function guardianMonths(id,now=Date.now(),count=2){
+  const d=new Date(now+9*HOUR),out=[];let y=d.getUTCFullYear(),m=d.getUTCMonth();
+  for(let i=0;i<HIDDEN.length*count+1&&out.length<count;i++){if(guardianOf(y,m)===id)out.push({year:y,month:m+1});if(++m>11){m=0;y++;}}
+  return out;
+}
 export function calendar(now=Date.now()){
   const d=new Date(now+9*HOUR),day=d.toISOString().slice(0,10),month=day.slice(0,7);
   const monday=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-(d.getUTCDay()+6)%7));
-  // Normal-banner pickup: the six standard URs rotate every Monday (UTC+9).
+  // Normal-banner pickup: the standard URs rotate every Monday (UTC+9).
   const weekNo=Math.round((monday.getTime()-Date.UTC(1970,0,5))/(7*24*HOUR));
-  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:HIDDEN[d.getUTCMonth()%6],pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
+  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:guardianOf(d.getUTCFullYear(),d.getUTCMonth()),pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
 }
 export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;
@@ -49,6 +59,7 @@ export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
 export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
+export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
 export function relicRates(draws){const t=relicTier(draws),q=t/(t+T.relicProbabilityHalf),ur=.0005+.0195*q,sr=.0045+.1355*q,r=.035+.255*q;return [1-r-sr-ur,r,sr,ur];}

@@ -25,6 +25,9 @@ const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,pha
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
   const h=HERO[u.hero],st=E.combatStats(s,u,i);let v=st.damage/st.interval*aoe(h)*coverage(u.hero,i)*(ROLE[u.hero]||1);
+  const aura=new Set(['siren','ancient_dragon','harmonious']);
+  if(u.hero==='behemoth'&&E.neighbors(i).some(n=>{const a=s.board[n];return a&&!a.cursed&&aura.has(a.hero);}))v*=1.12;
+  if(aura.has(u.hero)&&E.neighbors(i).some(n=>s.board[n]?.hero==='behemoth'&&!s.board[n].cursed))v*=1.08;
   if(u.hero==='time_magician'){ // every third attack lets each neighbour fire once more at 60%
     for(const n of E.neighbors(i)){const a=s.board[n];if(!a||a.cursed)continue;const ns=E.combatStats(s,a,n);v+=ns.damage*.6*E.rankSupport(u.rank)/(3*st.interval)*aoe(HERO[a.hero])*coverage(a.hero,n);}
   }
@@ -76,7 +79,7 @@ function trainValue(s,id){
 // ── Ultimate values, in damage units (team damage per second times seconds, or direct damage).
 function ultValue(s,m,id,gv){
   const h=HERO[id],u=E.bestUnit(s,id);if(!u)return -Infinity;
-  const type=h.skill.type,P=E.power(s,u),list=alive(s),dps=Math.max(1,m.dps),rem=remainingFight(s,dps),cap=E.gaugeCap(s);
+  const type=h.skill.type,P=E.combatStats(s,u).damage,list=alive(s),dps=Math.max(1,m.dps),rem=remainingFight(s,dps),cap=E.gaugeCap(s);
   const taken=e=>1+(e.takenBonus||0)+(e.boss&&HERO[id].bossDamage?HERO[id].bossDamage-1:0);
   const hit=(f,e)=>Math.min(f*P*taken(e),e.hp+(e.shield||0));
   const strike=f=>list.reduce((n,e)=>n+hit(f,e),0);
@@ -90,7 +93,7 @@ function ultValue(s,m,id,gv){
   const scale=E.rankControl(u.rank),boss=list.find(e=>e.boss),strongest=list.reduce((a,b)=>!a||b.maxHp>a.maxHp?b:a,null);
   const thunderCancel=()=>s.telegraph?.pattern==='thunder'&&list.some(e=>e.judging)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
-  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
+  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
     case 'echo':return E.rumiDream(s,u)?strike(E.RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)):buff(E.ULT_BUFF.echo.ratio*scale,8);
     case 'haste':return buff(fam('haste','speed',E.ULT_BUFF.haste.speed*scale),E.ULT_BUFF.haste.seconds);
@@ -114,7 +117,8 @@ function ultValue(s,m,id,gv){
     case 'combust':return list.reduce((n,e)=>n+hit(e.burnTime>0?10:4,e),0)+strike(.6)*1.5;
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
     case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
-    case 'ice_court':return strike(9)+control(3)+buff(E.WINTER_TAKEN,6);
+    case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0);return strike(9)+control(3)+buff(Math.max(0,E.WINTER_EXPOSURE-have),6);}
+    case 'crush':{if(!list.length)return 0;let sum=0;for(const e of list){const p=E.pathPoint(e.progress);sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.CRUSH.radius?hit(E.CRUSH.factor,t):0);},0);}return sum/list.length*E.CRUSH.hits;}
     case 'freeze':return strike(3)+control(2*scale+3)+thunderCancel();
     case 'avalanche':return list.reduce((n,e)=>n+hit(e.controlTime>0?12:4,e),0)+control(2);
     case 'dragon':{let best=[];for(const e of list){const p=E.pathPoint(e.progress),near=list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=180;});if(near.length>best.length)best=near;}return best.reduce((n,e)=>n+hit(14,e)+hit(.6*5*.5,e),0);}
@@ -209,7 +213,7 @@ function placeNew(s,index){
 function optimize(s,m){
   const lit=litCells(s),total=Math.max(1e-9,boardValue(s));let best=null;
   const units=CELLS.filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
-  const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage']);
+  const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth']);
   const pick=[...new Set([...units.slice(0,10),...units.filter(c=>support.has(s.board[c].hero))])];
   for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
   if(best&&best.d>total*.03){E.move(s,best.a,best.b);return true;}

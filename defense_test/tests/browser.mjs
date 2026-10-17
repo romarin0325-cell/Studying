@@ -94,7 +94,7 @@ try{
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),30);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),31);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -104,7 +104,7 @@ try{
     await m.page.locator('[data-action="memorial-story"]').click();assert.ok(!(await m.page.locator('#sheet').getAttribute('class')).includes('mv-reading'),'the story steps aside for the painting');
     assert.ok(await m.page.evaluate(()=>[...document.querySelectorAll('.mv-controls button')].every(b=>b.getBoundingClientRect().bottom<=innerHeight+1)),'viewer controls stay on screen');await shot(m.page,'memorial-art',width,height);await close(m.page);
     if(width===390){
-      // Open and close all thirty real pictures through buttons, never hidden preload.
+      // Open and close every companion's picture through buttons, never hidden preload.
       const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
       await nav(chain.page,'동료');await chain.page.locator('[data-collection="album"]').click();
       for(const h of HEROES){await chain.page.locator(`.mem-tile[data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
@@ -190,10 +190,10 @@ try{
     await page.locator('.lb-touch').click();assert.equal((await profile(page)).dreams,640);assert.equal(await page.locator('#greet-cue').count(),0);
     await nav(page,'정원');await page.locator('.gd').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.equal(await page.locator('.bed[data-bed="rose"] .bed-level').innerText(),'Lv.1');
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),31);assert.equal(await page.locator('.cards .cc.unowned').count(),26);
     await shot(page,'collection',width,height);
-    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
-    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),13);
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),31,'tapping the filter again shows everything');
     await page.locator('.cards [data-hero="star_boy"]').click();
     assert.equal(await page.locator('#app').getAttribute('aria-hidden'),'true');
     await shot(page,'detail',width,height);await page.keyboard.press('Escape');assert.equal(await page.locator('#overlay').isVisible(),false);
@@ -336,7 +336,8 @@ try{
   won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;end.active.run=E.serialize(won);
   const result=await boot(390,844,end);
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
-  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,770);await shot(result.page,'result',390,844);
+  // No core leak in the fixture: first clear (170) plus the first perfect (100).
+  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,870);assert.deepEqual((await profile(result.page)).perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);await shot(result.page,'result',390,844);
   await result.context.close();
   const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
   await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();
