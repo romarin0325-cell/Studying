@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 960" preserveAspectRatio="xMidYMin slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ec8f2"/>
+      <stop offset=".32" stop-color="#bfe2fa"/>
+      <stop offset=".68" stop-color="#e5f4fd"/>
+      <stop offset="1" stop-color="#f7fbff"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".18" r=".55">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>
+      <stop offset=".45" stop-color="#e3f4ff" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#bfe2fa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#dcedfa" stop-opacity=".85"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe8a3"/>
+      <stop offset="1" stop-color="#dfb252"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="960" fill="url(#sky)"/>
+  <rect width="540" height="960" fill="url(#sun)"/>
+  <!-- Celestial Schale / Stella Halo Rings in upper sky -->
+  <g fill="none" stroke="#ffffff" transform="translate(270 195)">
+    <ellipse rx="230" ry="72" transform="rotate(-14)" stroke-opacity=".55" stroke-width="1.8"/>
+    <ellipse rx="196" ry="58" transform="rotate(-14)" stroke-opacity=".38" stroke-width="1" stroke-dasharray="6 8"/>
+    <circle r="118" stroke-opacity=".45" stroke-width="1.4"/>
+    <circle r="92" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 7"/>
+    <path d="M-260 0H260M0-150V150" stroke-opacity=".22" stroke-width="1"/>
+  </g>
+  <!-- Golden Crescent & Starlight Emblem -->
+  <g transform="translate(390 122)">
+    <circle r="44" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>
+    <path d="M12-26a28 28 0 0 1-22 44 28 28 0 1 0 22-44Z" fill="url(#gold)"/>
+    <path d="m-22-14 2.5-7 2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5Z" fill="#fff"/>
+  </g>
+  <!-- Distant Mid-Sky Cloud Banks -->
+  <g fill="#ffffff" opacity=".55">
+    <path d="M-40 310q42-52 96-22 32-74 98-36 52-24 78 30 48-8 72 38H-40Z"/>
+    <path d="M270 365q30-48 76-30 12-60 76-40 52-26 78 24 46-6 68 38v18H270Z"/>
+  </g>
+  <!-- Lower Sanctuary Cloud Stage & Pillars -->
+  <g fill="url(#cloud)">
+    <path d="M-50 760q45-64 102-32 30-88 112-46 58-32 94 34 48-26 98 16 42-48 96-14 48-22 88 42v200H-50Z"/>
+    <path d="M-30 850q48-46 104-18 36-68 114-32 62-28 102 26 52-22 104 14 46-32 96 10v110H-30Z" opacity=".9"/>
+  </g>
+  <!-- Delicate Sky Sanctuary Arch & Star Prisms -->
+  <g fill="none" stroke="#6aa6d4" stroke-opacity=".28" stroke-width="1.2">
+    <path d="M40 820 Q270 735 500 820"/>
+    <path d="M80 842 Q270 768 460 842" stroke-dasharray="4 6"/>
+  </g>
+  <g fill="#ffffff">
+    <path d="m96 112 3-9 3 9 9 3-9 3-3 9-3-9-9-3Zm348 168 2.5-7 2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5Zm-280 96 2-6 2 6 6 2-6 2-2 6-2-6-6-2Zm292 280 3-8 3 8 8 3-8 3-3 8-3-8-8-3Z"/>
+    <circle cx="152" cy="78" r="2.2" opacity=".8"/>
+    <circle cx="72" cy="240" r="2" opacity=".7"/>
+    <circle cx="468" cy="210" r="2.4" opacity=".8"/>
+  </g>
+</svg>

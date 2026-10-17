@@ -1,0 +1,400 @@
+/* Legacy dialogs and secondary screens. Tokens only. Loaded after the game
+   style, card_pool_editor.css, and tokens.css. Does not style .dw-* . */
+
+/* Base */
+body.astra { font-family:var(--font); font-size:14px; line-height:1.55; color:var(--ink); }
+[hidden] { display:none !important; }
+body.astra :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+body.astra :is(button,input,select,textarea) { font-family:var(--font); }
+body.astra button:not([class*="dw-"]):disabled:not(.correct):not(.wrong) { opacity:.45 !important; cursor:not-allowed; }
+@media (prefers-reduced-motion:reduce) {
+  body.astra :is(.modal,.screen,.card-item,#astra-toast,.reward-card-preview) { animation:none !important; transition:none !important; }
+}
+
+/* Modal shell */
+body.astra .modal {
+  background:color-mix(in srgb,#000 45%,transparent);
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+  align-items:center;
+}
+body.astra .modal-content:not([class*="dw-"]) {
+  background:var(--surface) !important; color:var(--ink) !important;
+  border:1px solid var(--line) !important; border-radius:var(--r-lg);
+  box-shadow:var(--shadow-2); padding:16px; box-sizing:border-box;
+  width:min(520px,100%); max-width:min(520px,100%) !important;
+  max-height:calc(100dvh - 24px) !important; text-align:left;
+}
+body.astra .modal-content:not([class*="dw-"]) h3 {
+  margin:0 0 12px; padding:0 0 10px; color:var(--ink) !important;
+  font-size:18px; font-weight:700; line-height:1.3;
+}
+body.astra .modal-content:not([class*="dw-"]) > h3 { border-bottom:1px solid var(--line); }
+body.astra .modal-scroll { min-height:0; line-height:1.55; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+body.astra .study-text { font-family:var(--font); font-size:14px; line-height:1.55; overflow-wrap:anywhere; color:var(--ink); }
+body.astra .skill-detail { margin:10px 0; line-height:1.55; overflow-wrap:anywhere; color:var(--ink); }
+body.astra .skill-detail-heading,body.astra .skill-detail-body { display:block; white-space:normal; }
+body.astra .skill-detail-heading { font-weight:700; }
+body.astra .stat-value { font-weight:700; font-variant-numeric:tabular-nums; }
+body.astra .status-badge { display:inline-block; border-radius:var(--r-xs); padding:1px 6px; font-size:10px; font-weight:700; line-height:1.5; white-space:nowrap; }
+body.astra .status-positive { background:var(--positive-fill); color:var(--positive-ink); }
+body.astra .status-negative { background:var(--negative-fill); color:var(--negative-ink); }
+
+/* Buttons — secondary, then primary confirms, then answer tints */
+body.astra .modal-content:not([class*="dw-"]) button:not([class*="dw-"]),
+body.astra :is(#screen-draft,#screen-factory-draft,#screen-artifact-reserve-draft,#screen-perfect-plan-draft,#screen-chaos-roulette,#screen-transcendence-check) .menu-btn:not([class*="dw-"]) {
+  background:var(--surface) !important; color:var(--ink) !important;
+  border:1px solid var(--line-strong) !important; border-radius:var(--r-sm);
+  min-height:44px; padding:10px 12px; box-shadow:none; font-size:14px; line-height:1.35;
+}
+body.astra :is(#confirm-yes,#btn-enter-mode,#card-pool-editor-save,#btn-perfect-plan-next):not(:disabled):not([class*="dw-"]),
+body.astra :is(#factory-select-0,#factory-select-1),
+body.astra :is(#btn-claim-weekly-mission,#btn-claim-monthly-mission,#btn-claim-special-mission):not(:disabled),
+body.astra #draft-grid button:last-child,
+body.astra #modal-toeic-menu .menu-btn:first-of-type {
+  background:var(--accent) !important; color:var(--accent-ink) !important;
+  border-color:var(--accent) !important; font-weight:700;
+}
+body.astra .modal-content button.menu-btn.correct:not([class*="dw-"]) {
+  background:color-mix(in srgb,var(--success) 16%,var(--surface)) !important;
+  border-color:var(--success) !important; color:var(--success) !important;
+}
+body.astra .modal-content button.menu-btn.wrong:not([class*="dw-"]) {
+  background:color-mix(in srgb,var(--danger) 14%,var(--surface)) !important;
+  border-color:var(--danger) !important; color:var(--danger) !important;
+}
+
+/* Fields */
+body.astra .modal-content:not([class*="dw-"]) :is(input,textarea,select):not([type=checkbox]):not([type=radio]):not([type=range]) {
+  background:var(--surface-2) !important; color:var(--ink) !important;
+  border:1px solid var(--line-strong) !important; border-radius:var(--r-sm);
+  min-height:44px; padding:10px 12px; font-size:16px; box-sizing:border-box;
+}
+body.astra :is(input[type=checkbox],input[type=radio]) { accent-color:var(--accent); }
+body.astra :is(#quiz-question,#toeic-q-text) { color:var(--ink) !important; font-weight:700; line-height:1.55; }
+body.astra :is(#quiz-desc,.chaos-desc,#music-current-time,#music-duration,.mission-item-progress) { color:var(--muted) !important; }
+body.astra .chaos-uses { color:var(--accent) !important; }
+
+/* Card tiles. Grade is a 2px --tier border; portraits are 3:5. */
+body.astra .card-item.normal { --tier:var(--g-normal); }
+body.astra .card-item.rare { --tier:var(--g-rare); }
+body.astra .card-item.epic { --tier:var(--g-epic); }
+body.astra .card-item.legend { --tier:var(--g-legend); }
+body.astra .card-item.transcendence { --tier:var(--g-trans); }
+body.astra .card-item.special { --tier:var(--g-special); }
+body.astra .card-item.event { --tier:var(--g-event); }
+body.astra .card-grid {
+  grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; align-content:start;
+  padding:4px 2px max(16px,env(safe-area-inset-bottom)); min-height:0;
+}
+body.astra .card-item {
+  position:relative; background:var(--surface) !important; color:var(--ink) !important;
+  border:1px solid var(--line) !important; border-radius:var(--r-sm); padding:6px;
+  font-size:12px; text-align:left; overflow:hidden; box-shadow:none !important; animation:none !important;
+}
+body.astra .card-item:is(.normal,.rare,.epic,.legend,.transcendence,.special,.event),
+body.astra .card-item[data-grade] { border:2px solid var(--tier,var(--line-strong)) !important; }
+body.astra .card-item.selected { border-color:var(--accent) !important; }
+body.astra .card-item.unowned { opacity:.55; }
+body.astra .card-item .portrait {
+  width:100%; aspect-ratio:3/5; height:auto; margin:0 0 6px; border:0 !important;
+  border-radius:var(--r-xs); background:var(--sunken) !important; box-shadow:none;
+}
+body.astra :is(.card-item,.reward-card-preview,.factory-card-row,.bonus-pool-item) .portrait img,
+body.astra :is(#modal-date,#modal-tutoring,#modal-lecture-view,#modal-fortune-cookie) .portrait img { width:100%; height:100%; object-fit:cover; }
+body.astra .card-name { font-weight:700; font-size:13px; }
+body.astra .card-meta,body.astra .empty-message { color:var(--muted); }
+body.astra #card-pool-info { color:var(--muted) !important; }
+body.astra #card-pool-grid { min-height:0; overflow-y:auto; }
+
+/* Draft */
+body.astra :is(#screen-draft,#screen-factory-draft,#screen-artifact-reserve-draft,#screen-perfect-plan-draft,#screen-chaos-roulette,#screen-transcendence-check) {
+  background:var(--bg); color:var(--ink); min-height:0;
+}
+body.astra :is(#screen-draft,#screen-factory-draft,#screen-artifact-reserve-draft,#screen-perfect-plan-draft,#screen-chaos-roulette,#screen-transcendence-check) :is(h2,h3) {
+  color:var(--ink) !important; font-size:18px; font-weight:700; line-height:1.3;
+}
+body.astra #draft-grid .card-item { height:auto !important; display:flex; flex-direction:column; padding:8px; }
+body.astra #draft-grid button {
+  background:var(--surface) !important; color:var(--ink) !important;
+  border:1px solid var(--line-strong) !important; border-radius:var(--r-sm); min-height:44px;
+}
+body.astra #draft-grid .card-item > div { color:var(--ink) !important; }
+body.astra #draft-grid .portrait { flex:0 0 auto !important; width:100%; height:auto !important; aspect-ratio:3/5; }
+body.astra #draft-reroll-cnt,body.astra #ui-chaos-tickets { color:var(--accent) !important; font-weight:700; }
+body.astra #screen-transcendence-check > div:first-child {
+  background:var(--surface) !important; color:var(--ink) !important; border-bottom:1px solid var(--line);
+}
+body.astra #screen-transcendence-check > div:first-child button {
+  background:var(--surface) !important; color:var(--ink) !important;
+  border:1px solid var(--line-strong) !important; border-radius:var(--r-sm); min-height:44px;
+}
+
+/* Factory draft — container query and full-height column from the old mobile sheet */
+#screen-factory-draft { container-type:inline-size; container-name:factory-draft; min-height:0; box-sizing:border-box; }
+body.astra .factory-draft-title { margin:5px 0; font-size:18px; line-height:24px; flex-shrink:0; }
+body.astra .factory-draft-help { text-align:center; margin-bottom:8px; font-size:13px; color:var(--muted) !important; flex-shrink:0; }
+body.astra .factory-draft-body {
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
+  gap:16px; padding:0 12px; box-sizing:border-box; width:100%;
+}
+body.astra .factory-bundle {
+  display:flex; flex-direction:column; gap:8px; padding:12px; box-sizing:border-box; min-width:0;
+  background:var(--surface) !important; border:1px solid var(--line) !important; border-radius:var(--r-md) !important;
+}
+body.astra .factory-bundle-title { text-align:center; font-weight:700; font-size:18px; line-height:24px; margin:0; color:var(--ink); }
+body.astra .factory-bundle-cards { display:flex; flex-direction:column; gap:8px; }
+body.astra .factory-card-row {
+  display:grid; grid-template-columns:60px minmax(0,1fr); gap:10px; align-items:center;
+  min-height:120px; padding:8px; box-sizing:border-box; width:100%; text-align:left;
+  background:var(--surface-2) !important; color:var(--ink) !important; border-radius:var(--r-sm);
+}
+body.astra .factory-card-row[data-grade] { border:2px solid var(--tier,var(--line)) !important; }
+body.astra .factory-card-row .portrait {
+  width:60px; height:100px; flex-shrink:0; display:grid; place-items:center; overflow:hidden;
+  box-sizing:border-box; background:var(--sunken) !important; border-radius:var(--r-xs);
+}
+body.astra .factory-card-text { min-width:0; }
+body.astra .factory-card-name { font-size:16px; line-height:22px; font-weight:700; overflow-wrap:anywhere; }
+body.astra .factory-card-meta { font-size:13px; line-height:18px; margin-top:4px; color:var(--muted) !important; }
+body.astra .factory-select-btn { min-height:48px; width:100%; box-sizing:border-box; border-radius:var(--r-sm); border:1px solid var(--accent); }
+body.astra .factory-draft-actions {
+  flex-shrink:0; display:flex; flex-direction:column; gap:8px; align-items:center;
+  padding:8px 12px max(10px,env(safe-area-inset-bottom)); box-sizing:border-box;
+}
+body.astra .factory-aux-btn { width:min(100%,240px); min-height:44px; }
+@container factory-draft (min-width:768px) {
+  body.astra .factory-draft-body { flex-direction:row; align-items:stretch; max-width:1120px; margin:0 auto; padding:0 16px; }
+  body.astra .factory-bundle { flex:1; min-width:0; }
+  body.astra .factory-card-row { grid-template-columns:72px minmax(0,1fr); gap:12px; min-height:140px; }
+  body.astra .factory-card-row .portrait { width:72px; height:120px; }
+}
+
+/* Artifact reserve and perfect plan */
+body.astra :is(#artifact-reserve-bundle-0,#artifact-reserve-bundle-1) {
+  background:var(--surface) !important; border:1px solid var(--line) !important; border-radius:var(--r-md) !important; color:var(--ink) !important;
+}
+body.astra :is(#artifact-reserve-bundle-0,#artifact-reserve-bundle-1) > div:first-child { color:var(--ink) !important; }
+body.astra :is(#artifact-reserve-bundle-0-items,#artifact-reserve-bundle-1-items) > div {
+  background:var(--surface-2) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm) !important; color:var(--ink) !important;
+}
+body.astra :is(#artifact-reserve-bundle-0-items,#artifact-reserve-bundle-1-items) b { color:var(--ink) !important; }
+body.astra :is(#artifact-reserve-bundle-0-items,#artifact-reserve-bundle-1-items) span { color:var(--ink-2) !important; }
+body.astra #perfect-plan-help,body.astra #screen-artifact-reserve-draft > div:nth-child(2) { color:var(--muted) !important; }
+body.astra #screen-perfect-plan-draft .bonus-pool-item {
+  background:var(--surface) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm); color:var(--ink);
+}
+body.astra #screen-perfect-plan-draft .bonus-pool-item:not(.is-disabled) {
+  background:var(--accent-soft) !important; border-color:var(--accent) !important;
+}
+body.astra .bonus-pool-grade { color:var(--muted); }
+
+/* TOEIC */
+body.astra :is(#toeic-passage-scroll,#toeic-explanation-scroll,#fortune-explanation-scroll) {
+  background:var(--surface-2) !important; color:var(--ink) !important;
+  border:1px solid var(--line) !important; border-radius:var(--r-sm);
+}
+body.astra .toeic-hub-btn,body.astra .toeic-back-btn { font-weight:700; }
+body.astra #toeic-result-content,body.astra #quiz-feedback,body.astra #toeic-feedback { color:var(--ink); }
+
+/* Lecture, wordbook, tutoring, date */
+body.astra :is(#modal-lecture-view,#modal-wordbook,#modal-magic-class) .modal-content {
+  height:calc(100dvh - 24px) !important; max-height:calc(100dvh - 24px) !important; min-height:0;
+}
+body.astra :is(#modal-date,#modal-tutoring) {
+  padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
+}
+body.astra :is(#modal-date,#modal-tutoring) .modal-content {
+  height:calc(100dvh - 16px) !important; max-height:calc(100dvh - 16px) !important; min-height:0; padding:12px;
+}
+body.astra :is(#modal-date,#modal-tutoring,#modal-lecture-view) .lumi-modal-portrait {
+  width:clamp(108px,30vw,140px) !important; height:auto !important; aspect-ratio:3/5; flex:none;
+  margin-left:auto; margin-right:auto; border-radius:var(--r-sm);
+  background:var(--sunken) !important; border:1px solid var(--line) !important; overflow:hidden;
+}
+body.astra :is(#tutoring-content,#date-content) {
+  flex:1; min-height:0 !important; overflow:auto;
+  background:var(--surface-2) !important; color:var(--ink) !important;
+  border:1px solid var(--line) !important; border-radius:var(--r-sm);
+}
+body.astra :is(#modal-date,#modal-tutoring) .modal-content > button { flex-shrink:0; }
+body.astra .wordbook-toolbar { flex-wrap:wrap !important; flex-shrink:0; gap:8px; }
+body.astra .wordbook-entry { border-bottom:1px solid var(--line) !important; padding:9px 4px !important; }
+body.astra .wordbook-word { color:var(--accent-strong); font-size:1.05rem; font-weight:700; }
+body.astra .is-wrong .wordbook-word { color:var(--danger); }
+body.astra .wordbook-meaning { color:var(--ink); }
+body.astra .wordbook-wrong-badge {
+  display:inline-block; margin-left:8px; padding:1px 6px; border-radius:var(--r-xs);
+  color:var(--danger); background:color-mix(in srgb,var(--danger) 12%,var(--surface)); font-size:11px; vertical-align:middle;
+}
+body.astra :is(.wordbook-help,.wordbook-empty,#modal-wordbook label) { color:var(--muted) !important; font-size:12px; }
+@media (max-height:600px) {
+  body.astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:clamp(84px,19vh,108px) !important; }
+}
+@media (orientation:landscape) and (max-height:500px) {
+  body.astra :is(#modal-date,#modal-tutoring) .lumi-modal-portrait { width:72px !important; }
+  body.astra :is(#modal-date,#modal-tutoring) .modal-content { padding:8px 12px; }
+}
+
+/* Lumi chat — viewport comes from --chat-top / --chat-height */
+body.astra #modal-lumi-question {
+  top:var(--chat-top,0px); height:var(--chat-height,100dvh); bottom:auto;
+  padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));
+}
+body.astra #modal-lumi-question .modal-content { height:100% !important; max-height:100% !important; padding:12px; gap:6px; width:100%; }
+body.astra #modal-lumi-question .lumi-chat-title { margin:0; padding:0; border:0; color:var(--ink) !important; }
+body.astra .lumi-chat-top { gap:5px; padding-bottom:5px; border-bottom-color:var(--line); }
+body.astra .lumi-chat-controls { display:flex !important; flex-wrap:nowrap !important; gap:4px !important; width:100%; }
+body.astra #modal-lumi-question .lumi-chat-controls button { flex:1 1 0; min-width:0; min-height:44px; padding:6px 2px; font-size:11px; }
+body.astra .lumi-chat-log {
+  background:var(--sunken) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm); color:var(--ink);
+}
+body.astra .lumi-chat-bubble.user { background:var(--accent) !important; color:var(--accent-ink) !important; border:0 !important; }
+body.astra .lumi-chat-bubble.model { background:var(--surface) !important; color:var(--ink) !important; border:1px solid var(--line) !important; }
+body.astra .lumi-chat-meta,body.astra .lumi-chat-status { color:var(--muted); }
+body.astra .lumi-chat-status:empty { display:none; }
+body.astra .lumi-chat-input { font-size:16px; }
+body.astra .lumi-chat-input::placeholder { color:var(--muted); }
+body.astra #modal-lumi-question .lumi-chat-send-btn { background:var(--accent) !important; color:var(--accent-ink) !important; border-color:var(--accent) !important; font-weight:700; }
+body.astra .lumi-chat-source { background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); border-radius:var(--r-pill); }
+
+/* Music player — compact strip, library takes the rest; disc stays hidden */
+body.astra #modal-music-player .music-player-panel {
+  width:min(520px,100%); height:min(820px,calc(100dvh - 28px)); max-height:calc(100dvh - 28px) !important;
+  display:flex; flex-direction:column; overflow:hidden; text-align:left;
+  padding:16px 16px max(12px,env(safe-area-inset-bottom));
+  background:var(--surface) !important; color:var(--ink) !important;
+}
+body.astra .music-player-disc { display:none; }
+body.astra .music-player-kicker {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;
+  color:var(--muted); font-size:11px; font-weight:700; letter-spacing:0;
+}
+body.astra .music-player-kicker span { color:var(--muted); letter-spacing:0; font-size:11px; }
+body.astra .music-track-title { color:var(--ink) !important; font-size:18px; font-weight:700; line-height:1.4; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.astra .music-track-meta,body.astra .music-status { color:var(--muted) !important; font-size:12px; }
+body.astra .music-status.is-error { color:var(--danger) !important; }
+body.astra .music-progress { accent-color:var(--accent); }
+body.astra .music-time-row { color:var(--muted); font-variant-numeric:tabular-nums; }
+body.astra #music-play-toggle {
+  background:var(--accent) !important; color:var(--accent-ink) !important; border-color:var(--accent) !important;
+  border-radius:var(--r-pill) !important; width:44px; min-height:44px; justify-self:center; padding:0;
+}
+body.astra #modal-music-player .music-option-row button,
+body.astra #modal-music-player .music-playlist-mode-row button { min-height:34px; font-size:11px; padding:4px; }
+body.astra :is(.music-rate-toggle,.music-playlist-mode-row button)[aria-pressed=true] {
+  background:var(--accent-soft) !important; color:var(--ink) !important; border-color:var(--accent) !important;
+}
+body.astra .music-track-library {
+  flex:1 1 auto; min-height:100px; margin-top:12px; border:1px solid var(--line); border-radius:var(--r-md);
+  background:var(--sunken); overflow:hidden;
+}
+body.astra .music-track-list { flex:1 1 auto; max-height:none; min-height:44px; scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
+body.astra .music-track-row { min-height:44px; }
+body.astra #modal-music-player .music-track-row button {
+  border:0 !important; border-radius:0 !important; background:transparent !important; min-height:44px; box-shadow:none;
+}
+body.astra .music-track-row-title { color:var(--ink); font-size:13px; }
+body.astra .music-track-row-index,body.astra .music-track-count { color:var(--muted); }
+body.astra .music-track-row.is-current { background:var(--accent-soft); box-shadow:inset 2px 0 0 var(--accent); }
+body.astra .music-track-row.is-current .music-track-row-index { color:var(--accent); }
+body.astra .music-close-button { margin-top:10px; }
+
+/* Missions */
+body.astra #mission-hub-list > button:not([class*="dw-"]) { text-align:left; background:var(--surface) !important; color:var(--ink) !important; border:1px solid var(--line-strong) !important; border-radius:var(--r-sm); min-height:44px; }
+body.astra #modal-monthly-mission .modal-content {
+  height:min(740px,calc(100dvh - 28px)) !important; min-height:0 !important;
+  display:flex; flex-direction:column; overflow:hidden; padding:16px;
+}
+body.astra #modal-monthly-mission .modal-content > h3 { margin:0 0 10px; padding-bottom:8px; flex:none; }
+body.astra #modal-monthly-mission .modal-content > button { flex:none; }
+body.astra :is(#weekly-mission-section,#monthly-mission-section,#special-mission-section) > div:nth-child(2) {
+  background:var(--surface-2) !important; color:var(--muted) !important; border:1px solid var(--line) !important; border-radius:var(--r-md) !important;
+}
+body.astra :is(#weekly-mission-section,#monthly-mission-section,#special-mission-section) > div:nth-child(2) > div { color:var(--muted) !important; }
+body.astra :is(#weekly-mission-status,#monthly-mission-status,#special-mission-status) { color:var(--muted) !important; font-size:12px !important; }
+body.astra :is(#weekly-mission-reward-name,#monthly-mission-reward-name,#special-mission-reward-name):not([hidden]):not([class*="dw-"]) { color:var(--ink) !important; font-weight:700; }
+body.astra :is(#monthly-mission-section,#special-mission-section)[style*="block"] {
+  display:flex !important; flex:1; flex-direction:column; min-height:0;
+}
+body.astra :is(#monthly-mission-section,#special-mission-section) > :not(.modal-scroll) { flex:none; }
+body.astra :is(#monthly-mission-list,#special-mission-list) { flex:1; min-height:70px; max-height:none !important; overflow-y:auto; }
+body.astra .mission-item {
+  background:var(--surface-2) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm) !important; color:var(--ink);
+}
+body.astra .mission-item.complete {
+  background:color-mix(in srgb,var(--success) 12%,var(--surface)) !important; border-color:var(--success) !important;
+}
+body.astra .mission-item-title { color:var(--ink) !important; font-weight:700; }
+body.astra .mission-item.complete .mission-item-title { color:var(--success) !important; }
+body.astra #weekly-mission-section { min-height:0; overflow-y:auto; }
+body.astra #modal-monthly-mission .mission-reward-showcase {
+  display:grid; grid-template-columns:90px minmax(0,1fr); column-gap:12px;
+  align-content:center; align-items:center; text-align:left; min-height:168px;
+}
+body.astra #modal-monthly-mission .mission-reward-showcase > .reward-card-preview {
+  grid-column:1; grid-row:1/6; padding:0; margin:0; min-height:0;
+  border:0 !important; background:transparent !important; box-shadow:none;
+}
+body.astra #modal-monthly-mission .mission-reward-showcase > div,
+body.astra #modal-monthly-mission .mission-reward-showcase > .menu-btn { grid-column:2; }
+body.astra .reward-card-preview .portrait {
+  width:84px; height:140px; margin:0; aspect-ratio:3/5; border-radius:var(--r-xs);
+  background:var(--sunken) !important; border:2px solid var(--tier,var(--line-strong)) !important; box-shadow:var(--shadow-1);
+}
+body.astra .reward-progress { margin-top:8px; font-size:11px; color:var(--muted); }
+body.astra .reward-progress progress { display:block; width:100%; height:5px; margin-top:5px; border:0; border-radius:var(--r-pill); overflow:hidden; background:var(--sunken); accent-color:var(--accent); }
+body.astra .reward-progress progress::-webkit-progress-bar { background:var(--sunken); }
+body.astra .reward-progress progress::-webkit-progress-value { background:var(--accent); }
+
+/* Artifacts, special cards, fortune */
+body.astra #artifact-check-list .reserve-option {
+  padding:12px !important; background:var(--surface-2) !important; color:var(--ink) !important;
+  border:1px solid var(--line) !important; border-radius:var(--r-sm); line-height:1.5; text-align:left;
+}
+body.astra #artifact-check-list .reserve-option[aria-pressed=true] {
+  background:var(--accent-soft) !important; border-color:var(--accent) !important; box-shadow:none;
+}
+body.astra .reserve-option-state { color:var(--muted); font-size:11px; }
+body.astra .reserve-option[aria-pressed=true] .reserve-option-state { color:var(--success); }
+body.astra .reserve-option-desc { color:var(--ink); }
+body.astra .special-card-option {
+  background:var(--surface) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm) !important; color:var(--ink);
+}
+body.astra .special-card-option[data-active=true] {
+  background:var(--accent-soft) !important; border-color:var(--accent) !important;
+}
+body.astra .special-card-option > div:first-child { color:var(--ink) !important; }
+body.astra .special-card-option > div:nth-child(2),body.astra #special-card-editor-summary { color:var(--muted) !important; }
+body.astra #modal-fortune-cookie :is(h2,[id^=fortune-]) { color:var(--ink) !important; }
+body.astra #modal-fortune-cookie h2 { font-size:18px; font-weight:700; }
+body.astra #modal-fortune-cookie .fortune-audio-panel {
+  background:var(--surface-2) !important; border:1px solid var(--line) !important; border-radius:var(--r-sm); color:var(--ink) !important;
+}
+body.astra #modal-fortune-cookie .portrait { background:var(--sunken) !important; border-color:var(--line) !important; }
+
+/* Bonus pool editor — geometry stays in card_pool_editor.css */
+body.astra #modal-bonus-pool-editor .card-pool-editor { color:var(--ink); }
+body.astra #modal-bonus-pool-editor :is(.card-pool-set-row,.card-pool-card-row) {
+  background:var(--surface-2); border-color:var(--line); color:var(--ink);
+}
+body.astra .card-pool-card-row.is-compact .portrait { background:var(--sunken); }
+body.astra #modal-bonus-pool-editor :is(.card-pool-editor-note,.card-pool-set-status,.card-pool-card-meta,.card-pool-empty,.card-pool-base-label) { color:var(--muted); }
+body.astra #modal-bonus-pool-editor .card-pool-card-status { color:var(--accent); }
+body.astra .card-pool-grade-heading { color:var(--ink); border-bottom-color:var(--line); }
+body.astra #modal-bonus-pool-editor .is-selected {
+  background:var(--accent-soft) !important; border-color:var(--accent) !important; box-shadow:none;
+}
+body.astra #modal-bonus-pool-editor :is([aria-selected=true],[aria-pressed=true],.bonus-preset-btn.is-active) {
+  background:var(--accent-soft) !important; color:var(--ink) !important; border-color:var(--accent) !important; box-shadow:none;
+}
+body.astra #modal-bonus-pool-editor .card-pool-card-name { background:transparent !important; color:var(--ink) !important; border:0 !important; }
+body.astra #modal-bonus-pool-editor .bonus-preset-btn span { color:var(--muted); }
+/* Toast */
+body.astra #astra-toast {
+  position:fixed; left:50%; bottom:max(24px,env(safe-area-inset-bottom)); transform:translate(-50%,12px);
+  z-index:400; max-width:min(90vw,420px); padding:12px 16px; pointer-events:none; opacity:0;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-md);
+  box-shadow:var(--shadow-2); font-family:var(--font); font-size:14px; line-height:1.45;
+  transition:opacity .2s,transform .2s;
+}
+body.astra #astra-toast.visible { transform:translate(-50%,0); opacity:1; }
