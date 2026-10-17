@@ -336,7 +336,8 @@ try{
   won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;end.active.run=E.serialize(won);
   const result=await boot(390,844,end);
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
-  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,770);await shot(result.page,'result',390,844);
+  // No core leak in the fixture: first clear (170) plus the first perfect (100).
+  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,870);assert.deepEqual((await profile(result.page)).perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);await shot(result.page,'result',390,844);
   await result.context.close();
   const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
   await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();
