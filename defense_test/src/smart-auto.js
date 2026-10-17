@@ -79,7 +79,7 @@ function trainValue(s,id){
 // ── Ultimate values, in damage units (team damage per second times seconds, or direct damage).
 function ultValue(s,m,id,gv){
   const h=HERO[id],u=E.bestUnit(s,id);if(!u)return -Infinity;
-  const type=h.skill.type,P=E.power(s,u),list=alive(s),dps=Math.max(1,m.dps),rem=remainingFight(s,dps),cap=E.gaugeCap(s);
+  const type=h.skill.type,P=E.combatStats(s,u).damage,list=alive(s),dps=Math.max(1,m.dps),rem=remainingFight(s,dps),cap=E.gaugeCap(s);
   const taken=e=>1+(e.takenBonus||0)+(e.boss&&HERO[id].bossDamage?HERO[id].bossDamage-1:0);
   const hit=(f,e)=>Math.min(f*P*taken(e),e.hp+(e.shield||0));
   const strike=f=>list.reduce((n,e)=>n+hit(f,e),0);

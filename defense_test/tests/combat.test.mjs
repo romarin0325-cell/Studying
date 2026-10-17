@@ -233,7 +233,7 @@ test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain th
       assert.equal(trait.size,cells.length);close(trait.damageMultiplier,multiplier);
       close(E.power(s,u),HERO.lightning_sage.damage*multiplier);
       close(stats.damage,HERO.lightning_sage.damage*multiplier);
-      close(stats.skillPower,E.power(s,u));close(stats.chainRatio,ratio);assert.equal(stats.extraChain,extra);
+      close(stats.damage,E.power(s,u));close(stats.chainRatio,ratio);assert.equal(stats.extraChain,extra);
     }
   }
 });
@@ -300,7 +300,6 @@ test('Star Boy and Time Ruler use birth-wave age for exact power, displayed powe
       close(E.personalTrait(s,u).damageMultiplier,factor);
       close(E.power(s,u),HERO[id].damage*factor);
       close(E.combatStats(s,u).damage,HERO[id].damage*factor);
-      close(E.combatStats(s,u).skillPower,HERO[id].damage*factor);
       s.gauge=120;const before=enemy.hp;assert.ok(E.cast(s,id).ok);
       if(id==='star_boy'){
         // A full 120 gauge is spent at 0.4× power per point.
@@ -1538,6 +1537,33 @@ test('crush hits three times around a seeded enemy, echoes on the last hit, and 
   readyCast(lock,'behemoth');assert.equal(E.castLock(lock,'behemoth'),null);
   lock.gauge=120;assert.equal(E.cast(lock,'behemoth').ok,true);assert.equal(lock.gauge,50);
 });
+test('an ultimate hits for the power shown on the unit: auras, running ultimate buffs and relic power all count',()=>{
+  // The rule players read from the texts (a "power +N%" effect makes the unit hit harder, ultimate included), taken at the moment of the cast.
+  const hitOf=(s,id,e)=>{const before=e.hp;quiet(s);readyCast(s,id);return before-e.hp;};
+  const plain=traitArena([{hero:'zeke',index:12}]),[pe]=enemiesFor(plain,[{hp:1e9,progress:1200}]);
+  const base=hitOf(plain,'zeke',pe);close(base,E.power(plain,plain.board[12])*7,'no bonus: unchanged');
+  // Placement aura (Ancient Dragon next to Zeke: +20%).
+  const aura=traitArena([{hero:'zeke',index:12},{hero:'ancient_dragon',index:13}]),[ae]=enemiesFor(aura,[{hp:1e9,progress:1200}]);
+  const stats=E.combatStats(aura,aura.board[12]);assert.ok(stats.damage>E.power(aura,aura.board[12])*1.19);
+  close(hitOf(aura,'zeke',ae),stats.damage*7,'aura counts');
+  // The preview shows the same number the cast deals.
+  const prev=traitArena([{hero:'zeke',index:12},{hero:'ancient_dragon',index:13}]);enemiesFor(prev,[{hp:1e9,progress:1200}]);quiet(prev);prev.gauge=120;
+  const shown=E.castPreview(prev,'zeke').lines.join(' ');assert.ok(shown.includes(Math.round(E.combatStats(prev,prev.board[12]).damage*7).toLocaleString('ko-KR')),'preview uses the live power');
+  // A running ultimate buff (awaken: +35%) and a relic power bonus (crown on a 3-star: +16%) multiply as separate families.
+  const buffed=traitArena([{hero:'zeke',index:12,rank:3}],{artifacts:['crown']}),[be]=enemiesFor(buffed,[{hp:1e9,progress:1200}]);
+  buffed.buffs.awaken=8;buffed.buffTotals.awaken=8;
+  const live=E.combatStats(buffed,buffed.board[12]).damage;close(live/E.power(buffed,buffed.board[12]),1.35*(1+E.RELIC_VALUES.crown.power*E.relicScaleIn(buffed,'crown')));
+  close(hitOf(buffed,'zeke',be),live*7,'buff and relic count');
+  // The cast does not amplify itself: a buff cast (goddess radiance +50%) deals its own hit at the pre-cast power.
+  const self=traitArena([{hero:'jasmine',index:12}]),[se]=enemiesFor(self,[{hp:1e9,progress:1200}]);const pre=E.combatStats(self,self.board[12]).damage;
+  close(hitOf(self,'jasmine',se),pre*5,'goddess hit is taken before radiance');
+  // Behemoth takes placement auras twice, and so do his shocks.
+  const beast=traitArena([{hero:'behemoth',index:12},{hero:'ancient_dragon',index:13}]),[de]=enemiesFor(beast,[{hp:1e9,progress:1200}]);
+  quiet(beast);beast.board[12].disabled=0; // quiet() parks every unit; Behemoth must stay enabled to double auras
+  const bs=E.combatStats(beast,beast.board[12]);close(bs.damage/E.power(beast,beast.board[12]),1.4);
+  const b0=beast.time;readyCast(beast,'behemoth');advanceTo(beast,b0+1.3);close(1e9-de.hp,bs.damage*E.CRUSH.factor*E.CRUSH.hits,'crush uses the doubled aura');
+});
+
 test('stacked crush casts (and a dream form on top) still save and resume with every pending shock',()=>{
   // Casting is not locked: with enough starlight several crushes queue inside 1.25 s. Each queues three shocks.
   for(const plan of [['behemoth','behemoth','behemoth','behemoth'],['rumi','behemoth','behemoth','behemoth'],Array(8).fill('behemoth')]){

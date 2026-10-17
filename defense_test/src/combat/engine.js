@@ -639,7 +639,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   }
   const multiplier=(1+power_.aura)*(1+power_.ult)*(1+power_.relic),speed=(1+speed_.other)*(1+speed_.aura)*(1+speed_.ult);
   const cooldown=h.interval*zoneCadence(u.hero)/speed;
-  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,skillPower:power(s,u),range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
+  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
 }
 
 export function cast(s,id){
@@ -652,7 +652,9 @@ export function cast(s,id){
   const spent=hero.skill.type==='starfall'?s.gauge:hero.skill.cost;
   s.gold-=goldCost;s.gauge-=spent;if(has(s,'lantern'))addGauge(s,spent*RV.lantern.refund*relicScaleIn(s,'lantern'));if(s.sandStore>0){addGauge(s,s.sandStore);s.sandStore=0;}s.stats.skills++;s.tutorial=Math.max(s.tutorial,3);
   const echoes=has(s,'twin')?new Map():null;if(echoes)echoMaps.set(s,echoes);beginEmberFrame(s);
-  const type=hero.skill.type,base=power(s,u),targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
+  // An ultimate hits for the power shown on the unit right now: placement auras, running ultimate buffs and
+  // relic power bonuses all count (taken before this cast changes any of them).
+  const type=hero.skill.type,base=combatStats(s,u).damage,targets=s.enemies.filter(e=>e.hp>0),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const source=sourceKey('skill',id,s.nextId++);
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
   let visualTargets=targets,gift;
@@ -730,7 +732,7 @@ export const detectiveExposure=(s,u)=>Math.min(DAMAGE_TAKEN_CAP,(.35+(s.upgrades
 export const mirrorRatio=(s,u)=>Math.min(1,.5*rankSupport(u.rank)*special(s,'aurora'));
 export function castPreview(s,id){
   const u=bestUnit(s,id);if(!u)return null;
-  const hero=HERO[id],type=hero.skill.type,base=power(s,u),control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
+  const hero=HERO[id],type=hero.skill.type,base=combatStats(s,u).damage,control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const targets=s.enemies.filter(e=>e.hp>0),lines=[];
   // Boost: an ultimate that grows under a condition reports whether it is boosted right now, and its
   // lines carry the boosted numbers; the hint names the condition only while it is not met.

@@ -2,12 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {balanceSnapshot,assetProvenance} from './report-data.mjs';
+import {currentValues} from './current-values.mjs';
 import {gameRoot} from './local-inputs.mjs';
 
 export async function renderReports(){
   return new Map([
     ['BALANCE_SNAPSHOT.json',JSON.stringify(balanceSnapshot(),null,2)+'\n'],
-    ['ASSET_PROVENANCE.json',JSON.stringify(await assetProvenance(),null,2)+'\n']
+    ['ASSET_PROVENANCE.json',JSON.stringify(await assetProvenance(),null,2)+'\n'],
+    ['CURRENT_VALUES.md',currentValues()+'\n']
   ]);
 }
 
@@ -29,7 +31,7 @@ export async function writeGeneratedReports(directory=path.join(gameRoot,'docs')
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
   const args=process.argv.slice(2);
-  if(args.length===0){await writeGeneratedReports();console.log('Regenerated BALANCE_SNAPSHOT.json and ASSET_PROVENANCE.json from local Star Garden inputs.');}
-  else if(args.length===1&&args[0]==='--check'){await checkGeneratedReports();console.log('PASS: both generated reports match current local Star Garden inputs (read-only).');}
+  if(args.length===0){await writeGeneratedReports();console.log('Regenerated BALANCE_SNAPSHOT.json, ASSET_PROVENANCE.json and CURRENT_VALUES.md from local Star Garden inputs.');}
+  else if(args.length===1&&args[0]==='--check'){await checkGeneratedReports();console.log('PASS: all generated reports match current local Star Garden inputs (read-only).');}
   else throw new Error('Usage: node defense_test/scripts/generated-reports.mjs [--check]');
 }
