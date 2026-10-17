@@ -1459,12 +1459,6 @@
       "hidden": false
     },
     {
-      "id": "behemoth",
-      "name": "베히모스",
-      "rarity": "UR",
-      "hidden": false
-    },
-    {
       "id": "time_ruler",
       "name": "시간의지배자",
       "rarity": "UR",
@@ -1497,6 +1491,12 @@
     {
       "id": "frost_witch",
       "name": "혹한의마녀",
+      "rarity": "UR",
+      "hidden": true
+    },
+    {
+      "id": "behemoth",
+      "name": "베히모스",
       "rarity": "UR",
       "hidden": true
     }

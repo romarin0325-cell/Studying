@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER} from '../src/content.js';
-import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP} from '../src/economy.js';
+import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,guardianOf,guardianMonths} from '../src/economy.js';
 import {createProfile,random} from '../src/profile.js';
 
 test('normal and seasonal draws enforce the hidden guardian boundary',()=>{
@@ -125,7 +125,7 @@ test('a normal-banner UR is the weekly pickup half the time',()=>{
   assert.ok(pick/n>.55&&pick/n<.62,'pickup share '+pick/n);
 });
 
-test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
+test('calendar uses UTC+9, Monday weeks and seven guardians independently of host locale',()=>{
   const sunday=Date.parse('2026-10-04T14:59:59Z'),monday=sunday+1000;
   const {pickup,weekNo,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});assert.equal(calendar(monday).weekNo,weekNo+1,'weekly chapter turns with the week');
   assert.equal(calendar(monday).week,'2026-10-05');
@@ -133,6 +133,12 @@ test('calendar uses UTC+9, Monday weeks and six guardians independently of host 
   assert.ok(ROSTER.UR.includes(pickup));assert.notEqual(calendar(monday).pickup,pickup);assert.equal(calendar(monday+6*24*HOUR).pickup,calendar(monday).pickup);
   assert.equal(new Set(Array.from({length:6},(_,i)=>calendar(monday+i*7*24*HOUR).pickup)).size,6);
   assert.equal(calendar(Date.parse('2026-10-31T15:00:00Z')).guardian,HIDDEN[4]);
-  assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,HIDDEN[0]);
+  // Seven guardians: October to December 2026 keep the six-month cycle's guardians; Behemoth first guards January 2027.
+  assert.equal(calendar(Date.parse('2026-11-30T15:00:00Z')).guardian,'frost_witch');
+  assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,'behemoth');
+  assert.equal(calendar(Date.parse('2027-02-01T00:00:00Z')).guardian,'time_ruler');
+  assert.deepEqual(new Set(Array.from({length:7},(_,i)=>guardianOf(2027,i))),new Set(HIDDEN));
+  assert.deepEqual(guardianMonths('behemoth',Date.parse('2026-10-18T00:00:00Z')),[{year:2027,month:1},{year:2027,month:8}]);
+  assert.deepEqual(guardianMonths('cinderella',Date.parse('2026-10-18T00:00:00Z'),1),[{year:2026,month:10}]);
   assert.equal(calendar(monday-HOUR).day,'2026-10-04');
 });

@@ -13,9 +13,10 @@ export const ROSTER = {
   C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king'],
   R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora'],
   SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom'],
-  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','behemoth'],
+  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince'],
 };
-export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch'];
+// Season guardians in rotation order (one per month). Behemoth joined as the seventh; see guardianOf().
+export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch','behemoth'];
 export const DEFAULT_DECK = ['star_boy','snow_rabbit','night_rabbit','siren','great_detective'];
 export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map(id=>({
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,

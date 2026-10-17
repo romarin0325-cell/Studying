@@ -1538,3 +1538,14 @@ test('crush hits three times around a seeded enemy, echoes on the last hit, and 
   readyCast(lock,'behemoth');assert.equal(E.castLock(lock,'behemoth'),null);
   lock.gauge=120;assert.equal(E.cast(lock,'behemoth').ok,true);assert.equal(lock.gauge,50);
 });
+test('stacked crush casts (and a dream form on top) still save and resume with every pending shock',()=>{
+  // Casting is not locked: with enough starlight several crushes queue inside 1.25 s. Each queues three shocks.
+  for(const plan of [['behemoth','behemoth','behemoth','behemoth'],['rumi','behemoth','behemoth','behemoth'],Array(8).fill('behemoth')]){
+    const s=traitArena([{hero:'behemoth',index:12},{hero:'rumi',index:13,rank:5}]);
+    const pack=enemiesFor(s,[{hp:1e12,progress:1200},{hp:1e12,progress:1260},{hp:1e12,progress:1800}]);quiet(s);s.gold=1e6;
+    for(const id of plan){s.gauge=s.gaugeMax;assert.equal(E.cast(s,id).ok,true,id);}
+    const pending=s.volleys.length;assert.equal(pending,plan.filter(id=>id==='behemoth').length*E.CRUSH.hits+(plan.includes('rumi')?E.RUMI_DREAM.phases.length:0));
+    const saved=E.restore(E.serialize(s));assert.ok(saved,plan.join('+')+' must restore');assert.equal(saved.volleys.length,pending);
+    const t=s.time+3;advanceTo(s,t);advanceTo(saved,t);pack.forEach((e,i)=>close(saved.enemies[i].hp,e.hp));assert.equal(saved.volleys.length,0);
+  }
+});

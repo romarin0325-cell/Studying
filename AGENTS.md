@@ -58,5 +58,6 @@ Functional correctness of the browser app is more important than refactoring or 
 
 ### 도구
 - 코딩·시뮬레이터 같은 반복 작업은 Grok을 적극적으로 쓴다. 판단과 최종 품질은 Claude가 책임진다.
+- 에셋·사운드 제작은 `defense_test/docs/ASSET_PIPELINE.md`의 절차·합격 기준·도구(`scripts/art`, `scripts/sound`)를 따른다. 캐릭터의 표정·질감·분위기가 먼저이고, 세트와 맞추는 수정은 머리 배율·장식 높이·테두리 같은 기하로 한정한다.
 - Gemini API는 에셋 생성(나노바나나)에만 쓴다. Gemini 4 Argon은 사용자가 그 턴에 허락했을 때만 의견 수렴에 쓴다. API 키는 커밋하지 않는다.
 - 완료하면 PR을 준비 상태로 열고, 필요하면 모든 동료·유물이 열린 로컬 테스트 빌드(`node scripts/build.mjs --unlocked`)를 함께 만든다.

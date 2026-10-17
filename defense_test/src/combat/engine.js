@@ -47,7 +47,9 @@ export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CA
 export const QUAKE_FACTOR=2.4;
 export const WINTER_EXPOSURE=.15;
 // Behemoth: three 6x shocks, half a second apart, around one random enemy.
-export const CRUSH=Object.freeze({factor:6,radius:150,hits:3,first:.25,gap:.5});
+// queue: how many casts' worth of pending shocks a save may hold (each cast queues three). Casting is not locked,
+// so plenty of starlight (high spring bed, test builds, smart auto) can stack several casts inside 1.25 s.
+export const CRUSH=Object.freeze({factor:6,radius:150,hits:3,first:.25,gap:.5,queue:24});
 // Galaxy whale harvests divine marks into the blast (8x, +100% per mark, 3 marks = 32x) and does not stun.
 export const WHALE=Object.freeze({factor:8,perMark:1});
 export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});
@@ -1207,7 +1209,7 @@ export function restore(raw){
     const echoOk=v=>v.echo===undefined||!!(v.echo&&typeof v.echo==='object'&&!Array.isArray(v.echo)&&Object.keys(v.echo).length<=200&&Object.entries(v.echo).every(([k,d])=>id(Number(k))&&Number.isFinite(d)&&d>=0));
     const dreamOk=v=>v.hero==='rumi'&&v.kind==='dream'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<RUMI_DREAM.phases.length&&Number.isInteger(v.rank)&&v.rank>=RUMI_DREAM.rank&&v.rank<=MAX_RANK&&v.total<=3;
     const crushOk=v=>v.hero==='behemoth'&&v.kind==='crush'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<CRUSH.hits&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total<=CRUSH.first+2*CRUSH.gap+.01;
-    if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*2||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v))))return null;
+    if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*CRUSH.queue||s.volleys.filter(v=>v?.kind==='dream').length>RUMI_DREAM.phases.length||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v))))return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;

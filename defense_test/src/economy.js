@@ -1,12 +1,22 @@
 import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
+// Season guardian of a calendar month (UTC+9). Counted from year 0 so that, with seven guardians, October to
+// December 2026 keep the guardians the six-month cycle gave them (cinderella, harmonious, frost witch) and
+// Behemoth first guards January 2027; from then on the seven rotate in HIDDEN order.
+export const guardianOf=(year,month)=>HIDDEN[((year*12+month)%HIDDEN.length+HIDDEN.length)%HIDDEN.length];
+// The next months (as {year,month}) in which a hidden hero is the guardian, starting with this month.
+export function guardianMonths(id,now=Date.now(),count=2){
+  const d=new Date(now+9*HOUR),out=[];let y=d.getUTCFullYear(),m=d.getUTCMonth();
+  for(let i=0;i<HIDDEN.length*count+1&&out.length<count;i++){if(guardianOf(y,m)===id)out.push({year:y,month:m+1});if(++m>11){m=0;y++;}}
+  return out;
+}
 export function calendar(now=Date.now()){
   const d=new Date(now+9*HOUR),day=d.toISOString().slice(0,10),month=day.slice(0,7);
   const monday=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-(d.getUTCDay()+6)%7));
   // Normal-banner pickup: the standard URs rotate every Monday (UTC+9).
   const weekNo=Math.round((monday.getTime()-Date.UTC(1970,0,5))/(7*24*HOUR));
-  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:HIDDEN[d.getUTCMonth()%6],pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
+  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:guardianOf(d.getUTCFullYear(),d.getUTCMonth()),pickup:ROSTER.UR[weekNo%ROSTER.UR.length]};
 }
 export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;

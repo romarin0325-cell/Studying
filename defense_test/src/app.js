@@ -1,7 +1,7 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
@@ -51,10 +51,10 @@ const relicText=(id,level)=>liveText(ARTIFACT[id].text,relicTokens(id,level));
 const chips=list=>list.filter(Boolean).map(t=>`<span class="chip">${t}</span>`).join('');
 const stageLabel=n=>String(n).padStart(2,'0');
 const monthNo=c=>`${Number(String(c.month).slice(-2))}월`;
-// Hidden heroes rotate as the season guardian (one per month, six-month cycle).
+// Hidden heroes rotate as the season guardian (one per month, in HIDDEN order).
 function guardianNote(id){
-  const c=calendar(now()),month=Number(String(c.month).slice(-2))-1,slot=HIDDEN.indexOf(id),wait=(slot-month%6+6)%6,next=(month+wait)%12+1;
-  return wait===0?`지금 시즌 소환에서 획득할 수 있습니다.<br>${monthNo(c)} 이달의 수호자입니다.`:`이달의 수호자로 등장하는 달에만 시즌 소환에서 획득할 수 있습니다.<br>다음 등장: ${next}월 (${next>6?next-6:next+6}월에도 등장)`;
+  const c=calendar(now()),[first,second]=guardianMonths(id,now(),2),year=Number(c.month.slice(0,4)),label=m=>`${m.year!==year?`${m.year}년 `:''}${m.month}월`;
+  return c.guardian===id?`지금 시즌 소환에서 획득할 수 있습니다.<br>${monthNo(c)} 이달의 수호자입니다.`:`이달의 수호자로 등장하는 달에만 시즌 소환에서 획득할 수 있습니다.<br>다음 등장: ${label(first)}, 그다음 ${label(second)}`;
 }
 const bossOf=stage=>BOSSES[CHAPTERS[stage-1].bosses[0]];
 const giftArt=(gift,cls='')=>`<i class="gift-art ${cls}" data-gift="${gift}" aria-hidden="true"></i>`;
@@ -758,7 +758,7 @@ function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates;
   let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
   if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%";rows+=`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;}
-  if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/6)}</b></div><div class="rate-row"><span>UR · 나머지 5종 각각</span><b>${pct(T.heroRates[3]*.5/6)}</b></div>`;
+  if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/ROSTER.UR.length)}</b></div><div class="rate-row"><span>UR · 나머지 5종 각각</span><b>${pct(T.heroRates[3]*.5/6)}</b></div>`;
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
       :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':'UR의 절반은 이번 주 픽업, 절반은 일반 UR 6종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.'}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':'일반 UR 6종 중 원하는 한 명'}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
