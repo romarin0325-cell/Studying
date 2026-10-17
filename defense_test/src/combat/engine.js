@@ -45,7 +45,9 @@ export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CA
 // Rumi's hidden dream form: a 5★ Rumi casts it instead of the echo (same starlight). Sun, moon and star
 // strike the whole field in turn, then imagination becomes real. Not in the hero sheet; the battle peek shows it.
 export const QUAKE_FACTOR=2.4;
-export const WINTER_TAKEN=.15;
+export const WINTER_EXPOSURE=.15;
+// Behemoth: three 8x shocks, half a second apart, around one random enemy.
+export const CRUSH=Object.freeze({factor:8,radius:150,hits:3,first:.25,gap:.5});
 // Galaxy whale harvests divine marks into the blast (8x, +100% per mark, 3 marks = 32x) and does not stun.
 export const WHALE=Object.freeze({factor:8,perMark:1});
 export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});
@@ -59,12 +61,12 @@ export const coreHealthMax=s=>s.mode==='monthly'?MONTHLY_HEALTH:20;
 export const coreCrisis=s=>s.health<coreHealthMax(s)/2;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 // Running ultimates that refuse a second press: a pure buff would only restart its timer, and the
-// dream form keeps one sequence of phases (the save holds at most one). Damage-and-buff hybrids
-// (glassfall, gift, goddess, trauma, ice court) stay recastable because the hit is the point.
+// dream form keeps one sequence of phases. Damage-and-buff hybrids
+// (glassfall, gift, goddess, trauma, ice court, crush) stay recastable because the hit is the point.
 export const PURE_BUFFS=new Set(['echo','haste','awaken','march','harmony']);
 export function castLock(s,id){
   const u=bestUnit(s,id);if(!u)return null;
-  if(rumiDream(s,u)){const remaining=(s.volleys||[]).reduce((m,v)=>Math.max(m,v.life),0);return remaining>0?{kind:'dream',remaining,total:RUMI_DREAM.phases.at(-1).at}:null;}
+  if(rumiDream(s,u)){const remaining=(s.volleys||[]).reduce((m,v)=>v.kind==='dream'?Math.max(m,v.life):m,0);return remaining>0?{kind:'dream',remaining,total:RUMI_DREAM.phases.at(-1).at}:null;}
   const active=PURE_BUFFS.has(HERO[id].skill.type)&&activeSkill(s,id);return active?{kind:'buff',...active}:null;
 }
 export const BOARD = {x:135,y:212,cell:90};
@@ -176,7 +178,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -207,6 +209,7 @@ export function givenEffects(s,u,index){
   else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
   else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
+  else if(u.hero==='behemoth')out.push('오라 2배');
   return out;
 }
 export function unitEconomy(s,u){
@@ -304,7 +307,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
     buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
-    stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{}},tutorial:0,won:false};
+    stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
   for(const [i,hero] of opening.entries())place(s,hero,1,openingCells[i]);
@@ -439,7 +442,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   if(!e||e.hp<=0)return 0;
   syncStatuses(s,e,statusAt);syncSlows(s,e,statusAt);
   const passive=e.boss?BOSSES[e.boss]:null;
-  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*(passive?.exposeScale||1))*(passive?.dotScale?.[dotType]||1)*(basic?passive?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0))*(s.buffs.winter>0?1+WINTER_TAKEN:1);
+  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*(passive?.exposeScale||1))*(passive?.dotScale?.[dotType]||1)*(basic?passive?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
   if(!instant&&!flat){
     if(e.rage>0&&!dot)amount*=.75;
   }
@@ -620,6 +623,8 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(unitForm(s,u)){damageBonus('ult','트라우마',1.1);speedBonus('ult','트라우마',.35);}
   if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
   if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
+  // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
+  if(u.hero==='behemoth'&&!u.cursed&&!(u.disabled>0)){power_.aura*=2;speed_.aura*=2;if(detail)bonuses.push('오라 2배');}
   if(s.buffs.haste>0)speedBonus('ult','가속',ULT_BUFF.haste.speed*buffScale(s,'haste'));
   if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march'));
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',.2*buffScale(s,'festive'));
@@ -660,7 +665,7 @@ export function cast(s,id){
   else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control,'festive');}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');}
-  else if(type==='ice_court'){strike(9);for(const e of targets)if(e.hp>0)addSlow(s,e,source,.5,6);s.buffs.winter=skillDuration(s,6*control);}
+  else if(type==='ice_court'){const winter=skillDuration(s,6*control);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,.5,6);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control,'harmony');
   else if(type==='royal'||type==='starfall'||type==='mirror'){
     const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
@@ -702,6 +707,7 @@ export function cast(s,id){
   else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
   else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
   else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;}
+  else if(type==='crush'){visualTargets=[];for(let i=0;i<CRUSH.hits;i++){const life=CRUSH.first+i*CRUSH.gap;s.volleys.push({uid:s.nextId++,source:u.uid,hero:id,kind:'crush',phase:i,rank:u.rank,damage:base*CRUSH.factor,life,total:life,...(i===CRUSH.hits-1?{echo:{}}:{})});}}
   if(echoes){
     const ratio=RV.twin.echo*relicScaleIn(s,'twin');
     for(const [uid,dealt] of echoes){
@@ -782,7 +788,7 @@ export function castPreview(s,id){
   }else if(type==='ice_court'){
     lines.push(`적 전체에게 위력 9배, ${hit(9)}를 줍니다.`);
     lines.push(`적은 6초 동안 ${pct(slowOf(.5))}% 느려집니다.`);
-    lines.push(`겨울 동안 적이 받는 피해가 ${pct(WINTER_TAKEN)}% 늘어납니다.`);
+    lines.push(`겨울 동안 적이 받는 피해가 ${pct(WINTER_EXPOSURE)}% 늘어납니다.`);
     lines.push(`겨울은 ${dur(6)} 동안 이어지고, 쓰러진 적 주변 120 안의 일반 적이 ${sec(.8*scale)} 동안 얼어붙습니다.`);
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
@@ -902,6 +908,9 @@ export function castPreview(s,id){
   else if(type==='dividend'){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
     lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
+  }else if(type==='crush'){
+    lines.push(`무작위 적 주변(반경 ${CRUSH.radius})에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.`);
+    if(targets.length===1)lines.push(`적이 하나뿐이면 모두 그 적에게 들어갑니다(합계 ${hit(CRUSH.factor*CRUSH.hits)}).`);
   }else lines.push(hero.skill.text);
 
   const gold=skillGoldCost(id);
@@ -1033,7 +1042,7 @@ export function step(s,dt){
     if(e.progress>=PATH_LENGTH&&e.hp>0){
       // Returning Dawn: once per run the boss walks back to the middle of the path and takes more damage from then on.
       if((e.boss||e.kind==='boss')&&has(s,'phoenix')&&(s.phoenixUses||0)<RV.phoenix.uses){s.phoenixUses=(s.phoenixUses||0)+1;s.phoenixUsed=true;e.progress=PATH_LENGTH/2;e.dawn=RV.phoenix.taken*relicScaleIn(s,'phoenix');event(s,'phoenix');}
-      else{e.hp=0;s.health-=e.boss?7:e.kind==='armor'?2:1;event(s,'leak',{boss:e.boss,health:s.health});if(has(s,'amulet')&&(s.amuletUsed||0)<RV.amulet.uses){s.amuletUsed=(s.amuletUsed||0)+1;addGauge(s,RV.amulet.starlight*relicScaleIn(s,'amulet'));}}
+      else{e.hp=0;s.health-=e.boss?7:e.kind==='armor'?2:1;s.stats.leaks=(s.stats.leaks||0)+1;event(s,'leak',{boss:e.boss,health:s.health});if(has(s,'amulet')&&(s.amuletUsed||0)<RV.amulet.uses){s.amuletUsed=(s.amuletUsed||0)+1;addGauge(s,RV.amulet.starlight*relicScaleIn(s,'amulet'));}}
     }
   }
   for(const z of s.zones){
@@ -1079,10 +1088,21 @@ export function step(s,dt){
   // summed damage once, after the last phase, like any other field ultimate.
   for(const v of s.volleys){
     v.life-=dt;if(v.life>1e-9)continue;v.life=0;
-    const hit=s.enemies.filter(e=>e.hp>0),last=s.volleys.find(x=>x.source===v.source&&x.echo),points=[];
-    for(const e of hit){const dealt=damage(s,e,v.damage,v.hero);points.push({...pathPoint(e.progress),uid:e.uid});if(last&&dealt>0)last.echo[e.uid]=(last.echo[e.uid]||0)+dealt;}
-    event(s,'dreamPhase',{hero:v.hero,phase:v.phase,rank:v.rank,targets:points});
-    if(v.echo&&has(s,'twin'))for(const [uid,dealt] of Object.entries(v.echo)){const target=s.enemies.find(e=>e.uid===Number(uid)&&e.hp>0);if(target&&dealt>0)s.finishers.push({uid:s.nextId++,source:v.source,hero:v.hero,kind:'echo',target:target.uid,origin:pathPoint(target.progress),to:pathPoint(target.progress),damage:dealt*RV.twin.echo*relicScaleIn(s,'twin'),rank:v.rank,life:1.5,total:1.5});}
+    const echoFinisher=(uid,dealt)=>{const target=s.enemies.find(e=>e.uid===Number(uid)&&e.hp>0);if(target&&dealt>0)s.finishers.push({uid:s.nextId++,source:v.source,hero:v.hero,kind:'echo',target:target.uid,origin:pathPoint(target.progress),to:pathPoint(target.progress),damage:dealt*RV.twin.echo*relicScaleIn(s,'twin'),rank:v.rank,life:1.5,total:1.5});};
+    if(v.kind==='crush'){
+      const alive=s.enemies.filter(e=>e.hp>0);
+      if(alive.length){
+        const centre=alive[Math.floor(random(s)*alive.length)],at=pathPoint(centre.progress),echo=s.volleys.find(x=>x.kind==='crush'&&x.source===v.source&&x.echo&&(x===v||x.life>0)),points=[];
+        for(const e of alive){const p=pathPoint(e.progress);if(Math.hypot(p.x-at.x,p.y-at.y)>CRUSH.radius)continue;const dealt=damage(s,e,v.damage,v.hero);points.push({...p,uid:e.uid});if(echo&&dealt>0)echo.echo[e.uid]=(echo.echo[e.uid]||0)+dealt;}
+        event(s,'crushPhase',{hero:v.hero,phase:v.phase,rank:v.rank,x:at.x,y:at.y,radius:CRUSH.radius,targets:points});
+      }
+      if(v.echo&&has(s,'twin'))for(const [uid,dealt] of Object.entries(v.echo))echoFinisher(uid,dealt);
+    }else{
+      const hit=s.enemies.filter(e=>e.hp>0),last=s.volleys.find(x=>x.source===v.source&&x.echo),points=[];
+      for(const e of hit){const dealt=damage(s,e,v.damage,v.hero);points.push({...pathPoint(e.progress),uid:e.uid});if(last&&dealt>0)last.echo[e.uid]=(last.echo[e.uid]||0)+dealt;}
+      event(s,'dreamPhase',{hero:v.hero,phase:v.phase,rank:v.rank,targets:points});
+      if(v.echo&&has(s,'twin'))for(const [uid,dealt] of Object.entries(v.echo))echoFinisher(uid,dealt);
+    }
   }
   s.volleys=s.volleys.filter(v=>v.life>0);
   s.shots=s.shots.filter(shot=>shot.life>0);s.enemies=s.enemies.filter(e=>e.hp>0);
@@ -1184,7 +1204,10 @@ export function restore(raw){
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
     if(s.enemies.some(e=>!numeric(e,['frostStacks','frostTime','ccImmune','frostLock'])||!Number.isInteger(e.frostStacks)||e.frostStacks<0||e.frostStacks>2||e.frostTime<0||e.ccImmune<0||e.frostLock<0||e.ccImmune>s.time+30||e.frostLock>s.time+30||!Number.isFinite(e.dawn)||e.dawn<0||e.dawn>2||!Number.isFinite(e.ultControl)||e.ultControl<0||e.ultControl>s.time+30))return null;
     if(!Array.isArray(s.zones)||s.zones.length>ZONE_CAP||s.zones.some(z=>!id(z?.uid)||!id(z.source)||z.source>=s.nextId||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||!Number.isInteger(z.rank)||z.rank<1||z.rank>MAX_RANK||z.damage<0||z.x<GROUND_BOUNDS.left||z.x>GROUND_BOUNDS.right||z.y<GROUND_BOUNDS.top||z.y>GROUND_BOUNDS.bottom||z.radius<=0||z.radius>720||z.total<=0||z.total>30||z.life<=0||z.life>z.total||z.tick<-.05||z.tick>.5+1e-9||typeof z.orbit!=='boolean'))return null;
-    if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||v.hero!=='rumi'||v.kind!=='dream'||!Number.isInteger(v.phase)||v.phase<0||v.phase>=RUMI_DREAM.phases.length||!Number.isInteger(v.rank)||v.rank<RUMI_DREAM.rank||v.rank>MAX_RANK||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.total>3||v.life<=0||v.life>v.total||v.echo!==undefined&&(!v.echo||typeof v.echo!=='object'||Array.isArray(v.echo)||Object.keys(v.echo).length>200||Object.entries(v.echo).some(([k,d])=>!id(Number(k))||!Number.isFinite(d)||d<0))))return null;
+    const echoOk=v=>v.echo===undefined||!!(v.echo&&typeof v.echo==='object'&&!Array.isArray(v.echo)&&Object.keys(v.echo).length<=200&&Object.entries(v.echo).every(([k,d])=>id(Number(k))&&Number.isFinite(d)&&d>=0));
+    const dreamOk=v=>v.hero==='rumi'&&v.kind==='dream'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<RUMI_DREAM.phases.length&&Number.isInteger(v.rank)&&v.rank>=RUMI_DREAM.rank&&v.rank<=MAX_RANK&&v.total<=3;
+    const crushOk=v=>v.hero==='behemoth'&&v.kind==='crush'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<CRUSH.hits&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total<=CRUSH.first+2*CRUSH.gap+.01;
+    if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*2||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v))))return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
@@ -1194,7 +1217,8 @@ export function restore(raw){
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;
     if(!record(s.buffTotals)||Object.entries(s.buffTotals).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<0||n>60))return null;
     if(!record(s.buffScale)||Object.entries(s.buffScale).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<1||n>rankControl(MAX_RANK)+1e-9))return null;
-    if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
+    if(s.stats&&s.stats.leaks===undefined)s.stats.leaks=s.health<coreHealthMax(s)?1:0;
+    if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!Number.isInteger(s.stats.leaks)||s.stats.leaks<0||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation','stun1','starlust','thunder','shuffle','warp','judgement'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
     if(s.settlement){if(s.settlement.edict===undefined)s.settlement.edict=0;if(!numeric(s.settlement,['base','dividend','edict']))return null;}
     if(s.phase==='reward'&&(!Array.isArray(s.reward)||s.reward.length!==3||new Set(s.reward).size!==3||s.reward.some(a=>!BLESSING[a])))return null;

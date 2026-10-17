@@ -1,7 +1,7 @@
 // Local unlocked-build profile: every companion and every relic owned, stage 45 open.
 // Most companions start at ten hearts (memorials open); three start lower so gifts can be tried.
 // Deck, partner and equipped relics stay as created.
-import {ARTIFACT} from './content.js';
+import {ARTIFACT,ARTIFACTS,HEROES} from './content.js';
 import {COURSE} from './course.js';
 import {questionOf} from './quiz.js';
 export function unlockProfile(p){
@@ -13,6 +13,9 @@ export function unlockProfile(p){
 }
 // Saves from earlier test builds keep their progress but always have gifts to try.
 export function topUpUnlocked(p){
+  // Companions and relics added after this save was made show up owned, like a fresh unlock.
+  if(p.heroes)for(const h of HEROES){const e=p.heroes[h.id];if(e&&!e.owned){e.owned=true;e.bond=10;e.bondXp=0;}}
+  if(p.relics)for(const a of ARTIFACTS){const e=p.relics[a.id];if(e&&!e.owned){e.owned=true;e.enhance={C:6,R:4,SR:3,UR:1}[a.rarity];e.copies={C:20,R:8,SR:5,UR:3}[a.rarity];}}
   if(p.gifts)for(const id of Object.keys(p.gifts))p.gifts[id]=Math.max(p.gifts[id],30);
   // Study: a few wrong answers to try the star library; today's star and acceleration reopen on every load.
   const s=p.study;

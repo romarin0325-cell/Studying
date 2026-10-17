@@ -11,7 +11,7 @@ test('every companion has one favourite gift with its line, its own line for the
   assert.equal(Object.keys(FAVORITE).length,HEROES.length);
   for(const h of HEROES){assert.ok(GIFT_IDS.includes(FAVORITE[h.id]),h.id);assert.ok(FAVORITE_LINES[h.id],h.id);assert.ok(GIFT_LINES[h.id],h.id);}
   assert.equal(new Set(Object.values(GIFT_LINES)).size,HEROES.length,'no shared gift line');
-  for(const gift of GIFT_IDS)assert.equal(Object.values(FAVORITE).filter(g=>g===gift).length,10,gift);
+  assert.deepEqual(Object.fromEntries(GIFT_IDS.map(gift=>[gift,Object.values(FAVORITE).filter(g=>g===gift).length])),{candy:10,letter:11,bouquet:10});
 });
 
 test('hearts fill by points; a fully fed companion reaches ten hearts in two to three weeks',()=>{

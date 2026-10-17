@@ -285,7 +285,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 67,
+    "damage": 60,
     "interval": 1.8,
     "attack": "stone",
     "trait": {
@@ -1120,6 +1120,43 @@ export const HEROES = [
     "shape": "single",
     "range": 540,
     "radius": 0
+  },
+  {
+    "id": "behemoth",
+    "name": "베히모스",
+    "title": "대지를 쪼갠 주먹",
+    "color": "#b9dd6a",
+    "art": {
+      "atlas": "unit-behemoth",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 205,
+        "size": 250
+      }
+    },
+    "damage": 95,
+    "interval": 2,
+    "attack": "stone",
+    "trait": {
+      "type": "auraDouble",
+      "text": "자기 칸 주변(반경 210)의 적을 모두 칩니다. 상하좌우 동료의 오라 효과를 두 배로 받습니다."
+    },
+    "skill": {
+      "name": "대지분쇄",
+      "cost": 70,
+      "type": "crush",
+      "text": "무작위 적을 노려 주변(반경 150)에 위력 8배 충격을 0.5초 간격으로 3번 줍니다."
+    },
+    "heightGroup": "tall",
+    "role": "오라 증폭 · 대지 분쇄",
+    "shape": "pulse",
+    "range": 210,
+    "radius": 210
   }
 ];
 
@@ -1574,6 +1611,7 @@ export const ASSET_PATHS = {
   "unit-frost_witch": "./assets/merge/units/frost_witch.webp",
   "unit-harmonious": "./assets/merge/units/harmonious.webp",
   "unit-aurora": "./assets/merge/units/aurora.webp",
+  "unit-behemoth": "./assets/merge/units/behemoth.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
@@ -1592,6 +1630,7 @@ export const ASSET_PATHS = {
   "bosses-expansion": "./assets/merge/bosses-expansion.webp",
   "realms-expansion": "./assets/merge/realms-expansion.webp",
   "effects-trio": "./assets/merge/effects-trio.webp",
+  "effects-behemoth": "./assets/merge/effects-behemoth.webp",
   "ultimates": "./assets/merge/ultimates.webp",
   "ancient-cross": "./assets/merge/ancient-cross.webp",
   "zeke-cone": "./assets/merge/zeke-cone.webp",

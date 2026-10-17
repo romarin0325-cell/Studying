@@ -13,7 +13,7 @@ export const ROSTER = {
   C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king'],
   R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora'],
   SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom'],
-  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince'],
+  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','behemoth'],
 };
 export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch'];
 export const DEFAULT_DECK = ['star_boy','snow_rabbit','night_rabbit','siren','great_detective'];

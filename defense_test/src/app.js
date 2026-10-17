@@ -1,7 +1,7 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR} from './economy.js';
+import {calendar,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,BED_IDS,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
@@ -91,7 +91,15 @@ function shardsMarkup(){
 }
 function toast(text){if(!text)return;clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2800);}
 function settings(){sound.enabled=p().settings.sound;sound.music=p().settings.sound;sound.setVolume(.2);$('app').dataset.reduced=String(p().settings.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);if(renderer){renderer.reduced=$('app').dataset.reduced==='true';renderer.setQuality(p().settings.quality);}}
-function wallet(){const profile=p();$('dreams').textContent=fmt(profile.dreams);$('dust').textContent=fmt(profile.dust);$('save-warning').hidden=!store.broken&&!store.conflict;$('save-warning').textContent=store.warning||'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.';settings();}
+function bindTestGrant(){
+  if(!UNLOCKED||bindTestGrant.done)return;bindTestGrant.done=true;
+  for(const id of ['dreams','dust']){
+    const chip=$(id).closest('.pill');if(!chip)continue;
+    chip.tabIndex=0;chip.setAttribute('role','button');chip.setAttribute('aria-label','테스트 지급');chip.classList.add('wallet-grant');
+    const fire=()=>act('testGrant');chip.addEventListener('click',fire);chip.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fire();}});
+  }
+}
+function wallet(){const profile=p();$('dreams').textContent=fmt(profile.dreams);$('dust').textContent=fmt(profile.dust);$('save-warning').hidden=!store.broken&&!store.conflict;$('save-warning').textContent=store.warning||'다른 창에서 저장 내용이 바뀌었습니다. 이 창을 새로고침하세요.';settings();bindTestGrant();}
 function act(action,args={},showToast=true){const result=store.transact(action,args,now());wallet();if(!result.ok||showToast)toast(result.message);return result;}
 // Growth changes numbers on the screen under a sheet; redraw it without losing the scroll position.
 function refreshBehind(){const c=$('content'),y=c.scrollTop;render();c.scrollTop=y;}
@@ -345,19 +353,23 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges)},false);if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0},false);if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(4,Math.floor(p().cleared/9));close();render();showResult(lastResult);}
 function showResult(r){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${r.mode==='weekly'?'주간 드래프트':'월간 보스전'} · ${(TIERS[r.tier]||TIERS.easy).name}`;
-  show(r.won?'스테이지 클리어':r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?(r.mode==='main'?'승리':'완주'):r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}웨이브`}</b>${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
-    ${r.mode==='monthly'?`<p class="record-result">${r.newBest?'이번 달 최고 기록 갱신':'도전 기록 저장'} · 이번 도전 ${r.round}보스</p>${monthlyRecordPanel()}`:`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>`}
+  const crowned=r.mode==='main'&&r.won&&r.perfect,retry=r.mode==='main'&&r.won&&!r.perfect&&!(p().perfect||[]).includes(r.stage)?'코어 피해 없이 다시 클리어하면 퍼펙트 보상 +100':'';
+  const wonLine=r.won?[`파견 보상 +${p().cleared*5}%`,p().cleared%9===0&&p().cleared<=36?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 라운드에 도전하세요.';
+  const split=crowned&&r.firstPerfect?`<small class="reward-split">${r.clearReward>0?`첫 클리어 +${r.clearReward} · 퍼펙트 +100`:'퍼펙트 +100'}</small>`:'';
+  show(r.won?'스테이지 클리어':r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?(r.mode==='main'?'승리':'완주'):r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}웨이브`}</b>${crowned?`<span class="result-perfect">${icon('crown')}퍼펙트</span>`:''}${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
+    ${r.mode==='monthly'?`<p class="record-result">${r.newBest?'이번 달 최고 기록 갱신':'도전 기록 저장'} · 이번 도전 ${r.round}보스</p>${monthlyRecordPanel()}`:`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>${split}`}
     <div class="result-stat"><span>처치</span><b>${fmt(r.kills)}</b></div><div class="result-stat"><span>총 피해</span><b>${fmt(r.damage)}</b></div><div class="result-stat"><span>전투 시간</span><b>${duration(r.seconds*1000)}</b></div>
     ${mvp?`<div class="result-mvp">${image(mvp[0],true)}<div><p class="mvp-tag">MVP</p><strong>${HERO[mvp[0]].name}</strong><small>기여 피해 ${fmt(mvp[1])} (${Math.round(mvp[1]/Math.max(1,r.damage)*100)}%)</small></div></div>`:''}
-    <p class="subtext">${r.won?`파견 보상 +${p().cleared*5}%${p().cleared%9===0&&p().cleared<=36?' · 파견 슬롯이 해금되었습니다.':''}`:r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 라운드에 도전하세요.'}</p>`,
+    <p class="subtext">${wonLine}</p>`,
     `<div class="dialog-buttons"><button class="secondary" data-action="${r.mode==='monthly'?'close':'go-collection'}">${r.mode==='monthly'?'기록 확인':'동료 강화'}</button><button class="primary" data-action="${r.mode==='monthly'?'monthly-retry':'close'}">${r.mode==='monthly'?'다시 도전':'확인'}</button></div>`,'result');
   // Rewards count up; a win bursts gold stars over the result mark.
   const node=document.querySelector('#sheet .count-up'),to=Number(node?.dataset.to)||0,start=performance.now();
   if(node&&to>0&&$('app').dataset.reduced!=='true'&&!navigator.webdriver){const tick=t=>{const k=Math.min(1,(t-start)/900);node.textContent='+'+fmt(Math.round(to*(1-Math.pow(1-k,3))));if(k<1&&node.isConnected)requestAnimationFrame(tick);};node.textContent='+0';requestAnimationFrame(tick);}
   if(r.won){const mark=document.querySelector('#sheet .result-mark');if(mark)setTimeout(()=>{const c=centerOf(mark);burst(c.x,c.y,{count:16,spread:110,size:13,duration:1000,color:'#ffe08a'});},180);}
+  if(r.perfect)sound.event({type:'perfect'});
 }
 function storagePause(){paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
 function syncBattlePhase(){
@@ -661,9 +673,10 @@ function adventure(){
 }
 function mainStages(){
   const profile=p(),next=Math.min(45,profile.cleared+1);cycle=Math.min(4,Math.max(0,cycle));
-  const groups=Array.from({length:5},(_,i)=>{const cleared=Math.max(0,Math.min(9,profile.cleared-i*9)),open=i*9<=profile.cleared;return `<button class="chap ${cleared===9?'done':''}" data-cycle="${i}" aria-pressed="${cycle===i}" ${open?'':'disabled'}><b>${i+1}장</b><small>${open?`${cleared}/9`:icon('lock')}</small></button>`;}).join('');
-  const rows=CHAPTERS.slice(cycle*9,cycle*9+9).map(c=>{const done=c.stage<=profile.cleared,cur=c.stage===next,lock=c.stage>profile.cleared+1;
-    return `<button class="stage ${cur?'current':''} ${done?'done':''}" data-prepare-stage="${c.stage}" ${lock?'disabled':''}><span class="stage-no">${stageLabel(c.stage)}</span><span class="stage-info"><strong>${BOSSES[c.bosses[0]].name}</strong><small>${c.name}</small></span><span class="stage-state">${done?icon('check'):cur?'<b>도전</b>':icon('lock')}</span></button>`;}).join('');
+  const perfect=new Set(profile.perfect||[]);
+  const groups=Array.from({length:5},(_,i)=>{const cleared=Math.max(0,Math.min(9,profile.cleared-i*9)),open=i*9<=profile.cleared,all=Array.from({length:9},(__,k)=>i*9+k+1).every(n=>perfect.has(n));return `<button class="chap ${cleared===9?'done':''}${all?' all-perfect':''}" data-cycle="${i}" aria-pressed="${cycle===i}" ${open?'':'disabled'}><b>${i+1}장</b><small>${open?`${cleared}/9`:icon('lock')}</small></button>`;}).join('');
+  const rows=CHAPTERS.slice(cycle*9,cycle*9+9).map(c=>{const done=c.stage<=profile.cleared,cur=c.stage===next,lock=c.stage>profile.cleared+1,perf=done&&perfect.has(c.stage);
+    return `<button class="stage ${cur?'current':''} ${done?'done':''}" data-prepare-stage="${c.stage}" ${lock?'disabled':''}><span class="stage-no">${stageLabel(c.stage)}</span><span class="stage-info"><strong>${BOSSES[c.bosses[0]].name}</strong><small>${c.name}</small></span><span class="stage-state${perf?' perfect':''}"${done?` aria-label="${perf?'퍼펙트 클리어':'클리어'}"`:''}>${perf?icon('crown'):done?icon('check'):cur?'<b>도전</b>':icon('lock')}</span></button>`;}).join('');
   return `<div class="chap-tabs">${groups}</div><div class="chap-head"><b>${cycle+1}장 · ${CHAPTER_NAMES[cycle]}</b><button class="link" data-action="records">기록</button></div><div class="stage-list">${rows}</div>`;
 }
 // Tier picker shared by both challenges: locked tiers show their stage requirement.
@@ -696,7 +709,9 @@ function modeInfo(kind){
 function prepare(stage=Math.min(45,p().cleared+1),kind='main'){
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]],t=TIERS[challengeTier]||TIERS.easy;
-  const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}<span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span></div>`
+  const perf=kind==='main'&&(p().perfect||[]).includes(stage);
+  const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 체력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
+  const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'주간 드래프트':'월간 보스전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${head}
     ${kind==='weekly'?'':`<div class="panel-head"><h3>출전 팀</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}`}
