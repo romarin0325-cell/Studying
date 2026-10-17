@@ -1,0 +1,110 @@
+/* DREAMWEAVER Argon Edition — Multi-Theme Subculture RPG Design Tokens.
+   Each theme pairs its own sanctuary backdrop, emblem mark, decorative vector frame,
+   and tactile surface material while sharing a unified mobile geometry. */
+body.astra {
+  --font:DreamSans,"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --r-xs:6px; --r-sm:9px; --r-md:14px; --r-lg:18px; --r-pill:999px;
+  --app-width:520px; --edge:14px; --top-h:52px; --nav-h:62px;
+  --t-fast:.14s; --t-med:.24s; --ease:cubic-bezier(.2,.8,.2,1);
+  /* Grade colours shared across themes */
+  --g-normal:#9aa6b2; --g-rare:#3d8bfd; --g-epic:#9b5de5; --g-legend:#f2a71b; --g-trans:#14b8a6; --g-special:#ec4899; --g-event:#65a30d;
+  /* Element colours */
+  --el-fire:#ef6a3a; --el-water:#2f8fe0; --el-nature:#3fa25a; --el-wind:#25a99a; --el-light:#e3a21a; --el-dark:#7154c4; --el-earth:#a0743f; --el-normal:#8b95a1;
+  --success:#1fa971; --danger:#e5484d; --warning:#f59f00;
+}
+
+/* Dream Sky (Blue Archive / Stella Sora inspired luminous sky sanctuary) */
+body.astra[data-theme=dreamsky] {
+  --bg:#dff0ff;
+  --surface:rgba(255, 255, 255, 0.90);
+  --surface-solid:#ffffff;
+  --surface-2:rgba(244, 250, 255, 0.92);
+  --sunken:rgba(224, 238, 252, 0.85);
+  --scrim:rgba(232, 244, 255, 0.86);
+  --ink:#142538; --ink-2:#415870; --muted:#7288a0;
+  --line:#cde0f2; --line-strong:#a9c7e4;
+  --accent:#188bf0; --accent-strong:#0d70cc; --accent-ink:#ffffff; --accent-soft:#e0f1ff; --highlight:#ffd43b;
+  --cta-grad:linear-gradient(180deg, #3da6ff 0%, #157de0 100%);
+  --cta-shadow:0 4px 14px rgba(24, 139, 240, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  --panel-inset:inset 0 0 0 2px rgba(255, 255, 255, 0.92);
+  --shadow-1:0 4px 14px rgba(25, 68, 118, 0.10), 0 1px 3px rgba(25, 68, 118, 0.06);
+  --shadow-2:0 12px 32px rgba(20, 56, 102, 0.18);
+  --theme-bg-art:url("../assets/dreamsky-sanctuary.svg");
+  --theme-backdrop-overlay:url("../assets/dreamsky-backdrop.svg");
+  --theme-mark:url("../assets/dreamsky-mark.svg");
+  --theme-frame:url("../assets/dreamsky-frame.svg");
+  --theme-button:url("../assets/dreamsky-button.svg");
+  --theme-card-back:url("../assets/dreamsky-card.svg");
+  --scene-tint:linear-gradient(180deg, rgba(214, 238, 255, 0.05) 0%, rgba(235, 246, 255, 0.20) 60%, rgba(226, 240, 255, 0.44) 100%);
+  color-scheme:light;
+}
+
+/* Magical Girl (strawberry key kept for saves: pastel rose & cream magical sanctuary) */
+body.astra[data-theme=strawberry] {
+  --bg:#fdeef4;
+  --surface:rgba(255, 251, 253, 0.90);
+  --surface-solid:#fffbfd;
+  --surface-2:rgba(255, 244, 248, 0.92);
+  --sunken:rgba(249, 230, 238, 0.86);
+  --scrim:rgba(253, 238, 244, 0.86);
+  --ink:#361c28; --ink-2:#6b4657; --muted:#9a7486;
+  --line:#f2d2df; --line-strong:#e4b5c8;
+  --accent:#e4487e; --accent-strong:#c62d63; --accent-ink:#ffffff; --accent-soft:#ffe4ef; --highlight:#ffcf5c;
+  --cta-grad:linear-gradient(180deg, #ff73a3 0%, #df3f76 100%);
+  --cta-shadow:0 4px 14px rgba(228, 72, 126, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --panel-inset:inset 0 0 0 2px rgba(255, 253, 249, 0.95);
+  --shadow-1:0 4px 14px rgba(116, 33, 66, 0.10), 0 1px 3px rgba(116, 33, 66, 0.06);
+  --shadow-2:0 12px 32px rgba(102, 24, 55, 0.18);
+  --theme-bg-art:url("../assets/magical-sanctuary.webp");
+  --theme-backdrop-overlay:url("../assets/magical-backdrop.svg");
+  --theme-mark:url("../assets/magical-mark.svg");
+  --theme-frame:url("../assets/magical-frame.svg");
+  --theme-button:url("../assets/magical-button.svg");
+  --theme-card-back:url("../assets/card-back-strawberry.webp");
+  --scene-tint:linear-gradient(180deg, rgba(255, 234, 243, 0.06) 0%, rgba(255, 240, 246, 0.22) 60%, rgba(253, 234, 242, 0.46) 100%);
+  color-scheme:light;
+}
+
+/* Astra (Celestial Observatory: deep midnight navy glass, cyan & champagne gold) */
+body.astra[data-theme=astra] {
+  --bg:#09131e;
+  --surface:rgba(17, 30, 46, 0.86);
+  --surface-solid:#132234;
+  --surface-2:rgba(23, 39, 58, 0.88);
+  --sunken:rgba(11, 21, 33, 0.86);
+  --scrim:rgba(8, 16, 26, 0.88);
+  --ink:#ecf3fa; --ink-2:#b6c6d6; --muted:#7f95ab;
+  --line:#253950; --line-strong:#355170;
+  --accent:#4fb3ff; --accent-strong:#2b95eb; --accent-ink:#04121f; --accent-soft:rgba(79, 179, 255, 0.16); --highlight:#f2c46b;
+  --cta-grad:linear-gradient(180deg, #64beff 0%, #2d90e5 100%);
+  --cta-shadow:0 4px 16px rgba(45, 144, 229, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  --panel-inset:inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-1:0 4px 14px rgba(0, 0, 0, 0.38), 0 1px 3px rgba(0, 0, 0, 0.28);
+  --shadow-2:0 12px 34px rgba(0, 0, 0, 0.56);
+  --g-normal:#aab5c0; --g-rare:#5ea1ff; --g-epic:#b48af0; --g-legend:#f5b83d; --g-trans:#2dd4bf; --g-special:#f472b6; --g-event:#84cc16;
+  --theme-bg-art:url("../assets/observatory.webp");
+  --theme-backdrop-overlay:none;
+  --theme-mark:url("../assets/astra-mark.svg");
+  --theme-frame:url("../assets/astra-frame.svg");
+  --theme-button:url("../assets/astra-button.svg");
+  --theme-card-back:url("../assets/astra-card.svg");
+  --scene-tint:linear-gradient(180deg, rgba(8, 17, 28, 0.34) 0%, rgba(9, 19, 31, 0.64) 55%, rgba(8, 16, 26, 0.84) 100%);
+  color-scheme:dark;
+}
+
+/* Aliases used by legacy game dialogs and card-pool editor */
+body.astra {
+  --paper:var(--ink); --panel:var(--surface-solid); --panel-soft:var(--sunken); --sky:var(--accent); --sky-bright:var(--accent-strong);
+  --gold:var(--g-legend); --wash:var(--accent-soft);
+  --stat-up:var(--success); --stat-down:var(--danger); --stat-neutral:var(--ink);
+  --positive-ink:var(--success); --positive-fill:color-mix(in srgb,var(--success) 14%,var(--surface-solid));
+  --negative-ink:var(--danger); --negative-fill:color-mix(in srgb,var(--danger) 12%,var(--surface-solid));
+  --phy-line:#e0704a; --mag-line:#8b6ae6; --sup-line:#2fa58a;
+}
+.astra [data-grade=normal] { --tier:var(--g-normal); }
+.astra [data-grade=rare] { --tier:var(--g-rare); }
+.astra [data-grade=epic] { --tier:var(--g-epic); }
+.astra [data-grade=legend] { --tier:var(--g-legend); }
+.astra [data-grade=transcendence] { --tier:var(--g-trans); }
+.astra [data-grade=special] { --tier:var(--g-special); }
+.astra [data-grade=event] { --tier:var(--g-event); }
