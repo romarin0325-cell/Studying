@@ -30,8 +30,41 @@ const inView = (page, selector) => page.locator(selector).evaluate(el => {
 });
 try {
   const page = await open({width:390,height:844});
+  // Verify all 3 themes have bespoke sanctuary backdrops, crests, and card backs.
+  const themeCheck = await page.evaluate(() => {
+    const res = {};
+    for (const t of ['dreamsky', 'strawberry', 'astra']) {
+      Astra.setTheme(t);
+      res[t] = {
+        bg: getComputedStyle(document.querySelector('.dw-backdrop')).backgroundImage !== 'none',
+        mark: getComputedStyle(document.querySelector('.dw-title-crest-mark')).backgroundImage !== 'none',
+        cardBack: Boolean(window.DREAMWEAVER_THEME_CARDS && window.DREAMWEAVER_THEME_CARDS[t])
+      };
+    }
+    return res;
+  });
+  for (const t of ['dreamsky', 'strawberry', 'astra']) {
+    assert.deepEqual(themeCheck[t], { bg: true, mark: true, cardBack: true }, `Theme ${t} art assets missing`);
+  }
+  // The fortune-cookie badge clears once today's cookie is used.
+  assert.equal(await page.locator('#btn-fortune-cookie.has-dot').count(), 1);
+  await page.evaluate(() => { FortuneCookie.open(); FortuneCookie.markUsed({}); FortuneCookie.close(); });
+  await page.waitForFunction(() => !document.getElementById('btn-fortune-cookie').classList.contains('has-dot'));
   // A first journey starts without any confirmation and reports the save as a toast.
   await page.locator('#btn-start-load').click();
+  // Pre-run Deck Editor (#modal-bonus-pool-editor) must show >= 6 cards on 390x844 mobile.
+  await page.locator('#btn-bonus-pool-editor').click();
+  await page.waitForSelector('#modal-bonus-pool-editor.active');
+  const preRunVisible = await page.evaluate(() => {
+    const body = document.querySelector('#modal-bonus-pool-editor .card-pool-editor-body');
+    const br = body.getBoundingClientRect();
+    return [...body.querySelectorAll('.card-pool-card-row')].filter(el => {
+      const r = el.getBoundingClientRect();
+      return r.top >= br.top - 4 && r.bottom <= br.bottom + 12;
+    }).length;
+  });
+  assert(preRunVisible >= 6, `Pre-run deck editor shows too few cards on mobile: ${preRunVisible}`);
+  await page.locator('#modal-bonus-pool-editor .card-pool-icon-btn', { hasText: '닫기' }).click();
   await page.locator('[onclick="RPG.selectGameType(\'endless\')"]').click();
   await page.locator('#mode-btn-origin').click();
   assert.equal(await page.locator('#mode-btn-origin').getAttribute('aria-pressed'), 'true');
@@ -73,7 +106,10 @@ try {
   }
 
   await page.locator('[data-nav=deck]').click();
-  await page.locator('.dw-formation-head .dw-btn', {hasText:'자동 편성'}).click();
+  assert.equal(await page.locator('.astra-nav').isVisible(), false, 'Formation is a sub-screen without the main navigation');
+  const grid = await page.locator('#deck-card-list').evaluate(el => el.clientHeight / innerHeight);
+  assert.ok(grid > 0.5, `The card list gets most of the screen (${grid.toFixed(2)})`);
+  await page.locator('.dw-formation-bar .dw-btn', {hasText:'자동'}).click();
   assert.equal(await page.evaluate(() => RPG.state.deck.every(Boolean)), true);
   const first = await page.evaluate(() => RPG.state.deck[0]);
   await page.locator('#slot-0').click();
@@ -81,16 +117,39 @@ try {
   assert.equal(await page.evaluate(() => RPG.state.deck[0]), null, 'Tapping the placed card clears the slot');
   await page.locator(`#deck-card-list .dw-card[data-card-id="${first}"]`).click();
   assert.equal(await page.evaluate(() => RPG.state.deck[0]), first);
+  // Placement and copy-count badges never overlap.
+  const overlaps = await page.locator('#deck-card-list .dw-cardart').evaluateAll(frames => frames.some(frame => {
+    const a = frame.querySelector('.dw-card-slot')?.getBoundingClientRect();
+    const b = frame.querySelector('.dw-card-count')?.getBoundingClientRect();
+    return !!(a && b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom);
+  }));
+  assert.equal(overlaps, false);
   await page.locator('#deck-card-list .dw-card-info').first().click();
   assert.equal(await page.locator('#modal-card').isVisible(), true);
+  // The detail sheet keeps one height while paging, and its arrows live in the header bar.
+  const sheetHeight = () => page.locator('#modal-card .dw-card-sheet').evaluate(el => Math.round(el.getBoundingClientRect().height));
+  const firstHeight = await sheetHeight();
+  await page.locator('#modal-card .dw-viewer-nav[data-dir=next]').click();
+  assert.equal(await sheetHeight(), firstHeight);
+  assert.equal(await page.locator('#modal-card .dw-card-bar .dw-viewer-nav').count(), 2);
   await page.keyboard.press('Escape');
-  await page.locator('.dw-formation-head .dw-btn--primary').click();
+  await page.locator('#dw-top-action').click();
+  await page.waitForFunction(() => document.body.dataset.screen === 'menu');
   assert.equal(await page.locator('#astra-depart').isEnabled(), true);
 
   for (const nav of ['collection','study']) {
     await page.locator(`[data-nav=${nav}]`).click();
     assert.equal(await page.evaluate(() => document.body.dataset.screen), nav);
   }
+  // The account book reports unlock tracks from the game's own rules and marks locked cards.
+  await page.locator('[data-nav=collection]').click();
+  await page.locator('#dw-tab-book').click();
+  assert.equal(await page.locator('#dw-tracks .dw-track').count() >= 3, true);
+  assert.equal(await page.locator('#collection-grid .dw-card.is-locked').count() > 0, true);
+  await page.locator('#grade-picker-open').click();
+  assert.equal(await page.locator('#dw-grade-menu').isVisible(), true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#dw-grade-menu').isVisible(), false);
   await page.locator('[data-nav=menu]').click();
   await page.locator('#dw-quick-mission').click();
   assert.equal(await page.locator('#mission-hub-list .dw-mission-row').count() >= 2, true);
@@ -106,7 +165,7 @@ try {
   await page.evaluate(() => { RPG.battle.enemy.hp = 1; RPG.renderBattlefield(); });
   await page.locator('#battle-controls .skill-btn').first().click();
   await page.waitForFunction(() => document.querySelector('#modal-info.active.dw-result'), null, {timeout:15000});
-  assert.equal(await page.locator('.dw-result-banner').getAttribute('aria-label'), 'VICTORY');
+  assert.equal(await page.locator('.dw-result-head').getAttribute('aria-label'), 'VICTORY');
   await page.locator('.dw-result-actions .dw-btn', {hasText:'건너뛰기'}).click();
   await page.waitForFunction(() => document.body.dataset.screen === 'menu' && !document.querySelector('.modal.active'));
   assert.equal(await page.evaluate(() => RPG.state.enemyScale), 1);
@@ -129,11 +188,11 @@ try {
       Object.assign(RPG.state,{mode:'origin',gameType:'endless',tickets:20,enemyScale:0,deck:['marshmallow','kobold','golem'],inventory:['marshmallow','kobold','golem','luna']});
       RPG.toMenu();
     });
-    for (const selector of ['#astra-depart','.astra-nav','#dw-bless','#astra-party']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
+    for (const selector of ['#astra-depart','.astra-nav','#dw-bless','#astra-party','#dw-top-menu','#dw-ticket-pill']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
     await small.locator('[data-nav=summon]').click();
     for (const selector of ['#btn-challenge-gacha','#btn-normal-gacha']) assert.equal(await inView(small, selector), true, `${selector} visible at ${viewport.width}x${viewport.height}`);
     await small.context().close();
   }
   assert.deepEqual(errors, [], 'Uncaught browser errors');
-  console.log('PASS card_claude: offline boot, legacy ids, journey start, challenge-first summon with flip reveal (quiz repeat, Escape), formation, battle HUD/result, single overwrite confirmation, 360/390x667/desktop lobby');
+  console.log('PASS card_claude: offline boot, legacy ids, fortune badge, journey start, challenge-first summon with flip reveal (quiz repeat, Escape), formation sub-screen and badges, fixed card sheet, account book, battle HUD/result, single overwrite confirmation, 360/390x667/desktop lobby');
 } finally { await browser.close(); }
