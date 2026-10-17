@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#132c44"/>
+      <stop offset=".5" stop-color="#0b1d2e"/>
+      <stop offset="1" stop-color="#071320"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6dfa4"/>
+      <stop offset=".5" stop-color="#d4af62"/>
+      <stop offset="1" stop-color="#9be2ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="300" rx="14" fill="url(#bg)"/>
+  <rect x="7" y="7" width="166" height="286" rx="10" fill="none" stroke="url(#gold)" stroke-opacity=".55" stroke-width="1.5"/>
+  <rect x="12" y="12" width="156" height="276" rx="7" fill="none" stroke="#8fd8ff" stroke-opacity=".25" stroke-width="1"/>
+  <g fill="none" stroke="url(#gold)" stroke-opacity=".42" transform="translate(90 150)">
+    <path d="M0-96 62-52v104L0 96l-62-44V-52Z" stroke-width="1"/>
+    <circle r="54" stroke-width="1.2"/>
+    <circle r="44" stroke-dasharray="3 5" stroke-width="1"/>
+    <path d="m0-50 13 37 37 13-37 13-13 37-13-37-37-13 37-13Z" stroke-width="1.6" fill="#8fd8ff" fill-opacity=".1"/>
+    <path d="m0-26 7 26-7 26-7-26Z" fill="#f6dfa4" fill-opacity=".75" stroke="none"/>
+  </g>
+  <g fill="#f6dfa4" opacity=".65">
+    <circle cx="90" cy="32" r="2"/>
+    <circle cx="90" cy="268" r="2"/>
+    <circle cx="24" cy="150" r="1.8"/>
+    <circle cx="156" cy="150" r="1.8"/>
+  </g>
+</svg>

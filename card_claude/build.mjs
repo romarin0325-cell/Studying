@@ -65,35 +65,38 @@ const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(ga
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
 const cardPoolCSS = await fs.readFile(path.join(game, 'card_pool_editor.css'), 'utf8');
-let theme = '';
-for (const file of ['astra.css', 'mobile.css', 'themes.css', 'polish.css', 'dream.css']) theme += await read(`src/${file}`) + '\n';
-const themeCards = {};
-const assetTypes = {'.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2'};
-// card_claude/assets holds the prepared art kit; small theme SVGs are read from card/assets.
+
+const assetTypes = { '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' };
+const assetCache = new Map();
 const encodeAsset = async file => {
+  if (assetCache.has(file)) return assetCache.get(file);
   const mime = assetTypes[path.extname(file)];
   if (!mime || path.basename(file) !== file) throw new Error(`Unsupported inline asset: ${file}`);
   const own = path.join(root, 'assets', file);
   const bytes = await fs.readFile(await fs.access(own).then(() => own, () => path.join(card, 'assets', file)));
   const stableBytes = mime === 'image/svg+xml' ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n')) : bytes;
-  return `data:${mime};base64,${stableBytes.toString('base64')}`;
+  const encoded = `data:${mime};base64,${stableBytes.toString('base64')}`;
+  assetCache.set(file, encoded);
+  return encoded;
 };
-for (const [key,file] of [['strawberry','card-back-strawberry.webp'],['dreamsky','dreamsky-card.svg']]) themeCards[key] = await encodeAsset(file);
-for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
+
+let theme = '';
+for (const file of ['tokens.css', 'legacy.css', 'ui.css']) theme += await read(`src/${file}`) + '\n';
+for (const [reference, file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
   theme = theme.replaceAll(reference, `url("${await encodeAsset(file)}")`);
 }
-// Each image is embedded once, as a custom property the stylesheet refers to.
-let art = `@font-face { font-family:DreamJua; src:url("${await encodeAsset('jua-subset.woff2')}") format("woff2"); font-style:normal; font-weight:400; font-display:swap; }\n:root {`;
-for (const name of ['fx', 'banner-victory', 'banner-defeat', 'banner-clear']) art += ` --art-${name}:url("${await encodeAsset(`${name}.webp`)}");`;
-art += ' }\n';
-for (const themeName of ['astra', 'strawberry', 'dreamsky']) {
-  art += `body[data-theme=${themeName}] { --art-logo:url("${await encodeAsset(`logo-${themeName}.webp`)}");`;
-  for (const scene of ['title', 'lobby', 'battle', 'summon']) art += ` --scene-${scene}:url("${await encodeAsset(`${themeName}-${scene}.webp`)}");`;
-  art += ' }\n';
-}
-theme = art + theme;
+
+const themeCards = {
+  astra: await encodeAsset('astra-card.svg'),
+  strawberry: await encodeAsset('card-back-strawberry.webp'),
+  dreamsky: await encodeAsset('dreamsky-card.svg')
+};
+
+const font = await encodeAsset('dreamsans-subset.woff2');
+theme = `@font-face { font-family:DreamSans; src:url("${font}") format("woff2"); font-style:normal; font-weight:400 900; font-display:swap; }\n` + theme;
+
 const parts = {
-  STYLES: `<style>/* Bundled Jua font license:\n${await fs.readFile(path.join(card, 'assets/Jua-OFL.txt'), 'utf8')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
+  STYLES: `<style>/* Bundled Noto Sans KR subset (DreamSans) license:\n${await fs.readFile(path.join(root, 'assets/NotoSansKR-OFL.txt'), 'utf8')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
   MODALS: between('<div id="modal-mode-select"', '<script>')
@@ -107,4 +110,4 @@ if (/\{\{[A-Z_]+\}\}/.test(html)) throw new Error('Unresolved build placeholder'
 await fs.mkdir(path.join(root, 'dist'), { recursive: true });
 html = html.replace(/\r\n/g, '\n').replace(/[ \t]+$/gm, '');
 await fs.writeFile(path.join(root, 'dist/DREAMWEAVER-Claude.html'), html);
-console.log(`DREAMWEAVER (Claude UI): ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB -> card_claude/dist/DREAMWEAVER-Claude.html`);
+console.log(`DREAMWEAVER (Argon Edition): ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB -> card_claude/dist/DREAMWEAVER-Claude.html`);
