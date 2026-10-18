@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER} from '../src/content.js';
-import {drawCharacter,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,guardianOf,guardianMonths} from '../src/economy.js';
+import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE} from '../src/content.js';
+import {drawCharacter,heroPool,lateOpen,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,guardianOf,guardianMonths} from '../src/economy.js';
 import {createProfile,random} from '../src/profile.js';
 
 test('normal and seasonal draws enforce the hidden guardian boundary',()=>{
@@ -141,4 +141,22 @@ test('calendar uses UTC+9, Monday weeks and seven guardians independently of hos
   assert.deepEqual(guardianMonths('behemoth',Date.parse('2026-10-18T00:00:00Z')),[{year:2027,month:1},{year:2027,month:8}]);
   assert.deepEqual(guardianMonths('cinderella',Date.parse('2026-10-18T00:00:00Z'),1),[{year:2026,month:10}]);
   assert.equal(calendar(monday-HOUR).day,'2026-10-04');
+});
+
+test('companions added after the first 45 stages join the summon pool only once stage 45 is cleared',()=>{
+  assert.equal(LATE_UNLOCK_STAGE,45);assert.equal(lateOpen(44),false);assert.equal(lateOpen(45),true);
+  for(const id of LATE_COMPANIONS)assert.ok(HEROES.some(h=>h.id===id),id);
+  for(const rarity of Object.keys(ROSTER)){
+    const closed=heroPool(rarity,false),open=heroPool(rarity,true);
+    assert.ok(closed.length>0,rarity);
+    assert.ok(closed.every(id=>!LATE_COMPANIONS.includes(id)),rarity);
+    assert.deepEqual(open,ROSTER[rarity]);
+  }
+  const seen=new Set();let n=1;const rng=()=>{n=(n*16807)%2147483647;return n/2147483647;};
+  for(let i=0;i<4000;i++)seen.add(drawCharacter(rng,false,null,null,1,false));
+  for(const id of LATE_COMPANIONS)assert.ok(!seen.has(id),'closed summon never draws '+id);
+  const seenOpen=new Set();n=1;
+  for(let i=0;i<20000;i++)seenOpen.add(drawCharacter(rng,false,null,null,1,true));
+  for(const id of ['underdog','toffee_apple'])assert.ok(seenOpen.has(id),'open summon can draw '+id);
+  for(const id of LATE_COMPANIONS)assert.ok(HIDDEN.includes(id)||Object.values(ROSTER).some(p=>p.includes(id)),id+' is a roster or hidden companion');
 });

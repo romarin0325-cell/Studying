@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER} from '../src/content.js';
-import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,bedMax,critChance,critDamage,stardustRate,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward,relicCost,relicScale,relicPhase,RELIC_LEVEL_STEP,RELIC_COST_STEP,RELIC_COST_MULT,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from '../src/economy.js';
+import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,critChance,critDamage,stardustRate,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward,relicCost,relicScale,relicPhase,RELIC_LEVEL_STEP,RELIC_COST_STEP,RELIC_COST_MULT,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from '../src/economy.js';
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
@@ -19,7 +19,7 @@ export function balanceSnapshot(){
     tuning:TUNING,
     probability:[probability('any SR',TUNING.heroRates[2]),probability('specific SR',TUNING.heroRates[2]/ROSTER.SR.length),probability('any normal UR',TUNING.heroRates[3]),probability('current season guardian',TUNING.heroRates[3]/2)],
     enhancement:Array.from({length:21},(_,e)=>{const cost=duplicateCost(e);const row={current:e,nextCopies:cost,spentCopies:total,power:enhanceMultiplier(e),special:specialMultiplier(e),gainPerCopy:TUNING.enhanceStep/cost};total+=cost;return row;}),
-    beds:Object.fromEntries(BED_IDS.map(id=>[id,{unlockStage:TUNING.beds[id].unlock,levels:[...new Set([0,5,10,15,20,25,30].filter(l=>l<=bedMax(id)).concat(Number.isFinite(bedMax(id))?[bedMax(id)]:[]))].map(level=>({level,nextDust:bedCost(id,level),value:id==='rose'?1+roseAttack(level):id==='spring'?springGauge(level):id==='seed'?seedGold(level):id==='crit'?critChance(level):id==='critDamage'?critDamage(level):stardustRate(level),cumulativeDust:Array.from({length:level},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0)}))}])),
+    beds:Object.fromEntries(BED_IDS.map(id=>[id,{unlockStage:TUNING.beds[id].unlock,levels:[...new Set([0,5,10,15,20,25,30,TUNING.beds[id].knee2])].sort((a,b)=>a-b).map(level=>({level,nextDust:bedCost(id,level),value:id==='rose'?1+roseAttack(level):id==='spring'?springGauge(level):id==='seed'?seedGold(level):id==='crit'?critChance(level):id==='critDamage'?critDamage(level):stardustRate(level),cumulativeDust:Array.from({length:level},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0)}))}])),
     relics:Array.from({length:9},(_,tier)=>({tier,threshold:relicThreshold(tier),nextThreshold:relicThreshold(tier+1),rates:relicRates(relicThreshold(tier))})),
     relicEnhancement:{
       levelStep:RELIC_LEVEL_STEP,costStep:[...RELIC_COST_STEP],costMult:RELIC_COST_MULT,

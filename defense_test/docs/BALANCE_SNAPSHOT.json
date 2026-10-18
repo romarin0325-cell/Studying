@@ -61,26 +61,32 @@
       "crit": {
         "unlock": 45,
         "base": 400,
-        "growth": 1.17,
-        "steep": 1,
-        "knee": 26,
-        "max": 26
+        "growth": 1.09,
+        "rise": 27,
+        "knee": 27,
+        "steep": 1.15,
+        "knee2": 38,
+        "steep2": 1.2
       },
       "critDamage": {
         "unlock": 45,
         "base": 500,
-        "growth": 1.19,
-        "steep": 1,
-        "knee": 20,
-        "max": 20
+        "growth": 1.13,
+        "rise": 18,
+        "knee": 18,
+        "steep": 1.19,
+        "knee2": 25,
+        "steep2": 1.2
       },
       "stardust": {
         "unlock": 60,
         "base": 1200,
-        "growth": 1.1,
-        "steep": 1,
+        "growth": 1.05,
+        "rise": 34,
         "knee": 34,
-        "max": 34
+        "steep": 1.11,
+        "knee2": 49,
+        "steep2": 1.2
       }
     },
     "relicThresholdBase": 30,
@@ -344,6 +350,12 @@
           "nextDust": 626,
           "value": 1.3,
           "cumulativeDust": 8174
+        },
+        {
+          "level": 42,
+          "nextDust": 1759,
+          "value": 1.42,
+          "cumulativeDust": 20772
         }
       ]
     },
@@ -385,6 +397,12 @@
           "nextDust": 1566,
           "value": 145,
           "cumulativeDust": 17162
+        },
+        {
+          "level": 28,
+          "nextDust": 2028,
+          "value": 148,
+          "cumulativeDust": 22295
         },
         {
           "level": 30,
@@ -452,39 +470,45 @@
         },
         {
           "level": 5,
-          "nextDust": 877,
-          "value": 0.060000000000000005,
-          "cumulativeDust": 2807
+          "nextDust": 616,
+          "value": 0.035,
+          "cumulativeDust": 2397
         },
         {
           "level": 10,
-          "nextDust": 1923,
-          "value": 0.11,
-          "cumulativeDust": 8961
+          "nextDust": 947,
+          "value": 0.060000000000000005,
+          "cumulativeDust": 6083
         },
         {
           "level": 15,
-          "nextDust": 4216,
-          "value": 0.14500000000000002,
-          "cumulativeDust": 22450
+          "nextDust": 1457,
+          "value": 0.08499999999999999,
+          "cumulativeDust": 11753
         },
         {
           "level": 20,
-          "nextDust": 9243,
-          "value": 0.17,
-          "cumulativeDust": 52022
+          "nextDust": 2242,
+          "value": 0.11,
+          "cumulativeDust": 20475
         },
         {
           "level": 25,
-          "nextDust": 20264,
-          "value": 0.195,
-          "cumulativeDust": 116853
+          "nextDust": 3450,
+          "value": 0.135,
+          "cumulativeDust": 33894
         },
         {
-          "level": 26,
-          "nextDust": 23708,
+          "level": 30,
+          "nextDust": 6233,
+          "value": 0.16,
+          "cumulativeDust": 55336
+        },
+        {
+          "level": 38,
+          "nextDust": 19066,
           "value": 0.2,
-          "cumulativeDust": 137117
+          "cumulativeDust": 140892
         }
       ]
     },
@@ -499,27 +523,39 @@
         },
         {
           "level": 5,
-          "nextDust": 1194,
-          "value": 1.65,
-          "cumulativeDust": 3650
+          "nextDust": 922,
+          "value": 1.6,
+          "cumulativeDust": 3242
         },
         {
           "level": 10,
-          "nextDust": 2848,
-          "value": 1.8,
-          "cumulativeDust": 12358
+          "nextDust": 1698,
+          "value": 1.7,
+          "cumulativeDust": 9215
         },
         {
           "level": 15,
-          "nextDust": 6795,
-          "value": 1.9000000000000001,
-          "cumulativeDust": 33137
+          "nextDust": 3128,
+          "value": 1.8,
+          "cumulativeDust": 20217
         },
         {
           "level": 20,
-          "nextDust": 16215,
+          "nextDust": 6390,
+          "value": 1.9,
+          "cumulativeDust": 40756
+        },
+        {
+          "level": 25,
+          "nextDust": 15248,
           "value": 2,
-          "cumulativeDust": 82718
+          "cumulativeDust": 87381
+        },
+        {
+          "level": 30,
+          "nextDust": 37942,
+          "value": 2.1,
+          "cumulativeDust": 200853
         }
       ]
     },
@@ -534,45 +570,45 @@
         },
         {
           "level": 5,
-          "nextDust": 1933,
-          "value": 0.11,
-          "cumulativeDust": 7328
+          "nextDust": 1532,
+          "value": 0.060000000000000005,
+          "cumulativeDust": 6632
         },
         {
           "level": 10,
-          "nextDust": 3113,
-          "value": 0.21000000000000002,
-          "cumulativeDust": 19129
+          "nextDust": 1955,
+          "value": 0.11,
+          "cumulativeDust": 15097
         },
         {
           "level": 15,
-          "nextDust": 5013,
-          "value": 0.31,
-          "cumulativeDust": 38133
+          "nextDust": 2495,
+          "value": 0.16,
+          "cumulativeDust": 25900
         },
         {
           "level": 20,
-          "nextDust": 8073,
-          "value": 0.36,
-          "cumulativeDust": 68738
+          "nextDust": 3184,
+          "value": 0.21000000000000002,
+          "cumulativeDust": 39687
         },
         {
           "level": 25,
-          "nextDust": 13002,
-          "value": 0.41000000000000003,
-          "cumulativeDust": 118027
+          "nextDust": 4064,
+          "value": 0.26,
+          "cumulativeDust": 57283
         },
         {
           "level": 30,
-          "nextDust": 20940,
-          "value": 0.45999999999999996,
-          "cumulativeDust": 197405
+          "nextDust": 5187,
+          "value": 0.31,
+          "cumulativeDust": 79740
         },
         {
-          "level": 34,
-          "nextDust": 30658,
+          "level": 49,
+          "nextDust": 30163,
           "value": 0.5,
-          "cumulativeDust": 294587
+          "cumulativeDust": 318995
         }
       ]
     }
@@ -1510,6 +1546,12 @@
       "hidden": false
     },
     {
+      "id": "underdog",
+      "name": "언더독",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
       "id": "great_detective",
       "name": "명탐정",
       "rarity": "R",
@@ -1542,6 +1584,12 @@
     {
       "id": "aurora",
       "name": "아우로라",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "toffee_apple",
+      "name": "토피애플",
       "rarity": "R",
       "hidden": false
     },

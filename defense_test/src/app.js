@@ -1,7 +1,7 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,bedFull,GARDENS,critChance,critDamage,critExpected,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
@@ -74,20 +74,19 @@ const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{co
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
 const roseBonus=level=>Math.round(roseAttack(level)*100);
 // Dream greenhouse: each bed is a plant whose art grows through four stages.
-// "만개" (bloom) marks the soft cap: after it the cost climbs much faster.
 const pct1=x=>`${+(x*100).toFixed(1)}%`;
 const BED_UI={
   rose:{name:'용기의 장미',effect:'모든 동료 위력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,line:'보유한 모든 동료의 위력이 오릅니다.'},
   spring:{name:'별이슬 샘',effect:'최대 별빛',row:1,order:1,color:'#8fdcff',value:l=>String(springGauge(l)),line:'전투에서 모을 수 있는 별빛이 늘어납니다.'},
   seed:{name:'황금 씨앗',effect:'시작 골드',row:2,order:3,color:'#ffd36a',value:l=>`+${seedGold(l)}`,line:'모든 원정을 더 많은 골드로 시작합니다.'},
   // Dawn greenhouse (second garden): same art language, rows of the dawn sheet.
-  crit:{name:'표적의 엉겅퀴',effect:'치명타 확률',row:0,order:2,color:'#d68cff',value:l=>pct1(critChance(l)),line:''},
-  critDamage:{name:'일격의 불꽃나리',effect:'치명타 대미지',row:1,order:1,color:'#ff9a5c',value:l=>`${Math.round(critDamage(l)*100)}%`,line:''},
-  stardust:{name:'별비 은방울',effect:'별똥별 가속',row:2,order:3,color:'#bfe6ff',value:l=>`+${Math.round(stardustRate(l)*100)}%`,line:''},
+  crit:{name:'여명의 엉겅퀴',effect:'치명타 확률',row:0,order:2,color:'#d68cff',value:l=>pct1(critChance(l)),line:''},
+  critDamage:{name:'노을빛 불꽃나리',effect:'치명타 대미지',row:1,order:1,color:'#ff9a5c',value:l=>`${Math.round(critDamage(l)*100)}%`,line:''},
+  stardust:{name:'유성우 은방울',effect:'별똥별 가속',row:2,order:3,color:'#bfe6ff',value:l=>`+${Math.round(stardustRate(l)*100)}%`,line:''},
 };
 // Art stage only (sprout → bud → bloom → starlit); it follows the cost knees without saying so.
-const bedStage=(id,level)=>{const b=T.beds[id],k=b.knee;if(b.max)return level>=b.max?3:level>=Math.ceil(b.max*.65)?2:level>=Math.ceil(b.max*.3)?1:0;return level>=(b.knee2??k+5)?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
-const bedReady=(profile,id)=>bedOpen(id,profile.cleared)&&!bedFull(id,profile.beds[id])&&!profile.active&&profile.dust>=bedCost(id,profile.beds[id]);
+const bedStage=(id,level)=>{const b=T.beds[id],k=b.knee;return level>=b.knee2?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
+const bedReady=(profile,id)=>bedOpen(id,profile.cleared)&&!profile.active&&profile.dust>=bedCost(id,profile.beds[id]);
 let bedFocus='rose';
 // Shooting stars pile up on the lobby floor with the idle reward (max 9 shards).
 const SHARD_SPOTS=[[62,74],[80,68],[44,58],[88,56],[70,60],[26,54],[56,66],[14,47],[86,44]];
@@ -570,10 +569,12 @@ function relicCard(id){
   const a=ARTIFACT[id],e=p().relics[id],ready=e.owned&&e.copies>=relicCost(a.rarity,e.enhance)&&!p().active,worn=p().equipped.includes(id);
   return `<button class="cc relic ${e.owned?'':'unowned'} ${ready?'ready':''} ${worn?'worn':''}" data-relic="${id}" data-rarity="${a.rarity}" aria-label="${a.name}${e.owned?` Lv.${relicLevel(e)}`:', 미보유'}${worn?', 장착 중':''}"><span class="cc-art">${image(id)}</span>${badge(a.rarity)}${e.owned?`<span class="cc-plus">Lv.${relicLevel(e)}</span>`:''}${ready?`<span class="cc-up">${icon('up')}</span>`:''}${worn?`<span class="cc-worn">${icon('check')}</span>`:''}<strong>${a.name}</strong></button>`;
 }
+// Companions added after stage 45 stay out of the collection until stage 45 is cleared (or until owned).
+const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES||p().heroes[h.id].owned);
 const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
-  const owned=HEROES.filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=HEROES.filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
-  const tabs=[['hero','동료',`${owned}/${HEROES.length}`],['relic','유물',`${relics}/${ARTIFACTS.length}`],['album','기억',`${memories}/${HEROES.length+CONSTELLATIONS.length}`]];
+  const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
+  const tabs=[['hero','동료',`${owned}/${shown().length}`],['relic','유물',`${relics}/${ARTIFACTS.length}`],['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
     ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}</section>`;
@@ -582,8 +583,8 @@ function rarityFilter(list,table){
   return `<div class="rare-filter">${RARITIES.map(r=>{const all=list.filter(x=>x.rarity===r),have=all.filter(x=>table[x.id].owned).length;return `<button data-filter="${r}" data-rarity="${r}" aria-pressed="${rarity===r}">${badge(r)}<span>${have}/${all.length}</span>${have===all.length?`<i class="done">${icon('check')}</i>`:''}</button>`;}).join('')}</div>`;
 }
 function heroView(){
-  const list=HEROES.filter(h=>rarity==='all'||h.rarity===rarity).sort((a,b)=>Number(p().heroes[b.id].owned)-Number(p().heroes[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
-  return `${rarityFilter(HEROES,p().heroes)}<div class="cards">${list.map(h=>bookCard(h.id)).join('')}</div>`;
+  const list=shown().filter(h=>rarity==='all'||h.rarity===rarity).sort((a,b)=>Number(p().heroes[b.id].owned)-Number(p().heroes[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
+  return `${rarityFilter(shown(),p().heroes)}<div class="cards">${list.map(h=>bookCard(h.id)).join('')}</div>`;
 }
 function relicView(){
   const worn=p().equipped,bonus=collectionBonus(p().relics),list=ARTIFACTS.filter(a=>rarity==='all'||a.rarity===rarity).sort((a,b)=>Number(p().relics[b.id].owned)-Number(p().relics[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
@@ -599,10 +600,10 @@ function relicInfo(){
 }
 // Album: memories (bond ten) and the star-library paintings, each in a frame of its own shape.
 function albumView(){
-  const open=HEROES.filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
-  const tiles=[...HEROES].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),thumb=window.__MEMORIAL_THUMBS__?.[h.id];
+  const open=shown().filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
+  const tiles=[...shown()].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),thumb=window.__MEMORIAL_THUMBS__?.[h.id];
     return `<button class="mem-tile ${on?'open':''}" data-memorial="${h.id}" aria-label="${h.name} · ${on?escapeText(MEMORIAL_STORIES[h.id].title):`호감도 ${e.bond}/10`}">${on&&thumb?`<img src="${thumb}" alt="" draggable="false" loading="lazy">`:`<span class="mem-shade">${image(h.id)}</span>`}<span class="mem-cap">${on?`<b>${h.name}</b>`:`<span class="bond-hearts" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span>`}</span></button>`;}).join('');
-  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${HEROES.length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요.</p><div class="mem-grid">${tiles}</div></div>
+  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${shown().length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요.</p><div class="mem-grid">${tiles}</div></div>
     <div class="album-sec"><div class="album-head"><h3>별자리 그림</h3><span>${arts}/${CONSTELLATIONS.length}</span></div><p class="album-note">루미의 별의 서재에서 별자리를 완성하면 걸려요.</p>${frameWall(true)}</div>`;
 }
 
@@ -789,7 +790,7 @@ function rates(){
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
       :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':'UR의 절반은 이번 주 픽업, 절반은 일반 UR 6종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.'}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':'일반 UR 6종 중 원하는 한 명'}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
-    <details class="more"><summary>얻을 수 있는 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>!h.hidden||banner==='season'&&h.id===c.guardian)).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
+    <details class="more"><summary>얻을 수 있는 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES))).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
 }
 
 // ───────── Garden: greenhouse, dispatch, gift basket ─────────
@@ -805,14 +806,13 @@ function gardenTabs(){
 }
 function bedRow(){
   const profile=p();
-  return `<div class="bed-row">${GARDENS.find(g=>g.id===gardenTab).beds.map(id=>{const u=BED_UI[id],unlocked=bedOpen(id,profile.cleared),lv=profile.beds[id],full=unlocked&&bedFull(id,lv);
-    return `<button class="bed ${bedFocus===id?'focus':''} ${unlocked?'':'locked'} ${full?'full':''}" data-bed="${id}" style="--bed-row:${u.row};--bed-stage:${bedStage(id,lv)};--bed-color:${u.color};order:${u.order}" aria-pressed="${bedFocus===id}"><span class="bed-art"></span>${unlocked?`<span class="bed-level">${full?'만개':`Lv.${lv}`}</span>`:`<span class="bed-lock">${icon('lock')}</span>`}${bedReady(profile,id)?'<i class="dot"></i>':''}<b class="bed-name">${u.name}</b><small class="bed-sub">${unlocked?`${u.effect} ${u.value(lv)}`:`스테이지 ${T.beds[id].unlock}`}</small></button>`;}).join('')}</div>`;
+  return `<div class="bed-row">${GARDENS.find(g=>g.id===gardenTab).beds.map(id=>{const u=BED_UI[id],unlocked=bedOpen(id,profile.cleared),lv=profile.beds[id];
+    return `<button class="bed ${bedFocus===id?'focus':''} ${unlocked?'':'locked'}" data-bed="${id}" style="--bed-row:${u.row};--bed-stage:${bedStage(id,lv)};--bed-color:${u.color};order:${u.order}" aria-pressed="${bedFocus===id}"><span class="bed-art"></span>${unlocked?`<span class="bed-level">Lv.${lv}</span>`:`<span class="bed-lock">${icon('lock')}</span>`}${bedReady(profile,id)?'<i class="dot"></i>':''}<b class="bed-name">${u.name}</b><small class="bed-sub">${unlocked?`${u.effect} ${u.value(lv)}`:`스테이지 ${T.beds[id].unlock}`}</small></button>`;}).join('')}</div>`;
 }
 function bedPanel(id){
-  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),full=unlocked&&bedFull(id,lv),cost=bedCost(id,lv),ready=bedReady(profile,id);
-  const gain=!unlocked?'':id==='stardust'?'<small class="bed-gain">방치·파견 보상</small>':id==='crit'||id==='critDamage'?`<small class="bed-gain">평균 화력 +${+((critExpected(profile.beds)-1)*100).toFixed(1)}%</small>`:'';
-  return `<div class="bed-panel" style="--bed-color:${u.color}"><div class="bed-panel-info"><small>${u.effect}</small><b>${unlocked?(full?`${u.value(lv)} <em>만개</em>`:`${u.value(lv)} ${icon('chevron')} <em>${u.value(lv+1)}</em>`):'잠김'}</b>${gain}</div>
-    <button class="primary bed-grow ${ready?'shine':''}" data-bed-grow="${id}" ${ready?'':'disabled'}>${!unlocked?`${icon('lock')}<b>스테이지 ${T.beds[id].unlock}</b>`:full?`${icon('check')}<b>만개</b>`:`${icon('drop')}<b>물 주기</b><span class="cost dust">${icon('dust')}<b>${fmt(cost)}</b></span>`}</button></div>`;
+  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),cost=bedCost(id,lv),ready=bedReady(profile,id);
+  return `<div class="bed-panel" style="--bed-color:${u.color}"><div class="bed-panel-info"><small>${u.effect}</small><b>${unlocked?`${u.value(lv)} ${icon('chevron')} <em>${u.value(lv+1)}</em>`:'잠김'}</b></div>
+    <button class="primary bed-grow ${ready?'shine':''}" data-bed-grow="${id}" ${ready?'':'disabled'}>${!unlocked?`${icon('lock')}<b>스테이지 ${T.beds[id].unlock}</b>`:`${icon('drop')}<b>물 주기</b><span class="cost dust">${icon('dust')}<b>${fmt(cost)}</b></span>`}</button></div>`;
 }
 function refreshGarden(){
   if(screen!=='garden')return;const house=document.querySelector('.gd-house');if(house){house.dataset.garden=gardenTab;house.innerHTML=gardenTabs()+bedRow()+bedPanel(bedFocus);}
@@ -820,7 +820,7 @@ function refreshGarden(){
 }
 function growBed(id){
   const before=bedStage(id,p().beds[id]),result=act('bed',{id},false);if(!result.ok){toast(result.message);return false;}
-  const house=document.querySelector('.gd-house');if(house){const row=house.querySelector('.bed-row');for(const node of row.querySelectorAll('.bed[data-bed]')){const k=node.dataset.bed,u=BED_UI[k],lv=p().beds[k];node.style.setProperty('--bed-stage',bedStage(k,lv));const level=node.querySelector('.bed-level');if(level)level.textContent=bedFull(k,lv)?'만개':`Lv.${lv}`;node.classList.toggle('full',bedFull(k,lv));const sub=node.querySelector('.bed-sub');if(sub&&bedOpen(k,p().cleared))sub.textContent=`${u.effect} ${u.value(lv)}`;const ready=bedReady(p(),k),dot=node.querySelector('.dot');if(ready&&!dot)node.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!ready&&dot)dot.remove();}
+  const house=document.querySelector('.gd-house');if(house){const tabs=house.querySelector('.garden-tabs');if(tabs)tabs.outerHTML=gardenTabs();const row=house.querySelector('.bed-row');for(const node of row.querySelectorAll('.bed[data-bed]')){const k=node.dataset.bed,u=BED_UI[k],lv=p().beds[k];node.style.setProperty('--bed-stage',bedStage(k,lv));const level=node.querySelector('.bed-level');if(level)level.textContent=`Lv.${lv}`;const sub=node.querySelector('.bed-sub');if(sub&&bedOpen(k,p().cleared))sub.textContent=`${u.effect} ${u.value(lv)}`;const ready=bedReady(p(),k),dot=node.querySelector('.dot');if(ready&&!dot)node.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!ready&&dot)dot.remove();}
     const panel=house.querySelector('.bed-panel');if(panel)panel.outerHTML=bedPanel(bedFocus);}
   const art=document.querySelector(`.bed[data-bed="${id}"] .bed-art`);if(!art)return true;
   const c=centerOf(art),stage=bedStage(id,result.level),u=BED_UI[id];art.classList.remove('grow');void art.offsetWidth;art.classList.add('grow');

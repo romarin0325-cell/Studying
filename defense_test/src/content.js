@@ -10,8 +10,8 @@ export const RARITY = {
   UR:{name:'얼티밋레어',color:'#e6be6c',motif:'왕관'},
 };
 export const ROSTER = {
-  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king'],
-  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora'],
+  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog'],
+  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple'],
   SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom'],
   UR:['zeke','luna','jasmine','queen','rumi','cherry_prince'],
 };
@@ -45,6 +45,11 @@ export const CHAPTERS=Array.from({length:MAIN_STAGES},(_,id)=>{
 // Companions that join the garden the first time a stage is cleared (a temporary arrangement: Behemoth is
 // still a guardian-rotation hidden companion as well).
 export const CLEAR_UNLOCKS=Object.freeze({45:['behemoth']});
+// Companions added after the first 45 stages open to the normal summon and the collection only once stage 45
+// has been cleared (before that the summon pool and the collection are exactly what they were). Every new
+// companion goes on this list.
+export const LATE_UNLOCK_STAGE=45;
+export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
 // late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
@@ -73,9 +78,11 @@ export const TUNING=Object.freeze({
   // Each bed's knee meets the next bed's opening (rose 25 ≈ stage 15, spring 18 ≈ stage 30). Later beds start at the
   // price of that stage's income and meet the earlier beds' prices in the soft cap. knee is the bloom (만개) stage.
   beds:{rose:{unlock:0,base:120,growth:1.05,knee:25,steep:1.09,knee2:42,steep2:1.2},spring:{unlock:15,base:300,growth:1.06,knee:18,steep:1.09,knee2:28,steep2:1.2},seed:{unlock:30,base:700,growth:1.06,knee:12,steep:1.09,knee2:20,steep2:1.2},
-    // Second garden (opens with part two): soft-capped beds. Each level is a plain geometric price and the bed stops at `max`
-    // (the effect reaches its soft cap there). Cheap first levels give a fast start; the last levels take weeks.
-    // See docs/DAWN_GARDEN.md for the pacing model.
-    crit:{unlock:45,base:400,growth:1.17,steep:1,knee:26,max:26},critDamage:{unlock:45,base:500,growth:1.19,steep:1,knee:20,max:20},stardust:{unlock:60,base:1200,growth:1.10,steep:1,knee:34,max:34}},
+    // Second garden (opens with part two): price grows by `growth` to `rise` (70% of the soft-cap level), by `steep`
+    // from there to `knee2` (the soft-cap level), by `steep2` after; effects are linear and unbounded, so the soft cap
+    // comes from price. See docs/DAWN_GARDEN.md for the pacing model.
+    crit:{unlock:45,base:400,growth:1.09,rise:27,knee:27,steep:1.15,knee2:38,steep2:1.2},
+    critDamage:{unlock:45,base:500,growth:1.13,rise:18,knee:18,steep:1.19,knee2:25,steep2:1.2},
+    stardust:{unlock:60,base:1200,growth:1.05,rise:34,knee:34,steep:1.11,knee2:49,steep2:1.2}},
   relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
 });

@@ -40,6 +40,8 @@ export class Renderer {
     if(e.type==='ribbon'){const p=cellPoint(e.index);this.effects.push({type:'ribbon',...p,color:'#ff9ecf',life:1.1,total:1.1});this.bursts(p.x,p.y-34,'#ffc6e3',16,.9);this.float('리본 2성!',p.x,p.y-88,'#ffd3ec',22);}
     if(e.type==='merge'){const p=cellPoint(e.to);this.effects.push({type:'merge',...p,color:HERO[e.hero].color,life:1,total:1});this.bursts(p.x,p.y-25,'#ffe4a0',28,1.1);this.float(`${e.rank}성`,p.x,p.y-72,'#ffe5aa',31);if(e.refund)this.float(`+${e.refund} G`,p.x,p.y-35,'#ffe5aa');this.shake=3;}
     if(e.type==='dreamPhase')this.shake=e.phase===3?8:4;
+    if(e.type==='bombBlast'){this.shake=7;this.bursts(e.x,e.y,'#ff6a50',20,1.1);}
+    if(e.type==='bombSet')this.bursts(e.x,e.y-8,'#ffd9c8',8,.6);
     if(e.type==='crushPhase'){this.shake=4;this.bursts(e.x,e.y,HERO.behemoth.color,8,.7);}
     if(e.type==='skill'){const life=e.kind==='dream'?2.9:1.6;this.skill={...e,uid:++this.skillSeq,life,total:life};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}

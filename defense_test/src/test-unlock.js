@@ -20,7 +20,7 @@ export const TEST_TOOLS=Object.freeze([
   {kind:'dust',label:'별가루 +1,000,000'},
   {kind:'stage60',label:'스테이지 60까지 클리어'},
   {kind:'stage90',label:'스테이지 90까지 클리어'},
-  {kind:'dawn-max',label:'제2정원 모두 만개'},
+  {kind:'dawn-max',label:'제2정원 소프트캡까지'},
   {kind:'dawn-reset',label:'제2정원 처음으로'},
 ]);
 export function testGrant(p,kind='wallet'){
@@ -31,7 +31,7 @@ export function testGrant(p,kind='wallet'){
     case 'dust':add('dust',1000000);return '테스트 지급: 별가루 +1,000,000';
     case 'stage60':p.cleared=Math.max(p.cleared,60);return '스테이지 60까지 클리어한 상태로 바꿨어요';
     case 'stage90':p.cleared=Math.max(p.cleared,90);return '스테이지 90까지 클리어한 상태로 바꿨어요';
-    case 'dawn-max':Object.assign(p.beds,{crit:26,critDamage:20,stardust:34});p.cleared=Math.max(p.cleared,60);return '제2정원이 모두 만개했어요';
+    case 'dawn-max':Object.assign(p.beds,{crit:38,critDamage:25,stardust:49});p.cleared=Math.max(p.cleared,60);return '제2정원을 소프트캡까지 키웠어요';
     case 'dawn-reset':Object.assign(p.beds,{crit:0,critDamage:0,stardust:0});return '제2정원을 처음 상태로 되돌렸어요';
     default:return '';
   }

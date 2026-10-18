@@ -4,7 +4,7 @@
 // when one of their numbers disagrees with this file, this file is right.
 import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS,CLEAR_UNLOCKS} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
-import {PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,bedMax,GARDENS,roseAttack,springGauge,seedGold} from '../src/economy.js';
+import {PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,GARDENS,roseAttack,springGauge,seedGold} from '../src/economy.js';
 
 const SHAPE={single:'단일',pulse:'원형(자기 칸)',beam:'관통',splash:'범위',cleave:'부채꼴',zone:'장판',cross:'십자',bounce:'도약',chain:'연쇄'};
 const CLASS={tall:'큼',medium:'보통',short:'작음'};
@@ -27,13 +27,13 @@ export function currentValues(){
     `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 매주 월요일(UTC+9) 순서대로 픽업이 돈다.`,
     `- **이달의 수호자(히든 ${HIDDEN.length}명, 시즌 소환에서만):** ${HIDDEN.map(id=>HEROES.find(h=>h.id===id).name).join(' → ')} 순서로 월마다 한 명. 월 번호는 (연도×12+월 인덱스) % ${HIDDEN.length}이고 지금 2026년 10월은 ${HEROES.find(h=>h.id===guardianOf(2026,9)).name}, 2027년 1월은 ${HEROES.find(h=>h.id===guardianOf(2027,0)).name}.`,
     `- **소환 확률:** C/R/SR/UR = ${TUNING.heroRates.map(r=>(r*100).toFixed(1).replace(/\.0$/,'')+'%').join(' / ')}, 천장 ${TUNING.pity.normal}/${TUNING.pity.season}.`,'');
-  const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],max=bedMax(id),name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'표적의 엉겅퀴',critDamage:'일격의 불꽃나리',stardust:'별비 은방울'}[id];
+  const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],cap=b.knee2,name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'여명의 엉겅퀴',critDamage:'노을빛 불꽃나리',stardust:'유성우 은방울'}[id];
     const effect={rose:['위력',l=>'+'+num(roseAttack(l)*100)+'%'],spring:['최대 별빛',l=>String(springGauge(l))],seed:['시작 골드',l=>'+'+seedGold(l)],crit:['치명타 확률',l=>num(critChance(l)*100)+'%'],critDamage:['치명타 대미지',l=>num(critDamage(l)*100)+'%'],stardust:['별똥별 가속(방치·파견 별가루)',l=>'+'+num(stardustRate(l)*100)+'%']}[id];
-    const total=Number.isFinite(max)?Array.from({length:max},(_,l)=>bedCost(id,l)).reduce((a,c)=>a+c,0):null;
-    return `| ${g.id==='dream'?'꿈의 온실':'새벽 온실'} | ${name} | 스테이지 ${b.unlock} | ${effect[0]} | ${effect[1](0)} | ${Number.isFinite(max)?`${effect[1](max)} (레벨 ${max}에서 만개)`:'제한 없음(비용이 가파르게 오름)'} | ${bedCost(id,0)} | ${total===null?'-':total} |`;}));
+    const total=Array.from({length:cap},(_,l)=>bedCost(id,l)).reduce((a,c)=>a+c,0);
+    return `| ${g.id==='dream'?'꿈의 온실':'새벽 온실'} | ${name} | 스테이지 ${b.unlock} | ${effect[0]} | ${effect[1](0)} | ${effect[1](cap)} (레벨 ${cap}) | ${bedCost(id,0)} | ${total} |`;}));
   lines.push('## 정원','',
-    '두 정원에 화단이 셋씩 있다. 새벽 온실의 화단은 소프트캡에서 만개하고 더 키울 수 없다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.','',
-    '| 정원 | 화단 | 열리는 곳 | 효과 | 시작 | 소프트캡 | 첫 레벨 별가루 | 만개까지 합계 |','|---|---|---|---|---|---|---:|---:|',
+    '두 정원에 화단이 셋씩 있다. 여섯 화단 모두 레벨 상한은 없고, 가격이 소프트캡을 만든다. 효과는 그 뒤에도 이어진다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.','',
+    '| 정원 | 화단 | 열리는 곳 | 효과 | 시작 | 소프트캡 | 첫 레벨 별가루 | 소프트캡까지 합계 |','|---|---|---|---|---|---|---:|---:|',
     ...bedRows,'');
   lines.push('## 필살기 상수','',
     '| 항목 | 값 |','|---|---|',
